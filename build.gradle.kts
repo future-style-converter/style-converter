@@ -25,7 +25,7 @@ application {
 }
 
 kotlin {
-    jvmToolchain(23)
+    jvmToolchain(21)
 }
 
 // Use the JUnit Platform so kotlin.test (which delegates) and any direct
