@@ -1,0 +1,54 @@
+{
+  "components": {
+    "Navigation_C01_NavDown": {
+      "properties": {
+        "nav-down": "#target2",
+        "nav-left": "auto",
+        "nav-right": "#next",
+        "nav-up": "auto",
+        "reading-order": "normal",
+        "width": "240px",
+        "height": "80px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Navigation_BoxModel": {
+      "properties": {
+        "width": "200px",
+        "height": "96px",
+        "padding": "20px",
+        "margin": "4px",
+        "border": "2px dashed #e74c3c",
+        "background-color": "#e74c3c",
+        "nav-down": "auto",
+        "nav-left": "#prev"
+      }
+    },
+    "Navigation_TextBlock": {
+      "properties": {
+        "color": "#f9fafb",
+        "font-family": "monospace",
+        "font-size": "14px",
+        "line-height": "1.8",
+        "text-align": "center",
+        "padding": "8px",
+        "width": "180px",
+        "background-color": "#1f2937",
+        "nav-down": "#target2",
+        "nav-left": "#prev"
+      }
+    },
+    "Navigation_Decorated": {
+      "properties": {
+        "background-color": "#9b59b6",
+        "border-radius": "12px",
+        "box-shadow": "inset 0 2px 6px rgba(0,0,0,0.4)",
+        "opacity": "0.85",
+        "transform": "scale(1.1)",
+        "padding": "8px",
+        "nav-down": "auto",
+        "nav-left": "#prev"
+      }
+    }
+  }
+}

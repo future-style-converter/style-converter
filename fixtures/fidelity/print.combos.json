@@ -1,0 +1,74 @@
+{
+  "components": {
+    "Print_C01_Bleed": {
+      "properties": {
+        "bleed": "auto",
+        "bookmark-label": "Chapter 1",
+        "bookmark-level": "none",
+        "width": "240px",
+        "height": "80px",
+        "background-color": "#f39c12"
+      }
+    },
+    "Print_C02_BookmarkState": {
+      "properties": {
+        "bookmark-state": "closed",
+        "bookmark-target": "self",
+        "footnote-display": "inline",
+        "width": "140px",
+        "height": "80px",
+        "background-color": "#16a085"
+      }
+    },
+    "Print_C03_FootnotePolicy": {
+      "properties": {
+        "footnote-policy": "line",
+        "leader": "dotted",
+        "marks": "crop",
+        "page": "chapter-page",
+        "size": "letter landscape",
+        "width": "240px",
+        "height": "64px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Print_BoxModel": {
+      "properties": {
+        "width": "240px",
+        "height": "64px",
+        "padding": "12px",
+        "margin": "8px",
+        "border": "1px solid #2c3e50",
+        "background-color": "#1abc9c",
+        "bleed": "6mm",
+        "bookmark-label": "Chapter 1"
+      }
+    },
+    "Print_TextBlock": {
+      "properties": {
+        "color": "#7e3b09",
+        "font-family": "monospace",
+        "font-size": "14px",
+        "line-height": "1.4",
+        "text-align": "center",
+        "padding": "20px",
+        "width": "140px",
+        "background-color": "#fdf2e9",
+        "bleed": "auto",
+        "bookmark-label": "Chapter 1"
+      }
+    },
+    "Print_Decorated": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "border-radius": "50%",
+        "box-shadow": "inset 0 2px 6px rgba(0,0,0,0.4)",
+        "opacity": "0.7",
+        "transform": "rotate(6deg)",
+        "padding": "20px",
+        "bleed": "auto",
+        "bookmark-label": "Chapter 1"
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "components": {
+    "Interactions_C01_Caret": {
+      "properties": {
+        "caret": "bar #0a84ff",
+        "caret-shape": "auto",
+        "cursor": "ew-resize",
+        "width": "200px",
+        "height": "48px",
+        "background-color": "#f39c12"
+      }
+    },
+    "Interactions_C02_Interactivity": {
+      "properties": {
+        "interactivity": "inert",
+        "pointer-events": "auto",
+        "resize": "none",
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Interactions_C03_ScrollBehavior": {
+      "properties": {
+        "scroll-behavior": "auto",
+        "touch-action": "manipulation",
+        "user-select": "none",
+        "width": "180px",
+        "height": "96px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Interactions_BoxModel": {
+      "properties": {
+        "width": "200px",
+        "height": "64px",
+        "padding": "16px 24px",
+        "margin": "12px 6px",
+        "border": "3px solid #16a085",
+        "background-color": "#f39c12",
+        "caret": "block",
+        "caret-shape": "bar"
+      }
+    },
+    "Interactions_TextBlock": {
+      "properties": {
+        "color": "#ffffff",
+        "font-family": "serif",
+        "font-size": "14px",
+        "line-height": "2",
+        "text-align": "left",
+        "padding": "16px 24px",
+        "width": "240px",
+        "background-color": "#2c3e50",
+        "caret": "#ff00aa",
+        "caret-shape": "block"
+      }
+    },
+    "Interactions_Decorated": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "border-radius": "12px",
+        "box-shadow": "2px 2px 6px rgba(0,0,0,0.35)",
+        "opacity": "0.85",
+        "transform": "rotate(6deg)",
+        "padding": "20px",
+        "caret": "bar #0a84ff",
+        "caret-shape": "block"
+      }
+    }
+  }
+}

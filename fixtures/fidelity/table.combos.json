@@ -1,0 +1,54 @@
+{
+  "components": {
+    "Table_C01_BorderCollapse": {
+      "properties": {
+        "border-collapse": "separate",
+        "border-spacing": "4px",
+        "caption-side": "top",
+        "empty-cells": "show",
+        "table-layout": "auto",
+        "width": "240px",
+        "height": "80px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Table_BoxModel": {
+      "properties": {
+        "width": "240px",
+        "height": "80px",
+        "padding": "12px",
+        "margin": "4px",
+        "border": "2px dashed #e74c3c",
+        "background-color": "#e74c3c",
+        "border-collapse": "separate",
+        "border-spacing": "4px"
+      }
+    },
+    "Table_TextBlock": {
+      "properties": {
+        "color": "#f9fafb",
+        "font-family": "serif",
+        "font-size": "14px",
+        "line-height": "1.8",
+        "text-align": "right",
+        "padding": "8px",
+        "width": "240px",
+        "background-color": "#1f2937",
+        "border-collapse": "collapse",
+        "border-spacing": "4px 8px"
+      }
+    },
+    "Table_Decorated": {
+      "properties": {
+        "background-color": "#1abc9c",
+        "border-radius": "24px 8px",
+        "box-shadow": "2px 2px 6px rgba(0,0,0,0.35)",
+        "opacity": "0.7",
+        "transform": "translate(6px, 4px)",
+        "padding": "12px",
+        "border-collapse": "collapse",
+        "border-spacing": "4px 8px"
+      }
+    }
+  }
+}

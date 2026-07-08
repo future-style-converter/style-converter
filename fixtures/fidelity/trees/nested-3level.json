@@ -1,0 +1,161 @@
+{
+  "components": {
+    "N3_ColumnOfRows": {
+      "properties": {
+        "width": "280px",
+        "display": "flex",
+        "flex-direction": "column",
+        "gap": "8px",
+        "padding": "8px",
+        "background-color": "#1f2937"
+      },
+      "children": {
+        "row1": {
+          "properties": {
+            "display": "flex",
+            "flex-direction": "row",
+            "gap": "6px",
+            "padding": "6px",
+            "background-color": "#34495e"
+          },
+          "children": {
+            "a": {
+              "properties": {
+                "width": "50px",
+                "height": "30px",
+                "background-color": "#3498db"
+              }
+            },
+            "b": {
+              "properties": {
+                "width": "50px",
+                "height": "30px",
+                "background-color": "#2ecc71"
+              }
+            }
+          }
+        },
+        "row2": {
+          "properties": {
+            "display": "flex",
+            "flex-direction": "row",
+            "gap": "6px",
+            "padding": "6px",
+            "background-color": "#34495e",
+            "order": "-1"
+          },
+          "children": {
+            "c": {
+              "properties": {
+                "width": "50px",
+                "height": "30px",
+                "background-color": "#1abc9c"
+              }
+            },
+            "d": {
+              "properties": {
+                "width": "50px",
+                "height": "30px",
+                "background-color": "#1abc9c"
+              }
+            }
+          }
+        }
+      }
+    },
+    "N3_GridOfFlex": {
+      "properties": {
+        "width": "320px",
+        "display": "grid",
+        "grid-template-columns": "1fr 1fr",
+        "gap": "8px",
+        "padding": "8px",
+        "background-color": "#1f2937"
+      },
+      "children": {
+        "cellA": {
+          "properties": {
+            "display": "flex",
+            "flex-direction": "row",
+            "gap": "6px",
+            "padding": "6px",
+            "background-color": "#34495e"
+          },
+          "children": {
+            "a": {
+              "properties": {
+                "height": "30px",
+                "background-color": "#f39c12",
+                "flex-grow": "1"
+              }
+            },
+            "b": {
+              "properties": {
+                "height": "30px",
+                "background-color": "#e67e22",
+                "flex-grow": "1"
+              }
+            }
+          }
+        },
+        "cellB": {
+          "properties": {
+            "display": "flex",
+            "flex-direction": "row",
+            "gap": "6px",
+            "padding": "6px",
+            "background-color": "#34495e"
+          },
+          "children": {
+            "c": {
+              "properties": {
+                "width": "40px",
+                "height": "30px",
+                "background-color": "#e74c3c"
+              }
+            },
+            "d": {
+              "properties": {
+                "height": "30px",
+                "background-color": "#2ecc71",
+                "flex-grow": "1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "N3_BlockGrid": {
+      "properties": {
+        "width": "280px",
+        "padding": "14px",
+        "background-color": "#ecf0f1"
+      },
+      "children": {
+        "grid": {
+          "properties": {
+            "display": "grid",
+            "grid-template-columns": "1fr 1fr",
+            "gap": "6px",
+            "background-color": "#bdc3c7",
+            "padding": "6px"
+          },
+          "children": {
+            "a": {
+              "properties": {
+                "height": "36px",
+                "background-color": "#f39c12"
+              }
+            },
+            "b": {
+              "properties": {
+                "height": "36px",
+                "background-color": "#f39c12"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

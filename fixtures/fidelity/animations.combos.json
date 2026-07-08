@@ -1,0 +1,124 @@
+{
+  "components": {
+    "Animations_C01_AnimationComposition": {
+      "properties": {
+        "animation-composition": "accumulate",
+        "animation-delay": "1s",
+        "animation-direction": "alternate-reverse",
+        "width": "180px",
+        "height": "64px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Animations_C02_AnimationDuration": {
+      "properties": {
+        "animation-duration": "0s",
+        "animation-fill-mode": "none, forwards, backwards, both",
+        "animation-iteration-count": "3",
+        "width": "140px",
+        "height": "64px",
+        "background-color": "#16a085"
+      }
+    },
+    "Animations_C03_AnimationName": {
+      "properties": {
+        "animation-name": "--custom-anim",
+        "animation-play-state": "paused",
+        "animation-range": "normal",
+        "width": "180px",
+        "height": "64px",
+        "background-color": "#f39c12"
+      }
+    },
+    "Animations_C04_AnimationRangeEnd": {
+      "properties": {
+        "animation-range-end": "75%",
+        "animation-range-start": "cover 25%",
+        "animation-timeline": "scroll(root)",
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Animations_C05_AnimationTimingFunction": {
+      "properties": {
+        "animation-timing-function": "cubic-bezier(0.25, 0.1, 0.25, 1)",
+        "timeline-scope": "--scroll-tl",
+        "transition-behavior": "normal",
+        "width": "240px",
+        "height": "80px",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Animations_C06_TransitionDelay": {
+      "properties": {
+        "transition-delay": "-1s",
+        "transition-duration": "300ms",
+        "transition-property": "color, all, width",
+        "width": "140px",
+        "height": "48px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Animations_C07_TransitionTimingFunction": {
+      "properties": {
+        "transition-timing-function": "cubic-bezier(0.25, 0.1, 0.25, 1)",
+        "view-timeline": "--my-view",
+        "view-timeline-axis": "block",
+        "width": "180px",
+        "height": "96px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Animations_C08_ViewTimelineInset": {
+      "properties": {
+        "view-timeline-inset": "auto 30px",
+        "view-timeline-name": "--reveal",
+        "view-transition-class": "slide fade fast",
+        "view-transition-group": "--my-group",
+        "view-transition-name": "header",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Animations_BoxModel": {
+      "properties": {
+        "width": "140px",
+        "height": "96px",
+        "padding": "8px",
+        "margin": "4px",
+        "border": "4px double #8e44ad",
+        "background-color": "#2ecc71",
+        "animation-composition": "replace",
+        "animation-delay": "0s, 500ms, -250ms, 1s"
+      }
+    },
+    "Animations_TextBlock": {
+      "properties": {
+        "color": "#ffffff",
+        "font-family": "monospace",
+        "font-size": "14px",
+        "line-height": "1.4",
+        "text-align": "left",
+        "padding": "16px 24px",
+        "width": "140px",
+        "background-color": "#2c3e50",
+        "animation-composition": "replace",
+        "animation-delay": "-500ms"
+      }
+    },
+    "Animations_Decorated": {
+      "properties": {
+        "background-color": "#16a085",
+        "border-radius": "6px",
+        "box-shadow": "inset 0 2px 6px rgba(0,0,0,0.4)",
+        "opacity": "0.7",
+        "transform": "rotate(6deg)",
+        "padding": "12px",
+        "animation-composition": "add",
+        "animation-delay": "-1.5s"
+      }
+    }
+  }
+}

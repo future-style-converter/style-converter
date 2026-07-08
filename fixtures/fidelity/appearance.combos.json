@@ -1,0 +1,53 @@
+{
+  "components": {
+    "Appearance_C01_Appearance": {
+      "properties": {
+        "appearance": "menulist",
+        "appearance-variant": "button",
+        "color-adjust": "exact",
+        "image-rendering-quality": "high",
+        "width": "140px",
+        "height": "64px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Appearance_BoxModel": {
+      "properties": {
+        "width": "240px",
+        "height": "96px",
+        "padding": "20px",
+        "margin": "8px",
+        "border": "4px double #8e44ad",
+        "background-color": "#e74c3c",
+        "appearance": "menulist",
+        "appearance-variant": "button"
+      }
+    },
+    "Appearance_TextBlock": {
+      "properties": {
+        "color": "#7e3b09",
+        "font-family": "sans-serif",
+        "font-size": "18px",
+        "line-height": "1.4",
+        "text-align": "center",
+        "padding": "8px",
+        "width": "180px",
+        "background-color": "#fdf2e9",
+        "appearance": "auto",
+        "appearance-variant": "searchfield"
+      }
+    },
+    "Appearance_Decorated": {
+      "properties": {
+        "background-color": "#3498db",
+        "border-radius": "50%",
+        "box-shadow": "2px 2px 6px rgba(0,0,0,0.35)",
+        "opacity": "0.85",
+        "transform": "scale(1.1)",
+        "padding": "16px 24px",
+        "appearance": "progress-bar",
+        "appearance-variant": "button"
+      }
+    }
+  }
+}
