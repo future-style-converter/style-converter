@@ -16,7 +16,7 @@ dependencies {
     // production code. JUnit 5 chosen over 4 for matching modern toolchain
     // (Java 23+) and clearer parameterised test ergonomics.
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
 
