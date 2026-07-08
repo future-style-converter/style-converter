@@ -49,9 +49,9 @@ jobs:
       # Skip puppeteer's Chromium download — the unit suites never launch a browser.
       - run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
       - name: Typecheck both workspaces
-        run: npm -ws run typecheck
+        run: npm -ws run typecheck --if-present
       - name: Unit tests — engine (@style-converter/web) + harness (web-harness)
-        run: npm -ws run test
+        run: npm -ws run test --if-present
 
   test-tooling:
     name: test tooling (node)
