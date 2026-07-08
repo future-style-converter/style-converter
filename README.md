@@ -23,7 +23,7 @@ fixture on all three platforms and compares the results with SSIM, so
 ```
 your-styles.json  (CSS properties per component)
         │
-        │  ./gradlew run --args="convert --from css --to ir -i … -o out"
+        │  ./gradlew :converter:run --args="convert … -i … -o out"
         ▼
    typed IR  (out/tmpOutput.json)
         │
@@ -69,7 +69,7 @@ unusually thorough cross-platform verification harness.
 
 ```bash
 # 1. Convert CSS to IR
-./gradlew run --args="convert --from css --to ir -i examples/visual-test.json -o out"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/visual-test.json -o out"
 # → out/tmpOutput.json (the IR)
 
 # 2. Render + compare on all three platforms
@@ -111,7 +111,7 @@ angles → degrees, times → ms. Runtime-dependent values (`var()`, `calc()`,
 ## Repository layout
 
 ```
-src/main/kotlin/app/
+converter/src/main/kotlin/app/
 ├── irmodels/            # typed IR: one file per CSS property (550-property catalogue)
 └── parsing/css/         # CSS value parsers (longhands, shorthands, primitives)
 
@@ -134,7 +134,7 @@ full per-property contract.
 ## Running the tests
 
 ```bash
-./gradlew test                                          # JVM parser/IR tests
+./gradlew :converter:test                               # JVM parser/IR tests
 node --test testing/*.test.mjs testing/titan/*.test.mjs # harness unit tests
 bash testing/smoke.sh                                   # full smoke (adds native baselines)
 ```

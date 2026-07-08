@@ -42,7 +42,7 @@ pre-converted into per-component IR JSONs served from `public/`.
 3. **Route/asset wiring** — ship 15 pre-converted IR JSONs at
    `testing/web/public/fixtures/<Name>.json`. Either:
    - a one-shot npm script (`npm run build-fixtures`) that loops the 15
-     fixtures through `./gradlew run --args="convert ..."`, or
+     fixtures through `./gradlew :converter:run --args="convert ..."`, or
    - extend `package.json`'s `copy-ir` to do the same.
 4. **`testing/interaction-states.mjs`** — add (a) launch-the-vite-server-or-fail
    check, (b) `await page.waitForSelector('[data-fixture-ready]')` before the

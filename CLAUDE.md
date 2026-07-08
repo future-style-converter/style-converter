@@ -9,7 +9,7 @@ converter emits IR only via `--to ir`).
 
 ```bash
 # Convert CSS to IR
-./gradlew run --args="convert --from css --to ir -i examples/visual-test.json -o out"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/visual-test.json -o out"
 
 # Full 3-platform test (convert → render on web/Android/iOS → SSIM compare)
 ./test-all.sh examples/visual-test.json
@@ -27,7 +27,7 @@ JSON Input → CSS Parser → IR Model → runtime style engines
 ### Project Structure
 
 ```
-src/main/kotlin/app/
+converter/src/main/kotlin/app/
 ├── irmodels/                    # IR data models (567 property files)
 │   ├── IRDocument.kt            # IRDocument, IRComponent
 │   ├── IRProperty.kt            # Base interface
@@ -110,7 +110,7 @@ adb pull /sdcard/Android/data/com.styleconverter.test/files/test_screenshots/ ./
 
 ```bash
 # 1. Convert CSS to IR
-./gradlew run --args="convert --from css --to ir -i examples/your-test.json -o out"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/your-test.json -o out"
 
 # 2. Copy to Android assets
 cp out/tmpOutput.json testing/Android/app/src/main/assets/
@@ -147,8 +147,8 @@ All CSS values normalize to universal formats:
 
 All three runtime renderers (Android, iOS, Web) share **one** folder structure
 for their style engines. That structure is locked to the folders under
-`src/main/kotlin/app/irmodels/properties/` and
-`src/main/kotlin/app/parsing/css/properties/longhands/`. These three trees —
+`converter/src/main/kotlin/app/irmodels/properties/` and
+`converter/src/main/kotlin/app/parsing/css/properties/longhands/`. These three trees —
 irmodels, parser, style-engine — are kept byte-for-byte parallel: the same
 category paths, the same property files. If a property lives at
 `irmodels/properties/borders/sides/BorderTopWidth.kt`, its runtime
@@ -186,7 +186,7 @@ Each property ships as a **triplet per platform**, in the canonical subfolder:
 | file | purpose |
 |---|---|
 | `{Property}Config.{ext}`    | Typed value struct (what was extracted, ready for rendering) |
-| `{Property}Extractor.{ext}` | `IRProperty → Config`. Handles every CSS value flavor the parser recognizes (see `src/main/kotlin/app/parsing/css/properties/longhands/{category}/{Property}PropertyParser.kt` for the full list) |
+| `{Property}Extractor.{ext}` | `IRProperty → Config`. Handles every CSS value flavor the parser recognizes (see `converter/src/main/kotlin/app/parsing/css/properties/longhands/{category}/{Property}PropertyParser.kt` for the full list) |
 | `{Property}Applier.{ext}`   | `Config → platform output` (Compose Modifier on Android, SwiftUI modifier on iOS, CSS declaration on Web) |
 
 ### Hard rules for every file

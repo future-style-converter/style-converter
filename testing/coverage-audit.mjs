@@ -3,7 +3,7 @@
 // coverage-audit.mjs
 //
 // Phase 11 deliverable: compares the IR property catalogue
-// (src/main/kotlin/app/irmodels/properties/**/*Property.kt) against each
+// (converter/src/main/kotlin/app/irmodels/properties/**/*Property.kt) against each
 // platform's PropertyRegistry claims and emits a per-category coverage
 // matrix + a one-shot pass/fail exit code.
 //
@@ -37,9 +37,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(__dirname, '..');
 
 // ── 1. Derive the IR catalogue ──────────────────────────────────────────
-// src/main/kotlin/app/irmodels/properties/<category>/**/<Name>Property.kt
+// converter/src/main/kotlin/app/irmodels/properties/<category>/**/<Name>Property.kt
 // → { category: '<category>', name: '<Name>' }
-const IR_ROOT = join(REPO, 'src/main/kotlin/app/irmodels/properties');
+const IR_ROOT = join(REPO, 'converter/src/main/kotlin/app/irmodels/properties');
 
 function walk(dir, acc = []) {
   for (const entry of readdirSync(dir)) {

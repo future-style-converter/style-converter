@@ -11,7 +11,7 @@ layout-of-children are directly measurable by the screenshot harness.
 Run via:
 
 ```bash
-./gradlew run --args="convert --from css --to ir -i examples/properties/layout/<file>.json -o /tmp/p7"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/properties/layout/<file>.json -o /tmp/p7"
 ```
 
 All 48 fixtures convert with `(0 generic)` on every component.

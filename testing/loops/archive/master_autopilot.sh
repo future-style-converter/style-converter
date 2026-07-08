@@ -111,7 +111,7 @@ for fi in "${FUZZ_INPUTS[@]}"; do
 {"components":{"FZ":{"properties":{"width":"100px","height":"40px","background-color":"#3b82f6","color":"$val"}}}}
 EOJ
   # Just verify converter doesn't crash; SSIM may be 0 if it falls back
-  if ./gradlew run --args="convert --from css --to ir -i examples/properties/fuzz/$label.json -o /tmp/fuzz_$label" 2>&1 | grep -q "BUILD SUCCESSFUL"; then
+  if ./gradlew :converter:run --args="convert --from css --to ir -i examples/properties/fuzz/$label.json -o /tmp/fuzz_$label" 2>&1 | grep -q "BUILD SUCCESSFUL"; then
     echo "PASS_PARSE $label" >> $RES
   else
     echo "FAIL_PARSE $label" >> $RES

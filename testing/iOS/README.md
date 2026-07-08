@@ -98,7 +98,7 @@ on renderer changes):
 
 ```bash
 # 1. Convert + copy IR (or just run test-all.sh once first)
-./gradlew run --args="convert --from css --to ir -i examples/visual-test.json -o out"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/visual-test.json -o out"
 cp out/tmpOutput.json testing/iOS/StyleConverterTest/Resources/tmpOutput.json
 
 # 2. Generate and open the project

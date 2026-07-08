@@ -58,7 +58,7 @@ for (const src of sources) {
     // gradle's own error stream, which is what we want to see.
     execFileSync(
       './gradlew',
-      ['--no-daemon', 'run', `--args=convert --from css --to ir -i ${srcPath} -o out`, '--quiet'],
+      ['--no-daemon', ':converter:run', `--args=convert --from css --to ir -i ${srcPath} -o out`, '--quiet'],
       { cwd: REPO_ROOT, stdio: ['ignore', 'ignore', 'inherit'] }
     );
 
@@ -73,7 +73,7 @@ for (const src of sources) {
       throw new Error(`converter output for ${name} has no .components array`);
     }
     if (ir.components.length === 0) {
-      throw new Error(`converter output for ${name} produced 0 components — likely a CSS-shorthand parse failure (run ./gradlew run --args="convert ..." manually to see the error)`);
+      throw new Error(`converter output for ${name} produced 0 components — likely a CSS-shorthand parse failure (run ./gradlew :converter:run --args="convert ..." manually to see the error)`);
     }
 
     copyFileSync(TMP_OUT, outPath);

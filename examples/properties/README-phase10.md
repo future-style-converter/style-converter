@@ -7,7 +7,7 @@ parses cleanly with zero `generic` rows.
 Run any fixture via:
 
 ```bash
-./gradlew run --args="convert --from css --to ir -i examples/properties/<cat>/longtail.json -o /tmp/p10"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/properties/<cat>/longtail.json -o /tmp/p10"
 ```
 
 ## Coverage map

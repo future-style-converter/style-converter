@@ -30,7 +30,7 @@ my `mkdir`-based lockfile doesn't serialise against that agent, so
 `out/tmpOutput.json`, `testing/Android/app/src/main/assets/tmpOutput.json`
 and `testing/web/public/ir-components.json` get clobbered mid-pipeline.
 Per-property captures for this fixture were NOT produced. The parser
-itself is clean: `./gradlew run --args="convert … audit-phase12.json"`
+itself is clean: `./gradlew :converter:run --args="convert … audit-phase12.json"`
 reports `0 generic` for all 18 components (18/18 components, 4–5 parsed
 properties each). Audit below is therefore parser+code-review based;
 findings do not depend on fresh screenshots.
@@ -201,7 +201,7 @@ three separate `graphicsLayer` calls rather than one accumulation.
 
 ### T11 — Parser coverage is complete for this fixture
 
-`./gradlew run … audit-phase12.json` reports `Parsed N properties
+`./gradlew :converter:run … audit-phase12.json` reports `Parsed N properties
 (0 generic)` for every component, and the resulting `tmpOutput.json`
 contains 18 components matching the fixture 1:1. No decode errors;
 no fall-through to GenericProperty. The parser-side of Phase 12 is

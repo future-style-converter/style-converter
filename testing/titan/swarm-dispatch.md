@@ -74,10 +74,10 @@ Justification:
   the daemon-handshake race (test-all.sh already documents this — port
   exhaustion at >50k TIME_WAIT). With 8 parallel `--no-daemon` invocations,
   each spawns its own JVM; this is the steady-state RAM driver above.
-  If the prebuilt classes path (`build/classes/kotlin/main`) is up to
+  If the prebuilt classes path (`converter/build/classes/kotlin/main`) is up to
   date, section-runner falls through to direct `java -cp ...` and
   skips the daemon entirely — that drops the peak by ~400 MB / agent.
-  **Pre-build with `./gradlew classes` once before dispatching SWARM-2B.**
+  **Pre-build with `./gradlew :converter:classes` once before dispatching SWARM-2B.**
 * **Vite + esbuild.** Each vite uses ~4 worker threads for esbuild. 8
   agents × 4 threads = 32 esbuild workers, comfortable on an 8-core M2
   (it'll context-switch but won't stall). 16 would saturate.
@@ -94,7 +94,7 @@ Justification:
 ls testing/wpt/css/css-flexbox/abspos | head  # smoke check
 
 # 2. Pre-build the JVM classes so section-runners skip the gradle daemon.
-./gradlew classes
+./gradlew :converter:classes
 
 # 3. Pre-warm npm install in testing/web (section-runners symlink
 #    node_modules from this dir).

@@ -300,11 +300,11 @@ GRADLE_LOG="$WORK_DIR/gradle-convert.log"
   cd "$PROJECT_ROOT"
   # Match test-all.sh's fallback: try gradle daemon first, fall back to the
   # prebuilt JVM classes if the daemon is unreachable (port exhaustion).
-  if ! ./gradlew --no-daemon run --args="convert --from css --to ir -i $REL_INPUT -o $GRADLE_OUT_DIR" --quiet >"$GRADLE_LOG" 2>&1; then
+  if ! ./gradlew --no-daemon :converter:run --args="convert --from css --to ir -i $REL_INPUT -o $GRADLE_OUT_DIR" --quiet >"$GRADLE_LOG" 2>&1; then
     if grep -q "Could not connect to the Gradle daemon\|BindException" "$GRADLE_LOG" 2>/dev/null && \
-       [[ -d "$PROJECT_ROOT/build/classes/kotlin/main" ]]; then
+       [[ -d "$PROJECT_ROOT/converter/build/classes/kotlin/main" ]]; then
       warn "gradle daemon unreachable — using prebuilt classes"
-      CP="$PROJECT_ROOT/build/classes/kotlin/main"
+      CP="$PROJECT_ROOT/converter/build/classes/kotlin/main"
       CP="$CP:$(find "$HOME/.gradle/caches/modules-2" -name '*.jar' 2>/dev/null | tr '\n' ':')"
       java -cp "$CP" app.MainKt convert --from css --to ir -i "$REL_INPUT" -o "$GRADLE_OUT_DIR"
     else

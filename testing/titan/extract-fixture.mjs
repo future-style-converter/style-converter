@@ -1910,7 +1910,7 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
     // the components-map key IS their id.
     if (node.children && node.children.length > 0) {
       // Children stored as `{id1: {...}, id2: {...}}` map (NOT array),
-      // matching the Kotlin parser at `src/main/kotlin/app/parsing/css/CssParsing.kt:96`
+      // matching the Kotlin parser at `converter/src/main/kotlin/app/parsing/css/CssParsing.kt:96`
       // which calls `obj["children"]?.jsonObject?.mapValues { ... }` — it
       // expects a JsonObject keyed by id, not a JsonArray. The components
       // map at the top level uses the same shape, keeping the schema

@@ -9,7 +9,7 @@ scroll-timeline longhand parsers under
 Run each via:
 
 ```bash
-./gradlew run --args="convert --from css --to ir -i examples/properties/animations/<file>.json -o /tmp/p9"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/properties/animations/<file>.json -o /tmp/p9"
 ```
 
 All 10 fixtures convert with `(0 generic)` on every component.

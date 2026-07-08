@@ -8,7 +8,7 @@ is under `irmodels/properties/color/`).
 Run via:
 
 ```bash
-./gradlew run --args="convert --from css --to ir -i examples/properties/effects/<file>.json -o /tmp/p8"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/properties/effects/<file>.json -o /tmp/p8"
 ```
 
 All 25 fixtures convert with `(0 generic)` on every component.
