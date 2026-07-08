@@ -4,6 +4,7 @@ import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
@@ -15,7 +16,6 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -56,9 +56,18 @@ object FilterApplier {
         val dropShadowFilters = config.filters.filterIsInstance<FilterFunction.DropShadow>()
         val colorMatrixFilters = config.filters.filter { it.isColorMatrixFilter() }
 
-        // Apply blur first
+        // Apply blur first.
+        //
+        // Unbounded edge treatment: CSS `filter: blur()` (Filter Effects 1
+        // §10.1) does NOT clip the result to the element's border box — the
+        // Gaussian halo bleeds past the bounds, which is exactly what
+        // Chrome renders. Compose's Modifier.blur defaults to
+        // BlurredEdgeTreatment.Rectangle, which clamps + clips at the
+        // bounds and produced hard-edged blurs on Android
+        // (filter-functions 002_Filter_BlurLarge: web soft halo vs Android
+        // sharp rect, Android-web SSIM 0.85).
         blurFilters.forEach { blur ->
-            result = result.blur(blur.radius)
+            result = result.blur(blur.radius, BlurredEdgeTreatment.Unbounded)
         }
 
         // Apply drop shadows
@@ -211,6 +220,21 @@ object FilterApplier {
     /**
      * Apply drop shadow effect using drawBehind.
      */
+    /**
+     * Convert a CSS drop-shadow <blur-radius> (px) into the radius
+     * parameter [android.graphics.BlurMaskFilter] needs to reproduce the
+     * spec's Gaussian.
+     *
+     * Filter Effects 1 §10.1: the <blur-radius> r means a Gaussian with
+     * standard deviation σ = r/2. BlurMaskFilter maps its `radius` input
+     * to σ ≈ radius·0.57735 + 0.5 (the legacy Android convert-radius-to-
+     * sigma formula), so we invert: radius = (σ − 0.5) / 0.57735, floored
+     * at a tiny positive value because BlurMaskFilter throws on radius ≤ 0.
+     * Pure function — pinned by FilterDropShadowMathTest on the JVM.
+     */
+    internal fun dropShadowMaskRadius(blurPx: Float): Float =
+        (((blurPx / 2f) - 0.5f) / 0.57735f).coerceAtLeast(0.1f)
+
     private fun applyDropShadow(modifier: Modifier, shadow: FilterFunction.DropShadow): Modifier {
         return modifier.drawBehind {
             val offsetX = shadow.offsetX.toPx()
@@ -218,18 +242,38 @@ object FilterApplier {
             val blur = shadow.blurRadius.toPx()
 
             drawIntoCanvas { canvas ->
+                // The previous implementation drew a FULL-SIZE rect at
+                // (0,0) and relied on Paint.setShadowLayer for the offset
+                // shadow. On a hardware-accelerated canvas (every Compose
+                // RenderNode) setShadowLayer only applies to TEXT draws —
+                // for rects it's silently ignored, so no shadow ever
+                // rendered (filter-functions 016/017: web showed the
+                // offset shadow, Android showed none) and the full-size
+                // rect itself hid exactly under the content.
+                //
+                // Instead, draw the shadow silhouette directly: a rect
+                // offset by (dx, dy) in the shadow colour, blurred with a
+                // BlurMaskFilter (supported on hardware canvases since the
+                // Skia-backed HWUI in Android P). Filter Effects 1 §10.1:
+                // drop-shadow's <blur-radius> r means a Gaussian with
+                // σ = r/2. BlurMaskFilter(radius) maps its radius to
+                // σ ≈ radius·0.57735 + 0.5, so we invert that to hit the
+                // spec's σ.
                 val paint = Paint().apply {
                     color = shadow.color
-                    asFrameworkPaint().apply {
-                        setShadowLayer(blur, offsetX, offsetY, shadow.color.toArgb())
+                    if (blur > 0f) {
+                        asFrameworkPaint().maskFilter =
+                            android.graphics.BlurMaskFilter(
+                                dropShadowMaskRadius(blur),
+                                android.graphics.BlurMaskFilter.Blur.NORMAL)
                     }
                 }
 
                 canvas.drawRect(
-                    left = 0f,
-                    top = 0f,
-                    right = size.width,
-                    bottom = size.height,
+                    left = offsetX,
+                    top = offsetY,
+                    right = offsetX + size.width,
+                    bottom = offsetY + size.height,
                     paint = paint
                 )
             }

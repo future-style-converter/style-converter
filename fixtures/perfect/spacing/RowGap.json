@@ -1,8 +1,0 @@
-{
-  "components": {
-    "G_0":   { "properties": { "display": "flex", "width": "180px", "height": "60px", "background-color": "#1f2937", "row-gap": "0" } },
-    "G_4px": { "properties": { "display": "flex", "width": "180px", "height": "60px", "background-color": "#1f2937", "row-gap": "4px" } },
-    "G_8px": { "properties": { "display": "flex", "width": "180px", "height": "60px", "background-color": "#1f2937", "row-gap": "8px" } },
-    "G_16px":{ "properties": { "display": "flex", "width": "180px", "height": "60px", "background-color": "#1f2937", "row-gap": "16px" } }
-  }
-}

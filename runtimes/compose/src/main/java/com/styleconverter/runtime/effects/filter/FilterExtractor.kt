@@ -107,7 +107,17 @@ object FilterExtractor {
             }
 
             "hue-rotate" -> {
-                val angle = obj["angle"]?.let { ValueExtractors.extractDegrees(it) } ?: 0f
+                // Key drift fix: the IR serializer writes the angle under
+                // "a" ({"fn":"hue-rotate","a":{"deg":90}} — see
+                // FilterPropertyParser/serializer), but this reader only
+                // looked for a legacy "angle" key, so EVERY hue-rotate
+                // silently extracted as 0deg and the filter was an
+                // identity on Android (filter-functions 013/014: web
+                // rotated #e67e22 → green, Android stayed orange; 28-29%
+                // mismatched pixels, Lab ΔE p95 ≈ 52). "angle" is kept as
+                // a fallback for older snapshots.
+                val angle = (obj["a"] ?: obj["angle"])
+                    ?.let { ValueExtractors.extractDegrees(it) } ?: 0f
                 FilterFunction.HueRotate(angle)
             }
 

@@ -1,9 +1,0 @@
-{
-  "components": {
-    "C_red":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-inline-start-width": "6px", "border-inline-start-style": "solid", "border-inline-start-color": "#ef4444" } },
-    "C_green": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-inline-start-width": "6px", "border-inline-start-style": "solid", "border-inline-start-color": "#10b981" } },
-    "C_hex":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-inline-start-width": "6px", "border-inline-start-style": "solid", "border-inline-start-color": "#3b82f6" } },
-    "C_rgb":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-inline-start-width": "6px", "border-inline-start-style": "solid", "border-inline-start-color": "rgb(245,158,11)" } },
-    "C_named": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-inline-start-width": "6px", "border-inline-start-style": "solid", "border-inline-start-color": "white" } }
-  }
-}

@@ -74,8 +74,8 @@ apps/                            # per-platform capture harnesses (not products)
 └── ios-harness/                 # xcodegen iOS app; ImageRenderer captures
 
 fixtures/                        # test inputs: properties/<category>/ (33 canonical
-│                                #   categories) + suite trees (fuzz/, perfect/,
-│                                #   combos/, components/, keyframes/, …)
+│                                #   categories) + components/ (realistic UI
+│                                #   fixtures) + _metric_probes/ (text probes)
 tools/
 ├── visual/                      # SSIM compare, coverage-audit, smoke.sh, baseline/
 ├── titan/                       # WPT-corpus harness
@@ -84,7 +84,7 @@ tools/
 schema/                          # IR wire-format contract (see below)
 docs/
 ├── NAMING.md                    # the vocabulary glossary
-└── reports/                     # historical campaign docs + generated COVERAGE.md
+└── STATUS.md                    # one-page honest status (coverage + tier record)
 test-all.sh                      # convert → render on 3 platforms → compare
 test-ios.sh                      # thin wrapper: SKIP_ANDROID=1 SKIP_WEB=1 test-all.sh
 ```
@@ -214,7 +214,7 @@ A property is "done" when **all five** are true:
    are staged alongside the runtime code.
 5. **Coverage regenerated** — `node tools/visual/coverage-audit.mjs` shows
    the property under the right category on every platform
-   (`docs/reports/COVERAGE.md` is its generated output).
+   (`tools/visual/COVERAGE.md` is its generated output).
 
 ## Adding a new property
 
@@ -248,9 +248,9 @@ Gradle commands need JDK 21):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 43 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 786 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 413 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 444 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 60 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 448 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 409 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 12 goldens × 4 codebases |
 
 (`npm test` at the root runs every workspace's vitest suite — the web
@@ -288,7 +288,7 @@ Two different numbers, both true — do not conflate them:
   iOS 550 / 550, Web 550 / 550). Every property in the 550-property IR
   catalogue (33 categories) has a registered Config/Extractor/Applier
   triplet on all three platforms — `node tools/visual/coverage-audit.mjs`
-  is the source of truth (`docs/reports/COVERAGE.md`). "Registered" means
+  is the source of truth (`tools/visual/COVERAGE.md`). "Registered" means
   the triplet exists and claims the type; some appliers are intentional
   no-op + TODO where no mobile analogue exists (speech/, regions/, print/, …).
 - **Verified rendering coverage: 91/550 (~17%)**. Only 91 properties pass
@@ -296,10 +296,9 @@ Two different numbers, both true — do not conflate them:
   pair against committed baselines. Of the rest: 419 blocked-platform
   (need capability tiers the harness doesn't have — animation state,
   scroll, real tables, …), 37 exhausted (no meaningful visual test
-  exists), 3 failing (known real divergences). See
-  `docs/reports/CAMPAIGN_SUMMARY.md` for how the tracker went from a
-  dishonest "548/548 passing" to this classification, and
-  `docs/reports/TIER1_VARIANT_DEPTH.md` for the per-property tracker.
+  exists), 3 failing (known real divergences). `docs/STATUS.md` carries
+  the converged headline table, the per-tier record, and how the tracker
+  went from a dishonest "548/548 passing" to this classification.
 
 ## Roadmap
 
@@ -307,8 +306,9 @@ Static code **writers** that emit Compose / SwiftUI (and eventually
 Tailwind) source from the IR; the **flat-IR v2** freeze with the
 slot/placement children contract (`schema/spec/03-children.md` and
 `05-versioning.md` describe the v1 rules it replaces); repairing the
-known v1 wire defects at that freeze. Execution history — the 12-commit
-rollout, the 70-round audit campaign, TITAN — lives in `docs/reports/`.
+known v1 wire defects at that freeze. The durable conclusions of the
+execution history — the 12-commit rollout, the 70-round audit campaign —
+are summarized in `docs/STATUS.md`; the full record lives in git history.
 
 ## Tech stack
 

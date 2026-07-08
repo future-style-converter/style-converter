@@ -157,17 +157,16 @@ run_baseline() {
 
 # ── Doc-staleness check (round 70 — automates rounds 65-68's manual catches) ──
 #
-# Re-runs each source-of-truth script (coverage-audit, degenerate_audit,
-# ssim-history) and verifies the claims in the docs match. Fails if any
-# headline number in README/ROLLOUT/COVERAGE/DEGENERATE_FIXTURES/TIERS/
-# TIER1_VARIANT_DEPTH/TIER8_HISTORY drifted from reality.
+# Re-runs each live source-of-truth script (coverage-audit, the unit-test
+# and per-suite counts, fixture category count) and verifies the claims in
+# the living docs (README.md / CLAUDE.md / docs/STATUS.md) match. Fails if
+# any headline number drifted from reality.
 #
-# Why this matters: rounds 65-68 caught 4 stale-doc instances manually
-# (DEGENERATE 102→94, README 545→550, ROLLOUT 545→550, ssim-history
-# 1→2 snapshots). Each took a manual round to find. This step catches
-# them automatically going forward — the next time someone changes the
-# IR catalogue or re-runs the degenerate-audit, the doc-staleness check
-# fails fast in CI before the drift compounds.
+# Why this matters: rounds 65-68 caught 4 stale-doc instances manually,
+# each taking a manual round to find. This step catches them automatically
+# going forward — the next time someone changes the IR catalogue or the
+# test suites, the doc-staleness check fails fast in CI before the drift
+# compounds.
 run_doc_staleness() {
     echo -e "\n${B}━━━ Doc-staleness check (live source-of-truth vs doc claims) ━━━${N}"
     if bash tools/visual/doc-staleness-check.sh > /tmp/smoke-docstaleness.log 2>&1; then
@@ -186,33 +185,12 @@ run_doc_staleness() {
     fi
 }
 
-# ── Tracker fabrication audit (round 38 guardrail, wired round 59) ──────────
-#
-# Verifies every "REWRITTEN" tracker claim in TIER1_VARIANT_DEPTH.md has a
-# corresponding fixture file present + git history. Exits non-zero on any
-# fabrication. Runs first because it's a static check (no node, no vite,
-# no build) — fastest signal of "did the tracker drift from reality".
-run_rewrite_audit() {
-    echo -e "\n${B}━━━ Tracker fabrication audit (REWRITTEN claims) ━━━${N}"
-    if bash docs/reports/loops/audit_rewrite_claims.sh > /tmp/smoke-rewriteaudit.log 2>&1; then
-        local summary
-        summary=$(grep -E "^✓ all [0-9]+ REWRITTEN" /tmp/smoke-rewriteaudit.log | tail -1)
-        log "$summary"
-        add_result "Rewrite-claim audit: $summary"
-    else
-        err "Rewrite-claim audit FAILED — fabrication suspected. Tail of log:"
-        tail -15 /tmp/smoke-rewriteaudit.log >&2
-        add_result "Rewrite-claim audit: FAILED — fabrication suspected"
-        return 1
-    fi
-}
-
 # ── Unit tests for testing-side scripts ─────────────────────────────────────
 #
-# Round 56: tools/visual/css-to-ir.test.mjs uses Node's built-in --test runner
-# to pin the contract for the Tier 9 adapter (extractRootVars, resolveVars,
-# isVisible, extractRules). 25 tests, ~50ms — basically free; runs first
-# so a broken adapter fails fast before we boot vite or run captures.
+# Node's built-in --test runner pins the contracts of the compare/classify
+# pipeline (tools/visual/*.test.mjs) and the TITAN extractor + browser-ref
+# helpers (tools/titan/*.test.mjs). Fast (~seconds) — runs first so a
+# broken helper fails fast before we boot vite or run captures.
 run_unit_tests() {
     echo -e "\n${B}━━━ Unit tests: tools/visual/*.test.mjs + tools/titan/*.test.mjs ━━━${N}"
     # TITAN Phase 1: include tools/titan/*.test.mjs so the WPT extractor
@@ -277,7 +255,6 @@ EXIT_CODE=0
 
 # Static checks first — fastest signal, no runtime needed.
 run_doc_staleness || EXIT_CODE=1
-run_rewrite_audit || EXIT_CODE=1
 
 # Cheap unit tests next — any failure here means the adapter logic is
 # broken and the downstream captures would mismeasure.

@@ -84,7 +84,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // section-runner (tools/titan/section-runner.sh) sets the per-platform
 // screenshot dirs + REPORT_DIR + MANIFEST_OUT to per-section paths so 30+
 // agents can run compare in parallel without racing on tools/visual/report/ or
-// the screenshot trees. See tools/titan/swarm-dispatch.md.
+// the screenshot trees.
 const PLATFORMS = ['iOS', 'Android', 'web'];
 
 const paths = {
@@ -735,7 +735,15 @@ async function syncBaseline() {
     process.exit(2);
   }
 
-  rmSync(paths.baseline, { recursive: true, force: true });
+  // UPSERT, never wipe. The old implementation rmSync'd the whole baseline
+  // dir and rewrote only the current run's captures — which silently deleted
+  // every baseline belonging to OTHER fixture suites and to platforms that
+  // were skipped this run (bit us twice: legacy commit c36d030 and the
+  // 2026-07 hard-prune campaign, where UPDATE_BASELINE with SKIP_IOS=1
+  // deleted 12 iOS rows and a whole per-property suite). Now: a platform
+  // with zero captures is left untouched, and existing baselines for
+  // components not in this run survive. Deleting a retired component's
+  // baseline is a deliberate manual `git rm`, not a side effect.
   mkdirSync(paths.baseline, { recursive: true });
   let count = 0;
   for (const p of PLATFORMS) {
@@ -747,7 +755,7 @@ async function syncBaseline() {
       count += 1;
     }
   }
-  console.log(`✓ wrote ${count} baseline image(s) to ${paths.baseline}`);
+  console.log(`✓ upserted ${count} baseline image(s) into ${paths.baseline} (absent platforms/components untouched)`);
 }
 
 function summarize(row) {

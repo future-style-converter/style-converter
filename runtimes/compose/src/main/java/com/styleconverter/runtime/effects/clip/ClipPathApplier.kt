@@ -2,6 +2,7 @@ package com.styleconverter.runtime.effects.clip
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
@@ -49,9 +50,43 @@ object ClipPathApplier {
             is ClipShape.Polygon -> createPolygonShape(shape)
             is ClipShape.Path -> createPathShape(shape)
             is ClipShape.LegacyRect -> createLegacyRectShape(shape)
+            is ClipShape.Xywh -> createXywhShape(shape)
         }
 
         return modifier.clip(composeShape)
+    }
+
+    /**
+     * Create a Compose Shape for `xywh(x y w h [round r])` (CSS Shapes 1
+     * §2.1). The rect is anchored at (x, y) from the box's top-left with
+     * a fixed w×h extent; `round` applies a uniform corner radius (the
+     * single-radius form is all the IR serializes today). Rendered as an
+     * [Outline.Rounded] so Skia handles the corner arcs natively — the
+     * same primitive the browser uses for its border-radius fast path.
+     */
+    private fun createXywhShape(xywh: ClipShape.Xywh): Shape {
+        return object : Shape {
+            override fun createOutline(
+                size: Size,
+                layoutDirection: LayoutDirection,
+                density: Density
+            ): Outline {
+                val x = with(density) { xywh.x.toPx() }
+                val y = with(density) { xywh.y.toPx() }
+                val w = with(density) { xywh.w.toPx() }.coerceAtLeast(0f)
+                val h = with(density) { xywh.h.toPx() }.coerceAtLeast(0f)
+                val r = with(density) { xywh.round.toPx() }
+                    // CSS Backgrounds 3 §5.5 corner-overlap rule: radii
+                    // never exceed half the rect's shorter dimension.
+                    .coerceIn(0f, min(w, h) / 2f)
+                return Outline.Rounded(
+                    RoundRect(
+                        left = x, top = y, right = x + w, bottom = y + h,
+                        cornerRadius = CornerRadius(r, r)
+                    )
+                )
+            }
+        }
     }
 
     /**
@@ -64,8 +99,12 @@ object ClipPathApplier {
                 layoutDirection: LayoutDirection,
                 density: Density
             ): Outline {
-                val centerX = size.width * (circle.centerX / 100f)
-                val centerY = size.height * (circle.centerY / 100f)
+                // Absolute-length center (`at 20px 30px`) wins over the
+                // percent form when present — CSS Shapes 1 §3.1 <position>.
+                val centerX = circle.centerXDp?.let { with(density) { it.toPx() } }
+                    ?: (size.width * (circle.centerX / 100f))
+                val centerY = circle.centerYDp?.let { with(density) { it.toPx() } }
+                    ?: (size.height * (circle.centerY / 100f))
 
                 val radius = resolveCircleRadius(
                     circle.radius,
@@ -103,7 +142,14 @@ object ClipPathApplier {
     ): Float {
         return when (radius) {
             is ClipRadius.Fixed -> with(density) { radius.dp.toPx() }
-            is ClipRadius.Percentage -> min(size.width, size.height) * (radius.percent / 100f)
+            // CSS Shapes 1 §3.1: a percentage circle radius resolves
+            // against sqrt(width² + height²) / √2 — NOT min(w,h). For the
+            // 358×70 ClipPath_Circle_AtCenter box, circle(40%): spec gives
+            // 0.4·√(358²+70²)/√2 ≈ 103px; the old min(w,h)·0.4 = 28px
+            // clipped a far smaller disc than web (SSIM 0.90, 4.9% px).
+            is ClipRadius.Percentage ->
+                (kotlin.math.sqrt(size.width * size.width + size.height * size.height.toDouble()) /
+                    kotlin.math.sqrt(2.0)).toFloat() * (radius.percent / 100f)
             ClipRadius.ClosestSide -> min(
                 min(centerX, size.width - centerX),
                 min(centerY, size.height - centerY)
@@ -352,6 +398,7 @@ object ClipPathApplier {
             is ClipShape.Polygon -> createPolygonShape(shape)
             is ClipShape.Path -> createPathShape(shape)
             is ClipShape.LegacyRect -> createLegacyRectShape(shape)
+            is ClipShape.Xywh -> createXywhShape(shape)
         }
     }
 }

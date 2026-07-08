@@ -93,7 +93,9 @@ object FlexExtractor {
     }
 
     private fun parseJustifyContent(keyword: String?): JustifyContent = when (keyword) {
-        "flex-end", "end" -> JustifyContent.FLEX_END
+        // css-align-3 §5.2 physical keywords: right ≡ end, left ≡ start in
+        // the LTR-normalized engine (same fold as FlexboxExtractor).
+        "flex-end", "end", "right" -> JustifyContent.FLEX_END
         "center" -> JustifyContent.CENTER
         "space-between" -> JustifyContent.SPACE_BETWEEN
         "space-around" -> JustifyContent.SPACE_AROUND

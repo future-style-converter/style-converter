@@ -1,7 +1,0 @@
-{
-  "components": {
-    "TB_normal":     { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "transition-behavior": "normal" } },
-    "TB_allow":      { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "transition-behavior": "allow-discrete" } },
-    "TB_commaList":  { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "transition-behavior": "normal, allow-discrete" } }
-  }
-}

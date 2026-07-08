@@ -553,13 +553,40 @@ object ColorApplier {
         val cyFrac = gradient.centerY
         val colors = gradient.colorStops.map { it.color }
         val stops = gradient.colorStops.map { it.position }
+        // CSS `from` angle, degrees. 0 when the author omitted `from …`.
+        val fromDeg = gradient.angle
         return object : ShaderBrush() {
             override fun createShader(size: Size): Shader {
                 val cx = cxFrac * size.width
                 val cy = cyFrac * size.height
-                return android.graphics.SweepGradient(cx, cy, colors.map { it.toArgb() }.toIntArray(),
-                                                      if (stops.isEmpty()) null else stops.toFloatArray())
+                val shader = android.graphics.SweepGradient(cx, cy, colors.map { it.toArgb() }.toIntArray(),
+                                                            if (stops.isEmpty()) null else stops.toFloatArray())
+                // Convention fix: android.graphics.SweepGradient places its
+                // 0-position at 3 o'clock (+x axis) sweeping clockwise,
+                // while CSS conic-gradient() (css-images-4 §3.3) starts at
+                // 12 o'clock. On the visual-test Gradient_Conic wheel this
+                // rendered every hue rotated +90° vs web (red at 3 o'clock
+                // instead of 12; Android-web SSIM 0.88 / 14.9% pixels).
+                // Rotate the shader by (from - 90)° around the centre:
+                // -90° re-homes 0deg to 12 o'clock, and the previously
+                // ignored CSS `from <angle>` offset composes on top.
+                val rotate = android.graphics.Matrix()
+                rotate.setRotate(conicSweepRotationDegrees(fromDeg), cx, cy)
+                shader.setLocalMatrix(rotate)
+                return shader
             }
         }
     }
+
+    /**
+     * Degrees to rotate an android SweepGradient so it matches a CSS
+     * conic-gradient whose `from` angle is [cssFromDeg].
+     *
+     * CSS (css-images-4 §3.3): conic 0deg points UP (12 o'clock),
+     * increasing clockwise. Android SweepGradient: position 0 points
+     * RIGHT (3 o'clock = 90deg in CSS terms), increasing clockwise.
+     * Matrix.setRotate is clockwise-positive in screen coordinates, so
+     * the correction is a plain (from − 90) — pure math, JVM-testable.
+     */
+    internal fun conicSweepRotationDegrees(cssFromDeg: Float): Float = cssFromDeg - 90f
 }

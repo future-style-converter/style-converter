@@ -1,8 +1,0 @@
-{
-  "components": {
-    "BF_none":       { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "rgba(255,255,255,0.3)", "backdrop-filter": "none" } },
-    "BF_blur":       { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "rgba(255,255,255,0.3)", "backdrop-filter": "blur(4px)" } },
-    "BF_brightness": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "rgba(255,255,255,0.3)", "backdrop-filter": "brightness(1.5)" } },
-    "BF_grayscale":  { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "rgba(255,255,255,0.3)", "backdrop-filter": "grayscale(50%)" } }
-  }
-}

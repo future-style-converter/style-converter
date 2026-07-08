@@ -110,8 +110,29 @@ object ClipPathExtractor {
             "inset" -> extractInset(json)
             "polygon" -> extractPolygon(json)
             "path" -> extractPath(json)
+            "xywh" -> extractXywh(json)
             else -> null
         }
+    }
+
+    /**
+     * Extract `xywh(x y w h [round r])` (CSS Shapes 1 §2.1).
+     *
+     * IR canonical keys (ClipPathSerializers, same file as inset/rect):
+     *   { type: "xywh", x: IRLength, y: IRLength, w: IRLength, h: IRLength,
+     *     round?: IRLength }
+     * All lengths are parser-resolved px. Missing/unresolvable values
+     * default to 0 — a zero-area rect clips everything, which is the
+     * CSS-correct degenerate outcome for `xywh(0 0 0 0)`.
+     */
+    private fun extractXywh(json: JsonObject): ClipShape.Xywh {
+        return ClipShape.Xywh(
+            x = ValueExtractors.extractDp(json["x"]) ?: 0.dp,
+            y = ValueExtractors.extractDp(json["y"]) ?: 0.dp,
+            w = ValueExtractors.extractDp(json["w"]) ?: 0.dp,
+            h = ValueExtractors.extractDp(json["h"]) ?: 0.dp,
+            round = ValueExtractors.extractDp(json["round"]) ?: 0.dp,
+        )
     }
 
     /**
@@ -149,7 +170,15 @@ object ClipPathExtractor {
         // legacy hand-written `x` / `y` numeric keys for any older test fixture
         // that pre-dates the canonical Position serializer.
         val (centerX, centerY) = readCenterPercent(json)
-        return ClipShape.Circle(radius, centerX, centerY)
+        // Absolute-length center form: `circle(60px at 20px 30px)` — the
+        // pos axes arrive as IRLength px objects, which readCenterPercent
+        // (percent-only by design) ignores. Surface them separately so the
+        // applier can prefer the definite px coordinates (CSS Shapes 1
+        // §3.1 <position> takes any <length-percentage>).
+        val pos = json["pos"] as? JsonObject
+        val centerXDp = pos?.get("x")?.let { ValueExtractors.extractDp(it) }
+        val centerYDp = pos?.get("y")?.let { ValueExtractors.extractDp(it) }
+        return ClipShape.Circle(radius, centerX, centerY, centerXDp, centerYDp)
     }
 
     /**

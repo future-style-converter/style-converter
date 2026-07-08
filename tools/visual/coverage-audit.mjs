@@ -13,7 +13,7 @@
 // Usage:
 //   node tools/visual/coverage-audit.mjs           # text report
 //   node tools/visual/coverage-audit.mjs --json    # machine-readable
-//   node tools/visual/coverage-audit.mjs --md      # emits docs/reports/COVERAGE.md
+//   node tools/visual/coverage-audit.mjs --md      # emits tools/visual/COVERAGE.md
 //
 // Design notes:
 //   • Each platform uses its own registration surface, so we parse those
@@ -219,8 +219,8 @@ if (mode === 'md') {
     lines.push(`⚠ ${unclaimedAnywhere.length} IR properties are not claimed on any platform:`);
     for (const p of unclaimedAnywhere) lines.push(`- \`${p.category}/${p.name}\``);
   }
-  writeFileSync(resolve(REPO, 'docs/reports/COVERAGE.md'), lines.join('\n') + '\n');
-  process.stdout.write(`✓ wrote docs/reports/COVERAGE.md (${rows.length} categories, passed=${passed})\n`);
+  writeFileSync(resolve(REPO, 'tools/visual/COVERAGE.md'), lines.join('\n') + '\n');
+  process.stdout.write(`✓ wrote tools/visual/COVERAGE.md (${rows.length} categories, passed=${passed})\n`);
   process.exit(passed ? 0 : 1);
 }
 

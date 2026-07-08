@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.toArgb
 import com.styleconverter.runtime.color.ColorStop
 import kotlin.math.PI
 import kotlin.math.cos
@@ -198,20 +199,37 @@ object RepeatingGradientHelper {
             .distinctBy { "%.4f".format(it.first) }
             .toTypedArray()
 
-        // Ensure we have at least 2 stops
-        if (sortedStops.size < 2) {
-            val first = colorStops.first()
-            val last = colorStops.last()
-            return Brush.sweepGradient(
-                colorStops = arrayOf(0f to first.color, 1f to last.color),
-                center = center
-            )
+        // Ensure we have at least 2 stops — degrade to a 2-stop sweep.
+        val effectiveStops = if (sortedStops.size < 2) {
+            arrayOf(0f to colorStops.first().color, 1f to colorStops.last().color)
+        } else {
+            sortedStops
         }
 
-        return Brush.sweepGradient(
-            colorStops = sortedStops,
-            center = center
-        )
+        // Build the sweep through android.graphics so we can rotate it:
+        // CSS conic 0deg = 12 o'clock (css-images-4 §3.3) but Android
+        // SweepGradient's 0-position = 3 o'clock, and the CSS `from`
+        // angle must offset the start. Compose's Brush.sweepGradient has
+        // no start-angle parameter, so we wrap a framework SweepGradient
+        // in a ShaderBrush and apply the same (from − 90)° local-matrix
+        // rotation as the non-repeating path in ColorApplier
+        // (conicSweepRotationDegrees — single source of truth).
+        return object : androidx.compose.ui.graphics.ShaderBrush() {
+            override fun createShader(size: Size): android.graphics.Shader {
+                val shader = android.graphics.SweepGradient(
+                    center.x, center.y,
+                    effectiveStops.map { it.second.toArgb() }.toIntArray(),
+                    effectiveStops.map { it.first }.toFloatArray()
+                )
+                val rotate = android.graphics.Matrix()
+                rotate.setRotate(
+                    com.styleconverter.runtime.color.ColorApplier.conicSweepRotationDegrees(startAngle),
+                    center.x, center.y
+                )
+                shader.setLocalMatrix(rotate)
+                return shader
+            }
+        }
     }
 
     /**

@@ -54,11 +54,21 @@ sealed interface ClipShape {
      * @param radius The radius of the circle (fixed, percentage, or keyword)
      * @param centerX Horizontal center position as percentage (0-100)
      * @param centerY Vertical center position as percentage (0-100)
+     * @param centerXDp Horizontal center as an absolute length. CSS Shapes 1
+     *   §3.1 allows `circle(r at 20px 30px)`; the IR then carries
+     *   `pos.x = {px: 20}` instead of a percent. Non-null wins over
+     *   [centerX] at draw time. (Previously the extractor only understood
+     *   the percent form, so px-positioned circles silently recentred to
+     *   50%/50% — clip-path-basic-shapes 006_ClipPath_Circle_AtCorner sat
+     *   at SSIM 0.86 vs web.)
+     * @param centerYDp Vertical counterpart of [centerXDp].
      */
     data class Circle(
         val radius: ClipRadius = ClipRadius.ClosestSide,
         val centerX: Float = 50f,
-        val centerY: Float = 50f
+        val centerY: Float = 50f,
+        val centerXDp: Dp? = null,
+        val centerYDp: Dp? = null,
     ) : ClipShape
 
     /**
@@ -103,6 +113,24 @@ sealed interface ClipShape {
         // 0..1 fraction the applier multiplies inside createOutline where
         // `size` is in scope.
         val borderRadiusFraction: Float? = null,
+    ) : ClipShape
+
+    /**
+     * CSS Shapes 1 §2.1 `xywh(x y w h [round r])` — a rectangle anchored
+     * at (x, y) from the box's top-left with explicit width/height and an
+     * optional uniform corner radius. IR wire shape (ClipPathSerializers):
+     *   { type: "xywh", x: IRLength, y: IRLength, w: IRLength, h: IRLength,
+     *     round?: IRLength }
+     * Before this variant existed the extractor returned null for xywh and
+     * the element rendered UNCLIPPED on Android (clip-path-basic-shapes
+     * 012/013: 16% mismatched pixels vs web, SSIM 0.79-0.81).
+     */
+    data class Xywh(
+        val x: Dp = 0.dp,
+        val y: Dp = 0.dp,
+        val w: Dp = 0.dp,
+        val h: Dp = 0.dp,
+        val round: Dp = 0.dp,
     ) : ClipShape
 
     /**

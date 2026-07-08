@@ -1,8 +1,0 @@
-{
-  "components": {
-    "Plain": { "properties": { "width": "140px", "height": "70px", "background-color": "#7f8c8d" } },
-    "WC_FlatType": { "properties": { "width": "140px", "height": "70px", "background-color": "#7f8c8d", "appearance": "auto" } },
-    "WC_NestedType": { "properties": { "width": "140px", "height": "70px", "background-color": "#7f8c8d", "scroll-behavior": "auto" } },
-    "ImgOrient_NoFlip": { "properties": { "width": "140px", "height": "70px", "background-color": "#7f8c8d", "image-orientation": "90deg" } }
-  }
-}

@@ -160,6 +160,13 @@ object TextStyleApplier {
         // and iOS (`.frame(minHeight: 28)`) byte-for-byte.
         return TextStyle.Default.copy(
             color = color ?: Color.Unspecified,
+            // text-align (css-text-3 §6.1). The local was extracted from the
+            // "TextAlign" IR property above but never written into the copy,
+            // so every caller (ComponentRenderer.PlaceholderContent included)
+            // saw Unspecified and fell back to Start — `text-align: center`
+            // rendered left-flushed on Android while web centered it
+            // (TextAlign_Center, Android-web SSIM 0.86).
+            textAlign = textAlign ?: TextAlign.Unspecified,
             fontSize = fontSize ?: TextUnit.Unspecified,
             fontWeight = fontWeight,
             fontStyle = fontStyle,

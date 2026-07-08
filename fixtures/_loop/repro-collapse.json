@@ -1,9 +1,0 @@
-{
-  "components": {
-    "Plain": { "properties": { "width": "140px", "height": "70px", "background-color": "#7f8c8d" } },
-    "WillChange_Auto": { "properties": { "width": "140px", "height": "70px", "background-color": "#7f8c8d", "will-change": "auto" } },
-    "WillChange_Transform": { "properties": { "width": "140px", "height": "70px", "background-color": "#7f8c8d", "will-change": "transform" } },
-    "ImageOrientation_Angle": { "properties": { "width": "140px", "height": "70px", "background-color": "#7f8c8d", "image-orientation": "180deg flip" } },
-    "Both": { "properties": { "width": "140px", "height": "70px", "background-color": "#7f8c8d", "will-change": "auto", "image-orientation": "180deg flip" } }
-  }
-}

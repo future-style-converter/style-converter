@@ -43,14 +43,14 @@ Two coverage numbers, both true:
 
 | claim | number | source of truth |
 |---|---|---|
-| Registration coverage (triplet exists + registered) | **550 / 550 per platform** (Android 550 / 550 · iOS 550 / 550 · Web 550 / 550) | `node tools/visual/coverage-audit.mjs` → `docs/reports/COVERAGE.md` |
-| Verified rendering coverage (SSIM ≥ 0.95, every variant, every platform pair) | **91/550 (~17%)** | `docs/reports/TIER1_VARIANT_DEPTH.md` |
+| Registration coverage (triplet exists + registered) | **550 / 550 per platform** (Android 550 / 550 · iOS 550 / 550 · Web 550 / 550) | `node tools/visual/coverage-audit.mjs` → `tools/visual/COVERAGE.md` |
+| Verified rendering coverage (SSIM ≥ 0.95, every variant, every platform pair) | **91/550 (~17%)** | [docs/STATUS.md](docs/STATUS.md) |
 
 Of the unverified remainder: 419 are blocked on platform capability gaps
 or missing harness tiers (animations, interactions, print, …), 37 are
 exhausted (no meaningful visual test exists), and 3 have known real
-divergences. `docs/reports/CAMPAIGN_SUMMARY.md` tells the story of how
-the tracker got honest.
+divergences. [docs/STATUS.md](docs/STATUS.md) carries the full breakdown
+and how the tracker got honest.
 
 **Roadmap:** code *writers* that emit static Jetpack Compose / SwiftUI
 source from the IR. An earlier generator scaffold was removed; the
@@ -134,10 +134,10 @@ tools/
 ├── titan/               # WPT-corpus test harness
 └── wpt/                 # WPT corpus mirror (gitignored; tools/titan/fetch-wpt.sh)
 
-fixtures/                # test fixtures: properties/<category>/ + suites (fuzz, perfect, combos, …)
+fixtures/                # test fixtures: properties/<category>/ + components/ + probes
 schema/                  # the IR wire-format contract (JSON Schema + spec + golden fixtures)
 docs/NAMING.md           # vocabulary glossary (reader/writer/runtime/harness/…)
-docs/reports/            # historical campaign docs + generated COVERAGE.md
+docs/STATUS.md           # one-page honest status (coverage numbers + tier record)
 test-all.sh              # convert → render on 3 platforms → compare
 ```
 
@@ -179,9 +179,9 @@ the point.
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 43 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 786 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 413 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 444 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 60 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 448 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 409 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 12 goldens × 4 codebases |
 
 CI (`.github/workflows/ci.yml`) runs the converter, web-runtime,
@@ -197,7 +197,7 @@ emulator and an iOS simulator.
 - [CONTRIBUTING.md](CONTRIBUTING.md) — dev setup, branch model, PR checklist
 - [docs/NAMING.md](docs/NAMING.md) — the vocabulary glossary
 - [schema/spec/](schema/spec/) — the normative IR wire-format spec
-- [docs/reports/](docs/reports/) — historical campaign + audit reports
+- [docs/STATUS.md](docs/STATUS.md) — the one-page status + testing-tier record
 
 ## License
 
