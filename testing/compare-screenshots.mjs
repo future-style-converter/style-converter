@@ -6,7 +6,7 @@
 //
 // Reads per-component PNGs from:
 //   testing/iOS/screenshots/
-//   testing/Android/screenshots/
+//   apps/android-harness/screenshots/
 //   apps/web-harness/screenshots/
 //
 // For each component (matched by filename like `012_Color_HSL.png`) it:
@@ -89,7 +89,7 @@ const PLATFORMS = ['iOS', 'Android', 'web'];
 
 const paths = {
   iOS:     process.env.IOS_SCREENSHOTS_DIR     || resolve(__dirname, 'iOS/screenshots'),
-  Android: process.env.ANDROID_SCREENSHOTS_DIR || resolve(__dirname, 'Android/screenshots'),
+  Android: process.env.ANDROID_SCREENSHOTS_DIR || resolve(__dirname, '../apps/android-harness/screenshots'),
   web:     process.env.WEB_SCREENSHOTS_DIR     || resolve(__dirname, '../apps/web-harness/screenshots'),
   baseline: resolve(__dirname, 'baseline'),
   // REPORT_DIR controls where index.html + diffs/ + images/ are written.
@@ -730,7 +730,7 @@ async function syncBaseline() {
   }
   if (totalAvailable === 0) {
     console.error('✗ refusing to update baseline: no current captures found.');
-    console.error('  expected PNGs under testing/{iOS,Android}/screenshots/ + apps/web-harness/screenshots/');
+    console.error('  expected PNGs under testing/iOS/screenshots/ + apps/{android,web}-harness/screenshots/');
     console.error('  (did a capture step fail, or was everything skipped?)');
     process.exit(2);
   }

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Library manifest: intentionally empty — the namespace comes from
+     build.gradle.kts (com.styleconverter.runtime). -->
+<manifest />

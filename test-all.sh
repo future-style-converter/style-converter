@@ -94,7 +94,7 @@ INPUT_JSON="${1:-examples/visual-test.json}"
 
 OUTPUT_DIR="$PROJECT_ROOT/out"
 IOS_DIR="$PROJECT_ROOT/testing/iOS"
-ANDROID_DIR="$PROJECT_ROOT/testing/Android"
+ANDROID_DIR="$PROJECT_ROOT/apps/android-harness"
 WEB_DIR="$PROJECT_ROOT/apps/web-harness"
 TESTING_DIR="$PROJECT_ROOT/testing"
 

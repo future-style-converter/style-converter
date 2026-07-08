@@ -20,7 +20,7 @@ converter emits IR only via `--to ir`).
 ```
 JSON Input → CSS Parser → IR Model → runtime style engines
                                       ├─ Web     (runtimes/web/,   DOM/CSS)
-                                      ├─ Android (testing/Android/, Compose)
+                                      ├─ Android (runtimes/compose/, Compose)
                                       └─ iOS     (testing/iOS/,    SwiftUI)
 ```
 
@@ -40,13 +40,14 @@ converter/src/main/kotlin/app/
         ├── shorthands/          # Shorthand expanders
         └── primitiveParsers/    # Color, Length, Angle parsers
 
-testing/Android/                 # Android runtime style engine
+runtimes/compose/                # Android runtime style engine — AGP library
+│                                #   (com.styleconverter.runtime; canonical
+│                                #   per-property Config/Extractor/Applier
+│                                #   triplets under src/main/java/…/runtime/)
+apps/android-harness/            # Android test app consuming :runtime
 ├── app/src/main/
 │   ├── assets/tmpOutput.json    # IR loaded at runtime (regenerated, gitignored)
 │   └── java/.../
-│       ├── style/               # canonical engine tree (per-property
-│       │                        #   Config/Extractor/Applier triplets;
-│       │                        #   the legacy sdui/ folder was folded in here)
 │       ├── screenshot/          # Auto screenshot capture
 │       │   ├── ScreenshotManager.kt
 │       │   └── ScreenshotCaptureScreen.kt
@@ -114,10 +115,10 @@ adb pull /sdcard/Android/data/com.styleconverter.test/files/test_screenshots/ ./
 ./gradlew :converter:run --args="convert --from css --to ir -i examples/your-test.json -o out"
 
 # 2. Copy to Android assets
-cp out/tmpOutput.json testing/Android/app/src/main/assets/
+cp out/tmpOutput.json apps/android-harness/app/src/main/assets/
 
 # 3. Build and install
-cd testing/Android
+cd apps/android-harness
 JAVA_HOME=$(/usr/libexec/java_home -v 21) ./gradlew installDebug
 
 # 4. Launch app (screenshots auto-capture on startup)
@@ -156,7 +157,7 @@ category paths, the same property files. If a property lives at
 implementations live at the mirror paths:
 
 ```
-testing/Android/app/src/main/java/com/styleconverter/test/style/
+runtimes/compose/src/main/java/com/styleconverter/runtime/
   └── borders/sides/BorderTopWidth{Config,Extractor,Applier}.kt
 testing/iOS/StyleConverterTest/StyleEngine/
   └── borders/sides/BorderTopWidth{Config,Extractor,Applier}.swift
@@ -415,9 +416,9 @@ PageBreak*                       # No printing
 ## Key files reference (current)
 
 Android (canonical tree):
-- `testing/Android/app/src/main/java/com/styleconverter/test/style/PropertyRegistry.kt` — coverage registry
-- `testing/Android/app/src/main/java/com/styleconverter/test/style/<category>/` — per-category Config / Extractor / Applier triplets
-- `testing/Android/app/src/main/java/com/styleconverter/test/style/core/renderer/ComponentRenderer.kt` — engine + legacy dispatch
+- `runtimes/compose/src/main/java/com/styleconverter/runtime/PropertyRegistry.kt` — coverage registry
+- `runtimes/compose/src/main/java/com/styleconverter/runtime/<category>/` — per-category Config / Extractor / Applier triplets
+- `runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt` — engine + legacy dispatch
 
 iOS (canonical tree):
 - `testing/iOS/StyleConverterTest/StyleEngine/PropertyRegistry.swift` — registry
