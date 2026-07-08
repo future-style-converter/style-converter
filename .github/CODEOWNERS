@@ -1,0 +1,18 @@
+# CODEOWNERS — review routing. Later lines win over earlier ones.
+# Single-maintainer today; the per-area lines exist so that adding a
+# platform owner later is a one-line change, not a restructure.
+
+# Default: everything.
+* @FlorentGrea
+
+# Converter (CSS reader → typed IR).
+/converter/ @FlorentGrea
+
+# IR wire-format contract — schema, normative spec, golden fixtures.
+# Changes here are contract changes (see schema/spec/05-versioning.md).
+/schema/ @FlorentGrea
+
+# The three runtimes (the product).
+/runtimes/web/ @FlorentGrea
+/runtimes/compose/ @FlorentGrea
+/runtimes/swiftui/ @FlorentGrea

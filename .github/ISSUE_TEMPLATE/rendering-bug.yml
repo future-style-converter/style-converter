@@ -1,0 +1,87 @@
+name: Rendering bug
+description: The same fixture renders differently across platforms (web / compose / swiftui)
+title: "[rendering] "
+labels: ["kind:rendering-bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! A rendering bug means the **same IR renders
+        differently** on two or more runtimes. The smaller the fixture, the
+        faster we can fix it — one component with only the properties needed
+        to show the divergence is ideal.
+
+        Vocabulary (fixture, runtime, harness, baseline) is pinned in
+        [docs/NAMING.md](https://github.com/future-style-converter/style-converter/blob/dev/docs/NAMING.md).
+  - type: textarea
+    id: fixture
+    attributes:
+      label: Fixture JSON
+      description: >
+        The JSON envelope that reproduces the bug (same format as
+        `fixtures/properties/<category>/<property>.json` — component names
+        mapping to CSS properties). Please minimize it as far as you can.
+      render: json
+      placeholder: |
+        {
+          "components": {
+            "Repro": {
+              "properties": {
+                "background-color": "#6200EE",
+                "border-radius": "8px"
+              }
+            }
+          }
+        }
+    validations:
+      required: true
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Platforms affected
+      description: Which runtimes render this fixture incorrectly? (Check all that diverge.)
+      options:
+        - label: "web (`runtimes/web` — React + DOM/CSS)"
+        - label: "compose (`runtimes/compose` — Jetpack Compose / Android)"
+        - label: "swiftui (`runtimes/swiftui` — SwiftUI / iOS)"
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots per platform
+      description: >
+        Drag and drop a capture from each platform you tested (the harness
+        saves them under `tools/visual/` when you run `./test-all.sh`).
+        If you can only run one platform, that's fine — say which.
+      placeholder: |
+        web: (image)
+        compose: (image)
+        swiftui: (image)
+    validations:
+      required: false
+  - type: input
+    id: expected
+    attributes:
+      label: Expected result per the CSS spec
+      description: What should the property do, in one sentence?
+      placeholder: "border-radius should clip the background to a rounded rect"
+    validations:
+      required: true
+  - type: input
+    id: spec-link
+    attributes:
+      label: CSS spec link
+      description: Link to the relevant spec section (drafts.csswg.org or developer.mozilla.org is fine).
+      placeholder: "https://drafts.csswg.org/css-backgrounds-3/#border-radius"
+    validations:
+      required: false
+  - type: textarea
+    id: ssim
+    attributes:
+      label: SSIM / report row (if available)
+      description: >
+        If you ran `./test-all.sh <fixture>`, paste the failing row from
+        `tools/visual/report/index.html` or the console SSIM output.
+        Skip this if you didn't run the harness.
+      render: text
+    validations:
+      required: false

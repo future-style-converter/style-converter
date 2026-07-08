@@ -1,0 +1,63 @@
+# Dependabot — weekly checks, minor+patch grouped into one PR per
+# ecosystem so the noise stays low; majors arrive as individual PRs.
+# Limits are small (3) on purpose: this is a single-maintainer project.
+version: 2
+updates:
+  # npm workspaces at the root cover runtimes/web, apps/web-harness, and
+  # tools (see package.json "workspaces") — one root entry handles all.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Root Gradle build (:converter).
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      gradle-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # apps/android-harness is a separate Gradle build (its own
+  # settings.gradle.kts), so Dependabot needs its own entry for it.
+  - package-ecosystem: "gradle"
+    directory: "/apps/android-harness"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      android-harness-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # CI actions in .github/workflows/.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  # SwiftPM manifest lives at the repo root (see Package.swift header
+  # comment) even though the sources are under runtimes/swiftui/.
+  - package-ecosystem: "swift"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3

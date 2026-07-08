@@ -1,0 +1,55 @@
+name: Feature request
+description: Propose a new CSS property, value variant, or capability for the converter or a runtime
+title: "[feature] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: all 550 catalogued properties already have a
+        registered triplet on every platform, but only ~91 are *verified*
+        rendering correctly — the honest breakdown is in
+        [docs/STATUS.md](https://github.com/future-style-converter/style-converter/blob/dev/docs/STATUS.md).
+        If your property is listed
+        there as blocked or exhausted, a request to *unblock* it (with a
+        concrete plan) is very welcome; a request to *add* it is probably
+        already covered.
+  - type: textarea
+    id: feature
+    attributes:
+      label: Property or feature
+      description: >
+        Which CSS property, value variant, or capability — and what should
+        it do here? If it's not a property (e.g. a new reader, writer, or
+        harness capability), describe the use case.
+      placeholder: "Support the `round()` CSS math function in length values"
+    validations:
+      required: true
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Which platforms
+      description: >
+        Where does this need to land? (Converter-only changes: leave these
+        unchecked and say so above.)
+      options:
+        - label: "web (`runtimes/web`)"
+        - label: "compose (`runtimes/compose`)"
+        - label: "swiftui (`runtimes/swiftui`)"
+  - type: input
+    id: spec-link
+    attributes:
+      label: CSS spec link
+      description: Link to the spec section that defines the behaviour, if one exists.
+      placeholder: "https://drafts.csswg.org/css-values-4/#round-func"
+    validations:
+      required: false
+  - type: checkboxes
+    id: willing-to-pr
+    attributes:
+      label: Contribution
+      options:
+        - label: >
+            I'm willing to open a PR for this (see CONTRIBUTING.md — new
+            properties ship as a fixture + a Config/Extractor/Applier
+            triplet on all three platforms).
+          required: false
