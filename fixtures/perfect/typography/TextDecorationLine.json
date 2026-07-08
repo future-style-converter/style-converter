@@ -1,8 +1,0 @@
-{
-  "components": {
-    "TDL_none":         { "properties": { "width": "180px", "height": "60px", "padding": "10px", "background-color": "#1f2937", "color": "#ffffff", "text": "Sample", "text-decoration-line": "none" } },
-    "TDL_underline":    { "properties": { "width": "180px", "height": "60px", "padding": "10px", "background-color": "#1f2937", "color": "#ffffff", "text": "Sample", "text-decoration-line": "underline" } },
-    "TDL_overline":     { "properties": { "width": "180px", "height": "60px", "padding": "10px", "background-color": "#1f2937", "color": "#ffffff", "text": "Sample", "text-decoration-line": "overline" } },
-    "TDL_linethrough":  { "properties": { "width": "180px", "height": "60px", "padding": "10px", "background-color": "#1f2937", "color": "#ffffff", "text": "Sample", "text-decoration-line": "line-through" } }
-  }
-}

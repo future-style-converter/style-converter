@@ -12,16 +12,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -47,7 +44,7 @@ private const val TAG = "MainActivity"
  * 4. Then displays the regular component gallery for browsing
  *
  * ## Testing Workflow
- * 1. Run main project: ./gradlew run --args="convert --from css --to compose -i fixtures/all-css-properties.json -o out"
+ * 1. Run main project: ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/visual-test.json -o out"
  * 2. Copy out/tmpOutput.json to apps/android-harness/app/src/main/assets/
  * 3. Run this Android app - screenshots are auto-captured
  * 4. Pull screenshots: adb pull /sdcard/test_screenshots/ ./screenshots/
@@ -89,17 +86,26 @@ class MainActivity : ComponentActivity() {
                     .background(Color(0xFF111111)),
                 contentAlignment = Alignment.TopCenter
             ) {
-                // Inner: 390x844dp phone frame matching web's #root
+                // Inner: 390x844dp phone frame matching web's #root.
+                //
+                // NO border / corner clip here. The frame used to draw a
+                // 1dp rgba(255,255,255,0.15) rounded border to mimic the
+                // web harness's decorative #root outline — but the web
+                // CAPTURE path never includes that chrome, while Android's
+                // PixelCopy region spans the full 390dp width and so
+                // picked up the border's left/right columns in EVERY
+                // component screenshot (a constant (60,60,77) 1-px fringe
+                // at x=0/x=389 over the #1A1A2E canvas — verified by
+                // pixel-sampling the captures). That was a permanent
+                // ~0.5% pixel-mismatch tax + edge SSIM hit on every
+                // Android↔web / Android↔iOS pair. Captures must be
+                // chromeless (see CaptureCanvas contract in
+                // ScreenshotCaptureScreen.kt), so the cosmetic border is
+                // gone for good.
                 Box(
                     modifier = Modifier
                         .width(390.dp)
                         .height(844.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(
-                            1.dp,
-                            Color(0x26FFFFFF), // rgba(255,255,255,0.15)
-                            RoundedCornerShape(12.dp)
-                        )
                         .background(Color(0xFF1A1A2E))
                 ) {
                     MainContent(

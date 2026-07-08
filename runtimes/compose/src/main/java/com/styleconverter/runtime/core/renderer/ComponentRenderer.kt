@@ -30,8 +30,10 @@ import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.types.ValueExtractors
 import com.styleconverter.runtime.StyleApplier
 import com.styleconverter.runtime.scrolling.OverflowExtractor
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import com.styleconverter.runtime.lists.ListStyleConfig
 import com.styleconverter.runtime.lists.ListStyleExtractor
@@ -312,6 +314,27 @@ object ComponentRenderer {
         // displayConfig switch otherwise.
         if (engineDecision.kind == com.styleconverter.runtime.layout.ContainerKind.None) {
             // display: none — suppress rendering entirely.
+            return
+        }
+        // Empty-container demotion — mirrors the web harness rule in
+        // apps/web-harness/src/sdui/ComponentRenderer.tsx ("Render children
+        // or placeholder" block): a grid/flex container with ZERO children
+        // renders as `display: block`, because grid tracks / flex
+        // arrangement make no visual sense for a lone placeholder label.
+        // Without this, Compose kept the Row/Column/Grid path alive for
+        // empty containers, so `justify-content` / `align-items` / grid
+        // track sizing repositioned the placeholder while web pinned it
+        // top-left — Flex_JustifyCenter / Flex_AlignCenter / Grid_Simple /
+        // Grid_FixedTracks all diverged structurally (SSIM 0.80-0.90 on the
+        // visual-test fixture). Box's default contentAlignment is TopStart,
+        // matching CSS block flow (align-items is ignored in block layout).
+        if (demotesEmptyContainer(displayConfig.type, component.children.isNullOrEmpty()) ||
+            (component.children.isNullOrEmpty() && flexDecision != null &&
+                engineDecision.kind == com.styleconverter.runtime.layout.ContainerKind.Flex)
+        ) {
+            Box(modifier = modifier) {
+                RenderContent(component, textColor, displayConfig)
+            }
             return
         }
         if (flexDecision != null &&
@@ -925,6 +948,55 @@ object ComponentRenderer {
     private data class IndexedChild(val originalIndex: Int, val child: IRComponent)
 
     /**
+     * True when an empty container should be demoted to block layout.
+     *
+     * Mirrors the web harness (`ComponentRenderer.tsx`): components with no
+     * children force `display: block` when their declared display is
+     * grid / flex / inline-grid / inline-flex, because track/arrangement
+     * layout is meaningless around a lone placeholder label. Pure function
+     * (no Compose deps) so the JVM unit suite can pin the rule.
+     */
+    internal fun demotesEmptyContainer(type: DisplayType, childrenEmpty: Boolean): Boolean {
+        if (!childrenEmpty) return false
+        return type == DisplayType.FLEX_ROW ||
+            type == DisplayType.FLEX_COLUMN ||
+            type == DisplayType.GRID
+    }
+
+    /**
+     * True when the placeholder text node should fill the parent's content
+     * width (the Compose analogue of the web placeholder's
+     * `display: block` span).
+     *
+     * CSS: a block-level text container spans 100% of the containing
+     * block, which is what makes `text-align: center/right` visible. The
+     * web harness wrapper defaults to `width: fit-content` (box hugs the
+     * text — alignment is a no-op) UNLESS the IR declares a definite
+     * width, in which case the block span stretches to it. We replicate
+     * exactly that: fill only when a definite Width/InlineSize is present
+     * (`length` with a resolved px, or `percentage`) — never for `auto` /
+     * unresolvable (null px) values, where filling would blow the
+     * wrap-content box out to the canvas width.
+     */
+    internal fun placeholderFillsParentWidth(properties: List<IRProperty>): Boolean {
+        return properties.any { prop ->
+            (prop.type == "Width" || prop.type == "InlineSize") && run {
+                val obj = prop.data as? JsonObject ?: return@run false
+                when (obj["type"]?.jsonPrimitive?.contentOrNull) {
+                    // Absolute length — definite only when the parser
+                    // resolved it to px (em/vw/calc serialize px:null).
+                    "length" -> obj["px"]?.jsonPrimitive?.doubleOrNull != null
+                    // Percentages resolve against the parent at layout
+                    // time (SizingApplier → fillMaxWidth(fraction)), so
+                    // the box is always definite.
+                    "percentage" -> obj["value"]?.jsonPrimitive?.doubleOrNull != null
+                    else -> false
+                }
+            }
+        }
+    }
+
+    /**
      * Placeholder content showing component name with text styling support.
      *
      * @param name The component name to display
@@ -940,7 +1012,7 @@ object ComponentRenderer {
      *   behaviour, preserving the 327-pair baseline.
      */
     @Composable
-    private fun PlaceholderContent(
+    internal fun PlaceholderContent(
         name: String,
         textColor: Color?,
         properties: List<IRProperty> = emptyList(),
@@ -970,8 +1042,16 @@ object ComponentRenderer {
         // Note: list-style markers are not prepended to placeholder text
         // to match web renderer behavior (web shows plain component name)
 
-        // Extract line-clamp and text-overflow
-        val maxLines = TextStyleApplier.extractMaxLines(properties) ?: 2
+        // Extract line-clamp and text-overflow.
+        //
+        // Default = unlimited: CSS has NO implicit line clamp, and the web
+        // placeholder (`PlaceholderContent` in ComponentRenderer.tsx) is a
+        // plain block <span> that wraps freely. The previous `?: 2` default
+        // silently dropped the 3rd+ line on narrow boxes (Edge_NegativeOffset:
+        // web wrapped "Edge Negativ eOffset" onto 3 lines, Compose clipped it
+        // to 2 — Android-web SSIM 0.91). Only an explicit line-clamp /
+        // -webkit-line-clamp / max-lines IR property may limit lines.
+        val maxLines = TextStyleApplier.extractMaxLines(properties) ?: Int.MAX_VALUE
         val textOverflow = TextStyleApplier.extractTextOverflow(properties)
 
         // Extract text wrap configuration (word-break, overflow-wrap, white-space)
@@ -1142,13 +1222,26 @@ object ComponentRenderer {
             )
         }
 
+        // Block-level width fill — the web placeholder is a `display:block`
+        // <span>, which spans the parent's content box whenever the parent
+        // has a definite width. Compose Text hugs its glyphs by default, so
+        // `text-align: center/right` had nothing to align within (the
+        // TextAlign_Center fixture rendered left-flushed on Android while
+        // web centered it). Fill only when the IR declares a definite
+        // width — for `fit-content`-like unsized parents fillMaxWidth would
+        // wrongly stretch the wrap-content box to the canvas width.
+        val textModifier = if (placeholderFillsParentWidth(properties)) {
+            Modifier.fillMaxWidth().padding(4.dp)
+        } else {
+            Modifier.padding(4.dp)
+        }
         Text(
             text = displayText,
             style = finalTextStyle,
             maxLines = effectiveMaxLines,
             overflow = textOverflow,
             softWrap = wrapConfig.softWrap,
-            modifier = Modifier.padding(4.dp)
+            modifier = textModifier
         )
     }
 
@@ -1200,7 +1293,9 @@ object ComponentRenderer {
                     val keyword = ValueExtractors.extractKeyword(prop.data)?.uppercase()
                     justifyContent = when (keyword) {
                         "CENTER" -> JustifyContent.CENTER
-                        "FLEX_END", "FLEX-END", "END" -> JustifyContent.FLEX_END
+                        // css-align-3 §5.2: physical `right` ≡ `end` in the
+                        // LTR-normalized engine (matches FlexboxExtractor).
+                        "FLEX_END", "FLEX-END", "END", "RIGHT" -> JustifyContent.FLEX_END
                         "SPACE_BETWEEN", "SPACE-BETWEEN" -> JustifyContent.SPACE_BETWEEN
                         "SPACE_AROUND", "SPACE-AROUND" -> JustifyContent.SPACE_AROUND
                         "SPACE_EVENLY", "SPACE-EVENLY" -> JustifyContent.SPACE_EVENLY

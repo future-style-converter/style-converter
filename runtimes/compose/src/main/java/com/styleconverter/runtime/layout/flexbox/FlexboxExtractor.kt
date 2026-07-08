@@ -236,6 +236,16 @@ object FlexboxExtractor {
         // resolved by CompositionLocal.
         "start" -> AlignmentKeyword.Start
         "end" -> AlignmentKeyword.End
+        // css-align-3 §5.2: `left`/`right` are the physical-edge keywords
+        // for justify-content. The engine renders LTR-normalized layouts
+        // (RTL is handled by CompositionLocal layout direction upstream),
+        // so left ≡ start and right ≡ end here. Before this mapping,
+        // `justify-content: right` fell through to Normal → FLEX_START and
+        // right-justified rows rendered LEFT-packed on Android
+        // (flex-justify-content fixture 033_JC_Right: SSIM 0.82, 17.8%
+        // mismatched pixels vs web).
+        "left" -> AlignmentKeyword.Start
+        "right" -> AlignmentKeyword.End
         "flex-start" -> AlignmentKeyword.FlexStart
         "flex-end" -> AlignmentKeyword.FlexEnd
         "center" -> AlignmentKeyword.Center
