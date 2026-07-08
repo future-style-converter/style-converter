@@ -1,0 +1,306 @@
+{
+  "components": {
+    "Typography_C01_AlignmentBaseline": {
+      "properties": {
+        "alignment-baseline": "central",
+        "baseline-shift": "6px",
+        "baseline-source": "auto",
+        "block-ellipsis": "\"...\"",
+        "caret-color": "auto",
+        "width": "140px",
+        "height": "64px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Typography_C02_Direction": {
+      "properties": {
+        "direction": "rtl",
+        "dominant-baseline": "alphabetic",
+        "dominant-baseline-adjust": "10%",
+        "font-display": "block",
+        "font-family": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "width": "240px",
+        "height": "64px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Typography_C03_FontFeatureSettings": {
+      "properties": {
+        "font-feature-settings": "\"liga\"",
+        "font-kerning": "auto",
+        "font-language-override": "\"TRK\"",
+        "font-max-size": "none",
+        "font-min-size": "none",
+        "width": "200px",
+        "height": "64px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Typography_C04_FontNamedInstance": {
+      "properties": {
+        "font-named-instance": "\"Condensed Light\"",
+        "font-optical-sizing": "none",
+        "font-palette": "--my-brand",
+        "font-size": "28px",
+        "font-size-adjust": "cap-height 0.7",
+        "width": "200px",
+        "height": "64px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Typography_C05_FontSmooth": {
+      "properties": {
+        "font-smooth": "antialiased",
+        "font-stretch": "200%",
+        "font-style": "oblique -15deg",
+        "font-synthesis-position": "auto",
+        "font-synthesis-small-caps": "none",
+        "width": "140px",
+        "height": "64px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Typography_C06_FontSynthesisStyle": {
+      "properties": {
+        "font-synthesis-style": "none",
+        "font-synthesis-weight": "auto",
+        "font-variant-alternates": "normal",
+        "font-variant-caps": "small-caps",
+        "font-variant-east-asian": "jis83",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Typography_C07_FontVariantEmoji": {
+      "properties": {
+        "font-variant-emoji": "emoji",
+        "font-variant-ligatures": "no-common-ligatures no-contextual",
+        "font-variant-numeric": "ordinal",
+        "font-variant-position": "normal",
+        "font-variation-settings": "\"wght\" 900",
+        "width": "240px",
+        "height": "64px",
+        "background-color": "#3498db"
+      }
+    },
+    "Typography_C08_FontWeight": {
+      "properties": {
+        "font-weight": "bolder",
+        "glyph-orientation-horizontal": "0deg",
+        "glyph-orientation-vertical": "0deg",
+        "hanging-punctuation": "allow-end",
+        "hyphenate-character": "auto",
+        "width": "140px",
+        "height": "80px",
+        "background-color": "#3498db"
+      }
+    },
+    "Typography_C09_HyphenateLimitChars": {
+      "properties": {
+        "hyphenate-limit-chars": "8 3",
+        "hyphenate-limit-last": "none",
+        "hyphenate-limit-lines": "1",
+        "hyphenate-limit-zone": "8%",
+        "hyphens": "manual",
+        "width": "240px",
+        "height": "96px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Typography_C10_InitialLetter": {
+      "properties": {
+        "initial-letter": "3",
+        "initial-letter-align": "auto",
+        "kerning": "0",
+        "letter-spacing": "0.25rem",
+        "line-break": "auto",
+        "width": "200px",
+        "height": "48px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Typography_C11_LineClamp": {
+      "properties": {
+        "line-clamp": "3",
+        "line-grid": "match-parent",
+        "line-height": "5",
+        "line-height-step": "8pt",
+        "line-snap": "contain",
+        "width": "240px",
+        "height": "48px",
+        "background-color": "#f39c12"
+      }
+    },
+    "Typography_C12_MaxLines": {
+      "properties": {
+        "max-lines": "none",
+        "orphans": "5",
+        "overflow-wrap": "normal",
+        "ruby-align": "center",
+        "ruby-merge": "auto",
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#16a085"
+      }
+    },
+    "Typography_C13_RubyOverhang": {
+      "properties": {
+        "ruby-overhang": "auto",
+        "ruby-position": "inter-character",
+        "tab-size": "40px",
+        "text-align": "right",
+        "text-align-all": "left",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Typography_C14_TextAlignLast": {
+      "properties": {
+        "text-align-last": "left",
+        "text-anchor": "end",
+        "text-autospace": "ideograph-parenthesis",
+        "text-box-edge": "ex",
+        "text-box-trim": "trim-end",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Typography_C15_TextCombineUpright": {
+      "properties": {
+        "text-combine-upright": "digits",
+        "text-decoration-color": "currentcolor",
+        "text-decoration-line": "none",
+        "text-decoration-skip": "box-decoration",
+        "text-decoration-skip-ink": "none",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Typography_C16_TextDecorationStyle": {
+      "properties": {
+        "text-decoration-style": "double",
+        "text-decoration-thickness": "auto",
+        "text-emphasis": "filled circle #e74c3c",
+        "text-emphasis-color": "#e74c3c",
+        "text-emphasis-position": "under left",
+        "width": "140px",
+        "height": "64px",
+        "background-color": "#16a085"
+      }
+    },
+    "Typography_C17_TextEmphasisStyle": {
+      "properties": {
+        "text-emphasis-style": "circle",
+        "text-group-align": "right",
+        "text-indent": "-100px",
+        "text-justify": "inter-word",
+        "text-orientation": "sideways",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#f39c12"
+      }
+    },
+    "Typography_C18_TextOverflow": {
+      "properties": {
+        "text-overflow": "fade(20px)",
+        "text-rendering": "geometricPrecision",
+        "text-shadow": "2px 2px 4px #e74c3c, -2px -2px 4px #3498db",
+        "text-size-adjust": "80%",
+        "text-space-collapse": "break-spaces",
+        "width": "240px",
+        "height": "64px",
+        "background-color": "#3498db"
+      }
+    },
+    "Typography_C19_TextSpaceTrim": {
+      "properties": {
+        "text-space-trim": "space-all",
+        "text-spacing": "none",
+        "text-spacing-trim": "trim-all",
+        "text-transform": "uppercase",
+        "text-underline-offset": "auto",
+        "width": "140px",
+        "height": "48px",
+        "background-color": "#3498db"
+      }
+    },
+    "Typography_C20_TextUnderlinePosition": {
+      "properties": {
+        "text-underline-position": "auto",
+        "text-wrap": "nowrap",
+        "text-wrap-mode": "nowrap",
+        "text-wrap-style": "balance",
+        "unicode-bidi": "embed",
+        "width": "240px",
+        "height": "48px",
+        "background-color": "#3498db"
+      }
+    },
+    "Typography_C21_VerticalAlign": {
+      "properties": {
+        "vertical-align": "text-bottom",
+        "vertical-align-last": "auto",
+        "white-space": "nowrap",
+        "white-space-collapse": "break-spaces",
+        "widows": "5",
+        "width": "140px",
+        "height": "48px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Typography_C22_WordBreak": {
+      "properties": {
+        "word-break": "keep-all",
+        "word-space-transform": "auto",
+        "word-spacing": "normal",
+        "word-wrap": "normal",
+        "writing-mode": "horizontal-tb",
+        "width": "200px",
+        "height": "48px",
+        "background-color": "#f39c12"
+      }
+    },
+    "Typography_BoxModel": {
+      "properties": {
+        "width": "240px",
+        "height": "80px",
+        "padding": "20px",
+        "margin": "16px",
+        "border": "2px dashed #e74c3c",
+        "background-color": "#e74c3c",
+        "alignment-baseline": "mathematical",
+        "baseline-shift": "-0.2em"
+      }
+    },
+    "Typography_TextBlock": {
+      "properties": {
+        "color": "#f9fafb",
+        "font-family": "serif",
+        "font-size": "18px",
+        "line-height": "1.4",
+        "text-align": "left",
+        "padding": "12px",
+        "width": "140px",
+        "background-color": "#1f2937",
+        "alignment-baseline": "hanging",
+        "baseline-shift": "sub"
+      }
+    },
+    "Typography_Decorated": {
+      "properties": {
+        "background-color": "#f39c12",
+        "border-radius": "24px 8px",
+        "box-shadow": "0 4px 8px rgba(0,0,0,0.25)",
+        "opacity": "0.7",
+        "transform": "rotate(6deg)",
+        "padding": "8px",
+        "alignment-baseline": "alphabetic",
+        "baseline-shift": "-0.2em"
+      }
+    }
+  }
+}

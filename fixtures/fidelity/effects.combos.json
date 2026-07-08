@@ -1,0 +1,124 @@
+{
+  "components": {
+    "Effects_C01_BackdropFilter": {
+      "properties": {
+        "backdrop-filter": "contrast(150%)",
+        "clip": "rect(10px, 150px, 110px, 10px)",
+        "clip-path": "xywh(10px 20px 120px 80px round 12px)",
+        "width": "240px",
+        "height": "96px",
+        "background-color": "#16a085"
+      }
+    },
+    "Effects_C02_ClipRule": {
+      "properties": {
+        "clip-rule": "nonzero",
+        "mask-border-mode": "alpha",
+        "mask-border-outset": "2",
+        "width": "240px",
+        "height": "80px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Effects_C03_MaskBorderRepeat": {
+      "properties": {
+        "mask-border-repeat": "repeat",
+        "mask-border-slice": "25% 33%",
+        "mask-border-source": "none",
+        "width": "200px",
+        "height": "64px",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Effects_C04_MaskBorderWidth": {
+      "properties": {
+        "mask-border-width": "10px",
+        "mask-clip": "no-clip",
+        "mask-composite": "subtract",
+        "width": "240px",
+        "height": "48px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Effects_C05_MaskImage": {
+      "properties": {
+        "mask-image": "linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)",
+        "mask-mode": "luminance",
+        "mask-origin": "border-box",
+        "width": "200px",
+        "height": "64px",
+        "background-color": "#16a085"
+      }
+    },
+    "Effects_C06_MaskPosition": {
+      "properties": {
+        "mask-position": "center",
+        "mask-position-x": "center",
+        "mask-position-y": "40%",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#16a085"
+      }
+    },
+    "Effects_C07_MaskRepeat": {
+      "properties": {
+        "mask-repeat": "no-repeat",
+        "mask-size": "50% 25%",
+        "mask-type": "luminance",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Effects_C08_OverflowBlock": {
+      "properties": {
+        "overflow-block": "hidden",
+        "overflow-inline": "hidden",
+        "overflow-x": "hidden",
+        "overflow-y": "scroll",
+        "visibility": "visible",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Effects_BoxModel": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "padding": "12px",
+        "margin": "16px",
+        "border": "4px double #8e44ad",
+        "background-color": "#2ecc71",
+        "backdrop-filter": "grayscale(80%)",
+        "clip": "rect(10px, 150px, 110px, 10px)"
+      }
+    },
+    "Effects_TextBlock": {
+      "properties": {
+        "color": "#111111",
+        "font-family": "serif",
+        "font-size": "22px",
+        "line-height": "1.8",
+        "text-align": "center",
+        "padding": "12px",
+        "width": "140px",
+        "background-color": "#ecf0f1",
+        "backdrop-filter": "grayscale(80%)",
+        "clip": "auto"
+      }
+    },
+    "Effects_Decorated": {
+      "properties": {
+        "background-color": "#3498db",
+        "border-radius": "6px",
+        "box-shadow": "0 4px 8px rgba(0,0,0,0.25)",
+        "opacity": "0.55",
+        "transform": "scale(1.1)",
+        "padding": "20px",
+        "backdrop-filter": "brightness(1.2)",
+        "clip": "rect(10px, 150px, 110px, 10px)"
+      }
+    }
+  }
+}

@@ -586,8 +586,14 @@ else
         "$ADB" shell wm density 160 >/dev/null
         log "emulator: 390×844 @ 160dpi"
 
-        # Pick Java 21 for Gradle
-        if /usr/libexec/java_home -v 21 &>/dev/null; then
+        # Pick Java 21 for Gradle.
+        # `/usr/libexec/java_home` is macOS-only. On Linux CI runners
+        # (ubuntu-latest + actions/setup-java) the binary doesn't exist, so
+        # guard on `-x` and fall through to the ambient JAVA_HOME the CI
+        # workflow already exported. Without the guard this still worked
+        # (a failing `if` condition doesn't trip `set -e`), but the intent
+        # was invisible — make the Linux path explicit.
+        if [[ -x /usr/libexec/java_home ]] && /usr/libexec/java_home -v 21 &>/dev/null; then
             export JAVA_HOME=$(/usr/libexec/java_home -v 21)
         fi
 

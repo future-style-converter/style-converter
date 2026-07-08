@@ -1,0 +1,162 @@
+{
+  "components": {
+    "Scrolling_C01_OverflowAnchor": {
+      "properties": {
+        "overflow-anchor": "auto",
+        "overflow-clip-margin": "content-box",
+        "overscroll-behavior": "auto",
+        "width": "200px",
+        "height": "48px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Scrolling_C02_OverscrollBehaviorBlock": {
+      "properties": {
+        "overscroll-behavior-block": "auto",
+        "overscroll-behavior-inline": "none",
+        "overscroll-behavior-x": "none",
+        "width": "240px",
+        "height": "48px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Scrolling_C03_OverscrollBehaviorY": {
+      "properties": {
+        "overscroll-behavior-y": "contain",
+        "scroll-margin-block-end": "12px",
+        "scroll-margin-block-start": "12px",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#3498db"
+      }
+    },
+    "Scrolling_C04_ScrollMarginBottom": {
+      "properties": {
+        "scroll-margin-bottom": "8px",
+        "scroll-margin-inline-end": "12px",
+        "scroll-margin-inline-start": "12px",
+        "width": "240px",
+        "height": "64px",
+        "background-color": "#f39c12"
+      }
+    },
+    "Scrolling_C05_ScrollMarginLeft": {
+      "properties": {
+        "scroll-margin-left": "40px",
+        "scroll-margin-right": "24px",
+        "scroll-margin-top": "16px",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Scrolling_C06_ScrollMarkerGroup": {
+      "properties": {
+        "scroll-marker-group": "after",
+        "scroll-padding-bottom": "15px",
+        "scroll-padding-left": "20px",
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#16a085"
+      }
+    },
+    "Scrolling_C07_ScrollPaddingRight": {
+      "properties": {
+        "scroll-padding-right": "10px",
+        "scroll-padding-top": "5px",
+        "scroll-snap-align": "center",
+        "width": "180px",
+        "height": "96px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Scrolling_C08_ScrollSnapStop": {
+      "properties": {
+        "scroll-snap-stop": "normal",
+        "scroll-snap-type": "x mandatory",
+        "scroll-start": "40px",
+        "width": "140px",
+        "height": "64px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Scrolling_C09_ScrollStartBlock": {
+      "properties": {
+        "scroll-start-block": "end",
+        "scroll-start-inline": "start",
+        "scroll-start-target": "none",
+        "width": "240px",
+        "height": "96px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Scrolling_C10_ScrollStartX": {
+      "properties": {
+        "scroll-start-x": "10px",
+        "scroll-start-y": "center",
+        "scroll-target-group": "none",
+        "width": "240px",
+        "height": "48px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Scrolling_C11_ScrollTimeline": {
+      "properties": {
+        "scroll-timeline": "--my-scroll",
+        "scroll-timeline-axis": "inline",
+        "scroll-timeline-name": "scroller",
+        "width": "140px",
+        "height": "80px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Scrolling_C12_ScrollbarColor": {
+      "properties": {
+        "scrollbar-color": "#111 #eee",
+        "scrollbar-gutter": "stable",
+        "scrollbar-width": "thin",
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#f39c12"
+      }
+    },
+    "Scrolling_BoxModel": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "padding": "8px",
+        "margin": "4px",
+        "border": "1px solid #2c3e50",
+        "background-color": "#f39c12",
+        "overflow-anchor": "auto",
+        "overflow-clip-margin": "content-box 8px"
+      }
+    },
+    "Scrolling_TextBlock": {
+      "properties": {
+        "color": "#111111",
+        "font-family": "monospace",
+        "font-size": "18px",
+        "line-height": "1.8",
+        "text-align": "center",
+        "padding": "20px",
+        "width": "140px",
+        "background-color": "#ecf0f1",
+        "overflow-anchor": "auto",
+        "overflow-clip-margin": "content-box 8px"
+      }
+    },
+    "Scrolling_Decorated": {
+      "properties": {
+        "background-color": "#9b59b6",
+        "border-radius": "50%",
+        "box-shadow": "2px 2px 6px rgba(0,0,0,0.35)",
+        "opacity": "0.7",
+        "transform": "translate(6px, 4px)",
+        "padding": "12px",
+        "overflow-anchor": "auto",
+        "overflow-clip-margin": "border-box"
+      }
+    }
+  }
+}

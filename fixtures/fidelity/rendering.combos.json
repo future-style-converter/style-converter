@@ -1,0 +1,82 @@
+{
+  "components": {
+    "Rendering_C01_ColorInterpolation": {
+      "properties": {
+        "color-interpolation": "sRGB",
+        "color-interpolation-filters": "sRGB",
+        "color-rendering": "optimizeQuality",
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Rendering_C02_ContentVisibility": {
+      "properties": {
+        "content-visibility": "auto",
+        "field-sizing": "content",
+        "forced-color-adjust": "auto",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#3498db"
+      }
+    },
+    "Rendering_C03_ImageOrientation": {
+      "properties": {
+        "image-orientation": "none",
+        "image-resolution": "from-image",
+        "input-security": "auto",
+        "width": "240px",
+        "height": "64px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Rendering_C04_InterpolateSize": {
+      "properties": {
+        "interpolate-size": "numeric-only",
+        "print-color-adjust": "economy",
+        "zoom": "normal",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Rendering_BoxModel": {
+      "properties": {
+        "width": "240px",
+        "height": "80px",
+        "padding": "8px",
+        "margin": "8px",
+        "border": "3px solid #16a085",
+        "background-color": "#e67e22",
+        "color-interpolation": "sRGB",
+        "color-interpolation-filters": "sRGB"
+      }
+    },
+    "Rendering_TextBlock": {
+      "properties": {
+        "color": "#f9fafb",
+        "font-family": "monospace",
+        "font-size": "22px",
+        "line-height": "2",
+        "text-align": "left",
+        "padding": "12px",
+        "width": "200px",
+        "background-color": "#1f2937",
+        "color-interpolation": "linearRGB",
+        "color-interpolation-filters": "sRGB"
+      }
+    },
+    "Rendering_Decorated": {
+      "properties": {
+        "background-color": "#3498db",
+        "border-radius": "6px",
+        "box-shadow": "0 0 0 3px #3498db",
+        "opacity": "0.7",
+        "transform": "scale(1.1)",
+        "padding": "20px",
+        "color-interpolation": "sRGB",
+        "color-interpolation-filters": "auto"
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "components": {
+    "Container_C01_Container": {
+      "properties": {
+        "container": "inline-size",
+        "container-name": "sidebar card",
+        "container-type": "normal",
+        "width": "180px",
+        "height": "64px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Container_BoxModel": {
+      "properties": {
+        "width": "140px",
+        "height": "96px",
+        "padding": "12px",
+        "margin": "12px 6px",
+        "border": "4px double #8e44ad",
+        "background-color": "#e67e22",
+        "container": "inline-size",
+        "container-name": "none"
+      }
+    },
+    "Container_TextBlock": {
+      "properties": {
+        "color": "#f9fafb",
+        "font-family": "monospace",
+        "font-size": "22px",
+        "line-height": "2",
+        "text-align": "center",
+        "padding": "20px",
+        "width": "140px",
+        "background-color": "#1f2937",
+        "container": "myContainer",
+        "container-name": "none"
+      }
+    },
+    "Container_Decorated": {
+      "properties": {
+        "background-color": "#16a085",
+        "border-radius": "6px",
+        "box-shadow": "2px 2px 6px rgba(0,0,0,0.35)",
+        "opacity": "0.55",
+        "transform": "rotate(6deg)",
+        "padding": "20px",
+        "container": "inline-size",
+        "container-name": "sidebar card"
+      }
+    }
+  }
+}

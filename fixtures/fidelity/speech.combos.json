@@ -1,0 +1,124 @@
+{
+  "components": {
+    "Speech_C01_Azimuth": {
+      "properties": {
+        "azimuth": "left behind",
+        "cue": "none",
+        "cue-after": "none",
+        "width": "180px",
+        "height": "48px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Speech_C02_Elevation": {
+      "properties": {
+        "elevation": "45deg",
+        "pause": "500ms 1s",
+        "pause-after": "1s",
+        "width": "240px",
+        "height": "48px",
+        "background-color": "#16a085"
+      }
+    },
+    "Speech_C03_PauseBefore": {
+      "properties": {
+        "pause-before": "500ms",
+        "pitch": "high",
+        "pitch-range": "50",
+        "width": "240px",
+        "height": "48px",
+        "background-color": "#3498db"
+      }
+    },
+    "Speech_C04_Rest": {
+      "properties": {
+        "rest": "100ms 300ms",
+        "rest-after": "200ms",
+        "rest-before": "100ms",
+        "width": "200px",
+        "height": "64px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Speech_C05_Richness": {
+      "properties": {
+        "richness": "5",
+        "speak": "none",
+        "speak-as": "digits",
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Speech_C06_SpeechRate": {
+      "properties": {
+        "speech-rate": "fast",
+        "stress": "50",
+        "voice-balance": "-50",
+        "width": "240px",
+        "height": "80px",
+        "background-color": "#16a085"
+      }
+    },
+    "Speech_C07_VoiceDuration": {
+      "properties": {
+        "voice-duration": "500ms",
+        "voice-family": "Jane, female, neutral",
+        "voice-pitch": "high",
+        "width": "200px",
+        "height": "64px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Speech_C08_VoiceRange": {
+      "properties": {
+        "voice-range": "medium",
+        "voice-rate": "medium",
+        "voice-stress": "strong",
+        "voice-volume": "medium",
+        "volume": "50%",
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#3498db"
+      }
+    },
+    "Speech_BoxModel": {
+      "properties": {
+        "width": "240px",
+        "height": "64px",
+        "padding": "12px",
+        "margin": "12px 6px",
+        "border": "1px solid #2c3e50",
+        "background-color": "#9b59b6",
+        "azimuth": "30deg",
+        "cue": "none"
+      }
+    },
+    "Speech_TextBlock": {
+      "properties": {
+        "color": "#7e3b09",
+        "font-family": "sans-serif",
+        "font-size": "18px",
+        "line-height": "2",
+        "text-align": "left",
+        "padding": "16px 24px",
+        "width": "180px",
+        "background-color": "#fdf2e9",
+        "azimuth": "leftwards",
+        "cue": "none"
+      }
+    },
+    "Speech_Decorated": {
+      "properties": {
+        "background-color": "#e67e22",
+        "border-radius": "6px",
+        "box-shadow": "0 0 0 3px #3498db",
+        "opacity": "0.55",
+        "transform": "translate(6px, 4px)",
+        "padding": "20px",
+        "azimuth": "far-left",
+        "cue": "none"
+      }
+    }
+  }
+}

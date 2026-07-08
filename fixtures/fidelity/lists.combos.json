@@ -1,0 +1,52 @@
+{
+  "components": {
+    "Lists_C01_ListStyleImage": {
+      "properties": {
+        "list-style-image": "none",
+        "list-style-position": "inside",
+        "list-style-type": "upper-latin",
+        "width": "240px",
+        "height": "96px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Lists_BoxModel": {
+      "properties": {
+        "width": "180px",
+        "height": "48px",
+        "padding": "16px 24px",
+        "margin": "16px",
+        "border": "1px solid #2c3e50",
+        "background-color": "#16a085",
+        "list-style-image": "none",
+        "list-style-position": "outside"
+      }
+    },
+    "Lists_TextBlock": {
+      "properties": {
+        "color": "#f9fafb",
+        "font-family": "monospace",
+        "font-size": "22px",
+        "line-height": "2",
+        "text-align": "right",
+        "padding": "12px",
+        "width": "180px",
+        "background-color": "#1f2937",
+        "list-style-image": "none",
+        "list-style-position": "outside"
+      }
+    },
+    "Lists_Decorated": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "border-radius": "12px",
+        "box-shadow": "inset 0 2px 6px rgba(0,0,0,0.4)",
+        "opacity": "0.55",
+        "transform": "rotate(6deg)",
+        "padding": "16px 24px",
+        "list-style-image": "none",
+        "list-style-position": "inside"
+      }
+    }
+  }
+}

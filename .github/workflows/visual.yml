@@ -1,0 +1,209 @@
+# Style Converter visual CI — device-on-test screenshot pipeline.
+#
+# Boots REAL devices on GitHub runners (Android emulator under KVM, iOS
+# simulator on macOS) and runs the same ./test-all.sh pipeline used locally,
+# in BASELINE=1 mode against the committed captures in tools/visual/baseline/.
+#
+# ⚠ EXPERIMENTAL — deliberately NOT in the required-check set. CI GPU
+# rendering (swiftshader) and CI font stacks can differ by a few pixels from
+# the local machines that produced the committed baselines, so the first runs
+# are calibration runs: inspect the uploaded report artifact
+# (tools/visual/report/) and decide whether baselines need a CI variant or a
+# tolerance bump BEFORE anyone wires these jobs into branch protection.
+#
+# How each job gets its device:
+#   android-visual — reactivecircus/android-emulator-runner boots the AVD;
+#     test-all.sh then reuses it via the "already-connected device" branch of
+#     maybe_start_headless_emulator (`adb devices` shows the runner's
+#     emulator, so test-all never boots its own). Screen geometry is NOT
+#     baked into the AVD: test-all.sh issues `adb shell wm size 390x844` and
+#     `wm density 160` at runtime, so the runner's default AVD profile works.
+#   ios-visual — test-all.sh discovers a simulator itself (SIM_DEVICE /
+#     preference list / first available iPhone) and boots it headlessly with
+#     `simctl boot`. We only guarantee (a) an Xcode whose Swift toolchain can
+#     read the repo-root Package.swift (swift-tools-version 6.3) is selected,
+#     and (b) at least one iPhone simulator exists, creating one if the CI
+#     image ships none. The exact iPhone model is not critical: the harness
+#     renders a fixed 390-pt-wide chromeless CaptureCanvas via ImageRenderer
+#     at scale 1.0, and compare-screenshots.mjs pads every capture onto a
+#     shared canvas, so device point-geometry never leaks into the pixels.
+#   web-visual — the cheap anchor: converter → vite → headless puppeteer
+#     Chrome, all driven by test-all.sh's existing web section.
+name: visual
+
+on:
+  workflow_dispatch:
+    inputs:
+      fixture:
+        description: Fixture JSON to run through the pipeline
+        required: false
+        default: fixtures/visual-test.json
+  schedule:
+    # Nightly 03:00 UTC — catches drift between runner-image updates (new
+    # emulator system images / Xcode point releases) and committed baselines.
+    - cron: '0 3 * * *'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # workflow_dispatch supplies inputs.fixture; on schedule/push the inputs
+  # context is empty, so the || falls back to the default fixture.
+  FIXTURE: ${{ inputs.fixture || 'fixtures/visual-test.json' }}
+
+jobs:
+  android-visual:
+    name: android visual (emulator)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      # KVM hardware acceleration — the documented udev-rule step for
+      # GitHub-hosted Linux runners. Without it the emulator falls back to
+      # software emulation and never boots inside the job timeout.
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # Toolchains BEFORE the emulator step: the runner action's `script:`
+      # drives test-all.sh, which needs JDK 21 (converter + android-harness
+      # gradle builds) and node 24 (compare pipeline) from its first line.
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: '21' }
+      - uses: gradle/actions/setup-gradle@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
+      # Pre-install so test-all.sh's own `npm install` fallback never fires.
+      # Web capture is skipped in this job → no puppeteer Chrome download.
+      - name: Install node deps (compare pipeline)
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
+
+      # Pinned by commit SHA (not tag) because this action boots a VM with
+      # our code inside — tag-hijack here would be invisible. SHA = v2.38.0.
+      - name: Boot emulator + run visual pipeline (Android only)
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          # Same flags test-all.sh uses for its own local headless boots
+          # (see maybe_start_headless_emulator) — software GPU, no window.
+          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect
+          disable-animations: true
+          # BASELINE=1 → compare-screenshots.mjs exits non-zero on any
+          # SSIM/pixel regression vs tools/visual/baseline/, failing the job.
+          script: SKIP_IOS=1 SKIP_WEB=1 BASELINE=1 NO_OPEN=1 ./test-all.sh "$FIXTURE"
+
+      - name: Upload visual report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-report-android
+          path: tools/visual/report/
+          retention-days: 14
+          # Report may not exist if test-all failed before the compare step.
+          if-no-files-found: warn
+
+  ios-visual:
+    name: ios visual (simulator)
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      # macos-15 images carry several Xcode majors side by side under
+      # /Applications/Xcode_*.app. Package.swift (repo root) declares
+      # swift-tools-version 6.3, so pick the newest Xcode and fail fast —
+      # with a readable message — if its toolchain still can't parse the
+      # manifest (better than a cryptic SwiftPM error mid-xcodebuild).
+      - name: Select newest Xcode
+        run: |
+          LATEST=$(printf '%s\n' /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selecting $LATEST"
+          sudo xcode-select -s "$LATEST/Contents/Developer"
+          xcodebuild -version
+          xcrun swift --version
+          if ! swift package dump-package > /dev/null; then
+            echo "::error::Selected Xcode's Swift toolchain cannot read Package.swift (needs swift-tools 6.3). Bump the runner image or lower the tools version."
+            exit 1
+          fi
+
+      # test-all.sh brew-installs xcodegen itself when missing; doing it as
+      # a dedicated step keeps the failure mode visible in the job UI.
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      # Guarantee an iPhone simulator exists for test-all.sh's discovery
+      # (preference list → first available iPhone). CI images normally ship
+      # iPhones for the selected Xcode; if this one doesn't, create a device
+      # from the newest iPhone device type + newest available iOS runtime.
+      # test-all.sh boots whatever it picks with `simctl boot` itself.
+      - name: Ensure an iPhone simulator exists
+        run: |
+          if ! xcrun simctl list devices available | grep -q "iPhone"; then
+            DEVICE_TYPE=$(xcrun simctl list devicetypes -j | jq -r '[.devicetypes[] | select(.productFamily == "iPhone")] | last | .identifier')
+            RUNTIME=$(xcrun simctl list runtimes -j | jq -r '[.runtimes[] | select(.isAvailable and (.identifier | contains("iOS")))] | last | .identifier')
+            echo "No iPhone simulator on image — creating one ($DEVICE_TYPE on $RUNTIME)"
+            xcrun simctl create "CI iPhone" "$DEVICE_TYPE" "$RUNTIME"
+          fi
+          xcrun simctl list devices available | grep "iPhone" || true
+
+      # JDK 21 for the converter step; node 24 for the compare pipeline.
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: '21' }
+      - uses: gradle/actions/setup-gradle@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
+      - name: Install node deps (compare pipeline)
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
+
+      - name: Run visual pipeline (iOS only)
+        run: SKIP_ANDROID=1 SKIP_WEB=1 BASELINE=1 NO_OPEN=1 ./test-all.sh "$FIXTURE"
+
+      - name: Upload visual report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-report-ios
+          path: tools/visual/report/
+          retention-days: 14
+          if-no-files-found: warn
+
+  web-visual:
+    name: web visual (headless chrome)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      # JDK 21: test-all.sh's first step runs the converter through gradle.
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: '21' }
+      - uses: gradle/actions/setup-gradle@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
+      # NO PUPPETEER_SKIP_DOWNLOAD here — unlike ci.yml's unit-test jobs,
+      # this job actually launches Chrome, so let puppeteer's postinstall
+      # fetch its pinned browser build.
+      - name: Install node deps (including puppeteer Chrome)
+        run: npm ci
+
+      - name: Run visual pipeline (web only)
+        run: SKIP_ANDROID=1 SKIP_IOS=1 BASELINE=1 NO_OPEN=1 ./test-all.sh "$FIXTURE"
+
+      - name: Upload visual report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-report-web
+          path: tools/visual/report/
+          retention-days: 14
+          if-no-files-found: warn

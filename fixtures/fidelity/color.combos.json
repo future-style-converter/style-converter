@@ -1,0 +1,63 @@
+{
+  "components": {
+    "Color_C01_AccentColor": {
+      "properties": {
+        "accent-color": "red",
+        "background-blend-mode": "screen",
+        "background-color": "hsl(200 70% 45%)",
+        "width": "140px",
+        "height": "48px"
+      }
+    },
+    "Color_C02_Color": {
+      "properties": {
+        "color": "hsla(200, 80%, 40%, 0.7)",
+        "color-scheme": "only light",
+        "filter": "hue-rotate(90deg)",
+        "mix-blend-mode": "lighten",
+        "opacity": "-0.5",
+        "width": "240px",
+        "height": "48px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Color_BoxModel": {
+      "properties": {
+        "width": "180px",
+        "height": "64px",
+        "padding": "12px",
+        "margin": "8px",
+        "border": "1px solid #2c3e50",
+        "background-color": "#16a085",
+        "accent-color": "red",
+        "background-blend-mode": "screen"
+      }
+    },
+    "Color_TextBlock": {
+      "properties": {
+        "color": "#7e3b09",
+        "font-family": "serif",
+        "font-size": "14px",
+        "line-height": "2",
+        "text-align": "right",
+        "padding": "12px",
+        "width": "200px",
+        "background-color": "#fdf2e9",
+        "accent-color": "red",
+        "background-blend-mode": "screen"
+      }
+    },
+    "Color_Decorated": {
+      "properties": {
+        "background-color": "#e67e22",
+        "border-radius": "12px",
+        "box-shadow": "inset 0 2px 6px rgba(0,0,0,0.4)",
+        "opacity": "0.7",
+        "transform": "scale(1.1)",
+        "padding": "12px",
+        "accent-color": "red",
+        "background-blend-mode": "screen"
+      }
+    }
+  }
+}

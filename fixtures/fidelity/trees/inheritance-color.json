@@ -1,0 +1,91 @@
+{
+  "components": {
+    "IH_Color": {
+      "properties": {
+        "width": "260px",
+        "padding": "10px",
+        "color": "#c0392b",
+        "font-size": "16px",
+        "background-color": "#fdf2e9"
+      },
+      "children": {
+        "plain": {
+          "properties": {},
+          "_text": "inherited color"
+        },
+        "redeclared": {
+          "properties": {
+            "color": "#1a5276"
+          },
+          "_text": "redeclared color"
+        }
+      }
+    },
+    "IH_FontSize": {
+      "properties": {
+        "width": "260px",
+        "padding": "10px",
+        "color": "#f9fafb",
+        "font-size": "22px",
+        "background-color": "#1f2937"
+      },
+      "children": {
+        "plain": {
+          "properties": {},
+          "_text": "inherited size"
+        },
+        "redeclared": {
+          "properties": {
+            "font-size": "12px"
+          },
+          "_text": "redeclared size"
+        }
+      }
+    },
+    "IH_LineHeight": {
+      "properties": {
+        "width": "220px",
+        "padding": "10px",
+        "color": "#f9fafb",
+        "font-size": "14px",
+        "line-height": "2",
+        "background-color": "#1f2937"
+      },
+      "children": {
+        "plain": {
+          "properties": {},
+          "_text": "wrapped text inherits double line height from the parent"
+        },
+        "redeclared": {
+          "properties": {
+            "line-height": "1.1"
+          },
+          "_text": "wrapped text redeclares a tight line height locally"
+        }
+      }
+    },
+    "IH_TwoLevel": {
+      "properties": {
+        "width": "260px",
+        "padding": "10px",
+        "color": "#1e8449",
+        "font-size": "15px",
+        "background-color": "#eafaf1"
+      },
+      "children": {
+        "mid": {
+          "properties": {
+            "padding": "8px",
+            "background-color": "#d5f5e3"
+          },
+          "children": {
+            "deep": {
+              "properties": {},
+              "_text": "inherited through two levels"
+            }
+          }
+        }
+      }
+    }
+  }
+}

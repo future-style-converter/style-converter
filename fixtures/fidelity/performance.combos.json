@@ -1,0 +1,64 @@
+{
+  "components": {
+    "Performance_C01_Contain": {
+      "properties": {
+        "contain": "style",
+        "contain-intrinsic-block-size": "auto",
+        "contain-intrinsic-height": "100px",
+        "width": "200px",
+        "height": "48px",
+        "background-color": "#3498db"
+      }
+    },
+    "Performance_C02_ContainIntrinsicInlineSize": {
+      "properties": {
+        "contain-intrinsic-inline-size": "auto 120px",
+        "contain-intrinsic-size": "200px",
+        "contain-intrinsic-width": "auto 200px",
+        "isolation": "auto",
+        "will-change": "transform, opacity",
+        "width": "200px",
+        "height": "64px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Performance_BoxModel": {
+      "properties": {
+        "width": "140px",
+        "height": "64px",
+        "padding": "16px 24px",
+        "margin": "12px 6px",
+        "border": "4px double #8e44ad",
+        "background-color": "#9b59b6",
+        "contain": "style",
+        "contain-intrinsic-block-size": "auto"
+      }
+    },
+    "Performance_TextBlock": {
+      "properties": {
+        "color": "#f9fafb",
+        "font-family": "serif",
+        "font-size": "14px",
+        "line-height": "1.8",
+        "text-align": "center",
+        "padding": "8px",
+        "width": "180px",
+        "background-color": "#1f2937",
+        "contain": "content",
+        "contain-intrinsic-block-size": "180px"
+      }
+    },
+    "Performance_Decorated": {
+      "properties": {
+        "background-color": "#16a085",
+        "border-radius": "24px 8px",
+        "box-shadow": "inset 0 2px 6px rgba(0,0,0,0.4)",
+        "opacity": "0.85",
+        "transform": "skewX(8deg)",
+        "padding": "12px",
+        "contain": "style",
+        "contain-intrinsic-block-size": "180px"
+      }
+    }
+  }
+}

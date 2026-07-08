@@ -1,0 +1,53 @@
+{
+  "components": {
+    "Images_C01_ImageRendering": {
+      "properties": {
+        "image-rendering": "smooth",
+        "object-fit": "none",
+        "object-position": "center",
+        "object-view-box": "none",
+        "width": "200px",
+        "height": "64px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Images_BoxModel": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "8px",
+        "margin": "8px",
+        "border": "4px double #8e44ad",
+        "background-color": "#9b59b6",
+        "image-rendering": "smooth",
+        "object-fit": "scale-down"
+      }
+    },
+    "Images_TextBlock": {
+      "properties": {
+        "color": "#111111",
+        "font-family": "sans-serif",
+        "font-size": "18px",
+        "line-height": "1.8",
+        "text-align": "left",
+        "padding": "20px",
+        "width": "180px",
+        "background-color": "#ecf0f1",
+        "image-rendering": "auto",
+        "object-fit": "fill"
+      }
+    },
+    "Images_Decorated": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "border-radius": "50%",
+        "box-shadow": "0 0 0 3px #3498db",
+        "opacity": "0.55",
+        "transform": "translate(6px, 4px)",
+        "padding": "12px",
+        "image-rendering": "smooth",
+        "object-fit": "none"
+      }
+    }
+  }
+}

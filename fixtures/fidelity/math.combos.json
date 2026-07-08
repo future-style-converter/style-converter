@@ -1,0 +1,52 @@
+{
+  "components": {
+    "Math_C01_MathDepth": {
+      "properties": {
+        "math-depth": "2",
+        "math-shift": "normal",
+        "math-style": "normal",
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Math_BoxModel": {
+      "properties": {
+        "width": "240px",
+        "height": "48px",
+        "padding": "16px 24px",
+        "margin": "4px",
+        "border": "4px double #8e44ad",
+        "background-color": "#9b59b6",
+        "math-depth": "2",
+        "math-shift": "compact"
+      }
+    },
+    "Math_TextBlock": {
+      "properties": {
+        "color": "#f9fafb",
+        "font-family": "serif",
+        "font-size": "22px",
+        "line-height": "1.8",
+        "text-align": "right",
+        "padding": "12px",
+        "width": "240px",
+        "background-color": "#1f2937",
+        "math-depth": "auto",
+        "math-shift": "normal"
+      }
+    },
+    "Math_Decorated": {
+      "properties": {
+        "background-color": "#9b59b6",
+        "border-radius": "50%",
+        "box-shadow": "inset 0 2px 6px rgba(0,0,0,0.4)",
+        "opacity": "0.55",
+        "transform": "rotate(6deg)",
+        "padding": "20px",
+        "math-depth": "auto-add",
+        "math-shift": "compact"
+      }
+    }
+  }
+}

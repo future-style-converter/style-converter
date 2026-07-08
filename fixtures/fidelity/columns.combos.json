@@ -1,0 +1,63 @@
+{
+  "components": {
+    "Columns_C01_ColumnCount": {
+      "properties": {
+        "column-count": "3",
+        "column-fill": "auto",
+        "column-gap": "12px",
+        "width": "240px",
+        "height": "80px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Columns_C02_ColumnRuleStyle": {
+      "properties": {
+        "column-rule-style": "double",
+        "column-rule-width": "2px",
+        "column-span": "none",
+        "column-width": "160px",
+        "width": "240px",
+        "height": "64px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Columns_BoxModel": {
+      "properties": {
+        "width": "200px",
+        "height": "64px",
+        "padding": "20px",
+        "margin": "4px",
+        "border": "3px solid #16a085",
+        "background-color": "#e74c3c",
+        "column-count": "3",
+        "column-fill": "auto"
+      }
+    },
+    "Columns_TextBlock": {
+      "properties": {
+        "color": "#ffffff",
+        "font-family": "sans-serif",
+        "font-size": "18px",
+        "line-height": "1.8",
+        "text-align": "left",
+        "padding": "12px",
+        "width": "140px",
+        "background-color": "#2c3e50",
+        "column-count": "auto",
+        "column-fill": "auto"
+      }
+    },
+    "Columns_Decorated": {
+      "properties": {
+        "background-color": "#e67e22",
+        "border-radius": "12px",
+        "box-shadow": "0 4px 8px rgba(0,0,0,0.25)",
+        "opacity": "0.55",
+        "transform": "scale(1.1)",
+        "padding": "12px",
+        "column-count": "3",
+        "column-fill": "balance-all"
+      }
+    }
+  }
+}

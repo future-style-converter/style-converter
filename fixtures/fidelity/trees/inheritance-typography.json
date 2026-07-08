@@ -1,0 +1,93 @@
+{
+  "components": {
+    "IT_Family": {
+      "properties": {
+        "width": "240px",
+        "padding": "10px",
+        "color": "#111111",
+        "font-size": "15px",
+        "background-color": "#ecf0f1",
+        "font-family": "monospace"
+      },
+      "children": {
+        "plain": {
+          "properties": {},
+          "_text": "inherited monospace"
+        },
+        "redeclared": {
+          "properties": {
+            "font-family": "serif"
+          },
+          "_text": "redeclared serif"
+        }
+      }
+    },
+    "IT_Weight": {
+      "properties": {
+        "width": "240px",
+        "padding": "10px",
+        "color": "#111111",
+        "font-size": "15px",
+        "background-color": "#ecf0f1",
+        "font-weight": "700"
+      },
+      "children": {
+        "plain": {
+          "properties": {},
+          "_text": "inherited bold"
+        },
+        "redeclared": {
+          "properties": {
+            "font-weight": "300"
+          },
+          "_text": "redeclared light"
+        }
+      }
+    },
+    "IT_SpacingTransform": {
+      "properties": {
+        "width": "240px",
+        "padding": "10px",
+        "color": "#111111",
+        "font-size": "15px",
+        "background-color": "#ecf0f1",
+        "letter-spacing": "2px",
+        "text-transform": "uppercase"
+      },
+      "children": {
+        "plain": {
+          "properties": {},
+          "_text": "inherited spacing"
+        },
+        "redeclared": {
+          "properties": {
+            "letter-spacing": "normal"
+          },
+          "_text": "reset spacing"
+        }
+      }
+    },
+    "IT_Align": {
+      "properties": {
+        "width": "240px",
+        "padding": "10px",
+        "color": "#111111",
+        "font-size": "15px",
+        "background-color": "#ecf0f1",
+        "text-align": "right"
+      },
+      "children": {
+        "plain": {
+          "properties": {},
+          "_text": "inherited right align"
+        },
+        "redeclared": {
+          "properties": {
+            "text-align": "left"
+          },
+          "_text": "redeclared left align"
+        }
+      }
+    }
+  }
+}
