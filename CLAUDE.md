@@ -19,7 +19,7 @@ converter emits IR only via `--to ir`).
 
 ```
 JSON Input → CSS Parser → IR Model → runtime style engines
-                                      ├─ Web     (testing/web/,    DOM/CSS)
+                                      ├─ Web     (runtimes/web/,   DOM/CSS)
                                       ├─ Android (testing/Android/, Compose)
                                       └─ iOS     (testing/iOS/,    SwiftUI)
 ```
@@ -54,7 +54,8 @@ testing/Android/                 # Android runtime style engine
 │           └── ComponentListScreen.kt
 
 testing/iOS/                     # iOS runtime style engine (StyleEngine/)
-testing/web/                     # Web runtime style engine (src/style/engine/)
+runtimes/web/                    # Web runtime style engine — npm package @style-converter/web (src/engine/)
+apps/web-harness/                # Vite harness consuming @style-converter/web (npm workspaces, root package.json)
 testing/screenshots/             # Pulled screenshots from device
 ```
 
@@ -159,7 +160,7 @@ testing/Android/app/src/main/java/com/styleconverter/test/style/
   └── borders/sides/BorderTopWidth{Config,Extractor,Applier}.kt
 testing/iOS/StyleConverterTest/StyleEngine/
   └── borders/sides/BorderTopWidth{Config,Extractor,Applier}.swift
-testing/web/src/style/engine/
+runtimes/web/src/engine/
   └── borders/sides/BorderTopWidth{Config,Extractor,Applier}.ts
 ```
 
@@ -424,9 +425,9 @@ iOS (canonical tree):
 - `testing/iOS/StyleConverterTest/Renderer/StyleBuilder.swift` + `Renderer/ComponentRenderer.swift`
 
 Web (canonical tree):
-- `testing/web/src/style/engine/PropertyRegistry.ts` — registry
-- `testing/web/src/style/engine/<category>/` — per-category triplets + per-category `_dispatch.ts`
-- `testing/web/src/style/core/renderer/StyleBuilder.ts` — top-level dispatcher
+- `runtimes/web/src/engine/PropertyRegistry.ts` — registry
+- `runtimes/web/src/engine/<category>/` — per-category triplets + per-category `_dispatch.ts`
+- `runtimes/web/src/core/renderer/StyleBuilder.ts` — top-level dispatcher
 
 Shared tooling:
 - `testing/compare-screenshots.mjs` — 3-way SSIM + pixelmatch + HTML report

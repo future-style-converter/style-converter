@@ -384,7 +384,7 @@ const RX = {
     // Rule 22 — requires-containment:
     //   `contain:` with any non-`none` value (layout, paint, style, size,
     //   inline-size, strict, content, or any combination). Only the web
-    //   has a Contain triplet (testing/web/src/style/engine/performance/
+    //   has a Contain triplet (runtimes/web/src/engine/performance/
     //   Contain*); Android + iOS have none. Even on web, `contain` only
     //   has meaning when the component contains its own children in the
     //   rendered surface — and the per-component card host doesn't yet

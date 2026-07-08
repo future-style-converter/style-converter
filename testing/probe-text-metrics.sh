@@ -30,7 +30,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TESTING_DIR="$PROJECT_ROOT/testing"
-WEB_DIR="$PROJECT_ROOT/testing/web"
+WEB_DIR="$PROJECT_ROOT/apps/web-harness"
 PROBES_DIR="$TESTING_DIR/probes"
 PROBE_FIXTURES_ROOT="$PROJECT_ROOT/examples/_metric_probes"
 WEB_PORT="${WEB_PORT:-3000}"
@@ -91,9 +91,10 @@ elif ! command -v node &>/dev/null; then
   warn "node not found → skipping web capture"
 else
   log "starting vite for web capture"
-  if [[ ! -d "$WEB_DIR/node_modules/puppeteer" ]]; then
+  # Harness deps hoist to the repo-root node_modules (npm workspaces).
+  if [[ ! -d "$PROJECT_ROOT/node_modules/puppeteer" ]]; then
     log "installing web deps…"
-    ( cd "$WEB_DIR" && npm install --silent )
+    ( cd "$PROJECT_ROOT" && npm install --silent )
   fi
   # Kill anything on the port (a stale vite from a crashed run).
   lsof -ti:"$WEB_PORT" 2>/dev/null | xargs kill -9 2>/dev/null || true

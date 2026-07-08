@@ -190,7 +190,7 @@ export async function captureRefs(testRels, opts = {}) {
       // at 30 s, and every browser-ref capture fails with "TimeoutError"
       // → section-runner reports `browser-ref had failures` and the
       // downstream classifier sees no reference frames. See
-      // testing/web/capture-screenshots.mjs for the matching fix.
+      // apps/web-harness/capture-screenshots.mjs for the matching fix.
       '--no-default-browser-check',
       '--no-first-run',
       '--disable-features=Translate,MediaRouter,OptimizationHints',

@@ -1,0 +1,23 @@
+{
+  "name": "@style-converter/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Web runtime style engine — IR properties rendered as CSS declarations (Config/Extractor/Applier triplets).",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "typescript": "^5.3.0",
+    "vitest": "^4.1.4"
+  }
+}

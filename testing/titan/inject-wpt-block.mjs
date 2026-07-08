@@ -572,7 +572,7 @@ async function main() {
     refsRoot: REFS_ROOT,
     // Per-section runs override --web-dir to their isolated capture path so
     // browser-ref diffs target this section's web PNGs rather than whatever
-    // happens to be in testing/web/screenshots/ at the moment.
+    // happens to be in apps/web-harness/screenshots/ at the moment.
     webDir: WEB_DIR_ARG ? resolve(WEB_DIR_ARG) : join(REPO_ROOT, 'testing', 'web', 'screenshots'),
   });
 

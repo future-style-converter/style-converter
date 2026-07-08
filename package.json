@@ -1,0 +1,14 @@
+{
+  "name": "style-converter",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Monorepo root — npm workspaces for the web runtime style engine and its vite test harness.",
+  "workspaces": [
+    "runtimes/web",
+    "apps/web-harness"
+  ],
+  "scripts": {
+    "test": "npm -ws run test --if-present",
+    "typecheck": "npm -ws run typecheck --if-present"
+  }
+}

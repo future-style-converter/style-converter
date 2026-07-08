@@ -41,14 +41,17 @@ jobs:
     name: web runtime (TypeScript)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    defaults: { run: { working-directory: testing/web } }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 24, cache: npm, cache-dependency-path: testing/web/package-lock.json }
-      - run: npm ci
-      - run: npx tsc --noEmit
-      - run: npx vitest run
+        with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
+      # Root npm ci installs both workspaces (runtimes/web + apps/web-harness).
+      # Skip puppeteer's Chromium download — the unit suites never launch a browser.
+      - run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
+      - name: Typecheck both workspaces
+        run: npm -ws run typecheck
+      - name: Unit tests — engine (@style-converter/web) + harness (web-harness)
+        run: npm -ws run test
 
   test-tooling:
     name: test tooling (node)

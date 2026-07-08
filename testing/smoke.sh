@@ -55,7 +55,7 @@ err()  { echo -e "${R}[smoke]${N} $*" >&2; }
 VITE_PID=""
 start_vite() {
     log "starting vite on :3000…"
-    ( cd testing/web && npm run dev > /tmp/smoke-vite.log 2>&1 ) &
+    ( cd apps/web-harness && npm run dev > /tmp/smoke-vite.log 2>&1 ) &
     VITE_PID=$!
     # Poll until vite responds or 30s elapses. Faster than a fixed sleep,
     # avoids the "vite not ready yet" race that the per-harness pre-flight

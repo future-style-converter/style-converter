@@ -41,7 +41,7 @@ export const BASE_URL = `http://localhost:${WEB_PORT}`;
 export const COMPONENTS_DIR = 'examples/properties/components';
 export const REPORT_PATH = 'testing/a11y-report.json';
 // Pin axe-core version for reproducibility. CDN URL — no npm install needed.
-// If we move to local bundling we'd add `axe-core` to testing/web/package.json
+// If we move to local bundling we'd add `axe-core` to apps/web-harness/package.json
 // and import from node_modules.
 export const AXE_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.8.3/axe.min.js';
 // The single rule this Phase 11a actually scores. Other WCAG rules are
@@ -125,7 +125,7 @@ async function preflightVite() {
   } catch (err) {
     throw new Error(
       `vite dev server not reachable at ${BASE_URL} (${err.message}). ` +
-      `Run \`cd testing/web && npm run dev\` in another terminal first.`
+      `Run \`cd apps/web-harness && npm run dev\` in another terminal first.`
     );
   }
 }
