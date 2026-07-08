@@ -20,7 +20,7 @@
 //   2. Boot the chosen UDID
 //   3. Run test-all.sh with SIM_UDID=<udid> SKIP_ANDROID=1 SKIP_WEB=1
 //      (web is platform-stable; we're scoring iOS-version drift specifically)
-//   4. Snapshot testing/iOS/screenshots/ into testing/os-matrix-snapshots/<runtime>/
+//   4. Snapshot apps/ios-harness/screenshots/ into testing/os-matrix-snapshots/<runtime>/
 //   5. Repeat for next runtime
 //   6. Cross-runtime SSIM: for every fixture present in both runtimes, score.
 //      Drift > 0.05 = regression. Drift ≤ 0.05 = stable.
@@ -158,7 +158,7 @@ function runOnIOSRuntime(runtime) {
   const snapDir = join(SNAP_ROOT, runtime.label);
   if (existsSync(snapDir)) rmSync(snapDir, { recursive: true });
   mkdirSync(snapDir, { recursive: true });
-  const srcDir = 'testing/iOS/screenshots';
+  const srcDir = 'apps/ios-harness/screenshots';
   if (!existsSync(srcDir)) {
     return { error: 'no-screenshots-captured', wallMs };
   }

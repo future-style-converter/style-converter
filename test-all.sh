@@ -93,7 +93,7 @@ PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
 INPUT_JSON="${1:-examples/visual-test.json}"
 
 OUTPUT_DIR="$PROJECT_ROOT/out"
-IOS_DIR="$PROJECT_ROOT/testing/iOS"
+IOS_DIR="$PROJECT_ROOT/apps/ios-harness"
 ANDROID_DIR="$PROJECT_ROOT/apps/android-harness"
 WEB_DIR="$PROJECT_ROOT/apps/web-harness"
 TESTING_DIR="$PROJECT_ROOT/testing"

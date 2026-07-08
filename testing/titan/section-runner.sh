@@ -417,7 +417,7 @@ set -m
 # compare-screenshots.mjs does pairwise diffs. With web-only scope, we point
 # IOS_SCREENSHOTS_DIR + ANDROID_SCREENSHOTS_DIR at empty dirs so the
 # unmatched-platform branch fires (rows[].pairs.iOS-* are null) without
-# attempting to read the real testing/iOS/screenshots/ which a sibling
+# attempting to read the real apps/ios-harness/screenshots/ which a sibling
 # section may be wiping. REPORT_DIR + MANIFEST_OUT scope every output file.
 
 step "Step 6: compare + manifest"

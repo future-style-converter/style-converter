@@ -5,7 +5,7 @@
 // Cross-platform component screenshot comparison.
 //
 // Reads per-component PNGs from:
-//   testing/iOS/screenshots/
+//   apps/ios-harness/screenshots/
 //   apps/android-harness/screenshots/
 //   apps/web-harness/screenshots/
 //
@@ -88,7 +88,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PLATFORMS = ['iOS', 'Android', 'web'];
 
 const paths = {
-  iOS:     process.env.IOS_SCREENSHOTS_DIR     || resolve(__dirname, 'iOS/screenshots'),
+  iOS:     process.env.IOS_SCREENSHOTS_DIR     || resolve(__dirname, '../apps/ios-harness/screenshots'),
   Android: process.env.ANDROID_SCREENSHOTS_DIR || resolve(__dirname, '../apps/android-harness/screenshots'),
   web:     process.env.WEB_SCREENSHOTS_DIR     || resolve(__dirname, '../apps/web-harness/screenshots'),
   baseline: resolve(__dirname, 'baseline'),
@@ -730,7 +730,7 @@ async function syncBaseline() {
   }
   if (totalAvailable === 0) {
     console.error('✗ refusing to update baseline: no current captures found.');
-    console.error('  expected PNGs under testing/iOS/screenshots/ + apps/{android,web}-harness/screenshots/');
+    console.error('  expected PNGs under apps/{ios,android,web}-harness/screenshots/');
     console.error('  (did a capture step fail, or was everything skipped?)');
     process.exit(2);
   }

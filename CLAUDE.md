@@ -21,7 +21,7 @@ converter emits IR only via `--to ir`).
 JSON Input → CSS Parser → IR Model → runtime style engines
                                       ├─ Web     (runtimes/web/,   DOM/CSS)
                                       ├─ Android (runtimes/compose/, Compose)
-                                      └─ iOS     (testing/iOS/,    SwiftUI)
+                                      └─ iOS     (runtimes/swiftui/, SwiftUI)
 ```
 
 ### Project Structure
@@ -54,7 +54,8 @@ apps/android-harness/            # Android test app consuming :runtime
 │       └── ui/
 │           └── ComponentListScreen.kt
 
-testing/iOS/                     # iOS runtime style engine (StyleEngine/)
+runtimes/swiftui/                # iOS runtime style engine — SwiftPM package StyleConverterRuntime (manifest: Package.swift at repo root)
+apps/ios-harness/                # iOS test app consuming StyleConverterRuntime (xcodegen project.yml)
 runtimes/web/                    # Web runtime style engine — npm package @style-converter/web (src/engine/)
 apps/web-harness/                # Vite harness consuming @style-converter/web (npm workspaces, root package.json)
 testing/screenshots/             # Pulled screenshots from device
@@ -159,7 +160,7 @@ implementations live at the mirror paths:
 ```
 runtimes/compose/src/main/java/com/styleconverter/runtime/
   └── borders/sides/BorderTopWidth{Config,Extractor,Applier}.kt
-testing/iOS/StyleConverterTest/StyleEngine/
+runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/
   └── borders/sides/BorderTopWidth{Config,Extractor,Applier}.swift
 runtimes/web/src/engine/
   └── borders/sides/BorderTopWidth{Config,Extractor,Applier}.ts
@@ -421,9 +422,10 @@ Android (canonical tree):
 - `runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt` — engine + legacy dispatch
 
 iOS (canonical tree):
-- `testing/iOS/StyleConverterTest/StyleEngine/PropertyRegistry.swift` — registry
-- `testing/iOS/StyleConverterTest/StyleEngine/<category>/` — per-category triplets
-- `testing/iOS/StyleConverterTest/Renderer/StyleBuilder.swift` + `Renderer/ComponentRenderer.swift`
+- `runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/PropertyRegistry.swift` — registry
+- `runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/<category>/` — per-category triplets
+- `runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift` + `Renderer/ComponentRenderer.swift`
+- `runtimes/swiftui/Tests/StyleConverterRuntimeTests/` — XCTest suite (run: `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'`)
 
 Web (canonical tree):
 - `runtimes/web/src/engine/PropertyRegistry.ts` — registry

@@ -1,0 +1,68 @@
+# XcodeGen config — generates StyleConverterTest.xcodeproj from this file.
+#
+# Regenerate the project:
+#     cd apps/ios-harness && xcodegen generate
+#
+# Install XcodeGen if missing:
+#     brew install xcodegen
+
+name: StyleConverterTest
+options:
+  bundleIdPrefix: com.styleconverter
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+# The runtime style engine (StyleEngine + Models + Renderer) is consumed as
+# a local SwiftPM package. Its manifest sits at the REPO ROOT (Package.swift)
+# with sources under runtimes/swiftui/ — hence path: ../.. from this folder.
+packages:
+  StyleConverterRuntime:
+    path: ../..
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    CODE_SIGNING_REQUIRED: NO
+    CODE_SIGNING_ALLOWED: NO
+
+targets:
+  StyleConverterTest:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      # Harness-only chrome: App entry, UI gallery, Screenshot capture.
+      # The engine trees (StyleEngine/, Models/, Renderer/) moved into the
+      # StyleConverterRuntime package — do not re-add them here.
+      - path: StyleConverterTest
+        excludes:
+          - "Info.plist"
+          - "**/README.md"
+    dependencies:
+      # Link the runtime engine product from the local package above.
+      - package: StyleConverterRuntime
+        product: StyleConverterRuntime
+    resources:
+      - StyleConverterTest/Resources
+      - StyleConverterTest/Assets.xcassets
+    info:
+      path: StyleConverterTest/Info.plist
+      properties:
+        CFBundleDisplayName: Style Converter
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.styleconverter.test
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
