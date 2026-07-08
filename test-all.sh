@@ -196,13 +196,14 @@ cd "$PROJECT_ROOT"
 # exhaustion from unrelated background HTTPS traffic — we've seen this
 # in Phase 12 audit runs with 16k+ TIME_WAIT sockets), fall back to
 # driving the already-built JVM classes directly. Requires a prior
-# `./gradlew build` or `./gradlew classes` to populate build/classes/;
-# we try gradle first and only fall through on connection failure.
-if ! ./gradlew --no-daemon run --args="convert --from css --to ir -i $INPUT_JSON -o out" --quiet 2>/tmp/gradle-convert.log; then
+# `./gradlew :converter:build` or `./gradlew :converter:classes` to populate
+# converter/build/classes/; we try gradle first and only fall through on
+# connection failure.
+if ! ./gradlew --no-daemon :converter:run --args="convert --from css --to ir -i $INPUT_JSON -o out" --quiet 2>/tmp/gradle-convert.log; then
   if grep -q "Could not connect to the Gradle daemon\|BindException" /tmp/gradle-convert.log 2>/dev/null && \
-     [[ -d "$PROJECT_ROOT/build/classes/kotlin/main" ]]; then
+     [[ -d "$PROJECT_ROOT/converter/build/classes/kotlin/main" ]]; then
     warn "gradle daemon unreachable (loopback port exhaustion?) — using prebuilt classes"
-    CP="$PROJECT_ROOT/build/classes/kotlin/main"
+    CP="$PROJECT_ROOT/converter/build/classes/kotlin/main"
     CP="$CP:$(find "$HOME/.gradle/caches/modules-2" -name '*.jar' 2>/dev/null | tr '\n' ':')"
     java -cp "$CP" app.MainKt convert --from css --to ir -i "$INPUT_JSON" -o out
   else

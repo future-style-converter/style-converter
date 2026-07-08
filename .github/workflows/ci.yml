@@ -28,12 +28,12 @@ jobs:
         with: { distribution: temurin, java-version: '21' }
       - uses: gradle/actions/setup-gradle@v4
       - name: Unit tests
-        run: ./gradlew test --no-daemon
+        run: ./gradlew :converter:test --no-daemon
       - name: CLI honesty — --to ir succeeds, --to compose fails loudly
         run: |
-          ./gradlew run --no-daemon --args="convert --from css --to ir -i examples/visual-test.json -o out"
+          ./gradlew :converter:run --no-daemon --args="convert --from css --to ir -i examples/visual-test.json -o out"
           test -s out/tmpOutput.json
-          if ./gradlew run --no-daemon --args="convert --from css --to compose -i examples/visual-test.json -o out" 2>/dev/null; then
+          if ./gradlew :converter:run --no-daemon --args="convert --from css --to compose -i examples/visual-test.json -o out" 2>/dev/null; then
             echo "::error::--to compose must exit non-zero until the writer exists" ; exit 1
           fi
 

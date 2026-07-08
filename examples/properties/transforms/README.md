@@ -6,7 +6,7 @@ in `src/main/kotlin/app/parsing/css/properties/longhands/transforms/`.
 Run via:
 
 ```bash
-./gradlew run --args="convert --from css --to ir -i examples/properties/transforms/<file>.json -o /tmp/p8"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/properties/transforms/<file>.json -o /tmp/p8"
 ```
 
 All 10 fixtures convert with `(0 generic)` on every component.

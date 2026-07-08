@@ -269,7 +269,7 @@ Each item ≤1 hr. Order interleaves fixture authoring → capture
 pipeline → metric impl → tests so each step has a runnable end state.
 
 1. **B8 fixtures** (3 files / 9 components). Validate via
-   `./gradlew run --args="convert ..."`.
+   `./gradlew :converter:run --args="convert ..."`.
 2. **B9 fixtures** (1 file / 5 components).
 3. **B10 fixtures** (3 files / 9 components).
 4. **Probe-fixture exclusion filter** in `test-all.sh` + per-platform

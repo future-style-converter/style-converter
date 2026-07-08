@@ -74,7 +74,7 @@ log "converting merged fixture to IR"
 cd "$PROJECT_ROOT"
 # Use TESTALL_SKIP_LOCK so the test-all.sh advisory lock doesn't block us
 # if a sibling test-all run is in flight. Probe runs are independent.
-./gradlew --no-daemon run --args="convert --from css --to ir -i $MERGED_FIXTURE -o out_probe" --quiet 2>/tmp/probe-convert.log || {
+./gradlew --no-daemon :converter:run --args="convert --from css --to ir -i $MERGED_FIXTURE -o out_probe" --quiet 2>/tmp/probe-convert.log || {
   err "convert failed; tail of /tmp/probe-convert.log:"
   tail -10 /tmp/probe-convert.log >&2
   exit 1

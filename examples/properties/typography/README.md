@@ -6,7 +6,7 @@ parsers in `src/main/kotlin/app/parsing/css/properties/longhands/typography/`.
 Each fixture is one sub-topic. Run via:
 
 ```bash
-./gradlew run --args="convert --from css --to ir -i examples/properties/typography/<file>.json -o /tmp/p6"
+./gradlew :converter:run --args="convert --from css --to ir -i examples/properties/typography/<file>.json -o /tmp/p6"
 ```
 
 ## Coverage map

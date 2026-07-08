@@ -34,7 +34,7 @@
 | 15 | Flex_Direction_Reverse_Wrap  | `row-reverse` + `flex-wrap: wrap` + 3×100px items in 240px |
 
 Parser: all 15 components decoded cleanly
-(`./gradlew run --args="convert --from css --to ir -i … -o /tmp/audit-layout"`
+(`./gradlew :converter:run --args="convert --from css --to ir -i … -o /tmp/audit-layout"`
  — BUILD SUCCESSFUL, zero decode errors, 59 components total including
  children). See `[CSS Parser]` trace in capture log — `flex`, `grid-area`,
  `gap` shorthands all expanded correctly.

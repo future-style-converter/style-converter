@@ -29,9 +29,18 @@ kotlin {
 }
 
 // Use the JUnit Platform so kotlin.test (which delegates) and any direct
-// JUnit 5 tests both run under `./gradlew test`.
+// JUnit 5 tests both run under `./gradlew :converter:test`.
 tasks.test {
     useJUnitPlatform()
+}
+
+// The CLI contract is cwd-relative: `-i examples/visual-test.json -o out`
+// must resolve against the REPO ROOT regardless of which Gradle project
+// hosts the task. In a multi-project build JavaExec defaults its working
+// directory to the subproject dir (converter/), which would silently
+// re-root every relative path — so pin it to the root project dir.
+tasks.named<JavaExec>("run") {
+    workingDir = rootDir
 }
 
 

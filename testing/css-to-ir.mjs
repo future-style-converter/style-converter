@@ -3,7 +3,7 @@
 //
 // Reads testing/real-pages/<slug>.css, parses out class definitions,
 // emits testing/real-pages/<slug>.ir.json in the Style-Converter input
-// format. Then we can pipe each ir.json into ./gradlew run --args="convert"
+// format. Then we can pipe each ir.json into ./gradlew :converter:run --args="convert"
 // to validate the converter handles real CSS.
 //
 // Round-43 fix (per Tier 9 investigator): the previous adapter dropped every
