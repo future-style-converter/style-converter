@@ -1,22 +1,23 @@
 # Style Converter
 
+[![ci](https://github.com/future-style-converter/style-converter/actions/workflows/ci.yml/badge.svg)](https://github.com/future-style-converter/style-converter/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 **CSS in → typed IR → the same styles rendered natively on Web, Android, and iOS.**
 
 Style Converter parses CSS declarations (wrapped in a small JSON envelope) into a
 typed **intermediate representation (IR)**, then renders that IR with three
-**runtime style engines** — one per platform:
+**runtime style engines** — one per platform. The runtimes are the product:
 
-| engine | platform tech | where it lives today |
-|---|---|---|
-| Web | React + real DOM/CSS | `runtimes/web/` (engine) + `apps/web-harness/` (vite harness) |
-| Android | Jetpack Compose | `runtimes/compose/` (engine) + `apps/android-harness/` (test app) |
-| iOS | SwiftUI | `runtimes/swiftui/` (SwiftPM package) + `apps/ios-harness/` (test app) |
+| runtime | package | platform tech | where it lives |
+|---|---|---|---|
+| Web | npm `@style-converter/web` | React + real DOM/CSS | `runtimes/web/` + `apps/web-harness/` (vite harness) |
+| Android | AGP library `com.styleconverter.runtime` | Jetpack Compose | `runtimes/compose/` + `apps/android-harness/` (test app) |
+| iOS | SwiftPM `StyleConverterRuntime` | SwiftUI | `runtimes/swiftui/` + `apps/ios-harness/` (test app) |
 
-The three engines are the product. A screenshot harness renders every
-fixture on all three platforms and compares the results with SSIM, so
-"the same CSS looks the same everywhere" is a measured claim, not a hope.
+A screenshot harness renders every fixture on all three platforms and
+compares the results with SSIM, so "the same CSS looks the same everywhere"
+is a measured claim, not a hope.
 
 ```
 your-styles.json  (CSS properties per component)
@@ -27,30 +28,33 @@ your-styles.json  (CSS properties per component)
         │
         │  test-all.sh copies the IR into each runtime bundle
         ▼
-┌──────────────┬──────────────────┬───────────────┐
-│  Web engine  │  Android engine  │  iOS engine   │
-│  (DOM/CSS)   │  (Compose)       │  (SwiftUI)    │
-└──────┬───────┴────────┬─────────┴───────┬───────┘
-       │  screenshots   │                 │
-       ▼                ▼                 ▼
+┌──────────────────┬─────────────────────┬──────────────────────┐
+│  runtimes/web    │  runtimes/compose   │  runtimes/swiftui    │
+│  (DOM/CSS)       │  (Compose)          │  (SwiftUI)           │
+└──────┬───────────┴─────────┬───────────┴──────────┬───────────┘
+       │      screenshots    │                      │
+       ▼                     ▼                      ▼
       3-way SSIM comparison report (tools/visual/report/)
 ```
 
 ## Current status (honest)
 
-- **Working today:** the CSS → IR converter and all three runtime engines.
-  Every property in the 550-property IR catalogue has an
-  extractor/config/applier triplet on all three platforms
-  (see `docs/reports/COVERAGE.md`).
-- **Verified cross-platform:** **91 / 550 properties** pass the strict
-  bar — SSIM ≥ 0.95 on *every* value variant on *every* platform pair
-  (`docs/reports/TIER1_VARIANT_DEPTH.md`). Of the rest, 419 are blocked on
-  platform capability gaps or missing harness tiers (animations,
-  interactions, print, …), 37 are exhausted (no meaningful visual test
-  exists), and 3 have known real divergences.
-- **Roadmap:** code *writers* that emit static Jetpack Compose / SwiftUI
-  source from the IR. An earlier generator scaffold was removed; the
-  converter currently emits IR only (`--to ir`).
+Two coverage numbers, both true:
+
+| claim | number | source of truth |
+|---|---|---|
+| Registration coverage (triplet exists + registered) | **550 / 550 per platform** (Android 550 / 550 · iOS 550 / 550 · Web 550 / 550) | `node tools/visual/coverage-audit.mjs` → `docs/reports/COVERAGE.md` |
+| Verified rendering coverage (SSIM ≥ 0.95, every variant, every platform pair) | **91/550 (~17%)** | `docs/reports/TIER1_VARIANT_DEPTH.md` |
+
+Of the unverified remainder: 419 are blocked on platform capability gaps
+or missing harness tiers (animations, interactions, print, …), 37 are
+exhausted (no meaningful visual test exists), and 3 have known real
+divergences. `docs/reports/CAMPAIGN_SUMMARY.md` tells the story of how
+the tracker got honest.
+
+**Roadmap:** code *writers* that emit static Jetpack Compose / SwiftUI
+source from the IR. An earlier generator scaffold was removed; the
+converter currently emits IR only (`--to ir`).
 
 Don't expect a drop-in "convert my stylesheet to production Compose code"
 tool yet. Do expect a solid IR, three faithful runtime renderers, and an
@@ -58,14 +62,19 @@ unusually thorough cross-platform verification harness.
 
 ## Requirements
 
-- **Java 21+** (converter; Gradle wrapper included)
-- **Node 20+** (web engine + comparison tooling; `npm install` at the repo root — npm workspaces)
-- macOS + **Xcode** — only if you want iOS captures
+- **JDK 21** (converter; Gradle wrapper included)
+- **Node 24** (web runtime + tooling; `npm ci` at the repo root — npm workspaces)
+- macOS + **Xcode** + **xcodegen** — only if you want iOS captures
 - **Android SDK / emulator** — only if you want Android captures
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full dev setup.
 
 ## Quick start
 
 ```bash
+# JDK 21 required — on macOS:
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+
 # 1. Convert CSS to IR
 ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/visual-test.json -o out"
 # → out/tmpOutput.json (the IR)
@@ -101,10 +110,11 @@ A JSON envelope mapping component names to CSS properties:
 }
 ```
 
-Fixtures for every property category live under `fixtures/properties/`.
-Values are normalized in the IR: colors → sRGB floats, lengths → px,
-angles → degrees, times → ms. Runtime-dependent values (`var()`, `calc()`,
-`em`, `%`) stay unresolved (`null`) for the engines to handle.
+Fixtures for every property category live under `fixtures/properties/`
+(33 categories). Values are normalized in the IR: colors → sRGB floats,
+lengths → px, angles → degrees, times → ms. Runtime-dependent values
+(`var()`, `calc()`, `em`, `%`) stay unresolved (`null`) for the runtimes
+to handle.
 
 ## Repository layout
 
@@ -114,9 +124,9 @@ converter/src/main/kotlin/app/
 └── parsing/css/         # CSS value parsers (longhands, shorthands, primitives)
 
 runtimes/                # ← the three runtime style engines (the product)
-├── web/src/engine/                            # Web engine (per-property triplets)
-├── compose/src/main/java/…/runtime/           # Android engine (per-property triplets)
-└── swiftui/Sources/StyleConverterRuntime/     # iOS engine (per-property triplets)
+├── web/src/engine/                            # Web runtime (per-property triplets)
+├── compose/src/main/java/…/runtime/           # Android runtime (per-property triplets)
+└── swiftui/Sources/StyleConverterRuntime/     # iOS runtime (per-property triplets)
 
 apps/                    # per-platform capture harnesses (web / android / ios)
 tools/
@@ -126,13 +136,14 @@ tools/
 
 fixtures/                # test fixtures: properties/<category>/ + suites (fuzz, perfect, combos, …)
 schema/                  # the IR wire-format contract (JSON Schema + spec + golden fixtures)
+docs/NAMING.md           # vocabulary glossary (reader/writer/runtime/harness/…)
 docs/reports/            # historical campaign docs + generated COVERAGE.md
 test-all.sh              # convert → render on 3 platforms → compare
 ```
 
 Each property is implemented as a **Config / Extractor / Applier** triplet
-at the same relative path in all three engines — see `CLAUDE.md` for the
-full per-property contract.
+at the same relative path in all three runtimes — see [CLAUDE.md](CLAUDE.md)
+for the full per-property contract.
 
 ## The wire format is a contract — `schema/`
 
@@ -164,11 +175,29 @@ the point.
 
 ## Running the tests
 
-```bash
-./gradlew :converter:test                               # JVM parser/IR tests
-node --test tools/visual/*.test.mjs tools/titan/*.test.mjs # tooling unit tests
-bash tools/visual/smoke.sh                              # full smoke (adds native baselines)
-```
+| suite | command | tests |
+|---|---|---:|
+| converter (Kotlin) | `./gradlew :converter:test` | 43 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 786 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 413 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 60 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 448 |
+| IR conformance | `node schema/conformance/run.mjs --emit` | 12 goldens × 4 codebases |
+
+CI (`.github/workflows/ci.yml`) runs the converter, web-runtime,
+test-tooling, and schema-conformance jobs on every push/PR to
+`main`/`dev`. The full visual pipeline (`./test-all.sh`, plus
+`BASELINE=1` for regression gating) runs locally — it needs an Android
+emulator and an iOS simulator.
+
+## Going deeper
+
+- [CLAUDE.md](CLAUDE.md) — architecture, the per-property contract,
+  done-definition, how to add a property
+- [CONTRIBUTING.md](CONTRIBUTING.md) — dev setup, branch model, PR checklist
+- [docs/NAMING.md](docs/NAMING.md) — the vocabulary glossary
+- [schema/spec/](schema/spec/) — the normative IR wire-format spec
+- [docs/reports/](docs/reports/) — historical campaign + audit reports
 
 ## License
 
