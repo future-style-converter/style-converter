@@ -16,11 +16,11 @@
   "dependencies": {
     "@style-converter/web": "*",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.2.0",
     "pixelmatch": "^7.1.0",
     "pngjs": "^7.0.0",
