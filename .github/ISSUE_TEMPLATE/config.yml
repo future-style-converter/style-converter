@@ -1,0 +1,20 @@
+# Issue-template chooser configuration.
+# blank_issues_enabled: false — every issue goes through a form (rendering
+# bug, converter bug, or feature request) so reports arrive with a fixture
+# and enough context to reproduce.
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and discussion
+    url: https://github.com/future-style-converter/style-converter/discussions
+    about: >
+      General questions, help getting set up, and open-ended ideas.
+      (Discussions may not be enabled yet — if this link 404s, email the
+      maintainer at greaflorent@gmail.com in the meantime.)
+  - name: Security or private reports
+    # GitHub requires contact links to be http(s), so this points at the
+    # policy rather than a mailto: — the policy carries the email address.
+    url: https://github.com/future-style-converter/style-converter/blob/dev/SECURITY.md
+    about: >
+      Please do NOT open a public issue for vulnerabilities. Report
+      privately per SECURITY.md — GitHub private vulnerability reporting
+      (once enabled) or greaflorent@gmail.com.

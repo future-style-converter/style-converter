@@ -1,0 +1,70 @@
+name: Converter bug
+description: The CSS reader parses a value wrong, or the emitted IR is not what the spec says it should be
+title: "[converter] "
+labels: ["area:converter"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! A converter bug lives on the **input side**:
+        the CSS reader (`converter/`) parsed a declaration incorrectly, or
+        the IR it emits (`--to ir`) has the wrong shape or value.
+
+        If the IR looks *right* but a runtime renders it wrong, that's a
+        **rendering bug** — use the other template.
+
+        Heads-up: the IR wire format is a contract (`schema/`). If your
+        report is really "the wire shape should change", expect the fix to
+        be scheduled for the flat-IR v2 freeze rather than patched into v1
+        (see `schema/spec/05-versioning.md`).
+  - type: textarea
+    id: css-input
+    attributes:
+      label: CSS input
+      description: >
+        The JSON envelope you fed the converter (or the minimal CSS
+        declaration that misparses). Reproduce with:
+        `./gradlew :converter:run --args="convert --from css --to ir -i your.json -o out"`
+      render: json
+      placeholder: |
+        {
+          "components": {
+            "Repro": {
+              "properties": {
+                "transform": "rotate(0.25turn)"
+              }
+            }
+          }
+        }
+    validations:
+      required: true
+  - type: textarea
+    id: expected-ir
+    attributes:
+      label: Expected IR
+      description: >
+        What you expected the converter to emit, as best you can describe it —
+        a rough sketch is fine (e.g. "angle normalized to 90 degrees").
+        Normalization rules are in the README ("Input format") and
+        `schema/spec/`.
+    validations:
+      required: true
+  - type: textarea
+    id: actual-ir
+    attributes:
+      label: Actual IR
+      description: >
+        The relevant snippet from `out/tmpOutput.json`. Just the property
+        block(s) for the affected component — no need to paste the whole
+        document.
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Converter version / commit
+      description: "`git rev-parse --short HEAD` on the checkout you ran (there are no tagged releases yet, so the commit is the version)."
+      placeholder: "d61601f"
+    validations:
+      required: true
