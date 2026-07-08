@@ -118,7 +118,7 @@ fi
 #   2. puppeteer.launch's recent default protocolTimeout dropped
 #      (fixed by passing { protocolTimeout: 5*60*1000 })
 #
-# Both fixes are in testing/web/src/ui/FixtureCanvas.tsx,
+# Both fixes are in apps/web-harness/src/ui/FixtureCanvas.tsx,
 # testing/interaction-states.mjs, testing/a11y-audit.mjs. If a future
 # refactor removes them (e.g. "let's use RAF for proper paint sync"),
 # the smoke harness goes 0/90 again. Pin the fixes with grep checks
@@ -131,12 +131,12 @@ echo -e "\n${B}━━━ Round 75 regression-prevention checks ━━━${N}"
 # Strip comment lines (//, *, /*) before checking — the round 75 fix
 # explicitly documents the prior RAF approach in a comment, which would
 # otherwise false-trigger this check.
-RAF_USE=$(grep -nE "requestAnimationFrame" testing/web/src/ui/FixtureCanvas.tsx 2>/dev/null \
+RAF_USE=$(grep -nE "requestAnimationFrame" apps/web-harness/src/ui/FixtureCanvas.tsx 2>/dev/null \
             | grep -vE "^\s*[0-9]+:\s*(//|\*|/\*)" \
             | head -1)
 if [[ -n "$RAF_USE" ]]; then
     err "FixtureCanvas.tsx contains requestAnimationFrame in non-comment line ($RAF_USE) — round 75 caught this hangs in headless puppeteer (Pattern 9 in LESSONS_LEARNED.md). Use setTimeout instead."
-elif grep -q "setTimeout" testing/web/src/ui/FixtureCanvas.tsx 2>/dev/null; then
+elif grep -q "setTimeout" apps/web-harness/src/ui/FixtureCanvas.tsx 2>/dev/null; then
     log "✓ FixtureCanvas.tsx uses setTimeout (not RAF) — round 75 fix preserved"
 else
     err "FixtureCanvas.tsx has neither setTimeout nor RAF — verify ready-flag mechanism"

@@ -95,7 +95,7 @@ INPUT_JSON="${1:-examples/visual-test.json}"
 OUTPUT_DIR="$PROJECT_ROOT/out"
 IOS_DIR="$PROJECT_ROOT/testing/iOS"
 ANDROID_DIR="$PROJECT_ROOT/testing/Android"
-WEB_DIR="$PROJECT_ROOT/testing/web"
+WEB_DIR="$PROJECT_ROOT/apps/web-harness"
 TESTING_DIR="$PROJECT_ROOT/testing"
 
 IOS_BUNDLE="com.styleconverter.test"
@@ -663,10 +663,11 @@ elif ! command -v node &>/dev/null; then
 else
     step "Web capture"
 
-    # Ensure web deps are installed
-    if [[ ! -d "$WEB_DIR/node_modules/puppeteer" ]]; then
+    # Ensure web deps are installed. The harness is an npm workspace — deps
+    # are hoisted to the repo-root node_modules, so install from the root.
+    if [[ ! -d "$PROJECT_ROOT/node_modules/puppeteer" ]]; then
         log "installing web deps…"
-        ( cd "$WEB_DIR" && npm install --silent )
+        ( cd "$PROJECT_ROOT" && npm install --silent )
     fi
 
     # Kill anything squatting on the port

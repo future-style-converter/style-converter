@@ -6,12 +6,12 @@
 // stub uses XCUITest hooks; Android stub uses Espresso UiObject2 hooks).
 //
 // Pre-flight contract for the web side (matches testing/TIER5_PLAN.md):
-//   1. `cd testing/web && npm run build-fixtures` has produced
-//      testing/web/public/fixtures/<Name>.json for every COMPONENTS entry.
+//   1. `cd apps/web-harness && npm run build-fixtures` has produced
+//      apps/web-harness/public/fixtures/<Name>.json for every COMPONENTS entry.
 //   2. `npm run dev` (or vite preview) is running on WEB_PORT — this script
 //      does NOT start vite (test-all.sh owns that lifecycle).
 //
-// Component DOM contract (see testing/web/src/ui/FixtureCanvas.tsx):
+// Component DOM contract (see apps/web-harness/src/ui/FixtureCanvas.tsx):
 //   - `[data-testid="<ComponentName>"]` resolves to a single element
 //   - `[data-fixture-ready="1"]` set after first paint (used as a wait gate)
 
@@ -79,7 +79,7 @@ async function preflightVite() {
   } catch (err) {
     throw new Error(
       `vite dev server not reachable at ${BASE_URL} (${err.message}). ` +
-      `Run \`cd testing/web && npm run dev\` in another terminal first.`
+      `Run \`cd apps/web-harness && npm run dev\` in another terminal first.`
     );
   }
 }

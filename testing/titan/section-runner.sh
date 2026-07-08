@@ -13,8 +13,8 @@
 #   - testing/report/manifest.json    (compare-screenshots overwrites)
 #   - vite port 3000                   (only one bind per port)
 #   - /tmp/style-converter-testall.lock (mkdir-atomic; second runner aborts)
-#   - testing/web/public/ir-components.json (vite serves this; one writer)
-#   - testing/web/screenshots/         (capture-screenshots wipes & rewrites)
+#   - apps/web-harness/public/ir-components.json (vite serves this; one writer)
+#   - apps/web-harness/screenshots/    (capture-screenshots wipes & rewrites)
 #   - testing/wpt/refs/<sha>/...       (browser-ref cache)
 #   - examples/wpt/_smoke-combined.json (build-combined-fixture writes)
 #
@@ -49,7 +49,7 @@
 #   manifest.json              — per-section v4 TITAN manifest
 #   tests.list                 — the resolved test list (cap-applied)
 #   combined.json              — per-section combined fixture (gradle input)
-#   web/                       — per-section vite root (rsync'd from testing/web)
+#   web/                       — per-section vite root (rsync'd from apps/web-harness)
 #   web/public/ir-components.json — IR served to vite
 #   screenshots/               — per-section web captures
 #   report/                    — per-section HTML + diff PNGs
@@ -319,10 +319,10 @@ log "IR: $(grep -o '"id"' "$GRADLE_OUT_DIR/tmpOutput.json" | wc -l | tr -d '[:sp
 
 # ── Step 5: per-section vite root + capture ─────────────────────────────────
 #
-# We need testing/web/public/ir-components.json to point at THIS section's
+# We need apps/web-harness/public/ir-components.json to point at THIS section's
 # IR while a sibling agent's vite is serving a different section's IR. We
 # can't rewrite that path (App.tsx hard-codes /ir-components.json), so we
-# materialize a per-section copy of testing/web/ via rsync (excluding the
+# materialize a per-section copy of apps/web-harness/ via rsync (excluding the
 # heavy node_modules + dist + screenshots), symlink node_modules so we
 # don't pay the npm install cost, and run vite from there. ~50ms cost per
 # section-runner; eliminates the public/ir-components.json race.
@@ -334,10 +334,10 @@ mkdir -p "$WEB_ROOT"
 # and timestamps; --delete keeps the per-section root in sync if we re-run.
 rsync -a --delete \
   --exclude=node_modules --exclude=dist --exclude=screenshots \
-  "$TESTING_DIR/web/" "$WEB_ROOT/"
+  "$PROJECT_ROOT/apps/web-harness/" "$WEB_ROOT/"
 # Symlink node_modules — the per-section root resolves imports against the
 # real cache without paying for ~200MB of npm copy.
-[[ -e "$WEB_ROOT/node_modules" ]] || ln -s "$TESTING_DIR/web/node_modules" "$WEB_ROOT/node_modules"
+[[ -e "$WEB_ROOT/node_modules" ]] || ln -s "$PROJECT_ROOT/node_modules" "$WEB_ROOT/node_modules"
 mkdir -p "$WEB_ROOT/public"
 cp "$GRADLE_OUT_DIR/tmpOutput.json" "$WEB_ROOT/public/ir-components.json"
 

@@ -107,7 +107,7 @@ for (const p of ir) (byCategory[p.category] ??= []).push(p.name);
 const PLATFORMS = [
   { id: 'android', root: join(REPO, 'testing/Android/app/src/main/java/com/styleconverter/test/style') },
   { id: 'ios',     root: join(REPO, 'testing/iOS/StyleConverterTest/StyleEngine') },
-  { id: 'web',     root: join(REPO, 'testing/web/src/style/engine') },
+  { id: 'web',     root: join(REPO, 'runtimes/web/src/engine') },
 ];
 
 const claims = {};

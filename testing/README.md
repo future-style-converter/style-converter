@@ -240,7 +240,7 @@ EMULATOR_KEEP=1 ./test-all.sh
 ( cd testing && node compare-screenshots.mjs --pixel-threshold 1 --ssim-threshold 0.98 )
 
 # Capture a single platform manually
-( cd testing/web && node capture-screenshots.mjs --url http://localhost:3000 )
+( cd apps/web-harness && node capture-screenshots.mjs --url http://localhost:3000 )
 ```
 
 ## What lives where
@@ -387,7 +387,7 @@ down to rows flagged `has-diff`.
 - **Web capture times out**: the Puppeteer script waits for a
   `data-capture-ready` sentinel emitted by `CaptureGallery` after all
   canvases render. If the gallery fails to load (check
-  `testing/web/public/ir-components.json`), no sentinel means timeout.
+  `apps/web-harness/public/ir-components.json`), no sentinel means timeout.
 
 - **"Maximum update depth exceeded" in capture console**: the hot-reload
   hook used by the dev gallery needs a memoized callback. Capture mode

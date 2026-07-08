@@ -10,7 +10,7 @@ typed **intermediate representation (IR)**, then renders that IR with three
 
 | engine | platform tech | where it lives today |
 |---|---|---|
-| Web | React + real DOM/CSS | `testing/web/` |
+| Web | React + real DOM/CSS | `runtimes/web/` (engine) + `apps/web-harness/` (vite harness) |
 | Android | Jetpack Compose | `testing/Android/` |
 | iOS | SwiftUI | `testing/iOS/` |
 
@@ -61,7 +61,7 @@ unusually thorough cross-platform verification harness.
 ## Requirements
 
 - **Java 21+** (converter; Gradle wrapper included)
-- **Node 20+** (web engine + comparison tooling; `npm install` in `testing/web/`)
+- **Node 20+** (web engine + comparison tooling; `npm install` at the repo root — npm workspaces)
 - macOS + **Xcode** — only if you want iOS captures
 - **Android SDK / emulator** — only if you want Android captures
 

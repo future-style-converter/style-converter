@@ -1,6 +1,6 @@
 // testing/capture-url.test.mjs
 //
-// Unit tests for testing/web/capture-url.mjs — the URL builder used by
+// Unit tests for apps/web-harness/capture-url.mjs — the URL builder used by
 // capture-screenshots.mjs to wire the `WPT_MODE=1` env var through to the
 // React app's `?wpt=1` query parameter. Pins the contract that:
 //
@@ -17,7 +17,7 @@
 // builder into capture-url.mjs lets us pin its contract for ~3 ms instead
 // of ~30 s + a Chromium dependency.
 //
-// Lives in testing/ root (not testing/web/) so smoke.sh's
+// Lives in testing/ root (not apps/web-harness/) so smoke.sh's
 // `node --test testing/*.test.mjs testing/titan/*.test.mjs` glob picks it
 // up alongside the other adapter tests. doc-staleness-check.sh's "live
 // test count" extracted from the same glob will include these tests.
@@ -25,7 +25,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildCaptureUrl } from './web/capture-url.mjs';
+import { buildCaptureUrl } from '../apps/web-harness/capture-url.mjs';
 
 // ── Legacy contract — unchanged from pre-fix ───────────────────────────────
 
