@@ -75,15 +75,15 @@ data class IRMedia(
  * @property children Nested child components (null for leaf components)
  * @property text Optional element text content carried through from extraction.
  *
- * Populated by the WPT extractor (testing/titan/extract-fixture.mjs) for fixtures
+ * Populated by the WPT extractor (tools/titan/extract-fixture.mjs) for fixtures
  * whose styled element has an inner text node — e.g. the green sentence in
  * `<p class=test>Test passes if this text is green</p>`. Mirrors the TypeScript
- * `IRComponent._text` field in testing/web/src/style/core/ir/IRModels.ts; that
+ * `IRComponent._text` field in runtimes/web/src/core/ir/IRModels.ts; that
  * leading underscore (a renderer-only metadata convention reserved for fields
  * that aren't CSS properties) is added by the serializer, NOT stored here.
  *
  * Optional / nullable to preserve backward compatibility with existing
- * non-WPT fixtures (visual-test.json, examples/properties/&#42;) that never carry
+ * non-WPT fixtures (visual-test.json, fixtures/properties/&#42;) that never carry
  * text content (the slash-asterisk in that path is HTML-encoded only because
  * a literal close-comment marker would terminate this KDoc block early). The
  * serializer omits the field entirely when null so the 327-pair BASELINE=1
@@ -91,7 +91,7 @@ data class IRMedia(
  *
  * @property role Optional renderer-only role marker carried through from the
  *   WPT extractor. Today the only value emitted is `"body-root"` (set at
- *   testing/titan/extract-fixture.mjs:1417 for synthetic components that
+ *   tools/titan/extract-fixture.mjs:1417 for synthetic components that
  *   aggregate html/body-scoped CSS so renderers can treat the root-element
  *   paint differently from a styled descendant). Mirrors the same wire
  *   convention as `text`: leading underscore on the JSON side (`_role`),
@@ -125,14 +125,14 @@ data class IRComponent(
  * - `children` is omitted if null or empty (and serialized as a JSON array,
  *   matching the TS `IRComponent[]` shape the web renderer consumes)
  * - `_text` is omitted if null (preserves backward-compat byte stability for
- *   non-WPT fixtures like examples/visual-test.json)
+ *   non-WPT fixtures like fixtures/visual-test.json)
  * - `_role` is omitted if null (same byte-stability contract as `_text` —
  *   only WPT body-root components actually carry a value today)
  *
  * Why `_text` / `_role` (with the leading underscore) on the wire but `text`
  * / `role` in Kotlin: the underscore is the IR convention for renderer-only
  * metadata that isn't a CSS property (see
- * testing/web/src/style/core/ir/IRModels.ts comments). Kotlin field names
+ * runtimes/web/src/core/ir/IRModels.ts comments). Kotlin field names
  * can't start with `_` without backticks, so we keep the Kotlin identifier
  * idiomatic and add the prefix at the JSON boundary here.
  *

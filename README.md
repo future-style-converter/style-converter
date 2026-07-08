@@ -33,7 +33,7 @@ your-styles.json  (CSS properties per component)
 └──────┬───────┴────────┬─────────┴───────┬───────┘
        │  screenshots   │                 │
        ▼                ▼                 ▼
-      3-way SSIM comparison report (testing/report/)
+      3-way SSIM comparison report (tools/visual/report/)
 ```
 
 ## Current status (honest)
@@ -41,10 +41,10 @@ your-styles.json  (CSS properties per component)
 - **Working today:** the CSS → IR converter and all three runtime engines.
   Every property in the 550-property IR catalogue has an
   extractor/config/applier triplet on all three platforms
-  (see `testing/COVERAGE.md`).
+  (see `docs/reports/COVERAGE.md`).
 - **Verified cross-platform:** **91 / 550 properties** pass the strict
   bar — SSIM ≥ 0.95 on *every* value variant on *every* platform pair
-  (`testing/TIER1_VARIANT_DEPTH.md`). Of the rest, 419 are blocked on
+  (`docs/reports/TIER1_VARIANT_DEPTH.md`). Of the rest, 419 are blocked on
   platform capability gaps or missing harness tiers (animations,
   interactions, print, …), 37 are exhausted (no meaningful visual test
   exists), and 3 have known real divergences.
@@ -67,19 +67,19 @@ unusually thorough cross-platform verification harness.
 
 ```bash
 # 1. Convert CSS to IR
-./gradlew :converter:run --args="convert --from css --to ir -i examples/visual-test.json -o out"
+./gradlew :converter:run --args="convert --from css --to ir -i fixtures/visual-test.json -o out"
 # → out/tmpOutput.json (the IR)
 
 # 2. Render + compare on all three platforms
-./test-all.sh examples/visual-test.json
-# → testing/report/index.html (side-by-side screenshots + SSIM per component)
+./test-all.sh fixtures/visual-test.json
+# → tools/visual/report/index.html (side-by-side screenshots + SSIM per component)
 
 # Only one platform? Skip the others:
-SKIP_ANDROID=1 SKIP_WEB=1 ./test-all.sh examples/visual-test.json   # iOS only
-./test-ios.sh examples/visual-test.json                             # same thing
+SKIP_ANDROID=1 SKIP_WEB=1 ./test-all.sh fixtures/visual-test.json   # iOS only
+./test-ios.sh fixtures/visual-test.json                             # same thing
 
 # 3. Fast health check of the harness itself (web-only, ~2 min)
-bash testing/smoke.sh --quick
+bash tools/visual/smoke.sh --quick
 ```
 
 ## Input format
@@ -101,7 +101,7 @@ A JSON envelope mapping component names to CSS properties:
 }
 ```
 
-Fixtures for every property category live under `examples/properties/`.
+Fixtures for every property category live under `fixtures/properties/`.
 Values are normalized in the IR: colors → sRGB floats, lengths → px,
 angles → degrees, times → ms. Runtime-dependent values (`var()`, `calc()`,
 `em`, `%`) stay unresolved (`null`) for the engines to handle.
@@ -113,15 +113,19 @@ converter/src/main/kotlin/app/
 ├── irmodels/            # typed IR: one file per CSS property (550-property catalogue)
 └── parsing/css/         # CSS value parsers (longhands, shorthands, primitives)
 
-testing/                 # ← the three runtime engines + verification harness
-├── web/src/style/engine/                      # Web engine (per-property triplets)
-├── Android/app/src/main/java/…/style/         # Android engine (per-property triplets)
-├── iOS/StyleConverterTest/StyleEngine/        # iOS engine (per-property triplets)
-├── compare-screenshots.mjs                    # 3-way SSIM + report
-├── coverage-audit.mjs                         # IR ↔ engine coverage matrix
-└── titan/                                     # WPT-corpus test harness (fetched, not committed)
+runtimes/                # ← the three runtime style engines (the product)
+├── web/src/engine/                            # Web engine (per-property triplets)
+├── compose/src/main/java/…/runtime/           # Android engine (per-property triplets)
+└── swiftui/Sources/StyleConverterRuntime/     # iOS engine (per-property triplets)
 
-examples/                # fixtures, one suite per property category
+apps/                    # per-platform capture harnesses (web / android / ios)
+tools/
+├── visual/              # 3-way SSIM compare + coverage audit + smoke.sh
+├── titan/               # WPT-corpus test harness
+└── wpt/                 # WPT corpus mirror (gitignored; tools/titan/fetch-wpt.sh)
+
+fixtures/                # test fixtures: properties/<category>/ + suites (fuzz, perfect, combos, …)
+docs/reports/            # historical campaign docs + generated COVERAGE.md
 test-all.sh              # convert → render on 3 platforms → compare
 ```
 
@@ -133,8 +137,8 @@ full per-property contract.
 
 ```bash
 ./gradlew :converter:test                               # JVM parser/IR tests
-node --test testing/*.test.mjs testing/titan/*.test.mjs # harness unit tests
-bash testing/smoke.sh                                   # full smoke (adds native baselines)
+node --test tools/visual/*.test.mjs tools/titan/*.test.mjs # tooling unit tests
+bash tools/visual/smoke.sh                              # full smoke (adds native baselines)
 ```
 
 ## License

@@ -19,7 +19,7 @@
 //                           name overlay.
 //
 // The WPT-suppression flag is the fix for the pilot investigation at
-// `testing/titan/investigations/pilot-001/
+// `tools/titan/investigations/pilot-001/
 //   css-backgrounds__background-color-animation-in-body.json`. The pilot
 // found that every WPT capture across the corpus carried a
 // "wpt <section> <stem> <idx>" text overlay (the component name with

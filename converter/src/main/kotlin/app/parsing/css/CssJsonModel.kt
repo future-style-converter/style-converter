@@ -33,7 +33,7 @@ data class CssMedia(
  *
  * Supports nested children for SDUI container components, plus an optional
  * `text` payload threaded through from the WPT extractor (see
- * testing/titan/extract-fixture.mjs). The extractor writes the field as
+ * tools/titan/extract-fixture.mjs). The extractor writes the field as
  * `_text` on the input JSON; the parser strips the leading underscore at
  * the boundary to keep this Kotlin identifier idiomatic. The IR serializer
  * re-adds the underscore on the output side
@@ -45,7 +45,7 @@ data class CssMedia(
  * the web/iOS/Android renderers can index positionally.
  *
  * `role` mirrors the WPT extractor's `_role` marker (see
- * testing/titan/extract-fixture.mjs:1417). Today the only value emitted is
+ * tools/titan/extract-fixture.mjs:1417). Today the only value emitted is
  * `"body-root"` (a synthetic component aggregating html/body-scoped CSS so
  * the renderers can treat the root-element paint differently from a normal
  * styled descendant). Same naming convention as `_text` — leading

@@ -5,8 +5,8 @@
 # code and don't want to wait for the Android emulator or vite server.
 #
 # Usage:
-#     ./test-ios.sh                      # uses examples/visual-test.json
-#     ./test-ios.sh examples/foo.json    # different input
+#     ./test-ios.sh                      # uses fixtures/visual-test.json
+#     ./test-ios.sh fixtures/foo.json    # different input
 #     SIM_DEVICE="iPhone 17 Pro" ./test-ios.sh
 #
 # For the full 3-platform run, use test-all.sh instead.

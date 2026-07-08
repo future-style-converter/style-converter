@@ -103,7 +103,7 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
 
         // Read optional element-text content. Source field is `_text` (the
         // leading underscore is the renderer-only metadata convention used
-        // by the WPT extractor — see testing/titan/extract-fixture.mjs).
+        // by the WPT extractor — see tools/titan/extract-fixture.mjs).
         // Strip the underscore at the parser boundary so the CssComponent
         // identifier stays idiomatic Kotlin; the IR serializer puts it back
         // on the output side. JSON null → null (treated identically to
@@ -180,7 +180,7 @@ fun cssParsing(doc: JsonObject): IRDocument {
         // WPT input ships children as a name-keyed map (preserving stable
         // extractor IDs like `color-001__1__0`), but the renderer-facing IR
         // needs an array (matches IRComponent[] in
-        // testing/web/src/style/core/ir/IRModels.ts so the JS renderer can
+        // runtimes/web/src/core/ir/IRModels.ts so the JS renderer can
         // index positionally without a Map<String, IRComponent>). The
         // child's map key becomes its `name`, so the original ID survives
         // verbatim in the output.

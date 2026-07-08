@@ -9,10 +9,10 @@ converter emits IR only via `--to ir`).
 
 ```bash
 # Convert CSS to IR
-./gradlew :converter:run --args="convert --from css --to ir -i examples/visual-test.json -o out"
+./gradlew :converter:run --args="convert --from css --to ir -i fixtures/visual-test.json -o out"
 
 # Full 3-platform test (convert → render on web/Android/iOS → SSIM compare)
-./test-all.sh examples/visual-test.json
+./test-all.sh fixtures/visual-test.json
 ```
 
 ## Architecture
@@ -58,7 +58,10 @@ runtimes/swiftui/                # iOS runtime style engine — SwiftPM package 
 apps/ios-harness/                # iOS test app consuming StyleConverterRuntime (xcodegen project.yml)
 runtimes/web/                    # Web runtime style engine — npm package @style-converter/web (src/engine/)
 apps/web-harness/                # Vite harness consuming @style-converter/web (npm workspaces, root package.json)
-testing/screenshots/             # Pulled screenshots from device
+tools/visual/                    # SSIM compare + coverage audit + smoke harness
+tools/titan/                     # WPT-corpus harness (corpus at tools/wpt/, gitignored)
+fixtures/                        # test fixtures (properties/<category>/ + suite trees)
+docs/reports/                    # historical campaign docs + generated COVERAGE.md
 ```
 
 ## Testing Workflow
@@ -75,7 +78,7 @@ testing/screenshots/             # Pulled screenshots from device
 2. Copies the IR into each platform bundle (Android assets, iOS Resources, web public/)
 3. Builds + launches each platform (Android emulator, iOS simulator, vite + puppeteer)
 4. Captures per-component screenshots on each platform
-5. Runs the 3-way SSIM comparison → `testing/report/index.html`
+5. Runs the 3-way SSIM comparison → `tools/visual/report/index.html`
 
 **Skips:** `SKIP_ANDROID=1`, `SKIP_IOS=1`, `SKIP_WEB=1` env vars.
 
@@ -113,7 +116,7 @@ adb pull /sdcard/Android/data/com.styleconverter.test/files/test_screenshots/ ./
 
 ```bash
 # 1. Convert CSS to IR
-./gradlew :converter:run --args="convert --from css --to ir -i examples/your-test.json -o out"
+./gradlew :converter:run --args="convert --from css --to ir -i fixtures/your-test.json -o out"
 
 # 2. Copy to Android assets
 cp out/tmpOutput.json apps/android-harness/app/src/main/assets/
@@ -211,27 +214,27 @@ Each property ships as a **triplet per platform**, in the canonical subfolder:
 
 A property is "done" when **all five** are true:
 
-1. **Test fixture** in `examples/properties/{category}/{property}.json` exercises
+1. **Test fixture** in `fixtures/properties/{category}/{property}.json` exercises
    every value variant listed in the parser's value flavors (see the CSS
    parser's `{Property}PropertyParser.kt`). One component per variant.
 2. **Triplet exists on all three platforms** in the matching subfolder, with
    the commenting + size rules above.
-3. **`./test-all.sh examples/properties/{category}/{property}.json`** runs cleanly:
+3. **`./test-all.sh fixtures/properties/{category}/{property}.json`** runs cleanly:
    - zero `decode error` rows
    - every pair's SSIM ≥ 0.95 for every variant
    - no "size mismatch" warnings
 4. **Baseline committed** — `UPDATE_BASELINE=1 ./test-all.sh …` runs; the
-   resulting `testing/baseline/{platform}__{NNN}_{Variant}.png` files are
+   resulting `tools/visual/baseline/{platform}__{NNN}_{Variant}.png` files are
    staged and the baseline PRs are in-scope for the category PR.
 5. **Documentation updated** — the category's coverage matrix row in
-   `testing/README.md` is flipped to ✓.
+   `docs/reports/README.md` is flipped to ✓.
 
 ## Implementation phases
 
 The rollout plan is **complete** (Phases 0–11, 12 commits). Full
-execution history + per-phase status lives in `testing/ROLLOUT.md`;
-per-category coverage matrix is at `testing/COVERAGE.md` and regenerated
-by `node testing/coverage-audit.mjs`.
+execution history + per-phase status lives in `docs/reports/ROLLOUT.md`;
+per-category coverage matrix is at `docs/reports/COVERAGE.md` and regenerated
+by `node tools/visual/coverage-audit.mjs`.
 
 Current coverage vs the 550-property IR catalogue (33 categories):
 
@@ -262,14 +265,14 @@ Phase summary (see ROLLOUT.md for commit hashes):
   extraction only; runtime animation execution is follow-up work per
   platform.
 - **Phase 10** long tail (~150 across 22 categories).
-- **Phase 11** baseline harness + `testing/COVERAGE.md` + audit script.
+- **Phase 11** baseline harness + `docs/reports/COVERAGE.md` + audit script.
 
 ---
 
 ## Implementation status
 
-See `testing/COVERAGE.md` for the live per-category / per-platform
-coverage matrix (regenerate with `node testing/coverage-audit.mjs`).
+See `docs/reports/COVERAGE.md` for the live per-category / per-platform
+coverage matrix (regenerate with `node tools/visual/coverage-audit.mjs`).
 
 The legacy "Android SDUI Implementation Status" section that used to live
 here listed ~60 working properties and a handful of TODOs, pinned to the
@@ -433,10 +436,10 @@ Web (canonical tree):
 - `runtimes/web/src/core/renderer/StyleBuilder.ts` — top-level dispatcher
 
 Shared tooling:
-- `testing/compare-screenshots.mjs` — 3-way SSIM + pixelmatch + HTML report
-- `testing/coverage-audit.mjs` — IR vs PropertyRegistry coverage matrix
-- `testing/baseline/` — committed per-platform PNGs for `BASELINE=1 ./test-all.sh`
-- `examples/properties/<category>/` — per-category fixture suites
+- `tools/visual/compare-screenshots.mjs` — 3-way SSIM + pixelmatch + HTML report
+- `tools/visual/coverage-audit.mjs` — IR vs PropertyRegistry coverage matrix (+ fixture-taxonomy guard)
+- `tools/visual/baseline/` — committed per-platform PNGs for `BASELINE=1 ./test-all.sh`
+- `fixtures/properties/<category>/` — per-category fixture suites (suite trees like fuzz/, perfect/, combos/ live at `fixtures/<suite>/`)
 
 ## Adding a new property
 
@@ -447,7 +450,7 @@ When adding a new CSS property to the system:
    of the filename convention `coverage-audit.mjs` relies on).
 2. **Parser**: add `parsing/css/properties/longhands/<category>/<Name>PropertyParser.kt`.
 3. **Parser registry**: wire into `PropertyParserRegistry.kt`.
-4. **Fixture**: add a component under `examples/properties/<category>/<property>.json`
+4. **Fixture**: add a component under `fixtures/properties/<category>/<property>.json`
    exercising every value variant the parser recognises.
 5. **Platform engines** — for each of Android / iOS / Web:
    a. Author `Config` + `Extractor` + `Applier` under `style(/Engine)/<category>/`
@@ -455,11 +458,11 @@ When adding a new CSS property to the system:
    b. Claim the IR type name in `PropertyRegistry` (either directly or via
       a grouped `Set` union).
    c. Add a unit test under the matching `test`/`tests` tree.
-6. **Run `./test-all.sh examples/properties/<category>/<property>.json`**;
+6. **Run `./test-all.sh fixtures/properties/<category>/<property>.json`**;
    iterate until all platform pairs hit SSIM ≥ 0.95 on every variant.
 7. **Update baseline** with `UPDATE_BASELINE=1 ./test-all.sh …` and commit
    the captures alongside the engine code.
-8. **Verify coverage** with `node testing/coverage-audit.mjs` — the new
+8. **Verify coverage** with `node tools/visual/coverage-audit.mjs` — the new
    property must show up under the right category on every platform.
 
 ## Tech Stack

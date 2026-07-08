@@ -358,7 +358,7 @@ object ClipPathPropertyParser : PropertyParser {
      * `polygon(0 0, 100px 0, 100px 30px, 30px 30px, 30px 100px, 0 100px)`
      * which collapsed to a single `(0%, 0%)` vertex — 5 of 6 points silently
      * dropped, producing a degenerate clip that hid the entire green box.
-     * See testing/titan/investigations/swarm-002/css-masking__clip-path-
+     * See tools/titan/investigations/swarm-002/css-masking__clip-path-
      * blending-offset.json for the full root-cause walk.
      */
     private fun parsePolygon(value: String): ClipPathProperty.Shape? {

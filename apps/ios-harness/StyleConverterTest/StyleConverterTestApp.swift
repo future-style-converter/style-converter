@@ -50,7 +50,7 @@ struct StyleConverterTestApp: App {
 }
 
 /// Outer dark background + inner 390×844 frame matching
-/// `testing/Android/.../MainActivity.kt` and `testing/web`.
+/// `apps/android-harness/.../MainActivity.kt` and `apps/web-harness`.
 struct RootView: View {
     var body: some View {
         ZStack {
