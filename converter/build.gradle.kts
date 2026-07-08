@@ -1,7 +1,7 @@
 plugins {
     application
-    kotlin("jvm") version "2.1.0"
-    kotlin("plugin.serialization") version "2.1.0"
+    kotlin("jvm") version "2.4.0"
+    kotlin("plugin.serialization") version "2.4.0"
 }
 
 repositories {
@@ -10,14 +10,15 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    // kotlin-test runs on the JUnit 5 platform via the Kotlin stdlib's test
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    // kotlin-test runs on the JUnit Platform via the Kotlin stdlib's test
     // shim, picking up the same kotlinx-serialization JSON parser used by
-    // production code. JUnit 5 chosen over 4 for matching modern toolchain
-    // (Java 23+) and clearer parameterised test ergonomics.
+    // production code. JUnit Jupiter chosen over 4 for matching modern
+    // toolchain and clearer parameterised test ergonomics. JUnit 6 unifies
+    // Jupiter and Platform version numbers (launcher is 6.x, not 1.x).
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.1")
 }
 
 application {

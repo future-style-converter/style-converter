@@ -15,11 +15,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@sdui/*": ["src/sdui/*"],
-      "@ui/*": ["src/ui/*"],
+      "@/*": ["./src/*"],
+      "@sdui/*": ["./src/sdui/*"],
+      "@ui/*": ["./src/ui/*"],
       "@style-converter/web": ["../../runtimes/web/src/index.ts"],
       "@style-converter/web/*": ["../../runtimes/web/src/*"]
     }

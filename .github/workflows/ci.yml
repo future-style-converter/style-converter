@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: '21' }
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: Unit tests
         run: ./gradlew :converter:test --no-daemon
       - name: CLI honesty — --to ir succeeds, --to compose fails loudly
@@ -42,8 +42,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      # setup-node v6: automatic lockfile-based caching is npm-only now; our
+      # explicit `cache: npm` + dependency-path pin predates that and still works.
+      - uses: actions/setup-node@v6
         with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
       # Root npm ci installs both workspaces (runtimes/web + apps/web-harness).
       # Skip puppeteer's Chromium download — the unit suites never launch a browser.
@@ -66,11 +68,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: '21' }
-      - uses: gradle/actions/setup-gradle@v4
-      - uses: actions/setup-node@v4
+      - uses: gradle/actions/setup-gradle@v6
+      - uses: actions/setup-node@v6
         with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
       # ajv lives in the tools workspace; the root lockfile covers it.
       - name: Install (skip puppeteer chrome download)
@@ -85,8 +87,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
       # tools/ is an npm workspace now — the single root lockfile covers it.
       - name: Install (skip puppeteer chrome download — unit tests never launch a browser)

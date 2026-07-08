@@ -1,18 +1,24 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    // org.jetbrains.kotlin.android removed: AGP 9's built-in Kotlin support
+    // compiles Kotlin sources itself and errors if the old plugin is applied.
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "com.styleconverter.test"
-    compileSdk = 35
+    // compileSdk 37 (Android 17): required by androidx.core 1.19 and
+    // androidx.lifecycle 2.11 AAR metadata (minCompileSdk=37).
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.styleconverter.test"
         minSdk = 24
-        targetSdk = 35
+        // targetSdk stays one behind compileSdk on purpose: bumping it opts
+        // the harness into Android 17 runtime behavior changes that the
+        // committed visual baselines have not been validated against.
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -35,9 +41,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = "21"
-    }
     buildFeatures {
         compose = true
     }
@@ -48,23 +51,34 @@ android {
     }
 }
 
+// android.kotlinOptions was removed in the AGP 9 / KGP 2.x DSL cleanup;
+// the replacement is the Kotlin extension's compilerOptions block.
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    }
+}
+
 dependencies {
     // The runtime style engine (repo-root/runtimes/compose), wired in via
     // settings.gradle.kts as an out-of-tree module. The harness only keeps
     // MainActivity + screenshot/ui glue; all styling lives in the library.
     implementation(project(":runtime"))
 
-    implementation("androidx.core:core-ktx:1.15.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
-    implementation("androidx.activity:activity-compose:1.9.3")
-    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    implementation("androidx.core:core-ktx:1.19.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
+    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation(platform("androidx.compose:compose-bom:2026.06.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
-    // Image loading library for background-image: url() support
+    // Image loading library for background-image: url() support.
+    // 2.7.0 is the final io.coil-kt 2.x release; Coil 3 moved to the
+    // io.coil-kt.coil3 coordinates (a source-level migration, out of scope
+    // for a version-currency pass).
     implementation("io.coil-kt:coil-compose:2.7.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")

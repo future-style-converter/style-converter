@@ -9,7 +9,7 @@
     "tools"
   ],
   "scripts": {
-    "test": "npm -ws run test --if-present",
-    "typecheck": "npm -ws run typecheck --if-present"
+    "test": "npm --workspaces run test --if-present",
+    "typecheck": "npm --workspaces run typecheck --if-present"
   }
 }
