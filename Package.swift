@@ -1,4 +1,4 @@
-// swift-tools-version:6.1
+// swift-tools-version:6.3
 //
 // Package.swift — SwiftPM manifest for the iOS/SwiftUI runtime style engine.
 //
@@ -87,7 +87,7 @@ let package = Package(
             swiftSettings: [
                 // The engine was authored under Swift 5 language mode
                 // (project.yml SWIFT_VERSION 5.9). Pin the mode so the
-                // 6.1 tools version above doesn't opt us into Swift 6
+                // 6.3 tools version above doesn't opt us into Swift 6
                 // strict concurrency before the code is audited for it.
                 .swiftLanguageMode(.v5),
             ]
