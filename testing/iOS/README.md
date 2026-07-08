@@ -1,7 +1,7 @@
 # iOS SDUI testing environment
 
 Runtime SDUI renderer for the Style Converter — the iOS sibling of
-`testing/Android/` and `testing/web/`. Loads `tmpOutput.json` at launch
+`runtimes/compose/` + `apps/android-harness/` and `runtimes/web/` + `apps/web-harness/`. Loads `tmpOutput.json` at launch
 and renders each component using SwiftUI.
 
 **Primary entry point: [`../../test-all.sh`](../../test-all.sh)** runs

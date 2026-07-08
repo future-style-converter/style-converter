@@ -226,13 +226,13 @@ CAPTURE_LOG="$RUN_DIR/capture.log"
 # Stale-screenshot guard. In web-only mode, prior iOS / Android captures
 # (from a hand `./test-all.sh examples/visual-test.json` or a previous
 # TITAN run with --all-platforms) live in testing/iOS/screenshots/ and
-# testing/Android/screenshots/. compare-screenshots picks them up by
+# apps/android-harness/screenshots/. compare-screenshots picks them up by
 # directory walk and merges them into the manifest's rows[] array — they
 # don't share component names with this run's web captures, so they end
 # up as "row with web=missing", which corrupts the classifier label
 # distribution downstream. Wipe them up-front so the manifest is clean.
 if [[ "$PLATFORM_SCOPE" == "web-only" ]]; then
-  rm -rf "$TESTING_DIR/iOS/screenshots" "$TESTING_DIR/Android/screenshots"
+  rm -rf "$TESTING_DIR/iOS/screenshots" "$PROJECT_ROOT/apps/android-harness/screenshots"
   log "wiped stale iOS/Android screenshots (web-only scope)"
 fi
 

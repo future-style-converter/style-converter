@@ -11,12 +11,12 @@ typed **intermediate representation (IR)**, then renders that IR with three
 | engine | platform tech | where it lives today |
 |---|---|---|
 | Web | React + real DOM/CSS | `runtimes/web/` (engine) + `apps/web-harness/` (vite harness) |
-| Android | Jetpack Compose | `testing/Android/` |
+| Android | Jetpack Compose | `runtimes/compose/` (engine) + `apps/android-harness/` (test app) |
 | iOS | SwiftUI | `testing/iOS/` |
 
-The three engines are the product. They currently live under `testing/`
-for historical reasons (they grew out of the visual-verification harness);
-a restructure to `runtimes/` is planned. A screenshot harness renders every
+The three engines are the product. The iOS engine still lives under
+`testing/` for historical reasons (it grew out of the visual-verification
+harness); its move to `runtimes/` is planned. A screenshot harness renders every
 fixture on all three platforms and compares the results with SSIM, so
 "the same CSS looks the same everywhere" is a measured claim, not a hope.
 
