@@ -1,15 +1,16 @@
-# iOS SDUI testing environment
+# iOS capture harness
 
-iOS test app for the Style Converter — the iOS sibling of
+iOS test app for the SwiftUI runtime — the iOS sibling of
 `apps/android-harness/` and `apps/web-harness/`. Loads `tmpOutput.json` at
 launch and renders each component using SwiftUI via the
 **StyleConverterRuntime** SwiftPM package (`runtimes/swiftui/`, manifest at
 the repo-root `Package.swift`), which this app consumes as a local package
-dependency (see `project.yml`).
+dependency (see `project.yml`). Not a product — the runtime is; this app
+just feeds the visual pipeline.
 
 **Primary entry point: [`../../test-all.sh`](../../test-all.sh)** runs
-iOS + Android + Web capture + cross-platform comparison. See
-[`../../docs/reports/README.md`](../../docs/reports/README.md) for the full system.
+iOS + Android + Web capture + cross-platform comparison. See the repo-root
+[`CLAUDE.md`](../../CLAUDE.md) for the full system.
 
 Use this directory's scripts only when you want iOS in isolation:
 
@@ -23,23 +24,13 @@ Use this directory's scripts only when you want iOS in isolation:
 
 ## Scope
 
-This is the **basic-rendering scaffold**. Supported today:
-
-| Category   | Properties |
-|------------|------------|
-| Sizing     | `Width`, `Height`, `Min/MaxWidth`, `Min/MaxHeight`, `AspectRatio` |
-| Spacing    | `Padding{Top,Right,Bottom,Left}` (+ logical equivalents) |
-| Colors     | `BackgroundColor`, `Color` |
-| Borders    | Per-side widths + colors, per-corner radii, uniform stroke |
-| Layout     | `Display: flex/grid/inline/none`, `FlexDirection`, `JustifyContent`, `AlignItems`, `FlexWrap`, `Gap` / `RowGap` / `ColumnGap` |
-| Typography | `FontSize`, `FontWeight`, `FontStyle`, `LetterSpacing`, `LineHeight`, `TextAlign`, `TextDecoration` |
-| Effects    | `Opacity`, `Rotate`, `Scale`, `BoxShadow` (single), `ZIndex` |
-
-Everything else falls through to the default block layout with the
-component's name rendered as a placeholder. To add more properties, extend
-the engine package: see
-[`../../runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift`](../../runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/StyleBuilder.swift)
-and the per-category triplets under `StyleEngine/`.
+The rendering surface is the `StyleConverterRuntime` package, not this
+app — all 550 IR properties have registered Config/Extractor/Applier
+triplets there (verified rendering coverage is far lower; see the repo-root
+`CLAUDE.md` "Honest status"). To add or fix properties, work in
+[`../../runtimes/swiftui/Sources/StyleConverterRuntime/`](../../runtimes/swiftui/Sources/StyleConverterRuntime/)
+(`Renderer/StyleBuilder.swift` + the per-category triplets under
+`StyleEngine/`); this harness only loads, renders, and screenshots.
 
 ## Requirements
 
@@ -73,7 +64,7 @@ apps/ios-harness/
     └── Assets.xcassets/
 ```
 
-The engine itself (Models/ IR decode, Renderer/ StyleBuilder +
+The runtime itself (Models/ IR decode, Renderer/ StyleBuilder +
 ComponentRenderer, StyleEngine/ per-property triplets) lives in the
 `StyleConverterRuntime` package under
 `runtimes/swiftui/Sources/StyleConverterRuntime/`, with its XCTest suite at
@@ -94,8 +85,8 @@ On first launch, the app:
    `apps/ios-harness/screenshots/`.
 
 The chromeless canvas contract is deliberately identical to the Android
-and Web capture surfaces — see [`../../docs/reports/README.md`](../../docs/reports/README.md) for the
-cross-platform system and how the comparison report uses it.
+and Web capture surfaces — see the repo-root [`CLAUDE.md`](../../CLAUDE.md)
+for the cross-platform system and how the comparison report uses it.
 
 ## Running from Xcode manually
 

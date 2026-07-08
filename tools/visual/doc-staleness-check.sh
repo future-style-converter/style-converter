@@ -12,8 +12,13 @@
 #
 # Prevent the same drift from accumulating: re-run each source-of-truth
 # script + grep the docs for known-historical and current values; warn on
-# mismatch. Designed to run fast (~5s) so it can sit at the front of
+# mismatch. Designed to run fast (~10s — the vitest live-count run added
+# by the R7 docs rewrite costs ~3s) so it can sit at the front of
 # smoke.sh as a static check.
+#
+# R7 docs rewrite: the living numeric claims now live in the root
+# README.md + CLAUDE.md (and the tiny runtimes/*/README.md), so the greps
+# below target those in addition to the historical docs/reports/ files.
 #
 # Exit codes:
 #   0 = all doc-quoted numbers match live source-of-truth output
@@ -41,7 +46,9 @@ if [[ -z "$ANDROID" || -z "$IOS" || -z "$WEB" ]]; then
 else
     log "live: android=$ANDROID ios=$IOS web=$WEB"
     # Each doc should mention the per-platform total in a `… / 550` form.
-    for doc in docs/reports/README.md docs/reports/ROLLOUT.md docs/reports/COVERAGE.md; do
+    # R7: the root README.md + CLAUDE.md now carry the living registration-
+    # coverage claim ("Honest status" sections) — enforce them too.
+    for doc in README.md CLAUDE.md docs/reports/README.md docs/reports/ROLLOUT.md docs/reports/COVERAGE.md; do
         # Look for any "X / 550" or "X/550" near the platform name. We don't
         # want to be over-precise: just confirm the live number appears at
         # least once in the doc.
@@ -55,7 +62,7 @@ else
             err "$doc: does not mention web=$WEB/550 (live truth)"
         fi
     done
-    [[ "$FAILED" -eq 0 ]] && log "✓ all 3 docs match live coverage"
+    [[ "$FAILED" -eq 0 ]] && log "✓ all 5 docs match live coverage"
 fi
 
 # ── Degenerate-fixture count (DEGENERATE_FIXTURES.md headline) ──────────────
@@ -104,11 +111,72 @@ if [[ -z "$TEST_COUNT" ]]; then
 else
     log "live: $TEST_COUNT unit tests"
     if grep -q "$TEST_COUNT unit tests" docs/reports/README.md || grep -q "$TEST_COUNT total" docs/reports/README.md; then
-        log "✓ README mentions $TEST_COUNT (unit tests / total)"
+        log "✓ docs/reports/README.md mentions $TEST_COUNT (unit tests / total)"
     else
-        err "README does NOT mention live test count $TEST_COUNT — update the audit-infrastructure table"
+        err "docs/reports/README.md does NOT mention live test count $TEST_COUNT — update the audit-infrastructure table"
     fi
+    # R7: the root README.md + CLAUDE.md test-suite tables quote the same
+    # tooling count — keep them in lockstep with the live number.
+    for doc in README.md CLAUDE.md; do
+        if grep -qE "(^|[^0-9])$TEST_COUNT([^0-9]|$)" "$doc"; then
+            log "✓ $doc mentions tooling test count $TEST_COUNT"
+        else
+            err "$doc does NOT mention live tooling test count $TEST_COUNT — update its test-suite table"
+        fi
+    done
 fi
+
+# ── Per-suite test counts vs root README/CLAUDE tables (R7 addition) ────────
+#
+# The R7 docs rewrite put a test-suite table in README.md + CLAUDE.md
+# (converter / web / compose / swiftui counts). Derive each count live so
+# the tables can't drift:
+#   - converter + compose: JUnit `@Test` annotation count (1 annotation ==
+#     1 runtime test today; if parameterized tests ever appear, switch to
+#     parsing the gradle test-results XML instead)
+#   - swiftui: XCTest `func test` declaration count (same 1:1 property)
+#   - web: a real vitest run (~3s) — loops/`it.each` generate tests, so a
+#     static grep undercounts (723 declarations vs 786 runtime tests)
+echo -e "\n${B}━━━ per-suite test counts vs README/CLAUDE tables ━━━${N}"
+CONVERTER_TESTS=$(grep -rE "@Test" converter/src/test --include="*.kt" | wc -l | tr -d ' ')
+COMPOSE_TESTS=$(grep -rE "@Test" runtimes/compose/src/test --include="*.kt" | wc -l | tr -d ' ')
+SWIFTUI_TESTS=$(grep -rE "func test" runtimes/swiftui/Tests --include="*.swift" -r | wc -l | tr -d ' ')
+WEB_TESTS=$(npm -w runtimes/web run test 2>&1 | grep -E "Tests +[0-9]+ passed" | grep -oE "[0-9]+" | head -1)
+log "live: converter=$CONVERTER_TESTS web=$WEB_TESTS compose=$COMPOSE_TESTS swiftui=$SWIFTUI_TESTS"
+check_suite_count() { # $1=label $2=count $3…=docs that must quote it
+    local label="$1" count="$2"; shift 2
+    if [[ -z "$count" || "$count" == "0" ]]; then
+        err "could not derive live $label test count — re-check this script's extraction"
+        return
+    fi
+    for doc in "$@"; do
+        if grep -qE "(^|[^0-9])$count([^0-9]|$)" "$doc"; then
+            log "✓ $doc mentions $label=$count"
+        else
+            err "$doc does NOT mention live $label test count $count — update its test-suite table"
+        fi
+    done
+}
+check_suite_count "converter" "$CONVERTER_TESTS" README.md CLAUDE.md
+check_suite_count "web"       "$WEB_TESTS"       README.md CLAUDE.md runtimes/web/README.md
+check_suite_count "compose"   "$COMPOSE_TESTS"   README.md CLAUDE.md runtimes/compose/README.md apps/android-harness/README.md
+check_suite_count "swiftui"   "$SWIFTUI_TESTS"   README.md CLAUDE.md runtimes/swiftui/README.md
+
+# ── Fixture category count vs root README/CLAUDE (R7 addition) ──────────────
+#
+# The "33 categories" claim (the canonical irmodels/fixtures taxonomy)
+# appears in README.md + CLAUDE.md. Count the real category directories
+# under fixtures/properties/ so the claim tracks reality.
+echo -e "\n${B}━━━ fixture category count vs README/CLAUDE ━━━${N}"
+CATEGORY_COUNT=$(find fixtures/properties -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+log "live: $CATEGORY_COUNT category directories under fixtures/properties/"
+for doc in README.md CLAUDE.md; do
+    if grep -q "$CATEGORY_COUNT categor" "$doc"; then
+        log "✓ $doc mentions $CATEGORY_COUNT categories"
+    else
+        err "$doc does NOT mention live category count \"$CATEGORY_COUNT categories\""
+    fi
+done
 
 # ── Round 75 regression-prevention checks (round 78 addition) ───────────────
 #
@@ -175,6 +243,16 @@ if grep -q "$PASS/550" docs/reports/TIERS.md; then
 else
     err "TIERS.md row 1 does NOT mention $PASS/550 (the live count)"
 fi
+# R7: the root README.md + CLAUDE.md "Honest status" sections quote the
+# verified-rendering number ("91/550") next to the registration number —
+# keep the living docs pinned to the tracker too.
+for doc in README.md CLAUDE.md; do
+    if grep -qE "$PASS ?/ ?550" "$doc"; then
+        log "✓ $doc mentions verified coverage $PASS/550"
+    else
+        err "$doc does NOT mention verified coverage $PASS/550 (the live tracker count)"
+    fi
+done
 
 echo
 if [[ "$FAILED" -eq 0 ]]; then
