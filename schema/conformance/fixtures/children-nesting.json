@@ -1,0 +1,35 @@
+{
+    "components": [
+        {
+            "id": "parent-001",
+            "name": "Parent",
+            "properties": [
+                { "type": "Display", "data": "FLEX" }
+            ],
+            "children": [
+                {
+                    "id": "child__0-002",
+                    "name": "child__0",
+                    "properties": [
+                        { "type": "Width", "data": { "type": "length", "px": 50.0 } }
+                    ],
+                    "children": [
+                        {
+                            "id": "grandchild__0__0-003",
+                            "name": "grandchild__0__0",
+                            "properties": [
+                                { "type": "Height", "data": { "type": "length", "px": 10.0 } }
+                            ],
+                            "_text": "leaf text"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "leaf-sibling-004",
+            "name": "LeafSibling",
+            "properties": []
+        }
+    ]
+}

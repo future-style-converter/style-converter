@@ -10,6 +10,7 @@
     "compare:update-baseline": "node visual/compare-screenshots.mjs --update-baseline"
   },
   "dependencies": {
+    "ajv": "^8.20.0",
     "culori": "^4.0.2",
     "fft.js": "^4.0.4",
     "pixelmatch": "^7.1.0",

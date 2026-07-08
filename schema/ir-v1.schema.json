@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://style-converter.dev/schema/ir-v1.schema.json",
+  "title": "Style-Converter IR v1 (wire format)",
+  "description": "Machine-checked contract for the IR JSON that the converter emits (out/tmpOutput.json) and the three runtime style engines consume. STRICT at the envelope (document / component / selector / media / property wrapper): unknown keys at these levels are a schema violation. PERMISSIVE at property-data leaves: the 550-property value surface varies per property and is documented (not enforced) in schema/spec/02-values.md; leaf strictness arrives with the flat-IR v2 freeze (see schema/spec/05-versioning.md). Ground truth: converter/src/main/kotlin/app/irmodels/IRDocument.kt (IRComponentSerializer) and IRPropertySerializer.kt.",
+  "type": "object",
+  "properties": {
+    "components": {
+      "description": "Top-level component list. Always an ARRAY on the wire — the converter flattens the authoring-side name->component map in CssParsing.convertToIR (converter/src/main/kotlin/app/parsing/css/CssParsing.kt). May be empty for an empty input document.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/component" }
+    }
+  },
+  "required": ["components"],
+  "additionalProperties": false,
+  "$defs": {
+    "component": {
+      "description": "One UI component. Serialized by IRComponentSerializer (converter/src/main/kotlin/app/irmodels/IRDocument.kt): id/name/properties always present; selectors/media omitted when empty; children omitted when null or empty (hence minItems 1 where present); _text/_role omitted when null. _tag/_pseudo are reserved renderer-hint fields read by the runtimes (runtimes/web/src/core/ir/IRModels.ts) but not currently emitted by the converter — see schema/spec/04-metadata-fields.md.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique component-instance id. Converter-generated form is '<lowercased-name>-<NNN>' (CssParsing.convertToIR); extractor-derived children carry WPT ids like 'color-001__1__0'. Always non-empty on the wire.",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "description": "Component type/class name (e.g. 'Button'). For children flattened from the input map, the map key becomes the name verbatim.",
+          "type": "string",
+          "minLength": 1
+        },
+        "properties": {
+          "description": "Base properties. Always present, may be empty (e.g. every declared CSS property was invalid and dropped by PropertiesParser step 1).",
+          "type": "array",
+          "items": { "$ref": "#/$defs/property" }
+        },
+        "selectors": {
+          "description": "Pseudo-class buckets (:hover etc.). Omitted entirely when empty, so if present it is non-empty.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/selector" },
+          "minItems": 1
+        },
+        "media": {
+          "description": "Media-query buckets. Omitted entirely when empty, so if present it is non-empty.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/media" },
+          "minItems": 1
+        },
+        "children": {
+          "description": "Nested child components. ARRAY on the wire (map-in / array-out — see schema/spec/03-children.md); omitted when null or empty, so if present it is non-empty. flat-IR v2 (slot/placement) is a planned major version, not this contract.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/component" },
+          "minItems": 1
+        },
+        "_text": {
+          "description": "Renderer-only metadata (underscore rule, spec 04): element inner text carried from the WPT extractor. Omitted when null; empty string IS a legal emitted value ('extracted, was empty').",
+          "type": "string"
+        },
+        "_tag": {
+          "description": "Renderer-only metadata: originating HTML tag, lowercase (e.g. 'ol', 'li'). Emitted by tools/titan/extract-fixture.mjs for non-generic tags; consumed by the runtimes; currently DROPPED by the converter pipeline (known gap, spec 04).",
+          "type": "string",
+          "minLength": 1
+        },
+        "_role": {
+          "description": "Renderer-only metadata: role marker. Only value emitted today is 'body-root' (tools/titan/extract-fixture.mjs, forwarded by the converter). Open-ended string by design so future markers need no schema change.",
+          "type": "string",
+          "minLength": 1
+        },
+        "_pseudo": {
+          "description": "Renderer-only metadata: synthetic ::before/::after/::marker nodes (runtimes/web/src/core/ir/IRModels.ts PseudoElements). Emitted by the WPT extractor, read by the web runtime, currently dropped by the converter (spec 04). Slot payloads are component-shaped but produced pre-converter, so they are validated permissively at v1.",
+          "type": "object",
+          "properties": {
+            "before": { "type": "object" },
+            "after": { "type": "object" },
+            "marker": { "type": "object" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "name", "properties"],
+      "additionalProperties": false
+    },
+    "property": {
+      "description": "The {type, data} property envelope (converter/src/main/kotlin/app/irmodels/IRPropertySerializer.kt). 'type' is the IR type name with the 'Property' suffix stripped (e.g. 'PaddingTop', 'Color', 'Generic'). 'data' is deliberately unconstrained at v1: observed emitted kinds are object (most properties), raw number (e.g. percentage padding, numeric font-weight), raw string (keywords like 'auto', enum names like 'FLEX'), array (list-valued properties like TransitionDelay, BackgroundImage), and — inside objects — null and boolean leaves. Readers MUST tolerate unknown 'type' values by skipping the property with a logged warning (spec 05).",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "data": true
+      },
+      "required": ["type", "data"],
+      "additionalProperties": false
+    },
+    "selector": {
+      "description": "IRSelector (converter/src/main/kotlin/app/irmodels/IRDocument.kt): condition is the selector WITHOUT the leading colon (':hover' is stored as 'hover').",
+      "type": "object",
+      "properties": {
+        "condition": { "type": "string", "minLength": 1 },
+        "properties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/property" }
+        }
+      },
+      "required": ["condition", "properties"],
+      "additionalProperties": false
+    },
+    "media": {
+      "description": "IRMedia (converter/src/main/kotlin/app/irmodels/IRDocument.kt): query is the raw media query string, e.g. '(min-width: 768px)'.",
+      "type": "object",
+      "properties": {
+        "query": { "type": "string", "minLength": 1 },
+        "properties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/property" }
+        }
+      },
+      "required": ["query", "properties"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+    "components": [
+        {
+            "id": "fontweight-bold-001",
+            "name": "FontWeight_BoldKeyword",
+            "properties": [
+                { "type": "FontWeight", "data": { "weight": 700, "original": "bold" } }
+            ]
+        },
+        {
+            "id": "fontweight-normal-002",
+            "name": "FontWeight_NormalKeyword",
+            "properties": [
+                { "type": "FontWeight", "data": { "weight": 400, "original": "normal" } }
+            ]
+        },
+        {
+            "id": "fontweight-numeric-003",
+            "name": "FontWeight_NumericPrimitive",
+            "properties": [
+                { "type": "FontWeight", "data": 700 }
+            ]
+        }
+    ]
+}

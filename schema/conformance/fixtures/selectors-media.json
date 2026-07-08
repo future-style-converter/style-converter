@@ -1,0 +1,46 @@
+{
+    "components": [
+        {
+            "id": "selmedia-001",
+            "name": "SelMedia_Both",
+            "properties": [
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": { "r": 1.0, "g": 1.0, "b": 1.0 },
+                        "original": "#ffffff"
+                    }
+                }
+            ],
+            "selectors": [
+                {
+                    "condition": "hover",
+                    "properties": [
+                        {
+                            "type": "BackgroundColor",
+                            "data": {
+                                "srgb": { "r": 0.0, "g": 0.0, "b": 0.0 },
+                                "original": "#000000"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "media": [
+                {
+                    "query": "(min-width: 768px)",
+                    "properties": [
+                        { "type": "Width", "data": { "type": "length", "px": 100.0 } }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "selmedia-none-002",
+            "name": "SelMedia_OmittedWhenEmpty",
+            "properties": [
+                { "type": "PaddingTop", "data": { "px": 4.0 } }
+            ]
+        }
+    ]
+}

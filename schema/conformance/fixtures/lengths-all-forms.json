@@ -1,0 +1,35 @@
+{
+    "components": [
+        {
+            "id": "lengths-px-001",
+            "name": "Lengths_PxOnly",
+            "properties": [
+                { "type": "PaddingTop", "data": { "px": 16.0 } },
+                { "type": "Width", "data": { "type": "length", "px": 200.0 } }
+            ]
+        },
+        {
+            "id": "lengths-dual-002",
+            "name": "Lengths_DualStorage",
+            "properties": [
+                { "type": "PaddingRight", "data": { "px": 16.0, "original": { "v": 12.0, "u": "PT" } } }
+            ]
+        },
+        {
+            "id": "lengths-relative-003",
+            "name": "Lengths_RelativeOriginalOnly",
+            "properties": [
+                { "type": "PaddingBottom", "data": { "original": { "v": 2.0, "u": "EM" } } },
+                { "type": "MarginTop", "data": { "original": { "v": 1.5, "u": "REM" } } }
+            ]
+        },
+        {
+            "id": "lengths-escapes-004",
+            "name": "Lengths_PercentAndKeyword",
+            "properties": [
+                { "type": "PaddingLeft", "data": 10.0 },
+                { "type": "MarginLeft", "data": "auto" }
+            ]
+        }
+    ]
+}

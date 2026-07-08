@@ -1,0 +1,35 @@
+{
+    "components": [
+        {
+            "id": "transform-functions-001",
+            "name": "Transform_FunctionList",
+            "properties": [
+                {
+                    "type": "Transform",
+                    "data": {
+                        "type": "functions",
+                        "list": [
+                            { "fn": "translateX", "x": { "px": 10.0 } },
+                            { "fn": "rotate", "a": { "deg": 45.0 } },
+                            { "fn": "scale", "x": 1.5, "y": 1.5 }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "transform-rotate-002",
+            "name": "Transform_RotateAngleDual",
+            "properties": [
+                {
+                    "type": "Rotate",
+                    "data": {
+                        "type": "angle",
+                        "deg": 180.0,
+                        "original": { "v": 0.5, "u": "TURN" }
+                    }
+                }
+            ]
+        }
+    ]
+}

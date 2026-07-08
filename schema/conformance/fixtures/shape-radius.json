@@ -1,0 +1,42 @@
+{
+    "components": [
+        {
+            "id": "shape-circle-length-001",
+            "name": "Shape_Circle_Length",
+            "properties": [
+                { "type": "ClipPath", "data": { "type": "circle", "px": 40.0 } }
+            ]
+        },
+        {
+            "id": "shape-circle-keyword-002",
+            "name": "Shape_Circle_Keyword",
+            "properties": [
+                { "type": "ClipPath", "data": { "type": "circle", "r": "farthest-side" } }
+            ]
+        },
+        {
+            "id": "shape-ellipse-keywords-003",
+            "name": "Shape_Ellipse_Keywords",
+            "properties": [
+                { "type": "ClipPath", "data": { "type": "ellipse", "rx": "closest-side", "ry": "farthest-side" } }
+            ]
+        },
+        {
+            "id": "shape-polygon-004",
+            "name": "Shape_Polygon_PercentPoints",
+            "properties": [
+                {
+                    "type": "ClipPath",
+                    "data": {
+                        "type": "polygon",
+                        "points": [
+                            { "x": 50.0, "y": 0.0 },
+                            { "x": 100.0, "y": 100.0 },
+                            { "x": 0.0, "y": 100.0 }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

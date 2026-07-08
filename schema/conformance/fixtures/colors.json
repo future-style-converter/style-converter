@@ -1,0 +1,110 @@
+{
+    "components": [
+        {
+            "id": "colors-static-001",
+            "name": "Colors_StaticForms",
+            "properties": [
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                },
+                {
+                    "type": "Color",
+                    "data": {
+                        "srgb": {
+                            "r": 1.0,
+                            "g": 0.0,
+                            "b": 0.0
+                        },
+                        "original": {
+                            "r": 255,
+                            "g": 0,
+                            "b": 0
+                        }
+                    }
+                },
+                {
+                    "type": "BorderTopColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.25,
+                            "g": 0.75,
+                            "b": 0.25
+                        },
+                        "original": {
+                            "h": 120.0,
+                            "s": 50.0,
+                            "l": 50.0
+                        }
+                    }
+                },
+                {
+                    "type": "ColumnRuleColor",
+                    "data": {
+                        "srgb": {
+                            "r": 1.0,
+                            "g": 0.0,
+                            "b": 0.0
+                        },
+                        "original": "red"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "colors-modern-002",
+            "name": "Colors_ModernSpaces",
+            "properties": [
+                {
+                    "type": "OutlineColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.25183094033414793,
+                            "g": 0.6942495954401552,
+                            "b": 0.7170636897415913
+                        },
+                        "original": {
+                            "type": "oklch",
+                            "l": 0.7,
+                            "c": 0.1,
+                            "h": 200.0
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "id": "colors-special-003",
+            "name": "Colors_SpecialKeywords",
+            "properties": [
+                {
+                    "type": "CaretColor",
+                    "data": {
+                        "type": "color",
+                        "srgb": {
+                            "r": 0.0,
+                            "g": 0.0,
+                            "b": 0.0,
+                            "a": 0.0
+                        },
+                        "original": "transparent"
+                    }
+                },
+                {
+                    "type": "AccentColor",
+                    "data": {
+                        "type": "color",
+                        "original": "currentColor"
+                    }
+                }
+            ]
+        }
+    ]
+}

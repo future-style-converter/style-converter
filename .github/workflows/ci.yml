@@ -53,6 +53,33 @@ jobs:
       - name: Unit tests — engine (@style-converter/web) + harness (web-harness)
         run: npm -ws run test --if-present
 
+  schema-conformance:
+    # The IR wire format is a contract (schema/): validate the golden
+    # fixtures AND a freshly-converted visual-test artifact against
+    # schema/ir-v1.schema.json. The per-platform conformance suites ride
+    # their existing jobs automatically (converter → :converter:test,
+    # web → the vitest run in web-runtime); the Compose and SwiftUI
+    # conformance tests need Android/Xcode toolchains and run locally
+    # (apps/android-harness gradlew testDebugUnitTest, xcodebuild test
+    # -scheme StyleConverterRuntime) until the device-level workflow lands.
+    name: schema conformance (IR v1)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '21' }
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
+      # ajv lives in the tools workspace; the root lockfile covers it.
+      - name: Install (skip puppeteer chrome download)
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
+      - name: Runner self-test
+        run: node --test schema/conformance/run.test.mjs
+      - name: Convert visual-test fixture and validate artifact + goldens
+        run: node schema/conformance/run.mjs --emit
+
   test-tooling:
     name: test tooling (node)
     runs-on: ubuntu-latest
