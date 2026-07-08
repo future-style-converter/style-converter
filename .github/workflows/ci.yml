@@ -43,7 +43,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
       # Root npm ci installs both workspaces (runtimes/web + apps/web-harness).
       # Skip puppeteer's Chromium download — the unit suites never launch a browser.
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '21' }
       - uses: gradle/actions/setup-gradle@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
       # ajv lives in the tools workspace; the root lockfile covers it.
       - name: Install (skip puppeteer chrome download)
@@ -86,7 +86,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
       # tools/ is an npm workspace now — the single root lockfile covers it.
       - name: Install (skip puppeteer chrome download — unit tests never launch a browser)
