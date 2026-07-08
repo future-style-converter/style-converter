@@ -1,0 +1,48 @@
+{
+    "components": [
+        {
+            "id": "gradient-linear-001",
+            "name": "Gradient_LinearTwoStop",
+            "properties": [
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "linear-gradient",
+                            "angle": { "deg": 45.0 },
+                            "stops": [
+                                {
+                                    "color": {
+                                        "srgb": { "r": 1.0, "g": 0.0, "b": 0.0 },
+                                        "original": "#ff0000"
+                                    },
+                                    "position": null
+                                },
+                                {
+                                    "color": {
+                                        "srgb": { "r": 0.0, "g": 0.0, "b": 1.0 },
+                                        "original": "#0000ff"
+                                    },
+                                    "position": null
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "gradient-host-002",
+            "name": "Gradient_PlainBackgroundSibling",
+            "properties": [
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": { "r": 0.20392156862745098, "g": 0.596078431372549, "b": 0.8588235294117647 },
+                        "original": "#3498db"
+                    }
+                }
+            ]
+        }
+    ]
+}

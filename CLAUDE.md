@@ -24,6 +24,14 @@ JSON Input → CSS Parser → IR Model → runtime style engines
                                       └─ iOS     (runtimes/swiftui/, SwiftUI)
 ```
 
+**The IR wire format is a contract** — `schema/ir-v1.schema.json` +
+`schema/spec/` document exactly what the converter emits today (v1, no
+version field); golden fixtures in `schema/conformance/fixtures/` are
+decoded by conformance tests on all four codebases. Validate with
+`node schema/conformance/run.mjs [--emit]`. Changing an emitted byte
+shape is a v2-freeze event (`schema/spec/05-versioning.md`), not a
+casual PR.
+
 ### Project Structure
 
 ```

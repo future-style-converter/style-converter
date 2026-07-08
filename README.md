@@ -125,6 +125,7 @@ tools/
 └── wpt/                 # WPT corpus mirror (gitignored; tools/titan/fetch-wpt.sh)
 
 fixtures/                # test fixtures: properties/<category>/ + suites (fuzz, perfect, combos, …)
+schema/                  # the IR wire-format contract (JSON Schema + spec + golden fixtures)
 docs/reports/            # historical campaign docs + generated COVERAGE.md
 test-all.sh              # convert → render on 3 platforms → compare
 ```
@@ -132,6 +133,34 @@ test-all.sh              # convert → render on 3 platforms → compare
 Each property is implemented as a **Config / Extractor / Applier** triplet
 at the same relative path in all three engines — see `CLAUDE.md` for the
 full per-property contract.
+
+## The wire format is a contract — `schema/`
+
+The IR JSON that `--to ir` emits and all three runtimes consume is
+machine-checked, not folklore:
+
+- `schema/ir-v1.schema.json` — JSON Schema (draft 2020-12): **strict** on
+  the envelope (document / component / `{type, data}` property wrapper),
+  **permissive** at property-data leaves (leaf strictness arrives with the
+  flat-IR v2 freeze).
+- `schema/spec/01…05-*.md` — normative prose lifted from the serializer
+  code: envelope, value shapes (including the known defects), the
+  children map-in/array-out rule, the `_underscore` metadata fields, and
+  the versioning policy (v1 is implicit; unknown property types are
+  tolerated, unknown envelope keys are an error).
+- `schema/conformance/fixtures/` — 12 hand-authored golden IR documents,
+  one wire-shape family each, decoded by conformance tests on **all four
+  codebases** (converter, web, compose, swiftui).
+
+```bash
+node schema/conformance/run.mjs          # validate goldens (+ out/tmpOutput.json if present)
+node schema/conformance/run.mjs --emit   # convert fixtures/visual-test.json first, then validate
+node --test schema/conformance/run.test.mjs   # the runner's own tests
+```
+
+CI runs the schema check on every push; if you change what the converter
+emits, the goldens (and all four platform suites) will tell you — that is
+the point.
 
 ## Running the tests
 

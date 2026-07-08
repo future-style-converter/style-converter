@@ -1,0 +1,32 @@
+{
+    "components": [
+        {
+            "id": "textrole-body-001",
+            "name": "TextRole_BodyRoot",
+            "properties": [
+                {
+                    "type": "Color",
+                    "data": {
+                        "srgb": { "r": 0.0, "g": 0.5019607843137255, "b": 0.0 },
+                        "original": "green"
+                    }
+                }
+            ],
+            "_text": "Test passes if this text is green",
+            "_role": "body-root"
+        },
+        {
+            "id": "textrole-emptytext-002",
+            "name": "TextRole_EmptyStringText",
+            "properties": [],
+            "_text": ""
+        },
+        {
+            "id": "textrole-absent-003",
+            "name": "TextRole_NoMetadata",
+            "properties": [
+                { "type": "PaddingTop", "data": { "px": 8.0 } }
+            ]
+        }
+    ]
+}
