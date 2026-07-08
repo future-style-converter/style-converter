@@ -2,12 +2,12 @@
 
 ## Web Platform Tests (WPT)
 
-The TITAN test harness (`testing/titan/`) exercises this project against
+The TITAN test harness (`tools/titan/`) exercises this project against
 test pages from the [Web Platform Tests](https://github.com/web-platform-tests/wpt)
 corpus. The corpus is **not committed to or redistributed with this
-repository**: `testing/titan/fetch-wpt.sh` fetches it at test time as a
+repository**: `tools/titan/fetch-wpt.sh` fetches it at test time as a
 sparse checkout, pinned to the exact upstream commit recorded in
-`testing/titan/WPT_REF` (re-pinned quarterly). Only derived, non-copyrighted
+`tools/titan/WPT_REF` (re-pinned quarterly). Only derived, non-copyrighted
 artifacts (bucket indexes, pass/fail metrics) are kept. The WPT corpus is
 distributed by its authors under the BSD 3-Clause License reproduced below.
 

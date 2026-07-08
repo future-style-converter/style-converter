@@ -14,7 +14,7 @@ Pipeline: Parse input JSON → normalize to IR → write <outDir>/tmpOutput.json
 The platform code generators (compose/swiftui/css writers) were removed:
 they were dead stubs (SwiftUI/CSS exited 0 without output; Compose emitted
 non-compiling code covering ~20/550 properties). The three runtime renderers
-under testing/ consume the IR artifact (tmpOutput.json) directly, so `ir`
+under runtimes/ consume the IR artifact (tmpOutput.json) directly, so `ir`
 is the only supported target until real writers exist.
 */
 
@@ -75,7 +75,7 @@ private fun usageError(message: String): Nothing {
  * Pipeline: parse input JSON → normalize to IR → write IR artifact.
  *
  * Supported target: `ir` — writes <outDir>/tmpOutput.json (the IR artifact
- * consumed by the Android/iOS/Web runtime renderers under testing/).
+ * consumed by the Android/iOS/Web runtime renderers under runtimes/).
  *
  * Targets `compose`, `swiftui`, `css` are recognised but not implemented:
  * they fail fast with a clear error and a non-zero exit code instead of

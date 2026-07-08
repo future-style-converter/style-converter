@@ -9,14 +9,14 @@ dependency (see `project.yml`).
 
 **Primary entry point: [`../../test-all.sh`](../../test-all.sh)** runs
 iOS + Android + Web capture + cross-platform comparison. See
-[`../../testing/README.md`](../../testing/README.md) for the full system.
+[`../../docs/reports/README.md`](../../docs/reports/README.md) for the full system.
 
 Use this directory's scripts only when you want iOS in isolation:
 
 ```bash
 # From the repo root:
 ./test-ios.sh                        # iOS only, skipping Android + Web
-./test-ios.sh examples/foo.json      # different input
+./test-ios.sh fixtures/foo.json      # different input
 ```
 
 (It's a thin wrapper that runs `SKIP_ANDROID=1 SKIP_WEB=1 ./test-all.sh`.)
@@ -94,7 +94,7 @@ On first launch, the app:
    `apps/ios-harness/screenshots/`.
 
 The chromeless canvas contract is deliberately identical to the Android
-and Web capture surfaces — see [`../../testing/README.md`](../../testing/README.md) for the
+and Web capture surfaces — see [`../../docs/reports/README.md`](../../docs/reports/README.md) for the
 cross-platform system and how the comparison report uses it.
 
 ## Running from Xcode manually
@@ -104,7 +104,7 @@ on renderer changes):
 
 ```bash
 # 1. Convert + copy IR (or just run test-all.sh once first)
-./gradlew :converter:run --args="convert --from css --to ir -i examples/visual-test.json -o out"
+./gradlew :converter:run --args="convert --from css --to ir -i fixtures/visual-test.json -o out"
 cp out/tmpOutput.json apps/ios-harness/StyleConverterTest/Resources/tmpOutput.json
 
 # 2. Generate and open the project

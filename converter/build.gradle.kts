@@ -34,7 +34,7 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// The CLI contract is cwd-relative: `-i examples/visual-test.json -o out`
+// The CLI contract is cwd-relative: `-i fixtures/visual-test.json -o out`
 // must resolve against the REPO ROOT regardless of which Gradle project
 // hosts the task. In a multi-project build JavaExec defaults its working
 // directory to the subproject dir (converter/), which would silently

@@ -146,7 +146,7 @@ class ScreenshotManager(private val context: Context) {
     /**
      * Returns true when a component name belongs to the B-EXT typography
      * probe set (B8/B9/B10), per
-     * testing/COMPARE_METRICS_B8-B10.md Section 2 naming convention.
+     * docs/reports/COMPARE_METRICS_B8-B10.md Section 2 naming convention.
      *
      * The capture loop uses this to decide whether to scale the captured
      * bitmap 4× before saving (B8 needs 4× resolution so a 0.25-px CSS
@@ -162,7 +162,7 @@ class ScreenshotManager(private val context: Context) {
 
     /**
      * Hi-res variant for B-EXT typography probes
-     * (testing/COMPARE_METRICS_B8-B10.md Section 1.1 + Section 7 step 7).
+     * (docs/reports/COMPARE_METRICS_B8-B10.md Section 1.1 + Section 7 step 7).
      *
      * Composables on the standard 160-dpi emulator render at 1 dp = 1 px,
      * so the captured Bitmap matches CSS coordinates pixel-for-pixel. To
@@ -190,7 +190,7 @@ class ScreenshotManager(private val context: Context) {
      */
     // ── TITAN Phase 1 inbox-polling mode ────────────────────────────────────
     //
-    // testing/TITAN_ARCHITECTURE.md §6.4 — the WPT bucket-A pass needs to
+    // docs/reports/TITAN_ARCHITECTURE.md §6.4 — the WPT bucket-A pass needs to
     // amortise the (slow) emulator boot + APK install + activity launch
     // across many fixtures rather than paying ~30 s of overhead per
     // fixture. The app boots ONCE; the orchestrator pushes per-fixture
@@ -201,7 +201,7 @@ class ScreenshotManager(private val context: Context) {
     // TODO[TITAN Phase 1.5]: requires Android emulator validation pass.
     // Phase 1 (TITAN-IMPL-1) ships these helpers as code-only because the
     // emulator validation environment couldn't be reliably booted within
-    // the time budget. The host-side counterpart (testing/titan/feed-android.mjs)
+    // the time budget. The host-side counterpart (tools/titan/feed-android.mjs)
     // is also Phase 1.5 work — it pushes fixtures via:
     //   adb push <ir.json> /sdcard/Android/data/com.styleconverter.test/files/inbox/
     //
@@ -258,7 +258,7 @@ class ScreenshotManager(private val context: Context) {
             // adb-pull script renames to `Android__<name>.png` on the
             // host so it matches the iOS__/web__ pattern that
             // compute-text-metrics.mjs's discoverProbes() regex expects.
-            // (See testing/probe-text-metrics.sh for the rename rule once
+            // (See tools/visual/probe-text-metrics.sh for the rename rule once
             // the Android branch is wired — TODO[B-EXT round 91+] above.)
             val filename = String.format("Android__%s.png", safeName)
             val file = File(screenshotDir, filename)

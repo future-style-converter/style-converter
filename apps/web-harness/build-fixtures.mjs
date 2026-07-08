@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE       = fileURLToPath(new URL('.', import.meta.url));
 const REPO_ROOT  = resolve(HERE, '../..');
-const FIXTURES_SRC = join(REPO_ROOT, 'examples/properties/components');
+const FIXTURES_SRC = join(REPO_ROOT, 'fixtures/components');
 const FIXTURES_OUT = join(HERE, 'public/fixtures');
 const TMP_OUT      = join(REPO_ROOT, 'out/tmpOutput.json');
 

@@ -35,7 +35,7 @@ interface CaptureGalleryProps {
  * Why a separate canvas per top-level component (instead of one global
  * scene): TITAN's inject-wpt-block.mjs matches per-component captures by
  * the `_<safeKey>.png` suffix and stitches them vertically before diffing
- * against the browser-ref (see testing/titan/inject-wpt-block.mjs L389-401
+ * against the browser-ref (see tools/titan/inject-wpt-block.mjs L389-401
  * `for (const key of matchingKeys) { ... }`). Emitting one canvas per
  * `matchingKey` preserves that match contract — the stitching step
  * short-circuits to a no-op for the single-canvas case and the diff lines
@@ -63,7 +63,7 @@ const WPT_MODE: boolean = (() => {
 
 /**
  * WPT canvas viewport — matches the per-section capture viewport that
- * testing/titan/capture-browser-ref.mjs uses for browser-ref PNGs
+ * tools/titan/capture-browser-ref.mjs uses for browser-ref PNGs
  * (390×600, the iPhone-12-mini-portrait shape). Per-test browser refs
  * land at this exact size, so the SDUI canvas must match to give the
  * comparator a fair shape-to-shape diff. The canvas grows naturally
@@ -97,7 +97,7 @@ const WPT_CANVAS_MIN_HEIGHT_PX = 600;
  *   - filter (non-empty)       → Filter             (effects/filter/)
  *   - backdrop-filter          → BackdropFilter     (effects/filter/)
  *
- * Rationale (swarm-002 RC1 — testing/titan/investigations/swarm-002/
+ * Rationale (swarm-002 RC1 — tools/titan/investigations/swarm-002/
  * css-overflow__clip-002.json + filter-effects__backdrop-filter-clip-rect-zoom.json):
  * post-EXTFIX-A the IR fixture nests inner elements under their parent's
  * `children` map, and the renderer recurses correctly — the parent's clip /
@@ -260,7 +260,7 @@ export function CaptureCanvas({ component, index }: CaptureCanvasProps) {
   // padding so the SDUI scene shares the browser-ref's coordinate system
   // exactly. The min-height floor prevents the
   // `position:absolute root → 0-height collapse → 32px sliver` regression
-  // documented in testing/titan/investigations/swarm-003/
+  // documented in tools/titan/investigations/swarm-003/
   // css-masking__clip-path-borderBox-1a.json (LAYER 3). The `box-sizing:
   // content-box` on the IR subtree is supplied separately by the
   // index.html `body.wpt-mode` selector (Bug 1 fix), which scopes the

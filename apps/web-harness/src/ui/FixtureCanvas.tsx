@@ -3,7 +3,7 @@
  * (interaction state) testing.
  *
  * Visited via `?fixture=<ComponentName>`. The Puppeteer driver in
- * testing/interaction-states.mjs grabs `[data-testid="<ComponentName>"]`,
+ * tools/visual/interaction-states.mjs grabs `[data-testid="<ComponentName>"]`,
  * fires a state event (.hover / .focus / .click etc.), then element-screenshots.
  *
  * The wrapper div carries:

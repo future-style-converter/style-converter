@@ -47,8 +47,8 @@ private const val TAG = "MainActivity"
  * 4. Then displays the regular component gallery for browsing
  *
  * ## Testing Workflow
- * 1. Run main project: ./gradlew run --args="convert --from css --to compose -i examples/all-css-properties.json -o out"
- * 2. Copy out/tmpOutput.json to testing/android/app/src/main/assets/
+ * 1. Run main project: ./gradlew run --args="convert --from css --to compose -i fixtures/all-css-properties.json -o out"
+ * 2. Copy out/tmpOutput.json to apps/android-harness/app/src/main/assets/
  * 3. Run this Android app - screenshots are auto-captured
  * 4. Pull screenshots: adb pull /sdcard/test_screenshots/ ./screenshots/
  */

@@ -105,7 +105,7 @@ try {
 
   // WPT mode flag — when set, the capture URL gets `?wpt=1` so that
   // `ComponentRenderer.PlaceholderContent` suppresses the placeholder
-  // text overlay (the pilot agent at testing/titan/investigations/pilot-001/
+  // text overlay (the pilot agent at tools/titan/investigations/pilot-001/
   // css-backgrounds__background-color-animation-in-body.json showed this
   // text was the dominant pixel-divergence cause across the WPT corpus).
   // The legacy 327-pair flow (test-all.sh) does NOT set WPT_MODE, so the

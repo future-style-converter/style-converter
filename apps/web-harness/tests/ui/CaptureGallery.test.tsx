@@ -200,7 +200,7 @@ describe('parentCreatesContext — true negatives', () => {
 //     anchor-position, 3D context, clip context, etc.)
 //   - size each canvas at 390×600 minimum (matches the browser-ref viewport,
 //     prevents the position:absolute root → 32px-sliver collapse documented
-//     in testing/titan/investigations/swarm-003/css-masking__clip-path-
+//     in tools/titan/investigations/swarm-003/css-masking__clip-path-
 //     borderBox-1a.json LAYER 3)
 //   - keep box-sizing:border-box on the WRAPPER (the index.html `body.wpt-
 //     mode [data-component-id]` selector handles content-box on the IR subtree)
@@ -309,7 +309,7 @@ describe('CaptureGallery — WPT_MODE viewport canvas (swarm-003 Bug 2)', () => 
   });
 
   it('WPT mode preserves the data-capture-name + data-capture-id contract', async () => {
-    // inject-wpt-block.mjs (testing/titan/inject-wpt-block.mjs L389) matches
+    // inject-wpt-block.mjs (tools/titan/inject-wpt-block.mjs L389) matches
     // captures by `_<safe(component.name)>.png`. The data-capture-name
     // attribute drives capture-screenshots.mjs's per-canvas filename, so it
     // MUST be present on the WPT-mode canvas just like the legacy canvas.

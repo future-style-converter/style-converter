@@ -1,7 +1,7 @@
 package app.parsing.css.properties.longhands.effects
 
 // Regression suite for the clip-path polygon px-coordinate fix
-// (testing/titan/investigations/swarm-002/css-masking__clip-path-blending-
+// (tools/titan/investigations/swarm-002/css-masking__clip-path-blending-
 // offset.json). Prior to this fix, polygon() vertices with length units
 // (px/em/rem/etc) were silently dropped by `parsePercentageValue` because
 // it only matched trailing `%` or unitless numerics. The WPT fixture

@@ -480,8 +480,8 @@ private fun CompleteView(
  * appearance depends on?
  *
  * Mirrors `parentCreatesContext` in
- * testing/web/src/ui/CaptureGallery.tsx and the Swift twin in
- * testing/iOS/StyleConverterTest/Screenshot/ScreenshotCaptureView.swift —
+ * apps/web-harness/src/ui/CaptureGallery.tsx and the Swift twin in
+ * apps/ios-harness/StyleConverterTest/Screenshot/ScreenshotCaptureView.swift —
  * identical IR property-type set, identical decision rules, so the flattened
  * capture lists line up by index across iOS/Android/web for inject-wpt-block.mjs.
  *
@@ -493,7 +493,7 @@ private fun CompleteView(
  *   - Transform (non-empty array), Rotate / Scale / Translate (presence)
  *   - Opacity value < 1
  *
- * Rationale (swarm-002 RC1 — testing/titan/investigations/swarm-002/
+ * Rationale (swarm-002 RC1 — tools/titan/investigations/swarm-002/
  * css-overflow__clip-002.json + filter-effects__backdrop-filter-clip-rect-zoom.json):
  * EXTFIX-A nests inner elements inside their parent's IR `children`; the
  * Compose renderer recurses correctly so the parent's clip / blend /

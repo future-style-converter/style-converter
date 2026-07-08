@@ -36,13 +36,13 @@ class CssParsingTextAndChildrenTest {
     /**
      * (a) `_text` on a leaf component is preserved end-to-end.
      *
-     * Mirrors examples/wpt/css-color/color-001.json — the simplest WPT case
+     * Mirrors fixtures/wpt/css-color/color-001.json — the simplest WPT case
      * and the one that broke first in the swarm-2b smoke. If this test
      * fails, the W3 renderer will see no-data on every css-color test.
      */
     @Test
     fun `text on leaf component flows from input to IR output`() {
-        // Input shape exactly matches what testing/titan/extract-fixture.mjs
+        // Input shape exactly matches what tools/titan/extract-fixture.mjs
         // emits for a single-element WPT fixture (a <p> with text inside).
         val input = json.parseToJsonElement(
             """
@@ -70,7 +70,7 @@ class CssParsingTextAndChildrenTest {
 
         // The wire field is `_text` (leading underscore = renderer-only
         // metadata convention; see IRComponentSerializer KDoc and
-        // testing/web/src/style/core/ir/IRModels.ts).
+        // runtimes/web/src/core/ir/IRModels.ts).
         val textNode = component["_text"]
         assertNotNull(textNode, "Expected _text field on serialized IRComponent")
         assertEquals(
@@ -91,7 +91,7 @@ class CssParsingTextAndChildrenTest {
      * The WPT extractor ships nested children as a name-keyed map so each
      * child keeps its stable extractor id (`__0`, `__0__1`, …). The
      * renderer-facing IR needs an array (matches `IRComponent[]` in
-     * testing/web/src/style/core/ir/IRModels.ts). This test pins the
+     * runtimes/web/src/core/ir/IRModels.ts). This test pins the
      * map→array flattening at the IR boundary.
      */
     @Test
@@ -143,7 +143,7 @@ class CssParsingTextAndChildrenTest {
     /**
      * (c) Deep nesting (3 levels) preserved end-to-end.
      *
-     * Mirrors examples/wpt/css-break/abspos-in-opacity-000.json — three
+     * Mirrors fixtures/wpt/css-break/abspos-in-opacity-000.json — three
      * levels of `children` plus a leaf `_text` at the top. Catches any
      * regression where recursion bottoms out early or the serializer fails
      * to recurse on the array shape it just wrote.
@@ -209,7 +209,7 @@ class CssParsingTextAndChildrenTest {
 
     /**
      * Backward-compat: a fixture WITHOUT `_text` and WITHOUT `children`
-     * (e.g. examples/visual-test.json) must produce IR JSON that does not
+     * (e.g. fixtures/visual-test.json) must produce IR JSON that does not
      * contain either field. Any spurious key would shift bytes on the
      * 327-pair BASELINE=1 regression and break that gate.
      */
@@ -261,7 +261,7 @@ class CssParsingTextAndChildrenTest {
     /**
      * Bug 1 / swarm-003 backdrop-filter-root-element regression test.
      *
-     * The WPT extractor (testing/titan/extract-fixture.mjs:1417) stamps
+     * The WPT extractor (tools/titan/extract-fixture.mjs:1417) stamps
      * `_role: "body-root"` on synthetic body-root components so the
      * platform renderers can branch on root-element paint semantics.
      * Before this fix the Kotlin convert pipeline silently dropped the

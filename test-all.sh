@@ -14,18 +14,18 @@
 # window, etc.). TITAN-class runs can last hours; the laptop must remain
 # usable for unrelated work throughout. See the per-step comments for how
 # each platform achieves headlessness.
-# 6. Run testing/compare-screenshots.mjs to generate the HTML report.
+# 6. Run tools/visual/compare-screenshots.mjs to generate the HTML report.
 #
 # Platform steps are auto-skipped (with a warning) when the required tools
 # are missing. The comparison report always runs and includes whatever was
 # captured.
 #
 # Usage:
-#     ./test-all.sh [input.json]         # default: examples/visual-test.json
+#     ./test-all.sh [input.json]         # default: fixtures/visual-test.json
 #
 # Environment overrides:
 #     SKIP_IOS=1 SKIP_ANDROID=1 SKIP_WEB=1    skip a platform
-#     UPDATE_BASELINE=1                        copy captures → testing/baseline/
+#     UPDATE_BASELINE=1                        copy captures → tools/visual/baseline/
 #     BASELINE=1                               compare vs baseline, fail on regression
 #     SIM_DEVICE="iPhone 17 Pro"               force a specific iOS simulator (by name)
 #     SIM_UDID="0BB986A6-1EAD-..."              force a specific simulator by UDID
@@ -51,7 +51,7 @@ set -euo pipefail
 
 # ── Single-run lock ──────────────────────────────────────────────────────────
 # Two test-all.sh invocations in parallel will race on several shared paths:
-#   out/tmpOutput.json, testing/report/, the Android/iOS IR asset bundles,
+#   out/tmpOutput.json, tools/visual/report/, the Android/iOS IR asset bundles,
 #   the iOS xcodebuild DerivedData + build.db, the Vite dev server port,
 #   and the Android installDebug APK staging area.
 # macOS ships without flock(1), so we roll a `mkdir`-based advisory lock.
@@ -90,13 +90,13 @@ fi
 
 # ── Configuration ────────────────────────────────────────────────────────────
 PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
-INPUT_JSON="${1:-examples/visual-test.json}"
+INPUT_JSON="${1:-fixtures/visual-test.json}"
 
 OUTPUT_DIR="$PROJECT_ROOT/out"
 IOS_DIR="$PROJECT_ROOT/apps/ios-harness"
 ANDROID_DIR="$PROJECT_ROOT/apps/android-harness"
 WEB_DIR="$PROJECT_ROOT/apps/web-harness"
-TESTING_DIR="$PROJECT_ROOT/testing"
+TOOLS_VISUAL_DIR="$PROJECT_ROOT/tools/visual"
 
 IOS_BUNDLE="com.styleconverter.test"
 ANDROID_PACKAGE="com.styleconverter.test"
@@ -178,13 +178,13 @@ CAPTURED_ANDROID=""
 CAPTURED_WEB=""
 
 # ── Probe-fixture exclusion guard (B-EXT spec Section 7 step 4) ──────────────
-# Probe fixtures under examples/_metric_probes/ are deliberately captured at
-# 4× resolution by testing/probe-text-metrics.sh and never enter the
+# Probe fixtures under fixtures/_metric_probes/ are deliberately captured at
+# 4× resolution by tools/visual/probe-text-metrics.sh and never enter the
 # 1×-pinned 327-pair regression baseline. If someone hand-feeds one to
 # test-all.sh they'd otherwise pollute baseline/ on the next BASELINE=1
 # run, so refuse the input early with a pointer to the right driver.
 if [[ "$INPUT_JSON" == *"_metric_probes/"* ]]; then
-  echo "[test-all] $INPUT_JSON is a probe fixture (B8/B9/B10); use testing/probe-text-metrics.sh instead." >&2
+  echo "[test-all] $INPUT_JSON is a probe fixture (B8/B9/B10); use tools/visual/probe-text-metrics.sh instead." >&2
   exit 2
 fi
 
@@ -230,13 +230,13 @@ cp "$OUTPUT_DIR/tmpOutput.json" "$ANDROID_DIR/app/src/main/assets/tmpOutput.json
 cp "$OUTPUT_DIR/tmpOutput.json" "$WEB_DIR/public/ir-components.json"
 log "IR synced"
 
-# Install the testing/ helper deps (pngjs, sharp, pixelmatch, ssim.js) now —
+# Install the tools/visual/ helper deps (pngjs, sharp, pixelmatch, ssim.js) now —
 # the iOS post-capture step uses normalize-pngs.mjs which pulls in pngjs.
-# Doing it here (rather than at step 6) means a single `npm install` for
-# the whole run and avoids racy on-demand installs under time pressure.
-if [[ ! -d "$TESTING_DIR/node_modules" ]]; then
-    log "installing testing deps…"
-    ( cd "$TESTING_DIR" && npm install --silent )
+# tools/ is an npm workspace, so its deps hoist to the repo-root
+# node_modules — a single root `npm install` covers every helper script.
+if [[ ! -d "$PROJECT_ROOT/node_modules/pngjs" ]]; then
+    log "installing tooling deps…"
+    ( cd "$PROJECT_ROOT" && npm install --silent )
 fi
 
 # ── Step 3: iOS capture ──────────────────────────────────────────────────────
@@ -402,8 +402,8 @@ print('Unknown')")
                 # (timestamps etc.), so pixel-identical runs produce different
                 # MD5 hashes. Strip the ancillary chunks so captures are byte-
                 # reproducible — makes committed baselines usable in git.
-                if [[ -d "$TESTING_DIR/node_modules" ]] && command -v node &>/dev/null; then
-                    ( cd "$TESTING_DIR" && node normalize-pngs.mjs "$IOS_DIR/screenshots" ) || warn "PNG normalization failed (non-fatal)"
+                if [[ -d "$PROJECT_ROOT/node_modules/pngjs" ]] && command -v node &>/dev/null; then
+                    ( cd "$TOOLS_VISUAL_DIR" && node normalize-pngs.mjs "$IOS_DIR/screenshots" ) || warn "PNG normalization failed (non-fatal)"
                 fi
 
                 CAPTURED_IOS=$COUNT
@@ -750,11 +750,11 @@ fi
 
 # ── Step 6: Compare ──────────────────────────────────────────────────────────
 step "Generating comparison report"
-# Testing deps were installed at step 2 (so normalize-pngs.mjs can run during
+# Tooling deps were installed at step 2 (so normalize-pngs.mjs can run during
 # the iOS capture step). If someone deleted node_modules between runs, repair.
-if [[ ! -d "$TESTING_DIR/node_modules" ]]; then
-    log "installing testing deps…"
-    ( cd "$TESTING_DIR" && npm install --silent )
+if [[ ! -d "$PROJECT_ROOT/node_modules/pngjs" ]]; then
+    log "installing tooling deps…"
+    ( cd "$PROJECT_ROOT" && npm install --silent )
 fi
 
 COMPARE_ARGS=()
@@ -768,7 +768,7 @@ fi
 # is empty (default mode — no baseline flags).
 # `--input` threads the IR filename into the HTML report headline so you can
 # tell at a glance which test case the report was generated from.
-( cd "$TESTING_DIR" && node compare-screenshots.mjs --input "$INPUT_JSON" "${COMPARE_ARGS[@]:-}" )
+( cd "$TOOLS_VISUAL_DIR" && node compare-screenshots.mjs --input "$INPUT_JSON" "${COMPARE_ARGS[@]:-}" )
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 # Close out whatever stage was running, then print the summary without
@@ -790,7 +790,7 @@ done
 echo
 echo -e "  ${G}total elapsed: ${SCRIPT_TOTAL}s${N}"
 
-REPORT_PATH="$TESTING_DIR/report/index.html"
+REPORT_PATH="$TOOLS_VISUAL_DIR/report/index.html"
 # After --update-baseline there's no comparison report, so don't dangle a
 # stale "Report: ..." line pointing at the previous run's output.
 if [[ "${UPDATE_BASELINE:-0}" != "1" ]] && [[ -f "$REPORT_PATH" ]]; then

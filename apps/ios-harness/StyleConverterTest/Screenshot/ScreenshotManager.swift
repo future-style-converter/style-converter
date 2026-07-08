@@ -6,7 +6,7 @@
 //  SwiftUI's ImageRenderer (iOS 16+). The test-ios.sh script pulls them
 //  out of the simulator with `xcrun simctl get_app_container`.
 //
-//  Mirrors testing/Android/.../screenshot/ScreenshotManager.kt.
+//  Mirrors apps/android-harness/.../screenshot/ScreenshotManager.kt.
 //
 
 import SwiftUI
@@ -52,13 +52,13 @@ enum ScreenshotManager {
     }
 
     /// Hi-res variant for the B-EXT typography probes
-    /// (testing/COMPARE_METRICS_B8-B10.md Section 1.1). Renders at
+    /// (docs/reports/COMPARE_METRICS_B8-B10.md Section 1.1). Renders at
     /// scale=4.0 so a 0.25-pt baseline shift in CSS coords surfaces as
     /// a 1-px shift in the captured buffer (above AA noise).
     ///
     /// The probe pipeline uses this only for components whose ID begins
     /// with "B8_", "B9_", or "B10_" — the canonical naming convention
-    /// for examples/_metric_probes/ fixtures. The 327-pair regression
+    /// for fixtures/_metric_probes/ fixtures. The 327-pair regression
     /// baseline is locked at 1× and must never call into here.
     ///
     /// TODO[B-EXT round 91+]: requires Xcode/simulator validation pass
@@ -78,7 +78,7 @@ enum ScreenshotManager {
     /// Returns true when a component ID belongs to the B-EXT typography
     /// probe set (B8/B9/B10). Used by the capture loop to decide between
     /// the standard 1× render and the hires 4× render.
-    /// See testing/COMPARE_METRICS_B8-B10.md Section 2 for the naming
+    /// See docs/reports/COMPARE_METRICS_B8-B10.md Section 2 for the naming
     /// convention.
     static func isProbeComponent(_ name: String) -> Bool {
         // Underscore-suffix match keeps "B8_Serif_AVATAR_16" in the set
@@ -88,7 +88,7 @@ enum ScreenshotManager {
 
     // MARK: - TITAN Phase 1 inbox-polling mode
     //
-    // testing/TITAN_ARCHITECTURE.md §6.3 — for the WPT bucket-A pass we
+    // docs/reports/TITAN_ARCHITECTURE.md §6.3 — for the WPT bucket-A pass we
     // can't afford a 30 s xcodebuild + simctl install + launch cycle
     // per fixture (10 000 fixtures × 30 s = 83 hours, untenable). The
     // app boots ONCE; the orchestrator pushes per-fixture IR JSON into
@@ -105,10 +105,10 @@ enum ScreenshotManager {
     // because the headless-Xcode validation environment couldn't be
     // booted reliably during the time-budgeted Phase 1 run. The code
     // paths below are exercised by the unit-test scaffolding in
-    // testing/titan/extract-fixture.test.mjs (the IR-shape contract)
+    // tools/titan/extract-fixture.test.mjs (the IR-shape contract)
     // but NOT by an end-to-end iOS capture run yet.
     //
-    // The host-side counterpart (testing/titan/feed-ios.mjs) is
+    // The host-side counterpart (tools/titan/feed-ios.mjs) is
     // deferred to Phase 1.5 — it pushes fixtures via `xcrun simctl
     // pasteboard` or via writing into the simulator's app container
     // directly with `simctl get_app_container <udid> com.styleconverter.test data`.

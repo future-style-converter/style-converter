@@ -43,7 +43,7 @@ function isWptMode(): boolean {
  * /fixtures/<name>.json) inside a <FixtureCanvas> wrapper that
  * Puppeteer can grab via `[data-testid="<name>"]`. See
  * apps/web-harness/src/ui/FixtureCanvas.tsx for the wrapper contract and
- * testing/TIER5_PLAN.md for the full pipeline.
+ * docs/reports/TIER5_PLAN.md for the full pipeline.
  */
 function getFixtureName(): string | null {
   if (typeof window === 'undefined') return null;
@@ -152,7 +152,7 @@ export function App() {
   // Fixture mode: render exactly one component (looked up by name) inside
   // a FixtureCanvas with the data-testid + tabIndex + ready-sentinel
   // contract that interaction-states.mjs expects. See FixtureCanvas.tsx
-  // and testing/TIER5_PLAN.md.
+  // and docs/reports/TIER5_PLAN.md.
   if (fixtureName) {
     if (error) {
       return <pre style={styles.errorPlain}>{error}</pre>;

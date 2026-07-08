@@ -12,13 +12,13 @@ import { buildStyles, type CSSStyles } from '@style-converter/web/core/renderer/
 /**
  * WPT-mode detector — reads the `?wpt=1` query parameter once per module load.
  *
- * Why this exists: TITAN's WPT capture pipeline (testing/titan/section-runner.sh)
+ * Why this exists: TITAN's WPT capture pipeline (tools/titan/section-runner.sh)
  * extracts a one-component-per-test IR where the component name is the WPT
  * key `wpt__<section>__<stem>__<index>`. When the extracted IR is empty
  * (extractor dropped a body-level style, or the test renders nothing on a
  * 100×100 box) the only visible thing in the screenshot is the placeholder
  * text — `wpt css-backgrounds background-color-animation-in-body 0` etc. —
- * which the pilot agent (testing/titan/investigations/pilot-001/
+ * which the pilot agent (tools/titan/investigations/pilot-001/
  * css-backgrounds__background-color-animation-in-body.json) flagged as the
  * source of false `structural-divergence` labels across the entire WPT
  * corpus (the title overlay alone produces ~33 pHash hamming distance vs
@@ -155,7 +155,7 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   const hasChildren = !!(component.children && component.children.length > 0);
 
   // Aspect-ratio fit-content suppression — see
-  // testing/titan/investigations/swarm-001/css-sizing__block-aspect-ratio-032.json
+  // tools/titan/investigations/swarm-001/css-sizing__block-aspect-ratio-032.json
   //
   // CSS aspect-ratio (css-sizing-4 §6.2) only transfers a size from the
   // constrained axis to the unconstrained axis when the cross axis is left
@@ -199,7 +199,7 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   const aspectRatioBlockUnconstrained = hasAspectRatio && inlineAxisConstrained && !blockAxisConstrained;
 
   // Bug 1 — WPT block-flow widen carve-out — see
-  // testing/titan/investigations/swarm-003/css-ui__negative-outline-offset.json
+  // tools/titan/investigations/swarm-003/css-ui__negative-outline-offset.json
   //
   // The unconditional `width: 'fit-content' + minWidth:'50px' + minHeight:'30px'`
   // defaults are essential for the legacy 327-pair visual-test fixtures
@@ -254,7 +254,7 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
     // `width: fit-content` did.
     //
     // Bug 3 — aspect-ratio + child intrinsic-size lift — see
-    // testing/titan/investigations/swarm-003/css-sizing__block-aspect-ratio-015.json
+    // tools/titan/investigations/swarm-003/css-sizing__block-aspect-ratio-015.json
     //
     // CSS Sizing 4 §6.2.2 says `min-width: auto` on an aspect-ratio box
     // resolves to the `min-content` of its contents. When the parent has
@@ -299,7 +299,7 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   // `Outline_Solid`). The mismatch was ~30% pixel divergence on every
   // light-card fixture.
   // Children recursion — see
-  // testing/titan/investigations/swarm-001/css-overflow__clip-001.json
+  // tools/titan/investigations/swarm-001/css-overflow__clip-001.json
   //
   // Many WPT fixtures (overflow:clip on a parent, css-grid abspos, contain,
   // any composed parent>child geometry) require that the IR's tree structure
@@ -311,7 +311,7 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   // unchanged, preserving the 327-pair visual-test baseline.
   //
   // Mixed-content fix (Bug 1) — see
-  // testing/titan/investigations/swarm-002/css-text-decor__text-decoration-decorating-box-thickness-001.json
+  // tools/titan/investigations/swarm-002/css-text-decor__text-decoration-decorating-box-thickness-001.json
   //
   // The two branches USED to be mutually exclusive: a component with both
   // _text and children would render only the children, silently dropping
@@ -334,8 +334,8 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   // declaration); Chromium then evaluates `counter()` / `counters()` /
   // `attr()` / literal strings natively against the parent's live
   // counter tree. See:
-  //   testing/titan/investigations/swarm-003/css-lists__counter-001.json
-  //   testing/titan/investigations/swarm-003/css-pseudo__before-preceding-whitespace-dynamic.json
+  //   tools/titan/investigations/swarm-003/css-lists__counter-001.json
+  //   tools/titan/investigations/swarm-003/css-pseudo__before-preceding-whitespace-dynamic.json
   //
   // Components without `_pseudo` (the 327-pair baseline) skip these
   // branches entirely so the legacy DOM is byte-identical.
@@ -427,7 +427,7 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
     <PlaceholderContent
       name={component.name}
       // Inner-text rendering — see
-      // testing/titan/investigations/swarm-001/css-color__color-001.json
+      // tools/titan/investigations/swarm-001/css-color__color-001.json
       //
       // FIX-A is concurrently teaching the WPT extractor to preserve the
       // styled element's text content as `_text`. When that field is
@@ -461,7 +461,7 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   // `list-style-type: arabic-indic` (and ~350 other list-related WPT
   // tests) silently inert because Chromium's counter algorithm only
   // fires on `display: list-item`. See
-  // testing/titan/investigations/swarm-002/css-counter-styles__css3-counter-styles-101.json.
+  // tools/titan/investigations/swarm-002/css-counter-styles__css3-counter-styles-101.json.
   //
   // Allow-list rather than free-form: we only switch to tags whose
   // browser-default semantics we positively want (lists, headings,
@@ -485,7 +485,7 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
     'figure', 'figcaption',
     'section', 'article', 'nav', 'header', 'footer', 'main', 'aside',
     // Bug 2 — emit <span> when F-G-EXTRACTOR forwards _tag:'span'. See
-    // testing/titan/investigations/swarm-003/css-contain__content-visibility-hidden-and-innertext.json
+    // tools/titan/investigations/swarm-003/css-contain__content-visibility-hidden-and-innertext.json
     //
     // The CSS-Containment-2 spec says content-visibility:hidden does NOT
     // apply to non-atomic inline boxes (<span> with default display:inline
@@ -535,7 +535,7 @@ interface PlaceholderContentProps {
    * legacy component-style fixtures where the harness still draws a
    * synthetic placeholder.
    *
-   * See testing/titan/investigations/swarm-001/css-color__color-001.json.
+   * See tools/titan/investigations/swarm-001/css-color__color-001.json.
    */
   text?: string;
   /** Resolved CSS color of the parent element (e.g. "rgb(255,255,255)"). */
@@ -621,7 +621,7 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor }: Plac
       ? 'rgba(51, 51, 51, 0.7)'    // dark on light
       : 'rgba(237, 237, 237, 0.7)'); // light on dark (and the no-bg fallback)
   // Visible-text resolution priority — see
-  // testing/titan/investigations/swarm-001/css-color__color-001.json
+  // tools/titan/investigations/swarm-001/css-color__color-001.json
   //
   //   1. `text` from IR (component._text) — the actual element text content
   //      preserved by the WPT extractor. Takes precedence over EVERYTHING

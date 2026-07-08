@@ -10,10 +10,10 @@
 // so a 0.25-px sub-pixel baseline drift on the 1× canvas surfaces as a
 // 1-px shift on the captured 4× buffer (above AA noise). The 327-pair
 // regression baseline is locked at 1× — running this driver populates a
-// SEPARATE output directory (testing/probes/) so we can never accidentally
-// commit a 4× image into testing/baseline/.
+// SEPARATE output directory (tools/visual/probes/) so we can never accidentally
+// commit a 4× image into tools/visual/baseline/.
 //
-// Output contract: one PNG per probe component to testing/probes/web__<comp>.png
+// Output contract: one PNG per probe component to tools/visual/probes/web__<comp>.png
 // (the `web__` prefix mirrors the iOS__/Android__ pattern compute-text-metrics
 // scans for). Captures are intentionally NOT cropped to per-canvas bounds —
 // the metric helpers (B8 baseline scan, B9 line FFT, B10 glyph projection)
@@ -40,16 +40,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Mirror the 1× driver's flag handling so callers reuse the same mental model.
 const args = process.argv.slice(2);
 const baseUrl = getArg('--url') ?? 'http://localhost:3000';
-// Default `out` resolves to `testing/probes/` (the harness now lives in
+// Default `out` resolves to `tools/visual/probes/` (the harness now lives in
 // apps/web-harness, so hop to the repo root first). Lives outside the
 // per-platform screenshot dirs so the standard compare loop never scans
 // them (compare-screenshots.mjs walks the iOS/Android/web screenshot dirs).
-const outDir = resolve(__dirname, '..', '..', getArg('--out') ?? 'testing/probes');
+const outDir = resolve(__dirname, '..', '..', getArg('--out') ?? 'tools/visual/probes');
 // The probe-fixture root — the driver discovers component IDs by walking
 // every JSON file underneath. Default points at the canonical location
-// the spec defines (examples/_metric_probes/). Allows alternate roots so
+// the spec defines (fixtures/_metric_probes/). Allows alternate roots so
 // the test suite can point at a tmp dir.
-const probeDir = resolve(getArg('--probe-dir') ?? resolve(__dirname, '..', '..', 'examples', '_metric_probes'));
+const probeDir = resolve(getArg('--probe-dir') ?? resolve(__dirname, '..', '..', 'fixtures', '_metric_probes'));
 
 function getArg(name) {
   const i = args.indexOf(name);
@@ -149,7 +149,7 @@ try {
       if (!handle) { skipped++; continue; }
       const safe = name.replace(/[^A-Za-z0-9._-]/g, '_');
       // The `web__` prefix matches the iOS__/Android__ shape compute-text-metrics
-      // scans for in testing/probes/.
+      // scans for in tools/visual/probes/.
       const outPath = resolve(outDir, `web__${safe}.png`);
       await handle.screenshot({ path: outPath, type: 'png' });
       captured++;

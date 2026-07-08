@@ -112,7 +112,7 @@ struct ScreenshotCaptureView: View {
 /// appearance depends on?
 ///
 /// Mirrors `parentCreatesContext` in
-/// testing/web/src/ui/CaptureGallery.tsx — identical IR property-type set,
+/// apps/web-harness/src/ui/CaptureGallery.tsx — identical IR property-type set,
 /// identical decision rules. Kept in lock-step across platforms so the
 /// flattened capture lists line up by index for the cross-platform diff
 /// inject-wpt-block.mjs runs.
@@ -125,7 +125,7 @@ struct ScreenshotCaptureView: View {
 ///   - Transform (non-empty list), Rotate / Scale / Translate (presence)
 ///   - Opacity value < 1
 ///
-/// Rationale (swarm-002 RC1 — testing/titan/investigations/swarm-002/
+/// Rationale (swarm-002 RC1 — tools/titan/investigations/swarm-002/
 /// css-overflow__clip-002.json + filter-effects__backdrop-filter-clip-rect-zoom.json):
 /// EXTFIX-A nests children inside their parent's IR `children`; the renderer
 /// recurses correctly so the parent's clip / blend / transform / opacity

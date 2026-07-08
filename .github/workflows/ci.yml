@@ -31,9 +31,9 @@ jobs:
         run: ./gradlew :converter:test --no-daemon
       - name: CLI honesty — --to ir succeeds, --to compose fails loudly
         run: |
-          ./gradlew :converter:run --no-daemon --args="convert --from css --to ir -i examples/visual-test.json -o out"
+          ./gradlew :converter:run --no-daemon --args="convert --from css --to ir -i fixtures/visual-test.json -o out"
           test -s out/tmpOutput.json
-          if ./gradlew :converter:run --no-daemon --args="convert --from css --to compose -i examples/visual-test.json -o out" 2>/dev/null; then
+          if ./gradlew :converter:run --no-daemon --args="convert --from css --to compose -i fixtures/visual-test.json -o out" 2>/dev/null; then
             echo "::error::--to compose must exit non-zero until the writer exists" ; exit 1
           fi
 
@@ -49,9 +49,9 @@ jobs:
       # Skip puppeteer's Chromium download — the unit suites never launch a browser.
       - run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
       - name: Typecheck both workspaces
-        run: npm -ws run typecheck
+        run: npm -ws run typecheck --if-present
       - name: Unit tests — engine (@style-converter/web) + harness (web-harness)
-        run: npm -ws run test
+        run: npm -ws run test --if-present
 
   test-tooling:
     name: test tooling (node)
@@ -60,8 +60,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 24, cache: npm, cache-dependency-path: testing/package-lock.json }
+        with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
+      # tools/ is an npm workspace now — the single root lockfile covers it.
       - name: Install (skip puppeteer chrome download — unit tests never launch a browser)
-        run: cd testing && PUPPETEER_SKIP_DOWNLOAD=1 npm ci
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
       - name: Unit tests
-        run: node --test testing/*.test.mjs testing/titan/*.test.mjs
+        run: node --test tools/visual/*.test.mjs tools/titan/*.test.mjs

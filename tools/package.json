@@ -1,0 +1,22 @@
+{
+  "name": "style-converter-tools",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Cross-platform visual-testing tooling — screenshot comparison (tools/visual/) and the TITAN WPT harness (tools/titan/).",
+  "scripts": {
+    "compare": "node visual/compare-screenshots.mjs",
+    "compare:baseline": "node visual/compare-screenshots.mjs --baseline",
+    "compare:update-baseline": "node visual/compare-screenshots.mjs --update-baseline"
+  },
+  "dependencies": {
+    "culori": "^4.0.2",
+    "fft.js": "^4.0.4",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
+    "puppeteer": "^24.43.0",
+    "sharp": "^0.33.0",
+    "sharp-phash": "^2.2.0",
+    "ssim.js": "^3.5.0"
+  }
+}
