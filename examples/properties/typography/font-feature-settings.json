@@ -1,0 +1,12 @@
+{
+  "components": {
+    "FontFeatureSettings_Normal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-feature-settings": "normal" } },
+    "FontFeatureSettings_Kern_On": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-feature-settings": "\"kern\" on" } },
+    "FontFeatureSettings_Kern_Off": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-feature-settings": "\"kern\" off" } },
+    "FontFeatureSettings_Kern_1": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-feature-settings": "\"kern\" 1" } },
+    "FontFeatureSettings_Kern_0": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-feature-settings": "\"kern\" 0" } },
+    "FontFeatureSettings_TagOnly": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-feature-settings": "\"liga\"" } },
+    "FontFeatureSettings_NumericTag": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-feature-settings": "\"salt\" 3" } },
+    "FontFeatureSettings_List": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-feature-settings": "\"liga\" 1, \"dlig\" 0, \"smcp\" on" } }
+  }
+}

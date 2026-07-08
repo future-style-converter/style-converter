@@ -1,0 +1,31 @@
+{
+  "components": {
+    "V0_1dppx": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "image-resolution": "1dppx"
+      }
+    },
+    "V1_2dppx": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "image-resolution": "2dppx"
+      }
+    },
+    "V2_from_ima": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "image-resolution": "from-image"
+      }
+    }
+  }
+}

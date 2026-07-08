@@ -1,0 +1,29 @@
+{
+  "components": {
+    "GridDisplay_Grid": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr 1fr", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "40px", "background-color": "#10b981" } },
+        "c": { "properties": { "height": "40px", "background-color": "#3b82f6" } },
+        "d": { "properties": { "height": "40px", "background-color": "#f59e0b" } },
+        "e": { "properties": { "height": "40px", "background-color": "#a78bfa" } },
+        "f": { "properties": { "height": "40px", "background-color": "#22d3ee" } }
+      }
+    },
+    "GridDisplay_InlineGrid": {
+      "properties": { "width": "300px", "display": "inline-grid", "grid-template-columns": "1fr 1fr", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "GridDisplay_Subgrid_Columns": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "subgrid", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "40px", "background-color": "#10b981" } }
+      }
+    }
+  }
+}

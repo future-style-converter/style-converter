@@ -1,0 +1,78 @@
+{
+  "components": {
+    "GTA_3x3": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 1fr 1fr", "grid-template-rows": "40px 40px 40px",
+        "grid-template-areas": "\"a b c\" \"d e f\" \"g h i\"",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "a": { "properties": { "background-color": "#ef4444" } },
+        "b": { "properties": { "background-color": "#10b981" } },
+        "c": { "properties": { "background-color": "#3b82f6" } },
+        "d": { "properties": { "background-color": "#f59e0b" } },
+        "e": { "properties": { "background-color": "#a78bfa" } },
+        "f": { "properties": { "background-color": "#22d3ee" } },
+        "g": { "properties": { "background-color": "#fb7185" } },
+        "h": { "properties": { "background-color": "#86efac" } },
+        "i": { "properties": { "background-color": "#fcd34d" } }
+      }
+    },
+    "GTA_WithSpans": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 1fr 1fr", "grid-template-rows": "40px 40px 40px",
+        "grid-template-areas": "\"header header header\" \"nav main main\" \"nav footer footer\"",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "header": { "properties": { "grid-area": "header", "background-color": "#ef4444" } },
+        "nav":    { "properties": { "grid-area": "nav",    "background-color": "#10b981" } },
+        "main":   { "properties": { "grid-area": "main",   "background-color": "#3b82f6" } },
+        "footer": { "properties": { "grid-area": "footer", "background-color": "#f59e0b" } }
+      }
+    },
+    "GTA_WithDots": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 1fr 1fr", "grid-template-rows": "40px 40px 40px",
+        "grid-template-areas": "\"a . b\" \". c .\" \"d . e\"",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "a": { "properties": { "background-color": "#ef4444" } },
+        "b": { "properties": { "background-color": "#10b981" } },
+        "c": { "properties": { "background-color": "#3b82f6" } },
+        "d": { "properties": { "background-color": "#f59e0b" } },
+        "e": { "properties": { "background-color": "#a78bfa" } }
+      }
+    },
+    "GTA_Asymmetric_2x3": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 2fr", "grid-template-rows": "40px 40px 40px",
+        "grid-template-areas": "\"top top\" \"left right\" \"bottom bottom\"",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "top":    { "properties": { "background-color": "#ef4444" } },
+        "left":   { "properties": { "background-color": "#10b981" } },
+        "right":  { "properties": { "background-color": "#3b82f6" } },
+        "bottom": { "properties": { "background-color": "#f59e0b" } }
+      }
+    },
+    "GTA_None": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 1fr", "grid-template-rows": "40px 40px",
+        "grid-template-areas": "none",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "a": { "properties": { "background-color": "#ef4444" } },
+        "b": { "properties": { "background-color": "#10b981" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "components": {
+    "TransformStyle_Flat": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "transform-style": "flat", "transform": "rotateY(30deg)" } },
+    "TransformStyle_Preserve3d": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "transform-style": "preserve-3d", "transform": "rotateY(30deg)" } }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "components": {
+    "FZ_mixed_calc": {
+      "properties": {
+        "width": "calc(100px + 5em + 10vw - 2rem + 50%)",
+        "height": "80px",
+        "background-color": "#9b59b6"
+      }
+    }
+  }
+}

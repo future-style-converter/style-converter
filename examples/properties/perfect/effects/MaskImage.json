@@ -1,0 +1,6 @@
+{
+  "components": {
+    "MI_none":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#3b82f6", "mask-image": "none" } },
+    "MI_linear": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#3b82f6", "mask-image": "linear-gradient(to right, black, transparent)" } }
+  }
+}

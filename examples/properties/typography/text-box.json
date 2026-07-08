@@ -1,0 +1,15 @@
+{
+  "components": {
+    "TextBoxEdge_Leading": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-edge": "leading" } },
+    "TextBoxEdge_Text": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-edge": "text" } },
+    "TextBoxEdge_Cap": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-edge": "cap" } },
+    "TextBoxEdge_Ex": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-edge": "ex" } },
+    "TextBoxEdge_Alphabetic": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-edge": "alphabetic" } },
+    "TextBoxEdge_Ideographic": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-edge": "ideographic" } },
+    "TextBoxEdge_Two_CapAlphabetic": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-edge": "cap alphabetic" } },
+    "TextBoxTrim_None": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-trim": "none" } },
+    "TextBoxTrim_TrimStart": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-trim": "trim-start" } },
+    "TextBoxTrim_TrimEnd": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-trim": "trim-end" } },
+    "TextBoxTrim_TrimBoth": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-box-trim": "trim-both" } }
+  }
+}

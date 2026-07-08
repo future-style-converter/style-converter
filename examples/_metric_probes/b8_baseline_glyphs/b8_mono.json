@@ -1,0 +1,7 @@
+{
+  "components": {
+    "B8_Mono_AVATAR_16": { "properties": { "width": "240px", "height": "80px", "background-color": "#ffffff", "color": "#000000", "font-size": "16px", "font-family": "monospace" } },
+    "B8_Mono_AVATAR_24": { "properties": { "width": "240px", "height": "80px", "background-color": "#ffffff", "color": "#000000", "font-size": "24px", "font-family": "monospace" } },
+    "B8_Mono_AVATAR_48": { "properties": { "width": "240px", "height": "80px", "background-color": "#ffffff", "color": "#000000", "font-size": "48px", "font-family": "monospace" } }
+  }
+}

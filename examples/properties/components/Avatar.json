@@ -1,0 +1,21 @@
+{
+  "components": {
+    "Avatar": {
+      "properties": {
+        "width": "48px",
+        "height": "48px",
+        "background-color": "#10b981",
+        "color": "#ffffff",
+        "border-radius": "50%",
+        "font-size": "18px",
+        "font-weight": "600",
+        "text-align": "center",
+        "line-height": "48px",
+        "display": "inline-block",
+        "border": "2px solid #ffffff",
+        "box-shadow": "0 0 0 1px #d1d5db",
+        "text": "JD"
+      }
+    }
+  }
+}

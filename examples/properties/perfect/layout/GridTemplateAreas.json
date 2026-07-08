@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "grid-template-areas": "none"
+      }
+    },
+    "V1__a_b___c": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "grid-template-areas": "\"a b\" \"c d\""
+      }
+    }
+  }
+}

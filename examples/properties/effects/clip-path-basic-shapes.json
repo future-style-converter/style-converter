@@ -1,0 +1,18 @@
+{
+  "components": {
+    "ClipPath_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#3498db", "clip-path": "none" } },
+    "ClipPath_Inset_Uniform": { "properties": { "width": "160px", "height": "120px", "background-color": "#e74c3c", "clip-path": "inset(10px)" } },
+    "ClipPath_Inset_4Values": { "properties": { "width": "160px", "height": "120px", "background-color": "#2ecc71", "clip-path": "inset(10px 20px 30px 40px)" } },
+    "ClipPath_Inset_Round": { "properties": { "width": "160px", "height": "120px", "background-color": "#9b59b6", "clip-path": "inset(10px round 20px)" } },
+    "ClipPath_Circle_Radius": { "properties": { "width": "160px", "height": "120px", "background-color": "#f39c12", "clip-path": "circle(50px)" } },
+    "ClipPath_Circle_AtCenter": { "properties": { "width": "160px", "height": "120px", "background-color": "#1abc9c", "clip-path": "circle(40% at 50% 50%)" } },
+    "ClipPath_Circle_AtCorner": { "properties": { "width": "160px", "height": "120px", "background-color": "#34495e", "clip-path": "circle(60px at 20px 30px)" } },
+    "ClipPath_Ellipse_TwoRadii": { "properties": { "width": "160px", "height": "120px", "background-color": "#c0392b", "clip-path": "ellipse(60px 40px)" } },
+    "ClipPath_Ellipse_AtPosition": { "properties": { "width": "160px", "height": "120px", "background-color": "#16a085", "clip-path": "ellipse(50% 30% at 50% 50%)" } },
+    "ClipPath_Polygon_Triangle": { "properties": { "width": "160px", "height": "120px", "background-color": "#d35400", "clip-path": "polygon(50% 0%, 100% 100%, 0% 100%)" } },
+    "ClipPath_Polygon_Hexagon": { "properties": { "width": "160px", "height": "120px", "background-color": "#2980b9", "clip-path": "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)" } },
+    "ClipPath_Rect": { "properties": { "width": "160px", "height": "120px", "background-color": "#27ae60", "clip-path": "rect(10px 150px 110px 10px)" } },
+    "ClipPath_Xywh": { "properties": { "width": "160px", "height": "120px", "background-color": "#8e44ad", "clip-path": "xywh(10px 20px 120px 80px)" } },
+    "ClipPath_Xywh_Round": { "properties": { "width": "160px", "height": "120px", "background-color": "#7f8c8d", "clip-path": "xywh(10px 20px 120px 80px round 12px)" } }
+  }
+}

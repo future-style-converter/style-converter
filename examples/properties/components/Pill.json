@@ -1,0 +1,18 @@
+{
+  "components": {
+    "Pill": {
+      "properties": {
+        "padding": "4px 12px",
+        "background-color": "#e0f2fe",
+        "color": "#0369a1",
+        "border-radius": "999px",
+        "font-size": "12px",
+        "font-weight": "500",
+        "display": "inline-flex",
+        "align-items": "center",
+        "border": "1px solid #bae6fd",
+        "text": "Filter"
+      }
+    }
+  }
+}

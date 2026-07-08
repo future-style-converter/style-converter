@@ -1,0 +1,12 @@
+{
+  "components": {
+    "Scale_None": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "scale": "none" } },
+    "Scale_Uniform_Num": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "scale": "1.5" } },
+    "Scale_Uniform_Pct": { "properties": { "width": "120px", "height": "80px", "background-color": "#2ecc71", "scale": "150%" } },
+    "Scale_Uniform_Shrink": { "properties": { "width": "120px", "height": "80px", "background-color": "#9b59b6", "scale": "0.8" } },
+    "Scale_TwoAxis_Nums": { "properties": { "width": "120px", "height": "80px", "background-color": "#f39c12", "scale": "1.2 0.8" } },
+    "Scale_TwoAxis_Pcts": { "properties": { "width": "120px", "height": "80px", "background-color": "#1abc9c", "scale": "120% 80%" } },
+    "Scale_ThreeAxis": { "properties": { "width": "120px", "height": "80px", "background-color": "#34495e", "scale": "1.2 0.9 1" } },
+    "Scale_Negative": { "properties": { "width": "120px", "height": "80px", "background-color": "#c0392b", "scale": "-1 1" } }
+  }
+}

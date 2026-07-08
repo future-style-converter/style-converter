@@ -1,0 +1,7 @@
+{
+  "components": {
+    "LineSnap_None": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "line-snap": "none" } },
+    "LineSnap_Baseline": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "line-snap": "baseline" } },
+    "LineSnap_Contain": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "line-snap": "contain" } }
+  }
+}

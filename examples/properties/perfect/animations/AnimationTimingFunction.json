@@ -1,0 +1,67 @@
+{
+  "components": {
+    "Anim_ease": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-timing-function": "ease"
+      }
+    },
+    "Anim_linear": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-timing-function": "linear"
+      }
+    },
+    "Anim_ease_in": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-timing-function": "ease-in"
+      }
+    },
+    "Anim_ease_out": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-timing-function": "ease-out"
+      }
+    },
+    "Anim_ease_in_out": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-timing-function": "ease-in-out"
+      }
+    },
+    "Anim_step_start": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-timing-function": "step-start"
+      }
+    },
+    "Anim_cubic_bezier_0_4": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-timing-function": "cubic-bezier(0.42, 0, 0.58, 1)"
+      }
+    }
+  }
+}

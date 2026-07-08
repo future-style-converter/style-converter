@@ -1,0 +1,30 @@
+{
+  "components": {
+    "A_backgr": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6"
+      }
+    },
+    "B_scroll": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "scroll-behavior": "auto"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "scroll-behavior": "auto"
+      }
+    }
+  }
+}

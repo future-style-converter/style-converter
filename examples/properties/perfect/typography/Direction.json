@@ -1,0 +1,26 @@
+{
+  "components": {
+    "V0_ltr": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "direction": "ltr"
+      }
+    },
+    "V1_rtl": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "direction": "rtl"
+      }
+    }
+  }
+}

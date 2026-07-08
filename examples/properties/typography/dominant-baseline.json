@@ -1,0 +1,13 @@
+{
+  "components": {
+    "DominantBaseline_Auto": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "dominant-baseline": "auto" } },
+    "DominantBaseline_TextBottom": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "dominant-baseline": "text-bottom" } },
+    "DominantBaseline_Alphabetic": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "dominant-baseline": "alphabetic" } },
+    "DominantBaseline_Ideographic": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "dominant-baseline": "ideographic" } },
+    "DominantBaseline_Middle": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "dominant-baseline": "middle" } },
+    "DominantBaseline_Central": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "dominant-baseline": "central" } },
+    "DominantBaseline_Mathematical": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "dominant-baseline": "mathematical" } },
+    "DominantBaseline_Hanging": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "dominant-baseline": "hanging" } },
+    "DominantBaseline_TextTop": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "dominant-baseline": "text-top" } }
+  }
+}

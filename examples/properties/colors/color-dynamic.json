@@ -1,0 +1,32 @@
+{
+  "components": {
+    "Color_Mix_Srgb": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "color-mix(in srgb, red 50%, blue)"
+      }
+    },
+    "Color_Mix_Oklch": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "color-mix(in oklch, red, blue 30%)"
+      }
+    },
+    "Color_LightDark": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "light-dark(#ffeedd, #221100)"
+      }
+    },
+    "Color_Relative": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "rgb(from red calc(r - 50) g b)"
+      }
+    }
+  }
+}

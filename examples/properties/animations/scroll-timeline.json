@@ -1,0 +1,16 @@
+{
+  "components": {
+    "ST_NameOnly": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "scroll-timeline": "--my-scroll" } },
+    "ST_NameBlock": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "scroll-timeline": "--my-scroll block" } },
+    "ST_NameInline": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "scroll-timeline": "--my-scroll inline" } },
+    "ST_NameX": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "scroll-timeline": "--my-scroll x" } },
+    "ST_NameY": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "scroll-timeline": "--my-scroll y" } },
+    "STName_Ident": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "scroll-timeline-name": "--page-scroll" } },
+    "STName_Plain": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "scroll-timeline-name": "scroller" } },
+    "STName_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "scroll-timeline-name": "none" } },
+    "STAxis_Block": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "scroll-timeline-axis": "block" } },
+    "STAxis_Inline": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "scroll-timeline-axis": "inline" } },
+    "STAxis_X": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "scroll-timeline-axis": "x" } },
+    "STAxis_Y": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "scroll-timeline-axis": "y" } }
+  }
+}

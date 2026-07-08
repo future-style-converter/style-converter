@@ -1,0 +1,88 @@
+{
+  "components": {
+    "PT_None": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-try": "none" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#ef4444" } }
+      }
+    },
+    "PT_SingleFallback": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-try": "--bottom-then-top" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "PT_MultipleFallbacks": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-try": "--first, --second, --third" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#3b82f6" } }
+      }
+    },
+    "PT_FallbacksProp": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-try-fallbacks": "--a, --b" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#f59e0b" } }
+      }
+    },
+    "PT_Options_FlipBlock": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-try-options": "flip-block" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#a78bfa" } }
+      }
+    },
+    "PT_Options_FlipInlineStart": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-try-options": "flip-inline flip-start" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#22d3ee" } }
+      }
+    },
+    "PT_Order_Normal": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-try-order": "normal" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#fb7185" } }
+      }
+    },
+    "PT_Order_MostWidth": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-try-order": "most-width" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#86efac" } }
+      }
+    },
+    "PT_Order_MostBlockSize": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-try-order": "most-block-size" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#fcd34d" } }
+      }
+    },
+    "PT_Visibility_Always": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-visibility": "always" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#c084fc" } }
+      }
+    },
+    "PT_Visibility_AnchorsVisible": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-visibility": "anchors-visible" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#ef4444" } }
+      }
+    },
+    "PT_Visibility_NoOverflow": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-visibility": "no-overflow" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "PT_Fallback_None": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-fallback": "none" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#3b82f6" } }
+      }
+    },
+    "PT_Fallback_Named": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "position-fallback": "--compat" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#f59e0b" } }
+      }
+    }
+  }
+}

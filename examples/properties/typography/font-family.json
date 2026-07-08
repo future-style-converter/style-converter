@@ -1,0 +1,20 @@
+{
+  "components": {
+    "FontFamily_Serif": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "serif" } },
+    "FontFamily_SansSerif": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "sans-serif" } },
+    "FontFamily_Monospace": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "monospace" } },
+    "FontFamily_Cursive": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "cursive" } },
+    "FontFamily_Fantasy": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "fantasy" } },
+    "FontFamily_SystemUi": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "system-ui" } },
+    "FontFamily_UiSerif": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "ui-serif" } },
+    "FontFamily_UiSansSerif": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "ui-sans-serif" } },
+    "FontFamily_UiMonospace": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "ui-monospace" } },
+    "FontFamily_UiRounded": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "ui-rounded" } },
+    "FontFamily_Emoji": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "emoji" } },
+    "FontFamily_Math": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "math" } },
+    "FontFamily_Fangsong": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "fangsong" } },
+    "FontFamily_QuotedSingle": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "\"Helvetica Neue\"" } },
+    "FontFamily_Fallback_List": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "\"Helvetica Neue\", Helvetica, Arial, sans-serif" } },
+    "FontFamily_Unquoted_Named": { "properties": { "width": "240px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "Arial" } }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "components": {
+    "TransformBox_ContentBox": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "transform-box": "content-box", "transform": "rotate(10deg)" } },
+    "TransformBox_BorderBox": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "transform-box": "border-box", "transform": "rotate(10deg)" } },
+    "TransformBox_FillBox": { "properties": { "width": "120px", "height": "80px", "background-color": "#2ecc71", "transform-box": "fill-box", "transform": "rotate(10deg)" } },
+    "TransformBox_StrokeBox": { "properties": { "width": "120px", "height": "80px", "background-color": "#9b59b6", "transform-box": "stroke-box", "transform": "rotate(10deg)" } },
+    "TransformBox_ViewBox": { "properties": { "width": "120px", "height": "80px", "background-color": "#f39c12", "transform-box": "view-box", "transform": "rotate(10deg)" } }
+  }
+}

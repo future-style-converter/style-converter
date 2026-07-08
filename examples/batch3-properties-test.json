@@ -1,0 +1,199 @@
+{
+  "components": {
+    "Cursor_Pointer": {
+      "properties": {
+        "cursor": "pointer",
+        "background-color": "#3498db",
+        "padding": "15px",
+        "width": "120px",
+        "border-radius": "8px"
+      }
+    },
+    "Cursor_Default": {
+      "properties": {
+        "cursor": "default",
+        "background-color": "#95a5a6",
+        "padding": "15px",
+        "width": "120px"
+      }
+    },
+    "PointerEvents_None": {
+      "properties": {
+        "pointer-events": "none",
+        "background-color": "#e74c3c",
+        "padding": "15px",
+        "width": "140px",
+        "opacity": "0.6"
+      }
+    },
+    "PointerEvents_Auto": {
+      "properties": {
+        "pointer-events": "auto",
+        "background-color": "#2ecc71",
+        "padding": "15px",
+        "width": "140px"
+      }
+    },
+
+    "UserSelect_None": {
+      "properties": {
+        "user-select": "none",
+        "background-color": "#9b59b6",
+        "padding": "15px",
+        "width": "130px"
+      }
+    },
+    "UserSelect_All": {
+      "properties": {
+        "user-select": "all",
+        "background-color": "#1abc9c",
+        "padding": "15px",
+        "width": "130px"
+      }
+    },
+    "TouchAction_None": {
+      "properties": {
+        "touch-action": "none",
+        "background-color": "#e67e22",
+        "padding": "15px",
+        "width": "130px"
+      }
+    },
+    "TouchAction_Manipulation": {
+      "properties": {
+        "touch-action": "manipulation",
+        "background-color": "#16a085",
+        "padding": "15px",
+        "width": "150px"
+      }
+    },
+
+    "ScrollBehavior_Smooth": {
+      "properties": {
+        "scroll-behavior": "smooth",
+        "background-color": "#2980b9",
+        "padding": "15px",
+        "width": "150px"
+      }
+    },
+    "OverscrollBehavior_Contain": {
+      "properties": {
+        "overscroll-behavior": "contain",
+        "background-color": "#8e44ad",
+        "padding": "15px",
+        "width": "170px"
+      }
+    },
+    "ScrollbarWidth_Thin": {
+      "properties": {
+        "scrollbar-width": "thin",
+        "background-color": "#27ae60",
+        "padding": "15px",
+        "width": "150px"
+      }
+    },
+    "ScrollbarWidth_None": {
+      "properties": {
+        "scrollbar-width": "none",
+        "background-color": "#c0392b",
+        "padding": "15px",
+        "width": "150px"
+      }
+    },
+
+    "WritingMode_HorizontalTB": {
+      "properties": {
+        "writing-mode": "horizontal-tb",
+        "background-color": "#f39c12",
+        "padding": "10px",
+        "width": "150px",
+        "height": "60px"
+      }
+    },
+    "WritingMode_VerticalRL": {
+      "properties": {
+        "writing-mode": "vertical-rl",
+        "background-color": "#d35400",
+        "padding": "10px",
+        "width": "60px",
+        "height": "120px"
+      }
+    },
+    "WritingMode_VerticalLR": {
+      "properties": {
+        "writing-mode": "vertical-lr",
+        "background-color": "#c0392b",
+        "padding": "10px",
+        "width": "60px",
+        "height": "120px"
+      }
+    },
+    "Resize_Both": {
+      "properties": {
+        "resize": "both",
+        "background-color": "#7f8c8d",
+        "padding": "15px",
+        "width": "120px",
+        "height": "80px",
+        "overflow": "auto"
+      }
+    },
+    "Resize_Horizontal": {
+      "properties": {
+        "resize": "horizontal",
+        "background-color": "#34495e",
+        "padding": "15px",
+        "width": "120px"
+      }
+    },
+
+    "BoxSizing_BorderBox": {
+      "properties": {
+        "box-sizing": "border-box",
+        "background-color": "#1abc9c",
+        "padding": "20px",
+        "width": "150px",
+        "border-width": "3px",
+        "border-style": "solid",
+        "border-color": "#16a085"
+      }
+    },
+    "BoxSizing_ContentBox": {
+      "properties": {
+        "box-sizing": "content-box",
+        "background-color": "#e74c3c",
+        "padding": "20px",
+        "width": "150px",
+        "border-width": "3px",
+        "border-style": "solid",
+        "border-color": "#c0392b"
+      }
+    },
+    "ImageRendering_Pixelated": {
+      "properties": {
+        "image-rendering": "pixelated",
+        "background-color": "#9b59b6",
+        "width": "100px",
+        "height": "80px",
+        "padding": "5px"
+      }
+    },
+    "ImageRendering_CrispEdges": {
+      "properties": {
+        "image-rendering": "crisp-edges",
+        "background-color": "#3498db",
+        "width": "100px",
+        "height": "80px",
+        "padding": "5px"
+      }
+    },
+
+    "Reference_Normal": {
+      "properties": {
+        "background-color": "#bdc3c7",
+        "padding": "15px",
+        "width": "100px"
+      }
+    }
+  }
+}

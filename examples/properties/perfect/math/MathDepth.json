@@ -1,0 +1,40 @@
+{
+  "components": {
+    "V0_auto_add": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "math-depth": "auto-add"
+      }
+    },
+    "V1_add_1_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "math-depth": "add(1)"
+      }
+    },
+    "V2_0": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "math-depth": "0"
+      }
+    },
+    "V3_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "math-depth": "auto"
+      }
+    }
+  }
+}

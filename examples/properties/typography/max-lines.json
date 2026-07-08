@@ -1,0 +1,8 @@
+{
+  "components": {
+    "MaxLines_None": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "max-lines": "none" } },
+    "MaxLines_One": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "max-lines": "1" } },
+    "MaxLines_Two": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "max-lines": "2" } },
+    "MaxLines_Four": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "max-lines": "4" } }
+  }
+}

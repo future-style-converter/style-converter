@@ -1,0 +1,16 @@
+{
+  "components": {
+    "FontStretch_UltraCondensed": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "ultra-condensed" } },
+    "FontStretch_ExtraCondensed": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "extra-condensed" } },
+    "FontStretch_Condensed": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "condensed" } },
+    "FontStretch_SemiCondensed": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "semi-condensed" } },
+    "FontStretch_Normal": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "normal" } },
+    "FontStretch_SemiExpanded": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "semi-expanded" } },
+    "FontStretch_Expanded": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "expanded" } },
+    "FontStretch_ExtraExpanded": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "extra-expanded" } },
+    "FontStretch_UltraExpanded": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "ultra-expanded" } },
+    "FontStretch_Percent_75": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "75%" } },
+    "FontStretch_Percent_100": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "100%" } },
+    "FontStretch_Percent_150": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "150%" } }
+  }
+}

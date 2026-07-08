@@ -1,0 +1,43 @@
+{
+    "components": {
+      "CrazyColorComponent": {
+        "properties": {
+          "background-color": "#FFF",
+          "border-color": "#123456",
+          "color": "#11223344",
+          "highlight": "rgb(255,0,255)",
+          "shadow-color": "rgba(0,128,255,0.5)",
+          "gradient-start": "hsl(120, 100%, 50%)",
+          "gradient-end": "hsla(240, 50%, 50%, 0.7)",
+          "mix-color": "color-mix(in srgb, red 50%, blue 50%)",
+          "nested-color-mix": "color-mix(in display-p3, rgb(100,200,150) 25%, hsl(60, 80%, 70%) 75%)",
+          "weird-name-color": "LightCoral",
+          "unknown-name-color": "superPink",
+          "extra-spaces-color": "   rgb(  10 , 20 , 30 )   ",
+          "uppercase-hex": "#ABCDEF",
+          "mixed-case-func": "RgB(12,34,56)",
+          "transparent-color": "transparent",
+          "current-color": "currentColor"
+        }
+      },
+    "InsaneColorComponent": {
+      "properties": {
+        "background-color": "color-mix(in srgb, rgb(255,0,255) 30%, color-mix(in display-p3, hsl(120, 50%, 60%) 50%, rgba(10,20,30,0.4) 50%) 70%)",
+        "border-color": "RGBA(  128 , 64 , 32 , 0.75 )",
+        "color": "#ABC",
+        "shadow-color": "#12345678",
+        "highlight": "rgb( 255 , 255 , 0 )",
+        "mix-color": "color-mix(in display-p3, LightSalmon 25%, ColorMix(in srgb, Blue 50%, rgb(0,255,0) 50%) 75%)",
+        "nested-color-fun": "color-mix(in srgb, color-mix(in srgb, rgb(0,0,0) 10%, hsl(0,0%,50%) 90%) 60%, rgba(255,255,255,0.2) 40%)",
+        "crazy-spaces": " hSlA(  300 , 75% , 25% , 0.5 ) ",
+        "uppercase-hex": "#FEDCBA",
+        "weird-names": "superPink",
+        "transparent-color": "TRANSPARENT",
+        "current-color": "currentColor",
+        "all-caps-func": "RGB(12,34,56)",
+        "triple-nest": "color-mix(in srgb, color-mix(in srgb, color-mix(in srgb, red 10%, blue 90%) 20%, green 80%) 30%, yellow 70%)"
+      }
+    }
+    }
+  }
+  

@@ -1,0 +1,59 @@
+{
+  "components": {
+    "V0_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "hanging-punctuation": "none"
+      }
+    },
+    "V1_first": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "hanging-punctuation": "first"
+      }
+    },
+    "V2_last": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "hanging-punctuation": "last"
+      }
+    },
+    "V3_allow_en": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "hanging-punctuation": "allow-end"
+      }
+    },
+    "V4_force_end": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "hanging-punctuation": "force-end"
+      }
+    }
+  }
+}

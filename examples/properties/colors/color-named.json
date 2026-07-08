@@ -1,0 +1,47 @@
+{
+  "components": {
+    "Color_Named_Red": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "red"
+      }
+    },
+    "Color_Named_Coral": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "coral"
+      }
+    },
+    "Color_Named_Rebeccapurple": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "rebeccapurple"
+      }
+    },
+    "Color_Named_Navy": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "navy"
+      }
+    },
+    "Color_Transparent": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "transparent"
+      }
+    },
+    "Color_CurrentColor": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "color": "red",
+        "background-color": "currentColor"
+      }
+    }
+  }
+}

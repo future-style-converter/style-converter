@@ -1,0 +1,22 @@
+{
+  "components": {
+    "R_0": {
+      "properties": { "width": "180px", "height": "80px", "background-color": "#1f2937", "padding": "0", "position": "relative" },
+      "children": {
+        "child": { "properties": { "position": "absolute", "right": "0", "top": "10px", "width": "40px", "height": "40px", "background-color": "#ef4444" } }
+      }
+    },
+    "R_10px": {
+      "properties": { "width": "180px", "height": "80px", "background-color": "#1f2937", "padding": "0", "position": "relative" },
+      "children": {
+        "child": { "properties": { "position": "absolute", "right": "10px", "top": "10px", "width": "40px", "height": "40px", "background-color": "#ef4444" } }
+      }
+    },
+    "R_50pct": {
+      "properties": { "width": "180px", "height": "80px", "background-color": "#1f2937", "padding": "0", "position": "relative" },
+      "children": {
+        "child": { "properties": { "position": "absolute", "right": "50%", "top": "10px", "width": "40px", "height": "40px", "background-color": "#ef4444" } }
+      }
+    }
+  }
+}

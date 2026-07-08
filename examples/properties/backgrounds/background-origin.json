@@ -1,0 +1,7 @@
+{
+  "components": {
+    "Origin_BorderBox": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(red, blue)", "background-repeat": "no-repeat", "background-size": "40px 40px", "background-origin": "border-box", "border": "10px dashed yellow", "padding": "10px" } },
+    "Origin_PaddingBox": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(red, blue)", "background-repeat": "no-repeat", "background-size": "40px 40px", "background-origin": "padding-box", "border": "10px dashed yellow", "padding": "10px" } },
+    "Origin_ContentBox": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(red, blue)", "background-repeat": "no-repeat", "background-size": "40px 40px", "background-origin": "content-box", "border": "10px dashed yellow", "padding": "10px" } }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "components": {
+    "Size_Auto": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(to right, red, blue)", "background-size": "auto", "background-repeat": "no-repeat" } },
+    "Size_Cover": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(to right, red, blue)", "background-size": "cover", "background-repeat": "no-repeat" } },
+    "Size_Contain": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(to right, red, blue)", "background-size": "contain", "background-repeat": "no-repeat" } },
+    "Size_100px": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(to right, red, blue)", "background-size": "100px", "background-repeat": "no-repeat" } },
+    "Size_50Percent": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(to right, red, blue)", "background-size": "50%", "background-repeat": "no-repeat" } },
+    "Size_TwoValues_Px": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(to right, red, blue)", "background-size": "100px 50px", "background-repeat": "no-repeat" } },
+    "Size_TwoValues_Percent": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(to right, red, blue)", "background-size": "50% 100%", "background-repeat": "no-repeat" } },
+    "Size_Auto_Auto": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(to right, red, blue)", "background-size": "auto auto", "background-repeat": "no-repeat" } }
+  }
+}

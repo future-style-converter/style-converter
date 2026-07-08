@@ -1,0 +1,12 @@
+{
+  "components": {
+    "TextIndent_Zero": { "properties": { "width": "280px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "0" } },
+    "TextIndent_Px_20": { "properties": { "width": "280px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "20px" } },
+    "TextIndent_Px_40": { "properties": { "width": "280px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "40px" } },
+    "TextIndent_Em_2": { "properties": { "width": "280px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "2em" } },
+    "TextIndent_Percent_10": { "properties": { "width": "280px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "10%" } },
+    "TextIndent_Negative": { "properties": { "width": "280px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "-1em" } },
+    "TextIndent_Hanging": { "properties": { "width": "280px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "2em hanging" } },
+    "TextIndent_EachLine": { "properties": { "width": "280px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "2em each-line" } }
+  }
+}

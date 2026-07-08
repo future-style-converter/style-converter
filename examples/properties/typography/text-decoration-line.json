@@ -1,0 +1,11 @@
+{
+  "components": {
+    "TextDecorationLine_None": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "none" } },
+    "TextDecorationLine_Underline": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline" } },
+    "TextDecorationLine_Overline": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "overline" } },
+    "TextDecorationLine_LineThrough": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "line-through" } },
+    "TextDecorationLine_Blink": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "blink" } },
+    "TextDecorationLine_UnderOver": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline overline" } },
+    "TextDecorationLine_Triple": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline overline line-through" } }
+  }
+}

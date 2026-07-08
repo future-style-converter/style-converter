@@ -1,0 +1,9 @@
+{
+  "components": {
+    "MaskBorderWidth_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "mask-border-width": "auto" } },
+    "MaskBorderWidth_Length": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-border-width": "10px" } },
+    "MaskBorderWidth_Number": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "mask-border-width": "2" } },
+    "MaskBorderWidth_Two": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "mask-border-width": "10px 20px" } },
+    "MaskBorderWidth_Four": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "mask-border-width": "10px 15px 20px 25px" } }
+  }
+}

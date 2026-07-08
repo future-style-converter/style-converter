@@ -1,0 +1,31 @@
+{
+  "components": {
+    "Time_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "timeline-scope": "none"
+      }
+    },
+    "Time_all": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "timeline-scope": "all"
+      }
+    },
+    "Time_inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "timeline-scope": "inherit"
+      }
+    }
+  }
+}

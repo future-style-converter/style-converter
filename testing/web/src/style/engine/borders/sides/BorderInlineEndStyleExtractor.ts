@@ -1,0 +1,28 @@
+// BorderInlineEndStyleExtractor.ts — folds `BorderInlineEndStyle` IR properties into a config.
+// IR shape flavors (from examples/properties/borders/border-styles.json):
+//   "SOLID" / "DASHED" / "DOTTED" / "DOUBLE" / "GROOVE" / "RIDGE" / "INSET" / "OUTSET" / "NONE" / "HIDDEN"
+// Parser emits UPPERCASE bare strings; we lowercase + validate against the
+// CSS Backgrounds & Borders §5 keyword set (see _shared.ts).
+
+import { extractBorderSideStyle } from './_shared';                       // shared parse/validate logic
+import type { BorderInlineEndStyleConfig, BorderInlineEndStylePropertyType } from './BorderInlineEndStyleConfig';
+import { BORDER_INLINE_END_STYLE_PROPERTY_TYPE } from './BorderInlineEndStyleConfig';
+
+// Minimal IRProperty shape — keeps engine modules decoupled from IR types dir.
+interface IRPropertyLike { type: string; data: unknown; }
+
+// Type-narrowing predicate — used by the registry/renderer for dispatch gating.
+export function isBorderInlineEndStyleProperty(type: string): type is BorderInlineEndStylePropertyType {
+  return type === BORDER_INLINE_END_STYLE_PROPERTY_TYPE;
+}
+
+// Main entrypoint — last-write-wins fold (CSS cascade is already resolved upstream).
+export function extractBorderInlineEndStyle(properties: IRPropertyLike[]): BorderInlineEndStyleConfig {
+  const cfg: BorderInlineEndStyleConfig = {};                                   // blank accumulator
+  for (const p of properties) {                                         // single pass
+    if (!isBorderInlineEndStyleProperty(p.type)) continue;                                // skip unrelated
+    const v = extractBorderSideStyle(p.data);                                     // validate & parse
+    if (v) cfg.style = v;                                           // last recognised value wins
+  }
+  return cfg;
+}

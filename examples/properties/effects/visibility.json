@@ -1,0 +1,7 @@
+{
+  "components": {
+    "Visibility_Visible": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "visibility": "visible" } },
+    "Visibility_Hidden": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "visibility": "hidden" } },
+    "Visibility_Collapse": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "visibility": "collapse" } }
+  }
+}

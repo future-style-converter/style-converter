@@ -1,0 +1,203 @@
+{
+  "components": {
+    "Image_Source_None": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "10px", "border-right-width": "10px", "border-bottom-width": "10px", "border-left-width": "10px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "none",
+        "background-color": "#3498db"
+      }
+    },
+    "Image_Source_Url": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "url(border.png)",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Image_Source_LinearGradient": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(45deg, red, blue)",
+        "border-image-slice": "1",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Source_RadialGradient": {
+      "properties": {
+        "width": "200px", "height": "120px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "radial-gradient(circle, red, yellow, blue)",
+        "border-image-slice": "30%",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Slice_Number": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "30",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Slice_Percent": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "25%",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Slice_Fill": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "30 fill",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Slice_FourValues": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "10 20 30 40",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Width_Length": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "1",
+        "border-image-width": "10px",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Width_Auto": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "1",
+        "border-image-width": "auto",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Width_Number_Multiplier": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "10px", "border-right-width": "10px", "border-bottom-width": "10px", "border-left-width": "10px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "1",
+        "border-image-width": "2",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Width_FourValues": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "1",
+        "border-image-width": "10px 20px 30px 40px",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Outset_Length": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "10px", "border-right-width": "10px", "border-bottom-width": "10px", "border-left-width": "10px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "1",
+        "border-image-outset": "10px",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Outset_Number": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "10px", "border-right-width": "10px", "border-bottom-width": "10px", "border-left-width": "10px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "1",
+        "border-image-outset": "2",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Repeat_Stretch": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "30",
+        "border-image-repeat": "stretch",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Repeat_Repeat": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "30",
+        "border-image-repeat": "repeat",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Repeat_Round": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "30",
+        "border-image-repeat": "round",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Repeat_Space": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "30",
+        "border-image-repeat": "space",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Image_Repeat_TwoValues": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "30",
+        "border-image-repeat": "repeat stretch",
+        "background-color": "#ecf0f1"
+      }
+    }
+  }
+}

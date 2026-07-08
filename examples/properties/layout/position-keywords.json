@@ -1,0 +1,38 @@
+{
+  "components": {
+    "Pos_Static": {
+      "properties": { "width": "300px", "height": "80px", "position": "static", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "Pos_Relative": {
+      "properties": { "width": "300px", "height": "80px", "position": "relative", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444", "position": "relative", "top": "10px", "left": "20px" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "Pos_Absolute": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444", "position": "absolute", "top": "10px", "left": "10px" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981", "position": "absolute", "bottom": "10px", "right": "10px" } }
+      }
+    },
+    "Pos_Fixed": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444", "position": "fixed", "top": "10px", "left": "10px" } }
+      }
+    },
+    "Pos_Sticky": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444", "position": "sticky", "top": "0" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    }
+  }
+}

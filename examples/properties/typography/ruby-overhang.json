@@ -1,0 +1,8 @@
+{
+  "components": {
+    "RubyOverhang_Auto": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-overhang": "auto" } },
+    "RubyOverhang_Start": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-overhang": "start" } },
+    "RubyOverhang_End": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-overhang": "end" } },
+    "RubyOverhang_None": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-overhang": "none" } }
+  }
+}

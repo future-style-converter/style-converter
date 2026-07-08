@@ -1,0 +1,8 @@
+{
+  "components": {
+    "S_solid":  { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-bottom-width": "6px", "border-bottom-color": "#ef4444", "border-bottom-style": "solid" } },
+    "S_dashed": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-bottom-width": "6px", "border-bottom-color": "#ef4444", "border-bottom-style": "dashed" } },
+    "S_dotted": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-bottom-width": "6px", "border-bottom-color": "#ef4444", "border-bottom-style": "dotted" } },
+    "S_none":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-bottom-width": "6px", "border-bottom-color": "#ef4444", "border-bottom-style": "none" } }
+  }
+}

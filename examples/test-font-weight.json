@@ -1,0 +1,39 @@
+{
+  "components": {
+    "NormalKeyword": {
+      "properties": {
+        "font-weight": "normal"
+      }
+    },
+    "BoldKeyword": {
+      "properties": {
+        "font-weight": "bold"
+      }
+    },
+    "LighterKeyword": {
+      "properties": {
+        "font-weight": "lighter"
+      }
+    },
+    "BolderKeyword": {
+      "properties": {
+        "font-weight": "bolder"
+      }
+    },
+    "Numeric400": {
+      "properties": {
+        "font-weight": "400"
+      }
+    },
+    "Numeric700": {
+      "properties": {
+        "font-weight": "700"
+      }
+    },
+    "Numeric300": {
+      "properties": {
+        "font-weight": "300"
+      }
+    }
+  }
+}

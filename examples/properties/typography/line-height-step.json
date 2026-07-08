@@ -1,0 +1,9 @@
+{
+  "components": {
+    "LineHeightStep_None": { "properties": { "width": "240px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-height-step": "none" } },
+    "LineHeightStep_12px": { "properties": { "width": "240px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-height-step": "12px" } },
+    "LineHeightStep_24px": { "properties": { "width": "240px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-height-step": "24px" } },
+    "LineHeightStep_Pt_8": { "properties": { "width": "240px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-height-step": "8pt" } },
+    "LineHeightStep_Em_1": { "properties": { "width": "240px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-height-step": "1em" } }
+  }
+}

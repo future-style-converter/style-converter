@@ -1,0 +1,48 @@
+{
+  "components": {
+    "V0_normal": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-feature-settings": "normal"
+      }
+    },
+    "V1__liga_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-feature-settings": "\"liga\""
+      }
+    },
+    "V2__liga__o": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-feature-settings": "\"liga\" off"
+      }
+    },
+    "V3__smcp__1": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-feature-settings": "\"smcp\" 1"
+      }
+    }
+  }
+}

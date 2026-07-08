@@ -1,0 +1,9 @@
+{
+  "components": {
+    "All_Initial": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "all": "initial" } },
+    "All_Inherit": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "all": "inherit" } },
+    "All_Unset": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "all": "unset" } },
+    "All_Revert": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "all": "revert" } },
+    "All_RevertLayer": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "all": "revert-layer" } }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "components": {
+    "FontVariantLigatures_Normal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "normal" } },
+    "FontVariantLigatures_None": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "none" } },
+    "FontVariantLigatures_CommonLigatures": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "common-ligatures" } },
+    "FontVariantLigatures_NoCommonLigatures": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "no-common-ligatures" } },
+    "FontVariantLigatures_DiscretionaryLigatures": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "discretionary-ligatures" } },
+    "FontVariantLigatures_NoDiscretionaryLigatures": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "no-discretionary-ligatures" } },
+    "FontVariantLigatures_HistoricalLigatures": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "historical-ligatures" } },
+    "FontVariantLigatures_NoHistoricalLigatures": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "no-historical-ligatures" } },
+    "FontVariantLigatures_Contextual": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "contextual" } },
+    "FontVariantLigatures_NoContextual": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "no-contextual" } },
+    "FontVariantLigatures_Combo": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "common-ligatures discretionary-ligatures contextual" } },
+    "FontVariantLigatures_Combo_Negations": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-ligatures": "no-common-ligatures no-contextual" } }
+  }
+}

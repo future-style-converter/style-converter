@@ -1,0 +1,12 @@
+{
+  "components": {
+    "GlyphOrientationHorizontal_0": { "properties": { "width": "180px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "glyph-orientation-horizontal": "0deg" } },
+    "GlyphOrientationHorizontal_90": { "properties": { "width": "180px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "glyph-orientation-horizontal": "90deg" } },
+    "GlyphOrientationHorizontal_180": { "properties": { "width": "180px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "glyph-orientation-horizontal": "180deg" } },
+    "GlyphOrientationHorizontal_270": { "properties": { "width": "180px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "glyph-orientation-horizontal": "270deg" } },
+    "GlyphOrientationVertical_Auto": { "properties": { "width": "180px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "glyph-orientation-vertical": "auto" } },
+    "GlyphOrientationVertical_0": { "properties": { "width": "180px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "glyph-orientation-vertical": "0deg" } },
+    "GlyphOrientationVertical_90": { "properties": { "width": "180px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "glyph-orientation-vertical": "90deg" } },
+    "GlyphOrientationVertical_Turn": { "properties": { "width": "180px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "glyph-orientation-vertical": "0.25turn" } }
+  }
+}

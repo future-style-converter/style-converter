@@ -1,0 +1,9 @@
+{
+  "components": {
+    "TabSize_Number_4": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre", "tab-size": "4" } },
+    "TabSize_Number_2": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre", "tab-size": "2" } },
+    "TabSize_Number_8": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre", "tab-size": "8" } },
+    "TabSize_Length_Px_16": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre", "tab-size": "16px" } },
+    "TabSize_Length_Em_2": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre", "tab-size": "2em" } }
+  }
+}

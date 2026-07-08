@@ -1,0 +1,31 @@
+{
+  "components": {
+    "View_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "view-timeline-inset": "auto"
+      }
+    },
+    "View_10px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "view-timeline-inset": "10px"
+      }
+    },
+    "View_inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "view-timeline-inset": "inherit"
+      }
+    }
+  }
+}

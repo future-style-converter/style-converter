@@ -1,0 +1,10 @@
+{
+  "components": {
+    "WordSpacing_Normal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "word-spacing": "normal" } },
+    "WordSpacing_Px_4": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "word-spacing": "4px" } },
+    "WordSpacing_Px_12": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "word-spacing": "12px" } },
+    "WordSpacing_Em_0_5": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "word-spacing": "0.5em" } },
+    "WordSpacing_Rem_1": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "word-spacing": "1rem" } },
+    "WordSpacing_Negative": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "word-spacing": "-2px" } }
+  }
+}

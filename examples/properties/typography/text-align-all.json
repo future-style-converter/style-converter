@@ -1,0 +1,11 @@
+{
+  "components": {
+    "TextAlignAll_Start": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align-all": "start" } },
+    "TextAlignAll_End": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align-all": "end" } },
+    "TextAlignAll_Left": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align-all": "left" } },
+    "TextAlignAll_Right": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align-all": "right" } },
+    "TextAlignAll_Center": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align-all": "center" } },
+    "TextAlignAll_Justify": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align-all": "justify" } },
+    "TextAlignAll_MatchParent": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align-all": "match-parent" } }
+  }
+}

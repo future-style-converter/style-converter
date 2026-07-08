@@ -1,0 +1,21 @@
+{
+  "_notes": {
+    "fixture": "colors-legacy",
+    "purpose": "Hex (#3,#4,#6,#8), rgb/rgba (comma + space), hsl/hsla (comma + space).",
+    "ir_shape": "IRColor wraps { 'srgb': {r,g,b,a?}, 'original': <representation> }. Representation varies: Hex -> bare string '#...', RGB -> {r,g,b,a?}, HSL -> {h,s,l,a?}."
+  },
+  "components": {
+    "Color_Hex3":           { "properties": { "background-color": "#f0a", "padding": "20px" } },
+    "Color_Hex4":           { "properties": { "background-color": "#f0a8", "padding": "20px" } },
+    "Color_Hex6":           { "properties": { "background-color": "#ff3366", "padding": "20px" } },
+    "Color_Hex8":           { "properties": { "background-color": "#ff336680", "padding": "20px" } },
+    "Color_RgbComma":       { "properties": { "background-color": "rgb(52, 152, 219)", "padding": "20px" } },
+    "Color_RgbSpace":       { "properties": { "background-color": "rgb(231 76 60)", "padding": "20px" } },
+    "Color_RgbaComma":      { "properties": { "background-color": "rgba(155, 89, 182, 0.7)", "padding": "20px" } },
+    "Color_RgbSlashAlpha":  { "properties": { "background-color": "rgb(26 188 156 / 80%)", "padding": "20px" } },
+    "Color_HslComma":       { "properties": { "background-color": "hsl(120, 60%, 50%)", "padding": "20px" } },
+    "Color_HslSpace":       { "properties": { "background-color": "hsl(240 60% 50%)", "padding": "20px" } },
+    "Color_HslaComma":      { "properties": { "background-color": "hsla(30, 80%, 55%, 0.6)", "padding": "20px" } },
+    "Color_HslSlashAlpha":  { "properties": { "background-color": "hsl(300 60% 50% / 50%)", "padding": "20px" } }
+  }
+}

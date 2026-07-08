@@ -1,0 +1,49 @@
+{
+  "components": {
+    "Anim_normal": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-range-end": "normal"
+      }
+    },
+    "Anim_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-range-end": "auto"
+      }
+    },
+    "Anim_cover": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-range-end": "cover"
+      }
+    },
+    "Anim_contain": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-range-end": "contain"
+      }
+    },
+    "Anim_50_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-range-end": "50%"
+      }
+    }
+  }
+}

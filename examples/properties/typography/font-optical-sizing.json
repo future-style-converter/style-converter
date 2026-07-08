@@ -1,0 +1,6 @@
+{
+  "components": {
+    "FontOpticalSizing_Auto": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-optical-sizing": "auto" } },
+    "FontOpticalSizing_None": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-optical-sizing": "none" } }
+  }
+}

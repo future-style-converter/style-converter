@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "marker": "none"
+      }
+    },
+    "V1_url__m_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "marker": "url(#m)"
+      }
+    }
+  }
+}

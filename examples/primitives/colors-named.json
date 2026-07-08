@@ -1,0 +1,17 @@
+{
+  "_notes": {
+    "fixture": "colors-named",
+    "purpose": "CSS named colors + transparent + currentColor keywords.",
+    "ir_shape_named": "original is a bare JSON string ('red', 'coral', ...). srgb is resolved for spec-known names.",
+    "ir_shape_transparent": "original is the string 'transparent'. srgb may be {r:0,g:0,b:0,a:0} or null.",
+    "ir_shape_currentColor": "original is the string 'currentColor'. srgb=null (dynamic — depends on element color)."
+  },
+  "components": {
+    "Color_Named_Red":          { "properties": { "background-color": "red", "padding": "20px" } },
+    "Color_Named_Coral":        { "properties": { "background-color": "coral", "padding": "20px" } },
+    "Color_Named_RebeccaPurple":{ "properties": { "background-color": "rebeccapurple", "padding": "20px" } },
+    "Color_Named_Navy":         { "properties": { "background-color": "navy", "color": "white", "padding": "20px" } },
+    "Color_Transparent":        { "properties": { "background-color": "transparent", "border": "3px solid #333", "padding": "20px" } },
+    "Color_CurrentColor":       { "properties": { "color": "#e74c3c", "border": "3px solid currentColor", "padding": "20px" } }
+  }
+}

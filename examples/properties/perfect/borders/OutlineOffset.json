@@ -1,0 +1,40 @@
+{
+  "components": {
+    "Outl_1px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "outline-offset": "1px"
+      }
+    },
+    "Outl_4px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "outline-offset": "4px"
+      }
+    },
+    "Outl_25_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "outline-offset": "25%"
+      }
+    },
+    "Outl_inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "outline-offset": "inherit"
+      }
+    }
+  }
+}

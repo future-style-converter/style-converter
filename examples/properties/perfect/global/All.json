@@ -1,0 +1,17 @@
+{
+  "components": {
+    "All_Default": {
+      "properties": {
+        "width": "180px", "height": "80px", "padding": "10px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "All_Initial": {
+      "properties": {
+        "all": "initial",
+        "width": "180px", "height": "80px",
+        "background-color": "#9b59b6"
+      }
+    }
+  }
+}

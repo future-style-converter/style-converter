@@ -1,0 +1,11 @@
+{
+  "components": {
+    "TextAlign_Start": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align": "start" } },
+    "TextAlign_End": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align": "end" } },
+    "TextAlign_Left": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align": "left" } },
+    "TextAlign_Right": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align": "right" } },
+    "TextAlign_Center": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align": "center" } },
+    "TextAlign_Justify": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align": "justify" } },
+    "TextAlign_MatchParent": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align": "match-parent" } }
+  }
+}

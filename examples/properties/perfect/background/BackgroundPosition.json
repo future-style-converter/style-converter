@@ -1,0 +1,54 @@
+{
+  "components": {
+    "BP_top_left": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#1f2937",
+        "background-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "background-repeat": "no-repeat",
+        "background-position": "top left"
+      }
+    },
+    "BP_top_right": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#1f2937",
+        "background-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "background-repeat": "no-repeat",
+        "background-position": "top right"
+      }
+    },
+    "BP_bottom_left": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#1f2937",
+        "background-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "background-repeat": "no-repeat",
+        "background-position": "bottom left"
+      }
+    },
+    "BP_bottom_right": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#1f2937",
+        "background-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "background-repeat": "no-repeat",
+        "background-position": "bottom right"
+      }
+    },
+    "BP_center": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#1f2937",
+        "background-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "background-repeat": "no-repeat",
+        "background-position": "center"
+      }
+    }
+  }
+}

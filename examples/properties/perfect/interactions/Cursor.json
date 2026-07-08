@@ -1,0 +1,15 @@
+{
+  "components": {
+    "C_auto":         { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "auto" } },
+    "C_default":      { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "default" } },
+    "C_pointer":      { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "pointer" } },
+    "C_text":         { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "text" } },
+    "C_help":         { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "help" } },
+    "C_wait":         { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "wait" } },
+    "C_progress":     { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "progress" } },
+    "C_not_allowed":  { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "not-allowed" } },
+    "C_grab":         { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "grab" } },
+    "C_move":         { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "move" } },
+    "C_none":         { "properties": { "width": "180px", "height": "60px", "background-color": "#3b82f6", "cursor": "none" } }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "components": {
+    "V0_12px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px"
+      }
+    },
+    "V1_16px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "16px"
+      }
+    },
+    "V2_20px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "20px"
+      }
+    },
+    "V3_24px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "24px"
+      }
+    },
+    "V4_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "initial-letter-align": "auto"
+      }
+    },
+    "V5_alphabetic": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "initial-letter-align": "alphabetic"
+      }
+    },
+    "V6_hanging": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "initial-letter-align": "hanging"
+      }
+    },
+    "V7_ideographi": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "initial-letter-align": "ideographic"
+      }
+    },
+    "V8_border_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "initial-letter-align": "border-box"
+      }
+    }
+  }
+}

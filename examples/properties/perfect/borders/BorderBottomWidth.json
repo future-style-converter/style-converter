@@ -1,0 +1,8 @@
+{
+  "components": {
+    "W_thin":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-bottom-color": "#ef4444", "border-bottom-style": "solid", "border-bottom-width": "1px" } },
+    "W_medium": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-bottom-color": "#ef4444", "border-bottom-style": "solid", "border-bottom-width": "4px" } },
+    "W_thick":  { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-bottom-color": "#ef4444", "border-bottom-style": "solid", "border-bottom-width": "12px" } },
+    "W_zero":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-bottom-color": "#ef4444", "border-bottom-style": "solid", "border-bottom-width": "0" } }
+  }
+}

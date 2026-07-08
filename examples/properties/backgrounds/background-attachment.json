@@ -1,0 +1,7 @@
+{
+  "components": {
+    "Attachment_Scroll": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(red, blue)", "background-attachment": "scroll" } },
+    "Attachment_Fixed": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(red, blue)", "background-attachment": "fixed" } },
+    "Attachment_Local": { "properties": { "width": "160px", "height": "80px", "background-image": "linear-gradient(red, blue)", "background-attachment": "local" } }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "components": {
+    "V0_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "caret": "auto"
+      }
+    },
+    "V1__3b82f6_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "caret": "#3b82f6 bar"
+      }
+    },
+    "V2_bar": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "caret": "bar"
+      }
+    },
+    "V3_block": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "caret": "block"
+      }
+    },
+    "V4_underscore": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "caret": "underscore"
+      }
+    }
+  }
+}

@@ -1,0 +1,106 @@
+{
+  "components": {
+    "Isolation_Auto": {
+      "properties": {
+        "isolation": "auto",
+        "background-color": "#3498db",
+        "padding": "20px",
+        "width": "150px"
+      }
+    },
+    "Isolation_Isolate": {
+      "properties": {
+        "isolation": "isolate",
+        "background-color": "#e74c3c",
+        "padding": "20px",
+        "width": "150px"
+      }
+    },
+    "Isolation_WithBlendMode": {
+      "properties": {
+        "isolation": "isolate",
+        "mix-blend-mode": "multiply",
+        "background-color": "#9b59b6",
+        "padding": "25px",
+        "width": "180px"
+      }
+    },
+    "ImageRendering_Auto": {
+      "properties": {
+        "image-rendering": "auto",
+        "background-color": "#2ecc71",
+        "width": "100px",
+        "height": "100px",
+        "transform": "scale(2)"
+      }
+    },
+    "ImageRendering_Pixelated": {
+      "properties": {
+        "image-rendering": "pixelated",
+        "background-color": "#f39c12",
+        "width": "100px",
+        "height": "100px",
+        "transform": "scale(2)"
+      }
+    },
+    "ImageRendering_CrispEdges": {
+      "properties": {
+        "image-rendering": "crisp-edges",
+        "background-color": "#1abc9c",
+        "width": "100px",
+        "height": "100px",
+        "transform": "scale(1.5)"
+      }
+    },
+    "ImageRendering_Smooth": {
+      "properties": {
+        "image-rendering": "smooth",
+        "background-color": "#e67e22",
+        "width": "80px",
+        "height": "80px",
+        "transform": "scale(2)"
+      }
+    },
+    "ImageRendering_HighQuality": {
+      "properties": {
+        "image-rendering": "high-quality",
+        "background-color": "#8e44ad",
+        "width": "80px",
+        "height": "80px",
+        "transform": "scale(2)"
+      }
+    },
+    "MixBlendMode_Multiply": {
+      "properties": {
+        "mix-blend-mode": "multiply",
+        "background-color": "#e74c3c",
+        "padding": "20px",
+        "width": "120px"
+      }
+    },
+    "MixBlendMode_Screen": {
+      "properties": {
+        "mix-blend-mode": "screen",
+        "background-color": "#3498db",
+        "padding": "20px",
+        "width": "120px"
+      }
+    },
+    "MixBlendMode_Overlay": {
+      "properties": {
+        "mix-blend-mode": "overlay",
+        "background-color": "#2ecc71",
+        "padding": "20px",
+        "width": "120px"
+      }
+    },
+    "MixBlendMode_Difference": {
+      "properties": {
+        "mix-blend-mode": "difference",
+        "background-color": "#9b59b6",
+        "padding": "20px",
+        "width": "120px"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "components": {
+    "Hyphens_None": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "hyphens": "none" } },
+    "Hyphens_Manual": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "hyphens": "manual" } },
+    "Hyphens_Auto": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "hyphens": "auto" } }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "components": {
+    "ThinBorder": {
+      "properties": {
+        "border-top-width": "thin"
+      }
+    },
+    "MediumBorder": {
+      "properties": {
+        "border-right-width": "medium"
+      }
+    },
+    "ThickBorder": {
+      "properties": {
+        "border-bottom-width": "thick"
+      }
+    },
+    "PixelBorder": {
+      "properties": {
+        "border-left-width": "2px"
+      }
+    },
+    "EmBorder": {
+      "properties": {
+        "border-top-width": "0.5em"
+      }
+    },
+    "AllSides": {
+      "properties": {
+        "border-top-width": "thin",
+        "border-right-width": "medium",
+        "border-bottom-width": "thick",
+        "border-left-width": "4px"
+      }
+    }
+  }
+}

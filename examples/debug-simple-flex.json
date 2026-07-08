@@ -1,0 +1,77 @@
+{
+  "components": [
+    {
+      "id": "simple-row-test",
+      "name": "SimpleRow",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 300.0}},
+        {"type": "Height", "data": {"type": "length", "px": 100.0}},
+        {"type": "Display", "data": {"keyword": "flex"}},
+        {"type": "FlexDirection", "data": {"keyword": "row"}},
+        {"type": "JustifyContent", "data": {"keyword": "space-between"}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 0.9, "g": 0.9, "b": 0.9}, "original": "#e5e5e5"}}
+      ],
+      "children": [
+        {
+          "id": "red-box",
+          "name": "RedBox",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 80.0}},
+            {"type": "Height", "data": {"type": "length", "px": 80.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 1.0, "g": 0.0, "b": 0.0}, "original": "red"}}
+          ]
+        },
+        {
+          "id": "blue-box",
+          "name": "BlueBox",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 80.0}},
+            {"type": "Height", "data": {"type": "length", "px": 80.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0.0, "g": 0.0, "b": 1.0}, "original": "blue"}}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "simple-col-test",
+      "name": "SimpleColumn",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 120.0}},
+        {"type": "Height", "data": {"type": "length", "px": 250.0}},
+        {"type": "Display", "data": {"keyword": "flex"}},
+        {"type": "FlexDirection", "data": {"keyword": "column"}},
+        {"type": "JustifyContent", "data": {"keyword": "space-around"}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 0.2, "g": 0.2, "b": 0.2}, "original": "#333"}}
+      ],
+      "children": [
+        {
+          "id": "green-box",
+          "name": "GreenBox",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 80.0}},
+            {"type": "Height", "data": {"type": "length", "px": 50.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0.0, "g": 1.0, "b": 0.0}, "original": "green"}}
+          ]
+        },
+        {
+          "id": "yellow-box",
+          "name": "YellowBox",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 80.0}},
+            {"type": "Height", "data": {"type": "length", "px": 50.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 1.0, "g": 1.0, "b": 0.0}, "original": "yellow"}}
+          ]
+        },
+        {
+          "id": "purple-box",
+          "name": "PurpleBox",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 80.0}},
+            {"type": "Height", "data": {"type": "length", "px": 50.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0.5, "g": 0.0, "b": 0.5}, "original": "purple"}}
+          ]
+        }
+      ]
+    }
+  ]
+}

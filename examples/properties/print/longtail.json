@@ -1,0 +1,46 @@
+{
+  "components": {
+    "Bleed_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "bleed": "auto" } },
+    "Bleed_Length": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "bleed": "6mm" } },
+
+    "BookmarkLabel_Content": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "bookmark-label": "Chapter 1" } },
+    "BookmarkLabel_Attr": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "bookmark-label": "attr(title)" } },
+
+    "BookmarkLevel_None": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "bookmark-level": "none" } },
+    "BookmarkLevel_Int": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "bookmark-level": "2" } },
+
+    "BookmarkState_Open": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "bookmark-state": "open" } },
+    "BookmarkState_Closed": { "properties": { "width": "160px", "height": "80px", "background-color": "#c0392b", "bookmark-state": "closed" } },
+
+    "BookmarkTarget_Self": { "properties": { "width": "160px", "height": "80px", "background-color": "#16a085", "bookmark-target": "self" } },
+    "BookmarkTarget_Url": { "properties": { "width": "160px", "height": "80px", "background-color": "#8e44ad", "bookmark-target": "url(#section-1)" } },
+    "BookmarkTarget_Attr": { "properties": { "width": "160px", "height": "80px", "background-color": "#2980b9", "bookmark-target": "attr(href)" } },
+
+    "FootnoteDisplay_Block": { "properties": { "width": "160px", "height": "80px", "background-color": "#27ae60", "footnote-display": "block" } },
+    "FootnoteDisplay_Inline": { "properties": { "width": "160px", "height": "80px", "background-color": "#7f8c8d", "footnote-display": "inline" } },
+    "FootnoteDisplay_Compact": { "properties": { "width": "160px", "height": "80px", "background-color": "#d35400", "footnote-display": "compact" } },
+
+    "FootnotePolicy_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "footnote-policy": "auto" } },
+    "FootnotePolicy_Line": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "footnote-policy": "line" } },
+    "FootnotePolicy_Block": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "footnote-policy": "block" } },
+
+    "Leader_Dotted": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "leader": "dotted" } },
+    "Leader_Solid": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "leader": "solid" } },
+    "Leader_Space": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "leader": "space" } },
+    "Leader_String": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "leader": "\". \"" } },
+
+    "Marks_None": { "properties": { "width": "160px", "height": "80px", "background-color": "#c0392b", "marks": "none" } },
+    "Marks_Crop": { "properties": { "width": "160px", "height": "80px", "background-color": "#16a085", "marks": "crop" } },
+    "Marks_Cross": { "properties": { "width": "160px", "height": "80px", "background-color": "#8e44ad", "marks": "cross" } },
+    "Marks_Both": { "properties": { "width": "160px", "height": "80px", "background-color": "#2980b9", "marks": "crop cross" } },
+
+    "Page_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#27ae60", "page": "auto" } },
+    "Page_Named": { "properties": { "width": "160px", "height": "80px", "background-color": "#7f8c8d", "page": "chapter-page" } },
+
+    "Size_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#d35400", "size": "auto" } },
+    "Size_A4": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "size": "A4" } },
+    "Size_Letter_Landscape": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "size": "letter landscape" } },
+    "Size_Portrait": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "size": "portrait" } },
+    "Size_Dimensions": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "size": "210mm 297mm" } }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_separate": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "border-collapse": "separate"
+      }
+    },
+    "V1_collapse": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "border-collapse": "collapse"
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "components": {
+    "V0_medium": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "speech-rate": "medium"
+      }
+    },
+    "V1_slow": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "speech-rate": "slow"
+      }
+    },
+    "V2_fast": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "speech-rate": "fast"
+      }
+    },
+    "V3_x_slow": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "speech-rate": "x-slow"
+      }
+    }
+  }
+}

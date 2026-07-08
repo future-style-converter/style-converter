@@ -1,0 +1,14 @@
+{
+  "components": {
+    "NavUp_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "nav-up": "auto" } },
+    "NavUp_Id": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "nav-up": "#target1" } },
+    "NavDown_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "nav-down": "auto" } },
+    "NavDown_Id": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "nav-down": "#target2" } },
+    "NavLeft_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "nav-left": "auto" } },
+    "NavLeft_Id": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "nav-left": "#prev" } },
+    "NavRight_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "nav-right": "auto" } },
+    "NavRight_Id": { "properties": { "width": "160px", "height": "80px", "background-color": "#c0392b", "nav-right": "#next" } },
+    "ReadingOrder_Normal": { "properties": { "width": "160px", "height": "80px", "background-color": "#16a085", "reading-order": "normal" } },
+    "ReadingOrder_SourceOrder": { "properties": { "width": "160px", "height": "80px", "background-color": "#8e44ad", "reading-order": "source-order" } }
+  }
+}

@@ -1,0 +1,1424 @@
+{
+  "generatedAt": "2026-04-18T07:44:54.928Z",
+  "inputLabel": "examples/properties/math/longtail.json",
+  "thresholds": {
+    "ssim": 0.95,
+    "pixel": 2
+  },
+  "rows": [
+    {
+      "name": "000_MathStyle_Normal.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/000_MathStyle_Normal.png"
+        },
+        "Android": {
+          "present": false
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/000_MathStyle_Normal.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": {
+          "pixelMismatchedCount": 233,
+          "pixelMismatchedPct": 0.649,
+          "ssim": 0.9536,
+          "diffImage": "diffs/000_MathStyle_Normal__iOS-web.png"
+        },
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "000_NegMargin_Sides_Overflow.png",
+      "canvasW": 390,
+      "canvasH": 132,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/Android/000_NegMargin_Sides_Overflow.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "001_MathStyle_Compact.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/001_MathStyle_Compact.png"
+        },
+        "Android": {
+          "present": false
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/001_MathStyle_Compact.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": {
+          "pixelMismatchedCount": 331,
+          "pixelMismatchedPct": 0.923,
+          "ssim": 0.9482,
+          "diffImage": "diffs/001_MathStyle_Compact__iOS-web.png"
+        },
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "001_inner.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/Android/001_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "002_MathShift_Normal.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/002_MathShift_Normal.png"
+        },
+        "Android": {
+          "present": false
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/002_MathShift_Normal.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": {
+          "pixelMismatchedCount": 173,
+          "pixelMismatchedPct": 0.482,
+          "ssim": 0.9576,
+          "diffImage": "diffs/002_MathShift_Normal__iOS-web.png"
+        },
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "002_NegMargin_Top_Overlap.png",
+      "canvasW": 390,
+      "canvasH": 192,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 192,
+          "image": "images/Android/002_NegMargin_Top_Overlap.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "003_MathShift_Compact.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/003_MathShift_Compact.png"
+        },
+        "Android": {
+          "present": false
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/003_MathShift_Compact.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": {
+          "pixelMismatchedCount": 264,
+          "pixelMismatchedPct": 0.736,
+          "ssim": 0.9496,
+          "diffImage": "diffs/003_MathShift_Compact__iOS-web.png"
+        },
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "003_a.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/Android/003_a.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "004_MathDepth_Auto.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/004_MathDepth_Auto.png"
+        },
+        "Android": {
+          "present": false
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/004_MathDepth_Auto.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": {
+          "pixelMismatchedCount": 283,
+          "pixelMismatchedPct": 0.789,
+          "ssim": 0.9569,
+          "diffImage": "diffs/004_MathDepth_Auto__iOS-web.png"
+        },
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "004_b.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/Android/004_b.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "005_AutoMargin_Flex_PushRight.png",
+      "canvasW": 390,
+      "canvasH": 128,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 128,
+          "image": "images/Android/005_AutoMargin_Flex_PushRight.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "005_MathDepth_AutoAdd.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/005_MathDepth_AutoAdd.png"
+        },
+        "Android": {
+          "present": false
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/005_MathDepth_AutoAdd.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": {
+          "pixelMismatchedCount": 293,
+          "pixelMismatchedPct": 0.817,
+          "ssim": 0.9497,
+          "diffImage": "diffs/005_MathDepth_AutoAdd__iOS-web.png"
+        },
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "006_MathDepth_Integer.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/006_MathDepth_Integer.png"
+        },
+        "Android": {
+          "present": false
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/006_MathDepth_Integer.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": {
+          "pixelMismatchedCount": 369,
+          "pixelMismatchedPct": 1.028,
+          "ssim": 0.9474,
+          "diffImage": "diffs/006_MathDepth_Integer__iOS-web.png"
+        },
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "006_a.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/006_a.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "007_MathDepth_Add.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/007_MathDepth_Add.png"
+        },
+        "Android": {
+          "present": false
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/007_MathDepth_Add.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": {
+          "pixelMismatchedCount": 315,
+          "pixelMismatchedPct": 0.878,
+          "ssim": 0.9535,
+          "diffImage": "diffs/007_MathDepth_Add__iOS-web.png"
+        },
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "007_b.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/007_b.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "008_AutoMargin_Block_Center.png",
+      "canvasW": 390,
+      "canvasH": 132,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/Android/008_AutoMargin_Block_Center.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "009_inner.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/Android/009_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "010_Padding_ExceedsParent.png",
+      "canvasW": 390,
+      "canvasH": 512,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 512,
+          "image": "images/Android/010_Padding_ExceedsParent.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "011_inner.png",
+      "canvasW": 390,
+      "canvasH": 512,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 512,
+          "image": "images/Android/011_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "012_Padding_Huge_9999px.png",
+      "canvasW": 390,
+      "canvasH": 10071,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 10071,
+          "image": "images/Android/012_Padding_Huge_9999px.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "013_inner.png",
+      "canvasW": 390,
+      "canvasH": 10071,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 10071,
+          "image": "images/Android/013_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "014_Padding_Percent_Parent.png",
+      "canvasW": 390,
+      "canvasH": 232,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 232,
+          "image": "images/Android/014_Padding_Percent_Parent.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "015_inner.png",
+      "canvasW": 390,
+      "canvasH": 258,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 258,
+          "image": "images/Android/015_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "016_Padding_Calc_Dynamic.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/016_Padding_Calc_Dynamic.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "017_inner.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/017_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "018_Padding_Block_Em.png",
+      "canvasW": 390,
+      "canvasH": 120,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 120,
+          "image": "images/Android/018_Padding_Block_Em.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "019_inner.png",
+      "canvasW": 390,
+      "canvasH": 120,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 120,
+          "image": "images/Android/019_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "020_Padding_Logical_Mixed.png",
+      "canvasW": 390,
+      "canvasH": 107,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 107,
+          "image": "images/Android/020_Padding_Logical_Mixed.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "021_inner.png",
+      "canvasW": 390,
+      "canvasH": 107,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 107,
+          "image": "images/Android/021_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "022_Margin_LogicalMixed.png",
+      "canvasW": 390,
+      "canvasH": 172,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 172,
+          "image": "images/Android/022_Margin_LogicalMixed.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "023_inner.png",
+      "canvasW": 390,
+      "canvasH": 82,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 82,
+          "image": "images/Android/023_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "024_Gap_Zero_vs_Normal.png",
+      "canvasW": 390,
+      "canvasH": 88,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 88,
+          "image": "images/Android/024_Gap_Zero_vs_Normal.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "025_a.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/025_a.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "026_b.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/026_b.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "027_c.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/027_c.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "028_Gap_NonFlex_Context.png",
+      "canvasW": 390,
+      "canvasH": 78,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 78,
+          "image": "images/Android/028_Gap_NonFlex_Context.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "029_a.png",
+      "canvasW": 390,
+      "canvasH": 62,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 62,
+          "image": "images/Android/029_a.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "030_b.png",
+      "canvasW": 390,
+      "canvasH": 62,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 62,
+          "image": "images/Android/030_b.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "031_Gap_Grid_AutoGap.png",
+      "canvasW": 390,
+      "canvasH": 88,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 88,
+          "image": "images/Android/031_Gap_Grid_AutoGap.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "032_a.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/032_a.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "033_b.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/033_b.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "034_c.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/034_c.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "035_MarginTrim_All_Edges.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/035_MarginTrim_All_Edges.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "036_a.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/036_a.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "037_b.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/037_b.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "038_c.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/038_c.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "039_Nested_PaddingMargin_Collapse.png",
+      "canvasW": 390,
+      "canvasH": 142,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 142,
+          "image": "images/Android/039_Nested_PaddingMargin_Collapse.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "040_outer.png",
+      "canvasW": 390,
+      "canvasH": 102,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 102,
+          "image": "images/Android/040_outer.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "041_inner.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/041_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "042_ScrollMargin_Basic.png",
+      "canvasW": 390,
+      "canvasH": 112,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/Android/042_ScrollMargin_Basic.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "043_inner.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/043_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "044_ScrollMargin_Sides.png",
+      "canvasW": 390,
+      "canvasH": 112,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/Android/044_ScrollMargin_Sides.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    },
+    {
+      "name": "045_inner.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/045_inner.png"
+        },
+        "web": {
+          "present": false
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": null
+      },
+      "baseline": null
+    }
+  ]
+}

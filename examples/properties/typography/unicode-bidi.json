@@ -1,0 +1,10 @@
+{
+  "components": {
+    "UnicodeBidi_Normal": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "normal" } },
+    "UnicodeBidi_Embed": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "embed" } },
+    "UnicodeBidi_Isolate": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "isolate" } },
+    "UnicodeBidi_BidiOverride": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "bidi-override" } },
+    "UnicodeBidi_IsolateOverride": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "isolate-override" } },
+    "UnicodeBidi_Plaintext": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "plaintext" } }
+  }
+}

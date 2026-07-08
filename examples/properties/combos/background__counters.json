@@ -1,0 +1,30 @@
+{
+  "components": {
+    "A_backgr": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6"
+      }
+    },
+    "B_counte": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "counter-reset": "none"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "counter-reset": "none"
+      }
+    }
+  }
+}

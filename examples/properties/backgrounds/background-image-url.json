@@ -1,0 +1,6 @@
+{
+  "components": {
+    "Bg_Url_Data_Png": { "properties": { "width": "80px", "height": "80px", "background-image": "url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=\")" } },
+    "Bg_Url_None": { "properties": { "width": "80px", "height": "80px", "background-color": "#cccccc", "background-image": "none" } }
+  }
+}

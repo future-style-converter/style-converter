@@ -1,0 +1,8 @@
+{
+  "components": {
+    "WordSpaceTransform_None": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-space-transform": "none" } },
+    "WordSpaceTransform_Auto": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-space-transform": "auto" } },
+    "WordSpaceTransform_Space": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-space-transform": "space" } },
+    "WordSpaceTransform_IdeographicSpace": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-space-transform": "ideographic-space" } }
+  }
+}

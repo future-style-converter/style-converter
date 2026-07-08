@@ -1,0 +1,36 @@
+{
+  "components": {
+    "AccentColor_Red": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#ecf0f1",
+        "accent-color": "red"
+      }
+    },
+    "AccentColor_Auto": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#ecf0f1",
+        "accent-color": "auto"
+      }
+    },
+    "CaretColor_Blue": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#ecf0f1",
+        "caret-color": "blue"
+      }
+    },
+    "CaretColor_Auto": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#ecf0f1",
+        "caret-color": "auto"
+      }
+    }
+  }
+}

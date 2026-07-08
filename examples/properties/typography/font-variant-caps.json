@@ -1,0 +1,11 @@
+{
+  "components": {
+    "FontVariantCaps_Normal": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-caps": "normal" } },
+    "FontVariantCaps_SmallCaps": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-caps": "small-caps" } },
+    "FontVariantCaps_AllSmallCaps": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-caps": "all-small-caps" } },
+    "FontVariantCaps_PetiteCaps": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-caps": "petite-caps" } },
+    "FontVariantCaps_AllPetiteCaps": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-caps": "all-petite-caps" } },
+    "FontVariantCaps_Unicase": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-caps": "unicase" } },
+    "FontVariantCaps_TitlingCaps": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-caps": "titling-caps" } }
+  }
+}

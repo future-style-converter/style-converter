@@ -1,0 +1,44 @@
+{
+  "components": {
+    "V0_60": {
+      "properties": {
+        "width": "180px",
+        "padding": "10px",
+        "background-color": "#ef4444",
+        "block-size": "60px"
+      }
+    },
+    "V1_100": {
+      "properties": {
+        "width": "180px",
+        "padding": "10px",
+        "background-color": "#10b981",
+        "block-size": "100px"
+      }
+    },
+    "V2_auto": {
+      "properties": {
+        "width": "180px",
+        "padding": "10px",
+        "background-color": "#ef4444",
+        "block-size": "auto"
+      }
+    },
+    "V3_min_conten": {
+      "properties": {
+        "width": "180px",
+        "padding": "10px",
+        "background-color": "#ef4444",
+        "block-size": "min-content"
+      }
+    },
+    "V4_max_conten": {
+      "properties": {
+        "width": "180px",
+        "padding": "10px",
+        "background-color": "#ef4444",
+        "block-size": "max-content"
+      }
+    }
+  }
+}

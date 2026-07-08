@@ -1,0 +1,9 @@
+{
+  "components": {
+    "InitialLetter_Normal": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter": "normal" } },
+    "InitialLetter_Size_2": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter": "2" } },
+    "InitialLetter_Size_3": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter": "3" } },
+    "InitialLetter_SizeSink": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter": "3 2" } },
+    "InitialLetter_FractionalSize": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter": "1.5" } }
+  }
+}

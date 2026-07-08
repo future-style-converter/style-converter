@@ -1,0 +1,16 @@
+{
+  "components": {
+    "TextEmphasisStyle_None": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "none" } },
+    "TextEmphasisStyle_Filled": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "filled" } },
+    "TextEmphasisStyle_Open": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "open" } },
+    "TextEmphasisStyle_Dot": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "dot" } },
+    "TextEmphasisStyle_Circle": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "circle" } },
+    "TextEmphasisStyle_DoubleCircle": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "double-circle" } },
+    "TextEmphasisStyle_Triangle": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "triangle" } },
+    "TextEmphasisStyle_Sesame": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "sesame" } },
+    "TextEmphasisStyle_FilledDot": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "filled dot" } },
+    "TextEmphasisStyle_OpenCircle": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "open circle" } },
+    "TextEmphasisStyle_FilledSesame": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "filled sesame" } },
+    "TextEmphasisStyle_CustomChar": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "\"*\"" } }
+  }
+}

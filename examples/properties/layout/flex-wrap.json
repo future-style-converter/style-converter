@@ -1,0 +1,42 @@
+{
+  "components": {
+    "FlexWrap_Nowrap": {
+      "properties": {
+        "width": "240px", "display": "flex", "flex-direction": "row", "flex-wrap": "nowrap",
+        "background-color": "#1f2937", "padding": "6px", "gap": "6px"
+      },
+      "children": {
+        "a": { "properties": { "width": "80px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "80px", "height": "40px", "background-color": "#10b981" } },
+        "c": { "properties": { "width": "80px", "height": "40px", "background-color": "#3b82f6" } },
+        "d": { "properties": { "width": "80px", "height": "40px", "background-color": "#f59e0b" } }
+      }
+    },
+    "FlexWrap_Wrap": {
+      "properties": {
+        "width": "240px", "display": "flex", "flex-direction": "row", "flex-wrap": "wrap",
+        "background-color": "#1f2937", "padding": "6px", "gap": "6px"
+      },
+      "children": {
+        "a": { "properties": { "width": "80px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "80px", "height": "40px", "background-color": "#10b981" } },
+        "c": { "properties": { "width": "80px", "height": "40px", "background-color": "#3b82f6" } },
+        "d": { "properties": { "width": "80px", "height": "40px", "background-color": "#f59e0b" } },
+        "e": { "properties": { "width": "80px", "height": "40px", "background-color": "#a78bfa" } }
+      }
+    },
+    "FlexWrap_WrapReverse": {
+      "properties": {
+        "width": "240px", "display": "flex", "flex-direction": "row", "flex-wrap": "wrap-reverse",
+        "background-color": "#1f2937", "padding": "6px", "gap": "6px"
+      },
+      "children": {
+        "a": { "properties": { "width": "80px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "80px", "height": "40px", "background-color": "#10b981" } },
+        "c": { "properties": { "width": "80px", "height": "40px", "background-color": "#3b82f6" } },
+        "d": { "properties": { "width": "80px", "height": "40px", "background-color": "#f59e0b" } },
+        "e": { "properties": { "width": "80px", "height": "40px", "background-color": "#a78bfa" } }
+      }
+    }
+  }
+}

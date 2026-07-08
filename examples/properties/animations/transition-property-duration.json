@@ -1,0 +1,15 @@
+{
+  "components": {
+    "TP_All": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "transition-property": "all" } },
+    "TP_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "transition-property": "none" } },
+    "TP_Single": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "transition-property": "opacity" } },
+    "TP_Custom": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "transition-property": "background-color" } },
+    "TP_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "transition-property": "opacity, transform, background-color" } },
+    "TP_MixedAllNone": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "transition-property": "color, all, width" } },
+    "TD_Seconds": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "transition-duration": "1s" } },
+    "TD_Millis": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "transition-duration": "300ms" } },
+    "TD_Fractional": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "transition-duration": "0.15s" } },
+    "TD_Zero": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "transition-duration": "0s" } },
+    "TD_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "transition-duration": "200ms, 500ms, 1s" } }
+  }
+}

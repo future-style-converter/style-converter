@@ -1,0 +1,261 @@
+{
+  "components": {
+    "Margin_Top_20px": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-top": "20px",
+            "background-color": "#3498db"
+          }
+        }
+      }
+    },
+    "Margin_Right_20px": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-right": "20px",
+            "background-color": "#2ecc71"
+          }
+        }
+      }
+    },
+    "Margin_Bottom_20px": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-bottom": "20px",
+            "background-color": "#e74c3c"
+          }
+        }
+      }
+    },
+    "Margin_Left_20px": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-left": "20px",
+            "background-color": "#f1c40f"
+          }
+        }
+      }
+    },
+    "Margin_All_15px": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin": "15px",
+            "background-color": "#9b59b6"
+          }
+        }
+      }
+    },
+    "Margin_Negative_Top": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-top": "-10px",
+            "background-color": "#1abc9c"
+          }
+        }
+      }
+    },
+    "Margin_Negative_Left": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-left": "-10px",
+            "background-color": "#e67e22"
+          }
+        }
+      }
+    },
+    "Margin_Auto_Left": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-left": "auto",
+            "background-color": "#c0392b"
+          }
+        }
+      }
+    },
+    "Margin_Auto_Horizontal": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-left": "auto",
+            "margin-right": "auto",
+            "background-color": "#2980b9"
+          }
+        }
+      }
+    },
+    "Margin_Auto_Vertical_Block": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "display": "flex",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin": "auto 0",
+            "background-color": "#16a085"
+          }
+        }
+      }
+    },
+    "Margin_Logical_BlockStart": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-block-start": "20px",
+            "background-color": "#27ae60"
+          }
+        }
+      }
+    },
+    "Margin_Logical_BlockEnd": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-block-end": "20px",
+            "background-color": "#8e44ad"
+          }
+        }
+      }
+    },
+    "Margin_Logical_InlineStart": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-inline-start": "20px",
+            "background-color": "#d35400"
+          }
+        }
+      }
+    },
+    "Margin_Logical_InlineEnd": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin-inline-end": "20px",
+            "background-color": "#7f8c8d"
+          }
+        }
+      }
+    },
+    "Margin_Mixed_TRBL": {
+      "properties": {
+        "width": "300px",
+        "height": "120px",
+        "background-color": "#333333"
+      },
+      "children": {
+        "inner": {
+          "properties": {
+            "width": "100px",
+            "height": "50px",
+            "margin": "5px 10px 15px 20px",
+            "background-color": "#f39c12"
+          }
+        }
+      }
+    }
+  }
+}

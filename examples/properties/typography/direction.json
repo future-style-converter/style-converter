@@ -1,0 +1,6 @@
+{
+  "components": {
+    "Direction_Ltr": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "direction": "ltr" } },
+    "Direction_Rtl": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "direction": "rtl" } }
+  }
+}

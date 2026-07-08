@@ -1,0 +1,18 @@
+{
+  "components": {
+    "AnimName_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "animation-name": "none" } },
+    "AnimName_Single": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "animation-name": "slide-in" } },
+    "AnimName_DashedIdent": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "animation-name": "--custom-anim" } },
+    "AnimName_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "animation-name": "fade-in, slide-up, pulse" } },
+    "AnimDur_Single_Seconds": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "animation-duration": "2s" } },
+    "AnimDur_Single_Millis": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "animation-duration": "500ms" } },
+    "AnimDur_Fractional": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "animation-duration": "0.25s" } },
+    "AnimDur_Zero": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "animation-duration": "0s" } },
+    "AnimDur_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "animation-duration": "1s, 500ms, 2.5s" } },
+    "AnimDelay_Positive": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "animation-delay": "1s" } },
+    "AnimDelay_Millis": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "animation-delay": "250ms" } },
+    "AnimDelay_Negative": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "animation-delay": "-500ms" } },
+    "AnimDelay_NegativeSec": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "animation-delay": "-1.5s" } },
+    "AnimDelay_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "animation-delay": "0s, 500ms, -250ms, 1s" } }
+  }
+}

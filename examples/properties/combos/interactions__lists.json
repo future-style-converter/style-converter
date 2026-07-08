@@ -1,0 +1,32 @@
+{
+  "components": {
+    "A_intera": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "cursor": "pointer"
+      }
+    },
+    "B_lists": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "list-style": "none"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "cursor": "pointer",
+        "list-style": "none"
+      }
+    }
+  }
+}

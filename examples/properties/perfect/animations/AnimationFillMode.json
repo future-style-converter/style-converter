@@ -1,0 +1,58 @@
+{
+  "components": {
+    "Anim_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-fill-mode": "none"
+      }
+    },
+    "Anim_forwards": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-fill-mode": "forwards"
+      }
+    },
+    "Anim_backwards": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-fill-mode": "backwards"
+      }
+    },
+    "Anim_both": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-fill-mode": "both"
+      }
+    },
+    "Anim_inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-fill-mode": "inherit"
+      }
+    },
+    "Anim_none__forwards": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-fill-mode": "none, forwards"
+      }
+    }
+  }
+}

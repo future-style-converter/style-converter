@@ -1,0 +1,16 @@
+{
+  "components": {
+    "CounterIncrement_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "counter-increment": "none" } },
+    "CounterIncrement_Default": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "counter-increment": "section" } },
+    "CounterIncrement_Int": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "counter-increment": "section 2" } },
+    "CounterIncrement_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "counter-increment": "chapter 1 section 2" } },
+
+    "CounterReset_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "counter-reset": "none" } },
+    "CounterReset_Default": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "counter-reset": "section" } },
+    "CounterReset_Int": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "counter-reset": "section 5" } },
+    "CounterReset_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "counter-reset": "chapter 0 section 0" } },
+
+    "CounterSet_Int": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "counter-set": "page 1" } },
+    "CounterSet_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "counter-set": "page 1 chapter 3" } }
+  }
+}

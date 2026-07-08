@@ -1,0 +1,729 @@
+{
+    "components": [
+        {
+            "id": "shapeoutside_none-001",
+            "name": "ShapeOutside_None",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "none"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeoutside_marginbox-002",
+            "name": "ShapeOutside_MarginBox",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "margin-box"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeoutside_borderbox-003",
+            "name": "ShapeOutside_BorderBox",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "border-box"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeoutside_paddingbox-004",
+            "name": "ShapeOutside_PaddingBox",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.6078431372549019,
+                            "g": 0.34901960784313724,
+                            "b": 0.7137254901960784
+                        },
+                        "original": "#9b59b6"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "padding-box"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeoutside_contentbox-005",
+            "name": "ShapeOutside_ContentBox",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9529411764705882,
+                            "g": 0.611764705882353,
+                            "b": 0.07058823529411765
+                        },
+                        "original": "#f39c12"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "content-box"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeoutside_circle-006",
+            "name": "ShapeOutside_Circle",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.10196078431372549,
+                            "g": 0.7372549019607844,
+                            "b": 0.611764705882353
+                        },
+                        "original": "#1abc9c"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "basic-shape",
+                        "shape": "circle(50%)"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeoutside_ellipse-007",
+            "name": "ShapeOutside_Ellipse",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.28627450980392155,
+                            "b": 0.3686274509803922
+                        },
+                        "original": "#34495e"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "basic-shape",
+                        "shape": "ellipse(40% 50%)"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeoutside_polygon-008",
+            "name": "ShapeOutside_Polygon",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.7529411764705882,
+                            "g": 0.2235294117647059,
+                            "b": 0.16862745098039217
+                        },
+                        "original": "#c0392b"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "basic-shape",
+                        "shape": "polygon(0 0, 100% 0, 100% 100%)"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeoutside_inset-009",
+            "name": "ShapeOutside_Inset",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.08627450980392157,
+                            "g": 0.6274509803921569,
+                            "b": 0.5215686274509804
+                        },
+                        "original": "#16a085"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "basic-shape",
+                        "shape": "inset(10px)"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeoutside_url-010",
+            "name": "ShapeOutside_Url",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.5568627450980392,
+                            "g": 0.26666666666666666,
+                            "b": 0.6784313725490196
+                        },
+                        "original": "#8e44ad"
+                    }
+                },
+                {
+                    "type": "ShapeOutside",
+                    "data": {
+                        "type": "image-url",
+                        "url": "shape.png"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapemargin_length-011",
+            "name": "ShapeMargin_Length",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1607843137254902,
+                            "g": 0.5019607843137255,
+                            "b": 0.7254901960784313
+                        },
+                        "original": "#2980b9"
+                    }
+                },
+                {
+                    "type": "ShapeMargin",
+                    "data": {
+                        "type": "length",
+                        "px": 10.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapemargin_pct-012",
+            "name": "ShapeMargin_Pct",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.15294117647058825,
+                            "g": 0.6823529411764706,
+                            "b": 0.3764705882352941
+                        },
+                        "original": "#27ae60"
+                    }
+                },
+                {
+                    "type": "ShapeMargin",
+                    "data": {
+                        "type": "percentage",
+                        "value": 5.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapepadding_length-013",
+            "name": "ShapePadding_Length",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.4980392156862745,
+                            "g": 0.5490196078431373,
+                            "b": 0.5529411764705883
+                        },
+                        "original": "#7f8c8d"
+                    }
+                },
+                {
+                    "type": "ShapePadding",
+                    "data": {
+                        "type": "length",
+                        "px": 8.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapepadding_pct-014",
+            "name": "ShapePadding_Pct",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.8274509803921568,
+                            "g": 0.32941176470588235,
+                            "b": 0.0
+                        },
+                        "original": "#d35400"
+                    }
+                },
+                {
+                    "type": "ShapePadding",
+                    "data": {
+                        "type": "percentage",
+                        "value": 3.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeimagethreshold_zero-015",
+            "name": "ShapeImageThreshold_Zero",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                },
+                {
+                    "type": "ShapeImageThreshold",
+                    "data": 0.0
+                }
+            ]
+        },
+        {
+            "id": "shapeimagethreshold_half-016",
+            "name": "ShapeImageThreshold_Half",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "ShapeImageThreshold",
+                    "data": 0.5
+                }
+            ]
+        },
+        {
+            "id": "shapeimagethreshold_one-017",
+            "name": "ShapeImageThreshold_One",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                },
+                {
+                    "type": "ShapeImageThreshold",
+                    "data": 1.0
+                }
+            ]
+        },
+        {
+            "id": "shapeinside_auto-018",
+            "name": "ShapeInside_Auto",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.6078431372549019,
+                            "g": 0.34901960784313724,
+                            "b": 0.7137254901960784
+                        },
+                        "original": "#9b59b6"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeinside_none-019",
+            "name": "ShapeInside_None",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9529411764705882,
+                            "g": 0.611764705882353,
+                            "b": 0.07058823529411765
+                        },
+                        "original": "#f39c12"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "shapeinside_circle-020",
+            "name": "ShapeInside_Circle",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.10196078431372549,
+                            "g": 0.7372549019607844,
+                            "b": 0.611764705882353
+                        },
+                        "original": "#1abc9c"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "scrollbar-color": "auto"
+      }
+    },
+    "V1_ef4444_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "scrollbar-color": "#ef4444 #1f2937"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "components": {
+    "Isolation_Auto": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#3498db",
+        "isolation": "auto"
+      }
+    },
+    "Isolation_Isolate": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#e67e22",
+        "isolation": "isolate"
+      }
+    }
+  }
+}

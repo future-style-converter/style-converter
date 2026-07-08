@@ -1,0 +1,21 @@
+{
+  "components": {
+    "VT_NameOnly": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "view-timeline": "--my-view" } },
+    "VT_NameBlock": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "view-timeline": "--my-view block" } },
+    "VT_NameInline": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "view-timeline": "--my-view inline" } },
+    "VT_NameY": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "view-timeline": "--my-view y" } },
+    "VTName_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "view-timeline-name": "none" } },
+    "VTName_Ident": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "view-timeline-name": "--reveal" } },
+    "VTName_Plain": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "view-timeline-name": "scroller" } },
+    "VTAxis_Block": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "view-timeline-axis": "block" } },
+    "VTAxis_Inline": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "view-timeline-axis": "inline" } },
+    "VTAxis_X": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "view-timeline-axis": "x" } },
+    "VTAxis_Y": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "view-timeline-axis": "y" } },
+    "VTInset_Auto": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "view-timeline-inset": "auto" } },
+    "VTInset_SingleLen": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "view-timeline-inset": "20px" } },
+    "VTInset_SinglePct": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "view-timeline-inset": "10%" } },
+    "VTInset_PairLen": { "properties": { "width": "160px", "height": "60px", "background-color": "#95a5a6", "view-timeline-inset": "20px 40px" } },
+    "VTInset_PairMixed": { "properties": { "width": "160px", "height": "60px", "background-color": "#e67e22", "view-timeline-inset": "auto 30px" } },
+    "VTInset_PairAuto": { "properties": { "width": "160px", "height": "60px", "background-color": "#f1c40f", "view-timeline-inset": "auto auto" } }
+  }
+}

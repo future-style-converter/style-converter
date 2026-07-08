@@ -1,0 +1,11 @@
+{
+  "components": {
+    "TextUnderlinePosition_Auto": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-position": "auto" } },
+    "TextUnderlinePosition_FromFont": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-position": "from-font" } },
+    "TextUnderlinePosition_Under": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-position": "under" } },
+    "TextUnderlinePosition_Left": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-position": "left" } },
+    "TextUnderlinePosition_Right": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-position": "right" } },
+    "TextUnderlinePosition_UnderLeft": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-position": "under left" } },
+    "TextUnderlinePosition_UnderRight": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-position": "under right" } }
+  }
+}

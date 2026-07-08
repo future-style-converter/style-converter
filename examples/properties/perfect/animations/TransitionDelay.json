@@ -1,0 +1,7 @@
+{
+  "components": {
+    "TD_0s":    { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "transition-delay": "0s" } },
+    "TD_300ms": { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "transition-delay": "300ms" } },
+    "TD_1s":    { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "transition-delay": "1s" } }
+  }
+}

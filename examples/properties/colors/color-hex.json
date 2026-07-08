@@ -1,0 +1,32 @@
+{
+  "components": {
+    "Color_Hex_3": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#f0a"
+      }
+    },
+    "Color_Hex_4": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#f0a8"
+      }
+    },
+    "Color_Hex_6": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#ff3366"
+      }
+    },
+    "Color_Hex_8": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#ff336680"
+      }
+    }
+  }
+}

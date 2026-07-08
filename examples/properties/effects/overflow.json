@@ -1,0 +1,21 @@
+{
+  "components": {
+    "Overflow_Visible": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "overflow": "visible" } },
+    "Overflow_Hidden": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "overflow": "hidden" } },
+    "Overflow_Clip": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "overflow": "clip" } },
+    "Overflow_Scroll": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "overflow": "scroll" } },
+    "Overflow_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "overflow": "auto" } },
+    "Overflow_TwoValue": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "overflow": "hidden scroll" } },
+    "OverflowX_Hidden": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "overflow-x": "hidden" } },
+    "OverflowX_Scroll": { "properties": { "width": "160px", "height": "80px", "background-color": "#c0392b", "overflow-x": "scroll" } },
+    "OverflowX_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#16a085", "overflow-x": "auto" } },
+    "OverflowX_Clip": { "properties": { "width": "160px", "height": "80px", "background-color": "#d35400", "overflow-x": "clip" } },
+    "OverflowY_Hidden": { "properties": { "width": "160px", "height": "80px", "background-color": "#2980b9", "overflow-y": "hidden" } },
+    "OverflowY_Scroll": { "properties": { "width": "160px", "height": "80px", "background-color": "#27ae60", "overflow-y": "scroll" } },
+    "OverflowY_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#8e44ad", "overflow-y": "auto" } },
+    "OverflowBlock_Hidden": { "properties": { "width": "160px", "height": "80px", "background-color": "#7f8c8d", "overflow-block": "hidden" } },
+    "OverflowBlock_Scroll": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "overflow-block": "scroll" } },
+    "OverflowInline_Hidden": { "properties": { "width": "160px", "height": "80px", "background-color": "#e67e22", "overflow-inline": "hidden" } },
+    "OverflowInline_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#f1c40f", "overflow-inline": "auto" } }
+  }
+}

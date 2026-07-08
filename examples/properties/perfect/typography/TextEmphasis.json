@@ -1,0 +1,92 @@
+{
+  "components": {
+    "V0_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "text-emphasis": "none"
+      }
+    },
+    "V1_filled": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "text-emphasis": "filled"
+      }
+    },
+    "V2_open": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "text-emphasis": "open"
+      }
+    },
+    "V3_dot": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "text-emphasis": "dot"
+      }
+    },
+    "V4_circle": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "text-emphasis": "circle"
+      }
+    },
+    "V5_double_cir": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "text-emphasis": "double-circle"
+      }
+    },
+    "V6_triangle": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "text-emphasis": "triangle"
+      }
+    },
+    "V7_sesame": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "text-emphasis": "sesame"
+      }
+    }
+  }
+}

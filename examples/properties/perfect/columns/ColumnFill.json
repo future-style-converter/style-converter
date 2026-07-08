@@ -1,0 +1,31 @@
+{
+  "components": {
+    "V0_balance": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-fill": "balance"
+      }
+    },
+    "V1_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-fill": "auto"
+      }
+    },
+    "V2_balance_al": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-fill": "balance-all"
+      }
+    }
+  }
+}

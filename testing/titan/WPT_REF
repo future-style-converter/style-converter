@@ -1,0 +1,6 @@
+# Most recent epochs/three_hourly tip at Phase 0 PR time, per
+# TITAN_ARCHITECTURE.md Section 3.2 / Section 10 Q1 (frozen-as-SHA,
+# re-pin quarterly). Resolved with:
+#   git ls-remote --heads https://github.com/web-platform-tests/wpt epochs/three_hourly
+# on 2026-05-11. Override per-run via WPT_REF=<sha>.
+9b5435e55e0b54a6cd09c1c563861eb3c999cef1

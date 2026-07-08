@@ -1,0 +1,94 @@
+{
+  "components": {
+    "Shadow_None": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#3498db",
+        "box-shadow": "none"
+      }
+    },
+    "Shadow_OffsetOnly": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#3498db",
+        "box-shadow": "8px 8px #111"
+      }
+    },
+    "Shadow_WithBlur": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#2ecc71",
+        "box-shadow": "4px 4px 12px #111"
+      }
+    },
+    "Shadow_WithBlurAndSpread": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#9b59b6",
+        "box-shadow": "4px 4px 12px 4px #111"
+      }
+    },
+    "Shadow_ColorFirst": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#e74c3c",
+        "box-shadow": "#333 4px 4px 8px"
+      }
+    },
+    "Shadow_ColorLast": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#f39c12",
+        "box-shadow": "4px 4px 8px #333"
+      }
+    },
+    "Shadow_Rgba": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#ecf0f1",
+        "box-shadow": "0 4px 12px rgba(0, 0, 0, 0.25)"
+      }
+    },
+    "Shadow_ZeroOffset": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#ecf0f1",
+        "box-shadow": "0 0 12px rgba(0, 0, 0, 0.5)"
+      }
+    },
+    "Shadow_Inset": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#f1c40f",
+        "box-shadow": "inset 4px 4px 8px #111"
+      }
+    },
+    "Shadow_Inset_WithSpread": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#f1c40f",
+        "box-shadow": "inset 0 0 8px 4px #111"
+      }
+    },
+    "Shadow_NegativeOffset": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#1abc9c",
+        "box-shadow": "-8px -8px 12px #111"
+      }
+    },
+    "Shadow_HugeBlur": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#34495e",
+        "box-shadow": "0 0 40px #fff"
+      }
+    },
+    "Shadow_Multiple": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#ecf0f1",
+        "box-shadow": "4px 4px 8px #e74c3c, -4px -4px 8px #3498db"
+      }
+    },
+    "Shadow_Multiple_InsetMix": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#ecf0f1",
+        "box-shadow": "inset 0 0 8px #111, 0 8px 16px rgba(0,0,0,0.3)"
+      }
+    },
+    "Shadow_Calc_Offset": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#ecf0f1",
+        "box-shadow": "calc(2px + 2px) calc(2px + 2px) 8px #111"
+      }
+    }
+  }
+}

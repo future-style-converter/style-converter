@@ -1,0 +1,56 @@
+{
+  "components": {
+    "Volume_Silent": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "volume": "silent" } },
+    "Volume_Medium": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "volume": "medium" } },
+    "Volume_XLoud": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "volume": "x-loud" } },
+    "Volume_Pct": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "volume": "50%" } },
+    "Volume_Number": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "volume": "75" } },
+
+    "Speak_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "speak": "normal" } },
+    "Speak_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "speak": "none" } },
+    "Speak_SpellOut": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "speak": "spell-out" } },
+    "SpeakAs_Digits": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "speak-as": "digits" } },
+    "SpeakAs_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "speak-as": "spell-out literal-punctuation" } },
+
+    "Pause_Single": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "pause": "250ms" } },
+    "Pause_Pair": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "pause": "500ms 1s" } },
+    "PauseBefore": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "pause-before": "500ms" } },
+    "PauseAfter": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "pause-after": "1s" } },
+    "Rest_Single": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "rest": "200ms" } },
+    "Rest_Pair": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "rest": "100ms 300ms" } },
+    "RestBefore": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "rest-before": "100ms" } },
+    "RestAfter": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "rest-after": "200ms" } },
+
+    "Cue_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "cue": "none" } },
+    "Cue_Url": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "cue": "url(bell.wav)" } },
+    "CueBefore_Url": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "cue-before": "url(chime.wav)" } },
+    "CueAfter_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "cue-after": "none" } },
+
+    "VoiceFamily_Named": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "voice-family": "male" } },
+    "VoiceFamily_List": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "voice-family": "Jane, female, neutral" } },
+    "VoiceRate_Medium": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "voice-rate": "medium" } },
+    "VoicePitch_High": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "voice-pitch": "high" } },
+    "VoiceRange_Medium": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "voice-range": "medium" } },
+    "VoiceStress_Strong": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "voice-stress": "strong" } },
+    "VoiceVolume_Medium": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "voice-volume": "medium" } },
+    "VoiceDuration_Ms": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "voice-duration": "500ms" } },
+    "VoiceBalance_Zero": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "voice-balance": "0" } },
+    "VoiceBalance_Neg": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "voice-balance": "-50" } },
+
+    "Pitch_High": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "pitch": "high" } },
+    "PitchRange_Num": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "pitch-range": "50" } },
+    "Richness_Num": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "richness": "5" } },
+    "Stress_Num": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "stress": "50" } },
+    "SpeechRate_Fast": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "speech-rate": "fast" } },
+
+    "Azimuth_Named": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "azimuth": "center" } },
+    "Azimuth_FarLeft": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "azimuth": "far-left" } },
+    "Azimuth_Behind": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "azimuth": "left behind" } },
+    "Azimuth_Angle": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "azimuth": "30deg" } },
+    "Azimuth_Leftwards": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "azimuth": "leftwards" } },
+
+    "Elevation_Named": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "elevation": "level" } },
+    "Elevation_Above": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "elevation": "above" } },
+    "Elevation_Angle": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "elevation": "45deg" } }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "components": {
+    "Clip_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#3498db", "position": "absolute", "clip": "auto" } },
+    "Clip_Rect": { "properties": { "width": "160px", "height": "120px", "background-color": "#e74c3c", "position": "absolute", "clip": "rect(10px, 150px, 110px, 10px)" } }
+  }
+}

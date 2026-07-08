@@ -1,0 +1,72 @@
+{
+  "components": {
+    "MixBlend_Normal": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "normal"}}}
+    },
+    "MixBlend_Multiply": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "multiply"}}}
+    },
+    "MixBlend_Screen": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "screen"}}}
+    },
+    "MixBlend_Overlay": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "overlay"}}}
+    },
+    "MixBlend_Darken": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "darken"}}}
+    },
+    "MixBlend_Lighten": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "lighten"}}}
+    },
+    "MixBlend_ColorDodge": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "color-dodge"}}}
+    },
+    "MixBlend_ColorBurn": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "color-burn"}}}
+    },
+    "MixBlend_HardLight": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "hard-light"}}}
+    },
+    "MixBlend_SoftLight": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "soft-light"}}}
+    },
+    "MixBlend_Difference": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "difference"}}}
+    },
+    "MixBlend_Exclusion": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "exclusion"}}}
+    },
+    "MixBlend_Hue": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "hue"}}}
+    },
+    "MixBlend_Saturation": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "saturation"}}}
+    },
+    "MixBlend_Color": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "color"}}}
+    },
+    "MixBlend_Luminosity": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "luminosity"}}}
+    },
+    "MixBlend_PlusLighter": {
+      "properties": {"width": "200px", "height": "80px", "background-color": "red"},
+      "children": {"overlay": {"properties": {"width": "100%", "height": "100%", "background-color": "rgba(0,0,255,0.7)", "mix-blend-mode": "plus-lighter"}}}
+    }
+  }
+}

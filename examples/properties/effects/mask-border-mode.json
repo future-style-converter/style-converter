@@ -1,0 +1,6 @@
+{
+  "components": {
+    "MaskBorderMode_Luminance": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "mask-border-mode": "luminance" } },
+    "MaskBorderMode_Alpha": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-border-mode": "alpha" } }
+  }
+}

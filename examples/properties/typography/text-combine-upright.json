@@ -1,0 +1,10 @@
+{
+  "components": {
+    "TextCombineUpright_None": { "properties": { "width": "120px", "height": "160px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "writing-mode": "vertical-rl", "text-combine-upright": "none" } },
+    "TextCombineUpright_All": { "properties": { "width": "120px", "height": "160px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "writing-mode": "vertical-rl", "text-combine-upright": "all" } },
+    "TextCombineUpright_Digits": { "properties": { "width": "120px", "height": "160px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "writing-mode": "vertical-rl", "text-combine-upright": "digits" } },
+    "TextCombineUpright_Digits2": { "properties": { "width": "120px", "height": "160px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "writing-mode": "vertical-rl", "text-combine-upright": "digits 2" } },
+    "TextCombineUpright_Digits3": { "properties": { "width": "120px", "height": "160px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "writing-mode": "vertical-rl", "text-combine-upright": "digits 3" } },
+    "TextCombineUpright_Digits4": { "properties": { "width": "120px", "height": "160px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "writing-mode": "vertical-rl", "text-combine-upright": "digits 4" } }
+  }
+}

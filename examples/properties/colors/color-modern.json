@@ -1,0 +1,74 @@
+{
+  "components": {
+    "Color_HWB": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "hwb(120 20% 20%)"
+      }
+    },
+    "Color_HWB_Alpha": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "hwb(200 10% 10% / 60%)"
+      }
+    },
+    "Color_Lab": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "lab(50% 40 -20)"
+      }
+    },
+    "Color_Lab_Alpha": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "lab(70% -30 25 / 70%)"
+      }
+    },
+    "Color_Lch": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "lch(60% 50 180)"
+      }
+    },
+    "Color_Oklab": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "oklab(0.7 -0.1 0.15)"
+      }
+    },
+    "Color_Oklch": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "oklch(0.63 0.26 29)"
+      }
+    },
+    "Color_Oklch_Alpha": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "oklch(0.75 0.15 210 / 60%)"
+      }
+    },
+    "Color_Func_Srgb": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "color(srgb 0.9 0.3 0.4)"
+      }
+    },
+    "Color_Func_DisplayP3": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "color(display-p3 0.2 0.8 0.5)"
+      }
+    }
+  }
+}

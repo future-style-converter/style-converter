@@ -1,0 +1,20 @@
+{
+  "components": {
+    "VTN_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "view-transition-name": "none" } },
+    "VTN_Auto": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "view-transition-name": "auto" } },
+    "VTN_Ident": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "view-transition-name": "header" } },
+    "VTN_Dashed": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "view-transition-name": "--hero-image" } },
+    "VTC_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "view-transition-class": "none" } },
+    "VTC_Single": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "view-transition-class": "fade" } },
+    "VTC_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "view-transition-class": "slide fade fast" } },
+    "VTG_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "view-transition-group": "normal" } },
+    "VTG_Nearest": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "view-transition-group": "nearest" } },
+    "VTG_Contain": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "view-transition-group": "contain" } },
+    "VTG_Root": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "view-transition-group": "root" } },
+    "VTG_Ident": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "view-transition-group": "--my-group" } },
+    "TlScope_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "timeline-scope": "none" } },
+    "TlScope_All": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "timeline-scope": "all" } },
+    "TlScope_Single": { "properties": { "width": "160px", "height": "60px", "background-color": "#95a5a6", "timeline-scope": "--scroll-tl" } },
+    "TlScope_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#e67e22", "timeline-scope": "--tl-a, --tl-b, --tl-c" } }
+  }
+}

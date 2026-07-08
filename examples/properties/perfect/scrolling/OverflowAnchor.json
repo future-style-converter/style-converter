@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "overflow-anchor": "auto"
+      }
+    },
+    "V1_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "overflow-anchor": "none"
+      }
+    }
+  }
+}

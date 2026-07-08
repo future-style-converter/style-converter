@@ -1,0 +1,32 @@
+{
+  "components": {
+    "A_contai": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "container-type": "normal"
+      }
+    },
+    "B_render": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "image-rendering": "auto"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "container-type": "normal",
+        "image-rendering": "auto"
+      }
+    }
+  }
+}

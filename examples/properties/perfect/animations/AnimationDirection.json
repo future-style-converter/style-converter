@@ -1,0 +1,58 @@
+{
+  "components": {
+    "Anim_normal": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-direction": "normal"
+      }
+    },
+    "Anim_reverse": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-direction": "reverse"
+      }
+    },
+    "Anim_alternate": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-direction": "alternate"
+      }
+    },
+    "Anim_alternate_revers": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-direction": "alternate-reverse"
+      }
+    },
+    "Anim_inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-direction": "inherit"
+      }
+    },
+    "Anim_normal__reverse": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-direction": "normal, reverse"
+      }
+    }
+  }
+}

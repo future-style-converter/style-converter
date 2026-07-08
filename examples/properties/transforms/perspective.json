@@ -1,0 +1,8 @@
+{
+  "components": {
+    "Perspective_None": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "perspective": "none", "transform": "rotateY(30deg)" } },
+    "Perspective_500px": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "perspective": "500px", "transform": "rotateY(30deg)" } },
+    "Perspective_1000px": { "properties": { "width": "120px", "height": "80px", "background-color": "#2ecc71", "perspective": "1000px", "transform": "rotateY(30deg)" } },
+    "Perspective_Zero": { "properties": { "width": "120px", "height": "80px", "background-color": "#9b59b6", "perspective": "0", "transform": "rotateY(30deg)" } }
+  }
+}

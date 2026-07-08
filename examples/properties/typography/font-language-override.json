@@ -1,0 +1,8 @@
+{
+  "components": {
+    "FontLanguageOverride_Normal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-language-override": "normal" } },
+    "FontLanguageOverride_Trk": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-language-override": "\"TRK\"" } },
+    "FontLanguageOverride_Eng": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-language-override": "\"ENG\"" } },
+    "FontLanguageOverride_Dan": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-language-override": "\"DAN\"" } }
+  }
+}

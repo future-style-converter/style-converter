@@ -1,0 +1,67 @@
+{
+  "components": {
+    "V0_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "page-break-before": "auto"
+      }
+    },
+    "V1_always": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "page-break-before": "always"
+      }
+    },
+    "V2_avoid": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "page-break-before": "avoid"
+      }
+    },
+    "V3_left": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "page-break-before": "left"
+      }
+    },
+    "V4_right": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "page-break-before": "right"
+      }
+    },
+    "V5_recto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "page-break-before": "recto"
+      }
+    },
+    "V6_verso": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "page-break-before": "verso"
+      }
+    }
+  }
+}

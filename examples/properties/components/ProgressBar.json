@@ -1,0 +1,16 @@
+{
+  "components": {
+    "ProgressBar": {
+      "properties": {
+        "width": "240px",
+        "height": "8px",
+        "background-color": "#e5e7eb",
+        "border-radius": "4px",
+        "overflow": "hidden",
+        "position": "relative",
+        "padding": "0",
+        "background-image": "linear-gradient(to right, #3b82f6 0%, #3b82f6 60%, #e5e7eb 60%, #e5e7eb 100%)"
+      }
+    }
+  }
+}

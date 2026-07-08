@@ -1,0 +1,36 @@
+{
+  "components": {
+    "GRS_IntLines": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-template-rows": "40px 40px 40px", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-row-start": "1", "grid-row-end": "3", "background-color": "#ef4444" } },
+        "b": { "properties": { "grid-row-start": "2", "grid-row-end": "4", "background-color": "#10b981" } }
+      }
+    },
+    "GRS_Negative": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-template-rows": "40px 40px 40px", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-row-start": "1", "grid-row-end": "-1", "background-color": "#ef4444" } }
+      }
+    },
+    "GRS_Span": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-template-rows": "40px 40px 40px", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-row-start": "span 2", "background-color": "#ef4444" } },
+        "b": { "properties": { "background-color": "#10b981" } }
+      }
+    },
+    "GRS_NamedLine": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-template-rows": "[top] 40px [mid] 40px [bot]", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-row-start": "top", "grid-row-end": "bot", "background-color": "#ef4444" } }
+      }
+    },
+    "GRS_Auto": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-template-rows": "40px 40px", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-row-start": "auto", "grid-row-end": "auto", "background-color": "#ef4444" } }
+      }
+    }
+  }
+}

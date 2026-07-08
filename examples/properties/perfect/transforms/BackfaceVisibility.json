@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_visible": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "backface-visibility": "visible"
+      }
+    },
+    "V1_hidden": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "backface-visibility": "hidden"
+      }
+    }
+  }
+}

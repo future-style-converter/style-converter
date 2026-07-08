@@ -1,0 +1,46 @@
+{
+  "components": {
+    "Color_RGB_Comma": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "rgb(52, 152, 219)"
+      }
+    },
+    "Color_RGBA_Comma": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "rgba(155, 89, 182, 0.7)"
+      }
+    },
+    "Color_RGB_Space": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "rgb(52 152 219)"
+      }
+    },
+    "Color_RGB_Space_Alpha": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "rgb(52 152 219 / 0.5)"
+      }
+    },
+    "Color_RGB_Percent": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "rgb(20% 60% 85%)"
+      }
+    },
+    "Color_RGB_ZeroAlpha": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "rgba(255, 0, 0, 0)"
+      }
+    }
+  }
+}

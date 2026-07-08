@@ -1,0 +1,7 @@
+{
+  "components": {
+    "TDu_0s":    { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "transition-duration": "0s" } },
+    "TDu_300ms": { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "transition-duration": "300ms" } },
+    "TDu_1s":    { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "transition-duration": "1s" } }
+  }
+}

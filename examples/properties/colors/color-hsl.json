@@ -1,0 +1,32 @@
+{
+  "components": {
+    "Color_HSL_Basic": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "hsl(120, 60%, 50%)"
+      }
+    },
+    "Color_HSLA_Comma": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "hsla(30, 80%, 55%, 0.6)"
+      }
+    },
+    "Color_HSL_Space": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "hsl(200 70% 45%)"
+      }
+    },
+    "Color_HSL_Deg": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "hsl(0deg, 100%, 50%)"
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "components": {
+    "LineBreak_Auto": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-break": "auto" } },
+    "LineBreak_Loose": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-break": "loose" } },
+    "LineBreak_Normal": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-break": "normal" } },
+    "LineBreak_Strict": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-break": "strict" } },
+    "LineBreak_Anywhere": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-break": "anywhere" } }
+  }
+}

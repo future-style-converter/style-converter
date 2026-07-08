@@ -1,0 +1,7 @@
+{
+  "components": {
+    "RubyMerge_Separate": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-merge": "separate" } },
+    "RubyMerge_Collapse": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-merge": "collapse" } },
+    "RubyMerge_Auto": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-merge": "auto" } }
+  }
+}

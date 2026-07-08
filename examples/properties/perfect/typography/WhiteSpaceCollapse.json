@@ -1,0 +1,37 @@
+{
+  "components": {
+    "V0_collapse": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "white-space-collapse": "collapse"
+      }
+    },
+    "V1_preserve": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "white-space-collapse": "preserve"
+      }
+    },
+    "V2_preserve": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "white-space-collapse": "preserve-breaks"
+      }
+    }
+  }
+}

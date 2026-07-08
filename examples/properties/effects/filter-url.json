@@ -1,0 +1,6 @@
+{
+  "components": {
+    "Filter_Url_Ref": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "filter": "url(#mono)" } },
+    "Filter_Url_External": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "filter": "url(filters.svg#grayscale)" } }
+  }
+}

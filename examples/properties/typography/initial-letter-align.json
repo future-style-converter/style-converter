@@ -1,0 +1,9 @@
+{
+  "components": {
+    "InitialLetterAlign_Auto": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter-align": "auto" } },
+    "InitialLetterAlign_Alphabetic": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter-align": "alphabetic" } },
+    "InitialLetterAlign_Hanging": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter-align": "hanging" } },
+    "InitialLetterAlign_Ideographic": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter-align": "ideographic" } },
+    "InitialLetterAlign_BorderBox": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "initial-letter-align": "border-box" } }
+  }
+}

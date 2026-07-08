@@ -1,0 +1,9 @@
+{
+  "components": {
+    "AT_none":     { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "animation-timeline": "none" } },
+    "AT_auto":     { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "animation-timeline": "auto" } },
+    "AT_named":    { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "animation-timeline": "--my-timeline" } },
+    "AT_scrollY":  { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "animation-timeline": "scroll(root y)" } },
+    "AT_viewInline": { "properties": { "width": "180px", "height": "60px", "background-color": "#9b59b6", "animation-timeline": "view(inline)" } }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "components": {
+    "TextAnchor_Start": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-anchor": "start" } },
+    "TextAnchor_Middle": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-anchor": "middle" } },
+    "TextAnchor_End": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-anchor": "end" } }
+  }
+}

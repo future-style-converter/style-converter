@@ -1,0 +1,10 @@
+{
+  "components": {
+    "AD_0s":       { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-delay": "0s" } },
+    "AD_300ms":    { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-delay": "300ms" } },
+    "AD_500ms":    { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-delay": "0.5s" } },
+    "AD_1s":       { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-delay": "1s" } },
+    "AD_Negative": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-delay": "-0.5s" } },
+    "AD_List":     { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-delay": "0s, 300ms, 1s" } }
+  }
+}

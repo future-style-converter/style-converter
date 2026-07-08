@@ -1,0 +1,10 @@
+{
+  "components": {
+    "PerspOrigin_Center": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "perspective": "500px", "perspective-origin": "center", "transform": "rotateY(30deg)" } },
+    "PerspOrigin_CenterCenter": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "perspective": "500px", "perspective-origin": "center center", "transform": "rotateY(30deg)" } },
+    "PerspOrigin_TopLeft": { "properties": { "width": "120px", "height": "80px", "background-color": "#2ecc71", "perspective": "500px", "perspective-origin": "top left", "transform": "rotateY(30deg)" } },
+    "PerspOrigin_BottomRight": { "properties": { "width": "120px", "height": "80px", "background-color": "#9b59b6", "perspective": "500px", "perspective-origin": "bottom right", "transform": "rotateY(30deg)" } },
+    "PerspOrigin_Pcts": { "properties": { "width": "120px", "height": "80px", "background-color": "#f39c12", "perspective": "500px", "perspective-origin": "25% 75%", "transform": "rotateY(30deg)" } },
+    "PerspOrigin_Lengths": { "properties": { "width": "120px", "height": "80px", "background-color": "#1abc9c", "perspective": "500px", "perspective-origin": "20px 40px", "transform": "rotateY(30deg)" } }
+  }
+}

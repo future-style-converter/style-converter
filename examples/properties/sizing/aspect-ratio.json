@@ -1,0 +1,68 @@
+{
+  "components": {
+    "Ratio_16_9": {
+      "properties": {
+        "width": "200px",
+        "aspect-ratio": "16/9",
+        "background-color": "#3498db"
+      }
+    },
+    "Ratio_1_1": {
+      "properties": {
+        "width": "150px",
+        "aspect-ratio": "1/1",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Ratio_4_3": {
+      "properties": {
+        "width": "200px",
+        "aspect-ratio": "4/3",
+        "background-color": "#e67e22"
+      }
+    },
+    "Ratio_3_4": {
+      "properties": {
+        "width": "150px",
+        "aspect-ratio": "3/4",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Ratio_Auto": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "aspect-ratio": "auto",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Ratio_Numeric_1_5": {
+      "properties": {
+        "width": "200px",
+        "aspect-ratio": "1.5",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Ratio_Width_Only": {
+      "properties": {
+        "width": "200px",
+        "aspect-ratio": "2/1",
+        "background-color": "#16a085"
+      }
+    },
+    "Ratio_Height_Only": {
+      "properties": {
+        "height": "100px",
+        "aspect-ratio": "2/1",
+        "background-color": "#8e44ad"
+      }
+    },
+    "Ratio_Auto_With_Explicit": {
+      "properties": {
+        "width": "200px",
+        "aspect-ratio": "auto 16/9",
+        "background-color": "#c0392b"
+      }
+    }
+  }
+}

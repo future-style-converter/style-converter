@@ -1,0 +1,52 @@
+{
+  "components": {
+    "MM_0": {
+      "properties": {
+        "background-color": "#ef4444",
+        "width": "180px",
+        "height": "60px",
+        "min-width": "0"
+      }
+    },
+    "MM_50": {
+      "properties": {
+        "background-color": "#10b981",
+        "width": "180px",
+        "height": "60px",
+        "min-width": "50px"
+      }
+    },
+    "MM_200": {
+      "properties": {
+        "background-color": "#3b82f6",
+        "width": "180px",
+        "height": "60px",
+        "min-width": "200px"
+      }
+    },
+    "MM_kw": {
+      "properties": {
+        "background-color": "#f59e0b",
+        "width": "180px",
+        "height": "60px",
+        "min-width": "auto"
+      }
+    },
+    "V4_min_conten": {
+      "properties": {
+        "background-color": "#ef4444",
+        "width": "180px",
+        "height": "60px",
+        "min-width": "min-content"
+      }
+    },
+    "V5_max_conten": {
+      "properties": {
+        "background-color": "#ef4444",
+        "width": "180px",
+        "height": "60px",
+        "min-width": "max-content"
+      }
+    }
+  }
+}

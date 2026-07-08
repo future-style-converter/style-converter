@@ -1,0 +1,31 @@
+{
+  "components": {
+    "V0_0": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "offset-distance": "0"
+      }
+    },
+    "V1_50_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "offset-distance": "50%"
+      }
+    },
+    "V2_100px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "offset-distance": "100px"
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "components": {
+    "ZI_Auto": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "width": "80px", "height": "60px", "background-color": "#ef4444", "position": "absolute", "top": "20px", "left": "20px", "z-index": "auto" } },
+        "b": { "properties": { "width": "80px", "height": "60px", "background-color": "#10b981", "position": "absolute", "top": "40px", "left": "60px", "z-index": "auto" } }
+      }
+    },
+    "ZI_Zero": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "width": "80px", "height": "60px", "background-color": "#ef4444", "position": "absolute", "top": "20px", "left": "20px", "z-index": "0" } },
+        "b": { "properties": { "width": "80px", "height": "60px", "background-color": "#10b981", "position": "absolute", "top": "40px", "left": "60px", "z-index": "0" } }
+      }
+    },
+    "ZI_Positive": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "width": "80px", "height": "60px", "background-color": "#ef4444", "position": "absolute", "top": "20px", "left": "20px", "z-index": "1" } },
+        "b": { "properties": { "width": "80px", "height": "60px", "background-color": "#10b981", "position": "absolute", "top": "40px", "left": "60px", "z-index": "5" } }
+      }
+    },
+    "ZI_Negative": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "width": "80px", "height": "60px", "background-color": "#ef4444", "position": "absolute", "top": "20px", "left": "20px", "z-index": "-1" } },
+        "b": { "properties": { "width": "80px", "height": "60px", "background-color": "#10b981", "position": "absolute", "top": "40px", "left": "60px", "z-index": "2" } }
+      }
+    }
+  }
+}

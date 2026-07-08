@@ -1,0 +1,32 @@
+{
+  "components": {
+    "A_effect": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "opacity": "0.8"
+      }
+    },
+    "B_math": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "math-style": "normal"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "opacity": "0.8",
+        "math-style": "normal"
+      }
+    }
+  }
+}

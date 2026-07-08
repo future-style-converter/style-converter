@@ -1,0 +1,31 @@
+{
+  "components": {
+    "V0_pack": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "masonry-auto-flow": "pack"
+      }
+    },
+    "V1_next": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "masonry-auto-flow": "next"
+      }
+    },
+    "V2_definite": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "masonry-auto-flow": "definite-first"
+      }
+    }
+  }
+}

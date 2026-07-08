@@ -1,0 +1,62 @@
+{
+  "components": {
+    "BC_Border": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "15px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(to right, #f59e0b, #ef4444)",
+        "background-clip": "border-box"
+      }
+    },
+    "BC_Default": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "15px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(to right, #f59e0b, #ef4444)"
+      }
+    },
+    "BC_Inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "15px",
+        "background-color": "#1f2937",
+        "background-clip": "inherit"
+      }
+    },
+    "V3_padding_bo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "15px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(to right, #f59e0b, #ef4444)",
+        "background-clip": "padding-box"
+      }
+    },
+    "V4_content_bo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "15px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(to right, #f59e0b, #ef4444)",
+        "background-clip": "content-box"
+      }
+    },
+    "V5_text": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "15px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(to right, #f59e0b, #ef4444)",
+        "background-clip": "text"
+      }
+    }
+  }
+}

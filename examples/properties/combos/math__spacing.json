@@ -1,0 +1,30 @@
+{
+  "components": {
+    "A_math": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "math-style": "normal"
+      }
+    },
+    "B_spacin": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "12px",
+        "background-color": "#1f2937"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "12px",
+        "background-color": "#1f2937",
+        "math-style": "normal"
+      }
+    }
+  }
+}

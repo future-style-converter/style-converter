@@ -1,0 +1,14 @@
+{
+  "components": {
+    "MathStyle_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "math-style": "normal" } },
+    "MathStyle_Compact": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "math-style": "compact" } },
+
+    "MathShift_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "math-shift": "normal" } },
+    "MathShift_Compact": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "math-shift": "compact" } },
+
+    "MathDepth_Auto": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "math-depth": "auto" } },
+    "MathDepth_AutoAdd": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "math-depth": "auto-add" } },
+    "MathDepth_Integer": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "math-depth": "2" } },
+    "MathDepth_Add": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "math-depth": "add(1)" } }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "components": {
+    "TextUnderlineOffset_Auto": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-offset": "auto" } },
+    "TextUnderlineOffset_Px_2": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-offset": "2px" } },
+    "TextUnderlineOffset_Px_6": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-offset": "6px" } },
+    "TextUnderlineOffset_Em_0_2": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-offset": "0.2em" } },
+    "TextUnderlineOffset_Percent_20": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-offset": "20%" } }
+  }
+}

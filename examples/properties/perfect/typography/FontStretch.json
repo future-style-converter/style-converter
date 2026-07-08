@@ -1,0 +1,103 @@
+{
+  "components": {
+    "V0_normal": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "font-stretch": "normal"
+      }
+    },
+    "V1_cond": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "font-stretch": "condensed"
+      }
+    },
+    "V2_exp": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "font-stretch": "expanded"
+      }
+    },
+    "V3_ultra_cond": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "font-stretch": "ultra-condensed"
+      }
+    },
+    "V4_extra_cond": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "font-stretch": "extra-condensed"
+      }
+    },
+    "V5_semi_conde": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "font-stretch": "semi-condensed"
+      }
+    },
+    "V6_semi_expan": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "font-stretch": "semi-expanded"
+      }
+    },
+    "V7_extra_expa": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "font-stretch": "extra-expanded"
+      }
+    },
+    "V8_ultra_expa": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "font-stretch": "ultra-expanded"
+      }
+    }
+  }
+}

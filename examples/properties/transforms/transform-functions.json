@@ -1,0 +1,32 @@
+{
+  "components": {
+    "Transform_None": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "transform": "none" } },
+    "Transform_TranslateX": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "transform": "translateX(20px)" } },
+    "Transform_TranslateY": { "properties": { "width": "120px", "height": "80px", "background-color": "#2ecc71", "transform": "translateY(20px)" } },
+    "Transform_TranslateZ": { "properties": { "width": "120px", "height": "80px", "background-color": "#9b59b6", "transform": "translateZ(20px)" } },
+    "Transform_TranslateSingle": { "properties": { "width": "120px", "height": "80px", "background-color": "#f39c12", "transform": "translate(20px)" } },
+    "Transform_TranslateXY": { "properties": { "width": "120px", "height": "80px", "background-color": "#1abc9c", "transform": "translate(20px, 10px)" } },
+    "Transform_Translate3d": { "properties": { "width": "120px", "height": "80px", "background-color": "#34495e", "transform": "translate3d(10px, 20px, 30px)" } },
+    "Transform_RotateAngle": { "properties": { "width": "120px", "height": "80px", "background-color": "#c0392b", "transform": "rotate(45deg)" } },
+    "Transform_RotateTurn": { "properties": { "width": "120px", "height": "80px", "background-color": "#d35400", "transform": "rotate(0.25turn)" } },
+    "Transform_RotateRad": { "properties": { "width": "120px", "height": "80px", "background-color": "#16a085", "transform": "rotate(0.5rad)" } },
+    "Transform_RotateX": { "properties": { "width": "120px", "height": "80px", "background-color": "#8e44ad", "transform": "rotateX(45deg)" } },
+    "Transform_RotateY": { "properties": { "width": "120px", "height": "80px", "background-color": "#2980b9", "transform": "rotateY(45deg)" } },
+    "Transform_RotateZ": { "properties": { "width": "120px", "height": "80px", "background-color": "#27ae60", "transform": "rotateZ(45deg)" } },
+    "Transform_Rotate3d": { "properties": { "width": "120px", "height": "80px", "background-color": "#7f8c8d", "transform": "rotate3d(1, 1, 0, 45deg)" } },
+    "Transform_ScaleSingle": { "properties": { "width": "120px", "height": "80px", "background-color": "#e67e22", "transform": "scale(1.2)" } },
+    "Transform_ScaleXY": { "properties": { "width": "120px", "height": "80px", "background-color": "#f1c40f", "transform": "scale(1.5, 0.8)" } },
+    "Transform_ScaleX": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "transform": "scaleX(1.5)" } },
+    "Transform_ScaleY": { "properties": { "width": "120px", "height": "80px", "background-color": "#2ecc71", "transform": "scaleY(1.5)" } },
+    "Transform_ScaleZ": { "properties": { "width": "120px", "height": "80px", "background-color": "#9b59b6", "transform": "scaleZ(1.5)" } },
+    "Transform_Scale3d": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "transform": "scale3d(1.2, 0.8, 1)" } },
+    "Transform_Skew": { "properties": { "width": "120px", "height": "80px", "background-color": "#1abc9c", "transform": "skew(15deg, 5deg)" } },
+    "Transform_SkewX": { "properties": { "width": "120px", "height": "80px", "background-color": "#34495e", "transform": "skewX(20deg)" } },
+    "Transform_SkewY": { "properties": { "width": "120px", "height": "80px", "background-color": "#c0392b", "transform": "skewY(20deg)" } },
+    "Transform_Matrix": { "properties": { "width": "120px", "height": "80px", "background-color": "#16a085", "transform": "matrix(1, 0.2, -0.2, 1, 10, 20)" } },
+    "Transform_Matrix3d": { "properties": { "width": "120px", "height": "80px", "background-color": "#d35400", "transform": "matrix3d(1,0,0,0, 0,1,0,0, 0,0,1,0, 20,10,0,1)" } },
+    "Transform_Perspective": { "properties": { "width": "120px", "height": "80px", "background-color": "#2980b9", "transform": "perspective(500px) rotateY(30deg)" } },
+    "Transform_Chain": { "properties": { "width": "120px", "height": "80px", "background-color": "#27ae60", "transform": "rotate(45deg) translate(20px, 0) scale(1.2)" } },
+    "Transform_ChainLong": { "properties": { "width": "120px", "height": "80px", "background-color": "#8e44ad", "transform": "translateX(30px) rotate(15deg) scale(0.9) skewX(5deg)" } }
+  }
+}

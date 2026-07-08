@@ -1,0 +1,35 @@
+{
+  "components": {
+    "NormalHeight": {
+      "properties": {
+        "line-height": "normal"
+      }
+    },
+    "NumberHeight": {
+      "properties": {
+        "line-height": "1.5"
+      }
+    },
+    "PercentHeight": {
+      "properties": {
+        "line-height": "150%"
+      }
+    },
+    "PixelHeight": {
+      "properties": {
+        "line-height": "24px"
+      }
+    },
+    "EmHeight": {
+      "properties": {
+        "line-height": "1.2em"
+      }
+    },
+    "AllVariants": {
+      "properties": {
+        "line-height": "1.6",
+        "font-size": "16px"
+      }
+    }
+  }
+}

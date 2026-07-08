@@ -1,0 +1,68 @@
+{
+  "components": {
+    "Opacity_0": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#3498db",
+        "opacity": "0"
+      }
+    },
+    "Opacity_25": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#3498db",
+        "opacity": "0.25"
+      }
+    },
+    "Opacity_50": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#3498db",
+        "opacity": "0.5"
+      }
+    },
+    "Opacity_75": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#3498db",
+        "opacity": "0.75"
+      }
+    },
+    "Opacity_1": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#3498db",
+        "opacity": "1"
+      }
+    },
+    "Opacity_Percent": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#e67e22",
+        "opacity": "50%"
+      }
+    },
+    "Opacity_Clamp_Above": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#2ecc71",
+        "opacity": "1.5"
+      }
+    },
+    "Opacity_Clamp_Below": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#9b59b6",
+        "opacity": "-0.5"
+      }
+    }
+  }
+}

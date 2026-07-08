@@ -1,0 +1,39 @@
+{
+  "components": {
+    "EaseKeyword": {
+      "properties": {
+        "animation-timing-function": "ease"
+      }
+    },
+    "LinearKeyword": {
+      "properties": {
+        "transition-timing-function": "linear"
+      }
+    },
+    "EaseInOut": {
+      "properties": {
+        "animation-timing-function": "ease-in-out"
+      }
+    },
+    "StepStart": {
+      "properties": {
+        "animation-timing-function": "step-start"
+      }
+    },
+    "CubicBezier": {
+      "properties": {
+        "transition-timing-function": "cubic-bezier(0.4, 0, 0.2, 1)"
+      }
+    },
+    "Steps": {
+      "properties": {
+        "animation-timing-function": "steps(4, jump-end)"
+      }
+    },
+    "Multiple": {
+      "properties": {
+        "animation-timing-function": "ease, linear, ease-in-out"
+      }
+    }
+  }
+}

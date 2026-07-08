@@ -1,0 +1,29 @@
+{
+  "components": {
+    "FullOpacity": {
+      "properties": {
+        "opacity": "1"
+      }
+    },
+    "HalfOpacity": {
+      "properties": {
+        "opacity": "0.5"
+      }
+    },
+    "ZeroOpacity": {
+      "properties": {
+        "opacity": "0"
+      }
+    },
+    "PercentOpacity": {
+      "properties": {
+        "opacity": "75%"
+      }
+    },
+    "PercentHalf": {
+      "properties": {
+        "opacity": "50%"
+      }
+    }
+  }
+}

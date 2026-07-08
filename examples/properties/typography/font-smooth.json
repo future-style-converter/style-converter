@@ -1,0 +1,9 @@
+{
+  "components": {
+    "FontSmooth_Auto": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-smooth": "auto" } },
+    "FontSmooth_Never": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-smooth": "never" } },
+    "FontSmooth_Always": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-smooth": "always" } },
+    "FontSmooth_Antialiased": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-smooth": "antialiased" } },
+    "FontSmooth_SubpixelAntialiased": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-smooth": "subpixel-antialiased" } }
+  }
+}

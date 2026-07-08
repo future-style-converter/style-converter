@@ -1,0 +1,40 @@
+{
+  "components": {
+    "V0_from_ima": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "image-orientation": "from-image"
+      }
+    },
+    "V1_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "image-orientation": "none"
+      }
+    },
+    "V2_0deg": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "image-orientation": "0deg"
+      }
+    },
+    "V3_90deg": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "image-orientation": "90deg"
+      }
+    }
+  }
+}

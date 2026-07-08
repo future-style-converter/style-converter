@@ -1,0 +1,2100 @@
+{
+  "generatedAt": "2026-04-19T09:15:05.001Z",
+  "inputLabel": "examples/properties/spacing/audit-phase12.json",
+  "thresholds": {
+    "ssim": 0.95,
+    "pixel": 2
+  },
+  "rows": [
+    {
+      "name": "000_NegMargin_Sides_Overflow.png",
+      "canvasW": 390,
+      "canvasH": 132,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/iOS/000_NegMargin_Sides_Overflow.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/Android/000_NegMargin_Sides_Overflow.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/web/000_NegMargin_Sides_Overflow.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 12000,
+          "pixelMismatchedPct": 23.31,
+          "ssim": 0.8454,
+          "diffImage": "diffs/000_NegMargin_Sides_Overflow__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 2799,
+          "pixelMismatchedPct": 5.437,
+          "ssim": 0.9457,
+          "diffImage": "diffs/000_NegMargin_Sides_Overflow__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 11160,
+          "pixelMismatchedPct": 21.678,
+          "ssim": 0.8537,
+          "diffImage": "diffs/000_NegMargin_Sides_Overflow__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "001_inner.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/001_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/Android/001_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/001_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 65,
+          "pixelMismatchedPct": 0.181,
+          "ssim": 0.9813,
+          "diffImage": "diffs/001_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 2799,
+          "pixelMismatchedPct": 7.801,
+          "ssim": 0.9041,
+          "diffImage": "diffs/001_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 2859,
+          "pixelMismatchedPct": 7.968,
+          "ssim": 0.893,
+          "diffImage": "diffs/001_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "002_NegMargin_Top_Overlap.png",
+      "canvasW": 390,
+      "canvasH": 192,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 192,
+          "image": "images/iOS/002_NegMargin_Top_Overlap.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 192,
+          "image": "images/Android/002_NegMargin_Top_Overlap.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 192,
+          "image": "images/web/002_NegMargin_Top_Overlap.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 19320,
+          "pixelMismatchedPct": 25.801,
+          "ssim": 0.849,
+          "diffImage": "diffs/002_NegMargin_Top_Overlap__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 53,
+          "pixelMismatchedPct": 0.071,
+          "ssim": 0.994,
+          "diffImage": "diffs/002_NegMargin_Top_Overlap__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 19320,
+          "pixelMismatchedPct": 25.801,
+          "ssim": 0.8484,
+          "diffImage": "diffs/002_NegMargin_Top_Overlap__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "003_a.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/003_a.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/Android/003_a.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/003_a.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 24,
+          "pixelMismatchedPct": 0.067,
+          "ssim": 0.9938,
+          "diffImage": "diffs/003_a__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 509,
+          "pixelMismatchedPct": 1.419,
+          "ssim": 0.9827,
+          "diffImage": "diffs/003_a__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 490,
+          "pixelMismatchedPct": 1.366,
+          "ssim": 0.9867,
+          "diffImage": "diffs/003_a__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "004_b.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/004_b.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/Android/004_b.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/004_b.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 19,
+          "pixelMismatchedPct": 0.053,
+          "ssim": 0.9957,
+          "diffImage": "diffs/004_b__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 24,
+          "pixelMismatchedPct": 0.067,
+          "ssim": 0.9952,
+          "diffImage": "diffs/004_b__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 6,
+          "pixelMismatchedPct": 0.017,
+          "ssim": 0.9985,
+          "diffImage": "diffs/004_b__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "005_AutoMargin_Flex_PushRight.png",
+      "canvasW": 390,
+      "canvasH": 128,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 128,
+          "image": "images/iOS/005_AutoMargin_Flex_PushRight.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 128,
+          "image": "images/Android/005_AutoMargin_Flex_PushRight.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/web/005_AutoMargin_Flex_PushRight.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 2949,
+          "pixelMismatchedPct": 5.907,
+          "ssim": 0.8234,
+          "diffImage": "diffs/005_AutoMargin_Flex_PushRight__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 1323,
+          "pixelMismatchedPct": 2.65,
+          "ssim": 0.8819,
+          "diffImage": "diffs/005_AutoMargin_Flex_PushRight__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 2968,
+          "pixelMismatchedPct": 5.946,
+          "ssim": 0.8247,
+          "diffImage": "diffs/005_AutoMargin_Flex_PushRight__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "006_a.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/006_a.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/006_a.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/006_a.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 13,
+          "pixelMismatchedPct": 0.046,
+          "ssim": 0.9927,
+          "diffImage": "diffs/006_a__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 19,
+          "pixelMismatchedPct": 0.068,
+          "ssim": 0.9925,
+          "diffImage": "diffs/006_a__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 16,
+          "pixelMismatchedPct": 0.057,
+          "ssim": 0.9931,
+          "diffImage": "diffs/006_a__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "007_b.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/007_b.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/007_b.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/007_b.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 2954,
+          "pixelMismatchedPct": 10.52,
+          "ssim": 0.8441,
+          "diffImage": "diffs/007_b__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 24,
+          "pixelMismatchedPct": 0.085,
+          "ssim": 0.9913,
+          "diffImage": "diffs/007_b__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 2956,
+          "pixelMismatchedPct": 10.527,
+          "ssim": 0.8439,
+          "diffImage": "diffs/007_b__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "008_AutoMargin_Block_Center.png",
+      "canvasW": 390,
+      "canvasH": 132,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/iOS/008_AutoMargin_Block_Center.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/Android/008_AutoMargin_Block_Center.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/web/008_AutoMargin_Block_Center.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 5178,
+          "pixelMismatchedPct": 10.058,
+          "ssim": 0.8974,
+          "diffImage": "diffs/008_AutoMargin_Block_Center__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 7,
+          "pixelMismatchedPct": 0.014,
+          "ssim": 0.9876,
+          "diffImage": "diffs/008_AutoMargin_Block_Center__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 5252,
+          "pixelMismatchedPct": 10.202,
+          "ssim": 0.8992,
+          "diffImage": "diffs/008_AutoMargin_Block_Center__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "009_inner.png",
+      "canvasW": 390,
+      "canvasH": 92,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/iOS/009_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/Android/009_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/009_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 9169,
+          "pixelMismatchedPct": 25.555,
+          "ssim": 0.7087,
+          "diffImage": "diffs/009_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 7,
+          "pixelMismatchedPct": 0.02,
+          "ssim": 0.9815,
+          "diffImage": "diffs/009_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 9173,
+          "pixelMismatchedPct": 25.566,
+          "ssim": 0.7084,
+          "diffImage": "diffs/009_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "010_Padding_ExceedsParent.png",
+      "canvasW": 390,
+      "canvasH": 512,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 512,
+          "image": "images/iOS/010_Padding_ExceedsParent.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 512,
+          "image": "images/Android/010_Padding_ExceedsParent.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 472,
+          "image": "images/web/010_Padding_ExceedsParent.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 179517,
+          "pixelMismatchedPct": 89.902,
+          "ssim": 0.4354,
+          "diffImage": "diffs/010_Padding_ExceedsParent__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 15049,
+          "pixelMismatchedPct": 7.537,
+          "ssim": 0.9056,
+          "diffImage": "diffs/010_Padding_ExceedsParent__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 164560,
+          "pixelMismatchedPct": 82.412,
+          "ssim": 0.4586,
+          "diffImage": "diffs/010_Padding_ExceedsParent__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "011_inner.png",
+      "canvasW": 390,
+      "canvasH": 512,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 512,
+          "image": "images/iOS/011_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 512,
+          "image": "images/Android/011_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 472,
+          "image": "images/web/011_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 179517,
+          "pixelMismatchedPct": 89.902,
+          "ssim": 0.3085,
+          "diffImage": "diffs/011_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 15049,
+          "pixelMismatchedPct": 7.537,
+          "ssim": 0.9056,
+          "diffImage": "diffs/011_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 164560,
+          "pixelMismatchedPct": 82.412,
+          "ssim": 0.3575,
+          "diffImage": "diffs/011_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "012_Padding_Huge_9999px.png",
+      "canvasW": 390,
+      "canvasH": 10071,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 10071,
+          "image": "images/Android/012_Padding_Huge_9999px.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 10031,
+          "image": "images/web/012_Padding_Huge_9999px.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": {
+          "pixelMismatchedCount": 399960,
+          "pixelMismatchedPct": 10.183,
+          "ssim": 0.8857,
+          "diffImage": "diffs/012_Padding_Huge_9999px__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "013_inner.png",
+      "canvasW": 390,
+      "canvasH": 10071,
+      "platforms": {
+        "iOS": {
+          "present": false
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 10071,
+          "image": "images/Android/013_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 10031,
+          "image": "images/web/013_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": null,
+        "iOS-web": null,
+        "Android-web": {
+          "pixelMismatchedCount": 709640,
+          "pixelMismatchedPct": 18.068,
+          "ssim": 0.7628,
+          "diffImage": "diffs/013_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "014_Padding_Percent_Parent.png",
+      "canvasW": 390,
+      "canvasH": 232,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 232,
+          "image": "images/iOS/014_Padding_Percent_Parent.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 232,
+          "image": "images/Android/014_Padding_Percent_Parent.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 232,
+          "image": "images/web/014_Padding_Percent_Parent.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 39968,
+          "pixelMismatchedPct": 44.173,
+          "ssim": 0.707,
+          "diffImage": "diffs/014_Padding_Percent_Parent__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 41264,
+          "pixelMismatchedPct": 45.606,
+          "ssim": 0.6624,
+          "diffImage": "diffs/014_Padding_Percent_Parent__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 9296,
+          "pixelMismatchedPct": 10.274,
+          "ssim": 0.8328,
+          "diffImage": "diffs/014_Padding_Percent_Parent__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "015_inner.png",
+      "canvasW": 390,
+      "canvasH": 284,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 42,
+          "image": "images/iOS/015_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 258,
+          "image": "images/Android/015_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 284,
+          "image": "images/web/015_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 5980,
+          "pixelMismatchedPct": 5.399,
+          "ssim": 0.9092,
+          "diffImage": "diffs/015_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 14540,
+          "pixelMismatchedPct": 13.127,
+          "ssim": 0.7264,
+          "diffImage": "diffs/015_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 13752,
+          "pixelMismatchedPct": 12.416,
+          "ssim": 0.7499,
+          "diffImage": "diffs/015_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "016_Padding_Calc_Dynamic.png",
+      "canvasW": 390,
+      "canvasH": 132,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/iOS/016_Padding_Calc_Dynamic.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/Android/016_Padding_Calc_Dynamic.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/016_Padding_Calc_Dynamic.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 15215,
+          "pixelMismatchedPct": 29.555,
+          "ssim": 0.7417,
+          "diffImage": "diffs/016_Padding_Calc_Dynamic__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 13590,
+          "pixelMismatchedPct": 26.399,
+          "ssim": 0.6874,
+          "diffImage": "diffs/016_Padding_Calc_Dynamic__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 7673,
+          "pixelMismatchedPct": 14.905,
+          "ssim": 0.7467,
+          "diffImage": "diffs/016_Padding_Calc_Dynamic__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "017_inner.png",
+      "canvasW": 390,
+      "canvasH": 132,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/iOS/017_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 132,
+          "image": "images/Android/017_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/017_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 12084,
+          "pixelMismatchedPct": 23.473,
+          "ssim": 0.7136,
+          "diffImage": "diffs/017_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 13590,
+          "pixelMismatchedPct": 26.399,
+          "ssim": 0.6857,
+          "diffImage": "diffs/017_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 6873,
+          "pixelMismatchedPct": 13.351,
+          "ssim": 0.7573,
+          "diffImage": "diffs/017_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "018_Padding_Block_Em.png",
+      "canvasW": 390,
+      "canvasH": 120,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 120,
+          "image": "images/iOS/018_Padding_Block_Em.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 120,
+          "image": "images/Android/018_Padding_Block_Em.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 92,
+          "image": "images/web/018_Padding_Block_Em.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 12723,
+          "pixelMismatchedPct": 27.186,
+          "ssim": 0.7859,
+          "diffImage": "diffs/018_Padding_Block_Em__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 6428,
+          "pixelMismatchedPct": 13.735,
+          "ssim": 0.7725,
+          "diffImage": "diffs/018_Padding_Block_Em__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 7643,
+          "pixelMismatchedPct": 16.331,
+          "ssim": 0.745,
+          "diffImage": "diffs/018_Padding_Block_Em__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "019_inner.png",
+      "canvasW": 390,
+      "canvasH": 120,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 120,
+          "image": "images/iOS/019_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 120,
+          "image": "images/Android/019_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 80,
+          "image": "images/web/019_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 4846,
+          "pixelMismatchedPct": 10.355,
+          "ssim": 0.8508,
+          "diffImage": "diffs/019_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 6908,
+          "pixelMismatchedPct": 14.761,
+          "ssim": 0.7581,
+          "diffImage": "diffs/019_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 4614,
+          "pixelMismatchedPct": 9.859,
+          "ssim": 0.7848,
+          "diffImage": "diffs/019_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "020_Padding_Logical_Mixed.png",
+      "canvasW": 390,
+      "canvasH": 107,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 107,
+          "image": "images/iOS/020_Padding_Logical_Mixed.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 107,
+          "image": "images/Android/020_Padding_Logical_Mixed.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 82,
+          "image": "images/web/020_Padding_Logical_Mixed.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 12681,
+          "pixelMismatchedPct": 30.388,
+          "ssim": 0.7546,
+          "diffImage": "diffs/020_Padding_Logical_Mixed__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 11855,
+          "pixelMismatchedPct": 28.409,
+          "ssim": 0.7218,
+          "diffImage": "diffs/020_Padding_Logical_Mixed__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 8246,
+          "pixelMismatchedPct": 19.76,
+          "ssim": 0.7195,
+          "diffImage": "diffs/020_Padding_Logical_Mixed__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "021_inner.png",
+      "canvasW": 390,
+      "canvasH": 107,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 107,
+          "image": "images/iOS/021_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 107,
+          "image": "images/Android/021_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 82,
+          "image": "images/web/021_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 6298,
+          "pixelMismatchedPct": 15.092,
+          "ssim": 0.7735,
+          "diffImage": "diffs/021_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 11855,
+          "pixelMismatchedPct": 28.409,
+          "ssim": 0.714,
+          "diffImage": "diffs/021_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 8246,
+          "pixelMismatchedPct": 19.76,
+          "ssim": 0.7083,
+          "diffImage": "diffs/021_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "022_Margin_LogicalMixed.png",
+      "canvasW": 390,
+      "canvasH": 202,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 172,
+          "image": "images/iOS/022_Margin_LogicalMixed.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 172,
+          "image": "images/Android/022_Margin_LogicalMixed.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 202,
+          "image": "images/web/022_Margin_LogicalMixed.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 9988,
+          "pixelMismatchedPct": 12.678,
+          "ssim": 0.8762,
+          "diffImage": "diffs/022_Margin_LogicalMixed__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 13075,
+          "pixelMismatchedPct": 16.597,
+          "ssim": 0.7794,
+          "diffImage": "diffs/022_Margin_LogicalMixed__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 13073,
+          "pixelMismatchedPct": 16.594,
+          "ssim": 0.7773,
+          "diffImage": "diffs/022_Margin_LogicalMixed__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "023_inner.png",
+      "canvasW": 390,
+      "canvasH": 112,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/iOS/023_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 82,
+          "image": "images/Android/023_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/web/023_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 1498,
+          "pixelMismatchedPct": 3.429,
+          "ssim": 0.927,
+          "diffImage": "diffs/023_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 9475,
+          "pixelMismatchedPct": 21.692,
+          "ssim": 0.6803,
+          "diffImage": "diffs/023_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 8073,
+          "pixelMismatchedPct": 18.482,
+          "ssim": 0.697,
+          "diffImage": "diffs/023_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "024_Gap_Zero_vs_Normal.png",
+      "canvasW": 390,
+      "canvasH": 88,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 88,
+          "image": "images/iOS/024_Gap_Zero_vs_Normal.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 88,
+          "image": "images/Android/024_Gap_Zero_vs_Normal.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 88,
+          "image": "images/web/024_Gap_Zero_vs_Normal.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 36,
+          "pixelMismatchedPct": 0.105,
+          "ssim": 0.8556,
+          "diffImage": "diffs/024_Gap_Zero_vs_Normal__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 9415,
+          "pixelMismatchedPct": 27.433,
+          "ssim": 0.6597,
+          "diffImage": "diffs/024_Gap_Zero_vs_Normal__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 9420,
+          "pixelMismatchedPct": 27.448,
+          "ssim": 0.6662,
+          "diffImage": "diffs/024_Gap_Zero_vs_Normal__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "025_a.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/025_a.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/025_a.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/025_a.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 13,
+          "pixelMismatchedPct": 0.046,
+          "ssim": 0.9927,
+          "diffImage": "diffs/025_a__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 3680,
+          "pixelMismatchedPct": 13.105,
+          "ssim": 0.7793,
+          "diffImage": "diffs/025_a__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 3680,
+          "pixelMismatchedPct": 13.105,
+          "ssim": 0.7789,
+          "diffImage": "diffs/025_a__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "026_b.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/026_b.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/026_b.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/026_b.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 18,
+          "pixelMismatchedPct": 0.064,
+          "ssim": 0.9916,
+          "diffImage": "diffs/026_b__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 3680,
+          "pixelMismatchedPct": 13.105,
+          "ssim": 0.7787,
+          "diffImage": "diffs/026_b__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 3680,
+          "pixelMismatchedPct": 13.105,
+          "ssim": 0.7784,
+          "diffImage": "diffs/026_b__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "027_c.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/027_c.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/027_c.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/027_c.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 5,
+          "pixelMismatchedPct": 0.018,
+          "ssim": 0.9933,
+          "diffImage": "diffs/027_c__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 3680,
+          "pixelMismatchedPct": 13.105,
+          "ssim": 0.7795,
+          "diffImage": "diffs/027_c__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 3680,
+          "pixelMismatchedPct": 13.105,
+          "ssim": 0.7792,
+          "diffImage": "diffs/027_c__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "028_Gap_NonFlex_Context.png",
+      "canvasW": 390,
+      "canvasH": 148,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 148,
+          "image": "images/iOS/028_Gap_NonFlex_Context.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 78,
+          "image": "images/Android/028_Gap_NonFlex_Context.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 108,
+          "image": "images/web/028_Gap_NonFlex_Context.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 7172,
+          "pixelMismatchedPct": 12.426,
+          "ssim": 0.7376,
+          "diffImage": "diffs/028_Gap_NonFlex_Context__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 6330,
+          "pixelMismatchedPct": 10.967,
+          "ssim": 0.7781,
+          "diffImage": "diffs/028_Gap_NonFlex_Context__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 6707,
+          "pixelMismatchedPct": 11.62,
+          "ssim": 0.7692,
+          "diffImage": "diffs/028_Gap_NonFlex_Context__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "029_a.png",
+      "canvasW": 390,
+      "canvasH": 62,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 62,
+          "image": "images/iOS/029_a.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 62,
+          "image": "images/Android/029_a.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 62,
+          "image": "images/web/029_a.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 15,
+          "pixelMismatchedPct": 0.062,
+          "ssim": 0.9913,
+          "diffImage": "diffs/029_a__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 2490,
+          "pixelMismatchedPct": 10.298,
+          "ssim": 0.7525,
+          "diffImage": "diffs/029_a__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 2475,
+          "pixelMismatchedPct": 10.236,
+          "ssim": 0.756,
+          "diffImage": "diffs/029_a__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "030_b.png",
+      "canvasW": 390,
+      "canvasH": 62,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 62,
+          "image": "images/iOS/030_b.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 62,
+          "image": "images/Android/030_b.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 62,
+          "image": "images/web/030_b.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 22,
+          "pixelMismatchedPct": 0.091,
+          "ssim": 0.99,
+          "diffImage": "diffs/030_b__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 2496,
+          "pixelMismatchedPct": 10.323,
+          "ssim": 0.7518,
+          "diffImage": "diffs/030_b__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 2482,
+          "pixelMismatchedPct": 10.265,
+          "ssim": 0.7552,
+          "diffImage": "diffs/030_b__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "031_Gap_Grid_AutoGap.png",
+      "canvasW": 390,
+      "canvasH": 88,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 88,
+          "image": "images/iOS/031_Gap_Grid_AutoGap.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 88,
+          "image": "images/Android/031_Gap_Grid_AutoGap.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 88,
+          "image": "images/web/031_Gap_Grid_AutoGap.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 4200,
+          "pixelMismatchedPct": 12.238,
+          "ssim": 0.685,
+          "diffImage": "diffs/031_Gap_Grid_AutoGap__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 5281,
+          "pixelMismatchedPct": 15.388,
+          "ssim": 0.7162,
+          "diffImage": "diffs/031_Gap_Grid_AutoGap__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 9206,
+          "pixelMismatchedPct": 26.824,
+          "ssim": 0.6285,
+          "diffImage": "diffs/031_Gap_Grid_AutoGap__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "032_a.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/032_a.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/032_a.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/032_a.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 1403,
+          "pixelMismatchedPct": 4.996,
+          "ssim": 0.9247,
+          "diffImage": "diffs/032_a__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 2880,
+          "pixelMismatchedPct": 10.256,
+          "ssim": 0.7808,
+          "diffImage": "diffs/032_a__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 3280,
+          "pixelMismatchedPct": 11.681,
+          "ssim": 0.7872,
+          "diffImage": "diffs/032_a__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "033_b.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/033_b.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/033_b.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/033_b.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 1409,
+          "pixelMismatchedPct": 5.018,
+          "ssim": 0.9242,
+          "diffImage": "diffs/033_b__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 2880,
+          "pixelMismatchedPct": 10.256,
+          "ssim": 0.7803,
+          "diffImage": "diffs/033_b__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 3280,
+          "pixelMismatchedPct": 11.681,
+          "ssim": 0.7867,
+          "diffImage": "diffs/033_b__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "034_c.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/034_c.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/034_c.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/034_c.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 1403,
+          "pixelMismatchedPct": 4.996,
+          "ssim": 0.925,
+          "diffImage": "diffs/034_c__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 2880,
+          "pixelMismatchedPct": 10.256,
+          "ssim": 0.7809,
+          "diffImage": "diffs/034_c__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 3280,
+          "pixelMismatchedPct": 11.681,
+          "ssim": 0.7875,
+          "diffImage": "diffs/034_c__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "035_MarginTrim_All_Edges.png",
+      "canvasW": 390,
+      "canvasH": 272,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 272,
+          "image": "images/iOS/035_MarginTrim_All_Edges.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/035_MarginTrim_All_Edges.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 232,
+          "image": "images/web/035_MarginTrim_All_Edges.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 12800,
+          "pixelMismatchedPct": 12.066,
+          "ssim": 0.7869,
+          "diffImage": "diffs/035_MarginTrim_All_Edges__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 15840,
+          "pixelMismatchedPct": 14.932,
+          "ssim": 0.8121,
+          "diffImage": "diffs/035_MarginTrim_All_Edges__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 12480,
+          "pixelMismatchedPct": 11.765,
+          "ssim": 0.7758,
+          "diffImage": "diffs/035_MarginTrim_All_Edges__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "036_a.png",
+      "canvasW": 390,
+      "canvasH": 112,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/iOS/036_a.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/036_a.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/web/036_a.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 4010,
+          "pixelMismatchedPct": 9.18,
+          "ssim": 0.8761,
+          "diffImage": "diffs/036_a__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 6880,
+          "pixelMismatchedPct": 15.751,
+          "ssim": 0.741,
+          "diffImage": "diffs/036_a__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 6080,
+          "pixelMismatchedPct": 13.919,
+          "ssim": 0.7698,
+          "diffImage": "diffs/036_a__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "037_b.png",
+      "canvasW": 390,
+      "canvasH": 112,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/iOS/037_b.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/037_b.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/web/037_b.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 4011,
+          "pixelMismatchedPct": 9.183,
+          "ssim": 0.871,
+          "diffImage": "diffs/037_b__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 6880,
+          "pixelMismatchedPct": 15.751,
+          "ssim": 0.7372,
+          "diffImage": "diffs/037_b__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 6080,
+          "pixelMismatchedPct": 13.919,
+          "ssim": 0.768,
+          "diffImage": "diffs/037_b__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "038_c.png",
+      "canvasW": 390,
+      "canvasH": 112,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/iOS/038_c.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/038_c.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/web/038_c.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 4007,
+          "pixelMismatchedPct": 9.174,
+          "ssim": 0.8795,
+          "diffImage": "diffs/038_c__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 6080,
+          "pixelMismatchedPct": 13.919,
+          "ssim": 0.7434,
+          "diffImage": "diffs/038_c__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 4480,
+          "pixelMismatchedPct": 10.256,
+          "ssim": 0.771,
+          "diffImage": "diffs/038_c__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "039_Nested_PaddingMargin_Collapse.png",
+      "canvasW": 390,
+      "canvasH": 202,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 202,
+          "image": "images/iOS/039_Nested_PaddingMargin_Collapse.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 142,
+          "image": "images/Android/039_Nested_PaddingMargin_Collapse.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 202,
+          "image": "images/web/039_Nested_PaddingMargin_Collapse.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 17498,
+          "pixelMismatchedPct": 22.211,
+          "ssim": 0.7048,
+          "diffImage": "diffs/039_Nested_PaddingMargin_Collapse__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 25280,
+          "pixelMismatchedPct": 32.089,
+          "ssim": 0.742,
+          "diffImage": "diffs/039_Nested_PaddingMargin_Collapse__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 16659,
+          "pixelMismatchedPct": 21.146,
+          "ssim": 0.728,
+          "diffImage": "diffs/039_Nested_PaddingMargin_Collapse__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "040_outer.png",
+      "canvasW": 390,
+      "canvasH": 162,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 162,
+          "image": "images/iOS/040_outer.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 102,
+          "image": "images/Android/040_outer.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 162,
+          "image": "images/web/040_outer.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 14798,
+          "pixelMismatchedPct": 23.422,
+          "ssim": 0.7541,
+          "diffImage": "diffs/040_outer__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 20906,
+          "pixelMismatchedPct": 33.09,
+          "ssim": 0.7109,
+          "diffImage": "diffs/040_outer__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 10640,
+          "pixelMismatchedPct": 16.841,
+          "ssim": 0.7336,
+          "diffImage": "diffs/040_outer__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "041_inner.png",
+      "canvasW": 390,
+      "canvasH": 102,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 102,
+          "image": "images/iOS/041_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/041_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 102,
+          "image": "images/web/041_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 1460,
+          "pixelMismatchedPct": 3.67,
+          "ssim": 0.9238,
+          "diffImage": "diffs/041_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 4906,
+          "pixelMismatchedPct": 12.333,
+          "ssim": 0.7442,
+          "diffImage": "diffs/041_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 4589,
+          "pixelMismatchedPct": 11.536,
+          "ssim": 0.7458,
+          "diffImage": "diffs/041_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "042_ScrollMargin_Basic.png",
+      "canvasW": 390,
+      "canvasH": 112,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/iOS/042_ScrollMargin_Basic.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/Android/042_ScrollMargin_Basic.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/web/042_ScrollMargin_Basic.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 3942,
+          "pixelMismatchedPct": 9.025,
+          "ssim": 0.9016,
+          "diffImage": "diffs/042_ScrollMargin_Basic__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 5343,
+          "pixelMismatchedPct": 12.232,
+          "ssim": 0.7721,
+          "diffImage": "diffs/042_ScrollMargin_Basic__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 8443,
+          "pixelMismatchedPct": 19.329,
+          "ssim": 0.7293,
+          "diffImage": "diffs/042_ScrollMargin_Basic__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "043_inner.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/043_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/043_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/043_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 27,
+          "pixelMismatchedPct": 0.096,
+          "ssim": 0.9759,
+          "diffImage": "diffs/043_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 3743,
+          "pixelMismatchedPct": 13.33,
+          "ssim": 0.7322,
+          "diffImage": "diffs/043_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 3656,
+          "pixelMismatchedPct": 13.02,
+          "ssim": 0.7388,
+          "diffImage": "diffs/043_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "044_ScrollMargin_Sides.png",
+      "canvasW": 390,
+      "canvasH": 112,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/iOS/044_ScrollMargin_Sides.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/Android/044_ScrollMargin_Sides.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 112,
+          "image": "images/web/044_ScrollMargin_Sides.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 3981,
+          "pixelMismatchedPct": 9.114,
+          "ssim": 0.9027,
+          "diffImage": "diffs/044_ScrollMargin_Sides__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 6880,
+          "pixelMismatchedPct": 15.751,
+          "ssim": 0.7728,
+          "diffImage": "diffs/044_ScrollMargin_Sides__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 8459,
+          "pixelMismatchedPct": 19.366,
+          "ssim": 0.7302,
+          "diffImage": "diffs/044_ScrollMargin_Sides__Android-web.png"
+        }
+      },
+      "baseline": null
+    },
+    {
+      "name": "045_inner.png",
+      "canvasW": 390,
+      "canvasH": 72,
+      "platforms": {
+        "iOS": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/iOS/045_inner.png"
+        },
+        "Android": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/Android/045_inner.png"
+        },
+        "web": {
+          "present": true,
+          "width": 390,
+          "height": 72,
+          "image": "images/web/045_inner.png"
+        }
+      },
+      "pairs": {
+        "iOS-Android": {
+          "pixelMismatchedCount": 72,
+          "pixelMismatchedPct": 0.256,
+          "ssim": 0.9762,
+          "diffImage": "diffs/045_inner__iOS-Android.png"
+        },
+        "iOS-web": {
+          "pixelMismatchedCount": 5280,
+          "pixelMismatchedPct": 18.803,
+          "ssim": 0.7333,
+          "diffImage": "diffs/045_inner__iOS-web.png"
+        },
+        "Android-web": {
+          "pixelMismatchedCount": 5264,
+          "pixelMismatchedPct": 18.746,
+          "ssim": 0.7398,
+          "diffImage": "diffs/045_inner__Android-web.png"
+        }
+      },
+      "baseline": null
+    }
+  ]
+}

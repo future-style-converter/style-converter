@@ -1,0 +1,102 @@
+{
+  "components": {
+    "Radius_Zero": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-top-left-radius": "0", "border-top-right-radius": "0",
+        "border-bottom-right-radius": "0", "border-bottom-left-radius": "0",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Radius_Px_All": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-top-left-radius": "16px", "border-top-right-radius": "16px",
+        "border-bottom-right-radius": "16px", "border-bottom-left-radius": "16px",
+        "background-color": "#3498db"
+      }
+    },
+    "Radius_Px_Large": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-top-left-radius": "40px", "border-top-right-radius": "40px",
+        "border-bottom-right-radius": "40px", "border-bottom-left-radius": "40px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Radius_Percent": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-top-left-radius": "50%", "border-top-right-radius": "50%",
+        "border-bottom-right-radius": "50%", "border-bottom-left-radius": "50%",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Radius_Percent_25": {
+      "properties": {
+        "width": "160px", "height": "160px",
+        "border-top-left-radius": "25%", "border-top-right-radius": "25%",
+        "border-bottom-right-radius": "25%", "border-bottom-left-radius": "25%",
+        "background-color": "#f39c12"
+      }
+    },
+    "Radius_Rem": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-top-left-radius": "1rem", "border-top-right-radius": "1rem",
+        "border-bottom-right-radius": "1rem", "border-bottom-left-radius": "1rem",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Radius_Elliptical_Pair": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-left-radius": "40px 20px", "border-top-right-radius": "40px 20px",
+        "border-bottom-right-radius": "40px 20px", "border-bottom-left-radius": "40px 20px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Radius_Elliptical_Mixed_PxPercent": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-left-radius": "40px 50%", "border-top-right-radius": "40px 50%",
+        "border-bottom-right-radius": "40px 50%", "border-bottom-left-radius": "40px 50%",
+        "background-color": "#34495e"
+      }
+    },
+    "Radius_Per_Corner_Different": {
+      "properties": {
+        "width": "160px", "height": "100px",
+        "border-top-left-radius": "4px", "border-top-right-radius": "16px",
+        "border-bottom-right-radius": "32px", "border-bottom-left-radius": "48px",
+        "background-color": "#16a085"
+      }
+    },
+    "Radius_Only_TopLeft": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-top-left-radius": "40px",
+        "background-color": "#c0392b"
+      }
+    },
+    "Radius_Pill": {
+      "properties": {
+        "width": "240px", "height": "60px",
+        "border-top-left-radius": "30px", "border-top-right-radius": "30px",
+        "border-bottom-right-radius": "30px", "border-bottom-left-radius": "30px",
+        "background-color": "#2980b9"
+      }
+    },
+    "Radius_With_Border": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-top-left-radius": "20px", "border-top-right-radius": "20px",
+        "border-bottom-right-radius": "20px", "border-bottom-left-radius": "20px",
+        "border-top-width": "6px", "border-right-width": "6px", "border-bottom-width": "6px", "border-left-width": "6px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-top-color": "#111", "border-right-color": "#111", "border-bottom-color": "#111", "border-left-color": "#111",
+        "background-color": "#f1c40f"
+      }
+    }
+  }
+}

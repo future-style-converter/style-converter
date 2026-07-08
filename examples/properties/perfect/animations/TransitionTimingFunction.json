@@ -1,0 +1,67 @@
+{
+  "components": {
+    "Tran_linear": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "transition-timing-function": "linear"
+      }
+    },
+    "Tran_ease": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "transition-timing-function": "ease"
+      }
+    },
+    "Tran_ease_in": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "transition-timing-function": "ease-in"
+      }
+    },
+    "Tran_ease_out": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "transition-timing-function": "ease-out"
+      }
+    },
+    "Tran_ease_in_out": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "transition-timing-function": "ease-in-out"
+      }
+    },
+    "Tran_step_start": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "transition-timing-function": "step-start"
+      }
+    },
+    "Tran_inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "transition-timing-function": "inherit"
+      }
+    }
+  }
+}

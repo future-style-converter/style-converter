@@ -1,0 +1,11 @@
+{
+  "components": {
+    "FontMinSize_None": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-min-size": "none" } },
+    "FontMinSize_Px_10": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-min-size": "10px" } },
+    "FontMinSize_Pt_8": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-min-size": "8pt" } },
+    "FontMaxSize_None": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-max-size": "none" } },
+    "FontMaxSize_Infinity": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-max-size": "infinity" } },
+    "FontMaxSize_Px_48": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-max-size": "48px" } },
+    "FontMaxSize_Em_3": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-max-size": "3em" } }
+  }
+}

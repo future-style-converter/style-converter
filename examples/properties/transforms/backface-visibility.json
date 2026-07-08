@@ -1,0 +1,6 @@
+{
+  "components": {
+    "Backface_Visible": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "backface-visibility": "visible", "transform": "rotateY(180deg)" } },
+    "Backface_Hidden": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "backface-visibility": "hidden", "transform": "rotateY(180deg)" } }
+  }
+}

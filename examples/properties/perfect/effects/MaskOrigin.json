@@ -1,0 +1,64 @@
+{
+  "components": {
+    "V0_border_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-origin": "border-box"
+      }
+    },
+    "V1_padding_bo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-origin": "padding-box"
+      }
+    },
+    "V2_content_bo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-origin": "content-box"
+      }
+    },
+    "V3_fill_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-origin": "fill-box"
+      }
+    },
+    "V4_stroke_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-origin": "stroke-box"
+      }
+    },
+    "V5_view_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-origin": "view-box"
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "components": {
+    "TextEmphasis_None": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis": "none" } },
+    "TextEmphasis_FilledCircle": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis": "filled circle #e74c3c" } },
+    "TextEmphasis_OpenDot": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis": "open dot #3498db" } },
+    "TextEmphasis_Sesame": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis": "sesame #111" } }
+  }
+}

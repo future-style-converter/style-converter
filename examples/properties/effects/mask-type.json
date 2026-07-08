@@ -1,0 +1,6 @@
+{
+  "components": {
+    "MaskType_Luminance": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "mask-type": "luminance" } },
+    "MaskType_Alpha": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-type": "alpha" } }
+  }
+}

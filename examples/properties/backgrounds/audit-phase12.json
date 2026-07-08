@@ -1,0 +1,128 @@
+{
+  "components": {
+    "Audit_Multi4Layers": {
+      "properties": {
+        "width": "200px",
+        "height": "120px",
+        "background-image": "linear-gradient(red, transparent), linear-gradient(to right, blue, transparent), linear-gradient(to bottom, yellow, transparent), linear-gradient(135deg, green, transparent)",
+        "background-position": "0% 0%, 100% 0%, 0% 100%, 100% 100%",
+        "background-size": "50% 50%, 50% 50%, 50% 50%, 50% 50%",
+        "background-repeat": "no-repeat"
+      }
+    },
+    "Audit_LinearAngleMultiStops": {
+      "properties": {
+        "width": "200px",
+        "height": "60px",
+        "background-image": "linear-gradient(135deg, red 0%, orange 15%, yellow 35%, green 60%, blue 85%, purple 100%)"
+      }
+    },
+    "Audit_RadialEllipseClosestSide": {
+      "properties": {
+        "width": "200px",
+        "height": "100px",
+        "background-image": "radial-gradient(ellipse closest-side at center, red, blue)"
+      }
+    },
+    "Audit_ConicFrom30degAt25": {
+      "properties": {
+        "width": "160px",
+        "height": "160px",
+        "background-image": "conic-gradient(from 30deg at 25% 25%, red, yellow, green, blue, red)"
+      }
+    },
+    "Audit_GradientOklabInterpolation": {
+      "properties": {
+        "width": "200px",
+        "height": "60px",
+        "background-image": "linear-gradient(in oklab, red, blue)"
+      }
+    },
+    "Audit_UrlBroken404": {
+      "properties": {
+        "width": "140px",
+        "height": "80px",
+        "background-color": "#cccccc",
+        "background-image": "url(https://example.invalid/does-not-exist.png)"
+      }
+    },
+    "Audit_AttachmentFixedScrollable": {
+      "properties": {
+        "width": "160px",
+        "height": "120px",
+        "background-image": "linear-gradient(red, blue)",
+        "background-attachment": "fixed",
+        "overflow": "scroll"
+      }
+    },
+    "Audit_ClipTextGradient": {
+      "properties": {
+        "background-image": "linear-gradient(to right, red, orange, yellow, green, blue, purple)",
+        "background-clip": "text",
+        "-webkit-background-clip": "text",
+        "color": "transparent",
+        "font-size": "48px",
+        "font-weight": "900"
+      }
+    },
+    "Audit_OriginContentBoxBigPad": {
+      "properties": {
+        "width": "160px",
+        "height": "100px",
+        "padding": "40px",
+        "background-color": "teal",
+        "background-image": "linear-gradient(red, blue)",
+        "background-origin": "content-box",
+        "background-repeat": "no-repeat",
+        "background-size": "100% 100%",
+        "border": "4px solid black"
+      }
+    },
+    "Audit_SizeMixedPercent": {
+      "properties": {
+        "width": "200px",
+        "height": "120px",
+        "background-image": "linear-gradient(to right, red, blue)",
+        "background-size": "50% 25%",
+        "background-repeat": "no-repeat"
+      }
+    },
+    "Audit_RepeatSpaceRound": {
+      "properties": {
+        "width": "200px",
+        "height": "120px",
+        "background-color": "#ecf0f1",
+        "background-image": "linear-gradient(red, blue)",
+        "background-size": "40px 40px",
+        "background-repeat": "space round"
+      }
+    },
+    "Audit_BlendModeMultiply": {
+      "properties": {
+        "width": "180px",
+        "height": "120px",
+        "background-image": "linear-gradient(red, transparent), linear-gradient(to right, blue, transparent)",
+        "background-blend-mode": "multiply"
+      }
+    },
+    "Audit_PositionBlockInline": {
+      "properties": {
+        "width": "160px",
+        "height": "120px",
+        "background-image": "linear-gradient(red, blue)",
+        "background-size": "40px 40px",
+        "background-repeat": "no-repeat",
+        "background-position-block": "25%",
+        "background-position-inline": "75%"
+      }
+    },
+    "Audit_DataUrlBase64": {
+      "properties": {
+        "width": "80px",
+        "height": "80px",
+        "background-image": "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=)",
+        "background-color": "#888888"
+      }
+    }
+  }
+}

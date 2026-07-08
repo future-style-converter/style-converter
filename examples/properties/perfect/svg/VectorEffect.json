@@ -1,0 +1,49 @@
+{
+  "components": {
+    "V0_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "vector-effect": "none"
+      }
+    },
+    "V1_non_scal": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "vector-effect": "non-scaling-stroke"
+      }
+    },
+    "V2_non_scal": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "vector-effect": "non-scaling-size"
+      }
+    },
+    "V3_non_rotati": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "vector-effect": "non-rotation"
+      }
+    },
+    "V4_fixed_posi": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "vector-effect": "fixed-position"
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "components": {
+    "Width_Auto": {
+      "properties": {
+        "width": "auto",
+        "height": "60px",
+        "background-color": "#3498db"
+      }
+    },
+    "Width_MinContent_Wrap": {
+      "properties": {
+        "width": "min-content",
+        "height": "60px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Width_MaxContent_Nowrap": {
+      "properties": {
+        "width": "max-content",
+        "height": "60px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Width_FitContent": {
+      "properties": {
+        "width": "fit-content",
+        "height": "60px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Width_FitContent_Bounded_200px": {
+      "properties": {
+        "width": "fit-content(200px)",
+        "height": "60px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Height_Auto": {
+      "properties": {
+        "width": "200px",
+        "height": "auto",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Height_MinContent": {
+      "properties": {
+        "width": "200px",
+        "height": "min-content",
+        "background-color": "#16a085"
+      }
+    },
+    "Height_MaxContent": {
+      "properties": {
+        "width": "200px",
+        "height": "max-content",
+        "background-color": "#8e44ad"
+      }
+    }
+  }
+}

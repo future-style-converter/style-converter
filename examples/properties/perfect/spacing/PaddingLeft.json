@@ -1,0 +1,8 @@
+{
+  "components": {
+    "Sp_0":     { "properties": { "width": "180px", "height": "60px", "background-color": "#ef4444", "padding-left": "0" } },
+    "Sp_4px":   { "properties": { "width": "180px", "height": "60px", "background-color": "#ef4444", "padding-left": "4px" } },
+    "Sp_16px":  { "properties": { "width": "180px", "height": "60px", "background-color": "#ef4444", "padding-left": "16px" } },
+    "Sp_24px":  { "properties": { "width": "180px", "height": "60px", "background-color": "#ef4444", "padding-left": "24px" } }
+  }
+}

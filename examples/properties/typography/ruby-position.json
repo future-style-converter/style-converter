@@ -1,0 +1,12 @@
+{
+  "components": {
+    "RubyPosition_Over": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-position": "over" } },
+    "RubyPosition_Under": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-position": "under" } },
+    "RubyPosition_Alternate": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-position": "alternate" } },
+    "RubyPosition_InterCharacter": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-position": "inter-character" } },
+    "RubyPosition_OverLeft": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-position": "over left" } },
+    "RubyPosition_OverRight": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-position": "over right" } },
+    "RubyPosition_UnderLeft": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-position": "under left" } },
+    "RubyPosition_UnderRight": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "ruby-position": "under right" } }
+  }
+}

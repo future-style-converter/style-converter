@@ -1,0 +1,39 @@
+{
+  "components": {
+    "UltraCondensed": {
+      "properties": {
+        "font-stretch": "ultra-condensed"
+      }
+    },
+    "Condensed": {
+      "properties": {
+        "font-stretch": "condensed"
+      }
+    },
+    "Normal": {
+      "properties": {
+        "font-stretch": "normal"
+      }
+    },
+    "Expanded": {
+      "properties": {
+        "font-stretch": "expanded"
+      }
+    },
+    "UltraExpanded": {
+      "properties": {
+        "font-stretch": "ultra-expanded"
+      }
+    },
+    "Percentage75": {
+      "properties": {
+        "font-stretch": "75%"
+      }
+    },
+    "Percentage150": {
+      "properties": {
+        "font-stretch": "150%"
+      }
+    }
+  }
+}

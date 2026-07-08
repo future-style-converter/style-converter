@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "string-set": "none"
+      }
+    },
+    "V1_foo_cont": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "string-set": "foo content(text)"
+      }
+    }
+  }
+}

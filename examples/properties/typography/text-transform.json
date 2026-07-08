@@ -1,0 +1,10 @@
+{
+  "components": {
+    "TextTransform_None": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "none" } },
+    "TextTransform_Uppercase": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "uppercase" } },
+    "TextTransform_Lowercase": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "lowercase" } },
+    "TextTransform_Capitalize": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "capitalize" } },
+    "TextTransform_FullWidth": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "full-width" } },
+    "TextTransform_FullSizeKana": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "full-size-kana" } }
+  }
+}

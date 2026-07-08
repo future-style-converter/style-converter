@@ -1,0 +1,9 @@
+{
+  "components": {
+    "Co_normal":   { "properties": { "width": "180px", "height": "40px", "background-color": "#3b82f6", "content": "normal" } },
+    "Co_none":     { "properties": { "width": "180px", "height": "40px", "background-color": "#3b82f6", "content": "none" } },
+    "Co_str":      { "properties": { "width": "180px", "height": "40px", "background-color": "#3b82f6", "content": "\"Hello\"" } },
+    "Co_open":     { "properties": { "width": "180px", "height": "40px", "background-color": "#3b82f6", "content": "open-quote" } },
+    "Co_close":    { "properties": { "width": "180px", "height": "40px", "background-color": "#3b82f6", "content": "close-quote" } }
+  }
+}

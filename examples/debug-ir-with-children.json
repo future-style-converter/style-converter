@@ -1,0 +1,203 @@
+{
+  "components": [
+    {
+      "id": "debug-01-basicbox",
+      "name": "Debug_01_BasicBox",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 200.0}},
+        {"type": "Height", "data": {"type": "length", "px": 100.0}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 0.204, "g": 0.596, "b": 0.859}, "original": "#3498db"}}
+      ]
+    },
+    {
+      "id": "debug-02-opacity",
+      "name": "Debug_02_Opacity",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 200.0}},
+        {"type": "Height", "data": {"type": "length", "px": 100.0}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 0.906, "g": 0.298, "b": 0.235}, "original": "#e74c3c"}},
+        {"type": "Opacity", "data": {"alpha": 0.5, "original": {"type": "number", "value": 0.5}}}
+      ]
+    },
+    {
+      "id": "debug-03-flexrow-spacebetween",
+      "name": "FlexRow_SpaceBetween",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 320.0}},
+        {"type": "Height", "data": {"type": "length", "px": 80.0}},
+        {"type": "Display", "data": {"keyword": "flex"}},
+        {"type": "FlexDirection", "data": {"keyword": "row"}},
+        {"type": "JustifyContent", "data": {"keyword": "space-between"}},
+        {"type": "AlignItems", "data": {"keyword": "center"}},
+        {"type": "PaddingTop", "data": {"type": "length", "px": 8.0}},
+        {"type": "PaddingRight", "data": {"type": "length", "px": 8.0}},
+        {"type": "PaddingBottom", "data": {"type": "length", "px": 8.0}},
+        {"type": "PaddingLeft", "data": {"type": "length", "px": 8.0}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 0.204, "g": 0.286, "b": 0.369}, "original": "#34495e"}}
+      ],
+      "children": [
+        {
+          "id": "flex-child-1",
+          "name": "Child1",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 60.0}},
+            {"type": "Height", "data": {"type": "length", "px": 50.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0.906, "g": 0.298, "b": 0.235}, "original": "#e74c3c"}}
+          ]
+        },
+        {
+          "id": "flex-child-2",
+          "name": "Child2",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 60.0}},
+            {"type": "Height", "data": {"type": "length", "px": 50.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0.180, "g": 0.800, "b": 0.443}, "original": "#2ecc71"}}
+          ]
+        },
+        {
+          "id": "flex-child-3",
+          "name": "Child3",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 60.0}},
+            {"type": "Height", "data": {"type": "length", "px": 50.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0.204, "g": 0.596, "b": 0.859}, "original": "#3498db"}}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "debug-04-flexrow-center",
+      "name": "FlexRow_Center",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 320.0}},
+        {"type": "Height", "data": {"type": "length", "px": 80.0}},
+        {"type": "Display", "data": {"keyword": "flex"}},
+        {"type": "FlexDirection", "data": {"keyword": "row"}},
+        {"type": "JustifyContent", "data": {"keyword": "center"}},
+        {"type": "AlignItems", "data": {"keyword": "center"}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 0.498, "g": 0.549, "b": 0.553}, "original": "#7f8c8d"}}
+      ],
+      "children": [
+        {
+          "id": "center-child-1",
+          "name": "A",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 50.0}},
+            {"type": "Height", "data": {"type": "length", "px": 50.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0.608, "g": 0.349, "b": 0.714}, "original": "#9b59b6"}},
+            {"type": "BorderTopLeftRadius", "data": {"type": "length", "px": 8.0}},
+            {"type": "BorderTopRightRadius", "data": {"type": "length", "px": 8.0}},
+            {"type": "BorderBottomRightRadius", "data": {"type": "length", "px": 8.0}},
+            {"type": "BorderBottomLeftRadius", "data": {"type": "length", "px": 8.0}}
+          ]
+        },
+        {
+          "id": "center-child-2",
+          "name": "B",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 50.0}},
+            {"type": "Height", "data": {"type": "length", "px": 50.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0.953, "g": 0.612, "b": 0.071}, "original": "#f39c12"}},
+            {"type": "BorderTopLeftRadius", "data": {"type": "length", "px": 8.0}},
+            {"type": "BorderTopRightRadius", "data": {"type": "length", "px": 8.0}},
+            {"type": "BorderBottomRightRadius", "data": {"type": "length", "px": 8.0}},
+            {"type": "BorderBottomLeftRadius", "data": {"type": "length", "px": 8.0}}
+          ]
+        },
+        {
+          "id": "center-child-3",
+          "name": "C",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 50.0}},
+            {"type": "Height", "data": {"type": "length", "px": 50.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0.902, "g": 0.494, "b": 0.133}, "original": "#e67e22"}},
+            {"type": "BorderTopLeftRadius", "data": {"type": "length", "px": 8.0}},
+            {"type": "BorderTopRightRadius", "data": {"type": "length", "px": 8.0}},
+            {"type": "BorderBottomRightRadius", "data": {"type": "length", "px": 8.0}},
+            {"type": "BorderBottomLeftRadius", "data": {"type": "length", "px": 8.0}}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "debug-05-flexcol-spacearound",
+      "name": "FlexCol_SpaceAround",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 120.0}},
+        {"type": "Height", "data": {"type": "length", "px": 200.0}},
+        {"type": "Display", "data": {"keyword": "flex"}},
+        {"type": "FlexDirection", "data": {"keyword": "column"}},
+        {"type": "JustifyContent", "data": {"keyword": "space-around"}},
+        {"type": "AlignItems", "data": {"keyword": "center"}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 0.102, "g": 0.737, "b": 0.612}, "original": "#1abc9c"}}
+      ],
+      "children": [
+        {
+          "id": "col-child-1",
+          "name": "Top",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 80.0}},
+            {"type": "Height", "data": {"type": "length", "px": 35.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 1.0, "g": 1.0, "b": 1.0}, "original": "#ffffff"}}
+          ]
+        },
+        {
+          "id": "col-child-2",
+          "name": "Mid",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 80.0}},
+            {"type": "Height", "data": {"type": "length", "px": 35.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 1.0, "g": 1.0, "b": 1.0}, "original": "#ffffff"}}
+          ]
+        },
+        {
+          "id": "col-child-3",
+          "name": "Bot",
+          "properties": [
+            {"type": "Width", "data": {"type": "length", "px": 80.0}},
+            {"type": "Height", "data": {"type": "length", "px": 35.0}},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 1.0, "g": 1.0, "b": 1.0}, "original": "#ffffff"}}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "debug-06-border",
+      "name": "Debug_06_Border",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 200.0}},
+        {"type": "Height", "data": {"type": "length", "px": 100.0}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 0.925, "g": 0.941, "b": 0.945}, "original": "#ecf0f1"}},
+        {"type": "BorderTopWidth", "data": {"type": "length", "px": 3.0}},
+        {"type": "BorderTopColor", "data": {"srgb": {"r": 0.173, "g": 0.243, "b": 0.314}, "original": "#2c3e50"}}
+      ]
+    },
+    {
+      "id": "debug-07-borderradius",
+      "name": "Debug_07_BorderRadius",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 200.0}},
+        {"type": "Height", "data": {"type": "length", "px": 100.0}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 0.102, "g": 0.737, "b": 0.612}, "original": "#1abc9c"}},
+        {"type": "BorderTopLeftRadius", "data": {"type": "length", "px": 16.0}},
+        {"type": "BorderTopRightRadius", "data": {"type": "length", "px": 16.0}},
+        {"type": "BorderBottomRightRadius", "data": {"type": "length", "px": 16.0}},
+        {"type": "BorderBottomLeftRadius", "data": {"type": "length", "px": 16.0}}
+      ]
+    },
+    {
+      "id": "debug-08-shadow",
+      "name": "Debug_08_Shadow",
+      "properties": [
+        {"type": "Width", "data": {"type": "length", "px": 200.0}},
+        {"type": "Height", "data": {"type": "length", "px": 100.0}},
+        {"type": "BackgroundColor", "data": {"srgb": {"r": 1.0, "g": 1.0, "b": 1.0}, "original": "#ffffff"}},
+        {"type": "BorderTopLeftRadius", "data": {"type": "length", "px": 8.0}},
+        {"type": "BorderTopRightRadius", "data": {"type": "length", "px": 8.0}},
+        {"type": "BorderBottomRightRadius", "data": {"type": "length", "px": 8.0}},
+        {"type": "BorderBottomLeftRadius", "data": {"type": "length", "px": 8.0}},
+        {"type": "BoxShadow", "data": [{"x": {"px": 0.0}, "y": {"px": 4.0}, "blur": {"px": 12.0}, "c": {"srgb": {"r": 0.0, "g": 0.0, "b": 0.0, "a": 0.15}, "original": "rgba(0,0,0,0.15)"}}]}
+      ]
+    }
+  ]
+}

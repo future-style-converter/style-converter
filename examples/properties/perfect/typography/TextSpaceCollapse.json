@@ -1,0 +1,108 @@
+{
+  "components": {
+    "V0_12px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px"
+      }
+    },
+    "V1_16px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "16px"
+      }
+    },
+    "V2_20px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "20px"
+      }
+    },
+    "V3_24px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "24px"
+      }
+    },
+    "V4_collapse": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "text-space-collapse": "collapse"
+      }
+    },
+    "V5_preserve": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "text-space-collapse": "preserve"
+      }
+    },
+    "V6_preserve_b": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "text-space-collapse": "preserve-breaks"
+      }
+    },
+    "V7_preserve_s": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "text-space-collapse": "preserve-spaces"
+      }
+    },
+    "V8_break_spac": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "font-size": "12px",
+        "text-space-collapse": "break-spaces"
+      }
+    }
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "components": {
+    "PrimaryButton": {
+      "properties": {
+        "background-color": "#6200EE",
+        "opacity": 1,
+        "border-top": "2px solid #000000",
+        "border-right": "1px solid #FF0000",
+        "border-bottom": "0px none #000000",
+        "border-left": "3px solid #00FF00",
+        "border-top-left-radius": "8px",
+        "border-top-right-radius": "4px",
+        "border-bottom-right-radius": "2px",
+        "border-bottom-left-radius": "0px",
+        "color": "#FFFFFF",
+        "padding": "10px 16px",
+        "font-weight": "600"
+      },
+      "selectors": [
+        { "selector": ":hover", "properties": { "opacity": 0.9 } },
+        { "selector": ":active", "properties": { "opacity": 0.8, "transform": "scale(0.98)" } }
+      ],
+      "media": [
+        { "query": "(min-width: 768px)", "properties": { "border-left": "4px solid #00FF00" } }
+      ]
+    },
+
+    "SecondaryButton": {
+      "properties": {
+        "background-color": "#FFFFFF",
+        "border": "2px solid #6200EE",
+        "color": "#6200EE",
+        "padding": "10px 16px",
+        "border-radius": "6px",
+        "font-weight": "500"
+      },
+      "selectors": [
+        { "selector": ":hover", "properties": { "background-color": "#F2E7FE" } }
+      ]
+    },
+
+    "DangerButton": {
+      "properties": {
+        "background-color": "#B00020",
+        "color": "#FFFFFF",
+        "padding": "10px 16px",
+        "border-radius": "6px",
+        "font-weight": "600"
+      },
+      "selectors": [
+        { "selector": ":hover", "properties": { "background-color": "#D32F2F" } }
+      ]
+    },
+
+    "InputField": {
+      "properties": {
+        "border": "1px solid #CCCCCC",
+        "padding": "8px 12px",
+        "border-radius": "4px",
+        "font-size": "14px",
+        "color": "#333333"
+      },
+      "selectors": [
+        { "selector": ":focus", "properties": { "border-color": "#6200EE", "outline": "none" } }
+      ]
+    },
+
+    "Card": {
+      "properties": {
+        "background-color": "#FFFFFF",
+        "border": "1px solid #E0E0E0",
+        "border-radius": "8px",
+        "padding": "16px",
+        "box-shadow": "0px 2px 4px rgba(0,0,0,0.1)"
+      },
+      "selectors": [
+        { "selector": ":hover", "properties": { "box-shadow": "0px 4px 8px rgba(0,0,0,0.15)" } }
+      ]
+    },
+
+    "Modal": {
+      "properties": {
+        "background-color": "#FFFFFF",
+        "padding": "24px",
+        "border-radius": "12px",
+        "box-shadow": "0px 8px 20px rgba(0,0,0,0.2)",
+        "width": "90%",
+        "max-width": "600px"
+      }
+    },
+
+    "Navbar": {
+      "properties": {
+        "display": "flex",
+        "align-items": "center",
+        "justify-content": "space-between",
+        "background-color": "#6200EE",
+        "padding": "12px 24px",
+        "color": "#FFFFFF"
+      }
+    },
+
+    "Footer": {
+      "properties": {
+        "background-color": "#F5F5F5",
+        "padding": "20px",
+        "color": "#333333",
+        "text-align": "center"
+      }
+    },
+
+    "Badge": {
+      "properties": {
+        "display": "inline-block",
+        "padding": "4px 10px",
+        "border-radius": "12px",
+        "background-color": "#03DAC6",
+        "color": "#000000",
+        "font-size": "12px",
+        "font-weight": "500"
+      }
+    },
+
+    "Alert": {
+      "properties": {
+        "padding": "12px 16px",
+        "border-radius": "6px",
+        "font-weight": "500"
+      },
+      "variants": {
+        "success": { "background-color": "#C8E6C9", "color": "#256029" },
+        "error": { "background-color": "#FFCDD2", "color": "#B71C1C" },
+        "warning": { "background-color": "#FFF9C4", "color": "#7F6000" },
+        "info": { "background-color": "#BBDEFB", "color": "#0D47A1" }
+      }
+    },
+
+    "Tooltip": {
+      "properties": {
+        "background-color": "#333333",
+        "color": "#FFFFFF",
+        "padding": "6px 10px",
+        "border-radius": "4px",
+        "font-size": "12px"
+      }
+    }
+  }
+}

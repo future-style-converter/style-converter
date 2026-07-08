@@ -1,0 +1,15 @@
+{
+  "_notes": {
+    "fixture": "lengths-container",
+    "purpose": "CSS container-query length units. All context-dependent (pixels=null).",
+    "ir_shape": "{ 'type':'length', 'original': { 'v': <n>, 'u': 'CQW'|'CQH'|'CQI'|'CQB'|'CQMIN'|'CQMAX' } }"
+  },
+  "components": {
+    "Length_Cqw_50":   { "properties": { "width": "50cqw",   "height": "60px", "background-color": "#3498db" } },
+    "Length_Cqh_20":   { "properties": { "width": "80px",    "height": "20cqh", "background-color": "#9b59b6" } },
+    "Length_Cqi_40":   { "properties": { "width": "40cqi",   "height": "60px", "background-color": "#e74c3c" } },
+    "Length_Cqb_15":   { "properties": { "width": "80px",    "height": "15cqb", "background-color": "#2ecc71" } },
+    "Length_Cqmin_30": { "properties": { "width": "30cqmin", "height": "60px", "background-color": "#1abc9c" } },
+    "Length_Cqmax_30": { "properties": { "width": "30cqmax", "height": "60px", "background-color": "#f39c12" } }
+  }
+}

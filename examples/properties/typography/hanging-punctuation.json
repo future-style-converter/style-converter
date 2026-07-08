@@ -1,0 +1,12 @@
+{
+  "components": {
+    "HangingPunctuation_None": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "hanging-punctuation": "none" } },
+    "HangingPunctuation_First": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "hanging-punctuation": "first" } },
+    "HangingPunctuation_Last": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "hanging-punctuation": "last" } },
+    "HangingPunctuation_AllowEnd": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "hanging-punctuation": "allow-end" } },
+    "HangingPunctuation_ForceEnd": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "hanging-punctuation": "force-end" } },
+    "HangingPunctuation_FirstLast": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "hanging-punctuation": "first last" } },
+    "HangingPunctuation_FirstForceEnd": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "hanging-punctuation": "first force-end" } },
+    "HangingPunctuation_FirstAllowEndLast": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "hanging-punctuation": "first allow-end last" } }
+  }
+}

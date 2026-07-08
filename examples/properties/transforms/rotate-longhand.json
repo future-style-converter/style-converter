@@ -1,0 +1,14 @@
+{
+  "components": {
+    "Rotate_None": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "rotate": "none" } },
+    "Rotate_Angle_Deg": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "rotate": "45deg" } },
+    "Rotate_Angle_Turn": { "properties": { "width": "120px", "height": "80px", "background-color": "#2ecc71", "rotate": "0.25turn" } },
+    "Rotate_Angle_Rad": { "properties": { "width": "120px", "height": "80px", "background-color": "#9b59b6", "rotate": "1rad" } },
+    "Rotate_Angle_Grad": { "properties": { "width": "120px", "height": "80px", "background-color": "#f39c12", "rotate": "100grad" } },
+    "Rotate_X_Angle": { "properties": { "width": "120px", "height": "80px", "background-color": "#1abc9c", "rotate": "x 45deg" } },
+    "Rotate_Y_Angle": { "properties": { "width": "120px", "height": "80px", "background-color": "#34495e", "rotate": "y 60deg" } },
+    "Rotate_Z_Angle": { "properties": { "width": "120px", "height": "80px", "background-color": "#c0392b", "rotate": "z 30deg" } },
+    "Rotate_XYZ_Angle": { "properties": { "width": "120px", "height": "80px", "background-color": "#16a085", "rotate": "1 1 0 45deg" } },
+    "Rotate_Negative": { "properties": { "width": "120px", "height": "80px", "background-color": "#d35400", "rotate": "-30deg" } }
+  }
+}

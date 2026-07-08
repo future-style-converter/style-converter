@@ -1,0 +1,94 @@
+{
+  "components": {
+    "V0_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "none"
+      }
+    },
+    "V1_solid": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "solid"
+      }
+    },
+    "V2_dashed": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "dashed"
+      }
+    },
+    "V3_dotted": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "dotted"
+      }
+    },
+    "V4_hidden": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "hidden"
+      }
+    },
+    "V5_double": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "double"
+      }
+    },
+    "V6_groove": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "groove"
+      }
+    },
+    "V7_ridge": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "ridge"
+      }
+    },
+    "V8_inset": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "inset"
+      }
+    },
+    "V9_outset": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "column-rule-style": "outset"
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "_notes": {
+    "fixture": "lengths-intrinsic",
+    "purpose": "Intrinsic sizing keywords — NOT IRLength values. They come through as Keyword variants on Width/Height value types.",
+    "ir_shape": "Expect { 'type':'keyword', 'value':'auto'|'min-content'|'max-content'|'fit-content' } or similar. Confirm via converter output; some of these may not yet be parsed (skip if so)."
+  },
+  "components": {
+    "Length_Auto":         { "properties": { "width": "auto", "height": "60px", "background-color": "#3498db" } },
+    "Length_MinContent":   { "properties": { "width": "min-content", "height": "60px", "background-color": "#9b59b6" } },
+    "Length_MaxContent":   { "properties": { "width": "max-content", "height": "60px", "background-color": "#e67e22" } },
+    "Length_FitContent":   { "properties": { "width": "fit-content", "height": "60px", "background-color": "#2ecc71" } }
+  }
+}

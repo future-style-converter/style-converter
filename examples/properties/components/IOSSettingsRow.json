@@ -1,0 +1,21 @@
+{
+  "components": {
+    "IOSSettingsRow": {
+      "properties": {
+        "width": "375px",
+        "height": "44px",
+        "padding": "8px 16px",
+        "background-color": "#ffffff",
+        "color": "#1f2937",
+        "font-size": "17px",
+        "font-family": "system-ui",
+        "display": "flex",
+        "flex-direction": "row",
+        "align-items": "center",
+        "justify-content": "space-between",
+        "border-bottom": "1px solid #c8c7cc",
+        "text": "Settings Row"
+      }
+    }
+  }
+}

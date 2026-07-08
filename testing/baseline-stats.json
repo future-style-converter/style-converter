@@ -1,0 +1,25 @@
+{
+  "generated": "2026-07-08T06:56:15.821Z",
+  "classifierVersion": 4,
+  "manifestVersion": 4,
+  "inputLabel": "examples/wpt/css-color/color-003.json",
+  "totalPairs": 6,
+  "perLabel": {
+    "identical": 0,
+    "sub-pixel-noise": 0,
+    "color-drift": 2,
+    "edge-shift": 0,
+    "structural-divergence": 0,
+    "mixed": 4,
+    "unknown": 0,
+    "no-content": 0
+  },
+  "perPair": {
+    "000_color-003__0.png__iOS-Android": "mixed",
+    "000_color-003__0.png__iOS-web": "color-drift",
+    "000_color-003__0.png__Android-web": "mixed",
+    "001_color-003__0__0.png__iOS-Android": "mixed",
+    "001_color-003__0__0.png__iOS-web": "color-drift",
+    "001_color-003__0__0.png__Android-web": "mixed"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "components": {
+    "BlockEllipsis_None": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "block-ellipsis": "none" } },
+    "BlockEllipsis_Auto": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "block-ellipsis": "auto" } },
+    "BlockEllipsis_CustomDots": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "block-ellipsis": "\"...\"" } },
+    "BlockEllipsis_CustomArrow": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "block-ellipsis": "\"\u2192\"" } }
+  }
+}

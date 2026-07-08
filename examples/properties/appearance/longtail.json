@@ -1,0 +1,22 @@
+{
+  "components": {
+    "Appearance_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "appearance": "none" } },
+    "Appearance_Auto": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "appearance": "auto" } },
+    "Appearance_Button": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "appearance": "button" } },
+    "Appearance_Checkbox": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "appearance": "checkbox" } },
+    "Appearance_Textfield": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "appearance": "textfield" } },
+    "Appearance_Menulist": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "appearance": "menulist" } },
+    "Appearance_Progress": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "appearance": "progress-bar" } },
+
+    "AppearanceVariant_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "appearance-variant": "normal" } },
+    "AppearanceVariant_Button": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "appearance-variant": "button" } },
+    "AppearanceVariant_Searchfield": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "appearance-variant": "searchfield" } },
+
+    "ColorAdjust_Economy": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "color-adjust": "economy" } },
+    "ColorAdjust_Exact": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "color-adjust": "exact" } },
+
+    "ImageRenderingQuality_Auto": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "image-rendering-quality": "auto" } },
+    "ImageRenderingQuality_High": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "image-rendering-quality": "high" } },
+    "ImageRenderingQuality_Low": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "image-rendering-quality": "low" } }
+  }
+}

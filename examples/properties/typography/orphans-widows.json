@@ -1,0 +1,10 @@
+{
+  "components": {
+    "Orphans_2": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "orphans": "2" } },
+    "Orphans_3": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "orphans": "3" } },
+    "Orphans_5": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "orphans": "5" } },
+    "Widows_2": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "widows": "2" } },
+    "Widows_3": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "widows": "3" } },
+    "Widows_5": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "widows": "5" } }
+  }
+}

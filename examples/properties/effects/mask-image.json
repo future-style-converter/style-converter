@@ -1,0 +1,15 @@
+{
+  "components": {
+    "MaskImage_None": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "mask-image": "none" } },
+    "MaskImage_Url": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-image": "url(mask.png)" } },
+    "MaskImage_LinearDefault": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "mask-image": "linear-gradient(black, transparent)" } },
+    "MaskImage_LinearAngle": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "mask-image": "linear-gradient(45deg, black, transparent)" } },
+    "MaskImage_LinearToRight": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "mask-image": "linear-gradient(to right, black, transparent)" } },
+    "MaskImage_Radial": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "mask-image": "radial-gradient(black 0%, transparent 100%)" } },
+    "MaskImage_RadialCircle": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "mask-image": "radial-gradient(circle, black, transparent)" } },
+    "MaskImage_RadialEllipse": { "properties": { "width": "160px", "height": "80px", "background-color": "#c0392b", "mask-image": "radial-gradient(ellipse, black, transparent)" } },
+    "MaskImage_Conic": { "properties": { "width": "160px", "height": "80px", "background-color": "#16a085", "mask-image": "conic-gradient(black, transparent, black)" } },
+    "MaskImage_RepeatingLinear": { "properties": { "width": "160px", "height": "80px", "background-color": "#d35400", "mask-image": "repeating-linear-gradient(45deg, black 0%, transparent 10%)" } },
+    "MaskImage_Multi": { "properties": { "width": "160px", "height": "80px", "background-color": "#2980b9", "mask-image": "linear-gradient(black, transparent), radial-gradient(black, transparent)" } }
+  }
+}

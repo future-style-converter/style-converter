@@ -1,0 +1,18 @@
+{
+  "components": {
+    "FontWeight_Normal": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "normal" } },
+    "FontWeight_Bold": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "bold" } },
+    "FontWeight_Bolder": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "bolder" } },
+    "FontWeight_Lighter": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "lighter" } },
+    "FontWeight_100": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "100" } },
+    "FontWeight_200": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "200" } },
+    "FontWeight_300": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "300" } },
+    "FontWeight_350_Variable": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "350" } },
+    "FontWeight_400": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "400" } },
+    "FontWeight_500": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "500" } },
+    "FontWeight_600": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "600" } },
+    "FontWeight_700": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "700" } },
+    "FontWeight_800": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "800" } },
+    "FontWeight_900": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "900" } }
+  }
+}

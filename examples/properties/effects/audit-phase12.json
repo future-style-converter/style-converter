@@ -1,0 +1,24 @@
+{
+  "components": {
+    "ClipPath_Polygon_Evenodd_Overlap": { "properties": { "width": "180px", "height": "180px", "background-color": "#2c3e50", "clip-path": "polygon(evenodd, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 30% 30%, 70% 30%, 70% 70%, 30% 70%, 30% 30%)" } },
+    "ClipPath_Inset_Round50pct_NonSquare": { "properties": { "width": "240px", "height": "80px", "background-color": "#e67e22", "clip-path": "inset(0 round 50%)" } },
+    "ClipPath_Path_MultipleSubpaths": { "properties": { "width": "200px", "height": "200px", "background-color": "#16a085", "clip-path": "path('M20,20 L80,20 L80,80 L20,80 Z M120,120 L180,120 L180,180 L120,180 Z')" } },
+    "ClipPath_Url_MissingRef": { "properties": { "width": "160px", "height": "160px", "background-color": "#c0392b", "clip-path": "url(#does-not-exist)" } },
+    "Filter_ChainOrder_BrightnessThenBlur": { "properties": { "width": "160px", "height": "160px", "background-color": "#8e44ad", "color": "white", "filter": "brightness(2) blur(4px)" } },
+    "Filter_ChainOrder_BlurThenBrightness": { "properties": { "width": "160px", "height": "160px", "background-color": "#8e44ad", "color": "white", "filter": "blur(4px) brightness(2)" } },
+    "Filter_DropShadowBeforeBlur": { "properties": { "width": "160px", "height": "160px", "background-color": "#27ae60", "filter": "drop-shadow(0 0 20px red) blur(4px)" } },
+    "Filter_DropShadowAfterBlur": { "properties": { "width": "160px", "height": "160px", "background-color": "#27ae60", "filter": "blur(4px) drop-shadow(0 0 20px red)" } },
+    "Backdrop_Filter_NoBackground": { "properties": { "width": "160px", "height": "160px", "backdrop-filter": "blur(12px) saturate(180%)" } },
+    "MaskImage_LinearGradient_SoftEdge": { "properties": { "width": "240px", "height": "120px", "background-color": "#2980b9", "mask-image": "linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)" } },
+    "MaskImage_MultiSource_CompositeExclude": { "properties": { "width": "200px", "height": "200px", "background-color": "#d35400", "mask-image": "radial-gradient(circle at 30% 50%, black 30%, transparent 31%), radial-gradient(circle at 70% 50%, black 30%, transparent 31%)", "mask-composite": "exclude" } },
+    "MaskMode_Luminance_ColoredGradient": { "properties": { "width": "200px", "height": "120px", "background-color": "#34495e", "mask-image": "linear-gradient(to right, red, lime, blue)", "mask-mode": "luminance" } },
+    "MaskRepeat_SpaceRound_TwoAxis": { "properties": { "width": "240px", "height": "160px", "background-color": "#1abc9c", "mask-image": "radial-gradient(circle 20px, black 99%, transparent 100%)", "mask-repeat": "space round" } },
+    "Visibility_Collapse_TableRow": { "properties": { "display": "table-row", "visibility": "collapse", "width": "200px", "height": "40px", "background-color": "#f1c40f" } },
+    "Visibility_Collapse_FlexItem": { "properties": { "visibility": "collapse", "width": "200px", "height": "40px", "background-color": "#e74c3c" } },
+    "Visibility_Collapse_Block": { "properties": { "display": "block", "visibility": "collapse", "width": "200px", "height": "40px", "background-color": "#9b59b6" } },
+    "OverflowClipMargin_Edge": { "properties": { "width": "160px", "height": "160px", "background-color": "#3498db", "overflow": "clip", "overflow-clip-margin": "20px" } },
+    "OverscrollBehavior_Contain": { "properties": { "width": "200px", "height": "160px", "background-color": "#7f8c8d", "overflow": "auto", "overscroll-behavior": "contain" } },
+    "OverscrollBehavior_None": { "properties": { "width": "200px", "height": "160px", "background-color": "#95a5a6", "overflow": "auto", "overscroll-behavior": "none" } },
+    "Clip_Legacy_Rect_PartialAuto": { "properties": { "width": "200px", "height": "200px", "position": "absolute", "background-color": "#2ecc71", "clip": "rect(auto, 100px, 200px, 0)" } }
+  }
+}

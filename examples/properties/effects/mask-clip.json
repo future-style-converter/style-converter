@@ -1,0 +1,11 @@
+{
+  "components": {
+    "MaskClip_ContentBox": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "mask-clip": "content-box" } },
+    "MaskClip_PaddingBox": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-clip": "padding-box" } },
+    "MaskClip_BorderBox": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "mask-clip": "border-box" } },
+    "MaskClip_FillBox": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "mask-clip": "fill-box" } },
+    "MaskClip_StrokeBox": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "mask-clip": "stroke-box" } },
+    "MaskClip_ViewBox": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "mask-clip": "view-box" } },
+    "MaskClip_NoClip": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "mask-clip": "no-clip" } }
+  }
+}

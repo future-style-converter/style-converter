@@ -1,0 +1,16 @@
+{
+  "components": {
+    "AlignmentBaseline_Auto": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "auto" } },
+    "AlignmentBaseline_Baseline": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "baseline" } },
+    "AlignmentBaseline_BeforeEdge": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "before-edge" } },
+    "AlignmentBaseline_TextBeforeEdge": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "text-before-edge" } },
+    "AlignmentBaseline_Middle": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "middle" } },
+    "AlignmentBaseline_Central": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "central" } },
+    "AlignmentBaseline_AfterEdge": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "after-edge" } },
+    "AlignmentBaseline_TextAfterEdge": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "text-after-edge" } },
+    "AlignmentBaseline_Ideographic": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "ideographic" } },
+    "AlignmentBaseline_Alphabetic": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "alphabetic" } },
+    "AlignmentBaseline_Hanging": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "hanging" } },
+    "AlignmentBaseline_Mathematical": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "alignment-baseline": "mathematical" } }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "components": {
+    "TextDecorationStyle_Solid": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-style": "solid" } },
+    "TextDecorationStyle_Double": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-style": "double" } },
+    "TextDecorationStyle_Dotted": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-style": "dotted" } },
+    "TextDecorationStyle_Dashed": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-style": "dashed" } },
+    "TextDecorationStyle_Wavy": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-style": "wavy" } }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "components": {
+    "MaskMode_Alpha": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "mask-mode": "alpha" } },
+    "MaskMode_Luminance": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-mode": "luminance" } },
+    "MaskMode_MatchSource": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "mask-mode": "match-source" } }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "components": {
+    "BgBlend_Multiply": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "red",
+        "background-image": "linear-gradient(blue, blue)",
+        "background-blend-mode": "multiply"
+      }
+    },
+    "BgBlend_Screen": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "red",
+        "background-image": "linear-gradient(blue, blue)",
+        "background-blend-mode": "screen"
+      }
+    },
+    "BgBlend_Overlay": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "red",
+        "background-image": "linear-gradient(blue, blue)",
+        "background-blend-mode": "overlay"
+      }
+    },
+    "BgBlend_Difference": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "red",
+        "background-image": "linear-gradient(blue, blue)",
+        "background-blend-mode": "difference"
+      }
+    },
+    "BgBlend_Luminosity": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "red",
+        "background-image": "linear-gradient(blue, blue)",
+        "background-blend-mode": "luminosity"
+      }
+    }
+  }
+}

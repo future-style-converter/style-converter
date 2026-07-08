@@ -1,0 +1,10 @@
+{
+  "components": {
+    "MaskRepeat_Repeat": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "mask-repeat": "repeat" } },
+    "MaskRepeat_NoRepeat": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-repeat": "no-repeat" } },
+    "MaskRepeat_RepeatX": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "mask-repeat": "repeat-x" } },
+    "MaskRepeat_RepeatY": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "mask-repeat": "repeat-y" } },
+    "MaskRepeat_Round": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "mask-repeat": "round" } },
+    "MaskRepeat_Space": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "mask-repeat": "space" } }
+  }
+}

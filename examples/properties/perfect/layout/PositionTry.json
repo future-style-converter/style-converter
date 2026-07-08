@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_normal": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "position-try": "normal"
+      }
+    },
+    "V1___fb": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "position-try": "--fb"
+      }
+    }
+  }
+}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Style Converter - Web Testing</title>
+    <style>
+      /* Inter — bundled and forced as the default font on every platform
+       * (iOS / Android / web) so cross-platform SSIM isn't capped by
+       * default-font divergence (SF Pro vs Roboto vs Chromium-default).
+       * Loaded from /fonts/Inter-*.ttf which Vite serves from the public
+       * directory at the same path. */
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 400;
+        font-display: block;
+        src: url('/fonts/Inter-Regular.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 500;
+        font-display: block;
+        src: url('/fonts/Inter-Medium.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 700;
+        font-display: block;
+        src: url('/fonts/Inter-Bold.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 900;
+        font-display: block;
+        src: url('/fonts/Inter-Black.ttf') format('truetype');
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      /* WPT mode override (F-G-HARNESS swarm-003 fix for
+       * css-backgrounds__background-clip-009 and the wider css-backgrounds /
+       * css-borders / css-sizing structural-divergence cluster). When the
+       * capture URL carries `?wpt=1`, App.tsx adds `wpt-mode` to <body> in
+       * addition to `capture-mode`. The CSS Backgrounds and Borders L3 §3.7
+       * specification (`background-clip: border-box`) — and every other WPT
+       * test built against the spec — assumes the browser-default box-sizing
+       * of `content-box` (CSS2.1 §10.2). The universal-selector reset above
+       * is load-bearing for the legacy 327-pair visual-test fixtures, but it
+       * poisons any WPT test that combines a small / zero `width` with
+       * non-trivial border or padding: `width: 0; border: 48px solid` MUST
+       * produce a 96px outer box per the spec, but under border-box it
+       * collapses to 0px wide and the background paints nothing.
+       *
+       * Scope: only `[data-component-id]` descendants — that's the set of
+       * SDUI-rendered IR elements (every ComponentRenderer-emitted <div>
+       * carries this attribute). The capture-canvas chrome wrapper, the
+       * gallery scaffold, and the React app's own header / search / etc.
+       * are unaffected because they do not carry `[data-component-id]`. */
+      body.wpt-mode [data-component-id],
+      body.wpt-mode [data-component-id] * {
+        box-sizing: content-box;
+      }
+      html, body {
+        width: 100%;
+        height: 100%;
+        background: #111;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        color: #eee;
+        overflow: hidden;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        padding-top: 20px;
+      }
+      #root {
+        width: 390px;
+        max-width: 390px;
+        min-width: 390px;
+        height: 844px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        background: #1a1a2e;
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 12px;
+      }
+      /* Capture mode: a flat list of chromeless canvases with NO phone-frame
+       * border, rounded corners, or scroll container. The CaptureGallery JS
+       * toggles `<body class="capture-mode">` before the first paint. */
+      body.capture-mode {
+        padding-top: 0;
+        justify-content: flex-start;
+        overflow: visible;
+      }
+      body.capture-mode,
+      body.capture-mode html {
+        background: #1a1a2e;
+        height: auto;
+      }
+      body.capture-mode #root {
+        width: 390px;
+        min-width: 390px;
+        max-width: 390px;
+        height: auto;
+        overflow: visible;
+        border: none;
+        border-radius: 0;
+        background: #1a1a2e;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

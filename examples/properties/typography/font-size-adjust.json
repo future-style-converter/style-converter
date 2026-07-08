@@ -1,0 +1,12 @@
+{
+  "components": {
+    "FontSizeAdjust_None": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-size-adjust": "none" } },
+    "FontSizeAdjust_FromFont": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-size-adjust": "from-font" } },
+    "FontSizeAdjust_Number": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-size-adjust": "0.5" } },
+    "FontSizeAdjust_ExHeight": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-size-adjust": "ex-height 0.5" } },
+    "FontSizeAdjust_CapHeight": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-size-adjust": "cap-height 0.7" } },
+    "FontSizeAdjust_ChWidth": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-size-adjust": "ch-width 0.42" } },
+    "FontSizeAdjust_IcWidth": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-size-adjust": "ic-width 1.0" } },
+    "FontSizeAdjust_IcHeight": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-size-adjust": "ic-height 1.0" } }
+  }
+}

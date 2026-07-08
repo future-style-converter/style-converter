@@ -1,0 +1,102 @@
+{
+  "components": {
+    "Width_100px": {
+      "properties": {
+        "width": "100px",
+        "height": "60px",
+        "background-color": "#3498db"
+      }
+    },
+    "Width_150px": {
+      "properties": {
+        "width": "150px",
+        "height": "60px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Width_200px": {
+      "properties": {
+        "width": "200px",
+        "height": "60px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Width_250px": {
+      "properties": {
+        "width": "250px",
+        "height": "60px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Width_300px": {
+      "properties": {
+        "width": "300px",
+        "height": "60px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Width_390px_Full": {
+      "properties": {
+        "width": "390px",
+        "height": "60px",
+        "background-color": "#1abc9c"
+      }
+    },
+    "Width_Zero": {
+      "properties": {
+        "width": "0px",
+        "height": "60px",
+        "background-color": "#34495e"
+      }
+    },
+    "Width_Large_500px": {
+      "properties": {
+        "width": "500px",
+        "height": "60px",
+        "background-color": "#c0392b"
+      }
+    },
+    "Width_Small_20px": {
+      "properties": {
+        "width": "20px",
+        "height": "60px",
+        "background-color": "#16a085"
+      }
+    },
+    "Height_50px": {
+      "properties": {
+        "width": "200px",
+        "height": "50px",
+        "background-color": "#3498db"
+      }
+    },
+    "Height_100px": {
+      "properties": {
+        "width": "200px",
+        "height": "100px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Height_150px": {
+      "properties": {
+        "width": "200px",
+        "height": "150px",
+        "background-color": "#e67e22"
+      }
+    },
+    "Height_200px": {
+      "properties": {
+        "width": "200px",
+        "height": "200px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Height_Zero": {
+      "properties": {
+        "width": "200px",
+        "height": "0px",
+        "background-color": "#34495e"
+      }
+    }
+  }
+}

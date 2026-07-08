@@ -1,0 +1,14 @@
+{
+  "components": {
+    "ClipPath_Url": { "properties": { "width": "160px", "height": "120px", "background-color": "#3498db", "clip-path": "url(#clipShape)" } },
+    "ClipPath_GeomBox_MarginBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#e74c3c", "clip-path": "margin-box" } },
+    "ClipPath_GeomBox_BorderBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#2ecc71", "clip-path": "border-box" } },
+    "ClipPath_GeomBox_PaddingBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#9b59b6", "clip-path": "padding-box" } },
+    "ClipPath_GeomBox_ContentBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#f39c12", "clip-path": "content-box" } },
+    "ClipPath_GeomBox_FillBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#1abc9c", "clip-path": "fill-box" } },
+    "ClipPath_GeomBox_StrokeBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#34495e", "clip-path": "stroke-box" } },
+    "ClipPath_GeomBox_ViewBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#c0392b", "clip-path": "view-box" } },
+    "ClipPath_Shape_WithBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#16a085", "clip-path": "circle(40%) border-box" } },
+    "ClipPath_Box_WithShape": { "properties": { "width": "160px", "height": "120px", "background-color": "#d35400", "clip-path": "margin-box circle(50%)" } }
+  }
+}

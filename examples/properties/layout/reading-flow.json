@@ -1,0 +1,46 @@
+{
+  "components": {
+    "RF_Normal": {
+      "properties": { "width": "300px", "display": "flex", "background-color": "#1f2937", "padding": "6px", "gap": "6px", "reading-flow": "normal" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "RF_FlexVisual": {
+      "properties": { "width": "300px", "display": "flex", "background-color": "#1f2937", "padding": "6px", "gap": "6px", "reading-flow": "flex-visual" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "RF_FlexFlow": {
+      "properties": { "width": "300px", "display": "flex", "background-color": "#1f2937", "padding": "6px", "gap": "6px", "reading-flow": "flex-flow" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "RF_GridRows": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "background-color": "#1f2937", "padding": "6px", "gap": "6px", "reading-flow": "grid-rows" },
+      "children": {
+        "a": { "properties": { "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "RF_GridColumns": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "background-color": "#1f2937", "padding": "6px", "gap": "6px", "reading-flow": "grid-columns" },
+      "children": {
+        "a": { "properties": { "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "RF_GridOrder": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "background-color": "#1f2937", "padding": "6px", "gap": "6px", "reading-flow": "grid-order" },
+      "children": {
+        "a": { "properties": { "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "40px", "background-color": "#10b981" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "components": {
+    "TextDecorationSkip_None": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-skip": "none" } },
+    "TextDecorationSkip_Objects": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-skip": "objects" } },
+    "TextDecorationSkip_Spaces": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-skip": "spaces" } },
+    "TextDecorationSkip_LeadingSpaces": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-skip": "leading-spaces" } },
+    "TextDecorationSkip_TrailingSpaces": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-skip": "trailing-spaces" } },
+    "TextDecorationSkip_Edges": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-skip": "edges" } },
+    "TextDecorationSkip_BoxDecoration": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-skip": "box-decoration" } }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "components": {
+    "V0_border_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-clip": "border-box"
+      }
+    },
+    "V1_padding_bo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-clip": "padding-box"
+      }
+    },
+    "V2_content_bo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-clip": "content-box"
+      }
+    },
+    "V3_no_clip": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-clip": "no-clip"
+      }
+    },
+    "V4_fill_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-clip": "fill-box"
+      }
+    },
+    "V5_stroke_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-clip": "stroke-box"
+      }
+    },
+    "V6_view_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-clip": "view-box"
+      }
+    }
+  }
+}

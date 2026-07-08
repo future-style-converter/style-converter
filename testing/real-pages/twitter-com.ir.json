@@ -1,0 +1,260 @@
+{
+  "components": {
+    "css-146c3p1": {
+      "properties": {
+        "background-color": "rgba(0,0,0,0.00)",
+        "border": "0 solid black",
+        "box-sizing": "border-box",
+        "color": "rgba(0,0,0,1.00)",
+        "display": "inline",
+        "font": "14px -apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif",
+        "list-style": "none",
+        "margin": "0px",
+        "padding": "0px",
+        "position": "relative",
+        "text-align": "start",
+        "text-decoration": "none",
+        "white-space": "pre-wrap",
+        "word-wrap": "break-word"
+      }
+    },
+    "css-175oi2r": {
+      "properties": {
+        "align-items": "stretch",
+        "background-color": "rgba(0,0,0,0.00)",
+        "border": "0 solid black",
+        "box-sizing": "border-box",
+        "display": "flex",
+        "flex-basis": "auto",
+        "flex-direction": "column",
+        "flex-shrink": "0",
+        "list-style": "none",
+        "margin": "0px",
+        "min-height": "0px",
+        "min-width": "0px",
+        "padding": "0px",
+        "position": "relative",
+        "text-decoration": "none",
+        "z-index": "0"
+      }
+    },
+    "css-1jxf684": {
+      "properties": {
+        "background-color": "rgba(0,0,0,0.00)",
+        "border": "0 solid black",
+        "box-sizing": "border-box",
+        "color": "inherit",
+        "display": "inline",
+        "font": "inherit",
+        "list-style": "none",
+        "margin": "0px",
+        "padding": "0px",
+        "position": "relative",
+        "text-align": "inherit",
+        "text-decoration": "none",
+        "white-space": "inherit",
+        "word-wrap": "break-word"
+      }
+    },
+    "r-1phboty": {
+      "properties": {
+        "border-bottom-style": "solid",
+        "border-left-style": "solid",
+        "border-right-style": "solid",
+        "border-top-style": "solid"
+      }
+    },
+    "r-4iw3lz": {
+      "properties": {
+        "border-bottom-width": "0",
+        "border-left-width": "0",
+        "border-right-width": "0",
+        "border-top-width": "0"
+      }
+    },
+    "r-rs99b7": {
+      "properties": {
+        "border-bottom-width": "1px",
+        "border-left-width": "1px",
+        "border-right-width": "1px",
+        "border-top-width": "1px"
+      }
+    },
+    "r-10v3vxq": {
+      "properties": {
+        "transform": "scaleX(-1)"
+      }
+    },
+    "r-11f8fnl": {
+      "properties": {
+        "background-color": "rgba(180,180,182,0.50)"
+      }
+    },
+    "r-12181gd": {
+      "properties": {
+        "box-shadow": "0 0 2px rgba(0,0,0,0.03) inset"
+      }
+    },
+    "r-14j79pv": {
+      "properties": {
+        "color": "rgba(83,100,113,1.00)"
+      }
+    },
+    "r-14lw9ot": {
+      "properties": {
+        "background-color": "rgba(255,255,255,1.00)"
+      }
+    },
+    "r-176fswd": {
+      "properties": {
+        "transform": "translateX(-50%) translateY(-50%)"
+      }
+    },
+    "r-17c3jg3": {
+      "properties": {
+        "background-color": "rgba(0,0,0,0.80)"
+      }
+    },
+    "r-18jsvk2": {
+      "properties": {
+        "color": "rgba(15,20,25,1.00)"
+      }
+    },
+    "r-1ewcgjf": {
+      "properties": {
+        "box-shadow": "0px 1px 3px rgba(0,0,0,0.5)"
+      }
+    },
+    "r-1ffj0ar": {
+      "properties": {
+        "background-color": "rgba(0,0,0,0.40)"
+      }
+    },
+    "r-1nao33i": {
+      "properties": {
+        "color": "rgba(231,233,234,1.00)"
+      }
+    },
+    "r-1niwhzg": {
+      "properties": {
+        "background-color": "rgba(0,0,0,0.00)"
+      }
+    },
+    "r-1oifz5y": {
+      "properties": {
+        "background-color": "rgba(170,17,0,1.00)"
+      }
+    },
+    "r-1to6hqq": {
+      "properties": {
+        "background-color": "rgba(255,212,0,1.00)"
+      }
+    },
+    "r-54znze": {
+      "properties": {
+        "color": "rgba(239,243,244,1.00)"
+      }
+    },
+    "r-6026j": {
+      "properties": {
+        "background-color": "rgba(255,255,255,0.85)"
+      }
+    },
+    "r-agouwx": {
+      "properties": {
+        "transform": "translateZ(0)"
+      }
+    },
+    "r-bqz1g2": {
+      "properties": {
+        "background-color": "rgba(229,234,236,1.00)"
+      }
+    },
+    "r-emqnss": {
+      "properties": {
+        "transform": "translateZ(0px)"
+      }
+    },
+    "r-gf0ln": {
+      "properties": {
+        "-webkit-filter": "brightness(1)",
+        "filter": "brightness(1)"
+      }
+    },
+    "r-impgnl": {
+      "properties": {
+        "transform": "translateX(50%) translateY(-50%)"
+      }
+    },
+    "r-j5o65s": {
+      "properties": {
+        "border-bottom-color": "rgba(239,243,244,1.00)"
+      }
+    },
+    "r-jmul1s": {
+      "properties": {
+        "transform": "scale(1.1)"
+      }
+    },
+    "r-jwli3a": {
+      "properties": {
+        "color": "rgba(255,255,255,1.00)"
+      }
+    },
+    "r-kemksi": {
+      "properties": {
+        "background-color": "rgba(0,0,0,1.00)"
+      }
+    },
+    "r-qklmqi": {
+      "properties": {
+        "border-bottom-width": "1px"
+      }
+    },
+    "r-vqxq0j": {
+      "properties": {
+        "border": "0 solid black"
+      }
+    },
+    "r-wcz47r": {
+      "properties": {
+        "box-shadow": "0 8px 24px rgba(15, 20, 25, 0.18)"
+      }
+    },
+    "r-x572qd": {
+      "properties": {
+        "background-color": "rgba(247,249,249,1.00)"
+      }
+    },
+    "r-xigjrr": {
+      "properties": {
+        "-webkit-filter": "blur(4px)",
+        "filter": "blur(4px)"
+      }
+    },
+    "r-yyyyoo": {
+      "properties": {
+        "fill": "currentcolor"
+      }
+    },
+    "errorContainer": {
+      "properties": {
+        "background-color": "#FFF",
+        "color": "#0F1419",
+        "max-width": "600px",
+        "margin": "0 auto",
+        "padding": "10%",
+        "font-family": "Helvetica, sans-serif",
+        "font-size": "16px"
+      }
+    },
+    "errorFooter": {
+      "properties": {
+        "color": "#657786",
+        "font-size": "80%",
+        "line-height": "1.5",
+        "padding": "1em 0"
+      }
+    }
+  }
+}

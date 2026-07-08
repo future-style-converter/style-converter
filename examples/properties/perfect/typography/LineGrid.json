@@ -1,0 +1,26 @@
+{
+  "components": {
+    "V0_match_pa": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "line-grid": "match-parent"
+      }
+    },
+    "V1_create": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "line-grid": "create"
+      }
+    }
+  }
+}

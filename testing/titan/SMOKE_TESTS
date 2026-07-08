@@ -1,0 +1,124 @@
+# TITAN Phase 1 smoke list — exactly 100 tests across 8 CSS spec sections.
+# Generated to satisfy TITAN_ARCHITECTURE.md §8 Phase 1 success criterion:
+# 100 tests, ≥5 spec sections, 3+ buckets covered (A + B + skipped C entries).
+# Lines starting with # or blank are ignored by run-titan.sh --smoke.
+# Distribution rationale (TITAN spec Phase 1, hard rule "manifest.wpt.totalTests === 100"):
+#   95 bucket-A (clean conversion) + 5 bucket-B (lossy markers) = 100.
+#   8 spec sections covered (≥5 required).
+#
+# Bucket-A (95 tests):
+# — css-color (15)
+css/css-color/a98rgb-001.html
+css/css-color/a98rgb-002.html
+css/css-color/a98rgb-003.html
+css/css-color/a98rgb-004.html
+css/css-color/animation/contrast-color-interpolation.html
+css/css-color/at-color-profile-001.html
+css/css-color/background-color-hsl-001.html
+css/css-color/background-color-hsl-002.html
+css/css-color/background-color-hsl-003.html
+css/css-color/background-color-hsl-004.html
+css/css-color/background-color-rgb-001.html
+css/css-color/background-color-rgb-002.html
+css/css-color/background-color-rgb-003.html
+css/css-color/border-color-currentcolor.html
+css/css-color/clip-opacity-out-of-flow.html
+# — css-flexbox (15)
+css/css-flexbox/abspos/abspos-autopos-htb-ltr.html
+css/css-flexbox/abspos/abspos-autopos-htb-rtl.html
+css/css-flexbox/abspos/abspos-autopos-vlr-ltr.html
+css/css-flexbox/abspos/abspos-autopos-vlr-rtl.html
+css/css-flexbox/abspos/abspos-autopos-vrl-ltr.html
+css/css-flexbox/abspos/abspos-autopos-vrl-rtl.html
+css/css-flexbox/abspos/dynamic-align-self-001.html
+css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html
+css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html
+css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-003.html
+css/css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001.html
+css/css-flexbox/abspos/flex-abspos-staticpos-justify-self-001.html
+css/css-flexbox/abspos/flex-abspos-staticpos-margin-001.html
+css/css-flexbox/abspos/flex-abspos-staticpos-margin-002.html
+css/css-flexbox/abspos/flex-abspos-staticpos-margin-003.html
+# — css-backgrounds (14)
+css/css-backgrounds/animations/background-color-animation-in-body.html
+css/css-backgrounds/animations/background-color-animation-with-images.html
+css/css-backgrounds/animations/background-color-animation-with-table1.html
+css/css-backgrounds/animations/background-color-animation-with-table2.html
+css/css-backgrounds/animations/background-color-animation-with-table3.html
+css/css-backgrounds/animations/background-color-animation-with-table4.html
+css/css-backgrounds/animations/background-color-transparent-animation-in-body.html
+css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html
+css/css-backgrounds/background-334.html
+css/css-backgrounds/background-attachment-350.html
+css/css-backgrounds/background-attachment-fixed-inside-transform-1.html
+css/css-backgrounds/background-attachment-local-hidden.html
+css/css-backgrounds/background-attachment-local/attachment-local-clipping-color-1.html
+css/css-backgrounds/background-attachment-local/attachment-local-clipping-color-2.html
+# — css-borders (10)
+css/css-borders/border-radius-greater-than-width.html
+css/css-borders/border-shape-absolute-coords-shape.tentative.html
+css/css-borders/border-shape/border-shape-background-origin-border-box.html
+css/css-borders/border-shape/border-shape-clips-background.html
+css/css-borders/border-shape/border-shape-collapsed-shape-clips-background.html
+css/css-borders/border-shape/border-shape-combined-shadow.html
+css/css-borders/border-shape/border-shape-double-shape-default.html
+css/css-borders/border-shape/border-shape-geometry-box.html
+css/css-borders/border-shape/border-shape-half-border-box-default.html
+css/css-borders/border-shape/border-shape-ignore-radius.html
+# — css-sizing (14)
+css/css-sizing/abspos-auto-sizing-fit-content-percentage-001.html
+css/css-sizing/abspos-auto-sizing-fit-content-percentage-002.html
+css/css-sizing/abspos-auto-sizing-fit-content-percentage-003.html
+css/css-sizing/abspos-auto-sizing-fit-content-percentage-004.html
+css/css-sizing/abspos-auto-sizing-fit-content-percentage-005.html
+css/css-sizing/abspos-auto-sizing-fit-content-percentage-006.html
+css/css-sizing/abspos-auto-sizing-fit-content-percentage-007.html
+css/css-sizing/abspos-auto-sizing-fit-content-percentage-008.html
+css/css-sizing/aspect-ratio/abspos-001.html
+css/css-sizing/aspect-ratio/abspos-002.html
+css/css-sizing/aspect-ratio/abspos-003.html
+css/css-sizing/aspect-ratio/abspos-004.html
+css/css-sizing/aspect-ratio/abspos-005.html
+css/css-sizing/aspect-ratio/abspos-006.html
+# — css-text (9)
+css/css-text/bidi/bidi-lines-001.html
+css/css-text/bidi/bidi-lines-002.html
+css/css-text/bidi/bidi-tab-001.html
+css/css-text/bidi/empty-span-001.html
+css/css-text/boundary-shaping/boundary-shaping-001.html
+css/css-text/boundary-shaping/boundary-shaping-002.html
+css/css-text/boundary-shaping/boundary-shaping-003.html
+css/css-text/boundary-shaping/boundary-shaping-004.html
+css/css-text/boundary-shaping/boundary-shaping-005.html
+# — css-shadow (9)
+css/css-shadow/css-scoping-shadow-assigned-node-with-before-after.html
+css/css-shadow/css-scoping-shadow-assigned-node-with-rules.html
+css/css-shadow/css-scoping-shadow-host-functional-rule.html
+css/css-shadow/css-scoping-shadow-host-namespace.html
+css/css-shadow/css-scoping-shadow-host-rule.html
+css/css-shadow/css-scoping-shadow-host-with-before-after.html
+css/css-shadow/css-scoping-shadow-invisible-slot.html
+css/css-shadow/css-scoping-shadow-nested-slot-display-override.html
+css/css-shadow/css-scoping-shadow-root-hides-children.html
+# — css-overflow (9)
+css/css-overflow/clip-001.html
+css/css-overflow/clip-002.html
+css/css-overflow/clip-003.html
+css/css-overflow/clip-004.html
+css/css-overflow/clip-005.html
+css/css-overflow/clip-006.html
+css/css-overflow/clip-007.html
+css/css-overflow/clip-008.html
+css/css-overflow/column-style-change-triggers-relayout.html
+#
+# Bucket-B (5 tests — lossy, dashboard surfaces them in expected-gap lane):
+# — css-color bucket-B
+css/css-color/contrast-color-001.html
+# — css-flexbox bucket-B
+css/css-flexbox/dynamic-isize-change-002.html
+# — css-backgrounds bucket-B
+css/css-backgrounds/background-attachment-fixed-border-radius-offset.html
+# — css-borders bucket-B
+css/css-borders/border-radius-currentcolor.html
+# — css-sizing bucket-B
+css/css-sizing/aspect-ratio/replaced-element-007.html

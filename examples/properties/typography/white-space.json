@@ -1,0 +1,10 @@
+{
+  "components": {
+    "WhiteSpace_Normal": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "normal" } },
+    "WhiteSpace_Nowrap": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "nowrap" } },
+    "WhiteSpace_Pre": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre" } },
+    "WhiteSpace_PreWrap": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre-wrap" } },
+    "WhiteSpace_PreLine": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre-line" } },
+    "WhiteSpace_BreakSpaces": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "break-spaces" } }
+  }
+}

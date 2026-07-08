@@ -1,0 +1,108 @@
+{
+  "components": {
+    "V0_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "text-decoration-thickness": "auto"
+      }
+    },
+    "V1_from_fon": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "text-decoration-thickness": "from-font"
+      }
+    },
+    "V2_1px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "text-decoration-thickness": "1px"
+      }
+    },
+    "V3_2px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "text-decoration-thickness": "2px"
+      }
+    },
+    "V4_solid": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "text-decoration-thickness": "auto",
+        "text-decoration-style": "solid"
+      }
+    },
+    "V5_double": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "text-decoration-thickness": "auto",
+        "text-decoration-style": "double"
+      }
+    },
+    "V6_dotted": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "text-decoration-thickness": "auto",
+        "text-decoration-style": "dotted"
+      }
+    },
+    "V7_dashed": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "text-decoration-thickness": "auto",
+        "text-decoration-style": "dashed"
+      }
+    },
+    "V8_wavy": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample Text",
+        "text-decoration-thickness": "auto",
+        "text-decoration-style": "wavy"
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "components": {
+    "V0_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "shape-rendering": "auto"
+      }
+    },
+    "V1_optimize": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "shape-rendering": "optimizeSpeed"
+      }
+    },
+    "V2_crispEdg": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "shape-rendering": "crispEdges"
+      }
+    },
+    "V3_geometri": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "shape-rendering": "geometricPrecision"
+      }
+    },
+    "V4_optimizesp": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "shape-rendering": "optimizespeed"
+      }
+    },
+    "V5_crispedges": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "shape-rendering": "crispedges"
+      }
+    },
+    "V6_geometricp": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "shape-rendering": "geometricprecision"
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "components": {
+    "A_experi": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "navigation": "auto"
+      }
+    },
+    "B_speech": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "speak": "auto"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "navigation": "auto",
+        "speak": "auto"
+      }
+    }
+  }
+}

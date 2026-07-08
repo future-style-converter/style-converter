@@ -1,0 +1,40 @@
+{
+  "components": {
+    "V0_medium": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "volume": "medium"
+      }
+    },
+    "V1_silent": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "volume": "silent"
+      }
+    },
+    "V2_soft": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "volume": "soft"
+      }
+    },
+    "V3_loud": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "volume": "loud"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "components": {
+    "B10_Serif_abcdefg":          { "properties": { "width": "320px", "height": "60px", "background-color": "#ffffff", "color": "#000000", "font-size": "24px", "font-family": "serif" } },
+    "B10_Serif_abcdefghijklmnop": { "properties": { "width": "320px", "height": "60px", "background-color": "#ffffff", "color": "#000000", "font-size": "24px", "font-family": "serif" } },
+    "B10_Serif_AVATAR_WAVE":      { "properties": { "width": "320px", "height": "60px", "background-color": "#ffffff", "color": "#000000", "font-size": "24px", "font-family": "serif" } }
+  }
+}

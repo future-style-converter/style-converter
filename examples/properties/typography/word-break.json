@@ -1,0 +1,9 @@
+{
+  "components": {
+    "WordBreak_Normal": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-break": "normal" } },
+    "WordBreak_BreakAll": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-break": "break-all" } },
+    "WordBreak_KeepAll": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-break": "keep-all" } },
+    "WordBreak_BreakWord": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-break": "break-word" } },
+    "WordBreak_AutoPhrase": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-break": "auto-phrase" } }
+  }
+}

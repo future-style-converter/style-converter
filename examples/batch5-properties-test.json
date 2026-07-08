@@ -1,0 +1,254 @@
+{
+  "components": {
+    "Transition_Basic": {
+      "properties": {
+        "transition-property": "background-color",
+        "transition-duration": "300ms",
+        "transition-timing-function": "ease-in-out",
+        "background-color": "#3498db",
+        "padding": "20px",
+        "width": "150px",
+        "border-radius": "8px"
+      }
+    },
+    "Transition_Multiple": {
+      "properties": {
+        "transition-property": "transform, opacity",
+        "transition-duration": "500ms, 200ms",
+        "transition-timing-function": "ease-out",
+        "transition-delay": "0ms, 100ms",
+        "background-color": "#9b59b6",
+        "padding": "20px",
+        "width": "150px"
+      }
+    },
+    "Transition_All": {
+      "properties": {
+        "transition-property": "all",
+        "transition-duration": "400ms",
+        "transition-timing-function": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "transition-behavior": "allow-discrete",
+        "background-color": "#e74c3c",
+        "padding": "20px",
+        "width": "150px"
+      }
+    },
+
+    "Contain_Strict": {
+      "properties": {
+        "contain": "strict",
+        "background-color": "#2ecc71",
+        "padding": "20px",
+        "width": "200px",
+        "height": "100px"
+      }
+    },
+    "Contain_Layout": {
+      "properties": {
+        "contain": "layout",
+        "background-color": "#f39c12",
+        "padding": "20px",
+        "width": "200px",
+        "height": "100px"
+      }
+    },
+    "Contain_Paint": {
+      "properties": {
+        "contain": "paint",
+        "background-color": "#1abc9c",
+        "padding": "20px",
+        "width": "200px",
+        "height": "100px"
+      }
+    },
+    "Contain_Size": {
+      "properties": {
+        "contain": "size",
+        "contain-intrinsic-width": "200px",
+        "contain-intrinsic-height": "100px",
+        "background-color": "#e67e22",
+        "padding": "20px"
+      }
+    },
+
+    "WillChange_Transform": {
+      "properties": {
+        "will-change": "transform",
+        "background-color": "#8e44ad",
+        "padding": "20px",
+        "width": "150px"
+      }
+    },
+    "WillChange_Opacity": {
+      "properties": {
+        "will-change": "opacity",
+        "background-color": "#2980b9",
+        "padding": "20px",
+        "width": "150px"
+      }
+    },
+    "WillChange_Multiple": {
+      "properties": {
+        "will-change": "transform, opacity, scroll-position",
+        "background-color": "#16a085",
+        "padding": "20px",
+        "width": "150px"
+      }
+    },
+
+    "Counter_Reset": {
+      "properties": {
+        "counter-reset": "section 0",
+        "background-color": "#d35400",
+        "padding": "15px",
+        "width": "200px"
+      }
+    },
+    "Counter_Increment": {
+      "properties": {
+        "counter-increment": "section 1",
+        "background-color": "#c0392b",
+        "padding": "15px",
+        "width": "200px"
+      }
+    },
+    "Counter_Set": {
+      "properties": {
+        "counter-set": "chapter 5",
+        "background-color": "#7f8c8d",
+        "padding": "15px",
+        "width": "200px"
+      }
+    },
+
+    "Quotes_Double": {
+      "properties": {
+        "quotes": "\"\\201C\" \"\\201D\" \"\\2018\" \"\\2019\"",
+        "background-color": "#bdc3c7",
+        "padding": "15px",
+        "width": "200px"
+      }
+    },
+    "Quotes_Guillemets": {
+      "properties": {
+        "quotes": "\"\\00AB\" \"\\00BB\"",
+        "background-color": "#95a5a6",
+        "padding": "15px",
+        "width": "200px"
+      }
+    },
+
+    "TextJustify_InterWord": {
+      "properties": {
+        "text-justify": "inter-word",
+        "text-align": "justify",
+        "background-color": "#ecf0f1",
+        "padding": "15px",
+        "width": "250px"
+      }
+    },
+    "TextJustify_InterChar": {
+      "properties": {
+        "text-justify": "inter-character",
+        "text-align": "justify",
+        "background-color": "#dfe6e9",
+        "padding": "15px",
+        "width": "250px"
+      }
+    },
+    "TextAlignLast_Center": {
+      "properties": {
+        "text-align-last": "center",
+        "text-align": "justify",
+        "background-color": "#ffeaa7",
+        "padding": "15px",
+        "width": "250px"
+      }
+    },
+    "TextAlignLast_Right": {
+      "properties": {
+        "text-align-last": "right",
+        "text-align": "justify",
+        "background-color": "#fdcb6e",
+        "padding": "15px",
+        "width": "250px"
+      }
+    },
+
+    "Hyphens_Auto": {
+      "properties": {
+        "hyphens": "auto",
+        "hyphenate-character": "-",
+        "background-color": "#74b9ff",
+        "padding": "15px",
+        "width": "150px"
+      }
+    },
+    "Hyphens_Manual": {
+      "properties": {
+        "hyphens": "manual",
+        "background-color": "#a29bfe",
+        "padding": "15px",
+        "width": "150px"
+      }
+    },
+
+    "OverflowWrap_BreakWord": {
+      "properties": {
+        "overflow-wrap": "break-word",
+        "background-color": "#fab1a0",
+        "padding": "15px",
+        "width": "120px"
+      }
+    },
+    "OverflowWrap_Anywhere": {
+      "properties": {
+        "overflow-wrap": "anywhere",
+        "background-color": "#ff7675",
+        "padding": "15px",
+        "width": "120px"
+      }
+    },
+    "WordWrap_BreakWord": {
+      "properties": {
+        "word-wrap": "break-word",
+        "background-color": "#fd79a8",
+        "padding": "15px",
+        "width": "120px"
+      }
+    },
+
+    "LineBreak_Strict": {
+      "properties": {
+        "line-break": "strict",
+        "background-color": "#81ecec",
+        "padding": "15px",
+        "width": "150px"
+      }
+    },
+    "LineBreak_Loose": {
+      "properties": {
+        "line-break": "loose",
+        "background-color": "#00cec9",
+        "padding": "15px",
+        "width": "150px"
+      }
+    },
+    "LineBreak_Anywhere": {
+      "properties": {
+        "line-break": "anywhere",
+        "background-color": "#55efc4",
+        "padding": "15px",
+        "width": "150px"
+      }
+    },
+
+    "Reference_Normal": {
+      "properties": {
+        "background-color": "#dfe6e9",
+        "padding": "15px",
+        "width": "100px"
+      }
+    }
+  }
+}

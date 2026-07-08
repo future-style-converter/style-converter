@@ -1,0 +1,12 @@
+{
+  "components": {
+    "FontStyle_Normal": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "normal" } },
+    "FontStyle_Italic": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "italic" } },
+    "FontStyle_Oblique": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "oblique" } },
+    "FontStyle_Oblique_0deg": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "oblique 0deg" } },
+    "FontStyle_Oblique_14deg": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "oblique 14deg" } },
+    "FontStyle_Oblique_Neg10deg": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "oblique -10deg" } },
+    "FontStyle_Oblique_Rad": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "oblique 0.2rad" } },
+    "FontStyle_Oblique_Turn": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "oblique 0.05turn" } }
+  }
+}

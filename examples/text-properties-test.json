@@ -1,0 +1,115 @@
+{
+  "components": {
+    "TabSize_Default": {
+      "properties": {
+        "width": "280px",
+        "padding": "10px",
+        "background-color": "#f5f5f5",
+        "font-family": "monospace",
+        "font-size": "12px"
+      }
+    },
+    "TabSize_4": {
+      "properties": {
+        "tab-size": "4",
+        "width": "280px",
+        "padding": "10px",
+        "background-color": "#e6f3ff",
+        "font-family": "monospace",
+        "font-size": "12px"
+      }
+    },
+    "TabSize_2": {
+      "properties": {
+        "tab-size": "2",
+        "width": "280px",
+        "padding": "10px",
+        "background-color": "#fff0e6",
+        "font-family": "monospace",
+        "font-size": "12px"
+      }
+    },
+    "WhiteSpace_Normal": {
+      "properties": {
+        "white-space": "normal",
+        "width": "200px",
+        "padding": "10px",
+        "background-color": "#e6ffe6",
+        "font-size": "14px"
+      }
+    },
+    "WhiteSpace_NoWrap": {
+      "properties": {
+        "white-space": "nowrap",
+        "width": "150px",
+        "padding": "10px",
+        "background-color": "#ffe6e6",
+        "font-size": "14px",
+        "overflow": "hidden"
+      }
+    },
+    "WhiteSpace_Pre": {
+      "properties": {
+        "white-space": "pre",
+        "width": "280px",
+        "padding": "10px",
+        "background-color": "#f0e6ff",
+        "font-family": "monospace",
+        "font-size": "12px"
+      }
+    },
+    "WhiteSpace_PreWrap": {
+      "properties": {
+        "white-space": "pre-wrap",
+        "width": "220px",
+        "padding": "10px",
+        "background-color": "#ffffd6",
+        "font-size": "13px"
+      }
+    },
+    "Direction_LTR": {
+      "properties": {
+        "direction": "ltr",
+        "text-align": "start",
+        "width": "220px",
+        "padding": "10px",
+        "background-color": "#d9f2d9",
+        "font-size": "16px"
+      }
+    },
+    "Direction_RTL": {
+      "properties": {
+        "direction": "rtl",
+        "text-align": "start",
+        "width": "220px",
+        "padding": "10px",
+        "background-color": "#f2d9d9",
+        "font-size": "16px"
+      }
+    },
+    "Combined_TabWhitespace": {
+      "properties": {
+        "tab-size": "4",
+        "white-space": "pre",
+        "width": "300px",
+        "padding": "10px",
+        "background-color": "#f2f2d9",
+        "font-family": "monospace",
+        "font-size": "12px"
+      }
+    },
+    "Combined_AllText": {
+      "properties": {
+        "tab-size": "2",
+        "direction": "rtl",
+        "white-space": "pre",
+        "text-align": "end",
+        "width": "280px",
+        "padding": "10px",
+        "background-color": "#d9d9f2",
+        "font-family": "monospace",
+        "font-size": "14px"
+      }
+    }
+  }
+}

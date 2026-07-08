@@ -1,0 +1,22 @@
+{
+  "components": {
+    "BorderCollapse_Collapse": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "border-collapse": "collapse" } },
+    "BorderCollapse_Separate": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "border-collapse": "separate" } },
+
+    "BorderSpacing_Single": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "border-spacing": "4px" } },
+    "BorderSpacing_Pair": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "border-spacing": "4px 8px" } },
+
+    "CaptionSide_Top": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "caption-side": "top" } },
+    "CaptionSide_Bottom": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "caption-side": "bottom" } },
+    "CaptionSide_BlockStart": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "caption-side": "block-start" } },
+    "CaptionSide_BlockEnd": { "properties": { "width": "160px", "height": "80px", "background-color": "#c0392b", "caption-side": "block-end" } },
+    "CaptionSide_InlineStart": { "properties": { "width": "160px", "height": "80px", "background-color": "#16a085", "caption-side": "inline-start" } },
+    "CaptionSide_InlineEnd": { "properties": { "width": "160px", "height": "80px", "background-color": "#8e44ad", "caption-side": "inline-end" } },
+
+    "EmptyCells_Show": { "properties": { "width": "160px", "height": "80px", "background-color": "#2980b9", "empty-cells": "show" } },
+    "EmptyCells_Hide": { "properties": { "width": "160px", "height": "80px", "background-color": "#27ae60", "empty-cells": "hide" } },
+
+    "TableLayout_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#7f8c8d", "table-layout": "auto" } },
+    "TableLayout_Fixed": { "properties": { "width": "160px", "height": "80px", "background-color": "#d35400", "table-layout": "fixed" } }
+  }
+}

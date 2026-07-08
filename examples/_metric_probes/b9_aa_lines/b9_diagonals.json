@@ -1,0 +1,97 @@
+{
+  "components": {
+    "B9_Diag_0": {
+      "properties": {
+        "width": "128px", "height": "128px",
+        "background-color": "#ffffff",
+        "position": "relative",
+        "overflow": "hidden"
+      },
+      "children": {
+        "line": {
+          "properties": {
+            "position": "absolute",
+            "left": "0px", "top": "63px",
+            "width": "128px", "height": "1px",
+            "background-color": "#000000"
+          }
+        }
+      }
+    },
+    "B9_Diag_22_5": {
+      "properties": {
+        "width": "128px", "height": "128px",
+        "background-color": "#ffffff",
+        "position": "relative",
+        "overflow": "hidden"
+      },
+      "children": {
+        "line": {
+          "properties": {
+            "position": "absolute",
+            "left": "-26px", "top": "63px",
+            "width": "180px", "height": "1px",
+            "background-color": "#000000",
+            "transform": "rotate(22.5deg)"
+          }
+        }
+      }
+    },
+    "B9_Diag_45": {
+      "properties": {
+        "width": "128px", "height": "128px",
+        "background-color": "#ffffff",
+        "position": "relative",
+        "overflow": "hidden"
+      },
+      "children": {
+        "line": {
+          "properties": {
+            "position": "absolute",
+            "left": "-26px", "top": "63px",
+            "width": "180px", "height": "1px",
+            "background-color": "#000000",
+            "transform": "rotate(45deg)"
+          }
+        }
+      }
+    },
+    "B9_Diag_67_5": {
+      "properties": {
+        "width": "128px", "height": "128px",
+        "background-color": "#ffffff",
+        "position": "relative",
+        "overflow": "hidden"
+      },
+      "children": {
+        "line": {
+          "properties": {
+            "position": "absolute",
+            "left": "-26px", "top": "63px",
+            "width": "180px", "height": "1px",
+            "background-color": "#000000",
+            "transform": "rotate(67.5deg)"
+          }
+        }
+      }
+    },
+    "B9_Diag_90": {
+      "properties": {
+        "width": "128px", "height": "128px",
+        "background-color": "#ffffff",
+        "position": "relative",
+        "overflow": "hidden"
+      },
+      "children": {
+        "line": {
+          "properties": {
+            "position": "absolute",
+            "left": "63px", "top": "0px",
+            "width": "1px", "height": "128px",
+            "background-color": "#000000"
+          }
+        }
+      }
+    }
+  }
+}

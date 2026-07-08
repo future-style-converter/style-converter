@@ -1,0 +1,10 @@
+{
+  "components": {
+    "TextGroupAlign_None": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-group-align": "none" } },
+    "TextGroupAlign_Start": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-group-align": "start" } },
+    "TextGroupAlign_End": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-group-align": "end" } },
+    "TextGroupAlign_Left": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-group-align": "left" } },
+    "TextGroupAlign_Right": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-group-align": "right" } },
+    "TextGroupAlign_Center": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-group-align": "center" } }
+  }
+}

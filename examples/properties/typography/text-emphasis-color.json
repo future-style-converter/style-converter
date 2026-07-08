@@ -1,0 +1,8 @@
+{
+  "components": {
+    "TextEmphasisColor_Hex": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "filled circle", "text-emphasis-color": "#e74c3c" } },
+    "TextEmphasisColor_Rgb": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "filled circle", "text-emphasis-color": "rgb(30, 180, 90)" } },
+    "TextEmphasisColor_Rgba": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "filled circle", "text-emphasis-color": "rgba(30,180,90,0.6)" } },
+    "TextEmphasisColor_Named": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis-style": "filled circle", "text-emphasis-color": "rebeccapurple" } }
+  }
+}

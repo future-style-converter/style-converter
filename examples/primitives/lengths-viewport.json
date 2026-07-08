@@ -1,0 +1,36 @@
+{
+  "_notes": {
+    "fixture": "lengths-viewport",
+    "purpose": "Classic viewport units + small/large/dynamic variants + logical axes. All context-dependent (pixels=null).",
+    "ir_shape": "{ 'type':'length', 'original': { 'v': <n>, 'u': 'VW'|'VH'|'VMIN'|'VMAX'|'VI'|'VB'|'SVW'|'SVH'|'SVMIN'|'SVMAX'|'SVI'|'SVB'|'LVW'|'LVH'|'LVMIN'|'LVMAX'|'LVI'|'LVB'|'DVW'|'DVH'|'DVMIN'|'DVMAX'|'DVI'|'DVB' } }"
+  },
+  "components": {
+    "Length_Vw_50":    { "properties": { "width": "50vw",   "height": "60px", "background-color": "#3498db" } },
+    "Length_Vh_20":    { "properties": { "width": "80px",   "height": "20vh", "background-color": "#9b59b6" } },
+    "Length_Vmin_30":  { "properties": { "width": "30vmin", "height": "60px", "background-color": "#e74c3c" } },
+    "Length_Vmax_30":  { "properties": { "width": "30vmax", "height": "60px", "background-color": "#2ecc71" } },
+    "Length_Vi_40":    { "properties": { "width": "40vi",   "height": "60px", "background-color": "#1abc9c" } },
+    "Length_Vb_15":    { "properties": { "width": "80px",   "height": "15vb", "background-color": "#f39c12" } },
+
+    "Length_Svw_50":   { "properties": { "width": "50svw",   "height": "60px", "background-color": "#e67e22" } },
+    "Length_Svh_20":   { "properties": { "width": "80px",    "height": "20svh", "background-color": "#34495e" } },
+    "Length_Svmin_30": { "properties": { "width": "30svmin", "height": "60px", "background-color": "#16a085" } },
+    "Length_Svmax_30": { "properties": { "width": "30svmax", "height": "60px", "background-color": "#c0392b" } },
+    "Length_Svi_40":   { "properties": { "width": "40svi",   "height": "60px", "background-color": "#8e44ad" } },
+    "Length_Svb_15":   { "properties": { "width": "80px",    "height": "15svb", "background-color": "#27ae60" } },
+
+    "Length_Lvw_50":   { "properties": { "width": "50lvw",   "height": "60px", "background-color": "#d35400" } },
+    "Length_Lvh_20":   { "properties": { "width": "80px",    "height": "20lvh", "background-color": "#2980b9" } },
+    "Length_Lvmin_30": { "properties": { "width": "30lvmin", "height": "60px", "background-color": "#7f8c8d" } },
+    "Length_Lvmax_30": { "properties": { "width": "30lvmax", "height": "60px", "background-color": "#bdc3c7" } },
+    "Length_Lvi_40":   { "properties": { "width": "40lvi",   "height": "60px", "background-color": "#f1c40f" } },
+    "Length_Lvb_15":   { "properties": { "width": "80px",    "height": "15lvb", "background-color": "#95a5a6" } },
+
+    "Length_Dvw_50":   { "properties": { "width": "50dvw",   "height": "60px", "background-color": "#e84393" } },
+    "Length_Dvh_20":   { "properties": { "width": "80px",    "height": "20dvh", "background-color": "#00b894" } },
+    "Length_Dvmin_30": { "properties": { "width": "30dvmin", "height": "60px", "background-color": "#0984e3" } },
+    "Length_Dvmax_30": { "properties": { "width": "30dvmax", "height": "60px", "background-color": "#6c5ce7" } },
+    "Length_Dvi_40":   { "properties": { "width": "40dvi",   "height": "60px", "background-color": "#fdcb6e" } },
+    "Length_Dvb_15":   { "properties": { "width": "80px",    "height": "15dvb", "background-color": "#d63031" } }
+  }
+}

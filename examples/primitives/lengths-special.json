@@ -1,0 +1,13 @@
+{
+  "_notes": {
+    "fixture": "lengths-special",
+    "purpose": "Non-length-ish length tokens: percent (%) and grid fraction (fr).",
+    "ir_shape_percent_on_width": "Width percentage may serialize as an IRPercentage shape or a length-with-original {u:'PERCENT'} depending on the property's value type. Document actual shape from converter output.",
+    "ir_shape_fr": "FR units typically appear inside grid-template-columns; same length shape with u='FR'."
+  },
+  "components": {
+    "Length_Percent_Width":   { "properties": { "width": "50%", "height": "60px", "background-color": "#3498db" } },
+    "Length_Percent_Height":  { "properties": { "width": "120px", "height": "50%", "background-color": "#9b59b6" } },
+    "Length_Fr_Grid":         { "properties": { "display": "grid", "grid-template-columns": "1fr 2fr 1fr", "gap": "4px", "background-color": "#e67e22", "padding": "8px" } }
+  }
+}

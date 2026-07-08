@@ -1,0 +1,31 @@
+{
+  "components": {
+    "V0_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "cue-after": "none"
+      }
+    },
+    "V1_url_a_wa": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "cue-after": "url(a.wav)"
+      }
+    },
+    "V2_url_a_wa": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "cue-after": "url(a.wav) -3db"
+      }
+    }
+  }
+}

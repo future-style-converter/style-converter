@@ -1,0 +1,11 @@
+{
+  "components": {
+    "VerticalAlignLast_Auto": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align-last": "auto" } },
+    "VerticalAlignLast_Baseline": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align-last": "baseline" } },
+    "VerticalAlignLast_Top": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align-last": "top" } },
+    "VerticalAlignLast_Middle": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align-last": "middle" } },
+    "VerticalAlignLast_Bottom": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align-last": "bottom" } },
+    "VerticalAlignLast_Px_4": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align-last": "4px" } },
+    "VerticalAlignLast_Percent_25": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align-last": "25%" } }
+  }
+}

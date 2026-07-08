@@ -1,0 +1,75 @@
+{
+  "components": {
+    "ScrollBehavior_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#3498db", "scroll-behavior": "auto" } },
+    "ScrollBehavior_Smooth": { "properties": { "width": "160px", "height": "120px", "background-color": "#e74c3c", "scroll-behavior": "smooth" } },
+
+    "ScrollSnapType_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#2ecc71", "scroll-snap-type": "none" } },
+    "ScrollSnapType_XMandatory": { "properties": { "width": "160px", "height": "120px", "background-color": "#9b59b6", "scroll-snap-type": "x mandatory" } },
+    "ScrollSnapType_YProximity": { "properties": { "width": "160px", "height": "120px", "background-color": "#f39c12", "scroll-snap-type": "y proximity" } },
+    "ScrollSnapType_Both": { "properties": { "width": "160px", "height": "120px", "background-color": "#1abc9c", "scroll-snap-type": "both mandatory" } },
+    "ScrollSnapType_Block": { "properties": { "width": "160px", "height": "120px", "background-color": "#34495e", "scroll-snap-type": "block" } },
+    "ScrollSnapType_Inline": { "properties": { "width": "160px", "height": "120px", "background-color": "#c0392b", "scroll-snap-type": "inline" } },
+
+    "ScrollSnapAlign_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#16a085", "scroll-snap-align": "none" } },
+    "ScrollSnapAlign_Start": { "properties": { "width": "160px", "height": "120px", "background-color": "#8e44ad", "scroll-snap-align": "start" } },
+    "ScrollSnapAlign_End": { "properties": { "width": "160px", "height": "120px", "background-color": "#2980b9", "scroll-snap-align": "end" } },
+    "ScrollSnapAlign_Center": { "properties": { "width": "160px", "height": "120px", "background-color": "#27ae60", "scroll-snap-align": "center" } },
+
+    "ScrollSnapStop_Normal": { "properties": { "width": "160px", "height": "120px", "background-color": "#7f8c8d", "scroll-snap-stop": "normal" } },
+    "ScrollSnapStop_Always": { "properties": { "width": "160px", "height": "120px", "background-color": "#d35400", "scroll-snap-stop": "always" } },
+
+    "ScrollMarginTop": { "properties": { "width": "160px", "height": "120px", "background-color": "#3498db", "scroll-margin-top": "16px" } },
+    "ScrollMarginRight": { "properties": { "width": "160px", "height": "120px", "background-color": "#e74c3c", "scroll-margin-right": "24px" } },
+    "ScrollMarginBottom": { "properties": { "width": "160px", "height": "120px", "background-color": "#2ecc71", "scroll-margin-bottom": "8px" } },
+    "ScrollMarginLeft": { "properties": { "width": "160px", "height": "120px", "background-color": "#9b59b6", "scroll-margin-left": "32px" } },
+    "ScrollMarginBlockStart": { "properties": { "width": "160px", "height": "120px", "background-color": "#f39c12", "scroll-margin-block-start": "12px" } },
+    "ScrollMarginBlockEnd": { "properties": { "width": "160px", "height": "120px", "background-color": "#1abc9c", "scroll-margin-block-end": "12px" } },
+    "ScrollMarginInlineStart": { "properties": { "width": "160px", "height": "120px", "background-color": "#34495e", "scroll-margin-inline-start": "12px" } },
+    "ScrollMarginInlineEnd": { "properties": { "width": "160px", "height": "120px", "background-color": "#c0392b", "scroll-margin-inline-end": "12px" } },
+
+    "OverscrollBehavior_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#16a085", "overscroll-behavior": "auto" } },
+    "OverscrollBehavior_ContainNone": { "properties": { "width": "160px", "height": "120px", "background-color": "#8e44ad", "overscroll-behavior": "contain none" } },
+    "OverscrollBehaviorX_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#2980b9", "overscroll-behavior-x": "none" } },
+    "OverscrollBehaviorY_Contain": { "properties": { "width": "160px", "height": "120px", "background-color": "#27ae60", "overscroll-behavior-y": "contain" } },
+    "OverscrollBehaviorBlock_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#7f8c8d", "overscroll-behavior-block": "auto" } },
+    "OverscrollBehaviorInline_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#d35400", "overscroll-behavior-inline": "none" } },
+
+    "ScrollbarColor_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#3498db", "scrollbar-color": "auto" } },
+    "ScrollbarColor_TwoColors": { "properties": { "width": "160px", "height": "120px", "background-color": "#e74c3c", "scrollbar-color": "#111 #eee" } },
+    "ScrollbarWidth_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#2ecc71", "scrollbar-width": "auto" } },
+    "ScrollbarWidth_Thin": { "properties": { "width": "160px", "height": "120px", "background-color": "#9b59b6", "scrollbar-width": "thin" } },
+    "ScrollbarWidth_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#f39c12", "scrollbar-width": "none" } },
+    "ScrollbarGutter_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#1abc9c", "scrollbar-gutter": "auto" } },
+    "ScrollbarGutter_Stable": { "properties": { "width": "160px", "height": "120px", "background-color": "#34495e", "scrollbar-gutter": "stable" } },
+    "ScrollbarGutter_StableBothEdges": { "properties": { "width": "160px", "height": "120px", "background-color": "#c0392b", "scrollbar-gutter": "stable both-edges" } },
+
+    "OverflowAnchor_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#16a085", "overflow-anchor": "auto" } },
+    "OverflowAnchor_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#8e44ad", "overflow-anchor": "none" } },
+
+    "OverflowClipMargin_Length": { "properties": { "width": "160px", "height": "120px", "background-color": "#2980b9", "overflow-clip-margin": "10px" } },
+    "OverflowClipMargin_ContentBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#27ae60", "overflow-clip-margin": "content-box" } },
+    "OverflowClipMargin_PaddingBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#7f8c8d", "overflow-clip-margin": "padding-box" } },
+    "OverflowClipMargin_BorderBox": { "properties": { "width": "160px", "height": "120px", "background-color": "#d35400", "overflow-clip-margin": "border-box" } },
+    "OverflowClipMargin_BoxLength": { "properties": { "width": "160px", "height": "120px", "background-color": "#3498db", "overflow-clip-margin": "content-box 8px" } },
+
+    "ScrollStart_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#e74c3c", "scroll-start": "auto" } },
+    "ScrollStart_Start": { "properties": { "width": "160px", "height": "120px", "background-color": "#2ecc71", "scroll-start": "start" } },
+    "ScrollStart_End": { "properties": { "width": "160px", "height": "120px", "background-color": "#9b59b6", "scroll-start": "end" } },
+    "ScrollStart_Center": { "properties": { "width": "160px", "height": "120px", "background-color": "#f39c12", "scroll-start": "center" } },
+    "ScrollStart_Length": { "properties": { "width": "160px", "height": "120px", "background-color": "#1abc9c", "scroll-start": "40px" } },
+    "ScrollStart_Percentage": { "properties": { "width": "160px", "height": "120px", "background-color": "#34495e", "scroll-start": "25%" } },
+    "ScrollStartX_Length": { "properties": { "width": "160px", "height": "120px", "background-color": "#c0392b", "scroll-start-x": "10px" } },
+    "ScrollStartY_Center": { "properties": { "width": "160px", "height": "120px", "background-color": "#16a085", "scroll-start-y": "center" } },
+    "ScrollStartBlock_End": { "properties": { "width": "160px", "height": "120px", "background-color": "#8e44ad", "scroll-start-block": "end" } },
+    "ScrollStartInline_Start": { "properties": { "width": "160px", "height": "120px", "background-color": "#2980b9", "scroll-start-inline": "start" } },
+
+    "ScrollStartTarget_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#27ae60", "scroll-start-target": "none" } },
+    "ScrollStartTarget_Auto": { "properties": { "width": "160px", "height": "120px", "background-color": "#7f8c8d", "scroll-start-target": "auto" } },
+
+    "ScrollMarkerGroup_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#d35400", "scroll-marker-group": "none" } },
+    "ScrollMarkerGroup_Before": { "properties": { "width": "160px", "height": "120px", "background-color": "#3498db", "scroll-marker-group": "before" } },
+    "ScrollMarkerGroup_After": { "properties": { "width": "160px", "height": "120px", "background-color": "#e74c3c", "scroll-marker-group": "after" } },
+    "ScrollTargetGroup_None": { "properties": { "width": "160px", "height": "120px", "background-color": "#2ecc71", "scroll-target-group": "none" } },
+    "ScrollTargetGroup_Named": { "properties": { "width": "160px", "height": "120px", "background-color": "#9b59b6", "scroll-target-group": "my-target" } }
+  }
+}

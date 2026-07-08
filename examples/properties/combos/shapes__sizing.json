@@ -1,0 +1,32 @@
+{
+  "components": {
+    "A_shapes": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "shape-margin": "0"
+      }
+    },
+    "B_sizing": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "object-fit": "fill"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "shape-margin": "0",
+        "object-fit": "fill"
+      }
+    }
+  }
+}

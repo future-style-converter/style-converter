@@ -1,0 +1,35 @@
+{
+  "components": {
+    "NormalLetterSpacing": {
+      "properties": {
+        "letter-spacing": "normal"
+      }
+    },
+    "PixelLetterSpacing": {
+      "properties": {
+        "letter-spacing": "2px"
+      }
+    },
+    "EmLetterSpacing": {
+      "properties": {
+        "letter-spacing": "0.1em"
+      }
+    },
+    "NormalWordSpacing": {
+      "properties": {
+        "word-spacing": "normal"
+      }
+    },
+    "PixelWordSpacing": {
+      "properties": {
+        "word-spacing": "4px"
+      }
+    },
+    "NegativeSpacing": {
+      "properties": {
+        "letter-spacing": "-1px",
+        "word-spacing": "-2px"
+      }
+    }
+  }
+}

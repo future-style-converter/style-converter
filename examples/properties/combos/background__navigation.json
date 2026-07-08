@@ -1,0 +1,30 @@
+{
+  "components": {
+    "A_backgr": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6"
+      }
+    },
+    "B_naviga": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "nav-up": "auto"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "nav-up": "auto"
+      }
+    }
+  }
+}

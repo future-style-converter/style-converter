@@ -1,0 +1,16 @@
+{
+  "components": {
+    "Fill_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "animation-fill-mode": "none" } },
+    "Fill_Forwards": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "animation-fill-mode": "forwards" } },
+    "Fill_Backwards": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "animation-fill-mode": "backwards" } },
+    "Fill_Both": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "animation-fill-mode": "both" } },
+    "Fill_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "animation-fill-mode": "none, forwards, backwards, both" } },
+    "Play_Running": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "animation-play-state": "running" } },
+    "Play_Paused": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "animation-play-state": "paused" } },
+    "Play_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "animation-play-state": "running, paused, running" } },
+    "Comp_Replace": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "animation-composition": "replace" } },
+    "Comp_Add": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "animation-composition": "add" } },
+    "Comp_Accumulate": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "animation-composition": "accumulate" } },
+    "Comp_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "animation-composition": "replace, add, accumulate" } }
+  }
+}

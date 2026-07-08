@@ -1,0 +1,20 @@
+{
+  "components": {
+    "Content_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "content": "normal" } },
+    "Content_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "content": "none" } },
+    "Content_OpenQuote": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "content": "open-quote" } },
+    "Content_CloseQuote": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "content": "close-quote" } },
+    "Content_NoOpenQuote": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "content": "no-open-quote" } },
+    "Content_NoCloseQuote": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "content": "no-close-quote" } },
+
+    "Content_String": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "content": "\"Hello\"" } },
+    "Content_Counter": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "content": "counter(section)" } },
+    "Content_CounterStyle": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "content": "counter(section, upper-roman)" } },
+    "Content_Counters": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "content": "counters(section, \".\")" } },
+    "Content_Attr": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "content": "attr(data-title)" } },
+    "Content_Url": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "content": "url(icon.svg)" } },
+    "Content_UrlAlt": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "content": "url(icon.svg) / \"[icon]\"" } },
+    "Content_Multiple": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "content": "\"Chapter \" counter(chapter) \": \" attr(data-title)" } },
+    "Content_Gradient": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "content": "linear-gradient(red, blue)" } }
+  }
+}

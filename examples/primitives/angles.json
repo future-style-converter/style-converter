@@ -1,0 +1,15 @@
+{
+  "_notes": {
+    "fixture": "angles",
+    "purpose": "Every CSS angle unit: deg, rad, grad, turn. Exercised via transform: rotate() and linear-gradient direction.",
+    "ir_shape": "IRAngle serializes as { 'deg': <normalized>, 'original'?: { 'v': <n>, 'u':'DEG'|'RAD'|'GRAD'|'TURN' } } — 'original' omitted for DEG input."
+  },
+  "components": {
+    "Angle_Deg_45":     { "properties": { "transform": "rotate(45deg)",   "background-color": "#3498db", "padding": "20px" } },
+    "Angle_Rad_PiOver4":{ "properties": { "transform": "rotate(0.7854rad)", "background-color": "#9b59b6", "padding": "20px" } },
+    "Angle_Grad_100":   { "properties": { "transform": "rotate(100grad)", "background-color": "#e67e22", "padding": "20px" } },
+    "Angle_Turn_Quarter": { "properties": { "transform": "rotate(0.25turn)", "background-color": "#2ecc71", "padding": "20px" } },
+    "Angle_GradientDeg":  { "properties": { "background-image": "linear-gradient(135deg, #667eea, #764ba2)", "padding": "30px" } },
+    "Angle_GradientTurn": { "properties": { "background-image": "linear-gradient(0.5turn, #ee0979, #ff6a00)", "padding": "30px" } }
+  }
+}

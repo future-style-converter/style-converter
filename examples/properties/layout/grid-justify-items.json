@@ -1,0 +1,39 @@
+{
+  "components": {
+    "JI_Start": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-auto-rows": "60px", "justify-items": "start", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "JI_End": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-auto-rows": "60px", "justify-items": "end", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "JI_Center": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-auto-rows": "60px", "justify-items": "center", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "JI_Stretch": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-auto-rows": "60px", "justify-items": "stretch", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "JI_Normal": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-auto-rows": "60px", "justify-items": "normal", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "60px", "height": "40px", "background-color": "#10b981" } }
+      }
+    }
+  }
+}

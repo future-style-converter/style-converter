@@ -1,0 +1,15 @@
+{
+  "components": {
+    "VerticalAlign_Baseline": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "baseline" } },
+    "VerticalAlign_Sub": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "sub" } },
+    "VerticalAlign_Super": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "super" } },
+    "VerticalAlign_TextTop": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "text-top" } },
+    "VerticalAlign_TextBottom": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "text-bottom" } },
+    "VerticalAlign_Middle": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "middle" } },
+    "VerticalAlign_Top": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "top" } },
+    "VerticalAlign_Bottom": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "bottom" } },
+    "VerticalAlign_Px_8": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "8px" } },
+    "VerticalAlign_Em_Neg": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "-0.25em" } },
+    "VerticalAlign_Percent_50": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "50%" } }
+  }
+}

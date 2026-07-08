@@ -1,0 +1,208 @@
+{
+    "components": {
+      "primary-button": {
+        "properties": {
+          "background": "linear-gradient(135deg, #f00 0%, #0f0 50%, #00f 100%), url('bg1.png') no-repeat center/cover",
+          "background-color": "rgba(255, 255, 255, 0.1)",
+          "background-image": "radial-gradient(circle at 10% 90%, #ff0, #f0f), url('texture.svg')",
+          "background-attachment": "fixed, local",
+          "background-repeat": "space round",
+          "background-position": "left top, right bottom",
+          "background-position-x": "calc(50% - 10px), 90%",
+          "background-position-y": "20%, calc(100% - 5px)",
+          "background-size": "300% 200%, contain",
+          "background-origin": "content-box, border-box",
+          "background-clip": "text, padding-box",
+          "background-blend-mode": "multiply, screen",
+          "backdrop-filter": "blur(4px) saturate(180%) contrast(120%)",
+          "mask": "linear-gradient(black 50%, transparent 50%)",
+          "mask-image": "url('maskA.svg'), conic-gradient(from 90deg, black, transparent)",
+          "mask-clip": "padding-box, content-box",
+          "mask-mode": "alpha, luminance",
+          "mask-origin": "border-box, content-box",
+          "mask-position": "center center, 10% 90%",
+          "mask-repeat": "round no-repeat",
+          "mask-size": "cover, 25% 50%",
+          "mask-type": "luminance",
+          "mask-border": "url('mask-borderA.png') 40 / 20px / 10px space",
+          "mask-border-source": "url('mask-borderA.svg')",
+          "mask-border-slice": "30% fill",
+          "mask-border-width": "5em",
+          "mask-border-outset": "3em",
+          "mask-border-repeat": "round",
+          "mask-border-mode": "alpha",
+          "-webkit-mask-box-image": "url('webkit-maskA.png') 30 fill stretch",
+          "-webkit-mask-position-x": "33%",
+          "-webkit-mask-position-y": "67%",
+          "-webkit-mask-repeat-x": "round",
+          "-webkit-mask-repeat-y": "space"
+        },
+        "selectors": [
+          {
+            "selector": ":hover",
+            "properties": {
+              "background": "url('hover-bg.png'), linear-gradient(to right, #333, #999)",
+              "background-size": "contain, auto",
+              "background-blend-mode": "difference, hard-light",
+              "mask-image": "url('hover-mask.svg')",
+              "mask-repeat": "space round",
+              "mask-border-slice": "fill 40%",
+              "-webkit-mask-repeat-x": "space",
+              "-webkit-mask-repeat-y": "repeat"
+            }
+          },
+          {
+            "selector": ":active",
+            "properties": {
+              "background-position-x": "10%, 90%",
+              "background-position-y": "center, bottom",
+              "mask-size": "10% 10%, cover",
+              "mask-border-width": "1px",
+              "mask-border-mode": "luminance"
+            }
+          }
+        ],
+        "media": [
+          {
+            "query": "(min-width: 1200px)",
+            "properties": {
+              "background-attachment": "scroll",
+              "background-repeat": "repeat space",
+              "mask-border-source": "url('mask-large.svg')",
+              "mask-border-outset": "15px",
+              "-webkit-mask-position-x": "center",
+              "-webkit-mask-position-y": "top"
+            }
+          }
+        ]
+      },
+  
+      "secondary-button": {
+        "properties": {
+          "background": "repeating-linear-gradient(45deg, #222 0, #555 5px), url('noise.png')",
+          "background-color": "#fafafa",
+          "background-image": "conic-gradient(from 180deg at center, #f0f, #0ff), url('pattern2.png')",
+          "background-attachment": "local, fixed",
+          "background-repeat": "round, repeat",
+          "background-position-x": "left, center",
+          "background-position-y": "top, bottom",
+          "background-size": "auto 100%, 150% 150%",
+          "background-origin": "border-box, content-box",
+          "background-clip": "border-box",
+          "background-blend-mode": "lighten, difference",
+          "backdrop-filter": "grayscale(70%) invert(30%)",
+          "mask-image": "linear-gradient(transparent 40%, black 60%), url('maskB.svg')",
+          "mask-clip": "text, content-box",
+          "mask-mode": "match-source, alpha",
+          "mask-origin": "padding-box, border-box",
+          "mask-position": "center top, 80% 20%",
+          "mask-repeat": "no-repeat, repeat",
+          "mask-size": "contain, auto",
+          "mask-type": "alpha",
+          "mask-border-source": "url('mask-borderB.svg')",
+          "mask-border-slice": "10% fill",
+          "mask-border-width": "4px",
+          "mask-border-outset": "2px",
+          "mask-border-repeat": "stretch",
+          "mask-border-mode": "luminance",
+          "-webkit-mask-box-image": "url('webkit-maskB.png') 15 repeat",
+          "-webkit-mask-position-x": "center",
+          "-webkit-mask-position-y": "center",
+          "-webkit-mask-repeat-x": "repeat",
+          "-webkit-mask-repeat-y": "no-repeat"
+        }
+      },
+  
+      "card": {
+        "properties": {
+          "background": "radial-gradient(circle farthest-side at top right, #000 0%, #fff 100%), url('card-bg.png')",
+          "background-color": "transparent",
+          "background-image": "linear-gradient(to bottom left, #999, #222)",
+          "background-attachment": "scroll",
+          "background-repeat": "space round",
+          "background-position": "center center",
+          "background-size": "cover",
+          "background-origin": "padding-box",
+          "background-clip": "content-box",
+          "background-blend-mode": "hard-light",
+          "backdrop-filter": "contrast(250%) blur(2px)",
+          "mask": "url('maskC.svg')",
+          "mask-image": "url('maskC2.svg'), linear-gradient(to left, black, transparent)",
+          "mask-clip": "content-box",
+          "mask-mode": "luminance",
+          "mask-origin": "content-box",
+          "mask-position": "left bottom, right top",
+          "mask-repeat": "round space",
+          "mask-size": "auto 50%, cover",
+          "mask-border": "url('mask-borderC.png') 20 / 5px stretch",
+          "mask-border-mode": "alpha",
+          "-webkit-mask-box-image": "url('webkit-maskC.png') 20 round",
+          "-webkit-mask-position-x": "10%",
+          "-webkit-mask-position-y": "90%",
+          "-webkit-mask-repeat-x": "space",
+          "-webkit-mask-repeat-y": "round"
+        },
+        "selectors": [
+          {
+            "selector": ":hover",
+            "properties": {
+              "background-blend-mode": "color-dodge",
+              "mask-repeat": "space",
+              "mask-size": "100% 200%",
+              "-webkit-mask-repeat-x": "repeat",
+              "-webkit-mask-repeat-y": "space"
+            }
+          }
+        ]
+      },
+  
+      "tooltip": {
+        "properties": {
+          "background": "linear-gradient(0deg, #111 0%, #666 100%), url('tooltip-bg.png')",
+          "background-color": "#333333",
+          "background-image": "radial-gradient(circle, #000000, #444444)",
+          "background-attachment": "fixed",
+          "background-repeat": "repeat-x",
+          "background-position-x": "center",
+          "background-position-y": "top",
+          "background-size": "contain",
+          "background-origin": "border-box",
+          "background-clip": "text",
+          "background-blend-mode": "soft-light",
+          "backdrop-filter": "invert(100%) hue-rotate(180deg) blur(4px)",
+          "mask-image": "url('tooltip-mask.png'), linear-gradient(to bottom, black, transparent)",
+          "mask-clip": "content-box, padding-box",
+          "mask-mode": "alpha, luminance",
+          "mask-origin": "padding-box, border-box",
+          "mask-position": "center top, left bottom",
+          "mask-repeat": "no-repeat, round",
+          "mask-size": "cover, 30% 60%",
+          "mask-type": "alpha",
+          "mask-border-source": "url('mask-borderD.svg')",
+          "mask-border-slice": "50% fill",
+          "mask-border-width": "10px",
+          "mask-border-outset": "5px",
+          "mask-border-repeat": "round",
+          "mask-border-mode": "luminance",
+          "-webkit-mask-box-image": "url('webkit-maskD.png') 15 stretch",
+          "-webkit-mask-position-x": "80%",
+          "-webkit-mask-position-y": "20%",
+          "-webkit-mask-repeat-x": "repeat",
+          "-webkit-mask-repeat-y": "space"
+        },
+        "selectors": [
+          {
+            "selector": ":hover",
+            "properties": {
+              "background-blend-mode": "difference",
+              "mask-repeat": "space no-repeat",
+              "mask-size": "contain, cover",
+              "-webkit-mask-repeat-x": "space",
+              "-webkit-mask-repeat-y": "no-repeat"
+            }
+          }
+        ]
+      }
+    }
+  }
+  

@@ -1,0 +1,27 @@
+{
+  "components": {
+    "Tl_Auto": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "animation-timeline": "auto" } },
+    "Tl_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "animation-timeline": "none" } },
+    "Tl_NamedIdent": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "animation-timeline": "--my-timeline" } },
+    "Tl_Scroll_Default": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "animation-timeline": "scroll()" } },
+    "Tl_Scroll_Root": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "animation-timeline": "scroll(root)" } },
+    "Tl_Scroll_Inline": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "animation-timeline": "scroll(inline)" } },
+    "Tl_Scroll_RootInline": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "animation-timeline": "scroll(root inline)" } },
+    "Tl_View_Default": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "animation-timeline": "view()" } },
+    "Tl_View_Inline": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "animation-timeline": "view(inline)" } },
+    "Tl_View_WithInset": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "animation-timeline": "view(inline 10px 20px)" } },
+    "Rng_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "animation-range": "normal" } },
+    "Rng_PctPair": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "animation-range": "0% 100%" } },
+    "Rng_NamedPair": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "animation-range": "entry 0% cover 100%" } },
+    "RngStart_Pct": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "animation-range-start": "25%" } },
+    "RngStart_Length": { "properties": { "width": "160px", "height": "60px", "background-color": "#95a5a6", "animation-range-start": "100px" } },
+    "RngStart_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#e67e22", "animation-range-start": "normal" } },
+    "RngStart_Cover": { "properties": { "width": "160px", "height": "60px", "background-color": "#f1c40f", "animation-range-start": "cover 25%" } },
+    "RngStart_Entry": { "properties": { "width": "160px", "height": "60px", "background-color": "#bdc3c7", "animation-range-start": "entry 0%" } },
+    "RngEnd_Pct": { "properties": { "width": "160px", "height": "60px", "background-color": "#ecf0f1", "animation-range-end": "75%" } },
+    "RngEnd_Length": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "animation-range-end": "200px" } },
+    "RngEnd_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "animation-range-end": "normal" } },
+    "RngEnd_Contain": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "animation-range-end": "contain 100%" } },
+    "RngEnd_Exit": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "animation-range-end": "exit 100%" } }
+  }
+}

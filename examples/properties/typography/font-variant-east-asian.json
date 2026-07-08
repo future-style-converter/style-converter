@@ -1,0 +1,16 @@
+{
+  "components": {
+    "FontVariantEastAsian_Normal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "normal" } },
+    "FontVariantEastAsian_Ruby": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "ruby" } },
+    "FontVariantEastAsian_Jis78": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "jis78" } },
+    "FontVariantEastAsian_Jis83": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "jis83" } },
+    "FontVariantEastAsian_Jis90": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "jis90" } },
+    "FontVariantEastAsian_Jis04": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "jis04" } },
+    "FontVariantEastAsian_Simplified": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "simplified" } },
+    "FontVariantEastAsian_Traditional": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "traditional" } },
+    "FontVariantEastAsian_ProportionalWidth": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "proportional-width" } },
+    "FontVariantEastAsian_FullWidth": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "full-width" } },
+    "FontVariantEastAsian_Combo_RubyJis04": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "ruby jis04" } },
+    "FontVariantEastAsian_Combo_SimplifiedFullWidth": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-east-asian": "simplified full-width" } }
+  }
+}

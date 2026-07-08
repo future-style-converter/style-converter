@@ -1,0 +1,63 @@
+{
+  "components": {
+    "GA_ByName": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 1fr 1fr", "grid-template-rows": "40px 40px",
+        "grid-template-areas": "\"head head head\" \"side main main\"",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "head": { "properties": { "grid-area": "head", "background-color": "#ef4444" } },
+        "side": { "properties": { "grid-area": "side", "background-color": "#10b981" } },
+        "main": { "properties": { "grid-area": "main", "background-color": "#3b82f6" } }
+      }
+    },
+    "GA_ByLines_2Vals": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 1fr 1fr", "grid-template-rows": "40px 40px 40px",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "a": { "properties": { "grid-area": "1 / 2", "background-color": "#ef4444" } },
+        "b": { "properties": { "grid-area": "2 / 1", "background-color": "#10b981" } }
+      }
+    },
+    "GA_ByLines_4Vals": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 1fr 1fr", "grid-template-rows": "40px 40px 40px",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "a": { "properties": { "grid-area": "1 / 1 / 2 / 3", "background-color": "#ef4444" } },
+        "b": { "properties": { "grid-area": "2 / 1 / 4 / 2", "background-color": "#10b981" } },
+        "c": { "properties": { "grid-area": "2 / 2 / 3 / 4", "background-color": "#3b82f6" } }
+      }
+    },
+    "GA_Span": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 1fr 1fr", "grid-template-rows": "40px 40px",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "a": { "properties": { "grid-area": "span 1 / span 2", "background-color": "#ef4444" } },
+        "b": { "properties": { "background-color": "#10b981" } },
+        "c": { "properties": { "background-color": "#3b82f6" } }
+      }
+    },
+    "GA_Auto": {
+      "properties": {
+        "width": "300px", "display": "grid",
+        "grid-template-columns": "1fr 1fr", "grid-template-rows": "40px 40px",
+        "gap": "6px", "background-color": "#1f2937", "padding": "6px"
+      },
+      "children": {
+        "a": { "properties": { "grid-area": "auto", "background-color": "#ef4444" } },
+        "b": { "properties": { "grid-area": "auto", "background-color": "#10b981" } }
+      }
+    }
+  }
+}

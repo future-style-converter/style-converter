@@ -1,0 +1,15 @@
+{
+  "components": {
+    "FontVariantNumeric_Normal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "normal" } },
+    "FontVariantNumeric_Ordinal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "ordinal" } },
+    "FontVariantNumeric_SlashedZero": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "slashed-zero" } },
+    "FontVariantNumeric_LiningNums": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "lining-nums" } },
+    "FontVariantNumeric_OldstyleNums": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "oldstyle-nums" } },
+    "FontVariantNumeric_ProportionalNums": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "proportional-nums" } },
+    "FontVariantNumeric_TabularNums": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "tabular-nums" } },
+    "FontVariantNumeric_DiagonalFractions": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "diagonal-fractions" } },
+    "FontVariantNumeric_StackedFractions": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "stacked-fractions" } },
+    "FontVariantNumeric_Combo_TabOldstyle": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "tabular-nums oldstyle-nums" } },
+    "FontVariantNumeric_Combo_SlashedOrdinal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-variant-numeric": "slashed-zero ordinal" } }
+  }
+}

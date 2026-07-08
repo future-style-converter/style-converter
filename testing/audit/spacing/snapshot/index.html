@@ -1,0 +1,2694 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Style Converter — cross-platform capture report</title>
+<style>
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, system-ui, sans-serif;
+  background: #111;
+  color: #eee;
+  font-size: 14px;
+}
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 16px 24px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #333;
+}
+.top h1 { margin: 0 0 4px 0; font-size: 18px; }
+.top h1 .input-label { font-weight: 400; color: #888; font-size: 13px; font-family: ui-monospace, monospace; }
+.top .meta { margin: 2px 0; color: #999; font-size: 13px; }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.controls input[type="search"] {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+}
+.controls input[type="search"]:focus { border-color: #68a; }
+.controls label { color: #aaa; font-size: 13px; cursor: pointer; user-select: none; }
+.controls select {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  color: #fff;
+  padding: 5px 8px;
+  font-size: 13px;
+}
+.visible-count { color: #888; font-size: 12px; margin-left: auto; }
+
+main { padding: 16px 24px; }
+
+/* Narrow viewports: stack platform / pair grids instead of horizontal scroll */
+@media (max-width: 900px) {
+  .platforms, .pairs { grid-template-columns: 1fr !important; }
+  main { padding: 12px; }
+  .top { padding: 12px; }
+  .controls input[type="search"] { max-width: none; }
+}
+
+.row {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #181824;
+  border: 1px solid #2a2a3a;
+  border-radius: 8px;
+}
+.row.has-diff { border-color: #663; }
+.row.regressed { border-color: #a33; background: #2a1818; }
+.row { overflow: hidden; } /* prevent inner overflow bubbling to body */
+
+.row h2 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-family: ui-monospace, monospace;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.badge {
+  font-family: -apple-system, system-ui, sans-serif;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.badge.warn { background: #664; color: #fe9; }
+.badge.bad  { background: #622; color: #fcc; }
+
+.min-ssim {
+  font-family: -apple-system, system-ui, sans-serif;
+  font-size: 11px;
+  color: #888;
+  font-weight: 400;
+  margin-left: auto;
+}
+
+.platforms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+.platform { background: #0e0e18; padding: 8px; border-radius: 4px; }
+.platform .plabel { font-size: 12px; color: #ccc; margin-bottom: 6px; font-family: ui-monospace, monospace; }
+.platform .plabel .dim { color: #666; margin-left: 4px; }
+.platform img { display: block; width: 100%; max-width: 100%; height: auto; image-rendering: pixelated; }
+.platform.missing .pimg.muted { color: #555; text-align: center; padding: 32px 0; font-style: italic; }
+.platform.errored { border: 1px solid #a44; }
+.platform.errored .pimg.err { color: #f99; padding: 16px; font-family: ui-monospace, monospace; font-size: 11px; word-break: break-word; }
+
+.pairs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pair {
+  background: #0e0e18;
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 3px solid transparent;
+}
+.pair.ok   { border-left-color: #4a4; }
+.pair.warn { border-left-color: #aa4; }
+.pair.bad  { border-left-color: #a44; }
+.pair .ptitle { font-size: 12px; color: #ccc; margin-bottom: 6px; font-family: ui-monospace, monospace; }
+.pair .metrics { font-size: 11px; color: #aaa; margin-bottom: 6px; display: flex; gap: 12px; }
+.pair .metrics b { color: #fff; font-weight: 500; }
+.pair img { display: block; width: 100%; max-width: 100%; height: auto; image-rendering: pixelated; }
+.pair.missing .pimg.muted { color: #555; text-align: center; padding: 32px 0; font-style: italic; }
+
+.baseline {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #12121c;
+  border-radius: 4px;
+}
+.baseline summary { cursor: pointer; color: #aaa; font-size: 12px; }
+.baseline[open] summary { margin-bottom: 8px; }
+
+.ok  { color: #6c6; }
+.bad { color: #f99; }
+
+/* (Client-side JS handles diff-only filtering via row.style.display now —
+   the old CSS-based .filter-diffs toggle is no longer used.) */
+
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Cross-platform capture report <span class="input-label">(examples/properties/spacing/audit-phase12.json)</span></h1>
+  <p class="meta">
+    46 components · 3 identical (SSIM &ge; 0.97)
+    
+    · SSIM threshold 0.95 · pixel threshold 2%
+  </p>
+  <p class="meta">
+    Generated 4/19/2026, 11:15:05 AM
+  </p>
+  <div class="controls">
+    <input type="search" id="search" placeholder="Filter components by name…" autocomplete="off">
+    <label><input type="checkbox" id="onlyDiff"> diffs only</label>
+    <label for="sort">sort:</label>
+    <select id="sort">
+      <option value="index">by index (default)</option>
+      <option value="worst">worst SSIM first</option>
+      <option value="best">best SSIM first</option>
+      <option value="name">by name</option>
+    </select>
+    <span class="visible-count" id="visibleCount"></span>
+  </div>
+</header>
+
+<main id="rows">
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.8454"
+      data-index="0"
+      data-name="000_NegMargin_Sides_Overflow.png">
+    <h2>
+      000_NegMargin_Sides_Overflow.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.845</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×132</span></div>
+    <img src="images/iOS/000_NegMargin_Sides_Overflow.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×132</span></div>
+    <img src="images/Android/000_NegMargin_Sides_Overflow.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×132</span></div>
+    <img src="images/web/000_NegMargin_Sides_Overflow.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8454</b></span>
+      <span>Δpx <b>23.31%</b></span>
+    </div>
+    <img src="diffs/000_NegMargin_Sides_Overflow__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9457</b></span>
+      <span>Δpx <b>5.44%</b></span>
+    </div>
+    <img src="diffs/000_NegMargin_Sides_Overflow__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair warn">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8537</b></span>
+      <span>Δpx <b>21.68%</b></span>
+    </div>
+    <img src="diffs/000_NegMargin_Sides_Overflow__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.8930"
+      data-index="1"
+      data-name="001_inner.png">
+    <h2>
+      001_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.893</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×92</span></div>
+    <img src="images/iOS/001_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×92</span></div>
+    <img src="images/Android/001_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×92</span></div>
+    <img src="images/web/001_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9813</b></span>
+      <span>Δpx <b>0.18%</b></span>
+    </div>
+    <img src="diffs/001_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9041</b></span>
+      <span>Δpx <b>7.80%</b></span>
+    </div>
+    <img src="diffs/001_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair warn">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8930</b></span>
+      <span>Δpx <b>7.97%</b></span>
+    </div>
+    <img src="diffs/001_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.8484"
+      data-index="2"
+      data-name="002_NegMargin_Top_Overlap.png">
+    <h2>
+      002_NegMargin_Top_Overlap.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.848</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/002_NegMargin_Top_Overlap.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×192</span></div>
+    <img src="images/Android/002_NegMargin_Top_Overlap.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/002_NegMargin_Top_Overlap.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8490</b></span>
+      <span>Δpx <b>25.80%</b></span>
+    </div>
+    <img src="diffs/002_NegMargin_Top_Overlap__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9940</b></span>
+      <span>Δpx <b>0.07%</b></span>
+    </div>
+    <img src="diffs/002_NegMargin_Top_Overlap__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8484</b></span>
+      <span>Δpx <b>25.80%</b></span>
+    </div>
+    <img src="diffs/002_NegMargin_Top_Overlap__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9827"
+      data-index="3"
+      data-name="003_a.png">
+    <h2>
+      003_a.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.983</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×92</span></div>
+    <img src="images/iOS/003_a.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×92</span></div>
+    <img src="images/Android/003_a.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×92</span></div>
+    <img src="images/web/003_a.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9938</b></span>
+      <span>Δpx <b>0.07%</b></span>
+    </div>
+    <img src="diffs/003_a__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9827</b></span>
+      <span>Δpx <b>1.42%</b></span>
+    </div>
+    <img src="diffs/003_a__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9867</b></span>
+      <span>Δpx <b>1.37%</b></span>
+    </div>
+    <img src="diffs/003_a__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9952"
+      data-index="4"
+      data-name="004_b.png">
+    <h2>
+      004_b.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.995</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×92</span></div>
+    <img src="images/iOS/004_b.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×92</span></div>
+    <img src="images/Android/004_b.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/004_b.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9957</b></span>
+      <span>Δpx <b>0.05%</b></span>
+    </div>
+    <img src="diffs/004_b__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9952</b></span>
+      <span>Δpx <b>0.07%</b></span>
+    </div>
+    <img src="diffs/004_b__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9985</b></span>
+      <span>Δpx <b>0.02%</b></span>
+    </div>
+    <img src="diffs/004_b__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.8234"
+      data-index="5"
+      data-name="005_AutoMargin_Flex_PushRight.png">
+    <h2>
+      005_AutoMargin_Flex_PushRight.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.823</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×128</span></div>
+    <img src="images/iOS/005_AutoMargin_Flex_PushRight.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×128</span></div>
+    <img src="images/Android/005_AutoMargin_Flex_PushRight.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×112</span></div>
+    <img src="images/web/005_AutoMargin_Flex_PushRight.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8234</b></span>
+      <span>Δpx <b>5.91%</b></span>
+    </div>
+    <img src="diffs/005_AutoMargin_Flex_PushRight__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8819</b></span>
+      <span>Δpx <b>2.65%</b></span>
+    </div>
+    <img src="diffs/005_AutoMargin_Flex_PushRight__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8247</b></span>
+      <span>Δpx <b>5.95%</b></span>
+    </div>
+    <img src="diffs/005_AutoMargin_Flex_PushRight__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9925"
+      data-index="6"
+      data-name="006_a.png">
+    <h2>
+      006_a.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.993</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/006_a.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/006_a.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/006_a.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9927</b></span>
+      <span>Δpx <b>0.05%</b></span>
+    </div>
+    <img src="diffs/006_a__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9925</b></span>
+      <span>Δpx <b>0.07%</b></span>
+    </div>
+    <img src="diffs/006_a__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9931</b></span>
+      <span>Δpx <b>0.06%</b></span>
+    </div>
+    <img src="diffs/006_a__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.8439"
+      data-index="7"
+      data-name="007_b.png">
+    <h2>
+      007_b.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.844</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/007_b.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/007_b.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/007_b.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8441</b></span>
+      <span>Δpx <b>10.52%</b></span>
+    </div>
+    <img src="diffs/007_b__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9913</b></span>
+      <span>Δpx <b>0.09%</b></span>
+    </div>
+    <img src="diffs/007_b__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8439</b></span>
+      <span>Δpx <b>10.53%</b></span>
+    </div>
+    <img src="diffs/007_b__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.8974"
+      data-index="8"
+      data-name="008_AutoMargin_Block_Center.png">
+    <h2>
+      008_AutoMargin_Block_Center.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.897</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×132</span></div>
+    <img src="images/iOS/008_AutoMargin_Block_Center.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×132</span></div>
+    <img src="images/Android/008_AutoMargin_Block_Center.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×132</span></div>
+    <img src="images/web/008_AutoMargin_Block_Center.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8974</b></span>
+      <span>Δpx <b>10.06%</b></span>
+    </div>
+    <img src="diffs/008_AutoMargin_Block_Center__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9876</b></span>
+      <span>Δpx <b>0.01%</b></span>
+    </div>
+    <img src="diffs/008_AutoMargin_Block_Center__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair warn">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8992</b></span>
+      <span>Δpx <b>10.20%</b></span>
+    </div>
+    <img src="diffs/008_AutoMargin_Block_Center__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7084"
+      data-index="9"
+      data-name="009_inner.png">
+    <h2>
+      009_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.708</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×92</span></div>
+    <img src="images/iOS/009_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×92</span></div>
+    <img src="images/Android/009_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×92</span></div>
+    <img src="images/web/009_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7087</b></span>
+      <span>Δpx <b>25.55%</b></span>
+    </div>
+    <img src="diffs/009_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9815</b></span>
+      <span>Δpx <b>0.02%</b></span>
+    </div>
+    <img src="diffs/009_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7084</b></span>
+      <span>Δpx <b>25.57%</b></span>
+    </div>
+    <img src="diffs/009_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.4354"
+      data-index="10"
+      data-name="010_Padding_ExceedsParent.png">
+    <h2>
+      010_Padding_ExceedsParent.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.435</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×512</span></div>
+    <img src="images/iOS/010_Padding_ExceedsParent.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×512</span></div>
+    <img src="images/Android/010_Padding_ExceedsParent.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×472</span></div>
+    <img src="images/web/010_Padding_ExceedsParent.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.4354</b></span>
+      <span>Δpx <b>89.90%</b></span>
+    </div>
+    <img src="diffs/010_Padding_ExceedsParent__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9056</b></span>
+      <span>Δpx <b>7.54%</b></span>
+    </div>
+    <img src="diffs/010_Padding_ExceedsParent__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.4586</b></span>
+      <span>Δpx <b>82.41%</b></span>
+    </div>
+    <img src="diffs/010_Padding_ExceedsParent__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.3085"
+      data-index="11"
+      data-name="011_inner.png">
+    <h2>
+      011_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.308</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×512</span></div>
+    <img src="images/iOS/011_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×512</span></div>
+    <img src="images/Android/011_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×472</span></div>
+    <img src="images/web/011_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.3085</b></span>
+      <span>Δpx <b>89.90%</b></span>
+    </div>
+    <img src="diffs/011_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9056</b></span>
+      <span>Δpx <b>7.54%</b></span>
+    </div>
+    <img src="diffs/011_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.3575</b></span>
+      <span>Δpx <b>82.41%</b></span>
+    </div>
+    <img src="diffs/011_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.8857"
+      data-index="12"
+      data-name="012_Padding_Huge_9999px.png">
+    <h2>
+      012_Padding_Huge_9999px.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.886</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×10071</span></div>
+    <img src="images/Android/012_Padding_Huge_9999px.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×10031</span></div>
+    <img src="images/web/012_Padding_Huge_9999px.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair warn">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8857</b></span>
+      <span>Δpx <b>10.18%</b></span>
+    </div>
+    <img src="diffs/012_Padding_Huge_9999px__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7628"
+      data-index="13"
+      data-name="013_inner.png">
+    <h2>
+      013_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.763</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×10071</span></div>
+    <img src="images/Android/013_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×10031</span></div>
+    <img src="images/web/013_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7628</b></span>
+      <span>Δpx <b>18.07%</b></span>
+    </div>
+    <img src="diffs/013_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.6624"
+      data-index="14"
+      data-name="014_Padding_Percent_Parent.png">
+    <h2>
+      014_Padding_Percent_Parent.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.662</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×232</span></div>
+    <img src="images/iOS/014_Padding_Percent_Parent.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×232</span></div>
+    <img src="images/Android/014_Padding_Percent_Parent.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×232</span></div>
+    <img src="images/web/014_Padding_Percent_Parent.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7070</b></span>
+      <span>Δpx <b>44.17%</b></span>
+    </div>
+    <img src="diffs/014_Padding_Percent_Parent__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6624</b></span>
+      <span>Δpx <b>45.61%</b></span>
+    </div>
+    <img src="diffs/014_Padding_Percent_Parent__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8328</b></span>
+      <span>Δpx <b>10.27%</b></span>
+    </div>
+    <img src="diffs/014_Padding_Percent_Parent__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7264"
+      data-index="15"
+      data-name="015_inner.png">
+    <h2>
+      015_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.726</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×42</span></div>
+    <img src="images/iOS/015_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×258</span></div>
+    <img src="images/Android/015_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×284</span></div>
+    <img src="images/web/015_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9092</b></span>
+      <span>Δpx <b>5.40%</b></span>
+    </div>
+    <img src="diffs/015_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7264</b></span>
+      <span>Δpx <b>13.13%</b></span>
+    </div>
+    <img src="diffs/015_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7499</b></span>
+      <span>Δpx <b>12.42%</b></span>
+    </div>
+    <img src="diffs/015_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.6874"
+      data-index="16"
+      data-name="016_Padding_Calc_Dynamic.png">
+    <h2>
+      016_Padding_Calc_Dynamic.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.687</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×132</span></div>
+    <img src="images/iOS/016_Padding_Calc_Dynamic.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×132</span></div>
+    <img src="images/Android/016_Padding_Calc_Dynamic.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×92</span></div>
+    <img src="images/web/016_Padding_Calc_Dynamic.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7417</b></span>
+      <span>Δpx <b>29.55%</b></span>
+    </div>
+    <img src="diffs/016_Padding_Calc_Dynamic__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6874</b></span>
+      <span>Δpx <b>26.40%</b></span>
+    </div>
+    <img src="diffs/016_Padding_Calc_Dynamic__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7467</b></span>
+      <span>Δpx <b>14.90%</b></span>
+    </div>
+    <img src="diffs/016_Padding_Calc_Dynamic__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.6857"
+      data-index="17"
+      data-name="017_inner.png">
+    <h2>
+      017_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.686</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×132</span></div>
+    <img src="images/iOS/017_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×132</span></div>
+    <img src="images/Android/017_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×92</span></div>
+    <img src="images/web/017_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7136</b></span>
+      <span>Δpx <b>23.47%</b></span>
+    </div>
+    <img src="diffs/017_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6857</b></span>
+      <span>Δpx <b>26.40%</b></span>
+    </div>
+    <img src="diffs/017_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7573</b></span>
+      <span>Δpx <b>13.35%</b></span>
+    </div>
+    <img src="diffs/017_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7450"
+      data-index="18"
+      data-name="018_Padding_Block_Em.png">
+    <h2>
+      018_Padding_Block_Em.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.745</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×120</span></div>
+    <img src="images/iOS/018_Padding_Block_Em.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×120</span></div>
+    <img src="images/Android/018_Padding_Block_Em.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×92</span></div>
+    <img src="images/web/018_Padding_Block_Em.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7859</b></span>
+      <span>Δpx <b>27.19%</b></span>
+    </div>
+    <img src="diffs/018_Padding_Block_Em__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7725</b></span>
+      <span>Δpx <b>13.73%</b></span>
+    </div>
+    <img src="diffs/018_Padding_Block_Em__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7450</b></span>
+      <span>Δpx <b>16.33%</b></span>
+    </div>
+    <img src="diffs/018_Padding_Block_Em__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7581"
+      data-index="19"
+      data-name="019_inner.png">
+    <h2>
+      019_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.758</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×120</span></div>
+    <img src="images/iOS/019_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×120</span></div>
+    <img src="images/Android/019_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×80</span></div>
+    <img src="images/web/019_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8508</b></span>
+      <span>Δpx <b>10.36%</b></span>
+    </div>
+    <img src="diffs/019_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7581</b></span>
+      <span>Δpx <b>14.76%</b></span>
+    </div>
+    <img src="diffs/019_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7848</b></span>
+      <span>Δpx <b>9.86%</b></span>
+    </div>
+    <img src="diffs/019_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7195"
+      data-index="20"
+      data-name="020_Padding_Logical_Mixed.png">
+    <h2>
+      020_Padding_Logical_Mixed.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.720</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×107</span></div>
+    <img src="images/iOS/020_Padding_Logical_Mixed.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×107</span></div>
+    <img src="images/Android/020_Padding_Logical_Mixed.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×82</span></div>
+    <img src="images/web/020_Padding_Logical_Mixed.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7546</b></span>
+      <span>Δpx <b>30.39%</b></span>
+    </div>
+    <img src="diffs/020_Padding_Logical_Mixed__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7218</b></span>
+      <span>Δpx <b>28.41%</b></span>
+    </div>
+    <img src="diffs/020_Padding_Logical_Mixed__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7195</b></span>
+      <span>Δpx <b>19.76%</b></span>
+    </div>
+    <img src="diffs/020_Padding_Logical_Mixed__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7083"
+      data-index="21"
+      data-name="021_inner.png">
+    <h2>
+      021_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.708</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×107</span></div>
+    <img src="images/iOS/021_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×107</span></div>
+    <img src="images/Android/021_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×82</span></div>
+    <img src="images/web/021_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7735</b></span>
+      <span>Δpx <b>15.09%</b></span>
+    </div>
+    <img src="diffs/021_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7140</b></span>
+      <span>Δpx <b>28.41%</b></span>
+    </div>
+    <img src="diffs/021_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7083</b></span>
+      <span>Δpx <b>19.76%</b></span>
+    </div>
+    <img src="diffs/021_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7773"
+      data-index="22"
+      data-name="022_Margin_LogicalMixed.png">
+    <h2>
+      022_Margin_LogicalMixed.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.777</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×172</span></div>
+    <img src="images/iOS/022_Margin_LogicalMixed.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×172</span></div>
+    <img src="images/Android/022_Margin_LogicalMixed.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×202</span></div>
+    <img src="images/web/022_Margin_LogicalMixed.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8762</b></span>
+      <span>Δpx <b>12.68%</b></span>
+    </div>
+    <img src="diffs/022_Margin_LogicalMixed__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7794</b></span>
+      <span>Δpx <b>16.60%</b></span>
+    </div>
+    <img src="diffs/022_Margin_LogicalMixed__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7773</b></span>
+      <span>Δpx <b>16.59%</b></span>
+    </div>
+    <img src="diffs/022_Margin_LogicalMixed__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.6803"
+      data-index="23"
+      data-name="023_inner.png">
+    <h2>
+      023_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.680</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×112</span></div>
+    <img src="images/iOS/023_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×82</span></div>
+    <img src="images/Android/023_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×112</span></div>
+    <img src="images/web/023_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9270</b></span>
+      <span>Δpx <b>3.43%</b></span>
+    </div>
+    <img src="diffs/023_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6803</b></span>
+      <span>Δpx <b>21.69%</b></span>
+    </div>
+    <img src="diffs/023_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6970</b></span>
+      <span>Δpx <b>18.48%</b></span>
+    </div>
+    <img src="diffs/023_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.6597"
+      data-index="24"
+      data-name="024_Gap_Zero_vs_Normal.png">
+    <h2>
+      024_Gap_Zero_vs_Normal.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.660</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×88</span></div>
+    <img src="images/iOS/024_Gap_Zero_vs_Normal.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×88</span></div>
+    <img src="images/Android/024_Gap_Zero_vs_Normal.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×88</span></div>
+    <img src="images/web/024_Gap_Zero_vs_Normal.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8556</b></span>
+      <span>Δpx <b>0.10%</b></span>
+    </div>
+    <img src="diffs/024_Gap_Zero_vs_Normal__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6597</b></span>
+      <span>Δpx <b>27.43%</b></span>
+    </div>
+    <img src="diffs/024_Gap_Zero_vs_Normal__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6662</b></span>
+      <span>Δpx <b>27.45%</b></span>
+    </div>
+    <img src="diffs/024_Gap_Zero_vs_Normal__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7789"
+      data-index="25"
+      data-name="025_a.png">
+    <h2>
+      025_a.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.779</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/025_a.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/025_a.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/025_a.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9927</b></span>
+      <span>Δpx <b>0.05%</b></span>
+    </div>
+    <img src="diffs/025_a__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7793</b></span>
+      <span>Δpx <b>13.11%</b></span>
+    </div>
+    <img src="diffs/025_a__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7789</b></span>
+      <span>Δpx <b>13.11%</b></span>
+    </div>
+    <img src="diffs/025_a__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7784"
+      data-index="26"
+      data-name="026_b.png">
+    <h2>
+      026_b.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.778</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/026_b.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/026_b.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/026_b.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9916</b></span>
+      <span>Δpx <b>0.06%</b></span>
+    </div>
+    <img src="diffs/026_b__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7787</b></span>
+      <span>Δpx <b>13.11%</b></span>
+    </div>
+    <img src="diffs/026_b__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7784</b></span>
+      <span>Δpx <b>13.11%</b></span>
+    </div>
+    <img src="diffs/026_b__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7792"
+      data-index="27"
+      data-name="027_c.png">
+    <h2>
+      027_c.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.779</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/027_c.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/027_c.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/027_c.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9933</b></span>
+      <span>Δpx <b>0.02%</b></span>
+    </div>
+    <img src="diffs/027_c__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7795</b></span>
+      <span>Δpx <b>13.11%</b></span>
+    </div>
+    <img src="diffs/027_c__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7792</b></span>
+      <span>Δpx <b>13.11%</b></span>
+    </div>
+    <img src="diffs/027_c__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7376"
+      data-index="28"
+      data-name="028_Gap_NonFlex_Context.png">
+    <h2>
+      028_Gap_NonFlex_Context.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.738</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×148</span></div>
+    <img src="images/iOS/028_Gap_NonFlex_Context.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×78</span></div>
+    <img src="images/Android/028_Gap_NonFlex_Context.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×108</span></div>
+    <img src="images/web/028_Gap_NonFlex_Context.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7376</b></span>
+      <span>Δpx <b>12.43%</b></span>
+    </div>
+    <img src="diffs/028_Gap_NonFlex_Context__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7781</b></span>
+      <span>Δpx <b>10.97%</b></span>
+    </div>
+    <img src="diffs/028_Gap_NonFlex_Context__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7692</b></span>
+      <span>Δpx <b>11.62%</b></span>
+    </div>
+    <img src="diffs/028_Gap_NonFlex_Context__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7525"
+      data-index="29"
+      data-name="029_a.png">
+    <h2>
+      029_a.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.752</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×62</span></div>
+    <img src="images/iOS/029_a.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×62</span></div>
+    <img src="images/Android/029_a.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×62</span></div>
+    <img src="images/web/029_a.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9913</b></span>
+      <span>Δpx <b>0.06%</b></span>
+    </div>
+    <img src="diffs/029_a__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7525</b></span>
+      <span>Δpx <b>10.30%</b></span>
+    </div>
+    <img src="diffs/029_a__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7560</b></span>
+      <span>Δpx <b>10.24%</b></span>
+    </div>
+    <img src="diffs/029_a__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7518"
+      data-index="30"
+      data-name="030_b.png">
+    <h2>
+      030_b.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.752</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×62</span></div>
+    <img src="images/iOS/030_b.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×62</span></div>
+    <img src="images/Android/030_b.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×62</span></div>
+    <img src="images/web/030_b.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9900</b></span>
+      <span>Δpx <b>0.09%</b></span>
+    </div>
+    <img src="diffs/030_b__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7518</b></span>
+      <span>Δpx <b>10.32%</b></span>
+    </div>
+    <img src="diffs/030_b__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7552</b></span>
+      <span>Δpx <b>10.27%</b></span>
+    </div>
+    <img src="diffs/030_b__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.6285"
+      data-index="31"
+      data-name="031_Gap_Grid_AutoGap.png">
+    <h2>
+      031_Gap_Grid_AutoGap.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.628</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×88</span></div>
+    <img src="images/iOS/031_Gap_Grid_AutoGap.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×88</span></div>
+    <img src="images/Android/031_Gap_Grid_AutoGap.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×88</span></div>
+    <img src="images/web/031_Gap_Grid_AutoGap.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6850</b></span>
+      <span>Δpx <b>12.24%</b></span>
+    </div>
+    <img src="diffs/031_Gap_Grid_AutoGap__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7162</b></span>
+      <span>Δpx <b>15.39%</b></span>
+    </div>
+    <img src="diffs/031_Gap_Grid_AutoGap__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6285</b></span>
+      <span>Δpx <b>26.82%</b></span>
+    </div>
+    <img src="diffs/031_Gap_Grid_AutoGap__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7808"
+      data-index="32"
+      data-name="032_a.png">
+    <h2>
+      032_a.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.781</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/032_a.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/032_a.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/032_a.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9247</b></span>
+      <span>Δpx <b>5.00%</b></span>
+    </div>
+    <img src="diffs/032_a__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7808</b></span>
+      <span>Δpx <b>10.26%</b></span>
+    </div>
+    <img src="diffs/032_a__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7872</b></span>
+      <span>Δpx <b>11.68%</b></span>
+    </div>
+    <img src="diffs/032_a__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7803"
+      data-index="33"
+      data-name="033_b.png">
+    <h2>
+      033_b.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.780</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/033_b.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/033_b.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/033_b.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9242</b></span>
+      <span>Δpx <b>5.02%</b></span>
+    </div>
+    <img src="diffs/033_b__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7803</b></span>
+      <span>Δpx <b>10.26%</b></span>
+    </div>
+    <img src="diffs/033_b__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7867</b></span>
+      <span>Δpx <b>11.68%</b></span>
+    </div>
+    <img src="diffs/033_b__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7809"
+      data-index="34"
+      data-name="034_c.png">
+    <h2>
+      034_c.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.781</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/034_c.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/034_c.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/034_c.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9250</b></span>
+      <span>Δpx <b>5.00%</b></span>
+    </div>
+    <img src="diffs/034_c__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7809</b></span>
+      <span>Δpx <b>10.26%</b></span>
+    </div>
+    <img src="diffs/034_c__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7875</b></span>
+      <span>Δpx <b>11.68%</b></span>
+    </div>
+    <img src="diffs/034_c__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7758"
+      data-index="35"
+      data-name="035_MarginTrim_All_Edges.png">
+    <h2>
+      035_MarginTrim_All_Edges.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.776</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×272</span></div>
+    <img src="images/iOS/035_MarginTrim_All_Edges.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/035_MarginTrim_All_Edges.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×232</span></div>
+    <img src="images/web/035_MarginTrim_All_Edges.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7869</b></span>
+      <span>Δpx <b>12.07%</b></span>
+    </div>
+    <img src="diffs/035_MarginTrim_All_Edges__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8121</b></span>
+      <span>Δpx <b>14.93%</b></span>
+    </div>
+    <img src="diffs/035_MarginTrim_All_Edges__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7758</b></span>
+      <span>Δpx <b>11.77%</b></span>
+    </div>
+    <img src="diffs/035_MarginTrim_All_Edges__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7410"
+      data-index="36"
+      data-name="036_a.png">
+    <h2>
+      036_a.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.741</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×112</span></div>
+    <img src="images/iOS/036_a.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/036_a.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×112</span></div>
+    <img src="images/web/036_a.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8761</b></span>
+      <span>Δpx <b>9.18%</b></span>
+    </div>
+    <img src="diffs/036_a__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7410</b></span>
+      <span>Δpx <b>15.75%</b></span>
+    </div>
+    <img src="diffs/036_a__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7698</b></span>
+      <span>Δpx <b>13.92%</b></span>
+    </div>
+    <img src="diffs/036_a__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7372"
+      data-index="37"
+      data-name="037_b.png">
+    <h2>
+      037_b.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.737</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×112</span></div>
+    <img src="images/iOS/037_b.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/037_b.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×112</span></div>
+    <img src="images/web/037_b.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8710</b></span>
+      <span>Δpx <b>9.18%</b></span>
+    </div>
+    <img src="diffs/037_b__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7372</b></span>
+      <span>Δpx <b>15.75%</b></span>
+    </div>
+    <img src="diffs/037_b__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7680</b></span>
+      <span>Δpx <b>13.92%</b></span>
+    </div>
+    <img src="diffs/037_b__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7434"
+      data-index="38"
+      data-name="038_c.png">
+    <h2>
+      038_c.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.743</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×112</span></div>
+    <img src="images/iOS/038_c.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/038_c.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×112</span></div>
+    <img src="images/web/038_c.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8795</b></span>
+      <span>Δpx <b>9.17%</b></span>
+    </div>
+    <img src="diffs/038_c__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7434</b></span>
+      <span>Δpx <b>13.92%</b></span>
+    </div>
+    <img src="diffs/038_c__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7710</b></span>
+      <span>Δpx <b>10.26%</b></span>
+    </div>
+    <img src="diffs/038_c__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7048"
+      data-index="39"
+      data-name="039_Nested_PaddingMargin_Collapse.png">
+    <h2>
+      039_Nested_PaddingMargin_Collapse.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.705</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×202</span></div>
+    <img src="images/iOS/039_Nested_PaddingMargin_Collapse.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×142</span></div>
+    <img src="images/Android/039_Nested_PaddingMargin_Collapse.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×202</span></div>
+    <img src="images/web/039_Nested_PaddingMargin_Collapse.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7048</b></span>
+      <span>Δpx <b>22.21%</b></span>
+    </div>
+    <img src="diffs/039_Nested_PaddingMargin_Collapse__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7420</b></span>
+      <span>Δpx <b>32.09%</b></span>
+    </div>
+    <img src="diffs/039_Nested_PaddingMargin_Collapse__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7280</b></span>
+      <span>Δpx <b>21.15%</b></span>
+    </div>
+    <img src="diffs/039_Nested_PaddingMargin_Collapse__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7109"
+      data-index="40"
+      data-name="040_outer.png">
+    <h2>
+      040_outer.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.711</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×162</span></div>
+    <img src="images/iOS/040_outer.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/040_outer.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×162</span></div>
+    <img src="images/web/040_outer.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7541</b></span>
+      <span>Δpx <b>23.42%</b></span>
+    </div>
+    <img src="diffs/040_outer__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7109</b></span>
+      <span>Δpx <b>33.09%</b></span>
+    </div>
+    <img src="diffs/040_outer__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7336</b></span>
+      <span>Δpx <b>16.84%</b></span>
+    </div>
+    <img src="diffs/040_outer__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7442"
+      data-index="41"
+      data-name="041_inner.png">
+    <h2>
+      041_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.744</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×102</span></div>
+    <img src="images/iOS/041_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/041_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×102</span></div>
+    <img src="images/web/041_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9238</b></span>
+      <span>Δpx <b>3.67%</b></span>
+    </div>
+    <img src="diffs/041_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7442</b></span>
+      <span>Δpx <b>12.33%</b></span>
+    </div>
+    <img src="diffs/041_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7458</b></span>
+      <span>Δpx <b>11.54%</b></span>
+    </div>
+    <img src="diffs/041_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7293"
+      data-index="42"
+      data-name="042_ScrollMargin_Basic.png">
+    <h2>
+      042_ScrollMargin_Basic.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.729</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×112</span></div>
+    <img src="images/iOS/042_ScrollMargin_Basic.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×112</span></div>
+    <img src="images/Android/042_ScrollMargin_Basic.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×112</span></div>
+    <img src="images/web/042_ScrollMargin_Basic.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9016</b></span>
+      <span>Δpx <b>9.03%</b></span>
+    </div>
+    <img src="diffs/042_ScrollMargin_Basic__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7721</b></span>
+      <span>Δpx <b>12.23%</b></span>
+    </div>
+    <img src="diffs/042_ScrollMargin_Basic__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7293</b></span>
+      <span>Δpx <b>19.33%</b></span>
+    </div>
+    <img src="diffs/042_ScrollMargin_Basic__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7322"
+      data-index="43"
+      data-name="043_inner.png">
+    <h2>
+      043_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.732</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/043_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/043_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/043_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9759</b></span>
+      <span>Δpx <b>0.10%</b></span>
+    </div>
+    <img src="diffs/043_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7322</b></span>
+      <span>Δpx <b>13.33%</b></span>
+    </div>
+    <img src="diffs/043_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7388</b></span>
+      <span>Δpx <b>13.02%</b></span>
+    </div>
+    <img src="diffs/043_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7302"
+      data-index="44"
+      data-name="044_ScrollMargin_Sides.png">
+    <h2>
+      044_ScrollMargin_Sides.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.730</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×112</span></div>
+    <img src="images/iOS/044_ScrollMargin_Sides.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×112</span></div>
+    <img src="images/Android/044_ScrollMargin_Sides.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×112</span></div>
+    <img src="images/web/044_ScrollMargin_Sides.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9027</b></span>
+      <span>Δpx <b>9.11%</b></span>
+    </div>
+    <img src="diffs/044_ScrollMargin_Sides__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7728</b></span>
+      <span>Δpx <b>15.75%</b></span>
+    </div>
+    <img src="diffs/044_ScrollMargin_Sides__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7302</b></span>
+      <span>Δpx <b>19.37%</b></span>
+    </div>
+    <img src="diffs/044_ScrollMargin_Sides__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7333"
+      data-index="45"
+      data-name="045_inner.png">
+    <h2>
+      045_inner.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.733</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×72</span></div>
+    <img src="images/iOS/045_inner.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×72</span></div>
+    <img src="images/Android/045_inner.png" alt="Android capture" loading="lazy">
+  </div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/045_inner.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Android</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9762</b></span>
+      <span>Δpx <b>0.26%</b></span>
+    </div>
+    <img src="diffs/045_inner__iOS-Android.png" alt="iOS ↔ Android diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7333</b></span>
+      <span>Δpx <b>18.80%</b></span>
+    </div>
+    <img src="diffs/045_inner__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair bad">
+    <div class="ptitle">Android ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7398</b></span>
+      <span>Δpx <b>18.75%</b></span>
+    </div>
+    <img src="diffs/045_inner__Android-web.png" alt="Android ↔ Web diff" loading="lazy">
+  </div>
+    </div>
+
+    
+  </section>
+</main>
+
+<script>
+(() => {
+  const rowsEl = document.getElementById('rows');
+  const rows = Array.from(rowsEl.querySelectorAll('.row'));
+  const search = document.getElementById('search');
+  const onlyDiff = document.getElementById('onlyDiff');
+  const sortSel = document.getElementById('sort');
+  const countEl = document.getElementById('visibleCount');
+
+  function minSsim(r) {
+    // Data attribute written server-side; parseFloat never returns NaN for
+    // valid values, and falls back to 1 so rows missing the attr stay at
+    // the "best" end of sorts.
+    const v = parseFloat(r.getAttribute('data-min-ssim'));
+    return Number.isFinite(v) ? v : 1;
+  }
+
+  function apply() {
+    const q = (search.value || '').toLowerCase().trim();
+    const diffsOnly = onlyDiff.checked;
+    const sortBy = sortSel.value;
+
+    // Sort (detach + reattach children — O(n) vs O(n²) for reorder loops).
+    const ordered = [...rows];
+    if (sortBy === 'worst') ordered.sort((a, b) => minSsim(a) - minSsim(b));
+    else if (sortBy === 'best') ordered.sort((a, b) => minSsim(b) - minSsim(a));
+    else if (sortBy === 'name') ordered.sort((a, b) =>
+      a.dataset.name.localeCompare(b.dataset.name));
+    else ordered.sort((a, b) =>
+      Number(a.dataset.index) - Number(b.dataset.index));
+
+    const frag = document.createDocumentFragment();
+    let visible = 0;
+    for (const r of ordered) {
+      const matches = !q || r.dataset.name.toLowerCase().includes(q);
+      const diffOk = !diffsOnly || r.classList.contains('has-diff') || r.classList.contains('regressed');
+      if (matches && diffOk) {
+        r.style.display = '';
+        visible++;
+      } else {
+        r.style.display = 'none';
+      }
+      frag.appendChild(r);
+    }
+    rowsEl.appendChild(frag);
+    countEl.textContent = visible === rows.length
+      ? `${rows.length} components`
+      : `${visible} / ${rows.length} components`;
+  }
+
+  search.addEventListener('input', apply);
+  onlyDiff.addEventListener('change', apply);
+  sortSel.addEventListener('change', apply);
+  apply();
+
+  // Keyboard: '/' focuses search — standard convention.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== search) {
+      e.preventDefault();
+      search.focus();
+      search.select();
+    }
+  });
+})();
+</script>
+</body>
+</html>

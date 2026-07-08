@@ -1,0 +1,9 @@
+{
+  "components": {
+    "TextDecorationColor_Hex": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-color": "#ff3366" } },
+    "TextDecorationColor_Rgb": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-color": "rgb(30, 180, 90)" } },
+    "TextDecorationColor_Rgba": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-color": "rgba(30, 180, 90, 0.6)" } },
+    "TextDecorationColor_Named": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-color": "rebeccapurple" } },
+    "TextDecorationColor_CurrentColor": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#c0392b", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-color": "currentcolor" } }
+  }
+}

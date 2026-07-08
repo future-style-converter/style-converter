@@ -1,0 +1,9 @@
+{
+  "components": {
+    "HyphenateLimitLast_None": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "hyphens": "auto", "hyphenate-limit-last": "none" } },
+    "HyphenateLimitLast_Always": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "hyphens": "auto", "hyphenate-limit-last": "always" } },
+    "HyphenateLimitLast_Column": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "hyphens": "auto", "hyphenate-limit-last": "column" } },
+    "HyphenateLimitLast_Page": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "hyphens": "auto", "hyphenate-limit-last": "page" } },
+    "HyphenateLimitLast_Spread": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "hyphens": "auto", "hyphenate-limit-last": "spread" } }
+  }
+}

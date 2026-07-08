@@ -1,0 +1,8 @@
+{
+  "components": {
+    "FontNamedInstance_Auto": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-named-instance": "auto" } },
+    "FontNamedInstance_Regular": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-named-instance": "\"Regular\"" } },
+    "FontNamedInstance_Bold": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-named-instance": "\"Bold\"" } },
+    "FontNamedInstance_CondensedLight": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-named-instance": "\"Condensed Light\"" } }
+  }
+}

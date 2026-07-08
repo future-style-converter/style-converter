@@ -1,0 +1,54 @@
+{
+  "components": {
+    "V0_start": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)",
+        "background-position-block": "start"
+      }
+    },
+    "V1_center": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)",
+        "background-position-block": "center"
+      }
+    },
+    "V2_end": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)",
+        "background-position-block": "end"
+      }
+    },
+    "V3_50_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)",
+        "background-position-block": "50%"
+      }
+    },
+    "V4_10px": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)",
+        "background-position-block": "10px"
+      }
+    }
+  }
+}

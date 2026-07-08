@@ -1,0 +1,32 @@
+{
+  "components": {
+    "A_scroll": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "scroll-behavior": "auto"
+      }
+    },
+    "B_transf": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "transform": "none"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "scroll-behavior": "auto",
+        "transform": "none"
+      }
+    }
+  }
+}

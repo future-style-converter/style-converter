@@ -1,0 +1,32 @@
+{
+  "components": {
+    "A_animat": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "animation-name": "none"
+      }
+    },
+    "B_global": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "all": "initial"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "animation-name": "none",
+        "all": "initial"
+      }
+    }
+  }
+}

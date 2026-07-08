@@ -1,0 +1,12 @@
+{
+  "components": {
+    "LetterSpacing_Normal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "letter-spacing": "normal" } },
+    "LetterSpacing_Zero": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "letter-spacing": "0" } },
+    "LetterSpacing_Px_1": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "letter-spacing": "1px" } },
+    "LetterSpacing_Px_4": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "letter-spacing": "4px" } },
+    "LetterSpacing_Em_0_1": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "letter-spacing": "0.1em" } },
+    "LetterSpacing_Rem_0_25": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "letter-spacing": "0.25rem" } },
+    "LetterSpacing_Negative_Px_1": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "letter-spacing": "-1px" } },
+    "LetterSpacing_Negative_Em": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "letter-spacing": "-0.05em" } }
+  }
+}

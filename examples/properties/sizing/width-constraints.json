@@ -1,0 +1,106 @@
+{
+  "components": {
+    "MinWidth_100px_OnSmallContent": {
+      "properties": {
+        "width": "50px",
+        "min-width": "100px",
+        "height": "60px",
+        "background-color": "#3498db"
+      }
+    },
+    "MaxWidth_200px_OnLargeContent": {
+      "properties": {
+        "width": "400px",
+        "max-width": "200px",
+        "height": "60px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "MinMax_Width_100_300_Content_150": {
+      "properties": {
+        "width": "150px",
+        "min-width": "100px",
+        "max-width": "300px",
+        "height": "60px",
+        "background-color": "#e67e22"
+      }
+    },
+    "MinMax_Width_100_300_Content_50": {
+      "properties": {
+        "width": "50px",
+        "min-width": "100px",
+        "max-width": "300px",
+        "height": "60px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "MinMax_Width_100_300_Content_500": {
+      "properties": {
+        "width": "500px",
+        "min-width": "100px",
+        "max-width": "300px",
+        "height": "60px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "MinHeight_80px_ShortContent": {
+      "properties": {
+        "width": "200px",
+        "height": "20px",
+        "min-height": "80px",
+        "background-color": "#1abc9c"
+      }
+    },
+    "MaxHeight_50px_OnTallContent": {
+      "properties": {
+        "width": "200px",
+        "height": "200px",
+        "max-height": "50px",
+        "background-color": "#16a085"
+      }
+    },
+    "MinMax_Height_40_120_Content_80": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "min-height": "40px",
+        "max-height": "120px",
+        "background-color": "#8e44ad"
+      }
+    },
+    "MinMax_Height_40_120_Content_20": {
+      "properties": {
+        "width": "200px",
+        "height": "20px",
+        "min-height": "40px",
+        "max-height": "120px",
+        "background-color": "#c0392b"
+      }
+    },
+    "MinMax_Height_40_120_Content_300": {
+      "properties": {
+        "width": "200px",
+        "height": "300px",
+        "min-height": "40px",
+        "max-height": "120px",
+        "background-color": "#d35400"
+      }
+    },
+    "MaxWidth_None": {
+      "properties": {
+        "width": "200px",
+        "max-width": "none",
+        "height": "60px",
+        "background-color": "#2980b9"
+      }
+    },
+    "MaxHeight_None": {
+      "properties": {
+        "width": "200px",
+        "height": "60px",
+        "max-height": "none",
+        "background-color": "#27ae60"
+      }
+    }
+  }
+}

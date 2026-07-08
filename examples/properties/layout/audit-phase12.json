@@ -1,0 +1,129 @@
+{
+  "components": {
+    "Flex_Grow_Fractional": {
+      "properties": { "width": "300px", "height": "60px", "display": "flex", "background-color": "#1f2937", "padding": "6px", "gap": "6px" },
+      "children": {
+        "a": { "properties": { "flex-grow": "0.5", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "flex-grow": "1.5", "height": "40px", "background-color": "#10b981" } },
+        "c": { "properties": { "flex-grow": "0.25", "height": "40px", "background-color": "#3b82f6" } }
+      }
+    },
+    "Flex_Basis_Conflict_MinWidth": {
+      "properties": { "width": "300px", "height": "60px", "display": "flex", "background-color": "#1f2937", "padding": "6px", "gap": "6px" },
+      "children": {
+        "a": { "properties": { "flex": "1 0 200px", "min-width": "180px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "flex": "1 0 200px", "min-width": "180px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "Flex_Order_Extremes": {
+      "properties": { "width": "360px", "height": "60px", "display": "flex", "background-color": "#1f2937", "padding": "6px", "gap": "6px" },
+      "children": {
+        "a": { "properties": { "order": "-9999", "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "order": "0", "width": "60px", "height": "40px", "background-color": "#10b981" } },
+        "c": { "properties": { "order": "9999", "width": "60px", "height": "40px", "background-color": "#3b82f6" } },
+        "d": { "properties": { "order": "1", "width": "60px", "height": "40px", "background-color": "#f59e0b" } }
+      }
+    },
+    "Flex_Gap_Mixed_Px_Percent": {
+      "properties": { "width": "320px", "height": "60px", "display": "flex", "background-color": "#1f2937", "padding": "6px", "row-gap": "10%", "column-gap": "12px" },
+      "children": {
+        "a": { "properties": { "width": "80px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "80px", "height": "40px", "background-color": "#10b981" } },
+        "c": { "properties": { "width": "80px", "height": "40px", "background-color": "#3b82f6" } }
+      }
+    },
+    "Grid_AutoFit_Minmax": {
+      "properties": { "width": "360px", "height": "70px", "display": "grid", "grid-template-columns": "repeat(auto-fit, minmax(80px, 1fr))", "gap": "8px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "height": "50px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "50px", "background-color": "#10b981" } },
+        "c": { "properties": { "height": "50px", "background-color": "#3b82f6" } },
+        "d": { "properties": { "height": "50px", "background-color": "#f59e0b" } }
+      }
+    },
+    "Grid_FitContent_Mixed": {
+      "properties": { "width": "360px", "height": "70px", "display": "grid", "grid-template-columns": "fit-content(100px) 1fr minmax(50px, 80px)", "gap": "8px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "height": "50px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "50px", "background-color": "#10b981" } },
+        "c": { "properties": { "height": "50px", "background-color": "#3b82f6" } }
+      }
+    },
+    "Grid_Areas_Invalid_NonRect": {
+      "properties": { "width": "360px", "height": "120px", "display": "grid", "grid-template-columns": "1fr 1fr 1fr", "grid-template-areas": "\"h h h\" \"s m h\" \"s f f\"", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-area": "h", "background-color": "#ef4444" } },
+        "b": { "properties": { "grid-area": "s", "background-color": "#10b981" } },
+        "c": { "properties": { "grid-area": "m", "background-color": "#3b82f6" } },
+        "d": { "properties": { "grid-area": "f", "background-color": "#f59e0b" } }
+      }
+    },
+    "Abs_Top_Right_Only": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "position": "absolute", "top": "10px", "right": "10px", "width": "60px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "position": "absolute", "top": "10px", "right": "80px", "background-color": "#10b981", "padding": "8px" } }
+      }
+    },
+    "Abs_Inset_No_Size": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "position": "absolute", "top": "10px", "right": "10px", "bottom": "10px", "left": "10px", "background-color": "#10b981" } }
+      }
+    },
+    "Sticky_Bottom_Auto_NoScroll": {
+      "properties": { "width": "300px", "height": "120px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "position": "sticky", "bottom": "auto", "top": "10px", "width": "120px", "height": "40px", "background-color": "#ef4444" } }
+      }
+    },
+    "Inset_Logical_RTL": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "direction": "rtl", "background-color": "#1f2937" },
+      "children": {
+        "a": { "properties": { "position": "absolute", "inset-inline-start": "10px", "inset-block-start": "10px", "width": "80px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "position": "absolute", "inset-inline-end": "10px", "inset-block-end": "10px", "width": "80px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "ZIndex_Negative_Stacking": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937" },
+      "children": {
+        "back": { "properties": { "position": "absolute", "top": "10px", "left": "10px", "width": "120px", "height": "80px", "background-color": "#ef4444", "z-index": "-1" } },
+        "mid": { "properties": { "position": "absolute", "top": "30px", "left": "50px", "width": "120px", "height": "80px", "background-color": "#10b981", "z-index": "0" } },
+        "front": { "properties": { "position": "absolute", "top": "50px", "left": "90px", "width": "120px", "height": "80px", "background-color": "#3b82f6", "z-index": "5" } }
+      }
+    },
+    "Nested_Flex_In_Grid": {
+      "properties": { "width": "360px", "height": "100px", "display": "grid", "grid-template-columns": "1fr 1fr", "gap": "8px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "row1": { "properties": { "display": "flex", "flex-direction": "row", "gap": "4px", "background-color": "#334155", "padding": "4px" },
+          "children": {
+            "x": { "properties": { "flex-grow": "1", "height": "30px", "background-color": "#ef4444" } },
+            "y": { "properties": { "flex-grow": "2", "height": "30px", "background-color": "#10b981" } }
+          }
+        },
+        "row2": { "properties": { "display": "flex", "flex-direction": "column", "gap": "4px", "background-color": "#334155", "padding": "4px" },
+          "children": {
+            "x": { "properties": { "height": "20px", "background-color": "#3b82f6" } },
+            "y": { "properties": { "height": "20px", "background-color": "#f59e0b" } }
+          }
+        }
+      }
+    },
+    "Grid_Minmax_Spread": {
+      "properties": { "width": "360px", "height": "70px", "display": "grid", "grid-template-columns": "minmax(100px, 1fr) minmax(50px, 2fr) minmax(60px, 1fr)", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "height": "50px", "background-color": "#ef4444" } },
+        "b": { "properties": { "height": "50px", "background-color": "#10b981" } },
+        "c": { "properties": { "height": "50px", "background-color": "#3b82f6" } }
+      }
+    },
+    "Flex_Direction_Reverse_Wrap": {
+      "properties": { "width": "240px", "height": "100px", "display": "flex", "flex-direction": "row-reverse", "flex-wrap": "wrap", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "width": "100px", "height": "40px", "background-color": "#ef4444" } },
+        "b": { "properties": { "width": "100px", "height": "40px", "background-color": "#10b981" } },
+        "c": { "properties": { "width": "100px", "height": "40px", "background-color": "#3b82f6" } }
+      }
+    }
+  }
+}

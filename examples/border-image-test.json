@@ -1,0 +1,34 @@
+{
+  "components": [
+    {
+      "name": "BorderImageComponent",
+      "properties": {
+        "border-image-source": "url(border.png)",
+        "border-image-slice": "30 40 50 60",
+        "border-image-width": "10px 20px 30px 40px",
+        "border-image-outset": "5px 10px",
+        "border-image-repeat": "repeat stretch"
+      }
+    },
+    {
+      "name": "BorderImageGradientComponent",
+      "properties": {
+        "border-image-source": "linear-gradient(to right, red, blue)",
+        "border-image-slice": "30 fill",
+        "border-image-width": "1",
+        "border-image-outset": "0",
+        "border-image-repeat": "round"
+      }
+    },
+    {
+      "name": "BorderImagePercentageComponent",
+      "properties": {
+        "border-image-source": "url(border-pattern.svg)",
+        "border-image-slice": "50% 25%",
+        "border-image-width": "auto",
+        "border-image-outset": "1.5",
+        "border-image-repeat": "space"
+      }
+    }
+  ]
+}

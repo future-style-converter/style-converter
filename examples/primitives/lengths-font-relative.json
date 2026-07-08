@@ -1,0 +1,17 @@
+{
+  "_notes": {
+    "fixture": "lengths-font-relative",
+    "purpose": "Font-relative units: em, rem, ex, ch, cap, ic, lh, rlh. All have pixels=null (context-dependent).",
+    "ir_shape_width": "{ 'type':'length', 'original': { 'v': <n>, 'u': 'EM'|'REM'|'EX'|'CH'|'CAP'|'IC'|'LH'|'RLH' } } — no 'px' key because not resolvable at parse time."
+  },
+  "components": {
+    "Length_Em_2":    { "properties": { "width": "2em",   "height": "60px", "background-color": "#3498db" } },
+    "Length_Rem_3":   { "properties": { "width": "3rem",  "height": "60px", "background-color": "#9b59b6" } },
+    "Length_Ex_5":    { "properties": { "width": "5ex",   "height": "60px", "background-color": "#e74c3c" } },
+    "Length_Ch_10":   { "properties": { "width": "10ch",  "height": "60px", "background-color": "#2ecc71" } },
+    "Length_Cap_4":   { "properties": { "width": "4cap",  "height": "60px", "background-color": "#1abc9c" } },
+    "Length_Ic_3":    { "properties": { "width": "3ic",   "height": "60px", "background-color": "#f39c12" } },
+    "Length_Lh_2":    { "properties": { "width": "2lh",   "height": "60px", "background-color": "#e67e22" } },
+    "Length_Rlh_2":   { "properties": { "width": "2rlh",  "height": "60px", "background-color": "#34495e" } }
+  }
+}

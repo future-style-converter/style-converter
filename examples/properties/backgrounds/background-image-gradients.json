@@ -1,0 +1,30 @@
+{
+  "components": {
+    "Gradient_Linear_Basic": { "properties": { "width": "120px", "height": "80px", "background-image": "linear-gradient(red, blue)" } },
+    "Gradient_Linear_45deg": { "properties": { "width": "120px", "height": "80px", "background-image": "linear-gradient(45deg, red, blue)" } },
+    "Gradient_Linear_ToRight": { "properties": { "width": "120px", "height": "80px", "background-image": "linear-gradient(to right, red, blue)" } },
+    "Gradient_Linear_ToBottomRight": { "properties": { "width": "120px", "height": "80px", "background-image": "linear-gradient(to bottom right, red, blue)" } },
+    "Gradient_Linear_3Stops": { "properties": { "width": "120px", "height": "80px", "background-image": "linear-gradient(to right, red 0%, green 50%, blue 100%)" } },
+    "Gradient_Linear_5Stops": { "properties": { "width": "200px", "height": "40px", "background-image": "linear-gradient(to right, red 0%, orange 25%, yellow 50%, green 75%, blue 100%)" } },
+    "Gradient_Linear_Turn": { "properties": { "width": "120px", "height": "80px", "background-image": "linear-gradient(0.25turn, red, blue)" } },
+    "Gradient_Linear_ImplicitStops": { "properties": { "width": "120px", "height": "80px", "background-image": "linear-gradient(to right, red, green, blue)" } },
+
+    "Gradient_Radial_Basic": { "properties": { "width": "120px", "height": "120px", "background-image": "radial-gradient(red, blue)" } },
+    "Gradient_Radial_Circle": { "properties": { "width": "120px", "height": "120px", "background-image": "radial-gradient(circle, red, blue)" } },
+    "Gradient_Radial_Ellipse": { "properties": { "width": "140px", "height": "80px", "background-image": "radial-gradient(ellipse 60px 40px, red, blue)" } },
+    "Gradient_Radial_AtPosition": { "properties": { "width": "120px", "height": "120px", "background-image": "radial-gradient(circle at 20% 30%, red, blue)" } },
+    "Gradient_Radial_ClosestSide": { "properties": { "width": "120px", "height": "80px", "background-image": "radial-gradient(closest-side, red, blue)" } },
+    "Gradient_Radial_FarthestCorner": { "properties": { "width": "120px", "height": "80px", "background-image": "radial-gradient(farthest-corner, red 0%, blue 100%)" } },
+
+    "Gradient_Conic_Basic": { "properties": { "width": "120px", "height": "120px", "background-image": "conic-gradient(red, blue)" } },
+    "Gradient_Conic_From30deg": { "properties": { "width": "120px", "height": "120px", "background-image": "conic-gradient(from 30deg, red, yellow, blue, red)" } },
+    "Gradient_Conic_AtCenter": { "properties": { "width": "120px", "height": "120px", "background-image": "conic-gradient(at 50% 50%, red, blue, red)" } },
+    "Gradient_Conic_4Color": { "properties": { "width": "120px", "height": "120px", "background-image": "conic-gradient(red, yellow, green, blue)" } },
+
+    "Gradient_RepeatingLinear": { "properties": { "width": "160px", "height": "80px", "background-image": "repeating-linear-gradient(45deg, red, blue 20px)" } },
+    "Gradient_RepeatingRadial": { "properties": { "width": "160px", "height": "160px", "background-image": "repeating-radial-gradient(circle, red, blue 20px)" } },
+    "Gradient_RepeatingConic": { "properties": { "width": "120px", "height": "120px", "background-image": "repeating-conic-gradient(red 0%, blue 10%)" } },
+
+    "Bg_Multiple_Gradients": { "properties": { "width": "160px", "height": "120px", "background-image": "linear-gradient(red, transparent), linear-gradient(to right, blue, transparent)" } }
+  }
+}

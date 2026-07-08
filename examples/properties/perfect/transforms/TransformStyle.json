@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_flat": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "transform-style": "flat"
+      }
+    },
+    "V1_preserve": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "transform-style": "preserve-3d"
+      }
+    }
+  }
+}

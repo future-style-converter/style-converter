@@ -1,0 +1,229 @@
+{
+  "components": {
+    "V0_block": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "block"
+      }
+    },
+    "V1_flex": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "flex"
+      }
+    },
+    "V2_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "none"
+      }
+    },
+    "V3_inline": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "inline"
+      }
+    },
+    "V4_inline_blo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "inline-block"
+      }
+    },
+    "V5_inline_fle": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "inline-flex"
+      }
+    },
+    "V6_grid": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "grid"
+      }
+    },
+    "V7_inline_gri": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "inline-grid"
+      }
+    },
+    "V8_table": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "table"
+      }
+    },
+    "V9_inline_tab": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "inline-table"
+      }
+    },
+    "V10_table_row": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "table-row"
+      }
+    },
+    "V11_table_cell": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "table-cell"
+      }
+    },
+    "V12_table_colu": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "table-column"
+      }
+    },
+    "V13_table_row_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "table-row-group"
+      }
+    },
+    "V14_table_colu": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "table-column-group"
+      }
+    },
+    "V15_table_head": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "table-header-group"
+      }
+    },
+    "V16_table_foot": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "table-footer-group"
+      }
+    },
+    "V17_table_capt": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "table-caption"
+      }
+    },
+    "V18_list_item": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "list-item"
+      }
+    },
+    "V19_contents": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "contents"
+      }
+    },
+    "V20_flow_root": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "flow-root"
+      }
+    },
+    "V21_ruby": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "ruby"
+      }
+    },
+    "V22_ruby_base": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "ruby-base"
+      }
+    },
+    "V23_ruby_text": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "ruby-text"
+      }
+    },
+    "V24_ruby_base_": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "display": "ruby-base-container"
+      }
+    }
+  }
+}

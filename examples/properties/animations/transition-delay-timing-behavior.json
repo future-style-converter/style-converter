@@ -1,0 +1,25 @@
+{
+  "components": {
+    "TDel_Seconds": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "transition-delay": "1s" } },
+    "TDel_Millis": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "transition-delay": "250ms" } },
+    "TDel_Zero": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "transition-delay": "0s" } },
+    "TDel_Negative": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "transition-delay": "-500ms" } },
+    "TDel_NegativeSec": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "transition-delay": "-1s" } },
+    "TDel_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "transition-delay": "0s, 250ms, -125ms, 1s" } },
+    "TTF_Linear": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "transition-timing-function": "linear" } },
+    "TTF_Ease": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "transition-timing-function": "ease" } },
+    "TTF_EaseIn": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "transition-timing-function": "ease-in" } },
+    "TTF_EaseOut": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "transition-timing-function": "ease-out" } },
+    "TTF_EaseInOut": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "transition-timing-function": "ease-in-out" } },
+    "TTF_StepStart": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "transition-timing-function": "step-start" } },
+    "TTF_StepEnd": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "transition-timing-function": "step-end" } },
+    "TTF_CubicBezier": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "transition-timing-function": "cubic-bezier(0.25, 0.1, 0.25, 1)" } },
+    "TTF_Steps_End": { "properties": { "width": "160px", "height": "60px", "background-color": "#95a5a6", "transition-timing-function": "steps(4, end)" } },
+    "TTF_Steps_JumpStart": { "properties": { "width": "160px", "height": "60px", "background-color": "#e67e22", "transition-timing-function": "steps(3, jump-start)" } },
+    "TTF_Steps_JumpNone": { "properties": { "width": "160px", "height": "60px", "background-color": "#f1c40f", "transition-timing-function": "steps(3, jump-none)" } },
+    "TTF_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#bdc3c7", "transition-timing-function": "ease, cubic-bezier(0.25, 0.1, 0.25, 1), steps(4, end)" } },
+    "TBeh_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#ecf0f1", "transition-behavior": "normal" } },
+    "TBeh_AllowDiscrete": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "transition-behavior": "allow-discrete" } },
+    "TBeh_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "transition-behavior": "normal, allow-discrete" } }
+  }
+}

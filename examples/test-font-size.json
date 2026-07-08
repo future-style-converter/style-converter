@@ -1,0 +1,59 @@
+{
+  "components": {
+    "XXSmall": {
+      "properties": {
+        "font-size": "xx-small"
+      }
+    },
+    "Small": {
+      "properties": {
+        "font-size": "small"
+      }
+    },
+    "Medium": {
+      "properties": {
+        "font-size": "medium"
+      }
+    },
+    "Large": {
+      "properties": {
+        "font-size": "large"
+      }
+    },
+    "XLarge": {
+      "properties": {
+        "font-size": "x-large"
+      }
+    },
+    "XXLarge": {
+      "properties": {
+        "font-size": "xx-large"
+      }
+    },
+    "PixelSize": {
+      "properties": {
+        "font-size": "20px"
+      }
+    },
+    "EmSize": {
+      "properties": {
+        "font-size": "1.5em"
+      }
+    },
+    "PercentSize": {
+      "properties": {
+        "font-size": "120%"
+      }
+    },
+    "RelativeSmaller": {
+      "properties": {
+        "font-size": "smaller"
+      }
+    },
+    "RelativeLarger": {
+      "properties": {
+        "font-size": "larger"
+      }
+    }
+  }
+}

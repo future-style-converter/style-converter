@@ -1,0 +1,12 @@
+{
+  "components": {
+    "Pos_Left_Top": { "properties": { "width": "160px", "height": "100px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "40px 40px", "background-repeat": "no-repeat", "background-position": "left top" } },
+    "Pos_Right_Top": { "properties": { "width": "160px", "height": "100px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "40px 40px", "background-repeat": "no-repeat", "background-position": "right top" } },
+    "Pos_Center": { "properties": { "width": "160px", "height": "100px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "40px 40px", "background-repeat": "no-repeat", "background-position": "center" } },
+    "Pos_Center_Center": { "properties": { "width": "160px", "height": "100px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "40px 40px", "background-repeat": "no-repeat", "background-position": "center center" } },
+    "Pos_Bottom_Right": { "properties": { "width": "160px", "height": "100px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "40px 40px", "background-repeat": "no-repeat", "background-position": "bottom right" } },
+    "Pos_Percent_50_50": { "properties": { "width": "160px", "height": "100px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "40px 40px", "background-repeat": "no-repeat", "background-position": "50% 50%" } },
+    "Pos_Px_20_30": { "properties": { "width": "160px", "height": "100px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "40px 40px", "background-repeat": "no-repeat", "background-position": "20px 30px" } },
+    "Pos_Single_Value": { "properties": { "width": "160px", "height": "100px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "40px 40px", "background-repeat": "no-repeat", "background-position": "top" } }
+  }
+}

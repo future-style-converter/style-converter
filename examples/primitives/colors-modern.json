@@ -1,0 +1,35 @@
+{
+  "_notes": {
+    "fixture": "colors-modern",
+    "purpose": "Modern CSS color spaces: hwb, lab, lch, oklab, oklch; color() function; color-mix(); light-dark(); relative color syntax.",
+    "ir_shape_static": "Representation object has a 'type' discriminator: 'hwb'|'lab'|'lch'|'oklab'|'oklch'|'color'|'color-mix'|'light-dark'|'relative'. Static ones (hwb/lab/lch/oklab/oklch/color) have srgb filled via ColorConversion; dynamic ones (color-mix/light-dark/relative) have srgb=null.",
+    "ir_shape_hwb": "{ 'type':'hwb', 'h':Number, 'w':Number, 'b':Number, 'alpha'?:Number }",
+    "ir_shape_lab": "{ 'type':'lab', 'l':Number, 'a':Number, 'b':Number, 'alpha'?:Number }",
+    "ir_shape_lch": "{ 'type':'lch', 'l':Number, 'c':Number, 'h':Number, 'alpha'?:Number }",
+    "ir_shape_oklab": "{ 'type':'oklab', 'l':Number, 'a':Number, 'b':Number, 'alpha'?:Number }",
+    "ir_shape_oklch": "{ 'type':'oklch', 'l':Number, 'c':Number, 'h':Number, 'alpha'?:Number }",
+    "ir_shape_color_fn": "{ 'type':'color', 'colorSpace':String, 'values':[Number...], 'alpha'?:Number }",
+    "ir_shape_color_mix": "{ 'type':'color-mix', 'colorSpace':String, 'hueMethod'?:String, 'color1':String, 'percent1'?:Number, 'color2':String, 'percent2'?:Number } — srgb=null",
+    "ir_shape_light_dark": "{ 'type':'light-dark', 'lightColor':String, 'darkColor':String } — srgb=null",
+    "ir_shape_relative": "{ 'type':'relative', 'function':String, 'baseColor':String, 'components':[String...] } — srgb=null"
+  },
+  "components": {
+    "Color_Hwb":             { "properties": { "background-color": "hwb(120 20% 20%)", "padding": "20px" } },
+    "Color_HwbAlpha":        { "properties": { "background-color": "hwb(200 10% 10% / 60%)", "padding": "20px" } },
+    "Color_Lab":             { "properties": { "background-color": "lab(50% 40 -20)", "padding": "20px" } },
+    "Color_LabAlpha":        { "properties": { "background-color": "lab(70% -30 25 / 70%)", "padding": "20px" } },
+    "Color_Lch":             { "properties": { "background-color": "lch(60% 50 180)", "padding": "20px" } },
+    "Color_LchAlpha":        { "properties": { "background-color": "lch(40% 60 20 / 80%)", "padding": "20px" } },
+    "Color_OkLab":           { "properties": { "background-color": "oklab(0.7 -0.1 0.15)", "padding": "20px" } },
+    "Color_OkLch_Red":       { "properties": { "background-color": "oklch(0.63 0.26 29)", "padding": "20px" } },
+    "Color_OkLch_Alpha":     { "properties": { "background-color": "oklch(0.75 0.15 210 / 60%)", "padding": "20px" } },
+    "Color_ColorFn_sRGB":    { "properties": { "background-color": "color(srgb 0.9 0.3 0.4)", "padding": "20px" } },
+    "Color_ColorFn_P3":      { "properties": { "background-color": "color(display-p3 0.2 0.8 0.5)", "padding": "20px" } },
+    "Color_ColorFn_Alpha":   { "properties": { "background-color": "color(srgb 0.1 0.5 0.9 / 0.7)", "padding": "20px" } },
+    "Color_Mix_Srgb":        { "properties": { "background-color": "color-mix(in srgb, red 50%, blue)", "padding": "20px" } },
+    "Color_Mix_OkLch":       { "properties": { "background-color": "color-mix(in oklch, red, blue 30%)", "padding": "20px" } },
+    "Color_LightDark":       { "properties": { "background-color": "light-dark(#ffeedd, #221100)", "padding": "20px" } },
+    "Color_Relative_Rgb":    { "properties": { "background-color": "rgb(from red calc(r - 50) g b)", "padding": "20px" } },
+    "Color_Relative_Oklch":  { "properties": { "background-color": "oklch(from blue l c h / 0.5)", "padding": "20px" } }
+  }
+}

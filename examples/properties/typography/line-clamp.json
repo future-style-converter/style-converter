@@ -1,0 +1,9 @@
+{
+  "components": {
+    "LineClamp_None": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-clamp": "none" } },
+    "LineClamp_One": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-clamp": "1" } },
+    "LineClamp_Two": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-clamp": "2" } },
+    "LineClamp_Three": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-clamp": "3" } },
+    "LineClamp_Five": { "properties": { "width": "200px", "height": "100px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "line-clamp": "5" } }
+  }
+}

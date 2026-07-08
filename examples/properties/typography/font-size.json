@@ -1,0 +1,21 @@
+{
+  "components": {
+    "FontSize_XxSmall": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "xx-small" } },
+    "FontSize_XSmall": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "x-small" } },
+    "FontSize_Small": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "small" } },
+    "FontSize_Medium": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "medium" } },
+    "FontSize_Large": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "large" } },
+    "FontSize_XLarge": { "properties": { "width": "200px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "x-large" } },
+    "FontSize_XxLarge": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "xx-large" } },
+    "FontSize_XxxLarge": { "properties": { "width": "200px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "xxx-large" } },
+    "FontSize_Smaller": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "smaller" } },
+    "FontSize_Larger": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "larger" } },
+    "FontSize_Px_12": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "12px" } },
+    "FontSize_Px_24": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px" } },
+    "FontSize_Pt_14": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "14pt" } },
+    "FontSize_Em_2": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "2em" } },
+    "FontSize_Rem_1_5": { "properties": { "width": "200px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "1.5rem" } },
+    "FontSize_Percent_120": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "120%" } },
+    "FontSize_Calc": { "properties": { "width": "200px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "calc(16px + 2px)" } }
+  }
+}

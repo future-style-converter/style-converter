@@ -1,0 +1,10 @@
+{
+  "components": {
+    "TextOverflow_Clip": { "properties": { "width": "160px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "overflow": "hidden", "white-space": "nowrap", "text-overflow": "clip" } },
+    "TextOverflow_Ellipsis": { "properties": { "width": "160px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "overflow": "hidden", "white-space": "nowrap", "text-overflow": "ellipsis" } },
+    "TextOverflow_Fade": { "properties": { "width": "160px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "overflow": "hidden", "white-space": "nowrap", "text-overflow": "fade(20px)" } },
+    "TextOverflow_FadeDefault": { "properties": { "width": "160px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "overflow": "hidden", "white-space": "nowrap", "text-overflow": "fade()" } },
+    "TextOverflow_String": { "properties": { "width": "160px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "overflow": "hidden", "white-space": "nowrap", "text-overflow": "\"...\"" } },
+    "TextOverflow_TwoValue": { "properties": { "width": "160px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "overflow": "hidden", "white-space": "nowrap", "text-overflow": "clip ellipsis" } }
+  }
+}

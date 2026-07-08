@@ -1,0 +1,31 @@
+{
+    "components": {
+      "InsaneLengthsComponent": {
+        "properties": {
+          "width": "calc(min(100vw, max(50%, 20rem)) - var(--offset, 10px))",
+          "height": "clamp(0px, 100vh, 200%)",
+          "min-width": "0",
+          "max-width": "calc((100% - 20px) / 2 + 5em)",
+          "padding-top": "clamp(min(1rem, 2vw), max(5%, 10px), 50vh)",
+          "padding-right": "calc(10px + 2em - var(--extra-space, 1ch))",
+          "padding-bottom": "min(max(50%, 200px), calc(10px + 5%))",
+          "padding-left": "max(2ch, 1rem, 0px)",
+          "margin-bottom": "calc(var(--space) * -2)", 
+          "border-left-width": "calc(0.1rem + 1vh - 2px)",
+          "outline-offset": "-2px",
+          "gap": "calc(100%/3 + 2em)",
+          "row-gap": "fit-content(min(50%, 200px))",
+          "column-gap": "fit-content(max(100px, 10%))",
+          "background-position-y": "calc(10% + 2vh)",
+          "top": "env(safe-area-inset-top)",
+          "bottom": "max(0px, 1vh, 5%)",
+          "left": "min(100px, 10%, var(--left-offset, 1rem))",
+          "border-radius": "calc(10px + 1% + min(2em, 5%))",
+          "clip-path-inset": "inset(10px 5% round 1rem 2%)",
+          "custom-length-func": "calc(clamp(1rem, 50%, 10rem) * 2 + max(1px, 0.5%))",
+          "funky-functions": "calc((100% - 20px) / 3 + clamp(1rem, 50%, 10rem))"
+        }
+      }
+    }
+  }
+  

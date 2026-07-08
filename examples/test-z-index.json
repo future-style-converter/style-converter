@@ -1,0 +1,29 @@
+{
+  "components": {
+    "AutoZIndex": {
+      "properties": {
+        "z-index": "auto"
+      }
+    },
+    "PositiveZIndex": {
+      "properties": {
+        "z-index": "10"
+      }
+    },
+    "NegativeZIndex": {
+      "properties": {
+        "z-index": "-1"
+      }
+    },
+    "LargeZIndex": {
+      "properties": {
+        "z-index": "9999"
+      }
+    },
+    "ZeroZIndex": {
+      "properties": {
+        "z-index": "0"
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "components": {
+    "V0_htb": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "writing-mode": "horizontal-tb"
+      }
+    },
+    "V1_vertical_r": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "writing-mode": "vertical-rl"
+      }
+    },
+    "V2_vertical_l": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "writing-mode": "vertical-lr"
+      }
+    },
+    "V3_sideways_r": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "writing-mode": "sideways-rl"
+      }
+    },
+    "V4_sideways_l": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "color": "#ffffff",
+        "text": "Sample",
+        "writing-mode": "sideways-lr"
+      }
+    }
+  }
+}

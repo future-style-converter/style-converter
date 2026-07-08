@@ -1,0 +1,16 @@
+{
+  "components": {
+    "Backdrop_None": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "backdrop-filter": "none" } },
+    "Backdrop_Blur": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "backdrop-filter": "blur(8px)" } },
+    "Backdrop_Brightness": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "backdrop-filter": "brightness(1.2)" } },
+    "Backdrop_Contrast": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "backdrop-filter": "contrast(150%)" } },
+    "Backdrop_Grayscale": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "backdrop-filter": "grayscale(80%)" } },
+    "Backdrop_Sepia": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "backdrop-filter": "sepia(100%)" } },
+    "Backdrop_Invert": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "backdrop-filter": "invert(100%)" } },
+    "Backdrop_Saturate": { "properties": { "width": "160px", "height": "80px", "background-color": "#c0392b", "backdrop-filter": "saturate(200%)" } },
+    "Backdrop_Opacity": { "properties": { "width": "160px", "height": "80px", "background-color": "#16a085", "backdrop-filter": "opacity(50%)" } },
+    "Backdrop_HueRotate": { "properties": { "width": "160px", "height": "80px", "background-color": "#d35400", "backdrop-filter": "hue-rotate(45deg)" } },
+    "Backdrop_Chain": { "properties": { "width": "160px", "height": "80px", "background-color": "#2980b9", "backdrop-filter": "blur(6px) brightness(1.1) saturate(1.5)" } },
+    "Backdrop_DropShadow": { "properties": { "width": "160px", "height": "80px", "background-color": "#27ae60", "backdrop-filter": "drop-shadow(2px 2px 4px rgba(0,0,0,0.3))" } }
+  }
+}

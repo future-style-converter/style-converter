@@ -1,0 +1,58 @@
+{
+  "components": {
+    "Anim_0s": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-duration": "0s"
+      }
+    },
+    "Anim_300ms": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-duration": "300ms"
+      }
+    },
+    "Anim_1s": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-duration": "1s"
+      }
+    },
+    "Anim_0_5s": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-duration": "0.5s"
+      }
+    },
+    "Anim_2s": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-duration": "2s"
+      }
+    },
+    "Anim_0s__300ms__1s": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "animation-duration": "0s, 300ms, 1s"
+      }
+    }
+  }
+}

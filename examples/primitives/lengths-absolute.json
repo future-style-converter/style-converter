@@ -1,0 +1,17 @@
+{
+  "_notes": {
+    "fixture": "lengths-absolute",
+    "purpose": "Exercise every absolute length unit: px, pt, cm, mm, in, pc, Q. All normalize to pixels.",
+    "ir_shape_width": "{ 'type': 'length', 'px': <normalized>, 'original'?: { 'v': <n>, 'u': 'PT'|'CM'|... } } — 'original' omitted for PX inputs.",
+    "ir_shape_color": "{ 'srgb': { 'r','g','b' }, 'original': '#hex' } for hex inputs."
+  },
+  "components": {
+    "Length_Px_200":   { "properties": { "width": "200px", "height": "80px", "background-color": "#3498db" } },
+    "Length_Pt_120":   { "properties": { "width": "120pt", "height": "80px", "background-color": "#9b59b6" } },
+    "Length_Cm_3":     { "properties": { "width": "3cm",   "height": "80px", "background-color": "#e67e22" } },
+    "Length_Mm_40":    { "properties": { "width": "40mm",  "height": "80px", "background-color": "#2ecc71" } },
+    "Length_In_2":     { "properties": { "width": "2in",   "height": "80px", "background-color": "#e74c3c" } },
+    "Length_Pc_12":    { "properties": { "width": "12pc",  "height": "80px", "background-color": "#1abc9c" } },
+    "Length_Q_80":     { "properties": { "width": "80Q",   "height": "80px", "background-color": "#f39c12" } }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "components": {
+    "ContainerType_Normal": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "container-type": "normal" } },
+    "ContainerType_Size": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "container-type": "size" } },
+    "ContainerType_InlineSize": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "container-type": "inline-size" } },
+
+    "ContainerName_None": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "container-name": "none" } },
+    "ContainerName_Single": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "container-name": "sidebar" } },
+    "ContainerName_Multi": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "container-name": "sidebar card" } },
+
+    "Container_TypeOnly_Size": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "container": "size" } },
+    "Container_TypeOnly_Inline": { "properties": { "width": "160px", "height": "80px", "background-color": "#c0392b", "container": "inline-size" } },
+    "Container_NameType": { "properties": { "width": "160px", "height": "80px", "background-color": "#16a085", "container": "myContainer / size" } },
+    "Container_NameOnly": { "properties": { "width": "160px", "height": "80px", "background-color": "#8e44ad", "container": "myContainer" } }
+  }
+}

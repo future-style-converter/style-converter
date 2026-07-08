@@ -1,0 +1,52 @@
+{
+  "components": {
+    "OP_None": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "offset-path": "none" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#ef4444" } }
+      }
+    },
+    "OP_PathString": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "offset-path": "path('M 20 20 L 200 20 L 200 100')" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#10b981" } }
+      }
+    },
+    "OP_RayAngle": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "offset-path": "ray(45deg)" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#3b82f6" } }
+      }
+    },
+    "OP_RayAngleSize": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "offset-path": "ray(45deg closest-side)" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#f59e0b" } }
+      }
+    },
+    "OP_Circle": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "offset-path": "circle(50%)" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#a78bfa" } }
+      }
+    },
+    "OP_CircleAt": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "offset-path": "circle(40% at center)" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#22d3ee" } }
+      }
+    },
+    "OP_Ellipse": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "offset-path": "ellipse(50% 30%)" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#fb7185" } }
+      }
+    },
+    "OP_Polygon": {
+      "properties": { "width": "300px", "height": "120px", "position": "relative", "background-color": "#1f2937", "offset-path": "polygon(0% 0%, 100% 0%, 100% 100%)" },
+      "children": {
+        "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#86efac" } }
+      }
+    }
+  }
+}

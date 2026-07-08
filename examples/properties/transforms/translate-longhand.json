@@ -1,0 +1,12 @@
+{
+  "components": {
+    "Translate_None": { "properties": { "width": "120px", "height": "80px", "background-color": "#3498db", "translate": "none" } },
+    "Translate_OneAxis_Px": { "properties": { "width": "120px", "height": "80px", "background-color": "#e74c3c", "translate": "20px" } },
+    "Translate_OneAxis_Pct": { "properties": { "width": "120px", "height": "80px", "background-color": "#2ecc71", "translate": "25%" } },
+    "Translate_TwoAxis_Px": { "properties": { "width": "120px", "height": "80px", "background-color": "#9b59b6", "translate": "20px 10px" } },
+    "Translate_TwoAxis_Pct": { "properties": { "width": "120px", "height": "80px", "background-color": "#f39c12", "translate": "10% 5%" } },
+    "Translate_TwoAxis_Mixed": { "properties": { "width": "120px", "height": "80px", "background-color": "#1abc9c", "translate": "20px 50%" } },
+    "Translate_ThreeAxis": { "properties": { "width": "120px", "height": "80px", "background-color": "#34495e", "translate": "10px 20px 30px" } },
+    "Translate_Negative": { "properties": { "width": "120px", "height": "80px", "background-color": "#c0392b", "translate": "-15px -5px" } }
+  }
+}

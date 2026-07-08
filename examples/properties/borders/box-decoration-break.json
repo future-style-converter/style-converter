@@ -1,0 +1,22 @@
+{
+  "components": {
+    "BoxDecorationBreak_Slice": {
+      "properties": {
+        "width": "200px", "height": "80px", "background-color": "#3498db",
+        "border-top-width": "4px", "border-right-width": "4px", "border-bottom-width": "4px", "border-left-width": "4px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-top-color": "#111", "border-right-color": "#111", "border-bottom-color": "#111", "border-left-color": "#111",
+        "box-decoration-break": "slice"
+      }
+    },
+    "BoxDecorationBreak_Clone": {
+      "properties": {
+        "width": "200px", "height": "80px", "background-color": "#2ecc71",
+        "border-top-width": "4px", "border-right-width": "4px", "border-bottom-width": "4px", "border-left-width": "4px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-top-color": "#111", "border-right-color": "#111", "border-bottom-color": "#111", "border-left-color": "#111",
+        "box-decoration-break": "clone"
+      }
+    }
+  }
+}

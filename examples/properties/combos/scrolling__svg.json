@@ -1,0 +1,32 @@
+{
+  "components": {
+    "A_scroll": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "scroll-behavior": "auto"
+      }
+    },
+    "B_svg": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "fill": "#ef4444"
+      }
+    },
+    "AB_combo": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "scroll-behavior": "auto",
+        "fill": "#ef4444"
+      }
+    }
+  }
+}

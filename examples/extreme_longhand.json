@@ -1,0 +1,118 @@
+{
+    "components": {
+      "ExtremeComponent": {
+        "properties": {
+          "background-color": "rgba(255, 0, 0, 0.25)",
+          "background-image": "url(\"https://example.com/bg with space.svg\")",
+          "background-position-x": "calc(100% - 20px)",
+          "background-position-y": "center",
+          "background-repeat-x": "no-repeat",
+          "background-repeat-y": "repeat",
+          "background-attachment": "fixed",
+          "background-origin": "border-box",
+          "background-clip": "padding-box",
+  
+          "border-top-width": "0",
+          "border-top-style": "dashed",
+          "border-top-color": "hsl(120, 50%, 50%)",
+  
+          "border-right-width": "1.5rem",
+          "border-right-style": "groove",
+          "border-right-color": "currentColor",
+  
+          "border-bottom-width": "thin",
+          "border-bottom-style": "ridge",
+          "border-bottom-color": "transparent",
+  
+          "border-left-width": "calc(5px + 2%)",
+          "border-left-style": "solid",
+          "border-left-color": "#FF00FF",
+  
+          "border-top-left-radius": "50%",
+          "border-top-right-radius": "10em",
+          "border-bottom-right-radius": "clamp(5px, 2vw, 15px)",
+          "border-bottom-left-radius": "min(2rem, 10%)",
+  
+          "box-shadow": "inset 0px 10px 5px -3px rgba(0, 0, 0, 0.75), 2px 4px 6px 1px #ff0000",
+  
+          "color": "rgb(255, 255, 0)",
+          "opacity": 0.3333,
+  
+          "font-size": "calc(12px + 1vw)",
+          "font-weight": "900",
+          "font-style": "oblique 30deg",
+          "font-variant": "small-caps",
+          "font-stretch": "ultra-condensed",
+          "font-family": "\"Open Sans\", 'Comic Sans MS', cursive",
+  
+          "line-height": "1.2",
+          "letter-spacing": "-0.05em",
+          "word-spacing": "3ch",
+  
+          "text-align": "justify",
+          "text-decoration-color": "rgba(0,255,255,0.5)",
+          "text-decoration-line": "underline overline",
+          "text-decoration-style": "wavy",
+          "text-indent": "calc(5% + 2rem)",
+          "text-transform": "uppercase",
+          "text-shadow": "1px 1px 2px #000, -1px -1px 2px rgba(255,255,255,0.5)",
+  
+          "width": "max(50%, 200px)",
+          "min-width": "0",
+          "max-width": "fit-content",
+  
+          "height": "clamp(100px, 50vh, 300px)",
+          "min-height": "auto",
+          "max-height": "none",
+  
+          "margin-top": "env(safe-area-inset-top)",
+          "margin-right": "-10%",
+          "margin-bottom": "calc(2em - 5px)",
+          "margin-left": "auto",
+  
+          "padding-top": "0.0001px",
+          "padding-right": "calc(1vw + 1em)",
+          "padding-bottom": "inherit",
+          "padding-left": "unset",
+  
+          "outline-width": "thick",
+          "outline-style": "double",
+          "outline-color": "rebeccapurple",
+          "outline-offset": "-3px",
+  
+          "position": "absolute",
+          "top": "var(--header-height)",
+          "left": "max(10%, 20px)",
+          "z-index": "999999",
+  
+          "overflow-x": "hidden",
+          "overflow-y": "scroll",
+  
+          "clip-path": "polygon(0% 0%, 100% 0%, 100% 100%)",
+          "mask-image": "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA...)",
+          "mix-blend-mode": "multiply",
+  
+          "transition-property": "background-color, transform",
+          "transition-duration": "0.3s, 1s",
+          "transition-timing-function": "ease-in-out, steps(4, jump-start)",
+          "transition-delay": "200ms, 0s",
+  
+          "animation-name": "fadeIn, spin",
+          "animation-duration": "2s, 3s",
+          "animation-timing-function": "linear, ease-in",
+          "animation-delay": "0s, 1s",
+          "animation-iteration-count": "infinite, 3",
+          "animation-direction": "normal, reverse",
+          "animation-fill-mode": "forwards, backwards",
+  
+          "cursor": "url(custom.cur), pointer",
+          "pointer-events": "none",
+  
+          "transform-origin-x": "left",
+          "transform-origin-y": "50%",
+          "transform-box": "border-box",
+          "transform-style": "preserve-3d"
+        }
+      }
+    }
+  }

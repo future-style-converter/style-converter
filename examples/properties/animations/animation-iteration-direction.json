@@ -1,0 +1,15 @@
+{
+  "components": {
+    "Iter_One": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "animation-iteration-count": "1" } },
+    "Iter_Three": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "animation-iteration-count": "3" } },
+    "Iter_Fractional": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "animation-iteration-count": "0.5" } },
+    "Iter_FractionalGtOne": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "animation-iteration-count": "2.5" } },
+    "Iter_Infinite": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "animation-iteration-count": "infinite" } },
+    "Iter_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "animation-iteration-count": "1, 3, infinite, 0.5" } },
+    "Dir_Normal": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "animation-direction": "normal" } },
+    "Dir_Reverse": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "animation-direction": "reverse" } },
+    "Dir_Alternate": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "animation-direction": "alternate" } },
+    "Dir_AlternateReverse": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "animation-direction": "alternate-reverse" } },
+    "Dir_Multi": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "animation-direction": "normal, reverse, alternate, alternate-reverse" } }
+  }
+}

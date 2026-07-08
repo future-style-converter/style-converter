@@ -1,0 +1,14 @@
+{
+  "components": {
+    "NavHeader": {
+      "properties": {
+        "width": "375px",
+        "height": "56px",
+        "padding": "0",
+        "background-color": "#3b82f6",
+        "border-bottom": "1px solid #1e3a8a",
+        "display": "block"
+      }
+    }
+  }
+}

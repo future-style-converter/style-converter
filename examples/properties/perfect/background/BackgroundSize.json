@@ -1,0 +1,11 @@
+{
+  "components": {
+    "V0_auto":      { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)", "background-size": "auto" } },
+    "V1_cover":     { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)", "background-size": "cover" } },
+    "V2_contain":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)", "background-size": "contain" } },
+    "V3_50px":      { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)", "background-size": "50px" } },
+    "V4_100x50":    { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)", "background-size": "100px 50px" } },
+    "V5_50pct":     { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)", "background-size": "50% 50%" } },
+    "V6_auto100":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "background-image": "linear-gradient(45deg, #f59e0b, #ef4444)", "background-size": "auto 100px" } }
+  }
+}

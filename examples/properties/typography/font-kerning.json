@@ -1,0 +1,7 @@
+{
+  "components": {
+    "FontKerning_Auto": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-kerning": "auto" } },
+    "FontKerning_Normal": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-kerning": "normal" } },
+    "FontKerning_None": { "properties": { "width": "240px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-kerning": "none" } }
+  }
+}

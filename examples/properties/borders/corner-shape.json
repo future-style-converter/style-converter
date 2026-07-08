@@ -1,0 +1,52 @@
+{
+  "components": {
+    "CornerShape_Round": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#3498db",
+        "border-top-left-radius": "30px", "border-top-right-radius": "30px",
+        "border-bottom-right-radius": "30px", "border-bottom-left-radius": "30px",
+        "corner-shape": "round"
+      }
+    },
+    "CornerShape_Angle": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#2ecc71",
+        "border-top-left-radius": "30px", "border-top-right-radius": "30px",
+        "border-bottom-right-radius": "30px", "border-bottom-left-radius": "30px",
+        "corner-shape": "angle"
+      }
+    },
+    "CornerShape_Notch": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#9b59b6",
+        "border-top-left-radius": "30px", "border-top-right-radius": "30px",
+        "border-bottom-right-radius": "30px", "border-bottom-left-radius": "30px",
+        "corner-shape": "notch"
+      }
+    },
+    "CornerShape_Bevel": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#e74c3c",
+        "border-top-left-radius": "30px", "border-top-right-radius": "30px",
+        "border-bottom-right-radius": "30px", "border-bottom-left-radius": "30px",
+        "corner-shape": "bevel"
+      }
+    },
+    "CornerShape_Scoop": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#f39c12",
+        "border-top-left-radius": "30px", "border-top-right-radius": "30px",
+        "border-bottom-right-radius": "30px", "border-bottom-left-radius": "30px",
+        "corner-shape": "scoop"
+      }
+    },
+    "CornerShape_Squircle": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#1abc9c",
+        "border-top-left-radius": "30px", "border-top-right-radius": "30px",
+        "border-bottom-right-radius": "30px", "border-bottom-left-radius": "30px",
+        "corner-shape": "squircle"
+      }
+    }
+  }
+}

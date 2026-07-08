@@ -1,0 +1,11 @@
+package app.irmodels.properties.effects
+
+import app.irmodels.*
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class MaskBorderSliceProperty(
+    val value: MaskBorderSliceValue
+) : IRProperty {
+    override val propertyName = "mask-border-slice"
+}

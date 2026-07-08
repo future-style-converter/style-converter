@@ -1,0 +1,34 @@
+{
+  "components": {
+    "V0_match_sour": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-mode": "match-source"
+      }
+    },
+    "V1_alpha": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-mode": "alpha"
+      }
+    },
+    "V2_luminance": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#3b82f6",
+        "mask-image": "linear-gradient(to right, black, transparent)",
+        "mask-mode": "luminance"
+      }
+    }
+  }
+}

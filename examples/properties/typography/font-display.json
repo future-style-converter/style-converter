@@ -1,0 +1,9 @@
+{
+  "components": {
+    "FontDisplay_Auto": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-display": "auto" } },
+    "FontDisplay_Block": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-display": "block" } },
+    "FontDisplay_Swap": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-display": "swap" } },
+    "FontDisplay_Fallback": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-display": "fallback" } },
+    "FontDisplay_Optional": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-display": "optional" } }
+  }
+}

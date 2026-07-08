@@ -1,0 +1,23 @@
+{
+  "components": {
+    "ListStyleType_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "list-style-type": "none" } },
+    "ListStyleType_Disc": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "list-style-type": "disc" } },
+    "ListStyleType_Circle": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "list-style-type": "circle" } },
+    "ListStyleType_Square": { "properties": { "width": "160px", "height": "60px", "background-color": "#9b59b6", "list-style-type": "square" } },
+    "ListStyleType_Decimal": { "properties": { "width": "160px", "height": "60px", "background-color": "#f39c12", "list-style-type": "decimal" } },
+    "ListStyleType_LowerRoman": { "properties": { "width": "160px", "height": "60px", "background-color": "#1abc9c", "list-style-type": "lower-roman" } },
+    "ListStyleType_UpperLatin": { "properties": { "width": "160px", "height": "60px", "background-color": "#34495e", "list-style-type": "upper-latin" } },
+    "ListStyleType_Hiragana": { "properties": { "width": "160px", "height": "60px", "background-color": "#c0392b", "list-style-type": "hiragana" } },
+    "ListStyleType_Armenian": { "properties": { "width": "160px", "height": "60px", "background-color": "#16a085", "list-style-type": "armenian" } },
+    "ListStyleType_JapaneseFormal": { "properties": { "width": "160px", "height": "60px", "background-color": "#8e44ad", "list-style-type": "japanese-formal" } },
+    "ListStyleType_String": { "properties": { "width": "160px", "height": "60px", "background-color": "#2980b9", "list-style-type": "\"-> \"" } },
+    "ListStyleType_CustomIdent": { "properties": { "width": "160px", "height": "60px", "background-color": "#27ae60", "list-style-type": "my-counter" } },
+    "ListStyleType_Symbols": { "properties": { "width": "160px", "height": "60px", "background-color": "#7f8c8d", "list-style-type": "symbols(cyclic \"a\" \"b\" \"c\")" } },
+
+    "ListStylePosition_Inside": { "properties": { "width": "160px", "height": "60px", "background-color": "#d35400", "list-style-position": "inside" } },
+    "ListStylePosition_Outside": { "properties": { "width": "160px", "height": "60px", "background-color": "#3498db", "list-style-position": "outside" } },
+
+    "ListStyleImage_None": { "properties": { "width": "160px", "height": "60px", "background-color": "#e74c3c", "list-style-image": "none" } },
+    "ListStyleImage_Url": { "properties": { "width": "160px", "height": "60px", "background-color": "#2ecc71", "list-style-image": "url(bullet.png)" } }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_accumula": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "enable-background": "accumulate"
+      }
+    },
+    "V1_new": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "enable-background": "new"
+      }
+    }
+  }
+}

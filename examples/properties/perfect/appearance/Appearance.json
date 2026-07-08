@@ -1,0 +1,157 @@
+{
+  "components": {
+    "Appe_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "none"
+      }
+    },
+    "Appe_auto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "auto"
+      }
+    },
+    "Appe_button": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "button"
+      }
+    },
+    "Appe_checkbox": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "checkbox"
+      }
+    },
+    "Appe_listbox": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "listbox"
+      }
+    },
+    "Appe_menulist": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "menulist"
+      }
+    },
+    "Appe_inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "inherit"
+      }
+    },
+    "V7_menulist_b": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "menulist-button"
+      }
+    },
+    "V8_meter": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "meter"
+      }
+    },
+    "V9_progress_b": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "progress-bar"
+      }
+    },
+    "V10_push_butto": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "push-button"
+      }
+    },
+    "V11_radio": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "radio"
+      }
+    },
+    "V12_searchfiel": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "searchfield"
+      }
+    },
+    "V13_slider_hor": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "slider-horizontal"
+      }
+    },
+    "V14_square_but": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "square-button"
+      }
+    },
+    "V15_textarea": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "textarea"
+      }
+    },
+    "V16_textfield": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "appearance": "textfield"
+      }
+    }
+  }
+}

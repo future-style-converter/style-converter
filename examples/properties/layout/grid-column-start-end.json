@@ -1,0 +1,38 @@
+{
+  "components": {
+    "GCS_IntLines": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr 1fr 1fr", "grid-auto-rows": "40px", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-column-start": "1", "grid-column-end": "3", "background-color": "#ef4444" } },
+        "b": { "properties": { "grid-column-start": "3", "grid-column-end": "5", "background-color": "#10b981" } }
+      }
+    },
+    "GCS_Negative": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr 1fr 1fr", "grid-auto-rows": "40px", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-column-start": "1", "grid-column-end": "-1", "background-color": "#ef4444" } }
+      }
+    },
+    "GCS_Span": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr 1fr 1fr", "grid-auto-rows": "40px", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-column-start": "span 2", "background-color": "#ef4444" } },
+        "b": { "properties": { "grid-column-start": "span 2", "background-color": "#10b981" } }
+      }
+    },
+    "GCS_NamedLine": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "[a] 1fr [b] 1fr [c] 1fr [d]", "grid-auto-rows": "40px", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-column-start": "a", "grid-column-end": "c", "background-color": "#ef4444" } },
+        "b": { "properties": { "grid-column-start": "c", "grid-column-end": "d", "background-color": "#10b981" } }
+      }
+    },
+    "GCS_Auto": {
+      "properties": { "width": "300px", "display": "grid", "grid-template-columns": "1fr 1fr 1fr", "grid-auto-rows": "40px", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "a": { "properties": { "grid-column-start": "auto", "grid-column-end": "auto", "background-color": "#ef4444" } },
+        "b": { "properties": { "background-color": "#10b981" } }
+      }
+    }
+  }
+}

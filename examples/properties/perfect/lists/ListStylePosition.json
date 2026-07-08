@@ -1,0 +1,22 @@
+{
+  "components": {
+    "V0_outside": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "list-style-position": "outside"
+      }
+    },
+    "V1_inside": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "list-style-position": "inside"
+      }
+    }
+  }
+}

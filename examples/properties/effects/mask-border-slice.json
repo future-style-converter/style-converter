@@ -1,0 +1,10 @@
+{
+  "components": {
+    "MaskBorderSlice_Number": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "mask-border-slice": "30" } },
+    "MaskBorderSlice_Percentage": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-border-slice": "25%" } },
+    "MaskBorderSlice_Two": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "mask-border-slice": "25% 33%" } },
+    "MaskBorderSlice_Four": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "mask-border-slice": "10 20 30 40" } },
+    "MaskBorderSlice_Fill": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "mask-border-slice": "fill" } },
+    "MaskBorderSlice_WithFill": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "mask-border-slice": "25% fill" } }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "components": {
+    "TextShadow_None": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "none" } },
+    "TextShadow_OffsetOnly": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "2px 2px #888" } },
+    "TextShadow_WithBlur": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "2px 2px 4px #000" } },
+    "TextShadow_ZeroBlur": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "1px 1px 0 #333" } },
+    "TextShadow_HugeBlur": { "properties": { "width": "260px", "height": "60px", "background-color": "#34495e", "color": "#fff", "font-size": "24px", "text-shadow": "0 0 20px #fff" } },
+    "TextShadow_Negative": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "-2px -2px 4px #c0392b" } },
+    "TextShadow_Rgba": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "0 2px 6px rgba(0,0,0,0.4)" } },
+    "TextShadow_ColorFirst": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "#333 3px 3px 6px" } },
+    "TextShadow_ColorLast": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "3px 3px 6px #333" } },
+    "TextShadow_Multi": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "2px 2px 4px #e74c3c, -2px -2px 4px #3498db" } }
+  }
+}

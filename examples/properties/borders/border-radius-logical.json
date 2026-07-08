@@ -1,0 +1,80 @@
+{
+  "components": {
+    "LogicalRadius_StartStart": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-start-start-radius": "32px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "LogicalRadius_StartEnd": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-start-end-radius": "32px",
+        "background-color": "#3498db"
+      }
+    },
+    "LogicalRadius_EndStart": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-end-start-radius": "32px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "LogicalRadius_EndEnd": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-end-end-radius": "32px",
+        "background-color": "#9b59b6"
+      }
+    },
+    "LogicalRadius_All_Same": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-start-start-radius": "20px", "border-start-end-radius": "20px",
+        "border-end-start-radius": "20px", "border-end-end-radius": "20px",
+        "background-color": "#f39c12"
+      }
+    },
+    "LogicalRadius_Percent": {
+      "properties": {
+        "width": "160px", "height": "120px",
+        "border-start-start-radius": "50%", "border-start-end-radius": "50%",
+        "border-end-start-radius": "50%", "border-end-end-radius": "50%",
+        "background-color": "#1abc9c"
+      }
+    },
+    "LogicalRadius_Elliptical_Pair": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-start-start-radius": "40px 20px", "border-start-end-radius": "40px 20px",
+        "border-end-start-radius": "40px 20px", "border-end-end-radius": "40px 20px",
+        "background-color": "#e67e22"
+      }
+    },
+    "LogicalRadius_MixedPxPercent": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-start-start-radius": "40px 50%", "border-start-end-radius": "40px 50%",
+        "border-end-start-radius": "40px 50%", "border-end-end-radius": "40px 50%",
+        "background-color": "#34495e"
+      }
+    },
+    "LogicalRadius_Different_Per_Corner": {
+      "properties": {
+        "width": "160px", "height": "100px",
+        "border-start-start-radius": "4px", "border-start-end-radius": "16px",
+        "border-end-start-radius": "32px", "border-end-end-radius": "48px",
+        "background-color": "#16a085"
+      }
+    },
+    "LogicalRadius_Rem": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-start-start-radius": "1rem", "border-start-end-radius": "1rem",
+        "border-end-start-radius": "1rem", "border-end-end-radius": "1rem",
+        "background-color": "#c0392b"
+      }
+    }
+  }
+}

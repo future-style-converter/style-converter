@@ -1,0 +1,13 @@
+{
+  "_notes": {
+    "fixture": "times",
+    "purpose": "Seconds (s) and milliseconds (ms). Exercised via transition-duration and animation-delay.",
+    "ir_shape": "IRTime serializes as { 'ms': <normalized>, 'original'?: { 'v': <n>, 'u':'S'|'MS' } } — 'original' omitted for MS input."
+  },
+  "components": {
+    "Time_Seconds":      { "properties": { "transition-duration": "0.3s", "background-color": "#3498db", "padding": "20px" } },
+    "Time_Milliseconds": { "properties": { "transition-duration": "500ms", "background-color": "#9b59b6", "padding": "20px" } },
+    "Time_Delay_s":      { "properties": { "animation-delay": "2s", "background-color": "#e67e22", "padding": "20px" } },
+    "Time_Delay_ms":     { "properties": { "animation-delay": "750ms", "background-color": "#2ecc71", "padding": "20px" } }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "components": {
+    "NFG_FlexOfGrids": {
+      "properties": { "width": "320px", "display": "flex", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "gridA": {
+          "properties": { "width": "150px", "display": "grid", "grid-template-columns": "1fr 1fr", "grid-auto-rows": "30px", "gap": "4px", "background-color": "#374151", "padding": "4px" },
+          "children": {
+            "a1": { "properties": { "background-color": "#ef4444" } },
+            "a2": { "properties": { "background-color": "#10b981" } },
+            "a3": { "properties": { "background-color": "#3b82f6" } },
+            "a4": { "properties": { "background-color": "#f59e0b" } }
+          }
+        },
+        "gridB": {
+          "properties": { "width": "150px", "display": "grid", "grid-template-columns": "1fr 1fr 1fr", "grid-auto-rows": "30px", "gap": "4px", "background-color": "#374151", "padding": "4px" },
+          "children": {
+            "b1": { "properties": { "background-color": "#a78bfa" } },
+            "b2": { "properties": { "background-color": "#22d3ee" } },
+            "b3": { "properties": { "background-color": "#fb7185" } }
+          }
+        }
+      }
+    },
+    "NFG_GridOfFlex": {
+      "properties": { "width": "320px", "display": "grid", "grid-template-columns": "1fr 1fr", "gap": "6px", "background-color": "#1f2937", "padding": "6px" },
+      "children": {
+        "flexA": {
+          "properties": { "display": "flex", "gap": "4px", "background-color": "#374151", "padding": "4px" },
+          "children": {
+            "a1": { "properties": { "width": "30px", "height": "30px", "background-color": "#ef4444" } },
+            "a2": { "properties": { "width": "30px", "height": "30px", "background-color": "#10b981" } }
+          }
+        },
+        "flexB": {
+          "properties": { "display": "flex", "flex-direction": "column", "gap": "4px", "background-color": "#374151", "padding": "4px" },
+          "children": {
+            "b1": { "properties": { "width": "60px", "height": "20px", "background-color": "#3b82f6" } },
+            "b2": { "properties": { "width": "60px", "height": "20px", "background-color": "#f59e0b" } }
+          }
+        }
+      }
+    }
+  }
+}

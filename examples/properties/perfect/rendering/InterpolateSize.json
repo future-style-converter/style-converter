@@ -1,0 +1,22 @@
+{
+  "components": {
+    "Inter_Default": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "interpolate-size": "numeric-only"
+      }
+    },
+    "V1_allow_keyw": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "interpolate-size": "allow-keywords"
+      }
+    }
+  }
+}

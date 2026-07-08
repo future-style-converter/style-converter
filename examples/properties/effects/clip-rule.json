@@ -1,0 +1,6 @@
+{
+  "components": {
+    "ClipRule_Nonzero": { "properties": { "width": "160px", "height": "120px", "background-color": "#3498db", "clip-rule": "nonzero" } },
+    "ClipRule_Evenodd": { "properties": { "width": "160px", "height": "120px", "background-color": "#e74c3c", "clip-rule": "evenodd" } }
+  }
+}

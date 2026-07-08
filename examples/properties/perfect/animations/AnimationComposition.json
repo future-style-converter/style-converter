@@ -1,0 +1,9 @@
+{
+  "components": {
+    "AC_Replace":    { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-composition": "replace" } },
+    "AC_Add":        { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-composition": "add" } },
+    "AC_Accumulate": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-composition": "accumulate" } },
+    "AC_Inherit":    { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-composition": "inherit" } },
+    "AC_List":       { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#9b59b6", "animation-composition": "replace, add, accumulate" } }
+  }
+}

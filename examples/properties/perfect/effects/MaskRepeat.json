@@ -1,0 +1,49 @@
+{
+  "components": {
+    "MR_repeat": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#3b82f6",
+        "mask-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "mask-repeat": "repeat"
+      }
+    },
+    "MR_norepeat": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#3b82f6",
+        "mask-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "mask-repeat": "no-repeat"
+      }
+    },
+    "MR_repeatx": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#3b82f6",
+        "mask-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "mask-repeat": "repeat-x"
+      }
+    },
+    "MR_repeaty": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#3b82f6",
+        "mask-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "mask-repeat": "repeat-y"
+      }
+    },
+    "MR_space": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "background-color": "#3b82f6",
+        "mask-image": "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23ef4444'/></svg>\")",
+        "mask-repeat": "space"
+      }
+    }
+  }
+}

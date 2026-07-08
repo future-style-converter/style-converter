@@ -1,0 +1,7 @@
+{
+  "components": {
+    "BaselineSource_Auto": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "baseline-source": "auto" } },
+    "BaselineSource_First": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "baseline-source": "first" } },
+    "BaselineSource_Last": { "properties": { "width": "220px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "baseline-source": "last" } }
+  }
+}

@@ -1,0 +1,211 @@
+{
+    "components": [
+        {
+            "name": "PrimaryButton",
+            "composableCode": "@Composable\nfun PrimaryButton(\n    modifier: Modifier = Modifier,\n    text: String\n) {\n    var isHovered by remember { mutableStateOf(false) }\n    var isPressed by remember { mutableStateOf(false) }\n\n    BoxWithConstraints {\n        Box(\n            modifier = modifier\n                .pointerInput(Unit) {\n                awaitPointerEventScope {\n                    while (true) {\n                        val event = awaitPointerEvent()\n                        when (event.type) {\n                            PointerEventType.Enter -> isHovered = true\n                        PointerEventType.Exit -> isHovered = false\n                        PointerEventType.Press -> isPressed = true\n                        PointerEventType.Release -> isPressed = false\n                        }\n                    }\n                }\n            }\n                .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 4.dp, bottomEnd = 2.dp, bottomStart = 0.dp))\n                .background(Color(0xFF6200EE))\n                .drawWithContent { drawContent(); drawLine(Color(0xFF000000), Offset(0f, 2.dp.toPx() / 2), Offset(size.width, 2.dp.toPx() / 2), 2.dp.toPx()); drawLine(Color(0xFF000000), Offset(0f, size.height - 0.dp.toPx() / 2), Offset(size.width, size.height - 0.dp.toPx() / 2), 0.dp.toPx()); drawLine(Color(0xFF00FF00), Offset(3.dp.toPx() / 2, 0f), Offset(3.dp.toPx() / 2, size.height), 3.dp.toPx()); drawLine(Color(0xFFFF0000), Offset(size.width - 1.dp.toPx() / 2, 0f), Offset(size.width - 1.dp.toPx() / 2, size.height), 1.dp.toPx()) }\n                .padding(top = 10.dp, end = 16.dp, bottom = 10.dp, start = 16.dp)\n                .then(if (isHovered) Modifier.alpha(0.9f) else Modifier)\n                .then(if (isPressed) Modifier.alpha(0.8f) else Modifier)\n                .then(if (isPressed) Modifier.scale(0.98f) else Modifier)\n                .then(if (maxWidth >= 768.dp) Modifier.border(1.dp, Color(0xFF00FF00)) else Modifier)\n        ) {\n            Text(\n                text = text,\n                fontWeight = FontWeight.SemiBold,\n                color = Color(0xFFFFFFFF)\n            )\n        }\n    }\n}\n",
+            "baseModifiers": [
+                "clip(RoundedCornerShape(topStart = 8.dp, topEnd = 4.dp, bottomEnd = 2.dp, bottomStart = 0.dp))",
+                "background(Color(0xFF6200EE))",
+                "drawWithContent { drawContent(); drawLine(Color(0xFF000000), Offset(0f, 2.dp.toPx() / 2), Offset(size.width, 2.dp.toPx() / 2), 2.dp.toPx()); drawLine(Color(0xFF000000), Offset(0f, size.height - 0.dp.toPx() / 2), Offset(size.width, size.height - 0.dp.toPx() / 2), 0.dp.toPx()); drawLine(Color(0xFF00FF00), Offset(3.dp.toPx() / 2, 0f), Offset(3.dp.toPx() / 2, size.height), 3.dp.toPx()); drawLine(Color(0xFFFF0000), Offset(size.width - 1.dp.toPx() / 2, 0f), Offset(size.width - 1.dp.toPx() / 2, size.height), 1.dp.toPx()) }",
+                "padding(top = 10.dp, end = 16.dp, bottom = 10.dp, start = 16.dp)"
+            ],
+            "states": [
+                {
+                    "name": ":hover",
+                    "modifiers": [
+                        "alpha(0.9f)"
+                    ]
+                },
+                {
+                    "name": ":active",
+                    "modifiers": [
+                        "alpha(0.8f)",
+                        "scale(0.98f)"
+                    ]
+                }
+            ],
+            "responsive": [
+                {
+                    "condition": "(min-width: 768px)",
+                    "modifiers": [
+                        "drawWithContent { drawContent(); drawLine(Color(0xFF00FF00), Offset(4.dp.toPx() / 2, 0f), Offset(4.dp.toPx() / 2, size.height), 4.dp.toPx()) }"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "SecondaryButton",
+            "composableCode": "@Composable\nfun SecondaryButton(\n    modifier: Modifier = Modifier,\n    text: String\n) {\n    var isHovered by remember { mutableStateOf(false) }\n\n    Box(\n        modifier = modifier\n            .pointerInput(Unit) {\n                awaitPointerEventScope {\n                    while (true) {\n                        val event = awaitPointerEvent()\n                        when (event.type) {\n                            PointerEventType.Enter -> isHovered = true\n                        PointerEventType.Exit -> isHovered = false\n                        }\n                    }\n                }\n            }\n            .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomEnd = 6.dp, bottomStart = 6.dp))\n            .then(if (isHovered) Modifier.background(Color(0xFFF2E7FE)) else Modifier.background(Color(0xFFFFFFFF)))\n            .border(2.dp, Color(0xFF6200EE))\n            .padding(top = 10.dp, end = 16.dp, bottom = 10.dp, start = 16.dp)\n    ) {\n        Text(\n            text = text,\n            fontWeight = FontWeight.Medium,\n            color = Color(0xFF6200EE)\n        )\n    }\n}\n",
+            "baseModifiers": [
+                "clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomEnd = 6.dp, bottomStart = 6.dp))",
+                "background(Color(0xFFFFFFFF))",
+                "border(2.dp, Color(0xFF6200EE))",
+                "padding(top = 10.dp, end = 16.dp, bottom = 10.dp, start = 16.dp)"
+            ],
+            "states": [
+                {
+                    "name": ":hover",
+                    "modifiers": [
+                        "background(Color(0xFFF2E7FE))"
+                    ]
+                }
+            ],
+            "responsive": []
+        },
+        {
+            "name": "DangerButton",
+            "composableCode": "@Composable\nfun DangerButton(\n    modifier: Modifier = Modifier,\n    text: String\n) {\n    var isHovered by remember { mutableStateOf(false) }\n\n    Box(\n        modifier = modifier\n            .pointerInput(Unit) {\n                awaitPointerEventScope {\n                    while (true) {\n                        val event = awaitPointerEvent()\n                        when (event.type) {\n                            PointerEventType.Enter -> isHovered = true\n                        PointerEventType.Exit -> isHovered = false\n                        }\n                    }\n                }\n            }\n            .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomEnd = 6.dp, bottomStart = 6.dp))\n            .then(if (isHovered) Modifier.background(Color(0xFFD32F2F)) else Modifier.background(Color(0xFFB00020)))\n            .padding(top = 10.dp, end = 16.dp, bottom = 10.dp, start = 16.dp)\n    ) {\n        Text(\n            text = text,\n            fontWeight = FontWeight.SemiBold,\n            color = Color(0xFFFFFFFF)\n        )\n    }\n}\n",
+            "baseModifiers": [
+                "clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomEnd = 6.dp, bottomStart = 6.dp))",
+                "background(Color(0xFFB00020))",
+                "padding(top = 10.dp, end = 16.dp, bottom = 10.dp, start = 16.dp)"
+            ],
+            "states": [
+                {
+                    "name": ":hover",
+                    "modifiers": [
+                        "background(Color(0xFFD32F2F))"
+                    ]
+                }
+            ],
+            "responsive": []
+        },
+        {
+            "name": "InputField",
+            "composableCode": "@Composable\nfun InputField(\n    modifier: Modifier = Modifier,\n    text: String\n) {\n    var isFocused by remember { mutableStateOf(false) }\n\n    Box(\n        modifier = modifier\n            .onFocusChanged { isFocused = it.isFocused }\n            .focusable()\n            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomEnd = 4.dp, bottomStart = 4.dp))\n            .then(if (isFocused) Modifier.border(1.dp, Color(0xFF6200EE)) else Modifier.border(1.dp, Color(0xFFCCCCCC)))\n            .padding(top = 8.dp, end = 12.dp, bottom = 8.dp, start = 12.dp)\n    ) {\n        Text(\n            text = text,\n            fontSize = 14.0.sp,\n            color = Color(0xFF333333)\n        )\n    }\n}\n",
+            "baseModifiers": [
+                "clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomEnd = 4.dp, bottomStart = 4.dp))",
+                "border(1.dp, Color(0xFFCCCCCC))",
+                "padding(top = 8.dp, end = 12.dp, bottom = 8.dp, start = 12.dp)"
+            ],
+            "states": [
+                {
+                    "name": ":focus",
+                    "modifiers": [
+                        "/* border-*-color: Color(0xFF6200EE) - property not yet mapped to Compose */",
+                        "/* border-*-color: Color(0xFF6200EE) - property not yet mapped to Compose */",
+                        "/* border-*-color: Color(0xFF6200EE) - property not yet mapped to Compose */",
+                        "/* border-*-color: Color(0xFF6200EE) - property not yet mapped to Compose */"
+                    ]
+                }
+            ],
+            "responsive": []
+        },
+        {
+            "name": "Card",
+            "composableCode": "@Composable\nfun Card(\n    modifier: Modifier = Modifier,\n    content: @Composable BoxScope.() -> Unit = {}\n) {\n    var isHovered by remember { mutableStateOf(false) }\n\n    Box(\n        modifier = modifier\n            .pointerInput(Unit) {\n                awaitPointerEventScope {\n                    while (true) {\n                        val event = awaitPointerEvent()\n                        when (event.type) {\n                            PointerEventType.Enter -> isHovered = true\n                        PointerEventType.Exit -> isHovered = false\n                        }\n                    }\n                }\n            }\n            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomEnd = 8.dp, bottomStart = 8.dp))\n            .background(Color(0xFFFFFFFF))\n            .border(1.dp, Color(0xFFE0E0E0))\n            .padding(top = 16.dp, end = 16.dp, bottom = 16.dp, start = 16.dp)\n            .then(if (isHovered) Modifier.shadow(8.0.dp) else Modifier.shadow(2.dp))\n    ) {\n        content()\n    }\n}\n",
+            "baseModifiers": [
+                "clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp, bottomEnd = 8.dp, bottomStart = 8.dp))",
+                "background(Color(0xFFFFFFFF))",
+                "border(1.dp, Color(0xFFE0E0E0))",
+                "padding(top = 16.dp, end = 16.dp, bottom = 16.dp, start = 16.dp)",
+                "shadow(2.dp)"
+            ],
+            "states": [
+                {
+                    "name": ":hover",
+                    "modifiers": [
+                        "shadow(4.dp)"
+                    ]
+                }
+            ],
+            "responsive": []
+        },
+        {
+            "name": "Modal",
+            "composableCode": "@Composable\nfun Modal(modifier: Modifier = Modifier) {\n    Box(\n        modifier = modifier\n            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 12.dp))\n            .background(Color(0xFFFFFFFF))\n            .padding(top = 24.dp, end = 24.dp, bottom = 24.dp, start = 24.dp)\n            .shadow(12.dp)\n            .fillMaxWidth(0.9f)\n            .widthIn(max = 600.dp)\n    )\n}\n",
+            "baseModifiers": [
+                "clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 12.dp))",
+                "background(Color(0xFFFFFFFF))",
+                "padding(top = 24.dp, end = 24.dp, bottom = 24.dp, start = 24.dp)",
+                "shadow(12.dp)",
+                "fillMaxWidth(0.9f)",
+                "widthIn(max = 600.dp)"
+            ],
+            "states": [],
+            "responsive": []
+        },
+        {
+            "name": "Navbar",
+            "composableCode": "@Composable\nfun Navbar(\n    modifier: Modifier = Modifier,\n    content: @Composable RowScope.() -> Unit = {}\n) {\n    Row(\n        modifier = modifier\n            .background(Color(0xFF6200EE))\n            .padding(top = 12.dp, end = 24.dp, bottom = 12.dp, start = 24.dp),\n        horizontalArrangement = Arrangement.SpaceBetween,\n        verticalAlignment = Alignment.CenterVertically\n    ) {\n        content()\n    }\n}\n",
+            "baseModifiers": [
+                "background(Color(0xFF6200EE))",
+                "padding(top = 12.dp, end = 24.dp, bottom = 12.dp, start = 24.dp)"
+            ],
+            "states": [],
+            "responsive": []
+        },
+        {
+            "name": "Footer",
+            "composableCode": "@Composable\nfun Footer(modifier: Modifier = Modifier) {\n    ProvideTextStyle(\n        value = LocalTextStyle.current.copy(\n            color = Color(0xFF333333),\n            textAlign = TextAlign.Center\n        )\n    ) {\n        Box(\n            modifier = modifier\n                .background(Color(0xFFF5F5F5))\n                .padding(top = 20.dp, end = 20.dp, bottom = 20.dp, start = 20.dp)\n        )\n    }\n}\n",
+            "baseModifiers": [
+                "background(Color(0xFFF5F5F5))",
+                "padding(top = 20.dp, end = 20.dp, bottom = 20.dp, start = 20.dp)"
+            ],
+            "states": [],
+            "responsive": []
+        },
+        {
+            "name": "Badge",
+            "composableCode": "@Composable\nfun Badge(modifier: Modifier = Modifier) {\n    ProvideTextStyle(\n        value = LocalTextStyle.current.copy(\n            color = Color(0xFF000000),\n            fontSize = 12.sp\n        )\n    ) {\n        Box(\n            modifier = modifier\n                .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 12.dp))\n                .background(Color(0xFF03DAC6))\n                .padding(top = 4.dp, end = 10.dp, bottom = 4.dp, start = 10.dp)\n        )\n    }\n}\n",
+            "baseModifiers": [
+                "clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp, bottomEnd = 12.dp, bottomStart = 12.dp))",
+                "background(Color(0xFF03DAC6))",
+                "padding(top = 4.dp, end = 10.dp, bottom = 4.dp, start = 10.dp)"
+            ],
+            "states": [],
+            "responsive": []
+        },
+        {
+            "name": "Alert",
+            "composableCode": "@Composable\nfun Alert(modifier: Modifier = Modifier) {\n    Box(\n        modifier = modifier\n            .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomEnd = 6.dp, bottomStart = 6.dp))\n            .padding(top = 12.dp, end = 16.dp, bottom = 12.dp, start = 16.dp)\n    )\n}\n",
+            "baseModifiers": [
+                "clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomEnd = 6.dp, bottomStart = 6.dp))",
+                "padding(top = 12.dp, end = 16.dp, bottom = 12.dp, start = 16.dp)"
+            ],
+            "states": [],
+            "responsive": []
+        },
+        {
+            "name": "Tooltip",
+            "composableCode": "@Composable\nfun Tooltip(modifier: Modifier = Modifier) {\n    ProvideTextStyle(\n        value = LocalTextStyle.current.copy(\n            color = Color(0xFFFFFFFF),\n            fontSize = 12.sp\n        )\n    ) {\n        Box(\n            modifier = modifier\n                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomEnd = 4.dp, bottomStart = 4.dp))\n                .background(Color(0xFF333333))\n                .padding(top = 6.dp, end = 10.dp, bottom = 6.dp, start = 10.dp)\n        )\n    }\n}\n",
+            "baseModifiers": [
+                "clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomEnd = 4.dp, bottomStart = 4.dp))",
+                "background(Color(0xFF333333))",
+                "padding(top = 6.dp, end = 10.dp, bottom = 6.dp, start = 10.dp)"
+            ],
+            "states": [],
+            "responsive": []
+        }
+    ],
+    "imports": [
+        "androidx.compose.runtime.Composable",
+        "androidx.compose.ui.Modifier",
+        "androidx.compose.foundation.layout.*",
+        "androidx.compose.foundation.background",
+        "androidx.compose.foundation.border",
+        "androidx.compose.foundation.shape.RoundedCornerShape",
+        "androidx.compose.foundation.shape.RectangleShape",
+        "androidx.compose.ui.draw.clip",
+        "androidx.compose.ui.draw.alpha",
+        "androidx.compose.ui.draw.shadow",
+        "androidx.compose.ui.draw.rotate",
+        "androidx.compose.ui.draw.scale",
+        "androidx.compose.ui.graphics.Color",
+        "androidx.compose.ui.graphics.Brush",
+        "androidx.compose.ui.unit.dp",
+        "androidx.compose.ui.unit.sp",
+        "androidx.compose.ui.text.font.FontStyle",
+        "androidx.compose.ui.text.font.FontWeight",
+        "androidx.compose.ui.text.style.TextDecoration",
+        "androidx.compose.ui.text.style.TextAlign",
+        "androidx.compose.foundation.verticalScroll",
+        "androidx.compose.foundation.horizontalScroll",
+        "androidx.compose.foundation.rememberScrollState",
+        "androidx.compose.ui.zIndex",
+        "androidx.compose.ui.Alignment",
+        "androidx.compose.foundation.layout.Arrangement",
+        "androidx.compose.material3.LocalTextStyle",
+        "androidx.compose.material3.ProvideTextStyle"
+    ]
+}

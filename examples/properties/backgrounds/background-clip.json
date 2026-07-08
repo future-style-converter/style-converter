@@ -1,0 +1,8 @@
+{
+  "components": {
+    "Clip_BorderBox": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "border": "5px dashed yellow", "padding": "10px", "background-clip": "border-box" } },
+    "Clip_PaddingBox": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "border": "5px dashed yellow", "padding": "10px", "background-clip": "padding-box" } },
+    "Clip_ContentBox": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "border": "5px dashed yellow", "padding": "10px", "background-clip": "content-box" } },
+    "Clip_Text": { "properties": { "background-image": "linear-gradient(to right, red, blue)", "background-clip": "text", "color": "transparent", "font-size": "40px", "font-weight": "bold" } }
+  }
+}

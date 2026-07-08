@@ -1,0 +1,169 @@
+{
+  "components": {
+    "Audit_Radius_50Pct_30Pct_Square": {
+      "properties": {
+        "width": "120px", "height": "120px",
+        "border-top-left-radius": "50% 30%",
+        "border-top-right-radius": "50% 30%",
+        "border-bottom-right-radius": "50% 30%",
+        "border-bottom-left-radius": "50% 30%",
+        "background-color": "#3498db"
+      }
+    },
+    "Audit_Radius_SumExceedsSide": {
+      "properties": {
+        "width": "120px", "height": "60px",
+        "border-top-left-radius": "80px",
+        "border-top-right-radius": "80px",
+        "border-bottom-right-radius": "80px",
+        "border-bottom-left-radius": "80px",
+        "background-color": "#e74c3c"
+      }
+    },
+    "Audit_Radius_Asymmetric_Corners": {
+      "properties": {
+        "width": "180px", "height": "80px",
+        "border-top-left-radius": "4px",
+        "border-top-right-radius": "40px",
+        "border-bottom-right-radius": "4px",
+        "border-bottom-left-radius": "40px",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Audit_Radius_Zero": {
+      "properties": {
+        "width": "160px", "height": "80px",
+        "border-top-left-radius": "0",
+        "border-top-right-radius": "0",
+        "border-bottom-right-radius": "0",
+        "border-bottom-left-radius": "0",
+        "background-color": "#9b59b6"
+      }
+    },
+    "Audit_Style_Double_3px": {
+      "properties": {
+        "width": "160px", "height": "60px",
+        "border-top-width": "3px", "border-right-width": "3px", "border-bottom-width": "3px", "border-left-width": "3px",
+        "border-top-style": "double", "border-right-style": "double", "border-bottom-style": "double", "border-left-style": "double",
+        "border-top-color": "#111", "border-right-color": "#111", "border-bottom-color": "#111", "border-left-color": "#111",
+        "background-color": "#f1c40f"
+      }
+    },
+    "Audit_Style_Double_2px": {
+      "properties": {
+        "width": "160px", "height": "60px",
+        "border-top-width": "2px", "border-right-width": "2px", "border-bottom-width": "2px", "border-left-width": "2px",
+        "border-top-style": "double", "border-right-style": "double", "border-bottom-style": "double", "border-left-style": "double",
+        "border-top-color": "#111", "border-right-color": "#111", "border-bottom-color": "#111", "border-left-color": "#111",
+        "background-color": "#f39c12"
+      }
+    },
+    "Audit_Style_Groove_Thick": {
+      "properties": {
+        "width": "160px", "height": "60px",
+        "border-top-width": "14px", "border-right-width": "14px", "border-bottom-width": "14px", "border-left-width": "14px",
+        "border-top-style": "groove", "border-right-style": "groove", "border-bottom-style": "groove", "border-left-style": "groove",
+        "border-top-color": "#8e44ad", "border-right-color": "#8e44ad", "border-bottom-color": "#8e44ad", "border-left-color": "#8e44ad",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Audit_Style_Ridge_Thick": {
+      "properties": {
+        "width": "160px", "height": "60px",
+        "border-top-width": "14px", "border-right-width": "14px", "border-bottom-width": "14px", "border-left-width": "14px",
+        "border-top-style": "ridge", "border-right-style": "ridge", "border-bottom-style": "ridge", "border-left-style": "ridge",
+        "border-top-color": "#c0392b", "border-right-color": "#c0392b", "border-bottom-color": "#c0392b", "border-left-color": "#c0392b",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Audit_Style_Inset_Thick": {
+      "properties": {
+        "width": "160px", "height": "60px",
+        "border-top-width": "14px", "border-right-width": "14px", "border-bottom-width": "14px", "border-left-width": "14px",
+        "border-top-style": "inset", "border-right-style": "inset", "border-bottom-style": "inset", "border-left-style": "inset",
+        "border-top-color": "#27ae60", "border-right-color": "#27ae60", "border-bottom-color": "#27ae60", "border-left-color": "#27ae60",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Audit_Style_Outset_Thick": {
+      "properties": {
+        "width": "160px", "height": "60px",
+        "border-top-width": "14px", "border-right-width": "14px", "border-bottom-width": "14px", "border-left-width": "14px",
+        "border-top-style": "outset", "border-right-style": "outset", "border-bottom-style": "outset", "border-left-style": "outset",
+        "border-top-color": "#2980b9", "border-right-color": "#2980b9", "border-bottom-color": "#2980b9", "border-left-color": "#2980b9",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Audit_PerSide_FourStyles": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "8px", "border-right-width": "8px", "border-bottom-width": "8px", "border-left-width": "8px",
+        "border-top-style": "solid", "border-right-style": "dashed", "border-bottom-style": "dotted", "border-left-style": "double",
+        "border-top-color": "#c0392b", "border-right-color": "#2980b9", "border-bottom-color": "#27ae60", "border-left-color": "#8e44ad",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Audit_ZeroWidth_SolidStyle": {
+      "properties": {
+        "width": "160px", "height": "60px",
+        "border-top-width": "0", "border-right-width": "0", "border-bottom-width": "0", "border-left-width": "0",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-top-color": "#111", "border-right-color": "#111", "border-bottom-color": "#111", "border-left-color": "#111",
+        "background-color": "#16a085"
+      }
+    },
+    "Audit_BorderImage_Gradient_FractionalSlice": {
+      "properties": {
+        "width": "200px", "height": "80px",
+        "border-top-width": "20px", "border-right-width": "20px", "border-bottom-width": "20px", "border-left-width": "20px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(45deg, #e74c3c, #f1c40f, #2ecc71)",
+        "border-image-slice": "12.5%",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Audit_BorderImage_Outset_Large": {
+      "properties": {
+        "width": "180px", "height": "80px",
+        "border-top-width": "10px", "border-right-width": "10px", "border-bottom-width": "10px", "border-left-width": "10px",
+        "border-top-style": "solid", "border-right-style": "solid", "border-bottom-style": "solid", "border-left-style": "solid",
+        "border-image-source": "linear-gradient(red, blue)",
+        "border-image-slice": "1",
+        "border-image-outset": "20px",
+        "background-color": "#ecf0f1"
+      }
+    },
+    "Audit_Outline_Double_2px": {
+      "properties": {
+        "width": "160px", "height": "60px",
+        "outline-width": "2px", "outline-style": "double", "outline-color": "#111",
+        "background-color": "#3498db"
+      }
+    },
+    "Audit_Outline_Double_6px": {
+      "properties": {
+        "width": "160px", "height": "60px",
+        "outline-width": "6px", "outline-style": "double", "outline-color": "#111",
+        "background-color": "#2ecc71"
+      }
+    },
+    "Audit_Shadow_ManyLayers": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#ecf0f1",
+        "box-shadow": "0 0 4px #e74c3c, 0 0 8px #f39c12, 0 0 12px #f1c40f, 0 0 16px #2ecc71, 0 0 20px #1abc9c, 0 0 24px #3498db, 0 0 28px #9b59b6, 0 0 32px #e91e63, 2px 2px 4px #111, -2px -2px 4px #111"
+      }
+    },
+    "Audit_Shadow_Inset_And_Outset_Mixed": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#f1c40f",
+        "box-shadow": "inset 0 0 8px 2px #111, 4px 4px 12px 2px rgba(0,0,0,0.4)"
+      }
+    },
+    "Audit_Shadow_Inset_LargeSpread": {
+      "properties": {
+        "width": "160px", "height": "80px", "background-color": "#3498db",
+        "box-shadow": "inset 0 0 0 16px rgba(0,0,0,0.3)"
+      }
+    }
+  }
+}

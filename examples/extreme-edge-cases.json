@@ -1,0 +1,1136 @@
+{
+  "components": {
+    "UnitlessZeroMadness": {
+      "properties": {
+        "margin": "0",
+        "padding": "0 0 0 0",
+        "border-radius": "0",
+        "border": "0 solid #000",
+        "outline": "0 solid rgba(0, 0, 0, 0)",
+        "width": "0",
+        "max-width": "0"
+      }
+    },
+    "AllMarginVariations": {
+      "properties": {
+        "margin-top": "10px",
+        "margin-right": "20%",
+        "margin-bottom": "0",
+        "margin-left": "auto"
+      }
+    },
+    "AllPaddingVariations": {
+      "properties": {
+        "padding-top": "5px",
+        "padding-right": "10em",
+        "padding-bottom": "15rem",
+        "padding-left": "20vh"
+      }
+    },
+    "MarginShorthand_1Value": {
+      "properties": {
+        "margin": "10px"
+      }
+    },
+    "MarginShorthand_2Values": {
+      "properties": {
+        "margin": "10px 20px"
+      }
+    },
+    "MarginShorthand_3Values": {
+      "properties": {
+        "margin": "10px 20px 30px"
+      }
+    },
+    "MarginShorthand_4Values": {
+      "properties": {
+        "margin": "10px 20px 30px 40px"
+      }
+    },
+    "MarginShorthand_MixedUnits": {
+      "properties": {
+        "margin": "10px 5% 0 auto"
+      }
+    },
+    "PaddingShorthand_1Value": {
+      "properties": {
+        "padding": "15px"
+      }
+    },
+    "PaddingShorthand_2Values": {
+      "properties": {
+        "padding": "15px 25px"
+      }
+    },
+    "PaddingShorthand_3Values": {
+      "properties": {
+        "padding": "15px 25px 35px"
+      }
+    },
+    "PaddingShorthand_4Values": {
+      "properties": {
+        "padding": "15px 25px 35px 45px"
+      }
+    },
+    "PaddingShorthand_DifferentUnits": {
+      "properties": {
+        "padding": "1em 2rem 3vh 4vw"
+      }
+    },
+    "AllBorderWidths": {
+      "properties": {
+        "border-top-width": "1px",
+        "border-right-width": "2px",
+        "border-bottom-width": "3px",
+        "border-left-width": "4px"
+      }
+    },
+    "BorderWidthKeywords": {
+      "properties": {
+        "border-top-width": "thin",
+        "border-right-width": "medium",
+        "border-bottom-width": "thick",
+        "border-left-width": "0"
+      }
+    },
+    "AllBorderStyles": {
+      "properties": {
+        "border-top-style": "solid",
+        "border-right-style": "dashed",
+        "border-bottom-style": "dotted",
+        "border-left-style": "double"
+      }
+    },
+    "MoreBorderStyles": {
+      "properties": {
+        "border-top-style": "groove",
+        "border-right-style": "ridge",
+        "border-bottom-style": "inset",
+        "border-left-style": "outset"
+      }
+    },
+    "BorderStyles_NoneHidden": {
+      "properties": {
+        "border-top-style": "none",
+        "border-right-style": "hidden",
+        "border-bottom-style": "none",
+        "border-left-style": "hidden"
+      }
+    },
+    "AllBorderColors_Hex": {
+      "properties": {
+        "border-top-color": "#ff0000",
+        "border-right-color": "#00ff00",
+        "border-bottom-color": "#0000ff",
+        "border-left-color": "#000000"
+      }
+    },
+    "AllBorderColors_RGB": {
+      "properties": {
+        "border-top-color": "rgb(255, 0, 0)",
+        "border-right-color": "rgb(0, 255, 0)",
+        "border-bottom-color": "rgb(0, 0, 255)",
+        "border-left-color": "rgb(128, 128, 128)"
+      }
+    },
+    "AllBorderColors_RGBA": {
+      "properties": {
+        "border-top-color": "rgba(255, 0, 0, 0.5)",
+        "border-right-color": "rgba(0, 255, 0, 0.8)",
+        "border-bottom-color": "rgba(0, 0, 255, 0.3)",
+        "border-left-color": "rgba(128, 128, 128, 1)"
+      }
+    },
+    "AllBorderColors_Named": {
+      "properties": {
+        "border-top-color": "red",
+        "border-right-color": "blue",
+        "border-bottom-color": "green",
+        "border-left-color": "transparent"
+      }
+    },
+    "AllBorderRadii_Uniform": {
+      "properties": {
+        "border-top-left-radius": "10px",
+        "border-top-right-radius": "20px",
+        "border-bottom-right-radius": "30px",
+        "border-bottom-left-radius": "40px"
+      }
+    },
+    "AllBorderRadii_Elliptical": {
+      "properties": {
+        "border-top-left-radius": "10px 5px",
+        "border-top-right-radius": "20px 10px",
+        "border-bottom-right-radius": "30px 15px",
+        "border-bottom-left-radius": "40px 20px"
+      }
+    },
+    "AllBorderRadii_MixedUnits": {
+      "properties": {
+        "border-top-left-radius": "10px",
+        "border-top-right-radius": "5%",
+        "border-bottom-right-radius": "2em",
+        "border-bottom-left-radius": "0"
+      }
+    },
+    "BorderShorthand_WidthOnly": {
+      "properties": {
+        "border": "5px"
+      }
+    },
+    "BorderShorthand_WidthStyle": {
+      "properties": {
+        "border": "2px solid"
+      }
+    },
+    "BorderShorthand_StyleOnly": {
+      "properties": {
+        "border": "dashed"
+      }
+    },
+    "BorderShorthand_ColorOnly": {
+      "properties": {
+        "border": "#ff0000"
+      }
+    },
+    "BorderShorthand_WidthStyleColor": {
+      "properties": {
+        "border": "3px dotted #00ff00"
+      }
+    },
+    "BorderShorthand_WidthStyleColorRGBA": {
+      "properties": {
+        "border": "1px solid rgba(255, 0, 0, 0.5)"
+      }
+    },
+    "BorderShorthand_StyleColorWidth": {
+      "properties": {
+        "border": "dashed blue 2px"
+      }
+    },
+    "BorderShorthand_ComplexRGBA": {
+      "properties": {
+        "border": "2px double rgba(128, 64, 255, 0.75)"
+      }
+    },
+    "BorderTopShorthand": {
+      "properties": {
+        "border-top": "5px groove rgba(255, 128, 0, 0.6)"
+      }
+    },
+    "BorderRightShorthand": {
+      "properties": {
+        "border-right": "3px ridge rgb(100, 200, 50)"
+      }
+    },
+    "BorderBottomShorthand": {
+      "properties": {
+        "border-bottom": "4px inset #abcdef"
+      }
+    },
+    "BorderLeftShorthand": {
+      "properties": {
+        "border-left": "6px outset transparent"
+      }
+    },
+    "BorderRadiusShorthand_1Value": {
+      "properties": {
+        "border-radius": "10px"
+      }
+    },
+    "BorderRadiusShorthand_2Values": {
+      "properties": {
+        "border-radius": "10px 20px"
+      }
+    },
+    "BorderRadiusShorthand_3Values": {
+      "properties": {
+        "border-radius": "10px 20px 30px"
+      }
+    },
+    "BorderRadiusShorthand_4Values": {
+      "properties": {
+        "border-radius": "10px 20px 30px 40px"
+      }
+    },
+    "BorderRadiusShorthand_Elliptical_1": {
+      "properties": {
+        "border-radius": "10px / 20px"
+      }
+    },
+    "BorderRadiusShorthand_Elliptical_4_4": {
+      "properties": {
+        "border-radius": "10px 20px 30px 40px / 5px 10px 15px 20px"
+      }
+    },
+    "BorderRadiusShorthand_Mixed": {
+      "properties": {
+        "border-radius": "50% 0 25% 0"
+      }
+    },
+    "BorderRadiusShorthand_Zero": {
+      "properties": {
+        "border-radius": "0"
+      }
+    },
+    "BorderColorShorthand_1Value": {
+      "properties": {
+        "border-color": "#ff0000"
+      }
+    },
+    "BorderColorShorthand_2Values": {
+      "properties": {
+        "border-color": "#ff0000 #00ff00"
+      }
+    },
+    "BorderColorShorthand_3Values": {
+      "properties": {
+        "border-color": "#ff0000 #00ff00 #0000ff"
+      }
+    },
+    "BorderColorShorthand_4Values": {
+      "properties": {
+        "border-color": "#ff0000 #00ff00 #0000ff #000000"
+      }
+    },
+    "BorderColorShorthand_RGBA_1Value": {
+      "properties": {
+        "border-color": "rgba(255, 0, 0, 0.5)"
+      }
+    },
+    "BorderColorShorthand_RGBA_4Values": {
+      "properties": {
+        "border-color": "rgba(255, 0, 0, 0.5) rgba(0, 255, 0, 0.6) rgba(0, 0, 255, 0.7) rgba(128, 128, 128, 0.8)"
+      }
+    },
+    "BorderColorShorthand_Mixed": {
+      "properties": {
+        "border-color": "red rgba(0, 255, 0, 0.5) #0000ff transparent"
+      }
+    },
+    "OutlineProperties_Individual": {
+      "properties": {
+        "outline-width": "2px",
+        "outline-style": "solid",
+        "outline-color": "#ff0000"
+      }
+    },
+    "OutlineWidth_Keywords": {
+      "properties": {
+        "outline-width": "thin"
+      }
+    },
+    "OutlineWidth_Medium": {
+      "properties": {
+        "outline-width": "medium"
+      }
+    },
+    "OutlineWidth_Thick": {
+      "properties": {
+        "outline-width": "thick"
+      }
+    },
+    "OutlineStyles_All": {
+      "properties": {
+        "outline-style": "dotted"
+      }
+    },
+    "OutlineColor_RGBA": {
+      "properties": {
+        "outline-color": "rgba(100, 200, 255, 0.4)"
+      }
+    },
+    "OutlineShorthand_Full": {
+      "properties": {
+        "outline": "3px dashed rgba(255, 100, 50, 0.8)"
+      }
+    },
+    "OutlineShorthand_StyleOnly": {
+      "properties": {
+        "outline": "dotted"
+      }
+    },
+    "OutlineShorthand_WidthStyle": {
+      "properties": {
+        "outline": "5px ridge"
+      }
+    },
+    "BoxShadow_Single": {
+      "properties": {
+        "box-shadow": "5px 5px 10px rgba(0, 0, 0, 0.5)"
+      }
+    },
+    "BoxShadow_SingleWithSpread": {
+      "properties": {
+        "box-shadow": "5px 5px 10px 2px rgba(0, 0, 0, 0.5)"
+      }
+    },
+    "BoxShadow_SingleInset": {
+      "properties": {
+        "box-shadow": "inset 5px 5px 10px rgba(0, 0, 0, 0.5)"
+      }
+    },
+    "BoxShadow_Double": {
+      "properties": {
+        "box-shadow": "5px 5px 10px rgba(0, 0, 0, 0.5), -5px -5px 15px rgba(255, 255, 255, 0.3)"
+      }
+    },
+    "BoxShadow_Triple": {
+      "properties": {
+        "box-shadow": "0 0 5px red, 0 0 10px blue, inset 0 0 20px rgba(0, 255, 0, 0.5)"
+      }
+    },
+    "BoxShadow_ZeroOffset": {
+      "properties": {
+        "box-shadow": "0 0 20px rgba(255, 215, 0, 0.8)"
+      }
+    },
+    "BoxShadow_NoBlur": {
+      "properties": {
+        "box-shadow": "10px 10px 0 #000"
+      }
+    },
+    "BoxShadow_Complex": {
+      "properties": {
+        "box-shadow": "inset 2px 2px 4px rgba(0,0,0,0.1), 3px 3px 6px rgba(0,0,0,0.15), 5px 5px 15px rgba(0,0,0,0.2)"
+      }
+    },
+    "Transform_Translate": {
+      "properties": {
+        "transform": "translate(10px, 20px)"
+      }
+    },
+    "Transform_TranslateX": {
+      "properties": {
+        "transform": "translateX(50px)"
+      }
+    },
+    "Transform_TranslateY": {
+      "properties": {
+        "transform": "translateY(-30px)"
+      }
+    },
+    "Transform_Rotate": {
+      "properties": {
+        "transform": "rotate(45deg)"
+      }
+    },
+    "Transform_RotateNegative": {
+      "properties": {
+        "transform": "rotate(-90deg)"
+      }
+    },
+    "Transform_Scale": {
+      "properties": {
+        "transform": "scale(1.5)"
+      }
+    },
+    "Transform_ScaleXY": {
+      "properties": {
+        "transform": "scale(2, 0.5)"
+      }
+    },
+    "Transform_ScaleX": {
+      "properties": {
+        "transform": "scaleX(0.8)"
+      }
+    },
+    "Transform_ScaleY": {
+      "properties": {
+        "transform": "scaleY(1.2)"
+      }
+    },
+    "Transform_Skew": {
+      "properties": {
+        "transform": "skew(10deg, 5deg)"
+      }
+    },
+    "Transform_SkewX": {
+      "properties": {
+        "transform": "skewX(15deg)"
+      }
+    },
+    "Transform_SkewY": {
+      "properties": {
+        "transform": "skewY(20deg)"
+      }
+    },
+    "Transform_Multiple": {
+      "properties": {
+        "transform": "translate(10px, 20px) rotate(45deg) scale(1.1)"
+      }
+    },
+    "Transform_ComplexChain": {
+      "properties": {
+        "transform": "translateX(50px) translateY(-30px) rotate(30deg) scaleX(1.2) scaleY(0.9) skewX(5deg)"
+      }
+    },
+    "Transform_Matrix": {
+      "properties": {
+        "transform": "matrix(1, 0.5, -0.5, 1, 0, 0)"
+      }
+    },
+    "Transform_Perspective": {
+      "properties": {
+        "transform": "perspective(500px)"
+      }
+    },
+    "Transform_Translate3d": {
+      "properties": {
+        "transform": "translate3d(10px, 20px, 30px)"
+      }
+    },
+    "Transform_Rotate3d": {
+      "properties": {
+        "transform": "rotate3d(1, 1, 1, 45deg)"
+      }
+    },
+    "Transform_RotateX": {
+      "properties": {
+        "transform": "rotateX(45deg)"
+      }
+    },
+    "Transform_RotateY": {
+      "properties": {
+        "transform": "rotateY(60deg)"
+      }
+    },
+    "Transform_RotateZ": {
+      "properties": {
+        "transform": "rotateZ(90deg)"
+      }
+    },
+    "Transform_Scale3d": {
+      "properties": {
+        "transform": "scale3d(1.5, 1.2, 0.8)"
+      }
+    },
+    "Transform_ScaleZ": {
+      "properties": {
+        "transform": "scaleZ(2)"
+      }
+    },
+    "Transform_TranslateZ": {
+      "properties": {
+        "transform": "translateZ(100px)"
+      }
+    },
+    "Color_Hex3": {
+      "properties": {
+        "color": "#f00"
+      }
+    },
+    "Color_Hex6": {
+      "properties": {
+        "color": "#ff0000"
+      }
+    },
+    "Color_RGB": {
+      "properties": {
+        "color": "rgb(255, 0, 0)"
+      }
+    },
+    "Color_RGBA": {
+      "properties": {
+        "color": "rgba(255, 0, 0, 0.5)"
+      }
+    },
+    "Color_Named": {
+      "properties": {
+        "color": "red"
+      }
+    },
+    "Color_Transparent": {
+      "properties": {
+        "color": "transparent"
+      }
+    },
+    "BackgroundColor_AllFormats": {
+      "properties": {
+        "background-color": "rgba(100, 150, 200, 0.75)"
+      }
+    },
+    "Opacity_Zero": {
+      "properties": {
+        "opacity": "0"
+      }
+    },
+    "Opacity_Half": {
+      "properties": {
+        "opacity": "0.5"
+      }
+    },
+    "Opacity_Full": {
+      "properties": {
+        "opacity": "1"
+      }
+    },
+    "Opacity_Decimal": {
+      "properties": {
+        "opacity": "0.75"
+      }
+    },
+    "Display_Flex": {
+      "properties": {
+        "display": "flex"
+      }
+    },
+    "Display_Block": {
+      "properties": {
+        "display": "block"
+      }
+    },
+    "Display_Inline": {
+      "properties": {
+        "display": "inline"
+      }
+    },
+    "Display_InlineBlock": {
+      "properties": {
+        "display": "inline-block"
+      }
+    },
+    "Display_None": {
+      "properties": {
+        "display": "none"
+      }
+    },
+    "Display_Grid": {
+      "properties": {
+        "display": "grid"
+      }
+    },
+    "Display_InlineFlex": {
+      "properties": {
+        "display": "inline-flex"
+      }
+    },
+    "JustifyContent_FlexStart": {
+      "properties": {
+        "justify-content": "flex-start"
+      }
+    },
+    "JustifyContent_FlexEnd": {
+      "properties": {
+        "justify-content": "flex-end"
+      }
+    },
+    "JustifyContent_Center": {
+      "properties": {
+        "justify-content": "center"
+      }
+    },
+    "JustifyContent_SpaceBetween": {
+      "properties": {
+        "justify-content": "space-between"
+      }
+    },
+    "JustifyContent_SpaceAround": {
+      "properties": {
+        "justify-content": "space-around"
+      }
+    },
+    "JustifyContent_SpaceEvenly": {
+      "properties": {
+        "justify-content": "space-evenly"
+      }
+    },
+    "AlignItems_FlexStart": {
+      "properties": {
+        "align-items": "flex-start"
+      }
+    },
+    "AlignItems_FlexEnd": {
+      "properties": {
+        "align-items": "flex-end"
+      }
+    },
+    "AlignItems_Center": {
+      "properties": {
+        "align-items": "center"
+      }
+    },
+    "AlignItems_Baseline": {
+      "properties": {
+        "align-items": "baseline"
+      }
+    },
+    "AlignItems_Stretch": {
+      "properties": {
+        "align-items": "stretch"
+      }
+    },
+    "Position_Static": {
+      "properties": {
+        "position": "static"
+      }
+    },
+    "Position_Relative": {
+      "properties": {
+        "position": "relative"
+      }
+    },
+    "Position_Absolute": {
+      "properties": {
+        "position": "absolute"
+      }
+    },
+    "Position_Fixed": {
+      "properties": {
+        "position": "fixed"
+      }
+    },
+    "Position_Sticky": {
+      "properties": {
+        "position": "sticky"
+      }
+    },
+    "FontSize_Pixels": {
+      "properties": {
+        "font-size": "16px"
+      }
+    },
+    "FontSize_Em": {
+      "properties": {
+        "font-size": "1.5em"
+      }
+    },
+    "FontSize_Rem": {
+      "properties": {
+        "font-size": "2rem"
+      }
+    },
+    "FontSize_Percent": {
+      "properties": {
+        "font-size": "120%"
+      }
+    },
+    "FontSize_Keywords": {
+      "properties": {
+        "font-size": "large"
+      }
+    },
+    "FontWeight_100": {
+      "properties": {
+        "font-weight": 100
+      }
+    },
+    "FontWeight_200": {
+      "properties": {
+        "font-weight": 200
+      }
+    },
+    "FontWeight_300": {
+      "properties": {
+        "font-weight": 300
+      }
+    },
+    "FontWeight_400": {
+      "properties": {
+        "font-weight": 400
+      }
+    },
+    "FontWeight_500": {
+      "properties": {
+        "font-weight": 500
+      }
+    },
+    "FontWeight_600": {
+      "properties": {
+        "font-weight": 600
+      }
+    },
+    "FontWeight_700": {
+      "properties": {
+        "font-weight": 700
+      }
+    },
+    "FontWeight_800": {
+      "properties": {
+        "font-weight": 800
+      }
+    },
+    "FontWeight_900": {
+      "properties": {
+        "font-weight": 900
+      }
+    },
+    "FontWeight_Normal": {
+      "properties": {
+        "font-weight": "normal"
+      }
+    },
+    "FontWeight_Bold": {
+      "properties": {
+        "font-weight": "bold"
+      }
+    },
+    "FontWeight_Lighter": {
+      "properties": {
+        "font-weight": "lighter"
+      }
+    },
+    "FontWeight_Bolder": {
+      "properties": {
+        "font-weight": "bolder"
+      }
+    },
+    "TextAlign_Left": {
+      "properties": {
+        "text-align": "left"
+      }
+    },
+    "TextAlign_Right": {
+      "properties": {
+        "text-align": "right"
+      }
+    },
+    "TextAlign_Center": {
+      "properties": {
+        "text-align": "center"
+      }
+    },
+    "TextAlign_Justify": {
+      "properties": {
+        "text-align": "justify"
+      }
+    },
+    "Width_Pixels": {
+      "properties": {
+        "width": "100px"
+      }
+    },
+    "Width_Percent": {
+      "properties": {
+        "width": "50%"
+      }
+    },
+    "Width_Auto": {
+      "properties": {
+        "width": "auto"
+      }
+    },
+    "Width_Viewport": {
+      "properties": {
+        "width": "80vw"
+      }
+    },
+    "MaxWidth_Pixels": {
+      "properties": {
+        "max-width": "1200px"
+      }
+    },
+    "MaxWidth_Percent": {
+      "properties": {
+        "max-width": "90%"
+      }
+    },
+    "MaxWidth_None": {
+      "properties": {
+        "max-width": "none"
+      }
+    },
+    "CombinedFlexLayout": {
+      "properties": {
+        "display": "flex",
+        "justify-content": "space-between",
+        "align-items": "center",
+        "padding": "20px 40px",
+        "margin": "10px 0",
+        "border": "1px solid rgba(0, 0, 0, 0.1)",
+        "border-radius": "8px",
+        "background-color": "#ffffff",
+        "box-shadow": "0 2px 8px rgba(0, 0, 0, 0.1)"
+      }
+    },
+    "ComplexCard": {
+      "properties": {
+        "position": "relative",
+        "padding": "24px 32px 24px 32px",
+        "margin": "16px auto 32px auto",
+        "border": "2px solid rgba(100, 150, 200, 0.3)",
+        "border-radius": "12px 12px 4px 4px",
+        "background-color": "rgba(255, 255, 255, 0.95)",
+        "box-shadow": "0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
+        "width": "100%",
+        "max-width": "800px"
+      }
+    },
+    "InsaneBorderCombinations": {
+      "properties": {
+        "border-top": "5px solid red",
+        "border-right": "3px dashed rgba(0, 255, 0, 0.6)",
+        "border-bottom": "4px dotted #0000ff",
+        "border-left": "2px double rgba(255, 128, 0, 0.8)",
+        "border-radius": "10px 20px 30px 40px / 5px 10px 15px 20px",
+        "padding": "15px 20px 25px 30px",
+        "margin": "5px 10px 15px 20px"
+      }
+    },
+    "TransformMadness": {
+      "properties": {
+        "transform": "translate(50px, -30px) rotate(15deg) scale(1.2, 0.8) skewX(10deg) skewY(-5deg)",
+        "opacity": "0.85",
+        "border-radius": "50%",
+        "box-shadow": "0 0 20px rgba(255, 0, 255, 0.5), inset 0 0 10px rgba(0, 255, 255, 0.3)"
+      }
+    },
+    "AllUnitsTest_Length": {
+      "properties": {
+        "padding-top": "10px",
+        "padding-right": "2em",
+        "padding-bottom": "1.5rem",
+        "padding-left": "5vh",
+        "margin-top": "3vw",
+        "margin-right": "4%",
+        "margin-bottom": "0.5cm",
+        "margin-left": "10mm"
+      }
+    },
+    "AllUnitsTest_MoreUnits": {
+      "properties": {
+        "border-top-width": "1pt",
+        "border-right-width": "0.5in",
+        "border-bottom-width": "2pc",
+        "border-left-width": "3ex"
+      }
+    },
+    "ZeroValueVariations": {
+      "properties": {
+        "margin": "0",
+        "padding": "0px",
+        "border": "0 none transparent",
+        "outline": "0",
+        "opacity": "0"
+      }
+    },
+    "AutoValueVariations": {
+      "properties": {
+        "margin-left": "auto",
+        "margin-right": "auto",
+        "width": "auto",
+        "max-width": "none"
+      }
+    },
+    "MixedColorFormats": {
+      "properties": {
+        "color": "#ff0000",
+        "background-color": "rgb(0, 255, 0)",
+        "border-top-color": "rgba(0, 0, 255, 0.5)",
+        "border-right-color": "blue",
+        "border-bottom-color": "transparent",
+        "border-left-color": "#abc",
+        "outline-color": "rgba(255, 128, 64, 0.75)"
+      }
+    },
+    "ComplexNestedProperties": {
+      "properties": {
+        "display": "flex",
+        "position": "absolute",
+        "transform": "translate3d(10px, 20px, 30px) rotateX(45deg) scale3d(1.1, 1.2, 1.3)",
+        "box-shadow": "0 0 5px red, 0 0 10px blue, 0 0 15px green, inset 0 0 20px rgba(255, 255, 255, 0.5)",
+        "border": "3px double rgba(128, 128, 255, 0.9)",
+        "border-radius": "25% 10% 35% 20%",
+        "padding": "1em 2rem 3vh 4vw",
+        "margin": "5% auto 10px 20px",
+        "width": "80vw",
+        "max-width": "1000px",
+        "opacity": "0.95"
+      }
+    },
+    "EdgeCase_DecimalValues": {
+      "properties": {
+        "opacity": "0.123456",
+        "padding": "10.5px 20.75px 30.25px 40.125px",
+        "border-radius": "5.5px 10.25px 15.75px 20.125px",
+        "transform": "rotate(45.5deg) scale(1.234)"
+      }
+    },
+    "EdgeCase_VeryLargeValues": {
+      "properties": {
+        "width": "9999px",
+        "padding": "999px",
+        "font-size": "500px",
+        "border-width": "100px"
+      }
+    },
+    "EdgeCase_VerySmallValues": {
+      "properties": {
+        "width": "0.001px",
+        "padding": "0.5px",
+        "font-size": "0.1px",
+        "opacity": "0.01"
+      }
+    },
+    "CompletePropertyCoverage": {
+      "properties": {
+        "display": "flex",
+        "position": "relative",
+        "width": "100%",
+        "max-width": "1200px",
+        "padding": "20px 30px 40px 50px",
+        "margin": "10px 15px 20px 25px",
+        "border-top": "1px solid red",
+        "border-right": "2px dashed green",
+        "border-bottom": "3px dotted blue",
+        "border-left": "4px double yellow",
+        "border-top-left-radius": "10px",
+        "border-top-right-radius": "20px",
+        "border-bottom-right-radius": "30px",
+        "border-bottom-left-radius": "40px",
+        "outline": "5px groove rgba(255, 0, 255, 0.5)",
+        "background-color": "rgba(240, 240, 240, 0.9)",
+        "color": "#333333",
+        "font-size": "18px",
+        "font-weight": 600,
+        "text-align": "center",
+        "opacity": "0.95",
+        "transform": "translate(10px, 20px) rotate(5deg) scale(1.05)",
+        "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.3)",
+        "justify-content": "space-between",
+        "align-items": "center"
+      }
+    },
+    "StressTest_MultipleRGBAInShorthands": {
+      "properties": {
+        "border-color": "rgba(255, 0, 0, 0.1) rgba(0, 255, 0, 0.2) rgba(0, 0, 255, 0.3) rgba(255, 255, 0, 0.4)",
+        "outline": "2px solid rgba(255, 128, 64, 0.5)",
+        "box-shadow": "rgba(0, 0, 0, 0.1) 0 0 5px, rgba(255, 0, 0, 0.2) 0 0 10px, rgba(0, 255, 0, 0.3) 0 0 15px",
+        "background-color": "rgba(128, 128, 128, 0.05)"
+      }
+    },
+    "ExtremeNesting": {
+      "properties": {
+        "transform": "translate3d(10px, 20px, 30px) rotateX(10deg) rotateY(20deg) rotateZ(30deg) scale3d(1.1, 1.2, 1.3) skewX(5deg) skewY(-5deg) perspective(1000px)",
+        "box-shadow": "0 1px 1px rgba(0,0,0,0.1), 0 2px 2px rgba(0,0,0,0.1), 0 4px 4px rgba(0,0,0,0.1), 0 8px 8px rgba(0,0,0,0.1), 0 16px 16px rgba(0,0,0,0.1), inset 0 0 20px rgba(255, 255, 255, 0.1)"
+      }
+    },
+    "WithHoverSelector": {
+      "properties": {
+        "background-color": "#ffffff",
+        "padding": "10px",
+        "border": "1px solid #ccc"
+      },
+      "selectors": [
+        {
+          "selector": ":hover",
+          "properties": {
+            "background-color": "#f0f0f0",
+            "border-color": "#999",
+            "transform": "scale(1.05)",
+            "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.2)"
+          }
+        }
+      ]
+    },
+    "WithMultipleSelectors": {
+      "properties": {
+        "padding": "15px",
+        "background-color": "#ffffff"
+      },
+      "selectors": [
+        {
+          "selector": ":hover",
+          "properties": {
+            "background-color": "#e0e0e0"
+          }
+        },
+        {
+          "selector": ":active",
+          "properties": {
+            "background-color": "#d0d0d0",
+            "transform": "translateY(2px)"
+          }
+        },
+        {
+          "selector": ":focus",
+          "properties": {
+            "outline": "3px solid rgba(0, 100, 255, 0.5)",
+            "outline-offset": "2px"
+          }
+        },
+        {
+          "selector": ":disabled",
+          "properties": {
+            "opacity": "0.5",
+            "background-color": "#f5f5f5"
+          }
+        }
+      ]
+    },
+    "WithMediaQueries": {
+      "properties": {
+        "width": "100%",
+        "padding": "10px"
+      },
+      "media": [
+        {
+          "query": "(min-width: 768px)",
+          "properties": {
+            "width": "750px",
+            "padding": "20px",
+            "margin": "0 auto"
+          }
+        },
+        {
+          "query": "(min-width: 1024px)",
+          "properties": {
+            "width": "960px",
+            "padding": "30px 40px"
+          }
+        },
+        {
+          "query": "(min-width: 1200px)",
+          "properties": {
+            "width": "1140px",
+            "padding": "40px 50px",
+            "border": "2px solid rgba(0, 0, 0, 0.1)",
+            "border-radius": "12px"
+          }
+        }
+      ]
+    },
+    "ComplexWithSelectorsAndMedia": {
+      "properties": {
+        "display": "flex",
+        "padding": "20px",
+        "background-color": "#ffffff",
+        "border": "1px solid #e0e0e0",
+        "border-radius": "8px"
+      },
+      "selectors": [
+        {
+          "selector": ":hover",
+          "properties": {
+            "box-shadow": "0 4px 12px rgba(0, 0, 0, 0.15)",
+            "transform": "translateY(-2px)"
+          }
+        },
+        {
+          "selector": ":active",
+          "properties": {
+            "transform": "translateY(0)",
+            "box-shadow": "0 2px 6px rgba(0, 0, 0, 0.1)"
+          }
+        }
+      ],
+      "media": [
+        {
+          "query": "(min-width: 768px)",
+          "properties": {
+            "padding": "30px 40px",
+            "border-radius": "12px"
+          }
+        },
+        {
+          "query": "(min-width: 1024px)",
+          "properties": {
+            "padding": "40px 60px",
+            "max-width": "1000px",
+            "margin": "20px auto"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "components": {
+    "TextSpacingTrim_Normal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-spacing-trim": "normal" } },
+    "TextSpacingTrim_TrimStart": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-spacing-trim": "trim-start" } },
+    "TextSpacingTrim_SpaceFirst": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-spacing-trim": "space-first" } },
+    "TextSpacingTrim_TrimEnd": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-spacing-trim": "trim-end" } },
+    "TextSpacingTrim_SpaceAll": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-spacing-trim": "space-all" } },
+    "TextSpacingTrim_TrimAll": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-spacing-trim": "trim-all" } }
+  }
+}

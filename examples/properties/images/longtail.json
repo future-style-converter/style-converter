@@ -1,0 +1,24 @@
+{
+  "components": {
+    "ImageRendering_Auto": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "image-rendering": "auto" } },
+    "ImageRendering_CrispEdges": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "image-rendering": "crisp-edges" } },
+    "ImageRendering_Pixelated": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "image-rendering": "pixelated" } },
+    "ImageRendering_Smooth": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "image-rendering": "smooth" } },
+    "ImageRendering_HighQuality": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "image-rendering": "high-quality" } },
+
+    "ObjectFit_Fill": { "properties": { "width": "160px", "height": "80px", "background-color": "#1abc9c", "object-fit": "fill" } },
+    "ObjectFit_Contain": { "properties": { "width": "160px", "height": "80px", "background-color": "#34495e", "object-fit": "contain" } },
+    "ObjectFit_Cover": { "properties": { "width": "160px", "height": "80px", "background-color": "#c0392b", "object-fit": "cover" } },
+    "ObjectFit_None": { "properties": { "width": "160px", "height": "80px", "background-color": "#16a085", "object-fit": "none" } },
+    "ObjectFit_ScaleDown": { "properties": { "width": "160px", "height": "80px", "background-color": "#8e44ad", "object-fit": "scale-down" } },
+
+    "ObjectPosition_Single": { "properties": { "width": "160px", "height": "80px", "background-color": "#2980b9", "object-position": "center" } },
+    "ObjectPosition_Pair": { "properties": { "width": "160px", "height": "80px", "background-color": "#27ae60", "object-position": "right top" } },
+    "ObjectPosition_Pct": { "properties": { "width": "160px", "height": "80px", "background-color": "#7f8c8d", "object-position": "25% 75%" } },
+    "ObjectPosition_Length": { "properties": { "width": "160px", "height": "80px", "background-color": "#d35400", "object-position": "10px 20px" } },
+
+    "ObjectViewBox_None": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "object-view-box": "none" } },
+    "ObjectViewBox_Inset1": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "object-view-box": "inset(10px)" } },
+    "ObjectViewBox_Inset4": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "object-view-box": "inset(5px 10px 15px 20px)" } }
+  }
+}

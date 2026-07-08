@@ -1,0 +1,262 @@
+{
+  "components": {
+    "Ruby_Center": {
+      "properties": {
+        "ruby-align": "center",
+        "ruby-position": "over",
+        "background-color": "#3498db",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "Ruby_SpaceBetween": {
+      "properties": {
+        "ruby-align": "space-between",
+        "ruby-position": "under",
+        "background-color": "#e74c3c",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "Ruby_Merge": {
+      "properties": {
+        "ruby-merge": "merge",
+        "ruby-overhang": "auto",
+        "background-color": "#2ecc71",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "Baseline_Alphabetic": {
+      "properties": {
+        "alignment-baseline": "alphabetic",
+        "dominant-baseline": "auto",
+        "background-color": "#9b59b6",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "Baseline_Middle": {
+      "properties": {
+        "alignment-baseline": "middle",
+        "dominant-baseline": "central",
+        "background-color": "#1abc9c",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "Baseline_Shift_Super": {
+      "properties": {
+        "baseline-shift": "super",
+        "background-color": "#f39c12",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "Baseline_Shift_Sub": {
+      "properties": {
+        "baseline-shift": "sub",
+        "background-color": "#34495e",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "TextCombine_All": {
+      "properties": {
+        "text-combine-upright": "all",
+        "background-color": "#16a085",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "TabSize_4": {
+      "properties": {
+        "tab-size": "4",
+        "background-color": "#8e44ad",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px",
+        "font-family": "monospace"
+      }
+    },
+    "TabSize_8": {
+      "properties": {
+        "tab-size": "8",
+        "background-color": "#d35400",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px",
+        "font-family": "monospace"
+      }
+    },
+    "TextIndent_20px": {
+      "properties": {
+        "text-indent": "20px",
+        "background-color": "#c0392b",
+        "color": "white",
+        "padding": "15px",
+        "width": "220px",
+        "height": "100px"
+      }
+    },
+    "TextTransform_Uppercase": {
+      "properties": {
+        "text-transform": "uppercase",
+        "background-color": "#2980b9",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "TextTransform_Capitalize": {
+      "properties": {
+        "text-transform": "capitalize",
+        "background-color": "#27ae60",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "TextRendering_Legibility": {
+      "properties": {
+        "text-rendering": "optimizeLegibility",
+        "background-color": "#e67e22",
+        "color": "white",
+        "padding": "15px",
+        "width": "220px",
+        "height": "80px"
+      }
+    },
+    "TextSizeAdjust_None": {
+      "properties": {
+        "text-size-adjust": "none",
+        "background-color": "#7f8c8d",
+        "color": "white",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "OffsetPath_Circle": {
+      "properties": {
+        "offset-path": "circle(50px)",
+        "offset-distance": "25%",
+        "background-color": "#3498db",
+        "padding": "15px",
+        "width": "180px",
+        "height": "60px"
+      }
+    },
+    "OffsetPath_Path": {
+      "properties": {
+        "offset-path": "path('M 0 0 L 100 100')",
+        "offset-distance": "50%",
+        "offset-rotate": "auto",
+        "background-color": "#9b59b6",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "OffsetRotate_45deg": {
+      "properties": {
+        "offset-rotate": "45deg",
+        "offset-anchor": "center",
+        "background-color": "#1abc9c",
+        "padding": "15px",
+        "width": "180px",
+        "height": "60px"
+      }
+    },
+    "Nav_Directional": {
+      "properties": {
+        "nav-up": "auto",
+        "nav-down": "auto",
+        "nav-left": "auto",
+        "nav-right": "auto",
+        "background-color": "#e74c3c",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "Nav_Custom": {
+      "properties": {
+        "nav-up": "#header",
+        "nav-down": "#footer",
+        "background-color": "#2ecc71",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "ReadingOrder_Source": {
+      "properties": {
+        "reading-order": "source",
+        "background-color": "#f39c12",
+        "padding": "15px",
+        "width": "200px",
+        "height": "80px"
+      }
+    },
+    "Combined_RubyBaseline": {
+      "properties": {
+        "ruby-align": "center",
+        "ruby-position": "over",
+        "alignment-baseline": "middle",
+        "background-color": "#8e44ad",
+        "color": "white",
+        "padding": "15px",
+        "width": "250px",
+        "height": "100px"
+      }
+    },
+    "Combined_TextFormatting": {
+      "properties": {
+        "tab-size": "4",
+        "text-indent": "15px",
+        "text-transform": "uppercase",
+        "text-rendering": "optimizeLegibility",
+        "background-color": "#16a085",
+        "color": "white",
+        "padding": "15px",
+        "width": "250px",
+        "height": "100px",
+        "font-family": "monospace"
+      }
+    },
+    "Combined_OffsetNav": {
+      "properties": {
+        "offset-path": "circle(30px)",
+        "offset-distance": "75%",
+        "nav-up": "auto",
+        "nav-down": "auto",
+        "background-color": "#34495e",
+        "color": "white",
+        "padding": "15px",
+        "width": "220px",
+        "height": "80px"
+      }
+    }
+  }
+}

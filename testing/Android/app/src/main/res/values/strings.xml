@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Style Converter Test</string>
+    <string name="title">Compose Style Converter - Visual Test</string>
+    <string name="loading">Loading components...</string>
+    <string name="error">Failed to load components</string>
+    <string name="total_components">Total components: %1$d</string>
+    <string name="component_title">Component: %1$s</string>
+    <string name="base_modifiers">Base Modifiers:</string>
+    <string name="states">States:</string>
+    <string name="responsive">Responsive:</string>
+    <string name="hover_instructions">Hover/touch to see interaction states</string>
+</resources>

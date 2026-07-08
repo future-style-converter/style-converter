@@ -1,0 +1,156 @@
+//
+//  ScreenshotManager.swift
+//  StyleConverterTest
+//
+//  Saves per-component screenshots to the app's Documents directory using
+//  SwiftUI's ImageRenderer (iOS 16+). The test-ios.sh script pulls them
+//  out of the simulator with `xcrun simctl get_app_container`.
+//
+//  Mirrors testing/Android/.../screenshot/ScreenshotManager.kt.
+//
+
+import SwiftUI
+import UIKit
+
+enum ScreenshotManager {
+
+    /// Directory: <Documents>/test_screenshots/
+    static var directory: URL {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let dir  = docs.appendingPathComponent("test_screenshots", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    /// Reset capture directory.
+    static func reset() {
+        let fm = FileManager.default
+        try? fm.removeItem(at: directory)
+        try? fm.createDirectory(at: directory, withIntermediateDirectories: true)
+    }
+
+    /// Save a UIImage as `{index}_{componentName}.png`.
+    static func save(image: UIImage, index: Int, name: String) {
+        let sanitized = name
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: " ", with: "_")
+        let filename = String(format: "%03d_%@.png", index, sanitized)
+        let url = directory.appendingPathComponent(filename)
+        if let data = image.pngData() {
+            try? data.write(to: url)
+        }
+    }
+
+    /// Render a SwiftUI view to UIImage at 1x scale to match the Android
+    /// emulator's 160dpi baseline (1pt == 1px). That keeps per-component
+    /// captures the same pixel dimensions across platforms.
+    @MainActor
+    static func render<V: View>(_ view: V) -> UIImage? {
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = 1.0
+        return renderer.uiImage
+    }
+
+    /// Hi-res variant for the B-EXT typography probes
+    /// (testing/COMPARE_METRICS_B8-B10.md Section 1.1). Renders at
+    /// scale=4.0 so a 0.25-pt baseline shift in CSS coords surfaces as
+    /// a 1-px shift in the captured buffer (above AA noise).
+    ///
+    /// The probe pipeline uses this only for components whose ID begins
+    /// with "B8_", "B9_", or "B10_" — the canonical naming convention
+    /// for examples/_metric_probes/ fixtures. The 327-pair regression
+    /// baseline is locked at 1× and must never call into here.
+    ///
+    /// TODO[B-EXT round 91+]: requires Xcode/simulator validation pass
+    /// before the iOS branch of probe-text-metrics.sh can call it. The
+    /// web pipeline already produces real probe data via
+    /// capture-screenshots-hires.mjs.
+    @MainActor
+    static func renderHires<V: View>(_ view: V) -> UIImage? {
+        let renderer = ImageRenderer(content: view)
+        // 4.0 — Section 1.1 of the spec. NOT a config value: hardcoded
+        // because the B8/B9/B10 metric helpers expect exactly 4× and the
+        // unit conversion (4× px → 1× px = divide by 4) is baked in there.
+        renderer.scale = 4.0
+        return renderer.uiImage
+    }
+
+    /// Returns true when a component ID belongs to the B-EXT typography
+    /// probe set (B8/B9/B10). Used by the capture loop to decide between
+    /// the standard 1× render and the hires 4× render.
+    /// See testing/COMPARE_METRICS_B8-B10.md Section 2 for the naming
+    /// convention.
+    static func isProbeComponent(_ name: String) -> Bool {
+        // Underscore-suffix match keeps "B8_Serif_AVATAR_16" in the set
+        // but excludes a hypothetical "B8X_..." that isn't ours.
+        return name.hasPrefix("B8_") || name.hasPrefix("B9_") || name.hasPrefix("B10_")
+    }
+
+    // MARK: - TITAN Phase 1 inbox-polling mode
+    //
+    // testing/TITAN_ARCHITECTURE.md §6.3 — for the WPT bucket-A pass we
+    // can't afford a 30 s xcodebuild + simctl install + launch cycle
+    // per fixture (10 000 fixtures × 30 s = 83 hours, untenable). The
+    // app boots ONCE; the orchestrator pushes per-fixture IR JSON into
+    // an "inbox" directory inside the simulator's Documents/, the app
+    // detects it, renders + screenshots, deletes the inbox file, and
+    // waits for the next one.
+    //
+    // Per-fixture cost drops to ~0.5 s (just the SwiftUI render + the
+    // ImageRenderer pass), giving the iOS pass an estimated wall time
+    // of ~6-8 hours for full bucket-A.
+    //
+    // TODO[TITAN Phase 1.5]: requires Xcode/simulator validation pass.
+    // The Phase 1 implementer (TITAN-IMPL-1) shipped this as code-only
+    // because the headless-Xcode validation environment couldn't be
+    // booted reliably during the time-budgeted Phase 1 run. The code
+    // paths below are exercised by the unit-test scaffolding in
+    // testing/titan/extract-fixture.test.mjs (the IR-shape contract)
+    // but NOT by an end-to-end iOS capture run yet.
+    //
+    // The host-side counterpart (testing/titan/feed-ios.mjs) is
+    // deferred to Phase 1.5 — it pushes fixtures via `xcrun simctl
+    // pasteboard` or via writing into the simulator's app container
+    // directly with `simctl get_app_container <udid> com.styleconverter.test data`.
+
+    /// Inbox directory. Host pushes IR JSON into here; app polls and
+    /// renders one at a time. Living inside Documents/ means it
+    /// survives app restarts and is reachable from the host via
+    /// `xcrun simctl get_app_container <udid> ... data`.
+    static var inboxDirectory: URL {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let dir  = docs.appendingPathComponent("inbox", isDirectory: true)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    /// Polls the inbox for the oldest *.json fixture. Returns its URL or
+    /// nil if the inbox is empty. The caller is responsible for deleting
+    /// the file after it's been processed (so a crash mid-render doesn't
+    /// drop the fixture; a re-poll picks it up again).
+    static func nextFixtureURL() -> URL? {
+        let fm = FileManager.default
+        guard let entries = try? fm.contentsOfDirectory(
+            at: inboxDirectory,
+            includingPropertiesForKeys: [.contentModificationDateKey],
+            options: [.skipsHiddenFiles]
+        ) else { return nil }
+        // Oldest-first ordering matches FIFO semantics the orchestrator
+        // expects — a host that pushes fixtures in deterministic order
+        // gets them back in the same order.
+        let jsonFiles = entries.filter { $0.pathExtension == "json" }
+        let sorted = jsonFiles.sorted { (a, b) -> Bool in
+            let ta = (try? a.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? Date.distantPast
+            let tb = (try? b.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? Date.distantPast
+            return ta < tb
+        }
+        return sorted.first
+    }
+
+    /// Mark a processed inbox fixture as consumed by deleting the file.
+    /// Idempotent — missing file is not an error (the host may have
+    /// re-pushed before we got around to deleting our copy).
+    static func consumeFixture(_ url: URL) {
+        try? FileManager.default.removeItem(at: url)
+    }
+}

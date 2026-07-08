@@ -1,0 +1,10 @@
+{
+  "components": {
+    "TextDecorationThickness_Auto": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-thickness": "auto" } },
+    "TextDecorationThickness_FromFont": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-thickness": "from-font" } },
+    "TextDecorationThickness_Px_1": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-thickness": "1px" } },
+    "TextDecorationThickness_Px_4": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-thickness": "4px" } },
+    "TextDecorationThickness_Em_0_1": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-thickness": "0.1em" } },
+    "TextDecorationThickness_Percent_10": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-thickness": "10%" } }
+  }
+}

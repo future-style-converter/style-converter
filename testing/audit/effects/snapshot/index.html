@@ -1,0 +1,1848 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Style Converter — cross-platform capture report</title>
+<style>
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, system-ui, sans-serif;
+  background: #111;
+  color: #eee;
+  font-size: 14px;
+}
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 16px 24px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #333;
+}
+.top h1 { margin: 0 0 4px 0; font-size: 18px; }
+.top h1 .input-label { font-weight: 400; color: #888; font-size: 13px; font-family: ui-monospace, monospace; }
+.top .meta { margin: 2px 0; color: #999; font-size: 13px; }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.controls input[type="search"] {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+}
+.controls input[type="search"]:focus { border-color: #68a; }
+.controls label { color: #aaa; font-size: 13px; cursor: pointer; user-select: none; }
+.controls select {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  color: #fff;
+  padding: 5px 8px;
+  font-size: 13px;
+}
+.visible-count { color: #888; font-size: 12px; margin-left: auto; }
+
+main { padding: 16px 24px; }
+
+/* Narrow viewports: stack platform / pair grids instead of horizontal scroll */
+@media (max-width: 900px) {
+  .platforms, .pairs { grid-template-columns: 1fr !important; }
+  main { padding: 12px; }
+  .top { padding: 12px; }
+  .controls input[type="search"] { max-width: none; }
+}
+
+.row {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #181824;
+  border: 1px solid #2a2a3a;
+  border-radius: 8px;
+}
+.row.has-diff { border-color: #663; }
+.row.regressed { border-color: #a33; background: #2a1818; }
+.row { overflow: hidden; } /* prevent inner overflow bubbling to body */
+
+.row h2 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-family: ui-monospace, monospace;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.badge {
+  font-family: -apple-system, system-ui, sans-serif;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+.badge.warn { background: #664; color: #fe9; }
+.badge.bad  { background: #622; color: #fcc; }
+
+.min-ssim {
+  font-family: -apple-system, system-ui, sans-serif;
+  font-size: 11px;
+  color: #888;
+  font-weight: 400;
+  margin-left: auto;
+}
+
+.platforms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+.platform { background: #0e0e18; padding: 8px; border-radius: 4px; }
+.platform .plabel { font-size: 12px; color: #ccc; margin-bottom: 6px; font-family: ui-monospace, monospace; }
+.platform .plabel .dim { color: #666; margin-left: 4px; }
+.platform img { display: block; width: 100%; max-width: 100%; height: auto; image-rendering: pixelated; }
+.platform.missing .pimg.muted { color: #555; text-align: center; padding: 32px 0; font-style: italic; }
+.platform.errored { border: 1px solid #a44; }
+.platform.errored .pimg.err { color: #f99; padding: 16px; font-family: ui-monospace, monospace; font-size: 11px; word-break: break-word; }
+
+.pairs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.pair {
+  background: #0e0e18;
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 3px solid transparent;
+}
+.pair.ok   { border-left-color: #4a4; }
+.pair.warn { border-left-color: #aa4; }
+.pair.bad  { border-left-color: #a44; }
+.pair .ptitle { font-size: 12px; color: #ccc; margin-bottom: 6px; font-family: ui-monospace, monospace; }
+.pair .metrics { font-size: 11px; color: #aaa; margin-bottom: 6px; display: flex; gap: 12px; }
+.pair .metrics b { color: #fff; font-weight: 500; }
+.pair img { display: block; width: 100%; max-width: 100%; height: auto; image-rendering: pixelated; }
+.pair.missing .pimg.muted { color: #555; text-align: center; padding: 32px 0; font-style: italic; }
+
+.baseline {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #12121c;
+  border-radius: 4px;
+}
+.baseline summary { cursor: pointer; color: #aaa; font-size: 12px; }
+.baseline[open] summary { margin-bottom: 8px; }
+
+.ok  { color: #6c6; }
+.bad { color: #f99; }
+
+/* (Client-side JS handles diff-only filtering via row.style.display now —
+   the old CSS-based .filter-diffs toggle is no longer used.) */
+
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Cross-platform capture report <span class="input-label">(examples/properties/effects/audit-phase12.json)</span></h1>
+  <p class="meta">
+    52 components · 41 identical (SSIM &ge; 0.97)
+    
+    · SSIM threshold 0.95 · pixel threshold 2%
+  </p>
+  <p class="meta">
+    Generated 4/19/2026, 11:17:14 AM
+  </p>
+  <div class="controls">
+    <input type="search" id="search" placeholder="Filter components by name…" autocomplete="off">
+    <label><input type="checkbox" id="onlyDiff"> diffs only</label>
+    <label for="sort">sort:</label>
+    <select id="sort">
+      <option value="index">by index (default)</option>
+      <option value="worst">worst SSIM first</option>
+      <option value="best">best SSIM first</option>
+      <option value="name">by name</option>
+    </select>
+    <span class="visible-count" id="visibleCount"></span>
+  </div>
+</header>
+
+<main id="rows">
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9563"
+      data-index="0"
+      data-name="000_ClipPath_Polygon_Evenodd_Overlap.png">
+    <h2>
+      000_ClipPath_Polygon_Evenodd_Overlap.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.956</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×212</span></div>
+    <img src="images/iOS/000_ClipPath_Polygon_Evenodd_Overlap.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×212</span></div>
+    <img src="images/web/000_ClipPath_Polygon_Evenodd_Overlap.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9563</b></span>
+      <span>Δpx <b>0.91%</b></span>
+    </div>
+    <img src="diffs/000_ClipPath_Polygon_Evenodd_Overlap__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="0"
+      data-name="000_Contain_None.png">
+    <h2>
+      000_Contain_None.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/000_Contain_None.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7781"
+      data-index="1"
+      data-name="001_ClipPath_Inset_Round50pct_NonSquare.png">
+    <h2>
+      001_ClipPath_Inset_Round50pct_NonSquare.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.778</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×112</span></div>
+    <img src="images/iOS/001_ClipPath_Inset_Round50pct_NonSquare.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×112</span></div>
+    <img src="images/web/001_ClipPath_Inset_Round50pct_NonSquare.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7781</b></span>
+      <span>Δpx <b>10.18%</b></span>
+    </div>
+    <img src="diffs/001_ClipPath_Inset_Round50pct_NonSquare__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="1"
+      data-name="001_Contain_Strict.png">
+    <h2>
+      001_Contain_Strict.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/001_Contain_Strict.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9256"
+      data-index="2"
+      data-name="002_ClipPath_Path_MultipleSubpaths.png">
+    <h2>
+      002_ClipPath_Path_MultipleSubpaths.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.926</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×232</span></div>
+    <img src="images/iOS/002_ClipPath_Path_MultipleSubpaths.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×232</span></div>
+    <img src="images/web/002_ClipPath_Path_MultipleSubpaths.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9256</b></span>
+      <span>Δpx <b>7.96%</b></span>
+    </div>
+    <img src="diffs/002_ClipPath_Path_MultipleSubpaths__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="2"
+      data-name="002_Contain_Content.png">
+    <h2>
+      002_Contain_Content.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/002_Contain_Content.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9734"
+      data-index="3"
+      data-name="003_ClipPath_Url_MissingRef.png">
+    <h2>
+      003_ClipPath_Url_MissingRef.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.973</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/003_ClipPath_Url_MissingRef.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/003_ClipPath_Url_MissingRef.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9734</b></span>
+      <span>Δpx <b>0.57%</b></span>
+    </div>
+    <img src="diffs/003_ClipPath_Url_MissingRef__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="3"
+      data-name="003_Contain_Size.png">
+    <h2>
+      003_Contain_Size.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/003_Contain_Size.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="4"
+      data-name="004_Contain_Layout.png">
+    <h2>
+      004_Contain_Layout.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/004_Contain_Layout.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9181"
+      data-index="4"
+      data-name="004_Filter_ChainOrder_BrightnessThenBlur.png">
+    <h2>
+      004_Filter_ChainOrder_BrightnessThenBlur.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.918</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/004_Filter_ChainOrder_BrightnessThenBlur.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/004_Filter_ChainOrder_BrightnessThenBlur.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9181</b></span>
+      <span>Δpx <b>31.59%</b></span>
+    </div>
+    <img src="diffs/004_Filter_ChainOrder_BrightnessThenBlur__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="5"
+      data-name="005_Contain_Style.png">
+    <h2>
+      005_Contain_Style.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/005_Contain_Style.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9110"
+      data-index="5"
+      data-name="005_Filter_ChainOrder_BlurThenBrightness.png">
+    <h2>
+      005_Filter_ChainOrder_BlurThenBrightness.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.911</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/005_Filter_ChainOrder_BlurThenBrightness.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/005_Filter_ChainOrder_BlurThenBrightness.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9110</b></span>
+      <span>Δpx <b>30.91%</b></span>
+    </div>
+    <img src="diffs/005_Filter_ChainOrder_BlurThenBrightness__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="6"
+      data-name="006_Contain_Paint.png">
+    <h2>
+      006_Contain_Paint.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/006_Contain_Paint.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9792"
+      data-index="6"
+      data-name="006_Filter_DropShadowBeforeBlur.png">
+    <h2>
+      006_Filter_DropShadowBeforeBlur.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.979</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/006_Filter_DropShadowBeforeBlur.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/006_Filter_DropShadowBeforeBlur.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9792</b></span>
+      <span>Δpx <b>0.00%</b></span>
+    </div>
+    <img src="diffs/006_Filter_DropShadowBeforeBlur__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="7"
+      data-name="007_Contain_InlineSize.png">
+    <h2>
+      007_Contain_InlineSize.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/007_Contain_InlineSize.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9848"
+      data-index="7"
+      data-name="007_Filter_DropShadowAfterBlur.png">
+    <h2>
+      007_Filter_DropShadowAfterBlur.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.985</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/007_Filter_DropShadowAfterBlur.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/007_Filter_DropShadowAfterBlur.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9848</b></span>
+      <span>Δpx <b>0.00%</b></span>
+    </div>
+    <img src="diffs/007_Filter_DropShadowAfterBlur__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.7005"
+      data-index="8"
+      data-name="008_Backdrop_Filter_NoBackground.png">
+    <h2>
+      008_Backdrop_Filter_NoBackground.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.701</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/008_Backdrop_Filter_NoBackground.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/008_Backdrop_Filter_NoBackground.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.7005</b></span>
+      <span>Δpx <b>33.45%</b></span>
+    </div>
+    <img src="diffs/008_Backdrop_Filter_NoBackground__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="8"
+      data-name="008_Contain_LayoutStyle.png">
+    <h2>
+      008_Contain_LayoutStyle.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/008_Contain_LayoutStyle.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="9"
+      data-name="009_Contain_SizeLayoutStylePaint.png">
+    <h2>
+      009_Contain_SizeLayoutStylePaint.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/009_Contain_SizeLayoutStylePaint.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9588"
+      data-index="9"
+      data-name="009_MaskImage_LinearGradient_SoftEdge.png">
+    <h2>
+      009_MaskImage_LinearGradient_SoftEdge.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.959</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×152</span></div>
+    <img src="images/iOS/009_MaskImage_LinearGradient_SoftEdge.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×152</span></div>
+    <img src="images/web/009_MaskImage_LinearGradient_SoftEdge.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9588</b></span>
+      <span>Δpx <b>0.20%</b></span>
+    </div>
+    <img src="diffs/009_MaskImage_LinearGradient_SoftEdge__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="10"
+      data-name="010_ContentVisibility_Visible.png">
+    <h2>
+      010_ContentVisibility_Visible.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/010_ContentVisibility_Visible.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.8962"
+      data-index="10"
+      data-name="010_MaskImage_MultiSource_CompositeExclude.png">
+    <h2>
+      010_MaskImage_MultiSource_CompositeExclude.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.896</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×232</span></div>
+    <img src="images/iOS/010_MaskImage_MultiSource_CompositeExclude.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×232</span></div>
+    <img src="images/web/010_MaskImage_MultiSource_CompositeExclude.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8962</b></span>
+      <span>Δpx <b>12.93%</b></span>
+    </div>
+    <img src="diffs/010_MaskImage_MultiSource_CompositeExclude__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="11"
+      data-name="011_ContentVisibility_Auto.png">
+    <h2>
+      011_ContentVisibility_Auto.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/011_ContentVisibility_Auto.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.8764"
+      data-index="11"
+      data-name="011_MaskMode_Luminance_ColoredGradient.png">
+    <h2>
+      011_MaskMode_Luminance_ColoredGradient.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.876</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×152</span></div>
+    <img src="images/iOS/011_MaskMode_Luminance_ColoredGradient.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×152</span></div>
+    <img src="images/web/011_MaskMode_Luminance_ColoredGradient.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.8764</b></span>
+      <span>Δpx <b>0.81%</b></span>
+    </div>
+    <img src="diffs/011_MaskMode_Luminance_ColoredGradient__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="12"
+      data-name="012_ContentVisibility_Hidden.png">
+    <h2>
+      012_ContentVisibility_Hidden.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/012_ContentVisibility_Hidden.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9660"
+      data-index="12"
+      data-name="012_MaskRepeat_SpaceRound_TwoAxis.png">
+    <h2>
+      012_MaskRepeat_SpaceRound_TwoAxis.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.966</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/012_MaskRepeat_SpaceRound_TwoAxis.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/012_MaskRepeat_SpaceRound_TwoAxis.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair warn">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9660</b></span>
+      <span>Δpx <b>0.56%</b></span>
+    </div>
+    <img src="diffs/012_MaskRepeat_SpaceRound_TwoAxis__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1.0000"
+      data-index="13"
+      data-name="013_Visibility_Collapse_TableRow.png">
+    <h2>
+      013_Visibility_Collapse_TableRow.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×32</span></div>
+    <img src="images/iOS/013_Visibility_Collapse_TableRow.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×32</span></div>
+    <img src="images/web/013_Visibility_Collapse_TableRow.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>1.0000</b></span>
+      <span>Δpx <b>0.00%</b></span>
+    </div>
+    <img src="diffs/013_Visibility_Collapse_TableRow__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="13"
+      data-name="013_WillChange_Auto.png">
+    <h2>
+      013_WillChange_Auto.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×53</span></div>
+    <img src="images/Android/013_WillChange_Auto.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1.0000"
+      data-index="14"
+      data-name="014_Visibility_Collapse_FlexItem.png">
+    <h2>
+      014_Visibility_Collapse_FlexItem.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×32</span></div>
+    <img src="images/iOS/014_Visibility_Collapse_FlexItem.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/014_Visibility_Collapse_FlexItem.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>1.0000</b></span>
+      <span>Δpx <b>0.00%</b></span>
+    </div>
+    <img src="diffs/014_Visibility_Collapse_FlexItem__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="14"
+      data-name="014_WillChange_Scroll.png">
+    <h2>
+      014_WillChange_Scroll.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×53</span></div>
+    <img src="images/Android/014_WillChange_Scroll.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1.0000"
+      data-index="15"
+      data-name="015_Visibility_Collapse_Block.png">
+    <h2>
+      015_Visibility_Collapse_Block.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×32</span></div>
+    <img src="images/iOS/015_Visibility_Collapse_Block.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×72</span></div>
+    <img src="images/web/015_Visibility_Collapse_Block.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>1.0000</b></span>
+      <span>Δpx <b>0.00%</b></span>
+    </div>
+    <img src="diffs/015_Visibility_Collapse_Block__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="15"
+      data-name="015_WillChange_Contents.png">
+    <h2>
+      015_WillChange_Contents.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×53</span></div>
+    <img src="images/Android/015_WillChange_Contents.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9758"
+      data-index="16"
+      data-name="016_OverflowClipMargin_Edge.png">
+    <h2>
+      016_OverflowClipMargin_Edge.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.976</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/016_OverflowClipMargin_Edge.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/016_OverflowClipMargin_Edge.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9758</b></span>
+      <span>Δpx <b>0.39%</b></span>
+    </div>
+    <img src="diffs/016_OverflowClipMargin_Edge__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="16"
+      data-name="016_WillChange_Transform.png">
+    <h2>
+      016_WillChange_Transform.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×53</span></div>
+    <img src="images/Android/016_WillChange_Transform.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9724"
+      data-index="17"
+      data-name="017_OverscrollBehavior_Contain.png">
+    <h2>
+      017_OverscrollBehavior_Contain.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.972</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/017_OverscrollBehavior_Contain.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/017_OverscrollBehavior_Contain.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9724</b></span>
+      <span>Δpx <b>0.21%</b></span>
+    </div>
+    <img src="diffs/017_OverscrollBehavior_Contain__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="17"
+      data-name="017_WillChange_Multi.png">
+    <h2>
+      017_WillChange_Multi.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×53</span></div>
+    <img src="images/Android/017_WillChange_Multi.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="18"
+      data-name="018_ContainIntrinsicSize_Len.png">
+    <h2>
+      018_ContainIntrinsicSize_Len.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/018_ContainIntrinsicSize_Len.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="0.9710"
+      data-index="18"
+      data-name="018_OverscrollBehavior_None.png">
+    <h2>
+      018_OverscrollBehavior_None.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.971</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×192</span></div>
+    <img src="images/iOS/018_OverscrollBehavior_None.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×192</span></div>
+    <img src="images/web/018_OverscrollBehavior_None.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair ok">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.9710</b></span>
+      <span>Δpx <b>0.25%</b></span>
+    </div>
+    <img src="diffs/018_OverscrollBehavior_None__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row has-diff"
+      data-has-diff="true"
+      data-min-ssim="0.6669"
+      data-index="19"
+      data-name="019_Clip_Legacy_Rect_PartialAuto.png">
+    <h2>
+      019_Clip_Legacy_Rect_PartialAuto.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 0.667</span>
+      <span class="badge warn">size mismatch</span>
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform">
+    <div class="plabel">iOS <span class="dim">390×232</span></div>
+    <img src="images/iOS/019_Clip_Legacy_Rect_PartialAuto.png" alt="iOS capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">Android</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">web <span class="dim">390×32</span></div>
+    <img src="images/web/019_Clip_Legacy_Rect_PartialAuto.png" alt="web capture" loading="lazy">
+  </div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair bad">
+    <div class="ptitle">iOS ↔ Web</div>
+    <div class="metrics">
+      <span>SSIM <b>0.6669</b></span>
+      <span>Δpx <b>40.94%</b></span>
+    </div>
+    <img src="diffs/019_Clip_Legacy_Rect_PartialAuto__iOS-web.png" alt="iOS ↔ Web diff" loading="lazy">
+  </div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="19"
+      data-name="019_ContainIntrinsicSize_Pair.png">
+    <h2>
+      019_ContainIntrinsicSize_Pair.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/019_ContainIntrinsicSize_Pair.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="20"
+      data-name="020_ContainIntrinsicSize_Auto.png">
+    <h2>
+      020_ContainIntrinsicSize_Auto.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/020_ContainIntrinsicSize_Auto.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="21"
+      data-name="021_ContainIntrinsicSize_AutoLen.png">
+    <h2>
+      021_ContainIntrinsicSize_AutoLen.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/021_ContainIntrinsicSize_AutoLen.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="22"
+      data-name="022_ContainIntrinsicSize_AutoPair.png">
+    <h2>
+      022_ContainIntrinsicSize_AutoPair.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/022_ContainIntrinsicSize_AutoPair.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="23"
+      data-name="023_ContainIntrinsicSize_None.png">
+    <h2>
+      023_ContainIntrinsicSize_None.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/023_ContainIntrinsicSize_None.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="24"
+      data-name="024_ContainIntrinsicWidth_Len.png">
+    <h2>
+      024_ContainIntrinsicWidth_Len.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/024_ContainIntrinsicWidth_Len.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="25"
+      data-name="025_ContainIntrinsicWidth_Auto.png">
+    <h2>
+      025_ContainIntrinsicWidth_Auto.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/025_ContainIntrinsicWidth_Auto.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="26"
+      data-name="026_ContainIntrinsicHeight_Len.png">
+    <h2>
+      026_ContainIntrinsicHeight_Len.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/026_ContainIntrinsicHeight_Len.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="27"
+      data-name="027_ContainIntrinsicHeight_None.png">
+    <h2>
+      027_ContainIntrinsicHeight_None.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/027_ContainIntrinsicHeight_None.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="28"
+      data-name="028_ContainIntrinsicBlockSize_Auto.png">
+    <h2>
+      028_ContainIntrinsicBlockSize_Auto.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/028_ContainIntrinsicBlockSize_Auto.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="29"
+      data-name="029_ContainIntrinsicBlockSize_Len.png">
+    <h2>
+      029_ContainIntrinsicBlockSize_Len.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/029_ContainIntrinsicBlockSize_Len.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="30"
+      data-name="030_ContainIntrinsicInlineSize_Len.png">
+    <h2>
+      030_ContainIntrinsicInlineSize_Len.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/030_ContainIntrinsicInlineSize_Len.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+<section class="row "
+      data-has-diff="false"
+      data-min-ssim="1"
+      data-index="31"
+      data-name="031_ContainIntrinsicInlineSize_Auto.png">
+    <h2>
+      031_ContainIntrinsicInlineSize_Auto.png
+      <span class="min-ssim" title="lowest SSIM across pairs">SSIM 1.000</span>
+      
+      
+    </h2>
+
+    <div class="platforms">
+      <div class="platform missing"><div class="plabel">iOS</div><div class="pimg muted">missing</div></div><div class="platform">
+    <div class="plabel">Android <span class="dim">390×102</span></div>
+    <img src="images/Android/031_ContainIntrinsicInlineSize_Auto.png" alt="Android capture" loading="lazy">
+  </div><div class="platform missing"><div class="plabel">web</div><div class="pimg muted">missing</div></div>
+    </div>
+
+    <div class="pairs">
+      <div class="pair missing"><div class="ptitle">iOS ↔ Android</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">iOS ↔ Web</div><div class="pimg muted">n/a</div></div>
+      <div class="pair missing"><div class="ptitle">Android ↔ Web</div><div class="pimg muted">n/a</div></div>
+    </div>
+
+    
+  </section>
+</main>
+
+<script>
+(() => {
+  const rowsEl = document.getElementById('rows');
+  const rows = Array.from(rowsEl.querySelectorAll('.row'));
+  const search = document.getElementById('search');
+  const onlyDiff = document.getElementById('onlyDiff');
+  const sortSel = document.getElementById('sort');
+  const countEl = document.getElementById('visibleCount');
+
+  function minSsim(r) {
+    // Data attribute written server-side; parseFloat never returns NaN for
+    // valid values, and falls back to 1 so rows missing the attr stay at
+    // the "best" end of sorts.
+    const v = parseFloat(r.getAttribute('data-min-ssim'));
+    return Number.isFinite(v) ? v : 1;
+  }
+
+  function apply() {
+    const q = (search.value || '').toLowerCase().trim();
+    const diffsOnly = onlyDiff.checked;
+    const sortBy = sortSel.value;
+
+    // Sort (detach + reattach children — O(n) vs O(n²) for reorder loops).
+    const ordered = [...rows];
+    if (sortBy === 'worst') ordered.sort((a, b) => minSsim(a) - minSsim(b));
+    else if (sortBy === 'best') ordered.sort((a, b) => minSsim(b) - minSsim(a));
+    else if (sortBy === 'name') ordered.sort((a, b) =>
+      a.dataset.name.localeCompare(b.dataset.name));
+    else ordered.sort((a, b) =>
+      Number(a.dataset.index) - Number(b.dataset.index));
+
+    const frag = document.createDocumentFragment();
+    let visible = 0;
+    for (const r of ordered) {
+      const matches = !q || r.dataset.name.toLowerCase().includes(q);
+      const diffOk = !diffsOnly || r.classList.contains('has-diff') || r.classList.contains('regressed');
+      if (matches && diffOk) {
+        r.style.display = '';
+        visible++;
+      } else {
+        r.style.display = 'none';
+      }
+      frag.appendChild(r);
+    }
+    rowsEl.appendChild(frag);
+    countEl.textContent = visible === rows.length
+      ? `${rows.length} components`
+      : `${visible} / ${rows.length} components`;
+  }
+
+  search.addEventListener('input', apply);
+  onlyDiff.addEventListener('change', apply);
+  sortSel.addEventListener('change', apply);
+  apply();
+
+  // Keyboard: '/' focuses search — standard convention.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== search) {
+      e.preventDefault();
+      search.focus();
+      search.select();
+    }
+  });
+})();
+</script>
+</body>
+</html>

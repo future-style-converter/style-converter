@@ -1,0 +1,40 @@
+{
+  "components": {
+    "Back_border_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "background-origin": "border-box"
+      }
+    },
+    "Back_padding_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "background-origin": "padding-box"
+      }
+    },
+    "Back_content_box": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "background-origin": "content-box"
+      }
+    },
+    "Back_inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "background-origin": "inherit"
+      }
+    }
+  }
+}

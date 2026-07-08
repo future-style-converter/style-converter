@@ -1,0 +1,83 @@
+{
+  "components": {
+    "Typography_FontFamily_MissingFallback": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "\"NonExistentFont12345\", sans-serif" } },
+    "Typography_FontFamily_AllMissing": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "\"Fake1\", \"Fake2\", \"Fake3\"" } },
+    "Typography_FontFamily_UnicodeName": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-family": "\"ＭＳ ゴシック\", monospace" } },
+
+    "Typography_FontWeight_VariableOdd_150": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "150" } },
+    "Typography_FontWeight_VariableOdd_850": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "850" } },
+    "Typography_FontWeight_Boundary_1": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "1" } },
+    "Typography_FontWeight_Boundary_1000": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-weight": "1000" } },
+
+    "Typography_LetterSpacing_TinyFont_Negative": { "properties": { "width": "260px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "10px", "letter-spacing": "-0.5px" } },
+    "Typography_LetterSpacing_Extreme_10px": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "letter-spacing": "10px" } },
+    "Typography_LetterSpacing_Extreme_Negative_3px": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "letter-spacing": "-3px" } },
+
+    "Typography_WordSpacing_Extreme": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "word-spacing": "30px" } },
+    "Typography_WordSpacing_Negative": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "word-spacing": "-5px" } },
+
+    "Typography_LineHeight_Tiny_0_5": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "line-height": "0.5" } },
+    "Typography_LineHeight_Huge_5": { "properties": { "width": "260px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "16px", "line-height": "5" } },
+    "Typography_LineHeight_Zero": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "line-height": "0" } },
+
+    "Typography_TextIndent_LargeNegative": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "-100px" } },
+    "Typography_TextIndent_HugePositive": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-indent": "200px" } },
+
+    "Typography_TextShadow_ManyShadows": { "properties": { "width": "280px", "height": "70px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "1px 1px 2px #e74c3c, 2px 2px 4px #f39c12, 3px 3px 6px #f1c40f, -1px -1px 2px #2ecc71, -2px -2px 4px #3498db, -3px -3px 6px #9b59b6, 0 0 8px #000, 0 0 12px rgba(0,0,0,0.5), 4px 4px 10px #e67e22, -4px -4px 10px #1abc9c" } },
+    "Typography_TextShadow_ZeroOffsetLargeBlur": { "properties": { "width": "280px", "height": "70px", "background-color": "#34495e", "color": "#fff", "font-size": "28px", "text-shadow": "0 0 50px #fff" } },
+    "Typography_TextShadow_NegativeBlur_Ignored": { "properties": { "width": "280px", "height": "70px", "background-color": "#ecf0f1", "color": "#111", "font-size": "24px", "text-shadow": "2px 2px 0px #000" } },
+
+    "Typography_TabSize_PreText_Length": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre", "tab-size": "40px" } },
+    "Typography_TabSize_PreText_Huge": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "pre", "tab-size": "16" } },
+
+    "Typography_WritingMode_VerticalRl_Latin": { "properties": { "width": "120px", "height": "180px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "writing-mode": "vertical-rl" } },
+    "Typography_WritingMode_VerticalLr_Mixed": { "properties": { "width": "120px", "height": "180px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "writing-mode": "vertical-lr", "text-orientation": "mixed" } },
+    "Typography_WritingMode_Sideways_Upright": { "properties": { "width": "120px", "height": "180px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "writing-mode": "vertical-rl", "text-orientation": "upright" } },
+
+    "Typography_TextDecoration_WavyThick": { "properties": { "width": "260px", "height": "70px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-decoration-style": "wavy", "text-decoration-thickness": "4px", "text-decoration-color": "#e74c3c" } },
+    "Typography_TextDecoration_DoubleOverline": { "properties": { "width": "260px", "height": "70px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "overline", "text-decoration-style": "double", "text-decoration-color": "#2980b9" } },
+    "Typography_TextDecoration_AllLinesDashed": { "properties": { "width": "260px", "height": "70px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-decoration-line": "underline overline line-through", "text-decoration-style": "dashed", "text-decoration-color": "#27ae60" } },
+
+    "Typography_FontVariantNumeric_TabularFractions": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-variant-numeric": "tabular-nums diagonal-fractions" } },
+    "Typography_FontVariantNumeric_StackedFractions": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-variant-numeric": "stacked-fractions" } },
+    "Typography_FontVariantNumeric_OldstyleSlashed": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-variant-numeric": "oldstyle-nums slashed-zero" } },
+
+    "Typography_TextTransform_FullWidth": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-transform": "full-width" } },
+    "Typography_TextTransform_FullSizeKana": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "text-transform": "full-size-kana" } },
+
+    "Typography_FontStretch_UltraCondensed": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "ultra-condensed" } },
+    "Typography_FontStretch_UltraExpanded": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "ultra-expanded" } },
+    "Typography_FontStretch_Percent_200": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-stretch": "200%" } },
+
+    "Typography_FontSize_Extreme_Huge": { "properties": { "width": "320px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "80px" } },
+    "Typography_FontSize_Extreme_Tiny": { "properties": { "width": "260px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "6px" } },
+
+    "Typography_Hyphens_AutoLongWord": { "properties": { "width": "120px", "height": "100px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "hyphens": "auto", "lang": "en" } },
+    "Typography_WordBreak_BreakAll_Numbers": { "properties": { "width": "120px", "height": "100px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-break": "break-all" } },
+    "Typography_WordBreak_KeepAll": { "properties": { "width": "120px", "height": "100px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "word-break": "keep-all" } },
+
+    "Typography_TextAlign_Justify_ShortLine": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align": "justify" } },
+    "Typography_TextAlignLast_Justify": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "text-align": "justify", "text-align-last": "justify" } },
+
+    "Typography_VerticalAlign_Super": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "super" } },
+    "Typography_VerticalAlign_Sub": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "sub" } },
+    "Typography_VerticalAlign_Percent_50": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "vertical-align": "50%" } },
+
+    "Typography_TextUnderlineOffset_Large": { "properties": { "width": "260px", "height": "70px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-offset": "8px" } },
+    "Typography_TextUnderlinePosition_Under": { "properties": { "width": "260px", "height": "70px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-decoration-line": "underline", "text-underline-position": "under" } },
+
+    "Typography_TextOverflow_Ellipsis_Nowrap": { "properties": { "width": "140px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "nowrap", "overflow": "hidden", "text-overflow": "ellipsis" } },
+    "Typography_TextOverflow_ClipNowrap": { "properties": { "width": "140px", "height": "40px", "background-color": "#ecf0f1", "color": "#111", "font-size": "18px", "white-space": "nowrap", "overflow": "hidden", "text-overflow": "clip" } },
+
+    "Typography_Direction_Rtl": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "direction": "rtl" } },
+    "Typography_UnicodeBidi_BidiOverride": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "bidi-override", "direction": "rtl" } },
+
+    "Typography_FontStyle_ObliqueAngle": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "oblique 20deg" } },
+    "Typography_FontStyle_ObliqueNegative": { "properties": { "width": "260px", "height": "60px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "font-style": "oblique -15deg" } },
+
+    "Typography_LineClamp_3": { "properties": { "width": "260px", "height": "120px", "background-color": "#ecf0f1", "color": "#111", "font-size": "16px", "-webkit-line-clamp": "3", "display": "-webkit-box", "-webkit-box-orient": "vertical", "overflow": "hidden" } },
+
+    "Typography_TextEmphasis_Filled": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis": "filled circle #e74c3c", "text-emphasis-position": "over right" } },
+    "Typography_TextEmphasis_Open": { "properties": { "width": "260px", "height": "80px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-emphasis": "open dot #2980b9" } }
+  }
+}
