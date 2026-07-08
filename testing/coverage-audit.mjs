@@ -106,7 +106,7 @@ for (const p of ir) (byCategory[p.category] ??= []).push(p.name);
 
 const PLATFORMS = [
   { id: 'android', root: join(REPO, 'runtimes/compose/src/main/java/com/styleconverter/runtime') },
-  { id: 'ios',     root: join(REPO, 'testing/iOS/StyleConverterTest/StyleEngine') },
+  { id: 'ios',     root: join(REPO, 'runtimes/swiftui/Sources/StyleConverterRuntime') },
   { id: 'web',     root: join(REPO, 'runtimes/web/src/engine') },
 ];
 

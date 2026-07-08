@@ -377,7 +377,7 @@ down to rows flagged `has-diff`.
 ## Troubleshooting
 
 - **iOS build fails with "CaptureCanvas not in scope"**: delete
-  `testing/iOS/StyleConverterTest.xcodeproj/` and re-run — XcodeGen
+  `apps/ios-harness/StyleConverterTest.xcodeproj/` and re-run — XcodeGen
   re-picks up new files. `test-all.sh` does this automatically.
 
 - **Android captures come out at 358×N instead of 390×N**: check the
