@@ -324,6 +324,16 @@ object ComponentRenderer {
         val flexDecision = engineDecision.arrangement
             as? com.styleconverter.runtime.layout.flexbox.FlexDecision
 
+        // Content rendering must see the INHERITED-MERGED property list, not
+        // the raw IR one: PlaceholderContent derives its TextStyle from
+        // `component.properties`, so a child with EMPTY properties under a
+        // `font-size: 22px` parent rendered at the 16sp default (IH_FontSize
+        // 0.865, IH_LineHeight 0.702 — web inherits both per css-cascade-4
+        // §7.3, our merge channel computed them but only fed the modifier
+        // chain). Children are untouched — each re-merges from the
+        // composition local when recursed.
+        val mergedComponent = component.copy(properties = effectiveProperties)
+
         // Wrap content with direction if not default LTR
         val content: @Composable () -> Unit = {
             // Wrap in BorderImageBox if border image is configured
@@ -332,10 +342,10 @@ object ComponentRenderer {
                     config = borderImageConfig,
                     modifier = modifier
                 ) {
-                    RenderComponentContent(component, Modifier, displayConfig, textColor, engineDecision, flexDecision)
+                    RenderComponentContent(mergedComponent, Modifier, displayConfig, textColor, engineDecision, flexDecision)
                 }
             } else {
-                RenderComponentContent(component, modifier, displayConfig, textColor, engineDecision, flexDecision)
+                RenderComponentContent(mergedComponent, modifier, displayConfig, textColor, engineDecision, flexDecision)
             }
         }
 
@@ -408,20 +418,32 @@ object ComponentRenderer {
         // LocalSelfAlignmentHandled) — flex items IGNORE justify-self and
         // grid cells implement it as cell contentAlignment.
         val blockJustifySelf = extractJustifySelf(effectiveProperties)
+        // Resolve the block-level inline-axis alignment from either channel:
+        //   - justify-self center/end (css-align-3 §6.2, wave-2 fix), or
+        //   - auto horizontal margins (CSS 2.1 §10.3.3: definite-width block
+        //     box + `margin-left/right: auto` centers in its containing
+        //     block; left-only auto pushes the box right). Web centers
+        //     B_MarginAuto's child (tree) AND the standalone child capture
+        //     (auto margins against the capture canvas); Compose left-pinned
+        //     both (0.805 parent / 0.616 child crop). Handling it HERE — not
+        //     in the block-Column child loop — makes one implementation
+        //     cover both render paths.
+        val blockSelfAlignment: Alignment? = when {
+            LocalSelfAlignmentHandled.current -> null
+            blockJustifySelf == JustifySelf.CENTER -> Alignment.TopCenter
+            // Physical right / end / flex-end all collapse to End in the
+            // LTR-normalized engine (css-align-3 §5.2).
+            blockJustifySelf == JustifySelf.END ||
+                blockJustifySelf == JustifySelf.FLEX_END ||
+                blockJustifySelf == JustifySelf.RIGHT -> Alignment.TopEnd
+            else -> autoMarginAlignment(effectiveProperties)
+        }
         val selfAlignedContent: @Composable () -> Unit =
-            if (!LocalSelfAlignmentHandled.current &&
-                (blockJustifySelf == JustifySelf.CENTER ||
-                    blockJustifySelf == JustifySelf.END ||
-                    blockJustifySelf == JustifySelf.FLEX_END ||
-                    blockJustifySelf == JustifySelf.RIGHT)
-            ) {
+            if (blockSelfAlignment != null) {
                 {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
-                        // Physical right / end / flex-end all collapse to End
-                        // in the LTR-normalized engine (css-align-3 §5.2).
-                        contentAlignment = if (blockJustifySelf == JustifySelf.CENTER)
-                            Alignment.TopCenter else Alignment.TopEnd
+                        contentAlignment = blockSelfAlignment
                     ) {
                         inheritanceWrappedContent()
                     }
@@ -787,6 +809,10 @@ object ComponentRenderer {
                     if (listConfig != null && child._tag?.lowercase() == "li") {
                         RenderListItemMarker(child, index, listConfig, textColor)
                     } else {
+                        // Auto-margin centering for block children is handled
+                        // inside RenderComponent's self-alignment wrapper (one
+                        // implementation covers tree children AND root-level
+                        // standalone captures).
                         RenderComponent(child)
                     }
                 }
@@ -837,32 +863,21 @@ object ComponentRenderer {
 
     /**
      * Render an absolutely positioned child.
+     *
+     * The top/left offset and z-index are NOT applied here: the child's own
+     * style chain already applies them (LayoutFacade → PositionApplier
+     * `applyPosition`, ABSOLUTE branch → `Modifier.offset`). Applying them
+     * again in this wrapper DOUBLED every inset — B_RelativeAnchor's
+     * `top:10px; left:20px` child landed at ~(40,20) instead of (20,10),
+     * drifting below-right of its in-flow sibling (Android-web 0.833 on the
+     * floating-child crop). CSS 2.1 §10.6.4: the offset applies ONCE,
+     * from the containing block's padding box — which is exactly what the
+     * parent's overlay Box (RenderContent's positioned-container branch)
+     * plus the child's own offset modifier already produce.
      */
     @Composable
     private fun RenderAbsoluteChild(child: IRComponent) {
-        val positionOffset = extractPositionOffsets(child.properties)
-        val zIndexValue = extractZIndex(child.properties)
-
-        // Build offset modifier based on top/right/bottom/left
-        var offsetModifier: Modifier = Modifier
-
-        // Apply z-index
-        if (zIndexValue != 0f) {
-            offsetModifier = offsetModifier.zIndex(zIndexValue)
-        }
-
-        // Apply position offsets
-        if (positionOffset.top != null || positionOffset.left != null) {
-            offsetModifier = offsetModifier.offset(
-                x = positionOffset.left ?: 0.dp,
-                y = positionOffset.top ?: 0.dp
-            )
-        }
-
-        // Wrap in Box with offset
-        Box(modifier = offsetModifier) {
-            RenderComponent(child)
-        }
+        RenderComponent(child)
     }
 
     /**
@@ -873,14 +888,35 @@ object ComponentRenderer {
     }
 
     /**
-     * Position offsets data class.
+     * CSS 2.1 §10.3.3 auto-margin resolution for a block-level child, as a
+     * Compose 2D alignment (pure + internal for the JVM pinning suite).
+     *
+     * Returns non-null only when the auto margin actually moves the box:
+     *  - definite width + margin-left:auto + margin-right:auto → Center
+     *  - definite width + margin-left:auto only → End (left absorbs space)
+     *  - margin-right:auto only → null (box stays at the left edge — the
+     *    wrapper would be a no-op, so we skip it)
+     *  - width:auto → null (the box fills the containing block; §10.3.3
+     *    resolves auto margins to 0, nothing to center)
      */
-    data class PositionOffsets(
-        val top: Dp? = null,
-        val right: Dp? = null,
-        val bottom: Dp? = null,
-        val left: Dp? = null
-    )
+    internal fun autoMarginAlignment(properties: List<IRProperty>): Alignment? {
+        // A margin is auto when the IR carries the bare "auto" keyword —
+        // MarginPropertyParser emits it as a plain string primitive.
+        fun isAuto(type: String) = properties.any { p ->
+            p.type == type &&
+                (p.data as? JsonPrimitive)?.contentOrNull?.equals("auto", ignoreCase = true) == true
+        }
+        // Logical inline margins behave identically in the LTR-normalized
+        // engine (css-logical-1 §4.2 maps inline-start→left for LTR).
+        val leftAuto = isAuto("MarginLeft") || isAuto("MarginInlineStart")
+        val rightAuto = isAuto("MarginRight") || isAuto("MarginInlineEnd")
+        if (!leftAuto) return null
+        // §10.3.3 precondition: auto margins only absorb space when the
+        // box's width is definite; with width:auto the width absorbs it.
+        val hasDefiniteWidth = properties.any { it.type == "Width" || it.type == "InlineSize" }
+        if (!hasDefiniteWidth) return null
+        return if (rightAuto) Alignment.TopCenter else Alignment.TopEnd
+    }
 
     /**
      * Extract position type from properties.
@@ -899,39 +935,6 @@ object ComponentRenderer {
             }
         }
         return PositionType.STATIC
-    }
-
-    /**
-     * Extract position offsets (top, right, bottom, left) from properties.
-     */
-    private fun extractPositionOffsets(properties: List<IRProperty>): PositionOffsets {
-        var top: Dp? = null
-        var right: Dp? = null
-        var bottom: Dp? = null
-        var left: Dp? = null
-
-        properties.forEach { prop ->
-            when (prop.type) {
-                "Top", "InsetBlockStart" -> top = ValueExtractors.extractDp(prop.data)
-                "Right", "InsetInlineEnd" -> right = ValueExtractors.extractDp(prop.data)
-                "Bottom", "InsetBlockEnd" -> bottom = ValueExtractors.extractDp(prop.data)
-                "Left", "InsetInlineStart" -> left = ValueExtractors.extractDp(prop.data)
-            }
-        }
-
-        return PositionOffsets(top, right, bottom, left)
-    }
-
-    /**
-     * Extract z-index from properties.
-     */
-    private fun extractZIndex(properties: List<IRProperty>): Float {
-        properties.forEach { prop ->
-            if (prop.type == "ZIndex") {
-                return ValueExtractors.extractFloat(prop.data) ?: 0f
-            }
-        }
-        return 0f
     }
 
     /**
@@ -1616,15 +1619,19 @@ object ComponentRenderer {
             synthesizeSmallCaps(displayText, effectiveFontSize.value)
         else androidx.compose.ui.text.AnnotatedString(displayText)
 
-        // CSS overflow is VISIBLE by default: a nowrap line that exceeds
-        // its box paints past the border box (web C20/C21 draw the full
-        // single line across the canvas). Compose Text defaults to Clip,
-        // which chopped the line at the box edge — only force Visible for
-        // the nowrap case (no declared text-overflow), so line-clamp and
-        // ellipsis fixtures keep their current clipping behaviour.
-        val effectiveOverflow = if (!wrapConfig.softWrap &&
-            properties.none { it.type == "TextOverflow" }
-        ) TextOverflow.Visible else textOverflow
+        // CSS overflow is VISIBLE by default: text that exceeds its box
+        // paints past the border box (CSS 2.1 §11.1.1 — overflow applies to
+        // the box, and the initial value clips nothing). Compose Text
+        // defaults to Clip, which chopped glyphs at the box edge in BOTH
+        // axes: horizontally for nowrap lines (web C20/C21 draw the full
+        // single line across the canvas) and VERTICALLY for wrapping text
+        // in a height-bound box (Transforms_BoxModel: height 48 − padding
+        // 20×2 − border 1×2 leaves a 6px content box, web paints the label
+        // over the padding band, Compose clipped it to nothing). Force
+        // Visible whenever the fixture declares no clipping intent — i.e.
+        // no explicit text-overflow AND no line-clamp limit; declared
+        // ellipsis / line-clamp fixtures keep their clipping behaviour.
+        val effectiveOverflow = placeholderOverflow(properties, effectiveMaxLines, textOverflow)
 
         // text-emphasis marks (css-text-decor-3 §3). Compose has no native
         // emphasis-mark support, so we paint one mark per typographic unit
@@ -1707,6 +1714,27 @@ object ComponentRenderer {
             onTextLayout = { layoutResult.value = it },
             modifier = textModifier.then(emphasisModifier)
         )
+    }
+
+    /**
+     * The placeholder Text's overflow policy (pure + internal for the JVM
+     * pinning suite). Compose Text defaults to Clip, but CSS's initial
+     * `overflow: visible` (CSS 2.1 §11.1.1) means overflowing glyphs PAINT
+     * outside the box on the web reference — both past the right edge for
+     * nowrap lines and past the bottom edge for wrapping text inside a
+     * height-bound box (Transforms_BoxModel: 6px content box, web paints
+     * the label over the padding band, Clip erased it entirely). Visible
+     * unless the fixture declares clipping intent: an explicit
+     * text-overflow (ellipsis fixtures) or a line-clamp limit.
+     */
+    internal fun placeholderOverflow(
+        properties: List<IRProperty>,
+        effectiveMaxLines: Int,
+        declared: TextOverflow
+    ): TextOverflow {
+        val declaresClipIntent = properties.any { it.type == "TextOverflow" } ||
+            effectiveMaxLines != Int.MAX_VALUE
+        return if (declaresClipIntent) declared else TextOverflow.Visible
     }
 
     /**

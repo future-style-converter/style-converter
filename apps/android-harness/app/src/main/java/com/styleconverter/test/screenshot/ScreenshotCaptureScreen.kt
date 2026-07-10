@@ -395,7 +395,53 @@ private fun CaptureCanvas(
             }
             .padding(CaptureCanvasPadding)
     ) {
-        ComponentRenderer.RenderComponent(component)
+        if (isOutOfFlowRoot(component)) {
+            // A standalone capture of a `position: absolute|fixed` component
+            // must mirror the web canvas semantics (CSS 2.1 §9.6 + §10.1):
+            //   1. OUT OF FLOW — it contributes NO height, so the canvas
+            //      collapses to padding-only (web: 390x32 for the
+            //      block-flow `floating` child; Android rendered a 62px
+            //      canvas with the box in flow — crop 0.833).
+            //   2. Insets anchor at the containing block's PADDING EDGE —
+            //      the canvas's outer edge here (border 0), NOT the padded
+            //      content origin. The runtime chain already applies the
+            //      top/left offset, so we only back out the canvas padding.
+            androidx.compose.ui.layout.Layout(
+                content = { ComponentRenderer.RenderComponent(component) }
+            ) { measurables, constraints ->
+                val pad = CaptureCanvasPadding.roundToPx()
+                // Measure with the canvas's width budget but unbounded
+                // height (out-of-flow boxes don't shrink to the collapsed
+                // canvas); min constraints relaxed so the box keeps its
+                // natural size.
+                val loose = constraints.copy(
+                    minWidth = 0, minHeight = 0,
+                    maxHeight = androidx.compose.ui.unit.Constraints.Infinity
+                )
+                val placeables = measurables.map { it.measure(loose) }
+                // Report 0x0 — out of flow — and paint from the canvas's
+                // outer edge (offset −padding on both axes). PixelCopy's
+                // canvas rect then clips exactly where the web capture does.
+                layout(0, 0) {
+                    placeables.forEach { it.place(-pad, -pad) }
+                }
+            }
+        } else {
+            ComponentRenderer.RenderComponent(component)
+        }
+    }
+}
+
+/**
+ * True when a ROOT-LEVEL capture subject is absolutely/fixed positioned —
+ * the standalone-capture out-of-flow contract above only applies to the
+ * component the canvas hosts directly (children inside a tree render
+ * through the runtime's positioned-container path instead).
+ */
+internal fun isOutOfFlowRoot(component: IRComponent): Boolean {
+    return component.properties.any { p ->
+        p.type == "Position" &&
+            ((p.data as? JsonPrimitive)?.contentOrNull?.uppercase() in setOf("ABSOLUTE", "FIXED"))
     }
 }
 

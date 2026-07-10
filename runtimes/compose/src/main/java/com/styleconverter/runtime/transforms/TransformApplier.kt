@@ -433,8 +433,30 @@ object TransformApplier {
                 }
             }
 
-            // Add standalone properties
+            // Add standalone properties. css-transforms-2 §5: the individual
+            // `translate` / `rotate` / `scale` properties multiply into the
+            // final transform BEFORE the `transform` list (translate, then
+            // rotate, then scale, then transform). graphicsLayer composes a
+            // single translate·rotate·scale-about-pivot matrix, so we fold
+            // them into the same accumulators the function list uses — exact
+            // for the common uniform-scale/rotate combinations, approximate
+            // only when a non-uniform scale meets a rotation. Previously only
+            // translateZ/scaleZ were folded, so `scale: 150%` alongside
+            // `transform: rotate(15deg)` rendered the rotation UNSCALED
+            // (Transforms_C02: 180x48 box vs web/iOS 270x72).
+            config.translateX?.let { totalTranslationX += it.toPx() }
+            config.translateY?.let { totalTranslationY += it.toPx() }
+            config.translateXFraction?.let { totalTranslationX += size.width * it }
+            config.translateYFraction?.let { totalTranslationY += size.height * it }
             config.translateZ?.let { totalTranslationZ += it.toPx() }
+            config.rotate?.let { totalRotation += it }
+            config.rotateX?.let { totalRotationX += it }
+            config.rotateY?.let { totalRotationY += it }
+            // `scale: <uniform>` and axis-split scale/scaleX/scaleY all
+            // multiply per css-transforms-2 §5's matrix accumulation.
+            config.scale?.let { totalScaleX *= it; totalScaleY *= it }
+            config.scaleX?.let { totalScaleX *= it }
+            config.scaleY?.let { totalScaleY *= it }
             config.scaleZ?.let { totalScaleZ *= it }
 
             // Calculate camera distance from perspective

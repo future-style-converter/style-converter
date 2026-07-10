@@ -100,7 +100,30 @@ object TransformExtractor {
                         originYDp = originDp?.second,
                     )
                 }
-                "Rotate" -> config.copy(rotate = ValueExtractors.extractDegrees(data))
+                "Rotate" -> {
+                    // RotatePropertyParser union: {"type":"angle","deg":25}
+                    // (plain Z rotation, read via extractDegrees), {"type":
+                    // "none"} (identity → null), or {"type":"axis-angle",
+                    // "x":0,"y":0,"z":1,"angle":{"deg":45}} — css-transforms-2
+                    // §5's `rotate: <axis> <angle>` form, routed to the axis
+                    // whose component is 1 so `rotate: x 45deg` lands on
+                    // rotateX instead of being silently dropped.
+                    val axisAngle = (data as? JsonObject)
+                        ?.takeIf { it["type"]?.jsonPrimitive?.contentOrNull == "axis-angle" }
+                    if (axisAngle != null) {
+                        val deg = ValueExtractors.extractDegrees(axisAngle["angle"])
+                        val ax = axisAngle["x"]?.jsonPrimitive?.floatOrNull ?: 0f
+                        val ay = axisAngle["y"]?.jsonPrimitive?.floatOrNull ?: 0f
+                        when {
+                            ax != 0f && ay == 0f -> config.copy(rotateX = deg)
+                            ay != 0f && ax == 0f -> config.copy(rotateY = deg)
+                            // z-axis (or unsupported diagonal axis) → planar.
+                            else -> config.copy(rotate = deg)
+                        }
+                    } else {
+                        config.copy(rotate = ValueExtractors.extractDegrees(data))
+                    }
+                }
                 "RotateX" -> config.copy(rotateX = ValueExtractors.extractDegrees(data))
                 "RotateY" -> config.copy(rotateY = ValueExtractors.extractDegrees(data))
                 "Scale" -> {
@@ -567,6 +590,16 @@ object TransformExtractor {
                 data.floatOrNull?.let { ScaleData(uniform = it) } ?: ScaleData()
             }
             is JsonObject -> {
+                // ScalePropertyParser emits a discriminated union:
+                //   {"type":"uniform","value":1.5}  — `scale: 150%` / `scale: 2`
+                //   {"type":"2d","x":1.2,"y":0.8}   — `scale: 1.2 0.8`
+                //   {"type":"none"}                 — `scale: none` (identity)
+                // The old code only read x/y, so the UNIFORM shape silently
+                // extracted as identity (Transforms_C02: `scale: 150%`
+                // rendered unscaled at 180x48 while web/iOS drew 270x72).
+                val uniform = data["value"]?.jsonPrimitive?.floatOrNull
+                if (uniform != null) return ScaleData(uniform = uniform)
+
                 val x = data["x"]?.jsonPrimitive?.floatOrNull
                 val y = data["y"]?.jsonPrimitive?.floatOrNull
 
