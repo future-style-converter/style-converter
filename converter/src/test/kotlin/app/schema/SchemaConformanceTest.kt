@@ -318,7 +318,9 @@ class SchemaConformanceTest {
 
         // Flat component check mirroring the v2 schema's envelope rules.
         fun checkComponent(cmp: JsonObject, ids: Set<String>, where: String) {
-            val allowed = setOf("id", "name", "properties", "selectors", "media", "slot", "text", "pseudos", "meta")
+            // "variables" joined the v2 envelope in the wave-6 additive
+            // revision (spec 05 process) — custom-property definitions map.
+            val allowed = setOf("id", "name", "properties", "selectors", "media", "slot", "text", "pseudos", "meta", "variables")
             assertTrue(allowed.containsAll(cmp.keys), "$where has unknown envelope keys: ${cmp.keys - allowed}")
             // The flat-list hard rule: children must never appear.
             assertFalse("children" in cmp, "$where carries a children key — v2 is flat-only")
