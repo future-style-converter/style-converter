@@ -66,6 +66,11 @@ object ColorExtractor {
         // be suppressed to avoid double-rendering.
         var suppressBackgroundImage = false
         var backgroundBlendModes: List<androidx.compose.ui.graphics.BlendMode> = emptyList()
+        // padding-box / content-box painting-area clip (css-backgrounds-3
+        // §3.11). Resolved into edge insets AFTER the property loop because
+        // the inset amounts come from OTHER properties (border widths and
+        // padding) that may appear later in the IR stream.
+        var clipKeyword: String? = null
 
         properties.forEach { (type, data) ->
             when (type) {
@@ -84,6 +89,9 @@ object ColorExtractor {
                         (it as? JsonPrimitive)?.contentOrNull?.lowercase()
                     } ?: emptyList()
                     if (keywords.any { it == "text" }) suppressBackgroundImage = true
+                    // First layer decides the box clip in our single-layer
+                    // model (padding_box / content_box shrink the paint area).
+                    clipKeyword = keywords.firstOrNull()
                 }
                 "BackgroundBlendMode" -> {
                     // IR shape: array of keyword strings — one per
@@ -118,6 +126,37 @@ object ColorExtractor {
             }
         }
 
+        // Resolve `background-clip: padding-box | content-box` into edge
+        // insets from the border-box (css-backgrounds-3 §3.11):
+        //   padding-box → inset by the computed border widths;
+        //   content-box → border widths + padding.
+        // The web reference paints exactly this: Background_BoxModel's
+        // double-border gap shows the page through (padding-box), and
+        // Background_Decorated paints red only behind the content
+        // (content-box) — Android previously flooded the whole border box
+        // (0.8852 / 0.6529). Border widths gate on hasBorder so a style-less
+        // side contributes 0, mirroring the computed-value rules.
+        val backgroundClipInsets: BackgroundClipInsets? = when (clipKeyword) {
+            "padding_box", "padding-box", "content_box", "content-box" -> {
+                val sides = com.styleconverter.runtime.borders.sides.BorderSideExtractor
+                    .extractBorderConfig(properties)
+                fun borderOf(side: com.styleconverter.runtime.borders.sides.BorderSideConfig) =
+                    if (side.hasBorder) side.width ?: androidx.compose.ui.unit.Dp(0f)
+                    else androidx.compose.ui.unit.Dp(0f)
+                val contentBox = clipKeyword.startsWith("content")
+                fun paddingOf(type: String) = if (!contentBox) androidx.compose.ui.unit.Dp(0f) else
+                    properties.firstOrNull { it.first == type }?.second
+                        ?.let { ValueExtractors.extractDp(it) } ?: androidx.compose.ui.unit.Dp(0f)
+                BackgroundClipInsets(
+                    top = borderOf(sides.top) + paddingOf("PaddingTop"),
+                    right = borderOf(sides.end) + paddingOf("PaddingRight"),
+                    bottom = borderOf(sides.bottom) + paddingOf("PaddingBottom"),
+                    left = borderOf(sides.start) + paddingOf("PaddingLeft")
+                ).takeIf { it.hasInsets }
+            }
+            else -> null
+        }
+
         return ColorConfig(
             backgroundColor = backgroundColor,
             opacity = opacity,
@@ -128,6 +167,7 @@ object ColorExtractor {
             backgroundAttachment = backgroundAttachment,
             suppressBackgroundImage = suppressBackgroundImage,
             backgroundBlendModes = backgroundBlendModes,
+            backgroundClipInsets = backgroundClipInsets,
         )
     }
 

@@ -1,43 +1,34 @@
 //
 //  BackgroundClipApplier.swift
-//  StyleEngine/background — Phase 4.
+//  StyleEngine/background — Phase 4 (rewired in fidelity wave 1).
 //
-//  Applies BackgroundClip via `.clipShape(_:)`. Since border-widths and
-//  padding values aren't threaded into this modifier (they live in
-//  BorderConfig and PaddingConfig respectively), the clip uses the
-//  view's outer bounds; the `padding-box` case is approximated with a
-//  1pt inset so a visible difference is rendered during fixture capture.
-//  Exact inset matching is deferred until a later phase threads border +
-//  padding into the background chain — see Phase 4 open issues.
+//  `background-clip` no longer clips HERE. CSS Backgrounds 3 §2.4 says
+//  the property restricts the *background painting area* only — it must
+//  never clip the element's content or borders. The old implementation
+//  applied a coarse `.clipShape(Rectangle().inset(...))` to the whole
+//  view, which sliced off content AND was numerically wrong (1–2pt
+//  instead of the real border/padding bands).
+//
+//  The real work now happens where the background actually paints:
+//  StyleBuilder computes the concrete shrink band (border widths for
+//  padding-box, border+padding for content-box) and threads it into
+//  ColorApplier / BackgroundImageApplier as `clipInsets`. This modifier
+//  is retained as a chain marker so the applyStyle chain shape (and the
+//  per-property triplet contract) stays intact; `text` mode is likewise
+//  handled upstream (PlaceholderLabel paints the gradient as glyph fill).
 //
 
 import SwiftUI
 
 struct BackgroundClipApplier: ViewModifier {
-    // Config from BackgroundClipExtractor.
+    // Config from BackgroundClipExtractor. Kept for chain-shape parity;
+    // consumed for paint-area computation in StyleBuilder instead.
     let config: BackgroundClipConfig?
 
     func body(content: Content) -> some View {
-        // Fast path.
-        guard let cfg = config, cfg.hasAny else { return AnyView(content) }
-
-        // border-box → no extra clip (SwiftUI's default).
-        if cfg.mode == .borderBox { return AnyView(content) }
-
-        // text → mask to glyphs. Complex; stub as identity so non-text
-        // parts of the layout don't get wiped out. Documented.
-        if cfg.mode == .text { return AnyView(content) }
-
-        // padding-box / content-box: clip the background to an inset
-        // rectangle. With no border/padding data available here we use
-        // a coarse 1pt / 2pt inset — visual signal rather than pixel-
-        // perfect. Future work: thread BorderConfig / PaddingConfig.
-        let inset: CGFloat = cfg.mode == .contentBox ? 2 : 1
-        return AnyView(
-            content.clipShape(
-                Rectangle().inset(by: inset)
-            )
-        )
+        // Identity — see the header. The paint-area restriction lives in
+        // the background paint chain (ColorApplier/BackgroundImageApplier).
+        content
     }
 }
 

@@ -124,13 +124,104 @@ object ValueExtractors {
         if (json == null) return null
         return when (json) {
             is JsonObject -> {
-                val srgb = json["srgb"]?.jsonObject ?: return null
-                val r = srgb["r"]?.jsonPrimitive?.doubleOrNull ?: return null
-                val g = srgb["g"]?.jsonPrimitive?.doubleOrNull ?: return null
-                val b = srgb["b"]?.jsonPrimitive?.doubleOrNull ?: return null
-                val a = srgb["a"]?.jsonPrimitive?.doubleOrNull ?: 1.0
-                Color(r.toFloat(), g.toFloat(), b.toFloat(), a.toFloat())
+                val srgb = json["srgb"]?.jsonObject
+                if (srgb != null) {
+                    val r = srgb["r"]?.jsonPrimitive?.doubleOrNull ?: return null
+                    val g = srgb["g"]?.jsonPrimitive?.doubleOrNull ?: return null
+                    val b = srgb["b"]?.jsonPrimitive?.doubleOrNull ?: return null
+                    val a = srgb["a"]?.jsonPrimitive?.doubleOrNull ?: 1.0
+                    return Color(r.toFloat(), g.toFloat(), b.toFloat(), a.toFloat())
+                }
+                // No pre-resolved srgb: the parser leaves `color-mix()` as
+                // original-only metadata ({"original": {"type":"color-mix",
+                // "colorSpace":"srgb", "color1":"red", "percent1":50.0,
+                // "color2":"blue"}}). The browser resolves this natively, so
+                // web painted the mixed purple while Android fell back to
+                // the grey placeholder (Borders_C09's 1px inset border:
+                // web rgb(43,0,43) vs Android rgb(119,119,119)). Resolve
+                // the simple srgb case here: css-color-5 §3 interpolates
+                // the gamma-encoded sRGB components linearly (Chrome shows
+                // color-mix(in srgb, red 50%, blue) = rgb(128,0,128)).
+                val original = json["original"] as? JsonObject ?: return null
+                if (original["type"]?.jsonPrimitive?.contentOrNull != "color-mix") return null
+                // Only srgb interpolation is a plain component lerp; other
+                // spaces (oklch, hsl…) need real color-space math — bail to
+                // the caller's fallback rather than mixing in the wrong space.
+                if (original["colorSpace"]?.jsonPrimitive?.contentOrNull != "srgb") return null
+                val c1 = original["color1"]?.jsonPrimitive?.contentOrNull?.let(::parseCssColorLiteral) ?: return null
+                val c2 = original["color2"]?.jsonPrimitive?.contentOrNull?.let(::parseCssColorLiteral) ?: return null
+                // css-color-5 §3.1 percentage normalization: a missing
+                // percent defaults to (100 − the other); both missing = 50/50.
+                val p1raw = original["percent1"]?.jsonPrimitive?.doubleOrNull
+                val p2raw = original["percent2"]?.jsonPrimitive?.doubleOrNull
+                val p1 = (p1raw ?: p2raw?.let { 100.0 - it } ?: 50.0).toFloat() / 100f
+                val p2 = (p2raw ?: (100.0 - (p1raw ?: 50.0))).toFloat() / 100f
+                val total = (p1 + p2).takeIf { it > 0f } ?: return null
+                val w1 = p1 / total
+                val w2 = p2 / total
+                Color(
+                    red = c1.red * w1 + c2.red * w2,
+                    green = c1.green * w1 + c2.green * w2,
+                    blue = c1.blue * w1 + c2.blue * w2,
+                    alpha = c1.alpha * w1 + c2.alpha * w2
+                )
             }
+            else -> null
+        }
+    }
+
+    /**
+     * Minimal CSS color literal parser for `color-mix()` endpoints, which
+     * the IR carries as raw CSS strings. Handles #hex (3/4/6/8 digit) and
+     * the CSS named colors that appear in fixtures. Anything else → null
+     * (the caller treats the whole mix as unresolvable, same as var()).
+     */
+    internal fun parseCssColorLiteral(s: String): Color? {
+        val t = s.trim().lowercase()
+        if (t.startsWith("#")) {
+            val h = t.drop(1)
+            fun hx(c: Char) = Character.digit(c, 16).takeIf { it >= 0 }
+            return when (h.length) {
+                3, 4 -> {
+                    val ch = h.map { hx(it) ?: return null }
+                    Color(
+                        red = ch[0] * 17 / 255f, green = ch[1] * 17 / 255f, blue = ch[2] * 17 / 255f,
+                        alpha = if (h.length == 4) ch[3] * 17 / 255f else 1f
+                    )
+                }
+                6, 8 -> {
+                    val v = h.toLongOrNull(16) ?: return null
+                    if (h.length == 6) Color(
+                        ((v shr 16) and 0xFF) / 255f, ((v shr 8) and 0xFF) / 255f, (v and 0xFF) / 255f
+                    ) else Color(
+                        ((v shr 24) and 0xFF) / 255f, ((v shr 16) and 0xFF) / 255f,
+                        ((v shr 8) and 0xFF) / 255f, (v and 0xFF) / 255f
+                    )
+                }
+                else -> null
+            }
+        }
+        // CSS Level 1 named colors + the extended names our fixtures use.
+        return when (t) {
+            "black" -> Color(0f, 0f, 0f)
+            "white" -> Color(1f, 1f, 1f)
+            "red" -> Color(1f, 0f, 0f)
+            "green" -> Color(0f, 128 / 255f, 0f)
+            "blue" -> Color(0f, 0f, 1f)
+            "yellow" -> Color(1f, 1f, 0f)
+            "cyan", "aqua" -> Color(0f, 1f, 1f)
+            "magenta", "fuchsia" -> Color(1f, 0f, 1f)
+            "gray", "grey" -> Color(128 / 255f, 128 / 255f, 128 / 255f)
+            "silver" -> Color(192 / 255f, 192 / 255f, 192 / 255f)
+            "maroon" -> Color(128 / 255f, 0f, 0f)
+            "olive" -> Color(128 / 255f, 128 / 255f, 0f)
+            "lime" -> Color(0f, 1f, 0f)
+            "teal" -> Color(0f, 128 / 255f, 128 / 255f)
+            "navy" -> Color(0f, 0f, 128 / 255f)
+            "purple" -> Color(128 / 255f, 0f, 128 / 255f)
+            "orange" -> Color(1f, 165 / 255f, 0f)
+            "crimson" -> Color(220 / 255f, 20 / 255f, 60 / 255f)
+            "transparent" -> Color(0f, 0f, 0f, 0f)
             else -> null
         }
     }
@@ -380,6 +471,22 @@ object ValueExtractors {
                 // Check for normalized pixels
                 json["px"]?.jsonPrimitive?.floatOrNull?.dp
                     ?: json["pixels"]?.jsonPrimitive?.floatOrNull?.dp
+                    // Typed keyword envelope — the parser emits width
+                    // keywords as {"type":"keyword","value":"THICK"}
+                    // (`outline-width: thick` in Borders_C14). This shape
+                    // was previously unhandled, so the width fell through
+                    // to null → 0 → hasOutline false → the crimson ridge
+                    // outline never painted at all (Android-web 0.8025).
+                    // css-backgrounds-3 §4.3: thin=1px, medium=3px, thick=5px.
+                    ?: (json.takeIf { it["type"]?.jsonPrimitive?.contentOrNull == "keyword" })
+                        ?.let { kw ->
+                            when (kw["value"]?.jsonPrimitive?.contentOrNull?.lowercase()) {
+                                "thin" -> 1.dp
+                                "medium" -> 3.dp
+                                "thick" -> 5.dp
+                                else -> null
+                            }
+                        }
                     // Check for original with keyword
                     ?: (json["original"] as? JsonObject)?.let { original ->
                         when (original["keyword"]?.jsonPrimitive?.contentOrNull?.lowercase()) {

@@ -242,6 +242,19 @@ enum StyleBuilder {
         s.visibility = VisibilityExtractor.extract(from: properties)
         s.filter     = FilterExtractor.extract(from: properties)
         s.mask       = MaskExtractor.extract(from: properties)
+        // CSS 2.1 §11.1.2 — the legacy `clip` property "applies to:
+        // absolutely positioned elements" ONLY. On a static/relative
+        // element web ignores `clip: rect(...)` entirely; iOS used to
+        // apply it universally, truncating unpositioned boxes (and
+        // slicing their borders off — effects/008_BoxModel lost its 4px
+        // double border to the rect). Drop the legacy rect unless the
+        // element is absolute/fixed positioned.
+        if let lc = s.clipPath?.legacy, case .rect = lc {
+            let pos = s.layout7?.position
+            if pos != .absolute && pos != .fixed {
+                s.clipPath?.legacy = nil
+            }
+        }
         // Compatibility bridge — mirror the flex aggregate into the
         // legacy `layout` config so any code paths still reading it
         // (PlaceholderLabel via style.layout.display for .none short-
@@ -442,6 +455,86 @@ enum StyleBuilder {
     // BoxShadowExtractor + BoxShadowApplier under StyleEngine/effects/
     // shadow — this includes multi-layer composition, inset shadows,
     // and spread (all of which the legacy helper silently dropped).
+
+    // MARK: - Fidelity wave 1 helpers
+
+    /// CSS Backgrounds 3 §2.4 — the concrete shrink band for
+    /// `background-clip`:
+    ///   • border-box (default) → zero (paint under the border too)
+    ///   • padding-box          → inset by each side's border width
+    ///   • content-box          → inset by border width + padding
+    /// Pure so BackgroundClipTests can pin the arithmetic; padding
+    /// resolves through the same SpacingResolver lane the padding
+    /// applier uses (percent sides fall back to the viewport basis —
+    /// the same approximation PaddingApplier's fast path makes).
+    static func backgroundClipInsets(_ style: ComponentStyle) -> EdgeInsets {
+        // Which band? border-box / text / absent → no shrink.
+        let mode = style.backgroundClip?.mode
+        guard mode == .paddingBox || mode == .contentBox else { return EdgeInsets() }
+        // Border band: effective width of each side that paints.
+        let b = style.borderSides
+        var top: CGFloat      = b?.top.hasBorder    == true ? (b?.top.effectiveWidth ?? 0)    : 0
+        var leading: CGFloat  = b?.start.hasBorder  == true ? (b?.start.effectiveWidth ?? 0)  : 0
+        var bottom: CGFloat   = b?.bottom.hasBorder == true ? (b?.bottom.effectiveWidth ?? 0) : 0
+        var trailing: CGFloat = b?.end.hasBorder    == true ? (b?.end.effectiveWidth ?? 0)    : 0
+        // content-box additionally excludes the padding band.
+        if mode == .contentBox, let p = style.spacing.padding {
+            // Percent padding resolves against the viewport width here —
+            // matches the PaddingApplier fallback basis.
+            let basis = CGFloat(style.spacing.context.viewportWidth)
+            func px(_ v: LengthValue) -> CGFloat {
+                switch SpacingResolver.resolve(v, ctx: style.spacing.context, isPadding: true) {
+                case .px(let n):      return n
+                case .percent(let f): return f * basis
+                case .auto, .skip:    return 0
+                }
+            }
+            top += px(p.top); leading += px(p.left)
+            bottom += px(p.bottom); trailing += px(p.right)
+        }
+        return EdgeInsets(top: top, leading: leading,
+                          bottom: bottom, trailing: trailing)
+    }
+
+    /// Web-harness min-box floor decision (see MinBoxFloor below): the
+    /// floor applies per axis only when the IR declared NO width/min/max
+    /// on that axis — mirrors apps/web-harness ComponentRenderer.tsx
+    /// (`minWidth: styles.minWidth || (max ? '0' : (width || '50px'))`).
+    /// Split out as a pure function so XCTest pins the truth table.
+    static func minFloor(for size: SizeConfig) -> (width: CGFloat?, height: CGFloat?) {
+        // Inline axis: any explicit width-family constraint disables it.
+        let w: CGFloat? = (size.width == nil && size.minWidth == nil
+                           && size.maxWidth == nil) ? 50 : nil
+        // Block axis: same rule with the height family.
+        let h: CGFloat? = (size.height == nil && size.minHeight == nil
+                           && size.maxHeight == nil) ? 30 : nil
+        return (w, h)
+    }
+}
+
+/// Fidelity wave 1 — the 50×30 minimum box every OTHER platform already
+/// applies (web: fit-content + minWidth 50px/minHeight 30px defaults;
+/// Android: Modifier.defaultMinSize(50.dp, 30.dp)). Sits inside the
+/// paint chain so background/border cover the floored area. Top-leading
+/// keeps content at the block-flow origin like a browser box.
+private struct MinBoxFloor: ViewModifier {
+    /// The component's sizing bag — decides which axes get the floor.
+    let size: SizeConfig
+
+    func body(content: Content) -> some View {
+        // Per-axis floors (nil = axis already constrained by the IR).
+        let floor = StyleBuilder.minFloor(for: size)
+        if floor.width == nil && floor.height == nil {
+            // Fully constrained → identity, no extra frame node.
+            content
+        } else {
+            // `.frame(minWidth:)` never expands past the child's ideal
+            // size (upper bound stays the child's own width), so this is
+            // a pure floor — boxes still hug content above 50×30.
+            content.frame(minWidth: floor.width, minHeight: floor.height,
+                          alignment: .topLeading)
+        }
+    }
 }
 
 // MARK: - View modifier
@@ -453,6 +546,13 @@ extension View {
     @ViewBuilder
     func applyStyle(_ style: ComponentStyle) -> some View {
         self
+            // Fidelity wave 1 — CSS box model: content sits INSIDE the
+            // border band (CSS 2.1 §8.1). The border strokes paint as an
+            // overlay on the border box, so without this inner inset the
+            // first `border-width` points of content were painted OVER
+            // (borders/001_C02, 007_C08, 008_C09 text displacement).
+            // Innermost so an explicit `width` still reads border-box.
+            .engineBorderContentInset(style.borderSides)
             // Phase 2: padding goes INSIDE the size frame so total width
             // reads as `width` (border-box semantics). Previously sizing
             // wrapped padding (content-box), so a fixture like Card_Complete
@@ -470,6 +570,16 @@ extension View {
             // SpacingContext so em/rem/vw resolve against the same 390×844
             // canvas as padding/margin.
             .engineSizing(style.size, context: style.spacing.context)
+            // Fidelity wave 1 — web-harness minimum-box parity. The web
+            // renderer floors every component at minWidth 50 / minHeight
+            // 30 unless the IR declares width/min/max for that axis, and
+            // Android mirrors it via Modifier.defaultMinSize(50.dp,30.dp).
+            // iOS had NO floor, so short-named children (grid-2col
+            // 001_a…019_d crops) hugged their glyphs ~17pt wide while
+            // web/Android boxes were 50pt. Applied INSIDE the paint chain
+            // so backgrounds/borders cover the floored area; top-leading
+            // matches the block-flow origin on the other platforms.
+            .modifier(MinBoxFloor(size: style.size))
             // Phase 4 — painting chain. Order (from innermost outward):
             //   1. BackgroundImage: gradients sit behind solid colour so
             //      a BackgroundColor with translucency can tint them.
@@ -484,10 +594,18 @@ extension View {
             // pass `nil` to engineBackgroundImage to suppress the
             // rectangular paint that would otherwise sit behind the
             // text and double-render the gradient.
+            // Fidelity wave 1: the paint-area shrink for background-clip
+            // padding-box/content-box (CSS Backgrounds 3 §2.4) plus the
+            // viewport anchoring for background-attachment: fixed (§2.6)
+            // both thread INTO the paint calls — clipping the whole view
+            // after the fact would slice content/borders off.
             .engineBackgroundImage(
-                style.backgroundClip?.mode == .text ? nil : style.backgroundImage
+                style.backgroundClip?.mode == .text ? nil : style.backgroundImage,
+                clipInsets: StyleBuilder.backgroundClipInsets(style),
+                attachment: style.backgroundAttachment
             )
-            .engineBackgroundColor(style.color, radius: style.borderRadius)
+            .engineBackgroundColor(style.color, radius: style.borderRadius,
+                                   clipInsets: StyleBuilder.backgroundClipInsets(style))
             .engineBackgroundClip(style.backgroundClip)
             .engineBackgroundOrigin(style.backgroundOrigin)
             .engineBackgroundRepeat(style.backgroundRepeat)
@@ -500,7 +618,12 @@ extension View {
             // stacks on the fully-painted element.
             .engineBorderImage(style.borderImage)
             .engineBorderRadius(style.borderRadius)
-            .engineBorderSides(style.borderSides, radius: style.borderRadius)
+            // currentColor (CSS Backgrounds 3 §3.2): a border side with a
+            // style but no colour inherits the element's own `color` —
+            // threaded here so dotted/solid colourless sides stop
+            // defaulting to black (borders/003_C04).
+            .engineBorderSides(style.borderSides, radius: style.borderRadius,
+                               currentColor: style.text.color)
             .engineOutline(style.outline, radius: style.borderRadius)
             .engineBorderMisc(style.borderMisc)
             .engineBoxShadow(style.boxShadow, radius: style.borderRadius)

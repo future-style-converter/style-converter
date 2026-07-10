@@ -73,13 +73,76 @@ import com.styleconverter.runtime.core.media.MediaQueryApplier
 object ComponentRenderer {
 
     /**
+     * CSS-inherited text properties (css-cascade-4 / per-property "Inherited:
+     * yes" table). These — and ONLY these — flow from parent to child when
+     * the child doesn't declare them itself. Layout/box properties (Width,
+     * Padding, Background*, Border*) are deliberately absent: they never
+     * inherit in CSS. TextDecorationLine is also absent — decoration
+     * PROPAGATES to inline descendants rather than inheriting, and our
+     * leading-text sibling already handles the visible case.
+     *
+     * `Color` is deliberately absent too, even though CSS inherits it:
+     * the WEB harness placeholder span (`PlaceholderContent` in
+     * ComponentRenderer.tsx) always sets an explicit `color` — the
+     * bg-luminance contrast pick — which beats browser inheritance on the
+     * reference render. Verified by pixel-sampling the IT_Family web
+     * capture: child text paints rgba(237,237,237,0.7), NOT the parent's
+     * #111. Android's PlaceholderContent implements the same pick, so
+     * inheriting Color here would push the platforms APART, not together.
+     */
+    internal val INHERITED_TEXT_PROPERTY_TYPES: Set<String> = setOf(
+        "FontFamily", "FontSize", "FontWeight", "FontStyle", "FontStretch",
+        "LetterSpacing", "LineHeight", "WordSpacing",
+        "TextAlign", "TextTransform", "TextIndent",
+        "WhiteSpace", "TabSize", "Direction"
+    )
+
+    /**
+     * The inherited-property channel. Compose has no CSS cascade, so we
+     * thread the parent's inheritable text declarations down through the
+     * composition. RenderComponent merges these UNDER the child's own
+     * declarations (own always wins — cascade specificity is irrelevant
+     * inside one element) and re-provides the merged set for grandchildren,
+     * which reproduces the transitive inheritance chain.
+     *
+     * Why: the inheritance-typography tree fixtures set font-size /
+     * font-family / font-weight / letter-spacing / text-align on the PARENT
+     * and expect the child `_text` nodes to render with them, exactly as
+     * the browser does. Without this channel every child fell back to the
+     * placeholder defaults (Inter 16sp, left) — IT_* parents sat at
+     * SSIM 0.784 against web.
+     */
+    internal val LocalInheritedProperties =
+        androidx.compose.runtime.compositionLocalOf<List<IRProperty>> { emptyList() }
+
+    /**
+     * Merge the inherited channel under the component's own declarations.
+     * Pure function (JVM-testable): own properties always win; inherited
+     * entries only fill types the component didn't declare.
+     */
+    internal fun mergeInherited(
+        own: List<IRProperty>,
+        inherited: List<IRProperty>
+    ): List<IRProperty> {
+        if (inherited.isEmpty()) return own
+        val declaredTypes = own.mapTo(HashSet()) { it.type }
+        return inherited.filter { it.type !in declaredTypes } + own
+    }
+
+    /**
      * Render a single IR component.
+     *
+     * @param itemModifier Optional OUTERMOST modifier injected by a layout
+     *   parent (currently: grid cells applying css-align-3 `align-self:
+     *   stretch` as fillMaxHeight). Prepended so the style-driven size
+     *   modifiers still win for children with definite sizes — callers only
+     *   pass a stretch when the corresponding axis is auto.
      */
     @OptIn(ExperimentalLayoutApi::class)
     @Composable
-    fun RenderComponent(component: IRComponent) {
+    fun RenderComponent(component: IRComponent, itemModifier: Modifier = Modifier) {
         // Apply media queries to get effective properties based on screen size
-        val rawProperties = if (component.media.isNotEmpty()) {
+        val mediaProperties = if (component.media.isNotEmpty()) {
             MediaQueryApplier.applyMediaQueries(
                 baseProperties = component.properties,
                 mediaQueries = component.media
@@ -87,6 +150,10 @@ object ComponentRenderer {
         } else {
             component.properties
         }
+
+        // Fold the parent's inheritable text declarations in UNDER the
+        // component's own (CSS inheritance — see LocalInheritedProperties).
+        val rawProperties = mergeInherited(mediaProperties, LocalInheritedProperties.current)
 
         // CSS `all: initial|inherit|unset|revert|revert-layer` resets every
         // other property to its respective global value. We can't synthesize
@@ -147,11 +214,25 @@ object ComponentRenderer {
         // web: minHeight = styles.height || styles.minHeight || '30px'
         val hasExplicitWidth = effectiveProperties.any { it.type in listOf("Width", "MinWidth", "InlineSize", "MinInlineSize") }
         val hasExplicitHeight = effectiveProperties.any { it.type in listOf("Height", "MinHeight", "BlockSize", "MinBlockSize") }
-        val sizedModifier = baseModifier.then(
+        // itemModifier (parent-injected stretch) goes OUTERMOST so the grid
+        // cell's fillMaxHeight established the constraint the style chain
+        // then works within.
+        val sizedModifier = itemModifier.then(baseModifier).then(
             Modifier.defaultMinSize(
                 minWidth = if (hasExplicitWidth) Dp.Unspecified else 50.dp,
                 minHeight = if (hasExplicitHeight) Dp.Unspecified else 30.dp
             )
+        ).then(
+            // Border-band content inset — INSIDE the 30dp placeholder floor
+            // above, so the band participates in the minimum instead of
+            // stacking on top of it. Web's floor (`minHeight: 30px`) is a
+            // border-box minimum: for a min-bound box the border is absorbed
+            // by the 30px, not added to it. Chaining the band before the
+            // floor grew every min-bound bordered placeholder by the band
+            // (the wave-1 +2px regression: 094_Input_Field 198x52→198x54
+            // content box, 097_Glass_Effect 140x70→140x72). See
+            // StyleApplier.borderContentInset for the per-side math.
+            StyleApplier.borderContentInset(effectiveProperties)
         )
 
         // Apply animations to modifier if present
@@ -286,12 +367,25 @@ object ComponentRenderer {
             counterWrappedContent
         }
 
-        if (direction == TextStyleApplier.DirectionMode.RTL) {
-            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+        // Re-provide the merged inheritable set for descendants. Because
+        // effectiveProperties already contains what THIS component inherited,
+        // filtering it reproduces the transitive cascade (grandchildren see
+        // grandparent values unless a closer ancestor overrode them).
+        val inheritableForChildren = effectiveProperties.filter {
+            it.type in INHERITED_TEXT_PROPERTY_TYPES
+        }
+        val inheritanceWrappedContent: @Composable () -> Unit = {
+            CompositionLocalProvider(LocalInheritedProperties provides inheritableForChildren) {
                 wrappedContent()
             }
+        }
+
+        if (direction == TextStyleApplier.DirectionMode.RTL) {
+            CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+                inheritanceWrappedContent()
+            }
         } else {
-            wrappedContent()
+            inheritanceWrappedContent()
         }
     }
 
@@ -502,11 +596,27 @@ object ComponentRenderer {
                 }
             }
             else -> {
-                Box(
-                    modifier = modifier,
-                    contentAlignment = displayConfig.alignItems.toBoxAlignment()
-                ) {
-                    RenderContent(component, textColor, displayConfig)
+                // CSS block flow stacks children VERTICALLY. Compose Box
+                // overlays its children at contentAlignment instead, which
+                // superimposed every sibling of a block parent on top of
+                // each other — the inheritance-typography IT_* cards drew
+                // both `_text` children in the SAME 30px band (garbled
+                // double-struck glyphs, card 50px tall vs web's 80px,
+                // SSIM 0.784). Use a Column (no spacing — block boxes butt
+                // together margin-collapse aside) when real children exist;
+                // keep the Box for leaf/placeholder rendering where
+                // contentAlignment still matters.
+                if (!component.children.isNullOrEmpty()) {
+                    Column(modifier = modifier) {
+                        RenderContent(component, textColor, displayConfig)
+                    }
+                } else {
+                    Box(
+                        modifier = modifier,
+                        contentAlignment = displayConfig.alignItems.toBoxAlignment()
+                    ) {
+                        RenderContent(component, textColor, displayConfig)
+                    }
                 }
             }
         }
@@ -772,6 +882,19 @@ object ComponentRenderer {
     @Composable
     fun RowScope.RenderRowContent(component: IRComponent, textColor: Color?) {
         if (!component.children.isNullOrEmpty()) {
+            // css-flexbox-1 §9.7: flex-grow distributes the container's FREE
+            // space — which only exists when the container's main size is
+            // DEFINITE. Our reference render (web harness) gives every
+            // container `width: fit-content` unless the IR declares a width,
+            // so an unsized flex container hugs its items and grow is a
+            // visual no-op. Compose's `Modifier.weight` does the OPPOSITE:
+            // it forces the Row to expand to the incoming max constraint
+            // (the full canvas), which blew nested flex rows out to 358px
+            // with the items spread across them (nested-3level 008_cellA
+            // 0.68 / 011_cellB 0.77 vs web's compact cards). Only translate
+            // flex-grow to weight when the container declares a definite
+            // main-axis size.
+            val mainSizeDefinite = placeholderFillsParentWidth(component.properties)
             // Sort children by order property
             val sortedChildren = sortByOrder(component.children)
             sortedChildren.forEach { child ->
@@ -787,8 +910,8 @@ object ComponentRenderer {
                     else -> childModifier
                 }
 
-                // Apply flex-grow as weight
-                if (flexGrow > 0f) {
+                // Apply flex-grow as weight (definite main size only — see above)
+                if (flexGrow > 0f && mainSizeDefinite) {
                     childModifier = childModifier.weight(flexGrow)
                 }
 
@@ -807,6 +930,12 @@ object ComponentRenderer {
     @Composable
     fun ColumnScope.RenderColumnContent(component: IRComponent, textColor: Color?) {
         if (!component.children.isNullOrEmpty()) {
+            // Same css-flexbox-1 §9.7 rule as RenderRowContent, but the main
+            // axis of a column flex container is BLOCK (height): free space
+            // for flex-grow only exists when the container's height is
+            // definite. Compose's weight would otherwise stretch the Column
+            // to the full canvas height.
+            val mainSizeDefinite = hasDefiniteSize(component.properties, widthAxis = false)
             // Sort children by order property
             val sortedChildren = sortByOrder(component.children)
             sortedChildren.forEach { child ->
@@ -822,8 +951,8 @@ object ComponentRenderer {
                     else -> childModifier
                 }
 
-                // Apply flex-grow as weight
-                if (flexGrow > 0f) {
+                // Apply flex-grow as weight (definite main size only — see above)
+                if (flexGrow > 0f && mainSizeDefinite) {
                     childModifier = childModifier.weight(flexGrow)
                 }
 
@@ -978,9 +1107,21 @@ object ComponentRenderer {
      * unresolvable (null px) values, where filling would blow the
      * wrap-content box out to the canvas width.
      */
-    internal fun placeholderFillsParentWidth(properties: List<IRProperty>): Boolean {
+    internal fun placeholderFillsParentWidth(properties: List<IRProperty>): Boolean =
+        hasDefiniteSize(properties, widthAxis = true)
+
+    /**
+     * True when the IR declares a DEFINITE size on the given axis — an
+     * absolute length the parser resolved to px, or a percentage (which
+     * resolves against the parent at layout time). `auto`, unresolvable
+     * relative units (em/vw/calc → px:null), and absent declarations are
+     * all indefinite. Drives both the placeholder block-span rule and the
+     * flex-grow gating (free space only exists on a definite main axis).
+     */
+    internal fun hasDefiniteSize(properties: List<IRProperty>, widthAxis: Boolean): Boolean {
+        val types = if (widthAxis) setOf("Width", "InlineSize") else setOf("Height", "BlockSize")
         return properties.any { prop ->
-            (prop.type == "Width" || prop.type == "InlineSize") && run {
+            (prop.type in types) && run {
                 val obj = prop.data as? JsonObject ?: return@run false
                 when (obj["type"]?.jsonPrimitive?.contentOrNull) {
                     // Absolute length — definite only when the parser

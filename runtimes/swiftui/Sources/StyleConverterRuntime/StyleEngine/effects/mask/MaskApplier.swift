@@ -42,6 +42,17 @@ struct MaskApplier: ViewModifier {
     // for gradients via an Alignment offset.
     @ViewBuilder
     private func buildLayer(_ layer: MaskLayer, cfg: MaskConfig) -> some View {
+        // `mask-mode: luminance` (CSS Masking 1 §7.3) converts the mask
+        // source to a luminance channel before use: the mask value at
+        // each pixel is `relativeLuminance × alpha` instead of the raw
+        // alpha. SwiftUI's `.mask` only reads alpha, so we pre-fold the
+        // stop colours: a BLACK stop (luminance 0) becomes fully
+        // transparent — which is why web renders NOTHING for a black
+        // linear-gradient mask in luminance mode while the old iOS path
+        // (alpha-only) showed a gradient fade (effects/004_C05).
+        let stopsFor: ([Gradient.Stop]) -> [Gradient.Stop] = { stops in
+            cfg.mode == .luminance ? stops.map(Self.luminanceStop) : stops
+        }
         switch layer {
         case .none:
             // No-op — we still render a transparent colour so the ZStack
@@ -55,19 +66,41 @@ struct MaskApplier: ViewModifier {
             // CSS angle convention: 0deg points UP, rotating clockwise.
             // SwiftUI LinearGradient's startPoint/endPoint interprets
             // differently — we fake it by constructing unit vectors.
-            LinearGradient(gradient: Gradient(stops: stops),
+            LinearGradient(gradient: Gradient(stops: stopsFor(stops)),
                            startPoint: startPoint(forAngle: deg),
                            endPoint: endPoint(forAngle: deg))
         case .radialGradient(let stops):
             // Radial: centre at mask position (defaults 50% 50%).
-            RadialGradient(gradient: Gradient(stops: stops),
+            RadialGradient(gradient: Gradient(stops: stopsFor(stops)),
                            center: UnitPoint(x: cfg.position.x, y: cfg.position.y),
                            startRadius: 0, endRadius: 200)
         case .conicGradient(let stops):
-            // Conic: SwiftUI's AngularGradient sweeps 360° from 0rad.
-            AngularGradient(gradient: Gradient(stops: stops),
-                            center: UnitPoint(x: cfg.position.x, y: cfg.position.y))
+            // Conic: CSS starts at 12 o'clock (css-images-4 §2.3) while
+            // SwiftUI's AngularGradient starts at 3 o'clock — apply the
+            // same −90° offset as GradientApplier.conic so mask and
+            // background conics stay rotationally aligned.
+            AngularGradient(gradient: Gradient(stops: stopsFor(stops)),
+                            center: UnitPoint(x: cfg.position.x, y: cfg.position.y),
+                            angle: .degrees(-90))
         }
+    }
+
+    /// Fold a stop's colour into its luminance-derived alpha:
+    /// `alpha' = Y × alpha`, colour forced to white so only the alpha
+    /// channel carries signal. Y uses the Rec.709 relative-luminance
+    /// coefficients referenced by CSS Masking 1 §7.3 (via SVG 1.1
+    /// `luminanceToAlpha`): Y = 0.2126 R + 0.7152 G + 0.0722 B.
+    static func luminanceStop(_ stop: Gradient.Stop) -> Gradient.Stop {
+        // UIColor bridge — every mask colour reaches here via
+        // Color(.sRGB, …) so getRed always succeeds; fall back to the
+        // stop unchanged if a pattern/named colour ever sneaks in.
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        guard UIColor(stop.color).getRed(&r, green: &g, blue: &b, alpha: &a) else {
+            return stop
+        }
+        let y = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        return Gradient.Stop(color: Color.white.opacity(Double(y * a)),
+                             location: stop.location)
     }
 
     // Helpers — map CSS angle (in degrees, 0 = up) to SwiftUI

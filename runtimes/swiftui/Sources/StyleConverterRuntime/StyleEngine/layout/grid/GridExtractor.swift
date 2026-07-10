@@ -66,16 +66,31 @@ enum GridExtractor {
                     agg.gridArea = line
                     touched = true
                 }
-            case "GridColumnStart", "GridColumnEnd":
-                // Fold into gridColumn — last-seen wins. A finer split
-                // (separate start/end) will land when the applier needs
-                // span ranges spanning both sides. TODO: expose both.
+            case "GridColumnStart":
+                // Fidelity wave 1: start/end kept on SEPARATE aggregate
+                // fields so a `1 / 3` pair survives to the placement
+                // algorithm. The legacy folded `gridColumn` is still
+                // written (last-seen-wins) for older consumers.
                 if let line = parseGridLine(prop.data) {
+                    agg.gridColumnStart = line
                     agg.gridColumn = line
                     touched = true
                 }
-            case "GridRowStart", "GridRowEnd":
+            case "GridColumnEnd":
                 if let line = parseGridLine(prop.data) {
+                    agg.gridColumnEnd = line
+                    agg.gridColumn = line
+                    touched = true
+                }
+            case "GridRowStart":
+                if let line = parseGridLine(prop.data) {
+                    agg.gridRowStart = line
+                    agg.gridRow = line
+                    touched = true
+                }
+            case "GridRowEnd":
+                if let line = parseGridLine(prop.data) {
+                    agg.gridRowEnd = line
                     agg.gridRow = line
                     touched = true
                 }

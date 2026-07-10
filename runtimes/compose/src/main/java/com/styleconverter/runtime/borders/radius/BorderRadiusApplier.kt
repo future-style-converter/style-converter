@@ -39,8 +39,10 @@ object BorderRadiusApplier {
         if (!config.hasRadius) return modifier
 
         // Circular fast path: the built-in RoundedCornerShape is the cheapest
-        // and most-tested Shape; use it whenever every corner is x==y.
-        if (config.isCircular) {
+        // and most-tested Shape; use it whenever every corner is x==y AND no
+        // corner carries a paint-time percentage axis (fractions need the
+        // custom Shape below to resolve against the laid-out size).
+        if (config.isCircular && !config.hasFraction) {
             return modifier.clip(
                 RoundedCornerShape(
                     topStart = config.topStart.first,
@@ -51,10 +53,11 @@ object BorderRadiusApplier {
             )
         }
 
-        // Elliptical path: hand-built Shape that emits a RoundRect with
-        // independent x/y radii per corner — this is what CSS "40px 20px"
-        // actually specifies and what the IR's {horizontal, vertical}
-        // encoding carries through.
+        // Elliptical / percentage path: hand-built Shape that emits a
+        // RoundRect with independent x/y radii per corner — this is what
+        // CSS "40px 20px" and "50%" actually specify. Percentage axes are
+        // resolved here against the box's width (x) / height (y) per
+        // css-backgrounds-3 §4.4.
         return modifier.clip(EllipticalCornerShape(config))
     }
 }
@@ -81,19 +84,32 @@ private class EllipticalCornerShape(
         // shape behaves consistently with the rest of the style engine.
         val ltr = layoutDirection == LayoutDirection.Ltr
 
-        // Convert each Dp pair to pixel CornerRadius(x, y). Dp->px needs
-        // the current Density, which Compose hands us here.
-        fun cr(pair: Pair<androidx.compose.ui.unit.Dp, androidx.compose.ui.unit.Dp>) =
-            with(density) {
-                CornerRadius(pair.first.toPx(), pair.second.toPx())
-            }
+        // Convert each corner to pixel CornerRadius(x, y). A percentage
+        // axis (carried as a 0..1 fraction) resolves against the box's
+        // WIDTH for x and HEIGHT for y — css-backgrounds-3 §4.4. That's
+        // why `border-radius: 50%` yields a full ellipse on a non-square
+        // box (rx = w/2, ry = h/2), matching Chrome. Fixed axes convert
+        // Dp→px via the Density Compose hands us here.
+        fun cr(
+            pair: Pair<androidx.compose.ui.unit.Dp, androidx.compose.ui.unit.Dp>,
+            fraction: Pair<Float?, Float?>
+        ) = with(density) {
+            CornerRadius(
+                fraction.first?.times(size.width) ?: pair.first.toPx(),
+                fraction.second?.times(size.height) ?: pair.second.toPx()
+            )
+        }
 
         // Map logical corners (start/end) to physical corners (left/right)
         // based on layout direction. In LTR: start=left, end=right.
-        val topLeft = if (ltr) cr(config.topStart) else cr(config.topEnd)
-        val topRight = if (ltr) cr(config.topEnd) else cr(config.topStart)
-        val bottomRight = if (ltr) cr(config.bottomEnd) else cr(config.bottomStart)
-        val bottomLeft = if (ltr) cr(config.bottomStart) else cr(config.bottomEnd)
+        val cTopStart = cr(config.topStart, config.topStartFraction)
+        val cTopEnd = cr(config.topEnd, config.topEndFraction)
+        val cBottomEnd = cr(config.bottomEnd, config.bottomEndFraction)
+        val cBottomStart = cr(config.bottomStart, config.bottomStartFraction)
+        val topLeft = if (ltr) cTopStart else cTopEnd
+        val topRight = if (ltr) cTopEnd else cTopStart
+        val bottomRight = if (ltr) cBottomEnd else cBottomStart
+        val bottomLeft = if (ltr) cBottomStart else cBottomEnd
 
         // RoundRect with per-corner CornerRadius(x, y) — this is the only
         // geometry type in Compose that represents true elliptical corners.

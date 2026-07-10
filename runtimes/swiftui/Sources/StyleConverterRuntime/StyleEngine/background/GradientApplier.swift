@@ -156,10 +156,18 @@ enum GradientApplier {
     // AngularGradient is SwiftUI's conic equivalent. CSS's `from <angle>`
     // sets the starting position; we pass it through as the `angle`
     // parameter (which controls where colour 0% lives).
+    //
+    // Fidelity wave 1 −90° offset: CSS `conic-gradient` starts at the
+    // TOP of the box (0deg = 12 o'clock, css-images-4 §2.3) while
+    // SwiftUI's AngularGradient measures its start angle from the
+    // trailing edge (0 = 3 o'clock). Without the offset every conic
+    // rendered rotated a quarter-turn clockwise — red pointed east
+    // instead of north on background/000_C01 while web/Android agreed
+    // on north.
     private static func conic(fromDeg: Double?, stops: [BackgroundImageStop],
                               cx: Double, cy: Double) -> some View {
         AngularGradient(gradient: toGradient(stops),
                         center: UnitPoint(x: cx, y: cy),
-                        angle: .degrees(fromDeg ?? 0))
+                        angle: .degrees((fromDeg ?? 0) - 90))
     }
 }

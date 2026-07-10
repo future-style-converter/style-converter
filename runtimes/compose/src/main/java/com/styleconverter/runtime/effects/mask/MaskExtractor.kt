@@ -455,6 +455,26 @@ object MaskExtractor {
     }
 
     private fun extractMaskMode(data: JsonElement?): MaskModeValue {
+        // Canonical wire shape (MaskModeProperty's sealed-class serializer):
+        //   {"type": "app.irmodels.properties.effects.MaskModeValue.Luminance"}
+        // — a class-discriminator OBJECT, not a keyword string. The old
+        // extractKeyword() call returned null on it, so `mask-mode:
+        // luminance` silently fell back to MATCH_SOURCE and a black
+        // gradient mask rendered as an alpha fade instead of fully hiding
+        // the box (Effects_C05_MaskImage: web/iOS blank, Android showed a
+        // left-to-right fade — 0.8527). Match on the discriminator's class
+        // SUFFIX, then keep the legacy keyword-string path for older IR.
+        val discriminator = (data as? kotlinx.serialization.json.JsonObject)
+            ?.get("type")?.let { (it as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull }
+        if (discriminator != null) {
+            return when (discriminator.substringAfterLast('.').uppercase()) {
+                "ALPHA" -> MaskModeValue.ALPHA
+                "LUMINANCE" -> MaskModeValue.LUMINANCE
+                "MATCHSOURCE", "MATCH_SOURCE" -> MaskModeValue.MATCH_SOURCE
+                else -> MaskModeValue.MATCH_SOURCE
+            }
+        }
+
         val keyword = ValueExtractors.extractKeyword(data)?.uppercase()?.replace("-", "_")
             ?: return MaskModeValue.MATCH_SOURCE
 

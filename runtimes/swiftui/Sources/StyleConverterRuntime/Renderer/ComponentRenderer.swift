@@ -18,6 +18,33 @@ import SwiftUI
 public struct ComponentRenderer: View {
     let component: IRComponent
 
+    // Fidelity wave 1 — grid stretch injection. css-align-3 §9: a grid
+    // item whose block size is `auto` and whose align-self resolves to
+    // stretch fills its row track. The parent grid computes the row
+    // height statically (explicit grid-template-rows) and passes it via
+    // this environment slot; we fold it into SizeConfig BEFORE the style
+    // chain so the child's own background/border paint at the stretched
+    // height (an outer .frame can't reach the child's paint chain).
+    @Environment(\.gridStretchHeight) private var gridStretchHeight
+
+    // Fidelity wave 1 — CSS text inheritance channel. The converter
+    // flattens no cascade, so a parent's font-size/family/weight/
+    // letter-spacing/text-align never reached child renders on iOS while
+    // the web reference inherits them natively (inheritance-typography
+    // IT_* trees). Parents publish their inheritable declarations here;
+    // we merge them UNDER the component's own (own always wins) before
+    // building the style, then re-publish the merged set for
+    // grandchildren — reproducing the transitive chain. Mirrors the
+    // Android LocalInheritedProperties channel 1:1.
+    @Environment(\.inheritedTextProperties) private var inheritedTextProperties
+
+    /// The component's declarations with the parent's inheritable text
+    /// properties merged underneath (css-cascade-4 inheritance).
+    private var mergedProperties: [IRProperty] {
+        InheritedText.merge(own: component.properties,
+                            inherited: inheritedTextProperties)
+    }
+
     // public: explicit memberwise init — the synthesized one is internal,
     // so cross-module callers need this spelled out.
     public init(component: IRComponent) {
@@ -26,7 +53,17 @@ public struct ComponentRenderer: View {
 
     // public: View protocol witness on a public type must be public.
     public var body: some View {
-        let style = StyleBuilder.build(from: component.properties)
+        // Build the style from the inheritance-merged declarations, then
+        // fold in the grid-stretch height (if the parent injected one and
+        // the IR declared no explicit height — an explicit height always
+        // wins per css-align-3 §9's "auto block size" precondition).
+        let style: ComponentStyle = {
+            var s = StyleBuilder.build(from: mergedProperties)
+            if let h = gridStretchHeight, s.size.height == nil {
+                s.size.height = .exact(px: h)
+            }
+            return s
+        }()
 
         if style.layout.display == .none {
             EmptyView()
@@ -79,7 +116,13 @@ public struct ComponentRenderer: View {
         let hasChildren = !(component.children?.isEmpty ?? true)
         let gridKind: ContainerDecision.ContainerKind? = {
             guard hasChildren, let agg = style.layout7 else { return nil }
-            return GridApplier.containerKind(for: agg)
+            // Explicit templates / auto-flow pick their container kind;
+            // a bare `display: grid` with children (no template at all)
+            // still IS a grid per css-grid-1 — a single auto column —
+            // so route it through the CSS grid layout too instead of
+            // falling to the legacy 2-col adaptive LazyVGrid.
+            if let k = GridApplier.containerKind(for: agg) { return k }
+            return agg.display == .grid ? .lazyVGrid : nil
         }()
         // Phase 7 step 2: route flex containers through FlexboxApplier's
         // FlowLayout when `flex-wrap: wrap|wrap-reverse` is set.
@@ -175,12 +218,32 @@ public struct ComponentRenderer: View {
         let agg = style.layout7  // safe — gridKind only fires when non-nil
         switch kind {
         case .lazyVGrid:
-            // Map GridTemplateColumns → [GridItem] via GridApplier.
-            let items = GridApplier.gridItems(
-                for: agg?.gridTemplateColumns,
-                columnGap: gap.column
-            )
-            LazyVGrid(columns: items, spacing: gap.row) {
+            // Fidelity wave 1: real CSS-grid subset via CSSGridLayout.
+            // LazyVGrid centred items, ignored placement/spans, ignored
+            // grid-template-rows, and expanded greedily to the canvas
+            // width — all four flagged in the grid-2col/nested-3level
+            // wave. The plan (placement + alignment per subview) is
+            // computed once and shared with the stretch-height env
+            // injection in contentOrPlaceholder.
+            let plan = gridPlan(style: style)
+            CSSGridLayout(
+                // Column tracks from the template; a template-less grid
+                // is a single auto column per css-grid-1 §7.1.
+                tracks: agg?.gridTemplateColumns?.tracks.map(\.kind) ?? [.automatic],
+                // Row template feeds fixed row heights (60px tracks in
+                // grid-2col/010_G2_AlignSelf).
+                rowTemplate: agg?.gridTemplateRows?.tracks.map(\.kind),
+                // Implicit rows take the first grid-auto-rows size.
+                autoRows: agg?.gridAutoRows?.tracks.first?.kind,
+                requests: plan?.requests ?? [],
+                justify: plan?.justify ?? [],
+                align: plan?.align ?? [],
+                rowGap: gap.row,
+                columnGap: gap.column,
+                // Explicit CSS width ⇒ fr/% tracks split the proposal;
+                // otherwise fit-content hug (web harness parity).
+                definiteWidth: style.size.width != nil
+            ) {
                 contentOrPlaceholder(style: style)
             }
         case .lazyHGrid:
@@ -248,6 +311,10 @@ public struct ComponentRenderer: View {
                             Color.clear
                         } else if let child = byArea[cellName] {
                             ComponentRenderer(component: child)
+                                // Text inheritance flows into area-placed
+                                // children the same as flow children.
+                                .environment(\.inheritedTextProperties,
+                                             InheritedText.inheritable(from: mergedProperties))
                         } else {
                             // Named but no matching child — still reserve
                             // the cell so the grid stays rectangular.
@@ -257,6 +324,108 @@ public struct ComponentRenderer: View {
                 }
             }
         }
+    }
+
+    // MARK: - Grid plan (fidelity wave 1)
+
+    /// Everything CSSGridLayout needs about this container's items, in
+    /// SUBVIEW order (leading `_text` placeholder first when present,
+    /// then the `order`-sorted children). Also carries the stretch-
+    /// height map keyed by SORTED-CHILD index for the environment
+    /// injection in contentOrPlaceholder.
+    struct GridPlan {
+        /// Placement request per subview.
+        var requests: [GridItemRequest]
+        /// Inline-axis alignment per subview.
+        var justify: [GridItemAlign]
+        /// Block-axis alignment per subview.
+        var align: [GridItemAlign]
+        /// Sorted-child index → fixed row height to stretch to.
+        var stretchHeights: [Int: CGFloat]
+    }
+
+    /// Build the grid plan for a `display: grid` container. Returns nil
+    /// for non-grid parents so contentOrPlaceholder can skip the env
+    /// injection entirely.
+    private func gridPlan(style: ComponentStyle) -> GridPlan? {
+        // Only grid containers with children get a plan. Mirrors the
+        // gridKind decision in layoutContainer: an explicit template
+        // routes to the grid path even without `display: grid` (legacy
+        // behaviour of GridApplier.containerKind).
+        guard let parentAgg = style.layout7,
+              parentAgg.display == .grid
+                || GridApplier.containerKind(for: parentAgg) == .lazyVGrid,
+              let rawChildren = component.children, !rawChildren.isEmpty else { return nil }
+        // Same ordering contentOrPlaceholder renders with (CSS `order`).
+        let children = FlexboxApplier.sorted(rawChildren)
+        // A parent that carries _text AND children renders the text as a
+        // leading placeholder — CSS wraps loose grid text in an
+        // anonymous grid ITEM, so it participates in placement.
+        let hasLeadingText = (component._text?.isEmpty == false)
+        var requests: [GridItemRequest] = []
+        var justify: [GridItemAlign] = []
+        var align: [GridItemAlign] = []
+        // Track per-child "block size may stretch" flags for the env map.
+        var stretchFlags: [Bool] = []
+        if hasLeadingText {
+            // The anonymous text item auto-places at the first free cell
+            // and start-aligns (it has no self-alignment properties).
+            requests.append(GridItemRequest())
+            justify.append(.start)
+            align.append(.start)
+        }
+        for child in children {
+            // Full layout aggregate — placement longhands + self-align.
+            let a = LayoutExtractor.extract(from: child.properties)
+            var rq = GridItemRequest()
+            // Placement lines are 1-based; spans ride on either longhand
+            // (`grid-column-start: span 2` / `grid-column-end: span 2`).
+            rq.colStart = a?.gridColumnStart?.line
+            rq.colEnd   = a?.gridColumnEnd?.line
+            rq.rowStart = a?.gridRowStart?.line
+            rq.rowEnd   = a?.gridRowEnd?.line
+            rq.colSpan  = a?.gridColumnStart?.span ?? a?.gridColumnEnd?.span
+            rq.rowSpan  = a?.gridRowStart?.span ?? a?.gridRowEnd?.span
+            requests.append(rq)
+            // Self-alignment resolves against the container's *-items
+            // defaults (css-align-3 §6).
+            justify.append(GridPlacer.resolveAlign(self: a?.justifySelf,
+                                                   items: parentAgg.justifyItems))
+            align.append(GridPlacer.resolveAlign(self: a?.alignSelf,
+                                                 items: parentAgg.alignItems))
+            // Stretch candidate: effective block-axis keyword is
+            // stretch/normal/auto (the grid default) AND the child has
+            // no explicit block size in the IR.
+            let effAlign: AlignmentKeyword? = {
+                if let s = a?.alignSelf, s != .auto { return s }
+                return parentAgg.alignItems
+            }()
+            let stretchy = effAlign == nil || effAlign == .stretch || effAlign == .normal
+            let hasHeight = child.properties.contains {
+                $0.type == "Height" || $0.type == "BlockSize"
+            }
+            stretchFlags.append(stretchy && !hasHeight)
+        }
+        // Resolve stretch heights: the item's assigned row must be a
+        // FIXED template track (only then is the row height knowable
+        // before measurement — auto rows are content-sized and stretch
+        // to content is an identity).
+        var stretchHeights: [Int: CGFloat] = [:]
+        if let rowTracks = parentAgg.gridTemplateRows?.tracks {
+            let cols = parentAgg.gridTemplateColumns?.tracks.count ?? 1
+            let (cells, _) = GridPlacer.assign(requests, columnCount: cols)
+            let offset = hasLeadingText ? 1 : 0
+            for i in 0..<children.count where stretchFlags[i] {
+                let cell = cells[i + offset]
+                // Only single-row items stretch to one track cleanly.
+                guard cell.rowSpan == 1, cell.row < rowTracks.count else { continue }
+                if case .fixed(let px) = rowTracks[cell.row].kind {
+                    stretchHeights[i] = px
+                }
+            }
+        }
+        return GridPlan(requests: requests, justify: justify,
+                        align: align, stretchHeights: stretchHeights)
     }
 
     // MARK: - Content
@@ -284,7 +453,11 @@ public struct ComponentRenderer: View {
                     color: style.text.color,
                     textConfig: style.text,
                     backgroundColor: style.backgroundColor,
-                    clipTextGradient: nil
+                    clipTextGradient: nil,
+                    // text-align only has room to act when the box is
+                    // wider than the glyph run — i.e. when the IR set an
+                    // explicit width (see fillWidth doc on the label).
+                    fillWidth: style.size.width != nil
                 )
             }
             // Phase 7 step 2: sort children by CSS `order` BEFORE rendering.
@@ -295,6 +468,15 @@ public struct ComponentRenderer: View {
             // keeps us on the legacy-layout path when Phase 7 has not
             // touched this component.
             let parentAgg = style.layout7
+            // Grid stretch map (fidelity wave 1): nil for non-grid
+            // parents. Every child gets the env value SET explicitly —
+            // including nil — so a grandparent's injection can never
+            // leak past its own children.
+            let plan = gridPlan(style: style)
+            // Inheritable text declarations for the children — computed
+            // from the MERGED list so grandparents' values ride through
+            // parents that don't redeclare them (transitive cascade).
+            let childInherited = InheritedText.inheritable(from: mergedProperties)
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
                 // Build the child's aggregate once so FlexChildModifier
                 // can read align-self / flex-basis / flex-grow without
@@ -318,22 +500,34 @@ public struct ComponentRenderer: View {
                 // — we leave that to a follow-up.
                 let parentTag = (component._tag ?? "").lowercased()
                 let isListItem = (child._tag ?? "").lowercased() == "li"
-                if isListItem && (parentTag == "ol" || parentTag == "ul") {
-                    HStack(alignment: .firstTextBaseline, spacing: 4) {
-                        Text(parentTag == "ol" ? "\(index + 1)." : "•")
-                        if let ca = childAgg, let pa = parentAgg {
-                            ComponentRenderer(component: child)
-                                .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
-                        } else {
-                            ComponentRenderer(component: child)
+                Group {
+                    if isListItem && (parentTag == "ol" || parentTag == "ul") {
+                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                            Text(parentTag == "ol" ? "\(index + 1)." : "•")
+                            if let ca = childAgg, let pa = parentAgg {
+                                ComponentRenderer(component: child)
+                                    .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
+                            } else {
+                                ComponentRenderer(component: child)
+                            }
                         }
+                    } else if let ca = childAgg, let pa = parentAgg {
+                        ComponentRenderer(component: child)
+                            .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
+                    } else {
+                        ComponentRenderer(component: child)
                     }
-                } else if let ca = childAgg, let pa = parentAgg {
-                    ComponentRenderer(component: child)
-                        .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
-                } else {
-                    ComponentRenderer(component: child)
                 }
+                // Grid stretch injection (css-align-3 §9) — the value is
+                // ALWAYS written (nil when not a stretching grid child)
+                // so the environment resets at every tree level.
+                .environment(\.gridStretchHeight, plan?.stretchHeights[index])
+                // Text inheritance (css-cascade-4): publish this
+                // element's merged inheritable declarations for the
+                // child. Always written so each level's channel is
+                // exactly its parent's merged set — no accumulation
+                // beyond the CSS-inherited property list.
+                .environment(\.inheritedTextProperties, childInherited)
             }
         } else {
             // CSS `background-clip: text` + a `background-image`
@@ -368,7 +562,16 @@ public struct ComponentRenderer: View {
                 color: style.text.color,
                 textConfig: style.text,
                 backgroundColor: style.backgroundColor,
-                clipTextGradient: clipText
+                clipTextGradient: clipText,
+                // CSS `text-align: right|center` positions the line box
+                // inside the element's CONTENT box. SwiftUI's
+                // .multilineTextAlignment only aligns lines against each
+                // other, so a single-line label in a wider explicit-width
+                // box stayed flush left (background/004_TextBlock,
+                // borders/015_TextBlock). Fill the proposed width only
+                // when the IR declared a width — otherwise the box hugs
+                // (fit-content) and alignment is a no-op anyway.
+                fillWidth: style.size.width != nil
             )
         }
     }
@@ -397,6 +600,13 @@ private struct PlaceholderLabel: View {
     // `color` when set so the rendered output matches web's clipped
     // text only (no rectangular bg fill).
     var clipTextGradient: LinearGradient? = nil
+    // Fidelity wave 1 — when true, the label expands to the full
+    // proposed width so `text-align` (multilineTextAlignment + frame
+    // alignment below) can position the glyph run inside a box that is
+    // wider than the text. ONLY set when the IR declared an explicit
+    // width: expanding unconditionally would defeat the fit-content
+    // hugging every placeholder-only fixture depends on.
+    var fillWidth: Bool = false
 
     var body: some View {
         // Resolve the visible string: rawText wins when present (the IR
@@ -436,8 +646,16 @@ private struct PlaceholderLabel: View {
             // to match web/Android's line-box height (e.g. font-size 14
             // + line-height 2 = 28px text box, not the bare 14px iOS
             // would otherwise allocate).
-            .frame(minHeight: textConfig.lineHeight ?? 0,
-                   alignment: .center)
+            //
+            // fillWidth (fidelity wave 1): `maxWidth: .infinity` accepts
+            // the parent's proposal so text-align has room to act; the
+            // frame's horizontal alignment mirrors the CSS keyword
+            // (right → trailing, center → center). Vertical stays
+            // centred inside the line box exactly as before.
+            .frame(maxWidth: fillWidth ? .infinity : nil,
+                   minHeight: textConfig.lineHeight ?? 0,
+                   alignment: Alignment(horizontal: fillHorizontal,
+                                        vertical: .center))
             .lineSpacing(max(0, (textConfig.lineHeight ?? 0) - (textConfig.fontSize ?? 16)))
             // CSS `text-indent` — push the text right by the indent
             // amount. SwiftUI lacks a first-line-only API, so we use
@@ -447,6 +665,17 @@ private struct PlaceholderLabel: View {
             // diverge but no fixture exercises that today.
             .padding(.leading, textConfig.textIndentPx ?? 0)
             .padding(4)
+    }
+
+    /// Horizontal frame alignment mirroring the CSS text-align keyword.
+    /// Leading when not filling (identity — the frame hugs the text).
+    private var fillHorizontal: HorizontalAlignment {
+        guard fillWidth else { return .leading }
+        switch textConfig.textAlign {
+        case .center:   return .center
+        case .trailing: return .trailing
+        case .leading:  return .leading
+        }
     }
 
     private var font: Font {
@@ -517,7 +746,13 @@ private extension LayoutConfig.Align {
         case .flexEnd:   return .bottom
         case .center:    return .center
         case .baseline:  return .firstTextBaseline
-        case .stretch:   return .center
+        // css-flexbox-1 §8.3: `stretch` only stretches items whose cross
+        // size is `auto`; items with a definite cross size are aligned
+        // as `flex-start`. Our items are intrinsically sized (fit-content
+        // harness parity), so the visible behaviour of the default
+        // `align-items: stretch` is TOP alignment — web/Android agree;
+        // the old `.center` mapping floated shorter items mid-row.
+        case .stretch:   return .top
         }
     }
 
