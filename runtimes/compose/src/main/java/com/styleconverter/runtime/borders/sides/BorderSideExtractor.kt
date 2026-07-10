@@ -2,6 +2,7 @@ package com.styleconverter.runtime.borders.sides
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.PropertyRegistry
 import com.styleconverter.runtime.core.types.ValueExtractors
 import kotlinx.serialization.json.JsonElement
@@ -82,6 +83,23 @@ object BorderSideExtractor {
             }
         }
 
+        // Resolve CSS `currentColor` for border colors. Per css-backgrounds-3
+        // §4.1 the INITIAL value of border-*-color is `currentcolor`, i.e. the
+        // element's computed `color`. A side declared with style+width but no
+        // color must therefore paint with the text color — NOT black. Our
+        // renderer has no full cascade, so the fallback chain is:
+        //   1. the element's own `Color` property, if declared;
+        //   2. #eee — the capture harness body color that `color` inherits
+        //      from on web (apps/web-harness/index.html `body { color:#eee }`),
+        //      which is what the browser resolves currentcolor to for these
+        //      fixtures (Borders_C04: web paints a light dotted border,
+        //      Android painted black → 0.8665).
+        // extractColor returns null for the `currentcolor` keyword itself, so
+        // explicit `border-color: currentColor` declarations land here too.
+        val currentColor = properties.firstOrNull { it.first == "Color" }
+            ?.second?.let { ValueExtractors.extractColor(it) }
+            ?: Color(0xFFEEEEEE)
+
         // Apply shorthand values to sides that don't have specific values
         if (sharedWidth != null || sharedColor != null || sharedStyle != null) {
             top = top.copy(
@@ -105,6 +123,30 @@ object BorderSideExtractor {
                 style = start.style ?: sharedStyle
             )
         }
+
+        // Fill any still-missing side color with the resolved currentColor
+        // (AFTER the shorthand merge so an explicit `border-color` shorthand
+        // keeps precedence over the currentcolor fallback).
+        if (top.color == null) top = top.copy(color = currentColor)
+        if (end.color == null) end = end.copy(color = currentColor)
+        if (bottom.color == null) bottom = bottom.copy(color = currentColor)
+        if (start.color == null) start = start.copy(color = currentColor)
+
+        // css-backgrounds-3 §4.3: border-width's initial value is `medium`
+        // (3px in every browser UA sheet). A side declared with a visible
+        // style but NO width must therefore paint 3px — not vanish.
+        // Borders_Decorated (`border-block-end-style: dotted`, no width)
+        // renders a 3px dotted bottom edge on web; Android dropped it
+        // because hasBorder required an explicit width.
+        fun applyMediumDefault(side: BorderSideConfig): BorderSideConfig =
+            if (side.width == null && side.style != null &&
+                side.style != ValueExtractors.LineStyle.NONE &&
+                side.style != ValueExtractors.LineStyle.HIDDEN
+            ) side.copy(width = 3.dp) else side
+        top = applyMediumDefault(top)
+        end = applyMediumDefault(end)
+        bottom = applyMediumDefault(bottom)
+        start = applyMediumDefault(start)
 
         return AllBordersConfig(top, end, bottom, start)
     }

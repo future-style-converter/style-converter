@@ -103,37 +103,56 @@ object GridRenderer {
         // Standard grid rendering (no template areas)
         val columnCount = gridConfig.columnCount ?: 2
 
-        // Use non-lazy grid implementation to work inside LazyColumn
-        // Sort children by order property, then split into rows
+        // Definite-width detection. The web reference gives every component
+        // `width: fit-content` unless the IR declares a width, so a grid
+        // with NO declared width HUGS its tracks (fr resolves to content
+        // size). Compose Layout constraints can't tell us this — the parent
+        // Box always hands down a bounded canvas width — so we read the IR.
+        // Without this, nested-3level's inner `grid` blew out to the full
+        // 358px canvas while web hugged it at ~130px (0.5408 / 42.7% px).
+        val definiteWidth = ComponentRenderer.hasDefiniteSize(
+            component.properties, widthAxis = true
+        )
+
+        // Sort children by order property (CSS `order` participates in
+        // auto-placement order, css-flexbox-1 §5.4 / css-grid-1 §8.5),
+        // then run the placement algorithm — explicit grid-column/row
+        // lines are honored; everything else auto-flows row-major.
         val sortedChildren = ComponentRenderer.sortByOrder(component.children)
-        val rows = sortedChildren.chunked(columnCount)
+        val placements = placeItems(
+            sortedChildren.map { extractPlacementSpec(it.properties) },
+            columnCount
+        )
+        val rowCount = (placements.maxOfOrNull { it.row } ?: 0) + 1
         val rowHeights = gridConfig.rowHeights
 
         Column(
             modifier = modifier,
             verticalArrangement = Arrangement.spacedBy(verticalSpacing)
         ) {
-            rows.forEachIndexed { rowIndex, rowChildren ->
-                // Get row height: use explicit height if available, otherwise use default
+            for (rowIndex in 0 until rowCount) {
+                // Get row height: use explicit height if available, otherwise auto
                 val rowHeight = rowHeights?.getOrNull(rowIndex)
+                // Cells landing in this row, left-to-right.
+                val rowCells = placements.filter { it.row == rowIndex }.sortedBy { it.col }
 
-                // Track-aware row. The previous implementation gave every
-                // column `Modifier.weight(1f)`, which silently rewrote
-                // `grid-template-columns: 80px 120px 80px` (or 25% 50% 25%,
-                // or 1fr 2fr 1fr) into three equal columns — the whole
-                // GTC fixture family diverged from web at SSIM 0.76-0.80.
-                // GridTrackRow measures/places cells per the parsed specs
-                // (css-grid-1 §7.2 track sizing, approximated: px / %
-                // literal, fr shares of free space, auto = max-content +
-                // an equal share of leftover per Chrome's stretch
-                // behaviour, minmax(min,fr) = max(min, fr share)).
-                GridTrackRow(
+                // Track-aware row. GridPlacedRow measures/places cells per
+                // the parsed track specs (css-grid-1 §7.2 approximation:
+                // px / % literal, fr shares of free space, auto =
+                // max-content + stretch share, minmax(min,fr) =
+                // max(min, fr share)) at their PLACED track offsets —
+                // spanning cells get the sum of their tracks plus the
+                // in-between gaps.
+                GridPlacedRow(
                     tracks = gridConfig.columnTracks,
                     columnCount = columnCount,
                     gap = horizontalSpacing,
-                    rowHeight = rowHeight
+                    rowHeight = rowHeight,
+                    definiteWidth = definiteWidth,
+                    cells = rowCells
                 ) {
-                    rowChildren.forEach { child ->
+                    rowCells.forEach { cell ->
+                        val child = sortedChildren[cell.childIndex]
                         // Extract justify-self and align-self for individual item alignment
                         val justifySelf = ComponentRenderer.extractJustifySelf(child.properties)
                         val alignSelf = extractAlignSelf(child.properties)
@@ -141,11 +160,29 @@ object GridRenderer {
                         // Calculate content alignment from justify-self and align-self
                         val contentAlignment = getContentAlignment(justifySelf, alignSelf)
 
+                        // css-align-3 §6.6: `align-self: stretch` (and the
+                        // `normal`/auto default) makes an AUTO-height item
+                        // fill its row track. Web stretches these (the
+                        // harness only suppresses INLINE-axis stretch via
+                        // width:fit-content; heights stay auto), Android
+                        // kept content height (G2_AlignSelf `d` sat 30px
+                        // in a 60px track, 0.9644). Only when the row has
+                        // a definite height and the child's height is auto.
+                        val childHeightDefinite = ComponentRenderer.hasDefiniteSize(
+                            child.properties, widthAxis = false
+                        )
+                        val stretchHeight = rowHeight != null && !childHeightDefinite &&
+                            (alignSelf == ComponentRenderer.AlignSelf.STRETCH ||
+                             alignSelf == ComponentRenderer.AlignSelf.AUTO)
+
                         Box(
                             modifier = if (rowHeight != null) Modifier.fillMaxHeight() else Modifier,
                             contentAlignment = contentAlignment
                         ) {
-                            ComponentRenderer.RenderComponent(child)
+                            ComponentRenderer.RenderComponent(
+                                child,
+                                itemModifier = if (stretchHeight) Modifier.fillMaxHeight() else Modifier
+                            )
                         }
                     }
                 }
@@ -154,30 +191,150 @@ object GridRenderer {
     }
 
     /**
-     * One grid row laid out against explicit column tracks.
+     * One grid item's explicit placement request, in 1-based CSS grid
+     * lines. Null = auto. Wire shape (GridColumnStartPropertyParser et al):
+     * `{"type":"number","number":N}` for line numbers; `span N` / named
+     * lines serialize differently and are treated as auto here (honest
+     * fallback — the wave fixtures only use line numbers).
+     */
+    internal data class GridPlacementSpec(
+        val colStart: Int? = null,
+        val colEnd: Int? = null,
+        val rowStart: Int? = null,
+        val rowEnd: Int? = null
+    )
+
+    /** A resolved item: 0-based row/col plus its column span. */
+    internal data class PlacedItem(
+        val childIndex: Int,
+        val row: Int,
+        val col: Int,
+        val colSpan: Int
+    )
+
+    /**
+     * Pull the four explicit-placement longhands off a child's IR.
+     */
+    internal fun extractPlacementSpec(properties: List<IRProperty>): GridPlacementSpec {
+        fun lineOf(type: String): Int? = properties.firstOrNull { it.type == type }?.data?.let { d ->
+            ((d as? JsonObject)?.get("number") as? JsonPrimitive)?.intOrNull
+                ?: (d as? JsonPrimitive)?.intOrNull
+        }
+        return GridPlacementSpec(
+            colStart = lineOf("GridColumnStart"),
+            colEnd = lineOf("GridColumnEnd"),
+            rowStart = lineOf("GridRowStart"),
+            rowEnd = lineOf("GridRowEnd")
+        )
+    }
+
+    /**
+     * Simplified css-grid-1 §8.5 auto-placement for row-flow grids.
+     * Pure function (JVM unit-tested). Supports:
+     *   - items with definite row AND column → anchored exactly there;
+     *   - items with definite column only → cursor drops to the first row
+     *     (at or after the current one) where the requested tracks are free;
+     *   - fully-auto items → next free cell in row-major order.
+     * Spans clamp to the explicit column count; row spans collapse to 1
+     * (each row renders independently — no cell renderer for row spans yet).
+     */
+    internal fun placeItems(
+        specs: List<GridPlacementSpec>,
+        columnCount: Int
+    ): List<PlacedItem> {
+        val occupied = mutableSetOf<Pair<Int, Int>>() // (row, col)
+        val out = mutableListOf<PlacedItem>()
+        var cursorRow = 0
+        var cursorCol = 0
+
+        fun spanOf(start: Int?, end: Int?): Int =
+            if (start != null && end != null && end > start) end - start else 1
+
+        fun fits(row: Int, col: Int, span: Int): Boolean =
+            col + span <= columnCount && (0 until span).none { (row to col + it) in occupied }
+
+        fun mark(row: Int, col: Int, span: Int) {
+            for (i in 0 until span) occupied.add(row to col + i)
+        }
+
+        specs.forEachIndexed { index, spec ->
+            val colSpan = spanOf(spec.colStart, spec.colEnd).coerceAtMost(columnCount)
+            when {
+                // Fully anchored: place exactly where asked (grid lines are
+                // 1-based; row/col indices 0-based). Does NOT move the
+                // auto-placement cursor, matching §8.5 step 1.
+                spec.colStart != null && spec.rowStart != null -> {
+                    val row = (spec.rowStart - 1).coerceAtLeast(0)
+                    val col = (spec.colStart - 1).coerceIn(0, columnCount - 1)
+                    out.add(PlacedItem(index, row, col, colSpan))
+                    mark(row, col, colSpan)
+                }
+                // Definite column, auto row: drop the cursor down rows until
+                // the requested tracks are free (§8.5 "column position is
+                // definite" branch). If the cursor already passed that
+                // column on the current row, start from the next row.
+                spec.colStart != null -> {
+                    val col = (spec.colStart - 1).coerceIn(0, columnCount - 1)
+                    var row = if (cursorCol > col) cursorRow + 1 else cursorRow
+                    while (!fits(row, col, colSpan)) row++
+                    out.add(PlacedItem(index, row, col, colSpan))
+                    mark(row, col, colSpan)
+                    cursorRow = row
+                    cursorCol = col + colSpan
+                }
+                // Fully auto: sparse row-major scan from the cursor.
+                else -> {
+                    var row = cursorRow
+                    var col = cursorCol
+                    while (true) {
+                        if (col + colSpan > columnCount) { row++; col = 0; continue }
+                        if (fits(row, col, colSpan)) break
+                        col++
+                    }
+                    out.add(PlacedItem(index, row, col, colSpan))
+                    mark(row, col, colSpan)
+                    cursorRow = row
+                    cursorCol = col + colSpan
+                }
+            }
+        }
+        return out
+    }
+
+    /**
+     * One grid row laid out against explicit column tracks, with cells at
+     * their PLACED track offsets (explicit grid-column lines + spans).
      *
-     * Each direct child is one cell (a Box wrapping the grid item). The
-     * measure policy:
+     * Each direct child is one cell (a Box wrapping the grid item), 1:1
+     * with [cells]. The measure policy:
      *   1. resolves every track to a pixel width via [computeTrackWidths]
      *      (pure function — unit-tested on the JVM),
-     *   2. measures cell i with exactly track[i]'s width so the cell Box
-     *      spans the track and its contentAlignment (justify-self /
-     *      align-self) positions the item inside it,
-     *   3. places cells left-to-right at the cumulative track offsets with
-     *      [gap] between tracks (css-align-3 column-gap).
+     *   2. measures cell i with the sum of its spanned tracks (plus the
+     *      gaps BETWEEN them, css-align-3) so the cell Box spans its area
+     *      and its contentAlignment (justify-self / align-self) positions
+     *      the item inside it,
+     *   3. places cells at the cumulative offsets of their start tracks.
+     *
+     * [definiteWidth] mirrors the web reference's `width: fit-content`
+     * default: when the grid declares NO definite width, flexible tracks
+     * (fr / %) size to their max-content instead of splitting the incoming
+     * constraint, and the row reports its own footprint — the grid HUGS.
      *
      * Auto tracks need the item's max-content width (css-grid-1 §7.2.1);
      * we read `maxIntrinsicWidth` before the real measure pass.
      */
     @Composable
-    private fun GridTrackRow(
+    private fun GridPlacedRow(
         tracks: List<TrackSpec>?,
         columnCount: Int,
         gap: Dp,
         rowHeight: Dp?,
+        definiteWidth: Boolean,
+        cells: List<PlacedItem>,
         content: @Composable () -> Unit
     ) {
-        Layout(content = content, modifier = Modifier.fillMaxWidth()) { measurables, constraints ->
+        val rowModifier = if (definiteWidth) Modifier.fillMaxWidth() else Modifier
+        Layout(content = content, modifier = rowModifier) { measurables, constraints ->
             val gapPx = gap.roundToPx().toFloat()
             val rowHeightPx = rowHeight?.roundToPx()
             // Unbounded-width guard: inside a horizontal scroller the max
@@ -194,21 +351,52 @@ object GridRenderer {
             // Normalize the specs to columnCount entries. No parsed specs
             // (legacy IR / unsupported expr) → all-fr(1), byte-compatible
             // with the old equal-weight behaviour.
-            val specs = (0 until columnCount).map { i ->
+            val rawSpecs = (0 until columnCount).map { i ->
                 tracks?.getOrNull(i) ?: TrackSpec.Fr(1f)
             }
-            // Max-content width per cell — only consulted for auto/fit
-            // tracks; cheap no-op for the rest.
-            val intrinsics = measurables.mapIndexed { i, m ->
-                when (specs.getOrNull(i)) {
+            // Indefinite grid width → flexible tracks degrade to content
+            // sizing (fr under a max-content sizing pass behaves as auto,
+            // css-grid-1 §7.2.4 "indefinite available space").
+            val specs = if (definiteWidth) rawSpecs else rawSpecs.map { s ->
+                when (s) {
+                    is TrackSpec.Fr, is TrackSpec.Percent -> TrackSpec.Auto
+                    is TrackSpec.MinMax -> TrackSpec.Auto
+                    else -> s
+                }
+            }
+            // Max-content width per TRACK: the widest single-track cell
+            // that STARTS there (spanning cells excluded — their space
+            // distribution is a §7.2.3 refinement we skip). Only consulted
+            // for auto/fit tracks.
+            val intrinsics = (0 until columnCount).map { t ->
+                when (specs.getOrNull(t)) {
                     is TrackSpec.Auto, is TrackSpec.Fit ->
-                        m.maxIntrinsicWidth(rowHeightPx ?: Int.MAX_VALUE).toFloat()
+                        cells.withIndex().filter { it.value.col == t && it.value.colSpan == 1 }
+                            .maxOfOrNull { (i, _) ->
+                                measurables[i].maxIntrinsicWidth(rowHeightPx ?: Int.MAX_VALUE).toFloat()
+                            } ?: 0f
                     else -> 0f
                 }
             }
-            val widths = computeTrackWidths(specs, intrinsics, containerW, gapPx)
+            val widths = computeTrackWidths(
+                specs, intrinsics, containerW, gapPx, stretch = definiteWidth
+            )
+            // Cumulative track start offsets (track i starts after all
+            // previous tracks + gaps).
+            val offsets = FloatArray(columnCount)
+            for (i in 1 until columnCount) {
+                offsets[i] = offsets[i - 1] + widths.getOrElse(i - 1) { 0f } + gapPx
+            }
+            fun cellWidth(cell: PlacedItem): Float {
+                var w = 0f
+                for (i in cell.col until (cell.col + cell.colSpan).coerceAtMost(columnCount)) {
+                    w += widths.getOrElse(i) { 0f }
+                }
+                // Gaps BETWEEN spanned tracks belong to the cell area.
+                return w + gapPx * (cell.colSpan - 1).coerceAtLeast(0)
+            }
             val placeables = measurables.mapIndexed { i, m ->
-                val w = widths.getOrElse(i) { 0f }.toInt().coerceAtLeast(0)
+                val w = cells.getOrNull(i)?.let { cellWidth(it) }?.toInt()?.coerceAtLeast(0) ?: 0
                 m.measure(
                     if (rowHeightPx != null)
                         Constraints.fixed(w, rowHeightPx)
@@ -217,18 +405,19 @@ object GridRenderer {
                 )
             }
             val rowH = rowHeightPx ?: (placeables.maxOfOrNull { it.height } ?: 0)
-            // Row width: the bounded container width, or (degenerate
-            // unbounded case) the tracks' own footprint — never Infinity,
-            // which Compose would reject at layout() time.
-            val rowW = if (constraints.hasBoundedWidth)
+            // Row width: definite grids report the bounded container width;
+            // indefinite ones report the tracks' own footprint (the hug).
+            val footprint = (widths.sum() + gapPx * (widths.size - 1).coerceAtLeast(0)).toInt()
+            val rowW = if (definiteWidth && constraints.hasBoundedWidth)
                 constraints.maxWidth
             else
-                (widths.sum() + gapPx * (widths.size - 1).coerceAtLeast(0)).toInt()
+                footprint.coerceAtMost(
+                    if (constraints.hasBoundedWidth) constraints.maxWidth else Int.MAX_VALUE
+                )
             layout(rowW, rowH) {
-                var x = 0f
                 placeables.forEachIndexed { i, p ->
-                    p.placeRelative(x.toInt(), 0)
-                    x += widths.getOrElse(i) { 0f } + gapPx
+                    val cell = cells.getOrNull(i) ?: return@forEachIndexed
+                    p.placeRelative(offsets[cell.col].toInt(), 0)
                 }
             }
         }
@@ -278,7 +467,12 @@ object GridRenderer {
         specs: List<TrackSpec>,
         maxContentWidths: List<Float>,
         containerWidth: Float,
-        gapPx: Float
+        gapPx: Float,
+        // When false (grid width indefinite — the web fit-content hug),
+        // auto tracks do NOT absorb leftover container space: they stay at
+        // max-content. Default true preserves the historical behaviour for
+        // definite-width grids and existing unit tests.
+        stretch: Boolean = true
     ): List<Float> {
         val n = specs.size
         if (n == 0) return emptyList()
@@ -320,8 +514,10 @@ object GridRenderer {
             }
         } else {
             // No fr tracks: leftover space stretches auto tracks equally
-            // (Chrome's normal-alignment auto-track stretch).
-            val autoIdx = specs.indices.filter { specs[it] is TrackSpec.Auto }
+            // (Chrome's normal-alignment auto-track stretch) — but ONLY
+            // when the grid's width is definite; a fit-content grid keeps
+            // autos at max-content (the hug).
+            val autoIdx = if (stretch) specs.indices.filter { specs[it] is TrackSpec.Auto } else emptyList()
             if (autoIdx.isNotEmpty()) {
                 val used = base.sum() + gaps
                 val extra = ((containerWidth - used) / autoIdx.size).coerceAtLeast(0f)

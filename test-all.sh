@@ -49,6 +49,17 @@
 #
 set -euo pipefail
 
+# ── Display-sleep guard ──────────────────────────────────────────────────────
+# puppeteer 25 / Chrome-for-Testing 150 stalls Page.captureScreenshot when the
+# macOS display sleeps mid-run (13 consecutive unattended-run failures on
+# 2026-07-09; interactive runs always passed). Re-exec the whole script under
+# caffeinate -dimsu so unattended/overnight runs hold display+idle+system
+# assertions for exactly the lifetime of this process. No-ops off-macOS.
+if [[ "$(uname)" == "Darwin" ]] && command -v caffeinate >/dev/null 2>&1 && [[ -z "${_TESTALL_CAFFEINATED:-}" ]]; then
+    export _TESTALL_CAFFEINATED=1
+    exec caffeinate -dimsu "$0" "$@"
+fi
+
 # ── Single-run lock ──────────────────────────────────────────────────────────
 # Two test-all.sh invocations in parallel will race on several shared paths:
 #   out/tmpOutput.json, tools/visual/report/, the Android/iOS IR asset bundles,

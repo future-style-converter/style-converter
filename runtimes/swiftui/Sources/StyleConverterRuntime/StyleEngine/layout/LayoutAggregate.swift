@@ -298,6 +298,18 @@ struct LayoutAggregate: Equatable {
     var gridColumn: GridLine? = nil
     /// `grid-row` — block-axis line placement.
     var gridRow: GridLine? = nil
+    /// Fidelity wave 1: the four placement longhands, kept SEPARATE.
+    /// The legacy `gridColumn`/`gridRow` folding was last-seen-wins, so
+    /// `grid-column-start: 1; grid-column-end: 3` collapsed to just the
+    /// end line and the span was lost (grid-2col/000_G2_Placement).
+    /// CSSGridLayout's placement algorithm reads these instead.
+    var gridColumnStart: GridLine? = nil
+    /// `grid-column-end` — end line (exclusive, 1-based) or span.
+    var gridColumnEnd: GridLine? = nil
+    /// `grid-row-start` — start line (1-based) or span.
+    var gridRowStart: GridLine? = nil
+    /// `grid-row-end` — end line (exclusive, 1-based) or span.
+    var gridRowEnd: GridLine? = nil
 
     // MARK: - Position + inset
 

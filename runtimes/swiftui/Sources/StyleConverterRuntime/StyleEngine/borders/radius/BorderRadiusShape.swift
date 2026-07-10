@@ -62,14 +62,22 @@ struct BorderRadiusShape: InsettableShape {
         // 0.005, scaling each radius to 50 — half the short side, the
         // standard pill capsule.
         let shrink: (CGFloat) -> CGFloat = { max(0, $0 - self.inset) }
-        let rTL = BorderRadiusCorner(x: shrink(radius.topLeft.x),
-                                     y: shrink(radius.topLeft.y))
-        let rTR = BorderRadiusCorner(x: shrink(radius.topRight.x),
-                                     y: shrink(radius.topRight.y))
-        let rBR = BorderRadiusCorner(x: shrink(radius.bottomRight.x),
-                                     y: shrink(radius.bottomRight.y))
-        let rBL = BorderRadiusCorner(x: shrink(radius.bottomLeft.x),
-                                     y: shrink(radius.bottomLeft.y))
+        // Resolve percent axes FIRST — CSS Backgrounds 3 §5.1 says a
+        // percent horizontal radius refers to the border-box WIDTH and
+        // a percent vertical radius to its HEIGHT. Resolution against
+        // the un-inset rect (the border box) keeps `border-radius: 50%`
+        // an exact half-width/half-height ellipse; the stroke inset is
+        // subtracted afterwards like any other px radius.
+        let full = CGSize(width: rect.width + inset * 2,
+                          height: rect.height + inset * 2)
+        let pTL = radius.topLeft.resolved(in: full)
+        let pTR = radius.topRight.resolved(in: full)
+        let pBR = radius.bottomRight.resolved(in: full)
+        let pBL = radius.bottomLeft.resolved(in: full)
+        let rTL = BorderRadiusCorner(x: shrink(pTL.x), y: shrink(pTL.y))
+        let rTR = BorderRadiusCorner(x: shrink(pTR.x), y: shrink(pTR.y))
+        let rBR = BorderRadiusCorner(x: shrink(pBR.x), y: shrink(pBR.y))
+        let rBL = BorderRadiusCorner(x: shrink(pBL.x), y: shrink(pBL.y))
         let scaleFactor = sideScaleFactor(rTL: rTL, rTR: rTR,
                                           rBR: rBR, rBL: rBL,
                                           width: rect.width,

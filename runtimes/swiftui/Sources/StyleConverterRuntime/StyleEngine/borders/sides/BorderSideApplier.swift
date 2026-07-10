@@ -33,6 +33,21 @@ struct BorderSideApplier: ViewModifier {
     // Forwarded radius so the outline follows the rounded box. Nil when
     // no radius config was extracted — uses square corners.
     let radius: BorderRadiusConfig?
+    // CSS `currentColor` resolution target: when a border side has a
+    // style+width but NO explicit colour, the initial value of
+    // `border-*-color` is `currentColor` (CSS Backgrounds 3 §3.2) —
+    // i.e. the element's own `color`. The capture harness inherits
+    // `color: #eee` from the web body, so absent BOTH an element colour
+    // and an IR colour we fall back to that same light grey instead of
+    // `.primary` (which painted the dots BLACK on iOS while web/Android
+    // rendered them light — borders/003_C04 divergence).
+    var currentColor: Color? = nil
+
+    // The resolved fallback for colourless sides. 0.933 white == #eee,
+    // matching the web harness body colour that currentColor inherits.
+    private var inheritedColor: Color {
+        currentColor ?? Color(white: 0.933)
+    }
 
     func body(content: Content) -> some View {
         // Fast path A — absent or empty.
@@ -43,7 +58,7 @@ struct BorderSideApplier: ViewModifier {
         // visually sits on the perimeter.
         if cfg.isUniform, let w = cfg.top.width, w > 0,
            (cfg.top.style ?? .solid) == .solid {
-            let colour = cfg.top.color ?? .primary
+            let colour = cfg.top.color ?? inheritedColor
             return AnyView(
                 content.overlay(
                     BorderRadiusShape(radius: radius ?? BorderRadiusConfig())
@@ -60,7 +75,7 @@ struct BorderSideApplier: ViewModifier {
         // Canvas can stack the two strokes double needs.
         if cfg.isUniform, let w = cfg.top.width, w > 0,
            let s = cfg.top.style, s == .dotted || s == .dashed {
-            let colour = cfg.top.color ?? .primary
+            let colour = cfg.top.color ?? inheritedColor
             return AnyView(
                 content.overlay(
                     BorderRadiusShape(radius: radius ?? BorderRadiusConfig())
@@ -114,8 +129,11 @@ struct BorderSideApplier: ViewModifier {
     // exactly (same trick as Android's drawLine path).
     private func drawEdge(_ ctx: inout GraphicsContext, size: CGSize,
                           side: Side, c: BorderSideConfig) {
-        guard c.hasBorder, let w = c.width else { return }
-        let colour = c.color ?? .primary
+        // effectiveWidth (not raw width) so a style-only side paints at
+        // the CSS `medium` 3px default like web does.
+        guard c.hasBorder, let w = c.effectiveWidth else { return }
+        // currentColor fallback — see the `inheritedColor` doc above.
+        let colour = c.color ?? inheritedColor
         let style = c.style ?? .solid
         // Line segment spanning the edge at its midline.
         let mid = w / 2
@@ -191,7 +209,31 @@ struct BorderSideApplier: ViewModifier {
 // StyleBuilder.applyStyle (mirrors `.engineBackgroundColor`).
 extension View {
     func engineBorderSides(_ config: AllBordersConfig?,
-                           radius: BorderRadiusConfig? = nil) -> some View {
-        modifier(BorderSideApplier(config: config, radius: radius))
+                           radius: BorderRadiusConfig? = nil,
+                           currentColor: Color? = nil) -> some View {
+        modifier(BorderSideApplier(config: config, radius: radius,
+                                   currentColor: currentColor))
+    }
+
+    /// CSS box model: content sits INSIDE the border band. The border
+    /// itself is painted as an `.overlay` stroke on the border box, so
+    /// without this inset the text/children start at the border box's
+    /// edge and the stroke paints OVER the first `width` points of
+    /// content — web/Android shift content inward by exactly the border
+    /// width (CSS 2.1 §8.1: content edge = border edge + border width +
+    /// padding). Attached innermost in applyStyle (before the CSS
+    /// padding) so the total border-box width is unchanged when an
+    /// explicit `width` is set (border-box sizing) and grows by the
+    /// border width otherwise — both matching web.
+    func engineBorderContentInset(_ config: AllBordersConfig?) -> some View {
+        // Zero-inset fast path keeps the modifier cost-free when no
+        // border is declared.
+        let insets = EdgeInsets(
+            top:      config?.top.hasBorder    == true ? (config?.top.effectiveWidth ?? 0)    : 0,
+            leading:  config?.start.hasBorder  == true ? (config?.start.effectiveWidth ?? 0)  : 0,
+            bottom:   config?.bottom.hasBorder == true ? (config?.bottom.effectiveWidth ?? 0) : 0,
+            trailing: config?.end.hasBorder    == true ? (config?.end.effectiveWidth ?? 0)    : 0
+        )
+        return padding(insets)
     }
 }

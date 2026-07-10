@@ -72,36 +72,69 @@ enum BorderRadiusExtractor {
 
     // Map an IR payload → BorderRadiusCorner.
     // Accepted shapes (from the CSS parser at
-    // `src/main/kotlin/app/parsing/css/properties/longhands/borders/radius/`):
-    //   `{ "px": 10 }`                         → circular 10pt
-    //   `{ "x": {"px":20}, "y": {"px":10} }`   → elliptical 20×10
-    //   Bare number (rare, shorthand leftovers) → circular.
-    //   `{ "original": { "v": 50, "u":"PERCENT" } }` → percent, resolved
-    //   against 100pt as a placeholder. Full resolution needs the live
-    //   component size — we accept the approximation and document it.
+    // `src/main/kotlin/app/parsing/css/properties/longhands/borders/radius/`
+    // — verified against live converter output on fixtures/fidelity/
+    // borders.combos.json):
+    //   `{ "px": 10 }`                          → circular 10pt
+    //   `{ "horizontal": {...}, "vertical": {...} }`
+    //                                           → elliptical, each axis a
+    //                                             length OR percent wrapper
+    //   `{ "x": {"px":20}, "y": {"px":10} }`    → legacy elliptical form
+    //   Bare number (rare, shorthand leftovers)  → circular.
+    //   `{ "original": { "v": 50, "u":"PERCENT" } }` → percent of the
+    //   border-box's corresponding dimension (CSS Backgrounds 3 §5.1).
+    //   Percent axes are carried symbolically on the corner and resolved
+    //   against the live rect in BorderRadiusShape.path(in:).
     private static func cornerFromValue(_ value: IRValue?) -> BorderRadiusCorner? {
         guard let value = value else { return nil }
-        // Elliptical object form — check before generic px extraction.
-        if case .object(let o) = value, o["x"] != nil || o["y"] != nil {
-            // Each axis can be a length OR a percent; re-enter the Phase-1
-            // length extractor and fall back to the px helper.
-            let xp = ValueExtractors.extractPx(o["x"]) ?? 0
-            let yp = ValueExtractors.extractPx(o["y"]) ?? 0
-            return BorderRadiusCorner(x: xp, y: yp)
+        // Elliptical object form — the converter emits `horizontal` /
+        // `vertical` for the two-value corner syntax ("40px 50%"); the
+        // legacy `x` / `y` spelling is kept for compatibility. Checked
+        // before generic px extraction so the pair never collapses.
+        if case .object(let o) = value {
+            let h = o["horizontal"] ?? o["x"]
+            let v = o["vertical"]   ?? o["y"]
+            if h != nil || v != nil {
+                // Each axis independently: absolute px OR percent. A
+                // percent axis rides through as `nil` px + a percent
+                // component so "40px 50%" survives instead of degrading
+                // to a square corner (the pre-fix behaviour dropped it).
+                let (hx, hpct) = axisFromValue(h)
+                let (vy, vpct) = axisFromValue(v)
+                return BorderRadiusCorner(x: hx, y: vy,
+                                          xPercent: hpct, yPercent: vpct)
+            }
         }
-        // Percent shape — resolve against 100pt (conservative; a future
-        // pass can thread real size via SizingContext like padding does).
+        // Uniform percent shape — e.g. `border-radius: 50%`. Both axes
+        // percent; resolution (x→width, y→height) happens at draw time
+        // so a 200×80 box yields the web-matching 100×40 ellipse.
         if case .object(let o) = value,
            let original = o["original"]?.objectValue,
            let u = original["u"]?.stringValue, u.uppercased() == "PERCENT",
            let v = original["v"]?.doubleValue {
-            let resolved = CGFloat(v) // placeholder: v% of 100pt = v pt.
-            return BorderRadiusCorner(uniform: resolved)
+            return BorderRadiusCorner(x: 0, y: 0,
+                                      xPercent: CGFloat(v), yPercent: CGFloat(v))
         }
         // Circular scalar.
         if let px = ValueExtractors.extractPx(value) {
             return BorderRadiusCorner(uniform: px)
         }
         return nil
+    }
+
+    // Decode one elliptical axis: `{px: N}` → (N, nil); percent wrapper
+    // `{original:{v,u:PERCENT}}` → (0, v). Falls back to (0, nil) for
+    // unresolvable payloads so the sibling axis still renders.
+    private static func axisFromValue(_ v: IRValue?) -> (CGFloat, CGFloat?) {
+        guard let v = v else { return (0, nil) }
+        // Percent wrapper first — extractPx would return nil for it.
+        if case .object(let o) = v,
+           let original = o["original"]?.objectValue,
+           original["u"]?.stringValue?.uppercased() == "PERCENT",
+           let pv = original["v"]?.doubleValue {
+            return (0, CGFloat(pv))
+        }
+        // Absolute length via the shared Phase-1 helper.
+        return (ValueExtractors.extractPx(v) ?? 0, nil)
     }
 }

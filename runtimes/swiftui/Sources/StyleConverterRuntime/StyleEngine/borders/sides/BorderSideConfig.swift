@@ -42,10 +42,25 @@ struct BorderSideConfig: Equatable {
     // non-`hidden` style, and a resolvable (or defaultable) colour.
     // Matches Android's `hasBorder` derived property.
     var hasBorder: Bool {
-        guard let w = width, w > 0 else { return false }
         // `none` + `hidden` paint nothing per CSS 2.1 §8.5.3.
         if let s = style, s == .none || s == .hidden { return false }
-        return true
+        // Effective width: explicit wins; absent width with a visible
+        // declared style falls back to the CSS initial `medium` (3px —
+        // CSS Backgrounds 3 §3.3). Web paints `border-*-style: dotted`
+        // with no width as a 3px dotted band; iOS previously dropped
+        // the side entirely (borders/016_Decorated's missing dotted
+        // border-block-end).
+        guard let w = effectiveWidth, w > 0 else { return false }
+        return w > 0
+    }
+
+    // Paint width in points: explicit width, else the `medium` (3px)
+    // default when a visible style was declared, else nil (nothing to
+    // paint — CSS initial border-style is `none`).
+    var effectiveWidth: CGFloat? {
+        if let w = width { return w }
+        if let s = style, s != .none, s != .hidden { return 3 }
+        return nil
     }
 }
 

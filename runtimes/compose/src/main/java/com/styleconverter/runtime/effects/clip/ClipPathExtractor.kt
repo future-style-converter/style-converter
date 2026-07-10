@@ -72,26 +72,48 @@ object ClipPathExtractor {
      * @return ClipPathConfig with extracted clip path shape.
      */
     fun extractClipPathConfig(properties: List<Pair<String, JsonElement?>>): ClipPathConfig {
+        // Single pass over the IR: collect BOTH clip channels plus the
+        // element's position scheme, then decide at the end. The previous
+        // first-match loop made the WINNER depend on IR property ORDER —
+        // a fixture declaring `clip: rect(...)` before `clip-path: xywh(...)`
+        // silently applied the legacy rect and dropped the clip-path
+        // (Effects_C01_BackdropFilter: region offset upward, no rounded
+        // corners, Android-web SSIM 0.904).
+        var clipPathShape: ClipShape? = null
+        var legacyRect: ClipShape.LegacyRect? = null
+        var positionKeyword: String? = null
         for ((type, data) in properties) {
-            if (type == "ClipPath" && data != null) {
-                return ClipPathConfig(shape = extractShape(data))
+            when (type) {
+                "ClipPath" -> if (clipPathShape == null && data != null) {
+                    clipPathShape = extractShape(data)
+                }
+                // Legacy CSS 2.1 `clip` — IR shape is
+                // {type:"rect", top|right|bottom|left: <length>?} where any
+                // missing key means CSS `auto`. The values are absolute
+                // coordinates from the box's top-left, NOT inset distances.
+                "Clip" -> if (legacyRect == null && data is JsonObject &&
+                    data["type"]?.jsonPrimitive?.contentOrNull == "rect") {
+                    legacyRect = ClipShape.LegacyRect(
+                        ValueExtractors.extractDp(data["top"]),
+                        ValueExtractors.extractDp(data["right"]),
+                        ValueExtractors.extractDp(data["bottom"]),
+                        ValueExtractors.extractDp(data["left"])
+                    )
+                }
+                // Needed to gate the legacy `clip` per spec (see below).
+                "Position" -> positionKeyword = ValueExtractors.extractKeyword(data)?.uppercase()
             }
-            // Legacy CSS 2.1 `clip` property — only effective on
-            // absolutely-positioned elements per spec, but we accept it
-            // universally to keep parity with web/iOS. The IR shape is
-            // {type:"rect", top|right|bottom|left: <length>?} where any
-            // missing key means CSS `auto`. The values are absolute
-            // coordinates from the box's top-left, NOT inset distances.
-            // Wrap them in a LegacyClipRect shape that resolves the
-            // coordinates into the actual rect at draw time.
-            if (type == "Clip" && data is JsonObject &&
-                data["type"]?.jsonPrimitive?.contentOrNull == "rect") {
-                val top = ValueExtractors.extractDp(data["top"])
-                val right = ValueExtractors.extractDp(data["right"])
-                val bottom = ValueExtractors.extractDp(data["bottom"])
-                val left = ValueExtractors.extractDp(data["left"])
-                return ClipPathConfig(shape = ClipShape.LegacyRect(top, right, bottom, left))
-            }
+        }
+        // Modern `clip-path` always applies (css-masking-1 §7).
+        if (clipPathShape != null) return ClipPathConfig(shape = clipPathShape)
+        // CSS 2.1 §11.1.2: `clip` applies ONLY to absolutely positioned
+        // elements (position: absolute | fixed). Chrome/Firefox/WebKit all
+        // ignore it on static/relative boxes, and the web harness renders
+        // these fixtures unclipped — honoring it here truncated the box and
+        // cut the label text (Effects_BoxModel 0.86, Effects_Decorated 0.7853).
+        val isAbsolutelyPositioned = positionKeyword == "ABSOLUTE" || positionKeyword == "FIXED"
+        if (legacyRect != null && isAbsolutelyPositioned) {
+            return ClipPathConfig(shape = legacyRect)
         }
         return ClipPathConfig()
     }

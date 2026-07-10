@@ -61,10 +61,14 @@ object OutlineExtractor {
 
     /**
      * Extract outline width from JSON.
-     * Supports both pixel values and keywords (thin, medium, thick).
+     * Supports both pixel values and keywords (thin, medium, thick — the
+     * typed {"type":"keyword","value":"THICK"} envelope included, which
+     * `outline-width: thick` emits; see ValueExtractors.extractBorderWidth).
+     * Unparseable data falls back to `medium` (3px), the css-ui-4 §4.2
+     * initial value — never 0, which would silently kill the whole outline.
      */
     private fun extractWidth(json: JsonElement?): Dp {
-        return ValueExtractors.extractBorderWidth(json) ?: 0.dp
+        return ValueExtractors.extractBorderWidth(json) ?: 3.dp
     }
 
     /**

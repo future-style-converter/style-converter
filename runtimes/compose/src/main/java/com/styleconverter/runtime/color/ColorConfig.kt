@@ -61,6 +61,18 @@ data class ColorConfig(
      * the matching paint.blendMode.
      */
     val backgroundBlendModes: List<androidx.compose.ui.graphics.BlendMode> = emptyList(),
+    /**
+     * Paint-area insets for CSS `background-clip: padding-box | content-box`
+     * (css-backgrounds-3 §3.11: the background painting area shrinks to the
+     * padding box / content box). Null = border-box (the initial value) —
+     * paint the whole box as before. When non-null, ColorApplier insets the
+     * background-color / gradient fill by these edge amounts instead of
+     * calling the full-box `Modifier.background`. Computed at extract time
+     * from the element's border widths (padding-box) plus padding
+     * (content-box), because the modifier chain applies padding LAST
+     * (border-box sizing) so the paint pass can't discover them on its own.
+     */
+    val backgroundClipInsets: BackgroundClipInsets? = null,
 ) {
     /** Returns true if any color-related property is set */
     val hasColor: Boolean get() = backgroundColor != null || opacity != null || backgroundImages.isNotEmpty() ||
@@ -73,6 +85,22 @@ data class ColorConfig(
         it is BackgroundImageConfig.RadialGradient ||
         it is BackgroundImageConfig.ConicGradient
     }
+}
+
+/**
+ * Edge insets (border-box → painting-area) for CSS `background-clip:
+ * padding-box | content-box` (css-backgrounds-3 §3.11). For padding-box the
+ * insets are the computed border widths; for content-box they additionally
+ * include the padding. All four zero ≡ border-box (no clip).
+ */
+data class BackgroundClipInsets(
+    val top: Dp = 0.dp,
+    val right: Dp = 0.dp,
+    val bottom: Dp = 0.dp,
+    val left: Dp = 0.dp
+) {
+    /** True when at least one edge actually shrinks the paint area. */
+    val hasInsets: Boolean get() = top > 0.dp || right > 0.dp || bottom > 0.dp || left > 0.dp
 }
 
 /**

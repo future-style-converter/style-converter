@@ -1,6 +1,7 @@
 package com.styleconverter.runtime.borders.image
 
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 /**
  * Configuration for CSS border-image properties.
@@ -39,7 +40,24 @@ data class BorderImageConfig(
     /** How to repeat/tile horizontal edges */
     val repeatHorizontal: BorderImageRepeatValue = BorderImageRepeatValue.STRETCH,
     /** How to repeat/tile vertical edges */
-    val repeatVertical: BorderImageRepeatValue = BorderImageRepeatValue.STRETCH
+    val repeatVertical: BorderImageRepeatValue = BorderImageRepeatValue.STRETCH,
+    /**
+     * The element's COMPUTED border widths (css-backgrounds-3 §4.3: 0 when
+     * the side's border-style is none/absent). These are the resolution
+     * basis for border-image-width per §6.3:
+     *   - `<number>` is a MULTIPLE of the computed border-width, and the
+     *     initial value of border-image-width is the number 1 — so an
+     *     element with no real border (computed width 0) paints NO border
+     *     image at all, exactly like the browser (Borders_C06: web renders
+     *     nothing for `border-image-width: 2` on a borderless box; Android
+     *     painted a thick 16dp gradient frame from the old hard-coded
+     *     8dp fallback basis → SSIM 0.5861).
+     * Filled by BorderImageExtractor from the same IR property list.
+     */
+    val computedBorderTop: Dp = 0.dp,
+    val computedBorderRight: Dp = 0.dp,
+    val computedBorderBottom: Dp = 0.dp,
+    val computedBorderLeft: Dp = 0.dp
 ) {
     /** Returns true if any border-image property is set */
     val hasBorderImage: Boolean

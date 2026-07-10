@@ -92,8 +92,26 @@ object ColorApplier {
         // underneath them. (Previously the call sat after the image
         // loop and painted ON TOP, which silently overwrote any
         // semi-transparent gradient layered against a solid colour.)
+        //
+        // background-clip: padding-box / content-box (css-backgrounds-3
+        // §3.11) shrinks the PAINTING AREA — the fill starts inside the
+        // border band (padding-box) or inside border+padding (content-box)
+        // and the uncovered ring stays transparent. Modifier.background
+        // always floods the full box, so the clipped case draws an inset
+        // rect via drawBehind instead (same paint position in the chain).
         config.backgroundColor?.let { color ->
-            result = result.background(color)
+            val insets = config.backgroundClipInsets
+            result = if (insets != null && insets.hasInsets) {
+                result.drawBehind {
+                    val l = insets.left.toPx()
+                    val t = insets.top.toPx()
+                    val w = (size.width - l - insets.right.toPx()).coerceAtLeast(0f)
+                    val h = (size.height - t - insets.bottom.toPx()).coerceAtLeast(0f)
+                    drawRect(color = color, topLeft = Offset(l, t), size = Size(w, h))
+                }
+            } else {
+                result.background(color)
+            }
         }
 
         // 3. Background images (gradients) - drawn inside the alpha

@@ -45,7 +45,7 @@ struct CaptureCanvas: View {
     static let width: CGFloat = 390
 
     var body: some View {
-        // Critical: `alignment: .topLeading` on the outer frame.
+        // Critical: explicit alignment on the outer frame.
         //
         // The rendered component's natural width is often narrower than the
         // 390 pt canvas (e.g. a `Sizing_Fixed` box with `width: 200`). Without
@@ -55,10 +55,17 @@ struct CaptureCanvas: View {
         // place block content at the flow origin. Anchoring to top-leading
         // mirrors the CSS block-flow origin and keeps captures pixel-aligned
         // across platforms.
+        //
+        // Fidelity wave 1: the web capture page honours a top-level
+        // component's `justify-self` (center/end shift the box along the
+        // canvas's inline axis — grid-2col standalone crops b/c). Resolve
+        // the alignment through the runtime's RootAlignment helper so the
+        // three canvases agree; components without justify-self keep the
+        // .topLeading block-flow origin exactly as before.
         ComponentRenderer(component: component)
             .frame(
                 maxWidth: CaptureCanvas.width - (CaptureCanvas.padding * 2),
-                alignment: .topLeading
+                alignment: RootAlignment.alignment(for: component)
             )
             .padding(CaptureCanvas.padding)
             .frame(width: CaptureCanvas.width, alignment: .topLeading)

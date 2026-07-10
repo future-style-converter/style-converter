@@ -146,12 +146,14 @@ object BorderSideApplier {
                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(width * 6, width * 4))
                 )
             LineStyle.DOTTED ->
-                drawStrokedLine(
-                    c, start, end, width,
-                    // Square 1:1 dash + round caps → renders as circles.
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(width, width)),
-                    cap = StrokeCap.Round
-                )
+                // True spaced circles. The previous 1:1 dash + Round cap
+                // did NOT render dots: a Round cap extends each dash by
+                // width/2 on BOTH ends, so every "dot" was a 2w-long
+                // oblong with only a w gap — adjacent blobs visually
+                // merged (Borders_C01/C04 web-Android 0.87-0.88).
+                // Chromium paints `dotted` as circles of diameter w with
+                // ≈w of clear space between them; drawDotted mirrors that.
+                drawDotted(c, start, end, width)
             LineStyle.DOUBLE -> drawDouble(c, side, width)
             LineStyle.GROOVE -> drawGrooveOrRidge(c, side, width, groove = true)
             LineStyle.RIDGE -> drawGrooveOrRidge(c, side, width, groove = false)
@@ -209,6 +211,66 @@ object BorderSideApplier {
             color = color, start = start, end = end,
             strokeWidth = width, pathEffect = pathEffect, cap = cap
         )
+    }
+
+    /**
+     * Render CSS `border-style: dotted` as a row of filled circles along
+     * the side's centerline. Geometry mirrors Chromium's dotted painter
+     * (blink `StylePainter`): dot diameter = border width; dots spaced so
+     * the clear gap between neighbours is ≈ one width. We fit an integer
+     * dot count to the side length and distribute the remainder evenly so
+     * the first/last dots sit flush with the corners — same visual rhythm
+     * the browser produces.
+     */
+    private fun DrawScope.drawDotted(
+        color: Color,
+        start: Offset,
+        end: Offset,
+        width: Float
+    ) {
+        // Vector along the side and its length. Sides are always axis-
+        // aligned but the math below works for either orientation.
+        val dx = end.x - start.x
+        val dy = end.y - start.y
+        val len = kotlin.math.sqrt(dx * dx + dy * dy)
+        if (len <= 0f || width <= 0f) return
+        val r = width / 2f
+        // Ideal center-to-center pitch = 2×width (dot w + gap w). Fit an
+        // integer count: n dots need (n-1) pitches plus one diameter.
+        val count = dottedDotCount(len, width)
+        if (count == 1) {
+            // Side shorter than one pitch — single dot centered on the side.
+            drawCircle(color, r, Offset(start.x + dx / 2f, start.y + dy / 2f))
+            return
+        }
+        // Even spacing with first/last dot centers inset r from each end so
+        // the dots stay fully inside the box (Chromium keeps corner dots
+        // flush with the adjacent side's edge).
+        val step = (len - width) / (count - 1).toFloat()
+        val ux = dx / len
+        val uy = dy / len
+        for (i in 0 until count) {
+            val d = r + step * i
+            drawCircle(color, r, Offset(start.x + ux * d, start.y + uy * d))
+        }
+    }
+
+    /**
+     * Number of dots Chromium fits on a dotted side of length [len] with
+     * dot diameter [width]: pitches = round-half-UP((len - w) / 2w), dots =
+     * pitches + 1, first/last dot flush with the side ends.
+     *
+     * Rounding MUST be half-up (floor(x+0.5)), NOT kotlin.math.round:
+     * kotlin.math.round is rint (ties-to-even), so the exact-half case
+     * dropped a dot vs Chromium — Borders_C01 (240px side, 8px dots:
+     * (240-8)/16 = 14.5) painted 15 dots on Android vs web's 16, putting
+     * every dot after the first two out of phase (red rings across the
+     * whole diff strip at Android-web 0.8965). Internal for JVM tests.
+     */
+    internal fun dottedDotCount(len: Float, width: Float): Int {
+        if (len <= 0f || width <= 0f) return 0
+        val pitches = kotlin.math.floor((len - width) / (2f * width) + 0.5f).toInt()
+        return kotlin.math.max(1, pitches + 1)
     }
 
     /**

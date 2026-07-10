@@ -228,9 +228,14 @@ object ContentApplier {
         quotesConfig: QuotesConfig,
         quoteLevel: Int
     ) {
-        // Apply modifier from pseudo-element properties
+        // Apply modifier from pseudo-element properties. Pseudo-elements have
+        // no 30dp placeholder floor, so the border-band content inset (moved
+        // out of applyProperties — see StyleApplier.borderContentInset) is
+        // chained directly after the style chain to keep the CSS box model
+        // (border reserves layout space before the content).
         val modifier = try {
             StyleApplier.applyProperties(config.properties)
+                .then(StyleApplier.borderContentInset(config.properties))
         } catch (e: Exception) {
             Modifier
         }

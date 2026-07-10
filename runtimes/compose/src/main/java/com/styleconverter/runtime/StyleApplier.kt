@@ -1,5 +1,6 @@
 package com.styleconverter.runtime
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import com.styleconverter.runtime.core.ir.IRProperty
@@ -460,8 +461,11 @@ object StyleApplier {
             result = WritingModeApplier.applyWritingMode(result, config.writingMode)
         }
 
-        // 3. Effects (filters, clip-path, shadows) — clip/filter the element
-        result = EffectsFacade.apply(result, config.effects)
+        // 3. Effects (filters, clip-path, shadows) — clip/filter the element.
+        //    The border-radius config rides along so the box-shadow painter
+        //    can shape its perimeter like the border box (spread ring on a
+        //    `border-radius: 50%` element = concentric ellipse, not a rect).
+        result = EffectsFacade.apply(result, config.effects, config.borders.radius)
 
         // 3.5. Mask (applied after clip for proper compositing)
         if (config.mask.hasMask) {
@@ -489,6 +493,17 @@ object StyleApplier {
             result = ScrollApplier.applyScroll(result, config.scroll)
         }
 
+        // 7.8 (moved) Border-band content inset now lives in
+        //    [borderContentInset], chained by ComponentRenderer AFTER its
+        //    30dp placeholder floor (defaultMinSize). Round 1 placed the
+        //    band HERE — outside the floor — which stacked border width ON
+        //    TOP of the min-bound content box and grew every min-bound
+        //    bordered placeholder by the band (094_Input_Field 54→56,
+        //    097_Glass_Effect 70→72 vs web's 54/70: the wave-1 +2px
+        //    regression). Inside the floor, the band participates in the
+        //    30dp minimum exactly like web's `minHeight: 30px` border-box
+        //    minimum absorbs the border, restoring the committed geometry.
+
         // 8. Padding LAST (innermost). With padding deferred to the end of
         //    the chain, the modifier order becomes
         //      width(W) → radius/border → bg → overflow → padding(P)
@@ -502,6 +517,52 @@ object StyleApplier {
         result = LayoutFacade.applyPaddingOnly(result, config.layout)
 
         return result
+    }
+
+    /**
+     * Border-band content inset (CSS box model §3: border-box → padding-box).
+     *
+     * Our stroke painter (BorderSideApplier drawWithContent) only PAINTS the
+     * border band without reserving layout space, so a 6px border must be
+     * compensated with 6px of padding or the label text sits border-width px
+     * off vs web (Borders_C02/C08/C09: doubled text in the round-1 diffs).
+     *
+     * IMPORTANT chain position: this modifier must sit INSIDE (after)
+     * ComponentRenderer's defaultMinSize(30.dp) placeholder floor. Web's
+     * floor is `minHeight: 30px` on the BORDER box, so the border band is
+     * absorbed by the minimum whenever the floor is what determines the
+     * height. Chaining the band outside the floor instead ADDED the band to
+     * the floored content (the wave-1 +2px height regression on
+     * 094_Input_Field / 097_Glass_Effect). See [borderBandInsets] for the
+     * per-side width math (unit-tested separately).
+     */
+    fun borderContentInset(properties: List<IRProperty>): Modifier {
+        // Extract just the border sides — cheap relative to a full
+        // extractConfig, and the only config the band depends on.
+        val sides = com.styleconverter.runtime.borders.sides.BorderSideExtractor
+            .extractBorderConfig(properties.map { it.type to it.data })
+        val (start, top, end, bottom) = borderBandInsets(sides)
+        // No border anywhere → keep the chain untouched (Modifier identity).
+        if (start.value <= 0f && top.value <= 0f && end.value <= 0f && bottom.value <= 0f) {
+            return Modifier
+        }
+        return Modifier.padding(start = start, top = top, end = end, bottom = bottom)
+    }
+
+    /**
+     * Pure per-side band math for [borderContentInset]: a side reserves its
+     * computed width only when it actually has a visible border (style not
+     * none/hidden, width > 0) — mirrors how web's border-box layout only
+     * consumes space for rendered borders. Returned in CSS order
+     * (start, top, end, bottom). Kept separate + internal for JVM tests.
+     */
+    internal fun borderBandInsets(
+        sides: com.styleconverter.runtime.borders.sides.AllBordersConfig
+    ): List<androidx.compose.ui.unit.Dp> {
+        fun bandOf(side: com.styleconverter.runtime.borders.sides.BorderSideConfig) =
+            if (side.hasBorder) side.width ?: androidx.compose.ui.unit.Dp(0f)
+            else androidx.compose.ui.unit.Dp(0f)
+        return listOf(bandOf(sides.start), bandOf(sides.top), bandOf(sides.end), bandOf(sides.bottom))
     }
 
     /**
@@ -537,7 +598,8 @@ object StyleApplier {
         result = BordersFacade.apply(result, config.borders)
         // Note: Border image requires BorderImageBox composable for async loading
         result = ColorApplier.applyColors(result, config.colors)
-        result = EffectsFacade.apply(result, config.effects)
+        // Radius rides along for border-box-shaped shadows (§7.1.1).
+        result = EffectsFacade.apply(result, config.effects, config.borders.radius)
         if (config.mask.hasMask) {
             result = MaskApplier.applyMask(result, config.mask)
         }

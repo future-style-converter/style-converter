@@ -124,6 +124,26 @@ object BorderImageApplier {
 
         val density = LocalDensity.current
 
+        // Resolve the four border-image-width values against the element's
+        // COMPUTED border widths (css-backgrounds-3 §6.3). When every side
+        // resolves to 0 — the spec outcome for the initial `1` (or any
+        // `<number>`) multiplier on a border-less element — the border
+        // image paints NOTHING and must not inset the content either.
+        // Browsers render Borders_C06 (`border-image-width: 2`, no border)
+        // as a plain background box; the old 8dp fallback painted a thick
+        // gradient frame here (Android-web SSIM 0.5861).
+        val resolvedTop = config.widthTop.resolve(config.computedBorderTop, config.sliceTop)
+        val resolvedRight = config.widthRight.resolve(config.computedBorderRight, config.sliceRight)
+        val resolvedBottom = config.widthBottom.resolve(config.computedBorderBottom, config.sliceBottom)
+        val resolvedLeft = config.widthLeft.resolve(config.computedBorderLeft, config.sliceLeft)
+        if (resolvedTop <= 0.dp && resolvedRight <= 0.dp &&
+            resolvedBottom <= 0.dp && resolvedLeft <= 0.dp
+        ) {
+            // Zero-width border image area — nothing to paint, no inset.
+            Box(modifier = modifier, content = content)
+            return
+        }
+
         // Use cached image loading
         val urlBitmap = when (val source = config.source) {
             is BorderImageSourceValue.Url -> rememberCachedImage(source.url)
@@ -143,17 +163,18 @@ object BorderImageApplier {
 
         val imageBitmap = urlBitmap ?: gradientBitmap
 
-        // Calculate border widths
-        val borderTop = config.widthTop.toDp(fallbackBorderWidth)
-        val borderRight = config.widthRight.toDp(fallbackBorderWidth)
-        val borderBottom = config.widthBottom.toDp(fallbackBorderWidth)
-        val borderLeft = config.widthLeft.toDp(fallbackBorderWidth)
+        // Border widths resolved above against the computed border-widths.
+        val borderTop = resolvedTop
+        val borderRight = resolvedRight
+        val borderBottom = resolvedBottom
+        val borderLeft = resolvedLeft
 
-        // Calculate outsets
-        val outsetTop = config.outsetTop.toDp(0.dp)
-        val outsetRight = config.outsetRight.toDp(0.dp)
-        val outsetBottom = config.outsetBottom.toDp(0.dp)
-        val outsetLeft = config.outsetLeft.toDp(0.dp)
+        // Calculate outsets. css-backgrounds-3 §6.4: <length> is literal,
+        // <number> is a multiple of the computed border-width, initial 0.
+        val outsetTop = config.outsetTop.resolveOutset(config.computedBorderTop)
+        val outsetRight = config.outsetRight.resolveOutset(config.computedBorderRight)
+        val outsetBottom = config.outsetBottom.resolveOutset(config.computedBorderBottom)
+        val outsetLeft = config.outsetLeft.resolveOutset(config.computedBorderLeft)
 
         Box(
             modifier = modifier
@@ -918,15 +939,51 @@ object BorderImageApplier {
     }
 
     /**
-     * Convert BorderImageDimension to Dp.
+     * Resolve one border-image-width value per css-backgrounds-3 §6.3.
+     *
+     * @param computedBorder the side's COMPUTED border-width (0 when the
+     *        side has no border-style) — the basis for `<number>` values
+     *        and for the initial value `1`.
+     * @param slice the side's border-image-slice, used for `auto` (§6.3:
+     *        auto = the intrinsic size of the corresponding slice; for our
+     *        gradient/bitmap sources the slice's px value is that size).
      */
-    private fun BorderImageDimension?.toDp(fallback: Dp): Dp {
+    internal fun BorderImageDimension?.resolve(
+        computedBorder: Dp,
+        slice: BorderImageSliceEdge?
+    ): Dp {
         return when (this) {
-            null -> fallback
-            BorderImageDimension.Auto -> fallback
+            // Initial value is the NUMBER 1 → 1 × computed border-width.
+            null -> computedBorder
+            // auto → slice size when it's an absolute px count; percentage
+            // slices refer to the source image, whose px size we don't know
+            // here, so fall back to the computed border width.
+            BorderImageDimension.Auto ->
+                if (slice != null && !slice.isPercentage) slice.value.dp else computedBorder
             is BorderImageDimension.Length -> value
-            is BorderImageDimension.Percentage -> fallback * (value / 100f)
-            is BorderImageDimension.Number -> fallback * value
+            // TODO(spec §6.3): percentages refer to the border image AREA
+            // dimension (border box width/height), which is only known at
+            // draw time. Approximated against the computed border width —
+            // logged as an honest gap rather than silently wrong: the old
+            // code multiplied an arbitrary 8dp constant instead.
+            is BorderImageDimension.Percentage -> computedBorder * (value / 100f)
+            // <number> = multiple of the computed border-width.
+            is BorderImageDimension.Number -> computedBorder * value
+        }
+    }
+
+    /**
+     * Resolve one border-image-outset value per css-backgrounds-3 §6.4:
+     * lengths are literal, numbers multiply the computed border-width,
+     * initial value 0.
+     */
+    internal fun BorderImageDimension?.resolveOutset(computedBorder: Dp): Dp {
+        return when (this) {
+            null -> 0.dp
+            BorderImageDimension.Auto -> 0.dp // not a valid outset value
+            is BorderImageDimension.Length -> value
+            is BorderImageDimension.Percentage -> 0.dp // not valid for outset
+            is BorderImageDimension.Number -> computedBorder * value
         }
     }
 
@@ -950,10 +1007,18 @@ object BorderImageApplier {
             return modifier
         }
 
-        val borderTop = config.widthTop.toDp(fallbackBorderWidth)
-        val borderRight = config.widthRight.toDp(fallbackBorderWidth)
-        val borderBottom = config.widthBottom.toDp(fallbackBorderWidth)
-        val borderLeft = config.widthLeft.toDp(fallbackBorderWidth)
+        // Same §6.3 resolution as BorderImageBox — number/initial values
+        // multiply the computed border-width, so a border-less element
+        // draws nothing here either.
+        val borderTop = config.widthTop.resolve(config.computedBorderTop, config.sliceTop)
+        val borderRight = config.widthRight.resolve(config.computedBorderRight, config.sliceRight)
+        val borderBottom = config.widthBottom.resolve(config.computedBorderBottom, config.sliceBottom)
+        val borderLeft = config.widthLeft.resolve(config.computedBorderLeft, config.sliceLeft)
+        if (borderTop <= 0.dp && borderRight <= 0.dp &&
+            borderBottom <= 0.dp && borderLeft <= 0.dp
+        ) {
+            return modifier
+        }
 
         return modifier.drawBehind {
             drawBorderImage(

@@ -79,6 +79,19 @@ object BorderImageExtractor {
             }
         }
 
+        // Resolve the element's COMPUTED border widths — the §6.3 basis for
+        // `<number>` border-image-width values (and for the initial value 1
+        // when no border-image-width is declared). css-backgrounds-3 §4.3:
+        // a side whose border-style is none/hidden/absent computes to width
+        // 0, which BorderSideConfig.hasBorder already encodes (width>0 AND
+        // style != NONE). Reuses BorderSideExtractor so both consumers stay
+        // in lockstep on the width/style gating rules.
+        val sides = com.styleconverter.runtime.borders.sides.BorderSideExtractor
+            .extractBorderConfig(properties)
+        fun computed(side: com.styleconverter.runtime.borders.sides.BorderSideConfig): androidx.compose.ui.unit.Dp =
+            if (side.hasBorder) side.width ?: androidx.compose.ui.unit.Dp(0f)
+            else androidx.compose.ui.unit.Dp(0f)
+
         return BorderImageConfig(
             source = source,
             sliceTop = sliceTop,
@@ -95,7 +108,11 @@ object BorderImageExtractor {
             outsetBottom = outsetBottom,
             outsetLeft = outsetLeft,
             repeatHorizontal = repeatHorizontal,
-            repeatVertical = repeatVertical
+            repeatVertical = repeatVertical,
+            computedBorderTop = computed(sides.top),
+            computedBorderRight = computed(sides.end),
+            computedBorderBottom = computed(sides.bottom),
+            computedBorderLeft = computed(sides.start)
         )
     }
 

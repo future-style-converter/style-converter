@@ -57,12 +57,36 @@ struct BoxShadowApplier: ViewModifier {
                 // size beyond my parent's bounds" — the shape paints
                 // across the inflated frame, producing the spread halo.
                 let cornerRadius = self.radius ?? BorderRadiusConfig()
+                // Fidelity wave 1: CSS Backgrounds 3 §7.1.1 — an OUTER
+                // shadow "is clipped out" over the border-box area: it
+                // must never paint UNDER the element. The old negative-
+                // padding fill covered the whole border box too, which
+                // was invisible under opaque elements but tinted every
+                // translucent one — borders/016_Decorated's `opacity:
+                // 0.85` ellipse composited the blue ring through its
+                // whole fill (pixel-probe: iOS fill (214,153,44) vs
+                // web's clean (210,137,22)). Paint the spread halo,
+                // then punch the border box back out with a
+                // destination-out layer inside one compositing group.
                 v = AnyView(v.background(
-                    BorderRadiusShape(radius: cornerRadius)
-                        .foregroundColor(colour)
-                        .blur(radius: radius)
-                        .offset(x: layer.x, y: layer.y)
-                        .padding(-layer.spread)
+                    ZStack {
+                        // The spread-expanded silhouette, blurred and
+                        // offset per the layer (blur ≈ CSS/2, see header).
+                        BorderRadiusShape(radius: cornerRadius)
+                            .inset(by: -layer.spread)
+                            .fill(colour)
+                            .blur(radius: radius)
+                            .offset(x: layer.x, y: layer.y)
+                        // §7.1.1 clip: erase the border-box region so
+                        // nothing of the shadow survives under the
+                        // (possibly translucent) element itself.
+                        BorderRadiusShape(radius: cornerRadius)
+                            .fill(Color.black)
+                            .blendMode(.destinationOut)
+                    }
+                    // The punch-out only composites against THIS pair —
+                    // without the group it would erase the canvas too.
+                    .compositingGroup()
                 ))
             } else {
                 // Pure blur (or zero) shadow — keep the lightweight

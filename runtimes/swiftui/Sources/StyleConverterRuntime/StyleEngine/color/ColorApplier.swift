@@ -29,6 +29,11 @@ struct ColorApplier: ViewModifier {
     // (StyleEngine/borders/radius). Nil when the IR has no radius
     // property — background paints a plain rectangle in that case.
     let radius: BorderRadiusConfig?
+    // CSS `background-clip: padding-box | content-box` shrink band
+    // (CSS Backgrounds 3 §2.4) — the background colour paints only
+    // inside the border band (padding-box) or inside border+padding
+    // (content-box). Zero insets == default border-box paint.
+    var clipInsets: EdgeInsets = EdgeInsets()
 
     func body(content: Content) -> some View {
         // Fast path: nothing to paint at all.
@@ -45,14 +50,18 @@ struct ColorApplier: ViewModifier {
 
         // Rounded-corner aware painting — uses the same BorderRadiusShape
         // the Phase 5 radius applier clips to, so the fill aligns pixel-
-        // for-pixel with the stroke.
+        // for-pixel with the stroke. `.padding(clipInsets)` shrinks the
+        // painted shape for background-clip's non-default boxes.
         if let r = radius, r.hasAny {
             return AnyView(
-                content.background(BorderRadiusShape(radius: r).fill(swiftColor))
+                content.background(
+                    BorderRadiusShape(radius: r).fill(swiftColor)
+                        .padding(clipInsets)
+                )
             )
         }
         // Plain rectangle path.
-        return AnyView(content.background(swiftColor))
+        return AnyView(content.background(swiftColor.padding(clipInsets)))
     }
 }
 
@@ -62,9 +71,12 @@ struct ColorApplier: ViewModifier {
 extension View {
     // Chain helper. Mirrors `.engineSpacingPadding` in the spacing module.
     // `radius` is the engine-side corner config so the background paints
-    // inside rounded corners without duplicating the Shape.
+    // inside rounded corners without duplicating the Shape. `clipInsets`
+    // carries the resolved background-clip shrink band (default zero).
     func engineBackgroundColor(_ config: ColorConfig?,
-                               radius: BorderRadiusConfig? = nil) -> some View {
-        modifier(ColorApplier(config: config, radius: radius))
+                               radius: BorderRadiusConfig? = nil,
+                               clipInsets: EdgeInsets = EdgeInsets()) -> some View {
+        modifier(ColorApplier(config: config, radius: radius,
+                              clipInsets: clipInsets))
     }
 }

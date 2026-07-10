@@ -86,9 +86,18 @@ object EffectsFacade {
      *
      * @param modifier The modifier to apply effects to.
      * @param config The combined effects configuration.
+     * @param radiusConfig The element's border-radius config, threaded to
+     *   the shadow painter so the shadow perimeter follows the border-box
+     *   corner shape (css-backgrounds-3 §7.1.1 — `border-radius: 50%` must
+     *   cast an elliptical spread ring, not a rectangular one).
      * @return Modified modifier with effects applied.
      */
-    fun apply(modifier: Modifier, config: EffectsConfig): Modifier {
+    fun apply(
+        modifier: Modifier,
+        config: EffectsConfig,
+        radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE
+    ): Modifier {
         var result = modifier
 
         // Apply blend mode first (affects layer compositing)
@@ -100,8 +109,9 @@ object EffectsFacade {
         // Apply mask (determines visible region based on image/gradient)
         result = MaskApplier.applyMask(result, config.mask)
 
-        // Apply shadows (they render behind the content)
-        result = ShadowApplier.applyShadow(result, config.shadows)
+        // Apply shadows (they render behind the content, shaped by the
+        // element's border-radius — see radiusConfig KDoc above)
+        result = ShadowApplier.applyShadow(result, config.shadows, radiusConfig)
 
         // Apply filters
         result = FilterApplier.applyFilters(result, config.filters)

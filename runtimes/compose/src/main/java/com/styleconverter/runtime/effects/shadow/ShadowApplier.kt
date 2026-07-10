@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
@@ -57,10 +58,22 @@ object ShadowApplier {
      *
      * @param modifier The base modifier to apply shadows to.
      * @param config The shadow configuration.
+     * @param radiusConfig The element's border-radius config. css-backgrounds-3
+     *   §7.1.1: the shadow's perimeter takes the SAME corner shape as the
+     *   border box, so a `border-radius: 50%` element casts an ELLIPTICAL
+     *   spread ring. Previously the ring was always a (near-)rectangular
+     *   round-rect, so Borders_Decorated's blue 3px ring filled the whole
+     *   rectangular box behind the orange ellipse on Android while web/iOS
+     *   drew a ring hugging the ellipse (Android-web 0.7685).
      * @return Modified modifier with shadows applied.
      */
-    fun applyShadow(modifier: Modifier, config: ShadowConfig): Modifier {
-        return applyShadowWithRadius(modifier, config, 0.dp)
+    fun applyShadow(
+        modifier: Modifier,
+        config: ShadowConfig,
+        radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE
+    ): Modifier {
+        return applyFullShadow(modifier, config, 0.dp, radiusConfig)
     }
 
     /**
@@ -68,10 +81,19 @@ object ShadowApplier {
      *
      * @param modifier The base modifier to apply shadows to.
      * @param config The shadow configuration.
-     * @param cornerRadius The corner radius for the shadow shape.
+     * @param cornerRadius Legacy single-value corner radius (used when no
+     *   [radiusConfig] is supplied by the caller).
+     * @param radiusConfig Per-corner border-radius (Dp + paint-time
+     *   percentage fractions) driving the shadow perimeter shape.
      * @return Modified modifier with shadows applied.
      */
-    fun applyFullShadow(modifier: Modifier, config: ShadowConfig, cornerRadius: Dp = 0.dp): Modifier {
+    fun applyFullShadow(
+        modifier: Modifier,
+        config: ShadowConfig,
+        cornerRadius: Dp = 0.dp,
+        radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE
+    ): Modifier {
         if (!config.hasShadow) return modifier
 
         // Separate inset and outset shadows
@@ -82,7 +104,7 @@ object ShadowApplier {
 
         // Apply outset shadows first (drawn behind content)
         if (outsetShadows.isNotEmpty()) {
-            resultModifier = applyOutsetShadows(resultModifier, outsetShadows, cornerRadius)
+            resultModifier = applyOutsetShadows(resultModifier, outsetShadows, cornerRadius, radiusConfig)
         }
 
         // Apply inset shadows (drawn over content, clipped to bounds)
@@ -118,10 +140,14 @@ object ShadowApplier {
     private fun applyOutsetShadows(
         modifier: Modifier,
         shadows: List<ShadowData>,
-        cornerRadius: Dp
+        cornerRadius: Dp,
+        radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE
     ): Modifier {
-        // Check if we can use simple elevation for single shadow
-        if (shadows.size == 1 && isSimpleElevationShadow(shadows.first())) {
+        // Check if we can use simple elevation for single shadow. Skip the
+        // fast path when the element has border-radius: elevation shadows
+        // take a rectangular default shape and would ignore the radius.
+        if (shadows.size == 1 && isSimpleElevationShadow(shadows.first()) && !radiusConfig.hasRadius) {
             val shadow = shadows.first()
             return modifier.shadow(
                 elevation = shadow.blurRadius,
@@ -159,18 +185,43 @@ object ShadowApplier {
                     val offsetX = shadowData.offsetX.toPx()
                     val offsetY = shadowData.offsetY.toPx()
                     val spread = shadowData.spreadRadius.toPx()
-                    val radius = cornerRadius.toPx() + spread.coerceAtLeast(0f)
+                    val spreadGrow = spread.coerceAtLeast(0f)
 
-                    // Draw shadow rect expanded by spread
-                    canvas.nativeCanvas.drawRoundRect(
-                        offsetX - spread,
-                        offsetY - spread,
-                        size.width + offsetX + spread,
-                        size.height + offsetY + spread,
-                        radius,
-                        radius,
-                        nativePaint
+                    // css-backgrounds-3 §7.1.1: the shadow perimeter is the
+                    // border box shape (per-corner radii, percentages
+                    // resolved against the laid-out size) expanded by the
+                    // spread — each corner radius grows by the spread too,
+                    // which is what turns `border-radius: 50%` + a spread
+                    // ring into a concentric ELLIPSE ring instead of a
+                    // rectangle (Borders_Decorated web/iOS vs old Android).
+                    fun corner(
+                        dp: Pair<Dp, Dp>,
+                        frac: Pair<Float?, Float?>
+                    ): CornerRadius {
+                        val rx = (frac.first?.times(size.width) ?: dp.first.toPx()) + spreadGrow
+                        val ry = (frac.second?.times(size.height) ?: dp.second.toPx()) + spreadGrow
+                        return CornerRadius(rx, ry)
+                    }
+                    // Legacy single-Dp radius keeps working when no
+                    // per-corner config was supplied.
+                    val legacy = CornerRadius(cornerRadius.toPx() + spreadGrow, cornerRadius.toPx() + spreadGrow)
+                    val useConfig = radiusConfig.hasRadius
+                    val shadowShape = RoundRect(
+                        rect = Rect(
+                            left = offsetX - spread,
+                            top = offsetY - spread,
+                            right = size.width + offsetX + spread,
+                            bottom = size.height + offsetY + spread
+                        ),
+                        topLeft = if (useConfig) corner(radiusConfig.topStart, radiusConfig.topStartFraction) else legacy,
+                        topRight = if (useConfig) corner(radiusConfig.topEnd, radiusConfig.topEndFraction) else legacy,
+                        bottomRight = if (useConfig) corner(radiusConfig.bottomEnd, radiusConfig.bottomEndFraction) else legacy,
+                        bottomLeft = if (useConfig) corner(radiusConfig.bottomStart, radiusConfig.bottomStartFraction) else legacy
                     )
+                    // Path-based draw so per-corner (and elliptical) radii
+                    // render exactly; Skia clamps overlapping radii for us.
+                    val path = Path().apply { addRoundRect(shadowShape) }
+                    canvas.nativeCanvas.drawPath(path.asAndroidPath(), nativePaint)
                 }
             }
         }
