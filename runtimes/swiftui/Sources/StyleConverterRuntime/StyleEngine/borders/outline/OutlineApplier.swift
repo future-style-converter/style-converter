@@ -21,6 +21,10 @@ struct OutlineApplier: ViewModifier {
     let config: OutlineConfig?
     // Forwarded element radius so the outline follows rounded corners.
     let radius: BorderRadiusConfig?
+    // The element's own `color` (CSS currentColor) threaded by
+    // StyleBuilder — wave 5: outline-color's initial value resolves to
+    // currentColor exactly like colourless border sides do.
+    var currentColor: Color? = nil
 
     func body(content: Content) -> some View {
         guard let cfg = config, cfg.hasOutline else { return AnyView(content) }
@@ -29,10 +33,13 @@ struct OutlineApplier: ViewModifier {
         // `outline-offset` gap. Negative offsets pull inward — SwiftUI
         // handles that naturally via `.padding` with negative values.
         let outer = cfg.width / 2 + cfg.offset
-        // Colour resolves to the environment foreground when IR said
-        // `currentColor`. `.primary` matches the dark-mode default used
-        // by the test harness (preferredColorScheme(.dark)).
-        let colour = cfg.color ?? .primary
+        // Colour: declared outline-color → element `color` (currentColor,
+        // css-ui-4 §4.3 initial) → the harness's default text colour
+        // #eee, the SAME fallback chain BorderSideApplier uses. The old
+        // `.primary` fallback resolved BLACK in the capture pipeline
+        // while web painted its white currentColor frame
+        // (W5_OutlineGroove 0.747 → the frame flipped tone).
+        let colour = cfg.color ?? currentColor ?? Color(white: 0.933)
         // Scale up the original radius by the outer distance so the
         // outline curve stays parallel to the element's rounded corners.
         let outlineRadius = grownRadius(radius, by: outer)
@@ -126,7 +133,9 @@ private struct OutlineShape: View {
 // View chain helper.
 extension View {
     func engineOutline(_ config: OutlineConfig?,
-                       radius: BorderRadiusConfig? = nil) -> some View {
-        modifier(OutlineApplier(config: config, radius: radius))
+                       radius: BorderRadiusConfig? = nil,
+                       currentColor: Color? = nil) -> some View {
+        modifier(OutlineApplier(config: config, radius: radius,
+                                currentColor: currentColor))
     }
 }

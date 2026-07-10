@@ -175,6 +175,24 @@ enum LayoutExtractor {
         // Steps 5 (advanced / root) plug in next to this call —
         // parallel agents own those scopes.
 
+        // Wave 5 — classic `float` (CSS 2.1 §9.5, harness-scale subset).
+        // The IR carries an uppercase keyword ("RIGHT" / "INLINE_END").
+        // Previously registered-but-dropped: a `float: right` box stayed
+        // at the left edge while web floats it to the containing block's
+        // right (PW_Borders_Layout_03 i-w 0.357). The renderer consumes
+        // only the horizontal anchor half of float semantics — sibling
+        // text wrap-around stays a documented limitation.
+        for p in properties where p.type == "Float" {
+            switch ValueExtractors.extractKeyword(p.data)?.uppercased() {
+            case "LEFT":         agg.float = .left;        agg.touched = true
+            case "RIGHT":        agg.float = .right;       agg.touched = true
+            case "INLINE_START": agg.float = .inlineStart; agg.touched = true
+            case "INLINE_END":   agg.float = .inlineEnd;   agg.touched = true
+            case "NONE":         agg.float = FloatKeyword.none; agg.touched = true
+            default: break
+            }
+        }
+
         // Return nil when nothing wrote — lets LayoutApplier short-
         // circuit and leaves the renderer's legacy fallback untouched.
         return agg.touched ? agg : nil

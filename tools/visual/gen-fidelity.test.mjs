@@ -12,8 +12,17 @@
 //   3. structural budgets — combos files stay ≤25 components with ≥3
 //      declarations each; the 8 tree files carry 10–20 nodes and include
 //      3-level nesting.
-//   4. converter round-trip — 3 representative files convert cleanly and the
-//      emitted IR validates against schema/ir-v1.schema.json. Gradle-slow and
+//   4. pairwise coverage — the 6 pairwise shards cover ALL 66 unordered pairs
+//      of the 12 visually-strongest categories, 4 components per pair, each
+//      component carrying ≥2 properties from each side of its pair.
+//   5. placement coverage — the 6 placement files carry child-side placement
+//      claims (IR v2 slot/placement contract): grid-area names, line
+//      numbers/spans, order permutations, self-alignment overrides, z-index
+//      stacking, mixed claimed+unclaimed auto-flow, and a dangling area claim.
+//   6. converter round-trip — 6 representative files (3 wave-4 originals + a
+//      pairwise shard + 2 placement trees) convert cleanly, the emitted IR
+//      validates against schema/ir-v2.schema.json, and the output is flat +
+//      slot-composed (no nested children survive). Gradle-slow and
 //      JDK-21-dependent, so it only runs when GEN_FIDELITY_CONVERT=1 is set
 //      (the CI test-tooling job has no JDK — see .github/workflows/ci.yml).
 
@@ -23,7 +32,10 @@ import { readFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-import { generate, SEED, REPO } from './gen-fidelity.mjs';
+import {
+  generate, SEED, REPO,
+  buildCategoryMap, PAIRWISE_CATEGORIES, PAIRWISE_PER_PAIR, pairwisePairs,
+} from './gen-fidelity.mjs';
 // Reuse the conformance machinery (ajv 2020-12 + the IR v2 schema — the
 // converter emits v2 by default since the freeze) rather than
 // re-compiling a validator here; run.mjs is import-safe (main() is
@@ -161,6 +173,142 @@ test('trees: 8 files, 10–20 nodes each, map-in children, 3-level nesting prese
   assert.ok(sawThreeLevels, 'at least one tree must nest 3 levels deep');
 });
 
+// ── 3b. Pairwise cross-category coverage ─────────────────────────────────
+
+test('pairwise: 6 shards cover all 66 category pairs, 4 components per pair, ≥2 props per side', () => {
+  const shards = manifest.files.filter((f) => f.kind === 'pairwise');
+  assert.equal(shards.length, 6, 'pairwise shard count must stay at 6');
+  const catMap = buildCategoryMap(); // property → canonical category (converter catalogue)
+  const seen = new Map(); // 'a+b' → component count across all shards
+  for (const entry of shards) {
+    const doc = JSON.parse(byPath.get(entry.path));
+    const comps = Object.entries(doc.components);
+    assert.ok(comps.length <= 44, `${entry.path}: ${comps.length} components exceeds the 44 shard cap`);
+    assert.equal(comps.length, entry.components, `${entry.path}: manifest component count drifted`);
+    const pairOrder = []; // unique pairs in component order — must match the descriptor
+    for (const [name, comp] of comps) {
+      // The name encodes the pair: PW_<PascalA>_<PascalB>_<NN>. All 12
+      // pairwise categories are single lowercase words, so Pascal → lower
+      // round-trips exactly.
+      const m = name.match(/^PW_([A-Za-z]+)_([A-Za-z]+)_(\d{2})$/);
+      assert.ok(m, `${entry.path}: bad pairwise component name "${name}"`);
+      const a = m[1].toLowerCase();
+      const b = m[2].toLowerCase();
+      assert.ok(PAIRWISE_CATEGORIES.includes(a), `${name}: unknown category "${a}"`);
+      assert.ok(PAIRWISE_CATEGORIES.includes(b), `${name}: unknown category "${b}"`);
+      assert.ok(a < b, `${name}: pair must be lexicographically ordered (unordered-pair canon)`);
+      const key = `${a}+${b}`;
+      seen.set(key, (seen.get(key) ?? 0) + 1);
+      if (pairOrder[pairOrder.length - 1] !== key) pairOrder.push(key);
+      // Interaction-hunting substance: ≥2 properties from EACH side of the
+      // pair (support props may add to a side — width/height are sizing,
+      // background-color is background — so only the floor is asserted).
+      let fromA = 0;
+      let fromB = 0;
+      for (const p of Object.keys(comp.properties)) {
+        const cat = catMap.get(p);
+        if (cat === a) fromA++;
+        if (cat === b) fromB++;
+      }
+      assert.ok(fromA >= 2, `${name}: only ${fromA} properties from "${a}"`);
+      assert.ok(fromB >= 2, `${name}: only ${fromB} properties from "${b}"`);
+    }
+    // The manifest coverage descriptor must be exactly the pairs generated,
+    // in shard order.
+    assert.deepEqual(pairOrder, entry.pairs, `${entry.path}: manifest pairs descriptor drifted`);
+  }
+  // Union across shards = all 66 unordered pairs, each with exactly 4 components.
+  const expected = pairwisePairs().map(([a, b]) => `${a}+${b}`).sort();
+  assert.deepEqual([...seen.keys()].sort(), expected, 'pairwise union must cover all 66 pairs');
+  for (const [pair, n] of seen) {
+    assert.equal(n, PAIRWISE_PER_PAIR, `pair ${pair}: expected ${PAIRWISE_PER_PAIR} components, got ${n}`);
+  }
+});
+
+// ── 3c. Placement claims coverage (IR v2 slot/placement stress) ──────────
+
+// The item-scoped claim properties (schema/spec/03-children.md frozen list —
+// the subset the placement suite exercises).
+const CLAIM_PROPS = [
+  'grid-area', 'grid-column-start', 'grid-column-end', 'grid-row-start', 'grid-row-end',
+  'order', 'align-self', 'justify-self', 'z-index',
+];
+
+test('placement: 6 files, 2–3 claim-carrying containers each, all hard cases present', () => {
+  const placement = manifest.files.filter((f) => f.kind === 'placement');
+  assert.equal(placement.length, 6, 'placement template set must stay at 6 files');
+  // Structural scan flags — every hard case the suite exists for must be
+  // observed in the actual fixture bytes, not just claimed by the manifest.
+  let sawAreaNames = false;      // child claims an area the container defines
+  let sawDecoupledName = false;  // child key ≠ claimed area name (anti name-matching)
+  let sawDangling = false;       // child claims an area the container never defines
+  let sawLines = false;          // numeric line claims
+  let sawSpan = false;           // span claims
+  let sawPermutation = false;    // ≥3 distinct order values on one row
+  let sawSelfOverride = false;   // align-self/justify-self against a container policy
+  let sawZStack = false;         // ≥2 overlapping abspos siblings with z-index
+  let sawMixed = false;          // claimed + unclaimed children in ONE grid
+  for (const entry of placement) {
+    const doc = JSON.parse(byPath.get(entry.path));
+    const roots = Object.entries(doc.components);
+    assert.ok(roots.length >= 2 && roots.length <= 3, `${entry.path}: ${roots.length} containers outside 2–3`);
+    assert.ok(entry.nodes >= 8 && entry.nodes <= 24, `${entry.path}: ${entry.nodes} nodes outside the 8–24 budget`);
+    assert.ok(Array.isArray(entry.claims) && entry.claims.length > 0, `${entry.path}: manifest claims descriptor missing`);
+    for (const [rootName, root] of roots) {
+      assert.ok(root.children, `${entry.path}#${rootName}: placement container without children`);
+      const cprops = root.properties;
+      const kids = Object.entries(root.children);
+      // Area names the container actually defines (identifiers inside the
+      // quoted template rows; '.' cells are anonymous and excluded).
+      const areaNames = new Set(
+        (cprops['grid-template-areas'] ?? '').match(/[a-z][a-z0-9-]*/gi) ?? [],
+      );
+      let claimed = 0;
+      let unclaimed = 0;
+      for (const [kidName, kid] of kids) {
+        const kp = kid.properties;
+        CLAIM_PROPS.some((p) => p in kp) ? claimed++ : unclaimed++;
+        const area = kp['grid-area'];
+        // A pure-name grid-area claim (no slashes/spaces ⇒ not line syntax).
+        if (area && !/[/ ]/.test(area)) {
+          if (areaNames.has(area)) {
+            sawAreaNames = true;
+            if (kidName !== area) sawDecoupledName = true;
+          } else if (cprops['grid-template-areas']) {
+            sawDangling = true; // defined template, undefined name → CSS auto-place fallback
+          }
+        }
+        if (/^-?\d+$/.test(kp['grid-column-start'] ?? '') || /^-?\d+$/.test(kp['grid-row-start'] ?? '')) sawLines = true;
+        if (/span/.test(kp['grid-column-start'] ?? '') || /span/.test(area ?? '')) sawSpan = true;
+        if (('align-self' in kp && 'align-items' in cprops) || ('justify-self' in kp && 'justify-items' in cprops)) sawSelfOverride = true;
+      }
+      if (cprops.display === 'grid' && claimed > 0 && unclaimed > 0) sawMixed = true;
+      const orders = kids.map(([, k]) => k.properties.order).filter((o) => o !== undefined);
+      if (orders.length >= 3 && new Set(orders).size >= 3) sawPermutation = true;
+      const zKids = kids.filter(([, k]) => k.properties.position === 'absolute' && 'z-index' in k.properties);
+      if (zKids.length >= 2) sawZStack = true;
+    }
+  }
+  assert.ok(sawAreaNames, 'no grid-area name claim found');
+  assert.ok(sawDecoupledName, 'no child with key ≠ claimed area name (name-matching trap missing)');
+  assert.ok(sawDangling, 'no dangling area claim (undefined area name) found');
+  assert.ok(sawLines, 'no numeric grid line claim found');
+  assert.ok(sawSpan, 'no span claim found');
+  assert.ok(sawPermutation, 'no order permutation found');
+  assert.ok(sawSelfOverride, 'no self-alignment override against a container policy found');
+  assert.ok(sawZStack, 'no z-index stacking between abspos siblings found');
+  assert.ok(sawMixed, 'no grid mixing claimed and unclaimed children found');
+  // Claim-descriptor vocabulary union — the coverage promise wave runs read.
+  const claimUnion = new Set(placement.flatMap((f) => f.claims));
+  for (const c of [
+    'grid-area-names', 'dangling-claim', 'grid-lines', 'grid-spans',
+    'order-permutation', 'align-self-override', 'justify-self-override',
+    'z-index-stacking', 'auto-flow-interleave', 'mixed-claims',
+  ]) {
+    assert.ok(claimUnion.has(c), `placement manifest claims missing "${c}"`);
+  }
+});
+
 test('manifest lists every generated fixture exactly once with correct byte sizes', () => {
   const listed = manifest.files.map((f) => f.path).sort();
   const actual = fixtureFiles.map((f) => f.relPath).sort();
@@ -185,9 +333,11 @@ test('manifest lists every generated fixture exactly once with correct byte size
 
 // ── 4. Converter round-trip (opt-in: needs JDK 21 + warm Gradle) ─────────
 
-// Three representative files: the smallest fixture, the largest combos file
-// (typography-scale property pressure), and the deepest tree (children
-// map-in → array-out flattening at 3 levels).
+// Six representative files: the wave-4 trio (smallest fixture, largest combos
+// file, deepest tree) plus the wave-5 additions — one pairwise shard
+// (cross-category payload pressure) and two placement trees: grid-areas.json
+// (named areas + the dangling claim) and mixed-claims.json (claimed+unclaimed
+// auto-flow interleave — the claim/resolution algorithm's hardest case).
 function representativeFiles() {
   const byBytes = [...manifest.files].sort((a, b) => a.bytes - b.bytes || (a.path < b.path ? -1 : 1));
   const smallest = byBytes[0];
@@ -195,14 +345,30 @@ function representativeFiles() {
     .filter((f) => f.kind === 'combos')
     .sort((a, b) => b.bytes - a.bytes || (a.path < b.path ? -1 : 1))[0];
   const deepestTree = manifest.files.find((f) => f.path.endsWith('trees/nested-3level.json'));
+  const pairwiseShard = manifest.files.find((f) => f.path.endsWith('pairwise/pairs-01.json'));
+  const placementAreas = manifest.files.find((f) => f.path.endsWith('placement/grid-areas.json'));
+  const placementMixed = manifest.files.find((f) => f.path.endsWith('placement/mixed-claims.json'));
   // De-dupe while preserving the selection intent (paths are unique keys).
-  return [...new Map([smallest, largestCombos, deepestTree].map((f) => [f.path, f])).values()];
+  return [...new Map(
+    [smallest, largestCombos, deepestTree, pairwiseShard, placementAreas, placementMixed]
+      .map((f) => [f.path, f]),
+  ).values()];
+}
+
+/** Count every node in an authored components map (children maps recurse). */
+function countInputNodes(components) {
+  let n = 0;
+  for (const comp of Object.values(components)) {
+    n += 1;
+    if (comp.children) n += countInputNodes(comp.children);
+  }
+  return n;
 }
 
 const CONVERT_ENABLED = process.env.GEN_FIDELITY_CONVERT === '1';
 
 test(
-  'converter round-trip: 3 representative files convert cleanly and validate against IR v2',
+  'converter round-trip: 6 representative files convert cleanly, validate against IR v2, and emit flat+slot output',
   { skip: CONVERT_ENABLED ? false : 'set GEN_FIDELITY_CONVERT=1 (requires JDK 21) to run' },
   () => {
     // Pin Java 21 on macOS dev machines, mirroring schema/conformance/run.mjs.
@@ -247,6 +413,25 @@ test(
         ir.components.filter((c) => !c.slot).length,
         Object.keys(input.components).length,
         `${entry.path}: root component count changed during conversion`,
+      );
+      // Flat + slot assertions (the v2 wire promise the placement suite
+      // exists to exercise): explicit version stamp, ZERO nested children
+      // anywhere, every non-root slot ref resolvable, and the flat entry
+      // count equal to the authored node count (pre-order flattener is
+      // lossless — no node dropped, none duplicated).
+      assert.equal(ir.irVersion, 2, `${entry.path}: converter must emit irVersion 2`);
+      const ids = new Set(ir.components.map((c) => c.id));
+      assert.equal(ids.size, ir.components.length, `${entry.path}: duplicate component ids in flat list`);
+      for (const c of ir.components) {
+        assert.ok(!('children' in c), `${entry.path}#${c.id}: nested children survived flattening`);
+        if (c.slot) {
+          assert.ok(ids.has(c.slot.parent), `${entry.path}#${c.id}: dangling slot.parent "${c.slot.parent}"`);
+        }
+      }
+      assert.equal(
+        ir.components.length,
+        countInputNodes(input.components),
+        `${entry.path}: flat component count != authored node count`,
       );
     }
   },

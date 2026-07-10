@@ -38,9 +38,6 @@ import androidx.compose.ui.graphics.toArgb
  */
 object OutlineApplier {
 
-    /** Chromium's dark shade for 3D outline styles — see class KDoc. */
-    private const val DARK_FACTOR = 0.618f
-
     /**
      * Apply outline to modifier. The ring paints after drawContent so it
      * sits above the background/border exactly like the browser.
@@ -109,31 +106,84 @@ object OutlineApplier {
     }
 
     /**
-     * Ridge/groove ring: two concentric per-side-shaded bands. The light
-     * band is ceil(w/2) thick, the dark band the remainder — the split
-     * Chromium rasterizes for `thick` (3px + 2px).
+     * Ridge/groove OUTLINE ring. Calibrated pixel-for-pixel against a
+     * fresh headless-Chrome probe (wave 5, scratchpad/outline-probe.png,
+     * all four sides scanned OUTWARD from the box edge):
+     *
+     *   `3px groove #eee`:   top/left  → light 1px in, DARK 2px out
+     *                        bottom/right → DARK 2px in, light 1px out
+     *   `5px ridge crimson`: top/left  → dark 2px in, LIGHT 3px out
+     *                        bottom/right → LIGHT 3px in, dark 2px out
+     *
+     * Unified rule: the ring splits into a CEIL(w/2) band and a FLOOR
+     * band; the ceil band is the DARK shade for groove and the LIGHT
+     * (declared) color for ridge, and it sits at the ring's OUTER half on
+     * the top/left sides but the INNER half on the bottom/right sides —
+     * the classic top-left "light source" bevel. (The pre-wave-5 painter
+     * put ceil() at the outer half on ALL sides and also swapped the
+     * light/dark assignment per side, matching no Chrome pixel — it held
+     * PW_Borders_Sizing_04/_02 at 0.66-0.94 across waves.)
      */
     private fun DrawScope.drawShadedRing(config: OutlineConfig, groove: Boolean) {
         val w = config.width.toPx()
         val off = config.offset.toPx()
         val light = config.color
         val dark = darken(config.color)
-        // Outer half thickness (light for ridge top/left) = ceil(w/2).
-        val outerW = kotlin.math.ceil(w / 2f)
-        val innerW = w - outerW
+        // Chrome's split: ceil band + floor band.
+        val tCeil = kotlin.math.ceil(w / 2f)
+        val tFloor = w - tCeil
+        val ceilColor = if (groove) dark else light
+        val floorColor = if (groove) light else dark
+        // Top/left: ceil band at the ring's OUTER half.
+        halfRing(distOut = off + w, thickness = tCeil, color = ceilColor, topLeft = true)
+        if (tFloor > 0f) {
+            halfRing(distOut = off + tFloor, thickness = tFloor, color = floorColor, topLeft = true)
+        }
+        // Bottom/right: ceil band at the ring's INNER half.
+        if (tFloor > 0f) {
+            halfRing(distOut = off + w, thickness = tFloor, color = floorColor, topLeft = false)
+        }
+        halfRing(distOut = off + tCeil, thickness = tCeil, color = ceilColor, topLeft = false)
+    }
 
-        // For RIDGE: outer band light on top/left, dark on right/bottom;
-        // inner band is mirrored. GROOVE swaps both.
-        val outerTL = if (groove) dark else light
-        val outerBR = if (groove) light else dark
-        val innerTL = if (groove) light else dark
-        val innerBR = if (groove) dark else light
-
-        // Outer band spans [off+innerW, off+w] outside the border box,
-        // inner band [off, off+innerW].
-        drawSideBands(distOut = off + w, thickness = outerW, tl = outerTL, br = outerBR)
-        if (innerW > 0f) {
-            drawSideBands(distOut = off + innerW, thickness = innerW, tl = innerTL, br = innerBR)
+    /**
+     * Paint the top+left (or bottom+right) trapezoids of one ring layer.
+     * [distOut] is the distance from the border box edge to the layer's
+     * OUTER boundary, [thickness] its band width. Sides meet on the 45°
+     * corner diagonals of THIS layer's rects (mitered joins); adjacent
+     * layers with different radial positions overlap corners by ≤1px,
+     * which is inside Chrome's own corner rasterization noise.
+     */
+    private fun DrawScope.halfRing(
+        distOut: Float,
+        thickness: Float,
+        color: Color,
+        topLeft: Boolean
+    ) {
+        if (thickness <= 0f) return
+        val w = size.width
+        val h = size.height
+        // Outer rect corners (border box inflated by distOut).
+        val oL = -distOut; val oT = -distOut; val oR = w + distOut; val oB = h + distOut
+        // Inner rect corners (one band-thickness inside the outer rect).
+        val iL = oL + thickness; val iT = oT + thickness
+        val iR = oR - thickness; val iB = oB - thickness
+        fun quad(a: Offset, b: Offset, c: Offset, d: Offset) {
+            val p = Path().apply {
+                moveTo(a.x, a.y); lineTo(b.x, b.y); lineTo(c.x, c.y); lineTo(d.x, d.y); close()
+            }
+            drawPath(p, color)
+        }
+        if (topLeft) {
+            // Top: outer TL → outer TR → inner TR → inner TL.
+            quad(Offset(oL, oT), Offset(oR, oT), Offset(iR, iT), Offset(iL, iT))
+            // Left: outer TL → inner TL → inner BL → outer BL.
+            quad(Offset(oL, oT), Offset(iL, iT), Offset(iL, iB), Offset(oL, oB))
+        } else {
+            // Bottom: outer BL → inner BL → inner BR → outer BR.
+            quad(Offset(oL, oB), Offset(iL, iB), Offset(iR, iB), Offset(oR, oB))
+            // Right: outer TR → outer BR → inner BR → inner TR.
+            quad(Offset(oR, oT), Offset(oR, oB), Offset(iR, iB), Offset(iR, iT))
         }
     }
 
@@ -194,11 +244,46 @@ object OutlineApplier {
         quad(Offset(oR, oT), Offset(oR, oB), Offset(iR, iB), Offset(iR, iT), br)
     }
 
-    /** Dark shade for the 3D styles — DARK_FACTOR per channel, alpha kept. */
-    internal fun darken(base: Color): Color = Color(
-        red = base.red * DARK_FACTOR,
-        green = base.green * DARK_FACTOR,
-        blue = base.blue * DARK_FACTOR,
-        alpha = base.alpha
-    )
+    /**
+     * Dark shade for the 3D styles — Chromium's Color::Dark(), i.e. an HSL
+     * transform L' = max(0, L·2/3 − 0.02) with hue/saturation preserved.
+     * Calibrated against the wave-5 headless-Chrome probe:
+     *   crimson rgb(220,20,60)  → rgb(136,12,37)   (this formula: 137,12,37)
+     *   #eee    rgb(238,238,238)→ rgb(154,154,154) (this formula: 154,154,154)
+     * The previous flat per-channel ×0.618 was exact for crimson but 7/255
+     * off for grays — visible on every currentColor(#eee) 3D outline.
+     */
+    internal fun darken(base: Color): Color {
+        val r = base.red; val g = base.green; val b = base.blue
+        val mx = maxOf(r, g, b); val mn = minOf(r, g, b)
+        val l = (mx + mn) / 2f
+        val c = mx - mn
+        // Hue in [0,6) sextants; saturation per HSL.
+        val h = when {
+            c == 0f -> 0f
+            mx == r -> ((g - b) / c).mod(6f)
+            mx == g -> (b - r) / c + 2f
+            else -> (r - g) / c + 4f
+        }
+        val s = if (c == 0f) 0f else c / (1f - kotlin.math.abs(2f * l - 1f))
+        val l2 = (l * 2f / 3f - 0.02f).coerceAtLeast(0f)
+        // HSL → RGB at the darkened lightness.
+        val c2 = (1f - kotlin.math.abs(2f * l2 - 1f)) * s
+        val x2 = c2 * (1f - kotlin.math.abs(h.mod(2f) - 1f))
+        val m = l2 - c2 / 2f
+        val (r2, g2, b2) = when {
+            h < 1f -> Triple(c2, x2, 0f)
+            h < 2f -> Triple(x2, c2, 0f)
+            h < 3f -> Triple(0f, c2, x2)
+            h < 4f -> Triple(0f, x2, c2)
+            h < 5f -> Triple(x2, 0f, c2)
+            else -> Triple(c2, 0f, x2)
+        }
+        return Color(
+            red = (r2 + m).coerceIn(0f, 1f),
+            green = (g2 + m).coerceIn(0f, 1f),
+            blue = (b2 + m).coerceIn(0f, 1f),
+            alpha = base.alpha
+        )
+    }
 }

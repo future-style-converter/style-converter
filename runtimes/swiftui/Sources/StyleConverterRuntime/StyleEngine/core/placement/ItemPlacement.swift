@@ -120,6 +120,15 @@ enum ItemPlacementExtractor {
             p.grid.request.rowEnd   = agg.gridRowEnd?.line
             p.grid.request.colSpan  = agg.gridColumnStart?.span ?? agg.gridColumnEnd?.span
             p.grid.request.rowSpan  = agg.gridRowStart?.span ?? agg.gridRowEnd?.span
+            // NAMED lines ride the claim raw (css-grid-1 §8.3) — e.g.
+            // `grid-area: media` reaches us as GridRowStart{name:"media"}.
+            // Only the container can turn a name into a line number (it
+            // owns grid-template-areas), so resolution happens inside
+            // CSSGridLayout via GridPlacer.resolveNames at measure time.
+            p.grid.request.colStartName = agg.gridColumnStart?.name
+            p.grid.request.colEndName   = agg.gridColumnEnd?.name
+            p.grid.request.rowStartName = agg.gridRowStart?.name
+            p.grid.request.rowEndName   = agg.gridRowEnd?.name
             // Self-alignment keywords raw — resolution against the
             // container's *-items defaults happens INSIDE the layout
             // (css-align-3 §6), which is the only party that knows them.

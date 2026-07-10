@@ -45,25 +45,17 @@ object WritingModeApplier {
      * For true vertical-rl/lr, consider using VerticalTextWrapper instead.
      */
     fun applyWritingMode(modifier: Modifier, config: WritingModeConfig): Modifier {
-        if (!config.hasWritingMode || !config.isVertical) {
-            return modifier
-        }
-
-        val rotation = when (config.writingMode) {
-            WritingModeValue.VERTICAL_RL -> 90f
-            WritingModeValue.VERTICAL_LR -> -90f
-            WritingModeValue.SIDEWAYS_RL -> 90f
-            WritingModeValue.SIDEWAYS_LR -> -90f
-            else -> 0f
-        }
-
-        return if (rotation != 0f) {
-            modifier.graphicsLayer {
-                rotationZ = rotation
-            }
-        } else {
-            modifier
-        }
+        // Wave 5: DO NOT rotate the element box. css-writing-modes-4 §3
+        // changes the flow direction of the CONTENT — the box itself keeps
+        // its specified width/height (web renders PW_Layout_Typography_03's
+        // `writing-mode: sideways-lr; width:240; height:48` as an unrotated
+        // 240×48 box with rotated text inside; A-w sat at 0.568). The old
+        // graphicsLayer rotationZ spun the whole box (background, borders
+        // and all) around its center, which matches NO browser behaviour.
+        // The text-flow rotation now lives in ComponentRenderer's
+        // PlaceholderContent (the sideways text wrapper), where only the
+        // glyph run rotates — mirroring what Chrome actually paints.
+        return modifier
     }
 
     /**

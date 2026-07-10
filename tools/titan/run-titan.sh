@@ -124,12 +124,35 @@ step() { echo -e "\n${B}━━━ $* ━━━${N}"; }
 LOCK="/tmp/style-converter-testall.lock"
 if [[ -z "${TESTALL_SKIP_LOCK:-}" ]]; then
   if ! mkdir "$LOCK" 2>/dev/null; then
-    other_pid=$(cat "$LOCK/pid" 2>/dev/null || echo "?")
-    err "another run holds $LOCK (pid=$other_pid). rm -rf $LOCK if stale."
-    exit 2
+    other_pid=$(cat "$LOCK/pid" 2>/dev/null || echo "")
+    # Stale-lock self-heal (mirrors test-all.sh): if the recorded pid is
+    # numeric and provably dead, the holder crashed — reclaim the lock
+    # instead of demanding a manual `rm -rf`. A live pid, or a missing/
+    # garbled pid file (could be a holder that hasn't written its pid
+    # yet), still aborts.
+    if [[ "$other_pid" =~ ^[0-9]+$ ]] && ! kill -0 "$other_pid" 2>/dev/null; then
+      warn "stale lock: pid $other_pid is dead — reclaiming $LOCK"
+      rm -rf "$LOCK"
+      # Re-acquire atomically — a concurrent invocation may have raced us
+      # to the same reclaim; whoever wins mkdir runs, the loser aborts.
+      if ! mkdir "$LOCK" 2>/dev/null; then
+        err "another run grabbed the lock during reclaim — aborting"
+        exit 2
+      fi
+    else
+      err "another run holds $LOCK (pid=${other_pid:-?}). rm -rf $LOCK if stale."
+      exit 2
+    fi
   fi
   echo "$$" > "$LOCK/pid"
-  trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT INT TERM HUP
+  # Release on EXIT; signals route through `exit` so the release fires
+  # exactly once AND the script actually stops on Ctrl-C (trapping the
+  # release on the signals directly made bash resume the script after the
+  # handler, with the lock already gone).
+  trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  trap 'exit 129' HUP
 fi
 
 # Now that WE hold the lock, any sub-script (test-all.sh, etc.) must skip

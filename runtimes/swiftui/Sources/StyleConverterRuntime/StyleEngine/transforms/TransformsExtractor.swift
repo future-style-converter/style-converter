@@ -140,7 +140,12 @@ enum TransformsExtractor {
             return .matrix(a: a, b: b, c: c, d: d, e: e, f: f)
         // ── perspective function (inline, not the longhand) ───────────
         case "perspective":
-            return .perspective(d: lenPx("d"))
+            // Wave 5: the parser emits the distance under "l" (see the
+            // Kotlin transform parser's length field), not "d" — the old
+            // read produced 0 for every perspective() and the wave-5
+            // keystone gate (`d > 0`) never fired. Keep "d" as fallback
+            // for older IR captures.
+            return .perspective(d: fields["l"] != nil ? lenPx("l") : lenPx("d"))
         default:
             // Unknown function — drop silently so an exotic IR shape
             // doesn't break the whole transform chain.

@@ -193,8 +193,18 @@ object TransformApplier {
         // Apply transforms using drawWithContent for skew support
         return modifier.drawWithContent {
             val density = this.density
-            val pivotX = size.width * originX
-            val pivotY = size.height * originY
+            // Transform-origin pivot: LENGTH origins (transform-origin: 30px
+            // 25%) ride in originXDp/originYDp and must resolve to absolute
+            // px, exactly like the graphicsLayer paths already do (see
+            // applyTransformFunctions). This canvas path previously used
+            // ONLY the fractional origin, so a `skewY(20deg)` with
+            // `transform-origin: 30px 25%` anchored at the box CENTER
+            // (0.5 default) instead of x=30px — PW_Color_Transforms_01 sat
+            // at A-w 0.771 with iOS agreeing on the same wrong pivot.
+            // Per-axis fallback matches css-transforms-1 §3 (each axis
+            // resolves independently: px x-axis + % y-axis is legal).
+            val pivotX = config.originXDp?.toPx() ?: (size.width * originX)
+            val pivotY = config.originYDp?.toPx() ?: (size.height * originY)
 
             // Convert Dp values to pixels
             val txPx = translateX * density

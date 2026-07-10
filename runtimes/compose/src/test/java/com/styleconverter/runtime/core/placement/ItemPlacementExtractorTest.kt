@@ -70,6 +70,30 @@ class ItemPlacementExtractorTest {
     }
 
     @Test
+    fun `wave5 span and name wire flavors populate the new claim fields`() {
+        // Canonical converter shapes: GridLine.Span → {"type":"span","count":N},
+        // GridLine.LineName → {"type":"name","name":X} (the grid-area lowering).
+        val p = ItemPlacementExtractor.extract(listOf(
+            prop("GridColumnStart", """{"type":"span","count":2}"""),
+            prop("GridRowStart", """{"type":"name","name":"media"}"""),
+            prop("GridRowEnd", """{"type":"span","count":3}""")
+        ))
+        // Numeric fields stay auto (pinned semantics untouched)…
+        assertNull(p.grid.colStart)
+        assertNull(p.grid.rowStart)
+        // …while the additive fields carry the claims.
+        assertEquals(2, p.grid.colStartSpan)
+        assertEquals("media", p.grid.rowStartName)
+        assertEquals(3, p.grid.rowEndSpan)
+        // A number wire never leaks into span/name fields.
+        val num = ItemPlacementExtractor.extract(listOf(
+            prop("GridColumnStart", """{"type":"number","number":2}""")
+        ))
+        assertNull(num.grid.colStartSpan)
+        assertNull(num.grid.colStartName)
+    }
+
+    @Test
     fun `flex claims decode the nested-Number and dual-basis shapes`() {
         val p = ItemPlacementExtractor.extract(listOf(
             // FlexGrow nested sealed-class shape (parser output).

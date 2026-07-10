@@ -31,6 +31,19 @@ struct GridItemRequest: Equatable {
     var colSpan: Int? = nil
     /// `span N` on the row axis when declared without lines.
     var rowSpan: Int? = nil
+    /// NAMED lines (css-grid-1 §8.3 <custom-ident>), e.g. the
+    /// `grid-row-start: media` the converter emits for `grid-area: media`.
+    /// Carried as raw names on the claim — only the CONTAINER can resolve
+    /// them (against its own grid-template-areas) via
+    /// `GridPlacer.resolveNames` at measure time (wave 5: the old
+    /// child-name↔area-name matcher dropped/duplicated items).
+    var colStartName: String? = nil
+    /// Named grid-column-end line — see colStartName.
+    var colEndName: String? = nil
+    /// Named grid-row-start line — see colStartName.
+    var rowStartName: String? = nil
+    /// Named grid-row-end line — see colStartName.
+    var rowEndName: String? = nil
 }
 
 /// Resolved cell for one item after auto-placement: 0-based column/row
@@ -62,6 +75,63 @@ enum GridItemAlign: Equatable {
 // MARK: - Placement algorithm
 
 enum GridPlacer {
+
+    /// css-grid-1 §8.3 named-line resolution + negative-line
+    /// normalisation, run by the CONTAINER (the only party that knows
+    /// the template) before `assign`. Verified against the browser
+    /// (puppeteer probe, wave 5):
+    ///   • `grid-row-start: media` matches the implicit `media-start`
+    ///     line a named template area contributes → the area's first
+    ///     row line. The item does NOT copy the area's column/span —
+    ///     the other three lines stay auto exactly like the browser
+    ///     given this single longhand (the converter expands
+    ///     `grid-area: <name>` to grid-row-start alone).
+    ///   • A DANGLING name (no such area) resolves to the first
+    ///     IMPLICIT line past the explicit grid (§8.3.1 "all implicit
+    ///     lines are assumed to have that name"): explicit grid with R
+    ///     rows has lines 1…R+1, so the name lands on line R+2 —
+    ///     browser-verified: `ghost` in a 2-row grid sits in implicit
+    ///     row 4 leaving an empty implicit row 3.
+    ///   • Negative integers count from the end of the explicit grid
+    ///     (§8.3): -1 = last explicit line = trackCount+1, i.e.
+    ///     normalised = trackCount + 2 + N for N < 0.
+    static func resolveNames(_ request: GridItemRequest,
+                             areas: [[String]]?,
+                             columnCount: Int,
+                             explicitRowCount: Int) -> GridItemRequest {
+        var rq = request
+        // Bounding rectangle of a named area in 0-based cell indices —
+        // nil when the template doesn't define the name (or no template).
+        func rect(_ name: String) -> (r0: Int, r1: Int, c0: Int, c1: Int)? {
+            guard let rows = areas else { return nil }
+            var r0 = Int.max, r1 = Int.min, c0 = Int.max, c1 = Int.min
+            // One scan over the template cells; areas are rectangular
+            // per CSS grammar, so min/max bounds fully describe them.
+            for (r, row) in rows.enumerated() {
+                for (c, cell) in row.enumerated() where cell == name {
+                    r0 = min(r0, r); r1 = max(r1, r)
+                    c0 = min(c0, c); c1 = max(c1, c)
+                }
+            }
+            return r0 == Int.max ? nil : (r0, r1, c0, c1)
+        }
+        // First implicit line index past an explicit axis of N tracks
+        // (lines 1…N+1 are explicit; the dangling-name landing spot).
+        let implicitRowLine = explicitRowCount + 2
+        let implicitColLine = columnCount + 2
+        // Named lines → numbers. `-start` names take the area's first
+        // line, `-end` names the line just past it (r1+2 in 1-based).
+        if let n = rq.rowStartName { rq.rowStart = rect(n).map { $0.r0 + 1 } ?? implicitRowLine }
+        if let n = rq.rowEndName   { rq.rowEnd   = rect(n).map { $0.r1 + 2 } ?? implicitRowLine }
+        if let n = rq.colStartName { rq.colStart = rect(n).map { $0.c0 + 1 } ?? implicitColLine }
+        if let n = rq.colEndName   { rq.colEnd   = rect(n).map { $0.c1 + 2 } ?? implicitColLine }
+        // Negative integers → count back from the explicit end line.
+        if let v = rq.colStart, v < 0 { rq.colStart = columnCount + 2 + v }
+        if let v = rq.colEnd,   v < 0 { rq.colEnd   = columnCount + 2 + v }
+        if let v = rq.rowStart, v < 0 { rq.rowStart = explicitRowCount + 2 + v }
+        if let v = rq.rowEnd,   v < 0 { rq.rowEnd   = explicitRowCount + 2 + v }
+        return rq
+    }
 
     /// css-grid-1 §8.5 sparse row-flow auto-placement, simplified to the
     /// subset the IR carries (no named lines, no dense packing).

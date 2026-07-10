@@ -67,37 +67,88 @@ fi
 #   and the Android installDebug APK staging area.
 # macOS ships without flock(1), so we roll a `mkdir`-based advisory lock.
 # `mkdir` is atomic on the local filesystem, so the first caller wins and
-# everyone else aborts cleanly with a readable message. Unlike file locks,
-# this also prevents re-entry after a crash (stale lock dir) — which is a
-# feature, not a bug: manual cleanup is trivial (`rm -rf "$LOCK"`) and the
-# alternative (letting a half-finished run corrupt shared artefacts) is
-# worse.
+# everyone else aborts cleanly with a readable message. A leftover lock from
+# a crashed run self-heals in the common case: if the pid recorded inside
+# the lock is provably dead we reclaim it (see below). Only a live-pid lock
+# — or one whose pid file is missing/garbled, which could be a runner that
+# just mkdir'd and hasn't written its pid yet — demands manual `rm -rf`.
 # Skip the lock when TESTALL_SKIP_LOCK=1 (used by sub-scripts that already
 # hold it, e.g. our own retry loops).
 LOCK="/tmp/style-converter-testall.lock"
+# Whether THIS process created $LOCK (TESTALL_SKIP_LOCK runs never own it —
+# the parent, e.g. run-titan.sh, does). The EXIT handler below must only
+# ever remove a lock we own.
+LOCK_ACQUIRED=0
 if [[ -z "${TESTALL_SKIP_LOCK:-}" ]]; then
   if ! mkdir "$LOCK" 2>/dev/null; then
-    other_pid=$(cat "$LOCK/pid" 2>/dev/null || echo "?")
-    echo "[test-all] another run is in progress (pid=$other_pid, lock=$LOCK)" >&2
-    echo "[test-all] remove $LOCK if you know no other run is active" >&2
-    exit 2
+    other_pid=$(cat "$LOCK/pid" 2>/dev/null || echo "")
+    # Stale-lock self-heal: `kill -0` probes process existence without
+    # signalling. If the recorded pid is numeric and provably dead, the
+    # previous run crashed (or its EXIT handler was killed mid-flight — see
+    # the handler comment below for how that happened) and the lock is
+    # stale; reclaim it instead of demanding a manual `rm -rf`.
+    if [[ "$other_pid" =~ ^[0-9]+$ ]] && ! kill -0 "$other_pid" 2>/dev/null; then
+      echo "[test-all] stale lock: pid $other_pid is dead — reclaiming $LOCK" >&2
+      rm -rf "$LOCK"
+      # Re-acquire atomically — a concurrent invocation may have raced us
+      # to the same reclaim; whoever wins mkdir runs, the loser aborts.
+      if ! mkdir "$LOCK" 2>/dev/null; then
+        echo "[test-all] another run grabbed the lock during reclaim — aborting" >&2
+        exit 2
+      fi
+    else
+      echo "[test-all] another run is in progress (pid=${other_pid:-?}, lock=$LOCK)" >&2
+      echo "[test-all] remove $LOCK if you know no other run is active" >&2
+      exit 2
+    fi
   fi
   echo "$$" > "$LOCK/pid"
-  # Release the lock no matter how we exit. The vite section below installs
-  # its own EXIT trap that previously clobbered this one; that's now fixed
-  # by having the vite trap chain back through _testall_on_exit.
-  # Also chains the headless-emulator teardown — defined further down, but
-  # bash resolves function calls at runtime so the forward reference is
-  # fine. The teardown is a no-op unless WE booted the emulator (it checks
-  # EMULATOR_STARTED_BY_US itself).
-  _testall_on_exit() {
-      if declare -F _teardown_headless_emulator >/dev/null 2>&1; then
-          _teardown_headless_emulator
-      fi
-      rm -rf "$LOCK" 2>/dev/null || true
-  }
-  trap _testall_on_exit EXIT INT TERM HUP
+  LOCK_ACQUIRED=1
 fi
+
+# Cleanup handler. Runs on EXIT — the signal traps below route INT/TERM/HUP
+# through `exit`, so it fires exactly once on every way out. The vite
+# section further down temporarily swaps the EXIT trap for one that chains
+# vite cleanup into this handler, then restores it.
+_testall_on_exit() {
+    # Cleanup must be unkillable-by-error: the handler inherits `set -e`,
+    # and any failing command aborts it MID-WAY. That was the stale-lock
+    # bug (IR v2 verification, 2026-07-10): after an EMULATOR_KEEP=1 run
+    # whose stdout reader had gone away right after the summary, the
+    # teardown's log line failed with a broken-pipe write error, `set -e`
+    # killed the handler, and the lock release below never ran — every
+    # later invocation then aborted against a dead pid.
+    set +e
+    # Same failure family: a write to a closed pipe/PTY must not
+    # SIGPIPE-kill the handler between teardown and lock release.
+    trap '' PIPE
+    # Teardown BEFORE lock release: the lock guards the emulator/adb
+    # singletons, so hold it until the emulator we booted is actually gone.
+    # The function is defined further down (bash resolves function calls at
+    # runtime, so the forward reference is fine) and no-ops unless WE
+    # booted the emulator — it checks EMULATOR_STARTED_BY_US and
+    # EMULATOR_KEEP itself.
+    if declare -F _teardown_headless_emulator >/dev/null 2>&1; then
+        _teardown_headless_emulator
+    fi
+    # Release the lock we own. TESTALL_SKIP_LOCK runs skip this via the
+    # LOCK_ACQUIRED guard so they can't remove the parent's lock.
+    if [[ "$LOCK_ACQUIRED" == "1" ]]; then
+        rm -rf "$LOCK" 2>/dev/null
+    fi
+}
+# Installed even when TESTALL_SKIP_LOCK=1: parent-held-lock runs still need
+# the emulator teardown on exit (previously they got NO trap at all, so a
+# run-titan --all-platforms invocation leaked the headless emulator).
+trap _testall_on_exit EXIT
+# Fatal signals exit with the conventional 128+signo code, which fires the
+# EXIT trap above. Trapping the cleanup function on the signals directly —
+# the old scheme — had two bugs: bash RESUMES the script after a trapped
+# signal (a Ctrl-C'd run kept running with the lock already released), and
+# cleanup then ran a second time at EOF.
+trap 'exit 130' INT
+trap 'exit 143' TERM
+trap 'exit 129' HUP
 
 # ── Configuration ────────────────────────────────────────────────────────────
 PROJECT_ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -709,15 +760,15 @@ else
         fi
         lsof -ti:"$WEB_PORT" 2>/dev/null | xargs kill -9 2>/dev/null || true
     }
-    # Chain: vite cleanup + lock release. Preserves the lock release that
-    # was installed at script start so we don't leave a stale lock behind.
+    # Chain: vite cleanup + the base cleanup handler (emulator teardown +
+    # lock release) installed at script start, so we don't leave a stale
+    # lock behind. Only the EXIT trap is swapped — INT/TERM/HUP keep their
+    # `exit`-routing traps from script start, which fire this via EXIT.
     _testall_cleanup_all() {
         _cleanup_vite
-        if declare -F _testall_on_exit >/dev/null 2>&1; then
-            _testall_on_exit
-        fi
+        _testall_on_exit
     }
-    trap _testall_cleanup_all EXIT INT TERM HUP
+    trap _testall_cleanup_all EXIT
 
     # Poll for vite readiness. Bail fast (a) if the process died — don't
     # wait the full 30s only to have Puppeteer report "connection refused",
@@ -741,12 +792,8 @@ else
         err "  vite log tail:"
         tail -20 /tmp/vite.log 2>/dev/null | sed 's/^/    /' >&2 || true
         _cleanup_vite
-        # Restore just the lock-release trap (vite cleanup already ran).
-        if declare -F _testall_on_exit >/dev/null 2>&1; then
-            trap _testall_on_exit EXIT INT TERM HUP
-        else
-            trap - EXIT INT TERM HUP
-        fi
+        # Restore the base cleanup trap (vite cleanup already ran).
+        trap _testall_on_exit EXIT
         set -m
     else
         ( cd "$WEB_DIR" && node capture-screenshots.mjs --url "http://localhost:$WEB_PORT" )
@@ -755,12 +802,8 @@ else
         CAPTURED_WEB=$COUNT
 
         _cleanup_vite
-        # Restore just the lock-release trap (vite cleanup already ran).
-        if declare -F _testall_on_exit >/dev/null 2>&1; then
-            trap _testall_on_exit EXIT INT TERM HUP
-        else
-            trap - EXIT INT TERM HUP
-        fi
+        # Restore the base cleanup trap (vite cleanup already ran).
+        trap _testall_on_exit EXIT
         set -m
     fi
 fi

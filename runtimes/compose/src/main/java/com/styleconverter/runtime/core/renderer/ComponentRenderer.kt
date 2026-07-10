@@ -447,6 +447,17 @@ object ComponentRenderer {
                 blockJustifySelf == JustifySelf.FLEX_END ||
                 blockJustifySelf == JustifySelf.RIGHT -> Alignment.TopEnd
             else -> autoMarginAlignment(effectiveProperties)
+                // CSS 2.1 §9.5: `float: right` (and its logical alias
+                // `inline-end` in our LTR-normalized engine) shifts the box
+                // to the RIGHT edge of its containing block. Compose has no
+                // float layout; for the harness's dominant case — a floated
+                // box whose siblings' wrap behaviour isn't observable — the
+                // end-alignment wrapper reproduces the box position web
+                // paints (PW_Borders_Layout_03 green box flush right,
+                // A-w 0.406/55% px; PW_Layout_Typography_04 A-w 0.356 —
+                // iOS shared the same at-left gap, i-A 0.95). float:left/
+                // inline-start is the block default → no wrapper needed.
+                ?: floatEndAlignment(effectiveProperties)
         }
         val selfAlignedContent: @Composable () -> Unit =
             if (blockSelfAlignment != null) {
@@ -800,8 +811,42 @@ object ComponentRenderer {
             val isPositionedContainer = extractPositionType(component.properties) == PositionType.RELATIVE
 
             if (isPositionedContainer) {
+                // CSS 2.1 §9.9.1 / Appendix E: a child with NEGATIVE z-index
+                // paints BEHIND its stacking context's background. Compose
+                // draws the parent's background modifier before any child,
+                // so a Modifier.zIndex(-1) child still painted ABOVE it
+                // (PL_ZNegative: web hides the teal box behind the parent's
+                // opaque bg, Android showed it — A-w 0.931, iOS shared).
+                // Emulation: when a positioned child claims z < 0, re-paint
+                // the parent's background as a z=0 sibling layer. Ties at
+                // z=0 resolve by placement order, so in-flow siblings
+                // (placed after the layer) stay on top while negative-z
+                // children sink below it — exactly the browser's paint
+                // order for an opaque background.
+                val negativeZBackdrop: Color? = run {
+                    val hasNegativeZChild = component.children.any { child ->
+                        extractPositionType(child.properties) != PositionType.STATIC &&
+                            (com.styleconverter.runtime.core.placement.ItemPlacementExtractor
+                                .zIndex(child.properties) ?: 0) < 0
+                    }
+                    if (!hasNegativeZChild) null
+                    else component.properties.firstOrNull { it.type == "BackgroundColor" }
+                        ?.data?.let { ValueExtractors.extractColor(it) }
+                        // Only fully-opaque backgrounds can be re-painted
+                        // losslessly (a translucent layer would double-blend).
+                        ?.takeIf { it.alpha == 1f }
+                }
                 // Render with Box to support absolute positioning
                 Box(modifier = Modifier.fillMaxSize()) {
+                    if (negativeZBackdrop != null) {
+                        // The backdrop layer: same paint as the parent bg,
+                        // placed FIRST so every z>=0 sibling still wins ties.
+                        Box(
+                            modifier = Modifier.fillMaxSize()
+                                .zIndex(0f)
+                                .background(negativeZBackdrop)
+                        )
+                    }
                     component.children.forEachIndexed { index, child ->
                         val childPosition = extractPositionType(child.properties)
                         if (childPosition == PositionType.ABSOLUTE || childPosition == PositionType.FIXED) {
@@ -926,6 +971,23 @@ object ComponentRenderer {
         val hasDefiniteWidth = properties.any { it.type == "Width" || it.type == "InlineSize" }
         if (!hasDefiniteWidth) return null
         return if (rightAuto) Alignment.TopCenter else Alignment.TopEnd
+    }
+
+    /**
+     * CSS 2.1 §9.5 float → block-level end alignment, or null when the box
+     * doesn't float rightward. Pure + internal for the JVM pinning suite.
+     * Reads the Float longhand through FloatExtractor (the single owner of
+     * float/clear keyword parsing) so `right` and the logical `inline-end`
+     * (LTR → right, css-logical-1 §2.1) share one mapping.
+     */
+    internal fun floatEndAlignment(properties: List<IRProperty>): Alignment? {
+        val cfg = com.styleconverter.runtime.layout.FloatExtractor
+            .extractFloatConfig(properties.map { it.type to it.data })
+        return when (cfg.float) {
+            com.styleconverter.runtime.layout.FloatValue.RIGHT,
+            com.styleconverter.runtime.layout.FloatValue.INLINE_END -> Alignment.TopEnd
+            else -> null
+        }
     }
 
     /**
@@ -1653,11 +1715,91 @@ object ComponentRenderer {
         // web centered it). Fill only when the IR declares a definite
         // width — for `fit-content`-like unsized parents fillMaxWidth would
         // wrongly stretch the wrap-content box to the canvas width.
+        // word-break: break-word — the web placeholder <span> declares it
+        // (apps/web-harness ComponentRenderer.tsx), which makes the span's
+        // MIN-CONTENT width a single grapheme: `width: min-content` boxes
+        // collapse to a one-character column on web (PW_Sizing_Spacing_02's
+        // 49px sliver) while Compose Text reports its longest WORD as the
+        // min intrinsic (Android rendered a 100px box, A-w 0.868). The shim
+        // caps the Text's reported min-intrinsic width at ~one em so
+        // IntrinsicSize.Min measurement matches the harness's break-word
+        // floor; normal measurement (bounded constraints) is untouched, and
+        // Compose Text already breaks words mid-grapheme when the incoming
+        // constraint is narrower than the word — the same fallback
+        // break-word uses.
+        val breakWordShim = BreakWordMinIntrinsicModifier(effectiveFontSize.value)
         val textModifier = if (placeholderFillsParentWidth(properties)) {
-            Modifier.fillMaxWidth().padding(4.dp)
+            Modifier.fillMaxWidth().padding(4.dp).then(breakWordShim)
         } else {
-            Modifier.padding(4.dp)
+            Modifier.padding(4.dp).then(breakWordShim)
         }
+
+        // css-writing-modes-4 §3: vertical / sideways writing modes rotate
+        // the TEXT FLOW inside the box (the box itself keeps its geometry —
+        // see WritingModeApplier.applyWritingMode). Chrome lays the line
+        // out against the box's HEIGHT and stacks lines along the width:
+        // sideways-lr reads bottom-to-top with lines left→right (a -90°
+        // glyph-run rotation), vertical-rl / sideways-rl read top-to-bottom
+        // with lines right→left (+90°). We reproduce that with a wrapper
+        // Layout that measures the Text against SWAPPED constraints and
+        // rotates the laid-out run about its center — only the glyphs
+        // rotate, not background/borders (PW_Layout_Typography_03 web
+        // reference; Android previously drew horizontal text, A-w 0.568).
+        val writingModeConfig = try {
+            com.styleconverter.runtime.typography.text.TextExtractor
+                .extractWritingModeConfig(propertyPairs)
+        } catch (e: Exception) {
+            null
+        }
+        if (writingModeConfig != null && writingModeConfig.isVertical) {
+            val rotation = when (writingModeConfig.writingMode) {
+                // lines stack left→right, glyphs read bottom-to-top.
+                com.styleconverter.runtime.typography.text.WritingModeValue.SIDEWAYS_LR -> -90f
+                // vertical-rl / sideways-rl / vertical-lr approximate as
+                // +90° (top-to-bottom glyph run; the rl/lr difference is
+                // the line-stacking side which the single-line placeholder
+                // corpus can't distinguish).
+                else -> 90f
+            }
+            androidx.compose.ui.layout.Layout(
+                content = {
+                    Text(
+                        text = annotatedText,
+                        style = styledTextStyle,
+                        maxLines = effectiveMaxLines,
+                        overflow = effectiveOverflow,
+                        softWrap = wrapConfig.softWrap,
+                        onTextLayout = { layoutResult.value = it },
+                        modifier = Modifier.padding(4.dp).then(emphasisModifier)
+                    )
+                }
+            ) { measurables, constraints ->
+                // Swap the axes: the text's inline axis runs along the
+                // box's block axis, so its wrap width is the incoming
+                // HEIGHT budget (unbounded → let it be a single line).
+                val swapped = androidx.compose.ui.unit.Constraints(
+                    minWidth = 0,
+                    maxWidth = if (constraints.hasBoundedHeight) constraints.maxHeight else androidx.compose.ui.unit.Constraints.Infinity,
+                    minHeight = 0,
+                    maxHeight = if (constraints.hasBoundedWidth) constraints.maxWidth else androidx.compose.ui.unit.Constraints.Infinity
+                )
+                val placeable = measurables.first().measure(swapped)
+                // Report the rotated footprint (width↔height swapped).
+                val w = placeable.height.coerceIn(constraints.minWidth, constraints.maxWidth)
+                val h = placeable.width.coerceIn(constraints.minHeight, constraints.maxHeight)
+                layout(w, h) {
+                    // Center-rotate: place the child so its center lands at
+                    // the wrapper's center, then spin it about that center.
+                    val x = (w - placeable.width) / 2
+                    val y = (h - placeable.height) / 2
+                    placeable.placeWithLayer(x, y) {
+                        rotationZ = rotation
+                    }
+                }
+            }
+            return
+        }
+
         Text(
             text = annotatedText,
             style = styledTextStyle,
@@ -1940,5 +2082,48 @@ object ComponentRenderer {
         // Tag_Chip rendered with text mid-card while iOS/web rendered
         // them at the top-left of the padding band.
         AlignItems.STRETCH -> Alignment.TopStart
+    }
+}
+
+/**
+ * Placeholder break-word shim (wave 5). The web harness's placeholder
+ * <span> declares `word-break: break-word`, which makes the span's
+ * MIN-CONTENT contribution a single grapheme instead of the widest word
+ * (css-text-3 §5.2: break-word allows breaks anywhere for intrinsic-size
+ * purposes' worst case). Compose Text reports its longest word as the min
+ * intrinsic, so `width: min-content` boxes measured word-wide on Android
+ * while the web reference collapsed to a one-character column
+ * (PW_Sizing_Spacing_02: 100px vs 49px, A-w 0.868).
+ *
+ * The shim caps ONLY the reported minIntrinsicWidth at ~1em of the
+ * placeholder's font size; measurement itself (and the other three
+ * intrinsics) pass through untouched, so plain bounded layouts see no
+ * difference. When the capped intrinsic then feeds a narrow measure
+ * constraint, Compose Text already breaks words mid-grapheme — the same
+ * fallback rendering break-word produces.
+ */
+private class BreakWordMinIntrinsicModifier(
+    private val fontSizeSp: Float
+) : androidx.compose.ui.layout.LayoutModifier {
+    override fun androidx.compose.ui.layout.MeasureScope.measure(
+        measurable: androidx.compose.ui.layout.Measurable,
+        constraints: androidx.compose.ui.unit.Constraints
+    ): androidx.compose.ui.layout.MeasureResult {
+        // Pass-through measurement — the shim only affects intrinsics.
+        val placeable = measurable.measure(constraints)
+        return layout(placeable.width, placeable.height) {
+            placeable.placeRelative(0, 0)
+        }
+    }
+
+    override fun androidx.compose.ui.layout.IntrinsicMeasureScope.minIntrinsicWidth(
+        measurable: androidx.compose.ui.layout.IntrinsicMeasurable,
+        height: Int
+    ): Int {
+        // One em ≈ the widest single grapheme ("W" at Inter 16 ≈ 15-16px) —
+        // the break-word min-content floor. Never RAISE the child's own
+        // min intrinsic (short labels stay exact).
+        val oneChar = with(this) { fontSizeSp.sp.roundToPx() }
+        return minOf(measurable.minIntrinsicWidth(height), oneChar)
     }
 }

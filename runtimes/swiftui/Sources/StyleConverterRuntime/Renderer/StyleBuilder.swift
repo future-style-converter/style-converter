@@ -536,6 +536,25 @@ enum StyleBuilder {
                           bottom: bottom, trailing: trailing)
     }
 
+    /// Wave 5 — resolved horizontal padding band (left + right, px) for
+    /// the min-content sizing lane: SizeApplier's narrow-width proposal
+    /// must clear the `.padding` inside it before reaching the text.
+    /// Same resolver lane as backgroundClipInsets above.
+    static func horizontalPaddingPx(_ style: ComponentStyle) -> CGFloat {
+        guard let p = style.spacing.padding else { return 0 }
+        // Percent padding resolves against the viewport width — the
+        // PaddingApplier fallback basis (same approximation as above).
+        let basis = CGFloat(style.spacing.context.viewportWidth)
+        func px(_ v: LengthValue) -> CGFloat {
+            switch SpacingResolver.resolve(v, ctx: style.spacing.context, isPadding: true) {
+            case .px(let n):      return n
+            case .percent(let f): return f * basis
+            case .auto, .skip:    return 0
+            }
+        }
+        return px(p.left) + px(p.right)
+    }
+
     /// Web-harness min-box floor decision (see MinBoxFloor below): the
     /// floor applies per axis only when the IR declared NO width/min/max
     /// on that axis — mirrors apps/web-harness ComponentRenderer.tsx
@@ -608,8 +627,10 @@ extension View {
             .engineSpacingPadding(style.spacing.padding, context: style.spacing.context)
             // Phase 3 — sizing applied via SizeApplier. Uses the threaded
             // SpacingContext so em/rem/vw resolve against the same 390×844
-            // canvas as padding/margin.
-            .engineSizing(style.size, context: style.spacing.context)
+            // canvas as padding/margin. Wave 5: the padding band rides
+            // along for the min-content proposal (see SizeApplier doc).
+            .engineSizing(style.size, context: style.spacing.context,
+                          horizontalPadding: StyleBuilder.horizontalPaddingPx(style))
             // Fidelity wave 1 — web-harness minimum-box parity. The web
             // renderer floors every component at minWidth 50 / minHeight
             // 30 unless the IR declares width/min/max for that axis, and
@@ -644,8 +665,18 @@ extension View {
                 clipInsets: StyleBuilder.backgroundClipInsets(style),
                 attachment: style.backgroundAttachment
             )
-            .engineBackgroundColor(style.color, radius: style.borderRadius,
-                                   clipInsets: StyleBuilder.backgroundClipInsets(style))
+            // Wave 5: `background-clip: text` clips the SOLID background
+            // to the glyph shape too (css-backgrounds-4 §2.2), not just
+            // gradients — the browser paints NO rectangular box, only
+            // bg-coloured text. iOS painted the full solid rect
+            // (PW_Background_Effects_01, i-w 0.774). The label paints
+            // the glyph tint via PlaceholderLabel's clip-text path, so
+            // the rectangular paint is suppressed the same way the
+            // gradient layer is above.
+            .engineBackgroundColor(
+                style.backgroundClip?.mode == .text ? nil : style.color,
+                radius: style.borderRadius,
+                clipInsets: StyleBuilder.backgroundClipInsets(style))
             .engineBackgroundClip(style.backgroundClip)
             .engineBackgroundOrigin(style.backgroundOrigin)
             .engineBackgroundRepeat(style.backgroundRepeat)
@@ -664,7 +695,10 @@ extension View {
             // defaulting to black (borders/003_C04).
             .engineBorderSides(style.borderSides, radius: style.borderRadius,
                                currentColor: style.text.color)
-            .engineOutline(style.outline, radius: style.borderRadius)
+            // Wave 5: outline-color initial = currentColor (css-ui-4
+            // §4.3) — same threading as border sides above.
+            .engineOutline(style.outline, radius: style.borderRadius,
+                           currentColor: style.text.color)
             .engineBorderMisc(style.borderMisc)
             .engineBoxShadow(style.boxShadow, radius: style.borderRadius)
             // Phase 4 — blend / isolation / opacity. `.blendMode`

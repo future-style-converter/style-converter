@@ -153,12 +153,37 @@ step() { echo -e "\n${B}━━━ ${TAG} $* ━━━${N}"; }
 # `css-color`) hold different lock dirs and proceed in parallel.
 LOCK="/tmp/titan-section-${SECTION}.lock"
 if ! mkdir "$LOCK" 2>/dev/null; then
-  other_pid=$(cat "$LOCK/pid" 2>/dev/null || echo "?")
-  err "another section-runner holds $LOCK (pid=$other_pid). rm -rf $LOCK if stale."
-  exit 2
+  other_pid=$(cat "$LOCK/pid" 2>/dev/null || echo "")
+  # Stale-lock self-heal (mirrors test-all.sh): `kill -0` probes process
+  # existence without signalling. If the recorded pid is numeric and
+  # provably dead, the previous run crashed and the lock is stale; reclaim
+  # it instead of demanding a manual `rm -rf`. A live pid — or a missing/
+  # garbled pid file, which could be a runner that just mkdir'd and hasn't
+  # written its pid yet — still aborts.
+  if [[ "$other_pid" =~ ^[0-9]+$ ]] && ! kill -0 "$other_pid" 2>/dev/null; then
+    warn "stale lock: pid $other_pid is dead — reclaiming $LOCK"
+    rm -rf "$LOCK"
+    # Re-acquire atomically — a concurrent invocation may have raced us
+    # to the same reclaim; whoever wins mkdir runs, the loser aborts.
+    if ! mkdir "$LOCK" 2>/dev/null; then
+      err "another section-runner grabbed the lock during reclaim — aborting"
+      exit 2
+    fi
+  else
+    err "another section-runner holds $LOCK (pid=${other_pid:-?}). rm -rf $LOCK if stale."
+    exit 2
+  fi
 fi
 echo "$$" > "$LOCK/pid"
-trap 'rm -rf "$LOCK" 2>/dev/null || true; rm -rf "${VITE_TMPDIR:-/dev/null}" 2>/dev/null || true' EXIT INT TERM HUP
+trap 'rm -rf "$LOCK" 2>/dev/null || true; rm -rf "${VITE_TMPDIR:-/dev/null}" 2>/dev/null || true' EXIT
+# Fatal signals exit with the conventional 128+signo code, which fires the
+# EXIT trap above. Trapping the cleanup command on the signals directly —
+# the old scheme — had two bugs (mirrors test-all.sh): bash RESUMES the
+# script after a trapped signal (a Ctrl-C'd run kept running with the lock
+# already released), and cleanup then ran a second time at EOF.
+trap 'exit 130' INT
+trap 'exit 143' TERM
+trap 'exit 129' HUP
 
 # ── Pre-flight ───────────────────────────────────────────────────────────────
 
@@ -359,8 +384,10 @@ _cleanup_vite() {
   fi
   lsof -ti:"$PORT" 2>/dev/null | xargs kill -9 2>/dev/null || true
 }
-# Chain into the lock-release trap installed at top of script.
-trap '_cleanup_vite; rm -rf "$LOCK" 2>/dev/null || true' EXIT INT TERM HUP
+# Chain into the lock-release trap installed at top of script. EXIT-only:
+# the INT/TERM/HUP traps installed up top keep routing signals through
+# `exit`, which fires this handler exactly once.
+trap '_cleanup_vite; rm -rf "$LOCK" 2>/dev/null || true' EXIT
 
 log "waiting for vite @ :$PORT…"
 VITE_READY=0
@@ -409,7 +436,9 @@ echo "total elapsed: $(( $(date +%s) - SECTION_START ))s" >> "$CAPTURE_LOG"
 # Tear vite down before we move on so the next stage isn't holding the port.
 _cleanup_vite
 unset VITE_PID
-trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT INT TERM HUP
+# Restore the base lock-release trap (vite cleanup already ran). EXIT-only —
+# the signal traps from the top of the script stay installed.
+trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT
 set -m
 
 # ── Step 6: compare (web-only — empty iOS/Android dirs) ──────────────────────
