@@ -125,12 +125,21 @@ struct TransformsApplier: ViewModifier {
                                axis: (x: x, y: y, z: z),
                                anchor: anchor)
         case .skew(let xDeg, let yDeg):
-            // SwiftUI has no first-class skew. Use ProjectionEffect with
-            // a CGAffineTransform encoding the two skew tangents.
-            let tx = tan(xDeg * .pi / 180)
-            let ty = tan(yDeg * .pi / 180)
-            v.projectionEffect(ProjectionTransform(CGAffineTransform(
-                a: 1, b: ty, c: tx, d: 1, tx: 0, ty: 0)))
+            // SwiftUI has no first-class skew, and a bare
+            // `.projectionEffect` applies its matrix about the view's
+            // TOP-LEADING corner. CSS composes every transform function
+            // about `transform-origin` (css-transforms-1 §8: translate
+            // by origin · function · translate by −origin), default
+            // 50% 50%. Shearing about the top edge instead of the
+            // vertical centre displaced skewX(θ) content by a constant
+            // +tan(θ)·h/2 — the wave-4 measured +4–5px rightward drift
+            // on Performance_Decorated / Svg_Decorated (skewX(8deg),
+            // tan 8° · 64/2 ≈ 4.5px) that web/Android never render
+            // (Compose graphicsLayer pivots at centre by default).
+            // SkewEffect is a GeometryEffect: it receives the laid-out
+            // size without disturbing layout and conjugates the shear
+            // about the anchor via TransformsMath.anchoredSkew.
+            v.modifier(SkewEffect(xDeg: xDeg, yDeg: yDeg, anchor: anchor))
         case .matrix(let a, let b, let c, let d, let e, let f):
             // Direct 2D affine. CSS matrix(a,b,c,d,e,f) maps to
             // [[a,c,e],[b,d,f],[0,0,1]]; CGAffineTransform uses the
@@ -179,6 +188,32 @@ extension View {
     }
 }
 
+// MARK: - Anchored skew (fidelity wave 4)
+
+/// CSS skew about `transform-origin`, as a GeometryEffect.
+///
+/// GeometryEffect is the right vehicle: SwiftUI hands it the element's
+/// laid-out size (so the fractional anchor resolves to pixels exactly
+/// like rotate/scale's UnitPoint anchors) and the effect never
+/// participates in layout — unlike the GeometryReader wrapping the
+/// percentage-translate path, it cannot change the view's proposed size.
+struct SkewEffect: GeometryEffect {
+    // Skew angles in CSS degrees (skewX(θ) → xDeg, skewY(θ) → yDeg).
+    var xDeg: CGFloat
+    var yDeg: CGFloat
+    // Fractional transform-origin — same UnitPoint rotate/scale use;
+    // defaults to .center upstream, matching the CSS 50% 50% initial.
+    var anchor: UnitPoint
+
+    // Called by SwiftUI with the final laid-out size of the content.
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        // Delegate the spec arithmetic to TransformsMath so XCTest can
+        // pin the matrix without instantiating a view hierarchy.
+        ProjectionTransform(TransformsMath.anchoredSkew(
+            xDeg: xDeg, yDeg: yDeg, size: size, anchor: anchor))
+    }
+}
+
 // MARK: - Pure transform math (fidelity wave 3)
 
 /// Spec arithmetic split out of the view code so XCTest can pin it.
@@ -202,6 +237,32 @@ enum TransformsMath {
         guard has3DRotation, distancePx > 0 else { return 1.0 }
         // Legacy baseline-pinned approximation for 3D-rotated content.
         return max(0.9, min(1.0, distancePx / 1000.0))
+    }
+
+    /// CSS skew matrix conjugated about the transform-origin anchor
+    /// (fidelity wave 4 — the skewX placement fix).
+    ///
+    /// css-transforms-1 §8 defines the rendered matrix as
+    ///   T(origin) · S · T(−origin)
+    /// with the raw shear S = [1 tanθx; tanθy 1] (§13, skew()). The
+    /// linear 2×2 part survives conjugation unchanged; only a constant
+    /// translation appears:
+    ///   offset = c − S·c = (−tanθx·cy, −tanθy·cx)
+    /// where c = (anchor.x·w, anchor.y·h). For the default centre
+    /// anchor this cancels exactly the +tan(θ)·h/2 drift a top-left
+    /// application produces — the measured +4–5px on the skewX(8deg)
+    /// Decorated rows (tan 8° ≈ 0.1405, ×32 ≈ 4.5px on a 64px box).
+    static func anchoredSkew(xDeg: CGFloat, yDeg: CGFloat,
+                             size: CGSize, anchor: UnitPoint) -> CGAffineTransform {
+        // Shear tangents from the CSS angles (degrees → radians → tan).
+        let tx = tan(xDeg * .pi / 180)
+        let ty = tan(yDeg * .pi / 180)
+        // Anchor point in local pixels — fractional UnitPoint × size.
+        let cx = size.width * anchor.x
+        let cy = size.height * anchor.y
+        // Closed form of T(c) · S · T(−c): shear + compensating offset.
+        return CGAffineTransform(a: 1, b: ty, c: tx, d: 1,
+                                 tx: -tx * cy, ty: -ty * cx)
     }
 
     /// True when the aggregate carries a rotation OUT of the z = 0
