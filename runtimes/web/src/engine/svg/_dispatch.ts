@@ -46,6 +46,9 @@ import { extractMarkerEnd } from './MarkerEndExtractor';
 import { applyMarkerEnd } from './MarkerEndApplier';
 import { extractMarker } from './MarkerExtractor';
 import { applyMarker } from './MarkerApplier';
+// Issue #38: MarkerSide was a coverage-only claim; now a real triplet.
+import { extractMarkerSide } from './MarkerSideExtractor';
+import { applyMarkerSide } from './MarkerSideApplier';
 import { extractPaintOrder } from './PaintOrderExtractor';
 import { applyPaintOrder } from './PaintOrderApplier';
 import { extractShapeRendering } from './ShapeRenderingExtractor';
@@ -98,6 +101,7 @@ export function applySvgPhase10(properties: IRPropertyLike[]): CSSProperties {
   Object.assign(out, applyMarkerMid(extractMarkerMid(properties)));
   Object.assign(out, applyMarkerEnd(extractMarkerEnd(properties)));
   Object.assign(out, applyMarker(extractMarker(properties)));
+  Object.assign(out, applyMarkerSide(extractMarkerSide(properties)));
   Object.assign(out, applyPaintOrder(extractPaintOrder(properties)));
   Object.assign(out, applyShapeRendering(extractShapeRendering(properties)));
   Object.assign(out, applyVectorEffect(extractVectorEffect(properties)));

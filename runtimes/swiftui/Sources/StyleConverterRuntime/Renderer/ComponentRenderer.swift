@@ -55,11 +55,61 @@ public struct ComponentRenderer: View {
     // Android LocalInheritedProperties channel 1:1.
     @Environment(\.inheritedTextProperties) private var inheritedTextProperties
 
+    // Wave 6 (#32) — custom-property scope channel. Parents publish
+    // their MERGED VariableStore (their own `variables` map layered
+    // over their inherited chain); this component layers its own map on
+    // top before resolving var() references (css-variables-1 §2:
+    // custom properties inherit like any other inherited property).
+    @Environment(\.cssVariables) private var inheritedVariables
+
+    // Wave 6 (#39) — host-published surface geometry. Replaces the
+    // hardcoded 390×844 capture-canvas numbers inside SpacingContext:
+    // the harness pins its capture frame, a real app publishes its own
+    // window. nil keeps the legacy defaults (see StyleViewport.swift).
+    @Environment(\.styleViewport) private var styleViewport
+
     /// The component's declarations with the parent's inheritable text
     /// properties merged underneath (css-cascade-4 inheritance).
     private var mergedProperties: [IRProperty] {
         InheritedText.merge(own: component.properties,
                             inherited: inheritedTextProperties)
+    }
+
+    /// This element's full custom-property scope: own definitions
+    /// shadowing the slot-parent chain (css-variables-1 §2 nearest-wins).
+    private var mergedVariables: VariableStore {
+        VariableStore.merge(inherited: inheritedVariables,
+                            own: component.variables)
+    }
+
+    /// Wave 6 — the inheritance-merged declarations with every dynamic
+    /// value RESOLVED: var() references substituted from the scope
+    /// chain (§2.3, guaranteed-invalid ⇒ dropped = unset) and preserved
+    /// calc()/relative expressions evaluated against the wave-3
+    /// containing-block channel + the inheritance channel's font size.
+    /// Static declarations pass through byte-identical, so variable-free
+    /// fixtures render exactly as before.
+    private var resolvedProperties: [IRProperty] {
+        // em/rem base: the PARENT's computed font size, read from the
+        // inheritance channel (the parent publishes resolved pixels).
+        let inheritedFs = inheritedTextProperties
+            .last(where: { $0.type == "FontSize" })
+            .flatMap { ValueExtractors.extractPx($0.data) }
+            .map(Double.init) ?? 16.0
+        // calc() bases — same geometry the style chain itself uses:
+        // host viewport (#39, legacy 390×844 when unpublished) and the
+        // wave-3 containing block (root fallback mirrors
+        // SpacingContext.containingBlockWidth exactly).
+        var ctx = CalcEvaluator.EvalContext()
+        ctx.viewportWidth = styleViewport?.width ?? 390.0
+        ctx.viewportHeight = styleViewport?.height ?? 844.0
+        ctx.percentBasisPx = containingBlockWidth.map(Double.init)
+            ?? styleViewport?.rootContainingBlock
+            ?? (ctx.viewportWidth - 32)
+        return DynamicValueResolver.resolve(properties: mergedProperties,
+                                            variables: mergedVariables,
+                                            calc: ctx,
+                                            inheritedFontSizePx: inheritedFs)
     }
 
     // MARK: - Flow membership (fidelity wave 3)
@@ -126,12 +176,22 @@ public struct ComponentRenderer: View {
 
     // public: View protocol witness on a public type must be public.
     public var body: some View {
-        // Build the style from the inheritance-merged declarations, then
+        // Build the style from the inheritance-merged, variable-RESOLVED
+        // declarations (wave 6 — extraction sees concrete values), then
         // fold in the grid-stretch height (if the parent injected one and
         // the IR declared no explicit height — an explicit height always
         // wins per css-align-3 §9's "auto block size" precondition).
         let style: ComponentStyle = {
-            var s = StyleBuilder.build(from: mergedProperties)
+            var s = StyleBuilder.build(from: resolvedProperties)
+            // Wave 6 (#39) — adopt the host-published surface geometry
+            // FIRST so every resolver lane below (vw/vh, percent bases,
+            // GeometryReader fallbacks) uses the capture canvas / app
+            // window instead of the old hardcoded 390×844 literals.
+            if let vp = styleViewport {
+                s.spacing.context.viewportWidth = vp.width
+                s.spacing.context.viewportHeight = vp.height
+                s.spacing.context.rootContainingBlockPx = vp.rootContainingBlock
+            }
             // Fidelity wave 3 — thread the parent-published containing
             // block into the resolver context FIRST so every percent
             // width below (own width, flex plans, child publication)
@@ -432,7 +492,9 @@ public struct ComponentRenderer: View {
                                     children: [IRComponent]) -> some View {
         // Inheritance flows into positioned children exactly like flow
         // children (css-cascade-4 — inheritance is by tree, not flow).
-        let childInherited = InheritedText.inheritable(from: mergedProperties)
+        // Wave 6: publish the RESOLVED declarations so children inherit
+        // computed values (a var()-valued font-size flows down as px).
+        let childInherited = InheritedText.inheritable(from: resolvedProperties)
         // Percent widths of absolute children resolve against the
         // positioned ancestor's box (content-box approximation — same
         // channel as flow children).
@@ -449,6 +511,10 @@ public struct ComponentRenderer: View {
                 .environment(\.flexStretchWidth, nil)
                 .environment(\.containingBlockWidth, childCB)
                 .environment(\.inheritedTextProperties, childInherited)
+                // Custom-property scope (wave 6): positioned children
+                // sit in the same slot-parent chain as flow children —
+                // the merged store flows down uncut (css-variables-1 §2).
+                .environment(\.cssVariables, mergedVariables)
         }
     }
 
@@ -825,9 +891,12 @@ public struct ComponentRenderer: View {
             // leak past its own children.
             let stretchHeights = gridStretchHeights(style: style)
             // Inheritable text declarations for the children — computed
-            // from the MERGED list so grandparents' values ride through
-            // parents that don't redeclare them (transitive cascade).
-            let childInherited = InheritedText.inheritable(from: mergedProperties)
+            // from the MERGED, variable-RESOLVED list so grandparents'
+            // values ride through parents that don't redeclare them
+            // (transitive cascade) and children inherit COMPUTED values
+            // (css-cascade-4 §7.3 — a var()-valued font-size flows down
+            // as the resolved pixels, keeping chained em bases honest).
+            let childInherited = InheritedText.inheritable(from: resolvedProperties)
             // Fidelity wave 2 — flex parents route through CSSFlexLayout
             // (single-line) which consumes per-child ItemPlacement.flex
             // claims. FlowLayout (wrap) keeps the legacy FlexChildModifier.
@@ -962,6 +1031,12 @@ public struct ComponentRenderer: View {
                 // exactly its parent's merged set — no accumulation
                 // beyond the CSS-inherited property list.
                 .environment(\.inheritedTextProperties, childInherited)
+                // Custom-property scope (wave 6, css-variables-1 §2):
+                // publish this element's merged VariableStore — own
+                // definitions shadowing the inherited chain — so every
+                // child resolves var() against exactly its slot-parent
+                // chain (TK_TwoLevelShadow's mid `--accent` repaint).
+                .environment(\.cssVariables, mergedVariables)
             }
         } else {
             // CSS `background-clip: text` + a `background-image`

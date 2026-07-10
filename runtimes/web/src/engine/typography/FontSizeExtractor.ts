@@ -3,6 +3,7 @@
 // examples/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontSizeConfig, FONT_SIZE_PROPERTY_TYPE, FontSizePropertyType } from './FontSizeConfig';
+import { isWholeVarExpression } from '../core/types/LengthValue';
 import { kwLower, lengthCss } from './_shared';
 
 // Minimal IRProperty shape — keeps engine modules decoupled from IR types dir.
@@ -26,8 +27,12 @@ function parse(data: unknown): string | number | undefined {
     const orig = o.original as Record<string, unknown> | undefined;
     if (orig) {                                                      // keyword/calc paths
       if (typeof orig.keyword === 'string') return kwLower(orig.keyword);
-      if (typeof orig.expr === 'string') {                           // calc expression passthrough
+      if (typeof orig.expr === 'string') {                           // calc/var expression passthrough
         const raw = orig.expr.trim();
+        // Whole-value var() (wave-6 preserved dynamic value, e.g.
+        // `font-size: var(--type)`) emits VERBATIM — a calc() wrapper would
+        // corrupt keyword-valued tokens and break the preservation contract.
+        if (isWholeVarExpression(raw)) return raw;
         return raw.startsWith('calc(') ? raw : `calc(${raw})`;
       }
     }

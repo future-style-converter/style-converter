@@ -37,6 +37,14 @@ here and in `manifest.json` instead.
   absolutely-positioned siblings, mixed claimed+unclaimed auto-flow interleave,
   and a dangling area claim). Authored CSS-side nested per
   schema/spec/03-children.md; the converter flattens to the v2 flat+slot form.
+- `tokens/*.json` — dynamic-value suite (wave 6): custom-property definitions
+  (`--name` declarations → the IR v2 component `variables` key), var()
+  references consumed across the slot-parent chain (with shadowing), missing-
+  var vs fallback vs nested-fallback chains, and calc()/relative-unit
+  arithmetic (%−px against definite parents, em against inherited font-size
+  chains, nested calc, calc-consuming-var). Components are built so
+  resolution SUCCESS vs FAILURE changes visible pixels (spec 02
+  custom-properties section).
 
 ## Inventory
 
@@ -93,5 +101,8 @@ here and in `manifest.json` instead.
 | `placement/self-alignment.json` | placement | 3 | 15 |
 | `placement/z-stack.json` | placement | 3 | 11 |
 | `placement/mixed-claims.json` | placement | 3 | 18 |
-| **total** | | **554** | **716** |
+| `tokens/token-theme.json` | tokens | 3 | 11 |
+| `tokens/token-fallbacks.json` | tokens | 3 | 9 |
+| `tokens/calc-units.json` | tokens | 3 | 10 |
+| **total** | | **563** | **746** |
 

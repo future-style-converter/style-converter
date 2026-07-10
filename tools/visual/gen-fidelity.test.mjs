@@ -19,12 +19,19 @@
 //      claims (IR v2 slot/placement contract): grid-area names, line
 //      numbers/spans, order permutations, self-alignment overrides, z-index
 //      stacking, mixed claimed+unclaimed auto-flow, and a dangling area claim.
-//   6. converter round-trip — 6 representative files (3 wave-4 originals + a
-//      pairwise shard + 2 placement trees) convert cleanly, the emitted IR
-//      validates against schema/ir-v2.schema.json, and the output is flat +
-//      slot-composed (no nested children survive). Gradle-slow and
-//      JDK-21-dependent, so it only runs when GEN_FIDELITY_CONVERT=1 is set
-//      (the CI test-tooling job has no JDK — see .github/workflows/ci.yml).
+//   6. tokens coverage — the 3 token files (wave 6) carry custom-property
+//      definitions, var() references across the slot chain (with shadowing),
+//      missing-var/fallback/nested-fallback cases, and calc()/relative-unit
+//      mixes; the manifest features vocabulary is pinned.
+//   7. converter round-trip — 9 representative files (3 wave-4 originals + a
+//      pairwise shard + 2 placement trees + the 3 wave-6 token files) convert
+//      cleanly, the emitted IR validates against schema/ir-v2.schema.json,
+//      the output is flat + slot-composed (no nested children survive),
+//      authored --* declarations surface 1:1 as component `variables` maps,
+//      and every whole-value var()/calc() declaration survives byte-for-byte
+//      (spec 02 preservation contract). Gradle-slow and JDK-21-dependent, so
+//      it only runs when GEN_FIDELITY_CONVERT=1 is set (the CI test-tooling
+//      job has no JDK — see .github/workflows/ci.yml).
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -86,6 +93,10 @@ test('seed is pinned in the manifest', () => {
 // exactly what the generator is allowed to emit.
 const ALLOWED_NODE_KEYS = new Set(['properties', 'children', '_text']);
 const PROP_NAME_RE = /^-?[a-z][a-z0-9-]*$/; // css longhand/shorthand names (optional vendor dash)
+// Custom-property declarations (css-variables-1 §2): `--` + at least one
+// character. The tokens suite declares these alongside normal properties;
+// the converter lifts them into the IR v2 `variables` envelope key.
+const CUSTOM_PROP_RE = /^--[a-z][a-z0-9-]*$/;
 const NODE_NAME_RE = /^[A-Za-z][A-Za-z0-9_]*$/;
 
 function assertComponentNode(node, path) {
@@ -96,7 +107,10 @@ function assertComponentNode(node, path) {
   // properties is always present (may be {} — e.g. inheritance "plain" children).
   assert.equal(typeof node.properties, 'object', `${path}: missing properties map`);
   for (const [prop, value] of Object.entries(node.properties)) {
-    assert.match(prop, PROP_NAME_RE, `${path}: bad property name "${prop}"`);
+    assert.ok(
+      PROP_NAME_RE.test(prop) || CUSTOM_PROP_RE.test(prop),
+      `${path}: bad property name "${prop}"`,
+    );
     assert.equal(typeof value, 'string', `${path}.${prop}: value must be a string`);
     assert.ok(value.length > 0, `${path}.${prop}: empty value`);
   }
@@ -309,6 +323,83 @@ test('placement: 6 files, 2–3 claim-carrying containers each, all hard cases p
   }
 });
 
+// ── 3d. Tokens coverage (custom properties / var() / calc — wave 6) ──────
+
+test('tokens: 3 files carrying var definitions, references, fallbacks, and calc mixes', () => {
+  const tokens = manifest.files.filter((f) => f.kind === 'tokens');
+  assert.equal(tokens.length, 3, 'tokens template set must stay at 3 files');
+  // Structural scan flags — every dynamic-value scenario the suite exists
+  // for must be observed in the actual fixture bytes.
+  let sawVarDef = false;         // a --name declaration (variables source)
+  let sawVarRef = false;         // a var(--x) reference
+  let sawChainRef = false;       // a reference on a child whose ANCESTOR defines it
+  let sawShadowing = false;      // a child redefining a token its ancestor defines
+  let sawMissing = false;        // var() with neither definition nor fallback
+  let sawFallback = false;       // var(--x, literal)
+  let sawNestedFallback = false; // var(--x, var(--y, literal))
+  let sawCalcPctPx = false;      // calc mixing % and px
+  let sawCalcEm = false;         // calc using em (inherited font-size)
+  let sawNestedCalc = false;     // calc(calc(…))
+  let sawVarInCalc = false;      // calc(var(--x) …)
+  // Recursive scan carrying the set of token names defined by ancestors.
+  const scan = (node, inherited) => {
+    const props = node.properties ?? {};
+    const defined = new Set(inherited);
+    for (const [p, v] of Object.entries(props)) {
+      if (p.startsWith('--')) {
+        sawVarDef = true;
+        if (inherited.has(p)) sawShadowing = true;
+        defined.add(p);
+        continue;
+      }
+      for (const m of v.matchAll(/var\((--[a-z0-9-]+)\s*(,)?/gi)) {
+        sawVarRef = true;
+        const [, name, hasFallback] = m;
+        if (inherited.has(name)) sawChainRef = true;
+        if (hasFallback) sawFallback = true;
+        if (!hasFallback && !inherited.has(name) && !(name in props)) sawMissing = true;
+      }
+      if (/var\(--[a-z0-9-]+,\s*var\(/i.test(v)) sawNestedFallback = true;
+      if (/calc\([^)]*%[^)]*px/i.test(v)) sawCalcPctPx = true;
+      if (/calc\([^)]*\dem\b/i.test(v)) sawCalcEm = true;
+      if (/calc\(\s*calc\(/i.test(v)) sawNestedCalc = true;
+      if (/calc\(\s*var\(/i.test(v)) sawVarInCalc = true;
+    }
+    for (const child of Object.values(node.children ?? {})) scan(child, defined);
+  };
+  for (const entry of tokens) {
+    const doc = JSON.parse(byPath.get(entry.path));
+    const roots = Object.values(doc.components);
+    assert.ok(roots.length >= 2 && roots.length <= 3, `${entry.path}: ${roots.length} containers outside 2–3`);
+    assert.ok(entry.nodes >= 8 && entry.nodes <= 16, `${entry.path}: ${entry.nodes} nodes outside the 8–16 budget`);
+    assert.ok(Array.isArray(entry.features) && entry.features.length > 0, `${entry.path}: manifest features descriptor missing`);
+    // Token names never leak into category attribution (they carry no
+    // irmodels category — they ride the variables envelope key).
+    assert.ok(!entry.categories.includes('other'), `${entry.path}: token declarations mis-attributed to a category`);
+    for (const root of roots) scan(root, new Set());
+  }
+  assert.ok(sawVarDef, 'no custom-property definition (--name) found');
+  assert.ok(sawVarRef, 'no var() reference found');
+  assert.ok(sawChainRef, 'no reference resolved through an ancestor definition (slot chain)');
+  assert.ok(sawShadowing, 'no child shadowing an ancestor token');
+  assert.ok(sawMissing, 'no missing-var (guaranteed-invalid) case found');
+  assert.ok(sawFallback, 'no var() fallback found');
+  assert.ok(sawNestedFallback, 'no nested fallback chain found');
+  assert.ok(sawCalcPctPx, 'no calc(% … px) mix found');
+  assert.ok(sawCalcEm, 'no calc with em found');
+  assert.ok(sawNestedCalc, 'no nested calc found');
+  assert.ok(sawVarInCalc, 'no calc consuming var() found');
+  // Feature-descriptor vocabulary union — the coverage promise wave runs read.
+  const featureUnion = new Set(tokens.flatMap((f) => f.features));
+  for (const feat of [
+    'var-definitions', 'var-references', 'slot-chain-resolution', 'shadowing',
+    'missing-var', 'fallback', 'nested-fallback', 'definition-beats-fallback',
+    'calc-percent-px', 'calc-em-px', 'nested-calc', 'em-inheritance-chain', 'var-in-calc',
+  ]) {
+    assert.ok(featureUnion.has(feat), `tokens manifest features missing "${feat}"`);
+  }
+});
+
 test('manifest lists every generated fixture exactly once with correct byte sizes', () => {
   const listed = manifest.files.map((f) => f.path).sort();
   const actual = fixtureFiles.map((f) => f.relPath).sort();
@@ -333,11 +424,14 @@ test('manifest lists every generated fixture exactly once with correct byte size
 
 // ── 4. Converter round-trip (opt-in: needs JDK 21 + warm Gradle) ─────────
 
-// Six representative files: the wave-4 trio (smallest fixture, largest combos
-// file, deepest tree) plus the wave-5 additions — one pairwise shard
+// Nine representative files: the wave-4 trio (smallest fixture, largest
+// combos file, deepest tree) plus the wave-5 additions — one pairwise shard
 // (cross-category payload pressure) and two placement trees: grid-areas.json
 // (named areas + the dangling claim) and mixed-claims.json (claimed+unclaimed
-// auto-flow interleave — the claim/resolution algorithm's hardest case).
+// auto-flow interleave — the claim/resolution algorithm's hardest case) —
+// plus the wave-6 tokens trio (ALL of it: the variables envelope key and the
+// var()/calc() preservation contract are exactly what these files exist to
+// pin end-to-end through the real converter).
 function representativeFiles() {
   const byBytes = [...manifest.files].sort((a, b) => a.bytes - b.bytes || (a.path < b.path ? -1 : 1));
   const smallest = byBytes[0];
@@ -348,11 +442,38 @@ function representativeFiles() {
   const pairwiseShard = manifest.files.find((f) => f.path.endsWith('pairwise/pairs-01.json'));
   const placementAreas = manifest.files.find((f) => f.path.endsWith('placement/grid-areas.json'));
   const placementMixed = manifest.files.find((f) => f.path.endsWith('placement/mixed-claims.json'));
+  // Wave 6: the whole tokens suite rides along — the variables envelope
+  // key + verbatim var()/calc() preservation are pinned per file below.
+  const tokenFiles = manifest.files.filter((f) => f.kind === 'tokens');
   // De-dupe while preserving the selection intent (paths are unique keys).
   return [...new Map(
-    [smallest, largestCombos, deepestTree, pairwiseShard, placementAreas, placementMixed]
+    [smallest, largestCombos, deepestTree, pairwiseShard, placementAreas, placementMixed, ...tokenFiles]
       .map((f) => [f.path, f]),
   ).values()];
+}
+
+/** Collect every authored custom-property map ({--name: raw}) in tree order,
+ *  plus every TOP-LEVEL var()/calc() declaration VALUE — the verbatim-
+ *  preservation and variables-envelope expectations for the converter
+ *  round-trip below. Top-level only: a whole-value `var(…)`/`calc(…)` is
+ *  unresolvable and MUST survive byte-for-byte (spec 02 null+original),
+ *  whereas expressions nested inside an otherwise-parseable function (e.g.
+ *  the relative color `rgb(from red calc(r - 50) g b)`) legitimately decompose
+ *  into structured IR. */
+function collectTokenExpectations(components) {
+  const variableMaps = []; // one entry per component that declares --* props
+  const dynamicValues = new Set(); // whole-value var()/calc() declarations
+  const walk = (node) => {
+    const vars = {};
+    for (const [p, v] of Object.entries(node.properties ?? {})) {
+      if (p.startsWith('--')) vars[p] = v;
+      else if (/^(var|calc)\(/.test(v.trim())) dynamicValues.add(v);
+    }
+    if (Object.keys(vars).length > 0) variableMaps.push(vars);
+    for (const child of Object.values(node.children ?? {})) walk(child);
+  };
+  for (const comp of Object.values(components)) walk(comp);
+  return { variableMaps, dynamicValues };
 }
 
 /** Count every node in an authored components map (children maps recurse). */
@@ -368,7 +489,7 @@ function countInputNodes(components) {
 const CONVERT_ENABLED = process.env.GEN_FIDELITY_CONVERT === '1';
 
 test(
-  'converter round-trip: 6 representative files convert cleanly, validate against IR v2, and emit flat+slot output',
+  'converter round-trip: 9 representative files convert cleanly, validate against IR v2, and emit flat+slot+variables output',
   { skip: CONVERT_ENABLED ? false : 'set GEN_FIDELITY_CONVERT=1 (requires JDK 21) to run' },
   () => {
     // Pin Java 21 on macOS dev machines, mirroring schema/conformance/run.mjs.
@@ -433,6 +554,35 @@ test(
         countInputNodes(input.components),
         `${entry.path}: flat component count != authored node count`,
       );
+      // Wave-6 dynamic-value pins (tokens suite; vacuous for files that
+      // author no --*/var()/calc() declarations):
+      const { variableMaps, dynamicValues } = collectTokenExpectations(input.components);
+      // (a) variables envelope key: every authored --* declaration block
+      // must surface as an IDENTICAL component-level variables map (names
+      // case-preserved, raw values verbatim, nothing added or dropped) —
+      // pre-order flattening preserves authoring order, so the sequence of
+      // maps must match 1:1.
+      const emittedMaps = ir.components.filter((c) => c.variables).map((c) => c.variables);
+      assert.deepEqual(
+        emittedMaps,
+        variableMaps,
+        `${entry.path}: component variables maps drifted from the authored --* declarations`,
+      );
+      if (entry.kind === 'tokens') {
+        assert.ok(variableMaps.length > 0, `${entry.path}: tokens fixture authored no --* declarations`);
+        assert.ok(dynamicValues.size > 0, `${entry.path}: tokens fixture authored no var()/calc() values`);
+      }
+      // (b) preservation contract (spec 02): every var()/calc() declaration
+      // value must appear byte-for-byte somewhere in the emitted IR text —
+      // the exact-string assertion that catches lowercase folds, re-
+      // tokenization, or truncation anywhere in the parser surface.
+      const irText = readFileSync(irPath, 'utf8');
+      for (const value of dynamicValues) {
+        assert.ok(
+          irText.includes(value),
+          `${entry.path}: dynamic value '${value}' was not preserved verbatim in the emitted IR`,
+        );
+      }
     }
   },
 );

@@ -406,6 +406,18 @@ private fun CaptureCanvas(
             }
             .padding(CaptureCanvasPadding)
     ) {
+        // Root containing block for the wave-6 dynamic-value channel: the
+        // canvas CONTENT box (390 − 2×16 = 358dp), which is exactly the
+        // base web resolves root-level % / calc(…%…) against (the web
+        // CaptureCanvas div is the component's containing block; its
+        // content box is the same 358px). Height stays unknown — the
+        // canvas is content-sized on the block axis, matching web.
+        androidx.compose.runtime.CompositionLocalProvider(
+            com.styleconverter.runtime.core.variables.LocalContainingBlock provides
+                com.styleconverter.runtime.core.variables.ContainingBlock(
+                    widthPx = (CaptureCanvasWidth - CaptureCanvasPadding * 2).value
+                )
+        ) {
         if (isOutOfFlowRoot(component)) {
             // A standalone capture of a `position: absolute|fixed` component
             // must mirror the web canvas semantics (CSS 2.1 §9.6 + §10.1):
@@ -446,6 +458,7 @@ private fun CaptureCanvas(
             // parent-data + engine delegation, zero extra layout nodes.
             ComponentHost.Render(component)
         }
+        } // CompositionLocalProvider (root containing block)
     }
 }
 

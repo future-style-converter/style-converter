@@ -366,6 +366,16 @@ object CssPropertyValidator {
      * @return true if the property is valid, false otherwise
      */
     fun isValidProperty(propertyName: String): Boolean {
+        // CSS custom properties (`--name`, css-variables-1 §2) are valid
+        // declaration targets for ANY name after the two dashes. Checked
+        // BEFORE the lowercase normalization below because custom property
+        // names are case-SENSITIVE, unlike standard property names. Their
+        // values are routed to the component-level `variables` map by
+        // CustomPropertyParser, never to the typed property pipeline.
+        if (CustomPropertyParser.isCustomProperty(propertyName)) {
+            return true
+        }
+
         // CSS property names are case-insensitive
         val loweredName = propertyName.lowercase()
 

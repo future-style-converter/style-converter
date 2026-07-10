@@ -68,8 +68,24 @@ object PropertiesParser {
     fun parse(properties: Map<String, CssPropertyValue>): MutableList<IRProperty> {
         val result = mutableListOf<IRProperty>()
 
+        // Step 0: route custom properties (--*) OUT of the typed pipeline.
+        // They are untyped until substitution (css-variables-1 §2) and are
+        // lifted into the component-level `variables` map by
+        // CustomPropertyParser (CssParsing.convertToIR owns that call for
+        // base declarations). Filtered FIRST because normalizePropertyName
+        // below lowercases, and custom property names are case-sensitive.
+        // Without this filter they would degrade into GenericProperty noise.
+        val declaredProperties = properties.filterKeys { !CustomPropertyParser.isCustomProperty(it) }
+        val customCount = properties.size - declaredProperties.size
+        if (customCount > 0) {
+            // Base declarations are re-extracted at the component level;
+            // selector/media buckets have no variables surface yet (spec 02
+            // custom-properties section), so the log keeps the drop honest.
+            println("[CSS Parser] $customCount custom propert${if (customCount == 1) "y" else "ies"} (--*) routed to the component-level variables map")
+        }
+
         // Normalize property names (camelCase to kebab-case, mixed case to lowercase)
-        val normalizedProperties = properties.mapKeys { (name, _) -> normalizePropertyName(name) }
+        val normalizedProperties = declaredProperties.mapKeys { (name, _) -> normalizePropertyName(name) }
 
         // Step 1: Validate CSS properties (filter out invalid property names)
         val validProperties = normalizedProperties.filter { (name, _) ->

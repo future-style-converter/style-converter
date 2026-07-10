@@ -76,6 +76,17 @@ export interface IRComponent {
   name: string;
   /** List of CSS properties as IR; ITEM-scoped placement claims included. */
   properties: IRProperty[];
+  /**
+   * CSS custom-property definitions declared on this component
+   * (`--name` → RAW declaration value, verbatim). Additive IR v2 minor
+   * revision (spec 01 component table). Names are case-SENSITIVE
+   * (css-variables-1 §2) and values are untyped token streams until a
+   * var() reference substitutes them; the empty string is a legal value.
+   * var() resolution walks element → slot-parent chain → fallback
+   * (spec 02 custom-properties section) and happens at style-build
+   * time, never at decode time. Omitted when the component defines none.
+   */
+  variables?: Record<string, string>;
   /** State-based styles (hover, focus, …). v2 omits the key when empty. */
   selectors?: IRSelector[];
   /** Responsive breakpoint styles. v2 omits the key when empty. */

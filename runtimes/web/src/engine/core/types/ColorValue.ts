@@ -30,9 +30,17 @@ function pickAlpha(srgb: Record<string, unknown>): number {
 // Decide which DynamicKind (if any) an 'original' shape represents.
 // Returns null if 'original' doesn't look dynamic — caller should treat as unknown.
 function classifyDynamic(original: unknown): DynamicKind | null {
-  // String forms: 'currentColor' is the only dynamic bare string we recognise.
+  // String forms: 'currentColor' and whole-value var() references.
   if (typeof original === 'string') {
     if (original === 'currentColor' || original === 'currentcolor') return 'currentColor';
+    // Wave-6 dynamic values: the converter preserves `color: var(--x)` /
+    // `var(--x, fallback)` declarations VERBATIM as {original:'var(...)'}
+    // (spec 02, custom-properties section). Previously this returned null,
+    // so every var() color was silently dropped as {kind:'unknown'} — the
+    // classifyDynamic-null drop. The raw string is kept untouched (names
+    // are case-sensitive per css-variables-1 §2) and the browser resolves
+    // it against inherited custom properties at paint time.
+    if (original.startsWith('var(')) return 'var';
     return null;                                                    // named colors/hex are static even if srgb missing
   }
   // Object form: read the 'type' discriminator produced by the IR.
@@ -56,6 +64,12 @@ export function extractColor(data: unknown): ColorValue {
     if (data === 'transparent') return { kind: 'srgb', r: 0, g: 0, b: 0, a: 0 };
     if (data === 'currentColor' || data === 'currentcolor') {
       return { kind: 'dynamic', dynamicKind: 'currentColor', raw: data };
+    }
+    // Defensive symmetry with classifyDynamic: a bare 'var(...)' string is a
+    // preserved dynamic reference too (the converter normally wraps it in an
+    // {original} envelope, but the raw form costs nothing to accept).
+    if (data.startsWith('var(')) {
+      return { kind: 'dynamic', dynamicKind: 'var', raw: data };
     }
     return { kind: 'unknown' };                                     // named/hex resolution happens upstream
   }

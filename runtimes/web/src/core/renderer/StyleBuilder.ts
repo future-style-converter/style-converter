@@ -35,6 +35,17 @@ import { extractAccentColor }     from '../../engine/color/AccentColorExtractor'
 import { applyAccentColor }       from '../../engine/color/AccentColorApplier';
 import { extractCaretColor }      from '../../engine/color/CaretColorExtractor';
 import { applyCaretColor }        from '../../engine/color/CaretColorApplier';
+// Issue #38 one-key emitters — these three were coverage-only registry claims
+// (no applier existed); each is now a real Config/Extractor/Applier triplet.
+import { extractBoxSizing }         from '../../engine/sizing/BoxSizingExtractor';
+import { applyBoxSizing }           from '../../engine/sizing/BoxSizingApplier';
+import { extractColorScheme }       from '../../engine/color/ColorSchemeExtractor';
+import { applyColorScheme }         from '../../engine/color/ColorSchemeApplier';
+import { extractDynamicRangeLimit } from '../../engine/color/DynamicRangeLimitExtractor';
+import { applyDynamicRangeLimit }   from '../../engine/color/DynamicRangeLimitApplier';
+// Wave-6 honest-fallthrough contract: log-once tracker for property types
+// (or Generic payloads) that produce no CSS output. See engine/PropertyTracker.ts.
+import { logUnhandled, markHandled } from '../../engine/PropertyTracker';
 import { extractBackgroundImage }      from '../../engine/background/BackgroundImageExtractor';
 import { applyBackgroundImage }        from '../../engine/background/BackgroundImageApplier';
 import { extractBackgroundSize }       from '../../engine/background/BackgroundSizeExtractor';
@@ -120,6 +131,8 @@ export function buildStyles(properties: IRProperty[]): CSSStyles {
   if (marginTrim) Object.assign(styles, applyMarginTrim(marginTrim));
   // Phase-3 sizing — width/height/min-*/max-*/block-size/inline-size/aspect-ratio.
   Object.assign(styles, applySize(extractSize(properties)));
+  // Issue #38: box-sizing — real one-key emitter (was a coverage-only claim).
+  Object.assign(styles, applyBoxSizing(extractBoxSizing(properties)));
 
   // Phase-4 color + background engine.  Each extractor is a single-pass fold
   // over `properties`; appliers emit CSS keys that the browser renders
@@ -138,6 +151,10 @@ export function buildStyles(properties: IRProperty[]): CSSStyles {
   Object.assign(styles, applyBackgroundAttachment(extractBackgroundAttachment(properties)));
   Object.assign(styles, applyBlendMode(extractBlendMode(properties)));
   Object.assign(styles, applyIsolation(extractIsolation(properties)));
+  // Issue #38: color-scheme + dynamic-range-limit — real one-key emitters
+  // (both were coverage-only claims that never emitted CSS).
+  Object.assign(styles, applyColorScheme(extractColorScheme(properties)));
+  Object.assign(styles, applyDynamicRangeLimit(extractDynamicRangeLimit(properties)));
 
   // Phase-5 borders engine — 46 per-side/corner/image/outline/misc
   // properties plus BoxShadow routed separately.
@@ -195,12 +212,77 @@ export function buildStyles(properties: IRProperty[]): CSSStyles {
   Object.assign(styles, applyGlobalPhase10(properties));
 
   for (const prop of properties) {
+    // Wave-6: Generic is the parser's degradation envelope for declarations
+    // it recognised but couldn't type (today that's dominated by var()/calc()
+    // inside expanded shorthands, e.g. `border-radius: var(--pad)` →
+    // 4 × Generic{propertyName, rawValue}). The browser CAN evaluate those
+    // raw values natively, so pass dynamic ones through verbatim instead of
+    // silently dropping them; anything else logs once via PropertyTracker.
+    if (prop.type === 'Generic') {
+      applyGeneric(styles, prop.data);
+      continue;
+    }
     // Skip properties already served by the engine path above.
     if (!isLegacyProperty(prop.type)) continue;
     applyProperty(styles, prop);
   }
 
   return styles;
+}
+
+/**
+ * Convert a component's custom-property definitions (`IRComponent.variables`,
+ * the additive IR v2 key — spec 01 component table) into inline-style
+ * declarations. React inline styles accept `--name` keys since React 16 and
+ * emit them onto the element's `style` attribute, so definitions placed on
+ * the element participate in normal CSS inheritance: descendants (the
+ * slot-composed DOM) resolve `var(--name)` against them natively, and a
+ * child redefinition shadows the parent exactly per css-variables-1 §2.3.
+ * Names and values are forwarded VERBATIM — names are case-sensitive and
+ * values are untyped token streams (the empty string is legal).
+ */
+export function buildVariables(variables?: Record<string, string>): CSSStyles {
+  const out: CSSStyles = {};
+  if (!variables) return out;                                       // omit-when-empty wire key
+  for (const [name, value] of Object.entries(variables)) {
+    // Defensive gate mirroring the schema rule (^--. — bare `--` reserved
+    // per css-variables-1 §2); the decoder already enforces string values.
+    if (name.startsWith('--') && name.length > 2) out[name] = value;
+  }
+  return out;
+}
+
+/**
+ * Apply one Generic (untyped) declaration. Shape from the Kotlin parser:
+ * `{ propertyName: 'border-top-left-radius', rawValue: 'var(--pad)', _unmapped: true }`.
+ * Only dynamic values (containing var()/calc()) pass through — those are
+ * exactly the ones the parser cannot pre-compute but a browser resolves
+ * natively. Static unparseable values stay dropped (emitting them would
+ * mask real parser gaps) but are now LOGGED per the no-silent-fallthrough
+ * contract.
+ */
+function applyGeneric(styles: CSSStyles, data: unknown): void {
+  // Narrow the envelope; anything malformed is logged and skipped.
+  const obj = (data && typeof data === 'object') ? data as Record<string, unknown> : undefined;
+  const name = typeof obj?.propertyName === 'string' ? obj.propertyName : undefined;
+  const raw = typeof obj?.rawValue === 'string' ? obj.rawValue : undefined;
+  if (!name || raw === undefined) {
+    logUnhandled('Generic', 'malformed payload');                   // envelope without name/value
+    return;
+  }
+  // Dynamic pass-through: browsers substitute var()/evaluate calc() in
+  // inline styles, so the raw declaration is fully renderable as-is.
+  if (raw.includes('var(') || raw.includes('calc(')) {
+    // React style keys are camelCase ('border-top-left-radius' →
+    // 'borderTopLeftRadius'); custom properties never reach here (they're
+    // routed to `variables` upstream and never degrade to Generic).
+    const key = name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
+    styles[key] = raw;                                              // verbatim — case/spacing preserved
+    markHandled('Generic');                                         // coverage bookkeeping
+    return;
+  }
+  // Static value the parser couldn't type — an honest gap, logged once.
+  logUnhandled('Generic', name);
 }
 
 /**
@@ -390,6 +472,11 @@ function applyProperty(styles: CSSStyles, prop: IRProperty): void {
       const value = extractKeyword(data) || extractLength(data);
       if (value) {
         styles[cssProperty] = typeof value === 'string' ? value.toLowerCase().replace('_', '-') : value;
+        markHandled(type);                                          // fallback DID emit a declaration
+      } else {
+        // Nothing extractable — the CLAUDE.md contract forbids silent
+        // fallthroughs, so record + warn (once per type) via the tracker.
+        logUnhandled(type);
       }
   }
 }

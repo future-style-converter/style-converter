@@ -1,0 +1,47 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "calcmixes-001",
+            "name": "CalcMixes",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "expression",
+                        "expr": "calc(100% - 24px)"
+                    }
+                },
+                {
+                    "type": "PaddingTop",
+                    "data": {
+                        "expr": "calc(2em + 4px)"
+                    }
+                },
+                {
+                    "type": "FontSize",
+                    "data": {
+                        "original": {
+                            "type": "expression",
+                            "expr": "calc(1em + 2px)"
+                        }
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "expression",
+                        "expr": "calc(calc(100% - 10px) / 2)"
+                    }
+                },
+                {
+                    "type": "MarginTop",
+                    "data": {
+                        "expr": "calc(var(--space-2) * 2)"
+                    }
+                }
+            ]
+        }
+    ]
+}

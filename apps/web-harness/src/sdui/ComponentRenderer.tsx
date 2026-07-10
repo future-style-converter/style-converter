@@ -11,7 +11,7 @@
 
 import React, { useMemo } from 'react';
 import type { IRProperty, IRPseudoNode } from '@style-converter/web/core/ir/IRModels';
-import { buildStyles, type CSSStyles } from '@style-converter/web/core/renderer/StyleBuilder';
+import { buildStyles, buildVariables, type CSSStyles } from '@style-converter/web/core/renderer/StyleBuilder';
 import type { ComposedNode } from './Composer';
 
 /**
@@ -122,6 +122,15 @@ export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
   // styles for a display:none component is a trivially cheap memoised
   // no-op, so hoisting is safe.
   const styles = useMemo(() => buildStyles(component.properties), [component.properties]);
+
+  // Wave-6 dynamic values: custom-property DEFINITIONS from the component's
+  // `variables` map (IR v2 additive key) become `--name` inline-style keys
+  // on THIS element. Placing them on the defining element — not hoisted to
+  // some global scope — is what makes CSS inheritance do the resolution
+  // work: every slot-composed descendant rendering below picks them up via
+  // getComputedStyle inheritance, and a child's own definition shadows the
+  // parent's per css-variables-1 §2.3. Values pass through verbatim.
+  const variableStyles = useMemo(() => buildVariables(component.variables), [component.variables]);
 
   // Don't render if display: none
   if (displayType === 'none') {
@@ -541,7 +550,10 @@ export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
     {
       'data-component-id': component.id,
       'data-component-name': component.name,
-      style: containerStyles as React.CSSProperties,
+      // Custom-property definitions merge LAST — their `--name` keys are
+      // disjoint from every regular CSS key, so this can never clobber a
+      // declaration; ordering just keeps the intent obvious.
+      style: { ...containerStyles, ...variableStyles } as React.CSSProperties,
     },
     content
   );

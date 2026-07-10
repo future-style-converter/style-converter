@@ -26,9 +26,75 @@ import androidx.compose.ui.unit.sp
  */
 object CssVariableResolver {
 
-    private val VAR_PATTERN = Regex("""var\(\s*(--[a-zA-Z0-9_-]+)\s*(?:,\s*(.+))?\s*\)""")
+    // NOTE: var() occurrences are found by the balanced-paren scanner
+    // findVar() below — a regex cannot pair the close paren correctly when
+    // the var() sits inside calc() with trailing tokens.
     private val LENGTH_PATTERN = Regex("""^(-?\d+(?:\.\d+)?)\s*(px|dp|em|rem|%)?$""")
     private val COLOR_HEX_PATTERN = Regex("""^#([0-9a-fA-F]{3,8})$""")
+
+    /**
+     * Upper bound on var() substitutions per resolve() call. css-variables-1
+     * §3 makes CYCLIC references guaranteed-invalid; a self-referential
+     * definition like `--a: var(--a)` re-inserts the exact var() token it
+     * just replaced, so an unbounded substitution loop would spin forever.
+     * 32 comfortably exceeds any legitimate fixture chain (deepest golden
+     * is 2 nested fallbacks) while converting cycles into the null return
+     * the spec's guaranteed-invalid handling maps to.
+     */
+    private const val MAX_SUBSTITUTIONS = 32
+
+    /**
+     * One parsed var() occurrence: its char range in the host string, the
+     * variable name, and the raw fallback token stream (null when absent).
+     */
+    private data class VarOccurrence(
+        val range: IntRange,
+        val name: String,
+        val fallback: String?
+    )
+
+    /** Custom-property name charset (css-syntax ident subset the IR emits). */
+    private val VAR_NAME = Regex("""^--[a-zA-Z0-9_-]+$""")
+
+    /**
+     * Find the first var() in [s] by BALANCED-PAREN scanning. The old
+     * regex's greedy fallback group swallowed everything to the LAST close
+     * paren, so `calc(var(--u, 5px) * 10)` substituted into a corrupted
+     * `calc(12px` — the fallback split must happen at the top-level comma
+     * inside var()'s OWN parens, exactly like css-syntax tokenization.
+     */
+    private fun findVar(s: String): VarOccurrence? {
+        var from = 0
+        while (true) {
+            val start = s.indexOf("var(", from)
+            if (start < 0) return null
+            var depth = 0
+            var end = -1
+            var comma = -1
+            var i = start + 3 // index of var's own '('
+            while (i < s.length) {
+                when (s[i]) {
+                    '(' -> depth++
+                    ')' -> { depth--; if (depth == 0) { end = i; break } }
+                    // Fallback separator: first comma at var()'s own level.
+                    ',' -> if (depth == 1 && comma < 0) comma = i
+                }
+                i++
+            }
+            if (end < 0) return null // unbalanced parens — not a valid var()
+            val name = s.substring(start + 4, if (comma >= 0) comma else end).trim()
+            if (VAR_NAME.matches(name)) {
+                return VarOccurrence(
+                    range = start..end,
+                    name = name,
+                    fallback = if (comma >= 0) s.substring(comma + 1, end) else null
+                )
+            }
+            // Malformed name (e.g. bare `--`, reserved per css-variables-1
+            // §2) — skip past and keep scanning for a later valid var().
+            from = start + 4
+        }
+    }
 
     /**
      * Resolve all var() expressions in a value string.
@@ -37,28 +103,43 @@ object CssVariableResolver {
      * @param scope The current variable scope for lookups
      * @param maxDepth Maximum recursion depth for nested variables
      * @return The resolved value, or null if resolution fails
+     *   (css-variables-1 §3 guaranteed-invalid: missing variable with no
+     *   fallback, or a substitution cycle)
      */
     fun resolve(value: String, scope: CssVariableScope, maxDepth: Int = 10): String? {
         if (maxDepth <= 0) return null
         if (!value.contains("var(")) return value
 
         var result = value
-        var match = VAR_PATTERN.find(result)
+        // Substitution counter backing the MAX_SUBSTITUTIONS cycle guard.
+        var substitutions = 0
 
-        while (match != null) {
-            val variableName = match.groupValues[1]
-            val fallback = match.groupValues.getOrNull(2)?.trim()?.takeIf { it.isNotEmpty() }
+        while (true) {
+            val match = findVar(result) ?: break
+            // Cycle guard — see MAX_SUBSTITUTIONS. Cyclic chains are
+            // guaranteed-invalid per css-variables-1 §3, hence null.
+            if (++substitutions > MAX_SUBSTITUTIONS) return null
+            val fallback = match.fallback?.trim()?.takeIf { it.isNotEmpty() }
 
-            val resolved = scope.get(variableName)
+            val resolved = scope.get(match.name)
                 ?: fallback?.let { resolve(it, scope, maxDepth - 1) }
                 ?: return null
 
             result = result.replaceRange(match.range, resolved)
-            match = VAR_PATTERN.find(result)
         }
 
         return result
     }
+
+    /**
+     * Parse an already-substituted CSS color string (hex / rgb / rgba /
+     * hsl / hsla / named). Public surface for DynamicValueResolver's
+     * pre-resolution pass, which rewrites var()-carrying color originals
+     * into the wire's `srgb` shape after substitution. Delegates to the
+     * same parseColor used by the composable resolveToColor path so both
+     * entries share one color grammar.
+     */
+    fun parseColorValue(value: String): Color? = parseColor(value)
 
     /**
      * Resolve a value and parse as a length (Dp).

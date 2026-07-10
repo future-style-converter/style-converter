@@ -47,13 +47,16 @@ Implementing code:
 
 ## v2 component
 
-Emitted by `IRComponentV2Serializer.serialize` in this key order:
+Emitted by `IRComponentV2Serializer.serialize` in this key order
+(`variables` — added as a sanctioned additive minor revision — sits
+between `properties` and `selectors`):
 
 | key | type | presence | rule (from the serializer) |
 |---|---|---|---|
 | `id` | string | always | non-empty; unique across the WHOLE document (duplicate = convert error); converter generates `<lowercased-name>-<NNN>` in pre-order |
 | `name` | string | always | component/class name; for components flattened from the authoring map the map key becomes the name verbatim |
 | `properties` | array of property envelopes | always | may be `[]`; ITEM-scoped placement claims live here on the CHILD (03-children.md §3) |
+| `variables` | object | omit-when-empty | **additive minor-revision key** — CSS custom-property definitions declared on this component: `"--name" → raw value` verbatim (names case-sensitive, values untyped token streams per css-variables-1 §2; the empty string is legal). Keys match `^--.`; present ⇒ non-empty. `var()` *references* stay unresolved inside normal property envelopes — resolution is a runtime concern (02-values.md, custom-properties section) |
 | `selectors` | array of selector buckets | omit-when-empty | present ⇒ non-empty (unchanged from v1) |
 | `media` | array of media buckets | omit-when-empty | present ⇒ non-empty (unchanged from v1) |
 | `slot` | object | omit for roots | `{parent, name?}` — structural, MUST round-trip; `name` omitted at the default `"content"` (03-children.md) |

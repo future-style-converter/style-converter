@@ -172,7 +172,8 @@ object ComponentRenderer {
 
         // Fold the parent's inheritable text declarations in UNDER the
         // component's own (CSS inheritance — see LocalInheritedProperties).
-        val rawProperties = mergeInherited(mediaProperties, LocalInheritedProperties.current)
+        val inheritedProperties = LocalInheritedProperties.current
+        val rawProperties = mergeInherited(mediaProperties, inheritedProperties)
 
         // CSS `all: initial|inherit|unset|revert|revert-layer` resets every
         // other property to its respective global value. We can't synthesize
@@ -187,7 +188,62 @@ object ComponentRenderer {
         val allReset = rawProperties.firstOrNull { it.type == "All" }?.let { p ->
             (p.data as? JsonPrimitive)?.contentOrNull?.uppercase()
         }
-        val effectiveProperties = if (allReset != null) emptyList() else rawProperties
+        val unresolvedProperties = if (allReset != null) emptyList() else rawProperties
+
+        // ── Wave-6 dynamic-value resolution ────────────────────────────
+        // Merge this component's custom-property definitions (the decoded
+        // v2 `variables` map) ONTO the ambient scope — element scope wins
+        // over the slot-parent chain (css-variables-1 §2, spec 02
+        // resolution order). The merged scope is re-provided to children
+        // below so shadowing composes transitively down the slot tree.
+        val parentVarScope = com.styleconverter.runtime.core.variables.LocalCssVariables.current
+        val varScope = androidx.compose.runtime.remember(parentVarScope, component.variables) {
+            val own = component.variables
+            if (own.isNullOrEmpty()) parentVarScope
+            else parentVarScope.merge(
+                com.styleconverter.runtime.core.variables.CssVariableScope(own)
+            )
+        }
+        // Live evaluation context replacing the resolvers' old constants:
+        //  - containing block (% base) from the width channel — provided by
+        //    the harness capture root (CaptureCanvas content box) and
+        //    re-derived per level from each parent's resolved content box;
+        //  - viewport from LocalConfiguration (screen dp — the runtime's
+        //    px==dp space, matching every other IR px→dp conversion);
+        //  - parent font size from the inheritance channel (the parent
+        //    always publishes RESOLVED px FontSize, see fontSizePxOf);
+        //  - root font size: 16px residual constant — fixtures never style
+        //    the root element, so the browser-default the web reference
+        //    inherits is the honest value (documented in the resolver).
+        val containingBlock = com.styleconverter.runtime.core.variables.LocalContainingBlock.current
+        val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+        val dynCtx = com.styleconverter.runtime.core.variables.DynamicValueResolver.Context(
+            containingBlockWidthPx = containingBlock.widthPx,
+            containingBlockHeightPx = containingBlock.heightPx,
+            viewportWidthPx = configuration.screenWidthDp.toFloat(),
+            viewportHeightPx = configuration.screenHeightDp.toFloat(),
+            parentFontSizePx = com.styleconverter.runtime.core.variables.DynamicValueResolver
+                .fontSizePxOf(inheritedProperties)
+                ?: com.styleconverter.runtime.core.variables.DynamicValueResolver.DEFAULT_FONT_SIZE_PX,
+            rootFontSizePx = com.styleconverter.runtime.core.variables.DynamicValueResolver
+                .DEFAULT_FONT_SIZE_PX,
+            // Block-context gate for the guaranteed-invalid width emulation
+            // (CSS 2.1 §10.3.3 auto-fill — see invalidWidthFallback). The
+            // self-alignment channel is true exactly when a flex/grid
+            // ancestor owns this component, where auto width is
+            // content-based instead.
+            blockLevelWidthAuto = !LocalSelfAlignmentHandled.current
+        )
+        // The pre-resolution pass: var() substituted per §2.3 (guaranteed-
+        // invalid ⇒ declaration dropped ⇒ unset), calc()/min()/max()/clamp()
+        // evaluated, em/rem/vw/% rewritten to px against the live context.
+        // Static lists return the SAME instance — the fixture corpus without
+        // dynamic values renders byte-identically to the frozen baseline.
+        val dynResolution = androidx.compose.runtime.remember(unresolvedProperties, varScope, dynCtx) {
+            com.styleconverter.runtime.core.variables.DynamicValueResolver
+                .resolve(unresolvedProperties, varScope.variables, dynCtx)
+        }
+        val effectiveProperties = dynResolution.properties
 
         // Extract property pairs for extractors
         val propertyPairs = effectiveProperties.map { it.type to it.data }
@@ -410,11 +466,29 @@ object ComponentRenderer {
         // effectiveProperties already contains what THIS component inherited,
         // filtering it reproduces the transitive cascade (grandchildren see
         // grandparent values unless a closer ancestor overrode them).
+        // NOTE: filtered from the RESOLVED list, so children inherit the
+        // parent's COMPUTED FontSize px (css-cascade-4 §7.3: inherited
+        // values are computed values) — a parent `font-size: 1.5em` hands
+        // 24px down, never the raw em that would compound per level.
         val inheritableForChildren = effectiveProperties.filter {
             it.type in INHERITED_TEXT_PROPERTY_TYPES
         }
+        // The containing block THIS component establishes for its children:
+        // its resolved content box (width channel, CSS 2.1 §10.1). Unknown
+        // axes stay null — resolution then leaves child % values untouched.
+        val childContainingBlock = androidx.compose.runtime.remember(effectiveProperties, containingBlock) {
+            com.styleconverter.runtime.core.variables.DynamicValueResolver
+                .childContainingBlock(effectiveProperties, containingBlock)
+        }
         val inheritanceWrappedContent: @Composable () -> Unit = {
-            CompositionLocalProvider(LocalInheritedProperties provides inheritableForChildren) {
+            CompositionLocalProvider(
+                LocalInheritedProperties provides inheritableForChildren,
+                // Custom-property scope for descendants — element definitions
+                // shadow the slot-parent chain (spec 02 resolution order).
+                com.styleconverter.runtime.core.variables.LocalCssVariables provides varScope,
+                // % base channel for descendants' calc()/bare-% resolution.
+                com.styleconverter.runtime.core.variables.LocalContainingBlock provides childContainingBlock
+            ) {
                 wrappedContent()
             }
         }

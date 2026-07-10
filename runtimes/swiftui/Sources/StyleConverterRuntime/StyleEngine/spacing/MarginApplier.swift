@@ -48,9 +48,11 @@ struct MarginApplier: ViewModifier {
         if needsGeo {
             return AnyView(
                 GeometryReader { geo in
-                    // Fallback 390 matches the capture-canvas width when the
-                    // enclosing layout hasn't given us a concrete parent.
-                    let pw = geo.size.width > 0 ? geo.size.width : 390
+                    // Fallback when the enclosing layout hasn't given us a
+                    // concrete parent: the env-threaded viewport width
+                    // (#39 — was a hardcoded 390 canvas literal).
+                    let pw = geo.size.width > 0
+                        ? geo.size.width : CGFloat(context.viewportWidth)
                     build(content, t: t, r: r, b: b, l: l,
                           parentWidth: pw, hAuto: hAuto, vAuto: vAuto)
                 }

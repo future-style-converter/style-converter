@@ -1,0 +1,60 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "tokensource-001",
+            "name": "TokenSource",
+            "properties": [
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "original": "var(--brand-bg)"
+                    }
+                },
+                {
+                    "type": "Color",
+                    "data": {
+                        "original": "var(--Brand-Fg)"
+                    }
+                },
+                {
+                    "type": "PaddingTop",
+                    "data": {
+                        "expr": "var(--space-2)"
+                    }
+                }
+            ],
+            "variables": {
+                "--brand-bg": "#0f62fe",
+                "--Brand-Fg": "#ffffff",
+                "--space-2": "12px"
+            }
+        },
+        {
+            "id": "fallbackconsumer-002",
+            "name": "FallbackConsumer",
+            "properties": [
+                {
+                    "type": "Color",
+                    "data": {
+                        "original": "var(--missing, #00ff00)"
+                    }
+                },
+                {
+                    "type": "PaddingLeft",
+                    "data": {
+                        "expr": "var(--a, var(--b, 4px))"
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                }
+            ]
+        }
+    ]
+}

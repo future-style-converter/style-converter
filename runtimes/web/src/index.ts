@@ -17,5 +17,10 @@ export * from './core/renderer';
 // PropertyRegistry — migrated-property set used for coverage introspection
 export * from './engine/PropertyRegistry';
 
+// PropertyTracker — log-once unknown/unhandled tracker (CLAUDE.md
+// no-silent-fallthrough contract; mirrors the Compose runtime's object).
+// Namespaced because its member names (reset, getReport, …) are generic.
+export * as PropertyTracker from './engine/PropertyTracker';
+
 // Debug tools
 export * from './debug';
