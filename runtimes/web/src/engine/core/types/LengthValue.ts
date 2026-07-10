@@ -60,6 +60,28 @@ function normaliseUnit(u: unknown): LengthUnit | null {
 // Intrinsic keyword strings we accept as bare 'data'.
 const INTRINSICS = new Set(['min-content','max-content','fit-content']);
 
+// True when the whole string is ONE var() function — i.e. it starts with
+// 'var(' and the paren opened there closes exactly at the last character.
+// Nested fallbacks count: 'var(--a, var(--b, 4px))' is whole-value, while
+// 'var(--u) * 2' (a stripped calc interior) is NOT — its var() closes early.
+// Whole-value var() declarations are preserved verbatim by the converter
+// (spec 02, custom-properties section) and must be re-emitted verbatim:
+// wrapping them in calc() would break keyword substitutions (e.g. a token
+// holding 'auto') and violate the wave-6 pass-through contract.
+export function isWholeVarExpression(s: string): boolean {
+  if (!s.startsWith('var(')) return false;                          // must open with the var() function
+  let depth = 0;                                                    // paren nesting counter
+  for (let i = 3; i < s.length; i++) {                              // start at the '(' of 'var('
+    const ch = s[i];                                                // current character
+    if (ch === '(') depth++;                                        // descend into nested function
+    else if (ch === ')') {                                          // one level closes here
+      depth--;                                                      // ascend
+      if (depth === 0) return i === s.length - 1;                   // whole-value iff it closes at the very end
+    }
+  }
+  return false;                                                     // unbalanced — not a complete var()
+}
+
 // Main entrypoint — never throws; returns {kind:'unknown'} on anything unparseable.
 export function extractLength(data: unknown): LengthValue {
   if (data === null || data === undefined) return { kind: 'unknown' };// null/undefined -> unknown, not crash
@@ -97,15 +119,22 @@ export function extractLength(data: unknown): LengthValue {
   // Grid fraction: { fr: N } — quirk #4, NOT a length even though related.
   if (typeof obj.fr === 'number') return { kind: 'fraction', fr: obj.fr };
 
-  // calc() support — two IR shapes seen in the wild:
+  // calc()/var() support — three IR shapes seen in the wild:
   //   { type:'calc', expression:'...' }   (primitive fixtures)
   //   { expr:'calc(10px + 5px)' }         (spacing fixtures, per Phase-2 survey)
+  //   { expr:'var(--size)' }              (wave-6 preserved dynamic values;
+  //                                        also {type:'expression', expr} for
+  //                                        Width/Height — same `expr` key)
   if (obj.type === 'calc' && typeof obj.expression === 'string') {
     return { kind: 'calc', expression: obj.expression };
   }
   if (typeof obj.expr === 'string') {
-    // Strip redundant 'calc(...)' wrapper if IR already includes it, so callers can wrap uniformly.
     const raw = obj.expr.trim();
+    // Whole-value var() reference: keep the FULL string as the expression —
+    // toCssLength emits it bare (no calc() wrapper) so the declaration
+    // round-trips verbatim per the wave-6 preservation contract.
+    if (isWholeVarExpression(raw)) return { kind: 'calc', expression: raw };
+    // Strip redundant 'calc(...)' wrapper if IR already includes it, so callers can wrap uniformly.
     const inner = raw.startsWith('calc(') && raw.endsWith(')') ? raw.slice(5, -1) : raw;
     return { kind: 'calc', expression: inner };
   }
@@ -151,7 +180,12 @@ export function toCssLength(v: LengthValue): string {
       ? `fit-content(${toCssLength(v.bound)})`                      // -> fit-content(200px) etc.
       : v.intrinsicKind;                                            // unbounded: 'min-content' / ...
     case 'fraction':  return `${v.fr}fr`;                           // grid tracks
-    case 'calc':      return `calc(${v.expression})`;               // raw passthrough
+    // Whole-value var() references emit BARE (verbatim pass-through — the
+    // browser substitutes them; a calc() wrapper would corrupt non-numeric
+    // tokens). Everything else is a calc interior and gets re-wrapped.
+    case 'calc':      return isWholeVarExpression(v.expression)
+      ? v.expression                                                // 'var(--x[, fb])' verbatim
+      : `calc(${v.expression})`;                                    // arithmetic interior → calc(...)
     case 'unknown':   return 'auto';                                // safe fallback
     default: {                                                      // exhaustiveness guard
       const _exhaustive: never = v;

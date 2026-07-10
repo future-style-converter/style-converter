@@ -53,10 +53,22 @@ struct SpacingContext: Equatable {
     // since the renderer already flattens inheritance at convert time.
     var fontSizePx: Double = 16.0
 
-    // Canvas dimensions used for vw/vh resolution. Matches the phone frame
-    // in `StyleConverterTestApp.swift`.
+    // Surface dimensions used for vw/vh resolution. Wave 6 (#39): these
+    // literals are legacy DEFAULTS only — ComponentRenderer overwrites
+    // all three geometry fields from the host-published `styleViewport`
+    // Environment channel (StyleViewport.swift) whenever one exists, so
+    // the numbers are the HOST's capture/window geometry, not values the
+    // runtime made up. The 390×844 defaults keep pure unit tests and
+    // channel-less consumers byte-identical to the pre-wave-6 renders.
     var viewportWidth: Double = 390.0
     var viewportHeight: Double = 844.0
+
+    // Wave 6 (#39) — the host-published INITIAL containing block width
+    // (StyleViewport.rootContainingBlock): what a root component's
+    // percent width resolves against when no ancestor published one.
+    // The harness supplies its canvas content width (358); nil keeps
+    // the legacy `viewportWidth − 32` capture-canvas arithmetic below.
+    var rootContainingBlockPx: Double? = nil
 
     // Fidelity wave 3 — the parent's CONTENT-BOX width in px, published
     // down the tree by ComponentRenderer via the `containingBlockWidth`
@@ -71,10 +83,13 @@ struct SpacingContext: Equatable {
     var containingBlockWidthPx: Double? = nil
 
     // Resolved percent-width basis: the ancestor-published containing
-    // block when known, else the capture-canvas content width (390 −
-    // 2×16 padding = 358 — CaptureCanvas.swift geometry, same fallback
-    // SizeApplier used before the channel existed).
+    // block when known, else the host-published initial containing
+    // block (#39 — harness: 358 canvas content width), else the legacy
+    // capture-canvas arithmetic (390 − 2×16 padding = 358) so channel-
+    // less consumers keep the pre-wave-6 basis.
     var containingBlockWidth: CGFloat {
-        CGFloat(containingBlockWidthPx ?? (viewportWidth - 32))
+        CGFloat(containingBlockWidthPx
+                ?? rootContainingBlockPx
+                ?? (viewportWidth - 32))
     }
 }

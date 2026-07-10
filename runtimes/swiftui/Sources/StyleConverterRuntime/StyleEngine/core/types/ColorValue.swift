@@ -86,6 +86,17 @@ func extractColor(_ value: IRValue?) -> ColorValue {
         if lc == "currentcolor" {
             return .dynamic(kind: .currentColor, raw: original)
         }
+        // Wave 6: a var() reference rides `original` as a bare string
+        // too (`{ "original": "var(--tile-a)" }` — live converter
+        // output on fixtures/fidelity/tokens). Classify it honestly as
+        // `.dynamic(.varFn)` instead of `.unknown`: the renderer's
+        // DynamicValueResolver normally rewrites these to srgb BEFORE
+        // extraction, so hitting this branch means the value reached a
+        // context with no variable scope — callers see "dynamic,
+        // unpaintable" and fall back, same as currentColor.
+        if lc.contains("var(") {
+            return .dynamic(kind: .varFn, raw: original)
+        }
         // Any other bare-string original without srgb is unresolvable here.
         return .unknown
     }

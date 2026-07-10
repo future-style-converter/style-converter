@@ -26,6 +26,13 @@
 //                                              order, self-alignment, z-index,
 //                                              auto-flow interleave, dangling
 //                                              area claims
+//   fixtures/fidelity/tokens/*.json            dynamic-value suite: custom-
+//                                              property definitions (variables
+//                                              envelope key), var() refs +
+//                                              fallback chains across the slot
+//                                              chain, calc()/relative-unit
+//                                              arithmetic — visible-on-failure
+//                                              by construction
 //   fixtures/fidelity/manifest.json            file inventory for wave runs
 //   fixtures/fidelity/PROVENANCE.md            generation record (tool + seed)
 //
@@ -936,6 +943,148 @@ function buildPlacementMixedClaims(rng) {
   };
 }
 
+// ── 7b. TOKENS — custom properties, var() resolution, calc/relative units ─
+// The wave-6 dynamic-value suite: fixtures whose CORRECT rendering depends on
+// the runtime resolving CSS custom properties (component `variables` on the
+// IR v2 wire — schema/spec/01-envelope.md), var() fallbacks (css-variables-1
+// §2.3), and calc()/relative-unit arithmetic (spec 02 null+original escapes).
+// Every component is built so SUCCESS vs FAILURE of resolution changes
+// visible pixels: colored tiles whose color/size/padding come from tokens —
+// an unresolved var() computes to `unset` (guaranteed-invalid, spec 02
+// resolution order), collapsing the tile to transparent/auto against a
+// contrasting backdrop. Hand-designed structure (the resolution chain IS the
+// test surface); PRNG only picks backdrop/support colors.
+
+function buildTokenTheme(rng) {
+  const nextColor = paletteCycler(rng); // support colors for reference tiles
+  return {
+    // Single-hop resolution: the flex parent DEFINES palette + spacing
+    // tokens; each child consumes them through a different property class
+    // (background/size, padding, border-radius+color). If resolution fails
+    // every tile goes transparent/auto — nothing but the dark backdrop.
+    TK_Palette: box({
+      width: '300px', display: 'flex', 'flex-direction': 'row', gap: '8px',
+      padding: '10px', 'background-color': '#111827',
+      '--tile-a': '#e74c3c', '--tile-b': '#3498db', '--tile-c': '#2ecc71',
+      '--size': '64px', '--pad': '8px',
+    }, {
+      // color token drives the paint, size token drives the geometry.
+      a: { properties: { width: 'var(--size)', height: 'var(--size)', 'background-color': 'var(--tile-a)' } },
+      // padding token shrinks the inner box (content-box observable via
+      // the child's own child? no — via total size: padding grows the box).
+      b: { properties: { width: 'var(--size)', height: 'var(--size)', 'background-color': 'var(--tile-b)', padding: 'var(--pad)' } },
+      // radius token rounds the corners; border color token paints the edge.
+      c: { properties: { width: 'var(--size)', height: 'var(--size)', 'background-color': 'var(--tile-c)', 'border-radius': 'var(--pad)' } },
+    }),
+    // Two-hop chain + SHADOWING: root defines --accent/--gap; mid consumes
+    // --gap and SHADOWS --accent with its own definition; the leaf must see
+    // the MID definition (nearest slot-parent wins — spec 02 rule 2), the
+    // sibling leaf under root sees the root's. Wrong-scope resolution swaps
+    // the two colors — a visible diff, not a subtle one.
+    TK_TwoLevelShadow: box({
+      width: '280px', padding: '10px', 'background-color': '#ecf0f1',
+      '--accent': '#c0392b', '--gap': '6px',
+    }, {
+      rootLeaf: { properties: { width: '80px', height: '30px', 'background-color': 'var(--accent)' } },
+      mid: box({ padding: 'var(--gap)', 'background-color': '#bdc3c7', '--accent': '#1a5276' }, {
+        midLeaf: { properties: { width: '80px', height: '30px', 'background-color': 'var(--accent)' } },
+      }),
+    }),
+    // Typography tokens across the text channel: color + font-size both
+    // token-driven, with a fixed reference tile so a total-failure capture
+    // still anchors the layout.
+    TK_TextTokens: box({
+      width: '260px', padding: '10px', 'background-color': '#fdf2e9',
+      '--ink': '#7e3b09', '--type': '18px',
+    }, {
+      styled: { properties: { color: 'var(--ink)', 'font-size': 'var(--type)' }, _text: 'token ink and size' },
+      reference: { properties: { width: '60px', height: '14px', 'background-color': nextColor() } },
+    }),
+  };
+}
+
+function buildTokenFallbacks(rng) {
+  const nextColor = paletteCycler(rng);
+  return {
+    // Missing token vs fallback: `missing` paints nothing (guaranteed-
+    // invalid → unset → transparent) while `saved` lands on its fallback —
+    // side-by-side tiles make the difference unmissable.
+    TK_MissingVsFallback: box({
+      width: '280px', display: 'flex', 'flex-direction': 'row', gap: '8px',
+      padding: '10px', 'background-color': '#1f2937',
+    }, {
+      missing: { properties: { width: '70px', height: '48px', 'background-color': 'var(--nope)' } },
+      saved: { properties: { width: '70px', height: '48px', 'background-color': 'var(--nope, #e67e22)' } },
+      reference: { properties: { width: '70px', height: '48px', 'background-color': nextColor() } },
+    }),
+    // Nested fallback chains (css-variables-1 §2.3): --mid IS defined, so
+    // the chain must stop there (NOT fall through to the literal); the
+    // sibling's fully-missing chain must reach the deepest literal.
+    TK_NestedFallback: box({
+      width: '280px', display: 'flex', 'flex-direction': 'row', gap: '8px',
+      padding: '10px', 'background-color': '#111827', '--mid': '#9b59b6',
+    }, {
+      stopsAtMid: { properties: { width: '80px', height: '44px', 'background-color': 'var(--top, var(--mid, #ffffff))' } },
+      fallsThrough: { properties: { width: '80px', height: '44px', 'background-color': 'var(--a, var(--b, #16a085))' } },
+    }),
+    // Definition beats fallback: --accent exists on the parent, so the
+    // child's fallback literal (#000) must LOSE; padding fallback also
+    // resolves from the defined token, not the 2px literal.
+    TK_DefinitionWins: box({
+      width: '240px', padding: '10px', 'background-color': '#ecf0f1',
+      '--accent': '#f39c12', '--pad': '12px',
+    }, {
+      tile: { properties: { width: '90px', height: '40px', 'background-color': 'var(--accent, #000000)', padding: 'var(--pad, 2px)' } },
+    }),
+  };
+}
+
+function buildCalcUnits(rng) {
+  const nextColor = paletteCycler(rng);
+  return {
+    // % of a DEFINITE parent minus absolute px: 300−2·10(padding) = 280
+    // content box → child must be 280−40 = 240px wide. A calc failure
+    // (auto width) collapses to content width — visibly different.
+    CU_PercentMinusPx: box({
+      width: '300px', padding: '10px', 'background-color': '#1f2937',
+    }, {
+      bar: { properties: { width: 'calc(100% - 40px)', height: '32px', 'background-color': nextColor() } },
+    }),
+    // em against the INHERITED font-size chain: root pins 20px; `direct`
+    // resolves 1em=20px; `chained` sits under an undecorated mid so its
+    // 2em must still see 20px through two hops (24px vs 44px tall boxes).
+    CU_EmInheritance: box({
+      width: '260px', padding: '10px', 'font-size': '20px', 'background-color': '#ecf0f1',
+    }, {
+      direct: { properties: { width: '80px', height: 'calc(1em + 4px)', 'background-color': nextColor() } },
+      mid: box({ padding: '4px', 'background-color': '#bdc3c7' }, {
+        chained: { properties: { width: '80px', height: 'calc(2em + 4px)', 'background-color': nextColor() } },
+      }),
+    }),
+    // Nested calc + calc-consuming-var: the arithmetic tree must evaluate
+    // inside-out ((100%−20px)/2 of a 240px content box = 110px), and the
+    // token-driven multiply needs BOTH var resolution and calc math.
+    CU_NestedAndVar: box({
+      width: '260px', padding: '10px', 'background-color': '#111827', '--u': '12px',
+    }, {
+      nested: { properties: { width: 'calc(calc(100% - 20px) / 2)', height: '28px', 'background-color': nextColor() } },
+      tokenMath: { properties: { width: 'calc(var(--u) * 10)', height: '28px', 'background-color': nextColor() } },
+      emMix: { properties: { width: '80px', 'padding-top': 'calc(1em + 2px)', 'background-color': nextColor() } },
+    }),
+  };
+}
+
+// Token template table: path → builder → feature descriptors surfaced in the
+// manifest (the coverage vocabulary the regeneration test pins).
+const TOKEN_BUILDERS = [
+  ['tokens/token-theme.json', buildTokenTheme,
+    ['var-definitions', 'var-references', 'slot-chain-resolution', 'shadowing']],
+  ['tokens/token-fallbacks.json', buildTokenFallbacks,
+    ['missing-var', 'fallback', 'nested-fallback', 'definition-beats-fallback']],
+  ['tokens/calc-units.json', buildCalcUnits,
+    ['calc-percent-px', 'calc-em-px', 'nested-calc', 'em-inheritance-chain', 'var-in-calc']],
+];
+
 // Placement template table: path → builder → claim descriptors surfaced in
 // the manifest (the coverage vocabulary the regeneration test pins).
 const PLACEMENT_BUILDERS = [
@@ -1094,9 +1243,41 @@ export function generate() {
     });
   }
 
+  // Tokens — the wave-6 dynamic-value suite: custom-property definitions,
+  // var() references/fallbacks, calc()/relative-unit arithmetic. Fixed
+  // templates (the resolution chain IS the test surface), PRNG-colored
+  // support tiles only.
+  for (const [name, builder, features] of TOKEN_BUILDERS) {
+    const relPath = `fixtures/fidelity/${name}`;
+    const components = builder(rngFor(relPath));
+    const content = toJson({ components });
+    // Category attribution intentionally skips `--*` declarations: custom
+    // properties belong to no irmodels category (they ride the component
+    // `variables` envelope key, not a property triplet).
+    const props = [...collectProps(components)].sort();
+    const cats = new Set();
+    for (const p of props) {
+      if (p.startsWith('--')) continue; // token names carry no category
+      cats.add(categoryMap.get(p) ?? SHORTHAND_CATEGORY.get(p) ?? 'other');
+    }
+    files.push({ relPath, content });
+    manifestFiles.push({
+      path: relPath,
+      kind: 'tokens',
+      categories: [...cats].sort(),
+      // Coverage descriptors: which dynamic-value scenarios this file
+      // exercises (vocabulary pinned by gen-fidelity.test.mjs).
+      features,
+      components: Object.keys(components).length,
+      nodes: countNodes(components),
+      bytes: Buffer.byteLength(content),
+      properties: props,
+    });
+  }
+
   // Manifest — the wave-run iteration surface. Sorted stably: combos by
-  // category, then pairwise shards, then trees, then placement templates
-  // (already appended in that order).
+  // category, then pairwise shards, then trees, then placement templates,
+  // then token templates (already appended in that order).
   const manifest = {
     generator: 'tools/visual/gen-fidelity.mjs',
     seed: SEED,
@@ -1151,6 +1332,14 @@ export function generate() {
   prov.push('  absolutely-positioned siblings, mixed claimed+unclaimed auto-flow interleave,');
   prov.push('  and a dangling area claim). Authored CSS-side nested per');
   prov.push('  schema/spec/03-children.md; the converter flattens to the v2 flat+slot form.');
+  prov.push('- `tokens/*.json` — dynamic-value suite (wave 6): custom-property definitions');
+  prov.push('  (`--name` declarations → the IR v2 component `variables` key), var()');
+  prov.push('  references consumed across the slot-parent chain (with shadowing), missing-');
+  prov.push('  var vs fallback vs nested-fallback chains, and calc()/relative-unit');
+  prov.push('  arithmetic (%−px against definite parents, em against inherited font-size');
+  prov.push('  chains, nested calc, calc-consuming-var). Components are built so');
+  prov.push('  resolution SUCCESS vs FAILURE changes visible pixels (spec 02');
+  prov.push('  custom-properties section).');
   prov.push('');
   prov.push('## Inventory');
   prov.push('');

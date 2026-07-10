@@ -78,6 +78,10 @@ import { extractJustifyContent } from './flexbox/JustifyContentExtractor';
 import { applyJustifyContent } from './flexbox/JustifyContentApplier';
 import { extractOrder } from './flexbox/OrderExtractor';
 import { applyOrder } from './flexbox/OrderApplier';
+// Issue #38: BoxOrient was a coverage-only claim ("legacy path" — which the
+// claim itself disabled); now a real -webkit-box-orient triplet.
+import { extractBoxOrient } from './flexbox/BoxOrientExtractor';
+import { applyBoxOrient } from './flexbox/BoxOrientApplier';
 
 // ---- Grid — 14 triplets ------------------------------------------------
 import { extractAlignTracks } from './grid/AlignTracksExtractor';
@@ -110,6 +114,10 @@ import { extractJustifyTracks } from './grid/JustifyTracksExtractor';
 import { applyJustifyTracks } from './grid/JustifyTracksApplier';
 import { extractMasonryAutoFlow } from './grid/MasonryAutoFlowExtractor';
 import { applyMasonryAutoFlow } from './grid/MasonryAutoFlowApplier';
+// Issue #38: GridAutoTrack was a coverage-only claim even though its parser
+// is registered; now a standalone triplet (GridExtractor untouched).
+import { extractGridAutoTrack } from './grid/GridAutoTrackExtractor';
+import { applyGridAutoTrack } from './grid/GridAutoTrackApplier';
 
 // ---- Position / edges — 10 triplets ------------------------------------
 import { extractBottom } from './position/BottomExtractor';
@@ -183,6 +191,7 @@ export function applyLayoutPhase7(properties: IRPropertyLike[]): CSSProperties {
   Object.assign(out, applyFlexGrow(extractFlexGrow(properties)));
   Object.assign(out, applyFlexShrink(extractFlexShrink(properties)));
   Object.assign(out, applyOrder(extractOrder(properties)));
+  Object.assign(out, applyBoxOrient(extractBoxOrient(properties)));
 
   // Grid container + item properties (incl. masonry draft extensions).
   Object.assign(out, applyGridTemplateColumns(extractGridTemplateColumns(properties)));
@@ -200,6 +209,7 @@ export function applyLayoutPhase7(properties: IRPropertyLike[]): CSSProperties {
   Object.assign(out, applyAlignTracks(extractAlignTracks(properties)));
   Object.assign(out, applyJustifyTracks(extractJustifyTracks(properties)));
   Object.assign(out, applyMasonryAutoFlow(extractMasonryAutoFlow(properties)));
+  Object.assign(out, applyGridAutoTrack(extractGridAutoTrack(properties)));
 
   // Position + physical/logical edges + stacking.
   Object.assign(out, applyPosition(extractPosition(properties)));

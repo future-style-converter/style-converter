@@ -38,11 +38,13 @@ struct PaddingApplier: ViewModifier {
 
         if hasPercent {
             // GeometryReader path: reads parent width and multiplies.
-            // We use a fallback of 390 when reading returns 0 (happens
-            // in measurement passes before layout).
+            // Fallback when reading returns 0 (measurement passes before
+            // layout) is the env-threaded viewport width (#39 — was a
+            // hardcoded 390 canvas literal).
             return AnyView(
                 GeometryReader { geo in
-                    let parentW = geo.size.width > 0 ? geo.size.width : 390
+                    let parentW = geo.size.width > 0
+                        ? geo.size.width : CGFloat(context.viewportWidth)
                     content.padding(edges(top: t, right: r, bottom: b, left: l,
                                           parentWidth: parentW))
                 }

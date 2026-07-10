@@ -196,6 +196,17 @@ fun cssParsing(doc: JsonObject): IRDocument {
         // Parse properties directly to specific property classes
         val properties = component.properties?.let { PropertiesParser.parse(it) } ?: mutableListOf()
 
+        // Extract custom-property declarations (--name: value) from the SAME
+        // base properties map into the component-level `variables` map.
+        // PropertiesParser filtered these names out of the typed pipeline;
+        // here they are lifted verbatim (case + raw value preserved — the
+        // css-variables-1 §2 "untyped until substitution" rule) so the IR v2
+        // wire can carry them as the additive `variables` envelope key.
+        // null when the component declares none, so the serializer omits it.
+        val variables = component.properties?.let {
+            app.parsing.css.properties.CustomPropertyParser.extractVariables(it)
+        }
+
         val selectors = parseSelectors(component.selectors)
         val media = parseMedia(component.media)
 
@@ -234,7 +245,12 @@ fun cssParsing(doc: JsonObject): IRDocument {
             // legacy v1 serializer ignores them regardless, so v1 output
             // bytes are untouched.
             tag = component.tag,
-            pseudos = component.pseudos
+            pseudos = component.pseudos,
+            // Forward the custom-property definitions (IR v2 `variables`
+            // key). Stays null on fixtures without --* declarations; the
+            // legacy v1 serializer ignores it either way, so v1 output
+            // bytes are untouched.
+            variables = variables
         )
     }
 

@@ -44,6 +44,23 @@ struct CaptureCanvas: View {
     /// gallery and other testing surfaces.
     static let width: CGFloat = 390
 
+    /// Fixed canvas height basis for vh units. Matches the 390×844
+    /// phone frame (StyleConverterTestApp) and web's #root — captures
+    /// have natural height, but vh must resolve against the same
+    /// number on all three platforms.
+    static let height: CGFloat = 844
+
+    /// Wave 6 (#39): the capture geometry the HARNESS publishes to the
+    /// runtime's styleViewport Environment channel. Same numbers the
+    /// runtime previously hardcoded (390×844 viewport; 390 − 2×16 = 358
+    /// root containing block), so every committed baseline stays
+    /// byte-identical — the values just come from the right owner now.
+    static let viewport = StyleViewport(
+        width: Double(width),
+        height: Double(height),
+        rootContainingBlock: Double(width - padding * 2)
+    )
+
     var body: some View {
         // Fidelity wave 3 — a ROOT component that is itself absolutely
         // positioned (a per-child standalone crop of e.g. B_RelativeAnchor's
@@ -79,6 +96,9 @@ struct CaptureCanvas: View {
             .clipped()
             .fixedSize(horizontal: false, vertical: true)
             .background(CaptureCanvas.backgroundColor)
+            // #39: the harness supplies the capture geometry — the
+            // runtime no longer assumes a 390×844 canvas on its own.
+            .environment(\.styleViewport, CaptureCanvas.viewport)
         } else {
         // Critical: explicit alignment on the outer frame.
         //
@@ -111,6 +131,9 @@ struct CaptureCanvas: View {
             // natural height rather than expanding to fill the parent.
             .fixedSize(horizontal: false, vertical: true)
             .background(CaptureCanvas.backgroundColor)
+            // #39: the harness supplies the capture geometry — the
+            // runtime no longer assumes a 390×844 canvas on its own.
+            .environment(\.styleViewport, CaptureCanvas.viewport)
         }
     }
 }

@@ -104,10 +104,11 @@ object IRWireV2 {
 
 /**
  * v2 component codec. Emission key order (spec 01, v2 table):
- * id, name, properties, selectors, media, slot, text, pseudos, meta.
- * Omit-when-empty rules carry over from v1 for selectors/media; the new
- * optional fields are omit-when-null (slot/text/pseudos) and meta is
- * omitted when BOTH of its members are null.
+ * id, name, properties, variables, selectors, media, slot, text, pseudos,
+ * meta. Omit-when-empty rules carry over from v1 for selectors/media; the
+ * new optional fields are omit-when-null (slot/text/pseudos), meta is
+ * omitted when BOTH of its members are null, and variables (additive
+ * minor-revision key — custom-property definitions) is omit-when-empty.
  */
 object IRComponentV2Serializer : KSerializer<IRComponent> {
     // Flat descriptor — slot/text/pseudos/meta are written dynamically in
@@ -134,6 +135,18 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
                 kotlinx.serialization.builtins.ListSerializer(IRPropertySerializer),
                 value.properties
             ))
+            // variables: component-level custom-property definitions
+            // ("--name" → RAW declaration value, verbatim — names keep
+            // their case, values keep their untyped token stream per
+            // css-variables-1 §2). ADDITIVE v2 envelope key (spec 05
+            // minor-revision process); omit-when-empty so documents
+            // without --* declarations stay byte-identical to the
+            // pre-variables emission. Insertion order == authoring order.
+            if (!value.variables.isNullOrEmpty()) {
+                put("variables", buildJsonObject {
+                    value.variables.forEach { (name, raw) -> put(name, raw) }
+                })
+            }
             // selectors/media: omit-when-empty, exactly the v1 rule.
             if (value.selectors.isNotEmpty()) {
                 put("selectors", json.encodeToJsonElement(
@@ -210,7 +223,11 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             role = meta?.get("role")?.let { el -> if (el is JsonNull) null else el.jsonPrimitive.content },
             slot = slot,
             tag = meta?.get("sourceTag")?.let { el -> if (el is JsonNull) null else el.jsonPrimitive.content },
-            pseudos = obj["pseudos"]?.jsonObject
+            pseudos = obj["pseudos"]?.jsonObject,
+            // variables: "--name" → raw string map, round-tripped verbatim
+            // (both key case and value bytes). Missing key → null so a
+            // re-encode omits it identically.
+            variables = obj["variables"]?.jsonObject?.mapValues { (_, el) -> el.jsonPrimitive.content }
         )
     }
 }

@@ -1,0 +1,70 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "themeroot-001",
+            "name": "ThemeRoot",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 260.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "original": "var(--panel-bg)"
+                    }
+                }
+            ],
+            "variables": {
+                "--panel-bg": "#1f2937",
+                "--accent": "#e74c3c",
+                "--pad": "10px"
+            }
+        },
+        {
+            "id": "mid-002",
+            "name": "mid",
+            "properties": [
+                {
+                    "type": "PaddingTop",
+                    "data": {
+                        "expr": "var(--pad)"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "themeroot-001"
+            }
+        },
+        {
+            "id": "leaf-003",
+            "name": "leaf",
+            "properties": [
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "original": "var(--accent)"
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 40.0
+                    }
+                }
+            ],
+            "variables": {
+                "--accent": "#2ecc71"
+            },
+            "slot": {
+                "parent": "mid-002"
+            }
+        }
+    ]
+}

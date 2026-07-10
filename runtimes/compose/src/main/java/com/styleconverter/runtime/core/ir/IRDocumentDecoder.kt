@@ -88,7 +88,10 @@ object IRDocumentDecoder {
     private val DOC_KEYS = setOf("irVersion", "minReaderVersion", "components")
     private val COMPONENT_KEYS = setOf(
         "id", "name", "properties", "selectors", "media",
-        "slot", "text", "pseudos", "meta"
+        "slot", "text", "pseudos", "meta",
+        // additive v2 minor revision: component-level custom-property
+        // definitions ("--name" → raw value; spec 01 component table).
+        "variables"
     )
     private val SLOT_KEYS = setOf("parent", "name")
     private val META_KEYS = setOf("sourceTag", "role")
@@ -224,7 +227,16 @@ object IRDocumentDecoder {
             // pseudos: opaque component-shaped payload forwarded verbatim —
             // generated content never flattens (design §4.2).
             pseudos = c["pseudos"] as? JsonObject,
-            role = (meta?.get("role") as? JsonPrimitive)?.contentOrNull
+            role = (meta?.get("role") as? JsonPrimitive)?.contentOrNull,
+            // variables: "--name" → raw string map, forwarded VERBATIM —
+            // names are case-sensitive and values untyped until var()
+            // substitution (css-variables-1 §2; spec 02 custom-properties
+            // section). Resolution (element → slot-parent chain →
+            // fallback) is the style engine's job, not the decoder's.
+            variables = (c["variables"] as? JsonObject)?.mapValues { (_, el) ->
+                (el as? JsonPrimitive)?.contentOrNull
+                    ?: throw IllegalArgumentException("component '$id': variables values must be strings")
+            }
         )
     }
 

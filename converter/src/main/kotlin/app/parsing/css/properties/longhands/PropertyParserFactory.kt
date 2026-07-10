@@ -149,8 +149,17 @@ object PropertyParserFactory {
 
             // Check for CSS expressions
             if (LengthParser.isExpression(trimmed)) {
-                // For expressions, use medium as default normalized value
-                return constructor(BorderWidthValue.fromKeyword(trimmed))
+                // Preservation contract (schema/spec/02-values.md): the raw
+                // expression must survive VERBATIM — fromKeyword() would
+                // lowercase it, mangling case-sensitive var() custom-property
+                // names (css-variables-1 §2: --BW ≠ --bw). Pixels fall back
+                // to the "medium" default (3px, CSS spec keyword mapping)
+                // because BorderWidthValue.pixels is non-nullable in the
+                // frozen wire shape; readers detect the expression via the
+                // preserved original string.
+                return constructor(
+                    BorderWidthValue(3.0, BorderWidthValue.BorderWidthOriginal.Keyword(trimmed))
+                )
             }
 
             // Check for global keywords

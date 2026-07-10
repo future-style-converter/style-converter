@@ -163,7 +163,18 @@ data class IRComponent(
     // are never flattened (design §4.2), so the converter forwards the
     // payload verbatim. v2 wire name: `pseudos`. Ignored by the v1
     // serializer (matching the historical dropped behavior).
-    val pseudos: JsonObject? = null
+    val pseudos: JsonObject? = null,
+    // CSS custom-property definitions declared on this component
+    // (`--name: value`), extracted by CustomPropertyParser. Names keep
+    // their exact case (css-variables-1 §2: custom property names are
+    // case-sensitive) and values are the RAW declaration strings verbatim
+    // (untyped until substitution — no normalization is possible before a
+    // var() reference gives the value a type). ADDITIVE IR v2 envelope
+    // key `variables` (schema/spec/01-envelope.md; omit-when-empty);
+    // ignored by the legacy v1 serializer so `--emit-ir v1` output stays
+    // byte-identical. Resolution order for var() references is specified
+    // in schema/spec/02-values.md (element → slot-parent chain → fallback).
+    val variables: Map<String, String>? = null
 )
 
 /**

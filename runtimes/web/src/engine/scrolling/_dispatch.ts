@@ -92,6 +92,15 @@ import { extractScrollStartInline } from './ScrollStartInlineExtractor';
 import { applyScrollStartInline } from './ScrollStartInlineApplier';
 import { extractScrollStartTarget } from './ScrollStartTargetExtractor';
 import { applyScrollStartTarget } from './ScrollStartTargetApplier';
+// Issue #38: the four axis variants were coverage-only claims; now real triplets.
+import { extractScrollStartTargetBlock } from './ScrollStartTargetBlockExtractor';
+import { applyScrollStartTargetBlock } from './ScrollStartTargetBlockApplier';
+import { extractScrollStartTargetInline } from './ScrollStartTargetInlineExtractor';
+import { applyScrollStartTargetInline } from './ScrollStartTargetInlineApplier';
+import { extractScrollStartTargetX } from './ScrollStartTargetXExtractor';
+import { applyScrollStartTargetX } from './ScrollStartTargetXApplier';
+import { extractScrollStartTargetY } from './ScrollStartTargetYExtractor';
+import { applyScrollStartTargetY } from './ScrollStartTargetYApplier';
 import { extractScrollMarkerGroup } from './ScrollMarkerGroupExtractor';
 import { applyScrollMarkerGroup } from './ScrollMarkerGroupApplier';
 import { extractScrollTargetGroup } from './ScrollTargetGroupExtractor';
@@ -151,6 +160,10 @@ export function applyScrollingPhase10(properties: IRPropertyLike[]): CSSProperti
   Object.assign(out, applyScrollStartBlock(extractScrollStartBlock(properties)));
   Object.assign(out, applyScrollStartInline(extractScrollStartInline(properties)));
   Object.assign(out, applyScrollStartTarget(extractScrollStartTarget(properties)));
+  Object.assign(out, applyScrollStartTargetBlock(extractScrollStartTargetBlock(properties)));
+  Object.assign(out, applyScrollStartTargetInline(extractScrollStartTargetInline(properties)));
+  Object.assign(out, applyScrollStartTargetX(extractScrollStartTargetX(properties)));
+  Object.assign(out, applyScrollStartTargetY(extractScrollStartTargetY(properties)));
   Object.assign(out, applyScrollMarkerGroup(extractScrollMarkerGroup(properties)));
   Object.assign(out, applyScrollTargetGroup(extractScrollTargetGroup(properties)));
   return out;

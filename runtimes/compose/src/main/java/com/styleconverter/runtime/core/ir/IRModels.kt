@@ -74,6 +74,14 @@ data class IRSlot(
  * @property role v2 `meta.role` droppable hint (only value emitted today
  *   is "body-root"). v1 wire spelled it `_role` and this model dropped it
  *   (the documented spec-04 caveat); the v2 decoder closes that gap.
+ * @property variables CSS custom-property definitions declared on this
+ *   component ("--name" → RAW declaration value, verbatim). Additive IR
+ *   v2 envelope key (schema/spec/01-envelope.md): names are
+ *   case-SENSITIVE and values stay untyped token streams until var()
+ *   substitution (css-variables-1 §2). null when the wire omitted the
+ *   key. Resolution (element → slot-parent chain → fallback →
+ *   guaranteed-invalid, schema/spec/02-values.md) is the style engine's
+ *   job — the decoder only round-trips the map.
  */
 @Serializable
 data class IRComponent(
@@ -87,7 +95,8 @@ data class IRComponent(
     val _tag: String? = null,
     val slot: IRSlot? = null,
     val pseudos: JsonObject? = null,
-    val role: String? = null
+    val role: String? = null,
+    val variables: Map<String, String>? = null
 )
 
 /**

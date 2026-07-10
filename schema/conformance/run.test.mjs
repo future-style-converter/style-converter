@@ -264,6 +264,44 @@ test('v2: data accepts every JSON kind (leaves stay permissive by design)', () =
   assert.equal(ok, true, JSON.stringify(errors));
 });
 
+// ---- variables (additive minor revision: custom-property definitions) ----
+
+test('v2: variables map of --name → raw string is valid (case-sensitive keys)', () => {
+  const doc = validDocV2();
+  doc.components[0].variables = {
+    '--brand-bg': '#0f62fe',
+    '--Brand-Fg': '#ffffff', // capitals are meaningful — never folded
+    '--space-2': 'calc(1em + 2px)',
+    '--empty': '', // `--x:;` is legal CSS — empty raw value allowed
+  };
+  const { ok, errors } = validateDocument(validateV2, doc);
+  assert.equal(ok, true, JSON.stringify(errors));
+});
+
+test('v2: variables key without the -- prefix fails (pattern ^--.)', () => {
+  const doc = validDocV2();
+  doc.components[0].variables = { 'brand-bg': '#0f62fe' };
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: the reserved bare -- name fails (at least one char after the dashes)', () => {
+  const doc = validDocV2();
+  doc.components[0].variables = { '--': 'nope' };
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: non-string variables value fails (raw token stream is a string)', () => {
+  const doc = validDocV2();
+  doc.components[0].variables = { '--space': 12 };
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: empty variables object fails (omit-when-empty ⇒ present is non-empty)', () => {
+  const doc = validDocV2();
+  doc.components[0].variables = {};
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
 test('v2: a v1-shaped document (no version pair, nested children) fails the v2 contract', () => {
   // The v1 validDoc() carries _text/_role/children — all three are v2
   // violations on top of the missing version pair.

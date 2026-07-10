@@ -27,13 +27,17 @@ export const migratedProperties = new Set<string>([
   'AspectRatio',
   'BlockSize', 'InlineSize',
   'MinBlockSize', 'MaxBlockSize', 'MinInlineSize', 'MaxInlineSize',
+  // css-sizing-3 §4 — real triplet since issue #38 (engine/sizing/BoxSizing*).
+  'BoxSizing',
   // Colors + background — Phase 4 migration. See engine/color/*, engine/background/*,
   // engine/effects/blend/*, engine/performance/*.
   'BackgroundColor', 'Color', 'Opacity', 'AccentColor', 'CaretColor',
-  // CSS Color HDR 1 §3.1 — claimed for IR coverage; web honours the
-  // CSS property natively via the user-agent so we don't need a
-  // dedicated applier.
+  // CSS Color HDR 1 §3.1 — real triplet since issue #38
+  // (engine/color/DynamicRangeLimit*): csstype-widened one-key emitter.
   'DynamicRangeLimit',
+  // css-color-adjust-1 §2 — real triplet since issue #38
+  // (engine/color/ColorScheme*): emits the `color-scheme` list verbatim.
+  'ColorScheme',
   'BackgroundImage', 'BackgroundSize',
   'BackgroundPosition', 'BackgroundPositionX', 'BackgroundPositionY',
   // Logical-axis variants — extractor folds them onto the physical axes.
@@ -111,6 +115,14 @@ export const migratedProperties = new Set<string>([
   'GridColumnStart', 'GridColumnEnd', 'GridRowStart', 'GridRowEnd',
   'JustifyItems', 'JustifySelf',
   'AlignTracks', 'JustifyTracks', 'MasonryAutoFlow',
+  // grid-auto-track (css-grid-3 masonry draft; its longhand parser IS
+  // registered, so the type reaches the wire) — real triplet since issue
+  // #38 (engine/layout/grid/GridAutoTrack*), standalone from GridExtractor.
+  'GridAutoTrack',
+  // -webkit-box-orient (legacy, line-clamp companion) — real triplet since
+  // issue #38 (engine/layout/flexbox/BoxOrient*). The old note claimed the
+  // legacy path emitted it, but membership in this set disabled that path.
+  'BoxOrient',
   'Position', 'Top', 'Right', 'Bottom', 'Left',
   'InsetBlockStart', 'InsetBlockEnd', 'InsetInlineStart', 'InsetInlineEnd',
   'ZIndex',
@@ -162,6 +174,10 @@ export const migratedProperties = new Set<string>([
   'OverflowAnchor', 'OverflowClipMargin',
   'ScrollStart', 'ScrollStartX', 'ScrollStartY', 'ScrollStartBlock', 'ScrollStartInline',
   'ScrollStartTarget', 'ScrollMarkerGroup', 'ScrollTargetGroup',
+  // scroll-start-target axis variants — real triplets since issue #38
+  // (engine/scrolling/ScrollStartTarget{Block,Inline,X,Y}*).
+  'ScrollStartTargetBlock', 'ScrollStartTargetInline',
+  'ScrollStartTargetX', 'ScrollStartTargetY',
   // ── svg (36) ─────────────────────────────────────────────────────────
   'Fill', 'FillOpacity', 'FillRule',
   'Stroke', 'StrokeOpacity', 'StrokeWidth', 'StrokeDasharray', 'StrokeDashoffset',
@@ -171,6 +187,9 @@ export const migratedProperties = new Set<string>([
   'MarkerStart', 'MarkerMid', 'MarkerEnd', 'Marker',
   'PaintOrder', 'ShapeRendering', 'VectorEffect', 'BufferedRendering', 'EnableBackground',
   'Cx', 'Cy', 'R', 'Rx', 'Ry', 'X', 'Y', 'D',
+  // marker-side (SVG 2 draft) — real triplet since issue #38
+  // (engine/svg/MarkerSide*): csstype-widened pass-through.
+  'MarkerSide',
   // ── speech (30) ──────────────────────────────────────────────────────
   'Volume', 'Speak', 'SpeakAs', 'SpeakHeader', 'SpeakNumeral', 'SpeakPunctuation',
   'Pause', 'PauseBefore', 'PauseAfter', 'Rest', 'RestBefore', 'RestAfter',
@@ -227,30 +246,21 @@ export const migratedProperties = new Set<string>([
   'Content',
   // ── global (1) ───────────────────────────────────────────────────────
   'All',
-  // ── coverage-only claims: properties whose web behaviour is fully
-  // covered by native CSS / shorthand expansion or whose IR type-name
-  // overlaps a CSS-L4 spec we don't render specially. Claimed here so
-  // the audit doesn't flag them as uncovered. The runtime path emits
-  // the underlying longhands (or csstype-widens the value) elsewhere.
-  // ── sizing (1) ───────────────────────────────────────────────────────
-  // box-sizing: routes through CSS verbatim; longhand applier emits it.
-  'BoxSizing',
-  // ── color (1) — color-scheme native CSS value ────────────────────────
-  'ColorScheme',
-  // ── borders (2) — shorthands; longhand expansion handled upstream ───
+  // ── coverage-only claims — SHORTHAND types that can never reach the
+  // wire: PropertiesParser expands shorthands via ShorthandRegistry
+  // BEFORE the longhand parser registry runs (PropertiesParser.kt step
+  // 2), and every one of these names has a registered Expander
+  // (ShorthandRegistry.kt), so the converter only ever emits their
+  // longhands — which are all individually claimed above. Verified in
+  // the issue #38 audit; every OTHER former coverage-only entry
+  // (BoxSizing, ColorScheme, DynamicRangeLimit, BoxOrient,
+  // GridAutoTrack, ScrollStartTarget{Block,Inline,X,Y}, MarkerSide)
+  // turned out to be reachable on the wire and now has a real triplet
+  // in its category section.
+  // ── borders (2) — expand to the 8 side longhands ─────────────────────
   'BorderWidth', 'BorderStyle',
-  // ── layout (5) — anchor/grid/legacy shorthands ───────────────────────
-  // `Offset` is the CSS Motion-Path 1 shorthand; `BoxOrient` is the
-  // pre-flexbox legacy keyword (we emit it through the legacy path);
-  // `GridArea` / `GridTemplate` / `GridAutoTrack` are the grid
-  // shorthand bundles whose longhands are already individually
-  // claimed above.
-  'Offset', 'BoxOrient', 'GridArea', 'GridTemplate', 'GridAutoTrack',
-  // ── scrolling (4) — scroll-start-target axis variants ────────────────
-  'ScrollStartTargetBlock', 'ScrollStartTargetInline',
-  'ScrollStartTargetX', 'ScrollStartTargetY',
-  // ── svg (1) — marker-side L2 keyword ─────────────────────────────────
-  'MarkerSide',
+  // ── layout (3) — Motion-Path 1 `offset` + grid shorthand bundles ─────
+  'Offset', 'GridArea', 'GridTemplate',
 ]);
 
 /**

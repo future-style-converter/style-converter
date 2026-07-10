@@ -1,0 +1,83 @@
+{
+  "components": {
+    "TK_MissingVsFallback": {
+      "properties": {
+        "width": "280px",
+        "display": "flex",
+        "flex-direction": "row",
+        "gap": "8px",
+        "padding": "10px",
+        "background-color": "#1f2937"
+      },
+      "children": {
+        "missing": {
+          "properties": {
+            "width": "70px",
+            "height": "48px",
+            "background-color": "var(--nope)"
+          }
+        },
+        "saved": {
+          "properties": {
+            "width": "70px",
+            "height": "48px",
+            "background-color": "var(--nope, #e67e22)"
+          }
+        },
+        "reference": {
+          "properties": {
+            "width": "70px",
+            "height": "48px",
+            "background-color": "#2ecc71"
+          }
+        }
+      }
+    },
+    "TK_NestedFallback": {
+      "properties": {
+        "width": "280px",
+        "display": "flex",
+        "flex-direction": "row",
+        "gap": "8px",
+        "padding": "10px",
+        "background-color": "#111827",
+        "--mid": "#9b59b6"
+      },
+      "children": {
+        "stopsAtMid": {
+          "properties": {
+            "width": "80px",
+            "height": "44px",
+            "background-color": "var(--top, var(--mid, #ffffff))"
+          }
+        },
+        "fallsThrough": {
+          "properties": {
+            "width": "80px",
+            "height": "44px",
+            "background-color": "var(--a, var(--b, #16a085))"
+          }
+        }
+      }
+    },
+    "TK_DefinitionWins": {
+      "properties": {
+        "width": "240px",
+        "padding": "10px",
+        "background-color": "#ecf0f1",
+        "--accent": "#f39c12",
+        "--pad": "12px"
+      },
+      "children": {
+        "tile": {
+          "properties": {
+            "width": "90px",
+            "height": "40px",
+            "background-color": "var(--accent, #000000)",
+            "padding": "var(--pad, 2px)"
+          }
+        }
+      }
+    }
+  }
+}

@@ -105,6 +105,17 @@ function normalizeV2Component(entry: unknown): IRComponent {
   };
   // omit-when-empty keys: only attach when the wire carried them, so a
   // re-encode of the decoded doc stays shape-faithful.
+  // variables: additive v2 key — "--name" → raw string map, forwarded
+  // verbatim (names case-sensitive, values untyped; spec 02
+  // custom-properties section). Non-string entries are dropped rather
+  // than crash (decode-side tolerance; the schema check is CI's job).
+  if (c.variables && typeof c.variables === 'object' && !Array.isArray(c.variables)) {
+    const vars: Record<string, string> = {};
+    for (const [k, v] of Object.entries(c.variables as Raw)) {
+      if (typeof v === 'string') vars[k] = v;
+    }
+    if (Object.keys(vars).length > 0) out.variables = vars;
+  }
   if (Array.isArray(c.selectors)) out.selectors = c.selectors as IRSelector[];
   if (Array.isArray(c.media)) out.media = c.media as IRMedia[];
   if (typeof c.text === 'string') out.text = c.text;

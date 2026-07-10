@@ -143,22 +143,34 @@ public struct IRComponent: Decodable {
     public let pseudos: IRValue?
     /// Grouped droppable hints (v2 `meta`, v1 `_tag`/`_role`).
     public let meta: IRMeta?
+    /// CSS custom-property definitions declared on this component
+    /// (`--name` → RAW declaration value, verbatim). Additive IR v2 key
+    /// (schema/spec/01-envelope.md): names are case-SENSITIVE and values
+    /// stay untyped token streams until var() substitution
+    /// (css-variables-1 §2). nil when the wire omitted the key. var()
+    /// resolution (element → slot-parent chain → fallback →
+    /// guaranteed-invalid, schema/spec/02-values.md) is the style
+    /// engine's job — decode only round-trips the map.
+    public let variables: [String: String]?
 
     // Dual-spelling key set: v2 names + the v1 underscore forms this
     // reader still translates during the deprecation window.
     enum CodingKeys: String, CodingKey {
         case id, name, properties, selectors, media, children
-        case slot, text, pseudos, meta
+        case slot, text, pseudos, meta, variables
         case _text, _tag, _pseudo, _role
     }
 
     // internal: memberwise construction for the strict v2 wire decoder
     // (IRWireV2Reader) and the composer (IRComposer), which rebuilds
     // components with their children attached.
+    // `variables` defaults to nil so pre-variables call sites
+    // (IRComposer, tests) construct unchanged.
     init(id: String, name: String, properties: [IRProperty],
          selectors: [IRSelector]?, media: [IRMedia]?,
          children: [IRComponent]?, slot: IRSlot?,
-         text: String?, pseudos: IRValue?, meta: IRMeta?) {
+         text: String?, pseudos: IRValue?, meta: IRMeta?,
+         variables: [String: String]? = nil) {
         self.id = id
         self.name = name
         self.properties = properties
@@ -169,6 +181,7 @@ public struct IRComponent: Decodable {
         self.text = text
         self.pseudos = pseudos
         self.meta = meta
+        self.variables = variables
     }
 
     /// Copy with a different composed-children array (IRComposer builds
@@ -177,7 +190,8 @@ public struct IRComponent: Decodable {
         IRComponent(id: id, name: name, properties: properties,
                     selectors: selectors, media: media,
                     children: kids, slot: slot,
-                    text: text, pseudos: pseudos, meta: meta)
+                    text: text, pseudos: pseudos, meta: meta,
+                    variables: variables)
     }
 
     // public: hand-written Decodable witness on a public type must be
@@ -219,6 +233,10 @@ public struct IRComponent: Decodable {
             let role = try c.decodeIfPresent(String.self, forKey: ._role)
             meta = (tag != nil || role != nil) ? IRMeta(sourceTag: tag, role: role) : nil
         }
+        // variables: additive v2 key — "--name" → raw string map,
+        // round-tripped verbatim (keys keep their case, values their
+        // bytes). Absent on every v1 document.
+        variables = try c.decodeIfPresent([String: String].self, forKey: .variables)
     }
 
     /// Synthesized-decode helper for the wire slot object (lenient path).

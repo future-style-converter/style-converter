@@ -1,0 +1,103 @@
+{
+  "components": {
+    "TK_Palette": {
+      "properties": {
+        "width": "300px",
+        "display": "flex",
+        "flex-direction": "row",
+        "gap": "8px",
+        "padding": "10px",
+        "background-color": "#111827",
+        "--tile-a": "#e74c3c",
+        "--tile-b": "#3498db",
+        "--tile-c": "#2ecc71",
+        "--size": "64px",
+        "--pad": "8px"
+      },
+      "children": {
+        "a": {
+          "properties": {
+            "width": "var(--size)",
+            "height": "var(--size)",
+            "background-color": "var(--tile-a)"
+          }
+        },
+        "b": {
+          "properties": {
+            "width": "var(--size)",
+            "height": "var(--size)",
+            "background-color": "var(--tile-b)",
+            "padding": "var(--pad)"
+          }
+        },
+        "c": {
+          "properties": {
+            "width": "var(--size)",
+            "height": "var(--size)",
+            "background-color": "var(--tile-c)",
+            "border-radius": "var(--pad)"
+          }
+        }
+      }
+    },
+    "TK_TwoLevelShadow": {
+      "properties": {
+        "width": "280px",
+        "padding": "10px",
+        "background-color": "#ecf0f1",
+        "--accent": "#c0392b",
+        "--gap": "6px"
+      },
+      "children": {
+        "rootLeaf": {
+          "properties": {
+            "width": "80px",
+            "height": "30px",
+            "background-color": "var(--accent)"
+          }
+        },
+        "mid": {
+          "properties": {
+            "padding": "var(--gap)",
+            "background-color": "#bdc3c7",
+            "--accent": "#1a5276"
+          },
+          "children": {
+            "midLeaf": {
+              "properties": {
+                "width": "80px",
+                "height": "30px",
+                "background-color": "var(--accent)"
+              }
+            }
+          }
+        }
+      }
+    },
+    "TK_TextTokens": {
+      "properties": {
+        "width": "260px",
+        "padding": "10px",
+        "background-color": "#fdf2e9",
+        "--ink": "#7e3b09",
+        "--type": "18px"
+      },
+      "children": {
+        "styled": {
+          "properties": {
+            "color": "var(--ink)",
+            "font-size": "var(--type)"
+          },
+          "_text": "token ink and size"
+        },
+        "reference": {
+          "properties": {
+            "width": "60px",
+            "height": "14px",
+            "background-color": "#f39c12"
+          }
+        }
+      }
+    }
+  }
+}

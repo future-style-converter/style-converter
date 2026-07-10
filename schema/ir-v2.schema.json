@@ -23,7 +23,7 @@
   "additionalProperties": false,
   "$defs": {
     "component": {
-      "description": "One UI component. Serialized by IRComponentV2Serializer (converter/src/main/kotlin/app/irmodels/IRWireV2.kt): id/name/properties always present; selectors/media omitted when empty; slot omitted for roots; text/pseudos omitted when null; meta omitted when it would be empty. `children` is deliberately ABSENT from this definition — additionalProperties:false makes any v2 document carrying a children key a hard validation error.",
+      "description": "One UI component. Serialized by IRComponentV2Serializer (converter/src/main/kotlin/app/irmodels/IRWireV2.kt): id/name/properties always present; variables omitted when the component declares no custom properties; selectors/media omitted when empty; slot omitted for roots; text/pseudos omitted when null; meta omitted when it would be empty. `children` is deliberately ABSENT from this definition — additionalProperties:false makes any v2 document carrying a children key a hard validation error.",
       "type": "object",
       "properties": {
         "id": {
@@ -40,6 +40,15 @@
           "description": "Base properties. Always present, may be empty. ITEM-scoped properties (align-self, order, flex-grow/shrink/basis, grid-area/column/row, z-index, position+insets — the frozen list in schema/spec/03-children.md) are declared HERE on the child and routed to placement parent-data by the runtimes; CONTAINER-scoped properties are declared on the container. The wire carries no per-property scope byte — classification is derivable (converter/src/main/kotlin/app/irmodels/PropertyScope.kt) and mirrored by each platform PropertyRegistry.",
           "type": "array",
           "items": { "$ref": "#/$defs/property" }
+        },
+        "variables": {
+          "description": "CSS custom-property definitions declared on this component: '--name' → RAW declaration value, verbatim (css-variables-1 §2: names are case-SENSITIVE, values are untyped token streams until substitution — the empty string is a legal value). ADDITIVE minor-revision key (schema/spec/05-versioning.md change process): omitted entirely when the component declares no custom properties, so pre-variables documents are byte-identical and remain valid. var() REFERENCES do not live here — they stay unresolved inside normal property envelopes (null+original contract, spec 02); resolution order (element → slot-parent chain → fallback → guaranteed-invalid) is specified in schema/spec/02-values.md.",
+          "type": "object",
+          "patternProperties": {
+            "^--.": { "type": "string" }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
         },
         "selectors": {
           "description": "Pseudo-class buckets (:hover etc.). Omitted entirely when empty, so if present it is non-empty. Unchanged from v1.",

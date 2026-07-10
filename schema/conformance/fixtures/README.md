@@ -21,10 +21,13 @@ today. JSON has no comments, so the commentary lives here.
 |---|---|---|
 | `v2/slot-composition.json` | 3-level composition via child-side `slot` refs (spec 03 §1–2): pre-order flat array, contiguous subtrees, roots slot-free, default slot name omitted | 6 components; `cell__0__0-003` slot-walks to root in 2 hops; sibling bands share `slot.parent` in source order |
 | `v2/placement-claims.json` | ITEM-scoped placement claims as plain `{type,data}` envelopes on children (spec 03 §3 — no scope byte on the wire): grid area/line/span claims, flex grow/shrink/basis + align-self + order, z-index + position/insets | grid host declares templates, children declare Grid\*/Flex\*/ZIndex/Position claims; converter emitted, not hand-typed |
+| `v2/variables-basic.json` | the additive `variables` envelope key (spec 01/02 custom-properties section): component-level `--name → raw` definitions with CASE-SENSITIVE names, `var()` references left unresolved in property envelopes (color `{"original": "var(--brand-bg)"}`, padding `{"expr": …}`), fallback + nested-fallback chains verbatim; second component has NO variables key (omit-when-empty) | `--Brand-Fg` keeps its capitals; `var(--a, var(--b, 4px))` survives byte-for-byte; `FallbackConsumer` carries no `variables` |
+| `v2/variables-inheritance.json` | definitions + references across the slot-parent chain (spec 02 resolution order): root defines 3 tokens, mid references without defining, leaf SHADOWS `--accent` with its own definition | `mid-002` has refs but no `variables`; `leaf-003.variables["--accent"]` overrides the root's; chain walks leaf→mid→root via `slot.parent` |
+| `v2/calc-mixed.json` | calc() preservation across value families (spec 02 null+original): `%−px` mix, `em+px` mixes, nested calc, calc-wrapping-var — each carried verbatim in its family's escape shape (`{"type":"expression","expr":…}`, `{"expr":…}`, FontSize `original.expr`) | every expression string survives byte-for-byte; no `px` key on any of them |
 
-Both v2-only goldens are **verbatim converter output** (the authoring
-inputs live in the freeze PR description); regenerate by re-running the
-converter, never by hand-editing.
+The v2-only goldens are **verbatim converter output** (the authoring
+inputs live in the freeze / wave-6 PR descriptions); regenerate by
+re-running the converter, never by hand-editing.
 
 Consumed by:
 

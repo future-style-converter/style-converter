@@ -61,6 +61,12 @@ struct RootView: View {
             // Inner: 390×844 phone frame matching web's #root
             ContentView()
                 .frame(width: 390, height: 844)
+                // #39: publish the phone-frame geometry to the runtime's
+                // styleViewport channel so gallery renders resolve vw/vh
+                // and root percentages against the same numbers the
+                // capture canvas publishes (the runtime no longer
+                // hardcodes 390×844 itself).
+                .environment(\.styleViewport, CaptureCanvas.viewport)
                 .background(
                     Color(red: 0x1A / 255.0, green: 0x1A / 255.0, blue: 0x2E / 255.0)
                 )

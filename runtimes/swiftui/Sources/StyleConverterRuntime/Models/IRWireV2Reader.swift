@@ -97,9 +97,12 @@ enum IRWireV2Reader {
             }
             // additionalProperties:false — anything outside the v2
             // component surface is a contract violation.
+            // `variables` is the sanctioned additive minor-revision key
+            // (custom-property definitions, spec 01 component table).
             let allowed: Set<String> = ["id", "name", "properties",
                                         "selectors", "media", "slot",
-                                        "text", "pseudos", "meta"]
+                                        "text", "pseudos", "meta",
+                                        "variables"]
             for k in c.allKeys where !allowed.contains(k.stringValue) {
                 throw violation("unknown component key '\(k.stringValue)' in v2 document", path: decoder.codingPath)
             }
@@ -161,12 +164,29 @@ enum IRWireV2Reader {
                 }
                 meta = IRMeta(sourceTag: tag, role: role)
             }
+            // variables: additive v2 key — "--name" → raw string map
+            // (custom-property definitions, css-variables-1 §2). Schema
+            // rules: keys match ^--., values are strings, present ⇒
+            // non-empty. Round-tripped verbatim (case + bytes); var()
+            // resolution is the style engine's job, never decode's.
+            var variables: [String: String]? = nil
+            if c.contains(IRAnyKey("variables")) {
+                let decoded = try c.decode([String: String].self, forKey: IRAnyKey("variables"))
+                guard !decoded.isEmpty else {
+                    throw violation("variables present but empty (schema: minProperties 1)", path: decoder.codingPath)
+                }
+                for name in decoded.keys where !(name.hasPrefix("--") && name.count > 2) {
+                    throw violation("variables key '\(name)' is not a custom-property name (^--. pattern)", path: decoder.codingPath)
+                }
+                variables = decoded
+            }
             // Assemble — children nil BY CONSTRUCTION (composer fills the
             // in-memory tree afterwards from the slot refs).
             component = IRComponent(id: id, name: name, properties: properties,
                                     selectors: selectors, media: media,
                                     children: nil, slot: slot,
-                                    text: text, pseudos: pseudos, meta: meta)
+                                    text: text, pseudos: pseudos, meta: meta,
+                                    variables: variables)
         }
     }
 

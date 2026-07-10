@@ -2422,11 +2422,110 @@
         "padding",
         "width"
       ]
+    },
+    {
+      "path": "fixtures/fidelity/tokens/token-theme.json",
+      "kind": "tokens",
+      "categories": [
+        "borders",
+        "color",
+        "layout",
+        "spacing",
+        "typography"
+      ],
+      "features": [
+        "var-definitions",
+        "var-references",
+        "slot-chain-resolution",
+        "shadowing"
+      ],
+      "components": 3,
+      "nodes": 11,
+      "bytes": 2488,
+      "properties": [
+        "--accent",
+        "--gap",
+        "--ink",
+        "--pad",
+        "--size",
+        "--tile-a",
+        "--tile-b",
+        "--tile-c",
+        "--type",
+        "background-color",
+        "border-radius",
+        "color",
+        "display",
+        "flex-direction",
+        "font-size",
+        "gap",
+        "height",
+        "padding",
+        "width"
+      ]
+    },
+    {
+      "path": "fixtures/fidelity/tokens/token-fallbacks.json",
+      "kind": "tokens",
+      "categories": [
+        "color",
+        "layout",
+        "spacing"
+      ],
+      "features": [
+        "missing-var",
+        "fallback",
+        "nested-fallback",
+        "definition-beats-fallback"
+      ],
+      "components": 3,
+      "nodes": 9,
+      "bytes": 1974,
+      "properties": [
+        "--accent",
+        "--mid",
+        "--pad",
+        "background-color",
+        "display",
+        "flex-direction",
+        "gap",
+        "height",
+        "padding",
+        "width"
+      ]
+    },
+    {
+      "path": "fixtures/fidelity/tokens/calc-units.json",
+      "kind": "tokens",
+      "categories": [
+        "color",
+        "spacing",
+        "typography"
+      ],
+      "features": [
+        "calc-percent-px",
+        "calc-em-px",
+        "nested-calc",
+        "em-inheritance-chain",
+        "var-in-calc"
+      ],
+      "components": 3,
+      "nodes": 10,
+      "bytes": 1934,
+      "properties": [
+        "--u",
+        "background-color",
+        "font-size",
+        "height",
+        "padding",
+        "padding-top",
+        "width"
+      ]
     }
   ],
   "totals": {
-    "files": 51,
-    "components": 554,
-    "nodes": 716
+    "files": 54,
+    "components": 563,
+    "nodes": 746
   }
 }

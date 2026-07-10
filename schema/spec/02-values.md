@@ -92,6 +92,69 @@ Same dual-storage idiom as lengths, with normalization always present:
   (`bold` → `{"weight": 700, "original": "bold"}`), numeric inputs
   flatten to a raw number (`700` → `"data": 700`).
 
+## Custom properties, `var()` substitution, and dynamic expressions
+
+**Status: normative (IR v2 additive minor revision — see 05-versioning.md
+change process).** Goldens: `schema/conformance/fixtures/v2/variables-basic.json`,
+`variables-inheritance.json`, `calc-mixed.json`.
+
+### Definitions — the component-level `variables` map
+
+A custom-property **declaration** (`--name: <value>`) does NOT become a
+`{type, data}` property envelope. The converter lifts it into the
+component-level `variables` map (01-envelope.md v2 component table):
+
+```json
+"variables": { "--brand-bg": "#0f62fe", "--space-2": "12px" }
+```
+
+Two rules carry over verbatim from css-variables-1 §2 and are pinned by
+`CustomPropertyParserTest`:
+
+- **Names are case-sensitive** (`--Main` ≠ `--main`) — the only names in
+  the whole IR that never pass through lowercase normalization.
+- **Values are raw, untyped token streams** until substitution: no px /
+  sRGB / degree normalization is possible, so the wire carries the
+  declaration value byte-for-byte (the empty string is a legal value —
+  `--x:;` is valid CSS). Emission order is authoring order.
+
+### References — the preservation contract
+
+A `var()` **reference** (and any `calc()` / relative-unit expression)
+stays inside its normal property envelope, **unresolved**, under the
+project-wide null+original rule (`null` means runtime-dependent): the
+normalized slot is absent/null and the ORIGINAL expression survives
+verbatim — carrier shape varies per value family (`{"expr": …}`,
+`{"original": …}`, raw string), but the bytes of the expression never
+change. Pinned by `VarCalcPreservationTest` across the core visual
+properties, including nested fallbacks (`var(--a, var(--b, 4px))`) and
+mixed-unit calc (`calc(100% - 24px)`, `calc(2em + 4px)`,
+`calc(var(--space-2) * 2)`).
+
+### Resolution order (runtime semantics)
+
+Substitution happens in the **runtimes**, never in the converter. For a
+`var(--x, <fallback>)` reference on component `C`:
+
+1. **Element scope:** if `C.variables` defines `--x`, use that value.
+2. **Slot-parent chain:** otherwise walk `C.slot.parent` transitively
+   (child → container → … → root, the same chain style inheritance
+   follows in 03-children.md) and use the first definition found.
+   Roots (no `slot`) end the walk.
+3. **Fallback:** otherwise, if the reference carries a fallback
+   (css-variables-1 §2.3 — fallbacks may nest arbitrarily), resolve the
+   fallback by the same rules.
+4. **Guaranteed-invalid:** otherwise the reference is
+   *invalid at computed-value time* (css-variables-1 §3): the declaration
+   behaves as `unset` (inherited properties inherit; others take their
+   initial value). Never render the literal `var(…)` string; log via
+   PropertyTracker (no silent fallthroughs).
+
+Scope note for this revision: `variables` is a **base-declaration**
+surface only — custom properties inside selector/media buckets are
+dropped by the parser (logged), pending a future revision if a use case
+appears.
+
 ## Known defects (fix at the v2 freeze, do NOT rely on)
 
 1. **The phantom `"u"` discriminator.** Several legacy *deserializers*
