@@ -237,9 +237,19 @@ object ComponentRenderer {
         // cell's fillMaxHeight established the constraint the style chain
         // then works within.
         val sizedModifier = itemModifier.then(baseModifier).then(
-            Modifier.defaultMinSize(
-                minWidth = if (hasExplicitWidth) Dp.Unspecified else 50.dp,
-                minHeight = if (hasExplicitHeight) Dp.Unspecified else 30.dp
+            // BORDER-BOX floor: web's 50/30px minimum constrains the whole
+            // card (box-sizing: border-box), so the content-box minimum
+            // Compose enforces here (inside the padding-last chain) must be
+            // 50/30 MINUS the padding + border bands. The previous raw
+            // defaultMinSize(50.dp, 30.dp) floored the CONTENT box instead,
+            // adding +2px to every default-font placeholder under
+            // `padding: 8px+` (all 33 Decorated combo rows: Android canvas
+            // 78/86/94/102 vs web 76/84/92/100). See
+            // StyleApplier.placeholderFloorMinSize for the exact math.
+            StyleApplier.placeholderFloorMinSize(
+                effectiveProperties,
+                applyWidthFloor = !hasExplicitWidth,
+                applyHeightFloor = !hasExplicitHeight
             )
         ).then(
             // Border-band content inset — INSIDE the 30dp placeholder floor

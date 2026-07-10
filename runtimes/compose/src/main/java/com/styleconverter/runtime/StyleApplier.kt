@@ -1,5 +1,6 @@
 package com.styleconverter.runtime
 
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -576,6 +577,99 @@ object StyleApplier {
             else androidx.compose.ui.unit.Dp(0f)
         return listOf(bandOf(sides.start), bandOf(sides.top), bandOf(sides.end), bandOf(sides.bottom))
     }
+
+    /**
+     * BORDER-BOX placeholder floor (wave-4 "+2px on every default-font
+     * leaf" fix — Decorated rows across all 33 categories, plus
+     * Color_Hex / Padding_All / Flex_Row / … in the visual-test corpus).
+     *
+     * Web's placeholder floor is `minWidth: 50px; minHeight: 30px` on the
+     * component `<div>` (apps/web-harness/src/sdui/ComponentRenderer.tsx)
+     * under the harness's `* { box-sizing: border-box }` reset — so the
+     * 50/30 minimum constrains the whole card INCLUDING its padding and
+     * border bands (CSS 2.1 §10.7 min-height applies to the box that
+     * box-sizing selects). Compose's `defaultMinSize(50.dp, 30.dp)` sits
+     * INSIDE the style chain (padding is chained last/innermost — see
+     * applyConfig step 8), which made it a CONTENT-box floor: a default-
+     * font placeholder (Text 20px + 4dp label padding = 28px) under
+     * `padding: 8px` measured max(28, 30) + 16 = 46px on Android while
+     * web computed max(27.4 + 16, 30) = 43.4px — the systematic +2px
+     * canvas delta on every Decorated row (76→78, 84→86, 92→94, 100→102).
+     *
+     * Fix: subtract the CSS padding and border band from the 50/30 floor
+     * so the *content-box* minimum equals what web's border-box minimum
+     * leaves for content. The floor stays at its chain position (inside
+     * padding, outside the border-band inset) so margin handling and the
+     * wave-1 "band absorbed by the minimum" behaviour (Input_Field /
+     * Glass_Effect) are unchanged.
+     *
+     * Padding resolution mirrors PaddingApplier.apply: resolveToDp with
+     * the default SpacingContext (px-exact values dominate the fixture
+     * corpus; relative units resolve against the same defaults the
+     * applier uses, so floor and padding never disagree).
+     */
+    fun placeholderFloorMinSize(
+        properties: List<IRProperty>,
+        applyWidthFloor: Boolean,
+        applyHeightFloor: Boolean
+    ): Modifier {
+        // Both axes explicitly sized → no floor at all (web only injects
+        // the 50/30 defaults when width/height are absent).
+        if (!applyWidthFloor && !applyHeightFloor) return Modifier
+        val pairs = properties.map { it.type to it.data }
+        // CSS padding, resolved exactly like the padding modifier will be.
+        val resolved = com.styleconverter.runtime.spacing.SpacingExtractor
+            .extractPaddingConfig(pairs)
+            .resolve(isRtl = false)
+        val ctx = com.styleconverter.runtime.spacing.SpacingContext()
+        fun side(v: com.styleconverter.runtime.core.types.LengthValue?): Float =
+            com.styleconverter.runtime.spacing.resolveToDp(v, ctx).value.coerceAtLeast(0f)
+        // Border band — the same per-side widths borderContentInset will
+        // chain INSIDE this floor; subtracting them here keeps the band
+        // absorbed by the minimum (web border-box semantics).
+        val sides = com.styleconverter.runtime.borders.sides.BorderSideExtractor
+            .extractBorderConfig(pairs)
+        val band = borderBandInsets(sides)
+        val horizontalInset = side(resolved.left) + side(resolved.right) +
+            band[0].value + band[2].value
+        val verticalInset = side(resolved.top) + side(resolved.bottom) +
+            band[1].value + band[3].value
+        val (minW, minH) = borderBoxFloorMins(
+            horizontalInset = horizontalInset,
+            verticalInset = verticalInset,
+            applyWidthFloor = applyWidthFloor,
+            applyHeightFloor = applyHeightFloor
+        )
+        return Modifier.defaultMinSize(minWidth = minW, minHeight = minH)
+    }
+
+    /**
+     * Pure floor math for [placeholderFloorMinSize] (JVM-pinnable): the
+     * web floor is 50×30 on the border box, so the content-box minimum is
+     * the floor minus everything the border box spends on padding + border
+     * bands — clamped at 0 (a fully-consumed floor means "no minimum").
+     * Dp.Unspecified disables an axis (explicit width/height present, or
+     * the floor is entirely absorbed by the insets).
+     */
+    internal fun borderBoxFloorMins(
+        horizontalInset: Float,
+        verticalInset: Float,
+        applyWidthFloor: Boolean,
+        applyHeightFloor: Boolean
+    ): Pair<androidx.compose.ui.unit.Dp, androidx.compose.ui.unit.Dp> {
+        // Web defaults from ComponentRenderer.tsx: minWidth 50, minHeight 30.
+        val minW = if (applyWidthFloor && horizontalInset < PLACEHOLDER_FLOOR_MIN_WIDTH)
+            androidx.compose.ui.unit.Dp(PLACEHOLDER_FLOOR_MIN_WIDTH - horizontalInset)
+        else androidx.compose.ui.unit.Dp.Unspecified
+        val minH = if (applyHeightFloor && verticalInset < PLACEHOLDER_FLOOR_MIN_HEIGHT)
+            androidx.compose.ui.unit.Dp(PLACEHOLDER_FLOOR_MIN_HEIGHT - verticalInset)
+        else androidx.compose.ui.unit.Dp.Unspecified
+        return minW to minH
+    }
+
+    /** Web placeholder floor constants (px == dp at the harness's 160dpi). */
+    internal const val PLACEHOLDER_FLOOR_MIN_WIDTH = 50f
+    internal const val PLACEHOLDER_FLOOR_MIN_HEIGHT = 30f
 
     /**
      * Apply only layout-related properties (sizing, spacing, position).
