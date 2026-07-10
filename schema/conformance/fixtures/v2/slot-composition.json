@@ -1,0 +1,286 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "slotroot-001",
+            "name": "SlotRoot",
+            "properties": [
+                {
+                    "type": "Display",
+                    "data": "FLEX"
+                },
+                {
+                    "type": "FlexDirection",
+                    "data": "COLUMN"
+                },
+                {
+                    "type": "RowGap",
+                    "data": {
+                        "type": "length",
+                        "px": 8.0
+                    }
+                },
+                {
+                    "type": "ColumnGap",
+                    "data": {
+                        "type": "length",
+                        "px": 8.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 240.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.12156862745098039,
+                            "g": 0.1607843137254902,
+                            "b": 0.21568627450980393
+                        },
+                        "original": "#1f2937"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "band__0-002",
+            "name": "band__0",
+            "properties": [
+                {
+                    "type": "Display",
+                    "data": "FLEX"
+                },
+                {
+                    "type": "FlexDirection",
+                    "data": "ROW"
+                },
+                {
+                    "type": "RowGap",
+                    "data": {
+                        "type": "length",
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "ColumnGap",
+                    "data": {
+                        "type": "length",
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "PaddingTop",
+                    "data": {
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "PaddingRight",
+                    "data": {
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "PaddingBottom",
+                    "data": {
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "PaddingLeft",
+                    "data": {
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.28627450980392155,
+                            "b": 0.3686274509803922
+                        },
+                        "original": "#34495e"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "slotroot-001"
+            }
+        },
+        {
+            "id": "cell__0__0-003",
+            "name": "cell__0__0",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 24.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "band__0-002"
+            }
+        },
+        {
+            "id": "cell__0__1-004",
+            "name": "cell__0__1",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 24.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "band__0-002"
+            }
+        },
+        {
+            "id": "band__1-005",
+            "name": "band__1",
+            "properties": [
+                {
+                    "type": "Display",
+                    "data": "FLEX"
+                },
+                {
+                    "type": "FlexDirection",
+                    "data": "ROW"
+                },
+                {
+                    "type": "RowGap",
+                    "data": {
+                        "type": "length",
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "ColumnGap",
+                    "data": {
+                        "type": "length",
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "PaddingTop",
+                    "data": {
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "PaddingRight",
+                    "data": {
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "PaddingBottom",
+                    "data": {
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "PaddingLeft",
+                    "data": {
+                        "px": 6.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.4980392156862745,
+                            "g": 0.5490196078431373,
+                            "b": 0.5529411764705883
+                        },
+                        "original": "#7f8c8d"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "slotroot-001"
+            }
+        },
+        {
+            "id": "cell__1__0-006",
+            "name": "cell__1__0",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 24.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "band__1-005"
+            }
+        }
+    ]
+}

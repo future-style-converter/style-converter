@@ -1,7 +1,17 @@
 # IR v1 — 04: Underscore metadata fields
 
-**Status: normative.** The underscore rule and the per-field emission
-matrix below document current behavior, caveats included.
+**Status: normative for the v1 wire (deprecation window).** The
+underscore rule and the per-field emission matrix below document v1
+behavior, caveats included.
+
+> **IR v2 note (the current default wire):** v2 emits **no** underscore
+> component keys. `_text` became the structural `text`, `_pseudo` became
+> `pseudos`, and `_tag`/`_role` grouped into `meta: {sourceTag?, role?}`
+> (droppable hints). Two v1 gaps closed at the freeze: the converter now
+> forwards `_tag` (→ `meta.sourceTag`) and `_pseudo` (→ `pseudos`)
+> instead of dropping them — see 01-envelope.md and 03-children.md. The
+> underscore convention itself survives only for future droppable hints;
+> in v2 the sanctioned extension point is a new key inside `meta`.
 
 ## The underscore rule
 

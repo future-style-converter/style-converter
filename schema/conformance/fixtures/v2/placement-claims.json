@@ -1,0 +1,335 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "placementgridhost-001",
+            "name": "PlacementGridHost",
+            "properties": [
+                {
+                    "type": "Display",
+                    "data": "GRID"
+                },
+                {
+                    "type": "GridTemplateColumns",
+                    "data": [
+                        {
+                            "px": 80.0
+                        },
+                        {
+                            "fr": 1.0
+                        },
+                        20.0
+                    ]
+                },
+                {
+                    "type": "GridTemplateAreas",
+                    "data": {
+                        "type": "areas",
+                        "rows": [
+                            [
+                                "media",
+                                "title"
+                            ],
+                            [
+                                "media",
+                                "body"
+                            ]
+                        ]
+                    }
+                },
+                {
+                    "type": "RowGap",
+                    "data": {
+                        "type": "length",
+                        "px": 12.0
+                    }
+                },
+                {
+                    "type": "ColumnGap",
+                    "data": {
+                        "type": "length",
+                        "px": 12.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 300.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "area-claim__0-002",
+            "name": "area-claim__0",
+            "properties": [
+                {
+                    "type": "GridRowStart",
+                    "data": {
+                        "type": "name",
+                        "name": "media"
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "placementgridhost-001"
+            }
+        },
+        {
+            "id": "line-claim__1-003",
+            "name": "line-claim__1",
+            "properties": [
+                {
+                    "type": "GridColumnStart",
+                    "data": {
+                        "type": "number",
+                        "number": 1
+                    }
+                },
+                {
+                    "type": "GridColumnEnd",
+                    "data": {
+                        "type": "number",
+                        "number": 3
+                    }
+                },
+                {
+                    "type": "GridRowStart",
+                    "data": {
+                        "type": "number",
+                        "number": 2
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "placementgridhost-001"
+            }
+        },
+        {
+            "id": "span-claim__2-004",
+            "name": "span-claim__2",
+            "properties": [
+                {
+                    "type": "GridColumnStart",
+                    "data": {
+                        "type": "span",
+                        "count": 2
+                    }
+                },
+                {
+                    "type": "GridRowStart",
+                    "data": {
+                        "type": "number",
+                        "number": 1
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.6078431372549019,
+                            "g": 0.34901960784313724,
+                            "b": 0.7137254901960784
+                        },
+                        "original": "#9b59b6"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "placementgridhost-001"
+            }
+        },
+        {
+            "id": "placementflexhost-005",
+            "name": "PlacementFlexHost",
+            "properties": [
+                {
+                    "type": "Display",
+                    "data": "FLEX"
+                },
+                {
+                    "type": "FlexDirection",
+                    "data": "ROW"
+                },
+                {
+                    "type": "RowGap",
+                    "data": {
+                        "type": "length",
+                        "px": 8.0
+                    }
+                },
+                {
+                    "type": "ColumnGap",
+                    "data": {
+                        "type": "length",
+                        "px": 8.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 300.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "flex-claim__0-006",
+            "name": "flex-claim__0",
+            "properties": [
+                {
+                    "type": "FlexGrow",
+                    "data": {
+                        "value": {
+                            "type": "app.irmodels.properties.layout.flexbox.FlexGrowProperty.FlexGrowValue.Number",
+                            "value": 1.0
+                        },
+                        "normalizedValue": 1.0
+                    }
+                },
+                {
+                    "type": "FlexShrink",
+                    "data": {
+                        "value": {
+                            "type": "app.irmodels.properties.layout.flexbox.FlexShrinkProperty.FlexShrinkValue.Number",
+                            "value": 0.0
+                        },
+                        "normalizedValue": 0.0
+                    }
+                },
+                {
+                    "type": "FlexBasis",
+                    "data": {
+                        "value": {
+                            "px": 40.0
+                        },
+                        "normalizedPixels": 40.0
+                    }
+                },
+                {
+                    "type": "AlignSelf",
+                    "data": "CENTER"
+                },
+                {
+                    "type": "Order",
+                    "data": 2
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9019607843137255,
+                            "g": 0.49411764705882355,
+                            "b": 0.13333333333333333
+                        },
+                        "original": "#e67e22"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "placementflexhost-005"
+            }
+        },
+        {
+            "id": "paint-claim__1-007",
+            "name": "paint-claim__1",
+            "properties": [
+                {
+                    "type": "ZIndex",
+                    "data": {
+                        "value": 3,
+                        "original": {
+                            "type": "integer",
+                            "value": 3
+                        }
+                    }
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "placementflexhost-005"
+            }
+        },
+        {
+            "id": "abs-claim__2-008",
+            "name": "abs-claim__2",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 4.0
+                    }
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 8.0
+                    }
+                },
+                {
+                    "type": "InsetInlineEnd",
+                    "data": {
+                        "px": 12.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.08627450980392157,
+                            "g": 0.6274509803921569,
+                            "b": 0.5215686274509804
+                        },
+                        "original": "#16a085"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "placementflexhost-005"
+            }
+        }
+    ]
+}

@@ -1,0 +1,56 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "unknown-mixed-001",
+            "name": "Unknown_MixedWithKnown",
+            "properties": [
+                {
+                    "type": "FrobnicateCorner",
+                    "data": {
+                        "amount": 3.0,
+                        "mode": "gentle"
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 100.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "unknown-primitive-002",
+            "name": "Unknown_PrimitiveData",
+            "properties": [
+                {
+                    "type": "QuantumEntanglement",
+                    "data": "spooky"
+                },
+                {
+                    "type": "PaddingTop",
+                    "data": {
+                        "px": 16.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "unknown-generic-003",
+            "name": "Unknown_GenericEnvelope",
+            "properties": [
+                {
+                    "type": "Generic",
+                    "data": {
+                        "propertyName": "hanging-punctuation",
+                        "rawValue": "first allow-end",
+                        "_unmapped": true
+                    }
+                }
+            ]
+        }
+    ]
+}

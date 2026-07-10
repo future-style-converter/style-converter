@@ -212,7 +212,9 @@ private struct ComponentCard: View {
     private var cardContent: some View {
         HStack {
             Spacer(minLength: 0)
-            ComponentRenderer(component: component)
+            // v2: gallery cards host components like every other render
+            // site (placement parent-data attached, inert in this HStack).
+            ComponentHost(component: component)
                 .frame(minHeight: 80)
             Spacer(minLength: 0)
         }

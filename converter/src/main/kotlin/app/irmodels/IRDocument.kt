@@ -47,6 +47,39 @@ data class IRMedia(
 )
 
 /**
+ * IR v2 child→parent composition reference (schema/spec/03-children.md).
+ *
+ * ## Purpose
+ * In the flat-list IR v2 wire format, components no longer nest: every
+ * component is a standalone entry in the document's flat `components`
+ * array, and a child points at its container via this `slot` object.
+ * The reference lives on the CHILD (never the parent) so containers stay
+ * composition-agnostic — a container's payload carries zero knowledge of
+ * what arrives in its open slot.
+ *
+ * ## Wire shape (IR v2 only — v1 documents never carry `slot`)
+ * ```json
+ * "slot": { "parent": "card-001", "name": "content" }
+ * ```
+ * `name` is omitted on the wire when it equals the default `"content"`;
+ * it is reserved for future multi-slot containers (scaffold
+ * header/body/footer). Roots omit the whole `slot` object.
+ *
+ * ## NOT underscore-prefixed — deliberately
+ * The `_` prefix is reserved for droppable renderer hints (spec 04).
+ * `slot` is structural composition data that MUST round-trip through
+ * every reader; a consumer that drops it has corrupted the document.
+ *
+ * @property parent The `id` of the container component this child composes into.
+ * @property name The slot name within the parent; `"content"` is the default single slot.
+ */
+@Serializable
+data class IRSlot(
+    val parent: String,
+    val name: String = "content"
+)
+
+/**
  * Represents a single UI component with its styles, selectors, and media queries.
  *
  * ## Purpose
@@ -111,7 +144,26 @@ data class IRComponent(
     val media: List<IRMedia> = emptyList(),
     val children: List<IRComponent>? = null,
     val text: String? = null,
-    val role: String? = null
+    val role: String? = null,
+    // --- IR v2 additions (see IRWireV2.kt for the v2 serializer) ---
+    // Child→parent composition reference. Stamped by IRFlattener during
+    // the v2 flatten; ALWAYS null on the nested (v1 / in-memory authoring)
+    // tree. The legacy v1 serializer below ignores it entirely so the
+    // deprecated `--emit-ir v1` output stays byte-identical to the
+    // pre-v2 converter.
+    val slot: IRSlot? = null,
+    // Originating HTML tag from the WPT extractor's `_tag` input hint
+    // (lowercase, e.g. "ol"). v1 dropped this at the converter hop (spec
+    // 04 field matrix); v2 forwards it inside `meta.sourceTag`. Ignored
+    // by the v1 serializer (matching the historical dropped behavior).
+    val tag: String? = null,
+    // Generated-content payload from the extractor's `_pseudo` input
+    // ({before?, after?, marker?} component-shaped slots). Carried as an
+    // opaque JsonObject — pseudo nodes have no independent lifecycle and
+    // are never flattened (design §4.2), so the converter forwards the
+    // payload verbatim. v2 wire name: `pseudos`. Ignored by the v1
+    // serializer (matching the historical dropped behavior).
+    val pseudos: JsonObject? = null
 )
 
 /**

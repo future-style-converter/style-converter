@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { IRDocument } from '@style-converter/web/core/ir/IRModels';
+import { decodeIRDocument } from '@style-converter/web/core/ir/IRDecode';
 import { ComponentGallery } from './ComponentGallery';
 import { CaptureGallery } from './CaptureGallery';
 import { FixtureCanvas } from './FixtureCanvas';
@@ -111,7 +112,12 @@ export function App() {
       if (!response.ok) {
         throw new Error(`Failed to load ${path}: ${response.status}`);
       }
-      const data = await response.json() as IRDocument;
+      // decodeIRDocument is the irVersion gate: v2 wire passes through
+      // (with slot.name defaults reconstructed), legacy v1 docs are
+      // translated to the flat v2 shape with a deprecation warning, and
+      // unsupported minReaderVersion / children-in-v2 throw into the
+      // catch below so the harness shows a real error, not a blank page.
+      const data = decodeIRDocument(await response.json());
       setDocument(data);
       setError(null);
     } catch (err) {
@@ -138,7 +144,15 @@ export function App() {
   //      setState, which re-renders, which → infinite loop and React's
   //      "Maximum update depth exceeded" warning.
   const onDocumentUpdate = useCallback((doc: IRDocument) => {
-    setDocument(doc);
+    // Hot reload hands us raw fetched JSON — run it through the same
+    // irVersion gate as the initial load (the gate is idempotent, so a
+    // doc that already passed through decodes to itself). Decode errors
+    // land in the error banner instead of crashing the render tree.
+    try {
+      setDocument(decodeIRDocument(doc));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to decode IR document');
+    }
   }, []);
   // Hot reload is also disabled in fixture mode: the interaction-state
   // harness wants a stable single-render so a state-event-then-screenshot

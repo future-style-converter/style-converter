@@ -1,23 +1,32 @@
 package app.schema
 
-// Converter-side conformance suite for the IR v1 wire contract
-// (schema/ir-v1.schema.json + schema/spec/*). The JS runner
-// (schema/conformance/run.mjs) validates documents with ajv; inside the
-// JVM we skip ajv and instead assert the emitted JsonObject shapes
-// directly for each sentinel family — this pins that SERIALIZING real
-// parse results still reproduces the exact wire forms the golden
-// fixtures document.
+// Converter-side conformance suite for the IR wire contracts
+// (schema/ir-v2.schema.json + schema/ir-v1.schema.json + schema/spec/*).
+// The JS runner (schema/conformance/run.mjs) validates documents with
+// ajv; inside the JVM we skip ajv and instead assert the emitted
+// JsonObject shapes directly for each sentinel family — this pins that
+// SERIALIZING real parse results still reproduces the exact wire forms
+// the golden fixtures document.
+//
+// Since the v2 freeze the DEFAULT emission is the flat-list v2 wire
+// (IRFlattener + IRWireV2), so the sentinel families below are asserted
+// against v2 bytes. The deprecated v1 path keeps its own pinning through
+// CssParsingTextAndChildrenTest (legacy nested serializer, byte-stable
+// for the deprecation window).
 //
 // Ground truth being pinned:
 //  - IRLengthSerializer dual storage        (ValueTypes.kt, spec 02)
 //  - PaddingValue/MarginValue escapes       (ValueTypes.kt, spec 02)
 //  - ShapeRadius keyword/length asymmetry   (ClipPathSerializers.kt, spec 02)
-//  - IRComponentSerializer field omission   (IRDocument.kt, spec 01/04)
-//  - children map-in / array-out            (CssParsing.kt, spec 03)
+//  - v2 envelope: irVersion/minReaderVersion (IRWireV2.kt, spec 01)
+//  - v2 component field omission + renames  (IRWireV2.kt, spec 01/04)
+//  - flat list + slot refs                  (IRFlattener.kt, spec 03)
 //  - {type,data} property envelope          (IRPropertySerializer.kt, spec 01)
 
 import app.irmodels.IRComponent
 import app.irmodels.IRDocument
+import app.irmodels.IRWireV2
+import app.parsing.IRFlattener
 import app.parsing.css.cssParsing
 import app.parsing.css.properties.GenericProperty
 import kotlinx.serialization.json.Json
@@ -25,6 +34,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.double
+import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -38,11 +48,12 @@ import kotlin.test.assertTrue
 class SchemaConformanceTest {
 
     // Parse a raw authoring-side JSON string through the REAL pipeline
-    // (cssParsing) and serialize the resulting IRDocument back to a
-    // JsonObject — i.e. exactly the bytes `--to ir` writes to disk.
+    // (cssParsing → IRFlattener → IRWireV2) and return the JsonObject —
+    // i.e. exactly the bytes the DEFAULT `--to ir` writes to disk since
+    // the v2 freeze.
     private fun emit(input: String): JsonObject {
         val doc = cssParsing(Json.parseToJsonElement(input).jsonObject)
-        return Json.encodeToJsonElement(IRDocument.serializer(), doc).jsonObject
+        return IRWireV2.encodeDocument(IRFlattener.flatten(doc))
     }
 
     // Convenience: first component of the emitted document.
@@ -52,6 +63,18 @@ class SchemaConformanceTest {
     // Convenience: data payload of the Nth property of the first component.
     private fun data(input: String, index: Int = 0) =
         firstComponent(input)["properties"]!!.jsonArray[index].jsonObject["data"]!!
+
+    // ---- v2 envelope (spec 01) ----
+
+    @Test
+    fun `document carries the v2 version pair and nothing else at top level`() {
+        val doc = emit("""{"components":{"C":{"properties":{"color":"red"}}}}""")
+        // Writer stamps both version fields; readers refuse newer minReader.
+        assertEquals(2, doc["irVersion"]!!.jsonPrimitive.int)
+        assertEquals(2, doc["minReaderVersion"]!!.jsonPrimitive.int)
+        // Strict top level: exactly the three envelope keys.
+        assertEquals(setOf("irVersion", "minReaderVersion", "components"), doc.keys)
+    }
 
     // ---- lengths (spec 02, lengths-all-forms.json) ----
 
@@ -116,19 +139,27 @@ class SchemaConformanceTest {
         assertEquals("farthest-side", d["ry"]!!.jsonPrimitive.content)
     }
 
-    // ---- metadata omission (spec 01/04, text-and-role.json) ----
+    // ---- v2 metadata renames (spec 01/04, v2/text-and-role.json) ----
 
     @Test
-    fun `_text and _role are forwarded when present and omitted when absent`() {
+    fun `text and meta are emitted under the v2 names and omitted when absent`() {
         val with = firstComponent(
-            """{"components":{"C":{"properties":{"color":"green"},"_text":"Test passes","_role":"body-root"}}}"""
+            """{"components":{"C":{"properties":{"color":"green"},"_text":"Test passes","_role":"body-root","_tag":"p"}}}"""
         )
-        assertEquals("Test passes", with["_text"]!!.jsonPrimitive.content)
-        assertEquals("body-root", with["_role"]!!.jsonPrimitive.content)
+        // _text → text: structural content field, unprefixed in v2.
+        assertEquals("Test passes", with["text"]!!.jsonPrimitive.content)
+        assertFalse("_text" in with, "v2 never emits underscore names")
+        // _tag + _role → meta:{sourceTag, role}: grouped droppable hints.
+        val meta = with["meta"]!!.jsonObject
+        assertEquals("body-root", meta["role"]!!.jsonPrimitive.content)
+        assertEquals("p", meta["sourceTag"]!!.jsonPrimitive.content)
+        assertFalse("_role" in with)
+        assertFalse("_tag" in with)
 
         val without = firstComponent("""{"components":{"C":{"properties":{"color":"green"}}}}""")
-        assertFalse("_text" in without, "omit-when-null keeps legacy fixtures byte-stable")
-        assertFalse("_role" in without)
+        assertFalse("text" in without, "omit-when-null keeps hint-free fixtures byte-stable")
+        assertFalse("meta" in without)
+        assertFalse("pseudos" in without)
     }
 
     @Test
@@ -152,23 +183,40 @@ class SchemaConformanceTest {
         assertFalse("media" in bare)
     }
 
-    // ---- children map-in / array-out (spec 03, children-nesting.json) ----
+    // ---- flat list + slot refs (spec 03, v2/children-nesting.json) ----
 
     @Test
-    fun `children map input flattens to an array with map key as name`() {
-        val cmp = firstComponent(
+    fun `nested children input flattens to slot refs — no children key anywhere`() {
+        val doc = emit(
             """{"components":{"Parent":{
                  "properties":{"display":"flex"},
                  "children":{"child__0":{"properties":{"width":"50px"},
                    "children":{"grandchild__0__0":{"properties":{"height":"10px"},"_text":"leaf text"}}}}
                }}}"""
         )
-        val children = cmp["children"]!!
-        assertTrue(children is JsonArray, "wire children must be an ARRAY (map is input-only)")
-        val child = children.jsonArray[0].jsonObject
+        val components = doc["components"]!!.jsonArray
+        // Pre-order flat list: parent, child, grandchild.
+        assertEquals(3, components.size)
+        val parent = components[0].jsonObject
+        val child = components[1].jsonObject
+        val grandchild = components[2].jsonObject
+        // No children key survives on ANY entry — hard error in v2 docs.
+        components.forEach { assertFalse("children" in it.jsonObject, "v2 wire must not carry children") }
+        // The child's map key still becomes its name (input contract unchanged).
         assertEquals("child__0", child["name"]!!.jsonPrimitive.content)
-        val grandchild = child["children"]!!.jsonArray[0].jsonObject
-        assertEquals("leaf text", grandchild["_text"]!!.jsonPrimitive.content)
+        // slot chain: child → parent, grandchild → child (on the CHILD side).
+        assertEquals(
+            parent["id"]!!.jsonPrimitive.content,
+            child["slot"]!!.jsonObject["parent"]!!.jsonPrimitive.content
+        )
+        assertEquals(
+            child["id"]!!.jsonPrimitive.content,
+            grandchild["slot"]!!.jsonObject["parent"]!!.jsonPrimitive.content
+        )
+        // Roots carry no slot at all.
+        assertFalse("slot" in parent)
+        // Leaf text rides the renamed structural field.
+        assertEquals("leaf text", grandchild["text"]!!.jsonPrimitive.content)
     }
 
     // ---- property envelope (spec 01, unknown-property-tolerance.json) ----
@@ -190,7 +238,8 @@ class SchemaConformanceTest {
     @Test
     fun `GenericProperty serializes with the _unmapped marker under type Generic`() {
         // Generic only triggers for valid-but-unparsed CSS names, so pin the
-        // serializer branch directly (IRPropertySerializer's GenericProperty case).
+        // serializer branch directly (IRPropertySerializer's GenericProperty
+        // case) through the v2 document codec.
         val doc = IRDocument(
             components = listOf(
                 IRComponent(
@@ -200,8 +249,7 @@ class SchemaConformanceTest {
                 )
             )
         )
-        val prop = Json.encodeToJsonElement(IRDocument.serializer(), doc)
-            .jsonObject["components"]!!.jsonArray[0]
+        val prop = IRWireV2.encodeDocument(doc)["components"]!!.jsonArray[0]
             .jsonObject["properties"]!!.jsonArray[0].jsonObject
         assertEquals("Generic", prop["type"]!!.jsonPrimitive.content)
         val d = prop["data"]!!.jsonObject
@@ -225,17 +273,22 @@ class SchemaConformanceTest {
 
     // ---- golden fixtures stay envelope-clean (mini structural check, no ajv in JVM) ----
 
-    @Test
-    fun `all golden fixtures satisfy the structural envelope contract`() {
-        // Resolve the repo root from the test working dir (converter/) by
-        // walking up until schema/ir-v1.schema.json appears.
+    // Resolve the repo root from the test working dir (converter/) by
+    // walking up until schema/ir-v1.schema.json appears.
+    private fun repoRoot(): File {
         var dir: File? = File(System.getProperty("user.dir"))
         while (dir != null && !File(dir, "schema/ir-v1.schema.json").exists()) dir = dir.parentFile
-        val fixturesDir = File(dir ?: error("repo root not found"), "schema/conformance/fixtures")
-        val fixtures = fixturesDir.listFiles { f -> f.extension == "json" }!!.sorted()
-        assertTrue(fixtures.size >= 10, "expected the full golden set, found ${fixtures.size}")
+        return dir ?: error("repo root not found")
+    }
 
-        // Recursive component check mirroring the schema's envelope rules.
+    @Test
+    fun `v1 golden fixtures satisfy the legacy structural envelope contract`() {
+        // v1 goldens stay validatable for the deprecation window (spec 05).
+        val fixturesDir = File(repoRoot(), "schema/conformance/fixtures")
+        val fixtures = fixturesDir.listFiles { f -> f.extension == "json" }!!.sorted()
+        assertTrue(fixtures.size >= 10, "expected the full v1 golden set, found ${fixtures.size}")
+
+        // Recursive component check mirroring the v1 schema's envelope rules.
         fun checkComponent(cmp: JsonObject, where: String) {
             val allowed = setOf("id", "name", "properties", "selectors", "media", "children", "_text", "_tag", "_role", "_pseudo")
             assertTrue(allowed.containsAll(cmp.keys), "$where has unknown envelope keys: ${cmp.keys - allowed}")
@@ -249,9 +302,56 @@ class SchemaConformanceTest {
         }
         for (file in fixtures) {
             val doc = Json.parseToJsonElement(file.readText()).jsonObject
-            assertEquals(setOf("components"), doc.keys, "${file.name}: document level must be exactly {components}")
+            assertEquals(setOf("components"), doc.keys, "${file.name}: v1 document level must be exactly {components}")
             doc["components"]!!.jsonArray.forEachIndexed { i, cmp ->
                 checkComponent(cmp.jsonObject, "${file.name}/components/$i")
+            }
+        }
+    }
+
+    @Test
+    fun `v2 golden fixtures satisfy the flat structural envelope contract`() {
+        val fixturesDir = File(repoRoot(), "schema/conformance/fixtures/v2")
+        val fixtures = fixturesDir.listFiles { f -> f.extension == "json" }!!.sorted()
+        // 12 v1-mirrors + slot-composition + placement-claims.
+        assertTrue(fixtures.size >= 14, "expected the full v2 golden set, found ${fixtures.size}")
+
+        // Flat component check mirroring the v2 schema's envelope rules.
+        fun checkComponent(cmp: JsonObject, ids: Set<String>, where: String) {
+            val allowed = setOf("id", "name", "properties", "selectors", "media", "slot", "text", "pseudos", "meta")
+            assertTrue(allowed.containsAll(cmp.keys), "$where has unknown envelope keys: ${cmp.keys - allowed}")
+            // The flat-list hard rule: children must never appear.
+            assertFalse("children" in cmp, "$where carries a children key — v2 is flat-only")
+            assertTrue(cmp["id"]!!.jsonPrimitive.content.isNotEmpty(), "$where id empty")
+            for (prop in cmp["properties"]!!.jsonArray) {
+                assertEquals(setOf("type", "data"), prop.jsonObject.keys, "$where property envelope drifted")
+            }
+            // Slot refs must resolve within the document (no dangling
+            // parents in GOLDENS — dangling is only composer-tolerated).
+            cmp["slot"]?.jsonObject?.let { slot ->
+                assertTrue(slot.keys.all { it in setOf("parent", "name") }, "$where slot has unknown keys")
+                assertTrue(slot["parent"]!!.jsonPrimitive.content in ids, "$where slot.parent dangles")
+            }
+            // meta, when present, is non-empty and strict.
+            cmp["meta"]?.jsonObject?.let { meta ->
+                assertTrue(meta.isNotEmpty(), "$where meta present but empty")
+                assertTrue(meta.keys.all { it in setOf("sourceTag", "role") }, "$where meta has unknown keys")
+            }
+        }
+        for (file in fixtures) {
+            val doc = Json.parseToJsonElement(file.readText()).jsonObject
+            assertEquals(
+                setOf("irVersion", "minReaderVersion", "components"),
+                doc.keys,
+                "${file.name}: v2 document level must be exactly the version pair + components"
+            )
+            assertEquals(2, doc["irVersion"]!!.jsonPrimitive.int, "${file.name}: irVersion must be 2")
+            assertEquals(2, doc["minReaderVersion"]!!.jsonPrimitive.int, "${file.name}: minReaderVersion must be 2")
+            val components = doc["components"]!!.jsonArray
+            val ids = components.map { it.jsonObject["id"]!!.jsonPrimitive.content }.toSet()
+            assertEquals(components.size, ids.size, "${file.name}: duplicate component ids")
+            components.forEachIndexed { i, cmp ->
+                checkComponent(cmp.jsonObject, ids, "${file.name}/components/$i")
             }
         }
     }

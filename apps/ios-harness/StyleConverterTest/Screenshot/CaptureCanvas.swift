@@ -70,7 +70,9 @@ struct CaptureCanvas: View {
                 // The component renders through the normal engine path —
                 // its own PositionApplier applies the top/left offsets
                 // from this ZStack's top-leading corner (card origin).
-                ComponentRenderer(component: component)
+                // v2: hosted so every component carries its placement
+                // parent-data (inert at root — no Layout parent here).
+                ComponentHost(component: component)
             }
             .frame(width: CaptureCanvas.width, alignment: .topLeading)
             // Web canvas `overflow: hidden` parity.
@@ -95,7 +97,10 @@ struct CaptureCanvas: View {
         // the alignment through the runtime's RootAlignment helper so the
         // three canvases agree; components without justify-self keep the
         // .topLeading block-flow origin exactly as before.
-        ComponentRenderer(component: component)
+        // v2: root components render through ComponentHost too — the
+        // placement layout value is inert against this frame/padding
+        // chain but keeps the "every component is hosted" invariant.
+        ComponentHost(component: component)
             .frame(
                 maxWidth: CaptureCanvas.width - (CaptureCanvas.padding * 2),
                 alignment: RootAlignment.alignment(for: component)

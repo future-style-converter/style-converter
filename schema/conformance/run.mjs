@@ -1,13 +1,16 @@
 #!/usr/bin/env node
-// schema/conformance/run.mjs — IR v1 conformance runner.
+// schema/conformance/run.mjs — IR conformance runner (v1 + v2).
 //
-// Validates IR documents against schema/ir-v1.schema.json (JSON Schema
-// draft 2020-12 via ajv, a tools-workspace dependency hoisted to the root
-// node_modules):
+// Validates IR documents against the two published contracts:
+//   - schema/ir-v1.schema.json — the legacy nested wire (deprecation
+//     window only; still emitted by `--emit-ir v1`)
+//   - schema/ir-v2.schema.json — the flat-list slot/placement wire the
+//     converter emits BY DEFAULT since the v2 freeze
 //
-//   node schema/conformance/run.mjs           # golden fixtures + out/tmpOutput.json (if present)
-//   node schema/conformance/run.mjs --emit    # run the converter on fixtures/visual-test.json first,
-//                                             # then validate the fresh artifact + the goldens
+//   node schema/conformance/run.mjs           # v1 goldens vs v1 schema, v2 goldens vs v2 schema,
+//                                             # + out/tmpOutput.json vs v2 (if present)
+//   node schema/conformance/run.mjs --emit    # run the converter on fixtures/visual-test.json first
+//                                             # (default v2 emission), then validate everything
 //
 // Exit code is non-zero on ANY violation, with a precise per-error path
 // report (file → JSON Pointer → message) so CI logs point at the byte.
@@ -25,7 +28,9 @@ import Ajv2020 from 'ajv/dist/2020.js';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = path.resolve(HERE, '..', '..');
 export const SCHEMA_PATH = path.join(REPO_ROOT, 'schema', 'ir-v1.schema.json');
+export const SCHEMA_V2_PATH = path.join(REPO_ROOT, 'schema', 'ir-v2.schema.json');
 export const FIXTURES_DIR = path.join(HERE, 'fixtures');
+export const FIXTURES_V2_DIR = path.join(HERE, 'fixtures', 'v2');
 const ARTIFACT = path.join(REPO_ROOT, 'out', 'tmpOutput.json');
 
 /** Compile the IR v1 schema into a reusable ajv validate function. */
@@ -34,6 +39,15 @@ export function makeValidator() {
   // strict mode keeps the schema itself honest (typos in keywords fail loudly).
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'));
+  return ajv.compile(schema);
+}
+
+/** Compile the IR v2 schema into a reusable ajv validate function. */
+export function makeValidatorV2() {
+  // Same ajv configuration as v1 — the two contracts differ in content,
+  // not in validation strictness policy.
+  const ajv = new Ajv2020({ allErrors: true, strict: true });
+  const schema = JSON.parse(readFileSync(SCHEMA_V2_PATH, 'utf8'));
   return ajv.compile(schema);
 }
 
@@ -54,7 +68,7 @@ export function validateDocument(validate, doc) {
 }
 
 /** Validate a JSON file on disk; prints a per-error report. Returns boolean. */
-function validateFile(validate, filePath) {
+function validateFile(validate, filePath, label) {
   const rel = path.relative(REPO_ROOT, filePath);
   let doc;
   try {
@@ -65,15 +79,24 @@ function validateFile(validate, filePath) {
   }
   const { ok, errors } = validateDocument(validate, doc);
   if (ok) {
-    console.log(`ok   ${rel}`);
+    console.log(`ok   [${label}] ${rel}`);
     return true;
   }
-  console.error(`FAIL ${rel} — ${errors.length} violation(s):`);
+  console.error(`FAIL [${label}] ${rel} — ${errors.length} violation(s):`);
   for (const e of errors) console.error(`     ${rel}#${e.path}: ${e.message}`);
   return false;
 }
 
-/** --emit: run the converter on fixtures/visual-test.json → out/tmpOutput.json. */
+/** List golden .json files directly inside a directory (subdirs excluded). */
+function goldenFiles(dir) {
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isFile() && d.name.endsWith('.json'))
+    .map((d) => d.name)
+    .sort()
+    .map((f) => path.join(dir, f));
+}
+
+/** --emit: run the converter on fixtures/visual-test.json → out/tmpOutput.json (v2 default). */
 function emitArtifact() {
   const env = { ...process.env };
   // Pin Java 21 on macOS dev machines (converter toolchain requirement);
@@ -86,7 +109,7 @@ function emitArtifact() {
     }
   }
   const gradlew = path.join(REPO_ROOT, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew');
-  console.log('emit: ./gradlew :converter:run — converting fixtures/visual-test.json → out/tmpOutput.json');
+  console.log('emit: ./gradlew :converter:run — converting fixtures/visual-test.json → out/tmpOutput.json (IR v2)');
   execFileSync(
     gradlew,
     [':converter:run', '-q', '--args=convert --from css --to ir -i fixtures/visual-test.json -o out'],
@@ -98,23 +121,34 @@ function main() {
   const emit = process.argv.includes('--emit');
   if (emit) emitArtifact();
 
-  const validate = makeValidator();
+  const validateV1 = makeValidator();
+  const validateV2 = makeValidatorV2();
   let allOk = true;
 
-  // (a) every golden fixture MUST validate — they define the contract.
-  const fixtureFiles = readdirSync(FIXTURES_DIR)
-    .filter((f) => f.endsWith('.json'))
-    .sort()
-    .map((f) => path.join(FIXTURES_DIR, f));
-  if (fixtureFiles.length === 0) {
-    console.error(`FAIL — no golden fixtures found in ${FIXTURES_DIR}`);
+  // (a) every v1 golden MUST validate against the v1 schema — the legacy
+  // contract stays checkable for the whole deprecation window.
+  const v1Fixtures = goldenFiles(FIXTURES_DIR);
+  if (v1Fixtures.length === 0) {
+    console.error(`FAIL — no v1 golden fixtures found in ${FIXTURES_DIR}`);
     process.exit(1);
   }
-  for (const f of fixtureFiles) allOk = validateFile(validate, f) && allOk;
+  for (const f of v1Fixtures) allOk = validateFile(validateV1, f, 'v1') && allOk;
 
-  // (b) the real converter artifact, when present (always present in --emit mode).
+  // (b) every v2 golden MUST validate against the v2 schema — these
+  // define the flat slot/placement contract (12 v1-mirrors + the
+  // slot-composition and placement-claims goldens).
+  const v2Fixtures = goldenFiles(FIXTURES_V2_DIR);
+  if (v2Fixtures.length === 0) {
+    console.error(`FAIL — no v2 golden fixtures found in ${FIXTURES_V2_DIR}`);
+    process.exit(1);
+  }
+  for (const f of v2Fixtures) allOk = validateFile(validateV2, f, 'v2') && allOk;
+
+  // (c) the real converter artifact, when present (always present in
+  // --emit mode). Default emission is v2 since the freeze, so the fresh
+  // artifact is held to the v2 contract.
   if (existsSync(ARTIFACT)) {
-    allOk = validateFile(validate, ARTIFACT) && allOk;
+    allOk = validateFile(validateV2, ARTIFACT, 'v2') && allOk;
   } else if (emit) {
     console.error('FAIL — --emit ran but out/tmpOutput.json was not produced');
     allOk = false;
@@ -123,10 +157,10 @@ function main() {
   }
 
   if (!allOk) {
-    console.error('\nIR v1 conformance: FAILED');
+    console.error('\nIR conformance: FAILED');
     process.exit(1);
   }
-  console.log('\nIR v1 conformance: all documents valid');
+  console.log('\nIR conformance: all documents valid (v1 goldens + v2 goldens)');
 }
 
 // Only run main() when invoked as a CLI — run.test.mjs imports the exported

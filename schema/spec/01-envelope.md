@@ -1,51 +1,78 @@
-# IR v1 — 01: The envelope
+# IR — 01: The envelope
 
-**Status: normative.** This section documents what the converter *actually
-emits today* (IR v1). It is machine-checked by `schema/ir-v1.schema.json`
-and the golden fixtures under `schema/conformance/fixtures/`.
+**Status: normative.** This section documents the wire envelope in both
+supported versions:
+
+- **IR v2** — the flat-list slot/placement wire the converter emits **by
+  default** since the v2 freeze. Machine-checked by
+  `schema/ir-v2.schema.json` and the goldens under
+  `schema/conformance/fixtures/v2/`.
+- **IR v1** — the legacy nested wire, still produced by the deprecated
+  `--emit-ir v1` flag for one deprecation window (05-versioning.md).
+  Machine-checked by `schema/ir-v1.schema.json` and the goldens under
+  `schema/conformance/fixtures/`.
 
 Implementing code:
 
-- `converter/src/main/kotlin/app/irmodels/IRDocument.kt` — `IRDocument`,
-  `IRComponent`, `IRSelector`, `IRMedia`, and the custom
-  `IRComponentSerializer` that controls field omission.
+- `converter/src/main/kotlin/app/irmodels/IRWireV2.kt` — the v2 document
+  envelope + `IRComponentV2Serializer`.
+- `converter/src/main/kotlin/app/parsing/IRFlattener.kt` — nested→flat
+  (pre-order, slot stamping, duplicate-id error).
+- `converter/src/main/kotlin/app/irmodels/IRDocument.kt` — the shared IR
+  model + the legacy v1 `IRComponentSerializer`.
 - `converter/src/main/kotlin/app/irmodels/IRPropertySerializer.kt` — the
-  `{type, data}` property envelope.
+  `{type, data}` property envelope (identical in both versions).
 
-## Document
+## v2 document
 
 ```json
-{ "components": [ <component>, ... ] }
+{
+  "irVersion": 2,
+  "minReaderVersion": 2,
+  "components": [ <component>, ... ]
+}
 ```
 
-- `components` is **always an array** on the wire, even though the
-  authoring-side input keys components by name (see 03-children.md for the
-  map→array flattening rule, which applies at every nesting level).
-- No other top-level keys exist in v1. There is **no version field** —
-  v1 is implicit (see 05-versioning.md).
-- Validators reject unknown top-level keys (`additionalProperties: false`).
+- `irVersion` states what the writer produced; `minReaderVersion` states
+  the oldest reader that can safely consume it. Both are **mandatory**
+  and both are `2` today. A reader MUST refuse a document whose
+  `minReaderVersion` exceeds what it implements (05-versioning.md).
+- A document **without** `irVersion` IS a v1 document (deprecation
+  window only).
+- `components` is a **flat array** — every component at every
+  composition depth is a standalone entry; composition is expressed by
+  the child-side `slot` reference (03-children.md). May be empty.
+- No other top-level keys exist. Validators reject unknown top-level
+  keys (`additionalProperties: false`).
 
-## Component
+## v2 component
 
-Emitted by `IRComponentSerializer.serialize` in this key order:
+Emitted by `IRComponentV2Serializer.serialize` in this key order:
 
 | key | type | presence | rule (from the serializer) |
 |---|---|---|---|
-| `id` | string | always | non-empty; converter generates `<lowercased-name>-<NNN>` (`CssParsing.convertToIR`), extractor children keep WPT ids like `color-001__1__0` |
-| `name` | string | always | component/class name; for flattened children the input map key becomes the name verbatim |
-| `properties` | array of property envelopes | always | may be `[]` (every declaration was invalid and dropped) |
-| `selectors` | array of selector buckets | omit-when-empty | present ⇒ non-empty |
-| `media` | array of media buckets | omit-when-empty | present ⇒ non-empty |
-| `children` | array of components | omit-when-null-or-empty | present ⇒ non-empty; **always an array** (03-children.md) |
-| `_text` | string | omit-when-null | empty string `""` is a legal emitted value (means "extracted, was empty" — see the serializer comment at `IRDocument.kt`) |
-| `_role` | string | omit-when-null | only emitted value today: `"body-root"` (04-metadata-fields.md) |
+| `id` | string | always | non-empty; unique across the WHOLE document (duplicate = convert error); converter generates `<lowercased-name>-<NNN>` in pre-order |
+| `name` | string | always | component/class name; for components flattened from the authoring map the map key becomes the name verbatim |
+| `properties` | array of property envelopes | always | may be `[]`; ITEM-scoped placement claims live here on the CHILD (03-children.md §3) |
+| `selectors` | array of selector buckets | omit-when-empty | present ⇒ non-empty (unchanged from v1) |
+| `media` | array of media buckets | omit-when-empty | present ⇒ non-empty (unchanged from v1) |
+| `slot` | object | omit for roots | `{parent, name?}` — structural, MUST round-trip; `name` omitted at the default `"content"` (03-children.md) |
+| `text` | string | omit-when-null | v2 rename of `_text`; empty string `""` is a legal emitted value ("extracted, was empty") |
+| `pseudos` | object | omit-when-null | v2 rename of `_pseudo`; `{before?, after?, marker?}` extractor-shaped payload forwarded verbatim, never flattened |
+| `meta` | object | omit-when-empty | droppable hints grouped: `{sourceTag?, role?}` — v2 home of v1 `_tag`/`_role`; present ⇒ non-empty and strict |
 
-`_tag` and `_pseudo` are part of the wire vocabulary (the runtimes read
-them — `runtimes/web/src/core/ir/IRModels.ts`) but are **not currently
-emitted by the converter**; see 04-metadata-fields.md for the honest
-status of each underscore field.
+**`children` does not exist in v2** — its presence anywhere is a hard
+validation error (03-children.md §1).
 
-## Property envelope
+### The underscore rule after v2
+
+v2 emits **no** underscore-prefixed component keys. `_text` became the
+structural `text`; `_pseudo` became `pseudos`; `_tag`/`_role` grouped
+into `meta`. The rule itself survives for future droppable hints
+(04-metadata-fields.md), but the sanctioned extension point in v2 is a
+new key inside `meta`, not a new top-level `_field`.
+
+## Property envelope (identical in v1 and v2)
 
 Every entry in any `properties` array is exactly:
 
@@ -68,14 +95,16 @@ Every entry in any `properties` array is exactly:
     (gradient stop `"position": null`; Generic `"_unmapped": true`)
 - The envelope has **no other keys** (`additionalProperties: false`).
   The shape of `data` per property is documented (not enforced) in
-  02-values.md; leaf strictness arrives with v2 (05-versioning.md).
+  02-values.md; the v2 freeze added strictness ONLY for the composition
+  structures (`slot`, `meta`) — full per-property leaf strictness
+  remains future work.
 - Two flattening passes shape `data` before emission
   (`IRPropertySerializer`): single-field unwrap (`{"value": X}` → `X`)
   and deep-flatten of `{type-discriminator + single object field}`
   (`{"type":"length","length":{"px":10}}` → `{"type":"length","px":10}`).
   Consequences of these passes are called out per-shape in 02-values.md.
 
-## Selector / media buckets
+## Selector / media buckets (identical in v1 and v2)
 
 ```json
 { "condition": "hover",             "properties": [ <property>, ... ] }
@@ -86,3 +115,15 @@ Every entry in any `properties` array is exactly:
   (`:hover` → `"hover"`), per `IRSelector` KDoc in `IRDocument.kt`.
 - `query` is the raw media query string, parentheses included.
 - Both buckets are strict: exactly the two keys shown.
+
+## Appendix: the v1 envelope (deprecation window only)
+
+A v1 document is `{ "components": [ ... ] }` with **no version field**.
+The v1 component emits, in order: `id`, `name`, `properties`,
+`selectors` (omit-when-empty), `media` (omit-when-empty), `children`
+(nested array of components, omit-when-null-or-empty), `_text`
+(omit-when-null), `_role` (omit-when-null). `_tag` and `_pseudo` are
+part of the v1 wire vocabulary (read by the runtimes) but were never
+emitted by the converter — see 04-metadata-fields.md for that history.
+`--emit-ir v1` reproduces this byte-identically until the flag is
+removed.

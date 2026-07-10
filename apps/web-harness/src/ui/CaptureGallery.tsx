@@ -19,6 +19,7 @@
 import React from 'react';
 import type { IRComponent, IRDocument } from '@style-converter/web/core/ir/IRModels';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
+import { composeTree, type ComposedNode } from '../sdui/Composer';
 
 interface CaptureGalleryProps {
   document: IRDocument;
@@ -205,21 +206,24 @@ export function parentCreatesContext(parent: IRComponent): boolean {
  * rule applies on every platform so capture indices stay aligned across
  * iOS/Android/web for the inject-wpt-block diff matching.
  */
-function flatten(components: IRComponent[]): IRComponent[] {
-  const out: IRComponent[] = [];
-  // Walker. When `suppressChildren` is true we still emit `c`, but we skip
-  // its children — they are not separately captured because the visible
-  // composition lives inside `c`'s own capture canvas.
-  const walk = (c: IRComponent) => {
-    out.push(c);
-    if (!c.children || c.children.length === 0) return;
+function flatten(roots: ComposedNode[]): ComposedNode[] {
+  const out: ComposedNode[] = [];
+  // Walker over the COMPOSED tree (slot refs → nodes, Composer.ts). The
+  // pre-order emit matches the converter's IRFlattener numbering, so
+  // capture indices are stable across the v1→v2 wire flip. When the
+  // parent creates a paint context we still emit it, but skip its
+  // children — they are not separately captured because the visible
+  // composition lives inside the parent's own capture canvas.
+  const walk = (n: ComposedNode) => {
+    out.push(n);
+    if (n.children.length === 0) return;
     // If this parent creates a paint context, its descendants are visually
     // dependent on the parent wrapper. Emitting them standalone leaks an
     // un-contextualised render into the comparator → drop them.
-    if (parentCreatesContext(c)) return;
-    c.children.forEach(walk);
+    if (parentCreatesContext(n.component)) return;
+    n.children.forEach(walk);
   };
-  components.forEach(walk);
+  roots.forEach(walk);
   return out;
 }
 
@@ -233,15 +237,20 @@ export function CaptureGallery({ document }: CaptureGalleryProps) {
   //
   // Legacy 327-pair flow (WPT_MODE=false): unchanged — flatten + emit one
   // canvas per descendant, parentCreatesContext-suppressed where needed.
+  // Compose the flat v2 wire into the preview tree first (slot refs →
+  // nodes; a zero-slot Mode B doc composes to a flat root list). "Top-
+  // level component" below means a composed ROOT — for the flat wire the
+  // slot-free entries, which is exactly what the nested v1 roots were.
+  const roots = React.useMemo(() => composeTree(document), [document]);
   const items = React.useMemo(
-    () => (WPT_MODE ? document.components : flatten(document.components)),
-    [document]
+    () => (WPT_MODE ? roots : flatten(roots)),
+    [roots]
   );
 
   return (
     <div style={containerStyle}>
-      {items.map((component, index) => (
-        <CaptureCanvas key={component.id || index} component={component} index={index} />
+      {items.map((node, index) => (
+        <CaptureCanvas key={node.component.id || index} node={node} index={index} />
       ))}
       {/* Sentinel so Puppeteer can tell when the full list has rendered. */}
       <div data-capture-ready={items.length} style={{ height: 0, overflow: 'hidden' }} />
@@ -250,12 +259,16 @@ export function CaptureGallery({ document }: CaptureGalleryProps) {
 }
 
 interface CaptureCanvasProps {
-  component: IRComponent;
+  /** Composed node — the component plus its slot-composed subtree. */
+  node: ComposedNode;
   index: number;
 }
 
 /** Single chromeless capture surface. */
-export function CaptureCanvas({ component, index }: CaptureCanvasProps) {
+export function CaptureCanvas({ node, index }: CaptureCanvasProps) {
+  // Data attributes still come from the component itself (id/name drive
+  // the Puppeteer capture filenames — unchanged contract).
+  const component = node.component;
   // WPT mode: switch to a viewport-sized canvas (390×600 minimum) with NO
   // padding so the SDUI scene shares the browser-ref's coordinate system
   // exactly. The min-height floor prevents the
@@ -274,7 +287,7 @@ export function CaptureCanvas({ component, index }: CaptureCanvasProps) {
       data-capture-name={component.name}
       style={style}
     >
-      <ComponentRenderer component={component} />
+      <ComponentRenderer node={node} />
     </div>
   );
 }

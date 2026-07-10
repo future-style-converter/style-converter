@@ -1,17 +1,21 @@
 // schema/conformance/run.test.mjs — unit tests for the conformance runner
 // itself (node:test, run with `node --test schema/conformance/run.test.mjs`).
 //
-// Covers: schema compiles; a valid document passes; each envelope-level
-// mutation fails with a pointed error; the CLI exits 0 on the goldens.
+// Covers: both schemas compile; valid v1 AND v2 documents pass their own
+// contract; each envelope-level mutation fails with a pointed error
+// (including the v2 hard errors: children key, missing version pair,
+// unknown slot/meta keys); the CLI exits 0 on the goldens.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { makeValidator, validateDocument } from './run.mjs';
+import { makeValidator, makeValidatorV2, validateDocument } from './run.mjs';
 
-// One compiled validator shared across tests (compilation is the slow part).
+// One compiled validator per contract shared across tests (compilation is
+// the slow part).
 const validate = makeValidator();
+const validateV2 = makeValidatorV2();
 
 // A minimal-but-complete valid document exercising every envelope level.
 function validDoc() {
@@ -127,9 +131,148 @@ test('data accepts every JSON kind (permissive leaves by design)', () => {
   assert.equal(ok, true, JSON.stringify(errors));
 });
 
+// ---------------------------------------------------------------------------
+// IR v2 — flat-list slot/placement contract (schema/ir-v2.schema.json)
+// ---------------------------------------------------------------------------
+
+// A minimal-but-complete valid v2 document exercising every envelope level:
+// version pair, flat components, slot ref, renamed text/pseudos/meta fields.
+function validDocV2() {
+  return {
+    irVersion: 2,
+    minReaderVersion: 2,
+    components: [
+      {
+        id: 'card-001',
+        name: 'Card',
+        properties: [
+          { type: 'Display', data: 'GRID' },
+          { type: 'PaddingTop', data: { px: 16.0 } },
+        ],
+        selectors: [{ condition: 'hover', properties: [{ type: 'Opacity', data: 0.5 }] }],
+        media: [{ query: '(min-width: 768px)', properties: [] }],
+        text: 'hello',
+        meta: { sourceTag: 'section', role: 'body-root' },
+      },
+      {
+        id: 'thumb-002',
+        name: 'Thumb',
+        // ITEM-scoped claims live on the child as plain property envelopes.
+        properties: [
+          { type: 'GridRowStart', data: 'media' },
+          { type: 'ZIndex', data: 3 },
+        ],
+        slot: { parent: 'card-001' },
+        pseudos: { before: { properties: [] } },
+      },
+    ],
+  };
+}
+
+test('v2: valid flat document passes', () => {
+  const { ok, errors } = validateDocument(validateV2, validDocV2());
+  assert.equal(ok, true, JSON.stringify(errors));
+});
+
+test('v2: zero-slot document is valid (Mode B — composition supplied externally)', () => {
+  const doc = validDocV2();
+  delete doc.components[1].slot;
+  assert.equal(validateDocument(validateV2, doc).ok, true);
+});
+
+test('v2: children key is a hard error (flat list only)', () => {
+  const doc = validDocV2();
+  doc.components[0].children = [{ id: 'x', name: 'x', properties: [] }];
+  const { ok, errors } = validateDocument(validateV2, doc);
+  assert.equal(ok, false);
+  assert.ok(errors.some((e) => e.message.includes('children')));
+});
+
+test('v2: missing irVersion fails (version pair is mandatory)', () => {
+  const doc = validDocV2();
+  delete doc.irVersion;
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: missing minReaderVersion fails', () => {
+  const doc = validDocV2();
+  delete doc.minReaderVersion;
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: wrong irVersion value fails (const 2)', () => {
+  const doc = validDocV2();
+  doc.irVersion = 3;
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: slot without parent fails (parent is required inside the object)', () => {
+  const doc = validDocV2();
+  doc.components[1].slot = { name: 'content' };
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: unknown slot key fails (slot is a frozen structure)', () => {
+  const doc = validDocV2();
+  doc.components[1].slot = { parent: 'card-001', index: 0 };
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: explicit non-default slot name is valid (multi-slot reservation)', () => {
+  const doc = validDocV2();
+  doc.components[1].slot = { parent: 'card-001', name: 'header' };
+  assert.equal(validateDocument(validateV2, doc).ok, true);
+});
+
+test('v2: legacy underscore names are rejected (_text/_role renamed)', () => {
+  const doc = validDocV2();
+  doc.components[0]._text = 'old name';
+  const { ok, errors } = validateDocument(validateV2, doc);
+  assert.equal(ok, false);
+  assert.ok(errors.some((e) => e.message.includes('_text')));
+});
+
+test('v2: unknown meta key fails (meta is a frozen structure)', () => {
+  const doc = validDocV2();
+  doc.components[0].meta = { role: 'body-root', extra: true };
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: empty meta object fails (omit-when-empty ⇒ present is non-empty)', () => {
+  const doc = validDocV2();
+  doc.components[0].meta = {};
+  assert.equal(validateDocument(validateV2, doc).ok, false);
+});
+
+test('v2: empty-string text is legal (extracted-but-empty signal, carried over)', () => {
+  const doc = validDocV2();
+  doc.components[0].text = '';
+  assert.equal(validateDocument(validateV2, doc).ok, true);
+});
+
+test('v2: data accepts every JSON kind (leaves stay permissive by design)', () => {
+  const doc = validDocV2();
+  doc.components[0].properties = [
+    { type: 'A', data: null },
+    { type: 'B', data: true },
+    { type: 'C', data: [] },
+    { type: 'D', data: {} },
+    { type: 'E', data: 'FLEX' },
+    { type: 'F', data: 700 },
+  ];
+  const { ok, errors } = validateDocument(validateV2, doc);
+  assert.equal(ok, true, JSON.stringify(errors));
+});
+
+test('v2: a v1-shaped document (no version pair, nested children) fails the v2 contract', () => {
+  // The v1 validDoc() carries _text/_role/children — all three are v2
+  // violations on top of the missing version pair.
+  assert.equal(validateDocument(validateV2, validDoc()).ok, false);
+});
+
 test('CLI: default mode exits 0 on the golden fixtures', () => {
   const runner = fileURLToPath(new URL('./run.mjs', import.meta.url));
   // Throws on non-zero exit — that IS the assertion.
   const out = execFileSync(process.execPath, [runner], { encoding: 'utf8' });
-  assert.match(out, /IR v1 conformance: all documents valid/);
+  assert.match(out, /IR conformance: all documents valid \(v1 goldens \+ v2 goldens\)/);
 });

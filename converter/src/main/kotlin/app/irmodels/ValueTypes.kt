@@ -1337,11 +1337,21 @@ object PaddingValueSerializer : KSerializer<PaddingValue> {
     override fun deserialize(decoder: Decoder): PaddingValue {
         require(decoder is JsonDecoder)
         val element = decoder.decodeJsonElement()
+        // Honest v2 reader, matching what serialize() ACTUALLY emits:
+        //  - Expression → {"expr": ...}
+        //  - Length     → IRLength object ({"px":…} and/or {"original":…})
+        //  - Keyword    → string primitive (global keywords)
+        //  - Percentage → raw NUMBER primitive (IRPercentageSerializer)
+        // The old reader branched on containsKey("u") — a key IRLength
+        // never emits at top level (u lives inside "original") — so every
+        // Length round-tripped into the Percentage branch and crashed.
         return when {
-            element is JsonPrimitive && element.content in setOf("inherit", "initial", "unset", "revert", "revert-layer") ->
-                PaddingValue.Keyword(element.content)
             element is JsonObject && element.containsKey("expr") -> PaddingValue.Expression(element["expr"]!!.jsonPrimitive.content)
-            element is JsonObject && element.containsKey("u") -> PaddingValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
+            // Any other object is the IRLength dual-storage shape.
+            element is JsonObject -> PaddingValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
+            // String primitives are keywords; only globals are ever emitted.
+            element is JsonPrimitive && element.isString -> PaddingValue.Keyword(element.content)
+            // Bare number == percentage (the IRPercentage wire form).
             else -> PaddingValue.Percentage(decoder.json.decodeFromJsonElement(IRPercentage.serializer(), element))
         }
     }
@@ -1362,10 +1372,14 @@ object MarginValueSerializer : KSerializer<MarginValue> {
     override fun deserialize(decoder: Decoder): MarginValue {
         require(decoder is JsonDecoder)
         val element = decoder.decodeJsonElement()
+        // Mirrors serialize(): "auto" string → Auto; {"expr"} → Expression;
+        // any other OBJECT is the IRLength dual-storage shape; a bare
+        // number is the IRPercentage wire form. (The old containsKey("u")
+        // branch never matched — see PaddingValueSerializer note.)
         return when {
             element is JsonPrimitive && element.content == "auto" -> MarginValue.Auto()
             element is JsonObject && element.containsKey("expr") -> MarginValue.Expression(element["expr"]!!.jsonPrimitive.content)
-            element is JsonObject && element.containsKey("u") -> MarginValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
+            element is JsonObject -> MarginValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
             else -> MarginValue.Percentage(decoder.json.decodeFromJsonElement(IRPercentage.serializer(), element))
         }
     }
@@ -1387,11 +1401,15 @@ object ScrollPaddingValueSerializer : KSerializer<ScrollPaddingValue> {
     override fun deserialize(decoder: Decoder): ScrollPaddingValue {
         require(decoder is JsonDecoder)
         val element = decoder.decodeJsonElement()
+        // Mirrors serialize(): "auto" → Auto; {"kw"} → Keyword; {"raw"} →
+        // Raw; any other OBJECT is the IRLength dual-storage shape; a bare
+        // number is the IRPercentage wire form. (Old containsKey("u")
+        // branch was unreachable — see PaddingValueSerializer note.)
         return when {
             element is JsonPrimitive && element.content == "auto" -> ScrollPaddingValue.Auto()
             element is JsonObject && element.containsKey("kw") -> ScrollPaddingValue.Keyword(element["kw"]!!.jsonPrimitive.content)
             element is JsonObject && element.containsKey("raw") -> ScrollPaddingValue.Raw(element["raw"]!!.jsonPrimitive.content)
-            element is JsonObject && element.containsKey("u") -> ScrollPaddingValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
+            element is JsonObject -> ScrollPaddingValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
             else -> ScrollPaddingValue.Percentage(decoder.json.decodeFromJsonElement(IRPercentage.serializer(), element))
         }
     }
@@ -1412,13 +1430,17 @@ object BorderRadiusValueSerializer : KSerializer<BorderRadiusValue> {
     override fun deserialize(decoder: Decoder): BorderRadiusValue {
         require(decoder is JsonDecoder)
         val element = decoder.decodeJsonElement()
+        // Mirrors serialize(): {"raw"} → Raw; any other OBJECT is the
+        // IRLength dual-storage shape; string primitive → Keyword (only
+        // keywords are emitted as strings); bare number → Percentage.
+        // (Old containsKey("u") branch was unreachable — see
+        // PaddingValueSerializer note.)
         return when {
-            element is JsonPrimitive && element.content in setOf("inherit", "initial", "unset", "revert", "revert-layer") ->
-                BorderRadiusValue.Keyword(element.content)
             element is JsonObject && element.containsKey("raw") ->
                 BorderRadiusValue.Raw(element["raw"]!!.jsonPrimitive.content)
-            element is JsonObject && element.containsKey("u") ->
+            element is JsonObject ->
                 BorderRadiusValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
+            element is JsonPrimitive && element.isString -> BorderRadiusValue.Keyword(element.content)
             else -> BorderRadiusValue.Percentage(decoder.json.decodeFromJsonElement(IRPercentage.serializer(), element))
         }
     }
@@ -1443,14 +1465,21 @@ object AnimationRangeValueSerializer : KSerializer<AnimationRangeValue> {
     override fun deserialize(decoder: Decoder): AnimationRangeValue {
         require(decoder is JsonDecoder)
         val element = decoder.decodeJsonElement()
+        // Mirrors serialize(): {"name","offset"} → NamedRange; any other
+        // OBJECT is the IRLength dual-storage shape (Percentage is NEVER
+        // an object — IRPercentageSerializer emits a bare number, which
+        // the old `element is JsonObject -> Percentage` branch got exactly
+        // backwards); bare number → Percentage; string → Keyword (Raw
+        // shares the string wire form and reads back as Keyword — a
+        // documented asymmetry, both carry verbatim CSS text).
         return when {
-            element is JsonObject && element.containsKey("u") -> AnimationRangeValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
             element is JsonObject && element.containsKey("name") -> {
                 val name = TimelineRangeName.valueOf((element["name"] as JsonPrimitive).content.uppercase().replace("-", "_"))
                 val offset = IRPercentage((element["offset"] as JsonPrimitive).double)
                 AnimationRangeValue.NamedRange(name, offset)
             }
-            element is JsonObject -> AnimationRangeValue.Percentage(decoder.json.decodeFromJsonElement(IRPercentage.serializer(), element))
+            element is JsonObject -> AnimationRangeValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
+            element is JsonPrimitive && !element.isString -> AnimationRangeValue.Percentage(decoder.json.decodeFromJsonElement(IRPercentage.serializer(), element))
             else -> AnimationRangeValue.Keyword((element as JsonPrimitive).content)
         }
     }
@@ -1505,9 +1534,13 @@ object PositionValueSerializer : KSerializer<PositionValue> {
     override fun deserialize(decoder: Decoder): PositionValue {
         require(decoder is JsonDecoder)
         val element = decoder.decodeJsonElement()
+        // Mirrors serialize(): every OBJECT is the IRLength dual-storage
+        // shape (a Percentage is a bare number, never an object — the old
+        // object→Percentage branch was backwards); bare number →
+        // Percentage; string → Keyword (left/center/right/top/bottom).
         return when {
-            element is JsonObject && element.containsKey("u") -> PositionValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
-            element is JsonObject -> PositionValue.Percentage(decoder.json.decodeFromJsonElement(IRPercentage.serializer(), element))
+            element is JsonObject -> PositionValue.Length(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
+            element is JsonPrimitive && !element.isString -> PositionValue.Percentage(decoder.json.decodeFromJsonElement(IRPercentage.serializer(), element))
             else -> PositionValue.Keyword((element as JsonPrimitive).content)
         }
     }
@@ -1657,18 +1690,25 @@ object SizeValueSerializer : KSerializer<SizeValue> {
     override fun deserialize(decoder: Decoder): SizeValue {
         require(decoder is JsonDecoder)
         val element = decoder.decodeJsonElement()
+        // Mirrors serialize(): {"fit-content"} → FitContent; {"expr"} →
+        // Expression; any other OBJECT is the IRLength dual-storage shape
+        // (the old containsKey("u") branch never matched, so every Length
+        // round-tripped into the string-keyword fallback); bare NUMBER →
+        // PercentageValue (IRPercentageSerializer wire form — previously
+        // swallowed by the Keyword fallback too); remaining strings are
+        // the keyword family.
         return when {
-            element is JsonObject && element.containsKey("u") -> SizeValue.LengthValue(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
             element is JsonObject && element.containsKey("fit-content") -> {
                 val fitVal = element["fit-content"]
                 SizeValue.FitContent(if (fitVal is JsonNull) null else decoder.json.decodeFromJsonElement(IRLength.serializer(), fitVal!!))
             }
             element is JsonObject && element.containsKey("expr") -> SizeValue.Expression(element["expr"]!!.jsonPrimitive.content)
+            element is JsonObject -> SizeValue.LengthValue(decoder.json.decodeFromJsonElement(IRLength.serializer(), element))
+            element is JsonPrimitive && !element.isString -> SizeValue.PercentageValue(decoder.json.decodeFromJsonElement(IRPercentage.serializer(), element))
             element is JsonPrimitive && element.content == "auto" -> SizeValue.Auto
             element is JsonPrimitive && element.content == "none" -> SizeValue.None
             element is JsonPrimitive && element.content == "max-content" -> SizeValue.MaxContent
             element is JsonPrimitive && element.content == "min-content" -> SizeValue.MinContent
-            element is JsonPrimitive && element.content in setOf("inherit", "initial", "unset", "revert") -> SizeValue.Keyword(element.content)
             element is JsonPrimitive -> SizeValue.Keyword(element.content)
             else -> SizeValue.Auto
         }
