@@ -2,17 +2,20 @@
 //  ConformanceTests.swift
 //  StyleConverterRuntimeTests
 //
-//  SwiftUI-runtime side of the IR v1 wire contract
-//  (schema/ir-v1.schema.json + schema/spec/*). Decodes EVERY golden
-//  fixture in schema/conformance/fixtures/ through the runtime's real
-//  IR-loading path — JSONDecoder into IRDocument/IRValue, exactly what
-//  the harness's ContentView.loadDocument does — and asserts sentinel
-//  extractions per shape family.
+//  SwiftUI-runtime side of the IR wire contract, both generations:
 //
-//  NOTE the documented caveat (schema/spec/04-metadata-fields.md): the
-//  Swift model has no `_role`/`_pseudo` CodingKeys, so a keyed container
-//  silently drops them. The sentinel is "decode survives their
-//  presence", not "they round-trip".
+//    v2 (schema/ir-v2.schema.json + schema/spec/01/03/05): every golden
+//    in schema/conformance/fixtures/v2/ decodes through the runtime's
+//    real IR-loading path (JSONDecoder → IRDocument → strict
+//    IRWireV2Reader → IRComposer), with sentinels for the flat/slot
+//    composition, the renames (text/pseudos/meta), the strictness rules
+//    (children hard error, unknown envelope keys, minReaderVersion
+//    refusal) and the placement-claims contract.
+//
+//    v1 (schema/ir-v1.schema.json, deprecation window): the original
+//    golden set keeps decoding through the tolerant legacy path, with
+//    the underscore hints now TRANSLATED into their v2 homes
+//    (text / meta.sourceTag / meta.role) instead of dropped.
 //
 
 import Foundation
@@ -37,14 +40,32 @@ final class ConformanceTests: XCTestCase {
             .appendingPathComponent("schema/conformance/fixtures", isDirectory: true)
     }
 
+    // The v2 golden set lives in the v2/ subdirectory (1:1 filenames with
+    // the v1 set + the two v2-only goldens).
+    private static var fixturesDirV2: URL {
+        fixturesDir.appendingPathComponent("v2", isDirectory: true)
+    }
+
     // Real load path: raw bytes → JSONDecoder → IRDocument (mirrors the
-    // harness's ContentView.loadDocument).
+    // harness's ContentView.loadDocument). v1 goldens.
     private func load(_ name: String) throws -> IRDocument {
         let data = try Data(contentsOf: Self.fixturesDir.appendingPathComponent(name))
         return try JSONDecoder().decode(IRDocument.self, from: data)
     }
 
-    // Depth-first walk — children are ARRAYS on the wire (spec 03).
+    // Same loader against the v2 golden directory.
+    private func loadV2(_ name: String) throws -> IRDocument {
+        let data = try Data(contentsOf: Self.fixturesDirV2.appendingPathComponent(name))
+        return try JSONDecoder().decode(IRDocument.self, from: data)
+    }
+
+    // Inline-JSON document decode for the strictness error-path tests.
+    private func decodeDoc(_ json: String) throws -> IRDocument {
+        try JSONDecoder().decode(IRDocument.self, from: Data(json.utf8))
+    }
+
+    // Depth-first walk of the COMPOSED tree — v1 children come from the
+    // wire, v2 children from IRComposer; either way this sees every node.
     private func walk(_ components: [IRComponent], _ visit: (IRComponent) -> Void) {
         for c in components {
             visit(c)
@@ -52,7 +73,7 @@ final class ConformanceTests: XCTestCase {
         }
     }
 
-    // Find a component by unique name anywhere in the tree.
+    // Find a component by unique name anywhere in the composed tree.
     private func byName(_ doc: IRDocument, _ name: String) throws -> IRComponent {
         var found: IRComponent?
         walk(doc.components) { if $0.name == name { found = $0 } }
@@ -75,7 +96,7 @@ final class ConformanceTests: XCTestCase {
         return nil
     }
 
-    // MARK: - umbrella: every golden decodes through the real path
+    // MARK: - umbrella: every v1 golden decodes through the real path
 
     func testEveryGoldenFixtureDecodes() throws {
         let files = try FileManager.default
@@ -85,16 +106,205 @@ final class ConformanceTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(files.count, 12, "expected the full golden set")
         for file in files {
             // Decode MUST NOT throw — including unknown property types
-            // (spec 05 tolerance rule 1) and unknown metadata keys
-            // (_role/_pseudo, the spec-04 model-gap caveat).
+            // (spec 05 tolerance rule 1) and the v1 underscore metadata
+            // keys, which now translate instead of dropping.
             let doc = try JSONDecoder().decode(IRDocument.self, from: Data(contentsOf: file))
+            XCTAssertEqual(doc.irVersion, 1, "\(file.lastPathComponent): v1 golden must take the v1 path")
             walk(doc.components) { c in
                 XCTAssertFalse(c.id.isEmpty, "\(file.lastPathComponent): empty id")
             }
         }
     }
 
-    // MARK: - per-family sentinels
+    // MARK: - umbrella: every v2 golden decodes through the strict path
+
+    func testEveryV2GoldenFixtureDecodes() throws {
+        let files = try FileManager.default
+            .contentsOfDirectory(at: Self.fixturesDirV2, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension == "json" }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        // 12 v1 mirrors + slot-composition + placement-claims.
+        XCTAssertGreaterThanOrEqual(files.count, 14, "expected the full v2 golden set")
+        for file in files {
+            let doc = try JSONDecoder().decode(IRDocument.self, from: Data(contentsOf: file))
+            XCTAssertEqual(doc.irVersion, 2, "\(file.lastPathComponent): v2 golden must take the v2 path")
+            // The flat wire list is preserved alongside the composition.
+            XCTAssertNotNil(doc.flatComponents, "\(file.lastPathComponent): flat list missing")
+            walk(doc.components) { c in
+                XCTAssertFalse(c.id.isEmpty, "\(file.lastPathComponent): empty id")
+            }
+        }
+    }
+
+    // MARK: - v2 slot composition
+
+    func testV2SlotComposition() throws {
+        // 6 flat entries → one 3-level tree: SlotRoot > (band__0 >
+        // (cell__0__0, cell__0__1), band__1 > cell__1__0).
+        let doc = try loadV2("slot-composition.json")
+        XCTAssertEqual(doc.flatComponents?.count, 6, "flat wire list must keep all entries")
+        // Exactly one root: the only slot-free entry.
+        XCTAssertEqual(doc.components.count, 1)
+        let root = try XCTUnwrap(doc.components.first)
+        XCTAssertEqual(root.name, "SlotRoot")
+        XCTAssertNil(root.slot, "roots omit slot")
+        // Sibling-order rule: flat array order IS composition order.
+        XCTAssertEqual(root.children?.map(\.name), ["band__0", "band__1"])
+        XCTAssertEqual(root.children?[0].children?.map(\.name), ["cell__0__0", "cell__0__1"])
+        XCTAssertEqual(root.children?[1].children?.map(\.name), ["cell__1__0"])
+        // slot round-trips on composed children (spec 05 rule 4), with
+        // the omitted default name reconstructed.
+        XCTAssertEqual(root.children?[0].slot?.parent, "slotroot-001")
+        XCTAssertEqual(root.children?[0].slot?.name, "content")
+        // Leaf children are nil, never [] (renderer placeholder contract).
+        XCTAssertNil(root.children?[1].children?[0].children)
+    }
+
+    // MARK: - v2 renames (text / meta)
+
+    func testV2TextAndMeta() throws {
+        let doc = try loadV2("text-and-role.json")
+        // `text` (v2 rename of `_text`), empty-string-is-meaningful.
+        XCTAssertEqual(try byName(doc, "TextRole_BodyRoot").text, "Test passes if this text is green")
+        XCTAssertEqual(try byName(doc, "TextRole_EmptyStringText").text, "")
+        XCTAssertNil(try byName(doc, "TextRole_NoMetadata").text)
+        // `meta.role` (v2 home of `_role`) — no longer dropped on iOS.
+        XCTAssertEqual(try byName(doc, "TextRole_BodyRoot").meta?.role, "body-root")
+        XCTAssertNil(try byName(doc, "TextRole_NoMetadata").meta)
+    }
+
+    // MARK: - v2 strictness: children is a hard error
+
+    func testV2ChildrenKeyIsHardError() {
+        // The one sanctioned break: `children` does not exist in v2.
+        let json = """
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [],
+            "children": [ { "id": "b-1", "name": "B", "properties": [] } ] }
+        ] }
+        """
+        XCTAssertThrowsError(try decodeDoc(json),
+                             "children inside a v2 document must be a hard decode error")
+    }
+
+    // MARK: - v2 strictness: unknown envelope keys error
+
+    func testV2UnknownEnvelopeKeysError() {
+        // Document level (spec 05 rule 2).
+        XCTAssertThrowsError(try decodeDoc("""
+        { "irVersion": 2, "minReaderVersion": 2, "components": [], "extra": 1 }
+        """), "unknown document key must error")
+        // Component level (additionalProperties:false).
+        XCTAssertThrowsError(try decodeDoc("""
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [], "_text": "x" }
+        ] }
+        """), "v1 underscore spelling inside a v2 document must error")
+        // Slot level.
+        XCTAssertThrowsError(try decodeDoc("""
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [],
+            "slot": { "parent": "p-1", "order": 3 } }
+        ] }
+        """), "unknown slot key must error")
+        // meta level, including the minProperties:1 rule.
+        XCTAssertThrowsError(try decodeDoc("""
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [], "meta": {} }
+        ] }
+        """), "empty meta must error (minProperties 1)")
+    }
+
+    // MARK: - v2 strictness: version pair
+
+    func testV2VersionPairRules() {
+        // minReaderVersion above what this reader implements → refuse.
+        XCTAssertThrowsError(try decodeDoc("""
+        { "irVersion": 3, "minReaderVersion": 3, "components": [] }
+        """), "must refuse minReaderVersion > 2")
+        // Version pair is mandatory once irVersion appears.
+        XCTAssertThrowsError(try decodeDoc("""
+        { "irVersion": 2, "components": [] }
+        """), "missing minReaderVersion must error")
+    }
+
+    // MARK: - v2 tolerance: unknown property types decode
+
+    func testV2UnknownPropertyTolerance() throws {
+        // The v2 mirror golden keeps the FrobnicateCorner unknown type —
+        // the {type,data} envelope decodes and dispatch skips it later
+        // (spec 05 rule 1).
+        let doc = try loadV2("unknown-property-tolerance.json")
+        let mixed = try byName(doc, "Unknown_MixedWithKnown")
+        XCTAssertEqual(mixed.properties[0].type, "FrobnicateCorner")
+        XCTAssertEqual(mixed.properties[1].type, "Width")
+        XCTAssertEqual(asDouble(member(mixed.properties[1].data, "px")), 100.0)
+    }
+
+    // MARK: - v2 composer edge cases
+
+    func testV2DanglingSlotParentBecomesRoot() throws {
+        // spec 03: dangling slot.parent → treat as root + warning —
+        // never a crash, never a dropped component.
+        let doc = try decodeDoc("""
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [] },
+          { "id": "b-1", "name": "B", "properties": [],
+            "slot": { "parent": "ghost-9" } }
+        ] }
+        """)
+        XCTAssertEqual(doc.components.map(\.name), ["A", "B"], "dangler must be promoted to root")
+        // The slot itself still round-trips even when dangling.
+        XCTAssertEqual(doc.components[1].slot?.parent, "ghost-9")
+    }
+
+    func testV2ModeBZeroSlotDocument() throws {
+        // Mode B: no slot fields at all — composition supplied
+        // externally; every entry is a root and engines need no change.
+        let doc = try decodeDoc("""
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [] },
+          { "id": "b-1", "name": "B", "properties": [] }
+        ] }
+        """)
+        XCTAssertEqual(doc.components.count, 2)
+        XCTAssertTrue(doc.components.allSatisfy { $0.children == nil && $0.slot == nil })
+    }
+
+    // MARK: - v2 placement claims (the ITEM-scope contract)
+
+    func testV2PlacementClaims() throws {
+        // placement-claims.json pins the wire decision: ITEM properties
+        // are ordinary {type,data} envelopes on the CHILD; the runtime
+        // routes them to ItemPlacement parent-data.
+        let doc = try loadV2("placement-claims.json")
+        // Two hosts (grid + flex), six claiming children.
+        XCTAssertEqual(doc.components.count, 2)
+        // Grid line claims: grid-column 1/3 + grid-row-start 2.
+        let lineClaim = try byName(doc, "line-claim__1")
+        let linePlacement = ItemPlacementExtractor.extract(from: lineClaim.properties)
+        XCTAssertEqual(linePlacement.grid.request.colStart, 1)
+        XCTAssertEqual(linePlacement.grid.request.colEnd, 3)
+        XCTAssertEqual(linePlacement.grid.request.rowStart, 2)
+        // Span claim: grid-column-start: span 2.
+        let spanClaim = try byName(doc, "span-claim__2")
+        let spanPlacement = ItemPlacementExtractor.extract(from: spanClaim.properties)
+        XCTAssertEqual(spanPlacement.grid.request.colSpan, 2)
+        XCTAssertEqual(spanPlacement.grid.request.rowStart, 1)
+        // Flex claims: grow 1 / shrink 0 / basis 40px / align-self center.
+        let flexClaim = try byName(doc, "flex-claim__0")
+        let flexPlacement = ItemPlacementExtractor.extract(from: flexClaim.properties)
+        XCTAssertEqual(flexPlacement.flex.grow, 1)
+        XCTAssertEqual(flexPlacement.flex.shrink, 0)
+        XCTAssertEqual(flexPlacement.flex.basisPx, 40)
+        XCTAssertEqual(flexPlacement.flex.alignSelf, .center)
+        // Paint claim: z-index 3.
+        let paintClaim = try byName(doc, "paint-claim__1")
+        let paintPlacement = ItemPlacementExtractor.extract(from: paintClaim.properties)
+        XCTAssertEqual(paintPlacement.paint.zIndex, 3)
+    }
+
+    // MARK: - per-family sentinels (v1 window)
 
     func testLengthsAllForms() throws {
         let doc = try load("lengths-all-forms.json")
@@ -146,11 +356,13 @@ final class ConformanceTests: XCTestCase {
 
     func testTextAndRole() throws {
         let doc = try load("text-and-role.json")
-        XCTAssertEqual(try byName(doc, "TextRole_BodyRoot")._text, "Test passes if this text is green")
-        XCTAssertEqual(try byName(doc, "TextRole_EmptyStringText")._text, "")  // "" meaningful, not nil
-        XCTAssertNil(try byName(doc, "TextRole_NoMetadata")._text)
-        // _role: no CodingKey in the Swift model — decode surviving IS the
-        // documented current behavior (spec 04 matrix).
+        // v1 `_text` translates to the v2 in-memory home `text`.
+        XCTAssertEqual(try byName(doc, "TextRole_BodyRoot").text, "Test passes if this text is green")
+        XCTAssertEqual(try byName(doc, "TextRole_EmptyStringText").text, "")  // "" meaningful, not nil
+        XCTAssertNil(try byName(doc, "TextRole_NoMetadata").text)
+        // v1 `_role` now translates to meta.role instead of dropping —
+        // the spec-04 model gap is closed by the v2 reader work.
+        XCTAssertEqual(try byName(doc, "TextRole_BodyRoot").meta?.role, "body-root")
     }
 
     func testChildrenNesting() throws {
@@ -158,7 +370,7 @@ final class ConformanceTests: XCTestCase {
         let parent = try byName(doc, "Parent")
         let child = try XCTUnwrap(parent.children?.first)
         XCTAssertEqual(child.name, "child__0")                 // map key became name (spec 03)
-        XCTAssertEqual(child.children?.first?._text, "leaf text")
+        XCTAssertEqual(child.children?.first?.text, "leaf text")
         XCTAssertNil(try byName(doc, "LeafSibling").children)  // omit-when-empty, never []
     }
 

@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.placement.itemPlacement
 import com.styleconverter.runtime.core.types.ValueExtractors
 import com.styleconverter.runtime.layout.grid.GridExtractor
 import com.styleconverter.runtime.layout.grid.GridTemplateAreas
@@ -153,9 +154,15 @@ object GridRenderer {
                 ) {
                     rowCells.forEach { cell ->
                         val child = sortedChildren[cell.childIndex]
-                        // Extract justify-self and align-self for individual item alignment
-                        val justifySelf = ComponentRenderer.extractJustifySelf(child.properties)
-                        val alignSelf = extractAlignSelf(child.properties)
+                        // v2 placement contract: read the child's ITEM
+                        // claims through the single placement union —
+                        // this grid consumes only the alignment claims it
+                        // owns (justify-self / align-self, css-align-3
+                        // §6); the flex block on the same child is inert.
+                        val placement = com.styleconverter.runtime.core.placement
+                            .ItemPlacementExtractor.extract(child.properties)
+                        val justifySelf = placement.justifySelf
+                        val alignSelf = placement.alignSelf
 
                         // Calculate content alignment from justify-self and align-self
                         val contentAlignment = getContentAlignment(justifySelf, alignSelf)
@@ -176,7 +183,16 @@ object GridRenderer {
                              alignSelf == ComponentRenderer.AlignSelf.AUTO)
 
                         Box(
-                            modifier = if (rowHeight != null) Modifier.fillMaxHeight() else Modifier,
+                            // itemPlacement publishes the child's claims
+                            // as parent-data on the measurable that
+                            // GridPlacedRow's Layout measures — the v2
+                            // parent-data channel (inert for measurement
+                            // today: the two-phase Column-of-rows
+                            // structure resolves placement pre-measure;
+                            // the single-Layout StyleGrid consumes it at
+                            // measure time when it lands, design §3.1).
+                            modifier = (if (rowHeight != null) Modifier.fillMaxHeight() else Modifier)
+                                .itemPlacement(placement),
                             contentAlignment = contentAlignment
                         ) {
                             // This cell already applied justify-self/align-self
@@ -222,17 +238,23 @@ object GridRenderer {
 
     /**
      * Pull the four explicit-placement longhands off a child's IR.
+     *
+     * v2 placement routing: the claims come from the CHILD-side placement
+     * union (core/placement/ItemPlacementExtractor — the same object
+     * ComponentHost publishes as parent-data), and this container
+     * consumes ONLY its own kind's block ([ItemPlacement.grid]); the flex
+     * / paint claims on the same child are inert here, exactly like
+     * `flex-grow` on a grid item in a browser. Resolution stays
+     * claimed-first-then-auto-flow in [placeItems] (css-grid-1 §8.5).
      */
     internal fun extractPlacementSpec(properties: List<IRProperty>): GridPlacementSpec {
-        fun lineOf(type: String): Int? = properties.firstOrNull { it.type == type }?.data?.let { d ->
-            ((d as? JsonObject)?.get("number") as? JsonPrimitive)?.intOrNull
-                ?: (d as? JsonPrimitive)?.intOrNull
-        }
+        val claims = com.styleconverter.runtime.core.placement.ItemPlacementExtractor
+            .extract(properties).grid
         return GridPlacementSpec(
-            colStart = lineOf("GridColumnStart"),
-            colEnd = lineOf("GridColumnEnd"),
-            rowStart = lineOf("GridRowStart"),
-            rowEnd = lineOf("GridRowEnd")
+            colStart = claims.colStart,
+            colEnd = claims.colEnd,
+            rowStart = claims.rowStart,
+            rowEnd = claims.rowEnd
         )
     }
 
@@ -829,25 +851,14 @@ object GridRenderer {
         }
     }
 
-    /**
-     * Extract align-self value from properties for grid items.
-     */
-    private fun extractAlignSelf(properties: List<IRProperty>): ComponentRenderer.AlignSelf {
-        properties.forEach { prop ->
-            if (prop.type == "AlignSelf") {
-                val keyword = ValueExtractors.extractKeyword(prop.data)?.uppercase()
-                return when (keyword) {
-                    "FLEX_START", "FLEX-START", "START" -> ComponentRenderer.AlignSelf.FLEX_START
-                    "FLEX_END", "FLEX-END", "END" -> ComponentRenderer.AlignSelf.FLEX_END
-                    "CENTER" -> ComponentRenderer.AlignSelf.CENTER
-                    "STRETCH" -> ComponentRenderer.AlignSelf.STRETCH
-                    "BASELINE" -> ComponentRenderer.AlignSelf.BASELINE
-                    else -> ComponentRenderer.AlignSelf.AUTO
-                }
-            }
-        }
-        return ComponentRenderer.AlignSelf.AUTO
-    }
+    // NOTE (v2 placement contract): GridRenderer's private extractAlignSelf
+    // copy was DELETED here — it was the exact "fix lands in a dead file"
+    // hazard the contract forbids (this copy still lacked the
+    // ANCHOR_CENTER→CENTER fold the live flex path gained in wave 4).
+    // Grid cells now read alignment claims from the single ITEM union
+    // (core/placement/ItemPlacementExtractor) in RenderGrid above; no
+    // committed baseline exercises anchor-center inside a grid, so the
+    // consolidation is pixel-neutral on the frozen set.
 
     /**
      * Convert align-self to vertical alignment.

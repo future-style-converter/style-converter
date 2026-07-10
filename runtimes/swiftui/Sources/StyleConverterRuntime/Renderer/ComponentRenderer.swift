@@ -250,8 +250,8 @@ public struct ComponentRenderer: View {
             // couldn't distribute justify-content free space, and never
             // stretched an auto-height child (FR_AlignSelf `d`). The
             // custom Layout implements css-flexbox-1 §8–§9 directly;
-            // per-child parameters ride the FlexItemSpec layout value
-            // attached in contentOrPlaceholder.
+            // per-child parameters ride the ItemPlacement layout value
+            // attached by ComponentHost (v2 placement contract).
             //
             // BUT only when there ARE children (css-flexbox-1 §4: flex
             // items are the container's in-flow children — an empty
@@ -376,7 +376,10 @@ public struct ComponentRenderer: View {
         // channel as flow children).
         let childCB = flexContentSize(style: style, vertical: false)
         ForEach(Array(outOfFlowChildren.enumerated()), id: \.offset) { _, child in
-            ComponentRenderer(component: child)
+            // v2: children render through ComponentHost (placement
+            // parent-data attached; inert here — the overlay ZStack
+            // reads no layout values).
+            ComponentHost(component: child)
                 // Reset the size-injection channels: an absolute child
                 // never stretch-inherits grid/flex geometry (it is not
                 // an item of the parent's formatting context).
@@ -406,10 +409,10 @@ public struct ComponentRenderer: View {
             // LazyVGrid centred items, ignored placement/spans, ignored
             // grid-template-rows, and expanded greedily to the canvas
             // width — all four flagged in the grid-2col/nested-3level
-            // wave. The plan (placement + alignment per subview) is
-            // computed once and shared with the stretch-height env
-            // injection in contentOrPlaceholder.
-            let plan = gridPlan(style: style)
+            // wave. v2: per-item placement arrives WITH the subviews via
+            // ItemPlacementKey (attached by ComponentHost); this call
+            // passes ONLY the container's own policy (tracks, gaps,
+            // *-items defaults) — zero child knowledge (design §2.1).
             CSSGridLayout(
                 // Column tracks from the template; a template-less grid
                 // is a single auto column per css-grid-1 §7.1.
@@ -419,9 +422,11 @@ public struct ComponentRenderer: View {
                 rowTemplate: agg?.gridTemplateRows?.tracks.map(\.kind),
                 // Implicit rows take the first grid-auto-rows size.
                 autoRows: agg?.gridAutoRows?.tracks.first?.kind,
-                requests: plan?.requests ?? [],
-                justify: plan?.justify ?? [],
-                align: plan?.align ?? [],
+                // Container-side alignment defaults — each arriving
+                // item's justify/align-self resolves against these
+                // inside the Layout (css-align-3 §6).
+                justifyItems: agg?.justifyItems,
+                alignItems: agg?.alignItems,
                 rowGap: gap.row,
                 columnGap: gap.column,
                 // Explicit CSS width ⇒ fr/% tracks split the proposal;
@@ -494,7 +499,12 @@ public struct ComponentRenderer: View {
                             // track widths consistent.
                             Color.clear
                         } else if let child = byArea[cellName] {
-                            ComponentRenderer(component: child)
+                            // v2: host-wrapped like every other child
+                            // (placement inert under SwiftUI Grid — this
+                            // legacy area path still matches by name;
+                            // TODO(v2): fold named areas into
+                            // CSSGridLayout claims and delete this).
+                            ComponentHost(component: child)
                                 // Text inheritance flows into area-placed
                                 // children the same as flow children.
                                 .environment(\.inheritedTextProperties,
@@ -517,28 +527,22 @@ public struct ComponentRenderer: View {
         }
     }
 
-    // MARK: - Grid plan (fidelity wave 1)
+    // MARK: - Grid stretch pre-pass (fidelity wave 1, v2-refactored)
 
-    /// Everything CSSGridLayout needs about this container's items, in
-    /// SUBVIEW order (leading `_text` placeholder first when present,
-    /// then the `order`-sorted children). Also carries the stretch-
-    /// height map keyed by SORTED-CHILD index for the environment
-    /// injection in contentOrPlaceholder.
-    struct GridPlan {
-        /// Placement request per subview.
-        var requests: [GridItemRequest]
-        /// Inline-axis alignment per subview.
-        var justify: [GridItemAlign]
-        /// Block-axis alignment per subview.
-        var align: [GridItemAlign]
-        /// Sorted-child index → fixed row height to stretch to.
-        var stretchHeights: [Int: CGFloat]
-    }
-
-    /// Build the grid plan for a `display: grid` container. Returns nil
-    /// for non-grid parents so contentOrPlaceholder can skip the env
-    /// injection entirely.
-    private func gridPlan(style: ComponentStyle) -> GridPlan? {
+    /// Static stretch-height map for a `display: grid` container, keyed
+    /// by SORTED-CHILD index — the paint-chain half of grid stretch
+    /// (css-align-3 §9): the row height is injected into the child's
+    /// environment so its OWN background/border paint at the stretched
+    /// height (an outer .frame can't reach the child's paint chain).
+    ///
+    /// v2 note: this is a RENDERER pre-pass over this component's own
+    /// children, not container-side child inspection — the placement
+    /// requests it simulates come from the exact same
+    /// ItemPlacementExtractor claims ComponentHost attaches for
+    /// CSSGridLayout, so the simulated assignment provably matches what
+    /// the Layout resolves at measure time. Returns nil for non-grid
+    /// parents so contentOrPlaceholder skips the env injection entirely.
+    private func gridStretchHeights(style: ComponentStyle) -> [Int: CGFloat]? {
         // Only grid containers with children get a plan. Mirrors the
         // gridKind decision in layoutContainer: an explicit template
         // routes to the grid path even without `display: grid` (legacy
@@ -552,53 +556,34 @@ public struct ComponentRenderer: View {
               !rawChildren.isEmpty else { return nil }
         // Same ordering contentOrPlaceholder renders with (CSS `order`).
         let children = FlexboxApplier.sorted(rawChildren)
-        // A parent that carries _text AND children renders the text as a
+        // A parent that carries text AND children renders the text as a
         // leading placeholder — CSS wraps loose grid text in an
-        // anonymous grid ITEM, so it participates in placement.
-        let hasLeadingText = (component._text?.isEmpty == false)
+        // anonymous grid ITEM, so it participates in placement (as a
+        // nil-placement subview: auto-placed, start-aligned).
+        let hasLeadingText = (component.text?.isEmpty == false)
         var requests: [GridItemRequest] = []
-        var justify: [GridItemAlign] = []
-        var align: [GridItemAlign] = []
         // Track per-child "block size may stretch" flags for the env map.
         var stretchFlags: [Bool] = []
         if hasLeadingText {
-            // The anonymous text item auto-places at the first free cell
-            // and start-aligns (it has no self-alignment properties).
+            // The anonymous text item auto-places at the first free cell.
             requests.append(GridItemRequest())
-            justify.append(.start)
-            align.append(.start)
         }
         for child in children {
-            // Full layout aggregate — placement longhands + self-align.
-            let a = LayoutExtractor.extract(from: child.properties)
-            var rq = GridItemRequest()
-            // Placement lines are 1-based; spans ride on either longhand
-            // (`grid-column-start: span 2` / `grid-column-end: span 2`).
-            rq.colStart = a?.gridColumnStart?.line
-            rq.colEnd   = a?.gridColumnEnd?.line
-            rq.rowStart = a?.gridRowStart?.line
-            rq.rowEnd   = a?.gridRowEnd?.line
-            rq.colSpan  = a?.gridColumnStart?.span ?? a?.gridColumnEnd?.span
-            rq.rowSpan  = a?.gridRowStart?.span ?? a?.gridRowEnd?.span
-            requests.append(rq)
-            // Self-alignment resolves against the container's *-items
-            // defaults (css-align-3 §6).
-            justify.append(GridPlacer.resolveAlign(self: a?.justifySelf,
-                                                   items: parentAgg.justifyItems))
-            align.append(GridPlacer.resolveAlign(self: a?.alignSelf,
-                                                 items: parentAgg.alignItems))
+            // The child's v2 placement claims — SAME extraction the
+            // ComponentHost attaches, so this simulation and the
+            // CSSGridLayout resolution can never drift.
+            let claim = ItemPlacementExtractor.extract(from: child.properties)
+            requests.append(claim.grid.request)
             // Stretch candidate: effective block-axis keyword is
             // stretch/normal/auto (the grid default) AND the child has
-            // no explicit block size in the IR.
+            // no explicit block size in the IR (css-align-3 §9 auto-size
+            // precondition — the explicitHeight fact on the claim).
             let effAlign: AlignmentKeyword? = {
-                if let s = a?.alignSelf, s != .auto { return s }
+                if let s = claim.grid.alignSelf, s != .auto { return s }
                 return parentAgg.alignItems
             }()
             let stretchy = effAlign == nil || effAlign == .stretch || effAlign == .normal
-            let hasHeight = child.properties.contains {
-                $0.type == "Height" || $0.type == "BlockSize"
-            }
-            stretchFlags.append(stretchy && !hasHeight)
+            stretchFlags.append(stretchy && !claim.explicitHeight)
         }
         // Resolve stretch heights: the item's assigned row must be a
         // FIXED template track (only then is the row height knowable
@@ -618,8 +603,7 @@ public struct ComponentRenderer: View {
                 }
             }
         }
-        return GridPlan(requests: requests, justify: justify,
-                        align: align, stretchHeights: stretchHeights)
+        return stretchHeights
     }
 
     // MARK: - Flex stretch geometry (fidelity wave 2)
@@ -682,10 +666,10 @@ public struct ComponentRenderer: View {
         // Definite main-axis content size or bail.
         guard let available = flexContentSize(style: style, vertical: column)
         else { return nil }
-        // A leading `_text` placeholder participates in the Layout as an
+        // A leading text placeholder participates in the Layout as an
         // extra item — index mapping would shift; no wave fixture mixes
         // text with flexed children, so bail honestly.
-        guard component._text?.isEmpty != false else { return nil }
+        guard component.text?.isEmpty != false else { return nil }
         let ctx = style.spacing.context
         // Main-axis gap through the same resolver as the container.
         let g = GapApplier.resolve(style.spacing.gap, context: ctx)
@@ -742,7 +726,7 @@ public struct ComponentRenderer: View {
             // Bug 1 mixed-content fix — see
             // testing/titan/investigations/swarm-002/css-text-decor__text-decoration-decorating-box-thickness-001.json
             //
-            // When the parent carries `_text` AND children, render the text
+            // When the parent carries text AND children, render the text
             // as a leading sibling so the parent's text-decoration / color
             // / font has a glyph stream to attach to. SwiftUI's Text
             // inherits no styling so we route through PlaceholderLabel to
@@ -753,7 +737,8 @@ public struct ComponentRenderer: View {
             // "x" — the parent's underline had nothing to draw under.
             // Known limitation: leading-only; full inline-flow ordering
             // would need an interleaved inlineRuns IR shape.
-            if let t = component._text, !t.isEmpty {
+            // (v2 rename: the wire field is `text`, formerly `_text`.)
+            if let t = component.text, !t.isEmpty {
                 PlaceholderLabel(
                     name: t,
                     color: style.text.color,
@@ -780,14 +765,14 @@ public struct ComponentRenderer: View {
             // parents. Every child gets the env value SET explicitly —
             // including nil — so a grandparent's injection can never
             // leak past its own children.
-            let plan = gridPlan(style: style)
+            let stretchHeights = gridStretchHeights(style: style)
             // Inheritable text declarations for the children — computed
             // from the MERGED list so grandparents' values ride through
             // parents that don't redeclare them (transitive cascade).
             let childInherited = InheritedText.inheritable(from: mergedProperties)
             // Fidelity wave 2 — flex parents route through CSSFlexLayout
-            // (single-line) which consumes per-child FlexItemSpec layout
-            // values. FlowLayout (wrap) keeps the legacy FlexChildModifier.
+            // (single-line) which consumes per-child ItemPlacement.flex
+            // claims. FlowLayout (wrap) keeps the legacy FlexChildModifier.
             let isWrapFlex = parentAgg?.flexWrap == .wrap
                 || parentAgg?.flexWrap == .wrapReverse
             let isCSSFlex = parentAgg?.display == .flex && !isWrapFlex
@@ -818,33 +803,27 @@ public struct ComponentRenderer: View {
             // never leaks past its own children.
             let childCB: CGFloat? = flexContentSize(style: style, vertical: false)
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
-                // Build the child's aggregate once so FlexChildModifier /
-                // FlexItemSpec can read align-self / flex-basis / flex-grow
-                // without re-parsing. This is a duplicated pass over the
-                // child's property list, but it's cheap (string-compare loop).
+                // Build the child's aggregate once so FlexChildModifier
+                // (legacy wrap path) and the stretch env computation can
+                // read align-self / flex-basis / flex-grow without
+                // re-parsing. This is a duplicated pass over the child's
+                // property list, but it's cheap (string-compare loop).
+                // (The CSSFlexLayout inputs themselves now ride the v2
+                // ItemPlacement layout value attached by ComponentHost —
+                // extracted from the same properties, so identical.)
                 let childAgg: LayoutAggregate? = {
                     guard parentAgg?.display == .flex else { return nil }
                     var a = LayoutAggregate()
                     FlexboxExtractor.extract(from: child.properties, into: &a)
                     return a.touched ? a : nil
                 }()
-                // Fidelity wave 2 — per-child flex spec for CSSFlexLayout.
-                // crossAuto mirrors css-flexbox-1 §8.3's stretch
-                // precondition: no explicit cross-axis size in the IR.
+                // Fidelity wave 2 — crossAuto mirrors css-flexbox-1
+                // §8.3's stretch precondition: no explicit cross-axis
+                // size in the IR (used by the stretch env injection).
                 let crossAuto = !child.properties.contains {
                     isColumn ? ($0.type == "Width" || $0.type == "InlineSize")
                              : ($0.type == "Height" || $0.type == "BlockSize")
                 }
-                let spec = FlexItemSpec(
-                    grow: CGFloat(childAgg?.flexGrow ?? 0),
-                    shrink: CGFloat(childAgg?.flexShrink ?? 1),
-                    basisPx: {
-                        if case .px(let px)? = childAgg?.flexBasis { return px }
-                        return nil
-                    }(),
-                    alignSelf: childAgg?.alignSelf,
-                    crossAuto: crossAuto
-                )
                 // Stretch injection value: only when this child's resolved
                 // alignment is stretch AND its cross size is auto AND the
                 // container's cross content size is definite.
@@ -855,41 +834,51 @@ public struct ComponentRenderer: View {
                     else { return nil }
                     return flexLineCross
                 }()
-                // Bug 2 list-marker — when the parent _tag is an ordered/
-                // unordered list and this child is an <li>, prepend a
-                // numeric/bullet marker. SwiftUI has no ::marker pseudo,
-                // so we emit it inline via an HStack with a leading Text.
-                // Markers follow the simple-numeric algorithm: 1-based
-                // index + ". " for <ol>, "• " for <ul>. Honors only the
-                // common cases; full CSS Counter Styles L3 (arabic-indic,
-                // lower-roman, etc.) requires the ListStyleType property
-                // on the <li> which existing iOS appliers already extract
-                // — we leave that to a follow-up.
-                let parentTag = (component._tag ?? "").lowercased()
-                let isListItem = (child._tag ?? "").lowercased() == "li"
+                // Bug 2 list-marker — when the parent's source tag is an
+                // ordered/unordered list and this child is an <li>,
+                // prepend a numeric/bullet marker. SwiftUI has no
+                // ::marker pseudo, so we emit it inline via an HStack
+                // with a leading Text. Markers follow the simple-numeric
+                // algorithm: 1-based index + ". " for <ol>, "• " for
+                // <ul>. Honors only the common cases; full CSS Counter
+                // Styles L3 (arabic-indic, lower-roman, etc.) requires
+                // the ListStyleType property on the <li> which existing
+                // iOS appliers already extract — we leave that to a
+                // follow-up. (v2 rename: the hint now lives at
+                // meta.sourceTag, formerly `_tag`.)
+                let parentTag = (component.meta?.sourceTag ?? "").lowercased()
+                let isListItem = (child.meta?.sourceTag ?? "").lowercased() == "li"
                 Group {
                     if isListItem && (parentTag == "ol" || parentTag == "ul") {
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
                             Text(parentTag == "ol" ? "\(index + 1)." : "•")
                             if !isCSSFlex, let ca = childAgg, let pa = parentAgg {
-                                ComponentRenderer(component: child)
+                                // Marker rows keep the legacy decoration;
+                                // the host's placement inside the HStack
+                                // is invisible to the outer Layout (layout
+                                // values don't cross container boundaries)
+                                // — same as the pre-v2 no-spec behaviour.
+                                ComponentHost(component: child)
                                     .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
                             } else {
-                                ComponentRenderer(component: child)
+                                ComponentHost(component: child)
                             }
                         }
                     } else if isCSSFlex {
-                        // CSSFlexLayout parent — parameters ride the
-                        // layout value; the legacy frame-based child
-                        // modifier would fight the Layout's placement.
-                        ComponentRenderer(component: child)
-                            .flexItem(spec)
+                        // CSSFlexLayout parent — the flex claims ride the
+                        // ItemPlacement layout value ComponentHost
+                        // attaches; the legacy frame-based child modifier
+                        // would fight the Layout's placement.
+                        ComponentHost(component: child)
                     } else if let ca = childAgg, let pa = parentAgg {
                         // FlowLayout (wrap) keeps the legacy decoration.
-                        ComponentRenderer(component: child)
+                        ComponentHost(component: child)
                             .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
                     } else {
-                        ComponentRenderer(component: child)
+                        // Block/grid parents — CSSGridLayout reads the
+                        // host-attached grid claims; block parents leave
+                        // the placement inert.
+                        ComponentHost(component: child)
                     }
                 }
                 // Grid + flex size injection (css-align-3 §9 stretch and
@@ -901,7 +890,7 @@ public struct ComponentRenderer: View {
                 // row-flex MAIN size. The fold in `body` only fires when
                 // the child declared no explicit size on that axis.
                 .environment(\.gridStretchHeight,
-                             plan?.stretchHeights[index]
+                             stretchHeights?[index]
                                 ?? (isColumn ? flexMainSizes?[index] : flexStretch))
                 .environment(\.flexStretchWidth,
                              isColumn ? flexStretch : flexMainSizes?[index])
@@ -937,15 +926,15 @@ public struct ComponentRenderer: View {
                 }
                 return nil
             }()
-            // Bug 1 leaf-text: when the component carries `_text`,
-            // render it verbatim instead of the underscore-stripped
-            // component name. Mirrors web PlaceholderContent.text and
-            // brings iOS leaf-text rendering in parity with the web
-            // _text fix (swarm-001/css-color__color-001). Absent _text
-            // → existing behaviour (placeholder shows the name).
+            // Bug 1 leaf-text: when the component carries `text` (the
+            // v2 rename of `_text`), render it verbatim instead of the
+            // underscore-stripped component name. Mirrors web
+            // PlaceholderContent.text and brings iOS leaf-text rendering
+            // in parity with the web fix (swarm-001/css-color__color-001).
+            // Absent text → existing behaviour (placeholder shows name).
             PlaceholderLabel(
                 name: component.name,
-                rawText: component._text,
+                rawText: component.text,
                 color: style.text.color,
                 textConfig: style.text,
                 backgroundColor: style.backgroundColor,

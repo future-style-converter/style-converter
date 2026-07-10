@@ -12,43 +12,16 @@
 //  §8.3/§8.4 cross-axis alignment incl. per-item align-self and true
 //  stretch for auto-cross-size items.
 //
-//  Per-item inputs ride a LayoutValueKey (FlexItemSpec) attached by
-//  ComponentRenderer's child loop — the SwiftUI-idiomatic channel for
-//  per-subview layout parameters. The arithmetic core (CSSFlexMath) is
-//  pure and XCTest-pinned without constructing any view.
+//  Per-item inputs ride the ItemPlacementKey layout value (IR v2 Slot &
+//  Placement contract, StyleEngine/core/placement/ItemPlacement.swift):
+//  ComponentHost attaches every component's self-extracted placement,
+//  and this Layout consumes ONLY the flex block — the SwiftUI-idiomatic
+//  channel for per-subview parent-data, and the v2 resolution rule
+//  (blocks for other container kinds stay inert). The arithmetic core
+//  (CSSFlexMath) is pure and XCTest-pinned without constructing any view.
 //
 
 import SwiftUI
-
-// MARK: - Per-item spec (LayoutValueKey)
-
-/// Flex inputs for one item, read by CSSFlexLayout via layout values.
-struct FlexItemSpec: Equatable {
-    /// `flex-grow` — share of positive free space (CSS initial 0).
-    var grow: CGFloat = 0
-    /// `flex-shrink` — scaled share of negative free space (initial 1).
-    var shrink: CGFloat = 1
-    /// `flex-basis: <length>` in px; nil = auto/content → intrinsic size.
-    var basisPx: CGFloat? = nil
-    /// `align-self` override; nil/auto → inherit container align-items.
-    var alignSelf: AlignmentKeyword? = nil
-    /// True when the IR declared NO explicit cross-axis size — the
-    /// css-flexbox-1 §8.3 precondition for stretch to actually stretch.
-    var crossAuto: Bool = true
-}
-
-/// LayoutValueKey carrying the spec from child modifiers to the Layout.
-struct FlexItemSpecKey: LayoutValueKey {
-    /// Default mirrors CSS initial values (grow 0 / shrink 1 / basis auto).
-    static let defaultValue = FlexItemSpec()
-}
-
-extension View {
-    /// Attach this child's flex parameters for a CSSFlexLayout parent.
-    func flexItem(_ spec: FlexItemSpec) -> some View {
-        layoutValue(key: FlexItemSpecKey.self, value: spec)
-    }
-}
 
 // MARK: - Pure arithmetic core
 
@@ -270,7 +243,13 @@ struct CSSFlexLayout: Layout {
         var aligns: [AlignmentKeyword] = []
         var stretchable: [Bool] = []
         for sub in subviews {
-            let spec = sub[FlexItemSpecKey.self]
+            // v2 placement contract: read the child-carried parent-data
+            // and consume ONLY the flex block (design §2.2 resolution
+            // rule). nil placement = anonymous subview (e.g. the leading
+            // `_text` placeholder) → CSS initial values, exactly the old
+            // FlexItemSpec defaults.
+            let placement = sub[ItemPlacementKey.self]
+            let claim = placement?.flex ?? ItemPlacement.FlexClaim()
             // Intrinsic (ideal) size — CSS `flex-basis: auto` fallback.
             let ideal = mc(sub.sizeThatFits(.unspecified))
             // Min main size: the subview's response to a zero proposal
@@ -280,13 +259,20 @@ struct CSSFlexLayout: Layout {
                 ? ProposedViewSize(width: 0, height: nil)
                 : ProposedViewSize(width: nil, height: 0)
             let minMain = mc(sub.sizeThatFits(zeroProbe)).main
-            inputs.append(.init(basis: spec.basisPx ?? ideal.main,
+            inputs.append(.init(basis: claim.basisPx ?? ideal.main,
                                 min: minMain,
-                                grow: spec.grow, shrink: spec.shrink))
-            let a = CSSFlexMath.resolvedAlign(self: spec.alignSelf, items: alignItems)
+                                grow: claim.grow, shrink: claim.shrink))
+            let a = CSSFlexMath.resolvedAlign(self: claim.alignSelf, items: alignItems)
             aligns.append(a)
             // §8.3: stretch only stretches items with an auto cross size.
-            stretchable.append(a == .stretch && spec.crossAuto)
+            // The placement carries axis-agnostic size FACTS; cross-axis
+            // resolution happens here because only the container knows
+            // its axis: row (horizontal main) → cross is the block axis
+            // (Height/BlockSize), column → cross is the inline axis.
+            let crossAuto = placement.map {
+                axis == .horizontal ? !$0.explicitHeight : !$0.explicitWidth
+            } ?? true  // anonymous items have no declared sizes
+            stretchable.append(a == .stretch && crossAuto)
         }
 
         // Main-axis resolution (§9.7) + justify offsets (§8.2).

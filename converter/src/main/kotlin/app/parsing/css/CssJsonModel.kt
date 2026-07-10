@@ -1,6 +1,7 @@
 package app.parsing.css
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 /**
  * Represents a CSS property value in JSON format
@@ -58,7 +59,16 @@ data class CssComponent(
     val media: List<CssMedia>? = null,
     val children: Map<String, CssComponent>? = null,
     val text: String? = null,
-    val role: String? = null
+    val role: String? = null,
+    // Originating HTML tag from the extractor's `_tag` hint (lowercase,
+    // non-generic tags only). v1 emission drops it (historical behavior);
+    // IR v2 forwards it as `meta.sourceTag` — see IRWireV2.kt.
+    val tag: String? = null,
+    // Opaque `_pseudo` payload ({before?, after?, marker?} component-
+    // shaped slots) forwarded verbatim. Pseudo nodes never flatten
+    // (design §4.2); v2 wire name is `pseudos`. Not @Serializable-typed
+    // deeper than JsonObject on purpose — the extractor owns the shape.
+    val pseudos: JsonObject? = null
 )
 
 /**

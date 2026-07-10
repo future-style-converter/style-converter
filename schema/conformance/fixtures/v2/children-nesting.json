@@ -1,0 +1,54 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "parent-001",
+            "name": "Parent",
+            "properties": [
+                {
+                    "type": "Display",
+                    "data": "FLEX"
+                }
+            ]
+        },
+        {
+            "id": "child__0-002",
+            "name": "child__0",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "parent-001"
+            }
+        },
+        {
+            "id": "grandchild__0__0-003",
+            "name": "grandchild__0__0",
+            "properties": [
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 10.0
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "child__0-002"
+            },
+            "text": "leaf text"
+        },
+        {
+            "id": "leaf-sibling-004",
+            "name": "LeafSibling",
+            "properties": []
+        }
+    ]
+}

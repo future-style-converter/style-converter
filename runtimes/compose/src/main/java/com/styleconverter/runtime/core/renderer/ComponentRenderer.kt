@@ -978,8 +978,15 @@ object ComponentRenderer {
             // wrapper off for the whole subtree root at each child.
             CompositionLocalProvider(LocalSelfAlignmentHandled provides true) {
             sortedChildren.forEachIndexed { index, child ->
-                val alignSelf = extractAlignSelf(child.properties)
-                val flexGrow = extractFlexGrow(child.properties)
+                // v2 placement contract: one union read per arriving child;
+                // this flex container consumes ONLY the flex block + the
+                // shared alignment claim (css-align-3 §6.4) — grid claims
+                // on the same child are inert here, like `grid-area` on a
+                // flex child in a browser (design §2.2 resolution rule).
+                val childPlacement = com.styleconverter.runtime.core.placement
+                    .ItemPlacementExtractor.extract(child.properties)
+                val alignSelf = childPlacement.alignSelf
+                val flexGrow = childPlacement.flex.grow
                 // `align-self: stretch` only stretches an item whose cross
                 // size is AUTO (css-flexbox-1 §8.3); with a definite cross
                 // size it behaves as flex-start. Row cross axis = vertical.
@@ -1042,8 +1049,12 @@ object ComponentRenderer {
             // Same suppression rationale as RenderRowContent.
             CompositionLocalProvider(LocalSelfAlignmentHandled provides true) {
             sortedChildren.forEachIndexed { index, child ->
-                val alignSelf = extractAlignSelf(child.properties)
-                val flexGrow = extractFlexGrow(child.properties)
+                // Same v2 single-union read as RenderRowContent — column
+                // flex consumes only its own claim kinds.
+                val childPlacement = com.styleconverter.runtime.core.placement
+                    .ItemPlacementExtractor.extract(child.properties)
+                val alignSelf = childPlacement.alignSelf
+                val flexGrow = childPlacement.flex.grow
 
                 // Build modifier with align and weight
                 var childModifier: Modifier = Modifier
@@ -1140,12 +1151,18 @@ object ComponentRenderer {
                 else pxOf(cp, "Height", "BlockSize")
             val minSize = if (rowAxis) pxOf(cp, "MinWidth", "MinInlineSize")
                 else pxOf(cp, "MinHeight", "MinBlockSize")
+            // v2 placement contract: the child's flex claims come from
+            // the single ITEM union (grow 0 / shrink 1 / basis auto are
+            // the CSS-initial defaults the union carries for absent
+            // fields — design §2.2 resolution rule).
+            val flexClaims = com.styleconverter.runtime.core.placement
+                .ItemPlacementExtractor.extract(cp).flex
             com.styleconverter.runtime.layout.flexbox.FlexSizeResolver.Item(
                 // Used flex basis: flex-basis, else the main-size property,
                 // else content (null → line unresolvable).
-                basisPx = flexBasisPx(cp) ?: mainSize,
-                grow = extractFlexGrow(cp).toDouble(),
-                shrink = extractFlexShrink(cp).toDouble(),
+                basisPx = flexClaims.basisPx ?: mainSize,
+                grow = flexClaims.grow.toDouble(),
+                shrink = flexClaims.shrink.toDouble(),
                 // Web wrapper: minWidth = width || min-width || 50px (30px
                 // floor on the block axis).
                 minPx = mainSize ?: minSize ?: (if (rowAxis) 50.0 else 30.0)
@@ -1170,74 +1187,25 @@ object ComponentRenderer {
         return null
     }
 
-    /**
-     * FlexBasis IR shape: `{"value":{"px":40.0},"normalizedPixels":40.0}`.
-     * Percentage / auto / content bases return null (not statically
-     * resolvable — %-of-parent needs layout-time context we don't model).
-     */
-    private fun flexBasisPx(properties: List<IRProperty>): Double? {
-        val data = properties.firstOrNull { it.type == "FlexBasis" }?.data ?: return null
-        val obj = data as? JsonObject ?: return null
-        obj["normalizedPixels"]?.jsonPrimitive?.doubleOrNull?.let { return it }
-        return (obj["value"] as? JsonObject)?.get("px")?.jsonPrimitive?.doubleOrNull
-    }
-
-    /**
-     * Extract flex-shrink (CSS initial 1). Same nested-Number IR shape as
-     * flex-grow — ValueExtractors.extractFloat unwraps it.
-     */
-    private fun extractFlexShrink(properties: List<IRProperty>): Float {
-        properties.forEach { prop ->
-            if (prop.type == "FlexShrink") {
-                return ValueExtractors.extractFloat(prop.data) ?: 1f
-            }
-        }
-        return 1f
-    }
-
-    /**
-     * Extract flex-grow value from properties.
-     */
-    private fun extractFlexGrow(properties: List<IRProperty>): Float {
-        properties.forEach { prop ->
-            if (prop.type == "FlexGrow") {
-                return ValueExtractors.extractFloat(prop.data) ?: 0f
-            }
-        }
-        return 0f
-    }
+    // NOTE (v2 placement contract): the private flexBasisPx /
+    // extractFlexShrink / extractFlexGrow copies were DELETED — every
+    // flex claim now flows through the single ITEM union
+    // (core/placement/ItemPlacementExtractor), read once per child in
+    // RenderRowContent / RenderColumnContent / resolveFlexMainSizes.
 
     /**
      * Extract align-self value from properties.
      *
      * Internal (not private) so the unit test can pin the LIVE render-path
-     * mapping directly — see ComponentRendererAlignSelfTest.
+     * mapping directly — see ComponentRendererAlignSelfTest. The parsing
+     * itself moved to core/placement/ItemPlacementExtractor (the v2
+     * single-owner rule for ITEM-scoped properties — this delegation is
+     * what guarantees a future keyword fix can no longer land in a dead
+     * copy while the live path lags, the original ANCHOR_CENTER failure
+     * mode).
      */
-    internal fun extractAlignSelf(properties: List<IRProperty>): AlignSelf {
-        properties.forEach { prop ->
-            if (prop.type == "AlignSelf") {
-                val keyword = ValueExtractors.extractKeyword(prop.data)?.uppercase()
-                return when (keyword) {
-                    "FLEX_START", "FLEX-START", "START" -> AlignSelf.FLEX_START
-                    "FLEX_END", "FLEX-END", "END" -> AlignSelf.FLEX_END
-                    "CENTER" -> AlignSelf.CENTER
-                    // CSS Anchor Positioning Level 1 §6: `anchor-center`
-                    // collapses to `center` whenever no default anchor is in
-                    // scope. The SDUI runtime has no anchor-positioning model,
-                    // so this fold is unconditionally correct. Mirrors
-                    // FlexboxExtractor.parseAlignment and
-                    // FlexExtractor.parseAlignSelf (plus iOS/Web appliers) —
-                    // previously this live path fell through to AUTO while
-                    // the engine-path copies were already fixed.
-                    "ANCHOR_CENTER", "ANCHOR-CENTER" -> AlignSelf.CENTER
-                    "STRETCH" -> AlignSelf.STRETCH
-                    "BASELINE" -> AlignSelf.BASELINE
-                    else -> AlignSelf.AUTO
-                }
-            }
-        }
-        return AlignSelf.AUTO
-    }
+    internal fun extractAlignSelf(properties: List<IRProperty>): AlignSelf =
+        com.styleconverter.runtime.core.placement.ItemPlacementExtractor.alignSelf(properties)
 
     enum class AlignSelf {
         AUTO, FLEX_START, FLEX_END, CENTER, STRETCH, BASELINE
@@ -1253,42 +1221,17 @@ object ComponentRenderer {
     /**
      * Extract order value from properties.
      * CSS order: integer (default 0), lower values appear first.
+     * Delegates to the single ITEM-scope owner (core/placement).
      */
-    fun extractOrder(properties: List<IRProperty>): Int {
-        properties.forEach { prop ->
-            if (prop.type == "Order") {
-                return ValueExtractors.extractInt(prop.data) ?: 0
-            }
-        }
-        return 0
-    }
+    fun extractOrder(properties: List<IRProperty>): Int =
+        com.styleconverter.runtime.core.placement.ItemPlacementExtractor.order(properties)
 
     /**
      * Extract justify-self value from properties.
+     * Delegates to the single ITEM-scope owner (core/placement).
      */
-    fun extractJustifySelf(properties: List<IRProperty>): JustifySelf {
-        properties.forEach { prop ->
-            if (prop.type == "JustifySelf") {
-                val keyword = ValueExtractors.extractKeyword(prop.data)?.uppercase()
-                    ?: ValueExtractors.extractKeywordFromObject(prop.data)?.uppercase()
-                return when (keyword) {
-                    "AUTO" -> JustifySelf.AUTO
-                    "NORMAL" -> JustifySelf.NORMAL
-                    "START", "SELF_START", "SELF-START" -> JustifySelf.START
-                    "END", "SELF_END", "SELF-END" -> JustifySelf.END
-                    "CENTER" -> JustifySelf.CENTER
-                    "STRETCH" -> JustifySelf.STRETCH
-                    "FLEX_START", "FLEX-START" -> JustifySelf.FLEX_START
-                    "FLEX_END", "FLEX-END" -> JustifySelf.FLEX_END
-                    "LEFT" -> JustifySelf.LEFT
-                    "RIGHT" -> JustifySelf.RIGHT
-                    "BASELINE" -> JustifySelf.BASELINE
-                    else -> JustifySelf.AUTO
-                }
-            }
-        }
-        return JustifySelf.AUTO
-    }
+    fun extractJustifySelf(properties: List<IRProperty>): JustifySelf =
+        com.styleconverter.runtime.core.placement.ItemPlacementExtractor.justifySelf(properties)
 
     /**
      * Sort children by their order property.

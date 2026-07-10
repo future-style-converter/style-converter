@@ -20,35 +20,23 @@
  */
 
 import React from 'react';
-import type { IRComponent, IRDocument } from '@style-converter/web/core/ir/IRModels';
+import type { IRDocument } from '@style-converter/web/core/ir/IRModels';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
+import { composeTree, findNode } from '../sdui/Composer';
 
 interface FixtureCanvasProps {
   document: IRDocument;
   fixtureName: string;
 }
 
-/**
- * Find the named component anywhere in the IR tree (including nested
- * children). The fixture-conversion pipeline produces single-component
- * docs, but the IR model permits trees, so walk defensively.
- */
-function findByName(components: IRComponent[], name: string): IRComponent | null {
-  for (const c of components) {
-    if (c.name === name || c.id === name) return c;
-    if (c.children) {
-      const found = findByName(c.children, name);
-      if (found) return found;
-    }
-  }
-  return null;
-}
-
 export function FixtureCanvas({ document, fixtureName }: FixtureCanvasProps) {
-  // Memoise the lookup so the sentinel useEffect below doesn't re-fire on
-  // every render (React would otherwise see a fresh component reference).
+  // Compose the flat v2 wire into the preview tree, then look the target
+  // up by name or id anywhere in the forest (fixture docs are usually
+  // single-component, but slot-composed subtrees are legal). Memoised so
+  // the sentinel useEffect below doesn't re-fire on every render (React
+  // would otherwise see a fresh node reference).
   const component = React.useMemo(
-    () => findByName(document.components, fixtureName),
+    () => findNode(composeTree(document), fixtureName),
     [document, fixtureName]
   );
 
@@ -93,7 +81,7 @@ export function FixtureCanvas({ document, fixtureName }: FixtureCanvasProps) {
       tabIndex={0}
       style={canvasStyle}
     >
-      <ComponentRenderer component={component} />
+      <ComponentRenderer node={component} />
     </div>
   );
 }

@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://style-converter.dev/schema/ir-v2.schema.json",
+  "title": "Style-Converter IR v2 (flat-list wire format with slot composition)",
+  "description": "Machine-checked contract for the IR v2 JSON the converter emits by default (out/tmpOutput.json) and the three runtime style engines consume. v2 headline changes vs v1: (1) explicit irVersion/minReaderVersion envelope; (2) components is a FLAT array — `children` does not exist and its presence anywhere is a validation error; (3) child→parent composition via the structural `slot` object on the CHILD; (4) renames: _text→text, _pseudo→pseudos, _tag+_role→meta:{sourceTag?,role?}. STRICT at the envelope (document / component / slot / meta / selector / media / property wrapper): unknown keys at these levels are a schema violation. PERMISSIVE at property-data leaves (the 550-property value surface is documented, not enforced, in schema/spec/02-values.md) — EXCEPT the frozen composition structures (slot, meta) defined here. Ground truth: converter/src/main/kotlin/app/irmodels/IRWireV2.kt (IRComponentV2Serializer) and app/parsing/IRFlattener.kt.",
+  "type": "object",
+  "properties": {
+    "irVersion": {
+      "description": "What the writer produced. Mandatory in v2 — a document without irVersion IS a v1 document and belongs to schema/ir-v1.schema.json (deprecation window only).",
+      "const": 2
+    },
+    "minReaderVersion": {
+      "description": "Oldest reader that can safely consume this document. A reader MUST refuse a document whose minReaderVersion exceeds what it implements (schema/spec/05-versioning.md).",
+      "const": 2
+    },
+    "components": {
+      "description": "FLAT component array — every component at every composition depth is a standalone entry. Sibling-order rule (schema/spec/03-children.md): relative order of entries sharing the same slot.parent IS the composition order (DOM order / Compose emission order / SwiftUI subview order); the converter's pre-order flattener (IRFlattener) guarantees each subtree is contiguous and order-stable vs the v1 nested form. May be empty for an empty input document.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/component" }
+    }
+  },
+  "required": ["irVersion", "minReaderVersion", "components"],
+  "additionalProperties": false,
+  "$defs": {
+    "component": {
+      "description": "One UI component. Serialized by IRComponentV2Serializer (converter/src/main/kotlin/app/irmodels/IRWireV2.kt): id/name/properties always present; selectors/media omitted when empty; slot omitted for roots; text/pseudos omitted when null; meta omitted when it would be empty. `children` is deliberately ABSENT from this definition — additionalProperties:false makes any v2 document carrying a children key a hard validation error.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique component-instance id — uniqueness across the WHOLE document is a convert-time invariant (IRFlattener errors on duplicates because slot references would become ambiguous). Converter-generated form is '<lowercased-name>-<NNN>' (pre-order, zero-padded, shared counter).",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "description": "Component type/class name (e.g. 'Button'). For components flattened from a nested authoring map, the map key becomes the name verbatim.",
+          "type": "string",
+          "minLength": 1
+        },
+        "properties": {
+          "description": "Base properties. Always present, may be empty. ITEM-scoped properties (align-self, order, flex-grow/shrink/basis, grid-area/column/row, z-index, position+insets — the frozen list in schema/spec/03-children.md) are declared HERE on the child and routed to placement parent-data by the runtimes; CONTAINER-scoped properties are declared on the container. The wire carries no per-property scope byte — classification is derivable (converter/src/main/kotlin/app/irmodels/PropertyScope.kt) and mirrored by each platform PropertyRegistry.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/property" }
+        },
+        "selectors": {
+          "description": "Pseudo-class buckets (:hover etc.). Omitted entirely when empty, so if present it is non-empty. Unchanged from v1.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/selector" },
+          "minItems": 1
+        },
+        "media": {
+          "description": "Media-query buckets. Omitted entirely when empty, so if present it is non-empty. Unchanged from v1.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/media" },
+          "minItems": 1
+        },
+        "slot": { "$ref": "#/$defs/slot" },
+        "text": {
+          "description": "v2 rename of v1 `_text` — element text content, now a STRUCTURAL field (text is content, not a droppable hint). Omitted when null; empty string IS a legal emitted value ('extracted, was empty'). Leading text run renders before injected children (mixed-inline-content limitation carried over — spec 03 edge cases).",
+          "type": "string"
+        },
+        "pseudos": {
+          "description": "v2 rename of v1 `_pseudo` — generated-content slots ({before?, after?, marker?}), component-shaped payloads produced by the WPT extractor and forwarded verbatim by the converter. Pseudo nodes have no independent lifecycle and are NEVER flattened into the component list (spec 03 edge cases); the runtime treats them as implicit first/last entries of the host's open slot. Slot payloads validated permissively (extractor-owned shape).",
+          "type": "object",
+          "properties": {
+            "before": { "type": "object" },
+            "after": { "type": "object" },
+            "marker": { "type": "object" }
+          },
+          "additionalProperties": false
+        },
+        "meta": {
+          "description": "Droppable renderer hints, grouped (v2 home of v1 `_tag` and `_role`). A consumer may ignore meta without correctness loss — unlike slot, which MUST round-trip. Omitted when no member has a value; if present it is non-empty and strict.",
+          "type": "object",
+          "properties": {
+            "sourceTag": {
+              "description": "Originating HTML tag, lowercase (e.g. 'ol', 'li'). v2 home of v1 `_tag`; the converter now forwards it (the v1 pipeline dropped it — spec 04 history).",
+              "type": "string",
+              "minLength": 1
+            },
+            "role": {
+              "description": "Role marker; only value emitted today is 'body-root'. v2 home of v1 `_role`. Open-ended string by design so future markers need no schema change.",
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "minProperties": 1,
+          "additionalProperties": false
+        }
+      },
+      "required": ["id", "name", "properties"],
+      "additionalProperties": false
+    },
+    "slot": {
+      "description": "Child→parent composition reference — one of the two frozen v2 placement structures (with meta). STRUCTURAL data that MUST round-trip through every reader (NOT underscore-prefixed by rule: `_` is reserved for droppable hints). Lives only on the CHILD; containers carry zero knowledge of their arrivals. Omitted for roots. Consumers: composers only (preview harness / SDUI shell) — style engines MUST ignore slot by contract. A valid v2 document may carry no slot fields at all (Mode B: composition supplied externally). Dangling slot.parent (no component with that id) → composer treats the entry as a root and warns; duplicate ids are already a convert-time error.",
+      "type": "object",
+      "properties": {
+        "parent": {
+          "description": "The id of the container component this component composes into.",
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "description": "Slot name within the parent. Omitted on the wire when it equals the default 'content'; reserved for future multi-slot containers (scaffold header/body/footer).",
+          "type": "string",
+          "minLength": 1,
+          "default": "content"
+        }
+      },
+      "required": ["parent"],
+      "additionalProperties": false
+    },
+    "property": {
+      "description": "The {type, data} property envelope — byte-identical semantics to v1 (converter/src/main/kotlin/app/irmodels/IRPropertySerializer.kt). 'type' is the IR type name with the 'Property' suffix stripped. 'data' remains deliberately permissive at v2 for the 550-property value surface (documented in schema/spec/02-values.md); readers MUST tolerate unknown 'type' values by skipping the property with a logged warning (spec 05).",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "data": true
+      },
+      "required": ["type", "data"],
+      "additionalProperties": false
+    },
+    "selector": {
+      "description": "IRSelector — unchanged from v1: condition is the selector WITHOUT the leading colon (':hover' is stored as 'hover').",
+      "type": "object",
+      "properties": {
+        "condition": { "type": "string", "minLength": 1 },
+        "properties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/property" }
+        }
+      },
+      "required": ["condition", "properties"],
+      "additionalProperties": false
+    },
+    "media": {
+      "description": "IRMedia — unchanged from v1: query is the raw media query string, e.g. '(min-width: 768px)'.",
+      "type": "object",
+      "properties": {
+        "query": { "type": "string", "minLength": 1 },
+        "properties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/property" }
+        }
+      },
+      "required": ["query", "properties"],
+      "additionalProperties": false
+    }
+  }
+}

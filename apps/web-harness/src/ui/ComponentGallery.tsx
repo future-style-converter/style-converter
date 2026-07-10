@@ -3,8 +3,9 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import type { IRComponent, IRDocument } from '@style-converter/web/core/ir/IRModels';
+import type { IRDocument } from '@style-converter/web/core/ir/IRModels';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
+import { composeTree, type ComposedNode } from '../sdui/Composer';
 
 interface ComponentGalleryProps {
   document: IRDocument | null;
@@ -12,19 +13,17 @@ interface ComponentGalleryProps {
 }
 
 /**
- * Flatten nested components for display.
+ * Flatten the composed tree for display (pre-order, sibling order kept).
  */
-function flattenComponents(components: IRComponent[]): IRComponent[] {
-  const result: IRComponent[] = [];
+function flattenNodes(roots: ComposedNode[]): ComposedNode[] {
+  const result: ComposedNode[] = [];
 
-  function traverse(component: IRComponent) {
-    result.push(component);
-    if (component.children) {
-      component.children.forEach(traverse);
-    }
+  function traverse(node: ComposedNode) {
+    result.push(node);
+    node.children.forEach(traverse);
   }
 
-  components.forEach(traverse);
+  roots.forEach(traverse);
   return result;
 }
 
@@ -37,24 +36,26 @@ export function ComponentGallery({ document, searchQuery = '' }: ComponentGaller
   const [showNested, setShowNested] = useState(true);
   const [page, setPage] = useState(0);
 
+  // Compose the flat v2 wire into the preview tree once per document.
+  const roots = useMemo(() => (document ? composeTree(document) : []), [document]);
+
   const allComponents = useMemo(() => {
     if (!document) return [];
 
-    const components = showNested
-      ? flattenComponents(document.components)
-      : document.components;
+    // "Include nested" walks the composed tree; unchecked shows roots only.
+    const nodes = showNested ? flattenNodes(roots) : roots;
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      return components.filter(
-        (c) =>
-          c.name.toLowerCase().includes(query) ||
-          c.id.toLowerCase().includes(query)
+      return nodes.filter(
+        (n) =>
+          n.component.name.toLowerCase().includes(query) ||
+          n.component.id.toLowerCase().includes(query)
       );
     }
 
-    return components;
-  }, [document, searchQuery, showNested]);
+    return nodes;
+  }, [document, roots, searchQuery, showNested]);
 
   // Reset page when search changes
   React.useEffect(() => {
@@ -129,8 +130,8 @@ export function ComponentGallery({ document, searchQuery = '' }: ComponentGaller
       </div>
 
       <div style={styles.grid}>
-        {components.map((component, index) => (
-          <ComponentCard key={component.id || index} component={component} index={page * PAGE_SIZE + index} />
+        {components.map((node, index) => (
+          <ComponentCard key={node.component.id || index} node={node} index={page * PAGE_SIZE + index} />
         ))}
       </div>
     </div>
@@ -141,12 +142,15 @@ export function ComponentGallery({ document, searchQuery = '' }: ComponentGaller
  * Individual component card.
  */
 interface ComponentCardProps {
-  component: IRComponent;
+  node: ComposedNode;
   index: number;
 }
 
-function ComponentCard({ component, index }: ComponentCardProps) {
+function ComponentCard({ node, index }: ComponentCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  // Card chrome reads the component; the renderer gets the whole node so
+  // slot-composed children preview inside their parent card.
+  const component = node.component;
 
   return (
     <div style={styles.card}>
@@ -157,13 +161,13 @@ function ComponentCard({ component, index }: ComponentCardProps) {
       </div>
 
       <div style={styles.cardContent}>
-        <ComponentRenderer component={component} />
+        <ComponentRenderer node={node} />
       </div>
 
       <div style={styles.cardFooter}>
         <span style={styles.propCount}>
           {component.properties.length} props
-          {component.children ? `, ${component.children.length} children` : ''}
+          {node.children.length > 0 ? `, ${node.children.length} children` : ''}
         </span>
         <button
           style={styles.expandButton}

@@ -57,7 +57,11 @@ private fun parseArgs(args: List<String>): Map<String, String> {
 private val prettyJson = Json { prettyPrint = true }
 
 private fun printUsage() {
-    println("Usage: style-converter convert --from css|compose|swiftui --to ir -i <input> -o <outDir>")
+    println("Usage: style-converter convert --from css|compose|swiftui --to ir -i <input> -o <outDir> [--emit-ir v1|v2]")
+    println("  --emit-ir v2   (default) flat-list IR v2 wire: irVersion/minReaderVersion envelope,")
+    println("                 flat components + slot refs, text/pseudos/meta field names")
+    println("  --emit-ir v1   DEPRECATED legacy nested-children wire, byte-identical to the pre-v2")
+    println("                 converter; kept for exactly one deprecation window, then removed")
 }
 
 /**
@@ -120,13 +124,31 @@ fun main(rawArgs: Array<String>) {
     val allowedFrom = setOf("css", "compose", "swiftui")
     if (fromRaw !in allowedFrom) usageError("unknown --from '$fromRaw'")
 
+    // IR wire version selector. v2 (flat list + slot) is the DEFAULT as of
+    // the v2 freeze; `--emit-ir v1` keeps the legacy nested wire available
+    // for exactly one deprecation window (see schema/spec/05-versioning.md),
+    // after which the flag and the nested serializer branches are deleted.
+    val emitIr = (args["--emit-ir"] ?: "v2").lowercase()
+    if (emitIr !in setOf("v1", "v2")) usageError("unknown --emit-ir '$emitIr' — expected v1 or v2")
+
     // Parse input JSON and convert to intermediate representation
     val json = Json { ignoreUnknownKeys = true }
     val root = json.parseToJsonElement(File(inputPath).readText()).jsonObject
     val ir = parsing(root, fromRaw)
 
-    // Serialize the IRDocument with specific property classes
-    val pretty = prettyJson.encodeToString(ir)
+    // Serialize the IRDocument to the selected wire version.
+    val pretty = if (emitIr == "v1") {
+        // DEPRECATED legacy path: nested children, underscore metadata
+        // names, no version envelope. Must stay byte-identical to the
+        // pre-v2 converter for the deprecation window — do not touch.
+        System.err.println("[style-converter] warning: --emit-ir v1 is deprecated and will be removed after one release window — migrate readers to IR v2")
+        prettyJson.encodeToString(ir)
+    } else {
+        // v2 default: pre-order flatten (stamps slot.parent, verifies id
+        // uniqueness — duplicate ids are a convert error), then the
+        // versioned flat envelope (IRWireV2).
+        prettyJson.encodeToString(app.irmodels.IRWireV2.encodeDocument(app.parsing.IRFlattener.flatten(ir)))
+    }
 
     // Ensure output directory exists and write IR to tmpOutput.json.
     // NOTE: the filename tmpOutput.json is load-bearing — the Android, iOS

@@ -128,13 +128,36 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             else el.jsonPrimitive.content
         }
 
+        // Read optional `_tag` (originating HTML tag, lowercase — emitted
+        // by the extractor for non-generic tags). Historically the
+        // converter dropped this hint entirely (spec 04 field matrix);
+        // reading it here closes that lossy hop so IR v2 can forward it
+        // as `meta.sourceTag`. The legacy v1 serializer still ignores it,
+        // preserving v1 byte-stability.
+        val tag = obj["_tag"]?.let { el ->
+            if (el is kotlinx.serialization.json.JsonNull) null
+            else el.jsonPrimitive.content
+        }
+
+        // Read optional `_pseudo` ({before?, after?, marker?} component-
+        // shaped generated-content slots) as an OPAQUE JsonObject — the
+        // extractor owns the payload shape and pseudo nodes never flatten
+        // (design §4.2). Forwarded verbatim to the v2 `pseudos` field;
+        // dropped by the legacy v1 serializer exactly as before.
+        val pseudos = obj["_pseudo"]?.let { el ->
+            if (el is kotlinx.serialization.json.JsonNull) null
+            else el.jsonObject
+        }
+
         return CssComponent(
             properties = props,
             selectors = selectors,
             media = media,
             children = children,
             text = text,
-            role = role
+            role = role,
+            tag = tag,
+            pseudos = pseudos
         )
     }
 
@@ -205,7 +228,13 @@ fun cssParsing(doc: JsonObject): IRDocument {
             // styled element isn't the document root, so the serializer can
             // omit the field and the BASELINE=1 byte-identical contract is
             // preserved.
-            role = component.role
+            role = component.role,
+            // Forward `_tag` / `_pseudo` for the IR v2 wire (meta.sourceTag
+            // / pseudos). Both stay null on non-extractor fixtures; the
+            // legacy v1 serializer ignores them regardless, so v1 output
+            // bytes are untouched.
+            tag = component.tag,
+            pseudos = component.pseudos
         )
     }
 

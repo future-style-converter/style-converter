@@ -27,9 +27,6 @@ function makeComp(overrides: Partial<IRComponent> = {}): IRComponent {
     id: 'test-id',
     name: 'Test_Comp',
     properties: [],
-    selectors: [],
-    media: [],
-    children: null,
     ...overrides,
   };
 }
@@ -210,10 +207,16 @@ describe('parentCreatesContext — true negatives', () => {
 // We re-import CaptureGallery dynamically per test so we can stub
 // window.location.search BEFORE the module's IIFE reads it.
 //
-// Helper: build a minimal IRDocument with N top-level components, each of
-// which may carry children.
+// Helper: build a minimal v2 IRDocument. The list is FLAT (IR v2 wire) —
+// composition is expressed by child-side `slot` refs, which CaptureGallery
+// composes internally via composeTree before flattening/rendering.
 function makeDoc(components: IRComponent[]): IRDocument {
-  return { components } as IRDocument;
+  return { irVersion: 2, minReaderVersion: 2, components } as IRDocument;
+}
+
+// Helper: a component slotted under the given parent id (Mode A entry).
+function slotted(parentId: string, overrides: Partial<IRComponent>): IRComponent {
+  return makeComp({ ...overrides, slot: { parent: parentId, name: 'content' } });
 }
 
 // Helper: render CaptureGallery to static markup. We use renderToStaticMarkup
@@ -251,11 +254,11 @@ describe('CaptureGallery — WPT_MODE viewport canvas (swarm-003 Bug 2)', () => 
     // Two top-level parents, each with one child. Legacy flatten walk emits
     // 4 captures (2 parents + 2 children). This pins the back-compat
     // contract for the 327-pair visual-test pipeline.
-    const child1 = makeComp({ id: 'c1', name: 'Child_1' });
-    const child2 = makeComp({ id: 'c2', name: 'Child_2' });
-    const parent1 = makeComp({ id: 'p1', name: 'Parent_1', children: [child1] });
-    const parent2 = makeComp({ id: 'p2', name: 'Parent_2', children: [child2] });
-    const html = await renderGalleryWithSearch('', makeDoc([parent1, parent2]));
+    const parent1 = makeComp({ id: 'p1', name: 'Parent_1' });
+    const child1 = slotted('p1', { id: 'c1', name: 'Child_1' });
+    const parent2 = makeComp({ id: 'p2', name: 'Parent_2' });
+    const child2 = slotted('p2', { id: 'c2', name: 'Child_2' });
+    const html = await renderGalleryWithSearch('', makeDoc([parent1, child1, parent2, child2]));
     // Each capture canvas carries `data-capture-canvas`. Count them.
     const canvasCount = (html.match(/data-capture-canvas/g) || []).length;
     expect(canvasCount).toBe(4);
@@ -270,11 +273,11 @@ describe('CaptureGallery — WPT_MODE viewport canvas (swarm-003 Bug 2)', () => 
     // appear as separate captures (they leak un-contextualised paint into
     // the comparator and break anchor-positioning / abs-positioning /
     // 3D-context-tree fixtures).
-    const child1 = makeComp({ id: 'c1', name: 'Child_1' });
-    const child2 = makeComp({ id: 'c2', name: 'Child_2' });
-    const parent1 = makeComp({ id: 'p1', name: 'Parent_1', children: [child1] });
-    const parent2 = makeComp({ id: 'p2', name: 'Parent_2', children: [child2] });
-    const html = await renderGalleryWithSearch('?wpt=1', makeDoc([parent1, parent2]));
+    const parent1 = makeComp({ id: 'p1', name: 'Parent_1' });
+    const child1 = slotted('p1', { id: 'c1', name: 'Child_1' });
+    const parent2 = makeComp({ id: 'p2', name: 'Parent_2' });
+    const child2 = slotted('p2', { id: 'c2', name: 'Child_2' });
+    const html = await renderGalleryWithSearch('?wpt=1', makeDoc([parent1, child1, parent2, child2]));
     const canvasCount = (html.match(/data-capture-canvas/g) || []).length;
     expect(canvasCount).toBe(2);
     expect(html).toContain('data-capture-ready="2"');
@@ -340,19 +343,18 @@ describe('CaptureGallery — WPT_MODE viewport canvas (swarm-003 Bug 2)', () => 
     // suppression is implicit: we never emit standalone child captures at
     // all, so the descendant is rendered EXACTLY ONCE (inside the parent's
     // canvas where the clip/blend/transform context applies).
-    const child = makeComp({
-      id: 'clipped-child',
-      name: 'Clipped_Child',
-      properties: [prop('Width', { type: 'length', px: 100 })],
-    });
     const parent = makeComp({
       id: 'clip-parent',
       name: 'Clip_Parent',
       // OverflowX:clip triggers parentCreatesContext in the legacy path.
       properties: [prop('OverflowX', 'clip')],
-      children: [child],
     });
-    const html = await renderGalleryWithSearch('?wpt=1', makeDoc([parent]));
+    const child = slotted('clip-parent', {
+      id: 'clipped-child',
+      name: 'Clipped_Child',
+      properties: [prop('Width', { type: 'length', px: 100 })],
+    });
+    const html = await renderGalleryWithSearch('?wpt=1', makeDoc([parent, child]));
     // Exactly one capture canvas (the parent).
     const canvasCount = (html.match(/data-capture-canvas/g) || []).length;
     expect(canvasCount).toBe(1);

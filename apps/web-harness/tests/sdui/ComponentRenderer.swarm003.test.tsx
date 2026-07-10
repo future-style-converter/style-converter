@@ -7,9 +7,9 @@
 //        in normal CSS block-flow (width:auto stretches to container).
 //        Source: swarm-003 css-ui__negative-outline-offset.json
 //
-// Bug 2: <span> in TAG_ALLOWLIST — emit a real <span> when _tag='span'
-//        so content-visibility (and similar inline/block-sensitive
-//        properties) observe the correct box type.
+// Bug 2: <span> in TAG_ALLOWLIST — emit a real <span> when the source
+//        tag is 'span' so content-visibility (and similar inline/block-
+//        sensitive properties) observe the correct box type.
 //        Source: swarm-003 css-contain__content-visibility-hidden-and-innertext.json
 //
 // Bug 3: aspect-ratio + child intrinsic min-content lift — inject
@@ -19,32 +19,40 @@
 //        actually transfers the child's intrinsic width to the parent.
 //        Source: swarm-003 css-sizing__block-aspect-ratio-015.json
 //
-// Bug 4: _pseudo rendering — materialise PseudoElements.before /
+// Bug 4: pseudos rendering — materialise PseudoElements.before /
 //        .after / .marker as inline <span>s whose properties carry
 //        the originating CSS rule's declarations. The browser
 //        evaluates counter() / counters() / attr() natively.
 //        Source: swarm-003 css-lists__counter-001.json +
 //                swarm-003 css-pseudo__before-preceding-whitespace-dynamic.json
 //
+// IR v2 note: the renderer consumes ComposedNodes and the v2 field
+// spellings (`text`, `pseudos`, `meta.sourceTag`); the pseudo PAYLOAD
+// stays in the extractor's verbatim shape, so inner nodes keep `_text`.
+//
 // All tests assert both the new behaviour AND a backward-compat case
 // so the legacy 327-pair visual-test baseline stays byte-stable.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import type { IRComponent, IRProperty } from '@style-converter/web/core/ir/IRModels';
+import type { ComposedNode } from '../../src/sdui/Composer';
+import type { IRComponent, IRProperty, IRPseudoNode } from '@style-converter/web/core/ir/IRModels';
 
-// Helper: build an IRComponent without forcing every test to spell out
-// all of the IR scaffolding (selectors/media/children).
-function makeComp(overrides: Partial<IRComponent>): IRComponent {
+// Helper: build a v2 IRComponent without forcing every test to spell out
+// all of the IR scaffolding.
+function makeComp(overrides: Partial<IRComponent> = {}): IRComponent {
   return {
     id: 'test-id',
     name: 'Test_Comp',
     properties: [],
-    selectors: [],
-    media: [],
-    children: null,
     ...overrides,
   };
+}
+
+// Helper: wrap a component (+ children) into the ComposedNode shape the
+// renderer consumes — what Composer.composeTree produces from slot refs.
+function makeNode(component: IRComponent, children: ComposedNode[] = []): ComposedNode {
+  return { component, children };
 }
 
 function prop(type: string, data: unknown): IRProperty {
@@ -86,7 +94,7 @@ describe('Bug 1 — WPT block-flow widen (swarm-003 css-ui__negative-outline-off
     // we want the browser's normal block-flow (width:auto). The legacy
     // mode would have set width:fit-content + min-width:50px.
     const comp = makeComp({ id: 'wpt-1', name: 'Block_Default' });
-    const html = renderToStaticMarkup(<ComponentRenderer component={comp} />);
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
     const styleMatch = html.match(/data-component-id="wpt-1"[^>]*style="([^"]*)"/);
     expect(styleMatch).not.toBeNull();
     const style = styleMatch![1];
@@ -108,7 +116,7 @@ describe('Bug 1 — WPT block-flow widen (swarm-003 css-ui__negative-outline-off
         prop('MinWidth', { type: 'length', px: 120 }),
       ],
     });
-    const html = renderToStaticMarkup(<ComponentRenderer component={comp} />);
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
     const styleMatch = html.match(/data-component-id="wpt-2"[^>]*style="([^"]*)"/);
     const style = styleMatch![1];
     expect(style).toMatch(/width:\s*200px/);
@@ -129,7 +137,7 @@ describe('Bug 1 — legacy-mode defaults preserved (327-pair compat)', () => {
 
   it('legacy mode (no ?wpt=1) still applies fit-content + minWidth:50px floor', () => {
     const comp = makeComp({ id: 'legacy-1' });
-    const html = renderToStaticMarkup(<ComponentRenderer component={comp} />);
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
     const styleMatch = html.match(/data-component-id="legacy-1"[^>]*style="([^"]*)"/);
     const style = styleMatch![1];
     // The 327-pair contract requires these defaults to be present.
@@ -149,27 +157,27 @@ describe('Bug 2 — <span> in TAG_ALLOWLIST (swarm-003 css-contain__content-visi
     ComponentRenderer = mod.ComponentRenderer;
   });
 
-  it('renders <span> when _tag is "span"', () => {
-    const comp = makeComp({ id: 'span-1', _tag: 'span' });
-    const html = renderToStaticMarkup(<ComponentRenderer component={comp} />);
+  it('renders <span> when meta.sourceTag is "span"', () => {
+    const comp = makeComp({ id: 'span-1', meta: { sourceTag: 'span' } });
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
     expect(html).toMatch(/^<span\b/);
     expect(html).toContain('</span>');
   });
 
-  it('renders <strong> when _tag is "strong" (inline-level companion)', () => {
+  it('renders <strong> when meta.sourceTag is "strong" (inline-level companion)', () => {
     // The inline-level companions (strong, em, b, i, etc.) were added
     // in the same set so content-visibility / whitespace-collapse /
     // text-decoration tests that depend on inline boxes work too.
-    const comp = makeComp({ id: 'strong-1', _tag: 'strong' });
-    const html = renderToStaticMarkup(<ComponentRenderer component={comp} />);
+    const comp = makeComp({ id: 'strong-1', meta: { sourceTag: 'strong' } });
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
     expect(html).toMatch(/^<strong\b/);
   });
 
-  it('still falls back to <div> when _tag is not in the allowlist', () => {
+  it('still falls back to <div> when meta.sourceTag is not in the allowlist', () => {
     // Security check — we only emit tags we positively want. A bogus
     // 'script' / 'iframe' / 'object' must demote to <div>.
-    const comp = makeComp({ id: 'bogus-1', _tag: 'iframe' });
-    const html = renderToStaticMarkup(<ComponentRenderer component={comp} />);
+    const comp = makeComp({ id: 'bogus-1', meta: { sourceTag: 'iframe' } });
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
     expect(html).toMatch(/^<div\b/);
   });
 });
@@ -200,9 +208,10 @@ describe('Bug 3 — aspect-ratio + child min-content lift (swarm-003 css-sizing_
         prop('AspectRatio', { ratio: { w: 1, h: 2 }, normalizedRatio: 0.5 }),
         prop('Height', { type: 'length', px: 100 }),
       ],
-      children: [child],
     });
-    const html = renderToStaticMarkup(<ComponentRenderer component={parent} />);
+    const html = renderToStaticMarkup(
+      <ComponentRenderer node={makeNode(parent, [makeNode(child)])} />,
+    );
     const styleMatch = html.match(/data-component-id="br15-parent"[^>]*style="([^"]*)"/);
     expect(styleMatch).not.toBeNull();
     const style = styleMatch![1];
@@ -227,7 +236,7 @@ describe('Bug 3 — aspect-ratio + child min-content lift (swarm-003 css-sizing_
         prop('MaxHeight', { type: 'length', px: 25 }),
       ],
     });
-    const html = renderToStaticMarkup(<ComponentRenderer component={comp} />);
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
     const styleMatch = html.match(/data-component-id="br32-empty"[^>]*style="([^"]*)"/);
     const style = styleMatch![1];
     // Empty box → no min-content floor, no 50px floor either.
@@ -249,9 +258,10 @@ describe('Bug 3 — aspect-ratio + child min-content lift (swarm-003 css-sizing_
         prop('AspectRatio', { ratio: { w: 2, h: 1 }, normalizedRatio: 2 }),
         prop('Width', { type: 'length', px: 100 }),
       ],
-      children: [child],
     });
-    const html = renderToStaticMarkup(<ComponentRenderer component={parent} />);
+    const html = renderToStaticMarkup(
+      <ComponentRenderer node={makeNode(parent, [makeNode(child)])} />,
+    );
     const styleMatch = html.match(/data-component-id="br15-vparent"[^>]*style="([^"]*)"/);
     const style = styleMatch![1];
     expect(style).toMatch(/min-height:\s*min-content/);
@@ -260,7 +270,7 @@ describe('Bug 3 — aspect-ratio + child min-content lift (swarm-003 css-sizing_
   });
 });
 
-describe('Bug 4 — _pseudo rendering (swarm-003 css-lists__counter-001 + css-pseudo__before-preceding-whitespace-dynamic)', () => {
+describe('Bug 4 — pseudos rendering (swarm-003 css-lists__counter-001 + css-pseudo__before-preceding-whitespace-dynamic)', () => {
   let ComponentRenderer: typeof import('../../src/sdui/ComponentRenderer').ComponentRenderer;
 
   beforeEach(async () => {
@@ -270,40 +280,40 @@ describe('Bug 4 — _pseudo rendering (swarm-003 css-lists__counter-001 + css-ps
     ComponentRenderer = mod.ComponentRenderer;
   });
 
-  it('renders _pseudo.before as a leading <span data-pseudo="before">', () => {
+  // The pseudo payload is forwarded VERBATIM from the extractor (spec 01:
+  // `pseudos` is extractor-owned), so inner nodes keep the `_text`
+  // spelling — exactly what the wire carries today.
+  function makePseudo(overrides: Partial<IRPseudoNode> = {}): IRPseudoNode {
+    return { id: 'pseudo-id', name: 'Pseudo', properties: [], ...overrides };
+  }
+
+  it('renders pseudos.before as a leading <span data-pseudo="before">', () => {
     // Mirrors css-pseudo__before-preceding-whitespace-dynamic: the host
     // <div> has children but also `::before { content: "two" }`. The
-    // synthetic pseudo IRComponent carries `_text: 'two'`.
-    const before = makeComp({
-      id: 'before-1',
-      name: 'BeforePseudo',
-      _text: 'two',
-    });
+    // synthetic pseudo node carries `_text: 'two'`.
+    const before = makePseudo({ id: 'before-1', _text: 'two' });
     const host = makeComp({
       id: 'host-1',
-      _text: 'words',
-      _pseudo: { before },
+      text: 'words',
+      pseudos: { before },
     });
-    const html = renderToStaticMarkup(<ComponentRenderer component={host} />);
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(host)} />);
     expect(html).toContain('data-pseudo="before"');
     expect(html).toContain('two');
     // Order: the before pseudo must appear before the host text.
     expect(html.indexOf('two')).toBeLessThan(html.indexOf('words'));
   });
 
-  it('renders _pseudo.after as a trailing <span data-pseudo="after">', () => {
-    const after = makeComp({
-      id: 'after-1',
-      name: 'AfterPseudo',
-      _text: 'end',
-    });
+  it('renders pseudos.after as a trailing <span data-pseudo="after">', () => {
+    const after = makePseudo({ id: 'after-1', _text: 'end' });
     const child = makeComp({ id: 'real-child', name: 'Child' });
     const host = makeComp({
       id: 'host-after',
-      children: [child],
-      _pseudo: { after },
+      pseudos: { after },
     });
-    const html = renderToStaticMarkup(<ComponentRenderer component={host} />);
+    const html = renderToStaticMarkup(
+      <ComponentRenderer node={makeNode(host, [makeNode(child)])} />,
+    );
     expect(html).toContain('data-pseudo="after"');
     expect(html).toContain('end');
     // The after pseudo must appear AFTER the real child.
@@ -311,26 +321,18 @@ describe('Bug 4 — _pseudo rendering (swarm-003 css-lists__counter-001 + css-ps
       .toBeLessThan(html.indexOf('data-pseudo="after"'));
   });
 
-  it('renders _pseudo.marker as a leading <span data-pseudo="marker">', () => {
+  it('renders pseudos.marker as a leading <span data-pseudo="marker">', () => {
     // Markers come even before ::before in the spec (and visually they
     // sit in the marker side of the principal box).
-    const marker = makeComp({
-      id: 'marker-1',
-      name: 'MarkerPseudo',
-      _text: '1.',
-    });
-    const before = makeComp({
-      id: 'before-2',
-      name: 'BeforePseudo',
-      _text: 'B',
-    });
+    const marker = makePseudo({ id: 'marker-1', _text: '1.' });
+    const before = makePseudo({ id: 'before-2', _text: 'B' });
     const host = makeComp({
       id: 'host-marker',
-      _text: 'item text',
-      _pseudo: { marker, before },
-      _tag: 'li',
+      text: 'item text',
+      pseudos: { marker, before },
+      meta: { sourceTag: 'li' },
     });
-    const html = renderToStaticMarkup(<ComponentRenderer component={host} />);
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(host)} />);
     expect(html).toContain('data-pseudo="marker"');
     expect(html).toContain('data-pseudo="before"');
     // Order: marker first, then before, then host text.
@@ -340,16 +342,15 @@ describe('Bug 4 — _pseudo rendering (swarm-003 css-lists__counter-001 + css-ps
       .toBeLessThan(html.indexOf('item text'));
   });
 
-  it('forwards the pseudo component _content via inline content style for counter()', () => {
+  it('forwards the pseudo content via inline content style for counter()', () => {
     // For functional `content` (e.g. `counter(c, decimal-leading-zero)`),
     // F-G-EXTRACTOR emits an IRProperty that buildStyles forwards onto
     // the inline-style as `content: counter(c, ...)` — the BROWSER then
     // evaluates the function against the live counter tree. Here we
     // simulate the IR shape: the pseudo carries a Content property
     // whose serialised value is a counter() string.
-    const before = makeComp({
+    const before = makePseudo({
       id: 'counter-before',
-      name: 'CounterBefore',
       properties: [
         prop('Content', { value: 'counter(c, decimal-leading-zero)' }),
       ],
@@ -357,34 +358,45 @@ describe('Bug 4 — _pseudo rendering (swarm-003 css-lists__counter-001 + css-ps
     const host = makeComp({
       id: 'counter-host',
       properties: [prop('CounterIncrement', { name: 'c', value: 1 })],
-      _pseudo: { before },
-      _tag: 'span',
+      pseudos: { before },
+      meta: { sourceTag: 'span' },
     });
-    const html = renderToStaticMarkup(<ComponentRenderer component={host} />);
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(host)} />);
     // The pseudo wrapper must be present...
     expect(html).toContain('data-pseudo="before"');
     // ...and the host must render as <span>.
     expect(html).toMatch(/<span\b[^>]*data-component-id="counter-host"/);
   });
 
-  it('components without _pseudo render byte-identically to legacy (327-pair compat)', () => {
-    // Hard rule: omitting _pseudo MUST produce the same DOM the
+  it('tolerates the v2 `text` spelling inside the pseudo payload', () => {
+    // The wire forwards the extractor's shape verbatim; if a future
+    // extractor emits `text` instead of `_text`, the renderer must
+    // pick it up the same way.
+    const before = makePseudo({ id: 'v2-before', text: 'v2 spelled' });
+    const host = makeComp({ id: 'v2-host', pseudos: { before } });
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(host)} />);
+    expect(html).toContain('data-pseudo="before"');
+    expect(html).toContain('v2 spelled');
+  });
+
+  it('components without pseudos render byte-identically to legacy (327-pair compat)', () => {
+    // Hard rule: omitting pseudos MUST produce the same DOM the
     // pre-Bug-4 renderer produced. No data-pseudo attribute anywhere.
     const comp = makeComp({ id: 'no-pseudo' });
-    const html = renderToStaticMarkup(<ComponentRenderer component={comp} />);
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
     expect(html).not.toContain('data-pseudo');
   });
 
-  it('null _pseudo slots are skipped silently', () => {
-    // F-G-EXTRACTOR may emit `_pseudo: { before: null, after: null }`
+  it('null pseudo slots are skipped silently', () => {
+    // F-G-EXTRACTOR may emit `pseudos: { before: null, after: null }`
     // for elements where the selector matched but the cascade
     // produced an empty rule. None of those slots should render a
     // <span>.
     const comp = makeComp({
       id: 'null-pseudo',
-      _pseudo: { before: null, after: null, marker: null },
+      pseudos: { before: null, after: null, marker: null },
     });
-    const html = renderToStaticMarkup(<ComponentRenderer component={comp} />);
+    const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
     expect(html).not.toContain('data-pseudo');
   });
 });

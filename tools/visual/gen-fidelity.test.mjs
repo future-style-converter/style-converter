@@ -24,10 +24,11 @@ import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 import { generate, SEED, REPO } from './gen-fidelity.mjs';
-// Reuse the conformance machinery (ajv 2020-12 + the IR v1 schema) rather
-// than re-compiling a validator here; run.mjs is import-safe (main() is
+// Reuse the conformance machinery (ajv 2020-12 + the IR v2 schema — the
+// converter emits v2 by default since the freeze) rather than
+// re-compiling a validator here; run.mjs is import-safe (main() is
 // guarded behind an argv check).
-import { makeValidator, validateDocument } from '../../schema/conformance/run.mjs';
+import { makeValidatorV2, validateDocument } from '../../schema/conformance/run.mjs';
 
 // Generate once; individual tests re-generate where the determinism pin
 // itself is the subject.
@@ -201,7 +202,7 @@ function representativeFiles() {
 const CONVERT_ENABLED = process.env.GEN_FIDELITY_CONVERT === '1';
 
 test(
-  'converter round-trip: 3 representative files convert cleanly and validate against IR v1',
+  'converter round-trip: 3 representative files convert cleanly and validate against IR v2',
   { skip: CONVERT_ENABLED ? false : 'set GEN_FIDELITY_CONVERT=1 (requires JDK 21) to run' },
   () => {
     // Pin Java 21 on macOS dev machines, mirroring schema/conformance/run.mjs.
@@ -214,7 +215,7 @@ test(
       }
     }
     const gradlew = join(REPO, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew');
-    const validate = makeValidator();
+    const validate = makeValidatorV2();
 
     for (const entry of representativeFiles()) {
       // out/ is gitignored; one scratch dir per input so artifacts don't clobber.
@@ -237,13 +238,15 @@ test(
         `${entry.path}: IR fails schema validation:\n` +
           errors.map((e) => `  ${e.path}: ${e.message}`).join('\n'),
       );
-      // Envelope arithmetic: top-level component count survives conversion
-      // (children flatten map→array inside components, not into the root).
+      // Envelope arithmetic (IR v2 flat list): every entry WITHOUT a slot
+      // ref is a root, and the root count must survive conversion —
+      // descendants now live as flat slot-carrying entries, not nested
+      // children (schema/spec/03-children.md).
       const input = JSON.parse(byPath.get(entry.path));
       assert.equal(
-        ir.components.length,
+        ir.components.filter((c) => !c.slot).length,
         Object.keys(input.components).length,
-        `${entry.path}: top-level component count changed during conversion`,
+        `${entry.path}: root component count changed during conversion`,
       );
     }
   },

@@ -1,4 +1,4 @@
-# Golden IR v1 fixtures
+# Golden IR fixtures (v1 in this directory, v2 under `v2/`)
 
 Hand-authored IR documents, one **shape family** each. Every byte shape
 here was verified against actual converter output (run the probe:
@@ -6,10 +6,31 @@ here was verified against actual converter output (run the probe:
 — these are not aspirational documents, they pin what the code emits
 today. JSON has no comments, so the commentary lives here.
 
+## Layout
+
+- **This directory** — the 12 IR **v1** goldens (legacy nested wire,
+  still produced by the deprecated `--emit-ir v1`). They stay
+  validatable for the whole deprecation window (spec 05), then become
+  historical record.
+- **`v2/`** — the IR **v2** goldens (flat list + slot, `irVersion`
+  envelope, `text`/`pseudos`/`meta` names): a 1:1 v2 mirror of each v1
+  golden (same filename — same shape family, flattened + renamed) plus
+  two v2-only composition goldens:
+
+| v2-only fixture | shape family pinned | sentinel expectations |
+|---|---|---|
+| `v2/slot-composition.json` | 3-level composition via child-side `slot` refs (spec 03 §1–2): pre-order flat array, contiguous subtrees, roots slot-free, default slot name omitted | 6 components; `cell__0__0-003` slot-walks to root in 2 hops; sibling bands share `slot.parent` in source order |
+| `v2/placement-claims.json` | ITEM-scoped placement claims as plain `{type,data}` envelopes on children (spec 03 §3 — no scope byte on the wire): grid area/line/span claims, flex grow/shrink/basis + align-self + order, z-index + position/insets | grid host declares templates, children declare Grid\*/Flex\*/ZIndex/Position claims; converter emitted, not hand-typed |
+
+Both v2-only goldens are **verbatim converter output** (the authoring
+inputs live in the freeze PR description); regenerate by re-running the
+converter, never by hand-editing.
+
 Consumed by:
 
-- `schema/conformance/run.mjs` — every fixture must validate against
-  `schema/ir-v1.schema.json`.
+- `schema/conformance/run.mjs` — every v1 fixture must validate against
+  `schema/ir-v1.schema.json`; every `v2/` fixture against
+  `schema/ir-v2.schema.json`.
 - `converter/src/test/kotlin/app/schema/SchemaConformanceTest.kt` —
   asserts the converter still *emits* these shapes from CSS input.
 - `runtimes/web/tests/conformance.test.ts` — decodes every fixture

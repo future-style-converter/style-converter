@@ -33,11 +33,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.styleconverter.runtime.core.ir.IRComponent
-import com.styleconverter.runtime.core.ir.IRDocument
-import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.renderer.ComponentHost
+import com.styleconverter.runtime.core.renderer.SlotComposer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -74,7 +74,10 @@ fun ScreenshotCaptureScreen(
     val context = LocalContext.current
     val screenshotManager = remember { ScreenshotManager(context) }
 
-    var document by remember { mutableStateOf<IRDocument?>(null) }
+    // Composed root trees (v2 slot refs rebuilt by SlotComposer; v1
+    // nested documents pass through) — the capture loop and the render
+    // pass both walk THIS list so indices always agree.
+    var roots by remember { mutableStateOf<List<IRComponent>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var currentIndex by remember { mutableIntStateOf(-1) }
     var capturePhase by remember { mutableStateOf(CapturePhase.LOADING) }
@@ -104,11 +107,17 @@ fun ScreenshotCaptureScreen(
                 .bufferedReader()
                 .use { it.readText() }
 
-            val json = Json { ignoreUnknownKeys = true }
-            document = json.decodeFromString<IRDocument>(jsonString)
+            // v2-aware decode (strict envelope per spec 05, v1 window
+            // fallback with a deprecation warning), then the composer
+            // step: rebuild render trees from slot refs. This replaces
+            // the blanket ignoreUnknownKeys load — unknown envelope keys
+            // now surface as the CapturePhase.ERROR screen instead of
+            // being silently dropped.
+            val document = IRDocumentDecoder.decode(jsonString)
+            roots = SlotComposer.compose(document)
 
-            Log.i(TAG, "Loaded ${document?.components?.size ?: 0} top-level components " +
-                    "(flattened: ${flattenComponents(document?.components ?: emptyList()).size})")
+            Log.i(TAG, "Loaded ${roots?.size ?: 0} root components " +
+                    "(flattened: ${flattenComponents(roots ?: emptyList()).size})")
             capturePhase = CapturePhase.CAPTURING
             currentIndex = 0
         } catch (e: Exception) {
@@ -120,11 +129,13 @@ fun ScreenshotCaptureScreen(
 
     // Capture logic using PixelCopy
     LaunchedEffect(shouldCapture, currentIndex) {
-        // Flatten the IR tree depth-first pre-order so child components become
-        // their own captures — matching iOS `flatten` and web `flatten` exactly.
-        // Filename indices (000_*, 001_*, ...) now align across all 3 platforms.
-        val flat = document?.let { flattenComponents(it.components) } ?: emptyList()
-        if (shouldCapture && document != null && currentIndex >= 0 && currentIndex < flat.size) {
+        // Flatten the COMPOSED tree depth-first pre-order so child components
+        // become their own captures — matching iOS `flatten` and web `flatten`
+        // exactly. Because SlotComposer inverts the converter's pre-order
+        // IRFlattener, a v2 flat document yields the SAME flatten order (and
+        // filename indices 000_*, 001_*, ...) as its v1 nested equivalent.
+        val flat = roots?.let { flattenComponents(it) } ?: emptyList()
+        if (shouldCapture && roots != null && currentIndex >= 0 && currentIndex < flat.size) {
             delay(400) // Wait for rendering + compositing
 
             try {
@@ -177,10 +188,10 @@ fun ScreenshotCaptureScreen(
             CapturePhase.LOADING -> LoadingView()
             CapturePhase.ERROR -> ErrorView(error ?: "Unknown error")
             CapturePhase.CAPTURING -> {
-                document?.let { doc ->
+                roots?.let { composedRoots ->
                     // Use the same depth-first flatten as the capture loop so
                     // the rendered component matches the one being saved.
-                    val flat = flattenComponents(doc.components)
+                    val flat = flattenComponents(composedRoots)
                     if (currentIndex >= 0 && currentIndex < flat.size) {
                         CaptureView(
                             component = flat[currentIndex],
@@ -407,7 +418,11 @@ private fun CaptureCanvas(
             //      content origin. The runtime chain already applies the
             //      top/left offset, so we only back out the canvas padding.
             androidx.compose.ui.layout.Layout(
-                content = { ComponentRenderer.RenderComponent(component) }
+                // ComponentHost: the v2 entry point — publishes ITEM
+                // placement parent-data (inert under this measuring
+                // Layout, which only implements the out-of-flow contract)
+                // then delegates to the style engine.
+                content = { ComponentHost.Render(component) }
             ) { measurables, constraints ->
                 val pad = CaptureCanvasPadding.roundToPx()
                 // Measure with the canvas's width budget but unbounded
@@ -427,7 +442,9 @@ private fun CaptureCanvas(
                 }
             }
         } else {
-            ComponentRenderer.RenderComponent(component)
+            // v2 runtime shim — see ComponentHost: itemPlacement
+            // parent-data + engine delegation, zero extra layout nodes.
+            ComponentHost.Render(component)
         }
     }
 }

@@ -31,8 +31,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import com.styleconverter.runtime.core.ir.IRComponent
-import com.styleconverter.runtime.core.ir.IRDocument
-import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.renderer.ComponentHost
+import com.styleconverter.runtime.core.renderer.SlotComposer
 import kotlinx.serialization.json.Json
 
 // ── Color tokens (matching web) ──────────────────────────────────────────────
@@ -82,7 +83,11 @@ private fun flattenComponents(components: List<IRComponent>): List<IRComponent> 
 @Composable
 fun ComponentListScreen() {
     val context = LocalContext.current
-    var document by remember { mutableStateOf<IRDocument?>(null) }
+    // The COMPOSED root list: v2 flat documents are rebuilt into render
+    // trees from their slot refs (SlotComposer); v1 nested documents pass
+    // through with their children arrays intact. Downstream code only
+    // ever sees composed roots — one tree shape for both wire versions.
+    var roots by remember { mutableStateOf<List<IRComponent>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var showNested by remember { mutableStateOf(true) }
@@ -94,8 +99,14 @@ fun ComponentListScreen() {
             val jsonString = context.assets.open("tmpOutput.json")
                 .bufferedReader()
                 .use { it.readText() }
-            val json = Json { ignoreUnknownKeys = true }
-            document = json.decodeFromString<IRDocument>(jsonString)
+            // v2-aware decode (strict envelope, spec 05) with the v1
+            // deprecation-window fallback — replaces the old blanket
+            // Json { ignoreUnknownKeys = true } load that silently
+            // dropped contract data (the spec-04 caveat).
+            val document = IRDocumentDecoder.decode(jsonString)
+            // Composer step: harness-side by design (§1.2 — only
+            // composers read slot; the engine stays composition-agnostic).
+            roots = SlotComposer.compose(document)
         } catch (e: Exception) {
             error = "Failed to load IR: ${e.message}"
             e.printStackTrace()
@@ -120,13 +131,13 @@ fun ComponentListScreen() {
 
         when {
             error != null -> ErrorDisplay(error!!)
-            document == null -> LoadingIndicator()
+            roots == null -> LoadingIndicator()
             else -> {
-                val allComponents = remember(document, searchQuery, showNested) {
+                val allComponents = remember(roots, searchQuery, showNested) {
                     val components = if (showNested) {
-                        flattenComponents(document!!.components)
+                        flattenComponents(roots!!)
                     } else {
-                        document!!.components
+                        roots!!
                     }
                     if (searchQuery.isBlank()) components
                     else components.filter {
@@ -139,7 +150,7 @@ fun ComponentListScreen() {
                 val pageComponents = allComponents.drop(page * PAGE_SIZE).take(PAGE_SIZE)
 
                 GalleryContent(
-                    topLevelCount = document!!.components.size,
+                    topLevelCount = roots!!.size,
                     totalCount = allComponents.size,
                     showNested = showNested,
                     onShowNestedChange = { showNested = it },
@@ -454,7 +465,12 @@ private fun ComponentCard(component: IRComponent, index: Int) {
                 .padding(12.dp),
             contentAlignment = Alignment.Center
         ) {
-            ComponentRenderer.RenderComponent(component)
+            // ComponentHost = the v2 runtime shim: publishes the
+            // component's ITEM placement claims as parent-data before
+            // delegating to the style engine (inert under this plain
+            // gallery Box — parent-data is only read at measure time by
+            // placement-aware containers).
+            ComponentHost.Render(component)
         }
 
         // ── Card Footer ──────────────────────────────────────────────────

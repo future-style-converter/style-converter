@@ -1,13 +1,18 @@
 /**
  * SDUI Component Renderer
  *
- * Renders IR components as HTML/CSS at runtime.
- * This is the web equivalent of the Android ComponentRenderer.
+ * Renders COMPOSED IR nodes as HTML/CSS at runtime — the web equivalent
+ * of the Android ComponentRenderer. Since the IR v2 freeze the wire is a
+ * flat component list; this renderer receives a {@link ComposedNode}
+ * (built by Composer.ts from `slot` refs — Mode A — or a root list for
+ * zero-slot Mode B docs) and only ever hands ONE component's properties
+ * to the engine's buildStyles. The engine never sees composition.
  */
 
 import React, { useMemo } from 'react';
-import type { IRComponent, IRProperty } from '@style-converter/web/core/ir/IRModels';
+import type { IRProperty, IRPseudoNode } from '@style-converter/web/core/ir/IRModels';
 import { buildStyles, type CSSStyles } from '@style-converter/web/core/renderer/StyleBuilder';
+import type { ComposedNode } from './Composer';
 
 /**
  * WPT-mode detector — reads the `?wpt=1` query parameter once per module load.
@@ -39,7 +44,8 @@ const WPT_MODE: boolean = (() => {
 })();
 
 interface ComponentRendererProps {
-  component: IRComponent;
+  /** Composed node: the flat-wire component + its slot-composed children. */
+  node: ComposedNode;
   depth?: number;
 }
 
@@ -98,9 +104,12 @@ function detectDisplayType(properties: IRProperty[]): DisplayType {
 }
 
 /**
- * Render a single IR component.
+ * Render a single composed IR node (one component + composed children).
  */
-export function ComponentRenderer({ component, depth = 0 }: ComponentRendererProps) {
+export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
+  // The renderer body reads the component for styles/metadata and the
+  // node's composed children for recursion — the only two inputs.
+  const component = node.component;
   const displayType = useMemo(() => detectDisplayType(component.properties), [component.properties]);
 
   // Build styles from properties.
@@ -152,7 +161,11 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   // 0.42→~0.85, Grid_FixedTracks (059) 0.50→~0.85, plus the same gain on
   // Android-web pairs. Honors any explicit `width` declaration via the
   // `...styles` spread because that comes after `display`.
-  const hasChildren = !!(component.children && component.children.length > 0);
+  // v2 note: "children" here means the COMPOSED child nodes the Composer
+  // attached from slot refs — the wire itself is flat and the component
+  // carries no children field at all. Same truthiness semantics as the
+  // pre-v2 `component.children` check, so the 327-pair baseline is stable.
+  const hasChildren = node.children.length > 0;
 
   // Aspect-ratio fit-content suppression — see
   // tools/titan/investigations/swarm-001/css-sizing__block-aspect-ratio-032.json
@@ -324,7 +337,9 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   // limitation: text always renders BEFORE all children regardless of the
   // original DOM position; full inline-flow ordering needs an interleaved
   // inlineRuns IR shape (tracked as the secondary fix in the investigation).
-  const text = component._text;
+  // v2 rename: the wire field is `text` (was `_text` in v1; the IRDecode
+  // gate translates legacy docs, so this is the only spelling seen here).
+  const text = component.text;
   const hasText = typeof text === 'string' && text.length > 0;
   // Bug 4 — pseudo-element rendering. The F-G-EXTRACTOR pipeline
   // populates `_pseudo.{before,after,marker}` from CSS rules like
@@ -339,7 +354,10 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   //
   // Components without `_pseudo` (the 327-pair baseline) skip these
   // branches entirely so the legacy DOM is byte-identical.
-  const pseudo = component._pseudo;
+  // v2 rename: `pseudos` (was `_pseudo` in v1). The payload itself is
+  // forwarded verbatim from the authoring extractor (spec 01), so the
+  // inner nodes keep the extractor's shape — see IRPseudoNode.
+  const pseudo = component.pseudos;
   const hasBefore = !!(pseudo && pseudo.before);
   const hasAfter = !!(pseudo && pseudo.after);
   const hasMarker = !!(pseudo && pseudo.marker);
@@ -359,19 +377,22 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   // would. Wrapped in <span> rather than <div> to preserve the inline
   // flow that ::before/::after participate in by default.
   const renderPseudo = (
-    p: IRComponent,
+    p: IRPseudoNode,
     role: 'before' | 'after' | 'marker',
   ): React.ReactNode => {
     // Use buildStyles directly on the pseudo's properties so any
     // declarations from the originating CSS rule (font-weight, color,
     // letter-spacing, AND `content`) reach the inline style attribute.
-    const ps = buildStyles(p.properties);
-    // The pseudo's _text carries the literal value of `content:` when
+    // The payload is extractor-owned and forwarded verbatim, so every
+    // field is optional — default to an empty property list.
+    const ps = buildStyles(p.properties ?? []);
+    // The pseudo's text carries the literal value of `content:` when
     // it's a plain string (e.g. `content:"two"`); for functional
-    // values (`counter(...)`), F-G-EXTRACTOR is expected to leave _text
+    // values (`counter(...)`), F-G-EXTRACTOR is expected to leave it
     // empty and emit a `content` IRProperty that buildStyles forwards
     // into the inline style — the browser then evaluates the function.
-    const pText = typeof p._text === 'string' ? p._text : '';
+    // Accept both spellings: `_text` (extractor legacy) and `text` (v2).
+    const pText = typeof p._text === 'string' ? p._text : (typeof p.text === 'string' ? p.text : '');
     // Marker pseudo gets a small trailing margin so it visually
     // separates from the host's content the way a native list-item
     // marker does (CSS-Lists 3 §4.3 — markers are typically preceded
@@ -403,8 +424,10 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
           naturally. Suppressed when _text is missing/empty so legacy
           fixtures (the 327-pair baseline) stay byte-identical. */}
       {hasText ? <span>{text}</span> : null}
-      {component.children!.map((child, index) => (
-        <ComponentRenderer key={child.id || index} component={child} depth={depth + 1} />
+      {/* Composed children (slot refs → tree, Composer.ts) recurse here
+          in flat-array sibling order — the spec 03 sibling-order rule. */}
+      {node.children.map((child, index) => (
+        <ComponentRenderer key={child.component.id || index} node={child} depth={depth + 1} />
       ))}
       {/* Trailing ::after pseudo renders last, after all children. */}
       {hasAfter ? renderPseudo(pseudo!.after!, 'after') : null}
@@ -471,8 +494,11 @@ export function ComponentRenderer({ component, depth = 0 }: ComponentRendererPro
   // script-context tags (<script>, <style>) into the SDUI renderer
   // surface. Lowercased for matching since the extractor emits
   // lowercase tags.
-  const tag = (typeof component._tag === 'string' && component._tag.length > 0)
-    ? component._tag.toLowerCase()
+  // v2 rename: the originating tag now lives at `meta.sourceTag` (was the
+  // top-level `_tag` in v1; the IRDecode gate translates legacy docs).
+  const sourceTag = component.meta?.sourceTag;
+  const tag = (typeof sourceTag === 'string' && sourceTag.length > 0)
+    ? sourceTag.toLowerCase()
     : null;
   const TAG_ALLOWLIST = new Set([
     'ol', 'ul', 'li',
@@ -658,17 +684,18 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor }: Plac
 }
 
 /**
- * Render a list of components.
+ * Render a list of composed nodes (e.g. the root forest of a document —
+ * this is exactly how a Mode B zero-slot doc renders: a flat root list).
  */
 interface ComponentListProps {
-  components: IRComponent[];
+  nodes: ComposedNode[];
 }
 
-export function ComponentList({ components }: ComponentListProps) {
+export function ComponentList({ nodes }: ComponentListProps) {
   return (
     <>
-      {components.map((component, index) => (
-        <ComponentRenderer key={component.id || index} component={component} />
+      {nodes.map((node, index) => (
+        <ComponentRenderer key={node.component.id || index} node={node} />
       ))}
     </>
   );

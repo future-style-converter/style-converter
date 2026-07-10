@@ -1,0 +1,76 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "envelope-primitives-001",
+            "name": "Envelope_PrimitiveData",
+            "properties": [
+                {
+                    "type": "MarginLeft",
+                    "data": "auto"
+                },
+                {
+                    "type": "PaddingLeft",
+                    "data": 10.0
+                },
+                {
+                    "type": "FontWeight",
+                    "data": 700
+                },
+                {
+                    "type": "Display",
+                    "data": "NONE"
+                },
+                {
+                    "type": "Visibility",
+                    "data": "HIDDEN"
+                }
+            ]
+        },
+        {
+            "id": "envelope-empty-object-002",
+            "name": "Envelope_EmptyObjectData",
+            "properties": [
+                {
+                    "type": "SparseConfig",
+                    "data": {}
+                }
+            ]
+        },
+        {
+            "id": "envelope-array-003",
+            "name": "Envelope_ArrayData",
+            "properties": [
+                {
+                    "type": "TransitionDelay",
+                    "data": [
+                        {
+                            "ms": 150.0
+                        }
+                    ]
+                },
+                {
+                    "type": "AnimationDuration",
+                    "data": {
+                        "type": "app.irmodels.properties.animations.AnimationDurationProperty.AnimationDurationValue.Durations",
+                        "durations": [
+                            {
+                                "ms": 300.0,
+                                "original": {
+                                    "v": 0.3,
+                                    "u": "S"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "id": "envelope-empty-list-004",
+            "name": "Envelope_EmptyPropertiesList",
+            "properties": []
+        }
+    ]
+}
