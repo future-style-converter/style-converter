@@ -14,6 +14,9 @@
 //
 
 import Foundation
+// UIKit only for UIFont metric introspection in the font-size-adjust
+// resolution below (capHeight/xHeight of the bundled reference face).
+import UIKit
 
 enum TypographyExtractor {
 
@@ -104,9 +107,60 @@ enum TypographyExtractor {
             agg.lineHeightPx = mult * (agg.fontSizePx ?? 16)
         }
 
+        // Fidelity wave 2 — `font-size-adjust` (css-fonts-4 §4.6): the
+        // used font size is scaled so the chosen metric hits the
+        // requested ratio: used = size × value / metricRatio(font).
+        // The web reference applies this natively (Typography_C04's
+        // `cap-height 0.7` renders 28px Inter at ≈26.9px); iOS ignored
+        // it and drew visibly larger glyphs.
+        if let factor = fontSizeAdjustFactor(from: properties) {
+            // No explicit font-size still adjusts the 16px default.
+            agg.fontSizePx = (agg.fontSizePx ?? 16) * factor
+            agg.touched = true
+        }
+
         // Return nil when no Applier flipped `touched` — lets the caller
         // skip TypographyApplier entirely. Non-touching appliers (stretch,
         // optical-sizing, unsupported groups) intentionally don't set it.
         return agg.touched ? agg : nil
+    }
+
+    // MARK: - font-size-adjust resolution (fidelity wave 2)
+
+    /// Scale factor for `font-size-adjust: [<metric>] <number>`, or nil
+    /// when absent / `none` / an unsupported metric. IR shape:
+    /// `{"type":"metric-value","metric":"cap-height","value":0.7}` (the
+    /// one-value ex-height form ships without the metric key).
+    static func fontSizeAdjustFactor(from properties: [IRProperty]) -> CGFloat? {
+        for prop in properties where prop.type == "FontSizeAdjust" {
+            // Keyword forms (`none`, `from-font`) have no numeric value.
+            guard case .object(let o) = prop.data,
+                  let v = o["value"]?.doubleValue, v > 0 else { continue }
+            // Default metric per spec grammar is ex-height.
+            let metric = o["metric"]?.stringValue?.lowercased() ?? "ex-height"
+            let ratio: CGFloat?
+            switch metric {
+            case "cap-height": ratio = referenceMetricRatio(\.capHeight, fallback: 0.7275)
+            case "ex-height":  ratio = referenceMetricRatio(\.xHeight,  fallback: 0.5459)
+            default:           ratio = nil  // ch-width / ic-* unsupported
+            }
+            guard let r = ratio, r > 0 else { continue }
+            return CGFloat(v) / r
+        }
+        return nil
+    }
+
+    /// Metric-to-em ratio of the harness reference face (bundled Inter),
+    /// probed live via UIFont so the value tracks the exact font tables
+    /// the render uses. Falls back to Inter 4.0's OS/2 constants
+    /// (capHeight 1490/2048, xHeight 1118/2048) when the face isn't
+    /// registered — e.g. in the unit-test bundle — keeping tests
+    /// deterministic.
+    private static func referenceMetricRatio(_ metric: KeyPath<UIFont, CGFloat>,
+                                             fallback: CGFloat) -> CGFloat {
+        if let f = UIFont(name: "Inter", size: 100) {
+            return f[keyPath: metric] / 100
+        }
+        return fallback
     }
 }

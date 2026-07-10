@@ -15,7 +15,12 @@ enum FontVariantCapsExtractor {
             touched = true
             // All grammar branches are keywords — extractKeyword covers both
             // plain strings and { keyword: "…" } object forms.
-            switch ValueExtractors.extractKeyword(prop.data)?.lowercased() {
+            // Fidelity wave 2: the converter serializes enum keywords in
+            // SCREAMING_SNAKE ("SMALL_CAPS"), so normalise underscores to
+            // hyphens after lowercasing — otherwise small-caps never
+            // matched and Typography_C06 row 005 lost its caps variant.
+            switch ValueExtractors.extractKeyword(prop.data)?.lowercased()
+                .replacingOccurrences(of: "_", with: "-") {
             case "normal":          cfg.mode = .normal
             case "small-caps":      cfg.mode = .smallCaps
             case "all-small-caps":  cfg.mode = .allSmallCaps

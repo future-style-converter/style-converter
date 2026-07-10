@@ -796,7 +796,16 @@ object TypographyExtractor {
     }
 
     private fun extractTextEmphasisStyle(json: JsonElement?): TextEmphasisStyle {
-        val keyword = ValueExtractors.extractKeyword(json)?.uppercase()?.replace("-", "_")
+        // The IR serializes <text-emphasis-style> as a sealed-interface
+        // object keyed by "type" ({"type":"circle"}), which extractKeyword
+        // (keyword/value keys only) misses — every emphasis fixture came
+        // back NONE and no marks rendered (Typography_C16 0.842 / C17
+        // 0.898 while web painted the mark row). Fall back to the
+        // type-aware reader. Per css-text-decor-3 §3.1 a bare shape
+        // keyword defaults to FILLED, which the CIRCLE branch below yields.
+        val keyword = (ValueExtractors.extractKeyword(json)
+            ?: ValueExtractors.extractKeywordFromObject(json))
+            ?.uppercase()?.replace("-", "_")
             ?: return TextEmphasisStyle.NONE
         return try {
             TextEmphasisStyle.valueOf(keyword)
@@ -823,6 +832,21 @@ object TypographyExtractor {
     }
 
     private fun extractTextEmphasisPosition(json: JsonElement?): TextEmphasisPosition {
+        // Two-axis wire shape {"vertical":"UNDER","horizontal":"LEFT"}
+        // (TextEmphasisPositionProperty) — recombine into the enum's
+        // VERTICAL_HORIZONTAL spelling. Without this, `under left`
+        // defaulted to OVER_RIGHT and marks drew on the wrong side.
+        if (json is kotlinx.serialization.json.JsonObject && json["vertical"] != null) {
+            val v = (json["vertical"] as? kotlinx.serialization.json.JsonPrimitive)
+                ?.contentOrNull?.uppercase() ?: "OVER"
+            val h = (json["horizontal"] as? kotlinx.serialization.json.JsonPrimitive)
+                ?.contentOrNull?.uppercase() ?: "RIGHT"
+            return try {
+                TextEmphasisPosition.valueOf("${v}_${h}")
+            } catch (e: IllegalArgumentException) {
+                TextEmphasisPosition.OVER_RIGHT
+            }
+        }
         val keyword = ValueExtractors.extractKeyword(json)?.uppercase()?.replace("-", "_")
             ?: return TextEmphasisPosition.OVER_RIGHT
         return try {
@@ -899,7 +923,15 @@ object TypographyExtractor {
     }
 
     private fun extractFontVariantLigatures(json: JsonElement?): FontVariantLigatures {
-        val keyword = ValueExtractors.extractKeyword(json)?.uppercase()?.replace("-", "_")
+        // Array wire shape (["NO_COMMON_LIGATURES","NO_CONTEXTUAL"]). The
+        // config models a single enum slot — take the first entry (the
+        // remaining flags only matter for ligature-heavy scripts the
+        // placeholder corpus doesn't exercise).
+        val keyword = (if (json is kotlinx.serialization.json.JsonArray) {
+            (json.firstOrNull() as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull
+        } else {
+            ValueExtractors.extractKeyword(json)
+        })?.uppercase()?.replace("-", "_")
             ?: return FontVariantLigatures.NORMAL
         return try {
             FontVariantLigatures.valueOf(keyword)
@@ -911,8 +943,20 @@ object TypographyExtractor {
     private fun extractFontVariantNumeric(json: JsonElement?): FontVariantNumeric {
         if (json == null) return FontVariantNumeric()
 
-        val keyword = ValueExtractors.extractKeyword(json)?.uppercase()?.replace("-", "_")
-        if (keyword == "NORMAL" || keyword == null) return FontVariantNumeric()
+        // The parser emits <font-variant-numeric> as an ARRAY of keyword
+        // primitives (["ORDINAL"]) — one entry per feature. extractKeyword
+        // can't unwrap arrays, so `ordinal` never reached the feature
+        // string and web's raised "07" ordinals had no Android counterpart
+        // (Typography_C07 0.844). Join the entries so the splitter below
+        // sees every token.
+        val keyword = (if (json is kotlinx.serialization.json.JsonArray) {
+            json.mapNotNull {
+                (it as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull
+            }.joinToString(" ")
+        } else {
+            ValueExtractors.extractKeyword(json)
+        })?.uppercase()?.replace("-", "_")
+        if (keyword == "NORMAL" || keyword.isNullOrBlank()) return FontVariantNumeric()
 
         // Parse multiple values
         var figure = NumericFigure.NORMAL

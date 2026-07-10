@@ -73,7 +73,12 @@ object OffsetPathExtractor {
                         OffsetPathValue.Url(url)
                     }
                     "ray" -> {
-                        val angle = data["angle"]?.jsonPrimitive?.floatOrNull ?: 0f
+                        // IRAngleSerializer emits the normalized angle under
+                        // "deg" (ValueTypes.kt: put("deg", value.degrees));
+                        // reading only "angle" left every ray() at 0deg —
+                        // Layout_C14's ray(45deg) never rotated on Android.
+                        val angle = (data["deg"] as? JsonPrimitive)?.floatOrNull
+                            ?: (data["angle"] as? JsonPrimitive)?.floatOrNull ?: 0f
                         val size = data["size"]?.jsonPrimitive?.contentOrNull?.uppercase()?.replace("-", "_")
                         val sizeValue = when (size) {
                             "CLOSEST_SIDE" -> RaySizeValue.CLOSEST_SIDE
@@ -201,17 +206,53 @@ object OffsetPathExtractor {
                 if (content == "auto") return OffsetAnchorValue.Auto
             }
             is JsonObject -> {
-                val type = data["type"]?.jsonPrimitive?.contentOrNull?.lowercase()
+                val type = (data["type"] as? JsonPrimitive)?.contentOrNull?.lowercase()
                 if (type == "auto") return OffsetAnchorValue.Auto
 
-                val x = data["x"]?.jsonPrimitive?.floatOrNull ?: 50f
-                val y = data["y"]?.jsonPrimitive?.floatOrNull ?: 50f
+                // The IR position shape is {"type":"position","x":<comp>,
+                // "y":<comp>} where each component is EITHER a bare number
+                // (percent) OR an object — a positional keyword
+                // ({"type":"center"|"left"|…}) or a length/percentage
+                // ({"px":N} / {"type":"percentage","value":N}). The old
+                // bare `.jsonPrimitive` call THREW on the object shape,
+                // and because StyleApplier.extractConfig runs every
+                // extractor, the throw nuked the WHOLE style chain: any
+                // component carrying offset-anchor/-position lost its
+                // background + size (Layout_C13 0.717, Layout_C14 —
+                // box vanished while web/iOS rendered it).
+                val x = positionComponent(data["x"], horizontal = true) ?: 50f
+                val y = positionComponent(data["y"], horizontal = false) ?: 50f
                 return OffsetAnchorValue.Position(x, y)
             }
             else -> return OffsetAnchorValue.Auto
         }
 
         return OffsetAnchorValue.Auto
+    }
+
+    /**
+     * Resolve one <position> component to a percentage (0..100).
+     * css-values-4 §6.1 keyword mapping: left/top → 0%, center → 50%,
+     * right/bottom → 100%. Explicit percentages pass through; px lengths
+     * are not expressible as a containing-block percentage here → null
+     * (caller falls back to 50%, the CSS initial anchor).
+     */
+    private fun positionComponent(el: JsonElement?, horizontal: Boolean): Float? {
+        return when (el) {
+            null -> null
+            is JsonPrimitive -> el.floatOrNull
+            is JsonObject -> {
+                val kw = (el["type"] as? JsonPrimitive)?.contentOrNull?.lowercase()
+                when (kw) {
+                    "left", "top" -> 0f
+                    "center" -> 50f
+                    "right", "bottom" -> 100f
+                    "percentage" -> (el["value"] as? JsonPrimitive)?.floatOrNull
+                    else -> (el["value"] as? JsonPrimitive)?.floatOrNull
+                }
+            }
+            else -> null
+        }
     }
 
     /**

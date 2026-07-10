@@ -288,6 +288,19 @@ object TextStyleApplier {
             // floatOrNull covers IRs that emit "700.0" — kotlinx-serialization
             // sometimes preserves the JSON numeric type literally.
             is JsonPrimitive -> data.intOrNull ?: data.floatOrNull?.toInt()
+                // css-fonts-4 §2.2 keyword values. The RELATIVE keywords
+                // resolve against the inherited weight; the placeholder's
+                // inherited weight is always `normal` (400), so the spec's
+                // resolution table gives bolder→700 and lighter→100.
+                // Previously `font-weight: bolder` fell through to null →
+                // regular, while web rendered bold (Typography_C08 0.908).
+                ?: when (data.contentOrNull?.lowercase()) {
+                    "normal" -> 400
+                    "bold" -> 700
+                    "bolder" -> 700   // from inherited 400 (css-fonts-4 table)
+                    "lighter" -> 100  // from inherited 400 (css-fonts-4 table)
+                    else -> null
+                }
             else -> null
         }
         if (weight != null) {
@@ -407,6 +420,27 @@ object TextStyleApplier {
             data["pixels"]?.jsonPrimitive?.floatOrNull?.let {
                 return it.sp
             }
+            // Relative-unit escape hatch: the converter serializes
+            // `letter-spacing: 0.25rem` as {"px": 0.0, "original":
+            // {"v":0.25,"u":"REM"}} — px carries a bogus 0 instead of null,
+            // so extractDp below happily returned 0.sp and the tracking
+            // vanished (Typography_C10: web spaced glyphs 4px apart,
+            // Android didn't, 0.847). When px is 0 but the ORIGINAL is a
+            // non-zero em/rem, resolve it the same way the reference does:
+            // ×16 (harness root and body font-size are both 16px).
+            val px = data["px"]?.jsonPrimitive?.floatOrNull
+            if (px == 0f) {
+                // The wire shape nests once: {"px":0.0,"original":{"type":
+                // "length","original":{"v":0.25,"u":"REM"}}} — unwrap the
+                // outer envelope before reading v/u.
+                val outer = data["original"] as? JsonObject
+                val original = (outer?.get("original") as? JsonObject) ?: outer
+                val v = original?.get("v")?.jsonPrimitive?.floatOrNull
+                val u = original?.get("u")?.jsonPrimitive?.contentOrNull?.uppercase()
+                if (v != null && v != 0f && (u == "EM" || u == "REM")) {
+                    return (v * 16f).sp
+                }
+            }
         }
         val dp = ValueExtractors.extractDp(data)
         if (dp != null) {
@@ -522,11 +556,19 @@ object TextStyleApplier {
 
     /**
      * Extract white-space mode from properties.
+     *
+     * css-text-4 split `white-space` into longhands: `text-wrap-mode`
+     * (whose value also arrives via the `text-wrap` shorthand) carries the
+     * nowrap bit. The reference (Chrome) treats `text-wrap: nowrap` exactly
+     * like `white-space: nowrap` for wrapping, so all three IR spellings
+     * fold into the same mode here. Previously only "WhiteSpace" was read
+     * and Typography_C20 (`text-wrap: nowrap`) still wrapped to two lines
+     * on Android while web kept one (0.766).
      */
     fun extractWhiteSpace(properties: List<IRProperty>): WhiteSpaceMode {
-        val prop = properties.find { it.type == "WhiteSpace" } ?: return WhiteSpaceMode.NORMAL
-        val keyword = ValueExtractors.extractKeyword(prop.data)
-        return when (keyword?.lowercase()?.replace("-", "_")) {
+        val prop = properties.find { it.type == "WhiteSpace" }
+        val keyword = prop?.let { ValueExtractors.extractKeyword(it.data) }
+        val mode = when (keyword?.lowercase()?.replace("-", "_")) {
             "nowrap" -> WhiteSpaceMode.NOWRAP
             "pre" -> WhiteSpaceMode.PRE
             "pre_wrap" -> WhiteSpaceMode.PRE_WRAP
@@ -534,6 +576,15 @@ object TextStyleApplier {
             "break_spaces" -> WhiteSpaceMode.BREAK_SPACES
             else -> WhiteSpaceMode.NORMAL
         }
+        if (mode != WhiteSpaceMode.NORMAL) return mode
+        // text-wrap / text-wrap-mode: only the wrap-vs-nowrap bit exists in
+        // Compose terms (`balance`/`pretty` are line-breaking strategies the
+        // paragraph layouter doesn't expose) — map nowrap, ignore the rest.
+        val wrapsOff = properties.any { p ->
+            (p.type == "TextWrap" || p.type == "TextWrapMode") &&
+                ValueExtractors.extractKeyword(p.data)?.lowercase() == "nowrap"
+        }
+        return if (wrapsOff) WhiteSpaceMode.NOWRAP else WhiteSpaceMode.NORMAL
     }
 
     // ==================== TAB SIZE ====================

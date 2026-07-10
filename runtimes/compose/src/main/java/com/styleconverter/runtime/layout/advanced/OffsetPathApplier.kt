@@ -9,6 +9,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -90,6 +92,112 @@ object OffsetPathApplier {
                 anchorOffset.y / size.height.coerceAtLeast(1f)
             )
         }
+    }
+
+    /**
+     * css-motion-1 static ray() placement.
+     *
+     * Chrome's rendering of
+     *   `offset-path: ray(45deg); offset-position: left top; offset-rotate: reverse`
+     * (Layout_C14 web reference) is: the element's ANCHOR point (offset-anchor,
+     * auto → transform-origin → 50% 50%) is moved onto the ray's START point
+     * (offset-position, resolved in the containing block), advanced by
+     * offset-distance along the ray, and the element is rotated to the ray's
+     * direction (auto) / its opposite (reverse). With distance 0 that leaves
+     * only a rotated corner of the box on-canvas — web's capture shows exactly
+     * that wedge at the canvas origin.
+     *
+     * The containing block is approximated by the element's parent layout
+     * node, observed post-layout via onPlaced (positionInParent + parent
+     * size). That matches Chrome's behaviour for the harness's in-flow
+     * components, whose containing block is the capture canvas.
+     *
+     * Only applied when offset-position was DECLARED as a position — the
+     * `normal` initial value starts rays at the container CENTER, which the
+     * own-box approximation would get wrong, so we leave those untouched
+     * rather than paint a confidently wrong translate.
+     */
+    fun applyRayOffset(modifier: Modifier, config: OffsetPathConfig): Modifier {
+        val ray = config.offsetPath as? OffsetPathValue.Ray ?: return modifier
+        val pos = config.offsetPosition as? OffsetAnchorValue.Position ?: return modifier
+        // Anchor: auto → transform-origin default (50% 50%).
+        val anchor = config.offsetAnchor as? OffsetAnchorValue.Position
+        val anchorX = (anchor?.x ?: 50f) / 100f
+        val anchorY = (anchor?.y ?: 50f) / 100f
+        // CSS ray angles: 0deg points UP, clockwise-positive (css-motion-1
+        // §3.1, matching <angle> in gradients). Screen-space direction:
+        // (sin θ, −cos θ). The element's auto rotation aligns its inline
+        // axis (+x) with that direction: atan2(dy, dx).
+        val rad = Math.toRadians(ray.angle.toDouble())
+        val dirX = kotlin.math.sin(rad).toFloat()
+        val dirY = (-kotlin.math.cos(rad)).toFloat()
+        val pathAngle = Math.toDegrees(
+            atan2(dirY.toDouble(), dirX.toDouble())
+        ).toFloat()
+        val rotation = when (val r = config.offsetRotate) {
+            is OffsetRotateValue.Auto -> pathAngle
+            is OffsetRotateValue.AutoReverse -> pathAngle + 180f
+            is OffsetRotateValue.Angle -> r.degrees
+            is OffsetRotateValue.AutoAngle -> pathAngle + r.degrees
+        }
+        // px offset-distance advances along the ray; percentage distance is
+        // relative to the ray's size (closest-side etc.) which needs
+        // container geometry — treated as 0 (safe: fixture rays omit it).
+        val distPx = if (config.offsetDistanceUnit == OffsetDistanceUnit.LENGTH)
+            config.offsetDistance else 0f
+
+        // offset-position resolves in the CONTAINING BLOCK, not the element
+        // box. From a Modifier we can observe the element's placement inside
+        // its parent layout node (onPlaced → positionInParent + parent
+        // size), which IS the containing block for the harness's in-flow
+        // components. Chrome pins Layout_C14's ray start at the canvas
+        // origin (wedge 44×44 at 0,0) while the element itself sits 16px in
+        // (canvas padding) — without this correction Android's wedge was
+        // 76×76 (anchored at the element origin instead, 0.9267 vs web).
+        // The state is written post-layout and the graphicsLayer block
+        // re-reads it on change; the capture harness waits a settle frame,
+        // so the corrected placement is what gets photographed.
+        val placement = androidx.compose.runtime.mutableStateOf(
+            androidx.compose.ui.geometry.Offset.Zero to androidx.compose.ui.geometry.Size.Zero
+        )
+        return modifier
+            .onPlaced { coords ->
+                // Chrome resolves offset-position against the containing
+                // block's PADDING box, not its content box: the puppeteer
+                // probe (390px canvas, padding 16, child ray(45deg)/left
+                // top/reverse) reports the child's transformed bbox centered
+                // at the canvas origin (0,0), 16px up-left of the child's
+                // static position. Compose's parentLayoutCoordinates is the
+                // parent's inner placement scope (content box), so hop ONE
+                // more chain point outward — for a padded parent that is the
+                // pre-padding coordinate (the padding box). For unpadded
+                // parents the sizes match and we keep the content scope
+                // (content box == padding box there).
+                val content = coords.parentLayoutCoordinates
+                val outer = content?.parentCoordinates
+                val block = if (outer != null && outer.size != content.size) outer else content
+                if (block != null) {
+                    placement.value = block.localPositionOf(
+                        coords, androidx.compose.ui.geometry.Offset.Zero
+                    ) to androidx.compose.ui.geometry.Size(
+                        block.size.width.toFloat(), block.size.height.toFloat()
+                    )
+                }
+            }
+            .graphicsLayer {
+                val (inParent, parentSize) = placement.value
+                // Ray start point in the containing block, then re-expressed
+                // relative to the element's own top-left.
+                val startX = (pos.x / 100f) * parentSize.width - inParent.x
+                val startY = (pos.y / 100f) * parentSize.height - inParent.y
+                // Move the anchor onto the start point, advance by distance.
+                translationX = startX - anchorX * size.width + dirX * distPx
+                translationY = startY - anchorY * size.height + dirY * distPx
+                rotationZ = rotation
+                // Rotate about the anchor, matching CSS (the anchor point
+                // stays fixed on the path while the box spins around it).
+                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(anchorX, anchorY)
+            }
     }
 
     /**

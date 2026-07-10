@@ -107,11 +107,23 @@ struct TypographyAggregate: Equatable {
     /// `text-shadow` — the first layer only (SwiftUI doesn't stack Text
     /// shadows the way CSS does). Nil means "no shadow".
     var textShadow: TextShadowLayer? = nil
+    /// Fidelity wave 2 — ALL text-shadow layers, in CSS order. Applied at
+    /// the PlaceholderLabel glyph level via chained `.shadow(...)` calls
+    /// (css-text-decor-3 §4: text-shadow paints behind the TEXT, not the
+    /// element box — the old box-level TextShadowMod haloed the whole
+    /// container, Typography_C18 red ring bug).
+    var textShadowLayers: [TextShadowLayer] = []
     /// `text-transform` → SwiftUI `.textCase(_:)`.
     var textCase: Text.Case?? = nil   // nested Optional: outer nil = "inherit", inner nil = "explicitly none" (CSS `text-transform: none`).
 
     // MARK: - Wrapping / truncation
 
+    /// Fidelity wave 2 — `white-space: nowrap` / `text-wrap: nowrap`
+    /// (css-text-4 §5.1): suppress line wrapping entirely. The
+    /// PlaceholderLabel maps this to `.fixedSize(horizontal: true)` so
+    /// the glyph run stays on one line and overflows the box exactly
+    /// like the web reference (Typography_C20/C21 wrapped to 2 lines).
+    var noWrap: Bool = false
     /// `line-clamp` / `max-lines` — the smaller of the two wins when both set.
     var lineLimit: Int? = nil
     /// `text-overflow: ellipsis` → `.truncationMode(.tail)`. When nil we

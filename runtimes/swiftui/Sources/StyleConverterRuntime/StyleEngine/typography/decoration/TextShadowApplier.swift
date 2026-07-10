@@ -7,10 +7,15 @@ import Foundation
 
 enum TextShadowApplier {
     static func contribute(_ cfg: TextShadowConfig?, into agg: inout TypographyAggregate) {
-        guard let first = cfg?.layers.first else { return }
-        // Keep only the first layer — SwiftUI Text's `.shadow` doesn't
-        // stack like CSS does. TODO(phase-6+): multi-layer via CALayer.
+        guard let layers = cfg?.layers, let first = layers.first else { return }
+        // First layer kept for legacy single-shadow consumers.
         agg.textShadow = first
+        // Fidelity wave 2 — keep EVERY layer. css-text-decor-3 §4 allows
+        // a comma list; PlaceholderLabel chains one `.shadow(...)` per
+        // layer directly on the glyph run (Typography_C18 declares two).
+        // The old box-level TextShadowMod haloed the whole painted
+        // container instead of the glyphs — removed.
+        agg.textShadowLayers = layers
         agg.touched = true
     }
 }

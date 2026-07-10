@@ -46,7 +46,12 @@ struct TypographyApplier: ViewModifier {
             .modifier(TextCaseMod(tc: agg.textCase))
             .modifier(UnderlineMod(agg: agg))
             .modifier(StrikethroughMod(agg: agg))
-            .modifier(TextShadowMod(layer: agg.textShadow))
+            // Fidelity wave 2: TextShadowMod removed from the box chain.
+            // css-text-decor-3 §4 — text-shadow paints behind the TEXT
+            // only; the box-level `.shadow()` here haloed the whole
+            // painted container (Typography_C18 red ring). The glyph-
+            // level shadow now applies inside PlaceholderLabel via the
+            // TextConfig.shadows bridge.
             .modifier(LayoutDirectionMod(direction: agg.layoutDirection))
         // Note: no WritingModeMod. A `.rotationEffect(.degrees(90))`
         // approximation was tried in Phase 12 and regressed typography SSIM
@@ -221,32 +226,11 @@ private struct StrikethroughMod: ViewModifier {
     }
 }
 
-private struct TextShadowMod: ViewModifier {
-    let layer: TextShadowLayer?
-    func body(content: Content) -> some View {
-        // KNOWN BUG (TIER1 blocked-platform — typography/TextShadow):
-        // SwiftUI's `.shadow()` shadows the entire content view including
-        // the parent box's background, producing a halo around the whole
-        // component instead of just the text glyphs. Web + Android render
-        // text-shadow correctly (only on glyphs); iOS over-shadows.
-        //
-        // Real fix requires either:
-        //   1. Restructuring this engine so Text nodes are addressable
-        //      separately from their container boxes (so we can apply
-        //      .shadow() at the Text level, not at the box level), OR
-        //   2. Using TextRenderer/TextLayout (iOS 18+) to render glyphs
-        //      with shadow at the rasterizer level.
-        //
-        // Until then we apply the modifier and accept the cross-platform
-        // divergence honestly (was no-op'd for parity but Auditor round
-        // 9 confirmed Android renders correctly via Compose TextStyle.shadow,
-        // so iOS no-op was based on a false premise — reverted).
-        if let l = layer {
-            return AnyView(content.shadow(color: l.color ?? .black.opacity(0.5), radius: l.radius, x: l.x, y: l.y))
-        }
-        return AnyView(content)
-    }
-}
+// Fidelity wave 2: TextShadowMod deleted. The box-level `.shadow()`
+// haloed the entire painted container (background included) instead of
+// the glyphs — see css-text-decor-3 §4. Glyph-level shadows now paint
+// inside PlaceholderLabel (Renderer/ComponentRenderer.swift) from the
+// TextConfig.shadows bridge, chaining one `.shadow` per CSS layer.
 
 private struct LayoutDirectionMod: ViewModifier {
     let direction: LayoutDirection?
