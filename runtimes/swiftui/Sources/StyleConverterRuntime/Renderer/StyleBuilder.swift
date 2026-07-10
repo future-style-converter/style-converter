@@ -177,6 +177,12 @@ struct ComponentStyle {
     // -distance). Nil when absent or the path shape isn't renderable;
     // MotionOffsetApplier is identity in that case.
     var motionOffset: MotionOffsetConfig? = nil
+
+    // Fidelity wave 3 — multicol family (css-multicol-1). The applier
+    // is still identity (SwiftUI has no column flow), but the typed
+    // `count` drives the block-level full-width default for auto-width
+    // multicol containers in ComponentRenderer (Columns_Decorated).
+    var columns: ColumnsConfig? = nil
 }
 
 // MARK: - Builder
@@ -265,6 +271,10 @@ enum StyleBuilder {
         // here so the applier can translate/rotate the finished box the
         // way the web reference offsets it (Layout_C14_OffsetPath).
         s.motionOffset = MotionOffsetExtractor.extract(from: properties)
+        // Fidelity wave 3 — multicol family. Nil when no Column* property
+        // is present; the typed count feeds ComponentRenderer's
+        // block-full-width fold for auto-width multicol containers.
+        s.columns = ColumnsExtractor.extract(from: properties)
         // CSS 2.1 §11.1.2 — the legacy `clip` property "applies to:
         // absolutely positioned elements" ONLY. On a static/relative
         // element web ignores `clip: rect(...)` entirely; iOS used to

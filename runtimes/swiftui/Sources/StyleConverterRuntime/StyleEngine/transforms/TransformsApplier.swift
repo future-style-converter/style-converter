@@ -59,16 +59,31 @@ struct TransformsApplier: ViewModifier {
             v = AnyView(v.opacity(0))
         }
 
-        // Step 5 — perspective (projection). SwiftUI's ProjectionEffect
-        // applies a CGAffineTransform so pure perspective isn't
-        // expressible; we approximate via a small foreshortening scale
-        // when a finite distance was declared. Documented TODO.
-        if let p = c.perspective, let d = p.distancePx, d > 0 {
-            // Approximate "depth feel" — a 1000px distance maps to full
-            // size; smaller distance → slight shrink. Max 10% so layout
-            // tests don't drift wildly off-baseline.
-            let k = max(0.9, min(1.0, CGFloat(d) / 1000.0))
-            v = AnyView(v.scaleEffect(k, anchor: p.origin))
+        // Step 5 — perspective (css-transforms-2 §6). Two regimes,
+        // split by whether the element is actually 3D-rotated
+        // (TransformsMath.has3DRotation — any rotate with an X/Y axis
+        // component in the function list or longhand):
+        //   • FLAT content → identity. The projection of the z = 0
+        //     plane is exactly (x, y, 0, 1) — w' = 1 − 0/d = 1 (§13.1
+        //     matrix) — so with nothing rotated out of plane, nothing
+        //     may change. The previous unconditional "foreshorten by
+        //     max(0.9, d/1000)" shrank + inset flat components by up
+        //     to 10% — the fabricated distortion the wave-3
+        //     measurement flagged (Transforms_TextBlock 0.757 /
+        //     Transforms_Decorated 0.816; the inverse scaling with
+        //     distance confirmed the mechanism). Web/Android render
+        //     these byte-flat.
+        //   • 3D-rotated element → keep the legacy foreshortening
+        //     approximation. SwiftUI has no true perspective divide on
+        //     a 2D view chain, and the committed 046_Perspective_Rotate
+        //     baseline (perspective: 500px + rotateY(30deg)) pins this
+        //     depth-feel approximation — verified by the BASELINE=1
+        //     visual-test run.
+        if let p = c.perspective, let d = p.distancePx {
+            let k = TransformsMath.perspectiveScale(
+                distancePx: CGFloat(d),
+                has3DRotation: TransformsMath.has3DRotation(c))
+            if k != 1 { v = AnyView(v.scaleEffect(k, anchor: p.origin)) }
         }
 
         return v
@@ -123,11 +138,19 @@ struct TransformsApplier: ViewModifier {
             v.projectionEffect(ProjectionTransform(CGAffineTransform(
                 a: a, b: b, c: c, d: d, tx: e, ty: f)))
         case .perspective(let distance):
-            // Inline perspective() inside a transform list — shrink to
-            // simulate viewing distance, same approximation as the
-            // longhand path.
-            let k = distance > 0 ? max(0.9, min(1.0, distance / 1000.0)) : 1.0
-            v.scaleEffect(k, anchor: anchor)
+            // Inline perspective() inside a transform list contributes
+            // the §13.1 perspective matrix to the local accumulation.
+            // Applied to flat (z = 0) content the matrix is EXACTLY
+            // identity — w' = 1 − z/d = 1 — so with no 3D function in
+            // the list there is nothing to draw differently (same spec
+            // math as the longhand in Step 5; the old unconditional
+            // shrink fabricated up to 10% distortion). The 3D gate is
+            // threaded from the aggregate by the caller via
+            // `config`; recompute here for the same regime split.
+            v.scaleEffect(TransformsMath.perspectiveScale(
+                              distancePx: distance,
+                              has3DRotation: config.map(TransformsMath.has3DRotation) ?? false),
+                          anchor: anchor)
         }
     }
 
@@ -153,5 +176,45 @@ extension View {
     // Chain helper — identity when config is nil or untouched.
     func engineTransforms(_ config: TransformsAggregate?) -> some View {
         modifier(TransformsApplier(config: config))
+    }
+}
+
+// MARK: - Pure transform math (fidelity wave 3)
+
+/// Spec arithmetic split out of the view code so XCTest can pin it.
+enum TransformsMath {
+    /// Scale factor the perspective chain applies to this element.
+    ///
+    /// FLAT content (no 3D rotation): the §13.1 perspective matrix maps
+    /// (x, y, 0, 1) to (x, y, 0, 1 − 0/d) — identity for EVERY finite
+    /// positive distance. Pinned by FidelityWave3Tests because the old
+    /// applier unconditionally scaled by max(0.9, d/1000): a visible
+    /// ~10% shrink at `perspective: 500px` that web/Android never
+    /// render (wave-3 measurement, Transforms_TextBlock 0.757).
+    ///
+    /// 3D-ROTATED element: legacy depth-feel foreshortening
+    /// max(0.9, d/1000) — SwiftUI has no true perspective divide on a
+    /// 2D view chain, and the committed 046_Perspective_Rotate iOS
+    /// baseline pins this approximation exactly.
+    static func perspectiveScale(distancePx: CGFloat,
+                                 has3DRotation: Bool) -> CGFloat {
+        // Flat plane → spec-exact identity; degenerate d ≤ 0 too.
+        guard has3DRotation, distancePx > 0 else { return 1.0 }
+        // Legacy baseline-pinned approximation for 3D-rotated content.
+        return max(0.9, min(1.0, distancePx / 1000.0))
+    }
+
+    /// True when the aggregate carries a rotation OUT of the z = 0
+    /// plane — any rotate function (list or longhand) with a non-zero
+    /// X or Y axis component. Bare 2D `rotate(deg)` is (0,0,1) and
+    /// stays flat.
+    static func has3DRotation(_ agg: TransformsAggregate) -> Bool {
+        // Function list + longhand rotate, one scan.
+        let all = agg.functions + [agg.rotate].compactMap { $0 }
+        for fn in all {
+            if case .rotate(let x, let y, _, let d) = fn,
+               d != 0, (x != 0 || y != 0) { return true }
+        }
+        return false
     }
 }

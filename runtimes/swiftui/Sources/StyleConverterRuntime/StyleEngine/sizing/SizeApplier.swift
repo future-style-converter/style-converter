@@ -43,19 +43,23 @@ struct SizeApplier: ViewModifier {
         // need a richer context, deferred to a later phase.
         //
         // Fidelity wave 2 — the WIDTH percent basis is the containing
-        // block's CONTENT width, which in the capture harness is the
-        // canvas minus its 16px padding per side (390 − 32 = 358), NOT
-        // the raw 390 viewport (css-sizing-3 §5.1: percentages resolve
-        // against the containing block). The committed web baseline for
-        // Sizing_PercentWidth measures 179px = 50% × 358 while iOS
-        // rendered 195px = 50% × 390 (Sizing_C01_BlockSize right-edge
-        // band). Height keeps the viewport basis but percent heights
-        // are skipped anyway (allowPercent: false in the math).
+        // block's CONTENT width (css-sizing-3 §5.1: percentages resolve
+        // against the containing block). Wave 3 upgraded the basis from
+        // the fixed canvas content width (390 − 32 = 358) to the value
+        // threaded through SpacingContext by ComponentRenderer's
+        // containing-block channel: for NESTED components this is the
+        // parent's content-box width (trees/block-flow B_Stack —
+        // `width: 75%` of a 280px/10px-padding parent is 195px, not
+        // 75% × 358), and for root components / children of
+        // indefinite-width parents it falls back to the same 358 canvas
+        // basis as before (see SpacingContext.containingBlockWidth).
+        // Height keeps the viewport basis but percent heights are
+        // skipped anyway (allowPercent: false in the math).
         return AnyView(
             SizeApplierMath.apply(content,
                                   config: config,
                                   context: context,
-                                  parentW: CGFloat(context.viewportWidth) - 32,
+                                  parentW: context.containingBlockWidth,
                                   parentH: CGFloat(context.viewportHeight))
         )
     }

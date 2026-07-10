@@ -25,6 +25,14 @@ enum ColumnsExtractor {
             } else {
                 cfg.rawByType[p.type] = String(describing: p.data)
             }
+            // Fidelity wave 3 — typed column-count. Wire shape (see
+            // converter ColumnCountSerializer): `auto` → the string
+            // "auto"/"AUTO"; an integer count → a bare JSON number
+            // ({"type":"ColumnCount","data":3.0}). Only counts ≥ 1 are
+            // valid per css-multicol-1 §3.1 (<integer [1,∞]>).
+            if p.type == "ColumnCount", let n = p.data.doubleValue, n >= 1 {
+                cfg.count = Int(n)
+            }
         }
         return cfg.touched ? cfg : nil
     }

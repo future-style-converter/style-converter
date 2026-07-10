@@ -35,6 +35,15 @@ public struct ComponentRenderer: View {
     // (background/borders) covers the stretched width.
     @Environment(\.flexStretchWidth) private var flexStretchWidth
 
+    // Fidelity wave 3 — containing-block width channel (css-sizing-3
+    // §5.1). Parents with a statically-definite width publish their
+    // CONTENT-BOX width here; this component resolves its own percent
+    // width against it (threaded into SpacingContext below) instead of
+    // against the capture canvas. Nil → canvas fallback (root
+    // components, children of fit-content parents). See
+    // ContainingBlock.swift for the full rationale.
+    @Environment(\.containingBlockWidth) private var containingBlockWidth
+
     // Fidelity wave 1 — CSS text inheritance channel. The converter
     // flattens no cascade, so a parent's font-size/family/weight/
     // letter-spacing/text-align never reached child renders on iOS while
@@ -53,6 +62,41 @@ public struct ComponentRenderer: View {
                             inherited: inheritedTextProperties)
     }
 
+    // MARK: - Flow membership (fidelity wave 3)
+
+    /// True when a child is removed from normal flow — css-position-3
+    /// §2.1: `position: absolute | fixed` boxes are absolutely
+    /// positioned, do not participate in block flow, and are not
+    /// flex/grid items (css-flexbox-1 §4 / css-grid-1 §6). Pure so the
+    /// wave-3 XCTest pins the classification.
+    ///
+    /// public: the iOS harness's CaptureCanvas reuses this to give a
+    /// ROOT-level absolute component the same card treatment the web
+    /// canvas produces (collapsed flow height + overflow clip) — one
+    /// classification, two consumers.
+    public static func isOutOfFlow(_ child: IRComponent) -> Bool {
+        let p = LayoutExtractor.extract(from: child.properties)?.position
+        return p == .absolute || p == .fixed
+    }
+
+    /// Children that participate in the parent's normal flow (block /
+    /// flex / grid layout). Everything the flow container renders.
+    private var inFlowChildren: [IRComponent] {
+        (component.children ?? []).filter { !Self.isOutOfFlow($0) }
+    }
+
+    /// Absolutely-positioned children. Rendered as a ZStack overlay on
+    /// TOP of the in-flow content — CSS 2.1 Appendix E paint order:
+    /// positioned descendants (step 8) paint after in-flow blocks and
+    /// inlines (steps 4–7). The previous renderer put ALL children in
+    /// one ZStack, so (a) in-flow siblings lost their block stacking
+    /// and (b) a later in-flow sibling painted OVER the absolute box
+    /// (trees/block-flow B_RelativeAnchor: the red top:10/left:20 box
+    /// showed only a sliver below the orange in-flow sibling).
+    private var outOfFlowChildren: [IRComponent] {
+        (component.children ?? []).filter { Self.isOutOfFlow($0) }
+    }
+
     // public: explicit memberwise init — the synthesized one is internal,
     // so cross-module callers need this spelled out.
     public init(component: IRComponent) {
@@ -67,6 +111,12 @@ public struct ComponentRenderer: View {
         // wins per css-align-3 §9's "auto block size" precondition).
         let style: ComponentStyle = {
             var s = StyleBuilder.build(from: mergedProperties)
+            // Fidelity wave 3 — thread the parent-published containing
+            // block into the resolver context FIRST so every percent
+            // width below (own width, flex plans, child publication)
+            // resolves against the parent's content box (css-sizing-3
+            // §5.1) instead of the canvas.
+            s.spacing.context.containingBlockWidthPx = containingBlockWidth.map(Double.init)
             if let h = gridStretchHeight, s.size.height == nil {
                 s.size.height = .exact(px: h)
             }
@@ -75,6 +125,21 @@ public struct ComponentRenderer: View {
             // width always wins (css-align-3 §9 auto-size precondition).
             if let w = flexStretchWidth, s.size.width == nil {
                 s.size.width = .exact(px: w)
+            }
+            // Fidelity wave 3 — multicol full-width default
+            // (Columns_Decorated, 0.556 → worst wave-3 row). A multicol
+            // container is a BLOCK container (css-multicol-1 §1) whose
+            // max-content inline size is N × content-max-content +
+            // (N−1) × gap — for any real content with N ≥ 2 that
+            // overflows the canvas, so the web reference (fit-content
+            // capped by `max-width: 100%`, ComponentRenderer.tsx) lays
+            // it out exactly containing-block wide while iOS hugged the
+            // placeholder into a ~210px pill. Fold the containing-block
+            // width in as the used width; an explicit CSS width always
+            // wins. TODO: small-content multicol boxes (N × max-content
+            // < canvas) would need static text measurement to hug.
+            if s.size.width == nil, let n = s.columns?.count, n >= 2 {
+                s.size.width = .exact(px: Double(s.spacing.context.containingBlockWidth))
             }
             return s
         }()
@@ -96,18 +161,38 @@ public struct ComponentRenderer: View {
 
     @ViewBuilder
     private func layoutContainer(style: ComponentStyle) -> some View {
+        // Fidelity wave 3 — absolutely-positioned children are removed
+        // from flow (css-position-3 §2.1) and paint ABOVE in-flow
+        // content (CSS 2.1 Appendix E: positioned descendants are paint
+        // step 8, after in-flow steps 4–7). The in-flow children keep
+        // their normal container (block VStack / CSSFlexLayout / grid)
+        // and the out-of-flow ones overlay it in a top-leading ZStack
+        // so PositionApplier's offsets anchor at the parent's top-left
+        // corner. Previously ALL children shared one ZStack: in-flow
+        // siblings collapsed onto each other and painted over the
+        // absolute box (B_RelativeAnchor).
+        if outOfFlowChildren.isEmpty {
+            flowContainer(style: style)
+        } else {
+            ZStack(alignment: .topLeading) {
+                // In-flow content first — lower paint layer.
+                flowContainer(style: style)
+                // Positioned descendants after — upper paint layer.
+                absoluteOverlay(style: style)
+            }
+        }
+    }
+
+    /// The normal-flow container for this component's IN-FLOW children
+    /// (block / flex / grid selection). Split out of layoutContainer by
+    /// the wave-3 absolute-positioning fix so the overlay wrap composes
+    /// around any container kind.
+    @ViewBuilder
+    private func flowContainer(style: ComponentStyle) -> some View {
         // Phase 2: resolve gap via the new GapApplier. Row gap for vertical
         // stacks, column gap for horizontal. Zero when no gap/row/col-gap
         // is set on the IR.
         let gap = GapApplier.resolve(style.spacing.gap, context: style.spacing.context)
-        // Phase 7 step 4: detect absolute/fixed positioned children —
-        // their parent must be a ZStack(alignment: .topLeading) so
-        // offsets resolve against the upper-left corner.
-        let needsZStack: Bool = {
-            guard let kids = component.children else { return false }
-            let aggs: [LayoutAggregate?] = kids.map { LayoutExtractor.extract(from: $0.properties) }
-            return PositionApplier.needsZStackWrap(forChildren: aggs)
-        }()
         // Phase 7 step 3: grid container selection. Runs ahead of the
         // flex-wrap branch so grid containers with wrap hints still
         // route to the LazyVGrid / Grid path.
@@ -127,7 +212,11 @@ public struct ComponentRenderer: View {
         // there are no items to place into tracks. Routing through the
         // block path (VStack(alignment: .leading)) makes iOS hug the
         // PlaceholderLabel just like the other platforms.
-        let hasChildren = !(component.children?.isEmpty ?? true)
+        // Wave 3: only IN-FLOW children count — a container whose only
+        // children are absolutely positioned has zero flex/grid items
+        // (css-flexbox-1 §4 / css-grid-1 §6) and lays out like an empty
+        // block, exactly as the web reference does.
+        let hasChildren = !inFlowChildren.isEmpty
         let gridKind: ContainerDecision.ContainerKind? = {
             guard hasChildren, let agg = style.layout7 else { return nil }
             // Explicit templates / auto-flow pick their container kind;
@@ -143,13 +232,6 @@ public struct ComponentRenderer: View {
         if let kind = gridKind {
             // Grid path — LazyVGrid / LazyHGrid / iOS 16 Grid.
             gridContainer(kind: kind, style: style, gap: gap)
-        } else if needsZStack {
-            // Any non-grid parent with absolute/fixed children wraps in a
-            // top-leading ZStack so PositionApplier's .offset calls anchor
-            // to the correct corner.
-            ZStack(alignment: .topLeading) {
-                contentOrPlaceholder(style: style)
-            }
         } else if let layoutAgg = style.layout7,
            layoutAgg.display == .flex,
            layoutAgg.flexWrap == .wrap || layoutAgg.flexWrap == .wrapReverse {
@@ -270,6 +352,41 @@ public struct ComponentRenderer: View {
         }
     }
 
+    // MARK: - Absolute overlay (fidelity wave 3)
+
+    /// Render the absolutely-positioned children on top of the in-flow
+    /// content. Each child renders through ComponentRenderer as usual —
+    /// its own body applies PositionApplier, whose flexible
+    /// top-leading frame + offset resolves top/left against this
+    /// ZStack's corner. Declaration order breaks paint ties, matching
+    /// CSS tree order within paint step 8 (CSS 2.1 Appendix E).
+    ///
+    /// Approximation: the CSS containing block for an absolute child is
+    /// the PADDING box of its positioned ancestor; our ZStack wraps the
+    /// container BEFORE the padding applier, so offsets anchor at the
+    /// CONTENT-box corner instead. No wave fixture combines padding
+    /// with absolute children; TODO when one does.
+    @ViewBuilder
+    private func absoluteOverlay(style: ComponentStyle) -> some View {
+        // Inheritance flows into positioned children exactly like flow
+        // children (css-cascade-4 — inheritance is by tree, not flow).
+        let childInherited = InheritedText.inheritable(from: mergedProperties)
+        // Percent widths of absolute children resolve against the
+        // positioned ancestor's box (content-box approximation — same
+        // channel as flow children).
+        let childCB = flexContentSize(style: style, vertical: false)
+        ForEach(Array(outOfFlowChildren.enumerated()), id: \.offset) { _, child in
+            ComponentRenderer(component: child)
+                // Reset the size-injection channels: an absolute child
+                // never stretch-inherits grid/flex geometry (it is not
+                // an item of the parent's formatting context).
+                .environment(\.gridStretchHeight, nil)
+                .environment(\.flexStretchWidth, nil)
+                .environment(\.containingBlockWidth, childCB)
+                .environment(\.inheritedTextProperties, childInherited)
+        }
+    }
+
     // MARK: - Grid container (Phase 7 step 3)
 
     /// Render a grid container — routes to LazyVGrid / LazyHGrid for plain
@@ -382,6 +499,13 @@ public struct ComponentRenderer: View {
                                 // children the same as flow children.
                                 .environment(\.inheritedTextProperties,
                                              InheritedText.inheritable(from: mergedProperties))
+                                // Wave 3: percent widths of area-placed
+                                // children resolve against the grid's
+                                // content box (grid-area basis would be
+                                // the track — content box is the close
+                                // static approximation).
+                                .environment(\.containingBlockWidth,
+                                             flexContentSize(style: style, vertical: false))
                         } else {
                             // Named but no matching child — still reserve
                             // the cell so the grid stays rectangular.
@@ -419,10 +543,13 @@ public struct ComponentRenderer: View {
         // gridKind decision in layoutContainer: an explicit template
         // routes to the grid path even without `display: grid` (legacy
         // behaviour of GridApplier.containerKind).
+        // Wave 3: plan over IN-FLOW children only — absolute children
+        // are not grid items (css-grid-1 §6) and render via the overlay.
+        let rawChildren = inFlowChildren
         guard let parentAgg = style.layout7,
               parentAgg.display == .grid
                 || GridApplier.containerKind(for: parentAgg) == .lazyVGrid,
-              let rawChildren = component.children, !rawChildren.isEmpty else { return nil }
+              !rawChildren.isEmpty else { return nil }
         // Same ordering contentOrPlaceholder renders with (CSS `order`).
         let children = FlexboxApplier.sorted(rawChildren)
         // A parent that carries _text AND children renders the text as a
@@ -510,8 +637,11 @@ public struct ComponentRenderer: View {
             ? SizeApplierResolve.exact(style.size.height, ctx: ctx,
                                        parent: CGFloat(ctx.viewportHeight),
                                        allowPercent: false)
+            // Wave 3: percent widths resolve against the threaded
+            // containing block (parent content box, canvas at root) —
+            // the same basis SizeApplier paints with.
             : SizeApplierResolve.exact(style.size.width, ctx: ctx,
-                                       parent: CGFloat(ctx.viewportWidth) - 32)
+                                       parent: ctx.containingBlockWidth)
         guard var v = raw else { return nil }
         // Padding band — same resolver lane as PaddingApplier so em/%
         // agree with the painted inset. Horizontal axis subtracts the
@@ -576,8 +706,13 @@ public struct ComponentRenderer: View {
                 ? SizeApplierResolve.exact(cs.height, ctx: ctx,
                                            parent: CGFloat(ctx.viewportHeight),
                                            allowPercent: false)
+                // Wave 3: child percent widths resolve against THIS
+                // container's containing block for the static plan —
+                // close enough for the plan's purposes (the child's own
+                // paint pass re-resolves against the container's
+                // content box via the environment channel).
                 : SizeApplierResolve.exact(cs.width, ctx: ctx,
-                                           parent: CGFloat(ctx.viewportWidth) - 32)
+                                           parent: ctx.containingBlockWidth)
             // Content-derived basis (text measurement) is not statically
             // knowable — bail to the dynamic path.
             guard let basis = basisPx ?? explicit else { return nil }
@@ -598,7 +733,12 @@ public struct ComponentRenderer: View {
 
     @ViewBuilder
     private func contentOrPlaceholder(style: ComponentStyle) -> some View {
-        if let rawChildren = component.children, !rawChildren.isEmpty {
+        // The placeholder only appears when the component has NO
+        // children at all — a parent whose children are ALL absolutely
+        // positioned still renders empty in-flow content (web parity:
+        // ComponentRenderer.tsx keys the placeholder on
+        // `children.length`), while its boxes arrive via the overlay.
+        if component.children?.isEmpty == false {
             // Bug 1 mixed-content fix — see
             // testing/titan/investigations/swarm-002/css-text-decor__text-decoration-decorating-box-thickness-001.json
             //
@@ -629,7 +769,9 @@ public struct ComponentRenderer: View {
             // Phase 7 step 2: sort children by CSS `order` BEFORE rendering.
             // SwiftUI has no runtime analogue, so the reordering happens
             // at build time. When no child carries Order, this is a no-op.
-            let children = FlexboxApplier.sorted(rawChildren)
+            // Wave 3: in-flow children only — absolute/fixed boxes render
+            // via the layoutContainer overlay (see absoluteOverlay).
+            let children = FlexboxApplier.sorted(inFlowChildren)
             // Parent aggregate for flex-child decoration. Nil fallback
             // keeps us on the legacy-layout path when Phase 7 has not
             // touched this component.
@@ -667,6 +809,14 @@ public struct ComponentRenderer: View {
             let flexMainSizes: [CGFloat]? = isCSSFlex
                 ? flexMainPlan(style: style, children: children, column: isColumn)
                 : nil
+            // Fidelity wave 3 — containing-block publication
+            // (css-sizing-3 §5.1): children resolve percent widths
+            // against THIS box's content width. Definite only when our
+            // own width is statically known (flexContentSize subtracts
+            // the padding band + painted borders); nil resets the
+            // channel for fit-content parents so a grandparent's basis
+            // never leaks past its own children.
+            let childCB: CGFloat? = flexContentSize(style: style, vertical: false)
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
                 // Build the child's aggregate once so FlexChildModifier /
                 // FlexItemSpec can read align-self / flex-basis / flex-grow
@@ -755,6 +905,10 @@ public struct ComponentRenderer: View {
                                 ?? (isColumn ? flexMainSizes?[index] : flexStretch))
                 .environment(\.flexStretchWidth,
                              isColumn ? flexStretch : flexMainSizes?[index])
+                // Containing block (wave 3): always written — definite
+                // content width or nil — so the channel resets at every
+                // tree level (no grandparent leak).
+                .environment(\.containingBlockWidth, childCB)
                 // Text inheritance (css-cascade-4): publish this
                 // element's merged inheritable declarations for the
                 // child. Always written so each level's channel is
@@ -849,6 +1003,15 @@ private struct PlaceholderLabel: View {
             if let t = rawText, !t.isEmpty { return t }
             return name.replacingOccurrences(of: "_", with: " ")
         }()
+        // Fidelity wave 3 — CSS line-box leading split (CSS 2.1 §10.8):
+        // `spacing` makes each line ADVANCE exactly line-height px;
+        // `halfLeading` restores the band above the first / below the
+        // last line that browsers paint and SwiftUI's between-lines-only
+        // `.lineSpacing` dropped (IH_LineHeight band-sits-high channel).
+        // Both are 0 when the IR declared no line-height.
+        let leading = LineBoxMetrics.leading(lineHeightPx: textConfig.lineHeight,
+                                             fontSizePx: textConfig.fontSize ?? 16,
+                                             design: textConfig.fontDesign)
         let textView = Text(visibleText)
             .font(font)
         // SwiftUI's `.foregroundStyle` accepts ANY ShapeStyle including
@@ -884,6 +1047,17 @@ private struct PlaceholderLabel: View {
             // (Typography_C20/C21 previously wrapped to 2 lines).
             .lineLimit(nil)
             .fixedSize(horizontal: textConfig.noWrap, vertical: true)
+            // Fidelity wave 3 — first/last half-leading (CSS 2.1
+            // §10.8.1): browsers centre each line's glyphs inside a
+            // line box `line-height` tall, so half the leading paints
+            // ABOVE the first line and BELOW the last. Adding it as
+            // real vertical padding (a) grows an auto-height multi-line
+            // box to exactly N × line-height like the web reference and
+            // (b) keeps the single-line case byte-identical — content
+            // + 2 × half-leading = line-height, the same box the
+            // minHeight frame below already produced (glyphs were
+            // already centred in it). Zero when no line-height set.
+            .padding(.vertical, leading.halfLeading)
             // CSS `line-height` — total line-box height. SwiftUI's
             // `.lineSpacing` adds EXTRA between lines, which is invisible
             // for a single-line placeholder. Force the text frame to be
@@ -914,7 +1088,14 @@ private struct PlaceholderLabel: View {
                    alignment: Alignment(horizontal: fillHorizontal,
                                         vertical: .center))
             .fixedSize(horizontal: false, vertical: true)
-            .lineSpacing(max(0, (textConfig.lineHeight ?? 0) - (textConfig.fontSize ?? 16)))
+            // Fidelity wave 3 — line ADVANCE = line-height exactly.
+            // The extra between-lines space is `line-height − content
+            // area height` (ascent + descent of the rendered face), NOT
+            // `line-height − font-size` as before: font-size undershoots
+            // the content area by ~21% of an em for Inter, so every
+            // advance overshot the browser's by that difference while
+            // the box total still came out short (no first/last band).
+            .lineSpacing(leading.spacing)
             // CSS `text-indent` — push the text right by the indent
             // amount. SwiftUI lacks a first-line-only API, so we use
             // leading padding which inherits to wrapped lines too. For

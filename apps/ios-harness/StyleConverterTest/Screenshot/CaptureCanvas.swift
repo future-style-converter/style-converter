@@ -45,6 +45,39 @@ struct CaptureCanvas: View {
     static let width: CGFloat = 390
 
     var body: some View {
+        // Fidelity wave 3 — a ROOT component that is itself absolutely
+        // positioned (a per-child standalone crop of e.g. B_RelativeAnchor's
+        // `floating`, or any abs-positioned fixture root) gets the web
+        // canvas's card treatment instead of the block-flow one:
+        //   • the containing block is the card's PADDING box, whose origin
+        //     is the card corner (the web canvas is `position: relative`
+        //     with no border — CSS 2.1 §10.1), so top/left offsets anchor
+        //     at (0,0) of the card, NOT inside the 16px content inset;
+        //   • the card's flow height COLLAPSES to the padding band alone
+        //     (out-of-flow boxes add no height — the web card measures
+        //     exactly 2 × 16 = 32px for the `floating` crop);
+        //   • `overflow: hidden` on the web canvas clips whatever the
+        //     offsets push past the card — mirrored with `.clipped()`.
+        // Without this the iOS crop drew the box at content-origin +
+        // offset on an unclipped tall card (wave-3 floating crop 0.833).
+        if ComponentRenderer.isOutOfFlow(component) {
+            ZStack(alignment: .topLeading) {
+                // Collapsed flow: transparent strut fixes the card at the
+                // padding-band height (2 × 16) and full canvas width.
+                Color.clear
+                    .frame(width: CaptureCanvas.width,
+                           height: CaptureCanvas.padding * 2)
+                // The component renders through the normal engine path —
+                // its own PositionApplier applies the top/left offsets
+                // from this ZStack's top-leading corner (card origin).
+                ComponentRenderer(component: component)
+            }
+            .frame(width: CaptureCanvas.width, alignment: .topLeading)
+            // Web canvas `overflow: hidden` parity.
+            .clipped()
+            .fixedSize(horizontal: false, vertical: true)
+            .background(CaptureCanvas.backgroundColor)
+        } else {
         // Critical: explicit alignment on the outer frame.
         //
         // The rendered component's natural width is often narrower than the
@@ -73,5 +106,6 @@ struct CaptureCanvas: View {
             // natural height rather than expanding to fill the parent.
             .fixedSize(horizontal: false, vertical: true)
             .background(CaptureCanvas.backgroundColor)
+        }
     }
 }

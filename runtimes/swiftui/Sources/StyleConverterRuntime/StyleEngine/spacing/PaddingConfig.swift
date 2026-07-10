@@ -12,7 +12,9 @@
 //
 
 // Foundation gives us nothing specific but keeps call-sites uniform with
-// the rest of the engine.
+// the rest of the engine. CoreGraphics supplies CGFloat for the
+// containing-block basis accessor on SpacingContext (wave 3).
+import CoreGraphics
 import Foundation
 
 // One canonical per-edge record. Values are the raw Phase 1 enum so we
@@ -55,4 +57,24 @@ struct SpacingContext: Equatable {
     // in `StyleConverterTestApp.swift`.
     var viewportWidth: Double = 390.0
     var viewportHeight: Double = 844.0
+
+    // Fidelity wave 3 — the parent's CONTENT-BOX width in px, published
+    // down the tree by ComponentRenderer via the `containingBlockWidth`
+    // environment channel. css-sizing-3 §5.1: percentage inline sizes
+    // resolve against the containing block (the parent's content box),
+    // NOT the viewport — trees/block-flow B_Stack rendered `width: 75%`
+    // of a 280px parent as 75% × canvas instead of 75% × 260. Nil means
+    // "no ancestor with a definite width" (root components, or children
+    // of fit-content parents whose laid-out width isn't statically
+    // knowable) — resolution then falls back to the canvas content
+    // width below.
+    var containingBlockWidthPx: Double? = nil
+
+    // Resolved percent-width basis: the ancestor-published containing
+    // block when known, else the capture-canvas content width (390 −
+    // 2×16 padding = 358 — CaptureCanvas.swift geometry, same fallback
+    // SizeApplier used before the channel existed).
+    var containingBlockWidth: CGFloat {
+        CGFloat(containingBlockWidthPx ?? (viewportWidth - 32))
+    }
 }
