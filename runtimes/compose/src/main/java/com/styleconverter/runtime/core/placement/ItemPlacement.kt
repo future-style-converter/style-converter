@@ -22,15 +22,35 @@ import com.styleconverter.runtime.core.renderer.ComponentRenderer
 
 /**
  * Explicit grid placement claims, in 1-based CSS grid lines (css-grid-1
- * §8.3). Null = auto. Mirrors the wire shapes GridColumnStartPropertyParser
- * et al. emit; `span N` / named lines are treated as auto (honest
- * fallback — the wave fixtures only use line numbers).
+ * §8.3). Null = auto.
+ *
+ * The numeric fields keep their original pinned semantics (only
+ * `{type:number}` / bare-integer wires populate them — negative integers
+ * included, css-grid-1 §8.3 "negative integers count from the end of the
+ * explicit grid"). Wave 5 adds the two remaining wire flavors the
+ * GridColumn/RowStart parsers emit, previously dropped as auto:
+ *   - `{type:span, count:N}`  → the *Span fields ("span N" claims);
+ *   - `{type:name, name:X}`   → the *Name fields. These carry named-line /
+ *     named-area idents — critically, the converter's GridAreaExpander
+ *     lowers `grid-area: media` to a SINGLE `grid-row-start: media`
+ *     longhand, so area-name placement arrives through rowStartName.
  */
 data class GridClaims(
     val colStart: Int? = null,
     val colEnd: Int? = null,
     val rowStart: Int? = null,
-    val rowEnd: Int? = null
+    val rowEnd: Int? = null,
+    /** `span N` on grid-column-start / -end (css-grid-1 §8.3 span syntax). */
+    val colStartSpan: Int? = null,
+    val colEndSpan: Int? = null,
+    /** `span N` on grid-row-start / -end. */
+    val rowStartSpan: Int? = null,
+    val rowEndSpan: Int? = null,
+    /** Named-line / named-area idents (css-grid-1 §8.3 <custom-ident>). */
+    val colStartName: String? = null,
+    val colEndName: String? = null,
+    val rowStartName: String? = null,
+    val rowEndName: String? = null
 )
 
 /**

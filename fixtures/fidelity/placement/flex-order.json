@@ -1,0 +1,138 @@
+{
+  "components": {
+    "PL_OrderPermutation": {
+      "properties": {
+        "width": "320px",
+        "display": "flex",
+        "gap": "6px",
+        "padding": "6px",
+        "background-color": "#1f2937",
+        "height": "52px",
+        "flex-direction": "row"
+      },
+      "children": {
+        "a": {
+          "properties": {
+            "width": "50px",
+            "height": "40px",
+            "background-color": "#2ecc71",
+            "order": "4"
+          }
+        },
+        "b": {
+          "properties": {
+            "width": "50px",
+            "height": "40px",
+            "background-color": "#f39c12",
+            "order": "1"
+          }
+        },
+        "c": {
+          "properties": {
+            "width": "50px",
+            "height": "40px",
+            "background-color": "#9b59b6",
+            "order": "5"
+          }
+        },
+        "d": {
+          "properties": {
+            "width": "50px",
+            "height": "40px",
+            "background-color": "#1abc9c",
+            "order": "2"
+          }
+        },
+        "e": {
+          "properties": {
+            "width": "50px",
+            "height": "40px",
+            "background-color": "#e67e22",
+            "order": "3"
+          }
+        }
+      }
+    },
+    "PL_OrderTies": {
+      "properties": {
+        "width": "320px",
+        "display": "flex",
+        "gap": "6px",
+        "padding": "6px",
+        "background-color": "#1f2937",
+        "height": "52px",
+        "flex-direction": "row"
+      },
+      "children": {
+        "a": {
+          "properties": {
+            "width": "60px",
+            "height": "40px",
+            "background-color": "#16a085",
+            "order": "1"
+          }
+        },
+        "b": {
+          "properties": {
+            "width": "60px",
+            "height": "40px",
+            "background-color": "#e74c3c",
+            "order": "-1"
+          }
+        },
+        "c": {
+          "properties": {
+            "width": "60px",
+            "height": "40px",
+            "background-color": "#3498db",
+            "order": "1"
+          }
+        },
+        "d": {
+          "properties": {
+            "width": "60px",
+            "height": "40px",
+            "background-color": "#2ecc71",
+            "order": "0"
+          }
+        }
+      }
+    },
+    "PL_OrderColumn": {
+      "properties": {
+        "width": "200px",
+        "display": "flex",
+        "gap": "6px",
+        "padding": "6px",
+        "background-color": "#1f2937",
+        "flex-direction": "column"
+      },
+      "children": {
+        "a": {
+          "properties": {
+            "width": "80px",
+            "height": "30px",
+            "background-color": "#f39c12",
+            "order": "3"
+          }
+        },
+        "b": {
+          "properties": {
+            "width": "80px",
+            "height": "30px",
+            "background-color": "#9b59b6",
+            "order": "1"
+          }
+        },
+        "c": {
+          "properties": {
+            "width": "80px",
+            "height": "30px",
+            "background-color": "#1abc9c",
+            "order": "2"
+          }
+        }
+      }
+    }
+  }
+}

@@ -122,9 +122,14 @@ object BorderSideApplier {
         style: LineStyle?,
         color: Color?
     ) {
-        // No border on this side — either missing width or explicitly NONE/HIDDEN.
+        // No border on this side — missing width, or the style is
+        // none/hidden or ABSENT. CSS 2.1 §8.5.3: border-style initial is
+        // `none`, and none/absent zeroes the used width — a width-only
+        // longhand (`border-inline-end-width: 6px`) must paint NOTHING,
+        // matching the web reference. The old `style ?: SOLID` default
+        // painted style-less sides as solid currentColor bands.
         if (width <= 0f) return
-        val s = style ?: LineStyle.SOLID
+        val s = style ?: return
         if (s == LineStyle.NONE || s == LineStyle.HIDDEN) return
         val c = color ?: Color.Black
 

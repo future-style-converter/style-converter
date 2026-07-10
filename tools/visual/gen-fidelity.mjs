@@ -12,9 +12,20 @@
 //   fixtures/fidelity/<category>.combos.json   3–6 properties per component:
 //                                              intra-category clusters +
 //                                              cross-category standard recipes
+//   fixtures/fidelity/pairwise/pairs-NN.json   category-PAIR components: all 66
+//                                              unordered pairs of the 12
+//                                              visually-strongest categories,
+//                                              4 components per pair, 2–3
+//                                              harvested declarations per side
 //   fixtures/fidelity/trees/*.json             parent→child(→grandchild) trees
 //                                              (children map-in envelope per
 //                                              schema/spec/03-children.md)
+//   fixtures/fidelity/placement/*.json         child-side placement claims for
+//                                              the IR v2 slot/placement
+//                                              contract: grid areas/lines/spans,
+//                                              order, self-alignment, z-index,
+//                                              auto-flow interleave, dangling
+//                                              area claims
 //   fixtures/fidelity/manifest.json            file inventory for wave runs
 //   fixtures/fidelity/PROVENANCE.md            generation record (tool + seed)
 //
@@ -76,6 +87,29 @@ function rngFor(fileKey) {
 /** Deterministic pick from a (sorted) array. */
 function pick(rng, arr) {
   return arr[Math.floor(rng() * arr.length) % arr.length];
+}
+
+/** Deterministic sample WITHOUT replacement: up to k distinct entries of arr,
+ *  in PRNG draw order. Never throws on short pools — callers that need a
+ *  guaranteed minimum assert the pool size up front (see generate()). */
+function sampleDistinct(rng, arr, k) {
+  const pool = [...arr];                       // copy — never mutate the catalogue
+  const out = [];
+  const n = Math.min(k, pool.length);          // short pools yield what they have
+  for (let i = 0; i < n; i++) {
+    const idx = Math.floor(rng() * pool.length) % pool.length;
+    out.push(pool.splice(idx, 1)[0]);          // remove so re-draws are impossible
+  }
+  return out;
+}
+
+/** Palette cycler: returns a nullary function yielding PALETTE colors from a
+ *  PRNG-seeded offset, cycling WITHOUT repetition for up to 8 draws. Placement
+ *  fixtures need distinct sibling colors — a z-index or order bug is invisible
+ *  if two overlapping/reordered siblings happen to share a color. */
+function paletteCycler(rng) {
+  let i = Math.floor(rng() * PALETTE.length) % PALETTE.length;
+  return () => PALETTE[i++ % PALETTE.length];
 }
 
 // ── 1. HARVEST — catalogue of property → concrete values exercised today ──
@@ -298,7 +332,64 @@ function buildCombosForCategory(cat, catalogue, rng) {
   return { doc: { components }, properties: used };
 }
 
-// ── 5. TREES — multiple connected components (children map-in envelope) ──
+// ── 5. PAIRWISE — cross-CATEGORY combos (category-pair components) ──────
+// Single-category combos cannot see interaction bugs BETWEEN categories
+// (transform×border-radius, background-clip×box-shadow, typography×sizing…).
+// Each pairwise component carries 2–3 harvested properties from category A
+// plus 2–3 from category B; all 66 unordered pairs of the 12 visually
+// strongest categories are covered, 4 components per pair, sharded into 6
+// capture-friendly files of 44 components (11 pairs × 4).
+
+// The 12 categories with the strongest pixel footprint (kept sorted so the
+// pair enumeration below is deterministic and lexicographic).
+export const PAIRWISE_CATEGORIES = [
+  'background', 'borders', 'color', 'effects', 'images', 'layout',
+  'lists', 'shapes', 'sizing', 'spacing', 'transforms', 'typography',
+];
+export const PAIRWISE_PER_PAIR = 4;       // components generated per category pair
+const PAIRWISE_PAIRS_PER_SHARD = 11;      // 66 pairs / 11 = 6 shards × 44 components
+
+/** All C(12,2)=66 unordered category pairs, lexicographic by construction. */
+export function pairwisePairs() {
+  const pairs = [];
+  for (let i = 0; i < PAIRWISE_CATEGORIES.length; i++) {
+    for (let j = i + 1; j < PAIRWISE_CATEGORIES.length; j++) {
+      pairs.push([PAIRWISE_CATEGORIES[i], PAIRWISE_CATEGORIES[j]]);
+    }
+  }
+  return pairs;
+}
+
+/**
+ * Build one pairwise shard document covering the given category pairs.
+ * Per component: sample 2–3 distinct properties from each side's usable
+ * catalogue (one harvested value each), then add the standard support props
+ * (width/height/background) where the payload didn't claim the key. Property
+ * sets never collide across the two sides — buildCategoryMap assigns every
+ * longhand exactly one canonical category.
+ */
+function buildPairwiseShard(pairs, perCategory, rng) {
+  const components = {};
+  for (const [a, b] of pairs) {
+    for (let i = 0; i < PAIRWISE_PER_PAIR; i++) {
+      const payload = {};
+      for (const cat of [a, b]) {
+        const catalogue = perCategory.get(cat);       // presence asserted in generate()
+        const k = 2 + Math.floor(rng() * 2);          // 2 or 3 properties this side
+        for (const p of sampleDistinct(rng, [...catalogue.keys()], k)) {
+          payload[p] = pick(rng, catalogue.get(p));   // one harvested variant per property
+        }
+      }
+      // Name encodes the pair (PW_<A>_<B>_<NN>) — the regeneration test parses
+      // it back to verify each component really carries both categories.
+      const name = `PW_${pascal(a)}_${pascal(b)}_${String(i + 1).padStart(2, '0')}`;
+      components[name] = { properties: addSupport(payload, rng) };
+    }
+  }
+  return { components };
+}
+
+// ── 6. TREES — multiple connected components (children map-in envelope) ──
 // Hand-designed templates (structure is the test surface); PRNG only colors
 // the leaves so the layout/inheritance semantics stay reviewable.
 
@@ -608,7 +699,255 @@ const TREE_BUILDERS = [
   ['trees/mixed-direction.json', buildTreeMixedDirection],
 ];
 
-// ── 6. Assembly ──────────────────────────────────────────────────────────
+// ── 7. PLACEMENT — child-side placement claims (IR v2 slot/placement) ───
+// The v2 contract stress suite: trees whose CHILDREN carry explicit placement
+// claims (item-scoped properties: grid-area, grid line numbers/spans, order,
+// align-self/justify-self, z-index + absolute insets). Fixtures stay CSS-side
+// nested — children maps per schema/spec/03-children.md — the converter
+// flattens them into the v2 flat list with slot refs; the claims are just
+// properties on the child, which is exactly how the runtimes must route them
+// (child-carried parent-data, never parent introspection). Hand-designed
+// structure, PRNG only picks colors (via paletteCycler so overlapping /
+// reordered siblings never share a color — a stacking or ordering bug must
+// change pixels).
+
+/** Per-builder cell factory: fixed box + cycling palette color + claims. */
+function cellFactory(rng) {
+  const nextColor = paletteCycler(rng);       // distinct colors for ≤8 siblings
+  return (w, h, extra = {}) => {
+    const properties = {};
+    if (w !== null) properties['width'] = w;    // null width ⇒ stretch/track-sized
+    if (h !== null) properties['height'] = h;   // null height ⇒ stretch/row-sized
+    properties['background-color'] = nextColor();
+    Object.assign(properties, extra);           // the placement claims themselves
+    return { properties };
+  };
+}
+
+/** Grid container helper: dark backdrop + gap/padding, caller sets tracks. */
+function gridBox(extra, children) {
+  return box({
+    width: '300px', display: 'grid', gap: '6px', padding: '6px',
+    'background-color': '#1f2937', ...extra,
+  }, children);
+}
+
+/** Flex container helper: dark backdrop + gap/padding, caller sets axis. */
+function flexBox(extra, children) {
+  return box({
+    width: '320px', display: 'flex', gap: '6px', padding: '6px',
+    'background-color': '#1f2937', ...extra,
+  }, children);
+}
+
+function buildPlacementGridAreas(rng) {
+  const cell = cellFactory(rng);
+  return {
+    // The design-doc card (ir-v2 §2.1): media spans both rows via its area;
+    // children stretch to their named cells (no explicit width/height).
+    PL_AreasCard: gridBox({
+      'grid-template-columns': '80px 1fr',
+      'grid-template-rows': '40px 60px',
+      'grid-template-areas': '"media title" "media body"',
+    }, {
+      media: cell(null, null, { 'grid-area': 'media' }),
+      title: cell(null, null, { 'grid-area': 'title' }),
+      body: cell(null, null, { 'grid-area': 'body' }),
+    }),
+    // Child keys deliberately ≠ area names: catches any renderer that still
+    // matches children to areas BY NAME (the old iOS templateAreasGrid hack)
+    // instead of reading the child's grid-area claim.
+    PL_AreasDecoupled: gridBox({
+      'grid-template-columns': '1fr 1fr 1fr',
+      'grid-template-rows': '40px 40px',
+      'grid-template-areas': '"head head head" "side main main"',
+    }, {
+      box1: cell(null, null, { 'grid-area': 'main' }),
+      box2: cell(null, null, { 'grid-area': 'head' }),
+      box3: cell(null, null, { 'grid-area': 'side' }),
+    }),
+    // Dangling claim: "ghost" names an area the container never defines →
+    // per CSS Grid §8.4 the claim resolves to auto placement (implicit row).
+    // The claim/resolution algorithm must fall back, not crash or blank.
+    PL_AreasDangling: gridBox({
+      'grid-template-columns': '1fr 1fr',
+      'grid-template-rows': '40px 40px',
+      'grid-template-areas': '"a a" "b c"',
+    }, {
+      a: cell(null, null, { 'grid-area': 'a' }),
+      b: cell(null, null, { 'grid-area': 'b' }),
+      c: cell(null, null, { 'grid-area': 'c' }),
+      ghost: cell(null, '30px', { 'grid-area': 'ghost' }),
+    }),
+  };
+}
+
+function buildPlacementGridLines(rng) {
+  const cell = cellFactory(rng);
+  return {
+    // Numeric line claims: a/b tile row 1, c is pinned to the middle of row 2.
+    PL_LineNumbers: gridBox({ 'grid-template-columns': '1fr 1fr 1fr 1fr', 'grid-auto-rows': '40px' }, {
+      a: cell(null, null, { 'grid-column-start': '1', 'grid-column-end': '3' }),
+      b: cell(null, null, { 'grid-column-start': '3', 'grid-column-end': '5' }),
+      c: cell(null, null, { 'grid-column-start': '2', 'grid-column-end': '4', 'grid-row-start': '2', 'grid-row-end': '3' }),
+    }),
+    // Span + negative-line claims: span 2 from auto position, -1 = last line.
+    PL_LineSpans: gridBox({ 'grid-template-columns': '1fr 1fr 1fr', 'grid-auto-rows': '36px' }, {
+      a: cell(null, null, { 'grid-column-start': 'span 2' }),
+      b: cell(null, null, {}),
+      c: cell(null, null, { 'grid-column-start': '1', 'grid-column-end': '-1' }),
+      d: cell(null, null, { 'grid-column-start': '2', 'grid-row-start': '3', 'grid-row-end': '5' }),
+    }),
+    // grid-area line syntax (2- and 4-value slash forms + double span) — the
+    // shorthand route to the same longhand claims, per GA_ByLines/GA_Span.
+    PL_AreaLineSyntax: gridBox({ 'grid-template-columns': '1fr 1fr 1fr', 'grid-template-rows': '40px 40px 40px' }, {
+      a: cell(null, null, { 'grid-area': '1 / 1 / 2 / 3' }),
+      b: cell(null, null, { 'grid-area': '2 / 2 / 4 / 4' }),
+      c: cell(null, null, { 'grid-area': 'span 2 / span 1' }),
+    }),
+  };
+}
+
+function buildPlacementFlexOrder(rng) {
+  const cell = cellFactory(rng);
+  return {
+    // Full 5-way permutation: source a,b,c,d,e must render as b,d,e,a,c.
+    PL_OrderPermutation: flexBox({ height: '52px', 'flex-direction': 'row' }, {
+      a: cell('50px', '40px', { order: '4' }),
+      b: cell('50px', '40px', { order: '1' }),
+      c: cell('50px', '40px', { order: '5' }),
+      d: cell('50px', '40px', { order: '2' }),
+      e: cell('50px', '40px', { order: '3' }),
+    }),
+    // Ties + negative: b(-1), d(0), then a and c tie at 1 → source order
+    // breaks the tie (flat-array order rule, ir-v2 §1.1). Visual: b,d,a,c.
+    PL_OrderTies: flexBox({ height: '52px', 'flex-direction': 'row' }, {
+      a: cell('60px', '40px', { order: '1' }),
+      b: cell('60px', '40px', { order: '-1' }),
+      c: cell('60px', '40px', { order: '1' }),
+      d: cell('60px', '40px', { order: '0' }),
+    }),
+    // Same re-sort on the column axis: source a,b,c renders b,c,a top→bottom.
+    PL_OrderColumn: flexBox({ width: '200px', 'flex-direction': 'column' }, {
+      a: cell('80px', '30px', { order: '3' }),
+      b: cell('80px', '30px', { order: '1' }),
+      c: cell('80px', '30px', { order: '2' }),
+    }),
+  };
+}
+
+function buildPlacementSelfAlignment(rng) {
+  const cell = cellFactory(rng);
+  return {
+    // Container policy flex-end; three children override, d takes the policy.
+    // Stretch child omits height so the stretch is observable.
+    PL_FlexAlignOverride: flexBox({ height: '120px', 'flex-direction': 'row', 'align-items': 'flex-end' }, {
+      a: cell('50px', '30px', { 'align-self': 'flex-start' }),
+      b: cell('50px', '30px', { 'align-self': 'center' }),
+      c: cell('50px', null, { 'align-self': 'stretch' }),
+      d: cell('50px', '30px', {}),
+    }),
+    // Grid inline-axis: container centers items; children re-justify per cell
+    // (stretch omits width); d inherits the container's center policy.
+    PL_GridJustifyOverride: gridBox({ 'grid-template-columns': '1fr 1fr', 'grid-auto-rows': '50px', 'justify-items': 'center' }, {
+      a: cell('60px', '36px', { 'justify-self': 'start' }),
+      b: cell('60px', '36px', { 'justify-self': 'end' }),
+      c: cell(null, '36px', { 'justify-self': 'stretch' }),
+      d: cell('60px', '36px', {}),
+    }),
+    // Grid block-axis: container policy start; children re-align inside fixed
+    // 60px rows (stretch omits height); d inherits start.
+    PL_GridAlignOverride: gridBox({ 'grid-template-columns': '1fr 1fr', 'grid-template-rows': '60px 60px', 'align-items': 'start' }, {
+      a: cell('60px', '24px', { 'align-self': 'end' }),
+      b: cell('60px', '24px', { 'align-self': 'center' }),
+      c: cell('60px', null, { 'align-self': 'stretch' }),
+      d: cell('60px', '24px', {}),
+    }),
+  };
+}
+
+function buildPlacementZStack(rng) {
+  const cell = cellFactory(rng);
+  // Relative stage: absolutely-positioned children overlap diagonally so
+  // every pairwise stacking decision changes visible pixels.
+  const stage = (children) => box(
+    { width: '300px', height: '120px', position: 'relative', 'background-color': '#1f2937' },
+    children,
+  );
+  return {
+    // z 3/1/2 vs source a,b,c: paint bottom→top must be b, c, a — source
+    // order alone would paint a, b, c and fail the comparison.
+    PL_ZOverlap: stage({
+      a: cell('90px', '70px', { position: 'absolute', top: '10px', left: '20px', 'z-index': '3' }),
+      b: cell('90px', '70px', { position: 'absolute', top: '25px', left: '70px', 'z-index': '1' }),
+      c: cell('90px', '70px', { position: 'absolute', top: '40px', left: '120px', 'z-index': '2' }),
+    }),
+    // Equal z ties resolve by source order (a under b); c at z 0 sits under both.
+    PL_ZTies: stage({
+      a: cell('90px', '70px', { position: 'absolute', top: '10px', left: '30px', 'z-index': '1' }),
+      b: cell('90px', '70px', { position: 'absolute', top: '30px', left: '90px', 'z-index': '1' }),
+      c: cell('90px', '70px', { position: 'absolute', top: '20px', left: '150px', 'z-index': '0' }),
+    }),
+    // Negative z paints below the auto sibling but above the stage backdrop
+    // (ZI_Negative precedent in fixtures/properties/layout/z-index.json).
+    PL_ZNegative: stage({
+      a: cell('90px', '70px', { position: 'absolute', top: '15px', left: '40px', 'z-index': '-1' }),
+      b: cell('90px', '70px', { position: 'absolute', top: '35px', left: '90px' }),
+    }),
+  };
+}
+
+function buildPlacementMixedClaims(rng) {
+  const cell = cellFactory(rng);
+  return {
+    // Claimed + unclaimed interleave — the auto-placement algorithm's hardest
+    // case (CSS Grid §8.5): definite items land first, the auto cursor must
+    // flow the unclaimed items AROUND them (u1→r1c1, u2→r2c1, u3→r2c2,
+    // u4→r2c3; c2 owns r3c1-c2).
+    PL_InterleaveLines: gridBox({ 'grid-template-columns': '1fr 1fr 1fr', 'grid-auto-rows': '40px' }, {
+      u1: cell(null, null, {}),
+      c1: cell(null, null, { 'grid-column-start': '2', 'grid-column-end': '4', 'grid-row-start': '1' }),
+      u2: cell(null, null, {}),
+      u3: cell(null, null, {}),
+      c2: cell(null, null, { 'grid-column-start': '1', 'grid-column-end': '3', 'grid-row-start': '3' }),
+      u4: cell(null, null, {}),
+    }),
+    // Area claims + auto children: the '.' cells of row 2 are unnamed but
+    // explicit — u1/u2 must auto-place into them, not into implicit rows.
+    PL_InterleaveAreas: gridBox({
+      'grid-template-columns': '1fr 1fr 1fr',
+      'grid-template-rows': '40px 40px',
+      'grid-template-areas': '"top top top" ". mid ."',
+    }, {
+      top: cell(null, null, { 'grid-area': 'top' }),
+      mid: cell(null, null, { 'grid-area': 'mid' }),
+      u1: cell(null, null, {}),
+      u2: cell(null, null, {}),
+    }),
+    // dense backfill: wide (span 2) + tall's row-2 claim punch holes that
+    // row-dense auto flow must back-fill with u1/u2/u3.
+    PL_DenseBackfill: gridBox({ 'grid-template-columns': '1fr 1fr 1fr', 'grid-auto-rows': '36px', 'grid-auto-flow': 'row dense' }, {
+      wide: cell(null, null, { 'grid-column-start': 'span 2' }),
+      u1: cell(null, null, {}),
+      tall: cell(null, null, { 'grid-column-start': '2', 'grid-column-end': '4', 'grid-row-start': '2' }),
+      u2: cell(null, null, {}),
+      u3: cell(null, null, {}),
+    }),
+  };
+}
+
+// Placement template table: path → builder → claim descriptors surfaced in
+// the manifest (the coverage vocabulary the regeneration test pins).
+const PLACEMENT_BUILDERS = [
+  ['placement/grid-areas.json', buildPlacementGridAreas, ['grid-area-names', 'dangling-claim']],
+  ['placement/grid-lines.json', buildPlacementGridLines, ['grid-lines', 'grid-spans', 'negative-lines']],
+  ['placement/flex-order.json', buildPlacementFlexOrder, ['order-permutation', 'order-ties']],
+  ['placement/self-alignment.json', buildPlacementSelfAlignment, ['align-self-override', 'justify-self-override']],
+  ['placement/z-stack.json', buildPlacementZStack, ['z-index-stacking', 'z-index-ties']],
+  ['placement/mixed-claims.json', buildPlacementMixedClaims, ['auto-flow-interleave', 'mixed-claims', 'dense-backfill']],
+];
+
+// ── 8. Assembly ──────────────────────────────────────────────────────────
 
 /** Count every node in a components map, recursing through children maps. */
 function countNodes(components) {
@@ -677,6 +1016,36 @@ export function generate() {
     });
   }
 
+  // Pairwise — cross-category shards. The 12 target categories must all be
+  // present with ≥2 usable properties; a silent thin-out would quietly erode
+  // the 66-pair coverage promise, so fail the generation loudly instead.
+  for (const cat of PAIRWISE_CATEGORIES) {
+    if ((perCategory.get(cat)?.size ?? 0) < 2) {
+      throw new Error(`pairwise: category "${cat}" has <2 combo-usable harvested properties`);
+    }
+  }
+  const allPairs = pairwisePairs();
+  for (let s = 0; s * PAIRWISE_PAIRS_PER_SHARD < allPairs.length; s++) {
+    const shardPairs = allPairs.slice(s * PAIRWISE_PAIRS_PER_SHARD, (s + 1) * PAIRWISE_PAIRS_PER_SHARD);
+    const relPath = `fixtures/fidelity/pairwise/pairs-${String(s + 1).padStart(2, '0')}.json`;
+    const doc = buildPairwiseShard(shardPairs, perCategory, rngFor(relPath));
+    const content = toJson(doc);
+    files.push({ relPath, content });
+    manifestFiles.push({
+      path: relPath,
+      kind: 'pairwise',
+      // Coverage descriptors: the exact category pairs this shard covers
+      // (wave runs and the regeneration test reconstruct the 66-pair promise
+      // from the union of these lists).
+      categories: [...new Set(shardPairs.flat())].sort(),
+      pairs: shardPairs.map(([a, b]) => `${a}+${b}`),
+      components: Object.keys(doc.components).length,
+      nodes: countNodes(doc.components),
+      bytes: Buffer.byteLength(content),
+      properties: [...collectProps(doc.components)].sort(),
+    });
+  }
+
   // Trees — fixed template set, PRNG-colored.
   for (const [name, builder] of TREE_BUILDERS) {
     const relPath = `fixtures/fidelity/${name}`;
@@ -699,8 +1068,35 @@ export function generate() {
     });
   }
 
+  // Placement — the IR v2 slot/placement contract stress suite: fixed
+  // templates (structure IS the test surface), PRNG-colored cells.
+  for (const [name, builder, claims] of PLACEMENT_BUILDERS) {
+    const relPath = `fixtures/fidelity/${name}`;
+    const components = builder(rngFor(relPath));
+    const content = toJson({ components });
+    const props = [...collectProps(components)].sort();
+    // Category attribution mirrors the trees block: longhand map first,
+    // shorthand table second, "other" as the honest fallback.
+    const cats = new Set();
+    for (const p of props) cats.add(categoryMap.get(p) ?? SHORTHAND_CATEGORY.get(p) ?? 'other');
+    files.push({ relPath, content });
+    manifestFiles.push({
+      path: relPath,
+      kind: 'placement',
+      categories: [...cats].sort(),
+      // Coverage descriptors: which claim/resolution scenarios this file
+      // exercises (vocabulary pinned by gen-fidelity.test.mjs).
+      claims,
+      components: Object.keys(components).length,
+      nodes: countNodes(components),
+      bytes: Buffer.byteLength(content),
+      properties: props,
+    });
+  }
+
   // Manifest — the wave-run iteration surface. Sorted stably: combos by
-  // category, then trees in template order (already appended that way).
+  // category, then pairwise shards, then trees, then placement templates
+  // (already appended in that order).
   const manifest = {
     generator: 'tools/visual/gen-fidelity.mjs',
     seed: SEED,
@@ -738,6 +1134,24 @@ export function generate() {
   prov.push('`"_generated"` key inside fixtures would be a contract violation. Provenance lives');
   prov.push('here and in `manifest.json` instead.');
   prov.push('');
+  prov.push('## Suites');
+  prov.push('');
+  prov.push('- `<category>.combos.json` — intra-category clusters + cross-category standard');
+  prov.push('  recipes, 3–6 declarations per component.');
+  prov.push('- `pairwise/pairs-NN.json` — category-PAIR components: all 66 unordered pairs of');
+  prov.push('  the 12 visually-strongest categories (background, borders, color, effects,');
+  prov.push('  images, layout, lists, shapes, sizing, spacing, transforms, typography),');
+  prov.push('  4 components per pair, 2–3 harvested declarations from each side — hunts');
+  prov.push('  cross-category interaction bugs single-category combos cannot reach.');
+  prov.push('- `trees/*.json` — hand-designed parent→child templates (flex/grid/block flow +');
+  prov.push('  inheritance), PRNG-colored leaves.');
+  prov.push('- `placement/*.json` — IR v2 slot/placement contract stress: children carrying');
+  prov.push('  explicit placement claims (grid-area names, line numbers + spans, order');
+  prov.push('  permutations, align-self/justify-self overrides, z-index stacking among');
+  prov.push('  absolutely-positioned siblings, mixed claimed+unclaimed auto-flow interleave,');
+  prov.push('  and a dangling area claim). Authored CSS-side nested per');
+  prov.push('  schema/spec/03-children.md; the converter flattens to the v2 flat+slot form.');
+  prov.push('');
   prov.push('## Inventory');
   prov.push('');
   prov.push('| file | kind | components | nodes |');
@@ -753,7 +1167,7 @@ export function generate() {
   return files;
 }
 
-// ── 7. CLI ───────────────────────────────────────────────────────────────
+// ── 9. CLI ───────────────────────────────────────────────────────────────
 
 function main() {
   const files = generate();

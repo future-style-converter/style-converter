@@ -17,6 +17,7 @@ import com.styleconverter.runtime.core.renderer.ComponentRenderer
 import com.styleconverter.runtime.core.types.ValueExtractors
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
@@ -33,7 +34,18 @@ object ItemPlacementExtractor {
             colStart = gridLine(properties, "GridColumnStart"),
             colEnd = gridLine(properties, "GridColumnEnd"),
             rowStart = gridLine(properties, "GridRowStart"),
-            rowEnd = gridLine(properties, "GridRowEnd")
+            rowEnd = gridLine(properties, "GridRowEnd"),
+            // Wave 5: the previously-dropped span / named-line wire flavors
+            // (css-grid-1 §8.3). Each wire is one of number|span|name, so at
+            // most one of the three fields per line is non-null.
+            colStartSpan = gridSpan(properties, "GridColumnStart"),
+            colEndSpan = gridSpan(properties, "GridColumnEnd"),
+            rowStartSpan = gridSpan(properties, "GridRowStart"),
+            rowEndSpan = gridSpan(properties, "GridRowEnd"),
+            colStartName = gridName(properties, "GridColumnStart"),
+            colEndName = gridName(properties, "GridColumnEnd"),
+            rowStartName = gridName(properties, "GridRowStart"),
+            rowEndName = gridName(properties, "GridRowEnd")
         ),
         flex = FlexClaims(
             grow = flexGrow(properties),
@@ -153,6 +165,42 @@ object ItemPlacementExtractor {
         properties.firstOrNull { it.type == type }?.data?.let { d ->
             ((d as? JsonObject)?.get("number") as? JsonPrimitive)?.intOrNull
                 ?: (d as? JsonPrimitive)?.intOrNull
+        }
+
+    /**
+     * `span N` flavor of a grid line longhand → N, or null. Wire shape
+     * (GridLine.Span in the converter): `{"type":"span","count":N}`.
+     * Also accepts the bare-string "span N" primitive for legacy fixtures.
+     */
+    private fun gridSpan(properties: List<IRProperty>, type: String): Int? =
+        properties.firstOrNull { it.type == type }?.data?.let { d ->
+            when (d) {
+                // Typed wire: the "span" discriminator guards the count so a
+                // future {type:"...", count:N} shape can't be misread.
+                is JsonObject ->
+                    if ((d["type"] as? JsonPrimitive)?.contentOrNull == "span")
+                        (d["count"] as? JsonPrimitive)?.intOrNull
+                    else null
+                // Legacy bare-string carrier: "span 2".
+                is JsonPrimitive -> d.contentOrNull?.trim()?.lowercase()
+                    ?.takeIf { it.startsWith("span ") }
+                    ?.removePrefix("span ")?.trim()?.toIntOrNull()
+                else -> null
+            }
+        }
+
+    /**
+     * Named-line flavor of a grid line longhand → the ident, or null. Wire
+     * shape (GridLine.LineName): `{"type":"name","name":"media"}`. This is
+     * how `grid-area: media` reaches the runtime — the shorthand expander
+     * emits ONLY `grid-row-start: media` (see converter GridAreaExpander),
+     * so the row-start name doubles as the area-name claim.
+     */
+    private fun gridName(properties: List<IRProperty>, type: String): String? =
+        properties.firstOrNull { it.type == type }?.data?.let { d ->
+            val obj = d as? JsonObject ?: return@let null
+            if ((obj["type"] as? JsonPrimitive)?.contentOrNull != "name") return@let null
+            (obj["name"] as? JsonPrimitive)?.contentOrNull
         }
 
     /**

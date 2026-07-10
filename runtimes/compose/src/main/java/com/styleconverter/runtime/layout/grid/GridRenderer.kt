@@ -3,14 +3,11 @@ package com.styleconverter.runtime.layout.grid
 import com.styleconverter.runtime.core.renderer.ComponentRenderer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -19,8 +16,6 @@ import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.placement.itemPlacement
 import com.styleconverter.runtime.core.types.ValueExtractors
-import com.styleconverter.runtime.layout.grid.GridExtractor
-import com.styleconverter.runtime.layout.grid.GridTemplateAreas
 import kotlinx.serialization.json.*
 
 /**
@@ -60,7 +55,6 @@ object GridRenderer {
         textColor: Color?
     ) {
         val gridConfig = extractGridConfig(component.properties)
-        val templateAreas = extractGridTemplateAreas(component.properties)
 
         if (component.children.isNullOrEmpty()) {
             // No children — render the CANONICAL placeholder, top-start.
@@ -87,22 +81,23 @@ object GridRenderer {
         val horizontalSpacing = displayConfig.columnGap
         val verticalSpacing = displayConfig.rowGap
 
-        // Check if we should use template areas for placement
-        if (templateAreas != null) {
-            RenderGridWithTemplateAreas(
-                component = component,
-                modifier = modifier,
-                templateAreas = templateAreas,
-                rowHeights = gridConfig.rowHeights,
-                horizontalSpacing = horizontalSpacing,
-                verticalSpacing = verticalSpacing,
-                textColor = textColor
-            )
-            return
-        }
-
-        // Standard grid rendering (no template areas)
-        val columnCount = gridConfig.columnCount ?: 2
+        // v2 wave-5: template areas no longer take a separate weight-based
+        // rendering path. The converter's GridAreaExpander lowers
+        // `grid-area: name` to a single `grid-row-start: name` longhand, so
+        // the browser (our reference) resolves the NAME to the area's row
+        // line and auto-flows the column (css-grid-1 §8.3 <custom-ident> →
+        // §8.5 step 2) — verified pixel-exact against the PL_Areas* web
+        // captures: `media`/`title` share row 1, `body` lands (2,1), the
+        // dangling `ghost` name creates an implicit row AFTER an empty one.
+        // The old RenderGridWithTemplateAreas branch (childByArea keyed on a
+        // "GridArea" IR type the converter never emits) rendered every child
+        // as an EMPTY weighted cell and was unreachable for v2 areas wire
+        // anyway (GridExtractor didn't parse the rows-of-arrays shape). The
+        // areas grid now feeds ONLY named-line resolution below.
+        val areasGridForCount = extractAreasGridV2(component.properties)
+        val columnCount = gridConfig.columnCount
+            ?: areasGridForCount?.maxOfOrNull { it.size }
+            ?: 2
 
         // Definite-width detection. The web reference gives every component
         // `width: fit-content` unless the IR declares a width, so a grid
@@ -115,99 +110,143 @@ object GridRenderer {
             component.properties, widthAxis = true
         )
 
+        // Named-area map for §8.3 <custom-ident> line resolution. Parsed
+        // from the v2 areas wire ({"type":"areas","rows":[["a","a"],…]}) —
+        // the legacy GridTemplateAreas class only understood string rows.
+        val areasGrid = areasGridForCount
+        val areaMap = buildAreaMap(areasGrid)
+
+        // Explicit row count: template rows list, else the areas grid's row
+        // count (each areas string row defines one explicit row, css-grid-2
+        // §7.3). Needed for negative row lines + dangling-name resolution.
+        val rowHeights = gridConfig.rowHeights
+        val explicitRowCount = rowHeights?.size ?: areasGrid?.size ?: 0
+
         // Sort children by order property (CSS `order` participates in
         // auto-placement order, css-flexbox-1 §5.4 / css-grid-1 §8.5),
         // then run the placement algorithm — explicit grid-column/row
-        // lines are honored; everything else auto-flows row-major.
+        // lines, spans, and named-area lines are honored; everything else
+        // auto-flows row-major (dense re-scans from the grid start when
+        // grid-auto-flow requests dense packing, §8.5 "dense" variant).
+        val dense = gridConfig.autoFlow == GridAutoFlow.DENSE ||
+            gridConfig.autoFlow == GridAutoFlow.ROW_DENSE ||
+            gridConfig.autoFlow == GridAutoFlow.COLUMN_DENSE
         val sortedChildren = ComponentRenderer.sortByOrder(component.children)
-        val placements = placeItems(
-            sortedChildren.map { extractPlacementSpec(it.properties) },
-            columnCount
+        val claims = sortedChildren.map {
+            com.styleconverter.runtime.core.placement.ItemPlacementExtractor
+                .extract(it.properties)
+        }
+        val specs = claims.map {
+            resolvePlacementSpec(it.grid, columnCount, explicitRowCount, areaMap)
+        }
+        val placements = placeItems(specs, columnCount, dense)
+        // The grid's row extent: every EXPLICIT template row exists even
+        // with no item in it (css-grid-1 §7.1 — explicit tracks are always
+        // laid out), and placements can extend it with implicit rows.
+        val rowCount = maxOf(
+            placements.maxOfOrNull { it.row + it.rowSpan } ?: 0,
+            explicitRowCount,
+            1
         )
-        val rowCount = (placements.maxOfOrNull { it.row } ?: 0) + 1
-        val rowHeights = gridConfig.rowHeights
 
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(verticalSpacing)
+        // Per-row heights: explicit template rows first, then implicit rows
+        // take grid-auto-rows sizes (cycling through the list, css-grid-1
+        // §7.6), then null = auto (max content height of the row's cells).
+        val autoRowDp = gridConfig.autoConfig.autoRows
+            ?.mapNotNull { autoTrackSizeToDp(it) }
+            ?.takeIf { it.isNotEmpty() }
+        val resolvedRowHeights: List<Dp?> = (0 until rowCount).map { r ->
+            rowHeights?.getOrNull(r) ?: run {
+                val implicitIndex = r - (rowHeights?.size ?: 0)
+                if (implicitIndex >= 0 && autoRowDp != null)
+                    autoRowDp[implicitIndex % autoRowDp.size]
+                else null
+            }
+        }
+
+        // Container-level item alignment defaults (css-align-3 §6.2/§6.4):
+        // justify-self:auto resolves to the container's justify-items;
+        // align-self:auto resolves to the container's align-items. These
+        // fallbacks are what PL_GridJustifyOverride pinned — `d` (no
+        // justify-self) must CENTER under `justify-items: center` while its
+        // siblings' explicit start/end/stretch win (Android previously
+        // ignored justify-items entirely, A-w 0.868).
+        val justifyItems = extractJustifyItems(component.properties)
+
+        // Single-Layout placed grid: both axes resolved in one measure pass
+        // so ROW SPANS render (the Column-of-rows structure could only give
+        // a cell its own row's height — `grid-row: 3 / 5` items showed one
+        // track tall and implicit rows never materialized, PL_LineSpans /
+        // PL_DenseBackfill / PL_AreaLineSyntax).
+        GridPlacedGrid(
+            tracks = gridConfig.columnTracks,
+            columnCount = columnCount,
+            columnGap = horizontalSpacing,
+            rowGap = verticalSpacing,
+            rowHeights = resolvedRowHeights,
+            definiteWidth = definiteWidth,
+            cells = placements,
+            modifier = modifier
         ) {
-            for (rowIndex in 0 until rowCount) {
-                // Get row height: use explicit height if available, otherwise auto
-                val rowHeight = rowHeights?.getOrNull(rowIndex)
-                // Cells landing in this row, left-to-right.
-                val rowCells = placements.filter { it.row == rowIndex }.sortedBy { it.col }
+            placements.forEach { cell ->
+                val child = sortedChildren[cell.childIndex]
+                // v2 placement contract: read the child's ITEM claims through
+                // the single placement union — this grid consumes only the
+                // alignment claims it owns (justify-self / align-self,
+                // css-align-3 §6); the flex block on the same child is inert.
+                val placement = claims[cell.childIndex]
 
-                // Track-aware row. GridPlacedRow measures/places cells per
-                // the parsed track specs (css-grid-1 §7.2 approximation:
-                // px / % literal, fr shares of free space, auto =
-                // max-content + stretch share, minmax(min,fr) =
-                // max(min, fr share)) at their PLACED track offsets —
-                // spanning cells get the sum of their tracks plus the
-                // in-between gaps.
-                GridPlacedRow(
-                    tracks = gridConfig.columnTracks,
-                    columnCount = columnCount,
-                    gap = horizontalSpacing,
-                    rowHeight = rowHeight,
-                    definiteWidth = definiteWidth,
-                    cells = rowCells
+                // css-align-3 §6.2: justify-self:auto → container
+                // justify-items (default normal → start for our
+                // fit-content items).
+                val effJustify =
+                    if (placement.justifySelf == ComponentRenderer.JustifySelf.AUTO &&
+                        justifyItems != null) justifyItems
+                    else placement.justifySelf
+                val contentAlignment = getContentAlignment(effJustify, placement.alignSelf)
+
+                // Whether every row this cell spans has a definite height —
+                // only then can the cell Box fill and stretch its content.
+                val cellHeightDefinite = (cell.row until cell.row + cell.rowSpan)
+                    .all { resolvedRowHeights.getOrNull(it) != null }
+
+                // css-align-3 §6.6: `align-self: stretch` (and the
+                // `normal`/auto default) makes an AUTO-height item
+                // fill its row track. Web stretches these (the
+                // harness only suppresses INLINE-axis stretch via
+                // width:fit-content; heights stay auto), Android
+                // kept content height (G2_AlignSelf `d` sat 30px
+                // in a 60px track, 0.9644). Only when the row has
+                // a definite height and the child's height is auto.
+                val childHeightDefinite = ComponentRenderer.hasDefiniteSize(
+                    child.properties, widthAxis = false
+                )
+                val stretchHeight = cellHeightDefinite && !childHeightDefinite &&
+                    (placement.alignSelf == ComponentRenderer.AlignSelf.STRETCH ||
+                     placement.alignSelf == ComponentRenderer.AlignSelf.AUTO)
+
+                Box(
+                    // itemPlacement publishes the child's claims as
+                    // parent-data on the measurable that GridPlacedGrid's
+                    // Layout measures — the v2 parent-data channel (inert
+                    // for measurement today: placement is resolved
+                    // pre-measure by placeItems; a fully measure-time
+                    // StyleGrid can consume it later, design §3.1).
+                    modifier = (if (cellHeightDefinite) Modifier.fillMaxHeight() else Modifier)
+                        .itemPlacement(placement),
+                    contentAlignment = contentAlignment
                 ) {
-                    rowCells.forEach { cell ->
-                        val child = sortedChildren[cell.childIndex]
-                        // v2 placement contract: read the child's ITEM
-                        // claims through the single placement union —
-                        // this grid consumes only the alignment claims it
-                        // owns (justify-self / align-self, css-align-3
-                        // §6); the flex block on the same child is inert.
-                        val placement = com.styleconverter.runtime.core.placement
-                            .ItemPlacementExtractor.extract(child.properties)
-                        val justifySelf = placement.justifySelf
-                        val alignSelf = placement.alignSelf
-
-                        // Calculate content alignment from justify-self and align-self
-                        val contentAlignment = getContentAlignment(justifySelf, alignSelf)
-
-                        // css-align-3 §6.6: `align-self: stretch` (and the
-                        // `normal`/auto default) makes an AUTO-height item
-                        // fill its row track. Web stretches these (the
-                        // harness only suppresses INLINE-axis stretch via
-                        // width:fit-content; heights stay auto), Android
-                        // kept content height (G2_AlignSelf `d` sat 30px
-                        // in a 60px track, 0.9644). Only when the row has
-                        // a definite height and the child's height is auto.
-                        val childHeightDefinite = ComponentRenderer.hasDefiniteSize(
-                            child.properties, widthAxis = false
+                    // This cell already applied justify-self/align-self
+                    // as contentAlignment — suppress the block-level
+                    // self-alignment wrapper inside RenderComponent so
+                    // grid items don't double-align (css-align-3 §6).
+                    androidx.compose.runtime.CompositionLocalProvider(
+                        ComponentRenderer.LocalSelfAlignmentHandled provides true
+                    ) {
+                        ComponentRenderer.RenderComponent(
+                            child,
+                            itemModifier = if (stretchHeight) Modifier.fillMaxHeight() else Modifier
                         )
-                        val stretchHeight = rowHeight != null && !childHeightDefinite &&
-                            (alignSelf == ComponentRenderer.AlignSelf.STRETCH ||
-                             alignSelf == ComponentRenderer.AlignSelf.AUTO)
-
-                        Box(
-                            // itemPlacement publishes the child's claims
-                            // as parent-data on the measurable that
-                            // GridPlacedRow's Layout measures — the v2
-                            // parent-data channel (inert for measurement
-                            // today: the two-phase Column-of-rows
-                            // structure resolves placement pre-measure;
-                            // the single-Layout StyleGrid consumes it at
-                            // measure time when it lands, design §3.1).
-                            modifier = (if (rowHeight != null) Modifier.fillMaxHeight() else Modifier)
-                                .itemPlacement(placement),
-                            contentAlignment = contentAlignment
-                        ) {
-                            // This cell already applied justify-self/align-self
-                            // as contentAlignment — suppress the block-level
-                            // self-alignment wrapper inside RenderComponent so
-                            // grid items don't double-align (css-align-3 §6).
-                            androidx.compose.runtime.CompositionLocalProvider(
-                                ComponentRenderer.LocalSelfAlignmentHandled provides true
-                            ) {
-                                ComponentRenderer.RenderComponent(
-                                    child,
-                                    itemModifier = if (stretchHeight) Modifier.fillMaxHeight() else Modifier
-                                )
-                            }
-                        }
                     }
                 }
             }
@@ -215,37 +254,42 @@ object GridRenderer {
     }
 
     /**
-     * One grid item's explicit placement request, in 1-based CSS grid
-     * lines. Null = auto. Wire shape (GridColumnStartPropertyParser et al):
-     * `{"type":"number","number":N}` for line numbers; `span N` / named
-     * lines serialize differently and are treated as auto here (honest
-     * fallback — the wave fixtures only use line numbers).
+     * One grid item's explicit placement request, RESOLVED to 1-based
+     * numeric CSS grid lines (negative integers and named lines already
+     * translated by [resolvePlacementSpec]). Null = auto. [colSpanReq] /
+     * [rowSpanReq] carry a bare `span N` claim whose anchor line is auto —
+     * the item auto-places but occupies N tracks (css-grid-1 §8.3.1).
      */
     internal data class GridPlacementSpec(
         val colStart: Int? = null,
         val colEnd: Int? = null,
         val rowStart: Int? = null,
-        val rowEnd: Int? = null
+        val rowEnd: Int? = null,
+        val colSpanReq: Int? = null,
+        val rowSpanReq: Int? = null
     )
 
-    /** A resolved item: 0-based row/col plus its column span. */
+    /** A resolved item: 0-based row/col plus its column and row spans. */
     internal data class PlacedItem(
         val childIndex: Int,
         val row: Int,
         val col: Int,
-        val colSpan: Int
+        val colSpan: Int,
+        val rowSpan: Int = 1
+    )
+
+    /** One named area's rectangle in 1-based grid lines (ends exclusive). */
+    internal data class AreaRect(
+        val rowStart: Int,
+        val rowEnd: Int,
+        val colStart: Int,
+        val colEnd: Int
     )
 
     /**
      * Pull the four explicit-placement longhands off a child's IR.
-     *
-     * v2 placement routing: the claims come from the CHILD-side placement
-     * union (core/placement/ItemPlacementExtractor — the same object
-     * ComponentHost publishes as parent-data), and this container
-     * consumes ONLY its own kind's block ([ItemPlacement.grid]); the flex
-     * / paint claims on the same child are inert here, exactly like
-     * `flex-grow` on a grid item in a browser. Resolution stays
-     * claimed-first-then-auto-flow in [placeItems] (css-grid-1 §8.5).
+     * Legacy entry point kept for the campaign pinning tests — resolves
+     * with no areas context and the given column count defaults.
      */
     internal fun extractPlacementSpec(properties: List<IRProperty>): GridPlacementSpec {
         val claims = com.styleconverter.runtime.core.placement.ItemPlacementExtractor
@@ -259,72 +303,227 @@ object GridRenderer {
     }
 
     /**
-     * Simplified css-grid-1 §8.5 auto-placement for row-flow grids.
-     * Pure function (JVM unit-tested). Supports:
-     *   - items with definite row AND column → anchored exactly there;
-     *   - items with definite column only → cursor drops to the first row
-     *     (at or after the current one) where the requested tracks are free;
-     *   - fully-auto items → next free cell in row-major order.
-     * Spans clamp to the explicit column count; row spans collapse to 1
-     * (each row renders independently — no cell renderer for row spans yet).
+     * Resolve one child's raw grid claims into numeric lines + span
+     * requests (css-grid-1 §8.3). Pure function (JVM unit-tested).
+     *
+     * v2 placement routing: the claims come from the CHILD-side placement
+     * union (core/placement/ItemPlacementExtractor — the same object
+     * ComponentHost publishes as parent-data); this container consumes
+     * ONLY its own kind's block; flex claims on the same child are inert.
+     *
+     *  - Negative integers count backward from the end of the explicit
+     *    grid (§8.3: line -1 is the explicit grid's last line), so
+     *    `grid-column: 1 / -1` spans every explicit column track.
+     *  - <custom-ident> names resolve against the template-areas implicit
+     *    line names: `<name>-start` for a *-start longhand, `<name>-end`
+     *    for *-end (§8.3 + css-grid-1 §7.3.2). An ident with NO matching
+     *    area resolves to the FIRST IMPLICIT line past the explicit grid
+     *    (§8.3 "all implicit grid lines are counted as having that name"),
+     *    verified against Chrome: PL_AreasDangling's `ghost` lands in
+     *    implicit row 4 leaving an EMPTY implicit row 3.
+     *  - `span N` with a definite opposite line resolves to a concrete
+     *    start/end pair; with both lines auto it becomes a span REQUEST
+     *    that auto-placement honors (§8.3.1).
+     */
+    internal fun resolvePlacementSpec(
+        claims: com.styleconverter.runtime.core.placement.GridClaims,
+        columnCount: Int,
+        explicitRowCount: Int,
+        areas: Map<String, AreaRect>
+    ): GridPlacementSpec {
+        // The explicit grid has trackCount+1 lines; line -1 = last line.
+        fun negCol(n: Int?): Int? = n?.let { if (it < 0) columnCount + 2 + it else it }
+        fun negRow(n: Int?): Int? = n?.let { if (it < 0) explicitRowCount + 2 + it else it }
+        // Named lines: area edge if the ident names an area, else the first
+        // implicit line past the explicit grid (index lastLine+1).
+        fun rowLine(name: String?, isEnd: Boolean): Int? = name?.let { n ->
+            areas[n]?.let { if (isEnd) it.rowEnd else it.rowStart }
+                ?: (explicitRowCount + 2)
+        }
+        fun colLine(name: String?, isEnd: Boolean): Int? = name?.let { n ->
+            areas[n]?.let { if (isEnd) it.colEnd else it.colStart }
+                ?: (columnCount + 2)
+        }
+        var colStart = negCol(claims.colStart) ?: colLine(claims.colStartName, isEnd = false)
+        var colEnd = negCol(claims.colEnd) ?: colLine(claims.colEndName, isEnd = true)
+        var rowStart = negRow(claims.rowStart) ?: rowLine(claims.rowStartName, isEnd = false)
+        var rowEnd = negRow(claims.rowEnd) ?: rowLine(claims.rowEndName, isEnd = true)
+        var colSpanReq: Int? = null
+        var rowSpanReq: Int? = null
+        // §8.3.1: span against the opposite definite line, else a request.
+        claims.colStartSpan?.let { s -> if (colEnd != null) colStart = colEnd!! - s else colSpanReq = s }
+        claims.colEndSpan?.let { s -> if (colStart != null) colEnd = colStart!! + s else colSpanReq = s }
+        claims.rowStartSpan?.let { s -> if (rowEnd != null) rowStart = rowEnd!! - s else rowSpanReq = s }
+        claims.rowEndSpan?.let { s -> if (rowStart != null) rowEnd = rowStart!! + s else rowSpanReq = s }
+        return GridPlacementSpec(colStart, colEnd, rowStart, rowEnd, colSpanReq, rowSpanReq)
+    }
+
+    /**
+     * css-grid-1 §8.5 auto-placement for row-flow grids, in spec phase
+     * order. Pure function (JVM unit-tested). Supports:
+     *   1. items with definite row AND column → anchored exactly there
+     *      (never moves the auto cursor);
+     *   2. items with definite ROW only → first free column in that row,
+     *      after any item this phase already placed there (sparse) or from
+     *      the row start (dense) — this is the phase that places
+     *      named-area claims (`grid-area: media` → row-locked item);
+     *   3. remaining items in order: definite column → cursor drops rows
+     *      until the tracks are free; fully-auto → row-major scan. Dense
+     *      packing resets the cursor to the grid start per item (§8.5
+     *      "dense" variant, PL_DenseBackfill).
+     * Column spans clamp to the explicit column count; ROW spans occupy
+     * real cells so later items flow around them, and the single-Layout
+     * renderer sizes the item across all its rows.
      */
     internal fun placeItems(
         specs: List<GridPlacementSpec>,
-        columnCount: Int
+        columnCount: Int,
+        dense: Boolean = false
     ): List<PlacedItem> {
         val occupied = mutableSetOf<Pair<Int, Int>>() // (row, col)
-        val out = mutableListOf<PlacedItem>()
-        var cursorRow = 0
-        var cursorCol = 0
+        val out = arrayOfNulls<PlacedItem>(specs.size)
 
-        fun spanOf(start: Int?, end: Int?): Int =
-            if (start != null && end != null && end > start) end - start else 1
+        fun spanOf(start: Int?, end: Int?, req: Int?): Int =
+            req ?: if (start != null && end != null && end > start) end - start else 1
 
-        fun fits(row: Int, col: Int, span: Int): Boolean =
-            col + span <= columnCount && (0 until span).none { (row to col + it) in occupied }
+        fun colSpanOf(spec: GridPlacementSpec): Int =
+            spanOf(spec.colStart, spec.colEnd, spec.colSpanReq).coerceIn(1, columnCount)
 
-        fun mark(row: Int, col: Int, span: Int) {
-            for (i in 0 until span) occupied.add(row to col + i)
+        fun rowSpanOf(spec: GridPlacementSpec): Int =
+            spanOf(spec.rowStart, spec.rowEnd, spec.rowSpanReq).coerceAtLeast(1)
+
+        fun fits(row: Int, col: Int, colSpan: Int, rowSpan: Int): Boolean =
+            col + colSpan <= columnCount && (0 until rowSpan).none { r ->
+                (0 until colSpan).any { c -> (row + r to col + c) in occupied }
+            }
+
+        fun mark(row: Int, col: Int, colSpan: Int, rowSpan: Int) {
+            for (r in 0 until rowSpan) for (c in 0 until colSpan) {
+                occupied.add(row + r to col + c)
+            }
         }
 
+        // ── Phase 1 (§8.5 step 1): both axes definite — anchored. ──
         specs.forEachIndexed { index, spec ->
-            val colSpan = spanOf(spec.colStart, spec.colEnd).coerceAtMost(columnCount)
-            when {
-                // Fully anchored: place exactly where asked (grid lines are
-                // 1-based; row/col indices 0-based). Does NOT move the
-                // auto-placement cursor, matching §8.5 step 1.
-                spec.colStart != null && spec.rowStart != null -> {
-                    val row = (spec.rowStart - 1).coerceAtLeast(0)
-                    val col = (spec.colStart - 1).coerceIn(0, columnCount - 1)
-                    out.add(PlacedItem(index, row, col, colSpan))
-                    mark(row, col, colSpan)
-                }
+            if (spec.colStart == null || spec.rowStart == null) return@forEachIndexed
+            val row = (spec.rowStart - 1).coerceAtLeast(0)
+            val col = (spec.colStart - 1).coerceIn(0, columnCount - 1)
+            val cs = colSpanOf(spec)
+            val rs = rowSpanOf(spec)
+            out[index] = PlacedItem(index, row, col, cs, rs)
+            mark(row, col, cs, rs)
+        }
+
+        // ── Phase 2 (§8.5 step 2): definite row, auto column. ──
+        // Sparse keeps a per-row cursor ("past any items previously placed
+        // in this row BY THIS STEP"); dense rescans from the row start.
+        val rowCursor = mutableMapOf<Int, Int>()
+        specs.forEachIndexed { index, spec ->
+            if (out[index] != null || spec.rowStart == null) return@forEachIndexed
+            val row = (spec.rowStart - 1).coerceAtLeast(0)
+            val cs = colSpanOf(spec)
+            val rs = rowSpanOf(spec)
+            var col = if (dense) 0 else (rowCursor[row] ?: 0)
+            // Walk right until the area is free; if the row runs out of
+            // columns the item overlaps at the last legal start (degenerate
+            // overflow case — CSS would grow implicit columns we don't have).
+            while (col + cs <= columnCount && !fits(row, col, cs, rs)) col++
+            if (col + cs > columnCount) col = (columnCount - cs).coerceAtLeast(0)
+            out[index] = PlacedItem(index, row, col, cs, rs)
+            mark(row, col, cs, rs)
+            rowCursor[row] = col + cs
+        }
+
+        // ── Phase 3 (§8.5 step 4): everything else, shared cursor. ──
+        var cursorRow = 0
+        var cursorCol = 0
+        specs.forEachIndexed { index, spec ->
+            if (out[index] != null) return@forEachIndexed
+            val cs = colSpanOf(spec)
+            val rs = rowSpanOf(spec)
+            // Dense packing: restart the scan at the grid origin per item.
+            if (dense) { cursorRow = 0; cursorCol = 0 }
+            if (spec.colStart != null) {
                 // Definite column, auto row: drop the cursor down rows until
                 // the requested tracks are free (§8.5 "column position is
                 // definite" branch). If the cursor already passed that
                 // column on the current row, start from the next row.
-                spec.colStart != null -> {
-                    val col = (spec.colStart - 1).coerceIn(0, columnCount - 1)
-                    var row = if (cursorCol > col) cursorRow + 1 else cursorRow
-                    while (!fits(row, col, colSpan)) row++
-                    out.add(PlacedItem(index, row, col, colSpan))
-                    mark(row, col, colSpan)
-                    cursorRow = row
-                    cursorCol = col + colSpan
+                val col = (spec.colStart - 1).coerceIn(0, columnCount - 1)
+                var row = if (cursorCol > col) cursorRow + 1 else cursorRow
+                while (!fits(row, col, cs, rs)) row++
+                out[index] = PlacedItem(index, row, col, cs, rs)
+                mark(row, col, cs, rs)
+                cursorRow = row
+                cursorCol = col + cs
+            } else {
+                // Fully auto: row-major scan from the cursor.
+                var row = cursorRow
+                var col = cursorCol
+                while (true) {
+                    if (col + cs > columnCount) { row++; col = 0; continue }
+                    if (fits(row, col, cs, rs)) break
+                    col++
                 }
-                // Fully auto: sparse row-major scan from the cursor.
-                else -> {
-                    var row = cursorRow
-                    var col = cursorCol
-                    while (true) {
-                        if (col + colSpan > columnCount) { row++; col = 0; continue }
-                        if (fits(row, col, colSpan)) break
-                        col++
-                    }
-                    out.add(PlacedItem(index, row, col, colSpan))
-                    mark(row, col, colSpan)
-                    cursorRow = row
-                    cursorCol = col + colSpan
+                out[index] = PlacedItem(index, row, col, cs, rs)
+                mark(row, col, cs, rs)
+                cursorRow = row
+                cursorCol = col + cs
+            }
+        }
+        return out.filterNotNull()
+    }
+
+    /**
+     * Parse the v2 GridTemplateAreas wire into a rows×cols name grid.
+     * Canonical shape (GridTemplateAreasProperty serializer):
+     * `{"type":"areas","rows":[["a","a"],["b","."]]}` — rows of ARRAYS.
+     * Legacy carriers (rows of strings / bare string rows) are folded in
+     * for fixture compatibility. "." = unnamed cell (css-grid-1 §7.3).
+     */
+    internal fun parseAreasGrid(data: JsonElement?): List<List<String>>? {
+        if (data == null) return null
+        fun rowOf(el: JsonElement): List<String>? = when (el) {
+            // v2: one row is already an array of cell names.
+            is JsonArray -> el.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+                .takeIf { it.isNotEmpty() }
+            // legacy: one row is a space-separated string.
+            is JsonPrimitive -> el.contentOrNull?.trim()
+                ?.removeSurrounding("\"")?.removeSurrounding("'")
+                ?.takeIf { it.isNotEmpty() }
+                ?.split(Regex("\\s+"))
+            else -> null
+        }
+        val rowsEl: List<JsonElement>? = when (data) {
+            is JsonObject -> (data["rows"] as? JsonArray) ?: (data["areas"] as? JsonArray)
+            is JsonArray -> data
+            else -> null
+        }
+        return rowsEl?.mapNotNull { rowOf(it) }?.takeIf { it.isNotEmpty() }
+    }
+
+    /** [parseAreasGrid] over a component's property list. */
+    internal fun extractAreasGridV2(properties: List<IRProperty>): List<List<String>>? =
+        properties.firstOrNull { it.type == "GridTemplateAreas" }?.let { parseAreasGrid(it.data) }
+
+    /**
+     * Fold a name grid into per-area rectangles (1-based lines, exclusive
+     * ends). Non-rectangular repetitions keep their bounding box — invalid
+     * per css-grid-1 §7.3 but harmless as a best effort.
+     */
+    internal fun buildAreaMap(grid: List<List<String>>?): Map<String, AreaRect> {
+        if (grid == null) return emptyMap()
+        val out = mutableMapOf<String, AreaRect>()
+        grid.forEachIndexed { r, row ->
+            row.forEachIndexed { c, name ->
+                if (name == "." || name.isEmpty()) return@forEachIndexed
+                val prev = out[name]
+                out[name] = if (prev == null) {
+                    AreaRect(r + 1, r + 2, c + 1, c + 2)
+                } else {
+                    AreaRect(
+                        minOf(prev.rowStart, r + 1), maxOf(prev.rowEnd, r + 2),
+                        minOf(prev.colStart, c + 1), maxOf(prev.colEnd, c + 2)
+                    )
                 }
             }
         }
@@ -332,41 +531,76 @@ object GridRenderer {
     }
 
     /**
-     * One grid row laid out against explicit column tracks, with cells at
-     * their PLACED track offsets (explicit grid-column lines + spans).
+     * Container-level justify-items keyword → the JustifySelf domain used
+     * for per-cell alignment (css-align-3 §6.2: justify-self:auto resolves
+     * to the container's justify-items). Null when the container doesn't
+     * declare it (callers then keep the child's own AUTO → start default).
+     */
+    internal fun extractJustifyItems(properties: List<IRProperty>): ComponentRenderer.JustifySelf? {
+        val data = properties.firstOrNull { it.type == "JustifyItems" }?.data ?: return null
+        return when (ValueExtractors.extractKeyword(data)?.uppercase()) {
+            "START", "SELF_START", "SELF-START", "FLEX_START", "FLEX-START", "LEFT" ->
+                ComponentRenderer.JustifySelf.START
+            "END", "SELF_END", "SELF-END", "FLEX_END", "FLEX-END", "RIGHT" ->
+                ComponentRenderer.JustifySelf.END
+            "CENTER" -> ComponentRenderer.JustifySelf.CENTER
+            "STRETCH" -> ComponentRenderer.JustifySelf.STRETCH
+            "BASELINE" -> ComponentRenderer.JustifySelf.BASELINE
+            "NORMAL" -> ComponentRenderer.JustifySelf.NORMAL
+            else -> null
+        }
+    }
+
+    /**
+     * The WHOLE placed grid as one Layout: explicit column tracks on the
+     * inline axis, template/auto/content rows on the block axis, cells at
+     * their PLACED (row, col) offsets with both column AND row spans.
+     * Replaces the old per-row GridPlacedRow (a Column of independent row
+     * Layouts) which could not express row spans — a `grid-row: 3 / 5`
+     * item only ever got its start row's height and implicit rows created
+     * by row-end claims never materialized.
      *
      * Each direct child is one cell (a Box wrapping the grid item), 1:1
      * with [cells]. The measure policy:
-     *   1. resolves every track to a pixel width via [computeTrackWidths]
-     *      (pure function — unit-tested on the JVM),
-     *   2. measures cell i with the sum of its spanned tracks (plus the
-     *      gaps BETWEEN them, css-align-3) so the cell Box spans its area
-     *      and its contentAlignment (justify-self / align-self) positions
-     *      the item inside it,
-     *   3. places cells at the cumulative offsets of their start tracks.
+     *   1. resolves every column track to a pixel width via
+     *      [computeTrackWidths] (pure function — unit-tested on the JVM),
+     *   2. resolves row heights: [rowHeights] entries are template /
+     *      grid-auto-rows sizes; null entries are AUTO rows sized to the
+     *      max measured height of their single-row cells (css-grid-1
+     *      §7.2.1 content sizing, same simplification as column autos),
+     *   3. measures cell i with the sum of its spanned tracks in BOTH axes
+     *      (plus the gaps BETWEEN them, css-align-3) so the cell Box spans
+     *      its area and its contentAlignment (justify-self / align-self)
+     *      positions the item inside it,
+     *   4. places cells at the cumulative offsets of their start tracks.
      *
      * [definiteWidth] mirrors the web reference's `width: fit-content`
      * default: when the grid declares NO definite width, flexible tracks
      * (fr / %) size to their max-content instead of splitting the incoming
-     * constraint, and the row reports its own footprint — the grid HUGS.
+     * constraint, and the grid reports its own footprint — the grid HUGS.
      *
      * Auto tracks need the item's max-content width (css-grid-1 §7.2.1);
      * we read `maxIntrinsicWidth` before the real measure pass.
      */
     @Composable
-    private fun GridPlacedRow(
+    private fun GridPlacedGrid(
         tracks: List<TrackSpec>?,
         columnCount: Int,
-        gap: Dp,
-        rowHeight: Dp?,
+        columnGap: Dp,
+        rowGap: Dp,
+        rowHeights: List<Dp?>,
         definiteWidth: Boolean,
         cells: List<PlacedItem>,
+        modifier: Modifier,
         content: @Composable () -> Unit
     ) {
-        val rowModifier = if (definiteWidth) Modifier.fillMaxWidth() else Modifier
-        Layout(content = content, modifier = rowModifier) { measurables, constraints ->
-            val gapPx = gap.roundToPx().toFloat()
-            val rowHeightPx = rowHeight?.roundToPx()
+        val gridModifier = modifier.then(
+            if (definiteWidth) Modifier.fillMaxWidth() else Modifier
+        )
+        Layout(content = content, modifier = gridModifier) { measurables, constraints ->
+            val gapPx = columnGap.roundToPx().toFloat()
+            val rowGapPx = rowGap.roundToPx()
+            val rowCount = rowHeights.size.coerceAtLeast(1)
             // Unbounded-width guard: inside a horizontal scroller the max
             // constraint is Infinity, and fr/percent shares of infinity
             // are meaningless. CSS sizes fr against a definite containing
@@ -394,6 +628,20 @@ object GridRenderer {
                     else -> s
                 }
             }
+            // Pre-resolved row heights in px; null = auto (content-sized
+            // after measurement). Height hint for intrinsic width queries:
+            // the cell's own row height when definite.
+            val rowHpx: List<Int?> = (0 until rowCount).map { r ->
+                rowHeights.getOrNull(r)?.roundToPx()
+            }
+            fun cellHeightPx(cell: PlacedItem): Int? {
+                var h = 0
+                for (r in cell.row until cell.row + cell.rowSpan) {
+                    h += rowHpx.getOrNull(r) ?: return null // any auto row → defer
+                }
+                // Gaps BETWEEN spanned rows belong to the cell area.
+                return h + rowGapPx * (cell.rowSpan - 1).coerceAtLeast(0)
+            }
             // Max-content width per TRACK: the widest single-track cell
             // that STARTS there (spanning cells excluded — their space
             // distribution is a §7.2.3 refinement we skip). Only consulted
@@ -402,8 +650,10 @@ object GridRenderer {
                 when (specs.getOrNull(t)) {
                     is TrackSpec.Auto, is TrackSpec.Fit ->
                         cells.withIndex().filter { it.value.col == t && it.value.colSpan == 1 }
-                            .maxOfOrNull { (i, _) ->
-                                measurables[i].maxIntrinsicWidth(rowHeightPx ?: Int.MAX_VALUE).toFloat()
+                            .maxOfOrNull { (i, cell) ->
+                                measurables[i].maxIntrinsicWidth(
+                                    cellHeightPx(cell) ?: Int.MAX_VALUE
+                                ).toFloat()
                             } ?: 0f
                     else -> 0f
                 }
@@ -425,29 +675,54 @@ object GridRenderer {
                 // Gaps BETWEEN spanned tracks belong to the cell area.
                 return w + gapPx * (cell.colSpan - 1).coerceAtLeast(0)
             }
+            // Measure every cell: definite both-axes cells get exact
+            // constraints (the Box then stretches/aligns its item); cells
+            // touching an auto row get a fixed width and free height so
+            // their measured height can SIZE that row.
             val placeables = measurables.mapIndexed { i, m ->
-                val w = cells.getOrNull(i)?.let { cellWidth(it) }?.toInt()?.coerceAtLeast(0) ?: 0
+                val cell = cells.getOrNull(i)
+                val w = cell?.let { cellWidth(it) }?.toInt()?.coerceAtLeast(0) ?: 0
+                val h = cell?.let { cellHeightPx(it) }
                 m.measure(
-                    if (rowHeightPx != null)
-                        Constraints.fixed(w, rowHeightPx)
+                    if (h != null)
+                        Constraints.fixed(w, h)
                     else
                         Constraints(minWidth = w, maxWidth = w, minHeight = 0, maxHeight = constraints.maxHeight)
                 )
             }
-            val rowH = rowHeightPx ?: (placeables.maxOfOrNull { it.height } ?: 0)
-            // Row width: definite grids report the bounded container width;
+            // Resolve AUTO rows to the tallest single-row cell they host
+            // (spanning cells excluded, mirroring the column intrinsics
+            // simplification). Rows with no cells collapse to 0 — matching
+            // Chrome, where PL_AreasDangling's empty implicit row 3 is 0px
+            // tall between two 6px gaps.
+            val resolvedRowH = IntArray(rowCount) { r ->
+                rowHpx[r] ?: cells.withIndex()
+                    .filter { it.value.row == r && it.value.rowSpan == 1 }
+                    .maxOfOrNull { (i, _) -> placeables[i].height }
+                ?: 0
+            }
+            // Cumulative row start offsets.
+            val rowOffsets = IntArray(rowCount)
+            for (r in 1 until rowCount) {
+                rowOffsets[r] = rowOffsets[r - 1] + resolvedRowH[r - 1] + rowGapPx
+            }
+            val totalH = resolvedRowH.sum() + rowGapPx * (rowCount - 1).coerceAtLeast(0)
+            // Grid width: definite grids report the bounded container width;
             // indefinite ones report the tracks' own footprint (the hug).
             val footprint = (widths.sum() + gapPx * (widths.size - 1).coerceAtLeast(0)).toInt()
-            val rowW = if (definiteWidth && constraints.hasBoundedWidth)
+            val gridW = if (definiteWidth && constraints.hasBoundedWidth)
                 constraints.maxWidth
             else
                 footprint.coerceAtMost(
                     if (constraints.hasBoundedWidth) constraints.maxWidth else Int.MAX_VALUE
                 )
-            layout(rowW, rowH) {
+            layout(gridW, totalH.coerceIn(constraints.minHeight, constraints.maxHeight)) {
                 placeables.forEachIndexed { i, p ->
                     val cell = cells.getOrNull(i) ?: return@forEachIndexed
-                    p.placeRelative(offsets[cell.col].toInt(), 0)
+                    p.placeRelative(
+                        offsets[cell.col].toInt(),
+                        rowOffsets.getOrElse(cell.row) { 0 }
+                    )
                 }
             }
         }
@@ -653,149 +928,13 @@ object GridRenderer {
         return out.ifEmpty { null }
     }
 
-    /**
-     * Render a grid using grid-template-areas for named area placement.
-     *
-     * Children are placed according to their grid-area property matching
-     * the template area names.
-     */
-    @Composable
-    private fun RenderGridWithTemplateAreas(
-        component: IRComponent,
-        modifier: Modifier,
-        templateAreas: GridTemplateAreas,
-        rowHeights: List<Dp>?,
-        horizontalSpacing: Dp,
-        verticalSpacing: Dp,
-        textColor: Color?
-    ) {
-        val children = component.children ?: return
-        val columnCount = templateAreas.columnCount
-        val rowCount = templateAreas.rowCount
-
-        // Build a map of area name -> child component
-        val childByArea = mutableMapOf<String, IRComponent>()
-        children.forEach { child ->
-            val areaName = extractChildAreaName(child.properties)
-            if (areaName != null && templateAreas.hasArea(areaName)) {
-                childByArea[areaName] = child
-            }
-        }
-
-        // Track which cells are occupied by multi-cell areas
-        val occupiedCells = mutableSetOf<Pair<Int, Int>>()
-        templateAreas.areaMap.forEach { (areaName, placement) ->
-            for (row in placement.rowStart until placement.rowEnd) {
-                for (col in placement.columnStart until placement.columnEnd) {
-                    occupiedCells.add(row to col)
-                }
-            }
-        }
-
-        Column(
-            modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(verticalSpacing)
-        ) {
-            for (rowIndex in 0 until rowCount) {
-                val rowHeight = rowHeights?.getOrNull(rowIndex)
-
-                Row(
-                    modifier = if (rowHeight != null) {
-                        Modifier.fillMaxWidth().height(rowHeight)
-                    } else {
-                        Modifier.fillMaxWidth()
-                    },
-                    horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)
-                ) {
-                    var colIndex = 0
-                    while (colIndex < columnCount) {
-                        val areaName = templateAreas.grid.getOrNull(rowIndex)?.getOrNull(colIndex) ?: "."
-                        val placement = templateAreas.getPlacement(areaName)
-                        val child = childByArea[areaName]
-
-                        // Check if this is the start cell for this area
-                        val isAreaStart = placement != null &&
-                                placement.rowStart == rowIndex + 1 &&
-                                placement.columnStart == colIndex + 1
-
-                        when {
-                            areaName == "." -> {
-                                // Empty cell
-                                Box(modifier = Modifier.weight(1f))
-                                colIndex++
-                            }
-                            isAreaStart && child != null -> {
-                                // Render the child in this cell, spanning multiple columns if needed
-                                val columnSpan = placement!!.columnSpan
-                                val weight = columnSpan.toFloat()
-
-                                Box(
-                                    modifier = if (rowHeight != null) {
-                                        Modifier.weight(weight).fillMaxHeight()
-                                    } else {
-                                        Modifier.weight(weight)
-                                    },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    // Same double-alignment suppression as the
-                                    // placed-cell branch above.
-                                    androidx.compose.runtime.CompositionLocalProvider(
-                                        ComponentRenderer.LocalSelfAlignmentHandled provides true
-                                    ) {
-                                        ComponentRenderer.RenderComponent(child)
-                                    }
-                                }
-                                colIndex += columnSpan
-                            }
-                            placement != null && placement.rowStart < rowIndex + 1 -> {
-                                // This cell is part of a multi-row area that started on a previous row
-                                // Skip it (it's handled by the area's starting cell)
-                                colIndex++
-                            }
-                            else -> {
-                                // Cell occupied by an area not starting here, or area without child
-                                if (!isAreaStart && templateAreas.grid.getOrNull(rowIndex)?.getOrNull(colIndex) != ".") {
-                                    // Skip cells that are continuations of areas
-                                    colIndex++
-                                } else {
-                                    Box(modifier = Modifier.weight(1f))
-                                    colIndex++
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Extract grid-template-areas from properties using the GridExtractor.
-     */
-    private fun extractGridTemplateAreas(properties: List<IRProperty>): GridTemplateAreas? {
-        val propertyPairs = properties.map { it.type to it.data }
-        val config = GridExtractor.extractGridConfig(propertyPairs)
-        return config.templateAreas
-    }
-
-    /**
-     * Extract grid-area name from a child's properties.
-     */
-    private fun extractChildAreaName(properties: List<IRProperty>): String? {
-        properties.forEach { prop ->
-            if (prop.type == "GridArea") {
-                return when (val data = prop.data) {
-                    is JsonPrimitive -> data.contentOrNull?.trim()?.takeIf {
-                        it.isNotEmpty() && it.all { c -> c.isLetterOrDigit() || c == '-' || c == '_' }
-                    }
-                    is JsonObject -> data["name"]?.jsonPrimitive?.contentOrNull
-                        ?: data["value"]?.jsonPrimitive?.contentOrNull
-                    else -> null
-                }
-            }
-        }
-        return null
-    }
+    // NOTE (wave 5): RenderGridWithTemplateAreas + extractGridTemplateAreas +
+    // extractChildAreaName were DELETED here. The branch keyed child lookup
+    // on a "GridArea" IR type the converter never emits (grid-area expands
+    // to grid-row-start in GridAreaExpander), rendered every child as an
+    // empty weighted cell, and was unreachable for the v2 areas wire anyway.
+    // Named-area placement now flows through resolvePlacementSpec/placeItems
+    // above, matching the browser's §8.3/§8.5 semantics pixel-for-pixel.
 
     /**
      * Get content alignment from justify-self and align-self values.

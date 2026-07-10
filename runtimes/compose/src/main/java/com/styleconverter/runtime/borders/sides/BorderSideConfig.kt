@@ -12,7 +12,15 @@ data class BorderSideConfig(
     val color: Color? = null,
     val style: LineStyle? = null
 ) {
-    val hasBorder: Boolean get() = width != null && width.value > 0 && style != LineStyle.NONE
+    // CSS 2.1 §8.5.3 / css-backgrounds-3 §3.2: border-style's initial value
+    // is `none`, and a side whose style is none/hidden/ABSENT has a USED
+    // border-width of 0 — it neither paints nor consumes layout space.
+    // The old predicate treated a null (absent) style as bordered, so
+    // `border-inline-end-width: 6px` alone painted a 6px solid band and
+    // inset the content while web painted nothing (PW_Borders_Layout_03's
+    // green box lost its right 6px, A-w 0.9438 after the float fix).
+    val hasBorder: Boolean get() = width != null && width.value > 0 &&
+        style != null && style != LineStyle.NONE && style != LineStyle.HIDDEN
 }
 
 /**

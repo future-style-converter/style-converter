@@ -101,6 +101,18 @@ enum SizeApplierResolve {
         return false
     }
 
+    // True ONLY for the `min-content` keyword (wave 5). Unlike max/fit-
+    // content — where SwiftUI's ideal size (single-line text) matches —
+    // min-content means "wrap at every soft-wrap opportunity" (css-
+    // sizing-3 §4): the applier emulates it by proposing width 0 via
+    // MinContentWidthLayout instead of `.fixedSize` (which produced the
+    // MAX-content width — PW_Sizing_Spacing_02 rendered one wide line
+    // while web wrapped to the longest word).
+    static func isMinContent(_ v: LengthValue?) -> Bool {
+        guard let v = v, case .intrinsic(.minContent) = v else { return false }
+        return true
+    }
+
     // Extract the bound from `fit-content(<bound>)` for use as a
     // maxWidth / maxHeight clamp. Nil for non-fit-content shapes or
     // unbounded fit-content.

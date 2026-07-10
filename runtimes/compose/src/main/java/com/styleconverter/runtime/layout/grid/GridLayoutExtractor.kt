@@ -141,21 +141,40 @@ object GridLayoutExtractor {
     /** Expand a single track element into one or more Track-or-AdaptiveMarker. */
     private fun expandOne(json: JsonElement): List<Any> = when (json) {
         is JsonObject -> when {
-            // repeat(count, tracks) — count can be an Int (Number) or
-            // a keyword "auto-fill"/"auto-fit".
-            json["repeat"] != null -> expandRepeat(json["repeat"]!! as JsonObject)
-            // minmax(a, b)
+            // repeat(count, tracks). CANONICAL v2 wire (TrackSizeSerializer in
+            // the converter): {"repeat": <count LITERAL or "auto-fill"/"auto-fit">,
+            // "tracks": [<TrackSize>...]} — count and tracks are SIBLING keys on
+            // the SAME object. The old code hard-cast json["repeat"] to
+            // JsonObject expecting a nested {count, tracks} envelope; the wire's
+            // count literal (e.g. 4 for `repeat(4, 1fr)`) then threw
+            // ClassCastException and killed the whole render (pairs-01 lost
+            // 28/44 Android captures to PW_Background_Layout_01's inert
+            // `grid-template-rows: repeat(4, 1fr)`). We now pass the WHOLE
+            // object; expandRepeat handles both the canonical flat shape and
+            // the legacy nested one.
+            json["repeat"] != null -> expandRepeat(json)
+            // minmax(a, b). Canonical v2 wire is the FLAT {"min":…, "max":…}
+            // object (TrackSize.MinMax serializer) — the "minmax" wrapper key
+            // never ships but stays supported for the legacy fixtures.
             json["minmax"] != null -> {
                 val mm = json["minmax"] as JsonObject
                 val min = singleTrack(mm["min"]) ?: Track.Auto
                 val max = singleTrack(mm["max"]) ?: Track.Auto
                 listOf(Track.MinMax(min, max))
             }
-            // fit-content(limit) — limit is either a primitive (px number)
+            json["min"] != null && json["max"] != null -> {
+                val min = singleTrack(json["min"]) ?: Track.Auto
+                val max = singleTrack(json["max"]) ?: Track.Auto
+                listOf(Track.MinMax(min, max))
+            }
+            // fit-content(limit) — canonical v2 wire key is "fit"
+            // (TrackSize.FitContent serializer: {"fit": <IRLength>}); the
+            // "fitContent"/"fit-content" spellings never ship but remain for
+            // legacy compatibility. Limit is either a primitive (px number)
             // or an object {px: N}. Check object first because JsonPrimitive
             // access on an object throws.
-            json["fitContent"] != null || json["fit-content"] != null -> {
-                val limitJson = json["fitContent"] ?: json["fit-content"]!!
+            json["fit"] != null || json["fitContent"] != null || json["fit-content"] != null -> {
+                val limitJson = json["fit"] ?: json["fitContent"] ?: json["fit-content"]!!
                 val px = when (limitJson) {
                     is JsonObject -> limitJson["px"]?.jsonPrimitive?.floatOrNull ?: 0f
                     is JsonPrimitive -> limitJson.floatOrNull ?: 0f
@@ -165,13 +184,27 @@ object GridLayoutExtractor {
             }
             else -> listOfNotNull(singleTrack(json))
         }
-        is JsonPrimitive -> listOfNotNull(singleTrackFromString(json.content))
+        // Bare NUMBER primitives are percentages on the wire (IRPercentage
+        // serializes as a raw number, mirroring the web engine's trackSize()
+        // "bare number → %" rule); only STRING primitives carry px/fr text.
+        is JsonPrimitive ->
+            if (!json.isString && json.floatOrNull != null) listOf(Track.Percent(json.floatOrNull!!))
+            else listOfNotNull(singleTrackFromString(json.content))
         else -> emptyList()
     }
 
-    /** Expand {repeat: {count, tracks}}. */
-    private fun expandRepeat(repeat: JsonObject): List<Any> {
-        val countElem = repeat["count"]
+    /**
+     * Expand a repeat() carrier object into its repetitions.
+     * [obj] is the WHOLE track object. Two accepted shapes:
+     *   - canonical v2 wire: {"repeat": <count>, "tracks": [...]} (flat)
+     *   - legacy nested:     {"repeat": {"count": <count>, "tracks": [...]}}
+     */
+    private fun expandRepeat(obj: JsonObject): List<Any> {
+        // Nested legacy envelope → unwrap; canonical wire → the object itself
+        // carries count under "repeat" and tracks as a sibling.
+        val nested = obj["repeat"] as? JsonObject
+        val repeat = nested ?: obj
+        val countElem = if (nested != null) nested["count"] else obj["repeat"]
         val tracksElem = repeat["tracks"]
             ?: return emptyList() // TODO: log; shouldn't happen with our parser
         // Parse the inner track list once — every repetition is a copy.

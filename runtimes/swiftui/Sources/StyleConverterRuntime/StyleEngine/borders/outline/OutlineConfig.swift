@@ -19,7 +19,13 @@ import SwiftUI
 struct OutlineConfig: Equatable {
     // `outline-width`. Keywords (`thin|medium|thick`) pre-resolve to px
     // in the CSS parser so this always ends up numeric.
-    var width: CGFloat = 0
+    // Wave 5: the initial value is MEDIUM = 3px (css-ui-4 §4.2), not 0 —
+    // `outline-style: groove` with no declared width must paint a 3px
+    // frame exactly like the browser (PW_Borders_Sizing_04: iOS painted
+    // NOTHING because width stayed 0 and hasOutline gated the applier).
+    // `outline-style: none` (the style initial) still suppresses painting
+    // via hasOutline, so width-less/style-less components are unaffected.
+    var width: CGFloat = 3
     // `outline-style`. Reuses the border style enum — outline and border
     // share the ten-keyword set per CSS Box 3 §2.4.
     var style: BorderStyleValue = .none

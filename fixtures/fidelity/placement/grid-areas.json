@@ -1,0 +1,107 @@
+{
+  "components": {
+    "PL_AreasCard": {
+      "properties": {
+        "width": "300px",
+        "display": "grid",
+        "gap": "6px",
+        "padding": "6px",
+        "background-color": "#1f2937",
+        "grid-template-columns": "80px 1fr",
+        "grid-template-rows": "40px 60px",
+        "grid-template-areas": "\"media title\" \"media body\""
+      },
+      "children": {
+        "media": {
+          "properties": {
+            "background-color": "#16a085",
+            "grid-area": "media"
+          }
+        },
+        "title": {
+          "properties": {
+            "background-color": "#e74c3c",
+            "grid-area": "title"
+          }
+        },
+        "body": {
+          "properties": {
+            "background-color": "#3498db",
+            "grid-area": "body"
+          }
+        }
+      }
+    },
+    "PL_AreasDecoupled": {
+      "properties": {
+        "width": "300px",
+        "display": "grid",
+        "gap": "6px",
+        "padding": "6px",
+        "background-color": "#1f2937",
+        "grid-template-columns": "1fr 1fr 1fr",
+        "grid-template-rows": "40px 40px",
+        "grid-template-areas": "\"head head head\" \"side main main\""
+      },
+      "children": {
+        "box1": {
+          "properties": {
+            "background-color": "#2ecc71",
+            "grid-area": "main"
+          }
+        },
+        "box2": {
+          "properties": {
+            "background-color": "#f39c12",
+            "grid-area": "head"
+          }
+        },
+        "box3": {
+          "properties": {
+            "background-color": "#9b59b6",
+            "grid-area": "side"
+          }
+        }
+      }
+    },
+    "PL_AreasDangling": {
+      "properties": {
+        "width": "300px",
+        "display": "grid",
+        "gap": "6px",
+        "padding": "6px",
+        "background-color": "#1f2937",
+        "grid-template-columns": "1fr 1fr",
+        "grid-template-rows": "40px 40px",
+        "grid-template-areas": "\"a a\" \"b c\""
+      },
+      "children": {
+        "a": {
+          "properties": {
+            "background-color": "#1abc9c",
+            "grid-area": "a"
+          }
+        },
+        "b": {
+          "properties": {
+            "background-color": "#e67e22",
+            "grid-area": "b"
+          }
+        },
+        "c": {
+          "properties": {
+            "background-color": "#16a085",
+            "grid-area": "c"
+          }
+        },
+        "ghost": {
+          "properties": {
+            "height": "30px",
+            "background-color": "#e74c3c",
+            "grid-area": "ghost"
+          }
+        }
+      }
+    }
+  }
+}

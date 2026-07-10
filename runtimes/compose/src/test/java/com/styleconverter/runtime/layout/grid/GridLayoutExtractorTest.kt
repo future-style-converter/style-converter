@@ -91,6 +91,65 @@ class GridLayoutExtractorTest {
         assertTrue(list.tracks.all { it == Track.Flexible(1f) })
     }
 
+    // ── Wave-5 crash pin: the CANONICAL v2 wire shapes ──────────────────
+    // TrackSizeSerializer emits {"repeat": <count LITERAL>, "tracks": […]}
+    // with count and tracks as SIBLINGS. The old extractor hard-cast the
+    // count literal to JsonObject → ClassCastException killed the whole
+    // Android render (pairs-01 lost 28/44 captures to
+    // PW_Background_Layout_01's inert `grid-template-rows: repeat(4,1fr)`).
+
+    @Test fun `canonical v2 repeat wire with literal count expands without crashing`() {
+        val e = GridLayoutExtractor.extract(listOf(
+            pair("GridTemplateRows", """[{"repeat":4,"tracks":[{"fr":1.0}]}]""")
+        ))
+        val list = e.templateRows as GridTrackList.Explicit
+        assertEquals(4, list.tracks.size)
+        assertTrue(list.tracks.all { it == Track.Flexible(1f) })
+    }
+
+    @Test fun `canonical v2 repeat auto-fill wire yields Adaptive`() {
+        // RepeatCountSerializer emits the keyword as a bare string literal.
+        val e = GridLayoutExtractor.extract(listOf(
+            pair("GridTemplateColumns", """[{"repeat":"auto-fill","tracks":[{"min":{"px":100.0},"max":{"fr":1.0}}]}]""")
+        ))
+        val a = e.templateColumns as GridTrackList.Adaptive
+        assertEquals(100f, a.minSize, 0.01f)
+        assertEquals(false, a.autoFit)
+    }
+
+    @Test fun `canonical v2 minmax wire is the flat min-max object`() {
+        // TrackSize.MinMax serializes as {"min":…, "max":…} — no wrapper key.
+        val e = GridLayoutExtractor.extract(listOf(
+            pair("GridTemplateColumns", """[{"min":{"px":80.0},"max":{"fr":1.0}}]""")
+        ))
+        val list = e.templateColumns as GridTrackList.Explicit
+        val mm = list.tracks[0] as Track.MinMax
+        assertEquals(Track.Fixed(80f), mm.min)
+        assertEquals(Track.Flexible(1f), mm.max)
+    }
+
+    @Test fun `canonical v2 fit-content wire key is fit`() {
+        // TrackSize.FitContent serializes as {"fit": <IRLength>} — the old
+        // fitContent/fit-content spellings never ship (silent-drop sibling
+        // of the repeat crash).
+        val e = GridLayoutExtractor.extract(listOf(
+            pair("GridTemplateColumns", """[{"fit":{"px":200.0}}]""")
+        ))
+        val list = e.templateColumns as GridTrackList.Explicit
+        assertEquals(Track.FitContent(200f), list.tracks[0])
+    }
+
+    @Test fun `bare number track is a percentage not pixels`() {
+        // IRPercentage serializes as a raw number; the web engine reads it
+        // as "%" (trackSize() bare-number rule) — Android must agree.
+        val e = GridLayoutExtractor.extract(listOf(
+            pair("GridTemplateColumns", """[25.0,50.0,25.0]""")
+        ))
+        val list = e.templateColumns as GridTrackList.Explicit
+        assertEquals(Track.Percent(25f), list.tracks[0])
+        assertEquals(Track.Percent(50f), list.tracks[1])
+    }
+
     @Test fun `repeat auto-fill minmax yields Adaptive`() {
         val e = GridLayoutExtractor.extract(listOf(
             pair("GridTemplateColumns", """[{"repeat":{"count":"auto-fill","tracks":[{"minmax":{"min":{"px":100.0},"max":{"fr":1.0}}}]}}]""")

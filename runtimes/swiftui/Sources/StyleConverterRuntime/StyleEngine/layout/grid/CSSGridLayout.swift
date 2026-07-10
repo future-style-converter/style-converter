@@ -51,6 +51,11 @@ struct CSSGridLayout: Layout {
     /// width) — fr/% tracks then split the proposal; false = fit-content
     /// sizing (hug the tracks) matching the web harness default.
     var definiteWidth: Bool
+    /// grid-template-areas rows (nil = no named areas). Used ONLY to
+    /// resolve arriving named-line claims (css-grid-1 §8.3) — the wave-5
+    /// fix that retired the child-name↔area-name matcher which dropped
+    /// unmatched children and duplicated one child per spanned cell.
+    var templateAreas: [[String]]? = nil
 
     /// Read each subview's grid claims from the placement channel.
     /// nil placement = ANONYMOUS item (the harness's leading `_text`
@@ -63,11 +68,21 @@ struct CSSGridLayout: Layout {
         var requests: [GridItemRequest] = []
         var justify: [GridItemAlign] = []
         var align: [GridItemAlign] = []
+        // Explicit row count for named/negative-line resolution: the
+        // longest of the row template and the template-areas rows —
+        // both contribute explicit tracks per css-grid-1 §7.1.
+        let explicitRows = max(rowTemplate?.count ?? 0, templateAreas?.count ?? 0)
         for sub in subviews {
             if let p = sub[ItemPlacementKey.self] {
                 // Component subview — consume the grid block only
                 // (design §2.2 resolution rule; other blocks are inert).
-                requests.append(p.grid.request)
+                // Named lines / negative indices resolve HERE, against
+                // this container's own template (§8.3) — the child only
+                // carries the raw claim.
+                requests.append(GridPlacer.resolveNames(p.grid.request,
+                                                        areas: templateAreas,
+                                                        columnCount: tracks.count,
+                                                        explicitRowCount: explicitRows))
                 justify.append(GridPlacer.resolveAlign(self: p.grid.justifySelf,
                                                        items: justifyItems))
                 align.append(GridPlacer.resolveAlign(self: p.grid.alignSelf,
@@ -93,7 +108,12 @@ struct CSSGridLayout: Layout {
         // Placement claims ride the subviews (v2 parent-data channel).
         let (reqs, justify, align) = claims(subviews)
         // Resolve cells via the pure placer.
-        let (cells, rowCount) = GridPlacer.assign(reqs, columnCount: tracks.count)
+        let (cells, placedRows) = GridPlacer.assign(reqs, columnCount: tracks.count)
+        // Explicit tracks always exist even when unoccupied (css-grid-1
+        // §7.1) — an area template's "." row still reserves its track,
+        // so the row count covers the full template, not just content.
+        let rowCount = max(placedRows,
+                           max(rowTemplate?.count ?? 0, templateAreas?.count ?? 0))
         // Max-content per column (span-1 items only, like Android).
         var maxContent = [CGFloat](repeating: 0, count: tracks.count)
         for (i, cell) in cells.enumerated() where cell.colSpan == 1 && cell.col < tracks.count {

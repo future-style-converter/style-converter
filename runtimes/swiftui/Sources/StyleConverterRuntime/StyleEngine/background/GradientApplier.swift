@@ -1,11 +1,29 @@
 //
 //  GradientApplier.swift
-//  StyleEngine/background — Phase 4.
+//  StyleEngine/background — Phase 4, reworked in fidelity wave 5.
 //
 //  Shared helpers that turn parsed BackgroundImageLayer values into
 //  SwiftUI gradient Views. Lives separately from BackgroundImageApplier
 //  because the layer-stacking logic alone is close to 200 lines; this
 //  file owns the "one layer → one View" conversion.
+//
+//  Wave-5 rework (all 9 pairwise gradient rows were flagged, 0.87–0.91):
+//    1. COLOUR SPACE — SwiftUI interpolates Gradient colours in a
+//       perceptual space (red→blue passes washed pink); CSS legacy
+//       gradients interpolate in plain sRGB (dark purple midtones,
+//       css-images-3 §3.4.3 / css-color-4 §12: legacy srgb space). We
+//       pre-subdivide every stop pair with sRGB-lerped micro-stops so
+//       SwiftUI's own ramp is pinned to the sRGB line.
+//    2. ANGLE GEOMETRY — endpoints were computed on a UNIT SQUARE, so
+//       any non-square box squashed the angle (45deg on a 200×80 box
+//       rendered ≈horizontal). The §3.1.1 endpoint math now runs in
+//       PIXEL space (gradient-line length |w·sinθ| + |h·cosθ|).
+//    3. REPEATING flavours routed to their base shape. The converter
+//       drops px stop positions (period-less), and a repeating gradient
+//       whose stops span the whole line is IDENTICAL to its plain
+//       counterpart — which is exactly what the web reference renders —
+//       but the old stub sent repeating-RADIAL through the vertical
+//       LINEAR path (PW_Background_Sizing_03, red→blue bars).
 //
 
 import SwiftUI
@@ -30,93 +48,123 @@ enum GradientApplier {
             return AnyView(radial(shape: shape, stops: stops, cx: cx, cy: cy))
         case .conic(let from, let stops, let cx, let cy):
             return AnyView(conic(fromDeg: from, stops: stops, cx: cx, cy: cy))
-        case .repeating(_, let angle, let stops):
-            // Stub: SwiftUI has no repeating-gradient primitive. We
-            // fall back to a single-pass gradient (same stops) so the
-            // layer still contributes colour and the rest of the stack
-            // composites cleanly. Documented limitation.
-            return AnyView(linear(angle: angle, stops: stops))
+        case .repeating(let kind, let angle, let stops):
+            // Wave 5: period-less repeating layers equal their plain base
+            // flavour (header note 3) — dispatch on the base kind.
+            switch kind {
+            case .radial: return AnyView(radial(shape: "circle", stops: stops,
+                                                cx: 0.5, cy: 0.5))
+            case .conic:  return AnyView(conic(fromDeg: angle, stops: stops,
+                                               cx: 0.5, cy: 0.5))
+            case .linear: return AnyView(linear(angle: angle, stops: stops))
+            }
         }
+    }
+
+    // ── Stop resolution (sRGB space, wave 5) ──────────────────────────
+
+    /// One resolved stop: concrete sRGB components + 0…1 location.
+    /// Internal (not private) so XCTest can pin the interpolation.
+    struct RGBAStop: Equatable {
+        var r: Double, g: Double, b: Double, a: Double
+        var loc: Double
+    }
+
+    /// Resolve declared stops to concrete sRGB + location pairs.
+    /// Position rules unchanged from Phase 4: declared 0…1 positions win;
+    /// nil positions fall back to an even spread over the stop count.
+    /// Dynamic/unknown colours resolve to transparent (same visual as the
+    /// old `.clear` fallback).
+    static func resolveStops(_ stops: [BackgroundImageStop]) -> [RGBAStop] {
+        let total = max(1, stops.count - 1)
+        return stops.enumerated().map { i, s in
+            // Static sRGB block or transparent fallback.
+            let (r, g, b, a): (Double, Double, Double, Double) = {
+                if case .srgb(let r, let g, let b, let a) = s.color {
+                    return (r, g, b, a)
+                }
+                return (0, 0, 0, 0)
+            }()
+            return RGBAStop(r: r, g: g, b: b, a: a,
+                            loc: s.position ?? (Double(i) / Double(total)))
+        }
+    }
+
+    /// Subdivide each adjacent stop pair with sRGB-lerped micro-stops so
+    /// SwiftUI's internal (perceptual) interpolation is constrained to
+    /// segments too small to drift off the CSS sRGB ramp (header note 1).
+    static func srgbSubdivided(_ stops: [RGBAStop],
+                               segments: Int = 12) -> [RGBAStop] {
+        // 0/1 stops have nothing to interpolate.
+        guard stops.count >= 2 else { return stops }
+        var out: [RGBAStop] = [stops[0]]
+        for i in 1..<stops.count {
+            let s0 = stops[i - 1], s1 = stops[i]
+            // Straight sRGB component lerp — the legacy CSS behaviour.
+            for k in 1...segments {
+                let t = Double(k) / Double(segments)
+                out.append(RGBAStop(r: s0.r + (s1.r - s0.r) * t,
+                                    g: s0.g + (s1.g - s0.g) * t,
+                                    b: s0.b + (s1.b - s0.b) * t,
+                                    a: s0.a + (s1.a - s0.a) * t,
+                                    loc: s0.loc + (s1.loc - s0.loc) * t))
+            }
+        }
+        return out
+    }
+
+    // Convert the CSS stop list to a SwiftUI Gradient on the sRGB ramp.
+    private static func toGradient(_ stops: [BackgroundImageStop]) -> Gradient {
+        let fine = srgbSubdivided(resolveStops(stops))
+        return Gradient(stops: fine.map {
+            // `Color(red:green:blue:opacity:)` is sRGB by default —
+            // matching the resolved component space.
+            Gradient.Stop(color: Color(red: $0.r, green: $0.g, blue: $0.b,
+                                       opacity: $0.a),
+                          location: CGFloat($0.loc))
+        })
     }
 
     // ── Linear ─────────────────────────────────────────────────────────
 
-    // Convert a CSS `background` list of stops to SwiftUI gradient stops.
-    // CSS 0% lives at the start, 100% at the end; nil positions let
-    // SwiftUI interpolate automatically so we just omit them.
-    private static func toGradient(_ stops: [BackgroundImageStop]) -> Gradient {
-        // Resolve every colour to a SwiftUI Color; fall back to clear
-        // when dynamic / unknown so downstream interpolation still works.
-        let resolved: [Gradient.Stop] = stops.map { s in
-            let color = s.color.toSwiftUIColor() ?? .clear
-            // Position nil → spread evenly: SwiftUI doesn't accept nil,
-            // so we use Gradient.Stop only when we have a position, and
-            // fall back to a plain `.init(colors:)` path when no stops
-            // had positions. But to keep a single Gradient type, we
-            // emit .init(colors:) when every position is nil.
-            return Gradient.Stop(color: color, location: CGFloat(s.position ?? -1))
-        }
-        // If every stop had nil (we coded as -1), use colors-only init.
-        if resolved.allSatisfy({ $0.location < 0 }) {
-            return Gradient(colors: resolved.map { $0.color })
-        }
-        // Otherwise we need real 0..1 locations. For nil entries we fall
-        // back to even distribution.
-        let total = max(1, stops.count - 1)
-        let withDefaults = stops.enumerated().map { (i, s) -> Gradient.Stop in
-            let c = s.color.toSwiftUIColor() ?? .clear
-            let loc = s.position ?? (Double(i) / Double(total))
-            return Gradient.Stop(color: c, location: CGFloat(loc))
-        }
-        return Gradient(stops: withDefaults)
-    }
-
-    // CSS angle (0deg = up) → SwiftUI (startPoint, endPoint) on a unit
-    // square. 0deg means gradient goes bottom→top in CSS; map to that.
-    private static func endpoints(forAngleDeg angle: Double) -> (UnitPoint, UnitPoint) {
-        // Normalise angle to [0, 360).
-        let a = ((angle.truncatingRemainder(dividingBy: 360)) + 360)
-                .truncatingRemainder(dividingBy: 360)
-        // Convert CSS convention (clockwise from north) to radians used
-        // by our vector math. North = -PI/2 in standard math.
-        let theta = (a - 90) * .pi / 180
-        // Unit-circle end point from centre (0.5, 0.5).
-        let dx = cos(theta) * 0.5
-        let dy = sin(theta) * 0.5
-        let start = UnitPoint(x: 0.5 - dx, y: 0.5 - dy)
-        let end   = UnitPoint(x: 0.5 + dx, y: 0.5 + dy)
-        return (start, end)
+    /// css-images-3 §3.1.1 endpoint math in PIXEL space (wave 5): the
+    /// gradient line passes through the box centre at CSS angle θ
+    /// (clockwise from north) with length |w·sinθ| + |h·cosθ| — the
+    /// perpendiculars through its endpoints touch the box corners.
+    /// Returned as UnitPoints for SwiftUI (may exceed 0…1 — fine).
+    /// Internal so XCTest pins the geometry.
+    static func linearEndpoints(angleDeg: Double,
+                                size: CGSize) -> (start: UnitPoint, end: UnitPoint) {
+        let rad = angleDeg * .pi / 180
+        let s = sin(rad), c = cos(rad)
+        let w = max(Double(size.width), 0.001)
+        let h = max(Double(size.height), 0.001)
+        // Gradient-line length in pixels (§3.1.1).
+        let len = abs(w * s) + abs(h * c)
+        // Direction unit vector in screen coords: 0deg → up = (0, −1).
+        let dx = s * len / 2, dy = -c * len / 2
+        return (UnitPoint(x: 0.5 - dx / w, y: 0.5 - dy / h),
+                UnitPoint(x: 0.5 + dx / w, y: 0.5 + dy / h))
     }
 
     // LinearGradient constructor. `angle` default per CSS spec = 180deg
-    // (i.e. to bottom, which means top→bottom direction).
+    // (to bottom). GeometryReader supplies the pixel box — inside the
+    // `.background` slot it is proposed exactly the element's size.
     private static func linear(angle: Double?, stops: [BackgroundImageStop]) -> some View {
-        let (s, e) = endpoints(forAngleDeg: angle ?? 180)
-        return LinearGradient(gradient: toGradient(stops),
-                              startPoint: s, endPoint: e)
+        GeometryReader { geo in
+            let (s, e) = linearEndpoints(angleDeg: angle ?? 180, size: geo.size)
+            LinearGradient(gradient: toGradient(stops), startPoint: s, endPoint: e)
+        }
     }
 
     // ── Radial ─────────────────────────────────────────────────────────
 
     // Radial fills from the centre out. Per CSS Images Module 3 §3.5
     // the default ending shape is `ellipse` and the default sizing is
-    // `farthest-corner`, which means the gradient line reaches the
-    // farthest corner of the box on each axis. The previous code hard-
-    // coded endRadius=200 which produced a tiny bounded circle on every
-    // element regardless of size — Audit_RadialEllipseClosestSide /
-    // _ConicFrom30degAt25 etc. all rendered a small disc instead of
-    // filling the box.
-    //
-    // We use GeometryReader to read the actual bounds, then for `circle`
-    // shape pick a single radius (max of half-width / half-height for the
-    // farthest-side default) and for the default `ellipse` we let
-    // RadialGradient fill the full element by passing endRadius equal to
-    // the diagonal half-length. Per-axis (rx ≠ ry) is faked by scaling
-    // the gradient view to box ratio so the SwiftUI radial — which is
-    // inherently circular against unit space — appears elliptical when
-    // stretched. closest-side / farthest-side keywords aren't carried in
-    // the iOS `radial(shape:)` config yet (see BackgroundImageLayer in
-    // BackgroundImageConfig.swift), so we honour shape only.
+    // `farthest-corner`. GeometryReader reads the actual bounds; for
+    // `circle` a single radius (half-diagonal ≈ farthest-corner), for
+    // the default `ellipse` the circular SwiftUI gradient is stretched
+    // to the box aspect via scaleEffect.
     private static func radial(shape: String?, stops: [BackgroundImageStop],
                                cx: Double, cy: Double) -> some View {
         let unitCenter = UnitPoint(x: cx, y: cy)
@@ -126,9 +174,6 @@ enum GradientApplier {
             // Half-diagonal — distance to the farthest corner from the
             // centre (closest match to CSS `farthest-corner` default).
             let halfDiag = sqrt(w * w + h * h) / 2
-            // For `circle` shape force a single radius equal to
-            // half-diagonal so the gradient stays circular regardless of
-            // box aspect ratio.
             if shape == "circle" {
                 RadialGradient(gradient: toGradient(stops),
                                center: unitCenter,
@@ -136,9 +181,8 @@ enum GradientApplier {
                                endRadius: halfDiag)
                     .frame(width: w, height: h)
             } else {
-                // Ellipse default — RadialGradient is intrinsically
-                // circular, so we render at the larger axis radius and
-                // stretch via .scaleEffect to match the box's aspect.
+                // Ellipse default — render at the larger axis radius and
+                // stretch to the box's aspect.
                 let r = max(w, h) / 2
                 RadialGradient(gradient: toGradient(stops),
                                center: unitCenter,
@@ -154,16 +198,8 @@ enum GradientApplier {
     // ── Conic ──────────────────────────────────────────────────────────
 
     // AngularGradient is SwiftUI's conic equivalent. CSS's `from <angle>`
-    // sets the starting position; we pass it through as the `angle`
-    // parameter (which controls where colour 0% lives).
-    //
-    // Fidelity wave 1 −90° offset: CSS `conic-gradient` starts at the
-    // TOP of the box (0deg = 12 o'clock, css-images-4 §2.3) while
-    // SwiftUI's AngularGradient measures its start angle from the
-    // trailing edge (0 = 3 o'clock). Without the offset every conic
-    // rendered rotated a quarter-turn clockwise — red pointed east
-    // instead of north on background/000_C01 while web/Android agreed
-    // on north.
+    // sets the starting position. The −90° offset maps CSS's 0deg-at-12-
+    // o'clock convention onto SwiftUI's trailing-edge zero (wave 1 fix).
     private static func conic(fromDeg: Double?, stops: [BackgroundImageStop],
                               cx: Double, cy: Double) -> some View {
         AngularGradient(gradient: toGradient(stops),

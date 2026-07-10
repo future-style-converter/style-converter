@@ -10,6 +10,7 @@ package com.styleconverter.runtime.sizing
 // min-content/max-content directly on a size modifier — we approximate with
 // wrapContentWidth/Height() which at least reads as "shrink to content".
 
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -122,10 +123,18 @@ object SizingApplier {
             m.width(resolveToDp(v, ctx))
         }
         is LengthValue.Intrinsic -> when (v.kind) {
-            // min-content/max-content: Compose approximation is wrapContentWidth,
-            // which shrinks to intrinsic content width.
-            LengthValue.IntrinsicKind.MIN_CONTENT,
-            LengthValue.IntrinsicKind.MAX_CONTENT -> m.wrapContentWidth()
+            // width: min-content → the box takes its MIN intrinsic width
+            // (css-sizing-3 §4: the narrowest width that avoids overflow —
+            // for text, the widest unbreakable run). Compose expresses this
+            // directly as Modifier.width(IntrinsicSize.Min). The previous
+            // wrapContentWidth() let content pick its PREFERRED width, so
+            // `width: min-content` rendered max-content-wide — web showed a
+            // letter-wrapped sliver while Android filled the line
+            // (PW_Sizing_Spacing_02, A-w 0.698 / 28.5% px).
+            LengthValue.IntrinsicKind.MIN_CONTENT -> m.width(IntrinsicSize.Min)
+            // width: max-content → MAX intrinsic width (no-wrap preferred
+            // size, css-sizing-3 §4).
+            LengthValue.IntrinsicKind.MAX_CONTENT -> m.width(IntrinsicSize.Max)
             // fit-content(<bound>): Compose has no direct analog; use the
             // bound as a max-width constraint which approximates "content,
             // but capped at bound".
@@ -147,8 +156,10 @@ object SizingApplier {
             m.height(resolveToDp(v, ctx))
         }
         is LengthValue.Intrinsic -> when (v.kind) {
-            LengthValue.IntrinsicKind.MIN_CONTENT,
-            LengthValue.IntrinsicKind.MAX_CONTENT -> m.wrapContentHeight()
+            // Block-axis mirror of the width branch: height(IntrinsicSize.*)
+            // gives the true min/max intrinsic content heights.
+            LengthValue.IntrinsicKind.MIN_CONTENT -> m.height(IntrinsicSize.Min)
+            LengthValue.IntrinsicKind.MAX_CONTENT -> m.height(IntrinsicSize.Max)
             LengthValue.IntrinsicKind.FIT_CONTENT -> {
                 val bound = v.bound?.let { resolveToDp(it, ctx) }
                 if (bound != null) m.heightIn(max = bound) else m.wrapContentHeight()

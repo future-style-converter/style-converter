@@ -97,6 +97,27 @@ public struct ComponentRenderer: View {
         (component.children ?? []).filter { Self.isOutOfFlow($0) }
     }
 
+    /// Wave 5 — NEGATIVE z-index positioned children (CSS 2.1 Appendix E
+    /// step 3: they paint BEFORE the in-flow content of their stacking
+    /// context, i.e. visually BEHIND this element's own background). The
+    /// overlay ZStack put them on top, so `z-index: -1` boxes showed
+    /// through the parent's opaque background where web hides them
+    /// (PL_ZNegative). They render via `.background` OUTSIDE the paint
+    /// chain instead — behind everything this element paints.
+    private var negativeZChildren: [IRComponent] {
+        outOfFlowChildren.filter {
+            (ItemPlacementExtractor.extract(from: $0.properties).paint.zIndex ?? 0) < 0
+        }
+    }
+
+    /// The overlay half of the split: positioned children with
+    /// non-negative z-index — Appendix E step 8, above in-flow content.
+    private var overlayChildren: [IRComponent] {
+        outOfFlowChildren.filter {
+            (ItemPlacementExtractor.extract(from: $0.properties).paint.zIndex ?? 0) >= 0
+        }
+    }
+
     // public: explicit memberwise init — the synthesized one is internal,
     // so cross-module callers need this spelled out.
     public init(component: IRComponent) {
@@ -150,10 +171,37 @@ public struct ComponentRenderer: View {
             // Phase 7 step 4: apply per-child positioning after container
             // selection so absolute/relative offsets stack on top of the
             // fully-styled element. Identity when position/zindex unset.
-            PositionApplier.apply(
-                AnyView(layoutContainer(style: style).applyStyle(style)),
+            // Wave 5: negative-z positioned children attach OUTSIDE the
+            // styled box via `.background` — SwiftUI paints an outer
+            // .background behind everything applied so far, which is
+            // exactly Appendix E step 3 (behind this element's own
+            // background). Their PositionApplier offsets anchor at the
+            // same top-leading origin the overlay uses.
+            let positioned = PositionApplier.apply(
+                negativeZChildren.isEmpty
+                    ? AnyView(layoutContainer(style: style).applyStyle(style))
+                    : AnyView(layoutContainer(style: style).applyStyle(style)
+                        .background(alignment: .topLeading) {
+                            ZStack(alignment: .topLeading) {
+                                positionedChildren(style: style,
+                                                   children: negativeZChildren)
+                            }
+                        }),
                 aggregate: style.layout7
             )
+            // Wave 5 — `float: right | inline-end` (LTR: both anchor to
+            // the containing block's right edge, CSS 2.1 §9.5.1 rule 1).
+            // The greedy frame claims the containing block's width and
+            // parks the styled box at its trailing edge — the harness-
+            // scale half of float semantics (no sibling wrap-around).
+            // left/inline-start floats already sit at the left edge in
+            // this block-flow renderer, so they need no wrap.
+            let fl = style.layout7?.float
+            if fl == .right || fl == .inlineEnd {
+                positioned.frame(maxWidth: .infinity, alignment: .topTrailing)
+            } else {
+                positioned
+            }
         }
     }
 
@@ -171,7 +219,10 @@ public struct ComponentRenderer: View {
         // corner. Previously ALL children shared one ZStack: in-flow
         // siblings collapsed onto each other and painted over the
         // absolute box (B_RelativeAnchor).
-        if outOfFlowChildren.isEmpty {
+        // Wave 5: only NON-negative z-index positioned children ride the
+        // overlay; negative-z ones attach behind the styled box in
+        // `body` (Appendix E step 3 vs step 8 split).
+        if overlayChildren.isEmpty {
             flowContainer(style: style)
         } else {
             ZStack(alignment: .topLeading) {
@@ -368,6 +419,17 @@ public struct ComponentRenderer: View {
     /// with absolute children; TODO when one does.
     @ViewBuilder
     private func absoluteOverlay(style: ComponentStyle) -> some View {
+        // Overlay half only — negative-z children paint behind the
+        // styled box via the `body` background split (wave 5).
+        positionedChildren(style: style, children: overlayChildren)
+    }
+
+    /// Shared renderer for positioned children — used by BOTH halves of
+    /// the wave-5 z-split (overlay ≥ 0, background < 0) so environment
+    /// resets stay identical.
+    @ViewBuilder
+    private func positionedChildren(style: ComponentStyle,
+                                    children: [IRComponent]) -> some View {
         // Inheritance flows into positioned children exactly like flow
         // children (css-cascade-4 — inheritance is by tree, not flow).
         let childInherited = InheritedText.inheritable(from: mergedProperties)
@@ -375,7 +437,7 @@ public struct ComponentRenderer: View {
         // positioned ancestor's box (content-box approximation — same
         // channel as flow children).
         let childCB = flexContentSize(style: style, vertical: false)
-        ForEach(Array(outOfFlowChildren.enumerated()), id: \.offset) { _, child in
+        ForEach(Array(children.enumerated()), id: \.offset) { _, child in
             // v2: children render through ComponentHost (placement
             // parent-data attached; inert here — the overlay ZStack
             // reads no layout values).
@@ -445,84 +507,43 @@ public struct ComponentRenderer: View {
                 contentOrPlaceholder(style: style)
             }
         case .grid:
-            // iOS 16+ Grid for template-areas grids. We emit one GridRow
-            // per template-areas row; each cell renders the first child
-            // whose grid-area name matches the cell. Unnamed cells ("."),
-            // or areas with no matching child, render as empty space.
-            // TODO: this is a pragmatic mapping — it doesn't yet handle
-            // spanned cells across adjacent rows (would need gridCellMerge).
-            templateAreasGrid(style: style, gap: gap)
+            // Template-areas grids (wave 5) — SAME CSSGridLayout engine
+            // as plain track-list grids. The old iOS 16 Grid/GridRow
+            // path matched children to cells BY NAME (child "box1" only
+            // rendered if an area was literally called "box1"): children
+            // whose name matched no area were DROPPED, and a child whose
+            // area spanned N cells rendered N duplicate copies. Instead,
+            // each child's own grid-area claim (a NAMED line riding
+            // ItemPlacement) is resolved against this template inside
+            // the Layout — browser-verified semantics in
+            // GridPlacer.resolveNames.
+            CSSGridLayout(
+                // Column tracks: explicit template wins; otherwise the
+                // area template's width defines that many auto columns
+                // (css-grid-1 §7.3: each column in the areas grammar
+                // creates an explicit auto track).
+                tracks: agg?.gridTemplateColumns?.tracks.map(\.kind)
+                    ?? Array(repeating: GridTrack.Kind.automatic,
+                             count: max(1, agg?.gridTemplateAreas?.map(\.count).max() ?? 1)),
+                // Row template / implicit-row sizing identical to the
+                // plain-grid path above.
+                rowTemplate: agg?.gridTemplateRows?.tracks.map(\.kind),
+                autoRows: agg?.gridAutoRows?.tracks.first?.kind,
+                justifyItems: agg?.justifyItems,
+                alignItems: agg?.alignItems,
+                rowGap: gap.row,
+                columnGap: gap.column,
+                definiteWidth: style.size.width != nil,
+                // The named-area map — consumed only by the claims
+                // resolver (css-grid-1 §8.3).
+                templateAreas: agg?.gridTemplateAreas
+            ) {
+                contentOrPlaceholder(style: style)
+            }
         default:
             // Fallback — vertical stack. Keeps the switch exhaustive.
             VStack(alignment: .leading, spacing: gap.row) {
                 contentOrPlaceholder(style: style)
-            }
-        }
-    }
-
-    /// Render a template-areas grid using iOS 16 Grid / GridRow. Each
-    /// IRComponent child with `grid-area: <name>` lands in every cell
-    /// whose area matches that name. Without a match the cell is a
-    /// transparent spacer so the track layout still resolves.
-    @ViewBuilder
-    private func templateAreasGrid(
-        style: ComponentStyle,
-        gap: (row: CGFloat, column: CGFloat)
-    ) -> some View {
-        let areas = style.layout7?.gridTemplateAreas ?? []
-        let children = component.children ?? []
-        // Precompute a (name → child) lookup so cell rendering is O(1).
-        // A child without an explicit grid-area falls back to its name
-        // field — matches the "children named after the area" pattern
-        // in grid-template-areas.json fixtures.
-        let byArea: [String: IRComponent] = Dictionary(
-            uniqueKeysWithValues: children.map { c -> (String, IRComponent) in
-                // Extract grid-area name from the child's IRProperty list.
-                for p in c.properties where p.type == "GridArea" {
-                    if let line = GridExtractor.parseGridLine(p.data),
-                       let n = line.name {
-                        return (n, c)
-                    }
-                }
-                // Fall back on the component's own name — test fixtures
-                // use matching names for areas + children.
-                return (c.name, c)
-            }
-        )
-        // Build the grid. `Grid` is iOS 16+ (matches deployment target).
-        Grid(horizontalSpacing: gap.column, verticalSpacing: gap.row) {
-            ForEach(Array(areas.enumerated()), id: \.offset) { _, row in
-                GridRow {
-                    ForEach(Array(row.enumerated()), id: \.offset) { _, cellName in
-                        if cellName == "." {
-                            // Empty cell — transparent placeholder keeps
-                            // track widths consistent.
-                            Color.clear
-                        } else if let child = byArea[cellName] {
-                            // v2: host-wrapped like every other child
-                            // (placement inert under SwiftUI Grid — this
-                            // legacy area path still matches by name;
-                            // TODO(v2): fold named areas into
-                            // CSSGridLayout claims and delete this).
-                            ComponentHost(component: child)
-                                // Text inheritance flows into area-placed
-                                // children the same as flow children.
-                                .environment(\.inheritedTextProperties,
-                                             InheritedText.inheritable(from: mergedProperties))
-                                // Wave 3: percent widths of area-placed
-                                // children resolve against the grid's
-                                // content box (grid-area basis would be
-                                // the track — content box is the close
-                                // static approximation).
-                                .environment(\.containingBlockWidth,
-                                             flexContentSize(style: style, vertical: false))
-                        } else {
-                            // Named but no matching child — still reserve
-                            // the cell so the grid stays rectangular.
-                            Color.clear
-                        }
-                    }
-                }
             }
         }
     }
@@ -550,9 +571,12 @@ public struct ComponentRenderer: View {
         // Wave 3: plan over IN-FLOW children only — absolute children
         // are not grid items (css-grid-1 §6) and render via the overlay.
         let rawChildren = inFlowChildren
+        // Wave 5: template-areas grids (.grid kind) now flow through the
+        // same CSSGridLayout, so they take the same stretch plan.
+        let kind = style.layout7.flatMap { GridApplier.containerKind(for: $0) }
         guard let parentAgg = style.layout7,
               parentAgg.display == .grid
-                || GridApplier.containerKind(for: parentAgg) == .lazyVGrid,
+                || kind == .lazyVGrid || kind == .grid,
               !rawChildren.isEmpty else { return nil }
         // Same ordering contentOrPlaceholder renders with (CSS `order`).
         let children = FlexboxApplier.sorted(rawChildren)
@@ -568,12 +592,23 @@ public struct ComponentRenderer: View {
             // The anonymous text item auto-places at the first free cell.
             requests.append(GridItemRequest())
         }
+        // Same template facts CSSGridLayout.claims() resolves against —
+        // keeping this simulation bit-identical to the Layout (wave 5:
+        // named lines + negative indices resolve before assignment).
+        let areas = parentAgg.gridTemplateAreas
+        let explicitRows = max(parentAgg.gridTemplateRows?.tracks.count ?? 0,
+                               areas?.count ?? 0)
+        let cols = parentAgg.gridTemplateColumns?.tracks.count
+            ?? max(1, areas?.map(\.count).max() ?? 1)
         for child in children {
             // The child's v2 placement claims — SAME extraction the
             // ComponentHost attaches, so this simulation and the
             // CSSGridLayout resolution can never drift.
             let claim = ItemPlacementExtractor.extract(from: child.properties)
-            requests.append(claim.grid.request)
+            requests.append(GridPlacer.resolveNames(claim.grid.request,
+                                                    areas: areas,
+                                                    columnCount: cols,
+                                                    explicitRowCount: explicitRows))
             // Stretch candidate: effective block-axis keyword is
             // stretch/normal/auto (the grid default) AND the child has
             // no explicit block size in the IR (css-align-3 §9 auto-size
@@ -585,22 +620,45 @@ public struct ComponentRenderer: View {
             let stretchy = effAlign == nil || effAlign == .stretch || effAlign == .normal
             stretchFlags.append(stretchy && !claim.explicitHeight)
         }
-        // Resolve stretch heights: the item's assigned row must be a
-        // FIXED template track (only then is the row height knowable
-        // before measurement — auto rows are content-sized and stretch
-        // to content is an identity).
+        // Resolve stretch heights: every row the item covers must be a
+        // statically-knowable FIXED track — a `grid-template-rows` px
+        // entry inside the template, or the `grid-auto-rows` px size for
+        // implicit rows (wave 5: the old plan handled only span-1 items
+        // inside the template, so LineNumbers items hugged 30px in 40px
+        // auto-rows and LineSpans `d` never covered its 2-row span).
         var stretchHeights: [Int: CGFloat] = [:]
-        if let rowTracks = parentAgg.gridTemplateRows?.tracks {
-            let cols = parentAgg.gridTemplateColumns?.tracks.count ?? 1
-            let (cells, _) = GridPlacer.assign(requests, columnCount: cols)
-            let offset = hasLeadingText ? 1 : 0
-            for i in 0..<children.count where stretchFlags[i] {
-                let cell = cells[i + offset]
-                // Only single-row items stretch to one track cleanly.
-                guard cell.rowSpan == 1, cell.row < rowTracks.count else { continue }
-                if case .fixed(let px) = rowTracks[cell.row].kind {
-                    stretchHeights[i] = px
+        let rowTracks = parentAgg.gridTemplateRows?.tracks
+        let autoRow = parentAgg.gridAutoRows?.tracks.first?.kind
+        // Row gap joins the summed tracks for multi-row spans — same
+        // resolver lane the container's own layout call uses.
+        let rowGapPx = GapApplier.resolve(style.spacing.gap,
+                                          context: style.spacing.context).row
+        let (cells, _) = GridPlacer.assign(requests, columnCount: cols)
+        let offset = hasLeadingText ? 1 : 0
+        for i in 0..<children.count where stretchFlags[i] {
+            let cell = cells[i + offset]
+            // Sum the fixed heights of every covered row; bail on the
+            // first non-fixed one (content-sized rows stretch to content
+            // — an identity the paint chain already renders).
+            var total: CGFloat = 0
+            var allFixed = true
+            for r in cell.row..<(cell.row + cell.rowSpan) {
+                if let tpl = rowTracks, r < tpl.count {
+                    // Explicit template row — only a px literal is static.
+                    if case .fixed(let px) = tpl[r].kind { total += px }
+                    else { allFixed = false; break }
+                } else if case .fixed(let px)? = autoRow {
+                    // Implicit row — grid-auto-rows px size (§7.6).
+                    total += px
+                } else {
+                    allFixed = false; break
                 }
+            }
+            // Spanning items cover the (span−1) gaps too (css-align-3
+            // gutters are part of the spanned area, browser-verified:
+            // rows 3→5 of 36px tracks + 6px gap stretch to 78px).
+            if allFixed {
+                stretchHeights[i] = total + rowGapPx * CGFloat(cell.rowSpan - 1)
             }
         }
         return stretchHeights
@@ -915,12 +973,26 @@ public struct ComponentRenderer: View {
             // solid-colour foreground.
             let clipText: LinearGradient? = {
                 guard style.backgroundClip?.mode == .text else { return nil }
-                guard let layers = style.backgroundImage?.layers,
-                      let first = layers.first else { return nil }
-                if case .linear(_, let stops) = first {
+                if let layers = style.backgroundImage?.layers,
+                   let first = layers.first,
+                   case .linear(_, let stops) = first {
                     let colors = stops.compactMap { $0.color.toSwiftUIColor() ?? Color.clear }
-                    if colors.count < 2 { return nil }
-                    return LinearGradient(colors: colors,
+                    if colors.count >= 2 {
+                        return LinearGradient(colors: colors,
+                                              startPoint: .leading,
+                                              endPoint: .trailing)
+                    }
+                }
+                // Wave 5: a SOLID background-color clips to the glyphs
+                // too (css-backgrounds-4 §2.2) — the browser paints no
+                // rectangular box, just bg-coloured text
+                // (PW_Background_Effects_01: web shows a #3498db label
+                // on the bare canvas). StyleBuilder suppresses the rect
+                // paint; here the colour becomes the glyph fill via the
+                // same foregroundStyle path (a two-stop constant
+                // gradient keeps PlaceholderLabel's API unchanged).
+                if let bg = style.backgroundColor {
+                    return LinearGradient(colors: [bg, bg],
                                           startPoint: .leading,
                                           endPoint: .trailing)
                 }

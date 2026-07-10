@@ -30,6 +30,13 @@ struct SizeApplier: ViewModifier {
     // Threaded spacing context — we reuse it so em/rem/vw all resolve
     // through the same code path as Phase 2 spacing.
     let context: SpacingContext
+    // Wave 5 — resolved horizontal padding band (left + right, px).
+    // Only consumed by the min-content lane: the narrow proposal must
+    // reach the CONTENT, but `.padding` sits INSIDE this modifier and
+    // swallows the proposal first, so the layout proposes `inset + 1`
+    // to leave ~1px for the glyph run (0px makes SwiftUI text drop its
+    // glyphs entirely instead of wrapping per character).
+    var horizontalPadding: CGFloat = 0
 
     func body(content: Content) -> some View {
         // Fast path: nothing to apply.
@@ -60,7 +67,8 @@ struct SizeApplier: ViewModifier {
                                   config: config,
                                   context: context,
                                   parentW: context.containingBlockWidth,
-                                  parentH: CGFloat(context.viewportHeight))
+                                  parentH: CGFloat(context.viewportHeight),
+                                  horizontalPadding: horizontalPadding)
         )
     }
 }
@@ -75,7 +83,8 @@ enum SizeApplierMath {
                                      config c: SizeConfig,
                                      context ctx: SpacingContext,
                                      parentW: CGFloat,
-                                     parentH: CGFloat) -> AnyView {
+                                     parentH: CGFloat,
+                                     horizontalPadding: CGFloat = 0) -> AnyView {
         // Resolve each axis to a concrete CGFloat (or nil for
         // unresolvable / auto / none). We split width and height lanes
         // because SwiftUI's `.frame` builder wants both as paired args.
@@ -105,6 +114,15 @@ enum SizeApplierMath {
                                                        allowPercent: false) {
             maxH = maxH.map { min($0, bh) } ?? bh
         }
+
+        // Wave 5 — css-sizing-3 §5.2: when min > max, the MIN wins (the
+        // max is clamped up to it). SwiftUI's `.frame(minHeight: 80,
+        // maxHeight: 50)` is an INVALID frame (runtime warning,
+        // undefined layout) — PW_Sizing_Spacing_02 (`min-block-size:
+        // 80px; max-block-size: 50px`) collapsed to the raw content
+        // height instead of the CSS-resolved 80px.
+        if let mn = minW, let mx = maxW, mx < mn { maxW = mn }
+        if let mn = minH, let mx = maxH, mx < mn { maxH = mn }
 
         // Start unmodified and layer modifiers in CSS order: first the
         // min/max clamps (only attach if present), then exact width/height,
@@ -189,12 +207,27 @@ enum SizeApplierMath {
         // min-content / max-content / fit-content keywords; OR (b) the
         // axis has no exact width but does have min/max bounds (the new
         // CSS-cap case). Pure exact-width axes don't need fixedSize.
-        let fixH = SizeApplierResolve.wantsIntrinsic(c.width)
+        // Wave 5: `width: min-content` is NOT the ideal size — it's the
+        // narrowest wrap (css-sizing-3 §4). `.fixedSize` reports the
+        // single-line MAX-content width for text, so min-content boxes
+        // rendered one wide line while web wrapped at every word
+        // (PW_Sizing_Spacing_02). MinContentWidthLayout below proposes
+        // width 0 instead; exclude the keyword from the fixedSize lane.
+        let widthIsMin = SizeApplierResolve.isMinContent(c.width)
+        let fixH = (SizeApplierResolve.wantsIntrinsic(c.width) && !widthIsMin)
             || (c.width == nil && (minW != nil || maxW != nil))
         let fixV = SizeApplierResolve.wantsIntrinsic(c.height)
             || (c.height == nil && (minH != nil || maxH != nil))
         if fixH || fixV {
             out = AnyView(out.fixedSize(horizontal: fixH, vertical: fixV))
+        }
+        // min-content emulation — a zero-width proposal makes SwiftUI
+        // text wrap at every opportunity and report the longest-word
+        // width, exactly the CSS min-content measure.
+        if widthIsMin {
+            out = AnyView(MinContentWidthLayout(inset: horizontalPadding) {
+                out
+            })
         }
 
         // AspectRatio last — aspectRatio reinterprets any remaining
@@ -215,11 +248,55 @@ enum SizeApplierMath {
     }
 }
 
+// MARK: - min-content width emulation (fidelity wave 5)
+
+/// Proposes width 0 to its single child and adopts whatever size the
+/// child reports back — SwiftUI text under a zero-width proposal wraps
+/// at every soft-wrap opportunity and measures its longest word, which
+/// IS the CSS min-content inline size (css-sizing-3 §4). `.fixedSize`
+/// can't express this (it reports the IDEAL = max-content size), so
+/// `width: min-content` boxes rendered a single wide line on iOS while
+/// web/Android wrapped (PW_Sizing_Spacing_02, i-w 0.703).
+struct MinContentWidthLayout: Layout {
+    /// Horizontal padding band inside the wrapped chain — the proposal
+    /// must survive `.padding`'s subtraction so ~1px reaches the text.
+    var inset: CGFloat = 0
+
+    /// The narrowest proposal that still renders glyphs: the padding
+    /// band plus one pixel for the character column.
+    private var probe: CGFloat { inset + 1 }
+
+    /// Report the child's size under the narrow proposal. Height still
+    /// follows the container's proposal so explicit heights and
+    /// min/max clamps inside the child chain behave unchanged.
+    func sizeThatFits(proposal: ProposedViewSize,
+                      subviews: Subviews, cache: inout ()) -> CGSize {
+        guard let sub = subviews.first else { return .zero }
+        return sub.sizeThatFits(ProposedViewSize(width: probe,
+                                                 height: proposal.height))
+    }
+
+    /// Place the child at the size it measured under the narrow
+    /// proposal (re-proposing the CONCRETE measured size so the wrap
+    /// layout is reproduced at render time), anchored top-leading like
+    /// every other block box.
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize,
+                       subviews: Subviews, cache: inout ()) {
+        guard let sub = subviews.first else { return }
+        let sz = sub.sizeThatFits(ProposedViewSize(width: probe,
+                                                   height: proposal.height))
+        sub.place(at: bounds.origin, anchor: .topLeading,
+                  proposal: ProposedViewSize(sz))
+    }
+}
+
 // Thin View extension so StyleBuilder can chain `.engineSizing(cfg, ctx)`
 // without exposing the ViewModifier type at call-sites.
 extension View {
     func engineSizing(_ config: SizeConfig,
-                      context: SpacingContext) -> some View {
-        modifier(SizeApplier(config: config, context: context))
+                      context: SpacingContext,
+                      horizontalPadding: CGFloat = 0) -> some View {
+        modifier(SizeApplier(config: config, context: context,
+                             horizontalPadding: horizontalPadding))
     }
 }

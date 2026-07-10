@@ -1,0 +1,136 @@
+{
+  "components": {
+    "PL_FlexAlignOverride": {
+      "properties": {
+        "width": "320px",
+        "display": "flex",
+        "gap": "6px",
+        "padding": "6px",
+        "background-color": "#1f2937",
+        "height": "120px",
+        "flex-direction": "row",
+        "align-items": "flex-end"
+      },
+      "children": {
+        "a": {
+          "properties": {
+            "width": "50px",
+            "height": "30px",
+            "background-color": "#e74c3c",
+            "align-self": "flex-start"
+          }
+        },
+        "b": {
+          "properties": {
+            "width": "50px",
+            "height": "30px",
+            "background-color": "#3498db",
+            "align-self": "center"
+          }
+        },
+        "c": {
+          "properties": {
+            "width": "50px",
+            "background-color": "#2ecc71",
+            "align-self": "stretch"
+          }
+        },
+        "d": {
+          "properties": {
+            "width": "50px",
+            "height": "30px",
+            "background-color": "#f39c12"
+          }
+        }
+      }
+    },
+    "PL_GridJustifyOverride": {
+      "properties": {
+        "width": "300px",
+        "display": "grid",
+        "gap": "6px",
+        "padding": "6px",
+        "background-color": "#1f2937",
+        "grid-template-columns": "1fr 1fr",
+        "grid-auto-rows": "50px",
+        "justify-items": "center"
+      },
+      "children": {
+        "a": {
+          "properties": {
+            "width": "60px",
+            "height": "36px",
+            "background-color": "#9b59b6",
+            "justify-self": "start"
+          }
+        },
+        "b": {
+          "properties": {
+            "width": "60px",
+            "height": "36px",
+            "background-color": "#1abc9c",
+            "justify-self": "end"
+          }
+        },
+        "c": {
+          "properties": {
+            "height": "36px",
+            "background-color": "#e67e22",
+            "justify-self": "stretch"
+          }
+        },
+        "d": {
+          "properties": {
+            "width": "60px",
+            "height": "36px",
+            "background-color": "#16a085"
+          }
+        }
+      }
+    },
+    "PL_GridAlignOverride": {
+      "properties": {
+        "width": "300px",
+        "display": "grid",
+        "gap": "6px",
+        "padding": "6px",
+        "background-color": "#1f2937",
+        "grid-template-columns": "1fr 1fr",
+        "grid-template-rows": "60px 60px",
+        "align-items": "start"
+      },
+      "children": {
+        "a": {
+          "properties": {
+            "width": "60px",
+            "height": "24px",
+            "background-color": "#e74c3c",
+            "align-self": "end"
+          }
+        },
+        "b": {
+          "properties": {
+            "width": "60px",
+            "height": "24px",
+            "background-color": "#3498db",
+            "align-self": "center"
+          }
+        },
+        "c": {
+          "properties": {
+            "width": "60px",
+            "background-color": "#2ecc71",
+            "align-self": "stretch"
+          }
+        },
+        "d": {
+          "properties": {
+            "width": "60px",
+            "height": "24px",
+            "background-color": "#f39c12"
+          }
+        }
+      }
+    }
+  }
+}

@@ -44,13 +44,28 @@ object OutlineExtractor {
      * @return OutlineConfig with extracted outline properties.
      */
     fun extractOutlineConfig(properties: List<Pair<String, JsonElement?>>): OutlineConfig {
-        var config = OutlineConfig()
+        // css-ui-4 §4.3: the INITIAL outline-color is `currentColor` — the
+        // element's used `color`. The old Color.Black default painted a
+        // solid-black ring on every fixture that omitted outline-color,
+        // while the web reference (whose harness body sets `color: #eee`)
+        // painted light-gray 3D patterns — PW_Borders_Sizing_04 (groove, no
+        // color) sat at A-w 0.657 with all five outline-style variants
+        // wrong. Resolution order: explicit OutlineColor → the element's
+        // own `Color` property (inheritance already folded in by
+        // ComponentRenderer.mergeInherited) → the harness default #EEEEEE
+        // (apps/web-harness/index.html `body { color: #eee }`).
+        val currentColor = properties.firstOrNull { it.first == "Color" }
+            ?.second?.let { ValueExtractors.extractColor(it) }
+            ?: Color(0xFFEEEEEE)
+        var config = OutlineConfig(color = currentColor)
 
         for ((type, data) in properties) {
             config = when (type) {
                 "OutlineWidth" -> config.copy(width = extractWidth(data))
                 "OutlineStyle" -> config.copy(style = extractStyle(data))
-                "OutlineColor" -> config.copy(color = ValueExtractors.extractColor(data) ?: Color.Black)
+                // Unparseable outline-color (e.g. the {original:"currentColor"}
+                // dynamic carrier) falls back to currentColor, not black.
+                "OutlineColor" -> config.copy(color = ValueExtractors.extractColor(data) ?: currentColor)
                 "OutlineOffset" -> config.copy(offset = ValueExtractors.extractDp(data) ?: 0.dp)
                 else -> config
             }

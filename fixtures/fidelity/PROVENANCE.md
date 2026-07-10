@@ -20,6 +20,24 @@ the IR wire schema rejects unknown envelope keys (schema/spec/01-envelope.md), s
 `"_generated"` key inside fixtures would be a contract violation. Provenance lives
 here and in `manifest.json` instead.
 
+## Suites
+
+- `<category>.combos.json` — intra-category clusters + cross-category standard
+  recipes, 3–6 declarations per component.
+- `pairwise/pairs-NN.json` — category-PAIR components: all 66 unordered pairs of
+  the 12 visually-strongest categories (background, borders, color, effects,
+  images, layout, lists, shapes, sizing, spacing, transforms, typography),
+  4 components per pair, 2–3 harvested declarations from each side — hunts
+  cross-category interaction bugs single-category combos cannot reach.
+- `trees/*.json` — hand-designed parent→child templates (flex/grid/block flow +
+  inheritance), PRNG-colored leaves.
+- `placement/*.json` — IR v2 slot/placement contract stress: children carrying
+  explicit placement claims (grid-area names, line numbers + spans, order
+  permutations, align-self/justify-self overrides, z-index stacking among
+  absolutely-positioned siblings, mixed claimed+unclaimed auto-flow interleave,
+  and a dangling area claim). Authored CSS-side nested per
+  schema/spec/03-children.md; the converter flattens to the v2 flat+slot form.
+
 ## Inventory
 
 | file | kind | components | nodes |
@@ -55,6 +73,12 @@ here and in `manifest.json` instead.
 | `table.combos.json` | combos | 4 | 4 |
 | `transforms.combos.json` | combos | 6 | 6 |
 | `typography.combos.json` | combos | 25 | 25 |
+| `pairwise/pairs-01.json` | pairwise | 44 | 44 |
+| `pairwise/pairs-02.json` | pairwise | 44 | 44 |
+| `pairwise/pairs-03.json` | pairwise | 44 | 44 |
+| `pairwise/pairs-04.json` | pairwise | 44 | 44 |
+| `pairwise/pairs-05.json` | pairwise | 44 | 44 |
+| `pairwise/pairs-06.json` | pairwise | 44 | 44 |
 | `trees/flex-row.json` | tree | 4 | 17 |
 | `trees/flex-column.json` | tree | 4 | 17 |
 | `trees/grid-2col.json` | tree | 4 | 20 |
@@ -63,5 +87,11 @@ here and in `manifest.json` instead.
 | `trees/inheritance-typography.json` | tree | 4 | 12 |
 | `trees/nested-3level.json` | tree | 3 | 18 |
 | `trees/mixed-direction.json` | tree | 3 | 17 |
-| **total** | | **272** | **367** |
+| `placement/grid-areas.json` | placement | 3 | 13 |
+| `placement/grid-lines.json` | placement | 3 | 13 |
+| `placement/flex-order.json` | placement | 3 | 15 |
+| `placement/self-alignment.json` | placement | 3 | 15 |
+| `placement/z-stack.json` | placement | 3 | 11 |
+| `placement/mixed-claims.json` | placement | 3 | 18 |
+| **total** | | **554** | **716** |
 
