@@ -27,6 +27,14 @@ public struct ComponentRenderer: View {
     // height (an outer .frame can't reach the child's paint chain).
     @Environment(\.gridStretchHeight) private var gridStretchHeight
 
+    // Fidelity wave 2 — column-flex analogue of gridStretchHeight:
+    // css-flexbox-1 §8.3 stretch on the INLINE axis. A column-flex
+    // parent with a definite width publishes its content width here for
+    // children whose align resolves to stretch and whose width is auto;
+    // folded into SizeConfig below so the child's own paint chain
+    // (background/borders) covers the stretched width.
+    @Environment(\.flexStretchWidth) private var flexStretchWidth
+
     // Fidelity wave 1 — CSS text inheritance channel. The converter
     // flattens no cascade, so a parent's font-size/family/weight/
     // letter-spacing/text-align never reached child renders on iOS while
@@ -61,6 +69,12 @@ public struct ComponentRenderer: View {
             var s = StyleBuilder.build(from: mergedProperties)
             if let h = gridStretchHeight, s.size.height == nil {
                 s.size.height = .exact(px: h)
+            }
+            // Column-flex stretch (fidelity wave 2): same fold as the
+            // grid/row channel but on the inline axis. An explicit CSS
+            // width always wins (css-align-3 §9 auto-size precondition).
+            if let w = flexStretchWidth, s.size.width == nil {
+                s.size.width = .exact(px: w)
             }
             return s
         }()
@@ -148,22 +162,75 @@ public struct ComponentRenderer: View {
         } else {
         switch style.layout.display {
         case .flexRow:
-            // Empty flex containers: SwiftUI's HStack hugs content tight,
-            // but LazyVGrid (.grid case below) doesn't — same issue
-            // resolved for grids above. Empty flex doesn't expand by
-            // default, so the ordinary HStack path is fine here.
-            HStack(
-                alignment: style.layout.align.verticalAlignment,
-                spacing: gap.column
-            ) {
-                contentOrPlaceholder(style: style)
+            // Fidelity wave 2 — real CSS flexbox via CSSFlexLayout. The
+            // legacy HStack ignored flex-grow/shrink/basis (children
+            // stayed at intrinsic size, FR_GrowBasis/FR_ShrinkBasis),
+            // couldn't distribute justify-content free space, and never
+            // stretched an auto-height child (FR_AlignSelf `d`). The
+            // custom Layout implements css-flexbox-1 §8–§9 directly;
+            // per-child parameters ride the FlexItemSpec layout value
+            // attached in contentOrPlaceholder.
+            //
+            // BUT only when there ARE children (css-flexbox-1 §4: flex
+            // items are the container's in-flow children — an empty
+            // container has zero items, so align-items/justify-content
+            // have nothing to act on and its own box must not change).
+            // The harness's PlaceholderLabel is NOT CSS content: the web
+            // reference (apps/web-harness ComponentRenderer.tsx) rewrites
+            // display→block for childless flex/grid containers so the
+            // label lays out in normal block flow. Routing it through
+            // CSSFlexLayout made `align-items: center` vertically centre
+            // the label inside the declared height — the 055
+            // Flex_AlignCenter regression (baseline/web keep it at the
+            // top). Same guard as the empty-grid case below.
+            if hasChildren {
+                CSSFlexLayout(
+                    axis: .horizontal,
+                    reverse: style.layout7?.flexDirection == .rowReverse,
+                    justify: style.layout7?.justifyContent,
+                    alignItems: style.layout7?.alignItems,
+                    gap: gap.column,
+                    // Only an explicit CSS main/cross size lets the layout
+                    // flex against the proposal; otherwise it hugs content
+                    // exactly like the web harness's fit-content box.
+                    definiteMain: style.size.width != nil,
+                    definiteCross: style.size.height != nil
+                ) {
+                    contentOrPlaceholder(style: style)
+                }
+            } else {
+                // Childless flex → block path, exactly like the empty
+                // grid: the placeholder hugs top-leading and the outer
+                // style chain still paints the declared box (height /
+                // padding / background), matching web's display→block.
+                VStack(alignment: .leading, spacing: gap.row) {
+                    contentOrPlaceholder(style: style)
+                }
             }
         case .flexColumn:
-            VStack(
-                alignment: style.layout.align.horizontalAlignment,
-                spacing: gap.row
-            ) {
-                contentOrPlaceholder(style: style)
+            // Column axis: main = vertical. Same engine as .flexRow —
+            // this is what makes `justify-content: space-between`
+            // finally act in column direction (FC_SpaceBetween).
+            // Same childless guard as .flexRow above: zero flex items →
+            // block path so the placeholder is never aligned/justified.
+            if hasChildren {
+                CSSFlexLayout(
+                    axis: .vertical,
+                    reverse: style.layout7?.flexDirection == .columnReverse,
+                    justify: style.layout7?.justifyContent,
+                    alignItems: style.layout7?.alignItems,
+                    gap: gap.row,
+                    definiteMain: style.size.height != nil,
+                    definiteCross: style.size.width != nil
+                ) {
+                    contentOrPlaceholder(style: style)
+                }
+            } else {
+                // Web parity (display→block rewrite for empty containers);
+                // see the .flexRow comment for the full rationale.
+                VStack(alignment: .leading, spacing: gap.row) {
+                    contentOrPlaceholder(style: style)
+                }
             }
         case .grid:
             // Grid subset: render as an adaptive LazyVGrid with 2 columns
@@ -428,6 +495,105 @@ public struct ComponentRenderer: View {
                         align: align, stretchHeights: stretchHeights)
     }
 
+    // MARK: - Flex stretch geometry (fidelity wave 2)
+
+    /// Definite CONTENT size of a flex container on one axis: declared
+    /// border-box size minus the padding band and painted border widths
+    /// (CSS 2.1 §8.1 box model; the harness renders border-box). Nil when
+    /// the size is not declared/resolvable — indefinite containers
+    /// can't statically size children (depends on measurement; deferred).
+    private func flexContentSize(style: ComponentStyle, vertical: Bool) -> CGFloat? {
+        let ctx = style.spacing.context
+        // Declared size on the requested axis (percent heights degrade
+        // to auto, same rule as SizeApplier).
+        let raw: CGFloat? = vertical
+            ? SizeApplierResolve.exact(style.size.height, ctx: ctx,
+                                       parent: CGFloat(ctx.viewportHeight),
+                                       allowPercent: false)
+            : SizeApplierResolve.exact(style.size.width, ctx: ctx,
+                                       parent: CGFloat(ctx.viewportWidth) - 32)
+        guard var v = raw else { return nil }
+        // Padding band — same resolver lane as PaddingApplier so em/%
+        // agree with the painted inset. Horizontal axis subtracts the
+        // left/right band, vertical the top/bottom one.
+        if let p = style.spacing.padding {
+            func px(_ lv: LengthValue) -> CGFloat {
+                switch SpacingResolver.resolve(lv, ctx: ctx, isPadding: true) {
+                case .px(let n):      return n
+                case .percent(let f): return f * CGFloat(ctx.viewportWidth)
+                case .auto, .skip:    return 0
+                }
+            }
+            v -= vertical ? (px(p.top) + px(p.bottom)) : (px(p.left) + px(p.right))
+        }
+        // Painted border widths shrink the content box too.
+        if let b = style.borderSides {
+            func bw(_ s: BorderSideConfig) -> CGFloat {
+                s.hasBorder ? (s.effectiveWidth ?? 0) : 0
+            }
+            v -= vertical ? (bw(b.top) + bw(b.bottom)) : (bw(b.start) + bw(b.end))
+        }
+        return v > 0 ? v : nil
+    }
+
+    /// Static main-axis flex plan (fidelity wave 2). CSSFlexLayout places
+    /// children at their §9.7-resolved main sizes, but a flexed child's
+    /// own paint chain (background/border) still hugs its intrinsic size
+    /// — the resolved size has to be folded into the child's SizeConfig
+    /// the same way grid/flex stretch is (env injection). This pre-pass
+    /// re-runs the pure CSSFlexMath with statically-knowable inputs and
+    /// returns one main size per sorted child, or nil when any input is
+    /// dynamic (auto basis with no explicit main size, indefinite
+    /// container, anonymous leading text) — those fall back to the
+    /// Layout-only path where positions are right but paint hugs.
+    private func flexMainPlan(style: ComponentStyle,
+                              children: [IRComponent],
+                              column: Bool) -> [CGFloat]? {
+        // Definite main-axis content size or bail.
+        guard let available = flexContentSize(style: style, vertical: column)
+        else { return nil }
+        // A leading `_text` placeholder participates in the Layout as an
+        // extra item — index mapping would shift; no wave fixture mixes
+        // text with flexed children, so bail honestly.
+        guard component._text?.isEmpty != false else { return nil }
+        let ctx = style.spacing.context
+        // Main-axis gap through the same resolver as the container.
+        let g = GapApplier.resolve(style.spacing.gap, context: ctx)
+        let gap = column ? g.row : g.column
+        var items: [CSSFlexMath.ItemInput] = []
+        for child in children {
+            // Flex factors from the child's aggregate.
+            var a = LayoutAggregate()
+            FlexboxExtractor.extract(from: child.properties, into: &a)
+            let basisPx: CGFloat? = {
+                if case .px(let p)? = a.flexBasis { return p }
+                return nil
+            }()
+            // Explicit main size fallback (css-flexbox-1 §9.2.3.A —
+            // basis auto defers to the main-size property).
+            let cs = SizeExtractor.extract(from: child.properties)
+            let explicit: CGFloat? = column
+                ? SizeApplierResolve.exact(cs.height, ctx: ctx,
+                                           parent: CGFloat(ctx.viewportHeight),
+                                           allowPercent: false)
+                : SizeApplierResolve.exact(cs.width, ctx: ctx,
+                                           parent: CGFloat(ctx.viewportWidth) - 32)
+            // Content-derived basis (text measurement) is not statically
+            // knowable — bail to the dynamic path.
+            guard let basis = basisPx ?? explicit else { return nil }
+            // The web harness's 50×30 min floor applies per axis when
+            // the child declares nothing there (StyleBuilder.minFloor)
+            // — it clamps flexed sizes in the browser too (a browser
+            // min-width beats flex shrink/grow, §9.7 min violation).
+            let floor = StyleBuilder.minFloor(for: cs)
+            let minMain = (column ? floor.height : floor.width) ?? 0
+            items.append(.init(basis: basis, min: minMain,
+                               grow: CGFloat(a.flexGrow ?? 0),
+                               shrink: CGFloat(a.flexShrink ?? 1)))
+        }
+        return CSSFlexMath.mainSizes(items: items, available: available, gap: gap)
+    }
+
     // MARK: - Content
 
     @ViewBuilder
@@ -477,16 +643,67 @@ public struct ComponentRenderer: View {
             // from the MERGED list so grandparents' values ride through
             // parents that don't redeclare them (transitive cascade).
             let childInherited = InheritedText.inheritable(from: mergedProperties)
+            // Fidelity wave 2 — flex parents route through CSSFlexLayout
+            // (single-line) which consumes per-child FlexItemSpec layout
+            // values. FlowLayout (wrap) keeps the legacy FlexChildModifier.
+            let isWrapFlex = parentAgg?.flexWrap == .wrap
+                || parentAgg?.flexWrap == .wrapReverse
+            let isCSSFlex = parentAgg?.display == .flex && !isWrapFlex
+            // Column flex? Decides which axis counts as "cross" for the
+            // stretch checks below.
+            let isColumn = parentAgg?.flexDirection == .column
+                || parentAgg?.flexDirection == .columnReverse
+            // Definite cross-axis CONTENT size of this flex container —
+            // needed to stretch auto-cross-size children with painted
+            // backgrounds (css-flexbox-1 §8.3 / css-align-3 §9). Like the
+            // wave-1 grid fix, an outer .frame can't reach the child's
+            // paint chain, so the value is injected via the environment
+            // and folded into the child's own SizeConfig.
+            let flexLineCross: CGFloat? = isCSSFlex
+                ? flexContentSize(style: style, vertical: !isColumn)
+                : nil
+            // Static §9.7 main sizes for paint-chain injection (nil when
+            // any input is dynamic — Layout still positions correctly).
+            let flexMainSizes: [CGFloat]? = isCSSFlex
+                ? flexMainPlan(style: style, children: children, column: isColumn)
+                : nil
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
-                // Build the child's aggregate once so FlexChildModifier
-                // can read align-self / flex-basis / flex-grow without
-                // re-parsing. This is a duplicated pass over the child's
-                // property list, but it's cheap (string-compare loop).
+                // Build the child's aggregate once so FlexChildModifier /
+                // FlexItemSpec can read align-self / flex-basis / flex-grow
+                // without re-parsing. This is a duplicated pass over the
+                // child's property list, but it's cheap (string-compare loop).
                 let childAgg: LayoutAggregate? = {
                     guard parentAgg?.display == .flex else { return nil }
                     var a = LayoutAggregate()
                     FlexboxExtractor.extract(from: child.properties, into: &a)
                     return a.touched ? a : nil
+                }()
+                // Fidelity wave 2 — per-child flex spec for CSSFlexLayout.
+                // crossAuto mirrors css-flexbox-1 §8.3's stretch
+                // precondition: no explicit cross-axis size in the IR.
+                let crossAuto = !child.properties.contains {
+                    isColumn ? ($0.type == "Width" || $0.type == "InlineSize")
+                             : ($0.type == "Height" || $0.type == "BlockSize")
+                }
+                let spec = FlexItemSpec(
+                    grow: CGFloat(childAgg?.flexGrow ?? 0),
+                    shrink: CGFloat(childAgg?.flexShrink ?? 1),
+                    basisPx: {
+                        if case .px(let px)? = childAgg?.flexBasis { return px }
+                        return nil
+                    }(),
+                    alignSelf: childAgg?.alignSelf,
+                    crossAuto: crossAuto
+                )
+                // Stretch injection value: only when this child's resolved
+                // alignment is stretch AND its cross size is auto AND the
+                // container's cross content size is definite.
+                let flexStretch: CGFloat? = {
+                    guard isCSSFlex, crossAuto,
+                          CSSFlexMath.resolvedAlign(self: childAgg?.alignSelf,
+                                                    items: parentAgg?.alignItems) == .stretch
+                    else { return nil }
+                    return flexLineCross
                 }()
                 // Bug 2 list-marker — when the parent _tag is an ordered/
                 // unordered list and this child is an <li>, prepend a
@@ -504,24 +721,40 @@ public struct ComponentRenderer: View {
                     if isListItem && (parentTag == "ol" || parentTag == "ul") {
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
                             Text(parentTag == "ol" ? "\(index + 1)." : "•")
-                            if let ca = childAgg, let pa = parentAgg {
+                            if !isCSSFlex, let ca = childAgg, let pa = parentAgg {
                                 ComponentRenderer(component: child)
                                     .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
                             } else {
                                 ComponentRenderer(component: child)
                             }
                         }
+                    } else if isCSSFlex {
+                        // CSSFlexLayout parent — parameters ride the
+                        // layout value; the legacy frame-based child
+                        // modifier would fight the Layout's placement.
+                        ComponentRenderer(component: child)
+                            .flexItem(spec)
                     } else if let ca = childAgg, let pa = parentAgg {
+                        // FlowLayout (wrap) keeps the legacy decoration.
                         ComponentRenderer(component: child)
                             .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
                     } else {
                         ComponentRenderer(component: child)
                     }
                 }
-                // Grid stretch injection (css-align-3 §9) — the value is
-                // ALWAYS written (nil when not a stretching grid child)
-                // so the environment resets at every tree level.
-                .environment(\.gridStretchHeight, plan?.stretchHeights[index])
+                // Grid + flex size injection (css-align-3 §9 stretch and
+                // css-flexbox-1 §9.7 flexed main sizes) — the values are
+                // ALWAYS written (nil when nothing to inject) so the
+                // environment resets at every tree level. Height channel:
+                // grid row stretch, row-flex cross stretch, column-flex
+                // MAIN size. Width channel: column-flex cross stretch,
+                // row-flex MAIN size. The fold in `body` only fires when
+                // the child declared no explicit size on that axis.
+                .environment(\.gridStretchHeight,
+                             plan?.stretchHeights[index]
+                                ?? (isColumn ? flexMainSizes?[index] : flexStretch))
+                .environment(\.flexStretchWidth,
+                             isColumn ? flexStretch : flexMainSizes?[index])
                 // Text inheritance (css-cascade-4): publish this
                 // element's merged inheritable declarations for the
                 // child. Always written so each level's channel is
@@ -628,6 +861,12 @@ private struct PlaceholderLabel: View {
                 textView.foregroundColor(resolvedColor)
             }
         }
+            // Fidelity wave 2 — text-shadow paints behind the GLYPHS
+            // (css-text-decor-3 §4), so the `.shadow` chain attaches
+            // right here on the text, before any frame/background can
+            // widen the shadow caster. One call per CSS layer; SwiftUI
+            // radius is the gaussian σ ≈ CSS blur-radius / 2.
+            .modifier(GlyphShadows(layers: textConfig.shadows))
             .multilineTextAlignment(textConfig.textAlign)
             // No hard line cap — let the text wrap to fit the available
             // width and rely on the parent box's height to clip overflow.
@@ -637,8 +876,14 @@ private struct PlaceholderLabel: View {
             // wrapping behaves like web's natural overflow on
             // placeholder-only fixtures (Typography_TextShadow_*,
             // Typography_FontWeight_Boundary_1000 etc.).
+            //
+            // Fidelity wave 2 — horizontal is `noWrap` when white-space/
+            // text-wrap declared nowrap (css-text-4 §5.1): the run lays
+            // out on ONE line at full intrinsic width, overflowing the
+            // box to the right exactly like the web reference
+            // (Typography_C20/C21 previously wrapped to 2 lines).
             .lineLimit(nil)
-            .fixedSize(horizontal: false, vertical: true)
+            .fixedSize(horizontal: textConfig.noWrap, vertical: true)
             // CSS `line-height` — total line-box height. SwiftUI's
             // `.lineSpacing` adds EXTRA between lines, which is invisible
             // for a single-line placeholder. Force the text frame to be
@@ -650,12 +895,25 @@ private struct PlaceholderLabel: View {
             // fillWidth (fidelity wave 1): `maxWidth: .infinity` accepts
             // the parent's proposal so text-align has room to act; the
             // frame's horizontal alignment mirrors the CSS keyword
-            // (right → trailing, center → center). Vertical stays
-            // centred inside the line box exactly as before.
+            // (right → trailing, center → center).
+            //
+            // Fidelity wave 2 — minHeight is nil (NOT 0) when the IR set
+            // no line-height. Passing 0 made this frame ADOPT the parent
+            // height proposal (FrameLayout: a constrained axis clamps
+            // the proposal, not the child), so in a fixed-height box
+            // shorter than the wrapped text the frame shrank to the
+            // proposal and the `.center` alignment spilled glyphs ABOVE
+            // the box top — impossible in CSS block flow (Typography_C04
+            // /C19, Spacing_C08). The trailing `.fixedSize(vertical:)`
+            // pins the frame at its ideal (text) height so overflow now
+            // hangs BELOW the box like web/Android; `.center` remains
+            // only for the single-line half-leading case where the
+            // line box (minHeight) exceeds the glyph height.
             .frame(maxWidth: fillWidth ? .infinity : nil,
-                   minHeight: textConfig.lineHeight ?? 0,
+                   minHeight: textConfig.lineHeight,
                    alignment: Alignment(horizontal: fillHorizontal,
                                         vertical: .center))
+            .fixedSize(horizontal: false, vertical: true)
             .lineSpacing(max(0, (textConfig.lineHeight ?? 0) - (textConfig.fontSize ?? 16)))
             // CSS `text-indent` — push the text right by the indent
             // amount. SwiftUI lacks a first-line-only API, so we use
@@ -711,6 +969,11 @@ private struct PlaceholderLabel: View {
         }
         if let w = textConfig.fontWeight { f = f.weight(w) }
         if textConfig.fontItalic { f = f.italic() }
+        // Fidelity wave 2 — `font-variant-caps: small-caps` composes on
+        // the label's own font. The box-level FontMod can't reach this
+        // Text (a direct `.font` wins over container fonts, Apple docs),
+        // so the caps variant must be baked in here (Typography_C06).
+        if textConfig.smallCaps { f = f.smallCaps() }
         return f
     }
 
@@ -734,6 +997,26 @@ private struct PlaceholderLabel: View {
                 : Color(white: 0.93).opacity(0.7)
         }
         return Color(white: 0.93).opacity(0.7)
+    }
+}
+
+// MARK: - Glyph shadows (fidelity wave 2)
+
+/// Chains one `.shadow(...)` per CSS text-shadow layer directly on the
+/// glyph view (css-text-decor-3 §4 — the shadow caster is the text, not
+/// the element box). CSS blur-radius ≈ 2σ while SwiftUI's radius is the
+/// gaussian σ, hence the ÷2. Empty layer list → identity (no modifier).
+private struct GlyphShadows: ViewModifier {
+    /// CSS-ordered shadow layers bridged from TypographyAggregate.
+    let layers: [TextShadowLayer]
+    func body(content: Content) -> some View {
+        // Fold the layers left-to-right; later layers wrap the already-
+        // shadowed view which visually approximates CSS's painted-behind
+        // stacking for the small offsets the fixtures use.
+        layers.reduce(AnyView(content)) { acc, l in
+            AnyView(acc.shadow(color: l.color ?? .black.opacity(0.5),
+                               radius: l.radius / 2, x: l.x, y: l.y))
+        }
     }
 }
 

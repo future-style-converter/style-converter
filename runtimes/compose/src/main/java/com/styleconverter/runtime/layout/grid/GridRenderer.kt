@@ -179,10 +179,18 @@ object GridRenderer {
                             modifier = if (rowHeight != null) Modifier.fillMaxHeight() else Modifier,
                             contentAlignment = contentAlignment
                         ) {
-                            ComponentRenderer.RenderComponent(
-                                child,
-                                itemModifier = if (stretchHeight) Modifier.fillMaxHeight() else Modifier
-                            )
+                            // This cell already applied justify-self/align-self
+                            // as contentAlignment — suppress the block-level
+                            // self-alignment wrapper inside RenderComponent so
+                            // grid items don't double-align (css-align-3 §6).
+                            androidx.compose.runtime.CompositionLocalProvider(
+                                ComponentRenderer.LocalSelfAlignmentHandled provides true
+                            ) {
+                                ComponentRenderer.RenderComponent(
+                                    child,
+                                    itemModifier = if (stretchHeight) Modifier.fillMaxHeight() else Modifier
+                                )
+                            }
                         }
                     }
                 }
@@ -707,7 +715,13 @@ object GridRenderer {
                                     },
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    ComponentRenderer.RenderComponent(child)
+                                    // Same double-alignment suppression as the
+                                    // placed-cell branch above.
+                                    androidx.compose.runtime.CompositionLocalProvider(
+                                        ComponentRenderer.LocalSelfAlignmentHandled provides true
+                                    ) {
+                                        ComponentRenderer.RenderComponent(child)
+                                    }
                                 }
                                 colIndex += columnSpan
                             }

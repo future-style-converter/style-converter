@@ -90,19 +90,23 @@ class SizingExtractorTest {
 
     @Test fun `logical block-size uses raw px shape`() {
         // logical-sizing.json → BlockSize_100px emits {"px":100.0} directly.
+        // Wave-2: logical sizes FOLD into the physical slot (css-logical-1
+        // §1.1 cascades block-size together with height in horizontal-tb),
+        // so the value lands on `height`, not the vestigial `blockSize`.
         val cfg = SizingExtractor.extractSizingConfig(listOf(
             pair("BlockSize", """{"px":100.0}"""),
         ))
-        assertEquals(LengthValue.Exact(100.0), cfg.blockSize)
+        assertEquals(LengthValue.Exact(100.0), cfg.height)
     }
 
     @Test fun `logical inline-size bare number treated as percent`() {
         // Defensive: the IR emits bare numbers for percent on SizeValue shape
         // just like padding does. Verify the extractor routes to PERCENT.
+        // Wave-2: folded into the physical `width` slot (see above).
         val cfg = SizingExtractor.extractSizingConfig(listOf(
             pair("InlineSize", "25.0"),
         ))
-        assertEquals(LengthValue.Relative(25.0, LengthUnit.PERCENT, null), cfg.inlineSize)
+        assertEquals(LengthValue.Relative(25.0, LengthUnit.PERCENT, null), cfg.width)
     }
 
     @Test fun `aspect-ratio routes to extractAspectRatio`() {

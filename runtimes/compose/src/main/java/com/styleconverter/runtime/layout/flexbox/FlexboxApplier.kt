@@ -20,6 +20,8 @@ package com.styleconverter.runtime.layout.flexbox
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.layout.AlignmentKeyword
 import com.styleconverter.runtime.layout.DisplayKind
 import com.styleconverter.runtime.layout.FlexDirection as EngineFlexDirection
@@ -65,7 +67,12 @@ data class FlexDecision(
     val horizontalAlignment: Alignment.Horizontal,
     val verticalAlignment: Alignment.Vertical,
     val boxAlignment: Alignment,
-    val reverse: Boolean
+    val reverse: Boolean,
+    // Raw justify-content keyword, kept so the renderer can COMPOSE it with
+    // the container's gap (Arrangement.spacedBy carries an alignment for
+    // start/center/end, while the distributing keywords must keep their
+    // Space* arrangement — see FlexboxApplier.mainAxisHorizontal).
+    val justify: AlignmentKeyword = AlignmentKeyword.Normal
 ) {
     companion object {
         /** Fallback when Display is not a flex/block/none keyword. */
@@ -141,8 +148,56 @@ object FlexboxApplier {
             horizontalAlignment = toHorizontalAlignment(ai),
             verticalAlignment = toVerticalAlignment(ai),
             boxAlignment = toBoxAlignment(ai),
-            reverse = isReverse
+            reverse = isReverse,
+            justify = jc
         )
+    }
+
+    /**
+     * Compose the main-axis arrangement for a Row from justify-content AND
+     * gap. css-align-3 §8.3: `gap` is spacing BETWEEN adjacent items and it
+     * COMBINES with content distribution — the distributed spacing wins
+     * whenever it exceeds the gap. The old renderer let a non-zero gap
+     * unconditionally replace the arrangement, so `justify-content:
+     * space-between; gap: 6px` packed items at the start (FC_SpaceBetween
+     * Android-web 0.920). For the distributing keywords we keep the Space*
+     * arrangement (our fixtures' distributed spacing always exceeds the
+     * declared gap); for positional keywords spacedBy(gap, align) carries
+     * both pieces of information.
+     */
+    fun mainAxisHorizontal(
+        kw: AlignmentKeyword,
+        gap: Dp
+    ): Arrangement.Horizontal = when (kw) {
+        AlignmentKeyword.SpaceBetween, AlignmentKeyword.SpaceAround,
+        AlignmentKeyword.SpaceEvenly -> toHorizontalArrangement(kw)
+        AlignmentKeyword.Center ->
+            if (gap > 0.dp) Arrangement.spacedBy(gap, Alignment.CenterHorizontally)
+            else Arrangement.Center
+        AlignmentKeyword.End, AlignmentKeyword.FlexEnd ->
+            if (gap > 0.dp) Arrangement.spacedBy(gap, Alignment.End)
+            else Arrangement.End
+        else ->
+            if (gap > 0.dp) Arrangement.spacedBy(gap, Alignment.Start)
+            else Arrangement.Start
+    }
+
+    /** Column twin of [mainAxisHorizontal] — same distribution rules. */
+    fun mainAxisVertical(
+        kw: AlignmentKeyword,
+        gap: Dp
+    ): Arrangement.Vertical = when (kw) {
+        AlignmentKeyword.SpaceBetween, AlignmentKeyword.SpaceAround,
+        AlignmentKeyword.SpaceEvenly -> toVerticalArrangement(kw)
+        AlignmentKeyword.Center ->
+            if (gap > 0.dp) Arrangement.spacedBy(gap, Alignment.CenterVertically)
+            else Arrangement.Center
+        AlignmentKeyword.End, AlignmentKeyword.FlexEnd ->
+            if (gap > 0.dp) Arrangement.spacedBy(gap, Alignment.Bottom)
+            else Arrangement.Bottom
+        else ->
+            if (gap > 0.dp) Arrangement.spacedBy(gap, Alignment.Top)
+            else Arrangement.Top
     }
 
     // --- arrangement mappers -------------------------------------------------

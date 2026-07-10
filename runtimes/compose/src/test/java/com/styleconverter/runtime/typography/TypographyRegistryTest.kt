@@ -185,6 +185,16 @@ class TypographyRegistryTest {
         val badOwners = typographyProperties
             .mapNotNull { name -> PropertyRegistry.ownerOf(name)?.let { name to it } }
             .filter { (_, owner) -> owner !in validOwners }
+            // TextShadow is DUAL-claimed: its canonical IR file lives at
+            // irmodels/properties/effects/shadow/TextShadowProperty.kt, so
+            // ShadowExtractor legitimately registers it under
+            // "effects/shadow" while TypographyExtractor also claims it for
+            // the glyph-shadow path. PropertyRegistry is first-write-wins,
+            // so the reported owner depends on CLASS-LOAD ORDER across the
+            // test suite — either owner is correct here, and pinning one
+            // would make this test order-dependent (it flipped red the
+            // moment a wave-2 test loaded StyleApplier before this class).
+            .filter { (name, owner) -> !(name == "TextShadow" && owner == "effects/shadow") }
         assertTrue(
             "Typography properties with non-typography owners:\n" +
                 badOwners.joinToString("\n") { (n, o) -> "  - $n -> $o" },

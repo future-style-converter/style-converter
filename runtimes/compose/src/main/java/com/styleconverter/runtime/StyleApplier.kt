@@ -456,6 +456,18 @@ object StyleApplier {
         // 2. Transforms — rotate/scale/skew the entire element including bg
         result = TransformApplier.applyTransforms(result, config.transforms)
 
+        // 2.2 CSS Motion Path (css-motion-1). Only the static ray() case is
+        //     wired: it behaves like a whole-element transform (translate
+        //     anchor→ray start + rotate to the ray direction), so it chains
+        //     right after transforms. offset-distance / offset-anchor WITHOUT
+        //     an offset-path stay a no-op per spec ("offset-distance has no
+        //     effect when offset-path is none") — applyRayOffset guards on
+        //     the Ray variant so that invariant holds structurally.
+        if (config.offsetPath.offsetPath is com.styleconverter.runtime.layout.advanced.OffsetPathValue.Ray) {
+            result = com.styleconverter.runtime.layout.advanced.OffsetPathApplier
+                .applyRayOffset(result, config.offsetPath)
+        }
+
         // 2.5. Writing mode (vertical text, rotation)
         if (config.writingMode.hasWritingMode) {
             result = WritingModeApplier.applyWritingMode(result, config.writingMode)

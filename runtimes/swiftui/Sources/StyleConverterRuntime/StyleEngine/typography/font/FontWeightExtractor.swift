@@ -51,8 +51,14 @@ enum FontWeightExtractor {
             }()
             switch kw?.lowercased() {
             case "bold":    cfg.weight = .bold
-            case "bolder":  cfg.weight = .heavy
-            case "lighter": cfg.weight = .light
+            // Fidelity wave 2 — css-fonts-4 §2.2 relative-weight table:
+            // against the inherited default of 400, `bolder` computes to
+            // 700 (bold) and `lighter` to 100 (ultraLight). The converter
+            // flattens no cascade so 400 is always the inherited base for
+            // these fixtures; the old .heavy/.light picks over/under-shot
+            // the web reference (Typography_C08).
+            case "bolder":  cfg.weight = .bold
+            case "lighter": cfg.weight = .ultraLight
             case "normal":  cfg.weight = .regular
             default:        cfg.weight = nil   // unknown → inherit
             }

@@ -39,15 +39,23 @@ struct SizeApplier: ViewModifier {
         // intentionally do NOT use GeometryReader here because GR has
         // an expand-to-fill side-effect that inflates component card
         // heights in the screenshot harness — breaking byte-stable
-        // rendering on the existing baselines. The 390×844 canvas is
-        // the effective parent for top-level components; nested
-        // components would need a richer context, deferred to a later
-        // phase (there are no nested-percent cases in visual-test.json).
+        // rendering on the existing baselines. Nested components would
+        // need a richer context, deferred to a later phase.
+        //
+        // Fidelity wave 2 — the WIDTH percent basis is the containing
+        // block's CONTENT width, which in the capture harness is the
+        // canvas minus its 16px padding per side (390 − 32 = 358), NOT
+        // the raw 390 viewport (css-sizing-3 §5.1: percentages resolve
+        // against the containing block). The committed web baseline for
+        // Sizing_PercentWidth measures 179px = 50% × 358 while iOS
+        // rendered 195px = 50% × 390 (Sizing_C01_BlockSize right-edge
+        // band). Height keeps the viewport basis but percent heights
+        // are skipped anyway (allowPercent: false in the math).
         return AnyView(
             SizeApplierMath.apply(content,
                                   config: config,
                                   context: context,
-                                  parentW: CGFloat(context.viewportWidth),
+                                  parentW: CGFloat(context.viewportWidth) - 32,
                                   parentH: CGFloat(context.viewportHeight))
         )
     }

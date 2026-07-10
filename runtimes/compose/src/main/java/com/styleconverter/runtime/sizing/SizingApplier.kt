@@ -57,10 +57,30 @@ object SizingApplier {
         r = applyHeightIn(r, minHv, maxHv, ctx)
         // aspect-ratio. ratio=0.0 with isAuto means auto-only — skip modifier
         // and let Compose auto-size.
+        //
+        // css-sizing-4 §5.1: a preferred aspect ratio only takes effect when
+        // AT LEAST ONE of the two sizes is auto — with both width and height
+        // explicitly set, the ratio is ignored entirely. Compose's
+        // aspectRatio modifier doesn't know that rule and re-measured the
+        // box to 180×101 on Spacing_C01_AspectRatio (`width:180; height:150;
+        // aspect-ratio:16/9`) while web/iOS kept the declared 180×150
+        // (Android-web 0.806). Skip the modifier when both axes are pinned.
         config.aspectRatio?.let { ar ->
-            if (ar.ratio > 0.0) r = r.aspectRatio(ar.ratio.toFloat())
+            if (ar.ratio > 0.0 && !(isDefiniteAxis(rawW) && isDefiniteAxis(rawH))) {
+                r = r.aspectRatio(ar.ratio.toFloat())
+            }
         }
         return r
+    }
+
+    /**
+     * True when a size slot pins its axis (any value that produces a size
+     * modifier above). `auto` / `none` / absent / unresolvable-calc leave
+     * the axis auto — those are the cases where aspect-ratio may act.
+     */
+    private fun isDefiniteAxis(v: LengthValue?): Boolean = when (v) {
+        is LengthValue.Exact, is LengthValue.Relative, is LengthValue.Intrinsic -> true
+        else -> false
     }
 
     /**

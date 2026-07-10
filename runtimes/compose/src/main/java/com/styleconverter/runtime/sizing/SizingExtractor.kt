@@ -39,26 +39,28 @@ object SizingExtractor {
         var cfg = SizingConfig()
         // Walk once, dispatch per property. Last occurrence wins (matches CSS
         // cascade for same-specificity rules).
+        //
+        // Logical properties FOLD INTO the physical slots: css-logical-1 §1.1
+        // cascades `inline-size` together with `width` (in the harness's
+        // horizontal-tb LTR writing mode they are the same computed
+        // property), so whichever is declared LAST must win. The previous
+        // per-slot storage plus the applier's `width ?: inlineSize` made
+        // physical ALWAYS win — Sizing_BoxModel's later `inline-size: 250px`
+        // lost to the earlier `width: 240px`, and `block-size: auto` never
+        // overrode `height: 48px` (Android box 240×48 vs web's 250×60).
+        // The dedicated logical slots stay null; they remain on the config
+        // only as wire-compat for external readers.
         for ((type, data) in properties) {
             if (type !in PROPERTIES) continue
             cfg = when (type) {
-                // Physical sizing. extractLength handles WidthValue shape +
-                // the new None/fit-content extensions for min/max.
-                "Width" -> cfg.copy(width = asSize(data))
-                "Height" -> cfg.copy(height = asSize(data))
-                "MinWidth" -> cfg.copy(minWidth = asSize(data))
-                "MaxWidth" -> cfg.copy(maxWidth = asSize(data))
-                "MinHeight" -> cfg.copy(minHeight = asSize(data))
-                "MaxHeight" -> cfg.copy(maxHeight = asSize(data))
-                // Logical sizing. Same extractLength path: SizeValue shape is
-                // either a raw IRLength ({"px":N}), a bare number (percent),
-                // or an intrinsic keyword — all already handled by Phase 2.
-                "BlockSize" -> cfg.copy(blockSize = asSize(data))
-                "InlineSize" -> cfg.copy(inlineSize = asSize(data))
-                "MinBlockSize" -> cfg.copy(minBlockSize = asSize(data))
-                "MaxBlockSize" -> cfg.copy(maxBlockSize = asSize(data))
-                "MinInlineSize" -> cfg.copy(minInlineSize = asSize(data))
-                "MaxInlineSize" -> cfg.copy(maxInlineSize = asSize(data))
+                // Inline axis (width in horizontal-tb).
+                "Width", "InlineSize" -> cfg.copy(width = asSize(data))
+                "MinWidth", "MinInlineSize" -> cfg.copy(minWidth = asSize(data))
+                "MaxWidth", "MaxInlineSize" -> cfg.copy(maxWidth = asSize(data))
+                // Block axis (height in horizontal-tb).
+                "Height", "BlockSize" -> cfg.copy(height = asSize(data))
+                "MinHeight", "MinBlockSize" -> cfg.copy(minHeight = asSize(data))
+                "MaxHeight", "MaxBlockSize" -> cfg.copy(maxHeight = asSize(data))
                 // AspectRatio uses its own wire shape.
                 "AspectRatio" -> cfg.copy(aspectRatio = extractAspectRatio(data))
                 else -> cfg

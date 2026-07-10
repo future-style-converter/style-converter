@@ -37,24 +37,31 @@ enum PaddingExtractor {
         // not we return nil so the caller can skip the PaddingApplier.
         var touched = false
 
-        // Linear scan — property count per component is O(tens), so no
-        // need for a dict lookup. Order of appearance is not significant:
-        // logical longhands already resolve to physical at convert time.
+        // Fidelity wave 2 — LOGICAL WINS OVER PHYSICAL, regardless of
+        // declaration order, mirroring the web reference: the web
+        // PaddingApplier emits physical sides first and logical last
+        // into the React style object, so in the browser's CSSOM a
+        // logical longhand always overrides a physical one targeting
+        // the same edge (same rule as MarginExtractor / Spacing_C03).
+        // Two passes: physical first, then logical overrides. LTR-TB
+        // writing-mode assumed; block=top/bottom, inline=left/right.
         for prop in properties {
-            // Resolve each property-type to the right side. We assume LTR
-            // writing-mode; block=top/bottom, inline=left/right.
             switch prop.type {
-            case "PaddingTop", "PaddingBlockStart":
-                cfg.top = extractLengthPercentDefault(prop.data); touched = true
-            case "PaddingRight", "PaddingInlineEnd":
-                cfg.right = extractLengthPercentDefault(prop.data); touched = true
-            case "PaddingBottom", "PaddingBlockEnd":
-                cfg.bottom = extractLengthPercentDefault(prop.data); touched = true
-            case "PaddingLeft", "PaddingInlineStart":
-                cfg.left = extractLengthPercentDefault(prop.data); touched = true
-            default:
-                // Not a padding longhand — skip silently.
-                break
+            case "PaddingTop":    cfg.top    = extractLengthPercentDefault(prop.data); touched = true
+            case "PaddingRight":  cfg.right  = extractLengthPercentDefault(prop.data); touched = true
+            case "PaddingBottom": cfg.bottom = extractLengthPercentDefault(prop.data); touched = true
+            case "PaddingLeft":   cfg.left   = extractLengthPercentDefault(prop.data); touched = true
+            default: break // not a physical padding longhand
+            }
+        }
+        // Second pass — logical longhands override the physical edge.
+        for prop in properties {
+            switch prop.type {
+            case "PaddingBlockStart":  cfg.top    = extractLengthPercentDefault(prop.data); touched = true
+            case "PaddingInlineEnd":   cfg.right  = extractLengthPercentDefault(prop.data); touched = true
+            case "PaddingBlockEnd":    cfg.bottom = extractLengthPercentDefault(prop.data); touched = true
+            case "PaddingInlineStart": cfg.left   = extractLengthPercentDefault(prop.data); touched = true
+            default: break // not a logical padding longhand
             }
         }
 

@@ -85,6 +85,20 @@ struct TextConfig {
     // pairs than a more invasive NSAttributedString-based renderer
     // would risk regressing).
     var textIndentPx: CGFloat?    = nil
+    // Fidelity wave 2 — `white-space: nowrap` / `text-wrap: nowrap`
+    // (css-text-4 §5.1). PlaceholderLabel maps true to
+    // `.fixedSize(horizontal: true)` so the glyph run never soft-wraps.
+    var noWrap: Bool              = false
+    // Fidelity wave 2 — `font-variant-caps: small-caps` bridged from the
+    // typography aggregate. Must live here because PlaceholderLabel sets
+    // `.font(...)` DIRECTLY on its Text (which overrides any container-
+    // level font from TypographyApplier), so the caps variant has to be
+    // composed into that font.
+    var smallCaps: Bool           = false
+    // Fidelity wave 2 — text-shadow layers applied at the GLYPH level
+    // (css-text-decor-3 §4). One `.shadow(...)` per layer chains onto
+    // the label's Text; the old box-level shadow haloed the container.
+    var shadows: [TextShadowLayer] = []
 }
 
 struct EffectConfig {
@@ -158,6 +172,11 @@ struct ComponentStyle {
     var visibility: VisibilityConfig?    = nil
     var filter:     FilterConfig?        = nil
     var mask:       MaskConfig?          = nil
+
+    // Fidelity wave 2 — CSS Motion Path (offset-path/-position/-rotate/
+    // -distance). Nil when absent or the path shape isn't renderable;
+    // MotionOffsetApplier is identity in that case.
+    var motionOffset: MotionOffsetConfig? = nil
 }
 
 // MARK: - Builder
@@ -242,6 +261,10 @@ enum StyleBuilder {
         s.visibility = VisibilityExtractor.extract(from: properties)
         s.filter     = FilterExtractor.extract(from: properties)
         s.mask       = MaskExtractor.extract(from: properties)
+        // Fidelity wave 2 — CSS Motion Path family (motion-1). Extracted
+        // here so the applier can translate/rotate the finished box the
+        // way the web reference offsets it (Layout_C14_OffsetPath).
+        s.motionOffset = MotionOffsetExtractor.extract(from: properties)
         // CSS 2.1 §11.1.2 — the legacy `clip` property "applies to:
         // absolutely positioned elements" ONLY. On a static/relative
         // element web ignores `clip: rect(...)` entirely; iOS used to
@@ -282,6 +305,13 @@ enum StyleBuilder {
             if let a = agg.textAlign       { s.text.textAlign = a }
             s.text.underline = s.text.underline || agg.underline
             s.text.strikethrough = s.text.strikethrough || agg.strikethrough
+            // Fidelity wave 2 bridges — PlaceholderLabel builds its own
+            // Text, so glyph-level state must ride TextConfig:
+            // nowrap (css-text-4 §5.1), small-caps (css-fonts-4 §6.6),
+            // and per-layer text-shadow (css-text-decor-3 §4).
+            s.text.noWrap = agg.noWrap
+            s.text.smallCaps = agg.smallCaps
+            s.text.shadows = agg.textShadowLayers
             // Generic-family bridge. Ordering mirrors FontMod.design(for:):
             // rounded > monospaced > serif > default. PlaceholderLabel uses
             // this to call `.system(size:design:)` so the design survives
@@ -655,6 +685,13 @@ extension View {
             .engineFilter(style.filter)
             .engineClipPath(style.clipPath)
             .engineTransforms(style.transforms)
+            // Fidelity wave 2 — CSS Motion Path (motion-1 §4). Composes
+            // after the transform family, mirroring the css-transforms-2
+            // matrix order (transform → offset in the accumulated
+            // matrix; the wave fixtures never combine both, so the
+            // relative order is currently unobservable).
+            .engineMotionOffset(style.motionOffset, size: style.size,
+                                context: style.spacing.context)
             .engineVisibility(style.visibility)
             .modifier(EffectsModifier(effect: style.effect))
             .engineSpacingMargin(style.spacing.margin, context: style.spacing.context)
