@@ -14,6 +14,11 @@ export * from './core/colors';
 // StyleBuilder — the top-level IRProperty[] → CSSStyles dispatcher
 export * from './core/renderer';
 
+// Renderer surface (issue #41) — DocumentRenderer/NodeRenderer, the
+// Composer (slot refs → tree), the sourceTag element policy, the
+// stylesheet-lifecycle hook, and the RendererOptions calibration types.
+export * from './renderer';
+
 // PropertyRegistry — migrated-property set used for coverage introspection
 export * from './engine/PropertyRegistry';
 

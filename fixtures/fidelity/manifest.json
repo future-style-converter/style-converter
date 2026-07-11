@@ -2202,6 +2202,32 @@
       ]
     },
     {
+      "path": "fixtures/fidelity/trees/inheritance-extended.json",
+      "kind": "tree",
+      "categories": [
+        "borders",
+        "color",
+        "spacing",
+        "typography"
+      ],
+      "components": 5,
+      "nodes": 16,
+      "bytes": 3388,
+      "properties": [
+        "background-color",
+        "border",
+        "color",
+        "font-size",
+        "height",
+        "margin-bottom",
+        "outline",
+        "overflow-wrap",
+        "padding",
+        "text-shadow",
+        "width"
+      ]
+    },
+    {
       "path": "fixtures/fidelity/trees/nested-3level.json",
       "kind": "tree",
       "categories": [
@@ -2678,8 +2704,8 @@
     }
   ],
   "totals": {
-    "files": 59,
-    "components": 592,
-    "nodes": 775
+    "files": 60,
+    "components": 597,
+    "nodes": 791
   }
 }

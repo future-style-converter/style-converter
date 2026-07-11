@@ -128,4 +128,66 @@ class ColorExtractorTest {
         ))
         assertEquals(0.5f, cfg.opacity)
     }
+
+    // ---- wave 9: per-layer comma lists (css-backgrounds-3 §2.3) -------------
+
+    @Test fun `BackgroundSize two-layer list extracts both entries in order`() {
+        // Verbatim `--to ir` for `background-size: 50px 25px, 30px 30px`.
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundSize",
+                "[{\"w\":{\"px\":50.0},\"h\":{\"px\":25.0}},{\"w\":{\"px\":30.0},\"h\":{\"px\":30.0}}]")
+        ))
+        assertEquals(2, cfg.backgroundSizes.size)
+        val first = cfg.backgroundSizes[0] as BackgroundSizeConfig.Dimensions
+        assertEquals(50.dp, first.width)
+        assertEquals(25.dp, first.height)
+        val second = cfg.backgroundSizes[1] as BackgroundSizeConfig.Dimensions
+        assertEquals(30.dp, second.width)
+        // Legacy single field still carries the FIRST layer.
+        assertEquals(first, cfg.backgroundSize)
+    }
+
+    @Test fun `BackgroundRepeat space round two-axis survives per-layer`() {
+        // `background-repeat: space round` (Background_C03) — the flat enum
+        // could never express this pair; the axes list can.
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundRepeat", "[{\"x\":\"space\",\"y\":\"round\"}]")
+        ))
+        assertEquals(1, cfg.backgroundRepeats.size)
+        assertEquals(AxisRepeat.SPACE, cfg.backgroundRepeats[0].x)
+        assertEquals(AxisRepeat.ROUND, cfg.backgroundRepeats[0].y)
+    }
+
+    @Test fun `BackgroundRepeat keyword list expands each layer per spec`() {
+        // `background-repeat: repeat-x, no-repeat` → layer 0 (repeat,
+        // no-repeat), layer 1 (no-repeat, no-repeat) — §3.7 expansion.
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundRepeat", "[\"repeat-x\",\"no-repeat\"]")
+        ))
+        assertEquals(2, cfg.backgroundRepeats.size)
+        assertEquals(BackgroundRepeatAxes(AxisRepeat.REPEAT, AxisRepeat.NO_REPEAT), cfg.backgroundRepeats[0])
+        assertEquals(BackgroundRepeatAxes(AxisRepeat.NO_REPEAT, AxisRepeat.NO_REPEAT), cfg.backgroundRepeats[1])
+    }
+
+    @Test fun `BackgroundPositionX length px lands as a Dp offset`() {
+        // `background-position-x: 20px` ships {"type":"length","px":20} —
+        // previously dropped; now a raw edge offset (fraction stays 0).
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundPositionX", "{\"type\":\"length\",\"px\":20.0}")
+        ))
+        assertEquals(0f, cfg.backgroundPosition.x)
+        assertEquals(20.dp, cfg.backgroundPosition.xOffset)
+    }
+
+    @Test fun `layerValue cycles a short list and skips an empty one`() {
+        // §2.3: "if a property has fewer values than background-image, the
+        // list is repeated" — index 2 of a 2-list wraps to entry 0.
+        val sizes = listOf<BackgroundSizeConfig>(
+            BackgroundSizeConfig.Cover, BackgroundSizeConfig.Contain
+        )
+        assertEquals(BackgroundSizeConfig.Cover, ColorApplier.layerValue(sizes, 0))
+        assertEquals(BackgroundSizeConfig.Contain, ColorApplier.layerValue(sizes, 1))
+        assertEquals(BackgroundSizeConfig.Cover, ColorApplier.layerValue(sizes, 2))
+        assertEquals(null, ColorApplier.layerValue(emptyList<BackgroundSizeConfig>(), 0))
+    }
 }

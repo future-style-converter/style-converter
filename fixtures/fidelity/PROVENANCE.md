@@ -113,6 +113,7 @@ here and in `manifest.json` instead.
 | `trees/block-flow.json` | tree | 4 | 12 |
 | `trees/inheritance-color.json` | tree | 4 | 12 |
 | `trees/inheritance-typography.json` | tree | 4 | 12 |
+| `trees/inheritance-extended.json` | tree | 5 | 16 |
 | `trees/nested-3level.json` | tree | 3 | 18 |
 | `trees/mixed-direction.json` | tree | 3 | 17 |
 | `placement/grid-areas.json` | placement | 3 | 13 |
@@ -129,5 +130,5 @@ here and in `manifest.json` instead.
 | `dynamic/dark-mode.json` | dynamic | 4 | 4 |
 | `motion/keyframes-basic.json` | motion | 8 | 8 |
 | `motion/transitions.json` | motion | 4 | 4 |
-| **total** | | **592** | **775** |
+| **total** | | **597** | **791** |
 

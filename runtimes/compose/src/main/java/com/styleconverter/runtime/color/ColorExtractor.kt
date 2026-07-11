@@ -59,6 +59,11 @@ object ColorExtractor {
         var backgroundPosition = BackgroundPositionConfig()
         var backgroundSize: BackgroundSizeConfig = BackgroundSizeConfig.Auto
         var backgroundRepeat = BackgroundRepeatConfig.REPEAT
+        // Per-layer comma lists (css-backgrounds-3 §2.3): source-order
+        // entries pairing with backgroundImages by index. The single fields
+        // above keep carrying the FIRST entry for legacy readers.
+        var backgroundSizes: List<BackgroundSizeConfig> = emptyList()
+        var backgroundRepeats: List<BackgroundRepeatAxes> = emptyList()
         var backgroundAttachment = BackgroundAttachment.SCROLL
         // CSS `background-clip: text` masks the bg-image to glyph
         // shapes — Compose paints the gradient via TextStyle.brush in
@@ -120,8 +125,16 @@ object ColorExtractor {
                     }
                     backgroundPosition = extractBackgroundPosition(data, backgroundPosition, mappedType)
                 }
-                "BackgroundSize" -> backgroundSize = extractBackgroundSize(data)
-                "BackgroundRepeat" -> backgroundRepeat = extractBackgroundRepeat(data)
+                "BackgroundSize" -> {
+                    // Full per-layer list first; the single legacy field
+                    // stays the first layer so older readers keep working.
+                    backgroundSizes = extractBackgroundSizeLayers(data)
+                    backgroundSize = backgroundSizes.firstOrNull() ?: BackgroundSizeConfig.Auto
+                }
+                "BackgroundRepeat" -> {
+                    backgroundRepeats = extractBackgroundRepeatLayers(data)
+                    backgroundRepeat = extractBackgroundRepeat(data)
+                }
                 "BackgroundAttachment" -> backgroundAttachment = extractBackgroundAttachment(data)
             }
         }
@@ -164,6 +177,8 @@ object ColorExtractor {
             backgroundPosition = backgroundPosition,
             backgroundSize = backgroundSize,
             backgroundRepeat = backgroundRepeat,
+            backgroundSizes = backgroundSizes,
+            backgroundRepeats = backgroundRepeats,
             backgroundAttachment = backgroundAttachment,
             suppressBackgroundImage = suppressBackgroundImage,
             backgroundBlendModes = backgroundBlendModes,
@@ -385,9 +400,6 @@ object ColorExtractor {
                     }
                     "percentage" -> data["percentage"]?.jsonPrimitive?.floatOrNull?.div(100f)
                         ?: data["value"]?.jsonPrimitive?.floatOrNull?.div(100f)
-                    // For "length" with absolute px, we can't convert to fraction
-                    // without knowing the element size — fall through and let
-                    // the legacy x/y reader handle it below, or leave unchanged.
                     else -> null
                 }
                 if (fraction != null) {
@@ -395,6 +407,23 @@ object ColorExtractor {
                         "BackgroundPositionX" -> current.copy(x = fraction)
                         "BackgroundPositionY" -> current.copy(y = fraction)
                         else -> BackgroundPositionConfig(fraction, fraction)
+                    }
+                }
+                // Absolute px position (css-backgrounds-3 §3.6: a <length>
+                // offsets the tile edge from the box edge, independent of
+                // the box size). Carried as a Dp offset with fraction 0 —
+                // ColorApplier adds `xOffset/yOffset` to the free-space ×
+                // fraction anchor, so `background-position-x: 20px` lands
+                // the tile 20px from the left. Previously length values
+                // were silently dropped here.
+                if (tag == "length") {
+                    val px = ValueExtractors.extractDp(data)
+                    if (px != null) {
+                        return when (type) {
+                            "BackgroundPositionX" -> current.copy(x = 0f, xOffset = px)
+                            "BackgroundPositionY" -> current.copy(y = 0f, yOffset = px)
+                            else -> current.copy(x = 0f, y = 0f, xOffset = px, yOffset = px)
+                        }
                     }
                 }
                 // Legacy object with {x, y} as percentages — retained for safety.
@@ -425,7 +454,25 @@ object ColorExtractor {
             is JsonArray -> data.firstOrNull() ?: return BackgroundSizeConfig.Auto
             else -> data
         }
+        return parseBackgroundSizeEntry(entry)
+    }
 
+    /**
+     * Extract the FULL per-layer background-size list. Each array element
+     * is one comma-separated CSS entry in source order (css-backgrounds-3
+     * §2.3 pairs entry i with background-image layer i; the applier cycles
+     * a shorter list). Bare non-array data = a one-entry list.
+     */
+    fun extractBackgroundSizeLayers(data: JsonElement?): List<BackgroundSizeConfig> {
+        if (data == null) return emptyList()
+        return when (data) {
+            is JsonArray -> data.map { parseBackgroundSizeEntry(it) }
+            else -> listOf(parseBackgroundSizeEntry(data))
+        }
+    }
+
+    /** Parse ONE background-size layer entry (keyword or w/h object). */
+    private fun parseBackgroundSizeEntry(entry: JsonElement): BackgroundSizeConfig {
         when (entry) {
             is JsonPrimitive -> {
                 return when (entry.contentOrNull?.lowercase()) {
@@ -533,6 +580,43 @@ object ColorExtractor {
             "space" -> BackgroundRepeatConfig.SPACE
             "round" -> BackgroundRepeatConfig.ROUND
             else -> BackgroundRepeatConfig.REPEAT
+        }
+    }
+
+    /**
+     * Extract the FULL per-layer background-repeat list as two-axis values.
+     * Each array element is one comma-separated CSS entry:
+     *   "space"                       → space space (single-keyword expand)
+     *   {"x": "space", "y": "round"}  → the §3.7 two-value syntax verbatim
+     * This is the shape that finally represents `background-repeat:
+     * space round` (Background_C03) — the flat enum can't.
+     */
+    fun extractBackgroundRepeatLayers(data: JsonElement?): List<BackgroundRepeatAxes> {
+        if (data == null) return emptyList()
+        val entries: List<JsonElement> = when (data) {
+            is JsonArray -> data.toList()
+            else -> listOf(data)
+        }
+        return entries.map { entry ->
+            when (entry) {
+                // Two-axis object → parse each axis keyword directly.
+                is JsonObject -> {
+                    val x = entry["x"]?.jsonPrimitive?.contentOrNull
+                    val y = entry["y"]?.jsonPrimitive?.contentOrNull
+                    if (x != null || y != null) {
+                        BackgroundRepeatAxes(
+                            x = BackgroundRepeatAxes.axisOf(x),
+                            y = BackgroundRepeatAxes.axisOf(y)
+                        )
+                    } else {
+                        // Keyword-envelope object ({"type": "..."}) — expand
+                        // the single keyword like the primitive branch.
+                        BackgroundRepeatAxes.from(extractBackgroundRepeat(entry))
+                    }
+                }
+                // Single keyword → §3.7 expansion (repeat-x ≡ repeat no-repeat …).
+                else -> BackgroundRepeatAxes.from(extractBackgroundRepeat(entry))
+            }
         }
     }
 

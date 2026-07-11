@@ -1,0 +1,141 @@
+{
+  "components": {
+    "IE_CurrentColorBorder": {
+      "properties": {
+        "width": "280px",
+        "padding": "10px",
+        "color": "#8e44ad",
+        "background-color": "#f4ecf7"
+      },
+      "children": {
+        "mid": {
+          "properties": {
+            "padding": "8px",
+            "background-color": "#ffffff"
+          },
+          "children": {
+            "plain": {
+              "properties": {
+                "width": "120px",
+                "height": "36px",
+                "border": "3px solid",
+                "margin-bottom": "8px"
+              }
+            },
+            "redeclared": {
+              "properties": {
+                "width": "120px",
+                "height": "36px",
+                "color": "#16a085",
+                "border": "3px solid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "IE_CurrentColorOutline": {
+      "properties": {
+        "width": "280px",
+        "padding": "14px",
+        "color": "#c0392b",
+        "background-color": "#fdf2e9"
+      },
+      "children": {
+        "plain": {
+          "properties": {
+            "width": "120px",
+            "height": "32px",
+            "outline": "3px solid",
+            "background-color": "#ffffff",
+            "margin-bottom": "12px"
+          }
+        },
+        "redeclared": {
+          "properties": {
+            "width": "120px",
+            "height": "32px",
+            "color": "#2471a3",
+            "outline": "3px solid",
+            "background-color": "#ffffff"
+          }
+        }
+      }
+    },
+    "IE_LeadingText": {
+      "properties": {
+        "width": "260px",
+        "padding": "10px",
+        "color": "#1e8449",
+        "font-size": "15px",
+        "background-color": "#eafaf1"
+      },
+      "children": {
+        "mid": {
+          "properties": {
+            "padding": "6px",
+            "background-color": "#d5f5e3"
+          },
+          "_text": "leading text inherits green",
+          "children": {
+            "tail": {
+              "properties": {
+                "width": "60px",
+                "height": "20px",
+                "background-color": "#e67e22"
+              }
+            }
+          }
+        }
+      }
+    },
+    "IE_TextShadow": {
+      "properties": {
+        "width": "260px",
+        "padding": "10px",
+        "font-size": "16px",
+        "text-shadow": "2px 2px 3px #c0392b",
+        "background-color": "#1f2937"
+      },
+      "children": {
+        "plain": {
+          "properties": {},
+          "_text": "inherited glyph shadow"
+        },
+        "redeclared": {
+          "properties": {
+            "text-shadow": "none"
+          },
+          "_text": "shadow reset locally"
+        }
+      }
+    },
+    "IE_WrapChain": {
+      "properties": {
+        "width": "140px",
+        "padding": "8px",
+        "color": "#f9fafb",
+        "font-size": "14px",
+        "overflow-wrap": "break-word",
+        "background-color": "#1f2937"
+      },
+      "children": {
+        "mid": {
+          "properties": {
+            "padding": "4px"
+          },
+          "_text": "inheritedunbreakabletoken",
+          "children": {
+            "tail": {
+              "properties": {
+                "width": "40px",
+                "height": "14px",
+                "background-color": "#3498db"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

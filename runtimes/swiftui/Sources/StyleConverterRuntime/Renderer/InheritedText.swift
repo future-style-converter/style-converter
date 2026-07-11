@@ -21,27 +21,65 @@ import SwiftUI
 
 enum InheritedText {
 
-    /// CSS-inherited text properties — and ONLY these — flow from parent
-    /// to child (css-cascade-4 inheritance table). Layout/box properties
-    /// (Width, Padding, Background*, Border*) never inherit in CSS and
-    /// are deliberately absent. TextDecorationLine is absent too:
-    /// decoration PROPAGATES to inline boxes rather than inheriting, and
-    /// the leading-text sibling already covers the visible case.
+    /// CSS-inherited properties — and ONLY these — flow from parent to
+    /// child (css-cascade-4 per-property "Inherited: yes" tables).
+    /// Layout/box properties (Width, Padding, Background*, per-side
+    /// Border*) never inherit in CSS and are deliberately absent.
+    /// TextDecorationLine is absent too: decoration PROPAGATES to inline
+    /// boxes rather than inheriting, and the leading-text sibling already
+    /// covers the visible case.
     ///
-    /// `Color` is deliberately absent even though CSS inherits it: the
-    /// web harness placeholder always sets an explicit contrast-picked
-    /// `color` (bg-luminance flip), and the iOS PlaceholderLabel
-    /// implements the same pick — inheriting Color here would push the
-    /// platforms APART on every light-card fixture, not together.
+    /// Wave 9 (#37): the original 14-property TEXT channel grows to the
+    /// full inherited set the IR carries, and `Color` — deliberately
+    /// excluded since wave 1 — now INHERITS. currentColor consumers
+    /// (BorderSideConfig / OutlineExtractor / text-emphasis read "Color"
+    /// from the MERGED list) therefore resolve against the ancestor chain
+    /// exactly like the browser. LEAF placeholder glyphs still ignore an
+    /// inherited-only Color: the web reference placeholder span always
+    /// sets an explicit own-`color`-or-contrast-pick that beats DOM
+    /// inheritance (pixel-sampled on IT_Family) — see the leaf
+    /// PlaceholderLabel gate in ComponentRenderer.contentOrPlaceholder.
+    /// Mirrors Android's INHERITED_PROPERTY_TYPES entry-for-entry.
     static let inheritedTypes: Set<String> = [
-        // Font family/geometry.
+        // Font family/geometry (css-fonts-4).
         "FontFamily", "FontSize", "FontWeight", "FontStyle", "FontStretch",
-        // Glyph-run spacing.
+        // Glyph-run spacing (css-text-4).
         "LetterSpacing", "LineHeight", "WordSpacing",
         // Paragraph-level text behaviour.
         "TextAlign", "TextTransform", "TextIndent",
-        // Whitespace / writing direction.
+        // Whitespace / writing direction (css-writing-modes).
         "WhiteSpace", "TabSize", "Direction",
+        // css-color-4 §7: `color` inherits — the currentColor chain hangs
+        // off the inherited value (leaf placeholder gate documented above).
+        "Color",
+        // CSS 2.1 §11.2: visibility inherits (hidden parent hides children
+        // unless a child redeclares `visible`).
+        "Visibility",
+        // css-ui-4 §8.1: cursor inherits — no visual analogue in a static
+        // capture (no-op applier) but carried for honest wire coverage.
+        "Cursor",
+        // css-lists-3 §4: list-style-* inherit from list container to items
+        // ("ListStyle" covers a doc carrying the unexpanded shorthand).
+        "ListStyleType", "ListStylePosition", "ListStyleImage", "ListStyle",
+        // css-content-3 §2: quotes inherit.
+        "Quotes",
+        // css-text-decor-3 §4: text-shadow inherits — leaf placeholder
+        // glyphs DO show it on web (the span never resets text-shadow).
+        "TextShadow",
+        // css-text-4 §5: line-breaking controls all inherit. WordWrap is
+        // the legacy alias the parser may emit for `word-wrap`.
+        "OverflowWrap", "WordWrap", "WordBreak", "Hyphens",
+        // css-text-decor-3 §3: all three text-emphasis longhands inherit
+        // (emphasis-color defaults to currentColor — the inherited Color
+        // above keeps that chain honest).
+        "TextEmphasisStyle", "TextEmphasisColor", "TextEmphasisPosition",
+        // css-ruby-1 §4: ruby annotation layout properties inherit.
+        "RubyAlign", "RubyPosition", "RubyMerge", "RubyOverhang",
+        // CSS 2.1 §17 table model: table-scoped inherited properties.
+        "CaptionSide", "BorderCollapse", "BorderSpacing", "EmptyCells",
+        // CSS 2.1 §13.3.3 fragmentation: print-only no-ops on mobile,
+        // carried so the values flow honestly.
+        "Orphans", "Widows",
     ]
 
     /// Merge the inherited channel UNDER the component's own

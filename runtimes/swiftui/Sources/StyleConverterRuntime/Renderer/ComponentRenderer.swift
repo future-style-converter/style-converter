@@ -194,6 +194,18 @@ public struct ComponentRenderer: View {
                             inherited: inheritedTextProperties)
     }
 
+    /// Wave 9 (#37) — true when the merged list's `Color` arrived ONLY
+    /// through the inheritance channel (no own declaration, buckets
+    /// included). Gates the LEAF PlaceholderLabel color back to the
+    /// contrast pick for web parity: the reference placeholder span
+    /// always pins its own color, so DOM inheritance never reaches leaf
+    /// placeholder glyphs on web. Mirrors Android's colorIsInheritedOnly
+    /// + LocalColorIsInheritedOnly pair.
+    private var colorIsInheritedOnly: Bool {
+        inheritedTextProperties.contains { $0.type == "Color" } &&
+            !effectiveProperties.contains { $0.type == "Color" }
+    }
+
     /// Does any selector bucket resolve to `condition` at runtime v1?
     /// Gates the InteractionBridge listeners so ONLY selector-carrying
     /// components pay for input tracking.
@@ -1347,10 +1359,22 @@ public struct ComponentRenderer: View {
             // PlaceholderContent.text and brings iOS leaf-text rendering
             // in parity with the web fix (swarm-001/css-color__color-001).
             // Absent text → existing behaviour (placeholder shows name).
+            //
+            // Wave 9 (#37): `Color` rides the inheritance channel now, so
+            // style.text.color may be an ANCESTOR's color. The web leaf
+            // placeholder never paints a DOM-inherited color (its span
+            // pins own-declared-or-contrast-pick — pixel-sampled on
+            // IT_Family), so an inherited-only color is gated back to nil
+            // here and resolvedColor falls to the luminance pick.
+            // currentColor consumers (border/outline) keep reading the
+            // MERGED list and DO resolve against the inherited color —
+            // the exact split the browser implements. The leading-text
+            // label above keeps style.text.color un-gated: web renders
+            // leading `_text` through a plain inheriting <span>.
             PlaceholderLabel(
                 name: component.name,
                 rawText: component.text,
-                color: style.text.color,
+                color: colorIsInheritedOnly ? nil : style.text.color,
                 textConfig: style.text,
                 backgroundColor: style.backgroundColor,
                 clipTextGradient: clipText,

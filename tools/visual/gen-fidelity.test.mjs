@@ -258,9 +258,9 @@ test('combos: per-file cap of 25 components, each carrying at least 3 declaratio
   }
 });
 
-test('trees: 8 files, 10–20 nodes each, map-in children, 3-level nesting present', () => {
+test('trees: 9 files, 10–20 nodes each, map-in children, 3-level nesting present', () => {
   const trees = manifest.files.filter((f) => f.kind === 'tree');
-  assert.equal(trees.length, 8, 'tree template set must stay at 8 files');
+  assert.equal(trees.length, 9, 'tree template set must stay at 9 files');
   let sawThreeLevels = false;
   const depthOf = (node) =>
     node.children ? 1 + Math.max(...Object.values(node.children).map(depthOf)) : 1;

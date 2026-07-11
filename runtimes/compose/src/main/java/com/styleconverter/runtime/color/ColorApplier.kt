@@ -6,6 +6,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -33,10 +34,15 @@ import kotlin.math.sin
  * - Opacity/alpha
  *
  * ## Limitations
- * - Multiple background layers: Only the first gradient is applied
  * - Image URLs: Not rendered (use Coil or similar for image loading)
  * - Repeating conic gradients: Compose sweepGradient doesn't support TileMode
- * - Gradient sizing: Uses approximated coordinates; actual size requires DrawScope
+ *
+ * Multiple background layers paint back-to-front per css-backgrounds-3 §2
+ * (last source layer at the bottom, first on top), each with ITS OWN
+ * background-size / background-repeat entry from the comma lists (§2.3
+ * cyclic pairing) — including the `space` / `round` tile distribution
+ * (BackgroundTileMath). Wave-9 closed the "only the first gradient is
+ * applied" deferral.
  *
  * ## Usage
  * ```kotlin
@@ -178,14 +184,37 @@ object ColorApplier {
                     }
                 }
             } else {
-                config.backgroundImages.asReversed().forEach { bgImage ->
-                    result = applyBackgroundImage(result, bgImage, config)
+                // Back-to-front paint per css-backgrounds-3 §2: iterate the
+                // source list in REVERSE so the first source layer is the
+                // LAST modifier appended (Compose chains paint later entries
+                // on top). Each layer gets its OWN size/repeat entry from
+                // the §2.3 comma lists via layerValue's cyclic pairing.
+                for (idx in config.backgroundImages.indices.reversed()) {
+                    result = applyBackgroundImage(
+                        modifier = result,
+                        image = config.backgroundImages[idx],
+                        config = config,
+                        layerSize = layerValue(config.backgroundSizes, idx)
+                            ?: config.backgroundSize,
+                        layerRepeat = layerValue(config.backgroundRepeats, idx)
+                            ?: BackgroundRepeatAxes.from(config.backgroundRepeat)
+                    )
                 }
             }
         }
 
         return result
     }
+
+    /**
+     * css-backgrounds-3 §2.3 list pairing: entry `i` of a comma list styles
+     * background-image layer `i`; when the list is SHORTER than the image
+     * list "the missing values are filled in by repeating the list" —
+     * hence the modulo. Empty list → null (caller falls back to the legacy
+     * single-value field). Internal for direct JVM pinning.
+     */
+    internal fun <T> layerValue(list: List<T>, index: Int): T? =
+        if (list.isEmpty()) null else list[index % list.size]
 
     /**
      * Apply a single background color to a Modifier.
@@ -233,17 +262,21 @@ object ColorApplier {
     }
 
     /**
-     * Apply a background image (gradient or URL) to a Modifier.
+     * Apply ONE background-image layer (gradient or URL) to a Modifier.
      *
      * @param modifier Base modifier
-     * @param image Background image config
-     * @param config Full color config
+     * @param image Background image config for this layer
+     * @param config Full color config (position + shared fields)
+     * @param layerSize THIS layer's background-size entry (§2.3 pairing)
+     * @param layerRepeat THIS layer's two-axis background-repeat entry
      * @param size Optional size for gradient calculations
      */
     private fun applyBackgroundImage(
         modifier: Modifier,
         image: BackgroundImageConfig,
         config: ColorConfig,
+        layerSize: BackgroundSizeConfig = config.backgroundSize,
+        layerRepeat: BackgroundRepeatAxes = BackgroundRepeatAxes.from(config.backgroundRepeat),
         size: Size = Size(500f, 500f)
     ): Modifier {
         // For NON-repeating gradients we always want TileMode.Clamp regardless
@@ -292,78 +325,62 @@ object ColorApplier {
         val nonNullBrush: Brush = brush
 
         // CSS `background-size` + `background-position` decide where the
-        // brush tile draws inside the box. When `background-size` carries
-        // explicit dimensions (and the layer isn't a `repeating-*-gradient`
-        // — those bake their own tile into the brush), we can't just call
-        // `Modifier.background(brush)` because that always fills the
-        // entire element. Instead we draw the brush into a sized rect via
-        // `Modifier.drawBehind` at the configured top-left.  Without
-        // background-size or with size=auto we fall back to the prior
-        // full-fill path so previously-correct fixtures don't regress.
-        val sized = config.backgroundSize as? BackgroundSizeConfig.Dimensions
+        // brush tile draws inside the box. When THIS LAYER's size entry
+        // carries explicit dimensions (and the layer isn't a
+        // `repeating-*-gradient` — those bake their own tile into the
+        // brush), we can't just call `Modifier.background(brush)` because
+        // that always fills the entire element. Instead we draw the brush
+        // into sized tiles via `Modifier.drawBehind`. Without
+        // background-size or with size=auto/cover/contain we fall back to
+        // the full-fill path (gradients have no intrinsic dimensions, so
+        // auto/cover/contain all resolve to the box — css-backgrounds-3
+        // §3.9) so previously-correct fixtures don't regress.
+        val sized = layerSize as? BackgroundSizeConfig.Dimensions
         if (sized == null) {
             return modifier.background(nonNullBrush)
         }
         val pos = config.backgroundPosition
-        val repeat = config.backgroundRepeat
         return modifier.drawBehind {
             // Resolve the per-axis tile size against the box. Dp values
-            // (Dp? width / height) are taken verbatim; percent values
-            // resolve against the box; missing axis defaults to 0 so the
-            // tile collapses cleanly when only one axis was specified.
-            // CSS spec (Backgrounds 3 §3.9): when one axis of background-size
-            // is omitted, it defaults to `auto`. For gradient brushes (no
-            // intrinsic size), `auto` resolves to the container axis.
-            // Previously: tileH defaulted to 0 → return → no draw → 0.74 SSIM
-            // divergence vs web (Auditor round 8 finding).
+            // (Dp? width / height) are taken verbatim; percent values are
+            // 0..1 FRACTIONS of the box (the Dimensions contract — the
+            // previous `* it / 100f` here double-divided, shrinking `50%`
+            // to 0.5% of the box); a missing axis is `auto`, which for
+            // gradient brushes (no intrinsic size) resolves to the
+            // container axis (Auditor round 8 finding).
             val tileW = sized.width?.toPx()
-                ?: sized.widthPercent?.let { this.size.width * it / 100f }
+                ?: sized.widthPercent?.let { this.size.width * it }
                 ?: this.size.width
             val tileH = sized.height?.toPx()
-                ?: sized.heightPercent?.let { this.size.height * it / 100f }
+                ?: sized.heightPercent?.let { this.size.height * it }
                 ?: this.size.height
             if (tileW <= 0f || tileH <= 0f) return@drawBehind
-            // CSS background-position percent of (containerSize − tileSize).
+            // CSS background-position: percent of (containerSize − tileSize)
+            // free space, plus any absolute px offset (css-backgrounds-3
+            // §3.6 — `background-position-x: 20px` is a raw edge offset).
             val freeX = (this.size.width - tileW).coerceAtLeast(0f)
             val freeY = (this.size.height - tileH).coerceAtLeast(0f)
-            val anchorX = freeX * pos.x
-            val anchorY = freeY * pos.y
-            // background-repeat: NO_REPEAT draws a single tile at the
-            // anchor; the *_REPEAT / SPACE / ROUND variants tile across
-            // the box. SPACE and ROUND get the same approximation as
-            // REPEAT here — accurate gap distribution / radius rounding
-            // is a follow-up but the tiled fill alone restores the
-            // RepeatSpaceRound fixture's bg-color underlay parity.
-            val tileX = repeat == BackgroundRepeatConfig.REPEAT ||
-                        repeat == BackgroundRepeatConfig.REPEAT_X ||
-                        repeat == BackgroundRepeatConfig.SPACE ||
-                        repeat == BackgroundRepeatConfig.ROUND
-            val tileY = repeat == BackgroundRepeatConfig.REPEAT ||
-                        repeat == BackgroundRepeatConfig.REPEAT_Y ||
-                        repeat == BackgroundRepeatConfig.SPACE ||
-                        repeat == BackgroundRepeatConfig.ROUND
-            val xs: List<Float> = if (tileX) {
-                // Walk left from anchor, then right, until we cover [0, w].
-                val out = mutableListOf<Float>()
-                var x = anchorX
-                while (x > -tileW) { out.add(x); x -= tileW }
-                x = anchorX + tileW
-                while (x < this.size.width) { out.add(x); x += tileW }
-                out
-            } else listOf(anchorX)
-            val ys: List<Float> = if (tileY) {
-                val out = mutableListOf<Float>()
-                var y = anchorY
-                while (y > -tileH) { out.add(y); y -= tileH }
-                y = anchorY + tileH
-                while (y < this.size.height) { out.add(y); y += tileH }
-                out
-            } else listOf(anchorY)
-            val tileSize = androidx.compose.ui.geometry.Size(tileW, tileH)
-            for (x in xs) for (y in ys) {
-                drawRect(brush = nonNullBrush,
-                         topLeft = androidx.compose.ui.geometry.Offset(x, y),
-                         size = tileSize)
+            val anchorX = freeX * pos.x + pos.xOffset.toPx()
+            val anchorY = freeY * pos.y + pos.yOffset.toPx()
+            // Per-axis §3.7 tile plans: REPEAT walks edge-to-edge, SPACE
+            // fits whole tiles + equal gaps, ROUND rescales the tile so a
+            // whole count fills the axis, NO_REPEAT anchors a single tile.
+            // Pure math — pinned by BackgroundTileMathTest.
+            val planX = BackgroundTileMath.axisPlan(this.size.width, tileW, anchorX, layerRepeat.x)
+            val planY = BackgroundTileMath.axisPlan(this.size.height, tileH, anchorY, layerRepeat.y)
+            val tileSize = androidx.compose.ui.geometry.Size(planX.tileSize, planY.tileSize)
+            for (x in planX.origins) for (y in planY.origins) {
+                // TRANSLATE the draw space per tile instead of offsetting
+                // the rect: our gradient ShaderBrushes anchor their shader
+                // at the current origin, so translating renders the FULL
+                // gradient inside every tile (offsetting the rect would
+                // sample the single box-anchored gradient — every tile but
+                // the first showed clamped edge colours).
+                translate(left = x, top = y) {
+                    drawRect(brush = nonNullBrush,
+                             topLeft = androidx.compose.ui.geometry.Offset.Zero,
+                             size = tileSize)
+                }
             }
         }
     }

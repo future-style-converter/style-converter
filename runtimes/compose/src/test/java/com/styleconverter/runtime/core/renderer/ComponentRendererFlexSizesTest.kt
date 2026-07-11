@@ -75,6 +75,88 @@ class ComponentRendererFlexSizesTest {
         assertNull(ComponentRenderer.resolveFlexMainSizes(container, children, rowAxis = true))
     }
 
+    // ---- wave 9 (#40): content-sized bases hand off to the intrinsic pass --
+
+    /** A flex child with grow but NO width/basis — content-sized base. */
+    private fun autoBasisChild(name: String, grow: Double) = comp(
+        name, listOf(
+            prop(
+                "FlexGrow",
+                """{"value":{"type":"app.irmodels.properties.layout.flexbox.FlexGrowProperty.FlexGrowValue.Number","value":$grow},"normalizedValue":$grow}"""
+            )
+        )
+    )
+
+    @Test
+    fun `auto basis nulls the item base but keeps the line spec`() {
+        // The static resolver must still bail (null) — but flexLineSpec now
+        // survives with basisPx == null so the renderer routes the line to
+        // FlexIntrinsicRow instead of the legacy weight fallback.
+        val children = listOf(growChild(0.0, 40.0), autoBasisChild("b", 1.0))
+        val container = comp("FR_AutoBasis", flexRowContainer(320), children)
+        assertNull(ComponentRenderer.resolveFlexMainSizes(container, children, rowAxis = true))
+        val spec = ComponentRenderer.flexLineSpec(container, children, rowAxis = true)
+        assertNotNull(spec)
+        assertEquals(304.0, spec!!.contentMainPx, 0.001)   // 320 − 2×8 padding
+        assertEquals(8.0, spec.gapPx, 0.001)
+        assertEquals(40.0, spec.items[0].basisPx!!, 0.001) // declared base kept
+        assertNull(spec.items[1].basisPx)                   // content-sized
+        assertEquals(1.0, spec.items[1].grow, 0.001)
+        assertEquals(50.0, spec.items[1].minPx, 0.001)      // inline floor
+    }
+
+    @Test
+    fun `column axis spec reads height row-gap and the 30px block floor`() {
+        val children = listOf(autoBasisChild("a", 1.0), autoBasisChild("b", 2.0))
+        val container = comp(
+            "FC_AutoBasis",
+            listOf(
+                prop("Height", """{"type":"length","px":220.0}"""),
+                prop("Display", "\"FLEX\""),
+                prop("RowGap", """{"type":"length","px":6.0}"""),
+                prop("PaddingTop", """{"px":6.0}"""),
+                prop("PaddingBottom", """{"px":6.0}""")
+            ),
+            children
+        )
+        val spec = ComponentRenderer.flexLineSpec(container, children, rowAxis = false)
+        assertNotNull(spec)
+        assertEquals(208.0, spec!!.contentMainPx, 0.001)   // 220 − 2×6 padding
+        assertEquals(6.0, spec.gapPx, 0.001)
+        assertNull(spec.items[0].basisPx)
+        assertEquals(30.0, spec.items[0].minPx, 0.001)      // block floor
+    }
+
+    @Test
+    fun `declared max-width feeds the item max clamp`() {
+        val child = comp(
+            "capped", listOf(
+                prop(
+                    "FlexGrow",
+                    """{"value":{"type":"app.irmodels.properties.layout.flexbox.FlexGrowProperty.FlexGrowValue.Number","value":1.0},"normalizedValue":1.0}"""
+                ),
+                prop("MaxWidth", """{"type":"length","px":120.0}""")
+            )
+        )
+        val container = comp("FR_MaxWidth", flexRowContainer(320), listOf(child))
+        val spec = ComponentRenderer.flexLineSpec(container, listOf(child), rowAxis = true)
+        assertNotNull(spec)
+        assertEquals(120.0, spec!!.items[0].maxPx, 0.001)
+    }
+
+    @Test
+    fun `percentage container width stays unresolvable - legacy fallback`() {
+        // A percentage main size has no px at convert time: flexLineSpec
+        // must return null so the (logged) legacy weight path handles it.
+        val children = listOf(autoBasisChild("a", 1.0))
+        val container = comp(
+            "FR_PercentWidth",
+            listOf(prop("Width", """{"type":"percentage","value":50.0}""")),
+            children
+        )
+        assertNull(ComponentRenderer.flexLineSpec(container, children, rowAxis = true))
+    }
+
     @Test
     fun `logical bare px InlineSize counts as definite width`() {
         // Sizing_BoxModel regression: `inline-size: 250px` ships as

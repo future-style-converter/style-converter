@@ -78,28 +78,67 @@ import com.styleconverter.runtime.content.CounterStateProvider
 object ComponentRenderer {
 
     /**
-     * CSS-inherited text properties (css-cascade-4 / per-property "Inherited:
-     * yes" table). These — and ONLY these — flow from parent to child when
-     * the child doesn't declare them itself. Layout/box properties (Width,
-     * Padding, Background*, Border*) are deliberately absent: they never
-     * inherit in CSS. TextDecorationLine is also absent — decoration
-     * PROPAGATES to inline descendants rather than inheriting, and our
-     * leading-text sibling already handles the visible case.
+     * CSS-inherited properties (css-cascade-4 / per-property "Inherited:
+     * yes" tables) that our IR carries. These — and ONLY these — flow from
+     * parent to child when the child doesn't declare them itself.
+     * Layout/box properties (Width, Padding, Background*, per-side
+     * Border*) are deliberately absent: they never inherit in CSS.
+     * TextDecorationLine is also absent — decoration PROPAGATES to inline
+     * descendants rather than inheriting, and our leading-text sibling
+     * already handles the visible case.
      *
-     * `Color` is deliberately absent too, even though CSS inherits it:
-     * the WEB harness placeholder span (`PlaceholderContent` in
-     * ComponentRenderer.tsx) always sets an explicit `color` — the
-     * bg-luminance contrast pick — which beats browser inheritance on the
-     * reference render. Verified by pixel-sampling the IT_Family web
-     * capture: child text paints rgba(237,237,237,0.7), NOT the parent's
-     * #111. Android's PlaceholderContent implements the same pick, so
-     * inheriting Color here would push the platforms APART, not together.
+     * Wave 9 (#37): the original 14-property TEXT channel grows to the
+     * full inherited set the IR carries, and `Color` — deliberately
+     * excluded since wave 1 — now INHERITS. currentColor consumers
+     * (BorderSideExtractor / OutlineExtractor / text-emphasis, which read
+     * "Color" from the MERGED list) therefore resolve against the
+     * ancestor chain exactly like the browser. Leaf PLACEHOLDER glyphs
+     * still ignore an inherited-only Color: the web reference placeholder
+     * span (`PlaceholderContent` in ComponentRenderer.tsx) always sets an
+     * explicit own-`color`-or-contrast-pick that beats DOM inheritance
+     * (pixel-sampled on IT_Family: child text paints rgba(237,237,237,.7),
+     * NOT the parent's #111). See LocalColorIsInheritedOnly for the gate.
      */
-    internal val INHERITED_TEXT_PROPERTY_TYPES: Set<String> = setOf(
+    internal val INHERITED_PROPERTY_TYPES: Set<String> = setOf(
+        // The wave-1 text channel (css-fonts-4 / css-text-4 / css-writing-modes).
         "FontFamily", "FontSize", "FontWeight", "FontStyle", "FontStretch",
         "LetterSpacing", "LineHeight", "WordSpacing",
         "TextAlign", "TextTransform", "TextIndent",
-        "WhiteSpace", "TabSize", "Direction"
+        "WhiteSpace", "TabSize", "Direction",
+        // css-color-4 §7: `color` inherits; the currentColor chain hangs
+        // off the inherited value (placeholder gate documented above).
+        "Color",
+        // CSS 2.1 §11.2: visibility inherits (a hidden parent hides
+        // children unless a child redeclares `visible`).
+        "Visibility",
+        // css-ui-4 §8.1: cursor inherits. No visual analogue in a static
+        // native capture (no-op applier) but carried so the wire value
+        // survives the cascade honestly.
+        "Cursor",
+        // css-lists-3 §4: list-style-* inherit from the list container to
+        // every item ("ListStyle" covers a wire doc carrying the
+        // unexpanded shorthand — ListStyleExtractor accepts it too).
+        "ListStyleType", "ListStylePosition", "ListStyleImage", "ListStyle",
+        // css-content-3 §2: quotes inherit (open/close pairs for q-elements).
+        "Quotes",
+        // css-text-decor-3 §4: text-shadow inherits — leaf placeholder
+        // glyphs DO show it on web (the span never resets text-shadow).
+        "TextShadow",
+        // css-text-4 §5: line-breaking controls all inherit. WordWrap is
+        // the legacy alias the parser may emit for `word-wrap`.
+        "OverflowWrap", "WordWrap", "WordBreak", "Hyphens",
+        // css-text-decor-3 §3: all three text-emphasis longhands inherit
+        // (emphasis-color defaults to currentColor — the inherited Color
+        // above keeps that chain honest).
+        "TextEmphasisStyle", "TextEmphasisColor", "TextEmphasisPosition",
+        // css-ruby-1 §4: ruby annotation layout properties inherit.
+        "RubyAlign", "RubyPosition", "RubyMerge", "RubyOverhang",
+        // CSS 2.1 §17 table model: caption side, border model, spacing
+        // and empty-cell painting inherit (table-scoped).
+        "CaptionSide", "BorderCollapse", "BorderSpacing", "EmptyCells",
+        // CSS 2.1 §13.3.3 fragmentation: print-only, no-op appliers on
+        // the mobile runtimes, but the values flow for honest coverage.
+        "Orphans", "Widows"
     )
 
     /**
@@ -131,6 +170,20 @@ object ComponentRenderer {
      * wrongly honor a property CSS says to ignore.
      */
     internal val LocalSelfAlignmentHandled =
+        androidx.compose.runtime.compositionLocalOf { false }
+
+    /**
+     * True when the nearest RenderComponent's merged list carries a Color
+     * that arrived ONLY through the inheritance channel (no own
+     * declaration). PlaceholderContent reads it to keep LEAF placeholder
+     * glyphs on the web-parity contrast pick: the web placeholder span
+     * always sets an explicit color (own-declared or bg-luminance pick),
+     * so DOM inheritance never reaches leaf placeholder glyphs on the
+     * reference render. Leading `_text` siblings and list markers DO show
+     * the inherited color (web renders those through a plain inheriting
+     * <span>) — their call sites re-extract from the merged list.
+     */
+    internal val LocalColorIsInheritedOnly =
         androidx.compose.runtime.compositionLocalOf { false }
 
     /**
@@ -472,7 +525,17 @@ object ComponentRenderer {
             DisplayConfig(DisplayType.BLOCK, FlexDirection.ROW, JustifyContent.FLEX_START, AlignItems.STRETCH, AlignContent.STRETCH, FlexWrap.NOWRAP, 0.dp, 0.dp)
         }
 
-        val textColor = try {
+        // Wave 9 (#37): `Color` rides the inheritance channel now, so the
+        // merged list may carry an ancestor's color. The web placeholder
+        // span pins its own color (explicit or contrast pick) and NEVER
+        // paints a DOM-inherited color on leaf glyphs, so the placeholder
+        // textColor stays own-declared-only. currentColor consumers
+        // (border / outline / text-emphasis extractors) keep reading the
+        // MERGED list and therefore resolve against the inherited color —
+        // the exact split the browser implements.
+        val colorIsInheritedOnly = inheritedProperties.any { it.type == "Color" } &&
+            schemeResolvedProperties.none { it.type == "Color" }
+        val textColor = if (colorIsInheritedOnly) null else try {
             TextStyleApplier.extractTextColor(effectiveProperties)
         } catch (e: Exception) {
             null
@@ -610,7 +673,7 @@ object ComponentRenderer {
         // values are computed values) — a parent `font-size: 1.5em` hands
         // 24px down, never the raw em that would compound per level.
         val inheritableForChildren = effectiveProperties.filter {
-            it.type in INHERITED_TEXT_PROPERTY_TYPES
+            it.type in INHERITED_PROPERTY_TYPES
         }
         // The containing block THIS component establishes for its children:
         // its resolved content box (width channel, CSS 2.1 §10.1). Unknown
@@ -622,6 +685,11 @@ object ComponentRenderer {
         val inheritanceWrappedContent: @Composable () -> Unit = {
             CompositionLocalProvider(
                 LocalInheritedProperties provides inheritableForChildren,
+                // Wave 9: whether THIS component's Color is inherited-only —
+                // read by its own PlaceholderContent (leaf-glyph gate); each
+                // child RenderComponent re-provides its own value before the
+                // child's placeholder composes.
+                LocalColorIsInheritedOnly provides colorIsInheritedOnly,
                 // Custom-property scope for descendants — element definitions
                 // shadow the slot-parent chain (spec 02 resolution order).
                 com.styleconverter.runtime.core.variables.LocalCssVariables provides varScope,
@@ -746,34 +814,46 @@ object ComponentRenderer {
             val columnGap = displayConfig.columnGap
             when (flexDecision.kind) {
                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.Row -> {
+                    // Gap + justify-content COMPOSE, they don't compete:
+                    // a distributing justify (space-between/around/evenly)
+                    // owns the free space — the old `gap > 0 → spacedBy`
+                    // override packed FC_SpaceBetween's children at the
+                    // top because the fixture also declared `gap: 6px`
+                    // (Android-web 0.920). mainAxisArrangement folds the
+                    // gap into spacedBy(gap, <align>) only for the
+                    // non-distributing keywords, mirroring the legacy
+                    // toRowArrangement path. Hoisted so the intrinsic flex
+                    // path inside RenderRowContent re-uses the same values.
+                    val rowArrangement = com.styleconverter.runtime.layout.flexbox
+                        .FlexboxApplier.mainAxisHorizontal(flexDecision.justify, columnGap)
                     Row(
                         modifier = modifier,
-                        // Gap + justify-content COMPOSE, they don't compete:
-                        // a distributing justify (space-between/around/evenly)
-                        // owns the free space — the old `gap > 0 → spacedBy`
-                        // override packed FC_SpaceBetween's children at the
-                        // top because the fixture also declared `gap: 6px`
-                        // (Android-web 0.920). mainAxisArrangement folds the
-                        // gap into spacedBy(gap, <align>) only for the
-                        // non-distributing keywords, mirroring the legacy
-                        // toRowArrangement path.
-                        horizontalArrangement = com.styleconverter.runtime.layout.flexbox
-                            .FlexboxApplier.mainAxisHorizontal(flexDecision.justify, columnGap),
+                        horizontalArrangement = rowArrangement,
                         verticalAlignment = flexDecision.verticalAlignment
                     ) {
-                        RenderRowContent(component, textColor)
+                        RenderRowContent(
+                            component, textColor,
+                            mainArrangement = rowArrangement,
+                            crossAlignment = flexDecision.verticalAlignment
+                        )
                     }
                     return
                 }
                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.Column -> {
+                    // Same gap/justify composition as the Row branch —
+                    // hoisted for the intrinsic path too.
+                    val columnArrangement = com.styleconverter.runtime.layout.flexbox
+                        .FlexboxApplier.mainAxisVertical(flexDecision.justify, rowGap)
                     Column(
                         modifier = modifier,
-                        // Same gap/justify composition as the Row branch.
-                        verticalArrangement = com.styleconverter.runtime.layout.flexbox
-                            .FlexboxApplier.mainAxisVertical(flexDecision.justify, rowGap),
+                        verticalArrangement = columnArrangement,
                         horizontalAlignment = flexDecision.horizontalAlignment
                     ) {
-                        RenderColumnContent(component, textColor)
+                        RenderColumnContent(
+                            component, textColor,
+                            mainArrangement = columnArrangement,
+                            crossAlignment = flexDecision.horizontalAlignment
+                        )
                     }
                     return
                 }
@@ -828,12 +908,20 @@ object ComponentRenderer {
                     } else {
                         modifier
                     }
+                    // Hoisted so the intrinsic flex path shares the exact
+                    // arrangement/alignment the Row itself uses.
+                    val legacyRowArrangement = displayConfig.toRowArrangement()
+                    val legacyRowAlignment = displayConfig.alignItems.toRowAlignment()
                     Row(
                         modifier = rowModifier,
-                        horizontalArrangement = displayConfig.toRowArrangement(),
-                        verticalAlignment = displayConfig.alignItems.toRowAlignment()
+                        horizontalArrangement = legacyRowArrangement,
+                        verticalAlignment = legacyRowAlignment
                     ) {
-                        RenderRowContent(component, textColor)
+                        RenderRowContent(
+                            component, textColor,
+                            mainArrangement = legacyRowArrangement,
+                            crossAlignment = legacyRowAlignment
+                        )
                     }
                 }
             }
@@ -859,12 +947,19 @@ object ComponentRenderer {
                     } else {
                         modifier
                     }
+                    // Hoisted for the intrinsic flex path, as in the Row twin.
+                    val legacyColumnArrangement = displayConfig.toColumnArrangement()
+                    val legacyColumnAlignment = displayConfig.alignItems.toColumnAlignment()
                     Column(
                         modifier = columnModifier,
-                        verticalArrangement = displayConfig.toColumnArrangement(),
-                        horizontalAlignment = displayConfig.alignItems.toColumnAlignment()
+                        verticalArrangement = legacyColumnArrangement,
+                        horizontalAlignment = legacyColumnAlignment
                     ) {
-                        RenderColumnContent(component, textColor)
+                        RenderColumnContent(
+                            component, textColor,
+                            mainArrangement = legacyColumnArrangement,
+                            crossAlignment = legacyColumnAlignment
+                        )
                     }
                 }
             }
@@ -998,10 +1093,18 @@ object ComponentRenderer {
             // inherits the parent's styling, matching the web <span>
             // fallback.
             val parentText = component._text
+            // Wave 9: leading `_text` renders through a PLAIN inheriting
+            // <span> on web, so an inherited-only Color DOES reach these
+            // glyphs — unlike the leaf placeholder. `textColor` arrives
+            // null when Color is inherited-only (RenderComponent's gate),
+            // so re-extract from the merged list (component.properties
+            // here IS the inheritance-merged list — see mergedComponent).
+            val inheritedAwareTextColor = textColor
+                ?: runCatching { TextStyleApplier.extractTextColor(component.properties) }.getOrNull()
             if (!parentText.isNullOrEmpty()) {
                 PlaceholderContent(
                     name = parentText,
-                    textColor = textColor,
+                    textColor = inheritedAwareTextColor,
                     properties = component.properties,
                     rawText = parentText
                 )
@@ -1066,7 +1169,7 @@ object ComponentRenderer {
                             // Render absolutely positioned child with offset
                             RenderAbsoluteChild(child)
                         } else if (listConfig != null && child._tag?.lowercase() == "li") {
-                            RenderListItemMarker(child, index, listConfig, textColor)
+                            RenderListItemMarker(child, index, listConfig, inheritedAwareTextColor)
                         } else {
                             RenderComponent(child)
                         }
@@ -1075,7 +1178,7 @@ object ComponentRenderer {
             } else {
                 component.children.forEachIndexed { index, child ->
                     if (listConfig != null && child._tag?.lowercase() == "li") {
-                        RenderListItemMarker(child, index, listConfig, textColor)
+                        RenderListItemMarker(child, index, listConfig, inheritedAwareTextColor)
                     } else {
                         // Auto-margin centering for block children is handled
                         // inside RenderComponent's self-alignment wrapper (one
@@ -1224,9 +1327,19 @@ object ComponentRenderer {
 
     /**
      * Render content in Row scope with AlignSelf, FlexGrow, and Order support.
+     *
+     * [mainArrangement] / [crossAlignment] are the SAME values the caller
+     * hands to the wrapping Row — the wave-9 intrinsic flex path re-uses
+     * them so justify-content / align-items behave identically whether the
+     * line resolves statically, intrinsically, or not at all.
      */
     @Composable
-    fun RowScope.RenderRowContent(component: IRComponent, textColor: Color?) {
+    fun RowScope.RenderRowContent(
+        component: IRComponent,
+        textColor: Color?,
+        mainArrangement: Arrangement.Horizontal = Arrangement.Start,
+        crossAlignment: Alignment.Vertical = Alignment.Top
+    ) {
         if (!component.children.isNullOrEmpty()) {
             // css-flexbox-1 §9.7: flex-grow distributes the container's FREE
             // space — which only exists when the container's main size is
@@ -1243,15 +1356,49 @@ object ComponentRenderer {
             val mainSizeDefinite = placeholderFillsParentWidth(component.properties)
             // Sort children by order property
             val sortedChildren = sortByOrder(component.children)
-            // Run the real §9.7 algorithm when the line is statically
-            // resolvable (definite container main size + every child's flex
-            // base known in px). Returns null otherwise → the legacy
-            // weight fallback below stays in charge (wave-1 behaviour).
-            val resolvedSizes = resolveFlexMainSizes(component, sortedChildren, rowAxis = true)
+            // Extract the line inputs once; run the static §9.7 pass when
+            // every base is definite. A null resolvedSizes with a non-null
+            // spec means some base is CONTENT-SIZED → the intrinsic-measure
+            // layout below fills it at measure time (wave-9, #40).
+            val lineSpec = flexLineSpec(component, sortedChildren, rowAxis = true)
+            val resolvedSizes = lineSpec?.let {
+                com.styleconverter.runtime.layout.flexbox.FlexSizeResolver
+                    .resolve(it.contentMainPx, it.gapPx, it.items)
+            }
             // Flex items ignore justify-self (css-align-3 §6) and this Row
             // already owns align-self — turn the block-level self-alignment
             // wrapper off for the whole subtree root at each child.
             CompositionLocalProvider(LocalSelfAlignmentHandled provides true) {
+            if (lineSpec != null && resolvedSizes == null &&
+                lineSpec.items.any { it.basisPx == null }
+            ) {
+                // Wave-9 intrinsic pass: content-sized bases are measured
+                // (max-content, §9.2.3.E) inside this Layout, then the same
+                // §9.7 loop pins every item — no more weight fallback here.
+                com.styleconverter.runtime.layout.flexbox.FlexIntrinsicRow(
+                    contentMainPx = lineSpec.contentMainPx,
+                    gapPx = lineSpec.gapPx,
+                    items = lineSpec.items,
+                    cross = rowCrossPlacements(sortedChildren),
+                    arrangement = mainArrangement,
+                    containerCross = crossAlignment
+                ) {
+                    sortedChildren.forEach { child ->
+                        // One Box per child keeps the measurable list 1:1
+                        // with the item list regardless of what the child
+                        // renders to. propagateMinConstraints forwards the
+                        // EXACT width FlexIntrinsicRow measures with into
+                        // the component root — a plain Box would relax min
+                        // to 0 and the unsized child would hug its text
+                        // inside the resolved slot (visible as gaps between
+                        // grown items on the first flex-auto capture).
+                        Box(propagateMinConstraints = true) {
+                            RenderComponent(child, Modifier)
+                        }
+                    }
+                }
+                return@CompositionLocalProvider
+            }
             sortedChildren.forEachIndexed { index, child ->
                 // v2 placement contract: one union read per arriving child;
                 // this flex container consumes ONLY the flex block + the
@@ -1281,9 +1428,18 @@ object ComponentRenderer {
                     else -> childModifier
                 }
 
-                // Apply flex-grow as weight ONLY when the §9.7 resolver
-                // could not run (definite main size still required).
+                // LAST-RESORT legacy weight: only reachable when the line is
+                // genuinely unmeasurable ahead of layout — the container's
+                // main size is definite-but-not-px (percentage / relative
+                // units the parser couldn't resolve), so neither the static
+                // §9.7 pass nor the intrinsic pass has a free-space budget.
+                // Logged so unexpected fallbacks surface in capture runs.
                 if (resolvedSizes == null && flexGrow > 0f && mainSizeDefinite) {
+                    android.util.Log.i(
+                        "FlexSizeResolver",
+                        "legacy weight fallback for ${component.id}/${child.id}: " +
+                            "container main size not px-resolvable (row axis)"
+                    )
                     childModifier = childModifier.weight(flexGrow)
                 }
 
@@ -1307,9 +1463,17 @@ object ComponentRenderer {
 
     /**
      * Render content in Column scope with AlignSelf, FlexGrow, and Order support.
+     *
+     * [mainArrangement] / [crossAlignment] mirror RenderRowContent: the
+     * caller's Column arrangement values, re-used by the intrinsic path.
      */
     @Composable
-    fun ColumnScope.RenderColumnContent(component: IRComponent, textColor: Color?) {
+    fun ColumnScope.RenderColumnContent(
+        component: IRComponent,
+        textColor: Color?,
+        mainArrangement: Arrangement.Vertical = Arrangement.Top,
+        crossAlignment: Alignment.Horizontal = Alignment.Start
+    ) {
         if (!component.children.isNullOrEmpty()) {
             // Same css-flexbox-1 §9.7 rule as RenderRowContent, but the main
             // axis of a column flex container is BLOCK (height): free space
@@ -1319,10 +1483,39 @@ object ComponentRenderer {
             val mainSizeDefinite = hasDefiniteSize(component.properties, widthAxis = false)
             // Sort children by order property
             val sortedChildren = sortByOrder(component.children)
-            // §9.7 static resolver — column main axis is vertical (height).
-            val resolvedSizes = resolveFlexMainSizes(component, sortedChildren, rowAxis = false)
+            // §9.7 line inputs + static resolve — column main axis is
+            // vertical (height). Same three-way outcome as the row path.
+            val lineSpec = flexLineSpec(component, sortedChildren, rowAxis = false)
+            val resolvedSizes = lineSpec?.let {
+                com.styleconverter.runtime.layout.flexbox.FlexSizeResolver
+                    .resolve(it.contentMainPx, it.gapPx, it.items)
+            }
             // Same suppression rationale as RenderRowContent.
             CompositionLocalProvider(LocalSelfAlignmentHandled provides true) {
+            if (lineSpec != null && resolvedSizes == null &&
+                lineSpec.items.any { it.basisPx == null }
+            ) {
+                // Wave-9 intrinsic pass, block-axis flavour: content-sized
+                // bases come from maxIntrinsicHeight at the container width.
+                com.styleconverter.runtime.layout.flexbox.FlexIntrinsicColumn(
+                    contentMainPx = lineSpec.contentMainPx,
+                    gapPx = lineSpec.gapPx,
+                    items = lineSpec.items,
+                    cross = columnCrossPlacements(sortedChildren),
+                    arrangement = mainArrangement,
+                    containerCross = crossAlignment
+                ) {
+                    sortedChildren.forEach { child ->
+                        // 1:1 measurable-per-item wrapper with the same
+                        // min-constraint propagation as the row path (the
+                        // resolved HEIGHT must reach the component root).
+                        Box(propagateMinConstraints = true) {
+                            RenderComponent(child, Modifier)
+                        }
+                    }
+                }
+                return@CompositionLocalProvider
+            }
             sortedChildren.forEachIndexed { index, child ->
                 // Same v2 single-union read as RenderRowContent — column
                 // flex consumes only its own claim kinds.
@@ -1350,8 +1543,16 @@ object ComponentRenderer {
                     else -> childModifier
                 }
 
-                // Legacy weight fallback — only when §9.7 couldn't run.
+                // LAST-RESORT legacy weight — same gate + logging as the row
+                // path: only percentage / unresolvable container heights land
+                // here now that content-sized bases go through the intrinsic
+                // pass above.
                 if (resolvedSizes == null && flexGrow > 0f && mainSizeDefinite) {
+                    android.util.Log.i(
+                        "FlexSizeResolver",
+                        "legacy weight fallback for ${component.id}/${child.id}: " +
+                            "container main size not px-resolvable (column axis)"
+                    )
                     childModifier = childModifier.weight(flexGrow)
                 }
 
@@ -1371,6 +1572,19 @@ object ComponentRenderer {
     }
 
     /**
+     * The extracted inputs of one non-wrapping flex line, in IR px (== dp)
+     * units. Produced by [flexLineSpec]; consumed by BOTH resolution paths:
+     * the static §9.7 pass (every base definite → [resolveFlexMainSizes])
+     * and the wave-9 intrinsic-measure pass (some base content-sized →
+     * FlexIntrinsicRow/Column fill the bases at measure time, #40).
+     */
+    internal data class FlexLineSpec(
+        val contentMainPx: Double,
+        val gapPx: Double,
+        val items: List<com.styleconverter.runtime.layout.flexbox.FlexSizeResolver.Item>
+    )
+
+    /**
      * Statically run css-flexbox-1 §9.7 for a non-wrapping flex line.
      *
      * Returns the used main size (px) per child in [sortedChildren] order,
@@ -1379,18 +1593,40 @@ object ComponentRenderer {
      *   - no child declares any flex property (nothing to resolve — keeps
      *     the legacy path byte-identical for plain rows/columns), or
      *   - some child's flex base is content-sized (flex-basis auto without
-     *     a definite main-size property).
-     *
-     * The per-item minimum mirrors the WEB harness wrapper
-     * (`ComponentRenderer.tsx`): min = main-size ?? min-size ?? placeholder
-     * floor (50px inline / 30px block) — that floor is what web's flex
-     * algorithm clamps against (FR_GrowBasis `a`: basis 40 → rendered 50).
+     *     a definite main-size property) — the renderer then hands the
+     *     SAME spec to the intrinsic-measure layout instead of bailing to
+     *     the legacy weight fallback (wave-9, #40).
      */
     internal fun resolveFlexMainSizes(
         component: IRComponent,
         sortedChildren: List<IRComponent>,
         rowAxis: Boolean
-    ): List<Double>? {
+    ): List<Double>? = flexLineSpec(component, sortedChildren, rowAxis)?.let { spec ->
+        com.styleconverter.runtime.layout.flexbox.FlexSizeResolver
+            .resolve(spec.contentMainPx, spec.gapPx, spec.items)
+    }
+
+    /**
+     * Extract the flex-line inputs (container content main size, gap, one
+     * resolver Item per child) from the IR, or null when the line doesn't
+     * participate in flex resolution at all:
+     *   - no child declares any flex property (plain row/column), or
+     *   - the container's main size isn't a definite px value (percentage /
+     *     relative-unit sizes are only knowable at layout time — those keep
+     *     the legacy weight fallback, logged at the call site).
+     *
+     * The per-item minimum mirrors the WEB harness wrapper
+     * (`ComponentRenderer.tsx`): min = main-size ?? min-size ?? placeholder
+     * floor (50px inline / 30px block) — that floor is what web's flex
+     * algorithm clamps against (FR_GrowBasis `a`: basis 40 → rendered 50).
+     * The maximum is the declared max-size property (max-width/max-height,
+     * css-flexbox-1 §9.7.4.d max violations), +∞ when absent.
+     */
+    internal fun flexLineSpec(
+        component: IRComponent,
+        sortedChildren: List<IRComponent>,
+        rowAxis: Boolean
+    ): FlexLineSpec? {
         // Only engage when some child actually declares a flex property —
         // otherwise this is a plain Row/Column and legacy behaviour stands.
         val anyFlex = sortedChildren.any { c ->
@@ -1426,6 +1662,10 @@ object ComponentRenderer {
                 else pxOf(cp, "Height", "BlockSize")
             val minSize = if (rowAxis) pxOf(cp, "MinWidth", "MinInlineSize")
                 else pxOf(cp, "MinHeight", "MinBlockSize")
+            // Declared main-axis maximum — feeds the §9.7.4.d max-violation
+            // clamp (an item never grows past its max-width/max-height).
+            val maxSize = if (rowAxis) pxOf(cp, "MaxWidth", "MaxInlineSize")
+                else pxOf(cp, "MaxHeight", "MaxBlockSize")
             // v2 placement contract: the child's flex claims come from
             // the single ITEM union (grow 0 / shrink 1 / basis auto are
             // the CSS-initial defaults the union carries for absent
@@ -1434,18 +1674,66 @@ object ComponentRenderer {
                 .ItemPlacementExtractor.extract(cp).flex
             com.styleconverter.runtime.layout.flexbox.FlexSizeResolver.Item(
                 // Used flex basis: flex-basis, else the main-size property,
-                // else content (null → line unresolvable).
+                // else content (null → filled by the intrinsic pass).
                 basisPx = flexClaims.basisPx ?: mainSize,
                 grow = flexClaims.grow.toDouble(),
                 shrink = flexClaims.shrink.toDouble(),
                 // Web wrapper: minWidth = width || min-width || 50px (30px
                 // floor on the block axis).
-                minPx = mainSize ?: minSize ?: (if (rowAxis) 50.0 else 30.0)
+                minPx = mainSize ?: minSize ?: (if (rowAxis) 50.0 else 30.0),
+                maxPx = maxSize ?: Double.POSITIVE_INFINITY
             )
         }
-        return com.styleconverter.runtime.layout.flexbox.FlexSizeResolver
-            .resolve(contentMain, gap, items)
+        return FlexLineSpec(contentMain, gap, items)
     }
+
+    /**
+     * Per-child cross placements for the intrinsic ROW layout — the same
+     * `align-self` mapping the static path applies via RowScope.align:
+     * flex-start→top, flex-end→bottom, center→center, stretch→fill ONLY
+     * when the child's cross (height) is auto (css-flexbox-1 §8.3), and
+     * auto/absent→DEFAULT (container align-items decides).
+     */
+    private fun rowCrossPlacements(
+        sortedChildren: List<IRComponent>
+    ): List<com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement> =
+        sortedChildren.map { child ->
+            // Single ITEM-union read, same as the static loop.
+            val alignSelf = com.styleconverter.runtime.core.placement
+                .ItemPlacementExtractor.extract(child.properties).alignSelf
+            when (alignSelf) {
+                AlignSelf.FLEX_START -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.START
+                AlignSelf.FLEX_END -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.END
+                AlignSelf.CENTER -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.CENTER
+                // Definite-height stretch degrades to flex-start (§8.3).
+                AlignSelf.STRETCH ->
+                    if (!hasDefiniteSize(child.properties, widthAxis = false))
+                        com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH
+                    else com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.START
+                else -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.DEFAULT
+            }
+        }
+
+    /**
+     * Column twin of [rowCrossPlacements]. STRETCH maps to START outright:
+     * the web reference wraps unsized children in `width: fit-content`
+     * (a non-auto cross size), so §8.3 stretch never actually stretches
+     * there — mirrored from the static column loop's STRETCH→Start.
+     */
+    private fun columnCrossPlacements(
+        sortedChildren: List<IRComponent>
+    ): List<com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement> =
+        sortedChildren.map { child ->
+            val alignSelf = com.styleconverter.runtime.core.placement
+                .ItemPlacementExtractor.extract(child.properties).alignSelf
+            when (alignSelf) {
+                AlignSelf.FLEX_START, AlignSelf.STRETCH ->
+                    com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.START
+                AlignSelf.FLEX_END -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.END
+                AlignSelf.CENTER -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.CENTER
+                else -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.DEFAULT
+            }
+        }
 
     /**
      * First px-resolvable value among [types], reading both length IR
@@ -1691,7 +1979,14 @@ object ComponentRenderer {
                 Color(0xB3EEEEEE) // default light text for dark card background
             }
         }
-        val effectiveColor = textColor ?: if (textStyle.color != Color.Unspecified) textStyle.color else defaultPlaceholderColor
+        // Wave 9: when the nearest component's Color is inherited-only the
+        // merged `properties` list still carries it (currentColor consumers
+        // need it there), but the WEB leaf placeholder never paints an
+        // inherited color (its span pins own-or-contrast) — so the
+        // textStyle.color fallback must not resurrect what the caller's
+        // gate already suppressed.
+        val effectiveColor = textColor
+            ?: if (!LocalColorIsInheritedOnly.current && textStyle.color != Color.Unspecified) textStyle.color else defaultPlaceholderColor
         // CSS / iOS / web default for `text-align` is `start` (== left in
         // LTR). Android previously defaulted to `Center` for placeholder
         // text, which made every placeholder fixture (Card_Complete,
