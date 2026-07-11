@@ -33,6 +33,14 @@ kotlin {
 // JUnit 5 tests both run under `./gradlew :converter:test`.
 tasks.test {
     useJUnitPlatform()
+    // The conformance + parsing suites read repo-level files OUTSIDE this
+    // module (schema/ goldens, fixtures/ JSON). Declare them as task
+    // inputs so the up-to-date check re-runs tests when only those files
+    // change — without this a golden edit rides past a cached-green
+    // :converter:test (exactly how the wave-8 keyframes golden reached
+    // CI red while local runs stayed silently UP-TO-DATE).
+    inputs.dir(rootDir.resolve("schema"))
+    inputs.dir(rootDir.resolve("fixtures"))
 }
 
 // The CLI contract is cwd-relative: `-i fixtures/visual-test.json -o out`

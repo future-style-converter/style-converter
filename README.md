@@ -178,7 +178,7 @@ the point.
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 101 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 939 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 949 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 761 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 226 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 430 |

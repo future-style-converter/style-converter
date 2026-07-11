@@ -342,11 +342,26 @@ class SchemaConformanceTest {
         }
         for (file in fixtures) {
             val doc = Json.parseToJsonElement(file.readText()).jsonObject
-            assertEquals(
-                setOf("irVersion", "minReaderVersion", "components"),
-                doc.keys,
-                "${file.name}: v2 document level must be exactly the version pair + components"
+            // "keyframes" joined the v2 DOCUMENT envelope in the wave-8
+            // additive revision (spec 05 process; spec 07 defines the
+            // timeline shape) — optional, omitted when no @keyframes.
+            val requiredDocKeys = setOf("irVersion", "minReaderVersion", "components")
+            assertTrue(
+                doc.keys.containsAll(requiredDocKeys),
+                "${file.name}: v2 document must carry the version pair + components, found ${doc.keys}"
             )
+            assertTrue(
+                (requiredDocKeys + "keyframes").containsAll(doc.keys),
+                "${file.name}: v2 document has unknown envelope keys: ${doc.keys - requiredDocKeys - "keyframes"}"
+            )
+            // When present, keyframes is a non-empty name → stop-list map
+            // (offset ORDER is the JSON Schema's job; here we pin shape).
+            doc["keyframes"]?.jsonObject?.let { kf ->
+                assertTrue(kf.isNotEmpty(), "${file.name}: keyframes present but empty")
+                for ((kfName, stops) in kf) {
+                    assertTrue(stops.jsonArray.isNotEmpty(), "${file.name}: keyframes[$kfName] must be a non-empty stop list")
+                }
+            }
             assertEquals(2, doc["irVersion"]!!.jsonPrimitive.int, "${file.name}: irVersion must be 2")
             assertEquals(2, doc["minReaderVersion"]!!.jsonPrimitive.int, "${file.name}: minReaderVersion must be 2")
             val components = doc["components"]!!.jsonArray

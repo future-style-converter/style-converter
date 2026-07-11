@@ -49,8 +49,11 @@ export function parseMediaQueryV1(query: string): MediaTermV1[] | null {
   const terms: MediaTermV1[] = [];                                   // parsed conjunction
   // Split on the `and` combinator. `not`/`only` prefixes and range
   // syntax never match the per-term regexes below, so they fall out as
-  // parse failures without dedicated handling.
-  for (const rawTerm of q.split(/\s+and\s+/i)) {
+  // parse failures without dedicated handling. Whitespace runs are
+  // collapsed FIRST (linear scan) so the split needs no `\s+…\s+`
+  // pattern — that adjacent-ambiguity form backtracks polynomially on
+  // space-heavy library input (CodeQL js/polynomial-redos).
+  for (const rawTerm of q.replace(/\s+/g, ' ').split(/ and /i)) {
     const t = rawTerm.trim();                                        // per-term whitespace tolerance
     const width = WIDTH_TERM.exec(t);                                // width-bound term?
     if (width) {
