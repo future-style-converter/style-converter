@@ -27,6 +27,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -66,9 +67,19 @@ private val TextPropCount = Color(0xFF666666)
  *
  * Uses PixelCopy API to capture the fully-composited rendered frame,
  * preserving ALL visual effects: transforms, filters, clips, alpha/opacity.
+ *
+ * Dynamic-capture hooks (docs/DYNAMIC_CAPTURE.md; launch-intent transport in
+ * MainActivity):
+ *  - [forceState]: one runtime-v1 condition resolved as ACTIVE on every
+ *    captured component (spec 06 §6). PNG filenames stay identical to the
+ *    base run — the recipe keeps forced runs in separate output directories.
+ *  - [captureWidthDp]: render-surface width override (CAPTURE_WIDTH). The
+ *    default 390 is byte-identical to the historical capture path.
  */
 @Composable
 fun ScreenshotCaptureScreen(
+    forceState: String? = null,
+    captureWidthDp: Int = 390,
     onCaptureComplete: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -94,6 +105,12 @@ fun ScreenshotCaptureScreen(
 
     LaunchedEffect(Unit) {
         try {
+            // Run-configuration marker line (part of the forced-state
+            // contract: a capture script must be able to VERIFY via
+            // `adb logcat -d | grep` that the forced run actually ran
+            // forced instead of silently diffing two base captures).
+            Log.i(TAG, "Capture run config: forceState=${forceState ?: "none"} captureWidth=$captureWidthDp")
+
             val deleted = screenshotManager.clearScreenshots()
             Log.i(TAG, "Cleared $deleted existing screenshots")
 
@@ -197,6 +214,8 @@ fun ScreenshotCaptureScreen(
                             component = flat[currentIndex],
                             currentIndex = currentIndex,
                             totalCount = flat.size,
+                            forceState = forceState,
+                            captureWidthDp = captureWidthDp,
                             onCardPositioned = { bounds -> cardBoundsInWindow = bounds },
                             onRendered = { shouldCapture = true }
                         )
@@ -290,6 +309,8 @@ private fun CaptureView(
     component: IRComponent,
     currentIndex: Int,
     totalCount: Int,
+    forceState: String? = null,
+    captureWidthDp: Int = 390,
     onCardPositioned: (Rect) -> Unit,
     onRendered: () -> Unit
 ) {
@@ -347,6 +368,8 @@ private fun CaptureView(
         ) {
             CaptureCanvas(
                 component = component,
+                forceState = forceState,
+                canvasWidth = captureWidthDp.dp,
                 onPositioned = { posInWindow, widthPx, heightPx ->
                     onCardPositioned(Rect(
                         posInWindow.x.roundToInt(),
@@ -366,7 +389,8 @@ private fun CaptureView(
  * comparison pipeline (iOS / Android / Web).
  *
  * Contract — matches iOS `CaptureCanvas` and web `<CaptureCanvas>`:
- *   - Width            : exactly 390dp
+ *   - Width            : exactly 390dp (CAPTURE_WIDTH override via the
+ *                        `captureWidth` intent extra — docs/DYNAMIC_CAPTURE.md §2)
  *   - Height           : component's natural height (no clamping, no minimum)
  *   - Background       : solid #1A1A2E (no alpha compositing)
  *   - Padding          : 16dp on all sides
@@ -380,6 +404,8 @@ private fun CaptureView(
 @Composable
 private fun CaptureCanvas(
     component: IRComponent,
+    forceState: String? = null,
+    canvasWidth: Dp = CaptureCanvasWidth,
     onPositioned: (androidx.compose.ui.geometry.Offset, Float, Float) -> Unit,
     onRendered: () -> Unit
 ) {
@@ -398,8 +424,14 @@ private fun CaptureCanvas(
     // up with iOS / web's 390px.
     Box(
         modifier = Modifier
-            .width(CaptureCanvasWidth)
+            .width(canvasWidth)
             .background(CaptureCanvasBg)
+            // Forced-state marker — the native twin of the web reference's
+            // `data-force-state` canvas stamp (docs/DYNAMIC_CAPTURE.md §1):
+            // lets a capture/UI-automator script verify the forced run
+            // actually ran forced. Absent (plain "capture-canvas") on base
+            // runs so the default path stays semantically identical.
+            .testTag(if (forceState != null) "capture-canvas-force-state-$forceState" else "capture-canvas")
             .onGloballyPositioned { coords ->
                 val pos = coords.positionInWindow()
                 onPositioned(pos, coords.size.width.toFloat(), coords.size.height.toFloat())
@@ -407,16 +439,28 @@ private fun CaptureCanvas(
             .padding(CaptureCanvasPadding)
     ) {
         // Root containing block for the wave-6 dynamic-value channel: the
-        // canvas CONTENT box (390 − 2×16 = 358dp), which is exactly the
-        // base web resolves root-level % / calc(…%…) against (the web
-        // CaptureCanvas div is the component's containing block; its
-        // content box is the same 358px). Height stays unknown — the
-        // canvas is content-sized on the block axis, matching web.
+        // canvas CONTENT box (width − 2×16, i.e. 358dp at the default 390),
+        // which is exactly the base web resolves root-level % / calc(…%…)
+        // against (the web CaptureCanvas div is the component's containing
+        // block; its content box is the same 358px). Height stays unknown —
+        // the canvas is content-sized on the block axis, matching web.
         androidx.compose.runtime.CompositionLocalProvider(
             com.styleconverter.runtime.core.variables.LocalContainingBlock provides
                 com.styleconverter.runtime.core.variables.ContainingBlock(
-                    widthPx = (CaptureCanvasWidth - CaptureCanvasPadding * 2).value
-                )
+                    widthPx = (canvasWidth - CaptureCanvasPadding * 2).value
+                ),
+            // Render-surface width channel (spec 06 §4): media
+            // min/max-width buckets evaluate against the CAPTURE CANVAS
+            // width — never the device screen. Full canvas width (not the
+            // content box): the canvas is the analogue of web's viewport-
+            // sized capture surface, and DYNAMIC_CAPTURE.md pins 390 as the
+            // width the default truth table is built on.
+            com.styleconverter.runtime.core.media.MediaBucketEvaluator.LocalRenderSurfaceWidthPx provides
+                canvasWidth.value,
+            // Forced-state set (spec 06 §6): one condition per capture run,
+            // resolved as active on every component under this canvas.
+            com.styleconverter.runtime.core.states.DynamicStyleResolver.LocalForcedStates provides
+                (forceState?.let { setOf(it) } ?: emptySet())
         ) {
         if (isOutOfFlowRoot(component)) {
             // A standalone capture of a `position: absolute|fixed` component

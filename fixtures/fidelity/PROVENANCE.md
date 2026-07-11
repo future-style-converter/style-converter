@@ -45,6 +45,14 @@ here and in `manifest.json` instead.
   chains, nested calc, calc-consuming-var). Components are built so
   resolution SUCCESS vs FAILURE changes visible pixels (spec 02
   custom-properties section).
+- `dynamic/*.json` — dynamic-styling suite (wave 7,
+  schema/spec/06-dynamic-styling.md): selector state buckets
+  (:hover/:active/:focus/:disabled/:checked, base↔state values chosen for
+  maximal pixel contrast, plus a multi-bucket layering pin), media width
+  buckets designed around the 390/250 px capture widths (match / no-match /
+  flip rows plus an order-decides layering pin), and dark-mode buckets
+  (prefers-color-scheme: dark) alongside light-dark() color values.
+  Capture recipes live in docs/DYNAMIC_CAPTURE.md.
 
 ## Inventory
 
@@ -104,5 +112,8 @@ here and in `manifest.json` instead.
 | `tokens/token-theme.json` | tokens | 3 | 11 |
 | `tokens/token-fallbacks.json` | tokens | 3 | 9 |
 | `tokens/calc-units.json` | tokens | 3 | 10 |
-| **total** | | **563** | **746** |
+| `dynamic/states.json` | dynamic | 6 | 6 |
+| `dynamic/media-width.json` | dynamic | 7 | 7 |
+| `dynamic/dark-mode.json` | dynamic | 4 | 4 |
+| **total** | | **580** | **763** |
 

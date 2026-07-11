@@ -54,6 +54,45 @@ class MainActivity : ComponentActivity() {
     private var hasStoragePermission by mutableStateOf(false)
     private var permissionChecked by mutableStateOf(false)
 
+    /**
+     * Dynamic-capture hooks (docs/DYNAMIC_CAPTURE.md — Android transport is
+     * launch intent extras; web is the reference implementation):
+     *
+     *   adb shell am start -n com.styleconverter.test/.MainActivity \
+     *       --es forceState active --ei captureWidth 250
+     *
+     * forceState — one runtime-v1 condition (hover|active|focus|disabled|
+     * checked) treated as ACTIVE at style resolution on EVERY captured
+     * component (spec 06 §6). Invalid values are rejected with a warning
+     * (never crash, never force-by-guess).
+     */
+    private fun readForceStateExtra(): String? {
+        val raw = intent?.getStringExtra("forceState")?.trim()?.lowercase()
+        if (raw.isNullOrEmpty()) return null
+        // Validate against the contract vocabulary — mirrors the web
+        // harness's CAPTURE_FORCE_STATE validation.
+        return if (raw in com.styleconverter.runtime.core.states.DynamicStyleResolver.FORCEABLE_STATES) {
+            Log.i(TAG, "forceState=$raw (capture run resolves this condition as active)")
+            raw
+        } else {
+            Log.w(TAG, "Ignoring invalid forceState extra \"$raw\" — expected one of hover|active|focus|disabled|checked")
+            null
+        }
+    }
+
+    /**
+     * captureWidth — render-surface width override in px (CAPTURE_WIDTH
+     * contract, docs/DYNAMIC_CAPTURE.md §2). Default 390 = the historical
+     * canvas, byte-identical captures. Non-positive values are rejected.
+     */
+    private fun readCaptureWidthExtra(): Int {
+        val raw = intent?.getIntExtra("captureWidth", 390) ?: 390
+        return if (raw > 0) raw else {
+            Log.w(TAG, "Ignoring non-positive captureWidth extra $raw — using default 390")
+            390
+        }
+    }
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -110,7 +149,12 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MainContent(
                         hasPermission = hasStoragePermission,
-                        permissionChecked = permissionChecked
+                        permissionChecked = permissionChecked,
+                        // Dynamic-capture hooks from the launch intent —
+                        // read once at composition setup; a capture run is
+                        // one activity launch, one hook configuration.
+                        forceState = readForceStateExtra(),
+                        captureWidthDp = readCaptureWidthExtra()
                     )
                 }
             }
@@ -162,7 +206,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun MainContent(
     hasPermission: Boolean,
-    permissionChecked: Boolean
+    permissionChecked: Boolean,
+    forceState: String? = null,
+    captureWidthDp: Int = 390
 ) {
     var captureComplete by remember { mutableStateOf(false) }
 
@@ -172,8 +218,11 @@ private fun MainContent(
     }
 
     if (!captureComplete && hasPermission) {
-        // Run screenshot capture first
+        // Run screenshot capture first — the dynamic-capture hooks apply to
+        // the capture pass only (the browsing gallery stays base-state).
         ScreenshotCaptureScreen(
+            forceState = forceState,
+            captureWidthDp = captureWidthDp,
             onCaptureComplete = {
                 captureComplete = true
             }

@@ -33,6 +33,39 @@ const args = process.argv.slice(2);
 const baseUrl = getArg('--url') ?? 'http://localhost:3000';
 const outDir  = resolve(__dirname, getArg('--out') ?? 'screenshots');
 
+// ── Dynamic-styling capture hooks (docs/DYNAMIC_CAPTURE.md) ─────────────────
+// CAPTURE_WIDTH: render-surface width override for the media-width fixtures
+// (spec 06 §4 — media queries evaluate against the capture canvas, and the
+// canvas width IS the viewport width here). Default 390 keeps the committed-
+// baseline path byte-identical; test-all.sh needs no changes because the env
+// var flows through the shell.
+const captureWidth = Number(process.env.CAPTURE_WIDTH || 390);
+if (!Number.isInteger(captureWidth) || captureWidth <= 0) {
+  console.error(`✗ CAPTURE_WIDTH must be a positive integer, got "${process.env.CAPTURE_WIDTH}"`);
+  process.exit(2);
+}
+// CAPTURE_FORCE_STATE: force one interaction state for the whole run
+// (spec 06 §6). Validated against the runtime-v1 condition set so a typo
+// fails loudly instead of silently capturing base state.
+const FORCE_STATES = ['hover', 'active', 'focus', 'disabled', 'checked'];
+const forceState = process.env.CAPTURE_FORCE_STATE || undefined;
+if (forceState && !FORCE_STATES.includes(forceState)) {
+  console.error(`✗ CAPTURE_FORCE_STATE must be one of ${FORCE_STATES.join('|')}, got "${forceState}"`);
+  process.exit(2);
+}
+// CAPTURE_DARK: color-scheme pin for the run (docs/DYNAMIC_CAPTURE.md §3).
+// The capture scheme is ALWAYS emulated explicitly — headless Chrome
+// inherits the host OS appearance (a dev machine in dark mode silently
+// activated every `(prefers-color-scheme: dark)` bucket and the dark arm
+// of light-dark(), violating the light-default capture contract), so
+// "unset" must mean "pin light", never "inherit whatever the host says".
+// CAPTURE_DARK=1 is the forced-dark run; 0/unset is the standard light run.
+const captureDark = process.env.CAPTURE_DARK === '1';
+if (process.env.CAPTURE_DARK && !['0', '1'].includes(process.env.CAPTURE_DARK)) {
+  console.error(`✗ CAPTURE_DARK must be 0 or 1, got "${process.env.CAPTURE_DARK}"`);
+  process.exit(2);
+}
+
 function getArg(name) {
   const i = args.indexOf(name);
   return i >= 0 ? args[i + 1] : undefined;
@@ -83,9 +116,20 @@ const browser = await puppeteer.launch({
 try {
   const page = await browser.newPage();
 
-  // 390 px viewport at 1x scale. iOS captures at scale=1.0 and Android at
+  // 390 px viewport at 1x scale (or the CAPTURE_WIDTH override for the
+  // two-width media recipe). iOS captures at scale=1.0 and Android at
   // 160 dpi (1dp == 1px), so we match that exactly.
-  await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
+  await page.setViewport({ width: captureWidth, height: 844, deviceScaleFactor: 1 });
+
+  // Pin the color scheme for the whole run (docs/DYNAMIC_CAPTURE.md §3):
+  // light unless CAPTURE_DARK=1. Without an explicit emulation the page
+  // follows the HOST OS appearance, making captures nondeterministic
+  // across machines — the exact failure mode the light-default gate for
+  // dark-mode.json exists to catch. Mirrors iOS's pinned
+  // `.environment(\.colorScheme, …)` on the capture canvas.
+  await page.emulateMediaFeatures([
+    { name: 'prefers-color-scheme', value: captureDark ? 'dark' : 'light' },
+  ]);
 
   // Page-error = an actual uncaught exception. Always report these.
   page.on('pageerror', (err) => console.error('[pageerror]', err.message));
@@ -113,7 +157,10 @@ try {
   // visual-test fixture relies on it for empty-container identification
   // matching the iOS / Android placeholder labels.
   const wptMode = process.env.WPT_MODE === '1';
-  const captureUrl = buildCaptureUrl(baseUrl, wptMode);
+  // width/forceState ride the URL so CaptureGallery can size the canvas and
+  // stamp `data-force-state` (the runtime reads it at style resolution).
+  // Defaults produce the byte-identical legacy URL — see buildCaptureUrl.
+  const captureUrl = buildCaptureUrl(baseUrl, wptMode, { width: captureWidth, forceState });
   console.log(`→ loading ${captureUrl}${wptMode ? ' (WPT_MODE=1: placeholder text suppressed)' : ''}`);
   await page.goto(captureUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
 
@@ -191,11 +238,11 @@ try {
     document.documentElement.scrollHeight,
     document.body?.scrollHeight ?? 0,
   ));
-  await page.setViewport({ width: 390, height: pageHeight, deviceScaleFactor: 1 });
+  await page.setViewport({ width: captureWidth, height: pageHeight, deviceScaleFactor: 1 });
   // Give layout one tick to settle into the new viewport.
   await page.evaluate(() => new Promise((r) => setTimeout(r, 50)));
 
-  console.log(`  capturing ${manifest.length} canvases via ${390}×${pageHeight} screenshot → ${outDir}`);
+  console.log(`  capturing ${manifest.length} canvases via ${captureWidth}×${pageHeight} screenshot → ${outDir}`);
   const fullPng = await page.screenshot({ type: 'png' });
 
   // Crop with sharp — CPU-only, no more round-trips to the browser.
@@ -223,7 +270,7 @@ try {
   const sharp = sharpMod.default;
 
   const baseMeta = await sharp(fullPng, { limitInputPixels: false }).metadata();
-  const imgW = baseMeta.width ?? 390;
+  const imgW = baseMeta.width ?? captureWidth;
   const imgH = baseMeta.height ?? pageHeight;
 
   // Build the per-entry crop spec up-front so the parallel batch only does

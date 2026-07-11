@@ -70,6 +70,13 @@ struct ScreenshotCaptureView: View {
 
     private func startCapture() {
         ScreenshotManager.reset()
+        // Wave 7 — announce the dynamic-capture hooks for this run so a
+        // host script (and a human reading the simulator log) can verify
+        // a forced/width/dark run actually ran forced (the log-side
+        // sibling of the canvas's force-state accessibility marker).
+        print("[Capture] forceState=\(CaptureOverrides.forceState ?? "none") "
+              + "width=\(Int(CaptureOverrides.captureWidth)) "
+              + "scheme=\(CaptureOverrides.darkMode ? "dark" : "light")")
         total = flat.count
         captured = 0
         captureNext(index: 0)

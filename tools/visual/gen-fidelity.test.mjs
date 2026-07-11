@@ -23,15 +23,24 @@
 //      definitions, var() references across the slot chain (with shadowing),
 //      missing-var/fallback/nested-fallback cases, and calc()/relative-unit
 //      mixes; the manifest features vocabulary is pinned.
-//   7. converter round-trip — 9 representative files (3 wave-4 originals + a
-//      pairwise shard + 2 placement trees + the 3 wave-6 token files) convert
-//      cleanly, the emitted IR validates against schema/ir-v2.schema.json,
-//      the output is flat + slot-composed (no nested children survive),
-//      authored --* declarations surface 1:1 as component `variables` maps,
-//      and every whole-value var()/calc() declaration survives byte-for-byte
-//      (spec 02 preservation contract). Gradle-slow and JDK-21-dependent, so
-//      it only runs when GEN_FIDELITY_CONVERT=1 is set (the CI test-tooling
-//      job has no JDK — see .github/workflows/ci.yml).
+//   7. dynamic coverage — the 3 dynamic files (wave 7) carry selector state
+//      buckets (all 5 runtime-v1 conditions + a layering pin), media width
+//      buckets spanning the 390/250 px truth table (match / no-match / flip
+//      rows + a layering pin), and dark-mode buckets + light-dark() values;
+//      every bucket overrides ≥1 base declaration with a DIFFERENT value
+//      (the pixel-contrast guarantee); the features vocabulary is pinned.
+//   8. converter round-trip — 12 representative files (3 wave-4 originals +
+//      a pairwise shard + 2 placement trees + the 3 wave-6 token files + the
+//      3 wave-7 dynamic files) convert cleanly, the emitted IR validates
+//      against schema/ir-v2.schema.json, the output is flat + slot-composed
+//      (no nested children survive), authored --* declarations surface 1:1
+//      as component `variables` maps, every whole-value var()/calc()
+//      declaration survives byte-for-byte (spec 02 preservation contract),
+//      and authored selector/media buckets survive to the wire in order
+//      (conditions colon-stripped, queries verbatim — spec 01 buckets).
+//      Gradle-slow and JDK-21-dependent, so it only runs when
+//      GEN_FIDELITY_CONVERT=1 is set (the CI test-tooling job has no JDK —
+//      see .github/workflows/ci.yml).
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -89,9 +98,10 @@ test('seed is pinned in the manifest', () => {
 // ── 2. Envelope shape ────────────────────────────────────────────────────
 
 // The authoring envelope the converter's parseComponent accepts. We only
-// generate a subset (no selectors/media/_role), so the check is strict on
-// exactly what the generator is allowed to emit.
-const ALLOWED_NODE_KEYS = new Set(['properties', 'children', '_text']);
+// generate a subset (no _role), so the check is strict on exactly what the
+// generator is allowed to emit — selectors/media joined in wave 7 (the
+// dynamic suite) with their CSS-side bucket shapes validated below.
+const ALLOWED_NODE_KEYS = new Set(['properties', 'children', '_text', 'selectors', 'media']);
 const PROP_NAME_RE = /^-?[a-z][a-z0-9-]*$/; // css longhand/shorthand names (optional vendor dash)
 // Custom-property declarations (css-variables-1 §2): `--` + at least one
 // character. The tokens suite declares these alongside normal properties;
@@ -117,6 +127,45 @@ function assertComponentNode(node, path) {
   if ('_text' in node) {
     assert.equal(typeof node._text, 'string', `${path}: _text must be a string`);
     assert.ok(node._text.length > 0, `${path}: generator never emits empty _text`);
+  }
+  // Bucket property maps share the base-declaration rules (non-empty
+  // string values, css property names).
+  const assertBucketProps = (props, where) => {
+    assert.equal(typeof props, 'object', `${where}: missing bucket properties map`);
+    const entries = Object.entries(props);
+    assert.ok(entries.length > 0, `${where}: empty bucket`);
+    for (const [prop, value] of entries) {
+      assert.ok(PROP_NAME_RE.test(prop), `${where}: bad bucket property name "${prop}"`);
+      assert.equal(typeof value, 'string', `${where}.${prop}: value must be a string`);
+      assert.ok(value.length > 0, `${where}.${prop}: empty value`);
+    }
+  };
+  if ('selectors' in node) {
+    // CSS-side selector bucket shape (CssParsing.parseComponent): array of
+    // {selector, properties}; selector KEEPS the leading colon and must be
+    // a runtime-v1 condition (spec 06 §2) — the generator never authors
+    // conditions the runtimes define as inert.
+    assert.ok(Array.isArray(node.selectors) && node.selectors.length > 0, `${path}: selectors must be a non-empty array`);
+    for (const [i, bucket] of node.selectors.entries()) {
+      assert.deepEqual(Object.keys(bucket).sort(), ['properties', 'selector'], `${path}.selectors[${i}]: bucket keys drifted`);
+      assert.match(bucket.selector, /^:(hover|active|focus|disabled|checked)$/, `${path}.selectors[${i}]: non-runtime-v1 condition "${bucket.selector}"`);
+      assertBucketProps(bucket.properties, `${path}.selectors[${i}]`);
+    }
+  }
+  if ('media' in node) {
+    // CSS-side media bucket shape: array of {query, properties}; query is
+    // the raw parenthesised string, restricted to the runtime-v1 grammar
+    // (min-width/max-width in px, prefers-color-scheme — spec 06 §4).
+    assert.ok(Array.isArray(node.media) && node.media.length > 0, `${path}: media must be a non-empty array`);
+    for (const [i, bucket] of node.media.entries()) {
+      assert.deepEqual(Object.keys(bucket).sort(), ['properties', 'query'], `${path}.media[${i}]: bucket keys drifted`);
+      assert.match(
+        bucket.query,
+        /^\((min-width: \d+px|max-width: \d+px|prefers-color-scheme: (light|dark))\)$/,
+        `${path}.media[${i}]: query outside the runtime-v1 grammar "${bucket.query}"`,
+      );
+      assertBucketProps(bucket.properties, `${path}.media[${i}]`);
+    }
   }
   if ('children' in node) {
     // children map-in rule (schema/spec/03-children.md): a non-empty
@@ -400,6 +449,96 @@ test('tokens: 3 files carrying var definitions, references, fallbacks, and calc 
   }
 });
 
+// ── 3e. Dynamic coverage (selector states + media queries — wave 7) ─────
+
+test('dynamic: 3 files carrying state buckets, width buckets, and dark-mode buckets with guaranteed contrast', () => {
+  const dynamic = manifest.files.filter((f) => f.kind === 'dynamic');
+  assert.equal(dynamic.length, 3, 'dynamic template set must stay at 3 files');
+  // Structural scan flags — every dynamic-styling scenario the suite exists
+  // for must be observed in the actual fixture bytes (spec 06 §2/§3/§4).
+  const states = new Set();       // runtime-v1 conditions seen (:x → x)
+  let sawSelectorLayering = false; // ≥2 selector buckets claiming one property type
+  let sawMediaLayering = false;    // ≥2 media buckets claiming one property type
+  let sawMinMatch390 = false;      // (min-width ≤ 390px) — active at the default width
+  let sawMinNoMatch390 = false;    // (min-width > 390px) — must stay inert
+  let sawMaxMatch390 = false;      // (max-width ≥ 390px) — active at the default width
+  let sawFlip250 = false;          // a bucket whose truth flips between 390 and 250
+  let sawSchemeDark = false;       // (prefers-color-scheme: dark) bucket
+  let sawLightDark = false;        // light-dark() color value in base properties
+  let sawLayoutBucket = false;     // a bucket touching geometry (width/height/padding)
+  for (const entry of dynamic) {
+    const doc = JSON.parse(byPath.get(entry.path));
+    const comps = Object.values(doc.components);
+    assert.ok(comps.length >= 4 && comps.length <= 8, `${entry.path}: ${comps.length} components outside 4–8`);
+    assert.ok(Array.isArray(entry.features) && entry.features.length > 0, `${entry.path}: manifest features descriptor missing`);
+    for (const comp of comps) {
+      const base = comp.properties;
+      if (Object.values(base).some((v) => v.startsWith('light-dark('))) sawLightDark = true;
+      const buckets = [...(comp.selectors ?? []), ...(comp.media ?? [])];
+      // The pixel-contrast guarantee: EVERY bucket overrides at least one
+      // base declaration with a DIFFERENT value, so bucket application vs
+      // non-application always changes pixels (charter requirement — a
+      // bucket of only-new properties could render invisibly).
+      for (const bucket of buckets) {
+        assert.ok(
+          Object.entries(bucket.properties).some(([p, v]) => p in base && base[p] !== v),
+          `${entry.path}: bucket ${bucket.selector ?? bucket.query} overrides no base declaration`,
+        );
+        if (Object.keys(bucket.properties).some((p) => ['width', 'height', 'padding'].includes(p))) sawLayoutBucket = true;
+      }
+      // Layering pins: two buckets of the SAME kind claiming the same
+      // property — array order must decide (spec 06 §3).
+      const claimsOverlap = (list) => {
+        const seen = new Set();
+        for (const b of list ?? []) {
+          for (const p of Object.keys(b.properties)) {
+            if (seen.has(p)) return true;
+            seen.add(p);
+          }
+        }
+        return false;
+      };
+      if (claimsOverlap(comp.selectors)) sawSelectorLayering = true;
+      if (claimsOverlap(comp.media)) sawMediaLayering = true;
+      for (const b of comp.selectors ?? []) states.add(b.selector.slice(1));
+      for (const b of comp.media ?? []) {
+        const min = b.query.match(/^\(min-width: (\d+)px\)$/);
+        const max = b.query.match(/^\(max-width: (\d+)px\)$/);
+        if (min && Number(min[1]) <= 390) sawMinMatch390 = true;
+        if (min && Number(min[1]) > 390) sawMinNoMatch390 = true;
+        if (max && Number(max[1]) >= 390) sawMaxMatch390 = true;
+        // Flip rows: min-width in (250, 390] or max-width in [250, 390)
+        // answers differently at the two capture widths (DYNAMIC_CAPTURE §2).
+        if (min && Number(min[1]) > 250 && Number(min[1]) <= 390) sawFlip250 = true;
+        if (max && Number(max[1]) >= 250 && Number(max[1]) < 390) sawFlip250 = true;
+        if (b.query === '(prefers-color-scheme: dark)') sawSchemeDark = true;
+      }
+    }
+  }
+  // All five runtime-v1 conditions must be exercised (spec 06 §2).
+  assert.deepEqual([...states].sort(), ['active', 'checked', 'disabled', 'focus', 'hover'], 'runtime-v1 condition set drifted');
+  assert.ok(sawSelectorLayering, 'no multi-selector-bucket layering pin found');
+  assert.ok(sawMediaLayering, 'no multi-media-bucket layering pin found');
+  assert.ok(sawMinMatch390, 'no min-width bucket matching at 390px found');
+  assert.ok(sawMinNoMatch390, 'no min-width bucket that must stay inert at 390px found');
+  assert.ok(sawMaxMatch390, 'no max-width bucket matching at 390px found');
+  assert.ok(sawFlip250, 'no bucket flipping between the 390px and 250px capture widths found');
+  assert.ok(sawSchemeDark, 'no (prefers-color-scheme: dark) bucket found');
+  assert.ok(sawLightDark, 'no light-dark() color value found');
+  assert.ok(sawLayoutBucket, 'no bucket touching layout geometry found');
+  // Feature-descriptor vocabulary union — the coverage promise wave runs read.
+  const featureUnion = new Set(dynamic.flatMap((f) => f.features));
+  for (const feat of [
+    'selector-hover', 'selector-active', 'selector-focus', 'selector-disabled',
+    'selector-checked', 'selector-layering', 'media-min-width', 'media-max-width',
+    'media-match-390', 'media-nomatch-390', 'media-flip-250', 'media-layering',
+    'media-layout-flip', 'prefers-color-scheme-dark', 'light-dark-color',
+    'scheme-bucket-plus-light-dark',
+  ]) {
+    assert.ok(featureUnion.has(feat), `dynamic manifest features missing "${feat}"`);
+  }
+});
+
 test('manifest lists every generated fixture exactly once with correct byte sizes', () => {
   const listed = manifest.files.map((f) => f.path).sort();
   const actual = fixtureFiles.map((f) => f.relPath).sort();
@@ -445,9 +584,13 @@ function representativeFiles() {
   // Wave 6: the whole tokens suite rides along — the variables envelope
   // key + verbatim var()/calc() preservation are pinned per file below.
   const tokenFiles = manifest.files.filter((f) => f.kind === 'tokens');
+  // Wave 7: the whole dynamic suite too — selector/media bucket survival
+  // (conditions colon-stripped, queries verbatim, order preserved) is
+  // exactly what these files exist to pin end-to-end.
+  const dynamicFiles = manifest.files.filter((f) => f.kind === 'dynamic');
   // De-dupe while preserving the selection intent (paths are unique keys).
   return [...new Map(
-    [smallest, largestCombos, deepestTree, pairwiseShard, placementAreas, placementMixed, ...tokenFiles]
+    [smallest, largestCombos, deepestTree, pairwiseShard, placementAreas, placementMixed, ...tokenFiles, ...dynamicFiles]
       .map((f) => [f.path, f]),
   ).values()];
 }
@@ -476,6 +619,29 @@ function collectTokenExpectations(components) {
   return { variableMaps, dynamicValues };
 }
 
+/** Collect the authored selector/media bucket expectations per component
+ *  name, in authoring order: conditions WITHOUT the leading colon (the
+ *  converter strips it — Selectors.kt) and raw query strings (forwarded
+ *  verbatim — Media.kt). The dynamic suite authors buckets only on ROOT
+ *  components, so a flat name→expectation map suffices. */
+function collectBucketExpectations(components) {
+  const byName = new Map();
+  for (const [name, comp] of Object.entries(components)) {
+    if (!comp.selectors && !comp.media) continue;
+    byName.set(name, {
+      conditions: (comp.selectors ?? []).map((b) => b.selector.replace(/^:/, '')),
+      queries: (comp.media ?? []).map((b) => b.query),
+      // Per-bucket authored declaration counts — bucket properties parse
+      // through the same PropertiesParser as base declarations, so each
+      // emitted bucket must carry AT LEAST the authored count (shorthands
+      // like `border` expand to more longhands, never fewer).
+      selectorMinProps: (comp.selectors ?? []).map((b) => Object.keys(b.properties).length),
+      mediaMinProps: (comp.media ?? []).map((b) => Object.keys(b.properties).length),
+    });
+  }
+  return byName;
+}
+
 /** Count every node in an authored components map (children maps recurse). */
 function countInputNodes(components) {
   let n = 0;
@@ -489,7 +655,7 @@ function countInputNodes(components) {
 const CONVERT_ENABLED = process.env.GEN_FIDELITY_CONVERT === '1';
 
 test(
-  'converter round-trip: 9 representative files convert cleanly, validate against IR v2, and emit flat+slot+variables output',
+  'converter round-trip: 12 representative files convert cleanly, validate against IR v2, and emit flat+slot+variables+bucket output',
   { skip: CONVERT_ENABLED ? false : 'set GEN_FIDELITY_CONVERT=1 (requires JDK 21) to run' },
   () => {
     // Pin Java 21 on macOS dev machines, mirroring schema/conformance/run.mjs.
@@ -582,6 +748,52 @@ test(
           irText.includes(value),
           `${entry.path}: dynamic value '${value}' was not preserved verbatim in the emitted IR`,
         );
+      }
+      // Wave-7 dynamic-styling pins (dynamic suite; vacuous for files that
+      // author no selectors/media buckets): every authored bucket must
+      // survive to the wire — conditions colon-stripped, queries VERBATIM,
+      // array order preserved (spec 06 §3 layering depends on it), each
+      // bucket's property list parsed (≥ authored count — shorthands only
+      // ever expand) and never empty.
+      const bucketExpectations = collectBucketExpectations(input.components);
+      for (const [name, expect] of bucketExpectations) {
+        const emitted = ir.components.find((c) => c.name === name);
+        assert.ok(emitted, `${entry.path}#${name}: bucket-carrying component missing from the wire`);
+        assert.deepEqual(
+          (emitted.selectors ?? []).map((s) => s.condition),
+          expect.conditions,
+          `${entry.path}#${name}: selector conditions drifted (order or colon-stripping)`,
+        );
+        assert.deepEqual(
+          (emitted.media ?? []).map((m) => m.query),
+          expect.queries,
+          `${entry.path}#${name}: media queries not preserved verbatim in order`,
+        );
+        (emitted.selectors ?? []).forEach((s, i) => {
+          assert.ok(
+            s.properties.length >= expect.selectorMinProps[i],
+            `${entry.path}#${name}: selector bucket ${i} lost declarations (${s.properties.length} < ${expect.selectorMinProps[i]})`,
+          );
+        });
+        (emitted.media ?? []).forEach((m, i) => {
+          assert.ok(
+            m.properties.length >= expect.mediaMinProps[i],
+            `${entry.path}#${name}: media bucket ${i} lost declarations (${m.properties.length} < ${expect.mediaMinProps[i]})`,
+          );
+        });
+      }
+      if (entry.kind === 'dynamic') {
+        assert.ok(bucketExpectations.size > 0, `${entry.path}: dynamic fixture authored no buckets`);
+        // light-dark() color values are dynamic colors (srgb null,
+        // original preserved — spec 02): the raw function text must
+        // survive somewhere in the emitted IR for dark-mode fixtures.
+        for (const comp of Object.values(input.components)) {
+          for (const v of Object.values(comp.properties ?? {})) {
+            if (v.startsWith('light-dark(')) {
+              assert.ok(irText.includes('light-dark'), `${entry.path}: light-dark() value vanished from the wire`);
+            }
+          }
+        }
       }
     }
   },

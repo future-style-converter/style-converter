@@ -41,9 +41,22 @@
  * @param {boolean} wptMode - When true, appends `&wpt=1` so the React app
  *                            suppresses placeholder text. When false, the URL
  *                            stays at the legacy `?mode=capture` form.
+ * @param {object} [opts] - Dynamic-styling capture hooks (docs/DYNAMIC_CAPTURE.md).
+ *                          Omitted / defaulted ⇒ the URL is byte-identical to
+ *                          the legacy two-argument form — committed baselines
+ *                          were all captured against that exact string.
+ * @param {number} [opts.width] - Render-surface width override in px
+ *                          (`CAPTURE_WIDTH` env). Appended as `&width=<px>`
+ *                          ONLY when it differs from the 390px default, so
+ *                          the default run's URL (and captures) never drift.
+ * @param {string} [opts.forceState] - Forced interaction state
+ *                          (`CAPTURE_FORCE_STATE` env): one of
+ *                          hover|active|focus|disabled|checked
+ *                          (schema/spec/06-dynamic-styling.md §6). Appended
+ *                          as `&forceState=<state>` when set.
  * @returns {string} The fully formed URL to navigate to.
  */
-export function buildCaptureUrl(baseUrl, wptMode) {
+export function buildCaptureUrl(baseUrl, wptMode, opts = {}) {
   // Strip a single trailing slash. URL stays canonical regardless of how
   // the caller chose to format the origin (`http://x:3000` vs `http://x:3000/`).
   const trimmed = baseUrl.replace(/\/$/, '');
@@ -52,5 +65,10 @@ export function buildCaptureUrl(baseUrl, wptMode) {
   // `mode=capture` first preserves byte-identity with all pre-fix URLs in
   // logs and historical capture artifacts.
   const wptSuffix = wptMode ? '&wpt=1' : '';
-  return `${trimmed}/?mode=capture${wptSuffix}`;
+  // Dynamic-styling hooks, in fixed order (width, then forceState) so the
+  // URL stays deterministic for logs / artifact matching. The `!== 390`
+  // guard keeps the default path byte-identical to the legacy form.
+  const widthSuffix = opts.width && opts.width !== 390 ? `&width=${opts.width}` : '';
+  const stateSuffix = opts.forceState ? `&forceState=${opts.forceState}` : '';
+  return `${trimmed}/?mode=capture${wptSuffix}${widthSuffix}${stateSuffix}`;
 }

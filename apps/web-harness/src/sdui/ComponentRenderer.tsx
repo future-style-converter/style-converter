@@ -12,6 +12,10 @@
 import React, { useMemo } from 'react';
 import type { IRProperty, IRPseudoNode } from '@style-converter/web/core/ir/IRModels';
 import { buildStyles, buildVariables, type CSSStyles } from '@style-converter/web/core/renderer/StyleBuilder';
+// Stylesheet path (spec 06): every rendered component carries its
+// `sc-<id>` class so the RuleBuilder-generated selector/media rules
+// (mounted by useDynamicRules in App.tsx) can target it.
+import { componentClassName, forceClassName, isRuntimeV1Condition } from '@style-converter/web/core/renderer/RuleBuilder';
 import type { ComposedNode } from './Composer';
 
 /**
@@ -41,6 +45,24 @@ import type { ComposedNode } from './Composer';
 const WPT_MODE: boolean = (() => {
   if (typeof window === 'undefined') return false;
   return new URLSearchParams(window.location.search).get('wpt') === '1';
+})();
+
+/**
+ * `?forceState=<state>` — the forced interaction state for this capture
+ * run (spec 06 §6; docs/DYNAMIC_CAPTURE.md §1). CaptureGallery stamps the
+ * verification marker (`data-force-state`) on every canvas; THIS is where
+ * the state is actually applied: every rendered component element gets the
+ * `force-<state>` class, which twins the real pseudo-class on the SAME
+ * RuleBuilder rule — so a forced run resolves byte-identically to real
+ * input. Same read-once module-constant pattern as WPT_MODE (URL params
+ * can't change mid-capture; keeps the hot render loop allocation-free).
+ * Values outside the runtime-v1 set fall back to null (base-state render)
+ * — capture-screenshots.mjs's env validation is the loud gate.
+ */
+const FORCE_STATE = (() => {
+  if (typeof window === 'undefined') return null;                    // SSR — never forced
+  const raw = new URLSearchParams(window.location.search).get('forceState');
+  return raw && isRuntimeV1Condition(raw) ? raw : null;              // validated or dropped
 })();
 
 interface ComponentRendererProps {
@@ -220,6 +242,25 @@ export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
   const aspectRatioInlineUnconstrained = hasAspectRatio && blockAxisConstrained && !inlineAxisConstrained;
   const aspectRatioBlockUnconstrained = hasAspectRatio && inlineAxisConstrained && !blockAxisConstrained;
 
+  // Dynamic-sizing carve-out (spec 06) — do the component's selector/media
+  // buckets redeclare box geometry? The synthetic min-width/min-height
+  // floors below default to the BASE width/height, which is a no-op for
+  // static components (floor == declared size) but actively fights a
+  // bucket rule: `@media (max-width: 300px) { width: 120px !important }`
+  // beats the inline `width: 200px` in the cascade, yet the stale inline
+  // `min-width: 200px` floor re-clamps the used value back to 200 (CSS
+  // sizing: used width = max(min-width, width)). Caught by MW_LayoutFlip
+  // at the 250 px capture width. When ANY bucket declares a sizing
+  // property we drop the size-derived floor to '0' — pixel-identical at
+  // base state (the inline width/height still applies) but overridable by
+  // the stylesheet path. Bucket-free components (the 327-pair baseline)
+  // never enter this branch.
+  const SIZING_TYPES = ['Width', 'Height', 'MinWidth', 'MaxWidth', 'MinHeight', 'MaxHeight',
+    'InlineSize', 'BlockSize', 'MinInlineSize', 'MaxInlineSize', 'MinBlockSize', 'MaxBlockSize'];
+  const bucketsDeclareSizing =
+    (component.selectors ?? []).some((s) => s.properties.some((p) => SIZING_TYPES.includes(p.type))) ||
+    (component.media ?? []).some((m) => m.properties.some((p) => SIZING_TYPES.includes(p.type)));
+
   // Bug 1 — WPT block-flow widen carve-out — see
   // tools/titan/investigations/swarm-003/css-ui__negative-outline-offset.json
   //
@@ -290,14 +331,19 @@ export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
     // lift from. `min-content` is harmless on the empty-box case (the
     // 032 fixture) — no children means min-content resolves to 0, so
     // the aspect-ratio transfer still fires as before.
+    // Dynamic-sizing carve-out (see bucketsDeclareSizing above): when a
+    // bucket redeclares geometry, the size-derived floor collapses to '0'
+    // so the !important bucket rule owns the used value at every width.
     minWidth: aspectRatioInlineUnconstrained
       ? (hasChildren ? 'min-content' : undefined)
       : (styles.minWidth || styles.minInlineSize ||
-        ((styles.maxWidth || styles.maxInlineSize) ? '0' : (styles.width || styles.inlineSize || '50px'))),
+        ((styles.maxWidth || styles.maxInlineSize) ? '0'
+          : (bucketsDeclareSizing ? '0' : (styles.width || styles.inlineSize || '50px')))),
     minHeight: aspectRatioBlockUnconstrained
       ? (hasChildren ? 'min-content' : undefined)
       : (styles.minHeight || styles.minBlockSize ||
-        ((styles.maxHeight || styles.maxBlockSize) ? '0' : (styles.height || styles.blockSize || '30px'))),
+        ((styles.maxHeight || styles.maxBlockSize) ? '0'
+          : (bucketsDeclareSizing ? '0' : (styles.height || styles.blockSize || '30px')))),
     // Empty grid/flex → behave like a block so the placeholder doesn't get
     // inflated by track/flex sizing. Applied AFTER the spread so it always
     // wins for empty containers; explicit `display` from styles is dropped
@@ -545,11 +591,21 @@ export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
   // of them.
   const elementName: string = (tag && TAG_ALLOWLIST.has(tag)) ? tag : 'div';
 
+  // Stylesheet-path class list (spec 06): the per-component `sc-<id>`
+  // class is ALWAYS present — inert for bucket-free components (no rule
+  // targets it; the 327-pair baseline DOM gains an attribute, zero
+  // pixels) — and the `force-<state>` class is appended only on forced
+  // capture runs, activating the twin selector on every state rule.
+  const className = componentClassName(component.id)
+    + (FORCE_STATE ? ` ${forceClassName(FORCE_STATE)}` : '');
+
   return React.createElement(
     elementName,
     {
       'data-component-id': component.id,
       'data-component-name': component.name,
+      // Rule target + forced-state hook — see className above.
+      className,
       // Custom-property definitions merge LAST — their `--name` keys are
       // disjoint from every regular CSS key, so this can never clobber a
       // declaration; ordering just keeps the intent obvious.
@@ -654,8 +710,19 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor }: Plac
   // both honour explicit text colour, web didn't).
   const rgb = parseRgb(backgroundColor);
   const luminance = rgb ? 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2] : 0;
+  // When the IR declares an explicit `color`, INHERIT it from the container
+  // instead of re-stating the literal value on this span. The container's
+  // inline style already carries that exact value, so base renders are
+  // pixel-identical either way — but a dynamic-styling rule (spec 06: a
+  // `:focus` selector bucket recoloring text, forced or real) overrides the
+  // CONTAINER's color via `!important`, and a literal inline color here
+  // would clobber the cascade and keep the glyphs at the stale base value
+  // (caught by DS_StateStack forced-focus capture: text never flipped).
+  // `inherit` lets the state-resolved color reach the visible text, which
+  // is exactly what the native placeholders get from resolved styles.
   const color = explicitColor
-    ?? (luminance > 0.6
+    ? 'inherit'
+    : (luminance > 0.6
       ? 'rgba(51, 51, 51, 0.7)'    // dark on light
       : 'rgba(237, 237, 237, 0.7)'); // light on dark (and the no-bg fallback)
   // Visible-text resolution priority — see

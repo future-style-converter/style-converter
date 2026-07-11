@@ -1,0 +1,157 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "dynamiclayering-001",
+            "name": "DynamicLayering",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 180.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9254901960784314,
+                            "g": 0.9411764705882353,
+                            "b": 0.9450980392156862
+                        },
+                        "original": "#ecf0f1"
+                    }
+                },
+                {
+                    "type": "Color",
+                    "data": {
+                        "srgb": {
+                            "r": 0.06666666666666667,
+                            "g": 0.06666666666666667,
+                            "b": 0.06666666666666667
+                        },
+                        "original": "#111111"
+                    }
+                }
+            ],
+            "selectors": [
+                {
+                    "condition": "hover",
+                    "properties": [
+                        {
+                            "type": "BackgroundColor",
+                            "data": {
+                                "srgb": {
+                                    "r": 0.20392156862745098,
+                                    "g": 0.596078431372549,
+                                    "b": 0.8588235294117647
+                                },
+                                "original": "#3498db"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "condition": "active",
+                    "properties": [
+                        {
+                            "type": "BackgroundColor",
+                            "data": {
+                                "srgb": {
+                                    "r": 0.9058823529411765,
+                                    "g": 0.2980392156862745,
+                                    "b": 0.23529411764705882
+                                },
+                                "original": "#e74c3c"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "condition": "focus",
+                    "properties": [
+                        {
+                            "type": "Color",
+                            "data": {
+                                "srgb": {
+                                    "r": 1.0,
+                                    "g": 1.0,
+                                    "b": 1.0
+                                },
+                                "original": "#ffffff"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "media": [
+                {
+                    "query": "(min-width: 200px)",
+                    "properties": [
+                        {
+                            "type": "BackgroundColor",
+                            "data": {
+                                "srgb": {
+                                    "r": 0.17254901960784313,
+                                    "g": 0.24313725490196078,
+                                    "b": 0.3137254901960784
+                                },
+                                "original": "#2c3e50"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "query": "(max-width: 500px)",
+                    "properties": [
+                        {
+                            "type": "BackgroundColor",
+                            "data": {
+                                "srgb": {
+                                    "r": 0.9019607843137255,
+                                    "g": 0.49411764705882355,
+                                    "b": 0.13333333333333333
+                                },
+                                "original": "#e67e22"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "query": "(prefers-color-scheme: dark)",
+                    "properties": [
+                        {
+                            "type": "Color",
+                            "data": {
+                                "srgb": {
+                                    "r": 0.9764705882352941,
+                                    "g": 0.9803921568627451,
+                                    "b": 0.984313725490196
+                                },
+                                "original": "#f9fafb"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "lightdarkvalue-002",
+            "name": "LightDarkValue",
+            "properties": [
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "original": {
+                            "type": "light-dark",
+                            "lightColor": "#ecf0f1",
+                            "darkColor": "#111827"
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -33,12 +33,23 @@
 //                                              chain, calc()/relative-unit
 //                                              arithmetic — visible-on-failure
 //                                              by construction
+//   fixtures/fidelity/dynamic/*.json           dynamic-STYLING suite (wave 7):
+//                                              selector state buckets
+//                                              (:hover/:active/:focus/
+//                                              :disabled/:checked) and media
+//                                              buckets (min/max-width against
+//                                              the 390/250 px capture widths,
+//                                              prefers-color-scheme: dark,
+//                                              light-dark() colors) — runtime
+//                                              semantics per
+//                                              schema/spec/06-dynamic-styling.md
 //   fixtures/fidelity/manifest.json            file inventory for wave runs
 //   fixtures/fidelity/PROVENANCE.md            generation record (tool + seed)
 //
 // Provenance lives in manifest.json / PROVENANCE.md — NOT inside the fixture
 // envelopes: the CSS-side input tolerates only {properties, selectors, media,
-// children, _text, _role} per component (CssParsing.parseComponent) and the
+// children, _text, _role} per component (CssParsing.parseComponent — the
+// dynamic suite is the one that actually uses the selectors/media keys) and the
 // IR wire schema rejects unknown envelope keys (schema/spec/01-envelope.md),
 // so a "_generated" marker key is off the table by design.
 //
@@ -1085,6 +1096,219 @@ const TOKEN_BUILDERS = [
     ['calc-percent-px', 'calc-em-px', 'nested-calc', 'em-inheritance-chain', 'var-in-calc']],
 ];
 
+// ── 7c. DYNAMIC — selector states + media queries (wave 7) ───────────────
+// The dynamic-styling suite: fixtures whose CORRECT rendering depends on the
+// runtime's selector/media bucket semantics (schema/spec/06-dynamic-styling.md).
+// Buckets ride the CSS-side `selectors` / `media` envelope keys
+// (CssParsing.parseComponent) and survive to the IR wire as IRSelector /
+// IRMedia — this suite is the first fidelity corpus to exercise them.
+// Hand-designed values (the base↔bucket CONTRAST is the test surface): every
+// bucket overrides at least one base declaration with a maximally different
+// value, so bucket application vs non-application always changes pixels.
+// PRNG only picks support geometry (widths/heights) — never the contrast pairs.
+
+/** Selector-bucket helper: CSS-side shape per CssParsing.parseComponent
+ *  (`selector` keeps the leading colon; the converter strips it to the
+ *  IRSelector `condition`). */
+function sel(selector, properties) {
+  return { selector, properties };
+}
+
+/** Media-bucket helper: raw query string, parentheses included (spec 01). */
+function mq(query, properties) {
+  return { query, properties };
+}
+
+function buildDynamicStates(rng) {
+  return {
+    // :hover — light base flips to a saturated dark red on hover (max
+    // luminance contrast). Pointer platforms only; touch = defined no-op
+    // (spec 06 §2), so the base capture doubles as the touch expectation.
+    DS_HoverSwap: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': '#ecf0f1', color: '#111111', border: '3px solid #2c3e50',
+      },
+      selectors: [sel(':hover', { 'background-color': '#c0392b', color: '#ffffff' })],
+      _text: 'hover state',
+    },
+    // :active — press flips blue → orange AND the border to its dark
+    // complement; both channels must change together (whole-bucket overlay).
+    DS_ActivePress: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': '#3498db', border: '3px solid #1a5276', color: '#ffffff',
+      },
+      selectors: [sel(':active', { 'background-color': '#f39c12', border: '3px solid #7e3b09' })],
+      _text: 'active state',
+    },
+    // :focus — dark base gains a vivid focus border; background darkens a
+    // step so the bucket is visible even where borders render subtly.
+    DS_FocusRing: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': '#1f2937', border: '4px solid #4b5563', color: '#f9fafb',
+      },
+      selectors: [sel(':focus', { border: '4px solid #e67e22', 'background-color': '#111827' })],
+      _text: 'focus state',
+    },
+    // :disabled — vivid green desaturates to gray + half opacity: the
+    // canonical "grayed out" treatment, unmistakable against the base.
+    DS_DisabledDim: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': '#2ecc71', color: '#0b3d20',
+      },
+      selectors: [sel(':disabled', { 'background-color': '#95a5a6', opacity: '0.5' })],
+      _text: 'disabled state',
+    },
+    // :checked — hollow (white + teal border) fills solid teal when checked;
+    // text inverts to stay legible in both states.
+    DS_CheckedFill: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': '#ffffff', color: '#111111', border: '3px solid #16a085',
+      },
+      selectors: [sel(':checked', { 'background-color': '#16a085', color: '#ffffff' })],
+      _text: 'checked state',
+    },
+    // Layering pin (spec 06 §3): hover and active BOTH claim background-
+    // color — when both are active (pressed while hovering), the LATER
+    // bucket (:active → red) must win; :focus touches only `color`, so a
+    // focused+hovered render keeps hover's blue with focus's white text.
+    DS_StateStack: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': '#ecf0f1', color: '#111111',
+      },
+      selectors: [
+        sel(':hover', { 'background-color': '#3498db' }),
+        sel(':active', { 'background-color': '#e74c3c' }),
+        sel(':focus', { color: '#ffffff' }),
+      ],
+      _text: 'stacked states',
+    },
+  };
+}
+
+function buildDynamicMediaWidth(rng) {
+  // Width buckets are evaluated against the RENDER SURFACE — the capture
+  // canvas (spec 06 §4): 390 px default, 250 px on the second capture run
+  // (docs/DYNAMIC_CAPTURE.md §2). Each component pins one truth-table row.
+  return {
+    // (min-width: 200px) — TRUE at 390 and 250: the red MUST visibly
+    // replace the gray in every capture; a runtime that ignores media
+    // buckets renders gray and fails the pair.
+    MW_MinNarrowOn: {
+      properties: { width: '200px', height: pick(rng, HEIGHTS), 'background-color': '#7f8c8d' },
+      media: [mq('(min-width: 200px)', { 'background-color': '#e74c3c' })],
+    },
+    // (min-width: 500px) — FALSE at both capture widths: the base green
+    // must survive untouched; applying this bucket = evaluating against
+    // the DEVICE instead of the render surface (the classic bug).
+    MW_MinWideOff: {
+      properties: { width: '200px', height: pick(rng, HEIGHTS), 'background-color': '#2ecc71' },
+      media: [mq('(min-width: 500px)', { 'background-color': '#000000' })],
+    },
+    // (max-width: 500px) — TRUE at 390 and 250: gray → blue everywhere.
+    MW_MaxWideOn: {
+      properties: { width: '200px', height: pick(rng, HEIGHTS), 'background-color': '#95a5a6' },
+      media: [mq('(max-width: 500px)', { 'background-color': '#3498db' })],
+    },
+    // (max-width: 300px) — FALSE at 390, TRUE at 250: the flip bucket.
+    // Color AND height change so the flip is visible as layout too.
+    MW_MaxNarrowFlip: {
+      properties: { width: '180px', height: '48px', 'background-color': '#f39c12' },
+      media: [mq('(max-width: 300px)', { 'background-color': '#9b59b6', height: '96px' })],
+    },
+    // (min-width: 300px) — TRUE at 390, FALSE at 250: the inverse flip.
+    MW_MinMidFlip: {
+      properties: { width: '180px', height: pick(rng, HEIGHTS), 'background-color': '#16a085' },
+      media: [mq('(min-width: 300px)', { 'background-color': '#c0392b' })],
+    },
+    // Layering pin (spec 06 §3): BOTH buckets are true at 390 and both
+    // claim background-color — array order decides, the LAST bucket's
+    // orange must win over the navy.
+    MW_Layered: {
+      properties: { width: '200px', height: pick(rng, HEIGHTS), 'background-color': '#ecf0f1' },
+      media: [
+        mq('(min-width: 200px)', { 'background-color': '#2c3e50' }),
+        mq('(max-width: 500px)', { 'background-color': '#e67e22' }),
+      ],
+    },
+    // Layout flip: at 250 the bucket narrows the box and doubles the
+    // padding — a geometry change SSIM cannot miss, proving media buckets
+    // reach layout properties, not just paint.
+    MW_LayoutFlip: {
+      properties: { width: '200px', padding: '8px', height: '48px', 'background-color': '#3498db' },
+      media: [mq('(max-width: 300px)', { width: '120px', padding: '20px' })],
+    },
+  };
+}
+
+function buildDynamicDarkMode(rng) {
+  return {
+    // (prefers-color-scheme: dark) — maps to the PLATFORM dark-mode signal
+    // (spec 06 §4). The default capture environment is light, so the dark
+    // bucket must NOT apply in the standard run — non-application is the
+    // gate (docs/DYNAMIC_CAPTURE.md §3).
+    DK_SchemeBucket: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': '#fdf2e9', color: '#7e3b09',
+      },
+      media: [mq('(prefers-color-scheme: dark)', { 'background-color': '#111827', color: '#f9fafb' })],
+      _text: 'scheme bucket',
+    },
+    // Same signal through the border channel: light steel border swaps to
+    // purple in dark mode alongside the background flip.
+    DK_SchemeBorder: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': '#ecf0f1', border: '3px solid #2c3e50',
+      },
+      media: [mq('(prefers-color-scheme: dark)', { 'background-color': '#1f2937', border: '3px solid #9b59b6' })],
+    },
+    // light-dark() VALUES (css-color-5) — the per-property route to the
+    // same scheme signal: dynamic colors, srgb:null + original preserved
+    // (spec 02), resolved by the runtime against platform dark mode. Must
+    // agree with the bucket route above: one surface, one scheme answer.
+    DK_LightDark: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': 'light-dark(#ecf0f1, #111827)',
+        color: 'light-dark(#111111, #f9fafb)',
+      },
+      _text: 'light-dark colors',
+    },
+    // Both mechanisms on ONE component: light-dark() base + a dark bucket
+    // overriding only `color`. In dark mode the bucket's color wins over
+    // the light-dark() text arm (buckets overlay base — spec 06 §3), while
+    // the background still comes from light-dark() resolution.
+    DK_Mixed: {
+      properties: {
+        width: pick(rng, WIDTHS), height: pick(rng, HEIGHTS),
+        'background-color': 'light-dark(#ffffff, #000000)', color: '#111111',
+      },
+      media: [mq('(prefers-color-scheme: dark)', { color: '#e67e22' })],
+      _text: 'mixed mechanisms',
+    },
+  };
+}
+
+// Dynamic template table: path → builder → feature descriptors surfaced in
+// the manifest (the coverage vocabulary the regeneration test pins).
+const DYNAMIC_BUILDERS = [
+  ['dynamic/states.json', buildDynamicStates,
+    ['selector-hover', 'selector-active', 'selector-focus', 'selector-disabled',
+      'selector-checked', 'selector-layering']],
+  ['dynamic/media-width.json', buildDynamicMediaWidth,
+    ['media-min-width', 'media-max-width', 'media-match-390', 'media-nomatch-390',
+      'media-flip-250', 'media-layering', 'media-layout-flip']],
+  ['dynamic/dark-mode.json', buildDynamicDarkMode,
+    ['prefers-color-scheme-dark', 'light-dark-color', 'scheme-bucket-plus-light-dark']],
+];
+
 // Placement template table: path → builder → claim descriptors surfaced in
 // the manifest (the coverage vocabulary the regeneration test pins).
 const PLACEMENT_BUILDERS = [
@@ -1108,10 +1332,16 @@ function countNodes(components) {
   return n;
 }
 
-/** Collect every distinct declared property name in a components map. */
+/** Collect every distinct declared property name in a components map —
+ *  base declarations plus selector/media BUCKET declarations (the dynamic
+ *  suite's payload lives in buckets; pre-dynamic suites carry none, so
+ *  their manifest `properties` lists are unchanged by this scan). */
 function collectProps(components, acc = new Set()) {
   for (const comp of Object.values(components)) {
     for (const p of Object.keys(comp.properties ?? {})) acc.add(p);
+    for (const bucket of [...(comp.selectors ?? []), ...(comp.media ?? [])]) {
+      for (const p of Object.keys(bucket.properties ?? {})) acc.add(p);
+    }
     if (comp.children) collectProps(comp.children, acc);
   }
   return acc;
@@ -1275,9 +1505,40 @@ export function generate() {
     });
   }
 
+  // Dynamic — the wave-7 dynamic-styling suite: selector state buckets +
+  // media buckets (schema/spec/06-dynamic-styling.md). Fixed templates
+  // (the base↔bucket contrast IS the test surface), PRNG only picks
+  // support geometry.
+  for (const [name, builder, features] of DYNAMIC_BUILDERS) {
+    const relPath = `fixtures/fidelity/${name}`;
+    const components = builder(rngFor(relPath));
+    const content = toJson({ components });
+    // collectProps scans buckets too, so bucket-only declarations (e.g. a
+    // media-bucket `opacity`) still show in the manifest property list.
+    const props = [...collectProps(components)].sort();
+    // Category attribution mirrors the trees block: longhand map first,
+    // shorthand table second, "other" as the honest fallback.
+    const cats = new Set();
+    for (const p of props) cats.add(categoryMap.get(p) ?? SHORTHAND_CATEGORY.get(p) ?? 'other');
+    files.push({ relPath, content });
+    manifestFiles.push({
+      path: relPath,
+      kind: 'dynamic',
+      categories: [...cats].sort(),
+      // Coverage descriptors: which dynamic-styling scenarios this file
+      // exercises (vocabulary pinned by gen-fidelity.test.mjs).
+      features,
+      components: Object.keys(components).length,
+      nodes: countNodes(components),
+      bytes: Buffer.byteLength(content),
+      properties: props,
+    });
+  }
+
   // Manifest — the wave-run iteration surface. Sorted stably: combos by
   // category, then pairwise shards, then trees, then placement templates,
-  // then token templates (already appended in that order).
+  // then token templates, then dynamic templates (already appended in
+  // that order).
   const manifest = {
     generator: 'tools/visual/gen-fidelity.mjs',
     seed: SEED,
@@ -1340,6 +1601,14 @@ export function generate() {
   prov.push('  chains, nested calc, calc-consuming-var). Components are built so');
   prov.push('  resolution SUCCESS vs FAILURE changes visible pixels (spec 02');
   prov.push('  custom-properties section).');
+  prov.push('- `dynamic/*.json` — dynamic-styling suite (wave 7,');
+  prov.push('  schema/spec/06-dynamic-styling.md): selector state buckets');
+  prov.push('  (:hover/:active/:focus/:disabled/:checked, base↔state values chosen for');
+  prov.push('  maximal pixel contrast, plus a multi-bucket layering pin), media width');
+  prov.push('  buckets designed around the 390/250 px capture widths (match / no-match /');
+  prov.push('  flip rows plus an order-decides layering pin), and dark-mode buckets');
+  prov.push('  (prefers-color-scheme: dark) alongside light-dark() color values.');
+  prov.push('  Capture recipes live in docs/DYNAMIC_CAPTURE.md.');
   prov.push('');
   prov.push('## Inventory');
   prov.push('');

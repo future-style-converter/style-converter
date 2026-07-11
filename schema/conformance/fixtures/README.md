@@ -15,7 +15,7 @@ today. JSON has no comments, so the commentary lives here.
 - **`v2/`** — the IR **v2** goldens (flat list + slot, `irVersion`
   envelope, `text`/`pseudos`/`meta` names): a 1:1 v2 mirror of each v1
   golden (same filename — same shape family, flattened + renamed) plus
-  two v2-only composition goldens:
+  the v2-only goldens:
 
 | v2-only fixture | shape family pinned | sentinel expectations |
 |---|---|---|
@@ -24,6 +24,7 @@ today. JSON has no comments, so the commentary lives here.
 | `v2/variables-basic.json` | the additive `variables` envelope key (spec 01/02 custom-properties section): component-level `--name → raw` definitions with CASE-SENSITIVE names, `var()` references left unresolved in property envelopes (color `{"original": "var(--brand-bg)"}`, padding `{"expr": …}`), fallback + nested-fallback chains verbatim; second component has NO variables key (omit-when-empty) | `--Brand-Fg` keeps its capitals; `var(--a, var(--b, 4px))` survives byte-for-byte; `FallbackConsumer` carries no `variables` |
 | `v2/variables-inheritance.json` | definitions + references across the slot-parent chain (spec 02 resolution order): root defines 3 tokens, mid references without defining, leaf SHADOWS `--accent` with its own definition | `mid-002` has refs but no `variables`; `leaf-003.variables["--accent"]` overrides the root's; chain walks leaf→mid→root via `slot.parent` |
 | `v2/calc-mixed.json` | calc() preservation across value families (spec 02 null+original): `%−px` mix, `em+px` mixes, nested calc, calc-wrapping-var — each carried verbatim in its family's escape shape (`{"type":"expression","expr":…}`, `{"expr":…}`, FontSize `original.expr`) | every expression string survives byte-for-byte; no `px` key on any of them |
+| `v2/dynamic-styling.json` | MULTI-bucket selector/media carriage (spec 06 — the layering contract's wire dependency): three selector buckets + three media buckets on ONE component, **array order preserved verbatim** (spec 06 §3 resolves overlap by order, so order IS semantics), conditions colon-stripped, queries raw (min/max-width + prefers-color-scheme), plus a `light-dark()` dynamic color (no `srgb`, structured `original` — spec 02 dynamic colors) | `hover`→`active`→`focus` and `(min-width: 200px)`→`(max-width: 500px)`→`(prefers-color-scheme: dark)` in exactly that order; two buckets claim `BackgroundColor` (the overlap order decides); `LightDarkValue`'s data has `original.type: "light-dark"` and no `srgb` |
 
 The v2-only goldens are **verbatim converter output** (the authoring
 inputs live in the freeze / wave-6 PR descriptions); regenerate by

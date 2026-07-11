@@ -1,0 +1,118 @@
+{
+  "components": {
+    "MW_MinNarrowOn": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#7f8c8d"
+      },
+      "media": [
+        {
+          "query": "(min-width: 200px)",
+          "properties": {
+            "background-color": "#e74c3c"
+          }
+        }
+      ]
+    },
+    "MW_MinWideOff": {
+      "properties": {
+        "width": "200px",
+        "height": "80px",
+        "background-color": "#2ecc71"
+      },
+      "media": [
+        {
+          "query": "(min-width: 500px)",
+          "properties": {
+            "background-color": "#000000"
+          }
+        }
+      ]
+    },
+    "MW_MaxWideOn": {
+      "properties": {
+        "width": "200px",
+        "height": "96px",
+        "background-color": "#95a5a6"
+      },
+      "media": [
+        {
+          "query": "(max-width: 500px)",
+          "properties": {
+            "background-color": "#3498db"
+          }
+        }
+      ]
+    },
+    "MW_MaxNarrowFlip": {
+      "properties": {
+        "width": "180px",
+        "height": "48px",
+        "background-color": "#f39c12"
+      },
+      "media": [
+        {
+          "query": "(max-width: 300px)",
+          "properties": {
+            "background-color": "#9b59b6",
+            "height": "96px"
+          }
+        }
+      ]
+    },
+    "MW_MinMidFlip": {
+      "properties": {
+        "width": "180px",
+        "height": "64px",
+        "background-color": "#16a085"
+      },
+      "media": [
+        {
+          "query": "(min-width: 300px)",
+          "properties": {
+            "background-color": "#c0392b"
+          }
+        }
+      ]
+    },
+    "MW_Layered": {
+      "properties": {
+        "width": "200px",
+        "height": "48px",
+        "background-color": "#ecf0f1"
+      },
+      "media": [
+        {
+          "query": "(min-width: 200px)",
+          "properties": {
+            "background-color": "#2c3e50"
+          }
+        },
+        {
+          "query": "(max-width: 500px)",
+          "properties": {
+            "background-color": "#e67e22"
+          }
+        }
+      ]
+    },
+    "MW_LayoutFlip": {
+      "properties": {
+        "width": "200px",
+        "padding": "8px",
+        "height": "48px",
+        "background-color": "#3498db"
+      },
+      "media": [
+        {
+          "query": "(max-width: 300px)",
+          "properties": {
+            "width": "120px",
+            "padding": "20px"
+          }
+        }
+      ]
+    }
+  }
+}

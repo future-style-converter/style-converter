@@ -26,5 +26,33 @@ adb shell am start -n com.styleconverter.test/.MainActivity
 adb pull /sdcard/Android/data/com.styleconverter.test/files/test_screenshots/ ./screenshots/
 ```
 
-The runtime's JUnit suite (444 tests) also runs from this build:
+The runtime's JUnit suite (679 tests) also runs from this build:
 `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)`.
+
+## Dynamic-capture hooks (states + media)
+
+Android transport for the [docs/DYNAMIC_CAPTURE.md](../../docs/DYNAMIC_CAPTURE.md)
+contract — both hooks are **launch intent extras** on `MainActivity`
+(`test-all.sh` stays untouched; forced/width runs are manual relaunches
+against the emulator it leaves running with `EMULATOR_KEEP=1`):
+
+```bash
+# forced-state run (spec 06 §6): one runtime-v1 condition
+# (hover|active|focus|disabled|checked) resolved as active on EVERY
+# captured component. PNG names match the base run — pull to a
+# separate directory per the DYNAMIC_CAPTURE recipe.
+adb shell am force-stop com.styleconverter.test
+adb shell am start -n com.styleconverter.test/.MainActivity --es forceState active
+
+# two-width media run (CAPTURE_WIDTH contract): overrides the capture
+# canvas width; media min/max-width buckets evaluate against it
+# (render-surface semantics — never the device screen).
+adb shell am start -n com.styleconverter.test/.MainActivity --ei captureWidth 250
+```
+
+Verification markers: the capture screen logs
+`Capture run config: forceState=… captureWidth=…` to logcat
+(tag `ScreenshotCapture`), and the capture canvas carries the test tag
+`capture-canvas-force-state-<state>` on forced runs — the native twin of
+the web reference's `data-force-state` stamp, so a script can confirm the
+forced run actually ran forced.

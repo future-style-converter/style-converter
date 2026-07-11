@@ -68,11 +68,83 @@ public struct ComponentRenderer: View {
     // window. nil keeps the legacy defaults (see StyleViewport.swift).
     @Environment(\.styleViewport) private var styleViewport
 
+    // Wave 7 (#33/#34) — dynamic-styling inputs. The platform dark-mode
+    // signal drives BOTH prefers-color-scheme buckets and light-dark()
+    // values (spec 06 §4: one surface, one scheme answer)…
+    @Environment(\.colorScheme) private var platformColorScheme
+    // …the spec 06 §6 forced-state set arrives from the host (the
+    // capture harness's -forceState launch argument)…
+    @Environment(\.forcedStyleStates) private var forcedStyleStates
+    // …and `:disabled` reads SwiftUI's .disabled() propagation channel
+    // directly (spec 06 §2: the host supplies the flag).
+    @Environment(\.isEnabled) private var isEnabled
+
+    // Wave 7 (#33) — real interaction state, written by the
+    // InteractionBridge listeners attached in body (only when this
+    // component carries a selector bucket needing them). @State keeps
+    // view identity stable across restyles (spec 06 §5).
+    @State private var isHovered = false
+    @State private var isPressed = false
+    // Focus rides SwiftUI's own focus system (spec 06 §2 `focus`).
+    @FocusState private var isFocused: Bool
+
+    /// The spec 06 §4 evaluation environment: render-SURFACE width (the
+    /// host-published styleViewport — the capture canvas / app window,
+    /// never the device screen; 390 = the legacy canvas default) plus
+    /// the platform scheme signal.
+    private var mediaEnvironment: MediaQueryEvaluator.Environment {
+        MediaQueryEvaluator.Environment(
+            surfaceWidthPx: styleViewport?.width ?? 390.0,
+            prefersDark: platformColorScheme == .dark)
+    }
+
+    /// This component's interaction-state snapshot for StateResolver —
+    /// real bridge flags plus the host's forced set.
+    private var componentState: ComponentState {
+        ComponentState(hovered: isHovered, pressed: isPressed,
+                       focused: isFocused, disabled: !isEnabled,
+                       // No generic checkable analogue on iOS (spec 06
+                       // §2 "checked-if-cheap") — forced-only.
+                       checked: false,
+                       forced: forcedStyleStates)
+    }
+
+    /// Wave 7 — the component's OWN declarations after the spec 06 §3
+    /// fold (base → active media buckets → active selector buckets,
+    /// wire order, last writer wins) and the light-dark() rewrite.
+    /// Bucket-free components return `component.properties` untouched.
+    private var effectiveProperties: [IRProperty] {
+        // §3 layering against the live state + environment.
+        let layered = StateResolver.resolve(base: component.properties,
+                                            selectors: component.selectors,
+                                            media: component.media,
+                                            state: componentState,
+                                            environment: mediaEnvironment,
+                                            componentName: component.name)
+        // css-color-5 light-dark() arms resolve against the same scheme
+        // signal — buckets may introduce light-dark values, so this
+        // pass runs on the layered output.
+        return LightDarkResolver.resolve(layered,
+                                         prefersDark: mediaEnvironment.prefersDark)
+    }
+
     /// The component's declarations with the parent's inheritable text
     /// properties merged underneath (css-cascade-4 inheritance).
+    /// Wave 7: `own` is the state/media-RESOLVED list, so an active
+    /// bucket's values flow into extraction and into the inheritance
+    /// channel republished to children exactly like base declarations.
     private var mergedProperties: [IRProperty] {
-        InheritedText.merge(own: component.properties,
+        InheritedText.merge(own: effectiveProperties,
                             inherited: inheritedTextProperties)
+    }
+
+    /// Does any selector bucket resolve to `condition` at runtime v1?
+    /// Gates the InteractionBridge listeners so ONLY selector-carrying
+    /// components pay for input tracking.
+    private func wantsCondition(_ condition: String) -> Bool {
+        component.selectors?.contains {
+            StateResolver.normalize($0.condition) == condition
+        } ?? false
     }
 
     /// This element's full custom-property scope: own definitions
@@ -257,11 +329,24 @@ public struct ComponentRenderer: View {
             // left/inline-start floats already sit at the left edge in
             // this block-flow renderer, so they need no wrap.
             let fl = style.layout7?.float
-            if fl == .right || fl == .inlineEnd {
-                positioned.frame(maxWidth: .infinity, alignment: .topTrailing)
-            } else {
-                positioned
+            // Wave 7 (#33) — attach the interaction listeners on the
+            // finished box. Gated per condition: a component without
+            // hover/active/focus buckets attaches NOTHING (identity
+            // branches inside InteractionBridge), keeping the
+            // pre-wave-7 view hierarchy for the whole static corpus.
+            Group {
+                if fl == .right || fl == .inlineEnd {
+                    positioned.frame(maxWidth: .infinity, alignment: .topTrailing)
+                } else {
+                    positioned
+                }
             }
+            .modifier(InteractionBridge(wantsHover: wantsCondition("hover"),
+                                        wantsActive: wantsCondition("active"),
+                                        wantsFocus: wantsCondition("focus"),
+                                        hovered: $isHovered,
+                                        pressed: $isPressed,
+                                        focused: $isFocused))
         }
     }
 
