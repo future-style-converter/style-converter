@@ -38,6 +38,21 @@ data class ColorConfig(
     val backgroundSize: BackgroundSizeConfig = BackgroundSizeConfig.Auto,
     /** Background repeat configuration */
     val backgroundRepeat: BackgroundRepeatConfig = BackgroundRepeatConfig.REPEAT,
+    /**
+     * PER-LAYER background sizes in SOURCE order (css-backgrounds-3 §2.3:
+     * each comma-separated background-size entry pairs with the same-index
+     * background-image layer; a shorter list repeats cyclically — the
+     * applier's layerValue() implements the cycling). Empty = fall back to
+     * the single [backgroundSize] (legacy single-layer callers).
+     */
+    val backgroundSizes: List<BackgroundSizeConfig> = emptyList(),
+    /**
+     * PER-LAYER, PER-AXIS repeat modes in source order. Unlike the single
+     * [backgroundRepeat] enum this shape can express two-axis values like
+     * `background-repeat: space round` (css-backgrounds-3 §3.7 two-value
+     * syntax). Empty = fall back to the single field. Cycles like sizes.
+     */
+    val backgroundRepeats: List<BackgroundRepeatAxes> = emptyList(),
     /** Background attachment (scroll/fixed) */
     val backgroundAttachment: BackgroundAttachment = BackgroundAttachment.SCROLL,
     /**
@@ -269,7 +284,15 @@ sealed interface BackgroundSizeConfig {
     /** Scale to fit within element (may have gaps) */
     data object Contain : BackgroundSizeConfig
 
-    /** Explicit dimensions */
+    /**
+     * Explicit dimensions. Exactly one of (width, widthPercent) is set per
+     * axis; both null = that axis is `auto` (resolves to the container axis
+     * for gradients, which have no intrinsic size — css-backgrounds-3 §3.9).
+     * The *Percent fields are 0..1 FRACTIONS of the positioning area (the
+     * extractor divides the CSS 0..100 percentage by 100) — pinned by
+     * ColorExtractorTest and consumed as fractions by both
+     * BackgroundImageRenderer and ColorApplier's tile math.
+     */
     data class Dimensions(
         val width: Dp? = null,
         val height: Dp? = null,
@@ -296,6 +319,53 @@ enum class BackgroundRepeatConfig {
     SPACE,
     /** Repeat and stretch to fill */
     ROUND
+}
+
+/**
+ * One AXIS of a background-repeat value (css-backgrounds-3 §3.7
+ * <repeat-style>). The single-keyword forms expand per spec: `repeat-x` ≡
+ * `repeat no-repeat`, `space` ≡ `space space`, etc. — see
+ * [BackgroundRepeatAxes.from].
+ */
+enum class AxisRepeat {
+    /** Tile edge-to-edge, clipping the last tile (`repeat`). */
+    REPEAT,
+    /** One tile only, at the background-position anchor (`no-repeat`). */
+    NO_REPEAT,
+    /** Whole tiles only, leftover distributed as equal gaps (`space`). */
+    SPACE,
+    /** Tile size rescaled so a whole number fits exactly (`round`). */
+    ROUND
+}
+
+/**
+ * A full two-axis background-repeat value for ONE layer. Unlike the flat
+ * [BackgroundRepeatConfig] enum this can express mixed pairs like
+ * `space round` (Background_C03) which have no single-keyword equivalent.
+ */
+data class BackgroundRepeatAxes(
+    val x: AxisRepeat = AxisRepeat.REPEAT,
+    val y: AxisRepeat = AxisRepeat.REPEAT
+) {
+    companion object {
+        /** Expand a single-keyword [BackgroundRepeatConfig] per §3.7. */
+        fun from(config: BackgroundRepeatConfig): BackgroundRepeatAxes = when (config) {
+            BackgroundRepeatConfig.REPEAT -> BackgroundRepeatAxes(AxisRepeat.REPEAT, AxisRepeat.REPEAT)
+            BackgroundRepeatConfig.REPEAT_X -> BackgroundRepeatAxes(AxisRepeat.REPEAT, AxisRepeat.NO_REPEAT)
+            BackgroundRepeatConfig.REPEAT_Y -> BackgroundRepeatAxes(AxisRepeat.NO_REPEAT, AxisRepeat.REPEAT)
+            BackgroundRepeatConfig.NO_REPEAT -> BackgroundRepeatAxes(AxisRepeat.NO_REPEAT, AxisRepeat.NO_REPEAT)
+            BackgroundRepeatConfig.SPACE -> BackgroundRepeatAxes(AxisRepeat.SPACE, AxisRepeat.SPACE)
+            BackgroundRepeatConfig.ROUND -> BackgroundRepeatAxes(AxisRepeat.ROUND, AxisRepeat.ROUND)
+        }
+
+        /** Parse one axis keyword (`repeat` / `no-repeat` / `space` / `round`). */
+        fun axisOf(keyword: String?): AxisRepeat = when (keyword?.lowercase()?.replace("_", "-")) {
+            "no-repeat" -> AxisRepeat.NO_REPEAT
+            "space" -> AxisRepeat.SPACE
+            "round" -> AxisRepeat.ROUND
+            else -> AxisRepeat.REPEAT
+        }
+    }
 }
 
 /**

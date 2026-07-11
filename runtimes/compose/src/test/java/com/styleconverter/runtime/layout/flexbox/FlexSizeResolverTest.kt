@@ -97,4 +97,135 @@ class FlexSizeResolverTest {
         )
         assertSizes(listOf(100.0, 105.0), sizes)
     }
+
+    // ---- wave 9: max clamps (§9.7.4.d max violations) ----------------------
+
+    @Test
+    fun `max violation freezes at max and redistributes to siblings`() {
+        // content 300, bases 50+50, free 200 → +100 each; a hits max 80 →
+        // frozen at 80, second pass hands the whole remainder to b: 220.
+        val sizes = FlexSizeResolver.resolve(
+            contentMainPx = 300.0, gapPx = 0.0,
+            items = listOf(
+                Item(basisPx = 50.0, grow = 1.0, shrink = 1.0, minPx = 10.0, maxPx = 80.0),
+                Item(basisPx = 50.0, grow = 1.0, shrink = 1.0, minPx = 10.0)
+            )
+        )
+        assertSizes(listOf(80.0, 220.0), sizes)
+    }
+
+    @Test
+    fun `inflexible item with base above max freezes at max`() {
+        // §9.7.2: grow 0 while growing → frozen at clamp(base) = max 60.
+        val sizes = FlexSizeResolver.resolve(
+            contentMainPx = 400.0, gapPx = 0.0,
+            items = listOf(
+                Item(basisPx = 100.0, grow = 0.0, shrink = 1.0, minPx = 10.0, maxPx = 60.0),
+                Item(basisPx = 100.0, grow = 1.0, shrink = 1.0, minPx = 10.0)
+            )
+        )
+        // b gets base + free measured against a's FROZEN 60: 400−60−100=240.
+        assertSizes(listOf(60.0, 340.0), sizes)
+    }
+
+    @Test
+    fun `min beats max when the declared band is inverted`() {
+        // CSS 2.1 §10.4: min-width wins over a smaller max-width.
+        val sizes = FlexSizeResolver.resolve(
+            contentMainPx = 100.0, gapPx = 0.0,
+            items = listOf(
+                Item(basisPx = 100.0, grow = 0.0, shrink = 0.0, minPx = 70.0, maxPx = 40.0)
+            )
+        )
+        assertSizes(listOf(70.0), sizes)
+    }
+
+    // ---- wave 9: intrinsic pass (resolveWithIntrinsics, §9.2.3.E) ----------
+
+    @Test
+    fun `auto bases fill from measured max-content then grow from them`() {
+        // Row line: a declared basis 40 (grow 0), b/c content-sized with
+        // measured max-content 60 / 100. content 304, gap 8 → gaps 16.
+        // a freezes at min 50; free = 304−16−(50+60+100) = 78 → b +26, c +52.
+        val measured = mapOf(1 to 60.0, 2 to 100.0)
+        val sizes = resolveWithIntrinsics(
+            contentMainRealPx = 304.0, gapRealPx = 8.0,
+            items = listOf(
+                Item(basisPx = 40.0, grow = 0.0, shrink = 1.0, minPx = 50.0),
+                Item(basisPx = null, grow = 1.0, shrink = 1.0, minPx = 50.0),
+                Item(basisPx = null, grow = 2.0, shrink = 1.0, minPx = 50.0)
+            ),
+            density = 1f,
+            maxContentOf = { i -> measured.getValue(i) }
+        )
+        assertSizes(listOf(50.0, 86.0, 152.0), sizes)
+    }
+
+    @Test
+    fun `oversized content bases shrink scaled by base`() {
+        // Two content-sized items measuring 150 each in a 200px line:
+        // bases 300, free −100, equal scaled shrink → 100 each.
+        val sizes = resolveWithIntrinsics(
+            contentMainRealPx = 200.0, gapRealPx = 0.0,
+            items = listOf(
+                Item(basisPx = null, grow = 0.0, shrink = 1.0, minPx = 50.0),
+                Item(basisPx = null, grow = 0.0, shrink = 1.0, minPx = 50.0)
+            ),
+            density = 1f,
+            maxContentOf = { 150.0 }
+        )
+        assertSizes(listOf(100.0, 100.0), sizes)
+    }
+
+    @Test
+    fun `measured base clamps to the placeholder floor min`() {
+        // Tiny measured content (20px) with the 50px web floor: the §9.7
+        // min violation clamps the item at 50 even while growing siblings.
+        val sizes = resolveWithIntrinsics(
+            contentMainRealPx = 300.0, gapRealPx = 0.0,
+            items = listOf(
+                Item(basisPx = null, grow = 0.0, shrink = 1.0, minPx = 50.0),
+                Item(basisPx = null, grow = 1.0, shrink = 1.0, minPx = 50.0)
+            ),
+            density = 1f,
+            maxContentOf = { i -> if (i == 0) 20.0 else 60.0 }
+        )
+        // a frozen (grow 0) at max(20, 50) = 50; b takes the rest: 250.
+        assertSizes(listOf(50.0, 250.0), sizes)
+    }
+
+    @Test
+    fun `density scales declared dp fields but not measured px`() {
+        // density 2: declared basis/min are dp→×2; the measured intrinsic
+        // (already real px) passes through untouched. content 400 real px,
+        // bases 2×80=160 + 100 → free 140 → all to b (grow 1).
+        val sizes = resolveWithIntrinsics(
+            contentMainRealPx = 400.0, gapRealPx = 0.0,
+            items = listOf(
+                Item(basisPx = 80.0, grow = 0.0, shrink = 1.0, minPx = 10.0),
+                Item(basisPx = null, grow = 1.0, shrink = 1.0, minPx = 10.0)
+            ),
+            density = 2f,
+            maxContentOf = { 100.0 }
+        )
+        assertSizes(listOf(160.0, 240.0), sizes)
+    }
+
+    @Test
+    fun `measured base above declared max clamps to max`() {
+        // §9.2.3.E + §9.7.4.d: a 180px max-content base under max-width 120
+        // freezes at 120; the sibling absorbs the freed space.
+        val sizes = resolveWithIntrinsics(
+            contentMainRealPx = 300.0, gapRealPx = 0.0,
+            items = listOf(
+                Item(basisPx = null, grow = 1.0, shrink = 1.0, minPx = 50.0, maxPx = 120.0),
+                Item(basisPx = null, grow = 1.0, shrink = 1.0, minPx = 50.0)
+            ),
+            density = 1f,
+            maxContentOf = { i -> if (i == 0) 180.0 else 60.0 }
+        )
+        // bases 180+60=240, free 60 → +30 each → a 210 (max 120!) → frozen
+        // at 120; second pass: free = 300−120−60 = 120 → b = 180.
+        assertSizes(listOf(120.0, 180.0), sizes)
+    }
 }

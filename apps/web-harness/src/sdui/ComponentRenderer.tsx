@@ -1,21 +1,48 @@
 /**
- * SDUI Component Renderer
+ * SDUI Component Renderer — the harness CALIBRATION SKIN (issue #41).
  *
- * Renders COMPOSED IR nodes as HTML/CSS at runtime — the web equivalent
- * of the Android ComponentRenderer. Since the IR v2 freeze the wire is a
- * flat component list; this renderer receives a {@link ComposedNode}
- * (built by Composer.ts from `slot` refs — Mode A — or a root list for
- * zero-slot Mode B docs) and only ever hands ONE component's properties
- * to the engine's buildStyles. The engine never sees composition.
+ * The renderer CORE now lives in the package
+ * (@style-converter/web/renderer — NodeRenderer/DocumentRenderer): slot
+ * composition, text/pseudo rendering, sourceTag element mapping,
+ * variables, the stylesheet class, all shared with real apps. THIS file
+ * is only the capture calibration: every place screenshot comparability
+ * needs non-CSS behaviour is expressed as an explicit RendererOptions
+ * hook (HARNESS_OPTIONS below) instead of forked renderer code — one
+ * renderer core, two skins.
+ *
+ * The five calibrations this skin adds (and the package default omits):
+ *   1. display:none components render NOTHING (no capture canvas ever
+ *      sees them) — the package keeps the box in the DOM, display:none.
+ *   2. Sizing calibration (fit-content default, max-width:100% cap,
+ *      50×30 px floors, aspect-ratio carve-outs, empty grid/flex → block)
+ *      so a web <div> hugs content like SwiftUI/Compose intrinsic sizing
+ *      — the package emits exactly what the engine produced.
+ *   3. sourceTag ALLOWLIST (structural/inline tags only; interactive +
+ *      replaced elements demote to <div>, except the img branch) so
+ *      captures never pick up native control chrome — the package
+ *      trusts the wire minus a document-breaking denylist.
+ *   4. Placeholder label text for childless components (name +
+ *      bg-luminance contrast colour, matching iOS/Android placeholders)
+ *      — the package renders an empty element.
+ *   5. The deterministic inline <img> placeholder src (fixed bytes →
+ *      stable captures) — the package renders <img> without src until
+ *      the wave-9 content contract carries one.
+ *
+ * Since the IR v2 freeze the wire is a flat component list; this
+ * renderer receives a {@link ComposedNode} (built by Composer.ts from
+ * `slot` refs — Mode A — or a root list for zero-slot Mode B docs) and
+ * only ever hands ONE component's properties to the engine's
+ * buildStyles. The engine never sees composition.
  */
 
-import React, { useMemo } from 'react';
-import type { IRProperty, IRPseudoNode } from '@style-converter/web/core/ir/IRModels';
-import { buildStyles, buildVariables, type CSSStyles } from '@style-converter/web/core/renderer/StyleBuilder';
-// Stylesheet path (spec 06): every rendered component carries its
-// `sc-<id>` class so the RuleBuilder-generated selector/media rules
-// (mounted by useDynamicRules in App.tsx) can target it.
-import { componentClassName, forceClassName, isRuntimeV1Condition } from '@style-converter/web/core/renderer/RuleBuilder';
+import type { IRProperty } from '@style-converter/web/core/ir/IRModels';
+import type { CSSStyles } from '@style-converter/web/core/renderer/StyleBuilder';
+// Forced-state validation (spec 06 §6): the URL param must be one of the
+// runtime-v1 conditions before the skin forwards it to the core.
+import { isRuntimeV1Condition } from '@style-converter/web/core/renderer/RuleBuilder';
+// The shared renderer core + its calibration-hook types (issue #41).
+import { NodeRenderer } from '@style-converter/web/renderer/NodeRenderer';
+import type { RenderContext, RendererOptions } from '@style-converter/web/renderer/RendererOptions';
 import type { ComposedNode } from './Composer';
 
 /**
@@ -50,14 +77,15 @@ const WPT_MODE: boolean = (() => {
 /**
  * `?forceState=<state>` — the forced interaction state for this capture
  * run (spec 06 §6; docs/DYNAMIC_CAPTURE.md §1). CaptureGallery stamps the
- * verification marker (`data-force-state`) on every canvas; THIS is where
- * the state is actually applied: every rendered component element gets the
- * `force-<state>` class, which twins the real pseudo-class on the SAME
- * RuleBuilder rule — so a forced run resolves byte-identically to real
- * input. Same read-once module-constant pattern as WPT_MODE (URL params
- * can't change mid-capture; keeps the hot render loop allocation-free).
- * Values outside the runtime-v1 set fall back to null (base-state render)
- * — capture-screenshots.mjs's env validation is the loud gate.
+ * verification marker (`data-force-state`) on every canvas; the CORE is
+ * where the state is actually applied (options.forceState → every
+ * rendered element gets the `force-<state>` class, which twins the real
+ * pseudo-class on the SAME RuleBuilder rule — so a forced run resolves
+ * byte-identically to real input). Same read-once module-constant
+ * pattern as WPT_MODE (URL params can't change mid-capture; keeps the
+ * hot render loop allocation-free). Values outside the runtime-v1 set
+ * fall back to null (base-state render) — capture-screenshots.mjs's env
+ * validation is the loud gate.
  */
 const FORCE_STATE = (() => {
   if (typeof window === 'undefined') return null;                    // SSR — never forced
@@ -67,9 +95,10 @@ const FORCE_STATE = (() => {
 
 /**
  * Deterministic placeholder for `meta.sourceTag: 'img'` components
- * (issue #36 web slice — see the img branch in ComponentRenderer for the
- * wave-9 IR-gap rationale). An inline SVG data-URI so the capture needs
- * no network fetch and the bytes can never vary between runs:
+ * (issue #36 web slice — supplied to the core via resolveImageSource;
+ * the wave-9 IR-gap rationale lives with the hook below). An inline SVG
+ * data-URI so the capture needs no network fetch and the bytes can
+ * never vary between runs:
  *   - 100×100 intrinsic size → defined natural size + 1:1 natural aspect
  *     ratio for object-fit / aspect-ratio-transfer behavior;
  *   - mid-gray field (#808080) + darker centered disc (#4a4a4a) → visible
@@ -143,77 +172,22 @@ function detectDisplayType(properties: IRProperty[]): DisplayType {
 }
 
 /**
- * Render a single composed IR node (one component + composed children).
+ * Sizing-property IR types whose presence in a selector/media bucket
+ * means the bucket intends to own box geometry (the spec 06 dynamic-
+ * sizing carve-out below).
  */
-export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
-  // The renderer body reads the component for styles/metadata and the
-  // node's composed children for recursion — the only two inputs.
-  const component = node.component;
-  const displayType = useMemo(() => detectDisplayType(component.properties), [component.properties]);
+const SIZING_TYPES = ['Width', 'Height', 'MinWidth', 'MaxWidth', 'MinHeight', 'MaxHeight',
+  'InlineSize', 'BlockSize', 'MinInlineSize', 'MaxInlineSize', 'MinBlockSize', 'MaxBlockSize'];
 
-  // Build styles from properties.
-  //
-  // Rules-of-Hooks note: this useMemo MUST run before the `display: none`
-  // early return below. Hooks have to execute in the same order on every
-  // render; when this call sat after the conditional return, a component
-  // toggling between `display:none` and visible changed the number of
-  // hooks React saw between renders (the FIX-G-era regression). Computing
-  // styles for a display:none component is a trivially cheap memoised
-  // no-op, so hoisting is safe.
-  const styles = useMemo(() => buildStyles(component.properties), [component.properties]);
-
-  // Wave-6 dynamic values: custom-property DEFINITIONS from the component's
-  // `variables` map (IR v2 additive key) become `--name` inline-style keys
-  // on THIS element. Placing them on the defining element — not hoisted to
-  // some global scope — is what makes CSS inheritance do the resolution
-  // work: every slot-composed descendant rendering below picks them up via
-  // getComputedStyle inheritance, and a child's own definition shadows the
-  // parent's per css-variables-1 §2.3. Values pass through verbatim.
-  const variableStyles = useMemo(() => buildVariables(component.variables), [component.variables]);
-
-  // Don't render if display: none
-  if (displayType === 'none') {
-    return null;
-  }
-
-  // Add minimum sizing for empty components.
-  //
-  // Default sizing model has to match the native renderers.
-  // - iOS  (CaptureCanvas.swift): `.frame(maxWidth: 358, alignment: .topLeading)`
-  //   + ComponentRenderer uses SwiftUI intrinsic sizing — the component
-  //   occupies its natural content width, capped at 358.
-  // - Android (CaptureCanvas): `wrapContentSize()` equivalent — same deal,
-  //   boxes hug their content.
-  // - Web (this file, pre-fix): a plain <div> is display:block and stretches
-  //   to 100% of the 358 px canvas inner width, regardless of declared width
-  //   or content length. That's what dragged almost every SSIM into the
-  //   0.15-0.40 range on visual-test.json — outlines, shadows, grids, flex,
-  //   transforms, typography — because the web component was always ~2×
-  //   wider than its iOS/Android counterparts.
-  //
-  // Fix: default `width` to `fit-content` so the <div> hugs its content the
-  // way SwiftUI/Compose do, but let any IR-declared width (`Width` → `styles.width`)
-  // win via the spread. `max-width: 100%` caps it at the canvas so wide text
-  // runs can't overflow.
-  //
-  // Empty-container display override: when a `display: grid` (or `flex`)
-  // container has no children, the placeholder span is the only grid/flex
-  // item. Grid `fr` tracks expand to fill available space, and flex
-  // children stretch by default — so even with `width: fit-content` the
-  // container blows out to the full 358px canvas inner width. iOS bypasses
-  // this by routing empty grids through a VStack (see ComponentRenderer.swift
-  // `case .grid:` with `if hasChildren` guard); Android `wrapContentSize()`
-  // collapses naturally. The web equivalent: rewrite display→block when the
-  // child set is empty, so the placeholder lays out as a normal inline-ish
-  // block and the container hugs it. Fixed Grid_ThreeCol (058) iOS-web
-  // 0.42→~0.85, Grid_FixedTracks (059) 0.50→~0.85, plus the same gain on
-  // Android-web pairs. Honors any explicit `width` declaration via the
-  // `...styles` spread because that comes after `display`.
-  // v2 note: "children" here means the COMPOSED child nodes the Composer
-  // attached from slot refs — the wire itself is flat and the component
-  // carries no children field at all. Same truthiness semantics as the
-  // pre-v2 `component.children` check, so the 327-pair baseline is stable.
-  const hasChildren = node.children.length > 0;
+/**
+ * The harness sizing calibration — the decorateStyles hook. Byte-for-byte
+ * the containerStyles computation the pre-#41 renderer inlined; the
+ * RendererParity suite pins the resulting HTML against the pre-refactor
+ * golden. See the numbered divergence ledger in the file header for WHY
+ * none of this belongs in the package default.
+ */
+function calibrateStyles(styles: CSSStyles, ctx: RenderContext): CSSStyles {
+  const { component, hasChildren } = ctx;
 
   // Aspect-ratio fit-content suppression — see
   // tools/titan/investigations/swarm-001/css-sizing__block-aspect-ratio-032.json
@@ -272,8 +246,6 @@ export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
   // base state (the inline width/height still applies) but overridable by
   // the stylesheet path. Bucket-free components (the 327-pair baseline)
   // never enter this branch.
-  const SIZING_TYPES = ['Width', 'Height', 'MinWidth', 'MaxWidth', 'MinHeight', 'MaxHeight',
-    'InlineSize', 'BlockSize', 'MinInlineSize', 'MaxInlineSize', 'MinBlockSize', 'MaxBlockSize'];
   const bucketsDeclareSizing =
     (component.selectors ?? []).some((s) => s.properties.some((p) => SIZING_TYPES.includes(p.type))) ||
     (component.media ?? []).some((m) => m.properties.some((p) => SIZING_TYPES.includes(p.type)));
@@ -295,7 +267,7 @@ export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
   // a no-op in this branch since it was solving the same class of
   // problem (a different way) — WPT mode dominates. Legacy flow
   // (no `?wpt=1`) is unchanged.
-  const containerStyles: CSSStyles = WPT_MODE ? {
+  return WPT_MODE ? {
     // In WPT mode we want browser-default block-flow: width:auto
     // (stretches to containing block), height:auto (hugs content),
     // no synthetic minimum floor. The IR's own `width` / `min-*` /
@@ -372,307 +344,108 @@ export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
         : {}
     )),
   };
+}
 
-  // Render children or placeholder
+/**
+ * The harness sourceTag allowlist — divergence #3. We only switch to
+ * tags whose browser-default semantics we positively want (lists,
+ * headings, paragraphs, tables, details, inline companions). Anything
+ * else falls back to <div> so captures don't acquire form-control
+ * behaviour (<input>, <button>), embed handling (<iframe>, <object>),
+ * or script-context tags (<script>, <style>). The PACKAGE default
+ * (TagMapping.defaultMapTag) trusts the wire instead — production SDUI
+ * wants native button/link/input semantics; captures must not.
+ * Lowercasing happens in the core before the hook runs.
+ */
+const TAG_ALLOWLIST = new Set([
+  'ol', 'ul', 'li',
+  'p',
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th',
+  'details', 'summary',
+  'blockquote', 'q',
+  'dl', 'dt', 'dd',
+  'figure', 'figcaption',
+  'section', 'article', 'nav', 'header', 'footer', 'main', 'aside',
+  // Bug 2 — emit <span> when F-G-EXTRACTOR forwards _tag:'span'. See
+  // tools/titan/investigations/swarm-003/css-contain__content-visibility-hidden-and-innertext.json
   //
-  // PlaceholderContent receives the parent's resolved background color so its
-  // text colour can flip to dark-on-light or light-on-dark, matching iOS's
-  // `PlaceholderLabel.resolvedColor` (luminance > 0.6 → dark text). Without
-  // this, the web placeholder inherits whatever <body> color is in scope
-  // (typically near-white from CapturePage), which renders nearly invisible
-  // on white-card backgrounds (e.g. `Card_Complete`, `Input_Field`,
-  // `Outline_Solid`). The mismatch was ~30% pixel divergence on every
-  // light-card fixture.
-  // Children recursion — see
-  // tools/titan/investigations/swarm-001/css-overflow__clip-001.json
+  // The CSS-Containment-2 spec says content-visibility:hidden does NOT
+  // apply to non-atomic inline boxes (<span> with default display:inline
+  // is the canonical non-atomic inline). Previously we always rendered
+  // as <div>, which IS a block container, so the browser would
+  // (correctly per its rule) hide the contents — but that's exactly
+  // the opposite of what the test asserts. Emitting <span> lets the
+  // browser observe the inline/block distinction the spec hinges on.
+  'span',
+  // Inline-level structural tags follow the same pattern — they need
+  // to remain inline for surrounding inline-flow / generated-content
+  // / whitespace-collapse rules to behave correctly.
+  'strong', 'em', 'b', 'i', 'u', 's', 'mark', 'small', 'sub', 'sup',
+  'code', 'kbd', 'samp', 'var', 'cite', 'dfn', 'abbr', 'time',
+]);
+
+/**
+ * The complete harness calibration, handed to the shared core on every
+ * render. Module-level constant: the hooks close over the read-once URL
+ * modes (WPT_MODE / FORCE_STATE), and a stable identity keeps the core's
+ * render path allocation-free.
+ */
+const HARNESS_OPTIONS: RendererOptions = {
+  // Divergence #1: display:none renders nothing at all — a hidden
+  // component must never contribute a capture canvas or bleed paint
+  // into a neighbour's screenshot crop.
+  shouldRender: ({ component }) => detectDisplayType(component.properties) !== 'none',
+  // Divergence #2: the sizing calibration (see calibrateStyles).
+  decorateStyles: calibrateStyles,
+  // Divergence #3: allowlist mapping — except `img`, which bypasses the
+  // allowlist into the core's void-element branch (issue #36 web slice:
+  // replaced-element CSS needs a REAL <img> box even on captures).
+  mapTag: (tag) => (tag === 'img' ? 'img' : (tag && TAG_ALLOWLIST.has(tag) ? tag : 'div')),
+  // Divergence #4: childless components render the placeholder label
+  // (name text + bg-luminance contrast) instead of an empty element, so
+  // empty fixtures stay identifiable against iOS/Android placeholders.
   //
-  // Many WPT fixtures (overflow:clip on a parent, css-grid abspos, contain,
-  // any composed parent>child geometry) require that the IR's tree structure
-  // be preserved at render time. FIX-A teaches the extractor to emit
-  // `children: IRComponent[]` on container components; this branch recurses
-  // into them so the parent's CSS (clip context, scroll container, BFC,
-  // grid track, flex slot) actually wraps the descendant's box in the DOM.
-  // Components without children fall through to the placeholder branch
-  // unchanged, preserving the 327-pair visual-test baseline.
-  //
-  // Mixed-content fix (Bug 1) — see
-  // tools/titan/investigations/swarm-002/css-text-decor__text-decoration-decorating-box-thickness-001.json
-  //
-  // The two branches USED to be mutually exclusive: a component with both
-  // _text and children would render only the children, silently dropping
-  // the parent's surrounding text. For HTML mixed-content elements like
-  // <div>abc <span>x</span> def</div> the parent's "abc def" never reached
-  // the DOM, so its text-decoration had no glyph stream to underline. The
-  // patch renders _text as a leading inline text node BEFORE the children,
-  // wrapped in an inheriting <span> so the parent's CSS (color,
-  // text-decoration, letter-spacing, font-*) propagates naturally. Known
-  // limitation: text always renders BEFORE all children regardless of the
-  // original DOM position; full inline-flow ordering needs an interleaved
-  // inlineRuns IR shape (tracked as the secondary fix in the investigation).
-  // v2 rename: the wire field is `text` (was `_text` in v1; the IRDecode
-  // gate translates legacy docs, so this is the only spelling seen here).
-  const text = component.text;
-  const hasText = typeof text === 'string' && text.length > 0;
-  // Bug 4 — pseudo-element rendering. The F-G-EXTRACTOR pipeline
-  // populates `_pseudo.{before,after,marker}` from CSS rules like
-  // `#test span::before { content: counter(c, decimal-leading-zero) }`.
-  // We render each as an inline <span> whose styles come from the
-  // synthetic IRComponent's properties (which include the `content`
-  // declaration); Chromium then evaluates `counter()` / `counters()` /
-  // `attr()` / literal strings natively against the parent's live
-  // counter tree. See:
-  //   tools/titan/investigations/swarm-003/css-lists__counter-001.json
-  //   tools/titan/investigations/swarm-003/css-pseudo__before-preceding-whitespace-dynamic.json
-  //
-  // Components without `_pseudo` (the 327-pair baseline) skip these
-  // branches entirely so the legacy DOM is byte-identical.
-  // v2 rename: `pseudos` (was `_pseudo` in v1). The payload itself is
-  // forwarded verbatim from the authoring extractor (spec 01), so the
-  // inner nodes keep the extractor's shape — see IRPseudoNode.
-  const pseudo = component.pseudos;
-  const hasBefore = !!(pseudo && pseudo.before);
-  const hasAfter = !!(pseudo && pseudo.after);
-  const hasMarker = !!(pseudo && pseudo.marker);
-  // Render one pseudo-element node. The browser's `content` evaluator
-  // only fires on actual ::before/::after/::marker boxes, so we cheat
-  // by rendering an inline <span> whose styles include the IR's
-  // `content` declaration — the browser ignores `content` on regular
-  // elements, but the `content: counter(c, ...)` machinery is what we
-  // actually need: we pull the resolved CSS via buildStyles and emit
-  // the text via the leaf path so the glyph reaches the DOM. For now
-  // we materialise the pseudo's `_text` directly (the simple-string
-  // `content: "two"` case) AND attach the inline styles, so both
-  // counter() (browser-evaluated) and literal-string cases land
-  // visibly. The marker uses `display:list-item-marker`-style sizing
-  // via `display: inline-block` and a small right-margin so it spaces
-  // away from the host's leading content the way a native ::marker
-  // would. Wrapped in <span> rather than <div> to preserve the inline
-  // flow that ::before/::after participate in by default.
-  const renderPseudo = (
-    p: IRPseudoNode,
-    role: 'before' | 'after' | 'marker',
-  ): React.ReactNode => {
-    // Use buildStyles directly on the pseudo's properties so any
-    // declarations from the originating CSS rule (font-weight, color,
-    // letter-spacing, AND `content`) reach the inline style attribute.
-    // The payload is extractor-owned and forwarded verbatim, so every
-    // field is optional — default to an empty property list.
-    const ps = buildStyles(p.properties ?? []);
-    // The pseudo's text carries the literal value of `content:` when
-    // it's a plain string (e.g. `content:"two"`); for functional
-    // values (`counter(...)`), F-G-EXTRACTOR is expected to leave it
-    // empty and emit a `content` IRProperty that buildStyles forwards
-    // into the inline style — the browser then evaluates the function.
-    // Accept both spellings: `_text` (extractor legacy) and `text` (v2).
-    const pText = typeof p._text === 'string' ? p._text : (typeof p.text === 'string' ? p.text : '');
-    // Marker pseudo gets a small trailing margin so it visually
-    // separates from the host's content the way a native list-item
-    // marker does (CSS-Lists 3 §4.3 — markers are typically preceded
-    // by a marker-side gap).
-    const markerStyle: React.CSSProperties = role === 'marker'
-      ? { display: 'inline-block', marginInlineEnd: '0.5em' }
-      : {};
+  // PlaceholderContent receives the parent's resolved background color so
+  // its text colour can flip to dark-on-light or light-on-dark, matching
+  // iOS's `PlaceholderLabel.resolvedColor` (luminance > 0.6 → dark text);
+  // the raw `styles` in the context is the same pre-decoration engine
+  // output the pre-#41 renderer read. The explicit `color` passthrough
+  // mirrors iOS/Android's `textColor` parameter (see PlaceholderContent).
+  renderEmptyContent: ({ component, styles }) => {
+    const text = component.text;
+    const hasText = typeof text === 'string' && text.length > 0;
     return (
-      <span
-        key={`pseudo-${role}-${p.id}`}
-        data-pseudo={role}
-        data-component-id={p.id}
-        style={{ ...markerStyle, ...(ps as React.CSSProperties) }}
-      >
-        {pText}
-      </span>
-    );
-  };
-  const content = hasChildren ? (
-    <>
-      {/* Marker pseudo renders first (leading), then before, then
-          the host text, then real children. The CSS spec orders
-          ::marker before ::before, both before the inline content. */}
-      {hasMarker ? renderPseudo(pseudo!.marker!, 'marker') : null}
-      {hasBefore ? renderPseudo(pseudo!.before!, 'before') : null}
-      {/* Leading parent text (Bug 1 mixed-content fix). Wrapped in a
-          plain <span> so the parent <div>'s `color` /
-          `text-decoration` / `font-*` / `letter-spacing` all inherit
-          naturally. Suppressed when _text is missing/empty so legacy
-          fixtures (the 327-pair baseline) stay byte-identical. */}
-      {hasText ? <span>{text}</span> : null}
-      {/* Composed children (slot refs → tree, Composer.ts) recurse here
-          in flat-array sibling order — the spec 03 sibling-order rule. */}
-      {node.children.map((child, index) => (
-        <ComponentRenderer key={child.component.id || index} node={child} depth={depth + 1} />
-      ))}
-      {/* Trailing ::after pseudo renders last, after all children. */}
-      {hasAfter ? renderPseudo(pseudo!.after!, 'after') : null}
-    </>
-  ) : (hasBefore || hasAfter || hasMarker) ? (
-    // No real children but pseudo-elements present — still emit them
-    // around the placeholder so counter/content/etc. become visible.
-    <>
-      {hasMarker ? renderPseudo(pseudo!.marker!, 'marker') : null}
-      {hasBefore ? renderPseudo(pseudo!.before!, 'before') : null}
       <PlaceholderContent
         name={component.name}
         text={hasText ? text : undefined}
         backgroundColor={typeof styles.backgroundColor === 'string' ? styles.backgroundColor : undefined}
         explicitColor={typeof styles.color === 'string' ? styles.color : undefined}
       />
-      {hasAfter ? renderPseudo(pseudo!.after!, 'after') : null}
-    </>
-  ) : (
-    <PlaceholderContent
-      name={component.name}
-      // Inner-text rendering — see
-      // tools/titan/investigations/swarm-001/css-color__color-001.json
-      //
-      // FIX-A is concurrently teaching the WPT extractor to preserve the
-      // styled element's text content as `_text`. When that field is
-      // present, the placeholder renders THAT string instead of the
-      // component name (or the WPT_MODE empty string), so colour /
-      // font / text-decor / letter-spacing / line-height tests have an
-      // actual sentence to render and stop diverging at structural-
-      // divergence with empty-card captures. When `_text` is absent, the
-      // existing placeholder behaviour applies unchanged: WPT_MODE → '',
-      // legacy mode → component name with underscores stripped.
-      text={hasText ? text : undefined}
-      backgroundColor={typeof styles.backgroundColor === 'string' ? styles.backgroundColor : undefined}
-      // Pass through the user-declared text colour (CSS `color`) when
-      // present, so a fixture like `Typography_FontUltraCondensed`
-      // (`color: #e74c3c`) renders the placeholder in red instead of
-      // the bg-luminance-derived dark/light grey. The container <div>
-      // already carries the colour; without an explicit handoff the
-      // <span> below would clobber it with its own pick. iOS / Android
-      // both honour an explicit text colour via `textColor` parameter
-      // — this is the web equivalent. When unset, falls back to the
-      // bg-luminance contrast pick (matches iOS PlaceholderLabel).
-      explicitColor={typeof styles.color === 'string' ? styles.color : undefined}
-    />
-  );
+    );
+  },
+  // Mixed-content text renders inside a plain inheriting <span> (the
+  // swarm-002 Bug 1 shape) — the parent's color / text-decoration /
+  // font-* reach the glyphs via inheritance, and tests/tooling can
+  // target the run. The package default is a bare text node.
+  renderText: (text) => <span>{text}</span>,
+  // Divergence #5: deterministic inline placeholder src for <img> —
+  // nothing on today's wire carries the image SOURCE (the extractor
+  // forwards `_tag: 'img'` → meta.sourceTag but never reads `src`, and
+  // spec 01 defines no replaced-element content contract), so the
+  // harness substitutes fixed bytes → fixed pixels → stable captures.
+  resolveImageSource: () => PLACEHOLDER_IMG_SRC,
+  // Forced-state capture hook (spec 06 §6) — validated URL param.
+  forceState: FORCE_STATE,
+};
 
-  // Bug 2: pick the DOM element type from `_tag` so the browser can
-  // contribute its native default styling for that tag (list-marker
-  // generation on <ol>/<ul>/<li>, paragraph spacing on <p>, table
-  // layout on <table>/<tr>/<td>, etc.). Without this every IR node
-  // rendered as <div> regardless of its source — making
-  // `list-style-type: arabic-indic` (and ~350 other list-related WPT
-  // tests) silently inert because Chromium's counter algorithm only
-  // fires on `display: list-item`. See
-  // tools/titan/investigations/swarm-002/css-counter-styles__css3-counter-styles-101.json.
-  //
-  // Allow-list rather than free-form: we only switch to tags whose
-  // browser-default semantics we positively want (lists, headings,
-  // paragraphs, tables, details). Anything else falls back to <div>
-  // so we don't accidentally introduce form-control behaviour
-  // (<input>, <button>), embed handling (<iframe>, <object>), or
-  // script-context tags (<script>, <style>) into the SDUI renderer
-  // surface. Lowercased for matching since the extractor emits
-  // lowercase tags.
-  // v2 rename: the originating tag now lives at `meta.sourceTag` (was the
-  // top-level `_tag` in v1; the IRDecode gate translates legacy docs).
-  const sourceTag = component.meta?.sourceTag;
-  const tag = (typeof sourceTag === 'string' && sourceTag.length > 0)
-    ? sourceTag.toLowerCase()
-    : null;
-  const TAG_ALLOWLIST = new Set([
-    'ol', 'ul', 'li',
-    'p',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th',
-    'details', 'summary',
-    'blockquote', 'q',
-    'dl', 'dt', 'dd',
-    'figure', 'figcaption',
-    'section', 'article', 'nav', 'header', 'footer', 'main', 'aside',
-    // Bug 2 — emit <span> when F-G-EXTRACTOR forwards _tag:'span'. See
-    // tools/titan/investigations/swarm-003/css-contain__content-visibility-hidden-and-innertext.json
-    //
-    // The CSS-Containment-2 spec says content-visibility:hidden does NOT
-    // apply to non-atomic inline boxes (<span> with default display:inline
-    // is the canonical non-atomic inline). Previously we always rendered
-    // as <div>, which IS a block container, so the browser would
-    // (correctly per its rule) hide the contents — but that's exactly
-    // the opposite of what the test asserts. Emitting <span> lets the
-    // browser observe the inline/block distinction the spec hinges on.
-    'span',
-    // Inline-level structural tags follow the same pattern — they need
-    // to remain inline for surrounding inline-flow / generated-content
-    // / whitespace-collapse rules to behave correctly.
-    'strong', 'em', 'b', 'i', 'u', 's', 'mark', 'small', 'sub', 'sup',
-    'code', 'kbd', 'samp', 'var', 'cite', 'dfn', 'abbr', 'time',
-  ]);
-  // React's createElement accepts a string element name, so we just
-  // hand it the validated tag. Anything not in the allowlist (or
-  // missing) keeps the legacy <div> path so the 327-pair baseline
-  // doesn't shift. Use React.createElement (not a dynamic JSX element)
-  // to keep the TypeScript prop-type intersection sensible across
-  // every allowed tag — data-*, style, and children are valid on all
-  // of them.
-  const elementName: string = (tag && TAG_ALLOWLIST.has(tag)) ? tag : 'div';
-
-  // Stylesheet-path class list (spec 06): the per-component `sc-<id>`
-  // class is ALWAYS present — inert for bucket-free components (no rule
-  // targets it; the 327-pair baseline DOM gains an attribute, zero
-  // pixels) — and the `force-<state>` class is appended only on forced
-  // capture runs, activating the twin selector on every state rule.
-  const className = componentClassName(component.id)
-    + (FORCE_STATE ? ` ${forceClassName(FORCE_STATE)}` : '');
-
-  // Issue #36 (web slice) — `meta.sourceTag: 'img'` components render as a
-  // REAL <img> replaced element, not a <div> with placeholder text, so
-  // replaced-element CSS (object-fit / object-position / aspect-ratio
-  // transfer / border rounding on the image box) exercises the browser's
-  // actual replaced-element code path.
-  //
-  // HONEST IR GAP (wave 9): nothing on today's wire carries the image
-  // SOURCE. The extractor (tools/titan/extract-fixture.mjs) forwards
-  // `_tag: 'img'` → meta.sourceTag but never reads the `src` attribute,
-  // and spec 01 defines no content contract for replaced elements — so a
-  // src cannot be invented here without inventing wire. Until the wave-9
-  // content contract lands, the harness substitutes a DETERMINISTIC
-  // inline placeholder (fixed bytes → fixed pixels → stable captures):
-  // a 100×100 SVG data-URI, mid-gray field + darker centered disc, giving
-  // the box a defined natural size/aspect AND visible interior structure
-  // so object-fit: cover vs contain vs fill produce distinct pixels.
-  // <img> is a void element, so this branch bypasses the content tree
-  // entirely (children/pseudos cannot exist inside it; any composed
-  // children would be an authoring error and are surfaced loudly below).
-  if (tag === 'img') {
-    if (hasChildren) {
-      // No silent fallthrough: an <img> cannot host children. Warn (the
-      // harness's console reaches the capture logs) and drop them — the
-      // browser would discard nested markup inside <img> the same way.
-      console.warn(
-        `[ComponentRenderer] component "${component.id}" has sourceTag 'img' but ${node.children.length} composed child(ren) — <img> is void; children not rendered`,
-      );
-    }
-    return React.createElement('img', {
-      'data-component-id': component.id,
-      'data-component-name': component.name,
-      className,
-      // Deterministic placeholder source (see the wave-9 gap note above).
-      src: PLACEHOLDER_IMG_SRC,
-      // The component's text (alt text is the natural text of an <img>)
-      // keeps captures self-describing; empty alt is valid fallback.
-      alt: typeof text === 'string' ? text : '',
-      // Same style pipeline as every other element: engine styles + the
-      // sizing defaults + custom-property definitions.
-      style: { ...containerStyles, ...variableStyles } as React.CSSProperties,
-    });
-  }
-
-  return React.createElement(
-    elementName,
-    {
-      'data-component-id': component.id,
-      'data-component-name': component.name,
-      // Rule target + forced-state hook — see className above.
-      className,
-      // Custom-property definitions merge LAST — their `--name` keys are
-      // disjoint from every regular CSS key, so this can never clobber a
-      // declaration; ordering just keeps the intent obvious.
-      style: { ...containerStyles, ...variableStyles } as React.CSSProperties,
-    },
-    content
-  );
+/**
+ * Render a single composed IR node (one component + composed children)
+ * with the harness calibration applied at every composition depth.
+ */
+export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
+  // Everything happens in the shared core; the skin only supplies hooks.
+  return <NodeRenderer node={node} depth={depth} options={HARNESS_OPTIONS} />;
 }
 
 /**

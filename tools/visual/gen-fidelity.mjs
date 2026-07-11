@@ -646,6 +646,88 @@ function buildTreeInheritanceTypography(rng) {
   };
 }
 
+// Wave 9 (#37) — the EXTENDED inheritance channel: color (through the
+// currentColor consumers), text-shadow, overflow-wrap. Every row is a
+// chain of at least parent→child; the first row goes three levels deep so
+// the transitive republication is exercised, and every family carries a
+// mid/sibling REDECLARATION so "own beats inherited" stays observable.
+//
+// Deliberate scope notes (web is the reference — see issue #37):
+//   • Inherited COLOR is asserted through channels the web harness makes
+//     visible: currentColor borders/outlines on descendant boxes and
+//     leading `_text` on containers (a plain inheriting <span> on web).
+//     Leaf placeholder glyphs contrast-pick on ALL three platforms (the
+//     web span pins its own color), so no row keys on leaf glyph color.
+//   • list-style-* inheritance is pinned in the native unit suites, not
+//     here: markers only materialise on list-tagged nodes, and the native
+//     marker synthesis doesn't yet read the inherited list-style-type —
+//     a visual row would test the marker gap, not the channel.
+function buildTreeInheritanceExtended(rng) {
+  return {
+    // currentColor through TWO hops: root color → colorless mid → leaf
+    // borders. border-color's initial value is currentColor
+    // (css-backgrounds-3 §3.2), so "plain"'s border must paint in the
+    // ROOT's #8e44ad; "redeclared" re-anchors currentColor locally.
+    IE_CurrentColorBorder: box(
+      { width: '280px', padding: '10px', color: '#8e44ad', 'background-color': '#f4ecf7' },
+      {
+        mid: box(
+          { padding: '8px', 'background-color': '#ffffff' },
+          {
+            plain: { properties: { width: '120px', height: '36px', border: '3px solid', 'margin-bottom': '8px' } },
+            redeclared: { properties: { width: '120px', height: '36px', color: '#16a085', border: '3px solid' } },
+          },
+        ),
+      },
+    ),
+    // outline-color's initial is currentColor too (css-ui-4 §4.3) — same
+    // assertion one hop up, on the outline channel.
+    IE_CurrentColorOutline: box(
+      { width: '280px', padding: '14px', color: '#c0392b', 'background-color': '#fdf2e9' },
+      {
+        plain: { properties: { width: '120px', height: '32px', outline: '3px solid', 'background-color': '#ffffff', 'margin-bottom': '12px' } },
+        redeclared: { properties: { width: '120px', height: '32px', color: '#2471a3', outline: '3px solid', 'background-color': '#ffffff' } },
+      },
+    ),
+    // Leading `_text` on a CONTAINER renders through a plain inheriting
+    // <span> on web, so the inherited green IS visible there — unlike
+    // leaf placeholders (contrast-picked on every platform).
+    IE_LeadingText: box(
+      { width: '260px', padding: '10px', color: '#1e8449', 'font-size': '15px', 'background-color': '#eafaf1' },
+      {
+        mid: {
+          properties: { padding: '6px', 'background-color': '#d5f5e3' },
+          _text: 'leading text inherits green',
+          children: { tail: leaf(rng, '60px', '20px') },
+        },
+      },
+    ),
+    // text-shadow inherits into leaf glyphs (the web placeholder span
+    // never resets it); the sibling redeclares `none` locally.
+    IE_TextShadow: box(
+      { width: '260px', padding: '10px', 'font-size': '16px', 'text-shadow': '2px 2px 3px #c0392b', 'background-color': '#1f2937' },
+      {
+        plain: { properties: {}, _text: 'inherited glyph shadow' },
+        redeclared: { properties: { 'text-shadow': 'none' }, _text: 'shadow reset locally' },
+      },
+    ),
+    // overflow-wrap: break-word inherited from the root is the ONLY thing
+    // letting the long token break inside the 140px column (leading-text
+    // channel again — the leaf placeholder span hardcodes break-word on
+    // web, which would mask the assertion).
+    IE_WrapChain: box(
+      { width: '140px', padding: '8px', color: '#f9fafb', 'font-size': '14px', 'overflow-wrap': 'break-word', 'background-color': '#1f2937' },
+      {
+        mid: {
+          properties: { padding: '4px' },
+          _text: 'inheritedunbreakabletoken',
+          children: { tail: leaf(rng, '40px', '14px') },
+        },
+      },
+    ),
+  };
+}
+
 function buildTreeNested3Level(rng) {
   const row = (extra, children) => box({
     display: 'flex', 'flex-direction': 'row', gap: '6px', padding: '6px',
@@ -713,6 +795,7 @@ const TREE_BUILDERS = [
   ['trees/block-flow.json', buildTreeBlockFlow],
   ['trees/inheritance-color.json', buildTreeInheritanceColor],
   ['trees/inheritance-typography.json', buildTreeInheritanceTypography],
+  ['trees/inheritance-extended.json', buildTreeInheritanceExtended],
   ['trees/nested-3level.json', buildTreeNested3Level],
   ['trees/mixed-direction.json', buildTreeMixedDirection],
 ];

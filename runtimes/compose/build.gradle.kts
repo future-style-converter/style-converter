@@ -40,6 +40,19 @@ kotlin {
     }
 }
 
+// The runtime's conformance/decoder suites read repo-level files OUTSIDE
+// this module (schema/conformance goldens, fixtures/ JSON) via repo-root
+// discovery at test time. Declare them as test-task inputs so Gradle's
+// up-to-date check re-runs the suite when only those files change — the
+// converter side learned this the hard way when a wave-8 golden edit rode
+// past a cached-green test run straight to CI red. NOTE: this build's
+// rootDir is apps/android-harness (out-of-tree include), so the repo root
+// is resolved relative to THIS module dir instead.
+tasks.withType<Test>().configureEach {
+    inputs.dir(projectDir.resolve("../../schema").normalize())
+    inputs.dir(projectDir.resolve("../../fixtures").normalize())
+}
+
 dependencies {
     // Compose runtime surface used by the per-property Appliers.
     implementation(platform("androidx.compose:compose-bom:2026.06.01"))
