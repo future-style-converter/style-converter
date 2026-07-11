@@ -91,3 +91,39 @@ test('buildCaptureUrl: WPT mode toggle is the ONLY difference vs legacy', () => 
     buildCaptureUrl(base, true)
   );
 });
+
+// ── Dynamic-styling hooks (wave 7 — docs/DYNAMIC_CAPTURE.md) ───────────────
+
+test('buildCaptureUrl: default-width opts leave the legacy URL byte-identical', () => {
+  // CAPTURE_WIDTH defaults to 390 and capture-screenshots.mjs always passes
+  // it through opts — the 390 guard must keep the default run's URL exactly
+  // the committed-baseline string.
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', false, { width: 390 }),
+    'http://localhost:3000/?mode=capture'
+  );
+});
+
+test('buildCaptureUrl: width override appends &width=<px>', () => {
+  // The 250px second run of the two-width media recipe.
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', false, { width: 250 }),
+    'http://localhost:3000/?mode=capture&width=250'
+  );
+});
+
+test('buildCaptureUrl: forceState appends &forceState=<state>', () => {
+  // One forced state per capture run (spec 06 §6).
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', false, { forceState: 'active' }),
+    'http://localhost:3000/?mode=capture&forceState=active'
+  );
+});
+
+test('buildCaptureUrl: hooks compose in fixed order (wpt, width, forceState)', () => {
+  // Deterministic param order keeps log greps and artifact matching stable.
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', true, { width: 250, forceState: 'hover' }),
+    'http://localhost:3000/?mode=capture&wpt=1&width=250&forceState=hover'
+  );
+});

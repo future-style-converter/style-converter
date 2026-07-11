@@ -1,5 +1,23 @@
 package com.styleconverter.runtime.core.states
 
+// StateHandler — maps CSS interaction pseudo-classes onto Compose's
+// InteractionSource machinery (schema/spec/06-dynamic-styling.md §2).
+//
+// Split of responsibilities in this package:
+//   - StateHandler (this file): condition parsing + the live interaction
+//     plumbing (collect pressed/hovered/focused, attach input modifiers).
+//   - DynamicStyleResolver: which buckets are ACTIVE (incl. forced states,
+//     §6) and how they layer over base properties (§3).
+//
+// Runtime-v1 condition set (spec 06 §2): hover (pointer surfaces only —
+// touch is a defined no-op), active (press), focus, disabled, checked.
+// focus-visible / focus-within / enabled and everything structural are
+// RESERVED: preserved on the wire, inert at resolution (DynamicStyleResolver
+// logs the miss once — the no-silent-fallthrough rule).
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -7,60 +25,34 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import com.styleconverter.runtime.core.ir.IRProperty
-import com.styleconverter.runtime.core.ir.IRSelector
+import androidx.compose.ui.Modifier
 
-/**
- * Handles CSS pseudo-class selectors by mapping them to Compose interaction states.
- *
- * ## Supported Selectors
- * - :hover -> isHovered (desktop/TV only)
- * - :active -> isPressed
- * - :focus -> isFocused
- * - :focus-visible -> isFocused (approximation)
- * - :focus-within -> isFocused (approximation)
- * - :disabled -> !isEnabled
- * - :enabled -> isEnabled
- * - :checked -> isChecked
- *
- * ## Usage
- * ```kotlin
- * val (interactionSource, state) = StateHandler.rememberInteractionState()
- *
- * // Find matching selector
- * val activeSelector = StateHandler.findActiveSelector(component.selectors, state)
- *
- * // Merge base properties with selector properties
- * val effectiveProperties = StateHandler.mergeProperties(
- *     component.properties,
- *     activeSelector?.properties
- * )
- * ```
- *
- * ## Limitations
- * - :hover is limited on touch devices
- * - :focus-within would need parent context
- * - :first-child, :nth-child etc. require structural info
- */
 object StateHandler {
 
     /**
-     * Selector condition type.
+     * Selector condition vocabulary. The wire carries colon-stripped names
+     * ("hover", not ":hover" — pinned by v2/dynamic-styling.json);
+     * [parseCondition] also tolerates the single-colon spelling. Members
+     * beyond the runtime-v1 five exist so the resolver can name WHAT is
+     * reserved instead of lumping everything into UNKNOWN.
      */
     enum class SelectorCondition {
-        HOVER,
-        ACTIVE,
-        FOCUS,
-        FOCUS_VISIBLE,
-        FOCUS_WITHIN,
-        DISABLED,
-        ENABLED,
-        CHECKED,
-        UNKNOWN
+        HOVER,          // css-selectors-4 §7.1 — pointer designation
+        ACTIVE,         // css-selectors-4 §7.2 — activation in progress
+        FOCUS,          // css-selectors-4 §7.3 — input focus
+        FOCUS_VISIBLE,  // reserved at runtime v1 (inert + logged)
+        FOCUS_WITHIN,   // reserved at runtime v1 (inert + logged)
+        DISABLED,       // css-selectors-4 §12.1.2 — host-supplied flag
+        ENABLED,        // not in the runtime-v1 table (inert + logged)
+        CHECKED,        // css-selectors-4 §12.2.1 — host-supplied flag
+        UNKNOWN         // anything else — preserved on wire, inert
     }
 
     /**
-     * Parse selector condition from string.
+     * Parse a wire condition string. Lowercases, trims, and strips ONE
+     * leading colon (":hover" → hover) — "::before" keeps a colon and lands
+     * in UNKNOWN, which is correct: pseudo-ELEMENTS ride the ContentApplier
+     * channel, not interaction state (see DynamicStyleResolver.isPseudoElement).
      */
     fun parseCondition(condition: String): SelectorCondition {
         return when (condition.lowercase().trim().removePrefix(":")) {
@@ -77,7 +69,11 @@ object StateHandler {
     }
 
     /**
-     * State for a component with selectors.
+     * Snapshot of a component's interaction state at one resolution pass.
+     * hovered/pressed/focused come from the InteractionSource collectors;
+     * enabled/checked are HOST-supplied flags (spec 06 §2: the runtime only
+     * styles them) — defaulted to the interactive/unchecked baseline, and
+     * overridable by the harness forced-state hook at resolution time.
      */
     data class InteractionState(
         val isHovered: Boolean,
@@ -86,116 +82,18 @@ object StateHandler {
         val isEnabled: Boolean = true,
         val isChecked: Boolean = false
     ) {
-        /**
-         * Check if a selector condition is active.
-         */
-        fun isActive(condition: SelectorCondition): Boolean {
-            return when (condition) {
-                SelectorCondition.HOVER -> isHovered
-                SelectorCondition.ACTIVE -> isPressed
-                SelectorCondition.FOCUS,
-                SelectorCondition.FOCUS_VISIBLE,
-                SelectorCondition.FOCUS_WITHIN -> isFocused
-                SelectorCondition.DISABLED -> !isEnabled
-                SelectorCondition.ENABLED -> isEnabled
-                SelectorCondition.CHECKED -> isChecked
-                SelectorCondition.UNKNOWN -> false
-            }
-        }
-
-        /**
-         * Check if any interactive state is active.
-         */
-        val hasActiveState: Boolean
-            get() = isHovered || isPressed || isFocused
-    }
-
-    /**
-     * Find the first matching selector based on current interaction state.
-     * Priority: active > hover > focus
-     */
-    fun findActiveSelector(
-        selectors: List<IRSelector>,
-        state: InteractionState
-    ): IRSelector? {
-        val priorityOrder = listOf(
-            SelectorCondition.ACTIVE,
-            SelectorCondition.HOVER,
-            SelectorCondition.FOCUS,
-            SelectorCondition.FOCUS_VISIBLE,
-            SelectorCondition.FOCUS_WITHIN,
-            SelectorCondition.DISABLED,
-            SelectorCondition.CHECKED
-        )
-
-        for (priority in priorityOrder) {
-            val selector = selectors.find { selector ->
-                val condition = parseCondition(selector.condition)
-                condition == priority && state.isActive(condition)
-            }
-            if (selector != null) return selector
-        }
-
-        return null
-    }
-
-    /**
-     * Find all matching selectors based on current interaction state.
-     */
-    fun findAllActiveSelectors(
-        selectors: List<IRSelector>,
-        state: InteractionState
-    ): List<IRSelector> {
-        return selectors.filter { selector ->
-            val condition = parseCondition(selector.condition)
-            state.isActive(condition)
+        companion object {
+            /** The at-rest state — what a component resolves with before any input. */
+            val IDLE = InteractionState(isHovered = false, isPressed = false, isFocused = false)
         }
     }
 
     /**
-     * Merge base properties with selector properties.
-     * Selector properties override base properties.
-     */
-    fun mergeProperties(
-        baseProperties: List<IRProperty>,
-        selectorProperties: List<IRProperty>?
-    ): List<IRProperty> {
-        if (selectorProperties.isNullOrEmpty()) return baseProperties
-
-        val mergedMap = mutableMapOf<String, IRProperty>()
-
-        // Add base properties first
-        baseProperties.forEach { prop ->
-            mergedMap[prop.type] = prop
-        }
-
-        // Override with selector properties
-        selectorProperties.forEach { prop ->
-            mergedMap[prop.type] = prop
-        }
-
-        return mergedMap.values.toList()
-    }
-
-    /**
-     * Merge base properties with multiple selector properties.
-     * Later selectors take precedence.
-     */
-    fun mergePropertiesFromSelectors(
-        baseProperties: List<IRProperty>,
-        activeSelectors: List<IRSelector>
-    ): List<IRProperty> {
-        var result = baseProperties
-
-        activeSelectors.forEach { selector ->
-            result = mergeProperties(result, selector.properties)
-        }
-
-        return result
-    }
-
-    /**
-     * Composable helper to collect interaction state.
+     * Collect the live interaction state for one component. Reading the
+     * three collect*AsState values here makes the CALLING composable
+     * re-resolve styles on every state flip — a restyle of the same
+     * composable identity, no subtree recreation (spec 06 §5 re-evaluation
+     * contract: stable identity, within one frame).
      */
     @Composable
     fun rememberInteractionState(
@@ -203,8 +101,13 @@ object StateHandler {
         isEnabled: Boolean = true,
         isChecked: Boolean = false
     ): Pair<MutableInteractionSource, InteractionState> {
+        // HoverInteraction — emitted ONLY for pointer (mouse/stylus)
+        // enter/exit; Android touch never produces one, which gives the
+        // spec's "hover is a defined no-op on touch" for free.
         val isHovered by interactionSource.collectIsHoveredAsState()
+        // PressInteraction — a press gesture in progress (:active).
         val isPressed by interactionSource.collectIsPressedAsState()
+        // FocusInteraction — the platform focus system (:focus).
         val isFocused by interactionSource.collectIsFocusedAsState()
 
         return Pair(
@@ -220,19 +123,27 @@ object StateHandler {
     }
 
     /**
-     * Get the CSS selector string for a condition.
+     * Attach the input handlers that FEED the interaction source. Applied by
+     * ComponentRenderer only to components that carry hover/active/focus
+     * selector buckets (the efficiency gate — everyone else pays nothing).
+     *
+     *  - clickable emits PressInteraction (→ :active). indication = null:
+     *    visual state feedback is the selector bucket's job, not a ripple.
+     *  - hoverable emits HoverInteraction on pointer enter/exit (→ :hover;
+     *    inert on touch by construction — see rememberInteractionState).
+     *  - focusable emits FocusInteraction (→ :focus) when the platform
+     *    focus system lands on the node (keyboard/d-pad; touch taps do not
+     *    focus a plain box, matching web button behaviour).
      */
-    fun conditionToCssSelector(condition: SelectorCondition): String {
-        return when (condition) {
-            SelectorCondition.HOVER -> ":hover"
-            SelectorCondition.ACTIVE -> ":active"
-            SelectorCondition.FOCUS -> ":focus"
-            SelectorCondition.FOCUS_VISIBLE -> ":focus-visible"
-            SelectorCondition.FOCUS_WITHIN -> ":focus-within"
-            SelectorCondition.DISABLED -> ":disabled"
-            SelectorCondition.ENABLED -> ":enabled"
-            SelectorCondition.CHECKED -> ":checked"
-            SelectorCondition.UNKNOWN -> ""
-        }
-    }
+    fun Modifier.stateInteractions(interactionSource: MutableInteractionSource): Modifier =
+        this
+            .clickable(
+                interactionSource = interactionSource,
+                // No indication: the pressed VISUAL comes from the :active
+                // bucket via style resolution, never a Material ripple.
+                indication = null,
+                onClick = { /* press styling only — activation is not an event the IR models */ }
+            )
+            .hoverable(interactionSource)
+            .focusable(interactionSource = interactionSource)
 }

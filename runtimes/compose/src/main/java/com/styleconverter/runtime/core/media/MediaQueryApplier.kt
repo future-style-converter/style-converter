@@ -17,6 +17,17 @@ import com.styleconverter.runtime.core.ir.IRProperty
 /**
  * Evaluates CSS media queries at runtime and merges matching properties.
  *
+ * NOTE (wave 7): this is the LEGACY broad-grammar evaluator, kept for the
+ * ResponsiveUtils convenience surface (breakpoints / orientation helpers).
+ * The IR envelope's `media` buckets no longer route through it —
+ * ComponentRenderer uses [MediaBucketEvaluator], the strict dynamic-styling
+ * runtime v1 contract (schema/spec/06-dynamic-styling.md §4: render-surface
+ * width + prefers-color-scheme only; everything else conservatively
+ * inactive). This evaluator also APPENDS matching bucket properties instead
+ * of the spec's whole-value replace, and compares against the DEVICE screen
+ * width — both fine for app-level responsive helpers, non-conformant for
+ * the wire contract.
+ *
  * Uses Compose's [LocalConfiguration] to detect current screen dimensions
  * and [isSystemInDarkTheme] for color scheme detection.
  *

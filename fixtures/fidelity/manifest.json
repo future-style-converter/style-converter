@@ -2521,11 +2521,89 @@
         "padding-top",
         "width"
       ]
+    },
+    {
+      "path": "fixtures/fidelity/dynamic/states.json",
+      "kind": "dynamic",
+      "categories": [
+        "borders",
+        "color",
+        "spacing"
+      ],
+      "features": [
+        "selector-hover",
+        "selector-active",
+        "selector-focus",
+        "selector-disabled",
+        "selector-checked",
+        "selector-layering"
+      ],
+      "components": 6,
+      "nodes": 6,
+      "bytes": 2853,
+      "properties": [
+        "background-color",
+        "border",
+        "color",
+        "height",
+        "opacity",
+        "width"
+      ]
+    },
+    {
+      "path": "fixtures/fidelity/dynamic/media-width.json",
+      "kind": "dynamic",
+      "categories": [
+        "color",
+        "spacing"
+      ],
+      "features": [
+        "media-min-width",
+        "media-max-width",
+        "media-match-390",
+        "media-nomatch-390",
+        "media-flip-250",
+        "media-layering",
+        "media-layout-flip"
+      ],
+      "components": 7,
+      "nodes": 7,
+      "bytes": 2460,
+      "properties": [
+        "background-color",
+        "height",
+        "padding",
+        "width"
+      ]
+    },
+    {
+      "path": "fixtures/fidelity/dynamic/dark-mode.json",
+      "kind": "dynamic",
+      "categories": [
+        "borders",
+        "color",
+        "spacing"
+      ],
+      "features": [
+        "prefers-color-scheme-dark",
+        "light-dark-color",
+        "scheme-bucket-plus-light-dark"
+      ],
+      "components": 4,
+      "nodes": 4,
+      "bytes": 1507,
+      "properties": [
+        "background-color",
+        "border",
+        "color",
+        "height",
+        "width"
+      ]
     }
   ],
   "totals": {
-    "files": 54,
-    "components": 563,
-    "nodes": 746
+    "files": 57,
+    "components": 580,
+    "nodes": 763
   }
 }

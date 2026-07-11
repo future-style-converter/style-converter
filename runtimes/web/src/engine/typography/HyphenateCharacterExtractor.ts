@@ -20,7 +20,7 @@ function parse(data: unknown): string | number | undefined {
   const o = data as Record<string, unknown>;
   if (o.type === 'auto') return 'auto';
   if (o.type === 'string' && typeof o.value === 'string') {
-    return `"${o.value.replace(/"/g, '\\"')}"`;                    // CSS double-quoted string
+    return `"${o.value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;                    // CSS double-quoted string
   }
   return undefined;
 }

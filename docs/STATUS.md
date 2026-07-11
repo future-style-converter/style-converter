@@ -93,11 +93,11 @@ pipeline), and the full `./test-all.sh` visual pipeline.
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 43 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 786 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 444 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 60 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 409 |
+| converter (Kotlin) | `./gradlew :converter:test` | 93 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 888 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 679 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 184 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 425 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 12 goldens × 4 codebases |
 
 ## Roadmap

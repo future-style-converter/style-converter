@@ -1,0 +1,65 @@
+{
+  "components": {
+    "DK_SchemeBucket": {
+      "properties": {
+        "width": "180px",
+        "height": "48px",
+        "background-color": "#fdf2e9",
+        "color": "#7e3b09"
+      },
+      "media": [
+        {
+          "query": "(prefers-color-scheme: dark)",
+          "properties": {
+            "background-color": "#111827",
+            "color": "#f9fafb"
+          }
+        }
+      ],
+      "_text": "scheme bucket"
+    },
+    "DK_SchemeBorder": {
+      "properties": {
+        "width": "200px",
+        "height": "48px",
+        "background-color": "#ecf0f1",
+        "border": "3px solid #2c3e50"
+      },
+      "media": [
+        {
+          "query": "(prefers-color-scheme: dark)",
+          "properties": {
+            "background-color": "#1f2937",
+            "border": "3px solid #9b59b6"
+          }
+        }
+      ]
+    },
+    "DK_LightDark": {
+      "properties": {
+        "width": "140px",
+        "height": "80px",
+        "background-color": "light-dark(#ecf0f1, #111827)",
+        "color": "light-dark(#111111, #f9fafb)"
+      },
+      "_text": "light-dark colors"
+    },
+    "DK_Mixed": {
+      "properties": {
+        "width": "180px",
+        "height": "48px",
+        "background-color": "light-dark(#ffffff, #000000)",
+        "color": "#111111"
+      },
+      "media": [
+        {
+          "query": "(prefers-color-scheme: dark)",
+          "properties": {
+            "color": "#e67e22"
+          }
+        }
+      ],
+      "_text": "mixed mechanisms"
+    }
+  }
+}

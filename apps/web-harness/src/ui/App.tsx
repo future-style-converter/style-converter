@@ -11,6 +11,9 @@ import { ComponentGallery } from './ComponentGallery';
 import { CaptureGallery } from './CaptureGallery';
 import { FixtureCanvas } from './FixtureCanvas';
 import { useHotReload } from '@style-converter/web/debug/hotreload/HotReloadManager';
+// Dynamic-styling stylesheet mount (spec 06): selector/media bucket rules
+// + the light-dark() color-scheme root opt-in, for ALL render modes.
+import { useDynamicRules } from '../sdui/useDynamicRules';
 
 const IR_ASSET_PATH = '/ir-components.json';
 
@@ -162,6 +165,13 @@ export function App() {
     [captureMode, fixtureName]
   );
   useHotReload(onDocumentUpdate, hotReloadOpts);
+
+  // Mount the document's dynamic-styling stylesheet (RuleBuilder rules)
+  // into <head>. Runs for every mode — gallery, capture, fixture — so
+  // real-input probing (interaction-states.mjs), forced-state captures,
+  // and interactive browsing all resolve states identically. Must sit
+  // with the other unconditional hooks, above the mode early-returns.
+  useDynamicRules(document);
 
   // Fixture mode: render exactly one component (looked up by name) inside
   // a FixtureCanvas with the data-testid + tabIndex + ready-sentinel

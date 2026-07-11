@@ -22,14 +22,14 @@ function parse(data: unknown): string | number | undefined {
   if (!data || typeof data !== 'object') return kwLower(data);
   const o = data as Record<string, unknown>;
   if (o.type === 'custom' && typeof o.character === 'string') {
-    return `"${o.character.replace(/"/g, '\\"')}"`;                 // CSS double-quoted string
+    return `"${o.character.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;                 // CSS double-quoted string
   }
   // Fill/shape combo: 'filled circle'/'open dot' arrive as 'filled-circle' via kebab normalisation;
   // replace the dash with a space so it matches the CSS grammar.
   const kw = kwLower(o.type);
   if (!kw) return undefined;
   return kw.includes('-') && (kw.startsWith('filled-') || kw.startsWith('open-'))
-    ? kw.replace('-', ' ')
+    ? kw.replace(/-/g, ' ')
     : kw;
 }
 

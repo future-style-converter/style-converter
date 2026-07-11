@@ -40,9 +40,12 @@ struct CaptureCanvas: View {
     /// web / Android canvases exactly.
     static let padding: CGFloat = 16
 
-    /// Fixed canvas width. Matches the 390 px phone frame used by the
-    /// gallery and other testing surfaces.
-    static let width: CGFloat = 390
+    /// Canvas width. 390 (the phone-frame default every committed
+    /// baseline was captured at) unless the CAPTURE_WIDTH hook
+    /// overrides it for a two-width media run (docs/DYNAMIC_CAPTURE.md
+    /// §2) — the canvas IS the render surface media queries evaluate
+    /// against (spec 06 §4), so the recipe only changes this number.
+    static let width: CGFloat = CaptureOverrides.captureWidth
 
     /// Fixed canvas height basis for vh units. Matches the 390×844
     /// phone frame (StyleConverterTestApp) and web's #root — captures
@@ -99,6 +102,9 @@ struct CaptureCanvas: View {
             // #39: the harness supplies the capture geometry — the
             // runtime no longer assumes a 390×844 canvas on its own.
             .environment(\.styleViewport, CaptureCanvas.viewport)
+            // Wave 7 — the dynamic-styling capture hooks ride the same
+            // environment channel (see the block on the flow branch).
+            .modifier(DynamicCaptureHooks())
         } else {
         // Critical: explicit alignment on the outer frame.
         //
@@ -134,6 +140,37 @@ struct CaptureCanvas: View {
             // #39: the harness supplies the capture geometry — the
             // runtime no longer assumes a 390×844 canvas on its own.
             .environment(\.styleViewport, CaptureCanvas.viewport)
+            // Wave 7 — the dynamic-styling capture hooks: forced state,
+            // pinned scheme, and the forced-run marker.
+            .modifier(DynamicCaptureHooks())
         }
+    }
+}
+
+/// Wave 7 (docs/DYNAMIC_CAPTURE.md) — the environment half of the iOS
+/// capture hooks, shared by both canvas branches:
+///
+///   • `forcedStyleStates` — the spec 06 §6 forced-state set; the
+///     runtime's StateResolver treats it as active on EVERY component
+///     in this canvas (deterministic state captures).
+///   • `colorScheme` — pinned LIGHT by default / dark on the forced-
+///     dark run (§3). Explicit so ImageRenderer output never depends
+///     on app or system appearance (the harness chrome runs dark).
+///   • accessibility identifier — the native analogue of the web
+///     canvas's `data-force-state` stamp: a forced run is VERIFIABLE
+///     ("force-state-active"), a base run reads "capture-canvas".
+struct DynamicCaptureHooks: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            // Forced-state set into the runtime's resolution channel.
+            .environment(\.forcedStyleStates, CaptureOverrides.forcedStates)
+            // Deterministic scheme signal for prefers-color-scheme
+            // buckets AND light-dark() arms (one surface, one answer).
+            .environment(\.colorScheme, CaptureOverrides.colorScheme)
+            // Forced-run marker (contract: never silently diff two
+            // base-state runs believing one was forced).
+            .accessibilityIdentifier(
+                CaptureOverrides.forceState.map { "force-state-\($0)" }
+                    ?? "capture-canvas")
     }
 }

@@ -62,7 +62,6 @@ import com.styleconverter.runtime.interactions.forms.FormStylingExtractor
 import com.styleconverter.runtime.content.ContentApplier
 import com.styleconverter.runtime.content.ContentExtractor
 import com.styleconverter.runtime.content.CounterStateProvider
-import com.styleconverter.runtime.core.media.MediaQueryApplier
 
 /**
  * SDUI Component Renderer.
@@ -160,20 +159,96 @@ object ComponentRenderer {
     @OptIn(ExperimentalLayoutApi::class)
     @Composable
     fun RenderComponent(component: IRComponent, itemModifier: Modifier = Modifier) {
-        // Apply media queries to get effective properties based on screen size
-        val mediaProperties = if (component.media.isNotEmpty()) {
-            MediaQueryApplier.applyMediaQueries(
-                baseProperties = component.properties,
-                mediaQueries = component.media
-            )
+        // ── Wave-7 dynamic-styling resolution (schema/spec/06-dynamic-styling.md)
+        // Fold ACTIVE media buckets (§4) then ACTIVE selector buckets (§2)
+        // over the base list — array order, whole-value replace per property
+        // type, last writer wins (§3: state must beat a width-bucket recolor).
+        val hasSelectorBuckets = component.selectors.isNotEmpty()
+        val hasMediaBuckets = component.media.isNotEmpty()
+
+        // Forced-state hook (§6): the harness capture screen provides one
+        // forced condition per run; production hosts leave the set empty.
+        val forcedStates = com.styleconverter.runtime.core.states.DynamicStyleResolver
+            .LocalForcedStates.current
+
+        // Efficiency gate: ONLY components whose selector buckets contain a
+        // real-input runtime-v1 condition (hover/active/focus) pay for an
+        // InteractionSource + input modifiers. disabled/checked have no
+        // self-service input source (host/harness supplies them, §2), and
+        // bucket-free components skip this branch entirely.
+        val needsInteraction = hasSelectorBuckets &&
+            com.styleconverter.runtime.core.states.DynamicStyleResolver
+                .needsInteractionSource(component.selectors)
+        val interactionState: com.styleconverter.runtime.core.states.StateHandler.InteractionState?
+        val interactionModifier: Modifier
+        if (needsInteraction) {
+            // The collect*AsState reads inside make THIS composable restyle
+            // on every state flip — same composable identity, no subtree
+            // recreation (§5 re-evaluation contract).
+            val (source, state) = com.styleconverter.runtime.core.states.StateHandler
+                .rememberInteractionState()
+            interactionState = state
+            // Press/hover/focus feeders (see StateHandler.stateInteractions
+            // for the per-condition mapping and the touch-hover no-op).
+            interactionModifier = with(com.styleconverter.runtime.core.states.StateHandler) {
+                Modifier.stateInteractions(source)
+            }
         } else {
+            // No real-input buckets: resolution still runs (media buckets /
+            // forced disabled/checked) but no input plumbing is composed.
+            interactionState = null
+            interactionModifier = Modifier
+        }
+
+        // Render-surface width (§4): media min/max-width compare against the
+        // surface the document renders INTO — the harness capture canvas
+        // provides it; absent a host-provided surface the window IS the
+        // surface (LocalConfiguration width, the runtime's px==dp space).
+        val surfaceWidthPx = com.styleconverter.runtime.core.media.MediaBucketEvaluator
+            .LocalRenderSurfaceWidthPx.current
+            ?: androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.toFloat()
+        // Platform dark-mode signal — shared by prefers-color-scheme buckets
+        // AND light-dark() color values below (§4: one surface, one scheme
+        // answer). Maps to configuration uiMode's night mask.
+        val isDarkScheme = androidx.compose.foundation.isSystemInDarkTheme()
+
+        val mediaProperties = if (!hasSelectorBuckets && !hasMediaBuckets) {
+            // Identity-preserving fast path: the static corpus (no buckets)
+            // must render byte-identically to the frozen baseline.
             component.properties
+        } else {
+            androidx.compose.runtime.remember(
+                component, interactionState, forcedStates, surfaceWidthPx, isDarkScheme
+            ) {
+                // Which media buckets hold for this surface (strict
+                // runtime-v1 grammar; unsupported ⇒ conservatively inactive).
+                val activeMedia = com.styleconverter.runtime.core.media.MediaBucketEvaluator
+                    .activeBuckets(component.media, surfaceWidthPx, isDarkScheme)
+                // Which selector buckets hold for this state/forced set.
+                val activeSelectors = com.styleconverter.runtime.core.states.DynamicStyleResolver
+                    .activeSelectorBuckets(component.selectors, interactionState, forcedStates)
+                // §3 layering fold: base → media (array order) → selectors
+                // (array order), whole-value replace per type.
+                com.styleconverter.runtime.core.states.DynamicStyleResolver
+                    .resolve(component.properties, activeMedia, activeSelectors)
+            }
+        }
+
+        // light-dark() color values (css-color-5) resolve per-property
+        // against the SAME scheme signal (§4 note) — after bucket folding so
+        // bucket-supplied light-dark values resolve too. Identity-preserving
+        // when no light-dark value is present (the common case).
+        val schemeResolvedProperties = androidx.compose.runtime.remember(mediaProperties, isDarkScheme) {
+            com.styleconverter.runtime.core.colors.LightDarkResolver
+                .resolve(mediaProperties, isDarkScheme)
         }
 
         // Fold the parent's inheritable text declarations in UNDER the
         // component's own (CSS inheritance — see LocalInheritedProperties).
+        // Uses the DYNAMIC-RESOLVED list so bucket overrides and resolved
+        // light-dark colors participate in inheritance like any other value.
         val inheritedProperties = LocalInheritedProperties.current
-        val rawProperties = mergeInherited(mediaProperties, inheritedProperties)
+        val rawProperties = mergeInherited(schemeResolvedProperties, inheritedProperties)
 
         // CSS `all: initial|inherit|unset|revert|revert-layer` resets every
         // other property to its respective global value. We can't synthesize
@@ -291,8 +366,11 @@ object ComponentRenderer {
         val hasExplicitHeight = effectiveProperties.any { it.type in listOf("Height", "MinHeight", "BlockSize", "MinBlockSize") }
         // itemModifier (parent-injected stretch) goes OUTERMOST so the grid
         // cell's fillMaxHeight established the constraint the style chain
-        // then works within.
-        val sizedModifier = itemModifier.then(baseModifier).then(
+        // then works within. The interaction feeders (press/hover/focus →
+        // selector-bucket restyle) sit just inside it, ahead of the style
+        // chain, so the hit/hover/focus target is the component's full
+        // laid-out box; Modifier (the no-selector case) chains as a no-op.
+        val sizedModifier = itemModifier.then(interactionModifier).then(baseModifier).then(
             // BORDER-BOX floor: web's 50/30px minimum constrains the whole
             // card (box-sizing: border-box), so the content-box minimum
             // Compose enforces here (inside the padding-last chain) must be

@@ -4,7 +4,8 @@
  *
  * Visited via `?mode=capture`. Each component renders inside a
  * <CaptureCanvas> element with:
- *   - exactly 390 px width
+ *   - exactly 390 px width (or the `?width=` override — the two-width
+ *     media capture recipe, docs/DYNAMIC_CAPTURE.md §2)
  *   - natural height (no clamping)
  *   - solid #1A1A2E background (no alpha compositing)
  *   - 16 px padding on all sides
@@ -60,6 +61,43 @@ interface CaptureGalleryProps {
 const WPT_MODE: boolean = (() => {
   if (typeof window === 'undefined') return false;
   return new URLSearchParams(window.location.search).get('wpt') === '1';
+})();
+
+/**
+ * Dynamic-styling capture hooks (docs/DYNAMIC_CAPTURE.md; runtime semantics
+ * in schema/spec/06-dynamic-styling.md). Same read-once pattern as WPT_MODE
+ * — URL params can't change mid-capture, and module constants keep the
+ * render loop allocation-free.
+ *
+ * `?width=<px>` — render-surface width override (`CAPTURE_WIDTH` env on
+ * capture-screenshots.mjs). Media `min-width`/`max-width` buckets evaluate
+ * against the CANVAS width (spec 06 §4: the render surface, never the
+ * device), so the two-width media recipe just re-runs the capture with a
+ * different canvas width. Default 390 = the committed-baseline contract;
+ * non-positive / NaN values fall back to 390 rather than emit a 0-width
+ * canvas that would blank every capture.
+ */
+const CANVAS_WIDTH_PX: number = (() => {
+  if (typeof window === 'undefined') return 390;
+  const raw = new URLSearchParams(window.location.search).get('width');
+  const parsed = raw ? Number(raw) : NaN;
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 390;
+})();
+
+/**
+ * `?forceState=<state>` — the forced interaction state for this capture run
+ * (`CAPTURE_FORCE_STATE` env; spec 06 §6). The gallery's job is transport,
+ * not resolution: it validates the value and stamps `data-force-state` on
+ * every capture canvas so (a) the web engine can treat the condition as
+ * active at style resolution and (b) capture scripts can VERIFY a forced
+ * run actually ran forced. Unknown values are dropped to null (base-state
+ * capture) — the node-side env validation in capture-screenshots.mjs is
+ * the loud gate; this guard just keeps hand-typed URLs honest.
+ */
+const FORCE_STATE: string | null = (() => {
+  if (typeof window === 'undefined') return null;
+  const raw = new URLSearchParams(window.location.search).get('forceState');
+  return raw && ['hover', 'active', 'focus', 'disabled', 'checked'].includes(raw) ? raw : null;
 })();
 
 /**
@@ -285,6 +323,12 @@ export function CaptureCanvas({ node, index }: CaptureCanvasProps) {
       data-capture-index={index}
       data-capture-id={component.id}
       data-capture-name={component.name}
+      // Forced-state marker (spec 06 §6 / docs/DYNAMIC_CAPTURE.md §1):
+      // present on EVERY canvas when the run is forced, absent otherwise
+      // (React drops null-valued data attributes). The web engine reads
+      // this at style resolution; capture scripts assert on it so a forced
+      // run can never silently degrade to a base-state capture.
+      data-force-state={FORCE_STATE}
       style={style}
     >
       <ComponentRenderer node={node} />
@@ -329,7 +373,10 @@ const containerStyle: React.CSSProperties = {
  *  https://www.w3.org/TR/css-transforms-1/#containing-block-for-all-descendants).
  */
 const canvasStyle: React.CSSProperties = {
-  width: '390px',
+  // 390 unless the `?width=` capture hook overrides it (CANVAS_WIDTH_PX
+  // above) — the canvas IS the render surface media queries evaluate
+  // against (spec 06 §4), so the two-width media recipe only changes this.
+  width: `${CANVAS_WIDTH_PX}px`,
   boxSizing: 'border-box',
   padding: '16px',
   background: '#1A1A2E',
