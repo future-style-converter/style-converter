@@ -16,7 +16,7 @@
     "PW_Background_Borders_02": {
       "properties": {
         "background-position-y": "bottom",
-        "background-position": "bottom right",
+        "background-position": "center",
         "background-clip": "border-box",
         "border-image-repeat": "round",
         "border-right-style": "groove",
@@ -86,7 +86,7 @@
     },
     "PW_Background_Color_04": {
       "properties": {
-        "background-position": "center",
+        "background-position": "center center",
         "background-clip": "padding-box",
         "background-position-y": "30%",
         "color": "#f39",
@@ -111,7 +111,7 @@
     },
     "PW_Background_Effects_02": {
       "properties": {
-        "background-size": "100px",
+        "background-size": "100px 50px",
         "background-position-y": "30%",
         "background-position-inline": "75%",
         "mask-type": "alpha",
@@ -220,7 +220,7 @@
       "properties": {
         "background-position-block": "25%",
         "background-position": "top",
-        "background-size": "40px 40px",
+        "background-size": "40px 24px",
         "grid-row-end": "-1",
         "grid-auto-rows": "auto",
         "inset-block-end": "10px",
@@ -309,7 +309,7 @@
       "properties": {
         "background-position-block": "25%",
         "background-image": "linear-gradient(in oklab, red, blue)",
-        "background-size": "100px",
+        "background-size": "100px 50px",
         "shape-outside": "border-box",
         "shape-inside": "circle(50%)",
         "shape-padding": "3%",
@@ -346,7 +346,7 @@
       "properties": {
         "background-position-y": "bottom",
         "background-origin": "padding-box",
-        "background-size": "100px 50px",
+        "background-size": "20px 12px",
         "min-inline-size": "300px",
         "inline-size": "150px",
         "max-inline-size": "150px",
@@ -402,7 +402,7 @@
     "PW_Background_Spacing_02": {
       "properties": {
         "background-position-x": "right",
-        "background-size": "30px 30px",
+        "background-size": "30px 18px",
         "padding-right": "30px",
         "margin-block-end": "20px",
         "max-width": "200px",
@@ -414,7 +414,7 @@
     "PW_Background_Spacing_03": {
       "properties": {
         "background-position-inline": "75%",
-        "background-position": "left top",
+        "background-position": "right bottom",
         "margin-inline-end": "20px",
         "margin-top": "-10px",
         "min-height": "300px",
@@ -472,9 +472,9 @@
     },
     "PW_Background_Transforms_04": {
       "properties": {
-        "background-position": "center center",
+        "background-position": "left top",
         "background-position-inline": "75%",
-        "background-size": "40px 40px",
+        "background-size": "40px 24px",
         "transform-box": "content-box",
         "rotate": "none",
         "width": "180px",
@@ -496,7 +496,7 @@
     "PW_Background_Typography_02": {
       "properties": {
         "background-repeat": "repeat-y",
-        "background-size": "auto",
+        "background-size": "50% 50%, 50% 50%, 50% 50%, 50% 50%",
         "line-snap": "contain",
         "text-size-adjust": "none",
         "width": "200px",

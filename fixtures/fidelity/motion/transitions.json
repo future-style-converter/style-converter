@@ -1,0 +1,79 @@
+{
+  "components": {
+    "MT_BgFade": {
+      "properties": {
+        "width": "140px",
+        "height": "48px",
+        "background-color": "#7f8c8d",
+        "transition-property": "background-color",
+        "transition-duration": "1s",
+        "transition-timing-function": "linear"
+      },
+      "selectors": [
+        {
+          "selector": ":hover",
+          "properties": {
+            "background-color": "#c0392b"
+          }
+        }
+      ]
+    },
+    "MT_WidthGrow": {
+      "properties": {
+        "width": "80px",
+        "height": "40px",
+        "background-color": "#2980b9",
+        "transition-property": "width",
+        "transition-duration": "1s",
+        "transition-timing-function": "linear"
+      },
+      "selectors": [
+        {
+          "selector": ":active",
+          "properties": {
+            "width": "160px"
+          }
+        }
+      ]
+    },
+    "MT_AllChannels": {
+      "properties": {
+        "width": "120px",
+        "height": "56px",
+        "background-color": "#27ae60",
+        "opacity": "1",
+        "transition-property": "all",
+        "transition-duration": "1s",
+        "transition-timing-function": "linear"
+      },
+      "selectors": [
+        {
+          "selector": ":focus",
+          "properties": {
+            "background-color": "#8e44ad",
+            "opacity": "0.4"
+          }
+        }
+      ]
+    },
+    "MT_Delayed": {
+      "properties": {
+        "width": "100px",
+        "height": "32px",
+        "background-color": "#f1c40f",
+        "transition-property": "background-color",
+        "transition-duration": "1s",
+        "transition-delay": "0.5s",
+        "transition-timing-function": "linear"
+      },
+      "selectors": [
+        {
+          "selector": ":checked",
+          "properties": {
+            "background-color": "#2c3e50"
+          }
+        }
+      ]
+    }
+  }
+}

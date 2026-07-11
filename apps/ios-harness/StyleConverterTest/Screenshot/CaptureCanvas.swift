@@ -167,10 +167,19 @@ struct DynamicCaptureHooks: ViewModifier {
             // Deterministic scheme signal for prefers-color-scheme
             // buckets AND light-dark() arms (one surface, one answer).
             .environment(\.colorScheme, CaptureOverrides.colorScheme)
-            // Forced-run marker (contract: never silently diff two
-            // base-state runs believing one was forced).
+            // Wave 8 — the spec 07 §5 pinned motion clock: every
+            // animation on this canvas renders its state at absolute
+            // second t, paused (the renderer's TimelineView schedule
+            // pauses outright when this is non-nil). nil = live clock,
+            // byte-identical to every committed baseline.
+            .environment(\.animationCaptureTime, CaptureOverrides.animationTime)
+            // Run markers (contract: never silently diff two base runs
+            // believing one was forced/seized). The composite identifier
+            // is the native analogue of the web canvas's
+            // data-force-state + data-animation-time attributes.
             .accessibilityIdentifier(
-                CaptureOverrides.forceState.map { "force-state-\($0)" }
+                (CaptureOverrides.forceState.map { "force-state-\($0)" }
                     ?? "capture-canvas")
+                + (CaptureOverrides.animationTimeRaw.map { "+animation-time-\($0)" } ?? ""))
     }
 }

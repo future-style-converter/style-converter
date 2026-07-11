@@ -11,8 +11,10 @@ import { ComponentGallery } from './ComponentGallery';
 import { CaptureGallery } from './CaptureGallery';
 import { FixtureCanvas } from './FixtureCanvas';
 import { useHotReload } from '@style-converter/web/debug/hotreload/HotReloadManager';
-// Dynamic-styling stylesheet mount (spec 06): selector/media bucket rules
-// + the light-dark() color-scheme root opt-in, for ALL render modes.
+// Dynamic-styling stylesheet mount (spec 06 + spec 07 §1.2): selector/
+// media bucket rules, the light-dark() color-scheme root opt-in, AND the
+// document's @keyframes rules (built by the engine's RuleBuilder from
+// the decoded `IRDocument.keyframes`), for ALL render modes.
 import { useDynamicRules } from '../sdui/useDynamicRules';
 
 const IR_ASSET_PATH = '/ir-components.json';
@@ -120,7 +122,11 @@ export function App() {
       // translated to the flat v2 shape with a deprecation warning, and
       // unsupported minReaderVersion / children-in-v2 throw into the
       // catch below so the harness shows a real error, not a blank page.
-      const data = decodeIRDocument(await response.json());
+      const raw = await response.json();
+      // Document-level keyframes (spec 07 §1.2) ride the decoded document
+      // — IRDecode passes the additive v2 key through — so the dynamic-
+      // rules mount below covers them with zero extra plumbing.
+      const data = decodeIRDocument(raw);
       setDocument(data);
       setError(null);
     } catch (err) {
@@ -166,11 +172,12 @@ export function App() {
   );
   useHotReload(onDocumentUpdate, hotReloadOpts);
 
-  // Mount the document's dynamic-styling stylesheet (RuleBuilder rules)
-  // into <head>. Runs for every mode — gallery, capture, fixture — so
+  // Mount the document's dynamic-styling stylesheet (RuleBuilder rules —
+  // selector/media buckets AND the spec 07 §1.2 @keyframes rules) into
+  // <head>. Runs for every mode — gallery, capture, fixture — so
   // real-input probing (interaction-states.mjs), forced-state captures,
-  // and interactive browsing all resolve states identically. Must sit
-  // with the other unconditional hooks, above the mode early-returns.
+  // animations, and interactive browsing all resolve identically. Must
+  // sit with the other unconditional hooks, above the mode early-returns.
   useDynamicRules(document);
 
   // Fixture mode: render exactly one component (looked up by name) inside

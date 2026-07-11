@@ -1,0 +1,322 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "fadebox-001",
+            "name": "FadeBox",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 120.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                },
+                {
+                    "type": "AnimationName",
+                    "data": [
+                        {
+                            "type": "identifier",
+                            "name": "fade"
+                        }
+                    ]
+                },
+                {
+                    "type": "AnimationDuration",
+                    "data": {
+                        "type": "app.irmodels.properties.animations.AnimationDurationProperty.AnimationDurationValue.Durations",
+                        "durations": [
+                            {
+                                "ms": 1000.0,
+                                "original": {
+                                    "v": 1.0,
+                                    "u": "S"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "AnimationFillMode",
+                    "data": [
+                        "BOTH"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "slidebox-002",
+            "name": "SlideBox",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "AnimationName",
+                    "data": [
+                        {
+                            "type": "identifier",
+                            "name": "slide-shift"
+                        }
+                    ]
+                },
+                {
+                    "type": "AnimationDuration",
+                    "data": {
+                        "type": "app.irmodels.properties.animations.AnimationDurationProperty.AnimationDurationValue.Durations",
+                        "durations": [
+                            {
+                                "ms": 2000.0,
+                                "original": {
+                                    "v": 2.0,
+                                    "u": "S"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "AnimationDirection",
+                    "data": [
+                        "ALTERNATE"
+                    ]
+                },
+                {
+                    "type": "AnimationIterationCount",
+                    "data": [
+                        2.0
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ghostbox-003",
+            "name": "GhostBox",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                },
+                {
+                    "type": "AnimationName",
+                    "data": [
+                        {
+                            "type": "identifier",
+                            "name": "ghost"
+                        }
+                    ]
+                },
+                {
+                    "type": "AnimationDuration",
+                    "data": {
+                        "type": "app.irmodels.properties.animations.AnimationDurationProperty.AnimationDurationValue.Durations",
+                        "durations": [
+                            {
+                                "ms": 1000.0,
+                                "original": {
+                                    "v": 1.0,
+                                    "u": "S"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ],
+    "keyframes": {
+        "fade": [
+            {
+                "offset": 0.0,
+                "properties": [
+                    {
+                        "type": "Opacity",
+                        "data": {
+                            "alpha": 0.0,
+                            "original": {
+                                "type": "number",
+                                "value": 0.0
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "offset": 1.0,
+                "properties": [
+                    {
+                        "type": "Opacity",
+                        "data": {
+                            "alpha": 1.0,
+                            "original": {
+                                "type": "number",
+                                "value": 1.0
+                            }
+                        }
+                    }
+                ]
+            }
+        ],
+        "slide-shift": [
+            {
+                "offset": 0.0,
+                "properties": [
+                    {
+                        "type": "Transform",
+                        "data": {
+                            "type": "functions",
+                            "list": [
+                                {
+                                    "fn": "translateX",
+                                    "x": {
+                                        "px": 0.0
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "BackgroundColor",
+                        "data": {
+                            "srgb": {
+                                "r": 0.9058823529411765,
+                                "g": 0.2980392156862745,
+                                "b": 0.23529411764705882
+                            },
+                            "original": "#e74c3c"
+                        }
+                    }
+                ]
+            },
+            {
+                "offset": 0.5,
+                "properties": [
+                    {
+                        "type": "Transform",
+                        "data": {
+                            "type": "functions",
+                            "list": [
+                                {
+                                    "fn": "translateX",
+                                    "x": {
+                                        "px": 60.0
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "BackgroundColor",
+                        "data": {
+                            "srgb": {
+                                "r": 0.9529411764705882,
+                                "g": 0.611764705882353,
+                                "b": 0.07058823529411765
+                            },
+                            "original": "#f39c12"
+                        }
+                    },
+                    {
+                        "type": "Width",
+                        "data": {
+                            "type": "length",
+                            "px": 140.0
+                        }
+                    }
+                ]
+            },
+            {
+                "offset": 1.0,
+                "properties": [
+                    {
+                        "type": "Transform",
+                        "data": {
+                            "type": "functions",
+                            "list": [
+                                {
+                                    "fn": "translateX",
+                                    "x": {
+                                        "px": 120.0
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "type": "BackgroundColor",
+                        "data": {
+                            "srgb": {
+                                "r": 0.6078431372549019,
+                                "g": 0.34901960784313724,
+                                "b": 0.7137254901960784
+                            },
+                            "original": "#9b59b6"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

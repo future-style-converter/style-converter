@@ -27,6 +27,8 @@ import type {
   IRProperty,
   IRSelector,
   IRMedia,
+  IRKeyframes,
+  IRKeyframeStop,
 } from './IRModels';
 
 /** Highest wire version this runtime implements (spec 05 discovery rule). */
@@ -71,7 +73,45 @@ export function decodeIRDocument(raw: unknown): IRDocument {
   // v2 path: normalize each component (slot default, children hard error).
   const components = (doc.components as unknown[]).map(normalizeV2Component);
   // Canonical envelope out — version pair pinned to 2 (spec 01).
-  return { irVersion: 2, minReaderVersion: 2, components };
+  const out: IRDocument = { irVersion: 2, minReaderVersion: 2, components };
+  // keyframes: additive v2 minor-revision key (spec 07 §1.2) — attach only
+  // when the wire carried a non-empty map, mirroring the omit-when-empty
+  // emission rule so a re-encode of the decoded doc stays shape-faithful.
+  const keyframes = decodeKeyframes(doc.keyframes);
+  if (keyframes) out.keyframes = keyframes;
+  return out;
+}
+
+/**
+ * Decode the document-level `keyframes` map (spec 07 §1.2) with the same
+ * decode-side tolerance posture as `variables`: structurally malformed
+ * entries are dropped rather than crashing the whole document (the schema
+ * check is CI's job). Kept rules: a set is an ARRAY of stops; a stop is an
+ * object with a finite numeric `offset` in [0, 1] and a `properties` array
+ * (property payloads stay untyped-permissive, exactly like components).
+ * Sets left with zero valid stops are dropped whole — the converter never
+ * emits them (schema pins minItems 1), so an empty set here is corruption.
+ * Returns undefined when nothing valid survives (omit-when-empty out).
+ */
+function decodeKeyframes(raw: unknown): IRKeyframes | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const out: IRKeyframes = {};
+  for (const [name, stops] of Object.entries(raw as Raw)) {
+    if (!Array.isArray(stops)) continue;                             // set must be a stop array
+    const clean: IRKeyframeStop[] = [];
+    for (const stop of stops as unknown[]) {
+      if (!stop || typeof stop !== 'object' || Array.isArray(stop)) continue;
+      const s = stop as Raw;
+      // Offsets are pre-resolved fractions (readers never re-parse
+      // from/to/percent) — refuse anything outside the schema's 0..1 range.
+      if (typeof s.offset !== 'number' || !Number.isFinite(s.offset)) continue;
+      if (s.offset < 0 || s.offset > 1) continue;
+      if (!Array.isArray(s.properties)) continue;                    // typed stop declarations
+      clean.push({ offset: s.offset, properties: s.properties as IRProperty[] });
+    }
+    if (clean.length > 0) out[name] = clean;                         // minItems 1 (schema $defs)
+  }
+  return Object.keys(out).length > 0 ? out : undefined;              // omit-when-empty
 }
 
 /**

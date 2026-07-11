@@ -75,11 +75,13 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
-    // Image loading library for background-image: url() support.
-    // 2.7.0 is the final io.coil-kt 2.x release; Coil 3 moved to the
-    // io.coil-kt.coil3 coordinates (a source-level migration, out of scope
-    // for a version-currency pass).
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    // Image loading library for background-image: url()/data-URI support.
+    // Coil 3 (io.coil-kt.coil3 coordinates — wave-8 #36 migration), kept
+    // in lockstep with the :runtime library's version. The OkHttp network
+    // artifact self-registers via ServiceLoader in 3.x, so http(s) images
+    // keep loading with the default singleton loader.
+    implementation("io.coil-kt.coil3:coil-compose:3.5.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.5.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

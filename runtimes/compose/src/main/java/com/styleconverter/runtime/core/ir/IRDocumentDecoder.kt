@@ -27,6 +27,7 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 
@@ -85,7 +86,12 @@ object IRDocumentDecoder {
     // Closed key sets per schema/ir-v2.schema.json (additionalProperties:
     // false on every envelope level). Anything outside these sets is a
     // contract the reader doesn't speak → error (tolerance rule 2).
-    private val DOC_KEYS = setOf("irVersion", "minReaderVersion", "components")
+    private val DOC_KEYS = setOf(
+        "irVersion", "minReaderVersion", "components",
+        // additive v2 minor revision (spec 07 §1.2): document-level named
+        // @keyframes sets, omit-when-empty.
+        "keyframes"
+    )
     private val COMPONENT_KEYS = setOf(
         "id", "name", "properties", "selectors", "media",
         "slot", "text", "pseudos", "meta",
@@ -94,6 +100,9 @@ object IRDocumentDecoder {
         "variables"
     )
     private val SLOT_KEYS = setOf("parent", "name")
+    // Keyframe stop envelope (spec 07 §1.2 / schema $defs/keyframeStop —
+    // additionalProperties: false, exactly these two keys).
+    private val KEYFRAME_STOP_KEYS = setOf("offset", "properties")
     private val META_KEYS = setOf("sourceTag", "role")
     private val PROPERTY_KEYS = setOf("type", "data")
     private val SELECTOR_KEYS = setOf("condition", "properties")
@@ -127,11 +136,53 @@ object IRDocumentDecoder {
         val componentsEl = obj["components"] as? JsonArray
             ?: throw IllegalArgumentException("v2 document missing components array")
         // Flat list — every entry decodes independently, no recursion.
-        return IRDocument(componentsEl.map { el ->
-            decodeComponentV2(
-                el as? JsonObject ?: throw IllegalArgumentException("component entries must be objects")
-            )
-        })
+        return IRDocument(
+            components = componentsEl.map { el ->
+                decodeComponentV2(
+                    el as? JsonObject ?: throw IllegalArgumentException("component entries must be objects")
+                )
+            },
+            keyframes = decodeKeyframes(obj["keyframes"])
+        )
+    }
+
+    /**
+     * Decode the document-level `keyframes` envelope key (spec 07 §1.2 /
+     * schema $defs/keyframeSet + keyframeStop). Strict like every other
+     * envelope level: name → non-empty stop array; each stop is exactly
+     * {offset, properties} with offset a number in [0, 1]. Stop property
+     * payloads keep the component tolerance posture — unknown TYPES pass
+     * through as opaque envelopes for the applier to skip + log.
+     */
+    private fun decodeKeyframes(el: kotlinx.serialization.json.JsonElement?): Map<String, List<IRKeyframeStop>>? {
+        if (el == null) return null // omit-when-empty wire rule → no keyframes
+        val obj = el as? JsonObject
+            ?: throw IllegalArgumentException("document 'keyframes' must be an object of name → stop list")
+        // Schema pins minProperties 1 — an empty map is a writer bug.
+        require(obj.isNotEmpty()) { "document 'keyframes' present but empty (minProperties 1)" }
+        return obj.mapValues { (name, setEl) ->
+            val stops = setEl as? JsonArray
+                ?: throw IllegalArgumentException("keyframes '$name' must be an array of stops")
+            // Schema pins minItems 1 — fully-invalid sets are dropped by the
+            // CONVERTER, so an empty set reaching a reader is a writer bug.
+            require(stops.isNotEmpty()) { "keyframes '$name' present but empty (minItems 1)" }
+            stops.map { stopEl ->
+                val so = stopEl as? JsonObject
+                    ?: throw IllegalArgumentException("keyframes '$name': stops must be objects")
+                requireOnlyKeys(so, KEYFRAME_STOP_KEYS, "keyframe stop (in '$name')")
+                val offset = (so["offset"] as? JsonPrimitive)?.doubleOrNull
+                    ?: throw IllegalArgumentException("keyframes '$name': stop missing numeric 'offset'")
+                // Offsets are RESOLVED fractions (schema: 0 ≤ offset ≤ 1);
+                // out-of-range means the converter's drop rule was bypassed.
+                require(offset in 0.0..1.0) {
+                    "keyframes '$name': stop offset $offset outside [0, 1] (spec 07 §1.2 resolved-fraction rule)"
+                }
+                IRKeyframeStop(
+                    offset = offset,
+                    properties = decodePropertyList(so["properties"], "@keyframes $name")
+                )
+            }
+        }
     }
 
     private fun decodeComponentV2(c: JsonObject): IRComponent {

@@ -371,8 +371,44 @@ object IRComponentSerializer : KSerializer<IRComponent> {
  * ```
  *
  * @property components List of all components in the document
+ * @property keyframes Document-level named keyframe sets (wave 8 — see
+ *   IRKeyframeStop below and schema/spec/07-animations.md). Marked
+ *   @Transient so the plugin-generated serializer (the DEPRECATED
+ *   `--emit-ir v1` path) can never leak the field into the frozen v1
+ *   bytes; the v2 codec (IRWireV2.encodeDocument) reads it directly and
+ *   emits the additive `keyframes` envelope key, omit-when-empty.
  */
 @Serializable
 data class IRDocument(
-    val components: List<IRComponent>
+    val components: List<IRComponent>,
+    // Fully qualified: plain @Transient would be ambiguous between
+    // kotlinx.serialization.Transient (wanted) and kotlin.jvm.Transient.
+    @kotlinx.serialization.Transient
+    val keyframes: Map<String, List<IRKeyframeStop>>? = null
+)
+
+/**
+ * One typed keyframe stop inside a document-level named keyframe set
+ * (schema/spec/07-animations.md — the wire twin of one `@keyframes` rule).
+ *
+ * ## Wire shape (IR v2 additive key, spec 05 minor-revision process)
+ * ```json
+ * "keyframes": { "fade": [ { "offset": 0.0, "properties": [{type,data}…] }, … ] }
+ * ```
+ *
+ * @property offset Resolved fractional position in [0, 1] — `from`/`0%` → 0,
+ *   `to`/`100%` → 1, `50%` → 0.5 (css-animations-1 §4.2 keyframe selectors).
+ *   The converter emits each set SORTED ascending by this value (stable for
+ *   equal offsets) so runtimes can interpolate between adjacent entries
+ *   without re-sorting.
+ * @property properties The stop's declarations as typed IR properties —
+ *   parsed by the exact same PropertiesParser pipeline as component base
+ *   properties (shorthand expansion, color→sRGB, length→px, …). Animatable
+ *   tier + interpolation rules are the runtimes' contract (spec 07 §2); the
+ *   wire just carries the typed values.
+ */
+@Serializable
+data class IRKeyframeStop(
+    val offset: Double,
+    val properties: MutableList<@Serializable(with = IRPropertySerializer::class) IRProperty>
 )

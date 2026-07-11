@@ -93,6 +93,36 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * animationTime — CAPTURE_ANIMATION_TIME transport (spec 07 §5 /
+     * docs/DYNAMIC_CAPTURE.md §4): seconds on each animation's absolute
+     * timeline. When present, EVERY animation renders its state at t,
+     * paused (the runtime evaluates state-at-t instead of running clocks
+     * — the native equivalent of the web reference's WAAPI seize):
+     *
+     *   adb shell am start -n com.styleconverter.test/.MainActivity \
+     *       --es animationTime 0.5
+     *
+     * Validation mirrors capture-url.mjs: finite and >= 0 (0 IS meaningful
+     * — the initial frame, fill-mode arithmetic included). Absent or
+     * invalid ⇒ null ⇒ the historical live path, byte-identical captures.
+     */
+    private fun readAnimationTimeExtra(): Double? {
+        // String extra is the documented transport (`--es animationTime
+        // 0.5` — fractional seconds don't fit --ei, and --ef floats lose
+        // the "one spelled transport" simplicity).
+        val raw = intent?.getStringExtra("animationTime")?.trim()
+        if (raw.isNullOrEmpty()) return null
+        val parsed = raw.toDoubleOrNull()
+        return if (parsed != null && parsed.isFinite() && parsed >= 0.0) {
+            Log.i(TAG, "animationTime=$parsed (capture run renders every animation at t, paused)")
+            parsed
+        } else {
+            Log.w(TAG, "Ignoring invalid animationTime extra \"$raw\" — expected a finite number of seconds >= 0")
+            null
+        }
+    }
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -154,7 +184,8 @@ class MainActivity : ComponentActivity() {
                         // read once at composition setup; a capture run is
                         // one activity launch, one hook configuration.
                         forceState = readForceStateExtra(),
-                        captureWidthDp = readCaptureWidthExtra()
+                        captureWidthDp = readCaptureWidthExtra(),
+                        animationTime = readAnimationTimeExtra()
                     )
                 }
             }
@@ -208,7 +239,8 @@ private fun MainContent(
     hasPermission: Boolean,
     permissionChecked: Boolean,
     forceState: String? = null,
-    captureWidthDp: Int = 390
+    captureWidthDp: Int = 390,
+    animationTime: Double? = null
 ) {
     var captureComplete by remember { mutableStateOf(false) }
 
@@ -223,6 +255,7 @@ private fun MainContent(
         ScreenshotCaptureScreen(
             forceState = forceState,
             captureWidthDp = captureWidthDp,
+            animationTime = animationTime,
             onCaptureComplete = {
                 captureComplete = true
             }

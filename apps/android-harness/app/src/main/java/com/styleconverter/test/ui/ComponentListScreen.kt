@@ -88,6 +88,12 @@ fun ComponentListScreen() {
     // through with their children arrays intact. Downstream code only
     // ever sees composed roots — one tree shape for both wire versions.
     var roots by remember { mutableStateOf<List<IRComponent>?>(null) }
+    // Document-level wire keyframes (spec 07 §1.2), provided to the
+    // runtime's animation driver so gallery cards PLAY their animations
+    // live (the capture screen freezes them via CAPTURE_ANIMATION_TIME).
+    var keyframes by remember {
+        mutableStateOf<Map<String, List<com.styleconverter.runtime.core.ir.IRKeyframeStop>>>(emptyMap())
+    }
     var error by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var showNested by remember { mutableStateOf(true) }
@@ -107,6 +113,8 @@ fun ComponentListScreen() {
             // Composer step: harness-side by design (§1.2 — only
             // composers read slot; the engine stays composition-agnostic).
             roots = SlotComposer.compose(document)
+            // Keyframes ride the same decode (additive v2 envelope key).
+            keyframes = document.keyframes ?: emptyMap()
         } catch (e: Exception) {
             error = "Failed to load IR: ${e.message}"
             e.printStackTrace()
@@ -149,18 +157,26 @@ fun ComponentListScreen() {
                 val totalPages = ((allComponents.size + PAGE_SIZE - 1) / PAGE_SIZE).coerceAtLeast(1)
                 val pageComponents = allComponents.drop(page * PAGE_SIZE).take(PAGE_SIZE)
 
-                GalleryContent(
-                    topLevelCount = roots!!.size,
-                    totalCount = allComponents.size,
-                    showNested = showNested,
-                    onShowNestedChange = { showNested = it },
-                    page = page,
-                    totalPages = totalPages,
-                    allCount = allComponents.size,
-                    onPageChange = { page = it.coerceIn(0, (totalPages - 1).coerceAtLeast(0)) },
-                    components = pageComponents,
-                    pageOffset = page * PAGE_SIZE
-                )
+                // Keyframes channel for the gallery cards (spec 07 §1.2):
+                // gallery browsing PLAYS animations live — no forced time
+                // here, that hook belongs to the capture screen only.
+                androidx.compose.runtime.CompositionLocalProvider(
+                    com.styleconverter.runtime.animations.KeyframeAnimationDriver
+                        .LocalDocumentKeyframes provides keyframes
+                ) {
+                    GalleryContent(
+                        topLevelCount = roots!!.size,
+                        totalCount = allComponents.size,
+                        showNested = showNested,
+                        onShowNestedChange = { showNested = it },
+                        page = page,
+                        totalPages = totalPages,
+                        allCount = allComponents.size,
+                        onPageChange = { page = it.coerceIn(0, (totalPages - 1).coerceAtLeast(0)) },
+                        components = pageComponents,
+                        pageOffset = page * PAGE_SIZE
+                    )
+                }
             }
         }
     }

@@ -127,3 +127,41 @@ test('buildCaptureUrl: hooks compose in fixed order (wpt, width, forceState)', (
     'http://localhost:3000/?mode=capture&wpt=1&width=250&forceState=hover'
   );
 });
+
+// ── Animation-time hook (wave 8 — spec 07 §5 / DYNAMIC_CAPTURE.md §4) ──────
+
+test('buildCaptureUrl: animationTime appends &animationTime=<seconds>', () => {
+  // One frozen clock per capture run.
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', false, { animationTime: 0.5 }),
+    'http://localhost:3000/?mode=capture&animationTime=0.5'
+  );
+});
+
+test('buildCaptureUrl: animationTime 0 is a meaningful value, not "unset"', () => {
+  // t=0 freezes the INITIAL frame (fill-mode/delay arithmetic applies) —
+  // a truthiness guard would silently drop it and capture live motion.
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', false, { animationTime: 0 }),
+    'http://localhost:3000/?mode=capture&animationTime=0'
+  );
+});
+
+test('buildCaptureUrl: absent animationTime leaves the URL byte-identical', () => {
+  // The historical live-capture path must not drift when the hook exists
+  // but is unused (undefined flows through from an unset env var).
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', false, { animationTime: undefined }),
+    'http://localhost:3000/?mode=capture'
+  );
+});
+
+test('buildCaptureUrl: animationTime composes LAST in the fixed hook order', () => {
+  // wpt, width, forceState, animationTime — deterministic for log greps;
+  // forceState+animationTime together is the mid-transition capture recipe
+  // for fixtures/fidelity/motion/transitions.json.
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', true, { width: 250, forceState: 'hover', animationTime: 0.5 }),
+    'http://localhost:3000/?mode=capture&wpt=1&width=250&forceState=hover&animationTime=0.5'
+  );
+});

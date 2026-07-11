@@ -101,6 +101,62 @@ const FORCE_STATE: string | null = (() => {
 })();
 
 /**
+ * `?animationTime=<seconds>` — the deterministic animation-time seize
+ * (`CAPTURE_ANIMATION_TIME` env; schema/spec/07-animations.md §5,
+ * docs/DYNAMIC_CAPTURE.md §4). THIS FILE IS THE REFERENCE IMPLEMENTATION
+ * of the contract: every animation on the capture surface is forced to
+ * its state at absolute timeline time t and paused, so two captures at
+ * the same t are byte-comparable. Null (the default) = no seizing at all
+ * — the historical live-capture path stays byte-identical. `0` is a
+ * meaningful value (the initial frame, respecting fill-mode/delay), so
+ * the guard distinguishes "absent/invalid" from "zero". Negative and
+ * non-finite values are dropped to null (base capture) — the node-side
+ * env validation in capture-screenshots.mjs is the loud gate.
+ */
+const ANIMATION_TIME: number | null = (() => {
+  if (typeof window === 'undefined') return null;
+  const raw = new URLSearchParams(window.location.search).get('animationTime');
+  if (raw === null || raw.trim() === '') return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+})();
+
+/**
+ * Seize every animation on the page at absolute time t (seconds), paused —
+ * the Web Animations API route ([web-animations-1]): CSS animations, CSS
+ * transitions and script-created WAAPI animations all surface through
+ * `document.getAnimations()` as `Animation` objects with the same
+ * `currentTime`/`pause()` controls, so ONE loop freezes the whole surface
+ * with one clock (spec 07 §5's "every animation, absolute t" wording).
+ * pause() first, then currentTime: setting currentTime on a paused
+ * animation holds the seek instead of racing the running clock.
+ *
+ * Returns the number of animations seized so callers (the capture script's
+ * re-seize pass, the live browser check) can assert the pass did real work.
+ * Exposed as `window.__seizeAnimations` because animations can be CREATED
+ * after this module's mount-time pass (font-swap reflows, late transitions)
+ * — capture-screenshots.mjs re-invokes it right before screenshotting.
+ */
+function seizeAnimations(tSeconds: number): number {
+  // getAnimations is universally available in capture Chrome; the guard
+  // keeps SSR/jsdom render paths from crashing.
+  const anims = typeof document !== 'undefined' && document.getAnimations
+    ? document.getAnimations()
+    : [];
+  for (const anim of anims) {
+    anim.pause();                        // freeze FIRST so the seek holds
+    anim.currentTime = tSeconds * 1000;  // WAAPI currentTime is in ms
+  }
+  return anims.length;
+}
+// Publish the hook whenever a time was requested (read-once URL param —
+// same lifecycle as the module constants above).
+if (typeof window !== 'undefined' && ANIMATION_TIME !== null) {
+  (window as unknown as { __seizeAnimations: (t: number) => number }).__seizeAnimations =
+    seizeAnimations;
+}
+
+/**
  * WPT canvas viewport — matches the per-section capture viewport that
  * tools/titan/capture-browser-ref.mjs uses for browser-ref PNGs
  * (390×600, the iPhone-12-mini-portrait shape). Per-test browser refs
@@ -285,6 +341,18 @@ export function CaptureGallery({ document }: CaptureGalleryProps) {
     [roots]
   );
 
+  // Mount-time animation seize (spec 07 §5): freeze the whole surface at
+  // the requested absolute time as soon as the gallery has rendered.
+  // Runs after EVERY commit (no dep array) deliberately — a re-render
+  // that restarts CSS animations (style remount) must be re-seized, and
+  // seizing an already-paused animation at the same t is idempotent.
+  // Late-created animations are additionally covered by the capture
+  // script's pre-screenshot re-seize via window.__seizeAnimations.
+  React.useEffect(() => {
+    if (ANIMATION_TIME === null) return;
+    seizeAnimations(ANIMATION_TIME);
+  });
+
   return (
     <div style={containerStyle}>
       {items.map((node, index) => (
@@ -329,6 +397,11 @@ export function CaptureCanvas({ node, index }: CaptureCanvasProps) {
       // this at style resolution; capture scripts assert on it so a forced
       // run can never silently degrade to a base-state capture.
       data-force-state={FORCE_STATE}
+      // Animation-time marker (spec 07 §5 / docs/DYNAMIC_CAPTURE.md §4):
+      // same verification contract as data-force-state — present on every
+      // canvas when the run is time-seized, absent otherwise, so a seized
+      // run can never silently degrade to a live capture.
+      data-animation-time={ANIMATION_TIME}
       style={style}
     >
       <ComponentRenderer node={node} />

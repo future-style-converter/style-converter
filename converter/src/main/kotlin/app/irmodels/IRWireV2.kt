@@ -74,6 +74,24 @@ object IRWireV2 {
                 kotlinx.serialization.builtins.ListSerializer(IRComponentV2Serializer),
                 doc.components
             ))
+            // keyframes: document-level named keyframe sets (wave 8 —
+            // schema/spec/07-animations.md). ADDITIVE minor-revision key
+            // (spec 05): omit-when-empty so every pre-motion document
+            // stays byte-identical. Each set is already offset-sorted by
+            // the converter (CssParsing.convertKeyframesToIR); the stop
+            // shape {offset: 0..1, properties: [{type,data}…]} comes from
+            // IRKeyframeStop's plugin serializer + IRPropertySerializer —
+            // the same property-envelope bytes components carry.
+            if (!doc.keyframes.isNullOrEmpty()) {
+                put("keyframes", buildJsonObject {
+                    doc.keyframes.forEach { (name, stops) ->
+                        put(name, json.encodeToJsonElement(
+                            kotlinx.serialization.builtins.ListSerializer(IRKeyframeStop.serializer()),
+                            stops
+                        ))
+                    }
+                })
+            }
         }
     }
 
@@ -98,7 +116,21 @@ object IRWireV2 {
         val components = obj["components"]?.jsonArray?.map { el ->
             json.decodeFromJsonElement(IRComponentV2Serializer, el)
         } ?: emptyList()
-        return IRDocument(components)
+        // keyframes: structural fields (set names, stop offsets) round-trip;
+        // stop property payloads remain the documented IRPropertySerializer
+        // stub, exactly like component properties in this codec (tools that
+        // need full property round-trip read the JSON directly).
+        val keyframes = obj["keyframes"]?.jsonObject?.mapValues { (_, stopsEl) ->
+            stopsEl.jsonArray.map { stopEl ->
+                val stopObj = stopEl.jsonObject
+                IRKeyframeStop(
+                    offset = stopObj["offset"]?.jsonPrimitive?.content?.toDouble()
+                        ?: throw IllegalArgumentException("keyframe stop without offset"),
+                    properties = mutableListOf() // property decode stub — see class note
+                )
+            }
+        }
+        return IRDocument(components, keyframes = keyframes)
     }
 }
 

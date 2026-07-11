@@ -88,6 +88,32 @@ public struct ComponentRenderer: View {
     // Focus rides SwiftUI's own focus system (spec 06 §2 `focus`).
     @FocusState private var isFocused: Bool
 
+    // Wave 8 (#35) — motion inputs. The document keyframes map arrives
+    // from the host (spec 07 §1.2 — @keyframes are document-scoped)…
+    @Environment(\.styleKeyframes) private var styleKeyframes
+    // …and the spec 07 §5 pinned capture clock: non-nil = evaluate every
+    // animation at absolute second t, paused (CAPTURE_ANIMATION_TIME).
+    @Environment(\.animationCaptureTime) private var animationCaptureTime
+
+    // Wave 8 — the live animation clock's zero point: this component's
+    // mount. CSS starts an animation when it first applies to an element
+    // (css-animations-1 §5.1), which for the render tree is view mount.
+    @State private var appearDate = Date()
+    // Wave 8 — transition flip tracking (spec 07 §4): the pre-flip
+    // interaction state (to re-run the pure StateResolver fold for the
+    // "old" effective list) and the in-flight snapshot the blend runs
+    // against. Both stay nil for the whole static corpus — the motion
+    // body branch is gated on hasMotion below.
+    @State private var lastInteractionState: ComponentState? = nil
+    @State private var transitionSnapshot: TransitionSnapshot? = nil
+
+    /// One in-flight transition: the OLD effective declarations (the
+    /// blend's from-side) and the flip instant (elapsed-time zero).
+    private struct TransitionSnapshot {
+        let base: [IRProperty]
+        let startedAt: Date
+    }
+
     /// The spec 06 §4 evaluation environment: render-SURFACE width (the
     /// host-published styleViewport — the capture canvas / app window,
     /// never the device screen; 390 = the legacy canvas default) plus
@@ -114,11 +140,19 @@ public struct ComponentRenderer: View {
     /// wire order, last writer wins) and the light-dark() rewrite.
     /// Bucket-free components return `component.properties` untouched.
     private var effectiveProperties: [IRProperty] {
-        // §3 layering against the live state + environment.
+        effective(for: componentState)
+    }
+
+    /// Wave 8 — the same §3 fold parameterized by interaction state:
+    /// the transition driver re-runs it with the PRE-flip state to get
+    /// the blend's from-side (StateResolver is pure, so old and new
+    /// effective lists are both exactly reproducible).
+    private func effective(for state: ComponentState) -> [IRProperty] {
+        // §3 layering against the given state + live environment.
         let layered = StateResolver.resolve(base: component.properties,
                                             selectors: component.selectors,
                                             media: component.media,
-                                            state: componentState,
+                                            state: state,
                                             environment: mediaEnvironment,
                                             componentName: component.name)
         // css-color-5 light-dark() arms resolve against the same scheme
@@ -128,13 +162,35 @@ public struct ComponentRenderer: View {
                                          prefersDark: mediaEnvironment.prefersDark)
     }
 
+    /// Wave 8 — the effective list with any IN-FLIGHT transition blended
+    /// in (spec 07 §4): after a state flip, tier properties interpolate
+    /// old → new over transition-duration/-delay/-timing. `now == nil`
+    /// (no motion clock — the whole static corpus) short-circuits to the
+    /// plain effective list, allocation-identical to pre-wave-8.
+    private func motionEffectiveProperties(now: Date?) -> [IRProperty] {
+        guard let now = now, let snap = transitionSnapshot else {
+            return effectiveProperties
+        }
+        return TransitionResolver.blend(from: snap.base,
+                                        to: effectiveProperties,
+                                        elapsedSeconds: now.timeIntervalSince(snap.startedAt),
+                                        componentName: component.name).properties
+    }
+
     /// The component's declarations with the parent's inheritable text
     /// properties merged underneath (css-cascade-4 inheritance).
     /// Wave 7: `own` is the state/media-RESOLVED list, so an active
     /// bucket's values flow into extraction and into the inheritance
     /// channel republished to children exactly like base declarations.
     private var mergedProperties: [IRProperty] {
-        InheritedText.merge(own: effectiveProperties,
+        mergedProperties(now: nil)
+    }
+
+    /// Wave 8 — clock-parameterized variant: the transition blend runs
+    /// UNDER the inheritance merge so blended values extract exactly
+    /// like base declarations. nil clock = byte-identical legacy path.
+    private func mergedProperties(now: Date?) -> [IRProperty] {
+        InheritedText.merge(own: motionEffectiveProperties(now: now),
                             inherited: inheritedTextProperties)
     }
 
@@ -162,6 +218,16 @@ public struct ComponentRenderer: View {
     /// Static declarations pass through byte-identical, so variable-free
     /// fixtures render exactly as before.
     private var resolvedProperties: [IRProperty] {
+        resolvedProperties(now: nil)
+    }
+
+    /// Wave 8 — clock-parameterized variant of the wave-6 resolution
+    /// chain (transition blend rides underneath via mergedProperties).
+    /// Inheritance PUBLICATION to children intentionally keeps reading
+    /// the nil-clock list: animated values do not flow into the
+    /// inheritance channel at motion runtime v1 (documented limitation —
+    /// the motion fixtures animate leaf boxes only).
+    private func resolvedProperties(now: Date?) -> [IRProperty] {
         // em/rem base: the PARENT's computed font size, read from the
         // inheritance channel (the parent publishes resolved pixels).
         let inheritedFs = inheritedTextProperties
@@ -178,10 +244,96 @@ public struct ComponentRenderer: View {
         ctx.percentBasisPx = containingBlockWidth.map(Double.init)
             ?? styleViewport?.rootContainingBlock
             ?? (ctx.viewportWidth - 32)
-        return DynamicValueResolver.resolve(properties: mergedProperties,
+        return DynamicValueResolver.resolve(properties: mergedProperties(now: now),
                                             variables: mergedVariables,
                                             calc: ctx,
                                             inheritedFontSizePx: inheritedFs)
+    }
+
+    /// Wave 8 — THE style-chain input at motion runtime v1: the resolved
+    /// chain with the keyframe-animation overlay applied at clock time t
+    /// (spec 07 §2/§3). Precedence mirrors the CSS cascade origins:
+    /// transitions blend inside the chain (mergedProperties), keyframe
+    /// animations overlay LAST (the animation origin sits above author
+    /// styles, css-cascade-5 §6.2). Keyframe-free documents and nil-clock
+    /// renders return the resolved list untouched.
+    private func displayProperties(now: Date?) -> [IRProperty] {
+        let resolved = resolvedProperties(now: now)
+        guard let kf = styleKeyframes, !kf.isEmpty else { return resolved }
+        // Clock selection (spec 07 §5): the pinned capture time WINS over
+        // everything (including play-state paused — the resolver handles
+        // that composition); a live clock counts from view mount; no
+        // clock at all (hasMotion false but keyframes present — e.g. a
+        // dangling name) evaluates the initial frame at t = 0.
+        let t: Double
+        let pinned: Bool
+        if let cap = animationCaptureTime {
+            t = cap; pinned = true
+        } else if let now = now {
+            t = max(0, now.timeIntervalSince(appearDate)); pinned = false
+        } else {
+            t = 0; pinned = false
+        }
+        return AnimationResolver.resolve(properties: resolved, keyframes: kf,
+                                         atSeconds: t, pinnedClock: pinned,
+                                         componentName: component.name)
+    }
+
+    // MARK: - Motion gate (wave 8)
+
+    /// Does this component need the motion body branch at all? True only
+    /// when (a) the document defines keyframes AND the component (base or
+    /// any bucket) references animation-name, or (b) the component
+    /// declares transitions AND carries interactive buckets to flip.
+    /// CONSTANT for a given component + document, so the body's branch
+    /// identity never switches mid-life (state stays stable) — and false
+    /// for the entire pre-wave-8 corpus, which keeps every committed
+    /// baseline on the exact legacy view tree.
+    private var hasMotion: Bool {
+        if styleKeyframes?.isEmpty == false, containsPropertyType("AnimationName") {
+            return true
+        }
+        if component.selectors?.isEmpty == false, containsPropertyType("TransitionDuration") {
+            return true
+        }
+        return false
+    }
+
+    /// Scan base + selector + media declarations for a property type
+    /// (buckets can introduce animation/transition longhands too).
+    private func containsPropertyType(_ type: String) -> Bool {
+        if component.properties.contains(where: { $0.type == type }) { return true }
+        if component.selectors?.contains(where: { $0.properties.contains { $0.type == type } }) == true { return true }
+        if component.media?.contains(where: { $0.properties.contains { $0.type == type } }) == true { return true }
+        return false
+    }
+
+    /// Wave 8 — flip handler (spec 07 §4): snapshot the pre-flip
+    /// effective list as the blend's from-side and (re)start the clock.
+    /// A flip DURING an in-flight transition starts the new leg from the
+    /// CURRENT blended value (css-transitions-1 §3 reversing behavior,
+    /// v1 approximation: no shortened reverse duration).
+    private func beginTransition(to newState: ComponentState) {
+        let oldState = lastInteractionState
+            ?? ComponentState(forced: forcedStyleStates) // pre-onAppear fallback: base flags
+        lastInteractionState = newState
+        let oldEffective = effective(for: oldState)
+        // Post-flip list governs whether anything animates at all
+        // (css-transitions-1 §3: after-change style's transition-*).
+        guard TransitionResolver.hasTransitions(effective(for: newState)) else {
+            transitionSnapshot = nil
+            return
+        }
+        // From-side: mid-flight flips depart from the blended value.
+        let from: [IRProperty]
+        if let snap = transitionSnapshot {
+            from = TransitionResolver.blend(from: snap.base, to: oldEffective,
+                                            elapsedSeconds: Date().timeIntervalSince(snap.startedAt),
+                                            componentName: component.name).properties
+        } else {
+            from = oldEffective
+        }
+        transitionSnapshot = TransitionSnapshot(base: from, startedAt: Date())
     }
 
     // MARK: - Flow membership (fidelity wave 3)
@@ -248,13 +400,44 @@ public struct ComponentRenderer: View {
 
     // public: View protocol witness on a public type must be public.
     public var body: some View {
+        // Wave 8 — the motion branch is gated on hasMotion, which is
+        // CONSTANT per component + document: the static corpus renders
+        // through the identical pre-wave-8 tree (right branch), while
+        // animated/transitioning components get a TimelineView frame
+        // clock. The pinned capture clock (spec 07 §5) pauses the
+        // schedule outright — one deterministic frame at t, byte-stable
+        // under ImageRenderer.
+        if hasMotion {
+            TimelineView(.animation(minimumInterval: nil,
+                                    paused: animationCaptureTime != nil)) { timeline in
+                styledContent(now: timeline.date)
+            }
+            // Transition flip tracking (spec 07 §4): seed the pre-flip
+            // state at mount, snapshot the old effective list per flip.
+            // v1 note: the live schedule keeps ticking after finite
+            // animations settle (the schedule's `paused` is evaluated at
+            // body time, not per frame) — fill-mode frames re-render
+            // identically, so this costs battery in the live gallery,
+            // never correctness. The capture path is always paused.
+            .onAppear { if lastInteractionState == nil { lastInteractionState = componentState } }
+            .onChange(of: componentState) { beginTransition(to: $0) }
+        } else {
+            styledContent(now: nil)
+        }
+    }
+
+    /// The full pre-wave-8 body, parameterized by the motion clock.
+    /// `now == nil` (static corpus) renders byte-identically to the
+    /// legacy path — displayProperties collapses to resolvedProperties.
+    @ViewBuilder
+    private func styledContent(now: Date?) -> some View {
         // Build the style from the inheritance-merged, variable-RESOLVED
         // declarations (wave 6 — extraction sees concrete values), then
         // fold in the grid-stretch height (if the parent injected one and
         // the IR declared no explicit height — an explicit height always
         // wins per css-align-3 §9's "auto block size" precondition).
         let style: ComponentStyle = {
-            var s = StyleBuilder.build(from: resolvedProperties)
+            var s = StyleBuilder.build(from: displayProperties(now: now))
             // Wave 6 (#39) — adopt the host-published surface geometry
             // FIRST so every resolver lane below (vw/vh, percent bases,
             // GeometryReader fallbacks) uses the capture canvas / app

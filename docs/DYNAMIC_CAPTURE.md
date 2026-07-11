@@ -1,16 +1,20 @@
-# Dynamic-styling capture contract (states + media)
+# Dynamic-styling capture contract (states + media + motion)
 
 How the visual harnesses capture the dynamic-styling fixtures
 (`fixtures/fidelity/dynamic/` — see `schema/spec/06-dynamic-styling.md`
-for the runtime semantics being tested). Two harness-level hooks:
+for the runtime semantics being tested) and the motion fixtures
+(`fixtures/fidelity/motion/` — `schema/spec/07-animations.md`). Three
+harness-level hooks:
 
 1. **`forceState`** — deterministically force one interaction state for
    a whole capture run (selector buckets).
 2. **`CAPTURE_WIDTH`** — capture at a non-default render-surface width
    (media `min-width`/`max-width` buckets).
+3. **`CAPTURE_ANIMATION_TIME`** — freeze every animation at an absolute
+   time t, paused (keyframe animations + transitions, §4).
 
-Both are *contracts for all three harnesses*; the **web harness is the
-reference implementation** today. Wiring the native harnesses is the
+All three are *contracts for all three harnesses*; the **web harness is
+the reference implementation** today. Wiring the native harnesses is the
 platform lanes' job (tracked per-lane; the contract below is what they
 implement against).
 
@@ -132,3 +136,68 @@ or `CAPTURE_DARK=1` env via `SIMCTL_CHILD_CAPTURE_DARK`; the capture
 canvas pins `.environment(\.colorScheme, …)` explicitly, light unless
 forced, so ImageRenderer output never depends on app/system appearance)
 follows the same one-variable-per-run rule as §1/§2.
+
+## 4. Deterministic motion capture (`CAPTURE_ANIMATION_TIME`)
+
+Live motion is uncapturable — two screenshots of a running animation
+never match, across platforms or across runs. Spec 07 §5 therefore
+defines one hook:
+
+**`CAPTURE_ANIMATION_TIME=<seconds>`** forces **every animation on the
+capture surface to its state at absolute timeline time t, paused.**
+
+- *Absolute*: t counts from each animation's timeline zero — delay,
+  direction, iteration and fill-mode arithmetic all apply exactly as if
+  wall-clock time t had elapsed. `t=0` is the initial frame (which,
+  with `animation-fill-mode: backwards|both` + a delay, is the
+  from-state, NOT the base style — `MK_FillBoth` in
+  `fixtures/fidelity/motion/keyframes-basic.json` pins exactly this).
+- *Every animation*: keyframe animations AND running transitions, one
+  clock for the whole surface — `keyframes-basic.json` keeps every
+  duration at 1s so `t=0.5` is mid-run for all components in one shot.
+- *Paused*: the frame is frozen; capture latency cannot smear it, and
+  two runs at the same t are byte-comparable.
+- Unset ⇒ **no seizing at all**: the historical capture path stays
+  byte-identical (committed baselines carry no animations).
+
+### Per-platform transport
+
+| platform | transport | status |
+|---|---|---|
+| web | `?animationTime=<s>` query param on the capture URL; `CAPTURE_ANIMATION_TIME=<s>` env on `apps/web-harness/capture-screenshots.mjs` sets it | **reference implementation, wired end-to-end** — the capture screen (`CaptureGallery.tsx`) seizes via the Web Animations API: `document.getAnimations()` returns CSS animations, CSS transitions and WAAPI animations as uniform `Animation` objects, and the page sets `anim.pause(); anim.currentTime = t*1000` on each. The hook re-runs after every React commit AND is exposed as `window.__seizeAnimations(t)`, which capture-screenshots.mjs re-invokes right before screenshotting so late-created animations (font-swap reflows, late transitions) are caught. The `@keyframes` rules themselves are built by the web ENGINE (`RuleBuilder.buildKeyframeRules` serializes each decoded `IRDocument.keyframes` stop through the same `buildStyles` appliers as base properties) and mounted by the harness in the managed dynamic-rules stylesheet (`useDynamicRules`); the engine's registered animation-* appliers emit the per-component declarations that bind by ident |
+| Android | launch intent extra `animationTime=<s>` on the harness activity (`adb shell am start … --es animationTime 0.5`); `test-all.sh` forwards `CAPTURE_ANIMATION_TIME=<s>` into that extra automatically. The capture canvas provides `LocalForcedAnimationTime`, and the runtime's `KeyframeAnimationDriver` EVALUATES state-at-t (pure `KeyframeTimeline` math — delay/direction/iteration/fill arithmetic) instead of running any frame clock, so the frame is frozen by construction — the native equivalent of the WAAPI seize (`play-state: paused` is likewise overridden at t, matching what `currentTime = t` does to paused web animations). Markers: the canvas testTag gains an `-anim-time-<s>` suffix and the harness logs `Capture run config: … animationTime=<s>`; `test-all.sh` HARD-FAILS the run if the env was set but that logcat marker is missing | **wired end-to-end** |
+| iOS | launch argument `-animationTime <s>` (or `CAPTURE_ANIMATION_TIME` env via `SIMCTL_CHILD_CAPTURE_ANIMATION_TIME=<s>` on the host shell — `SIMCTL_CHILD_CAPTURE_ANIMATION_TIME=0.5 CAPTURE_ANIMATION_TIME=0.5 SKIP_ANDROID=1 SKIP_WEB=1 ./test-all.sh …` is the full recipe); `CaptureOverrides.swift` validates the value and the capture canvas publishes the runtime's `animationCaptureTime` environment. The renderer EVALUATES state-at-t in property space (pure `AnimationDriver` phase math — delay/direction/iteration/fill arithmetic — with per-segment easing in `KeyframeInterpolator`, css-animations-1 §4.4) and its TimelineView frame clock is paused outright, so the frame is frozen by construction — the native equivalent of the WAAPI seize (`play-state: paused` is likewise overridden at pinned t, spec 07 §5 composition). Markers: the canvas accessibility identifier gains an `+animation-time-<s>` suffix, the capture screen logs `[Capture] … animationTime=<s>`, AND the app writes `capture-config.json` beside the captures; `test-all.sh` HARD-FAILS the run if the env was set but the pulled config doesn't carry that t | **wired end-to-end** |
+
+The verification marker is part of the contract (same rationale as
+`data-force-state`): on web every capture canvas carries
+`data-animation-time="<s>"` on a seized run, and
+`capture-screenshots.mjs` HARD-FAILS if the env var was set but the
+marker (or the `__seizeAnimations` hook) is missing — a seized run can
+never silently degrade to a live capture. Native capture screens must
+expose an equivalent test tag.
+
+### Recipes
+
+```bash
+# keyframes: three deterministic time points (start / mid / end-ish)
+for t in 0 0.5 0.9; do
+  ( cd apps/web-harness && CAPTURE_ANIMATION_TIME=$t node capture-screenshots.mjs \
+      --url http://localhost:3000 --out screenshots-t$t )
+done
+
+# transitions (fixtures/fidelity/motion/transitions.json): force the state
+# that triggers the transition AND freeze mid-flight — one variable pair
+# per run. NOTE (web): the forced-state class is applied at first paint,
+# so the element mounts already IN the forced state and no transition
+# runs — the state flip must happen after first paint for a transition
+# Animation object to exist. Wiring that post-paint flip into the forced-
+# state hook is platform-lane work on all three platforms; until then the
+# transitions fixture gates the two ENDPOINT states (base capture vs
+# forced capture at t past the duration), which are deterministic today.
+CAPTURE_FORCE_STATE=hover CAPTURE_ANIMATION_TIME=0.5 \
+  node capture-screenshots.mjs --url http://localhost:3000 --out screenshots-hover-mid
+```
+
+Gating rules mirror §1/§2: one variable combination per run, one
+report per run, and `UPDATE_BASELINE=1` must never be combined with
+`CAPTURE_ANIMATION_TIME` (baselines are motion-free by contract).

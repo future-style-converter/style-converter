@@ -460,6 +460,21 @@ print('Unknown')")
                 COUNT=$(count_glob "$IOS_DIR/screenshots/*.png")
                 log "pulled $COUNT iOS screenshots"
 
+                # Wave 8 — seized-run verification (DYNAMIC_CAPTURE.md §4,
+                # the iOS analogue of the Android logcat gate): the app
+                # writes its run config beside the captures; if the host
+                # asked for CAPTURE_ANIMATION_TIME (via the SIMCTL_CHILD_
+                # transport) but the pulled config doesn't carry that t,
+                # the capture silently ran live — hard-fail, never diff.
+                if [[ -n "${CAPTURE_ANIMATION_TIME:-}" ]]; then
+                    IOS_CAPTURE_CONFIG="$APP_CONTAINER/Documents/test_screenshots/capture-config.json"
+                    if ! grep -q "\"animationTime\":\"${CAPTURE_ANIMATION_TIME}\"" "$IOS_CAPTURE_CONFIG" 2>/dev/null; then
+                        err "CAPTURE_ANIMATION_TIME=${CAPTURE_ANIMATION_TIME} was set but the iOS harness config marker is missing/mismatched ($IOS_CAPTURE_CONFIG) — the capture silently ran live. Export SIMCTL_CHILD_CAPTURE_ANIMATION_TIME=${CAPTURE_ANIMATION_TIME} so simctl forwards it."
+                        exit 1
+                    fi
+                    log "verified: iOS capture ran with animationTime=${CAPTURE_ANIMATION_TIME}"
+                fi
+
                 # iOS's UIImage.pngData() embeds non-deterministic metadata
                 # (timestamps etc.), so pixel-identical runs produce different
                 # MD5 hashes. Strip the ancillary chunks so captures are byte-
@@ -673,7 +688,27 @@ else
         # would exit instantly without waiting for THIS run's captures.
         SCREENSHOT_DIR_DEVICE="/sdcard/Android/data/$ANDROID_PACKAGE/files/test_screenshots"
         "$ADB" shell rm -rf "$SCREENSHOT_DIR_DEVICE" 2>/dev/null || true
-        "$ADB" shell am start -n "$ANDROID_PACKAGE/$ANDROID_ACTIVITY" >/dev/null
+        # Dynamic-capture hooks (docs/DYNAMIC_CAPTURE.md): the SAME env
+        # vars the web capture path reads become intent extras here, so one
+        # spelled invocation drives both platforms deterministically.
+        #   CAPTURE_ANIMATION_TIME=<s> → --es animationTime <s>  (spec 07 §5)
+        #   CAPTURE_FORCE_STATE=<st>   → --es forceState <st>    (spec 06 §6)
+        AM_EXTRAS=()
+        if [[ -n "${CAPTURE_ANIMATION_TIME:-}" ]]; then
+            AM_EXTRAS+=(--es animationTime "$CAPTURE_ANIMATION_TIME")
+        fi
+        if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
+            AM_EXTRAS+=(--es forceState "$CAPTURE_FORCE_STATE")
+        fi
+        # Clear logcat so the post-capture hook verification below greps
+        # THIS run's config marker, not a stale one.
+        if [[ ${#AM_EXTRAS[@]} -gt 0 ]]; then
+            "$ADB" logcat -c 2>/dev/null || true
+        fi
+        # ${arr[@]+…} guard: macOS bash 3.2 treats expanding an EMPTY
+        # array as an unbound variable under `set -u` — the guard expands
+        # to nothing when no hook env was set (the historical launch line).
+        "$ADB" shell am start -n "$ANDROID_PACKAGE/$ANDROID_ACTIVITY" ${AM_EXTRAS[@]+"${AM_EXTRAS[@]}"} >/dev/null
 
         # Poll sdcard until all captures land, OR until the count has been
         # stuck for 20 s (→ the app likely crashed mid-capture). The plain
@@ -720,6 +755,26 @@ else
         COUNT=$(count_glob "$ANDROID_DIR/screenshots/*.png")
         log "pulled $COUNT Android screenshots"
         CAPTURED_ANDROID=$COUNT
+
+        # Seized-run verification (spec 07 §5 / DYNAMIC_CAPTURE §4): when a
+        # hook env was set, the harness MUST have logged the matching run
+        # config — a hooked run can never silently degrade to a base/live
+        # capture (the web pipeline hard-fails the same way via the
+        # data-animation-time marker in capture-screenshots.mjs).
+        if [[ -n "${CAPTURE_ANIMATION_TIME:-}" ]]; then
+            if ! "$ADB" logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "animationTime=${CAPTURE_ANIMATION_TIME}"; then
+                err "CAPTURE_ANIMATION_TIME=${CAPTURE_ANIMATION_TIME} was set but the Android harness never logged that config — the capture silently ran live"
+                exit 1
+            fi
+            log "verified: Android capture ran with animationTime=${CAPTURE_ANIMATION_TIME}"
+        fi
+        if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
+            if ! "$ADB" logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "forceState=${CAPTURE_FORCE_STATE}"; then
+                err "CAPTURE_FORCE_STATE=${CAPTURE_FORCE_STATE} was set but the Android harness never logged that config — the capture silently ran base-state"
+                exit 1
+            fi
+            log "verified: Android capture ran with forceState=${CAPTURE_FORCE_STATE}"
+        fi
     fi
 fi
 

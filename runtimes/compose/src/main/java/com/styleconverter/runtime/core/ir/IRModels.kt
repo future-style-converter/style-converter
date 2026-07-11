@@ -6,10 +6,35 @@ import kotlinx.serialization.json.JsonObject
 
 /**
  * Root document containing all components.
+ *
+ * @property keyframes Document-level named @keyframes sets (additive IR v2
+ *   minor revision — schema/spec/07-animations.md §1.2). Keys are the
+ *   lowercased custom-ident names `AnimationName` references; values are
+ *   the offset-sorted stop lists. null when the wire omitted the key
+ *   (omit-when-empty rule) and for every v1 document — the legacy path
+ *   never carried keyframes, so the default keeps v1 decode byte-stable.
  */
 @Serializable
 data class IRDocument(
-    val components: List<IRComponent>
+    val components: List<IRComponent>,
+    val keyframes: Map<String, List<IRKeyframeStop>>? = null
+)
+
+/**
+ * One resolved keyframe stop (spec 07 §1.2).
+ *
+ * @property offset The RESOLVED fraction in [0, 1] — the converter already
+ *   mapped `from`/`to`/percent selectors, so readers never re-parse them.
+ *   Stops arrive sorted ascending (stable for equal offsets); readers MAY
+ *   rely on sortedness and MUST NOT reorder.
+ * @property properties Standard typed `{type, data}` property envelopes —
+ *   byte-identical semantics to component properties, including the
+ *   unknown-type tolerance rule (skip + log at use, never at decode).
+ */
+@Serializable
+data class IRKeyframeStop(
+    val offset: Double,
+    val properties: List<IRProperty> = emptyList()
 )
 
 /**

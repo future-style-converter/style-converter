@@ -75,11 +75,15 @@ private val TextPropCount = Color(0xFF666666)
  *    base run — the recipe keeps forced runs in separate output directories.
  *  - [captureWidthDp]: render-surface width override (CAPTURE_WIDTH). The
  *    default 390 is byte-identical to the historical capture path.
+ *  - [animationTime]: CAPTURE_ANIMATION_TIME (spec 07 §5) — seconds on the
+ *    absolute animation timeline; every animation renders its state at t,
+ *    paused. null = the historical live path.
  */
 @Composable
 fun ScreenshotCaptureScreen(
     forceState: String? = null,
     captureWidthDp: Int = 390,
+    animationTime: Double? = null,
     onCaptureComplete: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -89,6 +93,13 @@ fun ScreenshotCaptureScreen(
     // nested documents pass through) — the capture loop and the render
     // pass both walk THIS list so indices always agree.
     var roots by remember { mutableStateOf<List<IRComponent>?>(null) }
+    // Document-level wire keyframes (spec 07 §1.2) — kept beside the
+    // composed roots (the web harness keeps the raw wire block beside the
+    // decoded document the same way) and provided to the runtime driver
+    // via LocalDocumentKeyframes at the capture canvas.
+    var keyframes by remember {
+        mutableStateOf<Map<String, List<com.styleconverter.runtime.core.ir.IRKeyframeStop>>>(emptyMap())
+    }
     var error by remember { mutableStateOf<String?>(null) }
     var currentIndex by remember { mutableIntStateOf(-1) }
     var capturePhase by remember { mutableStateOf(CapturePhase.LOADING) }
@@ -105,11 +116,12 @@ fun ScreenshotCaptureScreen(
 
     LaunchedEffect(Unit) {
         try {
-            // Run-configuration marker line (part of the forced-state
-            // contract: a capture script must be able to VERIFY via
-            // `adb logcat -d | grep` that the forced run actually ran
-            // forced instead of silently diffing two base captures).
-            Log.i(TAG, "Capture run config: forceState=${forceState ?: "none"} captureWidth=$captureWidthDp")
+            // Run-configuration marker line (part of the forced-state AND
+            // seized-animation contracts: a capture script must be able to
+            // VERIFY via `adb logcat -d | grep` that the run actually ran
+            // with the hook active instead of silently diffing two base /
+            // live captures — the data-animation-time rationale, spec 07 §5).
+            Log.i(TAG, "Capture run config: forceState=${forceState ?: "none"} captureWidth=$captureWidthDp animationTime=${animationTime ?: "none"}")
 
             val deleted = screenshotManager.clearScreenshots()
             Log.i(TAG, "Cleared $deleted existing screenshots")
@@ -132,6 +144,9 @@ fun ScreenshotCaptureScreen(
             // being silently dropped.
             val document = IRDocumentDecoder.decode(jsonString)
             roots = SlotComposer.compose(document)
+            // Wire keyframes ride the same decode (additive envelope key);
+            // omit-when-empty on the wire → empty map = zero footprint.
+            keyframes = document.keyframes ?: emptyMap()
 
             Log.i(TAG, "Loaded ${roots?.size ?: 0} root components " +
                     "(flattened: ${flattenComponents(roots ?: emptyList()).size})")
@@ -216,6 +231,8 @@ fun ScreenshotCaptureScreen(
                             totalCount = flat.size,
                             forceState = forceState,
                             captureWidthDp = captureWidthDp,
+                            animationTime = animationTime,
+                            keyframes = keyframes,
                             onCardPositioned = { bounds -> cardBoundsInWindow = bounds },
                             onRendered = { shouldCapture = true }
                         )
@@ -311,6 +328,8 @@ private fun CaptureView(
     totalCount: Int,
     forceState: String? = null,
     captureWidthDp: Int = 390,
+    animationTime: Double? = null,
+    keyframes: Map<String, List<com.styleconverter.runtime.core.ir.IRKeyframeStop>> = emptyMap(),
     onCardPositioned: (Rect) -> Unit,
     onRendered: () -> Unit
 ) {
@@ -369,6 +388,8 @@ private fun CaptureView(
             CaptureCanvas(
                 component = component,
                 forceState = forceState,
+                animationTime = animationTime,
+                keyframes = keyframes,
                 canvasWidth = captureWidthDp.dp,
                 onPositioned = { posInWindow, widthPx, heightPx ->
                     onCardPositioned(Rect(
@@ -405,6 +426,8 @@ private fun CaptureView(
 private fun CaptureCanvas(
     component: IRComponent,
     forceState: String? = null,
+    animationTime: Double? = null,
+    keyframes: Map<String, List<com.styleconverter.runtime.core.ir.IRKeyframeStop>> = emptyMap(),
     canvasWidth: Dp = CaptureCanvasWidth,
     onPositioned: (androidx.compose.ui.geometry.Offset, Float, Float) -> Unit,
     onRendered: () -> Unit
@@ -426,12 +449,18 @@ private fun CaptureCanvas(
         modifier = Modifier
             .width(canvasWidth)
             .background(CaptureCanvasBg)
-            // Forced-state marker — the native twin of the web reference's
-            // `data-force-state` canvas stamp (docs/DYNAMIC_CAPTURE.md §1):
-            // lets a capture/UI-automator script verify the forced run
-            // actually ran forced. Absent (plain "capture-canvas") on base
-            // runs so the default path stays semantically identical.
-            .testTag(if (forceState != null) "capture-canvas-force-state-$forceState" else "capture-canvas")
+            // Hook markers — the native twins of the web reference's
+            // `data-force-state` / `data-animation-time` canvas stamps
+            // (docs/DYNAMIC_CAPTURE.md §1/§4): let a capture/UI-automator
+            // script verify a hooked run actually ran hooked (a seized run
+            // must never silently degrade to a live capture — spec 07 §5).
+            // Plain "capture-canvas" on base runs so the default path stays
+            // byte-identical to the historical tag.
+            .testTag(buildString {
+                append("capture-canvas")
+                if (forceState != null) append("-force-state-$forceState")
+                if (animationTime != null) append("-anim-time-$animationTime")
+            })
             .onGloballyPositioned { coords ->
                 val pos = coords.positionInWindow()
                 onPositioned(pos, coords.size.width.toFloat(), coords.size.height.toFloat())
@@ -460,7 +489,17 @@ private fun CaptureCanvas(
             // Forced-state set (spec 06 §6): one condition per capture run,
             // resolved as active on every component under this canvas.
             com.styleconverter.runtime.core.states.DynamicStyleResolver.LocalForcedStates provides
-                (forceState?.let { setOf(it) } ?: emptySet())
+                (forceState?.let { setOf(it) } ?: emptySet()),
+            // Document keyframes channel (spec 07 §1.2): @keyframes are
+            // document-scoped, the harness owns the document — same
+            // division of labor as the web harness's useKeyframeRules.
+            com.styleconverter.runtime.animations.KeyframeAnimationDriver.LocalDocumentKeyframes provides
+                keyframes,
+            // CAPTURE_ANIMATION_TIME (spec 07 §5): every animation under
+            // this canvas renders its state at absolute time t, paused —
+            // null keeps the historical live path byte-identical.
+            com.styleconverter.runtime.animations.KeyframeAnimationDriver.LocalForcedAnimationTime provides
+                animationTime
         ) {
         if (isOutOfFlowRoot(component)) {
             // A standalone capture of a `position: absolute|fixed` component

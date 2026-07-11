@@ -12,12 +12,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import coil.ImageLoader
-import coil.annotation.ExperimentalCoilApi
-import coil.disk.DiskCache
-import coil.memory.MemoryCache
-import coil.request.CachePolicy
-import coil.request.ImageRequest
+// Coil 3 (wave-8 #36 migration): coil.* → coil3.*. MemoryCache.Builder no
+// longer takes a Context, DiskCache directories are okio Paths, and
+// crossfade() is a coil3.request extension on the loader builder.
+import coil3.ImageLoader
+import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
+import coil3.request.crossfade
+import okio.Path.Companion.toOkioPath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -108,20 +110,21 @@ object ImageCache {
      * Initialize the image cache.
      * Call this once, typically in Application.onCreate().
      */
-    @OptIn(ExperimentalCoilApi::class)
     fun initialize(context: Context) {
         cacheDir = File(context.cacheDir, "image_cache")
         cacheDir?.mkdirs()
 
         imageLoader = ImageLoader.Builder(context)
             .memoryCache {
-                MemoryCache.Builder(context)
-                    .maxSizeBytes(MEMORY_CACHE_SIZE_MB * 1024 * 1024)
+                // Coil 3: the builder is context-free; sizing is explicit.
+                MemoryCache.Builder()
+                    .maxSizeBytes((MEMORY_CACHE_SIZE_MB * 1024 * 1024).toLong())
                     .build()
             }
             .diskCache {
                 DiskCache.Builder()
-                    .directory(File(context.cacheDir, "coil_cache"))
+                    // Coil 3 uses okio paths for its FileSystem-backed cache.
+                    .directory(File(context.cacheDir, "coil_cache").toOkioPath())
                     .maxSizeBytes((DISK_CACHE_SIZE_MB * 1024 * 1024).toLong())
                     .build()
             }
@@ -176,6 +179,12 @@ object ImageCache {
      */
     suspend fun loadImageDirect(url: String): ImageBitmap? = withContext(Dispatchers.IO) {
         try {
+            // Same data:-URI branch as loadFromNetwork (java.net.URL cannot
+            // open data: — see the comment there).
+            DataUri.decode(url)?.let { bytes ->
+                return@withContext BitmapFactory
+                    .decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
+            }
             val urlObj = URL(url)
             val inputStream = urlObj.openStream()
             val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -276,6 +285,13 @@ object ImageCache {
 
     private suspend fun loadFromNetwork(url: String): ImageBitmap? = withContext(Dispatchers.IO) {
         try {
+            // data: URIs (wave-8 #36) decode locally — java.net.URL has no
+            // data: protocol handler, so without this branch every inline
+            // image silently returned null here.
+            DataUri.decode(url)?.let { bytes ->
+                return@withContext BitmapFactory
+                    .decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
+            }
             val urlObj = URL(url)
             val connection = urlObj.openConnection()
             connection.connectTimeout = 10000

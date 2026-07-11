@@ -52,11 +52,15 @@ dependencies {
     // IR document decoding (core/ir).
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
-    // Image loading for background-image: url() support
-    // (background/BackgroundImageRenderer.kt). 2.7.0 is the final
-    // io.coil-kt 2.x release; Coil 3 lives at io.coil-kt.coil3 and is a
-    // source-level migration, out of scope for a version-currency pass.
-    implementation("io.coil-kt:coil-compose:2.7.0")
+    // Image loading for background-image: url()/data-URI support
+    // (background/BackgroundImageRenderer.kt, effects/mask/MaskApplier.kt,
+    // content/ContentApplier.kt, core/images/ImageCache.kt). Coil 3
+    // (io.coil-kt.coil3 coordinates — wave-8 #36 migration): coil-compose
+    // carries AsyncImage/rememberAsyncImagePainter; the network fetcher
+    // moved to a separate artifact in 3.x and self-registers via
+    // ServiceLoader, so http(s) URLs keep loading without loader changes.
+    implementation("io.coil-kt.coil3:coil-compose:3.5.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.5.0")
 
     // Extractor/registry unit tests are plain JVM JUnit4.
     testImplementation("junit:junit:4.13.2")

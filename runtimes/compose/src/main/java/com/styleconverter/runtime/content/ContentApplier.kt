@@ -20,11 +20,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
-import coil.request.ImageRequest
+// Coil 3 (wave-8 #36 migration): coil.* → coil3.*; crossfade() is an
+// extension in coil3.request; painter.state is a StateFlow (collected at
+// the use sites); data: URIs route through DataUri.toModel.
+import androidx.compose.runtime.collectAsState
+import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImageContent
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import com.styleconverter.runtime.core.images.DataUri
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.ir.IRSelector
 import com.styleconverter.runtime.StyleApplier
@@ -295,7 +301,8 @@ object ContentApplier {
 
         SubcomposeAsyncImage(
             model = ImageRequest.Builder(context)
-                .data(url)
+                // data: URIs decode to ByteArray (Coil 3 native model).
+                .data(DataUri.toModel(url))
                 .crossfade(true)
                 .build(),
             contentDescription = null, // Decorative content
@@ -304,7 +311,9 @@ object ContentApplier {
             ),
             contentScale = contentScale
         ) {
-            when (painter.state) {
+            // Coil 3: painter.state is a StateFlow — collect it so the
+            // loading→success/error branches recompose on completion.
+            when (painter.state.collectAsState().value) {
                 is AsyncImagePainter.State.Loading -> {
                     Box(
                         modifier = Modifier.size(defaultSize),

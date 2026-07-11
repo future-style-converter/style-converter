@@ -1296,6 +1296,205 @@ function buildDynamicDarkMode(rng) {
   };
 }
 
+// ── 7d. MOTION — keyframe animations + transitions (wave 8) ─────────────
+// The motion suite: fixtures whose CORRECT rendering depends on the
+// document-level `keyframes` wire block (schema/spec/07-animations.md §1)
+// and the deterministic time capture hook (CAPTURE_ANIMATION_TIME — spec 07
+// §5 / docs/DYNAMIC_CAPTURE.md §4). Hand-designed values: each animation's
+// from/to states are chosen for MAXIMAL pixel contrast AND distinct
+// geometry per component, so t=0 / t=mid / t=end captures differ from each
+// other and from every sibling. PRNG never touches the contrast pairs —
+// determinism of the animated VALUES is the test surface.
+
+/** Keyframe-stop helper: authoring shape per CssKeyframeStop
+ *  (CssParsing — offset keeps its CSS selector form; the converter
+ *  resolves 'from'/'to'/'N%' to 0..1 fractions and sorts). */
+function kf(offset, declarations) {
+  return { offset, declarations };
+}
+
+function buildMotionKeyframes() {
+  // NOTE: no PRNG at all — every value is part of a contrast pair the
+  // time captures diff against; a reroll would invalidate baselines
+  // without changing coverage.
+  return {
+    keyframes: {
+      // Opacity fade: 0 → 1 over the run (t=0 invisible, t=mid half,
+      // t=end solid — the §5 reference proof rides this set).
+      'motion-fade': [
+        kf('from', { opacity: '0' }),
+        kf('to', { opacity: '1' }),
+      ],
+      // Translate slide: 0 → 120px — pure geometry, unmissable at any t.
+      'motion-slide': [
+        kf('0%', { transform: 'translateX(0px)' }),
+        kf('100%', { transform: 'translateX(120px)' }),
+      ],
+      // Scale pulse: 3-stop set (0/50/100) with the PEAK in the middle —
+      // t=mid differs from BOTH ends, pinning multi-stop interpolation.
+      'motion-pulse': [
+        kf('0%', { transform: 'scale(1)' }),
+        kf('50%', { transform: 'scale(1.6)' }),
+        kf('100%', { transform: 'scale(1)' }),
+      ],
+      // Color shift: blue → orange in sRGB space (spec 07 §2 — colors
+      // interpolate on the wire's sRGB floats on every platform).
+      'motion-color': [
+        kf('from', { 'background-color': '#3498db' }),
+        kf('to', { 'background-color': '#e67e22' }),
+      ],
+      // Multi-property set: opacity + transform + background-color move
+      // TOGETHER in one set — pins that a stop's whole property list
+      // applies, not just the first entry.
+      'motion-multi': [
+        kf('0%', { opacity: '0.2', transform: 'translateX(0px)', 'background-color': '#2ecc71' }),
+        kf('100%', { opacity: '1', transform: 'translateX(80px)', 'background-color': '#9b59b6' }),
+      ],
+      // 3-stop width march: distinct value at each stop (40/160/90 px) —
+      // offset ORDER authored unsorted (100% before 50%) so the wire's
+      // sorted emission is observable in the fixture round-trip.
+      'motion-steps': [
+        kf('0%', { width: '40px' }),
+        kf('100%', { width: '90px' }),
+        kf('50%', { width: '160px' }),
+      ],
+    },
+    components: {
+      // Each component: distinct geometry (width/height pairs all differ)
+      // + the timing subset the runtimes extract (spec 07 §3). Durations
+      // are all 1s so CAPTURE_ANIMATION_TIME=0.5 is mid-run for every
+      // component in one capture (one clock, whole surface — spec 07 §5).
+      MK_Fade: {
+        properties: {
+          width: '120px', height: '48px', 'background-color': '#c0392b',
+          'animation-name': 'motion-fade', 'animation-duration': '1s',
+          'animation-fill-mode': 'both',
+        },
+      },
+      MK_Slide: {
+        properties: {
+          width: '60px', height: '60px', 'background-color': '#16a085',
+          'animation-name': 'motion-slide', 'animation-duration': '1s',
+          'animation-timing-function': 'linear', 'animation-fill-mode': 'both',
+        },
+      },
+      MK_Pulse: {
+        properties: {
+          width: '80px', height: '40px', 'background-color': '#f39c12',
+          'animation-name': 'motion-pulse', 'animation-duration': '1s',
+          'animation-fill-mode': 'both',
+        },
+      },
+      MK_ColorShift: {
+        properties: {
+          width: '160px', height: '56px',
+          'animation-name': 'motion-color', 'animation-duration': '1s',
+          'animation-timing-function': 'linear', 'animation-fill-mode': 'both',
+        },
+      },
+      MK_Multi: {
+        properties: {
+          width: '100px', height: '44px',
+          'animation-name': 'motion-multi', 'animation-duration': '1s',
+          'animation-timing-function': 'linear', 'animation-fill-mode': 'both',
+        },
+      },
+      MK_ThreeStop: {
+        properties: {
+          height: '36px', 'background-color': '#8e44ad',
+          'animation-name': 'motion-steps', 'animation-duration': '1s',
+          'animation-timing-function': 'linear', 'animation-fill-mode': 'both',
+        },
+      },
+      // Alternate direction: 2s total (1s out + 1s back) — at t=1.5 the
+      // REVERSED leg is halfway home, which distinguishes alternate from
+      // normal-with-2-iterations in a single capture.
+      MK_Alternate: {
+        properties: {
+          width: '70px', height: '30px', 'background-color': '#2c3e50',
+          'animation-name': 'motion-slide', 'animation-duration': '1s',
+          'animation-iteration-count': '2', 'animation-direction': 'alternate',
+          'animation-timing-function': 'linear', 'animation-fill-mode': 'both',
+        },
+      },
+      // fill-mode both + delay: at t=0 the animation has NOT started
+      // (0.5s delay) but `both` back-fills the from-state (opacity 0) —
+      // a capture that shows the base opacity instead fails the pin.
+      MK_FillBoth: {
+        properties: {
+          width: '140px', height: '52px', 'background-color': '#d35400',
+          'animation-name': 'motion-fade', 'animation-duration': '1s',
+          'animation-delay': '0.5s', 'animation-fill-mode': 'both',
+        },
+      },
+    },
+  };
+}
+
+function buildMotionTransitions() {
+  // Ties wave 7 (selector states) to motion: each component transitions
+  // a property that a selector bucket changes. The capture recipe is
+  // forceState=<state> + CAPTURE_ANIMATION_TIME=<mid> — forcing the state
+  // starts the transition exactly like real input (spec 07 §4), and the
+  // time hook freezes it mid-flight. All durations 1s, same one-clock
+  // rationale as the keyframes file. No PRNG — contrast pairs are pinned.
+  return {
+    components: {
+      // Background transition: gray → red on hover, frozen halfway.
+      MT_BgFade: {
+        properties: {
+          width: '140px', height: '48px', 'background-color': '#7f8c8d',
+          'transition-property': 'background-color', 'transition-duration': '1s',
+          'transition-timing-function': 'linear',
+        },
+        selectors: [sel(':hover', { 'background-color': '#c0392b' })],
+      },
+      // Geometry transition: width doubles when active — a mid-flight
+      // capture shows an INTERMEDIATE width no static state produces.
+      MT_WidthGrow: {
+        properties: {
+          width: '80px', height: '40px', 'background-color': '#2980b9',
+          'transition-property': 'width', 'transition-duration': '1s',
+          'transition-timing-function': 'linear',
+        },
+        selectors: [sel(':active', { width: '160px' })],
+      },
+      // Multi-channel transition via `all`: focus changes color AND
+      // opacity together; both must be mid-flight at the same t.
+      MT_AllChannels: {
+        properties: {
+          width: '120px', height: '56px', 'background-color': '#27ae60', opacity: '1',
+          'transition-property': 'all', 'transition-duration': '1s',
+          'transition-timing-function': 'linear',
+        },
+        selectors: [sel(':focus', { 'background-color': '#8e44ad', opacity: '0.4' })],
+      },
+      // Delayed transition: at t=0.25 the checked recolor has NOT started
+      // (0.5s delay) — base color must survive; at t=1.0 it is halfway.
+      MT_Delayed: {
+        properties: {
+          width: '100px', height: '32px', 'background-color': '#f1c40f',
+          'transition-property': 'background-color', 'transition-duration': '1s',
+          'transition-delay': '0.5s', 'transition-timing-function': 'linear',
+        },
+        selectors: [sel(':checked', { 'background-color': '#2c3e50' })],
+      },
+    },
+  };
+}
+
+// Motion template table: path → builder → feature descriptors surfaced in
+// the manifest (the coverage vocabulary the regeneration test pins).
+const MOTION_BUILDERS = [
+  ['motion/keyframes-basic.json', buildMotionKeyframes,
+    ['keyframes-opacity', 'keyframes-translate', 'keyframes-scale', 'keyframes-color',
+      'keyframes-multi-property', 'keyframes-three-stop', 'direction-alternate',
+      'fill-mode-both', 'unsorted-offsets']],
+  ['motion/transitions.json', buildMotionTransitions,
+    ['transition-background', 'transition-width', 'transition-all',
+      'transition-delay', 'state-triggered-motion']],
+];
+
 // Dynamic template table: path → builder → feature descriptors surfaced in
 // the manifest (the coverage vocabulary the regeneration test pins).
 const DYNAMIC_BUILDERS = [
@@ -1535,10 +1734,51 @@ export function generate() {
     });
   }
 
+  // Motion — the wave-8 animation suite: document-level keyframe sets +
+  // state-triggered transitions (schema/spec/07-animations.md). Fixed,
+  // PRNG-free templates: the animated from/to CONTRAST is the test
+  // surface, and the CAPTURE_ANIMATION_TIME captures diff against these
+  // exact values. The keyframes file is the one fixture family whose
+  // authoring envelope carries a top-level `keyframes` block beside
+  // `components` (spec 07 §1.1).
+  for (const [name, builder, features] of MOTION_BUILDERS) {
+    const relPath = `fixtures/fidelity/${name}`;
+    const doc = builder(); // PRNG-free by design (see builder notes)
+    const content = toJson(doc);
+    // Property scan covers base + bucket declarations (collectProps) plus
+    // every keyframe-stop declaration — animated properties are part of
+    // the file's coverage vocabulary too.
+    const propSet = collectProps(doc.components);
+    for (const stops of Object.values(doc.keyframes ?? {})) {
+      for (const stop of stops) for (const p of Object.keys(stop.declarations)) propSet.add(p);
+    }
+    const props = [...propSet].sort();
+    // Category attribution mirrors the trees block: longhand map first,
+    // shorthand table second, "other" as the honest fallback.
+    const cats = new Set();
+    for (const p of props) cats.add(categoryMap.get(p) ?? SHORTHAND_CATEGORY.get(p) ?? 'other');
+    files.push({ relPath, content });
+    manifestFiles.push({
+      path: relPath,
+      kind: 'motion',
+      categories: [...cats].sort(),
+      // Coverage descriptors: which motion scenarios this file exercises
+      // (vocabulary pinned by gen-fidelity.test.mjs).
+      features,
+      // Named keyframe sets this file defines (empty for transitions.json)
+      // — wave runs use this to know which fixtures need the time hook.
+      keyframeSets: Object.keys(doc.keyframes ?? {}).sort(),
+      components: Object.keys(doc.components).length,
+      nodes: countNodes(doc.components),
+      bytes: Buffer.byteLength(content),
+      properties: props,
+    });
+  }
+
   // Manifest — the wave-run iteration surface. Sorted stably: combos by
   // category, then pairwise shards, then trees, then placement templates,
-  // then token templates, then dynamic templates (already appended in
-  // that order).
+  // then token templates, then dynamic templates, then motion templates
+  // (already appended in that order).
   const manifest = {
     generator: 'tools/visual/gen-fidelity.mjs',
     seed: SEED,
@@ -1609,6 +1849,18 @@ export function generate() {
   prov.push('  flip rows plus an order-decides layering pin), and dark-mode buckets');
   prov.push('  (prefers-color-scheme: dark) alongside light-dark() color values.');
   prov.push('  Capture recipes live in docs/DYNAMIC_CAPTURE.md.');
+  prov.push('- `motion/*.json` — animation suite (wave 8,');
+  prov.push('  schema/spec/07-animations.md): keyframes-basic.json authors a document-');
+  prov.push('  level `keyframes` block (opacity fade, translate slide, scale pulse,');
+  prov.push('  sRGB color shift, a multi-property set, a 3-stop set authored with');
+  prov.push('  UNSORTED offsets to make the wire\'s sorted emission observable,');
+  prov.push('  alternate direction, fill-mode both + delay — distinct geometry per');
+  prov.push('  component so t=0 / t=mid / t=end captures differ maximally);');
+  prov.push('  transitions.json ties wave-7 selector states to motion (transition-');
+  prov.push('  property/duration/delay against :hover/:active/:focus/:checked buckets');
+  prov.push('  — captured via forceState + CAPTURE_ANIMATION_TIME mid-transition).');
+  prov.push('  These templates are PRNG-free: the animated value pairs ARE the test');
+  prov.push('  surface. Capture recipes live in docs/DYNAMIC_CAPTURE.md §4.');
   prov.push('');
   prov.push('## Inventory');
   prov.push('');

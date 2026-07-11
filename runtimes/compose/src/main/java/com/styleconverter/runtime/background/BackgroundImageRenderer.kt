@@ -19,11 +19,18 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.size.Scale
+// Coil 3 (wave-8 #36 migration): package root moved coil.* → coil3.*;
+// crossfade() became an extension in coil3.request; AsyncImagePainter.state
+// is now a StateFlow (collected below instead of read directly).
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.size.Scale
+import com.styleconverter.runtime.core.images.DataUri
 
 /**
  * Renders CSS background-image: url() as a Compose background.
@@ -95,10 +102,13 @@ object BackgroundImageRenderer {
             // Background image layer
             when (repeat) {
                 BackgroundRepeatConfig.NO_REPEAT -> {
-                    // Single image, positioned according to background-position
+                    // Single image, positioned according to background-position.
+                    // DataUri.toModel: data: URIs decode to ByteArray (Coil 3
+                    // loads bytes natively); other schemes pass through to
+                    // the network/file fetchers.
                     AsyncImage(
                         model = ImageRequest.Builder(context)
-                            .data(url)
+                            .data(DataUri.toModel(url))
                             .crossfade(true)
                             .build(),
                         contentDescription = null,
@@ -149,13 +159,17 @@ object BackgroundImageRenderer {
         val context = LocalContext.current
         val painter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(context)
-                .data(url)
+                // data: URIs decode to ByteArray (Coil 3 native model);
+                // other schemes go to the registered fetchers untouched.
+                .data(DataUri.toModel(url))
                 .scale(Scale.FILL)
                 .build()
         )
 
-        // Only draw when the image is loaded
-        val painterState = painter.state
+        // Only draw when the image is loaded. Coil 3: `state` is a
+        // StateFlow (the 2.x Compose State went away) — collect it so
+        // recomposition still tracks load completion.
+        val painterState by painter.state.collectAsState()
         if (painterState is AsyncImagePainter.State.Success) {
             Box(
                 modifier = modifier.drawBehind {

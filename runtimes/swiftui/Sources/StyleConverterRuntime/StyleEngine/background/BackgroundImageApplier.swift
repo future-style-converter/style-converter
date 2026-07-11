@@ -28,6 +28,14 @@ struct BackgroundImageApplier: ViewModifier {
     var clipInsets: EdgeInsets = EdgeInsets()
     // Per-layer attachment modes; nil/short arrays default to `.scroll`.
     var attachment: BackgroundAttachmentConfig? = nil
+    // Wave 8 (#36) — the raster-layer knobs. Gradients ignore them (the
+    // engineBackgroundSize/Position stubs stay identity for gradients,
+    // unchanged); url() layers resolve size/position/repeat per layer
+    // index with CSS list-repeat semantics (css-backgrounds-3 §2.7:
+    // shorter lists cycle to match the image layer count).
+    var size: BackgroundSizeConfig? = nil
+    var position: BackgroundPositionConfig? = nil
+    var repeatCfg: BackgroundRepeatConfig? = nil
 
     func body(content: Content) -> some View {
         // Short-circuit when nothing to paint.
@@ -38,7 +46,7 @@ struct BackgroundImageApplier: ViewModifier {
         // layers in source order (0..N) attaching `.background` for each,
         // which gives the correct z-ordering naturally.
         var view: AnyView = AnyView(content)
-        for layer in cfg.layers {
+        for (index, layer) in cfg.layers.enumerated() {
             // `background-attachment` is a deliberate NO-OP here.
             // CSS Backgrounds 3 §2.6 says `fixed` anchors the layer to
             // the viewport — but BOTH references this runtime is graded
@@ -55,7 +63,7 @@ struct BackgroundImageApplier: ViewModifier {
             // never scroll, so scroll/fixed/local are indistinguishable
             // here; a real scrolling SDUI surface is where `fixed`
             // becomes observable (capability-tier work, deferred).
-            let rendered = GradientApplier.render(layer)
+            let rendered = render(layer, index: index)
             // `.padding(clipInsets)` shrinks the paint rectangle for
             // padding-box / content-box clip modes; zero insets are a
             // no-op for the default border-box.
@@ -63,17 +71,51 @@ struct BackgroundImageApplier: ViewModifier {
         }
         return view
     }
+
+    /// One layer → one View. url() layers take the wave-8 raster path
+    /// (decode + size/position/repeat geometry); everything else keeps
+    /// the wave-5 GradientApplier rendering byte-identically.
+    private func render(_ layer: BackgroundImageLayer, index: Int) -> AnyView {
+        guard case .url(let urlString) = layer else {
+            return GradientApplier.render(layer)
+        }
+        // Decode (cached). Remote/undecodable → the browser's failed-load
+        // visual: nothing painted for this layer (resolver logged it).
+        guard let img = BackgroundURLImageResolver.image(for: urlString) else {
+            return AnyView(Color.clear)
+        }
+        // Per-layer knob slices — CSS §2.7 list matching (cycle short
+        // lists); nil configs mean the CSS initials (auto / 0% / repeat).
+        func slice<T>(_ layers: [T]?) -> T? {
+            guard let layers = layers, !layers.isEmpty else { return nil }
+            return layers[index % layers.count]
+        }
+        return AnyView(BackgroundURLImageView(
+            uiImage: img,
+            sizeLayer: slice(size?.layers),
+            // Position is one pair (not per-layer lists in this config
+            // shape) — applies to every layer, matching the extractor.
+            positionX: position?.x,
+            positionY: position?.y,
+            repeatLayer: slice(repeatCfg?.layers)))
+    }
 }
 
 extension View {
     // Chain helper — invoked once per ComponentStyle from StyleBuilder.
-    // `clipInsets` / `attachment` default to the CSS initial values so
-    // legacy call sites stay source-compatible.
+    // `clipInsets` / `attachment` / the raster knobs default to the CSS
+    // initial values so legacy call sites stay source-compatible.
     func engineBackgroundImage(_ config: BackgroundImageConfig?,
                                clipInsets: EdgeInsets = EdgeInsets(),
-                               attachment: BackgroundAttachmentConfig? = nil) -> some View {
+                               attachment: BackgroundAttachmentConfig? = nil,
+                               size: BackgroundSizeConfig? = nil,
+                               position: BackgroundPositionConfig? = nil,
+                               repeatCfg: BackgroundRepeatConfig? = nil) -> some View {
         modifier(BackgroundImageApplier(config: config,
                                         clipInsets: clipInsets,
-                                        attachment: attachment))
+                                        attachment: attachment,
+                                        size: size,
+                                        position: position,
+                                        repeatCfg: repeatCfg))
     }
 }

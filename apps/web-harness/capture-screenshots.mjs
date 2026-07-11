@@ -65,6 +65,17 @@ if (process.env.CAPTURE_DARK && !['0', '1'].includes(process.env.CAPTURE_DARK)) 
   console.error(`✗ CAPTURE_DARK must be 0 or 1, got "${process.env.CAPTURE_DARK}"`);
   process.exit(2);
 }
+// CAPTURE_ANIMATION_TIME: deterministic animation seize for the run
+// (schema/spec/07-animations.md §5 / docs/DYNAMIC_CAPTURE.md §4). Seconds,
+// ≥ 0 (0 = the initial frame, respecting fill-mode/delay arithmetic).
+// undefined when unset — the historical live-capture path stays untouched.
+const animationTime = process.env.CAPTURE_ANIMATION_TIME !== undefined
+  ? Number(process.env.CAPTURE_ANIMATION_TIME)
+  : undefined;
+if (animationTime !== undefined && (!Number.isFinite(animationTime) || animationTime < 0)) {
+  console.error(`✗ CAPTURE_ANIMATION_TIME must be a non-negative number of seconds, got "${process.env.CAPTURE_ANIMATION_TIME}"`);
+  process.exit(2);
+}
 
 function getArg(name) {
   const i = args.indexOf(name);
@@ -160,7 +171,7 @@ try {
   // width/forceState ride the URL so CaptureGallery can size the canvas and
   // stamp `data-force-state` (the runtime reads it at style resolution).
   // Defaults produce the byte-identical legacy URL — see buildCaptureUrl.
-  const captureUrl = buildCaptureUrl(baseUrl, wptMode, { width: captureWidth, forceState });
+  const captureUrl = buildCaptureUrl(baseUrl, wptMode, { width: captureWidth, forceState, animationTime });
   console.log(`→ loading ${captureUrl}${wptMode ? ' (WPT_MODE=1: placeholder text suppressed)' : ''}`);
   await page.goto(captureUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
 
@@ -194,6 +205,30 @@ try {
   await page.evaluate(() =>
     new Promise((r) => setTimeout(r, 50))
   );
+
+  // Deterministic animation seize (spec 07 §5). The capture page already
+  // seized on mount (CaptureGallery's `?animationTime=` effect — the
+  // reference implementation); this RE-seize catches animations created
+  // AFTER the initial pass (font-swap reflows, transitions started by
+  // late style application) so the frame we screenshot is provably the
+  // t-state. The data marker check makes a silently-degraded run (page
+  // ignored the param) a hard failure, mirroring the forceState contract.
+  if (animationTime !== undefined) {
+    const seized = await page.evaluate((t) => {
+      const w = /** @type {any} */ (window);
+      if (typeof w.__seizeAnimations !== 'function') return -1; // page too old
+      return w.__seizeAnimations(t);
+    }, animationTime);
+    if (seized === -1) {
+      throw new Error('CAPTURE_ANIMATION_TIME set but the capture page exposes no __seizeAnimations hook');
+    }
+    const marked = await page.$$eval('[data-capture-canvas]', (els) =>
+      els.every((el) => el.getAttribute('data-animation-time') !== null));
+    if (!marked) {
+      throw new Error('CAPTURE_ANIMATION_TIME set but canvases carry no data-animation-time marker — seize did not run');
+    }
+    console.log(`  animation clock seized at t=${animationTime}s (${seized} animation(s) paused)`);
+  }
 
   // ── Capture ────────────────────────────────────────────────────────────────
   //

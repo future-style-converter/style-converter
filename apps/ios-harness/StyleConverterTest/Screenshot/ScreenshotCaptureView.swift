@@ -74,9 +74,29 @@ struct ScreenshotCaptureView: View {
         // host script (and a human reading the simulator log) can verify
         // a forced/width/dark run actually ran forced (the log-side
         // sibling of the canvas's force-state accessibility marker).
+        // Wave 8: announce the motion clock too — the log-side half of
+        // the seized-run verification marker (DYNAMIC_CAPTURE.md §4: a
+        // seized run must be distinguishable from a live one at a glance).
         print("[Capture] forceState=\(CaptureOverrides.forceState ?? "none") "
               + "width=\(Int(CaptureOverrides.captureWidth)) "
-              + "scheme=\(CaptureOverrides.darkMode ? "dark" : "light")")
+              + "scheme=\(CaptureOverrides.darkMode ? "dark" : "light") "
+              + "animationTime=\(CaptureOverrides.animationTimeRaw ?? "live")")
+        // Wave 8 — the HOST-verifiable marker: the run config rides the
+        // pulled screenshot directory as capture-config.json, and
+        // test-all.sh HARD-FAILS a CAPTURE_ANIMATION_TIME run whose
+        // pulled config doesn't carry the expected t (the iOS analogue
+        // of Android's logcat gate / web's data-animation-time check —
+        // a seized run can never silently degrade to a live capture).
+        let config: [String: Any] = [
+            "forceState": CaptureOverrides.forceState ?? "none",
+            "width": Int(CaptureOverrides.captureWidth),
+            "scheme": CaptureOverrides.darkMode ? "dark" : "light",
+            "animationTime": CaptureOverrides.animationTimeRaw ?? "live",
+        ]
+        if let data = try? JSONSerialization.data(withJSONObject: config, options: [.sortedKeys]) {
+            try? data.write(to: ScreenshotManager.directory
+                .appendingPathComponent("capture-config.json"))
+        }
         total = flat.count
         captured = 0
         captureNext(index: 0)
@@ -100,7 +120,12 @@ struct ScreenshotCaptureView: View {
         // Render the chromeless CaptureCanvas — 390 px wide, natural height,
         // solid #1A1A2E background, 16 px padding. Matches the Android and
         // web canvases exactly so captures are directly pixel-diffable.
+        // Wave 8: ImageRenderer builds an ISOLATED render tree — the
+        // ContentView-level environment never reaches it — so the
+        // document keyframes block (spec 07 §1.2) is re-published
+        // directly on the captured content here.
         let canvas = CaptureCanvas(component: component)
+            .environment(\.styleKeyframes, document.keyframes)
 
         if let image = ScreenshotManager.render(canvas) {
             ScreenshotManager.save(image: image, index: index, name: component.name)

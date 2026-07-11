@@ -41,6 +41,12 @@ public struct IRDocument: Decodable {
     /// v2 only: the raw FLAT wire list in array order (the sibling-order
     /// contract of schema/spec/03-children.md). nil for v1 documents.
     public let flatComponents: [IRComponent]?
+    /// Wave 8 — document-level named keyframe sets (spec 07 §1.2): the
+    /// wire twin of CSS `@keyframes` at-rules, which are document-scoped
+    /// in CSS too. nil when the wire omitted the key (omit-when-empty)
+    /// and always nil for v1 documents (the v1 wire structurally cannot
+    /// carry the field — IRDocument.kt marks it @Transient).
+    public let keyframes: [String: [IRKeyframeStop]]?
 
     // public: hand-written Decodable witness on a public type.
     public init(from decoder: Decoder) throws {
@@ -49,12 +55,13 @@ public struct IRDocument: Decodable {
         let c = try decoder.container(keyedBy: IRAnyKey.self)
         if c.contains(IRAnyKey("irVersion")) {
             // v2+ path — strict envelope decode (IRWireV2Reader.swift).
-            let flat = try IRWireV2Reader.decodeEnvelope(from: c, codingPath: decoder.codingPath)
+            let envelope = try IRWireV2Reader.decodeEnvelope(from: c, codingPath: decoder.codingPath)
             irVersion = IRWireV2Reader.irVersion
-            flatComponents = flat
+            flatComponents = envelope.components
+            keyframes = envelope.keyframes
             // Composition is a COMPOSER concern (spec 03): rebuild the
             // preview tree from slot refs; dangling parents become roots.
-            components = IRComposer.compose(flat)
+            components = IRComposer.compose(envelope.components)
         } else {
             // v1 window — the legacy tolerant decode, unchanged behavior
             // (unknown keys ignored), plus a loud deprecation warning so
@@ -63,8 +70,35 @@ public struct IRDocument: Decodable {
                 "[StyleConverterRuntime] WARNING: decoding a v1 IR document (no irVersion). v1 is deprecated — re-run the converter to emit IR v2.\n".utf8))
             irVersion = 1
             flatComponents = nil
+            // The v1 codec structurally cannot carry keyframes (spec 07):
+            // nil, never [] — same absent-vs-empty discipline as children.
+            keyframes = nil
             components = try c.decode([IRComponent].self, forKey: IRAnyKey("components"))
         }
+    }
+}
+
+// MARK: - Keyframe stop (wave 8 — spec 07 §1.2)
+
+/// One resolved keyframe stop of a document-level `keyframes` set.
+/// `offset` is the resolved fraction in [0, 1] (`from` → 0, `to` → 1,
+/// `N%` → N/100 — resolved by the converter, never re-parsed here) and
+/// `properties` carries the stop's declarations as the SAME typed
+/// {type, data} envelopes component properties use. Sets arrive sorted
+/// ascending by offset, stable for equal offsets (spec 07 §1.2 — readers
+/// MAY rely on sortedness and MUST NOT reorder).
+// public: consumed by the animations engine (AnimationResolver) and
+// published by hosts through the styleKeyframes environment channel.
+public struct IRKeyframeStop {
+    /// Resolved fractional position in [0, 1].
+    public let offset: Double
+    /// The stop's typed declarations ({type, data} property envelopes).
+    public let properties: [IRProperty]
+
+    // public: constructed by the wire decoder, the harness and tests.
+    public init(offset: Double, properties: [IRProperty]) {
+        self.offset = offset
+        self.properties = properties
     }
 }
 
@@ -380,6 +414,17 @@ public indirect enum IRValue: Decodable {
         objectValue?[key]
     }
 }
+
+// Wave 8 — structural equality for IR payloads. Synthesized (all payload
+// types are Equatable, recursively). Used by the transition driver to
+// detect which property values a state flip actually CHANGED
+// (spec 07 §4 — transitions fire on effective-value change) and by tests.
+// Same-file extension so the compiler can synthesize the witness.
+extension IRValue: Equatable {}
+
+// Property equality follows from type + data equality — the transition
+// differ compares whole {type, data} envelopes.
+extension IRProperty: Equatable {}
 
 // MARK: - String coding key
 

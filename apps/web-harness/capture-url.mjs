@@ -54,6 +54,15 @@
  *                          hover|active|focus|disabled|checked
  *                          (schema/spec/06-dynamic-styling.md §6). Appended
  *                          as `&forceState=<state>` when set.
+ * @param {number} [opts.animationTime] - Deterministic animation-time seize
+ *                          (`CAPTURE_ANIMATION_TIME` env, seconds —
+ *                          schema/spec/07-animations.md §5 /
+ *                          docs/DYNAMIC_CAPTURE.md §4): every animation on
+ *                          the capture surface is forced to its state at
+ *                          absolute time t and paused. Appended as
+ *                          `&animationTime=<seconds>` when set (0 is a
+ *                          meaningful value — the initial frame — so the
+ *                          guard is `!= null`, not truthiness).
  * @returns {string} The fully formed URL to navigate to.
  */
 export function buildCaptureUrl(baseUrl, wptMode, opts = {}) {
@@ -65,10 +74,13 @@ export function buildCaptureUrl(baseUrl, wptMode, opts = {}) {
   // `mode=capture` first preserves byte-identity with all pre-fix URLs in
   // logs and historical capture artifacts.
   const wptSuffix = wptMode ? '&wpt=1' : '';
-  // Dynamic-styling hooks, in fixed order (width, then forceState) so the
-  // URL stays deterministic for logs / artifact matching. The `!== 390`
-  // guard keeps the default path byte-identical to the legacy form.
+  // Dynamic-styling hooks, in fixed order (width, then forceState, then
+  // animationTime) so the URL stays deterministic for logs / artifact
+  // matching. The `!== 390` guard keeps the default path byte-identical
+  // to the legacy form.
   const widthSuffix = opts.width && opts.width !== 390 ? `&width=${opts.width}` : '';
   const stateSuffix = opts.forceState ? `&forceState=${opts.forceState}` : '';
-  return `${trimmed}/?mode=capture${wptSuffix}${widthSuffix}${stateSuffix}`;
+  // `0` is legal (freeze at the initial frame), so test presence, not truth.
+  const timeSuffix = opts.animationTime != null ? `&animationTime=${opts.animationTime}` : '';
+  return `${trimmed}/?mode=capture${wptSuffix}${widthSuffix}${stateSuffix}${timeSuffix}`;
 }

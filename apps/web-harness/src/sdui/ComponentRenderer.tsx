@@ -65,6 +65,23 @@ const FORCE_STATE = (() => {
   return raw && isRuntimeV1Condition(raw) ? raw : null;              // validated or dropped
 })();
 
+/**
+ * Deterministic placeholder for `meta.sourceTag: 'img'` components
+ * (issue #36 web slice — see the img branch in ComponentRenderer for the
+ * wave-9 IR-gap rationale). An inline SVG data-URI so the capture needs
+ * no network fetch and the bytes can never vary between runs:
+ *   - 100×100 intrinsic size → defined natural size + 1:1 natural aspect
+ *     ratio for object-fit / aspect-ratio-transfer behavior;
+ *   - mid-gray field (#808080) + darker centered disc (#4a4a4a) → visible
+ *     interior structure, so cover/contain/fill scaling and object-
+ *     position offsets produce visibly different pixels under SSIM.
+ * URL-encoded per RFC 2397 (only `#` needs escaping in this payload).
+ */
+const PLACEHOLDER_IMG_SRC =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E" +
+  "%3Crect width='100' height='100' fill='%23808080'/%3E" +
+  "%3Ccircle cx='50' cy='50' r='30' fill='%234a4a4a'/%3E%3C/svg%3E";
+
 interface ComponentRendererProps {
   /** Composed node: the flat-wire component + its slot-composed children. */
   node: ComposedNode;
@@ -598,6 +615,49 @@ export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
   // capture runs, activating the twin selector on every state rule.
   const className = componentClassName(component.id)
     + (FORCE_STATE ? ` ${forceClassName(FORCE_STATE)}` : '');
+
+  // Issue #36 (web slice) — `meta.sourceTag: 'img'` components render as a
+  // REAL <img> replaced element, not a <div> with placeholder text, so
+  // replaced-element CSS (object-fit / object-position / aspect-ratio
+  // transfer / border rounding on the image box) exercises the browser's
+  // actual replaced-element code path.
+  //
+  // HONEST IR GAP (wave 9): nothing on today's wire carries the image
+  // SOURCE. The extractor (tools/titan/extract-fixture.mjs) forwards
+  // `_tag: 'img'` → meta.sourceTag but never reads the `src` attribute,
+  // and spec 01 defines no content contract for replaced elements — so a
+  // src cannot be invented here without inventing wire. Until the wave-9
+  // content contract lands, the harness substitutes a DETERMINISTIC
+  // inline placeholder (fixed bytes → fixed pixels → stable captures):
+  // a 100×100 SVG data-URI, mid-gray field + darker centered disc, giving
+  // the box a defined natural size/aspect AND visible interior structure
+  // so object-fit: cover vs contain vs fill produce distinct pixels.
+  // <img> is a void element, so this branch bypasses the content tree
+  // entirely (children/pseudos cannot exist inside it; any composed
+  // children would be an authoring error and are surfaced loudly below).
+  if (tag === 'img') {
+    if (hasChildren) {
+      // No silent fallthrough: an <img> cannot host children. Warn (the
+      // harness's console reaches the capture logs) and drop them — the
+      // browser would discard nested markup inside <img> the same way.
+      console.warn(
+        `[ComponentRenderer] component "${component.id}" has sourceTag 'img' but ${node.children.length} composed child(ren) — <img> is void; children not rendered`,
+      );
+    }
+    return React.createElement('img', {
+      'data-component-id': component.id,
+      'data-component-name': component.name,
+      className,
+      // Deterministic placeholder source (see the wave-9 gap note above).
+      src: PLACEHOLDER_IMG_SRC,
+      // The component's text (alt text is the natural text of an <img>)
+      // keeps captures self-describing; empty alt is valid fallback.
+      alt: typeof text === 'string' ? text : '',
+      // Same style pipeline as every other element: engine styles + the
+      // sizing defaults + custom-property definitions.
+      style: { ...containerStyles, ...variableStyles } as React.CSSProperties,
+    });
+  }
 
   return React.createElement(
     elementName,
