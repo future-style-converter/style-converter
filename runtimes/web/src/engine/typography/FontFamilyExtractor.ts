@@ -29,7 +29,7 @@ function parse(data: unknown): string | number | undefined {
     if (typeof f !== 'string' || f.length === 0) continue;           // skip garbage
     const lower = f.toLowerCase();                                   // case-insensitive generic check
     if (GENERIC.has(lower)) list.push(lower);                        // emit generic unquoted
-    else if (/[\s"']/.test(f)) list.push(`"${f.replace(/"/g,'\\"')}"`); // quote custom w/ space
+    else if (/[\s"']/.test(f)) list.push(`"${f.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`); // quote custom w/ space
     else list.push(f);                                               // single-token custom unquoted
   }
   return list.length ? list.join(', ') : undefined;                  // CSS comma-separated list

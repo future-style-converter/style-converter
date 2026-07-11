@@ -28,7 +28,7 @@ function parse(data: unknown): string | number | undefined {
     case 'Fade':                                                     // fade() functional
       return typeof o.length === 'string' ? `fade(${o.length})` : 'fade';
     case 'CustomString':                                             // quoted-string form
-      return typeof o.value === 'string' ? `"${o.value.replace(/"/g,'\\"')}"` : undefined;
+      return typeof o.value === 'string' ? `"${o.value.replace(/\\/g, '\\\\').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"` : undefined;
     case 'TwoValue': {                                               // '<start> <end>' pair
       const s = typeof o.start === 'string' ? o.start.toLowerCase() : 'clip';
       const e = typeof o.end === 'string' ? o.end.toLowerCase() : 'clip';

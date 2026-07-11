@@ -6,6 +6,10 @@
 # promotion workflow once the runtimes/ restructure lands.
 name: ci
 
+# Least-privilege default for every job (CodeQL actions/missing-workflow-permissions).
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main, dev]

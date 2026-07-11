@@ -100,7 +100,7 @@ async function bucketIndex() {
  *  trip on commented-out blocks. */
 export function stripComments(html) {
   // HTML comments first (can contain `*/`).
-  let out = html.replace(/<!--[\s\S]*?-->/g, '');
+  let out = html; for (let prev = null; prev !== out; ) { prev = out; out = out.replace(/<!--[\s\S]*?-->/g, ''); }
   // CSS comments inside <style> blocks.
   out = out.replace(/\/\*[\s\S]*?\*\//g, '');
   return out;
@@ -777,7 +777,7 @@ export function collectDefinedTags(html) {
   // Pull every <script>…</script> body (the registration calls live
   // inside the inline script bodies; external scripts can't be loaded
   // by the extractor anyway).
-  const scriptRe = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
+  const scriptRe = /<script\b[^>]*>([\s\S]*?)<\/script[^>]*>/gi;
   let m;
   while ((m = scriptRe.exec(html)) !== null) {
     const body = m[1];

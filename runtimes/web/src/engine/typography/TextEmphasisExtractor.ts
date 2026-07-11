@@ -24,11 +24,11 @@ function parse(data: unknown): string | number | undefined {
   if (o.style && typeof o.style === 'object') {
     const s = o.style as Record<string, unknown>;
     if (s.type === 'custom' && typeof s.character === 'string') {
-      styleStr = `"${s.character.replace(/"/g, '\\"')}"`;
+      styleStr = `"${s.character.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
     } else if (typeof s.type === 'string') {
       const kw = kwLower(s.type);
       styleStr = kw && (kw.startsWith('filled-') || kw.startsWith('open-'))
-        ? kw.replace('-', ' ')
+        ? kw.replace(/-/g, ' ')
         : kw;
     }
   }
