@@ -177,11 +177,11 @@ the point.
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 93 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 888 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 679 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 184 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 425 |
+| converter (Kotlin) | `./gradlew :converter:test` | 101 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 904 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 731 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 219 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 430 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 12 goldens × 4 codebases |
 
 CI (`.github/workflows/ci.yml`) runs the converter, web-runtime,

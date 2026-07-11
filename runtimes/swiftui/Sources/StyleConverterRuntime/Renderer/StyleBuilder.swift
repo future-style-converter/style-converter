@@ -660,10 +660,18 @@ extension View {
             // viewport anchoring for background-attachment: fixed (§2.6)
             // both thread INTO the paint calls — clipping the whole view
             // after the fact would slice content/borders off.
+            // Wave 8 (#36): size/position/repeat thread INTO the paint
+            // call for url() raster layers (cover/contain/px sizing,
+            // keyword/percent/px anchoring, per-axis tiling). Gradient
+            // layers ignore them — their engineBackground* stubs below
+            // stay identity, so every gradient baseline is untouched.
             .engineBackgroundImage(
                 style.backgroundClip?.mode == .text ? nil : style.backgroundImage,
                 clipInsets: StyleBuilder.backgroundClipInsets(style),
-                attachment: style.backgroundAttachment
+                attachment: style.backgroundAttachment,
+                size: style.backgroundSize,
+                position: style.backgroundPosition,
+                repeatCfg: style.backgroundRepeat
             )
             // Wave 5: `background-clip: text` clips the SOLID background
             // to the glyph shape too (css-backgrounds-4 §2.2), not just

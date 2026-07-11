@@ -26,7 +26,7 @@ adb shell am start -n com.styleconverter.test/.MainActivity
 adb pull /sdcard/Android/data/com.styleconverter.test/files/test_screenshots/ ./screenshots/
 ```
 
-The runtime's JUnit suite (679 tests) also runs from this build:
+The runtime's JUnit suite (731 tests) also runs from this build:
 `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)`.
 
 ## Dynamic-capture hooks (states + media)
@@ -48,11 +48,23 @@ adb shell am start -n com.styleconverter.test/.MainActivity --es forceState acti
 # canvas width; media min/max-width buckets evaluate against it
 # (render-surface semantics — never the device screen).
 adb shell am start -n com.styleconverter.test/.MainActivity --ei captureWidth 250
+
+# deterministic motion run (CAPTURE_ANIMATION_TIME, spec 07 §5): every
+# animation renders its state at absolute timeline time t, PAUSED — the
+# runtime evaluates state-at-t (KeyframeAnimationDriver) instead of
+# running any clock, so the frame is frozen by construction. Fractional
+# seconds ride the string extra; 0 is meaningful (the initial frame,
+# fill-mode/delay arithmetic included). test-all.sh forwards
+# CAPTURE_ANIMATION_TIME=<s> into this extra automatically.
+adb shell am start -n com.styleconverter.test/.MainActivity --es animationTime 0.5
 ```
 
 Verification markers: the capture screen logs
-`Capture run config: forceState=… captureWidth=…` to logcat
-(tag `ScreenshotCapture`), and the capture canvas carries the test tag
-`capture-canvas-force-state-<state>` on forced runs — the native twin of
-the web reference's `data-force-state` stamp, so a script can confirm the
-forced run actually ran forced.
+`Capture run config: forceState=… captureWidth=… animationTime=…` to
+logcat (tag `ScreenshotCapture`), and the capture canvas carries the test
+tags `capture-canvas-force-state-<state>` / `…-anim-time-<s>` on hooked
+runs — the native twins of the web reference's `data-force-state` /
+`data-animation-time` stamps. `test-all.sh` HARD-FAILS a
+`CAPTURE_ANIMATION_TIME` / `CAPTURE_FORCE_STATE` run whose logcat marker
+is missing, so a hooked run can never silently degrade to a base/live
+capture.

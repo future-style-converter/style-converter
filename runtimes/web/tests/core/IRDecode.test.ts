@@ -149,3 +149,53 @@ describe('decodeIRDocument — v1 translation details', () => {
     expect(doc.components[3].slot?.parent).toBe('r-001');
   });
 });
+
+describe('decodeIRDocument — keyframes (additive v2 key, spec 07 §1.2)', () => {
+  // Minimal valid v2 envelope factory for the keyframes-focused pins.
+  const v2 = (keyframes?: unknown) => ({
+    irVersion: 2,
+    minReaderVersion: 2,
+    components: [{ id: 'c1', name: 'C1', properties: [] }],
+    ...(keyframes !== undefined ? { keyframes } : {}),
+  });
+
+  it('passes a valid keyframes map through with offsets + typed stops intact', () => {
+    const doc = decodeIRDocument(v2({
+      fade: [
+        { offset: 0, properties: [{ type: 'Opacity', data: { alpha: 0 } }] },
+        { offset: 1, properties: [{ type: 'Opacity', data: { alpha: 1 } }] },
+      ],
+    }));
+    expect(doc.keyframes).toBeDefined();
+    expect(doc.keyframes!.fade.map((s) => s.offset)).toEqual([0, 1]);
+    expect(doc.keyframes!.fade[0].properties[0].type).toBe('Opacity');
+  });
+
+  it('omits the key entirely when the wire had none (baseline byte-shape)', () => {
+    const doc = decodeIRDocument(v2());
+    expect('keyframes' in doc).toBe(false);
+  });
+
+  it('drops malformed stops (bad offsets / missing properties), whole sets when empty', () => {
+    const doc = decodeIRDocument(v2({
+      // out-of-range + non-numeric offsets and a property-less stop are
+      // corruption (the converter pre-resolves offsets to [0,1] and the
+      // schema pins minItems 1) — decode-side tolerance drops, not crashes.
+      broken: [
+        { offset: 1.5, properties: [] },
+        { offset: 'from', properties: [] },
+        { offset: 0.5 },
+      ],
+      ok: [{ offset: 0.5, properties: [] }],
+    }));
+    expect(doc.keyframes).toBeDefined();
+    expect(Object.keys(doc.keyframes!)).toEqual(['ok']);
+  });
+
+  it('decode is idempotent with keyframes present (hot-reload path)', () => {
+    const once = decodeIRDocument(v2({
+      spin: [{ offset: 0, properties: [{ type: 'Transform', data: { type: 'functions', list: [] } }] }],
+    }));
+    expect(decodeIRDocument(once)).toEqual(once);
+  });
+});

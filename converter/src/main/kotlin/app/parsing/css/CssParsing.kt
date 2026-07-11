@@ -165,7 +165,90 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
         parseComponent(node.jsonObject)
     }
 
-    return CssComponents(components)
+    // Document-level `keyframes` block (wave 8, schema/spec/07-animations.md):
+    // { "<name>": [ { "offset": "0%"|"from"|"to", "declarations": {prop: value} }, … ] }.
+    // Mirrors CSS @keyframes at-rules being document-scoped. Malformed
+    // entries (non-object stop, missing offset) are skipped here with the
+    // same mapNotNull tolerance the selectors/media parsers use; offset
+    // VALUE validation happens at the IR boundary (parseKeyframeOffset in
+    // cssParsing) where a skip can be logged with the resolved context.
+    val keyframes = doc["keyframes"]?.jsonObject?.mapValues { (_, stopsEl) ->
+        stopsEl.jsonArray.mapNotNull { stopEl ->
+            val stopObj = stopEl.jsonObject
+            // A stop without an offset selector is unaddressable — drop it
+            // (matches the selector-bucket "missing selector ⇒ skip" rule).
+            val offset = stopObj["offset"]?.jsonPrimitive?.content ?: return@mapNotNull null
+            // Declarations reuse the exact base-properties value coercion
+            // (string/bool/number primitives → CssPropertyValue).
+            val declarations = toProperties(stopObj["declarations"]?.jsonObject) ?: emptyMap()
+            CssKeyframeStop(offset = offset, declarations = declarations)
+        }
+    }
+
+    return CssComponents(components, keyframes)
+}
+
+/**
+ * Resolve one authored keyframe selector to a fractional offset in [0, 1].
+ *
+ * css-animations-1 §4.2 keyframe-selector grammar: `from` (= 0%), `to`
+ * (= 100%), or a <percentage>. Percentages outside 0–100% make the
+ * keyframe rule INVALID per the same section — we return null and the
+ * caller drops the stop with a log (no silent fallthrough, no clamping:
+ * clamping would invent a stop the author never wrote).
+ */
+private fun parseKeyframeOffset(raw: String): Double? {
+    val t = raw.trim().lowercase()
+    return when {
+        t == "from" -> 0.0                       // css-animations-1 §4.2: from = 0%
+        t == "to" -> 1.0                         // css-animations-1 §4.2: to = 100%
+        t.endsWith("%") -> t.dropLast(1).trim().toDoubleOrNull()
+            ?.takeIf { it in 0.0..100.0 }        // out-of-range percentage ⇒ invalid rule
+            ?.div(100.0)                         // wire carries the 0..1 fraction (spec 07)
+        else -> null                             // anything else is not a keyframe selector
+    }
+}
+
+/**
+ * Convert the authored keyframes map into the typed IR form the v2 wire
+ * carries (schema/spec/07-animations.md):
+ *   name → [ IRKeyframeStop(offset: 0..1, properties: typed IR list) ]
+ * sorted ascending by offset (stable — equal offsets keep authoring order,
+ * mirroring the css-animations-1 §4.2 "last rule wins for equal selectors"
+ * cascade the runtimes apply).
+ *
+ * Declarations run through the SAME PropertiesParser as component base
+ * properties: shorthands expand, animatable values become typed IR data
+ * (colors → sRGB floats, lengths → px, …) exactly like base declarations —
+ * there is no separate "keyframe value" grammar.
+ */
+private fun convertKeyframesToIR(
+    authored: Map<String, List<CssKeyframeStop>>?
+): Map<String, List<IRKeyframeStop>>? {
+    if (authored.isNullOrEmpty()) return null
+    val out = LinkedHashMap<String, List<IRKeyframeStop>>()
+    for ((name, stops) in authored) {
+        val irStops = stops.mapNotNull { stop ->
+            val offset = parseKeyframeOffset(stop.offset)
+            if (offset == null) {
+                // Invalid selector ⇒ the keyframe rule is dropped, loudly
+                // (css-animations-1 §4.2; the no-silent-fallthrough rule).
+                println("[CSS Parser] keyframes '$name': invalid offset '${stop.offset}' — stop dropped")
+                return@mapNotNull null
+            }
+            // Reuse the component property pipeline for the payload.
+            IRKeyframeStop(offset = offset, properties = PropertiesParser.parse(stop.declarations))
+        }.sortedBy { it.offset } // sortedBy is stable: equal offsets keep authoring order
+        if (irStops.isEmpty()) {
+            // A set whose every stop was invalid (or that was authored
+            // empty) is dropped whole — an empty set can't animate and the
+            // v2 schema pins minItems 1 per set.
+            println("[CSS Parser] keyframes '$name': no valid stops — set dropped")
+            continue
+        }
+        out[name] = irStops
+    }
+    return out.ifEmpty { null }
 }
 
 /**
@@ -257,5 +340,10 @@ fun cssParsing(doc: JsonObject): IRDocument {
     val irComponents = components.components.map { (name, component) ->
         convertToIR(name, component)
     }
-    return IRDocument(irComponents)
+    // Document-level keyframes (wave 8): typed + offset-sorted at this
+    // boundary so every downstream consumer (wire codec, runtimes) sees
+    // one canonical shape. Null when the input authored none, so the v2
+    // serializer omits the envelope key and pre-motion documents stay
+    // byte-identical (spec 05 additive-revision rule).
+    return IRDocument(irComponents, keyframes = convertKeyframesToIR(components.keyframes))
 }

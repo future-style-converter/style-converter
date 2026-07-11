@@ -16,6 +16,13 @@
 //    darkMode     -captureDark 1 launch arg, or CAPTURE_DARK=1 env —
 //                 the forced-dark run of DYNAMIC_CAPTURE.md §3; default
 //                 LIGHT is the standard capture contract
+//    animationTime -animationTime <s> launch arg, or
+//                 CAPTURE_ANIMATION_TIME env (host shell:
+//                 SIMCTL_CHILD_CAPTURE_ANIMATION_TIME=… simctl launch) —
+//                 the spec 07 §5 deterministic motion clock: every
+//                 animation renders its state at absolute second t,
+//                 paused. 0 is MEANINGFUL (the initial frame); unset
+//                 keeps the historical live path byte-identical
 //
 //  `xcrun simctl launch` forwards SIMCTL_CHILD_* environment variables
 //  to the app process, so the host recipe needs zero test-all.sh
@@ -92,5 +99,30 @@ enum CaptureOverrides {
     /// chrome itself runs `.preferredColorScheme(.dark)`.
     static var colorScheme: ColorScheme {
         darkMode ? .dark : .light
+    }
+
+    /// The spec 07 §5 pinned motion clock (docs/DYNAMIC_CAPTURE.md §4,
+    /// iOS transport row) — VALIDATED RAW STRING form. Validation
+    /// mirrors the web capture script's gate byte-for-byte: finite and
+    /// ≥ 0, where 0 is meaningful (the initial frame). Invalid values
+    /// are dropped LOUDLY — a seized run must never silently degrade to
+    /// a live capture. Kept as the authored string so the host-side
+    /// marker check (test-all.sh grep against capture-config.json)
+    /// compares the exact bytes the host exported ("1" must not become
+    /// "1.0" on the round-trip).
+    static let animationTimeRaw: String? = {
+        guard let raw = knob(argument: "animationTime",
+                             env: "CAPTURE_ANIMATION_TIME") else { return nil }
+        guard let t = Double(raw), t.isFinite, t >= 0 else {
+            FileHandle.standardError.write(Data(
+                "[CaptureOverrides] invalid animationTime '\(raw)' — expected a finite number of seconds >= 0; running LIVE clock\n".utf8))
+            return nil
+        }
+        return raw
+    }()
+
+    /// Numeric form for the runtime's animationCaptureTime environment.
+    static var animationTime: Double? {
+        animationTimeRaw.flatMap(Double.init)
     }
 }

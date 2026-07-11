@@ -19,7 +19,7 @@ mount (`mountRules`) plus an SSR string export (`buildStylesheet`).
 
 ```bash
 # from the repo root (install once with `npm ci`)
-npm -w runtimes/web run test        # vitest suite (888 tests, tests/<category>/)
+npm -w runtimes/web run test        # vitest suite (904 tests, tests/<category>/)
 npm -w runtimes/web run typecheck   # tsc --noEmit
 ```
 

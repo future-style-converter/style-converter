@@ -318,7 +318,21 @@ object ComponentRenderer {
             com.styleconverter.runtime.core.variables.DynamicValueResolver
                 .resolve(unresolvedProperties, varScope.variables, dynCtx)
         }
-        val effectiveProperties = dynResolution.properties
+        // ── Wave-8 motion (schema/spec/07-animations.md) ────────────────
+        // 1. Transitions (§4): when the wave-7 bucket fold above changed a
+        //    covered property's effective value, animate old → new per
+        //    transition-*. Identity-preserving without transition-* props.
+        val transitionedProperties = com.styleconverter.runtime.animations.TransitionDriver
+            .apply(dynResolution.properties)
+        // 2. Keyframe animations (§1–§3): overlay the interpolated wire-
+        //    keyframe values for the current clock (live frame loop, or the
+        //    CAPTURE_ANIMATION_TIME forced instant, §5) BEFORE extraction —
+        //    an animated frame renders through the SAME extractor/applier
+        //    path as the SSIM-verified static corpus, so parity is
+        //    inherited rather than re-implemented. Identity-preserving for
+        //    keyframe-free documents (the frozen-baseline guarantee).
+        val effectiveProperties = com.styleconverter.runtime.animations.KeyframeAnimationDriver
+            .animate(transitionedProperties)
 
         // Extract property pairs for extractors
         val propertyPairs = effectiveProperties.map { it.type to it.data }
@@ -364,13 +378,47 @@ object ComponentRenderer {
         // web: minHeight = styles.height || styles.minHeight || '30px'
         val hasExplicitWidth = effectiveProperties.any { it.type in listOf("Width", "MinWidth", "InlineSize", "MinInlineSize") }
         val hasExplicitHeight = effectiveProperties.any { it.type in listOf("Height", "MinHeight", "BlockSize", "MinBlockSize") }
+        // Web-parity clamp for ANIMATION-SUPPLIED sizes: web's placeholder
+        // floor (min-width:50/min-height:30, injected when the BASE styles
+        // lack width/height) keeps clamping an @keyframes-animated size —
+        // CSS min-width beats width from any origin. On Android the
+        // inside-chain floor below is skipped on axes the animated list
+        // declares, so a keyframe track that supplies the ONLY width (e.g.
+        // motion-steps' 40px at 0% on a width-less component) would render
+        // 40 where web renders max(40, 50). Pre-chaining defaultMinSize
+        // OUTSIDE the style chain reproduces the clamp: Modifier.width
+        // coerces into incoming min constraints (unlike requiredWidth), so
+        // max(animated, floor) falls out of constraint propagation.
+        val animatedSizeFloor: Modifier =
+            if (effectiveProperties !== transitionedProperties) {
+                val baseHadWidth = transitionedProperties.any {
+                    it.type in listOf("Width", "MinWidth", "InlineSize", "MinInlineSize")
+                }
+                val baseHadHeight = transitionedProperties.any {
+                    it.type in listOf("Height", "MinHeight", "BlockSize", "MinBlockSize")
+                }
+                // Only the axes the ANIMATION introduced need the clamp —
+                // base-declared axes already skipped web's floor entirely.
+                val animSuppliedWidth = hasExplicitWidth && !baseHadWidth
+                val animSuppliedHeight = hasExplicitHeight && !baseHadHeight
+                if (animSuppliedWidth || animSuppliedHeight) {
+                    StyleApplier.placeholderFloorMinSize(
+                        effectiveProperties,
+                        applyWidthFloor = animSuppliedWidth,
+                        applyHeightFloor = animSuppliedHeight
+                    )
+                } else Modifier
+            } else Modifier // identity fast path: no animation overlay ran
         // itemModifier (parent-injected stretch) goes OUTERMOST so the grid
         // cell's fillMaxHeight established the constraint the style chain
         // then works within. The interaction feeders (press/hover/focus →
         // selector-bucket restyle) sit just inside it, ahead of the style
         // chain, so the hit/hover/focus target is the component's full
         // laid-out box; Modifier (the no-selector case) chains as a no-op.
-        val sizedModifier = itemModifier.then(interactionModifier).then(baseModifier).then(
+        // animatedSizeFloor sits OUTSIDE baseModifier so its min constraint
+        // coerces the animated width/height upward (see the comment above);
+        // Modifier (the common no-animation case) chains as a no-op.
+        val sizedModifier = itemModifier.then(interactionModifier).then(animatedSizeFloor).then(baseModifier).then(
             // BORDER-BOX floor: web's 50/30px minimum constrains the whole
             // card (box-sizing: border-box), so the content-box minimum
             // Compose enforces here (inside the padding-last chain) must be
@@ -398,8 +446,21 @@ object ComponentRenderer {
             StyleApplier.borderContentInset(effectiveProperties)
         )
 
-        // Apply animations to modifier if present
-        val modifier = if (animationConfig?.hasAnimations == true) {
+        // Apply the LEGACY animated modifier only when the wave-8 driver
+        // did NOT own the animation: (a) none of the names resolve against
+        // the document's wire keyframes (the driver already overlaid those
+        // values into effectiveProperties above — wrapping again would
+        // double-apply), and (b) no CAPTURE_ANIMATION_TIME is forced (a
+        // seized run must never leave a live legacy clock smearing the
+        // frame — spec 07 §5 "every animation, paused").
+        val docKeyframes = com.styleconverter.runtime.animations.KeyframeAnimationDriver
+            .LocalDocumentKeyframes.current
+        val forcedAnimationTime = com.styleconverter.runtime.animations.KeyframeAnimationDriver
+            .LocalForcedAnimationTime.current
+        val modifier = if (animationConfig?.hasAnimations == true &&
+            forcedAnimationTime == null &&
+            animationConfig.names.none { docKeyframes.containsKey(it) || docKeyframes.containsKey(it.lowercase()) }
+        ) {
             animatedModifier(sizedModifier, animationConfig, transitionConfig ?: com.styleconverter.runtime.animations.TransitionConfig())
         } else {
             sizedModifier

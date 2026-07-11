@@ -34,6 +34,13 @@ struct ContentView: View {
                     .foregroundColor(.white.opacity(0.7))
             }
         }
+        // Wave 8 — publish the document-level keyframes block (spec 07
+        // §1.2) over the whole render tree: @keyframes are document-
+        // scoped in CSS, and the harness owns the document — the exact
+        // division of labor of the web harness's useKeyframeRules mount.
+        // nil for keyframe-free documents keeps every legacy render
+        // byte-identical (the runtime's animation path never engages).
+        .environment(\.styleKeyframes, document?.keyframes)
         .onAppear(perform: loadDocument)
     }
 

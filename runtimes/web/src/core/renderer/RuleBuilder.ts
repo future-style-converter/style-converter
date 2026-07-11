@@ -9,6 +9,12 @@
  *   selectors[] → `.sc-<id>:hover, .sc-<id>.force-hover { … !important }`
  *   media[]     → `@media (min-width: 200px) { .sc-<id> { … !important } }`
  *
+ * Wave 8 (schema/spec/07-animations.md §1.2) adds the document-level
+ * keyframes map: `IRDocument.keyframes` → real `@keyframes` rules, each
+ * stop serialized through the SAME buildStyles engine as base properties
+ * (see buildKeyframeRules). The engine builds rule TEXT only; the harness
+ * still owns the document and mounts everything via mountRules.
+ *
  * How CSS cascade implements the spec-06 §3 layering model:
  * - Every bucket declaration carries `!important`, because author
  *   important beats the normal INLINE base declarations (css-cascade-5
@@ -25,7 +31,7 @@
  *   to the real pseudo-class — the capture-parity hook.
  */
 
-import type { IRComponent } from '../ir/IRModels';
+import type { IRComponent, IRKeyframes } from '../ir/IRModels';
 import { buildStyles } from './StyleBuilder';
 import { declarationsToCss } from './CssText';
 import { parseMediaQueryV1 } from './MediaQueryV1';
@@ -106,6 +112,102 @@ export function buildRules(component: IRComponent): string[] {
 }
 
 /**
+ * A keyframes name must be a CSS custom-ident excluding the CSS-wide
+ * keywords and `none` (css-animations-1 §4.1 `<keyframes-name>`). The
+ * converter lowercases idents and rejects garbage upstream, so this gate
+ * only fires on hand-authored/corrupt documents — but a bad name inside
+ * `@keyframes <name>` would poison the whole rule text handed to
+ * insertRule, so refuse-and-log beats emit-and-hope.
+ */
+const KEYFRAMES_NAME = /^-?[A-Za-z_][A-Za-z0-9_-]*$/;
+const KEYFRAMES_NAME_EXCLUDED = new Set(['none', 'initial', 'inherit', 'unset', 'revert', 'revert-layer', 'default']);
+
+/**
+ * Format a resolved stop offset (0..1 fraction, spec 07 §1.2) as the CSS
+ * percent selector: `0 → "0%"`, `0.5 → "50%"`, `1/3 → "33.3333%"`.
+ * toFixed(4) bounds float noise; Number() strips the trailing zeros so
+ * the round offsets stay byte-stable ("50%", never "50.0000%").
+ */
+function offsetToPercent(offset: number): string {
+  return `${Number((offset * 100).toFixed(4))}%`;
+}
+
+/**
+ * Build the `@keyframes` rule strings for a document's keyframes map
+ * (spec 07 §1.2), one rule per named set, map order preserved.
+ *
+ * Stop declarations are typed {type, data} property envelopes — the SAME
+ * bytes component properties use — so each stop goes through the ENGINE's
+ * buildStyles: every registered applier (opacity, transform lists, sRGB
+ * colors, px lengths, …) serializes keyframe values exactly like base
+ * values, and the two paths can never disagree. Web thereby emits every
+ * declaration an applier recognizes — a superset of the §2 animatable
+ * tier, which is spec-legal (non-tier values are "carried, not dropped";
+ * the browser interpolates or steps them natively) — while unknown types
+ * inside stops still log through buildStyles' PropertyTracker path.
+ *
+ * NO `!important` inside keyframes: css-animations-1 §4.1 makes important
+ * keyframe declarations invalid, so unlike the bucket rules these are
+ * plain declarations (keyframe values win via the animation origin, not
+ * the cascade).
+ */
+export function buildKeyframeRules(keyframes?: IRKeyframes): string[] {
+  const rules: string[] = [];                                        // one rule per named set
+  if (!keyframes) return rules;                                      // omit-when-empty wire key
+  for (const [name, stops] of Object.entries(keyframes)) {
+    // Name gate (see KEYFRAMES_NAME above) — refuse-and-log, never emit
+    // a rule whose header would make insertRule reject the whole set.
+    if (!KEYFRAMES_NAME.test(name) || KEYFRAMES_NAME_EXCLUDED.has(name.toLowerCase())) {
+      logUnhandled('KeyframesName', name);                           // no-silent-fallthrough
+      continue;
+    }
+    // Wire stops are pre-sorted ascending (spec 07 §1.2 — readers MUST
+    // NOT reorder), so array order here IS offset order.
+    const stopRules = stops.map((stop) => {
+      // Same engine as inline styles; plain declarations (no !important).
+      const decls = declarationsToCss(buildStyles(stop.properties), false);
+      // A stop whose payloads produced nothing still pins its offset —
+      // an empty keyframe block is valid CSS and keeps the rule shape
+      // faithful to the wire (the misses were logged by buildStyles).
+      return `${offsetToPercent(stop.offset)} { ${decls} }`;
+    });
+    rules.push(`@keyframes ${name} { ${stopRules.join(' ')} }`);
+  }
+  return rules;
+}
+
+/**
+ * Log (once per name, PropertyTracker-deduped) every animation-name
+ * reference that no keyframes set defines — the spec 07 §1.3 dangling-
+ * reference contract: a defined runtime no-op, surfaced loudly. Scans the
+ * base properties AND the selector/media buckets (a state bucket may
+ * start an animation). The `AnimationName` payload shape mirrors
+ * AnimationNameExtractor: a list of {type:'none'} | {type:'identifier',
+ * name} entries; 'none' never dangles.
+ */
+function logDanglingAnimationNames(components: IRComponent[], keyframes?: IRKeyframes): void {
+  const defined = keyframes ?? {};                                   // absent map = nothing defined
+  const check = (props: { type: string; data: unknown }[]) => {
+    for (const p of props) {
+      if (p.type !== 'AnimationName' || !Array.isArray(p.data)) continue;
+      for (const entry of p.data as Array<Record<string, unknown>>) {
+        if (!entry || typeof entry !== 'object') continue;
+        if (entry.type !== 'identifier' || typeof entry.name !== 'string') continue;
+        // Distinct tracker key ('KeyframesReference', not 'AnimationName')
+        // so the miss never shadows the applier's real handled/registered
+        // status for the AnimationName property type itself.
+        if (!(entry.name in defined)) logUnhandled('KeyframesReference', entry.name);
+      }
+    }
+  };
+  for (const c of components) {                                      // whole-document scan
+    check(c.properties);                                             // base declarations
+    for (const s of c.selectors ?? []) check(s.properties);          // state buckets
+    for (const m of c.media ?? []) check(m.properties);              // media buckets
+  }
+}
+
+/**
  * Does any component carry a `light-dark()` color value? Those resolve
  * against the element's USED color-scheme (css-color-5), so the
  * document stylesheet must opt the root into `color-scheme: light dark`
@@ -124,13 +226,26 @@ function usesLightDark(components: IRComponent[]): boolean {
 }
 
 /**
- * Build the full rule list for a document's components: a root
- * `color-scheme` opt-in first (only when light-dark() is present — the
- * scheme signal MUST agree with prefers-color-scheme buckets, spec 06
- * §4), then every component's rules in flat-list order.
+ * Build the full rule list for a document: a root `color-scheme` opt-in
+ * first (only when light-dark() is present — the scheme signal MUST agree
+ * with prefers-color-scheme buckets, spec 06 §4), then the document's
+ * `@keyframes` rules (spec 07 §1.2 — document-scoped at-rules, so they
+ * belong with the document stylesheet, before any rule can reference
+ * them), then every component's rules in flat-list order.
+ *
+ * `keyframes` is the additive v2 envelope key (IRDocument.keyframes);
+ * omitting it keeps the historical single-argument call sites — and the
+ * committed-baseline documents that carry no keyframes — byte-identical.
  */
-export function buildRuleList(components: IRComponent[]): string[] {
-  const rules = components.flatMap(buildRules);                      // per-component rules, doc order
+export function buildRuleList(components: IRComponent[], keyframes?: IRKeyframes): string[] {
+  // Dangling animation-name references are a defined no-op (spec 07 §1.3)
+  // but MUST be logged once per name — do the scan whenever we build the
+  // document stylesheet so the miss is visible on every render path.
+  logDanglingAnimationNames(components, keyframes);
+  const rules = [
+    ...buildKeyframeRules(keyframes),                                // document-scoped at-rules first
+    ...components.flatMap(buildRules),                               // per-component rules, doc order
+  ];
   if (usesLightDark(components)) {                                   // light-dark() needs the opt-in
     // Root-level so it inherits everywhere; light default = the dark arm
     // must NOT apply in the standard light capture (DYNAMIC_CAPTURE §3).
@@ -144,8 +259,8 @@ export function buildRuleList(components: IRComponent[]): string[] {
  * (rules joined by newlines) — what a server renderer would inline
  * into a `<style>` tag. Pure; no DOM access.
  */
-export function buildStylesheet(components: IRComponent[]): string {
-  return buildRuleList(components).join('\n');                       // deterministic join
+export function buildStylesheet(components: IRComponent[], keyframes?: IRKeyframes): string {
+  return buildRuleList(components, keyframes).join('\n');            // deterministic join
 }
 
 /** The id of the managed <style> element mountRules owns. */

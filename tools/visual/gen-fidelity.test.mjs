@@ -23,21 +23,28 @@
 //      definitions, var() references across the slot chain (with shadowing),
 //      missing-var/fallback/nested-fallback cases, and calc()/relative-unit
 //      mixes; the manifest features vocabulary is pinned.
+//   7b. motion coverage — the 2 motion files (wave 8) carry the keyframes
+//      authoring block (opacity/translate/scale/color/multi-property/3-stop
+//      sets, alternate direction, fill-mode both, an unsorted-offset pin)
+//      and state-triggered transitions; vocabulary + one-clock 1s durations
+//      + pairwise-distinct geometry are pinned.
 //   7. dynamic coverage — the 3 dynamic files (wave 7) carry selector state
 //      buckets (all 5 runtime-v1 conditions + a layering pin), media width
 //      buckets spanning the 390/250 px truth table (match / no-match / flip
 //      rows + a layering pin), and dark-mode buckets + light-dark() values;
 //      every bucket overrides ≥1 base declaration with a DIFFERENT value
 //      (the pixel-contrast guarantee); the features vocabulary is pinned.
-//   8. converter round-trip — 12 representative files (3 wave-4 originals +
+//   8. converter round-trip — 14 representative files (3 wave-4 originals +
 //      a pairwise shard + 2 placement trees + the 3 wave-6 token files + the
-//      3 wave-7 dynamic files) convert cleanly, the emitted IR validates
+//      3 wave-7 dynamic files + the 2 wave-8 motion files) convert cleanly, the emitted IR validates
 //      against schema/ir-v2.schema.json, the output is flat + slot-composed
 //      (no nested children survive), authored --* declarations surface 1:1
 //      as component `variables` maps, every whole-value var()/calc()
 //      declaration survives byte-for-byte (spec 02 preservation contract),
 //      and authored selector/media buckets survive to the wire in order
-//      (conditions colon-stripped, queries verbatim — spec 01 buckets).
+//      (conditions colon-stripped, queries verbatim — spec 01 buckets), and
+//      authored keyframes blocks survive TYPED (offsets resolved 0..1 and
+//      sorted, declarations as {type,data} envelopes — spec 07 §1.2).
 //      Gradle-slow and JDK-21-dependent, so it only runs when
 //      GEN_FIDELITY_CONVERT=1 is set (the CI test-tooling job has no JDK —
 //      see .github/workflows/ci.yml).
@@ -181,11 +188,48 @@ function assertComponentNode(node, path) {
   }
 }
 
+// Keyframe-set names are CSS custom-idents; the generator uses lowercase
+// dashed idents. Offsets are the css-animations-1 §4.2 selector forms the
+// converter resolves (from/to/percent) — parseKeyframeOffset in CssParsing.
+const KEYFRAME_NAME_RE = /^[a-z][a-z0-9-]*$/;
+const KEYFRAME_OFFSET_RE = /^(from|to|\d{1,3}(\.\d+)?%)$/;
+
+/** Validate one authored document-level keyframes block (motion suite —
+ *  spec 07 §1.1): name → non-empty array of {offset, declarations} stops
+ *  whose declarations follow the same rules as base property maps. */
+function assertKeyframesBlock(keyframes, path) {
+  const sets = Object.entries(keyframes);
+  assert.ok(sets.length > 0, `${path}: keyframes present ⇒ non-empty`);
+  for (const [name, stops] of sets) {
+    assert.match(name, KEYFRAME_NAME_RE, `${path}: bad keyframes name "${name}"`);
+    assert.ok(Array.isArray(stops) && stops.length > 0, `${path}.${name}: stops must be a non-empty array`);
+    for (const [i, stop] of stops.entries()) {
+      assert.deepEqual(Object.keys(stop).sort(), ['declarations', 'offset'], `${path}.${name}[${i}]: stop keys drifted`);
+      assert.match(stop.offset, KEYFRAME_OFFSET_RE, `${path}.${name}[${i}]: bad offset "${stop.offset}"`);
+      const decls = Object.entries(stop.declarations);
+      assert.ok(decls.length > 0, `${path}.${name}[${i}]: empty declarations`);
+      for (const [prop, value] of decls) {
+        assert.ok(PROP_NAME_RE.test(prop), `${path}.${name}[${i}]: bad property name "${prop}"`);
+        assert.equal(typeof value, 'string', `${path}.${name}[${i}].${prop}: value must be a string`);
+        assert.ok(value.length > 0, `${path}.${name}[${i}].${prop}: empty value`);
+      }
+    }
+  }
+}
+
 test('every generated fixture parses as JSON and matches the CSS envelope shape', () => {
   assert.ok(fixtureFiles.length > 0, 'no fixtures generated');
   for (const { relPath, content } of fixtureFiles) {
     const doc = JSON.parse(content); // throws → test fails with the bad file named
-    assert.deepEqual(Object.keys(doc), ['components'], `${relPath}: envelope must be exactly {components}`);
+    // The authoring envelope is {components} everywhere except the motion
+    // keyframes fixture, which adds the document-level keyframes block
+    // (spec 07 §1.1 — mirrors CSS @keyframes being document-scoped).
+    if ('keyframes' in doc) {
+      assert.deepEqual(Object.keys(doc).sort(), ['components', 'keyframes'], `${relPath}: envelope must be exactly {keyframes, components}`);
+      assertKeyframesBlock(doc.keyframes, relPath);
+    } else {
+      assert.deepEqual(Object.keys(doc), ['components'], `${relPath}: envelope must be exactly {components}`);
+    }
     const comps = Object.entries(doc.components);
     assert.ok(comps.length > 0, `${relPath}: empty components map`);
     for (const [name, comp] of comps) {
@@ -539,6 +583,98 @@ test('dynamic: 3 files carrying state buckets, width buckets, and dark-mode buck
   }
 });
 
+// ── 3f. Motion coverage (keyframes + transitions — wave 8) ───────────────
+
+test('motion: 2 files — keyframes cover the animatable scenarios, transitions tie states to motion', () => {
+  const motion = manifest.files.filter((f) => f.kind === 'motion');
+  assert.equal(motion.length, 2, 'motion template set must stay at 2 files');
+
+  // keyframes-basic.json — the document-level keyframes block + consumers.
+  const kfEntry = motion.find((f) => f.path.endsWith('motion/keyframes-basic.json'));
+  assert.ok(kfEntry, 'motion/keyframes-basic.json missing from the manifest');
+  const kfDoc = JSON.parse(byPath.get(kfEntry.path));
+  const sets = kfDoc.keyframes;
+  assert.ok(sets && Object.keys(sets).length >= 5, 'keyframes-basic must define ≥5 named sets');
+  // Manifest descriptor lists exactly the defined sets (sorted).
+  assert.deepEqual(kfEntry.keyframeSets, Object.keys(sets).sort(), 'manifest keyframeSets drifted');
+  // Scenario scan — every animatable-tier channel the suite exists for
+  // (spec 07 §2) must be observed in actual fixture bytes.
+  const allDecls = Object.values(sets).flat().map((s) => s.declarations);
+  assert.ok(allDecls.some((d) => 'opacity' in d), 'no opacity keyframe found');
+  assert.ok(allDecls.some((d) => /translate/.test(d.transform ?? '')), 'no translate keyframe found');
+  assert.ok(allDecls.some((d) => /scale/.test(d.transform ?? '')), 'no scale keyframe found');
+  assert.ok(allDecls.some((d) => 'background-color' in d), 'no color-shift keyframe found');
+  assert.ok(allDecls.some((d) => Object.keys(d).length >= 3), 'no multi-property keyframe stop found');
+  assert.ok(Object.values(sets).some((stops) => stops.length >= 3), 'no 3-stop set found');
+  // Unsorted-offset pin: at least one set authors a percent offset out of
+  // ascending order, so the converter's sorted emission is observable.
+  const pct = (o) => (o === 'from' ? 0 : o === 'to' ? 100 : parseFloat(o));
+  assert.ok(
+    Object.values(sets).some((stops) => stops.some((s, i) => i > 0 && pct(s.offset) < pct(stops[i - 1].offset))),
+    'no set with unsorted authored offsets found',
+  );
+  // Consumers: every animation-name references a set THIS document defines
+  // (the dangling-reference case is pinned by the conformance golden, not
+  // the visual suite — a dangling fixture would just capture statically),
+  // carries a duration, and all durations share the 1s one-clock contract.
+  const comps = Object.values(kfDoc.components);
+  let sawAlternate = false;
+  let sawFillBothDelay = false;
+  const geometries = new Set();
+  for (const comp of comps) {
+    const p = comp.properties;
+    assert.ok(p['animation-name'] in sets, `animation-name "${p['animation-name']}" dangles`);
+    assert.ok(p['animation-duration'], 'animated component without a duration');
+    assert.equal(p['animation-duration'], '1s', 'motion one-clock contract: all durations 1s');
+    if (p['animation-direction'] === 'alternate') sawAlternate = true;
+    if (p['animation-fill-mode'] === 'both' && p['animation-delay']) sawFillBothDelay = true;
+    geometries.add(`${p.width ?? 'auto'}×${p.height ?? 'auto'}`);
+  }
+  assert.equal(geometries.size, comps.length, 'animated components must have pairwise-distinct geometry');
+  assert.ok(sawAlternate, 'no alternate-direction component found');
+  assert.ok(sawFillBothDelay, 'no fill-mode:both + delay component found');
+
+  // transitions.json — state-triggered motion (spec 07 §4).
+  const trEntry = motion.find((f) => f.path.endsWith('motion/transitions.json'));
+  assert.ok(trEntry, 'motion/transitions.json missing from the manifest');
+  const trDoc = JSON.parse(byPath.get(trEntry.path));
+  assert.ok(!('keyframes' in trDoc), 'transitions.json must not define keyframes');
+  assert.deepEqual(trEntry.keyframeSets, [], 'transitions manifest keyframeSets must be empty');
+  let sawDelay = false;
+  let sawAll = false;
+  for (const [name, comp] of Object.entries(trDoc.components)) {
+    const p = comp.properties;
+    assert.ok(p['transition-property'], `${name}: no transition-property`);
+    assert.ok(p['transition-duration'], `${name}: no transition-duration`);
+    assert.ok(Array.isArray(comp.selectors) && comp.selectors.length > 0, `${name}: no selector bucket to trigger the transition`);
+    // The bucket must CHANGE a transitioned property — otherwise forcing
+    // the state starts no transition and the time capture is vacuous.
+    const transitioned = p['transition-property'];
+    for (const bucket of comp.selectors) {
+      assert.ok(
+        Object.entries(bucket.properties).some(([bp, bv]) =>
+          (transitioned === 'all' || bp === transitioned) && bp in p && p[bp] !== bv),
+        `${name}: bucket ${bucket.selector} does not change the transitioned property`,
+      );
+    }
+    if (p['transition-delay']) sawDelay = true;
+    if (transitioned === 'all') sawAll = true;
+  }
+  assert.ok(sawDelay, 'no delayed transition found');
+  assert.ok(sawAll, 'no transition-property: all found');
+
+  // Feature-descriptor vocabulary union — the coverage promise wave runs read.
+  const featureUnion = new Set(motion.flatMap((f) => f.features));
+  for (const feat of [
+    'keyframes-opacity', 'keyframes-translate', 'keyframes-scale', 'keyframes-color',
+    'keyframes-multi-property', 'keyframes-three-stop', 'direction-alternate',
+    'fill-mode-both', 'unsorted-offsets', 'transition-background', 'transition-width',
+    'transition-all', 'transition-delay', 'state-triggered-motion',
+  ]) {
+    assert.ok(featureUnion.has(feat), `motion manifest features missing "${feat}"`);
+  }
+});
+
 test('manifest lists every generated fixture exactly once with correct byte sizes', () => {
   const listed = manifest.files.map((f) => f.path).sort();
   const actual = fixtureFiles.map((f) => f.relPath).sort();
@@ -588,9 +724,14 @@ function representativeFiles() {
   // (conditions colon-stripped, queries verbatim, order preserved) is
   // exactly what these files exist to pin end-to-end.
   const dynamicFiles = manifest.files.filter((f) => f.kind === 'dynamic');
+  // Wave 8: the whole motion suite — the document-level keyframes block
+  // surviving to the wire TYPED (offsets resolved + sorted, declarations
+  // as {type,data} envelopes) is exactly what keyframes-basic.json pins;
+  // transitions.json rides along for its bucket + transition-* survival.
+  const motionFiles = manifest.files.filter((f) => f.kind === 'motion');
   // De-dupe while preserving the selection intent (paths are unique keys).
   return [...new Map(
-    [smallest, largestCombos, deepestTree, pairwiseShard, placementAreas, placementMixed, ...tokenFiles, ...dynamicFiles]
+    [smallest, largestCombos, deepestTree, pairwiseShard, placementAreas, placementMixed, ...tokenFiles, ...dynamicFiles, ...motionFiles]
       .map((f) => [f.path, f]),
   ).values()];
 }
@@ -655,7 +796,7 @@ function countInputNodes(components) {
 const CONVERT_ENABLED = process.env.GEN_FIDELITY_CONVERT === '1';
 
 test(
-  'converter round-trip: 12 representative files convert cleanly, validate against IR v2, and emit flat+slot+variables+bucket output',
+  'converter round-trip: 14 representative files convert cleanly, validate against IR v2, and emit flat+slot+variables+bucket+keyframes output',
   { skip: CONVERT_ENABLED ? false : 'set GEN_FIDELITY_CONVERT=1 (requires JDK 21) to run' },
   () => {
     // Pin Java 21 on macOS dev machines, mirroring schema/conformance/run.mjs.
@@ -781,6 +922,44 @@ test(
             `${entry.path}#${name}: media bucket ${i} lost declarations (${m.properties.length} < ${expect.mediaMinProps[i]})`,
           );
         });
+      }
+      // Wave-8 motion pins (motion suite; vacuous for files that author no
+      // keyframes block): the authored sets must survive to the wire TYPED
+      // — same names, offsets RESOLVED to 0..1 fractions and SORTED
+      // ascending, every stop's declarations parsed into {type,data}
+      // property envelopes (≥ authored count — shorthands only expand).
+      if (input.keyframes) {
+        assert.ok(ir.keyframes, `${entry.path}: authored keyframes block missing from the wire`);
+        assert.deepEqual(
+          Object.keys(ir.keyframes).sort(),
+          Object.keys(input.keyframes).sort(),
+          `${entry.path}: keyframe set names drifted`,
+        );
+        const toFraction = (o) => (o === 'from' ? 0 : o === 'to' ? 1 : parseFloat(o) / 100);
+        for (const [name, authoredStops] of Object.entries(input.keyframes)) {
+          const emitted = ir.keyframes[name];
+          assert.equal(emitted.length, authoredStops.length, `${entry.path}#${name}: stop count drifted`);
+          // Offsets: resolved fractions, sorted ascending — exactly the
+          // authored offsets' sorted image (spec 07 §1.2).
+          const emittedOffsets = emitted.map((s) => s.offset);
+          assert.deepEqual(
+            emittedOffsets,
+            authoredStops.map((s) => toFraction(s.offset)).sort((a, b) => a - b),
+            `${entry.path}#${name}: offsets not resolved+sorted`,
+          );
+          for (const stop of emitted) {
+            assert.ok(Array.isArray(stop.properties) && stop.properties.length > 0, `${entry.path}#${name}: empty typed stop`);
+            for (const prop of stop.properties) {
+              assert.equal(typeof prop.type, 'string', `${entry.path}#${name}: stop property without a type`);
+              assert.ok('data' in prop, `${entry.path}#${name}: stop property without data`);
+              // TYPED, not a Generic passthrough — every motion declaration
+              // uses tier properties with dedicated parsers.
+              assert.notEqual(prop.type, 'Generic', `${entry.path}#${name}: keyframe declaration degraded to Generic`);
+            }
+          }
+        }
+      } else {
+        assert.ok(!ir.keyframes, `${entry.path}: wire grew a keyframes key the author never wrote`);
       }
       if (entry.kind === 'dynamic') {
         assert.ok(bucketExpectations.size > 0, `${entry.path}: dynamic fixture authored no buckets`);

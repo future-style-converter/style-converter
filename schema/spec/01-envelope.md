@@ -42,6 +42,11 @@ Implementing code:
 - `components` is a **flat array** — every component at every
   composition depth is a standalone entry; composition is expressed by
   the child-side `slot` reference (03-children.md). May be empty.
+- `keyframes` (optional, **additive minor-revision key** — wave 8):
+  document-level named keyframe sets,
+  `name → [{offset: 0..1, properties: [{type,data}…]}]`, offset-sorted.
+  Omit-when-empty so pre-motion documents stay byte-identical. Full
+  contract: 07-animations.md §1; golden: `v2/keyframes.json`.
 - No other top-level keys exist. Validators reject unknown top-level
   keys (`additionalProperties: false`).
 

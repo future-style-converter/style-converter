@@ -72,9 +72,35 @@ data class CssComponent(
 )
 
 /**
- * Root document containing all CSS components in JSON format
+ * One authored keyframe stop inside a named `@keyframes` set (wave 8 —
+ * schema/spec/07-animations.md).
+ *
+ * Authoring shape mirrors css-animations-1 §4.2 keyframe rules:
+ * `offset` is the keyframe selector as authored — `"from"`, `"to"`, or a
+ * percentage string like `"50%"` (one selector per stop; comma-grouped
+ * selectors are authored as separate stops). `declarations` is a plain
+ * property→value map, the exact same shape as a component's base
+ * `properties` map, so the converter can reuse PropertiesParser (shorthand
+ * expansion + typed value parsing) verbatim for keyframe payloads.
+ */
+@Serializable
+data class CssKeyframeStop(
+    val offset: String,
+    val declarations: Map<String, CssPropertyValue>
+)
+
+/**
+ * Root document containing all CSS components in JSON format.
+ *
+ * `keyframes` (wave 8) is the DOCUMENT-level map of named keyframe sets —
+ * the authoring twin of CSS `@keyframes <name> { … }` at-rules, which are
+ * document-scoped in CSS too (they live beside rules, not inside them).
+ * Optional/null so every pre-motion fixture parses identically; each set
+ * is an authored-order list of stops (the converter sorts by resolved
+ * offset at the IR boundary — see CssParsing).
  */
 @Serializable
 data class CssComponents(
-    val components: Map<String, CssComponent>
+    val components: Map<String, CssComponent>,
+    val keyframes: Map<String, List<CssKeyframeStop>>? = null
 )

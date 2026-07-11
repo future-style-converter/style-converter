@@ -25,7 +25,33 @@ export interface IRDocument {
   minReaderVersion?: number;
   /** FLAT component list — every component at every composition depth. */
   components: IRComponent[];
+  /**
+   * Document-level named keyframe sets (schema/spec/07-animations.md §1.2)
+   * — the wire twin of CSS `@keyframes` at-rules, which are document-scoped
+   * in CSS too. ADDITIVE v2 minor-revision key, omit-when-empty: absent on
+   * every pre-motion document (and structurally impossible on legacy v1
+   * wire), so the committed-baseline path never sees it. Components opt in
+   * with an ordinary `AnimationName` property naming a key of this map;
+   * a dangling reference is a defined no-op (§1.3), never an error.
+   */
+  keyframes?: IRKeyframes;
 }
+
+/**
+ * One keyframe stop (spec 07 §1.2). Stops arrive from the converter
+ * SORTED ascending by offset (stable for equal offsets — the authoring
+ * order decides the css-animations-1 §4.2 last-wins cascade); readers may
+ * rely on sortedness and must not reorder.
+ */
+export interface IRKeyframeStop {
+  /** Resolved offset fraction in [0, 1] (`from`/`to`/percent pre-resolved). */
+  offset: number;
+  /** Typed stop declarations — the SAME {type, data} envelopes components use. */
+  properties: IRProperty[];
+}
+
+/** Named keyframe sets: animation-name ident → sorted stop list. */
+export type IRKeyframes = Record<string, IRKeyframeStop[]>;
 
 /**
  * Child-side composition reference (schema/spec/03-children.md).

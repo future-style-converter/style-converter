@@ -17,6 +17,12 @@
       "description": "FLAT component array — every component at every composition depth is a standalone entry. Sibling-order rule (schema/spec/03-children.md): relative order of entries sharing the same slot.parent IS the composition order (DOM order / Compose emission order / SwiftUI subview order); the converter's pre-order flattener (IRFlattener) guarantees each subtree is contiguous and order-stable vs the v1 nested form. May be empty for an empty input document.",
       "type": "array",
       "items": { "$ref": "#/$defs/component" }
+    },
+    "keyframes": {
+      "description": "Document-level named keyframe sets (schema/spec/07-animations.md) — the wire twin of CSS @keyframes at-rules, which are document-scoped in CSS too. ADDITIVE minor-revision key (spec 05 change process): omitted entirely when the document declares no keyframes, so pre-motion documents are byte-identical and remain valid. Map: animation name (the custom-ident animation-name references) → offset-SORTED stop list. A component participates by carrying a normal AnimationName property whose identifier matches a key here; a DANGLING reference (no matching key) is a defined runtime no-op + PropertyTracker log, never an error — pinned by schema/conformance/fixtures/v2/keyframes.json. Ground truth: converter/src/main/kotlin/app/irmodels/IRWireV2.kt + CssParsing.convertKeyframesToIR.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "$ref": "#/$defs/keyframeSet" }
     }
   },
   "required": ["irVersion", "minReaderVersion", "components"],
@@ -139,6 +145,25 @@
         }
       },
       "required": ["condition", "properties"],
+      "additionalProperties": false
+    },
+    "keyframeSet": {
+      "description": "One named keyframe set: the stop list, SORTED ascending by offset (stable — equal offsets keep authoring order, mirroring the css-animations-1 §4.2 last-wins cascade). Never empty: the converter drops sets with zero valid stops rather than emitting an unanimatable shell.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/keyframeStop" }
+    },
+    "keyframeStop": {
+      "description": "One keyframe stop. `offset` is the RESOLVED fractional position (authored 'from'/'0%' → 0, 'to'/'100%' → 1, '50%' → 0.5 — css-animations-1 §4.2 keyframe selectors). `properties` carries the stop's declarations as standard {type,data} property envelopes — the exact same typed pipeline as component base properties (colors → sRGB floats, lengths → px). Which property types interpolate (the animatable tier) and how is the runtimes' contract, spec 07 §2/§3; the wire just carries typed values.",
+      "type": "object",
+      "properties": {
+        "offset": { "type": "number", "minimum": 0, "maximum": 1 },
+        "properties": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/property" }
+        }
+      },
+      "required": ["offset", "properties"],
       "additionalProperties": false
     },
     "media": {

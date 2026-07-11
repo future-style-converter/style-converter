@@ -67,6 +67,9 @@ object IRFlattener {
 
         // Document roots walk in source order; each subtree is contiguous.
         doc.components.forEach { root -> walk(root, null) }
-        return IRDocument(flat)
+        // Document-level keyframes ride through untouched: flattening is a
+        // component-tree transform; keyframe sets have no composition and
+        // no slot semantics (schema/spec/07-animations.md).
+        return IRDocument(flat, keyframes = doc.keyframes)
     }
 }

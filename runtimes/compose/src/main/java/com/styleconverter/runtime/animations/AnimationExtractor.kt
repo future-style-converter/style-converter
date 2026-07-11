@@ -419,7 +419,22 @@ object AnimationExtractor {
                     item.contentOrNull?.let { result.add(it) }
                 }
                 is JsonObject -> {
-                    item["property"]?.jsonPrimitive?.contentOrNull?.let { result.add(it) }
+                    // Wire shape (TransitionPropertyProperty.kt sealed
+                    // variants, class-discriminated by "type"):
+                    //   {"type":"property-name","name":"background-color"}
+                    //   {"type":"all", …} / {"type":"none", …}
+                    // The keywords are carried as literal list entries so
+                    // the driver's coverage test can honor them.
+                    when (item["type"]?.jsonPrimitive?.contentOrNull) {
+                        "all" -> result.add("all")
+                        "none" -> result.add("none")
+                        "property-name" ->
+                            item["name"]?.jsonPrimitive?.contentOrNull?.let { result.add(it) }
+                        else ->
+                            // Legacy/loose carriers: bare {name} or {property}.
+                            (item["name"] ?: item["property"])
+                                ?.jsonPrimitive?.contentOrNull?.let { result.add(it) }
+                    }
                 }
                 else -> {}
             }

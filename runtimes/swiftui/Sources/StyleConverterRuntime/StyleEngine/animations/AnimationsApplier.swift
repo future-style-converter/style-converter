@@ -1,30 +1,29 @@
 //
 //  AnimationsApplier.swift
-//  StyleEngine/animations — Phase 9.
+//  StyleEngine/animations — Phase 9; execution landed in wave 8 (#35).
 //
-//  Phase 9 is a *registration + config + self-test* pass — the applier
-//  is intentionally an identity ViewModifier. Every CSS animation /
-//  transition feature maps to a very different SwiftUI API shape
-//  (`withAnimation { state.x = … }`, `.animation(_:value:)` bound to a
-//  value, `.transition(_:)` on an if/else branch, or iOS 17's
-//  `scrollTransition` for scroll-driven timelines). Wiring those
-//  requires a state-carrier + trigger model that the current
-//  ComponentRenderer does not have — that's a separate integration
-//  effort.
+//  WAVE-8 STATUS: keyframe + transition EXECUTION does NOT live in this
+//  modifier — it runs as a property-space pass ahead of StyleBuilder
+//  (AnimationResolver + KeyframeInterpolator + TransitionResolver,
+//  driven by ComponentRenderer's TimelineView clock / the pinned
+//  CAPTURE_ANIMATION_TIME hook). That altitude was chosen deliberately:
+//  interpolating IR payloads keeps every existing applier untouched and
+//  makes the math XCTest-pinnable, where a SwiftUI-native
+//  `withAnimation` model would leave progress unobservable (spec 07 §5
+//  deterministic-capture contract).
 //
-//  We still attach the modifier so the dispatch shape matches the
-//  Filter/Mask/Transforms appliers. That lets the renderer call
-//  `.engineAnimations(cfg)` on every view uniformly, and when the
-//  runtime wiring lands we flip the body in this one file.
+//  This modifier therefore STAYS an identity ViewModifier for the
+//  timing family it aggregates — the remaining TODOs below cover the
+//  features the property-space driver does not model yet (scroll-driven
+//  timelines, view transitions), which map to iOS 17/18 APIs above our
+//  iOS 16 deployment target.
 //
 //  Best-effort exception: `animation-play-state: paused` with a
 //  present duration is approximated as `.animation(nil, value: …)` —
 //  it would freeze the animation at its current frame, which matches
-//  CSS's `paused` semantics for static screenshot rendering. We leave
-//  it as a TODO rather than wiring the state binding here because
-//  SwiftUI's `.animation(_:value:)` needs a concrete value the modifier
-//  can observe, and that value lives in the child content, not the
-//  modifier scope.
+//  CSS's `paused` semantics for static screenshot rendering. (The
+//  wave-8 driver ALSO honors paused in property space — see
+//  AnimationResolver.resolve's live-clock freeze.)
 //
 
 import SwiftUI

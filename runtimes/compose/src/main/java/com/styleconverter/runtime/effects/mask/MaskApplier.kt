@@ -22,11 +22,16 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.CachePolicy
-import coil.request.ImageRequest
-import coil.size.Scale
+// Coil 3 (wave-8 #36 migration): coil.* → coil3.*; AsyncImagePainter.state
+// is a StateFlow now (collected below), CachePolicy moved with the request
+// package, and data: URIs route through DataUri.toModel (ByteArray model).
+import androidx.compose.runtime.collectAsState
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
+import coil3.size.Scale
+import com.styleconverter.runtime.core.images.DataUri
 import com.styleconverter.runtime.core.images.ImageCache
 import kotlin.math.PI
 import kotlin.math.cos
@@ -148,15 +153,17 @@ object MaskApplier {
         val imageLoader = ImageCache.getCoilLoader()
         val painter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(context)
-                .data(url)
+                // data: URIs decode to ByteArray (Coil 3 native model).
+                .data(DataUri.toModel(url))
                 .scale(Scale.FILL)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .diskCachePolicy(CachePolicy.ENABLED)
                 .build(),
-            imageLoader = imageLoader ?: coil.ImageLoader(context)
+            imageLoader = imageLoader ?: coil3.ImageLoader(context)
         )
 
-        val painterState = painter.state
+        // Coil 3: `state` is a StateFlow — collect for recomposition.
+        val painterState by painter.state.collectAsState()
 
         // Create color filter for luminance mode
         val colorFilter = if (config.mode == MaskModeValue.LUMINANCE) {

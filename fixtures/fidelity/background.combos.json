@@ -26,7 +26,7 @@
         "background-position-x": "20px",
         "background-position-y": "bottom",
         "background-repeat": "space round",
-        "background-size": "50% 50%, 50% 50%, 50% 50%, 50% 50%",
+        "background-size": "50% 25%",
         "width": "140px",
         "height": "64px",
         "background-color": "#2ecc71"

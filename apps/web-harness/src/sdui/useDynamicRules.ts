@@ -6,9 +6,13 @@
  *
  * Called once from App.tsx so every render mode (gallery, capture,
  * fixture) gets the same document stylesheet: selector-bucket rules,
- * media-bucket rules, and the root `color-scheme` opt-in for
- * light-dark() values. Bucket-free documents build an empty rule list
- * and mount nothing — the 327-pair baseline DOM is untouched.
+ * media-bucket rules, the root `color-scheme` opt-in for light-dark()
+ * values, and — wave 8 (spec 07 §1.2) — the document's `@keyframes`
+ * rules built by the ENGINE from `IRDocument.keyframes` (the engine's
+ * animation-* appliers emit the per-component `animation-name: <ident>`
+ * declarations that bind to them). Bucket-free, keyframe-free documents
+ * build an empty rule list and mount nothing — the 327-pair baseline
+ * DOM is untouched.
  */
 
 import React from 'react';
@@ -23,8 +27,10 @@ import { buildRuleList, mountRules } from '@style-converter/web/core/renderer/Ru
  */
 export function useDynamicRules(document: IRDocument | null): void {
   // Rule list derivation is pure — memoise on the decoded document.
+  // keyframes ride the SAME decoded document (IRDecode passes the
+  // additive v2 key through), so one memo covers both rule families.
   const rules = React.useMemo(
-    () => (document ? buildRuleList(document.components) : []),
+    () => (document ? buildRuleList(document.components, document.keyframes) : []),
     [document],
   );
   // useInsertionEffect is React's designated style-injection slot: it

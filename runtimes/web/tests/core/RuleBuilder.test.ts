@@ -4,17 +4,19 @@
 // SSR-safe string export. These strings are CONTRACT — the JSDOM tests in
 // apps/web-harness assert the same rules actually cascade.
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import type { IRComponent } from '../../src/core/ir/IRModels';
+import type { IRComponent, IRKeyframes } from '../../src/core/ir/IRModels';
 import {
   buildRules,
   buildRuleList,
   buildStylesheet,
+  buildKeyframeRules,
   componentClassName,
   forceClassName,
   isRuntimeV1Condition,
   mountRules,
   RUNTIME_V1_CONDITIONS,
 } from '../../src/core/renderer/RuleBuilder';
+import { buildStyles } from '../../src/core/renderer/StyleBuilder';
 import { parseMediaQueryV1, evaluateMediaQueryV1 } from '../../src/core/renderer/MediaQueryV1';
 import { cssPropertyName, declarationsToCss } from '../../src/core/renderer/CssText';
 import { reset, getReport } from '../../src/engine/PropertyTracker';
@@ -177,6 +179,170 @@ describe('buildRuleList / buildStylesheet — document level', () => {
       ],
     });
     expect(buildStylesheet([c]).split('\n')).toHaveLength(2);
+  });
+});
+
+describe('buildKeyframeRules — @keyframes emission (spec 07 §1.2)', () => {
+  // Payload shapes lifted verbatim from the conformance golden
+  // schema/conformance/fixtures/v2/keyframes.json — the bytes the Kotlin
+  // converter actually puts on the wire.
+  const fade: IRKeyframes = {
+    fade: [
+      { offset: 0, properties: [{ type: 'Opacity', data: { alpha: 0, original: { type: 'number', value: 0 } } }] },
+      { offset: 1, properties: [{ type: 'Opacity', data: { alpha: 1, original: { type: 'number', value: 1 } } }] },
+    ],
+  };
+
+  it('emits the exact rule text — percent selectors, engine declarations, NO !important', () => {
+    // !important inside keyframes is invalid CSS (css-animations-1 §4.1);
+    // keyframe values win via the animation origin, not the cascade.
+    expect(buildKeyframeRules(fade)).toEqual([
+      '@keyframes fade { 0% { opacity: 0 } 100% { opacity: 1 } }',
+    ]);
+  });
+
+  it('serializes tier payloads through the SAME appliers as base styles', () => {
+    // slide-shift stop shapes from the golden: transform function list,
+    // sRGB color (authored text reconstructed as rgba by the applier),
+    // and a px length — buildStyles is the single serialization engine,
+    // so keyframe values can never disagree with inline base values.
+    const rules = buildKeyframeRules({
+      'slide-shift': [
+        {
+          offset: 0.5,
+          properties: [
+            { type: 'Transform', data: { type: 'functions', list: [{ fn: 'translateX', x: { px: 60 } }] } },
+            { type: 'BackgroundColor', data: { srgb: { r: 1, g: 0, b: 0 }, original: '#ff0000' } },
+            { type: 'Width', data: { type: 'length', px: 140 } },
+          ],
+        },
+      ],
+    });
+    expect(rules).toHaveLength(1);
+    expect(rules[0]).toContain('@keyframes slide-shift {');
+    expect(rules[0]).toContain('50% {');
+    expect(rules[0]).toContain('transform: translateX(60px)');
+    expect(rules[0]).toContain('background-color: rgba(255, 0, 0, 1)');
+    expect(rules[0]).toContain('width: 140px');
+    expect(rules[0]).not.toContain('!important');
+  });
+
+  it('keeps wire stop order (pre-sorted by the converter) and trims percent zeros', () => {
+    const rules = buildKeyframeRules({
+      thirds: [
+        { offset: 0, properties: [{ type: 'Opacity', data: { alpha: 0 } }] },
+        { offset: 1 / 3, properties: [{ type: 'Opacity', data: { alpha: 0.4 } }] },
+        { offset: 0.333, properties: [{ type: 'Opacity', data: { alpha: 0.5 } }] },
+        { offset: 1, properties: [{ type: 'Opacity', data: { alpha: 1 } }] },
+      ],
+    });
+    // 1/3 → toFixed(4) float bound; 0.333 → no trailing-zero padding; and
+    // the emitted order is the array order (readers MUST NOT reorder).
+    const idx = (s: string) => rules[0].indexOf(s);
+    expect(rules[0]).toContain('33.3333% {');
+    expect(rules[0]).toContain('33.3% {');
+    expect(idx('0% {')).toBeLessThan(idx('33.3333% {'));
+    expect(idx('33.3333% {')).toBeLessThan(idx('33.3% {'));
+    expect(idx('33.3% {')).toBeLessThan(idx('100% {'));
+  });
+
+  it('emits one rule per named set in map order', () => {
+    const rules = buildKeyframeRules({
+      ...fade,
+      pulse: [{ offset: 1, properties: [{ type: 'Opacity', data: { alpha: 0.5 } }] }],
+    });
+    expect(rules).toHaveLength(2);
+    expect(rules[0]).toContain('@keyframes fade');
+    expect(rules[1]).toContain('@keyframes pulse');
+  });
+
+  it('refuses + logs names that cannot head a @keyframes rule', () => {
+    // A bad name would poison the whole rule text at insertRule time —
+    // refuse-and-log (no-silent-fallthrough), never emit-and-hope. `none`
+    // and the CSS-wide keywords are excluded <keyframes-name> values.
+    const rules = buildKeyframeRules({
+      'has space': [{ offset: 0, properties: [{ type: 'Opacity', data: { alpha: 0 } }] }],
+      none: [{ offset: 0, properties: [{ type: 'Opacity', data: { alpha: 0 } }] }],
+      ...fade,
+    });
+    expect(rules).toHaveLength(1); // only the legal name survives
+    expect(rules[0]).toContain('@keyframes fade');
+    expect(getReport().unhandled).toContain('KeyframesName');
+  });
+
+  it('builds nothing for an absent map (the committed-baseline path)', () => {
+    expect(buildKeyframeRules(undefined)).toEqual([]);
+    expect(buildKeyframeRules({})).toEqual([]);
+  });
+
+  it('buildRuleList emits keyframes BEFORE component rules', () => {
+    const c = comp({
+      properties: [{ type: 'AnimationName', data: [{ type: 'identifier', name: 'fade' }] }],
+      selectors: [{ condition: 'hover', properties: [{ type: 'BackgroundColor', data: srgb(1, 0, 0) }] }],
+    });
+    const rules = buildRuleList([c], fade);
+    expect(rules).toHaveLength(2);
+    expect(rules[0].startsWith('@keyframes fade')).toBe(true); // document-scoped at-rule first
+    expect(rules[1]).toContain(':hover');
+    // A defined reference is NOT logged as dangling.
+    expect(getReport().unhandled).not.toContain('KeyframesReference');
+  });
+
+  it('logs a dangling animation-name once as a defined no-op (spec 07 §1.3)', () => {
+    const c = comp({
+      properties: [{ type: 'AnimationName', data: [{ type: 'identifier', name: 'ghost-anim' }, { type: 'none' }] }],
+    });
+    // No keyframes at all: the reference dangles; rendering is unaffected
+    // (no rules) and the miss lands under the dedicated tracker key so it
+    // never shadows the AnimationName applier's own handled status.
+    expect(buildRuleList([c])).toEqual([]);
+    expect(getReport().unhandled).toContain('KeyframesReference');
+    expect(getReport().unhandled).not.toContain('AnimationName');
+  });
+
+  it('scans selector/media buckets for dangling references too', () => {
+    const c = comp({
+      selectors: [{
+        condition: 'hover',
+        properties: [{ type: 'AnimationName', data: [{ type: 'identifier', name: 'bucket-ghost' }] }],
+      }],
+    });
+    buildRuleList([c], fade);
+    expect(getReport().unhandled).toContain('KeyframesReference');
+  });
+});
+
+describe('transition emission — the state-flip motion recipe (spec 07 §4)', () => {
+  it('buildStyles emits transition-property/duration/delay from typed IR', () => {
+    // The inline base carries the transition declarations; the RuleBuilder
+    // hover bucket carries the target values — together a forced-state
+    // flip starts a real CSSTransition (the transitions.json fixture).
+    const styles = buildStyles([
+      { type: 'TransitionProperty', data: [{ type: 'property-name', name: 'background-color' }] },
+      { type: 'TransitionDuration', data: [{ ms: 1000, original: { v: 1, u: 'S' } }] },
+      { type: 'TransitionDelay', data: [{ ms: 250 }] },
+    ]);
+    expect(styles.transitionProperty).toBe('background-color');
+    expect(styles.transitionDuration).toBe('1s');
+    expect(styles.transitionDelay).toBe('250ms');
+  });
+
+  it('animation-name binds by ident: inline declaration matches the rule name', () => {
+    // The BINDING contract: the applier emits the same ident the
+    // @keyframes rule header carries — byte-equal, or nothing animates.
+    const styles = buildStyles([
+      { type: 'AnimationName', data: [{ type: 'identifier', name: 'fade' }] },
+      { type: 'AnimationDuration', data: {
+        type: 'app.irmodels.properties.animations.AnimationDurationProperty.AnimationDurationValue.Durations',
+        durations: [{ ms: 1000, original: { v: 1, u: 'S' } }],
+      } },
+    ]);
+    expect(styles.animationName).toBe('fade');
+    expect(styles.animationDuration).toBe('1s');
+    const rules = buildKeyframeRules({
+      fade: [{ offset: 0, properties: [{ type: 'Opacity', data: { alpha: 0 } }] }],
+    });
+    expect(rules[0].startsWith(`@keyframes ${styles.animationName} `)).toBe(true);
   });
 });
 

@@ -43,13 +43,19 @@ enum IRWireV2Reader {
 
     // MARK: - Document envelope
 
-    /// Decode the `{irVersion, minReaderVersion, components}` envelope
-    /// from an already-opened string-keyed container. Returns the FLAT
-    /// component list in wire order (the sibling-order contract).
+    /// Decode the `{irVersion, minReaderVersion, components, keyframes?}`
+    /// envelope from an already-opened string-keyed container. Returns the
+    /// FLAT component list in wire order (the sibling-order contract) plus
+    /// the optional document-level keyframes map (spec 07 §1.2 — nil when
+    /// the wire omitted the key, which is the omit-when-empty contract).
     static func decodeEnvelope(from c: KeyedDecodingContainer<IRAnyKey>,
-                               codingPath: [CodingKey]) throws -> [IRComponent] {
+                               codingPath: [CodingKey]) throws
+        -> (components: [IRComponent], keyframes: [String: [IRKeyframeStop]]?) {
         // Rule 2 (spec 05): unknown document-level keys are an error.
-        let allowed: Set<String> = ["irVersion", "minReaderVersion", "components"]
+        // `keyframes` is the sanctioned wave-8 additive minor-revision key
+        // (spec 07 §1.2; schema properties.keyframes).
+        let allowed: Set<String> = ["irVersion", "minReaderVersion",
+                                    "components", "keyframes"]
         for k in c.allKeys where !allowed.contains(k.stringValue) {
             throw violation("unknown envelope key '\(k.stringValue)' in v2 document (spec 05: unknown envelope keys MUST error)", path: codingPath)
         }
@@ -76,7 +82,67 @@ enum IRWireV2Reader {
         while !arr.isAtEnd {
             flat.append(try arr.decode(ComponentWire.self).component)
         }
-        return flat
+        // Optional document-level keyframes block (spec 07 §1.2). Strict
+        // shape mirrors schema $defs/keyframeSet + $defs/keyframeStop.
+        var keyframes: [String: [IRKeyframeStop]]? = nil
+        if c.contains(IRAnyKey("keyframes")) {
+            let kf = try c.nestedContainer(keyedBy: IRAnyKey.self,
+                                           forKey: IRAnyKey("keyframes"))
+            // Schema: minProperties 1 — an empty map may never ride the
+            // wire (omit-when-empty is the additive-key contract).
+            guard !kf.allKeys.isEmpty else {
+                throw violation("keyframes present but empty (schema: minProperties 1)", path: codingPath)
+            }
+            var sets: [String: [IRKeyframeStop]] = [:]
+            for name in kf.allKeys {
+                var stopArr = try kf.nestedUnkeyedContainer(forKey: name)
+                var stops: [IRKeyframeStop] = []
+                while !stopArr.isAtEnd {
+                    stops.append(try stopArr.decode(KeyframeStopWire.self).stop)
+                }
+                // Schema: minItems 1 — the converter drops zero-valid-stop
+                // sets whole rather than emitting an unanimatable shell.
+                guard !stops.isEmpty else {
+                    throw violation("keyframes['\(name.stringValue)'] is empty (schema: minItems 1)", path: codingPath)
+                }
+                sets[name.stringValue] = stops
+            }
+            keyframes = sets
+        }
+        return (flat, keyframes)
+    }
+
+    // MARK: - Keyframe stop wire shape (spec 07 §1.2)
+
+    /// Strict keyframe stop decoder (schema $defs/keyframeStop):
+    /// `{offset, properties}` only, offset a resolved fraction in [0, 1],
+    /// properties standard {type, data} envelopes (same tolerance rule as
+    /// component properties — unknown TYPE values decode fine and dispatch
+    /// skips them later).
+    struct KeyframeStopWire: Decodable {
+        /// The decoded stop.
+        let stop: IRKeyframeStop
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: IRAnyKey.self)
+            // additionalProperties:false on the stop object.
+            for k in c.allKeys where k.stringValue != "offset" && k.stringValue != "properties" {
+                throw violation("unknown keyframe-stop key '\(k.stringValue)' (allowed: offset/properties)", path: decoder.codingPath)
+            }
+            // offset: REQUIRED resolved fraction — readers never re-parse
+            // from/to/percent strings (spec 07 §1.2).
+            let offset = try c.decode(Double.self, forKey: IRAnyKey("offset"))
+            guard offset >= 0.0, offset <= 1.0 else {
+                throw violation("keyframe offset \(offset) outside [0, 1] (schema: minimum 0 / maximum 1)", path: decoder.codingPath)
+            }
+            // properties: standard strict property envelopes.
+            var propArr = try c.nestedUnkeyedContainer(forKey: IRAnyKey("properties"))
+            var props: [IRProperty] = []
+            while !propArr.isAtEnd {
+                props.append(try propArr.decode(PropertyWire.self).property)
+            }
+            stop = IRKeyframeStop(offset: offset, properties: props)
+        }
     }
 
     // MARK: - Component wire shape

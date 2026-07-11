@@ -53,6 +53,18 @@ here and in `manifest.json` instead.
   flip rows plus an order-decides layering pin), and dark-mode buckets
   (prefers-color-scheme: dark) alongside light-dark() color values.
   Capture recipes live in docs/DYNAMIC_CAPTURE.md.
+- `motion/*.json` — animation suite (wave 8,
+  schema/spec/07-animations.md): keyframes-basic.json authors a document-
+  level `keyframes` block (opacity fade, translate slide, scale pulse,
+  sRGB color shift, a multi-property set, a 3-stop set authored with
+  UNSORTED offsets to make the wire's sorted emission observable,
+  alternate direction, fill-mode both + delay — distinct geometry per
+  component so t=0 / t=mid / t=end captures differ maximally);
+  transitions.json ties wave-7 selector states to motion (transition-
+  property/duration/delay against :hover/:active/:focus/:checked buckets
+  — captured via forceState + CAPTURE_ANIMATION_TIME mid-transition).
+  These templates are PRNG-free: the animated value pairs ARE the test
+  surface. Capture recipes live in docs/DYNAMIC_CAPTURE.md §4.
 
 ## Inventory
 
@@ -115,5 +127,7 @@ here and in `manifest.json` instead.
 | `dynamic/states.json` | dynamic | 6 | 6 |
 | `dynamic/media-width.json` | dynamic | 7 | 7 |
 | `dynamic/dark-mode.json` | dynamic | 4 | 4 |
-| **total** | | **580** | **763** |
+| `motion/keyframes-basic.json` | motion | 8 | 8 |
+| `motion/transitions.json` | motion | 4 | 4 |
+| **total** | | **592** | **775** |
 

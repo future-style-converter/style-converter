@@ -12,8 +12,21 @@ iOS 16+, Swift 5 language mode.
 ```bash
 # from the repo root — needs Xcode 15+
 xcodebuild test -scheme StyleConverterRuntime \
-  -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'   # XCTest suite (184 tests)
+  -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'   # XCTest suite (219 tests)
 ```
 
 Rendered and screenshot-tested by [`apps/ios-harness/`](../../apps/ios-harness/)
 via `./test-all.sh` (or `./test-ios.sh` for iOS alone).
+
+Wave 8 (#35/#36): `@keyframes` animations and state-flip transitions
+execute in **property space** — pure state-at-t math in
+`StyleEngine/animations/` (`AnimationDriver` phase arithmetic,
+`KeyframeInterpolator` per-segment easing + tier interpolation,
+`AnimationResolver`/`TransitionResolver` glue) driven by
+ComponentRenderer's TimelineView clock or the pinned
+`CAPTURE_ANIMATION_TIME` hook (`schema/spec/07-animations.md` §5,
+`docs/DYNAMIC_CAPTURE.md` §4). `background-image: url(...)` raster
+layers (data URIs, local files) now paint with background-size /
+-position / -repeat honored (`StyleEngine/background/BackgroundURLImage`
++ the pure `BackgroundImageGeometry`); remote http(s) URLs stay a
+defined, logged no-op for capture determinism.
