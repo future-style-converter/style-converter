@@ -235,10 +235,54 @@ private func tryOpacityValue(_ v: IRValue) -> Double? {
     return nil
 }
 
+/// Render + save EVERY component of `document` synchronously through the
+/// exact same building blocks the first-launch auto-capture uses:
+/// `flatten` for the capture list, `CaptureCanvas` (+ the document
+/// keyframes environment) for the render surface, `ScreenshotManager.render`
+/// for the ImageRenderer pass, and `ScreenshotManager.save` for the
+/// `%03d_<name>.png` filename rule and the shared screenshot directory.
+///
+/// TITAN Phase 3: the inbox poll loop (InboxCaptureView) drives this once
+/// per host-pushed fixture. Sharing this code path with the auto-capture
+/// flow is the whole point — WPT captures MUST be byte-comparable with
+/// normal captures and their per-component filenames MUST match what the
+/// compare pipeline globs (`*_<safeKey>.png`, see
+/// tools/titan/inject-wpt-block.mjs diffPlatformVsRef).
+///
+/// The auto-capture flow (ScreenshotCaptureView) keeps its own async,
+/// per-component driver purely so its on-screen progress bar animates;
+/// the render/save primitives it calls are identical to these. This
+/// helper is synchronous because the inbox loop has no progress UI to
+/// pump and wants the fixture done before it consumes the inbox file.
+@MainActor
+func captureAllComponents(_ document: IRDocument) {
+    // reset() clears the screenshot dir so fixture N+1 never inherits
+    // fixture N's PNGs — the on-device half of the feeder's idempotence
+    // contract (the host also clears before each push).
+    ScreenshotManager.reset()
+    // Same flattened capture list the auto-capture flow renders. In IR v2
+    // children is always nil (flat doc), so this is document.components in
+    // declared order — matching the order the feeder derives host-side.
+    let flat = flatten(document.components)
+    for (index, component) in flat.enumerated() {
+        // Identical to ScreenshotCaptureView.captureNext: the chromeless
+        // CaptureCanvas with the document keyframes re-published on the
+        // isolated ImageRenderer tree (Wave 8 comment there).
+        let canvas = CaptureCanvas(component: component)
+            .environment(\.styleKeyframes, document.keyframes)
+        if let image = ScreenshotManager.render(canvas) {
+            ScreenshotManager.save(image: image, index: index, name: component.name)
+        }
+    }
+}
+
 /// Flatten the IR tree depth-first pre-order, suppressing children of any
 /// parent that creates a paint context (see parentCreatesContext above).
 /// Matches the web `flatten()` in CaptureGallery.tsx and Android's
 /// `flattenComponents()` exactly so capture indices align across platforms.
+/// Stays file-private (ComponentGallery.swift declares its own private
+/// `flatten`); the TITAN inbox loop reuses this rule THROUGH the internal
+/// captureAllComponents above rather than calling flatten directly.
 private func flatten(_ components: [IRComponent]) -> [IRComponent] {
     var out: [IRComponent] = []
     func walk(_ c: IRComponent) {

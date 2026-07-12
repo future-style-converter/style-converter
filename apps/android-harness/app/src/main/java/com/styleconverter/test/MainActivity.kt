@@ -123,6 +123,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * titanInbox — TITAN inbox-capture activation flag (this lane's new rail on
+     * the existing intent-extra transport, alongside forceState/animationTime):
+     *
+     *   adb shell am start -n com.styleconverter.test/.MainActivity \
+     *       --ez titanInbox true
+     *
+     * When true the app SKIPS the bundled-assets auto-capture and instead loops:
+     * poll the on-device inbox for the oldest *.json IR document, render + capture
+     * EVERY component through the identical capture path the bundled flow uses,
+     * consume the fixture, and keep polling. The host feeder
+     * (tools/titan/feed-android.mjs) pushes fixtures + pulls the resulting PNGs.
+     *
+     * Parsing is delegated to TitanInbox.isInboxModeRequested (unit-tested) and
+     * accepts BOTH `--ez titanInbox true` (boolean) and `--es titanInbox true`
+     * (string) so the feeder can use either am-extra flavour.
+     */
+    private fun readInboxModeExtra(): Boolean {
+        val boolExtra = intent?.getBooleanExtra("titanInbox", false) ?: false
+        val stringExtra = intent?.getStringExtra("titanInbox")
+        val on = com.styleconverter.test.screenshot.TitanInbox
+            .isInboxModeRequested(boolExtra, stringExtra)
+        if (on) Log.i(TAG, "titanInbox=true → inbox poll-capture mode (bundled-assets auto-capture skipped)")
+        return on
+    }
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -185,7 +211,11 @@ class MainActivity : ComponentActivity() {
                         // one activity launch, one hook configuration.
                         forceState = readForceStateExtra(),
                         captureWidthDp = readCaptureWidthExtra(),
-                        animationTime = readAnimationTimeExtra()
+                        animationTime = readAnimationTimeExtra(),
+                        // TITAN inbox poll-capture mode (this lane): when true
+                        // the capture screen never returns to the gallery — it
+                        // loops on the on-device inbox instead.
+                        inboxMode = readInboxModeExtra()
                     )
                 }
             }
@@ -240,7 +270,8 @@ private fun MainContent(
     permissionChecked: Boolean,
     forceState: String? = null,
     captureWidthDp: Int = 390,
-    animationTime: Double? = null
+    animationTime: Double? = null,
+    inboxMode: Boolean = false
 ) {
     var captureComplete by remember { mutableStateOf(false) }
 
@@ -249,13 +280,18 @@ private fun MainContent(
         return
     }
 
-    if (!captureComplete && hasPermission) {
+    // In inbox mode the capture screen owns the app for the whole session —
+    // it never signals completion (onCaptureComplete is inert), so we never
+    // fall through to the gallery. `captureComplete` only matters for the
+    // bundled one-shot flow.
+    if ((inboxMode || !captureComplete) && hasPermission) {
         // Run screenshot capture first — the dynamic-capture hooks apply to
         // the capture pass only (the browsing gallery stays base-state).
         ScreenshotCaptureScreen(
             forceState = forceState,
             captureWidthDp = captureWidthDp,
             animationTime = animationTime,
+            inboxMode = inboxMode,
             onCaptureComplete = {
                 captureComplete = true
             }

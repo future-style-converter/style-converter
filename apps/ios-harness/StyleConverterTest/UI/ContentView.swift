@@ -18,7 +18,13 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if let error = error {
+            // TITAN Phase 3: in inbox mode we NEVER load the bundled
+            // tmpOutput.json — the host pushes IR documents at runtime.
+            // Route straight to the poll loop and skip loadDocument
+            // entirely (its .onAppear below is gated on this branch too).
+            if CaptureOverrides.titanInbox {
+                InboxCaptureView()
+            } else if let error = error {
                 ErrorView(message: error, retry: loadDocument)
             } else if let doc = document {
                 if captureComplete {
@@ -45,6 +51,10 @@ struct ContentView: View {
     }
 
     private func loadDocument() {
+        // Inbox mode never reads the bundled IR — InboxCaptureView owns the
+        // document lifecycle. Skip so we don't decode Resources/tmpOutput.json
+        // for a view that will never be shown.
+        if CaptureOverrides.titanInbox { return }
         error = nil
         guard let url = Bundle.main.url(forResource: "tmpOutput", withExtension: "json") else {
             error = "tmpOutput.json not found in bundle. Run ./test-ios.sh to generate it."

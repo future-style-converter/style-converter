@@ -228,9 +228,12 @@ class ScreenshotManager(private val context: Context) {
      * silently — the next poll picks the same file up.
      */
     fun nextFixtureFile(): File? {
+        // Ordering (oldest-first, name tiebreak) lives in TitanInbox.pickOldest
+        // so the shipped path and the unit-tested path are the SAME code — the
+        // filter here (regular *.json only) stays local since it's about the
+        // on-device inbox contract, not the ordering rule under test.
         val files = inboxDir.listFiles { f -> f.isFile && f.extension == "json" }
-            ?: return null
-        return files.minByOrNull { it.lastModified() }
+        return TitanInbox.pickOldest(files)
     }
 
     /**
