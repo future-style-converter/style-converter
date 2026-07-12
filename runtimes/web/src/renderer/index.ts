@@ -13,6 +13,8 @@ export * from './TagMapping';
 export * from './RendererOptions';
 // The per-node renderer core.
 export * from './NodeRenderer';
+// Per-root render-error containment (one bad component fails alone).
+export * from './RootErrorBoundary';
 // The whole-document renderer.
 export * from './DocumentRenderer';
 // Stylesheet mount/unmount lifecycle hook.

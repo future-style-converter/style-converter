@@ -88,6 +88,14 @@ public struct ComponentRenderer: View {
     // Focus rides SwiftUI's own focus system (spec 06 §2 `focus`).
     @FocusState private var isFocused: Bool
 
+    // WPT reftest capture parity — an ambient host flag (WPTCaptureMode.swift),
+    // same shape as styleViewport/styleKeyframes. Default false = product +
+    // every committed baseline unchanged; the harness inbox/WPT capture path
+    // turns it ON so the SYNTHESIZED component-name placeholder is dropped for
+    // nameless-empty leaves (browser-ref parity). Real text still renders.
+    // Mirrors the web harness's ?wpt=1 WPT_MODE empty-visible-text path.
+    @Environment(\.wptCaptureMode) private var wptCaptureMode
+
     // Wave 8 (#35) — motion inputs. The document keyframes map arrives
     // from the host (spec 07 §1.2 — @keyframes are document-scoped)…
     @Environment(\.styleKeyframes) private var styleKeyframes
@@ -346,6 +354,38 @@ public struct ComponentRenderer: View {
             from = oldEffective
         }
         transitionSnapshot = TransitionSnapshot(base: from, startedAt: Date())
+    }
+
+    // MARK: - WPT placeholder suppression
+
+    /// WPT capture mode (mirror of the web harness's `?wpt=1` path):
+    /// should this component's SYNTHESIZED component-name placeholder be
+    /// suppressed for browser-ref parity? Pure + static so the XCTest
+    /// pins the classification without a render surface, exactly like
+    /// `isOutOfFlow` below.
+    ///
+    /// The rule, matching web's PlaceholderContent visible-text priority
+    /// (apps/web-harness/src/sdui/ComponentRenderer.tsx):
+    ///   • flag OFF → NEVER suppress. This is the product path and the
+    ///     whole committed baseline corpus, so those renders are byte-
+    ///     identical to before.
+    ///   • a component WITH children renders no synthesized name at all
+    ///     (children — or leading real text — are the content) → nothing
+    ///     to suppress.
+    ///   • a leaf WITH real element text (`text`, the IR `_text`/rawText
+    ///     channel) → that text is actual content and always renders; web
+    ///     gives it precedence over the WPT empty-string suppression.
+    ///   • a leaf WITHOUT real text in WPT mode → the placeholder would
+    ///     paint only the debug NAME the browser-ref never shows → suppress.
+    static func suppressesNamePlaceholder(_ component: IRComponent,
+                                          wptCaptureMode: Bool) -> Bool {
+        // Product / baseline path: the flag is off → keep the placeholder.
+        guard wptCaptureMode else { return false }
+        // With children there is no synthesized name placeholder to drop.
+        guard component.children?.isEmpty ?? true else { return false }
+        // Leaf: suppress ONLY when there is no real element text. `text`
+        // nil/empty ⇒ the leaf branch would fall back to component.name.
+        return component.text?.isEmpty ?? true
     }
 
     // MARK: - Flow membership (fidelity wave 3)
@@ -1318,6 +1358,21 @@ public struct ComponentRenderer: View {
                 // chain (TK_TwoLevelShadow's mid `--accent` repaint).
                 .environment(\.cssVariables, mergedVariables)
             }
+        } else if Self.suppressesNamePlaceholder(component,
+                                                 wptCaptureMode: wptCaptureMode) {
+            // WPT capture mode, nameless-empty leaf: the only thing the
+            // leaf branch below would paint is the SYNTHESIZED component
+            // name — a harness debug label the Chromium browser-ref (that
+            // native captures are SSIM-compared against) never renders. Drop
+            // it entirely for parity. Mirrors web's ?wpt=1 empty-visible-text
+            // path (ComponentRenderer.tsx PlaceholderContent). The outer
+            // styled box (background/border/size) still paints via the style
+            // chain in `styledContent`; only the inner name glyphs vanish.
+            // Unreachable for the whole static baseline corpus (flag OFF),
+            // so every committed capture keeps its placeholder untouched.
+            // Real element text takes the leading-text branch above (with
+            // children) or the leaf branch below (component.text present).
+            EmptyView()
         } else {
             // CSS `background-clip: text` + a `background-image`
             // gradient: render the gradient as the text fill instead

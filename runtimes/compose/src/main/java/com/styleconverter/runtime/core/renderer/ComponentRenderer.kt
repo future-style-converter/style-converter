@@ -1908,6 +1908,13 @@ object ComponentRenderer {
         // visible text). For legacy fixtures with no _text we fall
         // through to the underscore-stripped name path.
         val hasRawText = !rawText.isNullOrEmpty()
+        // WPT-capture-mode gate (mirrors the web harness's WPT_MODE label
+        // suppression): in WPT capture the browser-reference shows no
+        // component-name text, so when we'd fall back to the SYNTHESIZED name
+        // (no real `_text`) we render NOTHING. Real leading text (hasRawText)
+        // is never suppressed. Default mode → LocalWptCaptureMode is false →
+        // this is a no-op, keeping the 327-pair baseline byte-identical.
+        if (shouldSuppressSynthesizedName(LocalWptCaptureMode.current, rawText)) return
         var displayText = if (hasRawText) {
             rawText!!
         } else {

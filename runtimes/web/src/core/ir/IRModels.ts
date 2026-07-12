@@ -165,8 +165,14 @@ export interface IRPseudoNode {
   id?: string;
   /** Optional debug name. */
   name?: string;
-  /** Style declarations from the originating pseudo rule. */
-  properties?: IRProperty[];
+  /**
+   * Style declarations from the originating pseudo rule. The payload is
+   * extractor-owned and forwarded verbatim (spec 01), so BOTH shapes are
+   * legal on the wire: a typed IR list, or the raw declarations map the
+   * WPT extractor emits today ({ display: 'block', … }). NodeRenderer
+   * bridges each shape to inline styles accordingly.
+   */
+  properties?: IRProperty[] | Record<string, string> | null;
   /** Literal `content:` string in the extractor's legacy spelling. */
   _text?: string | null;
   /** Literal `content:` string in the v2 spelling (tolerated). */

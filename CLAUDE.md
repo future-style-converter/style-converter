@@ -247,10 +247,10 @@ Gradle commands need JDK 21):
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 101 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 949 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 959 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 761 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 226 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 430 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 232 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 473 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 12 goldens × 4 codebases |
 
 (`npm test` at the root runs every workspace's vitest suite — the web

@@ -521,6 +521,12 @@ if (!m.wpt || m.wpt.incomplete) {
 # ── Step 7: inject WPT v4 block ──────────────────────────────────────────────
 
 step "Step 7: inject wpt: block (manifest v4)"
+# --ios-dir/--android-dir at EMPTY_DIR for the same isolation reason the
+# compare step uses it (Step 6 comment): inject's Phase-4 defaults point at
+# the GLOBAL apps/*-harness/screenshots dirs, which a sibling section (or a
+# stale hand run) may be filling — per-section manifests must never absorb
+# those. The all-platforms wiring (feed-ios/feed-android per-section output
+# dirs) replaces EMPTY_DIR when the native feeders integrate here.
 node "$TITAN_DIR/inject-wpt-block.mjs" \
   --manifest "$MANIFEST_OUT" \
   --tests "$TESTS_LIST" \
@@ -529,7 +535,9 @@ node "$TITAN_DIR/inject-wpt-block.mjs" \
   --refs-root "$WPT_DIR/refs/$WPT_REF" \
   --capture-log "$CAPTURE_LOG" \
   --combined "$COMBINED_FIXTURE" \
-  --web-dir "$WEB_SHOTS_DIR"
+  --web-dir "$WEB_SHOTS_DIR" \
+  --ios-dir "$EMPTY_DIR" \
+  --android-dir "$EMPTY_DIR"
 log "manifest v4 → $MANIFEST_OUT"
 
 # ── Step 7.5: verify wpt block was actually written ─────────────────────────
@@ -556,7 +564,9 @@ if [[ "$WPT_OK" != "1" ]]; then
     --refs-root "$WPT_DIR/refs/$WPT_REF" \
     --capture-log "$CAPTURE_LOG" \
     --combined "$COMBINED_FIXTURE" \
-    --web-dir "$WEB_SHOTS_DIR"
+    --web-dir "$WEB_SHOTS_DIR" \
+    --ios-dir "$EMPTY_DIR" \
+    --android-dir "$EMPTY_DIR"
   WPT_OK=$(node -e "
 const m = require('$MANIFEST_OUT');
 process.stdout.write(

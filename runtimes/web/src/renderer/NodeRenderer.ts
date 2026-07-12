@@ -38,6 +38,28 @@ export interface NodeRendererProps {
 }
 
 /**
+ * Bridge a RAW CSS declarations map (the extractor-owned `pseudos`
+ * payload shape, spec 01 — e.g. `{ display: 'block', 'font-weight':
+ * 'bold' }`) to a React inline-style object: kebab-case keys camelise
+ * (`-webkit-mask` → `WebkitMask` falls out of the same replace), custom
+ * properties (`--x`) pass through verbatim (React sets them via
+ * setProperty), and non-primitive values are dropped loudly — a nested
+ * object here means the payload isn't a declarations map at all.
+ */
+export function styleFromRawDeclarations(decls: Record<string, unknown>): CSSProperties {
+  const out: Record<string, unknown> = {};
+  for (const [prop, value] of Object.entries(decls)) {
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      console.warn(`[NodeRenderer] raw declaration "${prop}" has non-primitive value — dropped`);
+      continue;
+    }
+    if (prop.startsWith('--')) { out[prop] = value; continue; }         // custom property, verbatim
+    out[prop.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
+  }
+  return out as CSSProperties;
+}
+
+/**
  * Render one pseudo-element node as an inline <span> (shared verbatim
  * with the old harness renderer — pseudo rendering is a semantic choice,
  * not a capture calibration). The span carries the pseudo rule's styles
@@ -49,7 +71,17 @@ export interface NodeRendererProps {
 function renderPseudoNode(p: IRPseudoNode, role: 'before' | 'after' | 'marker'): ReactElement {
   // Same engine as component styles: the pseudo rule's declarations
   // (color, font-*, AND content) reach the inline style attribute.
-  const ps = buildStyles(p.properties ?? []);
+  // The wire forwards the extractor's payload VERBATIM (spec 01), and
+  // the WPT extractor emits `properties` as a RAW declarations map
+  // ({ display: 'block', background: 'green' }), not a typed IR list —
+  // bridge that shape straight to inline styles; typed lists keep the
+  // engine path. (Pre-bridge, the raw map crashed buildStyles and took
+  // the whole capture page down with it.)
+  const ps = Array.isArray(p.properties)
+    ? buildStyles(p.properties)
+    : (p.properties && typeof p.properties === 'object')
+      ? styleFromRawDeclarations(p.properties as Record<string, unknown>)
+      : {};
   // Literal `content:` string — both wire spellings tolerated (`_text`
   // is what the extractor emits today; `text` is the v2 spelling).
   const pText = typeof p._text === 'string' ? p._text : (typeof p.text === 'string' ? p.text : '');

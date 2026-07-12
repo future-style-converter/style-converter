@@ -66,3 +66,49 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        # Pin the platform set so a test SCHEME's buildable-platform
+        # intersection (app + local SwiftPM package) is non-empty under
+        # Xcode 26 — otherwise xcodebuild test refuses every destination.
+        # Includes iphonesimulator so the `-target` app build the feeder
+        # uses (test-all.sh's contract) is unaffected.
+        SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+
+  # TITAN Phase 3 — device-free unit tests for the inbox-mode app logic
+  # (activation-flag parse + FIFO poll ordering). Hosted by the app target so
+  # `@testable import StyleConverterTest` resolves; run with:
+  #   xcodebuild test -project StyleConverterTest.xcodeproj \
+  #     -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,...'
+  # The end-to-end capture path is proven separately by tools/titan/feed-ios.mjs.
+  StyleConverterTestTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: StyleConverterTestTests
+    dependencies:
+      # Host inside the app so the test bundle can @testable import it.
+      - target: StyleConverterTest
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: com.styleconverter.test.tests
+        # Pin the platform set explicitly. Without this the scheme's
+        # buildable-platform intersection (app + local SwiftPM package)
+        # computes empty under Xcode 26 and xcodebuild refuses every
+        # simulator destination ("Supported platforms … is empty").
+        SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+        SDKROOT: iphoneos
+
+# Explicit shared scheme so `xcodebuild test` resolves a simulator
+# destination (xcodebuild's auto-created scheme computes an empty platform
+# set with the local SwiftPM package under Xcode 26).
+schemes:
+  StyleConverterTestTests:
+    build:
+      targets:
+        StyleConverterTest: [test]
+        StyleConverterTestTests: [test]
+    test:
+      targets:
+        - StyleConverterTestTests
+      gatherCoverageData: false

@@ -125,4 +125,32 @@ enum CaptureOverrides {
     static var animationTime: Double? {
         animationTimeRaw.flatMap(Double.init)
     }
+
+    // MARK: - TITAN Phase 3 inbox-polling activation
+    //
+    // The activation flag for the WPT feeder loop. It rides the SAME
+    // transport rails as the dynamic-capture hooks above (launch arg OR
+    // SIMCTL_CHILD_* env) so the host recipe needs no bespoke plumbing —
+    // `tools/titan/feed-ios.mjs` launches with
+    // `SIMCTL_CHILD_TITAN_INBOX=1` and `xcrun simctl launch` forwards it
+    // into the app process environment, identical to the
+    // SIMCTL_CHILD_CAPTURE_ANIMATION_TIME pattern.
+    //
+    // When true the app SKIPS the normal bundled-IR-from-Resources
+    // auto-capture (ContentView routes to InboxCaptureView) and instead
+    // polls Documents/inbox for host-pushed IR documents, rendering each
+    // through the IDENTICAL CaptureCanvas + ImageRenderer + Screenshot
+    // save path the auto-capture flow uses (see captureAllComponents in
+    // ScreenshotCaptureView.swift). Default false keeps every existing
+    // launch (test-all.sh / test-ios.sh) on the historical path.
+    static let titanInbox: Bool = {
+        isInboxActivated(knob(argument: "titanInbox", env: "TITAN_INBOX"))
+    }()
+
+    /// Pure activation predicate, split out so it is unit-testable without a
+    /// device (InboxModeTests): only the literal "1" activates inbox mode —
+    /// nil/empty/any other value keeps the historical auto-capture path.
+    static func isInboxActivated(_ raw: String?) -> Bool {
+        raw == "1"
+    }
 }

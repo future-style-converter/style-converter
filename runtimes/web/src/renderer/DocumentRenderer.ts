@@ -22,6 +22,7 @@ import type { IRDocument } from '../core/ir/IRModels';
 import { composeTree } from './Composer';
 import { NodeRenderer } from './NodeRenderer';
 import type { RendererOptions } from './RendererOptions';
+import { RootErrorBoundary } from './RootErrorBoundary';
 import { useDocumentRules } from './useDocumentRules';
 
 /** Props for a whole-document render. */
@@ -46,15 +47,21 @@ export function DocumentRenderer({ document: doc, options, styleTarget }: Docume
   // unmount (see useDocumentRules for the single-document contract).
   useDocumentRules(doc, styleTarget);
   // Root forest in flat-array order (spec 03 sibling-order rule); the
-  // mapped array is keyed by component id like every child list.
+  // mapped array is keyed by component id like every child list. Each
+  // root gets its own error boundary: one malformed component fails
+  // alone and visibly (data-render-error box) instead of unmounting the
+  // whole forest — load-bearing for capture runs, where the ready
+  // sentinel is a sibling of this list (see RootErrorBoundary).
   return createElement(
     Fragment,
     null,
     roots.map((root, index) =>
-      createElement(NodeRenderer, {
+      createElement(RootErrorBoundary, {
         key: root.component.id || index,
+        componentId: root.component.id,
+      }, createElement(NodeRenderer, {
         node: root,
         options,
-      })),
+      }))),
   );
 }

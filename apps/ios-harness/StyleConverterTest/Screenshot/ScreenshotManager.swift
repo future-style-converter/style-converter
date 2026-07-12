@@ -37,7 +37,13 @@ enum ScreenshotManager {
         let filename = String(format: "%03d_%@.png", index, sanitized)
         let url = directory.appendingPathComponent(filename)
         if let data = image.pngData() {
-            try? data.write(to: url)
+            // `.atomic` writes to a temp file then renames, so a host
+            // reader (the TITAN feeder polling this dir) can never observe
+            // a half-written PNG and pull a truncated capture. The final
+            // bytes are identical to a plain write, so committed baselines
+            // are unaffected — this only closes the read-during-write race
+            // the inbox feeder's tight poll loop would otherwise hit.
+            try? data.write(to: url, options: .atomic)
         }
     }
 
@@ -139,12 +145,21 @@ enum ScreenshotManager {
         // expects — a host that pushes fixtures in deterministic order
         // gets them back in the same order.
         let jsonFiles = entries.filter { $0.pathExtension == "json" }
-        let sorted = jsonFiles.sorted { (a, b) -> Bool in
-            let ta = (try? a.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? Date.distantPast
-            let tb = (try? b.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? Date.distantPast
-            return ta < tb
+        // Pair each *.json with its modification date, then defer the
+        // ordering to the pure `orderOldestFirst` helper (unit-testable
+        // without a filesystem — see InboxModeTests).
+        let dated: [(url: URL, date: Date)] = jsonFiles.map { url in
+            let d = (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? Date.distantPast
+            return (url, d)
         }
-        return sorted.first
+        return orderOldestFirst(dated).first
+    }
+
+    /// Pure oldest-first ordering of (url, mtime) pairs — the FIFO poll rule,
+    /// factored out so InboxModeTests can prove ordering without touching the
+    /// filesystem or a device.
+    static func orderOldestFirst(_ entries: [(url: URL, date: Date)]) -> [URL] {
+        entries.sorted { $0.date < $1.date }.map { $0.url }
     }
 
     /// Mark a processed inbox fixture as consumed by deleting the file.

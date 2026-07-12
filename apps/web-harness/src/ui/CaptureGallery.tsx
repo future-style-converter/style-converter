@@ -19,6 +19,7 @@
 
 import React from 'react';
 import type { IRComponent, IRDocument } from '@style-converter/web/core/ir/IRModels';
+import { RootErrorBoundary } from '@style-converter/web/renderer/RootErrorBoundary';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
 import { composeTree, type ComposedNode } from '../sdui/Composer';
 
@@ -404,7 +405,14 @@ export function CaptureCanvas({ node, index }: CaptureCanvasProps) {
       data-animation-time={ANIMATION_TIME}
       style={style}
     >
-      <ComponentRenderer node={node} />
+      {/* Per-canvas containment: one malformed component (WPT corpus
+          shapes especially) must fail alone as a visible
+          data-render-error box — NOT unmount the gallery and starve the
+          data-capture-ready sentinel below, which zeroes the whole run
+          to no-data (the 2026-07-12 smoke failure mode). */}
+      <RootErrorBoundary componentId={component.id}>
+        <ComponentRenderer node={node} />
+      </RootErrorBoundary>
     </div>
   );
 }

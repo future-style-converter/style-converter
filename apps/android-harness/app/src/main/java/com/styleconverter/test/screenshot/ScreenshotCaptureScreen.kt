@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRDocumentDecoder
 import com.styleconverter.runtime.core.renderer.ComponentHost
+import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.renderer.SlotComposer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -47,6 +48,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlin.coroutines.resume
 import kotlin.math.roundToInt
+import java.io.File
 
 private const val TAG = "ScreenshotCapture"
 
@@ -78,12 +80,24 @@ private val TextPropCount = Color(0xFF666666)
  *  - [animationTime]: CAPTURE_ANIMATION_TIME (spec 07 §5) — seconds on the
  *    absolute animation timeline; every animation renders its state at t,
  *    paused. null = the historical live path.
+ *
+ * TITAN inbox mode ([inboxMode], this lane): when true the screen does NOT read
+ * the bundled `assets/tmpOutput.json` and does NOT return to the gallery. It
+ * loops forever — poll the on-device inbox for the oldest *.json IR document,
+ * decode + compose + flatten it through the IDENTICAL path the bundled flow
+ * uses, capture every component, consume the fixture, and poll again. The host
+ * feeder (tools/titan/feed-android.mjs) pushes fixtures and pulls the PNGs.
+ * The capture machinery below (CaptureView / CaptureCanvas / PixelCopy /
+ * saveScreenshot) is byte-identical across both modes so WPT captures are
+ * directly comparable with normal captures and the per-component filenames
+ * (`%03d_<safeName>.png`) match what the compare pipeline globs for.
  */
 @Composable
 fun ScreenshotCaptureScreen(
     forceState: String? = null,
     captureWidthDp: Int = 390,
     animationTime: Double? = null,
+    inboxMode: Boolean = false,
     onCaptureComplete: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -110,21 +124,35 @@ fun ScreenshotCaptureScreen(
     var shouldCapture by remember { mutableStateOf(false) }
     var cardBoundsInWindow by remember { mutableStateOf<Rect?>(null) }
 
+    // TITAN inbox-mode state:
+    //  - currentFixtureFile: the inbox *.json currently being rendered, so it
+    //    can be consumed AFTER its last capture (crash-safe: an unconsumed
+    //    fixture is re-picked on the next poll).
+    //  - pollGeneration: bumped after each fixture to re-arm the loading effect
+    //    (LaunchedEffect keyed on it) for the next poll. Unused in bundled mode.
+    var currentFixtureFile by remember { mutableStateOf<File?>(null) }
+    var pollGeneration by remember { mutableIntStateOf(0) }
+
     // Get the Activity window for PixelCopy
     val activity = context as? android.app.Activity
     val window = activity?.window
 
-    LaunchedEffect(Unit) {
+    // Loading effect. Keyed on pollGeneration so inbox mode can re-arm it once
+    // per pushed fixture (bundled mode runs it exactly once at generation 0).
+    LaunchedEffect(pollGeneration) {
+        // Belt-and-braces: only (re)load while in the LOADING phase. The inbox
+        // completion path always bumps pollGeneration AND sets phase=LOADING
+        // together, but a stray recomposition must never re-enter mid-capture.
+        if (capturePhase != CapturePhase.LOADING) return@LaunchedEffect
         try {
             // Run-configuration marker line (part of the forced-state AND
             // seized-animation contracts: a capture script must be able to
             // VERIFY via `adb logcat -d | grep` that the run actually ran
             // with the hook active instead of silently diffing two base /
             // live captures — the data-animation-time rationale, spec 07 §5).
-            Log.i(TAG, "Capture run config: forceState=${forceState ?: "none"} captureWidth=$captureWidthDp animationTime=${animationTime ?: "none"}")
-
-            val deleted = screenshotManager.clearScreenshots()
-            Log.i(TAG, "Cleared $deleted existing screenshots")
+            // titanInbox is appended so the feeder can grep-verify the app
+            // actually entered inbox mode (same gate philosophy).
+            Log.i(TAG, "Capture run config: forceState=${forceState ?: "none"} captureWidth=$captureWidthDp animationTime=${animationTime ?: "none"} titanInbox=$inboxMode")
 
             if (!screenshotManager.hasWritePermission()) {
                 error = "No write permission for screenshots directory"
@@ -132,30 +160,85 @@ fun ScreenshotCaptureScreen(
                 return@LaunchedEffect
             }
 
-            val jsonString = context.assets.open("tmpOutput.json")
-                .bufferedReader()
-                .use { it.readText() }
+            // Reset per-fixture capture state so each fixture starts clean —
+            // critical in inbox mode where this effect re-runs per fixture.
+            capturedCount = 0
+            failedCount = 0
+            cardBoundsInWindow = null
+            shouldCapture = false
+
+            val jsonString: String = if (inboxMode) {
+                // DO NOT clearScreenshots() in inbox mode — the host feeder owns
+                // on-device PNG lifecycle (it pulls, verifies, then clears per
+                // fixture). Clearing here would race the host's pull of the
+                // PREVIOUS fixture's captures and lose data.
+                Log.i(TAG, "Titan inbox: polling ${screenshotManager.getInboxPath()} for next fixture…")
+                var file: File? = null
+                // Idle-poll until a fixture arrives. delay() suspends the
+                // coroutine (no busy-wait); 200 ms is well under the host's
+                // per-fixture push cadence so pickup latency stays negligible.
+                while (file == null) {
+                    file = screenshotManager.nextFixtureFile()
+                    if (file == null) delay(200)
+                }
+                currentFixtureFile = file
+                Log.i(TAG, "Titan inbox: loaded fixture ${file.name}")
+                file.readText()
+            } else {
+                // Bundled one-shot flow: clear stale captures, read the asset.
+                val deleted = screenshotManager.clearScreenshots()
+                Log.i(TAG, "Cleared $deleted existing screenshots")
+                context.assets.open("tmpOutput.json")
+                    .bufferedReader()
+                    .use { it.readText() }
+            }
 
             // v2-aware decode (strict envelope per spec 05, v1 window
             // fallback with a deprecation warning), then the composer
-            // step: rebuild render trees from slot refs. This replaces
-            // the blanket ignoreUnknownKeys load — unknown envelope keys
-            // now surface as the CapturePhase.ERROR screen instead of
-            // being silently dropped.
+            // step: rebuild render trees from slot refs. IDENTICAL decode +
+            // compose for both modes — that is what makes WPT captures
+            // comparable with normal captures.
             val document = IRDocumentDecoder.decode(jsonString)
-            roots = SlotComposer.compose(document)
+            val composed = SlotComposer.compose(document)
+            roots = composed
             // Wire keyframes ride the same decode (additive envelope key);
             // omit-when-empty on the wire → empty map = zero footprint.
             keyframes = document.keyframes ?: emptyMap()
 
-            Log.i(TAG, "Loaded ${roots?.size ?: 0} root components " +
-                    "(flattened: ${flattenComponents(roots ?: emptyList()).size})")
+            val flatSize = flattenComponents(composed).size
+            Log.i(TAG, "Loaded ${composed.size} root components (flattened: $flatSize)")
+
+            if (flatSize == 0) {
+                // Degenerate fixture (no capturable components). In inbox mode,
+                // consume + re-poll so it can't wedge the loop; the host times
+                // out on the (zero) expected PNGs and records the failure.
+                if (inboxMode) {
+                    currentFixtureFile?.let { screenshotManager.consumeFixture(it) }
+                    Log.w(TAG, "Titan inbox: fixture had 0 capturable components — consumed, re-polling")
+                    roots = null
+                    pollGeneration++
+                } else {
+                    capturePhase = CapturePhase.COMPLETE
+                }
+                return@LaunchedEffect
+            }
+
             capturePhase = CapturePhase.CAPTURING
             currentIndex = 0
         } catch (e: Exception) {
-            error = "Failed to load IR: ${e.message}"
-            capturePhase = CapturePhase.ERROR
-            Log.e(TAG, "Error loading document", e)
+            if (inboxMode) {
+                // A malformed fixture must NOT wedge the poll loop: log,
+                // consume it, and keep serving the next one. The feeder records
+                // the timeout for this fixture and moves on.
+                Log.e(TAG, "Titan inbox: failed to load fixture — consuming + re-polling", e)
+                currentFixtureFile?.let { screenshotManager.consumeFixture(it) }
+                roots = null
+                pollGeneration++
+            } else {
+                error = "Failed to load IR: ${e.message}"
+                capturePhase = CapturePhase.ERROR
+                Log.e(TAG, "Error loading document", e)
+            }
         }
     }
 
@@ -205,8 +288,21 @@ fun ScreenshotCaptureScreen(
             if (currentIndex < flat.size - 1) {
                 currentIndex++
             } else {
-                capturePhase = CapturePhase.COMPLETE
                 Log.i(TAG, "Capture complete: $capturedCount captured, $failedCount failed")
+                if (inboxMode) {
+                    // Consume the fixture we just finished (AFTER the last save,
+                    // so a crash mid-capture leaves it in the inbox for retry —
+                    // the primitive's documented contract), then re-arm the
+                    // loading effect to poll for the next fixture.
+                    currentFixtureFile?.let { screenshotManager.consumeFixture(it) }
+                    Log.i(TAG, "Titan inbox: consumed ${currentFixtureFile?.name}, re-polling")
+                    roots = null
+                    currentIndex = -1
+                    capturePhase = CapturePhase.LOADING
+                    pollGeneration++
+                } else {
+                    capturePhase = CapturePhase.COMPLETE
+                }
             }
         }
     }
@@ -225,17 +321,27 @@ fun ScreenshotCaptureScreen(
                     // the rendered component matches the one being saved.
                     val flat = flattenComponents(composedRoots)
                     if (currentIndex >= 0 && currentIndex < flat.size) {
-                        CaptureView(
-                            component = flat[currentIndex],
-                            currentIndex = currentIndex,
-                            totalCount = flat.size,
-                            forceState = forceState,
-                            captureWidthDp = captureWidthDp,
-                            animationTime = animationTime,
-                            keyframes = keyframes,
-                            onCardPositioned = { bounds -> cardBoundsInWindow = bounds },
-                            onRendered = { shouldCapture = true }
-                        )
+                        // WPT-capture-mode ambient flag: inbox capture IS WPT
+                        // capture, so when [inboxMode] is on we suppress the
+                        // synthesized component-name placeholder (real `_text`
+                        // still renders) to match the Chromium browser-ref,
+                        // mirroring the web harness's WPT_MODE path. In bundled
+                        // mode inboxMode is false → we provide the default
+                        // false → the render tree is byte-identical to before,
+                        // so the committed baseline captures are unchanged.
+                        CompositionLocalProvider(LocalWptCaptureMode provides inboxMode) {
+                            CaptureView(
+                                component = flat[currentIndex],
+                                currentIndex = currentIndex,
+                                totalCount = flat.size,
+                                forceState = forceState,
+                                captureWidthDp = captureWidthDp,
+                                animationTime = animationTime,
+                                keyframes = keyframes,
+                                onCardPositioned = { bounds -> cardBoundsInWindow = bounds },
+                                onRendered = { shouldCapture = true }
+                            )
+                        }
                     }
                 }
             }

@@ -267,6 +267,11 @@ case "$PLATFORM_SCOPE" in
   web-only)
     (
       cd "$PROJECT_ROOT"
+      # WPT_MODE=1 suppresses placeholder name text in captures — without it
+      # every ref diff is text-contaminated and reports false
+      # structural-divergence (the pilot-001 symptom; stale-path defect 4).
+      # section-runner.sh has set this at its Step 5 since the fix landed.
+      WPT_MODE=1 \
       BACKGROUND_MODE="$BACKGROUND_MODE" \
       TESTALL_SKIP_LOCK=1 \
       SKIP_IOS=1 SKIP_ANDROID=1 \
@@ -274,12 +279,45 @@ case "$PLATFORM_SCOPE" in
     ) >"$CAPTURE_LOG" 2>&1 || warn "test-all.sh exited non-zero — see $CAPTURE_LOG"
     ;;
   all)
+    # WEB via test-all (natives SKIPPED here): same web capture as web-only,
+    # and this is what converts the combined fixture → out/tmpOutput.json.
     (
       cd "$PROJECT_ROOT"
+      WPT_MODE=1 \
       BACKGROUND_MODE="$BACKGROUND_MODE" \
       TESTALL_SKIP_LOCK=1 \
+      SKIP_IOS=1 SKIP_ANDROID=1 \
       ./test-all.sh "$REL_INPUT"
-    ) >"$CAPTURE_LOG" 2>&1 || warn "test-all.sh exited non-zero — see $CAPTURE_LOG"
+    ) >"$CAPTURE_LOG" 2>&1 || warn "test-all.sh (web) exited non-zero — see $CAPTURE_LOG"
+
+    # NATIVES via the inbox feeders — NOT test-all's bundled native path.
+    # Why: the bundled path (a) has no WPT-mode placeholder suppression, so
+    # empty WPT boxes get component-name text painted on them → false
+    # divergence vs the browser-ref, and (b) renders all ~700 components in
+    # ONE giant capture, which on Android drops a large fraction (observed
+    # 195/737). The feeders launch the app in titan-inbox mode (placeholder
+    # suppressed) and STREAM small per-test docs (robust: per-fixture
+    # timeout + pull-retry), producing `<idx>_<safeName>.png` names that
+    # drop straight into inject-wpt-block's --ios-dir/--android-dir globs.
+    PERTEST_DIR="$RUN_DIR/per-test-ir"
+    log "splitting combined IR into per-test docs for the inbox feeders"
+    node "$TITAN_DIR/split-combined-ir.mjs" --in "$PROJECT_ROOT/out/tmpOutput.json" --out "$PERTEST_DIR" \
+      >>"$CAPTURE_LOG" 2>&1 || warn "split-combined-ir failed — natives will be absent"
+    # Fresh host capture dirs (the feeders reset device state themselves).
+    rm -rf "$PROJECT_ROOT/apps/android-harness/screenshots" "$PROJECT_ROOT/apps/ios-harness/screenshots"
+    if [[ -d "$PERTEST_DIR" ]]; then
+      # Android: feed-android self-locates adb (ANDROID_HOME / default SDK).
+      # 180s/fixture covers the largest split doc (~66 components).
+      log "feeding Android inbox (feed-android.mjs)…"
+      node "$TITAN_DIR/feed-android.mjs" --fixtures "$PERTEST_DIR" \
+        --out "$PROJECT_ROOT/apps/android-harness/screenshots" --timeout-per-fixture 180 \
+        >>"$CAPTURE_LOG" 2>&1 || warn "feed-android exited non-zero — Android column may be partial"
+      # iOS: timeout is MILLISECONDS for this feeder (180000 = 180s).
+      log "feeding iOS inbox (feed-ios.mjs)…"
+      node "$TITAN_DIR/feed-ios.mjs" --fixtures "$PERTEST_DIR" \
+        --out "$PROJECT_ROOT/apps/ios-harness/screenshots" --timeout-per-fixture 180000 \
+        >>"$CAPTURE_LOG" 2>&1 || warn "feed-ios exited non-zero — iOS column may be partial"
+    fi
     ;;
 esac
 
