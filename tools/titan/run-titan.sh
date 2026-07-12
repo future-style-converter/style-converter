@@ -267,6 +267,11 @@ case "$PLATFORM_SCOPE" in
   web-only)
     (
       cd "$PROJECT_ROOT"
+      # WPT_MODE=1 suppresses placeholder name text in captures — without it
+      # every ref diff is text-contaminated and reports false
+      # structural-divergence (the pilot-001 symptom; stale-path defect 4).
+      # section-runner.sh has set this at its Step 5 since the fix landed.
+      WPT_MODE=1 \
       BACKGROUND_MODE="$BACKGROUND_MODE" \
       TESTALL_SKIP_LOCK=1 \
       SKIP_IOS=1 SKIP_ANDROID=1 \
@@ -276,6 +281,10 @@ case "$PLATFORM_SCOPE" in
   all)
     (
       cd "$PROJECT_ROOT"
+      # Same WPT_MODE contract as web-only — the natives receive it via the
+      # harness env transports (intent extra / SIMCTL_CHILD_), mirroring
+      # section-runner.sh Step 5.
+      WPT_MODE=1 \
       BACKGROUND_MODE="$BACKGROUND_MODE" \
       TESTALL_SKIP_LOCK=1 \
       ./test-all.sh "$REL_INPUT"

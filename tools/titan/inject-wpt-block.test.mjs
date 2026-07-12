@@ -143,3 +143,62 @@ test('safe(): replaces non-safe characters with underscore', () => {
   assert.equal(safe('plain__component'), 'plain__component');
   assert.equal(safe('a b c'), 'a_b_c');
 });
+
+// ── stale-path defect 1 pin (R5 restructure) ───────────────────────────────
+//
+// The default --web-dir must point at the LIVE harness capture dir. The
+// pre-R5 `testing/web/screenshots` default silently yielded zero web
+// captures, nulling every browserRef diff in run-titan.sh smoke runs. The
+// default lives inside main()'s argument plumbing (not exported), so this
+// pin scans the module source for the join() segments.
+
+test('default webDir points at apps/web-harness/screenshots (defect 1 stays fixed)', async () => {
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  assert.match(src, /'apps',\s*'web-harness',\s*'screenshots'/, 'live default missing');
+  assert.doesNotMatch(src, /'testing',\s*'web'/, 'pre-R5 testing/web path resurfaced');
+});
+
+// ── diffPlatformVsRef — the Phase-4 per-platform ref-diff helper ───────────
+//
+// One helper serves web/ios/android because all three platforms write
+// identical `<idx>_<safeKey>.png` filenames into their own capture dir.
+// These tests pin the matching, the null contract (no captures → null,
+// NOT an error object), and that a real match produces metrics + the
+// stitchedComponents count.
+
+import { diffPlatformVsRef } from './inject-wpt-block.mjs';
+
+test('diffPlatformVsRef: returns null when the platform dir is missing or empty', async () => {
+  // Missing dir — the web-only smoke's ios/android case.
+  const none = await diffPlatformVsRef({
+    platformDir: '/nonexistent/dir', matchingKeys: ['a'], refPng: '/nope.png', fuzzy: null, cacheKey: 'k',
+  });
+  assert.equal(none, null);
+  // Present-but-unmatched dir (stale unrelated captures must not diff).
+  const dir = await tmpDir('dppr-empty');
+  await writePng(dir, '001_other_component.png', 4, 4, [1, 2, 3, 255]);
+  const unmatched = await diffPlatformVsRef({
+    platformDir: dir, matchingKeys: ['wpt__css-color__t1__0'], refPng: '/nope.png', fuzzy: null, cacheKey: 'k',
+  });
+  assert.equal(unmatched, null);
+});
+
+test('diffPlatformVsRef: matched captures produce metrics with stitchedComponents', async () => {
+  const dir = await tmpDir('dppr-match');
+  const refDir = await tmpDir('dppr-ref');
+  // Two components for one test, plus the browser-ref they diff against.
+  const key1 = 'wpt__css-color__t-001.html__0';
+  const key2 = 'wpt__css-color__t-001.html__1';
+  // 32px squares — ssim.js's windowed 'fast' path needs ≥11px per side,
+  // so tiny 8px fixtures silently yield ssim:null (caught + nulled).
+  await writePng(dir, `000_${safe(key1)}.png`, 32, 32, [0, 128, 0, 255]);
+  await writePng(dir, `001_${safe(key2)}.png`, 32, 32, [0, 128, 0, 255]);
+  const refPng = await writePng(refDir, 'ref.png', 32, 64, [0, 128, 0, 255]);
+  const diff = await diffPlatformVsRef({
+    platformDir: dir, matchingKeys: [key1, key2], refPng, fuzzy: null, cacheKey: 't-001',
+  });
+  assert.ok(diff, 'expected a diff object');
+  assert.equal(diff.stitchedComponents, 2);
+  // Identical solid-green composite vs ref → perfect scores.
+  assert.equal(diff.ssim, 1);
+});

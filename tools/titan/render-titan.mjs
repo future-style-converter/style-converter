@@ -182,6 +182,11 @@ export function aggregateManifest(manifest, bucketsIdx = null) {
       ssim: t.browserRef?.diffs?.['web-ref']?.ssim ?? null,
       labP95: t.browserRef?.diffs?.['web-ref']?.labDeltaE?.p95 ?? null,
       pixelPct: t.browserRef?.diffs?.['web-ref']?.pixelMismatchedPct ?? null,
+      // Phase-4 native-vs-ref pairs. Null means "platform not captured
+      // this run" — the dashboard renders that as an explicit n/a cell,
+      // so a missing platform is a visible gap, never a silent one.
+      iosSsim: t.browserRef?.diffs?.['ios-ref']?.ssim ?? null,
+      androidSsim: t.browserRef?.diffs?.['android-ref']?.ssim ?? null,
     });
   }
 
@@ -224,7 +229,9 @@ export function aggregateManifest(manifest, bucketsIdx = null) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const runsDir = path.join(REPO_ROOT, 'testing', 'titan', 'runs');
+  // Live runs tree (R5 moved testing/titan/ → tools/titan/; the stale path
+  // made the dashboard unable to find ANY run — TITAN stale-path defect 2).
+  const runsDir = path.join(REPO_ROOT, 'tools', 'titan', 'runs');
   const runId = args.run || pickLatestRunWithManifest(runsDir);
   if (!runId) {
     console.error('error: no run id supplied and no manifest.json found under', runsDir);
@@ -238,7 +245,9 @@ async function main() {
 
   const outPath = args.out
     ? path.resolve(args.out)
-    : path.join(REPO_ROOT, 'testing', 'report', 'titan.html');
+    // Default lands inside the live report tree next to index.html — the
+    // pre-R5 `testing/report/` default wrote outside it (defect 3).
+    : path.join(REPO_ROOT, 'tools', 'visual', 'report', 'titan.html');
 
   const bucketsPath = path.join(REPO_ROOT, 'tools', 'titan', 'wpt-buckets.json');
   const bucketsIdx = existsSync(bucketsPath)
@@ -864,6 +873,10 @@ const CLIENT_JS = `
     const ssimStr = t.ssim != null ? Number(t.ssim).toFixed(3) : '—';
     const labP95Str = t.labP95 != null ? Number(t.labP95).toFixed(1) : '—';
     const pixStr = t.pixelPct != null ? Number(t.pixelPct).toFixed(1) + '%' : '—';
+    // Phase-4 native columns. '—' = platform not captured this run — an
+    // EXPLICIT gap the reader can see and go fill, never a silent one.
+    const iosStr = t.iosSsim != null ? Number(t.iosSsim).toFixed(3) : '—';
+    const droidStr = t.androidSsim != null ? Number(t.androidSsim).toFixed(3) : '—';
     const tagsStr = (t.naTags && t.naTags.length)
       ? '<span class="na-tags" title="auto-bucketer tags">' + t.naTags.map(escapeHtml).join(', ') + '</span>'
       : '';
@@ -871,7 +884,9 @@ const CLIENT_JS = `
       '<span class="label-badge" style="background:' + labelColor(t.label) + '" title="' + escapeHtml(t.label) + '">' + labelBadgeAbbrev(t.label) + '</span>' +
       '<span class="test-path"><a href="' + escapeHtml(link) + '" target="_blank" rel="noopener">' + escapeHtml(t.path) + '</a> ' + tagsStr + '</span>' +
       '<span class="label-name" style="background:' + labelColor(t.label) + '">' + escapeHtml(t.label) + '</span>' +
-      '<span class="metric" title="SSIM vs browser-ref">SSIM <b>' + ssimStr + '</b></span>' +
+      '<span class="metric" title="web SSIM vs browser-ref">web <b>' + ssimStr + '</b></span>' +
+      '<span class="metric" title="iOS SSIM vs browser-ref">iOS <b>' + iosStr + '</b></span>' +
+      '<span class="metric" title="Android SSIM vs browser-ref">And <b>' + droidStr + '</b></span>' +
       '<span class="metric" title="CIEDE2000 ΔE p95">ΔE <b>' + labP95Str + '</b></span>' +
       '<span class="metric" title="pixel mismatch percent">Δpx <b>' + pixStr + '</b></span>' +
     '</div>';

@@ -268,3 +268,24 @@ test('aggregateManifest: preserves wptRef + runId + duration in output', () => {
   assert.equal(agg.runId, 'swarm-test');
   assert.equal(agg.duration.captureMs, 60_000);
 });
+
+// ── stale-path defect 2+3 pins (R5 restructure) ────────────────────────────
+//
+// runsDir and the default --out both pointed at pre-R5 `testing/…` paths,
+// leaving the dashboard unable to locate any run and writing its HTML
+// outside the live report tree. Both defaults live inside main() (not
+// exported), so these pins scan the module source for the join() segments.
+
+import { promises as fsPins } from 'node:fs';
+
+test('runsDir points at tools/titan/runs (defect 2 stays fixed)', async () => {
+  const src = await fsPins.readFile(new URL('./render-titan.mjs', import.meta.url), 'utf8');
+  assert.match(src, /'tools',\s*'titan',\s*'runs'/, 'live runs dir missing');
+  assert.doesNotMatch(src, /'testing',\s*'titan'/, 'pre-R5 testing/titan path resurfaced');
+});
+
+test('default --out lands in tools/visual/report (defect 3 stays fixed)', async () => {
+  const src = await fsPins.readFile(new URL('./render-titan.mjs', import.meta.url), 'utf8');
+  assert.match(src, /'tools',\s*'visual',\s*'report',\s*'titan\.html'/, 'live report default missing');
+  assert.doesNotMatch(src, /'testing',\s*'report'/, 'pre-R5 testing/report path resurfaced');
+});

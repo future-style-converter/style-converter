@@ -84,6 +84,14 @@ const CAPTURE_LOG   = arg('--capture-log');   // for duration
 // working unchanged.
 const COMBINED_ARG  = arg('--combined');
 const WEB_DIR_ARG   = arg('--web-dir');
+// Phase-4 native-vs-ref pairs: iOS/Android capture dirs. All three
+// platforms write IDENTICAL per-component filenames into their own dir
+// (collectCaptures() in tools/visual/compare-screenshots.mjs keys rows by
+// raw filename), so the same glob/stitch/diff path serves every platform.
+// Defaults are the live harness dirs; a platform with no matching PNGs
+// simply contributes no diff (web-only runs behave exactly as before).
+const IOS_DIR_ARG     = arg('--ios-dir');
+const ANDROID_DIR_ARG = arg('--android-dir');
 
 // True when the script is invoked directly (`node inject-wpt-block.mjs ...`);
 // false when imported as a module (e.g. inject-wpt-block.test.mjs). Reused
@@ -91,7 +99,7 @@ const WEB_DIR_ARG   = arg('--web-dir');
 const IS_CLI = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
 
 if (IS_CLI && (!MANIFEST_PATH || !TESTS_FILE || !WPT_REF)) {
-  console.error('usage: inject-wpt-block.mjs --manifest <PATH> --tests <FILE> --wpt-ref <SHA> [--run-id <ISO>] [--refs-root <PATH>] [--capture-log <PATH>] [--combined <PATH>] [--web-dir <PATH>]');
+  console.error('usage: inject-wpt-block.mjs --manifest <PATH> --tests <FILE> --wpt-ref <SHA> [--run-id <ISO>] [--refs-root <PATH>] [--capture-log <PATH>] [--combined <PATH>] [--web-dir <PATH>] [--ios-dir <PATH>] [--android-dir <PATH>]');
   process.exit(1);
 }
 
@@ -283,9 +291,40 @@ function checkFuzzyMatch(metrics, fuzzy) {
   return (px <= fuzzy.totalPixels.max && maxDelta <= fuzzy.maxDifference.max);
 }
 
+/** Glob ONE platform's capture dir for a test's per-component PNGs (all
+ *  three platforms write identical `<idx>_<safeKey>.png` filenames into
+ *  their own dir — see collectCaptures() in compare-screenshots.mjs),
+ *  stitch them vertically (swarm-002 RC2 contract), and diff the
+ *  composite against the browser-ref. Returns null when the platform has
+ *  no matching captures (web-only runs, missing platform) — the wpt
+ *  block then simply omits that pair instead of recording noise. */
+async function diffPlatformVsRef({ platformDir, matchingKeys, refPng, fuzzy, cacheKey }) {
+  if (!platformDir) return null;
+  const files = await fs.readdir(platformDir).catch(() => []);
+  // Match per IR component key in declared component-list order so the
+  // stitch order mirrors the on-page/document order on every platform.
+  const matched = [];
+  for (const key of matchingKeys) {
+    const safeKey = safe(key);
+    const f = files.find((x) => x.endsWith(`_${safeKey}.png`));
+    if (f) matched.push(join(platformDir, f));
+  }
+  if (matched.length === 0) return null;
+  try {
+    // Per-platform stitch cache — same layout the web path always used.
+    const composed = await stitchPngsVertically(matched, join(platformDir, '_stitched'), cacheKey);
+    const diff = await diffWebVsRef(composed, refPng);   // metric fn is platform-agnostic (PNG pair in, metrics out)
+    diff.wptFuzzyMatch = checkFuzzyMatch(diff, fuzzy);
+    diff.stitchedComponents = matched.length;
+    return diff;
+  } catch (err) {
+    return { error: String(err?.message ?? err) };
+  }
+}
+
 /** Walk SMOKE_TESTS and assemble manifest.wpt.results from manifest rows
  *  + the keyMap saved by build-combined-fixture. */
-async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, webDir }) {
+async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, webDir, iosDir, androidDir }) {
   const ix = rowIndex(manifest.rows ?? []);
   const results = {};
   let bucketA = 0, bucketB = 0, bucketC = 0;
@@ -355,67 +394,35 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       };
     }
 
-    // Browser-ref pair (Phase 1 — web only). For the WPT test we render
-    // the upstream Chromium ref and compare against our web capture of
-    // the *same component*. This gives us a "spec compliance" signal on
-    // the web pipeline even when iOS/Android weren't captured this run
-    // — which is the common case for the unattended Phase 1 smoke (the
-    // platforms are code-only, see TITAN spec hard rule B).
+    // Browser-ref pairs. For the WPT test we render the upstream Chromium
+    // ref once and compare EVERY captured platform against it (Phase 4:
+    // web-ref + ios-ref + android-ref — the same "spec compliance" signal
+    // per platform). Platforms with no captures this run contribute no
+    // pair — the unattended web-only smoke behaves exactly as Phase 1 did.
+    // The stitch-before-diff contract (swarm-002 RC2: compare a vertical
+    // composite of ALL per-test captures, never just the first) lives in
+    // diffPlatformVsRef and applies uniformly to all three platforms.
     const refStem = basename(testRel, '.html');
     const refPng = refsRoot
       ? join(refsRoot, meta.section, `${refStem}.png`)
       : null;
     const browserRefAvailable = refPng ? await_fs_exists_sync(refPng) : false;
 
-    let webRefDiff = null;
-    if (browserRefAvailable && webDir) {
-      // Web screenshots are written by capture-screenshots.mjs as
-      // `<paddedIndex>_<safeName>.png`. We don't know the indices a priori
-      // so we glob and resolve every per-component capture for this test.
-      //
-      // Swarm-002 RC2 fix: the legacy path took ONLY the first match and
-      // padded it to the browser-ref's dimensions, which trips false
-      // structural-divergence when the browser-ref is a composed multi-
-      // element scene. Now we stitch ALL per-component captures vertically
-      // into a composed PNG (cached in the run dir) and compare that to
-      // the ref. For single-component tests stitchPngsVertically short-
-      // circuits to the original file, so the diff result is unchanged
-      // from the legacy path — backward-compat with the 1-component
-      // baseline distribution.
-      const webFiles = await fs.readdir(webDir).catch(() => []);
-      // Match per IR component key in their declared component-list order
-      // (matchingKeys is built from keyMap entries that retain build order).
-      const matched = [];
-      for (const key of matchingKeys) {
-        const safeKey = safe(key);
-        const f = webFiles.find((x) => x.endsWith(`_${safeKey}.png`));
-        if (f) matched.push(join(webDir, f));
-      }
-      if (matched.length > 0) {
-        try {
-          // Cache stitched PNGs under <webDir>/_stitched/ so subsequent
-          // injects (e.g. recovery re-runs from section-runner.sh Step 7.5)
-          // don't re-do the bitblt loop.
-          const stitchDir = join(webDir, '_stitched');
-          const cacheKey = safe(testRel.replace(/\.html$/, ''));
-          const webComposed = await stitchPngsVertically(matched, stitchDir, cacheKey);
-          webRefDiff = await diffWebVsRef(webComposed, refPng);
-          webRefDiff.wptFuzzyMatch = checkFuzzyMatch(webRefDiff, meta.fuzzy);
-          // Surface the per-test component count so dashboards can show
-          // "stitched N captures into one composed PNG" — useful when a
-          // failing pair is being investigated.
-          webRefDiff.stitchedComponents = matched.length;
-        } catch (err) {
-          webRefDiff = { error: String(err?.message ?? err) };
-        }
-      }
+    let webRefDiff = null, iosRefDiff = null, androidRefDiff = null;
+    if (browserRefAvailable) {
+      const cacheKey = safe(testRel.replace(/\.html$/, ''));
+      webRefDiff = await diffPlatformVsRef({ platformDir: webDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
+      iosRefDiff = await diffPlatformVsRef({ platformDir: iosDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
+      androidRefDiff = await diffPlatformVsRef({ platformDir: androidDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
     }
 
     // Test-level divergence label = severest across all available signals.
     // When inter-platform pairs are missing (web-only mode), the browser-ref
-    // pair becomes the source of truth.
+    // pairs become the source of truth.
     const labelSources = pairKinds.map((k) => pairs[k]?.divergence).filter(Boolean);
     if (webRefDiff?.divergence) labelSources.push(webRefDiff.divergence);
+    if (iosRefDiff?.divergence) labelSources.push(iosRefDiff.divergence);
+    if (androidRefDiff?.divergence) labelSources.push(androidRefDiff.divergence);
     let divergence = labelSources.length ? severestDivergence(labelSources) : 'no-data';
 
     // FIX-E: auto-bucket override. If the WPT exclusion-rule scanner in
@@ -454,15 +461,26 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       browserRef: {
         available: browserRefAvailable,
         path: refPng ? relativeFromRepo(refPng) : null,
-        // Phase 1: web-vs-ref only. Phase 4 will add iOS-ref and Android-ref
-        // entries (they require a per-platform browser-ref re-render at the
-        // platform's native scale, which isn't on the Phase-1 deliverable
-        // list).
-        diffs: webRefDiff ? { 'web-ref': webRefDiff } : null,
+        // Phase 4: one entry per captured platform, all against the SAME
+        // Chromium browser-ref (the pipeline canvas is identical across
+        // platforms by the CaptureCanvas contract, so no per-platform
+        // re-render is needed). A platform with no captures this run is
+        // simply absent — dashboards render that as an explicit gap.
+        diffs: (webRefDiff || iosRefDiff || androidRefDiff)
+          ? {
+              ...(webRefDiff ? { 'web-ref': webRefDiff } : {}),
+              ...(iosRefDiff ? { 'ios-ref': iosRefDiff } : {}),
+              ...(androidRefDiff ? { 'android-ref': androidRefDiff } : {}),
+            }
+          : null,
       },
       divergence,
-      browserRefDivergence: webRefDiff?.divergence
-        ? { web: webRefDiff.divergence }
+      browserRefDivergence: (webRefDiff?.divergence || iosRefDiff?.divergence || androidRefDiff?.divergence)
+        ? {
+            ...(webRefDiff?.divergence ? { web: webRefDiff.divergence } : {}),
+            ...(iosRefDiff?.divergence ? { ios: iosRefDiff.divergence } : {}),
+            ...(androidRefDiff?.divergence ? { android: androidRefDiff.divergence } : {}),
+          }
         : null,
       // FIX-E: surface the matching exclusion tags so dashboards / reviewers
       // can group flipped tests by reason ("all 3,869 requires-inline-FC
@@ -572,8 +590,16 @@ async function main() {
     refsRoot: REFS_ROOT,
     // Per-section runs override --web-dir to their isolated capture path so
     // browser-ref diffs target this section's web PNGs rather than whatever
-    // happens to be in apps/web-harness/screenshots/ at the moment.
-    webDir: WEB_DIR_ARG ? resolve(WEB_DIR_ARG) : join(REPO_ROOT, 'testing', 'web', 'screenshots'),
+    // happens to be in apps/web-harness/screenshots/ at the moment. The
+    // default is the live harness capture dir — the pre-R5 `testing/web/`
+    // path yielded zero web captures, silently nulling every browserRef
+    // diff in run-titan.sh smoke runs (TITAN stale-path defect 1).
+    webDir: WEB_DIR_ARG ? resolve(WEB_DIR_ARG) : join(REPO_ROOT, 'apps', 'web-harness', 'screenshots'),
+    // Native capture dirs (Phase 4). Same override/default pattern as
+    // --web-dir; a dir with no matching PNGs contributes no pair, so
+    // web-only runs are byte-identical to the Phase-1 behaviour.
+    iosDir: IOS_DIR_ARG ? resolve(IOS_DIR_ARG) : join(REPO_ROOT, 'apps', 'ios-harness', 'screenshots'),
+    androidDir: ANDROID_DIR_ARG ? resolve(ANDROID_DIR_ARG) : join(REPO_ROOT, 'apps', 'android-harness', 'screenshots'),
   });
 
   const skipped = buildSkippedBlock(tests, bucketsIdx);
@@ -619,4 +645,4 @@ if (IS_CLI) {
 // Pure helpers exported for unit tests (tools/titan/inject-wpt-block.test.mjs).
 // The orchestrator side of this script remains CLI-driven via the IS_CLI gate
 // above, so importing doesn't trigger a usage-error exit.
-export { stitchPngsVertically, diffWebVsRef, safe };
+export { stitchPngsVertically, diffWebVsRef, diffPlatformVsRef, safe };

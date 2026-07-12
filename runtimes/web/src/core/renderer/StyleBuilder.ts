@@ -119,6 +119,16 @@ export interface CSSStyles {
  * Convert a list of IR properties to CSS styles.
  */
 export function buildStyles(properties: IRProperty[]): CSSStyles {
+  // Malformed-wire guard: every extractor below folds over an ARRAY of
+  // typed IR properties. Extractor-owned payloads (spec 01 `pseudos`)
+  // and hand-authored documents can reach here with other shapes; before
+  // this guard, a single such component threw "properties is not
+  // iterable" during render and unmounted the ENTIRE capture page —
+  // zeroing a whole WPT smoke run to no-data. Loud skip, never crash.
+  if (!Array.isArray(properties)) {
+    console.warn('[StyleBuilder] buildStyles: non-array properties payload skipped:', typeof properties);
+    return {};
+  }
   const styles: CSSStyles = {};
 
   // Phase-2 engine path — spacing properties are bucketed once and
