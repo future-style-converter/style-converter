@@ -330,8 +330,83 @@ try {
   // Give layout one tick to settle into the new viewport.
   await page.evaluate(() => new Promise((r) => setTimeout(r, 50)));
 
-  console.log(`  capturing ${manifest.length} canvases via ${captureWidth}×${pageHeight} screenshot → ${outDir}`);
-  const fullPng = await page.screenshot({ type: 'png' });
+  // Chrome/Chromium silently caps a SINGLE screenshot at 16384 px tall
+  // (SCREENSHOT_CAP — the 2^14 max-texture limit; confirmed on the WPT
+  // per-component page, where a composed border-radius canvas at y≈31 000
+  // came back as unrelated pixels). Anything the compositor is asked to
+  // paint below that offset in ONE screenshot returns garbage/blank, so
+  // every per-component crop taken from past the cap was untrustworthy.
+  //
+  // The tricky part is NOT regressing the committed 327-pair baseline.
+  // Those baselines are the visual-test fixture — 121 canvases, page
+  // height ≈13 000 px, comfortably UNDER the cap. So we branch on height:
+  //   • pageHeight ≤ cap → the exact historical call, byte-for-byte
+  //     (`page.screenshot({ type: 'png' })` on the pageHeight-tall
+  //     viewport). Every sub-cap capture page — including every baseline —
+  //     is captured identically to before. No re-baseline needed.
+  //   • pageHeight > cap → capture in vertical bands (each ≤ BAND_HEIGHT)
+  //     and stitch them into one full-height PNG, so the crop code below is
+  //     unchanged. This is what makes the WPT per-component page (328
+  //     canvases, ≈200 000 px) honest. We deliberately do NOT reuse the
+  //     WPT-composed per-element path here: that path is only viable at
+  //     ~100 elements — at 328 canvases the per-element
+  //     `Runtime.callFunctionOn` round-trips time out (the very reason this
+  //     legacy path exists). Banding keeps ONE screenshot per band (≈13
+  //     bands for 200 000 px), nowhere near the per-element ceiling.
+  const SCREENSHOT_CAP = 16384;   // Chrome's per-screenshot height ceiling (2^14).
+  const BAND_HEIGHT    = 16000;   // per-band capture height — a margin under the cap.
+
+  // sharp is needed both to stitch the bands and to crop the components, so
+  // import it once here (hoisted out of the crop section below). See the
+  // crop-section comment for why limitInputPixels:false is on every call.
+  const sharpMod = await import('sharp');
+  const sharp = sharpMod.default;
+
+  let fullPng;
+  if (pageHeight <= SCREENSHOT_CAP) {
+    // Fits in one screenshot → identical bytes to the historical path. This
+    // is the branch every committed-baseline capture takes.
+    console.log(`  capturing ${manifest.length} canvases via ${captureWidth}×${pageHeight} screenshot → ${outDir}`);
+    fullPng = await page.screenshot({ type: 'png' });
+  } else {
+    // Page exceeds the cap. Grab it in vertical bands and composite them
+    // back into one full-height PNG at their captured offsets.
+    const bandCount = Math.ceil(pageHeight / BAND_HEIGHT);
+    console.log(`  capturing ${manifest.length} canvases via ${bandCount} bands of ≤${BAND_HEIGHT}px (page ${captureWidth}×${pageHeight} exceeds ${SCREENSHOT_CAP}px cap) → ${outDir}`);
+    const bands = [];
+    for (let top = 0; top < pageHeight; top += BAND_HEIGHT) {
+      const height = Math.min(BAND_HEIGHT, pageHeight - top);
+      // `clip` bounds the OUTPUT image to this band, so no single screenshot
+      // ever reaches the cap. `captureBeyondViewport` is the load-bearing
+      // flag: it tells Chrome to render the clipped region even when it sits
+      // below the composited viewport — without it, every band past the
+      // first comes back blank, i.e. the same failure as the cap itself.
+      const buf = await page.screenshot({
+        type: 'png',
+        clip: { x: 0, y: top, width: captureWidth, height },
+        captureBeyondViewport: true,
+      });
+      bands.push({ input: buf, top, left: 0 });
+    }
+    // The bands tile [0, pageHeight) exactly (each starts where the previous
+    // ended; the last is trimmed to the remainder), so compositing them onto
+    // a blank full-height canvas reproduces what an uncapped single
+    // screenshot would have been — no gaps, no overlap. The background is
+    // the capture bg (#1A1A2E) purely as a safety net; full tiling means it
+    // is never actually visible.
+    fullPng = await sharp({
+      create: {
+        width: captureWidth,
+        height: pageHeight,
+        channels: 4,
+        background: { r: 0x1A, g: 0x1A, b: 0x2E, alpha: 1 },
+      },
+      limitInputPixels: false,
+    })
+      .composite(bands.map((b) => ({ input: b.input, top: b.top, left: b.left })))
+      .png()
+      .toBuffer();
+  }
 
   // Crop with sharp — CPU-only, no more round-trips to the browser.
   //
@@ -353,10 +428,8 @@ try {
   //
   // limitInputPixels: false bypasses sharp's default 268M-pixel guard
   // (intent: prevent OOM on adversarial input — for our trusted captures
-  // it's a false positive). Passed to ALL sharp() invocations.
-  const sharpMod = await import('sharp');
-  const sharp = sharpMod.default;
-
+  // it's a false positive). Passed to ALL sharp() invocations. `sharp` is
+  // imported once above (hoisted so the band-stitch path can use it too).
   const baseMeta = await sharp(fullPng, { limitInputPixels: false }).metadata();
   const imgW = baseMeta.width ?? captureWidth;
   const imgH = baseMeta.height ?? pageHeight;
