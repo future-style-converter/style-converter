@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRDocumentDecoder
 import com.styleconverter.runtime.core.renderer.ComponentHost
+import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.renderer.SlotComposer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -320,17 +321,27 @@ fun ScreenshotCaptureScreen(
                     // the rendered component matches the one being saved.
                     val flat = flattenComponents(composedRoots)
                     if (currentIndex >= 0 && currentIndex < flat.size) {
-                        CaptureView(
-                            component = flat[currentIndex],
-                            currentIndex = currentIndex,
-                            totalCount = flat.size,
-                            forceState = forceState,
-                            captureWidthDp = captureWidthDp,
-                            animationTime = animationTime,
-                            keyframes = keyframes,
-                            onCardPositioned = { bounds -> cardBoundsInWindow = bounds },
-                            onRendered = { shouldCapture = true }
-                        )
+                        // WPT-capture-mode ambient flag: inbox capture IS WPT
+                        // capture, so when [inboxMode] is on we suppress the
+                        // synthesized component-name placeholder (real `_text`
+                        // still renders) to match the Chromium browser-ref,
+                        // mirroring the web harness's WPT_MODE path. In bundled
+                        // mode inboxMode is false → we provide the default
+                        // false → the render tree is byte-identical to before,
+                        // so the committed baseline captures are unchanged.
+                        CompositionLocalProvider(LocalWptCaptureMode provides inboxMode) {
+                            CaptureView(
+                                component = flat[currentIndex],
+                                currentIndex = currentIndex,
+                                totalCount = flat.size,
+                                forceState = forceState,
+                                captureWidthDp = captureWidthDp,
+                                animationTime = animationTime,
+                                keyframes = keyframes,
+                                onCardPositioned = { bounds -> cardBoundsInWindow = bounds },
+                                onRendered = { shouldCapture = true }
+                            )
+                        }
                     }
                 }
             }

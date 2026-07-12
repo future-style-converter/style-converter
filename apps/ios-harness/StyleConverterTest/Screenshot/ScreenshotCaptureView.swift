@@ -268,8 +268,18 @@ func captureAllComponents(_ document: IRDocument) {
         // Identical to ScreenshotCaptureView.captureNext: the chromeless
         // CaptureCanvas with the document keyframes re-published on the
         // isolated ImageRenderer tree (Wave 8 comment there).
+        //
+        // WPT parity: THIS helper is the TITAN inbox/WPT capture path only
+        // (InboxCaptureView is its sole caller), so publish WPT capture mode
+        // so the runtime drops the synthesized component-name placeholder for
+        // nameless-empty leaves — the browser-ref never paints it. Gated on
+        // CaptureOverrides.titanInbox (the inbox=WPT launch signal) so it is
+        // provably OFF for the normal bundled auto-capture flow in
+        // captureNext, which does NOT set this and keeps every committed
+        // baseline byte-identical.
         let canvas = CaptureCanvas(component: component)
             .environment(\.styleKeyframes, document.keyframes)
+            .environment(\.wptCaptureMode, CaptureOverrides.titanInbox)
         if let image = ScreenshotManager.render(canvas) {
             ScreenshotManager.save(image: image, index: index, name: component.name)
         }
