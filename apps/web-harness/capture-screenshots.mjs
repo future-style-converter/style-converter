@@ -168,11 +168,19 @@ try {
   // visual-test fixture relies on it for empty-container identification
   // matching the iOS / Android placeholder labels.
   const wptMode = process.env.WPT_MODE === '1';
+  // WPT COMPOSED capture mode. When set, the app renders ONE canvas per WPT
+  // test (all of that test's components composed on a single browser-ref-
+  // framed surface) instead of one canvas per component, and we drop the
+  // numeric index prefix from the filename so each capture lands at
+  // `<safe(testKey)>.png` — the exact name inject-wpt-block.mjs's composed
+  // path globs for (no vertical stitch needed). Independent of WPT_MODE,
+  // but the TITAN driver sets both (placeholder suppression stays on).
+  const wptComposed = process.env.WPT_COMPOSED === '1';
   // width/forceState ride the URL so CaptureGallery can size the canvas and
   // stamp `data-force-state` (the runtime reads it at style resolution).
   // Defaults produce the byte-identical legacy URL — see buildCaptureUrl.
-  const captureUrl = buildCaptureUrl(baseUrl, wptMode, { width: captureWidth, forceState, animationTime });
-  console.log(`→ loading ${captureUrl}${wptMode ? ' (WPT_MODE=1: placeholder text suppressed)' : ''}`);
+  const captureUrl = buildCaptureUrl(baseUrl, wptMode, { width: captureWidth, forceState, animationTime, wptComposed });
+  console.log(`→ loading ${captureUrl}${wptMode ? ' (WPT_MODE=1: placeholder text suppressed)' : ''}${wptComposed ? ' (WPT_COMPOSED=1: one composed PNG per test)' : ''}`);
   await page.goto(captureUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
 
   // Wait for the CaptureGallery sentinel (emitted after the IR is loaded and
@@ -260,6 +268,51 @@ try {
     })
   );
 
+  // ── Composed WPT capture: per-element screenshots ────────────────────────
+  //
+  // The composed page is ONE full-height, min-600px canvas PER TEST, so it
+  // grows very tall (100 tests × ≥600px ≈ 60 000 px). The single-full-page-
+  // screenshot path below silently caps at Chrome's max screenshot height
+  // (~16 384 px): everything past that crops to garbage (a composed
+  // border-radius canvas at y≈31 000 came back as unrelated yellow pixels).
+  // The per-component path masks this because its min-height-600 dark
+  // padding dominates SSIM, but the composed diff is honest and exposes it.
+  //
+  // Fix for composed mode: screenshot each canvas element DIRECTLY
+  // (elementHandle.screenshot scrolls it into view and captures its own
+  // box, immune to the page-height cap). Only 100 elements here — well under
+  // the per-element `Runtime.callFunctionOn` limit that made this approach
+  // untenable for the 328-canvas per-component page — and we avoid a
+  // per-element evaluate() by aligning handles to the manifest positionally
+  // (page.$$ and $$eval share querySelectorAll DOM order). Legacy per-
+  // component capture keeps the single-screenshot + sharp-crop path verbatim.
+  if (wptComposed) {
+    const handles = await page.$$('[data-capture-canvas]');
+    if (handles.length !== manifest.length) {
+      throw new Error(`composed capture: handle/manifest length mismatch (${handles.length}/${manifest.length})`);
+    }
+    console.log(`  capturing ${manifest.length} composed canvases via per-element screenshots → ${outDir}`);
+    let captured = 0;
+    let zeroDim = 0;
+    for (let i = 0; i < manifest.length; i++) {
+      const entry = manifest[i];
+      if (entry.width <= 0 || entry.height <= 0) {
+        console.warn(`  ⚠ composed canvas ${entry.index} (${entry.name}) has zero dimensions — skipping`);
+        zeroDim += 1;
+        continue;
+      }
+      // Composed filename is the sanitised test key + .png (no index prefix)
+      // — exactly what inject-wpt-block.mjs's composed path globs for.
+      const safe = entry.name.replace(/[^A-Za-z0-9._-]/g, '_');
+      await handles[i].screenshot({ path: resolve(outDir, `${safe}.png`), type: 'png' });
+      captured += 1;
+    }
+    if (zeroDim > 0) console.warn(`  ⚠ skipped ${zeroDim} zero-dim composed canvases`);
+    console.log(`✓ captured ${captured} / ${manifest.length} composed canvases`);
+  } else {
+  // (top-level module code — can't `return` early, so the legacy per-
+  //  component single-screenshot + sharp-crop path lives in this else block.)
+  //
   // Capture gallery is a flat vertical list starting at (0,0); the page
   // height is the sum of all canvas heights (~20 000 px for 109 canvases).
   //
@@ -319,7 +372,13 @@ try {
       continue;
     }
     const safe = entry.name.replace(/[^A-Za-z0-9._-]/g, '_');
-    const filename = `${String(entry.index).padStart(3, '0')}_${safe}.png`;
+    // Composed mode: the canvas name IS the WPT test key, and the diff side
+    // (inject-wpt-block.mjs composed path) looks the file up by exactly
+    // `<safe(testKey)>.png` — so we DROP the `<NNN>_` index prefix that the
+    // per-component path uses (there it disambiguates same-named components;
+    // here each name is a unique test key). Legacy per-component runs keep
+    // the padded index prefix byte-for-byte.
+    const filename = wptComposed ? `${safe}.png` : `${String(entry.index).padStart(3, '0')}_${safe}.png`;
     // Clamp against the actual screenshot bounds — layout can round a
     // canvas's bottom edge one pixel past the measured pageHeight (e.g. when
     // aspect-ratio produces a fractional height), which makes sharp's
@@ -352,6 +411,7 @@ try {
   }
 
   console.log(`✓ captured ${captured} / ${manifest.length} canvases`);
+  }   // end else (legacy per-component capture path)
 } finally {
   await browser.close();
 }

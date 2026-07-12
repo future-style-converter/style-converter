@@ -63,6 +63,18 @@
  *                          `&animationTime=<seconds>` when set (0 is a
  *                          meaningful value — the initial frame — so the
  *                          guard is `!= null`, not truthiness).
+ * @param {boolean} [opts.wptComposed] - WPT COMPOSED capture mode
+ *                          (`WPT_COMPOSED` env). When true, appends
+ *                          `&wptComposed=1` so App.tsx renders the
+ *                          ComposedCaptureGallery: components are grouped
+ *                          per WPT test and rendered COMPOSED on ONE canvas
+ *                          each (framed like the Chromium browser-ref), so
+ *                          the diff is one composed PNG vs the ref — no
+ *                          post-hoc vertical stitch. Independent of `wpt=1`
+ *                          (which stays on for placeholder suppression), so
+ *                          both suffixes ride the URL together. Omitted /
+ *                          false ⇒ the byte-identical legacy per-component
+ *                          gallery.
  * @returns {string} The fully formed URL to navigate to.
  */
 export function buildCaptureUrl(baseUrl, wptMode, opts = {}) {
@@ -74,6 +86,10 @@ export function buildCaptureUrl(baseUrl, wptMode, opts = {}) {
   // `mode=capture` first preserves byte-identity with all pre-fix URLs in
   // logs and historical capture artifacts.
   const wptSuffix = wptMode ? '&wpt=1' : '';
+  // `&wptComposed=1` — the composed WPT capture path. Emitted right after
+  // `wpt=1` so the two WPT signals stay adjacent in logs; guarded on the
+  // opt so a non-composed run's URL is byte-identical to the legacy form.
+  const composedSuffix = opts.wptComposed ? '&wptComposed=1' : '';
   // Dynamic-styling hooks, in fixed order (width, then forceState, then
   // animationTime) so the URL stays deterministic for logs / artifact
   // matching. The `!== 390` guard keeps the default path byte-identical
@@ -82,5 +98,5 @@ export function buildCaptureUrl(baseUrl, wptMode, opts = {}) {
   const stateSuffix = opts.forceState ? `&forceState=${opts.forceState}` : '';
   // `0` is legal (freeze at the initial frame), so test presence, not truth.
   const timeSuffix = opts.animationTime != null ? `&animationTime=${opts.animationTime}` : '';
-  return `${trimmed}/?mode=capture${wptSuffix}${widthSuffix}${stateSuffix}${timeSuffix}`;
+  return `${trimmed}/?mode=capture${wptSuffix}${composedSuffix}${widthSuffix}${stateSuffix}${timeSuffix}`;
 }

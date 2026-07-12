@@ -9,6 +9,7 @@ import type { IRDocument } from '@style-converter/web/core/ir/IRModels';
 import { decodeIRDocument } from '@style-converter/web/core/ir/IRDecode';
 import { ComponentGallery } from './ComponentGallery';
 import { CaptureGallery } from './CaptureGallery';
+import { ComposedCaptureGallery } from './ComposedCaptureGallery';
 import { FixtureCanvas } from './FixtureCanvas';
 import { useHotReload } from '@style-converter/web/debug/hotreload/HotReloadManager';
 // Dynamic-styling stylesheet mount (spec 06 + spec 07 §1.2): selector/
@@ -39,6 +40,20 @@ function isCaptureMode(): boolean {
 function isWptMode(): boolean {
   if (typeof window === 'undefined') return false;
   return new URLSearchParams(window.location.search).get('wpt') === '1';
+}
+
+/**
+ * Returns true when the URL contains `?wptComposed=1` — the WPT COMPOSED
+ * capture mode. In this mode capture rendering routes to
+ * ComposedCaptureGallery: the combined fixture's components are grouped per
+ * WPT test and each test is rendered COMPOSED on ONE browser-ref-framed
+ * canvas (see ComposedCaptureGallery.tsx). Orthogonal to `?wpt=1` (which
+ * stays on for placeholder suppression + the wpt-mode box-sizing override);
+ * parsed once per mount.
+ */
+function isWptComposedMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('wptComposed') === '1';
 }
 
 /**
@@ -73,6 +88,10 @@ export function App() {
   // content-box }` override restores the WPT spec's assumed default box-
   // sizing model on SDUI elements only (F-G-HARNESS swarm-003 Bug 1).
   const [wptMode] = useState(isWptMode);
+  // Parse `?wptComposed=1` once per mount. Selects the ComposedCaptureGallery
+  // over the per-component CaptureGallery inside capture mode. Same URL-driven,
+  // read-once lifecycle as the other capture-mode flags.
+  const [wptComposed] = useState(isWptComposedMode);
 
   // Toggle the body class once, before the first render, so the chromeless
   // capture styles apply to #root and body without a flash of the gallery
@@ -204,7 +223,12 @@ export function App() {
     if (!document) {
       return <div data-capture-loading="true" style={{ display: 'none' }} />;
     }
-    return <CaptureGallery document={document} />;
+    // Composed WPT mode routes to the per-test composed gallery; everything
+    // else (the 327-pair baseline AND the legacy per-component WPT path)
+    // keeps the flat per-component CaptureGallery unchanged.
+    return wptComposed
+      ? <ComposedCaptureGallery document={document} />
+      : <CaptureGallery document={document} />;
   }
 
   return (

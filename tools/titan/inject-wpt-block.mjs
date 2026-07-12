@@ -322,6 +322,41 @@ async function diffPlatformVsRef({ platformDir, matchingKeys, refPng, fuzzy, cac
   }
 }
 
+/** Diff a per-test COMPOSED web capture against the browser-ref, WITHOUT
+ *  the vertical stitch.
+ *
+ *  The web harness's WPT_COMPOSED capture mode
+ *  (apps/web-harness/src/ui/ComposedCaptureGallery.tsx) renders all of a
+ *  test's components COMPOSED on ONE browser-ref-framed canvas and writes a
+ *  single PNG named `<safe(testKey)>.png`, where testKey =
+ *  `wpt__<section>__<stem>` (the same key split-combined-ir.mjs and the
+ *  build-combined-fixture component naming use). That composite already
+ *  reproduces the reference page's layout (bar heights, gaps, the 16px body
+ *  padding), so we diff it DIRECTLY against the ref — no stitchPngsVertically,
+ *  whose vertical concatenation of per-component crops is exactly the
+ *  geometry error the composed mode removes.
+ *
+ *  Returns null when no composed PNG exists for this test (e.g. a
+ *  per-component/legacy web capture) so the caller can fall back to the
+ *  stitch path — nothing else breaks. On a real match the returned metric
+ *  block carries `composed:true` so dashboards can tell the two web-ref
+ *  diff provenances apart. */
+async function diffComposedWebVsRef({ webDir, testKey, refPng, fuzzy }) {
+  if (!webDir) return null;
+  // The composed capture filename is the sanitised test key + .png. safe()
+  // here is the SAME rule capture-screenshots.mjs applies to the canvas name.
+  const composedPath = join(webDir, `${safe(testKey)}.png`);
+  if (!_existsSync(composedPath)) return null;   // no composed capture → caller stitches
+  try {
+    const diff = await diffWebVsRef(composedPath, refPng);  // one composite PNG vs the ref
+    diff.wptFuzzyMatch = checkFuzzyMatch(diff, fuzzy);       // Section 5.3 fuzzy tolerance (informational)
+    diff.composed = true;                                    // provenance marker
+    return diff;
+  } catch (err) {
+    return { error: String(err?.message ?? err) };
+  }
+}
+
 /** Walk SMOKE_TESTS and assemble manifest.wpt.results from manifest rows
  *  + the keyMap saved by build-combined-fixture. */
 async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, webDir, iosDir, androidDir }) {
@@ -411,7 +446,20 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     let webRefDiff = null, iosRefDiff = null, androidRefDiff = null;
     if (browserRefAvailable) {
       const cacheKey = safe(testRel.replace(/\.html$/, ''));
-      webRefDiff = await diffPlatformVsRef({ platformDir: webDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
+      // WPT test key = `wpt__<section>__<stem>` — matches the composed
+      // capture filename the web harness emits (ComposedCaptureGallery.tsx)
+      // and build-combined-fixture.mjs's `wpt__<section>__<stem>__<idx>`
+      // root naming. section is parts[1] of the test path (meta.section);
+      // stem is the .html basename (refStem, computed above).
+      const testKey = `wpt__${meta.section}__${refStem}`;
+      // WEB: prefer the COMPOSED single-PNG diff when the harness produced
+      // one (WPT_COMPOSED capture); otherwise fall back to the legacy
+      // per-component vertical stitch so non-composed runs are unchanged.
+      webRefDiff = await diffComposedWebVsRef({ webDir, testKey, refPng, fuzzy: meta.fuzzy });
+      if (!webRefDiff) {
+        webRefDiff = await diffPlatformVsRef({ platformDir: webDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
+      }
+      // NATIVES are untouched by this task — always the per-component stitch.
       iosRefDiff = await diffPlatformVsRef({ platformDir: iosDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
       androidRefDiff = await diffPlatformVsRef({ platformDir: androidDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
     }
@@ -645,4 +693,4 @@ if (IS_CLI) {
 // Pure helpers exported for unit tests (tools/titan/inject-wpt-block.test.mjs).
 // The orchestrator side of this script remains CLI-driven via the IS_CLI gate
 // above, so importing doesn't trigger a usage-error exit.
-export { stitchPngsVertically, diffWebVsRef, diffPlatformVsRef, safe };
+export { stitchPngsVertically, diffWebVsRef, diffPlatformVsRef, diffComposedWebVsRef, safe };
