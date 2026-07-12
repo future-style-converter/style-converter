@@ -753,8 +753,10 @@ table.heatmap td.hm-cell:hover:not(.empty) {
 
 .test-row {
   display: grid;
-  grid-template-columns: 24px 1fr 130px 70px 70px 70px;
-  gap: 10px;
+  /* badge · path · label · 5 metrics (web/iOS/And SSIM, ΔE, Δpx) — the
+     three per-platform browser-ref columns are the Phase-4 addition. */
+  grid-template-columns: 24px 1fr 120px 58px 58px 58px 58px 58px;
+  gap: 8px;
   align-items: center;
   padding: 4px 12px;
   font-family: ui-monospace, monospace;
