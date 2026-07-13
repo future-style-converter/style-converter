@@ -580,9 +580,21 @@ private struct MinBoxFloor: ViewModifier {
     /// The component's sizing bag — decides which axes get the floor.
     let size: SizeConfig
 
+    // TITAN Round 4 (GAP 1) — the composed-WPT capture flag. When true the
+    // 50×30 floor is DROPPED so a block box hugs its real content and its
+    // width comes from the block-flow fill (browser-ref parity). This is the
+    // iOS analogue of web's WPT branch skipping the fit-content + minWidth
+    // 50 / minHeight 30 defaults (apps/web-harness ComponentRenderer.tsx):
+    // without it a bare <p> bar is floored at 30px tall (vs the ref's ~18px
+    // line box) and the composed multi-bar tests can't align. Flag off (the
+    // product path + the whole 327-pair baseline) keeps the floor exactly.
+    @Environment(\.wptCaptureMode) private var wptCaptureMode
+
     func body(content: Content) -> some View {
-        // Per-axis floors (nil = axis already constrained by the IR).
-        let floor = StyleBuilder.minFloor(for: size)
+        // Composed WPT capture: no synthetic floor — the box hugs content
+        // (height) and takes its width from the block-flow fill / IR.
+        let floor: (width: CGFloat?, height: CGFloat?) =
+            wptCaptureMode ? (nil, nil) : StyleBuilder.minFloor(for: size)
         if floor.width == nil && floor.height == nil {
             // Fully constrained → identity, no extra frame node.
             content

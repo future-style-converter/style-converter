@@ -37,7 +37,9 @@ import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRDocumentDecoder
 import com.styleconverter.runtime.core.renderer.ComponentHost
 import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
+import com.styleconverter.runtime.core.renderer.LocalWptComposedMode
 import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.core.types.ValueExtractors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.JsonArray
@@ -408,8 +410,15 @@ fun ScreenshotCaptureScreen(
                     // Composed WPT capture IS WPT capture → suppress the
                     // synthesized component-name placeholder (same ambient flag
                     // as the per-component inbox path) so the render matches the
-                    // Chromium browser-ref.
-                    CompositionLocalProvider(LocalWptCaptureMode provides true) {
+                    // Chromium browser-ref. LocalWptComposedMode is ADDITIONALLY
+                    // set true here (and ONLY here) so the Round-4b composed-only
+                    // line-box + padding calibration in PlaceholderContent fires
+                    // for composed captures but NOT for the per-component inbox
+                    // path or the 327-pair baseline (both leave it default false).
+                    CompositionLocalProvider(
+                        LocalWptCaptureMode provides true,
+                        LocalWptComposedMode provides true
+                    ) {
                         ComposedCaptureView(
                             roots = composedRoots,
                             forceState = forceState,
@@ -783,6 +792,22 @@ private val CaptureCanvasBg      = Color(0xFF1A1A2E)
 private val ComposedCanvasMinHeight = 600.dp
 
 /**
+ * Resolve the composed canvas background (FIX 3, TITAN Round 4b) — the native
+ * twin of the web harness's `resolveCanvasBackground`. Find the document's
+ * `meta.role == 'body-root'` component (a document has one body) and read its
+ * BackgroundColor through the SAME [ValueExtractors.extractColor] the renderer
+ * uses, so the painted color matches what the runtime would render. When there
+ * is no body-root, or it declares no background, fall back to the pipeline
+ * default #1A1A2E so every other test's canvas is byte-identical to before.
+ */
+internal fun resolveComposedCanvasBackground(roots: List<IRComponent>): Color {
+    val bodyRoot = roots.firstOrNull { it.role == "body-root" } ?: return CaptureCanvasBg
+    val bg = bodyRoot.properties.firstOrNull { it.type == "BackgroundColor" }
+        ?.data?.let { ValueExtractors.extractColor(it) }
+    return bg ?: CaptureCanvasBg
+}
+
+/**
  * COMPOSED capture host (TITAN Round 3). No progress chrome — the composed
  * canvas must sit at window origin (0,0) so its PixelCopy rect stays inside the
  * capturable window. The canvas renders the WHOLE document (all roots, document
@@ -867,6 +892,29 @@ private fun ComposedCaptureCanvas(
         onRendered()
     }
 
+    // FIX 3 (body/root background propagation) — TITAN Round 4b. The ref frames
+    // every page with a ZERO-specificity `:where(html,body){background:#1A1A2E}`,
+    // so a reference that sets its OWN `body{background:…}` (specificity 0,0,1)
+    // WINS and paints the whole page that color (css-color/a98rgb-003's grey
+    // page). The reader tags that body background as a `meta.role:'body-root'`
+    // component; we resolve its BackgroundColor and paint the composed canvas
+    // with it (fallback #1A1A2E), mirroring the web harness's
+    // resolveCanvasBackground exactly. Pure per document → memoise on identity.
+    val canvasBackground = androidx.compose.runtime.remember(roots) {
+        resolveComposedCanvasBackground(roots)
+    }
+    // FIX 1 (UA default margins) — TITAN Round 4b. Per-root effective UA block
+    // margins (IR-declared sides zeroed — the runtime's margin applier already
+    // renders those and wins over UA), then the collapsed vertical gaps to
+    // inject between the stacked roots so the composed page reproduces the ref's
+    // ~16px inter-`<p>` gaps. Pure/testable helpers in UaBlockMargins.kt.
+    val rootMargins = androidx.compose.runtime.remember(roots) {
+        roots.map { effectiveUaMargins(it) }
+    }
+    val rootGaps = androidx.compose.runtime.remember(rootMargins) {
+        collapsedVerticalGaps(rootMargins.map { it.top to it.bottom })
+    }
+
     // `onGloballyPositioned` BEFORE `.padding()` so it reports the full outer
     // 390dp × natural-height rect (including padding + background), matching the
     // ref's outer canvas — same ordering rationale as CaptureCanvas.
@@ -874,7 +922,7 @@ private fun ComposedCaptureCanvas(
         modifier = Modifier
             .width(canvasWidth)
             .heightIn(min = ComposedCanvasMinHeight)
-            .background(CaptureCanvasBg)
+            .background(canvasBackground)
             .testTag("composed-capture-canvas")
             .onGloballyPositioned { coords ->
                 val pos = coords.positionInWindow()
@@ -902,11 +950,31 @@ private fun ComposedCaptureCanvas(
             com.styleconverter.runtime.animations.KeyframeAnimationDriver.LocalForcedAnimationTime provides
                 animationTime
         ) {
-            // Document flow: roots stacked top-to-bottom, no inter-item gap
-            // (block boxes abut; each root carries its own margins). Mirrors the
-            // web composed canvas's flex column of roots in sibling order.
+            // Document flow: roots stacked top-to-bottom. FIX 1 injects the
+            // COLLAPSED UA-default vertical margins as Spacers between roots so
+            // the composed page reproduces the browser-ref's inter-`<p>` gaps
+            // (rootGaps has size roots+1: [beforeFirst, between…, afterLast]).
+            // Any horizontal UA inset (blockquote/figure 40px) wraps the root in
+            // a start/end-padded Box. Mirrors the ref's block flow + the web
+            // composed canvas's `margin: revert` on the stacked roots.
             Column(modifier = Modifier.fillMaxWidth()) {
-                roots.forEach { root -> ComponentHost.Render(root) }
+                roots.forEachIndexed { i, root ->
+                    // Gap ABOVE this root (collapsed with the previous root's
+                    // bottom margin; the first root's is its full top margin).
+                    if (rootGaps[i] > 0) Spacer(Modifier.height(rootGaps[i].dp))
+                    val m = rootMargins[i]
+                    if (m.left > 0 || m.right > 0) {
+                        // Horizontal UA inset (blockquote/figure) — pad the root
+                        // box left/right; the runtime renders inside it.
+                        Box(modifier = Modifier.padding(start = m.left.dp, end = m.right.dp)) {
+                            ComponentHost.Render(root)
+                        }
+                    } else {
+                        ComponentHost.Render(root)
+                    }
+                }
+                // Trailing gap = the last root's (uncollapsed) bottom margin.
+                if (rootGaps[roots.size] > 0) Spacer(Modifier.height(rootGaps[roots.size].dp))
             }
         }
     }

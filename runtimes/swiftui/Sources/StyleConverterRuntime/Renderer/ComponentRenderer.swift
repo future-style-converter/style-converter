@@ -44,6 +44,15 @@ public struct ComponentRenderer: View {
     // ContainingBlock.swift for the full rationale.
     @Environment(\.containingBlockWidth) private var containingBlockWidth
 
+    // TITAN Round 4 (GAP 1, WIDTH half) — the composed-WPT block-flow
+    // fill-width channel (WPTCaptureMode.swift). nil everywhere but the
+    // composed canvas, which publishes the 358px content-box width on its
+    // stacked ROOTS so an auto-width block box paints full-bleed like the
+    // browser-ref (the iOS analogue of web's WPT width:auto carve-out). We
+    // fold it into SizeConfig below (same path as flexStretchWidth) and
+    // reset it to nil for our children so block-fill stays root-scoped.
+    @Environment(\.wptBlockFlowFillWidth) private var wptBlockFlowFillWidth
+
     // Fidelity wave 1 — CSS text inheritance channel. The converter
     // flattens no cascade, so a parent's font-size/family/weight/
     // letter-spacing/text-align never reached child renders on iOS while
@@ -388,6 +397,50 @@ public struct ComponentRenderer: View {
         return component.text?.isEmpty ?? true
     }
 
+    // MARK: - WPT composed line-box calibration (TITAN Round 4 GAP 1, height half)
+
+    /// The Chromium browser-ref's default-font `<p>` line box at a 16px
+    /// root — ~18px (line-height ≈ 1.125). capture-browser-ref.mjs forces
+    /// NO font, so the ref's text lays out in Chromium's default UA face;
+    /// the harness FORCES Inter for iOS/Android/web parity, and Inter's
+    /// `normal` line box (~20px @16px) is ~2px TALLER per line. Flush bars
+    /// hid that; once GAP 1's UA margins spread the bars apart the 2px
+    /// COMPOUNDS down a 10-bar test into ~half-a-pitch vertical drift and
+    /// the edge-phase-sensitive SSIM collapses (web commit 4e6bacf0). The
+    /// web fix pins `line-height: 18px` in composed mode; this is the same
+    /// calibration constant for the native path.
+    public static let wptRefLineBoxPx: CGFloat = 18
+
+    /// The line-height a placeholder text run should lay out with. Outside
+    /// WPT capture (the product path + the whole committed baseline corpus)
+    /// this is IDENTITY — the IR's declared line-height, or nil for
+    /// SwiftUI's natural `line-height: normal` metrics — so every existing
+    /// render is byte-unchanged. In WPT capture it DEFERS to any
+    /// IR-declared line-height (a test that sets its own keeps it) and
+    /// otherwise pins the ref line box (18px @16px) so a forced-Inter bar
+    /// matches the browser-ref's default-font `<p>` height, removing the
+    /// compounding drift. Pure + static so WPTCaptureModeTests pins it
+    /// without a render surface (same pattern as suppressesNamePlaceholder).
+    public static func effectiveLineHeight(declared: CGFloat?,
+                                           wptCaptureMode: Bool) -> CGFloat? {
+        // IR-declared line-height always wins (author > our calibration).
+        if let declared { return declared }
+        // Bare text: pin the ref line box only under WPT capture; otherwise
+        // nil = SwiftUI's natural metrics (unchanged product behaviour).
+        return wptCaptureMode ? wptRefLineBoxPx : nil
+    }
+
+    /// Resolve the background color a property list paints, via the SAME
+    /// engine the renderer uses (StyleBuilder), returning nil when none is
+    /// declared. Public so the harness's ComposedCaptureCanvas can read a
+    /// document body-root's background to paint the composed canvas (TITAN
+    /// Round 4 GAP 2) byte-identically to how the runtime would render it —
+    /// never a re-implemented color parser. Mirrors web's
+    /// `buildStyles(bodyRoot.properties).backgroundColor`.
+    public static func resolvedBackgroundColor(from properties: [IRProperty]) -> Color? {
+        StyleBuilder.build(from: properties).backgroundColor
+    }
+
     // MARK: - Flow membership (fidelity wave 3)
 
     /// True when a child is removed from normal flow — css-position-3
@@ -512,6 +565,21 @@ public struct ComponentRenderer: View {
             // grid/row channel but on the inline axis. An explicit CSS
             // width always wins (css-align-3 §9 auto-size precondition).
             if let w = flexStretchWidth, s.size.width == nil {
+                s.size.width = .exact(px: w)
+            }
+            // TITAN Round 4 (GAP 1, WIDTH half) — composed-WPT block-flow
+            // fill. A block box with width:auto fills its containing block
+            // (CSS 2.1 §10.3.3); iOS hugs by default, so in composed WPT
+            // capture we fold the canvas-published content-box width into an
+            // auto-width, IN-FLOW box so its background paints full-bleed
+            // like the browser-ref (mirror of web's WPT width:auto carve-out).
+            // Gated three ways so nothing else moves: wptCaptureMode (never
+            // the product/baseline), a non-nil channel (only the composed
+            // canvas sets it, and it is reset for children below so only the
+            // stacked ROOTS fill), an auto width (an IR width always wins),
+            // and in-flow only (absolute/fixed boxes size to their offsets).
+            if wptCaptureMode, let w = wptBlockFlowFillWidth,
+               s.size.width == nil, !Self.isOutOfFlow(component) {
                 s.size.width = .exact(px: w)
             }
             // Fidelity wave 3 — multicol full-width default
@@ -829,6 +897,9 @@ public struct ComponentRenderer: View {
                 // an item of the parent's formatting context).
                 .environment(\.gridStretchHeight, nil)
                 .environment(\.flexStretchWidth, nil)
+                // Round 4: block-fill is root-scoped — a child never inherits
+                // the stacked root's fill width (it has its own box).
+                .environment(\.wptBlockFlowFillWidth, nil)
                 .environment(\.containingBlockWidth, childCB)
                 .environment(\.inheritedTextProperties, childInherited)
                 // Custom-property scope (wave 6): positioned children
@@ -1192,7 +1263,10 @@ public struct ComponentRenderer: View {
                     // text-align only has room to act when the box is
                     // wider than the glyph run — i.e. when the IR set an
                     // explicit width (see fillWidth doc on the label).
-                    fillWidth: style.size.width != nil
+                    fillWidth: style.size.width != nil,
+                    // Thread the parent renderer's resolved WPT flag so the
+                    // composed-mode line-box pin + padding-0 fire (Round 4).
+                    wptCaptureMode: wptCaptureMode
                 )
             }
             // Phase 7 step 2: sort children by CSS `order` BEFORE rendering.
@@ -1341,6 +1415,11 @@ public struct ComponentRenderer: View {
                                 ?? (isColumn ? flexMainSizes?[index] : flexStretch))
                 .environment(\.flexStretchWidth,
                              isColumn ? flexStretch : flexMainSizes?[index])
+                // Round 4: block-fill is scoped to the composed ROOTS — a
+                // flow/flex/grid child never inherits the root's fill width
+                // (it sizes within its own formatting context), so reset the
+                // channel at every level like the stretch channels above.
+                .environment(\.wptBlockFlowFillWidth, nil)
                 // Containing block (wave 3): always written — definite
                 // content width or nil — so the channel resets at every
                 // tree level (no grandparent leak).
@@ -1441,7 +1520,10 @@ public struct ComponentRenderer: View {
                 // borders/015_TextBlock). Fill the proposed width only
                 // when the IR declared a width — otherwise the box hugs
                 // (fit-content) and alignment is a no-op anyway.
-                fillWidth: style.size.width != nil
+                fillWidth: style.size.width != nil,
+                // Thread the parent renderer's resolved WPT flag so the
+                // composed-mode line-box pin + padding-0 fire (Round 4).
+                wptCaptureMode: wptCaptureMode
             )
         }
     }
@@ -1478,6 +1560,17 @@ private struct PlaceholderLabel: View {
     // hugging every placeholder-only fixture depends on.
     var fillWidth: Bool = false
 
+    // TITAN Round 4 (GAP 1, height half) — the WPT capture flag, threaded
+    // EXPLICITLY from ComponentRenderer (which owns the @Environment) so the
+    // value is unambiguous at this single call site. Default false = product
+    // + every committed baseline unchanged; the composed WPT path passes
+    // true. When on, the placeholder pins the ref line box (18px @16px) and
+    // drops its 4px breathing room so a text bar is as tight as the
+    // browser-ref's `<p>` (see ComponentRenderer.effectiveLineHeight + the
+    // padding gate below). The 50×30 MinBoxFloor is dropped in the same mode
+    // (StyleBuilder.MinBoxFloor) so this line box actually sets the height.
+    var wptCaptureMode: Bool = false
+
     var body: some View {
         // Resolve the visible string: rawText wins when present (the IR
         // carried explicit element text content), otherwise fall back to
@@ -1486,15 +1579,33 @@ private struct PlaceholderLabel: View {
             if let t = rawText, !t.isEmpty { return t }
             return name.replacingOccurrences(of: "_", with: " ")
         }()
+        // TITAN Round 4 (GAP 1, height half) — the line-height this run
+        // lays out with: the IR-declared value when present (defer to it),
+        // else the ref line box (18px) in WPT capture, else nil (SwiftUI
+        // natural metrics — the unchanged product path). Feeds BOTH the
+        // leading split and the minHeight frame below so the bar height +
+        // baselines track the browser-ref's default-font `<p>`.
+        let effectiveLineHeight = ComponentRenderer.effectiveLineHeight(
+            declared: textConfig.lineHeight, wptCaptureMode: wptCaptureMode)
         // Fidelity wave 3 — CSS line-box leading split (CSS 2.1 §10.8):
         // `spacing` makes each line ADVANCE exactly line-height px;
         // `halfLeading` restores the band above the first / below the
         // last line that browsers paint and SwiftUI's between-lines-only
         // `.lineSpacing` dropped (IH_LineHeight band-sits-high channel).
-        // Both are 0 when the IR declared no line-height.
-        let leading = LineBoxMetrics.leading(lineHeightPx: textConfig.lineHeight,
+        // Both are 0 when the effective line-height is nil.
+        let leading = LineBoxMetrics.leading(lineHeightPx: effectiveLineHeight,
                                              fontSizePx: textConfig.fontSize ?? 16,
                                              design: textConfig.fontDesign)
+        // TITAN Round 4 (GAP 1, height half) — single-line proxy for the
+        // WPT line-box CAP below. A run with NO internal whitespace can never
+        // wrap, so in composed WPT capture we can pin its box to EXACTLY one
+        // ref line box: the browser-ref lays `line-height: normal` `<p>`s out
+        // at ~18px, but the harness-forced Inter face reports a ~20px line so
+        // every bar would sit ~2px tall and DRIFT down a 10-bar test. Capping
+        // the single-line box to the ref line box removes that drift. Text
+        // that MAY wrap (any whitespace) is left to grow to N line boxes so
+        // multi-line content (e.g. a full-sentence `<p>`) is never clipped.
+        let singleLineText = !visibleText.contains { $0.isWhitespace }
         let textView = Text(visibleText)
             .font(font)
         // SwiftUI's `.foregroundStyle` accepts ANY ShapeStyle including
@@ -1567,7 +1678,14 @@ private struct PlaceholderLabel: View {
             // only for the single-line half-leading case where the
             // line box (minHeight) exceeds the glyph height.
             .frame(maxWidth: fillWidth ? .infinity : nil,
-                   minHeight: textConfig.lineHeight,
+                   minHeight: effectiveLineHeight,
+                   // Round 4 — in composed WPT capture, CAP a single-line box
+                   // to exactly the ref line box (glyphs overflow like the
+                   // browser's line-height:18) so forced-Inter bars stop
+                   // drifting; multi-line/other paths keep the floor-only
+                   // frame (maxHeight nil) so nothing is clipped.
+                   maxHeight: (wptCaptureMode && singleLineText)
+                       ? effectiveLineHeight : nil,
                    alignment: Alignment(horizontal: fillHorizontal,
                                         vertical: .center))
             .fixedSize(horizontal: false, vertical: true)
@@ -1586,7 +1704,13 @@ private struct PlaceholderLabel: View {
             // matches web/Android pixel-for-pixel; multi-line cases
             // diverge but no fixture exercises that today.
             .padding(.leading, textConfig.textIndentPx ?? 0)
-            .padding(4)
+            // TITAN Round 4 (GAP 1, height half) — the 4px label breathing
+            // room drops to 0 in WPT capture so a text bar is exactly one
+            // line box tall, matching the browser-ref's native `<p>` (which
+            // has no such inset). Mirrors web's composed-mode `padding: 0`
+            // on PlaceholderContent. Every non-WPT path keeps the 4px, so
+            // the product renderer + 327-pair baseline are byte-identical.
+            .padding(wptCaptureMode ? 0 : 4)
     }
 
     /// Horizontal frame alignment mirroring the CSS text-align keyword.

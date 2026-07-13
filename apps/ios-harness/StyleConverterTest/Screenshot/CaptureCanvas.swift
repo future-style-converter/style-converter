@@ -207,23 +207,67 @@ struct ComposedCaptureCanvas: View {
         rootContainingBlock: Double(width - padding * 2)
     )
 
+    /// TITAN Round 4 GAP 1 — the per-root effective UA vertical block
+    /// margins (deferring to any IR-declared margin the runtime's
+    /// MarginApplier already paints), collapsed into the space to place
+    /// ABOVE each root + BELOW the last. See UABlockMargin: this reproduces
+    /// the browser-ref's UA `<p>`/`<hN>`/… block margins the native flush
+    /// stack lacked, so a multi-bar test's gaps match the ref. Composed
+    /// WPT only — this canvas is built solely by captureComposedDocument.
+    private var stackedSpacing: (leading: [CGFloat], trailing: CGFloat) {
+        let margins = document.components.map {
+            UABlockMargin.effectiveVertical(tag: $0.meta?.sourceTag,
+                                            properties: $0.properties)
+        }
+        return UABlockMargin.stackedSpacing(margins)
+    }
+
+    /// TITAN Round 4 GAP 2 — the canvas background. The browser-ref frames
+    /// every page with a ZERO-specificity `:where(html,body){background:
+    /// #1A1A2E}`, so a reference that sets its OWN `body{background}` WINS
+    /// and paints the whole page that color (css-color/a98rgb-003's grey).
+    /// The reader tags that body background as a `meta.role:"body-root"`
+    /// component; we resolve it through the SAME engine the renderer uses
+    /// (ComponentRenderer.resolvedBackgroundColor) and honor it here,
+    /// falling back to the pipeline's #1A1A2E default when there is no
+    /// body-root or it declares no background.
+    private var canvasBackground: Color {
+        guard let bodyRoot = document.components.first(where: {
+                  $0.meta?.role == "body-root"
+              }),
+              let bg = ComponentRenderer.resolvedBackgroundColor(
+                  from: bodyRoot.properties)
+        else { return CaptureCanvas.backgroundColor }
+        return bg
+    }
+
     var body: some View {
-        // Stack every composed root in block-flow order, top-leading, with
-        // zero inter-root gap — the browser stacks the reference page's
-        // block boxes with their own margins only (the ref divs carry
-        // none), and the web composed container uses
-        // `align-items: flex-start` + no gap. Matching that here keeps the
-        // composed layout comparable to both the ref and the web composite.
-        VStack(alignment: .leading, spacing: 0) {
+        // GAP 1 — fold the per-root UA margins (with adjacent collapse and
+        // no collapse at the padded top/bottom edges) into per-root spacing.
+        let spacing = stackedSpacing
+        let lastIndex = document.components.count - 1
+        return VStack(alignment: .leading, spacing: 0) {
             // enumerated()+offset id: roots are rendered positionally, never
             // reordered — a stable positional key is correct and avoids
             // relying on component.id uniqueness across a malformed doc.
-            ForEach(Array(document.components.enumerated()), id: \.offset) { _, root in
+            ForEach(Array(document.components.enumerated()), id: \.offset) { idx, root in
                 // Identical host shim the per-component canvas and the
                 // engine's own child loop use — placement parent-data
                 // attached (inert under this VStack), full ComponentRenderer
                 // engine underneath. Zero per-node render difference.
                 ComponentHost(component: root)
+                    // GAP 1 — the UA block margin ABOVE this root: its full
+                    // top margin for the first root (the canvas's 16px
+                    // padding blocks parent↔child collapse there), or the
+                    // previous root's bottom COLLAPSED with this root's top
+                    // for interior roots. IR-declared margins contribute 0
+                    // here (already painted by MarginApplier inside the host)
+                    // so they are never double-counted.
+                    .padding(.top, spacing.leading[idx])
+                    // Only the LAST root carries the trailing bottom margin
+                    // (again uncollapsed — the padded bottom edge). Interior
+                    // bottoms are folded into the next root's leading gap.
+                    .padding(.bottom, idx == lastIndex ? spacing.trailing : 0)
             }
         }
         // Constrain the composed content to the 358px ref content box,
@@ -242,12 +286,23 @@ struct ComposedCaptureCanvas: View {
         // Natural (content) height beyond the 600 floor — mirrors the ref's
         // documentHeight capture and the per-component canvas's height rule.
         .fixedSize(horizontal: false, vertical: true)
-        // Solid #1A1A2E — the ref canvas background; any sub-root gap paints
-        // this so seams are invisible against the ref.
-        .background(CaptureCanvas.backgroundColor)
+        // GAP 2 — the ref canvas background: #1A1A2E by default, or the
+        // document body-root's own background when it declares one (e.g.
+        // a98rgb-003's full-page grey). Any sub-root gap paints this so
+        // seams stay invisible against the ref.
+        .background(canvasBackground)
         // Publish the capture geometry so the runtime resolves vw/vh/% and
         // containing blocks against 390×844/358, not the device screen.
         .environment(\.styleViewport, Self.viewport)
+        // GAP 1 (WIDTH half) — publish the 358px content-box width so the
+        // runtime stretches each auto-width, in-flow ROOT to full bleed like
+        // the browser-ref's block `<p>`/`<div>` (iOS otherwise hugs content).
+        // Set on the whole stack, but ComponentRenderer folds it into ROOTS
+        // only and resets it for their children, so block-fill is root-scoped.
+        // Composed WPT only (this canvas is built solely by
+        // captureComposedDocument), and the fold is additionally gated on
+        // wptCaptureMode — the 327-pair baseline never sees it.
+        .environment(\.wptBlockFlowFillWidth, Self.width - Self.padding * 2)
         // Same dynamic-capture hooks the per-component canvas carries
         // (pinned light scheme, empty forced set, live clock) so the
         // composed capture is a deterministic base render.
