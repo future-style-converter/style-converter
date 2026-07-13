@@ -30,11 +30,25 @@ object ColorParser {
     // Modern space-separated RGB: rgb(255 0 0) or rgb(255 0 0 / 50%)
     private val rgbSpaceRegex = """^rgba?\s*\(\s*([\d.]+%?|none)\s+([\d.]+%?|none)\s+([\d.]+%?|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
-    // Legacy comma-separated HSL: hsl(120, 100%, 50%) - supports 'none' keyword
-    private val hslCommaRegex = """^hsla?\s*\(\s*([\d.]+|none)(?:deg)?\s*,\s*([\d.]+|none)%?\s*,\s*([\d.]+|none)%?\s*(?:,\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
+    // CSS <hue> for hsl()/hsla(): the hue may be a bare <number> OR an <angle>
+    // with a unit (CSS Color 4 §7 "The HSL functions"). This sub-pattern captures
+    // the whole hue token so grad/rad/turn units and scientific-notation numbers
+    // are matched (not dropped):
+    //   [+-]?                    optional sign
+    //   (?:\d+\.?\d*|\.\d+)      integer/decimal mantissa (e.g. 120, 120.0, .5)
+    //   (?:[eE][+-]?\d+)?        optional scientific exponent (e.g. 1.2e2 == 120)
+    //   (?:deg|grad|rad|turn)?   optional <angle> unit; bare number = degrees
+    // parseHslHue() below normalizes any unit to degrees via AngleParser so the
+    // existing hue→rgb math (ColorConversion.hslToSrgb, which wraps mod 360) is
+    // unchanged. Previously the hue group was `[\d.]+(?:deg)?`, which failed to
+    // match grad/rad/turn/scientific hues and made the whole color parse null.
+    private const val HUE = """[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?(?:deg|grad|rad|turn)?"""
 
-    // Modern space-separated HSL: hsl(120deg 100% 50%) or hsl(120 100% 50% / 50%) - supports 'none' keyword
-    private val hslSpaceRegex = """^hsla?\s*\(\s*([\d.]+|none)(?:deg)?\s+([\d.]+|none)%?\s+([\d.]+|none)%?\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
+    // Legacy comma-separated HSL: hsl(120, 100%, 50%) - supports 'none' keyword + angle-unit/sci-notation hue
+    private val hslCommaRegex = """^hsla?\s*\(\s*($HUE|none)\s*,\s*([\d.]+|none)%?\s*,\s*([\d.]+|none)%?\s*(?:,\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
+
+    // Modern space-separated HSL: hsl(120deg 100% 50%) or hsl(120 100% 50% / 50%) - supports 'none' keyword + angle-unit/sci-notation hue
+    private val hslSpaceRegex = """^hsla?\s*\(\s*($HUE|none)\s+([\d.]+|none)%?\s+([\d.]+|none)%?\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
     // HWB: hwb(120 0% 0%) or hwb(120deg 0% 0% / 50%)
     private val hwbRegex = """^hwb\s*\(\s*([\d.]+)(?:deg)?\s+([\d.]+)%\s+([\d.]+)%\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex()
@@ -274,8 +288,9 @@ object ColorParser {
         val sStr = match.groupValues[2]
         val lStr = match.groupValues[3]
 
-        // Handle 'none' keyword
-        val h = parseHslValue(hStr)
+        // Hue is an <angle>-or-<number>: normalize any unit to degrees (parseHslHue).
+        // Saturation/lightness are plain <percentage> numbers (parseHslValue).
+        val h = parseHslHue(hStr)
         val s = parseHslValue(sStr)
         val l = parseHslValue(lStr)
         val a = parseAlpha(match.groupValues.getOrNull(4))
@@ -291,6 +306,26 @@ object ColorParser {
     private fun parseHslValue(value: String): Double {
         val trimmed = value.trim().lowercase()
         if (trimmed == "none") return 0.0
+        return trimmed.toDoubleOrNull() ?: 0.0
+    }
+
+    /**
+     * Parse the HSL hue component into degrees.
+     *
+     * Per CSS Color 4 §7, the hue is an <angle> or a <number>:
+     * - A bare number (or scientific notation like 1.2e2) is degrees.
+     * - deg/grad/rad/turn are <angle> units; AngleParser reuses IRAngle's shared
+     *   conversion constants (grad ×0.9, rad ×180/π, turn ×360) — no duplication here.
+     * The returned degrees are handed to ColorConversion.hslToSrgb, which already
+     * wraps mod 360 (so e.g. hsl(600deg) → 240 = blue) — the hue→rgb math is unchanged.
+     */
+    private fun parseHslHue(value: String): Double {
+        val trimmed = value.trim().lowercase()
+        if (trimmed == "none") return 0.0 // 'none' contributes hue 0
+        // Angle with a unit (deg/grad/rad/turn) → normalize to degrees.
+        AngleParser.parse(trimmed)?.let { return it.degrees }
+        // Bare number or scientific notation (no unit): already degrees.
+        // Kotlin's toDouble handles exponents (e.g. "1.2e2" == 120.0).
         return trimmed.toDoubleOrNull() ?: 0.0
     }
 
