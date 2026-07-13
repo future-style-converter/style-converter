@@ -179,11 +179,24 @@ object ColorParser {
             val v3 = match.groupValues[4].toDoubleOrNull() ?: return null
             val alpha = parseAlpha(match.groupValues.getOrNull(5))
             val repr = IRColor.ColorRepresentation.ColorFunction(colorSpace, listOf(v1, v2, v3), alpha)
-            // Compute sRGB based on color space
+            // Compute the normalized sRGB per predefined color space (CSS Color 4 §16).
+            // Each space is primaries→XYZ(D65)→sRGB; results are gamut-clipped to [0,1]
+            // (simple clip — a true gamut map is a later refinement). The `original`
+            // still carries the untouched colorSpace + values, so this only ADDS the
+            // `srgb` field the runtimes already read (no wire-shape change).
             val srgb = when (colorSpace) {
-                "srgb" -> SRGB(v1, v2, v3, alpha)
+                // Plain sRGB: values are already sRGB channels; just clip out-of-gamut.
+                "srgb" -> SRGB(v1, v2, v3, alpha).clamped()
+                // Linear-light sRGB — gamma-encode each channel.
+                "srgb-linear" -> ColorConversion.srgbLinearToSrgb(v1, v2, v3, alpha).clamped()
+                // Wide-gamut RGB spaces — decode transfer function, primaries→XYZ→sRGB.
                 "display-p3" -> ColorConversion.displayP3ToSrgb(v1, v2, v3, alpha).clamped()
-                else -> null // Unknown color space - can't convert
+                "a98-rgb" -> ColorConversion.a98RgbToSrgb(v1, v2, v3, alpha).clamped()
+                "rec2020" -> ColorConversion.rec2020ToSrgb(v1, v2, v3, alpha).clamped()
+                // CIE XYZ inputs — xyz defaults to D65; xyz-d50 needs Bradford adaptation.
+                "xyz", "xyz-d65" -> ColorConversion.xyzD65ToSrgb(v1, v2, v3, alpha).clamped()
+                "xyz-d50" -> ColorConversion.xyzD50ToSrgb(v1, v2, v3, alpha).clamped()
+                else -> null // Unknown color space - leave srgb null (runtime-dependent)
             }
             return IRColor(repr, srgb)
         }
