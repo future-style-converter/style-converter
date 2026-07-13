@@ -52,8 +52,54 @@
 import React from 'react';
 import type { IRComponent, IRDocument } from '@style-converter/web/core/ir/IRModels';
 import { RootErrorBoundary } from '@style-converter/web/renderer/RootErrorBoundary';
+// buildStyles is the SAME engine entry point NodeRenderer uses to resolve a
+// component's inline CSS — reused here (GAP 2) to derive the document body's
+// background color byte-identically to how it would render, so the composed
+// canvas honors a page-level background exactly as the runtime paints it.
+import { buildStyles } from '@style-converter/web/core/renderer/StyleBuilder';
 import { composeTree } from '../sdui/Composer';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
+
+/**
+ * The pipeline's default composed-canvas background — the #1A1A2E the ref
+ * canvas (capture-browser-ref.mjs's CANVAS_BG) paints on `:where(html,body)`.
+ * Used as the fallback when a test's document declares no body background.
+ */
+const CANVAS_BG_DEFAULT = '#1A1A2E';
+
+/**
+ * GAP 2 — BODY/ROOT BACKGROUND PROPAGATION. Resolve the background color the
+ * composed canvas should paint for one per-test document.
+ *
+ * WHY: capture-browser-ref.mjs frames every reference page with a
+ * ZERO-SPECIFICITY `:where(html, body) { background: #1A1A2E }`. Per CSS
+ * Selectors L4, `:where()` contributes 0 specificity, so a reference that sets
+ * its OWN `body { background: … }` (specificity 0,0,1) WINS and paints the
+ * whole page that color (its `min-height:100vh` body fills the viewport).
+ * css-color/a98rgb-003 is the canonical case — its ref is a full-page GREY.
+ *
+ * Our composed canvas hardcoded #1A1A2E, so it ignored that page background
+ * and diffed a dark canvas against a grey ref (SSIM ≈ 0.38). The reader
+ * captures a `body { background }` as a component tagged `meta.role:
+ * 'body-root'` carrying a `BackgroundColor` property. We find that component
+ * and run its properties through the same `buildStyles` engine the renderer
+ * uses, then read the resolved `backgroundColor` — mirroring the ref's
+ * "author body background wins over the zero-specificity default" exactly.
+ * When there is no body-root, or it declares no background, we fall back to
+ * the #1A1A2E default so every other test is byte-identical to before.
+ */
+function resolveCanvasBackground(doc: IRDocument): string {
+  // The IR marks the document body with meta.role: 'body-root' (see the
+  // per-test IR docs). First such component wins — a document has one body.
+  const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
+  if (!bodyRoot) return CANVAS_BG_DEFAULT;
+  // Resolve via the engine so the color string matches what the runtime would
+  // paint (rgba(...) / color-mix(...) / etc.), never a re-implemented parser.
+  const bg = buildStyles(bodyRoot.properties).backgroundColor;
+  // Only override when the body-root actually declared a background; a bare
+  // body-root role marker (no BackgroundColor) keeps the pipeline default.
+  return typeof bg === 'string' && bg.length > 0 ? bg : CANVAS_BG_DEFAULT;
+}
 
 interface ComposedCaptureGalleryProps {
   /** The decoded COMBINED IR document (every WPT test's components, flat). */
@@ -160,6 +206,11 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
   // Composition is pure per document — memoise on identity (same as
   // DocumentRenderer's `useMemo(() => composeTree(doc), [doc])`).
   const roots = React.useMemo(() => composeTree(doc), [doc]);
+  // GAP 2: the canvas background honors the document's body-root background
+  // (falling back to #1A1A2E) so a full-page-colored ref (e.g. a98rgb-003's
+  // grey page) is matched instead of diffed against a dark canvas. Pure per
+  // document — memoise on identity alongside the composition above.
+  const canvasBackground = React.useMemo(() => resolveCanvasBackground(doc), [doc]);
   return (
     <div
       data-capture-canvas
@@ -169,7 +220,10 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
       // which is exactly what inject-wpt-block.mjs's composed path globs for.
       data-capture-id={testKey}
       data-capture-name={testKey}
-      style={composedCanvasStyle}
+      // Spread the shared frame first, then override just `background` with the
+      // per-document resolved color (identical to the default for every test
+      // that declares no body background — so those captures are unchanged).
+      style={{ ...composedCanvasStyle, background: canvasBackground }}
     >
       {roots.map((root, i) => (
         <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>

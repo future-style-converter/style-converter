@@ -66,6 +66,32 @@
       body.wpt-mode [data-component-id] * {
         box-sizing: content-box;
       }
+      /* WPT COMPOSED mode override (Round-4 TITAN GAP 1 — UA default margins).
+       * When the capture URL carries `?wptComposed=1`, App.tsx adds
+       * `wpt-composed-mode` to <body>. The browser-ref (capture-browser-ref.mjs)
+       * renders each WPT reference page with the FULL UA stylesheet intact —
+       * so a <p> bar keeps its 1em (≈16px) block margins and adjacent bars
+       * collapse to a real ~16px gap. Our composed capture renders the same
+       * bars as <p data-component-id> elements, but the universal `* { margin:
+       * 0 }` reset above zeroes those UA margins → the bars render FLUSH and a
+       * 10-bar test (background-color-hsl-001 etc.) scores far below the ref.
+       *
+       * Fix: on the IR-rendered elements ONLY (`[data-component-id]` and their
+       * descendants), roll the margin cascade back to the user-agent origin
+       * with `margin: revert`. `revert` restores the exact UA default per tag
+       * — 1em block margins for <p>/<h*>, the list margins for <ul>/<ol>, 0 for
+       * <div>/<span> — reproducing the ref's native layout. IR-declared margins
+       * still win: they arrive as INLINE styles (higher priority than this
+       * stylesheet rule), so a component that sets its own margin is unaffected
+       * — only the UA default is restored where the IR is silent.
+       *
+       * Scope: `wpt-composed-mode` is set ONLY under `?wptComposed=1`, so the
+       * legacy per-component WPT path (`?wpt=1` alone) and the committed
+       * 327-pair visual baseline (no WPT class at all) keep the flush reset. */
+      body.wpt-composed-mode [data-component-id],
+      body.wpt-composed-mode [data-component-id] * {
+        margin: revert;
+      }
       html, body {
         width: 100%;
         height: 100%;

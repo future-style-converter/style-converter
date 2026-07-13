@@ -123,6 +123,27 @@ export function App() {
     }
   }, [wptMode]);
 
+  // Toggle the `wpt-composed-mode` body class, gated on `?wptComposed=1`.
+  // GAP 1 (UA default margins): the index.html `* { margin: 0 }` reset zeroes
+  // the browser's UA <p>/<h*>/<ul>… default margins, so a composed multi-<p>
+  // test (e.g. background-color-hsl-001's 10 bars) renders FLUSH. The
+  // browser-ref (tools/titan/capture-browser-ref.mjs) keeps the UA stylesheet
+  // — its <p> bars have real ~16px (1em) inter-element gaps. This class drives
+  // the index.html `body.wpt-composed-mode [data-component-id] { margin:
+  // revert }` rule, which rolls the margin cascade back to the UA origin on
+  // the IR-rendered elements ONLY — restoring those native gaps so our
+  // composed page matches the ref's layout. Scoped to composed WPT capture:
+  // the per-component path and the 327-pair baseline never carry this class.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (wptComposed) {
+      window.document.body.classList.add('wpt-composed-mode');
+      return () => {
+        window.document.body.classList.remove('wpt-composed-mode');
+      };
+    }
+  }, [wptComposed]);
+
   // Load document from assets.
   //
   // In fixture mode we load `/fixtures/<name>.json` (a single-component IR

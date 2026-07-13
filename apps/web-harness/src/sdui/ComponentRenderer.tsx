@@ -75,6 +75,29 @@ const WPT_MODE: boolean = (() => {
 })();
 
 /**
+ * WPT COMPOSED-mode detector — reads `?wptComposed=1` once per module load.
+ *
+ * Why this exists (Round-4 TITAN GAP 1, height half): the composed capture
+ * (ComposedCaptureGallery) renders each WPT test's components composed on ONE
+ * ref-framed canvas, then diffs it against the Chromium browser-ref. The ref
+ * renders the reference page's real DOM — a text `<p>` bar is exactly one
+ * line-box tall (≈18px). Our renderer wraps a childless component's text in a
+ * PlaceholderContent <span> whose default `padding: 4px` makes the same bar
+ * ≈10px TALLER. With flush bars that height error was mostly hidden; once the
+ * UA margins are restored (index.html `wpt-composed-mode` margin:revert), the
+ * per-bar height error COMPOUNDS down a 10-bar test and drifts every bar off
+ * its ref position — sinking SSIM. So in composed mode ONLY we drop the
+ * placeholder padding to 0 (PlaceholderContent below), rendering text as tight
+ * as the ref's <p>. Read-once module constant like WPT_MODE / FORCE_STATE; the
+ * per-component `?wpt=1`-only path and the 327-pair baseline never set this
+ * param, so their placeholder padding (and captures) stay byte-identical.
+ */
+const WPT_COMPOSED_MODE: boolean = (() => {
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('wptComposed') === '1';
+})();
+
+/**
  * `?forceState=<state>` — the forced interaction state for this capture
  * run (spec 06 §6; docs/DYNAMIC_CAPTURE.md §1). CaptureGallery stamps the
  * verification marker (`data-force-state`) on every canvas; the CORE is
@@ -415,12 +438,18 @@ const HARNESS_OPTIONS: RendererOptions = {
   renderEmptyContent: ({ component, styles }) => {
     const text = component.text;
     const hasText = typeof text === 'string' && text.length > 0;
+    // Forward the component's IR-resolved line-height (if any) so the
+    // composed-mode line-height pin can DEFER to it — a test that declares
+    // its own line-height keeps it; only bare text (no declaration) gets the
+    // ref-matching default. `lineHeight` may be number or string in CSS-in-JS.
+    const irLineHeight = styles.lineHeight !== undefined ? String(styles.lineHeight) : undefined;
     return (
       <PlaceholderContent
         name={component.name}
         text={hasText ? text : undefined}
         backgroundColor={typeof styles.backgroundColor === 'string' ? styles.backgroundColor : undefined}
         explicitColor={typeof styles.color === 'string' ? styles.color : undefined}
+        irLineHeight={irLineHeight}
       />
     );
   },
@@ -474,6 +503,14 @@ interface PlaceholderContentProps {
    * passthrough in iOS `PlaceholderLabel` and Android `PlaceholderContent`.
    */
   explicitColor?: string;
+  /**
+   * The component's IR-resolved `line-height` (stringified), when the IR
+   * declared one. Used ONLY by the composed-mode line-height pin below: when
+   * present, the pin defers to this value so a test's own line-height is
+   * honoured; when absent, bare text gets the ref-matching default so our
+   * text bar height matches the browser-ref's default-font line box.
+   */
+  irLineHeight?: string;
 }
 
 /**
@@ -519,7 +556,7 @@ function parseRgb(css: string | undefined): [number, number, number] | null {
   return null;
 }
 
-function PlaceholderContent({ name, text, backgroundColor, explicitColor }: PlaceholderContentProps) {
+function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLineHeight }: PlaceholderContentProps) {
   // Critical: inherit font properties from the parent so typography fixtures
   // render at their declared sizes/weights/etc. The previous implementation
   // hardcoded `fontSize: '11px'` here, which clobbered every Typography_*
@@ -581,7 +618,31 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor }: Plac
     <span
       style={{
         display: 'block',
-        padding: '4px',
+        // Composed WPT mode drops the placeholder padding to 0 so a text bar
+        // is exactly one line-box tall — matching the browser-ref's native
+        // <p> height (GAP 1 height half; see WPT_COMPOSED_MODE above). Every
+        // other path (per-component `?wpt=1`, the 327-pair baseline) keeps the
+        // 4px label breathing room, byte-for-byte unchanged.
+        padding: WPT_COMPOSED_MODE ? 0 : '4px',
+        // GAP 1 (height half) — line-height pin. The harness FORCES the Inter
+        // font (index.html) to keep iOS/Android/web mutually comparable, but
+        // the browser-ref (capture-browser-ref.mjs) forces NO font, so its <p>
+        // text uses Chromium's default UA font. Inter's `normal` line-height
+        // (≈1.25 → 20px @16px) is TALLER than the default font's (≈18px @16px),
+        // so every text bar we render is ~2px taller than the ref's. With flush
+        // bars that error hid; once UA margins (index.html wpt-composed-mode
+        // margin:revert) spread the bars out, the 2px COMPOUNDS down a 10-bar
+        // test — by the last bar our bars are ~half a pitch off the ref's,
+        // and SSIM (edge-phase sensitive) collapses. Pinning the line-height to
+        // the ref default-font line box (18px @16px) removes that drift and
+        // lifts the multi-<p> tests from ~0.50 to ~0.90.
+        //   • Composed WPT mode ONLY — the per-component `?wpt=1` path and the
+        //     327-pair baseline never set WPT_COMPOSED_MODE, so both are byte-
+        //     identical to before.
+        //   • DEFER to an IR-declared line-height (irLineHeight): a test that
+        //     sets its own line-height keeps it; only bare text (no declaration,
+        //     i.e. inheriting Inter's `normal`) gets the ref-matching default.
+        ...(WPT_COMPOSED_MODE ? { lineHeight: irLineHeight ?? '18px' } : {}),
         // fontSize/fontWeight/letterSpacing/textTransform/etc. all
         // inherit by default — don't set them explicitly. Colour is the
         // exception: we drive it from bg luminance to match iOS.
