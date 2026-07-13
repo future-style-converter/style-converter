@@ -129,30 +129,43 @@ object ColorConversion {
 
     /**
      * Convert CIE Lab to sRGB via XYZ.
+     *
+     * Per CSS Color 4 §11 (https://www.w3.org/TR/css-color-4/#lab-to-lch and the
+     * §17 sample "Lab_to_XYZ"), CSS `lab()` is CIELAB relative to the **D50** white
+     * point. sRGB is a D65 space, so after decoding to XYZ(D50) we chromatically
+     * adapt D50→D65 (Bradford) before the XYZ→sRGB matrix. (The old code used D65
+     * directly with no adaptation, which drifted every lab()/lch() color slightly.)
+     *
      * @param l Lightness (0-100)
      * @param a Green-red axis (-125 to 125)
      * @param b Blue-yellow axis (-125 to 125)
      * @param alpha Alpha (0-1)
      */
     fun labToSrgb(l: Double, a: Double, b: Double, alpha: Double = 1.0): SRGB {
-        // Lab to XYZ (D65 illuminant)
-        val fy = (l + 16) / 116
-        val fx = a / 500 + fy
-        val fz = fy - b / 200
+        // CIELAB → XYZ, inverse of the CIE L*a*b* definition (CIE 15 §8.2.1).
+        val fy = (l + 16) / 116      // f(Y/Yn)
+        val fx = a / 500 + fy        // f(X/Xn)
+        val fz = fy - b / 200        // f(Z/Zn)
 
-        val epsilon = 216.0 / 24389
-        val kappa = 24389.0 / 27
+        val epsilon = 216.0 / 24389  // (6/29)^3 — the CIE "actual intent" threshold
+        val kappa = 24389.0 / 27     // (29/3)^3 — the CIE "actual intent" scale (903.3)
 
+        // Undo the cube-root companding piecewise (CIE 15) → X/Xn, Y/Yn, Z/Zn.
         val xr = if (fx.pow(3) > epsilon) fx.pow(3) else (116 * fx - 16) / kappa
         val yr = if (l > kappa * epsilon) ((l + 16) / 116).pow(3) else l / kappa
         val zr = if (fz.pow(3) > epsilon) fz.pow(3) else (116 * fz - 16) / kappa
 
-        // D65 reference white
-        val x = xr * 0.95047
-        val y = yr * 1.00000
-        val z = zr * 1.08883
+        // Scale by the D50 reference white (CSS Color 4 uses the D50 chromaticity
+        // white [0.3457/0.3585, 1, (1-0.3457-0.3585)/0.3585]).
+        val xD50 = xr * D50_X
+        val yD50 = yr * D50_Y
+        val zD50 = zr * D50_Z
 
-        return xyzToSrgb(x, y, z, alpha)
+        // Chromatically adapt XYZ from D50 to D65 (Bradford) since sRGB is D65.
+        val (xD65, yD65, zD65) = mul3(BRADFORD_D50_TO_D65, xD50, yD50, zD50)
+
+        // XYZ(D65) → linear sRGB → gamma-encoded sRGB.
+        return xyzToSrgb(xD65, yD65, zD65, alpha)
     }
 
     // ========== LCH (CIE LCH) ==========
@@ -409,36 +422,122 @@ object ColorConversion {
         return namedColors[name.lowercase()]
     }
 
-    // ========== Display-P3 and other color spaces ==========
-
-    /**
-     * Convert display-p3 to sRGB (approximate, may clip).
-     */
-    fun displayP3ToSrgb(r: Double, g: Double, b: Double, alpha: Double = 1.0): SRGB {
-        // Display-P3 to linear sRGB (simplified)
-        // This is an approximation - proper conversion requires matrix math
-        val rLin = srgbGammaToLinear(r)
-        val gLin = srgbGammaToLinear(g)
-        val bLin = srgbGammaToLinear(b)
-
-        // P3 to sRGB matrix (approximate)
-        val rSrgb = 1.2249 * rLin - 0.2247 * gLin + 0.0 * bLin
-        val gSrgb = 0.0 * rLin + 1.0 * gLin + 0.0 * bLin
-        val bSrgb = 0.0 * rLin - 0.0420 * gLin + 1.0420 * bLin
-
-        return SRGB(
-            r = linearToSrgbGamma(rSrgb),
-            g = linearToSrgbGamma(gSrgb),
-            b = linearToSrgbGamma(bSrgb),
-            a = alpha
-        )
-    }
-
     private fun srgbGammaToLinear(c: Double): Double {
         return if (c <= 0.04045) {
             c / 12.92
         } else {
             ((c + 0.055) / 1.055).pow(2.4)
         }
+    }
+
+    // ========== Predefined color() color spaces ==========
+    //
+    // Every predefined RGB color space converts the same way: decode its own
+    // transfer function to linear light, apply its primaries→XYZ(D65) matrix, then
+    // reuse xyzToSrgb (XYZ(D65)→linear sRGB→gamma). D50-based spaces (lab, xyz-d50)
+    // are Bradford-adapted to D65 first. All matrices below are the exact
+    // first-principles values from the CSS Color 4 sample code (§17,
+    // https://www.w3.org/TR/css-color-4/#color-conversion-code), which agree with
+    // Bruce Lindbloom's tables. Callers clamp the result into gamut (simple clip).
+
+    /** D50 reference white (CSS Color 4 D50 chromaticity: [0.3457/0.3585, 1, …]). */
+    private const val D50_X = 0.3457 / 0.3585
+    private const val D50_Y = 1.0
+    private const val D50_Z = (1.0 - 0.3457 - 0.3585) / 0.3585
+
+    /** Bradford chromatic-adaptation matrix D50→D65 (CSS Color 4 sample code). */
+    private val BRADFORD_D50_TO_D65 = arrayOf(
+        doubleArrayOf( 0.955473421488075,    -0.02309845494876471,  0.06325924320057072),
+        doubleArrayOf(-0.0283697093338637,    1.0099953980813041,   0.021041441191917323),
+        doubleArrayOf( 0.012314014864481998, -0.020507649298898964, 1.330365926242124)
+    )
+
+    /** Linear Display-P3 → XYZ(D65) (CSS Color 4 lin_P3_to_XYZ). */
+    private val P3_TO_XYZ = arrayOf(
+        doubleArrayOf(0.4865709486482162,  0.26566769316909306,  0.19821728523436247),
+        doubleArrayOf(0.2289745640697488,  0.6917385218365064,   0.079286914093745),
+        doubleArrayOf(0.0000000000000000,  0.04511338185890264,  1.043944368900976)
+    )
+
+    /** Linear a98-rgb (Adobe RGB 1998) → XYZ(D65) (CSS Color 4 lin_a98rgb_to_XYZ). */
+    private val A98_TO_XYZ = arrayOf(
+        doubleArrayOf(0.5766690429101305,  0.1855582379065463,   0.1882286462349947),
+        doubleArrayOf(0.29734497525053605, 0.6273635662554661,   0.07529145849399788),
+        doubleArrayOf(0.02703136138641234, 0.07068885253582723,  0.9913375368376388)
+    )
+
+    /** Linear rec2020 → XYZ(D65) (CSS Color 4 lin_2020_to_XYZ). */
+    private val REC2020_TO_XYZ = arrayOf(
+        doubleArrayOf(0.6369580483012914,  0.14461690358620832,  0.16888097516417210),
+        doubleArrayOf(0.2627002120112671,  0.6779980715188708,   0.05930171646986196),
+        doubleArrayOf(0.0000000000000000,  0.028072693049087428, 1.060985057710791)
+    )
+
+    /** Multiply a 3×3 matrix by the column vector (x,y,z). */
+    private fun mul3(m: Array<DoubleArray>, x: Double, y: Double, z: Double): Triple<Double, Double, Double> =
+        Triple(
+            m[0][0] * x + m[0][1] * y + m[0][2] * z,
+            m[1][0] * x + m[1][1] * y + m[1][2] * z,
+            m[2][0] * x + m[2][1] * y + m[2][2] * z
+        )
+
+    /**
+     * color(srgb-linear r g b) — linear-light sRGB. Only the transfer function
+     * differs from plain sRGB, so we just gamma-encode each channel (no matrix).
+     */
+    fun srgbLinearToSrgb(r: Double, g: Double, b: Double, alpha: Double = 1.0): SRGB =
+        SRGB(linearToSrgbGamma(r), linearToSrgbGamma(g), linearToSrgbGamma(b), alpha)
+
+    /**
+     * color(display-p3 r g b). Display-P3 shares the sRGB transfer function, so we
+     * decode to linear light, go P3→XYZ(D65), then XYZ→sRGB (both D65 — no adapt).
+     */
+    fun displayP3ToSrgb(r: Double, g: Double, b: Double, alpha: Double = 1.0): SRGB {
+        val (x, y, z) = mul3(P3_TO_XYZ, srgbGammaToLinear(r), srgbGammaToLinear(g), srgbGammaToLinear(b))
+        return xyzToSrgb(x, y, z, alpha)
+    }
+
+    /**
+     * color(a98-rgb r g b). Adobe RGB (1998): decode the 2.19921875 gamma to linear
+     * light, apply the Adobe primaries→XYZ(D65) matrix, then XYZ→sRGB (both D65).
+     */
+    fun a98RgbToSrgb(r: Double, g: Double, b: Double, alpha: Double = 1.0): SRGB {
+        val (x, y, z) = mul3(A98_TO_XYZ, a98Linear(r), a98Linear(g), a98Linear(b))
+        return xyzToSrgb(x, y, z, alpha)
+    }
+
+    /** a98-rgb transfer decode: linear = sign(v)·|v|^(563/256) (CSS Color 4 lin_a98rgb). */
+    private fun a98Linear(v: Double): Double {
+        val sign = if (v < 0) -1.0 else 1.0
+        return sign * abs(v).pow(563.0 / 256.0)  // 563/256 = 2.19921875 (Adobe RGB gamma)
+    }
+
+    /**
+     * color(rec2020 r g b). ITU-R BT.2020: decode the BT.2020 transfer function to
+     * linear light, apply rec2020→XYZ(D65), then XYZ→sRGB (both D65).
+     */
+    fun rec2020ToSrgb(r: Double, g: Double, b: Double, alpha: Double = 1.0): SRGB {
+        val (x, y, z) = mul3(REC2020_TO_XYZ, rec2020Linear(r), rec2020Linear(g), rec2020Linear(b))
+        return xyzToSrgb(x, y, z, alpha)
+    }
+
+    /** BT.2020 transfer decode (CSS Color 4 lin_2020): α=1.09929682680944, β=0.018053968510807. */
+    private fun rec2020Linear(v: Double): Double {
+        val a = 1.09929682680944   // BT.2020 α
+        val b = 0.018053968510807  // BT.2020 β
+        val sign = if (v < 0) -1.0 else 1.0
+        val mag = abs(v)
+        // Linear segment below β·4.5, power segment above (encode used 4.5 slope / 0.45 exponent).
+        return if (mag < b * 4.5) sign * (mag / 4.5) else sign * ((mag + a - 1) / a).pow(1.0 / 0.45)
+    }
+
+    /** color(xyz r g b) / color(xyz-d65 …) — components already XYZ(D65). */
+    fun xyzD65ToSrgb(x: Double, y: Double, z: Double, alpha: Double = 1.0): SRGB =
+        xyzToSrgb(x, y, z, alpha)
+
+    /** color(xyz-d50 x y z) — Bradford-adapt D50→D65, then XYZ→sRGB. */
+    fun xyzD50ToSrgb(x: Double, y: Double, z: Double, alpha: Double = 1.0): SRGB {
+        val (xd, yd, zd) = mul3(BRADFORD_D50_TO_D65, x, y, z)
+        return xyzToSrgb(xd, yd, zd, alpha)
     }
 }

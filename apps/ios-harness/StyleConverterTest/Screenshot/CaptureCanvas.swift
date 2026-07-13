@@ -147,6 +147,169 @@ struct CaptureCanvas: View {
     }
 }
 
+/// TITAN WPT Round 3 — the COMPOSED whole-document capture surface.
+///
+/// The per-component `CaptureCanvas` above renders ONE IRComponent per PNG;
+/// the legacy WPT native path captured every component that way and the
+/// orchestrator STITCHED the crops vertically before diffing against the
+/// browser-ref. That vertical concatenation does not reproduce the
+/// reference PAGE's layout (bar stacking, gaps, the ref's 16px body
+/// padding), so a multi-component test scored dishonestly.
+///
+/// This canvas fixes the geometry the same way the web harness's
+/// `ComposedCaptureGallery.tsx` does: it renders ALL of a fed doc's
+/// slot-composed roots (document.components is already the IRComposer
+/// output — see IRDocument.init(from:)) stacked in document flow on ONE
+/// surface, then the caller ImageRenderer's it ONCE into a single
+/// `<safe(testKey)>.png`. inject-wpt-block.mjs's diffComposedVsRef diffs
+/// that composite DIRECTLY against the browser-ref (no stitch).
+///
+/// The framing MIRRORS tools/titan/capture-browser-ref.mjs and the web
+/// composedCanvasStyle EXACTLY so the two images are pixel-comparable:
+///   - width       390 px            (CANVAS_WIDTH)
+///   - content box 358 px            (390 − 2×16, the ref body content box)
+///   - padding     16 px all sides   (CANVAS_PAD_PX / the ref `:where(body)` pad)
+///   - background  #1A1A2E           (CANVAS_BG — the ref html+body bg)
+///   - min-height  600 px            (the ref `min-height:100vh` floors
+///                                    capture-browser-ref's docHeight at 600;
+///                                    the canvas grows past 600 on overflow)
+///
+/// The ONLY thing that differs from the per-component path is the
+/// composition geometry — every node still renders through the identical
+/// ComponentHost → ComponentRenderer engine, so per-node fidelity is
+/// measured on the exact same footing (web harness's stated invariant).
+struct ComposedCaptureCanvas: View {
+    /// The fed per-test IR document. `components` are the slot-composed
+    /// roots (IRComposer ran at decode); we render them in flat sibling
+    /// order = the document/composition order (spec 03), identical to the
+    /// web ComposedTestCanvas root loop.
+    let document: IRDocument
+
+    /// Canvas width — the browser-ref CANVAS_WIDTH. Fixed at 390 (NOT
+    /// CaptureOverrides.captureWidth): the WPT browser-ref is always
+    /// captured at 390, so the composed comparison surface is too.
+    static let width: CGFloat = 390
+    /// Uniform 16px pad — the ref's `:where(body) { padding }`. Content box
+    /// is therefore 390 − 32 = 358, mirroring the ref body content box.
+    static let padding: CGFloat = 16
+    /// Minimum canvas height — the ref's `min-height:100vh` floors
+    /// capture-browser-ref.mjs's docHeight at 600; the surface grows past
+    /// 600 when the composed content is taller.
+    static let minHeight: CGFloat = 600
+
+    /// The capture geometry published to the runtime's styleViewport
+    /// channel — SAME numbers as CaptureCanvas.viewport (390×844 viewport,
+    /// 358 root containing block) so vw/vh/% resolve identically to the
+    /// per-component path and the web reference.
+    static let viewport = StyleViewport(
+        width: Double(width),
+        height: 844,
+        rootContainingBlock: Double(width - padding * 2)
+    )
+
+    /// TITAN Round 4 GAP 1 — the per-root effective UA vertical block
+    /// margins (deferring to any IR-declared margin the runtime's
+    /// MarginApplier already paints), collapsed into the space to place
+    /// ABOVE each root + BELOW the last. See UABlockMargin: this reproduces
+    /// the browser-ref's UA `<p>`/`<hN>`/… block margins the native flush
+    /// stack lacked, so a multi-bar test's gaps match the ref. Composed
+    /// WPT only — this canvas is built solely by captureComposedDocument.
+    private var stackedSpacing: (leading: [CGFloat], trailing: CGFloat) {
+        let margins = document.components.map {
+            UABlockMargin.effectiveVertical(tag: $0.meta?.sourceTag,
+                                            properties: $0.properties)
+        }
+        return UABlockMargin.stackedSpacing(margins)
+    }
+
+    /// TITAN Round 4 GAP 2 — the canvas background. The browser-ref frames
+    /// every page with a ZERO-specificity `:where(html,body){background:
+    /// #1A1A2E}`, so a reference that sets its OWN `body{background}` WINS
+    /// and paints the whole page that color (css-color/a98rgb-003's grey).
+    /// The reader tags that body background as a `meta.role:"body-root"`
+    /// component; we resolve it through the SAME engine the renderer uses
+    /// (ComponentRenderer.resolvedBackgroundColor) and honor it here,
+    /// falling back to the pipeline's #1A1A2E default when there is no
+    /// body-root or it declares no background.
+    private var canvasBackground: Color {
+        guard let bodyRoot = document.components.first(where: {
+                  $0.meta?.role == "body-root"
+              }),
+              let bg = ComponentRenderer.resolvedBackgroundColor(
+                  from: bodyRoot.properties)
+        else { return CaptureCanvas.backgroundColor }
+        return bg
+    }
+
+    var body: some View {
+        // GAP 1 — fold the per-root UA margins (with adjacent collapse and
+        // no collapse at the padded top/bottom edges) into per-root spacing.
+        let spacing = stackedSpacing
+        let lastIndex = document.components.count - 1
+        return VStack(alignment: .leading, spacing: 0) {
+            // enumerated()+offset id: roots are rendered positionally, never
+            // reordered — a stable positional key is correct and avoids
+            // relying on component.id uniqueness across a malformed doc.
+            ForEach(Array(document.components.enumerated()), id: \.offset) { idx, root in
+                // Identical host shim the per-component canvas and the
+                // engine's own child loop use — placement parent-data
+                // attached (inert under this VStack), full ComponentRenderer
+                // engine underneath. Zero per-node render difference.
+                ComponentHost(component: root)
+                    // GAP 1 — the UA block margin ABOVE this root: its full
+                    // top margin for the first root (the canvas's 16px
+                    // padding blocks parent↔child collapse there), or the
+                    // previous root's bottom COLLAPSED with this root's top
+                    // for interior roots. IR-declared margins contribute 0
+                    // here (already painted by MarginApplier inside the host)
+                    // so they are never double-counted.
+                    .padding(.top, spacing.leading[idx])
+                    // Only the LAST root carries the trailing bottom margin
+                    // (again uncollapsed — the padded bottom edge). Interior
+                    // bottoms are folded into the next root's leading gap.
+                    .padding(.bottom, idx == lastIndex ? spacing.trailing : 0)
+            }
+        }
+        // Constrain the composed content to the 358px ref content box,
+        // anchored at the block-flow origin (top-leading) — same maxWidth
+        // rule the per-component canvas applies to its single component.
+        .frame(maxWidth: Self.width - Self.padding * 2, alignment: .topLeading)
+        // The ref's 16px body padding — the exact offset the stitched path
+        // dropped (web composedCanvasStyle carries it too).
+        .padding(Self.padding)
+        // Frame to the full 390px width (min==max pins it) and floor the
+        // height at the ref's 600px min; fixedSize(vertical) below lets the
+        // surface adopt its natural height above that floor. Uses the
+        // flexible-frame overload because SwiftUI has no width+minHeight form.
+        .frame(minWidth: Self.width, maxWidth: Self.width,
+               minHeight: Self.minHeight, alignment: .topLeading)
+        // Natural (content) height beyond the 600 floor — mirrors the ref's
+        // documentHeight capture and the per-component canvas's height rule.
+        .fixedSize(horizontal: false, vertical: true)
+        // GAP 2 — the ref canvas background: #1A1A2E by default, or the
+        // document body-root's own background when it declares one (e.g.
+        // a98rgb-003's full-page grey). Any sub-root gap paints this so
+        // seams stay invisible against the ref.
+        .background(canvasBackground)
+        // Publish the capture geometry so the runtime resolves vw/vh/% and
+        // containing blocks against 390×844/358, not the device screen.
+        .environment(\.styleViewport, Self.viewport)
+        // GAP 1 (WIDTH half) — publish the 358px content-box width so the
+        // runtime stretches each auto-width, in-flow ROOT to full bleed like
+        // the browser-ref's block `<p>`/`<div>` (iOS otherwise hugs content).
+        // Set on the whole stack, but ComponentRenderer folds it into ROOTS
+        // only and resets it for their children, so block-fill is root-scoped.
+        // Composed WPT only (this canvas is built solely by
+        // captureComposedDocument), and the fold is additionally gated on
+        // wptCaptureMode — the 327-pair baseline never sees it.
+        .environment(\.wptBlockFlowFillWidth, Self.width - Self.padding * 2)
+        // Same dynamic-capture hooks the per-component canvas carries
+        // (pinned light scheme, empty forced set, live clock) so the
+        // composed capture is a deterministic base render.
+        .modifier(DynamicCaptureHooks())
+    }
+}
+
 /// Wave 7 (docs/DYNAMIC_CAPTURE.md) — the environment half of the iOS
 /// capture hooks, shared by both canvas branches:
 ///

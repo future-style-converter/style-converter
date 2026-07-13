@@ -14,9 +14,18 @@
 // with the SAME `<idx>_<safeName>.png` names inject-wpt-block.mjs globs for, so
 // captures drop straight into the existing compare pipeline.
 //
+// TITAN Round 3 — `--composed`: launch the app with titanComposed=true so it
+// renders the WHOLE fed doc COMPOSED on one ref-matching canvas and writes ONE
+// `<safe(testKey)>.png` per test (name derived from the fixture basename, the
+// same key the app derives from the inbox filename). The feeder then waits for
+// and pulls that single PNG instead of the per-component `%03d_<safe>.png` set;
+// tools/titan/inject-wpt-block.mjs's diffComposedVsRef diffs it DIRECTLY vs the
+// browser-ref (no stitch). Without the flag, the legacy per-component path is
+// byte-for-byte unchanged.
+//
 // Usage:
 //   node tools/titan/feed-android.mjs --fixtures <dir|a.json,b.json> --out <dir> \
-//       [--timeout-per-fixture 30] [--udid emulator-5554] [--skip-install]
+//       [--timeout-per-fixture 30] [--udid emulator-5554] [--skip-install] [--composed]
 //
 // Contract: the device must already be running. If none is attached the feeder
 // FAILS LOUDLY telling the caller to boot one (per the lane's BACKGROUND_MODE
@@ -26,7 +35,7 @@ import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseArgs, expectedPngNames, pngIsValid } from './feed-lib.mjs';
+import { parseArgs, expectedPngNames, composedPngName, pngIsValid } from './feed-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -126,7 +135,7 @@ function expandFixtures(arg) {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (!opts.fixtures || !opts.out) {
-    log('usage: feed-android.mjs --fixtures <dir|a.json,b.json> --out <dir> [--timeout-per-fixture N] [--udid S] [--skip-install]');
+    log('usage: feed-android.mjs --fixtures <dir|a.json,b.json> --out <dir> [--timeout-per-fixture N] [--udid S] [--skip-install] [--composed]');
     process.exit(2);
   }
   const fixtures = expandFixtures(opts.fixtures);
@@ -142,7 +151,7 @@ async function main() {
   const serial = opts.udid || devices[0];
   if (!devices.includes(serial)) { log(`FATAL: requested --udid ${serial} not attached (${devices.join(', ')})`); process.exit(3); }
   const adbx = makeAdb(adb, serial);
-  log(`device=${serial}  fixtures=${fixtures.length}  out=${opts.out}  timeout=${opts.timeoutPerFixture}s`);
+  log(`device=${serial}  fixtures=${fixtures.length}  out=${opts.out}  timeout=${opts.timeoutPerFixture}s  composed=${opts.composed}`);
 
   // Install (unless reusing the already-installed app) so the feeder is
   // self-contained. Incremental Gradle → a no-change reinstall is fast.
@@ -167,18 +176,26 @@ async function main() {
   try { adbx(['logcat', '-c']); } catch { /* logcat clear is best-effort */ }
 
   // Launch in inbox mode. Match the shared 390×844 @160dpi capture canvas.
+  // Composed mode layers `--ez titanComposed true` on top: same inbox poll,
+  // but the app composes the whole doc onto one canvas → one PNG per test.
   adbx(['shell', 'wm', 'size', '390x844']);
   adbx(['shell', 'wm', 'density', '160']);
-  adbx(['shell', 'am', 'start', '-n', ACTIVITY, '--ez', 'titanInbox', 'true']);
-  log('launched in titan-inbox mode; verifying marker…');
+  const launchArgs = ['shell', 'am', 'start', '-n', ACTIVITY, '--ez', 'titanInbox', 'true'];
+  if (opts.composed) launchArgs.push('--ez', 'titanComposed', 'true');
+  adbx(launchArgs);
+  log(`launched in titan-${opts.composed ? 'composed' : 'inbox'} mode; verifying marker…`);
   // Grep the run-config marker (same verification philosophy as test-all's
-  // animationTime/forceState gate) — proves the app really entered inbox mode.
+  // animationTime/forceState gate) — proves the app really entered the mode.
+  // In composed mode we additionally require titanComposed=true so a stale
+  // per-component launch can't masquerade as composed.
+  const markerRe = opts.composed ? /titanInbox=true titanComposed=true/ : /titanInbox=true/;
   let marked = false;
   for (let i = 0; i < 40 && !marked; i++) {
-    try { marked = /titanInbox=true/.test(adbx(['logcat', '-d'])); } catch { /* retry */ }
+    try { marked = markerRe.test(adbx(['logcat', '-d'])); } catch { /* retry */ }
     if (!marked) await new Promise((r) => setTimeout(r, 250));
   }
-  log(marked ? 'verified: app logged titanInbox=true' : 'WARNING: never saw titanInbox=true marker (continuing)');
+  log(marked ? `verified: app logged ${opts.composed ? 'titanComposed=true' : 'titanInbox=true'}`
+             : `WARNING: never saw ${opts.composed ? 'titanComposed=true' : 'titanInbox=true'} marker (continuing)`);
 
   // Feed each fixture and record a result row.
   const results = [];
@@ -188,7 +205,10 @@ async function main() {
     let doc;
     try { doc = JSON.parse(readFileSync(fx, 'utf8')); }
     catch (e) { results.push({ fixture: base, ok: false, error: `bad IR json: ${e.message}` }); continue; }
-    const expected = expectedPngNames(doc);
+    // Composed mode: ONE PNG named for the WPT test key (derived from the
+    // fixture basename, identical to what the app derives from the inbox
+    // filename). Per-component mode: one PNG per flattened component.
+    const expected = opts.composed ? [composedPngName(base)] : expectedPngNames(doc);
     const t0 = Date.now();
     // Push into the inbox under a unique, FIFO-ordered name (index prefix
     // guarantees uniqueness even if two fixtures share a basename).

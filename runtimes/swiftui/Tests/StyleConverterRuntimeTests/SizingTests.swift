@@ -19,6 +19,9 @@ final class SizingTests: XCTestCase {
     func testAspectRatioChecks()     { for failure in Self.runAspectRatioChecks()     { XCTFail(failure) } }
     func testSizeExtractorChecks()   { for failure in Self.runSizeExtractorChecks()   { XCTFail(failure) } }
     func testResolveChecks()         { for failure in Self.runResolveChecks()         { XCTFail(failure) } }
+    // TITAN Round 5 (EM/REM) — width/height in em must resolve to px against
+    // the effective font-size (WPT css-color/a98rgb sizes its box `12em`).
+    func testEmRemSizingChecks()     { for failure in Self.runEmRemSizingChecks()     { XCTFail(failure) } }
 
     // Build an IRValue object concisely.
     private static func obj(_ d: [String: IRValue]) -> IRValue { .object(d) }
@@ -185,5 +188,75 @@ final class SizingTests: XCTestCase {
         else { f.append("fit-content-bounded") }
 
         return f.map { "resolve/\($0)" }
+    }
+
+    // MARK: - EM / REM sizing resolution (TITAN Round 5)
+
+    // The four WPT css-color/a98rgb reftests size their swatch with
+    // `width: 12em; height: 12em` (a98rgb-004 uses `6em` for one axis). The
+    // converter cannot pre-resolve em — it is runtime-relative — so it emits
+    // the length as `{"type":"length","original":{"v":12,"u":"EM"}}` with NO
+    // `px` field (px is NULL / absent). These checks pin the two links in the
+    // chain the runtime owns: (1) the extractor decodes that px-less wrapper
+    // into `.relative(_, .em, nil)` rather than dropping it to `.unknown`, and
+    // (2) SizeApplierResolve.exact multiplies it by the effective font-size —
+    // 16pt CSS-initial `medium` by default — so the box is 12 × 16 = 192pt,
+    // matching the browser-ref, instead of collapsing to content size.
+    private static func runEmRemSizingChecks() -> [String] {
+        var f: [String] = []
+
+        // ── (1) Extraction: the exact a98rgb IR wire shape ───────────────
+        // `{"type":"length","original":{"v":12,"u":"EM"}}` — no `px` key.
+        // Must decode to `.relative(12, .em, nil)`; a `.unknown` here is the
+        // "em dropped → box mis-sized" failure the round targets.
+        let emWire = obj(["type": .string("length"),
+                          "original": obj(["v": .double(12), "u": .string("EM")])])
+        if case .relative(12, .em, nil) = extractLength(emWire) { }
+        else { f.append("em-extract-relative") }
+
+        // Same for rem so the root-relative unit is covered end-to-end.
+        let remWire = obj(["type": .string("length"),
+                           "original": obj(["v": .double(2), "u": .string("REM")])])
+        if case .relative(2, .rem, nil) = extractLength(remWire) { }
+        else { f.append("rem-extract-relative") }
+
+        // ── (2) Resolution against the default 16pt root font-size ───────
+        // CSS-initial `font-size: medium` = 16px; SpacingContext defaults to
+        // 16 (PaddingConfig.swift). 12em × 16 = 192pt — the a98rgb box size.
+        let ctx16 = SpacingContext(fontSizePx: 16, viewportWidth: 390, viewportHeight: 844)
+        let em12 = LengthValue.relative(value: 12, unit: .em, pxFallback: nil)
+        if SizeApplierResolve.exact(em12, ctx: ctx16, parent: 358) == 192 { }
+        else { f.append("em12-at-16-is-192") }
+
+        // a98rgb-004's short axis: 6em × 16 = 96pt.
+        let em6 = LengthValue.relative(value: 6, unit: .em, pxFallback: nil)
+        if SizeApplierResolve.exact(em6, ctx: ctx16, parent: 358) == 96 { }
+        else { f.append("em6-at-16-is-96") }
+
+        // Height axis (allowPercent:false) must resolve em identically — em is
+        // not a percentage, so the height-percent guard must not swallow it.
+        if SizeApplierResolve.exact(em12, ctx: ctx16, parent: 844, allowPercent: false) == 192 { }
+        else { f.append("em12-height-is-192") }
+
+        // rem resolves against the FIXED 16pt root, independent of the
+        // element font-size (SpacingResolver's `.rem` → value × 16).
+        let rem2 = LengthValue.relative(value: 2, unit: .rem, pxFallback: nil)
+        if SizeApplierResolve.exact(rem2, ctx: ctx16, parent: 358) == 32 { }
+        else { f.append("rem2-at-root-is-32") }
+
+        // ── (3) Element font-size override threads through for em ─────────
+        // When an ancestor/element sets `font-size: 24px`, em resolves
+        // against 24, not the 16 root: 12em × 24 = 288pt. rem stays on 16.
+        let ctx24 = SpacingContext(fontSizePx: 24, viewportWidth: 390, viewportHeight: 844)
+        if SizeApplierResolve.exact(em12, ctx: ctx24, parent: 358) == 288 { }
+        else { f.append("em12-at-24-is-288") }
+        if SizeApplierResolve.exact(rem2, ctx: ctx24, parent: 358) == 32 { }
+        else { f.append("rem2-root-ignores-fontsize") }
+
+        // Min/Max constraints resolve em through the same lane (constraint()).
+        if SizeApplierResolve.constraint(em12, ctx: ctx16, parent: 358) == 192 { }
+        else { f.append("em12-constraint-is-192") }
+
+        return f.map { "emRem/\($0)" }
     }
 }

@@ -48,6 +48,58 @@ class TitanInboxTest {
         assertFalse(TitanInbox.isInboxModeRequested(false, "yes")) // only literal "true" counts
     }
 
+    // ── isComposedModeRequested — composed sub-flag parse ───────────────────
+
+    @Test
+    fun composedModeParseMatchesInboxParse() {
+        // Same two-spelling contract as inbox mode: `--ez` boolean OR `--es "true"`.
+        assertTrue(TitanInbox.isComposedModeRequested(boolExtra = true, stringExtra = null))
+        assertTrue(TitanInbox.isComposedModeRequested(false, "true"))
+        assertTrue(TitanInbox.isComposedModeRequested(false, "  TRUE  "))
+        // Absent / falsy ⇒ per-component inbox capture (composed off).
+        assertFalse(TitanInbox.isComposedModeRequested(false, null))
+        assertFalse(TitanInbox.isComposedModeRequested(false, "false"))
+        assertFalse(TitanInbox.isComposedModeRequested(false, "0"))
+    }
+
+    // ── composedTestKey — recover the WPT key from the inbox filename ────────
+
+    @Test
+    fun composedTestKeyStripsFeederPrefixAndExtension() {
+        // Feeder pushes `<NNNN>-<testKey>.json`; we recover `<testKey>`.
+        assertEquals(
+            "wpt__css-color__background-color-hsl-001",
+            TitanInbox.composedTestKey("0000-wpt__css-color__background-color-hsl-001.json"),
+        )
+        // Multi-digit index prefix is stripped too.
+        assertEquals(
+            "wpt__css-backgrounds__background-334",
+            TitanInbox.composedTestKey("0123-wpt__css-backgrounds__background-334.json"),
+        )
+        // No prefix (a manual push) round-trips to the bare stem.
+        assertEquals(
+            "wpt__css-color__background-color-rgb-001",
+            TitanInbox.composedTestKey("wpt__css-color__background-color-rgb-001.json"),
+        )
+        // The `wpt` key never starts with a digit, so a leading digit in the
+        // SECTION (there is none in WPT, but prove the anchor only eats `\d+-`)
+        // is preserved once the single index prefix is gone.
+        assertEquals("wpt__css-2d__thing", TitanInbox.composedTestKey("7-wpt__css-2d__thing.json"))
+    }
+
+    // ── composedPngName — inject-safe() filename in lock-step ────────────────
+
+    @Test
+    fun composedPngNameMatchesInjectSafeRule() {
+        // WPT keys are already safe → identity + ".png".
+        assertEquals(
+            "wpt__css-color__background-color-hsl-001.png",
+            TitanInbox.composedPngName("wpt__css-color__background-color-hsl-001"),
+        )
+        // Dots are KEPT (inject's class is [^A-Za-z0-9._-]); spaces/slashes/colons → _.
+        assertEquals("a.b_c_d_e.png", TitanInbox.composedPngName("a.b/c d:e"))
+    }
+
     // ── pickOldest — poll ordering ──────────────────────────────────────────
 
     @Test

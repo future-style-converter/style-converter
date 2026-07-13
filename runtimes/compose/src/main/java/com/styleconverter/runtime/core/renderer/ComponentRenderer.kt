@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
@@ -471,7 +472,44 @@ object ComponentRenderer {
         // animatedSizeFloor sits OUTSIDE baseModifier so its min constraint
         // coerces the animated width/height upward (see the comment above);
         // Modifier (the common no-animation case) chains as a no-op.
-        val sizedModifier = itemModifier.then(interactionModifier).then(animatedSizeFloor).then(baseModifier).then(
+        // Round-4b (composed WPT block-flow, FIX 2 completion). The native twin
+        // of the web harness's WPT_MODE block-flow carve-out
+        // (apps/web-harness/src/sdui/ComponentRenderer.tsx: under `?wpt=1` it
+        // drops `fit-content` + `minWidth:50px` + `minHeight:30px` so block
+        // elements get browser block-flow — width stretches to the containing
+        // block, height hugs content). Those 50×30 floors are ESSENTIAL for the
+        // 327-pair baseline (Compose hugs its content intrinsically) but break
+        // stacked WPT tests: a <p> bar rendered 50dp-wide × 30dp-tall instead of
+        // full-width × one-line-box makes the composed page's bars drift off the
+        // ref's positions (the "half-a-pitch drift" the web fix calls out) and
+        // horizontally miss the ref's full-width bars. Gated on
+        // [LocalWptComposedMode] so the 327 baseline AND the per-component inbox
+        // path (both leave it false) are byte-identical.
+        val composedWpt = LocalWptComposedMode.current
+        // Block-level (NOT a flex/grid item — LocalSelfAlignmentHandled false)
+        // with no IR-declared width → stretch to the containing block, exactly
+        // like a browser block box. Explicit-width components (a98rgb's squares,
+        // the border-radius control) keep their declared width (hasExplicitWidth).
+        val blockFlowWidth: Modifier =
+            if (composedWpt && !hasExplicitWidth && !LocalSelfAlignmentHandled.current)
+                Modifier.fillMaxWidth()
+            else Modifier
+        // The 50×30 placeholder floor — skipped entirely in composed WPT capture
+        // so the box hugs its content height (one line box), matching the ref's
+        // <p>. Every other path keeps the floor.
+        val placeholderFloor: Modifier =
+            if (composedWpt) Modifier
+            else StyleApplier.placeholderFloorMinSize(
+                effectiveProperties,
+                applyWidthFloor = !hasExplicitWidth,
+                applyHeightFloor = !hasExplicitHeight
+            )
+        val sizedModifier = itemModifier.then(interactionModifier).then(animatedSizeFloor)
+            // blockFlowWidth sits just OUTSIDE baseModifier so the component's
+            // BackgroundColor (applied inside baseModifier) paints across the
+            // full stretched width; a no-op (Modifier) on every non-composed
+            // path and for explicit-width components.
+            .then(blockFlowWidth).then(baseModifier).then(
             // BORDER-BOX floor: web's 50/30px minimum constrains the whole
             // card (box-sizing: border-box), so the content-box minimum
             // Compose enforces here (inside the padding-last chain) must be
@@ -481,11 +519,7 @@ object ComponentRenderer {
             // `padding: 8px+` (all 33 Decorated combo rows: Android canvas
             // 78/86/94/102 vs web 76/84/92/100). See
             // StyleApplier.placeholderFloorMinSize for the exact math.
-            StyleApplier.placeholderFloorMinSize(
-                effectiveProperties,
-                applyWidthFloor = !hasExplicitWidth,
-                applyHeightFloor = !hasExplicitHeight
-            )
+            placeholderFloor
         ).then(
             // Border-band content inset — INSIDE the 30dp placeholder floor
             // above, so the band participates in the minimum instead of
@@ -2018,10 +2052,20 @@ object ComponentRenderer {
         // single-line-text fixtures that dominate the placeholder corpus.
         // When the IR DOES carry an explicit `line-height` we keep using
         // that value verbatim — only the missing-value branch is bounded.
+        //
+        // Round-4b (composed WPT line-box, FIX 2): in composed WPT capture the
+        // default box pins to the browser-ref's default-font line box (18px
+        // @16px, ratio 1.125) instead of the native 1.2× — see
+        // [composedDefaultLineHeightPx] / [LocalWptComposedMode]. Every other
+        // path (per-component inbox, the 327-pair baseline) keeps 1.2× because
+        // LocalWptComposedMode is false there, so those captures are byte-
+        // identical. An IR-declared line-height still wins (the `if` above).
         val effectiveLineHeight = if (textStyle.lineHeight != TextUnit.Unspecified)
             textStyle.lineHeight
         else
-            (effectiveFontSize.value * 1.2f).sp
+            composedDefaultLineHeightPx(
+                LocalWptComposedMode.current, effectiveFontSize.value
+            ).sp
 
         // CSS `background-clip: text` plus a `background-image` clips the
         // bg paint to the glyph shape — web typically pairs it with
@@ -2243,11 +2287,54 @@ object ComponentRenderer {
         // constraint is narrower than the word — the same fallback
         // break-word uses.
         val breakWordShim = BreakWordMinIntrinsicModifier(effectiveFontSize.value)
+        // Round-4b (composed WPT line-box, FIX 2): drop the 4dp placeholder pad
+        // to 0 in composed WPT capture so a text bar is exactly one line box
+        // tall (matching the ref's tight <p>); every other path keeps 4dp
+        // (LocalWptComposedMode is false → byte-identical). See
+        // [composedPlaceholderTextPaddingDp].
+        val placeholderPad = composedPlaceholderTextPaddingDp(LocalWptComposedMode.current).dp
         val textModifier = if (placeholderFillsParentWidth(properties)) {
-            Modifier.fillMaxWidth().padding(4.dp).then(breakWordShim)
+            Modifier.fillMaxWidth().padding(placeholderPad).then(breakWordShim)
         } else {
-            Modifier.padding(4.dp).then(breakWordShim)
+            Modifier.padding(placeholderPad).then(breakWordShim)
         }
+
+        // Round-4b (composed WPT line-box, FIX 2) — enforce the CSS line box.
+        // The browser lays a `<p>` line out at EXACTLY its `line-height` (18px
+        // @16px for the ref's default font); Compose instead FLOORS a single
+        // line at the font's natural glyph box, so Inter renders ~19px even with
+        // lineHeight pinned to 18 (line-height below the glyph box is ignored,
+        // and Trim can't shrink below it). That +1px/line makes a stacked 10-bar
+        // test drift ~1px/bar off the ref and collapses SSIM (proven: perfect
+        // 18px alignment scores ~0.90 vs ~0.59 with the drift). This snap
+        // re-imposes the CSS model: measure the text, then report a height of
+        // `lineCount × effectiveLineHeight` (from the onTextLayout result), the
+        // glyph box centered inside — trimming the ~1px/line font excess without
+        // clipping the ink (glyphs sit well inside the box). Composed WPT capture
+        // ONLY (LocalWptComposedMode) so the 327 baseline + per-component inbox
+        // path are byte-identical.
+        val snapDensity = androidx.compose.ui.platform.LocalDensity.current
+        val refLineBoxPx = with(snapDensity) { effectiveLineHeight.toPx() }
+        val composedLineBoxSnap: Modifier =
+            if (LocalWptComposedMode.current && refLineBoxPx > 0f) {
+                Modifier.layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    // lineCount comes from the previous frame's onTextLayout
+                    // (below); until it settles (0) we pass the natural height
+                    // through unchanged — the capture waits for layout to settle.
+                    val lines = layoutResult.value?.lineCount ?: 0
+                    if (lines <= 0) {
+                        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                    } else {
+                        val target = Math.round(lines * refLineBoxPx).coerceAtLeast(0)
+                        layout(placeable.width, target) {
+                            // Center the (slightly taller) glyph box in the
+                            // tightened CSS line box — symmetric ½px trim.
+                            placeable.place(0, (target - placeable.height) / 2)
+                        }
+                    }
+                }
+            } else Modifier
 
         // css-writing-modes-4 §3: vertical / sideways writing modes rotate
         // the TEXT FLOW inside the box (the box itself keeps its geometry —
@@ -2322,7 +2409,9 @@ object ComponentRenderer {
             overflow = effectiveOverflow,
             softWrap = wrapConfig.softWrap,
             onTextLayout = { layoutResult.value = it },
-            modifier = textModifier.then(emphasisModifier)
+            // composedLineBoxSnap (no-op outside composed WPT) tightens the box
+            // to the CSS line box before emphasis paints over it.
+            modifier = textModifier.then(composedLineBoxSnap).then(emphasisModifier)
         )
     }
 

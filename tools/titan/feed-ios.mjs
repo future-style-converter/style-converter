@@ -186,11 +186,29 @@ export function expectedCaptures(doc) {
   });
 }
 
+// ── TITAN WPT Round 3 composed-mode helpers (unit-tested) ────────────────────
+
+/** The WPT test key for a per-test-ir fixture path. The per-test-ir docs are
+ *  named exactly `wpt__<section>__<stem>.json` (split-combined-ir.mjs), so the
+ *  testKey is just the basename minus `.json`. This is the identity the app
+ *  derives from the inbox filename and the name diffComposedVsRef globs. */
+export function composedTestKey(fixturePath) {
+  return basename(fixturePath, '.json');
+}
+
+/** The composed capture PNG name for a testKey: `<safe(testKey)>.png` — the
+ *  ONE file the app writes and the compare pipeline reads. safeName() is the
+ *  same sanitiser the app's ScreenshotManager.safeCaptureName applies, so the
+ *  host predicts the exact on-device filename. */
+export function composedPngName(testKey) {
+  return `${safeName(testKey)}.png`;
+}
+
 /** Parse the CLI argv (after `node feed-ios.mjs`). */
 export function parseArgs(argv) {
   const out = {
     fixtures: null, out: null, timeoutPerFixture: 15000,
-    udid: null, appPath: null, noBuild: false, help: false,
+    udid: null, appPath: null, noBuild: false, composed: false, help: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -200,6 +218,10 @@ export function parseArgs(argv) {
     else if (a === '--udid') out.udid = argv[++i];
     else if (a === '--app') out.appPath = argv[++i];
     else if (a === '--no-build') out.noBuild = true;
+    // TITAN WPT Round 3: composed capture — feed each per-test doc named
+    // `<testKey>.json`, launch the app with SIMCTL_CHILD_TITAN_COMPOSED=1,
+    // and pull ONE `<safe(testKey)>.png` per test (no per-component stitch).
+    else if (a === '--composed') out.composed = true;
     else if (a === '--help' || a === '-h') out.help = true;
   }
   return out;
@@ -297,7 +319,7 @@ async function pullVerified(srcPath, destPath) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.fixtures || !args.out) {
-    console.log('usage: feed-ios.mjs --fixtures <dir|a.json,b.json> --out <dir> [--timeout-per-fixture <ms>] [--udid <UDID>] [--no-build] [--app <path>]');
+    console.log('usage: feed-ios.mjs --fixtures <dir|a.json,b.json> --out <dir> [--timeout-per-fixture <ms>] [--udid <UDID>] [--no-build] [--composed] [--app <path>]');
     process.exit(args.help ? 0 : 2);
   }
 
@@ -339,12 +361,16 @@ async function main() {
   }
 
   // 3. Launch in inbox mode. simctl forwards SIMCTL_CHILD_* into the app env
-  //    (same transport as SIMCTL_CHILD_CAPTURE_ANIMATION_TIME).
+  //    (same transport as SIMCTL_CHILD_CAPTURE_ANIMATION_TIME). In composed
+  //    mode we ALSO forward SIMCTL_CHILD_TITAN_COMPOSED=1 so the app renders
+  //    each fed doc as ONE composed `<safe(testKey)>.png` (WPT Round 3)
+  //    instead of the legacy per-component captures.
   run('xcrun', ['simctl', 'terminate', udid, BUNDLE_ID]);
-  const launch = run('xcrun', ['simctl', 'launch', udid, BUNDLE_ID],
-    { env: { ...process.env, SIMCTL_CHILD_TITAN_INBOX: '1' } });
+  const launchEnv = { ...process.env, SIMCTL_CHILD_TITAN_INBOX: '1' };
+  if (args.composed) launchEnv.SIMCTL_CHILD_TITAN_COMPOSED = '1';
+  const launch = run('xcrun', ['simctl', 'launch', udid, BUNDLE_ID], { env: launchEnv });
   if (launch.status !== 0) throw new Error(`simctl launch failed: ${launch.stderr}`);
-  console.log('[feed-ios] launched in inbox mode');
+  console.log(`[feed-ios] launched in inbox mode${args.composed ? ' (composed)' : ''}`);
 
   // 4. Resolve the app data container → inbox + screenshots dirs.
   const cont = run('xcrun', ['simctl', 'get_app_container', udid, BUNDLE_ID, 'data']);
@@ -375,18 +401,34 @@ async function main() {
       results.push({ fixture: label, ok: false, reason: 'unreadable-ir', pulled: 0, expected: 0 });
       continue;
     }
-    const expected = expectedCaptures(doc);
+    // Capture manifest + inbox filename depend on the mode:
+    //   • composed: ONE `<safe(testKey)>.png` per test; the inbox file is
+    //     named `<testKey>.json` so the app derives the testKey from it.
+    //   • per-component (legacy): one `%03d_<name>.png` per flattened
+    //     component; the inbox file is a generic `fixture-<n>.json`.
+    const testKey = args.composed ? composedTestKey(fx) : null;
+    const expected = args.composed
+      ? (() => {
+          const png = composedPngName(testKey);   // <safe(testKey)>.png
+          return [{ index: 0, name: testKey, deviceFile: png, hostFile: png }];
+        })()
+      : expectedCaptures(doc);
     if (expected.length === 0) {
       results.push({ fixture: label, ok: true, pulled: 0, expected: 0 });
       continue;
     }
+    // In composed mode the inbox filename IS the testKey (the app derives
+    // the PNG name from it); otherwise a generic per-run name is fine.
+    const inboxBase = args.composed ? testKey : `fixture-${n}`;
 
     await clearPngs(shotsDir);           // idempotence: no stale PNGs from fixture n-1
     const t0 = Date.now();
     // Push via a temp name + rename so the app never reads a half-written JSON
     // (nextFixtureURL only sees `.json` files; the rename is atomic in-dir).
-    const tmp = join(inboxDir, `.fixture-${n}.json.tmp`);
-    const dest = join(inboxDir, `fixture-${n}.json`);
+    // The tmp is dot-prefixed so its `.tmp` extension is skipped by the
+    // app's nextFixtureURL (it globs `.json` only) even mid-write.
+    const tmp = join(inboxDir, `.${inboxBase}.json.tmp`);
+    const dest = join(inboxDir, `${inboxBase}.json`);
     await fs.writeFile(tmp, JSON.stringify(doc));
     await fs.rename(tmp, dest);
 

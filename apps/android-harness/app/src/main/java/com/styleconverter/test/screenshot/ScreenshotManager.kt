@@ -98,6 +98,40 @@ class ScreenshotManager(private val context: Context) {
     }
 
     /**
+     * Saves a COMPOSED capture bitmap for a WPT test (TITAN Round 3).
+     *
+     * Unlike [saveScreenshot] (per-component, `%03d_<safeName>.png`), the
+     * composed path writes ONE PNG per fed document named `<safe(testKey)>.png`
+     * — the exact name tools/titan/inject-wpt-block.mjs's `diffComposedVsRef`
+     * globs for and the feeder pulls. Sanitisation is delegated to
+     * [TitanInbox.composedPngName] so the on-device name matches inject's
+     * `safe()` rule byte-for-byte (the `.` is preserved). Written into the
+     * SAME [screenshotDir] the feeder already pulls from, so no host-side path
+     * changes are needed.
+     *
+     * @param bitmap  the whole composed canvas, captured once via PixelCopy
+     * @param testKey the WPT test key `wpt__<section>__<stem>`
+     * @return the saved file, or null if writing failed
+     */
+    fun saveComposedScreenshot(bitmap: Bitmap, testKey: String): File? {
+        return try {
+            if (!screenshotDir.exists()) {
+                screenshotDir.mkdirs()
+            }
+            val filename = TitanInbox.composedPngName(testKey)
+            val file = File(screenshotDir, filename)
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            Log.i(TAG, "Saved composed screenshot: ${file.absolutePath}")
+            file
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving composed screenshot for $testKey: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
      * Gets the screenshot directory path.
      */
     fun getScreenshotPath(): String = screenshotDir.absolutePath

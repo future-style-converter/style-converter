@@ -271,7 +271,12 @@ case "$PLATFORM_SCOPE" in
       # every ref diff is text-contaminated and reports false
       # structural-divergence (the pilot-001 symptom; stale-path defect 4).
       # section-runner.sh has set this at its Step 5 since the fix landed.
+      # WPT_COMPOSED=1 renders each test's components COMPOSED on ONE
+      # ref-matching canvas (one PNG/test) instead of per-component + stitch —
+      # the honest per-page comparison (the stitch inflated SSIM via dark
+      # padding). inject prefers the composed PNG, stitch is the fallback.
       WPT_MODE=1 \
+      WPT_COMPOSED=1 \
       BACKGROUND_MODE="$BACKGROUND_MODE" \
       TESTALL_SKIP_LOCK=1 \
       SKIP_IOS=1 SKIP_ANDROID=1 \
@@ -284,6 +289,7 @@ case "$PLATFORM_SCOPE" in
     (
       cd "$PROJECT_ROOT"
       WPT_MODE=1 \
+      WPT_COMPOSED=1 \
       BACKGROUND_MODE="$BACKGROUND_MODE" \
       TESTALL_SKIP_LOCK=1 \
       SKIP_IOS=1 SKIP_ANDROID=1 \
@@ -308,13 +314,17 @@ case "$PLATFORM_SCOPE" in
     if [[ -d "$PERTEST_DIR" ]]; then
       # Android: feed-android self-locates adb (ANDROID_HOME / default SDK).
       # 180s/fixture covers the largest split doc (~66 components).
-      log "feeding Android inbox (feed-android.mjs)…"
-      node "$TITAN_DIR/feed-android.mjs" --fixtures "$PERTEST_DIR" \
+      # --composed: render each fed test COMPOSED on ONE ref-matching canvas
+      # (one <safe(testKey)>.png per test) instead of per-component — the
+      # honest per-page comparison, matching the web WPT_COMPOSED path.
+      # inject's diffComposedVsRef prefers that PNG (stitch is the fallback).
+      log "feeding Android inbox (feed-android.mjs, composed)…"
+      node "$TITAN_DIR/feed-android.mjs" --fixtures "$PERTEST_DIR" --composed \
         --out "$PROJECT_ROOT/apps/android-harness/screenshots" --timeout-per-fixture 180 \
         >>"$CAPTURE_LOG" 2>&1 || warn "feed-android exited non-zero — Android column may be partial"
       # iOS: timeout is MILLISECONDS for this feeder (180000 = 180s).
-      log "feeding iOS inbox (feed-ios.mjs)…"
-      node "$TITAN_DIR/feed-ios.mjs" --fixtures "$PERTEST_DIR" \
+      log "feeding iOS inbox (feed-ios.mjs, composed)…"
+      node "$TITAN_DIR/feed-ios.mjs" --fixtures "$PERTEST_DIR" --composed \
         --out "$PROJECT_ROOT/apps/ios-harness/screenshots" --timeout-per-fixture 180000 \
         >>"$CAPTURE_LOG" 2>&1 || warn "feed-ios exited non-zero — iOS column may be partial"
     fi

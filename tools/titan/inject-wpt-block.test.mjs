@@ -202,3 +202,44 @@ test('diffPlatformVsRef: matched captures produce metrics with stitchedComponent
   // Identical solid-green composite vs ref → perfect scores.
   assert.equal(diff.ssim, 1);
 });
+
+// ── diffComposedVsRef — the WPT COMPOSED web-ref helper ──────────────────
+//
+// The composed web capture writes ONE PNG per test named `<safe(testKey)>.png`
+// (no per-component stitch). These tests pin: the null contract when no
+// composed PNG exists (caller falls back to stitch), and that a present
+// composed PNG diffs DIRECTLY against the ref (no stitch) with the
+// `composed:true` provenance marker.
+
+import { diffComposedVsRef } from './inject-wpt-block.mjs';
+
+test('diffComposedVsRef: returns null when no composed PNG exists', async () => {
+  // Empty dir → the caller must fall back to the per-component stitch path.
+  const dir = await tmpDir('dcwr-none');
+  const none = await diffComposedVsRef({
+    platformDir: dir, testKey: 'wpt__css-color__t-002', refPng: '/nope.png', fuzzy: null,
+  });
+  assert.equal(none, null);
+  // Missing webDir also yields null (defensive — web-only guard).
+  const noDir = await diffComposedVsRef({
+    platformDir: null, testKey: 'wpt__css-color__t-002', refPng: '/nope.png', fuzzy: null,
+  });
+  assert.equal(noDir, null);
+});
+
+test('diffComposedVsRef: composed PNG diffs directly vs ref (no stitch)', async () => {
+  const dir = await tmpDir('dcwr-match');
+  const refDir = await tmpDir('dcwr-ref');
+  const testKey = 'wpt__css-color__t-003';
+  // ONE composed PNG named for the test key, plus a same-size solid ref.
+  // 40px squares clear ssim.js's ≥11px window requirement.
+  await writePng(dir, `${safe(testKey)}.png`, 40, 40, [0, 128, 0, 255]);
+  const refPng = await writePng(refDir, 'ref.png', 40, 40, [0, 128, 0, 255]);
+  const diff = await diffComposedVsRef({ platformDir: dir, testKey, refPng, fuzzy: null });
+  assert.ok(diff, 'expected a diff object');
+  assert.equal(diff.composed, true, 'composed provenance marker');
+  // No stitchedComponents key — this path never stitches.
+  assert.equal(diff.stitchedComponents, undefined);
+  // Identical solid-green composite vs ref → perfect SSIM.
+  assert.equal(diff.ssim, 1);
+});

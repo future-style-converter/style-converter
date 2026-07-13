@@ -47,6 +47,51 @@ enum ScreenshotManager {
         }
     }
 
+    // MARK: - TITAN WPT Round 3 composed capture
+
+    /// Compare-pipeline filename sanitiser — mirrors `safe()` in
+    /// tools/titan/inject-wpt-block.mjs and `safeName()` in
+    /// tools/titan/feed-ios.mjs: every char OUTSIDE `[A-Za-z0-9._-]`
+    /// becomes `_`. The composed WPT capture writes `<safe(testKey)>.png`,
+    /// which is exactly the name the orchestrator's diffComposedVsRef globs
+    /// for, so this rule MUST match those two byte-for-byte. Pure + static
+    /// so InboxModeTests pins it without a device.
+    static func safeCaptureName(_ name: String) -> String {
+        // The literal allow-set of the JS regex class `[A-Za-z0-9._-]`.
+        let allowed = Set(
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-")
+        return String(name.map { allowed.contains($0) ? $0 : "_" })
+    }
+
+    /// Derive the composed-capture PNG filename from an inbox fixture's
+    /// filename. The feeder (tools/titan/feed-ios.mjs, composed mode) pushes
+    /// each per-test doc named `<testKey>.json` where testKey =
+    /// `wpt__<section>__<stem>`; the composed capture writes ONE PNG named
+    /// `<safe(testKey)>.png`. Deriving the name from the inbox filename
+    /// keeps the testKey out of the IR payload (the feeder already knows it
+    /// from the per-test-ir filename) and gives the name ONE derivation
+    /// home. Pure so InboxModeTests pins it device-free.
+    static func composedPngName(forFixtureFilename filename: String) -> String {
+        // Strip exactly one trailing ".json" (the inbox extension); any
+        // other suffix is left intact then sanitised.
+        var key = filename
+        if key.hasSuffix(".json") { key.removeLast(".json".count) }
+        return safeCaptureName(key) + ".png"
+    }
+
+    /// Save the single composed-document capture under its testKey-derived
+    /// name. Unlike `save` (which prefixes `%03d_` per component), the
+    /// composed WPT capture is ONE PNG per fed doc named exactly
+    /// `<safe(testKey)>.png` — no index prefix — matching the web composed
+    /// capture and what diffComposedVsRef globs. `.atomic` closes the same
+    /// read-during-write race the feeder's tight poll loop would hit.
+    static func saveComposed(image: UIImage, filename: String) {
+        let url = directory.appendingPathComponent(filename)
+        if let data = image.pngData() {
+            try? data.write(to: url, options: .atomic)
+        }
+    }
+
     /// Render a SwiftUI view to UIImage at 1x scale to match the Android
     /// emulator's 160dpi baseline (1pt == 1px). That keeps per-component
     /// captures the same pixel dimensions across platforms.

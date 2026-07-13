@@ -50,6 +50,50 @@ final class InboxModeTests: XCTestCase {
     func testOrderOldestFirstEmptyIsEmpty() {
         XCTAssertTrue(ScreenshotManager.orderOldestFirst([]).isEmpty)
     }
+
+    // MARK: - TITAN WPT Round 3 composed sub-flag (SIMCTL_CHILD_TITAN_COMPOSED)
+
+    func testOnlyLiteralOneActivatesComposed() {
+        // Same "only the literal 1" rule as the inbox activation flag.
+        XCTAssertTrue(CaptureOverrides.isComposedActivated("1"))
+        XCTAssertFalse(CaptureOverrides.isComposedActivated(nil))
+        XCTAssertFalse(CaptureOverrides.isComposedActivated(""))
+        XCTAssertFalse(CaptureOverrides.isComposedActivated("0"))
+        XCTAssertFalse(CaptureOverrides.isComposedActivated("true"))
+        XCTAssertFalse(CaptureOverrides.isComposedActivated(" 1"))
+    }
+
+    // MARK: - Composed PNG-name derivation
+
+    func testComposedPngNameStripsJsonAndAppendsPng() {
+        // The common case: a per-test-ir fixture filename (already all safe
+        // chars) → the exact `<testKey>.png` diffComposedVsRef globs for.
+        XCTAssertEqual(
+            ScreenshotManager.composedPngName(
+                forFixtureFilename: "wpt__css-color__background-color-hsl-001.json"),
+            "wpt__css-color__background-color-hsl-001.png")
+    }
+
+    func testComposedPngNameSanitisesUnsafeChars() {
+        // Non-[A-Za-z0-9._-] chars → '_', mirroring safe() in
+        // inject-wpt-block.mjs. The trailing .json is stripped BEFORE
+        // sanitising so the extension dot never leaks into the key.
+        XCTAssertEqual(
+            ScreenshotManager.composedPngName(forFixtureFilename: "a b/c:d.json"),
+            "a_b_c_d.png")
+        // A name without the .json suffix is sanitised as-is + .png.
+        XCTAssertEqual(
+            ScreenshotManager.composedPngName(forFixtureFilename: "plainkey"),
+            "plainkey.png")
+    }
+
+    func testSafeCaptureNameMatchesCompareSanitiser() {
+        // Dots, dashes, underscores survive; everything else → '_'.
+        XCTAssertEqual(ScreenshotManager.safeCaptureName("keep.dots-and_dashes"),
+                       "keep.dots-and_dashes")
+        XCTAssertEqual(ScreenshotManager.safeCaptureName("Foo Bar:baz/qux"),
+                       "Foo_Bar_baz_qux")
+    }
 }
 
 // Small convenience so the test reads cleanly on all SDKs.

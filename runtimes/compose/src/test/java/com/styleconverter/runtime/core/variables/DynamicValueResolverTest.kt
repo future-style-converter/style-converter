@@ -261,6 +261,74 @@ class DynamicValueResolverTest {
     }
 
     @Test
+    fun `a98rgb-shaped em width and height resolve to 192 at the default 16px root font`() {
+        // TITAN WPT Round 5 (em/rem length resolution). The four css-color/
+        // a98rgb tests size their box with `width: 12em; height: 12em` (or
+        // 6em) on an element that declares NO font-size, so em resolves
+        // against the CSS-initial `medium` = 16px root font. This pins that
+        // the exact IR shape the converter emits for those tests —
+        // {"type":"length","original":{"v":12,"u":"EM"}} with NO top-level px
+        // (em is runtime-dependent, so the converter leaves px null) — is
+        // rewritten to px 192 (12 × 16) by the render path's pre-resolution
+        // pass. Regression guard: if this drops back to null the box would
+        // collapse (no content, no floor in composed WPT mode) and vanish.
+        val props = listOf(
+            // Byte-identical to per-test-ir/wpt__css-color__a98rgb-002.json.
+            prop("Width", """{"type":"length","original":{"v":12,"u":"EM"}}"""),
+            prop("Height", """{"type":"length","original":{"v":12,"u":"EM"}}""")
+        )
+        // ctx() defaults parentFontSizePx = 16 and declares no FontSize on the
+        // element, so ownFontSizePx falls back to 16 — the em base.
+        val r = DynamicValueResolver.resolve(props, emptyMap(), ctx())
+        assertEquals(192.0, pxOf(r.properties, "Width"))   // 12em × 16px
+        assertEquals(192.0, pxOf(r.properties, "Height"))  // 12em × 16px (12em box)
+
+        // End-to-end: the rewritten wire shape ({…,"px":192}) must decode
+        // through SizingExtractor to an EXACT dp — this is the value
+        // SizingApplier hands to Modifier.width(192.dp)/height(192.dp). The
+        // extractor prefers the top-level px over the preserved em original
+        // (LengthValue.extractLength: px-present ⇒ Exact), so the box is a
+        // definite 192×192, matching the browser-ref's rendered square.
+        val cfg = com.styleconverter.runtime.sizing.SizingExtractor
+            .extractSizingConfig(r.properties.map { it.type to it.data })
+        assertEquals(com.styleconverter.runtime.core.types.LengthValue.Exact(192.0), cfg.width)
+        assertEquals(com.styleconverter.runtime.core.types.LengthValue.Exact(192.0), cfg.height)
+    }
+
+    @Test
+    fun `rem width resolves against the root font size, ignoring the element font size`() {
+        // css-values-4 §5.1.1: rem is ALWAYS relative to the ROOT font size,
+        // never the element's own. Even with a local `font-size: 32px`, a
+        // `width: 12rem` must resolve to 12 × 16 (root) = 192, NOT 12 × 32.
+        // ctx().rootFontSizePx is fixed at 16 (the harness never styles the
+        // root, so the browser default the web reference inherits is honest).
+        val props = listOf(
+            // A local font-size that em WOULD use but rem must ignore.
+            prop("FontSize", """{"original":{"px":32.0,"type":"length"},"px":32.0}"""),
+            prop("Width", """{"type":"length","original":{"v":12,"u":"REM"}}""")
+        )
+        val r = DynamicValueResolver.resolve(props, emptyMap(), ctx())
+        assertEquals(192.0, pxOf(r.properties, "Width"))   // 12rem × 16 root
+    }
+
+    @Test
+    fun `em width honours an explicit element font-size override`() {
+        // When the element (or an ancestor threaded through the inheritance
+        // channel) sets an explicit font-size, em resolves against THAT, not
+        // the 16px default: `font-size: 10px; width: 12em` → 120px. This is
+        // the "font-size override" leg of the em contract — the render path
+        // resolves the element's own FontSize FIRST (resolveOwnFontSize) and
+        // uses it as the em base for every other property on the element.
+        val props = listOf(
+            prop("FontSize", """{"original":{"px":10.0,"type":"length"},"px":10.0}"""),
+            prop("Width", """{"type":"length","original":{"v":12,"u":"EM"}}""")
+        )
+        val r = DynamicValueResolver.resolve(props, emptyMap(), ctx())
+        assertEquals(120.0, pxOf(r.properties, "Width"))   // 12em × 10px own font
+        assertEquals(10f, r.fontSizePx)                    // element font base
+    }
+
+    @Test
     fun `font-size var carrier resolves through the expression shape`() {
         // token-theme "styled": FontSize {"original":{"type":"expression",
         // "expr":"var(--type)"}} with --type=18px → px 18 lands top-level

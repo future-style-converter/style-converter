@@ -51,3 +51,36 @@ public extension EnvironmentValues {
         set { self[WPTCaptureModeKey.self] = newValue }
     }
 }
+
+/// TITAN Round 4 (GAP 1, WIDTH half) — the block-flow fill-width channel.
+///
+/// iOS boxes hug their content (intrinsic SwiftUI sizing — no UA sheet), so
+/// a composed WPT `<p>`/`<div>` renders only as wide as its text, while the
+/// browser-ref paints it FULL-BLEED: a block-level box with `width: auto`
+/// fills its containing block (CSS 2.1 §10.3.3). The web harness already
+/// carves this out (`apps/web-harness/src/sdui/ComponentRenderer.tsx` WPT
+/// branch: skip the fit-content default so block elements get width:auto),
+/// which is exactly why the composed web bars are full-width and the Round-4
+/// margins/line-box could take effect. This channel is the iOS analogue: the
+/// composed canvas publishes the content-box width, and ComponentRenderer
+/// folds it into an auto-width, in-flow box's SizeConfig so its background
+/// paints the full width — the SAME fold path as flexStretchWidth.
+///
+/// Default nil = every other render (product, the 327-pair baseline, the
+/// per-component WPT path) UNCHANGED — only the composed canvas sets it, and
+/// the fold is additionally gated on wptCaptureMode. ComponentRenderer resets
+/// it to nil for its children (block-fill is scoped to the stacked ROOTS —
+/// flex/grid items and nested boxes keep their own sizing), so it never
+/// leaks past a root.
+private struct WPTBlockFlowFillWidthKey: EnvironmentKey {
+    static let defaultValue: CGFloat? = nil
+}
+
+public extension EnvironmentValues {
+    /// The content-box width a composed-WPT block-flow ROOT should stretch
+    /// to (nil everywhere but the composed canvas). See the key doc above.
+    var wptBlockFlowFillWidth: CGFloat? {
+        get { self[WPTBlockFlowFillWidthKey.self] }
+        set { self[WPTBlockFlowFillWidthKey.self] = newValue }
+    }
+}

@@ -92,6 +92,38 @@ final class WPTCaptureModeTests: XCTestCase {
             "a component with children paints no synthesized name to suppress")
     }
 
+    // MARK: - Line-box calibration pins (TITAN Round 4 GAP 1, height half)
+
+    /// Flag OFF (product + baseline): bare text stays on SwiftUI's natural
+    /// metrics (nil) — no calibration line box, so every committed capture
+    /// is byte-identical.
+    func testEffectiveLineHeightOffKeepsNaturalMetrics() {
+        XCTAssertNil(
+            ComponentRenderer.effectiveLineHeight(declared: nil, wptCaptureMode: false),
+            "flag OFF + no IR line-height must stay nil (natural metrics)")
+    }
+
+    /// Flag ON + no IR line-height: pin the ref line box (18px @16px) so the
+    /// forced-Inter bar matches the browser-ref's default-font `<p>`.
+    func testEffectiveLineHeightOnPinsRefLineBox() {
+        XCTAssertEqual(
+            ComponentRenderer.effectiveLineHeight(declared: nil, wptCaptureMode: true),
+            ComponentRenderer.wptRefLineBoxPx,
+            "flag ON + no IR line-height must pin the ref line box")
+        XCTAssertEqual(ComponentRenderer.wptRefLineBoxPx, 18)
+    }
+
+    /// An IR-declared line-height ALWAYS wins (author > calibration), flag
+    /// on or off — a test that sets its own line-height keeps it exactly.
+    func testEffectiveLineHeightDefersToIR() {
+        XCTAssertEqual(
+            ComponentRenderer.effectiveLineHeight(declared: 30, wptCaptureMode: true), 30,
+            "IR line-height must win over the ref-line-box pin in WPT mode")
+        XCTAssertEqual(
+            ComponentRenderer.effectiveLineHeight(declared: 30, wptCaptureMode: false), 30,
+            "IR line-height must pass through unchanged with the flag off")
+    }
+
     // MARK: - End-to-end pixel proof
 
     /// Render a component through the capture-canvas contract (390pt width,

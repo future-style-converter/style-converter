@@ -153,4 +153,35 @@ enum CaptureOverrides {
     static func isInboxActivated(_ raw: String?) -> Bool {
         raw == "1"
     }
+
+    // MARK: - TITAN WPT Round 3 composed-capture sub-flag
+    //
+    // A SUB-flag layered on TOP of inbox mode (titanInbox above). Rides the
+    // same transport rails (launch arg OR SIMCTL_CHILD_* env) — the feeder
+    // launches with `SIMCTL_CHILD_TITAN_COMPOSED=1` and `xcrun simctl
+    // launch` forwards it, identical to SIMCTL_CHILD_TITAN_INBOX.
+    //
+    // When true AND inbox mode is active, InboxCaptureView renders each
+    // host-pushed per-test doc as ONE COMPOSED capture (the whole doc's
+    // roots on one browser-ref-framed ComposedCaptureCanvas →
+    // `<safe(testKey)>.png`) instead of the legacy per-component captures
+    // (`%03d_<name>.png`). This is the honest per-PAGE comparison footing
+    // the web harness switched to (WPT_COMPOSED); the diff runs directly
+    // against the browser-ref with no vertical stitch.
+    //
+    // Default false keeps the existing inbox path (per-component captures)
+    // AND every non-inbox launch (test-all.sh / test-ios.sh bundled capture)
+    // exactly as before — the committed 327-pair baseline is untouched
+    // because it never sets titanInbox, let alone this.
+    static let titanComposed: Bool = {
+        isComposedActivated(knob(argument: "titanComposed", env: "TITAN_COMPOSED"))
+    }()
+
+    /// Pure activation predicate for the composed sub-flag, split out so it
+    /// is unit-testable device-free (InboxModeTests): only the literal "1"
+    /// activates composed mode — nil/empty/any other value keeps the
+    /// per-component inbox capture. Same rule as isInboxActivated.
+    static func isComposedActivated(_ raw: String?) -> Bool {
+        raw == "1"
+    }
 }
