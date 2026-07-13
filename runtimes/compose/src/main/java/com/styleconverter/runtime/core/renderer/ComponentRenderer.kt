@@ -490,8 +490,19 @@ object ComponentRenderer {
         // with no IR-declared width → stretch to the containing block, exactly
         // like a browser block box. Explicit-width components (a98rgb's squares,
         // the border-radius control) keep their declared width (hasExplicitWidth).
+        // EXCLUSIONS: an aspect-ratio box derives a DEFINITE width from its
+        // height (width = height × ratio), and an absolutely/fixed-positioned
+        // box is sized by its own dimensions, not block flow — neither may be
+        // stretched. Without these guards abspos-002 (height:100 +
+        // aspect-ratio:1/1 + position:absolute — a 100px SQUARE) got filled to
+        // the full canvas width, and aspect-ratio then derived a full-canvas
+        // height (Android 0.762 vs a 100px green square).
+        val hasAspectRatio = effectiveProperties.any { it.type == "AspectRatio" }
+        val isOutOfFlow = extractPositionType(effectiveProperties)
+            .let { it == PositionType.ABSOLUTE || it == PositionType.FIXED }
         val blockFlowWidth: Modifier =
-            if (composedWpt && !hasExplicitWidth && !LocalSelfAlignmentHandled.current)
+            if (composedWpt && !hasExplicitWidth && !hasAspectRatio && !isOutOfFlow &&
+                !LocalSelfAlignmentHandled.current)
                 Modifier.fillMaxWidth()
             else Modifier
         // The 50×30 placeholder floor — skipped entirely in composed WPT capture
