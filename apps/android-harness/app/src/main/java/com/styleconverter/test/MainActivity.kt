@@ -149,6 +149,28 @@ class MainActivity : ComponentActivity() {
         return on
     }
 
+    /**
+     * titanComposed — TITAN Round-3 COMPOSED capture sub-flag, layered ON TOP of
+     * titanInbox (composed capture polls the same inbox; it only changes HOW a
+     * fixture is captured — whole-document on one ref-matching canvas → ONE PNG
+     * per test, instead of one PNG per component):
+     *
+     *   adb shell am start -n com.styleconverter.test/.MainActivity \
+     *       --ez titanInbox true --ez titanComposed true
+     *
+     * Same dual-spelling parse as titanInbox (delegated to the unit-tested
+     * TitanInbox.isComposedModeRequested). Absent / falsy ⇒ the historical
+     * per-component inbox capture, byte-identical.
+     */
+    private fun readComposedModeExtra(): Boolean {
+        val boolExtra = intent?.getBooleanExtra("titanComposed", false) ?: false
+        val stringExtra = intent?.getStringExtra("titanComposed")
+        val on = com.styleconverter.test.screenshot.TitanInbox
+            .isComposedModeRequested(boolExtra, stringExtra)
+        if (on) Log.i(TAG, "titanComposed=true → composed whole-document capture (one PNG per test)")
+        return on
+    }
+
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -215,7 +237,9 @@ class MainActivity : ComponentActivity() {
                         // TITAN inbox poll-capture mode (this lane): when true
                         // the capture screen never returns to the gallery — it
                         // loops on the on-device inbox instead.
-                        inboxMode = readInboxModeExtra()
+                        inboxMode = readInboxModeExtra(),
+                        // TITAN Round-3 composed capture (whole-doc → one PNG).
+                        composedMode = readComposedModeExtra()
                     )
                 }
             }
@@ -271,7 +295,8 @@ private fun MainContent(
     forceState: String? = null,
     captureWidthDp: Int = 390,
     animationTime: Double? = null,
-    inboxMode: Boolean = false
+    inboxMode: Boolean = false,
+    composedMode: Boolean = false
 ) {
     var captureComplete by remember { mutableStateOf(false) }
 
@@ -292,6 +317,7 @@ private fun MainContent(
             captureWidthDp = captureWidthDp,
             animationTime = animationTime,
             inboxMode = inboxMode,
+            composedMode = composedMode,
             onCaptureComplete = {
                 captureComplete = true
             }

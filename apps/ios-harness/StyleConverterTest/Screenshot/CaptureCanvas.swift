@@ -147,6 +147,114 @@ struct CaptureCanvas: View {
     }
 }
 
+/// TITAN WPT Round 3 — the COMPOSED whole-document capture surface.
+///
+/// The per-component `CaptureCanvas` above renders ONE IRComponent per PNG;
+/// the legacy WPT native path captured every component that way and the
+/// orchestrator STITCHED the crops vertically before diffing against the
+/// browser-ref. That vertical concatenation does not reproduce the
+/// reference PAGE's layout (bar stacking, gaps, the ref's 16px body
+/// padding), so a multi-component test scored dishonestly.
+///
+/// This canvas fixes the geometry the same way the web harness's
+/// `ComposedCaptureGallery.tsx` does: it renders ALL of a fed doc's
+/// slot-composed roots (document.components is already the IRComposer
+/// output — see IRDocument.init(from:)) stacked in document flow on ONE
+/// surface, then the caller ImageRenderer's it ONCE into a single
+/// `<safe(testKey)>.png`. inject-wpt-block.mjs's diffComposedVsRef diffs
+/// that composite DIRECTLY against the browser-ref (no stitch).
+///
+/// The framing MIRRORS tools/titan/capture-browser-ref.mjs and the web
+/// composedCanvasStyle EXACTLY so the two images are pixel-comparable:
+///   - width       390 px            (CANVAS_WIDTH)
+///   - content box 358 px            (390 − 2×16, the ref body content box)
+///   - padding     16 px all sides   (CANVAS_PAD_PX / the ref `:where(body)` pad)
+///   - background  #1A1A2E           (CANVAS_BG — the ref html+body bg)
+///   - min-height  600 px            (the ref `min-height:100vh` floors
+///                                    capture-browser-ref's docHeight at 600;
+///                                    the canvas grows past 600 on overflow)
+///
+/// The ONLY thing that differs from the per-component path is the
+/// composition geometry — every node still renders through the identical
+/// ComponentHost → ComponentRenderer engine, so per-node fidelity is
+/// measured on the exact same footing (web harness's stated invariant).
+struct ComposedCaptureCanvas: View {
+    /// The fed per-test IR document. `components` are the slot-composed
+    /// roots (IRComposer ran at decode); we render them in flat sibling
+    /// order = the document/composition order (spec 03), identical to the
+    /// web ComposedTestCanvas root loop.
+    let document: IRDocument
+
+    /// Canvas width — the browser-ref CANVAS_WIDTH. Fixed at 390 (NOT
+    /// CaptureOverrides.captureWidth): the WPT browser-ref is always
+    /// captured at 390, so the composed comparison surface is too.
+    static let width: CGFloat = 390
+    /// Uniform 16px pad — the ref's `:where(body) { padding }`. Content box
+    /// is therefore 390 − 32 = 358, mirroring the ref body content box.
+    static let padding: CGFloat = 16
+    /// Minimum canvas height — the ref's `min-height:100vh` floors
+    /// capture-browser-ref.mjs's docHeight at 600; the surface grows past
+    /// 600 when the composed content is taller.
+    static let minHeight: CGFloat = 600
+
+    /// The capture geometry published to the runtime's styleViewport
+    /// channel — SAME numbers as CaptureCanvas.viewport (390×844 viewport,
+    /// 358 root containing block) so vw/vh/% resolve identically to the
+    /// per-component path and the web reference.
+    static let viewport = StyleViewport(
+        width: Double(width),
+        height: 844,
+        rootContainingBlock: Double(width - padding * 2)
+    )
+
+    var body: some View {
+        // Stack every composed root in block-flow order, top-leading, with
+        // zero inter-root gap — the browser stacks the reference page's
+        // block boxes with their own margins only (the ref divs carry
+        // none), and the web composed container uses
+        // `align-items: flex-start` + no gap. Matching that here keeps the
+        // composed layout comparable to both the ref and the web composite.
+        VStack(alignment: .leading, spacing: 0) {
+            // enumerated()+offset id: roots are rendered positionally, never
+            // reordered — a stable positional key is correct and avoids
+            // relying on component.id uniqueness across a malformed doc.
+            ForEach(Array(document.components.enumerated()), id: \.offset) { _, root in
+                // Identical host shim the per-component canvas and the
+                // engine's own child loop use — placement parent-data
+                // attached (inert under this VStack), full ComponentRenderer
+                // engine underneath. Zero per-node render difference.
+                ComponentHost(component: root)
+            }
+        }
+        // Constrain the composed content to the 358px ref content box,
+        // anchored at the block-flow origin (top-leading) — same maxWidth
+        // rule the per-component canvas applies to its single component.
+        .frame(maxWidth: Self.width - Self.padding * 2, alignment: .topLeading)
+        // The ref's 16px body padding — the exact offset the stitched path
+        // dropped (web composedCanvasStyle carries it too).
+        .padding(Self.padding)
+        // Frame to the full 390px width (min==max pins it) and floor the
+        // height at the ref's 600px min; fixedSize(vertical) below lets the
+        // surface adopt its natural height above that floor. Uses the
+        // flexible-frame overload because SwiftUI has no width+minHeight form.
+        .frame(minWidth: Self.width, maxWidth: Self.width,
+               minHeight: Self.minHeight, alignment: .topLeading)
+        // Natural (content) height beyond the 600 floor — mirrors the ref's
+        // documentHeight capture and the per-component canvas's height rule.
+        .fixedSize(horizontal: false, vertical: true)
+        // Solid #1A1A2E — the ref canvas background; any sub-root gap paints
+        // this so seams are invisible against the ref.
+        .background(CaptureCanvas.backgroundColor)
+        // Publish the capture geometry so the runtime resolves vw/vh/% and
+        // containing blocks against 390×844/358, not the device screen.
+        .environment(\.styleViewport, Self.viewport)
+        // Same dynamic-capture hooks the per-component canvas carries
+        // (pinned light scheme, empty forced set, live clock) so the
+        // composed capture is a deterministic base render.
+        .modifier(DynamicCaptureHooks())
+    }
+}
+
 /// Wave 7 (docs/DYNAMIC_CAPTURE.md) — the environment half of the iOS
 /// capture hooks, shared by both canvas branches:
 ///

@@ -16,6 +16,7 @@ import assert from 'node:assert/strict';
 import {
   safeName, deviceSafeName, pad3, parseArgs, pickBootedUdid,
   parentCreatesContext, composeComponents, flattenComponents, expectedCaptures,
+  composedTestKey, composedPngName,
 } from './feed-ios.mjs';
 
 test('safeName mirrors the compare-pipeline sanitiser (safe() in inject-wpt-block)', () => {
@@ -167,4 +168,31 @@ test('expectedCaptures host name always matches the compare glob suffix', () => 
   const doc = { components: [{ name: 'a:b', properties: [] }] };
   const [e] = expectedCaptures(doc);
   assert.ok(e.hostFile.endsWith(`_${safeName('a:b')}.png`));
+});
+
+// ── TITAN WPT Round 3 composed-mode helpers ──────────────────────────────────
+
+test('composedTestKey strips .json from a per-test-ir fixture path', () => {
+  // per-test-ir docs are named exactly `wpt__<section>__<stem>.json`; the
+  // testKey is the basename minus the extension.
+  assert.equal(
+    composedTestKey('/runs/x/per-test-ir/wpt__css-color__background-color-hsl-001.json'),
+    'wpt__css-color__background-color-hsl-001');
+  // A bare filename works too (no directory).
+  assert.equal(composedTestKey('wpt__css-borders__border-radius-greater-than-width.json'),
+               'wpt__css-borders__border-radius-greater-than-width');
+});
+
+test('composedPngName is `<safe(testKey)>.png` — the diffComposedVsRef glob', () => {
+  // A clean WPT key is already all-safe: identity + .png.
+  assert.equal(composedPngName('wpt__css-color__background-color-hsl-001'),
+               'wpt__css-color__background-color-hsl-001.png');
+  // A key with compare-unsafe chars is sanitised the same way safe() /
+  // ScreenshotManager.safeCaptureName do (parity across the three sites).
+  assert.equal(composedPngName('wpt__x__a b:c'), 'wpt__x__a_b_c.png');
+});
+
+test('parseArgs reads the --composed flag (default false)', () => {
+  assert.equal(parseArgs(['--fixtures', 'x', '--out', 'y']).composed, false);
+  assert.equal(parseArgs(['--fixtures', 'x', '--out', 'y', '--composed']).composed, true);
 });

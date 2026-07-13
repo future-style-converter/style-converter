@@ -341,11 +341,14 @@ async function diffPlatformVsRef({ platformDir, matchingKeys, refPng, fuzzy, cac
  *  stitch path — nothing else breaks. On a real match the returned metric
  *  block carries `composed:true` so dashboards can tell the two web-ref
  *  diff provenances apart. */
-async function diffComposedWebVsRef({ webDir, testKey, refPng, fuzzy }) {
-  if (!webDir) return null;
+async function diffComposedVsRef({ platformDir, testKey, refPng, fuzzy }) {
+  if (!platformDir) return null;
   // The composed capture filename is the sanitised test key + .png. safe()
-  // here is the SAME rule capture-screenshots.mjs applies to the canvas name.
-  const composedPath = join(webDir, `${safe(testKey)}.png`);
+  // here is the SAME rule capture-screenshots.mjs (web) and the native
+  // composed inbox capture apply to the canvas/test name. ONE helper serves
+  // web + iOS + Android because all three emit an identically-named composed
+  // PNG (`<safe(testKey)>.png`) in their own capture dir.
+  const composedPath = join(platformDir, `${safe(testKey)}.png`);
   if (!_existsSync(composedPath)) return null;   // no composed capture → caller stitches
   try {
     const diff = await diffWebVsRef(composedPath, refPng);  // one composite PNG vs the ref
@@ -452,16 +455,18 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       // root naming. section is parts[1] of the test path (meta.section);
       // stem is the .html basename (refStem, computed above).
       const testKey = `wpt__${meta.section}__${refStem}`;
-      // WEB: prefer the COMPOSED single-PNG diff when the harness produced
-      // one (WPT_COMPOSED capture); otherwise fall back to the legacy
-      // per-component vertical stitch so non-composed runs are unchanged.
-      webRefDiff = await diffComposedWebVsRef({ webDir, testKey, refPng, fuzzy: meta.fuzzy });
-      if (!webRefDiff) {
-        webRefDiff = await diffPlatformVsRef({ platformDir: webDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
-      }
-      // NATIVES are untouched by this task — always the per-component stitch.
-      iosRefDiff = await diffPlatformVsRef({ platformDir: iosDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
-      androidRefDiff = await diffPlatformVsRef({ platformDir: androidDir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
+      // Each platform prefers the COMPOSED single-PNG diff when its harness
+      // produced one (`<safe(testKey)>.png` — WPT_COMPOSED web / composed
+      // inbox natives), and falls back to the legacy per-component vertical
+      // stitch when it didn't, so non-composed runs are byte-for-byte
+      // unchanged. Same helper, same contract, all three platforms.
+      const composedOrStitch = async (dir) => {
+        const c = await diffComposedVsRef({ platformDir: dir, testKey, refPng, fuzzy: meta.fuzzy });
+        return c ?? diffPlatformVsRef({ platformDir: dir, matchingKeys, refPng, fuzzy: meta.fuzzy, cacheKey });
+      };
+      webRefDiff = await composedOrStitch(webDir);
+      iosRefDiff = await composedOrStitch(iosDir);
+      androidRefDiff = await composedOrStitch(androidDir);
     }
 
     // Test-level divergence label = severest across all available signals.
@@ -693,4 +698,4 @@ if (IS_CLI) {
 // Pure helpers exported for unit tests (tools/titan/inject-wpt-block.test.mjs).
 // The orchestrator side of this script remains CLI-driven via the IS_CLI gate
 // above, so importing doesn't trigger a usage-error exit.
-export { stitchPngsVertically, diffWebVsRef, diffPlatformVsRef, diffComposedWebVsRef, safe };
+export { stitchPngsVertically, diffWebVsRef, diffPlatformVsRef, diffComposedVsRef, safe };

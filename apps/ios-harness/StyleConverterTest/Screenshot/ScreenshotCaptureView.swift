@@ -286,6 +286,50 @@ func captureAllComponents(_ document: IRDocument) {
     }
 }
 
+/// Render the WHOLE fed document COMPOSED onto ONE browser-ref-framed
+/// canvas and save it as a SINGLE `<safe(testKey)>.png`.
+///
+/// TITAN WPT Round 3: this is the native twin of the web harness's
+/// WPT_COMPOSED path (apps/web-harness/src/ui/ComposedCaptureGallery.tsx).
+/// InboxCaptureView drives it once per host-pushed per-test doc when the
+/// inbox run is ALSO composed (CaptureOverrides.titanComposed). Unlike
+/// captureAllComponents — which captures every flattened component to its
+/// own `%03d_<name>.png` — this composes all of the doc's roots on one
+/// ComposedCaptureCanvas (slot layout + document flow, 390-wide/#1A1A2E/
+/// 16px-pad framing that mirrors the browser-ref) and ImageRenderer's it
+/// ONCE. inject-wpt-block.mjs's diffComposedVsRef then diffs the composite
+/// DIRECTLY against the ref, no vertical stitch.
+///
+/// `pngName` is the composed filename the feeder polls for and the compare
+/// pipeline globs — `<safe(testKey)>.png`, derived by the caller from the
+/// inbox fixture filename (ScreenshotManager.composedPngName). Kept as a
+/// parameter (not recomputed here) so the name derivation has ONE home and
+/// stays unit-testable device-free.
+///
+/// wptCaptureMode is published TRUE (this is the WPT capture path only, its
+/// sole caller is the composed inbox loop) so the renderer drops the
+/// synthesized component-name placeholder for nameless-empty leaves — the
+/// browser-ref never paints it. Real element text still renders. The
+/// bundled auto-capture flow (captureNext) never reaches here, so every
+/// committed 327-pair baseline stays byte-identical.
+@MainActor
+func captureComposedDocument(_ document: IRDocument, pngName: String) {
+    // Clear the screenshot dir so this doc's single PNG never sits beside a
+    // prior doc's captures — the on-device half of the feeder's idempotence
+    // contract (the host also clears before each push).
+    ScreenshotManager.reset()
+    // The whole doc, composed on one ref-matching surface. Keyframes are
+    // re-published on the isolated ImageRenderer tree exactly like the
+    // per-component path; wptCaptureMode drops debug-name placeholders.
+    let canvas = ComposedCaptureCanvas(document: document)
+        .environment(\.styleKeyframes, document.keyframes)
+        .environment(\.wptCaptureMode, true)
+    // ONE ImageRenderer pass → ONE composite PNG named for the test key.
+    if let image = ScreenshotManager.render(canvas) {
+        ScreenshotManager.saveComposed(image: image, filename: pngName)
+    }
+}
+
 /// Flatten the IR tree depth-first pre-order, suppressing children of any
 /// parent that creates a paint context (see parentCreatesContext above).
 /// Matches the web `flatten()` in CaptureGallery.tsx and Android's

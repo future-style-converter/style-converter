@@ -46,6 +46,62 @@ object TitanInbox {
     }
 
     /**
+     * Decide whether the launch intent requested TITAN *composed* capture — the
+     * Round-3 WPT capture mode that renders the WHOLE fed IR document composed
+     * on ONE ref-matching canvas and writes ONE PNG per test (as opposed to the
+     * legacy per-component inbox capture). Layered strictly ON TOP of inbox mode
+     * (composed is meaningless without a fixture to compose): the caller only
+     * consults this after [isInboxModeRequested] already returned true.
+     *
+     *   adb shell am start -n com.styleconverter.test/.MainActivity \
+     *       --ez titanInbox true --ez titanComposed true
+     *
+     * Same two-spelling parse as [isInboxModeRequested] (`--ez` boolean or
+     * `--es "true"`) so the feeder can use either am-extra flavour. Absent /
+     * falsy ⇒ false ⇒ the historical per-component inbox capture, unchanged.
+     */
+    fun isComposedModeRequested(boolExtra: Boolean, stringExtra: String?): Boolean {
+        if (boolExtra) return true
+        val s = stringExtra?.trim()?.lowercase()
+        return s == "true"
+    }
+
+    /**
+     * Recover the WPT test key (`wpt__<section>__<stem>`) from an inbox
+     * fixture's on-device filename. The host feeder (tools/titan/feed-android.mjs)
+     * pushes each per-test IR doc named `<NNNN>-<testKey>.json`, where `<NNNN>-`
+     * is the FIFO index prefix that guarantees push uniqueness. We strip that
+     * numeric prefix and the `.json` extension to get the bare test key, which
+     * (for a WPT feed) equals the first three `__`-delimited segments of the
+     * doc's root component names — i.e. the same key the web harness's
+     * rootTestKey() derives (ComposedCaptureGallery.tsx) and the key
+     * tools/titan/inject-wpt-block.mjs builds as `wpt__<section>__<stem>`.
+     *
+     * The prefix strip is unambiguous because a WPT test key always begins with
+     * the letters `wpt`, never a digit, so `^\d+-` can only match the feeder's
+     * index. A filename with no prefix (a manual push) round-trips unchanged.
+     */
+    fun composedTestKey(inboxFileName: String): String {
+        // Drop the feeder's `<NNNN>-` FIFO index prefix, then the .json suffix.
+        val noPrefix = inboxFileName.replace(Regex("^\\d+-"), "")
+        return noPrefix.removeSuffix(".json")
+    }
+
+    /**
+     * The composed-capture PNG filename for a test key: `<safe(testKey)>.png`.
+     *
+     * The sanitiser is the SAME character class tools/titan/inject-wpt-block.mjs
+     * `safe()` and the web harness apply (`[^A-Za-z0-9._-] → _`, note the `.`
+     * is KEPT), so the name the app writes is byte-identical to the one inject's
+     * `diffComposedVsRef` globs for and the feeder's `composedPngName` predicts.
+     * A WPT test key contains only `[A-Za-z0-9_-]`, so in practice this is the
+     * identity + ".png"; keeping the exact class matters only for the defensive
+     * non-WPT case and to stay in lock-step with the shared contract.
+     */
+    fun composedPngName(testKey: String): String =
+        testKey.replace(Regex("[^A-Za-z0-9._-]"), "_") + ".png"
+
+    /**
      * Pick the oldest fixture from an inbox directory listing, or null when
      * there is nothing to process.
      *

@@ -94,11 +94,28 @@ struct InboxCaptureView: View {
                 "[TITAN] IR decode failed for \(url.lastPathComponent)\n".utf8))
             return
         }
-        // Render + save every component through the shared auto-capture path.
-        captureAllComponents(document)
-        processed += 1
-        lastFixture = url.lastPathComponent
-        // Progress line the host can tail to confirm the fixture finished.
-        print("[TITAN] captured \(document.components.count) component(s) from \(url.lastPathComponent)")
+        // TITAN WPT Round 3: composed sub-flag (titanComposed) switches this
+        // per-fixture render between the two capture footings. Both consume
+        // the IDENTICAL decoded IRDocument; only the capture GEOMETRY differs.
+        if CaptureOverrides.titanComposed {
+            // Composed: the WHOLE doc on ONE browser-ref-framed canvas →
+            // ONE `<safe(testKey)>.png` (testKey derived from THIS inbox
+            // file's name, which the feeder pushed as `<testKey>.json`).
+            // diffComposedVsRef diffs it directly against the ref, no stitch.
+            let pngName = ScreenshotManager.composedPngName(
+                forFixtureFilename: url.lastPathComponent)
+            captureComposedDocument(document, pngName: pngName)
+            processed += 1
+            lastFixture = url.lastPathComponent
+            print("[TITAN] composed capture \(pngName) from \(document.components.count) root(s) of \(url.lastPathComponent)")
+        } else {
+            // Per-component (legacy inbox path, unchanged): every flattened
+            // component to its own `%03d_<name>.png`, stitched host-side.
+            captureAllComponents(document)
+            processed += 1
+            lastFixture = url.lastPathComponent
+            // Progress line the host can tail to confirm the fixture finished.
+            print("[TITAN] captured \(document.components.count) component(s) from \(url.lastPathComponent)")
+        }
     }
 }

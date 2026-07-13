@@ -49,6 +49,10 @@ export function parseArgs(argv) {
     timeoutPerFixture: Number.isFinite(timeout) && timeout > 0 ? timeout : 30,
     udid: get('--udid'),
     skipInstall: has('--skip-install'),
+    // TITAN Round-3 composed capture: launch the app with titanComposed=true
+    // and expect ONE `<safe(testKey)>.png` per fixture instead of the
+    // per-component `%03d_<safeName>.png` set. Default off ⇒ legacy behaviour.
+    composed: has('--composed'),
   };
 }
 
@@ -193,6 +197,26 @@ export function flattenComponents(roots) {
 export function expectedPngNames(doc) {
   const flat = flattenComponents(composeRoots(doc));
   return flat.map((c, i) => `${String(i).padStart(3, '0')}_${safeName(c.name)}.png`);
+}
+
+/**
+ * The single COMPOSED-capture PNG name for a fixture (TITAN Round 3): the WPT
+ * test key sanitised + ".png". The app derives the SAME name from the inbox
+ * filename (TitanInbox.composedTestKey + composedPngName) so the feeder's poll
+ * target, the on-device write, and inject-wpt-block's `diffComposedVsRef` glob
+ * all agree.
+ *
+ * Takes the host-side fixture BASENAME (e.g.
+ * `wpt__css-color__background-color-hsl-001.json`, optionally with the feeder's
+ * `<NNNN>-` index prefix): strip the prefix + `.json`, then apply inject's
+ * exact `safe()` class (`[^A-Za-z0-9._-] → _`, dot KEPT). For a WPT key this is
+ * the identity + ".png".
+ */
+export function composedPngName(fixtureBasename) {
+  const stem = String(fixtureBasename)
+    .replace(/^\d+-/, '')      // drop the feeder's FIFO index prefix if present
+    .replace(/\.json$/i, '');  // drop the .json extension
+  return stem.replace(/[^A-Za-z0-9._-]/g, '_') + '.png';
 }
 
 // ── PNG validation ───────────────────────────────────────────────────────────

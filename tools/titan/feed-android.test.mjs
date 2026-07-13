@@ -15,7 +15,8 @@ import { promises as fs } from 'node:fs';
 import { PNG } from 'pngjs';
 
 import {
-  parseArgs, safeName, expectedPngNames, parentCreatesContext, composeRoots, flattenComponents, pngIsValid,
+  parseArgs, safeName, expectedPngNames, composedPngName,
+  parentCreatesContext, composeRoots, flattenComponents, pngIsValid,
 } from './feed-lib.mjs';
 
 // ── parseArgs ────────────────────────────────────────────────────────────────
@@ -35,6 +36,28 @@ test('parseArgs defaults timeout to 30 and skipInstall false', () => {
   assert.equal(o.timeoutPerFixture, 30);
   assert.equal(o.skipInstall, false);
   assert.equal(o.udid, null);
+  assert.equal(o.composed, false); // per-component by default
+});
+
+test('parseArgs reads the --composed sub-flag', () => {
+  assert.equal(parseArgs(['--fixtures', 'a.json', '--out', 'x', '--composed']).composed, true);
+});
+
+// ── composedPngName: one PNG per test named for the WPT key ───────────────────
+
+test('composedPngName strips the .json (and any feeder index prefix) → <key>.png', () => {
+  // Host-side basename (no prefix) → key + .png.
+  assert.equal(
+    composedPngName('wpt__css-color__background-color-hsl-001.json'),
+    'wpt__css-color__background-color-hsl-001.png',
+  );
+  // The feeder's on-device `<NNNN>-` prefix (should the caller pass it) is dropped.
+  assert.equal(
+    composedPngName('0007-wpt__css-backgrounds__background-334.json'),
+    'wpt__css-backgrounds__background-334.png',
+  );
+  // Matches inject's safe() class exactly (dot kept; slash/space/colon → _).
+  assert.equal(composedPngName('a.b/c d:e.json'), 'a.b_c_d_e.png');
 });
 
 test('parseArgs rejects a non-positive / NaN timeout (watchdog must stay armed)', () => {

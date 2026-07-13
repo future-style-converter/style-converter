@@ -91,6 +91,18 @@ private val TextPropCount = Color(0xFF666666)
  * saveScreenshot) is byte-identical across both modes so WPT captures are
  * directly comparable with normal captures and the per-component filenames
  * (`%03d_<safeName>.png`) match what the compare pipeline globs for.
+ *
+ * TITAN composed mode ([composedMode], Round 3): layered strictly ON TOP of
+ * inbox mode. Instead of capturing each flattened component to its own PNG, it
+ * renders the WHOLE fed document COMPOSED (all roots in document order) on ONE
+ * canvas that mirrors the Chromium browser-ref (tools/titan/capture-browser-ref
+ * .mjs): 390dp wide, #1A1A2E, 16dp padding, 600dp min-height, natural height —
+ * then PixelCopies that canvas ONCE and saves a single `<safe(testKey)>.png`
+ * (ScreenshotManager.saveComposedScreenshot). This reproduces the reference
+ * page's real layout (bar stacking, gaps, positions) so MULTI-component tests
+ * are measured honestly instead of via inject's per-component vertical stitch.
+ * The per-component path (composedMode=false) is left byte-identical, and the
+ * bundled non-inbox baseline path (inboxMode=false) is untouched.
  */
 @Composable
 fun ScreenshotCaptureScreen(
@@ -98,6 +110,7 @@ fun ScreenshotCaptureScreen(
     captureWidthDp: Int = 390,
     animationTime: Double? = null,
     inboxMode: Boolean = false,
+    composedMode: Boolean = false,
     onCaptureComplete: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -133,6 +146,13 @@ fun ScreenshotCaptureScreen(
     var currentFixtureFile by remember { mutableStateOf<File?>(null) }
     var pollGeneration by remember { mutableIntStateOf(0) }
 
+    // TITAN composed-mode state: the WPT test key of the fixture currently being
+    // composed, recovered from its inbox filename (TitanInbox.composedTestKey).
+    // Becomes the single output PNG name `<safe(testKey)>.png`. Null outside
+    // composed mode; carried in state so the capture effect (which runs after
+    // the render settles) still knows which key to save under.
+    var composedTestKey by remember { mutableStateOf<String?>(null) }
+
     // Get the Activity window for PixelCopy
     val activity = context as? android.app.Activity
     val window = activity?.window
@@ -150,9 +170,10 @@ fun ScreenshotCaptureScreen(
             // VERIFY via `adb logcat -d | grep` that the run actually ran
             // with the hook active instead of silently diffing two base /
             // live captures — the data-animation-time rationale, spec 07 §5).
-            // titanInbox is appended so the feeder can grep-verify the app
-            // actually entered inbox mode (same gate philosophy).
-            Log.i(TAG, "Capture run config: forceState=${forceState ?: "none"} captureWidth=$captureWidthDp animationTime=${animationTime ?: "none"} titanInbox=$inboxMode")
+            // titanInbox / titanComposed are appended so the feeder can
+            // grep-verify the app actually entered the requested mode (same
+            // gate philosophy).
+            Log.i(TAG, "Capture run config: forceState=${forceState ?: "none"} captureWidth=$captureWidthDp animationTime=${animationTime ?: "none"} titanInbox=$inboxMode titanComposed=$composedMode")
 
             if (!screenshotManager.hasWritePermission()) {
                 error = "No write permission for screenshots directory"
@@ -182,7 +203,10 @@ fun ScreenshotCaptureScreen(
                     if (file == null) delay(200)
                 }
                 currentFixtureFile = file
-                Log.i(TAG, "Titan inbox: loaded fixture ${file.name}")
+                // Composed mode: recover the WPT test key from the inbox
+                // filename now (before decode) — it names the single output PNG.
+                composedTestKey = if (composedMode) TitanInbox.composedTestKey(file.name) else null
+                Log.i(TAG, "Titan inbox: loaded fixture ${file.name}${if (composedMode) " (composed key=$composedTestKey)" else ""}")
                 file.readText()
             } else {
                 // Bundled one-shot flow: clear stale captures, read the asset.
@@ -208,7 +232,12 @@ fun ScreenshotCaptureScreen(
             val flatSize = flattenComponents(composed).size
             Log.i(TAG, "Loaded ${composed.size} root components (flattened: $flatSize)")
 
-            if (flatSize == 0) {
+            // Degenerate-fixture guard. Per-component mode captures the flattened
+            // list, so "nothing to capture" == flatSize 0. Composed mode captures
+            // the composed ROOTS on one canvas, so it's empty only when there are
+            // no roots at all.
+            val nothingToCapture = if (composedMode) composed.isEmpty() else flatSize == 0
+            if (nothingToCapture) {
                 // Degenerate fixture (no capturable components). In inbox mode,
                 // consume + re-poll so it can't wedge the loop; the host times
                 // out on the (zero) expected PNGs and records the failure.
@@ -242,8 +271,11 @@ fun ScreenshotCaptureScreen(
         }
     }
 
-    // Capture logic using PixelCopy
+    // Capture logic using PixelCopy (PER-COMPONENT path). Composed mode uses
+    // the single-capture effect below instead, so bail out here to keep the two
+    // capture strategies from both firing on a shared shouldCapture toggle.
     LaunchedEffect(shouldCapture, currentIndex) {
+        if (composedMode) return@LaunchedEffect
         // Flatten the COMPOSED tree depth-first pre-order so child components
         // become their own captures — matching iOS `flatten` and web `flatten`
         // exactly. Because SlotComposer inverts the converter's pre-order
@@ -307,6 +339,62 @@ fun ScreenshotCaptureScreen(
         }
     }
 
+    // Capture logic using PixelCopy (COMPOSED path — TITAN Round 3). Fires once
+    // per fixture: the whole composed canvas is captured to ONE bitmap and saved
+    // as `<safe(testKey)>.png`, then the fixture is consumed and the poll loop
+    // re-armed. Only relevant in composed mode (which is always inbox mode), so
+    // it bails out otherwise. Keyed on shouldCapture alone (no per-component
+    // index in this path); ComposedCaptureView re-arms shouldCapture per fixture.
+    LaunchedEffect(shouldCapture) {
+        if (!composedMode) return@LaunchedEffect
+        if (shouldCapture && roots != null) {
+            delay(400) // let Compose finish laying out + compositing the full doc
+
+            try {
+                val bounds = cardBoundsInWindow
+                val bitmap = if (window != null && bounds != null && bounds.width() > 0 && bounds.height() > 0) {
+                    // ONE PixelCopy of the whole composed canvas rect (390 ×
+                    // natural height) — the composited frame with every root's
+                    // paint, exactly as PixelCopy grabs a single component.
+                    captureWithPixelCopy(window, bounds)
+                } else {
+                    null
+                }
+
+                val key = composedTestKey
+                if (bitmap != null && key != null) {
+                    val file = screenshotManager.saveComposedScreenshot(bitmap, key)
+                    if (file != null) {
+                        capturedCount++
+                        Log.i(TAG, "Composed capture: $key -> ${file.absolutePath} (${bitmap.width}x${bitmap.height})")
+                    } else {
+                        failedCount++
+                        Log.e(TAG, "Failed to save composed capture: $key")
+                    }
+                } else {
+                    failedCount++
+                    Log.e(TAG, "Composed PixelCopy failed for: ${key ?: "<no key>"}")
+                }
+            } catch (e: Exception) {
+                failedCount++
+                Log.e(TAG, "Composed capture error", e)
+            }
+
+            shouldCapture = false
+
+            // Composed mode is always inbox mode: consume the fixture we just
+            // captured (AFTER the save, so a crash leaves it in the inbox for
+            // retry) and re-arm the loading effect to poll for the next one.
+            currentFixtureFile?.let { screenshotManager.consumeFixture(it) }
+            Log.i(TAG, "Titan composed: consumed ${currentFixtureFile?.name}, re-polling")
+            roots = null
+            composedTestKey = null
+            currentIndex = -1
+            capturePhase = CapturePhase.LOADING
+            pollGeneration++
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -315,7 +403,25 @@ fun ScreenshotCaptureScreen(
         when (capturePhase) {
             CapturePhase.LOADING -> LoadingView()
             CapturePhase.ERROR -> ErrorView(error ?: "Unknown error")
-            CapturePhase.CAPTURING -> {
+            CapturePhase.CAPTURING -> if (composedMode) {
+                roots?.let { composedRoots ->
+                    // Composed WPT capture IS WPT capture → suppress the
+                    // synthesized component-name placeholder (same ambient flag
+                    // as the per-component inbox path) so the render matches the
+                    // Chromium browser-ref.
+                    CompositionLocalProvider(LocalWptCaptureMode provides true) {
+                        ComposedCaptureView(
+                            roots = composedRoots,
+                            forceState = forceState,
+                            captureWidthDp = captureWidthDp,
+                            animationTime = animationTime,
+                            keyframes = keyframes,
+                            onCanvasPositioned = { bounds -> cardBoundsInWindow = bounds },
+                            onRendered = { shouldCapture = true }
+                        )
+                    }
+                }
+            } else {
                 roots?.let { composedRoots ->
                     // Use the same depth-first flatten as the capture loop so
                     // the rendered component matches the one being saved.
@@ -669,6 +775,142 @@ internal fun isOutOfFlowRoot(component: IRComponent): Boolean {
 private val CaptureCanvasWidth   = 390.dp
 private val CaptureCanvasPadding = 16.dp
 private val CaptureCanvasBg      = Color(0xFF1A1A2E)
+// Composed-canvas minimum height. Mirrors capture-browser-ref.mjs, whose
+// injected `:where(body){min-height:100vh}` at a 600px viewport floors the ref
+// PNG height at 600 (docHeight = max(scrollHeight, 600)); the web composed
+// canvas uses the same `minHeight:600px`. Matching it keeps the composed PNG's
+// dark tail identical to the ref's when content is shorter than 600dp.
+private val ComposedCanvasMinHeight = 600.dp
+
+/**
+ * COMPOSED capture host (TITAN Round 3). No progress chrome — the composed
+ * canvas must sit at window origin (0,0) so its PixelCopy rect stays inside the
+ * capturable window. The canvas renders the WHOLE document (all roots, document
+ * order) and reports its outer rect for a single PixelCopy.
+ */
+@Composable
+private fun ComposedCaptureView(
+    roots: List<IRComponent>,
+    forceState: String? = null,
+    captureWidthDp: Int = 390,
+    animationTime: Double? = null,
+    keyframes: Map<String, List<com.styleconverter.runtime.core.ir.IRKeyframeStop>> = emptyMap(),
+    onCanvasPositioned: (Rect) -> Unit,
+    onRendered: () -> Unit
+) {
+    // Top-start alignment (not centred/scrolled like the per-component
+    // CaptureView): the canvas is full 390dp wide and must anchor at the window
+    // top so PixelCopy's rect [0,0 .. 390,height] never runs past the window.
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopStart
+    ) {
+        ComposedCaptureCanvas(
+            roots = roots,
+            forceState = forceState,
+            animationTime = animationTime,
+            keyframes = keyframes,
+            canvasWidth = captureWidthDp.dp,
+            onPositioned = { posInWindow, widthPx, heightPx ->
+                onCanvasPositioned(Rect(
+                    posInWindow.x.roundToInt(),
+                    posInWindow.y.roundToInt(),
+                    (posInWindow.x + widthPx).roundToInt(),
+                    (posInWindow.y + heightPx).roundToInt()
+                ))
+            },
+            onRendered = onRendered
+        )
+    }
+}
+
+/**
+ * The composed capture surface — the native twin of the web harness's
+ * ComposedTestCanvas (apps/web-harness/src/ui/ComposedCaptureGallery.tsx),
+ * framed to mirror capture-browser-ref.mjs EXACTLY so the composed PNG is
+ * directly diffable against the Chromium browser-ref:
+ *   - Width       : 390dp            (CANVAS_WIDTH in capture-browser-ref.mjs)
+ *   - Min-height  : 600dp            (the ref's min-height:100vh at 600 viewport)
+ *   - Background  : #1A1A2E          (CANVAS_BG — the ref html+body)
+ *   - Padding     : 16dp all sides   (CANVAS_PAD_PX — the ref's :where(body) pad)
+ *   - Height      : natural (content), floored at 600dp
+ *
+ * Unlike the per-component CaptureCanvas (which renders ONE flattened
+ * component), this stacks EVERY composed root in a Column in document order —
+ * reproducing the reference page's block flow (bar heights, inter-element gaps,
+ * vertical positions) that inject's per-component vertical stitch could not.
+ * Each root is rendered through the identical ComponentHost.Render entry the
+ * bundled gallery and per-component capture use, so the ONLY thing that differs
+ * between the two capture strategies is the composition geometry, never the
+ * per-node render.
+ *
+ * Absolute/fixed roots are NOT special-cased here (the per-component canvas's
+ * out-of-flow trick is for a STANDALONE positioned subject); a composed doc
+ * lays them out through the runtime's normal positioned-container path, exactly
+ * as the browser lays out the reference page. The multi-component color tests
+ * this round targets are all in-flow blocks.
+ */
+@Composable
+private fun ComposedCaptureCanvas(
+    roots: List<IRComponent>,
+    forceState: String? = null,
+    animationTime: Double? = null,
+    keyframes: Map<String, List<com.styleconverter.runtime.core.ir.IRKeyframeStop>> = emptyMap(),
+    canvasWidth: Dp = CaptureCanvasWidth,
+    onPositioned: (androidx.compose.ui.geometry.Offset, Float, Float) -> Unit,
+    onRendered: () -> Unit
+) {
+    // Settle one frame (slightly longer than the per-component 150ms because a
+    // whole document has a deeper layout tree), then signal ready for capture.
+    LaunchedEffect(roots) {
+        delay(250)
+        onRendered()
+    }
+
+    // `onGloballyPositioned` BEFORE `.padding()` so it reports the full outer
+    // 390dp × natural-height rect (including padding + background), matching the
+    // ref's outer canvas — same ordering rationale as CaptureCanvas.
+    Box(
+        modifier = Modifier
+            .width(canvasWidth)
+            .heightIn(min = ComposedCanvasMinHeight)
+            .background(CaptureCanvasBg)
+            .testTag("composed-capture-canvas")
+            .onGloballyPositioned { coords ->
+                val pos = coords.positionInWindow()
+                onPositioned(pos, coords.size.width.toFloat(), coords.size.height.toFloat())
+            }
+            .padding(CaptureCanvasPadding)
+    ) {
+        // Same dynamic-value channels as CaptureCanvas so composed renders
+        // resolve %/calc, media buckets, forced states and animation-at-t
+        // identically to per-component captures (the feeder leaves force/anim
+        // unset for WPT, so these default to base state).
+        androidx.compose.runtime.CompositionLocalProvider(
+            com.styleconverter.runtime.core.variables.LocalContainingBlock provides
+                com.styleconverter.runtime.core.variables.ContainingBlock(
+                    // Content box = canvas width − 2×padding (358dp at 390),
+                    // the same containing block the ref's padded body gives.
+                    widthPx = (canvasWidth - CaptureCanvasPadding * 2).value
+                ),
+            com.styleconverter.runtime.core.media.MediaBucketEvaluator.LocalRenderSurfaceWidthPx provides
+                canvasWidth.value,
+            com.styleconverter.runtime.core.states.DynamicStyleResolver.LocalForcedStates provides
+                (forceState?.let { setOf(it) } ?: emptySet()),
+            com.styleconverter.runtime.animations.KeyframeAnimationDriver.LocalDocumentKeyframes provides
+                keyframes,
+            com.styleconverter.runtime.animations.KeyframeAnimationDriver.LocalForcedAnimationTime provides
+                animationTime
+        ) {
+            // Document flow: roots stacked top-to-bottom, no inter-item gap
+            // (block boxes abut; each root carries its own margins). Mirrors the
+            // web composed canvas's flex column of roots in sibling order.
+            Column(modifier = Modifier.fillMaxWidth()) {
+                roots.forEach { root -> ComponentHost.Render(root) }
+            }
+        }
+    }
+}
 
 @Composable
 private fun CompleteView(
