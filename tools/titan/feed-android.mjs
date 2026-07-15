@@ -101,6 +101,40 @@ async function waitForPngs(adbx, expected, timeoutSec) {
   }
 }
 
+/** Force-stop the harness, wipe the inbox + shot dirs + logcat, relaunch in
+ *  inbox/composed mode, and verify the run-config marker. Returns whether the
+ *  marker was seen. Used at startup AND as recovery: a single fixture whose
+ *  on-device capture WEDGES (e.g. a pathological transform layer the composed
+ *  capture never returns from) leaves the inbox poll loop stuck forever, so
+ *  every fixture queued behind it would cascade-timeout on a still-hung app.
+ *  Restarting between a timeout and the next fixture gives each one a clean
+ *  app — one bad fixture costs one timeout, not the whole tail of the batch. */
+async function resetAndLaunch(adbx, opts) {
+  adbx(['shell', 'am', 'force-stop', PKG]);
+  adbx(['shell', 'rm', '-rf', INBOX_DIR, SHOT_DIR]);
+  adbx(['shell', 'mkdir', '-p', INBOX_DIR, SHOT_DIR]);
+  try { adbx(['logcat', '-c']); } catch { /* logcat clear is best-effort */ }
+  // Match the shared 390×844 @160dpi capture canvas. Composed mode layers
+  // `--ez titanComposed true`: same inbox poll, whole doc onto one canvas.
+  adbx(['shell', 'wm', 'size', '390x844']);
+  adbx(['shell', 'wm', 'density', '160']);
+  const launchArgs = ['shell', 'am', 'start', '-n', ACTIVITY, '--ez', 'titanInbox', 'true'];
+  if (opts.composed) launchArgs.push('--ez', 'titanComposed', 'true');
+  adbx(launchArgs);
+  // Grep the run-config marker (same verification philosophy as test-all's
+  // animationTime/forceState gate) — proves the app really entered the mode.
+  // In composed mode we additionally require titanComposed=true so a stale
+  // per-component launch can't masquerade as composed. logcat was just cleared,
+  // so a match is this launch's marker, not a stale one from a prior launch.
+  const markerRe = opts.composed ? /titanInbox=true titanComposed=true/ : /titanInbox=true/;
+  let marked = false;
+  for (let i = 0; i < 40 && !marked; i++) {
+    try { marked = markerRe.test(adbx(['logcat', '-d'])); } catch { /* retry */ }
+    if (!marked) await new Promise((r) => setTimeout(r, 250));
+  }
+  return marked;
+}
+
 /** Pull one PNG to the host and verify it decodes; retry the pull ONCE on the
  *  known adb truncation flake. `remoteName` is the on-device filename (device
  *  sanitiser rule) and `localName` is the host output name (compare-pipeline
@@ -172,32 +206,11 @@ async function main() {
       { cwd: path.join(REPO_ROOT, 'apps', 'android-harness'), env, stdio: ['ignore', 2, 2] });
   }
 
-  // Reset device state BEFORE launching so the poll loop starts clean
-  // (idempotence: a second run can't see the first run's stale files).
-  adbx(['shell', 'am', 'force-stop', PKG]);
-  adbx(['shell', 'rm', '-rf', INBOX_DIR, SHOT_DIR]);
-  adbx(['shell', 'mkdir', '-p', INBOX_DIR, SHOT_DIR]);
-  try { adbx(['logcat', '-c']); } catch { /* logcat clear is best-effort */ }
-
-  // Launch in inbox mode. Match the shared 390×844 @160dpi capture canvas.
-  // Composed mode layers `--ez titanComposed true` on top: same inbox poll,
-  // but the app composes the whole doc onto one canvas → one PNG per test.
-  adbx(['shell', 'wm', 'size', '390x844']);
-  adbx(['shell', 'wm', 'density', '160']);
-  const launchArgs = ['shell', 'am', 'start', '-n', ACTIVITY, '--ez', 'titanInbox', 'true'];
-  if (opts.composed) launchArgs.push('--ez', 'titanComposed', 'true');
-  adbx(launchArgs);
-  log(`launched in titan-${opts.composed ? 'composed' : 'inbox'} mode; verifying marker…`);
-  // Grep the run-config marker (same verification philosophy as test-all's
-  // animationTime/forceState gate) — proves the app really entered the mode.
-  // In composed mode we additionally require titanComposed=true so a stale
-  // per-component launch can't masquerade as composed.
-  const markerRe = opts.composed ? /titanInbox=true titanComposed=true/ : /titanInbox=true/;
-  let marked = false;
-  for (let i = 0; i < 40 && !marked; i++) {
-    try { marked = markerRe.test(adbx(['logcat', '-d'])); } catch { /* retry */ }
-    if (!marked) await new Promise((r) => setTimeout(r, 250));
-  }
+  // Reset device state + launch BEFORE the loop so the poll starts clean
+  // (idempotence: a second run can't see the first run's stale files). Same
+  // helper the timeout branch uses to recover from a wedged capture.
+  log(`launching in titan-${opts.composed ? 'composed' : 'inbox'} mode; verifying marker…`);
+  const marked = await resetAndLaunch(adbx, opts);
   log(marked ? `verified: app logged ${opts.composed ? 'titanComposed=true' : 'titanInbox=true'}`
              : `WARNING: never saw ${opts.composed ? 'titanComposed=true' : 'titanInbox=true'} marker (continuing)`);
 
@@ -230,8 +243,18 @@ async function main() {
     if (!done) {
       results.push({ fixture: base, ok: false, error: 'timeout',
         want: wantDevice, got: [...present], elapsedSec: (Date.now() - t0) / 1000 });
-      log(`  ${base}: TIMEOUT (${present.size}/${expected.length} PNGs) — continuing`);
-      adbx(['shell', 'rm', '-f', `${SHOT_DIR}/*`]); // clear partials for next fixture
+      // A timeout means the on-device capture WEDGED — the app's inbox loop is
+      // now stuck on this fixture and will never process the next one. Restart
+      // the app so the wedge doesn't cascade-timeout the whole tail of the
+      // batch (resetAndLaunch also wipes the inbox + partials). Skip the
+      // restart if this was the last fixture — nothing left to protect.
+      if (i < fixtures.length - 1) {
+        log(`  ${base}: TIMEOUT (${present.size}/${expected.length} PNGs) — restarting app to clear the wedge`);
+        const remarked = await resetAndLaunch(adbx, opts);
+        if (!remarked) log('  WARNING: marker not seen after restart (continuing)');
+      } else {
+        log(`  ${base}: TIMEOUT (${present.size}/${expected.length} PNGs) — last fixture, not restarting`);
+      }
       continue;
     }
     await new Promise((r) => setTimeout(r, 150)); // settle before pulling
