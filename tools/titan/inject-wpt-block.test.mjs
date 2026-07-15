@@ -19,7 +19,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { PNG } from 'pngjs';
 
-import { stitchPngsVertically, safe } from './inject-wpt-block.mjs';
+import {
+  stitchPngsVertically, safe, checkFuzzyMatch, computeWptPass,
+} from './inject-wpt-block.mjs';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -144,6 +146,46 @@ test('safe(): replaces non-safe characters with underscore', () => {
   assert.equal(safe('a b c'), 'a_b_c');
 });
 
+// ── wptPass — the WPT-native pass verdict (ssim ≥ 0.95 OR within fuzzy) ─────
+//
+// checkFuzzyMatch decides whether a browser-ref diff fits the test's declared
+// <meta fuzzy> tolerance; computeWptPass turns "ssim clears 0.95 OR fuzzy fits"
+// into the honest WPT reftest verdict WITHOUT overwriting the raw ssim.
+
+test('computeWptPass: ssim ≥ 0.95 passes regardless of fuzzy', () => {
+  assert.equal(computeWptPass(0.97, null), true);   // clean SSIM pass, no fuzzy tag
+  assert.equal(computeWptPass(0.95, false), true);  // exactly at the bar
+  assert.equal(computeWptPass(0.99, true), true);   // both paths true
+});
+
+test('computeWptPass: a fuzzy-within-tolerance pair passes even though ssim < 0.95', () => {
+  // The whole point: a test declaring a fuzzy tolerance that the diff fits
+  // is a WPT PASS even when perceptual SSIM sits below the strict 0.95 bar.
+  assert.equal(computeWptPass(0.80, true), true);
+});
+
+test('computeWptPass: a real failure (low ssim, no/failed fuzzy) is false', () => {
+  assert.equal(computeWptPass(0.80, false), false); // fuzzy present but exceeded
+  assert.equal(computeWptPass(0.80, null), false);  // no fuzzy tag at all
+  assert.equal(computeWptPass(null, null), false);  // ssim uncomputable, no fuzzy
+});
+
+test('checkFuzzyMatch → computeWptPass: within-tolerance fuzzy flips a sub-0.95 ssim to pass', () => {
+  // Fuzzy shape from extract-fixture.mjs: { maxDifference:{min,max}, totalPixels:{min,max} }.
+  // A diff of 40 mismatched pixels and a max ΔE of 3 fits inside 50px / ΔE 5.
+  const fuzzy = { maxDifference: { min: 0, max: 5 }, totalPixels: { min: 0, max: 50 } };
+  const metrics = { ssim: 0.82, pixelMismatchedCount: 40, labDeltaE: { max: 3 } };
+  const fuzzyMatch = checkFuzzyMatch(metrics, fuzzy);
+  assert.equal(fuzzyMatch, true);
+  assert.equal(computeWptPass(metrics.ssim, fuzzyMatch), true);
+
+  // A diff that BUSTS the pixel budget is not a pass (ssim still < 0.95).
+  const overBudget = { ssim: 0.82, pixelMismatchedCount: 999, labDeltaE: { max: 3 } };
+  const noMatch = checkFuzzyMatch(overBudget, fuzzy);
+  assert.equal(noMatch, false);
+  assert.equal(computeWptPass(overBudget.ssim, noMatch), false);
+});
+
 // ── stale-path defect 1 pin (R5 restructure) ───────────────────────────────
 //
 // The default --web-dir must point at the LIVE harness capture dir. The
@@ -201,6 +243,9 @@ test('diffPlatformVsRef: matched captures produce metrics with stitchedComponent
   assert.equal(diff.stitchedComponents, 2);
   // Identical solid-green composite vs ref → perfect scores.
   assert.equal(diff.ssim, 1);
+  // wptPass rides along the metric block (ssim ≥ 0.95 path here; no fuzzy).
+  assert.equal(diff.wptPass, true);
+  assert.equal(diff.wptFuzzyMatch, null); // fuzzy:null → no tolerance declared
 });
 
 // ── diffComposedVsRef — the WPT COMPOSED web-ref helper ──────────────────
@@ -242,4 +287,6 @@ test('diffComposedVsRef: composed PNG diffs directly vs ref (no stitch)', async 
   assert.equal(diff.stitchedComponents, undefined);
   // Identical solid-green composite vs ref → perfect SSIM.
   assert.equal(diff.ssim, 1);
+  // wptPass is recorded on the composed path too.
+  assert.equal(diff.wptPass, true);
 });

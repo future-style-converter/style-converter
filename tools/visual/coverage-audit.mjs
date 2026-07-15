@@ -15,6 +15,31 @@
 //   node tools/visual/coverage-audit.mjs --json    # machine-readable
 //   node tools/visual/coverage-audit.mjs --md      # emits tools/visual/COVERAGE.md
 //
+// TWO SIGNALS, both true, deliberately kept apart:
+//
+//   1. REGISTERED (a.k.a. "claimed") — the historical signal. A property is
+//      "registered" on a platform when its PascalCase IR type name appears as
+//      ANY quoted string anywhere under that platform's engine root. This is a
+//      pure string-presence probe, so a registration-only facade, a grouped
+//      `Set`, a comment, a TODO string, or a real renderer all count the same.
+//      It answers "does the platform *claim* this property?" — nothing more.
+//
+//   2. REAL — the honesty signal added because REGISTERED over-counts. A
+//      property is "real" on a platform only when a dedicated applier file
+//      named exactly `<Name>Applier.<ext>` exists under that platform's engine
+//      root (kt / swift / ts). This is the strictest floor we can VERIFY by
+//      filesystem alone: a file that is named for the property is a renderer
+//      authored for that property, not a bare Set membership.
+//
+//      CAVEAT — the REAL floor UNDER-counts on platforms that batch several
+//      properties into one grouped applier (e.g. iOS `FlexboxApplier.swift`,
+//      Compose `LayoutApplier.kt`, web `ScrollMarginApplier.ts`). Those files
+//      genuinely render multiple properties, but their basename matches at most
+//      one IR name (often none), so the batched properties score REGISTERED-yes
+//      / REAL-no. REAL is therefore a lower bound on real rendering, not an
+//      exact tally. The raw count of dedicated `*Applier` files is reported
+//      alongside so the grouped-applier gap is visible.
+//
 // Design notes:
 //   • Each platform uses its own registration surface, so we parse those
 //     files for the literal property-name strings rather than running
@@ -22,11 +47,6 @@
 //   • The IR catalogue is derived from Kotlin filenames, stripping the
 //     trailing "Property.kt" — this is a stable naming contract across
 //     the whole irmodels tree.
-//   • A property is "claimed" on a platform when its PascalCase type name
-//     appears inside a registry call/set on that platform's tree. A few
-//     properties register under shared grouped sets (e.g. iOS
-//     `TransformsProperty.set`) so we match any occurrence within the
-//     platform's style-engine root.
 //
 
 import { readdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
@@ -70,12 +90,14 @@ function extractIrProperties() {
   });
 }
 
-// ── 2. Scrape each platform's registry surface ──────────────────────────
+// ── 2. Scrape each platform's REGISTERED surface ────────────────────────
 // We look for ANY quoted PascalCase identifier that matches an IR property
 // name anywhere under the style-engine root. This is deliberately fuzzy —
 // false-positives on the order of a handful of coincidentally-identical
 // string literals are acceptable; false-negatives (a real registration we
-// miss) would be bugs.
+// miss) would be bugs. This is the REGISTERED signal (signal #1 above): it
+// says the platform *claims* the property, which is not the same as rendering
+// it — that is what the REAL signal (§2b) measures.
 
 function scrapePlatform(root, ir) {
   const names = new Set(ir.map((p) => p.name));
@@ -99,7 +121,31 @@ function scrapePlatform(root, ir) {
   return claimed;
 }
 
-// ── 2b. Fixture-taxonomy guard (R5 restructure) ─────────────────────────
+// ── 2b. Scrape each platform's REAL applier surface ─────────────────────
+// The strict-floor honesty signal (signal #2 above). We walk the platform's
+// engine root and collect the basenames of every dedicated applier file
+// (`<Name>Applier.<ext>`). A property is REAL only when a file named exactly
+// for it exists. We also return the raw file count — dedicated appliers whose
+// basename does NOT match a single IR name are grouped/batched appliers
+// (e.g. `FlexboxApplier`, `AnimationsApplier`), which is why the raw file
+// count exceeds the number of REAL-scored properties; that gap is the
+// grouped-applier caveat, surfaced in every render mode.
+function scrapeRealAppliers(root, ext, ir) {
+  const names = new Set(ir.map((p) => p.name));
+  const real = new Set(); // IR property names that own a dedicated applier file
+  const suffix = 'Applier' + ext; // e.g. "Applier.ts" / "Applier.swift" / "Applier.kt"
+  const files = walk(root).filter((f) => f.endsWith(suffix));
+  for (const f of files) {
+    // Strip the trailing "Applier.<ext>" to recover the intended property name.
+    const stem = basename(f).slice(0, -suffix.length);
+    if (names.has(stem)) real.add(stem);
+  }
+  // fileCount = total dedicated applier files (incl. grouped ones whose stem
+  // is NOT an IR name); real.size = properties that own a same-named file.
+  return { real, fileCount: files.length };
+}
+
+// ── 2c. Fixture-taxonomy guard (R5 restructure) ─────────────────────────
 // fixtures/properties/ must contain ONLY the canonical category folders —
 // the exact set of directories under converter/.../irmodels/properties/.
 // Suite trees (fuzz, perfect, combos, keyframes, viewport, perf, _loop, …)
@@ -137,19 +183,31 @@ const byCategory = {};
 for (const p of ir) (byCategory[p.category] ??= []).push(p.name);
 
 const PLATFORMS = [
-  { id: 'android', root: join(REPO, 'runtimes/compose/src/main/java/com/styleconverter/runtime') },
-  { id: 'ios',     root: join(REPO, 'runtimes/swiftui/Sources/StyleConverterRuntime') },
-  { id: 'web',     root: join(REPO, 'runtimes/web/src/engine') },
+  { id: 'android', ext: '.kt',    root: join(REPO, 'runtimes/compose/src/main/java/com/styleconverter/runtime') },
+  { id: 'ios',     ext: '.swift', root: join(REPO, 'runtimes/swiftui/Sources/StyleConverterRuntime') },
+  { id: 'web',     ext: '.ts',    root: join(REPO, 'runtimes/web/src/engine') },
 ];
 
+// REGISTERED claims (string presence) and REAL claims (dedicated applier file)
+// per platform, plus the raw dedicated-applier file count for the caveat note.
 const claims = {};
-for (const plat of PLATFORMS) claims[plat.id] = scrapePlatform(plat.root, ir);
+const realClaims = {};
+const applierFiles = {};
+for (const plat of PLATFORMS) {
+  claims[plat.id] = scrapePlatform(plat.root, ir);
+  const r = scrapeRealAppliers(plat.root, plat.ext, ir);
+  realClaims[plat.id] = r.real;
+  applierFiles[plat.id] = r.fileCount;
+}
 
 // ── 4. Render ───────────────────────────────────────────────────────────
 const categories = Object.keys(byCategory).sort();
 const totalIr = ir.length;
 const platformTotals = Object.fromEntries(
   PLATFORMS.map((p) => [p.id, claims[p.id].size]),
+);
+const realTotals = Object.fromEntries(
+  PLATFORMS.map((p) => [p.id, realClaims[p.id].size]),
 );
 
 const mode = process.argv.includes('--json')
@@ -158,9 +216,17 @@ const mode = process.argv.includes('--json')
   ? 'md'
   : 'text';
 
+// Registered (string-presence) count for a category on a platform.
 function pctFor(cat, platId) {
   const props = byCategory[cat];
   const ok = props.filter((n) => claims[platId].has(n)).length;
+  return { ok, total: props.length, pct: props.length ? ok / props.length : 1 };
+}
+
+// Real (dedicated-applier-file) count for a category on a platform.
+function realFor(cat, platId) {
+  const props = byCategory[cat];
+  const ok = props.filter((n) => realClaims[platId].has(n)).length;
   return { ok, total: props.length, pct: props.length ? ok / props.length : 1 };
 }
 
@@ -171,9 +237,12 @@ function fmt(r) {
 function buildRows() {
   return categories.map((cat) => ({
     category: cat,
-    android: pctFor(cat, 'android'),
-    ios:     pctFor(cat, 'ios'),
-    web:     pctFor(cat, 'web'),
+    android:     pctFor(cat, 'android'),
+    androidReal: realFor(cat, 'android'),
+    ios:         pctFor(cat, 'ios'),
+    iosReal:     realFor(cat, 'ios'),
+    web:         pctFor(cat, 'web'),
+    webReal:     realFor(cat, 'web'),
   }));
 }
 
@@ -181,7 +250,10 @@ const rows = buildRows();
 
 // Global gate: every IR property must be claimed by at least one platform.
 // (Not "every property on every platform" — some are no-mobile-analog and
-// legitimately unclaimed on Android/iOS but claimed on Web.)
+// legitimately unclaimed on Android/iOS but claimed on Web.) The gate stays
+// on the REGISTERED signal — REAL is reported for honesty, not enforced,
+// since grouped appliers make a strict per-property REAL gate produce false
+// failures.
 const unclaimedAnywhere = ir.filter(
   (p) => !claims.android.has(p.name) && !claims.ios.has(p.name) && !claims.web.has(p.name),
 );
@@ -189,7 +261,11 @@ const passed = unclaimedAnywhere.length === 0;
 
 if (mode === 'json') {
   const out = {
+    // `totals` stays the REGISTERED count for backward compatibility with any
+    // existing consumer; `realTotals` + `applierFiles` are additive.
     totals: { ir: totalIr, ...platformTotals },
+    realTotals: { ir: totalIr, ...realTotals },
+    applierFiles, // raw dedicated-applier file count (incl. grouped appliers)
     passed,
     unclaimedAnywhere: unclaimedAnywhere.map((p) => `${p.category}/${p.name}`),
     byCategory: rows,
@@ -202,21 +278,39 @@ if (mode === 'md') {
   const lines = [];
   lines.push('# Coverage matrix');
   lines.push('');
-  lines.push('Generated by `tools/visual/coverage-audit.mjs`. Each cell is `claimed/total` for that category on that platform; a property is "claimed" when its PascalCase IR type name appears in a platform registry call or grouped `Set`.');
+  lines.push('Generated by `tools/visual/coverage-audit.mjs`. Two signals per platform, both `count/total`:');
+  lines.push('');
+  lines.push('- **reg** (registered): the property\'s PascalCase IR type name appears as a quoted string anywhere under the platform engine root — a claim/registration, which counts facades, grouped `Set`s, comments and TODO strings the same as real renderers.');
+  lines.push('- **real**: a dedicated applier file named exactly `<Name>Applier.<ext>` exists — the strict filesystem floor for "a renderer was authored for this property".');
+  lines.push('');
+  lines.push('**real is a lower bound.** Grouped appliers (e.g. iOS `FlexboxApplier.swift`, Compose `LayoutApplier.kt`, web `ScrollMarginApplier.ts`) render several properties from one file whose basename matches at most one IR name, so the batched properties score reg-yes / real-no. The raw count of dedicated `*Applier` files (which includes those grouped files) is reported per platform below.');
   lines.push('');
   lines.push(`**IR catalogue**: ${totalIr} properties across ${categories.length} categories.`);
   lines.push('');
-  lines.push('| Category | Android | iOS | Web |');
-  lines.push('|---|---|---|---|');
+  lines.push(
+    `**Dedicated \`*Applier\` files**: ` +
+      `Android ${applierFiles.android} · iOS ${applierFiles.ios} · Web ${applierFiles.web} ` +
+      `(the grouped-applier files inflate this above the per-property **real** totals).`,
+  );
+  lines.push('');
+  lines.push('| Category | Android reg | Android real | iOS reg | iOS real | Web reg | Web real |');
+  lines.push('|---|---|---|---|---|---|---|');
   for (const r of rows) {
-    lines.push(`| ${r.category} | ${fmt(r.android)} | ${fmt(r.ios)} | ${fmt(r.web)} |`);
+    lines.push(
+      `| ${r.category} | ${fmt(r.android)} | ${fmt(r.androidReal)} | ${fmt(r.ios)} | ${fmt(r.iosReal)} | ${fmt(r.web)} | ${fmt(r.webReal)} |`,
+    );
   }
-  lines.push(`| **total** | **${platformTotals.android}/${totalIr}** | **${platformTotals.ios}/${totalIr}** | **${platformTotals.web}/${totalIr}** |`);
+  lines.push(
+    `| **total** ` +
+      `| **${platformTotals.android}/${totalIr}** | **${realTotals.android}/${totalIr}** ` +
+      `| **${platformTotals.ios}/${totalIr}** | **${realTotals.ios}/${totalIr}** ` +
+      `| **${platformTotals.web}/${totalIr}** | **${realTotals.web}/${totalIr}** |`,
+  );
   lines.push('');
   if (unclaimedAnywhere.length === 0) {
-    lines.push('✅ Every IR property is claimed by at least one platform.');
+    lines.push('✅ Every IR property is **registered** on at least one platform.');
   } else {
-    lines.push(`⚠ ${unclaimedAnywhere.length} IR properties are not claimed on any platform:`);
+    lines.push(`⚠ ${unclaimedAnywhere.length} IR properties are not registered on any platform:`);
     for (const p of unclaimedAnywhere) lines.push(`- \`${p.category}/${p.name}\``);
   }
   writeFileSync(resolve(REPO, 'tools/visual/COVERAGE.md'), lines.join('\n') + '\n');
@@ -226,21 +320,31 @@ if (mode === 'md') {
 
 // Default: text report
 console.log(`Coverage audit — IR=${totalIr}, ${categories.length} categories`);
-console.log(`  android=${platformTotals.android}  ios=${platformTotals.ios}  web=${platformTotals.web}`);
+// REGISTERED line kept first and in the exact `android=…` shape that
+// tools/visual/doc-staleness-check.sh greps (head -1) for the doc claim.
+console.log(`  registered:   android=${platformTotals.android}  ios=${platformTotals.ios}  web=${platformTotals.web}`);
+console.log(`  real:         android=${realTotals.android}  ios=${realTotals.ios}  web=${realTotals.web}`);
+console.log(`  applier files: android=${applierFiles.android}  ios=${applierFiles.ios}  web=${applierFiles.web}  (incl. grouped; real is a lower bound)`);
 console.log('');
 const pad = (s, n) => String(s).padEnd(n);
-console.log(`${pad('category', 18)} ${pad('android', 10)} ${pad('ios', 10)} ${pad('web', 10)}`);
-console.log('-'.repeat(52));
+console.log(
+  `${pad('category', 16)} ${pad('and reg', 9)} ${pad('and real', 9)} ${pad('ios reg', 9)} ${pad('ios real', 9)} ${pad('web reg', 9)} ${pad('web real', 9)}`,
+);
+console.log('-'.repeat(76));
 for (const r of rows) {
   console.log(
-    `${pad(r.category, 18)} ${pad(fmt(r.android), 10)} ${pad(fmt(r.ios), 10)} ${pad(fmt(r.web), 10)}`,
+    `${pad(r.category, 16)} ${pad(fmt(r.android), 9)} ${pad(fmt(r.androidReal), 9)} ${pad(fmt(r.ios), 9)} ${pad(fmt(r.iosReal), 9)} ${pad(fmt(r.web), 9)} ${pad(fmt(r.webReal), 9)}`,
   );
 }
-console.log('-'.repeat(52));
+console.log('-'.repeat(76));
+console.log(
+  `${pad('TOTAL', 16)} ${pad(`${platformTotals.android}/${totalIr}`, 9)} ${pad(`${realTotals.android}/${totalIr}`, 9)} ${pad(`${platformTotals.ios}/${totalIr}`, 9)} ${pad(`${realTotals.ios}/${totalIr}`, 9)} ${pad(`${platformTotals.web}/${totalIr}`, 9)} ${pad(`${realTotals.web}/${totalIr}`, 9)}`,
+);
+console.log('-'.repeat(76));
 if (passed) {
-  console.log('✓ every IR property is claimed on at least one platform');
+  console.log('✓ every IR property is registered on at least one platform');
 } else {
-  console.log(`✗ ${unclaimedAnywhere.length} properties unclaimed on ALL platforms:`);
+  console.log(`✗ ${unclaimedAnywhere.length} properties unregistered on ALL platforms:`);
   for (const p of unclaimedAnywhere) console.log(`  - ${p.category}/${p.name}`);
 }
 process.exit(passed ? 0 : 1);

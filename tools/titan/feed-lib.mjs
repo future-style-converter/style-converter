@@ -19,6 +19,15 @@
 // globs for (`<idx>_<safeKey>.png`).
 
 import { PNG } from 'pngjs';
+// The ONE canonical compare-pipeline sanitiser (dot KEPT). Re-exported below
+// so callers can import it from feed-lib too, and used for every HOST-side
+// filename this module derives (the names inject-wpt-block.mjs globs for).
+import { safe } from './safe-name.mjs';
+
+// Re-export the shared sanitiser so `import { safe } from './feed-lib.mjs'`
+// resolves to the exact same function as the standalone module — there is
+// only one implementation in the whole pipeline.
+export { safe };
 
 // ── Arg parsing ─────────────────────────────────────────────────────────────
 
@@ -58,9 +67,18 @@ export function parseArgs(argv) {
 
 // ── Filename derivation (mirror of the Android capture path) ─────────────────
 
-/** Sanitise a component name for a filename — identical char class to the
- *  Kotlin ScreenshotManager (`Regex("[^a-zA-Z0-9_-]")`). */
-export function safeName(name) {
+/** Sanitise a component name for the ON-DEVICE per-component filename —
+ *  identical char class to the Kotlin ScreenshotManager.saveScreenshot
+ *  (`Regex("[^a-zA-Z0-9_-]")`, apps/android-harness .../ScreenshotManager.kt),
+ *  which DROPS the dot. This predicts the exact name the app WROTE, so the
+ *  feeder polls for the right file. It is deliberately NOT the compare-
+ *  pipeline `safe()` (which keeps the dot): for a component name containing a
+ *  dot the device writes `_` where inject globs `.`, so the feeder must poll
+ *  with the device rule here and then RE-NAME to the compare `safe()` host
+ *  name on pull (see expectedPngNames' deviceFile vs hostFile — the same
+ *  decouple feed-ios.mjs's deviceSafeName/safeName split uses). For the
+ *  common WPT name (alnum/`-`/`_`, no dot) it equals `safe()` exactly. */
+export function deviceSafeName(name) {
   return String(name).replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
@@ -188,15 +206,35 @@ export function flattenComponents(roots) {
 }
 
 /**
- * The ordered list of per-component PNG filenames the app will write for this
- * IR document — the feeder's poll target AND its host-side output names (kept
- * identical so they drop straight into inject-wpt-block's `<idx>_<safeKey>.png`
- * glob). Index is the position in the flattened list, zero-padded to 3 digits
- * to match Kotlin's `String.format("%03d_%s.png", ...)`.
+ * The ordered per-component capture manifest the app will write for this IR
+ * document: `{ index, name, deviceFile, hostFile }` per flattened component.
+ *
+ * deviceFile — the feeder's POLL target: `%03d_<deviceSafeName(name)>.png`,
+ *   matching the Kotlin ScreenshotManager.saveScreenshot rule (dot DROPPED)
+ *   so the poll waits for the filename the app actually wrote.
+ * hostFile — the feeder's OUTPUT name (what it writes to --out):
+ *   `%03d_<safe(name)>.png`, using the compare-pipeline sanitiser (dot KEPT)
+ *   so the pulled PNG drops straight into inject-wpt-block's
+ *   `endsWith('_' + safe(key) + '.png')` glob.
+ *
+ * For a component name containing a "." the two names DIFFER (the feeder pulls
+ * the device file, renames to the host file) — closing the silent n/a-column
+ * bug where the Android-written drop-dot name never matched inject's keep-dot
+ * glob. For the common WPT name (no dot) deviceFile === hostFile. This mirrors
+ * feed-ios.mjs's expectedCaptures exactly. Index is zero-padded to 3 digits to
+ * match Kotlin's `String.format("%03d_%s.png", ...)`.
  */
 export function expectedPngNames(doc) {
   const flat = flattenComponents(composeRoots(doc));
-  return flat.map((c, i) => `${String(i).padStart(3, '0')}_${safeName(c.name)}.png`);
+  return flat.map((c, i) => {
+    const pad = String(i).padStart(3, '0');
+    return {
+      index: i,
+      name: c.name,
+      deviceFile: `${pad}_${deviceSafeName(c.name)}.png`, // poll target (device rule)
+      hostFile: `${pad}_${safe(c.name)}.png`,             // compare-glob output name
+    };
+  });
 }
 
 /**
@@ -208,15 +246,17 @@ export function expectedPngNames(doc) {
  *
  * Takes the host-side fixture BASENAME (e.g.
  * `wpt__css-color__background-color-hsl-001.json`, optionally with the feeder's
- * `<NNNN>-` index prefix): strip the prefix + `.json`, then apply inject's
- * exact `safe()` class (`[^A-Za-z0-9._-] → _`, dot KEPT). For a WPT key this is
- * the identity + ".png".
+ * `<NNNN>-` index prefix): strip the prefix + `.json`, then apply the shared
+ * `safe()` class (`[^A-Za-z0-9._-] → _`, dot KEPT). For a WPT key this is the
+ * identity + ".png". Both the poll target and the pulled host name use this
+ * one name because the Android COMPOSED capture rule (TitanInbox.kt
+ * composedPngName) also keeps the dot, so device and compare names agree.
  */
 export function composedPngName(fixtureBasename) {
   const stem = String(fixtureBasename)
     .replace(/^\d+-/, '')      // drop the feeder's FIFO index prefix if present
     .replace(/\.json$/i, '');  // drop the .json extension
-  return stem.replace(/[^A-Za-z0-9._-]/g, '_') + '.png';
+  return safe(stem) + '.png';  // shared compare-pipeline sanitiser (dot KEPT)
 }
 
 // ── PNG validation ───────────────────────────────────────────────────────────

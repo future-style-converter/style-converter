@@ -99,3 +99,28 @@ jobs:
         run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
       - name: Unit tests
         run: node --test tools/visual/*.test.mjs tools/titan/*.test.mjs
+
+  doc-staleness:
+    # Device-less doc-drift gate. tools/visual/doc-staleness-check.sh derives
+    # every headline number in README.md / CLAUDE.md / docs/STATUS.md (and the
+    # runtimes/*/README.md + apps/android-harness/README.md test-suite tables)
+    # from live source-of-truth — coverage-audit.mjs (registered/real totals), a
+    # real web vitest run, the tooling `node --test` suite, and grep-counted
+    # JUnit/XCTest declarations — and fails if any doc-quoted number drifted.
+    # This is the same script smoke.sh runs locally; hoisting it into CI stops
+    # doc drift from accumulating unenforced. Needs only node + the repo (the
+    # Kotlin/Swift suites are counted by grep, not run, so no JDK/Xcode here).
+    name: doc staleness (node)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
+      # The check runs a real web vitest run + the tooling node --test suite, so
+      # both workspaces' deps must be installed. Skip puppeteer's Chromium
+      # download — neither path launches a browser.
+      - name: Install (skip puppeteer chrome download)
+        run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
+      - name: Doc-staleness check (headline numbers vs live source-of-truth)
+        run: bash tools/visual/doc-staleness-check.sh

@@ -25,12 +25,16 @@
 import { promises as fs } from 'node:fs';
 import { resolve, join, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// The ONE canonical compare-pipeline sanitiser (dot KEPT). Previously this
+// module had its own copy that DROPPED the dot — a divergence that could name
+// a split per-test doc `<key-with-underscore>.json` while inject-wpt-block
+// globbed `<key-with-dot>.png`, silently dropping that platform's column for a
+// test key containing ".". Sharing the one helper closes that gap.
+import { safe } from './safe-name.mjs';
 
-// Filename/segment sanitiser — identical rule to inject-wpt-block.mjs's
-// safe() so a split file name matches what downstream tooling expects.
-export function safe(s) {
-  return String(s).replace(/[^a-zA-Z0-9_-]/g, '_');
-}
+// Re-export so existing `import { safe } from './split-combined-ir.mjs'`
+// call sites (and tests) resolve to the single shared implementation.
+export { safe };
 
 // The test key of a ROOT component's name. build-combined-fixture prefixes
 // only ROOTS as `wpt__<section>__<stem>__<idx>`, so the test is the first

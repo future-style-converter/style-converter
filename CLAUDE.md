@@ -28,7 +28,8 @@ is pinned in `docs/NAMING.md`. Say "runtime", not "engine".
 # JDK 21 required for anything Gradle — on macOS:
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
 
-# Convert CSS to IR
+# Convert CSS to IR (emits the flat-list IR v2 wire by default; append
+# --emit-ir v1 for the DEPRECATED legacy nested-children wire)
 ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/visual-test.json -o out"
 # → out/tmpOutput.json
 
@@ -94,24 +95,31 @@ test-ios.sh                      # thin wrapper: SKIP_ANDROID=1 SKIP_WEB=1 test-
 The IR JSON that `--to ir` emits and all three runtimes consume is
 machine-checked, not folklore:
 
-- `schema/ir-v1.schema.json` — JSON Schema (draft 2020-12): strict on the
-  envelope, permissive at property-data leaves (leaf strictness arrives
-  with the flat-IR v2 freeze).
+- `schema/ir-v2.schema.json` — the **current** wire's JSON Schema (draft
+  2020-12): strict on the v2 envelope (`irVersion`/`minReaderVersion`,
+  flat component list, `slot`/`meta`), permissive at property-data leaves
+  (full leaf strictness deferred to a future revision). The converter
+  emits this by default. `schema/ir-v1.schema.json` is the **deprecated**
+  legacy contract for the pre-v2 nested-children wire, emitted only by
+  `--emit-ir v1` for one deprecation window.
 - `schema/spec/01…05-*.md` — normative prose: envelope, value shapes,
-  the children map-in/array-out rule, the `_underscore` metadata-field
-  rule, and the versioning policy (v1 is implicit; unknown property
-  types are tolerated, unknown envelope keys are an error).
-- `schema/conformance/fixtures/` — 12 hand-authored golden IR documents,
-  decoded by conformance tests on **all four codebases** (converter,
-  web, compose, swiftui).
+  the children map-in/array-out rule (v1) + the flat slot/placement rule
+  (v2), the `_underscore`→`meta` field renames, and the versioning policy
+  (`schema/spec/05-versioning.md`: v2 is the frozen current wire, v1
+  deprecated; unknown property types are tolerated, unknown envelope keys
+  are an error).
+- `schema/conformance/fixtures/` — 31 hand-authored golden IR documents
+  (12 v1 + 19 v2 under `fixtures/v2/`), decoded by conformance tests on
+  **all four codebases** (converter, web, compose, swiftui).
 
 ```bash
 node schema/conformance/run.mjs          # validate goldens (+ out/tmpOutput.json if present)
 node schema/conformance/run.mjs --emit   # convert fixtures/visual-test.json first, then validate
 ```
 
-Changing an emitted byte shape is a v2-freeze event
-(`schema/spec/05-versioning.md`), not a casual PR.
+Changing an emitted byte shape is a major-version freeze event
+(`schema/spec/05-versioning.md` — v2 is the current frozen wire; any
+further byte-shape change is a v3-gated break), not a casual PR.
 
 ### IR value normalization
 
@@ -246,12 +254,12 @@ Gradle commands need JDK 21):
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 101 |
+| converter (Kotlin) | `./gradlew :converter:test` | 135 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 959 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 761 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 232 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 473 |
-| IR conformance | `node schema/conformance/run.mjs --emit` | 12 goldens × 4 codebases |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 770 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 248 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 497 |
+| IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 (`npm test` at the root runs every workspace's vitest suite — the web
 runtime plus the web-harness's own capture-pipeline tests.)
@@ -276,21 +284,36 @@ web public/), builds + launches each platform (emulator / simulator /
 vite + puppeteer), captures per-component screenshots, then runs the
 3-way SSIM comparison → `tools/visual/report/index.html`.
 
-CI (`.github/workflows/ci.yml`) runs 4 jobs on push/PR to `main`/`dev`:
-converter, web-runtime, test-tooling, schema-conformance. Device-level
-visual jobs are local-only for now.
+CI (`.github/workflows/ci.yml`) runs 5 jobs on push/PR to `main`/`dev`:
+converter, web-runtime, test-tooling, schema-conformance, and
+doc-staleness (device-less: `tools/visual/doc-staleness-check.sh` derives
+every headline number in the docs from live source-of-truth and fails on
+drift). Device-level visual jobs are local-only for now.
 
 ## Honest status
 
-Two different numbers, both true — do not conflate them:
+Three different numbers, all true — do not conflate them:
 
 - **Registration coverage: 550 / 550 per platform** (Android 550 / 550,
   iOS 550 / 550, Web 550 / 550). Every property in the 550-property IR
   catalogue (33 categories) has a registered Config/Extractor/Applier
   triplet on all three platforms — `node tools/visual/coverage-audit.mjs`
-  is the source of truth (`tools/visual/COVERAGE.md`). "Registered" means
-  the triplet exists and claims the type; some appliers are intentional
-  no-op + TODO where no mobile analogue exists (speech/, regions/, print/, …).
+  is the source of truth (`tools/visual/COVERAGE.md`). But "registered" is
+  only a **string-presence facade**: the triplet exists and claims the IR
+  type — it does NOT mean a dedicated applier renders the property natively.
+  Some registered appliers are intentional no-op + TODO where no mobile
+  analogue exists (speech/, regions/, print/, …).
+- **Real-applier floor: Android 18 / 550 · iOS 73 / 550 · Web 508 / 550**.
+  The stricter per-property bar — a dedicated `<Name>Applier.<ext>` file
+  exists — is far lower on mobile (`coverage-audit.mjs` prints it as the
+  `real:` line, alongside `registered:`). Caveat: `real` under-counts
+  grouped appliers — files like Compose `LayoutApplier.kt`, iOS
+  `FlexboxApplier.swift`, or web `ScrollMarginApplier.ts` render many
+  properties from one file whose basename matches at most one IR name, so
+  the raw dedicated-applier file counts (Android 59 · iOS 115 · Web 522)
+  sit above this per-property floor. (Web `real` is 508 not 509 because
+  `print/SizeApplier.ts` and `sizing/SizeApplier.ts` both map to the single
+  IR `Size` property and de-dupe.)
 - **Verified rendering coverage: 91/550 (~17%)**. Only 91 properties pass
   the strict bar — SSIM ≥ 0.95 on every value variant on every platform
   pair against committed baselines. Of the rest: 419 blocked-platform
@@ -303,12 +326,17 @@ Two different numbers, both true — do not conflate them:
 ## Roadmap
 
 Static code **writers** that emit Compose / SwiftUI (and eventually
-Tailwind) source from the IR; the **flat-IR v2** freeze with the
-slot/placement children contract (`schema/spec/03-children.md` and
-`05-versioning.md` describe the v1 rules it replaces); repairing the
-known v1 wire defects at that freeze. The durable conclusions of the
-execution history — the 12-commit rollout, the 70-round audit campaign —
-are summarized in `docs/STATUS.md`; the full record lives in git history.
+Tailwind) source from the IR; a future leaf-strictness revision that
+closes the still-permissive per-property `data` leaves; retiring the
+deprecated `--emit-ir v1` path (and its nested-children serializer
+branches) after its one-release deprecation window. The **flat-IR v2**
+wire already shipped (PR #30) — it is the current default, with the
+slot/placement children contract frozen in `schema/spec/03-children.md`
+and `05-versioning.md` (which now describe the deprecated v1 rules it
+replaced), and the known v1 wire defects repaired at that freeze. The
+durable conclusions of the execution history — the 12-commit rollout, the
+70-round audit campaign — are summarized in `docs/STATUS.md`; the full
+record lives in git history.
 
 ## Tech stack
 

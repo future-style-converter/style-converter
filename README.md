@@ -39,12 +39,22 @@ your-styles.json  (CSS properties per component)
 
 ## Current status (honest)
 
-Two coverage numbers, both true:
+Three coverage numbers, all true — and they mean different things:
 
 | claim | number | source of truth |
 |---|---|---|
-| Registration coverage (triplet exists + registered) | **550 / 550 per platform** (Android 550 / 550 · iOS 550 / 550 · Web 550 / 550) | `node tools/visual/coverage-audit.mjs` → `tools/visual/COVERAGE.md` |
-| Verified rendering coverage (SSIM ≥ 0.95, every variant, every platform pair) | **91/550 (~17%)** | [docs/STATUS.md](docs/STATUS.md) |
+| Registration coverage — a triplet exists + claims the IR type (a string-presence facade; does **not** imply native rendering) | **550 / 550 per platform** (Android 550 / 550 · iOS 550 / 550 · Web 550 / 550) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
+| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 18 / 550 · iOS 73 / 550 · Web 508 / 550** | `coverage-audit.mjs` (`real:` line) |
+| Verified rendering coverage — SSIM ≥ 0.95, every variant, every platform pair | **91/550 (~17%)** | [docs/STATUS.md](docs/STATUS.md) |
+
+`registered` is only a string-presence facade — the triplet exists and
+claims the type, but that alone does not render the property natively. The
+`real` floor counts a dedicated `<Name>Applier.<ext>` file per property; it
+under-counts grouped appliers (one file — e.g. Compose `LayoutApplier.kt`,
+iOS `FlexboxApplier.swift`, web `ScrollMarginApplier.ts` — renders many
+properties but its basename matches at most one IR name, so the raw
+dedicated-applier file counts Android 59 · iOS 115 · Web 522 sit above the
+per-property floor).
 
 Of the unverified remainder: 419 are blocked on platform capability gaps
 or missing harness tiers (animations, interactions, print, …), 37 are
@@ -75,9 +85,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for full dev setup.
 # JDK 21 required — on macOS:
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
 
-# 1. Convert CSS to IR
+# 1. Convert CSS to IR (emits the flat-list IR v2 wire by default)
 ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/visual-test.json -o out"
 # → out/tmpOutput.json (the IR)
+# --emit-ir v1|v2 selects the wire; v2 is the default. Append --emit-ir v1 for the
+# DEPRECATED legacy nested-children wire (kept for one deprecation window):
+#   ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/visual-test.json -o out --emit-ir v1"
 
 # 2. Render + compare on all three platforms
 ./test-all.sh fixtures/visual-test.json
@@ -150,18 +163,25 @@ for the full per-property contract.
 The IR JSON that `--to ir` emits and all three runtimes consume is
 machine-checked, not folklore:
 
-- `schema/ir-v1.schema.json` — JSON Schema (draft 2020-12): **strict** on
-  the envelope (document / component / `{type, data}` property wrapper),
-  **permissive** at property-data leaves (leaf strictness arrives with the
-  flat-IR v2 freeze).
+- `schema/ir-v2.schema.json` — the **current** wire's JSON Schema (draft
+  2020-12): **strict** on the v2 envelope (`irVersion`/`minReaderVersion`,
+  flat component list, `slot`/`meta` structures), **permissive** at
+  property-data leaves (full leaf strictness is deferred to a future
+  revision — the 550-property surface is still moving). This is what the
+  converter emits by default. `schema/ir-v1.schema.json` is the
+  **deprecated** legacy contract for the pre-v2 nested-children wire,
+  still emitted byte-for-byte by `--emit-ir v1` for one deprecation window.
 - `schema/spec/01…05-*.md` — normative prose lifted from the serializer
-  code: envelope, value shapes (including the known defects), the
-  children map-in/array-out rule, the `_underscore` metadata fields, and
-  the versioning policy (v1 is implicit; unknown property types are
-  tolerated, unknown envelope keys are an error).
-- `schema/conformance/fixtures/` — 12 hand-authored golden IR documents,
-  one wire-shape family each, decoded by conformance tests on **all four
-  codebases** (converter, web, compose, swiftui).
+  code: envelope, value shapes (including the known defects), the children
+  map-in/array-out rule (v1) and the flat slot/placement rule (v2), the
+  `_underscore`→`meta` field renames, and the versioning policy
+  (`schema/spec/05-versioning.md`: v2 is the frozen current wire, v1 is
+  deprecated; unknown property types are tolerated, unknown envelope keys
+  are an error).
+- `schema/conformance/fixtures/` — 31 hand-authored golden IR documents
+  (12 v1 + 19 v2 under `fixtures/v2/`), one wire-shape family each,
+  decoded by conformance tests on **all four codebases** (converter, web,
+  compose, swiftui).
 
 ```bash
 node schema/conformance/run.mjs          # validate goldens (+ out/tmpOutput.json if present)
@@ -177,18 +197,19 @@ the point.
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 101 |
+| converter (Kotlin) | `./gradlew :converter:test` | 135 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 959 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 761 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 232 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 473 |
-| IR conformance | `node schema/conformance/run.mjs --emit` | 12 goldens × 4 codebases |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 770 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 248 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 497 |
+| IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 CI (`.github/workflows/ci.yml`) runs the converter, web-runtime,
-test-tooling, and schema-conformance jobs on every push/PR to
-`main`/`dev`. The full visual pipeline (`./test-all.sh`, plus
-`BASELINE=1` for regression gating) runs locally — it needs an Android
-emulator and an iOS simulator.
+test-tooling, schema-conformance, and doc-staleness jobs on every push/PR
+to `main`/`dev` (the last derives every headline number in these docs from
+live source-of-truth and fails on drift). The full visual pipeline
+(`./test-all.sh`, plus `BASELINE=1` for regression gating) runs locally —
+it needs an Android emulator and an iOS simulator.
 
 ## Going deeper
 

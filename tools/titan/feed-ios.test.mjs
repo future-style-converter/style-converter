@@ -39,16 +39,26 @@ test('pad3 matches the app %03d index prefix', () => {
   assert.equal(pad3(123), '123');
 });
 
-test('parseArgs reads every flag and defaults timeout', () => {
+test('parseArgs reads every flag and defaults timeout (SECONDS, like feed-android)', () => {
+  // --timeout-per-fixture is now SECONDS (unified with feed-lib/feed-android),
+  // so the raw number is taken verbatim.
   const a = parseArgs(['--fixtures', 'ir/', '--out', 'shots/', '--udid', 'ABC', '--timeout-per-fixture', '9000']);
   assert.equal(a.fixtures, 'ir/');
   assert.equal(a.out, 'shots/');
   assert.equal(a.udid, 'ABC');
-  assert.equal(a.timeoutPerFixture, 9000);
+  assert.equal(a.timeoutPerFixture, 9000); // seconds
   assert.equal(a.noBuild, false);
   const d = parseArgs(['--fixtures', 'x', '--out', 'y', '--no-build']);
-  assert.equal(d.timeoutPerFixture, 15000); // default
+  assert.equal(d.timeoutPerFixture, 30); // default seconds — matches feed-android
   assert.equal(d.noBuild, true);
+});
+
+test('parseArgs rejects a non-positive / NaN timeout (watchdog must stay armed)', () => {
+  // Same guard as feed-lib.parseArgs — a bad value falls back to the 30s default
+  // so one malformed flag can never disable the per-fixture watchdog.
+  assert.equal(parseArgs(['--fixtures', 'x', '--out', 'y', '--timeout-per-fixture', '0']).timeoutPerFixture, 30);
+  assert.equal(parseArgs(['--fixtures', 'x', '--out', 'y', '--timeout-per-fixture', 'abc']).timeoutPerFixture, 30);
+  assert.equal(parseArgs(['--fixtures', 'x', '--out', 'y', '--timeout-per-fixture', '-5']).timeoutPerFixture, 30);
 });
 
 test('pickBootedUdid returns a Booted device and prefers an iPhone', () => {
