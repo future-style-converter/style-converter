@@ -284,11 +284,16 @@ web public/), builds + launches each platform (emulator / simulator /
 vite + puppeteer), captures per-component screenshots, then runs the
 3-way SSIM comparison → `tools/visual/report/index.html`.
 
-CI (`.github/workflows/ci.yml`) runs 5 jobs on push/PR to `main`/`dev`:
-converter, web-runtime, test-tooling, schema-conformance, and
-doc-staleness (device-less: `tools/visual/doc-staleness-check.sh` derives
-every headline number in the docs from live source-of-truth and fails on
-drift). Device-level visual jobs are local-only for now.
+CI (`.github/workflows/ci.yml`) runs 7 jobs on push/PR to `main`/`dev`:
+converter, web-runtime, test-tooling, schema-conformance, doc-staleness
+(device-less: `tools/visual/doc-staleness-check.sh` derives every headline
+number in the docs from live source-of-truth and fails on drift), plus two
+native IR-conformance gates — compose-conformance (JVM `SchemaConformanceTest`
+on ubuntu, no emulator) and swiftui-conformance (`ConformanceTests` under Mac
+Catalyst on a macOS runner). The native gates close the hole where an
+additive-envelope-key change the Kotlin/Swift decoders reject would pass every
+other job. Device-level *visual* jobs (emulator/simulator SSIM) are still
+local-only for now.
 
 ## Honest status
 

@@ -124,3 +124,44 @@ jobs:
         run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
       - name: Doc-staleness check (headline numbers vs live source-of-truth)
         run: bash tools/visual/doc-staleness-check.sh
+
+  compose-conformance:
+    # Native decoder gate. The node/ajv schema-conformance job above validates
+    # the goldens against the JSON Schema + the converter's emit, and the web
+    # runtime decodes them in its vitest job — but the COMPOSE (Kotlin) decoder
+    # was local-only, so an additive-envelope-key change the Kotlin load path
+    # rejects (exactly the wave-8 doc-level `keyframes` key that once broke
+    # converter conformance) would sail through every existing job and only
+    # surface on-device. SchemaConformanceTest decodes all 31 golden IR docs
+    # through the REAL load path. testDebugUnitTest is JVM-only — NO emulator —
+    # so it runs on ubuntu-latest (which ships the Android SDK gradle finds via
+    # $ANDROID_HOME/$ANDROID_SDK_ROOT). schema/ + fixtures/ are declared
+    # test-task inputs (wave-9 fix), so a golden change can't cache-green here.
+    name: compose conformance (JVM)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: '21' }
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Compose runtime — IR conformance decode (31 goldens)
+        run: cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest --tests '*SchemaConformanceTest*' --no-daemon
+
+  swiftui-conformance:
+    # Native decoder gate for the SwiftUI runtime — same rationale as
+    # compose-conformance. The runtime imports UIKit, so plain `swift test`
+    # fails with "no such module 'UIKit'"; it must build under Mac Catalyst,
+    # hence a macOS runner + xcodebuild (matching the local suite command).
+    # -only-testing scopes to the conformance class so the gate stays lean.
+    name: swiftui conformance (Catalyst)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: SwiftUI runtime — IR conformance decode (31 goldens)
+        run: >-
+          xcodebuild test
+          -scheme StyleConverterRuntime
+          -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'
+          -only-testing:StyleConverterRuntimeTests/ConformanceTests
