@@ -1,0 +1,171 @@
+{
+  "_snapshot": true,
+  "_note": "COMMITTED, HAND-PINNED snapshot of the FIRST real multi-section composed 3-platform WPT corpus (Big Rock #2). Supersedes the era when only the 95-test smoke had ever run. TITAN run dirs (tools/titan/runs/) + WPT corpus (tools/wpt/) are gitignored, so this file is the citable record. Dated by wptRef+devSha, not a timestamp.",
+  "artifact": "composed-3platform-wpt-corpus-v1",
+  "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+  "devSha": "10afb67b50ac6075f35590e41d97d27a1dde35e6",
+  "bucket": "A",
+  "passThreshold": 0.95,
+  "criterion": "raw SSIM >= 0.95 (composed per-test capture vs upstream Chromium browser-ref); each platform diffed against the SAME ref",
+  "sampling": "first 12 bucket-A tests per section (alphabetical, --max-tests 12 — NOT random); 7 sections = mandated top-3 (css-break/css-ui/css-grid) + breadth (css-color/css-backgrounds/css-flexbox/css-transforms)",
+  "totals": {
+    "tests": 84,
+    "web": {
+      "measured": 82,
+      "meanSsim": 0.9155,
+      "passAt95": 40
+    },
+    "ios": {
+      "measured": 82,
+      "meanSsim": 0.8948,
+      "passAt95": 29
+    },
+    "android": {
+      "measured": 75,
+      "meanSsim": 0.8922,
+      "passAt95": 28
+    }
+  },
+  "sections": {
+    "css-backgrounds": {
+      "tests": 12,
+      "noBrowserRef": 0,
+      "web": {
+        "measured": 12,
+        "meanSsim": 0.9192,
+        "passAt95": 7
+      },
+      "ios": {
+        "measured": 12,
+        "meanSsim": 0.9201,
+        "passAt95": 8
+      },
+      "android": {
+        "measured": 12,
+        "meanSsim": 0.9208,
+        "passAt95": 7
+      }
+    },
+    "css-break": {
+      "tests": 12,
+      "noBrowserRef": 0,
+      "web": {
+        "measured": 12,
+        "meanSsim": 0.7778,
+        "passAt95": 3
+      },
+      "ios": {
+        "measured": 12,
+        "meanSsim": 0.7342,
+        "passAt95": 1
+      },
+      "android": {
+        "measured": 12,
+        "meanSsim": 0.7493,
+        "passAt95": 3
+      }
+    },
+    "css-color": {
+      "tests": 12,
+      "noBrowserRef": 0,
+      "web": {
+        "measured": 12,
+        "meanSsim": 0.9251,
+        "passAt95": 4
+      },
+      "ios": {
+        "measured": 12,
+        "meanSsim": 0.9172,
+        "passAt95": 2
+      },
+      "android": {
+        "measured": 12,
+        "meanSsim": 0.9257,
+        "passAt95": 4
+      }
+    },
+    "css-flexbox": {
+      "tests": 12,
+      "noBrowserRef": 0,
+      "web": {
+        "measured": 12,
+        "meanSsim": 0.9027,
+        "passAt95": 3
+      },
+      "ios": {
+        "measured": 12,
+        "meanSsim": 0.8903,
+        "passAt95": 0
+      },
+      "android": {
+        "measured": 12,
+        "meanSsim": 0.9067,
+        "passAt95": 0
+      }
+    },
+    "css-grid": {
+      "tests": 12,
+      "noBrowserRef": 0,
+      "web": {
+        "measured": 12,
+        "meanSsim": 0.9627,
+        "passAt95": 8
+      },
+      "ios": {
+        "measured": 12,
+        "meanSsim": 0.8977,
+        "passAt95": 4
+      },
+      "android": {
+        "measured": 12,
+        "meanSsim": 0.9009,
+        "passAt95": 4
+      }
+    },
+    "css-transforms": {
+      "tests": 12,
+      "noBrowserRef": 0,
+      "web": {
+        "measured": 12,
+        "meanSsim": 0.9826,
+        "passAt95": 10
+      },
+      "ios": {
+        "measured": 12,
+        "meanSsim": 0.9693,
+        "passAt95": 9
+      },
+      "android": {
+        "measured": 5,
+        "meanSsim": 0.9805,
+        "passAt95": 5
+      }
+    },
+    "css-ui": {
+      "tests": 12,
+      "noBrowserRef": 2,
+      "web": {
+        "measured": 10,
+        "meanSsim": 0.9427,
+        "passAt95": 5
+      },
+      "ios": {
+        "measured": 10,
+        "meanSsim": 0.9429,
+        "passAt95": 5
+      },
+      "android": {
+        "measured": 10,
+        "meanSsim": 0.9173,
+        "passAt95": 5
+      }
+    }
+  },
+  "caveats": [
+    "css-transforms Android: only 5/12 measurable — the composed inbox capture REPRODUCIBLY produces no PNG (two independent feeds, 60s + 180s timeouts) for backface-visibility-001, backface-visibility-hidden-001/-002, 3dtransform-and-position-sticky-001/-002, 3d-rendering-context-and-z-ordering-003, rotate-animation-with-will-change-transform-001. Real Android runtime/capture hole, not a flake; its 0.98 Android mean is over the 5 that DID capture.",
+    "css-ui: 2/12 tests (accent-color-checkbox-checked-001, accent-color-radio-checked-001) have NO browser-ref (upstream ref render failed) and are honestly excluded from every platform count.",
+    "css-break is the fidelity floor (web 0.78 / iOS 0.73 / Android 0.75): dragged by background-image-000/001/002 at SSIM 0.16-0.38 — background images do not render in break/fragmentation contexts on any platform.",
+    "test-not-applicable dominates the classifier distribution (68/84) but is a CONSERVATIVE reftest label, NOT missing data — nearly every such test still carries real 3-platform SSIM. This table is computed from raw SSIM, not the classifier bucket."
+  ],
+  "reproduce": "run tools/titan/section-runner.sh --all-platforms --max-tests 12 --run-id titan-corpus-v1 for each of {css-color,css-backgrounds,css-flexbox,css-transforms,css-grid,css-ui,css-break}, then node tools/titan/aggregate-sections.mjs tools/titan/runs/titan-corpus-v1. Requires the gitignored WPT corpus (tools/titan/fetch-wpt.sh) + a booted iOS simulator & Android emulator."
+}
