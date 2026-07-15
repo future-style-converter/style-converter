@@ -205,11 +205,13 @@ the point.
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 CI (`.github/workflows/ci.yml`) runs the converter, web-runtime,
-test-tooling, schema-conformance, and doc-staleness jobs on every push/PR
-to `main`/`dev` (the last derives every headline number in these docs from
-live source-of-truth and fails on drift). The full visual pipeline
-(`./test-all.sh`, plus `BASELINE=1` for regression gating) runs locally —
-it needs an Android emulator and an iOS simulator.
+test-tooling, schema-conformance, doc-staleness, and two native
+IR-conformance jobs (compose on the JVM, swiftui under Mac Catalyst) on
+every push/PR to `main`/`dev` (doc-staleness derives every headline number
+in these docs from live source-of-truth and fails on drift; the native
+gates catch a wire change the Kotlin/Swift decoders would reject). The full
+visual pipeline (`./test-all.sh`, plus `BASELINE=1` for regression gating)
+runs locally — it needs an Android emulator and an iOS simulator.
 
 ## Going deeper
 
