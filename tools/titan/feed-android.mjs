@@ -102,17 +102,21 @@ async function waitForPngs(adbx, expected, timeoutSec) {
 }
 
 /** Pull one PNG to the host and verify it decodes; retry the pull ONCE on the
- *  known adb truncation flake. Returns true iff a valid PNG landed in out. */
-function pullVerified(adbx, name, outDir) {
-  const remote = `${SHOT_DIR}/${name}`;
-  const local = path.join(outDir, name);
+ *  known adb truncation flake. `remoteName` is the on-device filename (device
+ *  sanitiser rule) and `localName` is the host output name (compare-pipeline
+ *  `safe()` rule) — they differ only when a component name carries a dot, in
+ *  which case the pull RENAMES the device file to the compare-glob name.
+ *  Returns true iff a valid PNG landed in out. */
+function pullVerified(adbx, remoteName, localName, outDir) {
+  const remote = `${SHOT_DIR}/${remoteName}`;
+  const local = path.join(outDir, localName);
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       adbx(['pull', remote, local]);
       if (pngIsValid(readFileSync(local))) return true;
-      log(`  pulled ${name} failed PNG parse (attempt ${attempt + 1}) — retrying`);
+      log(`  pulled ${remoteName} failed PNG parse (attempt ${attempt + 1}) — retrying`);
     } catch (e) {
-      log(`  pull ${name} errored (attempt ${attempt + 1}): ${e.message}`);
+      log(`  pull ${remoteName} errored (attempt ${attempt + 1}): ${e.message}`);
     }
   }
   return false;
@@ -205,18 +209,27 @@ async function main() {
     let doc;
     try { doc = JSON.parse(readFileSync(fx, 'utf8')); }
     catch (e) { results.push({ fixture: base, ok: false, error: `bad IR json: ${e.message}` }); continue; }
-    // Composed mode: ONE PNG named for the WPT test key (derived from the
-    // fixture basename, identical to what the app derives from the inbox
-    // filename). Per-component mode: one PNG per flattened component.
-    const expected = opts.composed ? [composedPngName(base)] : expectedPngNames(doc);
+    // Both modes yield a list of { deviceFile, hostFile } captures: deviceFile
+    // is the on-device name the poll waits for; hostFile is the compare-glob
+    // name the pull writes to --out (they differ only for a dotted name).
+    //   • Composed: ONE PNG named for the WPT test key (derived from the
+    //     fixture basename, identical to what the app derives from the inbox
+    //     filename). The Android composed rule keeps the dot too, so device ==
+    //     host here.
+    //   • Per-component: one PNG per flattened component (expectedPngNames
+    //     already returns the decoupled {deviceFile, hostFile} pairs).
+    const expected = opts.composed
+      ? (() => { const n = composedPngName(base); return [{ deviceFile: n, hostFile: n }]; })()
+      : expectedPngNames(doc);
+    const wantDevice = expected.map((e) => e.deviceFile);
     const t0 = Date.now();
     // Push into the inbox under a unique, FIFO-ordered name (index prefix
     // guarantees uniqueness even if two fixtures share a basename).
     adbx(['push', fx, `${INBOX_DIR}/${String(i).padStart(4, '0')}-${base}`]);
-    const { done, present } = await waitForPngs(adbx, expected, opts.timeoutPerFixture);
+    const { done, present } = await waitForPngs(adbx, wantDevice, opts.timeoutPerFixture);
     if (!done) {
       results.push({ fixture: base, ok: false, error: 'timeout',
-        want: expected, got: [...present], elapsedSec: (Date.now() - t0) / 1000 });
+        want: wantDevice, got: [...present], elapsedSec: (Date.now() - t0) / 1000 });
       log(`  ${base}: TIMEOUT (${present.size}/${expected.length} PNGs) — continuing`);
       adbx(['shell', 'rm', '-f', `${SHOT_DIR}/*`]); // clear partials for next fixture
       continue;
@@ -224,7 +237,9 @@ async function main() {
     await new Promise((r) => setTimeout(r, 150)); // settle before pulling
     const pulled = [];
     const bad = [];
-    for (const name of expected) (pullVerified(adbx, name, opts.out) ? pulled : bad).push(name);
+    for (const e of expected) {
+      (pullVerified(adbx, e.deviceFile, e.hostFile, opts.out) ? pulled : bad).push(e.hostFile);
+    }
     const elapsedSec = (Date.now() - t0) / 1000;
     // Clear this fixture's on-device PNGs so the next fixture's poll is clean.
     adbx(['shell', 'rm', '-f', `${SHOT_DIR}/*`]);

@@ -15,8 +15,13 @@
 //
 // Usage:
 //   feed-ios.mjs --fixtures <dir|a.json,b.json> --out <hostScreenshotsDir>
-//                [--timeout-per-fixture <ms>] [--udid <UDID>]
+//                [--timeout-per-fixture <seconds>] [--udid <UDID>]
 //                [--no-build] [--app <StyleConverterTest.app>]
+//
+// --timeout-per-fixture is in SECONDS, matching feed-android.mjs (both feeders
+// take the same unit so run-titan.sh passes the same number to each). It was
+// milliseconds here historically; the seconds unit is friendlier and removes
+// the cross-feeder unit mismatch.
 //
 // --no-build reuses the app already installed on the device (skips xcodebuild
 // and install) but still relaunches it in inbox mode — used for the
@@ -30,6 +35,10 @@ import { join, resolve, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { PNG } from 'pngjs';
+// The ONE canonical compare-pipeline sanitiser (dot KEPT), shared with
+// feed-lib.mjs, inject-wpt-block.mjs, split-combined-ir.mjs and the web
+// capture drivers so every host-side filename is sanitised identically.
+import { safe } from './safe-name.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..', '..');
@@ -38,13 +47,14 @@ const BUNDLE_ID = 'com.styleconverter.test';
 
 // ── Pure helpers (unit-tested in feed-ios.test.mjs) ──────────────────────────
 
-/** Compare-pipeline filename sanitiser. Mirrors `safe()` in
- *  tools/titan/inject-wpt-block.mjs and compare-screenshots.mjs — every
- *  non-`[A-Za-z0-9._-]` char becomes `_`. This is the name the orchestrator
- *  globs for (`*_<safeName>.png`), so it is what we WRITE to --out. */
-export function safeName(name) {
-  return String(name).replace(/[^A-Za-z0-9._-]/g, '_');
-}
+/** Compare-pipeline filename sanitiser — the shared `safe()` (dot KEPT),
+ *  re-exported under this module's historical name. It is what the
+ *  orchestrator globs for (`*_<safeName>.png`), so it is what we WRITE to
+ *  --out. Identical function object as inject-wpt-block.mjs's `safe`. */
+export const safeName = safe;
+// Re-export the canonical helper directly too, so callers/tests can assert
+// `import { safe }` from any pipeline module resolves to one implementation.
+export { safe };
 
 /** On-device filename sanitiser. Mirrors ScreenshotManager.save (Swift):
  *  only `/` and space are replaced with `_`. This predicts the exact name
@@ -204,10 +214,14 @@ export function composedPngName(testKey) {
   return `${safeName(testKey)}.png`;
 }
 
-/** Parse the CLI argv (after `node feed-ios.mjs`). */
+/** Parse the CLI argv (after `node feed-ios.mjs`). `--timeout-per-fixture` is
+ *  in SECONDS (default 30), matching feed-lib.mjs/feed-android.mjs — a
+ *  non-numeric / non-positive value falls back to the default so the
+ *  per-fixture watchdog can never be silently disabled (same guard as
+ *  feed-lib's parseArgs). */
 export function parseArgs(argv) {
   const out = {
-    fixtures: null, out: null, timeoutPerFixture: 15000,
+    fixtures: null, out: null, timeoutPerFixture: 30,
     udid: null, appPath: null, noBuild: false, composed: false, help: false,
   };
   for (let i = 0; i < argv.length; i++) {
@@ -223,6 +237,11 @@ export function parseArgs(argv) {
     // and pull ONE `<safe(testKey)>.png` per test (no per-component stitch).
     else if (a === '--composed') out.composed = true;
     else if (a === '--help' || a === '-h') out.help = true;
+  }
+  // Guard against a non-numeric / non-positive timeout silently disabling the
+  // per-fixture watchdog (mirrors feed-lib.parseArgs). Seconds; default 30.
+  if (!(Number.isFinite(out.timeoutPerFixture) && out.timeoutPerFixture > 0)) {
+    out.timeoutPerFixture = 30;
   }
   return out;
 }
@@ -319,7 +338,7 @@ async function pullVerified(srcPath, destPath) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || !args.fixtures || !args.out) {
-    console.log('usage: feed-ios.mjs --fixtures <dir|a.json,b.json> --out <dir> [--timeout-per-fixture <ms>] [--udid <UDID>] [--no-build] [--composed] [--app <path>]');
+    console.log('usage: feed-ios.mjs --fixtures <dir|a.json,b.json> --out <dir> [--timeout-per-fixture <seconds>] [--udid <UDID>] [--no-build] [--composed] [--app <path>]');
     process.exit(args.help ? 0 : 2);
   }
 
@@ -432,7 +451,8 @@ async function main() {
     await fs.writeFile(tmp, JSON.stringify(doc));
     await fs.rename(tmp, dest);
 
-    const done = await waitForCaptures(shotsDir, expected, args.timeoutPerFixture);
+    // timeoutPerFixture is SECONDS (see parseArgs); waitForCaptures wants ms.
+    const done = await waitForCaptures(shotsDir, expected, args.timeoutPerFixture * 1000);
     if (!done) {
       const elapsed = ((Date.now() - t0) / 1000).toFixed(2);
       console.error(`[feed-ios] ${label}: TIMEOUT after ${elapsed}s (expected ${expected.length} PNG) — recording failure, continuing`);

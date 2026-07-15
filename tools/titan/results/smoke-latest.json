@@ -1,0 +1,29 @@
+{
+  "_snapshot": true,
+  "_note": "COMMITTED, HAND-PINNED snapshot — NOT a live-computed file. The TITAN run dirs (tools/titan/runs/) and the WPT corpus (tools/wpt/) are gitignored, so the composed 3-platform smoke result lived only in commit messages and ephemeral run dirs. This file is the citable record of that result. It is dated by the two SHAs below (wptRef + devSha), not by a timestamp: regenerate/replace it only when a fresh composed smoke run is taken against a new pinning.",
+  "artifact": "composed-3platform-wpt-smoke",
+  "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+  "devSha": "c1e541f659f4917ad14acde4a45ab19f7ebbc57a",
+  "bucket": "A",
+  "gatedTests": 33,
+  "passThreshold": 0.95,
+  "criterion": "raw SSIM >= 0.95 (composed per-test capture vs upstream Chromium browser-ref)",
+  "perPlatform": {
+    "web": {
+      "passAtThreshold": 16,
+      "outOf": 33,
+      "meanSsim": 0.935
+    },
+    "ios": {
+      "passAtThreshold": 13,
+      "outOf": 33,
+      "meanSsim": 0.916
+    },
+    "android": {
+      "passAtThreshold": 14,
+      "outOf": 33,
+      "meanSsim": 0.918
+    }
+  },
+  "reproduce": "WPT_REF=9b5435e55e0b54a6cd09c1c563861eb3c999cef1 tools/titan/run-titan.sh --all-platforms   (requires the gitignored WPT corpus via tools/titan/fetch-wpt.sh, a booted iOS simulator + Android emulator; writes a v4 titan-manifest.json whose wpt.results carry the per-platform browser-ref SSIM)"
+}

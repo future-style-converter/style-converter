@@ -15,23 +15,34 @@ the full history lives in git history.
   Config/Extractor/Applier triplet at the same canonical path on all three.
 - **Visual harness** — `./test-all.sh` renders any fixture on all three
   platforms and compares captures with SSIM;
-  `BASELINE=1` gates against the 327 committed baseline PNGs in
+  `BASELINE=1` gates against the 363 committed baseline PNGs in
   `tools/visual/baseline/`.
-- **Wire contract** — the IR JSON is machine-checked against
-  `schema/ir-v1.schema.json` + the normative spec in
-  [`schema/spec/`](../schema/spec/); 12 golden fixtures are decoded by
-  conformance tests on all four codebases (`node schema/conformance/run.mjs`).
+- **Wire contract** — the converter emits IR v2 by default (the flat-list
+  slot/placement wire); the JSON is machine-checked against
+  `schema/ir-v2.schema.json` (`schema/ir-v1.schema.json` is the deprecated
+  legacy contract for the `--emit-ir v1` compat wire) + the normative spec
+  in [`schema/spec/`](../schema/spec/); 31 golden fixtures (12 v1 + 19 v2)
+  are decoded by conformance tests on all four codebases
+  (`node schema/conformance/run.mjs`).
 
-## Coverage — two numbers, both true
+## Coverage — three numbers, all true
 
 | claim | number | source of truth |
 |---|---|---|
-| Registration coverage (triplet exists + registered) | **550 / 550 per platform** (Android · iOS · Web) | `node tools/visual/coverage-audit.mjs` → `tools/visual/COVERAGE.md` |
-| Verified rendering coverage (SSIM ≥ 0.95, every variant, every platform pair) | **91 / 550 (~17%)** | converged audit campaign, round 40 (below) |
+| Registration coverage — triplet exists + claims the IR type (a string-presence facade; not native rendering) | **550 / 550 per platform** (Android 550 / 550 · iOS 550 / 550 · Web 550 / 550) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
+| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 18 / 550 · iOS 73 / 550 · Web 508 / 550** | `coverage-audit.mjs` (`real:` line) |
+| Verified rendering coverage — SSIM ≥ 0.95, every variant, every platform pair | **91 / 550 (~17%)** | converged audit campaign, round 40 (below) |
 
-"Registered" means the triplet exists and claims the IR type; some
-appliers are intentional no-op + TODO where no mobile analogue exists
-(speech/, regions/, print/, …).
+"Registered" is only a string-presence facade — a triplet exists and
+claims the IR type; it does NOT mean a dedicated applier renders the
+property natively. The stricter real-applier floor counts a dedicated
+`<Name>Applier.<ext>` file per property; it under-counts grouped appliers
+(one file — e.g. Compose `LayoutApplier.kt`, iOS `FlexboxApplier.swift`,
+web `ScrollMarginApplier.ts` — renders many properties but its basename
+matches at most one IR name, so the raw dedicated-applier file counts
+Android 59 · iOS 115 · Web 522 sit above the per-property floor). Some
+registered appliers are intentional no-op + TODO where no mobile analogue
+exists (speech/, regions/, print/, …).
 
 ### The verified-coverage headline (audit campaign, converged round 40)
 
@@ -93,17 +104,20 @@ pipeline), and the full `./test-all.sh` visual pipeline.
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 101 |
+| converter (Kotlin) | `./gradlew :converter:test` | 135 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 959 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 761 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 232 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 473 |
-| IR conformance | `node schema/conformance/run.mjs --emit` | 12 goldens × 4 codebases |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 770 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 248 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 497 |
+| IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap
 
-Static code **writers** (Compose / SwiftUI / Tailwind source from IR);
-the **flat-IR v2** freeze with the slot/placement children contract
-(`schema/spec/03-children.md`, `05-versioning.md`); repairing the known
-v1 wire defects at that freeze; IR semantic model (roles/labels) to
-unblock the accessibility criteria above.
+Static code **writers** (Compose / SwiftUI / Tailwind source from IR); a
+future leaf-strictness revision closing the still-permissive per-property
+`data` leaves; retiring the deprecated `--emit-ir v1` path after its
+one-release deprecation window; IR semantic model (roles/labels) to
+unblock the accessibility criteria above. The **flat-IR v2** wire already
+shipped (PR #30) — it is the current default, with the slot/placement
+children contract frozen in `schema/spec/03-children.md` +
+`05-versioning.md` and the known v1 wire defects repaired at that freeze.

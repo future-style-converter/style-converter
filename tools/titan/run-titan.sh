@@ -322,10 +322,11 @@ case "$PLATFORM_SCOPE" in
       node "$TITAN_DIR/feed-android.mjs" --fixtures "$PERTEST_DIR" --composed \
         --out "$PROJECT_ROOT/apps/android-harness/screenshots" --timeout-per-fixture 180 \
         >>"$CAPTURE_LOG" 2>&1 || warn "feed-android exited non-zero — Android column may be partial"
-      # iOS: timeout is MILLISECONDS for this feeder (180000 = 180s).
+      # iOS: --timeout-per-fixture is SECONDS, same unit as feed-android above
+      # (both feeders were unified on seconds; 180 = 180s).
       log "feeding iOS inbox (feed-ios.mjs, composed)…"
       node "$TITAN_DIR/feed-ios.mjs" --fixtures "$PERTEST_DIR" --composed \
-        --out "$PROJECT_ROOT/apps/ios-harness/screenshots" --timeout-per-fixture 180000 \
+        --out "$PROJECT_ROOT/apps/ios-harness/screenshots" --timeout-per-fixture 180 \
         >>"$CAPTURE_LOG" 2>&1 || warn "feed-ios exited non-zero — iOS column may be partial"
     fi
     ;;

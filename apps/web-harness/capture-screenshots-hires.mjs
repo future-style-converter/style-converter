@@ -33,6 +33,11 @@ import puppeteer from 'puppeteer';
 import { mkdirSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// The ONE canonical compare-pipeline sanitiser (dot KEPT), shared across the
+// TITAN feeders / inject / web capture so probe PNG names sanitise identically
+// wherever they are produced or consumed. Dependency-free, so the cross-
+// workspace import is safe.
+import { safe } from '../../tools/titan/safe-name.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -147,10 +152,10 @@ try {
       await page.evaluate(() => document.fonts?.ready ?? Promise.resolve());
       const handle = await page.$(`[data-testid="${name}"]`);
       if (!handle) { skipped++; continue; }
-      const safe = name.replace(/[^A-Za-z0-9._-]/g, '_');
+      const safeName = safe(name);
       // The `web__` prefix matches the iOS__/Android__ shape compute-text-metrics
       // scans for in tools/visual/probes/.
-      const outPath = resolve(outDir, `web__${safe}.png`);
+      const outPath = resolve(outDir, `web__${safeName}.png`);
       await handle.screenshot({ path: outPath, type: 'png' });
       captured++;
     } catch (e) {

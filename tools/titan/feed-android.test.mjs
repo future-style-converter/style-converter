@@ -15,7 +15,7 @@ import { promises as fs } from 'node:fs';
 import { PNG } from 'pngjs';
 
 import {
-  parseArgs, safeName, expectedPngNames, composedPngName,
+  parseArgs, safe, deviceSafeName, expectedPngNames, composedPngName,
   parentCreatesContext, composeRoots, flattenComponents, pngIsValid,
 } from './feed-lib.mjs';
 
@@ -66,21 +66,43 @@ test('parseArgs rejects a non-positive / NaN timeout (watchdog must stay armed)'
   assert.equal(parseArgs(['--timeout-per-fixture', '-5']).timeoutPerFixture, 30);
 });
 
-// ── safeName ─────────────────────────────────────────────────────────────────
+// ── sanitisers: device rule (drop dot) vs compare rule (keep dot) ─────────────
 
-test('safeName matches the Kotlin char class [^a-zA-Z0-9_-]', () => {
-  assert.equal(safeName('attachment-local__0'), 'attachment-local__0'); // - and _ kept
-  assert.equal(safeName('a b/c.d:e'), 'a_b_c_d_e');
+test('deviceSafeName matches the Kotlin per-component char class [^a-zA-Z0-9_-] (dot DROPPED)', () => {
+  assert.equal(deviceSafeName('attachment-local__0'), 'attachment-local__0'); // - and _ kept
+  // A dot becomes `_` on device (ScreenshotManager.saveScreenshot rule).
+  assert.equal(deviceSafeName('a b/c.d:e'), 'a_b_c_d_e');
+});
+
+test('safe (compare rule) keeps the dot — diverges from deviceSafeName on a dotted name', () => {
+  // The shared compare-pipeline sanitiser keeps `.`; only the dot differs.
+  assert.equal(safe('a b/c.d:e'), 'a_b_c.d_e');
+  assert.notEqual(safe('x.y'), deviceSafeName('x.y')); // 'x.y' vs 'x_y'
 });
 
 // ── expectedPngNames: flat v2 (no slots), like css-color output ───────────────
+// Returns { index, name, deviceFile (poll), hostFile (compare-glob output) }.
+// For a dot-free name deviceFile === hostFile.
 
-test('flat v2 document → one PNG per component in order', () => {
+test('flat v2 document → one capture per component in order (device == host, no dots)', () => {
   const doc = { irVersion: 2, components: [
     { id: 'x-1', name: 'bg__0', properties: [] },
     { id: 'x-2', name: 'bg__1', properties: [] },
   ] };
-  assert.deepEqual(expectedPngNames(doc), ['000_bg__0.png', '001_bg__1.png']);
+  assert.deepEqual(expectedPngNames(doc).map((e) => e.deviceFile), ['000_bg__0.png', '001_bg__1.png']);
+  assert.deepEqual(expectedPngNames(doc).map((e) => e.hostFile), ['000_bg__0.png', '001_bg__1.png']);
+});
+
+test('expectedPngNames decouples device (drop-dot) from host (keep-dot) for a dotted name', () => {
+  // A component name with a "." is the exact footgun: the device WROTE the
+  // drop-dot name (poll target) but inject globs the keep-dot name — so the
+  // feeder must pull deviceFile and rename to hostFile.
+  const doc = { irVersion: 2, components: [{ id: 'x', name: 'a.b', properties: [] }] };
+  const [e] = expectedPngNames(doc);
+  assert.equal(e.deviceFile, '000_a_b.png');   // device rule → dot dropped
+  assert.equal(e.hostFile,   '000_a.b.png');   // compare rule → dot kept
+  // hostFile must end exactly with the compare glob suffix inject looks for.
+  assert.ok(e.hostFile.endsWith(`_${safe('a.b')}.png`));
 });
 
 // ── expectedPngNames: v2 slots with a clipping parent (suppression) ───────────
@@ -95,7 +117,7 @@ test('slot-composed tree with overflow:hidden parent suppresses child captures',
     { id: 'c-2', name: 'clip__0__0', properties: [], slot: { parent: 'r-1' } },
     { id: 'g-3', name: 'clip__0__0__0', properties: [], slot: { parent: 'c-2' } },
   ] };
-  assert.deepEqual(expectedPngNames(doc), ['000_clip__0.png']);
+  assert.deepEqual(expectedPngNames(doc).map((e) => e.deviceFile), ['000_clip__0.png']);
 });
 
 test('slot-composed tree WITHOUT a paint context keeps parent + children', () => {
@@ -104,7 +126,7 @@ test('slot-composed tree WITHOUT a paint context keeps parent + children', () =>
     { id: 'c-2', name: 'box__0__0', properties: [], slot: { parent: 'r-1' } },
   ] };
   // Pre-order: parent (000) then child (001).
-  assert.deepEqual(expectedPngNames(doc), ['000_box__0.png', '001_box__0__0.png']);
+  assert.deepEqual(expectedPngNames(doc).map((e) => e.hostFile), ['000_box__0.png', '001_box__0__0.png']);
 });
 
 test('v1 nested document (children arrays, no slots) flattens pre-order', () => {
@@ -112,7 +134,7 @@ test('v1 nested document (children arrays, no slots) flattens pre-order', () => 
     { id: 'r', name: 'root', properties: [], children: [
       { id: 'k', name: 'kid', properties: [] } ] },
   ] };
-  assert.deepEqual(expectedPngNames(doc), ['000_root.png', '001_kid.png']);
+  assert.deepEqual(expectedPngNames(doc).map((e) => e.hostFile), ['000_root.png', '001_kid.png']);
 });
 
 // ── parentCreatesContext ──────────────────────────────────────────────────────

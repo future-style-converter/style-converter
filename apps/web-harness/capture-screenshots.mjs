@@ -25,6 +25,12 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { buildCaptureUrl } from './capture-url.mjs';
+// The ONE canonical compare-pipeline sanitiser (dot KEPT), shared with the
+// TITAN feeders and inject-wpt-block.mjs so the composed/per-component PNG
+// names this driver writes are globbed back identically downstream. The
+// module is dependency-free, so importing it across the workspace boundary is
+// safe (web-harness does not vendor pngjs).
+import { safe } from '../../tools/titan/safe-name.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -303,8 +309,8 @@ try {
       }
       // Composed filename is the sanitised test key + .png (no index prefix)
       // — exactly what inject-wpt-block.mjs's composed path globs for.
-      const safe = entry.name.replace(/[^A-Za-z0-9._-]/g, '_');
-      await handles[i].screenshot({ path: resolve(outDir, `${safe}.png`), type: 'png' });
+      const safeName = safe(entry.name);
+      await handles[i].screenshot({ path: resolve(outDir, `${safeName}.png`), type: 'png' });
       captured += 1;
     }
     if (zeroDim > 0) console.warn(`  ⚠ skipped ${zeroDim} zero-dim composed canvases`);
@@ -444,14 +450,14 @@ try {
       zeroDim += 1;
       continue;
     }
-    const safe = entry.name.replace(/[^A-Za-z0-9._-]/g, '_');
+    const safeName = safe(entry.name);
     // Composed mode: the canvas name IS the WPT test key, and the diff side
     // (inject-wpt-block.mjs composed path) looks the file up by exactly
     // `<safe(testKey)>.png` — so we DROP the `<NNN>_` index prefix that the
     // per-component path uses (there it disambiguates same-named components;
     // here each name is a unique test key). Legacy per-component runs keep
     // the padded index prefix byte-for-byte.
-    const filename = wptComposed ? `${safe}.png` : `${String(entry.index).padStart(3, '0')}_${safe}.png`;
+    const filename = wptComposed ? `${safeName}.png` : `${String(entry.index).padStart(3, '0')}_${safeName}.png`;
     // Clamp against the actual screenshot bounds — layout can round a
     // canvas's bottom edge one pixel past the measured pageHeight (e.g. when
     // aspect-ratio produces a fractional height), which makes sharp's

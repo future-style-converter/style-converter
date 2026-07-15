@@ -57,6 +57,11 @@ import {
   computeEdgeSsim,
   computeLabDeltaE,
 } from '../visual/compare-screenshots-metrics.mjs';
+// The ONE canonical compare-pipeline sanitiser (dot KEPT). This module is the
+// consumer side of the pipeline — its diff globs MUST use the exact same rule
+// the feeders/web capture used to WRITE the filenames, or a key with a "."
+// silently drops a platform column. Sharing the helper guarantees agreement.
+import { safe } from './safe-name.mjs';
 
 const pixelmatch = pixelmatchDefault.default ?? pixelmatchDefault;
 
@@ -127,11 +132,11 @@ function rowIndex(rows) {
   return ix;
 }
 
-/** Sanitisation matches the iOS / Android / web capture loop's filename
- *  rule. Each platform replaces non-`[A-Za-z0-9._-]` with `_`. */
-function safe(name) {
-  return name.replace(/[^A-Za-z0-9._-]/g, '_');
-}
+// `safe()` (the compare-pipeline sanitiser) is imported from
+// ./safe-name.mjs above — the single source of truth shared with the feeders
+// and web capture drivers. It is re-exported at the bottom of this file so
+// existing `import { safe } from './inject-wpt-block.mjs'` call sites and
+// tests keep resolving to the one implementation.
 
 // ── PNG helpers (mirror compare-screenshots.mjs's padToCanvas + diffPair) ───
 
@@ -283,12 +288,28 @@ async function diffWebVsRef(webPath, refPath) {
 
 /** Apply the WPT fuzzy tolerance (Section 5.3): if the test carries a
  *  <meta name="fuzzy">, check whether the browser-ref pair fits inside it.
- *  Informational only — does not change the classifier label. */
+ *  Returns true/false when a fuzzy range exists, null when the test declared
+ *  none. The fuzzy shape is `{ maxDifference:{min,max}, totalPixels:{min,max} }`
+ *  (extract-fixture.mjs). Does NOT change the classifier label — it feeds the
+ *  wptPass verdict below. */
 function checkFuzzyMatch(metrics, fuzzy) {
   if (!fuzzy) return null;
   const px = metrics.pixelMismatchedCount ?? Infinity;
   const maxDelta = metrics.labDeltaE?.max ?? Infinity;
   return (px <= fuzzy.totalPixels.max && maxDelta <= fuzzy.maxDifference.max);
+}
+
+/** The WPT-native PASS verdict for a browser-ref pair. A pair PASSES when the
+ *  raw SSIM clears the 0.95 bar OR the diff fits inside the test's declared
+ *  <meta fuzzy> tolerance — WPT's OWN reftest criterion (a pixel-exact/within-
+ *  fuzz match is a pass upstream). `fuzzyMatch` is checkFuzzyMatch's result
+ *  (true | false | null). This is recorded ALONGSIDE the raw `ssim` (which is
+ *  never overwritten), so a future pass-rate computation can use the honest
+ *  WPT bar without inflating the SSIM number itself. Pure + exported for
+ *  unit tests. */
+function computeWptPass(ssim, fuzzyMatch) {
+  const ssimPass = typeof ssim === 'number' && ssim >= 0.95;
+  return ssimPass || fuzzyMatch === true;
 }
 
 /** Glob ONE platform's capture dir for a test's per-component PNGs (all
@@ -315,6 +336,9 @@ async function diffPlatformVsRef({ platformDir, matchingKeys, refPng, fuzzy, cac
     const composed = await stitchPngsVertically(matched, join(platformDir, '_stitched'), cacheKey);
     const diff = await diffWebVsRef(composed, refPng);   // metric fn is platform-agnostic (PNG pair in, metrics out)
     diff.wptFuzzyMatch = checkFuzzyMatch(diff, fuzzy);
+    // WPT-native pass: raw SSIM ≥ 0.95 OR within the declared fuzzy tolerance.
+    // Raw `diff.ssim` is left untouched so downstream can honour both bars.
+    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch);
     diff.stitchedComponents = matched.length;
     return diff;
   } catch (err) {
@@ -352,7 +376,9 @@ async function diffComposedVsRef({ platformDir, testKey, refPng, fuzzy }) {
   if (!_existsSync(composedPath)) return null;   // no composed capture → caller stitches
   try {
     const diff = await diffWebVsRef(composedPath, refPng);  // one composite PNG vs the ref
-    diff.wptFuzzyMatch = checkFuzzyMatch(diff, fuzzy);       // Section 5.3 fuzzy tolerance (informational)
+    diff.wptFuzzyMatch = checkFuzzyMatch(diff, fuzzy);       // Section 5.3 fuzzy tolerance
+    // WPT-native pass: raw SSIM ≥ 0.95 OR within the declared fuzzy tolerance.
+    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch);
     diff.composed = true;                                    // provenance marker
     return diff;
   } catch (err) {
@@ -698,4 +724,7 @@ if (IS_CLI) {
 // Pure helpers exported for unit tests (tools/titan/inject-wpt-block.test.mjs).
 // The orchestrator side of this script remains CLI-driven via the IS_CLI gate
 // above, so importing doesn't trigger a usage-error exit.
-export { stitchPngsVertically, diffWebVsRef, diffPlatformVsRef, diffComposedVsRef, safe };
+export {
+  stitchPngsVertically, diffWebVsRef, diffPlatformVsRef, diffComposedVsRef,
+  safe, checkFuzzyMatch, computeWptPass,
+};
