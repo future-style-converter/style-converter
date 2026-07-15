@@ -100,6 +100,25 @@ Still-live harnesses: `tools/visual/smoke.sh` (unit tests + Tier 5 +
 Tier 11 + BASELINE=1 + baseline classifier), `tools/titan/` (WPT-corpus
 pipeline), and the full `./test-all.sh` visual pipeline.
 
+### WPT fidelity — composed 3-platform corpus
+
+The `tools/titan/` pipeline diffs each WPT test rendered on all three
+runtimes against the **same** upstream Chromium browser-ref (composed
+per-test capture, SSIM). Two committed, hand-pinned snapshots (the run
+dirs + WPT corpus are gitignored):
+
+- `tools/titan/results/smoke-latest.json` — 33-test gated smoke: web 0.935
+  (16/33 ≥ 0.95), iOS 0.916 (13/33), Android 0.918 (14/33).
+- `tools/titan/results/corpus-v1.json` — first real **multi-section**
+  corpus (7 sections × 12 bucket-A tests = 84, via `section-runner.sh
+  --all-platforms`): web 0.915 (40/82 ≥ 0.95), iOS 0.895 (29/82), Android
+  0.892 (28/75). Honest holes it surfaced: `css-break` background-images
+  don't render in fragmentation contexts (SSIM 0.16–0.38), `css-flexbox`
+  mobile hits 0/12 ≥ 0.95, and the Android composed inbox reproducibly
+  can't capture `backface-visibility` / `3dtransform+position-sticky` /
+  `will-change-transform` (5/12 on `css-transforms`). Full 10,944-test
+  bucket-A remains the long-horizon target; this is a stratified sample.
+
 ## Test suites
 
 | suite | command | tests |
