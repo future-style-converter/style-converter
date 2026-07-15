@@ -103,6 +103,11 @@ const browser = await puppeteer.launch({
   headless: 'new',
   protocolTimeout: 300_000,
   args: [
+    // Force CPU rasterization — see capture-screenshots.mjs for the full
+    // rationale. Under headless:'new' on this toolchain the GPU raster path
+    // deadlocks Page.captureScreenshot on any page with real paint; this flag
+    // routes raster through CPU (deterministic, ~13ms) and unblocks capture.
+    '--disable-gpu',
     '--disable-background-timer-throttling',
     '--disable-renderer-backgrounding',
     '--disable-backgrounding-occluded-windows',
