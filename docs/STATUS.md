@@ -114,10 +114,13 @@ dirs + WPT corpus are gitignored):
   --all-platforms`): web 0.915 (40/82 ≥ 0.95), iOS 0.895 (29/82), Android
   0.892 (28/75). Honest holes it surfaced: `css-break` background-images
   don't render in fragmentation contexts (SSIM 0.16–0.38), `css-flexbox`
-  mobile hits 0/12 ≥ 0.95, and the Android composed inbox reproducibly
-  can't capture `backface-visibility` / `3dtransform+position-sticky` /
-  `will-change-transform` (5/12 on `css-transforms`). Full 10,944-test
-  bucket-A remains the long-horizon target; this is a stratified sample.
+  mobile hits 0/12 ≥ 0.95, and one `css-transforms` fixture
+  (`3d-rendering-context-and-z-ordering-003`) wedges the Android composed
+  capture. (That last one made `css-transforms` Android read 5/12 in this
+  snapshot: the wedge cascade-timed-out the 6 fixtures queued behind it —
+  since fixed by restart-on-timeout recovery in the native feeders, so a
+  re-feed now yields 11/12.) Full 10,944-test bucket-A remains the
+  long-horizon target; this is a stratified sample.
 
 ## Test suites
 
@@ -127,7 +130,7 @@ dirs + WPT corpus are gitignored):
 | web runtime (vitest) | `npm -w runtimes/web run test` | 959 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 770 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 248 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 504 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 506 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

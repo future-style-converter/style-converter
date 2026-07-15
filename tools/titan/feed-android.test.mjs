@@ -189,3 +189,17 @@ test('feed-android.mjs is wired to the shared lib and device contract', async ()
   assert.match(src, /files\/inbox/, 'must push to the on-device inbox path');
   assert.match(src, /no Android device\/emulator attached/, 'must fail loudly with no device');
 });
+
+test('a wedged capture restarts the app so it cannot cascade-timeout the batch', async () => {
+  // A fixture whose on-device composed capture WEDGES (e.g. css-transforms
+  // z-ordering-003) hangs the inbox poll loop; without a restart every fixture
+  // behind it cascade-timeouts on the still-hung app (observed: 5/12 → the
+  // recovery makes it 11/12, only the one genuinely-wedging fixture failing).
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  assert.match(src, /async function resetAndLaunch\(/, 'reset+launch helper dropped');
+  // Called at startup AND in the timeout branch — at least two call-sites.
+  const calls = src.match(/await resetAndLaunch\(adbx, opts\)/g) ?? [];
+  assert.ok(calls.length >= 2, `resetAndLaunch must run at startup AND on timeout, found ${calls.length}`);
+  assert.match(src, /restarting app to clear the wedge/, 'timeout-branch restart log/behaviour dropped');
+  assert.match(src, /i < fixtures\.length - 1/, 'last-fixture guard on the restart dropped');
+});

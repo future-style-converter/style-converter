@@ -13,6 +13,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { promises as fs } from 'node:fs';
 import {
   safeName, deviceSafeName, pad3, parseArgs, pickBootedUdid,
   parentCreatesContext, composeComponents, flattenComponents, expectedCaptures,
@@ -205,4 +206,17 @@ test('composedPngName is `<safe(testKey)>.png` — the diffComposedVsRef glob', 
 test('parseArgs reads the --composed flag (default false)', () => {
   assert.equal(parseArgs(['--fixtures', 'x', '--out', 'y']).composed, false);
   assert.equal(parseArgs(['--fixtures', 'x', '--out', 'y', '--composed']).composed, true);
+});
+
+test('a wedged capture restarts the app so it cannot cascade-timeout the batch', async () => {
+  // Symmetric with feed-android: a fixture whose composed capture WEDGES hangs
+  // the inbox poll loop, so without a terminate+relaunch every fixture behind
+  // it cascade-timeouts on the still-hung app.
+  const src = await fs.readFile(new URL('./feed-ios.mjs', import.meta.url), 'utf8');
+  // The restart log + the relaunch must both live in the recovery block (the
+  // relaunch follows the restart message — pinning the ordering makes this
+  // recovery-specific, not a match against the identical startup launch above).
+  assert.match(src, /restarting app to clear the wedge[\s\S]{0,400}'simctl', 'launch'/,
+    'timeout recovery must relaunch the app after the restart log');
+  assert.match(src, /n < fixtures\.length - 1/, 'last-fixture guard on the restart dropped');
 });

@@ -455,8 +455,26 @@ async function main() {
     const done = await waitForCaptures(shotsDir, expected, args.timeoutPerFixture * 1000);
     if (!done) {
       const elapsed = ((Date.now() - t0) / 1000).toFixed(2);
-      console.error(`[feed-ios] ${label}: TIMEOUT after ${elapsed}s (expected ${expected.length} PNG) — recording failure, continuing`);
+      console.error(`[feed-ios] ${label}: TIMEOUT after ${elapsed}s (expected ${expected.length} PNG) — recording failure`);
       results.push({ fixture: label, ok: false, reason: 'timeout', pulled: 0, expected: expected.length });
+      // A timeout means the on-device capture WEDGED — the app's inbox loop is
+      // now stuck on this fixture and won't process the next one. Terminate +
+      // relaunch (draining the stuck inbox file + partials first) so the wedge
+      // doesn't cascade-timeout the whole tail of the batch. Mirrors
+      // feed-android's resetAndLaunch recovery. Skip on the last fixture —
+      // nothing left to protect.
+      if (n < fixtures.length - 1) {
+        console.error('[feed-ios] restarting app to clear the wedge');
+        try {
+          for (const f of await fs.readdir(inboxDir)) {
+            if (f.endsWith('.json')) await fs.rm(join(inboxDir, f), { force: true });
+          }
+        } catch { /* inbox may be empty */ }
+        await clearPngs(shotsDir);
+        run('xcrun', ['simctl', 'terminate', udid, BUNDLE_ID]);
+        const relaunch = run('xcrun', ['simctl', 'launch', udid, BUNDLE_ID], { env: launchEnv });
+        if (relaunch.status !== 0) console.error(`[feed-ios] relaunch failed: ${relaunch.stderr}`);
+      }
       continue;
     }
 
