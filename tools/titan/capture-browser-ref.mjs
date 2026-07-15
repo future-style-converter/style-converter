@@ -176,6 +176,13 @@ export async function captureRefs(testRels, opts = {}) {
     // Match capture-screenshots.mjs's flag set so any timer-throttling
     // weirdness behaves identically across the two capture paths.
     args: [
+      // Force CPU rasterization — see capture-screenshots.mjs. Two reasons
+      // it matters HERE too: (1) rendering a real WPT reference page would
+      // otherwise deadlock Page.captureScreenshot the same way the platform
+      // capture did; (2) the browser-ref and the platform-web capture MUST
+      // use the same raster backend or a GPU-vs-CPU sub-pixel delta would
+      // depress every web-ref SSIM. Both CPU → apples-to-apples.
+      '--disable-gpu',
       '--disable-background-timer-throttling',
       '--disable-renderer-backgrounding',
       '--disable-backgrounding-occluded-windows',

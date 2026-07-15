@@ -424,7 +424,21 @@ log "vite ready on $PORT"
 # don't pass WPT_MODE, so the placeholder text continues to render the
 # way the visual-test baselines expect.
 CAPTURE_LOG="$WORK_DIR/capture.log"
-( cd "$WEB_ROOT" && WPT_MODE=1 node capture-screenshots.mjs --url "http://localhost:$PORT" --out "$WEB_SHOTS_DIR" ) \
+# WPT_COMPOSED=1 renders each test's components COMPOSED on ONE
+# ref-matching canvas (one <safe(testKey)>.png per test) instead of the
+# per-component + inflated-stitch method — the honest per-page comparison
+# (matching run-titan.sh --smoke). inject prefers the composed PNG.
+#
+# Run the CANONICAL in-place driver (apps/web-harness/), NOT the rsync'd copy
+# in $WEB_ROOT: the driver only talks to vite over --url (HTTP) and writes to
+# the absolute --out, so its cwd is irrelevant — but its relative imports
+# (`./capture-url.mjs`, `../../tools/titan/safe-name.mjs`) only resolve from
+# the original apps/web-harness/ depth. The copy sits two dirs deeper
+# ($WORK_DIR/web/), where `../../tools/titan/` points at the nonexistent
+# sections/tools/titan/ and the whole capture crashes at import time. The
+# $WEB_ROOT copy is only needed for the vite SERVER (it serves the per-section
+# public/ir-components.json), never for the capture driver.
+( cd "$PROJECT_ROOT" && WPT_MODE=1 WPT_COMPOSED=1 node apps/web-harness/capture-screenshots.mjs --url "http://localhost:$PORT" --out "$WEB_SHOTS_DIR" ) \
   >"$CAPTURE_LOG" 2>&1 || warn "capture-screenshots exited non-zero — see $CAPTURE_LOG"
 WEB_COUNT=$(find "$WEB_SHOTS_DIR" -maxdepth 1 -name '*.png' -type f 2>/dev/null | wc -l | tr -d '[:space:]')
 log "captured $WEB_COUNT web screenshots"
@@ -441,7 +455,62 @@ unset VITE_PID
 trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT
 set -m
 
-# ── Step 6: compare (web-only — empty iOS/Android dirs) ──────────────────────
+# ── Step 5b: native composed capture (--all-platforms) ──────────────────────
+#
+# The natives are SINGLETONS: parallel section-runners capture web
+# concurrently (isolated vite ports), but the ONE emulator + ONE simulator
+# must be fed SERIALLY. A global device lock (mkdir-atomic + stale-heal, like
+# the per-section lock) gates only this feed; the web capture above already
+# ran in parallel. The per-section combined IR is split into per-test docs
+# the inbox feeders stream in composed mode → one <safe(testKey)>.png per
+# test in the per-section native dirs, which inject reads via
+# diffComposedVsRef. For --web-only these dirs are created but left EMPTY, so
+# Step 6/7 (which always read them) behave exactly as the old EMPTY_DIR path.
+IOS_SHOTS_DIR="$WORK_DIR/ios-screenshots"
+ANDROID_SHOTS_DIR="$WORK_DIR/android-screenshots"
+rm -rf "$IOS_SHOTS_DIR" "$ANDROID_SHOTS_DIR"
+mkdir -p "$IOS_SHOTS_DIR" "$ANDROID_SHOTS_DIR"
+if [[ "$PLATFORM_SCOPE" == "all" ]]; then
+  step "Step 5b: native composed capture (device-serialized)"
+  PERTEST_DIR="$WORK_DIR/per-test-ir"
+  # Split THIS section's combined IR (from Step 4) into per-test docs.
+  node "$TITAN_DIR/split-combined-ir.mjs" --in "$GRADLE_OUT_DIR/tmpOutput.json" --out "$PERTEST_DIR" \
+    >>"$CAPTURE_LOG" 2>&1 || warn "split-combined-ir failed — natives will be absent"
+  # Global device lock — serialize native feeding across parallel sections.
+  DEV_LOCK="/tmp/titan-native-device.lock"
+  _dev_acquire() {
+    local waited=0
+    while ! mkdir "$DEV_LOCK" 2>/dev/null; do
+      local pid; pid=$(cat "$DEV_LOCK/pid" 2>/dev/null || echo "")
+      if [[ "$pid" =~ ^[0-9]+$ ]] && ! kill -0 "$pid" 2>/dev/null; then
+        rm -rf "$DEV_LOCK"; continue    # stale holder died — reclaim
+      fi
+      sleep 5; waited=$((waited+5))
+      if [[ $waited -ge 7200 ]]; then warn "device lock wait > 2h — skipping natives for $SECTION"; return 1; fi
+    done
+    echo "$$" > "$DEV_LOCK/pid"; return 0
+  }
+  _dev_release() { rm -rf "$DEV_LOCK" 2>/dev/null || true; }
+  if [[ -d "$PERTEST_DIR" ]] && _dev_acquire; then
+    # Hold BOTH locks during the feed; release the device lock the instant
+    # feeding ends so the next section can start (web work continues without it).
+    trap '_cleanup_vite 2>/dev/null; _dev_release; rm -rf "$LOCK" 2>/dev/null || true' EXIT
+    log "device lock acquired — feeding natives (composed)"
+    # Both feeders take --timeout-per-fixture in SECONDS (unified in the
+    # honesty quick-wins); --composed = one <safe(testKey)>.png per test.
+    node "$TITAN_DIR/feed-android.mjs" --fixtures "$PERTEST_DIR" --composed \
+      --out "$ANDROID_SHOTS_DIR" --timeout-per-fixture 180 >>"$CAPTURE_LOG" 2>&1 \
+      || warn "feed-android exited non-zero — Android column may be partial"
+    node "$TITAN_DIR/feed-ios.mjs" --fixtures "$PERTEST_DIR" --composed \
+      --out "$IOS_SHOTS_DIR" --timeout-per-fixture 180 >>"$CAPTURE_LOG" 2>&1 \
+      || warn "feed-ios exited non-zero — iOS column may be partial"
+    _dev_release
+    trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT   # drop device-lock from the trap
+    log "native composed: iOS $(find "$IOS_SHOTS_DIR" -maxdepth 1 -name '*.png' | wc -l | tr -d ' '), Android $(find "$ANDROID_SHOTS_DIR" -maxdepth 1 -name '*.png' | wc -l | tr -d ' ')"
+  fi
+fi
+
+# ── Step 6: compare (web composed; natives from Step 5b or empty) ────────────
 #
 # compare-screenshots.mjs does pairwise diffs. With web-only scope, we point
 # IOS_SCREENSHOTS_DIR + ANDROID_SCREENSHOTS_DIR at empty dirs so the
@@ -458,8 +527,8 @@ MANIFEST_OUT="$WORK_DIR/manifest.json"
 mkdir -p "$REPORT_DIR"
 (
   cd "$TOOLS_DIR/visual"
-  IOS_SCREENSHOTS_DIR="$EMPTY_DIR" \
-  ANDROID_SCREENSHOTS_DIR="$EMPTY_DIR" \
+  IOS_SCREENSHOTS_DIR="$IOS_SHOTS_DIR" \
+  ANDROID_SCREENSHOTS_DIR="$ANDROID_SHOTS_DIR" \
   WEB_SCREENSHOTS_DIR="$WEB_SHOTS_DIR" \
   REPORT_DIR="$REPORT_DIR" \
   MANIFEST_OUT="$MANIFEST_OUT" \
@@ -521,12 +590,13 @@ if (!m.wpt || m.wpt.incomplete) {
 # ── Step 7: inject WPT v4 block ──────────────────────────────────────────────
 
 step "Step 7: inject wpt: block (manifest v4)"
-# --ios-dir/--android-dir at EMPTY_DIR for the same isolation reason the
-# compare step uses it (Step 6 comment): inject's Phase-4 defaults point at
-# the GLOBAL apps/*-harness/screenshots dirs, which a sibling section (or a
-# stale hand run) may be filling — per-section manifests must never absorb
-# those. The all-platforms wiring (feed-ios/feed-android per-section output
-# dirs) replaces EMPTY_DIR when the native feeders integrate here.
+# --web-dir/--ios-dir/--android-dir all point at THIS section's isolated
+# capture dirs (never the GLOBAL apps/*-harness/screenshots, which a sibling
+# section may be filling). Under --all-platforms these hold the composed
+# per-test PNGs from Step 5/5b, so inject's diffComposedVsRef scores every
+# platform honestly; under --web-only the native dirs are empty (Step 5b
+# creates but doesn't feed them) so only web-ref is produced — same result
+# as the old EMPTY_DIR path, without the hardcoded dead-end.
 node "$TITAN_DIR/inject-wpt-block.mjs" \
   --manifest "$MANIFEST_OUT" \
   --tests "$TESTS_LIST" \
@@ -536,8 +606,8 @@ node "$TITAN_DIR/inject-wpt-block.mjs" \
   --capture-log "$CAPTURE_LOG" \
   --combined "$COMBINED_FIXTURE" \
   --web-dir "$WEB_SHOTS_DIR" \
-  --ios-dir "$EMPTY_DIR" \
-  --android-dir "$EMPTY_DIR"
+  --ios-dir "$IOS_SHOTS_DIR" \
+  --android-dir "$ANDROID_SHOTS_DIR"
 log "manifest v4 → $MANIFEST_OUT"
 
 # ── Step 7.5: verify wpt block was actually written ─────────────────────────
@@ -565,8 +635,8 @@ if [[ "$WPT_OK" != "1" ]]; then
     --capture-log "$CAPTURE_LOG" \
     --combined "$COMBINED_FIXTURE" \
     --web-dir "$WEB_SHOTS_DIR" \
-    --ios-dir "$EMPTY_DIR" \
-    --android-dir "$EMPTY_DIR"
+    --ios-dir "$IOS_SHOTS_DIR" \
+    --android-dir "$ANDROID_SHOTS_DIR"
   WPT_OK=$(node -e "
 const m = require('$MANIFEST_OUT');
 process.stdout.write(

@@ -107,6 +107,18 @@ const browser = await puppeteer.launch({
   headless: 'new',
   protocolTimeout: 300_000,
   args: [
+    // Force CPU rasterization. Under `headless: 'new'` on this toolchain the
+    // GPU raster path DEADLOCKS `Page.captureScreenshot`: about:blank shots
+    // fine, but any page with real paint hangs until protocolTimeout fires
+    // (elementHandle.screenshot surfaces it as `Runtime.callFunctionOn timed
+    // out`, page.screenshot as `Page.captureScreenshot timed out`). This bit
+    // the WPT COMPOSED path specifically — a single wedged shot crashes the
+    // whole capture, yielding "0 web screenshots". `--disable-gpu` routes
+    // raster through SwiftShader-on-CPU, which returns in ~13ms and is MORE
+    // deterministic across machines (no GPU-driver sub-pixel drift) — strictly
+    // better for SSIM. Verified: composed css-color captures went from 20s+
+    // timeout → 13ms with this flag.
+    '--disable-gpu',
     '--disable-background-timer-throttling',
     '--disable-renderer-backgrounding',
     '--disable-backgrounding-occluded-windows',
