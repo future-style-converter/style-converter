@@ -39,6 +39,20 @@ test('committed worklist: real-applier floor matches coverage-audit', () => {
   assert.equal(worklist.summary.realApplier.web, 508);
 });
 
+test('reverify-wave0 snapshot: 94 rows, bands partition, summary consistent', async () => {
+  // The wave-0 current-truth overlay for the verified+failing bucket. If a
+  // regeneration drops rows or the band arithmetic drifts, wave planning
+  // silently mis-prioritizes.
+  const rv = JSON.parse(await fs.readFile(new URL('./reverify-wave0.json', import.meta.url), 'utf8'));
+  assert.equal(rv.properties.length, 94, '91 verified + 3 failing must all be measured');
+  const b = rv.summary.bands;
+  assert.equal(b.hold + b.nearMiss + b.deep, 94, 'bands must partition the measured set');
+  assert.equal(rv.summary.verifiedThatStillHold + rv.summary.verifiedRegressed, 91);
+  for (const p of rv.properties) {
+    assert.equal(p.passes, p.minSsim >= 0.95, `${p.name}: passes flag disagrees with minSsim`);
+  }
+});
+
 test('generator re-verifies the recovered tracker counts (wrong-ref guard)', () => {
   // The tracker is read from git history at a pinned ref; if the ref or the
   // row regex drifts, the generator must FAIL LOUDLY, not emit garbage.

@@ -1,0 +1,49 @@
+{
+  "components": {
+    "V0_static": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "position": "static"
+      }
+    },
+    "V1_relative": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "position": "relative"
+      }
+    },
+    "V2_absolute": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "position": "absolute"
+      }
+    },
+    "V3_fixed": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "position": "fixed"
+      }
+    },
+    "V4_sticky": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#9b59b6",
+        "position": "sticky"
+      }
+    }
+  }
+}

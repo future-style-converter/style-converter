@@ -1,0 +1,8 @@
+{
+  "components": {
+    "CP_none":    { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#3b82f6", "clip-path": "none" } },
+    "CP_inset":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#3b82f6", "clip-path": "inset(10px)" } },
+    "CP_circle":  { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#3b82f6", "clip-path": "circle(40px)" } },
+    "CP_ellipse": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#3b82f6", "clip-path": "ellipse(60px 30px)" } }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "components": {
+    "C_red":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-right-width": "6px", "border-right-style": "solid", "border-right-color": "#ef4444" } },
+    "C_green": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-right-width": "6px", "border-right-style": "solid", "border-right-color": "#10b981" } },
+    "C_hex":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-right-width": "6px", "border-right-style": "solid", "border-right-color": "#3b82f6" } },
+    "C_rgb":   { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-right-width": "6px", "border-right-style": "solid", "border-right-color": "rgb(245,158,11)" } },
+    "C_named": { "properties": { "width": "180px", "height": "80px", "padding": "10px", "background-color": "#1f2937", "border-right-width": "6px", "border-right-style": "solid", "border-right-color": "white" } }
+  }
+}
