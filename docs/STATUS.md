@@ -112,7 +112,14 @@ dirs + WPT corpus are gitignored):
 - `tools/titan/results/corpus-v1.json` — first real **multi-section**
   corpus (7 sections × 12 bucket-A tests = 84, via `section-runner.sh
   --all-platforms`): web 0.915 (40/82 ≥ 0.95), iOS 0.895 (29/82), Android
-  0.892 (28/75). Honest holes it surfaced: `css-break` background-images
+  0.892 (28/75). `corpus-v2.json` re-measures the same corpus after
+  applier-campaign waves 1–3: web/iOS byte-identical (the sampled tests
+  don't exercise the fixed properties — and capture determinism holds to
+  4 decimals), Android 0.898 (32/81, +4 passing and +6 measurable via the
+  feeder cascade-recovery). The applier campaign's own axis is tracked in
+  `tools/visual/reverify-wave{0,4}.json`: deep divergences 33 → 21,
+  16 properties improved / 0 lost (BackgroundRepeat +0.29, Position
+  +0.28, MaskImage +0.19, border-image family resurrected). Honest holes it surfaced: `css-break` background-images
   don't render in fragmentation contexts (SSIM 0.16–0.38), `css-flexbox`
   mobile hits 0/12 ≥ 0.95, and one `css-transforms` fixture
   (`3d-rendering-context-and-z-ordering-003`) wedges the Android composed
