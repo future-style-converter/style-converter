@@ -32,11 +32,17 @@ enum FontWeightExtractor {
             // Button_Primary, etc. silently rendered .regular on iOS.
             if let n = ValueExtractors.extractInt(prop.data) {
                 cfg.weight = bucket(n)
+                // Lane IOS-TEXT fix 5: carry the raw number for the
+                // css-fonts-4 §5.2 face pick (bucketing alone loses the
+                // 600-vs-700 / 800-vs-900 distinction CoreText needs).
+                cfg.numeric = n
                 continue
             }
             if case .object(let o) = prop.data,
                let n = o["weight"]?.intValue {
                 cfg.weight = bucket(n)
+                // Keyword-form IR still resolves to a number — carry it.
+                cfg.numeric = n
                 continue
             }
             // Keyword path. Swift keywords match CSS exactly when lowercased.
@@ -49,18 +55,20 @@ enum FontWeightExtractor {
                 }
                 return nil
             }()
+            // Lane IOS-TEXT fix 5: each keyword also records its numeric
+            // equivalent so the §5.2 face pick has a target weight.
             switch kw?.lowercased() {
-            case "bold":    cfg.weight = .bold
+            case "bold":    cfg.weight = .bold;       cfg.numeric = 700
             // Fidelity wave 2 — css-fonts-4 §2.2 relative-weight table:
             // against the inherited default of 400, `bolder` computes to
             // 700 (bold) and `lighter` to 100 (ultraLight). The converter
             // flattens no cascade so 400 is always the inherited base for
             // these fixtures; the old .heavy/.light picks over/under-shot
             // the web reference (Typography_C08).
-            case "bolder":  cfg.weight = .bold
-            case "lighter": cfg.weight = .ultraLight
-            case "normal":  cfg.weight = .regular
-            default:        cfg.weight = nil   // unknown → inherit
+            case "bolder":  cfg.weight = .bold;       cfg.numeric = 700
+            case "lighter": cfg.weight = .ultraLight; cfg.numeric = 100
+            case "normal":  cfg.weight = .regular;    cfg.numeric = 400
+            default:        cfg.weight = nil;         cfg.numeric = nil   // unknown → inherit
             }
         }
         return touched ? cfg : nil

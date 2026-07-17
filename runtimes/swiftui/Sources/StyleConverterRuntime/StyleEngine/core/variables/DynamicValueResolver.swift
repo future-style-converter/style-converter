@@ -74,6 +74,13 @@ enum DynamicValueResolver {
             // Static px shape → adopt directly; dynamic → resolve now.
             if let px = staticPx(p.data) {
                 elementFontSizePx = px
+            } else if let px = resolveFontSizeWire(p.data,
+                                                  inheritedFontSizePx: inheritedFontSizePx) {
+                // Lane IOS-TEXT fix 4 — the converter's px-less relative
+                // shapes (em/rem/% lengths, smaller/larger keywords)
+                // resolve here against the inherited size; pass 1 emits
+                // the resolved pixels for the extractors.
+                elementFontSizePx = px
             } else if let expr = dynamicExpression(p.data),
                       let sub = VarSubstitutor.substitute(expr, store: variables),
                       let px = CalcEvaluator.evaluatePx(sub, ctx: fsCtx) {
@@ -99,6 +106,21 @@ enum DynamicValueResolver {
                     out.append(IRProperty(type: typed, data: rewritten))
                 }
                 // Unresolvable → dropped (unset — same as unknown Generic).
+                continue
+            }
+
+            // Lane IOS-TEXT fix 4 — FontSize relative wire shapes
+            // (em/rem/% lengths, smaller/larger) are px-less objects that
+            // dynamicExpression classifies as static, so they used to
+            // pass through untouched and FontSizeExtractor read nil
+            // (silently dropping `font-size: 1.5em` etc.). Emit the
+            // resolved pixels computed against the inherited basis so
+            // every downstream extractor sees the universal `{px:N}`.
+            if prop.type == "FontSize",
+               let px = resolveFontSizeWire(prop.data,
+                                            inheritedFontSizePx: inheritedFontSizePx) {
+                out.append(IRProperty(type: prop.type,
+                                      data: .object(["px": .double(px)])))
                 continue
             }
 
@@ -242,5 +264,60 @@ enum DynamicValueResolver {
     private static func staticPx(_ data: IRValue) -> Double? {
         guard case .object(let o) = data else { return nil }
         return o["px"]?.doubleValue
+    }
+
+    // MARK: - FontSize relative wire shapes (lane IOS-TEXT fix 4)
+
+    /// Resolve the converter's px-less FontSize shapes against the
+    /// inherited font size. Live wire shapes (FontSizeSerializer.kt via
+    /// the IRPropertySerializer deep-flatten):
+    ///   • em/rem length : { "original": { "type":"length",
+    ///                       "original": { "v": 1.5, "u": "EM"|"REM" } } }
+    ///   • percentage    : { "original": { "type":"percentage", "value": 120.0 } }
+    ///   • smaller/larger: { "original": { "type":"relative",
+    ///                       "keyword": "smaller"|"larger" } }
+    /// Bases (css-values-4 §6.1 — em ON font-size refers to the
+    /// INHERITED size; the renderer's inheritance channel supplies it,
+    /// 16 when unset): em × inherited, rem × 16 (harness root), % of the
+    /// inherited size. `smaller`/`larger` are one step down/up per
+    /// CSS 2.1 §15.7 — approximated as ÷1.2 / ×1.2, the classic UA
+    /// scaling-factor ratio between adjacent absolute-size keywords
+    /// (documented approximation; the fixture set only checks one step).
+    /// Returns nil for every other shape (static px, expressions, other
+    /// units) so those keep their existing lanes. Pure — pinned by
+    /// IOSTextLaneTests.
+    static func resolveFontSizeWire(_ data: IRValue,
+                                    inheritedFontSizePx: Double) -> Double? {
+        guard case .object(let o) = data else { return nil }
+        // A resolved px value is authoritative — never second-guess it.
+        guard o["px"]?.doubleValue == nil else { return nil }
+        // All relative shapes live under the `original` discriminator.
+        guard case .object(let orig)? = o["original"] else { return nil }
+        switch orig["type"]?.stringValue {
+        case "length":
+            // Nested IRLength: only the font-relative units resolve here
+            // (vw/vh etc. ride the expression lane with real bases).
+            guard case .object(let inner)? = orig["original"],
+                  let v = inner["v"]?.doubleValue,
+                  let u = inner["u"]?.stringValue?.uppercased() else { return nil }
+            switch u {
+            case "EM":  return v * inheritedFontSizePx    // §6.1 inherited basis
+            case "REM": return v * 16.0                   // harness root = 16px
+            default:    return nil                        // not ours — other lanes
+            }
+        case "percentage":
+            // font-size: P% = P/100 × inherited size (css-fonts-4 §3.2).
+            guard let p = orig["value"]?.doubleValue else { return nil }
+            return p / 100.0 * inheritedFontSizePx
+        case "relative":
+            // CSS 2.1 §15.7 relative keywords: ±1 step on the UA table.
+            switch orig["keyword"]?.stringValue?.lowercased() {
+            case "larger":  return inheritedFontSizePx * 1.2
+            case "smaller": return inheritedFontSizePx / 1.2
+            default:        return nil
+            }
+        default:
+            return nil
+        }
     }
 }

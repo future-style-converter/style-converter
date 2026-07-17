@@ -41,6 +41,7 @@ import com.styleconverter.runtime.lists.ListStyleExtractor
 import com.styleconverter.runtime.lists.ListStyleType
 import com.styleconverter.runtime.lists.ListStyleApplier as StyleListApplier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import com.styleconverter.runtime.typography.TextStyleApplier
 import com.styleconverter.runtime.typography.TypographyExtractor
 import com.styleconverter.runtime.typography.FontVariantApplier
@@ -186,6 +187,52 @@ object ComponentRenderer {
      */
     internal val LocalColorIsInheritedOnly =
         androidx.compose.runtime.compositionLocalOf { false }
+
+    /**
+     * True when a Color-typed property's wire value is the `currentColor`
+     * keyword. ColorParser emits it srgb-less — the wire is exactly
+     * {"original":"currentColor"} (IRColor.ColorRepresentation.CurrentColor
+     * serializes as that bare primitive; srgb stays null because the value
+     * is context-dependent). A present srgb always means the converter
+     * already resolved the color, so it is never re-resolved here. Pure +
+     * internal for the JVM pinning suite.
+     */
+    internal fun isCurrentColorValue(data: kotlinx.serialization.json.JsonElement?): Boolean {
+        val obj = data as? JsonObject ?: return false
+        if (obj["srgb"] != null) return false
+        return (obj["original"] as? JsonPrimitive)?.contentOrNull
+            ?.equals("currentColor", ignoreCase = true) == true
+    }
+
+    /**
+     * The runtime's DEFAULT TEXT COLOR — what glyphs resolve to when the
+     * cascade genuinely runs out of `color` declarations. This is the
+     * HARNESS STAGE CONTRACT made explicit: the web-harness capture page
+     * (apps/web-harness/index.html) declares `body { color: #eee }` on the
+     * `#1a1a2e` stage, so on the reference render any text whose `color`
+     * chain bottoms out inherits an OPAQUE #eee — rgb(238,238,238), alpha
+     * 1. Opaque #eee — NOT the 70%-alpha bg-contrast pick
+     * (0xB3EEEEEE), which exists only for the SYNTHESIZED placeholder
+     * label (the web placeholder span pins rgba(238,238,238,0.7)
+     * explicitly; real inheriting text never blends). iOS's counterpart
+     * constant is Color(white: 0.93) == 237/255, within 1/255 of this.
+     */
+    internal val DEFAULT_TEXT_COLOR = Color(0xFFEEEEEE)
+
+    /**
+     * Bottom-out for an own `color: currentColor` declaration
+     * (css-color-4 §7.2: currentColor on `color` itself == inherit).
+     * With an ancestor Color on the inheritance channel the inherited
+     * value wins; with NO ancestor Color the browser's inherit chain ends
+     * at the harness body's `color: #eee` — so the honest fallback is
+     * [DEFAULT_TEXT_COLOR], the same opaque stage color, NOT the
+     * 70%-alpha contrast pick (wave-5 device evidence: web painted
+     * 238,238,238 opaque while the contrast-pick path composited to ~171
+     * gray over the dark fixture bg — pair 0.856). Pure + internal for
+     * the JVM pinning suite.
+     */
+    internal fun resolveCurrentColorBottomOut(inheritedColor: Color?): Color =
+        inheritedColor ?: DEFAULT_TEXT_COLOR
 
     /**
      * Merge the inherited channel under the component's own declarations.
@@ -580,8 +627,32 @@ object ComponentRenderer {
         // the exact split the browser implements.
         val colorIsInheritedOnly = inheritedProperties.any { it.type == "Color" } &&
             schemeResolvedProperties.none { it.type == "Color" }
+        // css-color-4 §7.2: `color: currentColor` on the COLOR property
+        // itself is treated as `color: inherit` — it resolves to the
+        // INHERITED color, never circularly to the element's own value.
+        // The wire ships it srgb-less ({"original":"currentColor"}), so
+        // extractTextColor returned null and the placeholder fell back to
+        // the bg-contrast pick while web painted the ancestor's color.
+        // Resolve through the wave-9 inheritance channel: the inherited
+        // Color entry IS the ancestor's computed color. No inherited Color
+        // → the browser's inherit chain ends at the harness BODY's
+        // `color: #eee` (opaque), so bottom out into DEFAULT_TEXT_COLOR —
+        // the earlier null-into-contrast-pick fallback composited the
+        // 70%-alpha placeholder pick (~171 gray over a dark bg) while web
+        // painted 238,238,238 opaque (wave-5 device evidence, pair 0.856;
+        // see resolveCurrentColorBottomOut).
+        val ownColorIsCurrentColor = schemeResolvedProperties.any {
+            it.type == "Color" && isCurrentColorValue(it.data)
+        }
         val textColor = if (colorIsInheritedOnly) null else try {
-            TextStyleApplier.extractTextColor(effectiveProperties)
+            if (ownColorIsCurrentColor) {
+                resolveCurrentColorBottomOut(
+                    inheritedProperties.firstOrNull { it.type == "Color" }
+                        ?.let { ValueExtractors.extractColor(it.data) }
+                )
+            } else {
+                TextStyleApplier.extractTextColor(effectiveProperties)
+            }
         } catch (e: Exception) {
             null
         }
@@ -719,6 +790,17 @@ object ComponentRenderer {
         // 24px down, never the raw em that would compound per level.
         val inheritableForChildren = effectiveProperties.filter {
             it.type in INHERITED_PROPERTY_TYPES
+        }.map { p ->
+            // css-color-4 §7.2: the COMPUTED value of `color: currentColor`
+            // is the inherited color — children must inherit the resolved
+            // ancestor color, not the unresolvable keyword (an unresolved
+            // currentColor entry would null out every descendant's color
+            // extraction). Substitute the inherited entry when available;
+            // with no ancestor Color the keyword rides along unchanged and
+            // resolves to the same defaults at each level.
+            if (p.type == "Color" && isCurrentColorValue(p.data)) {
+                inheritedProperties.firstOrNull { it.type == "Color" } ?: p
+            } else p
         }
         // The containing block THIS component establishes for its children:
         // its resolved content box (width channel, CSS 2.1 §10.1). Unknown
@@ -1931,13 +2013,13 @@ object ComponentRenderer {
      * @param textColor Optional text color override
      * @param properties IR properties for styling
      * @param itemIndex Index for numbered list markers (default 0)
-     * @param rawText Optional verbatim text override. When non-null and
-     *   non-empty, replaces the underscore-stripped `name` as the visible
-     *   string AND skips the text-transform pass (the source text is
-     *   already the intended visible content). Powers the IR `_text`
-     *   channel (swarm-001 css-color__color-001 leaf-text fix, swarm-002
-     *   mixed-content fix). Absent rawText → existing placeholder
-     *   behaviour, preserving the 327-pair baseline.
+     * @param rawText Optional verbatim source-text override. When non-null
+     *   and non-empty, replaces the underscore-stripped `name` as the
+     *   visible string. Powers the IR `_text` channel (swarm-001
+     *   css-color__color-001 leaf-text fix, swarm-002 mixed-content fix).
+     *   text-transform APPLIES to it — see [placeholderDisplayText].
+     *   Absent rawText → existing placeholder behaviour, preserving the
+     *   327-pair baseline.
      */
     @Composable
     internal fun PlaceholderContent(
@@ -1948,10 +2030,11 @@ object ComponentRenderer {
         rawText: String? = null
     ) {
         // When rawText is supplied (the IR's `_text` channel), it wins
-        // over the synthesised "Component Name" placeholder AND bypasses
-        // text-transform (the extractor already captured the desired
-        // visible text). For legacy fixtures with no _text we fall
-        // through to the underscore-stripped name path.
+        // over the synthesised "Component Name" placeholder. For legacy
+        // fixtures with no _text we fall through to the
+        // underscore-stripped name path. Both paths run text-transform —
+        // see placeholderDisplayText for why (the old rawText bypass was
+        // based on a false claim that the extractor pre-transformed it).
         val hasRawText = !rawText.isNullOrEmpty()
         // WPT-capture-mode gate (mirrors the web harness's WPT_MODE label
         // suppression): in WPT capture the browser-reference shows no
@@ -1960,15 +2043,7 @@ object ComponentRenderer {
         // is never suppressed. Default mode → LocalWptCaptureMode is false →
         // this is a no-op, keeping the 327-pair baseline byte-identical.
         if (shouldSuppressSynthesizedName(LocalWptCaptureMode.current, rawText)) return
-        var displayText = if (hasRawText) {
-            rawText!!
-        } else {
-            val textTransform = TextStyleApplier.extractTextTransform(properties)
-            TextStyleApplier.applyTextTransform(
-                name.replace("_", " "),
-                textTransform
-            )
-        }
+        var displayText = placeholderDisplayText(name, rawText, properties)
 
         // Extract tab-size and process tabs in text
         val tabConfig = TextStyleApplier.extractTabSize(properties)
@@ -2023,8 +2098,19 @@ object ComponentRenderer {
             true -> maxLines
         }
 
-        // Extract additional text style properties
-        val textStyle = TextStyleApplier.extractTextStyle(properties)
+        // Extract additional text style properties. The inherited font-size
+        // (parent's RESOLVED px FontSize off the inheritance channel —
+        // parents always publish resolved px, see DynamicValueResolver.
+        // fontSizePxOf) is threaded as the base for the relative
+        // font-size values (em / % / smaller / larger, css-values-4
+        // §5.1.1 + CSS 2.1 §15.7 resolve against the INHERITED size),
+        // matching iOS's inherited-size resolution. Null (no styled
+        // ancestor) falls back to the extractor's 16sp browser default —
+        // identical outcomes on the committed fixtures, which never style
+        // ancestors.
+        val inheritedFontSizeSp = com.styleconverter.runtime.core.variables.DynamicValueResolver
+            .fontSizePxOf(LocalInheritedProperties.current)
+        val textStyle = TextStyleApplier.extractTextStyle(properties, inheritedFontSizeSp)
 
         // Build final text style with all extracted properties
         // For list-style-position: outside, we'd need padding on the left,
@@ -2228,6 +2314,29 @@ object ComponentRenderer {
             synthesizeSmallCaps(displayText, effectiveFontSize.value)
         else androidx.compose.ui.text.AnnotatedString(displayText)
 
+        // css-text-3 §5.1 word-spacing — real implementation. Compose's
+        // TextStyle has no word-spacing, and the old letter-spacing
+        // fallback inserted the gap between EVERY glyph pair (12px between
+        // single digits pushed '0123 4567' half off its box). Instead, a
+        // SpanStyle letter-spacing on ONLY the space characters adds the
+        // extra advance after each space — exactly the CSS model, negatives
+        // included. The span REPLACES the base tracking on those chars, so
+        // resolveWordSpacingSpanSp folds the paragraph letter-spacing back
+        // in (both trackings apply at a separator per spec). em/rem wire
+        // values resolve inside extractWordSpacingSp (em × element
+        // font-size, rem × 16px root — the letter-spacing escape hatch,
+        // mirrored). Skipped entirely for absent/normal/zero values so the
+        // frozen baseline renders byte-identically.
+        val wordSpacingSp = TextStyleApplier.extractWordSpacingSp(properties, effectiveFontSize.value)
+        val spacedText = if (wordSpacingSp != null && wordSpacingSp != 0f) {
+            TextStyleApplier.applyWordSpacingSpans(
+                annotatedText,
+                TextStyleApplier.resolveWordSpacingSpanSp(
+                    wordSpacingSp, styledTextStyle.letterSpacing, effectiveFontSize.value
+                )
+            )
+        } else annotatedText
+
         // CSS overflow is VISIBLE by default: text that exceeds its box
         // paints past the border box (CSS 2.1 §11.1.1 — overflow applies to
         // the box, and the initial value clips nothing). Compose Text
@@ -2300,6 +2409,65 @@ object ComponentRenderer {
                 }
             }
         } else Modifier
+
+        // text-decoration-line OWNERSHIP (css-text-decor-3 §2.1). The
+        // owned pass draws ALL flagged lines — underline, overline AND
+        // line-through — as rects with Chromium-matched geometry instead
+        // of delegating any of them to Compose's 1px built-ins. Device
+        // evidence (wave-5 gate): web draws pixel-snapped 2px-thick lines
+        // at 22px Inter while the built-ins drew 1px at different offsets
+        // (Underline 0.809, UnderOver 0.740, Triple 0.737 vs the
+        // fixture's 0.8695 no-decoration floor). Geometry from the
+        // onTextLayout-captured TextLayoutResult (the same layoutResult
+        // state the emphasis pass reads): one rect per flagged kind per
+        // VISUAL line, anchored on getLineBaseline(i) and spanning
+        // getLineLeft..getLineRight (each line box gets its own
+        // decoration per spec; the math + the measured-capture oracle
+        // live in TextStyleApplier.decorationSegments so the JVM suite
+        // pins the exact 22px rows). Color: text-decoration-color when
+        // declared, else currentColor == the text color (§2.2 initial).
+        // drawWithContent paints AFTER the glyphs — Blink's order for the
+        // through/over lines; the underline difference (skip-ink) is
+        // documented on decorationSegments.
+        val ownedDecorations = TextStyleApplier.extractDecorationLineFlags(properties)
+        val decorationModifier = if (ownedDecorations.any) {
+            val decorationColor = try {
+                TextStyleApplier.extractTextDecorationConfig(properties)?.color
+            } catch (e: Exception) {
+                null
+            }
+            val ownedDecorationColor = decorationColor ?: effectiveColor
+            Modifier.drawWithContent {
+                drawContent()
+                val layout = layoutResult.value ?: return@drawWithContent
+                TextStyleApplier.decorationSegments(
+                    lineCount = layout.lineCount,
+                    // px==dp==sp space (density 1 harness) — same convention
+                    // as the emphasis radius above.
+                    fontSizePx = effectiveFontSize.value,
+                    flags = ownedDecorations,
+                    lineBaseline = { layout.getLineBaseline(it) },
+                    lineLeft = { layout.getLineLeft(it) },
+                    lineRight = { layout.getLineRight(it) }
+                ).forEach { seg ->
+                    drawRect(
+                        color = ownedDecorationColor,
+                        topLeft = androidx.compose.ui.geometry.Offset(seg.left, seg.top),
+                        size = androidx.compose.ui.geometry.Size(seg.width, seg.thickness)
+                    )
+                }
+            }
+        } else Modifier
+        // Suppress the platform built-ins ONLY where the owned pass draws
+        // (this label path has layout access via onTextLayout): leaving
+        // TextDecoration.Underline/LineThrough in the style would paint
+        // Compose's 1px lines UNDER the owned 2px rects at different
+        // offsets — a visible double-draw. Paths without layout access
+        // (list markers, non-label Text sites) keep extractTextDecoration's
+        // TextDecoration untouched, so their existing rendering survives.
+        val paintedTextStyle = if (ownedDecorations.any)
+            styledTextStyle.copy(textDecoration = androidx.compose.ui.text.style.TextDecoration.None)
+        else styledTextStyle
 
         // Block-level width fill — the web placeholder is a `display:block`
         // <span>, which spans the parent's content box whenever the parent
@@ -2401,13 +2569,22 @@ object ComponentRenderer {
             androidx.compose.ui.layout.Layout(
                 content = {
                     Text(
-                        text = annotatedText,
-                        style = styledTextStyle,
+                        // spacedText = annotatedText + word-spacing spans
+                        // (identity when word-spacing is absent/zero).
+                        text = spacedText,
+                        // paintedTextStyle == styledTextStyle unless the
+                        // owned decoration pass is active (built-ins
+                        // stripped there — see paintedTextStyle above).
+                        style = paintedTextStyle,
                         maxLines = effectiveMaxLines,
                         overflow = effectiveOverflow,
                         softWrap = wrapConfig.softWrap,
                         onTextLayout = { layoutResult.value = it },
-                        modifier = Modifier.padding(4.dp).then(emphasisModifier)
+                        // decorationModifier no-ops without owned lines;
+                        // inside the rotated branch it draws in the
+                        // PRE-rotation frame, so the lines ride the
+                        // rotated glyph run.
+                        modifier = Modifier.padding(4.dp).then(emphasisModifier).then(decorationModifier)
                     )
                 }
             ) { measurables, constraints ->
@@ -2438,16 +2615,54 @@ object ComponentRenderer {
         }
 
         Text(
-            text = annotatedText,
-            style = styledTextStyle,
+            // spacedText = annotatedText + word-spacing spans (identity when
+            // word-spacing is absent/zero — baseline byte-identical).
+            text = spacedText,
+            // paintedTextStyle == styledTextStyle unless the owned
+            // decoration pass is active (built-ins stripped there).
+            style = paintedTextStyle,
             maxLines = effectiveMaxLines,
             overflow = effectiveOverflow,
             softWrap = wrapConfig.softWrap,
             onTextLayout = { layoutResult.value = it },
             // composedLineBoxSnap (no-op outside composed WPT) tightens the box
-            // to the CSS line box before emphasis paints over it.
-            modifier = textModifier.then(composedLineBoxSnap).then(emphasisModifier)
+            // to the CSS line box before emphasis paints over it; the owned
+            // decoration pass draws last so its rects sit over the final
+            // glyph layout.
+            modifier = textModifier.then(composedLineBoxSnap).then(emphasisModifier).then(decorationModifier)
         )
+    }
+
+    /**
+     * The visible string for a placeholder / real-text node, BEFORE
+     * tab-size processing (pure + internal for the JVM pinning suite).
+     *
+     * css-text-3 §2.1: text-transform is a RENDER-time transformation of
+     * the element's text — the converter never applies it, and the old
+     * rawText branch here skipped the transform behind a FALSE comment
+     * claiming the extractor pre-transformed `_text`. Result:
+     * `text-transform: uppercase` on a real `_text` node rendered
+     * verbatim lowercase on Android while web uppercased it. Both paths
+     * now run the same transform machinery; `full-width` remains a
+     * deliberate no-op inside extractTextTransform (documented there:
+     * Chromium, the reference, leaves the Latin corpus unchanged).
+     */
+    internal fun placeholderDisplayText(
+        name: String,
+        rawText: String?,
+        properties: List<IRProperty>
+    ): String {
+        val transform = TextStyleApplier.extractTextTransform(properties)
+        val source = if (!rawText.isNullOrEmpty()) {
+            // Real `_text` renders verbatim (no underscore stripping —
+            // underscores in source text are content, not separators).
+            rawText
+        } else {
+            // Synthesized placeholder label: component name with the
+            // fixture-naming underscores turned back into spaces.
+            name.replace("_", " ")
+        }
+        return TextStyleApplier.applyTextTransform(source, transform)
     }
 
     /**

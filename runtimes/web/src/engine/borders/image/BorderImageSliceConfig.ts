@@ -3,9 +3,12 @@
 
 import type { QuadEdge } from './_shared';
 
-// Single-field config — `quad` is absent when the property isn't set.
+// Config — `quad` is absent when the property isn't set; `fill` mirrors the
+// optional `fill` keyword of the css-backgrounds-3 §6.1 grammar
+// (`<number-percentage>{1,4} && fill?`) which preserves the middle region.
 export interface BorderImageSliceConfig {
   quad?: QuadEdge;                                               // parsed IR value
+  fill?: boolean;                                                // true when IR carried fill=true
 }
 
 // IR property type string — used by both extractor + registry.

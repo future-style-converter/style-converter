@@ -119,7 +119,23 @@ dirs + WPT corpus are gitignored):
   feeder cascade-recovery). The applier campaign's own axis is tracked in
   `tools/visual/reverify-wave{0,4}.json`: deep divergences 33 → 21,
   16 properties improved / 0 lost (BackgroundRepeat +0.29, Position
-  +0.28, MaskImage +0.19, border-image family resurrected). Honest holes it surfaced: `css-break` background-images
+  +0.28, MaskImage +0.19, border-image family resurrected). Wave 5
+  (`tools/visual/wave5-solo-gate.json`) mined the deep-19 typography set
+  and found a bug farm behind the "font wall": ~20 real renderer bugs
+  fixed across the three platforms (Compose skipped text-transform on
+  real text and rendered word-spacing as letter-spacing; iOS never
+  rendered word-spacing, dropped line-through to an underscore-token
+  miss, used push-out line breaking against Chromium/Compose's greedy
+  breaks, and rounded font weights down at 600/800; both natives dropped
+  em/rem spacing and currentColor; even the web reference dropped em/rem/%
+  font-size and the slice-`fill` keyword). Both natives now OWN their
+  decoration lines at Chromium-measured 2px geometry. Solo device mins
+  moved: word-spacing 0.763→0.868, text-decoration 0.763→0.864 (Triple
+  0.737→0.893), font-weight 0.785→0.870, font-size 0.786→0.860 (9/17
+  variants now ≥0.95 on every pair; em/rem fixed outright), slice-fill
+  0.866→0.986. What remains on these fixtures is the measured Android-web
+  ~0.87 rasterization wall (edgeSsim 1.0, identical glyph extents — AA
+  and stem-weight divergence only, content-dependent). Honest holes it surfaced: `css-break` background-images
   don't render in fragmentation contexts (SSIM 0.16–0.38), `css-flexbox`
   mobile hits 0/12 ≥ 0.95, and one `css-transforms` fixture
   (`3d-rendering-context-and-z-ordering-003`) wedges the Android composed
@@ -134,9 +150,9 @@ dirs + WPT corpus are gitignored):
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 135 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 979 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 887 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 332 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 985 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 950 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 369 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 516 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 

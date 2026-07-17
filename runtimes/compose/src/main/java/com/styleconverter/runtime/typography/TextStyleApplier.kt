@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.types.ValueExtractors
@@ -42,7 +43,9 @@ import kotlinx.serialization.json.*
  * - TextDecorationStyle (tracked, limited Compose support)
  * - LineHeight
  * - LetterSpacing
- * - WordSpacing (via letter spacing approximation)
+ * - WordSpacing (real: AnnotatedString space-only spans — see
+ *   [extractWordSpacingSp] / [applyWordSpacingSpans], NOT a
+ *   letter-spacing approximation)
  * - TextIndent
  * - TextTransform (uppercase, lowercase, capitalize)
  * - BaselineShift (sub, super)
@@ -69,8 +72,27 @@ object TextStyleApplier {
 
     /**
      * Extract text style from IR properties.
+     *
+     * @param inheritedFontSizeSp The PARENT's resolved font-size in the
+     *   runtime's px==sp space, when the caller has an inheritance channel
+     *   to read it from (ComponentRenderer / ContentApplier thread
+     *   `DynamicValueResolver.fontSizePxOf(LocalInheritedProperties)`).
+     *   It is the resolution base for the relative font-size values —
+     *   em / % (css-values-4 §5.1.1: font-size's own em resolves against
+     *   the INHERITED size) and smaller / larger (CSS 2.1 §15.7: one
+     *   ladder step from the INHERITED size). Null (unit tests, callers
+     *   without a cascade) falls back to [RELATIVE_SIZE_BASE_SP] — the
+     *   16px browser default, which IS the honest inherited value on the
+     *   committed fixture corpus (fixtures never style ancestors), so
+     *   defaulted and threaded calls agree everywhere the baseline pins.
      */
-    fun extractTextStyle(properties: List<IRProperty>): TextStyle {
+    fun extractTextStyle(
+        properties: List<IRProperty>,
+        inheritedFontSizeSp: Float? = null
+    ): TextStyle {
+        // Single resolved base for every relative-font-size branch below —
+        // threaded inherited size when available, browser-default 16 else.
+        val relativeBaseSp = inheritedFontSizeSp ?: RELATIVE_SIZE_BASE_SP
         var color: Color? = null
         var fontSize: TextUnit? = null
         var fontWeight: FontWeight? = null
@@ -91,13 +113,13 @@ object TextStyleApplier {
         // the right base. CSS source order isn't guaranteed.
         val preResolvedFontSp: Float? = properties
             .firstOrNull { it.type == "FontSize" }
-            ?.let { try { extractFontSize(it.data)?.value } catch (_: Exception) { null } }
+            ?.let { try { extractFontSize(it.data, relativeBaseSp)?.value } catch (_: Exception) { null } }
 
         properties.forEach { property ->
             try {
                 when (property.type) {
                     "Color" -> color = ValueExtractors.extractColor(property.data)
-                    "FontSize" -> fontSize = extractFontSize(property.data)
+                    "FontSize" -> fontSize = extractFontSize(property.data, relativeBaseSp)
                     "FontWeight" -> fontWeight = extractFontWeight(property.data)
                     "FontStyle" -> fontStyle = extractFontStyle(property.data)
                     "FontFamily" -> fontFamily = extractFontFamily(property.data)
@@ -106,12 +128,20 @@ object TextStyleApplier {
                     "LineHeight" -> lineHeight = extractLineHeight(property.data, preResolvedFontSp)
                     "LetterSpacing" -> letterSpacing = extractLetterSpacing(property.data)
                     "WordSpacing" -> {
-                        // Word spacing approximated via letter spacing
-                        // Note: Compose doesn't have direct word-spacing support
-                        val wordSpacing = extractWordSpacing(property.data)
-                        if (wordSpacing != null && letterSpacing == null) {
-                            letterSpacing = wordSpacing
-                        }
+                        // css-text-3 §5.1: word-spacing adds advance at WORD
+                        // SEPARATORS only. The old fallback mapped it onto
+                        // TextStyle.letterSpacing, which inserts the gap
+                        // between EVERY glyph pair — `word-spacing: 12px` on
+                        // "0123 4567" spread the digits 12px apart and pushed
+                        // "4567" clean off the box. Compose's TextStyle has no
+                        // word-spacing field, so the REAL implementation lives
+                        // in the AnnotatedString pass (PlaceholderContent →
+                        // [applyWordSpacingSpans]): a SpanStyle letter-spacing
+                        // applied ONLY to the space characters, i.e. extra
+                        // advance after each space == CSS word-spacing.
+                        // Nothing to write into the TextStyle here — the
+                        // render site reads the value via
+                        // [extractWordSpacingSp] (handled, not dropped).
                     }
                     "TextShadow" -> shadow = extractTextShadow(property.data)
                     "VerticalAlign" -> baselineShift = extractBaselineShift(property.data)
@@ -238,7 +268,13 @@ object TextStyleApplier {
         }
     }
 
-    private fun extractFontSize(data: JsonElement): TextUnit? {
+    private fun extractFontSize(
+        data: JsonElement,
+        // Inherited-size base for the relative branches (em / % / smaller /
+        // larger) — threaded from extractTextStyle; defaults to the 16px
+        // browser-inherited base for direct unit-level calls.
+        inheritedBaseSp: Float = RELATIVE_SIZE_BASE_SP
+    ): TextUnit? {
         // Check for pixel value
         val dp = ValueExtractors.extractDp(data)
         if (dp != null) {
@@ -254,7 +290,12 @@ object TextStyleApplier {
             val original = data["original"]
             if (original is JsonObject) {
                 val type = original["type"]?.jsonPrimitive?.contentOrNull
-                if (type == "absoluteKeyword") {
+                // The live wire tag is "absolute" (FontSizeProperty's
+                // serializer); "absoluteKeyword" is the stale name this
+                // check historically matched — the branch still worked in
+                // practice only because absolute keywords also ship a
+                // resolved px (caught above). Accept both, honestly.
+                if (type == "absoluteKeyword" || type == "absolute") {
                     val keyword = original["keyword"]?.jsonPrimitive?.contentOrNull
                     return when (keyword?.lowercase()) {
                         "xx-small" -> 9.sp
@@ -268,10 +309,94 @@ object TextStyleApplier {
                         else -> null
                     }
                 }
+                // Relative keywords (wire: {"original":{"type":"relative",
+                // "keyword":"smaller"|"larger"}, px absent}). CSS 2.1 §15.7
+                // (and css-fonts-4 §2.5): `larger`/`smaller` step ONE notch
+                // up/down the absolute-size ladder from the INHERITED size;
+                // adjacent ladder steps are separated by roughly the spec's
+                // recommended 1.2 scaling factor. We approximate the step
+                // as ×1.2 / ÷1.2 against the inherited base threaded in by
+                // the caller (browser-default 16px when no ancestor styles
+                // font-size — the only base the committed fixture corpus
+                // produces) — larger → 19.2px, smaller → 13.33px at that
+                // default, matching Chrome's observed resolution for a
+                // non-keyword inherited 16px. Previously this shape fell
+                // through to null → the caller's 16sp default, so
+                // smaller/larger reused the `medium` rendering unchanged.
+                if (type == "relative") {
+                    val keyword = original["keyword"]?.jsonPrimitive?.contentOrNull
+                    return when (keyword?.lowercase()) {
+                        "larger" -> (inheritedBaseSp * RELATIVE_SIZE_STEP).sp
+                        "smaller" -> (inheritedBaseSp / RELATIVE_SIZE_STEP).sp
+                        else -> null
+                    }
+                }
+                // Relative lengths (LIVE wire, verified against the running
+                // converter: `font-size: 1.5em` deep-flattens to
+                // {"original":{"type":"length","original":{"v":1.5,"u":"EM"}}}
+                // — NO resolved px, NO "value" key). css-values-4 §5.1.1:
+                // em on font-size itself resolves against the INHERITED
+                // size (the threaded base); rem against the ROOT size,
+                // which the harness pins at the 16px browser default
+                // (fixtures never style the root — a true constant).
+                // Previously this shape fell through to null → 16sp
+                // default while iOS/web resolved it (1.5em → 24px).
+                // Note: in the full renderer pipeline DynamicValueResolver
+                // usually adds a top-level "px" for em first (caught by
+                // extractDp above) — this branch is the honest fallback
+                // for callers without that pass.
+                if (type == "length") {
+                    val inner = original["original"] as? JsonObject
+                    val v = inner?.get("v")?.jsonPrimitive?.floatOrNull
+                    val u = inner?.get("u")?.jsonPrimitive?.contentOrNull?.uppercase()
+                    if (v != null) {
+                        return when (u) {
+                            "EM" -> (v * inheritedBaseSp).sp
+                            "REM" -> (v * 16f).sp
+                            // Other relative units (vw/vh/ch/ex …) have no
+                            // static base here — fall through to the
+                            // caller's default rather than forging one
+                            // (explicit, not a silent drop).
+                            else -> null
+                        }
+                    }
+                }
+                // Percentages (LIVE wire: `font-size: 120%` emits
+                // {"original":{"type":"percentage","value":120}}, no px).
+                // css-fonts-4 §2.4: a <percentage> font-size resolves
+                // against the inherited font-size — the same base as em,
+                // so 120% of the 16px default = 19.2px. Previously fell
+                // through to null → the 16sp default.
+                if (type == "percentage") {
+                    original["value"]?.jsonPrimitive?.floatOrNull?.let { pct ->
+                        return (pct / 100f * inheritedBaseSp).sp
+                    }
+                }
             }
         }
         return null
     }
+
+    /**
+     * Fallback inherited base for the relative font-size values (em / % /
+     * `smaller` / `larger`) — the browser-default 16px the placeholder
+     * corpus inherits (fixtures never style ancestors, so this is the
+     * honest computed base, not a guess). Used only when the caller has no
+     * inheritance channel to thread the real parent size through
+     * (extractTextStyle's `inheritedFontSizeSp` parameter); the render
+     * call sites pass the actual inherited value, matching iOS's
+     * inherited-size resolution.
+     */
+    private const val RELATIVE_SIZE_BASE_SP = 16f
+
+    /**
+     * CSS 2.1 §15.7's recommended scaling factor between adjacent entries
+     * of the absolute-size ladder — the ±1-step multiplier for
+     * `larger`/`smaller`. Documented approximation: real UAs use a
+     * per-entry table with non-uniform ratios; 1.2 matches Chrome for a
+     * 16px inherited base, which is the only base the corpus produces.
+     */
+    private const val RELATIVE_SIZE_STEP = 1.2f
 
     private fun extractFontWeight(data: JsonElement): FontWeight? {
         // IR ships font-weight in two shapes:
@@ -374,6 +499,15 @@ object TextStyleApplier {
                 when (kw) {
                     "underline" -> TextDecoration.Underline
                     "line-through" -> TextDecoration.LineThrough
+                    // "overline" is NOT dropped: Compose's TextDecoration has
+                    // no overline flag, so it renders through the OWNED draw
+                    // pass instead — [extractDecorationLineFlags] +
+                    // [decorationSegments], painted by PlaceholderContent over
+                    // the laid-out lines (css-text-decor-3 §2.1). Note the
+                    // owned pass also re-draws underline/line-through with
+                    // Chromium geometry on the label path; this TextStyle
+                    // mapping stays for paths WITHOUT layout access (the
+                    // renderer strips it where the owned pass is active).
                     else -> null
                 }
             }
@@ -422,23 +556,31 @@ object TextStyleApplier {
             }
             // Relative-unit escape hatch: the converter serializes
             // `letter-spacing: 0.25rem` as {"px": 0.0, "original":
-            // {"v":0.25,"u":"REM"}} — px carries a bogus 0 instead of null,
-            // so extractDp below happily returned 0.sp and the tracking
-            // vanished (Typography_C10: web spaced glyphs 4px apart,
-            // Android didn't, 0.847). When px is 0 but the ORIGINAL is a
-            // non-zero em/rem, resolve it the same way the reference does:
-            // ×16 (harness root and body font-size are both 16px).
+            // {…{"v":0.25,"u":"REM"}}} — px carries a bogus 0 instead of
+            // null, so extractDp below happily returned 0.sp and the
+            // tracking vanished (Typography_C10: web spaced glyphs 4px
+            // apart, Android didn't, 0.847).
             val px = data["px"]?.jsonPrimitive?.floatOrNull
             if (px == 0f) {
-                // The wire shape nests once: {"px":0.0,"original":{"type":
-                // "length","original":{"v":0.25,"u":"REM"}}} — unwrap the
-                // outer envelope before reading v/u.
-                val outer = data["original"] as? JsonObject
-                val original = (outer?.get("original") as? JsonObject) ?: outer
-                val v = original?.get("v")?.jsonPrimitive?.floatOrNull
-                val u = original?.get("u")?.jsonPrimitive?.contentOrNull?.uppercase()
-                if (v != null && v != 0f && (u == "EM" || u == "REM")) {
-                    return (v * 16f).sp
+                val vu = relativeOriginalVU(data)
+                if (vu != null) {
+                    val (v, u) = vu
+                    when (u) {
+                        // css-values-4 §5.1.1: em resolves against the
+                        // ELEMENT's own font-size. Compose has a native em
+                        // TextUnit for exactly this (a letterSpacing given
+                        // in .em resolves against the style's fontSize at
+                        // layout time), so `0.1em` on a 22px element yields
+                        // 2.2px — the previous hardcoded ×16 produced 1.6px
+                        // whenever the element's font-size wasn't the 16px
+                        // root default.
+                        "EM" -> return v.em
+                        // rem resolves against the ROOT font-size, which the
+                        // harness pins at the browser default 16px (fixtures
+                        // never style the root element) — a true constant
+                        // here, unlike em.
+                        "REM" -> return (v * 16f).sp
+                    }
                 }
             }
         }
@@ -447,6 +589,30 @@ object TextStyleApplier {
             return dp.value.sp
         }
         return null
+    }
+
+    /**
+     * Unwrap the {v,u} original of a spacing wire value whose px slot is a
+     * bogus 0. Two envelope generations exist in the corpus:
+     *   - {"px":0.0,"original":{"type":"length","original":{"v":…,"u":…}}}
+     *     (the LIVE Letter/WordSpacing wire — verified against the running
+     *     converter, which deep-flattens: IRLength's {v,u} sits directly
+     *     under the outer "original", NO "value" key), and
+     *   - {"px":0.0,"original":{"type":"length","value":{"original":{…}}}}
+     *     (older pinned wires — a legacy envelope that nested IRLength
+     *     under "value" before the deep-flatten).
+     * Accept both so the escape hatch never silently loses a value on
+     * either wire shape. Returns null for zero v (a true zero needs no
+     * resolution) or non-relative payloads.
+     */
+    private fun relativeOriginalVU(data: JsonObject): Pair<Float, String>? {
+        val outer = data["original"] as? JsonObject ?: return null
+        val original = (outer["original"] as? JsonObject)
+            ?: ((outer["value"] as? JsonObject)?.get("original") as? JsonObject)
+            ?: outer
+        val v = original["v"]?.jsonPrimitive?.floatOrNull ?: return null
+        val u = original["u"]?.jsonPrimitive?.contentOrNull?.uppercase() ?: return null
+        return if (v != 0f) v to u else null
     }
 
     /**
@@ -474,21 +640,315 @@ object TextStyleApplier {
         }
     }
 
+    // ==================== WORD SPACING ====================
+
     /**
-     * Extract word spacing from IR data.
-     * Word spacing is approximated using letter spacing since Compose doesn't support it directly.
+     * Extract CSS `word-spacing` as a resolved sp value for the given
+     * element font-size, or null when absent / `normal`.
+     *
+     * Wire (WordSpacingProperty serializer): {"px":N,"original":…} where
+     * `normal` ships as original:"normal" and relative units (em/rem) ship
+     * the same bogus px:0.0 the letter-spacing wire does — so the px==0
+     * case gets the identical {v,u} escape hatch: em × the ELEMENT
+     * font-size (css-values-4 §5.1.1 — word-spacing has no per-glyph em
+     * TextUnit path because the value is applied via 1-char spans, so it
+     * is resolved eagerly here), rem × the 16px harness root. Negative
+     * values pass through untouched (css-text-3 §5.1 allows them; the
+     * span mechanism contracts advance the same way it expands it).
      */
-    private fun extractWordSpacing(data: JsonElement): TextUnit? {
+    fun extractWordSpacingSp(properties: List<IRProperty>, fontSizeSp: Float): Float? {
+        val data = properties.find { it.type == "WordSpacing" }?.data ?: return null
         if (data is JsonObject) {
-            data["pixels"]?.jsonPrimitive?.floatOrNull?.let {
-                return it.sp
+            // `normal` → the initial value, no extra advance (treat as
+            // absent rather than as 0 so callers can skip the span pass).
+            val originalPrim = data["original"] as? JsonPrimitive
+            if (originalPrim?.contentOrNull?.lowercase() == "normal") return null
+            // Resolved px wins whenever it is non-zero ("pixels" is the
+            // legacy key some older wires used; "px" is the live one).
+            val px = data["px"]?.jsonPrimitive?.floatOrNull
+                ?: data["pixels"]?.jsonPrimitive?.floatOrNull
+            if (px != null && px != 0f) return px
+            // px==0 escape hatch (mirrors extractLetterSpacing): a
+            // non-zero em/rem original means the 0 was the converter's
+            // bogus fallback, not a declared zero — resolve it.
+            if (px == 0f) {
+                val vu = relativeOriginalVU(data)
+                if (vu != null) {
+                    val (v, u) = vu
+                    when (u) {
+                        "EM" -> return v * fontSizeSp
+                        "REM" -> return v * 16f
+                    }
+                }
+                // True declared zero (or a relative unit we can't
+                // resolve, e.g. % of the space advance) → honest 0.
+                return 0f
             }
         }
-        val dp = ValueExtractors.extractDp(data)
-        if (dp != null) {
-            return dp.value.sp
+        // Bare primitive / dp-shaped fallback (defensive; the live wire
+        // is always the JsonObject envelope above).
+        return ValueExtractors.extractDp(data)?.value
+    }
+
+    /**
+     * The letter-spacing a word-separator SPAN must carry so that both
+     * trackings apply. css-text-3 §5.1: letter-spacing applies between
+     * ALL typographic units and word-spacing applies ADDITIONALLY at word
+     * separators — but a SpanStyle letterSpacing REPLACES (not adds to)
+     * the paragraph's base letter-spacing on the spanned characters, so
+     * the span value has to be the SUM of both. The em base resolves
+     * against the element font-size (css-values-4 §5.1.1); Unspecified
+     * base contributes nothing.
+     */
+    fun resolveWordSpacingSpanSp(
+        wordSpacingSp: Float,
+        baseLetterSpacing: TextUnit,
+        fontSizeSp: Float
+    ): Float {
+        val baseSp = when {
+            baseLetterSpacing.isSp -> baseLetterSpacing.value
+            baseLetterSpacing.isEm -> baseLetterSpacing.value * fontSizeSp
+            else -> 0f // Unspecified → no base tracking to preserve
         }
-        return null
+        return wordSpacingSp + baseSp
+    }
+
+    /**
+     * Apply CSS word-spacing to already-built annotated text: a
+     * SpanStyle(letterSpacing) over EACH word-separator character only.
+     * Letter-spacing adds its tracking AFTER a glyph's advance, so extra
+     * advance after a space == exactly the CSS word-spacing model —
+     * including negatives, which contract the gap symmetrically to the
+     * browser. Separators: SPACE and NO-BREAK SPACE, the word-separator
+     * characters (css-text-3 §5.1) the Latin fixture corpus produces
+     * (ideographic/ogham separators are out of scope for this corpus).
+     * Builder-copies the input so existing spans (synthesized small-caps
+     * runs) survive untouched.
+     */
+    fun applyWordSpacingSpans(
+        text: androidx.compose.ui.text.AnnotatedString,
+        spanSpacingSp: Float
+    ): androidx.compose.ui.text.AnnotatedString {
+        val builder = androidx.compose.ui.text.AnnotatedString.Builder(text)
+        text.text.forEachIndexed { index, ch ->
+            if (ch == ' ' || ch == '\u00A0') {
+                builder.addStyle(
+                    SpanStyle(letterSpacing = spanSpacingSp.sp),
+                    index,
+                    index + 1
+                )
+            }
+        }
+        return builder.toAnnotatedString()
+    }
+
+    // ==================== OWNED DECORATION LINES ====================
+    //
+    // Wave-6 decoration-line ownership: the native runtime draws ALL THREE
+    // css-text-decor-3 §2.1 lines (underline / overline / line-through)
+    // itself instead of delegating underline+line-through to the
+    // platform's 1px built-ins. Device evidence (wave-5 gate,
+    // typography/text-decoration-line): Chromium draws pixel-snapped
+    // 2px-thick lines at 22px Inter while Android's built-ins drew ~1px
+    // at different offsets — Underline pair 0.809, UnderOver 0.740,
+    // Triple 0.737 vs the fixture's no-decoration floor 0.8695.
+    //
+    // THE GEOMETRY ORACLE IS EMPIRICAL — measured off the archived web
+    // captures (wave5-gate/typography_text-decoration-line/images/web,
+    // 22px Inter, #111 ink on #ecf0f1, two wrapped lines, alphabetic
+    // baselines at integer rows y=41 and y=67):
+    //   overline     rows [18,20) line 1 · [44,46) line 2
+    //   line-through rows [33,35) line 1 · [59,61) line 2
+    //   underline    rows [43,45) line 1 · (line 2's clipped by the box)
+    // All three are EXACTLY 2 fully-opaque pixel rows — no anti-aliasing
+    // — so Chromium places decorations at integral device rows with an
+    // integral thickness. The em-fractions below reproduce those rows
+    // exactly and come from the bundled Inter face's own tables
+    // (apps/web-harness/public/fonts/Inter-Regular.ttf, unitsPerEm 2048),
+    // which is what Blink consults for `text-decoration-thickness: auto`
+    // and the strike position.
+
+    /** Inter post.underlineThickness = 140/2048 em. At 22px → 1.504 →
+     *  rounds to the measured 2px; at 16px → 1.094 → the 1px Chrome
+     *  draws at body size (prior wave evidence). One thickness feeds all
+     *  three lines — the captures show identical 2px for each. */
+    private const val DECORATION_THICKNESS_EM = 140f / 2048f
+
+    /** Inter hhea.ascender = 1984/2048 em. Chromium rounds the ascent to
+     *  an integer (21 at 22px) and hangs the overline ABOVE that ascent
+     *  edge: measured bottom of the overline is flush with
+     *  baseline − round(ascent) (row 20 = 41 − 21), the line box top. */
+    private const val DECORATION_ASCENT_EM = 1984f / 2048f
+
+    /** Inter OS/2.yStrikeoutPosition = 671/2048 em above the baseline —
+     *  the strike CENTER. At 22px: 41 − 7.208 − 2/2 = 32.79 → snaps to
+     *  the measured top row 33. */
+    private const val STRIKEOUT_POSITION_EM = 671f / 2048f
+
+    /**
+     * Which of the three css-text-decor-3 §2.1 line keywords the
+     * component's `text-decoration-line` carries. When [any] is true the
+     * renderer's owned draw pass paints EVERY flagged line itself and the
+     * TextStyle must NOT also carry TextDecoration.Underline/LineThrough
+     * (the built-ins would double-draw under the owned rects).
+     */
+    data class DecorationLineFlags(
+        val underline: Boolean,   // `underline` keyword present
+        val overline: Boolean,    // `overline` keyword present
+        val lineThrough: Boolean  // `line-through` keyword present
+    ) {
+        /** True when at least one line is requested — the owned-pass gate. */
+        val any: Boolean get() = underline || overline || lineThrough
+    }
+
+    /** The no-decoration constant (all flags off) — what absent /
+     *  `none` / unknown-keyword wires resolve to. */
+    private val NO_DECORATION_LINES = DecorationLineFlags(
+        underline = false, overline = false, lineThrough = false
+    )
+
+    /**
+     * Parse `text-decoration-line` into [DecorationLineFlags]. Handles
+     * both wire shapes the converter emits (see TextDecorationLine
+     * PropertyParser): the keyword ARRAY (["UNDERLINE","OVERLINE"]) and a
+     * bare keyword primitive ("UNDERLINE"). `blink` is a no-visual-effect
+     * value in every modern browser (css-text-decor-3 §2.1: UAs "may not"
+     * blink) so it maps to no flags, like `none`.
+     */
+    fun extractDecorationLineFlags(properties: List<IRProperty>): DecorationLineFlags {
+        // No declared property → initial value `none` → nothing owned.
+        val data = properties.find { it.type == "TextDecorationLine" }?.data
+            ?: return NO_DECORATION_LINES
+        // Normalize each keyword the way extractTextDecoration does:
+        // lowercase + underscore→hyphen (wire ships LINE_THROUGH).
+        val keywords: List<String> = if (data is JsonArray) {
+            data.mapNotNull { elem ->
+                (elem as? JsonPrimitive)?.contentOrNull?.lowercase()?.replace("_", "-")
+            }
+        } else {
+            // Bare primitive wire — a single keyword or nothing.
+            listOfNotNull(ValueExtractors.extractKeyword(data)?.lowercase()?.replace("_", "-"))
+        }
+        // One flag per spec keyword; anything else (none/blink/garbage)
+        // contributes no line.
+        return DecorationLineFlags(
+            underline = "underline" in keywords,
+            overline = "overline" in keywords,
+            lineThrough = "line-through" in keywords
+        )
+    }
+
+    /**
+     * Whether `text-decoration-line` includes `overline` — kept as the
+     * historic wave-5 predicate name (JVM suite pins it); now a thin
+     * view over [extractDecorationLineFlags] so there is exactly ONE
+     * wire parser for the property.
+     */
+    fun extractHasOverline(properties: List<IRProperty>): Boolean =
+        extractDecorationLineFlags(properties).overline
+
+    /**
+     * One horizontal decoration rect in text-layout coordinates:
+     * top-left (left, top), extent (width, thickness). Same shape for
+     * all three lines — only `top` differs per line kind.
+     */
+    data class DecorationSegment(
+        val left: Float,      // line's leftmost painted x (TextLayoutResult.getLineLeft)
+        val top: Float,       // snapped top row of the rect (Chromium-matched, see decorationSegments)
+        val width: Float,     // getLineRight − getLineLeft, the inked extent of the visual line
+        val thickness: Float  // shared auto thickness (Inter underlineThickness em, ≥1px)
+    )
+
+    /**
+     * The shared `text-decoration-thickness: auto` in device px: the
+     * face's underlineThickness em-fraction × font-size, rounded to an
+     * integer like Chromium's device-row snapping, floored at 1px so tiny
+     * sizes still paint. 22px → 2 (measured), 16px → 1 (Chrome at body
+     * size), 8px → 1 (floor).
+     */
+    fun decorationThicknessPx(fontSizePx: Float): Float =
+        maxOf(1f, Math.round(fontSizePx * DECORATION_THICKNESS_EM).toFloat())
+
+    /**
+     * Compute the owned decoration rects for a laid-out paragraph — one
+     * segment per flagged line kind per VISUAL line (css-text-decor-3
+     * §2.1: each line box gets its own decoration), spanning that line's
+     * inked extent. Pure function over the TextLayoutResult accessors
+     * (lineCount / getLineBaseline / getLineLeft / getLineRight passed as
+     * lambdas) so the JVM suite can pin the geometry without an Android
+     * canvas.
+     *
+     * Geometry — Chromium-matched, all anchored on the ALPHABETIC
+     * BASELINE (the one anchor Android's layout reports identically to
+     * Blink for the same face+size), with the baseline snapped to an
+     * integer row first because every measured web row is integral:
+     *   T          = decorationThicknessPx            (2px at 22px)
+     *   underline  top = round(baseline) + T          (43 = 41+2 ✓ rows 43-44)
+     *   overline   top = round(baseline) − round(ascent·fs) − T
+     *                                                 (18 = 41−21−2 ✓ rows 18-19)
+     *   line-through top = round(round(baseline) − strikePos·fs − T/2)
+     *                                                 (33 = round(32.79) ✓ rows 33-34)
+     * Line 2 of the capture confirms the parameterization at a second
+     * baseline (67): overline 44 ✓, strike 59 ✓, underline 69 (clipped
+     * by the 50px fixture box, consistent).
+     *
+     * Known remaining divergence (documented, not silent): Chromium's
+     * `text-decoration-skip-ink: auto` gaps the underline around
+     * descenders (~11px of the 212px run at 22px); the owned pass paints
+     * the full run — Compose exposes no per-glyph outline geometry to
+     * carve the gaps without a platform canvas.
+     *
+     * Empty visual lines (right ≤ left, e.g. a trailing blank line) paint
+     * no decoration — the browser draws nothing over zero inked extent.
+     */
+    fun decorationSegments(
+        lineCount: Int,
+        fontSizePx: Float,
+        flags: DecorationLineFlags,
+        lineBaseline: (Int) -> Float,
+        lineLeft: (Int) -> Float,
+        lineRight: (Int) -> Float
+    ): List<DecorationSegment> {
+        // Nothing flagged → nothing owned (callers gate on flags.any, but
+        // stay total anyway — no silent surprises).
+        if (!flags.any) return emptyList()
+        // One shared thickness for all lines of all kinds (oracle: all
+        // three captures show identical 2px at 22px).
+        val thickness = decorationThicknessPx(fontSizePx)
+        // Chromium's integral rounded ascent (21 at 22px Inter).
+        val roundedAscent = Math.round(fontSizePx * DECORATION_ASCENT_EM)
+        return (0 until lineCount).flatMap { i ->
+            val left = lineLeft(i)
+            val right = lineRight(i)
+            // Zero inked extent → no decoration on this visual line.
+            if (right <= left) return@flatMap emptyList<DecorationSegment>()
+            val width = right - left
+            // Integral baseline row — web rows are pixel-snapped, and
+            // Android baselines can land on fractions; snapping here is
+            // what makes the three tops integral like the capture.
+            val baseline = Math.round(lineBaseline(i)).toFloat()
+            // Build only the flagged kinds, in under→through→over paint
+            // order (matches Blink: line-through paints last, over ink).
+            buildList {
+                if (flags.underline) add(DecorationSegment(
+                    // Gap below baseline == the thickness (measured: 2px
+                    // gap rows 41-42 clean, ink starts at 43 = 41+2).
+                    left, baseline + thickness, width, thickness
+                ))
+                if (flags.overline) add(DecorationSegment(
+                    // Bottom edge flush with baseline − rounded ascent
+                    // (the line box top): top = that edge − thickness.
+                    left, baseline - roundedAscent - thickness, width, thickness
+                ))
+                if (flags.lineThrough) add(DecorationSegment(
+                    // Strike CENTER at baseline − yStrikeoutPosition·fs;
+                    // the rect straddles it (±T/2) then snaps to a row.
+                    left,
+                    Math.round(baseline - fontSizePx * STRIKEOUT_POSITION_EM - thickness / 2f).toFloat(),
+                    width, thickness
+                ))
+            }
+        }
     }
 
     /**
@@ -525,10 +985,21 @@ object TextStyleApplier {
     fun extractTextTransform(properties: List<IRProperty>): TextTransformMode {
         val prop = properties.find { it.type == "TextTransform" } ?: return TextTransformMode.NONE
         val keyword = ValueExtractors.extractKeyword(prop.data)
-        return when (keyword?.lowercase()) {
+        // The wire ships the bare enum name ("FULL_WIDTH") — normalize the
+        // underscore form to CSS kebab-case before matching (no-op for the
+        // single-word keywords).
+        return when (keyword?.lowercase()?.replace("_", "-")) {
             "uppercase" -> TextTransformMode.UPPERCASE
             "lowercase" -> TextTransformMode.LOWERCASE
             "capitalize" -> TextTransformMode.CAPITALIZE
+            // css-text-3 §2.1 `full-width` maps glyphs to their U+FFxx
+            // fullwidth compatibility forms. DELIBERATE no-op: Chromium —
+            // the visual reference — renders the corpus's Latin fixture
+            // text unchanged for full-width, so substituting fullwidth
+            // codepoints here would DIVERGE from the reference captures.
+            // Explicitly mapped (not silently defaulted) so the decision
+            // is auditable.
+            "full-width" -> TextTransformMode.NONE
             else -> TextTransformMode.NONE
         }
     }
@@ -541,8 +1012,22 @@ object TextStyleApplier {
             TextTransformMode.NONE -> text
             TextTransformMode.UPPERCASE -> text.uppercase()
             TextTransformMode.LOWERCASE -> text.lowercase()
+            // css-text-3 §2.1: capitalize puts the first TYPOGRAPHIC LETTER
+            // UNIT of each word in titlecase. Chromium — the visual
+            // reference — titlecases the first LETTER even when the word
+            // begins with punctuation or digits (WPT capitalize-031:
+            // "(this)" renders "(This)"). The old replaceFirstChar touched
+            // word[0] only, so any leading non-letter left the word
+            // untransformed and Android diverged from web. Scan for the
+            // first Char.isLetter() instead; letterless words (pure
+            // punctuation / numbers) pass through unchanged — explicitly,
+            // matching the browser (nothing to titlecase).
             TextTransformMode.CAPITALIZE -> text.split(" ").joinToString(" ") { word ->
-                word.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                val i = word.indexOfFirst { it.isLetter() }
+                if (i < 0) word // no letter anywhere → word is untouched
+                // titlecase() is identity on already-uppercase letters, so
+                // "FOO" stays "FOO" — same as the previous behavior.
+                else word.substring(0, i) + word[i].titlecase() + word.substring(i + 1)
             }
         }
     }

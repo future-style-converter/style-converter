@@ -246,9 +246,20 @@ object ContentApplier {
             Modifier
         }
 
-        // Extract text style
+        // Extract text style. The inherited font-size base for relative
+        // font-size values (em / % / smaller / larger — css-values-4
+        // §5.1.1: they resolve against the INHERITED size) comes off the
+        // renderer's inheritance channel; read OUTSIDE the try because
+        // CompositionLocal.current is a composable read (Compose forbids
+        // composable calls inside try blocks). Null when no ancestor
+        // styles font-size → the extractor's honest 16sp browser default.
+        val inheritedFontSizeSp = com.styleconverter.runtime.core.variables.DynamicValueResolver
+            .fontSizePxOf(
+                com.styleconverter.runtime.core.renderer.ComponentRenderer
+                    .LocalInheritedProperties.current
+            )
         val textStyle = try {
-            TextStyleApplier.extractTextStyle(config.properties)
+            TextStyleApplier.extractTextStyle(config.properties, inheritedFontSizeSp)
         } catch (e: Exception) {
             TextStyle.Default
         }

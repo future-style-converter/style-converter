@@ -9,6 +9,8 @@ import type { BorderImageSliceConfig } from './BorderImageSliceConfig';
 export type BorderImageSliceStyles = Pick<CSSProperties, 'borderImageSlice'>;
 
 // Pure function — emits {} when unset so callers can safely spread.
+// `fill` rides along so the emitted declaration keeps the middle region
+// painted (css-backgrounds-3 §6.1) exactly like the native runtimes.
 export function applyBorderImageSlice(config: BorderImageSliceConfig): BorderImageSliceStyles {
-  return emitSlice(config.quad) as BorderImageSliceStyles;
+  return emitSlice(config.quad, config.fill) as BorderImageSliceStyles;
 }

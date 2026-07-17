@@ -103,6 +103,35 @@ describe('FontSize', () => {
     expect(applyFontSize(extractFontSize([p('FontSize', { original: { expr: 'calc(16px + 2px)', type: 'expression' } })])))
       .toEqual({ fontSize: 'calc(16px + 2px)' });
   });
+  it('emits rem length from the LIVE deep-flattened IRLength wire (no top-level px)', () => {
+    // font-size: 2rem — the LIVE converter deep-flattens: it emits
+    // {original:{type:'length', original:{v:2,u:'REM'}}} with NO px and NO
+    // `value` key (shape captured verbatim from ./gradlew :converter:run on a
+    // font-size probe fixture). Previously the extractor read `orig.value`
+    // and DROPPED this shape entirely.
+    expect(applyFontSize(extractFontSize([p('FontSize', { original: { type: 'length', original: { v: 2, u: 'REM' } } })])))
+      .toEqual({ fontSize: '2rem' });
+  });
+  it('emits em length from the LIVE deep-flattened IRLength wire', () => {
+    // font-size: 1.5em — same live relative-length wire, em flavour (captured
+    // from real converter output); Chromium resolves it natively against the
+    // inherited size (css-fonts-4 §3.1).
+    expect(applyFontSize(extractFontSize([p('FontSize', { original: { type: 'length', original: { v: 1.5, u: 'EM' } } })])))
+      .toEqual({ fontSize: '1.5em' });
+  });
+  it('still emits rem from the LEGACY nested `value` wire (pre-flatten IR)', () => {
+    // Older IR nested the IRLength wire under `value`; the extractor keeps a
+    // fallback (`orig.original ?? orig.value`) so archived IR still renders.
+    expect(applyFontSize(extractFontSize([p('FontSize', { original: { type: 'length', value: { original: { v: 1.5, u: 'REM' } } } })])))
+      .toEqual({ fontSize: '1.5rem' });
+  });
+  it('emits percentage of parent size (live wire shape)', () => {
+    // font-size: 120% — the LIVE converter emits {original:{type:'percentage',
+    // value:120}} (captured from real converter output); only the browser can
+    // resolve the parent reference, so we pass '120%' through.
+    expect(applyFontSize(extractFontSize([p('FontSize', { original: { type: 'percentage', value: 120 } })])))
+      .toEqual({ fontSize: '120%' });
+  });
   it('empty on unset', () => { expect(applyFontSize({})).toEqual({}); });
 });
 

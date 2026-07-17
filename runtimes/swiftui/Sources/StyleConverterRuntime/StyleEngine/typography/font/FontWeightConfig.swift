@@ -13,4 +13,10 @@ import SwiftUI
 struct FontWeightConfig: Equatable {
     /// SwiftUI Font.Weight bucket corresponding to the numeric weight.
     var weight: Font.Weight? = nil
+    /// Lane IOS-TEXT fix 5 — the raw numeric CSS weight (keywords are
+    /// mapped to their css-fonts-4 §2.2 numeric equivalents: bold/
+    /// bolder → 700, lighter → 100, normal → 400). Drives the concrete
+    /// installed-face pick in FontFaceMatcher; the bucketed `weight`
+    /// above stays as the fallback for families we can't introspect.
+    var numeric: Int? = nil
 }
