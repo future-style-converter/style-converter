@@ -271,6 +271,47 @@ async function main() {
     log(`  ${base}: ${ok ? 'OK' : 'PARTIAL'} ${pulled.length}/${expected.length} PNGs in ${elapsedSec.toFixed(2)}s`);
   }
 
+  // Tail-retry pass: give every timed-out fixture ONE more chance now that
+  // the app is warm. The dominant timeout cause on a pooled device is the
+  // COLD first launch after boot (JIT + first render blow the budget on
+  // fixture #1, then everything runs in ~1s) — without this pass, every
+  // section that lands on a cold slot ships a hole at its first fixture. A
+  // genuinely wedging fixture (e.g. css-transforms z-ordering-003) just
+  // times out a second time and stays failed — retried:true marks the row
+  // either way so the summary shows what was salvaged vs truly broken.
+  const timedOutRows = results.filter((r) => r.error === 'timeout');
+  if (timedOutRows.length > 0 && timedOutRows.length < fixtures.length) {
+    log(`tail-retry: ${timedOutRows.length} timed-out fixture(s), one warm retry each…`);
+    for (const row of timedOutRows) {
+      const fx = fixtures.find((f) => path.basename(f) === row.fixture);
+      if (!fx) continue;
+      const expected = opts.composed
+        ? (() => { const n = composedPngName(row.fixture); return [{ deviceFile: n, hostFile: n }]; })()
+        : expectedPngNames(JSON.parse(readFileSync(fx, 'utf8')));
+      const t0 = Date.now();
+      // 9xxx prefix keeps the inbox name unique vs the first attempt's 0xxx.
+      adbx(['push', fx, `${INBOX_DIR}/9${String(fixtures.indexOf(fx)).padStart(3, '0')}-${row.fixture}`]);
+      const { done } = await waitForPngs(adbx, expected.map((e) => e.deviceFile), opts.timeoutPerFixture);
+      row.retried = true;
+      if (done) {
+        await new Promise((r) => setTimeout(r, 150));
+        const pulled = [];
+        for (const e of expected) {
+          if (pullVerified(adbx, e.deviceFile, e.hostFile, opts.out)) pulled.push(e.hostFile);
+        }
+        if (pulled.length === expected.length) {
+          row.ok = true; delete row.error;
+          row.pulled = pulled; row.elapsedSec = (Date.now() - t0) / 1000;
+          log(`  ${row.fixture}: RETRY OK in ${row.elapsedSec.toFixed(2)}s`);
+        }
+      } else {
+        log(`  ${row.fixture}: RETRY TIMEOUT — genuinely failing, restarting app`);
+        await resetAndLaunch(adbx, opts);
+      }
+      adbx(['shell', 'rm', '-f', `${SHOT_DIR}/*`]);
+    }
+  }
+
   adbx(['shell', 'am', 'force-stop', PKG]); // stop app; leave the device running
 
   // Machine-readable summary on stdout (human logs went to stderr).

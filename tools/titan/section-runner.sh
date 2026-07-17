@@ -455,57 +455,126 @@ unset VITE_PID
 trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT
 set -m
 
-# ── Step 5b: native composed capture (--all-platforms) ──────────────────────
+# ── Step 5b: native composed capture (--all-platforms, device-pooled) ───────
 #
-# The natives are SINGLETONS: parallel section-runners capture web
-# concurrently (isolated vite ports), but the ONE emulator + ONE simulator
-# must be fed SERIALLY. A global device lock (mkdir-atomic + stale-heal, like
-# the per-section lock) gates only this feed; the web capture above already
-# ran in parallel. The per-section combined IR is split into per-test docs
-# the inbox feeders stream in composed mode → one <safe(testKey)>.png per
-# test in the per-section native dirs, which inject reads via
-# diffComposedVsRef. For --web-only these dirs are created but left EMPTY, so
-# Step 6/7 (which always read them) behave exactly as the old EMPTY_DIR path.
+# Native devices are a POOL, not a singleton: parallel section-runners capture
+# web concurrently (isolated vite ports), and each grabs one free Android
+# device + one free iOS simulator from whatever is currently booted. With a
+# single emulator + single simulator this degrades to the old serialized
+# behavior; with a provisioned fleet (tools/titan/provision-devices.sh) N
+# sections feed natives concurrently. Slots are mkdir-atomic per-device locks
+# with stale-heal (same pattern as the per-section lock). Android and iOS are
+# INDEPENDENT hardware, so the two feeders run CONCURRENTLY within a section.
+# The per-section combined IR is split into per-test docs the inbox feeders
+# stream in composed mode → one <safe(testKey)>.png per test in the
+# per-section native dirs, which inject reads via diffComposedVsRef. For
+# --web-only these dirs are created but left EMPTY, so Step 6/7 (which always
+# read them) behave exactly as the old EMPTY_DIR path.
 IOS_SHOTS_DIR="$WORK_DIR/ios-screenshots"
 ANDROID_SHOTS_DIR="$WORK_DIR/android-screenshots"
 rm -rf "$IOS_SHOTS_DIR" "$ANDROID_SHOTS_DIR"
 mkdir -p "$IOS_SHOTS_DIR" "$ANDROID_SHOTS_DIR"
 if [[ "$PLATFORM_SCOPE" == "all" ]]; then
-  step "Step 5b: native composed capture (device-serialized)"
+  step "Step 5b: native composed capture (device-pooled)"
   PERTEST_DIR="$WORK_DIR/per-test-ir"
   # Split THIS section's combined IR (from Step 4) into per-test docs.
   node "$TITAN_DIR/split-combined-ir.mjs" --in "$GRADLE_OUT_DIR/tmpOutput.json" --out "$PERTEST_DIR" \
     >>"$CAPTURE_LOG" 2>&1 || warn "split-combined-ir failed — natives will be absent"
-  # Global device lock — serialize native feeding across parallel sections.
-  DEV_LOCK="/tmp/titan-native-device.lock"
-  _dev_acquire() {
-    local waited=0
-    while ! mkdir "$DEV_LOCK" 2>/dev/null; do
-      local pid; pid=$(cat "$DEV_LOCK/pid" 2>/dev/null || echo "")
-      if [[ "$pid" =~ ^[0-9]+$ ]] && ! kill -0 "$pid" 2>/dev/null; then
-        rm -rf "$DEV_LOCK"; continue    # stale holder died — reclaim
-      fi
-      sleep 5; waited=$((waited+5))
-      if [[ $waited -ge 7200 ]]; then warn "device lock wait > 2h — skipping natives for $SECTION"; return 1; fi
+
+  POOL_ROOT="/tmp/titan-device-pool"
+  # adb lives outside PATH in most shells; mirror feed-android's resolution.
+  _adb_bin() {
+    command -v adb 2>/dev/null && return 0
+    local c
+    for c in "${ANDROID_HOME:-}/platform-tools/adb" "$HOME/Library/Android/sdk/platform-tools/adb"; do
+      [[ -x "$c" ]] && { echo "$c"; return 0; }
     done
-    echo "$$" > "$DEV_LOCK/pid"; return 0
+    return 1
   }
-  _dev_release() { rm -rf "$DEV_LOCK" 2>/dev/null || true; }
-  if [[ -d "$PERTEST_DIR" ]] && _dev_acquire; then
-    # Hold BOTH locks during the feed; release the device lock the instant
-    # feeding ends so the next section can start (web work continues without it).
-    trap '_cleanup_vite 2>/dev/null; _dev_release; rm -rf "$LOCK" 2>/dev/null || true' EXIT
-    log "device lock acquired — feeding natives (composed)"
+  # Booted-device discovery — the pool is "whatever is booted right now", so
+  # provisioning more devices needs zero config here.
+  _android_candidates() {
+    local adb; adb=$(_adb_bin) || return 0
+    "$adb" devices 2>/dev/null | awk '$2=="device" && $1 ~ /^emulator-/ {print $1}'
+  }
+  _ios_candidates() {
+    xcrun simctl list devices booted 2>/dev/null | grep -oE '\([0-9A-F-]{36}\)' | tr -d '()'
+  }
+  # Acquire ANY free slot among the candidates: try each device's mkdir-atomic
+  # lock (with stale-heal), looping until one frees up or the 2h cap. Echoes
+  # the acquired device id on stdout.
+  _pool_acquire() {
+    local platform="$1"; shift
+    [[ $# -eq 0 ]] && return 1          # no booted devices → caller skips platform
+    mkdir -p "$POOL_ROOT/$platform"
+    local waited=0 dev slot pid
+    while :; do
+      for dev in "$@"; do
+        slot="$POOL_ROOT/$platform/$dev.lock"
+        if mkdir "$slot" 2>/dev/null; then echo "$$" > "$slot/pid"; printf '%s\n' "$dev"; return 0; fi
+        pid=$(cat "$slot/pid" 2>/dev/null || echo "")
+        if [[ "$pid" =~ ^[0-9]+$ ]] && ! kill -0 "$pid" 2>/dev/null; then
+          rm -rf "$slot"                 # stale holder died — reclaim and retry
+          if mkdir "$slot" 2>/dev/null; then echo "$$" > "$slot/pid"; printf '%s\n' "$dev"; return 0; fi
+        fi
+      done
+      sleep 5; waited=$((waited+5))
+      [[ $waited -ge 7200 ]] && return 1
+    done
+  }
+  _pool_release() { [[ -n "${2:-}" ]] && rm -rf "$POOL_ROOT/$1/$2.lock" 2>/dev/null || true; }
+  ANDROID_DEV="" ; IOS_DEV=""
+
+  if [[ -d "$PERTEST_DIR" ]]; then
+    # Acquire one slot per platform (independently — a busy emulator pool must
+    # not delay the iOS feed, and vice versa). Empty candidate list or a 2h
+    # wait → that platform is skipped with a warning, the other still runs.
+    ANDROID_DEV=$(_pool_acquire android $(_android_candidates)) \
+      || warn "no free Android device (pool empty or 2h wait) — Android column absent for $SECTION"
+    IOS_DEV=$(_pool_acquire ios $(_ios_candidates)) \
+      || warn "no free iOS simulator (pool empty or 2h wait) — iOS column absent for $SECTION"
+    trap '_cleanup_vite 2>/dev/null; _pool_release android "$ANDROID_DEV"; _pool_release ios "$IOS_DEV"; rm -rf "$LOCK" 2>/dev/null || true' EXIT
+
+    # Prebuilt markers (written by provision-devices.sh): the app is already
+    # installed on every pool device, so feeders skip their own gradle install /
+    # xcodebuild — this is what makes CONCURRENT feeds safe (two simultaneous
+    # gradle installs or xcodebuilds in one repo checkout can collide).
+    # Plain strings, NOT arrays: macOS ships bash 3.2, where expanding an
+    # EMPTY array with "${arr[@]}" under `set -u` is an "unbound variable"
+    # error that kills the backgrounded feeder before it starts. The flags are
+    # space-free, so unquoted word-split expansion is safe here.
+    ANDROID_FLAGS="" ; IOS_FLAGS=""
+    grep -qxF "$ANDROID_DEV" "$POOL_ROOT/provisioned-android" 2>/dev/null && ANDROID_FLAGS="--skip-install"
+    grep -qxF "$IOS_DEV" "$POOL_ROOT/provisioned-ios" 2>/dev/null && IOS_FLAGS="--no-build"
+
     # Both feeders take --timeout-per-fixture in SECONDS (unified in the
     # honesty quick-wins); --composed = one <safe(testKey)>.png per test.
-    node "$TITAN_DIR/feed-android.mjs" --fixtures "$PERTEST_DIR" --composed \
-      --out "$ANDROID_SHOTS_DIR" --timeout-per-fixture 180 >>"$CAPTURE_LOG" 2>&1 \
-      || warn "feed-android exited non-zero — Android column may be partial"
-    node "$TITAN_DIR/feed-ios.mjs" --fixtures "$PERTEST_DIR" --composed \
-      --out "$IOS_SHOTS_DIR" --timeout-per-fixture 180 >>"$CAPTURE_LOG" 2>&1 \
-      || warn "feed-ios exited non-zero — iOS column may be partial"
-    _dev_release
-    trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT   # drop device-lock from the trap
+    # Separate log files (appended to CAPTURE_LOG after) so the two feeders'
+    # concurrent output can't interleave mid-line.
+    FEED_ANDROID_PID="" ; FEED_IOS_PID=""
+    if [[ -n "$ANDROID_DEV" ]]; then
+      log "android slot: $ANDROID_DEV — feeding (composed)"
+      node "$TITAN_DIR/feed-android.mjs" --fixtures "$PERTEST_DIR" --composed \
+        --udid "$ANDROID_DEV" $ANDROID_FLAGS \
+        --out "$ANDROID_SHOTS_DIR" --timeout-per-fixture 180 >"$WORK_DIR/feed-android.log" 2>&1 &
+      FEED_ANDROID_PID=$!
+    fi
+    if [[ -n "$IOS_DEV" ]]; then
+      log "ios slot: $IOS_DEV — feeding (composed)"
+      node "$TITAN_DIR/feed-ios.mjs" --fixtures "$PERTEST_DIR" --composed \
+        --udid "$IOS_DEV" $IOS_FLAGS \
+        --out "$IOS_SHOTS_DIR" --timeout-per-fixture 180 >"$WORK_DIR/feed-ios.log" 2>&1 &
+      FEED_IOS_PID=$!
+    fi
+    [[ -n "$FEED_ANDROID_PID" ]] && { wait "$FEED_ANDROID_PID" || warn "feed-android exited non-zero — Android column may be partial"; }
+    [[ -n "$FEED_IOS_PID" ]]     && { wait "$FEED_IOS_PID"     || warn "feed-ios exited non-zero — iOS column may be partial"; }
+    cat "$WORK_DIR/feed-android.log" "$WORK_DIR/feed-ios.log" >>"$CAPTURE_LOG" 2>/dev/null || true
+
+    # Release slots the instant feeding ends so the next section can start
+    # (web/compare work below continues without any device held).
+    _pool_release android "$ANDROID_DEV" ; _pool_release ios "$IOS_DEV"
+    ANDROID_DEV="" ; IOS_DEV=""
+    trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT   # drop pool slots from the trap
     log "native composed: iOS $(find "$IOS_SHOTS_DIR" -maxdepth 1 -name '*.png' | wc -l | tr -d ' '), Android $(find "$ANDROID_SHOTS_DIR" -maxdepth 1 -name '*.png' | wc -l | tr -d ' ')"
   fi
 fi

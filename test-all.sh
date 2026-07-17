@@ -911,7 +911,12 @@ REPORT_PATH="$TOOLS_VISUAL_DIR/report/index.html"
 if [[ "${UPDATE_BASELINE:-0}" != "1" ]] && [[ -f "$REPORT_PATH" ]]; then
     echo
     echo -e "  Report: ${B}$REPORT_PATH${N}"
-    if command -v open &>/dev/null && [[ "${NO_OPEN:-0}" != "1" ]]; then
+    # Silent by default: auto-`open`ing the report steals macOS focus, which
+    # makes long campaigns (parallel section-runners, overnight sweeps)
+    # unusable on a working machine. Opt IN with OPEN_REPORT=1; NO_OPEN=1
+    # still force-suppresses (BACKGROUND_MODE sets it), so existing callers
+    # keep working unchanged.
+    if command -v open &>/dev/null && [[ "${OPEN_REPORT:-0}" == "1" ]] && [[ "${NO_OPEN:-0}" != "1" ]]; then
         open "$REPORT_PATH"
     fi
 fi
