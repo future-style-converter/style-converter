@@ -319,7 +319,10 @@ final class EffectsTests: XCTestCase {
                 ]),
             ])),
         ]))
-        if case .linearGradient(let deg, _) = mimg?.images.first ?? .none, deg == 45 { /* ok */ }
+        // Case arity: lane M added the `repeating` flag (false for plain
+        // linear-gradient) — see MaskLayer.linearGradient.
+        if case .linearGradient(let deg, _, let rep) = mimg?.images.first ?? .none,
+           deg == 45, rep == false { /* ok */ }
         else { f.append("MaskImage: linear-gradient(45deg) mismatch") }
 
         // url form.

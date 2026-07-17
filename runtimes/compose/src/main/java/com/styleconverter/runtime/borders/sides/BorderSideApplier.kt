@@ -30,18 +30,25 @@ import com.styleconverter.runtime.core.types.ValueExtractors.LineStyle
  *                            render as circles.
  *   - double               — two parallel 1/3-width lines with a 1/3-width
  *                            gap. Needs width >= 3px to be visible.
- *   - groove / ridge       — CSS "3D" strokes: two half-width lines with
- *                            lighter and darker shades of the declared
- *                            color. groove = dark-outer/light-inner,
- *                            ridge = light-outer/dark-inner (reversed).
- *   - inset / outset       — Uniform half-shade: inset darkens top/left
- *                            and lightens bottom/right (sunken look);
- *                            outset is the mirror (raised look). This is
- *                            the canonical CSS 3D-border shading.
+ *   - groove / ridge       — CSS "3D" strokes: two half-width adjacent
+ *                            bands. Blink composes them as two half-
+ *                            borders styled inset(outer)/outset(inner)
+ *                            for groove (swapped for ridge), and EACH
+ *                            half then follows the per-side darkening
+ *                            rule below — so groove is dark-outer/light-
+ *                            inner on top/left but LIGHT-outer/dark-
+ *                            inner on bottom/right (ridge mirrored).
+ *   - inset / outset       — Per-side band shade: inset darkens top/left
+ *                            and keeps bottom/right at the declared color
+ *                            (sunken look); outset is the mirror (raised
+ *                            look). This is the canonical CSS 3D shading.
  *
- * The 3D styles use a simple lighten/darken factor on the declared color
- * rather than a palette lookup — matches what every browser engine does
- * and avoids a color theory dependency in the runtime.
+ * The 3D styles use Chromium's two-tone palette (see shade()): the light
+ * band is the declared color UNCHANGED (unless the base is near-black —
+ * then Blink Color::Light() lifts it so the bands stay distinguishable)
+ * and the dark band follows Blink Color::Dark()'s subtractive model —
+ * 3D painting is UA-defined, so the web reference engine's measured
+ * palette is the cross-platform contract.
  */
 object BorderSideApplier {
 
@@ -106,9 +113,10 @@ object BorderSideApplier {
         }
     }
 
-    // Internal enum identifying which side is currently being painted —
-    // drives the 3D-shading decision for inset/outset/groove/ridge.
-    private enum class Side { TOP, END, BOTTOM, START }
+    // Enum identifying which side is currently being painted — drives
+    // the 3D-shading decision for inset/outset/groove/ridge. Internal
+    // (not private) so JVM tests can pin the per-side band order.
+    internal enum class Side { TOP, END, BOTTOM, START }
 
     /**
      * Paint one side of the border inside a DrawScope. Dispatches to the
@@ -142,10 +150,18 @@ object BorderSideApplier {
             LineStyle.DASHED ->
                 drawStrokedLine(
                     c, start, end, width,
-                    // Width-conditional on:off intervals — see
-                    // dashedIntervals() for the Chromium measurements
-                    // that picked 2w:1w (thick) vs 6w:4w (thin).
-                    pathEffect = PathEffect.dashPathEffect(dashedIntervals(width))
+                    // Per-edge FITTED intervals — Chromium fits an integer
+                    // dash count to each edge so it starts AND ends on a
+                    // full dash; a fixed rhythm truncated the final dash
+                    // mid-way at the corners. Sides are axis-aligned, so
+                    // |Δx| + |Δy| is the exact edge length.
+                    pathEffect = PathEffect.dashPathEffect(
+                        fittedDashIntervals(
+                            kotlin.math.abs(end.x - start.x) +
+                                kotlin.math.abs(end.y - start.y),
+                            width
+                        )
+                    )
                 )
             LineStyle.DOTTED ->
                 // True spaced circles. The previous 1:1 dash + Round cap
@@ -159,17 +175,20 @@ object BorderSideApplier {
             LineStyle.DOUBLE -> drawDouble(c, side, width)
             LineStyle.GROOVE -> drawGrooveOrRidge(c, side, width, groove = true)
             LineStyle.RIDGE -> drawGrooveOrRidge(c, side, width, groove = false)
-            // CSS inset: top/left darker (sunken), bottom/right lighter. The
-            // logical sides (START==left, END==right) mirror this.
+            // CSS inset: top/left dark band (sunken), bottom/right the
+            // declared color (Chromium's light band == base — see shade()).
+            // The logical sides (START==left, END==right) mirror this;
+            // the shared rule lives in isLightBand so groove/ridge reuse it.
             LineStyle.INSET ->
                 drawStrokedLine(
-                    shade(c, lighten = side == Side.BOTTOM || side == Side.END),
+                    shade(c, lighten = isLightBand(side, inset = true)),
                     start, end, width, pathEffect = null
                 )
-            // CSS outset is the inverse of inset: top/left lighter (raised).
+            // CSS outset is the inverse of inset: top/left keep the
+            // declared color (raised), bottom/right take the dark band.
             LineStyle.OUTSET ->
                 drawStrokedLine(
-                    shade(c, lighten = side == Side.TOP || side == Side.START),
+                    shade(c, lighten = isLightBand(side, inset = false)),
                     start, end, width, pathEffect = null
                 )
             LineStyle.NONE, LineStyle.HIDDEN -> Unit // Already early-returned.
@@ -226,16 +245,53 @@ object BorderSideApplier {
      *     2w:1w rhythm. A fixed 6w:4w made native dashes 3x too long
      *     there, so thick widths use [2w, w].
      *   - Thin borders (w < 3px): the 6w:4w tuning was measured against
-     *     Chromium at w=2 (12px on / 8px off ≈ 9 dashes on a 218px edge)
-     *     and is preserved so the committed thin-dash baselines in
-     *     tools/visual/baseline/ stay byte-stable.
-     * Internal (not private) so JVM tests can pin the interval choice —
-     * the iOS applier mirrors this helper (BorderSideApplier.swift) so
-     * both natives derive intervals from one shared rule per platform.
+     *     Chromium at w=2 (12px on / 8px off ≈ 9 dashes on a 218px edge).
+     * These are the NOMINAL intervals only — the painter always runs them
+     * through fittedDashIntervals() so each edge starts and ends on a
+     * full dash (the fit preserves this on:off ratio). Internal (not
+     * private) so JVM tests can pin the interval choice — the iOS
+     * applier mirrors this helper (BorderSideApplier.swift) so both
+     * natives derive intervals from one shared rule per platform.
      */
     internal fun dashedIntervals(width: Float): FloatArray =
         if (width >= 3f) floatArrayOf(width * 2, width) // thick → Chromium's ~2w:1w
         else floatArrayOf(width * 6, width * 4)         // thin → measured w=2 tuning
+
+    /**
+     * Fit the nominal dashed rhythm to one edge of length [len] so the
+     * edge starts AND ends on a full dash. Chromium's dashed painter
+     * adjusts the dash/gap pair per edge so an integer number of dashes
+     * spans it exactly; painting the fixed nominal rhythm instead
+     * truncated the final dash mid-way at three of the four corners
+     * (the phase never resets, so only the starting corner lined up).
+     *
+     * n = max(1, round-half-up((len + gap) / (dash + gap))) full dashes
+     * — the numerator adds back the ONE trailing gap the last dash does
+     * not need — then both intervals scale by the single factor
+     * len / (n·dash + (n-1)·gap), preserving the nominal on:off ratio
+     * while making n dashes + (n-1) gaps == len exactly. Rounding is
+     * floor(x+0.5), not kotlin.math.round (rint/ties-to-even), for the
+     * same exact-half reason documented on dottedDotCount. Internal so
+     * JVM tests can pin the fit; the iOS applier mirrors this helper
+     * (BorderSideApplier.swift) so the natives share one rule.
+     */
+    internal fun fittedDashIntervals(len: Float, width: Float): FloatArray {
+        // Nominal rhythm for this width — the ratio the fit preserves.
+        val nominal = dashedIntervals(width)
+        val dash = nominal[0]
+        val gap = nominal[1]
+        // Degenerate edge — nothing to fit against; keep the nominal.
+        if (len <= 0f) return nominal
+        // Integer dash count closest to the nominal rhythm (min 1: an
+        // edge shorter than one nominal dash paints as a single full
+        // dash, i.e. solid — same degenerate outcome as Chromium).
+        val n = kotlin.math.max(
+            1, kotlin.math.floor((len + gap) / (dash + gap) + 0.5f).toInt()
+        )
+        // One shared stretch/shrink factor keeps the on:off proportion.
+        val scale = len / (n * dash + (n - 1) * gap)
+        return floatArrayOf(dash * scale, gap * scale)
+    }
 
     /**
      * Render CSS `border-style: dotted` as a row of filled circles along
@@ -327,10 +383,12 @@ object BorderSideApplier {
     }
 
     /**
-     * Render CSS `border-style: groove | ridge`. Groove looks like the
-     * border is carved into the surface (dark outer, light inner); ridge
-     * is the inverse (light outer, dark inner). Implemented as two
-     * half-width adjacent lines with shaded color.
+     * Render CSS `border-style: groove | ridge` as two half-width
+     * adjacent lines. The band shades are PER-SIDE (see
+     * grooveRidgeBandShades): the old code hardcoded dark-outer/light-
+     * inner for groove on every side, which is only right on top/left —
+     * on bottom/right the carved illusion needs the mirror, so all four
+     * grooved sides read as lit from the CSS top-left light source.
      */
     private fun DrawScope.drawGrooveOrRidge(
         color: Color, side: Side, width: Float, groove: Boolean
@@ -340,8 +398,8 @@ object BorderSideApplier {
             drawStrokedLine(color, s, e, width, null); return
         }
         val half = width / 2f
-        val outerShade = shade(color, lighten = !groove) // groove → dark outer
-        val innerShade = shade(color, lighten = groove)  // ridge → dark inner
+        // Outer/inner band colors from the per-side Blink rule.
+        val (outerShade, innerShade) = grooveRidgeBandShades(color, side, groove)
         val (outerStart, outerEnd) = doubleGeom(side, half / 2f)
         val (innerStart, innerEnd) = doubleGeom(side, half / 2f + half)
         drawStrokedLine(outerShade, outerStart, outerEnd, half, null)
@@ -349,18 +407,89 @@ object BorderSideApplier {
     }
 
     /**
-     * Produce a lighter or darker shade of [base] for the 3D border styles.
-     * Factor 0.5 is the usual CSS UA default for inset/outset/groove/ridge —
-     * it matches Chrome and Firefox closely enough for pixel-diffs ≥ 0.95.
+     * Chromium's per-side 3D darkening rule, shared by inset/outset and
+     * (via grooveRidgeBandShades) groove/ridge: a band styled `inset` is
+     * DARK on top/left and light on bottom/right — the sunken look under
+     * the CSS top-left light source — and `outset` is the exact mirror.
+     * Equivalently: dark ⇔ (side == top‖left) == (style == inset).
+     * Returns true when the band on [side] takes the LIGHT shade.
+     * Internal so JVM tests can pin the rule directly.
      */
-    private fun shade(base: Color, lighten: Boolean): Color {
-        // Mix toward white when lightening, toward black when darkening.
-        val t = 0.5f
-        val target = if (lighten) 1f else 0f
+    internal fun isLightBand(side: Side, inset: Boolean): Boolean =
+        if (inset) side == Side.BOTTOM || side == Side.END // sunken: light escapes bottom/right
+        else side == Side.TOP || side == Side.START        // raised: light hits top/left
+
+    /**
+     * Per-side (outer, inner) band colors for groove/ridge.
+     *
+     * Blink composes groove as two half-borders: the OUTER half styled
+     * `inset` and the INNER half `outset` (the carved trench); ridge
+     * swaps the styles (the raised rim). Each half then follows the
+     * per-side darkening rule (isLightBand) like a real inset/outset
+     * border would — so groove on TOP is dark-outer/light-inner but
+     * groove on BOTTOM is light-outer/dark-inner, and ridge mirrors
+     * both. Internal so JVM tests can pin all four sides' band order.
+     */
+    internal fun grooveRidgeBandShades(
+        base: Color, side: Side, groove: Boolean
+    ): Pair<Color, Color> =
+        // groove → outer half is the inset-styled one; ridge → outset.
+        shade(base, lighten = isLightBand(side, inset = groove)) to
+            // The inner half always takes the opposite style of the outer.
+            shade(base, lighten = isLightBand(side, inset = !groove))
+
+    /**
+     * Chromium's two-tone palette for the 3D border styles
+     * (groove/ridge/inset/outset). 3D shading is UA-defined, so the web
+     * reference engine (Blink color.cc Color::Dark()/Color::Light()) is
+     * the contract:
+     *   - LIGHT band  = the declared color UNCHANGED for normal bases,
+     *     EXCEPT when the base is so dark the dark band collapses to
+     *     black (max channel ≤ 0.33) — then Blink lifts the light band
+     *     via Color::Light() (black → rgb(84,84,84)) so groove/ridge/
+     *     inset/outset never vanish into a flat black border.
+     *   - DARK band   = Blink Color::Dark()'s SUBTRACTIVE model: every
+     *     RGB channel × max(0, (v − 0.33)/v) where v = max(r,g,b). The
+     *     previous single-point ×0.65 was fitted at one measurement
+     *     (declared 239 → 155, i.e. v = 0.937 where Dark() yields
+     *     0.6478 ≈ 0.649 measured) but drifted for mid/dark bases —
+     *     e.g. #808080 darkens ×0.343 in Blink, not ×0.65.
+     * Alpha is untouched throughout (Chromium shades in-gamut without
+     * changing transparency). Internal so JVM tests can pin the palette
+     * (BorderFidelityWave3Test / Wave4Test).
+     */
+    internal fun shade(base: Color, lighten: Boolean): Color {
+        // Blink's brightness proxy: the value channel v = max(r,g,b).
+        val v = maxOf(base.red, base.green, base.blue)
+        // Subtractive dark multiplier — 0.33 of full-scale is removed
+        // then renormalized by v; clamps to 0 for v ≤ 0.33 (and guards
+        // the v == 0 division, where Blink also short-circuits to 0).
+        val darkMultiplier = if (v <= 0f) 0f else ((v - 0.33f) / v).coerceAtLeast(0f)
+        if (lighten) {
+            // Normal bases: Chromium paints the light band as-is.
+            if (darkMultiplier > 0f) return base
+            // Dark-base special case — the dark band is pure black here,
+            // so a base≈black light band would be indistinguishable.
+            // Blink Color::Light(): pure black lifts to the fixed
+            // kLightenedBlack rgb(84,84,84)…
+            if (v <= 0f) return Color(84 / 255f, 84 / 255f, 84 / 255f, base.alpha)
+            // …and other dark bases scale ADDITIVELY by min(1, v+0.33)/v
+            // (the min keeps the max channel in gamut; the others are ≤ v
+            // so they stay in gamut too).
+            val lightMultiplier = kotlin.math.min(1f, v + 0.33f) / v
+            return Color(
+                red = base.red * lightMultiplier,
+                green = base.green * lightMultiplier,
+                blue = base.blue * lightMultiplier,
+                alpha = base.alpha
+            )
+        }
+        // Dark band — every channel scaled by the one shared multiplier
+        // (Blink darkens uniformly, preserving hue).
         return Color(
-            red = base.red + (target - base.red) * t,
-            green = base.green + (target - base.green) * t,
-            blue = base.blue + (target - base.blue) * t,
+            red = base.red * darkMultiplier,
+            green = base.green * darkMultiplier,
+            blue = base.blue * darkMultiplier,
             alpha = base.alpha
         )
     }

@@ -31,11 +31,15 @@ import coil3.compose.rememberAsyncImagePainter
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.size.Scale
+import androidx.compose.ui.graphics.RadialGradientShader
+import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.toArgb
+// Gradient geometry is shared with the background path (ColorApplier) so
+// mask and background gradients can never diverge — see createMaskBrush.
+import com.styleconverter.runtime.color.ColorApplier
 import com.styleconverter.runtime.core.images.DataUri
 import com.styleconverter.runtime.core.images.ImageCache
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 /**
  * Applies mask effects to Compose Modifiers.
@@ -292,51 +296,220 @@ object MaskApplier {
 
         return when (gradient) {
             is MaskGradientConfig.Linear -> {
-                val angleRad = (90 - gradient.angle) * PI.toFloat() / 180f
-                val halfWidth = size.width / 2
-                val halfHeight = size.height / 2
-
-                Brush.linearGradient(
-                    colorStops = colorStops,
-                    start = Offset(
-                        halfWidth - cos(angleRad) * halfWidth,
-                        halfHeight + sin(angleRad) * halfHeight
-                    ),
-                    end = Offset(
-                        halfWidth + cos(angleRad) * halfWidth,
-                        halfHeight - sin(angleRad) * halfHeight
-                    ),
-                    tileMode = if (gradient.repeating) TileMode.Repeated else TileMode.Clamp
-                )
+                // Endpoint math is REUSED from the background path:
+                // ColorApplier.linearGradientPoints implements the
+                // css-images-3 §3.4.1 pixel-space gradient line (centre
+                // through the box, length |W·sinθ| + |H·cosθ|). The old
+                // mask-only trig placed endpoints on the box edges, which
+                // squashed diagonal angles on non-square boxes — sharing
+                // the background helper keeps mask and background linears
+                // geometrically identical by construction.
+                val (lineStart, lineEnd) = ColorApplier.linearGradientPoints(gradient.angle, size)
+                // css-images-3 §3.4.3: a REPEATING gradient tiles the
+                // first→last stop span (the period), not the whole line.
+                // TileMode.Repeated repeats the brush's start→end segment,
+                // so shrink the segment to the stop span and renormalise
+                // the stops into it; a null span (degenerate or full-line)
+                // renders identically to the plain gradient.
+                val span = if (gradient.repeating) repeatingStopSpan(colorStops.map { it.first }) else null
+                if (span != null) {
+                    Brush.linearGradient(
+                        colorStops = colorStops.map { (pos, color) ->
+                            // Stop fraction on the line → fraction of the period segment.
+                            (pos - span.start) / (span.endInclusive - span.start) to color
+                        }.toTypedArray(),
+                        // Segment endpoints = the span's fractions walked along the full line.
+                        start = lerp(lineStart, lineEnd, span.start),
+                        end = lerp(lineStart, lineEnd, span.endInclusive),
+                        tileMode = TileMode.Repeated
+                    )
+                } else {
+                    Brush.linearGradient(
+                        colorStops = colorStops,
+                        start = lineStart,
+                        end = lineEnd,
+                        // Full-span repeating == plain (§3.4.3); Clamp matches web.
+                        tileMode = TileMode.Clamp
+                    )
+                }
             }
             is MaskGradientConfig.Radial -> {
-                val center = Offset(
-                    gradient.centerX * size.width,
-                    gradient.centerY * size.height
-                )
-                val radius = minOf(size.width, size.height) / 2
-
-                Brush.radialGradient(
-                    colorStops = colorStops,
-                    center = center,
-                    radius = radius,
-                    tileMode = if (gradient.repeating) TileMode.Repeated else TileMode.Clamp
-                )
+                // css-images-3 §3.5 defaults: ending shape ELLIPSE, size
+                // farthest-corner. The old branch hardcoded a CIRCLE of
+                // radius min(w,h)/2 — on the 160×80 mask fixtures that
+                // faded to transparent at x=±40 while web's ellipse
+                // reached the corners. Mirrors ColorApplier's radial
+                // FARTHEST_CORNER geometry (see createRadialGradientBrush
+                // there): circular shader at max(rx,ry) + a local-matrix
+                // axis scale to stretch the isolines into the ellipse,
+                // because RadialGradientShader is circular-only.
+                val cxFrac = gradient.centerX
+                val cyFrac = gradient.centerY
+                val shape = gradient.shape
+                val colors = colorStops.map { it.second }
+                val stops = colorStops.map { it.first }
+                // NOTE repeating-radial: TileMode.Repeated tiles the full
+                // 0→r ramp, not the CSS stop-span period — same known gap
+                // as the background path; kept (not silent: divergence is
+                // visible in the visual report if a fixture exercises it).
+                val tile = if (gradient.repeating) TileMode.Repeated else TileMode.Clamp
+                object : ShaderBrush() {
+                    override fun createShader(size: Size): Shader {
+                        val cx = cxFrac * size.width
+                        val cy = cyFrac * size.height
+                        val (rx, ry) = radialMaskRadii(shape, cxFrac, cyFrac, size.width, size.height)
+                        // Circular shader at the larger radius; the ≥ε
+                        // clamp mirrors radialAxisScale's guard so both
+                        // agree on a degenerate zero-sized box.
+                        val rMax = kotlin.math.max(rx.coerceAtLeast(1e-3f), ry.coerceAtLeast(1e-3f))
+                        val shader = RadialGradientShader(
+                            center = Offset(cx, cy),
+                            radius = rMax,
+                            colors = colors,
+                            colorStops = stops,
+                            tileMode = tile
+                        )
+                        // Squash factors rx/rMax, ry/rMax (≤ 1) — Skia's
+                        // setLocalMatrix maps the shader image THROUGH the
+                        // matrix, so shrinking the rMax circle to the
+                        // ellipse needs radius/rMax, NOT the old inverted
+                        // rMax/radius (which stretched the wrong axis).
+                        // Delegate to ColorApplier so mask and background
+                        // radials share one pinned owner.
+                        val (sx, sy) = radialMaskAxisScale(rx, ry)
+                        if (sx == 1f && sy == 1f) return shader
+                        // Axis squash about the centre — identical matrix
+                        // construction to ColorApplier's radial brush.
+                        val localMatrix = android.graphics.Matrix().apply {
+                            postTranslate(-cx, -cy)
+                            postScale(sx, sy)
+                            postTranslate(cx, cy)
+                        }
+                        shader.setLocalMatrix(localMatrix)
+                        return shader
+                    }
+                }
             }
             is MaskGradientConfig.Conic -> {
-                val center = Offset(
-                    gradient.centerX * size.width,
-                    gradient.centerY * size.height
-                )
-
-                // Note: Compose sweepGradient doesn't support starting angle or TileMode
-                Brush.sweepGradient(
-                    colorStops = colorStops,
-                    center = center
-                )
+                // css-images-4 §3.3: conic 0deg points UP (12 o'clock);
+                // android.graphics.SweepGradient anchors 0 at 3 o'clock.
+                // Compose's Brush.sweepGradient offers no start-angle, so
+                // the old branch rendered every conic mask rotated +90°
+                // vs web. Build the raw SweepGradient and rotate its local
+                // matrix by conicMaskRotationDegrees — a delegate to
+                // ColorApplier.conicSweepRotationDegrees, the SAME
+                // correction the background conic path applies, so mask
+                // and background conics can never drift apart.
+                val cxFrac = gradient.centerX
+                val cyFrac = gradient.centerY
+                val fromDeg = gradient.angle
+                // SweepGradient wants ARGB ints + float positions.
+                val argb = colorStops.map { it.second.toArgb() }.toIntArray()
+                val positions = colorStops.map { it.first }.toFloatArray()
+                object : ShaderBrush() {
+                    override fun createShader(size: Size): Shader {
+                        val cx = cxFrac * size.width
+                        val cy = cyFrac * size.height
+                        val shader = android.graphics.SweepGradient(cx, cy, argb, positions)
+                        val rotate = android.graphics.Matrix()
+                        // setRotate is clockwise-positive in screen coords —
+                        // matches the CSS clockwise sweep direction.
+                        rotate.setRotate(conicMaskRotationDegrees(fromDeg), cx, cy)
+                        shader.setLocalMatrix(rotate)
+                        return shader
+                    }
+                }
+                // Repeating-conic has no TileMode on SweepGradient; the
+                // full-turn stop list is period-less on this wire, so the
+                // plain sweep is the honest best effort (documented gap).
             }
         }
     }
+
+    /**
+     * The first→last stop span of a REPEATING gradient — the period that
+     * css-images-3 §3.4.3 tiles along the gradient line. Returns null when
+     * repeating degenerates to the plain gradient: a full-line span (0→1
+     * tiles to itself) or a zero span (no period to repeat — spec says
+     * solid average colour; we fall back to the plain clamped render and
+     * accept the divergence rather than hide it). Pure math, JVM-pinned
+     * by MaskGradientGeometryTest.
+     */
+    internal fun repeatingStopSpan(positions: List<Float>): ClosedFloatingPointRange<Float>? {
+        // Extractor emits stops in declaration order with 0–1 fractions.
+        val first = positions.firstOrNull() ?: return null
+        val last = positions.lastOrNull() ?: return null
+        // Zero span → no finite period; full span → identical to plain.
+        if (last <= first) return null
+        if (first <= 0f && last >= 1f) return null
+        return first..last
+    }
+
+    /**
+     * Radii (rx, ry) in pixels for a radial MASK gradient at its CSS
+     * defaults: size `farthest-corner` for both shapes (css-images-3
+     * §3.5 — the parser never emits an explicit size yet, see
+     * MaskImagePropertyParser). Shape null means the author omitted the
+     * keyword → ELLIPSE per spec. The math mirrors ColorApplier's
+     * FARTHEST_CORNER branches: ellipse radii are the farthest-corner
+     * distances ×√2 (solving (dx/rx)²+(dy/ry)²=1 with rx:ry = dx:dy);
+     * circle radius is the straight distance to the farthest corner.
+     * Pure math, JVM-pinned by MaskGradientGeometryTest.
+     */
+    internal fun radialMaskRadii(
+        shape: MaskRadialShape?,
+        cxFrac: Float,
+        cyFrac: Float,
+        width: Float,
+        height: Float
+    ): Pair<Float, Float> {
+        // Centre in pixels, then farthest-side distances per axis.
+        val cx = cxFrac * width
+        val cy = cyFrac * height
+        val dxFarthest = kotlin.math.max(cx, width - cx)
+        val dyFarthest = kotlin.math.max(cy, height - cy)
+        return when (shape) {
+            MaskRadialShape.CIRCLE -> {
+                // Farthest-corner circle: hypotenuse to the far corner.
+                val r = kotlin.math.sqrt(dxFarthest * dxFarthest + dyFarthest * dyFarthest)
+                r to r
+            }
+            // ELLIPSE and null (omitted keyword) share the CSS default.
+            else -> {
+                val k = kotlin.math.sqrt(2f)
+                (dxFarthest * k) to (dyFarthest * k)
+            }
+        }
+    }
+
+    /**
+     * CSS→SweepGradient rotation for conic MASKS — a pure delegate to
+     * [ColorApplier.conicSweepRotationDegrees] so the −90° convention
+     * shift (and the `from <angle>` offset on top) has exactly one owner
+     * shared by background and mask conics. Pinned by
+     * MaskGradientGeometryTest against the ColorApplier values.
+     */
+    internal fun conicMaskRotationDegrees(cssFromDeg: Float): Float =
+        ColorApplier.conicSweepRotationDegrees(cssFromDeg)
+
+    /**
+     * Circle→ellipse local-matrix scale for radial MASKS — a pure
+     * delegate to [ColorApplier.radialAxisScale] so the setLocalMatrix
+     * squash direction (radius/rMax, ≤ 1 — see the owner's doc for the
+     * Skia image-transform rationale) has exactly one owner shared by
+     * background and mask radials. Pinned by MaskGradientGeometryTest
+     * against the ColorApplier values on an asymmetric box.
+     */
+    internal fun radialMaskAxisScale(rx: Float, ry: Float): Pair<Float, Float> =
+        ColorApplier.radialAxisScale(rx, ry)
+
+    /**
+     * Linear interpolation between two pixel offsets — walks fraction [t]
+     * of the way from [a] to [b]. Used to place the repeating-gradient
+     * period segment on the §3.4.1 gradient line.
+     */
+    private fun lerp(a: Offset, b: Offset, t: Float): Offset =
+        Offset(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t)
 
     /**
      * Convert color to luminance-based alpha.

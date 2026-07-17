@@ -1,16 +1,20 @@
 // MaskImageExtractor.ts — reuses the BackgroundImage layer serialiser because
 // mask-image has byte-identical CSS grammar (Masking L1 §4.1 defers to
-// <image>). Bare string 'mask.png' in the IR is treated as an unquoted url().
+// <image>). Bare string 'mask.png' in the IR is treated as a url() layer.
 import { foldLast, type IRPropertyLike } from '../_shared';
 import { layerCss } from '../../background/BackgroundImageExtractor';               // shared serialiser
+import { cssUrl } from '../../borders/image/_shared';                                // shared quoted-url serialiser
 import type { MaskImageConfig } from './MaskImageConfig';
 import { MASK_IMAGE_PROPERTY_TYPE } from './MaskImageConfig';
 
 // Treat bare filename strings as url() references — MaskImage fixtures emit
-// 'mask.png' literally, which isn't legal CSS on its own.
+// 'mask.png' literally, which isn't legal CSS on its own. cssUrl quotes AND
+// escapes (css-values-4 §4.3/§4.5) — the previous inline `url("${s}")` broke
+// on any name containing a double quote or backslash (same class as the
+// background-image quoting hole; one shared owner for the escaping rules).
 function wrapBareString(s: string): string | null {
   if (s === 'none') return 'none';                                                  // sentinel
-  return `url("${s}")`;                                                              // wrap bare filename
+  return cssUrl(s);                                                                  // wrap + escape bare filename
 }
 
 function parseOne(data: unknown): string | undefined {

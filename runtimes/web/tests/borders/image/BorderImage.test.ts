@@ -20,10 +20,31 @@ describe('BorderImageSource', () => {
       p('BorderImageSource', { type: 'none' }),
     ]))).toEqual({ borderImageSource: 'none' });
   });
-  it('url reference', () => {
+  it('url reference is always emitted quoted', () => {
+    // Quoted form — an unquoted url() token cannot carry whitespace or
+    // quotes (css-values-4 §4.5), so the serialiser always quotes.
     expect(applyBorderImageSource(extractBorderImageSource([
       p('BorderImageSource', { type: 'url', url: 'border.png' }),
-    ]))).toEqual({ borderImageSource: 'url(border.png)' });
+    ]))).toEqual({ borderImageSource: 'url("border.png")' });
+  });
+  it('quote-and-space-laden SVG data URI survives as a valid declaration', () => {
+    // The border-image fixture shape: an inline SVG data URI whose XML
+    // attributes carry double quotes AND spaces. Unquoted, this produced
+    // an invalid url() token the browser dropped wholesale — no platform
+    // painted the border image. Double quotes must be backslash-escaped
+    // inside the CSS <string> (css-values-4 §4.3); spaces need no escape.
+    const uri = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10">'
+      + '<rect fill="red" width="10" height="10"/></svg>';
+    expect(applyBorderImageSource(extractBorderImageSource([
+      p('BorderImageSource', { type: 'url', url: uri }),
+    ]))).toEqual({ borderImageSource: `url("${uri.replace(/"/g, '\\"')}")` });
+  });
+  it('backslashes and newlines are CSS-string escaped', () => {
+    // Backslash doubles (it is the escape char); a raw newline is
+    // invalid inside a CSS <string> and becomes the `\a ` hex escape.
+    expect(applyBorderImageSource(extractBorderImageSource([
+      p('BorderImageSource', { type: 'url', url: 'a\\b\n c' }),
+    ]))).toEqual({ borderImageSource: 'url("a\\\\b\\a  c")' });
   });
   it('linear-gradient passthrough', () => {
     expect(applyBorderImageSource(extractBorderImageSource([

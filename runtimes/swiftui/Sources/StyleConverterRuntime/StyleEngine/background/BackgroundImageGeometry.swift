@@ -186,15 +186,40 @@ enum BackgroundImageGeometry {
                                              anchor: p.origin.y, mode: p.repeatY)
         var rects: [CGRect] = []
         rects.reserveCapacity(min(px.origins.count * py.origins.count, tileCap))
-        for y in py.origins {
-            for x in px.origins {
-                // Axis-plan tile sizes (not p.tileSize) so `round` on
-                // one axis rescales only that axis's extent.
-                rects.append(CGRect(x: x, y: y, width: px.tileSize, height: py.tileSize))
+        for (j, y) in py.origins.enumerated() {
+            for (i, x) in px.origins.enumerated() {
+                // Per-tile [start, end) segments from the axis plans — NOT
+                // a uniform tileSize: abutting lattices (repeat/round)
+                // pixel-snap their edges so adjacent rects share integer
+                // boundaries (fractional-edge neighbours are antialiased
+                // independently and leak a background seam — the
+                // Repeat_Round straggler); widths vary ±1px per tile.
+                rects.append(CGRect(x: x, y: y,
+                                    width: px.ends[i] - x, height: py.ends[j] - y))
                 if rects.count >= tileCap { return rects } // hard stop — cap guard
             }
         }
         return rects
+    }
+
+    /// The SHADER pitch for one layer: the per-axis plan tile sizes after
+    /// any `round` rescale — fractional (e.g. 200/7), NEVER the snapped
+    /// per-rect extents. Gradient painters must build their geometry
+    /// (endpoints / centres / radii) against this size (css-images-4
+    /// §3.4.1: the gradient box is the background-size tile), while
+    /// filling the snapped rects from `tileRects` — a snapped-wide rect
+    /// just clamps its last sub-pixel column to the edge colour.
+    static func shaderTileSize(placement p: Placement, box: CGSize) -> CGSize {
+        // Degenerate tiles paint nothing (tileRects returns []) — the
+        // value is unused, so pass the placement size through unchanged.
+        guard p.tileSize.width > 0, p.tileSize.height > 0 else { return p.tileSize }
+        // Re-run the (cheap, pure) per-axis plans so the rescale here is
+        // provably the same arithmetic tileRects used.
+        let px = BackgroundTileMath.axisPlan(area: box.width, tile: p.tileSize.width,
+                                             anchor: p.origin.x, mode: p.repeatX)
+        let py = BackgroundTileMath.axisPlan(area: box.height, tile: p.tileSize.height,
+                                             anchor: p.origin.y, mode: p.repeatY)
+        return CGSize(width: px.tileSize, height: py.tileSize)
     }
 
     /// Cheap tile-count estimate for the cap pre-check — mirrors the

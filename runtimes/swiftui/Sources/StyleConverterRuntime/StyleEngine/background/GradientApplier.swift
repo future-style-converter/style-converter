@@ -163,6 +163,28 @@ enum GradientApplier {
 
     // ── Radial ─────────────────────────────────────────────────────────
 
+    /// Pre-squash radius of the DEFAULT ellipse ending shape, evaluated
+    /// on the max(w,h) square the render-circular-then-stretch trick
+    /// shades. css-images-3 §3.5: the default size is `farthest-corner`,
+    /// whose ellipse "has the same aspect ratio [as] `farthest-side`"
+    /// but is scaled to pass THROUGH the farthest corner. For a centred
+    /// gradient the farthest-side aspect is (w/2 : h/2); putting the
+    /// corner (w/2, h/2) on the ellipse (k·w/2, k·h/2) gives
+    /// 1/k² + 1/k² = 1 → k = √2, i.e. radii (√2·w/2, √2·h/2) — exactly
+    /// what Compose and Chromium paint. The pre-fix code stopped at
+    /// (w/2, h/2), the farthest-SIDE ellipse: every default-radial fade
+    /// on iOS ended 29% early (the live 0.85-gate residual). After the
+    /// (w/m, h/m) squash a pre-squash radius of √2·m/2 lands on the
+    /// √2-scaled per-axis radii, so this helper returns that value.
+    /// Off-centre gradients still approximate with the centred factor —
+    /// the off-centre refinement is a recorded follow-up. Internal so
+    /// XCTest pins the factor once for all three call sites (view path
+    /// here, MaskApplier, BackgroundGradientTileView).
+    static func ellipseEndRadius(_ size: CGSize) -> CGFloat {
+        // √2 × half the squash-source square's side (see doc above).
+        max(size.width, size.height) / 2 * CGFloat(2.0.squareRoot())
+    }
+
     // Radial fills from the centre out. Per CSS Images Module 3 §3.5
     // the default ending shape is `ellipse` and the default sizing is
     // `farthest-corner`. GeometryReader reads the actual bounds; for
@@ -185,13 +207,16 @@ enum GradientApplier {
                                endRadius: halfDiag)
                     .frame(width: w, height: h)
             } else {
-                // Ellipse default — render at the larger axis radius and
-                // stretch to the box's aspect.
-                let r = max(w, h) / 2
+                // Ellipse default — render at the √2-scaled larger-axis
+                // radius (farthest-CORNER, see ellipseEndRadius) and
+                // stretch to the box's aspect. The gradient function
+                // extends past the square frame; only the frame is
+                // visible, so an endRadius larger than the frame simply
+                // moves the 100% stop outside it — which is the point.
                 RadialGradient(gradient: toGradient(stops),
                                center: unitCenter,
                                startRadius: 0,
-                               endRadius: r)
+                               endRadius: ellipseEndRadius(geo.size))
                     .frame(width: max(w, h), height: max(w, h))
                     .scaleEffect(x: w / max(w, h), y: h / max(w, h), anchor: .center)
                     .frame(width: w, height: h)

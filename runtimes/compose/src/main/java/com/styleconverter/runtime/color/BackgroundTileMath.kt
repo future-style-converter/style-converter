@@ -3,7 +3,8 @@ package com.styleconverter.runtime.color
 // css-backgrounds-3 §3.7 background-repeat tile placement — PURE math,
 // no Compose types, so the space/round rules are pinned by plain JVM tests
 // (BackgroundTileMathTest). ColorApplier feeds one axisPlan per axis and
-// draws the cartesian product of the two origin lists.
+// draws the cartesian product of the two per-axis [start, end) segment
+// lists (pixel-snapped for the abutting modes — see AxisPlan).
 
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -12,10 +13,38 @@ object BackgroundTileMath {
 
     /**
      * The resolved tiling of ONE axis: the (possibly `round`-rescaled) tile
-     * size plus every tile's start offset inside the positioning area.
-     * Empty [origins] = nothing to draw (degenerate tile/area).
+     * size plus every tile's DRAWN segment — tile i spans
+     * [origins[i], ends[i]). Empty [origins] = nothing to draw (degenerate
+     * tile/area).
+     *
+     * [tileSize] is the SHADER pitch (fractional for `round`, e.g. 200/7):
+     * gradient geometry must resolve against it (css-images-4 §3.4.1 sizes
+     * the gradient box, not the rasterized rect). [ends] is the DRAW edge:
+     * for the abutting modes (REPEAT/ROUND) the edges are pixel-snapped so
+     * adjacent rects share INTEGER boundaries — two independently
+     * antialiased rects meeting on a fractional edge never sum to full
+     * coverage, so every interior boundary leaked a light background seam
+     * (the Repeat_Round 0.946 SSIM straggler vs Chromium's seamless
+     * pattern rasterization). Non-abutting modes (NO_REPEAT/SPACE) keep
+     * exact ends — their tiles never share an edge, so there is no seam to
+     * close and no reason to perturb the spec'd geometry; the default
+     * derives end = start + tileSize for them.
      */
-    data class AxisPlan(val tileSize: Float, val origins: List<Float>)
+    data class AxisPlan(
+        val tileSize: Float,
+        val origins: List<Float>,
+        // Default: exact (unsnapped) ends — overridden by REPEAT/ROUND.
+        val ends: List<Float> = origins.map { it + tileSize }
+    )
+
+    /**
+     * Pixel-snap one lattice edge. floor(x + 0.5) is exactly Kotlin's
+     * roundToInt contract (ties toward +∞) spelled out so the Swift port
+     * (BackgroundTileMath.swift) can pin the IDENTICAL rule — Swift's
+     * default `.rounded()` breaks ties away from zero, which diverges on
+     * negative REPEAT overhang edges like −20.5.
+     */
+    private fun snap(x: Float): Float = floor(x + 0.5f)
 
     /**
      * Place tiles of [tile] px along an axis of [area] px.
@@ -42,13 +71,22 @@ object BackgroundTileMath {
                 // just left of the area and every tile is grid-aligned.
                 var start = anchor % tile
                 if (start > 0f) start -= tile
-                val origins = mutableListOf<Float>()
+                // Collect the FRACTIONAL grid edges (start + k·tile) — one
+                // past the last tile so every tile has a closing edge.
+                val edges = mutableListOf<Float>()
                 var x = start
                 while (x < area) {
-                    origins.add(x)
+                    edges.add(x)
                     x += tile
                 }
-                AxisPlan(tile, origins)
+                edges.add(x) // closing edge of the final (clipped) tile
+                // REPEAT is an abutting lattice: snap every edge so adjacent
+                // rects meet on integer pixels (identity for integer pitch +
+                // anchor — see AxisPlan doc for the seam rationale).
+                val snapped = edges.map { snap(it) }
+                // tileSize stays the fractional pitch for the shader; the
+                // drawn segments are consecutive snapped edge pairs.
+                AxisPlan(tile, origins = snapped.dropLast(1), ends = snapped.drop(1))
             }
             // §3.7 space: as many WHOLE tiles as fit, first and last flush
             // with the area edges, leftover split into equal gaps BETWEEN
@@ -70,7 +108,13 @@ object BackgroundTileMath {
             AxisRepeat.ROUND -> {
                 val n = (area / tile).roundToInt().coerceAtLeast(1)
                 val rounded = area / n
-                AxisPlan(rounded, List(n) { i -> i * rounded })
+                // Fractional pitch (e.g. 200/7 ≈ 28.571) at snapped shared
+                // edges: edge i = snap(i·X'), so tile i draws
+                // [snap(i·X'), snap((i+1)·X')) — per-tile width varies ±1px
+                // but adjacent rects abut on integer pixels (no AA seam).
+                // The SHADER keeps the fractional `rounded` pitch untouched.
+                val edges = List(n + 1) { i -> snap(i * rounded) }
+                AxisPlan(rounded, origins = edges.dropLast(1), ends = edges.drop(1))
             }
         }
     }

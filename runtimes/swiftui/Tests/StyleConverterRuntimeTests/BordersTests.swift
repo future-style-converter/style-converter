@@ -44,6 +44,176 @@ final class BordersTests: XCTestCase {
         XCTAssertEqual(BorderSideApplier.dashedIntervals(width: 3), [6, 3])
     }
 
+    // Per-edge dash fitting — the edge must start AND end on a full dash
+    // (Chromium adjusts the pair per edge; the fixed nominal rhythm
+    // truncated the final dash mid-way at three corners). Pins the same
+    // values as the Android test (BorderFidelityWave3Test) so the two
+    // natives share one fit rule.
+    func testFittedDashIntervals() {
+        // Exact fit: 160pt edge at w=5 → 11 dashes + 10 gaps = 160
+        // exactly with the nominal [10, 5]; scale stays 1.0.
+        XCTAssertEqual(BorderSideApplier.fittedDashIntervals(length: 160, width: 5), [10, 5])
+        // Non-exact: 97pt edge at w=5 → n = round-half-up(102/15) = 7
+        // dashes; nominal span 100 shrinks by 0.97 → [9.7, 4.85].
+        let fitted = BorderSideApplier.fittedDashIntervals(length: 97, width: 5)
+        XCTAssertEqual(fitted[0], 9.7, accuracy: 0.001)
+        XCTAssertEqual(fitted[1], 4.85, accuracy: 0.001)
+        // The invariant the fit exists for: 7 dashes + 6 gaps == edge.
+        XCTAssertEqual(7 * fitted[0] + 6 * fitted[1], 97, accuracy: 0.001)
+        // Edge shorter than one dash → the lone dash spans it (solid).
+        XCTAssertEqual(BorderSideApplier.fittedDashIntervals(length: 8, width: 5)[0],
+                       8, accuracy: 0.001)
+        // Degenerate zero-length edge falls back to the nominal rhythm
+        // so callers never see NaN intervals.
+        XCTAssertEqual(BorderSideApplier.fittedDashIntervals(length: 0, width: 5), [10, 5])
+    }
+
+    // Per-side dotted dot fitting — port of Android's dottedDotCount.
+    // Pins the same shapes as BorderFidelityWave2Test on Android so the
+    // natives cannot disagree on a dot count (a one-dot delta puts the
+    // whole edge out of phase against the web capture).
+    func testDottedDotCount() {
+        // Borders_C01 shape: 240px side, 8px dots → (240-8)/16 = 14.5
+        // pitches; round-half-UP gives 15 pitches → 16 dots (Chromium).
+        XCTAssertEqual(BorderSideApplier.dottedDotCount(length: 240, width: 8), 16)
+        // Borders_C04 shape: 200px side, 6px dots → 17 dots.
+        XCTAssertEqual(BorderSideApplier.dottedDotCount(length: 200, width: 6), 17)
+        // Degenerate shapes: one dot when the edge fits only itself,
+        // nothing on zero-length edges or zero-width dots.
+        XCTAssertEqual(BorderSideApplier.dottedDotCount(length: 6, width: 6), 1)
+        XCTAssertEqual(BorderSideApplier.dottedDotCount(length: 0, width: 6), 0)
+        XCTAssertEqual(BorderSideApplier.dottedDotCount(length: 100, width: 0), 0)
+    }
+
+    // Blink Dark()/Light() 3D palette (color.cc) — dark band scales
+    // every channel by the SUBTRACTIVE multiplier max(0, (v−0.33)/v)
+    // with v = max channel; light band is the declared colour except
+    // black, which falls back to Blink's kLightenedBlack rgb(84,84,84).
+    // Mirrors the Android shade() test so the groove/ridge/inset/outset
+    // bands stay identical across natives.
+    func testShadePalette() {
+        let base = Color(red: 239.0 / 255.0, green: 100.0 / 255.0,
+                         blue: 50.0 / 255.0, opacity: 0.8)
+        // Light band: exactly the declared colour, no blend.
+        XCTAssertEqual(BorderSideApplier.shade(base, light: true), base)
+        // Dark band: read back components via UIColor bridging (same
+        // conversion the applier itself uses). v = 239/255 here, so the
+        // multiplier is (0.937−0.33)/0.937 = 0.648 — the point the old
+        // flat ×0.65 was measured at, so these three pins carry over.
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        XCTAssertTrue(UIColor(BorderSideApplier.shade(base, light: false))
+            .getRed(&r, green: &g, blue: &b, alpha: &a))
+        XCTAssertEqual(r * 255, 155, accuracy: 1)   // 239 × 0.648 ≈ 155
+        XCTAssertEqual(g * 255, 65, accuracy: 1)    // 100 × 0.648 ≈ 65
+        XCTAssertEqual(b * 255, 32.5, accuracy: 1)  // 50 × 0.648 ≈ 32.4
+        XCTAssertEqual(a, 0.8, accuracy: 0.001)     // alpha untouched
+    }
+
+    // The two points where Blink's model DIVERGES from the old flat
+    // ×0.65 — a mid grey (subtractive shift darkens it twice as hard)
+    // and black (light band falls back to kLightenedBlack instead of
+    // collapsing both bands to black).
+    func testShadeBlinkModelDivergesFromFlatMultiplier() {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        // Mid grey 0.5: Dark() = 0.5 − 0.33 = 0.17 (flat ×0.65 gave 0.325).
+        let grey = Color(red: 0.5, green: 0.5, blue: 0.5, opacity: 1)
+        XCTAssertTrue(UIColor(BorderSideApplier.shade(grey, light: false))
+            .getRed(&r, green: &g, blue: &b, alpha: &a))
+        XCTAssertEqual(r, 0.17, accuracy: 0.005)
+        XCTAssertEqual(g, 0.17, accuracy: 0.005)
+        XCTAssertEqual(b, 0.17, accuracy: 0.005)
+        // Black: dark band clamps at black (max(0, ·))…
+        let black = Color(red: 0, green: 0, blue: 0, opacity: 1)
+        XCTAssertTrue(UIColor(BorderSideApplier.shade(black, light: false))
+            .getRed(&r, green: &g, blue: &b, alpha: &a))
+        XCTAssertEqual(r, 0, accuracy: 0.001)
+        // …and the LIGHT band lifts to rgb(84,84,84) so `groove black`
+        // still shows two bands (Blink Color::Light() black fast path).
+        XCTAssertTrue(UIColor(BorderSideApplier.shade(black, light: true))
+            .getRed(&r, green: &g, blue: &b, alpha: &a))
+        XCTAssertEqual(r * 255, 84, accuracy: 1)
+        XCTAssertEqual(g * 255, 84, accuracy: 1)
+        XCTAssertEqual(b * 255, 84, accuracy: 1)
+    }
+
+    // Blink per-side 3D band order for groove/ridge: each half is a
+    // sub-border (groove = inset-outer + outset-inner, ridge inverted)
+    // darkened via `dark ⇔ (side==top||side==left) == (substyle==inset)`
+    // — so bottom/right sides INVERT the band order. The wave-2 code
+    // painted the top/left order on all four sides; this truth table
+    // pins all 2 styles × 2 side classes.
+    func testGrooveRidgePerSideBands() {
+        let base = Color(red: 0.8, green: 0.4, blue: 0.2, opacity: 1)
+        let dark = BorderSideApplier.shade(base, light: false)
+        let light = BorderSideApplier.shade(base, light: true)
+        // groove, top/left: dark outer + light inner (carved in).
+        let gTL = BorderSideApplier.grooveRidgeBandColours(
+            style: .groove, isTopLeft: true, base: base)
+        XCTAssertEqual(gTL.outer, dark)
+        XCTAssertEqual(gTL.inner, light)
+        // groove, bottom/right: INVERTED — light outer + dark inner.
+        let gBR = BorderSideApplier.grooveRidgeBandColours(
+            style: .groove, isTopLeft: false, base: base)
+        XCTAssertEqual(gBR.outer, light)
+        XCTAssertEqual(gBR.inner, dark)
+        // ridge is the exact inverse of groove on the same side.
+        let rTL = BorderSideApplier.grooveRidgeBandColours(
+            style: .ridge, isTopLeft: true, base: base)
+        XCTAssertEqual(rTL.outer, light)
+        XCTAssertEqual(rTL.inner, dark)
+        let rBR = BorderSideApplier.grooveRidgeBandColours(
+            style: .ridge, isTopLeft: false, base: base)
+        XCTAssertEqual(rBR.outer, dark)
+        XCTAssertEqual(rBR.inner, light)
+    }
+
+    // Routing pin for uniform dashed/dotted borders (wave-2 regression
+    // guard): any non-zero border-radius routes to the continuous
+    // rounded strokeBorder perimeter (phase accrual is the lesser evil
+    // on rounded corners); radius zero keeps the per-side Canvas with
+    // its Chromium-style per-edge pattern reset.
+    func testDashedDottedRadiusRouting() {
+        // Uniform 4pt dashed border on all four sides.
+        let dashed = BorderSideConfig(width: 4, color: nil, style: .dashed)
+        let cfg = AllBordersConfig(top: dashed, end: dashed,
+                                   bottom: dashed, start: dashed)
+        // Non-zero radius (one rounded corner suffices — hasAny).
+        var rounded = BorderRadiusConfig()
+        rounded.topLeft = BorderRadiusCorner(uniform: 8)
+        // radius>0 → continuous strokeBorder perimeter.
+        XCTAssertTrue(BorderSideApplier.usesRoundedDashPerimeter(
+            cfg: cfg, radius: rounded))
+        // radius==0 (all-square config OR nil) → per-side Canvas.
+        XCTAssertFalse(BorderSideApplier.usesRoundedDashPerimeter(
+            cfg: cfg, radius: BorderRadiusConfig()))
+        XCTAssertFalse(BorderSideApplier.usesRoundedDashPerimeter(
+            cfg: cfg, radius: nil))
+        // Dotted routes identically to dashed.
+        let dotted = BorderSideConfig(width: 4, color: nil, style: .dotted)
+        let dottedCfg = AllBordersConfig(top: dotted, end: dotted,
+                                         bottom: dotted, start: dotted)
+        XCTAssertTrue(BorderSideApplier.usesRoundedDashPerimeter(
+            cfg: dottedCfg, radius: rounded))
+        // Solid never takes the dash perimeter (it has its own path B).
+        let solid = BorderSideConfig(width: 4, color: nil, style: .solid)
+        let solidCfg = AllBordersConfig(top: solid, end: solid,
+                                        bottom: solid, start: solid)
+        XCTAssertFalse(BorderSideApplier.usesRoundedDashPerimeter(
+            cfg: solidCfg, radius: rounded))
+        // Non-uniform dashed needs the per-side Canvas even when rounded.
+        var mixed = cfg
+        mixed.bottom.width = 8
+        XCTAssertFalse(BorderSideApplier.usesRoundedDashPerimeter(
+            cfg: mixed, radius: rounded))
+        // Recipe pins for the continuous path: dashed reuses the shared
+        // nominal rhythm; dotted keeps the round-cap near-zero dash.
+        XCTAssertEqual(BorderSideApplier.roundedDashStrokeStyle(.dashed, width: 5).dash,
+                       [10, 5])
+        let dotStyle = BorderSideApplier.roundedDashStrokeStyle(.dotted, width: 6)
+        XCTAssertEqual(dotStyle.dash, [0.01, 12])
+        XCTAssertEqual(dotStyle.lineCap, .round)
+    }
+
     // MARK: - Helpers
 
     // Concise IRValue.object builder matching ColorBackgroundSelfTest.

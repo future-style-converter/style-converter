@@ -32,10 +32,27 @@ export function parseBorderImageSource(data: unknown): BorderImageSourceValue | 
   return undefined;                                                        // unknown shape
 }
 
+// Serialise a URL as a QUOTED CSS url() token. An unquoted url() token
+// (css-values-4 §4.5) cannot contain whitespace, quotes, or parens — the
+// border-image fixtures use an SVG data URI full of spaces and double
+// quotes, so the previous `url(${url})` emitted an invalid declaration
+// that the browser dropped WHOLESALE (all four variants painted plain
+// boxes on web, silently matching the native TODO gaps). Inside a CSS
+// <string> (css-values-4 §4.3) only the backslash, the delimiting quote,
+// and raw newlines are meaningful, so those three are escaped: `\\`,
+// `\"`, and newline → `\a ` (hex escape, space-terminated per §3.2).
+export function cssUrl(url: string): string {
+  const escaped = url
+    .replace(/\\/g, '\\\\')                                                // backslash first (escape char)
+    .replace(/"/g, '\\"')                                                  // delimiter quote
+    .replace(/\n/g, '\\a ');                                               // raw newline is invalid in <string>
+  return `url("${escaped}")`;                                              // always-quoted form
+}
+
 // Serialise to the CSS `border-image-source` value.
 export function borderImageSourceToCss(v: BorderImageSourceValue): string {
   if (v.kind === 'none') return 'none';                                   // keyword
-  if (v.kind === 'url') return `url(${v.url})`;                            // url reference
+  if (v.kind === 'url') return cssUrl(v.url);                              // quoted url reference
   return v.css;                                                            // pre-formed gradient
 }
 
