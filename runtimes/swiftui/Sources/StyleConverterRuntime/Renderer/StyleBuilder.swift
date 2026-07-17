@@ -675,8 +675,11 @@ extension View {
             // Wave 8 (#36): size/position/repeat thread INTO the paint
             // call for url() raster layers (cover/contain/px sizing,
             // keyword/percent/px anchoring, per-axis tiling). Gradient
-            // layers ignore them — their engineBackground* stubs below
-            // stay identity, so every gradient baseline is untouched.
+            // layers honour them too now (gradient-geometry lane): a
+            // non-initial knob routes the layer through the Canvas tile
+            // painter (BackgroundGradientTileView); knob-less gradients
+            // keep the wave-5 full-box path so those baselines are
+            // untouched. The engineBackground* stubs below stay identity.
             .engineBackgroundImage(
                 style.backgroundClip?.mode == .text ? nil : style.backgroundImage,
                 clipInsets: StyleBuilder.backgroundClipInsets(style),

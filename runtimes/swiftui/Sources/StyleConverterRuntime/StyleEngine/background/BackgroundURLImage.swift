@@ -20,7 +20,8 @@
 //      corrupts case-sensitive base64 data URIs on the wire. FULLY
 //      percent-encoded data URIs (lowercase hex) survive it — the
 //      fixtures use that form until the parser preserves url() case.
-//    • `space`/`round` repeat approximate to `repeat` (geometry file).
+//  `space`/`round` repeat run the REAL §3.7 gap/rescale arithmetic via
+//  BackgroundTileMath (the wave-8 "approximate to repeat" note is gone).
 //
 
 import SwiftUI
@@ -156,6 +157,12 @@ struct BackgroundURLImageView: View {
 
     var body: some View {
         Canvas { context, size in
+            // The painting area bounds the pattern (css-backgrounds-3
+            // §2.3): a Canvas draw is NOT implicitly clipped to its
+            // frame, so phase-shifted / anchor-offset tiles would bleed
+            // outside the element without this explicit clip.
+            var context = context
+            context.clip(to: Path(CGRect(origin: .zero, size: size)))
             // Intrinsic pixel size: UIImage.size is in points — multiply
             // by scale so a decoded PNG's pixels are CSS px at 1×.
             let pixels = CGSize(width: uiImage.size.width * uiImage.scale,
@@ -167,12 +174,14 @@ struct BackgroundURLImageView: View {
             let img = Image(uiImage: uiImage)
             // Dense lattices (tiny tiles over a big box) blow past the
             // rect cap — a tiled SHADING fills them exactly when the
-            // scale is uniform (cover/contain/auto always are).
+            // scale is uniform (cover/contain/auto always are). Only
+            // plain `repeat` may take it: space/round lattices are not
+            // an infinite grid (gaps / rescale) so they must enumerate.
             let count = BackgroundImageGeometry.tileCount(placement: plan, box: size)
             let sx = plan.tileSize.width / max(pixels.width, 1)
             let sy = plan.tileSize.height / max(pixels.height, 1)
             if count > BackgroundImageGeometry.tileCap,
-               plan.repeatX, plan.repeatY, abs(sx - sy) < 0.0001 {
+               plan.repeatX == .repeat, plan.repeatY == .repeat, abs(sx - sy) < 0.0001 {
                 context.fill(Path(CGRect(origin: .zero, size: size)),
                              with: .tiledImage(img, origin: plan.origin,
                                                sourceRect: CGRect(x: 0, y: 0, width: 1, height: 1),

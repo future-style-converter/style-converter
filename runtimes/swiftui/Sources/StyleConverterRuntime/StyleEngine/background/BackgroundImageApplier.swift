@@ -28,11 +28,13 @@ struct BackgroundImageApplier: ViewModifier {
     var clipInsets: EdgeInsets = EdgeInsets()
     // Per-layer attachment modes; nil/short arrays default to `.scroll`.
     var attachment: BackgroundAttachmentConfig? = nil
-    // Wave 8 (#36) — the raster-layer knobs. Gradients ignore them (the
-    // engineBackgroundSize/Position stubs stay identity for gradients,
-    // unchanged); url() layers resolve size/position/repeat per layer
+    // Wave 8 (#36) — the size/position/repeat knobs, resolved per layer
     // index with CSS list-repeat semantics (css-backgrounds-3 §2.7:
-    // shorter lists cycle to match the image layer count).
+    // shorter lists cycle to match the image layer count). url() layers
+    // always take the raster geometry path; GRADIENT layers take the
+    // Canvas tile path only when a knob is non-initial (see
+    // gradientNeedsGeometry) so knob-less gradients keep the wave-5
+    // full-box GradientApplier rendering byte-identically.
     var size: BackgroundSizeConfig? = nil
     var position: BackgroundPositionConfig? = nil
     var repeatCfg: BackgroundRepeatConfig? = nil
@@ -73,31 +75,75 @@ struct BackgroundImageApplier: ViewModifier {
     }
 
     /// One layer → one View. url() layers take the wave-8 raster path
-    /// (decode + size/position/repeat geometry); everything else keeps
-    /// the wave-5 GradientApplier rendering byte-identically.
+    /// (decode + size/position/repeat geometry); gradient layers with a
+    /// non-initial knob take the Canvas tile path (same geometry math);
+    /// everything else keeps the wave-5 GradientApplier rendering
+    /// byte-identically.
     private func render(_ layer: BackgroundImageLayer, index: Int) -> AnyView {
-        guard case .url(let urlString) = layer else {
-            return GradientApplier.render(layer)
-        }
-        // Decode (cached). Remote/undecodable → the browser's failed-load
-        // visual: nothing painted for this layer (resolver logged it).
-        guard let img = BackgroundURLImageResolver.image(for: urlString) else {
-            return AnyView(Color.clear)
-        }
         // Per-layer knob slices — CSS §2.7 list matching (cycle short
         // lists); nil configs mean the CSS initials (auto / 0% / repeat).
         func slice<T>(_ layers: [T]?) -> T? {
             guard let layers = layers, !layers.isEmpty else { return nil }
             return layers[index % layers.count]
         }
-        return AnyView(BackgroundURLImageView(
-            uiImage: img,
-            sizeLayer: slice(size?.layers),
-            // Position is one pair (not per-layer lists in this config
-            // shape) — applies to every layer, matching the extractor.
-            positionX: position?.x,
-            positionY: position?.y,
-            repeatLayer: slice(repeatCfg?.layers)))
+        let sizeLayer = slice(size?.layers)
+        let repeatLayer = slice(repeatCfg?.layers)
+        if case .url(let urlString) = layer {
+            // Decode (cached). Remote/undecodable → the browser's
+            // failed-load visual: nothing painted (resolver logged it).
+            guard let img = BackgroundURLImageResolver.image(for: urlString) else {
+                return AnyView(Color.clear)
+            }
+            return AnyView(BackgroundURLImageView(
+                uiImage: img,
+                sizeLayer: sizeLayer,
+                // Position is one pair (not per-layer lists in this
+                // config shape) — applies to every layer, matching the
+                // extractor.
+                positionX: position?.x,
+                positionY: position?.y,
+                repeatLayer: repeatLayer))
+        }
+        // `none` paints Clear regardless of geometry knobs (there is no
+        // image to size/position/tile) — keep the stack index math.
+        if case .none = layer { return GradientApplier.render(layer) }
+        // Gradient layer: geometry-route only when a knob would change
+        // the picture; otherwise the wave-5 full-box path is untouched
+        // (every knob-less gradient baseline stays byte-identical).
+        if BackgroundImageApplier.gradientNeedsGeometry(
+            size: sizeLayer, positionX: position?.x, positionY: position?.y,
+            repeatLayer: repeatLayer) {
+            return AnyView(BackgroundGradientTileView(
+                layer: layer, sizeLayer: sizeLayer,
+                positionX: position?.x, positionY: position?.y,
+                repeatLayer: repeatLayer))
+        }
+        return GradientApplier.render(layer)
+    }
+
+    /// True when size/position/repeat can move a GRADIENT layer off the
+    /// full-box default. Static (and internal) so XCTest pins the
+    /// routing without building views.
+    static func gradientNeedsGeometry(size: BackgroundSizeLayer?,
+                                      positionX: BackgroundAxisPosition?,
+                                      positionY: BackgroundAxisPosition?,
+                                      repeatLayer: BackgroundRepeatLayer?) -> Bool {
+        // Only EXPLICIT sizes shrink/stretch an intrinsic-less image —
+        // auto/cover/contain all resolve to the box (§3.9), which is
+        // exactly what the default full-box path already paints.
+        if case .explicit = size { return true }
+        // Any position: px offsets shift even a full-box tile (the
+        // uncovered band shows the layer below, like the browser).
+        if positionX != nil || positionY != nil { return true }
+        // Repeat non-initial on either axis: no-repeat/space/round all
+        // change the lattice once a size is involved; with auto size the
+        // tile equals the box so the Canvas paints the same picture —
+        // routing is still correct, just unnecessary for plain repeat.
+        if let r = repeatLayer,
+           BackgroundTileMath.mode(r.x) != .repeat || BackgroundTileMath.mode(r.y) != .repeat {
+            return true
+        }
+        return false
     }
 }
 

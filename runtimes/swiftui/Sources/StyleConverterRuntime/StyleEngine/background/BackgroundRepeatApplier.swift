@@ -2,21 +2,25 @@
 //  BackgroundRepeatApplier.swift
 //  StyleEngine/background — Phase 4.
 //
-//  Stub. SwiftUI gradients don't repeat — they always fill the container.
-//  For future raster URL layers, a tiling `Image(uiImage:).resizable()`
-//  wrapped with a tiled rendering mode would implement `repeat`; that
-//  work is deferred. The applier here is identity and exists only for
-//  per-property contract symmetry. Documented limitation.
+//  Identity by design — NOT because repeat is unimplemented: the real
+//  tiling runs inside BackgroundImageApplier, which threads the parsed
+//  BackgroundRepeatConfig into the per-layer paint (url() rasters via
+//  BackgroundURLImageView, gradients via BackgroundGradientTileView,
+//  both on BackgroundTileMath's §3.7 repeat/space/round arithmetic).
+//  Repeat must compose with size/position INSIDE the layer paint — a
+//  standalone view modifier applied after the fact could not re-tile an
+//  already-painted layer. This applier exists only for per-property
+//  contract symmetry (one Applier file per property).
 //
 
 import SwiftUI
 
 struct BackgroundRepeatApplier: ViewModifier {
-    // Config held for diagnostics and future extension.
+    // Config held for diagnostics and contract symmetry (header note).
     let config: BackgroundRepeatConfig?
 
     func body(content: Content) -> some View {
-        // Intentional no-op today.
+        // Intentional identity — tiling happens in BackgroundImageApplier.
         content
     }
 }

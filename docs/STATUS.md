@@ -127,9 +127,9 @@ dirs + WPT corpus are gitignored):
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 135 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 959 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 770 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 248 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 963 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 783 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 266 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 516 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 

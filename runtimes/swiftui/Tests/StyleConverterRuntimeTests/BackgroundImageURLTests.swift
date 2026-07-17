@@ -135,18 +135,18 @@ final class BackgroundImageURLTests: XCTestCase {
     func testTileRectsLattice() {
         // Default repeat both: 80×80 box, 10×10 tile → 8×8 = 64 rects.
         let both = BackgroundImageGeometry.Placement(
-            tileSize: CGSize(width: 10, height: 10), origin: .zero, repeatX: true, repeatY: true)
+            tileSize: CGSize(width: 10, height: 10), origin: .zero, repeatX: .repeat, repeatY: .repeat)
         XCTAssertEqual(BackgroundImageGeometry.tileRects(placement: both,
                                                          box: CGSize(width: 80, height: 80)).count, 64)
         // no-repeat: exactly the anchor copy.
         let none = BackgroundImageGeometry.Placement(
             tileSize: CGSize(width: 10, height: 10), origin: CGPoint(x: 35, y: 35),
-            repeatX: false, repeatY: false)
+            repeatX: .noRepeat, repeatY: .noRepeat)
         let single = BackgroundImageGeometry.tileRects(placement: none, box: CGSize(width: 80, height: 80))
         XCTAssertEqual(single, [CGRect(x: 35, y: 35, width: 10, height: 10)])
         // repeat-x only: one row.
         let xOnly = BackgroundImageGeometry.Placement(
-            tileSize: CGSize(width: 10, height: 10), origin: .zero, repeatX: true, repeatY: false)
+            tileSize: CGSize(width: 10, height: 10), origin: .zero, repeatX: .repeat, repeatY: .noRepeat)
         XCTAssertEqual(BackgroundImageGeometry.tileRects(placement: xOnly,
                                                          box: CGSize(width: 80, height: 80)).count, 8)
         // An offset anchor extends the lattice into negative space (CSS
@@ -154,28 +154,30 @@ final class BackgroundImageURLTests: XCTestCase {
         // x=−5 column too → 9 columns.
         let offset = BackgroundImageGeometry.Placement(
             tileSize: CGSize(width: 10, height: 10), origin: CGPoint(x: 5, y: 0),
-            repeatX: true, repeatY: false)
+            repeatX: .repeat, repeatY: .noRepeat)
         let rects = BackgroundImageGeometry.tileRects(placement: offset, box: CGSize(width: 80, height: 80))
         XCTAssertEqual(rects.count, 9)
         XCTAssertEqual(rects.first?.origin.x, -5)
     }
 
-    func testRepeatFlagsVocabulary() {
-        XCTAssertEqual(BackgroundImageGeometry.repeatFlags(nil).x, true) // CSS initial = repeat
-        let nr = BackgroundImageGeometry.repeatFlags(BackgroundRepeatLayer(x: "no-repeat", y: "repeat"))
-        XCTAssertFalse(nr.x); XCTAssertTrue(nr.y)
-        // space/round approximate to repeat (logged, wave-8 v1).
+    func testRepeatModesVocabulary() {
+        XCTAssertEqual(BackgroundImageGeometry.repeatModes(nil).x, .repeat) // CSS initial = repeat
+        let nr = BackgroundImageGeometry.repeatModes(BackgroundRepeatLayer(x: "no-repeat", y: "repeat"))
+        XCTAssertEqual(nr.x, .noRepeat); XCTAssertEqual(nr.y, .repeat)
+        // space/round map to their REAL §3.7 modes now — the wave-8
+        // "approximated as repeat" logOnce breadcrumb is retired.
         PropertyTracker._resetForTests()
-        let sp = BackgroundImageGeometry.repeatFlags(BackgroundRepeatLayer(x: "space", y: "round"))
-        XCTAssertTrue(sp.x); XCTAssertTrue(sp.y)
-        XCTAssertFalse(PropertyTracker.logOnce(key: "bg-repeat:space", message: "dup"))
+        let sp = BackgroundImageGeometry.repeatModes(BackgroundRepeatLayer(x: "space", y: "round"))
+        XCTAssertEqual(sp.x, .space); XCTAssertEqual(sp.y, .round)
+        XCTAssertTrue(PropertyTracker.logOnce(key: "bg-repeat:space", message: "must be unused"),
+                      "space/round must no longer emit the approximation breadcrumb")
     }
 
     /// Cap guard: a 1×1 tile over a canvas-sized box must pre-count past
     /// the cap (the renderer switches to the tiled-shading fill there).
     func testTileCountCapPrecheck() {
         let tiny = BackgroundImageGeometry.Placement(
-            tileSize: CGSize(width: 1, height: 1), origin: .zero, repeatX: true, repeatY: true)
+            tileSize: CGSize(width: 1, height: 1), origin: .zero, repeatX: .repeat, repeatY: .repeat)
         XCTAssertGreaterThan(BackgroundImageGeometry.tileCount(placement: tiny,
                                                                box: CGSize(width: 390, height: 844)),
                              BackgroundImageGeometry.tileCap)

@@ -114,7 +114,11 @@ enum GradientApplier {
     }
 
     // Convert the CSS stop list to a SwiftUI Gradient on the sRGB ramp.
-    private static func toGradient(_ stops: [BackgroundImageStop]) -> Gradient {
+    // Internal (not private): BackgroundGradientTileView reuses it so the
+    // Canvas tile path shades the EXACT same subdivided ramp as the
+    // full-box view path — any divergence would show as a colour seam
+    // between the default and geometry-routed renderings of one fixture.
+    static func toGradient(_ stops: [BackgroundImageStop]) -> Gradient {
         let fine = srgbSubdivided(resolveStops(stops))
         return Gradient(stops: fine.map {
             // `Color(red:green:blue:opacity:)` is sRGB by default —

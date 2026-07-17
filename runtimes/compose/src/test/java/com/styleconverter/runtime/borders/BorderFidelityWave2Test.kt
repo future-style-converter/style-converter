@@ -122,6 +122,30 @@ class BorderFidelityWave2Test {
         assertEquals(0, BorderSideApplier.dottedDotCount(100f, 0f))
     }
 
+    // ── 2b. Dashed intervals (width-conditional on:off rhythm) ──────────
+
+    @Test
+    fun `dashed intervals keep the measured 6w-4w tuning at w=2`() {
+        // The thin tuning was calibrated against Chromium at w=2 (12px on,
+        // 8px off) and the committed thin-dash baselines embed it — the
+        // w<3 branch must stay byte-identical to the pre-split behaviour.
+        assertEquals(listOf(12f, 8f), BorderSideApplier.dashedIntervals(2f).toList())
+    }
+
+    @Test
+    fun `dashed intervals switch to Chromium's 2w-1w rhythm at w=5`() {
+        // At the dashed fixture's w=5 Chromium paints ~10px on / 5px off
+        // (~11 dashes on a 160px edge); 6w:4w made dashes 3x too long.
+        assertEquals(listOf(10f, 5f), BorderSideApplier.dashedIntervals(5f).toList())
+    }
+
+    @Test
+    fun `dashed interval boundary sits at exactly 3px`() {
+        // w=3 is the first "thick" width: 2w:1w applies from 3px upward so
+        // medium (3px) borders already match Chromium's long-dash rhythm.
+        assertEquals(listOf(6f, 3f), BorderSideApplier.dashedIntervals(3f).toList())
+    }
+
     // ── 3. outline-width keyword envelope ────────────────────────────────
 
     @Test

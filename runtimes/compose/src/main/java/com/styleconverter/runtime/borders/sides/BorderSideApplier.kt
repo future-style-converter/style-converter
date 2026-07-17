@@ -142,13 +142,10 @@ object BorderSideApplier {
             LineStyle.DASHED ->
                 drawStrokedLine(
                     c, start, end, width,
-                    // Dash ratio 6:4 (on:off). The prior 3:2 produced
-                    // ~22 dashes on a 218px edge while Chromium renders
-                    // ~9 — much longer dashes per side. 6w:4w (12px on,
-                    // 8px off at w=2) lands the dash count and stroke
-                    // ratio in Chromium's range so iOS+Android+web all
-                    // converge on dashed-border fixtures.
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(width * 6, width * 4))
+                    // Width-conditional on:off intervals — see
+                    // dashedIntervals() for the Chromium measurements
+                    // that picked 2w:1w (thick) vs 6w:4w (thin).
+                    pathEffect = PathEffect.dashPathEffect(dashedIntervals(width))
                 )
             LineStyle.DOTTED ->
                 // True spaced circles. The previous 1:1 dash + Round cap
@@ -217,6 +214,28 @@ object BorderSideApplier {
             strokeWidth = width, pathEffect = pathEffect, cap = cap
         )
     }
+
+    /**
+     * Dash intervals `[on, off]` in px for CSS `border-style: dashed`.
+     *
+     * Dashed painting is UA-defined (css-backgrounds-3 §3.2 only says
+     * "square-ended dashes"), so Chromium's painter is our cross-platform
+     * reference, and its on:off rhythm is width-dependent:
+     *   - Thick borders (w >= 3px): at the dashed fixture's w=5 Chromium
+     *     paints ≈10px on / 5px off (~11 dashes on a 160px edge) — a
+     *     2w:1w rhythm. A fixed 6w:4w made native dashes 3x too long
+     *     there, so thick widths use [2w, w].
+     *   - Thin borders (w < 3px): the 6w:4w tuning was measured against
+     *     Chromium at w=2 (12px on / 8px off ≈ 9 dashes on a 218px edge)
+     *     and is preserved so the committed thin-dash baselines in
+     *     tools/visual/baseline/ stay byte-stable.
+     * Internal (not private) so JVM tests can pin the interval choice —
+     * the iOS applier mirrors this helper (BorderSideApplier.swift) so
+     * both natives derive intervals from one shared rule per platform.
+     */
+    internal fun dashedIntervals(width: Float): FloatArray =
+        if (width >= 3f) floatArrayOf(width * 2, width) // thick → Chromium's ~2w:1w
+        else floatArrayOf(width * 6, width * 4)         // thin → measured w=2 tuning
 
     /**
      * Render CSS `border-style: dotted` as a row of filled circles along
