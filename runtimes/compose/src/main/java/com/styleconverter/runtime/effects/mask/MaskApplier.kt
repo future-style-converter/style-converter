@@ -1,16 +1,14 @@
 package com.styleconverter.runtime.effects.mask
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+// BitmapFactory is the SYNCHRONOUS raster decode for data:-URI mask
+// sources — the same decode ImageCache's data: branch uses; no Coil here
+// because the Modifier path must have the bitmap on the FIRST draw frame
+// (capture determinism) and Coil is async by construction.
+import android.graphics.BitmapFactory
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
@@ -18,36 +16,42 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalContext
-// Coil 3 (wave-8 #36 migration): coil.* → coil3.*; AsyncImagePainter.state
-// is a StateFlow now (collected below), CachePolicy moved with the request
-// package, and data: URIs route through DataUri.toModel (ByteArray model).
-import androidx.compose.runtime.collectAsState
-import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
-import coil3.size.Scale
 import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.toArgb
+// drawImage addresses destination geometry in integer px.
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+// Tile placement math is shared with the background path so mask-repeat
+// and background-repeat can never diverge (css-masking-1 §4.5 defines
+// mask-repeat with css-backgrounds-3 §3.7 semantics).
+import com.styleconverter.runtime.color.AxisRepeat
+import com.styleconverter.runtime.color.BackgroundTileMath
 // Gradient geometry is shared with the background path (ColorApplier) so
 // mask and background gradients can never diverge — see createMaskBrush.
 import com.styleconverter.runtime.color.ColorApplier
 import com.styleconverter.runtime.core.images.DataUri
-import com.styleconverter.runtime.core.images.ImageCache
+// IRLog: android.util.Log on device, stdout under plain-JVM tests — the
+// no-op branches below must log loudly WITHOUT breaking the JVM suite.
+import com.styleconverter.runtime.core.ir.IRLog
+import kotlin.math.roundToInt
 
 /**
  * Applies mask effects to Compose Modifiers.
  *
  * ## Compose Limitations
  * CSS masks are complex and Compose has limited native support:
- * - No direct mask-image support for URLs (implemented via Coil + BlendMode)
  * - Gradient masks use BlendMode.DstIn/DstOut for alpha-based masking
+ * - url() masks render ONLY from `data:` URIs (decoded synchronously);
+ *   remote schemes are a documented, logged no-op — async fetch cannot
+ *   be capture-deterministic (the first frame would race the load)
  * - Luminance mode requires ColorMatrix conversion to grayscale
  *
  * ## Implementation Strategy
@@ -57,28 +61,33 @@ import com.styleconverter.runtime.core.images.ImageCache
  * drawWithContent with BlendMode.DstIn to achieve masking effects.
  * The gradient's alpha channel determines visibility.
  *
- * ### URL Masks
- * For URL-based masks, Coil loads the image asynchronously. The image is drawn
- * with BlendMode.DstIn (alpha mode) or converted to luminance (luminance mode).
+ * ### URL Masks (data: URIs)
+ * The payload decodes inline via [DataUri] + BitmapFactory (cached), and
+ * the bitmap draws as a tile lattice — mask-size/position/repeat resolved
+ * through the SAME BackgroundTileMath the background path draws with —
+ * inside ONE saveLayer composited onto the content with BlendMode.DstIn,
+ * so content alpha is multiplied by mask alpha exactly once
+ * (EffectsFacade owns the single application; see StyleApplier step 3.5
+ * for the wave-2 double-apply post-mortem).
  *
  * ## Usage
  * ```kotlin
- * // For gradient masks (modifier-based)
  * val config = MaskExtractor.extractMaskConfig(properties)
  * val modifier = MaskApplier.applyMask(Modifier, config)
- *
- * // For URL masks (composable wrapper)
- * MaskApplier.MaskedBox(config) {
- *     // Content to be masked
- * }
  * ```
  */
 object MaskApplier {
 
+    /** Logcat tag for the loud no-op diagnostics below. */
+    private const val TAG = "MaskApplier"
+
     /**
      * Apply mask configuration to a Modifier.
      *
-     * Note: For URL-based masks, use MaskedBox composable instead.
+     * Gradient masks AND url(data:) masks both render here — this is the
+     * only mask entry point EffectsFacade calls (the old Coil-based
+     * MaskedBox composable was dead code nothing invoked, removed with
+     * this path's introduction).
      *
      * @param modifier The base modifier
      * @param config MaskConfig with mask properties
@@ -92,156 +101,251 @@ object MaskApplier {
             return applyGradientMask(modifier, config)
         }
 
-        // For URL-based masks, return unchanged (use MaskedBox instead)
-        // This allows the caller to detect and handle URL masks separately
+        // url() masks: data: URIs decode inline and composite with the
+        // same DstIn strategy as gradients; remote schemes stay a
+        // documented, once-logged no-op (see applyUrlMask).
+        val url = config.imageUrl
+        if (url != null) {
+            return applyUrlMask(modifier, config, url)
+        }
+
+        // hasImage with no drawable source — reachable when the extractor
+        // recognises a mask-image value but cannot recover a source from
+        // it (e.g. its generic-gradient fallback emits isGradient=true
+        // with gradient=null, or a url object misses its `url` key).
+        // Not silent: log once, then leave the content unmasked.
+        warnOnce("<no-source>", "mask config has hasImage=true but no url/gradient source recovered — rendering unmasked")
         return modifier
     }
 
+    // ==================== URL (data:) MASKS ====================
+
     /**
-     * Composable wrapper for URL-based masks.
-     *
-     * Loads the mask image and applies it to the content.
-     *
-     * @param config MaskConfig with URL mask
-     * @param modifier Modifier for the container
-     * @param content Content to be masked
+     * Once-per-URL guard for the no-op/failure warnings: this factory
+     * runs on every recomposition, and a per-frame Log.w would flood
+     * logcat — "no silent fallthroughs" wants loud, not spammy.
+     * Synchronized set: draw happens on the UI thread, tests reset from
+     * the test thread.
      */
-    @Composable
-    fun MaskedBox(
-        config: MaskConfig,
-        modifier: Modifier = Modifier,
-        content: @Composable BoxScope.() -> Unit
-    ) {
-        if (!config.hasMask) {
-            Box(modifier = modifier, content = content)
-            return
+    private val warnedMaskUrls = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+
+    /** Cap on cached decoded mask bitmaps — mask sources are tiny
+     *  (fixture masks are ≤ a few KB), so a small bound suffices. */
+    private const val MASK_CACHE_MAX_ENTRIES = 16
+
+    /**
+     * url → decoded [ImageBitmap]. Mirrors ImageCache's LRU memory-cache
+     * pattern but stays LOCAL and synchronous: ImageCache.loadImage is a
+     * suspend API with no synchronous lookup (a draw-time mask needs the
+     * bitmap NOW), and android.util.LruCache is a throwing stub under the
+     * plain-JVM unit suite that pins this routing (no Robolectric in this
+     * repo). accessOrder=true + removeEldestEntry is the textbook JDK LRU.
+     */
+    private val maskBitmapCache =
+        object : LinkedHashMap<String, ImageBitmap>(MASK_CACHE_MAX_ENTRIES, 0.75f, true) {
+            // Evict the least-recently-used entry once past the cap.
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ImageBitmap>): Boolean =
+                size > MASK_CACHE_MAX_ENTRIES
         }
 
-        // For gradient masks, use modifier approach
-        if (config.isGradient) {
-            Box(
-                modifier = modifier.then(applyGradientMask(Modifier, config)),
-                content = content
-            )
-            return
+    /**
+     * Raster bytes → [ImageBitmap]. An `internal var` seam: the default
+     * is the platform BitmapFactory decode (the same call ImageCache's
+     * data:-URI branch performs); the plain-JVM suite swaps in a fake
+     * because android.graphics is a throwing stub off-device. Production
+     * code must never reassign this.
+     */
+    internal var rasterMaskDecoder: (ByteArray) -> ImageBitmap? = { bytes ->
+        try {
+            // BitmapFactory returns null (does not throw) for undecodable
+            // bytes on device — null IS the visible-failure contract.
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
+        } catch (t: Throwable) {
+            // android.jar's "not mocked" stub throw under plain JVM (and a
+            // defensive belt on-device, e.g. OOM on a hostile payload) →
+            // the same null contract; the caller logs the failure once.
+            null
         }
-
-        // For URL masks, load image and apply as mask
-        if (config.imageUrl != null) {
-            UrlMaskedBox(
-                url = config.imageUrl,
-                config = config,
-                modifier = modifier,
-                content = content
-            )
-            return
-        }
-
-        // Fallback: no mask applied
-        Box(modifier = modifier, content = content)
     }
 
     /**
-     * Composable that applies a URL-based mask using Coil.
+     * Decode a `data:` URI mask source to an [ImageBitmap], cached per
+     * URL. Returns null when [url] is not a data URI or the payload is
+     * malformed/undecodable — callers must surface that loudly.
+     * Synchronous by design: data URIs carry their bytes inline (no I/O),
+     * which is exactly what first-frame capture determinism needs.
      */
-    @Composable
-    private fun UrlMaskedBox(
-        url: String,
-        config: MaskConfig,
-        modifier: Modifier = Modifier,
-        content: @Composable BoxScope.() -> Unit
-    ) {
-        val context = LocalContext.current
+    internal fun decodeDataUriMask(url: String): ImageBitmap? {
+        // Cache hit first — decoding per recomposition would waste work,
+        // and returning the SAME bitmap keeps captures deterministic.
+        synchronized(maskBitmapCache) { maskBitmapCache[url] }?.let { return it }
+        // RFC 2397 payload → bytes; DataUri owns the %xx-unescape +
+        // strict-base64 rules (pinned by its own JVM suite).
+        val bytes = DataUri.decode(url) ?: return null
+        // bytes → platform bitmap through the seam above.
+        val bitmap = rasterMaskDecoder(bytes) ?: return null
+        // Populate the LRU under the same lock the lookup uses.
+        synchronized(maskBitmapCache) { maskBitmapCache.put(url, bitmap) }
+        return bitmap
+    }
 
-        // Load mask image using shared Coil loader if available
-        val imageLoader = ImageCache.getCoilLoader()
-        val painter = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(context)
-                // data: URIs decode to ByteArray (Coil 3 native model).
-                .data(DataUri.toModel(url))
-                .scale(Scale.FILL)
-                .memoryCachePolicy(CachePolicy.ENABLED)
-                .diskCachePolicy(CachePolicy.ENABLED)
-                .build(),
-            imageLoader = imageLoader ?: coil3.ImageLoader(context)
-        )
+    /** Test hook: clear the decode cache and the warn-once guard so JVM
+     *  test cases start from a known state. Test-only by contract. */
+    internal fun resetUrlMaskStateForTest() {
+        synchronized(maskBitmapCache) { maskBitmapCache.clear() }
+        warnedMaskUrls.clear()
+    }
 
-        // Coil 3: `state` is a StateFlow — collect for recomposition.
-        val painterState by painter.state.collectAsState()
+    /** Log a url-mask diagnostic ONCE per URL (see [warnedMaskUrls]);
+     *  IRLog falls back to stdout under plain JVM. */
+    private fun warnOnce(url: String, message: String) {
+        if (warnedMaskUrls.add(url)) IRLog.warn(TAG, message)
+    }
 
-        // Create color filter for luminance mode
+    /**
+     * Apply a url() mask on the Modifier path.
+     *
+     * data: URIs render; anything else (http/https/file/relative) is the
+     * documented no-op — Compose has no synchronous fetch, and an async
+     * load would race the harness's first-frame capture, so the honest
+     * behavior is "unmasked + one loud log", never a flaky half-render.
+     */
+    private fun applyUrlMask(modifier: Modifier, config: MaskConfig, url: String): Modifier {
+        // Remote/relative schemes: documented, once-logged no-op (above).
+        if (!DataUri.isDataUri(url)) {
+            warnOnce(
+                url,
+                "mask-image: url($url) — non-data: schemes are a documented no-op on Compose " +
+                    "(async fetch is capture-nondeterministic); rendering unmasked"
+            )
+            return modifier
+        }
+        // Inline payload → bitmap, synchronously (cached after first use).
+        val mask = decodeDataUriMask(url)
+        if (mask == null) {
+            // Malformed payload or undecodable bytes: browsers treat a
+            // failed mask-image load as no mask layer (the element renders
+            // unmasked) — mirror that, loudly, not silently.
+            warnOnce(url, "mask-image: data: URI failed to decode — rendering unmasked (browsers ignore failed mask loads)")
+            return modifier
+        }
+        // Same single-application chain as the gradient path: flatten the
+        // content into ONE offscreen layer, then composite the mask onto
+        // it exactly once. EffectsFacade is the only caller — StyleApplier
+        // step 3.5 documents the wave-2 alpha² double-apply this design
+        // prevents.
+        return modifier
+            .graphicsLayer {
+                // Without Offscreen, DstIn would erase through to whatever
+                // renders BEHIND the element instead of just its content.
+                compositingStrategy = CompositingStrategy.Offscreen
+            }
+            .drawWithContent {
+                // Element content first — the mask multiplies THIS layer.
+                drawContent()
+                // Then the tiled image mask in one saveLayer pass.
+                drawImageMask(mask, config)
+            }
+    }
+
+    /**
+     * Draw [mask] over the content as a CSS mask layer.
+     *
+     * Geometry: mask-size (§4.8 — default `auto` = intrinsic px),
+     * mask-position (§4.6 — default 0% 0% = top-left), mask-repeat
+     * (§4.5 — default `repeat`, tiling BOTH axes; css-masking-1 defers
+     * the placement rules to css-backgrounds-3 §3.7, so the lattice comes
+     * from BackgroundTileMath.axisPlan, the same pinned owner the
+     * background path draws with, including space/round and the snapped
+     * abutting edges that close antialiasing seams).
+     *
+     * Compositing: all tiles draw SrcOver INTO one saveLayer; the layer
+     * then composites onto the content with the mask blend (DstIn for the
+     * default `add`). Per-tile DstIn would be wrong for no-repeat: pixels
+     * OUTSIDE the tile rect would keep full content alpha, where CSS says
+     * uncovered areas are transparent black (content hidden). The same
+     * property makes a degenerate lattice (zero-sized tile → empty plan)
+     * hide the element entirely — matching the spec's transparent-black
+     * mask layer, i.e. what browsers do for `mask-size: 0 0`.
+     */
+    private fun DrawScope.drawImageMask(mask: ImageBitmap, config: MaskConfig) {
+        // Intrinsic size in bitmap px used as draw px — the density-1
+        // convention this file already applies (Dp.value is read as px in
+        // calculateMaskSize), matching the capture harness setup.
+        val imageW = mask.width.toFloat()
+        val imageH = mask.height.toFloat()
+        // mask-size: default Auto keeps the intrinsic dimensions
+        // (css-masking-1 §4.8 / backgrounds §3.9 `auto`).
+        val (tileW, tileH) = calculateMaskSize(config.size, size, imageW, imageH)
+        // mask-position: the anchor of the first tile (free-space ×
+        // fraction — §4.6 positive-percentage semantics).
+        val (anchorX, anchorY) = calculateMaskPosition(config.position, size, tileW, tileH)
+        // mask-repeat → per-axis placement modes, then one axis plan each.
+        val (modeX, modeY) = maskRepeatAxes(config.repeat)
+        val planX = BackgroundTileMath.axisPlan(size.width, tileW, anchorX, modeX)
+        val planY = BackgroundTileMath.axisPlan(size.height, tileH, anchorY, modeY)
+        // mask-mode (css-masking-1 §7.4.3): `match-source` resolves to
+        // ALPHA for raster <image> sources — luminance is only the
+        // match-source default for SVG <mask> element references.
+        // TODO(svg-masks): when SVG mask sources land on this wire,
+        // MATCH_SOURCE must flip to luminance for them. Explicit
+        // `luminance` reuses the gradient path's luminance→alpha matrix.
         val colorFilter = if (config.mode == MaskModeValue.LUMINANCE) {
             ColorFilter.colorMatrix(LUMINANCE_TO_ALPHA_MATRIX)
         } else {
-            null
+            null // ALPHA / MATCH_SOURCE(raster): the bitmap's alpha IS the mask
         }
-
-        // Determine blend mode based on composite
-        val blendMode = config.composite.toBlendMode()
-
-        Box(
-            modifier = modifier
-                .graphicsLayer {
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }
-                .drawWithContent {
-                    // Draw original content first
-                    drawContent()
-
-                    // Only apply mask when image is loaded
-                    if (painterState is AsyncImagePainter.State.Success) {
-                        val imageWidth = painter.intrinsicSize.width
-                        val imageHeight = painter.intrinsicSize.height
-
-                        if (imageWidth > 0 && imageHeight > 0) {
-                            // Calculate mask dimensions based on size config
-                            val (maskWidth, maskHeight) = calculateMaskSize(
-                                config.size, size, imageWidth, imageHeight
-                            )
-
-                            // Calculate position based on position config
-                            val (offsetX, offsetY) = calculateMaskPosition(
-                                config.position, size, maskWidth, maskHeight
-                            )
-
-                            // Handle repeat
-                            val (repeatX, repeatY) = when (config.repeat) {
-                                MaskRepeatValue.REPEAT -> true to true
-                                MaskRepeatValue.REPEAT_X -> true to false
-                                MaskRepeatValue.REPEAT_Y -> false to true
-                                else -> false to false
-                            }
-
-                            if (repeatX || repeatY) {
-                                // Draw repeated tiles
-                                drawRepeatedMask(
-                                    painter = painter,
-                                    tileWidth = maskWidth,
-                                    tileHeight = maskHeight,
-                                    repeatX = repeatX,
-                                    repeatY = repeatY,
-                                    blendMode = blendMode,
-                                    colorFilter = colorFilter
-                                )
-                            } else {
-                                // Draw single mask
-                                with(painter) {
-                                    translate(left = offsetX, top = offsetY) {
-                                        draw(
-                                            size = Size(maskWidth, maskHeight),
-                                            colorFilter = colorFilter
-                                        )
-                                    }
-                                }
-                                // Apply blend mode with a full rect
-                                // Note: The actual masking happens through the painter's alpha
-                            }
-                        }
-                    }
-                }
-        ) {
-            content()
+        // The whole lattice composites in ONE pass (rationale in KDoc).
+        val layerPaint = Paint().apply { blendMode = config.composite.toBlendMode() }
+        val canvas = drawContext.canvas
+        canvas.saveLayer(Rect(Offset.Zero, size), layerPaint)
+        // Cartesian product of the two axis plans — the same walk the
+        // background tile renderer performs.
+        for (row in planY.origins.indices) {
+            for (col in planX.origins.indices) {
+                drawImage(
+                    image = mask,
+                    // AxisPlan edges are already pixel-snapped for the
+                    // abutting modes; roundToInt is exact on them.
+                    dstOffset = IntOffset(
+                        planX.origins[col].roundToInt(),
+                        planY.origins[row].roundToInt()
+                    ),
+                    // Segment extent, not the raw tile: REPEAT/ROUND edges
+                    // are snapped so adjacent tiles abut on integer px — a
+                    // ≤1px sub-pixel rescale beats a visible AA seam (see
+                    // AxisPlan's seam post-mortem).
+                    dstSize = IntSize(
+                        (planX.ends[col] - planX.origins[col]).roundToInt(),
+                        (planY.ends[row] - planY.origins[row]).roundToInt()
+                    ),
+                    colorFilter = colorFilter
+                )
+            }
         }
+        // Composite the finished mask layer onto the content (DstIn).
+        canvas.restore()
+    }
+
+    /**
+     * mask-repeat → per-axis [AxisRepeat] modes. css-masking-1 §4.5
+     * defines mask-repeat with css-backgrounds-3 §3.7 semantics, so the
+     * mapping targets the background path's enum directly. Internal:
+     * pinned by the plain-JVM suite (MaskUrlImageTest).
+     */
+    internal fun maskRepeatAxes(repeat: MaskRepeatValue): Pair<AxisRepeat, AxisRepeat> = when (repeat) {
+        // The initial value: edge-to-edge tiling on both axes.
+        MaskRepeatValue.REPEAT -> AxisRepeat.REPEAT to AxisRepeat.REPEAT
+        // Single tile at the position anchor.
+        MaskRepeatValue.NO_REPEAT -> AxisRepeat.NO_REPEAT to AxisRepeat.NO_REPEAT
+        // Horizontal strip: tile x, anchor y.
+        MaskRepeatValue.REPEAT_X -> AxisRepeat.REPEAT to AxisRepeat.NO_REPEAT
+        // Vertical strip: anchor x, tile y.
+        MaskRepeatValue.REPEAT_Y -> AxisRepeat.NO_REPEAT to AxisRepeat.REPEAT
+        // §3.7 space: whole tiles, equal gaps between them.
+        MaskRepeatValue.SPACE -> AxisRepeat.SPACE to AxisRepeat.SPACE
+        // §3.7 round: rescale so a whole number of tiles fits exactly.
+        MaskRepeatValue.ROUND -> AxisRepeat.ROUND to AxisRepeat.ROUND
     }
 
     /**
@@ -594,38 +698,6 @@ object MaskApplier {
     }
 
     /**
-     * Draw a repeated mask pattern.
-     */
-    private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawRepeatedMask(
-        painter: Painter,
-        tileWidth: Float,
-        tileHeight: Float,
-        repeatX: Boolean,
-        repeatY: Boolean,
-        blendMode: BlendMode,
-        colorFilter: ColorFilter?
-    ) {
-        val tilesX = if (repeatX) (size.width / tileWidth).toInt() + 2 else 1
-        val tilesY = if (repeatY) (size.height / tileHeight).toInt() + 2 else 1
-
-        for (row in 0 until tilesY) {
-            for (col in 0 until tilesX) {
-                translate(
-                    left = col * tileWidth,
-                    top = row * tileHeight
-                ) {
-                    with(painter) {
-                        draw(
-                            size = Size(tileWidth, tileHeight),
-                            colorFilter = colorFilter
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Extension to convert MaskCompositeValue to BlendMode.
      */
     private fun MaskCompositeValue.toBlendMode(): BlendMode {
@@ -635,20 +707,6 @@ object MaskApplier {
             MaskCompositeValue.INTERSECT -> BlendMode.DstIn
             MaskCompositeValue.EXCLUDE -> BlendMode.Xor
         }
-    }
-
-    /**
-     * Check if mask mode uses luminance.
-     */
-    fun useLuminanceMode(config: MaskConfig): Boolean {
-        return config.mode == MaskModeValue.LUMINANCE
-    }
-
-    /**
-     * Check if config requires the MaskedBox composable (URL-based mask).
-     */
-    fun requiresMaskedBox(config: MaskConfig): Boolean {
-        return config.isUrlMask
     }
 
     /**
@@ -663,17 +721,4 @@ object MaskApplier {
             0.2126f, 0.7152f, 0.0722f, 0f, 0f  // RGB luminance -> Alpha
         )
     )
-}
-
-/**
- * Helper extension to apply translate within DrawScope.
- */
-private inline fun androidx.compose.ui.graphics.drawscope.DrawScope.translate(
-    left: Float = 0f,
-    top: Float = 0f,
-    block: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit
-) {
-    drawContext.transform.translate(left, top)
-    block()
-    drawContext.transform.translate(-left, -top)
 }

@@ -1,7 +1,7 @@
 {
   "components": {
     "MaskImage_None": { "properties": { "width": "160px", "height": "80px", "background-color": "#3498db", "mask-image": "none" } },
-    "MaskImage_Url": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-image": "url(mask.png)" } },
+    "MaskImage_Url": { "properties": { "width": "160px", "height": "80px", "background-color": "#e74c3c", "mask-image": "url(\"data:image/png,%89%50%4e%47%0d%0a%1a%0a%00%00%00%0d%49%48%44%52%00%00%00%18%00%00%00%18%08%06%00%00%00%e0%77%3d%f8%00%00%00%68%49%44%41%54%78%01%dd%c1%49%0e%84%30%0c%00%c1%6e%ff%ff%cf%86%03%12%5b%80%08%e2%c3%4c%15%3f%4f%fa%24%6d%f2%40%ee%25%7d%e4%82%b4%25%ef%c8%81%9c%25%df%c8%46%50%4c%f6%92%31%64%11%14%93%55%32%96%cc%82%62%41%b1%a0%58%50%2c%28%26%7b%c9%18%b2%08%8a%c9%59%f2%8d%6c%04%c5%a4%2d%79%47%0e%e4%5e%d2%47%2e%48%9f%a4%4d%fe%de%04%4b%89%0b%1e%f6%6e%5e%25%00%00%00%00%49%45%4e%44%ae%42%60%82\")" } },
     "MaskImage_LinearDefault": { "properties": { "width": "160px", "height": "80px", "background-color": "#2ecc71", "mask-image": "linear-gradient(black, transparent)" } },
     "MaskImage_LinearAngle": { "properties": { "width": "160px", "height": "80px", "background-color": "#9b59b6", "mask-image": "linear-gradient(45deg, black, transparent)" } },
     "MaskImage_LinearToRight": { "properties": { "width": "160px", "height": "80px", "background-color": "#f39c12", "mask-image": "linear-gradient(to right, black, transparent)" } },

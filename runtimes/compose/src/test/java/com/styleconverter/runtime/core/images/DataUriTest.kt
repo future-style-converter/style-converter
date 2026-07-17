@@ -6,6 +6,7 @@ package com.styleconverter.runtime.core.images
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -62,5 +63,27 @@ class DataUriTest {
         // corruption is exactly what this local decoder avoids.
         assertEquals("a+b", DataUri.percentDecode("a+b"))
         assertEquals("a b", DataUri.percentDecode("a%20b"))
+    }
+
+    @Test
+    fun `non-base64 binary payloads decode to raw bytes, not UTF-8 mangling`() {
+        // Wave-3 regression pin: %89 must decode to the single byte 0x89 —
+        // the old String round-trip re-encoded it as UTF-8 (0xC2 0x89),
+        // corrupting every percent-encoded PNG at its very signature, so
+        // BitmapFactory returned null and Android painted no border-image
+        // while iOS matched Chromium at 1.00.
+        val bytes = DataUri.decode("data:image/png,%89PNG%0D%0A%1A%0A")
+        assertNotNull(bytes)
+        val expected = byteArrayOf(0x89.toByte(), 'P'.code.toByte(), 'N'.code.toByte(),
+            'G'.code.toByte(), 0x0D, 0x0A, 0x1A, 0x0A)
+        assertArrayEquals(expected, bytes)
+    }
+
+    @Test
+    fun `ascii svg payloads decode byte-identically through the bytes path`() {
+        // Text SVG (pure ASCII) must be unaffected by the binary-path fix.
+        val svg = DataUri.decode("data:image/svg+xml;utf8,%3Csvg%3E%3C/svg%3E")
+        assertNotNull(svg)
+        assertEquals("<svg></svg>", svg!!.toString(Charsets.UTF_8))
     }
 }

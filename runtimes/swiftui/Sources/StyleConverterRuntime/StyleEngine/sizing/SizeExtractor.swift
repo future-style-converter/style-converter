@@ -72,14 +72,24 @@ enum SizeExtractor {
                 cfg.aspectRatio = AspectRatioExtractor.extract(p.data)
 
             // ─── BoxSizing (border-box | content-box) ─────────────────
-            // Claimed here for coverage parity with Android. The iOS
-            // chain (`engineSpacingPadding → engineSizing`) already
-            // implements border-box semantics, which matches every
-            // current fixture — none explicitly set `box-sizing` — so
-            // we record the keyword but defer real content-box
-            // branching until a fixture drives it.
+            // Wire shape (BoxSizingPropertyParser.kt → single-field data
+            // class, flattened): bare SHOUTY enum string "CONTENT_BOX" |
+            // "BORDER_BOX" — same contract the web extractor decodes
+            // (runtimes/web/src/engine/sizing/BoxSizingExtractor.ts).
+            // TRI-STATE: an absent property leaves cfg.boxSizing nil so
+            // the applier keeps the border-box status quo; ONLY an
+            // explicitly-declared content-box triggers frame inflation
+            // (css-sizing-3 §3 — declared size = content box).
             case "BoxSizing":
-                _ = p.data
+                switch p.data {
+                case .string("CONTENT_BOX"): cfg.boxSizing = .contentBox
+                case .string("BORDER_BOX"):  cfg.boxSizing = .borderBox
+                default:
+                    // Unknown token / shape — the converter only emits the
+                    // two enum names, so anything else is wire drift. Leave
+                    // the slot UNSET (nil ≠ content-box) rather than guess.
+                    break
+                }
 
             default:
                 // Not a sizing prop — skip silently. The registry keeps

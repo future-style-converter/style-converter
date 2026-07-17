@@ -38,7 +38,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -221,6 +223,108 @@ class ColorApplierGradientTileTest {
             repeat = BackgroundRepeatAxes(AxisRepeat.REPEAT, AxisRepeat.REPEAT)
         )
         assertTrue(pass.origins.isEmpty())
+    }
+
+    // ---- (2b) geometry ROUTING: gradientNeedsGeometry (lane PW) --------
+    //
+    // The old gate was `sized == null → Modifier.background(brush)`, so
+    // background-position without an explicit background-size was silently
+    // dropped on Android: web and iOS wrap a box-sized tile through the
+    // offset (seam at the anchor), Compose painted the plain full-box
+    // gradient. gradientNeedsGeometry now mirrors iOS's
+    // BackgroundImageApplier.gradientNeedsGeometry: any non-default
+    // position or non-`repeat` axis routes through the tile path with
+    // tile = box (auto size for an intrinsic-less gradient = the box,
+    // css-backgrounds-3 §3.9). These tests pin BOTH directions of the
+    // predicate so the default path can never re-widen (baseline safety)
+    // and the knob paths can never re-narrow (the regression itself).
+
+    // Shorthands for the CSS initial values of the three knobs.
+    private val defaultPos = BackgroundPositionConfig()
+    private val defaultRepeat = BackgroundRepeatAxes(AxisRepeat.REPEAT, AxisRepeat.REPEAT)
+
+    @Test
+    fun `position-only gradient routes through the tile path`() {
+        // The repro knob: `background-position: 40px 0px`, NO size. The
+        // 40px offset lives in xOffset (raw px edge offset, §3.6).
+        val pos = BackgroundPositionConfig(xOffset = 40.dp)
+        assertTrue(ColorApplier.gradientNeedsGeometry(
+            layerSize = BackgroundSizeConfig.Auto, position = pos,
+            repeat = defaultRepeat, isRepeatingGradient = false))
+    }
+
+    @Test
+    fun `percent position routes too`() {
+        // `background-position: 50% 50%` — fractional anchor, no px part.
+        assertTrue(ColorApplier.gradientNeedsGeometry(
+            layerSize = BackgroundSizeConfig.Auto,
+            position = BackgroundPositionConfig.CENTER,
+            repeat = defaultRepeat, isRepeatingGradient = false))
+    }
+
+    @Test
+    fun `no knobs keeps the plain background path`() {
+        // Baseline safety: a knob-less gradient must NOT route — the
+        // Modifier.background(brush) call stays byte-identical so every
+        // knob-less gradient baseline is untouched by this wave. Same for
+        // cover/contain, which resolve to the box anyway (§3.9).
+        for (size in listOf(BackgroundSizeConfig.Auto, BackgroundSizeConfig.Cover,
+                            BackgroundSizeConfig.Contain)) {
+            assertFalse("size=$size", ColorApplier.gradientNeedsGeometry(
+                layerSize = size, position = defaultPos,
+                repeat = defaultRepeat, isRepeatingGradient = false))
+        }
+    }
+
+    @Test
+    fun `explicit dimensions still route (the pre-wave gate)`() {
+        // The original sized-tile pathway must keep routing unchanged.
+        assertTrue(ColorApplier.gradientNeedsGeometry(
+            layerSize = BackgroundSizeConfig.Dimensions(width = 30.dp, height = 30.dp),
+            position = defaultPos, repeat = defaultRepeat, isRepeatingGradient = false))
+    }
+
+    @Test
+    fun `non-repeat axis routes even without position`() {
+        // `background-repeat: no-repeat` changes the lattice (§3.7) —
+        // mirrors the iOS predicate's repeat clause axis-by-axis.
+        assertTrue(ColorApplier.gradientNeedsGeometry(
+            layerSize = BackgroundSizeConfig.Auto, position = defaultPos,
+            repeat = BackgroundRepeatAxes(AxisRepeat.NO_REPEAT, AxisRepeat.REPEAT),
+            isRepeatingGradient = false))
+    }
+
+    @Test
+    fun `repeating gradient never routes, even with knobs`() {
+        // The wave-2 exclusion outranks every knob: repeating-* brushes
+        // bake fixed 500×500 endpoints (RepeatingGradientHelper) that
+        // pinShaderToTile cannot re-pin — tiling them would render a
+        // near-constant slice per tile. Position AND size set here to
+        // prove the exclusion is checked first.
+        assertFalse(ColorApplier.gradientNeedsGeometry(
+            layerSize = BackgroundSizeConfig.Dimensions(width = 30.dp, height = 30.dp),
+            position = BackgroundPositionConfig(xOffset = 40.dp),
+            repeat = defaultRepeat, isRepeatingGradient = true))
+    }
+
+    @Test
+    fun `tile-equals-box plan wraps a 40px offset with the seam phase preserved`() {
+        // The skeptic's repro geometry: 200×120 box, linear-gradient,
+        // `background-position: 40px 0px`, no size → tile = box (§3.9).
+        // REPEAT normalizes the 40px anchor into (−tile, 0] (start
+        // 40 − 200 = −160), so the grid is TWO x-tiles: the wrapped tail
+        // at −160 (its visible part covers x∈[0,40)) and the anchored
+        // tile at 40 — the wrap seam web/iOS show at x=40.
+        val pass = ColorApplier.planTilePass(
+            box = Size(200f, 120f), tileW = 200f, tileH = 120f,
+            anchorX = 40f, anchorY = 0f, repeat = defaultRepeat)
+        // Shader pitch = the box-sized tile (the no-op pin case).
+        assertEquals(Size(200f, 120f), pass.tileSize)
+        // Exactly the two phase-preserving origins; y stays a single row.
+        assertEquals(listOf(Offset(-160f, 0f), Offset(40f, 0f)), pass.origins)
+        // Integer anchor/pitch → the snap is the identity: both tiles
+        // draw the full 200×120 extent (clipped to the box by clipRect).
+        assertTrue(pass.drawSizes.all { it == Size(200f, 120f) })
     }
 
     // ---- (4) radialAxisScale: circle→ellipse squash DIRECTION ----------

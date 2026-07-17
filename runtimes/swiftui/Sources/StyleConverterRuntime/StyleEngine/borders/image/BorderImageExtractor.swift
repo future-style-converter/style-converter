@@ -59,7 +59,30 @@ enum BorderImageExtractor {
             default: break
             }
         }
-        return touched ? cfg : nil
+        // No border-image key seen → nil so the applier short-circuits
+        // without resolving borders it will never use.
+        guard touched else { return nil }
+        // Resolve the element's COMPUTED border widths — the §6.3 basis
+        // for `<number>` border-image-width values (and the initial `1`).
+        // css-backgrounds-3 §4.3: a side whose border-style is
+        // none/hidden/absent computes to width 0, which
+        // BorderSideConfig.hasBorder + effectiveWidth already encode
+        // (including the `medium` 3px default for style-only sides).
+        // Reuses BorderSideExtractor so both consumers stay in lockstep
+        // on the gating rules — mirrors Compose's BorderImageExtractor.
+        let sides = BorderSideExtractor.extract(from: properties)
+        // Paintable side → its effective width; everything else → 0.
+        func computed(_ s: BorderSideConfig?) -> CGFloat {
+            guard let s = s, s.hasBorder else { return 0 }
+            return s.effectiveWidth ?? 0
+        }
+        // AllBordersConfig names the physical right/left buckets end/start
+        // (LTR mapping — see BorderSideConfig.swift).
+        cfg.computedBorderTop = computed(sides?.top)
+        cfg.computedBorderRight = computed(sides?.end)
+        cfg.computedBorderBottom = computed(sides?.bottom)
+        cfg.computedBorderLeft = computed(sides?.start)
+        return cfg
     }
 
     // MARK: - Source

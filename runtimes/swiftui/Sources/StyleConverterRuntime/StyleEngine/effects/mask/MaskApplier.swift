@@ -5,7 +5,8 @@
 //  Applies a `MaskConfig` via SwiftUI `.mask(_:)`. Gradient layers are
 //  the common case and translate cleanly — a LinearGradient from opaque
 //  black to transparent creates the same alpha profile as the CSS
-//  equivalent. URL references and mask-border are TODOs.
+//  equivalent. url() layers resolve to real rasters via MaskURLLayer
+//  (shared background decode + tiling pipeline); mask-border is a TODO.
 //
 
 import SwiftUI
@@ -58,10 +59,17 @@ struct MaskApplier: ViewModifier {
             // No-op — we still render a transparent colour so the ZStack
             // survives the ForEach indexing contract.
             Color.clear
-        case .url:
-            // No SwiftUI analog for `url(#id)` — paint a neutral grey
-            // so the user sees that SOMETHING is being masked.
-            Color.black.opacity(0.5)
+        case .url(let href):
+            // Real raster masks: MaskURLLayer resolves the href through
+            // the shared background url() pipeline and tiles it per
+            // cfg.size/position/repeat (BackgroundImageGeometry math).
+            // Unresolvable sources (url(#fragment) SVG refs, http(s)
+            // remotes, broken payloads) render Color.clear — the
+            // css-masking-1 failed-load semantics (transparent black
+            // layer = element hidden), replacing the old misleading
+            // Color.black.opacity(0.5) placeholder that showed the
+            // element uniformly half-visible.
+            MaskURLLayer.view(href, cfg: cfg)
         case .linearGradient(let deg, let stops, let repeating):
             // Endpoints REUSE GradientApplier.linearEndpoints — the
             // background path's css-images-3 §3.1.1 pixel-space math.

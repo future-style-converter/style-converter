@@ -49,9 +49,13 @@ object DataUri {
                 java.util.Base64.getDecoder()
                     .decode(percentDecode(payload).replace(Regex("\\s"), ""))
             } else {
-                // Non-base64 form: percent-decoded US-ASCII/UTF-8 text
-                // (SVG data URIs are the common CSS case).
-                percentDecode(payload).toByteArray(Charsets.UTF_8)
+                // Non-base64 form: percent-decode to RAW BYTES. This form
+                // carries BINARY payloads too (percent-encoded PNGs — the
+                // repo's canonical raster-data-URI style, since the parser
+                // lowercases values and corrupts base64); the previous
+                // String round-trip UTF-8-mangled every byte ≥ 0x80. Text
+                // SVG payloads (ASCII) decode byte-identically either way.
+                percentDecodeBytes(payload)
             }
         } catch (_: IllegalArgumentException) {
             null // broken base64 → caller's visible-failure fallback
@@ -87,5 +91,40 @@ object DataUri {
             i++
         }
         return out.toString()
+    }
+
+    /** Percent-decode straight to RAW BYTES — the non-base64 binary path.
+     *  The String-returning percentDecode above is WRONG for binary
+     *  payloads: `%89` decodes to the CHAR U+0089, and re-encoding that
+     *  as UTF-8 emits TWO bytes (0xC2 0x89) — every byte ≥ 0x80 corrupts,
+     *  so a percent-encoded PNG's very signature (%89PNG) broke and
+     *  BitmapFactory returned null (Android painted nothing while iOS,
+     *  which decodes byte-wise, matched Chromium at 1.00). Per RFC 2397 a
+     *  data URI is ASCII: literal chars map to their single byte; %xx maps
+     *  to the raw byte. Literal chars > 0x7F are technically invalid in a
+     *  URI — encode them UTF-8 as a lenient fallback (matches how such
+     *  hand-authored SVG payloads decoded before). */
+    internal fun percentDecodeBytes(s: String): ByteArray {
+        val out = java.io.ByteArrayOutputStream(s.length)
+        var i = 0
+        while (i < s.length) {
+            val c = s[i]
+            if (c == '%' && i + 2 < s.length) {
+                val hi = Character.digit(s[i + 1], 16)
+                val lo = Character.digit(s[i + 2], 16)
+                if (hi >= 0 && lo >= 0) {
+                    out.write((hi shl 4) or lo)
+                    i += 3
+                    continue
+                }
+            }
+            if (c.code <= 0x7F) {
+                out.write(c.code)                       // ASCII literal → its byte
+            } else {
+                out.write(c.toString().toByteArray(Charsets.UTF_8)) // lenient non-ASCII
+            }
+            i++
+        }
+        return out.toByteArray()
     }
 }

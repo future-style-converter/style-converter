@@ -327,19 +327,23 @@ object ColorApplier {
         // lambda below, so re-bind a non-null local for clarity.
         val nonNullBrush: Brush = brush
 
-        // CSS `background-size` + `background-position` decide where the
-        // brush tile draws inside the box. When THIS LAYER's size entry
-        // carries explicit dimensions (and the layer isn't a
-        // `repeating-*-gradient` — those bake their own tile into the
-        // brush), we can't just call `Modifier.background(brush)` because
-        // that always fills the entire element. Instead we draw the brush
-        // into sized tiles via `Modifier.drawBehind`. Without
-        // background-size or with size=auto/cover/contain we fall back to
-        // the full-fill path (gradients have no intrinsic dimensions, so
-        // auto/cover/contain all resolve to the box — css-backgrounds-3
-        // §3.9) so previously-correct fixtures don't regress.
+        // CSS `background-size` + `background-position` + `background-repeat`
+        // decide where the brush tile draws inside the box. The sized-tile
+        // drawBehind path below is entered whenever a knob can move the
+        // picture off the plain full-box fill — the routing predicate
+        // gradientNeedsGeometry (the Compose mirror of iOS's
+        // BackgroundImageApplier.gradientNeedsGeometry) decides. With no
+        // knob set we keep `Modifier.background(brush)` BYTE-IDENTICAL to
+        // the pre-wave behavior so knob-less gradient baselines never move.
+        // When a knob is set WITHOUT an explicit size (sized == null), the
+        // tile is the BOX: gradients have no intrinsic dimensions, so auto
+        // (and cover/contain) resolve to the box — css-backgrounds-3 §3.9.
+        // Previously this gate required explicit Dimensions, so
+        // `background-position: 40px 0` without a size rendered UNSHIFTED
+        // on Android while web/iOS wrapped the box-sized tile with a
+        // visible seam at x=40 (wave-1 skeptic deferral, both lenses).
         val sized = layerSize as? BackgroundSizeConfig.Dimensions
-        // Make the comment above TRUE in code (wave-1 skeptic finding): a
+        // Repeating-gradient exclusion input (wave-1 skeptic finding): a
         // `repeating-*-gradient` brush bakes FIXED pixel endpoints computed
         // against a default 500x500 size (RepeatingGradientHelper), so
         // pinShaderToTile cannot re-pin it — each tile would sample a
@@ -353,7 +357,11 @@ object ColorApplier {
             is BackgroundImageConfig.ConicGradient -> image.repeating
             else -> false
         }
-        if (sized == null || isRepeating) {
+        // Route through gradientNeedsGeometry so Compose and iOS agree on
+        // WHEN tile geometry matters (explicit size, non-default position,
+        // or a non-`repeat` axis) — and on the repeating-gradient exclusion.
+        if (!gradientNeedsGeometry(layerSize, config.backgroundPosition,
+                                   layerRepeat, isRepeating)) {
             return modifier.background(nonNullBrush)
         }
         val pos = config.backgroundPosition
@@ -364,12 +372,18 @@ object ColorApplier {
             // previous `* it / 100f` here double-divided, shrinking `50%`
             // to 0.5% of the box); a missing axis is `auto`, which for
             // gradient brushes (no intrinsic size) resolves to the
-            // container axis (Auditor round 8 finding).
-            val tileW = sized.width?.toPx()
-                ?: sized.widthPercent?.let { this.size.width * it }
+            // container axis (Auditor round 8 finding). `sized == null`
+            // (position/repeat knob without an explicit size) resolves
+            // BOTH axes to the box — §3.9 auto for an intrinsic-less
+            // image, mirroring iOS's tile-equals-box routing; the
+            // pinShaderToTile call below then pins to the box size, which
+            // is exactly what Modifier.background would have handed the
+            // shader (a no-op pin).
+            val tileW = sized?.width?.toPx()
+                ?: sized?.widthPercent?.let { this.size.width * it }
                 ?: this.size.width
-            val tileH = sized.height?.toPx()
-                ?: sized.heightPercent?.let { this.size.height * it }
+            val tileH = sized?.height?.toPx()
+                ?: sized?.heightPercent?.let { this.size.height * it }
                 ?: this.size.height
             if (tileW <= 0f || tileH <= 0f) return@drawBehind
             // CSS background-position: percent of (containerSize − tileSize)
@@ -444,6 +458,49 @@ object ColorApplier {
                 }
             }
         }
+    }
+
+    /**
+     * True when a size/position/repeat knob can move a GRADIENT layer off
+     * the plain full-box fill — i.e. when applyBackgroundImage must take
+     * the sized-tile drawBehind path instead of `Modifier.background`.
+     * The Compose mirror of iOS's
+     * BackgroundImageApplier.gradientNeedsGeometry, so both mobile
+     * runtimes route layers through tile geometry under the SAME
+     * conditions. Pure (data in, Boolean out) and internal so JUnit pins
+     * the routing without a DrawScope (ColorApplierGradientTileTest).
+     */
+    internal fun gradientNeedsGeometry(
+        layerSize: BackgroundSizeConfig,
+        position: BackgroundPositionConfig,
+        repeat: BackgroundRepeatAxes,
+        isRepeatingGradient: Boolean
+    ): Boolean {
+        // `repeating-*-gradient` exclusion (the wave-2 guard, checked
+        // FIRST so no knob can override it): the repeating helpers bake
+        // FIXED pixel endpoints against a default 500×500 size
+        // (RepeatingGradientHelper), so pinShaderToTile cannot re-pin
+        // them — each tile would sample a near-constant slice of the ramp.
+        // They keep the full-box path until the helpers take a tile size.
+        if (isRepeatingGradient) return false
+        // Explicit dimensions move the tile away from the box. The other
+        // size flavors (auto/cover/contain) all resolve to the box for an
+        // intrinsic-less gradient (css-backgrounds-3 §3.9) — exactly what
+        // the full-box fill already paints, so they don't route alone.
+        if (layerSize is BackgroundSizeConfig.Dimensions) return true
+        // Non-default position: a percent/px offset shifts even a
+        // box-sized tile, and the default REPEAT wraps it around with a
+        // visible seam (§3.6) — web and iOS both render that wrap, so
+        // Android must route it too (the wave-1 skeptic deferral).
+        if (position.hasPosition) return true
+        // A non-`repeat` axis changes the lattice (§3.7): no-repeat drops
+        // the wrap once position moves the tile, space/round re-place it.
+        // With auto size + default position the box-sized tile paints the
+        // same picture either way — routing is still correct, just
+        // unnecessary for plain repeat (same note as the iOS predicate).
+        if (repeat.x != AxisRepeat.REPEAT || repeat.y != AxisRepeat.REPEAT) return true
+        // No knob set: keep the byte-identical Modifier.background path.
+        return false
     }
 
     /**

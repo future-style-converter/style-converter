@@ -10,7 +10,6 @@ import android.graphics.Shader
 import android.graphics.SweepGradient
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -178,12 +177,18 @@ object BorderImageApplier {
 
         Box(
             modifier = modifier
-                .padding(
-                    start = outsetLeft,
-                    top = outsetTop,
-                    end = outsetRight,
-                    bottom = outsetBottom
-                )
+                // Outset is deliberately NOT a layout modifier: css-backgrounds-3
+                // §6.4 — "the border image area ... can extend outside the border
+                // box" and the outset region "does not trigger scrolling" nor
+                // "affect layout". Painting outward is safe here because
+                // Modifier.drawBehind draws with an UNCLIPPED DrawScope — Compose
+                // only clips a node's drawing when an explicit clip modifier
+                // (Modifier.clip / clipToBounds / graphicsLayer(clip = true)) is
+                // present, and neither this chain nor the harness's CaptureCanvas
+                // wraps components in one (its 16dp canvas padding gives the
+                // overdraw room inside the captured rect). The pre-fix code
+                // applied outset as an inward .padding(), i.e. the exact INVERSE
+                // of the spec: it shrank the border box and pulled the image in.
                 .drawBehind {
                     imageBitmap?.let { bitmap ->
                         drawBorderImage(
@@ -192,47 +197,156 @@ object BorderImageApplier {
                             borderTop = borderTop.toPx(),
                             borderRight = borderRight.toPx(),
                             borderBottom = borderBottom.toPx(),
-                            borderLeft = borderLeft.toPx()
+                            borderLeft = borderLeft.toPx(),
+                            // Expand the destination geometry outward: outset
+                            // (§6.4) PLUS the computed border band PLUS the
+                            // resolved CSS padding. The compensation exists
+                            // because this drawBehind sits AFTER the
+                            // component's own modifier chain, which already
+                            // contains StyleApplier.borderContentInset AND
+                            // LayoutFacade's padding modifier — so the
+                            // DrawScope's (0,0)..(w,h) is the padded CONTENT
+                            // box, not the border box. Without adding both
+                            // insets back, the 9-slice frame painted inset
+                            // inside the content area (the wave-3 device gate
+                            // showed the amber frame floating ~20px inside the
+                            // perimeter; the skeptic repro showed padding 20px
+                            // + border 4px pulling it a further 20px in).
+                            // §6: the border-image area IS the border box (+
+                            // outset) — reconstruct it by expanding each side
+                            // by exactly what the chain inset (destExpansion).
+                            outsetTop = destExpansion(outsetTop.toPx(), config.computedBorderTop.toPx(), config.resolvedPaddingTop.toPx()),
+                            outsetRight = destExpansion(outsetRight.toPx(), config.computedBorderRight.toPx(), config.resolvedPaddingRight.toPx()),
+                            outsetBottom = destExpansion(outsetBottom.toPx(), config.computedBorderBottom.toPx(), config.resolvedPaddingBottom.toPx()),
+                            outsetLeft = destExpansion(outsetLeft.toPx(), config.computedBorderLeft.toPx(), config.resolvedPaddingLeft.toPx())
                         )
                     }
-                }
-                .padding(
-                    // Only the EXTRA inset beyond the border band already
-                    // reserved by the renderer — css-backgrounds-3 §6: the
-                    // border-image area OVERLAYS the border box's border
-                    // band, it does not stack inside it. ComponentRenderer
-                    // chains StyleApplier.borderContentInset (the computed
-                    // border widths) into `modifier` before wrapping in
-                    // this Box, so padding the FULL resolved width again
-                    // inset the content twice (computed + resolved) and
-                    // shrank the content box vs web. See extraContentInset.
-                    start = extraContentInset(borderLeft, config.computedBorderLeft),
-                    top = extraContentInset(borderTop, config.computedBorderTop),
-                    end = extraContentInset(borderRight, config.computedBorderRight),
-                    bottom = extraContentInset(borderBottom, config.computedBorderBottom)
-                ),
+                },
+            // NO content padding here — deliberately. css-backgrounds-3 §6:
+            // the border-image properties "do not affect layout"; content is
+            // inset by border-width ONLY, and ComponentRenderer already
+            // chains StyleApplier.borderContentInset (the computed border
+            // widths) into `modifier` before wrapping in this Box. The
+            // previous extraContentInset padding reserved the part of the
+            // resolved border-image-width exceeding the border band, which
+            // Chromium never does — skeptic repro: border 10px +
+            // border-image-width 15px leaves the web content inset at 10px,
+            // while the extra 5px padding here shrank the Android content
+            // box and diverged from both web and iOS.
             content = content
         )
     }
 
     /**
-     * Content inset the border-image area needs BEYOND the border band
-     * the renderer already reserved via StyleApplier.borderContentInset.
-     *
-     * css-backgrounds-3 §6: "the border image is drawn ... in place of
-     * the border" — the border-image area overlays the border band, so
-     * the band's content inset already accounts for the first
-     * [computedBorder] of it. Only the part of the resolved
-     * border-image-width that EXCEEDS the computed border-width still
-     * needs reserving; when the image is narrower than (or equal to) the
-     * band, no extra inset applies. Clamped at zero — a narrower image
-     * must never pull content INTO the band. Internal for JVM tests.
+     * Per-side outward expansion of the drawBehind destination: the §6.4
+     * outset (the only spec'd growth beyond the border box) plus the two
+     * insets the component's modifier chain already applied BEFORE this
+     * drawBehind — the computed border band (StyleApplier
+     * .borderContentInset) and the resolved CSS padding (LayoutFacade /
+     * PaddingApplier). Summing them reconstructs the border box (+outset)
+     * from the DrawScope's padded content box. Skeptic repro pinned in
+     * BorderImageSpecFixesTest: padding 20px + border 4px + outset 0 on a
+     * 200px box → 24px per side, so the dest spans the full 200px.
+     * Pure arithmetic, internal for JVM tests.
      */
-    internal fun extraContentInset(resolved: Dp, computedBorder: Dp): Dp =
-        if (resolved > computedBorder) resolved - computedBorder else 0.dp
+    internal fun destExpansion(
+        outsetPx: Float,
+        computedBorderPx: Float,
+        resolvedPaddingPx: Float
+    ): Float = outsetPx + computedBorderPx + resolvedPaddingPx
 
     /**
-     * Draw the 9-slice border image.
+     * The four slice offsets in image pixels AFTER the css-backgrounds-3
+     * §6.1 overlap fix ("if the sum ... is larger than the [image extent],
+     * ... proportionally reduced"). Plain holder so the reduction stays a
+     * pure, JVM-testable function.
+     */
+    internal data class ReducedSlices(
+        val top: Float,
+        val right: Float,
+        val bottom: Float,
+        val left: Float
+    )
+
+    /**
+     * Apply css-backgrounds-3 §6.1's proportional slice reduction: when
+     * left+right exceeds the image width (or top+bottom its height) BOTH
+     * sides scale by extent/sum, so opposing slice lines never cross.
+     * Without this, any slice ≥ 50% (e.g. `border-image-slice: 60%` on a
+     * 30×30 source → 18+18 = 36 > 30) produces a NEGATIVE center-column
+     * width and inverted src rects downstream. Mirrors the iOS
+     * BorderImageMath.nineGrid overlap branch exactly (same clamp, same
+     * factor) so both natives paint the identical degenerate geometry.
+     * Negative inputs are clamped to 0 first — negative slices are
+     * invalid per the §6.1 grammar, matching iOS slicePx's clamp.
+     * Pure arithmetic, internal for JVM tests.
+     */
+    internal fun reduceSlices(
+        top: Float,
+        right: Float,
+        bottom: Float,
+        left: Float,
+        imageWidth: Float,
+        imageHeight: Float
+    ): ReducedSlices {
+        // Clamp invalid negative inputs before the overlap check (§6.1
+        // grammar: slice values are non-negative).
+        var t = kotlin.math.max(top, 0f)
+        var r = kotlin.math.max(right, 0f)
+        var b = kotlin.math.max(bottom, 0f)
+        var l = kotlin.math.max(left, 0f)
+        // Horizontal overlap: left+right may not exceed the image width.
+        // The sum > 0 guard avoids 0/0 on a degenerate zero-width image.
+        if (l + r > imageWidth && l + r > 0f) {
+            // §6.1 factor — both sides shrink by the SAME ratio.
+            val f = imageWidth / (l + r)
+            l *= f
+            r *= f
+        }
+        // Vertical overlap: top+bottom may not exceed the image height.
+        if (t + b > imageHeight && t + b > 0f) {
+            // Same proportional factor on the vertical axis.
+            val f = imageHeight / (t + b)
+            t *= f
+            b *= f
+        }
+        // Reduced offsets — center extents are now non-negative.
+        return ReducedSlices(top = t, right = r, bottom = b, left = l)
+    }
+
+    /**
+     * Border-image destination rectangle in the draw scope's local
+     * coordinates: the element's border box ([width] × [height] at origin
+     * 0,0) EXPANDED outward by the four resolved outsets — css-backgrounds-3
+     * §6.4: "The border-image-outset properties specify the amount by which
+     * the border image area extends beyond the border box." Origin moves to
+     * (−outsetLeft, −outsetTop); size grows by the per-axis outset sums.
+     * Pure Compose-geometry math (no DrawScope), internal for JVM tests.
+     */
+    internal fun outsetDestRect(
+        width: Float,
+        height: Float,
+        outsetTop: Float,
+        outsetRight: Float,
+        outsetBottom: Float,
+        outsetLeft: Float
+    ): Rect = Rect(
+        // Left/top edges shift OUTWARD (negative local coords) by their outset.
+        // `0f - x` instead of unary `-x`: IEEE-754 negation of +0.0 yields
+        // −0.0, and Compose Rect's equals compares Floats BITWISE (via
+        // Float.equals), so Rect(−0.0,…) != Rect(0.0,…) even though they
+        // print identically — a zero outset must produce exactly +0.0.
+        left = 0f - outsetLeft,
+        top = 0f - outsetTop,
+        // Right/bottom edges extend past the border box by their outset.
+        right = width + outsetRight,
+        bottom = height + outsetBottom
+    )
+
+    /**
+     * Draw the 9-slice border image into the outset-expanded destination
+     * rect (border box grown per css-backgrounds-3 §6.4 — outsets default
+     * to 0, keeping the destination exactly the border box).
      */
     private fun DrawScope.drawBorderImage(
         bitmap: ImageBitmap,
@@ -240,20 +354,54 @@ object BorderImageApplier {
         borderTop: Float,
         borderRight: Float,
         borderBottom: Float,
-        borderLeft: Float
+        borderLeft: Float,
+        outsetTop: Float = 0f,
+        outsetRight: Float = 0f,
+        outsetBottom: Float = 0f,
+        outsetLeft: Float = 0f
     ) {
         val imageWidth = bitmap.width.toFloat()
         val imageHeight = bitmap.height.toFloat()
 
-        // Calculate slice sizes in image pixels
-        val sliceTop = config.sliceTop.toPixels(imageHeight)
-        val sliceRight = config.sliceRight.toPixels(imageWidth)
-        val sliceBottom = config.sliceBottom.toPixels(imageHeight)
-        val sliceLeft = config.sliceLeft.toPixels(imageWidth)
+        // Calculate slice sizes in image pixels, then apply the §6.1
+        // proportional reduction: opposing slices whose sum exceeds the
+        // image extent scale down by extent/sum — without it, slice ≥ 50%
+        // makes (imageWidth − sliceRight) < sliceLeft and the center/edge
+        // source rects below get NEGATIVE widths (drawImage crash / garbage
+        // geometry). Mirrors the iOS BorderImageMath.nineGrid overlap fix
+        // so the two natives agree on the degenerate range.
+        val slices = reduceSlices(
+            top = config.sliceTop.toPixels(imageHeight),
+            right = config.sliceRight.toPixels(imageWidth),
+            bottom = config.sliceBottom.toPixels(imageHeight),
+            left = config.sliceLeft.toPixels(imageWidth),
+            imageWidth = imageWidth,
+            imageHeight = imageHeight
+        )
+        // Reduced per-side slice px — every src rect below uses these.
+        val sliceTop = slices.top
+        val sliceRight = slices.right
+        val sliceBottom = slices.bottom
+        val sliceLeft = slices.left
 
-        // Destination area (full size)
-        val destWidth = size.width
-        val destHeight = size.height
+        // Destination area: the border box (`size`) expanded by the outsets
+        // (§6.4). drawBehind's DrawScope is unclipped, so the negative /
+        // past-size coordinates below paint outside the layout bounds as the
+        // spec requires (see the BorderImageBox comment for the clip audit).
+        val dest = outsetDestRect(
+            width = size.width,
+            height = size.height,
+            outsetTop = outsetTop,
+            outsetRight = outsetRight,
+            outsetBottom = outsetBottom,
+            outsetLeft = outsetLeft
+        )
+        // Integer dest edges — drawImage takes IntRect geometry; truncation
+        // matches the pre-existing rounding of the border-band edges below.
+        val destLeft = dest.left.toInt()
+        val destTop = dest.top.toInt()
+        val destRight = dest.right.toInt()
+        val destBottom = dest.bottom.toInt()
 
         // Source rectangles (from the image)
         val srcTopLeft = IntRect(0, 0, sliceLeft.toInt(), sliceTop.toInt())
@@ -268,18 +416,21 @@ object BorderImageApplier {
         val srcBottomCenter = IntRect(sliceLeft.toInt(), (imageHeight - sliceBottom).toInt(), (imageWidth - sliceRight).toInt(), imageHeight.toInt())
         val srcBottomRight = IntRect((imageWidth - sliceRight).toInt(), (imageHeight - sliceBottom).toInt(), imageWidth.toInt(), imageHeight.toInt())
 
-        // Destination rectangles
-        val dstTopLeft = IntRect(0, 0, borderLeft.toInt(), borderTop.toInt())
-        val dstTopCenter = IntRect(borderLeft.toInt(), 0, (destWidth - borderRight).toInt(), borderTop.toInt())
-        val dstTopRight = IntRect((destWidth - borderRight).toInt(), 0, destWidth.toInt(), borderTop.toInt())
+        // Destination rectangles — the 9-slice grid of the OUTSET-EXPANDED
+        // dest rect (§6.4: "the [border-image] widths ... are measured from
+        // the border image area's boundary", i.e. the border bands hug the
+        // expanded rect's edges, not the border box's).
+        val dstTopLeft = IntRect(destLeft, destTop, destLeft + borderLeft.toInt(), destTop + borderTop.toInt())
+        val dstTopCenter = IntRect(destLeft + borderLeft.toInt(), destTop, destRight - borderRight.toInt(), destTop + borderTop.toInt())
+        val dstTopRight = IntRect(destRight - borderRight.toInt(), destTop, destRight, destTop + borderTop.toInt())
 
-        val dstMiddleLeft = IntRect(0, borderTop.toInt(), borderLeft.toInt(), (destHeight - borderBottom).toInt())
-        val dstMiddleCenter = IntRect(borderLeft.toInt(), borderTop.toInt(), (destWidth - borderRight).toInt(), (destHeight - borderBottom).toInt())
-        val dstMiddleRight = IntRect((destWidth - borderRight).toInt(), borderTop.toInt(), destWidth.toInt(), (destHeight - borderBottom).toInt())
+        val dstMiddleLeft = IntRect(destLeft, destTop + borderTop.toInt(), destLeft + borderLeft.toInt(), destBottom - borderBottom.toInt())
+        val dstMiddleCenter = IntRect(destLeft + borderLeft.toInt(), destTop + borderTop.toInt(), destRight - borderRight.toInt(), destBottom - borderBottom.toInt())
+        val dstMiddleRight = IntRect(destRight - borderRight.toInt(), destTop + borderTop.toInt(), destRight, destBottom - borderBottom.toInt())
 
-        val dstBottomLeft = IntRect(0, (destHeight - borderBottom).toInt(), borderLeft.toInt(), destHeight.toInt())
-        val dstBottomCenter = IntRect(borderLeft.toInt(), (destHeight - borderBottom).toInt(), (destWidth - borderRight).toInt(), destHeight.toInt())
-        val dstBottomRight = IntRect((destWidth - borderRight).toInt(), (destHeight - borderBottom).toInt(), destWidth.toInt(), destHeight.toInt())
+        val dstBottomLeft = IntRect(destLeft, destBottom - borderBottom.toInt(), destLeft + borderLeft.toInt(), destBottom)
+        val dstBottomCenter = IntRect(destLeft + borderLeft.toInt(), destBottom - borderBottom.toInt(), destRight - borderRight.toInt(), destBottom)
+        val dstBottomRight = IntRect(destRight - borderRight.toInt(), destBottom - borderBottom.toInt(), destRight, destBottom)
 
         // Draw corners (no scaling needed for repeat, just stretch)
         drawImageRect(bitmap, srcTopLeft, dstTopLeft)
@@ -1052,7 +1203,17 @@ object BorderImageApplier {
                 borderTop = borderTop.toPx(),
                 borderRight = borderRight.toPx(),
                 borderBottom = borderBottom.toPx(),
-                borderLeft = borderLeft.toPx()
+                borderLeft = borderLeft.toPx(),
+                // §6.4 outward expansion by the outset ONLY — unlike
+                // BorderImageBox this variant attaches to an arbitrary
+                // caller-supplied modifier position, so it cannot assume a
+                // border/padding inset sits before it in the chain and adds
+                // no destExpansion compensation. (No current call sites;
+                // ComponentRenderer routes through BorderImageBox.)
+                outsetTop = config.outsetTop.resolveOutset(config.computedBorderTop).toPx(),
+                outsetRight = config.outsetRight.resolveOutset(config.computedBorderRight).toPx(),
+                outsetBottom = config.outsetBottom.resolveOutset(config.computedBorderBottom).toPx(),
+                outsetLeft = config.outsetLeft.resolveOutset(config.computedBorderLeft).toPx()
             )
         }
     }

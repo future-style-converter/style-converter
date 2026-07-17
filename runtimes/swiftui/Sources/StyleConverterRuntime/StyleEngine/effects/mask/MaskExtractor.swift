@@ -58,8 +58,25 @@ enum MaskExtractor {
                 else { layers.append(.url(href: s)) }
                 continue
             }
-            guard case .object(let o) = entry,
-                  let t = o["type"]?.stringValue else { continue }
+            guard case .object(let o) = entry else { continue }
+            // url() layers arrive as OBJECTS `{url: "<href>"}` on the wire
+            // (the converter's MaskImage serializer), NOT bare strings —
+            // matching only stringValue silently dropped every url mask:
+            // cfg.images stayed empty, the applier short-circuited, and
+            // the element rendered fully UNMASKED on device while the
+            // Android extractor (which reads this shape) masked correctly.
+            if let u = o["url"]?.stringValue {
+                layers.append(.url(href: u))
+                continue
+            }
+            guard let t = o["type"]?.stringValue else {
+                // No-silent-fallthrough: an object that is neither a url
+                // nor a typed gradient is a wire shape we do not know.
+                PropertyTracker.logOnce(
+                    key: "mask-image-unknown-entry",
+                    message: "mask-image layer object with neither 'url' nor 'type' — dropped (unknown wire shape)")
+                continue
+            }
             switch t {
             case "linear-gradient", "repeating-linear-gradient":
                 // Optional angle; default 180° (top→bottom) per CSS spec.
@@ -159,6 +176,10 @@ enum MaskExtractor {
         if let x = axisFraction(o["x"]) { pos.x = CGFloat(x) }
         if let y = axisFraction(o["y"]) { pos.y = CGFloat(y) }
         cfg.position = pos
+        // Record that the wire DECLARED a position: the url() raster
+        // path must distinguish "author said center" from the config's
+        // gradient-centric 0.5 default (css-masking-1 initial is 0% 0%).
+        cfg.positionDeclared = true
         cfg.touched = true
     }
 
@@ -167,8 +188,17 @@ enum MaskExtractor {
                                           into cfg: inout MaskConfig) {
         // The axis longhand ships the axis blob directly (no array wrapper).
         guard let v = axisFraction(data) else { return }
+        // First axis longhand seen: the OTHER axis stays at its CSS
+        // initial 0% (css-masking-1 mask-position initial `0% 0%`) —
+        // reset the gradient-centric 0.5 config default before writing
+        // the declared axis, or a lone `mask-position-x` would silently
+        // center the y anchor.
+        if !cfg.positionDeclared { cfg.position = MaskPositionValue(x: 0, y: 0) }
         if isY { cfg.position.y = CGFloat(v) }
         else   { cfg.position.x = CGFloat(v) }
+        // Same declared-vs-default distinction as parsePosition: even a
+        // single-axis longhand counts as an authored position.
+        cfg.positionDeclared = true
         cfg.touched = true
     }
 

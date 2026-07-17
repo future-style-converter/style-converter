@@ -193,4 +193,19 @@ final class MaskFidelityTests: XCTestCase {
         if case .conicGradient = cfg?.images.first ?? MaskLayer.none { /* ok */ }
         else { XCTFail("repeating-conic-gradient must extract as a conic layer") }
     }
+
+    func testUrlLayerObjectWireShapeExtracts() throws {
+        // Wave-3 regression pin: the converter emits url() mask layers as
+        // OBJECTS {url: "<href>"} — matching only bare strings dropped the
+        // layer silently and the element rendered fully unmasked on
+        // device. The object shape must extract as a url layer.
+        let cfg = MaskExtractor.extract(from: props([
+            ("MaskImage", .array([.object(["url": .string("data:image/png,%89")])])),
+        ]))
+        XCTAssertEqual(cfg?.images.count, 1)
+        guard case .url(let href) = cfg!.images[0] else {
+            return XCTFail("object wire shape must extract as a url layer")
+        }
+        XCTAssertEqual(href, "data:image/png,%89")
+    }
 }

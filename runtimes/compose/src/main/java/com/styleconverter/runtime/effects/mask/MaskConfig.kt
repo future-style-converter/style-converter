@@ -26,8 +26,11 @@ import androidx.compose.ui.unit.dp
  * to apply the gradient's alpha channel as a mask to the content.
  *
  * ## URL Mask Implementation
- * URL-based masks use Coil for async image loading. The loaded image's alpha channel
- * (or luminance in luminance mode) is used as the mask.
+ * url() masks render on the Modifier path when the source is a `data:` URI —
+ * decoded synchronously (capture-deterministic) and drawn as a DstIn tile
+ * lattice; the image's alpha channel (or luminance in luminance mode) is the
+ * mask. Remote http(s) sources are a documented, logged no-op (async fetch
+ * would race the first-frame capture) — see MaskApplier.applyUrlMask.
  */
 data class MaskConfig(
     /** Whether a mask image is defined */
