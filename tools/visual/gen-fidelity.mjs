@@ -61,7 +61,7 @@
 //   • every directory listing is sorted; every map iterated in sorted key order
 //   • rerunning the generator produces byte-identical files
 
-import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, resolve, dirname, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -194,14 +194,37 @@ export function harvest() {
     }
     for (const child of Object.values(component.children ?? {})) collect(child);
   };
-  for (const cat of readdirSync(FIXTURE_PROPS_ROOT).sort()) {
-    const dir = join(FIXTURE_PROPS_ROOT, cat);
-    if (!statSync(dir).isDirectory()) continue;
-    for (const file of readdirSync(dir).sort()) {
-      if (!file.endsWith('.json')) continue;
-      const doc = JSON.parse(readFileSync(join(dir, file), 'utf8'));
-      for (const comp of Object.values(doc.components ?? {})) collect(comp);
+  // Harvest from the FROZEN input inventory (fixtures/fidelity/INPUTS.lock,
+  // one repo-relative path per line), NOT a live glob. Why: byte-determinism
+  // means "same inputs → same fixtures", but a live glob makes the INPUT SET
+  // grow whenever anyone adds a per-property fixture — the wave-0 recovery
+  // of 54 pruned fixtures silently re-rolled every seeded combo draw and
+  // would have invalidated the committed baselines. The lock freezes the
+  // harvest pool; widening it (and re-baselining!) is a deliberate act:
+  // edit the lock, regenerate, recapture. A locked path missing on disk is
+  // a hard error — silently harvesting fewer files would also re-roll draws.
+  const lockPath = join(REPO, 'fixtures', 'fidelity', 'INPUTS.lock');
+  let inputFiles;
+  if (existsSync(lockPath)) {
+    inputFiles = readFileSync(lockPath, 'utf8').split('\n').filter(Boolean).map((rel) => {
+      const abs = join(REPO, rel);
+      if (!existsSync(abs)) throw new Error(`INPUTS.lock entry missing on disk: ${rel}`);
+      return abs;
+    });
+  } else {
+    // No lock (older revision): fall back to the live glob the lock snapshots.
+    inputFiles = [];
+    for (const cat of readdirSync(FIXTURE_PROPS_ROOT).sort()) {
+      const dir = join(FIXTURE_PROPS_ROOT, cat);
+      if (!statSync(dir).isDirectory()) continue;
+      for (const file of readdirSync(dir).sort()) {
+        if (file.endsWith('.json')) inputFiles.push(join(dir, file));
+      }
     }
+  }
+  for (const f of inputFiles) {
+    const doc = JSON.parse(readFileSync(f, 'utf8'));
+    for (const comp of Object.values(doc.components ?? {})) collect(comp);
   }
   // Freeze into sorted arrays for deterministic PRNG picks.
   const out = new Map();

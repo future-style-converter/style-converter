@@ -1,0 +1,25 @@
+{
+  "components": {
+    "Sz_100": {
+      "properties": {
+        "background-color": "#ef4444",
+        "width": "180px",
+        "height": "100px"
+      }
+    },
+    "Sz_180": {
+      "properties": {
+        "background-color": "#10b981",
+        "width": "180px",
+        "height": "180px"
+      }
+    },
+    "Sz_50": {
+      "properties": {
+        "background-color": "#3b82f6",
+        "width": "180px",
+        "height": "50px"
+      }
+    }
+  }
+}

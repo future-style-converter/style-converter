@@ -1,0 +1,961 @@
+{
+  "_snapshot": true,
+  "_note": "Wave-0 re-verification: the 91 tracker-verified + 3 failing properties re-measured on TODAY's engines against the recovered per-property fixtures (combined per-category runs, min SSIM across every variant and platform pair). This replaces the historical tracker verdicts with current, device-measured truth. Bands: hold >=0.95; near-miss 0.90-0.95 (dominated by the deterministic Android glyph-rasterization wall on text-bearing variants + minor drift); deep <0.90 (real current divergences). Method caveat: components were measured in per-category COMBINED fixtures — a (small) context difference vs solo per-fixture runs.",
+  "devSha": "3b474e44f2f620563910b16c9bd290981e5a915e",
+  "method": "per-category combined fixture (components renamed <Prop>__<variant>) through test-all.sh on the pooled fleet (ANDROID_SERIAL=emulator-5554); score = min SSIM across all variants x all 3 platform pairs",
+  "summary": {
+    "measured": 94,
+    "verifiedThatStillHold": 11,
+    "verifiedRegressed": 80,
+    "failingConfirmed": 3,
+    "failingNowPassing": 0,
+    "bands": {
+      "hold": 11,
+      "nearMiss": 50,
+      "deep": 33
+    }
+  },
+  "properties": [
+    {
+      "name": "ColorAdjust",
+      "category": "appearance",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.9132,
+      "worst": "Colo_economy iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "ImageRenderingQuality",
+      "category": "appearance",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9068,
+      "worst": "Imag_inherit Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BackgroundAttachment",
+      "category": "background",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.8897,
+      "worst": "Attachment_Scroll Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BackgroundClip",
+      "category": "background",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.7957,
+      "worst": "Clip_Text iOS-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BackgroundImage",
+      "category": "background",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.928,
+      "worst": "BI_radial iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BackgroundPosition",
+      "category": "background",
+      "wasBucket": "verified",
+      "variants": 8,
+      "minSsim": 0.7059,
+      "worst": "Pos_Percent_50_50 iOS-Android",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BackgroundRepeat",
+      "category": "background",
+      "wasBucket": "verified",
+      "variants": 7,
+      "minSsim": 0.658,
+      "worst": "Repeat_NoRepeat iOS-Android",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BackgroundSize",
+      "category": "background",
+      "wasBucket": "failing-real-divergence",
+      "variants": 8,
+      "minSsim": 0.8754,
+      "worst": "Size_TwoValues_Px iOS-Android",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BorderBlockEndColor",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.92,
+      "worst": "C_named iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderBlockEndStyle",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.8907,
+      "worst": "S_dashed Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BorderBlockStartColor",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.9173,
+      "worst": "C_named Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderBlockStartStyle",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.9164,
+      "worst": "S_double Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderBottomColor",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.9389,
+      "worst": "C_named iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderBottomLeftRadius",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9175,
+      "worst": "V2_50pct Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderBottomRightRadius",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9198,
+      "worst": "V2_50pct Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderBottomStyle",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9069,
+      "worst": "S_dashed Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderBottomWidth",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9377,
+      "worst": "W_medium iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderBoundary",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9284,
+      "worst": "Bord_display iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderEndEndRadius",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9416,
+      "worst": "V2_50pct Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderEndStartRadius",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9363,
+      "worst": "V2_50pct Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderImageOutset",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.8456,
+      "worst": "BIO_6 Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BorderImageRepeat",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.8707,
+      "worst": "BIR_Round Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BorderImageSlice",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.8648,
+      "worst": "BISl_Pct Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BorderImageWidth",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.8459,
+      "worst": "BIW_15 Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BorderInlineEndColor",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.9133,
+      "worst": "C_named Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderInlineStartColor",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.9059,
+      "worst": "C_named Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderLeftColor",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.9285,
+      "worst": "C_named iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderLeftStyle",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9085,
+      "worst": "S_dotted iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderLeftWidth",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9157,
+      "worst": "W_medium Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderRightColor",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.9449,
+      "worst": "C_green iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderRightStyle",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.91,
+      "worst": "S_dashed Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderRightWidth",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9425,
+      "worst": "W_medium iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderStartEndRadius",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9393,
+      "worst": "V2_50pct Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderStartStartRadius",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9307,
+      "worst": "V2_50pct Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderStyle",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 11,
+      "minSsim": 0.8637,
+      "worst": "V4_dotted iOS-Android",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BorderTopColor",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.9233,
+      "worst": "C_named iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderTopLeftRadius",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9379,
+      "worst": "V2_50pct Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderTopRightRadius",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9403,
+      "worst": "V2_50pct Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderTopStyle",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.9342,
+      "worst": "S_double iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BorderTopWidth",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9213,
+      "worst": "W_medium iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BoxDecorationBreak",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 2,
+      "minSsim": 0.9064,
+      "worst": "BoxDecorationBreak_Clone iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BoxShadow",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 15,
+      "minSsim": 0.7867,
+      "worst": "Shadow_HugeBlur iOS-Android",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "OutlineWidth",
+      "category": "borders",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.9054,
+      "worst": "Outl_medium iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BackgroundBlendMode",
+      "category": "color",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.8613,
+      "worst": "BBM_screen iOS-Android",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "BackgroundColor",
+      "category": "color",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.9264,
+      "worst": "BC_Transparent Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "Color",
+      "category": "color",
+      "wasBucket": "verified",
+      "variants": 8,
+      "minSsim": 0.8715,
+      "worst": "Color_CurrentColor Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "Filter",
+      "category": "color",
+      "wasBucket": "verified",
+      "variants": 9,
+      "minSsim": 0.9513,
+      "worst": "F_brightness Android-web",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "MixBlendMode",
+      "category": "color",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9929,
+      "worst": "MBM_multiply iOS-web",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "Opacity",
+      "category": "color",
+      "wasBucket": "verified",
+      "variants": 8,
+      "minSsim": 0.9183,
+      "worst": "Opacity_Clamp_Above iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BackdropFilter",
+      "category": "effects",
+      "wasBucket": "verified",
+      "variants": 12,
+      "minSsim": 0.9306,
+      "worst": "Backdrop_DropShadow Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "ClipPath",
+      "category": "effects",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9572,
+      "worst": "CP_inset Android-web",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "MaskImage",
+      "category": "effects",
+      "wasBucket": "verified",
+      "variants": 11,
+      "minSsim": 0.7171,
+      "worst": "MaskImage_RepeatingLinear iOS-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "MaskPosition",
+      "category": "effects",
+      "wasBucket": "verified",
+      "variants": 13,
+      "minSsim": 0.9182,
+      "worst": "MaskPosition_CenterCenter Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "MaskRepeat",
+      "category": "effects",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.9251,
+      "worst": "MaskRepeat_Repeat Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "MaskSize",
+      "category": "effects",
+      "wasBucket": "verified",
+      "variants": 8,
+      "minSsim": 0.8709,
+      "worst": "MaskSize_LengthAuto Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "MaskType",
+      "category": "effects",
+      "wasBucket": "verified",
+      "variants": 2,
+      "minSsim": 0.9349,
+      "worst": "MaskType_Luminance Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "Visibility",
+      "category": "effects",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.9239,
+      "worst": "Visibility_Visible iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "Clear",
+      "category": "layout",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.9964,
+      "worst": "Clear_None iOS-Android",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "Left",
+      "category": "layout",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9646,
+      "worst": "V2_10px Android-web",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "Position",
+      "category": "layout",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.6742,
+      "worst": "V2_absolute iOS-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "ReadingFlow",
+      "category": "layout",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.9935,
+      "worst": "RF_Normal iOS-Android",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "ZIndex",
+      "category": "layout",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9966,
+      "worst": "ZI_Auto iOS-Android",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "Isolation",
+      "category": "performance",
+      "wasBucket": "verified",
+      "variants": 2,
+      "minSsim": 0.9461,
+      "worst": "Isolation_Isolate Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "BoxSizing",
+      "category": "sizing",
+      "wasBucket": "verified",
+      "variants": 2,
+      "minSsim": 0.807,
+      "worst": "V0_content_ Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "AspectRatio",
+      "category": "spacing",
+      "wasBucket": "verified",
+      "variants": 9,
+      "minSsim": 0.9178,
+      "worst": "Ratio_Auto_With_Explicit Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "Height",
+      "category": "spacing",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.9528,
+      "worst": "Sz_50 Android-web",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "MarginTrim",
+      "category": "spacing",
+      "wasBucket": "verified",
+      "variants": 7,
+      "minSsim": 0.8304,
+      "worst": "MarginTrim_None Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "PaddingBottom",
+      "category": "spacing",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.924,
+      "worst": "Sp_16px iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "PaddingLeft",
+      "category": "spacing",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9231,
+      "worst": "Sp_16px Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "PaddingRight",
+      "category": "spacing",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9279,
+      "worst": "Sp_16px iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "PaddingTop",
+      "category": "spacing",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9358,
+      "worst": "Sp_24px Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "Width",
+      "category": "spacing",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9504,
+      "worst": "Sz_100 iOS-Android",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "Rotate",
+      "category": "transforms",
+      "wasBucket": "verified",
+      "variants": 2,
+      "minSsim": 0.9588,
+      "worst": "V1_0deg Android-web",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "Scale",
+      "category": "transforms",
+      "wasBucket": "failing-real-divergence",
+      "variants": 4,
+      "minSsim": 0.9281,
+      "worst": "V_two Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "Transform",
+      "category": "transforms",
+      "wasBucket": "verified",
+      "variants": 7,
+      "minSsim": 0.9287,
+      "worst": "T_scaleXY Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "Translate",
+      "category": "transforms",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.9522,
+      "worst": "V0_none Android-web",
+      "passes": true,
+      "band": "hold"
+    },
+    {
+      "name": "FontFamily",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 16,
+      "minSsim": 0.7307,
+      "worst": "FontFamily_Cursive iOS-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "FontLanguageOverride",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 4,
+      "minSsim": 0.9039,
+      "worst": "FontLanguageOverride_Normal iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "FontSize",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 17,
+      "minSsim": 0.7711,
+      "worst": "FontSize_Rem_1_5 Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "FontStyle",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 8,
+      "minSsim": 0.7593,
+      "worst": "FontStyle_Oblique_14deg Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "FontWeight",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 14,
+      "minSsim": 0.775,
+      "worst": "FontWeight_800 iOS-Android",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "InitialLetter",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 5,
+      "minSsim": 0.8273,
+      "worst": "InitialLetter_SizeSink iOS-Android",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "LetterSpacing",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 8,
+      "minSsim": 0.7096,
+      "worst": "LetterSpacing_Rem_0_25 iOS-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "LineHeight",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 9,
+      "minSsim": 0.8477,
+      "worst": "LineHeight_Rem_2 iOS-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "LineSnap",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.9048,
+      "worst": "LineSnap_None Android-web",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "TextAlign",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 7,
+      "minSsim": 0.8306,
+      "worst": "TextAlign_Center iOS-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "TextDecorationLine",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 7,
+      "minSsim": 0.7483,
+      "worst": "TextDecorationLine_Triple Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "TextGroupAlign",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.8124,
+      "worst": "TextGroupAlign_Right iOS-Android",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "TextOrientation",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.8082,
+      "worst": "TextOrientation_Sideways Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "TextShadow",
+      "category": "typography",
+      "wasBucket": "failing-real-divergence",
+      "variants": 10,
+      "minSsim": 0.9153,
+      "worst": "TextShadow_WithBlur iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "TextTransform",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.8413,
+      "worst": "TextTransform_Lowercase Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "UnicodeBidi",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.9105,
+      "worst": "UnicodeBidi_Plaintext iOS-Android",
+      "passes": false,
+      "band": "near-miss"
+    },
+    {
+      "name": "WordSpacing",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 6,
+      "minSsim": 0.6845,
+      "worst": "WordSpacing_Negative Android-web",
+      "passes": false,
+      "band": "deep"
+    },
+    {
+      "name": "WordWrap",
+      "category": "typography",
+      "wasBucket": "verified",
+      "variants": 3,
+      "minSsim": 0.8076,
+      "worst": "WordWrap_BreakWord Android-web",
+      "passes": false,
+      "band": "deep"
+    }
+  ],
+  "reproduce": "Regenerate the 54 recovered fixtures if absent (git show 1e0234f6^:fixtures/perfect/<cat>/<Name>.json → fixtures/properties/<cat>/<kebab>.json), build per-category combined fixtures from the worklist verified+failing set (components renamed <Prop>__<variant>), run ./test-all.sh per combined fixture on a booted emulator+simulator (ANDROID_SERIAL pinned), then score min SSIM per property across all variants and platform pairs from each run manifest."
+}

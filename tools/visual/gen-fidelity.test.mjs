@@ -977,3 +977,18 @@ test(
     }
   },
 );
+
+test('harvest is FROZEN by INPUTS.lock — corpus growth cannot re-roll the suite', () => {
+  // Wave-0 recovered 54 pruned per-property fixtures; with a live-glob
+  // harvest that silently changed every seeded combo draw (668-line diff
+  // across 15 fidelity files) and would have invalidated the committed
+  // baselines. The lock freezes the harvest input set: regeneration stays
+  // byte-identical no matter what lands in fixtures/properties/ afterward.
+  const src = readFileSync(new URL('./gen-fidelity.mjs', import.meta.url), 'utf8');
+  assert.match(src, /INPUTS\.lock/, 'harvest no longer consults the input lock');
+  assert.match(src, /INPUTS\.lock entry missing on disk/, 'missing locked input must be a hard error (silent shrink also re-rolls draws)');
+  const lock = readFileSync(new URL("../../fixtures/fidelity/INPUTS.lock", import.meta.url), "utf8");
+  const entries = lock.split('\n').filter(Boolean);
+  assert.equal(entries.length, 275, 'the frozen pre-wave0 inventory is 275 files — widening it is a deliberate re-baseline event');
+  assert.ok(entries.every((e) => e.startsWith('fixtures/properties/')), 'lock entries must be repo-relative fixture paths');
+});

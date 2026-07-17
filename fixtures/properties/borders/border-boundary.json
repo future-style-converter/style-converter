@@ -1,0 +1,40 @@
+{
+  "components": {
+    "Bord_none": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "border-boundary": "none"
+      }
+    },
+    "Bord_parent": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "border-boundary": "parent"
+      }
+    },
+    "Bord_display": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "border-boundary": "display"
+      }
+    },
+    "Bord_inherit": {
+      "properties": {
+        "width": "180px",
+        "height": "80px",
+        "padding": "10px",
+        "background-color": "#1f2937",
+        "border-boundary": "inherit"
+      }
+    }
+  }
+}
