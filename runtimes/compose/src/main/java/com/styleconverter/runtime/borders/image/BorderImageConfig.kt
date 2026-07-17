@@ -57,7 +57,25 @@ data class BorderImageConfig(
     val computedBorderTop: Dp = 0.dp,
     val computedBorderRight: Dp = 0.dp,
     val computedBorderBottom: Dp = 0.dp,
-    val computedBorderLeft: Dp = 0.dp
+    val computedBorderLeft: Dp = 0.dp,
+    /**
+     * The element's RESOLVED CSS padding per side. Needed for the same
+     * reason as computedBorder*: BorderImageBox's drawBehind sits after
+     * the component's full modifier chain, and LayoutFacade's padding
+     * modifier (PaddingApplier.apply) shrinks the DrawScope box exactly
+     * like StyleApplier.borderContentInset does — so reconstructing the
+     * border box (css-backgrounds-3 §6: the border image area IS the
+     * border box + outset) means expanding by padding AND border, else a
+     * padded component paints its 9-slice frame floating INSIDE the
+     * content area (repro: padding 20px + border 4px on a 200px box —
+     * the dest must span all 200px, i.e. 24px expansion per side).
+     * Filled by BorderImageExtractor mirroring PaddingApplier's
+     * resolution (LTR logical collapse, default SpacingContext, ≥ 0).
+     */
+    val resolvedPaddingTop: Dp = 0.dp,
+    val resolvedPaddingRight: Dp = 0.dp,
+    val resolvedPaddingBottom: Dp = 0.dp,
+    val resolvedPaddingLeft: Dp = 0.dp
 ) {
     /** Returns true if any border-image property is set */
     val hasBorderImage: Boolean

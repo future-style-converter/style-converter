@@ -19,6 +19,23 @@ package com.styleconverter.runtime.sizing
 import com.styleconverter.runtime.core.types.LengthValue
 
 /**
+ * css-sizing-3 §3 `box-sizing` keyword. Only the two spec values live here —
+ * the TRI-STATE the sizing lane needs (unset ≠ content-box!) is carried by
+ * nullability on [SizingConfig.boxSizing]: null means "the IR never declared
+ * box-sizing", which must keep today's border-box modifier chains byte-stable.
+ * (The performance/ lane's BoxModelConfig defaults its copy to CONTENT_BOX —
+ * that no-op default must never leak into sizing, hence a separate tri-state
+ * here instead of threading BoxModelConfig through.)
+ */
+enum class BoxSizingKeyword {
+    /** Declared width/height = content box; frame = content + padding + border. */
+    CONTENT_BOX,
+
+    /** Declared width/height = border box (the pre-existing chain behaviour). */
+    BORDER_BOX,
+}
+
+/**
  * All sizing properties collected off one component. A null slot means the IR
  * did not specify that side — the Applier leaves Compose defaults in place.
  * [aspectRatio] is null when the author did not set aspect-ratio at all.
@@ -43,8 +60,26 @@ data class SizingConfig(
     val maxInlineSize: LengthValue? = null,
     // aspect-ratio is its own shape.
     val aspectRatio: AspectRatioValue? = null,
+    // css-sizing-3 §3 `box-sizing`. Null = the IR never declared it — the
+    // border-box status quo (the whole width+padding fixture corpus is
+    // captured against web's `* { box-sizing: border-box }` reset) must not
+    // change. Only an EXPLICIT CONTENT_BOX makes the Applier inflate
+    // declared width/height by [contentBoxInflateX]/[contentBoxInflateY].
+    val boxSizing: BoxSizingKeyword? = null,
+    // Pre-resolved content-box frame inflation per axis (px): CSS padding
+    // band + used border widths. Computed by SizingExtractor ONLY when
+    // boxSizing == CONTENT_BOX (0f otherwise) so the Applier stays a pure
+    // SizingConfig → Modifier function with no extractor re-runs.
+    val contentBoxInflateX: Float = 0f,
+    val contentBoxInflateY: Float = 0f,
 ) {
-    /** True if any sizing/aspect-ratio slot was populated. */
+    /**
+     * True if any sizing/aspect-ratio slot was populated. [boxSizing] is
+     * deliberately EXCLUDED: box-sizing only changes how definite
+     * width/height resolve (css-sizing-3 §3) — with no size to
+     * reinterpret the Applier has nothing to do, so a lone box-sizing
+     * declaration must not force sizing modifiers onto the chain.
+     */
     val hasSizing: Boolean
         get() = width != null || height != null ||
             minWidth != null || maxWidth != null ||

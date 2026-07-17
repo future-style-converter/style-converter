@@ -555,6 +555,53 @@ enum StyleBuilder {
         return px(p.left) + px(p.right)
     }
 
+    /// Lane BX — vertical analogue of [horizontalPaddingPx]: resolved
+    /// top + bottom padding band (px). Needed because `box-sizing:
+    /// content-box` inflates BOTH axes (css-sizing-3 §3) while the
+    /// min-content lane above only ever needed the horizontal band.
+    /// Same resolver lane + percent basis as horizontalPaddingPx (CSS
+    /// resolves percent padding on ALL sides against the inline basis).
+    static func verticalPaddingPx(_ style: ComponentStyle) -> CGFloat {
+        guard let p = style.spacing.padding else { return 0 }
+        // Percent padding resolves against the viewport width — the
+        // PaddingApplier fallback basis (same approximation as above).
+        let basis = CGFloat(style.spacing.context.viewportWidth)
+        func px(_ v: LengthValue) -> CGFloat {
+            switch SpacingResolver.resolve(v, ctx: style.spacing.context, isPadding: true) {
+            case .px(let n):      return n
+            case .percent(let f): return f * basis
+            case .auto, .skip:    return 0
+            }
+        }
+        return px(p.top) + px(p.bottom)
+    }
+
+    /// Lane BX — per-axis frame inflation for `box-sizing: content-box`
+    /// (css-sizing-3 §3: declared size = content; frame = content +
+    /// padding + border). Returns (0, 0) unless the IR EXPLICITLY
+    /// declared content-box — the tri-state guard (SizeConfig.boxSizing
+    /// nil = unset) that keeps every width+padding fixture captured
+    /// against the web harness's border-box reset byte-stable, and keeps
+    /// the fixture's V1_border variant (explicit border-box) untouched.
+    /// Border widths use the same hasBorder/effectiveWidth gate as
+    /// backgroundClipInsets above: a side with `border-style: none`
+    /// has USED width 0 (CSS 2.1 §8.5.3) and must not inflate.
+    static func contentBoxInflation(_ style: ComponentStyle) -> (h: CGFloat, v: CGFloat) {
+        // Unset or explicit border-box → the frame already IS the
+        // declared size; no inflation on either axis.
+        guard style.size.boxSizing == .contentBox else { return (0, 0) }
+        // Border band per side — mirrors backgroundClipInsets' gating.
+        let b = style.borderSides
+        let top: CGFloat      = b?.top.hasBorder    == true ? (b?.top.effectiveWidth ?? 0)    : 0
+        let leading: CGFloat  = b?.start.hasBorder  == true ? (b?.start.effectiveWidth ?? 0)  : 0
+        let bottom: CGFloat   = b?.bottom.hasBorder == true ? (b?.bottom.effectiveWidth ?? 0) : 0
+        let trailing: CGFloat = b?.end.hasBorder    == true ? (b?.end.effectiveWidth ?? 0)    : 0
+        // Padding bands ride the shared resolver helpers above so the
+        // inflation always agrees with what PaddingApplier will inset.
+        return (h: horizontalPaddingPx(style) + leading + trailing,
+                v: verticalPaddingPx(style) + top + bottom)
+    }
+
     /// Web-harness min-box floor decision (see MinBoxFloor below): the
     /// floor applies per axis only when the IR declared NO width/min/max
     /// on that axis — mirrors apps/web-harness ComponentRenderer.tsx
@@ -641,8 +688,14 @@ extension View {
             // SpacingContext so em/rem/vw resolve against the same 390×844
             // canvas as padding/margin. Wave 5: the padding band rides
             // along for the min-content proposal (see SizeApplier doc).
+            // Lane BX: contentBoxInflation is (0,0) unless the IR
+            // explicitly declared `box-sizing: content-box`, in which
+            // case the frame grows by padding+border so the declared
+            // width/height size the CONTENT box (css-sizing-3 §3).
             .engineSizing(style.size, context: style.spacing.context,
-                          horizontalPadding: StyleBuilder.horizontalPaddingPx(style))
+                          horizontalPadding: StyleBuilder.horizontalPaddingPx(style),
+                          contentBoxInflateH: StyleBuilder.contentBoxInflation(style).h,
+                          contentBoxInflateV: StyleBuilder.contentBoxInflation(style).v)
             // Fidelity wave 1 — web-harness minimum-box parity. The web
             // renderer floors every component at minWidth 50 / minHeight
             // 30 unless the IR declares width/min/max for that axis, and

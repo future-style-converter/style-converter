@@ -13,7 +13,9 @@ import SwiftUI
 
 // A single mask-image layer. `type` tokens:
 //   "none"          → nothing to mask with (identity)
-//   "url"           → opaque reference we stash as an id
+//   "url"           → the bare href (UrlParser strips the url() wrapper
+//                     and quotes) — resolved to a raster by
+//                     MaskURLLayer via BackgroundURLImageResolver
 //   "linear-gradient" / "radial-gradient" / "conic-gradient"
 //                   → fold into a LinearGradient / RadialGradient /
 //                     AngularGradient in the applier
@@ -78,6 +80,15 @@ struct MaskConfig: Equatable {
     var mode: MaskMode = .matchSource
     var repeatMode: MaskRepeat = .repeatBoth
     var position: MaskPositionValue = MaskPositionValue()
+    // TRUE only when the wire actually carried a mask-position
+    // declaration. The struct default above is CENTER (0.5, 0.5)
+    // because the gradient branches reuse `position` as their
+    // css-images center default — but css-masking-1 defines the
+    // mask-position INITIAL value as `0% 0%` (top/left flush, same as
+    // background-position). Raster url() layers key off this flag so
+    // an undeclared position anchors at the spec initial instead of
+    // inheriting the gradient-centric 0.5.
+    var positionDeclared: Bool = false
     var size: MaskSize = .auto
     var origin: MaskBoxRef = .borderBox
     var clip: MaskBoxRef = .borderBox

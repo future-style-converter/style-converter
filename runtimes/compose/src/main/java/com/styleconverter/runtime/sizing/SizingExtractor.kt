@@ -12,9 +12,16 @@ package com.styleconverter.runtime.sizing
 //
 // AspectRatio has its own wire shape, so we dispatch to extractAspectRatio().
 
+import com.styleconverter.runtime.borders.sides.BorderSideConfig
+import com.styleconverter.runtime.borders.sides.BorderSideExtractor
 import com.styleconverter.runtime.core.types.LengthValue
 import com.styleconverter.runtime.core.types.extractLength
+import com.styleconverter.runtime.spacing.SpacingContext
+import com.styleconverter.runtime.spacing.SpacingExtractor
+import com.styleconverter.runtime.spacing.resolveToDp
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 
 object SizingExtractor {
 
@@ -29,6 +36,17 @@ object SizingExtractor {
         "MinBlockSize", "MaxBlockSize", "MinInlineSize", "MaxInlineSize",
         "AspectRatio",
     )
+
+    /**
+     * Lane BX — `box-sizing` is CONSUMED here but deliberately NOT added to
+     * [PROPERTIES]: that set feeds LayoutFacade.isLayoutProperty routing and
+     * the registry claim already held by performance/ (BoxModelConfig keeps
+     * extracting it as a no-op for wire-compat). Sizing reads the SAME IR
+     * entry independently — extraction in this runtime is scan-everything,
+     * not exclusive-dispatch, so double-reading is safe and keeps both the
+     * registry ownership and coverage audit untouched.
+     */
+    private const val BOX_SIZING_TYPE = "BoxSizing"
 
     /**
      * Fold (type,data) pairs into a SizingConfig. Unknown sizing shapes are
@@ -51,7 +69,7 @@ object SizingExtractor {
         // The dedicated logical slots stay null; they remain on the config
         // only as wire-compat for external readers.
         for ((type, data) in properties) {
-            if (type !in PROPERTIES) continue
+            if (type !in PROPERTIES && type != BOX_SIZING_TYPE) continue
             cfg = when (type) {
                 // Inline axis (width in horizontal-tb).
                 "Width", "InlineSize" -> cfg.copy(width = asSize(data))
@@ -63,10 +81,61 @@ object SizingExtractor {
                 "MaxHeight", "MaxBlockSize" -> cfg.copy(maxHeight = asSize(data))
                 // AspectRatio uses its own wire shape.
                 "AspectRatio" -> cfg.copy(aspectRatio = extractAspectRatio(data))
+                // Lane BX — box-sizing tri-state (unset ≠ content-box).
+                BOX_SIZING_TYPE -> cfg.copy(boxSizing = asBoxSizing(data))
                 else -> cfg
             }
         }
+        // Lane BX — only an EXPLICIT content-box needs the padding+border
+        // inflation bands; unset/border-box configs keep 0f so the Applier
+        // is a guaranteed no-change on the whole existing fixture corpus.
+        if (cfg.boxSizing == BoxSizingKeyword.CONTENT_BOX) {
+            val (x, y) = contentBoxInflation(properties)
+            cfg = cfg.copy(contentBoxInflateX = x, contentBoxInflateY = y)
+        }
         return cfg
+    }
+
+    /**
+     * Lane BX — decode the `box-sizing` wire value. Shape (see
+     * BoxSizingPropertyParser.kt → single-field data class, flattened, and
+     * the web decoder runtimes/web/src/engine/sizing/BoxSizingExtractor.ts):
+     * bare SHOUTY enum string "CONTENT_BOX" | "BORDER_BOX". Anything else is
+     * wire drift → null (slot stays UNSET; never guess content-box because
+     * that would inflate every frame against the border-box baselines).
+     */
+    private fun asBoxSizing(data: JsonElement?): BoxSizingKeyword? =
+        when ((data as? JsonPrimitive)?.contentOrNull) {
+            "CONTENT_BOX" -> BoxSizingKeyword.CONTENT_BOX
+            "BORDER_BOX" -> BoxSizingKeyword.BORDER_BOX
+            else -> null
+        }
+
+    /**
+     * Lane BX — resolved (x, y) frame inflation for content-box: the CSS
+     * padding band plus the USED border widths per axis, in px (css-sizing-3
+     * §3: frame = content + padding + border). Mirrors the resolution lanes
+     * the real modifiers use so inflation and inset never disagree:
+     *   * padding — SpacingExtractor + resolveToDp with the default
+     *     SpacingContext, exactly like StyleApplier.placeholderFloorMinSize;
+     *   * border — BorderSideExtractor with the [BorderSideConfig.hasBorder]
+     *     gate, so a side with `border-style: none` has used width 0
+     *     (CSS 2.1 §8.5.3) and does not inflate, matching web layout.
+     */
+    private fun contentBoxInflation(
+        properties: List<Pair<String, JsonElement?>>
+    ): Pair<Float, Float> {
+        // Padding, resolved exactly like PaddingApplier will resolve it.
+        val pad = SpacingExtractor.extractPaddingConfig(properties).resolve(isRtl = false)
+        val ctx = SpacingContext()
+        fun side(v: LengthValue?): Float = resolveToDp(v, ctx).value.coerceAtLeast(0f)
+        // Border band — only sides that actually paint consume space.
+        val borders = BorderSideExtractor.extractBorderConfig(properties)
+        fun band(s: BorderSideConfig): Float = if (s.hasBorder) s.width?.value ?: 0f else 0f
+        return Pair(
+            side(pad.left) + side(pad.right) + band(borders.start) + band(borders.end),
+            side(pad.top) + side(pad.bottom) + band(borders.top) + band(borders.bottom),
+        )
     }
 
     /**

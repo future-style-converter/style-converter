@@ -83,6 +83,16 @@ struct BorderImageConfig: Equatable {
     // Two-axis repeat.
     var repeatHorizontal: BorderImageRepeat = .stretch
     var repeatVertical: BorderImageRepeat = .stretch
+    // The element's COMPUTED border widths (css-backgrounds-3 §4.3: a
+    // side whose border-style is none/hidden/absent computes to 0) —
+    // the §6.3 basis for `<number>` border-image-width values and the
+    // initial `1`, and the §6.4 basis for `<number>` outsets. Populated
+    // by the extractor from the same BorderSideExtractor lane the stroke
+    // painter reads, mirroring Compose's computedBorder* config fields.
+    var computedBorderTop: CGFloat = 0
+    var computedBorderRight: CGFloat = 0
+    var computedBorderBottom: CGFloat = 0
+    var computedBorderLeft: CGFloat = 0
 
     // `true` when any paint would result — saves the applier from
     // chaining a real modifier when only `source: none` was set.

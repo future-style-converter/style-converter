@@ -17,16 +17,16 @@ package com.styleconverter.runtime.borders
 //     dashed rhythm so an integer number of dashes spans each edge — the
 //     edge starts AND ends on a full dash like Chromium; the fixed
 //     [2w, w] rhythm truncated the final dash mid-way at the corners.
-//  3. Border-image double content inset: BorderImageBox must pad only
-//     max(0, resolvedWidth − computedBorderWidth) per side because
-//     ComponentRenderer already chains StyleApplier.borderContentInset
-//     (the computed border band) before wrapping — css-backgrounds-3 §6:
-//     the border-image area OVERLAYS the border band, it does not stack
-//     inside it.
+//  3. (SUPERSEDED) Border-image extra content inset: the wave-3 fix made
+//     BorderImageBox pad max(0, resolvedWidth − computedBorderWidth). The
+//     skeptic pass then showed even that partial inset violates
+//     css-backgrounds-3 §6 — border-image properties do not affect layout
+//     AT ALL; content is inset by border-width only (Chromium: border
+//     10px + border-image-width 15px keeps the content inset at 10px).
+//     extraContentInset was deleted; its former pins here went with it.
+//     The successor pins live in BorderImageSpecFixesTest.
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.styleconverter.runtime.borders.image.BorderImageApplier
 import com.styleconverter.runtime.borders.sides.BorderSideApplier
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -116,27 +116,8 @@ class BorderFidelityWave3Test {
         )
     }
 
-    // ── 3. Border-image extra content inset ──────────────────────────────
-
-    @Test
-    fun `border-image pads only the width exceeding the border band`() {
-        // 20dp image on a 6dp border: the renderer's borderContentInset
-        // already reserved 6dp, so the Box adds only the remaining 14dp.
-        assertEquals(14.dp, BorderImageApplier.extraContentInset(20.dp, 6.dp))
-    }
-
-    @Test
-    fun `border-image narrower than the band adds no inset`() {
-        // css-backgrounds-3 §6: the image overlays the band; a narrower
-        // image must never pull content INTO the band (clamped at 0).
-        assertEquals(0.dp, BorderImageApplier.extraContentInset(4.dp, 6.dp))
-        assertEquals(0.dp, BorderImageApplier.extraContentInset(6.dp, 6.dp))
-    }
-
-    @Test
-    fun `border-image on a border-less element pads its full width`() {
-        // computed border 0 (no border-style): the renderer reserved
-        // nothing, so the border-image width is reserved here in full.
-        assertEquals(12.dp, BorderImageApplier.extraContentInset(12.dp, 0.dp))
-    }
+    // ── 3. Border-image extra content inset — REMOVED ────────────────────
+    // See the header: extraContentInset was deleted per css-backgrounds-3
+    // §6 (border-image never affects layout); BorderImageSpecFixesTest
+    // pins the replacement dest-expansion behaviour.
 }

@@ -37,6 +37,14 @@ struct SizeApplier: ViewModifier {
     // to leave ~1px for the glyph run (0px makes SwiftUI text drop its
     // glyphs entirely instead of wrapping per character).
     var horizontalPadding: CGFloat = 0
+    // Lane BX — `box-sizing: content-box` frame inflation, pre-resolved
+    // by StyleBuilder.contentBoxInflation: the padding band + border
+    // widths per axis, in px. Both stay 0 unless the IR EXPLICITLY
+    // declared content-box (css-sizing-3 §3: declared size = content;
+    // frame = content + padding + border), so every unset/border-box
+    // fixture keeps its byte-stable border-box frame.
+    var contentBoxInflateH: CGFloat = 0
+    var contentBoxInflateV: CGFloat = 0
 
     func body(content: Content) -> some View {
         // Fast path: nothing to apply.
@@ -68,7 +76,9 @@ struct SizeApplier: ViewModifier {
                                   context: context,
                                   parentW: context.containingBlockWidth,
                                   parentH: CGFloat(context.viewportHeight),
-                                  horizontalPadding: horizontalPadding)
+                                  horizontalPadding: horizontalPadding,
+                                  contentBoxInflateH: contentBoxInflateH,
+                                  contentBoxInflateV: contentBoxInflateV)
         )
     }
 }
@@ -84,7 +94,9 @@ enum SizeApplierMath {
                                      context ctx: SpacingContext,
                                      parentW: CGFloat,
                                      parentH: CGFloat,
-                                     horizontalPadding: CGFloat = 0) -> AnyView {
+                                     horizontalPadding: CGFloat = 0,
+                                     contentBoxInflateH: CGFloat = 0,
+                                     contentBoxInflateV: CGFloat = 0) -> AnyView {
         // Resolve each axis to a concrete CGFloat (or nil for
         // unresolvable / auto / none). We split width and height lanes
         // because SwiftUI's `.frame` builder wants both as paired args.
@@ -179,6 +191,22 @@ enum SizeApplierMath {
             }
         }
 
+        // Lane BX — `box-sizing: content-box` (css-sizing-3 §3): the
+        // declared width/height size the CONTENT box, so the SwiftUI
+        // frame (which the iOS chain treats as the border box — padding
+        // and the border-band inset both sit INSIDE it, see
+        // StyleBuilder.applyStyle ordering) must grow by padding+border.
+        // Runs AFTER the min/max clamp and the aspect-ratio fill because
+        // both of those operate in content-box coordinates per spec;
+        // only the final frame conversion changes coordinate systems.
+        // Nil axes (auto / intrinsic) stay nil — content-box only
+        // reinterprets DEFINITE sizes. min/max-only axes keep border-box
+        // clamps for now: no fixture exercises content-box min/max, and
+        // inflating the clamp without an explicit size would desync the
+        // fixedSize lane below (TODO, tracked by the BX lane notes).
+        effW = inflatedAxis(effW, boxSizing: c.boxSizing, by: contentBoxInflateH)
+        effH = inflatedAxis(effH, boxSizing: c.boxSizing, by: contentBoxInflateV)
+
         // Exact width/height. Only attach when at least one is resolved.
         if effW != nil || effH != nil {
             out = AnyView(out.frame(width: effW, height: effH, alignment: .topLeading))
@@ -246,57 +274,42 @@ enum SizeApplierMath {
         }
         return out
     }
+
+    // Lane BX — pure content-box→border-box axis conversion, split out so
+    // BoxSizingTests can pin the arithmetic without a SwiftUI view tree.
+    // Returns the axis untouched unless box-sizing is EXPLICITLY
+    // content-box (nil = unset keeps border-box; .borderBox is the
+    // declared status quo). `by` is the padding band + border widths for
+    // this axis (px), pre-resolved by StyleBuilder.contentBoxInflation.
+    static func inflatedAxis(_ v: CGFloat?,
+                             boxSizing: BoxSizingKeyword?,
+                             by inflation: CGFloat) -> CGFloat? {
+        // No definite size on this axis → nothing to reinterpret
+        // (css-sizing-3 §3 only changes how definite sizes resolve).
+        guard let v = v else { return nil }
+        // The frame grows ONLY on an explicit content-box declaration —
+        // the tri-state guard that keeps every unset fixture byte-stable.
+        guard boxSizing == .contentBox else { return v }
+        // content-box: frame = declared content size + padding + border.
+        return v + inflation
+    }
 }
 
 // MARK: - min-content width emulation (fidelity wave 5)
-
-/// Proposes width 0 to its single child and adopts whatever size the
-/// child reports back — SwiftUI text under a zero-width proposal wraps
-/// at every soft-wrap opportunity and measures its longest word, which
-/// IS the CSS min-content inline size (css-sizing-3 §4). `.fixedSize`
-/// can't express this (it reports the IDEAL = max-content size), so
-/// `width: min-content` boxes rendered a single wide line on iOS while
-/// web/Android wrapped (PW_Sizing_Spacing_02, i-w 0.703).
-struct MinContentWidthLayout: Layout {
-    /// Horizontal padding band inside the wrapped chain — the proposal
-    /// must survive `.padding`'s subtraction so ~1px reaches the text.
-    var inset: CGFloat = 0
-
-    /// The narrowest proposal that still renders glyphs: the padding
-    /// band plus one pixel for the character column.
-    private var probe: CGFloat { inset + 1 }
-
-    /// Report the child's size under the narrow proposal. Height still
-    /// follows the container's proposal so explicit heights and
-    /// min/max clamps inside the child chain behave unchanged.
-    func sizeThatFits(proposal: ProposedViewSize,
-                      subviews: Subviews, cache: inout ()) -> CGSize {
-        guard let sub = subviews.first else { return .zero }
-        return sub.sizeThatFits(ProposedViewSize(width: probe,
-                                                 height: proposal.height))
-    }
-
-    /// Place the child at the size it measured under the narrow
-    /// proposal (re-proposing the CONCRETE measured size so the wrap
-    /// layout is reproduced at render time), anchored top-leading like
-    /// every other block box.
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize,
-                       subviews: Subviews, cache: inout ()) {
-        guard let sub = subviews.first else { return }
-        let sz = sub.sizeThatFits(ProposedViewSize(width: probe,
-                                                   height: proposal.height))
-        sub.place(at: bounds.origin, anchor: .topLeading,
-                  proposal: ProposedViewSize(sz))
-    }
-}
+// MinContentWidthLayout moved to its own file (MinContentWidthLayout.swift,
+// same folder) when Lane BX pushed this file past the ~300-line split rule.
 
 // Thin View extension so StyleBuilder can chain `.engineSizing(cfg, ctx)`
 // without exposing the ViewModifier type at call-sites.
 extension View {
     func engineSizing(_ config: SizeConfig,
                       context: SpacingContext,
-                      horizontalPadding: CGFloat = 0) -> some View {
+                      horizontalPadding: CGFloat = 0,
+                      contentBoxInflateH: CGFloat = 0,
+                      contentBoxInflateV: CGFloat = 0) -> some View {
         modifier(SizeApplier(config: config, context: context,
-                             horizontalPadding: horizontalPadding))
+                             horizontalPadding: horizontalPadding,
+                             contentBoxInflateH: contentBoxInflateH,
+                             contentBoxInflateV: contentBoxInflateV))
     }
 }

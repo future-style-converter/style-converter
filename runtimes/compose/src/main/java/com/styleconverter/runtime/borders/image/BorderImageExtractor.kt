@@ -1,7 +1,13 @@
 package com.styleconverter.runtime.borders.image
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.PropertyRegistry
+import com.styleconverter.runtime.core.types.LengthValue
 import com.styleconverter.runtime.core.types.ValueExtractors
+import com.styleconverter.runtime.spacing.PaddingExtractor
+import com.styleconverter.runtime.spacing.SpacingContext
+import com.styleconverter.runtime.spacing.resolveToDp
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -92,6 +98,26 @@ object BorderImageExtractor {
             if (side.hasBorder) side.width ?: androidx.compose.ui.unit.Dp(0f)
             else androidx.compose.ui.unit.Dp(0f)
 
+        // Resolve the element's CSS padding — the second dest-compensation
+        // basis alongside the computed border widths. ComponentRenderer
+        // hands BorderImageBox the component's FULL modifier chain, whose
+        // LayoutFacade padding (PaddingApplier.apply) shrinks the DrawScope
+        // box just like borderContentInset does, so the drawBehind must
+        // expand the destination back out by exactly what the chain inset.
+        // Mirror PaddingApplier byte-for-byte: logical→physical collapse
+        // with the same LTR default (the renderer doesn't plumb
+        // LayoutDirection into either consumer yet — Phase 3 note in
+        // PaddingApplier), reusing PaddingExtractor so both consumers stay
+        // in lockstep on the 8-longhand precedence rules.
+        val paddingSides = PaddingExtractor.extract(properties).resolve(isRtl = false)
+        // Resolution mirrors PaddingApplier.apply: the DEFAULT
+        // SpacingContext (font 16px / viewport 390×844 — the exact context
+        // SpacingApplier.applyPadding used on the layout side), clamped at
+        // 0 because CSS padding is never negative (spec clamp, and the
+        // layout chain never applied a negative inset to undo).
+        fun resolvedPad(value: LengthValue?): Dp =
+            resolveToDp(value, SpacingContext()).let { if (it.value < 0f) 0.dp else it }
+
         return BorderImageConfig(
             source = source,
             sliceTop = sliceTop,
@@ -112,7 +138,13 @@ object BorderImageExtractor {
             computedBorderTop = computed(sides.top),
             computedBorderRight = computed(sides.end),
             computedBorderBottom = computed(sides.bottom),
-            computedBorderLeft = computed(sides.start)
+            computedBorderLeft = computed(sides.start),
+            // Physical padding sides, resolved above with the same context
+            // the layout chain used — feeds the drawBehind dest expansion.
+            resolvedPaddingTop = resolvedPad(paddingSides.top),
+            resolvedPaddingRight = resolvedPad(paddingSides.right),
+            resolvedPaddingBottom = resolvedPad(paddingSides.bottom),
+            resolvedPaddingLeft = resolvedPad(paddingSides.left)
         )
     }
 

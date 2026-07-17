@@ -49,8 +49,23 @@ object SizingApplier {
         val minWv = config.minWidth ?: config.minInlineSize
         val minHv = config.minHeight ?: config.minBlockSize
         // Physical width wins over logical inlineSize (CSS spec).
-        r = applyWidth(r, clampLength(rawW, minWv, maxWv, ctx), ctx)
-        r = applyHeight(r, clampLength(rawH, minHv, maxHv, ctx), ctx)
+        // Lane BX — `box-sizing: content-box` (css-sizing-3 §3): the
+        // declared width/height size the CONTENT box, but this chain's
+        // Modifier.width/height frame is the BORDER box (padding is
+        // chained innermost — StyleApplier.applyConfig step 8 — and the
+        // border band inset sits inside too), so the frame must grow by
+        // the pre-resolved padding+border bands. Inflation runs AFTER
+        // clampLength because min/max also operate in content-box
+        // coordinates per spec; only the final frame value converts.
+        // inflateForContentBox is identity unless boxSizing is an
+        // EXPLICIT CONTENT_BOX (null = unset keeps border-box), so the
+        // whole existing corpus keeps byte-identical modifier chains.
+        r = applyWidth(r, inflateForContentBox(
+            clampLength(rawW, minWv, maxWv, ctx),
+            config.boxSizing, config.contentBoxInflateX), ctx)
+        r = applyHeight(r, inflateForContentBox(
+            clampLength(rawH, minHv, maxHv, ctx),
+            config.boxSizing, config.contentBoxInflateY), ctx)
         // Min/max constraints — kept for the case where no explicit
         // width/height was set (then clamp short-circuits to null and
         // widthIn/heightIn carry the intent).
@@ -82,6 +97,33 @@ object SizingApplier {
     private fun isDefiniteAxis(v: LengthValue?): Boolean = when (v) {
         is LengthValue.Exact, is LengthValue.Relative, is LengthValue.Intrinsic -> true
         else -> false
+    }
+
+    /**
+     * Lane BX — pure content-box→border-box axis conversion, internal so
+     * JUnit pins the arithmetic (width 100 + padding 16×2 + border 2×2 →
+     * frame 136). Identity unless [boxSizing] is an EXPLICIT
+     * [BoxSizingKeyword.CONTENT_BOX] — the tri-state guard (null = unset)
+     * that keeps every fixture captured against web's border-box reset
+     * byte-stable, and keeps explicit `border-box` declarations (the
+     * fixture's passing V1_border sentinel) untouched. Only Exact px
+     * inflates: percent widths route to fillMaxWidth (fractional — no px
+     * to add) and em/rem resolve at apply time; both stay border-box with
+     * the honest divergence noted here rather than half-inflating (no
+     * silent fallthrough: content-box + non-px sizes have no fixture yet).
+     */
+    internal fun inflateForContentBox(
+        v: LengthValue?,
+        boxSizing: BoxSizingKeyword?,
+        inflatePx: Float
+    ): LengthValue? {
+        // Not explicitly content-box → border-box status quo, untouched.
+        if (boxSizing != BoxSizingKeyword.CONTENT_BOX) return v
+        // Only definite px sizes reinterpret (css-sizing-3 §3); auto /
+        // intrinsic / relative shapes pass through unchanged.
+        if (v !is LengthValue.Exact) return v
+        // content-box: frame = declared content size + padding + border.
+        return LengthValue.Exact(v.px + inflatePx)
     }
 
     /**
@@ -168,7 +210,17 @@ object SizingApplier {
         is LengthValue.Calc, is LengthValue.Fraction -> m
     }
 
-    /** Min/max width constraint. */
+    /** Min/max width constraint.
+     *
+     *  KNOWN GAP (wave-3 skeptic, mirrored by the explicit TODO in iOS
+     *  SizeApplier.swift): under an explicit `box-sizing: content-box`,
+     *  css-sizing-3 §3 resolves min/max in the SAME box as width, so the
+     *  frame constraint should be min/max + padding + border — e.g.
+     *  `content-box; min-width: 100px; padding: 20px; border: 2px` means a
+     *  144px frame floor on web while this emits 100. The explicit-size
+     *  lane inflates (inflateForContentBox); this min/max-WITHOUT-size lane
+     *  does not yet — deferred with the repro until a fixture exercises it,
+     *  documented here so the fallthrough is not silent. */
     private fun applyWidthIn(m: Modifier, min: LengthValue?, max: LengthValue?, ctx: SpacingContext): Modifier {
         val mn = toDpOrNull(min, ctx)
         val mx = toDpOrNull(max, ctx)
@@ -199,7 +251,11 @@ object SizingApplier {
     fun applyWidthOnly(modifier: Modifier, config: SizingConfig): Modifier {
         val ctx = SpacingContext()
         var r = modifier
-        r = applyWidth(r, config.width ?: config.inlineSize, ctx)
+        // Lane BX — flex items honour content-box the same way the main
+        // lane does (identity unless the item explicitly declared it).
+        r = applyWidth(r, inflateForContentBox(
+            config.width ?: config.inlineSize,
+            config.boxSizing, config.contentBoxInflateX), ctx)
         r = applyWidthIn(r, config.minWidth ?: config.minInlineSize,
             config.maxWidth ?: config.maxInlineSize, ctx)
         return r
@@ -209,7 +265,10 @@ object SizingApplier {
     fun applyHeightOnly(modifier: Modifier, config: SizingConfig): Modifier {
         val ctx = SpacingContext()
         var r = modifier
-        r = applyHeight(r, config.height ?: config.blockSize, ctx)
+        // Lane BX — same explicit-content-box inflation as applyWidthOnly.
+        r = applyHeight(r, inflateForContentBox(
+            config.height ?: config.blockSize,
+            config.boxSizing, config.contentBoxInflateY), ctx)
         r = applyHeightIn(r, config.minHeight ?: config.minBlockSize,
             config.maxHeight ?: config.maxBlockSize, ctx)
         return r
