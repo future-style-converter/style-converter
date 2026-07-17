@@ -6,23 +6,34 @@
 //  the source decodes through BackgroundURLImageResolver (percent-
 //  encoded data URIs, file/bundle paths; remote = defined no-op), the
 //  image is cut along the §6.1 slice lines into nine regions, and a
-//  Canvas overlay paints corners fixed, edges per the §6.2 repeat
-//  keyword (stretch / repeat / round / space via BorderImageMath.
-//  edgePlan → BackgroundTileMath), and the center only when the slice
-//  `fill` flag is set. Outsets (§6.4) expand the PAINT rect outward
-//  with zero layout effect — Canvas draws are not clipped to the frame
-//  (same property BackgroundURLImageView relies on), so the overlay
-//  simply draws at negative origins.
+//  Canvas paints corners fixed, edges per the §6.2 repeat keyword
+//  (stretch / repeat / round / space via BorderImageMath.edgePlan →
+//  BackgroundTileMath), and the center only when the slice `fill` flag
+//  is set. Outsets (§6.4) expand the PAINT rect outward with zero
+//  layout effect — via NEGATIVE per-edge padding on the Canvas (see
+//  the view body), NOT by drawing at negative origins: empirically
+//  (Catalyst ImageRenderer probe, wave 5) GraphicsContext.draw(Image,
+//  in:) is silently CULLED outside the Canvas's own bounds even though
+//  fill(Path) is not, so a negative-origin image draw never rasterizes.
+//  The negative padding hands the Canvas the outset-expanded proposed
+//  size instead, keeping every image draw in-bounds; a `.background`
+//  child cannot influence the host's layout, so the expansion has zero
+//  layout effect.
+//
+//  Paint order (IOS-BI lane): the Canvas attaches as a `.background`,
+//  NOT an `.overlay`. CSS paints border-image in place of the border
+//  (css-backgrounds-3 §6), and CSS2 Appendix E paints an element's
+//  backgrounds-then-borders BEFORE its content — so border-image sits
+//  above the whole background chain yet BENEATH the element's text.
+//  The old `.overlay` inverted that: with slice `fill`, the center
+//  rectangle covered the content box and hid the label web/Android
+//  correctly draw on top. The z-order argument for `.background` lives
+//  at the attachment site below and in StyleBuilder.applyStyle.
 //
 //  Remaining honest gaps (each logged or spec-cited inline, never
 //  silent): gradient sources are still identity + logOnce; edge tiles
 //  use the source's pixel length as the tile pitch (mirroring Compose)
-//  rather than §6.2's corner-scale-derived pitch; the overlay paints
-//  ABOVE sibling content that intrudes into the border band (Compose
-//  draws behind content — SwiftUI has no "behind content, above
-//  background" slot in a modifier chain; content is normally inset off
-//  the band by engineBorderContentInset so this is invisible in the
-//  fixtures).
+//  rather than §6.2's corner-scale-derived pitch.
 //
 
 // SwiftUI for ViewModifier/Canvas; UIKit for the decoded UIImage.
@@ -68,11 +79,23 @@ struct BorderImageApplier: ViewModifier {
             // §6.4 outsets are box-independent (length literal / number
             // × computed border), so they resolve at modifier time.
             let outsets = BorderImageMath.resolvedOutsets(cfg)
-            // Overlay: paints ABOVE the background chain (backgrounds
-            // attach earlier via .background, so they sit behind) — the
-            // §6 stacking, "drawn in place of the border". Hit testing
-            // off: a border decoration must never eat touches.
-            return AnyView(content.overlay(
+            // Background, not overlay — the CSS paint order (§6 "drawn
+            // in place of the border"; CSS2 Appendix E: borders paint
+            // after backgrounds, before content). SwiftUI z-order: a
+            // `.background` always renders BEHIND the view it modifies,
+            // and each LATER `.background` in a chain wraps the earlier
+            // result and slots behind it — so the EARLIEST-attached
+            // `.background` is the topmost background layer. StyleBuilder
+            // attaches this modifier BEFORE every engineBackground* call,
+            // which puts the nine-slice above the background chain yet
+            // beneath the content (an `.overlay` painted above content
+            // and hid the label under a slice-`fill` center). §6.4
+            // outsets paint outside the host bounds via the view's
+            // negative padding (see the header — image draws outside
+            // the Canvas bounds are culled, so the Canvas must SPAN the
+            // outset area rather than overdraw into it).
+            // Hit testing off: a border decoration must never eat touches.
+            return AnyView(content.background(
                 BorderImageNineSliceView(uiImage: ui, config: cfg, outsets: outsets)
                     .allowsHitTesting(false)
             ))
@@ -92,13 +115,16 @@ private struct BorderImageNineSliceView: View {
 
     var body: some View {
         Canvas { ctx, size in
-            // Border image AREA = border box expanded by the outsets
-            // (§6.4). Canvas draws are NOT clipped to the frame (see
-            // BackgroundURLImageView), so the negative origin paints
-            // outside the border box with zero layout effect.
-            let area = CGRect(x: -outsets.left, y: -outsets.top,
-                              width: size.width + outsets.left + outsets.right,
-                              height: size.height + outsets.top + outsets.bottom)
+            // Border image AREA = the whole canvas: the negative padding
+            // below already expanded the proposed size to the border box
+            // plus the §6.4 outsets, so every draw stays inside the
+            // Canvas bounds. This matters because GraphicsContext culls
+            // draw(Image, in:) calls outside its own bounds (verified
+            // empirically under the Catalyst ImageRenderer — fill(Path)
+            // escapes, image draws do not), so the previous approach of
+            // drawing at negative origins silently dropped every band
+            // that lay fully outside the border box.
+            let area = CGRect(origin: .zero, size: size)
             // §6.3 widths resolved against the AREA — the true
             // percentage basis, only knowable here at draw time.
             let w = BorderImageMath.resolvedWidths(config, box: area.size)
@@ -143,6 +169,14 @@ private struct BorderImageNineSliceView: View {
                 drawStretched(ctx, from: src.center, to: dst.center)
             }
         }
+        // §6.4 outset expansion: NEGATIVE per-edge padding proposes the
+        // Canvas a size larger than the host by exactly the outsets, so
+        // the border-image area spans the canvas and every image draw is
+        // in-bounds (out-of-bounds image draws are culled — see header).
+        // Zero outsets → zero padding → identity. Inside `.background`
+        // this cannot affect the host's layout.
+        .padding(EdgeInsets(top: -outsets.top, leading: -outsets.left,
+                            bottom: -outsets.bottom, trailing: -outsets.right))
     }
 
     /// Crop one source region out of the bitmap as a drawable Image.
@@ -196,8 +230,10 @@ private struct BorderImageNineSliceView: View {
     }
 }
 
-// View chain helper — attached in StyleBuilder.applyStyle after the
-// background chain and before radius/sides (the Phase 5 border order).
+// View chain helper — attached in StyleBuilder.applyStyle BEFORE the
+// engineBackground* chain: earliest `.background` = topmost background
+// layer, so the nine-slice paints over every background but under the
+// content (the CSS §6 / Appendix E order — see body(content:) above).
 extension View {
     func engineBorderImage(_ config: BorderImageConfig?) -> some View {
         modifier(BorderImageApplier(config: config))

@@ -34,6 +34,13 @@ struct TypographyAggregate: Equatable {
     var fontSizePx: CGFloat? = nil
     /// Font weight (100–900 mapped to SwiftUI `Font.Weight`). `nil` → inherit.
     var fontWeight: Font.Weight? = nil
+    /// Lane IOS-TEXT fix 5 — the RAW numeric CSS weight (100…1000).
+    /// Kept alongside the bucketed SwiftUI weight because CoreText's
+    /// nearest-face pick on `.weight()` rounds DOWN at 600/800 with the
+    /// 4-face Inter family; PlaceholderLabel instead selects the concrete
+    /// installed face per css-fonts-4 §5.2 (FontFaceMatcher) using this
+    /// number. `nil` → keyword-only/unknown weight, legacy path.
+    var fontWeightNumeric: Int? = nil
     /// `italic | oblique` → true. `nil` → inherit.
     var italic: Bool? = nil
     /// `font-family` first concrete name, or nil for "system / inherit".
@@ -64,9 +71,18 @@ struct TypographyAggregate: Equatable {
 
     /// `letter-spacing` in points, fed to `.tracking(_:)`.
     var letterSpacingPx: CGFloat? = nil
-    /// `word-spacing` in points — SwiftUI has no direct API. Recorded so the
-    /// applier can log the TODO on first use without erroring.
+    /// Lane IOS-TEXT fix 3 — unresolved em/rem `letter-spacing` (the wire
+    /// ships px:0.0 with the true value nested at original.{v,u}).
+    /// TypographyExtractor resolves it into letterSpacingPx once the
+    /// element font size is known (em × font-size, rem × 16).
+    var letterSpacingRelative: RelativeFontLength? = nil
+    /// `word-spacing` in points — rendered by PlaceholderLabel as an
+    /// AttributedString `.kern` on each space character (lane IOS-TEXT
+    /// fix 2; css-text-3 §8.1 word-separator advance).
     var wordSpacingPx: CGFloat? = nil
+    /// Lane IOS-TEXT fix 3 — unresolved em/rem `word-spacing`, resolved
+    /// alongside letterSpacingRelative in TypographyExtractor.
+    var wordSpacingRelative: RelativeFontLength? = nil
     /// `line-height` in points, fed to `.lineSpacing(_:)` after subtracting
     /// the font size (SwiftUI's `lineSpacing` is the extra space, not total).
     var lineHeightPx: CGFloat? = nil
@@ -94,6 +110,14 @@ struct TypographyAggregate: Equatable {
     var underline: Bool = false
     /// True when `text-decoration-line` contained `line-through`.
     var strikethrough: Bool = false
+    /// Lane IOS wave 5 — true when `text-decoration-line` contained
+    /// `overline` (css-text-decor-3 §2.1). SwiftUI Text has no overline
+    /// API, so PlaceholderLabel paints one Rectangle per rendered line
+    /// at the line-box top (mirroring Compose's overlineSegments draw
+    /// pass — the android↔ios pair is what SSIM compares). Previously
+    /// captured-but-dropped, a native-pair divergence on the committed
+    /// TextDecorationLine fixture (Overline/UnderOver/Triple).
+    var overline: Bool = false
     /// Decoration line colour. Falls back to text colour when nil.
     var decorationColor: Color? = nil
     /// `text-decoration-style` keyword. SwiftUI `.underline(pattern:)`
@@ -115,6 +139,11 @@ struct TypographyAggregate: Equatable {
     var textShadowLayers: [TextShadowLayer] = []
     /// `text-transform` → SwiftUI `.textCase(_:)`.
     var textCase: Text.Case?? = nil   // nested Optional: outer nil = "inherit", inner nil = "explicitly none" (CSS `text-transform: none`).
+    /// Lane IOS-TEXT fix 6 — `text-transform: capitalize`. No Text.Case
+    /// member exists for it, so PlaceholderLabel titlecases each word at
+    /// the string level (TextTransformApplier.capitalizeWords, the
+    /// Compose-mirroring transform).
+    var capitalizeWords: Bool = false
 
     // MARK: - Wrapping / truncation
 
@@ -124,6 +153,15 @@ struct TypographyAggregate: Equatable {
     /// the glyph run stays on one line and overflows the box exactly
     /// like the web reference (Typography_C20/C21 wrapped to 2 lines).
     var noWrap: Bool = false
+    /// Lane IOS wave 5 — `white-space: pre | pre-wrap | break-spaces`
+    /// PRESERVES space runs (css-text-3 §4.1.2: "collapsible white space
+    /// is not collapsed"). The greedy pre-break in PlaceholderLabel
+    /// splits on spaces and re-joins with single separators — a glyph-
+    /// content REWRITE under preserved-whitespace modes — so this flag
+    /// gates the pre-break OFF and restores the legacy soft-wrap path
+    /// for those keywords (honest per-spec rendering; pre-breaking
+    /// preserved text is future work).
+    var preservesSpaces: Bool = false
     /// `line-clamp` / `max-lines` — the smaller of the two wins when both set.
     var lineLimit: Int? = nil
     /// `text-overflow: ellipsis` → `.truncationMode(.tail)`. When nil we

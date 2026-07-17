@@ -103,6 +103,77 @@ enum InheritedText {
         // Order-preserving filter — cheap, runs once per container.
         properties.filter { inheritedTypes.contains($0.type) }
     }
+
+    /// Lane IOS-TEXT (color channel) — css-color-4 §7.3: `currentColor`
+    /// used ON the `color` property itself "is treated as `inherit`".
+    /// The declaration therefore must not block the inherited Color from
+    /// flowing in through `merge` (own-wins would keep the unresolvable
+    /// dynamic marker, extractColor would yield no paintable value, and
+    /// the leaf placeholder fell back to the contrast pick — the
+    /// pixel-verified drop this fixes). Removing the own declaration IS
+    /// the resolution: the ancestor's Color takes its place in the
+    /// merged list, so the existing inherited-color channel that the
+    /// border/outline currentColor consumers already read (they resolve
+    /// against the MERGED list's "Color") sees the right value, and the
+    /// republished child channel carries the resolved ancestor color.
+    /// Only the `color` property is touched — currentColor on OTHER
+    /// properties (border-color etc.) keeps its dynamic marker and its
+    /// existing consumers. Pure — pinned by IOSTextLaneTests.
+    static func resolvingCurrentColorOnColor(_ own: [IRProperty]) -> [IRProperty] {
+        own.filter { prop in
+            // Keep everything that isn't `color: currentColor`.
+            guard prop.type == "Color" else { return true }
+            // extractColor classifies the wire's dynamic marker shapes
+            // ({"original":"currentColor"} and bare strings) — reuse it
+            // so this filter can never drift from the color decoder.
+            if case .dynamic(kind: .currentColor, raw: _) = extractColor(prop.data) {
+                return false
+            }
+            return true
+        }
+    }
+
+    /// Wave-5 gate follow-up (currentColor bottom-out) — true when the
+    /// element declared `color: currentColor` but NO ancestor `Color`
+    /// exists in the inherited channel to resolve it against. In that
+    /// case `resolvingCurrentColorOnColor` dropped the declaration and
+    /// nothing flowed in, so the merged list carries no Color at all —
+    /// the device gate measured the label then falling to the
+    /// 70%-alpha contrast pick (~171 blended gray on the dark stage)
+    /// while web resolved the harness BODY's `color: #eee` (opaque
+    /// 238,238,238) — a 0.856 diverging pair. The honest bottom-out is
+    /// `defaultTextColor` below, not the contrast pick. Pure —
+    /// XCTest-pinned alongside resolvingCurrentColorOnColor.
+    static func currentColorBottomsOut(own: [IRProperty],
+                                       inherited: [IRProperty]) -> Bool {
+        // The own list must actually declare `color: currentColor`
+        // (same extractColor classification as the resolver above, so
+        // the two can never disagree about what "currentColor" is).
+        let declaresCurrentColor = own.contains { prop in
+            guard prop.type == "Color" else { return false }
+            // Dynamic currentColor marker = the wire shapes extractColor
+            // recognises ({"original":"currentColor"}, bare string).
+            if case .dynamic(kind: .currentColor, raw: _) = extractColor(prop.data) {
+                return true
+            }
+            return false
+        }
+        // …and the ancestor chain must offer nothing to resolve it
+        // against (an inherited Color would have taken the dropped
+        // declaration's place in the merged list — no bottom-out).
+        return declaresCurrentColor && !inherited.contains { $0.type == "Color" }
+    }
+
+    /// The runtime's DEFAULT TEXT COLOR — what an undeclared-`color`
+    /// element ultimately computes to on the harness stage. The
+    /// web-harness stage contract is `body { color: #eee }` on the
+    /// `#1a1a2e` background, so a currentColor chain with no author
+    /// ancestor bottoms out in the BODY's #eee on web (opaque
+    /// 238,238,238). `Color(white: 0.93)` is 237/255 — within 1/255 of
+    /// #eee — and OPAQUE, unlike the 70%-alpha placeholder contrast
+    /// pick (which exists to keep dev-chrome labels subtle, not to
+    /// stand in for a real computed color).
+    static let defaultTextColor = Color(white: 0.93)
 }
 
 // MARK: - Environment plumbing

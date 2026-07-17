@@ -206,9 +206,16 @@ public struct ComponentRenderer: View {
     /// Wave 8 — clock-parameterized variant: the transition blend runs
     /// UNDER the inheritance merge so blended values extract exactly
     /// like base declarations. nil clock = byte-identical legacy path.
+    /// Lane IOS-TEXT (color channel): `color: currentColor` computes to
+    /// `inherit` (css-color-4 §7.3), so the own declaration is dropped
+    /// BEFORE the merge — the ancestor's Color then flows in and every
+    /// merged-list consumer (glyph color, border/outline currentColor)
+    /// resolves against it instead of the placeholder contrast pick.
     private func mergedProperties(now: Date?) -> [IRProperty] {
-        InheritedText.merge(own: motionEffectiveProperties(now: now),
-                            inherited: inheritedTextProperties)
+        InheritedText.merge(
+            own: InheritedText.resolvingCurrentColorOnColor(
+                motionEffectiveProperties(now: now)),
+            inherited: inheritedTextProperties)
     }
 
     /// Wave 9 (#37) — true when the merged list's `Color` arrived ONLY
@@ -221,6 +228,18 @@ public struct ComponentRenderer: View {
     private var colorIsInheritedOnly: Bool {
         inheritedTextProperties.contains { $0.type == "Color" } &&
             !effectiveProperties.contains { $0.type == "Color" }
+    }
+
+    /// Wave-5 gate follow-up — `color: currentColor` declared with NO
+    /// ancestor Color to resolve against (see
+    /// InheritedText.currentColorBottomsOut). The label then paints the
+    /// runtime default text color (web-harness body `#eee`, opaque)
+    /// instead of the 70%-alpha contrast pick the device gate measured
+    /// diverging (0.856). Reads the same effective/inherited lists as
+    /// colorIsInheritedOnly above so the two gates stay in one frame.
+    private var currentColorBottomsOut: Bool {
+        InheritedText.currentColorBottomsOut(own: effectiveProperties,
+                                             inherited: inheritedTextProperties)
     }
 
     /// Does any selector bucket resolve to `condition` at runtime v1?
@@ -1228,6 +1247,33 @@ public struct ComponentRenderer: View {
         return CSSFlexMath.mainSizes(items: items, available: available, gap: gap)
     }
 
+    // MARK: - Text wrap width (lane IOS-TEXT fix 1)
+
+    /// The CONTENT-BOX inline size a real-text run wraps at — the input
+    /// to the greedy pre-break in PlaceholderLabel. An explicit IR width
+    /// resolves through the SAME subtraction lane the flex plan uses
+    /// (flexContentSize: declared border-box width − padding band −
+    /// painted borders); a fit-content box wraps at the containing-block
+    /// cap (css-sizing-3 §5.1 — the widest the box can lay out before
+    /// text must wrap), minus this element's own padding + borders. Nil
+    /// only when the arithmetic degenerates (≤ 0).
+    private func textWrapWidth(style: ComponentStyle) -> CGFloat? {
+        // Declared width → definite content box, same lane as flex.
+        if let w = flexContentSize(style: style, vertical: false) { return w }
+        // Fit-content: the proposal cap is the containing block…
+        var w = style.spacing.context.containingBlockWidth
+        // …minus the element's own padding band (same resolver lane as
+        // the paint chain, StyleBuilder.horizontalPaddingPx)…
+        w -= StyleBuilder.horizontalPaddingPx(style)
+        // …and its painted border widths (border-style:none = used 0,
+        // CSS 2.1 §8.5.3 — the same hasBorder gate flexContentSize uses).
+        if let b = style.borderSides {
+            w -= b.start.hasBorder ? (b.start.effectiveWidth ?? 0) : 0
+            w -= b.end.hasBorder   ? (b.end.effectiveWidth ?? 0)   : 0
+        }
+        return w > 0 ? w : nil
+    }
+
     // MARK: - Content
 
     @ViewBuilder
@@ -1256,7 +1302,15 @@ public struct ComponentRenderer: View {
             if let t = component.text, !t.isEmpty {
                 PlaceholderLabel(
                     name: t,
-                    color: style.text.color,
+                    // Wave-5 gate follow-up — same currentColor
+                    // bottom-out as the leaf label below: web resolves
+                    // the leading-text run's currentColor to the
+                    // harness body's #eee when no ancestor declares
+                    // color (stage contract), so the honest fallback is
+                    // the opaque default text color, not the pick.
+                    color: style.text.color
+                        ?? (currentColorBottomsOut
+                                ? InheritedText.defaultTextColor : nil),
                     textConfig: style.text,
                     backgroundColor: style.backgroundColor,
                     clipTextGradient: nil,
@@ -1266,7 +1320,11 @@ public struct ComponentRenderer: View {
                     fillWidth: style.size.width != nil,
                     // Thread the parent renderer's resolved WPT flag so the
                     // composed-mode line-box pin + padding-0 fire (Round 4).
-                    wptCaptureMode: wptCaptureMode
+                    wptCaptureMode: wptCaptureMode,
+                    // Lane IOS-TEXT fix 1 — the content-box wrap width for
+                    // the greedy pre-break (leading text wraps exactly like
+                    // leaf text: same box, same containing block).
+                    wrapWidth: textWrapWidth(style: style)
                 )
             }
             // Phase 7 step 2: sort children by CSS `order` BEFORE rendering.
@@ -1548,7 +1606,18 @@ public struct ComponentRenderer: View {
             PlaceholderLabel(
                 name: component.name,
                 rawText: component.text,
-                color: colorIsInheritedOnly ? nil : style.text.color,
+                // Wave-5 gate follow-up — a currentColor declaration
+                // with no ancestor to resolve it bottoms out into the
+                // runtime DEFAULT TEXT COLOR (web-harness stage
+                // contract: body color:#eee on #1a1a2e — the value the
+                // browser's currentColor chain reaches), NOT the
+                // contrast pick (see currentColorBottomsOut). Mutually
+                // exclusive with colorIsInheritedOnly (which requires
+                // an inherited Color to exist).
+                color: colorIsInheritedOnly ? nil
+                    : style.text.color
+                        ?? (currentColorBottomsOut
+                                ? InheritedText.defaultTextColor : nil),
                 textConfig: style.text,
                 backgroundColor: style.backgroundColor,
                 clipTextGradient: clipText,
@@ -1563,7 +1632,12 @@ public struct ComponentRenderer: View {
                 fillWidth: style.size.width != nil,
                 // Thread the parent renderer's resolved WPT flag so the
                 // composed-mode line-box pin + padding-0 fire (Round 4).
-                wptCaptureMode: wptCaptureMode
+                wptCaptureMode: wptCaptureMode,
+                // Lane IOS-TEXT fix 1 — content-box wrap width for the
+                // greedy pre-break: multi-line real text must break where
+                // Chromium/Compose break (greedy), not where TextKit's
+                // push-out moves the soft break (see GreedyLineBreaker).
+                wrapWidth: textWrapWidth(style: style)
             )
         }
     }
@@ -1611,6 +1685,14 @@ private struct PlaceholderLabel: View {
     // (StyleBuilder.MinBoxFloor) so this line box actually sets the height.
     var wptCaptureMode: Bool = false
 
+    // Lane IOS-TEXT fix 1 — the CONTENT-BOX inline size this run wraps
+    // at (ComponentRenderer.textWrapWidth). When set and the run can
+    // wrap, the text is PRE-BROKEN greedily (GreedyLineBreaker) so line
+    // breaks land where Chromium/Compose put them instead of where
+    // TextKit's push-out orphan avoidance moves them. Nil = no wrap
+    // geometry known → the legacy soft-wrap path, byte-identical.
+    var wrapWidth: CGFloat? = nil
+
     var body: some View {
         // Resolve the visible string: rawText wins when present (the IR
         // carried explicit element text content), otherwise fall back to
@@ -1618,6 +1700,52 @@ private struct PlaceholderLabel: View {
         let visibleText: String = {
             if let t = rawText, !t.isEmpty { return t }
             return name.replacingOccurrences(of: "_", with: " ")
+        }()
+        // Lane IOS wave 5 (finding 1) — text-transform is a STRING
+        // rewrite applied BEFORE the greedy break so measurement sees
+        // the exact glyphs that render (css-text-3 §2.1; case folds and
+        // titlecasing change advances). Previously only `capitalize`
+        // was folded here while uppercase/lowercase rode the box-level
+        // `.textCase` environment applied AFTER measurement — committed
+        // lines overflowed once rendered and TextKit re-broke them
+        // (push-out included). The `.textCase(nil)` on this label's own
+        // chain below suppresses the environment transform so measure
+        // and render share ONE string (mirror of Compose's
+        // placeholderDisplayText, which transforms before layout).
+        let transformedText = TextTransformApplier.renderString(
+            visibleText,
+            textCase: textConfig.textCase,
+            capitalize: textConfig.capitalizeWords)
+        // Lane IOS-TEXT fix 1 — greedy pre-break. Gated on: a known wrap
+        // width, wrapping not suppressed (white-space/text-wrap nowrap,
+        // css-text-4 §5.1), preserved-whitespace modes OFF (wave 5
+        // finding 3 — pre-wrap/break-spaces keep space runs per
+        // css-text-3 §4.1.2, and the space-split below would collapse
+        // them: a glyph-content rewrite; those modes take the legacy
+        // soft-wrap path), and a break opportunity existing at all.
+        let displayText: String = {
+            guard let cb = wrapWidth, !textConfig.noWrap,
+                  !textConfig.preservesSpaces,
+                  transformedText.contains(" ") else { return transformedText }
+            // Text width available inside the label: the content box
+            // minus the 4px breathing inset each side (dropped in WPT
+            // capture, mirroring the padding gate below) and the
+            // text-indent leading pad — both shrink the line box.
+            let avail = cb - (wptCaptureMode ? 0 : 8) - (textConfig.textIndentPx ?? 0)
+            guard avail > 0 else { return transformedText }
+            // Measure with the EXACT resolved render face + spacing so
+            // the fit test uses the advances TextKit renders with.
+            let lines = GreedyLineBreaker.lines(
+                text: transformedText,
+                maxWidth: avail,
+                measure: GreedyLineBreaker.measurer(
+                    font: measurementUIFont,
+                    letterSpacingPx: textConfig.letterSpacing,
+                    wordSpacingPx: textConfig.wordSpacingPx))
+            // Hard newlines force TextKit to OUR break positions — its
+            // push-out strategy only relocates SOFT breaks, and every
+            // pre-broken line fits `avail` by construction.
+            return lines.joined(separator: "\n")
         }()
         // TITAN Round 4 (GAP 1, height half) — the line-height this run
         // lays out with: the IR-declared value when present (defer to it),
@@ -1645,8 +1773,10 @@ private struct PlaceholderLabel: View {
         // the single-line box to the ref line box removes that drift. Text
         // that MAY wrap (any whitespace) is left to grow to N line boxes so
         // multi-line content (e.g. a full-sentence `<p>`) is never clipped.
-        let singleLineText = !visibleText.contains { $0.isWhitespace }
-        let textView = Text(visibleText)
+        // (Reads the DISPLAY string so a greedily pre-broken run — which
+        // contains \n — always counts as multi-line, same as before.)
+        let singleLineText = !displayText.contains { $0.isWhitespace }
+        let textView = wordSpacedText(displayText)
             .font(font)
         // SwiftUI's `.foregroundStyle` accepts ANY ShapeStyle including
         // LinearGradient, so when bg-clip:text is on we replace the
@@ -1658,12 +1788,58 @@ private struct PlaceholderLabel: View {
                 textView.foregroundColor(resolvedColor)
             }
         }
+            // Lane IOS wave 5 (finding 1) — suppress the box-level
+            // `.textCase` environment for this label's own Text: the
+            // transform is already folded into the STRING above (so the
+            // greedy measurement saw the rendered glyphs), and letting
+            // the environment re-case the run would leave nothing for
+            // measure/render to disagree on only by accident. Innermost
+            // environment write wins over TypographyApplier's
+            // TextCaseMod; an INHERITED text-transform still reaches
+            // this label through the merged property list → TextConfig,
+            // so no declared transform is ever dropped.
+            .textCase(nil)
+            // Wave-5 gate follow-up (decoration ownership) — suppress
+            // the PLATFORM built-in underline/strikethrough on this
+            // label's own Text when (and only when) the owned overlay
+            // below draws them: the built-ins are ~1px lines at
+            // platform offsets (the device gate measured Underline
+            // 0.809 / UnderOver 0.740 / Triple 0.737 against Chromium's
+            // 2px bands) and double-drawing would smear both. The
+            // box-level UnderlineMod/StrikethroughMod (TypographyApplier)
+            // still fire from the SAME aggregate flags — the innermost
+            // `.underline(false)`/`.strikethrough(false)` here wins for
+            // this Text only. Non-label Text paths (list markers, an
+            // ANCESTOR's propagated decoration reaching a child label
+            // whose own flags are false) keep the built-ins — CSS
+            // decoration propagation (css-text-decor-3 §2.1) still
+            // rides the box-level modifier for them.
+            .modifier(OwnedDecorationSuppressor(
+                underline: ownsUnderline,
+                strikethrough: ownsStrikethrough))
             // Fidelity wave 2 — text-shadow paints behind the GLYPHS
             // (css-text-decor-3 §4), so the `.shadow` chain attaches
             // right here on the text, before any frame/background can
             // widen the shadow caster. One call per CSS layer; SwiftUI
             // radius is the gaussian σ ≈ CSS blur-radius / 2.
             .modifier(GlyphShadows(layers: textConfig.shadows))
+            // Lane IOS wave 5 (finding 4) + wave-5 gate follow-up —
+            // `text-decoration-line` (css-text-decor-3 §2.1). The owned
+            // decoration pass: one Rectangle per rendered line per
+            // declared line (underline / overline / line-through), with
+            // Chromium-measured geometry (DecorationMetrics header for
+            // the capture-derived rows): width = the line's measured
+            // advance (the SAME measurer the greedy fit test used),
+            // y offsets = the empirical baseline-relative fractions,
+            // thickness = max(1, round(fontSize/11)). Attached HERE —
+            // before padding/frame modifiers — so the overlay's
+            // coordinate space is the text's own bounds, and painted
+            // AFTER the glyphs like the browser's decoration paint
+            // order (over-position lines paint over ink).
+            .overlay(alignment: .topLeading) {
+                decorationOverlay(displayText: displayText,
+                                  lineSpacing: leading.spacing)
+            }
             .multilineTextAlignment(textConfig.textAlign)
             // No hard line cap — let the text wrap to fit the available
             // width and rely on the parent box's height to clip overflow.
@@ -1790,12 +1966,31 @@ private struct PlaceholderLabel: View {
         // .rounded) — those paths legitimately want SF Pro variants.
         let size = textConfig.fontSize ?? 16
         var f: Font
+        // Lane IOS-TEXT fix 5 — when the §5.2 face pick lands, the
+        // weight is BAKED into the concrete face and `.weight()` must
+        // not run (it would hand the pick back to CoreText's heuristic).
+        var weightBaked = false
         if textConfig.fontDesign == .default {
-            f = .custom("Inter", size: size)
+            // css-fonts-4 §5.2 concrete-face selection over the installed
+            // Inter faces (Regular/Medium/Bold/Black in the harness):
+            // CoreText's `.weight()` nearest-face heuristic rounds DOWN
+            // at 600/800 (FontWeight_800 rendered Bold-visual) while
+            // Chromium and Compose select the next face UP — §5.2's
+            // ">500: heavier weights first, ascending" clause.
+            if let n = textConfig.fontWeightNumeric,
+               let face = FontFaceMatcher.faceName(family: "Inter",
+                                                   desiredWeight: n) {
+                f = .custom(face, size: size)
+                weightBaked = true
+            } else {
+                // No numeric weight / family not registered (unit-test
+                // bundle) → the legacy Regular + `.weight()` path.
+                f = .custom("Inter", size: size)
+            }
         } else {
             f = Font.system(size: size, design: textConfig.fontDesign)
         }
-        if let w = textConfig.fontWeight { f = f.weight(w) }
+        if !weightBaked, let w = textConfig.fontWeight { f = f.weight(w) }
         if textConfig.fontItalic { f = f.italic() }
         // Fidelity wave 2 — `font-variant-caps: small-caps` composes on
         // the label's own font. The box-level FontMod can't reach this
@@ -1803,6 +1998,221 @@ private struct PlaceholderLabel: View {
         // so the caps variant must be baked in here (Typography_C06).
         if textConfig.smallCaps { f = f.smallCaps() }
         return f
+    }
+
+    // MARK: - Lane IOS-TEXT helpers
+
+    /// The UIKit twin of `font` above — the EXACT face the label renders
+    /// with, used by the greedy pre-break's measurement lane so fit
+    /// tests and rendering share one set of glyph advances (fix 1).
+    private var measurementUIFont: UIFont {
+        // Same 16pt web-body default as `font`.
+        let size = textConfig.fontSize ?? 16
+        if textConfig.fontDesign == .default {
+            // §5.2 face pick first (fix 5), mirroring `font` exactly.
+            if let n = textConfig.fontWeightNumeric,
+               let face = FontFaceMatcher.faceName(family: "Inter",
+                                                   desiredWeight: n),
+               let f = UIFont(name: face, size: size) {
+                return f
+            }
+            // Regular Inter when registered (harness app process).
+            if let f = UIFont(name: "Inter", size: size) { return f }
+        }
+        // System fallback: weight + generic-family design mapped onto
+        // the SF descriptor — the same face `Font.system(size:design:)`
+        // resolves to, so measurement still matches rendering.
+        var f = UIFont.systemFont(ofSize: size,
+                                  weight: Self.uiKitWeight(textConfig.fontWeight))
+        if let d = Self.uiKitDesign(textConfig.fontDesign),
+           let desc = f.fontDescriptor.withDesign(d) {
+            f = UIFont(descriptor: desc, size: size)
+        }
+        // Italic composes on the descriptor like `.italic()` does.
+        if textConfig.fontItalic,
+           let desc = f.fontDescriptor.withSymbolicTraits(.traitItalic) {
+            f = UIFont(descriptor: desc, size: size)
+        }
+        return f
+    }
+
+    /// SwiftUI Font.Weight → UIFont.Weight (identical 9-step ladders).
+    private static func uiKitWeight(_ w: Font.Weight?) -> UIFont.Weight {
+        switch w {
+        case .ultraLight: return .ultraLight
+        case .thin:       return .thin
+        case .light:      return .light
+        case .medium:     return .medium
+        case .semibold:   return .semibold
+        case .bold:       return .bold
+        case .heavy:      return .heavy
+        case .black:      return .black
+        default:          return .regular   // nil / .regular → regular
+        }
+    }
+
+    /// SwiftUI Font.Design → UIFontDescriptor.SystemDesign (nil for
+    /// `.default` — the plain SF face needs no descriptor rewrite).
+    private static func uiKitDesign(_ d: Font.Design) -> UIFontDescriptor.SystemDesign? {
+        switch d {
+        case .serif:      return .serif
+        case .monospaced: return .monospaced
+        case .rounded:    return .rounded
+        default:          return nil
+        }
+    }
+
+    /// Lane IOS-TEXT fix 2 / wave 5 (findings 2 + 6) — the Text view for
+    /// `displayText`, with CSS `word-spacing` applied as an
+    /// AttributedString `.kern` on each word separator — SPACE and NBSP
+    /// (css-text-3 §8.1: word-spacing ADDS to each word-separator's
+    /// advance, and NBSP is a word separator; kern after a glyph is
+    /// exactly that advance adjustment). When letter-spacing is ALSO
+    /// declared, the box-level `.tracking()` would SUPPRESS these kerns
+    /// (SwiftUI documents tracking as overriding kerning on a Text), so
+    /// TypographyApplier skips the TrackingMod in that combination and
+    /// the letter-spacing is baked here as `.kern` on EVERY character
+    /// (separators get letter + word) — the exact attribute model
+    /// `GreedyLineBreaker.measurer` fits with, so measurement and render
+    /// share one spacing model. Identity `Text(String)` when no
+    /// word-spacing is in effect, keeping every existing render
+    /// byte-stable. The attribute construction lives in
+    /// `WordSpacingApplier.kernedRun` (pure, XCTest-pinned).
+    private func wordSpacedText(_ s: String) -> Text {
+        // nil = nothing for the kern lane to do (letter-spacing alone
+        // stays on the legacy box-level tracking) → plain-string Text.
+        guard let attr = WordSpacingApplier.kernedRun(
+            text: s,
+            letterSpacingPx: textConfig.letterSpacing,
+            wordSpacingPx: textConfig.wordSpacingPx) else { return Text(s) }
+        return Text(attr)
+    }
+
+    /// Wave-5 gate follow-up — does the owned overlay draw the
+    /// underline for this label? Requires the flag AND a solid
+    /// decoration style: dashed/dotted/wavy/double keep the platform
+    /// built-in (its pattern rendering is closer to web than a solid
+    /// owned rect would be), so those paths lose nothing.
+    private var ownsUnderline: Bool {
+        textConfig.underline && textConfig.decorationStyle == .solid
+    }
+
+    /// Same ownership rule for line-through (see ownsUnderline).
+    private var ownsStrikethrough: Bool {
+        textConfig.strikethrough && textConfig.decorationStyle == .solid
+    }
+
+    /// Lane IOS wave 5 (finding 4) + wave-5 gate follow-up — the
+    /// per-line decoration overlay, now owning ALL THREE decoration
+    /// lines. EmptyView unless a decoration the overlay owns was
+    /// declared, so every other render is byte-identical. Geometry:
+    /// the display string's hard-broken lines (a non-pre-broken label
+    /// is a single line — covered by the same measurer, per the lane
+    /// prescription), each line's inked width from the SAME TextKit
+    /// measurer the greedy fit test used, line top = index × (content
+    /// line height + CSS inter-line spacing) — exactly the advance
+    /// `.lineSpacing` makes TextKit lay out — and the per-kind y
+    /// offsets from DecorationMetrics (the Chromium-capture oracle,
+    /// anchored on the render face's own ascent so the geometry is
+    /// font-metric-parameterized, not hardcoded to 22px). Color:
+    /// text-decoration-color when declared, else the resolved text
+    /// color (css-text-decor-3 §2.2 initial `currentColor`).
+    @ViewBuilder
+    private func decorationOverlay(displayText: String,
+                                   lineSpacing: CGFloat) -> some View {
+        if textConfig.overline || ownsUnderline || ownsStrikethrough {
+            // The rendered lines this label draws (pre-broken runs carry
+            // hard \n breaks; everything else is one visual line).
+            let lines = displayText.components(separatedBy: "\n")
+            // One un-ownable case: a multi-word run that was NOT
+            // pre-broken (unknown wrap width, or a preserved-whitespace
+            // mode gating the pre-break off) MAY still soft-wrap under a
+            // narrower proposal, and this overlay cannot see TextKit's
+            // soft breaks. Surfaced via logOnce — no silent drop — and
+            // painted best-effort (the dominant case, fit-content
+            // hugging, never soft-wraps).
+            let softWrapUnknown = !textConfig.noWrap && lines.count == 1
+                && lines[0].contains(" ")
+                && (wrapWidth == nil || textConfig.preservesSpaces)
+            let _ = softWrapUnknown && PropertyTracker.logOnce(
+                key: "decoration-softwrap-\(name)",
+                message: "text-decoration: line geometry unknown for a "
+                    + "soft-wrappable un-pre-broken run — overlay assumes "
+                    + "a single line")
+            // Same face + spacing as the render → identical advances.
+            let segs = DecorationMetrics.segments(
+                lines: lines,
+                fontSizePx: textConfig.fontSize ?? 16,
+                measure: GreedyLineBreaker.measurer(
+                    font: measurementUIFont,
+                    letterSpacingPx: textConfig.letterSpacing,
+                    wordSpacingPx: textConfig.wordSpacingPx))
+            // Line ADVANCE = rendered content height + the CSS leading
+            // split's between-lines extra (the label's `.lineSpacing`).
+            let advance = measurementUIFont.lineHeight + lineSpacing
+            // Baseline anchor: the RENDER face's ascent — the same
+            // number TextKit lays glyphs out with, so the empirical
+            // baseline-relative offsets track any font/size.
+            let ascent = measurementUIFont.ascender
+            // The decoration fractions scale with the declared size
+            // (16 = the label's web-body default, see `font`).
+            let fontSize = textConfig.fontSize ?? 16
+            // §2.2: decoration-color, initial currentColor → text color.
+            let color = textConfig.decorationColor ?? resolvedColor
+            ZStack(alignment: .topLeading) {
+                ForEach(segs, id: \.index) { seg in
+                    // This line box's top edge in the text's own space.
+                    let lineTop = CGFloat(seg.index) * advance
+                    // css-text-decor-3 §2.1 — each declared line paints
+                    // independently at its own measured offset.
+                    if textConfig.overline {
+                        decorationRow(seg, color: color, y: lineTop
+                            + DecorationMetrics.overlineTop(fontSizePx: fontSize))
+                    }
+                    if ownsStrikethrough {
+                        decorationRow(seg, color: color, y: lineTop
+                            + DecorationMetrics.lineThroughTop(
+                                ascentPx: ascent, fontSizePx: fontSize))
+                    }
+                    if ownsUnderline {
+                        decorationRow(seg, color: color, y: lineTop
+                            + DecorationMetrics.underlineTop(
+                                ascentPx: ascent, fontSizePx: fontSize))
+                    }
+                }
+            }
+        }
+    }
+
+    /// One decoration band: the segment's inked advance × the auto
+    /// thickness, aligned to its line by the CSS text-align keyword and
+    /// offset to the kind's measured row (y is relative to the text's
+    /// top-leading corner; negative for a first-line overline, which
+    /// hangs above the line box like Chromium's ink-overflow paint).
+    private func decorationRow(_ seg: DecorationMetrics.Segment,
+                               color: Color, y: CGFloat) -> some View {
+        Rectangle()
+            .fill(color)
+            // The band: this line's inked advance × the measured auto
+            // thickness (max(1, round(fontSize/11)) — DecorationMetrics).
+            .frame(width: seg.width, height: seg.thickness)
+            // Horizontal placement: shorter lines sit where
+            // `.multilineTextAlignment` puts them, so each row spans
+            // the text bounds and aligns its rect by the same keyword.
+            .frame(maxWidth: .infinity, alignment: decorationRowAlignment)
+            // Vertical placement: the kind's measured row.
+            .offset(y: y)
+    }
+
+    /// The overlay-row alignment mirroring CSS text-align — the same
+    /// keyword `.multilineTextAlignment` positions the glyph lines with,
+    /// so each decoration rect tracks its own line horizontally.
+    private var decorationRowAlignment: Alignment {
+        switch textConfig.textAlign {
+        case .center:   return .center
+        case .trailing: return .trailing
+        case .leading:  return .leading
+        }
     }
 
     private var resolvedColor: Color {
@@ -1825,6 +2235,37 @@ private struct PlaceholderLabel: View {
                 : Color(white: 0.93).opacity(0.7)
         }
         return Color(white: 0.93).opacity(0.7)
+    }
+}
+
+/// Wave-5 gate follow-up (decoration ownership) — turns OFF the
+/// platform's built-in underline/strikethrough for the label's own Text
+/// when the owned Rectangle overlay draws those lines instead. SwiftUI's
+/// `.underline(_:)`/`.strikethrough(_:)` are text-styling writes where
+/// the value CLOSEST to the Text wins (the same innermost-wins rule the
+/// label already relies on for `.textCase(nil)`), so an explicit `false`
+/// here beats the box-level UnderlineMod/StrikethroughMod that
+/// TypographyApplier attaches from the same aggregate flags. Identity
+/// when neither line is owned — an ancestor's PROPAGATED decoration
+/// (css-text-decor-3 §2.1 reaches descendant Texts through the ancestor
+/// box's modifier) and every non-label Text keep their built-ins.
+private struct OwnedDecorationSuppressor: ViewModifier {
+    /// True = the owned overlay draws the underline → kill the built-in.
+    let underline: Bool
+    /// True = the owned overlay draws the line-through → kill built-in.
+    let strikethrough: Bool
+    func body(content: Content) -> some View {
+        // Conditional chain: only the OWNED lines are suppressed, so a
+        // label owning just an underline keeps e.g. an ancestor's
+        // propagated strikethrough built-in. AnyView keeps the two
+        // independent conditions from exploding the generic signature.
+        var v = AnyView(content)
+        // Explicit inactive underline write — innermost wins over the
+        // box-level `.underline(true, …)`.
+        if underline { v = AnyView(v.underline(false)) }
+        // Explicit inactive strikethrough write — same rule.
+        if strikethrough { v = AnyView(v.strikethrough(false)) }
+        return v
     }
 }
 

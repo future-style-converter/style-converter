@@ -16,12 +16,20 @@ export function isFontSizeProperty(type: string): type is FontSizePropertyType {
 
 // Per-family parse routine — returns the CSS value string (or undefined to drop).
 function parse(data: unknown): string | number | undefined {
-  // FontSize flavours (see FontSizePropertyParser.kt):
+  // FontSize flavours (see FontSizePropertyParser.kt + FontSizeSerializer in
+  // FontSizeProperty.kt — the serializer is the authority on the wire shape):
   //   { px:N, original:{...} }                     — resolved length
   //   { original: { keyword:'large', type:'absolute' } }  — keyword
   //   { original: { keyword:'larger', type:'relative' } } — relative keyword
   //   { original: { expr:'calc(...)', type:'expression' } } — calc
-  // Prefer keyword (preserves intent) then calc, then px.
+  //   { original: { type:'length', original:{v,u} } }  — RELATIVE length
+  //     (em/rem/…): IRLengthSerializer omits the top-level px when the unit
+  //     is not absolute AND deep-flattens the IRLength wire directly into
+  //     the envelope (live shape verified against ./gradlew :converter:run
+  //     output for `font-size: 1.5em` — there is NO `value` key on the wire).
+  //   { original: { type:'percentage', value:N } }  — <percentage> of parent size
+  // Prefer keyword (preserves intent), then calc, then relative length /
+  // percentage (which have NO px to fall back to), then px.
   if (data && typeof data === 'object') {                            // envelope guard
     const o = data as Record<string, unknown>;
     const orig = o.original as Record<string, unknown> | undefined;
@@ -34,6 +42,23 @@ function parse(data: unknown): string | number | undefined {
         // corrupt keyword-valued tokens and break the preservation contract.
         if (isWholeVarExpression(raw)) return raw;
         return raw.startsWith('calc(') ? raw : `calc(${raw})`;
+      }
+      // Relative <length> (css-fonts-4 §3.1): the LIVE serializer deep-flattens
+      // the IRLength wire INTO the envelope — `{type:'length', original:{v,u}}`
+      // — so the {v,u} pair sits under `orig.original` (no `value` key; verified
+      // against real converter output for `font-size: 1.5em`). Keep `orig.value`
+      // as a fallback for the older nested shape so pre-flatten IR still renders.
+      // Re-emit the ORIGINAL CSS token ('1.5rem' / '2em') via the shared length
+      // alphabet — Chromium resolves relative units natively, keeping the
+      // reference honest vs. the natives.
+      if (orig.type === 'length') {
+        const css = lengthCss(orig.original ?? orig.value);          // live flattened wire, then legacy nesting
+        if (css !== undefined) return css;                           // unrecognised inner → try px below
+      }
+      // <percentage> (css-fonts-4 §3.1): percentage of the PARENT element's
+      // computed font size — only the browser can resolve it, so pass '<N>%'.
+      if (orig.type === 'percentage' && typeof orig.value === 'number') {
+        return `${orig.value}%`;                                     // e.g. 120 → '120%'
       }
     }
     if (typeof o.px === 'number') return `${o.px}px`;                // resolved length

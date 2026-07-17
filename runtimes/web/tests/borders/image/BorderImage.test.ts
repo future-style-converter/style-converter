@@ -83,6 +83,29 @@ describe('BorderImageSlice', () => {
       }),
     ]))).toEqual({ borderImageSlice: '10 20 30 40' });
   });
+  it('appends the fill keyword when IR carries fill=true', () => {
+    // css-backgrounds-3 §6.1 grammar: `<number-percentage>{1,4} && fill?` —
+    // the trailing token preserves the middle region. Previously dropped, so
+    // the web reference painted no center while both natives correctly did.
+    expect(applyBorderImageSlice(extractBorderImageSlice([
+      p('BorderImageSlice', {
+        top: { type: 'number', value: 10 }, right: { type: 'number', value: 20 },
+        bottom: { type: 'number', value: 30 }, left: { type: 'number', value: 40 },
+        fill: true,
+      }),
+    ]))).toEqual({ borderImageSlice: '10 20 30 40 fill' });
+  });
+  it('omits the fill keyword when IR carries fill=false', () => {
+    // Explicit fill:false (the IR default, BorderImageSliceProperty.kt) must
+    // NOT emit the token — bare quad only.
+    expect(applyBorderImageSlice(extractBorderImageSlice([
+      p('BorderImageSlice', {
+        top: { type: 'percentage', value: 25 }, right: { type: 'percentage', value: 25 },
+        bottom: { type: 'percentage', value: 25 }, left: { type: 'percentage', value: 25 },
+        fill: false,
+      }),
+    ]))).toEqual({ borderImageSlice: '25% 25% 25% 25%' });
+  });
 });
 
 describe('BorderImageWidth', () => {

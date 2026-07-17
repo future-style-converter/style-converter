@@ -107,6 +107,20 @@ enum TypographyExtractor {
             agg.lineHeightPx = mult * (agg.fontSizePx ?? 16)
         }
 
+        // Lane IOS-TEXT fix 3 — resolve em/rem letter/word-spacing now
+        // that the element's COMPUTED font size is known (css-values-4
+        // §6.1: em on a non-font-size property refers to the element's
+        // own font size; rem to the 16px harness root — the same bases
+        // Compose's extractLetterSpacing workaround uses). Runs BEFORE
+        // the font-size-adjust scale below because em tracks the
+        // computed size, not the adjust-scaled USED size (§4.6).
+        if let rel = agg.letterSpacingRelative {
+            agg.letterSpacingPx = rel.value * (rel.isRem ? 16 : (agg.fontSizePx ?? 16))
+        }
+        if let rel = agg.wordSpacingRelative {
+            agg.wordSpacingPx = rel.value * (rel.isRem ? 16 : (agg.fontSizePx ?? 16))
+        }
+
         // Fidelity wave 2 — `font-size-adjust` (css-fonts-4 §4.6): the
         // used font size is scaled so the chosen metric hits the
         // requested ratio: used = size × value / metricRatio(font).

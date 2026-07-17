@@ -156,8 +156,11 @@ export function borderImageRepeatToCss(v: { horizontal: string; vertical: string
 export function emitSource(v?: BorderImageSourceValue): Partial<CSSProperties> {
   return v ? { borderImageSource: borderImageSourceToCss(v) } : {};
 }
-export function emitSlice(v?: QuadEdge): Partial<CSSProperties> {
-  return v ? { borderImageSlice: quadToCss(v) } : {};
+// Slice additionally takes the optional `fill` keyword (css-backgrounds-3
+// §6.1 grammar: `<number-percentage>{1,4} && fill?`) — appended as a trailing
+// token so the browser preserves the middle region like the native runtimes.
+export function emitSlice(v?: QuadEdge, fill?: boolean): Partial<CSSProperties> {
+  return v ? { borderImageSlice: fill ? `${quadToCss(v)} fill` : quadToCss(v) } : {};
 }
 export function emitWidth(v?: QuadEdge): Partial<CSSProperties> {
   return v ? { borderImageWidth: quadToCss(v) } : {};

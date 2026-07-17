@@ -37,7 +37,21 @@ struct TypographyApplier: ViewModifier {
     private func apply(to content: Content, agg: TypographyAggregate) -> some View {
         content
             .modifier(FontMod(agg: agg))
-            .modifier(TrackingMod(px: agg.letterSpacingPx))
+            // Lane IOS wave 5 (finding 2) — when word-spacing is ALSO in
+            // effect, letter-spacing must NOT ride the box-level
+            // `.tracking()`: SwiftUI documents tracking as OVERRIDING
+            // kerning on the same Text, so the label's per-space `.kern`
+            // (the word-spacing render vehicle) was silently suppressed
+            // and word-spacing became a no-op while the greedy measurer
+            // still added both — measure and render disagreed. In that
+            // combination PlaceholderLabel bakes letter-spacing as
+            // `.kern` on EVERY character instead (spaces get
+            // letter+word, css-text-3 §8.1/§8.2 both add to the
+            // advance), the exact model the measurer already uses — so
+            // the box tracking is skipped to let the kern attributes
+            // paint. Letter-spacing alone keeps the legacy tracking.
+            .modifier(TrackingMod(px: agg.wordSpacingPx != nil
+                                      ? nil : agg.letterSpacingPx))
             .modifier(BaselineMod(px: agg.baselineOffsetPx))
             .modifier(LineSpacingMod(agg: agg))
             .modifier(MultilineAlignMod(alignment: agg.textAlign))

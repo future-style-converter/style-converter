@@ -13,6 +13,9 @@ enum FontWeightApplier {
         // Guard against accidental nil overwrite from a later empty pass.
         guard let w = cfg?.weight else { return }
         agg.fontWeight = w
+        // Lane IOS-TEXT fix 5 — the raw numeric weight rides along for
+        // the css-fonts-4 §5.2 concrete-face pick in PlaceholderLabel.
+        agg.fontWeightNumeric = cfg?.numeric
         agg.touched = true
     }
 }

@@ -99,6 +99,51 @@ struct TextConfig {
     // (css-text-decor-3 §4). One `.shadow(...)` per layer chains onto
     // the label's Text; the old box-level shadow haloed the container.
     var shadows: [TextShadowLayer] = []
+    // Lane IOS-TEXT fix 2 — `word-spacing` in points. PlaceholderLabel
+    // renders it as an AttributedString `.kern` on each space character
+    // (css-text-3 §8.1); it must ride TextConfig because the label owns
+    // its own Text (a box-level modifier can't reach glyph runs).
+    var wordSpacingPx: CGFloat?   = nil
+    // Lane IOS-TEXT fix 6 — `text-transform: capitalize`. SwiftUI's
+    // Text.Case has no member for it, so PlaceholderLabel titlecases
+    // each word at the string level (TextTransformApplier.capitalizeWords).
+    var capitalizeWords: Bool     = false
+    // Lane IOS-TEXT fix 5 — the raw numeric font-weight for the
+    // css-fonts-4 §5.2 concrete-face pick (FontFaceMatcher): CoreText's
+    // `.weight()` nearest-face heuristic rounds DOWN at 600/800 on the
+    // 4-face Inter family while Chromium/Compose round up.
+    var fontWeightNumeric: Int?   = nil
+    // Lane IOS wave 5 (finding 1) — `text-transform: uppercase|lowercase`
+    // as a RENDER value. PlaceholderLabel folds it into the string BEFORE
+    // the greedy pre-break measures it (the transform changes advances;
+    // measuring the untransformed string committed lines that overflowed
+    // once the box-level `.textCase` uppercased them and TextKit re-broke
+    // with push-out) and suppresses `.textCase` on its own Text so
+    // measure and render share one string. nil = no case transform.
+    var textCase: Text.Case?      = nil
+    // Lane IOS wave 5 (finding 3) — `white-space: pre|pre-wrap|
+    // break-spaces` preserves space runs (css-text-3 §4.1.2). Gates the
+    // greedy pre-break OFF: its space-split would collapse preserved
+    // runs — a glyph-content rewrite the spec forbids.
+    var preservesSpaces: Bool     = false
+    // Lane IOS wave 5 (finding 4) — `text-decoration-line: overline`
+    // (css-text-decor-3 §2.1). SwiftUI Text has no overline API, so
+    // PlaceholderLabel overlays one Rectangle per rendered line at the
+    // line-box top, mirroring Compose's overlineSegments geometry (the
+    // android↔ios pair is what the harness compares).
+    var overline: Bool            = false
+    // Lane IOS wave 5 (finding 4) — `text-decoration-color`, the paint
+    // for the owned decoration rectangles (css-text-decor-3 §2.2:
+    // initial value currentColor → falls back to the resolved text
+    // color when nil).
+    var decorationColor: Color?   = nil
+    // Wave-5 gate follow-up (decoration ownership) —
+    // `text-decoration-style` (css-text-decor-3 §2.3). The owned
+    // underline/line-through rectangles engage ONLY for `solid`;
+    // dashed/dotted/wavy/double keep the platform built-ins (their
+    // pattern rendering beats a solid owned rect), so the label needs
+    // the style to decide ownership.
+    var decorationStyle: TextDecorationPattern = .solid
 }
 
 struct EffectConfig {
@@ -322,6 +367,32 @@ enum StyleBuilder {
             s.text.noWrap = agg.noWrap
             s.text.smallCaps = agg.smallCaps
             s.text.shadows = agg.textShadowLayers
+            // Lane IOS-TEXT bridges — word-spacing render value (fix 2,
+            // includes the em/rem-resolved lane), the capitalize flag
+            // (fix 6), and the raw numeric weight for the §5.2 face
+            // pick (fix 5). All glyph-level state PlaceholderLabel owns.
+            s.text.wordSpacingPx = agg.wordSpacingPx
+            s.text.capitalizeWords = agg.capitalizeWords
+            s.text.fontWeightNumeric = agg.fontWeightNumeric
+            // Lane IOS wave 5 (finding 1) — flatten the aggregate's
+            // two-level textCase (outer nil = inherit, inner nil =
+            // explicit `none`) into the label's render value: both nil
+            // states mean "no case rewrite here" (an INHERITED transform
+            // arrives through the merged property list, so the child's
+            // own aggregate carries it — see InheritedText.inheritedTypes).
+            if case .some(let inner) = agg.textCase { s.text.textCase = inner }
+            // Lane IOS wave 5 (finding 3) — preserved-whitespace gate
+            // for the greedy pre-break (css-text-3 §4.1.2).
+            s.text.preservesSpaces = agg.preservesSpaces
+            // Lane IOS wave 5 (finding 4) — overline flag + decoration
+            // color for the label's per-line Rectangle overlay
+            // (css-text-decor-3 §2.1/§2.2).
+            s.text.overline = agg.overline
+            s.text.decorationColor = agg.decorationColor
+            // Wave-5 gate follow-up — decoration style gates the OWNED
+            // underline/line-through pass (solid only; §2.3 patterns
+            // keep the platform built-ins, see TextConfig).
+            s.text.decorationStyle = agg.decorationStyle
             // Generic-family bridge. Ordering mirrors FontMod.design(for:):
             // rounded > monospaced > serif > default. PlaceholderLabel uses
             // this to call `.system(size:design:)` so the design survives
@@ -706,6 +777,25 @@ extension View {
             // so backgrounds/borders cover the floored area; top-leading
             // matches the block-flow origin on the other platforms.
             .modifier(MinBoxFloor(size: style.size))
+            // Phase 5's bottom layer, attached FIRST — border-image
+            // (IOS-BI paint-order fix). The nine-slice Canvas hangs off
+            // a `.background`, and SwiftUI stacks `.background` calls so
+            // each LATER call paints UNDER the earlier ones (every call
+            // wraps the previous result and slots behind it) while ALL
+            // of them stay behind the content itself. Attaching border-
+            // image before every engineBackground* call therefore makes
+            // it the TOPMOST background layer: above the whole background
+            // chain, beneath the element's own text — the CSS order
+            // (css-backgrounds-3 §6 draws the image "in place of the
+            // border"; CSS2 Appendix E paints borders after backgrounds,
+            // before content). The old `.overlay` attachment down in
+            // Phase 5 painted ABOVE content, so a slice-`fill` center
+            // covered the label web/Android keep on top. Layout size at
+            // this point equals the old Phase 5 spot — the intervening
+            // engineBackground* modifiers never change geometry — and
+            // the §6.4 outset still paints outside the host bounds
+            // because neither `.background` nor Canvas clips draws.
+            .engineBorderImage(style.borderImage)
             // Phase 4 — painting chain. Order (from innermost outward):
             //   1. BackgroundImage: gradients sit behind solid colour so
             //      a BackgroundColor with translucency can tint them.
@@ -759,11 +849,12 @@ extension View {
             .engineBackgroundAttachment(style.backgroundAttachment)
             .engineBackgroundSize(style.backgroundSize)
             .engineBackgroundPosition(style.backgroundPosition)
-            // Phase 5 — border family. Order: image (bottom) → radius
-            // clip → sides stroke → outline (outside box) → shadow
-            // (stacked outside). BoxShadow comes last so `.shadow(...)`
-            // stacks on the fully-painted element.
-            .engineBorderImage(style.borderImage)
+            // Phase 5 — border family. Order: image (bottom — attached
+            // up before the background chain so its `.background` paints
+            // above backgrounds yet beneath content, see the IOS-BI note
+            // there) → radius clip → sides stroke → outline (outside
+            // box) → shadow (stacked outside). BoxShadow comes last so
+            // `.shadow(...)` stacks on the fully-painted element.
             .engineBorderRadius(style.borderRadius)
             // currentColor (CSS Backgrounds 3 §3.2): a border side with a
             // style but no colour inherits the element's own `color` —
