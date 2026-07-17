@@ -64,6 +64,35 @@ struct CaptureCanvas: View {
         rootContainingBlock: Double(width - padding * 2)
     )
 
+    /// IR inset property types per axis — the physical sides plus their
+    /// LTR/horizontal-tb logical resolutions (the runtime's
+    /// PositionExtractor maps InsetInlineStart→left, InsetBlockStart→top,
+    /// … the same way), so a logical-inset fixture anchors identically to
+    /// its physical twin. Kept in sync with Android's
+    /// Horizontal/VerticalInsetTypes in ScreenshotCaptureScreen.kt.
+    static let horizontalInsetTypes: Set<String> =
+        ["Left", "Right", "InsetInlineStart", "InsetInlineEnd"]
+    static let verticalInsetTypes: Set<String> =
+        ["Top", "Bottom", "InsetBlockStart", "InsetBlockEnd"]
+
+    /// True when the out-of-flow capture subject declares ANY horizontal
+    /// inset. Per CSS 2.1 §10.3.7, `left`/`right` both `auto` keeps an
+    /// absolutely positioned box at its STATIC inline position, so the
+    /// canvas must NOT re-anchor it at the padding edge on that axis.
+    /// Presence-based approximation: an explicit `left: auto` IR property
+    /// would count as an inset here — accepted, since no fixture declares
+    /// an auto inset explicitly (Chromium treats it as all-auto).
+    static func hasHorizontalInset(_ component: IRComponent) -> Bool {
+        component.properties.contains { horizontalInsetTypes.contains($0.type) }
+    }
+
+    /// Vertical twin of `hasHorizontalInset` (CSS 2.1 §10.6.4:
+    /// `top`/`bottom` both `auto` → static block position) — same
+    /// presence rule per axis.
+    static func hasVerticalInset(_ component: IRComponent) -> Bool {
+        component.properties.contains { verticalInsetTypes.contains($0.type) }
+    }
+
     var body: some View {
         // Fidelity wave 3 — a ROOT component that is itself absolutely
         // positioned (a per-child standalone crop of e.g. B_RelativeAnchor's
@@ -71,8 +100,13 @@ struct CaptureCanvas: View {
         // canvas's card treatment instead of the block-flow one:
         //   • the containing block is the card's PADDING box, whose origin
         //     is the card corner (the web canvas is `position: relative`
-        //     with no border — CSS 2.1 §10.1), so top/left offsets anchor
-        //     at (0,0) of the card, NOT inside the 16px content inset;
+        //     with no border — CSS 2.1 §10.1), so DECLARED top/left offsets
+        //     anchor at (0,0) of the card, NOT inside the 16px content inset;
+        //   • PER-AXIS auto-inset rule (CSS 2.1 §10.3.7 / §10.6.4): an axis
+        //     whose insets are ALL `auto` keeps the box at its STATIC
+        //     position — the content origin INSIDE the card padding
+        //     ((16,16), where Chromium leaves an all-auto box) — restored
+        //     below by padding that axis of the hosted component;
         //   • the card's flow height COLLAPSES to the padding band alone
         //     (out-of-flow boxes add no height — the web card measures
         //     exactly 2 × 16 = 32px for the `floating` crop);
@@ -81,30 +115,42 @@ struct CaptureCanvas: View {
         // Without this the iOS crop drew the box at content-origin +
         // offset on an unclipped tall card (wave-3 floating crop 0.833).
         if ComponentRenderer.isOutOfFlow(component) {
-            ZStack(alignment: .topLeading) {
-                // Collapsed flow: transparent strut fixes the card at the
-                // padding-band height (2 × 16) and full canvas width.
-                Color.clear
-                    .frame(width: CaptureCanvas.width,
-                           height: CaptureCanvas.padding * 2)
-                // The component renders through the normal engine path —
-                // its own PositionApplier applies the top/left offsets
-                // from this ZStack's top-leading corner (card origin).
-                // v2: hosted so every component carries its placement
-                // parent-data (inert at root — no Layout parent here).
-                ComponentHost(component: component)
-            }
-            .frame(width: CaptureCanvas.width, alignment: .topLeading)
-            // Web canvas `overflow: hidden` parity.
-            .clipped()
-            .fixedSize(horizontal: false, vertical: true)
-            .background(CaptureCanvas.backgroundColor)
-            // #39: the harness supplies the capture geometry — the
-            // runtime no longer assumes a 390×844 canvas on its own.
-            .environment(\.styleViewport, CaptureCanvas.viewport)
-            // Wave 7 — the dynamic-styling capture hooks ride the same
-            // environment channel (see the block on the flow branch).
-            .modifier(DynamicCaptureHooks())
+            // Collapsed flow: the BASE view pins the card at the padding-band
+            // height (2 × 16) and full canvas width. The component rides an
+            // .overlay, which NEVER influences the base's size — unlike the
+            // previous ZStack, which adopts the max child size (an 80pt-tall
+            // component grew the card to 80pt and defeated the collapse).
+            Color.clear
+                .frame(width: CaptureCanvas.width,
+                       height: CaptureCanvas.padding * 2)
+                .overlay(alignment: .topLeading) {
+                    // The component renders through the normal engine path —
+                    // its own PositionApplier applies declared top/left
+                    // offsets from this overlay's top-leading corner (card
+                    // origin). v2: hosted so every component carries its
+                    // placement parent-data (inert at root — no Layout
+                    // parent here).
+                    ComponentHost(component: component)
+                        // Per-axis static-position rule: an all-auto axis
+                        // gets the 16pt canvas padding back so the box sits
+                        // at the content origin (its static position); an
+                        // axis with a declared inset stays anchored at the
+                        // card corner (padding edge) — offset 0 here.
+                        .padding(.leading, CaptureCanvas.hasHorizontalInset(component)
+                                 ? 0 : CaptureCanvas.padding)
+                        .padding(.top, CaptureCanvas.hasVerticalInset(component)
+                                 ? 0 : CaptureCanvas.padding)
+                }
+                // Web canvas `overflow: hidden` parity — clip whatever the
+                // overlaid component paints past the collapsed 390×32 card.
+                .clipped()
+                .background(CaptureCanvas.backgroundColor)
+                // #39: the harness supplies the capture geometry — the
+                // runtime no longer assumes a 390×844 canvas on its own.
+                .environment(\.styleViewport, CaptureCanvas.viewport)
+                // Wave 7 — the dynamic-styling capture hooks ride the same
+                // environment channel (see the block on the flow branch).
+                .modifier(DynamicCaptureHooks())
         } else {
         // Critical: explicit alignment on the outer frame.
         //

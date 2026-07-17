@@ -12,9 +12,11 @@
 //    §3.9 background-size  — cover / contain / auto / <length-percentage>
 //    §3.6 background-position — keyword/percent anchor: offset =
 //         (box − tile) × fraction; px offsets measure from the top/left
-//    §3.4 background-repeat — repeat/no-repeat per axis; `space` and
-//         `round` are approximated as plain repeat + one log (v1 —
-//         documented, never silent)
+//    §3.7 background-repeat — repeat/no-repeat/space/round per axis; the
+//         real space (whole tiles + equal gaps) and round (integer-count
+//         rescale) arithmetic lives in BackgroundTileMath (ported from
+//         the Compose runtime's BackgroundTileMath.kt), replacing the
+//         wave-8 "approximated as repeat" logOnce path
 //
 
 import Foundation
@@ -30,10 +32,11 @@ enum BackgroundImageGeometry {
         /// Top-left of the ANCHOR copy (the one background-position
         /// places; the repeat lattice extends from it in both directions).
         var origin: CGPoint
-        /// Tile along the x axis (repeat / space / round on that axis).
-        var repeatX: Bool
-        /// Tile along the y axis.
-        var repeatY: Bool
+        /// x-axis repeat mode (§3.7) — `round` may rescale the drawn
+        /// tile width when the lattice is enumerated (tileRects).
+        var repeatX: AxisRepeat
+        /// y-axis repeat mode.
+        var repeatY: AxisRepeat
     }
 
     // MARK: - Size (§3.9)
@@ -79,6 +82,26 @@ enum BackgroundImageGeometry {
         }
     }
 
+    /// Drawn size of one GRADIENT copy. Gradients have no intrinsic
+    /// dimensions or proportions, so §3.9 resolves `auto` to the
+    /// positioning area's axis, and cover/contain — both defined via the
+    /// (absent) intrinsic ratio — degenerate to the area as well. Only
+    /// explicit lengths/percents shrink or stretch the tile; an `auto`
+    /// axis inside an explicit pair is 100% of the area for the same
+    /// no-intrinsic-proportions reason (NOT the raster ratio-preserving
+    /// branch in `tileSize` above).
+    static func gradientTileSize(box: CGSize, size: BackgroundSizeLayer?) -> CGSize {
+        switch size ?? .auto {
+        case .auto, .cover, .contain:
+            // Intrinsic-less image: every keyword fills the area (§3.9).
+            return box
+        case .explicit(let w, let h):
+            // Per-axis resolution; auto falls back to the box axis.
+            return CGSize(width: resolveDim(w, boxAxis: box.width) ?? box.width,
+                          height: resolveDim(h, boxAxis: box.height) ?? box.height)
+        }
+    }
+
     // MARK: - Position (§3.6)
 
     /// Anchor-tile origin. Keyword/percent positions resolve as
@@ -120,25 +143,14 @@ enum BackgroundImageGeometry {
         }
     }
 
-    // MARK: - Repeat lattice (§3.4)
+    // MARK: - Repeat lattice (§3.7)
 
-    /// Repeat flags for one layer. `space`/`round` approximate to plain
-    /// repeat (logged once) — implementing their gap/rescale arithmetic
-    /// is deferred until a fixture exercises them.
-    static func repeatFlags(_ layer: BackgroundRepeatLayer?) -> (x: Bool, y: Bool) {
-        func axis(_ kw: String?) -> Bool {
-            switch (kw ?? "repeat").lowercased() {
-            case "no-repeat": return false
-            case "repeat":    return true
-            case "space", "round":
-                PropertyTracker.logOnce(
-                    key: "bg-repeat:\(kw ?? "")",
-                    message: "background-repeat '\(kw ?? "")' approximated as 'repeat' (wave-8 v1 — gap/rescale arithmetic deferred)")
-                return true
-            default:          return true // CSS initial is repeat
-            }
-        }
-        return (axis(layer?.x), axis(layer?.y))
+    /// Per-axis repeat modes for one layer (nil layer / axis = the CSS
+    /// initial `repeat`). The wave-8 "space/round approximated as
+    /// repeat" logOnce path is retired: BackgroundTileMath implements
+    /// the real §3.7 gap/rescale arithmetic these modes select.
+    static func repeatModes(_ layer: BackgroundRepeatLayer?) -> (x: AxisRepeat, y: AxisRepeat) {
+        (BackgroundTileMath.mode(layer?.x), BackgroundTileMath.mode(layer?.y))
     }
 
     /// Full placement for one layer.
@@ -149,7 +161,7 @@ enum BackgroundImageGeometry {
                           repeatLayer: BackgroundRepeatLayer?) -> Placement {
         let tile = tileSize(imageSize: imageSize, box: box, size: size)
         let anchor = origin(tile: tile, box: box, x: positionX, y: positionY)
-        let rep = repeatFlags(repeatLayer)
+        let rep = repeatModes(repeatLayer)
         return Placement(tileSize: tile, origin: anchor, repeatX: rep.x, repeatY: rep.y)
     }
 
@@ -158,45 +170,50 @@ enum BackgroundImageGeometry {
     /// switch to a shading-based fill above this (see the renderer).
     static let tileCap = 4096
 
-    /// Enumerate the tile rects covering `box`. The lattice extends from
-    /// the anchor origin in both directions on repeating axes (CSS tiles
-    /// infinitely; only the copies intersecting the paint area draw).
+    /// Enumerate the tile rects covering `box` as the cartesian product
+    /// of one BackgroundTileMath axis plan per axis (§3.7: each axis
+    /// tiles independently; `round` may rescale its axis's tile size).
+    /// `repeat` lattices extend past the box edges (CSS tiles infinitely
+    /// and clips to the painting area — PAINTERS must clip to the box).
     /// Truncated at `tileCap` (callers pre-check `tileCount`).
     static func tileRects(placement p: Placement, box: CGSize) -> [CGRect] {
         // Zero-sized tiles paint nothing (avoid an infinite lattice).
         guard p.tileSize.width > 0, p.tileSize.height > 0 else { return [] }
-        // First lattice coordinate ≤ 0 on each repeating axis.
-        func starts(anchor: CGFloat, tile: CGFloat, extent: CGFloat, repeats: Bool) -> [CGFloat] {
-            guard repeats else { return [anchor] }
-            // k = smallest integer with anchor + k·tile > −tile.
-            let k = ((-anchor - tile) / tile).rounded(.up)
-            var out: [CGFloat] = []
-            var v = anchor + k * tile
-            while v < extent {
-                if v + tile > 0 { out.append(v) }
-                v += tile
-                if out.count > tileCap { break } // hard stop — cap guard
-            }
-            return out
-        }
-        let xs = starts(anchor: p.origin.x, tile: p.tileSize.width, extent: box.width, repeats: p.repeatX)
-        let ys = starts(anchor: p.origin.y, tile: p.tileSize.height, extent: box.height, repeats: p.repeatY)
+        // Independent per-axis plans (§3.7 two-keyword grammar).
+        let px = BackgroundTileMath.axisPlan(area: box.width, tile: p.tileSize.width,
+                                             anchor: p.origin.x, mode: p.repeatX)
+        let py = BackgroundTileMath.axisPlan(area: box.height, tile: p.tileSize.height,
+                                             anchor: p.origin.y, mode: p.repeatY)
         var rects: [CGRect] = []
-        rects.reserveCapacity(min(xs.count * ys.count, tileCap))
-        for y in ys {
-            for x in xs {
-                rects.append(CGRect(x: x, y: y, width: p.tileSize.width, height: p.tileSize.height))
-                if rects.count >= tileCap { return rects }
+        rects.reserveCapacity(min(px.origins.count * py.origins.count, tileCap))
+        for y in py.origins {
+            for x in px.origins {
+                // Axis-plan tile sizes (not p.tileSize) so `round` on
+                // one axis rescales only that axis's extent.
+                rects.append(CGRect(x: x, y: y, width: px.tileSize, height: py.tileSize))
+                if rects.count >= tileCap { return rects } // hard stop — cap guard
             }
         }
         return rects
     }
 
-    /// Cheap tile-count estimate for the cap pre-check.
+    /// Cheap tile-count estimate for the cap pre-check — mirrors the
+    /// axisPlan counts without materializing the origin lists.
     static func tileCount(placement p: Placement, box: CGSize) -> Int {
         guard p.tileSize.width > 0, p.tileSize.height > 0 else { return 0 }
-        let nx = p.repeatX ? Int((box.width / p.tileSize.width).rounded(.up)) + 1 : 1
-        let ny = p.repeatY ? Int((box.height / p.tileSize.height).rounded(.up)) + 1 : 1
-        return nx * ny
+        func axis(_ area: CGFloat, _ tile: CGFloat, _ mode: AxisRepeat) -> Int {
+            switch mode {
+            // Single anchored copy.
+            case .noRepeat: return 1
+            // Phase shift adds at most one extra edge tile.
+            case .repeat:   return Int((area / tile).rounded(.up)) + 1
+            // Whole tiles only — but never below the single-tile fallback.
+            case .space:    return max(Int(floor(area / tile)), 1)
+            // Integer refit, never fewer than one tile.
+            case .round:    return max(Int((area / tile).rounded()), 1)
+            }
+        }
+        return axis(box.width, p.tileSize.width, p.repeatX)
+            * axis(box.height, p.tileSize.height, p.repeatY)
     }
 }

@@ -484,7 +484,7 @@
     },
     "PW_Background_Typography_01": {
       "properties": {
-        "background-repeat": "repeat-x no-repeat",
+        "background-repeat": "repeat-x",
         "background-position-y": "30%",
         "font-language-override": "normal",
         "text-emphasis-color": "rebeccapurple",

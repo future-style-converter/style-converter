@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.geometry.Offset
@@ -150,7 +151,7 @@ object ColorApplier {
                 // closure (which runs per frame) doesn't re-extract.
                 val brushes: List<Pair<androidx.compose.ui.graphics.Brush, androidx.compose.ui.graphics.BlendMode>> =
                     config.backgroundImages.mapIndexedNotNull { idx, image ->
-                        val brush = brushFor(image, config) ?: return@mapIndexedNotNull null
+                        val brush = brushFor(image) ?: return@mapIndexedNotNull null
                         val blend = blendModes.getOrNull(idx)
                             ?: androidx.compose.ui.graphics.BlendMode.SrcOver
                         brush to blend
@@ -248,14 +249,16 @@ object ColorApplier {
      * blend path always paints across the full draw rect anyway, so
      * we approximate via the non-repeating branch's size-aware shader).
      */
-    private fun brushFor(image: BackgroundImageConfig, config: ColorConfig): Brush? {
+    private fun brushFor(image: BackgroundImageConfig): Brush? {
         return when (image) {
+            // Gradient brushes take no background-position: position moves
+            // the tile (css-backgrounds-3 §3.6), never the shader inside it.
             is BackgroundImageConfig.LinearGradient ->
-                createLinearGradientBrush(image, config.backgroundPosition, TileMode.Clamp)
+                createLinearGradientBrush(image, TileMode.Clamp)
             is BackgroundImageConfig.RadialGradient ->
-                createRadialGradientBrush(image, config.backgroundPosition, TileMode.Clamp)
+                createRadialGradientBrush(image, TileMode.Clamp)
             is BackgroundImageConfig.ConicGradient ->
-                createSweepGradientBrush(image, config.backgroundPosition)
+                createSweepGradientBrush(image)
             is BackgroundImageConfig.Url -> null
             is BackgroundImageConfig.None -> null
         }
@@ -282,11 +285,11 @@ object ColorApplier {
         // For NON-repeating gradients we always want TileMode.Clamp regardless
         // of background-repeat. CSS background-repeat only re-tiles a gradient
         // when an explicit background-size makes the tile smaller than the
-        // box; that pathway isn't wired into the gradient brushes here, so
-        // honouring `repeat` would mis-tile the gradient inside its own
-        // arbitrary brush-coordinate space (see createLinearGradientBrush()'s
-        // hard-coded gradientLength=1000) and produce wrap-around colour
-        // bands rather than the single fill CSS specifies.
+        // box; that pathway is handled by the sized-tile drawBehind branch
+        // below (tile-pinned shader + BackgroundTileMath plans), so honouring
+        // `repeat` at the SHADER level too would double-tile the gradient and
+        // produce wrap-around colour bands rather than the single per-tile
+        // fill CSS specifies.
         // The `repeating-linear-gradient(...)` form is handled by the
         // dedicated RepeatingGradientHelper branch below and is unaffected.
         val gradientTileMode = TileMode.Clamp
@@ -298,7 +301,7 @@ object ColorApplier {
                     RepeatingGradientHelper.createRepeatingLinearGradient(
                         angle = image.angle, colorStops = image.colorStops, size = size)
                 else
-                    createLinearGradientBrush(image, config.backgroundPosition, gradientTileMode)
+                    createLinearGradientBrush(image, gradientTileMode)
             }
             is BackgroundImageConfig.RadialGradient -> {
                 if (image.repeating)
@@ -306,7 +309,7 @@ object ColorApplier {
                         centerX = image.centerX, centerY = image.centerY,
                         colorStops = image.colorStops, size = size)
                 else
-                    createRadialGradientBrush(image, config.backgroundPosition, gradientTileMode)
+                    createRadialGradientBrush(image, gradientTileMode)
             }
             is BackgroundImageConfig.ConicGradient -> {
                 if (image.repeating)
@@ -314,7 +317,7 @@ object ColorApplier {
                         centerX = image.centerX, centerY = image.centerY,
                         startAngle = image.angle, colorStops = image.colorStops, size = size)
                 else
-                    createSweepGradientBrush(image, config.backgroundPosition)
+                    createSweepGradientBrush(image)
             }
             is BackgroundImageConfig.Url -> null
             is BackgroundImageConfig.None -> null
@@ -336,7 +339,21 @@ object ColorApplier {
         // auto/cover/contain all resolve to the box — css-backgrounds-3
         // §3.9) so previously-correct fixtures don't regress.
         val sized = layerSize as? BackgroundSizeConfig.Dimensions
-        if (sized == null) {
+        // Make the comment above TRUE in code (wave-1 skeptic finding): a
+        // `repeating-*-gradient` brush bakes FIXED pixel endpoints computed
+        // against a default 500x500 size (RepeatingGradientHelper), so
+        // pinShaderToTile cannot re-pin it — each tile would sample a
+        // near-constant slice of a ~707px ramp (solid first-stop colour
+        // instead of stripes). Until the repeating helpers accept a tile
+        // size, repeating gradients keep the full-box path (the pre-wave
+        // behavior); parity gap tracked in the wave-1 follow-ups.
+        val isRepeating = when (image) {
+            is BackgroundImageConfig.LinearGradient -> image.repeating
+            is BackgroundImageConfig.RadialGradient -> image.repeating
+            is BackgroundImageConfig.ConicGradient -> image.repeating
+            else -> false
+        }
+        if (sized == null || isRepeating) {
             return modifier.background(nonNullBrush)
         }
         val pos = config.backgroundPosition
@@ -358,30 +375,129 @@ object ColorApplier {
             // CSS background-position: percent of (containerSize − tileSize)
             // free space, plus any absolute px offset (css-backgrounds-3
             // §3.6 — `background-position-x: 20px` is a raw edge offset).
-            val freeX = (this.size.width - tileW).coerceAtLeast(0f)
-            val freeY = (this.size.height - tileH).coerceAtLeast(0f)
+            // NO clamp: when the tile is LARGER than the box, free space is
+            // negative and the anchor goes negative too — `100%` of a 320px
+            // tile in a 160px box anchors at −160 so the tile's END edge
+            // aligns with the box's end edge, matching Chromium and the iOS
+            // port (BackgroundImageGeometry.axisOffset). The old
+            // coerceAtLeast(0f) silently left oversized tiles start-aligned
+            // (wave-1 skeptic finding, both lenses).
+            val freeX = this.size.width - tileW
+            val freeY = this.size.height - tileH
             val anchorX = freeX * pos.x + pos.xOffset.toPx()
             val anchorY = freeY * pos.y + pos.yOffset.toPx()
             // Per-axis §3.7 tile plans: REPEAT walks edge-to-edge, SPACE
             // fits whole tiles + equal gaps, ROUND rescales the tile so a
             // whole count fills the axis, NO_REPEAT anchors a single tile.
-            // Pure math — pinned by BackgroundTileMathTest.
-            val planX = BackgroundTileMath.axisPlan(this.size.width, tileW, anchorX, layerRepeat.x)
-            val planY = BackgroundTileMath.axisPlan(this.size.height, tileH, anchorY, layerRepeat.y)
-            val tileSize = androidx.compose.ui.geometry.Size(planX.tileSize, planY.tileSize)
-            for (x in planX.origins) for (y in planY.origins) {
-                // TRANSLATE the draw space per tile instead of offsetting
-                // the rect: our gradient ShaderBrushes anchor their shader
-                // at the current origin, so translating renders the FULL
-                // gradient inside every tile (offsetting the rect would
-                // sample the single box-anchored gradient — every tile but
-                // the first showed clamped edge colours).
-                translate(left = x, top = y) {
-                    drawRect(brush = nonNullBrush,
-                             topLeft = androidx.compose.ui.geometry.Offset.Zero,
-                             size = tileSize)
+            // Pure math — planTilePass combines the two axisPlans and is
+            // pinned by ColorApplierGradientTileTest.
+            val pass = planTilePass(this.size, tileW, tileH, anchorX, anchorY, layerRepeat)
+            // Empty origin list = degenerate plan (nothing to draw).
+            if (pass.origins.isEmpty()) return@drawBehind
+            // Runaway-lattice guard (wave-1 skeptic finding): a tiny explicit
+            // background-size on a large element (1px tiles on a 390x844 box
+            // = ~330k origins) would issue hundreds of thousands of draw
+            // calls PER FRAME on the UI thread — a multi-second stall. Past
+            // the cap we degrade to one full-box fill (the pre-wave
+            // rendering): visually wrong in the same way the old code was,
+            // but never a hang. Mirrors iOS's tileCap=4096 in
+            // BackgroundImageGeometry.tileRects.
+            if (pass.origins.size > 4096) {
+                drawRect(brush = nonNullBrush)
+                return@drawBehind
+            }
+            // Pin the gradient's shader geometry to the TILE, not the box:
+            // css-images-4 §3.4.1 sizes the gradient line against the
+            // "gradient box", which for a background is the background-size
+            // tile — NOT the element. Without the pin every tile's
+            // createShader received the full DrawScope size, so a 30px tile
+            // showed only the top slice of a 120px-long gradient (solid
+            // first-stop colour instead of the full ramp).
+            val tileBrush = pinShaderToTile(nonNullBrush, pass.tileSize)
+            // css-backgrounds-3 §2.2: the background PAINTING AREA is the
+            // border box — tiles walking past an edge are clipped, never
+            // painted outside. The REPEAT plan deliberately overhangs both
+            // edges (grid coverage), so without this clip the overhanging
+            // tiles bled up to one tile-width past the box (painted bbox
+            // 210px on a 200px box in the wave audit).
+            clipRect(0f, 0f, pass.clip.width, pass.clip.height) {
+                for (origin in pass.origins) {
+                    // TRANSLATE the draw space per tile instead of offsetting
+                    // the rect: the pinned ShaderBrush anchors its shader at
+                    // the current origin, so translating renders the FULL
+                    // gradient inside every tile (offsetting the rect would
+                    // sample one box-anchored gradient — every tile but the
+                    // first showed clamped edge colours).
+                    translate(left = origin.x, top = origin.y) {
+                        drawRect(brush = tileBrush,
+                                 topLeft = androidx.compose.ui.geometry.Offset.Zero,
+                                 size = pass.tileSize)
+                    }
                 }
             }
+        }
+    }
+
+    /**
+     * The resolved draw commands for ONE sized-tile background pass:
+     * [clip] is the painting-area rect the tiles are clipped to
+     * (css-backgrounds-3 §2.2 — the border box), [tileSize] the per-tile
+     * draw size after any `round` rescale, [origins] the cartesian product
+     * of the two per-axis §3.7 plans. Pure data so plain JVM tests can pin
+     * that overhanging REPEAT tiles stay bounded by [clip].
+     */
+    internal data class TilePass(
+        val clip: Size,
+        val tileSize: Size,
+        val origins: List<Offset>
+    )
+
+    /**
+     * Combine the two per-axis BackgroundTileMath plans into one [TilePass].
+     * Kept free of DrawScope so ColorApplierGradientTileTest can assert the
+     * geometry (overflowing origins + border-box clip) on the JVM — the
+     * drawBehind lambda above is a thin consumer of this plan.
+     */
+    internal fun planTilePass(
+        box: Size,
+        tileW: Float,
+        tileH: Float,
+        anchorX: Float,
+        anchorY: Float,
+        repeat: BackgroundRepeatAxes
+    ): TilePass {
+        // One §3.7 plan per axis — REPEAT/SPACE/ROUND/NO_REPEAT semantics
+        // live in BackgroundTileMath (pinned by BackgroundTileMathTest).
+        val planX = BackgroundTileMath.axisPlan(box.width, tileW, anchorX, repeat.x)
+        val planY = BackgroundTileMath.axisPlan(box.height, tileH, anchorY, repeat.y)
+        // Cartesian product: every X origin pairs with every Y origin
+        // (background tiling is a rectangular grid, css-backgrounds-3 §3.7).
+        val origins = planX.origins.flatMap { x -> planY.origins.map { y -> Offset(x, y) } }
+        // Clip is always the full border box — the painting area for the
+        // default background-clip (§2.2); tile math never widens it.
+        return TilePass(clip = box, tileSize = Size(planX.tileSize, planY.tileSize), origins = origins)
+    }
+
+    /**
+     * Wrap a gradient [brush] so its shader is ALWAYS built against the
+     * background-size [tile], no matter what draw size Compose hands to
+     * createShader. css-images-4 §3.4.1: gradient-line length / radial
+     * radii / sweep centres resolve against the gradient box = the TILE
+     * when background-size is explicit (matches the web runtime, which
+     * rasterizes the gradient into a tile-sized canvas). Non-shader
+     * brushes (solid colours) pass through untouched — they have no
+     * size-dependent geometry to pin.
+     */
+    internal fun pinShaderToTile(brush: Brush, tile: Size): Brush {
+        // Identity for non-shader brushes — nothing size-dependent to pin.
+        if (brush !is ShaderBrush) return brush
+        // Explicit re-bind: smart-casts don't reliably propagate into
+        // object-expression captures (same pattern as nonNullBrush above).
+        val shaderBrush: ShaderBrush = brush
+        return object : ShaderBrush() {
+            // Delegate with the TILE size — the DrawScope's element size
+            // (the `size` arg) is deliberately ignored per the doc above.
+            override fun createShader(size: Size): Shader = shaderBrush.createShader(tile)
         }
     }
 
@@ -392,58 +508,39 @@ object ColorApplier {
      * - CSS: 0deg = to top (upward), 90deg = to right
      * - Compose: Uses start/end offsets
      *
+     * NOTE: background-position is deliberately NOT a parameter. Per
+     * css-backgrounds-3 §3.6 position places the background-image TILE
+     * inside the box; it never shifts the gradient geometry INSIDE its
+     * own tile (css-images-4 §3.4.1 centres the gradient line on the
+     * gradient box unconditionally). The previous posX·w / posY·h centre
+     * shift here double-applied the position — once in the tile translate,
+     * once inside the shader — skewing the ramp for any non-0 position.
+     *
      * @param gradient LinearGradient configuration
-     * @param position Background position configuration
      * @param tileMode Tile mode for repeating
      * @return Brush for the gradient, or null if invalid
      */
     private fun createLinearGradientBrush(
         gradient: BackgroundImageConfig.LinearGradient,
-        position: BackgroundPositionConfig = BackgroundPositionConfig(),
         tileMode: TileMode = TileMode.Clamp
     ): Brush? {
         if (gradient.colorStops.size < 2) return null
 
-        // CSS spec (Images Module 4 §3.4.1): the gradient line passes through
-        // the centre of the box at the requested angle, and is exactly long
-        // enough so that its perpendicular at each end touches the corner of
-        // the box closest to that end. CSS measures the angle clockwise from
-        // "to top": 0deg = up (gradient ends at top), 90deg = right, etc.
-        // We need a size-aware shader because the line's length and endpoints
-        // depend on the actual draw bounds — using a hard-coded 1000-pixel
-        // brush coordinate space (the previous implementation) parked the
-        // start/end far outside small elements and clamped them all to the
-        // first stop.
-        val cssRad = (gradient.angle * PI.toFloat() / 180f)
-        // CSS direction unit vector in screen coordinates (Y down).
-        // 0deg = "to top" = (0, -1); 90deg = "to right" = (+1, 0); 180deg = (0, +1).
-        val dirX = sin(cssRad)
-        val dirY = -cos(cssRad)
+        // Shader inputs are size-independent; hoist them out of the
+        // per-frame createShader call.
         val colors = gradient.colorStops.map { it.color }
         val stops = gradient.colorStops.map { it.position }
-
-        // Background-position offset is in 0..1 fractions of the box.
-        // We translate the gradient line by that fraction of the box size.
-        val posX = position.x
-        val posY = position.y
+        val angle = gradient.angle
 
         return object : ShaderBrush() {
             override fun createShader(size: Size): Shader {
-                val w = size.width
-                val h = size.height
-                // CSS gradient-line length: |W·sinθ| + |H·cosθ|. This
-                // guarantees the perpendiculars at each end touch the
-                // matching corners of the box.
-                val lineLen = abs(w * sin(cssRad)) + abs(h * cos(cssRad))
-                val cx = w / 2f + posX * w
-                val cy = h / 2f + posY * h
-                val sx = cx - dirX * lineLen / 2f
-                val sy = cy - dirY * lineLen / 2f
-                val ex = cx + dirX * lineLen / 2f
-                val ey = cy + dirY * lineLen / 2f
+                // Endpoint math is pure and lives in linearGradientPoints
+                // so plain JVM tests can pin it (android.graphics shaders
+                // can't be built in non-instrumented tests).
+                val (from, to) = linearGradientPoints(angle, size)
                 return LinearGradientShader(
-                    from = Offset(sx, sy),
-                    to = Offset(ex, ey),
+                    from = from,
+                    to = to,
                     colors = colors,
                     colorStops = stops,
                     tileMode = tileMode
@@ -453,16 +550,51 @@ object ColorApplier {
     }
 
     /**
+     * css-images-4 §3.4.1 gradient-line endpoints for a linear gradient of
+     * [angleDeg] over a gradient box of [size]: the line passes through the
+     * CENTRE of the box at the requested angle and is exactly long enough
+     * (|W·sinθ| + |H·cosθ|) that the perpendicular at each end touches the
+     * corner closest to that end. CSS measures the angle clockwise from
+     * "to top": 0deg = up, 90deg = right. A size-aware shader is required
+     * because length/endpoints depend on the actual draw bounds — the old
+     * hard-coded 1000px brush space parked the endpoints far outside small
+     * elements and clamped everything to the first stop. Pure math —
+     * pinned by ColorApplierGradientTileTest.
+     */
+    internal fun linearGradientPoints(angleDeg: Float, size: Size): Pair<Offset, Offset> {
+        // Degrees → radians once; both the direction vector and the
+        // corner-touching length formula consume the same angle.
+        val cssRad = angleDeg * PI.toFloat() / 180f
+        // CSS direction unit vector in screen coordinates (Y down):
+        // 0deg = "to top" = (0, -1); 90deg = "to right" = (+1, 0).
+        val dirX = sin(cssRad)
+        val dirY = -cos(cssRad)
+        // §3.4.1 gradient-line length: |W·sinθ| + |H·cosθ| guarantees the
+        // end perpendiculars touch the matching corners of the box.
+        val lineLen = abs(size.width * sin(cssRad)) + abs(size.height * cos(cssRad))
+        // Line centre = BOX centre, unconditionally (§3.4.1). Position
+        // placement happens in the tile translate, never here.
+        val cx = size.width / 2f
+        val cy = size.height / 2f
+        // Walk half the line each way from the centre along the direction.
+        return Offset(cx - dirX * lineLen / 2f, cy - dirY * lineLen / 2f) to
+               Offset(cx + dirX * lineLen / 2f, cy + dirY * lineLen / 2f)
+    }
+
+    /**
      * Create a radial gradient Brush from configuration.
      *
+     * background-position is NOT a parameter (same rationale as the linear
+     * builder): the radial centre comes from the gradient's own `at <pos>`
+     * (css-images-4 §3.2), resolved against the gradient box — background
+     * -position only moves the tile, outside this brush.
+     *
      * @param gradient RadialGradient configuration
-     * @param position Background position configuration
      * @param tileMode Tile mode for repeating
      * @return Brush for the gradient, or null if invalid
      */
     private fun createRadialGradientBrush(
         gradient: BackgroundImageConfig.RadialGradient,
-        position: BackgroundPositionConfig = BackgroundPositionConfig(),
         tileMode: TileMode = TileMode.Clamp
     ): Brush? {
         if (gradient.colorStops.size < 2) return null
@@ -565,13 +697,15 @@ object ColorApplier {
      * - TileMode (repeating gradients)
      * - Starting angle offset
      *
+     * background-position is NOT a parameter (same rationale as the linear
+     * builder): the sweep centre comes from conic-gradient's own `at <pos>`
+     * (css-images-4 §3.3) — background-position only moves the tile.
+     *
      * @param gradient ConicGradient configuration
-     * @param position Background position configuration
      * @return Brush for the gradient, or null if invalid
      */
     private fun createSweepGradientBrush(
-        gradient: BackgroundImageConfig.ConicGradient,
-        @Suppress("UNUSED_PARAMETER") position: BackgroundPositionConfig = BackgroundPositionConfig()
+        gradient: BackgroundImageConfig.ConicGradient
     ): Brush? {
         if (gradient.colorStops.size < 2) return null
 

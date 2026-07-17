@@ -14,10 +14,24 @@ export function isFontWeightProperty(type: string): type is FontWeightPropertyTy
 }
 
 // Per-family parse routine — returns the CSS value string (or undefined to drop).
+// Three wire shapes flow through here (see FontWeightProperty.kt serialize()):
+//   • bare numeric  : 700                            (font-weight: 700)
+//   • keyword form  : { weight: 700, original: "bold" }  (font-weight: bold/normal)
+//   • plain string  : "bolder" / "lighter"           (relative keywords, no numeric)
 function parse(data: unknown): string | number | undefined {
-  // FontWeight: bare 'normal'|'bold'|'bolder'|'lighter' OR numeric 100..900.
   if (typeof data === 'number') return data;                         // numeric weight passes through
-  const kw = kwLower(data);                                          // keyword path
+  // Keyword-form object — the parser resolves bold→700 / normal→400 per
+  // css-fonts-4 §2.2 and stashes the source token in `original`. Prefer the
+  // resolved numeric so web renders the same weight the natives bucket from.
+  // Without this branch the object fell to kwLower() (which only reads bare
+  // strings) and font-weight:bold silently dropped on web.
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
+    const o = data as Record<string, unknown>;                       // shape probe
+    if (typeof o.weight === 'number' && Number.isFinite(o.weight)) return o.weight; // resolved numeric wins
+    if (typeof o.original === 'string') return kwLower(o.original);  // no numeric → fall back to source keyword
+    return undefined;                                                // unknown object shape — drop, cascade unaffected
+  }
+  const kw = kwLower(data);                                          // bare-string keyword path
   if (!kw) return undefined;                                         // unknown input
   // Browser resolves bolder/lighter relative to inherited weight — pass through.
   return kw;

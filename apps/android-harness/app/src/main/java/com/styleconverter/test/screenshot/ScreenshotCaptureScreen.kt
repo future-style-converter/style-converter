@@ -729,10 +729,17 @@ private fun CaptureCanvas(
             //      collapses to padding-only (web: 390x32 for the
             //      block-flow `floating` child; Android rendered a 62px
             //      canvas with the box in flow — crop 0.833).
-            //   2. Insets anchor at the containing block's PADDING EDGE —
-            //      the canvas's outer edge here (border 0), NOT the padded
-            //      content origin. The runtime chain already applies the
-            //      top/left offset, so we only back out the canvas padding.
+            //   2. Declared insets anchor at the containing block's PADDING
+            //      EDGE — the canvas's outer edge here (border 0), NOT the
+            //      padded content origin. The runtime chain already applies
+            //      the top/left offset, so we only back out the canvas
+            //      padding on an axis that carries an inset.
+            //   3. PER-AXIS auto-inset rule (CSS 2.1 §10.3.7 / §10.6.4): an
+            //      axis whose insets are ALL `auto` keeps the box at its
+            //      STATIC position — the content origin INSIDE the canvas
+            //      padding ((16,16)), which is where Chromium leaves an
+            //      all-auto abs/fixed box on the web canvas. Backing out the
+            //      padding there shifted the native capture 16px up-left.
             androidx.compose.ui.layout.Layout(
                 // ComponentHost: the v2 entry point — publishes ITEM
                 // placement parent-data (inert under this measuring
@@ -750,11 +757,17 @@ private fun CaptureCanvas(
                     maxHeight = androidx.compose.ui.unit.Constraints.Infinity
                 )
                 val placeables = measurables.map { it.measure(loose) }
-                // Report 0x0 — out of flow — and paint from the canvas's
-                // outer edge (offset −padding on both axes). PixelCopy's
-                // canvas rect then clips exactly where the web capture does.
+                // Per-axis anchor (rules 2 + 3 above): back out the canvas
+                // padding ONLY on an axis with a declared inset (anchor =
+                // padding edge); an all-auto axis stays at offset 0 — the
+                // padded content origin, i.e. the CSS static position.
+                val dx = if (hasHorizontalInset(component)) -pad else 0
+                val dy = if (hasVerticalInset(component)) -pad else 0
+                // Report 0x0 — out of flow — and paint from the per-axis
+                // anchor computed above. PixelCopy's canvas rect then clips
+                // exactly where the web capture does.
                 layout(0, 0) {
-                    placeables.forEach { it.place(-pad, -pad) }
+                    placeables.forEach { it.place(dx, dy) }
                 }
             }
         } else {
@@ -778,6 +791,29 @@ internal fun isOutOfFlowRoot(component: IRComponent): Boolean {
             ((p.data as? JsonPrimitive)?.contentOrNull?.uppercase() in setOf("ABSOLUTE", "FIXED"))
     }
 }
+
+// IR inset property types per axis — the physical sides plus their
+// LTR/horizontal-tb logical resolutions (the runtime's PositionExtractor maps
+// InsetInlineStart→left, InsetBlockStart→top, … the same way), so a
+// logical-inset fixture anchors identically to its physical twin.
+private val HorizontalInsetTypes = setOf("Left", "Right", "InsetInlineStart", "InsetInlineEnd")
+private val VerticalInsetTypes   = setOf("Top", "Bottom", "InsetBlockStart", "InsetBlockEnd")
+
+/**
+ * True when the out-of-flow capture subject declares ANY horizontal inset.
+ * Per CSS 2.1 §10.3.7, `left`/`right` both `auto` keeps an absolutely
+ * positioned box at its STATIC inline position, so the canvas must NOT back
+ * out its padding on that axis. Presence-based approximation: an explicit
+ * `left: auto` IR property would count as an inset here — accepted, since no
+ * fixture declares an auto inset explicitly (Chromium treats it as all-auto).
+ */
+internal fun hasHorizontalInset(component: IRComponent): Boolean =
+    component.properties.any { it.type in HorizontalInsetTypes }
+
+/** Vertical twin of [hasHorizontalInset] (CSS 2.1 §10.6.4: `top`/`bottom`
+ *  both `auto` → static block position) — same presence rule per axis. */
+internal fun hasVerticalInset(component: IRComponent): Boolean =
+    component.properties.any { it.type in VerticalInsetTypes }
 
 // Shared capture-canvas constants. Kept at file scope so tests, debug tools,
 // and future capture modes can reference the same values.

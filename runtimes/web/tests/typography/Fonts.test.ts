@@ -113,6 +113,27 @@ describe('FontWeight', () => {
   it('handles odd numeric weight like 350', () => {
     expect(applyFontWeight(extractFontWeight([p('FontWeight', 350)]))).toEqual({ fontWeight: 350 });
   });
+  it('decodes keyword-form object {weight, original} to the resolved numeric (bold)', () => {
+    // font-weight:bold — the converter emits { weight: 700, original: "bold" }
+    // (FontWeightProperty.kt serialize()); web must render 700 like the natives.
+    expect(applyFontWeight(extractFontWeight([p('FontWeight', { weight: 700, original: 'bold' })])))
+      .toEqual({ fontWeight: 700 });
+  });
+  it('decodes keyword-form object for normal', () => {
+    // font-weight:normal — same object shape, resolved to 400 per css-fonts-4 §2.2.
+    expect(applyFontWeight(extractFontWeight([p('FontWeight', { weight: 400, original: 'normal' })])))
+      .toEqual({ fontWeight: 400 });
+  });
+  it('falls back to original keyword when object lacks a numeric weight', () => {
+    // Defensive: if a future wire drops the numeric, the source keyword still applies.
+    expect(applyFontWeight(extractFontWeight([p('FontWeight', { original: 'bolder' })])))
+      .toEqual({ fontWeight: 'bolder' });
+  });
+  it('drops an unrecognised object shape without clobbering the cascade', () => {
+    // Unknown payloads must not throw and must not overwrite an earlier valid weight.
+    expect(applyFontWeight(extractFontWeight([p('FontWeight', 700), p('FontWeight', { bogus: true })])))
+      .toEqual({ fontWeight: 700 });
+  });
   it('passes bolder relative keyword', () => {
     expect(applyFontWeight(extractFontWeight([p('FontWeight', 'bolder')]))).toEqual({ fontWeight: 'bolder' });
   });

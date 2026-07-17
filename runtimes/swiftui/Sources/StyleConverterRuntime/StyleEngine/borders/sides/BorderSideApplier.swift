@@ -96,17 +96,32 @@ struct BorderSideApplier: ViewModifier {
         )
     }
 
+    // Dash intervals [on, off] in points for CSS `border-style: dashed`.
+    // Dashed painting is UA-defined (css-backgrounds-3 §3.2 only says
+    // "square-ended dashes"), so Chromium's painter is the cross-platform
+    // reference, and its on:off rhythm is width-dependent:
+    //   - Thick (w >= 3px): at the dashed fixture's w=5 Chromium paints
+    //     ≈10px on / 5px off (~11 dashes on a 160px edge) — a 2w:1w
+    //     rhythm. A fixed 6w:4w made native dashes 3x too long there.
+    //   - Thin (w < 3px): the 6w:4w tuning was measured against Chromium
+    //     at w=2 (12px on / 8px off ≈ 9 dashes on a 218px edge) and is
+    //     preserved so committed thin-dash baselines stay byte-stable.
+    // ONE helper for BOTH the uniform fast path (dashStyle) and the
+    // per-side Canvas path (drawEdge) — those two sites previously
+    // hard-coded 6w:4w vs 3w:2w and silently drifted apart. `static`
+    // internal so XCTest (@testable) can pin the interval choice; the
+    // Android applier mirrors this rule (BorderSideApplier.kt).
+    static func dashedIntervals(width w: CGFloat) -> [CGFloat] {
+        w >= 3 ? [w * 2, w] : [w * 6, w * 4]
+    }
+
     // Build a dash-pattern StrokeStyle. Values mirror the Android applier
     // (BorderSideApplier.kt) so visual output lines up across platforms.
     private func dashStyle(_ style: BorderStyleValue, width w: CGFloat) -> StrokeStyle {
         switch style {
-        // CSS `border-style: dashed` is implementation-defined; Chromium
-        // renders much longer dashes than a 3w:2w pattern (~9 dashes per
-        // 218px edge at w=2 vs ~22 with the prior ratio), so iOS+Android
-        // both diverged sharply from web on every dashed-border fixture.
-        // 6w:4w (12px on, 8px off at w=2) lands the dash count + stroke
-        // ratio in the same band as Chromium's default.
-        case .dashed: return StrokeStyle(lineWidth: w, dash: [w * 6, w * 4])
+        // Width-conditional intervals — see dashedIntervals above for the
+        // Chromium measurements behind the 2w:1w / 6w:4w split.
+        case .dashed: return StrokeStyle(lineWidth: w, dash: Self.dashedIntervals(width: w))
         case .dotted: return StrokeStyle(lineWidth: w, lineCap: .round, dash: [0.01, w * 2])
         default:      return StrokeStyle(lineWidth: w)
         }
@@ -189,8 +204,12 @@ struct BorderSideApplier: ViewModifier {
             ctx.stroke(outer, with: .color(colour), style: StrokeStyle(lineWidth: band))
             ctx.stroke(inner, with: .color(colour), style: StrokeStyle(lineWidth: band))
         case .dashed:
+            // Same shared intervals as the uniform fast path — this branch
+            // previously hard-coded 3w:2w while dashStyle used 6w:4w, so a
+            // per-side dashed border dashed differently from a uniform one.
             ctx.stroke(path, with: .color(colour),
-                       style: StrokeStyle(lineWidth: w, dash: [w * 3, w * 2]))
+                       style: StrokeStyle(lineWidth: w,
+                                          dash: Self.dashedIntervals(width: w)))
         case .dotted:
             ctx.stroke(path, with: .color(colour),
                        style: StrokeStyle(lineWidth: w, lineCap: .round,

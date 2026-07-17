@@ -6,6 +6,6 @@
     "Repeat_RepeatY": { "properties": { "width": "200px", "height": "120px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "30px 30px", "background-repeat": "repeat-y" } },
     "Repeat_Space": { "properties": { "width": "200px", "height": "120px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "30px 30px", "background-repeat": "space" } },
     "Repeat_Round": { "properties": { "width": "200px", "height": "120px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "30px 30px", "background-repeat": "round" } },
-    "Repeat_TwoAxes": { "properties": { "width": "200px", "height": "120px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "30px 30px", "background-repeat": "repeat-x no-repeat" } }
+    "Repeat_TwoAxes": { "properties": { "width": "200px", "height": "120px", "background-color": "#ecf0f1", "background-image": "linear-gradient(red, blue)", "background-size": "30px 30px", "background-repeat": "repeat no-repeat" } }
   }
 }

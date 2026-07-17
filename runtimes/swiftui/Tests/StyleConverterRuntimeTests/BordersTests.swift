@@ -28,6 +28,22 @@ final class BordersTests: XCTestCase {
     func testImageChecks()   { for failure in Self.runImageChecks()   { XCTFail(failure) } }
     func testMiscChecks()    { for failure in Self.runMiscChecks()    { XCTFail(failure) } }
 
+    // Width-conditional dashed intervals — the ONE shared helper both the
+    // uniform fast path and the per-side Canvas path now consume (they
+    // previously hard-coded 6w:4w vs 3w:2w and drifted). Pins the same
+    // pairs as the Android test (BorderFidelityWave2Test) so the two
+    // natives cannot diverge without a test failing on each side.
+    func testDashedIntervals() {
+        // Thin branch (w < 3): the w=2 Chromium-measured tuning must stay
+        // byte-identical so committed thin-dash baselines don't shift.
+        XCTAssertEqual(BorderSideApplier.dashedIntervals(width: 2), [12, 8])
+        // Thick branch: at the fixture's w=5 Chromium paints ~10px on /
+        // 5px off (~11 dashes on a 160px edge) — a 2w:1w rhythm.
+        XCTAssertEqual(BorderSideApplier.dashedIntervals(width: 5), [10, 5])
+        // Boundary: w=3 (CSS `medium`) is the first thick width — 2w:1w.
+        XCTAssertEqual(BorderSideApplier.dashedIntervals(width: 3), [6, 3])
+    }
+
     // MARK: - Helpers
 
     // Concise IRValue.object builder matching ColorBackgroundSelfTest.
