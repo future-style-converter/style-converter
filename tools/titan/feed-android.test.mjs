@@ -203,3 +203,16 @@ test('a wedged capture restarts the app so it cannot cascade-timeout the batch',
   assert.match(src, /restarting app to clear the wedge/, 'timeout-branch restart log/behaviour dropped');
   assert.match(src, /i < fixtures\.length - 1/, 'last-fixture guard on the restart dropped');
 });
+
+test('timed-out fixtures get ONE warm tail-retry (cold-start holes)', async () => {
+  // On a pooled device the FIRST fixture after boot regularly blows the
+  // timeout (cold JIT + first render) while everything after runs in ~1s —
+  // without a warm retry, every section landing on a cold slot ships a hole
+  // at its first fixture. The retry pass is skipped when ALL fixtures timed
+  // out (dead device — don't double the wall-time), and a fixture that
+  // times out twice stays failed (genuine wedge, e.g. z-ordering-003).
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  assert.match(src, /tail-retry/, 'tail-retry pass dropped');
+  assert.match(src, /timedOutRows\.length < fixtures\.length/, 'all-timed-out (dead device) guard dropped');
+  assert.match(src, /row\.retried = true/, 'retried rows must be marked in the summary');
+});
