@@ -15,6 +15,14 @@
 // against the wrapper would make the test tautological — never regenerate
 // unless the harness DOM contract itself intentionally changes (which is
 // a visual-baseline event, not a refactor).
+//
+// REGENERATED (block-font labels): the placeholder LABEL branch now
+// renders the shared cross-platform block font (an inline <svg> of 1x1 px
+// rects at the pinned (8,6) origin — see BlockFontLabel.ts) instead of a
+// font-stack text node. That IS an intentional harness DOM contract
+// change and a 3-platform visual-baseline event, so the golden was
+// regenerated against the block-font renderer; it now pins the NEW label
+// DOM byte-for-byte (text/suppression branches were byte-unchanged).
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync, writeFileSync } from 'node:fs';

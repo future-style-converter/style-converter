@@ -1,10 +1,70 @@
 {
   "components": {
-    "UnicodeBidi_Normal": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "normal" } },
-    "UnicodeBidi_Embed": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "embed" } },
-    "UnicodeBidi_Isolate": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "isolate" } },
-    "UnicodeBidi_BidiOverride": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "bidi-override" } },
-    "UnicodeBidi_IsolateOverride": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "isolate-override" } },
-    "UnicodeBidi_Plaintext": { "properties": { "width": "220px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "unicode-bidi": "plaintext" } }
+    "UnicodeBidi_Normal": {
+      "properties": {
+        "width": "220px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "unicode-bidi": "normal"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "UnicodeBidi_Embed": {
+      "properties": {
+        "width": "220px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "unicode-bidi": "embed"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "UnicodeBidi_Isolate": {
+      "properties": {
+        "width": "220px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "unicode-bidi": "isolate"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "UnicodeBidi_BidiOverride": {
+      "properties": {
+        "width": "220px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "unicode-bidi": "bidi-override"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "UnicodeBidi_IsolateOverride": {
+      "properties": {
+        "width": "220px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "unicode-bidi": "isolate-override"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "UnicodeBidi_Plaintext": {
+      "properties": {
+        "width": "220px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "unicode-bidi": "plaintext"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    }
   }
 }

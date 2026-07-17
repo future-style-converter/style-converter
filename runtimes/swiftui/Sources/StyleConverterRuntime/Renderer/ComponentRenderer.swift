@@ -1452,6 +1452,45 @@ public struct ComponentRenderer: View {
             // Real element text takes the leading-text branch above (with
             // children) or the leaf branch below (component.text present).
             EmptyView()
+        } else if component.text?.isEmpty ?? true {
+            // Applier campaign (block font) — a leaf with NO real element
+            // text renders only the SYNTHESIZED component-name label, a
+            // harness debug artifact. Route it to the shared 5x7 block
+            // font (BlockLabel.swift) instead of PlaceholderLabel's Text:
+            // real font stacks antialias differently per platform and
+            // capped ~50 label-bearing fixtures at SSIM 0.90-0.949, while
+            // integer-rect glyphs rasterize byte-identically on all three.
+            // The input string is EXACTLY what the Text showed before
+            // (name, underscores → spaces); color is pinned to the legacy
+            // default rgba(237,237,237,0.7) — the luminance contrast pick
+            // and bg-clip:text gradient fill intentionally do NOT apply
+            // here (the shared spec fixes ONE color so the three
+            // platforms can be byte-identical; both only ever affected
+            // this debug label, never real content). Real element text
+            // (leaf `text` below, leading text above) keeps the full
+            // PlaceholderLabel typography path — fonts are the actual
+            // subject under test there. The WPT gate above already
+            // dropped this label in capture mode, so the block path is
+            // product/baseline-only, exactly like the Text it replaces.
+            // Truncation width = the USED inline size: CSS resolves it as
+            // max(min-width, min(width, max-width)) — the min-* floor only
+            // ever WIDENS the box, so the binding value is the smallest of
+            // the declared width and its max-* cap (mirrors web's
+            // usedPxWidth in apps/web-harness ComponentRenderer.tsx; both
+            // resolve through the same containing-block channel the flex
+            // plan uses). nil = content-sized: the box hugs the label, so
+            // nothing can overflow and no truncation applies.
+            let ctx = style.spacing.context
+            let usedWidth: CGFloat? = [
+                SizeApplierResolve.exact(style.size.width, ctx: ctx,
+                                         parent: ctx.containingBlockWidth),
+                SizeApplierResolve.constraint(style.size.maxWidth, ctx: ctx,
+                                              parent: ctx.containingBlockWidth),
+            ].compactMap { $0 }.min()
+            BlockLabel(
+                label: component.name.replacingOccurrences(of: "_", with: " "),
+                componentWidth: usedWidth
+            )
         } else {
             // CSS `background-clip: text` + a `background-image`
             // gradient: render the gradient as the text fill instead
@@ -1492,7 +1531,8 @@ public struct ComponentRenderer: View {
             // underscore-stripped component name. Mirrors web
             // PlaceholderContent.text and brings iOS leaf-text rendering
             // in parity with the web fix (swarm-001/css-color__color-001).
-            // Absent text → existing behaviour (placeholder shows name).
+            // Absent text no longer reaches this branch — the synthesized
+            // name label renders via BlockLabel above (applier campaign).
             //
             // Wave 9 (#37): `Color` rides the inheritance channel now, so
             // style.text.color may be an ANCESTOR's color. The web leaf

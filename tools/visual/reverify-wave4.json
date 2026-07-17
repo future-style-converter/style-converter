@@ -1048,5 +1048,889 @@
         "delta": 0.0407
       }
     ]
+  },
+  "blockFontResweep": {
+    "note": "Same 94-property combined-fixture sweep re-run after the block-font label change (harness labels drawn as shared 5x7 bit-pattern rects — no font stack, pixel-identical on all platforms by construction). This is the glyph-wall removal measurement; the visual-test baseline set was deliberately re-captured in the same PR.",
+    "bands": {
+      "hold": 72,
+      "nearMiss": 3,
+      "deep": 19
+    },
+    "properties": [
+      {
+        "name": "ColorAdjust",
+        "category": "appearance",
+        "minSsim": 0.9978,
+        "worst": "Colo_inherit iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9132
+      },
+      {
+        "name": "ImageRenderingQuality",
+        "category": "appearance",
+        "minSsim": 0.9947,
+        "worst": "Imag_auto iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9068
+      },
+      {
+        "name": "BackgroundAttachment",
+        "category": "background",
+        "minSsim": 0.9982,
+        "worst": "Attachment_Scroll iOS-web",
+        "band": "hold",
+        "preBlockFont": 0.8897
+      },
+      {
+        "name": "BackgroundClip",
+        "category": "background",
+        "minSsim": 0.9908,
+        "worst": "Clip_PaddingBox Android-web",
+        "band": "hold",
+        "preBlockFont": 0.8783
+      },
+      {
+        "name": "BackgroundImage",
+        "category": "background",
+        "minSsim": 0.9959,
+        "worst": "BI_radial iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9281
+      },
+      {
+        "name": "BackgroundPosition",
+        "category": "background",
+        "minSsim": 0.9999,
+        "worst": "Pos_Left_Top iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9374
+      },
+      {
+        "name": "BackgroundRepeat",
+        "category": "background",
+        "minSsim": 0.999,
+        "worst": "Repeat_Repeat iOS-web",
+        "band": "hold",
+        "preBlockFont": 0.9476
+      },
+      {
+        "name": "BackgroundSize",
+        "category": "background",
+        "minSsim": 0.999,
+        "worst": "Size_Auto iOS-web",
+        "band": "hold",
+        "preBlockFont": 0.9161
+      },
+      {
+        "name": "BorderBlockEndColor",
+        "category": "borders",
+        "minSsim": 0.9928,
+        "worst": "C_green iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.92
+      },
+      {
+        "name": "BorderBlockEndStyle",
+        "category": "borders",
+        "minSsim": 0.9921,
+        "worst": "S_dashed Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9213
+      },
+      {
+        "name": "BorderBlockStartColor",
+        "category": "borders",
+        "minSsim": 0.9941,
+        "worst": "C_red iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9173
+      },
+      {
+        "name": "BorderBlockStartStyle",
+        "category": "borders",
+        "minSsim": 0.9923,
+        "worst": "S_double Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9164
+      },
+      {
+        "name": "BorderBottomColor",
+        "category": "borders",
+        "minSsim": 0.9947,
+        "worst": "C_green iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9389
+      },
+      {
+        "name": "BorderBottomLeftRadius",
+        "category": "borders",
+        "minSsim": 0.9941,
+        "worst": "V2_50pct iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9175
+      },
+      {
+        "name": "BorderBottomRightRadius",
+        "category": "borders",
+        "minSsim": 0.9939,
+        "worst": "V2_50pct iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9198
+      },
+      {
+        "name": "BorderBottomStyle",
+        "category": "borders",
+        "minSsim": 0.992,
+        "worst": "S_dashed Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9375
+      },
+      {
+        "name": "BorderBottomWidth",
+        "category": "borders",
+        "minSsim": 0.9931,
+        "worst": "W_medium iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9377
+      },
+      {
+        "name": "BorderBoundary",
+        "category": "borders",
+        "minSsim": 0.9931,
+        "worst": "Bord_parent iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9284
+      },
+      {
+        "name": "BorderEndEndRadius",
+        "category": "borders",
+        "minSsim": 0.9939,
+        "worst": "V2_50pct iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9416
+      },
+      {
+        "name": "BorderEndStartRadius",
+        "category": "borders",
+        "minSsim": 0.9937,
+        "worst": "V2_50pct iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9363
+      },
+      {
+        "name": "BorderImageOutset",
+        "category": "borders",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9423
+      },
+      {
+        "name": "BorderImageRepeat",
+        "category": "borders",
+        "minSsim": 0.9942,
+        "worst": "V2_stretch Android-web",
+        "band": "hold",
+        "preBlockFont": 0.95
+      },
+      {
+        "name": "BorderImageSlice",
+        "category": "borders",
+        "minSsim": 0.8533,
+        "worst": "BISl_Fill iOS-web",
+        "band": "deep",
+        "preBlockFont": 0.8308
+      },
+      {
+        "name": "BorderImageWidth",
+        "category": "borders",
+        "minSsim": 0.9997,
+        "worst": "BIW_15 iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9482
+      },
+      {
+        "name": "BorderInlineEndColor",
+        "category": "borders",
+        "minSsim": 0.9944,
+        "worst": "C_red Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9133
+      },
+      {
+        "name": "BorderInlineStartColor",
+        "category": "borders",
+        "minSsim": 0.9923,
+        "worst": "C_hex iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9059
+      },
+      {
+        "name": "BorderLeftColor",
+        "category": "borders",
+        "minSsim": 0.997,
+        "worst": "C_green iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9285
+      },
+      {
+        "name": "BorderLeftStyle",
+        "category": "borders",
+        "minSsim": 0.9941,
+        "worst": "S_dashed Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9269
+      },
+      {
+        "name": "BorderLeftWidth",
+        "category": "borders",
+        "minSsim": 0.9948,
+        "worst": "W_medium iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9157
+      },
+      {
+        "name": "BorderRightColor",
+        "category": "borders",
+        "minSsim": 0.9948,
+        "worst": "C_green iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9449
+      },
+      {
+        "name": "BorderRightStyle",
+        "category": "borders",
+        "minSsim": 0.9929,
+        "worst": "S_dashed Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9208
+      },
+      {
+        "name": "BorderRightWidth",
+        "category": "borders",
+        "minSsim": 0.9937,
+        "worst": "W_medium iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9425
+      },
+      {
+        "name": "BorderStartEndRadius",
+        "category": "borders",
+        "minSsim": 0.9942,
+        "worst": "V2_50pct Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9393
+      },
+      {
+        "name": "BorderStartStartRadius",
+        "category": "borders",
+        "minSsim": 0.994,
+        "worst": "V2_50pct iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9307
+      },
+      {
+        "name": "BorderStyle",
+        "category": "borders",
+        "minSsim": 0.9936,
+        "worst": "V6_double iOS-web",
+        "band": "hold",
+        "preBlockFont": 0.9252
+      },
+      {
+        "name": "BorderTopColor",
+        "category": "borders",
+        "minSsim": 0.9999,
+        "worst": "C_rgb iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9233
+      },
+      {
+        "name": "BorderTopLeftRadius",
+        "category": "borders",
+        "minSsim": 0.994,
+        "worst": "V2_50pct iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9379
+      },
+      {
+        "name": "BorderTopRightRadius",
+        "category": "borders",
+        "minSsim": 0.994,
+        "worst": "V2_50pct Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9403
+      },
+      {
+        "name": "BorderTopStyle",
+        "category": "borders",
+        "minSsim": 0.9982,
+        "worst": "S_double Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9342
+      },
+      {
+        "name": "BorderTopWidth",
+        "category": "borders",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9213
+      },
+      {
+        "name": "BoxDecorationBreak",
+        "category": "borders",
+        "minSsim": 0.9984,
+        "worst": "BoxDecorationBreak_Slice iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9064
+      },
+      {
+        "name": "BoxShadow",
+        "category": "borders",
+        "minSsim": 0.9958,
+        "worst": "Shadow_Inset_WithSpread Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9118
+      },
+      {
+        "name": "OutlineWidth",
+        "category": "borders",
+        "minSsim": 0.9954,
+        "worst": "Outl_inherit iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9054
+      },
+      {
+        "name": "BackgroundBlendMode",
+        "category": "color",
+        "minSsim": 0.9339,
+        "worst": "BBM_screen iOS-web",
+        "band": "near-miss",
+        "preBlockFont": 0.8613
+      },
+      {
+        "name": "BackgroundColor",
+        "category": "color",
+        "minSsim": 0.9928,
+        "worst": "BC_Transparent iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9264
+      },
+      {
+        "name": "Color",
+        "category": "color",
+        "minSsim": 0.8385,
+        "worst": "Color_CurrentColor iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.8715
+      },
+      {
+        "name": "Filter",
+        "category": "color",
+        "minSsim": 0.9712,
+        "worst": "F_blur iOS-web",
+        "band": "hold",
+        "preBlockFont": 0.9513
+      },
+      {
+        "name": "MixBlendMode",
+        "category": "color",
+        "minSsim": 0.9957,
+        "worst": "MBM_multiply iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9929
+      },
+      {
+        "name": "Opacity",
+        "category": "color",
+        "minSsim": 0.9955,
+        "worst": "Opacity_Percent iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9183
+      },
+      {
+        "name": "BackdropFilter",
+        "category": "effects",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9306
+      },
+      {
+        "name": "ClipPath",
+        "category": "effects",
+        "minSsim": 0.9989,
+        "worst": "CP_circle Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9572
+      },
+      {
+        "name": "MaskImage",
+        "category": "effects",
+        "minSsim": 0.9603,
+        "worst": "MaskImage_RepeatingLinear iOS-Android",
+        "band": "hold",
+        "preBlockFont": 0.9066
+      },
+      {
+        "name": "MaskPosition",
+        "category": "effects",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9182
+      },
+      {
+        "name": "MaskRepeat",
+        "category": "effects",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9251
+      },
+      {
+        "name": "MaskSize",
+        "category": "effects",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.8709
+      },
+      {
+        "name": "MaskType",
+        "category": "effects",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9349
+      },
+      {
+        "name": "Visibility",
+        "category": "effects",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9239
+      },
+      {
+        "name": "Clear",
+        "category": "layout",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9964
+      },
+      {
+        "name": "Left",
+        "category": "layout",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9646
+      },
+      {
+        "name": "Position",
+        "category": "layout",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9518
+      },
+      {
+        "name": "ReadingFlow",
+        "category": "layout",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9935
+      },
+      {
+        "name": "ZIndex",
+        "category": "layout",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9966
+      },
+      {
+        "name": "Isolation",
+        "category": "performance",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9461
+      },
+      {
+        "name": "BoxSizing",
+        "category": "sizing",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9271
+      },
+      {
+        "name": "AspectRatio",
+        "category": "spacing",
+        "minSsim": 0.983,
+        "worst": "Ratio_Auto_With_Explicit iOS-web",
+        "band": "hold",
+        "preBlockFont": 0.9178
+      },
+      {
+        "name": "Height",
+        "category": "spacing",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9528
+      },
+      {
+        "name": "MarginTrim",
+        "category": "spacing",
+        "minSsim": 0.8321,
+        "worst": "MarginTrim_None iOS-web",
+        "band": "deep",
+        "preBlockFont": 0.8304
+      },
+      {
+        "name": "PaddingBottom",
+        "category": "spacing",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.924
+      },
+      {
+        "name": "PaddingLeft",
+        "category": "spacing",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9231
+      },
+      {
+        "name": "PaddingRight",
+        "category": "spacing",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9279
+      },
+      {
+        "name": "PaddingTop",
+        "category": "spacing",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9358
+      },
+      {
+        "name": "Width",
+        "category": "spacing",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9504
+      },
+      {
+        "name": "Rotate",
+        "category": "transforms",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9588
+      },
+      {
+        "name": "Scale",
+        "category": "transforms",
+        "minSsim": 0.9944,
+        "worst": "V_one_half iOS-web",
+        "band": "hold",
+        "preBlockFont": 0.9281
+      },
+      {
+        "name": "Transform",
+        "category": "transforms",
+        "minSsim": 0.9866,
+        "worst": "T_scaleXY Android-web",
+        "band": "hold",
+        "preBlockFont": 0.9287
+      },
+      {
+        "name": "Translate",
+        "category": "transforms",
+        "minSsim": 1,
+        "worst": null,
+        "band": "hold",
+        "preBlockFont": 0.9522
+      },
+      {
+        "name": "FontFamily",
+        "category": "typography",
+        "minSsim": 0.8051,
+        "worst": "FontFamily_Cursive iOS-web",
+        "band": "deep",
+        "preBlockFont": 0.7307
+      },
+      {
+        "name": "FontLanguageOverride",
+        "category": "typography",
+        "minSsim": 0.8746,
+        "worst": "FontLanguageOverride_Normal iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.9039
+      },
+      {
+        "name": "FontSize",
+        "category": "typography",
+        "minSsim": 0.7865,
+        "worst": "FontSize_Rem_1_5 iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.7711
+      },
+      {
+        "name": "FontStyle",
+        "category": "typography",
+        "minSsim": 0.8195,
+        "worst": "FontStyle_Italic iOS-web",
+        "band": "deep",
+        "preBlockFont": 0.7593
+      },
+      {
+        "name": "FontWeight",
+        "category": "typography",
+        "minSsim": 0.7847,
+        "worst": "FontWeight_800 iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.775
+      },
+      {
+        "name": "InitialLetter",
+        "category": "typography",
+        "minSsim": 0.9115,
+        "worst": "InitialLetter_Normal iOS-Android",
+        "band": "near-miss",
+        "preBlockFont": 0.8273
+      },
+      {
+        "name": "LetterSpacing",
+        "category": "typography",
+        "minSsim": 0.789,
+        "worst": "LetterSpacing_Rem_0_25 iOS-web",
+        "band": "deep",
+        "preBlockFont": 0.7096
+      },
+      {
+        "name": "LineHeight",
+        "category": "typography",
+        "minSsim": 0.8759,
+        "worst": "LineHeight_Rem_2 iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.8477
+      },
+      {
+        "name": "LineSnap",
+        "category": "typography",
+        "minSsim": 0.8899,
+        "worst": "LineSnap_None iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.9048
+      },
+      {
+        "name": "TextAlign",
+        "category": "typography",
+        "minSsim": 0.8929,
+        "worst": "TextAlign_Center iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.8306
+      },
+      {
+        "name": "TextDecorationLine",
+        "category": "typography",
+        "minSsim": 0.7629,
+        "worst": "TextDecorationLine_Triple Android-web",
+        "band": "deep",
+        "preBlockFont": 0.7483
+      },
+      {
+        "name": "TextGroupAlign",
+        "category": "typography",
+        "minSsim": 0.8565,
+        "worst": "TextGroupAlign_None iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.8124
+      },
+      {
+        "name": "TextOrientation",
+        "category": "typography",
+        "minSsim": 0.8691,
+        "worst": "TextOrientation_Upright Android-web",
+        "band": "deep",
+        "preBlockFont": 0.8082
+      },
+      {
+        "name": "TextShadow",
+        "category": "typography",
+        "minSsim": 0.8672,
+        "worst": "TextShadow_Multi iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.9153
+      },
+      {
+        "name": "TextTransform",
+        "category": "typography",
+        "minSsim": 0.7771,
+        "worst": "TextTransform_Uppercase Android-web",
+        "band": "deep",
+        "preBlockFont": 0.8413
+      },
+      {
+        "name": "UnicodeBidi",
+        "category": "typography",
+        "minSsim": 0.8565,
+        "worst": "UnicodeBidi_Normal iOS-Android",
+        "band": "deep",
+        "preBlockFont": 0.9105
+      },
+      {
+        "name": "WordSpacing",
+        "category": "typography",
+        "minSsim": 0.7635,
+        "worst": "WordSpacing_Px_12 Android-web",
+        "band": "deep",
+        "preBlockFont": 0.6845
+      },
+      {
+        "name": "WordWrap",
+        "category": "typography",
+        "minSsim": 0.9145,
+        "worst": "WordWrap_Normal iOS-Android",
+        "band": "near-miss",
+        "preBlockFont": 0.8076
+      }
+    ],
+    "topMoves": [
+      {
+        "property": "effects/MaskSize",
+        "pre": 0.8709,
+        "post": 1,
+        "delta": 0.1291
+      },
+      {
+        "property": "background/BackgroundClip",
+        "pre": 0.8783,
+        "post": 0.9908,
+        "delta": 0.1125
+      },
+      {
+        "property": "background/BackgroundAttachment",
+        "pre": 0.8897,
+        "post": 0.9982,
+        "delta": 0.1085
+      },
+      {
+        "property": "typography/WordWrap",
+        "pre": 0.8076,
+        "post": 0.9145,
+        "delta": 0.1069
+      },
+      {
+        "property": "borders/BoxDecorationBreak",
+        "pre": 0.9064,
+        "post": 0.9984,
+        "delta": 0.092
+      },
+      {
+        "property": "borders/OutlineWidth",
+        "pre": 0.9054,
+        "post": 0.9954,
+        "delta": 0.09
+      },
+      {
+        "property": "appearance/ImageRenderingQuality",
+        "pre": 0.9068,
+        "post": 0.9947,
+        "delta": 0.0879
+      },
+      {
+        "property": "borders/BorderInlineStartColor",
+        "pre": 0.9059,
+        "post": 0.9923,
+        "delta": 0.0864
+      },
+      {
+        "property": "appearance/ColorAdjust",
+        "pre": 0.9132,
+        "post": 0.9978,
+        "delta": 0.0846
+      },
+      {
+        "property": "typography/InitialLetter",
+        "pre": 0.8273,
+        "post": 0.9115,
+        "delta": 0.0842
+      },
+      {
+        "property": "borders/BoxShadow",
+        "pre": 0.9118,
+        "post": 0.9958,
+        "delta": 0.084
+      },
+      {
+        "property": "background/BackgroundSize",
+        "pre": 0.9161,
+        "post": 0.999,
+        "delta": 0.0829
+      },
+      {
+        "property": "effects/MaskPosition",
+        "pre": 0.9182,
+        "post": 1,
+        "delta": 0.0818
+      },
+      {
+        "property": "borders/BorderInlineEndColor",
+        "pre": 0.9133,
+        "post": 0.9944,
+        "delta": 0.0811
+      },
+      {
+        "property": "typography/LetterSpacing",
+        "pre": 0.7096,
+        "post": 0.789,
+        "delta": 0.0794
+      },
+      {
+        "property": "borders/BorderLeftWidth",
+        "pre": 0.9157,
+        "post": 0.9948,
+        "delta": 0.0791
+      },
+      {
+        "property": "typography/WordSpacing",
+        "pre": 0.6845,
+        "post": 0.7635,
+        "delta": 0.079
+      },
+      {
+        "property": "borders/BorderTopWidth",
+        "pre": 0.9213,
+        "post": 1,
+        "delta": 0.0787
+      },
+      {
+        "property": "color/Opacity",
+        "pre": 0.9183,
+        "post": 0.9955,
+        "delta": 0.0772
+      },
+      {
+        "property": "spacing/PaddingLeft",
+        "pre": 0.9231,
+        "post": 1,
+        "delta": 0.0769
+      }
+    ]
   }
 }

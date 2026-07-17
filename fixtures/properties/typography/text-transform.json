@@ -1,10 +1,70 @@
 {
   "components": {
-    "TextTransform_None": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "none" } },
-    "TextTransform_Uppercase": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "uppercase" } },
-    "TextTransform_Lowercase": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "lowercase" } },
-    "TextTransform_Capitalize": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "capitalize" } },
-    "TextTransform_FullWidth": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "full-width" } },
-    "TextTransform_FullSizeKana": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "22px", "text-transform": "full-size-kana" } }
+    "TextTransform_None": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "22px",
+        "text-transform": "none"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "TextTransform_Uppercase": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "22px",
+        "text-transform": "uppercase"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "TextTransform_Lowercase": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "22px",
+        "text-transform": "lowercase"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "TextTransform_Capitalize": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "22px",
+        "text-transform": "capitalize"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "TextTransform_FullWidth": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "22px",
+        "text-transform": "full-width"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "TextTransform_FullSizeKana": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "22px",
+        "text-transform": "full-size-kana"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    }
   }
 }

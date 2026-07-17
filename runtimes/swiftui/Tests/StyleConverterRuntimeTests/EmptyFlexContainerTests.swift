@@ -162,21 +162,26 @@ final class EmptyFlexContainerTests: XCTestCase {
     }
 
     /// Belt-and-braces on the same render: the placeholder glyphs sit in
-    /// the TOP portion of the 80px box (block flow), not centred. Glyphs
-    /// are the dark-ish pixels inside the light-grey container band.
+    /// the TOP portion of the 80px box (block flow), not centred. The
+    /// block-font label (applier campaign) paints the FIXED
+    /// rgba(237,237,237,0.7) ink — lighter than the #bdc3c7 fill but
+    /// darker than the white canvas, so the probe hunts that middle band.
     @MainActor
     func testChildlessFlexPlaceholderSitsAtTop() throws {
         let img = try render(try component(flexAlignCenterJSON))
         // Container band: canvas pad 16 → box rows 16..<96 (height 80).
-        // Text pixels: substantially darker than the #bdc3c7 background
-        // fill but present only where glyphs draw (sum < 400 of 765).
+        // Label ink over #bdc3c7 composites to ≈(223,225,226) — sum ≈ 673
+        // — strictly between the box fill (583) and the white canvas
+        // (765); box edges are integer-aligned at scale 1, so no
+        // fractional-coverage blend pixel can fall inside the band.
         let textRows = try XCTUnwrap(
-            rows(in: img) { r, g, b in Int(r) + Int(g) + Int(b) < 400 },
+            rows(in: img) { r, g, b in (640..<720).contains(Int(r) + Int(g) + Int(b)) },
             "no placeholder glyphs found in render")
-        // Box top = 16 (canvas padding). Block flow puts the line box
-        // right after the 10px container padding; glyph ink must start
-        // well above the vertical middle (16 + 40 = 56). The regression
-        // rendered the run at rows ≈50..64 — comfortably caught.
+        // Box top = 16 (canvas padding). Block flow puts the label run
+        // right after the 10px container padding (+ the label's fixed 6px
+        // top inset → ink starts at row ≈32); glyph ink must start well
+        // above the vertical middle (16 + 40 = 56). The regression
+        // rendered the run vertically centred — comfortably caught.
         XCTAssertLessThan(textRows.lowerBound, 40,
                           "placeholder vertically displaced — align-items " +
                           "leaked into the childless flex container")
