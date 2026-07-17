@@ -89,7 +89,15 @@ sealed interface MaskGradientConfig {
         val centerX: Float = 0.5f,
         val centerY: Float = 0.5f,
         val colorStops: List<MaskColorStop>,
-        val repeating: Boolean = false
+        val repeating: Boolean = false,
+        /**
+         * Ending shape (css-images-3 §3.2 `<ending-shape>`): the IR wire
+         * carries `"shape": "circle" | "ellipse"` when the author wrote
+         * one (MaskImageProperty.RadialGradient.shape); null when omitted.
+         * Null MUST render as ELLIPSE — that is the CSS default — so the
+         * applier treats null and ELLIPSE identically.
+         */
+        val shape: MaskRadialShape? = null
     ) : MaskGradientConfig
 
     /**
@@ -103,6 +111,18 @@ sealed interface MaskGradientConfig {
         val colorStops: List<MaskColorStop>,
         val repeating: Boolean = false
     ) : MaskGradientConfig
+}
+
+/**
+ * Radial mask ending shape (css-images-3 §3.2). Mirrors the converter's
+ * MaskImageValue.GradientShape enum — only these two keywords exist in
+ * the `radial-gradient()` grammar.
+ */
+enum class MaskRadialShape {
+    /** `circle` — single radius, both axes equal. */
+    CIRCLE,
+    /** `ellipse` — independent rx/ry; the CSS default when omitted. */
+    ELLIPSE
 }
 
 /**

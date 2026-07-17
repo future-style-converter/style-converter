@@ -28,6 +28,27 @@ final class BackgroundTileMathTests: XCTestCase {
         }
     }
 
+    /// Closing-edge companion to assertOrigins: `ends` is parallel to
+    /// `origins` (tile i = [origins[i], ends[i]) — the pixel-snap contract).
+    private func assertEnds(_ expected: [CGFloat], _ plan: BackgroundTileMath.AxisPlan,
+                            file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertEqual(expected.count, plan.ends.count, "end count", file: file, line: line)
+        for (i, pair) in zip(expected, plan.ends).enumerated() {
+            XCTAssertEqual(pair.0, pair.1, accuracy: 0.01, "end \(i)", file: file, line: line)
+        }
+    }
+
+    /// Abutting lattices must SHARE edges exactly: ends[i] == origins[i+1]
+    /// (bitwise, no accuracy — shared integer edges are the whole point of
+    /// the snap; two AA'd rects meeting on a fractional edge leak a seam).
+    private func assertSharedEdges(_ plan: BackgroundTileMath.AxisPlan,
+                                   file: StaticString = #filePath, line: UInt = #line) {
+        for i in 0..<max(plan.origins.count - 1, 0) {
+            XCTAssertEqual(plan.ends[i], plan.origins[i + 1],
+                           "shared edge \(i)", file: file, line: line)
+        }
+    }
+
     // MARK: - space (§3.7 whole tiles + equal gaps)
 
     func testSpaceDistributesLeftoverAsEqualGapsWithFlushEdges() {
@@ -53,16 +74,23 @@ final class BackgroundTileMathTests: XCTestCase {
     // MARK: - round (§3.7 integer-count rescale)
 
     func testRoundRescalesTheTileSoAWholeCountFits() {
-        // 140 / 50 = 2.8 → rounds to 3 tiles of 140/3 ≈ 46.67.
+        // 140 / 50 = 2.8 → rounds to 3 tiles of 140/3 ≈ 46.67. The SHADER
+        // pitch stays fractional; the DRAWN edges snap to integers:
+        // round(0)=0, round(46.67)=47, round(93.33)=93, round(140)=140.
         let plan = BackgroundTileMath.axisPlan(area: 140, tile: 50, anchor: 0, mode: .round)
         XCTAssertEqual(plan.tileSize, 140.0 / 3.0, accuracy: 0.001)
-        assertOrigins([0, 140.0 / 3.0, 280.0 / 3.0], plan)
+        assertOrigins([0, 47, 93], plan)
+        // Per-tile widths 47/46/47 (±1px), summing to the full 140px axis.
+        assertEnds([47, 93, 140], plan)
+        assertSharedEdges(plan)
     }
 
     func testRoundKeepsAnExactFitUntouched() {
+        // Integer pitch → the snap is the identity (edges 0/50/100).
         let plan = BackgroundTileMath.axisPlan(area: 100, tile: 50, anchor: 0, mode: .round)
         XCTAssertEqual(plan.tileSize, 50, accuracy: 0.001)
         assertOrigins([0, 50], plan)
+        assertEnds([50, 100], plan)
     }
 
     func testRoundGrowsAnOversizedTileUpToTheFullArea() {
@@ -71,6 +99,29 @@ final class BackgroundTileMathTests: XCTestCase {
         let plan = BackgroundTileMath.axisPlan(area: 100, tile: 80, anchor: 0, mode: .round)
         XCTAssertEqual(plan.tileSize, 100, accuracy: 0.001)
         assertOrigins([0], plan)
+        assertEnds([100], plan)
+    }
+
+    func testRepeatWithAFractionalPitchSnapsSharedEdgesToo() {
+        // Any abutting fractional-pitch lattice seams, not just `round`:
+        // repeat with tile 200/7 over 100px walks 0, 28.57, 57.14, 85.71
+        // → snapped tiles [0,29) [29,57) [57,86) [86,114) — shared
+        // integer edges, last tile overhangs (clipped by the painter).
+        let plan = BackgroundTileMath.axisPlan(area: 100, tile: 200.0 / 7.0,
+                                               anchor: 0, mode: .repeat)
+        assertOrigins([0, 29, 57, 86], plan)
+        assertEnds([29, 57, 86, 114], plan)
+        assertSharedEdges(plan)
+    }
+
+    func testSpaceAndNoRepeatKeepExactUnsnappedEnds() {
+        // Non-abutting modes have no seam to close: end = start + tile
+        // exactly, even for fractional geometry (gaps separate the tiles).
+        let space = BackgroundTileMath.axisPlan(area: 140, tile: 50, anchor: 0, mode: .space)
+        assertEnds([50, 140], space) // starts 0/90 + the 50px tile
+        let single = BackgroundTileMath.axisPlan(area: 100, tile: 30, anchor: 35.4, mode: .noRepeat)
+        assertOrigins([35.4], single)
+        assertEnds([65.4], single) // fractional anchor untouched
     }
 
     // MARK: - repeat / no-repeat (§3.6 anchor semantics)
@@ -122,14 +173,28 @@ final class BackgroundTileMathTests: XCTestCase {
     }
 
     func testFixtureRoundAxes() {
-        // x: 200/30 = 6.67 → 7 tiles of 200/7 ≈ 28.571 (rescaled).
+        // The Repeat_Round straggler: x: 200/30 = 6.67 → 7 tiles of
+        // 200/7 ≈ 28.571 (rescaled). Fractional origins (multiples of
+        // 200/7) made both natives paint independently-AA'd rects whose
+        // boundaries never summed to full coverage — a light background
+        // seam at every interior edge (SSIM 0.946 vs Chromium's seamless
+        // pattern rasterization).
         let x = BackgroundTileMath.axisPlan(area: 200, tile: 30, anchor: 0, mode: .round)
+        // Shader pitch stays the fractional 200/7 — never snapped.
         XCTAssertEqual(x.tileSize, 200.0 / 7.0, accuracy: 0.001)
-        XCTAssertEqual(x.origins.count, 7)
-        // y: 120/30 = 4 exactly → untouched 30px tiles.
+        // Drawn edges = round(i·200/7): 0,29,57,86,114,143,171,200 —
+        // per-tile widths alternate 29/28 (±1px around the pitch).
+        assertOrigins([0, 29, 57, 86, 114, 143, 171], x)
+        assertEnds([29, 57, 86, 114, 143, 171, 200], x)
+        // Integer edge sharing is the seam fix: exact, not accuracy-close.
+        assertSharedEdges(x)
+        // Last end flush with the 200px area — the lattice tiles it fully.
+        XCTAssertEqual(x.ends.last, 200)
+        // y: 120/30 = 4 exactly → untouched 30px tiles (snap = identity).
         let y = BackgroundTileMath.axisPlan(area: 120, tile: 30, anchor: 0, mode: .round)
         XCTAssertEqual(y.tileSize, 30, accuracy: 0.001)
         assertOrigins([0, 30, 60, 90], y)
+        assertEnds([30, 60, 90, 120], y)
     }
 
     /// The full lattice the Canvas paints for the fixture's `space` row:
@@ -147,7 +212,9 @@ final class BackgroundTileMathTests: XCTestCase {
         XCTAssertEqual(rects.last!.origin.y, 90, accuracy: 0.01)
     }
 
-    /// `round` rescales each axis independently in the emitted rects.
+    /// `round` rescales each axis independently in the emitted rects —
+    /// and the drawn rects carry the pixel-SNAPPED per-tile extents, not
+    /// the fractional pitch (the seam fix; see testFixtureRoundAxes).
     func testFixtureRoundLatticeRescalesPerAxis() {
         let plan = BackgroundImageGeometry.Placement(
             tileSize: CGSize(width: 30, height: 30), origin: .zero,
@@ -155,9 +222,24 @@ final class BackgroundTileMathTests: XCTestCase {
         let rects = BackgroundImageGeometry.tileRects(placement: plan,
                                                       box: CGSize(width: 200, height: 120))
         XCTAssertEqual(rects.count, 7 * 4)
-        // Width refit to 200/7; height stays 30 (exact 4× fit).
-        XCTAssertEqual(rects.first!.width, 200.0 / 7.0, accuracy: 0.001)
-        XCTAssertEqual(rects.first!.height, 30, accuracy: 0.001)
+        // First column drawn 29px wide (snap of the 200/7 pitch's first
+        // edge pair 0→29); height stays 30 (exact 4× fit → identity snap).
+        XCTAssertEqual(rects.first!.width, 29)
+        XCTAssertEqual(rects.first!.height, 30)
+        // The first row's 7 columns abut on shared INTEGER edges and tile
+        // the whole 200px axis: widths 29/28/29/28/29/28/29.
+        let row = Array(rects.prefix(7))
+        for i in 0..<6 {
+            XCTAssertEqual(row[i].maxX, row[i + 1].minX, "abutting edge \(i)")
+            XCTAssertEqual(row[i].maxX, row[i].maxX.rounded(), "integer edge \(i)")
+        }
+        XCTAssertEqual(row.map(\.width).reduce(0, +), 200)
+        // The SHADER size the painter must pin gradients to stays the
+        // fractional per-axis pitch — never the snapped rect extents.
+        let shader = BackgroundImageGeometry.shaderTileSize(
+            placement: plan, box: CGSize(width: 200, height: 120))
+        XCTAssertEqual(shader.width, 200.0 / 7.0, accuracy: 0.001)
+        XCTAssertEqual(shader.height, 30, accuracy: 0.001)
     }
 
     // MARK: - gradient tile sizing (§3.9, intrinsic-less images)

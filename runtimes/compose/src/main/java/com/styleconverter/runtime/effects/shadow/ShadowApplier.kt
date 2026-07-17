@@ -3,7 +3,6 @@ package com.styleconverter.runtime.effects.shadow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -26,13 +25,16 @@ import androidx.compose.ui.unit.dp
  *
  * ## Implementation Strategy
  *
- * ### Simple Shadows (elevation-style)
- * When the shadow has no offset and no spread, we use Compose's built-in
- * `Modifier.shadow()` which maps well to Android's elevation system.
- *
- * ### Complex Shadows (CSS-style)
- * For full CSS box-shadow compatibility (with offset, spread, color control),
- * we use `drawBehind` with native Android canvas operations.
+ * ### All shadows are CSS-style Gaussian glows
+ * Every outset shadow goes through `drawBehind` + `BlurMaskFilter`. There
+ * is deliberately NO `Modifier.shadow(elevation)` fast path: elevation is
+ * a physically-modeled z-light shadow (two fixed-alpha ambient/spot
+ * layers whose geometry depends on the device's simulated light source),
+ * NOT the colored Gaussian glow css-backgrounds-3 §7.1 specifies — a
+ * `box-shadow: 0 0 40px red` routed through elevation rendered as a faint
+ * grey-ish rim instead of a wide red halo, which is exactly the class of
+ * divergence the campaign diagnosed. The custom draw path handles color,
+ * blur, and shape correctly for every parameter combination.
  *
  * ## Limitations
  * - **Spread radius**: Implemented by expanding/contracting the drawn rect
@@ -144,18 +146,14 @@ object ShadowApplier {
         radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
             com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE
     ): Modifier {
-        // Check if we can use simple elevation for single shadow. Skip the
-        // fast path when the element has border-radius: elevation shadows
-        // take a rectangular default shape and would ignore the radius.
-        if (shadows.size == 1 && isSimpleElevationShadow(shadows.first()) && !radiusConfig.hasRadius) {
-            val shadow = shadows.first()
-            return modifier.shadow(
-                elevation = shadow.blurRadius,
-                ambientColor = shadow.color,
-                spotColor = shadow.color
-            )
-        }
-
+        // NOTE: no elevation fast path. The old code routed a single
+        // 0-offset/0-spread shadow through Modifier.shadow(elevation) —
+        // but elevation is Android's physically-modeled z-shadow with
+        // FIXED ambient/spot alphas and light-source-dependent geometry,
+        // not the colored Gaussian css-backgrounds-3 §7.1 asks for, so
+        // `box-shadow: 0 0 40px <color>` lost both its color intensity
+        // and its 40px reach. Every shadow now takes the BlurMaskFilter
+        // path below, which honors color/blur/shape exactly.
         return modifier.drawBehind {
             // CSS spec: "Shadows are rendered in back-to-front order: the
             // FIRST shadow in the list is on top of the stack." We iterate
@@ -174,9 +172,18 @@ object ShadowApplier {
                         isAntiAlias = true
                         color = shadowData.color.toArgb()
 
-                        if (shadowData.blurRadius > 0.dp) {
+                        // Convert the CSS blur radius to Skia's mask-filter
+                        // radius (see blurMaskRadius for the derivation) —
+                        // passing the raw CSS value made Android's blur
+                        // ~2.3× wider/softer than web's for the same
+                        // declaration. Skip the filter entirely when the
+                        // converted radius rounds to 0: BlurMaskFilter
+                        // rejects non-positive radii, and a sub-pixel σ is
+                        // visually indistinguishable from a crisp edge.
+                        val maskRadius = blurMaskRadius(shadowData.blurRadius.toPx())
+                        if (maskRadius > 0f) {
                             maskFilter = android.graphics.BlurMaskFilter(
-                                shadowData.blurRadius.toPx(),
+                                maskRadius,
                                 android.graphics.BlurMaskFilter.Blur.NORMAL
                             )
                         }
@@ -276,9 +283,15 @@ object ShadowApplier {
                             isAntiAlias = true
                             color = shadowData.color.toArgb()
 
-                            if (blur > 0f) {
+                            // Same CSS→Skia radius conversion as the outset
+                            // path (derivation in blurMaskRadius) — the raw
+                            // CSS radius over-blurred inset shadows by the
+                            // same ~2.3× factor. Guard: BlurMaskFilter
+                            // throws on radius ≤ 0.
+                            val maskRadius = blurMaskRadius(blur)
+                            if (maskRadius > 0f) {
                                 maskFilter = android.graphics.BlurMaskFilter(
-                                    blur,
+                                    maskRadius,
                                     android.graphics.BlurMaskFilter.Blur.NORMAL
                                 )
                             }
@@ -327,18 +340,27 @@ object ShadowApplier {
     }
 
     /**
-     * Check if shadow can use simple elevation-based rendering.
+     * Convert a CSS box-shadow blur radius (px) into the radius argument
+     * Skia's [android.graphics.BlurMaskFilter] expects.
      *
-     * Simple shadows have:
-     * - No horizontal/vertical offset
-     * - No spread radius
-     * - Not an inset shadow
+     * Derivation:
+     * - css-backgrounds-3 §7.1: a blur radius `r` means a Gaussian blur
+     *   whose standard deviation is `r / 2` — this is what Chromium (and
+     *   the web runtime under it) implements, so σ = r/2 is our parity
+     *   target.
+     * - Skia's BlurMaskFilter maps its radius argument to a sigma via
+     *   `sigma ≈ 0.57735 · radius + 0.5` (skia/src/core/SkBlurMask.cpp,
+     *   `SkBlurMask::ConvertRadiusToSigma`).
+     * - Equate the two and solve for radius:
+     *   `radiusForSkia = max(0, (r/2 − 0.5) / 0.57735)`.
+     *
+     * Passing the raw CSS radius straight through (the old behavior) made
+     * the effective sigma ≈ 0.577·r + 0.5 instead of r/2 — roughly 2.3×
+     * too soft/wide, a visible cross-platform divergence at 40px blurs.
+     * Result 0 (r ≤ 1px) means "skip the filter": BlurMaskFilter throws
+     * on non-positive radii and a sub-pixel sigma reads as a crisp edge.
      */
-    private fun isSimpleElevationShadow(shadow: ShadowData): Boolean {
-        return shadow.offsetX == 0.dp &&
-                shadow.offsetY == 0.dp &&
-                shadow.spreadRadius == 0.dp &&
-                !shadow.inset
-    }
+    internal fun blurMaskRadius(cssBlurPx: Float): Float =
+        (((cssBlurPx / 2f) - 0.5f) / 0.57735f).coerceAtLeast(0f)
 
 }

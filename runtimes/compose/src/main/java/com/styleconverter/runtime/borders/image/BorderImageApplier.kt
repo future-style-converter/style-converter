@@ -197,14 +197,39 @@ object BorderImageApplier {
                     }
                 }
                 .padding(
-                    start = borderLeft,
-                    top = borderTop,
-                    end = borderRight,
-                    bottom = borderBottom
+                    // Only the EXTRA inset beyond the border band already
+                    // reserved by the renderer — css-backgrounds-3 §6: the
+                    // border-image area OVERLAYS the border box's border
+                    // band, it does not stack inside it. ComponentRenderer
+                    // chains StyleApplier.borderContentInset (the computed
+                    // border widths) into `modifier` before wrapping in
+                    // this Box, so padding the FULL resolved width again
+                    // inset the content twice (computed + resolved) and
+                    // shrank the content box vs web. See extraContentInset.
+                    start = extraContentInset(borderLeft, config.computedBorderLeft),
+                    top = extraContentInset(borderTop, config.computedBorderTop),
+                    end = extraContentInset(borderRight, config.computedBorderRight),
+                    bottom = extraContentInset(borderBottom, config.computedBorderBottom)
                 ),
             content = content
         )
     }
+
+    /**
+     * Content inset the border-image area needs BEYOND the border band
+     * the renderer already reserved via StyleApplier.borderContentInset.
+     *
+     * css-backgrounds-3 §6: "the border image is drawn ... in place of
+     * the border" — the border-image area overlays the border band, so
+     * the band's content inset already accounts for the first
+     * [computedBorder] of it. Only the part of the resolved
+     * border-image-width that EXCEEDS the computed border-width still
+     * needs reserving; when the image is narrower than (or equal to) the
+     * band, no extra inset applies. Clamped at zero — a narrower image
+     * must never pull content INTO the band. Internal for JVM tests.
+     */
+    internal fun extraContentInset(resolved: Dp, computedBorder: Dp): Dp =
+        if (resolved > computedBorder) resolved - computedBorder else 0.dp
 
     /**
      * Draw the 9-slice border image.

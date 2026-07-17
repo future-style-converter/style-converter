@@ -20,8 +20,17 @@ import SwiftUI
 enum MaskLayer: Equatable {
     case none
     case url(href: String)
-    case linearGradient(angleDeg: Double, stops: [Gradient.Stop])
-    case radialGradient(stops: [Gradient.Stop])
+    // `repeating` carries the repeating-linear-gradient flag through to
+    // the applier: SwiftUI's Gradient clamps after its last stop, so a
+    // collapsed (flag-less) repeating layer rendered ONE period then a
+    // solid clamp instead of the css-images-3 §3.4.3 tiled stripes —
+    // the applier expands the period stops when the flag is set.
+    case linearGradient(angleDeg: Double, stops: [Gradient.Stop], repeating: Bool)
+    // `shape` is the wire's ending-shape keyword ("circle"/"ellipse",
+    // css-images-3 §3.2); nil = omitted = the CSS default ellipse. Same
+    // String? convention as GradientApplier's background radial so the
+    // two radial paths stay mirror images.
+    case radialGradient(shape: String?, stops: [Gradient.Stop])
     case conicGradient(stops: [Gradient.Stop])
 }
 

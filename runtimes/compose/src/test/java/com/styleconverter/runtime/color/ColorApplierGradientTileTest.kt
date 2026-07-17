@@ -162,13 +162,19 @@ class ColorApplierGradientTileTest {
                    maxRight > pass.clip.width)
         // Grid completeness: 7 columns (0..180) × 4 rows (0..90).
         assertEquals(28, pass.origins.size)
+        // Integer pitch → snapped drawn extents equal the tile exactly
+        // (the snap is the identity here), one per origin.
+        assertEquals(28, pass.drawSizes.size)
+        assertTrue(pass.drawSizes.all { it == Size(30f, 30f) })
     }
 
     @Test
     fun `round plan rescales the drawn tile in the pass`() {
-        // §3.7 round: 140px axis / 50px tile → 3 tiles of 140/3 px. The
-        // pass's tileSize is what both the drawRect AND the pinned shader
-        // receive, so the rescale must surface here.
+        // §3.7 round: 140px axis / 50px tile → 3 tiles of 140/3 px pitch.
+        // The pass's tileSize is what the pinned SHADER receives (stays
+        // fractional); the drawRect consumes the per-tile SNAPPED extents
+        // in drawSizes (edges 0/47/93/140 → widths 47/46/47) so abutting
+        // AA'd rects share integer edges instead of leaking a seam.
         val pass = ColorApplier.planTilePass(
             box = Size(140f, 140f), tileW = 50f, tileH = 50f,
             anchorX = 0f, anchorY = 0f,
@@ -177,6 +183,20 @@ class ColorApplierGradientTileTest {
         assertEquals(140f / 3f, pass.tileSize.width, 0.001f)
         assertEquals(140f / 3f, pass.tileSize.height, 0.001f)
         assertEquals(9, pass.origins.size)
+        // drawSizes is index-parallel to origins (tile k = origins[k] +
+        // drawSizes[k]); flattening order is x-outer/y-inner, so tile
+        // (col i, row j) sits at index i·rows + j.
+        assertEquals(9, pass.drawSizes.size)
+        // Snapped per-axis widths: col/row 0 → 47, 1 → 46, 2 → 47.
+        assertEquals(Size(47f, 47f), pass.drawSizes[0])     // (0,0)
+        assertEquals(Size(46f, 46f), pass.drawSizes[4])     // (1,1)
+        assertEquals(Size(47f, 47f), pass.drawSizes[8])     // (2,2)
+        // Every tile's closing edge lands EXACTLY on a neighbour's origin
+        // or the 140px area edge — shared integer edges are the seam fix.
+        pass.origins.zip(pass.drawSizes).forEach { (o, s) ->
+            val right = o.x + s.width
+            assertTrue("right edge $right", right == 47f || right == 93f || right == 140f)
+        }
     }
 
     @Test
@@ -201,5 +221,58 @@ class ColorApplierGradientTileTest {
             repeat = BackgroundRepeatAxes(AxisRepeat.REPEAT, AxisRepeat.REPEAT)
         )
         assertTrue(pass.origins.isEmpty())
+    }
+
+    // ---- (4) radialAxisScale: circle→ellipse squash DIRECTION ----------
+    //
+    // The radial brush simulates a CSS ellipse by building a circular
+    // RadialGradientShader at rMax = max(rx, ry) plus a local matrix.
+    // Skia's setLocalMatrix maps the shader IMAGE through the matrix, so
+    // the squash factors must be radius/rMax (≤ 1) — the old inline
+    // rMax/radius was the exact inverse and stretched the wrong axis on
+    // every non-circular radial (the mask path copied the same inversion;
+    // MaskGradientGeometryTest pins its delegation here).
+
+    @Test
+    fun `wide-box radial squashes the vertical axis of the rMax circle`() {
+        // Centred farthest-corner ellipse on a 160×80 box: rx = 80√2,
+        // ry = 40√2 → the X axis is rMax (sx = 1) and Y squashes to the
+        // radius ratio 0.5. The inverted pre-fix factors were (1, 2).
+        val k = kotlin.math.sqrt(2f)
+        val (sx, sy) = ColorApplier.radialAxisScale(80f * k, 40f * k)
+        assertEquals(1f, sx, 1e-6f)
+        assertEquals(0.5f, sy, 1e-6f)
+    }
+
+    @Test
+    fun `tall-box radial squashes the horizontal axis instead`() {
+        // ry > rx mirror: sy = 1 (Y is the shader radius) and X shrinks
+        // by rx/ry — the squash follows the SHORT axis, never fixed.
+        val (sx, sy) = ColorApplier.radialAxisScale(45f, 180f)
+        assertEquals(0.25f, sx, 1e-6f)
+        assertEquals(1f, sy, 1e-6f)
+    }
+
+    @Test
+    fun `squash factors never exceed one`() {
+        // The direction invariant behind the fix: the rMax circle only
+        // ever SHRINKS toward the ellipse; a factor > 1 means the matrix
+        // is inverted again.
+        for ((rx, ry) in listOf(10f to 200f, 200f to 10f, 77f to 77f)) {
+            val (sx, sy) = ColorApplier.radialAxisScale(rx, ry)
+            assertTrue("($rx, $ry) → ($sx, $sy)", sx <= 1f && sy <= 1f)
+            // And the long axis is untouched — exactly one of the two
+            // factors is 1 unless the radii are equal (then both are).
+            assertEquals(1f, kotlin.math.max(sx, sy), 0f)
+        }
+    }
+
+    @Test
+    fun `degenerate zero radii clamp to the epsilon guard, not NaN`() {
+        // A zero-sized box collapses both radii; the ε-clamp (1e-3) keeps
+        // the division finite and yields the identity scale.
+        val (sx, sy) = ColorApplier.radialAxisScale(0f, 0f)
+        assertEquals(1f, sx, 0f)
+        assertEquals(1f, sy, 0f)
     }
 }

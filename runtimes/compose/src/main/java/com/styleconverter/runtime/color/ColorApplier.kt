@@ -421,7 +421,7 @@ object ColorApplier {
             // tiles bled up to one tile-width past the box (painted bbox
             // 210px on a 200px box in the wave audit).
             clipRect(0f, 0f, pass.clip.width, pass.clip.height) {
-                for (origin in pass.origins) {
+                pass.origins.forEachIndexed { i, origin ->
                     // TRANSLATE the draw space per tile instead of offsetting
                     // the rect: the pinned ShaderBrush anchors its shader at
                     // the current origin, so translating renders the FULL
@@ -429,9 +429,17 @@ object ColorApplier {
                     // sample one box-anchored gradient — every tile but the
                     // first showed clamped edge colours).
                     translate(left = origin.x, top = origin.y) {
+                        // Draw the SNAPPED per-tile extent (drawSizes[i], from
+                        // the plan's integer shared edges) — not tileSize:
+                        // abutting AA'd rects on fractional edges leak a
+                        // background seam (Repeat_Round straggler). The
+                        // shader stays pinned to the fractional tileSize
+                        // above; a snapped-wide tile just clamps its last
+                        // sub-pixel column to the edge colour, which is
+                        // invisible next to the adjacent tile's first stop.
                         drawRect(brush = tileBrush,
                                  topLeft = androidx.compose.ui.geometry.Offset.Zero,
-                                 size = pass.tileSize)
+                                 size = pass.drawSizes[i])
                     }
                 }
             }
@@ -441,15 +449,23 @@ object ColorApplier {
     /**
      * The resolved draw commands for ONE sized-tile background pass:
      * [clip] is the painting-area rect the tiles are clipped to
-     * (css-backgrounds-3 §2.2 — the border box), [tileSize] the per-tile
-     * draw size after any `round` rescale, [origins] the cartesian product
-     * of the two per-axis §3.7 plans. Pure data so plain JVM tests can pin
-     * that overhanging REPEAT tiles stay bounded by [clip].
+     * (css-backgrounds-3 §2.2 — the border box), [tileSize] the SHADER
+     * pitch after any `round` rescale (fractional, e.g. 200/7 — gradient
+     * geometry resolves against it per css-images-4 §3.4.1), [origins] the
+     * cartesian product of the two per-axis §3.7 plans, and [drawSizes]
+     * each tile's DRAWN extent (parallel to [origins]). Drawn extents come
+     * from the axis plans' pixel-snapped edges: abutting lattices
+     * (repeat/round) vary ±1px per tile so adjacent rects share integer
+     * edges — fractional-edge neighbours are independently antialiased and
+     * never sum to full coverage, leaking a background seam at every
+     * interior boundary (the Repeat_Round straggler). Pure data so plain
+     * JVM tests can pin overflow, clip and snapping.
      */
     internal data class TilePass(
         val clip: Size,
         val tileSize: Size,
-        val origins: List<Offset>
+        val origins: List<Offset>,
+        val drawSizes: List<Size>
     )
 
     /**
@@ -472,10 +488,23 @@ object ColorApplier {
         val planY = BackgroundTileMath.axisPlan(box.height, tileH, anchorY, repeat.y)
         // Cartesian product: every X origin pairs with every Y origin
         // (background tiling is a rectangular grid, css-backgrounds-3 §3.7).
-        val origins = planX.origins.flatMap { x -> planY.origins.map { y -> Offset(x, y) } }
+        // Origin and drawn extent are built together so index i of both
+        // lists describes the same tile — the drawn extent is the axis
+        // plan's [start, end) segment, NOT the uniform tileSize (round /
+        // fractional repeat snap edges, so widths vary ±1px per tile).
+        val origins = mutableListOf<Offset>()
+        val drawSizes = mutableListOf<Size>()
+        for (i in planX.origins.indices) {
+            for (j in planY.origins.indices) {
+                origins.add(Offset(planX.origins[i], planY.origins[j]))
+                drawSizes.add(Size(planX.ends[i] - planX.origins[i],
+                                   planY.ends[j] - planY.origins[j]))
+            }
+        }
         // Clip is always the full border box — the painting area for the
         // default background-clip (§2.2); tile math never widens it.
-        return TilePass(clip = box, tileSize = Size(planX.tileSize, planY.tileSize), origins = origins)
+        return TilePass(clip = box, tileSize = Size(planX.tileSize, planY.tileSize),
+                        origins = origins, drawSizes = drawSizes)
     }
 
     /**
@@ -662,14 +691,13 @@ object ColorApplier {
                 }
                 // RadialGradientShader is circular only. To simulate an
                 // ellipse with rx ≠ ry, build a circular shader of radius
-                // max(rx,ry) centred at (cx,cy) and pre-multiply by a local
-                // matrix that scales one axis (rx/ry or ry/rx). The matrix
-                // is applied to the SHADER output, so we want the inverse:
-                // a matrix that maps draw-space (x,y) → shader-space scaled
-                // such that the elliptical isolines become circular.
+                // max(rx,ry) centred at (cx,cy) and squash it down to the
+                // ellipse with a local matrix — the scale factors come from
+                // radialAxisScale (rx/rMax, ry/rMax), which documents the
+                // Skia setLocalMatrix direction and is JVM-pinned so the
+                // squash can never invert again.
                 val rMax = kotlin.math.max(rx.coerceAtLeast(1e-3f), ry.coerceAtLeast(1e-3f))
-                val sx = rMax / rx.coerceAtLeast(1e-3f)
-                val sy = rMax / ry.coerceAtLeast(1e-3f)
+                val (sx, sy) = radialAxisScale(rx, ry)
                 val shader = RadialGradientShader(
                     center = Offset(cx, cy),
                     radius = rMax,
@@ -678,7 +706,9 @@ object ColorApplier {
                     tileMode = tileMode
                 )
                 if (sx == 1f && sy == 1f) return shader
-                // Apply the axis pre-scale around (cx,cy).
+                // Apply the axis squash around (cx,cy): translate the
+                // centre to the origin, scale, translate back — so the
+                // ellipse stays centred where CSS put it.
                 val localMatrix = android.graphics.Matrix().apply {
                     postTranslate(-cx, -cy)
                     postScale(sx, sy)
@@ -688,6 +718,38 @@ object ColorApplier {
                 return shader
             }
         }
+    }
+
+    /**
+     * Local-matrix axis scale (sx, sy) that turns the circular
+     * RadialGradientShader of radius rMax = max(rx, ry) into the CSS
+     * ellipse with radii (rx, ry).
+     *
+     * Direction matters: Skia's setLocalMatrix transforms the shader
+     * IMAGE by M — the painted pattern in draw space is the circle mapped
+     * THROUGH the matrix (Skia samples the shader at M⁻¹·p, so the color
+     * at shader-space q lands at draw-space M·q). To squash the rMax
+     * circle DOWN to the ellipse we therefore scale each axis by
+     * radius/rMax (both ≤ 1). The previous inline rMax/radius values were
+     * the exact INVERSE: on a wide box (rx > ry, farthest-corner default)
+     * they stretched the circle further along Y instead of squashing it,
+     * so every elliptical radial gradient (and mask — see
+     * MaskApplier.radialMaskAxisScale, a delegate to this) squashed the
+     * WRONG axis vs web.
+     *
+     * Radii are clamped ≥ 1e-3 so a zero-sized box cannot yield 0/0.
+     * Internal so JVM tests can pin the scale DIRECTION
+     * (ColorApplierGradientTileTest).
+     */
+    internal fun radialAxisScale(rx: Float, ry: Float): Pair<Float, Float> {
+        // ε-clamp mirrors the shader-radius guard in the caller so both
+        // computations agree on degenerate boxes.
+        val rxC = rx.coerceAtLeast(1e-3f)
+        val ryC = ry.coerceAtLeast(1e-3f)
+        // The circular shader is built at the LARGER radius; each axis
+        // then shrinks by its own radius/rMax (the max axis stays 1).
+        val rMax = kotlin.math.max(rxC, ryC)
+        return (rxC / rMax) to (ryC / rMax)
     }
 
     /**

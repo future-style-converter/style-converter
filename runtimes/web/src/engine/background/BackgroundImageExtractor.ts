@@ -5,6 +5,12 @@
 import { extractColor } from '../core/types/ColorValue';
 import { extractAngle } from '../core/types/AngleValue';
 import { colorToCss } from '../color/DynamicColorCss';
+// Shared always-quoted url() serialiser (css-values-4 §4.5): an unquoted
+// url() token cannot contain whitespace/quotes/parens, so data URIs with
+// spaces or quotes emitted as `url(${raw})` produce an INVALID declaration
+// the browser drops wholesale — the exact bug the border-image fix closed.
+// Imported (not duplicated) so the escaping rules have one owner.
+import { cssUrl } from '../borders/image/_shared';
 import type {
   BackgroundImageConfig,
   BackgroundImagePropertyType,
@@ -117,13 +123,16 @@ export function layerCss(entry: unknown): string | null {
     // unaffected — they round-trip through IRUrlSerializer as object
     // form { url, data:true } and reach the `obj.url` branch below.
     // See testing/titan/investigations/swarm-002/css-images__image-orientation-background-position.json.
-    return `url(${entry})`;
+    // Quoted via cssUrl — a bare `url(${entry})` is invalid CSS the
+    // moment the path contains a space/quote/paren (same latent hole
+    // the border-image fix closed; the whole declaration was dropped).
+    return cssUrl(entry);
   }
   if (typeof entry !== 'object') return null;                          // numbers etc. invalid here
   const obj = entry as Record<string, unknown>;
   if (obj.type === 'none') return 'none';                              // wrapped 'none'
-  if (typeof obj.url === 'string') return `url(${obj.url})`;           // url layer (wrapped or unwrapped)
-  if (obj.type === 'url' && typeof obj.url === 'string') return `url(${obj.url})`;
+  if (typeof obj.url === 'string') return cssUrl(obj.url);             // url layer (wrapped or unwrapped), quoted
+  if (obj.type === 'url' && typeof obj.url === 'string') return cssUrl(obj.url);
   switch (obj.type) {                                                  // gradient variants
     case 'linear-gradient':           return linearGradientCss(obj, false);
     case 'repeating-linear-gradient': return linearGradientCss(obj, true);

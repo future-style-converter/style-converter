@@ -220,11 +220,29 @@ object MaskExtractor {
         val type = data["type"]?.jsonPrimitive?.contentOrNull?.lowercase() ?: ""
         val repeating = type.startsWith("repeating")
 
-        // Extract center position
-        val centerX = data["centerX"]?.jsonPrimitive?.floatOrNull
+        // Ending shape (css-images-3 §3.2): the canonical wire key is
+        // "shape" with lowercase "circle"/"ellipse" (MaskImageValue
+        // serializer emits `it.name.lowercase()`). Absent → null, which
+        // the applier renders as the CSS default ELLIPSE.
+        val shape = when (data["shape"]?.jsonPrimitive?.contentOrNull?.lowercase()) {
+            "circle" -> MaskRadialShape.CIRCLE
+            "ellipse" -> MaskRadialShape.ELLIPSE
+            else -> null
+        }
+
+        // Extract center position. Canonical wire: `"pos": {"x", "y"}`
+        // where x/y are IRPercentage raw percents (0–100 — same scale
+        // ruling as extractSingleColorStop), so divide by 100 to get the
+        // 0–1 fractions the applier multiplies by the box size. The flat
+        // centerX/x fallbacks predate the serializer and are already
+        // fractions — kept for legacy IR only.
+        val pos = data["pos"] as? JsonObject
+        val centerX = pos?.get("x")?.jsonPrimitive?.floatOrNull?.let { it / 100f }
+            ?: data["centerX"]?.jsonPrimitive?.floatOrNull
             ?: data["x"]?.jsonPrimitive?.floatOrNull
             ?: 0.5f
-        val centerY = data["centerY"]?.jsonPrimitive?.floatOrNull
+        val centerY = pos?.get("y")?.jsonPrimitive?.floatOrNull?.let { it / 100f }
+            ?: data["centerY"]?.jsonPrimitive?.floatOrNull
             ?: data["y"]?.jsonPrimitive?.floatOrNull
             ?: 0.5f
 
@@ -233,7 +251,7 @@ object MaskExtractor {
         val colorStops = extractColorStops(stopsData)
 
         return if (colorStops.isNotEmpty()) {
-            MaskGradientConfig.Radial(centerX, centerY, colorStops, repeating)
+            MaskGradientConfig.Radial(centerX, centerY, colorStops, repeating, shape)
         } else {
             // Default radial fade for mask
             MaskGradientConfig.Radial(
@@ -243,7 +261,8 @@ object MaskExtractor {
                     MaskColorStop(Color.White, 0f),
                     MaskColorStop(Color.Transparent, 1f)
                 ),
-                repeating = repeating
+                repeating = repeating,
+                shape = shape
             )
         }
     }
@@ -255,11 +274,16 @@ object MaskExtractor {
         val type = data["type"]?.jsonPrimitive?.contentOrNull?.lowercase() ?: ""
         val repeating = type.startsWith("repeating")
 
-        // Extract center position
-        val centerX = data["centerX"]?.jsonPrimitive?.floatOrNull
+        // Extract center position — same `"pos"` percent-object wire as
+        // the radial branch (conic-gradient `at <pos>`, css-images-4
+        // §3.3); flat centerX/x fraction fallbacks for legacy IR.
+        val pos = data["pos"] as? JsonObject
+        val centerX = pos?.get("x")?.jsonPrimitive?.floatOrNull?.let { it / 100f }
+            ?: data["centerX"]?.jsonPrimitive?.floatOrNull
             ?: data["x"]?.jsonPrimitive?.floatOrNull
             ?: 0.5f
-        val centerY = data["centerY"]?.jsonPrimitive?.floatOrNull
+        val centerY = pos?.get("y")?.jsonPrimitive?.floatOrNull?.let { it / 100f }
+            ?: data["centerY"]?.jsonPrimitive?.floatOrNull
             ?: data["y"]?.jsonPrimitive?.floatOrNull
             ?: 0.5f
 
@@ -323,31 +347,48 @@ object MaskExtractor {
 
     /**
      * Extract a single color stop.
+     *
+     * ## Wire scale: stop positions are 0–100 PERCENTAGES, not fractions
+     * MaskImageValue.ColorStop.position is an IRPercentage, and
+     * IRPercentageSerializer (converter ValueTypes.kt) emits the raw
+     * percent number verbatim: `transparent 10%` arrives as `10.0`, never
+     * `0.1`. There is NO legacy 0–1-normalized producer on this wire —
+     * so we always divide by 100 (no `<= 1` heuristic: a wire `0.5`
+     * legitimately means `0.5%`). The old code fed the raw percent into
+     * coerceIn(0f, 1f), collapsing every stop past 1% to position 1.0
+     * (a `black 0%, transparent 10%` mask rendered as a full-box fade).
      */
     private fun extractSingleColorStop(element: JsonElement, index: Int, total: Int): MaskColorStop? {
+        // Missing-position fallback (css-images-3 §3.4.2 auto-placement):
+        // spread evenly over [0,1]. Already a fraction — must NOT be /100.
+        val evenFraction = if (total > 1) index.toFloat() / (total - 1) else 0f
         when (element) {
             is JsonObject -> {
                 // Get color
                 val colorData = element["color"] ?: element["c"]
                 val color = extractMaskColor(colorData) ?: return null
 
-                // Get position
-                val position = element["position"]?.jsonPrimitive?.floatOrNull
-                    ?: element["pos"]?.jsonPrimitive?.floatOrNull
-                    ?: (if (total > 1) index.toFloat() / (total - 1) else 0f)
+                // Get position — wire percent (0–100) → fraction (0–1).
+                val position = (element["position"]?.jsonPrimitive?.floatOrNull
+                    ?: element["pos"]?.jsonPrimitive?.floatOrNull)
+                    ?.let { it / 100f }
+                    ?: evenFraction
 
                 return MaskColorStop(color, position.coerceIn(0f, 1f))
             }
             is JsonArray -> {
-                // [position, color] or [color, position] format
+                // [position, color] or [color, position] format — same
+                // percent scale as the object form (both originate from
+                // the CSS `<color-stop>` position, a `<percentage>`).
                 if (element.size >= 2) {
                     val first = element[0]
                     val second = element[1]
 
                     // Try to determine which is color and which is position
-                    val position = first.jsonPrimitive.floatOrNull
-                        ?: second.jsonPrimitive.floatOrNull
-                        ?: (if (total > 1) index.toFloat() / (total - 1) else 0f)
+                    val position = (first.jsonPrimitive.floatOrNull
+                        ?: second.jsonPrimitive.floatOrNull)
+                        ?.let { it / 100f }
+                        ?: evenFraction
 
                     val colorElement = if (first.jsonPrimitive.floatOrNull != null) second else first
                     val color = extractMaskColor(colorElement) ?: return null

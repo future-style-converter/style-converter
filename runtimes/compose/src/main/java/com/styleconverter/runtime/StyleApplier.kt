@@ -50,7 +50,6 @@ import com.styleconverter.runtime.transforms.TransformConfig
 import com.styleconverter.runtime.transforms.TransformExtractor
 import com.styleconverter.runtime.typography.TypographyConfig
 import com.styleconverter.runtime.typography.TypographyExtractor
-import com.styleconverter.runtime.effects.mask.MaskApplier
 import com.styleconverter.runtime.effects.mask.MaskConfig
 import com.styleconverter.runtime.effects.mask.MaskExtractor
 import com.styleconverter.runtime.borders.image.BorderImageConfig
@@ -480,10 +479,13 @@ object StyleApplier {
         //    `border-radius: 50%` element = concentric ellipse, not a rect).
         result = EffectsFacade.apply(result, config.effects, config.borders.radius)
 
-        // 3.5. Mask (applied after clip for proper compositing)
-        if (config.mask.hasMask) {
-            result = MaskApplier.applyMask(result, config.mask)
-        }
+        // 3.5. Mask — applied INSIDE EffectsFacade.apply (step 3), which
+        //    extracts its own MaskConfig from the same properties. A
+        //    standalone MaskApplier.applyMask(config.mask) call here ran
+        //    the DstIn gradient pass a SECOND time, multiplying the mask
+        //    alpha with itself: measured Android alpha == web alpha² at
+        //    every sampled pixel of the mask fixtures (a 50%-alpha stop
+        //    rendered at 25%). EffectsFacade owns the single application.
 
         // 4. Layout — sizing + margin + position (NOT padding; see step 8).
         result = LayoutFacade.applyToModifier(result, config.layout)
@@ -705,10 +707,10 @@ object StyleApplier {
         // Note: Border image requires BorderImageBox composable for async loading
         result = ColorApplier.applyColors(result, config.colors)
         // Radius rides along for border-box-shaped shadows (§7.1.1).
+        // Mask included: EffectsFacade.apply runs MaskApplier once via its
+        // own MaskConfig — a second config.mask pass here squared the mask
+        // alpha exactly like the applyConfig duplicate did (see step 3.5).
         result = EffectsFacade.apply(result, config.effects, config.borders.radius)
-        if (config.mask.hasMask) {
-            result = MaskApplier.applyMask(result, config.mask)
-        }
         result = TransformApplier.applyTransforms(result, config.transforms)
         if (config.writingMode.hasWritingMode) {
             result = WritingModeApplier.applyWritingMode(result, config.writingMode)

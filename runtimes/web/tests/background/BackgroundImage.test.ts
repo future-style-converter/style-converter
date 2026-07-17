@@ -77,11 +77,31 @@ describe('BackgroundImage', () => {
     expect(applyBackgroundImage(cfg).backgroundImage).toContain('repeating-linear-gradient(');
   });
 
-  it('passes through url()', () => {
+  it('passes through url() as an always-QUOTED token', () => {
+    // cssUrl quoting (css-values-4 §4.5) — shared with border-image.
     const cfg = extractBackgroundImage([
       p('BackgroundImage', [{ url: 'data:image/png;base64,abc', data: true }]),
     ]);
-    expect(applyBackgroundImage(cfg).backgroundImage).toBe('url(data:image/png;base64,abc)');
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe('url("data:image/png;base64,abc")');
+  });
+
+  it('round-trips a data URI with spaces and quotes [quoting hole]', () => {
+    // An unquoted url() token cannot contain whitespace or quotes
+    // (css-values-4 §4.5) — the old `url(${entry})` emitted an invalid
+    // declaration the browser dropped WHOLESALE for exactly this input
+    // (SVG data URIs are full of spaces + double quotes). cssUrl must
+    // quote the token and escape the embedded quotes per §4.3.
+    const svg = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>';
+    const cfg = extractBackgroundImage([p('BackgroundImage', [{ url: svg, data: true }])]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'url("data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"10\\" height=\\"10\\"/>")',
+    );
+  });
+
+  it('quotes bare-string URLs with spaces too [quoting hole]', () => {
+    // The bare-string branch (Bug 5) shares the same cssUrl serialiser.
+    const cfg = extractBackgroundImage([p('BackgroundImage', ['my picture.png'])]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe('url("my picture.png")');
   });
 
   it('emits none for bare "none"', () => {
@@ -98,7 +118,7 @@ describe('BackgroundImage', () => {
     ]);
     const css = applyBackgroundImage(cfg).backgroundImage!;
     expect(css.startsWith('linear-gradient(')).toBe(true);
-    expect(css).toContain(', url(x.png)');
+    expect(css).toContain(', url("x.png")');
   });
 
   it('unset -> empty styles', () => {
@@ -119,7 +139,7 @@ describe('BackgroundImage', () => {
       p('BackgroundImage', ['support/exif-orientation-2-ur.jpg']),
     ]);
     expect(applyBackgroundImage(cfg).backgroundImage)
-      .toBe('url(support/exif-orientation-2-ur.jpg)');
+      .toBe('url("support/exif-orientation-2-ur.jpg")');
   });
 
   it('still emits "none" for the bare-"none" sentinel (legacy behaviour) [Bug 5]', () => {
@@ -141,7 +161,7 @@ describe('BackgroundImage', () => {
       ]),
     ]);
     const css = applyBackgroundImage(cfg).backgroundImage!;
-    expect(css).toContain('url(support/exif-orientation-2-ur.jpg)');
-    expect(css).toContain('url(support/exif-orientation-6-ru.jpg)');
+    expect(css).toContain('url("support/exif-orientation-2-ur.jpg")');
+    expect(css).toContain('url("support/exif-orientation-6-ru.jpg")');
   });
 });

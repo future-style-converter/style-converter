@@ -187,6 +187,28 @@ final class FidelityWave5Tests: XCTestCase {
         XCTAssertEqual(e3.y, 1, accuracy: 0.001)
     }
 
+    func testDefaultEllipseEndRadiusIsFarthestCorner() {
+        // css-images-3 §3.5: the default radial ending shape is an
+        // ellipse sized `farthest-corner` — farthest-SIDE aspect
+        // (w/2 : h/2 centred) scaled to pass THROUGH the farthest
+        // corner, i.e. radii (√2·w/2, √2·h/2). The applier renders a
+        // circle on the max(w,h) square then squashes to the box
+        // aspect, so the pre-squash radius must be √2·max(w,h)/2 (the
+        // old max(w,h)/2 was farthest-side — fades ended 29% early on
+        // every default radial vs web/Compose).
+        let r = GradientApplier.ellipseEndRadius(CGSize(width: 200, height: 80))
+        XCTAssertEqual(r, 100 * sqrt(2), accuracy: 0.001)
+        // After the (w/m, h/m) squash the per-axis radii land on the
+        // §3.5 values for the 200×80 box…
+        let m: CGFloat = 200                          // squash-source square
+        let rx = r * 200 / m, ry = r * 80 / m
+        XCTAssertEqual(rx, sqrt(2) * 100, accuracy: 0.001)
+        XCTAssertEqual(ry, sqrt(2) * 40, accuracy: 0.001)
+        // …and the geometric ground truth: the farthest corner
+        // (±w/2, ±h/2) from the centre lies exactly ON that ellipse.
+        XCTAssertEqual(pow(100 / rx, 2) + pow(40 / ry, 2), 1, accuracy: 0.001)
+    }
+
     func testSrgbSubdivisionPinsMidpoint() {
         // red→blue in sRGB passes (0.5, 0, 0.5) at the midpoint — the
         // browser's dark purple. (SwiftUI's own ramp would pass a washed

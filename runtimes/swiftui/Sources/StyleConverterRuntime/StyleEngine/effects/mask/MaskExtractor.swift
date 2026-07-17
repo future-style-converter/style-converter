@@ -61,18 +61,28 @@ enum MaskExtractor {
             guard case .object(let o) = entry,
                   let t = o["type"]?.stringValue else { continue }
             switch t {
-            case "linear-gradient":
+            case "linear-gradient", "repeating-linear-gradient":
                 // Optional angle; default 180° (top→bottom) per CSS spec.
                 let angle = extractAngle(o["angle"])?.degrees ?? 180
+                // The repeating flag must SURVIVE extraction: collapsing
+                // both types to one flag-less case made SwiftUI clamp
+                // after the last stop (one fade, then solid) where CSS
+                // tiles the first→last span (§3.4.3). The applier keys
+                // its period expansion off this flag.
                 layers.append(.linearGradient(angleDeg: angle,
-                                              stops: parseStops(o["stops"])))
+                                              stops: parseStops(o["stops"]),
+                                              repeating: t.hasPrefix("repeating")))
             case "radial-gradient", "repeating-radial-gradient":
-                layers.append(.radialGradient(stops: parseStops(o["stops"])))
-            case "repeating-linear-gradient":
-                let angle = extractAngle(o["angle"])?.degrees ?? 180
-                layers.append(.linearGradient(angleDeg: angle,
+                // Ending-shape keyword rides the wire as lowercase
+                // "circle"/"ellipse" (MaskImageValueSerializer); nil when
+                // omitted → the applier renders the CSS ellipse default.
+                layers.append(.radialGradient(shape: o["shape"]?.stringValue,
                                               stops: parseStops(o["stops"])))
-            case "conic-gradient":
+            case "conic-gradient", "repeating-conic-gradient":
+                // repeating-conic maps to the plain conic layer as a
+                // best effort (TODO: sweep-period expansion). The old
+                // switch had no repeating-conic case at all, so the
+                // layer was silently DROPPED and the mask vanished.
                 layers.append(.conicGradient(stops: parseStops(o["stops"])))
             default: break
             }
