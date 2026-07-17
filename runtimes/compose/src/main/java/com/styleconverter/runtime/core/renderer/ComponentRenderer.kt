@@ -1974,6 +1974,30 @@ object ComponentRenderer {
         val tabConfig = TextStyleApplier.extractTabSize(properties)
         displayText = TextStyleApplier.applyTabSize(displayText, tabConfig)
 
+        // ── Block-font label branch (cross-platform glyph-wall fix) ──────
+        // The SYNTHESIZED component-name label no longer renders through a
+        // font stack: it rasterizes via the shared 5x7 block atlas
+        // (BlockFont.gen.kt, checksum-pinned cb3c6e411c7b2859) as integer-
+        // coordinate 1x1-px rects, so all three platforms paint byte-
+        // identical label pixels (fonts were the residual noise capping
+        // ~50 text-bearing fixtures at SSIM 0.90-0.949). ONLY the
+        // synthesized name takes this path — real leading text (hasRawText,
+        // the IR `_text` channel) keeps the full CSS-styled Text pipeline
+        // below, exactly like the web/iOS runtimes. This branch sits AFTER
+        // the shouldSuppressSynthesizedName gate above, so WPT capture mode
+        // still renders NOTHING for synthesized names (gate unchanged).
+        // Note: the writing-mode rotation further down no longer applies to
+        // the synthesized label — the shared spec pins it as a single
+        // horizontal line at (8,6) on every platform.
+        if (!hasRawText) {
+            // The input is EXACTLY the string this function passed to Text
+            // before (underscore-stripped name + text-transform + tab-size
+            // applied above); BlockLabelPlaceholder uppercases and maps
+            // atlas-unknown characters to '-' itself (the shared transform).
+            BlockLabelPlaceholder(displayText)
+            return
+        }
+
         // Note: list-style markers are not prepended to placeholder text
         // to match web renderer behavior (web shows plain component name)
 

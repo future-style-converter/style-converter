@@ -33,11 +33,15 @@ final class WPTCaptureModeTests: XCTestCase {
         try JSONDecoder().decode(IRComponent.self, from: Data(json.utf8))
     }
 
-    /// A childless box with an explicit 120×40 size and a light (#eee)
-    /// background: light bg ⇒ the placeholder's contrast pick is DARK text
-    /// (PlaceholderLabel.resolvedColor: luminance > 0.6), so glyph ink
-    /// reads clearly against the fill, and the explicit height pins the box
-    /// size whether or not the label is present. `text` inserted verbatim.
+    /// A childless box with an explicit 120×40 size and a DARK (#222)
+    /// background. The block-font name label (applier campaign) paints the
+    /// FIXED rgba(237,237,237,0.7) ink — BlockLabel.labelColor, no
+    /// luminance contrast pick anymore — so glyph ink only separates from
+    /// the fill on a dark background (over the old #eee fill it composited
+    /// to ≈237 vs 238: invisible to a pixel probe). Real text in WPT mode
+    /// picks the same light-on-dark ink via PlaceholderLabel.resolvedColor,
+    /// so ONE ink band below covers both probes. The explicit height pins
+    /// the box size whether or not the label is present. `text` verbatim.
     private func boxJSON(name: String, text: String? = nil) -> String {
         let textField = text.map { ",\"text\":\"\($0)\"" } ?? ""
         return """
@@ -45,7 +49,7 @@ final class WPTCaptureModeTests: XCTestCase {
          "properties":[
            {"type":"Width","data":{"type":"length","px":120.0}},
            {"type":"Height","data":{"type":"length","px":40.0}},
-           {"type":"BackgroundColor","data":{"srgb":{"r":0.9333333333333333,"g":0.9333333333333333,"b":0.9333333333333333},"original":"#eeeeee"}}
+           {"type":"BackgroundColor","data":{"srgb":{"r":0.13333333333333333,"g":0.13333333333333333,"b":0.13333333333333333},"original":"#222222"}}
          ]}
         """
     }
@@ -128,9 +132,11 @@ final class WPTCaptureModeTests: XCTestCase {
 
     /// Render a component through the capture-canvas contract (390pt width,
     /// 16pt padding, top-leading, scale 1) with the WPT flag set as given,
-    /// on a WHITE canvas so the only dark ink is placeholder/text glyphs.
+    /// and count pixels in the light-ink band — the only pixels in that
+    /// band are placeholder/text glyphs over the dark box fill (see the
+    /// band rationale at the counting loop below).
     @MainActor
-    private func darkPixelCount(_ comp: IRComponent, wpt: Bool) throws -> Int {
+    private func labelInkPixelCount(_ comp: IRComponent, wpt: Bool) throws -> Int {
         // Mirror CaptureCanvas geometry; publish the WPT flag exactly the
         // way captureAllComponents does (`.environment(\.wptCaptureMode, …)`).
         let view = ComponentRenderer(component: comp)
@@ -150,13 +156,17 @@ final class WPTCaptureModeTests: XCTestCase {
             bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
         ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
-        // Glyph ink over the #eee box composites to ≈107/channel (sum≈321);
-        // the white canvas is 765 and the box fill 714. A sum < 450 is
-        // unambiguously glyph ink — count those pixels.
+        // Glyph ink over the #222 box: the label's fixed
+        // rgba(237,237,237,0.7) composites to ≈176/channel (sum ≈ 530),
+        // and WPT-mode real text picks the same light-on-dark ink
+        // (0.93 white @ 0.7 → ≈176 as well). The box fill sums to 102,
+        // the white canvas to 765, and every box edge is integer-aligned
+        // at scale 1 (no fractional-coverage blend pixels), so a sum in
+        // 480..<620 is unambiguously glyph ink — count those pixels.
         var count = 0
         for i in stride(from: 0, to: buf.count, by: 4) {
             let sum = Int(buf[i]) + Int(buf[i + 1]) + Int(buf[i + 2])
-            if sum < 450 { count += 1 }
+            if (480..<620).contains(sum) { count += 1 }
         }
         return count
     }
@@ -166,8 +176,8 @@ final class WPTCaptureModeTests: XCTestCase {
     @MainActor
     func testNamelessEmptyGlyphsVanishOnlyInWptMode() throws {
         let box = try component(boxJSON(name: "background color rgb 001"))
-        let off = try darkPixelCount(box, wpt: false)
-        let on  = try darkPixelCount(box, wpt: true)
+        let off = try labelInkPixelCount(box, wpt: false)
+        let on  = try labelInkPixelCount(box, wpt: true)
         // Baseline path must still paint the placeholder glyphs.
         XCTAssertGreaterThan(off, 0,
             "flag OFF must keep painting the name placeholder (baseline behaviour)")
@@ -182,7 +192,7 @@ final class WPTCaptureModeTests: XCTestCase {
     @MainActor
     func testRealTextStillRendersInWptMode() throws {
         let withText = try component(boxJSON(name: "css color 001", text: "Filler text"))
-        let on = try darkPixelCount(withText, wpt: true)
+        let on = try labelInkPixelCount(withText, wpt: true)
         XCTAssertGreaterThan(on, 0,
             "real element text must still render in WPT mode (only the " +
             "synthesized NAME placeholder is suppressed)")

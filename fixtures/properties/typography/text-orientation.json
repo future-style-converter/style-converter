@@ -1,7 +1,40 @@
 {
   "components": {
-    "TextOrientation_Mixed": { "properties": { "width": "120px", "height": "160px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "writing-mode": "vertical-rl", "text-orientation": "mixed" } },
-    "TextOrientation_Upright": { "properties": { "width": "120px", "height": "160px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "writing-mode": "vertical-rl", "text-orientation": "upright" } },
-    "TextOrientation_Sideways": { "properties": { "width": "120px", "height": "160px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "writing-mode": "vertical-rl", "text-orientation": "sideways" } }
+    "TextOrientation_Mixed": {
+      "properties": {
+        "width": "120px",
+        "height": "160px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "writing-mode": "vertical-rl",
+        "text-orientation": "mixed"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "TextOrientation_Upright": {
+      "properties": {
+        "width": "120px",
+        "height": "160px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "writing-mode": "vertical-rl",
+        "text-orientation": "upright"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "TextOrientation_Sideways": {
+      "properties": {
+        "width": "120px",
+        "height": "160px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "writing-mode": "vertical-rl",
+        "text-orientation": "sideways"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    }
   }
 }

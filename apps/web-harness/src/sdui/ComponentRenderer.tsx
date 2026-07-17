@@ -43,6 +43,16 @@ import { isRuntimeV1Condition } from '@style-converter/web/core/renderer/RuleBui
 // The shared renderer core + its calibration-hook types (issue #41).
 import { NodeRenderer } from '@style-converter/web/renderer/NodeRenderer';
 import type { RenderContext, RendererOptions } from '@style-converter/web/renderer/RendererOptions';
+// The cross-platform BLOCK FONT layout (atlas checksum cb3c6e411c7b2859):
+// placeholder LABELS render as integer-coordinate 1x1 px rects instead of
+// font-stack text, so all three platforms rasterize labels byte-identically
+// (the fix for the glyph wall capping ~50 text-bearing fixtures at <0.95).
+import {
+  BLOCK_LABEL_FILL,
+  BLOCK_LABEL_ORIGIN_X,
+  BLOCK_LABEL_ORIGIN_Y,
+  layoutBlockLabel,
+} from '@style-converter/web/renderer/BlockFontLabel';
 import type { ComposedNode } from './Composer';
 
 /**
@@ -426,11 +436,15 @@ const HARNESS_OPTIONS: RendererOptions = {
   // replaced-element CSS needs a REAL <img> box even on captures).
   mapTag: (tag) => (tag === 'img' ? 'img' : (tag && TAG_ALLOWLIST.has(tag) ? tag : 'div')),
   // Divergence #4: childless components render the placeholder label
-  // (name text + bg-luminance contrast) instead of an empty element, so
-  // empty fixtures stay identifiable against iOS/Android placeholders.
+  // instead of an empty element, so empty fixtures stay identifiable
+  // against iOS/Android placeholders. The LABEL now draws as the shared
+  // BLOCK FONT (pinned fill + geometry — see BlockFontLabel), so all
+  // three platforms rasterize it byte-identically; the bg-luminance /
+  // explicit-color machinery below still drives real `text` content,
+  // which keeps rendering as genuine glyphs (WPT ref comparability).
   //
   // PlaceholderContent receives the parent's resolved background color so
-  // its text colour can flip to dark-on-light or light-on-dark, matching
+  // TEXT colour can flip to dark-on-light or light-on-dark, matching
   // iOS's `PlaceholderLabel.resolvedColor` (luminance > 0.6 → dark text);
   // the raw `styles` in the context is the same pre-decoration engine
   // output the pre-#41 renderer read. The explicit `color` passthrough
@@ -450,6 +464,16 @@ const HARNESS_OPTIONS: RendererOptions = {
         backgroundColor={typeof styles.backgroundColor === 'string' ? styles.backgroundColor : undefined}
         explicitColor={typeof styles.color === 'string' ? styles.color : undefined}
         irLineHeight={irLineHeight}
+        // The USED px width approximation drives the shared block-label
+        // truncation `8 + n*ADVANCE <= width - 8`: the smallest of the
+        // declared width / inline-size and their max-* caps (CSS clamp:
+        // max-width beats width — mobile truncates against its MEASURED
+        // width, so web must honour the cap too or the label overflows
+        // a `width:300; max-width:50` box mobile would truncate).
+        // undefined = content-sized box (fit-content hugs the label, so
+        // nothing can overflow and no truncation applies). min-* floors
+        // only ever WIDEN the box — safe to ignore for truncation.
+        componentWidth={usedPxWidth(styles)}
       />
     );
   },
@@ -475,6 +499,47 @@ const HARNESS_OPTIONS: RendererOptions = {
 export function ComponentRenderer({ node, depth = 0 }: ComponentRendererProps) {
   // Everything happens in the shared core; the skin only supplies hooks.
   return <NodeRenderer node={node} depth={depth} options={HARNESS_OPTIONS} />;
+}
+
+/**
+ * Parse a CSS-in-JS length into an absolute px number, or undefined when
+ * it isn't one. The engine emits absolute lengths as `'<n>px'` strings
+ * (spec 02 — everything normalizes to px); bare numbers are tolerated for
+ * robustness. Percentages / keywords / calc() return undefined — a
+ * non-absolute width can't drive the shared block-label truncation, so
+ * the label renders untruncated (the box is content- or context-sized).
+ */
+function parsePx(value: unknown): number | undefined {
+  // Bare finite number → already px (React treats numbers as px too).
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  // `'<n>px'` string → the engine's canonical absolute-length spelling.
+  if (typeof value === 'string') {
+    const m = value.match(/^(\d+(?:\.\d+)?)px$/);
+    if (m) return parseFloat(m[1]);
+  }
+  // Anything else is not an absolute px width.
+  return undefined;
+}
+
+/**
+ * Approximate the component's USED inline width from raw engine styles,
+ * for the shared block-label truncation. CSS resolves used width as
+ * max(min-width, min(width, max-width)) — the min-* floor only ever
+ * WIDENS the box (harmless for truncation), so the binding value is the
+ * smallest of the declared size and its max-* cap, across both the
+ * physical and logical spellings (inline-size folds to width in our LTR
+ * horizontal-tb canvas). No absolute candidate → undefined (content-
+ * sized box: fit-content hugs the label, nothing can overflow).
+ */
+function usedPxWidth(styles: CSSStyles): number | undefined {
+  // Collect every absolute-px inline-axis constraint the engine emitted.
+  const candidates = [styles.width, styles.inlineSize, styles.maxWidth, styles.maxInlineSize]
+    // Non-absolute values (percentages, keywords, calc()) drop out here.
+    .map(parsePx)
+    // Keep only real numbers — Math.min over the survivors is the cap.
+    .filter((v): v is number => v !== undefined);
+  // No constraint at all → content-sized (caller treats as Infinity).
+  return candidates.length > 0 ? Math.min(...candidates) : undefined;
 }
 
 /**
@@ -511,6 +576,13 @@ interface PlaceholderContentProps {
    * text bar height matches the browser-ref's default-font line box.
    */
   irLineHeight?: string;
+  /**
+   * The component's declared absolute width in px (undefined when the
+   * box is content-sized or the width isn't an absolute length). Feeds
+   * the shared-spec block-label truncation `8 + n*ADVANCE <= width - 8`;
+   * only the LABEL branch reads it — real `text` content never truncates.
+   */
+  componentWidth?: number;
 }
 
 /**
@@ -556,7 +628,7 @@ function parseRgb(css: string | undefined): [number, number, number] | null {
   return null;
 }
 
-function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLineHeight }: PlaceholderContentProps) {
+function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLineHeight, componentWidth }: PlaceholderContentProps) {
   // Critical: inherit font properties from the parent so typography fixtures
   // render at their declared sizes/weights/etc. The previous implementation
   // hardcoded `fontSize: '11px'` here, which clobbered every Typography_*
@@ -614,6 +686,18 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLine
   const visibleText = text !== undefined
     ? text
     : (WPT_MODE ? '' : name.replace(/_/g, ' '));
+  // BLOCK-LABEL branch gate: only the synthetic debug LABEL (case 3 —
+  // legacy flow, no IR text, not WPT-suppressed) renders as the shared
+  // block font. Real `text` content (case 1) stays a genuine text node —
+  // WPT captures compare against a Chromium browser-ref that renders real
+  // fonts, so block-fonting actual content would wreck that comparison —
+  // and the WPT_MODE suppression gate (case 2, empty string) is untouched.
+  const isBlockLabel = text === undefined && !WPT_MODE;
+  // Lay out the label once per render: uppercase + unknown→'-', truncated
+  // to the declared component width (undefined → Infinity: a content-sized
+  // box hugs the label, nothing can overflow). Geometry is pinned by the
+  // shared spec so iOS/Android produce the same rects for the same string.
+  const blockLayout = isBlockLabel ? layoutBlockLabel(visibleText, componentWidth ?? Infinity) : null;
   return (
     <span
       style={{
@@ -623,7 +707,21 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLine
         // <p> height (GAP 1 height half; see WPT_COMPOSED_MODE above). Every
         // other path (per-component `?wpt=1`, the 327-pair baseline) keeps the
         // 4px label breathing room, byte-for-byte unchanged.
-        padding: WPT_COMPOSED_MODE ? 0 : '4px',
+        // BLOCK-LABEL branch: padding must be 0 — the shared-spec (8, 6)
+        // origin is supplied by the svg's absolute offset below, and any
+        // span padding would shift the rects off the cross-platform grid.
+        padding: isBlockLabel ? 0 : (WPT_COMPOSED_MODE ? 0 : '4px'),
+        // ZERO LAYOUT FOOTPRINT (block-label branch only): the label is
+        // dev chrome, not content — it must not contribute flow height.
+        // The first block-font cut let the svg occupy flow space, and the
+        // three platforms' old text line boxes differed (~19px web vs
+        // ~13px natives), so auto-height components rendered different
+        // canvas heights (web 138 vs iOS 132 on the color fixture) and
+        // every pixel below the label shifted — X-web pairs cratered while
+        // iOS-Android agreed at 1.000. A 0-height positioned wrapper +
+        // absolutely-placed svg pins the label at (8,6) with NO effect on
+        // the component's own auto-height, identically on all platforms.
+        ...(isBlockLabel ? { height: 0, position: 'relative' as const, overflow: 'visible' as const } : {}),
         // GAP 1 (height half) — line-height pin. The harness FORCES the Inter
         // font (index.html) to keep iOS/Android/web mutually comparable, but
         // the browser-ref (capture-browser-ref.mjs) forces NO font, so its <p>
@@ -651,7 +749,46 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLine
         wordBreak: 'break-word',
       }}
     >
-      {visibleText}
+      {blockLayout !== null ? (
+        // BLOCK-LABEL branch — the label as the shared block font: one
+        // 1x1 px <rect> per set atlas bit, integer coordinates only, so
+        // the same label rasterizes byte-identically on all 3 platforms.
+        // An empty layout (empty name, or truncation ate every char)
+        // renders nothing — same visual as the WPT suppression branch.
+        blockLayout.rects.length > 0 ? (
+          <svg
+            // Explicit px attributes sized to the TIGHT truncated block —
+            // the svg must never stretch, or the 1px bit grid resamples.
+            width={blockLayout.width}
+            height={blockLayout.height}
+            // Keep the original label string reachable for a11y/tooling
+            // (the rects carry no text content the DOM could expose).
+            role="img"
+            aria-label={visibleText}
+            // Integer-grid rendering: no antialiasing — the whole point.
+            shapeRendering="crispEdges"
+            // Shared-spec pinned fill (the light label color); set once
+            // here and inherited by every child <rect>.
+            fill={BLOCK_LABEL_FILL}
+            // Absolutely positioned inside the 0-height relative wrapper:
+            // the shared-spec (8, 6) origin with ZERO flow footprint (see
+            // the wrapper-span comment — in-flow labels made auto-heights
+            // diverge across platforms). display:block kills the inline
+            // baseline gap.
+            style={{ display: 'block', position: 'absolute', left: BLOCK_LABEL_ORIGIN_X, top: BLOCK_LABEL_ORIGIN_Y }}
+          >
+            {blockLayout.rects.map((r, i) => (
+              // One filled 1x1 px rect per set bit — block-local coords;
+              // the index key is stable because the layout is pure.
+              <rect key={i} x={r.x} y={r.y} width={1} height={1} />
+            ))}
+          </svg>
+        ) : null
+      ) : (
+        // TEXT / suppression branches — byte-identical to before: real IR
+        // text renders as glyphs, WPT_MODE renders the empty string.
+        visibleText
+      )}
     </span>
   );
 }

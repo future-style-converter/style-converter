@@ -1,8 +1,48 @@
 {
   "components": {
-    "FontLanguageOverride_Normal": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-language-override": "normal" } },
-    "FontLanguageOverride_Trk": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-language-override": "\"TRK\"" } },
-    "FontLanguageOverride_Eng": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-language-override": "\"ENG\"" } },
-    "FontLanguageOverride_Dan": { "properties": { "width": "260px", "height": "50px", "background-color": "#ecf0f1", "color": "#111", "font-size": "20px", "font-language-override": "\"DAN\"" } }
+    "FontLanguageOverride_Normal": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "font-language-override": "normal"
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "FontLanguageOverride_Trk": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "font-language-override": "\"TRK\""
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "FontLanguageOverride_Eng": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "font-language-override": "\"ENG\""
+      },
+      "_text": "Grumpy wizards vex 0123"
+    },
+    "FontLanguageOverride_Dan": {
+      "properties": {
+        "width": "260px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "color": "#111",
+        "font-size": "20px",
+        "font-language-override": "\"DAN\""
+      },
+      "_text": "Grumpy wizards vex 0123"
+    }
   }
 }
