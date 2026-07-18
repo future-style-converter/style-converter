@@ -29,39 +29,67 @@ import app.parsing.css.properties.primitiveParsers.TokenizationUtils
 object BackgroundImagePropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim()
+        // CASE-PRESERVATION CONTRACT: CSS keywords/function names are ASCII
+        // case-insensitive (CSS Syntax L3 §4.3), but url() PAYLOADS are
+        // case-sensitive author bytes (base64 data URIs, case-sensitive
+        // server paths). We therefore lower only a COPY for matching and
+        // extract every payload from the ORIGINAL bytes. This repairs the
+        // historic bug where the whole declaration was lowercased before
+        // splitting, corrupting data URIs (the iOS runtime documented it
+        // as a known wire quirk). Emitting the true bytes is a bug fix,
+        // not a wire-shape change: schema/spec/05-versioning.md freezes
+        // byte SHAPES, and the v2 schema is permissive at property-data
+        // leaves — the leaf string's shape (a JSON string) is unchanged.
         val lowered = trimmed.lowercase()
 
-        // Handle global keywords
+        // Handle global keywords (inherit/initial/…): matched and stored
+        // lowercase — keywords have no case-sensitive payload to preserve.
         if (GlobalKeywords.isGlobalKeyword(lowered)) {
             return BackgroundImageProperty(listOf(BackgroundImageProperty.BackgroundImage.Keyword(lowered)))
         }
 
-        // Check for var() or other complex expressions - use Raw
+        // Check for var() or other complex expressions - use Raw. Detection
+        // runs on the lowered copy (function names are case-insensitive)
+        // but Raw carries the ORIGINAL bytes for the runtimes to resolve.
         if (ExpressionDetector.containsExpression(lowered)) {
             return BackgroundImageProperty(listOf(BackgroundImageProperty.BackgroundImage.Raw(trimmed)))
         }
 
-        // Split by comma for multiple background images
-        val imageStrings = TokenizationUtils.splitByComma(lowered)
+        // Split by comma for multiple background images — split the ORIGINAL
+        // bytes (splitByComma is paren-aware and case-agnostic) so each
+        // layer still carries the author's casing into parseImage.
+        val imageStrings = TokenizationUtils.splitByComma(trimmed)
         if (imageStrings.isEmpty()) {
             return BackgroundImageProperty(listOf(BackgroundImageProperty.BackgroundImage.Raw(trimmed)))
         }
 
+        // Unparseable layers fall back to Raw with the ORIGINAL layer bytes
+        // (previously the lowered bytes leaked into Raw too).
         val images = imageStrings.map { parseImage(it.trim()) ?: BackgroundImageProperty.BackgroundImage.Raw(it.trim()) }
 
         return BackgroundImageProperty(images)
     }
 
+    // Receives one layer in ORIGINAL author bytes. Dispatch happens on a
+    // lowered copy (keywords/function names are case-insensitive); url()
+    // payloads are extracted from the original, while gradient bodies are
+    // parsed from the lowered copy — every token inside a gradient (color
+    // keywords, hex digits, angle units, direction keywords) is itself
+    // case-insensitive per CSS Images L3/L4, so no author bytes are lost.
     private fun parseImage(value: String): BackgroundImageProperty.BackgroundImage? {
+        // Lowered copy used ONLY for prefix matching and gradient parsing.
+        val lower = value.lowercase()
         return when {
-            value == "none" -> BackgroundImageProperty.BackgroundImage.None()
-            value.startsWith("url(") -> parseUrl(value)
-            value.startsWith("linear-gradient(") -> parseLinearGradient(value, repeating = false)
-            value.startsWith("repeating-linear-gradient(") -> parseLinearGradient(value, repeating = true)
-            value.startsWith("radial-gradient(") -> parseRadialGradient(value, repeating = false)
-            value.startsWith("repeating-radial-gradient(") -> parseRadialGradient(value, repeating = true)
-            value.startsWith("conic-gradient(") -> parseConicGradient(value, repeating = false)
-            value.startsWith("repeating-conic-gradient(") -> parseConicGradient(value, repeating = true)
+            lower == "none" -> BackgroundImageProperty.BackgroundImage.None()
+            // url(): parse from the ORIGINAL bytes — UrlParser matches the
+            // function name case-insensitively but returns the raw payload.
+            lower.startsWith("url(") -> parseUrl(value)
+            lower.startsWith("linear-gradient(") -> parseLinearGradient(lower, repeating = false)
+            lower.startsWith("repeating-linear-gradient(") -> parseLinearGradient(lower, repeating = true)
+            lower.startsWith("radial-gradient(") -> parseRadialGradient(lower, repeating = false)
+            lower.startsWith("repeating-radial-gradient(") -> parseRadialGradient(lower, repeating = true)
+            lower.startsWith("conic-gradient(") -> parseConicGradient(lower, repeating = false)
+            lower.startsWith("repeating-conic-gradient(") -> parseConicGradient(lower, repeating = true)
             else -> null
         }
     }

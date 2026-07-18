@@ -37,9 +37,11 @@ enum BackgroundImageLayer: Equatable {
     // CSS `none` — paint nothing for this layer.
     case none
     // URL (including data URIs). SwiftUI can't render arbitrary network
-    // URLs without AsyncImage and base64 is lowercased upstream (brief
-    // quirk); applier keeps this as a stub placeholder so the stack
-    // indexing stays correct.
+    // URLs without AsyncImage (remote url() is a defined no-op — see
+    // BackgroundURLImage.swift); data/file URIs decode and paint. The
+    // converter preserves url() bytes since wave 8 (base64 arrives
+    // intact); the case keeps the raw string so the stack indexing and
+    // the resolver's scheme dispatch stay correct.
     case url(String)
     // Linear gradient. `angleDeg` nil means "default 180deg" per CSS.
     case linear(angleDeg: Double?, stops: [BackgroundImageStop])

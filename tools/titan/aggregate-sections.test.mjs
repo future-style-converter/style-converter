@@ -255,3 +255,34 @@ test('aggregate() skips manifests missing the wpt block entirely (race-bug sympt
     await fs.rm(runDir, { recursive: true, force: true });
   }
 });
+
+// ── wave-8: NA-excluded headline split ─────────────────────────────────────
+//
+// Corpus honesty: the headline line must split score-eligible tests from
+// NA-tagged ones so "N tests" is never read as "N scored tests". A test is
+// NA when inject-wpt-block stamped scoreEligible:false (or, for pre-wave-8
+// manifests, when its divergence label is test-not-applicable).
+
+test('wave8: summarize splits scored vs NA-excluded tests in the headline', () => {
+  const results = {
+    'css/css-break/ok.html':
+      { bucket: 'A', specSection: 'css-break', divergence: 'identical', scoreEligible: true, pairs: null },
+    'css/css-break/na-tagged.html':
+      { bucket: 'A', specSection: 'css-break', divergence: 'test-not-applicable', scoreEligible: false, pairs: null },
+    // Legacy manifest shape: no scoreEligible field, NA label only — must
+    // still count as excluded (backfill path).
+    'css/css-break/na-legacy.html':
+      { bucket: 'A', specSection: 'css-break', divergence: 'test-not-applicable', pairs: null },
+  };
+  const m = mergeManifests([stub('css-break', { totalTests: 3, A: 3, results })]);
+  const { line } = summarize(m);
+  assert.match(line, /scored=1 NA-excluded=2/);
+  // The distribution still reports the NA label separately.
+  assert.match(line, /test-not-applicable: 2/);
+});
+
+test('wave8: summarize reports scored=total when nothing is NA-tagged', () => {
+  const m = mergeManifests([stub('css-color', { totalTests: 2, A: 2 })]);
+  const { line } = summarize(m);
+  assert.match(line, /scored=2 NA-excluded=0/);
+});

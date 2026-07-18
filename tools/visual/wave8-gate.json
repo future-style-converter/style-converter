@@ -1,0 +1,372 @@
+{
+ "_snapshot": "wave8-gate",
+ "_note": "Wave-8 record. FIXTURE-GEN REPAIRS (tools/titan/extract-fixture.mjs): child combinator implemented (A > B chains, right-to-left with backtracking — the 7 flexbox abspos fixtures had been shipping styleless placeholder children); WPT support/ raster assets <8KB now inlined as percent-encoded data URIs (the 3 css-break background tests 404ed on every platform); corpus scoring gate excludes ONLY requires-bundled-asset harness-delivery tags (first cut excluded any NA tag and would have gutted the denominator 82->~14 — caught at this gate). CONVERTER: url() case preservation in 4 parsers + shared UrlParser (base64 data URIs survive byte-exact; keywords stay case-insensitive). RENDERERS: Compose center-align compensation v2 models the AOSP DRAW path (getLineStartPos even-truncation) instead of the getLineLeft report path (the wave-7 probe read the wrong API — different formulas); Compose abspos children measured unbounded; iOS StyleBuilder split into box-decoration + group-effects halves so positioned descendants paint ABOVE the ancestor border (CSS2 Appendix E), byte-identical for plain renders (327-net clean + negative control). RESULTS: TextAlign_Center 0.9372 -> 0.9857 (fixture all >=0.977 — moves to hold); fallback-justify-content-001 web 0.724->0.983 / iOS 0.742->0.975 / Android 0.910->0.977 (all three PASS); justify-self-001 web 0.940->0.961, Android 0.894->0.941; css-break web asset delivery FIXED (red fallback gone, ink volume matches ref 75.7k vs 75.2k px) revealing the true fragmentainer-background geometry gap (web 0.28-0.47); natives never painted the tiled url() background (capability gap, queued); abspos-autopos unchanged — NEW precise finding: percentage Width/Height (px:null wire) dropped on abspos children by ALL runtimes incl. web (fixture lossyReasons already flags it) — the wave-9 seam. position fixture 1.0000 flat; 327-pair net ZERO regressions.",
+ "devSha": "ed4566b1",
+ "date": "2026-07-18",
+ "solo": {
+  "text-align": {
+   "min": 0.9778,
+   "variants": {
+    "TextAlign_Start": 0.9898,
+    "TextAlign_End": 0.9778,
+    "TextAlign_Left": 0.9898,
+    "TextAlign_Right": 0.9778,
+    "TextAlign_Center": 0.9857,
+    "TextAlign_Justify": 0.9898,
+    "TextAlign_MatchParent": 0.9898
+   }
+  },
+  "position": {
+   "min": 1,
+   "variants": {
+    "V0_static": 1,
+    "V1_relative": 1,
+    "V2_absolute": 1,
+    "V3_fixed": 1,
+    "V4_sticky": 1
+   }
+  }
+ },
+ "wptSections": {
+  "css-break": {
+   "abspos-in-offset-relpos.html": {
+    "web": [
+     0.933,
+     0.933
+    ],
+    "ios": [
+     0.865,
+     0.869
+    ],
+    "android": [
+     0.937,
+     0.937
+    ]
+   },
+   "abspos-in-opacity-000.html": {
+    "web": [
+     0.975,
+     0.975
+    ],
+    "ios": [
+     0.969,
+     0.971
+    ],
+    "android": [
+     0.964,
+     0.964
+    ]
+   },
+   "abspos-in-opacity-001.html": {
+    "web": [
+     0.958,
+     0.958
+    ],
+    "ios": [
+     0.949,
+     0.952
+    ],
+    "android": [
+     0.964,
+     0.964
+    ]
+   },
+   "abspos-in-opacity-002.html": {
+    "web": [
+     0.938,
+     0.938
+    ],
+    "ios": [
+     0.938,
+     0.941
+    ],
+    "android": [
+     0.944,
+     0.944
+    ]
+   },
+   "abspos-in-opacity-003.html": {
+    "web": [
+     0.938,
+     0.938
+    ],
+    "ios": [
+     0.938,
+     0.941
+    ],
+    "android": [
+     0.944,
+     0.944
+    ]
+   },
+   "abspos-inside-relpos-inside-monolithic.html": {
+    "web": [
+     0.933,
+     0.933
+    ],
+    "ios": [
+     0.885,
+     0.889
+    ],
+    "android": [
+     0.937,
+     0.937
+    ]
+   },
+   "avoid-border-break.html": {
+    "web": [
+     0.974,
+     0.974
+    ],
+    "ios": [
+     0.939,
+     0.942
+    ],
+    "android": [
+     0.973,
+     0.973
+    ]
+   },
+   "background-image-000.html": {
+    "web": [
+     0.199,
+     0.284
+    ],
+    "ios": [
+     0.194,
+     0.194
+    ],
+    "android": [
+     0.159,
+     0.159
+    ]
+   },
+   "background-image-001.html": {
+    "web": [
+     0.245,
+     0.238
+    ],
+    "ios": [
+     0.14,
+     0.14
+    ],
+    "android": [
+     0.138,
+     0.138
+    ]
+   },
+   "background-image-002.html": {
+    "web": [
+     0.377,
+     0.469
+    ],
+    "ios": [
+     0.162,
+     0.162
+    ],
+    "android": [
+     0.148,
+     0.148
+    ]
+   },
+   "background-image-003.html": {
+    "web": [
+     0.933,
+     0.933
+    ],
+    "ios": [
+     0.931,
+     0.935
+    ],
+    "android": [
+     0.937,
+     0.937
+    ]
+   },
+   "background-image-004.html": {
+    "web": [
+     0.933,
+     0.933
+    ],
+    "ios": [
+     0.928,
+     0.932
+    ],
+    "android": [
+     0.937,
+     0.937
+    ]
+   }
+  },
+  "css-flexbox": {
+   "abspos-autopos-htb-ltr.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.911,
+     0.914
+    ],
+    "android": [
+     0.915,
+     0.915
+    ]
+   },
+   "abspos-autopos-htb-rtl.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.911,
+     0.914
+    ],
+    "android": [
+     0.904,
+     0.904
+    ]
+   },
+   "abspos-autopos-vlr-ltr.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.911,
+     0.914
+    ],
+    "android": [
+     0.915,
+     0.915
+    ]
+   },
+   "abspos-autopos-vlr-rtl.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.911,
+     0.914
+    ],
+    "android": [
+     0.904,
+     0.904
+    ]
+   },
+   "abspos-autopos-vrl-ltr.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.911,
+     0.914
+    ],
+    "android": [
+     0.915,
+     0.915
+    ]
+   },
+   "abspos-autopos-vrl-rtl.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.911,
+     0.914
+    ],
+    "android": [
+     0.904,
+     0.904
+    ]
+   },
+   "dynamic-align-self-001.html": {
+    "web": [
+     0.909,
+     0.909
+    ],
+    "ios": [
+     0.907,
+     0.911
+    ],
+    "android": [
+     0.906,
+     0.906
+    ]
+   },
+   "flex-abspos-staticpos-align-self-safe-001.html": {
+    "web": [
+     0.956,
+     0.956
+    ],
+    "ios": [
+     0.882,
+     0.882
+    ],
+    "android": [
+     0.896,
+     0.896
+    ]
+   },
+   "flex-abspos-staticpos-align-self-safe-002.html": {
+    "web": [
+     0.955,
+     0.955
+    ],
+    "ios": [
+     0.863,
+     0.863
+    ],
+    "android": [
+     0.885,
+     0.885
+    ]
+   },
+   "flex-abspos-staticpos-align-self-safe-003.html": {
+    "web": [
+     0.956,
+     0.956
+    ],
+    "ios": [
+     0.924,
+     0.924
+    ],
+    "android": [
+     0.924,
+     0.924
+    ]
+   },
+   "flex-abspos-staticpos-fallback-justify-content-001.html": {
+    "web": [
+     0.724,
+     0.983
+    ],
+    "ios": [
+     0.742,
+     0.975
+    ],
+    "android": [
+     0.91,
+     0.977
+    ]
+   },
+   "flex-abspos-staticpos-justify-self-001.html": {
+    "web": [
+     0.94,
+     0.961
+    ],
+    "ios": [
+     0.934,
+     0.934
+    ],
+    "android": [
+     0.894,
+     0.941
+    ]
+   }
+  }
+ }
+}

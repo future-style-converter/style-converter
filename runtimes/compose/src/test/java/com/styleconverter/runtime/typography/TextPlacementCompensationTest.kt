@@ -8,8 +8,11 @@ package com.styleconverter.runtime.typography
 //     the wire snippet is the LIVE converter output for
 //     'line-height: 24px', see ValueExtractorsDpWireTest for the pin).
 //  2. centerAlignFractionalDeltaX — cancels StaticLayout ALIGN_CENTER's
-//     even-truncation snap (AOSP Layout#getLineStartPos:
-//     ((right+left) − ((int)lineMax & ~1)) >> 1).
+//     DRAW-path even-truncation snap (AOSP Layout#getLineStartPos:
+//     ((left+right) − ((int)lineMax & ~1)) >> 1), reworked in wave 8 to
+//     model the draw path from the UNROUNDED advance after the wave-7
+//     version was fooled by the self-consistently ROUNDED report path
+//     (getLineLeft/getLineRight floor/ceil in their ALIGN_CENTER branch).
 //  3. subNaturalLineHeightDeltaY — the shared cross-native contract:
 //     web paints the glyph band (L − natural)/2 higher when L < natural
 //     (css-inline-3 §3.2 negative half-leading); natives clamp, so the
@@ -65,79 +68,106 @@ class TextPlacementCompensationTest {
         assertEquals(32f.sp, style.lineHeight)
     }
 
-    // ── 2. center-align even-truncation compensation ──
+    // ── 2. center-align even-truncation compensation (DRAW-path model) ──
 
     @Test
-    fun `even-truncation reproduction - odd line width in a 358px box`() {
-        // AOSP snap for a 33px line in a 358px box:
-        //   start = (358 − (33 & ~1)) / 2 = (358 − 32) / 2 = 163  (integral)
-        // True CSS center: (358 − 33) / 2 = 162.5.
-        // delta = 162.5 − 163 = −0.5 — the exact web−Android offset the
-        // TextAlign_Center pixel measurement showed (web 16.5 vs Android 17).
-        val snappedLeft = ((358 - (33 and 1.inv())) / 2).toFloat() // 163f — the AOSP formula
+    fun `AOSP even-truncation reproduction - the TextAlign_Center fixture numbers`() {
+        // The wave-8 adjudicated fixture case: advance ≈ 219.3px (raw
+        // Paint extent, fractional) centered in a 252px layout box.
+        //   draw:  (252 − ((int)219.3 & ~1)) >> 1 = (252 − 218) >> 1 = 17
+        //   ideal: (252 − 219.3) / 2 = 16.35
+        //   delta: 16.35 − 17 = −0.65 (browser draws LEFT of Android).
+        // Wave-7's report-path version computed 0 on these numbers (left
+        // floor(16.35)=16, right ceil'd → width 220 → (252−220)/2−16 = 0)
+        // — pinning the fixture here is the regression test for that trap.
+        val delta = TextStyleApplier.centerAlignFractionalDeltaX(
+            layoutWidthPx = 252f,
+            lineCount = 1,
+            lineAdvance = { 219.3f }
+        )
+        // Expected from the model, written out so the pin is self-checking:
+        val expected = (252f - 219.3f) / 2f - ((252 - (219 and 1.inv())) shr 1)
+        assertEquals(expected, delta!!, 1e-5f)
+        assertEquals(-0.65f, delta, 1e-4f)
+    }
+
+    @Test
+    fun `odd integral advance still snaps one pixel wide of center`() {
+        // 33px advance in a 358px box (the wave-7 arithmetic, still valid
+        // under the draw model because an INTEGER odd advance truncates
+        // to 32 the same way):
+        //   draw (358 − 32) >> 1 = 163; ideal (358 − 33)/2 = 162.5 → −0.5.
         val delta = TextStyleApplier.centerAlignFractionalDeltaX(
             layoutWidthPx = 358f,
             lineCount = 1,
-            lineLeft = { snappedLeft },
-            lineRight = { snappedLeft + 33f }
+            lineAdvance = { 33f }
         )
         assertEquals(-0.5f, delta!!, 1e-6f)
     }
 
     @Test
-    fun `even line width snaps to the true center - no compensation`() {
-        // 34px line: (358 − 34)/2 = 162 both ways → delta 0 → null (no
-        // layer churn for already-correct lines).
+    fun `even integral advance draws at the true center - no compensation`() {
+        // 34px advance: draw (358 − 34) >> 1 = 162 == ideal (358 − 34)/2
+        // → delta 0 → null (no layer churn for already-correct lines).
         assertNull(
             TextStyleApplier.centerAlignFractionalDeltaX(
                 layoutWidthPx = 358f,
                 lineCount = 1,
-                lineLeft = { 162f },
-                lineRight = { 196f }
+                lineAdvance = { 34f }
             )
         )
     }
 
     @Test
-    fun `guard - deltas of 1_5px or more are repositioning not compensation`() {
-        // A line laid out 2px off-center is NOT the even-truncation snap
-        // (that snap is always sub-pixel) — the helper must refuse.
-        assertNull(
-            TextStyleApplier.centerAlignFractionalDeltaX(
+    fun `guard - model deltas stay sub-pixel across the advance range`() {
+        // The draw-model delta is bounded: truncate-to-even loses < 2px of
+        // advance (halved → < 1px) and the integral >> 1 loses at most
+        // another 0.5px the OTHER way — so |delta| < 1.5 always holds for
+        // model-consistent inputs and the 1.5px guard can only trip on
+        // inputs that violate the model (RTL/justified lines). Sweep a
+        // fractional advance across the box to pin both facts: every
+        // result is null or sub-1.5px.
+        var advance = 0.1f
+        while (advance < 357f) {
+            val d = TextStyleApplier.centerAlignFractionalDeltaX(
                 layoutWidthPx = 358f,
                 lineCount = 1,
-                lineLeft = { 160.5f },
-                lineRight = { 193.5f }
+                lineAdvance = { advance }
             )
-        )
+            if (d != null) {
+                org.junit.Assert.assertTrue(
+                    "delta $d out of guard range for advance $advance",
+                    kotlin.math.abs(d) < 1.5f
+                )
+            }
+            advance += 0.7f
+        }
     }
 
     @Test
     fun `multi-line compensation follows the widest line`() {
-        // Line 0 (widest, 101px, odd): snapped start (358−100)/2 = 129,
-        // true center (358−101)/2 = 128.5 → delta −0.5.
-        // Line 1 (34px, even): snapped 162 == true center → delta 0.
+        // Line 0 (widest, advance 101.5): draw (358 − 100) >> 1 = 129,
+        // ideal (358 − 101.5)/2 = 128.25 → delta −0.75.
+        // Line 1 (advance 34, even): draw == ideal → would be 0.
         // The helper must compute from the WIDEST line (documented
         // approximation — one translation, widest line dominates the mass).
-        val lefts = floatArrayOf(129f, 162f)
-        val rights = floatArrayOf(230f, 196f)
+        val advances = floatArrayOf(101.5f, 34f)
         val delta = TextStyleApplier.centerAlignFractionalDeltaX(
             layoutWidthPx = 358f,
             lineCount = 2,
-            lineLeft = { lefts[it] },
-            lineRight = { rights[it] }
+            lineAdvance = { advances[it] }
         )
-        assertEquals(-0.5f, delta!!, 1e-6f)
+        assertEquals(-0.75f, delta!!, 1e-6f)
     }
 
     @Test
     fun `no lines or blank lines produce no compensation`() {
-        // First frame (lineCount 0) and zero-extent lines are no-ops.
+        // First frame (lineCount 0) and zero-advance lines are no-ops.
         assertNull(
-            TextStyleApplier.centerAlignFractionalDeltaX(358f, 0, { 0f }, { 0f })
+            TextStyleApplier.centerAlignFractionalDeltaX(358f, 0) { 0f }
         )
         assertNull(
-            TextStyleApplier.centerAlignFractionalDeltaX(358f, 1, { 179f }, { 179f })
+            TextStyleApplier.centerAlignFractionalDeltaX(358f, 1) { 0f }
         )
     }
 

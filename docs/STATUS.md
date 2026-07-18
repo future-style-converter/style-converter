@@ -174,17 +174,33 @@ dirs + WPT corpus are gitignored):
   0.819 (blocked — platform cursive stacks), FontSize keyword-fractional
   0.864 (wall — identical extents), TextOrientation_Upright 0.869
   (capability tier), TextAlign_Center 0.937 (run-width divergence under
-  centering — wave-8 queue).
+  centering — wave-8 queue). Wave 8 (`tools/visual/wave8-gate.json`)
+  repaired the WPT harness itself: `extract-fixture.mjs` gained the child
+  combinator (seven flexbox fixtures had shipped styleless placeholder
+  children) and inlines WPT support/ rasters as percent-encoded data URIs
+  (three css-break tests had 404ed on every platform — web now paints the
+  ref's ink volume, exposing the true fragmentainer-background gap
+  beneath); the converter preserves url() payload case in four parsers
+  (base64 data URIs survive byte-exact); TextAlign_Center closed 0.937 →
+  **0.9857** by modeling Android's DRAW-path even-truncation (the report
+  API uses a different formula — the wave-7 probe read the wrong oracle);
+  iOS positioned descendants now paint above their ancestor's border
+  (CSS2 Appendix E) via a StyleBuilder box-decoration/group-effects
+  split, byte-identical for plain renders; fallback-justify-content
+  passes on all three platforms (web 0.724 → 0.983). Wave-9 seam:
+  percentage Width/Height (px:null wire) dropped on abspos children by
+  every runtime including web; native tiled-url() backgrounds;
+  fragmentainer background geometry.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 145 |
+| converter (Kotlin) | `./gradlew :converter:test` | 156 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 985 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1024 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 412 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 516 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1031 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 416 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 537 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

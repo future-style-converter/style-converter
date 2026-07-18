@@ -15,11 +15,11 @@
 //      should pre-fetch and hand the runtime file/data URIs.
 //    • undecodable payloads (bad base64, unsupported codecs) log once
 //      and paint nothing — the same visual the browser reference shows
-//      for a failed background load. NOTE the known converter quirk:
-//      the CSS parser lowercases whole declaration values, which
-//      corrupts case-sensitive base64 data URIs on the wire. FULLY
-//      percent-encoded data URIs (lowercase hex) survive it — the
-//      fixtures use that form until the parser preserves url() case.
+//      for a failed background load. HISTORY: the converter used to
+//      lowercase whole declaration values, corrupting base64 data URIs
+//      on the wire (fixed in wave 8 — url() payloads now arrive
+//      byte-exact). Percent-encoded data URIs remain fully supported:
+//      they are valid RFC 2397 authoring, not just the old workaround.
 //  `space`/`round` repeat run the REAL §3.7 gap/rescale arithmetic via
 //  BackgroundTileMath (the wave-8 "approximate to repeat" note is gone).
 //
@@ -75,7 +75,7 @@ enum BackgroundURLImageResolver {
                   let img = UIImage(data: data) else {
                 PropertyTracker.logOnce(
                     key: "bg-url-decode:\(trimmed.prefix(48))",
-                    message: "background-image data URI failed to decode — painting nothing (known cause: the converter lowercases url() values, corrupting base64; use fully percent-encoded data URIs)")
+                    message: "background-image data URI failed to decode — painting nothing (bad base64 / unsupported codec; the converter preserves url() bytes since wave 8, so the payload itself is malformed)")
                 return nil
             }
             return img
@@ -129,8 +129,8 @@ enum BackgroundURLImageResolver {
         return out
     }
 
-    /// One hex nibble (case-insensitive — lowercase survives the
-    /// converter's value lowercasing, which is the whole point).
+    /// One hex nibble (case-insensitive per RFC 3986 §2.1 — %AB and %ab
+    /// are equivalent percent-encodings, so both cases must decode).
     private static func hexValue(_ b: UInt8) -> UInt8? {
         switch b {
         case UInt8(ascii: "0")...UInt8(ascii: "9"): return b - UInt8(ascii: "0")

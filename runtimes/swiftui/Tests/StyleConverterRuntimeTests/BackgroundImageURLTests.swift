@@ -72,8 +72,10 @@ final class BackgroundImageURLTests: XCTestCase {
 
     func testLowercasedBase64FailsLoudlyNotSilently() {
         PropertyTracker._resetForTests()
-        // The converter's lowercase quirk corrupts base64 payloads — the
-        // decode must fail AND leave a breadcrumb (never a silent clear).
+        // A case-corrupted base64 payload (the shape the converter used
+        // to emit before its wave-8 case-preservation fix; still possible
+        // from any misbehaving IR producer) must fail the decode AND
+        // leave a breadcrumb (never a silent clear).
         let uri = "data:image/png;base64,\(makePNG().base64EncodedString().lowercased())"
         XCTAssertNil(BackgroundURLImageResolver.image(for: uri))
         XCTAssertFalse(PropertyTracker.logOnce(key: "bg-url-decode:\(uri.prefix(48))", message: "dup"))

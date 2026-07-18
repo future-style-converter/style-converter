@@ -1079,6 +1079,86 @@ export function splitCompounds(sel) {
 }
 
 /**
+ * wave-8 (css-flexbox abspos-autopos family + css-break): tokenise a full
+ * selector into its compound chain WITH combinators. Selectors-4 §15 defines
+ * four combinators: descendant (whitespace), child (`>`), next-sibling (`+`),
+ * subsequent-sibling (`~`). We model descendant + child; sibling combinators
+ * stay unsupported (the extractor has no sibling-adjacency matcher and a
+ * silent downgrade of `div + p` to `div p` would over-match).
+ *
+ * Why this exists: the previous pipeline (splitCompounds + a blanket
+ * `/[>+~]/` reject in selectorMatchesPseudoElement) dropped every rule
+ * containing `>` WHOLESALE. WPT leans on `A > B` heavily — e.g. the six
+ * css-flexbox/abspos/abspos-autopos-* tests style their subject via
+ * `.flex > div { position:absolute; … }`, and losing that rule shipped
+ * placeholder children with no styles (the all-platform ~0.90 scores were
+ * the corrupted fixture, not the renderers).
+ *
+ * Returns `{ compounds: string[], combinators: string[] }` where
+ * `combinators[i]` relates `compounds[i]` to `compounds[i+1]` and is either
+ * `' '` (descendant) or `'>'` (child). Returns null when the selector uses
+ * sibling combinators (`+`/`~`) or is malformed (leading/trailing/double
+ * `>`), so callers treat the rule as unsupported — same bail contract the
+ * old regex reject had.
+ *
+ * Paren-aware like splitCompounds: whitespace and `>` inside a functional
+ * pseudo's argument (`:nth-child(2n + 1)`) never split. Exported for unit
+ * testing.
+ */
+export function splitSelectorChain(sel) {
+  // Sibling combinators unsupported — bail early. `+` inside parens (An+B
+  // arguments like `:nth-child(2n+1)`) must NOT trip this, so the check
+  // walks with paren depth rather than a flat regex.
+  const compounds = [];
+  const combinators = [];
+  let buf = '';
+  let depth = 0;
+  // The combinator that will bind the NEXT compound to the previous one.
+  // null = none seen yet (plain whitespace run → descendant at flush time).
+  let pendingChild = false;
+  // Flush the accumulated compound buffer, recording the combinator that
+  // separated it from the previous compound (child if a `>` was seen in
+  // the separator run, descendant otherwise).
+  const flush = () => {
+    if (!buf) return true;
+    if (compounds.length > 0) combinators.push(pendingChild ? '>' : ' ');
+    else if (pendingChild) return false; // leading `>` — malformed
+    compounds.push(buf);
+    buf = '';
+    pendingChild = false;
+    return true;
+  };
+  for (let i = 0; i < sel.length; i++) {
+    const c = sel[i];
+    if (c === '(') { depth++; buf += c; continue; }
+    if (c === ')') { depth--; buf += c; continue; }
+    if (depth > 0) { buf += c; continue; } // inside a functional pseudo arg
+    if (c === '+' || c === '~') return null; // sibling combinators — unsupported
+    if (c === '>') {
+      // Child combinator between compounds. Flush whatever compound was
+      // being read; a second `>` before any new compound text (`a >> b`)
+      // is malformed CSS — bail.
+      if (!flush()) return null;
+      if (pendingChild) return null; // double `>` with no compound between
+      if (compounds.length === 0) return null; // leading `>` — malformed
+      pendingChild = true;
+      continue;
+    }
+    if (/\s/.test(c)) {
+      // Top-level whitespace: compound boundary (descendant combinator
+      // unless a `>` already marked this separator run as child).
+      if (!flush()) return null;
+      continue;
+    }
+    buf += c;
+  }
+  if (!flush()) return null;
+  // Trailing `>` with no right-hand compound (`.a >`) is malformed.
+  if (pendingChild) return null;
+  return { compounds, combinators };
+}
+
+/**
  * swarm-003 Bug 2 (selectors__nth-child-of-pseudo-class): split a
  * `:nth-child(...)` argument into its An+B head and optional Selectors-4
  * `of <selector-list>` suffix. The grammar (Selectors-4 §6.4.2) is
@@ -1367,9 +1447,14 @@ function compoundMatches(compound, tag, attrs, pos = null, ctx = {}) {
  *     must match SOME ancestor in document order (Bug 2 fix). When no
  *     ancestors are passed (legacy callers) we fall back to "rightmost
  *     compound only" so existing call sites stay green.
+ *   - child combinators: `A > B` (wave-8 — `.flex > div` in the WPT
+ *     css-flexbox abspos family). The compound left of `>` must match the
+ *     IMMEDIATE parent (last `ancestors` entry); chains (`A > B > C`)
+ *     consume ancestors right-to-left. No legacy fallback: without an
+ *     ancestor chain a child-combinator rule never matches.
  *
- * Pseudo-classes / attribute selectors / `>`/`+`/`~` combinators are
- * unsupported — when they appear in the rightmost compound we skip the rule.
+ * Attribute selectors / `+`/`~` sibling combinators are unsupported —
+ * when they appear anywhere in the selector we skip the rule.
  *
  * Returns boolean. For pseudo-element-aware matching (`::before`/`::after`/
  * `::marker` rules that should attach to a synthetic child bucket) use
@@ -1408,11 +1493,13 @@ export function selectorMatches(sel, tag, attrs, ancestors = null, pos = null, c
 export function selectorMatchesPseudoElement(
   sel, tag, attrs, ancestors = null, pos = null, ctx = {},
 ) {
-  // Reject child / sibling combinators anywhere in the full selector — we
-  // don't model adjacency. The split below would otherwise drop them
-  // silently and let `div + p` match a bare `<p>`.
-  if (/[>+~]/.test(sel)) return null;
-  const compounds = splitCompounds(sel);
+  // wave-8: tokenise into compounds + combinators. Sibling combinators
+  // (`+`/`~`) and malformed chains return null from splitSelectorChain —
+  // same "unsupported → rule dropped" contract the old `/[>+~]/` blanket
+  // reject had, except `>` (child) is now a first-class combinator.
+  const chain = splitSelectorChain(sel);
+  if (chain === null) return null;
+  const { compounds, combinators } = chain;
   if (compounds.length === 0) return null;
   const last = compounds[compounds.length - 1];
   // Inspect the rightmost compound for a pseudo-element suffix BEFORE
@@ -1427,31 +1514,60 @@ export function selectorMatchesPseudoElement(
   const pe = parsedLast.pseudoElement || '';
   // Single-compound selector — done.
   if (compounds.length === 1) return pe;
-  // Descendant chain: each prior compound (in order) must match some
-  // ancestor that comes AFTER the previous match (preserves nesting order).
-  // Without ancestors, preserve the legacy "rightmost compound only"
-  // behaviour so old call sites (and the existing test
-  // 'descendant — applies last compound') keep passing.
-  if (!ancestors) return pe;
-  const ancestorChain = ancestors;
-  let cursor = 0;
+  // Pre-flight every non-rightmost compound for unsupported syntax so the
+  // rule bails uniformly (legacy behaviour: unsupported ANYWHERE in the
+  // chain → null, never a partial match).
   for (let ci = 0; ci < compounds.length - 1; ci++) {
-    const c = compounds[ci];
-    let matched = false;
-    while (cursor < ancestorChain.length) {
-      const a = ancestorChain[cursor++];
-      // Each ancestor entry carries its own position metadata so pseudos
-      // on non-rightmost compounds (e.g. `:root:first-child .target`)
-      // evaluate against the right element. The synthetic `:root`
-      // sentinel ancestor we prepend in extractBodyTreeNested has
-      // `isRoot: true` so the Selectors-4 §6.4.1 carve-out fires.
-      const r = compoundMatches(c, a.tag, a.attrs, a.pos ?? null, ctx);
-      if (r === null) return null; // unsupported syntax — bail
-      if (r === true) { matched = true; break; }
-    }
-    if (!matched) return null;
+    if (parseCompound(compounds[ci]).unsupported) return null;
   }
-  return pe;
+  // Without ancestors, preserve the legacy "rightmost compound only"
+  // fallback for pure-DESCENDANT chains so old call sites (and the
+  // existing test 'descendant — applies last compound') keep passing.
+  // Child chains get NO such degrade: `.flex > div` matching any bare
+  // `<div>` would be a structural over-match, so we bail honestly.
+  if (!ancestors) return combinators.includes('>') ? null : pe;
+  /**
+   * Right-to-left chain matcher with backtracking (Selectors-4 §16 match
+   * semantics, evaluated right-to-left like real engines):
+   *   - compounds[ci] must match an ancestor at index ≤ maxIdx;
+   *   - combinators[ci] ('>' = child) pins compounds[ci] to EXACTLY
+   *     ancestors[maxIdx] (the immediate parent of whatever matched
+   *     compounds[ci+1] — the element itself for the rightmost step,
+   *     since `ancestors` is in document order with the immediate parent
+   *     LAST);
+   *   - ' ' (descendant) lets compounds[ci] match ANY ancestor at ≤ maxIdx,
+   *     with backtracking so mixed chains like `.a > .b .c` don't false-
+   *     negative when the greedy nearest `.b` candidate has the wrong
+   *     parent. Chains in the WPT corpus are ≤3 compounds, so the
+   *     backtracking cost is negligible.
+   * Each ancestor entry carries its own position metadata so pseudos on
+   * non-rightmost compounds (e.g. `:root:first-child .target`) evaluate
+   * against the right element. The synthetic `:root` sentinel ancestor
+   * prepended in propsForElement has `isRoot: true` so the Selectors-4
+   * §6.4.1 carve-out fires.
+   */
+  const matchPrefix = (ci, maxIdx) => {
+    if (ci < 0) return true; // whole chain consumed — match
+    const rel = combinators[ci]; // relates compounds[ci] → compounds[ci+1]
+    if (rel === '>') {
+      // Child combinator: compounds[ci] must match the IMMEDIATE parent
+      // (the highest ancestor index still available). No scan, no
+      // backtracking at this step — the child relation is exact.
+      if (maxIdx < 0) return false; // ran out of ancestors
+      const a = ancestors[maxIdx];
+      if (compoundMatches(compounds[ci], a.tag, a.attrs, a.pos ?? null, ctx) !== true) return false;
+      return matchPrefix(ci - 1, maxIdx - 1);
+    }
+    // Descendant combinator: try every remaining ancestor from nearest to
+    // farthest, backtracking into the rest of the chain on each candidate.
+    for (let j = maxIdx; j >= 0; j--) {
+      const a = ancestors[j];
+      if (compoundMatches(compounds[ci], a.tag, a.attrs, a.pos ?? null, ctx) === true
+          && matchPrefix(ci - 1, j - 1)) return true;
+    }
+    return false;
+  };
+  return matchPrefix(compounds.length - 2, ancestors.length - 1) ? pe : null;
 }
 
 /** Compute IR property dict for a body element by collecting every CSS
@@ -1541,7 +1657,10 @@ export function propsForBodyRoot(rules) {
     // as root-scope. The parser already split comma-lists into one rule per
     // selector, so each `r.selector` is a single selector.
     const sel = r.selector.trim();
-    // Reject combinators anywhere — same conservatism as selectorMatches.
+    // Reject combinators anywhere. NOTE: selectorMatches now supports the
+    // child combinator (wave-8), but a combinator NEVER qualifies as root
+    // scope — `body > div` styles the <div>, not the body root — so this
+    // reject stays a flat regex regardless.
     if (/[>+~]/.test(sel)) continue;
     // Bug 2c (selectors__child-indexed-no-parent): the prior `[\[:]` reject
     // also dropped `:root`, the spec's pseudo-class for the document root.
@@ -1635,6 +1754,211 @@ function lossyReasonsFor(props) {
   return [...reasons];
 }
 
+// ── Support-asset inlining (wave-8) ──────────────────────────────────────────
+//
+// WPT tests routinely paint via `url(../support/x.png)`. The extractor used
+// to pass those relative paths into the IR VERBATIM, and every platform
+// harness 404'd on them (css-break background-image-000/001/002 scored
+// 0.14–0.38 on ALL platforms — a pure asset-delivery gap, not a renderer
+// divergence). We now resolve url() references against the test file's
+// directory under tools/wpt/ and inline small raster assets as data URIs.
+//
+// Encoding choice — PERCENT-ENCODED bytes, NOT base64: the converter
+// lowercases CSS values on their way into the IR, which corrupts base64
+// payloads (uppercase letters are data). Percent-encoding survives —
+// RFC 3986 §2.1 makes the hex digits of a %xx escape case-INsensitive on
+// decode, and we encode EVERY byte (no literal alphanumerics that a
+// lowercase pass could flip). The `data:image/png,` prefix is lowercase
+// already. Size cost is 3x raw (cat.png: 1,883 B → ~5.6 KB of fixture
+// text), acceptable under the 8 KB raw-size cap below.
+//
+// Oversize / unresolvable / non-raster references stay verbatim and mark
+// the owning component `_lossy` with reason 'requires-bundled-asset' (the
+// same tag wpt-not-applicable.mjs Rule 20 uses), so the dashboard's lossy
+// lane sees the honest delivery gap instead of a mystery 404.
+
+// Raster formats we inline. SVG (text), fonts, CSS, etc. are excluded —
+// the confirmed wave-8 scope is raster assets only; anything else stays a
+// 'requires-bundled-asset' lossy marker.
+const RASTER_MIME = {
+  png:  'image/png',
+  gif:  'image/gif',
+  jpg:  'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  bmp:  'image/bmp',
+  ico:  'image/x-icon',
+};
+
+// Inline cap: raw asset size must be strictly < 8 KB. Bigger assets would
+// bloat fixtures ~3x that in JSON text and slow every decode path.
+export const MAX_INLINE_ASSET_BYTES = 8192;
+
+/** Percent-encode EVERY byte of a Buffer as lowercase %xx escapes.
+ *  Encoding all bytes (not just the reserved set) is deliberate: literal
+ *  alphanumeric bytes would be corrupted by the converter's value
+ *  lowercasing ('A' 0x41 → 'a' 0x61), while %xx hex digits decode
+ *  case-insensitively per RFC 3986 §2.1. Exported for unit tests. */
+export function percentEncodeBytes(buf) {
+  let out = '';
+  for (const b of buf) out += '%' + b.toString(16).padStart(2, '0');
+  return out;
+}
+
+// url() token matcher: unquoted / single- / double-quoted payloads, per
+// CSS Syntax 3 §4.3.5-6. Global flag — callers iterate matchAll-style.
+const URL_TOKEN_RE = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)"'\s]+))\s*\)/gi;
+
+/** Should a url() payload be left alone entirely (neither inlined nor
+ *  lossy-marked)? data: is already inline; http(s):// + protocol-relative
+ *  are the bucketer's cross-origin/remote-resource domain (Rule 37 /
+ *  bucket-C), `#frag` is a same-document SVG reference, and `{{…}}` is a
+ *  WPT sub-template token (Rule 36) — all out of the asset-inliner's
+ *  scope. */
+function urlPayloadOutOfScope(p) {
+  return /^data:/i.test(p) || /^https?:\/\//i.test(p) || p.startsWith('//')
+      || p.startsWith('#') || p.includes('{{');
+}
+
+/**
+ * Rewrite every inlinable url() reference inside ONE CSS value string.
+ * Returns `{ value, inlined, unresolved }`: `value` is the (possibly
+ * rewritten) string; `inlined`/`unresolved` count how many url() tokens
+ * were converted to data URIs vs left as un-deliverable file references
+ * (the latter drive the 'requires-bundled-asset' lossy marker upstream).
+ * Async because the asset bytes are read from disk.
+ */
+export async function inlineUrlsInValue(value, baseDir) {
+  let inlined = 0;
+  let unresolved = 0;
+  // Collect matches first (regex is stateful/global), then rebuild the
+  // string with replacements — async work inside a .replace callback
+  // isn't possible, so we do a manual splice pass.
+  const matches = [...value.matchAll(URL_TOKEN_RE)];
+  if (matches.length === 0) return { value, inlined, unresolved };
+  let out = '';
+  let cursor = 0;
+  for (const m of matches) {
+    const payload = (m[1] ?? m[2] ?? m[3] ?? '').trim();
+    out += value.slice(cursor, m.index);
+    cursor = m.index + m[0].length;
+    if (!payload || urlPayloadOutOfScope(payload)) {
+      out += m[0]; // out of scope — keep the author's original token
+      continue;
+    }
+    // Resolve relative to the test file's dir; a leading '/' is
+    // WPT-server-root-relative (same convention extractFixture uses for
+    // rel="match" and <link rel=stylesheet> hrefs).
+    const abs = payload.startsWith('/')
+      ? join(WPT_DIR, payload.slice(1))
+      : resolve(baseDir, payload);
+    // Only raster formats are inlined; the extension drives the mime type.
+    const ext = /\.([A-Za-z0-9]+)$/.exec(abs)?.[1]?.toLowerCase();
+    const mime = ext ? RASTER_MIME[ext] : null;
+    if (!mime) {
+      out += m[0];
+      unresolved++; // non-raster (svg/font/css/…) — undeliverable as-is
+      continue;
+    }
+    // Read + size-gate the asset. Missing file or ≥ 8 KB → lossy marker.
+    let bytes = null;
+    try {
+      bytes = await fs.readFile(abs);
+    } catch {
+      bytes = null; // asset not present under tools/wpt/ — unresolvable
+    }
+    if (!bytes || bytes.length >= MAX_INLINE_ASSET_BYTES) {
+      out += m[0];
+      unresolved++;
+      continue;
+    }
+    // Emit an UNQUOTED url() so whitespace-tokenising value parsers (e.g.
+    // the converter's BackgroundExpander) see one token: the percent-
+    // encoded payload contains only '%' + hex digits — no spaces, quotes,
+    // parens, or commas. The single mandatory data-URI comma (RFC 2397)
+    // sits inside the url() parens, which paren-aware top-level-comma
+    // splitters already protect.
+    out += `url(data:${mime},${percentEncodeBytes(bytes)})`;
+    inlined++;
+  }
+  out += value.slice(cursor);
+  return { value: out, inlined, unresolved };
+}
+
+/**
+ * Walk a built fixture's component tree (top-level components, nested
+ * `children` maps, and `_pseudo` buckets) rewriting url() references in
+ * every string property value. Components left with un-deliverable url()
+ * refs gain `_lossy: true` + 'requires-bundled-asset' in `_lossyReasons`;
+ * the fixture's `_wpt.lossy`/`_wpt.lossyReasons` roll up the same flag
+ * when the `_wpt` block carries lossy fields (test fixtures do; ref
+ * fixtures' minimal `_wpt` doesn't and is left untouched).
+ *
+ * Mutates `fixture` in place; returns `{ inlined, unresolved }` totals so
+ * the CLI can log what happened. Exported for unit tests.
+ */
+export async function inlineFixtureAssets(fixture, baseDir) {
+  let totalInlined = 0;
+  let totalUnresolved = 0;
+  // Per-component visitor: rewrite properties, then recurse into _pseudo
+  // buckets and nested children (both keyed maps of component-shaped
+  // objects, per buildComponents' contract).
+  async function visit(cmp) {
+    if (!cmp || typeof cmp !== 'object') return;
+    let unresolvedHere = 0;
+    if (cmp.properties && typeof cmp.properties === 'object') {
+      for (const [k, v] of Object.entries(cmp.properties)) {
+        if (typeof v !== 'string' || !/url\(/i.test(v)) continue;
+        const r = await inlineUrlsInValue(v, baseDir);
+        cmp.properties[k] = r.value;
+        totalInlined += r.inlined;
+        unresolvedHere += r.unresolved;
+      }
+    }
+    // Pseudo-element buckets carry their own properties dicts (swarm-003
+    // Bug 1 shape: `_pseudo.<name>.properties`). Same rewrite applies —
+    // `::before { content: url(...) }` is a real WPT pattern.
+    if (cmp._pseudo && typeof cmp._pseudo === 'object') {
+      for (const pe of Object.values(cmp._pseudo)) {
+        if (!pe?.properties) continue;
+        for (const [k, v] of Object.entries(pe.properties)) {
+          if (typeof v !== 'string' || !/url\(/i.test(v)) continue;
+          const r = await inlineUrlsInValue(v, baseDir);
+          pe.properties[k] = r.value;
+          totalInlined += r.inlined;
+          unresolvedHere += r.unresolved;
+        }
+      }
+    }
+    if (unresolvedHere > 0) {
+      // Honest lossy marker — no silent fallthrough: the value still
+      // carries a path no platform can deliver, so the component (and the
+      // fixture) must say so. Tag matches wpt-not-applicable.mjs Rule 20.
+      totalUnresolved += unresolvedHere;
+      cmp._lossy = true;
+      const reasons = new Set(cmp._lossyReasons ?? []);
+      reasons.add('requires-bundled-asset');
+      cmp._lossyReasons = [...reasons];
+    }
+    // Children map: `{ childId: { id, properties, … } }` (NOT an array —
+    // see buildComponents' Kotlin-parser note).
+    if (cmp.children && typeof cmp.children === 'object') {
+      for (const child of Object.values(cmp.children)) await visit(child);
+    }
+  }
+  for (const cmp of Object.values(fixture.components ?? {})) await visit(cmp);
+  // Roll the flag up to the test fixture's _wpt block (which carries
+  // `lossy` + `lossyReasons`); ref fixtures' `_wpt` is `{ref, of,
+  // specSection}` only and stays untouched.
+  if (totalUnresolved > 0 && fixture._wpt && 'lossy' in fixture._wpt) {
+    fixture._wpt.lossy = true;
+    const reasons = new Set(fixture._wpt.lossyReasons ?? []);
+    reasons.add('requires-bundled-asset');
+    fixture._wpt.lossyReasons = [...reasons];
+  }
+  return { inlined: totalInlined, unresolved: totalUnresolved };
+}
+
 // ── Main extractor ───────────────────────────────────────────────────────────
 //
 // extractFixture(testRel) → { fixture, refFixture }
@@ -1706,6 +2030,14 @@ export async function extractFixture(testRel) {
     components: built.components,
   };
 
+  // wave-8: resolve + inline url() support assets relative to the test
+  // file's directory (see the Support-asset-inlining section above). Runs
+  // AFTER buildComponents because url() refs arrive through BOTH stylesheet
+  // rules and inline style="…" attributes — the built component tree is the
+  // one place both funnels have already merged. Oversize / unresolvable
+  // refs mark the fixture lossy ('requires-bundled-asset').
+  await inlineFixtureAssets(fixture, dirname(testAbs));
+
   // Ref fixture — same shape, same logic, so the dashboard can render it
   // alongside the test (Phase 4+ adds explicit ref columns; for Phase 1 we
   // capture refs separately via the browser-ref pipeline so this fixture
@@ -1732,6 +2064,12 @@ export async function extractFixture(testRel) {
       _wpt: { ref: refRel, of: testRel, specSection: section },
       components: refBuilt.components,
     };
+    // wave-8: refs paint the same support assets (background-image-000-ref
+    // uses cat.png too) — inline them relative to the REF file's dir so the
+    // test/ref pair stays visually comparable. Component-level lossy
+    // markers apply; the minimal ref `_wpt` block has no lossy field and
+    // inlineFixtureAssets leaves it untouched by design.
+    await inlineFixtureAssets(refFixture, dirname(refAbs));
   } catch {
     // Ref unavailable — leave null. The orchestrator skips ref-capture and
     // marks the test as ref-missing in the wpt block.

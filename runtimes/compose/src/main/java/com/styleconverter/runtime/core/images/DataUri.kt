@@ -50,11 +50,12 @@ object DataUri {
                     .decode(percentDecode(payload).replace(Regex("\\s"), ""))
             } else {
                 // Non-base64 form: percent-decode to RAW BYTES. This form
-                // carries BINARY payloads too (percent-encoded PNGs — the
-                // repo's canonical raster-data-URI style, since the parser
-                // lowercases values and corrupts base64); the previous
-                // String round-trip UTF-8-mangled every byte ≥ 0x80. Text
-                // SVG payloads (ASCII) decode byte-identically either way.
+                // carries BINARY payloads too (percent-encoded PNGs — valid
+                // RFC 2397 authoring, and the repo's historical raster style
+                // from before the wave-8 converter fix that made base64
+                // survive the wire byte-exact); the previous String
+                // round-trip UTF-8-mangled every byte ≥ 0x80. Text SVG
+                // payloads (ASCII) decode byte-identically either way.
                 percentDecodeBytes(payload)
             }
         } catch (_: IllegalArgumentException) {

@@ -37,7 +37,8 @@ enum MaskURLResolution: Equatable {
 enum MaskURLLayer {
 
     /// Resolve `href` via the shared background decoder (data URIs —
-    /// fully percent-encoded survive the converter's lowercasing —
+    /// base64 and percent-encoded forms alike, now that the wave-8
+    /// converter fix delivers url() bytes intact —
     /// file paths, bundle resources). nil from the resolver covers all
     /// unresolvable flavors: url(#fragment) SVG references (no document
     /// to look the id up in), http(s) remotes (defined no-op for
