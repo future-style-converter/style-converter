@@ -1065,11 +1065,36 @@ public struct ComponentRenderer: View {
         // the child's percent height keeps degrading to auto. This is
         // the fix for the gate capture's zero-area `height: 100%` child.
         let childCBH = ContainingBlockBasis.paddingBox(style: style, vertical: true)
+        // Lane FLEX-SAFE — when THIS positioned ancestor is a flex
+        // container, an inset-less abspos child sits at its STATIC
+        // POSITION: the sole-flex-item hypothetical (css-flexbox-1
+        // §4.1), so align-self (incl. the safe/unsafe overflow keywords
+        // riding the Generic wire) shifts the child off the overlay's
+        // top-leading anchor on the CROSS axis. Nil for every non-flex
+        // ancestor — their children keep the block-flow anchor.
+        let parentFlexDirection: FlexDirectionKeyword? =
+            style.layout7?.display == .flex
+                ? (style.layout7?.flexDirection ?? .row)  // CSS initial: row
+                : nil
         ForEach(Array(children.enumerated()), id: \.offset) { _, child in
+            // Static-position cross shift (0 unless flex parent + an
+            // align-self claim + definite extents — the helper's docs
+            // spell out each honest no-op). Computed per child: the
+            // safe fallback depends on the CHILD's own size.
+            let staticShift = AbsposStaticAlignment.staticCrossOffset(
+                flexDirection: parentFlexDirection,
+                childProperties: child.properties,
+                containerW: childCB,
+                containerH: childCBH)
             // v2: children render through ComponentHost (placement
             // parent-data attached; inert here — the overlay ZStack
             // reads no layout values).
             ComponentHost(component: child)
+                // The cross-axis static-position offset — applied on
+                // the HOST so the child's own PositionApplier (which
+                // only runs for explicit insets, gated off above)
+                // never composes with it on the same axis.
+                .offset(x: staticShift.width, y: staticShift.height)
                 // Reset the size-injection channels: an absolute child
                 // never stretch-inherits grid/flex geometry (it is not
                 // an item of the parent's formatting context).
@@ -1609,8 +1634,33 @@ public struct ComponentRenderer: View {
                 // meta.sourceTag, formerly `_tag`.)
                 let parentTag = (component.meta?.sourceTag ?? "").lowercased()
                 let isListItem = (child.meta?.sourceTag ?? "").lowercased() == "li"
+                // Wave 10 — the fragmentation contract (css-break-3 §4):
+                // a multicol container's single in-flow child whose
+                // block-size C exceeds the column block-size H breaks
+                // into per-column fragments. The DECISION + geometry are
+                // pure (ColumnsApplier.fragmentPlan: the §2 multicol
+                // gate, the horizontal-tb bail, the §3 used columns via
+                // the SAME childCB/childCBH/multicolFillGap inputs the
+                // wave-9 fill basis reads, and the C > H overflow test).
+                // Nil = every current non-overflowing multicol fixture
+                // keeps the pre-wave-10 path byte-identically.
+                let fragPlan = ColumnsApplier.fragmentPlan(
+                    columns: style.columns,
+                    verticalWritingMode:
+                        style.typography?.verticalWritingMode == true,
+                    siblingCount: children.count,
+                    contentWidthPx: childCB,
+                    contentHeightPx: childCBH,
+                    gapPx: multicolFillGap,
+                    childProperties: child.properties,
+                    ctx: style.spacing.context)
                 Group {
-                    if isListItem && (parentTag == "ol" || parentTag == "ul") {
+                    if let plan = fragPlan {
+                        // Fragment pass — F clipped+translated clones of
+                        // the child, one per column (multicolFragmentRow
+                        // below documents the modifier-order argument).
+                        multicolFragmentRow(child: child, plan: plan)
+                    } else if isListItem && (parentTag == "ol" || parentTag == "ul") {
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
                             Text(parentTag == "ol" ? "\(index + 1)." : "•")
                             if !isCSSFlex, let ca = childAgg, let pa = parentAgg {
@@ -1849,6 +1899,78 @@ public struct ComponentRenderer: View {
                 // push-out moves the soft break (see GreedyLineBreaker).
                 wrapWidth: textWrapWidth(style: style)
             )
+        }
+    }
+
+    // MARK: - Multicol fragmentation (wave 10, css-break-3 §4)
+
+    /// The clip+translate draw pass for one overflowing multicol child:
+    /// F clones of the child's full view, each clipped to its COLUMN
+    /// rect and translated so fragment i exposes the child's continuous
+    /// paint band [i·H, min((i+1)·H, C)) — box-decoration-break:slice
+    /// (css-break-3 §5.2, the initial value): backgrounds paint as ONE
+    /// unfragmented C-tall box, then each column shows a slice of it,
+    /// so stripes/gradients continue seamlessly across columns.
+    ///
+    /// Modifier-order argument (inside-out):
+    ///   ComponentHost                 — the FULL child (W×C layout).
+    ///   .offset(y: −i·H)              — PAINT-only block shift: slides
+    ///                                   band i up to the slot's top.
+    ///                                   Offset does not change layout
+    ///                                   size, so the frame below still
+    ///                                   sees the W×C child.
+    ///   .frame(W, H, .topLeading)     — the COLUMN rect: a fixed W×H
+    ///                                   slot whose topLeading alignment
+    ///                                   pins the child's top edge to
+    ///                                   the slot's top edge (alignment
+    ///                                   works on LAYOUT bounds — the
+    ///                                   offset above is paint-only).
+    ///   .clipped()                    — clips to the frame's bounds =
+    ///                                   the column rect. Because the
+    ///                                   offset sits INSIDE the clip,
+    ///                                   the out-of-band paint (above /
+    ///                                   below the slice) is cut; the
+    ///                                   reverse nesting (.clipped()
+    ///                                   before .frame, i.e. clipping
+    ///                                   the child to its own W×C
+    ///                                   bounds) would clip nothing and
+    ///                                   let every fragment paint the
+    ///                                   full child over its neighbours.
+    /// The geometry's INLINE translation (+x_i = i·(W+G)) is realized
+    /// STRUCTURALLY by the HStack: each slot is exactly W wide with G
+    /// spacing, so slot i's origin is i·(W+G) by construction — adding
+    /// .offset(x:) on top would double-shift the paint. The block
+    /// translate comes straight from FragmentGeometry so the render
+    /// consumes the exact S-table-pinned values.
+    @ViewBuilder
+    private func multicolFragmentRow(child: IRComponent,
+                                     plan: ColumnsApplier.FragmentPlan) -> some View {
+        // .top alignment: every fragment's block start sits at the
+        // container's content-box top (column boxes share one row —
+        // css-multicol-1 §2's column row).
+        HStack(alignment: .top, spacing: plan.gapPx) {
+            // columnIndex is unique by construction (0..<F) — a stable
+            // ForEach identity for the clones.
+            ForEach(plan.fragments, id: \.columnIndex) { frag in
+                ComponentHost(component: child)
+                    // css-multicol-1 §2: the child's containing block
+                    // is the COLUMN box — override the container-width
+                    // channel the outer ForEach publishes (the inner,
+                    // leaf-closer .environment wins) so the child's
+                    // percent widths resolve against W, consistent
+                    // with the wave-9 wptChildFillWidth column basis.
+                    .environment(\.containingBlockWidth, plan.columnWidthPx)
+                    // Block-axis slice shift (−i·H) — see the modifier-
+                    // order argument in the doc comment above.
+                    .offset(y: frag.translate.height)
+                    // The column rect as a fixed frame; topLeading pins
+                    // the child's top-left to the slot's top-left.
+                    .frame(width: frag.clipRect.width,
+                           height: frag.clipRect.height,
+                           alignment: .topLeading)
+                    // Clip to the column rect — the pass' clip step.
+                    .clipped()
+            }
         }
     }
 }

@@ -1833,8 +1833,24 @@ object ComponentRenderer {
      * excess overflows toward the inline/block end exactly like the LTR
      * horizontal-tb refs. Compose does not clip children by default, so
      * the overflowing ink draws (matching CSS overflow:visible).
+     *
+     * Lane FLEX-SAFE: [crossSpec] carries the child's resolved abspos
+     * static-position CROSS alignment (align-self center / safe center /
+     * unsafe center — css-flexbox-1 §4.1 sole-item hypothetical +
+     * css-align-3 §4.4 overflow keywords). The parent-side Box.align only
+     * positions the REPORTED (constraint-clamped) box, which fills the
+     * cross axis whenever the child overflows — so the OVERFLOWING ink's
+     * alignment must be applied here, on the placeable itself:
+     * crossOffset(child, reported) is 0 when the child fits (reported ==
+     * measured; the parent Box.align then owns placement) and the
+     * safe-aware centered/end offset when it overflows (reported ==
+     * container cross size). Null spec ⇒ byte-identical wave-8 behaviour
+     * (the RenderAbsoluteChild overlay path always passes null).
      */
-    private fun absposOverflowMeasure(): Modifier = Modifier.layout { measurable, constraints ->
+    private fun absposOverflowMeasure(
+        crossSpec: com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Spec? = null,
+        crossIsVertical: Boolean = true
+    ): Modifier = Modifier.layout { measurable, constraints ->
         // Unbounded measure: min 0 / max ∞ both axes — the child's own
         // size chain (width/height/padding/border modifiers) decides.
         val placeable = measurable.measure(androidx.compose.ui.unit.Constraints())
@@ -1844,10 +1860,28 @@ object ComponentRenderer {
         val reportedW = absposReportedAxis(placeable.width, constraints.minWidth, constraints.maxWidth)
         val reportedH = absposReportedAxis(placeable.height, constraints.minHeight, constraints.maxHeight)
         layout(reportedW, reportedH) {
-            // Anchor at the origin of the reported box = the static
-            // position the parent placed us at; place() beyond the
-            // reported size is legal and draws unclipped.
-            placeable.place(0, 0)
+            // Cross-axis static-position shift for the overflow case —
+            // the shared safe-fallback math (identically pinned on iOS).
+            // roundToInt: Compose places on whole px; ties round half-up
+            // on both platforms' captures at the SSIM scale used.
+            val crossPx = crossSpec?.let { spec ->
+                com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.crossOffset(
+                    // Child extent on the cross axis vs the reported box.
+                    childPx = (if (crossIsVertical) placeable.height else placeable.width).toDouble(),
+                    containerPx = (if (crossIsVertical) reportedH else reportedW).toDouble(),
+                    spec = spec
+                ).let { kotlin.math.round(it).toInt() }
+            } ?: 0
+            // Anchor at the reported box's origin (the static position
+            // the parent placed us at), shifted by the cross offset;
+            // place() beyond the reported size is legal and draws
+            // unclipped — negative offsets spill toward the start edge.
+            placeable.place(
+                // Column flex: cross axis is horizontal (x shift).
+                x = if (crossIsVertical) 0 else crossPx,
+                // Row flex: cross axis is vertical (y shift).
+                y = if (crossIsVertical) crossPx else 0
+            )
         }
     }
 
@@ -2088,10 +2122,34 @@ object ComponentRenderer {
                 val childHeightDefinite = hasDefiniteSize(child.properties, widthAxis = false)
                 val stretches = alignSelf == AlignSelf.STRETCH &&
                     !childHeightDefinite && !childIsOutOfFlow
+                // Lane FLEX-SAFE: an out-of-flow child's static position
+                // derives its CROSS alignment from align-self INCLUDING
+                // the safe/unsafe overflow keywords, which ship on the
+                // Generic wire (css-align-3 §4.4; wire pinned in
+                // AbsposStaticAlignment). Row cross axis is vertical; an
+                // explicit vertical inset replaces the static position
+                // (css-position-3 §3.5), so the spec stands down then.
+                val absposCross = if (childIsOutOfFlow &&
+                    !com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
+                        .hasCrossInset(child.properties, vertical = true)
+                ) com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
+                    .resolveCross(child.properties) else null
 
                 // Build modifier with align and weight
                 var childModifier: Modifier = Modifier
-                childModifier = when (alignSelf) {
+                childModifier = if (absposCross != null) when (absposCross.base) {
+                    // Static-position base alignment for the REPORTED
+                    // (constraint-fitting) box — the overflow half of the
+                    // same alignment happens inside absposOverflowMeasure.
+                    // Base values mirror the typed arms below 1:1, so a
+                    // typed CENTER routes identically through either path.
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.START ->
+                        childModifier.align(Alignment.Top)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.CENTER ->
+                        childModifier.align(Alignment.CenterVertically)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.END ->
+                        childModifier.align(Alignment.Bottom)
+                } else when (alignSelf) {
                     AlignSelf.FLEX_START -> childModifier.align(Alignment.Top)
                     AlignSelf.FLEX_END -> childModifier.align(Alignment.Bottom)
                     AlignSelf.CENTER -> childModifier.align(Alignment.CenterVertically)
@@ -2133,7 +2191,9 @@ object ComponentRenderer {
                     // (flex-abspos-staticpos-align-self-safe-001/002: a
                     // 69px box spilling out of a 50px flex container that
                     // Android was clamping to fit, natives 0.86-0.92).
-                    itemModifier = absposOverflowMeasure()
+                    // Lane FLEX-SAFE: thread the resolved cross alignment
+                    // so overflowing ink centers / safe-falls-back too.
+                    itemModifier = absposOverflowMeasure(absposCross, crossIsVertical = true)
                 } else {
                     resolvedSizes?.get(index)?.let { itemModifier = itemModifier.width(it.toFloat().dp) }
                     if (stretches) itemModifier = itemModifier.fillMaxHeight()
@@ -2216,10 +2276,29 @@ object ComponentRenderer {
                 // alignment still derives their static position but every
                 // sizing branch is gated off below.
                 val childIsOutOfFlow = isOutOfFlowChild(child.properties)
+                // Lane FLEX-SAFE — column twin of the row loop's resolve:
+                // the column cross axis is HORIZONTAL, so the inset gate
+                // checks left/right (css-position-3 §3.5) and the base
+                // maps to horizontal alignments below.
+                val absposCross = if (childIsOutOfFlow &&
+                    !com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
+                        .hasCrossInset(child.properties, vertical = false)
+                ) com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
+                    .resolveCross(child.properties) else null
 
                 // Build modifier with align and weight
                 var childModifier: Modifier = Modifier
-                childModifier = when (alignSelf) {
+                childModifier = if (absposCross != null) when (absposCross.base) {
+                    // Static-position base alignment of the reported box
+                    // (overflow half lives in absposOverflowMeasure) —
+                    // horizontal mirror of the row loop's mapping.
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.START ->
+                        childModifier.align(Alignment.Start)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.CENTER ->
+                        childModifier.align(Alignment.CenterHorizontally)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.END ->
+                        childModifier.align(Alignment.End)
+                } else when (alignSelf) {
                     AlignSelf.FLEX_START -> childModifier.align(Alignment.Start)
                     AlignSelf.FLEX_END -> childModifier.align(Alignment.End)
                     AlignSelf.CENTER -> childModifier.align(Alignment.CenterHorizontally)
@@ -2256,8 +2335,9 @@ object ComponentRenderer {
                     // Wave 8: unbounded measure for the out-of-flow child —
                     // specified size wins and overflows the container
                     // (css-position-3 §2.1; see the row-loop twin for the
-                    // fixture evidence).
-                    itemModifier = absposOverflowMeasure()
+                    // fixture evidence). Lane FLEX-SAFE: column cross axis
+                    // is horizontal — thread the resolved cross alignment.
+                    itemModifier = absposOverflowMeasure(absposCross, crossIsVertical = false)
                 } else {
                     resolvedSizes?.get(index)?.let { itemModifier = itemModifier.height(it.toFloat().dp) }
                 }

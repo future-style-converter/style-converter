@@ -145,9 +145,13 @@ async function loadPng(p) {
   return PNG.sync.read(buf);
 }
 
-/** Pad to (W,H) with the canonical #1A1A2E background — matches
- *  compare-screenshots.mjs so browser-ref pairs are directly comparable to
- *  inter-platform pairs. */
+/** Pad to (W,H) with the WPT capture canvas background — WHITE from the
+ *  corpus-v4 white-canvas boundary (capture-browser-ref.mjs CANVAS_BG and
+ *  all three platform WPT capture modes paint white now), so a shorter
+ *  capture's padding blends into the ref's white tail instead of stamping
+ *  a dark block over it. This module serves ONLY WPT browser-ref diffs;
+ *  the 327-pair pipeline keeps its own dark padToCanvas in
+ *  compare-screenshots.mjs untouched. */
 async function padToCanvas(img, W, H) {
   if (img.width === W && img.height === H) return img;
   const padded = await sharp(PNG.sync.write(img))
@@ -156,7 +160,9 @@ async function padToCanvas(img, W, H) {
       bottom: Math.max(0, H - img.height),
       left: 0,
       right: Math.max(0, W - img.width),
-      background: { r: 0x1A, g: 0x1A, b: 0x2E, alpha: 1 },
+      // The corpus-v4 WHITE canvas (documented boundary — all WPT numbers
+      // shift at v4; do not compare against v1..v3 manifests).
+      background: { r: 0xFF, g: 0xFF, b: 0xFF, alpha: 1 },
     })
     .png()
     .toBuffer();
@@ -169,8 +175,8 @@ async function padToCanvas(img, W, H) {
  * Returns the path to the stitched PNG, cached in `cacheDir/<cacheKey>.png`
  * so re-runs are O(1). Width = max(inputs[].width); height = sum of input
  * heights. Inputs narrower than the canvas are left-aligned and padded with
- * the canonical #1A1A2E background (matches padToCanvas + CaptureCanvas's
- * own background so seams are invisible).
+ * the WHITE WPT canvas background (corpus-v4 boundary — matches padToCanvas
+ * above + every platform's WPT capture canvas so seams are invisible).
  *
  * Rationale (swarm-002 RC2, tools/titan/investigations/swarm-002/
  * css-overflow__clip-002.json): the legacy inject-wpt-block compared ONLY
@@ -205,13 +211,14 @@ async function stitchPngsVertically(inputPaths, cacheDir, cacheKey) {
   // Canvas width = max input width; height = sum of input heights.
   const W = Math.max(...metas.map((m) => m.width));
   const H = metas.reduce((s, m) => s + m.height, 0);
-  // Build a fresh PNG buffer initialised to the canonical #1A1A2E background
-  // so any sub-canvas gap is invisible (matches CaptureCanvas's own bg).
+  // Build a fresh PNG buffer initialised to the WHITE WPT canvas background
+  // (corpus-v4 boundary) so any sub-canvas gap blends with the white
+  // captures/ref instead of stamping dark seams between stitched crops.
   const composed = new PNG({ width: W, height: H });
   for (let i = 0; i < composed.data.length; i += 4) {
-    composed.data[i]     = 0x1A;
-    composed.data[i + 1] = 0x1A;
-    composed.data[i + 2] = 0x2E;
+    composed.data[i]     = 0xFF;
+    composed.data[i + 1] = 0xFF;
+    composed.data[i + 2] = 0xFF;
     composed.data[i + 3] = 0xFF;
   }
   // Row-by-row copy into the composed buffer at the running y-offset,
@@ -283,6 +290,12 @@ async function diffWebVsRef(webPath, refPath) {
     labDeltaE,
   };
   metrics.divergence = classifyDivergence(metrics);
+  // Color-aware triage signals (TITAN-WHITE lane) — every browser-ref diff
+  // carries both. diffWebVsRef serves ONLY the wpt: block's ref pairs
+  // (stitch + composed paths), so the 327-pair manifest rows are untouched.
+  // Neither field feeds wptPass (raw ssim ≥ 0.95 stays the one criterion).
+  metrics.colorComposite = computeColorComposite(metrics.ssim, metrics.labDeltaE);
+  metrics.colorDivergent = isColorDivergent(metrics.histogramKL);
   return metrics;
 }
 
@@ -310,6 +323,76 @@ function checkFuzzyMatch(metrics, fuzzy) {
 function computeWptPass(ssim, fuzzyMatch) {
   const ssimPass = typeof ssim === 'number' && ssim >= 0.95;
   return ssimPass || fuzzyMatch === true;
+}
+
+/** Color-aware composite score for a browser-ref diff (TITAN-WHITE lane).
+ *
+ *  WHY: raw SSIM is effectively COLOR-BLIND — it runs on luminance
+ *  structure, so wave-9 measured a FULL red→green repaint moving SSIM by
+ *  only 0.0001 (docs/STATUS.md, wave-9 section). A test can therefore sit
+ *  at ssim 0.99 while painting the wrong hue everywhere. The composite
+ *  folds the perceptual color error back in:
+ *
+ *      colorComposite = ssim − min(0.2, labDeltaE.mean / 50)
+ *
+ *  Formula rationale:
+ *    - labDeltaE.mean is the mean CIEDE2000 ΔE over sampled pixels
+ *      (compare-screenshots-metrics.mjs). ΔE ≈ 2.3 is the classic
+ *      just-noticeable difference; a whole-image hue swap like the wave-9
+ *      red→green case lands mean ΔE in the tens.
+ *    - /50 normalises so a saturated full-image hue error (mean ≈ 50,
+ *      e.g. red↔green is ~86 max) saturates the penalty, while AA-noise
+ *      pairs (mean < 0.5) lose < 0.01.
+ *    - min(…, 0.2) caps the penalty so structure still dominates the
+ *      score: a perfect-structure wrong-hue pair floors at ssim − 0.2,
+ *      clearly below the 0.95 bar but not nuked to zero.
+ *
+ *  This is a VISIBILITY/TRIAGE signal only — the wptPass criterion stays
+ *  raw ssim ≥ 0.95 (computeWptPass above, deliberately untouched) so the
+ *  corpus pass-rate series keeps one definition. Returns null when ssim is
+ *  unavailable; falls back to the raw ssim when labDeltaE could not be
+ *  computed (color-unknown ≠ color-penalised). Pure + exported for unit
+ *  pins. */
+function computeColorComposite(ssim, labDeltaE) {
+  // No SSIM → no base score to penalise; the diff is already error-shaped.
+  if (typeof ssim !== 'number') return null;
+  const mean = labDeltaE?.mean;
+  // labDeltaE is null for degenerate pairs (all-transparent, metric error):
+  // treat as "no color information", not "no color error".
+  if (typeof mean !== 'number' || !Number.isFinite(mean)) return +ssim.toFixed(4);
+  const penalty = Math.min(0.2, mean / 50);
+  return +(ssim - penalty).toFixed(4);
+}
+
+/** Per-channel histogram-KL threshold for the colorDivergent stamp.
+ *
+ *  Calibration (recorded values — pinned in inject-wpt-block.test.mjs):
+ *    - The wave-9 measured red→green repaint carries histogramKL
+ *      {r:0.0609, g:0.2396, b:0.0205} (tools/titan/runs/wave9-gate/
+ *      sections/css-flexbox manifest, iOS-web rows) — the canonical
+ *      "SSIM missed a full hue swap" case. The stamp MUST catch g=0.2396.
+ *    - AA-noise / correctly-rendering browser-ref pairs in the wave9c-gate
+ *      css-break + wave9-gate css-flexbox manifests top out at max-channel
+ *      KL 0.0197 (css-break non-white-ink passes) and 0.0024 (css-flexbox
+ *      passes). The stamp must NOT fire there.
+ *  0.1 sits ≥5× above the measured AA ceiling and 2.4× below the measured
+ *  hue-swap value — both margins comfortable. NOTE: the white-ink-
+ *  camouflage passes (css-break abspos-in-opacity, max KL 0.30–0.41 on the
+ *  pre-white-canvas corpus) DO stamp colorDivergent — that is intentional:
+ *  their color MASS genuinely diverges, and the stamp is triage colour,
+ *  not a pass/fail input. */
+const COLOR_DIVERGENT_KL_THRESHOLD = 0.1;
+
+/** True when ANY channel's histogram KL exceeds the calibrated threshold —
+ *  the boolean triage twin of computeColorComposite (same wave-9 rationale:
+ *  surface hue swaps SSIM cannot see). histogramKL absent/null (size
+ *  mismatch, metric error) → false: unknown is not divergent, and the raw
+ *  metrics are still on the diff for investigators. Pure + exported for
+ *  unit pins. */
+function isColorDivergent(histogramKL) {
+  if (!histogramKL || typeof histogramKL !== 'object') return false;
+  const channels = [histogramKL.r, histogramKL.g, histogramKL.b];
+  return channels.some((v) => typeof v === 'number' && v > COLOR_DIVERGENT_KL_THRESHOLD);
 }
 
 /** Tags that mean the HARNESS cannot even DELIVER the test's inputs —
@@ -781,4 +864,5 @@ if (IS_CLI) {
 export {
   stitchPngsVertically, diffWebVsRef, diffPlatformVsRef, diffComposedVsRef,
   safe, checkFuzzyMatch, computeWptPass,
+  computeColorComposite, isColorDivergent, COLOR_DIVERGENT_KL_THRESHOLD,
 };

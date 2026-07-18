@@ -39,6 +39,8 @@ import com.styleconverter.runtime.core.renderer.ComponentHost
 import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.renderer.LocalWptComposedMode
 import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.core.renderer.WPT_CANVAS_BACKGROUND
+import com.styleconverter.runtime.core.renderer.captureCanvasBackground
 import com.styleconverter.runtime.core.types.ValueExtractors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -98,7 +100,8 @@ private val TextPropCount = Color(0xFF666666)
  * inbox mode. Instead of capturing each flattened component to its own PNG, it
  * renders the WHOLE fed document COMPOSED (all roots in document order) on ONE
  * canvas that mirrors the Chromium browser-ref (tools/titan/capture-browser-ref
- * .mjs): 390dp wide, #1A1A2E, 16dp padding, 600dp min-height, natural height —
+ * .mjs): 390dp wide, WHITE (the corpus-v4 canvas — WPT_CANVAS_BACKGROUND, or the
+ * body-root's own background), 16dp padding, 600dp min-height, natural height —
  * then PixelCopies that canvas ONCE and saves a single `<safe(testKey)>.png`
  * (ScreenshotManager.saveComposedScreenshot). This reproduces the reference
  * page's real layout (bar stacking, gaps, positions) so MULTI-component tests
@@ -590,8 +593,9 @@ private fun CaptureView(
 
         // Component render area — captured via PixelCopy.
         //
-        // The canvas is a chromeless 390dp-wide surface on a solid #1A1A2E
-        // background with 16dp padding. Natural height (no chrome, no card
+        // The canvas is a chromeless 390dp-wide surface with 16dp padding on
+        // a solid background: #1A1A2E for the bundled/baseline path, WHITE
+        // in WPT capture mode (the corpus-v4 canvas — see CaptureCanvas). Natural height (no chrome, no card
         // border, no labels). Matches the iOS `CaptureCanvas` and web
         // `<CaptureCanvas>` contract so captures are pixel-diffable.
         //
@@ -634,7 +638,12 @@ private fun CaptureView(
  *   - Width            : exactly 390dp (CAPTURE_WIDTH override via the
  *                        `captureWidth` intent extra — docs/DYNAMIC_CAPTURE.md §2)
  *   - Height           : component's natural height (no clamping, no minimum)
- *   - Background       : solid #1A1A2E (no alpha compositing)
+ *   - Background       : solid #1A1A2E (no alpha compositing) on the
+ *                        bundled/baseline path; solid WHITE in WPT capture
+ *                        mode (LocalWptCaptureMode — the corpus-v4 white
+ *                        canvas, mirrored by the white browser-ref and the
+ *                        web/iOS WPT canvases so white WPT ink vanishes
+ *                        identically on every surface)
  *   - Padding          : 16dp on all sides
  *   - No header, footer, border, or label — just the component.
  *
@@ -669,7 +678,14 @@ private fun CaptureCanvas(
     Box(
         modifier = Modifier
             .width(canvasWidth)
-            .background(CaptureCanvasBg)
+            // Mode-split canvas background (TITAN-WHITE lane, pure helper in
+            // the runtime's WptCaptureMode.kt): the TITAN inbox/WPT path
+            // (LocalWptCaptureMode=true, provided by ScreenshotCaptureScreen)
+            // paints the corpus-v4 WHITE canvas so WPT white ink vanishes
+            // exactly as it does in the white browser-ref; the bundled
+            // 327-pair path (flag default false) keeps the dark #1A1A2E
+            // stage byte-identically.
+            .background(captureCanvasBackground(LocalWptCaptureMode.current, CaptureCanvasBg))
             // Hook markers — the native twins of the web reference's
             // `data-force-state` / `data-animation-time` canvas stamps
             // (docs/DYNAMIC_CAPTURE.md §1/§4): let a capture/UI-automator
@@ -833,14 +849,18 @@ private val ComposedCanvasMinHeight = 600.dp
  * `meta.role == 'body-root'` component (a document has one body) and read its
  * BackgroundColor through the SAME [ValueExtractors.extractColor] the renderer
  * uses, so the painted color matches what the runtime would render. When there
- * is no body-root, or it declares no background, fall back to the pipeline
- * default #1A1A2E so every other test's canvas is byte-identical to before.
+ * is no body-root, or it declares no background, fall back to the WPT canvas
+ * default — WHITE since the corpus-v4 boundary ([WPT_CANVAS_BACKGROUND]; the
+ * composed path is WPT-ONLY, so unlike the per-component canvas there is no
+ * dark-stage branch here). An author body background still wins, exactly as
+ * it beats the ref's zero-specificity `:where()` injection.
  */
 internal fun resolveComposedCanvasBackground(roots: List<IRComponent>): Color {
-    val bodyRoot = roots.firstOrNull { it.role == "body-root" } ?: return CaptureCanvasBg
+    val bodyRoot = roots.firstOrNull { it.role == "body-root" }
+        ?: return WPT_CANVAS_BACKGROUND
     val bg = bodyRoot.properties.firstOrNull { it.type == "BackgroundColor" }
         ?.data?.let { ValueExtractors.extractColor(it) }
-    return bg ?: CaptureCanvasBg
+    return bg ?: WPT_CANVAS_BACKGROUND
 }
 
 /**
@@ -892,7 +912,8 @@ private fun ComposedCaptureView(
  * directly diffable against the Chromium browser-ref:
  *   - Width       : 390dp            (CANVAS_WIDTH in capture-browser-ref.mjs)
  *   - Min-height  : 600dp            (the ref's min-height:100vh at 600 viewport)
- *   - Background  : #1A1A2E          (CANVAS_BG — the ref html+body)
+ *   - Background  : WHITE            (CANVAS_BG — the ref html+body since
+ *                                     the corpus-v4 white-canvas boundary)
  *   - Padding     : 16dp all sides   (CANVAS_PAD_PX — the ref's :where(body) pad)
  *   - Height      : natural (content), floored at 600dp
  *
@@ -929,12 +950,14 @@ private fun ComposedCaptureCanvas(
     }
 
     // FIX 3 (body/root background propagation) — TITAN Round 4b. The ref frames
-    // every page with a ZERO-specificity `:where(html,body){background:#1A1A2E}`,
+    // every page with a ZERO-specificity `:where(html,body){background:WHITE}`
+    // (the corpus-v4 canvas),
     // so a reference that sets its OWN `body{background:…}` (specificity 0,0,1)
     // WINS and paints the whole page that color (css-color/a98rgb-003's grey
     // page). The reader tags that body background as a `meta.role:'body-root'`
     // component; we resolve its BackgroundColor and paint the composed canvas
-    // with it (fallback #1A1A2E), mirroring the web harness's
+    // with it (fallback WHITE — WPT_CANVAS_BACKGROUND), mirroring the web
+    // harness's
     // resolveCanvasBackground exactly. Pure per document → memoise on identity.
     val canvasBackground = androidx.compose.runtime.remember(roots) {
         resolveComposedCanvasBackground(roots)

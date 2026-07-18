@@ -285,7 +285,10 @@ fi
 
 # ── Step 2: browser-ref capture (cached) ─────────────────────────────────────
 #
-# Cache lives at tools/wpt/refs/<sha>/<section>/<stem>.png. Section-keyed
+# Cache lives at tools/wpt/refs/<sha>/white/<section>/<stem>.png — the
+# `white` segment is capture-browser-ref.mjs's CANVAS_REV (the corpus-v4
+# white-canvas contract; pre-v4 dark refs sit at the un-segmented path and
+# are never mixed with white-canvas captures). Section-keyed
 # so two sections never overwrite each other; intra-section writes are
 # serial within this process. capture-browser-ref.mjs already tolerates
 # `existsSync(dest)` and short-circuits to `cached` — multi-agent re-runs
@@ -671,7 +674,7 @@ node "$TITAN_DIR/inject-wpt-block.mjs" \
   --tests "$TESTS_LIST" \
   --wpt-ref "$WPT_REF" \
   --run-id "$RUN_ID" \
-  --refs-root "$WPT_DIR/refs/$WPT_REF" \
+  --refs-root "$WPT_DIR/refs/$WPT_REF/white" \
   --capture-log "$CAPTURE_LOG" \
   --combined "$COMBINED_FIXTURE" \
   --web-dir "$WEB_SHOTS_DIR" \
@@ -700,7 +703,7 @@ if [[ "$WPT_OK" != "1" ]]; then
     --tests "$TESTS_LIST" \
     --wpt-ref "$WPT_REF" \
     --run-id "$RUN_ID" \
-    --refs-root "$WPT_DIR/refs/$WPT_REF" \
+    --refs-root "$WPT_DIR/refs/$WPT_REF/white" \
     --capture-log "$CAPTURE_LOG" \
     --combined "$COMBINED_FIXTURE" \
     --web-dir "$WEB_SHOTS_DIR" \

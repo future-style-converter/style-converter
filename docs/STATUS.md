@@ -207,7 +207,18 @@ dirs + WPT corpus are gitignored):
   multicol-aware WPT auto-width fill. Operational discovery: pool
   feeders run --skip-install against the provisioned app — every native
   section capture since provisioning used a stale binary; reprovision
-  before section runs that must reflect renderer changes.
+  before section runs that must reflect renderer changes. Wave 10
+  (`tools/titan/results/corpus-v4.json`) shipped the WHITE-CANVAS
+  boundary: WPT captures now render on a white canvas on all four
+  surfaces (refs cache under a /white segment; v4 is NOT comparable to
+  v1–v3), a color-aware reftest signal (colorComposite + colorDivergent
+  — raw SSIM moved 0.0001 on a full red→green repaint), native multicol
+  child fragmentation (css-break-3 §4 clip+translate, shared S-table
+  pinned identically on both natives), the abspos safe-alignment
+  fallback on both natives, and the composed-mode maxWidth clamp fix
+  that was the real web fragmentainer mechanism. corpus-v4: web mean
+  0.9593 (61/78 ≥ 0.95, **css-break web 12/12**), Android 46 passing
+  (was 33), iOS 36 (was 29); score-exclusions are delivery gaps only.
 
 ## Test suites
 
@@ -215,9 +226,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1053 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 454 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 537 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1078 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 481 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 552 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

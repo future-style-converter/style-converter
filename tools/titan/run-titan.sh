@@ -352,8 +352,12 @@ node "$TITAN_DIR/inject-wpt-block.mjs" \
   --tests "$SMOKE_LIST" \
   --wpt-ref "$WPT_REF" \
   --run-id "$RUN_ID" \
-  --refs-root "$WPT_DIR/refs/$WPT_REF" \
+  --refs-root "$WPT_DIR/refs/$WPT_REF/white" \
   --capture-log "$CAPTURE_LOG"
+# ^ the /white segment is capture-browser-ref.mjs's CANVAS_REV (corpus-v4
+#   white-canvas contract) — refs rendered under the pre-v4 dark canvas live
+#   at the un-segmented refs/<sha>/<section>/ path and must never be diffed
+#   against white-canvas captures.
 
 # Move (not copy) the WPT-injected manifest out of the legacy slot so it
 # doesn't shadow the visual-test 327-pair manifest that baseline-stats.mjs

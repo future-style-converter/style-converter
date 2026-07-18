@@ -1,6 +1,7 @@
 package com.styleconverter.runtime.core.renderer
 
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.graphics.Color
 
 /**
  * Ambient WPT-capture-mode flag for the Compose runtime.
@@ -126,3 +127,41 @@ fun composedDefaultLineHeightPx(composedWpt: Boolean, fontSizePx: Float): Float 
  * @param composedWpt value of [LocalWptComposedMode] at the call site.
  */
 fun composedPlaceholderTextPaddingDp(composedWpt: Boolean): Int = if (composedWpt) 0 else 4
+
+/**
+ * The WPT capture-canvas background — WHITE, the corpus-v4 canvas contract
+ * (TITAN-WHITE lane; the FIRST white-canvas corpus snapshot is corpus-v4 and
+ * its numbers are NOT comparable to the v1..v3 dark-canvas snapshots).
+ *
+ * ## Why white
+ * WPT reftests are authored against the spec-default WHITE page: many paint
+ * WHITE ink (borders/backgrounds — e.g. the abspos-autopos tests' `border:
+ * solid white` frames, ~5,200px of ink over 6 tests) that is SUPPOSED to
+ * vanish into the canvas, and their references paint none of it. The
+ * browser-ref render (tools/titan/capture-browser-ref.mjs CANVAS_BG) is
+ * white from the same boundary, so the SDUI capture must be too — on the
+ * old dark #1A1A2E stage that white ink was visible ONLY on our side, a
+ * systematic reftest penalty regardless of renderer correctness. All three
+ * platforms flip together: web `wptCanvasStyle`/`composedCanvasStyle`,
+ * this constant (consumed by the Android harness canvases), and SwiftUI's
+ * `WPTCanvas.background`.
+ */
+val WPT_CANVAS_BACKGROUND = Color(0xFFFFFFFF)
+
+/**
+ * Pure canvas-background decision for the Android capture canvases —
+ * extracted (same pattern as [shouldSuppressSynthesizedName]) so the exact
+ * mode split is unit-testable on the JVM without a Compose runtime.
+ *
+ * WPT capture mode ([wptCaptureMode] true — the TITAN inbox/composed paths)
+ * paints the corpus-v4 WHITE canvas; every other path returns
+ * [defaultBackground] VERBATIM so the bundled 327-pair baseline stage
+ * (#1A1A2E, owned by the harness) stays byte-identical — the split is the
+ * whole contract, there is no third state.
+ *
+ * @param wptCaptureMode value of [LocalWptCaptureMode] at the call site.
+ * @param defaultBackground the caller's non-WPT stage color (the harness's
+ *   `CaptureCanvasBg` #1A1A2E for the property-fixture pipeline).
+ */
+fun captureCanvasBackground(wptCaptureMode: Boolean, defaultBackground: Color): Color =
+    if (wptCaptureMode) WPT_CANVAS_BACKGROUND else defaultBackground

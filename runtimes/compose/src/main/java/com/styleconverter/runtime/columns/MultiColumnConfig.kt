@@ -36,7 +36,16 @@ data class MultiColumnConfig(
     /** Whether element spans all columns */
     val span: ColumnSpan = ColumnSpan.NONE,
     /** How columns are filled */
-    val fill: ColumnFill = ColumnFill.BALANCE
+    val fill: ColumnFill = ColumnFill.BALANCE,
+    /**
+     * True when the container's writing-mode is vertical (vertical-rl/-lr,
+     * sideways-rl/-lr). The css-break-3 fragmentation pass in
+     * [MultiColumnApplier] is horizontal-tb only (vertical modes are
+     * classified blocked-platform), so it bails — with a one-time log — when
+     * this flag is set. Extracted from the WritingMode IR property by
+     * [MultiColumnExtractor].
+     */
+    val verticalWritingMode: Boolean = false
 ) {
     val hasMultiColumn: Boolean
         get() = columnCount != null || columnWidth != null

@@ -4,8 +4,9 @@
  * WHY THIS EXISTS
  * ---------------
  * TITAN diffs each runtime's render of a WPT test against a Chromium render
- * of the WPT *reference* page — one COMPOSED image at 390px wide, #1A1A2E
- * background, 16px padding, natural height (tools/titan/capture-browser-ref.mjs).
+ * of the WPT *reference* page — one COMPOSED image at 390px wide, WHITE
+ * background (the corpus-v4 canvas), 16px padding, natural height
+ * (tools/titan/capture-browser-ref.mjs).
  *
  * The legacy WPT web path (CaptureGallery + `?wpt=1`) captures each IR
  * component of a test on its OWN canvas (one PNG per root component), and
@@ -61,11 +62,17 @@ import { composeTree } from '../sdui/Composer';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
 
 /**
- * The pipeline's default composed-canvas background — the #1A1A2E the ref
- * canvas (capture-browser-ref.mjs's CANVAS_BG) paints on `:where(html,body)`.
- * Used as the fallback when a test's document declares no body background.
+ * The pipeline's default composed-canvas background — the WHITE the ref
+ * canvas (capture-browser-ref.mjs's CANVAS_BG) paints on `:where(html,body)`
+ * since the corpus-v4 white-canvas boundary (WPT reftests are authored
+ * against the spec-default white page; white ink must vanish into it on
+ * both sides of the diff — see wptCanvasStyle in CaptureGallery.tsx for
+ * the full rationale). Used as the fallback when a test's document
+ * declares no body background; an author `body { background }` still wins
+ * (resolveCanvasBackground below), exactly as it beats the ref's
+ * zero-specificity `:where()` injection.
  */
-const CANVAS_BG_DEFAULT = '#1A1A2E';
+const CANVAS_BG_DEFAULT = '#FFFFFF';
 
 /**
  * GAP 2 — BODY/ROOT BACKGROUND PROPAGATION. Resolve the background color the
@@ -235,16 +242,17 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
 }
 
 /**
- * Flat vertical list of composed canvases, #1A1A2E so any sub-pixel bleed
- * between per-test crops is invisible. Same shape as CaptureGallery's
- * container so the single-full-page-screenshot + per-canvas crop pipeline in
- * capture-screenshots.mjs works unchanged.
+ * Flat vertical list of composed canvases, WHITE (the corpus-v4 canvas —
+ * this gallery is WPT-composed-only) so any sub-pixel bleed between
+ * per-test crops is invisible against the white canvases. Same shape as
+ * CaptureGallery's container so the single-full-page-screenshot +
+ * per-canvas crop pipeline in capture-screenshots.mjs works unchanged.
  */
 const containerStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'flex-start',
-  background: '#1A1A2E',
+  background: '#FFFFFF',
   margin: 0,
   padding: 0,
 };
@@ -253,14 +261,21 @@ const containerStyle: React.CSSProperties = {
  * Composed capture canvas — framed to match capture-browser-ref.mjs EXACTLY
  * so a composed PNG is directly diffable against the Chromium browser-ref:
  *   - width 390px            (CANVAS_WIDTH in capture-browser-ref.mjs)
- *   - background #1A1A2E      (CANVAS_BG — the ref sets html+body to this)
+ *   - background WHITE       (CANVAS_BG — the corpus-v4 white canvas the ref
+ *                             sets on `:where(html,body)`; white ink vanishes
+ *                             into it on BOTH sides, restoring the reftest
+ *                             camouflage the dark stage broke)
  *   - padding 16px           (CANVAS_PAD_PX — the ref's `:where(body)` pad;
  *                             box-sizing:border-box so content is 358px wide,
  *                             mirroring the ref's body content box)
  *   - min-height 600px       (the ref's `min-height:100vh` floors documentHeight
  *                             at 600 — capture-browser-ref.mjs's docHeight max;
  *                             the canvas grows past 600 when content overflows)
- *   - color #fff             (the ref sets body color:#fff)
+ *   - color #fff             (the ref keeps body color:#fff — default ink
+ *                             stays the near-white harness family on every
+ *                             surface, deliberately camouflaged on the white
+ *                             canvas; see capture-browser-ref.mjs's injection
+ *                             note for why a black-ink flip is deferred)
  * `overflow:hidden` + `transform:translateZ(0)` + `position:relative` keep
  * each canvas's paint (and any position:fixed descendant) confined to its
  * own box so one test can't bleed into the next crop — the same isolation
@@ -274,7 +289,7 @@ const composedCanvasStyle: React.CSSProperties = {
   minHeight: '600px',
   boxSizing: 'border-box',
   padding: '16px',
-  background: '#1A1A2E',
+  background: CANVAS_BG_DEFAULT,
   color: '#fff',
   overflow: 'hidden',
   transform: 'translateZ(0)',

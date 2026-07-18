@@ -418,12 +418,16 @@ export function CaptureCanvas({ node, index }: CaptureCanvasProps) {
 }
 
 /** Flat vertical list, no gaps, same background as the canvases themselves
- *  so any sub-pixel bleed around element screenshots is invisible. */
+ *  so any sub-pixel bleed around element screenshots is invisible. In WPT
+ *  mode the canvases are WHITE (corpus-v4 white-canvas boundary — see
+ *  wptCanvasStyle), so the container follows the mode split for the same
+ *  bleed-invisibility reason; the legacy 327-pair path keeps the dark
+ *  stage byte-identically. */
 const containerStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'flex-start',
-  background: '#1A1A2E',
+  background: WPT_MODE ? '#FFFFFF' : '#1A1A2E',
   margin: 0,
   padding: 0,
 };
@@ -490,13 +494,25 @@ const canvasStyle: React.CSSProperties = {
  *   600px+ height there's no abs-positioned-child cropping issue.
  * - `overflow: hidden` retained so a scene that overflows the canvas
  *   bottom doesn't bleed into the next captured component's screenshot.
+ * - `background: WHITE` — the corpus-v4 white-canvas boundary. WPT
+ *   reftests are authored against the spec-default WHITE page, and many
+ *   paint WHITE ink (borders/backgrounds — e.g. the abspos-autopos
+ *   `border: solid white` frames) that must VANISH into the canvas the
+ *   way the browser-ref hides it (capture-browser-ref.mjs CANVAS_BG is
+ *   the same white). The dark #1A1A2E stage made that ink visible only
+ *   on our side — a systematic reftest penalty. All three platforms flip
+ *   together (Compose WptCaptureMode.WPT_CANVAS_BACKGROUND, SwiftUI
+ *   WPTCanvas.background); the non-WPT canvasStyle above keeps #1A1A2E
+ *   so the committed 327-pair baselines stay byte-identical. ALL WPT
+ *   numbers shift at this boundary — corpus-v4 is the first white-canvas
+ *   snapshot.
  */
 const wptCanvasStyle: React.CSSProperties = {
   width: `${WPT_CANVAS_WIDTH_PX}px`,
   minHeight: `${WPT_CANVAS_MIN_HEIGHT_PX}px`,
   boxSizing: 'border-box',
   padding: 0,
-  background: '#1A1A2E',
+  background: '#FFFFFF',
   overflow: 'hidden',
   transform: 'translateZ(0)',
   position: 'relative',
