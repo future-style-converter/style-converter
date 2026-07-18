@@ -1,10 +1,5 @@
 package com.styleconverter.runtime.effects.mask
 
-// BitmapFactory is the SYNCHRONOUS raster decode for data:-URI mask
-// sources — the same decode ImageCache's data: branch uses; no Coil here
-// because the Modifier path must have the bitmap on the FIRST draw frame
-// (capture determinism) and Coil is async by construction.
-import android.graphics.BitmapFactory
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -19,7 +14,6 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.RadialGradientShader
@@ -38,6 +32,10 @@ import com.styleconverter.runtime.color.BackgroundTileMath
 // mask and background gradients can never diverge — see createMaskBrush.
 import com.styleconverter.runtime.color.ColorApplier
 import com.styleconverter.runtime.core.images.DataUri
+// The shared synchronous data:-URI decode (LRU cache + BitmapFactory
+// seam) — factored out of this file in wave 9 so ColorApplier's url()
+// background layers reuse the exact decode pipeline these masks pinned.
+import com.styleconverter.runtime.core.images.SyncImageDecode
 // IRLog: android.util.Log on device, stdout under plain-JVM tests — the
 // no-op branches below must log loudly WITHOUT breaking the JVM suite.
 import com.styleconverter.runtime.core.ir.IRLog
@@ -129,70 +127,34 @@ object MaskApplier {
      */
     private val warnedMaskUrls = java.util.Collections.synchronizedSet(mutableSetOf<String>())
 
-    /** Cap on cached decoded mask bitmaps — mask sources are tiny
-     *  (fixture masks are ≤ a few KB), so a small bound suffices. */
-    private const val MASK_CACHE_MAX_ENTRIES = 16
-
     /**
-     * url → decoded [ImageBitmap]. Mirrors ImageCache's LRU memory-cache
-     * pattern but stays LOCAL and synchronous: ImageCache.loadImage is a
-     * suspend API with no synchronous lookup (a draw-time mask needs the
-     * bitmap NOW), and android.util.LruCache is a throwing stub under the
-     * plain-JVM unit suite that pins this routing (no Robolectric in this
-     * repo). accessOrder=true + removeEldestEntry is the textbook JDK LRU.
+     * Raster bytes → [ImageBitmap] seam, DELEGATED to the shared
+     * [SyncImageDecode.rasterDecoder] (wave 9 factored the decode out of
+     * this file so url() backgrounds reuse it). Kept as a property here so
+     * the existing JVM pins (MaskUrlImageTest) — and their save/restore
+     * discipline — keep working unchanged against the mask-facing name.
      */
-    private val maskBitmapCache =
-        object : LinkedHashMap<String, ImageBitmap>(MASK_CACHE_MAX_ENTRIES, 0.75f, true) {
-            // Evict the least-recently-used entry once past the cap.
-            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, ImageBitmap>): Boolean =
-                size > MASK_CACHE_MAX_ENTRIES
-        }
-
-    /**
-     * Raster bytes → [ImageBitmap]. An `internal var` seam: the default
-     * is the platform BitmapFactory decode (the same call ImageCache's
-     * data:-URI branch performs); the plain-JVM suite swaps in a fake
-     * because android.graphics is a throwing stub off-device. Production
-     * code must never reassign this.
-     */
-    internal var rasterMaskDecoder: (ByteArray) -> ImageBitmap? = { bytes ->
-        try {
-            // BitmapFactory returns null (does not throw) for undecodable
-            // bytes on device — null IS the visible-failure contract.
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap()
-        } catch (t: Throwable) {
-            // android.jar's "not mocked" stub throw under plain JVM (and a
-            // defensive belt on-device, e.g. OOM on a hostile payload) →
-            // the same null contract; the caller logs the failure once.
-            null
-        }
-    }
+    internal var rasterMaskDecoder: (ByteArray) -> ImageBitmap?
+        // Read-through: the shared seam is the single source of truth.
+        get() = SyncImageDecode.rasterDecoder
+        // Write-through: swapping the mask seam swaps the shared decode.
+        set(value) { SyncImageDecode.rasterDecoder = value }
 
     /**
      * Decode a `data:` URI mask source to an [ImageBitmap], cached per
-     * URL. Returns null when [url] is not a data URI or the payload is
-     * malformed/undecodable — callers must surface that loudly.
-     * Synchronous by design: data URIs carry their bytes inline (no I/O),
-     * which is exactly what first-frame capture determinism needs.
+     * URL — a pure delegate to [SyncImageDecode.decodeDataUri] (LRU cache
+     * + strict [DataUri] rules + BitmapFactory seam, all pinned by
+     * MaskUrlImageTest through this entry point). Returns null when [url]
+     * is not a data URI or the payload is malformed/undecodable — callers
+     * must surface that loudly.
      */
-    internal fun decodeDataUriMask(url: String): ImageBitmap? {
-        // Cache hit first — decoding per recomposition would waste work,
-        // and returning the SAME bitmap keeps captures deterministic.
-        synchronized(maskBitmapCache) { maskBitmapCache[url] }?.let { return it }
-        // RFC 2397 payload → bytes; DataUri owns the %xx-unescape +
-        // strict-base64 rules (pinned by its own JVM suite).
-        val bytes = DataUri.decode(url) ?: return null
-        // bytes → platform bitmap through the seam above.
-        val bitmap = rasterMaskDecoder(bytes) ?: return null
-        // Populate the LRU under the same lock the lookup uses.
-        synchronized(maskBitmapCache) { maskBitmapCache.put(url, bitmap) }
-        return bitmap
-    }
+    internal fun decodeDataUriMask(url: String): ImageBitmap? =
+        SyncImageDecode.decodeDataUri(url)
 
-    /** Test hook: clear the decode cache and the warn-once guard so JVM
-     *  test cases start from a known state. Test-only by contract. */
+    /** Test hook: clear the (shared) decode cache and the warn-once guard
+     *  so JVM test cases start from a known state. Test-only by contract. */
     internal fun resetUrlMaskStateForTest() {
-        synchronized(maskBitmapCache) { maskBitmapCache.clear() }
+        SyncImageDecode.resetForTest()
         warnedMaskUrls.clear()
     }
 

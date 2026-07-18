@@ -17,6 +17,12 @@ export interface BackgroundPositionConfig {
 // IR property types recognised.
 export const BACKGROUND_POSITION_X = 'BackgroundPositionX' as const;
 export const BACKGROUND_POSITION_Y = 'BackgroundPositionY' as const;
+// The combined property the `background` SHORTHAND emits: the converter's
+// shorthand expander does NOT split position into X/Y — it emits a single
+// `BackgroundPosition` whose data is a tagged PositionValue LIST (see
+// converter irmodels/properties/background/BackgroundPositionProperty.kt),
+// e.g. [{"type":"two-value","x":{"type":"right"},"y":{"type":"bottom"}}].
+export const BACKGROUND_POSITION = 'BackgroundPosition' as const;
 // Logical-axis equivalents. The parser now passes these through (they
 // were previously filtered out as "invalid" properties); we fold them
 // onto the physical axes assuming LTR horizontal writing-mode (block→Y,
@@ -24,6 +30,7 @@ export const BACKGROUND_POSITION_Y = 'BackgroundPositionY' as const;
 export const BACKGROUND_POSITION_BLOCK = 'BackgroundPositionBlock' as const;
 export const BACKGROUND_POSITION_INLINE = 'BackgroundPositionInline' as const;
 export type BackgroundPositionPropertyType =
+  | typeof BACKGROUND_POSITION
   | typeof BACKGROUND_POSITION_X
   | typeof BACKGROUND_POSITION_Y
   | typeof BACKGROUND_POSITION_BLOCK

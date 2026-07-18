@@ -190,16 +190,33 @@ dirs + WPT corpus are gitignored):
   passes on all three platforms (web 0.724 → 0.983). Wave-9 seam:
   percentage Width/Height (px:null wire) dropped on abspos children by
   every runtime including web; native tiled-url() backgrounds;
-  fragmentainer background geometry.
+  fragmentainer background geometry. Wave 9 (`tools/visual/wave9-gate.json`)
+  then overturned half its own premise: the abspos overlay WAS painting
+  on web and Android — the flat 0.899 was **SSIM color-blindness** (a
+  full red→green repaint moves SSIM by 0.0001; labDeltaE/histogramKL
+  carry the color signal). The real bugs: iOS percent *heights* were
+  unconditionally skipped (a containingBlockHeight channel now exists,
+  gated on a definite basis; the % basis moved to the css-position-3
+  padding box); a wave-8 interaction bug made Compose percent sizing a
+  no-op under the unbounded abspos measure (pre-resolved against the
+  containing block — regression prevented before reaching devices);
+  Android url() backgrounds were a silent no-op with a dead zero-call
+  renderer (now tiled through the shared decode + BackgroundTileMath);
+  the BackgroundPosition *shorthand* wire was consumed by no runtime
+  including web (all three extractors now parse it); and iOS gained a
+  multicol-aware WPT auto-width fill. Operational discovery: pool
+  feeders run --skip-install against the provisioned app — every native
+  section capture since provisioning used a stale binary; reprovision
+  before section runs that must reflect renderer changes.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 985 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1031 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 416 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1053 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 454 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 537 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 

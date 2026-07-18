@@ -219,6 +219,25 @@ object ColorExtractor {
         val array = (data as? JsonArray) ?: return emptyList()
 
         return array.mapNotNull { element ->
+            // The converter's BackgroundImageProperty serializes url layers
+            // in TWO untagged shapes (pinned against live output, wave 9):
+            //   "x.png"                          — plain-url layer, a BARE
+            //                                      string primitive
+            //   {"url": "data:...", "data": true} — data-URI layer, object
+            //                                      WITHOUT a "type" tag
+            // Both fell through the object-with-"type" parse below and were
+            // silently dropped, so NO url() background ever reached the
+            // applier. Handle the bare-string shape first.
+            if (element is JsonPrimitive) {
+                val s = element.contentOrNull ?: return@mapNotNull null
+                // `none` as a bare keyword = an image layer that draws
+                // nothing (css-backgrounds-3 §3.1).
+                return@mapNotNull if (s.equals("none", ignoreCase = true)) {
+                    BackgroundImageConfig.None
+                } else {
+                    BackgroundImageConfig.Url(s)
+                }
+            }
             val obj = (element as? JsonObject) ?: return@mapNotNull null
             val type = obj["type"]?.jsonPrimitive?.contentOrNull
 
@@ -231,6 +250,12 @@ object ColorExtractor {
                 "repeating-conic-gradient" -> extractConicGradient(obj, repeating = true)
                 "url" -> BackgroundImageConfig.Url(obj["url"]?.jsonPrimitive?.contentOrNull ?: "")
                 "none" -> BackgroundImageConfig.None
+                // Untagged object carrying a "url" key — the data-URI layer
+                // shape above (the "data": true flag just records that the
+                // converter recognised the scheme; the url string is
+                // authoritative either way).
+                null -> obj["url"]?.jsonPrimitive?.contentOrNull
+                    ?.let { BackgroundImageConfig.Url(it) }
                 else -> null
             }
         }
@@ -356,6 +381,18 @@ object ColorExtractor {
      *   BackgroundPositionX/Y -> { "type": "percentage", "percentage": 50.0 }
      *   BackgroundPositionX/Y -> { "type": "length", "px": 10.0 }
      * Also tolerates the legacy shapes the previous extractor handled.
+     *
+     * The `background` SHORTHAND emits a different wire entirely (wave 9,
+     * pinned against live converter output of `background: red url(...)
+     * right bottom`): BackgroundPosition carries a tagged PositionValue
+     * LIST — one entry per comma layer — e.g.
+     *   [{"type":"two-value","x":{"type":"right"},"y":{"type":"bottom"}}]
+     *   [{"type":"center"}]
+     * (see converter irmodels/properties/background/
+     * BackgroundPositionProperty.kt). No runtime consumed this shape —
+     * it silently fell into the `else -> current` arm, so every shorthand
+     * position rendered top-left. Entry 0 parses here (per-layer position
+     * lists are a later step, matching the single-position ColorConfig).
      */
     private fun extractBackgroundPosition(
         data: JsonElement?,
@@ -365,6 +402,11 @@ object ColorExtractor {
         if (data == null) return current
 
         when (data) {
+            // The shorthand's PositionValue list — first layer wins until
+            // ColorConfig gains per-layer position support (same first-
+            // entry rule the size/repeat extractors started with).
+            is JsonArray -> return data.firstOrNull()
+                ?.let { extractShorthandPositionEntry(it, current) } ?: current
             is JsonPrimitive -> {
                 // Legacy path — bare string keywords. Still emitted by some
                 // older producers, so keep support.
@@ -431,7 +473,106 @@ object ColorExtractor {
                 val y = data["y"]?.jsonPrimitive?.floatOrNull?.div(100f) ?: current.y
                 return BackgroundPositionConfig(x, y)
             }
-            else -> return current
+            // Array/primitive/object cover every JsonElement subtype — the
+            // `when` is exhaustive, so no else arm (compiler-verified).
+        }
+    }
+
+    /**
+     * Parse ONE tagged PositionValue entry from the `background`
+     * shorthand's list wire (BackgroundPositionProperty.PositionValue —
+     * kotlinx sealed-class serialization tags each variant via "type"):
+     *   {"type":"center"}                     → 50% 50% (§3.6 one-value)
+     *   {"type":"two-value","x":E,"y":E}      → per-axis EdgeValues
+     *   {"type":"keyword","keyword":"top"}    → one-keyword form (other
+     *                                           axis centers, §3.6)
+     *   {"type":"raw",…}                      → unparseable in the
+     *                                           converter; logged, kept
+     * Internal so the JVM suite pins it against the live wire strings.
+     */
+    internal fun extractShorthandPositionEntry(
+        entry: JsonElement,
+        current: BackgroundPositionConfig
+    ): BackgroundPositionConfig {
+        // Every PositionValue variant serializes as a tagged object.
+        val obj = entry as? JsonObject ?: return current
+        return when (obj["type"]?.jsonPrimitive?.contentOrNull) {
+            // `center` alone means center on BOTH axes (§3.6).
+            "center" -> BackgroundPositionConfig(0.5f, 0.5f)
+            "two-value" -> {
+                // Each axis is an EdgeValue: keyword-as-type, length, or
+                // percentage. Fold the two axes into one config.
+                val xa = shorthandEdgeAxis(obj["x"], horizontal = true)
+                val ya = shorthandEdgeAxis(obj["y"], horizontal = false)
+                BackgroundPositionConfig(
+                    x = xa.first, y = ya.first,
+                    xOffset = xa.second, yOffset = ya.second
+                )
+            }
+            "keyword" -> {
+                // One-keyword form: the named axis takes the keyword, the
+                // OTHER axis defaults to center (css-backgrounds-3 §3.6).
+                when (obj["keyword"]?.jsonPrimitive?.contentOrNull?.lowercase()) {
+                    "top" -> BackgroundPositionConfig(0.5f, 0f)
+                    "bottom" -> BackgroundPositionConfig(0.5f, 1f)
+                    "left" -> BackgroundPositionConfig(0f, 0.5f)
+                    "right" -> BackgroundPositionConfig(1f, 0.5f)
+                    "center" -> BackgroundPositionConfig(0.5f, 0.5f)
+                    else -> current // unknown keyword — keep prior state
+                }
+            }
+            else -> {
+                // "raw" (converter could not parse the CSS) or a future
+                // variant: keep the current position but say so — no
+                // silent fallthrough (IRLog prints on JVM too).
+                com.styleconverter.runtime.core.ir.IRLog.warn(
+                    "ColorExtractor",
+                    "BackgroundPosition shorthand entry not understood: $obj — keeping default position"
+                )
+                current
+            }
+        }
+    }
+
+    /**
+     * One EdgeValue axis of the shorthand's two-value form → (fraction,
+     * px offset). EdgeValue serializes keyword-as-type ("left"/"right"/
+     * "top"/"bottom"/"center" ARE the tag), lengths as {"type":"length",
+     * "px":N} (IRLength flattens to a px field — live-pinned), and
+     * percentages as {"type":"percentage","percentage":N}. Start-edge
+     * keywords and lengths anchor at fraction 0 with the px carried as an
+     * offset — the same (fraction, offset) split the longhand length
+     * branch uses, consumed by the applier as free×fraction + offset.
+     */
+    private fun shorthandEdgeAxis(el: JsonElement?, horizontal: Boolean): Pair<Float, androidx.compose.ui.unit.Dp> {
+        // Missing axis (defensive — the converter always emits both in
+        // two-value form): start edge, no offset.
+        val obj = el as? JsonObject
+            ?: return 0f to androidx.compose.ui.unit.Dp(0f)
+        return when (obj["type"]?.jsonPrimitive?.contentOrNull) {
+            // Start edges = fraction 0 (left on x, top on y — §3.6).
+            "left", "top" -> 0f to androidx.compose.ui.unit.Dp(0f)
+            // End edges = fraction 1: `right`/`bottom` align the tile's
+            // far edge with the box's far edge via free-space × 1.
+            "right", "bottom" -> 1f to androidx.compose.ui.unit.Dp(0f)
+            // Either-axis center.
+            "center" -> 0.5f to androidx.compose.ui.unit.Dp(0f)
+            // Absolute px: raw edge offset from the start edge (§3.6) —
+            // fraction 0 + Dp offset, matching the longhand length branch.
+            "length" -> 0f to androidx.compose.ui.unit.Dp(
+                obj["px"]?.jsonPrimitive?.floatOrNull ?: 0f
+            )
+            // Percentage: free-space fraction (0..100 → 0..1).
+            "percentage" -> ((obj["percentage"]?.jsonPrimitive?.floatOrNull ?: 0f) / 100f) to
+                androidx.compose.ui.unit.Dp(0f)
+            // Unknown EdgeValue variant: start edge + one loud log.
+            else -> {
+                com.styleconverter.runtime.core.ir.IRLog.warn(
+                    "ColorExtractor",
+                    "BackgroundPosition EdgeValue not understood (${if (horizontal) "x" else "y"} axis): $obj"
+                )
+                0f to androidx.compose.ui.unit.Dp(0f)
+            }
         }
     }
 

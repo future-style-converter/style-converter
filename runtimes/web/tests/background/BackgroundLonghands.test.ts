@@ -68,6 +68,89 @@ describe('BackgroundPosition', () => {
     expect(out.backgroundPositionX).toBe('right');
     expect(out.backgroundPosition).toBeUndefined();
   });
+
+  // ---- SHORTHAND wire — the `background` shorthand emits a single
+  // `BackgroundPosition` whose data is a tagged PositionValue LIST.  All
+  // payloads below are pinned byte-for-byte against live converter output
+  // (JDK 21, `--to ir`) of the CSS noted on each test.
+
+  it('shorthand wire: keyword pair (background: red url(x) right bottom)', () => {
+    // Live wire: {"type":"BackgroundPosition","data":[{"type":"two-value",
+    //   "x":{"type":"right"},"y":{"type":"bottom"}}]}
+    const cfg = extractBackgroundPosition([
+      p('BackgroundPosition', [
+        { type: 'two-value', x: { type: 'right' }, y: { type: 'bottom' } },
+      ]),
+    ]);
+    expect(applyBackgroundPosition(cfg).backgroundPosition).toBe('right bottom');
+  });
+
+  it('shorthand wire: single center (background: blue url(x) center)', () => {
+    // Live wire: "data":[{"type":"center"}] — one-value center fills both axes.
+    const cfg = extractBackgroundPosition([
+      p('BackgroundPosition', [{ type: 'center' }]),
+    ]);
+    expect(applyBackgroundPosition(cfg).backgroundPosition).toBe('center center');
+  });
+
+  it('shorthand wire: length pair (background: green url(x) 10px 20px)', () => {
+    // Live wire: "data":[{"type":"two-value","x":{"type":"length","px":10.0},
+    //   "y":{"type":"length","px":20.0}}]
+    const cfg = extractBackgroundPosition([
+      p('BackgroundPosition', [
+        {
+          type: 'two-value',
+          x: { type: 'length', px: 10 },
+          y: { type: 'length', px: 20 },
+        },
+      ]),
+    ]);
+    expect(applyBackgroundPosition(cfg).backgroundPosition).toBe('10px 20px');
+  });
+
+  it('shorthand wire: percentage pair (background: green url(x) 25% 75%)', () => {
+    // Live wire: "data":[{"type":"two-value","x":{"type":"percentage",
+    //   "percentage":25.0},"y":{"type":"percentage","percentage":75.0}}]
+    const cfg = extractBackgroundPosition([
+      p('BackgroundPosition', [
+        {
+          type: 'two-value',
+          x: { type: 'percentage', percentage: 25 },
+          y: { type: 'percentage', percentage: 75 },
+        },
+      ]),
+    ]);
+    expect(applyBackgroundPosition(cfg).backgroundPosition).toBe('25% 75%');
+  });
+
+  it('shorthand wire: one-value keyword folds the missing axis to center', () => {
+    // Model variant PositionValue.Keyword ({"type":"keyword","keyword":"top"});
+    // css-backgrounds-3 §3.6: single `top` ≡ `center top`.
+    const cfg = extractBackgroundPosition([
+      p('BackgroundPosition', [{ type: 'keyword', keyword: 'top' }]),
+    ]);
+    expect(applyBackgroundPosition(cfg).backgroundPosition).toBe('center top');
+  });
+
+  it('shorthand wire: raw variant is dropped, not misrendered', () => {
+    // PositionValue.Raw carries unresolvable text (var()/calc()) — no per-axis
+    // decomposition exists, so the extractor must leave the config empty.
+    const cfg = extractBackgroundPosition([
+      p('BackgroundPosition', [{ type: 'raw', value: 'var(--pos)' }]),
+    ]);
+    expect(applyBackgroundPosition(cfg)).toEqual({});
+  });
+
+  it('longhand path unchanged: background-position: 25% 75%', () => {
+    // Live wire for the LONGHAND declaration — still split into X/Y:
+    //   {"type":"BackgroundPositionX","data":{"type":"percentage","percentage":25.0}}
+    //   {"type":"BackgroundPositionY","data":{"type":"percentage","percentage":75.0}}
+    const cfg = extractBackgroundPosition([
+      p('BackgroundPositionX', { type: 'percentage', percentage: 25 }),
+      p('BackgroundPositionY', { type: 'percentage', percentage: 75 }),
+    ]);
+    expect(applyBackgroundPosition(cfg).backgroundPosition).toBe('25% 75%');
+  });
 });
 
 describe('BackgroundRepeat', () => {
