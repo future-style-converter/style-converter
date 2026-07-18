@@ -33,9 +33,11 @@ import com.styleconverter.runtime.StyleApplier
 import com.styleconverter.runtime.scrolling.OverflowExtractor
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 import com.styleconverter.runtime.lists.ListStyleConfig
 import com.styleconverter.runtime.lists.ListStyleExtractor
 import com.styleconverter.runtime.lists.ListStyleType
@@ -752,8 +754,26 @@ object ComponentRenderer {
         //    path as the SSIM-verified static corpus, so parity is
         //    inherited rather than re-implemented. Identity-preserving for
         //    keyframe-free documents (the frozen-baseline guarantee).
-        val effectiveProperties = com.styleconverter.runtime.animations.KeyframeAnimationDriver
+        val animatedProperties = com.styleconverter.runtime.animations.KeyframeAnimationDriver
             .animate(transitionedProperties)
+        // ── Wave-9 abspos percent-size pre-resolution ───────────────────
+        // An out-of-flow child renders through absposOverflowMeasure's
+        // UNBOUNDED measure (Constraints() = 0..∞, wave 8), under which
+        // SizingApplier's percent mapping — fillMaxWidth/fillMaxHeight
+        // (fraction) — is a DOCUMENTED no-op (fraction × ∞ is undefined,
+        // Compose skips the constraint): percentage-of-parent sizing is
+        // structurally dead for abspos children unless resolved to px
+        // BEFORE the modifier chain is built. css-position-3 §5.1 resolves
+        // an abspos percentage against the CONTAINING BLOCK, which is what
+        // the LocalContainingBlock channel (read above) carries — so
+        // rewrite percent Width/Height wires to exact px here and keep the
+        // unbounded measure for the px-specified overflow it was built for.
+        // Identity (same list instance) for in-flow components and for
+        // percent-free lists — the frozen-baseline byte-stability rule.
+        val effectiveProperties =
+            if (isOutOfFlowChild(animatedProperties))
+                resolveOutOfFlowPercentSizes(animatedProperties, containingBlock)
+            else animatedProperties
 
         // Extract property pairs for extractors
         val propertyPairs = effectiveProperties.map { it.type to it.data }
@@ -1829,6 +1849,69 @@ object ComponentRenderer {
             // reported size is legal and draws unclipped.
             placeable.place(0, 0)
         }
+    }
+
+    /**
+     * Wave-9 companion to [absposOverflowMeasure]: rewrite percentage
+     * Width/Height wires ({"type":"percentage","value":N} — the frozen
+     * typed-sizing shape) to exact px ({"type":"length","px":…}) against
+     * the containing-block channel, for OUT-OF-FLOW components only.
+     *
+     * Why: fillMaxWidth/fillMaxHeight(fraction) — SizingApplier's percent
+     * mapping — resolve against the incoming MAX constraint, which the
+     * wave-8 unbounded measure sets to Infinity; Compose documents the
+     * fill modifiers as no-ops there, so a `position:absolute; width:50%`
+     * child would collapse to content size (no ink) on the next device
+     * run. css-position-3 §5.1: abspos percentages resolve against the
+     * containing block — [cb] carries the nearest ancestor's CONTENT box
+     * (the padding-box the spec names minus nothing further; content box
+     * is the channel's existing, documented approximation — same base the
+     * in-flow % path uses, kept consistent rather than re-derived).
+     *
+     * Axes with an UNKNOWN base (null cb axis: auto-sized ancestor) keep
+     * their percentage wire — nothing honest to resolve against; the
+     * fill-modifier no-op then matches the pre-wave-8 unknown-parent
+     * behaviour instead of inventing a base. Identity (same list
+     * instance) when nothing rewrites, preserving frozen-baseline
+     * byte-stability. Pure over the IR — JVM-pinned by
+     * AbsposOverflowMeasureTest.
+     */
+    internal fun resolveOutOfFlowPercentSizes(
+        properties: List<IRProperty>,
+        cb: com.styleconverter.runtime.core.variables.ContainingBlock
+    ): List<IRProperty> {
+        // Track whether any property actually rewrote — identity out when
+        // not, so remember{} keys and downstream fast paths stay stable.
+        var changed = false
+        val out = properties.map { p ->
+            // Axis base: physical + logical size types map to the cb axis
+            // they resolve against (css-logical-1 §4.1, LTR horizontal-tb:
+            // inline = width, block = height — the engine's normalization).
+            val base = when (p.type) {
+                "Width", "InlineSize" -> cb.widthPx
+                "Height", "BlockSize" -> cb.heightPx
+                else -> null
+            } ?: return@map p // not a size axis, or base unknown → keep
+            // Only the typed percentage wire rewrites; px/keyword/calc
+            // shapes flow through untouched (px overflow is exactly what
+            // the unbounded measure exists for).
+            val obj = p.data as? JsonObject ?: return@map p
+            if ((obj["type"] as? JsonPrimitive)?.contentOrNull != "percentage") return@map p
+            val pct = (obj["value"] as? JsonPrimitive)?.doubleOrNull ?: return@map p
+            changed = true
+            // Emit the frozen typed-length wire ({"type":"length","px":N} —
+            // the same shape DynamicValueResolver.lengthJson(typed=true)
+            // writes), which SizingExtractor reads as LengthValue.Exact →
+            // Modifier.width/height(px.dp): constraint-independent, so the
+            // specified size survives the unbounded measure.
+            IRProperty(p.type, buildJsonObject {
+                put("type", "length")
+                put("px", pct * base / 100.0)
+            })
+        }
+        // Identity contract: hand back the ORIGINAL instance when no
+        // percentage resolved (byte-stable for the whole static corpus).
+        return if (changed) out else properties
     }
 
     /**

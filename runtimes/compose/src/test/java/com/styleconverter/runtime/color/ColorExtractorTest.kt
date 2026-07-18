@@ -179,6 +179,97 @@ class ColorExtractorTest {
         assertEquals(20.dp, cfg.backgroundPosition.xOffset)
     }
 
+    // ---- BackgroundPosition SHORTHAND wire (wave 9) ------------------------
+    // The `background` shorthand emits a tagged PositionValue LIST (see
+    // converter irmodels/properties/background/BackgroundPositionProperty.kt)
+    // that NO runtime consumed. Every JSON string below is pinned verbatim
+    // against live converter output (JDK 21, wave-9 session):
+    //   background: red url(...) right bottom
+    //     → [{"type":"two-value","x":{"type":"right"},"y":{"type":"bottom"}}]
+    //   background: blue url(x.png) center → [{"type":"center"}]
+    //   background: green url(x.png) 20px 30% →
+    //     [{"type":"two-value","x":{"type":"length","px":20.0},
+    //       "y":{"type":"percentage","percentage":30.0}}]
+
+    @Test fun `shorthand two-value right bottom lands as end-edge fractions`() {
+        // right/bottom = fraction 1 on both axes (§3.6 free-space × 1
+        // end-aligns the tile) — the exact `background: red url(...) right
+        // bottom` wire from the wave-9 diagnosis.
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundPosition",
+                "[{\"type\":\"two-value\",\"x\":{\"type\":\"right\"},\"y\":{\"type\":\"bottom\"}}]")
+        ))
+        assertEquals(1f, cfg.backgroundPosition.x)
+        assertEquals(1f, cfg.backgroundPosition.y)
+    }
+
+    @Test fun `shorthand center entry lands as center on both axes`() {
+        // One-value `center` centers BOTH axes (§3.6).
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundPosition", "[{\"type\":\"center\"}]")
+        ))
+        assertEquals(0.5f, cfg.backgroundPosition.x)
+        assertEquals(0.5f, cfg.backgroundPosition.y)
+    }
+
+    @Test fun `shorthand length and percentage axes land as offset and fraction`() {
+        // x: 20px = raw edge offset (fraction 0 + Dp, same split as the
+        // longhand length branch); y: 30% = free-space fraction 0.3.
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundPosition",
+                "[{\"type\":\"two-value\",\"x\":{\"type\":\"length\",\"px\":20.0}," +
+                    "\"y\":{\"type\":\"percentage\",\"percentage\":30.0}}]")
+        ))
+        assertEquals(0f, cfg.backgroundPosition.x)
+        assertEquals(20.dp, cfg.backgroundPosition.xOffset)
+        assertEquals(0.3f, cfg.backgroundPosition.y)
+        assertEquals(0.dp, cfg.backgroundPosition.yOffset)
+    }
+
+    @Test fun `shorthand single keyword centers the other axis`() {
+        // `background-position: top` ≡ `center top` (§3.6 one-keyword form).
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundPosition", "[{\"type\":\"keyword\",\"keyword\":\"top\"}]")
+        ))
+        assertEquals(0.5f, cfg.backgroundPosition.x)
+        assertEquals(0f, cfg.backgroundPosition.y)
+    }
+
+    // ---- BackgroundImage url() wire shapes (wave 9) ------------------------
+    // Also pinned against live output: the shorthand serializes a data-URI
+    // layer as an UNTAGGED {"url":…,"data":true} object and a plain url as
+    // a BARE string — both previously fell through the tagged-object parse
+    // and were silently dropped (no url() background ever rendered).
+
+    @Test fun `bare-string image entry extracts as a Url layer`() {
+        // `background: blue url(x.png) center` → BackgroundImage ["x.png"].
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundImage", "[\"x.png\"]")
+        ))
+        assertEquals(listOf<BackgroundImageConfig>(BackgroundImageConfig.Url("x.png")),
+            cfg.backgroundImages)
+    }
+
+    @Test fun `untagged url object entry extracts as a Url layer`() {
+        // Data-URI layer shape: {"url": "...", "data": true} — no "type".
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundImage", "[{\"url\":\"data:image/png;base64,AAAA\",\"data\":true}]")
+        ))
+        assertEquals(
+            listOf<BackgroundImageConfig>(BackgroundImageConfig.Url("data:image/png;base64,AAAA")),
+            cfg.backgroundImages)
+    }
+
+    @Test fun `bare-string none entry extracts as the None layer`() {
+        // `none` is a real layer that draws nothing (§3.1) — it must not
+        // become a Url("none") lookup.
+        val cfg = ColorExtractor.extractColorConfig(listOf(
+            pair("BackgroundImage", "[\"none\"]")
+        ))
+        assertEquals(listOf<BackgroundImageConfig>(BackgroundImageConfig.None),
+            cfg.backgroundImages)
+    }
+
     @Test fun `layerValue cycles a short list and skips an empty one`() {
         // §2.3: "if a property has fewer values than background-image, the
         // list is repeated" — index 2 of a 2-list wraps to entry 0.

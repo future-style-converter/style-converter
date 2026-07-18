@@ -1,0 +1,352 @@
+{
+ "_snapshot": "wave9-gate",
+ "_note": "Wave-9 record. DIAGNOSIS OVERTURNED ITS OWN PREMISE: the abspos green overlay WAS painting on web+Android — the flat 0.899 was SSIM COLOR-BLINDNESS (a full red->green repaint moved SSIM 0.0001; labDeltaE/histogramKL carry the color signal — never read raw SSIM as ink-presence on reftests). Real bugs found+fixed: iOS percent HEIGHTS unconditionally skipped (no containingBlockHeight channel existed — added, allowPercent gated on a definite basis, ScrollView rationale preserved; % basis moved to the css-position-3 padding box); Compose wave-8 interaction bug (unbounded abspos measure made fillMax(fraction) a no-op — percent sizes now pre-resolve against LocalContainingBlock; REGRESSION PREVENTED before it reached devices); Android url() backgrounds were a SILENT no-op with a dead zero-call-site renderer (now wired through shared SyncImageDecode + BackgroundTileMath tiling, dead file deleted); BackgroundPosition SHORTHAND wire was consumed by NO runtime incl. web (all three extractors now parse the tagged PositionValue list); iOS WPT block-child auto-width fill added (CSS2 10.3.3) then scoped multicol-aware after fresh-binary evidence showed container-width fill breaking column tests (column box is the containing block per css-multicol 2). OPERATIONAL DISCOVERY: pool feeders run --skip-install against the PROVISIONED app — every native section capture since wave-6 provisioning used a STALE binary (fixture/IR changes flowed; renderer changes did not) — reprovision before any section run that must reflect renderer changes. Ceiling: css-break ref parity stays capped by the fragmentainer-background geometry gap (web 0.24-0.53); native tiling targets web parity. Property fixtures: background-image 0.9956 / background-position 0.9999; 327-net zero regressions (twice).",
+ "devSha": "12ae797e",
+ "date": "2026-07-18",
+ "propertyFixtures": {
+  "background-image": 0.9956,
+  "background-position": 0.9999
+ },
+ "wptSections": {
+  "css-flexbox": {
+   "abspos-autopos-htb-ltr.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.914,
+     0.915
+    ],
+    "android": [
+     0.915,
+     0.915
+    ]
+   },
+   "abspos-autopos-htb-rtl.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.914,
+     0.917
+    ],
+    "android": [
+     0.904,
+     0.904
+    ]
+   },
+   "abspos-autopos-vlr-ltr.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.914,
+     0.915
+    ],
+    "android": [
+     0.915,
+     0.915
+    ]
+   },
+   "abspos-autopos-vlr-rtl.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.914,
+     0.917
+    ],
+    "android": [
+     0.904,
+     0.904
+    ]
+   },
+   "abspos-autopos-vrl-ltr.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.914,
+     0.915
+    ],
+    "android": [
+     0.915,
+     0.915
+    ]
+   },
+   "abspos-autopos-vrl-rtl.html": {
+    "web": [
+     0.899,
+     0.899
+    ],
+    "ios": [
+     0.914,
+     0.917
+    ],
+    "android": [
+     0.904,
+     0.904
+    ]
+   },
+   "dynamic-align-self-001.html": {
+    "web": [
+     0.909,
+     0.909
+    ],
+    "ios": [
+     0.911,
+     0.911
+    ],
+    "android": [
+     0.906,
+     0.906
+    ]
+   },
+   "flex-abspos-staticpos-align-self-safe-001.html": {
+    "web": [
+     0.956,
+     0.956
+    ],
+    "ios": [
+     0.882,
+     0.896
+    ],
+    "android": [
+     0.896,
+     0.882
+    ]
+   },
+   "flex-abspos-staticpos-align-self-safe-002.html": {
+    "web": [
+     0.955,
+     0.955
+    ],
+    "ios": [
+     0.863,
+     0.866
+    ],
+    "android": [
+     0.885,
+     0.863
+    ]
+   },
+   "flex-abspos-staticpos-align-self-safe-003.html": {
+    "web": [
+     0.956,
+     0.956
+    ],
+    "ios": [
+     0.924,
+     0.924
+    ],
+    "android": [
+     0.924,
+     0.924
+    ]
+   },
+   "flex-abspos-staticpos-fallback-justify-content-001.html": {
+    "web": [
+     0.983,
+     0.983
+    ],
+    "ios": [
+     0.975,
+     0.975
+    ],
+    "android": [
+     0.977,
+     0.975
+    ]
+   },
+   "flex-abspos-staticpos-justify-self-001.html": {
+    "web": [
+     0.961,
+     0.961
+    ],
+    "ios": [
+     0.934,
+     0.933
+    ],
+    "android": [
+     0.941,
+     0.938
+    ]
+   }
+  },
+  "css-break": {
+   "abspos-in-offset-relpos.html": {
+    "web": [
+     0.933,
+     0.933
+    ],
+    "ios": [
+     0.869,
+     0.92
+    ],
+    "android": [
+     0.937,
+     0.937
+    ]
+   },
+   "abspos-in-opacity-000.html": {
+    "web": [
+     0.975,
+     0.975
+    ],
+    "ios": [
+     0.971,
+     0.971
+    ],
+    "android": [
+     0.964,
+     0.964
+    ]
+   },
+   "abspos-in-opacity-001.html": {
+    "web": [
+     0.958,
+     0.958
+    ],
+    "ios": [
+     0.952,
+     0.952
+    ],
+    "android": [
+     0.964,
+     0.964
+    ]
+   },
+   "abspos-in-opacity-002.html": {
+    "web": [
+     0.938,
+     0.938
+    ],
+    "ios": [
+     0.941,
+     0.939
+    ],
+    "android": [
+     0.944,
+     0.944
+    ]
+   },
+   "abspos-in-opacity-003.html": {
+    "web": [
+     0.938,
+     0.938
+    ],
+    "ios": [
+     0.941,
+     0.939
+    ],
+    "android": [
+     0.944,
+     0.944
+    ]
+   },
+   "abspos-inside-relpos-inside-monolithic.html": {
+    "web": [
+     0.933,
+     0.933
+    ],
+    "ios": [
+     0.889,
+     0.935
+    ],
+    "android": [
+     0.937,
+     0.937
+    ]
+   },
+   "avoid-border-break.html": {
+    "web": [
+     0.974,
+     0.974
+    ],
+    "ios": [
+     0.942,
+     0.937
+    ],
+    "android": [
+     0.973,
+     0.973
+    ]
+   },
+   "background-image-000.html": {
+    "web": [
+     0.284,
+     0.333
+    ],
+    "ios": [
+     0.194,
+     0.271
+    ],
+    "android": [
+     0.159,
+     0.226
+    ]
+   },
+   "background-image-001.html": {
+    "web": [
+     0.238,
+     0.237
+    ],
+    "ios": [
+     0.14,
+     0.092
+    ],
+    "android": [
+     0.138,
+     0.112
+    ]
+   },
+   "background-image-002.html": {
+    "web": [
+     0.469,
+     0.527
+    ],
+    "ios": [
+     0.162,
+     0.188
+    ],
+    "android": [
+     0.148,
+     0.193
+    ]
+   },
+   "background-image-003.html": {
+    "web": [
+     0.933,
+     0.933
+    ],
+    "ios": [
+     0.935,
+     0.895
+    ],
+    "android": [
+     0.937,
+     0.937
+    ]
+   },
+   "background-image-004.html": {
+    "web": [
+     0.933,
+     0.933
+    ],
+    "ios": [
+     0.932,
+     0.932
+    ],
+    "android": [
+     0.937,
+     0.937
+    ]
+   }
+  }
+ }
+}

@@ -211,7 +211,10 @@ sealed interface BackgroundImageConfig {
      * URL reference to an image.
      *
      * CSS: `url(path/to/image.png)`
-     * Note: Image loading is not supported in this context; use Coil or similar.
+     * `data:` URIs render (ColorApplier decodes them synchronously via
+     * SyncImageDecode and tiles them through BackgroundTileMath — wave 9);
+     * remote schemes are a documented, once-logged no-op because an async
+     * fetch cannot be capture-deterministic.
      *
      * @property url The URL or path to the image
      */
@@ -290,8 +293,8 @@ sealed interface BackgroundSizeConfig {
      * for gradients, which have no intrinsic size — css-backgrounds-3 §3.9).
      * The *Percent fields are 0..1 FRACTIONS of the positioning area (the
      * extractor divides the CSS 0..100 percentage by 100) — pinned by
-     * ColorExtractorTest and consumed as fractions by both
-     * BackgroundImageRenderer and ColorApplier's tile math.
+     * ColorExtractorTest and consumed as fractions by ColorApplier's tile
+     * math (both the gradient and the url()-image lattice paths).
      */
     data class Dimensions(
         val width: Dp? = null,

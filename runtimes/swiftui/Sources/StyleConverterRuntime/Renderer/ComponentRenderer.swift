@@ -44,6 +44,14 @@ public struct ComponentRenderer: View {
     // ContainingBlock.swift for the full rationale.
     @Environment(\.containingBlockWidth) private var containingBlockWidth
 
+    // Wave 9 — the HEIGHT twin of the channel above (CSS 2.1 §10.5):
+    // parents with a statically-definite height publish a basis here so
+    // percent heights (notably `height: 100%` on absolutely-positioned
+    // children, css-position-3 §3.1) can resolve. Nil → indefinite →
+    // percent heights keep degrading to auto (the ScrollView rationale
+    // documented in SizeApplier). See ContainingBlock.swift.
+    @Environment(\.containingBlockHeight) private var containingBlockHeight
+
     // Lane IOS-COLLAPSE — the CSS 2.1 §8.3.1 margin-collapse channel:
     // a BLOCK parent statically folds its children's vertical margins
     // (sibling max() collapse + first/last hoist-through) and sends each
@@ -458,6 +466,75 @@ public struct ComponentRenderer: View {
         return wptCaptureMode ? wptRefLineBoxPx : nil
     }
 
+    // MARK: - WPT block-child auto-width fill (wave 9)
+
+    /// The `wptBlockFlowFillWidth` value a parent publishes for its
+    /// IN-FLOW children — the wave-9 extension of the Round-4 root-only
+    /// fill. CSS 2.1 §10.3.3: a block-level box with `width: auto` fills
+    /// its containing block; the composed-WPT roots already do (the
+    /// canvas publishes the channel), but every CHILD block got zero /
+    /// intrinsic width because the channel was hard-reset to nil at each
+    /// level — so a complete url-background pipeline painted nothing on
+    /// the css-break tests (the box it painted had no width). Pure +
+    /// static so the XCTest pins the scoping without a render surface.
+    ///
+    /// Scope guards, in order:
+    ///   • wptCaptureMode only — the property-fixture path has its own
+    ///     width conventions (fit-content hug), so the 327 committed
+    ///     baselines (flag OFF) are untouched.
+    ///   • BLOCK containers only — flex/grid parents size their items
+    ///     via the flex/grid algorithms (css-flexbox-1 §9 / css-grid-1
+    ///     §11), and inline parents establish no block context; they
+    ///     all keep publishing nil (the pre-wave-9 reset).
+    ///   • never for ol/ul marker rows — the synthesized marker HStack
+    ///     already holds the row; a full-width li would overflow it by
+    ///     the marker's advance.
+    ///   • the value is the parent's CONTENT-box width (the containing
+    ///     block, same childCB the width channel publishes) — nil when
+    ///     the parent's own width is not statically definite.
+    ///   • MULTICOL parents (wave-9 regression fix): css-multicol-1 §2 —
+    ///     the containing block of a multicol element's children is the
+    ///     COLUMN box, not the container. Publishing the full container
+    ///     width stretched a block child across all columns (css-break
+    ///     background-image-001: iOS SSIM 0.140 → 0.040), so when the
+    ///     parent's computed column-count/column-width establishes a
+    ///     multicol context, the basis is the §3 USED column width
+    ///     (MulticolMath — the same used-value math the Android multicol
+    ///     wedge fix pinned), computed from the identical content-box
+    ///     width plus the used column-gap the caller resolves.
+    /// The receiving fold in styledContent re-checks wptCaptureMode +
+    /// width:auto + in-flow + non-inline before consuming the value.
+    static func wptChildFillWidth(parentDisplay: LayoutConfig.DisplayType,
+                                  wptCaptureMode: Bool,
+                                  isMarkerRow: Bool,
+                                  parentContentWidth: CGFloat?,
+                                  parentColumns: ColumnsConfig?,
+                                  columnGapPx: CGFloat) -> CGFloat? {
+        // Never outside WPT capture: baselines + product stay byte-stable.
+        guard wptCaptureMode else { return nil }
+        // Only block containers establish the §10.3.3 fill context (a
+        // multicol container IS a block container — css-multicol-1 §1).
+        guard parentDisplay == .block else { return nil }
+        // Marker rows lay the li out inside an HStack — no fill.
+        guard !isMarkerRow else { return nil }
+        // The containing block itself (nil = indefinite parent → no fill).
+        guard let contentWidth = parentContentWidth else { return nil }
+        // Multicol parent → the child's containing block is the COLUMN
+        // box (§2): fill basis = the §3 used per-column width. usedColumns
+        // returns nil when neither count nor width is non-auto (not a
+        // multicol container — e.g. column-rule alone), falling through
+        // to the plain block basis below.
+        if let used = MulticolMath.usedColumns(
+                availableWidthPx: Double(contentWidth),
+                requestedCount: parentColumns?.count,
+                requestedWidthPx: parentColumns?.widthPx,
+                gapPx: Double(columnGapPx)) {
+            return CGFloat(used.widthPx)
+        }
+        // Plain block container: the content-box width IS the basis.
+        return contentWidth
+    }
+
     /// Resolve the background color a property list paints, via the SAME
     /// engine the renderer uses (StyleBuilder), returning nil when none is
     /// declared. Public so the harness's ComposedCaptureCanvas can read a
@@ -586,6 +663,12 @@ public struct ComponentRenderer: View {
             // resolves against the parent's content box (css-sizing-3
             // §5.1) instead of the canvas.
             s.spacing.context.containingBlockWidthPx = containingBlockWidth.map(Double.init)
+            // Wave 9 — thread the parent-published containing-block
+            // HEIGHT the same way, so this box's own percent height
+            // (and its children's bases, via ContainingBlockBasis)
+            // resolve against a definite ancestor basis (CSS 2.1
+            // §10.5); nil keeps the percent-height skip.
+            s.spacing.context.containingBlockHeightPx = containingBlockHeight.map(Double.init)
             if let h = gridStretchHeight, s.size.height == nil {
                 s.size.height = .exact(px: h)
             }
@@ -601,13 +684,18 @@ public struct ComponentRenderer: View {
             // capture we fold the canvas-published content-box width into an
             // auto-width, IN-FLOW box so its background paints full-bleed
             // like the browser-ref (mirror of web's WPT width:auto carve-out).
-            // Gated three ways so nothing else moves: wptCaptureMode (never
-            // the product/baseline), a non-nil channel (only the composed
-            // canvas sets it, and it is reset for children below so only the
-            // stacked ROOTS fill), an auto width (an IR width always wins),
-            // and in-flow only (absolute/fixed boxes size to their offsets).
+            // Gated four ways so nothing else moves: wptCaptureMode (never
+            // the product/baseline), a non-nil channel (the composed canvas
+            // sets it on ROOTS, and — wave 9 — a BLOCK container re-publishes
+            // its content-box width for its in-flow children, see the flow
+            // ForEach's wptChildFillWidth publication), an auto width (an IR
+            // width always wins), and in-flow only (absolute/fixed boxes
+            // size to their offsets). Wave 9 adds the inline guard: CSS 2.1
+            // §10.3.3 fills BLOCK-LEVEL boxes only — a `display: inline`
+            // box sizes to its content (§10.3.1) and must never fill.
             if wptCaptureMode, let w = wptBlockFlowFillWidth,
-               s.size.width == nil, !Self.isOutOfFlow(component) {
+               s.size.width == nil, !Self.isOutOfFlow(component),
+               s.layout.display != .inline {
                 s.size.width = .exact(px: w)
             }
             // Fidelity wave 3 — multicol full-width default
@@ -965,10 +1053,18 @@ public struct ComponentRenderer: View {
         // Wave 6: publish the RESOLVED declarations so children inherit
         // computed values (a var()-valued font-size flows down as px).
         let childInherited = InheritedText.inheritable(from: resolvedProperties)
-        // Percent widths of absolute children resolve against the
-        // positioned ancestor's box (content-box approximation — same
-        // channel as flow children).
-        let childCB = flexContentSize(style: style, vertical: false)
+        // Wave 9 — percent sizes of absolute children resolve against
+        // the positioned ancestor's PADDING box (css-position-3 §3.1),
+        // matching the wave-8 overlay anchor which already insets by the
+        // border band only. The pre-wave-9 content-box approximation
+        // subtracted the padding band too, under-resolving `width: 100%`
+        // on children of padded ancestors (basis and anchor disagreed).
+        let childCB = ContainingBlockBasis.paddingBox(style: style, vertical: false)
+        // Wave 9 — the HEIGHT basis (same padding-box rule): definite
+        // ancestor height − painted borders, or nil when indefinite so
+        // the child's percent height keeps degrading to auto. This is
+        // the fix for the gate capture's zero-area `height: 100%` child.
+        let childCBH = ContainingBlockBasis.paddingBox(style: style, vertical: true)
         ForEach(Array(children.enumerated()), id: \.offset) { _, child in
             // v2: children render through ComponentHost (placement
             // parent-data attached; inert here — the overlay ZStack
@@ -988,6 +1084,10 @@ public struct ComponentRenderer: View {
                 // plan can't reach a positioned child's margins.
                 .environment(\.marginCollapseOverride, nil)
                 .environment(\.containingBlockWidth, childCB)
+                // Wave 9 — the height basis, same always-write reset
+                // discipline as the width channel (nil for indefinite
+                // ancestors, so a grandparent's basis never leaks).
+                .environment(\.containingBlockHeight, childCBH)
                 .environment(\.inheritedTextProperties, childInherited)
                 // Custom-property scope (wave 6): positioned children
                 // sit in the same slot-parent chain as flow children —
@@ -1216,40 +1316,13 @@ public struct ComponentRenderer: View {
     /// the size is not declared/resolvable — indefinite containers
     /// can't statically size children (depends on measurement; deferred).
     private func flexContentSize(style: ComponentStyle, vertical: Bool) -> CGFloat? {
-        let ctx = style.spacing.context
-        // Declared size on the requested axis (percent heights degrade
-        // to auto, same rule as SizeApplier).
-        let raw: CGFloat? = vertical
-            ? SizeApplierResolve.exact(style.size.height, ctx: ctx,
-                                       parent: CGFloat(ctx.viewportHeight),
-                                       allowPercent: false)
-            // Wave 3: percent widths resolve against the threaded
-            // containing block (parent content box, canvas at root) —
-            // the same basis SizeApplier paints with.
-            : SizeApplierResolve.exact(style.size.width, ctx: ctx,
-                                       parent: ctx.containingBlockWidth)
-        guard var v = raw else { return nil }
-        // Padding band — same resolver lane as PaddingApplier so em/%
-        // agree with the painted inset. Horizontal axis subtracts the
-        // left/right band, vertical the top/bottom one.
-        if let p = style.spacing.padding {
-            func px(_ lv: LengthValue) -> CGFloat {
-                switch SpacingResolver.resolve(lv, ctx: ctx, isPadding: true) {
-                case .px(let n):      return n
-                case .percent(let f): return f * CGFloat(ctx.viewportWidth)
-                case .auto, .skip:    return 0
-                }
-            }
-            v -= vertical ? (px(p.top) + px(p.bottom)) : (px(p.left) + px(p.right))
-        }
-        // Painted border widths shrink the content box too.
-        if let b = style.borderSides {
-            func bw(_ s: BorderSideConfig) -> CGFloat {
-                s.hasBorder ? (s.effectiveWidth ?? 0) : 0
-            }
-            v -= vertical ? (bw(b.top) + bw(b.bottom)) : (bw(b.start) + bw(b.end))
-        }
-        return v > 0 ? v : nil
+        // Wave 9 — the arithmetic moved verbatim to ContainingBlockBasis
+        // (pure, XCTest-pinnable): declared border-box size − padding
+        // band − painted borders. The height axis additionally gained
+        // the wave-9 definite-basis rule there (an ancestor-published
+        // containing-block height lets a percent height resolve, CSS
+        // 2.1 §10.5, instead of the old unconditional skip).
+        ContainingBlockBasis.contentBox(style: style, vertical: vertical)
     }
 
     /// Static main-axis flex plan (fidelity wave 2). CSSFlexLayout places
@@ -1449,6 +1522,13 @@ public struct ComponentRenderer: View {
             // channel for fit-content parents so a grandparent's basis
             // never leaks past its own children.
             let childCB: CGFloat? = flexContentSize(style: style, vertical: false)
+            // Wave 9 — the HEIGHT twin (CSS 2.1 §10.5): in-flow children
+            // resolve percent heights against this box's CONTENT-box
+            // height when it is statically definite; nil (indefinite —
+            // auto-height parents, the root ScrollView) keeps the
+            // percent-height skip. Same publication + reset discipline
+            // as the width channel above.
+            let childCBH: CGFloat? = flexContentSize(style: style, vertical: true)
             // Lane IOS-COLLAPSE (CSS 2.1 §8.3.1) — the block container's
             // margin-collapse plan: one used-(top,bottom) override per
             // child of THIS ForEach (containerPlan derives them from the
@@ -1457,6 +1537,32 @@ public struct ComponentRenderer: View {
             // children then keep their declared margins untouched.
             let collapsePlan = MarginCollapse.containerPlan(component: component,
                                                             style: style)
+            // Wave-9 regression fix — the USED column-gap feeding the
+            // multicol fill basis (css-multicol-1 §3 via MulticolMath in
+            // wptChildFillWidth). Declared ColumnGap/Gap resolves through
+            // the SAME GapApplier the flow container's spacing uses (one
+            // resolver, two consumers); an UNDECLARED gap is `normal`,
+            // which for multicol containers is 1em (css-align-3 §8.3) —
+            // the element's resolved font-size, NOT the GapConfig zero
+            // default (that zero is right for flex/grid, where `normal`
+            // means no gap). Non-multicol parents never read the value —
+            // 0 short-circuits without touching the resolver.
+            let multicolFillGap: CGFloat = {
+                // Only multicol containers consume a column-gap basis.
+                guard style.columns?.isMulticolContainer == true else { return 0 }
+                // Declared gap (Gap shorthand expands to ColumnGap on the
+                // converter, but check both — GapExtractor reads both).
+                if resolvedProperties.contains(where: {
+                    $0.type == "ColumnGap" || $0.type == "Gap" }) {
+                    // Percent column-gap resolves against the inline axis
+                    // — the container's content-box width (childCB).
+                    return GapApplier.resolve(style.spacing.gap,
+                                              context: style.spacing.context,
+                                              parentWidth: childCB).column
+                }
+                // `column-gap: normal` = 1em for multicol (css-align-3 §8.3).
+                return CGFloat(style.spacing.context.fontSizePx)
+            }()
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
                 // Build the child's aggregate once so FlexChildModifier
                 // (legacy wrap path) and the stretch env computation can
@@ -1549,15 +1655,37 @@ public struct ComponentRenderer: View {
                                 ?? (isColumn ? flexMainSizes?[index] : flexStretch))
                 .environment(\.flexStretchWidth,
                              isColumn ? flexStretch : flexMainSizes?[index])
-                // Round 4: block-fill is scoped to the composed ROOTS — a
-                // flow/flex/grid child never inherits the root's fill width
-                // (it sizes within its own formatting context), so reset the
-                // channel at every level like the stretch channels above.
-                .environment(\.wptBlockFlowFillWidth, nil)
+                // Wave 9 (extending Round 4): the block-fill channel is
+                // still ALWAYS written (reset discipline), but a BLOCK
+                // container in WPT capture now re-publishes its own
+                // content-box width for its in-flow children instead of
+                // hard nil — CSS 2.1 §10.3.3's width:auto fill applies
+                // at EVERY block-flow level, not just the composed
+                // roots (the css-break url-background boxes are child
+                // blocks). Flex/grid/inline parents and marker rows
+                // still publish nil (see wptChildFillWidth's guards),
+                // and the flag-off product path is nil by construction.
+                .environment(\.wptBlockFlowFillWidth,
+                             Self.wptChildFillWidth(
+                                parentDisplay: style.layout.display,
+                                wptCaptureMode: wptCaptureMode,
+                                isMarkerRow: isListItem && (parentTag == "ol"
+                                                            || parentTag == "ul"),
+                                parentContentWidth: childCB,
+                                // Wave-9 regression fix: multicol parents
+                                // publish the §3 USED column width as the
+                                // fill basis (css-multicol-1 §2 — the
+                                // children's containing block is the
+                                // column box), never the container width.
+                                parentColumns: style.columns,
+                                columnGapPx: multicolFillGap))
                 // Containing block (wave 3): always written — definite
                 // content width or nil — so the channel resets at every
                 // tree level (no grandparent leak).
                 .environment(\.containingBlockWidth, childCB)
+                // Wave 9 — the height basis: always written (definite
+                // content height or nil), same reset discipline.
+                .environment(\.containingBlockHeight, childCBH)
                 // Margin collapse (lane IOS-COLLAPSE, §8.3.1): the used
                 // vertical margins for THIS child, or nil when no plan
                 // applies. ALWAYS written so a grandparent's override

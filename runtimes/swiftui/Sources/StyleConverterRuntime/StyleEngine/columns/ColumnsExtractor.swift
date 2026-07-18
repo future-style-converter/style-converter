@@ -33,6 +33,30 @@ enum ColumnsExtractor {
             if p.type == "ColumnCount", let n = p.data.doubleValue, n >= 1 {
                 cfg.count = Int(n)
             }
+            // Wave-9 regression fix — typed `column-width` (css-multicol-1
+            // §3.2: `auto | <length [0,∞]>`). Wire shape (converter
+            // ColumnWidthSerializer): `auto` → the string "auto"; a length
+            // → the IRLength object `{"px": N, "original"?: {...}}`. Route
+            // through the shared Phase-1 length extractor so every wrapped
+            // form decodes identically to Width; only a strictly positive
+            // resolved-px value is a usable used-value basis (0 would fit
+            // infinite columns — degenerate per the §3 pseudo-algorithm).
+            if p.type == "ColumnWidth" {
+                switch extractLength(p.data) {
+                // Absolute length pre-resolved to px by the converter.
+                case .exact(let px) where px > 0:
+                    cfg.widthPx = px
+                // Font-relative shipped WITH a resolved px fallback —
+                // prefer the concrete pixels (same policy as SizeApplier).
+                case .relative(_, _, .some(let px)) where px > 0:
+                    cfg.widthPx = px
+                // auto / percent-without-basis / calc / unknown: no
+                // definite basis — stays nil (= behaves as `auto`); the
+                // raw string is already retained in rawByType above.
+                default:
+                    break
+                }
+            }
         }
         return cfg.touched ? cfg : nil
     }

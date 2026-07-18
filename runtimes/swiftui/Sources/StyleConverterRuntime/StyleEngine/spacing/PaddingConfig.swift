@@ -82,6 +82,20 @@ struct SpacingContext: Equatable {
     // width below.
     var containingBlockWidthPx: Double? = nil
 
+    // Wave 9 — the HEIGHT twin: the parent's containing-block height in
+    // px, published down the tree by ComponentRenderer via the
+    // `containingBlockHeight` environment channel (ContainingBlock.swift).
+    // CSS 2.1 §10.5: a percentage height resolves against the containing
+    // block's height ONLY when that height is explicitly definite —
+    // otherwise it computes to auto. Nil means "indefinite basis": there
+    // is deliberately NO viewport/canvas fallback (unlike the width
+    // accessor below) because the capture canvas sits in an unbounded
+    // ScrollView, so a root component's percent height must keep the
+    // pre-wave-9 skip (the documented allowPercent:false rationale in
+    // SizeApplier). SizeApplier flips the height axis to allowPercent
+    // ONLY when this is non-nil.
+    var containingBlockHeightPx: Double? = nil
+
     // Resolved percent-width basis: the ancestor-published containing
     // block when known, else the host-published initial containing
     // block (#39 — harness: 358 canvas content width), else the legacy

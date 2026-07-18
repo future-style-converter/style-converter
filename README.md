@@ -198,9 +198,9 @@ the point.
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 985 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1031 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 416 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1053 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 454 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 537 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 

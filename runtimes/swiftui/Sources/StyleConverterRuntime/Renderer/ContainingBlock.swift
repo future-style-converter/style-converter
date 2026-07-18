@@ -32,11 +32,39 @@ private struct ContainingBlockWidthKey: EnvironmentKey {
     static let defaultValue: CGFloat? = nil
 }
 
+/// Wave 9 — the HEIGHT twin of the width channel above. Environment key
+/// for the parent-published containing-block height. Unlike the width
+/// channel there is NO root/canvas fallback: the capture canvas sits in
+/// a ScrollView with unbounded height, so a nil value means "genuinely
+/// indefinite basis" and percent heights must degrade to auto (CSS 2.1
+/// §10.5: "If the height of the containing block is not specified
+/// explicitly … the value computes to auto"). Before this channel
+/// existed SizeApplier skipped percent heights UNCONDITIONALLY
+/// (allowPercent:false), so an absolutely-positioned child with
+/// `height: 100%` inside a definite-height parent resolved to intrinsic
+/// 0 and painted nothing (the wave-9 gate capture: a red 70×80 was the
+/// PARENT showing through a zero-area child).
+private struct ContainingBlockHeightKey: EnvironmentKey {
+    /// Nil default = indefinite (root under the unbounded ScrollView).
+    static let defaultValue: CGFloat? = nil
+}
+
 extension EnvironmentValues {
     /// Parent-published containing-block content width in px, or nil
     /// when the nearest ancestor's width is not statically definite.
     var containingBlockWidth: CGFloat? {
         get { self[ContainingBlockWidthKey.self] }
         set { self[ContainingBlockWidthKey.self] = newValue }
+    }
+
+    /// Wave 9 — parent-published containing-block height in px, or nil
+    /// when the nearest ancestor's height is not statically definite
+    /// (percent heights then stay skipped — the ScrollView rationale).
+    /// Same always-rewrite reset discipline as the width channel:
+    /// ComponentRenderer writes it (value or nil) for EVERY child level
+    /// so a grandparent's basis can never leak past its own children.
+    var containingBlockHeight: CGFloat? {
+        get { self[ContainingBlockHeightKey.self] }
+        set { self[ContainingBlockHeightKey.self] = newValue }
     }
 }

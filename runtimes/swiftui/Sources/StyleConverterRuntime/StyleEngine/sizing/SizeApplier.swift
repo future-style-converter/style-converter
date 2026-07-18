@@ -68,17 +68,30 @@ struct SizeApplier: ViewModifier {
         // 75% × 358), and for root components / children of
         // indefinite-width parents it falls back to the same 358 canvas
         // basis as before (see SpacingContext.containingBlockWidth).
-        // Height keeps the viewport basis but percent heights are
-        // skipped anyway (allowPercent: false in the math).
+        //
+        // Wave 9 — the HEIGHT axis gains the same channel: when an
+        // ancestor published a DEFINITE containing-block height
+        // (SpacingContext.containingBlockHeightPx, threaded by
+        // ComponentRenderer from the containingBlockHeight environment),
+        // percent heights resolve against it (CSS 2.1 §10.5). When the
+        // basis is nil — the root under the unbounded ScrollView, or a
+        // child of an indefinite-height parent — the pre-wave-9 skip is
+        // preserved (allowPercent:false → percent degrades to auto),
+        // exactly the documented ScrollView rationale.
+        let basisH: CGFloat? = context.containingBlockHeightPx.map { CGFloat($0) }
         return AnyView(
             SizeApplierMath.apply(content,
                                   config: config,
                                   context: context,
                                   parentW: context.containingBlockWidth,
-                                  parentH: CGFloat(context.viewportHeight),
+                                  // Definite ancestor basis wins; viewport
+                                  // height only ever feeds vh (percent is
+                                  // gated off without a basis below).
+                                  parentH: basisH ?? CGFloat(context.viewportHeight),
                                   horizontalPadding: horizontalPadding,
                                   contentBoxInflateH: contentBoxInflateH,
-                                  contentBoxInflateV: contentBoxInflateV)
+                                  contentBoxInflateV: contentBoxInflateV,
+                                  allowPercentH: basisH != nil)
         )
     }
 }
@@ -96,25 +109,34 @@ enum SizeApplierMath {
                                      parentH: CGFloat,
                                      horizontalPadding: CGFloat = 0,
                                      contentBoxInflateH: CGFloat = 0,
-                                     contentBoxInflateV: CGFloat = 0) -> AnyView {
+                                     contentBoxInflateV: CGFloat = 0,
+                                     // Wave 9 — percent HEIGHTS resolve only
+                                     // when the caller has a DEFINITE
+                                     // containing-block height basis (CSS 2.1
+                                     // §10.5); default false preserves the
+                                     // historical skip for every legacy
+                                     // call-site (indefinite ScrollView).
+                                     allowPercentH: Bool = false) -> AnyView {
         // Resolve each axis to a concrete CGFloat (or nil for
         // unresolvable / auto / none). We split width and height lanes
         // because SwiftUI's `.frame` builder wants both as paired args.
         let w  = SizeApplierResolve.exact(c.width,  ctx: ctx, parent: parentW)
         // Height axis: CSS says `height: %` is `auto` when parent has no
         // definite height. Our parent is a ScrollView with unbounded
-        // height, so we treat percent-heights as "skip" — matches the
-        // pre-Phase-3 rendering and the CSS fallback. Same for min/max
-        // height percent constraints.
+        // height, so percent heights are skipped UNLESS the wave-9
+        // containing-block-height channel supplied a definite basis
+        // (allowPercentH) — then `height: 50%` resolves against parentH,
+        // which the caller set to that basis. Same rule for min/max
+        // height percent constraints below.
         let h  = SizeApplierResolve.exact(c.height,
                                           ctx: ctx, parent: parentH,
-                                          allowPercent: false)
+                                          allowPercent: allowPercentH)
         let minW = SizeApplierResolve.constraint(c.minWidth,  ctx: ctx, parent: parentW)
         var maxW = SizeApplierResolve.constraint(c.maxWidth,  ctx: ctx, parent: parentW)
         let minH = SizeApplierResolve.constraint(c.minHeight, ctx: ctx, parent: parentH,
-                                                 allowPercent: false)
+                                                 allowPercent: allowPercentH)
         var maxH = SizeApplierResolve.constraint(c.maxHeight, ctx: ctx, parent: parentH,
-                                                 allowPercent: false)
+                                                 allowPercent: allowPercentH)
         // Fold `fit-content(W)` into the max-clamp so the box uses
         // ideal-size capped at W, matching CSS spec
         // (`min(max(content, min-content), W)`). Only fold when no
@@ -123,7 +145,10 @@ enum SizeApplierMath {
             maxW = maxW.map { min($0, bw) } ?? bw
         }
         if let bh = SizeApplierResolve.fitContentBound(c.height, ctx: ctx, parent: parentH,
-                                                       allowPercent: false) {
+                                                       // Wave 9 — same definite-
+                                                       // basis gate as the exact
+                                                       // height above.
+                                                       allowPercent: allowPercentH) {
             maxH = maxH.map { min($0, bh) } ?? bh
         }
 

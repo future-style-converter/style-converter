@@ -12,16 +12,30 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.TileMode
+// drawImage addresses destination geometry in integer px (same convention
+// as MaskApplier's tile lattice — the other consumer of these plans).
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import com.styleconverter.runtime.background.RepeatingGradientHelper
+// url() background layers: DataUri gates the scheme (only data: decodes
+// synchronously), SyncImageDecode owns the shared decode + LRU (the same
+// pipeline the wave-3 url() mask fix pinned), IRLog keeps the remote-url
+// no-op loud without breaking the plain-JVM suite.
+import com.styleconverter.runtime.core.images.DataUri
+import com.styleconverter.runtime.core.images.SyncImageDecode
+import com.styleconverter.runtime.core.ir.IRLog
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /**
@@ -32,10 +46,14 @@ import kotlin.math.sin
  * - Linear gradients (including repeating)
  * - Radial gradients (including repeating)
  * - Conic/sweep gradients (repeating not fully supported)
+ * - url() images from `data:` URIs (synchronous decode via
+ *   SyncImageDecode — the wave-3 mask pipeline — tiled through the same
+ *   BackgroundTileMath plans the gradient path draws with)
  * - Opacity/alpha
  *
  * ## Limitations
- * - Image URLs: Not rendered (use Coil or similar for image loading)
+ * - Remote (http/file/relative) image URLs: documented, once-logged no-op —
+ *   async fetch cannot be capture-deterministic (first frame would race)
  * - Repeating conic gradients: Compose sweepGradient doesn't support TileMode
  *
  * Multiple background layers paint back-to-front per css-backgrounds-3 §2
@@ -259,7 +277,17 @@ object ColorApplier {
                 createRadialGradientBrush(image, TileMode.Clamp)
             is BackgroundImageConfig.ConicGradient ->
                 createSweepGradientBrush(image)
-            is BackgroundImageConfig.Url -> null
+            is BackgroundImageConfig.Url -> {
+                // The per-layer blend pipeline needs a Brush; a bitmap tile
+                // lattice has none. Wiring url() layers INTO the saveLayer
+                // blend stack is future work — log so the drop is never
+                // silent (no fixture pairs blend-mode with url() yet).
+                warnOnce(image.url, "background-image: url() layers are not yet " +
+                    "composited in the background-blend-mode path — layer skipped")
+                null
+            }
+            // `none` IS the rendered result per css-backgrounds-3 §3.1
+            // (an image layer that draws nothing) — not a fallthrough.
             is BackgroundImageConfig.None -> null
         }
     }
@@ -282,6 +310,15 @@ object ColorApplier {
         layerRepeat: BackgroundRepeatAxes = BackgroundRepeatAxes.from(config.backgroundRepeat),
         size: Size = Size(500f, 500f)
     ): Modifier {
+        // url() layers take a dedicated bitmap-tile path (wave 9): the
+        // brush pipeline below is gradient-only (shaders), while an image
+        // layer draws decoded pixels through the SAME BackgroundTileMath
+        // plans. Previously `Url -> null` fell through to `return modifier`
+        // with no log — a silent no-op that violated the house rule and
+        // left `background: red url(...)` painting only the red.
+        if (image is BackgroundImageConfig.Url) {
+            return applyUrlBackground(modifier, image.url, config, layerSize, layerRepeat)
+        }
         // For NON-repeating gradients we always want TileMode.Clamp regardless
         // of background-repeat. CSS background-repeat only re-tiles a gradient
         // when an explicit background-size makes the tile smaller than the
@@ -319,7 +356,10 @@ object ColorApplier {
                 else
                     createSweepGradientBrush(image)
             }
+            // Unreachable: url() layers returned through the bitmap-tile
+            // path above; the arm exists only for `when` exhaustiveness.
             is BackgroundImageConfig.Url -> null
+            // `none` draws nothing by definition (css-backgrounds-3 §3.1).
             is BackgroundImageConfig.None -> null
         }
         if (brush == null) return modifier
@@ -458,6 +498,223 @@ object ColorApplier {
                 }
             }
         }
+    }
+
+    // ==================== URL (data:) BACKGROUND LAYERS ====================
+
+    /** Logcat tag for the loud url-layer diagnostics below. */
+    private const val TAG = "ColorApplier"
+
+    /**
+     * Once-per-URL guard for the no-op/failure warnings: applyColors runs
+     * on every recomposition, and a per-frame log would flood logcat —
+     * "no silent fallthroughs" wants loud, not spammy. Synchronized set:
+     * draw happens on the UI thread, tests reset from the test thread.
+     * (Same pattern as MaskApplier.warnedMaskUrls.)
+     */
+    private val warnedBackgroundUrls = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+
+    /** Log a url-layer diagnostic ONCE per URL (see [warnedBackgroundUrls]);
+     *  IRLog falls back to stdout under plain JVM. */
+    private fun warnOnce(url: String, message: String) {
+        if (warnedBackgroundUrls.add(url)) IRLog.warn(TAG, message)
+    }
+
+    /** Test hook: clear the warn-once guard (and the shared decode cache)
+     *  so JVM test cases start from a known state. Test-only by contract. */
+    internal fun resetUrlBackgroundStateForTest() {
+        warnedBackgroundUrls.clear()
+        SyncImageDecode.resetForTest()
+    }
+
+    /**
+     * Apply ONE `background-image: url(...)` layer — the wave-9 mirror of
+     * the wave-3 url() MASK fix, in the LIVE background path.
+     *
+     * data: URIs decode synchronously through [SyncImageDecode] (the
+     * shared DataUri → BitmapFactory → LRU pipeline) and draw as a tile
+     * lattice via the EXISTING [planTilePass]/BackgroundTileMath plans:
+     * tile size per css-backgrounds-3 §3.9 (auto = the image's natural
+     * px), anchor per §3.6 background-position (free-space × fraction +
+     * px offset — including the new shorthand parse), lattice per §3.7
+     * background-repeat (default `repeat`, both axes), clipped to the
+     * border box per §2.2.
+     *
+     * Anything else (http/https/file/relative) is a documented no-op —
+     * Compose has no synchronous fetch, and an async load would race the
+     * harness's first-frame capture, so the honest behavior is "layer
+     * skipped + one loud log", never a flaky half-render.
+     */
+    private fun applyUrlBackground(
+        modifier: Modifier,
+        url: String,
+        config: ColorConfig,
+        layerSize: BackgroundSizeConfig,
+        layerRepeat: BackgroundRepeatAxes
+    ): Modifier {
+        // Remote/relative schemes: documented, once-logged no-op (above).
+        if (!DataUri.isDataUri(url)) {
+            warnOnce(
+                url,
+                "background-image: url($url) — non-data: schemes are a documented no-op on " +
+                    "Compose (async fetch is capture-nondeterministic); layer skipped"
+            )
+            return modifier
+        }
+        // Inline payload → bitmap, synchronously (cached after first use).
+        val image = SyncImageDecode.decodeDataUri(url)
+        if (image == null) {
+            // Malformed payload or undecodable bytes: browsers treat a
+            // failed background-image load as a transparent layer (the
+            // element renders without it) — mirror that, loudly.
+            warnOnce(url, "background-image: data: URI failed to decode — layer skipped " +
+                "(browsers render failed image layers as transparent)")
+            return modifier
+        }
+        // A zero-dimension bitmap has no drawable tile (and would divide
+        // by zero in the aspect-ratio math) — skip it visibly.
+        if (image.width <= 0 || image.height <= 0) {
+            warnOnce(url, "background-image: decoded bitmap has a zero dimension — layer skipped")
+            return modifier
+        }
+        val pos = config.backgroundPosition
+        // drawBehind (not Modifier.background): the layer paints under the
+        // content but ON TOP of any modifier chained before it — exactly
+        // where the reversed layer loop in applyColors slots it.
+        return modifier.drawBehind {
+            // §3.9 tile size: explicit dimensions / cover / contain resolve
+            // against the box; `auto` keeps the image's natural px (the
+            // px==dp density-1 convention the capture harness runs at).
+            val tile = imageTileSize(
+                box = this.size,
+                imageW = image.width.toFloat(),
+                imageH = image.height.toFloat(),
+                layerSize = layerSize,
+                // Dp → px with the REAL draw density on device.
+                dpToPx = { it.toPx() }
+            )
+            // Degenerate tile (explicit 0 size) → nothing to draw; CSS
+            // renders no layer for a zero-sized tile.
+            if (tile.width <= 0f || tile.height <= 0f) return@drawBehind
+            // §3.6 anchor: percent of the free space + absolute px offset,
+            // unclamped so oversized tiles end-align correctly (the same
+            // no-clamp rule the gradient path documents).
+            val anchor = tileAnchor(this.size, tile, pos, dpToPx = { it.toPx() })
+            // §3.7 lattice from the SAME pinned planner gradients use.
+            val pass = planTilePass(this.size, tile.width, tile.height,
+                                    anchor.x, anchor.y, layerRepeat)
+            // Empty origin list = degenerate plan (nothing to draw).
+            if (pass.origins.isEmpty()) return@drawBehind
+            // Runaway-lattice guard (mirrors the gradient path's 4096 cap
+            // and iOS's tileCap): past the cap draw ONE anchored tile —
+            // bounded work, visibly wrong in a debuggable way, never a
+            // multi-second per-frame stall.
+            if (pass.origins.size > 4096) {
+                drawImage(
+                    image = image,
+                    dstOffset = IntOffset(anchor.x.roundToInt(), anchor.y.roundToInt()),
+                    dstSize = IntSize(tile.width.roundToInt(), tile.height.roundToInt())
+                )
+                return@drawBehind
+            }
+            // §2.2: the painting area is the border box — overhanging
+            // REPEAT tiles clip at the edges instead of bleeding out.
+            clipRect(0f, 0f, pass.clip.width, pass.clip.height) {
+                pass.origins.forEachIndexed { i, origin ->
+                    drawImage(
+                        image = image,
+                        // AxisPlan edges are already pixel-snapped for the
+                        // abutting modes; roundToInt is exact on them.
+                        dstOffset = IntOffset(origin.x.roundToInt(), origin.y.roundToInt()),
+                        // Segment extent (drawSizes[i]), not the raw tile:
+                        // REPEAT/ROUND edges snap so adjacent tiles abut on
+                        // integer px — a ≤1px sub-pixel rescale beats a
+                        // visible AA seam (the mask path's same trade).
+                        dstSize = IntSize(
+                            pass.drawSizes[i].width.roundToInt(),
+                            pass.drawSizes[i].height.roundToInt()
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * css-backgrounds-3 §3.9 concrete-size resolution for a RASTER image
+     * layer (a tile WITH intrinsic dimensions — unlike gradients):
+     *   auto            → the natural size (imageW × imageH)
+     *   cover / contain → uniform scale by the max/min box-to-image ratio
+     *   dimensions      → per-axis px / percent-of-box; ONE auto axis
+     *                     scales to preserve the intrinsic ratio (§3.9's
+     *                     "auto resolves via the aspect ratio" rule —
+     *                     `background-size: 80px auto` on a 2:1 image is
+     *                     80×40, not 80×naturalH)
+     * [dpToPx] injects the density so this stays pure for the JVM pins
+     * (tests pass `{ it.value }` — the px==dp harness convention).
+     * Callers guarantee imageW/imageH > 0.
+     */
+    internal fun imageTileSize(
+        box: Size,
+        imageW: Float,
+        imageH: Float,
+        layerSize: BackgroundSizeConfig,
+        dpToPx: (Dp) -> Float
+    ): Size = when (layerSize) {
+        // auto auto → intrinsic size, unscaled (§3.9 bullet 1).
+        BackgroundSizeConfig.Auto -> Size(imageW, imageH)
+        // cover: smallest uniform scale that fills BOTH axes (may crop).
+        BackgroundSizeConfig.Cover -> {
+            val scale = maxOf(box.width / imageW, box.height / imageH)
+            Size(imageW * scale, imageH * scale)
+        }
+        // contain: largest uniform scale that fits INSIDE both axes.
+        BackgroundSizeConfig.Contain -> {
+            val scale = minOf(box.width / imageW, box.height / imageH)
+            Size(imageW * scale, imageH * scale)
+        }
+        is BackgroundSizeConfig.Dimensions -> {
+            // Explicit axis: px verbatim, percent as fraction-of-box (the
+            // Dimensions contract — *Percent fields are 0..1 fractions).
+            val w = layerSize.width?.let(dpToPx)
+                ?: layerSize.widthPercent?.let { box.width * it }
+            val h = layerSize.height?.let(dpToPx)
+                ?: layerSize.heightPercent?.let { box.height * it }
+            when {
+                // Both axes pinned → use them (aspect ratio may distort).
+                w != null && h != null -> Size(w, h)
+                // One auto axis → preserve the intrinsic ratio (§3.9).
+                w != null -> Size(w, w * imageH / imageW)
+                h != null -> Size(h * imageW / imageH, h)
+                // Dimensions with neither axis = effectively auto auto.
+                else -> Size(imageW, imageH)
+            }
+        }
+    }
+
+    /**
+     * css-backgrounds-3 §3.6 first-tile anchor: percent positions place
+     * the tile at fraction × (box − tile) FREE space — so 100%/100%
+     * (`right bottom`) end-aligns the tile — plus any absolute px offset.
+     * Deliberately UNCLAMPED: negative free space (tile larger than box)
+     * must anchor negative so the tile's far edge aligns (the gradient
+     * path's wave-1 no-clamp rule, one owner away). Pure for JVM pinning;
+     * [dpToPx] as in [imageTileSize].
+     */
+    internal fun tileAnchor(
+        box: Size,
+        tile: Size,
+        pos: BackgroundPositionConfig,
+        dpToPx: (Dp) -> Float
+    ): Offset {
+        // Free space per axis — negative when the tile overhangs the box.
+        val freeX = box.width - tile.width
+        val freeY = box.height - tile.height
+        // fraction × free space + absolute offset (both §3.6 components).
+        return Offset(
+            freeX * pos.x + dpToPx(pos.xOffset),
+            freeY * pos.y + dpToPx(pos.yOffset)
+        )
     }
 
     /**
