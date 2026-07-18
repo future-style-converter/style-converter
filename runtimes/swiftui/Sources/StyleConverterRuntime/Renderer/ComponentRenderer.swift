@@ -44,6 +44,15 @@ public struct ComponentRenderer: View {
     // ContainingBlock.swift for the full rationale.
     @Environment(\.containingBlockWidth) private var containingBlockWidth
 
+    // Lane IOS-COLLAPSE — the CSS 2.1 §8.3.1 margin-collapse channel:
+    // a BLOCK parent statically folds its children's vertical margins
+    // (sibling max() collapse + first/last hoist-through) and sends each
+    // child its USED top/bottom here; the child folds them into its
+    // MarginConfig below so its own MarginApplier paints the collapsed
+    // values. Nil = no plan (root, non-block parent, ineligible margins)
+    // → declared margins apply untouched. See MarginCollapse.swift.
+    @Environment(\.marginCollapseOverride) private var marginCollapseOverride
+
     // TITAN Round 4 (GAP 1, WIDTH half) — the composed-WPT block-flow
     // fill-width channel (WPTCaptureMode.swift). nil everywhere but the
     // composed canvas, which publishes the 358px content-box width on its
@@ -616,6 +625,14 @@ public struct ComponentRenderer: View {
             if s.size.width == nil, let n = s.columns?.count, n >= 2 {
                 s.size.width = .exact(px: Double(s.spacing.context.containingBlockWidth))
             }
+            // Lane IOS-COLLAPSE (CSS 2.1 §8.3.1) — fold the parent's
+            // collapse override into this box's margin BEFORE the style
+            // chain: the used top/bottom (sibling max() collapse, 0 for
+            // hoisted edges) replace the declared ones so MarginApplier
+            // paints the collapsed geometry. Identity when nil (no plan)
+            // — every override-free render is byte-unchanged.
+            s.spacing.margin = MarginCollapse.applying(marginCollapseOverride,
+                                                       to: s.spacing.margin)
             return s
         }()
 
@@ -631,16 +648,34 @@ public struct ComponentRenderer: View {
             // exactly Appendix E step 3 (behind this element's own
             // background). Their PositionApplier offsets anchor at the
             // same top-leading origin the overlay uses.
+            let styledBox = negativeZChildren.isEmpty
+                ? AnyView(layoutContainer(style: style).applyStyle(style))
+                : AnyView(layoutContainer(style: style).applyStyle(style)
+                    .background(alignment: .topLeading) {
+                        ZStack(alignment: .topLeading) {
+                            positionedChildren(style: style,
+                                               children: negativeZChildren)
+                        }
+                    })
+            // Lane IOS-COLLAPSE (CSS 2.1 §8.3.1) — the hoisted bands: a
+            // first-top / last-bottom child margin that collapses THROUGH
+            // this unpadded/unbordered parent becomes TRANSPARENT outer
+            // spacing attached AFTER applyStyle, so the parent's
+            // background/borders (painted inside applyStyle) can never
+            // cover the escaped region — the browser's collapse-through
+            // geometry. The plan already BAKES the §8.3.1 max() rule
+            // against the parent's DECLARED own margin (containerPlan reads
+            // component.properties, never the override-folded style — the
+            // fix for the nested double-count), so we consume the final
+            // band directly. (nil plan / 0,0 → view tree unchanged.)
+            let hoistPlan = MarginCollapse.containerPlan(component: component, style: style)
+            let bandTop = hoistPlan?.hoistTop ?? 0
+            let bandBottom = hoistPlan?.hoistBottom ?? 0
             let positioned = PositionApplier.apply(
-                negativeZChildren.isEmpty
-                    ? AnyView(layoutContainer(style: style).applyStyle(style))
-                    : AnyView(layoutContainer(style: style).applyStyle(style)
-                        .background(alignment: .topLeading) {
-                            ZStack(alignment: .topLeading) {
-                                positionedChildren(style: style,
-                                                   children: negativeZChildren)
-                            }
-                        }),
+                bandTop > 0 || bandBottom > 0
+                    ? AnyView(styledBox.padding(EdgeInsets(top: bandTop, leading: 0,
+                                                           bottom: bandBottom, trailing: 0)))
+                    : styledBox,
                 aggregate: style.layout7
             )
             // Wave 5 — `float: right | inline-end` (LTR: both anchor to
@@ -919,6 +954,11 @@ public struct ComponentRenderer: View {
                 // Round 4: block-fill is root-scoped — a child never inherits
                 // the stacked root's fill width (it has its own box).
                 .environment(\.wptBlockFlowFillWidth, nil)
+                // Margin collapse (lane IOS-COLLAPSE): out-of-flow boxes
+                // never collapse (css-position-3 §2.1 / CSS 2.1 §8.3.1
+                // "in-flow" precondition) — reset so a grandparent's
+                // plan can't reach a positioned child's margins.
+                .environment(\.marginCollapseOverride, nil)
                 .environment(\.containingBlockWidth, childCB)
                 .environment(\.inheritedTextProperties, childInherited)
                 // Custom-property scope (wave 6): positioned children
@@ -1381,6 +1421,14 @@ public struct ComponentRenderer: View {
             // channel for fit-content parents so a grandparent's basis
             // never leaks past its own children.
             let childCB: CGFloat? = flexContentSize(style: style, vertical: false)
+            // Lane IOS-COLLAPSE (CSS 2.1 §8.3.1) — the block container's
+            // margin-collapse plan: one used-(top,bottom) override per
+            // child of THIS ForEach (containerPlan derives them from the
+            // identical sorted in-flow array, so indices line up by
+            // construction). Nil for non-block/ineligible containers —
+            // children then keep their declared margins untouched.
+            let collapsePlan = MarginCollapse.containerPlan(component: component,
+                                                            style: style)
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
                 // Build the child's aggregate once so FlexChildModifier
                 // (legacy wrap path) and the stretch env computation can
@@ -1482,6 +1530,12 @@ public struct ComponentRenderer: View {
                 // content width or nil — so the channel resets at every
                 // tree level (no grandparent leak).
                 .environment(\.containingBlockWidth, childCB)
+                // Margin collapse (lane IOS-COLLAPSE, §8.3.1): the used
+                // vertical margins for THIS child, or nil when no plan
+                // applies. ALWAYS written so a grandparent's override
+                // can never leak past its own children (same reset
+                // discipline as every channel above).
+                .environment(\.marginCollapseOverride, collapsePlan?.overrides[index])
                 // Text inheritance (css-cascade-4): publish this
                 // element's merged inheritable declarations for the
                 // child. Always written so each level's channel is
@@ -1970,6 +2024,11 @@ private struct PlaceholderLabel: View {
         // weight is BAKED into the concrete face and `.weight()` must
         // not run (it would hand the pick back to CoreText's heuristic).
         var weightBaked = false
+        // Wave 6 (font-style oblique) — remember the concrete Inter face
+        // name so the synthetic-italic branch below can rebuild it as a
+        // matrix-skewed UIFont (SwiftUI's `.italic()` can't slant a
+        // family that ships no italic face — it silently no-ops).
+        var interFaceName: String? = nil
         if textConfig.fontDesign == .default {
             // css-fonts-4 §5.2 concrete-face selection over the installed
             // Inter faces (Regular/Medium/Bold/Black in the harness):
@@ -1982,16 +2041,42 @@ private struct PlaceholderLabel: View {
                                                    desiredWeight: n) {
                 f = .custom(face, size: size)
                 weightBaked = true
+                interFaceName = face
             } else {
                 // No numeric weight / family not registered (unit-test
                 // bundle) → the legacy Regular + `.weight()` path.
                 f = .custom("Inter", size: size)
+                interFaceName = "Inter"
             }
         } else {
             f = Font.system(size: size, design: textConfig.fontDesign)
         }
         if !weightBaked, let w = textConfig.fontWeight { f = f.weight(w) }
-        if textConfig.fontItalic { f = f.italic() }
+        if textConfig.fontItalic {
+            // Wave 6 (font-style oblique) — the bundled Inter family ships
+            // roman faces only, so `.italic()`'s symbolic-trait lookup
+            // finds nothing and silently no-ops: the wave-6 iOS captures
+            // rendered plain `italic` fully upright while web and Android
+            // both SYNTHESIZED a slant. Mirror their font synthesis
+            // (css-fonts-4 §6, font-synthesis-style) with the same fixed
+            // matrix shear both use (Skia textSkewX -0.25 ≈ 14deg).
+            // Guard: only when the resolved face carries the final weight
+            // (weightBaked, or no weight requested) — a UIFont-backed
+            // Font can't take the `.weight()` chain applied above.
+            if let name = interFaceName,
+               textConfig.fontWeight == nil || weightBaked,
+               let base = UIFont(name: name, size: size) {
+                // CTFont-backed Font keeps the descriptor matrix alive
+                // through SwiftUI's Text layout (Font.init(_: CTFont)).
+                f = Font(Self.syntheticObliqueUIFont(base) as CTFont)
+            } else {
+                // SF system designs DO carry real italic faces, and the
+                // unit-test bundle (Inter unregistered) keeps the legacy
+                // behavior — `.italic()` works or degrades exactly as
+                // before, never worse than the pre-fix render.
+                f = f.italic()
+            }
+        }
         // Fidelity wave 2 — `font-variant-caps: small-caps` composes on
         // the label's own font. The box-level FontMod can't reach this
         // Text (a direct `.font` wins over container fonts, Apple docs),
@@ -2028,12 +2113,24 @@ private struct PlaceholderLabel: View {
            let desc = f.fontDescriptor.withDesign(d) {
             f = UIFont(descriptor: desc, size: size)
         }
-        // Italic composes on the descriptor like `.italic()` does.
-        if textConfig.fontItalic,
-           let desc = f.fontDescriptor.withSymbolicTraits(.traitItalic) {
-            f = UIFont(descriptor: desc, size: size)
+        // Wave 6 — italic composes as the SAME fixed-matrix synthetic
+        // oblique the render path uses (was `.traitItalic`, which returns
+        // nil for Inter and a different face for SF). A pure horizontal
+        // shear leaves glyph advances untouched, so the Inter early-
+        // returns above stay measurement-correct without the shear.
+        if textConfig.fontItalic {
+            f = Self.syntheticObliqueUIFont(f)
         }
         return f
+    }
+
+    /// Struct-local alias so existing `Self.` call sites read naturally;
+    /// the real (unit-tested) implementation is the file-scope
+    /// `syntheticObliqueUIFont` below — PlaceholderLabel is private, so
+    /// the skew math must live at module scope to be pinnable from
+    /// TypographyTests via @testable import.
+    private static func syntheticObliqueUIFont(_ f: UIFont) -> UIFont {
+        StyleConverterRuntime.syntheticObliqueUIFont(f)
     }
 
     /// SwiftUI Font.Weight → UIFont.Weight (identical 9-step ladders).
@@ -2331,4 +2428,27 @@ private extension Color {
         guard ui.getRed(&r, green: &g, blue: &b, alpha: &a) else { return nil }
         return (Double(r), Double(g), Double(b), Double(a))
     }
+}
+
+// MARK: - Synthetic oblique (wave 6, lane FONT-STYLE-OBLIQUE)
+
+/// Blink/Android-parity synthetic oblique. Neither SwiftUI's `.italic()`
+/// nor `.traitItalic` can slant the bundled Inter (the family ships no
+/// italic face, so the symbolic-trait lookup fails and silently no-ops —
+/// the wave-6 iOS captures rendered plain `italic` fully upright). Skew
+/// the roman outlines with the fixed 0.25 slope both reference platforms
+/// synthesize instead (Skia textSkewX -0.25 on Chromium and Android;
+/// atan(0.25) ≈ 14.04deg — css-fonts-4 §2.5's default oblique angle).
+/// UIKit glyph space is y-up, so a POSITIVE `c` shear maps
+/// x' = x + 0.25·y and leans glyph TOPS to the RIGHT, matching the
+/// wave-6 web capture's lean direction. Internal (not private) so
+/// TypographyTests can pin the matrix via @testable import.
+func syntheticObliqueUIFont(_ f: UIFont) -> UIFont {
+    // Pure horizontal shear — glyph advances are untouched, so measurement
+    // code sharing this font stays line-break-identical to the roman.
+    let shear = CGAffineTransform(a: 1, b: 0, c: 0.25, d: 1, tx: 0, ty: 0)
+    // Rebuild by PostScript name + matrix; UIFont(descriptor:size:)
+    // reapplies the point size on top of the sheared descriptor.
+    let desc = UIFontDescriptor(name: f.fontName, matrix: shear)
+    return UIFont(descriptor: desc, size: f.pointSize)
 }

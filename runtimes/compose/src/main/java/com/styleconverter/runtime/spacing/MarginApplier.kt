@@ -30,9 +30,24 @@ object MarginApplier {
         config: MarginConfig,
         ctx: SpacingContext = SpacingContext(),
         isRtl: Boolean = false,
+        // CSS2 §8.3.1 margin-collapse override, provided by the parent block
+        // container's collapse plan (BlockMarginCollapse.LocalCollapsedMargin
+        // → ComponentRenderer → StyleApplier → here). When present it
+        // REPLACES the block-axis sides with the post-collapse applied
+        // values; inline sides are untouched (vertical-only per §8.3.1).
+        collapsed: CollapsedMargin? = null,
     ): Modifier {
-        if (!config.hasMargin) return modifier
-        val r = config.resolve(isRtl = isRtl)
+        // Substitute the collapsed block-axis margins BEFORE any resolution
+        // so the rest of this applier (padding/offset/auto handling) treats
+        // them exactly like declared margins. Note the override can INTRODUCE
+        // margin on a margin-less child (a sibling's bottom margin carried as
+        // this child's applied top), so hasMargin must test the effective
+        // config, not the raw one.
+        val effective =
+            if (collapsed != null) BlockMarginCollapse.applyOverride(config, collapsed)
+            else config
+        if (!effective.hasMargin) return modifier
+        val r = effective.resolve(isRtl = isRtl)
 
         // Resolve each side to either a Dp (for lengths) or Auto. We inspect
         // the Auto pairs BEFORE computing offsets so auto sides contribute 0

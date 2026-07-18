@@ -189,6 +189,311 @@ object ComponentRenderer {
         androidx.compose.runtime.compositionLocalOf { false }
 
     /**
+     * CSS2 §8.3.1 collapse plan for the CURRENT block container's children,
+     * provided by the block branch in RenderComponentContent and consumed by
+     * RenderContent's default child loop (index-aligned with the children
+     * list). Null everywhere else — flex/grid/table/inline paths and the
+     * absolute-overlay branch never collapse (the plan builder gates them
+     * out structurally). See BlockMarginCollapse for the mechanism.
+     */
+    internal val LocalBlockCollapsePlan =
+        androidx.compose.runtime.compositionLocalOf<com.styleconverter.runtime.spacing.BlockCollapsePlan?> { null }
+
+    /**
+     * Plan-or-fallback result for [blockCollapsePlanFor]: [plan] null means
+     * "keep the existing stacking behavior", with [fallbackReason] non-null
+     * exactly when an IN-SCOPE-looking container was skipped for a value
+     * flavor we don't emulate (house rule: no silent fallthroughs — the
+     * composable call site logs it once). Reason stays null for the
+     * structurally out-of-scope cases (no children / no margins / list or
+     * relative parents) where silence is correct.
+     */
+    internal data class CollapsePlanResult(
+        val plan: com.styleconverter.runtime.spacing.BlockCollapsePlan?,
+        val fallbackReason: String?,
+    )
+
+    /**
+     * Build the §8.3.1 collapse plan for a block container, or decide to
+     * fall back. Pure over the IR (JVM-pinnable). Implements the UNIFIED
+     * collapse gate contract's container-level bails B1-B10 (shared
+     * byte-for-byte with the iOS runtime — divergence between the two
+     * implementations is the bug class this contract exists to kill).
+     * Scope gates, in order:
+     *  - children must exist, and the container must not also carry leading
+     *    `_text` (the text renders as an extra first sibling the plan's
+     *    index-aligned margins cannot describe);
+     *  - `position: relative` parents render children as an absolute-overlay
+     *    Box (RenderContent's positioned branch), not a block Column;
+     *  - <ol>/<ul> parents route children through the list-marker Row path;
+     *  - B6: parent selector/media buckets declaring padding/border/height/
+     *    overflow/position longhands bail — an interactive/breakpoint
+     *    restyle could flip a hoist gate the static plan already baked;
+     *  - B1/B2: display:none children (their margins must not fold into
+     *    visible siblings) and inline-level children (§8.3.1 collapses
+     *    BLOCK-level margins only) bail;
+     *  - B3/B4: every child must be in-flow (§8.3.1 collapses margins "of
+     *    boxes in the normal flow"): absolute/fixed or floated children
+     *    bail the whole container. For abspos this is DELIBERATE
+     *    conservatism: a browser would skip the box and collapse the rest,
+     *    but filtering it would break the index-map alignment with the
+     *    render loops — BOTH natives bail instead (contract B4);
+     *  - B5: children whose selector/media buckets declare a margin
+     *    longhand bail (the bucket could restyle the very margin the plan
+     *    overrides);
+     *  - B9: a self-collapsing candidate child (no _text, no children, no
+     *    explicit height/min-height, BOTH vertical margins declared with
+     *    either positive) bails — §8.3.1 collapses its own top+bottom
+     *    margins with BOTH neighbours into one n-ary max the pairwise
+     *    fold cannot reproduce;
+     *  - B10: a FIRST or LAST child that is itself an eligible unpadded/
+     *    unbordered block container with children bails — the grandchild's
+     *    edge margin would collapse THROUGH two levels into one n-ary max;
+     *    the single-level emulation is pinned conservative instead;
+     *  - B7/B8: every child's block-axis margins must be plain non-negative
+     *    px (auto/negative/relative are outside the emulation — see
+     *    BlockMarginCollapse.blockMarginsOrNull), as must the parent's own;
+     *  - at least one collapsible margin must be non-zero, so margin-less
+     *    corpora build no plan and render byte-identically to the frozen
+     *    baseline.
+     */
+    internal fun blockCollapsePlanFor(component: IRComponent): CollapsePlanResult {
+        // Structural silence cases first (correct to skip, nothing to log).
+        val children = component.children
+        if (children.isNullOrEmpty()) return CollapsePlanResult(null, null)
+        if (!component._text.isNullOrEmpty()) return CollapsePlanResult(null, null)
+        if (extractPositionType(component.properties) == PositionType.RELATIVE) {
+            return CollapsePlanResult(null, null)
+        }
+        val tag = component._tag?.lowercase()
+        if (tag == "ol" || tag == "ul") return CollapsePlanResult(null, null)
+        // B6: the plan is computed ONCE from base properties, but selector
+        // (hover/focus) and media buckets re-style live — a bucket that can
+        // touch the parent's padding/border/height/overflow/position could
+        // flip a hoist gate after the fact. Bail so the legacy per-frame
+        // stacking (which tracks the buckets) stays authoritative.
+        if ((component.selectors.asSequence().flatMap { it.properties.asSequence() } +
+                component.media.asSequence().flatMap { it.properties.asSequence() })
+                .any { gateAffectingParentBucketType(it.type) }
+        ) {
+            return CollapsePlanResult(null, "parent bucket declares gate-affecting longhand")
+        }
+        // Per-child bails B1-B5 + B9 (container-level: ONE ineligible child
+        // kills the whole plan — partial collapse would render geometry
+        // neither engine produces).
+        for (child in children) {
+            // Raw display keyword (underscore- and hyphen-form tolerant,
+            // matching extractDisplayConfig's keyword table).
+            val display = child.properties.firstOrNull { it.type == "Display" }
+                ?.data?.let { ValueExtractors.extractKeyword(it)?.uppercase()?.replace('-', '_') }
+            // B1: a display:none child generates NO box (css-display-3 §2.4)
+            // — its margins must not participate at all. The legacy path
+            // renders it size-0 in place; folding its margins into visible
+            // siblings would be WORSE than legacy, so bail.
+            if (display == "NONE") {
+                return CollapsePlanResult(null, "display:none child")
+            }
+            // B2: inline-level boxes don't produce block-level margins —
+            // §8.3.1 collapses "adjoining margins of block-level boxes"
+            // only; an inline/inline-block/inline-flex/inline-grid sibling
+            // also changes the whole line-layout the plan can't model.
+            if (display in INLINE_LEVEL_DISPLAY_KEYWORDS) {
+                return CollapsePlanResult(null, "inline-level child")
+            }
+            // B4: out-of-flow boxes don't participate in block flow (§8.3.1
+            // is normal-flow only). Browsers would skip the box and still
+            // collapse the remaining siblings, but filtering it here would
+            // desync the plan's index map from the render loops — BOTH
+            // natives bail instead (contract-pinned conservatism).
+            val pos = extractPositionType(child.properties)
+            if (pos == PositionType.ABSOLUTE || pos == PositionType.FIXED) {
+                return CollapsePlanResult(null, "out-of-flow child")
+            }
+            // B3: a float's margins never collapse (§8.3.1: "margins of
+            // floating boxes never collapse") — Float keyword != NONE takes
+            // the box out of the collapsing flow.
+            val floatKeyword = child.properties.firstOrNull { it.type == "Float" }
+                ?.data?.let { ValueExtractors.extractKeyword(it)?.uppercase() }
+            if (floatKeyword != null && floatKeyword != "NONE") {
+                return CollapsePlanResult(null, "floated child")
+            }
+            // B5: a selector/media bucket that can re-declare any margin
+            // longhand invalidates the plan's DECLARED-margin math the
+            // moment the bucket applies — bail. MarginTrim is screened out:
+            // it is a trimming switch (css-box-4 §4), not a margin longhand.
+            if ((child.selectors.asSequence().flatMap { it.properties.asSequence() } +
+                    child.media.asSequence().flatMap { it.properties.asSequence() })
+                    .any { it.type.startsWith("Margin") && it.type != "MarginTrim" }
+            ) {
+                return CollapsePlanResult(null, "bucket-declared child margin")
+            }
+            // B9: a self-collapsing candidate — no content (_text/children),
+            // no explicit block-size floor, yet BOTH vertical margins
+            // declared (either positive). §8.3.1 collapses such a box's own
+            // top and bottom margins with each other AND both neighbours
+            // into one n-ary max; the pairwise fold below cannot reproduce
+            // that, so bail (pin S12).
+            if (isSelfCollapsingCandidate(child)) {
+                return CollapsePlanResult(null, "self-collapsing child")
+            }
+        }
+        // B10: nested-hoist chain — a FIRST/LAST child that is itself an
+        // eligible (unpadded/unbordered, block-flow) container with children
+        // would let a grandchild edge margin collapse THROUGH two levels
+        // (§8.3.1 adjoining chains are transitive); the single-level
+        // emulation composes nested max()s instead of one n-ary max, so
+        // bail — pinned conservative on BOTH natives.
+        if (isNestedHoistChainChild(children.first(), edgeIsTop = true) ||
+            isNestedHoistChainChild(children.last(), edgeIsTop = false)
+        ) {
+            return CollapsePlanResult(null, "nested-hoist chain")
+        }
+        // Per-child block-axis margins — all must be plain positive px.
+        val childMargins = children.map { child ->
+            com.styleconverter.runtime.spacing.BlockMarginCollapse.blockMarginsOrNull(
+                com.styleconverter.runtime.spacing.SpacingExtractor
+                    .extractMarginConfig(child.properties.map { it.type to it.data })
+            ) ?: return CollapsePlanResult(null, "auto/negative/relative child margin")
+        }
+        // No collapsible margin anywhere → no plan (baseline-identity path).
+        if (childMargins.all { it.topPx == 0f && it.bottomPx == 0f }) {
+            return CollapsePlanResult(null, null)
+        }
+        // Parent's own block-axis margins feed the hoist max() composition;
+        // out-of-scope parent flavors bail (the hoist math would be wrong).
+        val parentPairs = component.properties.map { it.type to it.data }
+        val parentOwn = com.styleconverter.runtime.spacing.BlockMarginCollapse
+            .blockMarginsOrNull(
+                com.styleconverter.runtime.spacing.SpacingExtractor
+                    .extractMarginConfig(parentPairs)
+            ) ?: return CollapsePlanResult(null, "auto/negative/relative parent margin")
+        // Edge gates (§8.3.1 adjoining conditions: padding/border/BFC/height).
+        val gates = com.styleconverter.runtime.spacing.BlockMarginCollapse
+            .hoistGates(parentPairs)
+        // Pure collapse math — max rule between siblings + edge hoisting.
+        return CollapsePlanResult(
+            com.styleconverter.runtime.spacing.BlockMarginCollapse
+                .computePlan(childMargins, parentOwn, gates),
+            null
+        )
+    }
+
+    // Inline-level display keywords for bail B2 (css-display-3 §2.1's
+    // inline-level outer display values), normalized to underscore form.
+    private val INLINE_LEVEL_DISPLAY_KEYWORDS =
+        setOf("INLINE", "INLINE_BLOCK", "INLINE_FLEX", "INLINE_GRID")
+
+    /**
+     * Bail B6 predicate: a parent bucket (selector/media) property type
+     * that could flip a hoist gate when the bucket applies. Families match
+     * the gate inputs in BlockMarginCollapse.hoistGates: padding (G1),
+     * border (G2 — the whole Border* namespace, conservatively including
+     * radius/image since a bucket restyle needs no precision), overflow
+     * (G3 — OverflowWrap/OverflowAnchor screened out: text wrapping and
+     * scroll anchoring never establish a BFC), position (G4), and the
+     * block-size family (G5 — Max* included here even though it doesn't
+     * pin the STATIC gate, because a bucket could swap it for a Height).
+     */
+    private fun gateAffectingParentBucketType(type: String): Boolean =
+        type.startsWith("Padding") ||
+            type.startsWith("Border") ||
+            (type.startsWith("Overflow") &&
+                type != "OverflowWrap" && type != "OverflowAnchor") ||
+            type == "Position" ||
+            type in setOf(
+                "Height", "BlockSize", "MinHeight", "MinBlockSize",
+                "MaxHeight", "MaxBlockSize", "AspectRatio",
+            )
+
+    // Block-size floors that stop a box from self-collapsing (bail B9):
+    // CSS2 §8.3.1 requires "min-height of zero, and zero or auto computed
+    // height" for a box's own top/bottom margins to be adjoining — any of
+    // these declared means the box has (or floors) a height.
+    private val SELF_COLLAPSE_HEIGHT_TYPES =
+        setOf("Height", "BlockSize", "MinHeight", "MinBlockSize")
+
+    // Declared vertical-margin type sets for B9's "declares BOTH vertical
+    // margins" test (logical block aliases map to top/bottom in the
+    // horizontal-tb engine, css-logical-1 §4.2).
+    private val TOP_MARGIN_TYPES = setOf("MarginTop", "MarginBlockStart")
+    private val BOTTOM_MARGIN_TYPES = setOf("MarginBottom", "MarginBlockEnd")
+
+    /**
+     * Bail B9 predicate: a child whose own top and bottom margins would be
+     * adjoining (§8.3.1 self-collapsing box) — no `_text`, no children, no
+     * explicit height/min-height, and BOTH vertical margins declared with
+     * either one positive. The pairwise fold applies prev.bottom vs own.top
+     * per gap; a self-collapsing box needs max(prevBottom, top, bottom,
+     * nextTop) across ONE combined gap instead — unreproducible, so bail.
+     */
+    private fun isSelfCollapsingCandidate(child: IRComponent): Boolean {
+        // Any content or a block-size floor → the box has extent, its own
+        // margins never touch each other, the pairwise fold is exact.
+        if (!child._text.isNullOrEmpty()) return false
+        if (!child.children.isNullOrEmpty()) return false
+        if (child.properties.any { it.type in SELF_COLLAPSE_HEIGHT_TYPES }) return false
+        // BOTH vertical margins must be DECLARED (an undeclared side is the
+        // initial 0 — a zero-width adjoining margin the fold handles fine).
+        val top = child.properties.firstOrNull { it.type in TOP_MARGIN_TYPES }
+            ?: return false
+        val bottom = child.properties.firstOrNull { it.type in BOTTOM_MARGIN_TYPES }
+            ?: return false
+        // Either margin positive triggers the bail: two declared ZEROS
+        // self-collapse harmlessly (the combined gap is still the plain
+        // pairwise max). Unresolvable flavors fall to B7/B8 later anyway;
+        // read via the spacing extractor to share one wire decoding.
+        val margins = com.styleconverter.runtime.spacing.BlockMarginCollapse
+            .blockMarginsOrNull(
+                com.styleconverter.runtime.spacing.SpacingExtractor
+                    .extractMarginConfig(listOf(top.type to top.data, bottom.type to bottom.data))
+            ) ?: return true // non-static declared pair — conservative bail
+        return margins.topPx > 0f || margins.bottomPx > 0f
+    }
+
+    /**
+     * Bail B10 predicate for one edge child: is it an eligible block
+     * container (block-flow display, children present, no text sibling)
+     * whose OWN hoist gate on the touching edge is open (unpadded/
+     * unbordered per hoistGates)? If so, its grandchild edge margin would
+     * chain-collapse through it — beyond the single-level emulation.
+     */
+    private fun isNestedHoistChainChild(child: IRComponent, edgeIsTop: Boolean): Boolean {
+        // Leaf children (or text-first containers) cannot hoist anything —
+        // their own plan builder structurally skips them.
+        if (child.children.isNullOrEmpty()) return false
+        if (!child._text.isNullOrEmpty()) return false
+        // Only block-flow containers hoist: an explicit non-block display
+        // (flex/grid/table/…) establishes an independent formatting context
+        // whose margins never collapse through (css-display-3 §2.1).
+        val display = child.properties.firstOrNull { it.type == "Display" }
+            ?.data?.let { ValueExtractors.extractKeyword(it)?.uppercase()?.replace('-', '_') }
+        if (display != null && display != "BLOCK") return false
+        // The chain only forms through the edge that touches THIS parent:
+        // the child's top gate for a first child, bottom gate for a last.
+        val gates = com.styleconverter.runtime.spacing.BlockMarginCollapse
+            .hoistGates(child.properties.map { it.type to it.data })
+        return if (edgeIsTop) gates.top else gates.bottom
+    }
+
+    // One log line per distinct fallback reason for the whole process —
+    // keeps the no-silent-fallthrough contract without flooding logcat on
+    // every recomposition. runCatching guards android.util.Log for JVM
+    // callers (unit tests exercise the pure plan builder directly).
+    private val collapseFallbacksLogged =
+        java.util.Collections.synchronizedSet(mutableSetOf<String>())
+    private fun logCollapseFallbackOnce(reason: String, componentId: String) {
+        if (collapseFallbacksLogged.add(reason)) {
+            runCatching {
+                android.util.Log.i(
+                    "BlockMarginCollapse",
+                    "margin-collapse fallback ($reason) — first seen on $componentId; " +
+                        "block-axis margins keep the legacy stacking behavior"
+                )
+            }
+        }
+    }
+
+    /**
      * True when a Color-typed property's wire value is the `currentColor`
      * keyword. ColorParser emits it srgb-less — the wire is exactly
      * {"original":"currentColor"} (IRColor.ColorRepresentation.CurrentColor
@@ -454,8 +759,15 @@ object ComponentRenderer {
         // collapsing the box to defaultMinSize. Logging the throwable
         // lets logcat reveal which extractor blew up so we can either fix
         // the extractor or normalise the IR shape.
+        // CSS2 §8.3.1 margin-collapse override: when THIS component is a
+        // child in a parent's collapsing block flow, the parent's plan
+        // provides the post-collapse applied block-axis margins here (see
+        // BlockMarginCollapse + the block branch in RenderComponentContent).
+        // Null on every other path — the style chain is byte-identical then.
+        val collapsedMargin = com.styleconverter.runtime.spacing.BlockMarginCollapse
+            .LocalCollapsedMargin.current
         val baseModifier = try {
-            StyleApplier.applyProperties(effectiveProperties)
+            StyleApplier.applyProperties(effectiveProperties, collapsedMargin)
         } catch (e: Exception) {
             android.util.Log.w("StyleApplier", "applyProperties threw for ${component.id}: ${e.message}", e)
             Modifier
@@ -821,7 +1133,15 @@ object ComponentRenderer {
                 // shadow the slot-parent chain (spec 02 resolution order).
                 com.styleconverter.runtime.core.variables.LocalCssVariables provides varScope,
                 // % base channel for descendants' calc()/bare-% resolution.
-                com.styleconverter.runtime.core.variables.LocalContainingBlock provides childContainingBlock
+                com.styleconverter.runtime.core.variables.LocalContainingBlock provides childContainingBlock,
+                // §8.3.1 collapse channels are strictly one-level: THIS
+                // component consumed its own override above, and any plan it
+                // publishes for its children is provided deeper (inside its
+                // block branch). Reset both so grandchildren never see a
+                // stale ancestor override/plan.
+                com.styleconverter.runtime.spacing.BlockMarginCollapse
+                    .LocalCollapsedMargin provides null,
+                LocalBlockCollapsePlan provides null
             ) {
                 wrappedContent()
             }
@@ -1143,8 +1463,45 @@ object ComponentRenderer {
                 // keep the Box for leaf/placeholder rendering where
                 // contentAlignment still matters.
                 if (!component.children.isNullOrEmpty()) {
-                    Column(modifier = modifier) {
-                        RenderContent(component, textColor, displayConfig)
+                    // CSS2 §8.3.1 margin collapse for the block child loop:
+                    // build the container's collapse plan (max() rule between
+                    // siblings, edge margins hoisted through a padding-0 /
+                    // border-0 parent). Gated to true BLOCK containers — the
+                    // else-branch can also catch residual display values, and
+                    // §8.3.1 only applies to block flow.
+                    val collapse =
+                        if (displayConfig.type == DisplayType.BLOCK) blockCollapsePlanFor(component)
+                        else CollapsePlanResult(null, null)
+                    // No-silent-fallthrough: an in-scope-looking container we
+                    // skipped for an unemulated value flavor logs once.
+                    collapse.fallbackReason?.let { logCollapseFallbackOnce(it, component.id) }
+                    val plan = collapse.plan
+                    if (plan != null) {
+                        // Hoisted edge margins become TRANSPARENT spacing
+                        // OUTSIDE the whole style chain (`modifier` carries
+                        // the parent's own margin → size → bg): chaining the
+                        // padding first means the background modifier inside
+                        // paints only below/above it — the browser's
+                        // collapse-through geometry where the escaped margin
+                        // sits outside the parent's border box.
+                        Column(
+                            modifier = Modifier
+                                .padding(top = plan.hoistTopPx.dp, bottom = plan.hoistBottomPx.dp)
+                                .then(modifier)
+                        ) {
+                            // Publish the per-child applied margins for
+                            // RenderContent's index-aligned child loop.
+                            CompositionLocalProvider(LocalBlockCollapsePlan provides plan) {
+                                RenderContent(component, textColor, displayConfig)
+                            }
+                        }
+                    } else {
+                        // No plan (margin-less children, or fallback): the
+                        // pre-collapse path, byte-identical to the frozen
+                        // baseline.
+                        Column(modifier = modifier) {
+                            RenderContent(component, textColor, displayConfig)
+                        }
                     }
                 } else {
                     Box(
@@ -1303,6 +1660,12 @@ object ComponentRenderer {
                     }
                 }
             } else {
+                // §8.3.1 collapse plan published by the block branch above —
+                // index-aligned with this exact children list. Null for every
+                // non-collapsing container (and always null for list/relative
+                // parents, which the plan builder gates out, so the two other
+                // branches here never need it).
+                val collapsePlan = LocalBlockCollapsePlan.current
                 component.children.forEachIndexed { index, child ->
                     if (listConfig != null && child._tag?.lowercase() == "li") {
                         RenderListItemMarker(child, index, listConfig, inheritedAwareTextColor)
@@ -1311,7 +1674,21 @@ object ComponentRenderer {
                         // inside RenderComponent's self-alignment wrapper (one
                         // implementation covers tree children AND root-level
                         // standalone captures).
-                        RenderComponent(child)
+                        val collapsed = collapsePlan?.perChild?.getOrNull(index)
+                        if (collapsed != null) {
+                            // Hand the child its post-collapse applied
+                            // block-axis margins; the child's RenderComponent
+                            // reads the local and passes it into its style
+                            // chain (and resets it for ITS children).
+                            CompositionLocalProvider(
+                                com.styleconverter.runtime.spacing.BlockMarginCollapse
+                                    .LocalCollapsedMargin provides collapsed
+                            ) {
+                                RenderComponent(child)
+                            }
+                        } else {
+                            RenderComponent(child)
+                        }
                     }
                 }
             }
@@ -2238,8 +2615,15 @@ object ComponentRenderer {
         // TextStyle(...) constructions below would lose those flags
         // (Compose's positional-arg ctor doesn't inherit Defaults) and
         // single-line text would collapse to font-natural metrics.
+        // textMotion rides along for the same reason: TextStyleApplier
+        // sets TextMotion.Animated (linear unhinted advances + subpixel
+        // positioning, matching Chrome/CoreText — see the why-comment in
+        // TextStyleApplier.extractTextStyle) and dropping it here would
+        // silently revert the placeholder path to hinted quantized
+        // advances, reintroducing the cumulative first-line glyph drift.
         val placeholderPlatformStyle = textStyle.platformStyle
         val placeholderLineHeightStyle = textStyle.lineHeightStyle
+        val placeholderTextMotion = textStyle.textMotion
         val finalTextStyle = if (clipTextBrush != null) {
             TextStyle(
                 brush = clipTextBrush,
@@ -2259,7 +2643,9 @@ object ComponentRenderer {
                 textIndent = textStyle.textIndent,
                 textGeometricTransform = textStyle.textGeometricTransform,
                 platformStyle = placeholderPlatformStyle,
-                lineHeightStyle = placeholderLineHeightStyle
+                lineHeightStyle = placeholderLineHeightStyle,
+                // Preserve linear/subpixel glyph advances (see above).
+                textMotion = placeholderTextMotion
             )
         } else {
             TextStyle(
@@ -2280,7 +2666,9 @@ object ComponentRenderer {
                 textIndent = textStyle.textIndent,
                 textGeometricTransform = textStyle.textGeometricTransform,
                 platformStyle = placeholderPlatformStyle,
-                lineHeightStyle = placeholderLineHeightStyle
+                lineHeightStyle = placeholderLineHeightStyle,
+                // Preserve linear/subpixel glyph advances (see above).
+                textMotion = placeholderTextMotion
             )
         }
 

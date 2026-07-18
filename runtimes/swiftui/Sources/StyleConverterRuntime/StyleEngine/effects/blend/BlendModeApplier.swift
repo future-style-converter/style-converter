@@ -2,11 +2,15 @@
 //  BlendModeApplier.swift
 //  StyleEngine/effects/blend — Phase 4.
 //
-//  Applies a BlendModeConfig via SwiftUI's `.blendMode(_:)`. The applier
-//  prefers `mix` (per the CSS cascade intent — mix-blend-mode acts on
-//  the whole element). When `mix` is nil but `background` has entries,
-//  we use the first background blend mode on the whole view, since
-//  SwiftUI doesn't expose per-layer blending. Documented limitation.
+//  Applies the `mix` half of a BlendModeConfig via SwiftUI's
+//  `.blendMode(_:)` — mix-blend-mode acts on the whole element against
+//  its backdrop, which is exactly what the modifier does. The
+//  `background` half (background-blend-mode) is NOT handled here: since
+//  the IOS-BBM lane it is consumed inside the background chain by
+//  BackgroundImageApplier + BackgroundBlendCompositor (per-layer
+//  .blendMode inside an isolated .compositingGroup — CSS Compositing 1
+//  §3.2), so this applier is deliberately identity for background-only
+//  configs.
 //
 
 import SwiftUI
@@ -27,17 +31,15 @@ struct BlendModeApplier: ViewModifier {
         // `background-blend-mode` is a different beast: per CSS
         // Compositing 1 §3.2 it composites background LAYERS within the
         // element's background painting area, not the element against
-        // its parent. The previous fallback applied the first
-        // `background-blend-mode` value as a whole-view `.blendMode`,
-        // which darkened the element against the dark canvas backdrop —
-        // `red × #1A1A2E` collapses near-black for `multiply`, matching
-        // the Phase-12 BlendModeMultiply audit regression where iOS
-        // rendered almost solid black. SwiftUI doesn't expose
-        // per-layer-within-background blending, so until a dedicated
-        // background compositor lands here we render the gradients
-        // unblended. That's still not visually identical to web (which
-        // composites the layers), but it's much closer than the wrong
-        // whole-view multiply against the canvas.
+        // its parent — a historical fallback here applied the first
+        // value as a whole-view `.blendMode`, which multiplied red
+        // against the dark canvas into near-black (the Phase-12
+        // BlendModeMultiply audit regression). IOS-BBM: the real
+        // compositor now lives in the background chain
+        // (BackgroundImageApplier routes non-normal mode lists through
+        // BackgroundBlendCompositor's isolated ZStack; StyleBuilder
+        // threads the modes via activeBackgroundBlendModes), so a
+        // background-only config is correctly IDENTITY at this level.
         return AnyView(content)
     }
 }

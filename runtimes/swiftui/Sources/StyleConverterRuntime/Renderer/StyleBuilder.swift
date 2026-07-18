@@ -569,6 +569,30 @@ enum StyleBuilder {
 
     // MARK: - Fidelity wave 1 helpers
 
+    /// IOS-BBM — the background-blend gate. Returns the per-layer
+    /// `background-blend-mode` list when the blended-background
+    /// compositor must run, `[]` otherwise. The compositor fires only
+    /// when ALL of:
+    ///   • the IR carried BackgroundBlendMode with ≥1 non-normal entry
+    ///     (all-normal must stay byte-stable on the legacy paint path —
+    ///     `normal` is the CSS initial and blends nothing);
+    ///   • there is at least one background-image layer to blend
+    ///     (colour alone has nothing above it — §3.2 blending is a
+    ///     layer-against-lower-layers operation);
+    ///   • background-clip is not `text` (the glyph-masked path paints
+    ///     via foregroundStyle in PlaceholderLabel; the rectangular
+    ///     stack is suppressed there, so blending it would be unseen
+    ///     work at best and a double paint at worst).
+    /// Pure + static so BackgroundBlendModeTests pins the gate directly.
+    static func activeBackgroundBlendModes(_ style: ComponentStyle) -> [BlendMode] {
+        guard let modes = style.blend?.background,
+              modes.contains(where: { $0 != .normal }),
+              style.backgroundImage?.hasAny == true,
+              style.backgroundClip?.mode != .text
+        else { return [] }
+        return modes
+    }
+
     /// CSS Backgrounds 3 §2.4 — the concrete shrink band for
     /// `background-clip`:
     ///   • border-box (default) → zero (paint under the border too)
@@ -823,13 +847,27 @@ extension View {
             // painter (BackgroundGradientTileView); knob-less gradients
             // keep the wave-5 full-box path so those baselines are
             // untouched. The engineBackground* stubs below stay identity.
+            // IOS-BBM: `background-blend-mode` threads INTO the image
+            // applier — CSS Compositing 1 §3.2 blends background LAYERS
+            // against each other (and the bg-colour at the bottom) in
+            // isolation, which only the layer-owning applier can build
+            // (BackgroundBlendCompositor: ZStack + per-layer .blendMode
+            // + .compositingGroup, mirroring Compose's saveLayer stack).
+            // The gate (activeBackgroundBlendModes) returns [] for
+            // all-normal / no-layers / clip:text, keeping those renders
+            // byte-stable on the legacy path. blendColor/blendRadius ride
+            // along unconditionally — the applier only consumes them when
+            // a non-normal mode is present.
             .engineBackgroundImage(
                 style.backgroundClip?.mode == .text ? nil : style.backgroundImage,
                 clipInsets: StyleBuilder.backgroundClipInsets(style),
                 attachment: style.backgroundAttachment,
                 size: style.backgroundSize,
                 position: style.backgroundPosition,
-                repeatCfg: style.backgroundRepeat
+                repeatCfg: style.backgroundRepeat,
+                blendModes: StyleBuilder.activeBackgroundBlendModes(style),
+                blendColor: style.color,
+                blendRadius: style.borderRadius
             )
             // Wave 5: `background-clip: text` clips the SOLID background
             // to the glyph shape too (css-backgrounds-4 §2.2), not just
@@ -839,8 +877,15 @@ extension View {
             // the glyph tint via PlaceholderLabel's clip-text path, so
             // the rectangular paint is suppressed the same way the
             // gradient layer is above.
+            // IOS-BBM: when the blended compositor above owns the paint,
+            // the colour already sits at the BOTTOM of its isolated stack
+            // (§3.2) — painting it again here would double-fill the box
+            // behind the blend group, washing the result. Same suppression
+            // pattern as clip:text.
             .engineBackgroundColor(
-                style.backgroundClip?.mode == .text ? nil : style.color,
+                (style.backgroundClip?.mode == .text
+                 || !StyleBuilder.activeBackgroundBlendModes(style).isEmpty)
+                    ? nil : style.color,
                 radius: style.borderRadius,
                 clipInsets: StyleBuilder.backgroundClipInsets(style))
             .engineBackgroundClip(style.backgroundClip)

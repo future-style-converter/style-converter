@@ -38,10 +38,52 @@ struct BackgroundImageApplier: ViewModifier {
     var size: BackgroundSizeConfig? = nil
     var position: BackgroundPositionConfig? = nil
     var repeatCfg: BackgroundRepeatConfig? = nil
+    // IOS-BBM — `background-blend-mode` per-layer modes (CSS Compositing
+    // 1 §3.2). Empty (or all-normal) keeps the legacy chained-background
+    // path BYTE-IDENTICAL; any non-normal entry routes the whole stack
+    // through BackgroundBlendCompositor. StyleBuilder only threads a
+    // non-empty list when the gate (activeBackgroundBlendModes) fires.
+    var blendModes: [BlendMode] = []
+    // The element's colour config — §3.2 puts `background-color` at the
+    // BOTTOM of the blended stack, so the compositor needs it here (and
+    // StyleBuilder suppresses the separate engineBackgroundColor paint
+    // to avoid double-painting). Ignored on the legacy path.
+    var blendColor: ColorConfig? = nil
+    // Corner radii for the colour fill — same shape ColorApplier uses,
+    // so the blended bottom fill stays pixel-aligned with the unblended
+    // colour paint.
+    var blendRadius: BorderRadiusConfig? = nil
 
     func body(content: Content) -> some View {
         // Short-circuit when nothing to paint.
         guard let cfg = config, cfg.hasAny else { return AnyView(content) }
+
+        // IOS-BBM: any non-normal blend mode → the isolated compositor.
+        // Gating on "contains non-normal" (not "non-empty") keeps every
+        // `background-blend-mode: normal` fixture on the legacy path
+        // below, byte-stable vs the pre-lane rendering (pinned by
+        // BackgroundBlendModeTests.testNormalModeControlIsByteStable).
+        if blendModes.contains(where: { $0 != .normal }) {
+            // Render every layer through the SAME per-layer pipeline as
+            // the legacy path (render(_:index:)) so url() rasters and
+            // the wave-8 size/position/repeat geometry keep working
+            // inside the blended stack.
+            let layerViews = cfg.layers.enumerated().map { render($0.element, index: $0.offset) }
+            // One `.background` hosting the whole isolated ZStack — same
+            // chain position as the legacy path, so paint order against
+            // borders/content is unchanged. The colour fill rides at the
+            // stack bottom per §3.2 (built by ColorApplier.fillView for
+            // pixel parity with the unblended colour paint).
+            let stack = BackgroundBlendCompositor(
+                layerViews: layerViews,
+                modes: blendModes,
+                baseFill: ColorApplier.fillView(config: blendColor,
+                                                radius: blendRadius))
+            // `.padding(clipInsets)` shrinks the paint rectangle for
+            // padding-box / content-box clip modes — applied to the whole
+            // stack since every layer shares the same clip box today.
+            return AnyView(content.background(stack.padding(clipInsets)))
+        }
 
         // SwiftUI stacks `.background(X).background(Y)` with X on top of
         // Y. CSS stacks layers[0] on top of layers[1]. So we walk the
@@ -156,12 +198,18 @@ extension View {
                                attachment: BackgroundAttachmentConfig? = nil,
                                size: BackgroundSizeConfig? = nil,
                                position: BackgroundPositionConfig? = nil,
-                               repeatCfg: BackgroundRepeatConfig? = nil) -> some View {
+                               repeatCfg: BackgroundRepeatConfig? = nil,
+                               blendModes: [BlendMode] = [],
+                               blendColor: ColorConfig? = nil,
+                               blendRadius: BorderRadiusConfig? = nil) -> some View {
         modifier(BackgroundImageApplier(config: config,
                                         clipInsets: clipInsets,
                                         attachment: attachment,
                                         size: size,
                                         position: position,
-                                        repeatCfg: repeatCfg))
+                                        repeatCfg: repeatCfg,
+                                        blendModes: blendModes,
+                                        blendColor: blendColor,
+                                        blendRadius: blendRadius))
     }
 }

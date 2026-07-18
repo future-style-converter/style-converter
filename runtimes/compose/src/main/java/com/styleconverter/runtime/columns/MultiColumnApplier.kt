@@ -83,6 +83,57 @@ import androidx.compose.ui.unit.dp
 object MultiColumnApplier {
 
     /**
+     * The used multi-column values after css-multicol §3.4 fitting: the column
+     * count and per-column width that actually get laid out, both guaranteed sane
+     * (count >= 1, widthPx >= 0) regardless of how narrow the container is.
+     */
+    data class UsedColumns(
+        /** Used column count — always >= 1, never more than the specified count. */
+        val count: Int,
+        /** Used per-column width in px — always >= 0, never a negative constraint. */
+        val widthPx: Int
+    )
+
+    /**
+     * Computes used column count + width per the css-multicol §3.4 pseudo-algorithm
+     * for the `column-width: auto` branch: W := max(0, (available - (N-1)*gap) / N).
+     *
+     * We additionally REDUCE the used count until (count-1)*gap fits in the available
+     * width. The strict spec pseudo-algorithm keeps N and clamps W to 0, but a run of
+     * zero-width columns is meaningless in Compose (children measured at maxWidth=0
+     * collapse) and — before this guard existed — the unclamped negative width
+     * ((15px - 4*16px gaps) / 5 = -9 for the WPT 3d-rendering-context-and-z-ordering-003
+     * #cube, width:15px + column-count:5, fixtures/wpt/css-transforms/…-003.json) was
+     * passed straight into Constraints.copy(maxWidth = -9), wedging the measure pass.
+     * A container narrower than its gaps therefore renders 1 column filling the
+     * available width, which matches the visible result in browsers (gaps have no
+     * painted extent of their own).
+     *
+     * @param availableWidthPx container content-box width in px (negative treated as 0)
+     * @param requestedCount specified `column-count` (values < 1 are invalid per spec —
+     *   column-count is a positive `<integer>` — and coerced to 1)
+     * @param gapPx used `column-gap` in px (negative is invalid per css-align and
+     *   treated as 0)
+     */
+    fun resolveUsedColumns(availableWidthPx: Int, requestedCount: Int, gapPx: Int): UsedColumns {
+        // Defensive floors: negative available space lays out as zero space, negative
+        // gaps are invalid CSS (css-align §8: gaps are non-negative), count is a
+        // positive <integer> per css-multicol §3.2.
+        val available = maxOf(0, availableWidthPx)
+        val gap = maxOf(0, gapPx)
+        val requested = maxOf(1, requestedCount)
+        // Largest n with (n-1)*gap <= available, i.e. the gaps alone still fit; with a
+        // zero gap every requested column fits by definition (also avoids div-by-zero).
+        val fitting = if (gap == 0) requested else minOf(requested, available / gap + 1)
+        // Never fewer than one column — CSS multicol always produces at least one box.
+        val count = maxOf(1, fitting)
+        // §3.4 used width: remaining space split evenly, floored at 0 (integer division
+        // can still round to 0 when available barely exceeds the gaps — that is fine).
+        val width = maxOf(0, (available - (count - 1) * gap) / count)
+        return UsedColumns(count, width)
+    }
+
+    /**
      * CompositionLocal for passing column config to children.
      */
     val LocalMultiColumnConfig = compositionLocalOf { MultiColumnConfig() }
@@ -186,10 +237,20 @@ object MultiColumnApplier {
             modifier = Modifier.drawBehind {
                 val gapPx = gap.toPx()
                 val ruleWidthPx = ruleWidth.toPx()
-                val columnWidth = (size.width - gapPx * (columnCount - 1)) / columnCount
+                // Same css-multicol §3.4 fitting as the measure pass: the naive
+                // (width - gaps) / count formula goes negative when the container is
+                // narrower than its gaps, which would paint rules at negative x. Using
+                // the shared resolver keeps rule positions aligned with where the
+                // layout actually placed the columns (float→int rounding is at most
+                // 1px, invisible for a rule line).
+                val used = resolveUsedColumns(size.width.toInt(), columnCount, gapPx.toInt())
+                // Non-negative used per-column width for rule x positions.
+                val columnWidth = used.widthPx.toFloat()
 
-                // Draw rules between columns
-                for (i in 1 until columnCount) {
+                // Draw rules between the USED columns only — a single-column fallback
+                // (used.count == 1) correctly draws no rules at all.
+                for (i in 1 until used.count) {
+                    // Rule sits centered in the gap after column i (css-multicol §5).
                     val x = columnWidth * i + gapPx * (i - 0.5f)
 
                     val pathEffect = when (ruleStyle) {
@@ -232,8 +293,14 @@ object MultiColumnApplier {
             modifier = modifier.fillMaxWidth()
         ) { measurables, constraints ->
             val gapPx = gap.roundToPx()
-            val totalGap = gapPx * (columnCount - 1)
-            val columnWidth = (constraints.maxWidth - totalGap) / columnCount
+            // css-multicol §3.4 fitting: yields used count >= 1 and width >= 0. The
+            // naive (maxWidth - totalGap) / count formula went NEGATIVE for containers
+            // narrower than their gaps (WPT …z-ordering-003 #cube: 15px wide with
+            // column-count:5 and the 16dp default gap → (15-64)/5 = -9) and the -9
+            // maxWidth constraint wedged the measure pass.
+            val used = resolveUsedColumns(constraints.maxWidth, columnCount, gapPx)
+            // Per-column measure width — guaranteed non-negative by resolveUsedColumns.
+            val columnWidth = used.widthPx
 
             // Measure all children with column width constraint
             val placeables = measurables.map { measurable ->
@@ -245,9 +312,10 @@ object MultiColumnApplier {
                 )
             }
 
-            // Distribute items to columns (balanced distribution)
-            val columnHeights = IntArray(columnCount)
-            val columnItems = Array(columnCount) { mutableListOf<Pair<Placeable, Int>>() }
+            // Distribute items to columns (balanced distribution) — sized by the USED
+            // count so we never allocate (or greedily fill) columns that don't fit.
+            val columnHeights = IntArray(used.count)
+            val columnItems = Array(used.count) { mutableListOf<Pair<Placeable, Int>>() }
 
             placeables.forEachIndexed { index, placeable ->
                 // Find column with minimum height
@@ -457,7 +525,9 @@ object MultiColumnApplier {
 
         val availableWidth = containerWidth.value
         val minWidth = minColumnWidth.value
-        val gapValue = gap.value
+        // Negative gaps are invalid CSS (css-align §8) and, unguarded, could zero the
+        // divisor below (minWidth + gap == 0 → Infinity.toInt()) — floor at 0.
+        val gapValue = maxOf(0f, gap.value)
 
         // Formula: (width + gap) / (minWidth + gap)
         return maxOf(1, ((availableWidth + gapValue) / (minWidth + gapValue)).toInt())
