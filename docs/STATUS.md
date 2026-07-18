@@ -158,7 +158,23 @@ dirs + WPT corpus are gitignored):
   multicol column width (css-multicol §3.4 used-value clamp; the fixture
   now captures in ~1s). The stale Scale "failing" record was refuted with
   fresh device pixels (0.994+). Wave-7 residue: iOS line-height
-  rem/unitless (0.876/0.907), TextAlign_Center 0.937 iOS-Android.
+  rem/unitless (0.876/0.907), TextAlign_Center 0.937 iOS-Android. Wave 7
+  (`tools/visual/wave7-gate.json` + `tools/titan/results/corpus-v3.json`)
+  measured the TextMotion harvest — 13 of 18 typography rows moved to
+  hold ≥0.95 (LetterSpacing/WordSpacing +0.105, TextDecorationLine
+  +0.102, FontWeight +0.101, LineSnap +0.099, …) — and closed
+  line-height: a THIRD wire generation (nested length, no top-level px)
+  was silently dropped (iOS: all lengths; Compose: nested plain-px);
+  unwrapped with em resolving against the element's OWN font size
+  (css-values-4 §6.1), plus a cross-native (L−natural)/2 placement
+  compensation for sub-natural line-heights — 0.876 → **0.9927 flat**
+  across all nine variants. corpus-v3: **Android measured 82/82 for the
+  first time** (z-ordering-003 on the board; css-transforms Android
+  0.973, 10/12). Remaining below-bar typography: FontFamily_Cursive
+  0.819 (blocked — platform cursive stacks), FontSize keyword-fractional
+  0.864 (wall — identical extents), TextOrientation_Upright 0.869
+  (capability tier), TextAlign_Center 0.937 (run-width divergence under
+  centering — wave-8 queue).
 
 ## Test suites
 
@@ -166,8 +182,8 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 145 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 985 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1006 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 404 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1024 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 412 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 516 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 

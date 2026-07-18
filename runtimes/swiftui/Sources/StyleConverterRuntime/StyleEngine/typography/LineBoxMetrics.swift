@@ -73,4 +73,33 @@ enum LineBoxMetrics {
         guard leading > 0 else { return (0, 0) }
         return (leading, leading / 2)
     }
+
+    /// Applier campaign (sub-natural line-height placement) — the
+    /// compensating glyph-run translation for `line-height` BELOW the
+    /// natural content height (e.g. `line-height: 1` on Inter, whose
+    /// content area is ~1.21em). CSS half-leading is signed (CSS 2.1
+    /// §10.8.1 / css-inline-3 §4.2): a browser centres the glyph band
+    /// in an L-tall line box, so when L < contentHeight the band paints
+    /// (L − contentHeight)/2 px ABOVE the line-box top (pixel-verified
+    /// web model: inkTop = 8 + (L − natural)/2 across all 9 line-height
+    /// captures). SwiftUI's `.lineSpacing` cannot go negative, so
+    /// `leading` above clamps the line BOX at natural height — this
+    /// offset restores the PLACEMENT half of the model: PlaceholderLabel
+    /// applies it as a pure render-time `.offset(y:)` on the glyph run
+    /// (layout-neutral, so the uncompressed box is untouched). Returns
+    /// the SIGNED shift — negative (upward) in the sub-natural case,
+    /// exactly 0 otherwise so every L ≥ natural render is byte-stable.
+    /// Multi-line advance stays uncompressed (honest limitation — the
+    /// caller logs it once). Pure — pinned by LineHeightWireTests.
+    static func subNaturalOffset(lineHeightPx: CGFloat?,
+                                 fontSizePx: CGFloat,
+                                 design: Font.Design) -> CGFloat {
+        // No declared line-height → natural metrics, no shift.
+        guard let lh = lineHeightPx else { return 0 }
+        // Signed half-leading: (L − contentHeight) / 2 (§10.8.1).
+        let half = (lh - contentHeight(fontSizePx: fontSizePx, design: design)) / 2
+        // Only the sub-natural (negative) case shifts — the positive
+        // case is already handled by `leading`'s padding + lineSpacing.
+        return half < 0 ? half : 0
+    }
 }

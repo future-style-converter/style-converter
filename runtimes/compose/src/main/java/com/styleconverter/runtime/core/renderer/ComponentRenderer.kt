@@ -42,6 +42,10 @@ import com.styleconverter.runtime.lists.ListStyleType
 import com.styleconverter.runtime.lists.ListStyleApplier as StyleListApplier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+// Draw-time fractional translation for the glyph placement compensation
+// (center-align snap + sub-natural line-height) — graphicsLayer does not
+// affect layout, so box geometry and the committed baselines stay put.
+import androidx.compose.ui.graphics.graphicsLayer
 import com.styleconverter.runtime.typography.TextStyleApplier
 import com.styleconverter.runtime.typography.TypographyExtractor
 import com.styleconverter.runtime.typography.FontVariantApplier
@@ -78,6 +82,17 @@ import com.styleconverter.runtime.content.CounterStateProvider
  * 5. Render placeholder content or children
  */
 object ComponentRenderer {
+
+    /**
+     * One-shot gate for the multi-line sub-natural line-height log — the
+     * honest-limitation notice (line boxes stay uncompressed; only the
+     * glyph-run PLACEMENT is compensated) must appear once per process,
+     * not once per frame: the emitting site is a graphicsLayer block that
+     * re-runs on every layout-state change. See the glyph placement
+     * compensation in the placeholder text path.
+     */
+    private val subNaturalMultiLineLogged =
+        java.util.concurrent.atomic.AtomicBoolean(false)
 
     /**
      * CSS-inherited properties (css-cascade-4 / per-property "Inherited:
@@ -2927,6 +2942,107 @@ object ComponentRenderer {
                 }
             } else Modifier
 
+        // ── Glyph placement compensation (wave-7 text placement) ──
+        // Two draw-time fractional translations of the glyph run, both pure
+        // math in TextStyleApplier (JVM-pinned) and both applied via
+        // Modifier.graphicsLayer so LAYOUT is untouched — box geometry,
+        // intrinsics and the committed baselines' component sizes are
+        // byte-identical; only the drawn ink moves sub-pixel.
+        //
+        // FIX 2 — center-align even-truncation: StaticLayout's ALIGN_CENTER
+        // snaps the centered run to an integer start (AOSP
+        // Layout#getLineStartPos even-truncates the line width) while the
+        // browser centers fractionally — see
+        // TextStyleApplier.centerAlignFractionalDeltaX for the measured
+        // evidence (TextAlign_Center 0.9372 iOS-Android, Android driving).
+        //
+        // FIX 3 — sub-natural line-height: when the DECLARED line-height is
+        // below the font's natural content height, CSS negative half-leading
+        // paints the glyph band (L − natural)/2 higher; StaticLayout clamps
+        // it — see TextStyleApplier.subNaturalLineHeightDeltaY. This is the
+        // shared cross-native contract with the iOS lane: both natives land
+        // the SAME compensation so the currently-agreeing native pair
+        // (0.993) moves to web together instead of splitting. Gates:
+        //   • only when the IR DECLARES a line-height
+        //     (textStyle.lineHeight != Unspecified) — the synthetic 1.2×
+        //     placeholder default above is a harness-matching constant, not
+        //     a CSS-resolved value, and compensating its ~0.2px sub-natural
+        //     sliver would subtly shift EVERY committed placeholder baseline;
+        //   • never in composed WPT mode — composedLineBoxSnap already
+        //     centers the natural glyph box inside the L-sized line box
+        //     there (the same (L−natural)/2 shift, done via placement), so
+        //     translating too would double-compensate;
+        //   • the natural height is read off the live TextLayoutResult's
+        //     first line box (the Paint/FontMetrics the layout itself used —
+        //     with includeFontPadding=false a clamped line IS the natural
+        //     ascent+descent box). If Compose ever honors the smaller
+        //     line-height, first-line height == L and the helper returns
+        //     null — a safe no-op, not a wrong shift.
+        val declaredLineHeightPx =
+            if (textStyle.lineHeight != TextUnit.Unspecified) refLineBoxPx else null
+        val wptComposedActive = LocalWptComposedMode.current
+        val glyphPlacementCompensation = Modifier.graphicsLayer {
+            // Reset both axes on every pass: the layer block re-runs when the
+            // layoutResult state it reads changes (no recomposition), and a
+            // stale translation must not survive a layout that no longer
+            // needs compensating.
+            var dx = 0f
+            var dy = 0f
+            val layout = layoutResult.value
+            if (layout != null) {
+                // FIX 2 — only when the effective alignment actually centers.
+                // Device adjudication (wave 7): on the committed text-align
+                // fixture StaticLayout already reports an INTEGER lineLeft at
+                // the ideal center (16.0 for 252/220), so this compensation
+                // computes 0 there — the remaining TextAlign_Center residue
+                // (0.937 iOS-Android) is a run-WIDTH divergence amplified by
+                // centering (both edges misalign), not an origin snap; it
+                // needs its own investigation (wave-8 queue). The math stays:
+                // it fires exactly when a fractional snap DOES appear.
+                if (effectiveTextAlign == TextAlign.Center) {
+                    TextStyleApplier.centerAlignFractionalDeltaX(
+                        // TextLayoutResult.size is the text's own layout box
+                        // (px == dp, density-1 harness) — the box
+                        // StaticLayout centered within.
+                        layoutWidthPx = layout.size.width.toFloat(),
+                        lineCount = layout.lineCount,
+                        lineLeft = { layout.getLineLeft(it) },
+                        lineRight = { layout.getLineRight(it) }
+                    )?.let { dx = it }
+                }
+                // FIX 3 — declared sub-natural line-height (gates above).
+                if (declaredLineHeightPx != null && !wptComposedActive && layout.lineCount > 0) {
+                    // First visual line's box height = the natural glyph box
+                    // whenever StaticLayout clamped the sub-natural value.
+                    val naturalPx = layout.getLineBottom(0) - layout.getLineTop(0)
+                    TextStyleApplier.subNaturalLineHeightDeltaY(
+                        resolvedLineHeightPx = declaredLineHeightPx,
+                        naturalLineBoxPx = naturalPx
+                    )?.let { delta ->
+                        dy = delta
+                        // Honest limitation, logged ONCE per process: on
+                        // multi-line sub-natural text only the PLACEMENT is
+                        // compensated — the line-to-line advance stays at
+                        // the natural height (StaticLayout can't compress a
+                        // line below the glyph box), so line 2+ still sits
+                        // lower than web's compressed stack.
+                        if (layout.lineCount > 1 &&
+                            subNaturalMultiLineLogged.compareAndSet(false, true)
+                        ) {
+                            android.util.Log.i(
+                                "ComponentRenderer",
+                                "sub-natural line-height: multi-line boxes remain " +
+                                    "uncompressed (advance stays natural); only glyph-run " +
+                                    "placement is compensated by (L-natural)/2"
+                            )
+                        }
+                    }
+                }
+            }
+            translationX = dx
+            translationY = dy
+        }
+
         // css-writing-modes-4 §3: vertical / sideways writing modes rotate
         // the TEXT FLOW inside the box (the box itself keeps its geometry —
         // see WritingModeApplier.applyWritingMode). Chrome lays the line
@@ -3016,8 +3132,14 @@ object ComponentRenderer {
             // composedLineBoxSnap (no-op outside composed WPT) tightens the box
             // to the CSS line box before emphasis paints over it; the owned
             // decoration pass draws last so its rects sit over the final
-            // glyph layout.
-            modifier = textModifier.then(composedLineBoxSnap).then(emphasisModifier).then(decorationModifier)
+            // glyph layout. glyphPlacementCompensation sits BEFORE the
+            // emphasis/decoration draw modifiers so its graphicsLayer wraps
+            // them — marks and decoration rects translate together with the
+            // glyph run, exactly as the whole inline band shifts on web.
+            // (The rotated writing-mode branch above deliberately skips the
+            // compensation: its glyph run is rotated ±90° and the corpus's
+            // vertical fixtures are neither centered nor sub-natural.)
+            modifier = textModifier.then(composedLineBoxSnap).then(glyphPlacementCompensation).then(emphasisModifier).then(decorationModifier)
         )
     }
 

@@ -12,6 +12,7 @@
 //    { "type":"expression","expr":"calc(…)" }    → { "px": N } / percentage
 //    { "original": "var(--tile-a)" }             → { "srgb": {…}, … }
 //    FontSize { "original": { expr } }           → { "px": N }
+//    LineHeight { "original": {type:length,…} }  → { "px": N }
 //    Generic border-*-radius rawValue var(…)     → typed radius { "px": N }
 //
 //  Declarations whose reference is guaranteed-invalid (undefined name,
@@ -119,6 +120,30 @@ enum DynamicValueResolver {
             if prop.type == "FontSize",
                let px = resolveFontSizeWire(prop.data,
                                             inheritedFontSizePx: inheritedFontSizePx) {
+                out.append(IRProperty(type: prop.type,
+                                      data: .object(["px": .double(px)])))
+                continue
+            }
+
+            // Applier campaign (line-height wire) — LineHeight LENGTH
+            // values ride a THIRD-generation nested wire with NO
+            // top-level px (pinned against live converter output on
+            // fixtures/properties/typography/line-height.json):
+            //   'line-height: 24px'  → {"original":{"type":"length","px":24.0}}
+            //   'line-height: 2rem'  → {"original":{"type":"length",
+            //                            "original":{"v":2.0,"u":"REM"}}}
+            // LineHeightExtractor's top-level extractPx read nil on ALL
+            // of these, so px/em/rem line-heights silently fell back to
+            // natural metrics (pixel-proven: iOS inkTop 8 vs web/Android
+            // 13 on Rem_2). Unwrap HERE — not in the extractor — because
+            // em needs the font-size channel: line-height em resolves
+            // against the element's OWN font size (css-values-4 §6.1),
+            // which pass 0 just computed. Multiplier/percentage/normal
+            // shapes return nil below and keep their extractor lane.
+            if prop.type == "LineHeight",
+               let px = resolveLineHeightWire(prop.data,
+                                              ownFontSizePx: elementFontSizePx) {
+                // Emit the universal `{px:N}` every extractor reads.
                 out.append(IRProperty(type: prop.type,
                                       data: .object(["px": .double(px)])))
                 continue
@@ -318,6 +343,47 @@ enum DynamicValueResolver {
             }
         default:
             return nil
+        }
+    }
+
+    // MARK: - LineHeight nested length wire (applier campaign)
+
+    /// Resolve the converter's nested LineHeight LENGTH wire to pixels.
+    /// Live wire shapes (LineHeightSerializer via the IRPropertySerializer
+    /// deep-flatten, pinned by re-running the converter on
+    /// fixtures/properties/typography/line-height.json):
+    ///   • absolute px : { "original": { "type":"length", "px": 24.0 } }
+    ///   • em/rem      : { "original": { "type":"length",
+    ///                     "original": { "v": 2.0, "u": "EM"|"REM" } } }
+    /// Bases (css-values-4 §6.1): em on line-height resolves against the
+    /// element's OWN computed font size — NOT the inherited size the
+    /// FontSize resolver uses, which is why this needs its own function
+    /// instead of reusing resolveFontSizeWire — and rem against the
+    /// 16px harness root. Returns nil for every other shape so
+    /// unitless multipliers ({"multiplier":N}), percentages (which the
+    /// converter already pre-folds into a multiplier), `normal`, and
+    /// calc() expressions all keep their existing lanes. Pure — pinned
+    /// by LineHeightWireTests.
+    static func resolveLineHeightWire(_ data: IRValue,
+                                      ownFontSizePx: Double) -> Double? {
+        guard case .object(let o) = data else { return nil }
+        // A top-level px would be authoritative — never second-guess it
+        // (future-proofs against the converter flattening this wire).
+        guard o["px"]?.doubleValue == nil else { return nil }
+        // Only the nested LENGTH discriminator is ours; number /
+        // percentage / "normal" shapes ride the multiplier lane.
+        guard case .object(let orig)? = o["original"],
+              orig["type"]?.stringValue == "length" else { return nil }
+        // Absolute lengths carry resolved pixels one level down.
+        if let px = orig["px"]?.doubleValue { return px }
+        // Font-relative lengths carry the raw {v, u} IRLength deeper.
+        guard case .object(let inner)? = orig["original"],
+              let v = inner["v"]?.doubleValue,
+              let u = inner["u"]?.stringValue?.uppercased() else { return nil }
+        switch u {
+        case "EM":  return v * ownFontSizePx  // §6.1 — the element's OWN size
+        case "REM": return v * 16.0           // harness root font size = 16px
+        default:    return nil                // vw/vh etc. — not this wire
         }
     }
 }
