@@ -756,8 +756,33 @@ extension View {
     /// Apply a ComponentStyle to this view. Does everything except layout-container
     /// choice (that's ComponentRenderer's job) and spacing-outside-border cases
     /// that need the caller to know container context.
+    ///
+    /// Wave 8 (lane IOS paint-order): split into TWO halves so the
+    /// renderer can slot absolutely-positioned descendants BETWEEN them
+    /// at the CSS 2.1 Appendix E boundary — the element's own
+    /// background/border paint in steps 2–4 (applyBoxDecoration, the
+    /// LOW layer) while positioned descendants paint in step 8, above
+    /// them, yet still INSIDE the parent's group effects (opacity /
+    /// filter / transform apply to the whole subtree — css-color-4
+    /// §2.1, css-transforms-1 §3). Chaining the halves back-to-back
+    /// reproduces the exact pre-split modifier order, so every caller
+    /// of plain applyStyle renders byte-identically.
     @ViewBuilder
     func applyStyle(_ style: ComponentStyle) -> some View {
+        // The two halves compose in the original order: box paint
+        // first, group effects (blend/opacity/typography/effects/
+        // transforms/margin) wrapped around the painted box.
+        applyBoxDecoration(style).applyGroupEffects(style)
+    }
+
+    /// FIRST half of the style chain — the element's own BOX: content
+    /// inset, padding, sizing, min-box floor, then the paint stack
+    /// (backgrounds, border image, radius, border sides, outline,
+    /// box-shadow). Everything here renders on the element's border box
+    /// and must sit BELOW the element's positioned descendants
+    /// (CSS 2.1 Appendix E: steps 2–4 paint before step 8).
+    @ViewBuilder
+    func applyBoxDecoration(_ style: ComponentStyle) -> some View {
         self
             // Fidelity wave 1 — CSS box model: content sits INSIDE the
             // border band (CSS 2.1 §8.1). The border strokes paint as an
@@ -913,6 +938,20 @@ extension View {
                            currentColor: style.text.color)
             .engineBorderMisc(style.borderMisc)
             .engineBoxShadow(style.boxShadow, radius: style.borderRadius)
+    }
+
+    /// SECOND half of the style chain — GROUP effects that wrap the
+    /// finished box: blend/opacity, typography environment, masks,
+    /// filters, clip-path, transforms, motion, visibility, and finally
+    /// margin. The renderer attaches the absolute-child overlay between
+    /// the halves, so everything below also applies to positioned
+    /// descendants — matching CSS, where a parent's opacity/filter/
+    /// transform composite the WHOLE subtree (they create stacking and
+    /// containing contexts: css-color-4 §2.1, filter-effects-1 §5,
+    /// css-transforms-1 §3) and margin moves the box children ride in.
+    @ViewBuilder
+    func applyGroupEffects(_ style: ComponentStyle) -> some View {
+        self
             // Phase 4 — blend / isolation / opacity. `.blendMode`
             // applies to the whole element (including already-painted
             // backgrounds) so it must come after the paint chain.

@@ -203,8 +203,19 @@ export function summarize(unified) {
       return `  ${s.padEnd(28)} ${String(total).padStart(5)} tests · ${durStr}`;
     });
 
+  // wave-8 corpus honesty: split score-ELIGIBLE tests from NA-tagged ones
+  // in the headline so nobody reads "N tests" as "N scored tests". A test
+  // is score-ineligible when inject-wpt-block stamped `scoreEligible:false`
+  // (equivalently: its divergence label is test-not-applicable) — its
+  // browserRef diffs carry scoreExcluded:true and MUST NOT feed mean-SSIM /
+  // passAt95 headline numbers.
+  const naCount = Object.values(w.results ?? {})
+    .filter((r) => r?.scoreEligible === false || r?.divergence === 'test-not-applicable')
+    .length;
+
   const line = `aggregated ${Object.keys(sections).length} sections · ` +
                `${w.totalTests ?? 0} tests · ` +
+               `scored=${(w.totalTests ?? 0) - naCount} NA-excluded=${naCount} · ` +
                `A=${w.buckets?.A ?? 0} B=${w.buckets?.B ?? 0} C=${w.buckets?.C ?? 0} · ` +
                `${distribution || 'no classifier data'}`;
   return { line, table: sectionRows.join('\n') };

@@ -464,14 +464,35 @@ extension View {
     /// explicit `width` is set (border-box sizing) and grows by the
     /// border width otherwise — both matching web.
     func engineBorderContentInset(_ config: AllBordersConfig?) -> some View {
-        // Zero-inset fast path keeps the modifier cost-free when no
-        // border is declared.
-        let insets = EdgeInsets(
+        // Shared band computation (see AllBordersConfig.bandInsets) —
+        // zero insets keep the modifier cost-free when no border is
+        // declared, because `.padding(EdgeInsets())` is layout-identity.
+        padding(AllBordersConfig.bandInsets(config))
+    }
+}
+
+extension AllBordersConfig {
+    /// The per-edge border BAND thickness as EdgeInsets — the distance
+    /// from the border box's outer edge to the padding box (CSS 2.1
+    /// §8.1: padding edge = border edge − border width). Factored out
+    /// of `engineBorderContentInset` (wave 8, lane IOS paint-order) so
+    /// TWO consumers share one truth:
+    ///   • the content inset above (content sits inside the band), and
+    ///   • ComponentRenderer's absolute-child overlay, which insets the
+    ///     positioned-descendant ZStack from the border box down to the
+    ///     PADDING box — the containing block css-position-3 §3.1
+    ///     assigns to absolutely positioned boxes.
+    /// `start`→leading / `end`→trailing keeps the extractor's logical
+    /// sides mapped exactly like the content-inset path always did.
+    static func bandInsets(_ config: AllBordersConfig?) -> EdgeInsets {
+        EdgeInsets(
+            // Each edge contributes only when it actually paints a band
+            // (`hasBorder` — style ≠ none/hidden AND width > 0), same
+            // gate the stroke painter uses, so band and inset agree.
             top:      config?.top.hasBorder    == true ? (config?.top.effectiveWidth ?? 0)    : 0,
             leading:  config?.start.hasBorder  == true ? (config?.start.effectiveWidth ?? 0)  : 0,
             bottom:   config?.bottom.hasBorder == true ? (config?.bottom.effectiveWidth ?? 0) : 0,
             trailing: config?.end.hasBorder    == true ? (config?.end.effectiveWidth ?? 0)    : 0
         )
-        return padding(insets)
     }
 }

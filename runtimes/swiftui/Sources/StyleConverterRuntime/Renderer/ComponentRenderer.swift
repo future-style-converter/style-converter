@@ -639,6 +639,51 @@ public struct ComponentRenderer: View {
         if style.layout.display == .none {
             EmptyView()
         } else {
+            // Wave 8 (lane IOS paint-order) — the styled box builds in
+            // THREE stages so positioned descendants slot in at the CSS
+            // 2.1 Appendix E boundary. Stage 1: the flow container plus
+            // applyBoxDecoration — the element's own background/border
+            // paint (Appendix E steps 2–4), the LOWEST layers of this
+            // element. Previously the absolute-child ZStack sat INSIDE
+            // the whole applyStyle chain, so the container's border
+            // stroke (an `.overlay` in BorderSideApplier) painted ABOVE
+            // its absolutely-positioned children — inverting Appendix E
+            // (positioned descendants are step 8, after the ancestor's
+            // border) and stroking e.g. a 3px black border across an
+            // overlapping abspos child.
+            let decoratedBox = AnyView(
+                flowContainer(style: style).applyBoxDecoration(style))
+            // Stage 2: non-negative-z positioned children attach via
+            // `.overlay` ON the painted box — SwiftUI overlays paint
+            // above everything applied so far, which is exactly step 8
+            // (above the ancestor's background/border). The inner inset
+            // pads the child ZStack from the border box down to the
+            // PADDING box: css-position-3 §3.1 makes the positioned
+            // ancestor's padding box the containing block, so `top:0 /
+            // left:0` lands just INSIDE the border band. As a bonus the
+            // overlay never feeds back into the container's measured
+            // size — out-of-flow boxes don't size their ancestors
+            // (css-position-3 §2.1), where the old shared ZStack let a
+            // large abspos child inflate an auto-sized parent.
+            let withOverlay = overlayChildren.isEmpty
+                ? decoratedBox
+                : AnyView(decoratedBox.overlay(alignment: .topLeading) {
+                    ZStack(alignment: .topLeading) {
+                        absoluteOverlay(style: style)
+                    }
+                    // Border-band inset → padding-box anchoring. Shares
+                    // the exact band computation the content inset uses
+                    // (AllBordersConfig.bandInsets), so children and
+                    // borders can never disagree about the band.
+                    .padding(AllBordersConfig.bandInsets(style.borderSides))
+                })
+            // Stage 3: the group half of the style chain wraps box AND
+            // overlay — parent opacity/filter/transform/margin apply to
+            // positioned descendants too (they create stacking and
+            // containing contexts, css-transforms-1 §3 / css-color-4
+            // §2.1), which is why the overlay attaches BETWEEN the
+            // halves and not after the finished chain.
+            let groupedBox = AnyView(withOverlay.applyGroupEffects(style))
             // Phase 7 step 4: apply per-child positioning after container
             // selection so absolute/relative offsets stack on top of the
             // fully-styled element. Identity when position/zindex unset.
@@ -649,8 +694,8 @@ public struct ComponentRenderer: View {
             // background). Their PositionApplier offsets anchor at the
             // same top-leading origin the overlay uses.
             let styledBox = negativeZChildren.isEmpty
-                ? AnyView(layoutContainer(style: style).applyStyle(style))
-                : AnyView(layoutContainer(style: style).applyStyle(style)
+                ? groupedBox
+                : AnyView(groupedBox
                     .background(alignment: .topLeading) {
                         ZStack(alignment: .topLeading) {
                             positionedChildren(style: style,
@@ -709,37 +754,17 @@ public struct ComponentRenderer: View {
 
     // MARK: - Container selection
 
-    @ViewBuilder
-    private func layoutContainer(style: ComponentStyle) -> some View {
-        // Fidelity wave 3 — absolutely-positioned children are removed
-        // from flow (css-position-3 §2.1) and paint ABOVE in-flow
-        // content (CSS 2.1 Appendix E: positioned descendants are paint
-        // step 8, after in-flow steps 4–7). The in-flow children keep
-        // their normal container (block VStack / CSSFlexLayout / grid)
-        // and the out-of-flow ones overlay it in a top-leading ZStack
-        // so PositionApplier's offsets anchor at the parent's top-left
-        // corner. Previously ALL children shared one ZStack: in-flow
-        // siblings collapsed onto each other and painted over the
-        // absolute box (B_RelativeAnchor).
-        // Wave 5: only NON-negative z-index positioned children ride the
-        // overlay; negative-z ones attach behind the styled box in
-        // `body` (Appendix E step 3 vs step 8 split).
-        if overlayChildren.isEmpty {
-            flowContainer(style: style)
-        } else {
-            ZStack(alignment: .topLeading) {
-                // In-flow content first — lower paint layer.
-                flowContainer(style: style)
-                // Positioned descendants after — upper paint layer.
-                absoluteOverlay(style: style)
-            }
-        }
-    }
+    // Wave 8 (lane IOS paint-order): the old `layoutContainer` wrapper
+    // — which ZStacked absoluteOverlay INSIDE the style chain — is
+    // gone. Absolutely-positioned children now attach in styledContent
+    // as an `.overlay` BETWEEN applyBoxDecoration and applyGroupEffects
+    // so they paint above the container's background/border (CSS 2.1
+    // Appendix E step 8 vs steps 2–4); see the three-stage build there.
 
     /// The normal-flow container for this component's IN-FLOW children
-    /// (block / flex / grid selection). Split out of layoutContainer by
-    /// the wave-3 absolute-positioning fix so the overlay wrap composes
-    /// around any container kind.
+    /// (block / flex / grid selection). Split out of the container
+    /// build by the wave-3 absolute-positioning fix so the overlay wrap
+    /// composes around any container kind.
     @ViewBuilder
     private func flowContainer(style: ComponentStyle) -> some View {
         // Phase 2: resolve gap via the new GapApplier. Row gap for vertical
@@ -914,11 +939,14 @@ public struct ComponentRenderer: View {
     /// ZStack's corner. Declaration order breaks paint ties, matching
     /// CSS tree order within paint step 8 (CSS 2.1 Appendix E).
     ///
-    /// Approximation: the CSS containing block for an absolute child is
-    /// the PADDING box of its positioned ancestor; our ZStack wraps the
-    /// container BEFORE the padding applier, so offsets anchor at the
-    /// CONTENT-box corner instead. No wave fixture combines padding
-    /// with absolute children; TODO when one does.
+    /// Anchoring (wave 8): the caller attaches this as an `.overlay` on
+    /// the fully-painted border box, inset by the border band, so
+    /// offsets anchor at the PADDING-box corner — exactly the
+    /// containing block css-position-3 §3.1 assigns to absolutely
+    /// positioned boxes (the ancestor's padding stays INSIDE the
+    /// containing block, so `top: 0` overlaps it — matching web).
+    /// This replaces the pre-wave-8 content-box approximation, which
+    /// also let the container's border stroke paint OVER the children.
     @ViewBuilder
     private func absoluteOverlay(style: ComponentStyle) -> some View {
         // Overlay half only — negative-z children paint behind the
@@ -1081,7 +1109,7 @@ public struct ComponentRenderer: View {
     /// parents so contentOrPlaceholder skips the env injection entirely.
     private func gridStretchHeights(style: ComponentStyle) -> [Int: CGFloat]? {
         // Only grid containers with children get a plan. Mirrors the
-        // gridKind decision in layoutContainer: an explicit template
+        // gridKind decision in flowContainer: an explicit template
         // routes to the grid path even without `display: grid` (legacy
         // behaviour of GridApplier.containerKind).
         // Wave 3: plan over IN-FLOW children only — absolute children
@@ -1371,7 +1399,7 @@ public struct ComponentRenderer: View {
             // SwiftUI has no runtime analogue, so the reordering happens
             // at build time. When no child carries Order, this is a no-op.
             // Wave 3: in-flow children only — absolute/fixed boxes render
-            // via the layoutContainer overlay (see absoluteOverlay).
+            // via the styledContent overlay (see absoluteOverlay).
             let children = FlexboxApplier.sorted(inFlowChildren)
             // Parent aggregate for flex-child decoration. Nil fallback
             // keeps us on the legacy-layout path when Phase 7 has not

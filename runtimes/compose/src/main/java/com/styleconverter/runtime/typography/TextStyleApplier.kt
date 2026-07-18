@@ -1003,20 +1003,41 @@ object TextStyleApplier {
     }
 
     /**
-     * Fix (wave 7, text placement): fractional X compensation for
-     * center-aligned text — pure math over the TextLayoutResult accessors
+     * Fix (wave 7, REWORKED wave 8): fractional X compensation for
+     * center-aligned text — pure math over the line's UNROUNDED advance
      * so the JVM suite can pin it without an Android canvas.
      *
      * Why: Android StaticLayout's ALIGN_CENTER EVEN-TRUNCATES the line
-     * width before centering — AOSP Layout#getLineStartPos computes
-     * `((right + left) − ((int) lineMax & ~1)) >> 1`, i.e. the line's
-     * width is floored to an even integer and the division is integral.
-     * A 33px-wide line in a 358px box therefore starts at (358−32)/2 =
-     * 163 while the browser centers at (358−33)/2 = 162.5 (pixel-measured
-     * on TextAlign_Center: iOS-Android 0.9372 with Android driving the
-     * divergence). The compensation is the TRUE fractional centering
-     * position minus the snapped position StaticLayout actually used:
-     *   delta = (layoutWidth − lineWidth)/2 − actualLineLeft
+     * width before centering AT DRAW TIME — AOSP Layout#getLineStartPos
+     * computes `((left + right) − ((int) lineMax & ~1)) >> 1`: the raw
+     * fractional advance is truncated to an EVEN integer and the division
+     * is integral, so a ~219.3px-wide line in a 252px box DRAWS at
+     * (252 − 218) >> 1 = 17 while the browser centers fractionally at
+     * (252 − 219.3)/2 ≈ 16.35 (pixel-measured on TextAlign_Center:
+     * iOS-Android 0.9372 with Android driving the divergence).
+     *
+     * Wave-7 meta-lesson (recorded, and the reason for this rework): the
+     * first version modelled the REPORT path instead of the DRAW path —
+     * it read Layout#getLineLeft, whose ALIGN_CENTER branch is a
+     * DIFFERENT formula, `floor(left + (mWidth − lineMax)/2)` = 16 on
+     * the fixture, and computed the delta against the equally-rounded
+     * getLineRight. The rounded report was self-consistent (left 16,
+     * right ceil'd, width 220 → delta exactly 0) so the compensation
+     * honestly computed 0 — while the pixels were being DRAWN at 17.
+     * Report accessors are useless here: the model below re-derives the
+     * draw position from the unrounded advance instead.
+     *
+     * The caller must supply the UNROUNDED line advance — on Android via
+     * TextLayoutResult.multiParagraph.getLineWidth(i), which delegates
+     * (AndroidParagraph → TextLayout) to android.text.Layout#getLineWidth,
+     * the raw float extent from TextLine measurement with NO rounding —
+     * NOT getLineRight − getLineLeft (both are floor/ceil-rounded in the
+     * ALIGN_CENTER branch, see the meta-lesson above).
+     *
+     *   drawX  = (layoutWidth − (floor(advance) & ~1)) >> 1   // AOSP draw
+     *   idealX = (layoutWidth − advance) / 2                  // CSS center
+     *   delta  = idealX − drawX
+     *
      * applied as a fractional translationX (graphicsLayer — draw-time
      * only, no layout effect), which cancels the snap exactly.
      *
@@ -1026,34 +1047,39 @@ object TextStyleApplier {
      * differ by <1px and would need per-line re-draw Compose can't do).
      *
      * Guard: |delta| must stay under 1.5px — this is a sub-pixel snap
-     * COMPENSATION, not a repositioning tool. Anything larger means the
-     * layout disagrees with our model (e.g. an RTL or justified line) and
-     * we honestly do nothing rather than smear the run. Returns null when
-     * no compensation should be applied (callers then leave the layer
-     * translation at 0).
+     * COMPENSATION, not a repositioning tool (the model's own range is
+     * (−1, +0.5], so anything larger means the inputs disagree with the
+     * model — e.g. an RTL or justified line — and we honestly do nothing
+     * rather than smear the run). Returns null when no compensation
+     * should be applied (callers then leave the layer translation at 0).
      */
     fun centerAlignFractionalDeltaX(
         layoutWidthPx: Float,
         lineCount: Int,
-        lineLeft: (Int) -> Float,
-        lineRight: (Int) -> Float
+        lineAdvance: (Int) -> Float
     ): Float? {
         // No laid-out lines yet (first frame) → nothing to compensate.
         if (lineCount <= 0) return null
         // Find the widest visual line — see the multi-line note above.
-        var widestIndex = -1
-        var widestWidth = -1f
+        var widestAdvance = -1f
         for (i in 0 until lineCount) {
-            val w = lineRight(i) - lineLeft(i)
-            if (w > widestWidth) {
-                widestWidth = w
-                widestIndex = i
-            }
+            val a = lineAdvance(i)
+            if (a > widestAdvance) widestAdvance = a
         }
-        // Zero/negative inked extent (blank line) → nothing to center.
-        if (widestWidth <= 0f) return null
-        // True fractional center start minus where StaticLayout snapped it.
-        val delta = (layoutWidthPx - widestWidth) / 2f - lineLeft(widestIndex)
+        // Zero/negative advance (blank line / first frame) → nothing to do.
+        if (widestAdvance <= 0f) return null
+        // AOSP Layout#getLineStartPos draw model, ALIGN_CENTER branch with
+        // left = 0 / right = mWidth: `max = (int) lineMax & ~1` (truncate,
+        // then clear bit 0 = round DOWN to even) and an integral `>> 1`.
+        // toInt() truncates toward zero == floor for the positive advance.
+        val truncatedEvenAdvance = widestAdvance.toInt() and 1.inv()
+        val drawX = ((layoutWidthPx.toInt() - truncatedEvenAdvance) shr 1).toFloat()
+        // True fractional CSS centering position (css-text-3 §7.1 center
+        // alignment is exact — browsers place the run at the half-remainder
+        // with subpixel precision, verified on the TextAlign_Center capture).
+        val idealX = (layoutWidthPx - widestAdvance) / 2f
+        // Compensation = where the browser draws minus where Android draws.
+        val delta = idealX - drawX
         // Identity → no layer churn; ≥1.5px → not a snap artifact, bail.
         if (delta == 0f || kotlin.math.abs(delta) >= 1.5f) return null
         return delta

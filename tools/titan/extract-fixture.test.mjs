@@ -30,6 +30,12 @@ import {
   buildComponents,
   splitAnBOfSelector,
   collectDefinedTags,
+  // wave-8: child combinator + support-asset inlining.
+  splitSelectorChain,
+  percentEncodeBytes,
+  inlineUrlsInValue,
+  inlineFixtureAssets,
+  MAX_INLINE_ASSET_BYTES,
 } from './extract-fixture.mjs';
 
 // ── stripComments ───────────────────────────────────────────────────────────
@@ -1112,4 +1118,226 @@ test('swarm003-bug3: :defined is true for built-in HTML elements always', () => 
   // <not-defined> has a hyphen and no registration → :defined false →
   // no color landed (or it stayed `undefined`).
   assert.equal(components['def__1'].properties.color, undefined);
+});
+
+// ── wave-8: child combinator (`A > B`) ─────────────────────────────────────
+//
+// Regression source: the six css-flexbox/abspos/abspos-autopos-* WPT tests
+// style their subject via `.flex > div { position:absolute; … }` and
+// flex-abspos-staticpos-fallback-justify-content-001 uses `.container > *`.
+// The prior blanket `/[>+~]/` reject dropped these rules WHOLESALE, so the
+// fixtures shipped placeholder children with no styles.
+
+test('wave8: splitSelectorChain tokenises descendant + child chains', () => {
+  // Spaced child combinator.
+  assert.deepEqual(splitSelectorChain('.flex > div'),
+    { compounds: ['.flex', 'div'], combinators: ['>'] });
+  // No-space form is equally valid CSS.
+  assert.deepEqual(splitSelectorChain('.flex>div'),
+    { compounds: ['.flex', 'div'], combinators: ['>'] });
+  // Pure descendant chains keep the ' ' combinator marker.
+  assert.deepEqual(splitSelectorChain('ol li'),
+    { compounds: ['ol', 'li'], combinators: [' '] });
+  // Mixed chain: descendant then child.
+  assert.deepEqual(splitSelectorChain('.a .b > .c'),
+    { compounds: ['.a', '.b', '.c'], combinators: [' ', '>'] });
+  // Three-compound child chain.
+  assert.deepEqual(splitSelectorChain('a > b > c'),
+    { compounds: ['a', 'b', 'c'], combinators: ['>', '>'] });
+});
+
+test('wave8: splitSelectorChain protects functional-pseudo arguments', () => {
+  // Whitespace inside `:nth-child(2n + 1)` parens must not split, mirroring
+  // splitCompounds' paren-awareness (swarm-003 Bug 2).
+  assert.deepEqual(splitSelectorChain('ul :nth-child(2n + 1)'),
+    { compounds: ['ul', ':nth-child(2n + 1)'], combinators: [' '] });
+});
+
+test('wave8: splitSelectorChain rejects sibling combinators and malformed chains', () => {
+  assert.equal(splitSelectorChain('div + p'), null);   // next-sibling unsupported
+  assert.equal(splitSelectorChain('div ~ p'), null);   // subsequent-sibling unsupported
+  assert.equal(splitSelectorChain('> div'), null);     // leading child — malformed
+  assert.equal(splitSelectorChain('div >'), null);     // trailing child — malformed
+  assert.equal(splitSelectorChain('a >> b'), null);    // double child — malformed
+});
+
+test('wave8: child combinator matches only the IMMEDIATE parent', () => {
+  // Ancestors are in document order: outermost first, immediate parent LAST.
+  const flexParent = [{ tag: 'div', attrs: { class: 'flex' } }];
+  // `.flex > div` matches a div whose immediate parent is .flex.
+  assert.equal(selectorMatches('.flex > div', 'div', {}, flexParent), true);
+  // Grandchild: immediate parent is a plain div, .flex is one level up —
+  // the child combinator must NOT match (descendant `. flex div` would).
+  const grandchild = [
+    { tag: 'div', attrs: { class: 'flex' } },
+    { tag: 'div', attrs: {} },
+  ];
+  assert.equal(selectorMatches('.flex > div', 'div', {}, grandchild), false);
+  assert.equal(selectorMatches('.flex div', 'div', {}, grandchild), true);
+});
+
+test('wave8: `.container > *` matches any child of .container (the fallback-justify shape)', () => {
+  const chain = [
+    { tag: 'div', attrs: { class: 'big' } },
+    { tag: 'div', attrs: { class: 'container' } },
+  ];
+  assert.equal(selectorMatches('.container > *', 'div', {}, chain), true);
+  // `.big > .container` from the same test also holds for the container itself.
+  assert.equal(selectorMatches('.big > .container', 'div', { class: 'container' },
+    [{ tag: 'div', attrs: { class: 'big' } }]), true);
+});
+
+test('wave8: chained child combinators consume ancestors right-to-left', () => {
+  const chain = [
+    { tag: 'section', attrs: {} },
+    { tag: 'ul', attrs: {} },
+    { tag: 'li', attrs: {} },
+  ];
+  // Full chain in order matches.
+  assert.equal(selectorMatches('ul > li > span', 'span', {}, chain), true);
+  // Wrong order does not.
+  assert.equal(selectorMatches('li > ul > span', 'span', {}, chain), false);
+  // Mixed: descendant hop over <ul> then exact child.
+  assert.equal(selectorMatches('section li > span', 'span', {}, chain), true);
+});
+
+test('wave8: mixed chains backtrack — greedy nearest-ancestor must not false-negative', () => {
+  // `.a > .b .c target`: the NEAREST .b candidate (index 2) has parent .b,
+  // not .a — only the farther .b (index 1, parent .a) satisfies the child
+  // step. A greedy right-to-left matcher without backtracking fails here.
+  const chain = [
+    { tag: 'div', attrs: { class: 'a' } },
+    { tag: 'div', attrs: { class: 'b' } },
+    { tag: 'div', attrs: { class: 'b' } },
+    { tag: 'div', attrs: { class: 'c' } },
+  ];
+  assert.equal(selectorMatches('.a > .b .c span', 'span', {}, chain), true);
+});
+
+test('wave8: child-combinator rules never degrade to rightmost-only without ancestors', () => {
+  // Descendant chains keep the legacy "rightmost compound only" fallback
+  // (pinned above in 'descendant — applies last compound'), but a child
+  // chain matching any bare <div> would be a structural over-match.
+  assert.equal(selectorMatches('.flex > div', 'div', {}), false);
+  assert.equal(selectorMatches('.parent .target', 'div', { class: 'target' }), true);
+});
+
+test('wave8: buildComponents lands `.flex > div` rules on the nested child (abspos-autopos shape)', () => {
+  // Minimal reproduction of css-flexbox/abspos/abspos-autopos-htb-ltr.html.
+  const html = '<body><div class="flex"><div></div></div></body>';
+  const rules = parseCss(
+    '.flex { display: flex; width: 100px; height: 100px; background: red }\n' +
+    '.flex > div { position: absolute; width: 100%; height: 100%; background: green }',
+  );
+  const { components } = buildComponents(html, rules, 't');
+  assert.equal(components['t__0'].properties.display, 'flex');
+  const child = components['t__0'].children['t__0__0'];
+  // The child rule must land — previously this was a 100x100 placeholder.
+  assert.equal(child.properties.position, 'absolute');
+  assert.equal(child.properties.background, 'green');
+  // The parent must NOT receive the child rule.
+  assert.equal(components['t__0'].properties.position, undefined);
+});
+
+// ── wave-8: support-asset inlining ─────────────────────────────────────────
+//
+// Regression source: css-break background-image-000/001/002 shipped
+// `url(../support/cat.png)` verbatim into the IR — a 404 on every platform
+// (0.14–0.38 SSIM everywhere; pure asset-delivery gap).
+
+test('wave8: percentEncodeBytes encodes EVERY byte as lowercase %xx', () => {
+  // 'A' (0x41) MUST be encoded — a literal 'A' would be corrupted by the
+  // converter's value lowercasing; %41 survives (hex digits decode
+  // case-insensitively per RFC 3986 §2.1).
+  assert.equal(percentEncodeBytes(Buffer.from([0x41])), '%41');
+  assert.equal(percentEncodeBytes(Buffer.from([0x89, 0x50, 0x4e, 0x47])), '%89%50%4e%47');
+  assert.equal(percentEncodeBytes(Buffer.from([0x0a, 0xff, 0x00])), '%0a%ff%00');
+  // Empty buffer → empty string.
+  assert.equal(percentEncodeBytes(Buffer.from([])), '');
+});
+
+test('wave8: inlineUrlsInValue inlines a small raster asset as a percent-encoded data URI', async () => {
+  // Write a tiny fake PNG into a temp dir and reference it relatively.
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'wave8-inline-'));
+  const bytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0x41]);
+  await fsp.writeFile(path.join(dir, 'cat.png'), bytes);
+  const { value, inlined, unresolved } =
+    await inlineUrlsInValue('red url(cat.png) left top', dir);
+  assert.equal(inlined, 1);
+  assert.equal(unresolved, 0);
+  // Unquoted url(), lowercase mime, every byte percent-encoded.
+  assert.equal(value, 'red url(data:image/png,%89%50%4e%47%00%41) left top');
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('wave8: inlineUrlsInValue leaves data:/http(s)/#fragment/sub-template refs untouched', async () => {
+  const cases = [
+    'url(data:image/png,%00)',           // already inline
+    'url(https://example.com/x.png)',    // cross-origin — bucketer domain
+    'url(#frag)',                        // same-document SVG ref
+    'url(http://{{hosts[][]}}/support/x.png)', // WPT sub-template token
+  ];
+  for (const v of cases) {
+    const r = await inlineUrlsInValue(v, '/nonexistent-base');
+    assert.equal(r.value, v, `should be untouched: ${v}`);
+    assert.equal(r.inlined, 0);
+    assert.equal(r.unresolved, 0, `out-of-scope refs are NOT lossy: ${v}`);
+  }
+});
+
+test('wave8: oversize + missing + non-raster assets stay verbatim and count unresolved', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'wave8-lossy-'));
+  // Oversize: exactly MAX_INLINE_ASSET_BYTES (cap is strict `<`).
+  await fsp.writeFile(path.join(dir, 'big.png'), Buffer.alloc(MAX_INLINE_ASSET_BYTES));
+  // Non-raster: svg is text, deliberately excluded from the raster scope.
+  await fsp.writeFile(path.join(dir, 'vec.svg'), '<svg/>');
+  for (const v of ['url(big.png)', 'url(missing.png)', 'url(vec.svg)']) {
+    const r = await inlineUrlsInValue(v, dir);
+    assert.equal(r.value, v, `verbatim: ${v}`);
+    assert.equal(r.unresolved, 1, `unresolved: ${v}`);
+  }
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('wave8: inlineFixtureAssets marks components + _wpt lossy for undeliverable assets', async () => {
+  const fixture = {
+    _wpt: { test: 'x.html', lossy: false, lossyReasons: [] },
+    components: {
+      a: { properties: { background: 'url(nope.png)' } },
+      b: {
+        properties: {},
+        children: { b__0: { id: 'b__0', properties: { 'background-image': 'url(also-nope.png)' } } },
+      },
+    },
+  };
+  const { inlined, unresolved } = await inlineFixtureAssets(fixture, '/nonexistent-base');
+  assert.equal(inlined, 0);
+  assert.equal(unresolved, 2);
+  // Component-level honest markers (tag matches wpt-not-applicable Rule 20).
+  assert.equal(fixture.components.a._lossy, true);
+  assert.deepEqual(fixture.components.a._lossyReasons, ['requires-bundled-asset']);
+  // Nested children get their own marker.
+  assert.equal(fixture.components.b.children.b__0._lossy, true);
+  // Top-level rollup.
+  assert.equal(fixture._wpt.lossy, true);
+  assert.ok(fixture._wpt.lossyReasons.includes('requires-bundled-asset'));
+});
+
+test('wave8: inlineFixtureAssets leaves ref-shaped _wpt blocks untouched', async () => {
+  // Ref fixtures' _wpt is `{ref, of, specSection}` — no lossy fields. The
+  // inliner must not invent them (component markers still apply).
+  const fixture = {
+    _wpt: { ref: 'x-ref.html', of: 'x.html', specSection: 's' },
+    components: { a: { properties: { background: 'url(nope.png)' } } },
+  };
+  await inlineFixtureAssets(fixture, '/nonexistent-base');
+  assert.equal(fixture._wpt.lossy, undefined);
+  assert.equal(fixture._wpt.lossyReasons, undefined);
+  assert.equal(fixture.components.a._lossy, true);
 });

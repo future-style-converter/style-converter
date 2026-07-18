@@ -21,6 +21,7 @@ import { PNG } from 'pngjs';
 
 import {
   stitchPngsVertically, safe, checkFuzzyMatch, computeWptPass,
+  applyNaScoreGate,
 } from './inject-wpt-block.mjs';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -289,4 +290,62 @@ test('diffComposedVsRef: composed PNG diffs directly vs ref (no stitch)', async 
   assert.equal(diff.ssim, 1);
   // wptPass is recorded on the composed path too.
   assert.equal(diff.wptPass, true);
+});
+
+// ── wave-8: NA scoring gate ────────────────────────────────────────────────
+//
+// Corpus-honesty regression source: wpt-buckets.json tagged the css-break
+// background-image-000/001/002 tests notApplicable (requires-bundled-asset),
+// but the section scoring counted their browserRef diffs anyway — FIX-E only
+// flipped the divergence LABEL while wptPass/ssim still fed mean-SSIM /
+// passAt95 aggregations over `wpt.results[].browserRef.diffs`. The gate
+// neutralises the SCORING fields on NA-tagged tests.
+
+test('wave8: applyNaScoreGate neutralises wptPass and stamps scoreExcluded on NA tests', () => {
+  const web = { ssim: 0.38, wptPass: false };
+  const ios = { ssim: 0.14, wptPass: false };
+  // requires-bundled-asset is the (only) harness-delivery tag the narrowed
+  // gate excludes on; broad capability tags stay scored (see SCORE_EXCLUDED_TAGS).
+  const isNa = applyNaScoreGate(['requires-bundled-asset'], [web, ios, null]);
+  assert.equal(isNa, true);
+  // Scoring fields neutralised…
+  assert.equal(web.wptPass, null);
+  assert.equal(web.scoreExcluded, true);
+  assert.equal(ios.wptPass, null);
+  assert.equal(ios.scoreExcluded, true);
+  // …but raw diagnostic metrics stay intact for investigators.
+  assert.equal(web.ssim, 0.38);
+  assert.equal(ios.ssim, 0.14);
+});
+
+test('wave8: applyNaScoreGate is a no-op for untagged tests', () => {
+  const web = { ssim: 0.99, wptPass: true };
+  // undefined and [] both mean "not NA".
+  assert.equal(applyNaScoreGate(undefined, [web]), false);
+  assert.equal(applyNaScoreGate([], [web]), false);
+  assert.equal(web.wptPass, true);
+  assert.equal(web.scoreExcluded, undefined);
+});
+
+test('wave8: applyNaScoreGate skips error-shaped and absent diffs', () => {
+  const err = { error: 'capture failed' };
+  // Must not throw on nulls and must not stamp scoring fields onto error
+  // records (they never carried any).
+  assert.equal(applyNaScoreGate(['requires-bundled-asset'], [null, err, undefined]), true);
+  // Broad capability tags do NOT exclude — the corpus keeps scoring them.
+  assert.equal(applyNaScoreGate(['requires-fragmentation', 'requires-print-medium'], [null, err, undefined]), false);
+  assert.equal(err.wptPass, undefined);
+  assert.equal(err.scoreExcluded, undefined);
+});
+
+test('wave8: buildResults source carries the scoreEligible contract', async () => {
+  // Source-scan pin: the per-test result object MUST expose scoreEligible
+  // (the one boolean scoring paths filter on) wired to the NA gate, and the
+  // gate MUST run over the three browser-ref diffs. Guards against a
+  // refactor silently dropping the corpus-honesty gate.
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  assert.match(src, /scoreEligible:\s*!isNa/,
+    'results must expose scoreEligible: !isNa');
+  assert.match(src, /applyNaScoreGate\(naTags,\s*\[webRefDiff,\s*iosRefDiff,\s*androidRefDiff\]\)/,
+    'the NA gate must neutralise all three browser-ref diffs');
 });

@@ -36,10 +36,11 @@ final class BorderImagePaintOrderTests: XCTestCase {
         }
     }
 
-    /// Percent-encoded RFC 2397 data URI for the red raster — the exact
-    /// wire shape the resolver documents as safe (the converter
-    /// lowercases url() payloads, which corrupts base64, so the runtime
-    /// tests standardize on %xx encoding like MaskURLRenderTests).
+    /// Percent-encoded RFC 2397 data URI for the red raster — a valid
+    /// wire shape the resolver must keep supporting (historically the
+    /// safe form while the converter lowercased url() payloads; that
+    /// converter bug is fixed in wave 8, but %xx-encoded URIs remain
+    /// legal authoring, so the coverage stays — like MaskURLRenderTests).
     private func redDataURI() -> String {
         let png = redSourceImage().pngData()!
         return "data:image/png," + png.map { String(format: "%%%02x", $0) }.joined()

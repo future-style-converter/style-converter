@@ -358,6 +358,20 @@ const RX = {
     //   and are equally unreachable from the SDUI harness, which has no
     //   token substitution AND no bundled support tree. Estimated
     //   ~100-150 more `.sub.html` tests caught by this widening.
+    //
+    //   wave-8 NOTE — this rule now OVER-fires for one class of test:
+    //   extract-fixture.mjs inlines raster support assets < 8 KB as
+    //   percent-encoded data URIs (see its "Support-asset inlining"
+    //   section), so url()-referenced small rasters like cat.png (1,883 B)
+    //   ARE deliverable and no longer an architectural exclusion. This
+    //   string-grep rule cannot stat file sizes (RULES are pure, no IO by
+    //   design — classifyAll must stay a pure function), so the tag was
+    //   hand-removed from the three css-break background-image-000/001/002
+    //   tests (+ refs) in wpt-buckets.json after their fixtures were
+    //   re-extracted with inlined assets. A future bucket-wpt.mjs
+    //   regeneration will re-add the tag unless this rule grows a
+    //   size-aware post-pass — if you regenerate, re-apply the removal or
+    //   implement that post-pass (TODO, tracked in the wave-8 record).
     //   Source: investigations/swarm-002/css-backgrounds__attachment-local-positioning-2.json
     //           investigations/swarm-002/css-images__image-orientation-background-position.json
     //           investigations/swarm-003/css-images__image-orientation-none-cross-origin-border-image.json

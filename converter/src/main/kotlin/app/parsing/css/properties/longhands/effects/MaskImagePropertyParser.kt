@@ -25,8 +25,18 @@ import app.parsing.css.properties.primitiveParsers.UrlParser
 object MaskImagePropertyParser : PropertyParser {
 
     override fun parse(value: String): MaskImageProperty? {
-        val trimmed = value.trim().lowercase()
+        // CASE-PRESERVATION CONTRACT (mirrors BackgroundImagePropertyParser):
+        // keywords/function names are ASCII case-insensitive (CSS Syntax L3
+        // §4.3) but url() payloads are case-sensitive author bytes (base64
+        // data URIs, case-sensitive paths). Keep the ORIGINAL bytes and
+        // lower per-layer copies only for matching — the old whole-value
+        // lowercase corrupted data-URI payloads on the wire. The v2 schema
+        // is permissive at property-data leaves (schema/spec/05-versioning.md),
+        // so restoring true bytes is a bug fix, not a wire-shape change.
+        val trimmed = value.trim()
 
+        // Split the ORIGINAL bytes; the splitter is paren-aware and
+        // case-agnostic, so layers keep the author's casing.
         val imageStrings = splitByComma(trimmed)
         if (imageStrings.isEmpty()) return null
 
@@ -36,16 +46,24 @@ object MaskImagePropertyParser : PropertyParser {
         return MaskImageProperty(images)
     }
 
+    // Receives one layer in ORIGINAL author bytes; dispatches on a lowered
+    // copy. url() payloads come from the original; gradient bodies parse
+    // from the lowered copy — every gradient token (color keywords, hex,
+    // angle units, directions) is case-insensitive per CSS Images L3/L4.
     private fun parseImage(value: String): MaskImageValue? {
+        // Lowered copy used ONLY for prefix matching and gradient parsing.
+        val lower = value.lowercase()
         return when {
-            value == "none" -> MaskImageValue.None
-            value.startsWith("url(") -> parseUrl(value)
-            value.startsWith("linear-gradient(") -> parseLinearGradient(value, repeating = false)
-            value.startsWith("repeating-linear-gradient(") -> parseLinearGradient(value, repeating = true)
-            value.startsWith("radial-gradient(") -> parseRadialGradient(value, repeating = false)
-            value.startsWith("repeating-radial-gradient(") -> parseRadialGradient(value, repeating = true)
-            value.startsWith("conic-gradient(") -> parseConicGradient(value, repeating = false)
-            value.startsWith("repeating-conic-gradient(") -> parseConicGradient(value, repeating = true)
+            lower == "none" -> MaskImageValue.None
+            // url(): UrlParser matches the function name case-insensitively
+            // and returns the payload from the original bytes untouched.
+            lower.startsWith("url(") -> parseUrl(value)
+            lower.startsWith("linear-gradient(") -> parseLinearGradient(lower, repeating = false)
+            lower.startsWith("repeating-linear-gradient(") -> parseLinearGradient(lower, repeating = true)
+            lower.startsWith("radial-gradient(") -> parseRadialGradient(lower, repeating = false)
+            lower.startsWith("repeating-radial-gradient(") -> parseRadialGradient(lower, repeating = true)
+            lower.startsWith("conic-gradient(") -> parseConicGradient(lower, repeating = false)
+            lower.startsWith("repeating-conic-gradient(") -> parseConicGradient(lower, repeating = true)
             else -> null
         }
     }

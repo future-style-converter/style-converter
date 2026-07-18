@@ -1764,10 +1764,71 @@ object ComponentRenderer {
      * from the containing block's padding box — which is exactly what the
      * parent's overlay Box (RenderContent's positioned-container branch)
      * plus the child's own offset modifier already produce.
+     *
+     * Wave 8: the child is measured through [absposOverflowMeasure] so its
+     * SPECIFIED size wins over the container's incoming constraints —
+     * css-position-3 §2.1: an out-of-flow box is sized by its own
+     * properties against its containing block and may overflow it; without
+     * the unbounded measure a 69px child of a 50px positioned container
+     * silently clamped to 50px (flex-abspos-staticpos-align-self-safe-001/
+     * 002 natives 0.86-0.92 while web overflowed correctly).
      */
     @Composable
     private fun RenderAbsoluteChild(child: IRComponent) {
-        RenderComponent(child)
+        RenderComponent(child, absposOverflowMeasure())
+    }
+
+    /**
+     * Out-of-flow test for a child's IR list (css-position-3 §2.1:
+     * `absolute` and `fixed` take the box out of flow; `relative`/`sticky`
+     * keep it in flow). Pure over the IR — JVM-pinned by
+     * AbsposOverflowMeasureTest.
+     */
+    internal fun isOutOfFlowChild(properties: List<IRProperty>): Boolean =
+        extractPositionType(properties)
+            .let { it == PositionType.ABSOLUTE || it == PositionType.FIXED }
+
+    /**
+     * The size an out-of-flow child REPORTS to its parent on one axis:
+     * the unbounded-measured size, coerced back into the incoming
+     * constraints. The parent's own geometry must not change (an abspos
+     * box never sizes its ancestors — css-position-3 §3), so the report
+     * fits the constraint envelope while the INK is placed unclipped and
+     * overflows. Pure math — JVM-pinned by AbsposOverflowMeasureTest.
+     */
+    internal fun absposReportedAxis(measuredPx: Int, minPx: Int, maxPx: Int): Int =
+        measuredPx.coerceIn(minPx, maxPx)
+
+    /**
+     * Measurement wrapper for absolutely/fixed-positioned children
+     * (wave 8): measure the child's whole style chain UNBOUNDED
+     * (Constraints() == 0..∞ on both axes) so the child's own width/height
+     * modifiers resolve to their SPECIFIED values instead of clamping to
+     * the container — css-position-3 §2.1 sizes an out-of-flow box purely
+     * from its own properties + containing block, and overflow is the
+     * correct rendering (the WPT refs paint the 69px box spilling out of
+     * the 50px container). The wrapper then reports a constraint-fitting
+     * size (see [absposReportedAxis]) and anchors the oversized placeable
+     * at the reported box's origin — the box's static position — so the
+     * excess overflows toward the inline/block end exactly like the LTR
+     * horizontal-tb refs. Compose does not clip children by default, so
+     * the overflowing ink draws (matching CSS overflow:visible).
+     */
+    private fun absposOverflowMeasure(): Modifier = Modifier.layout { measurable, constraints ->
+        // Unbounded measure: min 0 / max ∞ both axes — the child's own
+        // size chain (width/height/padding/border modifiers) decides.
+        val placeable = measurable.measure(androidx.compose.ui.unit.Constraints())
+        // Report a size the parent flow can live with (fits the incoming
+        // envelope); the flow geometry is byte-identical to the clamped
+        // behaviour, only the drawn ink now overflows.
+        val reportedW = absposReportedAxis(placeable.width, constraints.minWidth, constraints.maxWidth)
+        val reportedH = absposReportedAxis(placeable.height, constraints.minHeight, constraints.maxHeight)
+        layout(reportedW, reportedH) {
+            // Anchor at the origin of the reported box = the static
+            // position the parent placed us at; place() beyond the
+            // reported size is legal and draws unclipped.
+            placeable.place(0, 0)
+        }
     }
 
     /**
@@ -1928,11 +1989,22 @@ object ComponentRenderer {
                     .ItemPlacementExtractor.extract(child.properties)
                 val alignSelf = childPlacement.alignSelf
                 val flexGrow = childPlacement.flex.grow
+                // css-flexbox-1 §4.1: an absolutely-positioned child of a
+                // flex container is NOT a flex item — it takes no flex
+                // sizing (grow/shrink/resolved main size) and only borrows
+                // the container's align/justify values to derive its STATIC
+                // position (as if it were the sole flex item). The align
+                // branch below still runs for it (that IS the static
+                // position); the sizing branches are gated off it.
+                val childIsOutOfFlow = isOutOfFlowChild(child.properties)
                 // `align-self: stretch` only stretches an item whose cross
                 // size is AUTO (css-flexbox-1 §8.3); with a definite cross
                 // size it behaves as flex-start. Row cross axis = vertical.
+                // §4.1: stretch never stretches an out-of-flow child either
+                // (static position treats it as flex-start).
                 val childHeightDefinite = hasDefiniteSize(child.properties, widthAxis = false)
-                val stretches = alignSelf == AlignSelf.STRETCH && !childHeightDefinite
+                val stretches = alignSelf == AlignSelf.STRETCH &&
+                    !childHeightDefinite && !childIsOutOfFlow
 
                 // Build modifier with align and weight
                 var childModifier: Modifier = Modifier
@@ -1953,7 +2025,9 @@ object ComponentRenderer {
                 // units the parser couldn't resolve), so neither the static
                 // §9.7 pass nor the intrinsic pass has a free-space budget.
                 // Logged so unexpected fallbacks surface in capture runs.
-                if (resolvedSizes == null && flexGrow > 0f && mainSizeDefinite) {
+                // Out-of-flow children never take weight (§4.1: flex-grow
+                // is a flex-ITEM property and they aren't items).
+                if (resolvedSizes == null && flexGrow > 0f && mainSizeDefinite && !childIsOutOfFlow) {
                     android.util.Log.i(
                         "FlexSizeResolver",
                         "legacy weight fallback for ${component.id}/${child.id}: " +
@@ -1967,8 +2041,20 @@ object ComponentRenderer {
                 // (FR_GrowBasis b/c grew 40→93/145 on web; FR_ShrinkBasis
                 // b shrank 100→58 — pixel-verified against web captures).
                 var itemModifier: Modifier = Modifier
-                resolvedSizes?.get(index)?.let { itemModifier = itemModifier.width(it.toFloat().dp) }
-                if (stretches) itemModifier = itemModifier.fillMaxHeight()
+                if (childIsOutOfFlow) {
+                    // Wave 8: an abspos/fixed child is sized by its OWN
+                    // properties (css-position-3 §2.1), never by flex
+                    // resolution or the container's constraint envelope —
+                    // measure it unbounded so its specified size wins and
+                    // overflows the container like the WPT refs
+                    // (flex-abspos-staticpos-align-self-safe-001/002: a
+                    // 69px box spilling out of a 50px flex container that
+                    // Android was clamping to fit, natives 0.86-0.92).
+                    itemModifier = absposOverflowMeasure()
+                } else {
+                    resolvedSizes?.get(index)?.let { itemModifier = itemModifier.width(it.toFloat().dp) }
+                    if (stretches) itemModifier = itemModifier.fillMaxHeight()
+                }
 
                 Box(modifier = childModifier) {
                     RenderComponent(child, itemModifier)
@@ -2042,6 +2128,11 @@ object ComponentRenderer {
                     .ItemPlacementExtractor.extract(child.properties)
                 val alignSelf = childPlacement.alignSelf
                 val flexGrow = childPlacement.flex.grow
+                // css-flexbox-1 §4.1 out-of-flow gate — same rationale as
+                // the row loop: abspos/fixed children are not flex items;
+                // alignment still derives their static position but every
+                // sizing branch is gated off below.
+                val childIsOutOfFlow = isOutOfFlowChild(child.properties)
 
                 // Build modifier with align and weight
                 var childModifier: Modifier = Modifier
@@ -2065,8 +2156,8 @@ object ComponentRenderer {
                 // LAST-RESORT legacy weight — same gate + logging as the row
                 // path: only percentage / unresolvable container heights land
                 // here now that content-sized bases go through the intrinsic
-                // pass above.
-                if (resolvedSizes == null && flexGrow > 0f && mainSizeDefinite) {
+                // pass above. Out-of-flow children never take weight (§4.1).
+                if (resolvedSizes == null && flexGrow > 0f && mainSizeDefinite && !childIsOutOfFlow) {
                     android.util.Log.i(
                         "FlexSizeResolver",
                         "legacy weight fallback for ${component.id}/${child.id}: " +
@@ -2078,7 +2169,15 @@ object ComponentRenderer {
                 // Resolved main size pins the child height (FC_GrowBasis
                 // b/c grew 30→66/101 on web — pixel-verified).
                 var itemModifier: Modifier = Modifier
-                resolvedSizes?.get(index)?.let { itemModifier = itemModifier.height(it.toFloat().dp) }
+                if (childIsOutOfFlow) {
+                    // Wave 8: unbounded measure for the out-of-flow child —
+                    // specified size wins and overflows the container
+                    // (css-position-3 §2.1; see the row-loop twin for the
+                    // fixture evidence).
+                    itemModifier = absposOverflowMeasure()
+                } else {
+                    resolvedSizes?.get(index)?.let { itemModifier = itemModifier.height(it.toFloat().dp) }
+                }
 
                 Box(modifier = childModifier) {
                     RenderComponent(child, itemModifier)
@@ -2950,11 +3049,14 @@ object ComponentRenderer {
         // byte-identical; only the drawn ink moves sub-pixel.
         //
         // FIX 2 — center-align even-truncation: StaticLayout's ALIGN_CENTER
-        // snaps the centered run to an integer start (AOSP
-        // Layout#getLineStartPos even-truncates the line width) while the
-        // browser centers fractionally — see
-        // TextStyleApplier.centerAlignFractionalDeltaX for the measured
-        // evidence (TextAlign_Center 0.9372 iOS-Android, Android driving).
+        // snaps the centered run to an integer start AT DRAW TIME (AOSP
+        // Layout#getLineStartPos even-truncates the raw advance:
+        // (W − ((int)advance & ~1)) >> 1) while the browser centers
+        // fractionally — see TextStyleApplier.centerAlignFractionalDeltaX
+        // for the draw-path model and the wave-7 meta-lesson (the first
+        // version read the getLineLeft REPORT path, a different, floor'd
+        // formula whose self-consistent rounding made the delta compute 0
+        // while the pixels drew 0.65px right of the ideal center).
         //
         // FIX 3 — sub-natural line-height: when the DECLARED line-height is
         // below the font's natural content height, CSS negative half-leading
@@ -2991,14 +3093,13 @@ object ComponentRenderer {
             val layout = layoutResult.value
             if (layout != null) {
                 // FIX 2 — only when the effective alignment actually centers.
-                // Device adjudication (wave 7): on the committed text-align
-                // fixture StaticLayout already reports an INTEGER lineLeft at
-                // the ideal center (16.0 for 252/220), so this compensation
-                // computes 0 there — the remaining TextAlign_Center residue
-                // (0.937 iOS-Android) is a run-WIDTH divergence amplified by
-                // centering (both edges misalign), not an origin snap; it
-                // needs its own investigation (wave-8 queue). The math stays:
-                // it fires exactly when a fractional snap DOES appear.
+                // Wave-8 rework: wave 7 fed this from getLineLeft/getLineRight
+                // — the REPORT accessors, whose ALIGN_CENTER floor/ceil
+                // rounding is self-consistent, so the delta computed 0 while
+                // the DRAW path (getLineStartPos even-truncation) actually
+                // placed the run 1px right of getLineLeft's answer (fixture:
+                // report 16, draw 17, ideal 16.35). The helper now models
+                // the draw path from the UNROUNDED line advance instead.
                 if (effectiveTextAlign == TextAlign.Center) {
                     TextStyleApplier.centerAlignFractionalDeltaX(
                         // TextLayoutResult.size is the text's own layout box
@@ -3006,8 +3107,16 @@ object ComponentRenderer {
                         // StaticLayout centered within.
                         layoutWidthPx = layout.size.width.toFloat(),
                         lineCount = layout.lineCount,
-                        lineLeft = { layout.getLineLeft(it) },
-                        lineRight = { layout.getLineRight(it) }
+                        // UNROUNDED advance: multiParagraph.getLineWidth
+                        // delegates (AndroidParagraph → TextLayout) to
+                        // android.text.Layout#getLineWidth — the raw float
+                        // TextLine extent, no floor/ceil. getLineRight −
+                        // getLineLeft would re-import the rounded report
+                        // the wave-7 version was fooled by. (Honest nit:
+                        // getLineWidth includes trailing whitespace where
+                        // the draw path's getLineMax excludes it — identical
+                        // for the corpus's trimmed single-line labels.)
+                        lineAdvance = { layout.multiParagraph.getLineWidth(it) }
                     )?.let { dx = it }
                 }
                 // FIX 3 — declared sub-natural line-height (gates above).

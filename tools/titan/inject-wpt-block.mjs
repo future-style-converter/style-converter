@@ -312,6 +312,47 @@ function computeWptPass(ssim, fuzzyMatch) {
   return ssimPass || fuzzyMatch === true;
 }
 
+/** Tags that mean the HARNESS cannot even DELIVER the test's inputs —
+ *  scores for these measure a delivery gap, not renderer divergence, so
+ *  they are excluded from headline scoring. Deliberately NARROW: broad
+ *  capability tags (requires-fragmentation, requires-viewport-canvas,
+ *  requires-float-layout, …) stay SCORED — those tests render something
+ *  comparable and their divergence is real information the corpus-v1..v3
+ *  history already counts (excluding them would gut the denominator from
+ *  82 to ~14 and make every corpus snapshot incomparable). First cut of
+ *  this gate excluded on ANY notApplicable tag and did exactly that —
+ *  caught at the wave-8 device gate when every section row came back
+ *  [NA-excluded]. */
+const SCORE_EXCLUDED_TAGS = new Set(['requires-bundled-asset']);
+
+/** wave-8 corpus-honesty gate (pure — exported for unit tests): when a test
+ *  carries ≥1 HARNESS-DELIVERY tag (SCORE_EXCLUDED_TAGS — not every
+ *  notApplicable tag), its browser-ref diffs are EXCLUDED from scoring:
+ *  `wptPass` is nulled (it was never a meaningful pass/fail — the harness
+ *  never delivered the inputs) and `scoreExcluded: true` is stamped so any
+ *  mean-SSIM / passAt95 aggregation over `wpt.results[].browserRef.diffs`
+ *  can filter without consulting the buckets index. Raw metrics (ssim,
+ *  pixelMismatchedPct, pHash, …) are deliberately left intact for
+ *  investigators asking "what would this test have scored if rendered?" —
+ *  only the SCORING fields are neutralised. Error-shaped diffs (`{error}`)
+ *  are left alone.
+ *
+ *  @param {string[]|undefined} naTags  notApplicable tags for the test
+ *  @param {Array<object|null>} refDiffs diffs to neutralise (mutated in place)
+ *  @returns {boolean} true when the test is score-excluded */
+export function applyNaScoreGate(naTags, refDiffs) {
+  const isNa = Array.isArray(naTags) && naTags.some((t) => SCORE_EXCLUDED_TAGS.has(t));
+  if (!isNa) return false;
+  for (const d of refDiffs ?? []) {
+    // Skip absent platforms (null) and error records — neither carries
+    // scoring fields to neutralise.
+    if (!d || typeof d !== 'object' || d.error) continue;
+    d.wptPass = null;        // never a real pass/fail for an NA test
+    d.scoreExcluded = true;  // aggregators filter on this stamp
+  }
+  return true;
+}
+
 /** Glob ONE platform's capture dir for a test's per-component PNGs (all
  *  three platforms write identical `<idx>_<safeKey>.png` filenames into
  *  their own dir — see collectCaptures() in compare-screenshots.mjs),
@@ -525,11 +566,24 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     // manifest that already has the override applied produces the same
     // result.
     const naTags = bucketsIdx?.notApplicable?.[testRel];
-    if (Array.isArray(naTags) && naTags.length > 0) {
+    // wave-8 corpus-honesty gate: NA-tagged tests must never feed headline
+    // scoring. FIX-E above only flipped the divergence LABEL — the
+    // browserRef diffs still carried wptPass:true/false + raw SSIM, and
+    // every mean-SSIM / passAt95 aggregation over
+    // `wpt.results[].browserRef.diffs` (the corpus-v* reproduce recipe)
+    // counted known harness-delivery gaps as renderer divergence. The gate
+    // nulls wptPass + stamps scoreExcluded:true on each diff (raw metrics
+    // stay for investigators) and surfaces a per-test `scoreEligible`
+    // boolean that aggregators MUST filter on.
+    const isNa = applyNaScoreGate(naTags, [webRefDiff, iosRefDiff, androidRefDiff]);
+    if (isNa) {
       divergence = 'test-not-applicable';
     }
 
     results[testRel] = {
+      // wave-8: the one boolean scoring paths filter on. false ⇔ the test
+      // carries ≥1 notApplicable tag; its metrics are diagnostic-only.
+      scoreEligible: !isNa,
       bucket: meta.bucket,
       lossy: !!meta.lossy,
       lossyReasons: meta.lossyReasons ?? [],
