@@ -1,0 +1,152 @@
+{
+ "_snapshot": "corpus-v3",
+ "_note": "COMMITTED snapshot of the SAME 7-section corpus re-measured after applier-campaign waves 5-6 (PRs #67-#68) — the campaign-impact record vs corpus-v2.json. HEADLINE: Android measured 82/82 for the FIRST time — 3d-rendering-context-and-z-ordering-003 is measurable (the multicol negative-width wedge fixed in wave 6; css-transforms Android mean 0.9729, 10/12 >=0.95, was 5/12-with-cascade in v1). Web/iOS means byte-stable vs v2 (+0.0002/+0.0007 — the 84-test sample barely intersects the typography properties waves 5-6 fixed; determinism holds). Android passAt95 32->33.",
+ "artifact": "tools/titan/runs/titan-corpus-v3 (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "f56d873d",
+ "date": "2026-07-18",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "raw SSIM >= 0.95 (composed per-test capture vs upstream Chromium browser-ref); each platform diffed against the SAME ref",
+ "sampling": "first 12 bucket-A tests per section (alphabetical, --max-tests 12 — NOT random); 7 sections = mandated top-3 (css-break/css-ui/css-grid) + breadth (css-color/css-backgrounds/css-flexbox/css-transforms)",
+ "totals": {
+  "tests": 84,
+  "web": {
+   "measured": 82,
+   "meanSsim": 0.9157,
+   "passAt95": 40
+  },
+  "ios": {
+   "measured": 82,
+   "meanSsim": 0.8955,
+   "passAt95": 29
+  },
+  "android": {
+   "measured": 82,
+   "meanSsim": 0.8982,
+   "passAt95": 33
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9192,
+    "passAt95": 7
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9202,
+    "passAt95": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9206,
+    "passAt95": 7
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.7778,
+    "passAt95": 3
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.7365,
+    "passAt95": 1
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.7485,
+    "passAt95": 3
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9251,
+    "passAt95": 4
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9168,
+    "passAt95": 2
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9247,
+    "passAt95": 4
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9027,
+    "passAt95": 3
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8931,
+    "passAt95": 0
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9061,
+    "passAt95": 0
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9627,
+    "passAt95": 8
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8977,
+    "passAt95": 4
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9009,
+    "passAt95": 4
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9826,
+    "passAt95": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9693,
+    "passAt95": 9
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9729,
+    "passAt95": 10
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 10,
+    "meanSsim": 0.9443,
+    "passAt95": 5
+   },
+   "ios": {
+    "measured": 10,
+    "meanSsim": 0.9429,
+    "passAt95": 5
+   },
+   "android": {
+    "measured": 10,
+    "meanSsim": 0.9171,
+    "passAt95": 5
+   }
+  }
+ },
+ "reproduce": "run tools/titan/section-runner.sh <section> --all-platforms --max-tests 12 --run-id titan-corpus-v3 --foreground for each of {css-color,css-backgrounds,css-flexbox,css-transforms,css-grid,css-ui,css-break}, then aggregate per-section manifests (wpt.results[].browserRef.diffs). Requires the gitignored WPT corpus + booted fleet."
+}

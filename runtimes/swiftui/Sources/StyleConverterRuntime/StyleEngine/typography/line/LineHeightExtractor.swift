@@ -13,11 +13,18 @@ enum LineHeightExtractor {
         var touched = false
         for prop in properties where prop.type == LineHeightProperty.name {
             touched = true
-            // The IR emits LineHeight as `{ "px": N }` for absolute
-            // lengths and `{ "multiplier": N, "original": ... }` for
-            // unitless multipliers (CSS `line-height: 2`). extractPx
-            // only sees the `px` form; the multiplier path needs an
-            // explicit lookup so it isn't silently dropped.
+            // Two shapes reach this extractor: `{ "px": N }` for
+            // resolved lengths and `{ "multiplier": N, "original": … }`
+            // for unitless multipliers (CSS `line-height: 2`) and
+            // percentages. NOTE the converter actually ships lengths on
+            // a NESTED wire with no top-level px
+            // (`{"original":{"type":"length", …}}`, pinned live) —
+            // DynamicValueResolver.resolveLineHeightWire unwraps that
+            // to `{px:N}` BEFORE extraction, because em needs the
+            // element's own font size (css-values-4 §6.1), a channel
+            // only the resolver has. extractPx reads the px form; the
+            // multiplier path needs an explicit lookup so it isn't
+            // silently dropped.
             cfg.px = ValueExtractors.extractPx(prop.data)
             if cfg.px == nil, case .object(let o) = prop.data,
                let mult = o["multiplier"]?.doubleValue {

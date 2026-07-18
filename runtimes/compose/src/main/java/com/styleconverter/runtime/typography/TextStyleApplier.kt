@@ -1003,6 +1003,110 @@ object TextStyleApplier {
     }
 
     /**
+     * Fix (wave 7, text placement): fractional X compensation for
+     * center-aligned text — pure math over the TextLayoutResult accessors
+     * so the JVM suite can pin it without an Android canvas.
+     *
+     * Why: Android StaticLayout's ALIGN_CENTER EVEN-TRUNCATES the line
+     * width before centering — AOSP Layout#getLineStartPos computes
+     * `((right + left) − ((int) lineMax & ~1)) >> 1`, i.e. the line's
+     * width is floored to an even integer and the division is integral.
+     * A 33px-wide line in a 358px box therefore starts at (358−32)/2 =
+     * 163 while the browser centers at (358−33)/2 = 162.5 (pixel-measured
+     * on TextAlign_Center: iOS-Android 0.9372 with Android driving the
+     * divergence). The compensation is the TRUE fractional centering
+     * position minus the snapped position StaticLayout actually used:
+     *   delta = (layoutWidth − lineWidth)/2 − actualLineLeft
+     * applied as a fractional translationX (graphicsLayer — draw-time
+     * only, no layout effect), which cancels the snap exactly.
+     *
+     * Multi-line: the compensation is computed for the WIDEST visual line
+     * (documented approximation — one translation shifts every line, and
+     * the widest line dominates the SSIM-visible mass; per-line deltas
+     * differ by <1px and would need per-line re-draw Compose can't do).
+     *
+     * Guard: |delta| must stay under 1.5px — this is a sub-pixel snap
+     * COMPENSATION, not a repositioning tool. Anything larger means the
+     * layout disagrees with our model (e.g. an RTL or justified line) and
+     * we honestly do nothing rather than smear the run. Returns null when
+     * no compensation should be applied (callers then leave the layer
+     * translation at 0).
+     */
+    fun centerAlignFractionalDeltaX(
+        layoutWidthPx: Float,
+        lineCount: Int,
+        lineLeft: (Int) -> Float,
+        lineRight: (Int) -> Float
+    ): Float? {
+        // No laid-out lines yet (first frame) → nothing to compensate.
+        if (lineCount <= 0) return null
+        // Find the widest visual line — see the multi-line note above.
+        var widestIndex = -1
+        var widestWidth = -1f
+        for (i in 0 until lineCount) {
+            val w = lineRight(i) - lineLeft(i)
+            if (w > widestWidth) {
+                widestWidth = w
+                widestIndex = i
+            }
+        }
+        // Zero/negative inked extent (blank line) → nothing to center.
+        if (widestWidth <= 0f) return null
+        // True fractional center start minus where StaticLayout snapped it.
+        val delta = (layoutWidthPx - widestWidth) / 2f - lineLeft(widestIndex)
+        // Identity → no layer churn; ≥1.5px → not a snap artifact, bail.
+        if (delta == 0f || kotlin.math.abs(delta) >= 1.5f) return null
+        return delta
+    }
+
+    /**
+     * Fix (wave 7, text placement): fractional Y compensation for
+     * SUB-NATURAL line-height — the shared cross-native contract with the
+     * iOS lane (both natives must land the same placement or neither).
+     *
+     * Why: CSS half-leading (css-inline-3 §3.2 / CSS 2.1 §10.8.1) places
+     * the glyph band inside the line box at
+     *   inkTop = boxTop + (L − natural)/2
+     * where L is the used line-height and `natural` is the font's
+     * ascent+descent content height (verified against all 9 web captures:
+     * natural = Inter hhea (1984+494)/2048 × fontSize). When L < natural
+     * the half-leading is NEGATIVE, so the browser paints the glyph band
+     * (L−natural)/2 px HIGHER than the box top (LineHeight_Unitless_1:
+     * L=18 < natural 21.78 at 18px → web ink sits 1.89px higher).
+     * Android's StaticLayout (like iOS TextKit) CLAMPS negative
+     * half-leading — the rendered line stays at the natural height and
+     * the ink does not rise, so both natives agreed with each other
+     * (0.993) while both diverged from web (~0.91). This helper returns
+     * the exact web offset — (L − natural)/2, always negative = upward —
+     * for the renderer to apply as a fractional translationY of the glyph
+     * run (draw-time graphicsLayer; the line BOX itself stays
+     * uncompressed).
+     *
+     * Honest limitation (documented, logged once by the renderer): for
+     * MULTI-LINE sub-natural text the line boxes remain uncompressed —
+     * the line-to-line advance stays at the natural height instead of L,
+     * because Compose/StaticLayout cannot shrink a line below the glyph
+     * box. Only the overall PLACEMENT is compensated (which is what SSIM
+     * sees on the fixture corpus's single-line/short content).
+     *
+     * Returns null when no compensation applies: L ≥ natural (positive
+     * half-leading — StaticLayout distributes that correctly already) or
+     * degenerate non-positive inputs.
+     */
+    fun subNaturalLineHeightDeltaY(
+        resolvedLineHeightPx: Float,
+        naturalLineBoxPx: Float
+    ): Float? {
+        // Degenerate metrics (unset line-height, first-frame zero layout).
+        if (resolvedLineHeightPx <= 0f || naturalLineBoxPx <= 0f) return null
+        // L ≥ natural: half-leading is non-negative, the platform already
+        // places the band exactly where CSS does — nothing to compensate.
+        if (resolvedLineHeightPx >= naturalLineBoxPx) return null
+        // Web's negative half-leading: (L − natural)/2 < 0 == move UP.
+        return (resolvedLineHeightPx - naturalLineBoxPx) / 2f
+    }
+
+    /**
      * Extract baseline shift from vertical-align property.
      */
     private fun extractBaselineShift(data: JsonElement): BaselineShift? {

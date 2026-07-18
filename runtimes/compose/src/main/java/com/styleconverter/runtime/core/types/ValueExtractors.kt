@@ -25,16 +25,44 @@ object ValueExtractors {
             is JsonObject -> {
                 json["px"]?.jsonPrimitive?.doubleOrNull?.dp
                     ?: run {
-                        // Fall through to relative units when no `px` key:
-                        // the IR carries `{ original: { v, u } }` for
-                        // em/rem/ex/etc that the converter couldn't pre-
-                        // resolve. We resolve against a 16-px font-size
-                        // default — matches CSS body inherited default
-                        // and Compose's default text size. Only em/rem
-                        // are meaningful for gap/padding/margin in the
-                        // current fixture set; other relative units
-                        // (vw, ch, etc.) fall through to null.
+                        // Fall through when no TOP-LEVEL `px` key: the IR
+                        // has a third wire generation (pinned live against
+                        // the running converter, 2026-07: `line-height:
+                        // 24px` → {"original":{"type":"length","px":24.0}})
+                        // where the resolved pixel count rides INSIDE the
+                        // typed `original` wrapper — no top-level px, no
+                        // px:0.0 sentinel. Reading only json["px"] silently
+                        // dropped these (pixel-proven: Android rendered the
+                        // 24px line box at the font-natural height instead).
                         val original = json["original"] as? JsonObject ?: return@run null
+                        // Nested plain-px directly under the wrapper — the
+                        // live `line-height: <px>` shape above.
+                        original["px"]?.jsonPrimitive?.doubleOrNull?.let { return@run it.dp }
+                        // The wrapper may nest the raw IRLength one level
+                        // deeper — read a resolved px there too (defensive:
+                        // same wire family, and DynamicValueResolver never
+                        // flattens plain-px shapes since they carry no
+                        // relative unit for it to resolve).
+                        // ONLY px descends: nested {v,u} relative pairs are
+                        // deliberately NOT resolved here — their bases are
+                        // owned by callers with real context (FontSize's
+                        // extractor resolves em against the threaded
+                        // INHERITED size per css-values-4 §5.1.1, and the
+                        // renderer's DynamicValueResolver pre-flattens
+                        // em/rem against the LIVE font size). Resolving them
+                        // here at a hardcoded 16 would silently mask those
+                        // correct bases (caught by the pinned inherited-base
+                        // FontSize test when this descend read {v,u}).
+                        ((original["original"] as? JsonObject)?.get("px"))
+                            ?.jsonPrimitive?.doubleOrNull?.let { return@run it.dp }
+                        // Historic FLAT {v,u} original (no typed wrapper):
+                        // resolve against a 16-px font-size default —
+                        // matches the CSS body inherited default and
+                        // Compose's default text size. Only em/rem are
+                        // meaningful for gap/padding/margin in the current
+                        // fixture set; other relative units (vw, ch, etc.)
+                        // fall through to null. Behaviour unchanged from
+                        // before the nested-px fix.
                         val v = original["v"]?.jsonPrimitive?.doubleOrNull ?: return@run null
                         when (original["u"]?.jsonPrimitive?.contentOrNull?.uppercase()) {
                             "EM", "REM" -> (v * 16).dp

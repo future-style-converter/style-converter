@@ -1830,6 +1830,34 @@ private struct PlaceholderLabel: View {
         // (Reads the DISPLAY string so a greedily pre-broken run — which
         // contains \n — always counts as multi-line, same as before.)
         let singleLineText = !displayText.contains { $0.isWhitespace }
+        // Applier campaign (sub-natural line-height placement) — the
+        // signed-half-leading compensation for L < natural content
+        // height (LineBoxMetrics.subNaturalOffset header for the full
+        // model). Gated OFF for the WPT single-line path: there the
+        // Round-4 maxHeight cap compresses the frame to exactly L and
+        // the `.center` alignment already overflows the glyph band
+        // evenly above/below — i.e. the browser's negative-half-leading
+        // placement — so adding the offset would double-shift those
+        // calibrated captures. Every other path (the whole product
+        // renderer) keeps the frame uncompressed at natural height and
+        // needs the explicit translation. 0 whenever L ≥ natural.
+        let subNaturalShift: CGFloat = (wptCaptureMode && singleLineText)
+            ? 0
+            : LineBoxMetrics.subNaturalOffset(lineHeightPx: effectiveLineHeight,
+                                              fontSizePx: textConfig.fontSize ?? 16,
+                                              design: textConfig.fontDesign)
+        // Multi-line sub-natural line boxes stay UNCOMPRESSED: SwiftUI's
+        // `.lineSpacing` cannot go negative, so the per-line ADVANCE
+        // remains the natural content height while a browser advances
+        // exactly L — only the first-line placement is compensated.
+        // Honest limitation, surfaced once per process (repo no-silent-
+        // fallthrough rule; same vehicle as the soft-wrap breadcrumb).
+        let _ = (subNaturalShift < 0 && displayText.contains("\n"))
+            && PropertyTracker.logOnce(
+                key: "line-height:sub-natural-multiline",
+                message: "sub-natural line-height on multi-line text: " +
+                    "placement compensated, advance stays natural " +
+                    "(SwiftUI lineSpacing cannot be negative)")
         let textView = wordSpacedText(displayText)
             .font(font)
         // SwiftUI's `.foregroundStyle` accepts ANY ShapeStyle including
@@ -1967,6 +1995,18 @@ private struct PlaceholderLabel: View {
             // advance overshot the browser's by that difference while
             // the box total still came out short (no first/last band).
             .lineSpacing(leading.spacing)
+            // Applier campaign (sub-natural line-height placement) —
+            // translate the glyph run (plus its owned decoration
+            // overlay, attached above so it rides along) UP by the
+            // signed half-leading when L < natural. `.offset` is the
+            // same out-of-flow-safe vehicle BlockLabel uses: a pure
+            // render translation that never re-enters layout, so the
+            // line BOX stays uncompressed at natural height and only
+            // the PAINT position matches the browser's negative-half-
+            // leading model (web inkTop = 8 + (L − natural)/2, pixel-
+            // verified). Exactly 0 for every L ≥ natural render —
+            // byte-stable for the whole non-sub-natural corpus.
+            .offset(y: subNaturalShift)
             // CSS `text-indent` — push the text right by the indent
             // amount. SwiftUI lacks a first-line-only API, so we use
             // leading padding which inherits to wrapped lines too. For

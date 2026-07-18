@@ -1,0 +1,132 @@
+{
+ "_snapshot": "wave7-gate",
+ "_note": "Wave-7 record. Section A: post-TextMotion combined re-measure of typography+color (the reverify-wave5 numbers for these categories PRE-dated the wave-6 TextMotion.Animated fix): 13 of 18 typography rows moved to hold >=0.95 (FontLanguageOverride +0.112, LetterSpacing/WordSpacing +0.105, TextDecorationLine +0.102, FontWeight +0.101, LineSnap +0.099, InitialLetter +0.079, TextGroupAlign/UnicodeBidi +0.072, Color +0.058, TextTransform +0.108 vs its wave-5 solo). Section B: wave-7 fixes device-gated SOLO — line-height 0.8759 -> 0.9927 flat (third-generation nested-length wire unwrapped on iOS incl. em-vs-OWN-font-size basis; nested plain-px on Compose; sub-natural (L-natural)/2 placement compensation landed on BOTH natives per the both-or-neither contract). TextAlign_Center stays 0.9372: device adjudication showed StaticLayout already at integer-ideal lineLeft (computed compensation honestly 0); the residue is a centered run-WIDTH divergence (both edges misalign) — wave-8 queue. Remaining below-bar rows: FontFamily_Cursive 0.8194 (platform cursive stacks — no shippable fix without bundling fonts; classify blocked-platform), FontSize 0.8641 (Larger/keyword fractional sizes — wall per identical-extents adjudication), TextOrientation_Upright 0.8687 (vertical writing-mode machinery — capability tier), TextAlign_Center 0.9372 (above). corpus-v3.json committed alongside: Android measured 82/82 first time (z-ordering-003 on the board).",
+ "devSha": "f56d873d",
+ "date": "2026-07-18",
+ "postTextMotionRemeasure": {
+  "FontFamily": {
+   "min": 0.8194,
+   "worst": "FontFamily_Cursive"
+  },
+  "FontLanguageOverride": {
+   "min": 0.9869,
+   "worst": "FontLanguageOverride_Normal"
+  },
+  "FontSize": {
+   "min": 0.8641,
+   "worst": "FontSize_Larger"
+  },
+  "FontStyle": {
+   "min": 0.9637,
+   "worst": "FontStyle_Italic"
+  },
+  "FontWeight": {
+   "min": 0.9703,
+   "worst": "FontWeight_500"
+  },
+  "InitialLetter": {
+   "min": 0.9907,
+   "worst": "InitialLetter_Normal"
+  },
+  "LetterSpacing": {
+   "min": 0.9585,
+   "worst": "LetterSpacing_Px_4"
+  },
+  "LineHeight": {
+   "min": 0.8759,
+   "worst": "LineHeight_Rem_2"
+  },
+  "LineSnap": {
+   "min": 0.9885,
+   "worst": "LineSnap_None"
+  },
+  "TextAlign": {
+   "min": 0.9372,
+   "worst": "TextAlign_Center"
+  },
+  "TextDecorationLine": {
+   "min": 0.9656,
+   "worst": "TextDecorationLine_Triple"
+  },
+  "TextGroupAlign": {
+   "min": 0.9743,
+   "worst": "TextGroupAlign_None"
+  },
+  "TextOrientation": {
+   "min": 0.8687,
+   "worst": "TextOrientation_Upright"
+  },
+  "TextShadow": {
+   "min": 0.9543,
+   "worst": "TextShadow_Rgba"
+  },
+  "TextTransform": {
+   "min": 0.9533,
+   "worst": "TextTransform_Uppercase"
+  },
+  "UnicodeBidi": {
+   "min": 0.9743,
+   "worst": "UnicodeBidi_Normal"
+  },
+  "WordSpacing": {
+   "min": 0.9735,
+   "worst": "WordSpacing_Normal"
+  },
+  "WordWrap": {
+   "min": 0.9788,
+   "worst": "WordWrap_Normal"
+  },
+  "BackgroundBlendMode": {
+   "min": 0.9835,
+   "worst": "BBM_normal"
+  },
+  "BackgroundColor": {
+   "min": 0.9928,
+   "worst": "BC_Transparent"
+  },
+  "Color": {
+   "min": 0.9548,
+   "worst": "Color_CurrentColor"
+  },
+  "Filter": {
+   "min": 0.9712,
+   "worst": "F_blur"
+  },
+  "MixBlendMode": {
+   "min": 0.9957,
+   "worst": "MBM_multiply"
+  },
+  "Opacity": {
+   "min": 0.9955,
+   "worst": "Opacity_Percent"
+  }
+ },
+ "soloGate": {
+  "line-height": {
+   "min": 0.9927,
+   "variants": {
+    "LineHeight_Normal": 0.9928,
+    "LineHeight_Unitless_1": 0.9929,
+    "LineHeight_Unitless_1_5": 0.9927,
+    "LineHeight_Unitless_2": 0.9927,
+    "LineHeight_Px_24": 0.9928,
+    "LineHeight_Em_1_2": 0.9928,
+    "LineHeight_Rem_2": 0.9927,
+    "LineHeight_Percent_150": 0.9927,
+    "LineHeight_Calc": 0.9928
+   }
+  },
+  "text-align": {
+   "min": 0.9372,
+   "variants": {
+    "TextAlign_Start": 0.9898,
+    "TextAlign_End": 0.9778,
+    "TextAlign_Left": 0.9898,
+    "TextAlign_Right": 0.9778,
+    "TextAlign_Center": 0.9372,
+    "TextAlign_Justify": 0.9898,
+    "TextAlign_MatchParent": 0.9898
+   }
+  }
+ }
+}
