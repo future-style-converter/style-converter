@@ -13,7 +13,13 @@ object SpacingApplier {
     fun applyPadding(modifier: Modifier, config: PaddingConfig): Modifier =
         PaddingApplier.apply(modifier, config)
 
-    /** Delegate to MarginApplier. */
-    fun applyMargin(modifier: Modifier, config: MarginConfig): Modifier =
-        MarginApplier.apply(modifier, config)
+    /** Delegate to MarginApplier. [collapsed] is the optional CSS2 §8.3.1
+     *  margin-collapse override from the parent block container's plan
+     *  (see BlockMarginCollapse) — null everywhere outside the block loop. */
+    fun applyMargin(
+        modifier: Modifier,
+        config: MarginConfig,
+        collapsed: CollapsedMargin? = null,
+    ): Modifier =
+        MarginApplier.apply(modifier, config, collapsed = collapsed)
 }

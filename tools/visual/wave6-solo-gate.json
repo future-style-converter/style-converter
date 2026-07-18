@@ -1,0 +1,99 @@
+{
+ "_snapshot": "wave6-solo-gate",
+ "_note": "Wave-6 device gate: SOLO test-all per fixture, pooled fleet ANDROID_SERIAL=emulator-5554, min across variants x 3 pairs. preWave = reverify-wave5.json combined-method mins at dev 41fdf61e. Headlines: margin-trim 0.832->1.0000 flat (CSS2 8.3.1 collapse emulation, pixel-perfect vs Chromium); TextMotion.Animated killed the Android glyph-advance quantization drift (initial-letter 0.911->0.9907; the Android-web typography wall was substantially hinting quantization, not AA); z-ordering-003 Android composed capture FIXED (multicol negative-width clamp; captures in 1.16s — prior wedge repro fed raw fixtures instead of IR, see the decode-error trap note). Remaining below-bar residue for wave 7: LineHeight_Unitless_1 0.9066 + LineHeight_Rem_2 0.8759 (both iOS-web — iOS line-height rem/unitless resolution), TextAlign_Center 0.9372 iOS-Android.",
+ "devSha": "41fdf61e",
+ "date": "2026-07-18",
+ "preWave": {
+  "margin-trim": 0.8321,
+  "background-blend-mode": 0.934,
+  "font-style": 0.8215,
+  "initial-letter": 0.9115,
+  "line-height": 0.8759,
+  "word-wrap": 0.9614,
+  "text-align": 0.8929
+ },
+ "zOrdering003": "Android composed capture ok:true in 1.16s (was: silent wedge, cascade-timeout of all queued fixtures)",
+ "postWave": {
+  "margin-trim": {
+   "min": 1,
+   "variants": {
+    "MarginTrim_None": 1,
+    "a": 1,
+    "b": 1,
+    "c": 1,
+    "MarginTrim_Block": 1,
+    "MarginTrim_Inline": 1,
+    "MarginTrim_BlockStart": 1,
+    "MarginTrim_BlockEnd": 1,
+    "MarginTrim_InlineStart": 1,
+    "MarginTrim_InlineEnd": 1
+   }
+  },
+  "background-blend-mode": {
+   "min": 0.9834,
+   "variants": {
+    "BBM_normal": 0.9834,
+    "BBM_multiply": 0.9946,
+    "BBM_screen": 0.995,
+    "BBM_overlay": 0.996
+   }
+  },
+  "font-style": {
+   "min": 0.9637,
+   "variants": {
+    "FontStyle_Normal": 0.9735,
+    "FontStyle_Italic": 0.9637,
+    "FontStyle_Oblique": 0.9637,
+    "FontStyle_Oblique_0deg": 0.9735,
+    "FontStyle_Oblique_14deg": 0.9637,
+    "FontStyle_Oblique_Neg10deg": 0.9735,
+    "FontStyle_Oblique_Rad": 0.9735,
+    "FontStyle_Oblique_Turn": 0.9637
+   }
+  },
+  "initial-letter": {
+   "min": 0.9907,
+   "variants": {
+    "InitialLetter_Normal": 0.9907,
+    "InitialLetter_Size_2": 0.9907,
+    "InitialLetter_Size_3": 0.9907,
+    "InitialLetter_SizeSink": 0.9907,
+    "InitialLetter_FractionalSize": 0.9907
+   }
+  },
+  "line-height": {
+   "min": 0.8759,
+   "variants": {
+    "LineHeight_Normal": 0.9928,
+    "LineHeight_Unitless_1": 0.9066,
+    "LineHeight_Unitless_1_5": 0.9927,
+    "LineHeight_Unitless_2": 0.9927,
+    "LineHeight_Px_24": 0.9505,
+    "LineHeight_Em_1_2": 0.9928,
+    "LineHeight_Rem_2": 0.8759,
+    "LineHeight_Percent_150": 0.9927,
+    "LineHeight_Calc": 0.9928
+   }
+  },
+  "word-wrap": {
+   "min": 0.9788,
+   "variants": {
+    "WordWrap_Normal": 0.9788,
+    "WordWrap_BreakWord": 0.9788,
+    "WordWrap_Anywhere": 0.9788
+   }
+  },
+  "text-align": {
+   "min": 0.9372,
+   "variants": {
+    "TextAlign_Start": 0.9898,
+    "TextAlign_End": 0.9778,
+    "TextAlign_Left": 0.9898,
+    "TextAlign_Right": 0.9778,
+    "TextAlign_Center": 0.9372,
+    "TextAlign_Justify": 0.9898,
+    "TextAlign_MatchParent": 0.9898
+   }
+  }
+ }
+}

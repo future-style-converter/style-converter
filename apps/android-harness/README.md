@@ -26,7 +26,7 @@ adb shell am start -n com.styleconverter.test/.MainActivity
 adb pull /sdcard/Android/data/com.styleconverter.test/files/test_screenshots/ ./screenshots/
 ```
 
-The runtime's JUnit suite (950 tests) also runs from this build:
+The runtime's JUnit suite (1006 tests) also runs from this build:
 `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)`.
 
 ## Dynamic-capture hooks (states + media)

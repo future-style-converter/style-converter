@@ -28,9 +28,24 @@ enum BlendModeExtractor {
                 }
             case "BackgroundBlendMode":
                 if case .array(let arr) = prop.data {
-                    cfg.background = arr.compactMap { v in
-                        guard let s = v.stringValue else { return nil }
-                        return mapBlend(s)
+                    // IOS-BBM: keep INDEX ALIGNMENT with the BackgroundImage
+                    // layer list — the old compactMap silently DROPPED any
+                    // unmapped keyword, shifting every later layer onto the
+                    // wrong mode (css-backgrounds-3 §2.7 pairs modes to
+                    // layers positionally). Unknown keywords now fall back
+                    // to `.normal` (the CSS initial) with a logOnce
+                    // breadcrumb — no silent fallthrough.
+                    cfg.background = arr.compactMap { $0.stringValue }.map { s in
+                        if let mapped = mapBlend(s) { return mapped }
+                        // Breadcrumb once per unknown keyword, then paint
+                        // the layer unblended (initial value) so the rest
+                        // of the stack keeps its correct modes.
+                        PropertyTracker.logOnce(
+                            key: "blend.background.unmapped.\(s)",
+                            message: "background-blend-mode '\(s)' has no "
+                                + "SwiftUI BlendMode analogue — falling back "
+                                + "to normal for that layer")
+                        return .normal
                     }
                     touched = true
                 }
@@ -43,7 +58,13 @@ enum BlendModeExtractor {
 
     // CSS blend-mode keyword (UPPERCASE, words underscore-separated) →
     // SwiftUI BlendMode. Unknown / unsupported values return nil so the
-    // applier can leave the view unblended.
+    // caller can log + fall back explicitly (never a silent drop).
+    // Every keyword of CSS Compositing 1 §9 (<blend-mode>) has an EXACT
+    // SwiftUI analogue, and the mapping below agrees name-for-name with
+    // Compose's BlendModeMapping.fromCssValue (effects/blend/
+    // BlendModeConfig.kt) so the two natives blend identically — with
+    // one deliberate improvement: Compose approximates PLUS_DARKER with
+    // Multiply (no Skia equivalent) while SwiftUI has a real .plusDarker.
     //
     // Supported on SwiftUI (maps directly):
     //   NORMAL → .normal, MULTIPLY → .multiply, SCREEN → .screen,
@@ -60,7 +81,11 @@ enum BlendModeExtractor {
     // Unsupported on SwiftUI — returns nil:
     //   (none currently in Phase 4 fixture set)
     static func mapBlend(_ keyword: String) -> BlendMode? {
-        switch keyword.uppercased() {
+        // Normalize: uppercase + hyphens→underscores, mirroring Compose's
+        // BlendModeMapping (the IR emits "PLUS_LIGHTER" style today, but
+        // tolerating "plus-lighter" keeps the two natives' vocabularies
+        // byte-identical).
+        switch keyword.uppercased().replacingOccurrences(of: "-", with: "_") {
         case "NORMAL":           return .normal
         case "MULTIPLY":         return .multiply
         case "SCREEN":           return .screen

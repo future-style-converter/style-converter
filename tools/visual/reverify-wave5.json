@@ -1,0 +1,971 @@
+{
+ "_snapshot": "reverify-wave5",
+ "_note": "Post-wave-5 full 94-set re-measure at dev 41fdf61e (wave-5 typography bug-farm merged). Method identical to reverify-wave4: per-category combined fixtures (components renamed <Prop>__<variant>) through test-all.sh on the pooled fleet (ANDROID_SERIAL=emulator-5554); score = min SSIM across all variants x all 3 platform pairs. Child-component capture rows (unprefixed a/b/c/fg names, all ~1.0) and 4 stale null-pair rows in the color report are excluded from property mins.",
+ "devSha": "41fdf61e",
+ "date": "2026-07-18",
+ "method": "per-category combined fixture (components renamed <Prop>__<variant>) through test-all.sh on the pooled fleet; min SSIM across variants x pairs",
+ "summary": {
+  "measured": 94,
+  "bands": {
+   "hold": 73,
+   "near-miss": 5,
+   "deep": 16
+  },
+  "wave4Bands": {
+   "hold": 72,
+   "near-miss": 3,
+   "deep": 19
+  }
+ },
+ "adjudications": {
+  "Scale": "RECLASSIFIED from failing: the round-40 record (Android Modifier.scale clips to parent at >=1.5, 0.69) is STALE — the mechanism does not exist in current code (Modifier.scale = graphicsLayer clip=false; no clipToBounds on the fixture path) and the clip hypothesis was quantitatively refuted (synthetic clip models score 0.69-0.81 vs the measured 0.996+). This run: V_half 0.9963 / V_one_half 0.9944 / V_two 1.0 — passing.",
+  "BackgroundImage": "BI_none wave-4 0.9281 was the pre-block-font label artifact; solo wave-5 run = 1.0. Remaining sub-0.995 signal is BI_radial/BI_rep_linear gradient color drift (deltaE p95 ~6-9), separate small divergence.",
+  "TextDecorationSkipInk": "Chromium skip-ink gaps measured at exactly 17px per decorated variant (2.0% of Android-web divergent pixels, deltaSSIM 0.0019) — WALL; per-character advance-subtraction emulation simulated SSIM-NEGATIVE (0.881->0.8774), do not implement.",
+  "TextTransform": "FullWidth/FullSizeKana variants are VACUOUS on the Latin corpus — Chromium (the reference) renders them as no-ops; natives deliberately mirror. Exhausted-variant, do not implement toFullWidth.",
+  "MarginTrim": "The 0.832 is 100% missing native BLOCK MARGIN-COLLAPSE (CSS2 8.3.1 sibling max + collapse-through), NOT trim: margin-trim itself is unimplemented in Chromium (CSS.supports false) so all three platforms correctly no-op it; the trim mechanism is blocked-platform (reference engine lacks support). Wave-6 implements the collapse emulation.",
+  "BorderImageSlice": "Apparent -0.046 regression is band-shuffling: the real slice variants improved (Fill 0.853->0.986 after the web fill fix); the min moved to the intentionally-named V_svg_source_blocked_native_no_svg_decode blocked-platform variant (0.807).",
+  "AndroidFirstLine": "NEW SEAM: iOS-Android-worst typography cluster (InitialLetter 0.911, LineHeight_Rem_2 0.876, LineSnap 0.890, TextAlign_Center 0.893, FontLanguageOverride 0.875) diverges ONLY on Android and only on the FIRST text line (InitialLetter: iOS-web 0.9907, divergence rows 24-42, line 2 pixel-identical) — shared Android first-baseline/half-leading mechanism, wave-6 lane investigating."
+ },
+ "properties": [
+  {
+   "name": "BorderImageSlice",
+   "category": "borders",
+   "variants": 5,
+   "minSsim": 0.8073,
+   "worst": "V_svg_source_blocked_native_no_svg_decode Android-web",
+   "band": "deep",
+   "wave4": 0.8533,
+   "delta": -0.046
+  },
+  {
+   "name": "FontFamily",
+   "category": "typography",
+   "variants": 16,
+   "minSsim": 0.8194,
+   "worst": "FontFamily_Cursive iOS-web",
+   "band": "deep",
+   "wave4": 0.8051,
+   "delta": 0.0143
+  },
+  {
+   "name": "FontStyle",
+   "category": "typography",
+   "variants": 8,
+   "minSsim": 0.8215,
+   "worst": "FontStyle_Oblique_14deg Android-web",
+   "band": "deep",
+   "wave4": 0.8195,
+   "delta": 0.002
+  },
+  {
+   "name": "MarginTrim",
+   "category": "spacing",
+   "variants": 7,
+   "minSsim": 0.8321,
+   "worst": "MarginTrim_None iOS-web",
+   "band": "deep",
+   "wave4": 0.8321,
+   "delta": 0
+  },
+  {
+   "name": "TextTransform",
+   "category": "typography",
+   "variants": 6,
+   "minSsim": 0.8453,
+   "worst": "TextTransform_Uppercase Android-web",
+   "band": "deep",
+   "wave4": 0.7771,
+   "delta": 0.0682
+  },
+  {
+   "name": "LetterSpacing",
+   "category": "typography",
+   "variants": 8,
+   "minSsim": 0.8539,
+   "worst": "LetterSpacing_Negative_Px_1 Android-web",
+   "band": "deep",
+   "wave4": 0.789,
+   "delta": 0.0649
+  },
+  {
+   "name": "FontSize",
+   "category": "typography",
+   "variants": 17,
+   "minSsim": 0.8601,
+   "worst": "FontSize_Pt_14 iOS-Android",
+   "band": "deep",
+   "wave4": 0.7865,
+   "delta": 0.0736
+  },
+  {
+   "name": "TextDecorationLine",
+   "category": "typography",
+   "variants": 7,
+   "minSsim": 0.8641,
+   "worst": "TextDecorationLine_Overline Android-web",
+   "band": "deep",
+   "wave4": 0.7629,
+   "delta": 0.1012
+  },
+  {
+   "name": "WordSpacing",
+   "category": "typography",
+   "variants": 6,
+   "minSsim": 0.8684,
+   "worst": "WordSpacing_Px_4 Android-web",
+   "band": "deep",
+   "wave4": 0.7635,
+   "delta": 0.1049
+  },
+  {
+   "name": "TextOrientation",
+   "category": "typography",
+   "variants": 3,
+   "minSsim": 0.8691,
+   "worst": "TextOrientation_Upright Android-web",
+   "band": "deep",
+   "wave4": 0.8691,
+   "delta": 0
+  },
+  {
+   "name": "FontWeight",
+   "category": "typography",
+   "variants": 14,
+   "minSsim": 0.8695,
+   "worst": "FontWeight_Normal Android-web",
+   "band": "deep",
+   "wave4": 0.7847,
+   "delta": 0.0848
+  },
+  {
+   "name": "FontLanguageOverride",
+   "category": "typography",
+   "variants": 4,
+   "minSsim": 0.8746,
+   "worst": "FontLanguageOverride_Normal iOS-Android",
+   "band": "deep",
+   "wave4": 0.8746,
+   "delta": 0
+  },
+  {
+   "name": "LineHeight",
+   "category": "typography",
+   "variants": 9,
+   "minSsim": 0.8759,
+   "worst": "LineHeight_Rem_2 iOS-Android",
+   "band": "deep",
+   "wave4": 0.8759,
+   "delta": 0
+  },
+  {
+   "name": "LineSnap",
+   "category": "typography",
+   "variants": 3,
+   "minSsim": 0.8899,
+   "worst": "LineSnap_None iOS-Android",
+   "band": "deep",
+   "wave4": 0.8899,
+   "delta": 0
+  },
+  {
+   "name": "TextAlign",
+   "category": "typography",
+   "variants": 7,
+   "minSsim": 0.8929,
+   "worst": "TextAlign_Center iOS-Android",
+   "band": "deep",
+   "wave4": 0.8929,
+   "delta": 0
+  },
+  {
+   "name": "Color",
+   "category": "color",
+   "variants": 8,
+   "minSsim": 0.8969,
+   "worst": "Color_CurrentColor iOS-Android",
+   "band": "deep",
+   "wave4": 0.8385,
+   "delta": 0.0584
+  },
+  {
+   "name": "TextGroupAlign",
+   "category": "typography",
+   "variants": 6,
+   "minSsim": 0.9028,
+   "worst": "TextGroupAlign_None iOS-Android",
+   "band": "near-miss",
+   "wave4": 0.8565,
+   "delta": 0.0463
+  },
+  {
+   "name": "UnicodeBidi",
+   "category": "typography",
+   "variants": 6,
+   "minSsim": 0.9028,
+   "worst": "UnicodeBidi_Normal iOS-Android",
+   "band": "near-miss",
+   "wave4": 0.8565,
+   "delta": 0.0463
+  },
+  {
+   "name": "InitialLetter",
+   "category": "typography",
+   "variants": 5,
+   "minSsim": 0.9115,
+   "worst": "InitialLetter_Normal iOS-Android",
+   "band": "near-miss",
+   "wave4": 0.9115,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundBlendMode",
+   "category": "color",
+   "variants": 4,
+   "minSsim": 0.934,
+   "worst": "BBM_screen iOS-Android",
+   "band": "near-miss",
+   "wave4": 0.9339,
+   "delta": 0.0001
+  },
+  {
+   "name": "TextShadow",
+   "category": "typography",
+   "variants": 10,
+   "minSsim": 0.9452,
+   "worst": "TextShadow_Multi Android-web",
+   "band": "near-miss",
+   "wave4": 0.8672,
+   "delta": 0.078
+  },
+  {
+   "name": "MaskImage",
+   "category": "effects",
+   "variants": 11,
+   "minSsim": 0.9603,
+   "worst": "MaskImage_RepeatingLinear iOS-Android",
+   "band": "hold",
+   "wave4": 0.9603,
+   "delta": 0
+  },
+  {
+   "name": "WordWrap",
+   "category": "typography",
+   "variants": 3,
+   "minSsim": 0.9614,
+   "worst": "WordWrap_Normal Android-web",
+   "band": "hold",
+   "wave4": 0.9145,
+   "delta": 0.0469
+  },
+  {
+   "name": "Filter",
+   "category": "color",
+   "variants": 9,
+   "minSsim": 0.9721,
+   "worst": "F_invert iOS-Android",
+   "band": "hold",
+   "wave4": 0.9712,
+   "delta": 0.0009
+  },
+  {
+   "name": "AspectRatio",
+   "category": "spacing",
+   "variants": 9,
+   "minSsim": 0.983,
+   "worst": "Ratio_Auto_With_Explicit iOS-web",
+   "band": "hold",
+   "wave4": 0.983,
+   "delta": 0
+  },
+  {
+   "name": "Transform",
+   "category": "transforms",
+   "variants": 7,
+   "minSsim": 0.9866,
+   "worst": "T_scaleXY Android-web",
+   "band": "hold",
+   "wave4": 0.9866,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundClip",
+   "category": "background",
+   "variants": 4,
+   "minSsim": 0.9908,
+   "worst": "Clip_PaddingBox Android-web",
+   "band": "hold",
+   "wave4": 0.9908,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomStyle",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.992,
+   "worst": "S_dashed Android-web",
+   "band": "hold",
+   "wave4": 0.992,
+   "delta": 0
+  },
+  {
+   "name": "BorderBlockEndStyle",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9921,
+   "worst": "S_dashed Android-web",
+   "band": "hold",
+   "wave4": 0.9921,
+   "delta": 0
+  },
+  {
+   "name": "BorderBlockStartStyle",
+   "category": "borders",
+   "variants": 3,
+   "minSsim": 0.9923,
+   "worst": "S_double Android-web",
+   "band": "hold",
+   "wave4": 0.9923,
+   "delta": 0
+  },
+  {
+   "name": "BorderInlineStartColor",
+   "category": "borders",
+   "variants": 5,
+   "minSsim": 0.9923,
+   "worst": "C_hex iOS-Android",
+   "band": "hold",
+   "wave4": 0.9923,
+   "delta": 0
+  },
+  {
+   "name": "BorderBlockEndColor",
+   "category": "borders",
+   "variants": 5,
+   "minSsim": 0.9928,
+   "worst": "C_green iOS-Android",
+   "band": "hold",
+   "wave4": 0.9928,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundColor",
+   "category": "color",
+   "variants": 6,
+   "minSsim": 0.9928,
+   "worst": "BC_Transparent iOS-Android",
+   "band": "hold",
+   "wave4": 0.9928,
+   "delta": 0
+  },
+  {
+   "name": "BorderRightStyle",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9929,
+   "worst": "S_dashed Android-web",
+   "band": "hold",
+   "wave4": 0.9929,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomWidth",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9931,
+   "worst": "W_medium iOS-Android",
+   "band": "hold",
+   "wave4": 0.9931,
+   "delta": 0
+  },
+  {
+   "name": "BorderBoundary",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9931,
+   "worst": "Bord_parent iOS-Android",
+   "band": "hold",
+   "wave4": 0.9931,
+   "delta": 0
+  },
+  {
+   "name": "BorderStyle",
+   "category": "borders",
+   "variants": 11,
+   "minSsim": 0.9936,
+   "worst": "V6_double iOS-web",
+   "band": "hold",
+   "wave4": 0.9936,
+   "delta": 0
+  },
+  {
+   "name": "BorderEndStartRadius",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9937,
+   "worst": "V2_50pct iOS-Android",
+   "band": "hold",
+   "wave4": 0.9937,
+   "delta": 0
+  },
+  {
+   "name": "BorderRightWidth",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9937,
+   "worst": "W_medium iOS-Android",
+   "band": "hold",
+   "wave4": 0.9937,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomRightRadius",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9939,
+   "worst": "V2_50pct iOS-Android",
+   "band": "hold",
+   "wave4": 0.9939,
+   "delta": 0
+  },
+  {
+   "name": "BorderEndEndRadius",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9939,
+   "worst": "V2_50pct iOS-Android",
+   "band": "hold",
+   "wave4": 0.9939,
+   "delta": 0
+  },
+  {
+   "name": "BorderStartStartRadius",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.994,
+   "worst": "V2_50pct iOS-Android",
+   "band": "hold",
+   "wave4": 0.994,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopLeftRadius",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.994,
+   "worst": "V2_50pct iOS-Android",
+   "band": "hold",
+   "wave4": 0.994,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopRightRadius",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.994,
+   "worst": "V2_50pct Android-web",
+   "band": "hold",
+   "wave4": 0.994,
+   "delta": 0
+  },
+  {
+   "name": "BorderBlockStartColor",
+   "category": "borders",
+   "variants": 5,
+   "minSsim": 0.9941,
+   "worst": "C_red iOS-Android",
+   "band": "hold",
+   "wave4": 0.9941,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomLeftRadius",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9941,
+   "worst": "V2_50pct iOS-Android",
+   "band": "hold",
+   "wave4": 0.9941,
+   "delta": 0
+  },
+  {
+   "name": "BorderLeftStyle",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9941,
+   "worst": "S_dashed Android-web",
+   "band": "hold",
+   "wave4": 0.9941,
+   "delta": 0
+  },
+  {
+   "name": "BorderImageRepeat",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9942,
+   "worst": "V2_stretch iOS-Android",
+   "band": "hold",
+   "wave4": 0.9942,
+   "delta": 0
+  },
+  {
+   "name": "BorderStartEndRadius",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9942,
+   "worst": "V2_50pct Android-web",
+   "band": "hold",
+   "wave4": 0.9942,
+   "delta": 0
+  },
+  {
+   "name": "BorderInlineEndColor",
+   "category": "borders",
+   "variants": 5,
+   "minSsim": 0.9944,
+   "worst": "C_red Android-web",
+   "band": "hold",
+   "wave4": 0.9944,
+   "delta": 0
+  },
+  {
+   "name": "Scale",
+   "category": "transforms",
+   "variants": 4,
+   "minSsim": 0.9944,
+   "worst": "V_one_half iOS-web",
+   "band": "hold",
+   "wave4": 0.9944,
+   "delta": 0
+  },
+  {
+   "name": "ImageRenderingQuality",
+   "category": "appearance",
+   "variants": 4,
+   "minSsim": 0.9947,
+   "worst": "Imag_auto iOS-Android",
+   "band": "hold",
+   "wave4": 0.9947,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomColor",
+   "category": "borders",
+   "variants": 5,
+   "minSsim": 0.9947,
+   "worst": "C_green iOS-Android",
+   "band": "hold",
+   "wave4": 0.9947,
+   "delta": 0
+  },
+  {
+   "name": "BorderLeftWidth",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 0.9948,
+   "worst": "W_medium iOS-Android",
+   "band": "hold",
+   "wave4": 0.9948,
+   "delta": 0
+  },
+  {
+   "name": "BorderRightColor",
+   "category": "borders",
+   "variants": 5,
+   "minSsim": 0.9948,
+   "worst": "C_green iOS-Android",
+   "band": "hold",
+   "wave4": 0.9948,
+   "delta": 0
+  },
+  {
+   "name": "OutlineWidth",
+   "category": "borders",
+   "variants": 6,
+   "minSsim": 0.9954,
+   "worst": "Outl_inherit iOS-Android",
+   "band": "hold",
+   "wave4": 0.9954,
+   "delta": 0
+  },
+  {
+   "name": "Opacity",
+   "category": "color",
+   "variants": 8,
+   "minSsim": 0.9955,
+   "worst": "Opacity_Percent iOS-Android",
+   "band": "hold",
+   "wave4": 0.9955,
+   "delta": 0
+  },
+  {
+   "name": "MixBlendMode",
+   "category": "color",
+   "variants": 4,
+   "minSsim": 0.9957,
+   "worst": "MBM_multiply iOS-Android",
+   "band": "hold",
+   "wave4": 0.9957,
+   "delta": 0
+  },
+  {
+   "name": "BoxShadow",
+   "category": "borders",
+   "variants": 15,
+   "minSsim": 0.9958,
+   "worst": "Shadow_Inset_WithSpread Android-web",
+   "band": "hold",
+   "wave4": 0.9958,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundImage",
+   "category": "background",
+   "variants": 6,
+   "minSsim": 0.9959,
+   "worst": "BI_radial iOS-Android",
+   "band": "hold",
+   "wave4": 0.9959,
+   "delta": 0
+  },
+  {
+   "name": "BorderLeftColor",
+   "category": "borders",
+   "variants": 5,
+   "minSsim": 0.997,
+   "worst": "C_green iOS-Android",
+   "band": "hold",
+   "wave4": 0.997,
+   "delta": 0
+  },
+  {
+   "name": "ColorAdjust",
+   "category": "appearance",
+   "variants": 3,
+   "minSsim": 0.9978,
+   "worst": "Colo_inherit iOS-Android",
+   "band": "hold",
+   "wave4": 0.9978,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundAttachment",
+   "category": "background",
+   "variants": 3,
+   "minSsim": 0.9982,
+   "worst": "Attachment_Scroll iOS-web",
+   "band": "hold",
+   "wave4": 0.9982,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopStyle",
+   "category": "borders",
+   "variants": 3,
+   "minSsim": 0.9982,
+   "worst": "S_double Android-web",
+   "band": "hold",
+   "wave4": 0.9982,
+   "delta": 0
+  },
+  {
+   "name": "BoxDecorationBreak",
+   "category": "borders",
+   "variants": 2,
+   "minSsim": 0.9984,
+   "worst": "BoxDecorationBreak_Slice iOS-Android",
+   "band": "hold",
+   "wave4": 0.9984,
+   "delta": 0
+  },
+  {
+   "name": "ClipPath",
+   "category": "effects",
+   "variants": 4,
+   "minSsim": 0.9989,
+   "worst": "CP_circle Android-web",
+   "band": "hold",
+   "wave4": 0.9989,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundRepeat",
+   "category": "background",
+   "variants": 7,
+   "minSsim": 0.999,
+   "worst": "Repeat_Repeat iOS-web",
+   "band": "hold",
+   "wave4": 0.999,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundSize",
+   "category": "background",
+   "variants": 8,
+   "minSsim": 0.999,
+   "worst": "Size_Auto iOS-web",
+   "band": "hold",
+   "wave4": 0.999,
+   "delta": 0
+  },
+  {
+   "name": "BorderImageWidth",
+   "category": "borders",
+   "variants": 3,
+   "minSsim": 0.9997,
+   "worst": "BIW_15 iOS-Android",
+   "band": "hold",
+   "wave4": 0.9997,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundPosition",
+   "category": "background",
+   "variants": 8,
+   "minSsim": 0.9999,
+   "worst": "Pos_Left_Top iOS-Android",
+   "band": "hold",
+   "wave4": 0.9999,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopColor",
+   "category": "borders",
+   "variants": 5,
+   "minSsim": 0.9999,
+   "worst": "C_rgb iOS-Android",
+   "band": "hold",
+   "wave4": 0.9999,
+   "delta": 0
+  },
+  {
+   "name": "BorderImageOutset",
+   "category": "borders",
+   "variants": 3,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopWidth",
+   "category": "borders",
+   "variants": 4,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "BackdropFilter",
+   "category": "effects",
+   "variants": 12,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "MaskPosition",
+   "category": "effects",
+   "variants": 13,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "MaskRepeat",
+   "category": "effects",
+   "variants": 6,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "MaskSize",
+   "category": "effects",
+   "variants": 8,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "MaskType",
+   "category": "effects",
+   "variants": 2,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "Visibility",
+   "category": "effects",
+   "variants": 3,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "Clear",
+   "category": "layout",
+   "variants": 6,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "Left",
+   "category": "layout",
+   "variants": 4,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "Position",
+   "category": "layout",
+   "variants": 5,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "ReadingFlow",
+   "category": "layout",
+   "variants": 6,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "ZIndex",
+   "category": "layout",
+   "variants": 4,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "Isolation",
+   "category": "performance",
+   "variants": 2,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "BoxSizing",
+   "category": "sizing",
+   "variants": 2,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "Height",
+   "category": "spacing",
+   "variants": 3,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "PaddingBottom",
+   "category": "spacing",
+   "variants": 4,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "PaddingLeft",
+   "category": "spacing",
+   "variants": 4,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "PaddingRight",
+   "category": "spacing",
+   "variants": 4,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "PaddingTop",
+   "category": "spacing",
+   "variants": 4,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "Width",
+   "category": "spacing",
+   "variants": 4,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "Rotate",
+   "category": "transforms",
+   "variants": 2,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  },
+  {
+   "name": "Translate",
+   "category": "transforms",
+   "variants": 3,
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave4": 1,
+   "delta": 0
+  }
+ ]
+}

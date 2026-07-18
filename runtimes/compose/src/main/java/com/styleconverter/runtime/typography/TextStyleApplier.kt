@@ -213,7 +213,24 @@ object TextStyleApplier {
             lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(
                 alignment = androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center,
                 trim = androidx.compose.ui.text.style.LineHeightStyle.Trim.None,
-            )
+            ),
+            // TextMotion.Animated = linear (unhinted) glyph metrics +
+            // subpixel positioning — the same float-advance model Chrome
+            // (the reference) and CoreText use. The default (Static)
+            // quantizes each glyph advance through the hinting pass, and
+            // the per-glyph rounding error ACCUMULATES along a line:
+            // wave-6 combined-run measurement (typography-full archive)
+            // showed Android glyph runs drifting off web by up to ±3.5px
+            // at line end (+0.09px/glyph at font-size 20px, −0.13px/glyph
+            // at 22px — direction flips with size, so it cannot be fudged
+            // with letter-spacing), resetting at each line start, while
+            // iOS tracked web within ±0.5px everywhere. Re-aligning words
+            // in the captures lifted Android-web SSIM 0.9364→0.9833
+            // (InitialLetter_Normal 20px) and 0.8884→0.9657
+            // (FontWeight_Normal 22px), i.e. the drift — not AA character —
+            // was the bulk of the Android-web "rasterization wall".
+            // Vertical placement needed no change (matched web ≤0.3px).
+            textMotion = androidx.compose.ui.text.style.TextMotion.Animated
         )
     }
 
@@ -445,9 +462,43 @@ object TextStyleApplier {
         return null
     }
 
+    // css-fonts-4 §2.5: bare `oblique` means `oblique 14deg`, and 14deg is
+    // also the slant at which Blink's font-matching starts treating an
+    // oblique request as italic-shaped. Pinned empirically against the
+    // wave-6 web captures (Inter ships roman-only in every harness, so
+    // Chromium SYNTHESIZES the slant): `oblique 14deg`/`18deg` rendered
+    // pixel-identical to `italic`, while `0deg`/`-10deg`/`11.46deg`
+    // rendered pixel-identical to `normal` — one fixed skew, cut at 14.
+    private const val OBLIQUE_SLANT_THRESHOLD_DEG = 14.0
+
     private fun extractFontStyle(data: JsonElement): FontStyle? {
+        // `oblique <angle>` arrives as {"oblique":{"deg":N,…}} on the live
+        // wire. FontStylePropertyParser.kt normalizes ALL angle units
+        // (deg/rad/grad/turn — grad suffix-order bug fixed) to a numeric
+        // "deg", clamps to css-fonts-4 §2.4's [-90, 90] band, and rejects
+        // the declaration on an unparseable angle, so a well-formed wire
+        // always carries a real "deg" (non-deg sources add an "original"
+        // key we ignore).
+        // Compose's fake italic on a roman-only FontFamily applies the SAME
+        // fixed skew Chromium synthesizes (TextPaint#setTextSkewX(-0.25),
+        // ≈14deg, via the default FontSynthesis.All), so a threshold map —
+        // deg ≥ 14 → Italic, deg < 14 (incl. 0/negative) → Normal —
+        // reproduces the web render exactly. A per-angle
+        // TextGeometricTransform would NOT: it would slant 11.46deg text
+        // that Chromium leaves upright and over-slant 18deg text.
+        (data as? JsonObject)?.get("oblique")?.let { obliquePayload ->
+            // Missing/non-numeric "deg" is a malformed payload — return
+            // null so the drop stays visible instead of guessing a slant.
+            val deg = (obliquePayload as? JsonObject)
+                ?.get("deg")?.jsonPrimitive?.doubleOrNull ?: return null
+            return if (deg >= OBLIQUE_SLANT_THRESHOLD_DEG) FontStyle.Italic
+                   else FontStyle.Normal
+        }
         val keyword = ValueExtractors.extractKeyword(data)
         return when (keyword?.lowercase()) {
+            // Bare `oblique` = `oblique 14deg` (css-fonts-4 §2.5 default),
+            // exactly at the threshold → slants like italic on all three
+            // platforms (verified: web capture 039 == 038 pixel-identical).
             "italic", "oblique" -> FontStyle.Italic
             "normal" -> FontStyle.Normal
             else -> null

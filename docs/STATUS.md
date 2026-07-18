@@ -143,16 +143,31 @@ dirs + WPT corpus are gitignored):
   snapshot: the wedge cascade-timed-out the 6 fixtures queued behind it —
   since fixed by restart-on-timeout recovery in the native feeders, so a
   re-feed now yields 11/12.) Full 10,944-test bucket-A remains the
-  long-horizon target; this is a stratified sample.
+  long-horizon target; this is a stratified sample. Wave 6
+  (`tools/visual/reverify-wave5.json` + `wave6-solo-gate.json`) re-measured
+  the full 94-set (bands 72/3/19 → 73/5/16), then broke four walls: CSS2
+  §8.3.1 margin-collapse emulated in both natives' block paths under a
+  unified cross-native-pinned gate contract (margin-trim 0.832 → **1.0000
+  flat** vs Chromium); much of the "Android glyph wall" fell — the drift
+  was hinting-quantized glyph advances (Compose `TextMotion.Static`), not
+  antialiasing, and fractional advances lift typography to 0.96–0.99
+  (initial-letter 0.911→0.9907, font-style 0.822→0.964 incl. new
+  oblique-angle support + a converter grad/rad suffix-order fix); iOS
+  gained a real background-blend-mode compositor (0.934→0.983+); and the
+  z-ordering-003 Android composed-capture wedge is FIXED — a negative
+  multicol column width (css-multicol §3.4 used-value clamp; the fixture
+  now captures in ~1s). The stale Scale "failing" record was refuted with
+  fresh device pixels (0.994+). Wave-7 residue: iOS line-height
+  rem/unitless (0.876/0.907), TextAlign_Center 0.937 iOS-Android.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 135 |
+| converter (Kotlin) | `./gradlew :converter:test` | 145 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 985 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 950 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 369 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1006 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 404 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 516 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 

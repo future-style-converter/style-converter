@@ -36,32 +36,40 @@ struct ColorApplier: ViewModifier {
     var clipInsets: EdgeInsets = EdgeInsets()
 
     func body(content: Content) -> some View {
-        // Fast path: nothing to paint at all.
-        guard let cfg = config, let bg = cfg.background else {
+        // Fast path: nothing to paint (absent / dynamic / unknown colour
+        // — the fillView helper returns nil for all three, keeping the
+        // "degrade gracefully: skip > crash" rule from the header).
+        guard let fill = ColorApplier.fillView(config: config, radius: radius) else {
             return AnyView(content)
         }
+        // `.padding(clipInsets)` shrinks the painted shape for
+        // background-clip's non-default boxes (CSS Backgrounds 3 §2.4).
+        return AnyView(content.background(fill.padding(clipInsets)))
+    }
 
-        // Resolve the ColorValue through the Phase 1 bridge. `.dynamic`
-        // and `.unknown` map to nil here — we leave the environment alone
-        // rather than paint a wrong colour.
-        guard let swiftColor = bg.toSwiftUIColor() else {
-            return AnyView(content)
-        }
-
+    /// Shape-aware fill builder — shared by this modifier's body and the
+    /// background-blend compositor (IOS-BBM lane): CSS Compositing 1 §3.2
+    /// makes `background-color` the BOTTOM layer of a blended background
+    /// stack, so BackgroundImageApplier needs the exact fill view this
+    /// applier paints (same colour resolution, same radius shape) to slot
+    /// underneath the blended gradient layers. Extracting the builder —
+    /// rather than duplicating it — keeps the two paint paths pixel-
+    /// identical by construction. Returns nil when there is no paintable
+    /// colour (`.dynamic` / `.unknown` resolve to nil via the Phase 1
+    /// bridge — we never paint a guessed colour).
+    static func fillView(config: ColorConfig?,
+                         radius: BorderRadiusConfig?) -> AnyView? {
+        // No background entry, or a value the bridge can't resolve → nil.
+        guard let bg = config?.background,
+              let swiftColor = bg.toSwiftUIColor() else { return nil }
         // Rounded-corner aware painting — uses the same BorderRadiusShape
         // the Phase 5 radius applier clips to, so the fill aligns pixel-
-        // for-pixel with the stroke. `.padding(clipInsets)` shrinks the
-        // painted shape for background-clip's non-default boxes.
+        // for-pixel with the stroke.
         if let r = radius, r.hasAny {
-            return AnyView(
-                content.background(
-                    BorderRadiusShape(radius: r).fill(swiftColor)
-                        .padding(clipInsets)
-                )
-            )
+            return AnyView(BorderRadiusShape(radius: r).fill(swiftColor))
         }
-        // Plain rectangle path.
-        return AnyView(content.background(swiftColor.padding(clipInsets)))
+        // Plain rectangle path — SwiftUI `Color` fills its proposal.
+        return AnyView(swiftColor)
     }
 }
 

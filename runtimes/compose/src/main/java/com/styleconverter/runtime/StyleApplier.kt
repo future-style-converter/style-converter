@@ -300,7 +300,14 @@ object StyleApplier {
      * @param properties List of IR properties to apply
      * @return Modified Modifier with all applicable styles
      */
-    fun applyProperties(properties: List<IRProperty>): Modifier {
+    fun applyProperties(
+        properties: List<IRProperty>,
+        // CSS2 §8.3.1 collapsed-margin override from the parent block
+        // container's plan (BlockMarginCollapse.LocalCollapsedMargin, read
+        // by ComponentRenderer since this static chain can't). Null on every
+        // path outside the block child loop — byte-identical behavior there.
+        collapsedMargin: com.styleconverter.runtime.spacing.CollapsedMargin? = null,
+    ): Modifier {
         // Convert to type/data pairs for extractors
         val pairs = properties.map { it.type to it.data }
 
@@ -308,7 +315,7 @@ object StyleApplier {
         val config = extractConfig(pairs)
 
         // Apply in correct order
-        return applyConfig(Modifier, config)
+        return applyConfig(Modifier, config, collapsedMargin)
     }
 
     /**
@@ -401,7 +408,13 @@ object StyleApplier {
      * @param config The complete style configuration
      * @return Modified Modifier with all styles applied
      */
-    fun applyConfig(modifier: Modifier, config: StyleConfig): Modifier {
+    fun applyConfig(
+        modifier: Modifier,
+        config: StyleConfig,
+        // Optional §8.3.1 collapse override — see applyProperties. Default
+        // null keeps every existing call site byte-identical.
+        collapsedMargin: com.styleconverter.runtime.spacing.CollapsedMargin? = null,
+    ): Modifier {
         var result = modifier
 
         // CSS rendering model: transforms, clip, opacity, and visibility apply to the
@@ -488,7 +501,9 @@ object StyleApplier {
         //    rendered at 25%). EffectsFacade owns the single application.
 
         // 4. Layout — sizing + margin + position (NOT padding; see step 8).
-        result = LayoutFacade.applyToModifier(result, config.layout)
+        //    The collapse override rides into the margin step so a parent
+        //    block container's §8.3.1 plan replaces the block-axis margins.
+        result = LayoutFacade.applyToModifier(result, config.layout, collapsedMargin)
 
         // 5. Borders (sides and radius). Radius's clip sits between the
         //    outer sizing frame and the background, so the rounded corners

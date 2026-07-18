@@ -13,6 +13,8 @@
 
 import Foundation
 import SwiftUI
+// UIKit for the synthetic-oblique matrix pin (UIFont/UIFontDescriptor).
+import UIKit
 import XCTest
 // @testable: the Phase 6 extractors are internal to the runtime module.
 @testable import StyleConverterRuntime
@@ -63,6 +65,80 @@ final class TypographyTests: XCTestCase {
         // FontStyle italic
         if FontStyleExtractor.extract(from: props([("FontStyle", .string("italic"))]))?.italic != true {
             f.append("FontStyle: italic → true")
+        }
+        // FontStyle oblique — wave 6 (lane FONT-STYLE-OBLIQUE). Wire shapes
+        // byte-copied from a live converter run on fixtures/properties/
+        // typography/font-style.json: keywords are bare strings; `oblique
+        // <angle>` is {"oblique":{"deg":N,…}} with deg pre-normalized and
+        // an optional "original" {v,u} echo for non-deg source units.
+        // Expected italic flag mirrors the wave-6 web reference captures:
+        // Chromium's synthetic oblique engages at 14deg (css-fonts-4 §2.5
+        // default oblique angle) — 14deg/18deg == italic pixel-identical,
+        // 0deg/-10deg/11.46deg == normal pixel-identical.
+        if FontStyleExtractor.extract(from: props([("FontStyle", .string("oblique"))]))?.italic != true {
+            f.append("FontStyle: bare oblique (= 14deg default) → true")
+        }
+        if FontStyleExtractor.extract(from: props([
+            ("FontStyle", obj(["oblique": obj(["deg": .double(14.0)])])),
+        ]))?.italic != true {
+            f.append("FontStyle: oblique 14deg object → true")
+        }
+        if FontStyleExtractor.extract(from: props([
+            ("FontStyle", obj(["oblique": obj(["deg": .double(0.0)])])),
+        ]))?.italic != false {
+            f.append("FontStyle: oblique 0deg → false")
+        }
+        if FontStyleExtractor.extract(from: props([
+            ("FontStyle", obj(["oblique": obj(["deg": .double(-10.0)])])),
+        ]))?.italic != false {
+            f.append("FontStyle: oblique -10deg → false")
+        }
+        // `oblique 0.2rad` — the converted-unit wire keeps an "original"
+        // sibling the extractor must tolerate; 11.459deg < 14 → upright.
+        if FontStyleExtractor.extract(from: props([
+            ("FontStyle", obj(["oblique": obj([
+                "deg": .double(11.459155902616466),
+                "original": obj(["v": .double(0.2), "u": .string("RAD")]),
+            ])])),
+        ]))?.italic != false {
+            f.append("FontStyle: oblique 0.2rad (11.46deg) → false")
+        }
+        // `oblique 0.05turn` → 18deg ≥ 14 → italic appearance.
+        if FontStyleExtractor.extract(from: props([
+            ("FontStyle", obj(["oblique": obj([
+                "deg": .double(18.0),
+                "original": obj(["v": .double(0.05), "u": .string("TURN")]),
+            ])])),
+        ]))?.italic != true {
+            f.append("FontStyle: oblique 0.05turn (18deg) → true")
+        }
+        // Malformed {"oblique":{}} — no numeric "deg". Unreachable from the
+        // fixed converter wire (FontStylePropertyParser.kt now rejects the
+        // whole declaration on an unparseable angle), but pinned anyway:
+        // drop the payload — italic stays nil (= inherit/upright, the
+        // FontStyleConfig "null"), matching Compose's convention
+        // (TextStyleApplier.extractFontStyle returns null) — never guess
+        // the 14deg bare-oblique default.
+        if FontStyleExtractor.extract(from: props([
+            ("FontStyle", obj(["oblique": obj([:])])),
+        ]))?.italic != nil {
+            f.append("FontStyle: malformed oblique {} → nil drop, no 14deg guess")
+        }
+        // Synthetic-oblique skew math (render vehicle for the flags above):
+        // the shear matrix must be the fixed 0.25 slope Blink/Android
+        // synthesize (Skia textSkewX -0.25; UIKit y-up → POSITIVE c leans
+        // right), and the point size must survive the descriptor rebuild.
+        let roman = UIFont.systemFont(ofSize: 22)
+        let slanted = syntheticObliqueUIFont(roman)
+        // Read the matrix through Core Text — UIFontDescriptor.matrix is
+        // marked unavailable under Mac Catalyst, but the CTFont bridge
+        // (the exact type the render path hands SwiftUI) exposes it.
+        let m = CTFontGetMatrix(slanted as CTFont)
+        if abs(m.c - 0.25) > 1e-9 || m.a != 1 || m.b != 0 || m.d != 1 {
+            f.append("syntheticOblique: matrix must be pure c=0.25 shear, got \(m)")
+        }
+        if slanted.pointSize != 22 {
+            f.append("syntheticOblique: point size must survive (got \(slanted.pointSize))")
         }
         // FontFamily name + generic flag
         let ff = FontFamilyExtractor.extract(from: props([("FontFamily", .array([

@@ -140,7 +140,14 @@ object LayoutFacade {
      * @param config The combined layout configuration.
      * @return Modified modifier with sizing + margin + position applied.
      */
-    fun applyToModifier(modifier: Modifier, config: LayoutConfig): Modifier {
+    fun applyToModifier(
+        modifier: Modifier,
+        config: LayoutConfig,
+        // Optional CSS2 §8.3.1 collapsed-margin override for the block-axis
+        // sides (see BlockMarginCollapse) — threaded from the composable
+        // renderer because this static chain can't read CompositionLocals.
+        collapsedMargin: com.styleconverter.runtime.spacing.CollapsedMargin? = null,
+    ): Modifier {
         var result = modifier
 
         // Margin BEFORE sizing — in Compose chain order, leftmost = outermost.
@@ -150,7 +157,7 @@ object LayoutFacade {
         // subsequent applySizing chains size INSIDE the margin-padding.
         // Net effect: outer = size + margin, content area = size, sibling
         // children see outer for flex layout. CSS-correct.
-        result = SpacingApplier.applyMargin(result, config.margin)
+        result = SpacingApplier.applyMargin(result, config.margin, collapsedMargin)
 
         // Apply sizing AFTER margin so size is INSIDE the margin-padding
         // wrap. This is what makes `width: 250 + padding: 20` render as a

@@ -17,6 +17,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
@@ -71,6 +72,13 @@ import kotlinx.serialization.json.jsonPrimitive
  * ```
  */
 object TypographyExtractor {
+
+    // css-fonts-4 §2.5: bare `oblique` means `oblique 14deg`, and 14deg is
+    // the slant at which Chromium's synthetic oblique kicks in on the
+    // roman-only harness Inter — pinned empirically by the wave-6 web
+    // captures (14deg/18deg == italic pixel-identical; 0/-10/11.46deg ==
+    // normal pixel-identical). Shared by extractFontStyle below.
+    private const val OBLIQUE_SLANT_THRESHOLD_DEG = 14.0
 
     init {
         // Phase 6: claim the entire CSS Fonts + CSS Text + CSS Text-Decoration
@@ -313,15 +321,42 @@ object TypographyExtractor {
     /**
      * Extract font style from IR data.
      *
-     * CSS values: normal, italic, oblique
-     * Note: Compose doesn't distinguish oblique from italic.
+     * CSS values: normal, italic, oblique, oblique <angle>.
+     * `oblique <angle>` arrives as {"oblique":{"deg":N,…}} on the live wire.
+     * FontStylePropertyParser.kt normalizes ALL angle units (deg/rad/grad/
+     * turn — grad suffix-order bug fixed) to a numeric "deg", clamps it to
+     * css-fonts-4 §2.4's [-90, 90] band, and REJECTS the whole declaration
+     * on an unparseable angle — so a well-formed wire always carries a real
+     * "deg" (non-deg sources add an "original" key we ignore).
+     *
+     * Compose has no per-angle oblique — but neither does the reference
+     * render: every harness bundles roman-only Inter, so Chromium
+     * SYNTHESIZES the slant with one FIXED skew (Skia textSkewX -0.25,
+     * ≈14deg) once the requested angle reaches css-fonts-4 §2.5's 14deg
+     * default oblique angle, and leaves the roman upright below it
+     * (wave-6 captures: 14deg/18deg pixel-identical to italic;
+     * 0deg/-10deg/11.46deg pixel-identical to normal). Compose's fake
+     * italic uses the SAME -0.25 skew (TextPaint#setTextSkewX via the
+     * default FontSynthesis.All), so the threshold map below reproduces
+     * the web output exactly — a per-angle skew would not.
      *
      * @param json JSON element containing font style data
      * @return FontStyle, or null if not extractable
      */
     private fun extractFontStyle(json: JsonElement?): FontStyle? {
+        // Object shape: `oblique <angle>` → threshold against 14deg.
+        (json as? JsonObject)?.get("oblique")?.let { obliquePayload ->
+            // Malformed oblique payload (no numeric "deg") → null, so the
+            // drop stays tracker-visible instead of guessing a slant.
+            val deg = (obliquePayload as? JsonObject)
+                ?.get("deg")?.jsonPrimitive?.doubleOrNull ?: return null
+            return if (deg >= OBLIQUE_SLANT_THRESHOLD_DEG) FontStyle.Italic
+                   else FontStyle.Normal
+        }
         val style = ValueExtractors.extractKeyword(json)?.lowercase() ?: return null
         return when (style) {
+            // Bare `oblique` = `oblique 14deg` (css-fonts-4 §2.5 default),
+            // exactly at the threshold → slants like italic everywhere.
             "italic", "oblique" -> FontStyle.Italic
             "normal" -> FontStyle.Normal
             else -> null

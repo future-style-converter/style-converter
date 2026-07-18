@@ -46,11 +46,17 @@ data class MultiColumnConfig(
 
     /** Get effective column count based on count and width */
     fun getEffectiveColumnCount(containerWidth: Dp): Int {
-        if (columnCount != null) return columnCount
+        // column-count is a positive <integer> per css-multicol §3.2 — coerce so a
+        // malformed 0/negative count can never reach the layout dividers downstream
+        // (SimpleColumnGrid's rowCount = (n + count - 1) / count would divide by zero).
+        if (columnCount != null) return maxOf(1, columnCount)
 
         if (columnWidth != null && columnWidth.value > 0) {
-            val gap = columnGap?.value ?: 0f
+            // Negative gaps are invalid CSS (css-align §8); unguarded they could zero
+            // or flip the divisor below — floor at 0.
+            val gap = maxOf(0f, columnGap?.value ?: 0f)
             val availableWidth = containerWidth.value
+            // css-multicol §3.4 auto-count fitting: floor((available + gap) / (width + gap)).
             return maxOf(1, ((availableWidth + gap) / (columnWidth.value + gap)).toInt())
         }
 

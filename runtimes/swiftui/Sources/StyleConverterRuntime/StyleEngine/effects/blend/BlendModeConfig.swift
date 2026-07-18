@@ -17,10 +17,12 @@ struct BlendModeConfig: Equatable {
     // render when nil.
     var mix: BlendMode? = nil
     // CSS `background-blend-mode` — ORDERED list of modes matching the
-    // BackgroundImage layers. Empty when property absent. SwiftUI lacks
-    // a per-layer blend API, so the applier uses the first entry only
-    // (and only when no `mix` is set, since the two can't coexist on a
-    // single `.blendMode(_:)`).
+    // BackgroundImage layers (index i blends layer i; short lists cycle
+    // per css-backgrounds-3 §2.7). Empty when property absent. IOS-BBM:
+    // consumed by BackgroundImageApplier / BackgroundBlendCompositor in
+    // the background chain (per-layer `.blendMode` in an isolated
+    // compositing group), NOT by BlendModeApplier — see the gate in
+    // StyleBuilder.activeBackgroundBlendModes.
     var background: [BlendMode] = []
 
     // Short-circuit helper.
