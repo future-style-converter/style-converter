@@ -44,7 +44,14 @@ object MultiColumnExtractor {
             ruleStyle = ruleStyle,
             ruleColor = ruleColor,
             span = span,
-            fill = fill
+            fill = fill,
+            // The css-break-3 fragmentation pass is horizontal-tb only — flag
+            // vertical writing modes so MultiColumnLayout can bail (+log once)
+            // instead of slicing along the wrong axis. Delegates to the
+            // typography extractor that already owns the WritingMode IR
+            // property (same properties list, so no extra plumbing upstream).
+            verticalWritingMode = com.styleconverter.runtime.typography.text.TextExtractor
+                .extractWritingModeConfig(properties).isVertical
         )
     }
 

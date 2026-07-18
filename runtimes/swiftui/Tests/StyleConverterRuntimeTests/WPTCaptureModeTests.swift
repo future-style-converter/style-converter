@@ -197,4 +197,39 @@ final class WPTCaptureModeTests: XCTestCase {
             "real element text must still render in WPT mode (only the " +
             "synthesized NAME placeholder is suppressed)")
     }
+
+    // MARK: - WPT canvas background split (TITAN-WHITE lane, corpus-v4)
+
+    /// The corpus-v4 WPT canvas is opaque WHITE: WPT reftests are authored
+    /// against the spec-default white page, so white ink must vanish into
+    /// the canvas exactly as it does in the white browser-ref
+    /// (capture-browser-ref.mjs CANVAS_BG) and the web/Android WPT
+    /// canvases. `Color(white: 1)` is the SwiftUI literal for #FFFFFF.
+    func testWptCanvasBackgroundIsWhite() {
+        XCTAssertEqual(WPTCanvas.background, Color(white: 1))
+    }
+
+    /// The pure mode split (the 1:1 twin of Compose's
+    /// `captureCanvasBackground`, pinned by WptCanvasBackgroundTest.kt):
+    /// WPT capture mode paints the corpus-v4 white; every other path gets
+    /// the caller's stage color back VERBATIM so the committed 327-pair
+    /// baselines (captured on the harness's dark #1A1A2E stage) stay
+    /// byte-identical. The harness wiring is separately pinned by
+    /// tools/titan/wpt-white-canvas.test.mjs — this holds the semantics.
+    func testCaptureBackgroundSplitsOnWptMode() {
+        // The harness's historical dark stage (#1A1A2E).
+        let darkStage = Color(red: 0x1A / 255.0, green: 0x1A / 255.0, blue: 0x2E / 255.0)
+        // WPT mode → the white canvas, regardless of the caller default.
+        XCTAssertEqual(
+            WPTCanvas.captureBackground(wptCaptureMode: true, defaultBackground: darkStage),
+            WPTCanvas.background)
+        // Non-WPT mode → the caller's stage verbatim (baseline contract).
+        XCTAssertEqual(
+            WPTCanvas.captureBackground(wptCaptureMode: false, defaultBackground: darkStage),
+            darkStage)
+        // And the split is real — the two modes never collapse to one color.
+        XCTAssertNotEqual(
+            WPTCanvas.captureBackground(wptCaptureMode: true, defaultBackground: darkStage),
+            WPTCanvas.captureBackground(wptCaptureMode: false, defaultBackground: darkStage))
+    }
 }

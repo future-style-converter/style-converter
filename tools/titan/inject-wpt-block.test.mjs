@@ -21,6 +21,7 @@ import { PNG } from 'pngjs';
 
 import {
   stitchPngsVertically, safe, checkFuzzyMatch, computeWptPass,
+  computeColorComposite, isColorDivergent, COLOR_DIVERGENT_KL_THRESHOLD,
   applyNaScoreGate,
 } from './inject-wpt-block.mjs';
 
@@ -98,26 +99,29 @@ test('stitchPngsVertically: stitches 3 inputs into a single tall PNG', async () 
   assert.deepEqual(out.pixelAt(0, 100), [0, 0, 255, 255], 'blue band');
 });
 
-test('stitchPngsVertically: variable-width inputs pad to canvas with #1A1A2E bg', async () => {
+test('stitchPngsVertically: variable-width inputs pad to canvas with the WHITE WPT bg', async () => {
   // When per-component captures have differing widths (rare but possible
   // for mixed inline/block fixtures), the composed canvas should use
-  // max(input widths) and fill the gap with the canonical #1A1A2E
-  // background — matches CaptureCanvas's own background so the seam is
-  // invisible in the eventual diff.
+  // max(input widths) and fill the gap with the WHITE WPT canvas
+  // background (corpus-v4 boundary — matches the platforms' WPT capture
+  // canvases + the white browser-ref) so the seam is invisible in the
+  // eventual diff.
   const dir = await tmpDir('padwidth');
   const cacheDir = join(dir, '_stitched');
-  const wide  = await writePng(dir, 'wide.png',  200, 30, [255, 255, 255, 255]);
+  // Red wide band (deliberately NOT white so the fill pixel and the
+  // background pixel below are distinguishable in the assertions).
+  const wide  = await writePng(dir, 'wide.png',  200, 30, [255, 0, 0, 255]);
   const narrow = await writePng(dir, 'narrow.png', 100, 30, [0, 0, 0, 255]);
 
   const outPath = await stitchPngsVertically([wide, narrow], cacheDir, 'mix');
   const out = await readPng(outPath);
   assert.equal(out.width, 200, 'canvas width = max input width');
   assert.equal(out.height, 60, 'canvas height = sum of input heights');
-  // Wide input fills row 0 completely → white pixel at x=150 y=0.
-  assert.deepEqual(out.pixelAt(150, 0), [255, 255, 255, 255]);
+  // Wide input fills row 0 completely → red pixel at x=150 y=0.
+  assert.deepEqual(out.pixelAt(150, 0), [255, 0, 0, 255]);
   // Narrow input ends at x=99 on row 30 → gap at x=150 y=30 is the
-  // canvas background, which is the canonical #1A1A2E (0x1A,0x1A,0x2E).
-  assert.deepEqual(out.pixelAt(150, 30), [0x1A, 0x1A, 0x2E, 255]);
+  // canvas background: WHITE since corpus-v4 (was #1A1A2E through v3).
+  assert.deepEqual(out.pixelAt(150, 30), [255, 255, 255, 255]);
   // Narrow row body remains black at x=0 y=30.
   assert.deepEqual(out.pixelAt(0, 30), [0, 0, 0, 255]);
 });
@@ -185,6 +189,90 @@ test('checkFuzzyMatch → computeWptPass: within-tolerance fuzzy flips a sub-0.9
   const noMatch = checkFuzzyMatch(overBudget, fuzzy);
   assert.equal(noMatch, false);
   assert.equal(computeWptPass(overBudget.ssim, noMatch), false);
+});
+
+// ── color-aware triage signals (TITAN-WHITE lane) ──────────────────────────
+//
+// Raw SSIM is near color-blind: wave-9 measured a FULL red→green repaint
+// moving SSIM by 0.0001 (docs/STATUS.md). Every browser-ref diff now
+// carries colorComposite (= ssim − min(0.2, labDeltaE.mean/50)) and
+// colorDivergent (max-channel histogramKL over the calibrated threshold).
+// Neither feeds wptPass — the recorded-value pins below hold both formulas
+// AND the calibration against the wave-9 measurements.
+
+test('computeColorComposite: composite = ssim − min(0.2, labDeltaE.mean/50)', () => {
+  // Mid-range: mean ΔE 5 → penalty 0.1.
+  assert.equal(computeColorComposite(0.9, { mean: 5 }), 0.8);
+  // Penalty cap: a saturated full-image hue error (mean 50 → raw 1.0)
+  // clamps at 0.2 so structure still dominates the composite.
+  assert.equal(computeColorComposite(0.99, { mean: 50 }), 0.79);
+  assert.equal(computeColorComposite(0.99, { mean: 500 }), 0.79);
+  // AA-noise color error is a sub-0.01 nudge, not a penalty.
+  assert.equal(computeColorComposite(0.97, { mean: 0.4 }), 0.962);
+});
+
+test('computeColorComposite: wave-9 red→green case is visibly penalised', () => {
+  // Recorded values (tools/titan/runs/wave9-gate/sections/css-flexbox
+  // manifest, iOS-web rows): ssim 0.9252, labDeltaE.mean 4.206 — the pair
+  // whose full hue swap SSIM alone shrugged at. The composite drops it by
+  // mean/50 ≈ 0.084: visible in any triage sort.
+  assert.equal(computeColorComposite(0.9252, { mean: 4.206 }), 0.8411);
+});
+
+test('computeColorComposite: degraded inputs degrade loudly-but-safely', () => {
+  // No ssim → no base score; the diff is already error-shaped.
+  assert.equal(computeColorComposite(null, { mean: 5 }), null);
+  // No labDeltaE (all-transparent pair / metric error) → color-UNKNOWN is
+  // not color-PENALISED: composite falls back to the raw ssim.
+  assert.equal(computeColorComposite(0.97, null), 0.97);
+  assert.equal(computeColorComposite(0.97, {}), 0.97);
+});
+
+test('colorDivergent threshold catches the measured red→green KL but not AA noise', () => {
+  // Threshold pin: 0.1 — ≥5× the measured AA ceiling, 2.4× under the
+  // measured hue swap (margins documented at the constant).
+  assert.equal(COLOR_DIVERGENT_KL_THRESHOLD, 0.1);
+  // The wave-9 measured red→green repaint (css-flexbox manifest, iOS-web
+  // rows): histogramKL {r:0.0609, g:0.2396, b:0.0205} — MUST stamp.
+  assert.equal(isColorDivergent({ r: 0.0609, g: 0.2396, b: 0.0205 }), true);
+  // Calibration negatives from the wave9c-gate css-break + wave9-gate
+  // css-flexbox manifests: the largest max-channel KL among AA-noise /
+  // correctly-rendering passing pairs — 0.0197 (css-break) and 0.0024
+  // (css-flexbox). Neither may stamp.
+  assert.equal(isColorDivergent({ r: 0.0197, g: 0.0102, b: 0.0088 }), false);
+  assert.equal(isColorDivergent({ r: 0.0024, g: 0.0023, b: 0.0012 }), false);
+});
+
+test('diffWebVsRef wires both color signals onto every browser-ref diff', async () => {
+  // End-to-end wiring pin — the wave-9 blindness case in miniature: a flat
+  // red capture diffed against a flat green ref. Raw SSIM barely notices
+  // (≈0.9997, the measured Δ0.0001 phenomenon), so the diff MUST carry the
+  // color signals that do: a composite dragged down by the capped ΔE
+  // penalty and a colorDivergent stamp from the saturated histogram KL.
+  const dir = await tmpDir('colorwiring');
+  const red   = await writePng(dir, 'red.png',   20, 20, [255, 0, 0, 255]);
+  const green = await writePng(dir, 'green.png', 20, 20, [0, 128, 0, 255]);
+  const { diffWebVsRef } = await import('./inject-wpt-block.mjs');
+  const d = await diffWebVsRef(red, green);
+  assert.ok(typeof d.ssim === 'number' && d.ssim > 0.99, `SSIM should be color-blind here (got ${d.ssim})`);
+  // The composite is the ssim minus the CAPPED penalty (flat saturated hue
+  // swap → mean ΔE ≫ 10 → the 0.2 cap), so it sits ~0.2 under the ssim.
+  assert.ok(typeof d.colorComposite === 'number', 'colorComposite missing from the diff');
+  assert.ok(Math.abs(d.ssim - d.colorComposite - 0.2) < 1e-9, `cap penalty expected (ssim ${d.ssim} → composite ${d.colorComposite})`);
+  // …and the histogram stamp fires.
+  assert.equal(d.colorDivergent, true, 'colorDivergent must stamp a full hue swap');
+  // wptPass itself must stay the raw-SSIM criterion — the color signals
+  // are triage-only (the pass series definition is frozen).
+  assert.equal(computeWptPass(d.ssim, null), true);
+});
+
+test('colorDivergent: any single channel over threshold stamps; absent KL never does', () => {
+  // Per-channel semantics — a hue swap can live in ONE channel.
+  assert.equal(isColorDivergent({ r: 0.0, g: 0.0, b: 0.11 }), true);
+  // Missing/degenerate metric → unknown, not divergent.
+  assert.equal(isColorDivergent(null), false);
+  assert.equal(isColorDivergent(undefined), false);
+  assert.equal(isColorDivergent({}), false);
 });
 
 // ── stale-path defect 1 pin (R5 restructure) ───────────────────────────────

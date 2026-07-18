@@ -10,7 +10,12 @@
 //
 //  - Width                : exactly 390 px
 //  - Height               : component's natural height (no clamping)
-//  - Background           : solid #1A1A2E (no alpha compositing)
+//  - Background           : solid #1A1A2E (no alpha compositing) on the
+//                           bundled/baseline path; solid WHITE in WPT
+//                           capture mode (wptCaptureMode — the corpus-v4
+//                           white canvas, mirrored by the white browser-ref
+//                           and the web/Android WPT canvases so white WPT
+//                           ink vanishes identically on every surface)
 //  - Padding              : 16 px on all sides
 //  - Scale                : 1 px per logical pixel
 //
@@ -26,15 +31,34 @@ import StyleConverterRuntime
 struct CaptureCanvas: View {
     let component: IRComponent
 
+    /// WPT capture mode (TITAN inbox path — ScreenshotCaptureView publishes
+    /// it on the ImageRenderer tree). Read here so the canvas can flip to
+    /// the corpus-v4 WHITE stage in WPT capture while the bundled/baseline
+    /// path (default false) keeps the dark stage byte-identically.
+    @Environment(\.wptCaptureMode) private var wptCaptureMode
+
     /// Solid background matching the phone-frame color used by the web and
     /// Android capture canvases. Chosen so common dark-mode backgrounds on
     /// captured components blend cleanly; kept in sync with Android's
-    /// `CaptureCanvasBg` and web's `--capture-bg`.
+    /// `CaptureCanvasBg` and web's `--capture-bg`. NON-WPT paths only —
+    /// WPT capture routes through `canvasBackground` below.
     static let backgroundColor = Color(
         red:   0x1A / 255.0,
         green: 0x1A / 255.0,
         blue:  0x2E / 255.0
     )
+
+    /// Mode-split stage color (TITAN-WHITE lane): the corpus-v4 WHITE
+    /// canvas in WPT capture mode — so white WPT ink (borders/backgrounds)
+    /// vanishes exactly as it does in the white browser-ref and the
+    /// web/Android WPT canvases — else the historical dark stage. The
+    /// decision itself is the runtime's pure `WPTCanvas.captureBackground`
+    /// (unit-pinned in WPTCaptureModeTests), so all platforms split
+    /// identically.
+    private var canvasBackground: Color {
+        WPTCanvas.captureBackground(wptCaptureMode: wptCaptureMode,
+                                    defaultBackground: CaptureCanvas.backgroundColor)
+    }
 
     /// Uniform padding around the component. The 16pt value matches the
     /// web / Android canvases exactly.
@@ -144,7 +168,9 @@ struct CaptureCanvas: View {
                 // Web canvas `overflow: hidden` parity — clip whatever the
                 // overlaid component paints past the collapsed 390×32 card.
                 .clipped()
-                .background(CaptureCanvas.backgroundColor)
+                // Mode-split stage: dark for baseline, white in WPT capture
+                // (canvasBackground above — the corpus-v4 contract).
+                .background(canvasBackground)
                 // #39: the harness supplies the capture geometry — the
                 // runtime no longer assumes a 390×844 canvas on its own.
                 .environment(\.styleViewport, CaptureCanvas.viewport)
@@ -182,7 +208,9 @@ struct CaptureCanvas: View {
             // `fixedSize(vertical:)` lets SwiftUI give the component its
             // natural height rather than expanding to fill the parent.
             .fixedSize(horizontal: false, vertical: true)
-            .background(CaptureCanvas.backgroundColor)
+            // Mode-split stage: dark for baseline, white in WPT capture
+            // (canvasBackground above — the corpus-v4 contract).
+            .background(canvasBackground)
             // #39: the harness supplies the capture geometry — the
             // runtime no longer assumes a 390×844 canvas on its own.
             .environment(\.styleViewport, CaptureCanvas.viewport)
@@ -215,7 +243,9 @@ struct CaptureCanvas: View {
 ///   - width       390 px            (CANVAS_WIDTH)
 ///   - content box 358 px            (390 − 2×16, the ref body content box)
 ///   - padding     16 px all sides   (CANVAS_PAD_PX / the ref `:where(body)` pad)
-///   - background  #1A1A2E           (CANVAS_BG — the ref html+body bg)
+///   - background  WHITE             (CANVAS_BG — the ref html+body bg
+///                                    since the corpus-v4 white-canvas
+///                                    boundary; WPTCanvas.background)
 ///   - min-height  600 px            (the ref `min-height:100vh` floors
 ///                                    capture-browser-ref's docHeight at 600;
 ///                                    the canvas grows past 600 on overflow)
@@ -270,20 +300,23 @@ struct ComposedCaptureCanvas: View {
 
     /// TITAN Round 4 GAP 2 — the canvas background. The browser-ref frames
     /// every page with a ZERO-specificity `:where(html,body){background:
-    /// #1A1A2E}`, so a reference that sets its OWN `body{background}` WINS
-    /// and paints the whole page that color (css-color/a98rgb-003's grey).
-    /// The reader tags that body background as a `meta.role:"body-root"`
-    /// component; we resolve it through the SAME engine the renderer uses
+    /// WHITE}` (the corpus-v4 white canvas), so a reference that sets its
+    /// OWN `body{background}` WINS and paints the whole page that color
+    /// (css-color/a98rgb-003's grey). The reader tags that body background
+    /// as a `meta.role:"body-root"` component; we resolve it through the
+    /// SAME engine the renderer uses
     /// (ComponentRenderer.resolvedBackgroundColor) and honor it here,
-    /// falling back to the pipeline's #1A1A2E default when there is no
-    /// body-root or it declares no background.
+    /// falling back to the corpus-v4 WHITE default (WPTCanvas.background —
+    /// this canvas is WPT-ONLY, so unlike the per-component canvas there is
+    /// no dark-stage branch) when there is no body-root or it declares no
+    /// background.
     private var canvasBackground: Color {
         guard let bodyRoot = document.components.first(where: {
                   $0.meta?.role == "body-root"
               }),
               let bg = ComponentRenderer.resolvedBackgroundColor(
                   from: bodyRoot.properties)
-        else { return CaptureCanvas.backgroundColor }
+        else { return WPTCanvas.background }
         return bg
     }
 

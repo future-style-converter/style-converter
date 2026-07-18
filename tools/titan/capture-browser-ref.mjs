@@ -6,33 +6,55 @@
 // `*-ref.html` directly in headless Chromium and save it as the
 // "spec-truth" reference image.
 //
-// Cache layout (Section 5.4):
-//   tools/wpt/refs/<wpt-sha>/<spec-section>/<test-stem>.png
+// Cache layout (Section 5.4, revised at the corpus-v4 white-canvas boundary):
+//   tools/wpt/refs/<wpt-sha>/<canvas-rev>/<spec-section>/<test-stem>.png
 //
-// We key on the WPT_REF SHA so re-pinning regenerates the cache; everything
-// else hits cache on subsequent runs (the corpus is byte-identical for a
-// given pin, so the rendered ref PNG is too within AA noise).
+// We key on the WPT_REF SHA so re-pinning regenerates the cache; the extra
+// <canvas-rev> segment (CANVAS_REV below) keys the CANVAS CONTRACT so a
+// canvas change regenerates the cache too — the corpus-v1..v3 dark-canvas
+// refs stay untouched at tools/wpt/refs/<sha>/<section>/ for historical
+// reproduction. Everything else hits cache on subsequent runs (the corpus
+// is byte-identical for a given pin, so the rendered ref PNG is too within
+// AA noise).
 //
-// Capture canvas matches the rest of the Style-Converter pipeline so
-// browser-ref images are pixel-comparable against the iOS/Android/web
+// Capture canvas geometry matches the rest of the Style-Converter pipeline
+// so browser-ref images are pixel-comparable against the iOS/Android/web
 // captures from compare-screenshots.mjs:
 //   - width            : 390 px  (matches CaptureCanvas)
 //   - height           : natural (we resize the viewport to documentHeight)
-//   - background       : #1A1A2E (matches the chromeless capture mode)
+//   - background       : WHITE   (matches the platforms' WPT capture mode)
 //   - padding          : 16 px around the body root
 //   - deviceScaleFactor: 1
 //
-// We deliberately DO NOT use WPT's spec-default 800×600 white-background
-// canvas. Reasons:
-//   1. The 327-pair pipeline already standardises on 390×N #1A1A2E. A
+// ── DOCUMENTED CORPUS BOUNDARY (corpus-v4): the WHITE canvas ─────────────────
+// Through corpus-v3 the ref canvas was the pipeline's dark #1A1A2E stage.
+// That was a systematic reftest penalty: WPT tests are authored against the
+// spec-default WHITE canvas, and many paint WHITE ink (borders, backgrounds)
+// that is *supposed to vanish* into the page — e.g. the 6 abspos-autopos
+// tests draw `border: solid white` frames (~5,200 px of ink) whose refs are
+// a bare green square. On the dark stage that white ink was VISIBLE in the
+// SDUI captures while the ref hid nothing of the sort, so every white-ink
+// reftest was structurally penalised regardless of renderer correctness.
+// From corpus-v4 the WPT capture canvas is WHITE on the ref AND on all
+// three platform harnesses simultaneously (web wptCanvasStyle /
+// composedCanvasStyle, Compose WptCaptureMode.WPT_CANVAS_BACKGROUND,
+// SwiftUI WPTCanvas.background), restoring the camouflage the reftests
+// assume. ALL WPT numbers shift at this boundary — corpus-v4 is the first
+// white-canvas snapshot and is NOT comparable to v1..v3.
+// The injected default INK stays the harness `color: #fff` family (see the
+// injection below): the three runtimes' default-text bottom-outs still pin
+// the historical near-white stage ink (#eee), so keeping the ref's default
+// ink white keeps default-ink text symmetric (camouflaged on BOTH sides —
+// exactly how upstream WPT treats default-ink prose on its white canvas).
+// A black-ink flip must move all four surfaces at once and is deliberately
+// NOT part of this boundary.
+//
+// The 800×600 spec-default viewport is still not used. Reasons:
+//   1. The 327-pair pipeline standardises on 390-wide captures. A
 //      browser-ref captured at 800×600 would not be directly comparable
 //      to our existing platform captures without re-renormalising every
 //      pair.
-//   2. compare-screenshots.mjs's `padToCanvas` helper pads to #1A1A2E. A
-//      white-background ref would inflate edge-pair pixelmatch counts
-//      where the test renders past 390 px (very common — WPT tests often
-//      assume a wider canvas).
-//   3. The Section 5.3 fuzzy-tolerance metadata is stored alongside the
+//   2. The Section 5.3 fuzzy-tolerance metadata is stored alongside the
 //      ref but applies to the test↔ref pair, not to a particular canvas
 //      size. Rendering both halves at 390 px keeps fuzzy semantics
 //      consistent.
@@ -60,10 +82,21 @@ const REPO_ROOT  = resolve(__dirname, '..', '..');
 const WPT_DIR    = process.env.WPT_DIR ?? join(REPO_ROOT, 'tools', 'wpt');
 const REFS_ROOT  = join(REPO_ROOT, 'tools', 'wpt', 'refs');
 
-// Capture canvas dimensions — copied verbatim from the rest of the pipeline
-// so browser-ref images line up with iOS/Android/web captures pixel-for-pixel.
+// Capture canvas dimensions — width/padding copied verbatim from the rest of
+// the pipeline so browser-ref images line up with iOS/Android/web captures
+// pixel-for-pixel. Exported so unit tests can pin the canvas contract.
 const CANVAS_WIDTH  = 390;
-const CANVAS_BG     = '#1A1A2E';
+// The corpus-v4 WHITE canvas (see the header boundary note): WPT reftests
+// are authored against a white page, so white ink must vanish in the ref
+// exactly as it does upstream. The three platform WPT capture modes paint
+// the SAME white simultaneously — this constant and theirs move together.
+export const CANVAS_BG = '#FFFFFF';
+// Canvas-contract revision segment in the cache path. Bump/replace whenever
+// the canvas contract changes (background, padding, width, injected frame)
+// so stale refs from an older contract can never be diffed against captures
+// made under the new one. 'white' == the corpus-v4 white-canvas contract;
+// the pre-v4 dark refs live at the un-segmented refs/<sha>/<section>/ path.
+export const CANVAS_REV = 'white';
 const CANVAS_PAD_PX = 16;
 
 /** Resolve the WPT SHA the same way bucket-wpt.mjs and fetch-wpt.sh do. */
@@ -99,7 +132,11 @@ export function cachePathFor(wptRef, testRel) {
   // under "css" so the path layout stays uniform.
   const section = parts.length >= 3 ? parts[1] : 'css';
   const stem = basename(parts[parts.length - 1], '.html');
-  return join(REFS_ROOT, wptRef, section, `${stem}.png`);
+  // CANVAS_REV keys the canvas contract (corpus-v4 white canvas — header
+  // note): a contract change re-renders every ref instead of silently
+  // reusing PNGs captured under the old canvas. run-titan.sh and
+  // section-runner.sh derive their --refs-root with the SAME segment.
+  return join(REFS_ROOT, wptRef, CANVAS_REV, section, `${stem}.png`);
 }
 
 /** Render a single ref HTML to PNG. Returns the cache path. */
@@ -122,8 +159,9 @@ async function renderOne(page, wptRef, testRel) {
   // background. The ref's own root margin/padding still applies — the
   // injection is the OUTER frame, so reftest geometry stays intact.
   await page.goto(fileUrl, { waitUntil: 'load', timeout: 30_000 });
-  // Frame the ref in our 390-wide #1A1A2E canvas WITHOUT clobbering any
-  // body/html styling the WPT ref itself declares.
+  // Frame the ref in our 390-wide WHITE canvas (CANVAS_BG — the corpus-v4
+  // contract) WITHOUT clobbering any body/html styling the WPT ref itself
+  // declares.
   //
   // Why `:where(...)` and not bare `html, body`: per the CSS Selectors L4
   // spec, `:where()` zeroes out the specificity of its argument list. A
@@ -142,6 +180,15 @@ async function renderOne(page, wptRef, testRel) {
   //
   // Padding is handled the same way: `:where(body) { padding }` lets a
   // ref that explicitly sets its own body padding/margin keep it.
+  //
+  // `color: #fff` is DELIBERATELY kept at the corpus-v4 white-canvas flip
+  // (header note): the platform runtimes' default-text bottom-outs still
+  // pin the historical near-white stage ink (#eee family), so white default
+  // ink on the white canvas keeps default-ink prose camouflaged on BOTH
+  // sides of the diff — matching upstream WPT, where white ink vanishes
+  // into the white page. Flipping the ref ink to the spec-default black
+  // WITHOUT flipping every runtime bottom-out would black out ref prose
+  // while captures paint near-invisible #eee → an asymmetric text penalty.
   await page.addStyleTag({
     content: `
       :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }

@@ -139,6 +139,24 @@
         border-radius: 0;
         background: #1a1a2e;
       }
+      /* WPT capture stage — the corpus-v4 WHITE canvas. WPT reftests are
+       * authored against the spec-default white page: white ink (borders,
+       * backgrounds) is supposed to VANISH into the canvas, and the
+       * browser-ref (capture-browser-ref.mjs CANVAS_BG) renders white too.
+       * The dark stage above made that ink visible only in our captures —
+       * a systematic reftest penalty. `wpt-mode` / `wpt-composed-mode` are
+       * added by App.tsx ONLY under `?wpt=1` / `?wptComposed=1`, so the
+       * legacy 327-pair capture path (bare `capture-mode`) keeps the dark
+       * #1a1a2e stage byte-identically. Declared AFTER the capture-mode
+       * rules so equal-specificity cascade order makes white win when both
+       * classes are present. Default text `color` is NOT overridden here —
+       * the ref injection keeps `color:#fff` and every runtime bottoms out
+       * near-white (#eee), so default-ink prose stays symmetric (see
+       * capture-browser-ref.mjs's injection note). */
+      body.wpt-mode, body.wpt-mode #root,
+      body.wpt-composed-mode, body.wpt-composed-mode #root {
+        background: #fff;
+      }
     </style>
   </head>
   <body>

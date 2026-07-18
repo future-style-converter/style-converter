@@ -13,14 +13,28 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+// mutableStateOf bridges the measure pass (which decides the fragment list) to
+// the drawWithContent pass (which consumes it) — see MultiColumnDistributionLayout.
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+// drawWithContent lets the container REPLAY its child's draw once per fragment
+// (clip + translate) — the css-break-3 §4 fragmentation pass.
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+// clipRect/translate are the two DrawScope transforms the fragment pass is
+// built from: clip to column i's rect, translate the continuous paint by
+// (+x_i, −i*H) so band i shows through (box-decoration-break: slice).
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
+// Constraints.Infinity marks an unbounded block-size — no fragmentainer, so
+// the fragmentation branch never engages there.
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -133,6 +147,32 @@ object MultiColumnApplier {
         return UsedColumns(count, width)
     }
 
+    // One log line per distinct fragmentation-fallback reason for the whole
+    // process — keeps the no-silent-fallthrough contract without flooding
+    // logcat on every measure pass (mirrors ComponentRenderer's
+    // collapseFallbacksLogged precedent).
+    private val fragmentationFallbacksLogged =
+        java.util.Collections.synchronizedSet(mutableSetOf<String>())
+
+    /**
+     * Logs (once per reason) that an over-tall multicol child was NOT
+     * fragmented — the css-break-3 pass bailed to the legacy greedy layout.
+     * runCatching guards android.util.Log for plain-JVM callers (the JUnit
+     * suite exercises the pure geometry and this layout math without
+     * Robolectric, where Log.i throws "not mocked").
+     */
+    private fun logFragmentationFallbackOnce(reason: String) {
+        // add() is atomic on the synchronized set — first caller wins the log.
+        if (fragmentationFallbacksLogged.add(reason)) {
+            runCatching {
+                android.util.Log.i(
+                    "MultiColumnFragmentation",
+                    "column fragmentation skipped ($reason) — over-tall child keeps the legacy unfragmented layout"
+                )
+            }
+        }
+    }
+
     /**
      * CompositionLocal for passing column config to children.
      */
@@ -165,6 +205,12 @@ object MultiColumnApplier {
             val columnCount = config.getEffectiveColumnCount(containerWidth)
             val gap = config.columnGap ?: 16.dp
 
+            // css-break-3 fragmentation is modeled for horizontal-tb only —
+            // vertical writing modes are classified blocked-platform, so the
+            // overflow pass bails (with a one-time log at the bail site in the
+            // Layout below) rather than fragmenting along the wrong axis.
+            val fragmentationAllowed = !config.verticalWritingMode
+
             CompositionLocalProvider(
                 LocalMultiColumnConfig provides config,
                 LocalColumnCount provides columnCount
@@ -174,12 +220,14 @@ object MultiColumnApplier {
                         columnCount = columnCount,
                         gap = gap,
                         config = config,
+                        fragmentationAllowed = fragmentationAllowed,
                         content = content
                     )
                 } else {
                     SimpleMultiColumn(
                         columnCount = columnCount,
                         gap = gap,
+                        fragmentationAllowed = fragmentationAllowed,
                         content = content
                     )
                 }
@@ -194,6 +242,9 @@ object MultiColumnApplier {
     private fun SimpleMultiColumn(
         columnCount: Int,
         gap: Dp,
+        // Threaded from MultiColumnLayout: false under vertical writing modes,
+        // where the horizontal-tb fragmentation pass must bail.
+        fragmentationAllowed: Boolean,
         content: @Composable () -> Unit
     ) {
         Row(
@@ -213,6 +264,7 @@ object MultiColumnApplier {
         MultiColumnDistributionLayout(
             columnCount = columnCount,
             gap = gap,
+            fragmentationAllowed = fragmentationAllowed,
             content = content
         )
     }
@@ -225,6 +277,9 @@ object MultiColumnApplier {
         columnCount: Int,
         gap: Dp,
         config: MultiColumnConfig,
+        // Threaded from MultiColumnLayout: false under vertical writing modes,
+        // where the horizontal-tb fragmentation pass must bail.
+        fragmentationAllowed: Boolean,
         content: @Composable () -> Unit
     ) {
         val ruleColor = config.ruleColor ?: Color.Gray
@@ -234,6 +289,7 @@ object MultiColumnApplier {
         MultiColumnDistributionLayout(
             columnCount = columnCount,
             gap = gap,
+            fragmentationAllowed = fragmentationAllowed,
             modifier = Modifier.drawBehind {
                 val gapPx = gap.toPx()
                 val ruleWidthPx = ruleWidth.toPx()
@@ -279,18 +335,92 @@ object MultiColumnApplier {
     }
 
     /**
-     * Custom layout that distributes content across columns.
+     * Custom layout that distributes content across columns, with a
+     * css-break-3 §4 fragmentation pass for the over-tall single-child case.
+     *
+     * ## Fragmentation shape (wave-10)
+     *
+     * When the container has a DEFINITE block-size H and its sole child's
+     * natural block-size C exceeds H, the child fragments across columns:
+     * fragment i shows the child's [i*H, (i+1)*H) band in column i (geometry
+     * pinned in [FragmentGeometry]). Implementation: the child measures ONCE
+     * at column width with unbounded height and is placed once at the origin;
+     * a container-level drawWithContent then REPLAYS that single draw once
+     * per fragment through clip(column i) + translate(+x_i, −i*H). Drawing
+     * the SAME laid-out child means its background color and image tiles are
+     * painted as one continuous C-tall box and merely sliced — exactly the
+     * box-decoration-break: slice default of css-break-3 §6.
+     *
+     * drawWithContent was chosen over F subcomposed wrapper boxes because the
+     * Layout receives opaque measurables: subcomposition would instantiate
+     * the child F times (duplicating composition state and F-times measure
+     * cost) and require rewriting this Layout as a SubcomposeLayout, while a
+     * draw-level replay reuses the one real child node and is a pure paint
+     * transform — Compose forbids placing one Placeable twice, but a parent
+     * draw modifier may invoke drawContent() any number of times.
+     *
+     * The pass engages ONLY for a single over-tall child (the css-break WPT
+     * fixture family); multi-child overflow and vertical writing modes keep
+     * the pre-existing greedy path and log once (no silent fallthrough).
      */
     @Composable
     private fun MultiColumnDistributionLayout(
         columnCount: Int,
         gap: Dp,
         modifier: Modifier = Modifier,
+        // false bails the fragmentation pass (vertical writing-mode — the
+        // horizontal-tb geometry above would slice along the wrong axis).
+        fragmentationAllowed: Boolean = true,
         content: @Composable () -> Unit
     ) {
+        // Measure→draw bridge: the measure pass below writes the fragment list
+        // (empty = unfragmented), the drawWithContent modifier reads it. A
+        // snapshot state so the draw pass re-runs when the list changes;
+        // written only on actual change to avoid needless draw invalidations.
+        val fragmentsState = remember { mutableStateOf<List<FragmentGeometry.Fragment>>(emptyList()) }
         Layout(
             content = content,
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier
+                .fillMaxWidth()
+                // The fragmentation draw pass. Sits INSIDE the caller's
+                // modifier chain, so MultiColumnWithRules' drawBehind rules
+                // still paint underneath the fragment slices.
+                .drawWithContent {
+                    // Snapshot read — establishes the draw dependency on the
+                    // measure pass's decision.
+                    val fragments = fragmentsState.value
+                    if (fragments.isEmpty()) {
+                        // Unfragmented (every current non-overflow fixture):
+                        // draw children exactly as before — byte-identical.
+                        drawContent()
+                    } else {
+                        // css-break-3 §4: replay the child's continuous paint
+                        // once per fragment.
+                        fragments.forEach { fragment ->
+                            // Clip to column i's rect in container coordinates
+                            // — this bounds the fragment AND clips the tail of
+                            // a capped child (column-fill:auto overflow).
+                            clipRect(
+                                left = fragment.clipLeft.toFloat(),
+                                top = fragment.clipTop.toFloat(),
+                                right = (fragment.clipLeft + fragment.clipWidth).toFloat(),
+                                bottom = (fragment.clipTop + fragment.clipHeight).toFloat()
+                            ) {
+                                // Shift the continuous paint by (+x_i, −i*H)
+                                // so band i lands inside the clip — the slice.
+                                translate(
+                                    left = fragment.translateX.toFloat(),
+                                    top = fragment.translateY.toFloat()
+                                ) {
+                                    // Draw the SAME laid-out child (placed once
+                                    // at the origin) — backgrounds/tiles slice
+                                    // per box-decoration-break: slice.
+                                    this@drawWithContent.drawContent()
+                                }
+                            }
+                        }
+                    }
+                }
         ) { measurables, constraints ->
             val gapPx = gap.roundToPx()
             // css-multicol §3.4 fitting: yields used count >= 1 and width >= 0. The
@@ -301,6 +431,71 @@ object MultiColumnApplier {
             val used = resolveUsedColumns(constraints.maxWidth, columnCount, gapPx)
             // Per-column measure width — guaranteed non-negative by resolveUsedColumns.
             val columnWidth = used.widthPx
+
+            // ---- Fragmentation gate (css-break-3 §4) ----
+            // A fragmentainer only exists when the container's block-size is
+            // DEFINITE (css-break-3 §2: column boxes are fragmentation
+            // containers of fixed block-size). hasFixedHeight = min==max, the
+            // Compose signature of a fixed .height() in the style chain; an
+            // unbounded/auto block-size grows instead of fragmenting.
+            val columnBlockSize = constraints.maxHeight
+            val definiteBlockSize =
+                constraints.hasFixedHeight && columnBlockSize > 0 && columnBlockSize != Constraints.Infinity
+            if (definiteBlockSize) {
+                // Probe natural block-sizes via intrinsics — non-destructive
+                // (a measurable may still be measured after an intrinsic
+                // query), so the identity path below stays untouched when
+                // nothing overflows.
+                val naturalHeights = measurables.map { it.minIntrinsicHeight(columnWidth) }
+                // Which children WOULD fragment: natural size beyond H.
+                val overflowing = naturalHeights.count { it > columnBlockSize }
+                if (overflowing > 0 && !fragmentationAllowed) {
+                    // Vertical writing-mode bail — blocked-platform, log once.
+                    logFragmentationFallbackOnce("vertical writing-mode (blocked-platform)")
+                } else if (overflowing > 0 && measurables.size > 1) {
+                    // Multi-child fragmentation (content flow continuing from a
+                    // sibling's column) is beyond the wave-10 single-child
+                    // contract — keep the legacy greedy path, but say so once.
+                    logFragmentationFallbackOnce("multi-child container (only single-child fragmentation is implemented)")
+                } else if (overflowing == 1) {
+                    // THE fragmentation branch: sole child, C > H, horizontal-tb.
+                    // Measure ONCE at column width with unbounded block-size so
+                    // the child lays out (and paints) as one continuous C-tall
+                    // box — the slice source.
+                    val placeable = measurables[0].measure(
+                        constraints.copy(
+                            minWidth = 0,
+                            maxWidth = columnWidth,
+                            minHeight = 0,
+                            maxHeight = Constraints.Infinity
+                        )
+                    )
+                    // Geometry from the MEASURED height (the true laid-out C;
+                    // intrinsics only gated entry) — pinned by the shared
+                    // S-table in FragmentGeometryTest.
+                    val fragments = FragmentGeometry.fragmentGeometry(
+                        childBlockSizePx = placeable.height,
+                        columnBlockSizePx = columnBlockSize,
+                        columnWidthPx = columnWidth,
+                        columnGapPx = gapPx,
+                        columnCount = used.count
+                    )
+                    // Publish for the draw pass (write-on-change only).
+                    if (fragmentsState.value != fragments) fragmentsState.value = fragments
+                    // The container itself stays exactly H tall (min==max==H
+                    // anyway) and full width, like the legacy path.
+                    return@Layout layout(constraints.maxWidth, columnBlockSize) {
+                        // Place the child ONCE at the origin; every visible
+                        // copy comes from the drawWithContent replay above.
+                        placeable.place(0, 0)
+                    }
+                }
+                // overflowing == 0 falls through to the legacy path unchanged.
+            }
+            // Leaving the fragmentation branch (or never entering it): make
+            // sure a stale fragment list from a previous size doesn't keep
+            // slicing the now-fitting content.
+            if (fragmentsState.value.isNotEmpty()) fragmentsState.value = emptyList()
 
             // Measure all children with column width constraint
             val placeables = measurables.map { measurable ->

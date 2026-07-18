@@ -13,14 +13,36 @@ import { sep } from 'node:path';
 import {
   cachePathFor,
   resolveRefPath,
+  CANVAS_BG,
+  CANVAS_REV,
 } from './capture-browser-ref.mjs';
+
+// ── the corpus-v4 white-canvas contract ─────────────────────────────────────
+//
+// The ref canvas flipped from the dark #1A1A2E stage to WHITE at the
+// corpus-v4 boundary (white WPT ink must vanish into the canvas on BOTH
+// sides of the diff — see the module header). These pins hold the contract
+// so a canvas change can never ship without (a) being deliberate and (b)
+// bumping the cache revision segment that keeps stale refs out of diffs.
+
+test('CANVAS_BG is the corpus-v4 white canvas', () => {
+  assert.equal(CANVAS_BG, '#FFFFFF');
+});
+
+test('CANVAS_REV names the white-canvas cache revision', () => {
+  // run-titan.sh + section-runner.sh hardcode ".../refs/$WPT_REF/white" in
+  // their --refs-root; this pin keeps the .mjs segment in lock-step.
+  assert.equal(CANVAS_REV, 'white');
+});
 
 // ── cachePathFor ────────────────────────────────────────────────────────────
 
-test('cachePathFor produces section/stem layout under WPT SHA', () => {
+test('cachePathFor produces canvas-rev/section/stem layout under WPT SHA', () => {
   const p = cachePathFor('abc123', 'css/css-color/a98rgb-001.html');
   // Use sep so the assertion holds on Windows too even though dev is macOS.
-  assert.match(p, new RegExp(`tools\\${sep}wpt\\${sep}refs\\${sep}abc123\\${sep}css-color\\${sep}a98rgb-001\\.png$`));
+  // The CANVAS_REV segment sits between the SHA and the section so the
+  // pre-v4 dark refs (refs/<sha>/<section>/) are never picked up.
+  assert.match(p, new RegExp(`tools\\${sep}wpt\\${sep}refs\\${sep}abc123\\${sep}white\\${sep}css-color\\${sep}a98rgb-001\\.png$`));
 });
 
 test('cachePathFor preserves SHA verbatim (no truncation)', () => {
@@ -34,14 +56,14 @@ test('cachePathFor handles deeply-nested test paths', () => {
   // — section is still the second segment ("css-flexbox"), stem is the
   // basename of the deepest part.
   const p = cachePathFor('sha', 'css/css-flexbox/abspos/abspos-autopos-htb-ltr.html');
-  assert.match(p, new RegExp(`refs\\${sep}sha\\${sep}css-flexbox\\${sep}abspos-autopos-htb-ltr\\.png$`));
+  assert.match(p, new RegExp(`refs\\${sep}sha\\${sep}white\\${sep}css-flexbox\\${sep}abspos-autopos-htb-ltr\\.png$`));
 });
 
 test('cachePathFor for tests directly under /css/ falls back to "css" section', () => {
   // Defensive: very few tests live directly under /css/, but the spec
   // section helper in the bucketer hands them "css".
   const p = cachePathFor('sha', 'css/orphan.html');
-  assert.match(p, /refs.sha.css.orphan\.png$/);
+  assert.match(p, /refs.sha.white.css.orphan\.png$/);
 });
 
 // ── resolveRefPath ──────────────────────────────────────────────────────────

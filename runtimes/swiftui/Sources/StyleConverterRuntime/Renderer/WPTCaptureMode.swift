@@ -84,3 +84,38 @@ public extension EnvironmentValues {
         set { self[WPTBlockFlowFillWidthKey.self] = newValue }
     }
 }
+
+/// TITAN-WHITE lane — the WPT capture-canvas contract, corpus-v4 revision.
+///
+/// WHY WHITE: WPT reftests are authored against the spec-default WHITE
+/// page. Many paint WHITE ink (borders/backgrounds — e.g. the six
+/// abspos-autopos tests' `border: solid white` frames, ~5,200px of ink)
+/// that is SUPPOSED to vanish into the canvas; their references paint none
+/// of it. The Chromium browser-ref render (tools/titan/
+/// capture-browser-ref.mjs CANVAS_BG) is white from the same boundary, so
+/// on the old dark #1A1A2E stage that ink was visible ONLY in our captures
+/// — a systematic reftest penalty independent of renderer correctness.
+/// All three platforms flip simultaneously (web wptCanvasStyle /
+/// composedCanvasStyle, Compose WPT_CANVAS_BACKGROUND, this enum), and
+/// corpus-v4 is the FIRST white-canvas snapshot: its numbers are NOT
+/// comparable to the v1..v3 dark-canvas corpora.
+///
+/// The property-fixture (327-pair) capture path keeps its own dark stage —
+/// the harness owns that color and only routes through here when
+/// `wptCaptureMode` is true, so every committed baseline stays
+/// byte-identical.
+public enum WPTCanvas {
+    /// The corpus-v4 WPT canvas white. `Color(white: 1)` == #FFFFFF.
+    public static let background = Color(white: 1)
+
+    /// Pure canvas-background decision for the iOS capture canvases — the
+    /// 1:1 twin of Compose's `captureCanvasBackground` (unit-pinned in
+    /// WPTCaptureModeTests so the mode split can never silently drift).
+    /// WPT capture mode → the white canvas; anything else returns
+    /// `defaultBackground` VERBATIM (the harness's #1A1A2E stage), keeping
+    /// the 327-pair baselines byte-identical.
+    public static func captureBackground(wptCaptureMode: Bool,
+                                         defaultBackground: Color) -> Color {
+        wptCaptureMode ? background : defaultBackground
+    }
+}

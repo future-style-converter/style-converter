@@ -305,7 +305,18 @@ function calibrateStyles(styles: CSSStyles, ctx: RenderContext): CSSStyles {
     // (stretches to containing block), height:auto (hugs content),
     // no synthetic minimum floor. The IR's own `width` / `min-*` /
     // `max-*` come in via the spread below and take precedence.
-    maxWidth: '100%',
+    //
+    // COMPOSED mode must NOT clamp maxWidth: real WPT pages let wide
+    // geometry overflow the viewport and the browser-ref crops at the
+    // canvas edge (the composed canvas already has width:390px +
+    // overflow:hidden, so cropping matches the ref by construction).
+    // The clamp was squeezing multicol tests' wide column rows into the
+    // canvas width, diverging from the ref's crop — the wave-10 frag-bg
+    // diagnosis measured this as the PRIMARY web css-break mechanism
+    // (background-image-000/002 web 0.33/0.53 with assets delivered).
+    // Per-element WPT mode (non-composed) keeps the clamp: its capture
+    // crops per component, where 100% still mirrors the ref viewport.
+    ...(WPT_COMPOSED_MODE ? {} : { maxWidth: '100%' }),
     ...styles,
   } : {
     // Skip the `fit-content` initialiser when aspect-ratio needs to drive

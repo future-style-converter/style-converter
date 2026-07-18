@@ -118,7 +118,10 @@ struct ScreenshotCaptureView: View {
         currentName = component.name
 
         // Render the chromeless CaptureCanvas — 390 px wide, natural height,
-        // solid #1A1A2E background, 16 px padding. Matches the Android and
+        // solid #1A1A2E background (this is the bundled/baseline flow —
+        // wptCaptureMode is never set here, so the canvas keeps the dark
+        // stage; the TITAN inbox flow below flips it white per corpus-v4),
+        // 16 px padding. Matches the Android and
         // web canvases exactly so captures are directly pixel-diffable.
         // Wave 8: ImageRenderer builds an ISOLATED render tree — the
         // ContentView-level environment never reaches it — so the
@@ -295,7 +298,8 @@ func captureAllComponents(_ document: IRDocument) {
 /// inbox run is ALSO composed (CaptureOverrides.titanComposed). Unlike
 /// captureAllComponents — which captures every flattened component to its
 /// own `%03d_<name>.png` — this composes all of the doc's roots on one
-/// ComposedCaptureCanvas (slot layout + document flow, 390-wide/#1A1A2E/
+/// ComposedCaptureCanvas (slot layout + document flow, 390-wide/WHITE
+/// corpus-v4 canvas/
 /// 16px-pad framing that mirrors the browser-ref) and ImageRenderer's it
 /// ONCE. inject-wpt-block.mjs's diffComposedVsRef then diffs the composite
 /// DIRECTLY against the ref, no vertical stitch.
