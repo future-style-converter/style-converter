@@ -94,14 +94,33 @@ enum ContainingBlockBasis {
         return vertical ? (bw(b.top) + bw(b.bottom)) : (bw(b.start) + bw(b.end))
     }
 
-    /// CONTENT-box basis (in-flow children): definite border-box size
-    /// minus the padding band and the painted borders. Nil when the
-    /// size is indefinite or the subtraction degenerates (≤ 0) — the
-    /// exact contract flexContentSize has had since wave 2.
+    /// CONTENT-box basis (in-flow children). Wave 12 — the box-sizing
+    /// AXIS RULE: which bands the declared size already contains depends
+    /// on the EFFECTIVE `box-sizing` (css-sizing-3 §3):
+    ///   • `.contentBox` (the CSS INITIAL value — explicit on the style
+    ///     in WPT capture via SizeApplierMath.effectiveBoxSizing, or
+    ///     author-declared): the declared Width/Height IS the content
+    ///     box, so subtracting the bands double-counted them. Pixel
+    ///     proof: the css-break fragmentainer sliced at 118 (block-size
+    ///     120 minus its 1px border pair) instead of 120.
+    ///   • `.borderBox` / nil: the declared size is the BORDER box —
+    ///     nil is the frozen border-box status quo (the dark-stage
+    ///     corpus is captured against the web harness's
+    ///     `* { box-sizing: border-box }` reset; see SizeConfig.boxSizing
+    ///     docs), so the wave-2 subtraction stays byte-identical there.
+    /// Nil when the size is indefinite or the result degenerates (≤ 0).
     static func contentBox(style: ComponentStyle, vertical: Bool) -> CGFloat? {
         // Indefinite ancestor → no basis to publish.
         guard let box = definiteBorderBox(style: style, vertical: vertical)
         else { return nil }
+        // Effective content-box: the declared size already IS the
+        // content box — pass it through, subtract nothing (mirrors the
+        // SizeApplier.inflatedAxis tri-state, where only an explicit
+        // .contentBox reinterprets the declared slot).
+        if style.size.boxSizing == .contentBox {
+            // Degenerate declared sizes (0) still publish nil.
+            return box > 0 ? box : nil
+        }
         // Border box − padding − borders = content box (CSS 2.1 §8.1).
         let v = box - paddingBand(style: style, vertical: vertical)
                     - borderBand(style: style, vertical: vertical)
@@ -110,13 +129,33 @@ enum ContainingBlockBasis {
     }
 
     /// PADDING-box basis (absolutely-positioned children, css-position-3
-    /// §3.1): definite border-box size minus ONLY the painted borders —
-    /// the ancestor's padding stays INSIDE the containing block, exactly
-    /// like the wave-8 overlay anchor (border-band inset only).
+    /// §3.1: the containing block of an abspos child is the PADDING box
+    /// of its positioned ancestor). Wave 12 — same box-sizing axis rule
+    /// as contentBox above:
+    ///   • effective `.contentBox`: the declared size is the CONTENT
+    ///     box; the padding box wraps it, so the basis is declared +
+    ///     padding band (the painted frame is declared + padding +
+    ///     border via SizeApplier.inflatedAxis, and the wave-8 overlay
+    ///     anchor insets only the border band — frame − borders =
+    ///     declared + padding, so basis and anchor agree). Pixel proof:
+    ///     the flexbox abspos 100%×100% child of a 100×100 ancestor
+    ///     with 20/10/5/15 borders rendered 70×80 (declared minus the
+    ///     border bands) instead of covering the full 100×100 padding
+    ///     box.
+    ///   • `.borderBox` / nil (the frozen border-box status quo):
+    ///     declared border box − painted borders, exactly the wave-9
+    ///     arithmetic — padding stays INSIDE the containing block.
     static func paddingBox(style: ComponentStyle, vertical: Bool) -> CGFloat? {
         // Indefinite ancestor → no basis to publish.
         guard let box = definiteBorderBox(style: style, vertical: vertical)
         else { return nil }
+        // Effective content-box: padding box = declared content size +
+        // the padding band (borders never belong to the padding box).
+        if style.size.boxSizing == .contentBox {
+            let v = box + paddingBand(style: style, vertical: vertical)
+            // Degenerate declared sizes (0 content + 0 padding) → nil.
+            return v > 0 ? v : nil
+        }
         // Border box − borders = padding box (padding NOT subtracted).
         let v = box - borderBand(style: style, vertical: vertical)
         // Degenerate boxes publish nil, never negative.

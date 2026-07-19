@@ -233,7 +233,22 @@ dirs + WPT corpus are gitignored):
   11 (means 0.986–0.996), **iOS total 36 → 56 passing**, css-transforms
   iOS 12/12, css-grid Android 4 → 8. Widest remaining native gap:
   Android 16px prose rhythm (css-flexbox Android 1/12) — the wave-12
-  seam.
+  seam. Wave 12 (`tools/titan/results/corpus-v4-2.json`) refuted that
+  seam with sub-pixel measurement (Android 16px advances match the ref
+  to ≤0.27px — TextMotion holds) and found the real bugs: the ONE
+  surface the ink flip missed (the web composed canvas — inheriting
+  prose was invisible), Android RTL relative-position mirroring (CSS
+  insets are physical; the named applier had zero live callers — the
+  legacy chain was fixed), Android explicit-width clamping, the iOS
+  containing-block box-sizing axis (fragmentainer sliced at 118 not
+  120; the abspos child 70×80 not 100×100), WritingMode never inherited
+  (the vertical bail could not fire), and the extractor's inline-run
+  fragmentation (`<strong>` runs became block components — now merged
+  into parent `_text`, marked lossy). corpus-v4.2: **web 0.9787 mean,
+  71/78 — css-grid 1.000/12 perfect, css-break 0.999/12**; Android
+  46 → 58; iOS 56 → 59. Remaining: the css-ui form-control wall, the
+  native float-layout wall, vertical writing modes, and the
+  out-of-contract multi-child multicol family — all classified.
 
 ## Test suites
 
@@ -241,9 +256,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1106 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 502 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 569 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1123 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 513 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 580 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

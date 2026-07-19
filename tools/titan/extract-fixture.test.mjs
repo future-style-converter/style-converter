@@ -25,6 +25,11 @@ import {
   extractOwnText,
   // wave-11 fix 2: leading anonymous body text.
   extractLeadingBodyText,
+  // wave-12 EXTRACTOR-INLINE: pure-inline run merging.
+  extractOwnTextMerged,
+  extractLeadingBodyTextInfo,
+  isPureInlineMergeable,
+  collectStyledTags,
   selectorMatches,
   selectorMatchesPseudoElement,
   propsForElement,
@@ -1422,4 +1427,188 @@ test('wave8: inlineFixtureAssets leaves ref-shaped _wpt blocks untouched', async
   assert.equal(fixture._wpt.lossy, undefined);
   assert.equal(fixture._wpt.lossyReasons, undefined);
   assert.equal(fixture.components.a._lossy, true);
+});
+
+// ── wave-12 EXTRACTOR-INLINE: pure-inline run merging ───────────────────────
+//
+// The cross-platform inline-run fragmentation: the standard WPT reftest
+// preamble `<p>Test passes if there is a filled green square and
+// <strong>no red</strong>.</p>` used to flatten to the glued own-text
+// 'Test passes if there is a filled green square and .' PLUS a separate
+// <strong> child component that every runtime stacks as a BLOCK — 3 lines
+// vs the browser-ref's 2, displacing everything below by ~+20px on all
+// three platforms (and the orphan 'and .' token split Android/iOS line
+// breaking per UAX#14 LB13). The wave-12 short-term contract merges pure-
+// inline children into the parent's `_text` in reading order, dropping the
+// inline styling and marking the component lossy ('inline-run-merged').
+// The real interleaved inline-runs wire is v3-gated roadmap
+// (schema/spec/05-versioning.md — v2 is the frozen current wire).
+
+// The exact preamble innerHtml every abspos-autopos / abspos-in-* /
+// css-grid descendant test carries (and their shared 100px-square ref).
+const PREAMBLE_INNER =
+  'Test passes if there is a filled green square and <strong>no red</strong>.';
+// The exact single string the merge must produce — 'and no red.' with the
+// run spliced at its reading-order position, NOT the glued 'and .'.
+const PREAMBLE_MERGED =
+  'Test passes if there is a filled green square and no red.';
+
+test('wave12: extractOwnTextMerged merges the standard preamble to the exact single string', () => {
+  const r = extractOwnTextMerged(PREAMBLE_INNER, { styledTags: new Set() });
+  assert.equal(r.text, PREAMBLE_MERGED);
+  // Exactly one absorbed run — drives the lossy marker downstream.
+  assert.equal(r.merged, 1);
+});
+
+test('wave12: extractOwnTextMerged without a mergeCtx matches extractOwnText (legacy)', () => {
+  // Null ctx = merging off — byte-identical to the pre-wave-12 glued text.
+  const r = extractOwnTextMerged(PREAMBLE_INNER, null);
+  assert.equal(r.text, extractOwnText(PREAMBLE_INNER));
+  assert.equal(r.text, 'Test passes if there is a filled green square and .');
+  assert.equal(r.merged, 0);
+});
+
+test('wave12: isPureInlineMergeable pins all four guard conditions', () => {
+  // 1. Phrase-content tags qualify; block-ish tags never do.
+  assert.equal(isPureInlineMergeable('strong', {}, 'no red'), true);
+  assert.equal(isPureInlineMergeable('em', {}, 'x'), true);
+  assert.equal(isPureInlineMergeable('div', {}, 'x'), false);
+  assert.equal(isPureInlineMergeable('p', {}, 'x'), false);
+  // 2. Nested elements keep the child-component path.
+  assert.equal(isPureInlineMergeable('strong', {}, 'a <span>b</span>'), false);
+  // 3. ANY attribute disqualifies — id/class/style are style hooks, dir
+  //    flips bidi; conservatism protects styled subjects.
+  assert.equal(isPureInlineMergeable('span', { class: 'target' }, 'x'), false);
+  assert.equal(isPureInlineMergeable('span', { id: 't' }, 'x'), false);
+  assert.equal(isPureInlineMergeable('strong', { style: 'color:red' }, 'x'), false);
+  // 4. A rule targeting the tag directly keeps it a component.
+  assert.equal(isPureInlineMergeable('strong', {}, 'x', new Set(['strong'])), false);
+  assert.equal(isPureInlineMergeable('strong', {}, 'x', new Set(['div'])), true);
+});
+
+test('wave12: collectStyledTags collects rightmost-compound tags only', () => {
+  const rules = parseCss(
+    'strong { color: red }' +          // bare tag → collected
+    '.note em { font-style: normal }' + // rightmost em → collected
+    'span::before { content: "x" }' +  // pseudo-element host span → collected
+    '.flex > div { width: 10px }' +    // rightmost div → collected
+    '* { margin: 0 }' +                // universal — deliberately NOT collected
+    'code + b { color: blue }',        // sibling combinator → unsupported, skipped
+  );
+  const tags = collectStyledTags(rules);
+  assert.deepEqual([...tags].sort(), ['div', 'em', 'span', 'strong']);
+});
+
+test('wave12: extractBodyTreeNested absorbs the preamble strong (no child node)', () => {
+  const html = `<body><p>${PREAMBLE_INNER}</p><div class="flex"><div></div></div></body>`;
+  const tree = extractBodyTreeNested(html, 5, { styledTags: new Set() });
+  // The <p> keeps NO children — the strong was absorbed into ownText.
+  assert.equal(tree[0].tag, 'p');
+  assert.deepEqual(tree[0].children, []);
+  assert.equal(tree[0].ownText, PREAMBLE_MERGED);
+  // The absorbed node is flagged so buildComponents can lossy-mark it.
+  assert.equal(tree[0].inlineMerged, true);
+  // The block sibling is untouched (and un-flagged).
+  assert.equal(tree[1].tag, 'div');
+  assert.equal(tree[1].inlineMerged, undefined);
+});
+
+test('wave12: a nested-element strong does NOT merge (keeps the child path)', () => {
+  // <strong> wrapping an element is real structure — merging would need
+  // recursive flattening and would hide the inner element from the
+  // renderer. It must stay a child component, text un-glued as before.
+  const html = '<body><p>before <strong>keep <span>inner</span></strong> after</p></body>';
+  const tree = extractBodyTreeNested(html, 5, { styledTags: new Set() });
+  assert.equal(tree[0].children.length, 1);
+  assert.equal(tree[0].children[0].tag, 'strong');
+  // Parent text stays the (glued) own-text — the strong was NOT absorbed.
+  assert.equal(tree[0].ownText, 'before after');
+  assert.equal(tree[0].inlineMerged, undefined);
+});
+
+test('wave12: buildComponents merges the abspos-autopos preamble end-to-end', () => {
+  // Minimal reproduction of css-flexbox/abspos/abspos-autopos-htb-ltr.html
+  // (the shape shared by css-break abspos-in-* + css-grid descendants).
+  const html =
+    `<body><p>${PREAMBLE_INNER}</p>` +
+    '<div class="flex"><div></div></div></body>';
+  const rules = parseCss(
+    '.flex { display: flex; width: 100px; height: 100px; background: red }' +
+    '.flex > div { position: absolute; width: 100px; height: 100px; background: green }',
+  );
+  const { components, lossyOverall, lossyReasons } = buildComponents(html, rules, 't');
+  const p = components['t__0'];
+  // The exact merged sentence, ONE component, NO strong child.
+  assert.equal(p._text, PREAMBLE_MERGED);
+  assert.equal(p.children, undefined);
+  // The lossy marker lands on the component AND rolls up to the fixture.
+  assert.equal(p._lossy, true);
+  assert.ok(p._lossyReasons.includes('inline-run-merged'));
+  assert.equal(lossyOverall, true);
+  assert.ok(lossyReasons.includes('inline-run-merged'));
+  // The flex subject is untouched by the merge.
+  assert.equal(components['t__1'].properties.display, 'flex');
+  assert.equal(components['t__1'].children['t__1__0'].properties.background, 'green');
+});
+
+test('wave12: a tag-targeted strong stays a child component (styledTags guard)', () => {
+  // `strong { color: red }` — the declaration under test MUST land, so the
+  // merge is suppressed and the pre-wave-12 child path is preserved.
+  const html = `<body><p>${PREAMBLE_INNER}</p></body>`;
+  const rules = parseCss('strong { color: red }');
+  const { components, lossyReasons } = buildComponents(html, rules, 't');
+  const p = components['t__0'];
+  // Glued text + separate strong child — exactly the legacy shape.
+  assert.equal(p._text, 'Test passes if there is a filled green square and .');
+  const childKeys = Object.keys(p.children);
+  assert.equal(childKeys.length, 1);
+  assert.equal(p.children[childKeys[0]]._tag, 'strong');
+  assert.equal(p.children[childKeys[0]].properties.color, 'red');
+  // No merge happened → no inline-run-merged marker anywhere.
+  assert.ok(!lossyReasons.includes('inline-run-merged'));
+});
+
+test('wave12: leading body text absorbs pure-inline runs and keeps ordering (wave-11 interplay)', () => {
+  // Both features apply: bare body prose CONTAINING an inline element
+  // before the first block. The leading run must carry the full sentence,
+  // the strong must not double-emit as a component, and __text must still
+  // precede __0 in map insertion order (the renderers' document order).
+  const html =
+    '<body>There should be <strong>no red</strong>: <div class="t"></div></body>';
+  const rules = parseCss('.t { width: 20px }');
+  const { components, lossyReasons } = buildComponents(html, rules, 'x');
+  assert.equal(components['x__text']._text, 'There should be no red:');
+  // The absorbed run lossy-marks the __text component + the roll-up.
+  assert.equal(components['x__text']._lossy, true);
+  assert.deepEqual(components['x__text']._lossyReasons, ['inline-run-merged']);
+  assert.ok(lossyReasons.includes('inline-run-merged'));
+  // Exactly __text + the block sibling — no strong component anywhere.
+  const keys = Object.keys(components);
+  assert.deepEqual(keys, ['x__text', 'x__0']);
+  assert.equal(components['x__0'].properties.width, '20px');
+});
+
+test('wave12: extractLeadingBodyTextInfo without mergeCtx keeps wave-11 semantics', () => {
+  // Legacy contract: the run stops at the FIRST renderable element of any
+  // kind — inline or block — and reports zero merges.
+  const html = '<body>There should be <strong>no red</strong>: <div></div></body>';
+  const r = extractLeadingBodyTextInfo(html, null);
+  assert.equal(r.text, 'There should be');
+  assert.equal(r.merged, 0);
+  // The string wrapper delegates to the same path.
+  assert.equal(extractLeadingBodyText(html), 'There should be');
+});
+
+test('wave12: body-level inline runs AFTER the first block keep the component path', () => {
+  // Only the LEADING run is absorbed into __text. A body-level inline
+  // element after the first block sibling has no other text carrier, so
+  // it must remain a component — text is never silently lost.
+  const html = '<body><div class="t"></div><em>tail note</em></body>';
+  const rules = parseCss('.t { width: 20px }');
+  const { components } = buildComponents(html, rules, 'x');
+  // No __text (body opens with an element), block first, em second.
+  assert.equal(components['x__text'], undefined);
+  assert.equal(components['x__0'].properties.width, '20px');
+  assert.equal(components['x__1']._text, 'tail note');
+  assert.equal(components['x__1']._tag, 'em');
 });

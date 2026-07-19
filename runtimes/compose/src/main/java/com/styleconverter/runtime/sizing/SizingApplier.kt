@@ -180,7 +180,10 @@ object SizingApplier {
     /** Width axis. */
     private fun applyWidth(m: Modifier, v: LengthValue?, ctx: SpacingContext): Modifier = when (v) {
         null, LengthValue.Unknown, LengthValue.Auto, LengthValue.None -> m  // no override
-        is LengthValue.Exact -> m.width(v.px.toFloat().dp)
+        // Definite px → the wave-12 overflow-aware exact width (see
+        // exactWidth above: Modifier.width semantics when fitting, declared
+        // size + start-aligned visible overflow when larger than the parent).
+        is LengthValue.Exact -> m.exactWidth(v.px.toFloat().dp)
         is LengthValue.Relative -> if (v.unit == LengthUnit.PERCENT) {
             // % on width resolves against parent width — Compose has a direct
             // modifier for that. We clamp to [0,1] since fillMaxWidth rejects

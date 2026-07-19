@@ -124,6 +124,19 @@ object ComponentRenderer {
         "LetterSpacing", "LineHeight", "WordSpacing",
         "TextAlign", "TextTransform", "TextIndent",
         "WhiteSpace", "TabSize", "Direction",
+        // css-writing-modes-4 §3.1: writing-mode INHERITS ("Inherited: yes").
+        // Wave 12 honesty fix: without it the wave-10 multicol
+        // vertical-writing bail could NEVER fire — the css-break
+        // background-image-001/002 fixtures declare `writing-mode:
+        // vertical-rl` on the PARENT .container while the multicol children
+        // declare only column properties, so MultiColumnExtractor's
+        // WritingMode read (which runs on THIS merged list via
+        // mergedComponent) always saw the horizontal default and fragmented
+        // along the wrong axis with no breadcrumb. Threading it here makes
+        // the documented bail + logFragmentationFallbackOnce actually fire,
+        // and gives descendant placeholder glyphs the inherited vertical
+        // flow exactly like the browser's cascade.
+        "WritingMode",
         // css-color-4 §7: `color` inherits; the currentColor chain hangs
         // off the inherited value (placeholder gate documented above).
         "Color",
