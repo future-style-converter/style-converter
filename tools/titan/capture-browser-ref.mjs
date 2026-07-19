@@ -41,13 +41,58 @@
 // SwiftUI WPTCanvas.background), restoring the camouflage the reftests
 // assume. ALL WPT numbers shift at this boundary — corpus-v4 is the first
 // white-canvas snapshot and is NOT comparable to v1..v3.
-// The injected default INK stays the harness `color: #fff` family (see the
-// injection below): the three runtimes' default-text bottom-outs still pin
-// the historical near-white stage ink (#eee), so keeping the ref's default
-// ink white keeps default-ink text symmetric (camouflaged on BOTH sides —
-// exactly how upstream WPT treats default-ink prose on its white canvas).
-// A black-ink flip must move all four surfaces at once and is deliberately
-// NOT part of this boundary.
+// ── DOCUMENTED INK+FONT SUB-BOUNDARY (corpus-v4.1): BLACK ink, Inter face ────
+// Within the v4 white-canvas era the default TEXT rendering flipped a
+// second time — two coupled changes, one boundary:
+//
+// INK: at the v4 flip the injected default ink was kept `color: #fff` (the
+// harness family) so default-ink prose stayed camouflaged on BOTH sides —
+// but that symmetry was VACUOUS: real WPT pages paint BLACK prose (the UA
+// `color: CanvasText` default), so every default-ink text test "passed" by
+// neither side showing the text at all. From corpus-v4.1 the injected ink
+// is the spec BLACK (#000) and all three runtime default-text bottom-outs
+// flip to black IN WPT MODE simultaneously (web PlaceholderContent
+// WPT_MODE ink + index.html wpt-mode body color, Compose
+// WPT_DEFAULT_TEXT_INK, SwiftUI WPTCanvas.textInk) — making prose tests
+// real instead of vacuous.
+//
+// FONT: black ink made the prose VISIBLE, which exposed the second half of
+// the divergence — the ref rendered it in Chromium's default SERIF while
+// all three harnesses render text in the bundled Inter sans stack (web
+// index.html html/body rule, Compose InterFontFamily, iOS registered
+// "Inter" face). Different faces → different WRAP POINTS, so everything
+// below the prose shifts vertically (the a98rgb cluster's entire failure —
+// the color math there is pixel-exact). From corpus-v4.1 the ref injection
+// pins the SAME stack (REF_FONT_STACK below) and embeds the harness's own
+// Inter faces as data-URI @font-face rules so the first stack entry
+// actually resolves in the ref browser. The natives need no font hook:
+// their default text face is ALREADY the bundled Inter unconditionally
+// (WPT and non-WPT modes alike), so only the ref side had to move.
+//
+// LINE-HEIGHT: the third leg of the same v4.1 sub-boundary. With black ink
+// and the shared Inter face landed, ref-vs-capture prose diverged ONLY in
+// vertical rhythm: the ref's default paragraphs advanced 36px top-to-top
+// (line box ~20px — Chromium's natural Inter `line-height: normal` at
+// 16px) while every harness capture advanced 34px (the Round-4 composed
+// line-box calibration's ~18px box, tuned against the OLD default-serif
+// ref), accumulating 2px per paragraph — 20px over a 10-bar test, the
+// whole css-color/css-break/css-flexbox collapse of the first v4.1 run.
+// Neither side may depend on font-`normal` metrics: the ref injection now
+// pins an explicit deterministic `line-height: 1.25` (REF_LINE_HEIGHT
+// below — 20px at the default 16px, matching Chromium's measured natural
+// Inter rhythm so ref pixels barely move) and all three harness composed
+// line-box calibrations move to the SAME 20px box (web index.html
+// wpt rules + ComponentRenderer composed pin, Compose
+// REF_DEFAULT_FONT_LINE_HEIGHT_RATIO, SwiftUI wptRefLineBoxPx).
+// Author-declared line-height still WINS everywhere — the pin is a
+// DEFAULT (`:where` zero specificity here and on web; the natives only
+// apply it when no LineHeight property resolved).
+//
+// The dark-stage property-fixture path keeps its #eee-family/Inter
+// defaults byte-identically (all three flips are WPT-mode-only).
+// CANVAS_REV bumps at this sub-boundary so v4.0 white-ink refs — and the
+// line-height-less black-ink scratch refs from the first v4.1 run — are
+// never diffed against v4.1 black-ink/Inter/line-height captures.
 //
 // The 800×600 spec-default viewport is still not used. Reasons:
 //   1. The 327-pair pipeline standardises on 390-wide captures. A
@@ -92,12 +137,94 @@ const CANVAS_WIDTH  = 390;
 // the SAME white simultaneously — this constant and theirs move together.
 export const CANVAS_BG = '#FFFFFF';
 // Canvas-contract revision segment in the cache path. Bump/replace whenever
-// the canvas contract changes (background, padding, width, injected frame)
-// so stale refs from an older contract can never be diffed against captures
-// made under the new one. 'white' == the corpus-v4 white-canvas contract;
-// the pre-v4 dark refs live at the un-segmented refs/<sha>/<section>/ path.
-export const CANVAS_REV = 'white';
+// the canvas contract changes (background, padding, width, injected frame,
+// injected font, injected line-height) so stale refs from an older contract
+// can never be diffed against captures made under the new one.
+// 'white-black-ink-font-lh' == the full corpus-v4.1 contract (white canvas
+// + spec-BLACK injected default ink + the harness Inter font stack + the
+// deterministic REF_LINE_HEIGHT pin — the header's three-legged ink+font+
+// line-height sub-boundary). The line-height-less 'white-black-ink-font'
+// scratch refs from the first v4.1 experiments, the corpus-v4.0
+// white-canvas/white-ink refs at refs/<sha>/white/, and the pre-v4 dark
+// refs at the un-segmented refs/<sha>/<section>/ path are ALL stale —
+// none is ever mixed into a v4.1 diff.
+export const CANVAS_REV = 'white-black-ink-font-lh';
 const CANVAS_PAD_PX = 16;
+
+// ── corpus-v4.1 FONT pin (header sub-boundary, FONT half) ────────────────────
+//
+// The font-family stack injected at zero specificity on the ref's body.
+// MUST stay byte-identical to the harness stack in
+// apps/web-harness/index.html's `html, body { font-family: … }` rule — the
+// whole point is that ref prose and harness prose hit the SAME face and
+// wrap at the SAME points. Exported so wpt-white-canvas.test.mjs can pin
+// the two strings against each other.
+export const REF_FONT_STACK =
+  "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif";
+
+// ── corpus-v4.1 LINE-HEIGHT pin (header sub-boundary, third leg) ─────────────
+//
+// The default line-height injected at zero specificity on the ref's body.
+// UNITLESS on purpose (CSS Inheritance: a number inherits as the NUMBER and
+// recomputes against each descendant's own font-size — exactly how a UA
+// default behaves), so `1.25` yields a 20px line box at the default 16px
+// root and scales with any author font-size. 20px matches Chromium's
+// MEASURED natural Inter `line-height: normal` rhythm (default ref
+// paragraphs advanced 36px top-to-top = 20px box + 16px collapsed margins),
+// so pinning it barely moves ref pixels — the point is DETERMINISM: neither
+// the ref nor the harnesses may depend on font-`normal` metrics, which are
+// face- and rasterizer-specific. The three harness composed line-box
+// calibrations pin the SAME 20px box (web index.html wpt rules '1.25' +
+// ComponentRenderer composed default, Compose
+// REF_DEFAULT_FONT_LINE_HEIGHT_RATIO 1.25, SwiftUI wptRefLineBoxPx 20).
+// Exported so wpt-white-canvas.test.mjs can pin all four surfaces together.
+export const REF_LINE_HEIGHT = '1.25';
+
+// The harness's bundled Inter faces (the same files the web harness serves
+// at /fonts/ and the natives bundle as res/font/inter_*.ttf). The ref page
+// is raw WPT HTML with no @font-face of its own, so 'Inter' would silently
+// fall through to -apple-system without an embedded face — a soft font
+// drift that would defeat the pin. We embed Regular (400) + Bold (700):
+// the two weights UA-stylesheet prose can reach (<b>/<strong>/<h*>);
+// Medium/Black are only reachable via author `font-weight` rules, which
+// the ref's own CSS supplies and which don't route through this default.
+const HARNESS_FONT_DIR = join(REPO_ROOT, 'apps', 'web-harness', 'public', 'fonts');
+const EMBEDDED_FONT_WEIGHTS = [
+  ['Inter-Regular.ttf', 400],
+  ['Inter-Bold.ttf', 700],
+];
+
+// Lazily-built @font-face CSS with base64 data-URI payloads (~550 KB per
+// face — read once per process, injected per page; local CDP handles it).
+// base64 is SAFE here, unlike extract-fixture.mjs's percentEncodeBytes:
+// this CSS goes straight to the ref browser and never passes through the
+// converter's value-lowercasing IR path.
+let _interFontFaceCss = null;
+async function interFontFaceCss() {
+  if (_interFontFaceCss !== null) return _interFontFaceCss;
+  const faces = [];
+  for (const [file, weight] of EMBEDDED_FONT_WEIGHTS) {
+    try {
+      const bytes = await fs.readFile(join(HARNESS_FONT_DIR, file));
+      // font-display: block mirrors the harness @font-face rules so the
+      // capture never races a fallback-face first paint.
+      faces.push(
+        `@font-face { font-family: 'Inter'; font-style: normal; ` +
+        `font-weight: ${weight}; font-display: block; ` +
+        `src: url(data:font/ttf;base64,${bytes.toString('base64')}) format('truetype'); }`,
+      );
+    } catch (err) {
+      // No silent fallthrough: a missing harness font means the ref would
+      // quietly render system-sans while the harnesses render Inter — the
+      // exact wrap-point drift this pin exists to kill. Warn loudly; the
+      // stack's -apple-system fallback keeps captures running.
+      console.error(`[capture-browser-ref] WARN: cannot embed ${file} ` +
+        `(${err.message}) — ref falls back past 'Inter' in REF_FONT_STACK`);
+    }
+  }
+  _interFontFaceCss = faces.join('\n');
+  return _interFontFaceCss;
+}
 
 /** Resolve the WPT SHA the same way bucket-wpt.mjs and fetch-wpt.sh do. */
 async function resolveWptRef() {
@@ -181,19 +308,49 @@ async function renderOne(page, wptRef, testRel) {
   // Padding is handled the same way: `:where(body) { padding }` lets a
   // ref that explicitly sets its own body padding/margin keep it.
   //
-  // `color: #fff` is DELIBERATELY kept at the corpus-v4 white-canvas flip
-  // (header note): the platform runtimes' default-text bottom-outs still
-  // pin the historical near-white stage ink (#eee family), so white default
-  // ink on the white canvas keeps default-ink prose camouflaged on BOTH
-  // sides of the diff — matching upstream WPT, where white ink vanishes
-  // into the white page. Flipping the ref ink to the spec-default black
-  // WITHOUT flipping every runtime bottom-out would black out ref prose
-  // while captures paint near-invisible #eee → an asymmetric text penalty.
+  // `color: #000` — the corpus-v4.1 ink+font sub-boundary, INK half
+  // (header note). Real WPT pages paint default prose in the UA `color:
+  // CanvasText` default, which is BLACK on the light-scheme white page
+  // (html.css UA stylesheet); through corpus-v4.0 we injected the harness
+  // `color: #fff` family instead, so default-ink text vanished on BOTH
+  // sides of the diff and every prose test passed VACUOUSLY. Stating #000
+  // explicitly (rather than deleting the declaration) pins the
+  // light-scheme value even if the headless UA ever resolves CanvasText
+  // differently (e.g. a forced dark scheme). `:where()` keeps it
+  // zero-specificity, so any author `color` rule in the ref still wins —
+  // exactly like a UA default. The three runtime WPT-mode bottom-outs
+  // flip to the same black at this sub-boundary (see the header list);
+  // the flip is WPT-mode-only, so the dark-stage 327-pair path keeps its
+  // #eee-family ink byte-identically.
+  //
+  // `font-family: REF_FONT_STACK` — the FONT half of the same
+  // sub-boundary. Without it the ref laid instruction prose out in
+  // Chromium's default SERIF while every harness renders the bundled
+  // Inter sans — different wrap points shifted everything below the prose
+  // (the a98rgb cluster's whole failure; its color math is pixel-exact).
+  // The @font-face preamble (interFontFaceCss) embeds the harness's own
+  // Inter Regular/Bold as data URIs so the stack's first entry resolves
+  // here too; `:where(body)` + inheritance carry the face to descendants
+  // at zero specificity, so any author font rule in the ref still wins.
+  //
+  // `line-height: REF_LINE_HEIGHT` — the LINE-HEIGHT leg of the same
+  // sub-boundary (constant doc above). With ink and face pinned, the last
+  // ref-vs-capture prose divergence was VERTICAL RHYTHM: the ref's
+  // `line-height: normal` Inter box (~20px @16px) vs the harnesses'
+  // Round-4 calibrated ~18px box — 2px of drift PER PARAGRAPH down a
+  // stacked test. Pinning an explicit unitless 1.25 here (20px @16px —
+  // Chromium's measured natural rhythm, so ref pixels barely move) makes
+  // the ref deterministic while the harness calibrations move to the same
+  // 20px box. `:where(body)` + unitless inheritance keep it a true UA-like
+  // default: any author line-height rule in the ref still wins.
   await page.addStyleTag({
     content: `
+      ${await interFontFaceCss()}
       :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }
       :where(body) { padding: ${CANVAS_PAD_PX}px; box-sizing: border-box;
-                     min-height: 100vh; color: #fff; }
+                     min-height: 100vh; color: #000;
+                     font-family: ${REF_FONT_STACK};
+                     line-height: ${REF_LINE_HEIGHT}; }
     `,
   });
 
@@ -210,6 +367,18 @@ async function renderOne(page, wptRef, testRel) {
   ));
   await page.setViewport({ width: CANVAS_WIDTH, height: docHeight, deviceScaleFactor: 1 });
   await page.evaluate(() => new Promise((r) => setTimeout(r, 50)));
+
+  // corpus-v4.1 FONT half: the injected Inter @font-face (base64 data-URI)
+  // loads ASYNCHRONOUSLY — the settle timers above are not a font-ready
+  // guarantee, and a screenshot taken before the face applies renders the
+  // UA default (serif), silently diverging every prose wrap from the
+  // harness captures. This exact race collapsed the first v4.1 section
+  // run (css-color web 0.93 → 0.66). document.fonts.ready resolves when
+  // all pending FontFace loads settle; the double-rAF then guarantees a
+  // relayout with the loaded face has actually painted.
+  await page.evaluate(() => document.fonts.ready.then(
+    () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+  ));
 
   await page.screenshot({ path: dest, type: 'png' });
   return { dest, cached: false };

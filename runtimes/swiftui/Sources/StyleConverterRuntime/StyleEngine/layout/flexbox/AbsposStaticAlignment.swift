@@ -56,8 +56,23 @@ enum AbsposStaticAlignment {
     /// legacy start anchor — css-flexbox-1 §4.1 treats them as
     /// flex-start for abspos children).
     static func resolveCross(from properties: [IRProperty]) -> Spec? {
+        // Delegates to the generalized reader with the align-self wire
+        // names — kept as the flex lane's entry point so every existing
+        // caller and pin stays byte-identical.
+        resolveSelf(from: properties, typedType: "AlignSelf", cssName: "align-self")
+    }
+
+    /// Wave 11 (lane IOS grid-abspos) — the generalized SELF-alignment
+    /// wire reader: the exact resolveCross algorithm, parameterized by
+    /// the property pair so the grid static-position lane can read
+    /// `justify-self` (typed "JustifySelf" / Generic "justify-self")
+    /// through the SAME two channels (css-align-3 treats align-self and
+    /// justify-self as one grammar on two axes).
+    static func resolveSelf(from properties: [IRProperty],
+                            typedType: String,
+                            cssName: String) -> Spec? {
         // Channel 1 — typed wire: bare keyword primitive ("CENTER").
-        if let prop = properties.first(where: { $0.type == "AlignSelf" }) {
+        if let prop = properties.first(where: { $0.type == typedType }) {
             // Same keyword reader the flexbox extractor uses.
             if let base = baseOf(ValueExtractors.extractKeyword(prop.data)) {
                 // Typed keywords never carry an overflow modifier (the
@@ -70,14 +85,14 @@ enum AbsposStaticAlignment {
         }
         // Channel 2 — Generic escape hatch for `safe|unsafe <pos>`.
         for p in properties where p.type == "Generic" {
-            // Only align-self Generics participate.
+            // Only Generics for THIS longhand participate.
             guard case .object(let o) = p.data,
-                  o["propertyName"]?.stringValue == "align-self",
+                  o["propertyName"]?.stringValue == cssName,
                   let raw = o["rawValue"]?.stringValue else { continue }
-            // First align-self Generic wins (cascade already resolved).
+            // First matching Generic wins (cascade already resolved).
             return parseRaw(raw)
         }
-        // No align-self claim on either channel.
+        // No claim for this longhand on either channel.
         return nil
     }
 
@@ -105,14 +120,20 @@ enum AbsposStaticAlignment {
     /// divergence in the runtime's LTR horizontal-tb normalization.
     private static func baseOf(_ kw: String?) -> Base? {
         switch kw?.uppercased() {
-        // css-align-3 §4.2 start-family keywords.
-        case "FLEX-START", "FLEX_START", "START", "SELF-START", "SELF_START":
+        // css-align-3 §4.2 start-family keywords. `left` joins via the
+        // wave-11 justify-self reader — css-align-3 §5.4: left/right
+        // are justify-axis-only and fold to start/end in this runtime's
+        // LTR horizontal-tb normalization (align-self never emits them,
+        // so the flex lane's table is unchanged in practice).
+        case "FLEX-START", "FLEX_START", "START", "SELF-START", "SELF_START",
+             "LEFT":
             return .start
         // center + the anchor-positioning fold (no anchor in scope).
         case "CENTER", "ANCHOR-CENTER", "ANCHOR_CENTER":
             return .center
-        // end-family keywords.
-        case "FLEX-END", "FLEX_END", "END", "SELF-END", "SELF_END":
+        // end-family keywords (+ the LTR `right` fold, see above).
+        case "FLEX-END", "FLEX_END", "END", "SELF-END", "SELF_END",
+             "RIGHT":
             return .end
         // auto/stretch/baseline/unknown → no static-position claim.
         default:

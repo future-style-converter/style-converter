@@ -1,0 +1,153 @@
+{
+ "_snapshot": "corpus-v4.1",
+ "_note": "THE TYPOGRAPHIC-CONTRACT SUB-BOUNDARY within the v4 white-canvas era — the first FULLY-REAL snapshot: default prose ink flipped to spec BLACK on all four surfaces (v4.0 kept the near-white harness ink, so default-ink text tests matched VACUOUSLY — neither side showed the text; v4.0 pass counts are inflated by those vacuous matches and NOT comparable for prose tests), the ref injection pins the harness Inter stack (embedded data-URI @font-face + document.fonts.ready await — the un-awaited font load raced the screenshot and collapsed the first v4.1 run), and an explicit line-height:1.25 default is pinned on ref+web+Compose+iOS (neither side depends on font-normal metrics; proven ref-vs-web SSIM 1.0000 band-identical on background-color-hsl-001). Also at this boundary: extractor CSS-comment=separator fix (hsla comment variants un-corrupted), anonymous leading body-text components (the 18px translation on 4 css-grid tests), WPT-mode content-box default on both natives, grid abspos partition (css-grid-1 §9/9.2) on both natives, and the Compose multicol fragmentation gate actually firing in the real tree (BoxWithConstraints loosened the wave-10 gate constraints — integration gap). HEADLINES vs v4.0 (prose-real vs prose-vacuous): css-color 5/11-ish -> web 11 / iOS 11 / Android 10 (means 0.986-0.996); iOS TOTAL 36 -> 56 passing (the waves-5-7 text pipeline visible at last); css-transforms iOS 12/12; css-grid Android 4 -> 8, web 10/12. Android-web prose rhythm at 16px remains the widest native gap (css-flexbox Android 1/12) — wave-12 seam.",
+ "artifact": "tools/titan/runs/titan-corpus-v4-1b (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "b7ac4a39",
+ "date": "2026-07-19",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "raw SSIM >= 0.95 (composed per-test capture vs upstream Chromium browser-ref); each platform diffed against the SAME ref",
+ "sampling": "first 12 bucket-A tests per section (alphabetical, --max-tests 12 — NOT random); 7 sections = mandated top-3 (css-break/css-ui/css-grid) + breadth (css-color/css-backgrounds/css-flexbox/css-transforms)",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh)",
+ "totals": {
+  "tests": 84,
+  "web": {
+   "measured": 78,
+   "meanSsim": 0.9556,
+   "passAt95": 53
+  },
+  "ios": {
+   "measured": 78,
+   "meanSsim": 0.9276,
+   "passAt95": 56
+  },
+  "android": {
+   "measured": 78,
+   "meanSsim": 0.9201,
+   "passAt95": 46
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 9,
+    "meanSsim": 0.95,
+    "passAt95": 8
+   },
+   "ios": {
+    "measured": 9,
+    "meanSsim": 0.9492,
+    "passAt95": 8
+   },
+   "android": {
+    "measured": 9,
+    "meanSsim": 0.95,
+    "passAt95": 8
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.921,
+    "passAt95": 3
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.7765,
+    "passAt95": 5
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.7582,
+    "passAt95": 3
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.996,
+    "passAt95": 11
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.9927,
+    "passAt95": 11
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.9861,
+    "passAt95": 10
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9394,
+    "passAt95": 4
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9355,
+    "passAt95": 7
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9199,
+    "passAt95": 1
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9759,
+    "passAt95": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9562,
+    "passAt95": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9539,
+    "passAt95": 8
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9979,
+    "passAt95": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9879,
+    "passAt95": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9819,
+    "passAt95": 11
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 10,
+    "meanSsim": 0.9015,
+    "passAt95": 5
+   },
+   "ios": {
+    "measured": 10,
+    "meanSsim": 0.9017,
+    "passAt95": 5
+   },
+   "android": {
+    "measured": 10,
+    "meanSsim": 0.9001,
+    "passAt95": 5
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh FIRST, then section-runner.sh <section> --all-platforms --max-tests 12 --run-id titan-corpus-v4-1b --foreground x7; aggregate per-section manifests filtering scoreExcluded."
+}

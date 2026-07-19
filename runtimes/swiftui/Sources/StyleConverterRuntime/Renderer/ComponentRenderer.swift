@@ -435,17 +435,23 @@ public struct ComponentRenderer: View {
 
     // MARK: - WPT composed line-box calibration (TITAN Round 4 GAP 1, height half)
 
-    /// The Chromium browser-ref's default-font `<p>` line box at a 16px
-    /// root — ~18px (line-height ≈ 1.125). capture-browser-ref.mjs forces
-    /// NO font, so the ref's text lays out in Chromium's default UA face;
-    /// the harness FORCES Inter for iOS/Android/web parity, and Inter's
-    /// `normal` line box (~20px @16px) is ~2px TALLER per line. Flush bars
-    /// hid that; once GAP 1's UA margins spread the bars apart the 2px
-    /// COMPOUNDS down a 10-bar test into ~half-a-pitch vertical drift and
-    /// the edge-phase-sensitive SSIM collapses (web commit 4e6bacf0). The
-    /// web fix pins `line-height: 18px` in composed mode; this is the same
-    /// calibration constant for the native path.
-    public static let wptRefLineBoxPx: CGFloat = 18
+    /// The Chromium browser-ref's `<p>` line box at a 16px root — 20px,
+    /// recalibrated at the corpus-v4.1 LINE-HEIGHT sub-boundary. The
+    /// Round-4 value was 18: back then capture-browser-ref.mjs forced NO
+    /// font and Chromium's default-SERIF `line-height: normal` box was
+    /// ~18px @16px, ~2px SHORTER than the harness Inter box — pinning 18
+    /// removed the per-bar compounding drift down stacked tests. From
+    /// corpus-v4.1 the ref pins the harness Inter face AND an explicit
+    /// deterministic `line-height: 1.25` (capture-browser-ref.mjs
+    /// REF_LINE_HEIGHT — 20px @16px, Chromium's measured natural Inter
+    /// rhythm: default ref paragraphs advance 36px top-to-top), so the OLD
+    /// 18px calibration became the drift (captures advanced 34px — 2px
+    /// re-accumulating per paragraph, the css-color/css-break/css-flexbox
+    /// collapse of the first v4.1 run). 20 mirrors the ref pin at the
+    /// 16px default root; web pins the same unitless 1.25
+    /// (index.html wpt rules + ComponentRenderer.tsx), Compose the same
+    /// ratio (REF_DEFAULT_FONT_LINE_HEIGHT_RATIO 1.25).
+    public static let wptRefLineBoxPx: CGFloat = 20
 
     /// The line-height a placeholder text run should lay out with. Outside
     /// WPT capture (the product path + the whole committed baseline corpus)
@@ -453,10 +459,11 @@ public struct ComponentRenderer: View {
     /// SwiftUI's natural `line-height: normal` metrics — so every existing
     /// render is byte-unchanged. In WPT capture it DEFERS to any
     /// IR-declared line-height (a test that sets its own keeps it) and
-    /// otherwise pins the ref line box (18px @16px) so a forced-Inter bar
-    /// matches the browser-ref's default-font `<p>` height, removing the
-    /// compounding drift. Pure + static so WPTCaptureModeTests pins it
-    /// without a render surface (same pattern as suppressesNamePlaceholder).
+    /// otherwise pins the ref line box (20px @16px since the corpus-v4.1
+    /// REF_LINE_HEIGHT pin) so a forced-Inter bar matches the browser-ref's
+    /// pinned `<p>` height, removing the compounding drift. Pure + static
+    /// so WPTCaptureModeTests pins it without a render surface (same
+    /// pattern as suppressesNamePlaceholder).
     public static func effectiveLineHeight(declared: CGFloat?,
                                            wptCaptureMode: Bool) -> CGFloat? {
         // IR-declared line-height always wins (author > our calibration).
@@ -669,14 +676,50 @@ public struct ComponentRenderer: View {
             // resolve against a definite ancestor basis (CSS 2.1
             // §10.5); nil keeps the percent-height skip.
             s.spacing.context.containingBlockHeightPx = containingBlockHeight.map(Double.init)
+            // TITAN WPT lane (wave 11) — the box-sizing UA default.
+            // css-sizing-3 §3: the INITIAL value of box-sizing is
+            // content-box, and WPT refs are authored against that UA
+            // default, while SizeConfig.boxSizing nil deliberately means
+            // "the border-box status quo" (the whole dark-stage corpus is
+            // captured against the web harness's `* { box-sizing:
+            // border-box }` reset). In WPT capture mode ONLY, an
+            // UNDECLARED box-sizing therefore defaults to contentBox —
+            // the iOS twin of the web harness's `body.wpt-mode
+            // [data-component-id] { box-sizing: content-box }` override
+            // and Compose's SizingApplier.effectiveBoxSizing. A DECLARED
+            // keyword always wins verbatim; the pure decision is pinned
+            // in WPTCaptureModeTests (wptCaptureMode false → nil stays
+            // nil, so the dark-stage path is byte-identical). Folded
+            // BEFORE the size-injection folds below so each can convert
+            // its border-box FRAME extent to the declared-content slot.
+            // Known scoped limitation: the percent-basis lanes
+            // (flexContentSize / ContainingBlockBasis contentBox) still
+            // read the declared size as border-box — a padded WPT
+            // container with percent-sized children under-publishes its
+            // basis (TODO, tracked with the explicit content-box case).
+            s.size.boxSizing = SizeApplierMath.effectiveBoxSizing(
+                declared: s.size.boxSizing, wptCaptureMode: wptCaptureMode)
             if let h = gridStretchHeight, s.size.height == nil {
-                s.size.height = .exact(px: h)
+                // The injected row height is a border-box FRAME extent
+                // from the parent's stretch plan (css-align-3 §9 sizes
+                // the item's margin/border box into the track). Under
+                // the WPT content-box default above the declared slot
+                // means CONTENT, so subtract this box's own bands
+                // (contentBoxInflation — 0 unless effective contentBox,
+                // keeping every non-WPT render byte-identical) so the
+                // painted frame still equals the injected track height.
+                s.size.height = .exact(px: SizeApplierMath.declaredFromFrame(
+                    h, inflate: StyleBuilder.contentBoxInflation(s).v))
             }
             // Column-flex stretch (fidelity wave 2): same fold as the
             // grid/row channel but on the inline axis. An explicit CSS
             // width always wins (css-align-3 §9 auto-size precondition).
             if let w = flexStretchWidth, s.size.width == nil {
-                s.size.width = .exact(px: w)
+                // Same frame→declared conversion as the grid fold above
+                // (identity whenever the effective box-sizing is not
+                // contentBox — i.e. everywhere outside WPT capture).
+                s.size.width = .exact(px: SizeApplierMath.declaredFromFrame(
+                    w, inflate: StyleBuilder.contentBoxInflation(s).h))
             }
             // TITAN Round 4 (GAP 1, WIDTH half) — composed-WPT block-flow
             // fill. A block box with width:auto fills its containing block
@@ -696,7 +739,16 @@ public struct ComponentRenderer: View {
             if wptCaptureMode, let w = wptBlockFlowFillWidth,
                s.size.width == nil, !Self.isOutOfFlow(component),
                s.layout.display != .inline {
-                s.size.width = .exact(px: w)
+                // Wave 11: the published fill width is the containing
+                // block's content width — the box's target FRAME extent
+                // (CSS 2.1 §10.3.3: margin+border+padding+content fill
+                // the containing block, so content = CB − bands). Under
+                // the WPT content-box default the declared slot means
+                // CONTENT, so the frame→declared conversion IS exactly
+                // that §10.3.3 subtraction; without it a padded/bordered
+                // block filled CB + bands and overflowed the browser-ref.
+                s.size.width = .exact(px: SizeApplierMath.declaredFromFrame(
+                    w, inflate: StyleBuilder.contentBoxInflation(s).h))
             }
             // Fidelity wave 3 — multicol full-width default
             // (Columns_Decorated, 0.556 → worst wave-3 row). A multicol
@@ -711,7 +763,12 @@ public struct ComponentRenderer: View {
             // wins. TODO: small-content multicol boxes (N × max-content
             // < canvas) would need static text measurement to hug.
             if s.size.width == nil, let n = s.columns?.count, n >= 2 {
-                s.size.width = .exact(px: Double(s.spacing.context.containingBlockWidth))
+                // Wave 11: same frame→declared conversion as the folds
+                // above — the containing-block width is the multicol
+                // box's target FRAME extent (identity outside WPT mode).
+                s.size.width = .exact(px: Double(SizeApplierMath.declaredFromFrame(
+                    s.spacing.context.containingBlockWidth,
+                    inflate: StyleBuilder.contentBoxInflation(s).h)))
             }
             // Lane IOS-COLLAPSE (CSS 2.1 §8.3.1) — fold the parent's
             // collapse override into this box's margin BEFORE the style
@@ -1086,15 +1143,34 @@ public struct ComponentRenderer: View {
                 childProperties: child.properties,
                 containerW: childCB,
                 containerH: childCBH)
+            // Wave 11 (lane IOS grid-abspos, css-grid-1 §9.2) — when
+            // THIS positioned ancestor is a GRID container, an
+            // inset-less abspos child sits at its static position "as
+            // if it were the sole grid item in a grid area whose edges
+            // coincide with the CONTENT edges of the grid container":
+            // the shift moves the child from the overlay's padding-box
+            // anchor to the content-box origin and applies the
+            // sole-item align-self/justify-self (defaulting to the
+            // container's align-items/justify-items) alignment there.
+            // Zero for every non-grid ancestor, and per axis whenever
+            // an explicit inset owns that axis (css-position-3 §3.5) —
+            // mutually exclusive with the flex shift above (display is
+            // never flex AND grid), so the sum below never composes.
+            let gridShift = AbsposGridStaticPosition.staticOffset(
+                parentStyle: style,
+                childProperties: child.properties)
             // v2: children render through ComponentHost (placement
             // parent-data attached; inert here — the overlay ZStack
             // reads no layout values).
             ComponentHost(component: child)
-                // The cross-axis static-position offset — applied on
-                // the HOST so the child's own PositionApplier (which
-                // only runs for explicit insets, gated off above)
-                // never composes with it on the same axis.
-                .offset(x: staticShift.width, y: staticShift.height)
+                // The static-position offset — applied on the HOST so
+                // the child's own PositionApplier (which only runs for
+                // explicit insets, gated off above) never composes
+                // with it on the same axis. Flex and grid shifts are
+                // mutually exclusive (see above), so adding them keeps
+                // exactly one lane's geometry.
+                .offset(x: staticShift.width + gridShift.width,
+                        y: staticShift.height + gridShift.height)
                 // Reset the size-injection channels: an absolute child
                 // never stretch-inherits grid/flex geometry (it is not
                 // an item of the parent's formatting context).
@@ -1474,9 +1550,18 @@ public struct ComponentRenderer: View {
                     // harness body's #eee when no ancestor declares
                     // color (stage contract), so the honest fallback is
                     // the opaque default text color, not the pick.
+                    // corpus-v4.1 ink sub-boundary: in WPT capture the
+                    // inherit chain ends at the ref injection's
+                    // `:where(body) { color:#000 }` instead, so the
+                    // bottom-out routes through captureTextInk — spec
+                    // BLACK in WPT mode, the near-white stage default
+                    // verbatim everywhere else (327 baselines).
                     color: style.text.color
                         ?? (currentColorBottomsOut
-                                ? InheritedText.defaultTextColor : nil),
+                                ? WPTCanvas.captureTextInk(
+                                    wptCaptureMode: wptCaptureMode,
+                                    defaultInk: InheritedText.defaultTextColor)
+                                : nil),
                     textConfig: style.text,
                     backgroundColor: style.backgroundColor,
                     clipTextGradient: nil,
@@ -1874,10 +1959,19 @@ public struct ComponentRenderer: View {
                 // contrast pick (see currentColorBottomsOut). Mutually
                 // exclusive with colorIsInheritedOnly (which requires
                 // an inherited Color to exist).
+                // corpus-v4.1 ink sub-boundary: in WPT capture the
+                // chain ends at the ref injection's `:where(body)
+                // { color:#000 }` instead, so the bottom-out routes
+                // through captureTextInk — spec BLACK in WPT mode, the
+                // near-white stage default verbatim everywhere else
+                // (the 327 baselines depend on that side never moving).
                 color: colorIsInheritedOnly ? nil
                     : style.text.color
                         ?? (currentColorBottomsOut
-                                ? InheritedText.defaultTextColor : nil),
+                                ? WPTCanvas.captureTextInk(
+                                    wptCaptureMode: wptCaptureMode,
+                                    defaultInk: InheritedText.defaultTextColor)
+                                : nil),
                 textConfig: style.text,
                 backgroundColor: style.backgroundColor,
                 clipTextGradient: clipText,
@@ -2010,7 +2104,8 @@ private struct PlaceholderLabel: View {
     // EXPLICITLY from ComponentRenderer (which owns the @Environment) so the
     // value is unambiguous at this single call site. Default false = product
     // + every committed baseline unchanged; the composed WPT path passes
-    // true. When on, the placeholder pins the ref line box (18px @16px) and
+    // true. When on, the placeholder pins the ref line box (20px @16px —
+    // the corpus-v4.1 REF_LINE_HEIGHT pin, see wptRefLineBoxPx) and
     // drops its 4px breathing room so a text bar is as tight as the
     // browser-ref's `<p>` (see ComponentRenderer.effectiveLineHeight + the
     // padding gate below). The 50×30 MinBoxFloor is dropped in the same mode
@@ -2081,7 +2176,7 @@ private struct PlaceholderLabel: View {
         }()
         // TITAN Round 4 (GAP 1, height half) — the line-height this run
         // lays out with: the IR-declared value when present (defer to it),
-        // else the ref line box (18px) in WPT capture, else nil (SwiftUI
+        // else the ref line box (20px — corpus-v4.1) in WPT capture, else nil (SwiftUI
         // natural metrics — the unchanged product path). Feeds BOTH the
         // leading split and the minHeight frame below so the bar height +
         // baselines track the browser-ref's default-font `<p>`.
@@ -2099,9 +2194,10 @@ private struct PlaceholderLabel: View {
         // TITAN Round 4 (GAP 1, height half) — single-line proxy for the
         // WPT line-box CAP below. A run with NO internal whitespace can never
         // wrap, so in composed WPT capture we can pin its box to EXACTLY one
-        // ref line box: the browser-ref lays `line-height: normal` `<p>`s out
-        // at ~18px, but the harness-forced Inter face reports a ~20px line so
-        // every bar would sit ~2px tall and DRIFT down a 10-bar test. Capping
+        // ref line box (20px @16px — the corpus-v4.1 REF_LINE_HEIGHT pin;
+        // the ref no longer lays `<p>`s out on font-`normal` metrics), while
+        // the Inter face's own natural metrics could report a different line
+        // and every bar would drift down a 10-bar test. Capping
         // the single-line box to the ref line box removes that drift. Text
         // that MAY wrap (any whitespace) is left to grow to N line boxes so
         // multi-line content (e.g. a full-sentence `<p>`) is never clipped.
@@ -2632,6 +2728,19 @@ private struct PlaceholderLabel: View {
 
     private var resolvedColor: Color {
         if let c = color { return c }
+        // corpus-v4.1 ink sub-boundary (WPT mode only): a real WPT page's
+        // default prose is the UA `color: CanvasText` BLACK, and the
+        // browser-ref now injects the same spec black
+        // (capture-browser-ref.mjs `:where(body) { color:#000 }`). The
+        // near-white contrast fallback below vanished into the v4 white
+        // canvas exactly like the ref's old white ink, so default-ink text
+        // tests passed VACUOUSLY. WPT capture therefore bottoms out at
+        // WPTCanvas.textInk (opaque #000), in lock-step with web
+        // (index.html wpt-mode rule + PlaceholderContent WPT_MODE ink) and
+        // Compose (WPT_DEFAULT_TEXT_INK). The luminance pick below is the
+        // 327-pair stage contract and stays byte-identical — the flag is
+        // false on every baseline path.
+        if wptCaptureMode { return WPTCanvas.textInk }
         // Web default: inherit #eee @ 0.7 on dark bg; dark text on light bg.
         // Note: alpha is intentionally NOT folded into the luminance here.
         // For translucent fills like rgba(255,255,255,0.2) the raw RGB is

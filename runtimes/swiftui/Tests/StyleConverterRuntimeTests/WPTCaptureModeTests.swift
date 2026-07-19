@@ -39,8 +39,10 @@ final class WPTCaptureModeTests: XCTestCase {
     /// luminance contrast pick anymore — so glyph ink only separates from
     /// the fill on a dark background (over the old #eee fill it composited
     /// to ≈237 vs 238: invisible to a pixel probe). Real text in WPT mode
-    /// picks the same light-on-dark ink via PlaceholderLabel.resolvedColor,
-    /// so ONE ink band below covers both probes. The explicit height pins
+    /// paints the corpus-v4.1 spec-BLACK default ink (WPTCanvas.textInk
+    /// via PlaceholderLabel.resolvedColor), so the pixel probes use TWO
+    /// bands: the light band for the non-WPT name label, the dark band for
+    /// WPT-mode prose (see labelInkPixelCount). The explicit height pins
     /// the box size whether or not the label is present. `text` verbatim.
     private func boxJSON(name: String, text: String? = nil) -> String {
         let textField = text.map { ",\"text\":\"\($0)\"" } ?? ""
@@ -107,14 +109,18 @@ final class WPTCaptureModeTests: XCTestCase {
             "flag OFF + no IR line-height must stay nil (natural metrics)")
     }
 
-    /// Flag ON + no IR line-height: pin the ref line box (18px @16px) so the
-    /// forced-Inter bar matches the browser-ref's default-font `<p>`.
+    /// Flag ON + no IR line-height: pin the ref line box (20px @16px — the
+    /// corpus-v4.1 REF_LINE_HEIGHT pin, no longer any font's `normal`
+    /// metrics) so the forced-Inter bar matches the browser-ref's pinned `<p>`.
     func testEffectiveLineHeightOnPinsRefLineBox() {
         XCTAssertEqual(
             ComponentRenderer.effectiveLineHeight(declared: nil, wptCaptureMode: true),
             ComponentRenderer.wptRefLineBoxPx,
             "flag ON + no IR line-height must pin the ref line box")
-        XCTAssertEqual(ComponentRenderer.wptRefLineBoxPx, 18)
+        // 20 == 16px root × the ref injection's unitless 1.25
+        // (capture-browser-ref.mjs REF_LINE_HEIGHT) — the four-surface
+        // corpus-v4.1 lock-step value.
+        XCTAssertEqual(ComponentRenderer.wptRefLineBoxPx, 20)
     }
 
     /// An IR-declared line-height ALWAYS wins (author > calibration), flag
@@ -132,11 +138,14 @@ final class WPTCaptureModeTests: XCTestCase {
 
     /// Render a component through the capture-canvas contract (390pt width,
     /// 16pt padding, top-leading, scale 1) with the WPT flag set as given,
-    /// and count pixels in the light-ink band — the only pixels in that
-    /// band are placeholder/text glyphs over the dark box fill (see the
-    /// band rationale at the counting loop below).
+    /// and count pixels in the given channel-sum band. Two bands are in
+    /// use: the default light-ink band (the non-WPT name label's fixed
+    /// rgba(237,237,237,0.7) over the #222 fill) and a dark band for
+    /// corpus-v4.1 WPT-mode prose (spec-black glyphs over the same fill) —
+    /// see the band rationale at the counting loop below.
     @MainActor
-    private func labelInkPixelCount(_ comp: IRComponent, wpt: Bool) throws -> Int {
+    private func labelInkPixelCount(_ comp: IRComponent, wpt: Bool,
+                                    band: Range<Int> = 480..<620) throws -> Int {
         // Mirror CaptureCanvas geometry; publish the WPT flag exactly the
         // way captureAllComponents does (`.environment(\.wptCaptureMode, …)`).
         let view = ComponentRenderer(component: comp)
@@ -156,17 +165,19 @@ final class WPTCaptureModeTests: XCTestCase {
             bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
         ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
-        // Glyph ink over the #222 box: the label's fixed
-        // rgba(237,237,237,0.7) composites to ≈176/channel (sum ≈ 530),
-        // and WPT-mode real text picks the same light-on-dark ink
-        // (0.93 white @ 0.7 → ≈176 as well). The box fill sums to 102,
-        // the white canvas to 765, and every box edge is integer-aligned
-        // at scale 1 (no fractional-coverage blend pixels), so a sum in
-        // 480..<620 is unambiguously glyph ink — count those pixels.
+        // Glyph-ink bands over the #222 box (fill sums to 102, the white
+        // canvas to 765; every box edge is integer-aligned at scale 1, so
+        // no fractional-coverage blend pixels muddy the bands):
+        //   • light band 480..<620 (the default) — the name label's fixed
+        //     rgba(237,237,237,0.7) composites to ≈176/channel (sum ≈530).
+        //   • dark band 0..<60 — corpus-v4.1 WPT-mode prose paints the
+        //     spec-black WPTCanvas.textInk (sum ≈0 for core glyph pixels;
+        //     antialiased edges blend toward the 102 fill and are
+        //     deliberately excluded so the count is unambiguous ink).
         var count = 0
         for i in stride(from: 0, to: buf.count, by: 4) {
             let sum = Int(buf[i]) + Int(buf[i + 1]) + Int(buf[i + 2])
-            if (480..<620).contains(sum) { count += 1 }
+            if band.contains(sum) { count += 1 }
         }
         return count
     }
@@ -187,15 +198,29 @@ final class WPTCaptureModeTests: XCTestCase {
             "— \(on) glyph pixels still painted")
     }
 
-    /// Real element text survives WPT mode: the same box carrying `text`
-    /// still paints glyphs with the flag ON.
+    /// Real element text survives WPT mode — and paints the corpus-v4.1
+    /// spec-BLACK default ink. Through v4.0 WPT-mode prose picked the
+    /// near-white 0.93@0.7 contrast ink (the light band); from the ink
+    /// sub-boundary a colorless run bottoms out at WPTCanvas.textInk, so
+    /// the glyphs land in the DARK band over the #222 fill and the light
+    /// band goes empty — proving both presence AND the ink flip end-to-end
+    /// through the real render path.
     @MainActor
-    func testRealTextStillRendersInWptMode() throws {
+    func testRealTextRendersBlackInkInWptMode() throws {
         let withText = try component(boxJSON(name: "css color 001", text: "Filler text"))
-        let on = try labelInkPixelCount(withText, wpt: true)
-        XCTAssertGreaterThan(on, 0,
+        // Black glyph ink present: real text still renders in WPT mode.
+        let dark = try labelInkPixelCount(withText, wpt: true, band: 0..<60)
+        XCTAssertGreaterThan(dark, 0,
             "real element text must still render in WPT mode (only the " +
-            "synthesized NAME placeholder is suppressed)")
+            "synthesized NAME placeholder is suppressed) — and in the " +
+            "corpus-v4.1 spec-black default ink")
+        // The v4.0 near-white ink is gone: nothing composites into the old
+        // light band anymore (a regression here means the WPT bottom-out
+        // silently fell back to the stage contrast pick).
+        let light = try labelInkPixelCount(withText, wpt: true)
+        XCTAssertEqual(light, 0,
+            "WPT-mode default prose must not paint the pre-v4.1 near-white " +
+            "ink — \(light) light-band pixels still painted")
     }
 
     // MARK: - WPT canvas background split (TITAN-WHITE lane, corpus-v4)
@@ -231,5 +256,132 @@ final class WPTCaptureModeTests: XCTestCase {
         XCTAssertNotEqual(
             WPTCanvas.captureBackground(wptCaptureMode: true, defaultBackground: darkStage),
             WPTCanvas.captureBackground(wptCaptureMode: false, defaultBackground: darkStage))
+    }
+
+    // MARK: - WPT default-ink split (corpus-v4.1: black ink)
+
+    /// The corpus-v4.1 default TEXT INK is opaque BLACK: real WPT pages
+    /// paint default prose in the UA `color: CanvasText` black, and the
+    /// browser-ref injection now pins the same value
+    /// (capture-browser-ref.mjs `:where(body) { color:#000 }`). Through
+    /// v4.0 both sides kept near-white ink on the white canvas — vacuous
+    /// prose passes. `Color(white: 0)` is the SwiftUI literal for #000000.
+    func testWptDefaultTextInkIsBlack() {
+        XCTAssertEqual(WPTCanvas.textInk, Color(white: 0))
+    }
+
+    /// The pure ink split (the 1:1 twin of Compose's `defaultTextInk`,
+    /// pinned by WptCanvasBackgroundTest.kt): WPT capture mode bottoms
+    /// text ink out at the spec black; every other path gets the caller's
+    /// stage ink back VERBATIM so the committed 327-pair baselines
+    /// (captured with the near-white #eee-family defaults) stay
+    /// byte-identical. The harness/renderer wiring is separately pinned by
+    /// tools/titan/wpt-white-canvas.test.mjs — this holds the semantics.
+    func testCaptureTextInkSplitsOnWptMode() {
+        // The runtime's dark-stage default ink (InheritedText.defaultTextColor).
+        let stageInk = InheritedText.defaultTextColor
+        // WPT mode → the spec black, regardless of the caller default.
+        XCTAssertEqual(
+            WPTCanvas.captureTextInk(wptCaptureMode: true, defaultInk: stageInk),
+            WPTCanvas.textInk)
+        // Non-WPT mode → the caller's ink verbatim (baseline contract).
+        XCTAssertEqual(
+            WPTCanvas.captureTextInk(wptCaptureMode: false, defaultInk: stageInk),
+            stageInk)
+        // And the ink split is real — the two modes never collapse.
+        XCTAssertNotEqual(
+            WPTCanvas.captureTextInk(wptCaptureMode: true, defaultInk: stageInk),
+            WPTCanvas.captureTextInk(wptCaptureMode: false, defaultInk: stageInk))
+    }
+
+    // MARK: - WPT box-sizing default split (wave 11)
+
+    /// The box-sizing tri-state resolution — the 1:1 twin of Compose's
+    /// `SizingApplier.effectiveBoxSizing` (JUnit-pinned there) and the
+    /// web harness's `body.wpt-mode [data-component-id] { box-sizing:
+    /// content-box }` override. css-sizing-3 §3: the property's INITIAL
+    /// value is content-box — the UA default every WPT ref is authored
+    /// against — while an UNDECLARED keyword on the dark stage means the
+    /// border-box status quo (the whole 327-pair corpus is captured
+    /// against the web harness's `* { box-sizing: border-box }` reset).
+    func testEffectiveBoxSizingSplitsOnWptMode() {
+        // WPT mode: the unset slot picks up the spec initial value.
+        XCTAssertEqual(
+            SizeApplierMath.effectiveBoxSizing(declared: nil, wptCaptureMode: true),
+            .contentBox)
+        // Dark stage: unset STAYS unset — nil is the tri-state's
+        // "border-box status quo" and must never silently flip.
+        XCTAssertNil(
+            SizeApplierMath.effectiveBoxSizing(declared: nil, wptCaptureMode: false))
+        // A DECLARED border-box wins even in WPT mode — a WPT test that
+        // writes `box-sizing: border-box` keeps its declared arithmetic.
+        XCTAssertEqual(
+            SizeApplierMath.effectiveBoxSizing(declared: .borderBox, wptCaptureMode: true),
+            .borderBox)
+        // A declared content-box passes through outside WPT mode too
+        // (the Lane BX explicit-declaration path is mode-independent).
+        XCTAssertEqual(
+            SizeApplierMath.effectiveBoxSizing(declared: .contentBox, wptCaptureMode: false),
+            .contentBox)
+    }
+
+    /// End-to-end frame arithmetic of the WPT default on the live wire
+    /// of css/css-grid/abspos/grid-abspos-staticpos-align-items-center-
+    /// large-border-padding.html: `width:100 height:500 padding:74/13/
+    /// 42/13 border:23/23/45/23`. WPT mode → content-box → the frame
+    /// inflates to 172×684 (the ref's padding+border-grown arithmetic);
+    /// dark stage → nil → inflation (0,0), the 100×500 border box the
+    /// baselines were captured with.
+    func testWptBoxSizingDefaultInflatesTheGridFixtureFrame() {
+        // The container's declaration list, IR shapes as the converter
+        // emits them (px objects + UPPER_SNAKE keywords).
+        let px: (String, Double) -> IRProperty = {
+            IRProperty(type: $0, data: .object(["px": .double($1)]))
+        }
+        let props: [IRProperty] = [
+            px("Width", 100), px("Height", 500),
+            px("PaddingTop", 74), px("PaddingRight", 13),
+            px("PaddingBottom", 42), px("PaddingLeft", 13),
+            px("BorderTopWidth", 23), px("BorderRightWidth", 23),
+            px("BorderBottomWidth", 45), px("BorderLeftWidth", 23),
+            // Solid styles so the borders COUNT as painted (CSS 2.1
+            // §8.5.3: style none ⇒ used width 0 — the inflation gate).
+            IRProperty(type: "BorderTopStyle", data: .string("SOLID")),
+            IRProperty(type: "BorderRightStyle", data: .string("SOLID")),
+            IRProperty(type: "BorderBottomStyle", data: .string("SOLID")),
+            IRProperty(type: "BorderLeftStyle", data: .string("SOLID")),
+        ]
+        // WPT capture: the fold defaults the unset keyword to contentBox…
+        var wpt = StyleBuilder.build(from: props)
+        wpt.size.boxSizing = SizeApplierMath.effectiveBoxSizing(
+            declared: wpt.size.boxSizing, wptCaptureMode: true)
+        // …so the frame inflates by the bands: h 13+13+23+23 = 72 (→ 172
+        // wide), v 74+42+23+45 = 184 (→ 684 tall).
+        let inf = StyleBuilder.contentBoxInflation(wpt)
+        XCTAssertEqual(inf.h, 72)
+        XCTAssertEqual(inf.v, 184)
+        // Dark stage: nil stays nil → zero inflation, byte-identical
+        // border-box frames for every committed baseline.
+        var dark = StyleBuilder.build(from: props)
+        dark.size.boxSizing = SizeApplierMath.effectiveBoxSizing(
+            declared: dark.size.boxSizing, wptCaptureMode: false)
+        XCTAssertNil(dark.size.boxSizing)
+        XCTAssertEqual(StyleBuilder.contentBoxInflation(dark).h, 0)
+        XCTAssertEqual(StyleBuilder.contentBoxInflation(dark).v, 0)
+    }
+
+    /// The injected-extent conversion that keeps the WPT default from
+    /// double-counting bands: environment channels inject border-box
+    /// FRAME extents, so under an effective content-box the declared
+    /// slot receives frame − bands (and SizeApplier re-inflates back to
+    /// the frame). Identity at inflate 0 — every non-WPT fold is
+    /// byte-identical — and floored at 0 for over-padded degenerates.
+    func testDeclaredFromFrameConvertsInjectedExtents() {
+        // Identity when there is nothing to subtract (non-WPT paths).
+        XCTAssertEqual(SizeApplierMath.declaredFromFrame(358, inflate: 0), 358)
+        // frame 172 − bands 72 = declared content 100 (the grid fixture).
+        XCTAssertEqual(SizeApplierMath.declaredFromFrame(172, inflate: 72), 100)
+        // Over-padded degenerate floors at zero, never negative.
+        XCTAssertEqual(SizeApplierMath.declaredFromFrame(40, inflate: 72), 0)
     }
 }

@@ -16,6 +16,9 @@ import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.placement.itemPlacement
 import com.styleconverter.runtime.core.types.ValueExtractors
+// §9.2 static-position machinery shared with the flex abspos path (wave 10) —
+// Spec/Base domain + the safe-aware align-self resolver + the inset gate.
+import com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
 import kotlinx.serialization.json.*
 
 /**
@@ -132,7 +135,19 @@ object GridRenderer {
             gridConfig.autoFlow == GridAutoFlow.ROW_DENSE ||
             gridConfig.autoFlow == GridAutoFlow.COLUMN_DENSE
         val sortedChildren = ComponentRenderer.sortByOrder(component.children)
-        val claims = sortedChildren.map {
+        // css-grid-1 §9: an absolutely-positioned child of a grid container
+        // is NOT a grid item — it does not participate in auto-placement and
+        // "does not affect the sizing of the grid tracks". Partition it out
+        // BEFORE the placement algorithm; without this filter abspos
+        // children were auto-placed as REAL items (occupying cell 1,1,
+        // feeding track intrinsics, size clamped by their track). They
+        // render in the §9.2 overlay after the placed grid below.
+        // WAVE-8 INDEX LESSON: every list derived from here (claims →
+        // specs → placements.childIndex → the render loop's child lookup)
+        // must index the SAME partitioned list, so the partition happens
+        // exactly once, first.
+        val (flowChildren, outOfFlowChildren) = partitionOutOfFlow(sortedChildren)
+        val claims = flowChildren.map {
             com.styleconverter.runtime.core.placement.ItemPlacementExtractor
                 .extract(it.properties)
         }
@@ -178,18 +193,18 @@ object GridRenderer {
         // a cell its own row's height — `grid-row: 3 / 5` items showed one
         // track tall and implicit rows never materialized, PL_LineSpans /
         // PL_DenseBackfill / PL_AreaLineSyntax).
-        GridPlacedGrid(
-            tracks = gridConfig.columnTracks,
-            columnCount = columnCount,
-            columnGap = horizontalSpacing,
-            rowGap = verticalSpacing,
-            rowHeights = resolvedRowHeights,
-            definiteWidth = definiteWidth,
-            cells = placements,
-            modifier = modifier
-        ) {
+        // The placed-cell content, hoisted so both render shapes below (bare
+        // grid / grid + §9.2 abspos overlay) share ONE cell loop — a second
+        // copy would be the exact fix-lands-in-a-dead-file hazard the v2
+        // placement contract forbids.
+        val placedCellContent: @Composable () -> Unit = {
             placements.forEach { cell ->
-                val child = sortedChildren[cell.childIndex]
+                // Index alignment (the wave-8 lesson): cell.childIndex was
+                // assigned by placeItems over the PARTITIONED in-flow specs
+                // list, so it must look up flowChildren — indexing the
+                // pre-partition sortedChildren would shift every child after
+                // the first abspos sibling by one.
+                val child = flowChildren[cell.childIndex]
                 // v2 placement contract: read the child's ITEM claims through
                 // the single placement union — this grid consumes only the
                 // alignment claims it owns (justify-self / align-self,
@@ -247,6 +262,94 @@ object GridRenderer {
                             child,
                             itemModifier = if (stretchHeight) Modifier.fillMaxHeight() else Modifier
                         )
+                    }
+                }
+            }
+        }
+
+        if (outOfFlowChildren.isEmpty()) {
+            // No out-of-flow children — the exact pre-partition render shape
+            // (grid Layout carries the container's whole style chain), so
+            // every committed grid baseline stays byte-identical.
+            GridPlacedGrid(
+                tracks = gridConfig.columnTracks,
+                columnCount = columnCount,
+                columnGap = horizontalSpacing,
+                rowGap = verticalSpacing,
+                rowHeights = resolvedRowHeights,
+                definiteWidth = definiteWidth,
+                cells = placements,
+                modifier = modifier,
+                content = placedCellContent
+            )
+        } else {
+            // css-grid-1 §9.2 overlay: the grid container's style chain moves
+            // to this Box, whose INNER area is the container's CONTENT box
+            // (StyleApplier chains padding innermost — step 8 — so content
+            // composed inside the chain sits within the padding band). That
+            // content box is precisely the §9.2 alignment container: "as if
+            // it were the sole grid item in a grid area whose edges coincide
+            // with the content edges of the grid container".
+            Box(modifier = modifier) {
+                // The real (in-flow) grid renders first, unchanged except the
+                // chain hand-off; abspos children can no longer reach its
+                // placement or track sizing (the §9 partition above).
+                GridPlacedGrid(
+                    tracks = gridConfig.columnTracks,
+                    columnCount = columnCount,
+                    columnGap = horizontalSpacing,
+                    rowGap = verticalSpacing,
+                    rowHeights = resolvedRowHeights,
+                    definiteWidth = definiteWidth,
+                    cells = placements,
+                    modifier = Modifier,
+                    content = placedCellContent
+                )
+                outOfFlowChildren.forEach { child ->
+                    // §9.2 static position: sole-item alignment from the
+                    // self properties, falling back to the container's
+                    // align-items / justify-items (css-align-3 §6.2/§6.4) —
+                    // pure resolution pinned in GridAbsposPartitionTest.
+                    val (inlineSpec, blockSpec) = absposStaticSpecs(
+                        childProperties = child.properties,
+                        containerJustifyItems = justifyItems,
+                        containerAlignItems = displayConfig.alignItems
+                    )
+                    Box(
+                        // matchParentSize: span the content box WITHOUT
+                        // participating in the wrapper Box's sizing — the
+                        // abspos child must never size its containing block
+                        // (css-position-3 §3), mirroring §9's "does not
+                        // affect the sizing of the grid tracks".
+                        modifier = Modifier.matchParentSize(),
+                        // Position the (constraint-fitting) reported box at
+                        // the resolved static alignment; abspos children
+                        // paint after (above) the in-flow grid, matching
+                        // CSS paint order for positioned boxes.
+                        contentAlignment = staticOverlayAlignment(inlineSpec.base, blockSpec.base)
+                    ) {
+                        // Alignment is fully handled here — suppress the
+                        // block-level self-alignment wrapper inside
+                        // RenderComponent, same rule as the placed cells.
+                        androidx.compose.runtime.CompositionLocalProvider(
+                            ComponentRenderer.LocalSelfAlignmentHandled provides true
+                        ) {
+                            ComponentRenderer.RenderComponent(
+                                child,
+                                // Wave-8 unbounded measure (css-position-3
+                                // §2.1: the box is sized by its OWN
+                                // properties and may overflow); the block
+                                // (vertical) spec rides along so overflowing
+                                // ink keeps its safe-aware alignment — the
+                                // same machinery the flex row path threads.
+                                // Inline-axis overflow ink stays anchored at
+                                // the reported box (documented crossOffset
+                                // single-axis scope), not a silent gap.
+                                itemModifier = ComponentRenderer.absposOverflowMeasure(
+                                    blockSpec, crossIsVertical = true
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -550,6 +653,151 @@ object GridRenderer {
             else -> null
         }
     }
+
+    /**
+     * css-grid-1 §9 partition: split a grid container's (already
+     * order-sorted) children into in-flow grid items and out-of-flow
+     * (abspos/fixed) boxes, PRESERVING relative order inside each half.
+     * The in-flow half is the ONLY input to placement — placements'
+     * childIndex values index it 1:1 (the wave-8 index-alignment lesson,
+     * pinned in GridAbsposPartitionTest). Pure over the IR.
+     */
+    internal fun partitionOutOfFlow(
+        children: List<IRComponent>
+    ): Pair<List<IRComponent>, List<IRComponent>> =
+        // isOutOfFlowChild is the single §2.1 out-of-flow test the flex and
+        // block paths already use (absolute | fixed; relative/sticky stay
+        // in flow) — one owner, no drift.
+        children.partition { !ComponentRenderer.isOutOfFlowChild(it.properties) }
+
+    /**
+     * css-grid-1 §9.2 static-position alignment for one out-of-flow child:
+     * resolve BOTH axes of the sole-item-in-content-area alignment.
+     * Returns (inline/horizontal spec, block/vertical spec) in the shared
+     * [AbsposStaticAlignment.Spec] domain so the block axis can ride into
+     * absposOverflowMeasure's safe-aware overflow offset unchanged.
+     *
+     * Per-axis resolution order (css-align-3 §6.2/§6.4 + css-position-3 §3.5):
+     *   1. an EXPLICIT inset on the axis replaces the static position
+     *      entirely — the child's own PositionApplier offsets from the
+     *      containing-block corner, so the alignment stands down to START
+     *      (a zero shift; anything else would double-offset);
+     *   2. the child's own self property (align-self for block — via the
+     *      wave-10 resolveCross, which reads the typed keyword AND the
+     *      Generic `safe|unsafe <pos>` escape hatch; justify-self for
+     *      inline — the typed ItemPlacementExtractor claim);
+     *   3. `auto` falls back to the container's align-items /
+     *      justify-items (§6.2: *-self:auto resolves to the parent's
+     *      *-items value);
+     *   4. nothing declared → START (normal behaves as start for a
+     *      non-stretchable abspos box, same rule the placed-cell path uses).
+     * Pure over the IR + enums — pinned in GridAbsposPartitionTest.
+     */
+    internal fun absposStaticSpecs(
+        childProperties: List<IRProperty>,
+        containerJustifyItems: ComponentRenderer.JustifySelf?,
+        containerAlignItems: ComponentRenderer.AlignItems
+    ): Pair<AbsposStaticAlignment.Spec, AbsposStaticAlignment.Spec> {
+        // ── Inline (horizontal) axis ────────────────────────────────────
+        val inline = if (AbsposStaticAlignment.hasCrossInset(childProperties, vertical = false)) {
+            // Rule 1: left/right (or logical inline) inset wins the axis.
+            AbsposStaticAlignment.Spec(AbsposStaticAlignment.Base.START, safe = false)
+        } else {
+            // Rule 2: the child's own justify-self claim (typed wire).
+            justifyBase(
+                com.styleconverter.runtime.core.placement.ItemPlacementExtractor
+                    .extract(childProperties).justifySelf
+            )
+                // Rule 3: container justify-items (extractJustifyItems).
+                ?.let { AbsposStaticAlignment.Spec(it, safe = false) }
+                ?: justifyBase(containerJustifyItems)
+                    ?.let { AbsposStaticAlignment.Spec(it, safe = false) }
+                // Rule 4: default start.
+                ?: AbsposStaticAlignment.Spec(AbsposStaticAlignment.Base.START, safe = false)
+        }
+        // ── Block (vertical) axis ───────────────────────────────────────
+        val block = if (AbsposStaticAlignment.hasCrossInset(childProperties, vertical = true)) {
+            // Rule 1: top/bottom (or logical block) inset wins the axis.
+            AbsposStaticAlignment.Spec(AbsposStaticAlignment.Base.START, safe = false)
+        } else {
+            // Rule 2: align-self through the wave-10 resolver — the ONLY
+            // reader of the safe/unsafe Generic wire, reused verbatim.
+            AbsposStaticAlignment.resolveCross(childProperties)
+                // Rule 3: container align-items (the DisplayConfig value the
+                // flex paths already extract — one owner for the keyword).
+                ?: alignItemsBase(containerAlignItems)
+                    ?.let { AbsposStaticAlignment.Spec(it, safe = false) }
+                // Rule 4: default start.
+                ?: AbsposStaticAlignment.Spec(AbsposStaticAlignment.Base.START, safe = false)
+        }
+        return inline to block
+    }
+
+    /**
+     * JustifySelf keyword → static-position Base, or null when the keyword
+     * makes no static-position claim (css-align-3 §6.2: auto defers to the
+     * container; normal/stretch behave as start for a non-stretchable
+     * abspos box — returning null lets the resolution chain fall through
+     * to the container level first). Same keyword grouping as
+     * justifySelfToHorizontal so the two tables cannot disagree.
+     */
+    internal fun justifyBase(
+        j: ComponentRenderer.JustifySelf?
+    ): AbsposStaticAlignment.Base? = when (j) {
+        ComponentRenderer.JustifySelf.START,
+        ComponentRenderer.JustifySelf.SELF_START,
+        ComponentRenderer.JustifySelf.FLEX_START,
+        ComponentRenderer.JustifySelf.LEFT -> AbsposStaticAlignment.Base.START
+        ComponentRenderer.JustifySelf.CENTER -> AbsposStaticAlignment.Base.CENTER
+        ComponentRenderer.JustifySelf.END,
+        ComponentRenderer.JustifySelf.SELF_END,
+        ComponentRenderer.JustifySelf.FLEX_END,
+        ComponentRenderer.JustifySelf.RIGHT -> AbsposStaticAlignment.Base.END
+        // AUTO/NORMAL/STRETCH/BASELINE/null → no claim on this level.
+        else -> null
+    }
+
+    /**
+     * Container align-items → static-position Base for the block axis.
+     * STRETCH (the initial value) and BASELINE make no positional claim for
+     * an abspos box (stretch cannot stretch an out-of-flow child —
+     * css-flexbox-1 §4.1's precedent, same as the flex path) → null lets
+     * the chain hit the START default.
+     */
+    internal fun alignItemsBase(
+        a: ComponentRenderer.AlignItems
+    ): AbsposStaticAlignment.Base? = when (a) {
+        ComponentRenderer.AlignItems.CENTER -> AbsposStaticAlignment.Base.CENTER
+        ComponentRenderer.AlignItems.FLEX_END -> AbsposStaticAlignment.Base.END
+        ComponentRenderer.AlignItems.FLEX_START -> AbsposStaticAlignment.Base.START
+        // STRETCH (initial) / BASELINE → no static-position claim.
+        else -> null
+    }
+
+    /**
+     * Fold the two per-axis bases into one Compose 2D alignment for the
+     * §9.2 overlay Box. BiasAlignment with the canonical -1/0/+1 biases —
+     * exactly the values Alignment.TopStart/Center/BottomEnd etc. carry,
+     * kept as a pure constructor so GridAbsposPartitionTest pins the
+     * mapping by equality.
+     */
+    internal fun staticOverlayAlignment(
+        inline: AbsposStaticAlignment.Base,
+        block: AbsposStaticAlignment.Base
+    ): Alignment = androidx.compose.ui.BiasAlignment(
+        // Inline axis: START -1, CENTER 0, END +1 (LTR horizontal-tb).
+        horizontalBias = when (inline) {
+            AbsposStaticAlignment.Base.START -> -1f
+            AbsposStaticAlignment.Base.CENTER -> 0f
+            AbsposStaticAlignment.Base.END -> 1f
+        },
+        // Block axis: top -1, center 0, bottom +1.
+        verticalBias = when (block) {
+            AbsposStaticAlignment.Base.START -> -1f
+            AbsposStaticAlignment.Base.CENTER -> 0f
+            AbsposStaticAlignment.Base.END -> 1f
+        }
+    )
 
     /**
      * The WHOLE placed grid as one Layout: explicit column tracks on the

@@ -352,12 +352,16 @@ node "$TITAN_DIR/inject-wpt-block.mjs" \
   --tests "$SMOKE_LIST" \
   --wpt-ref "$WPT_REF" \
   --run-id "$RUN_ID" \
-  --refs-root "$WPT_DIR/refs/$WPT_REF/white" \
+  --refs-root "$WPT_DIR/refs/$WPT_REF/white-black-ink-font-lh" \
   --capture-log "$CAPTURE_LOG"
-# ^ the /white segment is capture-browser-ref.mjs's CANVAS_REV (corpus-v4
-#   white-canvas contract) — refs rendered under the pre-v4 dark canvas live
-#   at the un-segmented refs/<sha>/<section>/ path and must never be diffed
-#   against white-canvas captures.
+# ^ the /white-black-ink-font-lh segment is capture-browser-ref.mjs's CANVAS_REV
+#   (corpus-v4.1: white canvas + spec-BLACK injected default ink + the
+#   harness Inter font stack + the deterministic REF_LINE_HEIGHT
+#   line-height pin on the ref) — the line-height-less black-ink scratch
+#   refs live at refs/<sha>/white-black-ink-font/, refs rendered under
+#   the v4.0 white-ink contract at refs/<sha>/white/,
+#   and pre-v4 dark-canvas refs at the un-segmented refs/<sha>/<section>/
+#   path; none may ever be diffed against v4.1 captures.
 
 # Move (not copy) the WPT-injected manifest out of the legacy slot so it
 # doesn't shadow the visual-test 327-pair manifest that baseline-stats.mjs

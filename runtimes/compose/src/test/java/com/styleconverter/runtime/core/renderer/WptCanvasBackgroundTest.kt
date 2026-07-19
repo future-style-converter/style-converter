@@ -58,4 +58,49 @@ class WptCanvasBackgroundTest {
             captureCanvasBackground(wptCaptureMode = false, defaultBackground = darkStage)
         )
     }
+
+    // ── corpus-v4.1: the BLACK default-ink sub-boundary ─────────────────────
+    //
+    // Within the v4 white-canvas era the WPT default TEXT INK flipped from
+    // the harness near-white family to the spec BLACK (the UA CanvasText
+    // default a real WPT page bottoms out at). Through v4.0 both sides of
+    // the diff hid default-ink prose on the white canvas (ref injection
+    // `color:#fff`, runtime #eee bottom-outs) — vacuous passes. These pins
+    // hold the ink twin of the canvas split above.
+
+    /** The dark-stage default ink — the opaque #eee stage contract the
+     *  327-pair baselines were captured with (ComponentRenderer.DEFAULT_TEXT_COLOR). */
+    private val stageInk = Color(0xFFEEEEEE)
+
+    @Test
+    fun wptDefaultTextInk_isOpaqueBlack() {
+        // The corpus-v4.1 ink is fully-opaque BLACK — the light-scheme UA
+        // CanvasText value the ref injection now pins (`color:#000`).
+        assertEquals(Color(0xFF000000), WPT_DEFAULT_TEXT_INK)
+    }
+
+    @Test
+    fun wptMode_bottomsTextInkOutAtSpecBlack() {
+        // WPT capture mode → the spec black, regardless of the caller's
+        // stage default (matching the ref's injected :where(body) black).
+        assertEquals(
+            WPT_DEFAULT_TEXT_INK,
+            defaultTextInk(wptCaptureMode = true, defaultInk = stageInk)
+        )
+    }
+
+    @Test
+    fun nonWptMode_returnsTheCallerInkVerbatim() {
+        // The dark-stage property-fixture path keeps its #eee-family ink
+        // byte-identically — the flip is WPT-mode-only by contract.
+        assertEquals(
+            stageInk,
+            defaultTextInk(wptCaptureMode = false, defaultInk = stageInk)
+        )
+        // And the ink split is real: the two modes never agree.
+        assertNotEquals(
+            defaultTextInk(wptCaptureMode = true, defaultInk = stageInk),
+            defaultTextInk(wptCaptureMode = false, defaultInk = stageInk)
+        )
+    }
 }

@@ -87,16 +87,24 @@ fun shouldSuppressSynthesizedName(wptCaptureMode: Boolean, rawText: String?): Bo
 val LocalWptComposedMode = compositionLocalOf { false }
 
 /**
- * The ref's default-font line-box ratio at a 16px font: capture-browser-ref.mjs
- * forces NO font, so the reference `<p>` uses Chromium's default UA font whose
- * `line-height: normal` box is ~18px at 16px (18/16 = 1.125). The harness forces
- * the Inter face (for iOS/Android/web parity) whose `normal` box is ~1.2× (19.2px
- * @16px) — ~1px taller per line. Flush bars hid that; once UA margins spread the
- * bars out the per-bar error COMPOUNDS down a 10-bar test and drifts every bar
- * off its ref position, collapsing the (edge-phase-sensitive) SSIM. Pinning the
- * DEFAULT line box to this ratio in composed WPT capture removes the drift.
+ * The ref's default line-box ratio — recalibrated at the corpus-v4.1
+ * LINE-HEIGHT sub-boundary. The Round-4b value was 1.125 (18px @16px):
+ * back then capture-browser-ref.mjs forced NO font and Chromium's default
+ * SERIF `line-height: normal` box was ~18px at 16px, while the harness
+ * Inter `normal` box was ~2px taller — pinning 1.125 removed the per-bar
+ * compounding drift down stacked multi-`<p>` tests. From corpus-v4.1 the
+ * ref pins the harness Inter face AND an explicit deterministic
+ * `line-height: 1.25` (capture-browser-ref.mjs REF_LINE_HEIGHT — 20px
+ * @16px, Chromium's measured natural Inter rhythm: default ref paragraphs
+ * advance 36px top-to-top), so the OLD 18px calibration became the drift
+ * (captures advanced 34px — 2px re-accumulating per paragraph, the whole
+ * css-color/css-break/css-flexbox collapse of the first v4.1 run). This
+ * ratio now mirrors the ref pin exactly: 1.25 → 20px @16px, scaling with
+ * font-size like the ref's inherited unitless number. Web pins the same
+ * value (index.html wpt rules + ComponentRenderer '1.25'), iOS the same
+ * box (wptRefLineBoxPx 20). Composed WPT capture only — see the callers.
  */
-const val REF_DEFAULT_FONT_LINE_HEIGHT_RATIO: Float = 1.125f // 18 / 16
+const val REF_DEFAULT_FONT_LINE_HEIGHT_RATIO: Float = 1.25f // 20 / 16
 
 /** The historical native default line-box ratio (see PlaceholderContent) —
  *  used for every non-composed path so those captures stay byte-identical. */
@@ -110,8 +118,9 @@ const val NATIVE_DEFAULT_LINE_HEIGHT_RATIO: Float = 1.2f
  *
  * @param composedWpt value of [LocalWptComposedMode] at the call site.
  * @param fontSizePx the placeholder's effective font size in px.
- * @return `fontSizePx × 1.125` in composed WPT capture (the ref default-font
- *   line box), else `fontSizePx × 1.2` (the historical native default box).
+ * @return `fontSizePx × 1.25` in composed WPT capture (the corpus-v4.1
+ *   pinned ref line box — 20px @16px), else `fontSizePx × 1.2` (the
+ *   historical native default box, byte-identical for the 327 baselines).
  */
 fun composedDefaultLineHeightPx(composedWpt: Boolean, fontSizePx: Float): Float =
     fontSizePx * (if (composedWpt) REF_DEFAULT_FONT_LINE_HEIGHT_RATIO
@@ -165,3 +174,53 @@ val WPT_CANVAS_BACKGROUND = Color(0xFFFFFFFF)
  */
 fun captureCanvasBackground(wptCaptureMode: Boolean, defaultBackground: Color): Color =
     if (wptCaptureMode) WPT_CANVAS_BACKGROUND else defaultBackground
+
+/**
+ * The WPT default TEXT INK — spec BLACK, the corpus-v4.1 ink sub-boundary
+ * within the v4 white-canvas era.
+ *
+ * ## Why black
+ * Real WPT pages paint default prose in the UA `color: CanvasText` default,
+ * which is BLACK on the light-scheme white page (the html.css UA sheet).
+ * Through corpus-v4.0 every surface kept the harness's near-white family
+ * (web body `color:#eee`, this runtime's [ComponentRenderer.DEFAULT_TEXT_COLOR]
+ * #eee bottom-out, the ref injection's old `color:#fff`) — so on the white
+ * canvas default-ink text vanished on BOTH sides of the diff and every
+ * prose reftest passed VACUOUSLY. From v4.1 all four surfaces flip
+ * together: the ref injection (capture-browser-ref.mjs `:where(body)
+ * { color:#000 }`), web (index.html wpt-mode rule + PlaceholderContent's
+ * WPT_MODE ink), this constant, and SwiftUI's `WPTCanvas.textInk`.
+ *
+ * ## The FONT half of the same v4.1 sub-boundary (no Compose hook needed)
+ * The sub-boundary also pins the default text FONT: the browser-ref now
+ * injects the harness Inter stack + embedded faces
+ * (capture-browser-ref.mjs REF_FONT_STACK) because visible black prose
+ * exposed that the ref wrapped text in Chromium's default serif while the
+ * harnesses wrap in Inter — shifting everything below the prose. Compose
+ * deliberately has NO font analogue of this ink split: the runtime's
+ * default text face is ALREADY the bundled Inter unconditionally
+ * (typography/InterFont.kt's InterFontFamily is the bottom-out in
+ * TextStyleApplier and ComponentRenderer's placeholder branches, WPT and
+ * non-WPT modes alike), so the native side already matches the newly
+ * pinned ref face and only ref + web carry explicit font pins.
+ */
+val WPT_DEFAULT_TEXT_INK = Color(0xFF000000)
+
+/**
+ * Pure default-text-ink decision — the ink twin of [captureCanvasBackground]
+ * (same extracted-decision pattern, unit-pinned in WptCanvasBackgroundTest so
+ * the mode split can never silently drift).
+ *
+ * WPT capture mode ([wptCaptureMode] true — the TITAN inbox/composed paths)
+ * bottoms text ink out at the corpus-v4.1 spec BLACK; every other path
+ * returns [defaultInk] VERBATIM so the dark-stage property-fixture pipeline
+ * keeps its historical #eee-family defaults ([ComponentRenderer.DEFAULT_TEXT_COLOR]
+ * and the placeholder contrast pick) byte-identically — the 327 committed
+ * baselines depend on that side never moving.
+ *
+ * @param wptCaptureMode value of [LocalWptCaptureMode] at the call site.
+ * @param defaultInk the caller's non-WPT bottom-out (the #eee-family stage
+ *   ink for the property-fixture pipeline).
+ */
+fun defaultTextInk(wptCaptureMode: Boolean, defaultInk: Color): Color =
+    if (wptCaptureMode) WPT_DEFAULT_TEXT_INK else defaultInk

@@ -550,11 +550,22 @@ object ComponentRenderer {
      * [DEFAULT_TEXT_COLOR], the same opaque stage color, NOT the
      * 70%-alpha contrast pick (wave-5 device evidence: web painted
      * 238,238,238 opaque while the contrast-pick path composited to ~171
-     * gray over the dark fixture bg — pair 0.856). Pure + internal for
-     * the JVM pinning suite.
+     * gray over the dark fixture bg — pair 0.856).
+     *
+     * corpus-v4.1 ink sub-boundary: in WPT capture the inherit chain ends
+     * at the ref injection's `:where(body) { color:#000 }` (the UA
+     * CanvasText black a real WPT page bottoms out at — see
+     * [WPT_DEFAULT_TEXT_INK]), so the WPT-mode bottom-out is BLACK; the
+     * dark-stage path keeps the #eee contract above verbatim. The flag is
+     * threaded explicitly (no default) so every call site states which
+     * side of the mode split it is on. Pure + internal for the JVM
+     * pinning suite.
      */
-    internal fun resolveCurrentColorBottomOut(inheritedColor: Color?): Color =
-        inheritedColor ?: DEFAULT_TEXT_COLOR
+    internal fun resolveCurrentColorBottomOut(
+        inheritedColor: Color?,
+        wptCaptureMode: Boolean,
+    ): Color =
+        inheritedColor ?: defaultTextInk(wptCaptureMode, DEFAULT_TEXT_COLOR)
 
     /**
      * Merge the inherited channel under the component's own declarations.
@@ -801,8 +812,17 @@ object ComponentRenderer {
         // Null on every other path — the style chain is byte-identical then.
         val collapsedMargin = com.styleconverter.runtime.spacing.BlockMarginCollapse
             .LocalCollapsedMargin.current
+        // TITAN WPT lane — thread the ambient capture mode into the static
+        // style chain (it can't read CompositionLocals itself). In WPT
+        // capture the sizing lane defaults an UNDECLARED box-sizing to
+        // css-sizing-3 §3's content-box initial value (the UA default the
+        // WPT refs assume — twin of the web harness's body.wpt-mode
+        // override); false on every dark-stage/baseline path, keeping the
+        // 327-pair corpus byte-identical (SizingApplier.effectiveBoxSizing
+        // pins the split).
+        val wptCaptureModeForSizing = LocalWptCaptureMode.current
         val baseModifier = try {
-            StyleApplier.applyProperties(effectiveProperties, collapsedMargin)
+            StyleApplier.applyProperties(effectiveProperties, collapsedMargin, wptCaptureModeForSizing)
         } catch (e: Exception) {
             android.util.Log.w("StyleApplier", "applyProperties threw for ${component.id}: ${e.message}", e)
             Modifier
@@ -991,11 +1011,18 @@ object ComponentRenderer {
         val ownColorIsCurrentColor = schemeResolvedProperties.any {
             it.type == "Color" && isCurrentColorValue(it.data)
         }
+        // Read the ambient WPT flag OUTSIDE the try below — CompositionLocal
+        // reads are composable calls, and the Compose compiler forbids
+        // composable invocations inside try/catch. The flag feeds the
+        // corpus-v4.1 ink split in resolveCurrentColorBottomOut (WPT mode →
+        // spec BLACK; dark-stage path → the historical #eee contract).
+        val wptCaptureModeForInk = LocalWptCaptureMode.current
         val textColor = if (colorIsInheritedOnly) null else try {
             if (ownColorIsCurrentColor) {
                 resolveCurrentColorBottomOut(
                     inheritedProperties.firstOrNull { it.type == "Color" }
-                        ?.let { ValueExtractors.extractColor(it.data) }
+                        ?.let { ValueExtractors.extractColor(it.data) },
+                    wptCaptureModeForInk,
                 )
             } else {
                 TextStyleApplier.extractTextColor(effectiveProperties)
@@ -1846,8 +1873,12 @@ object ComponentRenderer {
      * safe-aware centered/end offset when it overflows (reported ==
      * container cross size). Null spec ⇒ byte-identical wave-8 behaviour
      * (the RenderAbsoluteChild overlay path always passes null).
+     *
+     * internal (was private) since the wave-11 grid abspos partition:
+     * GridRenderer's out-of-flow overlay (css-grid-1 §9.2) reuses the same
+     * unbounded measure + cross-offset machinery for its overlay children.
      */
-    private fun absposOverflowMeasure(
+    internal fun absposOverflowMeasure(
         crossSpec: com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Spec? = null,
         crossIsVertical: Boolean = true
     ): Modifier = Modifier.layout { measurable, constraints ->
@@ -2784,7 +2815,20 @@ object ComponentRenderer {
         val effectiveFontSize = if (textStyle.fontSize != TextUnit.Unspecified) textStyle.fontSize else 16.sp
         // Smart contrast: use dark text on light backgrounds, light text on dark backgrounds
         // Web uses color:inherit (#eee) with opacity:0.7 → rgba(238,238,238,0.7) for dark bg
-        val defaultPlaceholderColor = run {
+        //
+        // corpus-v4.1 ink sub-boundary — the pick is wrapped in
+        // defaultTextInk: in WPT capture (LocalWptCaptureMode) the no-color
+        // bottom-out is the spec BLACK (WPT_DEFAULT_TEXT_INK), because a
+        // real WPT page's default prose is the UA CanvasText black and the
+        // browser-ref now injects `:where(body) { color:#000 }` — the old
+        // near-white 0xB3EEEEEE fallback vanished into the v4 white canvas
+        // exactly like the ref's old white ink, so default-ink text tests
+        // matched VACUOUSLY. Web flips the same way (index.html wpt-mode
+        // rule + PlaceholderContent's WPT_MODE '#000000'), iOS via
+        // WPTCanvas.textInk. The dark-stage contrast pick inside `run` is
+        // untouched — LocalWptCaptureMode is false on every 327-pair path,
+        // so those baselines stay byte-identical.
+        val defaultPlaceholderColor = defaultTextInk(LocalWptCaptureMode.current, run {
             val bgColor = properties.find { it.type == "BackgroundColor" }?.data?.let {
                 com.styleconverter.runtime.core.types.ValueExtractors.extractColor(it)
             }
@@ -2794,7 +2838,7 @@ object ComponentRenderer {
             } else {
                 Color(0xB3EEEEEE) // default light text for dark card background
             }
-        }
+        })
         // Wave 9: when the nearest component's Color is inherited-only the
         // merged `properties` list still carries it (currentColor consumers
         // need it there), but the WEB leaf placeholder never paints an
@@ -2828,9 +2872,11 @@ object ComponentRenderer {
         // When the IR DOES carry an explicit `line-height` we keep using
         // that value verbatim — only the missing-value branch is bounded.
         //
-        // Round-4b (composed WPT line-box, FIX 2): in composed WPT capture the
-        // default box pins to the browser-ref's default-font line box (18px
-        // @16px, ratio 1.125) instead of the native 1.2× — see
+        // Round-4b (composed WPT line-box, FIX 2; recalibrated at the
+        // corpus-v4.1 LINE-HEIGHT sub-boundary): in composed WPT capture the
+        // default box pins to the browser-ref's PINNED line box (20px @16px,
+        // ratio 1.25 — the ref injection's explicit REF_LINE_HEIGHT, no
+        // longer any font's `normal` metrics) instead of the native 1.2× — see
         // [composedDefaultLineHeightPx] / [LocalWptComposedMode]. Every other
         // path (per-component inbox, the 327-pair baseline) keeps 1.2× because
         // LocalWptComposedMode is false there, so those captures are byte-

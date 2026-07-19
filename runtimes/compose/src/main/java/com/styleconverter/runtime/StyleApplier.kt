@@ -307,12 +307,17 @@ object StyleApplier {
         // by ComponentRenderer since this static chain can't). Null on every
         // path outside the block child loop — byte-identical behavior there.
         collapsedMargin: com.styleconverter.runtime.spacing.CollapsedMargin? = null,
+        // TITAN WPT lane — LocalWptCaptureMode, read by ComponentRenderer
+        // (same static-chain-can't-read-locals rationale as collapsedMargin).
+        // Consumed by the sizing extractor's box-sizing tri-state default;
+        // default false keeps every non-WPT call site byte-identical.
+        wptCaptureMode: Boolean = false,
     ): Modifier {
         // Convert to type/data pairs for extractors
         val pairs = properties.map { it.type to it.data }
 
         // Extract all configurations
-        val config = extractConfig(pairs)
+        val config = extractConfig(pairs, wptCaptureMode)
 
         // Apply in correct order
         return applyConfig(Modifier, config, collapsedMargin)
@@ -328,9 +333,14 @@ object StyleApplier {
      * @param properties List of (propertyType, data) pairs from IR
      * @return StyleConfig with all extracted configurations
      */
-    fun extractConfig(properties: List<Pair<String, JsonElement?>>): StyleConfig {
+    fun extractConfig(
+        properties: List<Pair<String, JsonElement?>>,
+        // TITAN WPT lane — see applyProperties; only the layout/sizing lane
+        // reads it (box-sizing tri-state default), default false everywhere.
+        wptCaptureMode: Boolean = false,
+    ): StyleConfig {
         return StyleConfig(
-            layout = LayoutFacade.extractConfig(properties),
+            layout = LayoutFacade.extractConfig(properties, wptCaptureMode),
             colors = ColorExtractor.extractColorConfig(properties),
             borders = BordersFacade.extractConfig(properties),
             effects = EffectsFacade.extractConfig(properties),

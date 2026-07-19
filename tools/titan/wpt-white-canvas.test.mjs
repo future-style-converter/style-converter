@@ -45,18 +45,30 @@ test('capture-browser-ref: white CANVAS_BG + cache keyed by CANVAS_REV', () => {
   const s = src('tools/titan/capture-browser-ref.mjs');
   // The ref canvas is the corpus-v4 white.
   assert.match(s, /export const CANVAS_BG = '#FFFFFF'/, 'ref canvas must be white');
-  // The cache revision segment keeps pre-v4 dark refs out of white diffs.
-  assert.match(s, /export const CANVAS_REV = 'white'/, 'cache revision segment missing');
+  // The cache revision segment keeps pre-v4.1 refs (the line-height-less
+  // black-ink scratch refs at /white-black-ink-font/, v4.0 white-ink refs
+  // at /white/, pre-v4 dark refs at the un-segmented path) out of v4.1
+  // diffs. 'white-black-ink-font-lh' == the full corpus-v4.1 sub-boundary:
+  // black default ink AND the harness Inter font stack AND the
+  // deterministic REF_LINE_HEIGHT pin on the ref.
+  assert.match(s, /export const CANVAS_REV = 'white-black-ink-font-lh'/, 'cache revision segment missing');
   assert.match(s, /join\(REFS_ROOT, wptRef, CANVAS_REV, section/, 'cachePathFor must key on CANVAS_REV');
 });
 
-test('run-titan.sh + section-runner.sh point --refs-root at the white revision', () => {
+test('run-titan.sh + section-runner.sh point --refs-root at the black-ink-font-lh revision', () => {
   // Both orchestrators derive the refs root independently of cachePathFor —
-  // the /white segment must match CANVAS_REV or every diff sees no ref.
+  // the /white-black-ink-font-lh segment must match CANVAS_REV or every diff
+  // sees no ref (or, worse, a stale line-height-less v4.1-scratch ref).
   for (const sh of ['tools/titan/run-titan.sh', 'tools/titan/section-runner.sh']) {
     const s = src(sh);
-    assert.match(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/white"/, `${sh}: refs-root missing /white`);
+    assert.match(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/white-black-ink-font-lh"/, `${sh}: refs-root missing /white-black-ink-font-lh`);
     assert.doesNotMatch(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF" /, `${sh}: un-segmented refs-root resurfaced`);
+    assert.doesNotMatch(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/white"/, `${sh}: stale v4.0 white-ink refs-root resurfaced`);
+    assert.doesNotMatch(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/white-black-ink"/, `${sh}: stale ink-only (font-less) refs-root resurfaced`);
+    // NB: the two stale-revision guards above also catch the line-height-less
+    // 'white-black-ink-font' scratch root — the required -lh match plus the
+    // prefix doesNotMatch patterns leave no way to point at it.
+    assert.doesNotMatch(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/white-black-ink-font"\s/, `${sh}: stale line-height-less refs-root resurfaced`);
   }
 });
 
@@ -138,4 +150,215 @@ test('swiftui: WPTCanvas is white and the harness routes through the split', () 
   assert.match(harness, /blue:\s*0x2E \/ 255\.0/, 'iOS dark stage constant lost');
   // …and the WPT-only composed fallback is the runtime white.
   assert.match(harness, /else \{ return WPTCanvas\.background \}/, 'iOS composed fallback must be white');
+});
+
+// ── corpus-v4.1: the BLACK default-ink sub-boundary ─────────────────────────
+//
+// Within the v4 white-canvas era the WPT default TEXT INK flipped from the
+// harness near-white family to the spec BLACK. Real WPT pages paint default
+// prose in the UA `color: CanvasText` black; through corpus-v4.0 BOTH sides
+// of every diff hid default-ink prose on the white canvas (ref injection
+// `color:#fff`, web body #eee, native #eee-family bottom-outs) — so prose
+// tests matched VACUOUSLY (neither side showed the text). The flip must move
+// all four surfaces TOGETHER, WPT mode only; a half-flipped state (black ref
+// prose vs invisible near-white captures, or vice versa) is an asymmetric
+// text penalty that silently ruins a corpus run — exactly the failure mode
+// these one-place-per-surface scans exist to catch. The pure ink-decision
+// semantics are additionally unit-pinned in Compose WptCanvasBackgroundTest.kt
+// and SwiftUI WPTCaptureModeTests.swift; these scans hold the wiring.
+
+test('corpus-v4.1: the ref injection paints spec-black default ink', () => {
+  const s = src('tools/titan/capture-browser-ref.mjs');
+  // The injected zero-specificity body default is the UA CanvasText black.
+  assert.match(s, /min-height: 100vh; color: #000;/, 'ref injection must pin the spec-black default ink');
+  // The v4.0 white-ink injection must never resurface.
+  assert.doesNotMatch(s, /min-height: 100vh; color: #fff;/, 'v4.0 white default ink resurfaced in the ref injection');
+});
+
+// corpus-v4.1 FONT half: black ink made default prose VISIBLE, exposing the
+// face divergence — the ref rendered it in Chromium's default SERIF while
+// all three harnesses render the bundled Inter sans, so wrap points (and
+// everything below the prose) shifted vertically (the a98rgb cluster's
+// whole failure; its color math is pixel-exact). The ref injection pins
+// the harness font stack at zero specificity AND embeds the harness's own
+// Inter faces so the stack's first entry actually resolves. The natives
+// need no font hook: Compose (InterFontFamily) and iOS (registered
+// "Inter") already default to the bundled Inter UNCONDITIONALLY — WPT and
+// non-WPT modes alike — so only ref + web carry explicit pins.
+
+test('corpus-v4.1 font: the ref injection pins the harness Inter stack + embeds the faces', () => {
+  const s = src('tools/titan/capture-browser-ref.mjs');
+  // The stack constant exists and leads with the bundled Inter.
+  assert.match(s, /export const REF_FONT_STACK =\s*\n\s*"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif"/,
+    'REF_FONT_STACK missing/changed');
+  // The :where(body) injection consumes it (zero specificity — author
+  // font rules in the ref must still win, like a UA default). The block no
+  // longer closes on this declaration — the v4.1 line-height pin follows it
+  // (its own scan below holds that ordering).
+  assert.match(s, /font-family: \$\{REF_FONT_STACK\};/, 'ref injection must apply REF_FONT_STACK');
+  // The harness's own Inter faces are embedded so 'Inter' resolves in the
+  // ref browser (raw WPT HTML has no @font-face of its own).
+  assert.match(s, /\$\{await interFontFaceCss\(\)\}/, 'ref injection must embed the Inter @font-face preamble');
+  assert.match(s, /\['Inter-Regular\.ttf', 400\],\s*\n\s*\['Inter-Bold\.ttf', 700\],/,
+    'embedded weights must cover UA-reachable prose (400 + 700)');
+});
+
+test('corpus-v4.1 font: ref stack and web harness stack are byte-identical', () => {
+  // The whole point of the pin: ref prose and harness prose hit the SAME
+  // face and wrap at the SAME points. Extract both stacks from source and
+  // compare them as strings so either side drifting fails here.
+  const ref = src('tools/titan/capture-browser-ref.mjs');
+  const refStack = /export const REF_FONT_STACK =\s*\n\s*"([^"]+)"/.exec(ref)?.[1];
+  assert.ok(refStack, 'REF_FONT_STACK not found in capture-browser-ref.mjs');
+  const html = src('apps/web-harness/index.html');
+  // The harness's global default stack (html, body rule)…
+  assert.ok(html.includes(`font-family: ${refStack};`),
+    'web harness html/body font stack must equal REF_FONT_STACK');
+  // …and the WPT-stage re-pin carry the same stack (the wpt-mode rule
+  // re-states it so a future change to the global rule cannot silently
+  // detach the WPT surface from the ref).
+  const wptRule = /body\.wpt-mode, body\.wpt-mode #root,\s*\n\s*body\.wpt-composed-mode, body\.wpt-composed-mode #root \{[^}]*\}/s.exec(html)?.[0];
+  assert.ok(wptRule, 'wpt-mode stage rule not found in index.html');
+  assert.ok(wptRule.includes(`font-family: ${refStack};`),
+    'wpt-mode stage rule must re-pin the REF_FONT_STACK');
+});
+
+test('corpus-v4.1 web: wpt body classes flip the default ink black; body keeps #eee', () => {
+  const html = src('apps/web-harness/index.html');
+  // The WPT stage rule carries the black ink alongside the white canvas.
+  assert.match(html, /body\.wpt-composed-mode, body\.wpt-composed-mode #root \{\s*\n\s*background: #fff;\s*\n\s*color: #000;/,
+    'wpt-mode black default-ink rule missing');
+  // The base stage contract stays: body inherits #eee for the 327-pair path.
+  assert.match(html, /color: #eee;/, 'the dark-stage body #eee contract must survive');
+
+  // The placeholder span pins its own color, so the body rule alone is not
+  // enough — the WPT_MODE branch must bottom out at opaque black too.
+  const tsx = src('apps/web-harness/src/sdui/ComponentRenderer.tsx');
+  assert.match(tsx, /: WPT_MODE\s*\n\s*\? '#000000'/, 'PlaceholderContent WPT_MODE black ink missing');
+  // …while the dark-stage contrast pick survives verbatim (327 baselines).
+  assert.match(tsx, /rgba\(237, 237, 237, 0\.7\)/, 'the dark-stage light contrast pick must survive');
+});
+
+test('corpus-v4.1 compose: WPT_DEFAULT_TEXT_INK is black and both bottom-outs route through the split', () => {
+  const runtime = src('runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/WptCaptureMode.kt');
+  // The runtime owns the black constant + the pure ink-split helper.
+  assert.match(runtime, /val WPT_DEFAULT_TEXT_INK = Color\(0xFF000000\)/, 'compose black ink constant missing');
+  assert.match(runtime, /fun defaultTextInk\(wptCaptureMode: Boolean, defaultInk: Color\): Color =\s*\n\s*if \(wptCaptureMode\) WPT_DEFAULT_TEXT_INK else defaultInk/,
+    'compose ink-split helper missing/changed');
+
+  const renderer = src('runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt');
+  // The currentColor bottom-out consumes the split…
+  assert.match(renderer, /inheritedColor \?\: defaultTextInk\(wptCaptureMode, DEFAULT_TEXT_COLOR\)/,
+    'compose currentColor bottom-out must route through the ink split');
+  // …and so does the no-color placeholder default.
+  assert.match(renderer, /defaultTextInk\(LocalWptCaptureMode\.current, run \{/,
+    'compose placeholder default must route through the ink split');
+  // The dark-stage #eee contract survives for the 327-pair path.
+  assert.match(renderer, /internal val DEFAULT_TEXT_COLOR = Color\(0xFFEEEEEE\)/, 'compose dark-stage #eee default lost');
+});
+
+test('corpus-v4.1 swiftui: WPTCanvas.textInk is black and both bottom-outs route through the split', () => {
+  const runtime = src('runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/WPTCaptureMode.swift');
+  // The runtime owns the black constant + the pure ink-split helper.
+  assert.match(runtime, /public static let textInk = Color\(white: 0\)/, 'swiftui black ink constant missing');
+  assert.match(runtime, /wptCaptureMode \? textInk : defaultInk/, 'swiftui ink-split helper missing/changed');
+
+  const renderer = src('runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift');
+  // Both currentColor bottom-out call sites (leading-text + leaf label)
+  // route through the split — count them so a third un-routed consumer of
+  // defaultTextColor can't slip back in.
+  const routed = renderer.match(/WPTCanvas\.captureTextInk\(\s*\n\s*wptCaptureMode: wptCaptureMode,\s*\n\s*defaultInk: InheritedText\.defaultTextColor\)/g) ?? [];
+  assert.equal(routed.length, 2, 'both iOS currentColor bottom-outs must route through the ink split');
+  assert.doesNotMatch(renderer, /\? InheritedText\.defaultTextColor : nil/,
+    'an iOS currentColor bottom-out bypasses the ink split');
+  // The no-color PlaceholderLabel fallback is black in WPT mode…
+  assert.match(renderer, /if wptCaptureMode \{ return WPTCanvas\.textInk \}/,
+    'iOS PlaceholderLabel no-color fallback must be black in WPT mode');
+  // …while the dark-stage 0.93-white default survives (327 baselines).
+  const inherited = src('runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/InheritedText.swift');
+  assert.match(inherited, /static let defaultTextColor = Color\(white: 0\.93\)/, 'swiftui dark-stage default ink lost');
+});
+
+// corpus-v4.1 LINE-HEIGHT leg (the third of the ink+font+line-height
+// sub-boundary): with black ink and the shared Inter face landed, ref-vs-
+// capture prose diverged ONLY in vertical rhythm — the ref's `line-height:
+// normal` Inter paragraphs advanced 36px top-to-top (line box ~20px @16px)
+// while every harness capture advanced 34px (the Round-4 composed ~18px
+// calibration, tuned against the OLD default-serif ref), accumulating 2px
+// per paragraph (20px over a 10-bar test — the whole css-color/css-break/
+// css-flexbox collapse of the first v4.1 run). Neither side may depend on
+// font-`normal` metrics: the ref injects an explicit unitless 1.25
+// (REF_LINE_HEIGHT — 20px @16px, Chromium's measured natural Inter rhythm)
+// and ALL harness composed calibrations pin the SAME 20px box. All pins are
+// WPT-mode-gated (author-declared line-height still wins everywhere — the
+// pin is a DEFAULT: :where zero specificity on ref, stylesheet-vs-inline on
+// web, declared-value deferral on the natives); the dark-stage 327 path
+// keeps its font-`normal`/1.2x line boxes byte-identically. A half-pinned
+// state (ref at 20px, one platform still at 18px) re-opens the compounding
+// rhythm drift — exactly what these one-place-per-surface scans catch.
+
+test('corpus-v4.1 line-height: the ref injection pins a deterministic unitless 1.25', () => {
+  const s = src('tools/titan/capture-browser-ref.mjs');
+  // The pin constant exists at the lock-step value (20px @ the 16px root).
+  assert.match(s, /export const REF_LINE_HEIGHT = '1\.25'/, 'REF_LINE_HEIGHT missing/changed');
+  // The :where(body) injection consumes it (zero specificity — author
+  // line-height rules in the ref must still win, like a UA default), on the
+  // same declaration block as the ink + font pins.
+  assert.match(s, /font-family: \$\{REF_FONT_STACK\};\s*\n\s*line-height: \$\{REF_LINE_HEIGHT\}; \}/,
+    'ref injection must apply REF_LINE_HEIGHT at zero specificity');
+});
+
+test('corpus-v4.1 line-height: web wpt stage + composed placeholder pin the ref value', () => {
+  // Extract the ref pin from source so all web assertions track it — either
+  // side drifting fails here, not silently in a corpus run.
+  const ref = src('tools/titan/capture-browser-ref.mjs');
+  const refLh = /export const REF_LINE_HEIGHT = '([^']+)'/.exec(ref)?.[1];
+  assert.ok(refLh, 'REF_LINE_HEIGHT not found in capture-browser-ref.mjs');
+
+  const html = src('apps/web-harness/index.html');
+  // The WPT stage rule re-pins the same unitless number (inheritance-based
+  // default only — IR-declared line-heights arrive inline and win)…
+  const wptRule = /body\.wpt-mode, body\.wpt-mode #root,\s*\n\s*body\.wpt-composed-mode, body\.wpt-composed-mode #root \{[^}]*\}/s.exec(html)?.[0];
+  assert.ok(wptRule, 'wpt-mode stage rule not found in index.html');
+  assert.ok(wptRule.includes(`line-height: ${refLh};`), 'wpt-mode stage rule must pin the ref line-height');
+  // …while the base html/body rule (the 327-pair stage) declares NO
+  // line-height at all, so the dark-stage captures keep font-normal boxes.
+  const baseRule = /html, body \{[^}]*\}/s.exec(html)?.[0];
+  assert.ok(baseRule, 'base html/body rule not found in index.html');
+  assert.doesNotMatch(baseRule, /line-height/, 'the dark-stage html/body rule must not grow a line-height');
+
+  // The composed placeholder default mirrors the same unitless value (the
+  // span re-states it so an ancestor's line-height can never detach it),
+  // still deferring to an IR-declared line-height first.
+  const tsx = src('apps/web-harness/src/sdui/ComponentRenderer.tsx');
+  assert.match(tsx, new RegExp(`WPT_COMPOSED_MODE \\? \\{ lineHeight: irLineHeight \\?\\? '${refLh.replace('.', '\\.')}' \\} : \\{\\}`),
+    'composed placeholder default must pin the ref line-height (after IR deferral)');
+  // The Round-4 default-serif 18px calibration must never resurface.
+  assert.doesNotMatch(tsx, /irLineHeight \?\? '18px'/, 'stale Round-4 18px composed pin resurfaced');
+});
+
+test('corpus-v4.1 line-height: compose composed ratio is 1.25 and the native default survives', () => {
+  const runtime = src('runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/WptCaptureMode.kt');
+  // The composed calibration ratio mirrors the ref pin (1.25 → 20px @16px).
+  assert.match(runtime, /const val REF_DEFAULT_FONT_LINE_HEIGHT_RATIO: Float = 1\.25f/,
+    'compose composed line-box ratio must be the ref 1.25');
+  // The dark-stage native default box survives byte-identically (327 path).
+  assert.match(runtime, /const val NATIVE_DEFAULT_LINE_HEIGHT_RATIO: Float = 1\.2f/,
+    'compose dark-stage 1.2x default lost');
+  // The mode split itself is unchanged: composed WPT → ref ratio, else 1.2x.
+  assert.match(runtime, /if \(composedWpt\) REF_DEFAULT_FONT_LINE_HEIGHT_RATIO\s*\n\s*else NATIVE_DEFAULT_LINE_HEIGHT_RATIO/,
+    'compose composed line-box mode split missing/changed');
+});
+
+test('corpus-v4.1 line-height: swiftui ref line box is 20 and stays WPT-gated + IR-deferring', () => {
+  const renderer = src('runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift');
+  // The calibration constant mirrors the ref pin (16px root x 1.25 = 20).
+  assert.match(renderer, /public static let wptRefLineBoxPx: CGFloat = 20/,
+    'swiftui ref line box must be the corpus-v4.1 20px');
+  // The gate shape is unchanged: IR-declared wins, then WPT-mode-only pin,
+  // else nil (SwiftUI natural metrics — the untouched product/baseline path).
+  assert.match(renderer, /if let declared \{ return declared \}/,
+    'swiftui IR line-height deferral missing');
+  assert.match(renderer, /return wptCaptureMode \? wptRefLineBoxPx : nil/,
+    'swiftui line-box pin must stay WPT-mode-gated with a nil product path');
 });

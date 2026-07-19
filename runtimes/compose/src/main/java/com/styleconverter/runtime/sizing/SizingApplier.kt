@@ -127,6 +127,32 @@ object SizingApplier {
     }
 
     /**
+     * TITAN WPT lane — resolve the box-sizing TRI-STATE for a capture mode.
+     * Pure decision (JUnit-pinned in WptBoxSizingDefaultTest) so the mode
+     * split can never silently drift:
+     *   - a DECLARED keyword always wins verbatim (a WPT test that writes
+     *     `box-sizing: border-box` must keep it);
+     *   - undeclared (null) in WPT capture mode defaults to CONTENT_BOX —
+     *     css-sizing-3 §3's initial value IS content-box (the UA default
+     *     the WPT refs are authored against; the browser-ref render in
+     *     tools/titan/capture-browser-ref.mjs applies no reset), the twin
+     *     of the web harness's `body.wpt-mode [data-component-id] {
+     *     box-sizing: content-box }` override in apps/web-harness/index.html.
+     *     Without it the 4 grid *-large-border-padding tests rendered
+     *     100x500 border boxes where the ref shows the padding+border-grown
+     *     172-wide content-box arithmetic (pixel-verified);
+     *   - undeclared OUTSIDE WPT mode stays null — the border-box status
+     *     quo the whole dark-stage/327-pair baseline corpus is captured
+     *     against (web's `* { box-sizing: border-box }` reset) is frozen.
+     */
+    internal fun effectiveBoxSizing(
+        declared: BoxSizingKeyword?,
+        wptCaptureMode: Boolean
+    ): BoxSizingKeyword? =
+        // Declared wins; only the UNSET slot picks up the WPT UA default.
+        declared ?: if (wptCaptureMode) BoxSizingKeyword.CONTENT_BOX else null
+
+    /**
      * Pre-clamp an explicit width/height by min/max so the resulting
      * Modifier.width/height honors CSS clamp semantics. Only operates on
      * the LengthValue.Exact + LengthValue.Relative-Px shapes — intrinsic

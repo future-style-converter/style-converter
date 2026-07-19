@@ -53,7 +53,15 @@ object SizingExtractor {
      * dropped (treated as "not specified") so callers don't need to distinguish
      * "IR said Unknown" from "property absent".
      */
-    fun extractSizingConfig(properties: List<Pair<String, JsonElement?>>): SizingConfig {
+    fun extractSizingConfig(
+        properties: List<Pair<String, JsonElement?>>,
+        // TITAN WPT lane — true ONLY on the LocalWptCaptureMode capture
+        // path (threaded from ComponentRenderer through StyleApplier /
+        // LayoutFacade, the same plumbing pattern as collapsedMargin).
+        // Default false keeps every existing call site — and therefore the
+        // whole dark-stage/327-pair baseline corpus — byte-identical.
+        wptCaptureMode: Boolean = false,
+    ): SizingConfig {
         var cfg = SizingConfig()
         // Walk once, dispatch per property. Last occurrence wins (matches CSS
         // cascade for same-specificity rules).
@@ -86,6 +94,14 @@ object SizingExtractor {
                 else -> cfg
             }
         }
+        // TITAN WPT lane — resolve the tri-state BEFORE the band gate below
+        // so a WPT-defaulted CONTENT_BOX also gets its inflation bands
+        // (frame = content + padding + border needs the resolved px bands;
+        // computing them here keeps SizingApplier a pure config→Modifier
+        // function). effectiveBoxSizing is identity when wptCaptureMode is
+        // false, so the tri-state pin (`absent stays null`) still holds on
+        // every non-WPT path.
+        cfg = cfg.copy(boxSizing = SizingApplier.effectiveBoxSizing(cfg.boxSizing, wptCaptureMode))
         // Lane BX — only an EXPLICIT content-box needs the padding+border
         // inflation bands; unset/border-box configs keep 0f so the Applier
         // is a guaranteed no-change on the whole existing fixture corpus.
