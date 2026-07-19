@@ -23,6 +23,8 @@ import {
   extractBodyTree,
   extractBodyTreeNested,
   extractOwnText,
+  // wave-11 fix 2: leading anonymous body text.
+  extractLeadingBodyText,
   selectorMatches,
   selectorMatchesPseudoElement,
   propsForElement,
@@ -41,12 +43,28 @@ import {
 // ── stripComments ───────────────────────────────────────────────────────────
 
 test('stripComments removes HTML comments', () => {
+  // HTML comments erase to '' — the DOM concatenates the neighbouring
+  // text nodes with nothing in between (see stripComments' asymmetry note).
   assert.equal(stripComments('a <!-- x --> b'), 'a  b');
 });
 
-test('stripComments removes CSS comments inside style', () => {
+test('stripComments replaces CSS comments with a single space', () => {
+  // wave-11 TITAN fix 1: css-syntax-3 §4.3.2 makes a comment a TOKEN
+  // SEPARATOR, so it must become whitespace — not vanish. The leading
+  // `/* hide */` therefore leaves a space behind (two spaces total with
+  // the one already following it).
   assert.equal(stripComments('<style>/* hide */ p{color:red}</style>'),
-                             '<style> p{color:red}</style>');
+                             '<style>  p{color:red}</style>');
+});
+
+test('stripComments keeps comment-separated hsla components apart', () => {
+  // wave-11 TITAN fix 1 pin — WPT css-color background-color-hsl-001 #p5:
+  // erasing the comments used to GLUE the number tokens into the corrupted
+  // `hsla(12075%50%/1.0)` (2 corrupt swatches in each of the 4
+  // comment-bearing css-color tests). The space replacement preserves the
+  // separator role the comment played.
+  assert.equal(stripComments('hsla(120/* c */75%/* c */50%/1.0)'),
+                             'hsla(120 75% 50%/1.0)');
 });
 
 // ── extractInlineStyle ──────────────────────────────────────────────────────
@@ -656,6 +674,70 @@ test('extfixA: buildComponents omits _text and children when empty (back-compat)
   const cmp = components['stem__0'];
   assert.deepEqual(Object.keys(cmp), ['properties']);
   assert.equal(cmp.properties.color, 'red');
+});
+
+// ── wave-11 fix 2: leading anonymous body text ──────────────────────────────
+//
+// css-grid/abspos/descendant-static-position-001..004: bare instruction
+// prose ("There should be no red:") is a direct <body> child TEXT node.
+// Browsers give it an anonymous block box (CSS 2.1 §9.2.1.1) one line box
+// tall before the first element; the walker only emits elements, so every
+// platform rendered ~18px higher than the browser-ref. The extractor now
+// emits the leading run as a `<idPrefix>__text` component on the same
+// `_text` channel the per-element ownText path uses.
+
+test('wave11: extractLeadingBodyText returns the bare prose before the first element', () => {
+  // Mirror of descendant-static-position-001.html's body shape.
+  const html =
+    '<body>\nThere should be no red:\n\n<div class="grid"><div></div></div></body>';
+  assert.equal(extractLeadingBodyText(html), 'There should be no red:');
+});
+
+test('wave11: extractLeadingBodyText is empty when body opens with an element', () => {
+  // The ~common case — fixtures must stay byte-identical (no __text key).
+  assert.equal(extractLeadingBodyText('<body><div class="t">x</div>tail</body>'), '');
+  // Whitespace-only leading runs are NOT anonymous boxes (collapsed away).
+  assert.equal(extractLeadingBodyText('<body>\n  \n<div></div></body>'), '');
+});
+
+test('wave11: extractLeadingBodyText skips head scaffolding in no-<body> fallback', () => {
+  // Body-less minimal WPT shape: head tags precede the prose; <style>
+  // content must NOT leak into the text, but the prose after it (still
+  // before the first renderable element) is the leading anonymous run.
+  const html =
+    '<link rel="match" href="r.html"><style>.t { color: red }</style>\n' +
+    'Instruction text\n<p class="t">subject</p>';
+  assert.equal(extractLeadingBodyText(html), 'Instruction text');
+});
+
+test('wave11: buildComponents emits the leading text as a __text component before __0', () => {
+  const html =
+    '<body>There should be no red:\n<div class="grid"></div></body>';
+  const rules = parseCss('.grid { width: 20px }');
+  const { components } = buildComponents(html, rules, 'dsp-001');
+  // The leading-text component rides the same `_text` channel as ownText,
+  // with an EMPTY properties bag (prose lays out at renderer defaults).
+  assert.deepEqual(components['dsp-001__text'], { properties: {}, _text: 'There should be no red:' });
+  // Document order: __text precedes the element siblings in map insertion
+  // order (which is what every renderer iterates).
+  const keys = Object.keys(components);
+  assert.ok(keys.indexOf('dsp-001__text') < keys.indexOf('dsp-001__0'),
+    `__text must precede __0; got ${keys}`);
+  // The element sibling is untouched.
+  assert.equal(components['dsp-001__0'].properties.width, '20px');
+});
+
+test('wave11: text-only body yields __text instead of the 100x100 placeholder', () => {
+  // Degenerate branch: with real prose on the canvas the phantom
+  // placeholder box must NOT be emitted alongside it.
+  const { components } = buildComponents('<body>just prose</body>', [], 'stem');
+  assert.deepEqual(components, { stem__text: { properties: {}, _text: 'just prose' } });
+});
+
+test('wave11: element-first body emits no __text key (byte-identical fixtures)', () => {
+  const { components } = buildComponents('<body><div class="t"></div></body>',
+    parseCss('.t { color: red }'), 'stem');
+  assert.equal(components['stem__text'], undefined);
 });
 
 // ── Bug 1 (F-EXTRACTOR retry): `_tag` field emission ───────────────────────

@@ -97,12 +97,32 @@ async function bucketIndex() {
 // Each helper is exported for unit testing.
 
 /** Strip C-style and HTML comments so neither <style> nor <body> regexes
- *  trip on commented-out blocks. */
+ *  trip on commented-out blocks.
+ *
+ *  Replacement text is deliberately ASYMMETRIC between the two syntaxes:
+ *
+ *  - HTML comments → '' (empty). A DOM comment node sits BETWEEN text
+ *    nodes; the surrounding text nodes render adjacent with nothing in
+ *    between (`a<!-- c -->b` paints "ab"), so deleting the comment
+ *    reproduces what the browser shows.
+ *  - CSS comments → ' ' (single space). Per css-syntax-3 §4.3.2 the
+ *    tokenizer treats a comment exactly like whitespace — it TERMINATES
+ *    the token before it and separates it from the next. Deleting it
+ *    instead GLUES the neighbours into one corrupted token: the WPT
+ *    background-color-hsl-001 #p5 value `hsla(120⟨comment⟩75%⟨comment⟩
+ *    50%/1.0)` (⟨comment⟩ = a slash-star CSS comment, unspellable inside
+ *    this doc block) collapsed to the unparseable `hsla(12075%50%/1.0)`
+ *    — 2 corrupt swatches in each of the 4 comment-bearing css-color
+ *    tests, failing on every platform. A space preserves the separator
+ *    role; CSS never distinguishes one space from many, so no value can
+ *    over-separate. */
 export function stripComments(html) {
-  // HTML comments first (can contain `*/`).
+  // HTML comments first (can contain `*/`). Empty replacement — see the
+  // DOM text-node-concatenation rationale in the doc comment above.
   let out = html; for (let prev = null; prev !== out; ) { prev = out; out = out.replace(/<!--[\s\S]*?-->/g, ''); }
-  // CSS comments inside <style> blocks.
-  out = out.replace(/\/\*[\s\S]*?\*\//g, '');
+  // CSS comments inside <style> blocks. Single-SPACE replacement — the
+  // css-syntax-3 comment-as-token-separator rule in the doc comment above.
+  out = out.replace(/\/\*[\s\S]*?\*\//g, ' ');
   return out;
 }
 
@@ -652,6 +672,113 @@ export function extractOwnText(innerHtml) {
     .replace(/[ \t\n\r\f]+/g, ' ')
     .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
   return collapsed;
+}
+
+/**
+ * wave-11 TITAN fix 2 (css-grid abspos descendant-static-position-001..004
+ * + every WPT test opening with bare instruction prose): extract the
+ * LEADING anonymous text of <body> — non-whitespace text nodes that are
+ * direct body children and precede the first renderable element, e.g.
+ * `<body>There should be no red:\n<div class="grid">…`.
+ *
+ * Why: browsers wrap such text in an anonymous block box (CSS 2.1
+ * §9.2.1.1) that occupies a full line box (~18px at the UA default)
+ * BEFORE the first element child. walkChildren() emits only ELEMENT
+ * children, so the extractor silently dropped that line and every
+ * platform rendered ~18px higher than the browser-ref — 100% of the web
+ * gap on the 4 css-grid descendant-static-position tests and a
+ * ~0.03–0.05 SSIM penalty on the natives. buildComponents() emits the
+ * returned string as a leading `_text`-bearing block component (the same
+ * `_text` channel the per-element ownText path uses).
+ *
+ * Scope: the LEADING run only. Anonymous text INTERLEAVED between (or
+ * trailing after) element siblings is rare in the corpus and remains a
+ * documented gap — representing it faithfully needs order-preserving
+ * text components between the `__N` siblings, which the flat components
+ * map cannot express today. No silent fallthrough: those runs were
+ * always dropped; this narrows the loss to the non-leading cases.
+ *
+ * Head-only elements (<style>/<script>/<link>/<meta>/…) encountered
+ * before the first renderable element are SKIPPED — including their
+ * content, so `<style>` CSS text never leaks into `_text` — because in
+ * the no-<body> fallback the whole document is scanned and head
+ * scaffolding precedes the body prose.
+ *
+ * Whitespace collapses per the same CSS `white-space: normal` ASCII-only
+ * rule as extractOwnText (CSS Text §4.1). Returns '' when body opens
+ * with an element (the common case — fixtures stay byte-identical).
+ *
+ * Exported so the unit tests can pin the contract.
+ */
+export function extractLeadingBodyText(html) {
+  // Same body-locator + implicit-<html>/<head> unwrap as
+  // extractBodyTreeNested so both walkers agree on what "body content" is.
+  const bodyMatch = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html);
+  let inner = bodyMatch ? bodyMatch[1] : html;
+  for (let unwrap = 0; unwrap < 2; unwrap++) {
+    const skipped = inner.replace(/^\s*<!doctype\b[^>]*>\s*/i, '').replace(/^\s+/, '');
+    const wrapMatch = /^<(html|head|body)\b[^>]*>([\s\S]*?)(?:<\/\1\s*>|$)/i.exec(skipped);
+    if (!wrapMatch) break;
+    inner = wrapMatch[2];
+  }
+  const n = inner.length;
+  // Void set mirrors walkChildren — <link>/<meta>/<base> have no close tag.
+  const VOID = new Set([
+    'area','base','br','col','embed','hr','img','input',
+    'link','meta','param','source','track','wbr',
+  ]);
+  let i = 0;
+  let buf = '';
+  while (i < n) {
+    // Text region — accumulate until the next '<'.
+    if (inner[i] !== '<') {
+      const next = inner.indexOf('<', i);
+      const end = next < 0 ? n : next;
+      buf += inner.slice(i, end);
+      i = end;
+      continue;
+    }
+    // Comments / DOCTYPE / PIs — already stripped upstream, but skip
+    // defensively (mirrors extractOwnText).
+    if (inner.startsWith('<!', i) || inner.startsWith('<?', i)) {
+      const close = inner.indexOf('>', i);
+      i = close < 0 ? n : close + 1;
+      continue;
+    }
+    // Stray close tag (a dangling `</head>` in fallback mode) — not text,
+    // not a renderable element: skip past it and keep scanning.
+    if (inner.startsWith('</', i)) {
+      const close = inner.indexOf('>', i);
+      i = close < 0 ? n : close + 1;
+      continue;
+    }
+    // Element open tag — identify it.
+    const tagOpenEnd = inner.indexOf('>', i);
+    if (tagOpenEnd < 0) break; // malformed tail — nothing more to read
+    const tagOpen = inner.slice(i, tagOpenEnd + 1);
+    const tagName = (/^<\s*([A-Za-z][A-Za-z0-9-]*)/i.exec(tagOpen)?.[1] || '').toLowerCase();
+    if (!tagName) { i = tagOpenEnd + 1; continue; }
+    // First RENDERABLE element ends the leading run (its own text belongs
+    // to its component via the ownText channel, not to the body prose).
+    if (!HEAD_ONLY_TAGS.has(tagName)) break;
+    // Head-only element: skip it WHOLESALE (open tag through matching
+    // close) so <style>/<script> bodies never masquerade as prose.
+    if (tagOpen.endsWith('/>') || VOID.has(tagName)) {
+      i = tagOpenEnd + 1;
+      continue;
+    }
+    // Head-only tags never nest same-name in the corpus, so the first
+    // close tag is the matching one (no depth tracking needed here).
+    const closeRe = new RegExp(`</${tagName}\\s*>`, 'gi');
+    closeRe.lastIndex = tagOpenEnd + 1;
+    const c = closeRe.exec(inner);
+    i = c ? c.index + c[0].length : n;
+  }
+  // Collapse ASCII whitespace only — same CSS Text §4.1 rule (and the same
+  // U+3000-preserving rationale) as extractOwnText above.
+  return buf
+    .replace(/[ \t\n\r\f]+/g, ' ')
+    .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
 }
 
 /**
@@ -2094,6 +2221,11 @@ export async function extractFixture(testRel) {
  *  - Bug 2: descendant elements are walked with their ancestor chain so
  *    descendant selectors match.
  *  - Bug 5: head-only elements never emit components.
+ *  - wave-11 fix 2: LEADING anonymous body text (bare prose before the
+ *    first element child, e.g. "There should be no red:") is emitted as a
+ *    `<idPrefix>__text` component carrying `_text` — after `__body`,
+ *    before the `__N` siblings — so the anonymous block box the browser
+ *    lays out (CSS 2.1 §9.2.1.1) exists on our side of the diff too.
  *
  * EXTFIX-A (swarm-001 root-cause synthesis):
  *  - Top-level body elements become components keyed `<idPrefix>__N`.
@@ -2144,16 +2276,36 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
     components[`${idPrefix}__body`] = cmp;
   }
 
+  // wave-11 TITAN fix 2: LEADING anonymous body text. Browsers wrap bare
+  // text that is a direct <body> child in an anonymous block box (CSS 2.1
+  // §9.2.1.1) occupying one line box before the first element — dropping
+  // it shifted every capture ~18px up vs the browser-ref (the whole web
+  // gap on the css-grid descendant-static-position family). Emit it as a
+  // `_text`-bearing block component AFTER the synthetic body root but
+  // BEFORE the `__N` element siblings (the components map preserves
+  // insertion order, which is the renderers' document order). Empty
+  // properties bag on purpose: like the per-element ownText case, the
+  // renderer lays the text out at prose defaults and the capture is
+  // meaningful without an explicit width/height (see buildNode's Bug 1
+  // note). Leading-run-only scope + the interleaved-text gap are
+  // documented on extractLeadingBodyText.
+  const leadingText = extractLeadingBodyText(cleaned);
+  if (leadingText) {
+    components[`${idPrefix}__text`] = { properties: {}, _text: leadingText };
+  }
+
   // EXTFIX-A: walk subtree as a NESTED tree (not flat). depth ≤ 5 covers
   // the css-grid abspos / css-overflow / css-contain patterns documented
   // in swarm-001 without unbounded blow-up.
   const tree = extractBodyTreeNested(cleaned);
 
   if (tree.length === 0) {
-    // No renderable elements at all (extremely rare — body had only text).
-    // Keep the legacy degenerate placeholder so the capture pipeline still
-    // produces a row.
-    if (!components[`${idPrefix}__body`]) {
+    // No renderable elements at all. Keep the legacy degenerate
+    // placeholder so the capture pipeline still produces a row — unless
+    // the body-root or the wave-11 leading-text component already gives
+    // the canvas real content (a text-only body now yields its prose as
+    // `__text` instead of a phantom 100x100 box).
+    if (!components[`${idPrefix}__body`] && !components[`${idPrefix}__text`]) {
       components[`${idPrefix}__0`] = { properties: { width: '100px', height: '100px' } };
     }
     return {

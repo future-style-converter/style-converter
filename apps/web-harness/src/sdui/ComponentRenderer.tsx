@@ -91,7 +91,8 @@ const WPT_MODE: boolean = (() => {
  * (ComposedCaptureGallery) renders each WPT test's components composed on ONE
  * ref-framed canvas, then diffs it against the Chromium browser-ref. The ref
  * renders the reference page's real DOM — a text `<p>` bar is exactly one
- * line-box tall (≈18px). Our renderer wraps a childless component's text in a
+ * line-box tall (20px @16px since the corpus-v4.1 REF_LINE_HEIGHT pin; ≈18px
+ * in the Round-4 default-serif era). Our renderer wraps a childless component's text in a
  * PlaceholderContent <span> whose default `padding: 4px` makes the same bar
  * ≈10px TALLER. With flush bars that height error was mostly hidden; once the
  * UA margins are restored (index.html `wpt-composed-mode` margin:revert), the
@@ -673,11 +674,26 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLine
   // (caught by DS_StateStack forced-focus capture: text never flipped).
   // `inherit` lets the state-resolved color reach the visible text, which
   // is exactly what the native placeholders get from resolved styles.
+  // corpus-v4.1 BLACK-ink sub-boundary (WPT mode only): a real WPT page
+  // paints default prose in the UA `color: CanvasText` BLACK, and the
+  // browser-ref now injects the same spec black
+  // (capture-browser-ref.mjs `:where(body) { color:#000 }`). Through
+  // corpus-v4.0 this span's no-bg fallback was the near-white
+  // rgba(237,237,237,0.7) — invisible on the v4 white canvas exactly like
+  // the ref's old white ink, so default-ink text tests passed VACUOUSLY
+  // (neither side showed the text). Under WPT_MODE the colorless bottom-out
+  // is now opaque #000, in lock-step with the native WPT-mode bottom-outs
+  // (Compose WPT_DEFAULT_TEXT_INK, SwiftUI WPTCanvas.textInk). The
+  // luminance contrast pick below is the 327-pair stage contract (mirrors
+  // iOS PlaceholderLabel.resolvedColor) and stays byte-identical — WPT_MODE
+  // is only ever true under `?wpt=1`, which no baseline capture sets.
   const color = explicitColor
     ? 'inherit'
-    : (luminance > 0.6
-      ? 'rgba(51, 51, 51, 0.7)'    // dark on light
-      : 'rgba(237, 237, 237, 0.7)'); // light on dark (and the no-bg fallback)
+    : WPT_MODE
+      ? '#000000'                  // WPT default ink — spec CanvasText black
+      : (luminance > 0.6
+        ? 'rgba(51, 51, 51, 0.7)'    // dark on light
+        : 'rgba(237, 237, 237, 0.7)'); // light on dark (and the no-bg fallback)
   // Visible-text resolution priority — see
   // tools/titan/investigations/swarm-001/css-color__color-001.json
   //
@@ -733,25 +749,29 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLine
         // absolutely-placed svg pins the label at (8,6) with NO effect on
         // the component's own auto-height, identically on all platforms.
         ...(isBlockLabel ? { height: 0, position: 'relative' as const, overflow: 'visible' as const } : {}),
-        // GAP 1 (height half) — line-height pin. The harness FORCES the Inter
-        // font (index.html) to keep iOS/Android/web mutually comparable, but
-        // the browser-ref (capture-browser-ref.mjs) forces NO font, so its <p>
-        // text uses Chromium's default UA font. Inter's `normal` line-height
-        // (≈1.25 → 20px @16px) is TALLER than the default font's (≈18px @16px),
-        // so every text bar we render is ~2px taller than the ref's. With flush
-        // bars that error hid; once UA margins (index.html wpt-composed-mode
-        // margin:revert) spread the bars out, the 2px COMPOUNDS down a 10-bar
-        // test — by the last bar our bars are ~half a pitch off the ref's,
-        // and SSIM (edge-phase sensitive) collapses. Pinning the line-height to
-        // the ref default-font line box (18px @16px) removes that drift and
-        // lifts the multi-<p> tests from ~0.50 to ~0.90.
+        // GAP 1 (height half) — line-height pin, recalibrated at the
+        // corpus-v4.1 LINE-HEIGHT sub-boundary. The Round-4 cut pinned '18px'
+        // here: back then the browser-ref forced NO font, and Chromium's
+        // default-SERIF `<p>` line box was ~18px @16px while our forced Inter
+        // `normal` box was ~20px — the 2px COMPOUNDED down a 10-bar test and
+        // collapsed the edge-phase-sensitive SSIM. From v4.1 the ref pins the
+        // harness Inter face AND an explicit `line-height: 1.25`
+        // (capture-browser-ref.mjs REF_LINE_HEIGHT — 20px @16px, Chromium's
+        // measured natural Inter rhythm), so the OLD 18px calibration became
+        // the divergence: ref paragraphs advanced 36px top-to-top, ours 34px,
+        // re-accumulating 2px per bar (the whole css-color/css-break collapse
+        // of the first v4.1 run). The pin now mirrors the ref value — UNITLESS
+        // '1.25' so it recomputes against the span's own font-size exactly
+        // like the ref's inherited number (and like index.html's wpt-stage
+        // rule, which this duplicates deliberately: the span must stay pinned
+        // even if an intermediate ancestor ever grows a line-height).
         //   • Composed WPT mode ONLY — the per-component `?wpt=1` path and the
         //     327-pair baseline never set WPT_COMPOSED_MODE, so both are byte-
         //     identical to before.
         //   • DEFER to an IR-declared line-height (irLineHeight): a test that
         //     sets its own line-height keeps it; only bare text (no declaration,
         //     i.e. inheriting Inter's `normal`) gets the ref-matching default.
-        ...(WPT_COMPOSED_MODE ? { lineHeight: irLineHeight ?? '18px' } : {}),
+        ...(WPT_COMPOSED_MODE ? { lineHeight: irLineHeight ?? '1.25' } : {}),
         // fontSize/fontWeight/letterSpacing/textTransform/etc. all
         // inherit by default — don't set them explicitly. Colour is the
         // exception: we drive it from bg luminance to match iOS.

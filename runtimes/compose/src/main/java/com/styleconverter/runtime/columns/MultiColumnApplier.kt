@@ -147,6 +147,50 @@ object MultiColumnApplier {
         return UsedColumns(count, width)
     }
 
+    /**
+     * The css-break-3 §2 fragmentainer block-size decision, extracted pure
+     * for the JVM suite (MultiColumnFragmentationGateTest).
+     *
+     * ## Why TWO definiteness signals (the wave-10 integration gap)
+     * A fragmentainer only exists when the multicol container's block-size
+     * is DEFINITE. The original gate read ONLY `constraints.hasFixedHeight`
+     * inside MultiColumnDistributionLayout — but in the REAL render tree
+     * that layout sits inside [MultiColumnLayout]'s BoxWithConstraints,
+     * whose Box measure policy (propagateMinConstraints = false) LOOSENS
+     * minHeight to 0 before the content measures. min != max ⇒
+     * hasFixedHeight is false on every real path, so the wave-10
+     * fragmentation branch never engaged outside its unit tests (which
+     * handed the layout synthetic TIGHT constraints directly). The fix
+     * threads [containerBlockSizeDefinite] — read from the still-tight
+     * INCOMING constraints at the BoxWithConstraints boundary — down to
+     * this gate; `hasFixedHeight` stays as an OR so direct callers of the
+     * distribution layout under tight constraints (MasonryLayout, the
+     * original unit pins) keep their behaviour.
+     *
+     * @param containerBlockSizeDefinite `constraints.hasFixedHeight` of the
+     *   INCOMING constraints at the MultiColumnLayout boundary (before Box
+     *   loosening). False for callers with no such boundary.
+     * @param constraints the constraints THIS layout measures with (max
+     *   height survives the Box loosening; only the min is zeroed).
+     * @return the fragmentainer block-size H in px, or null when no
+     *   fragmentainer exists (unbounded/auto block-size grows instead of
+     *   fragmenting, css-break-3 §2).
+     */
+    internal fun fragmentainerBlockSizePx(
+        containerBlockSizeDefinite: Boolean,
+        constraints: Constraints
+    ): Int? {
+        // The candidate block-size: the max constraint — the Box loosening
+        // preserves it even while zeroing the min.
+        val h = constraints.maxHeight
+        // Definite iff EITHER signal says so, and the size is a real bound
+        // (0-height containers have no visible fragments; Infinity means
+        // unbounded — the same three checks as the wave-10 inline gate).
+        val definite = (containerBlockSizeDefinite || constraints.hasFixedHeight) &&
+            h > 0 && h != Constraints.Infinity
+        return if (definite) h else null
+    }
+
     // One log line per distinct fragmentation-fallback reason for the whole
     // process — keeps the no-silent-fallthrough contract without flooding
     // logcat on every measure pass (mirrors ComponentRenderer's
@@ -211,6 +255,19 @@ object MultiColumnApplier {
             // Layout below) rather than fragmenting along the wrong axis.
             val fragmentationAllowed = !config.verticalWritingMode
 
+            // Wave-11 gate fix: the INCOMING constraints at THIS boundary are
+            // still TIGHT when the container's style chain declared a fixed
+            // height (min == max — the Compose signature of Modifier.height).
+            // BoxWithConstraints' inner Box measure policy
+            // (propagateMinConstraints = false) loosens minHeight to 0 before
+            // MultiColumnDistributionLayout measures, so hasFixedHeight read
+            // INSIDE that layout is always false in the real render tree —
+            // the wave-10 fragmentation gate never engaged (its unit tests
+            // passed on synthetic tight constraints; an integration gap).
+            // Capture the definiteness HERE and thread it down to the gate
+            // (fragmentainerBlockSizePx pins the OR-composition).
+            val containerBlockSizeDefinite = this.constraints.hasFixedHeight
+
             CompositionLocalProvider(
                 LocalMultiColumnConfig provides config,
                 LocalColumnCount provides columnCount
@@ -221,6 +278,7 @@ object MultiColumnApplier {
                         gap = gap,
                         config = config,
                         fragmentationAllowed = fragmentationAllowed,
+                        containerBlockSizeDefinite = containerBlockSizeDefinite,
                         content = content
                     )
                 } else {
@@ -228,6 +286,7 @@ object MultiColumnApplier {
                         columnCount = columnCount,
                         gap = gap,
                         fragmentationAllowed = fragmentationAllowed,
+                        containerBlockSizeDefinite = containerBlockSizeDefinite,
                         content = content
                     )
                 }
@@ -245,6 +304,10 @@ object MultiColumnApplier {
         // Threaded from MultiColumnLayout: false under vertical writing modes,
         // where the horizontal-tb fragmentation pass must bail.
         fragmentationAllowed: Boolean,
+        // Wave-11: the boundary-level block-size definiteness signal (see
+        // MultiColumnLayout) — the Box loosening below this point destroys
+        // hasFixedHeight, so the gate needs it threaded.
+        containerBlockSizeDefinite: Boolean,
         content: @Composable () -> Unit
     ) {
         Row(
@@ -265,6 +328,7 @@ object MultiColumnApplier {
             columnCount = columnCount,
             gap = gap,
             fragmentationAllowed = fragmentationAllowed,
+            containerBlockSizeDefinite = containerBlockSizeDefinite,
             content = content
         )
     }
@@ -280,6 +344,8 @@ object MultiColumnApplier {
         // Threaded from MultiColumnLayout: false under vertical writing modes,
         // where the horizontal-tb fragmentation pass must bail.
         fragmentationAllowed: Boolean,
+        // Wave-11: boundary-level block-size definiteness (see SimpleMultiColumn).
+        containerBlockSizeDefinite: Boolean,
         content: @Composable () -> Unit
     ) {
         val ruleColor = config.ruleColor ?: Color.Gray
@@ -290,6 +356,7 @@ object MultiColumnApplier {
             columnCount = columnCount,
             gap = gap,
             fragmentationAllowed = fragmentationAllowed,
+            containerBlockSizeDefinite = containerBlockSizeDefinite,
             modifier = Modifier.drawBehind {
                 val gapPx = gap.toPx()
                 val ruleWidthPx = ruleWidth.toPx()
@@ -371,6 +438,12 @@ object MultiColumnApplier {
         // false bails the fragmentation pass (vertical writing-mode — the
         // horizontal-tb geometry above would slice along the wrong axis).
         fragmentationAllowed: Boolean = true,
+        // Wave-11: true when the MultiColumnLayout boundary saw TIGHT height
+        // constraints (see fragmentainerBlockSizePx — the Box between that
+        // boundary and this Layout loosens minHeight to 0, so hasFixedHeight
+        // is unreadable here). Default false keeps direct callers
+        // (MasonryLayout, unit pins) on the legacy incoming-constraints gate.
+        containerBlockSizeDefinite: Boolean = false,
         content: @Composable () -> Unit
     ) {
         // Measure→draw bridge: the measure pass below writes the fragment list
@@ -435,12 +508,15 @@ object MultiColumnApplier {
             // ---- Fragmentation gate (css-break-3 §4) ----
             // A fragmentainer only exists when the container's block-size is
             // DEFINITE (css-break-3 §2: column boxes are fragmentation
-            // containers of fixed block-size). hasFixedHeight = min==max, the
-            // Compose signature of a fixed .height() in the style chain; an
-            // unbounded/auto block-size grows instead of fragmenting.
+            // containers of fixed block-size); an unbounded/auto block-size
+            // grows instead of fragmenting. Wave-11: definiteness comes from
+            // the THREADED boundary signal OR these constraints' own
+            // hasFixedHeight — the shared pure gate (fragmentainerBlockSizePx)
+            // documents why the local read alone was structurally dead in the
+            // real render tree.
             val columnBlockSize = constraints.maxHeight
             val definiteBlockSize =
-                constraints.hasFixedHeight && columnBlockSize > 0 && columnBlockSize != Constraints.Infinity
+                fragmentainerBlockSizePx(containerBlockSizeDefinite, constraints) != null
             if (definiteBlockSize) {
                 // Probe natural block-sizes via intrinsics — non-destructive
                 // (a measurable may still be measured after an intrinsic

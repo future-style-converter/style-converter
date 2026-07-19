@@ -318,6 +318,50 @@ enum SizeApplierMath {
         // content-box: frame = declared content size + padding + border.
         return v + inflation
     }
+
+    // TITAN WPT lane (wave 11) — resolve the box-sizing TRI-STATE for a
+    // capture mode. Pure decision (pinned in WPTCaptureModeTests) so the
+    // mode split can never silently drift — the 1:1 twin of Compose's
+    // `SizingApplier.effectiveBoxSizing` (JUnit-pinned there):
+    //   • a DECLARED keyword always wins verbatim — a WPT test that
+    //     writes `box-sizing: border-box` must keep it;
+    //   • undeclared (nil) in WPT capture mode defaults to .contentBox —
+    //     css-sizing-3 §3's INITIAL value IS content-box (the UA default
+    //     WPT refs are authored against; the browser-ref render in
+    //     tools/titan/capture-browser-ref.mjs applies no reset). This is
+    //     the iOS twin of the web harness's `body.wpt-mode
+    //     [data-component-id] { box-sizing: content-box }` override
+    //     (apps/web-harness/index.html). Without it the 4 css-grid
+    //     `*-large-border-padding` tests rendered 100×500 border boxes
+    //     where the ref paints the padding+border-grown 172-wide
+    //     content-box arithmetic;
+    //   • undeclared OUTSIDE WPT mode stays nil — the border-box status
+    //     quo the whole dark-stage/327-pair baseline corpus is captured
+    //     against (web's `* { box-sizing: border-box }` reset) is frozen.
+    static func effectiveBoxSizing(declared: BoxSizingKeyword?,
+                                   wptCaptureMode: Bool) -> BoxSizingKeyword? {
+        // Declared wins; only the UNSET slot picks up the WPT UA default.
+        declared ?? (wptCaptureMode ? .contentBox : nil)
+    }
+
+    // TITAN WPT lane (wave 11) — convert an INJECTED frame extent to the
+    // declared-size slot. The renderer's environment channels
+    // (gridStretchHeight / flexStretchWidth / wptBlockFlowFillWidth and
+    // the multicol containing-block fold) all inject BORDER-BOX frame
+    // extents, but under an effective `box-sizing: content-box` the
+    // SizeConfig width/height slot means CONTENT (css-sizing-3 §3) and
+    // SizeApplier re-inflates it by the bands. Subtracting the same
+    // inflation here keeps the painted frame equal to the injected
+    // extent. `inflate` is StyleBuilder.contentBoxInflation's per-axis
+    // band — 0 unless the effective keyword is contentBox, so every
+    // border-box/unset path returns the value VERBATIM (byte-identical
+    // non-WPT renders). Clamped at 0: an over-padded box cannot inject a
+    // negative content size (css-sizing-3 §3 floors used sizes at zero).
+    static func declaredFromFrame(_ frame: CGFloat,
+                                  inflate: CGFloat) -> CGFloat {
+        // frame − bands = content; max() guards degenerate over-padding.
+        max(0, frame - inflate)
+    }
 }
 
 // MARK: - min-content width emulation (fidelity wave 5)

@@ -160,7 +160,9 @@ class PlaceholderTextAndCurrentColorTest {
 
     @Test
     fun `no inherited color bottoms out into the opaque default text color`() {
-        val out = ComponentRenderer.resolveCurrentColorBottomOut(null)
+        // Dark-stage (non-WPT) side of the corpus-v4.1 ink split: the
+        // 327-pair pipeline keeps the historical stage contract verbatim.
+        val out = ComponentRenderer.resolveCurrentColorBottomOut(null, wptCaptureMode = false)
         // Exactly the harness stage contract: opaque #eee.
         assertEquals(ComponentRenderer.DEFAULT_TEXT_COLOR, out)
         // Pin the constant itself: rgb(238,238,238) at FULL alpha — the
@@ -173,13 +175,35 @@ class PlaceholderTextAndCurrentColorTest {
     }
 
     @Test
+    fun `wpt mode bottoms currentColor out into the spec black ink`() {
+        // corpus-v4.1 ink sub-boundary: in WPT capture the browser's
+        // inherit chain ends at the ref injection's `:where(body)
+        // { color:#000 }` (the UA CanvasText black a real WPT page bottoms
+        // out at), NOT the harness #eee — so the WPT-mode bottom-out is
+        // the opaque spec black.
+        val out = ComponentRenderer.resolveCurrentColorBottomOut(null, wptCaptureMode = true)
+        assertEquals(WPT_DEFAULT_TEXT_INK, out)
+        // Pin the ink itself: rgb(0,0,0) at FULL alpha — near-white would
+        // vanish into the white canvas and keep prose tests vacuous.
+        assertEquals(1f, out.alpha, 0f)
+        assertEquals(0f, out.red, 0f)
+        assertEquals(0f, out.green, 0f)
+        assertEquals(0f, out.blue, 0f)
+    }
+
+    @Test
     fun `an inherited color always wins over the default`() {
         // css-color-4 §7.2: currentColor on `color` == inherit — a real
-        // ancestor value must pass through untouched.
+        // ancestor value must pass through untouched, on BOTH sides of the
+        // corpus-v4.1 ink split (author color beats any default ink).
         val inherited = androidx.compose.ui.graphics.Color(0.2f, 0.4f, 0.6f, 1f)
         assertEquals(
             inherited,
-            ComponentRenderer.resolveCurrentColorBottomOut(inherited)
+            ComponentRenderer.resolveCurrentColorBottomOut(inherited, wptCaptureMode = false)
+        )
+        assertEquals(
+            inherited,
+            ComponentRenderer.resolveCurrentColorBottomOut(inherited, wptCaptureMode = true)
         )
     }
 }

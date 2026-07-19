@@ -97,9 +97,17 @@ object LayoutFacade {
      *                   and second is the JSON data for that property.
      * @return LayoutConfig containing all extracted layout configurations.
      */
-    fun extractConfig(properties: List<Pair<String, JsonElement?>>): LayoutConfig {
+    fun extractConfig(
+        properties: List<Pair<String, JsonElement?>>,
+        // TITAN WPT lane — WPT-capture flag threaded from the composable
+        // renderer (this static facade can't read CompositionLocals — the
+        // same reasoning as applyToModifier's collapsedMargin parameter).
+        // Only the sizing lane consumes it (box-sizing tri-state default);
+        // default false keeps every other call site byte-identical.
+        wptCaptureMode: Boolean = false,
+    ): LayoutConfig {
         return LayoutConfig(
-            sizing = SizingExtractor.extractSizingConfig(properties),
+            sizing = SizingExtractor.extractSizingConfig(properties, wptCaptureMode),
             padding = SpacingExtractor.extractPaddingConfig(properties),
             margin = SpacingExtractor.extractMarginConfig(properties),
             gap = SpacingExtractor.extractGapConfig(properties),

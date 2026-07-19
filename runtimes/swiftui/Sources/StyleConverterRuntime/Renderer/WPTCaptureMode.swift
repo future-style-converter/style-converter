@@ -118,4 +118,43 @@ public enum WPTCanvas {
                                          defaultBackground: Color) -> Color {
         wptCaptureMode ? background : defaultBackground
     }
+
+    /// The WPT default TEXT INK — spec BLACK, the corpus-v4.1 ink
+    /// sub-boundary within the v4 white-canvas era. Real WPT pages paint
+    /// default prose in the UA `color: CanvasText` black; through
+    /// corpus-v4.0 every surface kept the harness's near-white family
+    /// (web body `color:#eee`, this runtime's
+    /// `InheritedText.defaultTextColor` 0.93-white, the ref injection's
+    /// old `color:#fff`), so on the white canvas default-ink text vanished
+    /// on BOTH sides of the diff and prose reftests passed VACUOUSLY.
+    /// From v4.1 all four surfaces flip together: the ref injection
+    /// (capture-browser-ref.mjs `:where(body) { color:#000 }`), web
+    /// (index.html wpt-mode rule + PlaceholderContent's WPT_MODE ink),
+    /// Compose's `WPT_DEFAULT_TEXT_INK`, and this constant.
+    /// `Color(white: 0)` == opaque #000000.
+    ///
+    /// The FONT half of the same v4.1 sub-boundary needs NO iOS hook:
+    /// the ref injection now also pins the harness Inter stack (visible
+    /// black prose exposed the ref's default-serif vs harness-Inter wrap
+    /// -point divergence — capture-browser-ref.mjs REF_FONT_STACK), but
+    /// this runtime's default text face is ALREADY the registered
+    /// "Inter" unconditionally (ComponentRenderer's `.custom("Inter")` /
+    /// FontFaceMatcher bottom-outs, WPT and non-WPT modes alike), so the
+    /// native side already matches the newly pinned ref face and only
+    /// ref + web carry explicit font pins.
+    public static let textInk = Color(white: 0)
+
+    /// Pure default-text-ink decision — the ink twin of
+    /// `captureBackground` (unit-pinned in WPTCaptureModeTests, mirrored
+    /// by Compose's `defaultTextInk` in WptCanvasBackgroundTest.kt). WPT
+    /// capture mode bottoms text ink out at the corpus-v4.1 spec BLACK;
+    /// every other path returns `defaultInk` VERBATIM so the dark-stage
+    /// property-fixture pipeline keeps its historical near-white defaults
+    /// (`InheritedText.defaultTextColor` and the placeholder contrast
+    /// pick) byte-identically — the 327 committed baselines depend on
+    /// that side never moving.
+    public static func captureTextInk(wptCaptureMode: Bool,
+                                      defaultInk: Color) -> Color {
+        wptCaptureMode ? textInk : defaultInk
+    }
 }

@@ -218,7 +218,22 @@ dirs + WPT corpus are gitignored):
   fallback on both natives, and the composed-mode maxWidth clamp fix
   that was the real web fragmentainer mechanism. corpus-v4: web mean
   0.9593 (61/78 ≥ 0.95, **css-break web 12/12**), Android 46 passing
-  (was 33), iOS 36 (was 29); score-exclusions are delivery gaps only.
+  (was 33), iOS 36 (was 29); score-exclusions are delivery gaps only. Wave 11 (`tools/titan/results/corpus-v4-1.json`) completed the
+  typographic contract: default prose ink flipped to spec BLACK (v4.0's
+  default-ink text tests matched *vacuously* — neither side showed the
+  text), the ref pins the harness Inter stack (with a fonts.ready await
+  — the un-awaited load raced the screenshot and collapsed the first
+  run), and line-height:1.25 is pinned on all four surfaces (proven
+  ref-vs-web SSIM 1.0000 on the calibration test). Plus: CSS comments
+  are token separators in the extractor (hsla comment variants), leading
+  anonymous body text becomes a component, WPT-mode content-box default
+  and the css-grid-1 §9 abspos partition on both natives, and the
+  multicol fragmentation gate now fires in the real tree. corpus-v4.1 —
+  the first fully-real snapshot: css-color web 11/iOS 11/Android 10 of
+  11 (means 0.986–0.996), **iOS total 36 → 56 passing**, css-transforms
+  iOS 12/12, css-grid Android 4 → 8. Widest remaining native gap:
+  Android 16px prose rhythm (css-flexbox Android 1/12) — the wave-12
+  seam.
 
 ## Test suites
 
@@ -226,9 +241,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1078 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 481 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 552 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1106 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 502 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 569 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

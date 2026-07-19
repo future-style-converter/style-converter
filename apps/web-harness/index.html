@@ -149,13 +149,63 @@
        * legacy 327-pair capture path (bare `capture-mode`) keeps the dark
        * #1a1a2e stage byte-identically. Declared AFTER the capture-mode
        * rules so equal-specificity cascade order makes white win when both
-       * classes are present. Default text `color` is NOT overridden here —
-       * the ref injection keeps `color:#fff` and every runtime bottoms out
-       * near-white (#eee), so default-ink prose stays symmetric (see
-       * capture-browser-ref.mjs's injection note). */
+       * classes are present.
+       *
+       * Default text `color` — the corpus-v4.1 BLACK-ink sub-boundary. Real
+       * WPT pages paint default prose in the UA `color: CanvasText` BLACK;
+       * through corpus-v4.0 both sides of the diff kept the near-white
+       * harness family (`body { color: #eee }` above + the ref injection's
+       * old `color:#fff`), so default-ink text tests matched VACUOUSLY —
+       * neither side showed the text on the white canvas. From v4.1 the
+       * WPT stage overrides the body's #eee with the spec black, in
+       * lock-step with the ref injection (capture-browser-ref.mjs now
+       * injects `:where(body) { color:#000 }`) and the native WPT-mode
+       * bottom-outs (Compose WPT_DEFAULT_TEXT_INK, SwiftUI
+       * WPTCanvas.textInk). Inheritance-based ink only: an IR-declared
+       * color arrives as an inline style and still wins. The 327-pair
+       * stage keeps `color: #eee` byte-identically (no wpt class → this
+       * rule never applies).
+       *
+       * Default `font-family` — the FONT half of the same corpus-v4.1
+       * sub-boundary. The browser-ref injection
+       * (capture-browser-ref.mjs REF_FONT_STACK) pins this exact stack on
+       * the ref's body (with the harness Inter faces embedded as data
+       * URIs) so ref prose and harness prose hit the SAME face and wrap
+       * at the SAME points — Chromium's default serif vs our Inter sans
+       * shifted every wrap point and everything below the prose (the
+       * a98rgb cluster's whole failure). The rule is a deliberate RE-PIN
+       * of the global html/body stack above: redundant today via
+       * inheritance, but it locks the WPT surface to the ref contract so
+       * a future change to the global rule cannot silently detach them
+       * (wpt-white-canvas.test.mjs compares both strings to
+       * REF_FONT_STACK byte-for-byte).
+       *
+       * Default `line-height` — the LINE-HEIGHT leg of the corpus-v4.1
+       * sub-boundary. With ink and face pinned, ref-vs-capture prose still
+       * diverged in VERTICAL RHYTHM: the ref's `line-height: normal` Inter
+       * box (~20px @16px; default paragraphs advance 36px top-to-top)
+       * against our Round-4 calibrated ~18px box — 2px of compounding
+       * drift per paragraph (the whole css-color/css-break/css-flexbox
+       * collapse of the first v4.1 run). Neither side may depend on
+       * font-`normal` metrics, so the ref injection now pins an explicit
+       * unitless 1.25 (capture-browser-ref.mjs REF_LINE_HEIGHT — 20px
+       * @16px) and this rule pins the SAME value on the WPT stage, in
+       * lock-step with the composed placeholder default
+       * (ComponentRenderer.tsx WPT_COMPOSED_MODE '1.25') and the native
+       * calibrations (Compose REF_DEFAULT_FONT_LINE_HEIGHT_RATIO 1.25,
+       * SwiftUI wptRefLineBoxPx 20). Unitless so descendants recompute
+       * against their own font-size exactly like the ref's inherited
+       * number. IR-declared line-heights arrive as INLINE styles and
+       * still win; the 327-pair stage sets no wpt class, so its
+       * font-`normal` line boxes are byte-identical to before
+       * (wpt-white-canvas.test.mjs pins this value against
+       * REF_LINE_HEIGHT). */
       body.wpt-mode, body.wpt-mode #root,
       body.wpt-composed-mode, body.wpt-composed-mode #root {
         background: #fff;
+        color: #000;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        line-height: 1.25;
       }
     </style>
   </head>
