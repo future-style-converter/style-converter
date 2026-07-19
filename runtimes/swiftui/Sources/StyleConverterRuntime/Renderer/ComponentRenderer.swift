@@ -692,11 +692,11 @@ public struct ComponentRenderer: View {
             // nil, so the dark-stage path is byte-identical). Folded
             // BEFORE the size-injection folds below so each can convert
             // its border-box FRAME extent to the declared-content slot.
-            // Known scoped limitation: the percent-basis lanes
-            // (flexContentSize / ContainingBlockBasis contentBox) still
-            // read the declared size as border-box — a padded WPT
-            // container with percent-sized children under-publishes its
-            // basis (TODO, tracked with the explicit content-box case).
+            // Wave 12 closed the former scoped limitation here: the
+            // percent-basis lanes (flexContentSize / ContainingBlockBasis
+            // contentBox+paddingBox) now honour the effective keyword —
+            // under content-box the declared size passes through as the
+            // content box instead of losing the bands twice.
             s.size.boxSizing = SizeApplierMath.effectiveBoxSizing(
                 declared: s.size.boxSizing, wptCaptureMode: wptCaptureMode)
             if let h = gridStretchHeight, s.size.height == nil {
@@ -1731,8 +1731,19 @@ public struct ComponentRenderer: View {
                 // keeps the pre-wave-10 path byte-identically.
                 let fragPlan = ColumnsApplier.fragmentPlan(
                     columns: style.columns,
+                    // Wave 12 — read the writing mode from the MERGED,
+                    // inheritance-resolved list, not the typography
+                    // aggregate: `writing-mode` is Inherited: yes
+                    // (css-writing-modes-4 §3.1) so it usually sits on
+                    // an ANCESTOR (now flowing in via InheritedText's
+                    // "WritingMode" entry), and the aggregate is nil
+                    // whenever writing-mode is the only typography
+                    // signal (WritingModeApplier deliberately never
+                    // flips `touched` — see its file header) — both
+                    // paths silently defeated the vertical-mode bail.
                     verticalWritingMode:
-                        style.typography?.verticalWritingMode == true,
+                        WritingModeExtractor.extract(
+                            from: resolvedProperties)?.isVertical == true,
                     siblingCount: children.count,
                     contentWidthPx: childCB,
                     contentHeightPx: childCBH,

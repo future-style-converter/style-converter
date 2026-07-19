@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.layout.position
 
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -13,8 +13,8 @@ import androidx.compose.ui.zIndex
  * | CSS Position | Compose Equivalent |
  * |--------------|-------------------|
  * | static       | No modifier (default) |
- * | relative     | `Modifier.offset()` |
- * | absolute     | `Box` + `Modifier.offset()` (container handling required) |
+ * | relative     | `Modifier.absoluteOffset()` (CSS insets are physical) |
+ * | absolute     | `Box` + `Modifier.absoluteOffset()` (container handling required) |
  * | fixed        | [FixedPositionWrapper] using `Popup` |
  * | sticky       | [StickyPositionWrapper] with scroll-aware behavior |
  *
@@ -48,7 +48,8 @@ import androidx.compose.ui.zIndex
  *
  * 1. **Absolute positioning**: In CSS, `position: absolute` removes the element from
  *    the normal flow and positions it relative to the nearest positioned ancestor.
- *    In Compose, this requires the parent to be a `Box` and uses `Modifier.offset()`.
+ *    In Compose, this requires the parent to be a `Box` and uses
+ *    `Modifier.absoluteOffset()` (physical CSS insets, css-position-3 §3.1).
  *    The [needsAbsoluteContainer] method indicates when this is needed.
  *
  * 2. **Fixed positioning**: CSS `position: fixed` positions relative to the viewport.
@@ -129,7 +130,18 @@ object PositionApplier {
 
         // Only apply offset if there's actual movement
         return if (x.value != 0f || y.value != 0f) {
-            modifier.offset(x = x, y = y)
+            // Wave 12: absoluteOffset, NOT offset. CSS top/right/bottom/left
+            // are PHYSICAL insets (css-position-3 §3.1: `left` always
+            // measures from the physical LEFT edge — only the logical
+            // inset-inline-* spellings are direction-aware, and PositionConfig
+            // already resolved those into the physical slots). This applier is
+            // the LIVE render chain (StyleApplier → LayoutFacade →
+            // applyPosition) and used the layout-direction-aware
+            // Modifier.offset(), so under Direction:RTL (ComponentRenderer
+            // provides LocalLayoutDirection=Rtl) a CSS left:-20px mirrored to
+            // +20px physical: the three rtl abspos-autopos containers
+            // pixel-measured at x56 instead of x16 (+40px total error).
+            modifier.absoluteOffset(x = x, y = y)
         } else {
             modifier
         }

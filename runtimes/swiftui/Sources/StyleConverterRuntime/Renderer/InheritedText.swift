@@ -49,6 +49,12 @@ enum InheritedText {
         "TextAlign", "TextTransform", "TextIndent",
         // Whitespace / writing direction (css-writing-modes).
         "WhiteSpace", "TabSize", "Direction",
+        // css-writing-modes-4 §3.1: `writing-mode` is Inherited: yes.
+        // Wave 12 — without this entry a vertical mode declared on an
+        // ANCESTOR never reached a multicol container's merged list, so
+        // ColumnsApplier.fragmentPlan's vertical-mode bail (and its
+        // PropertyTracker.logOnce breadcrumb) could never fire.
+        "WritingMode",
         // css-color-4 §7: `color` inherits — the currentColor chain hangs
         // off the inherited value (leaf placeholder gate documented above).
         "Color",

@@ -290,7 +290,15 @@ const composedCanvasStyle: React.CSSProperties = {
   boxSizing: 'border-box',
   padding: '16px',
   background: CANVAS_BG_DEFAULT,
-  color: '#fff',
+  // corpus-v4.1 BLACK ink (wave-12 catch): this canvas was the ONE surface
+  // the v4.1 ink flip missed — inheriting prose (NodeRenderer's bare text
+  // spans) computed white-on-white and vanished from every composed web
+  // capture (css-flexbox web fell to 4/12 on invisible-prose tests while
+  // the prose-free pair scored 1.0000). The ref injects color:#000
+  // (capture-browser-ref.mjs REF header, v4.1 sub-boundary); this canvas
+  // must match. Author-declared colors still win (inline styles beat the
+  // canvas inheritance).
+  color: '#000',
   overflow: 'hidden',
   transform: 'translateZ(0)',
   position: 'relative',

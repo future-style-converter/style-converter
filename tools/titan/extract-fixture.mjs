@@ -585,10 +585,171 @@ export function extractBodyTree(html, maxDepth = 3) {
  *
  * Returns the empty string when the element has no own text.
  *
- * Exported so the unit tests can pin the contract.
+ * Exported so the unit tests can pin the contract. Since wave-12 this is a
+ * thin wrapper over scanOwnText() with merging OFF — byte-identical to the
+ * pre-wave-12 behaviour for every legacy caller.
  */
 export function extractOwnText(innerHtml) {
-  if (!innerHtml) return '';
+  // Merging disabled (mergeCtx = null): descendant-element text is always
+  // excluded, exactly as before wave-12. Only the `.text` half is exposed.
+  return scanOwnText(innerHtml, null).text;
+}
+
+// ── wave-12 EXTRACTOR-INLINE: pure-inline run merging ────────────────────────
+//
+// The cross-platform inline-run fragmentation fix. WPT's standard reftest
+// preamble is `<p>Test passes if there is a filled green square and
+// <strong>no red</strong>.</p>`. The pre-wave-12 extractor flattened the
+// <p>'s OWN text nodes into one string — GLUING 'and' + '.' across the
+// removed <strong> ('…green square and .') — and emitted the <strong> as a
+// SEPARATE child component that every runtime stacks as a BLOCK. Net effect:
+// the paragraph renders as 3 lines vs the browser-ref's 2, displacing
+// everything below by ~+20px on ALL THREE platforms, and the synthetic
+// 'and .' token also splits Android/iOS line breaking (UAX#14 LB13 treats
+// the orphan '.' as a distinct break opportunity).
+//
+// SHORT-TERM CONTRACT: merge pure-inline children (strong/em/b/i/span/code
+// whose content is text-only — no nested elements, no attributes) INTO the
+// parent's `_text` in reading order, dropping the inline styling (default
+// bold weight etc.) and marking the component lossy with reason
+// 'inline-run-merged'. This is an honest, documented approximation: a small
+// font-weight/anti-aliasing divergence replaces a structural 3-vs-2-line
+// divergence plus an orphan token. The REAL fix — an interleaved inline-runs
+// wire on IRComponent — is a byte-shape change and therefore v3-gated per
+// schema/spec/05-versioning.md (v2 is the frozen current wire; any further
+// byte-shape change is a major-version freeze event, not a casual PR).
+//
+// Non-pure inline children (nested elements, any attribute, block-ish tags,
+// or tags targeted by a CSS rule) keep the current child-component path so
+// styled test subjects are never destroyed by the merge.
+
+// The inline tags eligible for merging. Exactly the phrase-content tags the
+// WPT preamble corpus uses; block-ish tags (<div>, <p>, …) and semantic
+// containers stay components. <span> is included ONLY because bare spans
+// (no attrs, no matching rules) are pure text wrappers — the attribute +
+// styledTags guards below keep every styled-subject span on the child path.
+const INLINE_MERGE_TAGS = new Set(['strong', 'em', 'b', 'i', 'span', 'code']);
+
+/** Parse the attribute map out of a raw open tag (`<strong title="x">`).
+ *  Mirrors walkChildren's attr scan exactly (same regex, same
+ *  unquoted-value exclusions) so merge decisions made from a raw tagOpen
+ *  agree with decisions made from walkChildren's parsed kids. */
+function parseAttrsFromTagOpen(tagOpen) {
+  const attrs = {};
+  // Strip the tag name so the attr regex can't capture it as an attribute
+  // (same normalisation walkChildren applies before its attr scan).
+  const afterName = tagOpen.replace(/^<\s*[A-Za-z][A-Za-z0-9-]*\s*/, '<');
+  // Attr tokens: name, then optionally = "double" | 'single' | unquoted.
+  const attrRe = /([A-Za-z_:][A-Za-z0-9_.\-:]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>/]+)))?/g;
+  attrRe.lastIndex = 1; // past the leading '<'
+  let am;
+  while ((am = attrRe.exec(afterName)) !== null) {
+    // Lowercased key + first non-undefined value alternative ('' for bare).
+    attrs[am[1].toLowerCase()] = am[2] ?? am[3] ?? am[4] ?? '';
+  }
+  return attrs;
+}
+
+/**
+ * Collect every tag name that appears as the RIGHTMOST compound's tag in
+ * any CSS rule. Used as a merge guard: a pure-inline child whose tag is
+ * directly targeted by a rule (`strong { color: red }`, `.note em {…}`,
+ * `span::before {…}`) must stay a component, otherwise the merge would
+ * silently drop the very declarations under test.
+ *
+ * Rightmost-only is sufficient: a non-rightmost compound (`strong span`)
+ * needs the tag to have ELEMENT descendants to match anything, and a
+ * mergeable child is text-only by definition — no descendants exist to
+ * lose. The universal `*` is deliberately NOT collected: WPT reset rules
+ * (`* { margin: 0 }`) also land on the parent that keeps the text, and
+ * non-inherited universal props on an anonymous inline run are a corner
+ * accepted under the 'inline-run-merged' lossy marker.
+ *
+ * Rules splitSelectorChain/parseCompound reject (sibling combinators,
+ * attr selectors, unknown pseudos) are skipped: our matcher drops those
+ * rules everywhere, so they can't style a child component either — the
+ * merge loses nothing the engine would have applied.
+ *
+ * Exported so the unit tests can pin the guard.
+ */
+export function collectStyledTags(rules) {
+  const out = new Set();
+  for (const r of rules) {
+    // Tokenise the selector into compounds; null = unsupported chain
+    // (sibling combinators / malformed) — rule never matches, skip.
+    const chain = splitSelectorChain(r.selector);
+    if (!chain || chain.compounds.length === 0) continue;
+    // Only the rightmost compound identifies the rule's HOST element.
+    const parsed = parseCompound(chain.compounds[chain.compounds.length - 1]);
+    if (parsed.unsupported) continue; // unmatchable rule — can't style anything
+    // Record the concrete host tag; '*' is excluded (see doc comment).
+    if (parsed.needTag && parsed.needTag !== '*') out.add(parsed.needTag);
+  }
+  return out;
+}
+
+/**
+ * Is this child element a pure-inline run the parent may absorb into its
+ * `_text`? All four conditions must hold:
+ *   1. tag is one of the phrase-content INLINE_MERGE_TAGS;
+ *   2. content is TEXT-ONLY — no '<' in innerHtml means no nested elements
+ *      (comments were already stripped upstream by stripComments);
+ *   3. NO attributes at all — an id/class/style (or even dir/title) marks
+ *      the element as an addressable/styleable subject, not anonymous prose;
+ *   4. no CSS rule targets the tag directly (styledTags guard, see
+ *      collectStyledTags) — `strong { color: red }` keeps <strong> a
+ *      component so the declaration under test survives.
+ *
+ * Exported so the unit tests can pin the predicate.
+ */
+export function isPureInlineMergeable(tag, attrs, innerHtml, styledTags = null) {
+  // 1. Only phrase-content tags ever merge; blocks keep the child path.
+  if (!INLINE_MERGE_TAGS.has(tag)) return false;
+  // 2. Nested elements (`<strong><span>x</span></strong>`) keep the child
+  //    path — merging would need recursive flattening + would hide real
+  //    structure from the renderer.
+  if (innerHtml && innerHtml.includes('<')) return false;
+  // 3. Any attribute disqualifies: id/class/style are style hooks, dir
+  //    flips bidi, title etc. are rare enough that conservatism is free.
+  if (attrs && Object.keys(attrs).length > 0) return false;
+  // 4. Tag directly targeted by a rule — the declarations must land, so
+  //    the element must exist as a component to receive them.
+  if (styledTags && styledTags.has(tag)) return false;
+  return true;
+}
+
+/**
+ * wave-12 EXTRACTOR-INLINE: the merge-aware sibling of extractOwnText.
+ * Returns `{ text, merged }` where `text` is the element's own text WITH
+ * every pure-inline child's content spliced in at its reading-order
+ * position, and `merged` counts how many inline runs were absorbed
+ * (drives the 'inline-run-merged' lossy marker in buildComponents).
+ *
+ * `mergeCtx` is `{ styledTags?: Set<string> }` (see collectStyledTags);
+ * pass null to disable merging entirely (identical to extractOwnText).
+ *
+ * Pin: the standard WPT preamble innerHtml
+ *   'Test passes if there is a filled green square and <strong>no red</strong>.'
+ * merges to the exact single string
+ *   'Test passes if there is a filled green square and no red.'
+ *
+ * Exported so the unit tests can pin the contract.
+ */
+export function extractOwnTextMerged(innerHtml, mergeCtx = null) {
+  // Full result object — callers need both the text and the merge count.
+  return scanOwnText(innerHtml, mergeCtx);
+}
+
+/**
+ * Shared own-text scanner behind extractOwnText (mergeCtx = null) and
+ * extractOwnTextMerged (mergeCtx = { styledTags }). One walker, one
+ * whitespace rule, so the two contracts can never drift. Returns
+ * `{ text, merged }`.
+ */
+function scanOwnText(innerHtml, mergeCtx) {
+  // Merge counter — how many pure-inline children were absorbed.
+  let merged = 0;
+  if (!innerHtml) return { text: '', merged };
   const n = innerHtml.length;
   const VOID = new Set([
     'area','base','br','col','embed','hr','img','input',
@@ -639,6 +800,10 @@ export function extractOwnText(innerHtml) {
     const closeRe = new RegExp(`</${tagName}\\s*>`, 'gi');
     let depth = 1;
     let cursor = tagOpenEnd + 1;
+    // wave-12: remember where the matching close tag STARTS so the merge
+    // branch can slice the child's inner content (walkChildren tracks the
+    // same `lastCloseStart` for its innerHtml computation).
+    let lastCloseStart = -1;
     while (depth > 0 && cursor < n) {
       openRe.lastIndex = cursor;
       closeRe.lastIndex = cursor;
@@ -650,7 +815,28 @@ export function extractOwnText(innerHtml) {
         cursor = o.index + o[0].length;
       } else {
         depth--;
+        lastCloseStart = c.index;
         cursor = c.index + c[0].length;
+      }
+    }
+    // wave-12 EXTRACTOR-INLINE: pure-inline run merging. When merging is
+    // on and this child is a text-only phrase element with no attributes
+    // and no tag-targeting rule, splice its inner text into the parent's
+    // buffer AT THIS POSITION — reading order preserved, so the preamble
+    // becomes '…green square and no red.' instead of '…and .'. The guard
+    // on lastCloseStart skips malformed unclosed tags (their trailing text
+    // is picked up as plain parent text by the outer loop anyway).
+    if (mergeCtx && lastCloseStart >= 0) {
+      // Child's inner content — the slice between open and close tags.
+      const childInner = innerHtml.slice(tagOpenEnd + 1, lastCloseStart);
+      // Attributes parsed from the raw open tag (same scan walkChildren
+      // uses) so the predicate here agrees with the tree walker's.
+      const attrs = parseAttrsFromTagOpen(tagOpen);
+      if (isPureInlineMergeable(tagName, attrs, childInner, mergeCtx.styledTags ?? null)) {
+        // Absorb the run; the shared whitespace collapse below normalises
+        // any boundary spacing per CSS Text §4.1.
+        textBuf += childInner;
+        merged++;
       }
     }
     i = cursor;
@@ -671,7 +857,8 @@ export function extractOwnText(innerHtml) {
   const collapsed = textBuf
     .replace(/[ \t\n\r\f]+/g, ' ')
     .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
-  return collapsed;
+  // Text plus the wave-12 merge count (0 whenever mergeCtx was null).
+  return { text: collapsed, merged };
 }
 
 /**
@@ -708,9 +895,38 @@ export function extractOwnText(innerHtml) {
  * rule as extractOwnText (CSS Text §4.1). Returns '' when body opens
  * with an element (the common case — fixtures stay byte-identical).
  *
+ * wave-12 EXTRACTOR-INLINE interplay: since wave-12 this is a thin
+ * string-returning wrapper over extractLeadingBodyTextInfo with merging
+ * OFF (legacy contract preserved). buildComponents calls the Info variant
+ * WITH a mergeCtx so a leading run like
+ * `<body>There should be <strong>no red</strong>: <div>…` yields the
+ * single string 'There should be no red:' — the pure-inline element is
+ * absorbed in reading order and the run CONTINUES past it instead of
+ * stopping (ordering stays correct when both wave-11 and wave-12 apply;
+ * the tree walker's depth-0 filter skips the same absorbed elements so
+ * they never double-emit as components).
+ *
  * Exported so the unit tests can pin the contract.
  */
 export function extractLeadingBodyText(html) {
+  // Merging disabled — byte-identical to the wave-11 behaviour for every
+  // legacy caller; only the `.text` half of the Info result is exposed.
+  return extractLeadingBodyTextInfo(html, null).text;
+}
+
+/**
+ * wave-12 EXTRACTOR-INLINE: the merge-aware leading-body-text scanner.
+ * Returns `{ text, merged }` — `merged` counts pure-inline elements
+ * absorbed into the leading run (drives the 'inline-run-merged' lossy
+ * marker on the `__text` component). `mergeCtx` is
+ * `{ styledTags?: Set<string> }` or null (no merging — wave-11 semantics:
+ * the run stops at the FIRST renderable element of any kind).
+ *
+ * Exported so the unit tests can pin the contract.
+ */
+export function extractLeadingBodyTextInfo(html, mergeCtx = null) {
+  // Merge counter for the leading run — reported to buildComponents.
+  let merged = 0;
   // Same body-locator + implicit-<html>/<head> unwrap as
   // extractBodyTreeNested so both walkers agree on what "body content" is.
   const bodyMatch = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html);
@@ -759,8 +975,41 @@ export function extractLeadingBodyText(html) {
     const tagName = (/^<\s*([A-Za-z][A-Za-z0-9-]*)/i.exec(tagOpen)?.[1] || '').toLowerCase();
     if (!tagName) { i = tagOpenEnd + 1; continue; }
     // First RENDERABLE element ends the leading run (its own text belongs
-    // to its component via the ownText channel, not to the body prose).
-    if (!HEAD_ONLY_TAGS.has(tagName)) break;
+    // to its component via the ownText channel, not to the body prose) —
+    // UNLESS (wave-12) merging is on and the element is a pure-inline run,
+    // in which case its text is absorbed and the leading run CONTINUES.
+    if (!HEAD_ONLY_TAGS.has(tagName)) {
+      if (mergeCtx) {
+        // Locate the element's matching close tag. Mergeable elements are
+        // text-only, so same-name nesting is impossible: if the content
+        // between here and the FIRST `</tag>` contains any '<', the
+        // predicate rejects it anyway — no depth tracking needed.
+        const selfClose = tagOpen.endsWith('/>') || VOID.has(tagName);
+        if (!selfClose) {
+          const closeRe = new RegExp(`</${tagName}\\s*>`, 'gi');
+          closeRe.lastIndex = tagOpenEnd + 1;
+          const c = closeRe.exec(inner);
+          if (c) {
+            // Candidate inner content + attrs, then the shared predicate —
+            // EXACTLY the one the depth-0 tree filter uses, so an element
+            // absorbed here is guaranteed to be skipped there (no double
+            // emission) and vice versa.
+            const childInner = inner.slice(tagOpenEnd + 1, c.index);
+            const attrs = parseAttrsFromTagOpen(tagOpen);
+            if (isPureInlineMergeable(tagName, attrs, childInner, mergeCtx.styledTags ?? null)) {
+              // Absorb the run in reading order and continue scanning —
+              // the whitespace collapse at the end normalises boundaries.
+              buf += childInner;
+              merged++;
+              i = c.index + c[0].length;
+              continue;
+            }
+          }
+        }
+      }
+      // Non-mergeable renderable element — the leading run ends here.
+      break;
+    }
     // Head-only element: skip it WHOLESALE (open tag through matching
     // close) so <style>/<script> bodies never masquerade as prose.
     if (tagOpen.endsWith('/>') || VOID.has(tagName)) {
@@ -775,10 +1024,14 @@ export function extractLeadingBodyText(html) {
     i = c ? c.index + c[0].length : n;
   }
   // Collapse ASCII whitespace only — same CSS Text §4.1 rule (and the same
-  // U+3000-preserving rationale) as extractOwnText above.
-  return buf
-    .replace(/[ \t\n\r\f]+/g, ' ')
-    .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
+  // U+3000-preserving rationale) as extractOwnText above. The merge count
+  // rides alongside so buildComponents can lossy-mark the __text component.
+  return {
+    text: buf
+      .replace(/[ \t\n\r\f]+/g, ' ')
+      .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, ''),
+    merged,
+  };
 }
 
 /**
@@ -806,8 +1059,25 @@ export function extractLeadingBodyText(html) {
  * Empty `children` arrays are still emitted (rather than omitted) so the
  * caller doesn't need to null-check; the fixture serializer is responsible
  * for omitting them when persisting.
+ *
+ * wave-12 EXTRACTOR-INLINE: `mergeCtx` (`{ styledTags?: Set<string> }` or
+ * null) switches on pure-inline run merging. When set:
+ *   - each node's `ownText` comes from extractOwnTextMerged, i.e. text-only
+ *     phrase children (strong/em/b/i/span/code, no attrs, no tag rule) are
+ *     absorbed into the parent's text in reading order;
+ *   - those absorbed children are FILTERED OUT of the walk (no component,
+ *     no sibling-position slot) — at depth ≥ 1 all of them, at depth 0
+ *     (body level) only the LEADING run (which extractLeadingBodyTextInfo
+ *     absorbed into the `__text` component); a body-level inline element
+ *     AFTER the first block sibling keeps the component path, because
+ *     nothing else carries its text (the block-stacking divergence remains
+ *     for that rare case, but no text is ever silently lost);
+ *   - nodes whose ownText absorbed at least one run carry
+ *     `inlineMerged: true` so buildComponents can emit the
+ *     'inline-run-merged' lossy marker.
+ * Null (legacy callers/tests) keeps the pre-wave-12 behaviour exactly.
  */
-export function extractBodyTreeNested(html, maxDepth = 5) {
+export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
   // Same body-locator + implicit-<html> unwrap logic as extractBodyTree —
   // factored as a sibling rather than shared so each retains its own
   // depth bound + ownText extraction without action-at-a-distance.
@@ -828,7 +1098,29 @@ export function extractBodyTreeNested(html, maxDepth = 5) {
   // synthetic root is injected in propsForElement() at match time, which
   // is the only call site that consumes pos data.
   function recurse(fragment, ancestors, depth) {
-    const kids = walkChildren(fragment).filter((k) => !HEAD_ONLY_TAGS.has(k.tag));
+    // Head-only scaffolding never becomes components (Bug 5), at any depth.
+    const rawKids = walkChildren(fragment).filter((k) => !HEAD_ONLY_TAGS.has(k.tag));
+    // wave-12 EXTRACTOR-INLINE: drop the pure-inline kids whose text was
+    // absorbed elsewhere — by the PARENT's ownText (depth ≥ 1, all of
+    // them) or by the leading `__text` component (depth 0, leading run
+    // only). `seenBlock` marks the end of the body-level leading run: once
+    // any non-mergeable kid has been kept, later inline kids stay
+    // components so their text is never silently lost (see the function
+    // doc comment). The predicate is the SAME isPureInlineMergeable the
+    // ownText scanner + leading-text scanner use, so absorb/skip decisions
+    // can never disagree.
+    let seenBlock = false;
+    const kids = rawKids.filter((k) => {
+      if (!mergeCtx) return true; // legacy path — no merging, keep all
+      const mergeable =
+        isPureInlineMergeable(k.tag, k.attrs, k.innerHtml, mergeCtx.styledTags ?? null);
+      if (!mergeable) { seenBlock = true; return true; }
+      // Depth 0: only the leading run was absorbed (into __text); inline
+      // kids after the first kept sibling remain components.
+      if (depth === 0) return seenBlock;
+      // Depth ≥ 1: the parent's merged ownText carries this kid's text.
+      return false;
+    });
     // First pass: compute per-sibling position metadata. We pre-walk and
     // count tag occurrences so each child gets its global sib-index AND
     // its tag-typed sib-index (drives `:nth-of-type` / `:first-of-type`).
@@ -846,7 +1138,12 @@ export function extractBodyTreeNested(html, maxDepth = 5) {
     kids.forEach((k, idx) => {
       const seen = typeSeen.get(k.tag) ?? 0;
       typeSeen.set(k.tag, seen + 1);
-      const ownText = extractOwnText(k.innerHtml);
+      // wave-12: with merging on, ownText absorbs this element's pure-
+      // inline children in reading order (extractOwnTextMerged); the
+      // corresponding kids are dropped by the recursion filter above.
+      // Legacy path (mergeCtx null) is byte-identical to extractOwnText.
+      const ownRes = extractOwnTextMerged(k.innerHtml, mergeCtx);
+      const ownText = ownRes.text;
       // Recurse to capture nested element children, BUT respect maxDepth.
       let children = [];
       const pos = {
@@ -870,13 +1167,19 @@ export function extractBodyTreeNested(html, maxDepth = 5) {
         );
       }
       pos.isEmpty = children.length === 0 && !ownText;
-      out.push({
+      const node = {
         tag: k.tag, attrs: k.attrs, raw: k.raw,
         ownText,
         ancestors: ancestors.slice(),
         children,
         pos,
-      });
+      };
+      // wave-12: flag nodes that absorbed inline runs so buildComponents
+      // emits the 'inline-run-merged' lossy marker (honest approximation:
+      // the run's default styling — bold for <strong> etc. — is dropped).
+      // Only set when true, keeping legacy node shapes byte-identical.
+      if (ownRes.merged > 0) node.inlineMerged = true;
+      out.push(node);
     });
     return out;
   }
@@ -2252,6 +2555,12 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
   // <script> registration exists, which is the byte-identical-fixture
   // path for the existing visual-test corpus.
   const effectiveCtx = ctx ?? { definedTags: collectDefinedTags(cleaned) };
+  // wave-12 EXTRACTOR-INLINE: merge context for pure-inline run merging.
+  // styledTags guards the merge — any tag a rule directly targets keeps
+  // its child-component path so the declarations under test survive (see
+  // collectStyledTags). Merging is ALWAYS on in production extraction;
+  // only legacy direct calls to the walkers (unit tests) run without it.
+  const mergeCtx = { styledTags: collectStyledTags(rules) };
 
   // Bug 3 + 4: body-root component for body-scope CSS. Stays as a flat
   // top-level entry (it represents <body> itself; the body's element
@@ -2289,15 +2598,30 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
   // meaningful without an explicit width/height (see buildNode's Bug 1
   // note). Leading-run-only scope + the interleaved-text gap are
   // documented on extractLeadingBodyText.
-  const leadingText = extractLeadingBodyText(cleaned);
-  if (leadingText) {
-    components[`${idPrefix}__text`] = { properties: {}, _text: leadingText };
+  // wave-12: the Info variant absorbs pure-inline elements into the
+  // leading run (reading order preserved) and reports how many it merged,
+  // so `<body>There should be <strong>no red</strong>: <div>…` yields ONE
+  // `__text` component with the full sentence instead of a fragmented
+  // prose + block-stacked <strong> pair.
+  const leading = extractLeadingBodyTextInfo(cleaned, mergeCtx);
+  if (leading.text) {
+    const cmp = { properties: {}, _text: leading.text };
+    if (leading.merged > 0) {
+      // Honest lossy marker — the absorbed runs' default styling (bold
+      // for <strong>, italic for <em>, …) is dropped by the merge.
+      lossyOverall = true;
+      lossyReasonsOverall.add('inline-run-merged');
+      cmp._lossy = true;
+      cmp._lossyReasons = ['inline-run-merged'];
+    }
+    components[`${idPrefix}__text`] = cmp;
   }
 
   // EXTFIX-A: walk subtree as a NESTED tree (not flat). depth ≤ 5 covers
   // the css-grid abspos / css-overflow / css-contain patterns documented
-  // in swarm-001 without unbounded blow-up.
-  const tree = extractBodyTreeNested(cleaned);
+  // in swarm-001 without unbounded blow-up. wave-12: the mergeCtx switches
+  // on pure-inline run merging (see extractBodyTreeNested's doc comment).
+  const tree = extractBodyTreeNested(cleaned, 5, mergeCtx);
 
   if (tree.length === 0) {
     // No renderable elements at all. Keep the legacy degenerate
@@ -2331,6 +2655,12 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
       rules, node.tag, node.attrs, node.ancestors, node.pos ?? null, effectiveCtx,
     );
     const reasons = lossyReasonsFor(props);
+    // wave-12: nodes whose ownText absorbed pure-inline runs are lossy —
+    // the merge is an honest approximation (default bold/italic weight of
+    // the absorbed run is dropped; see the EXTRACTOR-INLINE block comment).
+    // Rides the same reasons array so the existing _lossy/_lossyReasons
+    // emission + overall roll-up below cover it with no extra branches.
+    if (node.inlineMerged) reasons.push('inline-run-merged');
     if (reasons.length) {
       lossyOverall = true;
       reasons.forEach((r) => lossyReasonsOverall.add(r));

@@ -10,7 +10,6 @@ package com.styleconverter.runtime.layout.position
 // haven't flipped the renderer over yet.
 
 import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -56,7 +55,19 @@ object PositionLayoutApplier {
                 // "distance from the far edge."
                 val x = (inset.left ?: inset.right?.let { -it } ?: 0f).dp
                 val y = (inset.top ?: inset.bottom?.let { -it } ?: 0f).dp
-                if (x.value != 0f || y.value != 0f) m = m.offset(x = x, y = y)
+                // Wave 12: absoluteOffset, NOT offset. CSS `left`/`right` are
+                // PHYSICAL properties (css-position-3 §3.1 — "left: offset
+                // from the LEFT edge", regardless of direction; only the
+                // inset-inline-* logical spellings flip, and the extractor
+                // already reconciled those into physical left/right).
+                // Modifier.offset() is LAYOUT-DIRECTION-AWARE: under the
+                // Direction:RTL provider (ComponentRenderer wraps rtl
+                // components in LocalLayoutDirection=Rtl) it mirrored a CSS
+                // left:-20px into +20px physical — the three rtl
+                // abspos-autopos containers pixel-measured at x56 instead of
+                // x16 (+40px total error). The Absolute branch below already
+                // uses absoluteOffset with exactly this rationale.
+                if (x.value != 0f || y.value != 0f) m = m.absoluteOffset(x = x, y = y)
             }
             PositionKind.Absolute, PositionKind.Fixed -> {
                 // Approximation: parent must be a Box for true absolute
