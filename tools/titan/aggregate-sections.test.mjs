@@ -286,3 +286,64 @@ test('wave8: summarize reports scored=total when nothing is NA-tagged', () => {
   const { line } = summarize(m);
   assert.match(line, /scored=2 NA-excluded=0/);
 });
+
+// ── wave-13: nativeParity capability-wall rollup ───────────────────────────
+//
+// inject-wpt-block now stamps `nativeParity` (cross-platform pair SSIM
+// range) on capability-walled tests. summarize() groups those tests by
+// notApplicable tag and reports one line per tag —
+//   browser parity blocked by <tag> (N tests) · native parity <min>–<max>
+// — so a capability wall (natives agree, browser ref unreachable) is
+// visibly distinguishable from real cross-runtime divergence.
+
+test('wave13: summarize rolls up nativeParity per notApplicable tag', () => {
+  const results = {
+    // The wave12-gate css-ui pattern in miniature: two form-control-walled
+    // tests whose natives agree (recorded row SSIMs: visited 1/1/1,
+    // parent-currentcolor 0.9914/0.9995/0.9919).
+    'css/css-ui/accent-color-visited.html': {
+      bucket: 'A', specSection: 'css-ui', divergence: 'mixed', scoreEligible: true,
+      notApplicableTags: ['requires-form-control-rendering', 'requires-visited-pseudo'],
+      nativeParity: { pairs: { 'iOS-Android': 1, 'iOS-web': 1, 'Android-web': 1 }, min: 1, max: 1 },
+    },
+    'css/css-ui/accent-color-parent-currentcolor.html': {
+      bucket: 'A', specSection: 'css-ui', divergence: 'mixed', scoreEligible: true,
+      notApplicableTags: ['requires-form-control-rendering'],
+      nativeParity: { pairs: { 'iOS-Android': 0.9914, 'iOS-web': 0.9995, 'Android-web': 0.9919 }, min: 0.9914, max: 0.9995 },
+    },
+    // Walled test with NO pair data (web-only run) → nativeParity null →
+    // must not appear in the rollup (no zero-filled ranges).
+    'css/css-ui/appearance-auto-001.html': {
+      bucket: 'A', specSection: 'css-ui', divergence: 'mixed', scoreEligible: true,
+      notApplicableTags: ['requires-form-control-rendering'],
+      nativeParity: null,
+    },
+    // Un-walled test → never participates even though it has pairs.
+    'css/css-ui/plain.html': {
+      bucket: 'A', specSection: 'css-ui', divergence: 'identical', scoreEligible: true,
+      notApplicableTags: [],
+      nativeParity: null,
+    },
+  };
+  const m = mergeManifests([stub('css-ui', { totalTests: 4, A: 4, results })]);
+  const { nativeParity } = summarize(m);
+  // form-control tag: 2 tests with parity data; range folds both tests'
+  // [min,max] intervals → 0.99–1.00 at the 2-decimal display precision.
+  assert.match(nativeParity,
+    /browser parity blocked by requires-form-control-rendering \(2 tests\) · native parity 0\.99–1\.00/);
+  // A test carrying two tags is counted under EACH tag (singular "test").
+  assert.match(nativeParity,
+    /browser parity blocked by requires-visited-pseudo \(1 test\) · native parity 1\.00–1\.00/);
+});
+
+test('wave13: summarize yields an empty nativeParity rollup when no walled test has pairs', () => {
+  // Web-only smokes (no cross-platform pairs) and un-walled corpora both
+  // produce an empty string — main() prints nothing, and the legacy
+  // `{ line, table }` destructuring keeps working untouched.
+  const m = mergeManifests([stub('css-color', { totalTests: 2, A: 2 })]);
+  const out = summarize(m);
+  assert.equal(out.nativeParity, '');
+  // Backward-compat: the original two fields are still present and shaped.
+  assert.match(out.line, /aggregated 1 sections/);
+  assert.equal(typeof out.table, 'string');
+});

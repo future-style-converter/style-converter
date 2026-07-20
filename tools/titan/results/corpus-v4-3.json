@@ -1,0 +1,187 @@
+{
+ "_snapshot": "corpus-v4.3",
+ "_note": "THE HONEST-SCORING BOUNDARY (canvas unchanged from v4.1/v4.2): (1) the semanticPresence pass gate — wptPass is vetoed when the ref carries visible ink the capture entirely lacks (calibrated on 246 wave12-gate pairs, 3x margins both ways; the measured vacuous passes flip to presenceFailed; css-ui honestly reads 3/10, matching the wave-13 audit prediction); (2) delivery-aware score-exclusions (the requires-bundled-asset gate now consults the wave-8 inliner lossy record — three stale css-backgrounds exclusions restored, background-334 a real pass); (3) the static @keyframes t-sampler (negative-delay WPT animation tests bake their sampled values — background-color-animation-in-body scores real); (4) nativeParity secondary metric stamped on capability-tagged tests; (5) composed-mode cross-platform pairs FIXED (were silently null — row-name lookup). PLUS two NEW sections join: css-text (8/12 uniform on ALL THREE platforms — the typographic contract holding on virgin tests) and css-position (~0.91 all platforms, 4-5/12 — the next mineable seam). Totals under the HONEST gate (not comparable to v4.2 raw-SSIM counts): web 84/106, iOS 71/106, Android 68/106.",
+ "artifact": "tools/titan/runs/wave14-gate (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "42ab20c4",
+ "date": "2026-07-20",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence coverage asymmetry (corpus-v4.3 gate)",
+ "sampling": "9 sections x 12 bucket-A tests (css-text + css-position joined at this boundary)",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh)",
+ "totals": {
+  "tests": 108,
+  "web": {
+   "measured": 106,
+   "meanSsim": 0.9688,
+   "passing": 84
+  },
+  "ios": {
+   "measured": 106,
+   "meanSsim": 0.931,
+   "passing": 71
+  },
+  "android": {
+   "measured": 106,
+   "meanSsim": 0.9303,
+   "passing": 68
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9696,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8862,
+    "passing": 9
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9038,
+    "passing": 8
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.999,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8447,
+    "passing": 9
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8452,
+    "passing": 9
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9909,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9875,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9807,
+    "passing": 10
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9881,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9563,
+    "passing": 7
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9523,
+    "passing": 7
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 1,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9562,
+    "passing": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.954,
+    "passing": 8
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9184,
+    "passing": 5
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9131,
+    "passing": 4
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9107,
+    "passing": 4
+   }
+  },
+  "css-text": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9427,
+    "passing": 8
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9402,
+    "passing": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.939,
+    "passing": 8
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9979,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9879,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9819,
+    "passing": 11
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 10,
+    "meanSsim": 0.9017,
+    "passing": 3
+   },
+   "ios": {
+    "measured": 10,
+    "meanSsim": 0.9017,
+    "passing": 3
+   },
+   "android": {
+    "measured": 10,
+    "meanSsim": 0.9001,
+    "passing": 3
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh if renderers changed, then section-runner.sh <section> --all-platforms --max-tests 12 --run-id wave14-gate --foreground x9; aggregate filtering scoreExcluded; pass = wptPass (presence-gated)."
+}

@@ -318,11 +318,18 @@ export const SEMANTIC_PRESENCE_TOLERANCE = 8;
 // classifier and the metric helper share one threshold value.
 export const SEMANTIC_PRESENCE_EMPTY_PCT = 5;
 
-export function computeSemanticPresence(a, b) {
+// The optional third parameter `bg` (wave-13 SCORING gate) lets a caller
+// measure "ink on the page" against a DIFFERENT canonical background than the
+// 327-pair pipeline's dark #1A1A2E — the TITAN WPT browser-ref diffs run on
+// the corpus-v4 WHITE canvas (inject-wpt-block.mjs padToCanvas +
+// capture-browser-ref.mjs CANVAS_BG are all white), so their presence guard
+// must count deviation from WHITE. Defaulting to CANONICAL_BG keeps every
+// existing 327-pair call site byte-identical.
+export function computeSemanticPresence(a, b, bg = CANONICAL_BG) {
   try {
     if (a.data.length !== b.data.length) return null;
-    const aCoverage = foregroundCoverage(a.data, SEMANTIC_PRESENCE_TOLERANCE);
-    const bCoverage = foregroundCoverage(b.data, SEMANTIC_PRESENCE_TOLERANCE);
+    const aCoverage = foregroundCoverage(a.data, SEMANTIC_PRESENCE_TOLERANCE, bg);
+    const bCoverage = foregroundCoverage(b.data, SEMANTIC_PRESENCE_TOLERANCE, bg);
     return {
       aCoveragePct: +aCoverage.toFixed(3),
       bCoveragePct: +bCoverage.toFixed(3),
@@ -337,21 +344,22 @@ export function computeSemanticPresence(a, b) {
   }
 }
 
-// Count the fraction of pixels whose RGB deviates from CANONICAL_BG by more
-// than `tolerance` per-channel. Single-pass over the RGBA buffer. Alpha is
+// Count the fraction of pixels whose RGB deviates from the given canonical
+// background (`bg`, default the 327-pair dark #1A1A2E) by more than
+// `tolerance` per-channel. Single-pass over the RGBA buffer. Alpha is
 // ignored — the capture pipeline writes opaque pixels everywhere (extend
 // fills with alpha 1, see padToCanvas), so transparent pixels are a non-
 // concern; ignoring alpha keeps this fast and keeps the threshold trivial
-// to reason about ("pixels visibly different from the dark backdrop").
-function foregroundCoverage(data, tolerance) {
+// to reason about ("pixels visibly different from the backdrop").
+function foregroundCoverage(data, tolerance, bg = CANONICAL_BG) {
   let foreground = 0;
   let total = 0;
   // Stride 4 = RGBA; we only read R/G/B.
   for (let i = 0; i < data.length; i += 4) {
     total++;
-    const dr = Math.abs(data[i]     - CANONICAL_BG.r);
-    const dg = Math.abs(data[i + 1] - CANONICAL_BG.g);
-    const db = Math.abs(data[i + 2] - CANONICAL_BG.b);
+    const dr = Math.abs(data[i]     - bg.r);
+    const dg = Math.abs(data[i + 1] - bg.g);
+    const db = Math.abs(data[i + 2] - bg.b);
     // Logical OR, not max() — short-circuits faster on the common case
     // (pure-background pixel where all three deltas are 0).
     if (dr > tolerance || dg > tolerance || db > tolerance) foreground++;

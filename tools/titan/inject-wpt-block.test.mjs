@@ -434,6 +434,284 @@ test('wave8: buildResults source carries the scoreEligible contract', async () =
   const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
   assert.match(src, /scoreEligible:\s*!isNa/,
     'results must expose scoreEligible: !isNa');
-  assert.match(src, /applyNaScoreGate\(naTags,\s*\[webRefDiff,\s*iosRefDiff,\s*androidRefDiff\]\)/,
-    'the NA gate must neutralise all three browser-ref diffs');
+  // wave-13: the gate call must ALSO thread the extractor's delivery record
+  // (meta.lossyReasons) so the requires-bundled-asset exclusion stays
+  // delivery-aware — see the delivery-aware tests below.
+  assert.match(src, /applyNaScoreGate\(naTags,\s*\[webRefDiff,\s*iosRefDiff,\s*androidRefDiff\],\s*meta\.lossyReasons\)/,
+    'the NA gate must neutralise all three browser-ref diffs AND receive the delivery record');
+});
+
+// ── wave-13 corpus-v4.3 SCORING boundary ───────────────────────────────────
+//
+// Three coupled scoring-honesty changes (canvas unchanged — only SCORING):
+//   1. the SEMANTIC-PRESENCE pass gate (computePresenceFailed vetoes wptPass),
+//   2. the DELIVERY-AWARE requires-bundled-asset exclusion (applyNaScoreGate
+//      cross-checks the extractor's lossyReasons),
+//   3. the NATIVE-PARITY secondary metric (computeNativeParity).
+// Every threshold below is pinned to RECORDED wave12-gate values
+// (tools/titan/runs/wave12-gate/sections — white-canvas ink coverage
+// recomputed on the padded capture/ref pairs, tolerance 8).
+
+import {
+  computePresenceFailed, WPT_PRESENCE_REF_MIN_PCT, WPT_PRESENCE_RATIO_MIN,
+  WPT_CANVAS_BG, computeNativeParity,
+} from './inject-wpt-block.mjs';
+
+test('wave13: presence-gate thresholds and canvas are the calibrated pins', () => {
+  // The calibration margins documented at the constants only hold for THESE
+  // values — a silent threshold drift invalidates every pin below.
+  assert.equal(WPT_PRESENCE_REF_MIN_PCT, 0.02);
+  assert.equal(WPT_PRESENCE_RATIO_MIN, 0.05);
+  // Ink is measured against the corpus-v4 WHITE WPT canvas, NOT the
+  // 327-pair dark #1A1A2E.
+  assert.deepEqual(WPT_CANVAS_BG, { r: 0xFF, g: 0xFF, b: 0xFF });
+});
+
+test('wave13: presence gate MUST fail the measured wave12 vacuous passes', () => {
+  // Recorded wave12-gate coverage (capture aCoveragePct / ref bCoveragePct):
+  // appearance-auto-input-non-widget-001 — ssim 0.9711 "passed" with ALL
+  // THREE platform captures fully blank vs a ref carrying 1.119 % ink.
+  assert.equal(computePresenceFailed({ aCoveragePct: 0.000, bCoveragePct: 1.119 }), true);
+  // accent-color-visited — ssim 0.9967 "passed" blank vs the ~13px checkbox
+  // (0.068 % ink — the SMALLEST visibly-inked ref in the gate; this pin also
+  // guards the REF_MIN floor staying under it).
+  assert.equal(computePresenceFailed({ aCoveragePct: 0.000, bCoveragePct: 0.068 }), true);
+  // background-attachment-fixed-inside-transform-1 android-ref — the third
+  // measured blank capture (ssim 0.9762 vs a 7.404 %-ink ref). Not named in
+  // the wave-13 finding but the same vacuum class; the gate catches it too.
+  assert.equal(computePresenceFailed({ aCoveragePct: 0.000, bCoveragePct: 7.404 }), true);
+});
+
+test('wave13: presence gate MUST NOT fail any measured substantive pass', () => {
+  // The WORST substantive ratio in the wave12-gate: contrast-color-
+  // interpolation ios-ref, capture 0.800 % vs ref 5.103 % (ratio 0.157 —
+  // the capture rendered less ink than the ref but DID render). The 0.05
+  // ratio floor sits ~3× under this.
+  assert.equal(computePresenceFailed({ aCoveragePct: 0.800, bCoveragePct: 5.103 }), false);
+  // Next-worst: backface-visibility-hidden-001 ios-ref (0.951 / 4.092).
+  assert.equal(computePresenceFailed({ aCoveragePct: 0.951, bCoveragePct: 4.092 }), false);
+  // Tiny-ink-BOTH-sides: background-color-animation-with-table2 android-ref
+  // (0.043 / 0.047) — ref below the 0.02 floor is out of the gate's
+  // jurisdiction, so near-blank-vs-near-blank agreement stays a pass.
+  assert.equal(computePresenceFailed({ aCoveragePct: 0.043, bCoveragePct: 0.047 }), false);
+  // Blank-vs-blank: background-color-transparent-animation-in-body /
+  // background-color-animation-with-zero-alpha (0.000 / 0.000, ssim 1) —
+  // tests whose PASS criterion IS "render nothing" must keep passing.
+  assert.equal(computePresenceFailed({ aCoveragePct: 0.000, bCoveragePct: 0.000 }), false);
+  // Ordinary matched-ink passes far from any boundary.
+  assert.equal(computePresenceFailed({ aCoveragePct: 0.681, bCoveragePct: 0.803 }), false); // accent-color-parent-currentcolor ios
+  assert.equal(computePresenceFailed({ aCoveragePct: 17.153, bCoveragePct: 17.250 }), false); // a98rgb-004 android
+  // Over-painting capture (3d-rendering-context-and-inline ios: 5.104 /
+  // 0.856) — the gate is deliberately one-directional; SSIM already owns
+  // the over-paint direction.
+  assert.equal(computePresenceFailed({ aCoveragePct: 5.104, bCoveragePct: 0.856 }), false);
+});
+
+test('wave13: presence gate treats unknown presence as NOT failed', () => {
+  // computeSemanticPresence returns null on shape mismatch; pre-v4.3 diffs
+  // carry no block at all. Unknown ≠ failed (same stance as isColorDivergent).
+  assert.equal(computePresenceFailed(null), false);
+  assert.equal(computePresenceFailed(undefined), false);
+  assert.equal(computePresenceFailed({}), false);
+  // Non-numeric fields (hand-edited manifest) → unknown → not failed.
+  assert.equal(computePresenceFailed({ aCoveragePct: null, bCoveragePct: 5 }), false);
+  assert.equal(computePresenceFailed({ aCoveragePct: 'x', bCoveragePct: 5 }), false);
+});
+
+test('wave13: computeWptPass presence veto beats BOTH the ssim and fuzzy paths', () => {
+  // The whole point of the gate: the measured vacuous passes cleared 0.95
+  // on raw SSIM — presenceFailed must veto regardless.
+  assert.equal(computeWptPass(0.9711, null, true), false);  // appearance-auto-input… recorded ssim
+  assert.equal(computeWptPass(0.9967, null, true), false);  // accent-color-visited recorded ssim
+  // A declared fuzzy tolerance cannot rescue a presence failure either —
+  // WPT fuzzy budgets assume both sides actually rendered.
+  assert.equal(computeWptPass(0.80, true, true), false);
+  // presenceFailed=false and the omitted-argument legacy shape keep the
+  // frozen two-argument semantics bit-for-bit.
+  assert.equal(computeWptPass(0.9711, null, false), true);
+  assert.equal(computeWptPass(0.9711, null), true);
+});
+
+test('wave13: diffWebVsRef stamps white-canvas semanticPresence on every ref diff', async () => {
+  // Miniature of the vacuous-pass geometry: a fully-blank white capture vs
+  // a mostly-white ref with one small dark widget. 64×64 canvas, 16×16
+  // widget → ref ink 256/4096 = 6.25 %, capture ink 0 %.
+  const dir = await tmpDir('presence-wiring');
+  const blank = await writePng(dir, 'blank.png', 64, 64, [255, 255, 255, 255]);
+  // Hand-build the widget ref (writePng is solid-only): white field with a
+  // black 16×16 block at (8,8).
+  const png = new PNG({ width: 64, height: 64 });
+  for (let y = 0; y < 64; y++) {
+    for (let x = 0; x < 64; x++) {
+      const i = (y * 64 + x) * 4;
+      const ink = x >= 8 && x < 24 && y >= 8 && y < 24;   // the "widget"
+      png.data[i] = png.data[i + 1] = png.data[i + 2] = ink ? 0 : 255;
+      png.data[i + 3] = 255;
+    }
+  }
+  const refPath = join(dir, 'ref.png');
+  await fs.writeFile(refPath, PNG.sync.write(png));
+
+  const { diffWebVsRef } = await import('./inject-wpt-block.mjs');
+  const d = await diffWebVsRef(blank, refPath);
+  // a = capture, b = ref (diffWebVsRef argument order — pinned because the
+  // gate's directionality depends on it).
+  assert.ok(d.semanticPresence, 'semanticPresence block missing from ref diff');
+  assert.equal(d.semanticPresence.aCoveragePct, 0, 'blank capture must measure 0 % ink');
+  assert.equal(d.semanticPresence.bCoveragePct, 6.25, 'widget ref must measure 6.25 % ink');
+  assert.equal(computePresenceFailed(d.semanticPresence), true);
+});
+
+test('wave13: composed diff path presence-vetoes a blank capture even under a generous fuzzy', async () => {
+  // End-to-end through diffComposedVsRef: same blank-vs-widget geometry,
+  // PLUS a fuzzy tolerance generous enough that the legacy verdict would
+  // have been a PASS via the fuzzy path (256 mismatched px ≤ 100000,
+  // ΔE ≤ 255) — the presence veto must still win.
+  const dir = await tmpDir('presence-composed');
+  const refDir = await tmpDir('presence-composed-ref');
+  const testKey = 'wpt__css-ui__vacuous-001';
+  await writePng(dir, `${safe(testKey)}.png`, 64, 64, [255, 255, 255, 255]);
+  const png = new PNG({ width: 64, height: 64 });
+  for (let y = 0; y < 64; y++) {
+    for (let x = 0; x < 64; x++) {
+      const i = (y * 64 + x) * 4;
+      const ink = x >= 8 && x < 24 && y >= 8 && y < 24;
+      png.data[i] = png.data[i + 1] = png.data[i + 2] = ink ? 0 : 255;
+      png.data[i + 3] = 255;
+    }
+  }
+  const refPng = join(refDir, 'ref.png');
+  await fs.writeFile(refPng, PNG.sync.write(png));
+
+  const fuzzy = { maxDifference: { min: 0, max: 255 }, totalPixels: { min: 0, max: 100000 } };
+  const diff = await diffComposedVsRef({ platformDir: dir, testKey, refPng, fuzzy });
+  assert.ok(diff, 'expected a diff object');
+  assert.equal(diff.wptFuzzyMatch, true, 'the generous fuzzy DOES match — that is the trap');
+  assert.equal(diff.presenceFailed, true, 'blank capture vs inked ref must stamp presenceFailed');
+  assert.equal(diff.wptPass, false, 'presence veto must beat the fuzzy pass');
+  // Raw metrics stay honest and untouched for investigators.
+  assert.ok(typeof diff.ssim === 'number');
+});
+
+test('wave13: presence gate leaves content-matched composed diffs untouched', async () => {
+  // Positive control: identical inked composed capture and ref → the stamp
+  // is present (uniform triage field) but false, and wptPass stays true.
+  const dir = await tmpDir('presence-ok');
+  const refDir = await tmpDir('presence-ok-ref');
+  const testKey = 'wpt__css-ui__honest-001';
+  await writePng(dir, `${safe(testKey)}.png`, 40, 40, [0, 128, 0, 255]);
+  const refPng = await writePng(refDir, 'ref.png', 40, 40, [0, 128, 0, 255]);
+  const diff = await diffComposedVsRef({ platformDir: dir, testKey, refPng, fuzzy: null });
+  assert.equal(diff.presenceFailed, false);
+  assert.equal(diff.wptPass, true);
+});
+
+// ── wave-13: delivery-aware requires-bundled-asset exclusion ───────────────
+//
+// The textual Rule 20 regex (wpt-not-applicable.mjs) never consults the
+// wave-8 inliner, so wpt-buckets.json stale-tags tests whose assets
+// extract-fixture.mjs's inlineFixtureAssets() delivered as data URIs.
+// applyNaScoreGate now cross-checks the tag against the extractor's
+// lossyReasons — the actual delivery record.
+
+test('wave13: bundled-asset tag WITHOUT extractor corroboration no longer excludes', () => {
+  // The three measured wave12 css-backgrounds stale exclusions (assets
+  // 218–961 B, all < MAX_INLINE_ASSET_BYTES, per-test IR carries data URIs):
+  //   background-color-animation-with-images — lossyReasons []
+  //   background-334                          — ['inline-run-merged','percentage']
+  //   background-attachment-350               — ['inline-run-merged']
+  // None carry 'requires-bundled-asset' from the extractor → all three must
+  // now be SCORED (css-backgrounds denominator 9 → 12).
+  for (const reasons of [[], ['inline-run-merged', 'percentage'], ['inline-run-merged']]) {
+    const web = { ssim: 0.9584, wptPass: true };
+    const isNa = applyNaScoreGate(['requires-bundled-asset'], [web], reasons);
+    assert.equal(isNa, false, `reasons=${JSON.stringify(reasons)} must not exclude`);
+    assert.equal(web.wptPass, true, 'scoring fields must stay intact');
+    assert.equal(web.scoreExcluded, undefined);
+  }
+});
+
+test('wave13: bundled-asset tag WITH extractor corroboration still excludes', () => {
+  // When inlineFixtureAssets could NOT deliver (missing / ≥8 KB / non-raster
+  // asset) it stamps the same tag into lossyReasons — the exclusion is then
+  // genuine and the wave-8 neutralisation applies unchanged.
+  const web = { ssim: 0.38, wptPass: false };
+  const isNa = applyNaScoreGate(
+    ['requires-bundled-asset'],
+    [web],
+    ['requires-bundled-asset', 'inline-run-merged'],
+  );
+  assert.equal(isNa, true);
+  assert.equal(web.wptPass, null);
+  assert.equal(web.scoreExcluded, true);
+  assert.equal(web.ssim, 0.38, 'raw metrics stay for investigators');
+});
+
+test('wave13: absent delivery record falls back to the conservative legacy exclusion', () => {
+  // A pre-wave-8 combined fixture whose keyMap has no lossyReasons at all
+  // supplies undefined — absent delivery EVIDENCE must not promote a test
+  // into the scored set, so the tag alone excludes (old behaviour). This is
+  // also what keeps the wave-8 tests above passing unchanged.
+  const web = { ssim: 0.5, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-bundled-asset'], [web], undefined), true);
+  assert.equal(web.scoreExcluded, true);
+});
+
+test('wave13: capability tags stay scored regardless of the delivery record', () => {
+  // Broad capability tags were never in SCORE_EXCLUDED_TAGS; the delivery
+  // record must not change that in either direction.
+  const web = { ssim: 0.9, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-form-control-rendering'], [web], []), false);
+  assert.equal(applyNaScoreGate(['requires-float-layout'], [web], ['requires-float-layout']), false);
+  assert.equal(web.scoreExcluded, undefined);
+});
+
+// ── wave-13: nativeParity secondary metric ─────────────────────────────────
+//
+// Capability-walled tests (notApplicable-tagged) get their already-computed
+// cross-platform pair SSIMs surfaced as `nativeParity` so "browser parity
+// blocked by <tag>" is visibly distinguishable from real native divergence.
+
+test('wave13: computeNativeParity summarises pair SSIMs for tagged tests', () => {
+  // Recorded wave12-gate css-ui rows: accent-color-visited's composed row
+  // carried iOS-Android/iOS-web/Android-web all at ssim 1 (the natives agree
+  // perfectly on the blank render the form-control wall forces), while
+  // accent-color-parent-currentcolor carried 0.9914/0.9995/0.9919.
+  const p = computeNativeParity(
+    { 'iOS-Android': { ssim: 0.9914 }, 'iOS-web': { ssim: 0.9995 }, 'Android-web': { ssim: 0.9919 } },
+    ['requires-form-control-rendering'],
+  );
+  assert.deepEqual(p, {
+    pairs: { 'iOS-Android': 0.9914, 'iOS-web': 0.9995, 'Android-web': 0.9919 },
+    min: 0.9914,
+    max: 0.9995,
+  });
+});
+
+test('wave13: computeNativeParity is null for untagged tests and missing pair data', () => {
+  const pairs = { 'iOS-Android': { ssim: 0.99 }, 'iOS-web': null, 'Android-web': null };
+  // Untagged → the test is not capability-walled → no secondary metric.
+  assert.equal(computeNativeParity(pairs, []), null);
+  assert.equal(computeNativeParity(pairs, undefined), null);
+  // Tagged but NO pair carries a numeric ssim (web-only run) → null, so a
+  // non-null nativeParity always has a meaningful range.
+  assert.equal(computeNativeParity({ 'iOS-Android': null, 'iOS-web': null }, ['requires-float-layout']), null);
+  assert.equal(computeNativeParity(null, ['requires-float-layout']), null);
+  // Partial pair data still reports (single-pair range collapses to a point).
+  assert.deepEqual(computeNativeParity(pairs, ['requires-float-layout']),
+    { pairs: { 'iOS-Android': 0.99 }, min: 0.99, max: 0.99 });
+});
+
+test('wave13: buildResults matches composed-mode rows so pairs (and nativeParity) populate', async () => {
+  // Source-scan pin: composed-mode compare rows are named
+  // `<safe(testKey)>.png` (no NNN_ prefix, no __idx suffix) — measured on
+  // all 7 wave12-gate sections: the per-component lookup alone left EVERY
+  // test with pairs:null while rows[] held full cross-platform SSIMs. The
+  // pair aggregation must also consult the composed row and the result
+  // object must expose nativeParity.
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  assert.match(src, /ix\[`\$\{safe\(testKey\)\}\.png`\]/,
+    'pair aggregation must look up the composed row by test key');
+  assert.match(src, /nativeParity:\s*anyMatched\s*\?\s*computeNativeParity\(pairs,\s*naTags\)\s*:\s*null/,
+    'results must expose nativeParity wired to computeNativeParity');
 });
