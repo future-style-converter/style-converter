@@ -606,6 +606,34 @@ object ComponentRenderer {
     @OptIn(ExperimentalLayoutApi::class)
     @Composable
     fun RenderComponent(component: IRComponent, itemModifier: Modifier = Modifier) {
+        // ── Wave-17 out-of-flow interception (css-position-3 §2.1) ──────
+        // Under a CanvasRootHoist.Host (composed WPT capture only), a box
+        // the shared hoist decision marks out-of-flow — FIXED always,
+        // ABSOLUTE with no positioned ancestor — composes NOTHING here:
+        // an out-of-flow box reserves no space in its parent (pin S5; the
+        // diagnosed wave-17 bug rendered it in its flow slot and ADDED the
+        // inset on top — flow position + offset — where css-position-3
+        // treats insets as absolute anchors). The box itself renders from
+        // the host's canvas-root overlay instead (the walk in
+        // CanvasRootHoist.collectCanvasHoisted mirrors this decision
+        // one-for-one, so nothing is dropped or doubled; LocalBypass marks
+        // the overlay's own render so it passes through). Hostless paths —
+        // the dark-stage per-component canvas and the whole 327-pair
+        // baseline — have LocalActive false and skip this block entirely
+        // (frozen-baseline byte-stability). Not a silent fallthrough: the
+        // component IS rendered, just from the overlay.
+        if (com.styleconverter.runtime.layout.position.CanvasRootHoist.interceptsInFlow(
+                component,
+                hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .LocalActive.current,
+                hasPositionedAncestor = com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .LocalHasPositionedAncestor.current,
+                bypass = com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .LocalBypass.current,
+            )
+        ) {
+            return
+        }
         // ── Wave-7 dynamic-styling resolution (schema/spec/06-dynamic-styling.md)
         // Fold ACTIVE media buckets (§4) then ACTIVE selector buckets (§2)
         // over the base list — array order, whole-value replace per property
@@ -1196,6 +1224,21 @@ object ComponentRenderer {
             com.styleconverter.runtime.core.variables.DynamicValueResolver
                 .childContainingBlock(effectiveProperties, containingBlock)
         }
+        // Wave-17 positioned-ancestor channel (CSS 2.1 §10.1): descendants
+        // of a positioned box (position != static) have a positioned
+        // containing-block ancestor, so an ABSOLUTE descendant must NOT
+        // hoist to the canvas root (pin S4 — the wave-8/9 machinery anchors
+        // it at this ancestor's padding box instead). Computed from the RAW
+        // base declarations, deliberately mirroring the pure walk in
+        // CanvasRootHoist.collectCanvasHoisted — the two decisions must
+        // agree byte-for-byte or a box is dropped from flow with no overlay
+        // slot (bucket-flipped Position values are out of scope on BOTH
+        // sides, same conservatism as collapse-plan bail B6).
+        val childHasPositionedAncestor =
+            com.styleconverter.runtime.layout.position.CanvasRootHoist
+                .LocalHasPositionedAncestor.current ||
+                com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .establishesContainingBlock(component.properties)
         val inheritanceWrappedContent: @Composable () -> Unit = {
             CompositionLocalProvider(
                 LocalInheritedProperties provides inheritableForChildren,
@@ -1216,7 +1259,16 @@ object ComponentRenderer {
                 // stale ancestor override/plan.
                 com.styleconverter.runtime.spacing.BlockMarginCollapse
                     .LocalCollapsedMargin provides null,
-                LocalBlockCollapsePlan provides null
+                LocalBlockCollapsePlan provides null,
+                // Wave-17: publish the positioned-ancestor flag for the
+                // whole subtree (see childHasPositionedAncestor above) so
+                // the canvas-hoist interception at each descendant's
+                // RenderComponent reads the same ancestry the pure walk
+                // computed. Provided unconditionally: outside a host the
+                // value is never read past the LocalActive gate, and
+                // providing it costs no layout node.
+                com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .LocalHasPositionedAncestor provides childHasPositionedAncestor
             ) {
                 wrappedContent()
             }

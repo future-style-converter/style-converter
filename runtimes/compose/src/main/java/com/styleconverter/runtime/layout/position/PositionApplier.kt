@@ -15,34 +15,8 @@ import androidx.compose.ui.zIndex
  * | static       | No modifier (default) |
  * | relative     | `Modifier.absoluteOffset()` (CSS insets are physical) |
  * | absolute     | `Box` + `Modifier.absoluteOffset()` (container handling required) |
- * | fixed        | [FixedPositionWrapper] using `Popup` |
+ * | fixed        | `Modifier.absoluteOffset()` from a [CanvasRootHoist] overlay anchor |
  * | sticky       | [StickyPositionWrapper] with scroll-aware behavior |
- *
- * ## Position Wrappers
- *
- * For `position: fixed` and `position: sticky`, use the dedicated wrapper composables:
- *
- * ### Fixed Positioning
- * ```kotlin
- * if (config.isFixed()) {
- *     FixedPositionWrapper(config = config, modifier = modifier) {
- *         // Content renders fixed to viewport
- *     }
- * }
- * ```
- *
- * ### Sticky Positioning
- * ```kotlin
- * if (config.isSticky()) {
- *     StickyPositionWrapper(
- *         scrollState = scrollState,
- *         config = config,
- *         modifier = modifier
- *     ) {
- *         // Content sticks when scrolled past threshold
- *     }
- * }
- * ```
  *
  * ## Implementation Notes
  *
@@ -50,11 +24,22 @@ import androidx.compose.ui.zIndex
  *    the normal flow and positions it relative to the nearest positioned ancestor.
  *    In Compose, this requires the parent to be a `Box` and uses
  *    `Modifier.absoluteOffset()` (physical CSS insets, css-position-3 §3.1).
- *    The [needsAbsoluteContainer] method indicates when this is needed.
+ *    The [needsAbsoluteContainer] method indicates when this is needed. With NO
+ *    positioned ancestor the containing block is the initial containing block —
+ *    the capture canvas — and [CanvasRootHoist] re-anchors the box there
+ *    (wave 17, pin S2); the wave-8/9 positioned-container machinery keeps
+ *    owning the positioned-ancestor case (pin S4).
  *
- * 2. **Fixed positioning**: CSS `position: fixed` positions relative to the viewport.
- *    Implemented via [FixedPositionWrapper] which uses `Popup` to render content
- *    in a separate window above the app's content.
+ * 2. **Fixed positioning** (wave 17): CSS `position: fixed` anchors at the
+ *    VIEWPORT (css-position-3 §3.2) — our capture canvas. [CanvasRootHoist]
+ *    hoists the box out of its parent's flow entirely and renders it from a
+ *    zero-size overlay anchor at the UNPADDED canvas origin; the FIXED branch
+ *    below then applies the (left, top) inset as an absoluteOffset from that
+ *    origin. The former Popup-based FixedPositionWrapper was deleted as dead
+ *    code — do NOT resurrect the Popup route: a Popup renders into a SEPARATE
+ *    WINDOW that never composites into the capture bitmap (PixelCopy and the
+ *    composed canvas's GraphicsLayer record only the canvas's own window
+ *    surface), so a Popup-fixed box is invisible to every capture pipeline.
  *
  * 3. **Sticky positioning**: CSS `position: sticky` is a hybrid that acts like
  *    relative until a scroll threshold, then acts like fixed. Implemented via
@@ -103,8 +88,19 @@ object PositionApplier {
             }
 
             PositionType.FIXED -> {
-                // Fixed: positioned relative to viewport
-                // Limited support - apply offset but warn about viewport behavior
+                // Fixed (wave 17): the containing block is the VIEWPORT —
+                // our capture canvas (css-position-3 §3.2). The offset below
+                // is the (left, top) INSET from wherever this node is
+                // anchored: under CanvasRootHoist.Host (the composed WPT
+                // canvas) the node renders from a zero-size overlay anchor
+                // at the UNPADDED canvas origin, so this lands the box at
+                // canvas (left, top) exactly like the Chromium reference
+                // (pins S1/S3 — the parent's flow slot contributes NOTHING;
+                // the pre-wave-17 parent-relative reading of this same
+                // modifier was the diagnosed bug). On hostless paths (the
+                // dark-stage per-component canvas, whose wave-1 out-of-flow
+                // root contract already anchors a root-level subject) the
+                // chain is byte-identical to the frozen 327-pair baseline.
                 applyOffset(result, config)
             }
 
@@ -185,15 +181,11 @@ object PositionApplier {
         return PositionExtractor.isPositionProperty(propertyType)
     }
 
-    /**
-     * Check if this config requires a FixedPositionWrapper.
-     *
-     * When true, the component should be wrapped with [FixedPositionWrapper]
-     * instead of using normal modifier-based positioning.
-     */
-    fun needsFixedWrapper(config: PositionConfig): Boolean {
-        return config.type == PositionType.FIXED
-    }
+    // needsFixedWrapper / needsPositionWrapper were deleted in wave 17
+    // together with the Popup-based FixedPositionWrapper they routed to
+    // (dead code — no call sites; see the fixed-positioning note in the
+    // header for why the Popup route must never come back). Fixed boxes now
+    // ride CanvasRootHoist + the FIXED branch above.
 
     /**
      * Check if this config requires a StickyPositionWrapper.
@@ -203,15 +195,5 @@ object PositionApplier {
      */
     fun needsStickyWrapper(config: PositionConfig): Boolean {
         return config.type == PositionType.STICKY
-    }
-
-    /**
-     * Check if this config requires special wrapper handling.
-     *
-     * Returns true for both fixed and sticky positioning, which need
-     * dedicated wrapper composables rather than simple modifier application.
-     */
-    fun needsPositionWrapper(config: PositionConfig): Boolean {
-        return needsFixedWrapper(config) || needsStickyWrapper(config)
     }
 }

@@ -1075,11 +1075,13 @@ private fun ComposedCaptureView(
  * between the two capture strategies is the composition geometry, never the
  * per-node render.
  *
- * Absolute/fixed roots are NOT special-cased here (the per-component canvas's
- * out-of-flow trick is for a STANDALONE positioned subject); a composed doc
- * lays them out through the runtime's normal positioned-container path, exactly
- * as the browser lays out the reference page. The multi-component color tests
- * this round targets are all in-flow blocks.
+ * Absolute/fixed boxes (wave 17): the composed tree is wrapped in the
+ * runtime's CanvasRootHoist.Host, which hoists every out-of-flow descendant —
+ * fixed at any depth, absolute with no positioned ancestor — into an overlay
+ * anchored at the UNPADDED canvas origin, exactly where the Chromium ref
+ * anchors them (css-position-3 §3.1/§3.2). They reserve no flow space; the
+ * per-component canvas's standalone out-of-flow trick (wave 1) is unrelated
+ * and untouched.
  */
 @Composable
 private fun ComposedCaptureCanvas(
@@ -1118,7 +1120,19 @@ private fun ComposedCaptureCanvas(
     // inject between the stacked roots so the composed page reproduces the ref's
     // ~16px inter-`<p>` gaps. Pure/testable helpers in UaBlockMargins.kt.
     val rootMargins = androidx.compose.runtime.remember(roots) {
-        roots.map { effectiveUaMargins(it) }
+        roots.map { root ->
+            // Wave-17 out-of-flow roots (fixed, or absolute with no
+            // positioned ancestor — the canvas root has none) are hoisted to
+            // the canvas-root overlay and reserve NO flow space (pin S5), so
+            // their UA margins must not inject gap Spacers either — a
+            // browser collapses through an out-of-flow box as if it were
+            // absent (CSS 2.1 §9.3.1). Same decision function the runtime's
+            // hoist uses, so gap math and hoisting can never disagree.
+            if (com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .shouldHoistToCanvasRoot(root.properties, hasPositionedAncestor = false)
+            ) UaMargins.ZERO
+            else effectiveUaMargins(root)
+        }
     }
     val rootGaps = androidx.compose.runtime.remember(rootMargins) {
         collapsedVerticalGaps(rootMargins.map { it.top to it.bottom })
@@ -1154,7 +1168,14 @@ private fun ComposedCaptureCanvas(
                 val pos = coords.positionInWindow()
                 onPositioned(pos, coords.size.width.toFloat(), coords.size.height.toFloat())
             }
-            .padding(CaptureCanvasPadding)
+            // Wave 17: the 16dp canvas padding moved OFF this outer Box and
+            // onto the in-flow Column below, so the CanvasRootHoist overlay
+            // (hosted between the two) anchors at the UNPADDED canvas origin
+            // — where the Chromium ref anchors fixed boxes AND root-level
+            // absolute boxes (the initial containing block is the canvas,
+            // not the padded body content box: the measured web capture put
+            // an absolute `left:100` root at canvas x=100, not 116). The
+            // outer rect reported to PixelCopy is unchanged.
     ) {
         // Same dynamic-value channels as CaptureCanvas so composed renders
         // resolve %/calc, media buckets, forced states and animation-at-t
@@ -1176,31 +1197,45 @@ private fun ComposedCaptureCanvas(
             com.styleconverter.runtime.animations.KeyframeAnimationDriver.LocalForcedAnimationTime provides
                 animationTime
         ) {
-            // Document flow: roots stacked top-to-bottom. FIX 1 injects the
-            // COLLAPSED UA-default vertical margins as Spacers between roots so
-            // the composed page reproduces the browser-ref's inter-`<p>` gaps
-            // (rootGaps has size roots+1: [beforeFirst, between…, afterLast]).
-            // Any horizontal UA inset (blockquote/figure 40px) wraps the root in
-            // a start/end-padded Box. Mirrors the ref's block flow + the web
-            // composed canvas's `margin: revert` on the stacked roots.
-            Column(modifier = Modifier.fillMaxWidth()) {
-                roots.forEachIndexed { i, root ->
-                    // Gap ABOVE this root (collapsed with the previous root's
-                    // bottom margin; the first root's is its full top margin).
-                    if (rootGaps[i] > 0) Spacer(Modifier.height(rootGaps[i].dp))
-                    val m = rootMargins[i]
-                    if (m.left > 0 || m.right > 0) {
-                        // Horizontal UA inset (blockquote/figure) — pad the root
-                        // box left/right; the runtime renders inside it.
-                        Box(modifier = Modifier.padding(start = m.left.dp, end = m.right.dp)) {
+            // Wave-17 canvas-root host: collects every out-of-flow
+            // descendant (fixed anywhere; absolute with no positioned
+            // ancestor) and renders it in an overlay anchored HERE — the
+            // unpadded canvas origin — while the in-flow tree below skips
+            // it entirely (no reserved space, pin S5). Identity fast path
+            // inside the host keeps fixed-free documents byte-identical.
+            // The dynamic-value CompositionLocals above deliberately wrap
+            // the host so hoisted boxes resolve %/media/keyframes exactly
+            // like their in-flow siblings.
+            com.styleconverter.runtime.layout.position.CanvasRootHoist.Host(roots) {
+                // Document flow: roots stacked top-to-bottom. FIX 1 injects the
+                // COLLAPSED UA-default vertical margins as Spacers between roots so
+                // the composed page reproduces the browser-ref's inter-`<p>` gaps
+                // (rootGaps has size roots+1: [beforeFirst, between…, afterLast]).
+                // Any horizontal UA inset (blockquote/figure 40px) wraps the root in
+                // a start/end-padded Box. Mirrors the ref's block flow + the web
+                // composed canvas's `margin: revert` on the stacked roots.
+                // The 16dp canvas padding lives on THIS Column (moved off the
+                // outer Box, wave 17) so in-flow content keeps the ref's padded
+                // body geometry while the hoist overlay stays unpadded.
+                Column(modifier = Modifier.fillMaxWidth().padding(CaptureCanvasPadding)) {
+                    roots.forEachIndexed { i, root ->
+                        // Gap ABOVE this root (collapsed with the previous root's
+                        // bottom margin; the first root's is its full top margin).
+                        if (rootGaps[i] > 0) Spacer(Modifier.height(rootGaps[i].dp))
+                        val m = rootMargins[i]
+                        if (m.left > 0 || m.right > 0) {
+                            // Horizontal UA inset (blockquote/figure) — pad the root
+                            // box left/right; the runtime renders inside it.
+                            Box(modifier = Modifier.padding(start = m.left.dp, end = m.right.dp)) {
+                                ComponentHost.Render(root)
+                            }
+                        } else {
                             ComponentHost.Render(root)
                         }
-                    } else {
-                        ComponentHost.Render(root)
                     }
+                    // Trailing gap = the last root's (uncollapsed) bottom margin.
+                    if (rootGaps[roots.size] > 0) Spacer(Modifier.height(rootGaps[roots.size].dp))
                 }
-                // Trailing gap = the last root's (uncollapsed) bottom margin.
-                if (rootGaps[roots.size] > 0) Spacer(Modifier.height(rootGaps[roots.size].dp))
             }
         }
     }
