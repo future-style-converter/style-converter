@@ -57,6 +57,13 @@
 //     CSS so containment, body-background, root-font tests have a target.
 //   - Bug 5: head-only tags (<title>/<meta>/<link>/<style>/<script>/<base>/
 //     <head>) never emit components, even in the no-<body> fallback path.
+//
+// wave-13 KEYFRAMES-SAMPLER: WPT's time-stable animation tests (negative
+// delay + slope-zero easing) are statically sampled — @keyframes are parsed,
+// the animated values are interpolated at progress = -delay/duration, and
+// the results are BAKED into component properties with a 'sampled-animation'
+// lossy note (see the "Static @keyframes sampler" section for the full
+// scope boundary).
 
 import { promises as fs } from 'node:fs';
 import { resolve, dirname, join, relative, basename, sep } from 'node:path';
@@ -207,7 +214,9 @@ export function extractRefHref(html) {
 //   - one selector per rule (no comma lists with mixed targets — but we DO
 //     split selector lists and emit a rule per element)
 //   - skip @-rules entirely (they're bucket-B/C signals; the bucketer
-//     already screens those)
+//     already screens those). Exception carved out elsewhere: @keyframes
+//     blocks are re-scanned by parseKeyframes() (wave-13 sampler section)
+//     — this parser still skips them so rule extraction stays unchanged.
 //
 // Returns: Array<{ selector: string, props: Record<string,string> }>
 export function parseCss(css) {
@@ -2184,6 +2193,638 @@ function lossyReasonsFor(props) {
   return [...reasons];
 }
 
+// ── Static @keyframes sampler (wave-13 KEYFRAMES-SAMPLER) ────────────────────
+//
+// CONFIRMED wave-13 audit finding: the extractor never evaluated @keyframes,
+// so WPT's *time-stable* animation tests — the negative-delay + slope-zero-
+// easing engineering used across css-backgrounds/animations/ (e.g.
+// background-color-animation-in-body.html: `animation: bgcolor 1000000s
+// cubic-bezier(0,1,1,0) -500000s`, screenshot expected to be a uniform
+// rgb(100, 100, 0) at 50% progress) — extracted to a bare `animation`
+// shorthand no runtime executes, and scored 0.62 against the browser-ref as
+// FAKE renderer divergence, while alpha-0 siblings passed vacuously.
+//
+// These tests are deliberately engineered so the animated value is CONSTANT
+// at screenshot time: a huge duration, a negative delay placing t=0 at a
+// fixed progress, and a timing function whose slope is zero there. That
+// makes the value statically computable — no timeline execution needed:
+//
+//     progress = -delay / duration          (Web Animations §4.8.3.1, the
+//                                            "current iteration progress"
+//                                            at local time 0)
+//
+// We therefore parse @keyframes blocks, and when a component's animation
+// declaration resolves to a NEGATIVE delay strictly inside the first
+// iteration (0 < progress < 1 — inside the ACTIVE phase, where
+// animation-fill-mode can never matter, css-animations-1 §5.4), we
+// interpolate every keyframed property at that progress and BAKE the
+// sampled values into the component's extracted properties. The
+// animation-* declarations themselves are dropped (nothing downstream can
+// execute them) and the component is marked `_lossy` with the
+// 'sampled-animation' reason so the dashboard sees an honest static
+// approximation, not a silent rewrite.
+//
+// HARD SCOPE BOUNDARY (bounded by design — everything below falls back to
+// extracting the declarations verbatim exactly as before this wave, and any
+// pre-existing bucketer tags, e.g. wpt-not-applicable.mjs Rule 3's
+// 'requires-animation-runtime', stay untouched):
+//   - zero or positive delay (value at t=0 is the pre-animation state or
+//     depends on fill-mode backwards — timeline-dependent);
+//   - progress landing exactly on 0/1 or outside the first iteration
+//     (fill-mode / iteration composite dependent);
+//   - animation-direction other than 'normal' (directed-progress mapping
+//     not needed by the time-stable corpus);
+//   - comma-separated multi-animation lists (composite ordering);
+//   - keyframes missing a bracketing frame for a property (the fallback is
+//     the element's UNDERLYING computed value — css-animations-1 §4 — which
+//     static extraction cannot know);
+//   - value pairs that are neither sRGB-parsable colors nor same-unit
+//     numerics (no discrete/50% flip, no list interpolation).
+//
+// Interpolation model (mirrors css-animations-1 §4 keyframe selection):
+// pick the property-specific bracketing keyframes around `progress`,
+// compute the segment-local progress, ease it with the PREVIOUS keyframe's
+// own animation-timing-function when declared there (css-animations-1
+// "Timing functions for keyframes" — a tf declared ON a keyframe governs
+// the segment FROM that keyframe) falling back to the element-level one,
+// then lerp. Colors lerp per-component in sRGB — css-color-4 §13
+// (Interpolation) specifies premultiplied-alpha interpolation, and its
+// legacy-behavior caveat is exactly what Chromium does for these legacy
+// rgb()/rgba() tests: straight sRGB component space, premultiplied by
+// alpha. We reproduce that (premultiplied sRGB lerp), which the pinned
+// test confirms: rgb(0,200,0) → rgb(200,0,0) at eased 0.5 = rgb(100,100,0).
+
+// The animation longhands the sampler understands + drops after baking.
+// animation-composition/range are listed as DROP-ON-SAMPLE too: if present
+// they'd have parsed to non-default composite behaviour we don't model, so
+// parseAnimationDecl refuses to sample when they carry non-initial values.
+const ANIMATION_LONGHANDS = new Set([
+  'animation', 'animation-name', 'animation-duration', 'animation-delay',
+  'animation-timing-function', 'animation-iteration-count',
+  'animation-direction', 'animation-fill-mode', 'animation-play-state',
+]);
+
+// Offset comparison epsilon: keyframe offsets and progress are exact
+// decimals in the corpus (0.5, 0.05, …) but float division can wobble in
+// the last bits, so "same offset" means within 1e-9.
+const KF_EPS = 1e-9;
+
+/** Split a CSS value on `sep` (',' or null = whitespace) at paren depth 0,
+ *  so `cubic-bezier(0,1,1,0)` survives as ONE token inside an `animation`
+ *  shorthand. Trimmed, empties dropped. */
+function splitTopLevel(s, sep) {
+  const out = [];            // collected tokens
+  let depth = 0;             // '(' nesting depth — separators inside parens are literal
+  let cur = '';              // token under construction
+  for (const ch of s) {
+    if (ch === '(') depth++;                       // entering a function — separators become literal
+    else if (ch === ')') depth = Math.max(0, depth - 1); // leaving (clamp for stray ')')
+    // A separator only splits at depth 0; ',' mode splits on commas,
+    // whitespace mode on any /\s/ char.
+    const isSep = depth === 0 && (sep === ',' ? ch === ',' : /\s/.test(ch));
+    if (isSep) { if (cur.trim()) out.push(cur.trim()); cur = ''; }
+    else cur += ch;                                // accumulate non-separator chars
+  }
+  if (cur.trim()) out.push(cur.trim());            // flush the trailing token
+  return out;
+}
+
+/** Parse a CSS <time> token to milliseconds (css-values-4 §6.2: `s` and
+ *  `ms` only). Returns null for anything else — the caller must refuse to
+ *  sample rather than guess. */
+function parseTimeMs(tok) {
+  // Sign + decimal number + unit; unit is case-insensitive per CSS.
+  const m = /^([+-]?(?:\d+\.?\d*|\.\d+))(s|ms)$/i.exec(String(tok).trim());
+  if (!m) return null;                             // not a <time> — refuse
+  // 1s = 1000ms (css-values-4 §6.2 canonicalizes to seconds; we use ms to
+  // match the IR's time normalization table in schema/spec/02-values.md).
+  return Number(m[1]) * (m[2].toLowerCase() === 's' ? 1000 : 1);
+}
+
+/**
+ * Parse every `@keyframes <name> { … }` block out of a comment-stripped
+ * stylesheet. parseCss deliberately skips ALL @-rules (its "tiny parser"
+ * scope note), so this is a separate scan over the same text.
+ *
+ * Returns `{ [name]: Frame[] }` where Frame is
+ * `{ offset: 0..1, props: {prop: value}, easing?: string }`, sorted by
+ * offset ascending. Contract details, each mirroring css-animations-1:
+ *   - `from` = 0%, `to` = 100% (§4 keyframe-selector grammar);
+ *   - comma key lists (`0%, 100% { … }`) fan out to one frame per key;
+ *   - duplicate offsets cascade per property, later wins (§4: "the last
+ *     keyframe … wins" per property);
+ *   - duplicate @keyframes NAMES: the last block in document order wins
+ *     wholesale (§3: "the last one … overrides");
+ *   - `animation-timing-function` inside a frame is captured as the
+ *     frame's `easing` (it governs the segment FROM this frame — §4
+ *     "Timing functions for keyframes") and excluded from props;
+ *   - `!important` declarations inside keyframes are IGNORED entirely
+ *     (§4: "important rules in a keyframe … are ignored");
+ *   - custom properties (`--x`) are skipped like parseCss does.
+ * Out of scope (documented, not silent): quoted keyframe names, prefixed
+ * `@-webkit-keyframes`, and conditional nesting awareness — a @keyframes
+ * inside @media is collected unconditionally (reftest corpus never gates
+ * keyframes on media queries).
+ */
+export function parseKeyframes(css) {
+  const out = {};                                  // name → sorted Frame[]
+  // Unquoted <custom-ident> name then the opening brace. /g so we walk
+  // every block in document order (last-wins is Object assignment order).
+  const re = /@keyframes\s+([A-Za-z_][\w-]*)\s*\{/g;
+  let m;
+  while ((m = re.exec(css)) !== null) {
+    // Find the matching close brace by depth-counting from just after '{'.
+    let depth = 1;                                 // we're inside the block's '{'
+    let i = re.lastIndex;                          // first char of the block body
+    while (i < css.length && depth > 0) {
+      if (css[i] === '{') depth++;                 // nested frame block opens
+      else if (css[i] === '}') depth--;            // frame block / @keyframes closes
+      i++;
+    }
+    const body = css.slice(re.lastIndex, i - 1);   // body between the outer braces
+    re.lastIndex = i;                              // resume scanning after this block
+    out[m[1]] = parseKeyframeBody(body);           // last block with a name wins (§3)
+  }
+  return out;
+}
+
+/** Parse ONE @keyframes body into the sorted Frame[] contract described on
+ *  parseKeyframes. Internal — exported behaviour is pinned through
+ *  parseKeyframes itself. */
+function parseKeyframeBody(body) {
+  const byOffset = new Map();                      // offset → Frame (merged per §4 cascade)
+  let i = 0;                                       // scan cursor
+  const n = body.length;                           // body length
+  while (i < n) {
+    while (i < n && /\s/.test(body[i])) i++;       // skip inter-frame whitespace
+    if (i >= n) break;                             // done
+    const selStart = i;                            // keyframe-selector list starts here
+    while (i < n && body[i] !== '{') i++;          // selector runs to the frame's '{'
+    if (i >= n) break;                             // malformed tail — stop, keep what we have
+    const keyList = body.slice(selStart, i).trim();// e.g. "0%, 100%" or "from"
+    i++;                                           // consume '{'
+    const declStart = i;                           // declarations start
+    let depth = 1;                                 // inside the frame block
+    while (i < n && depth > 0) {                   // find the frame's matching '}'
+      if (body[i] === '{') depth++;                // defensive (frames never nest, but stay balanced)
+      else if (body[i] === '}') depth--;           // frame closes
+      i++;
+    }
+    const decls = body.slice(declStart, i - 1);    // raw declaration text
+    const props = {};                              // animatable declarations of this frame
+    let easing;                                    // frame-level animation-timing-function, if any
+    for (const decl of decls.split(';')) {         // same ';'-split model as parseCss
+      const colon = decl.indexOf(':');             // property/value divider
+      if (colon < 0) continue;                     // not a declaration
+      const k = decl.slice(0, colon).trim().toLowerCase(); // property name (CSS is ci)
+      const v = decl.slice(colon + 1).trim();      // raw value
+      if (!k || !v) continue;                      // empty side — skip
+      if (/!important\s*$/i.test(v)) continue;     // §4: !important in keyframes is IGNORED
+      if (k.startsWith('--')) continue;            // custom props — same skip as parseCss
+      if (k === 'animation-timing-function') { easing = v; continue; } // segment tf (§4)
+      props[k] = v;                                // last write wins within the frame
+    }
+    for (const key of keyList.split(',')) {        // fan a comma key list out per key
+      const kk = key.trim().toLowerCase();         // selector keyword / percentage
+      let off = null;                              // resolved 0..1 offset
+      if (kk === 'from') off = 0;                  // §4: from = 0%
+      else if (kk === 'to') off = 1;               // §4: to = 100%
+      else {
+        const pm = /^(\d+(?:\.\d+)?)%$/.exec(kk);  // "<number>%" selector
+        if (pm) off = Number(pm[1]) / 100;         // percent → fraction
+      }
+      // §4: selectors outside 0–100% (or non-percentage junk) make the
+      // KEYFRAME invalid — drop just this frame, keep the rest.
+      if (off === null || off < 0 || off > 1) continue;
+      const existing = byOffset.get(off);          // cascade target at this offset
+      if (existing) {                              // §4 same-offset cascade:
+        Object.assign(existing.props, props);      //   later declarations win per property
+        if (easing !== undefined) existing.easing = easing; // later frame tf wins too
+      } else {
+        // Fresh frame: copy props (the decl bag is shared across the
+        // comma-fanned keys and must not alias between offsets).
+        byOffset.set(off, { offset: off, props: { ...props }, ...(easing !== undefined ? { easing } : {}) });
+      }
+    }
+  }
+  // Sorted ascending so bracketing-frame lookups are simple linear scans.
+  return [...byOffset.values()].sort((a, b) => a.offset - b.offset);
+}
+
+// css-easing-1 §2.1: every easing keyword is defined as an equivalent
+// cubic-bezier (or steps) — these are the spec's exact control points.
+const EASING_KEYWORDS = {
+  // linear = cubic-bezier(0,0,1,1); evalTimingFunction shortcuts the
+  // identity case so no solve runs for it.
+  'linear':      { type: 'bezier', x1: 0,    y1: 0,   x2: 1,    y2: 1 },
+  'ease':        { type: 'bezier', x1: 0.25, y1: 0.1, x2: 0.25, y2: 1 },   // §2.1 ease
+  'ease-in':     { type: 'bezier', x1: 0.42, y1: 0,   x2: 1,    y2: 1 },   // §2.1 ease-in
+  'ease-out':    { type: 'bezier', x1: 0,    y1: 0,   x2: 0.58, y2: 1 },   // §2.1 ease-out
+  'ease-in-out': { type: 'bezier', x1: 0.42, y1: 0,   x2: 0.58, y2: 1 },   // §2.1 ease-in-out
+  'step-start':  { type: 'steps', n: 1, pos: 'jump-start' },               // §2.1 = steps(1, jump-start)
+  'step-end':    { type: 'steps', n: 1, pos: 'jump-end' },                 // §2.1 = steps(1, jump-end)
+};
+
+/** Evaluate the y of the css-easing-1 §2.3 cubic Bézier — endpoints pinned
+ *  at (0,0)/(1,1), control points (x1,y1)/(x2,y2) — at horizontal input
+ *  `x`. x(t) is monotone non-decreasing whenever x1,x2 ∈ [0,1] (the spec's
+ *  validity constraint, enforced by parseTimingFunction), so a plain
+ *  bisection on t converges; 60 halvings ≈ 2⁻⁶⁰ ≫ the 8-bit color
+ *  precision the fixtures need. Exported for the bezier pin tests. */
+export function cubicBezierY(x1, y1, x2, y2, x) {
+  // One-axis cubic Bézier polynomial with P0=0, P3=1:
+  // B(t) = 3(1-t)²t·p1 + 3(1-t)t²·p2 + t³ (standard Bernstein expansion).
+  const axis = (t, p1, p2) => 3 * (1 - t) * (1 - t) * t * p1 + 3 * (1 - t) * t * t * p2 + t * t * t;
+  let lo = 0;                                      // bisection lower bound on t
+  let hi = 1;                                      // bisection upper bound on t
+  for (let k = 0; k < 60; k++) {                   // 60 halvings — see doc comment
+    const mid = (lo + hi) / 2;                     // candidate parameter
+    if (axis(mid, x1, x2) < x) lo = mid;           // x(mid) left of target → go right
+    else hi = mid;                                 // else close in from the right
+  }
+  const t = (lo + hi) / 2;                         // converged parameter
+  return axis(t, y1, y2);                          // vertical value at that parameter
+}
+
+/** Parse an <easing-function> (css-easing-1 §2) into an evaluatable record:
+ *  `{type:'bezier',x1,y1,x2,y2}` or `{type:'steps',n,pos}`. Returns null
+ *  for anything unsupported (e.g. the `linear(…)` function) — the sampler
+ *  then refuses to sample rather than mis-easing. Exported for tests. */
+export function parseTimingFunction(raw) {
+  const s = String(raw).trim().toLowerCase();      // easing keywords are case-insensitive
+  if (EASING_KEYWORDS[s]) return EASING_KEYWORDS[s]; // keyword → its spec-defined equivalent
+  // cubic-bezier(x1, y1, x2, y2) — four <number>s (§2.3 grammar).
+  let m = /^cubic-bezier\(\s*([^,\s]+)\s*,\s*([^,\s]+)\s*,\s*([^,\s]+)\s*,\s*([^)\s]+)\s*\)$/.exec(s);
+  if (m) {
+    const [x1, y1, x2, y2] = m.slice(1).map(Number); // numeric control points
+    if (![x1, y1, x2, y2].every(Number.isFinite)) return null; // non-numeric → invalid
+    // §2.3: x1/x2 MUST be in [0,1] or the function is invalid (y's are
+    // unrestricted — overshoot beziers like (0,9,1,9) are legal).
+    if (x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1) return null;
+    return { type: 'bezier', x1, y1, x2, y2 };
+  }
+  // steps(n[, position]) — §2.4 grammar; position defaults to end.
+  m = /^steps\(\s*(\d+)\s*(?:,\s*([a-z-]+)\s*)?\)$/.exec(s);
+  if (m) {
+    const n = Number(m[1]);                        // step count
+    // §2.4: start/end are aliases of jump-start/jump-end.
+    const POS = { 'start': 'jump-start', 'end': 'jump-end', 'jump-start': 'jump-start',
+                  'jump-end': 'jump-end', 'jump-none': 'jump-none', 'jump-both': 'jump-both' };
+    const pos = POS[m[2] ?? 'end'];                // resolved jump keyword
+    // §2.4 validity: n ≥ 1, and jump-none needs n ≥ 2 (n-1 jumps).
+    if (!pos || n < 1 || (pos === 'jump-none' && n < 2)) return null;
+    return { type: 'steps', n, pos };
+  }
+  return null;                                     // unsupported easing — caller refuses
+}
+
+/** Evaluate a parsed timing function at input progress `p`. Callers only
+ *  pass p strictly inside (0,1) (exact-frame hits shortcut before easing),
+ *  so the css-easing-1 §3.9.2 before-flag edge cases never arise; the
+ *  steps output is still clamped to [0,1] defensively. Exported for the
+ *  pinned-point tests. */
+export function evalTimingFunction(tf, p) {
+  if (tf.type === 'bezier') {
+    // Identity control points (linear keyword) — skip the solve, exact.
+    if (tf.x1 === tf.y1 && tf.x2 === tf.y2) return p;
+    return cubicBezierY(tf.x1, tf.y1, tf.x2, tf.y2, p); // general bezier eval
+  }
+  // steps() per css-easing-1 §3.9.2: current step = ⌊p·n⌋ …
+  let step = Math.floor(p * tf.n);
+  // … +1 when the position starts with a rise (jump-start / jump-both).
+  if (tf.pos === 'jump-start' || tf.pos === 'jump-both') step += 1;
+  // Divisor = number of jumps: n for start/end, n-1 for jump-none, n+1 for
+  // jump-both (§2.4's jump-count table).
+  const jumps = tf.pos === 'jump-none' ? tf.n - 1 : tf.pos === 'jump-both' ? tf.n + 1 : tf.n;
+  return Math.min(1, Math.max(0, step / jumps));   // clamp — outputs are progress values
+}
+
+// The CSS2/css-color-4 §6.1 basic named colors (+ orange, the one HTML4
+// addition WPT reftests actually use, + transparent = rgba(0,0,0,0) per
+// css-color-4 §7.4). Deliberately tiny: the sampler only needs the names
+// the animation corpus interpolates; unknown names simply refuse to lerp.
+const NAMED_SRGB = {
+  transparent: [0, 0, 0, 0],       black: [0, 0, 0, 1],       silver: [192, 192, 192, 1],
+  gray: [128, 128, 128, 1],        grey: [128, 128, 128, 1],  white: [255, 255, 255, 1],
+  maroon: [128, 0, 0, 1],          red: [255, 0, 0, 1],       purple: [128, 0, 128, 1],
+  fuchsia: [255, 0, 255, 1],       green: [0, 128, 0, 1],     lime: [0, 255, 0, 1],
+  olive: [128, 128, 0, 1],         yellow: [255, 255, 0, 1],  navy: [0, 0, 128, 1],
+  blue: [0, 0, 255, 1],            teal: [0, 128, 128, 1],    aqua: [0, 255, 255, 1],
+  orange: [255, 165, 0, 1],
+};
+
+/** Parse a color the animation corpus interpolates — rgb()/rgba() (legacy
+ *  comma AND modern space/slash syntax, 3 or 4 components, css-color-4
+ *  §4.1), #hex (3/4/6/8 digits), or a NAMED_SRGB keyword — into
+ *  `{r,g,b,a}` (channels 0–255, alpha 0–1). Returns null for every other
+ *  color syntax (hsl/oklch/color() …) so the sampler refuses instead of
+ *  mis-lerping. Exported for tests. */
+export function parseSrgbColor(raw) {
+  const s = String(raw).trim().toLowerCase();      // color syntax is case-insensitive
+  if (NAMED_SRGB[s]) {                             // keyword hit
+    const [r, g, b, a] = NAMED_SRGB[s];            // unpack the table row
+    return { r, g, b, a };
+  }
+  let m = /^#([0-9a-f]{3,8})$/.exec(s);            // hex forms (css-color-4 §5)
+  if (m) {
+    const h = m[1];                                // digit run
+    // 3/4-digit shorthand doubles each digit (§5); 5/7 digit runs are invalid.
+    if (h.length === 3 || h.length === 4) {
+      const d = (i) => parseInt(h[i] + h[i], 16);  // expand one shorthand digit
+      return { r: d(0), g: d(1), b: d(2), a: h.length === 4 ? d(3) / 255 : 1 };
+    }
+    if (h.length === 6 || h.length === 8) {
+      const d = (i) => parseInt(h.slice(i, i + 2), 16); // one full byte pair
+      return { r: d(0), g: d(2), b: d(4), a: h.length === 8 ? d(6) / 255 : 1 };
+    }
+    return null;                                   // 5- or 7-digit — invalid hex
+  }
+  m = /^rgba?\(([^)]*)\)$/.exec(s);                // rgb()/rgba() payload
+  if (m) {
+    // Legacy commas, modern spaces, and the modern `/ alpha` divider all
+    // normalize to plain token separation (css-color-4 §4.1 both grammars).
+    const parts = m[1].split(/[,\s/]+/).filter(Boolean);
+    if (parts.length < 3 || parts.length > 4) return null; // must be rgb or rgb+alpha
+    // A channel is a <number> or <percentage> (100% = 255, §4.1).
+    const chan = (v) => v.endsWith('%') ? Number(v.slice(0, -1)) * 2.55 : Number(v);
+    const r = chan(parts[0]), g = chan(parts[1]), b = chan(parts[2]); // three channels
+    // Alpha is a 0–1 <number> or a <percentage> (§4.1); absent = opaque.
+    const a = parts.length === 4
+      ? (parts[3].endsWith('%') ? Number(parts[3].slice(0, -1)) / 100 : Number(parts[3]))
+      : 1;
+    if (![r, g, b, a].every(Number.isFinite)) return null; // any junk token → refuse
+    return { r, g, b, a };
+  }
+  return null;                                     // unsupported color syntax
+}
+
+/** Lerp two parsed sRGB colors at (possibly overshooting) progress `t` and
+ *  serialize back to CSS. Interpolation is PREMULTIPLIED-alpha in straight
+ *  sRGB — css-color-4 §13 mandates premultiplication, and its legacy
+ *  caveat (interpolation of legacy rgb()/rgba() forms happens in gamma-
+ *  encoded sRGB, which is exactly Chromium's behavior on these WPT
+ *  time-stable tests) fixes the space. Overshoot easings (y outside
+ *  [0,1], e.g. cubic-bezier(0,9,1,9)) are legal, so alpha clamps to [0,1]
+ *  and channels to [0,255] AFTER the lerp, matching rgb() serialization
+ *  clamping. Exported for tests. */
+export function lerpSrgbColors(c1, c2, t) {
+  // Alpha lerps straight, then clamps (overshoot protection).
+  const a = Math.min(1, Math.max(0, c1.a + (c2.a - c1.a) * t));
+  // Channel lerp in premultiplied space: pm = c·α lerped, then un-premultiplied.
+  const ch = (k) => {
+    if (a === 0) return 0;                         // fully transparent → channels defined as 0
+    const pm = c1[k] * c1.a + (c2[k] * c2.a - c1[k] * c1.a) * t; // premultiplied lerp
+    return Math.min(255, Math.max(0, Math.round(pm / a))); // un-premultiply, clamp, 8-bit round
+  };
+  const r = ch('r'), g = ch('g'), b = ch('b');     // the three channels
+  // Serialize like the browser-ref fixtures do: `rgb(R, G, B)` when opaque,
+  // `rgba(R, G, B, A)` otherwise (alpha to ≤4 decimals, float noise cut).
+  return a === 1 ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${Math.round(a * 10000) / 10000})`;
+}
+
+/** Interpolate ONE property value pair at eased progress `t`. Supported
+ *  families (the documented sampler boundary): equal strings (static
+ *  segment), sRGB-parsable colors, and same-unit scalar numerics (numeric
+ *  lerp for lengths/numbers per css-values). Returns the CSS string or
+ *  null when the pair is out of scope — the caller then aborts the WHOLE
+ *  sample so no fixture ever carries a half-baked animation. Exported for
+ *  tests. */
+export function lerpCssValue(aRaw, bRaw, t) {
+  const av = String(aRaw).trim();                  // normalized endpoints
+  const bv = String(bRaw).trim();
+  if (av === bv) return av;                        // static segment — value is constant
+  const c1 = parseSrgbColor(av);                   // try the color family first
+  const c2 = parseSrgbColor(bv);
+  if (c1 && c2) return lerpSrgbColors(c1, c2, t);  // both colors → sRGB lerp (§13 caveat above)
+  // Scalar numeric family: <number> with one optional unit token.
+  const NUM = /^([+-]?(?:\d+\.?\d*|\.\d+))([a-z%]*)$/i;
+  const m1 = NUM.exec(av);                         // parse both endpoints
+  const m2 = NUM.exec(bv);
+  if (m1 && m2 && m1[2].toLowerCase() === m2[2].toLowerCase()) { // units must MATCH (no calc-mixing)
+    const v = Number(m1[1]) + (Number(m2[1]) - Number(m1[1])) * t; // plain numeric lerp
+    // 4-decimal round strips float noise; unit rides through verbatim.
+    return `${Math.round(v * 10000) / 10000}${m1[2]}`;
+  }
+  return null;                                     // out-of-scope value family — refuse
+}
+
+/**
+ * Resolve a component's animation declaration (shorthand + longhands) to a
+ * single-animation spec `{ name, durationMs, delayMs, easing, iterations,
+ * direction }` or null when parsing is out of the sampler's scope. The
+ * shorthand grammar (css-animations-1 §7 <single-animation>) is order-free
+ * except: the FIRST <time> is the duration and the SECOND is the delay.
+ * Keyword slots are claimed greedily in spec order (easing → iteration →
+ * direction → fill → play-state → name), which matches how browsers
+ * disambiguate `none`/`forwards`-style keywords vs the keyframes name.
+ * Longhands override their shorthand slot unconditionally — true cascade
+ * order between `animation` and a later longhand isn't reconstructable
+ * from the merged props bag, and the corpus always writes longhands after
+ * the shorthand (documented approximation). Exported for tests.
+ */
+export function parseAnimationDecl(props) {
+  // Case-insensitive property lookup — parseCss preserves author case but
+  // CSS property names compare case-insensitively.
+  const getProp = (name) => {
+    for (const k of Object.keys(props)) if (k.toLowerCase() === name) return props[k];
+    return undefined;                              // longhand absent
+  };
+  // Spec defaults per css-animations-1 §7 initial values.
+  const spec = { name: null, durationMs: 0, delayMs: 0, easing: 'ease',
+                 iterations: 1, direction: 'normal' };
+  let sawAny = false;                              // did ANY animation declaration exist?
+  const sh = getProp('animation');                 // the shorthand, if present
+  if (sh !== undefined) {
+    sawAny = true;                                 // shorthand counts as a declaration
+    // Comma at depth 0 = a multi-animation list — composite ordering is
+    // out of the bounded scope; refuse.
+    const list = splitTopLevel(sh, ',');
+    if (list.length !== 1) return null;
+    let times = 0;                                 // how many <time> tokens consumed (1st=duration, 2nd=delay)
+    // One-shot flags per keyword slot so a second easing/direction/… token
+    // falls through to the name slot exactly like the browser grammar.
+    let gotEasing = false, gotIter = false, gotDir = false, gotFill = false, gotPlay = false, gotName = false;
+    for (const tok of splitTopLevel(list[0], null)) { // whitespace tokens, parens kept intact
+      const ms = parseTimeMs(tok);                 // is it a <time>?
+      if (ms !== null && times < 2) {              // §7: first time=duration, second=delay
+        if (times === 0) spec.durationMs = ms; else spec.delayMs = ms;
+        times++;
+        continue;
+      }
+      const low = tok.toLowerCase();               // keyword compare is ci
+      // <easing-function>: a spec keyword or an easing function token.
+      if (!gotEasing && (EASING_KEYWORDS[low] || /^(?:cubic-bezier|steps|linear)\(/.test(low))) {
+        spec.easing = tok; gotEasing = true; continue;
+      }
+      // <single-animation-iteration-count>: `infinite` or a plain number.
+      if (!gotIter && (low === 'infinite' || /^\d+\.?\d*$/.test(low))) {
+        spec.iterations = low === 'infinite' ? Infinity : Number(low); gotIter = true; continue;
+      }
+      // <single-animation-direction> keywords.
+      if (!gotDir && ['normal', 'reverse', 'alternate', 'alternate-reverse'].includes(low)) {
+        spec.direction = low; gotDir = true; continue;
+      }
+      // <single-animation-fill-mode>: parsed to keep the token from being
+      // mistaken for the name; the VALUE is irrelevant inside the active
+      // phase (css-animations-1 §5.4) so it isn't recorded.
+      if (!gotFill && ['none', 'forwards', 'backwards', 'both'].includes(low)) {
+        gotFill = true; continue;
+      }
+      // <single-animation-play-state>: paused samples identically at t=0
+      // (the WPT engineering makes the value time-stable either way), so
+      // like fill-mode it's consumed but not recorded.
+      if (!gotPlay && ['running', 'paused'].includes(low)) {
+        gotPlay = true; continue;
+      }
+      // Anything else is the <keyframes-name> — claim once.
+      if (!gotName) { spec.name = tok; gotName = true; continue; }
+      return null;                                 // second unclassifiable token — refuse to guess
+    }
+  }
+  // Longhand overrides. Each returns early with null on multi-animation
+  // comma lists or unparseable values (no silent fallthrough to defaults).
+  const single = (v) => {                          // enforce a single-animation value
+    const parts = splitTopLevel(v, ',');
+    return parts.length === 1 ? parts[0] : null;
+  };
+  const lhName = getProp('animation-name');        // animation-name longhand
+  if (lhName !== undefined) {
+    sawAny = true;
+    const v = single(lhName); if (v === null) return null;
+    spec.name = v;                                 // may be 'none' — rejected below
+  }
+  const lhDur = getProp('animation-duration');     // animation-duration longhand
+  if (lhDur !== undefined) {
+    sawAny = true;
+    const v = single(lhDur); if (v === null) return null;
+    const ms = parseTimeMs(v); if (ms === null) return null; // e.g. `auto` — refuse
+    spec.durationMs = ms;
+  }
+  const lhDelay = getProp('animation-delay');      // animation-delay longhand
+  if (lhDelay !== undefined) {
+    sawAny = true;
+    const v = single(lhDelay); if (v === null) return null;
+    const ms = parseTimeMs(v); if (ms === null) return null;
+    spec.delayMs = ms;
+  }
+  const lhTf = getProp('animation-timing-function'); // element-level easing longhand
+  if (lhTf !== undefined) {
+    sawAny = true;
+    const v = single(lhTf); if (v === null) return null;
+    spec.easing = v;                               // validated by parseTimingFunction later
+  }
+  const lhIter = getProp('animation-iteration-count'); // iteration-count longhand
+  if (lhIter !== undefined) {
+    sawAny = true;
+    const v = single(lhIter); if (v === null) return null;
+    if (v.toLowerCase() === 'infinite') spec.iterations = Infinity;
+    else if (/^\d+\.?\d*$/.test(v)) spec.iterations = Number(v);
+    else return null;                              // junk count — refuse
+  }
+  const lhDir = getProp('animation-direction');    // direction longhand
+  if (lhDir !== undefined) {
+    sawAny = true;
+    const v = single(lhDir); if (v === null) return null;
+    if (!['normal', 'reverse', 'alternate', 'alternate-reverse'].includes(v.toLowerCase())) return null;
+    spec.direction = v.toLowerCase();
+  }
+  // fill-mode / play-state longhands: consumed for the sawAny signal only —
+  // both are provably irrelevant to a sample strictly inside the active
+  // phase (fill: §5.4; paused: t=0 value identical), mirroring the
+  // shorthand slots above.
+  if (getProp('animation-fill-mode') !== undefined) sawAny = true;
+  if (getProp('animation-play-state') !== undefined) sawAny = true;
+  if (!sawAny) return null;                        // no animation declarations at all
+  return spec;
+}
+
+/**
+ * THE SAMPLER. Given a component's merged props bag and the stylesheet's
+ * parsed @keyframes map, decide whether the declared animation is the WPT
+ * time-stable negative-delay pattern and, if so, statically compute every
+ * keyframed property at `progress = -delay / duration`.
+ *
+ * Returns `{ baked: {prop: cssValue}, dropped: [animPropKeys] }` on
+ * success, or null when ANY scope-boundary rule (see the section banner)
+ * fires — null means "extract verbatim exactly as before this wave";
+ * partial bakes never happen (one uninterpolable property aborts the
+ * whole sample, keeping the fixture honest). Exported for tests.
+ */
+export function sampleKeyframesAnimation(props, keyframesMap) {
+  if (!keyframesMap) return null;                  // no @keyframes were parsed at all
+  // Fast path + the drop list: every animation-* key present (original
+  // spelling preserved for deletion by the caller).
+  const animKeys = Object.keys(props).filter((k) => ANIMATION_LONGHANDS.has(k.toLowerCase()));
+  if (animKeys.length === 0) return null;          // nothing animation-related on this component
+  const anim = parseAnimationDecl(props);          // resolve shorthand+longhands
+  if (!anim) return null;                          // unparseable / multi-animation — boundary
+  if (!anim.name || anim.name.toLowerCase() === 'none') return null; // no keyframes to run
+  const frames = keyframesMap[anim.name];          // the referenced @keyframes block
+  if (!frames || frames.length === 0) return null; // undeclared / empty name — boundary
+  if (!(anim.durationMs > 0)) return null;         // zero/negative duration never advances
+  // ★ THE boundary rule: only a strictly NEGATIVE delay is time-stable —
+  // zero/positive delays mean the screenshot races the timeline (out of
+  // scope by design; the declarations ride through verbatim).
+  if (!(anim.delayMs < 0)) return null;
+  // Web-Animations §4.8.3.1: at local time 0, iteration progress is
+  // (-delay)/duration for the first iteration.
+  const progress = -anim.delayMs / anim.durationMs;
+  // Must land strictly INSIDE the active phase's first iteration: at 0/1
+  // or beyond, the rendered value depends on fill-mode / iteration
+  // compositing (css-animations-1 §5.4) — out of scope.
+  if (!(progress > 0 && progress < 1)) return null;
+  if (!(progress < anim.iterations)) return null;  // count must cover the sample point
+  if (anim.direction !== 'normal') return null;    // directed-progress mapping — boundary
+  const elementTf = parseTimingFunction(anim.easing); // element-level easing (may be null)
+  const baked = {};                                // sampled property → CSS value
+  // Union of properties any frame declares = the animated property set.
+  const animatable = new Set();
+  for (const f of frames) for (const k of Object.keys(f.props)) animatable.add(k);
+  if (animatable.size === 0) return null;          // keyframes body was all-invalid/empty
+  for (const prop of animatable) {
+    // css-animations-1 §4 keyframe selection is PER PROPERTY: only frames
+    // declaring this property participate in its segment lookup.
+    const pf = frames.filter((f) => prop in f.props);
+    // prev = nearest frame at-or-before progress; next = nearest at-or-after.
+    let prev = null, next = null;                  // bracketing frames
+    for (const f of pf) {                          // frames are offset-sorted ascending
+      if (f.offset <= progress + KF_EPS) prev = f; // keeps advancing → last one ≤ progress
+      if (next === null && f.offset >= progress - KF_EPS) next = f; // first one ≥ progress
+    }
+    // Missing bracket ⇒ the §4 fallback is the element's UNDERLYING value,
+    // which static extraction can't know — abort the whole sample.
+    if (!prev || !next) return null;
+    if (prev === next || Math.abs(next.offset - prev.offset) < KF_EPS) {
+      baked[prop] = prev.props[prop];              // progress sits ON a frame — exact value, no easing
+      continue;
+    }
+    // Segment-local progress in [0,1] between the bracketing frames.
+    const local = (progress - prev.offset) / (next.offset - prev.offset);
+    // css-animations-1 "Timing functions for keyframes": a tf declared ON
+    // the previous keyframe governs this segment; else the element's.
+    const tf = prev.easing !== undefined ? parseTimingFunction(prev.easing) : elementTf;
+    if (!tf) return null;                          // unsupported easing — refuse, don't mis-ease
+    const eased = evalTimingFunction(tf, local);   // eased (possibly overshooting) progress
+    const v = lerpCssValue(prev.props[prop], next.props[prop], eased); // interpolate the pair
+    if (v === null) return null;                   // uninterpolable value family — abort whole sample
+    baked[prop] = v;                               // record the sampled value
+  }
+  return { baked, dropped: animKeys };             // success — caller bakes + drops
+}
+
+/** In-place integration shim for buildComponents: run the sampler on one
+ *  props bag; on success delete the animation-* declarations (nothing
+ *  downstream can execute them) and merge the baked values in. Returns
+ *  true iff a sample was baked so the caller can append the
+ *  'sampled-animation' lossy note — the LOUD marker this change rides. */
+function bakeSampledAnimation(props, keyframesMap) {
+  const s = sampleKeyframesAnimation(props, keyframesMap); // scope-check + sample
+  if (!s) return false;                            // out of scope — props untouched (verbatim path)
+  for (const k of s.dropped) delete props[k];      // drop the un-executable animation-* decls
+  Object.assign(props, s.baked);                   // bake the statically sampled values
+  return true;                                     // tell the caller to add the lossy note
+}
+
 // ── Support-asset inlining (wave-8) ──────────────────────────────────────────
 //
 // WPT tests routinely paint via `url(../support/x.png)`. The extractor used
@@ -2433,6 +3074,11 @@ export async function extractFixture(testRel) {
     }
   }
   const rules = parseCss(allCss);
+  // wave-13 KEYFRAMES-SAMPLER: @keyframes blocks are invisible to parseCss
+  // (it skips @-rules by design) — collect them in a separate pass over the
+  // same comment-stripped sheet so buildComponents can statically sample
+  // time-stable negative-delay animations (see the sampler section banner).
+  const keyframes = parseKeyframes(allCss);
 
   const fuzzy = extractFuzzy(cleaned);
   const refHref = extractRefHref(cleaned);
@@ -2445,7 +3091,9 @@ export async function extractFixture(testRel) {
   const stem = basename(testRel, '.html');
   const section = specSectionOf(testRel);
 
-  const built = buildComponents(cleaned, rules, stem);
+  // wave-13: pass the keyframes map so the sampler can run (5th arg; the
+  // 4th stays the ctx default — buildComponents harvests :defined itself).
+  const built = buildComponents(cleaned, rules, stem, null, keyframes);
 
   const fixture = {
     _wpt: {
@@ -2489,7 +3137,12 @@ export async function extractFixture(testRel) {
       } catch { /* tolerate missing */ }
     }
     const refRules = parseCss(refCss);
-    const refBuilt = buildComponents(refCleaned, refRules, `${stem}__ref`);
+    // wave-13: refs get the same sampler over THEIR stylesheet (refs of the
+    // time-stable family are static paint, so this is normally a no-op —
+    // but symmetric handling keeps the test/ref pair comparable if a ref
+    // ever animates).
+    const refKeyframes = parseKeyframes(refCss);
+    const refBuilt = buildComponents(refCleaned, refRules, `${stem}__ref`, null, refKeyframes);
     refFixture = {
       _wpt: { ref: refRel, of: testRel, specSection: section },
       components: refBuilt.components,
@@ -2544,7 +3197,11 @@ export async function extractFixture(testRel) {
  *    `_text: "…"` field on its component when non-empty. Drives
  *    color / font / text-decor tests where the styled subject is text.
  */
-export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
+// wave-13 KEYFRAMES-SAMPLER: `keyframes` is the parseKeyframes() map for the
+// same stylesheet the `rules` came from (parseCss skips @-rules, so the two
+// are complementary views of one sheet). Null/omitted = sampling disabled —
+// the legacy byte-identical path for callers without keyframes (unit tests).
+export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes = null) {
   const components = {};
   let lossyOverall = false;
   const lossyReasonsOverall = new Set();
@@ -2570,7 +3227,16 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
   // renderer already iterates the components map at the top level).
   const root = propsForBodyRoot(rules);
   if (root.matchedRules > 0 && Object.keys(root.props).length > 0) {
+    // wave-13 KEYFRAMES-SAMPLER: the measured WPT test (background-color-
+    // animation-in-body) animates <body> itself, so the body-root bag is a
+    // primary sampling site. Runs BEFORE the lossy scan so the scan sees
+    // the baked values (e.g. a %-bearing keyframe endpoint that got lerped
+    // away no longer flags 'percentage').
+    const rootSampled = bakeSampledAnimation(root.props, keyframes);
     const reasons = lossyReasonsFor(root.props);
+    // The LOUD marker: baked fixtures always carry the sampled-animation
+    // lossy note (see the sampler section banner).
+    if (rootSampled) reasons.push('sampled-animation');
     if (reasons.length) {
       lossyOverall = true;
       reasons.forEach((r) => lossyReasonsOverall.add(r));
@@ -2654,6 +3320,10 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
     const { props, matchedRules, pseudo } = propsForElement(
       rules, node.tag, node.attrs, node.ancestors, node.pos ?? null, effectiveCtx,
     );
+    // wave-13 KEYFRAMES-SAMPLER: element path (e.g. the `.container` divs
+    // of the css-backgrounds animation family). Before the lossy scan for
+    // the same reason as the body-root call site above.
+    const sampled = bakeSampledAnimation(props, keyframes);
     const reasons = lossyReasonsFor(props);
     // wave-12: nodes whose ownText absorbed pure-inline runs are lossy —
     // the merge is an honest approximation (default bold/italic weight of
@@ -2661,6 +3331,10 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
     // Rides the same reasons array so the existing _lossy/_lossyReasons
     // emission + overall roll-up below cover it with no extra branches.
     if (node.inlineMerged) reasons.push('inline-run-merged');
+    // wave-13: the sampled-animation LOUD marker rides the same reasons
+    // array as inline-run-merged so the existing _lossy/_lossyReasons
+    // emission + overall roll-up cover it with no extra branches.
+    if (sampled) reasons.push('sampled-animation');
     if (reasons.length) {
       lossyOverall = true;
       reasons.forEach((r) => lossyReasonsOverall.add(r));
@@ -2693,7 +3367,12 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null) {
       for (const peName of Object.keys(pseudo)) {
         const peProps = pseudo[peName];
         if (!peProps || Object.keys(peProps).length === 0) continue;
+        // wave-13 KEYFRAMES-SAMPLER: pseudo-element bags sample too (WPT
+        // has ::before animation variants of the same time-stable family).
+        const peSampled = bakeSampledAnimation(peProps, keyframes);
         const peReasons = lossyReasonsFor(peProps);
+        // Same LOUD marker contract as the host-element path above.
+        if (peSampled) peReasons.push('sampled-animation');
         if (peReasons.length) {
           lossyOverall = true;
           peReasons.forEach((r) => lossyReasonsOverall.add(r));

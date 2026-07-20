@@ -261,7 +261,19 @@ dirs + WPT corpus are gitignored):
   captures can currently "pass" against tiny-widget refs — a
   corpus-version decision), the static @keyframes t-sampler for
   negative-delay animation tests, and delivery-aware score-exclusions
-  (three css-backgrounds exclusions are stale post-inliner).
+  (three css-backgrounds exclusions are stale post-inliner). Wave 14
+  (`tools/titan/results/corpus-v4-3.json`) shipped all three as the
+  HONEST-SCORING boundary: the semanticPresence pass gate (calibrated on
+  246 pairs with 3× margins — the vacuous passes flip; css-ui honestly
+  reads 3/10, matching the audit prediction), delivery-aware exclusions
+  (denominator restored), the static @keyframes t-sampler (negative-delay
+  animation tests bake their sampled values and score real), the
+  nativeParity metric, and a bonus fix (composed-mode cross-platform
+  pairs were silently null). Two new sections joined: **css-text lands
+  at a uniform 8/12 on all three platforms** — the typographic contract
+  holding on virgin tests — and css-position (~0.91, 4–5/12) is the
+  next mineable seam. Honest totals: **web 84/106 · iOS 71 · Android
+  68** (not comparable to raw-SSIM v4.2 counts).
 
 ## Test suites
 
@@ -271,7 +283,7 @@ dirs + WPT corpus are gitignored):
 | web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1131 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 522 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 580 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 614 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

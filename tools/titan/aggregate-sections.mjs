@@ -218,7 +218,42 @@ export function summarize(unified) {
                `scored=${(w.totalTests ?? 0) - naCount} NA-excluded=${naCount} · ` +
                `A=${w.buckets?.A ?? 0} B=${w.buckets?.B ?? 0} C=${w.buckets?.C ?? 0} · ` +
                `${distribution || 'no classifier data'}`;
-  return { line, table: sectionRows.join('\n') };
+
+  // wave-13 NATIVE-PARITY rollup (corpus-v4.3): for tests carrying capability
+  // notApplicable tags, inject-wpt-block now stamps `nativeParity` — the
+  // cross-platform pair SSIM range — so a capability wall ("the browser ref
+  // needs form-control/float/vertical-wm rendering the harness can't
+  // deliver") is visibly distinguishable from real native divergence (the
+  // three runtimes disagreeing with EACH OTHER). Group the walled tests by
+  // tag and report each tag's cross-test nativeParity min–max range:
+  //   browser parity blocked by requires-form-control-rendering (4 tests) · native parity 0.98–1.00
+  // A tag whose range dips low is a genuine cross-runtime divergence lead
+  // hiding behind the wall; a tag pinned at ~1.0 is pure capability gap.
+  const byTag = {};
+  for (const r of Object.values(w.results ?? {})) {
+    // Only tests that are BOTH tagged and carry pair data participate —
+    // computeNativeParity already returns null otherwise, so the presence
+    // of the field is the filter.
+    if (!r?.nativeParity || !Array.isArray(r.notApplicableTags)) continue;
+    for (const tag of r.notApplicableTags) {
+      const g = byTag[tag] ?? (byTag[tag] = { count: 0, min: null, max: null });
+      g.count++;
+      // Fold each test's [min,max] parity interval into the tag's range.
+      g.min = g.min === null ? r.nativeParity.min : Math.min(g.min, r.nativeParity.min);
+      g.max = g.max === null ? r.nativeParity.max : Math.max(g.max, r.nativeParity.max);
+    }
+  }
+  const nativeParityRows = Object.entries(byTag)
+    .sort(([a], [b]) => a.localeCompare(b))   // stable, diffable output order
+    .map(([tag, g]) =>
+      `  browser parity blocked by ${tag} (${g.count} test${g.count === 1 ? '' : 's'}) · ` +
+      `native parity ${g.min.toFixed(2)}–${g.max.toFixed(2)}`);
+
+  // Third return field is additive — existing `{ line, table }` destructuring
+  // call sites keep working; consumers that want the capability-wall rollup
+  // read `nativeParity` (empty string when no walled test carried pair data,
+  // e.g. web-only smokes where cross-platform pairs don't exist).
+  return { line, table: sectionRows.join('\n'), nativeParity: nativeParityRows.join('\n') };
 }
 
 // ── IO wrapper ──────────────────────────────────────────────────────────────
@@ -298,9 +333,12 @@ async function main() {
     process.exit(1);
   }
   const unified = await aggregate(arg);
-  const { line, table } = summarize(unified);
+  const { line, table, nativeParity } = summarize(unified);
   console.log(line);
   if (table) console.log(table);
+  // wave-13: capability-wall rollup — one line per notApplicable tag with
+  // the cross-runtime parity range (see summarize for the format rationale).
+  if (nativeParity) console.log(nativeParity);
   console.log(`\n→ wrote ${join(resolve(arg), 'manifest.json')}`);
 }
 

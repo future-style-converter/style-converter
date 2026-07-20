@@ -43,6 +43,16 @@ import {
   inlineUrlsInValue,
   inlineFixtureAssets,
   MAX_INLINE_ASSET_BYTES,
+  // wave-13 KEYFRAMES-SAMPLER: static @keyframes sampling.
+  parseKeyframes,
+  parseTimingFunction,
+  evalTimingFunction,
+  cubicBezierY,
+  parseSrgbColor,
+  lerpSrgbColors,
+  lerpCssValue,
+  parseAnimationDecl,
+  sampleKeyframesAnimation,
 } from './extract-fixture.mjs';
 
 // ── stripComments ───────────────────────────────────────────────────────────
@@ -1611,4 +1621,225 @@ test('wave12: body-level inline runs AFTER the first block keep the component pa
   assert.equal(components['x__0'].properties.width, '20px');
   assert.equal(components['x__1']._text, 'tail note');
   assert.equal(components['x__1']._tag, 'em');
+});
+
+// ── wave-13 KEYFRAMES-SAMPLER ───────────────────────────────────────────────
+//
+// Static sampling of WPT's time-stable negative-delay animations. The pins
+// below mirror the CONFIRMED wave-13 audit finding: the measured test
+// (css-backgrounds/animations/background-color-animation-in-body.html) must
+// bake background-color rgb(100, 100, 0); a positive-delay control must NOT
+// sample; the cubic-bezier evaluator is pinned at the known midpoint plus
+// its endpoints.
+
+test('wave13: parseKeyframes reads from/to + percentage keys', () => {
+  // The measured test's exact keyframes block.
+  const kf = parseKeyframes(
+    '@keyframes bgcolor { 0% { background-color: rgb(0, 200, 0); } 100% { background-color: rgb(200, 0, 0); } }');
+  assert.deepEqual(kf.bgcolor, [
+    { offset: 0, props: { 'background-color': 'rgb(0, 200, 0)' } },
+    { offset: 1, props: { 'background-color': 'rgb(200, 0, 0)' } },
+  ]);
+  // from/to aliases map to 0/1 (css-animations-1 §4 keyframe-selector).
+  const kf2 = parseKeyframes('@keyframes m { from { opacity: 0 } to { opacity: 1 } }');
+  assert.equal(kf2.m[0].offset, 0);
+  assert.equal(kf2.m[1].offset, 1);
+});
+
+test('wave13: parseKeyframes fans out comma key lists and captures frame easing', () => {
+  // "0%, 100% { … }" produces one frame per key; a frame-level
+  // animation-timing-function lands in `easing`, not props (§4 "Timing
+  // functions for keyframes").
+  const kf = parseKeyframes(
+    '@keyframes k { 0%, 100% { width: 10px } 50% { width: 20px; animation-timing-function: linear } }');
+  assert.equal(kf.k.length, 3);
+  assert.deepEqual(kf.k.map((f) => f.offset), [0, 0.5, 1]);
+  assert.equal(kf.k[1].easing, 'linear');
+  assert.equal(kf.k[1].props['animation-timing-function'], undefined);
+});
+
+test('wave13: parseKeyframes ignores !important and honours last-name-wins', () => {
+  // §4: !important inside keyframes is IGNORED; §3: the last @keyframes
+  // block with a given name wins wholesale.
+  const kf = parseKeyframes(
+    '@keyframes k { 0% { width: 1px !important; height: 2px } }' +
+    '@keyframes k { 0% { width: 9px } }');
+  assert.deepEqual(kf.k, [{ offset: 0, props: { width: '9px' } }]);
+});
+
+test('wave13: cubic-bezier evaluator pinned at the measured point + endpoints', () => {
+  // The measured WPT easing: cubic-bezier(0,1,1,0) at x=0.5 is exactly 0.5
+  // (the curve is symmetric about the midpoint, slope zero — the whole
+  // reason WPT picked it for time-stable screenshots).
+  assert.ok(Math.abs(cubicBezierY(0, 1, 1, 0, 0.5) - 0.5) < 1e-6);
+  // Endpoint pins: y(0)=0 and y(1)=1 within bisection precision.
+  assert.ok(Math.abs(cubicBezierY(0, 1, 1, 0, 0) - 0) < 1e-6);
+  assert.ok(Math.abs(cubicBezierY(0, 1, 1, 0, 1) - 1) < 1e-6);
+});
+
+test('wave13: parseTimingFunction handles keywords, functions, and rejects junk', () => {
+  // Keywords map to their css-easing-1 §2.1 bezier equivalents.
+  assert.deepEqual(parseTimingFunction('ease-in'), { type: 'bezier', x1: 0.42, y1: 0, x2: 1, y2: 1 });
+  // cubic-bezier() parses its four control numbers.
+  assert.deepEqual(parseTimingFunction('cubic-bezier(0,1,1,0)'), { type: 'bezier', x1: 0, y1: 1, x2: 1, y2: 0 });
+  // §2.3: x-coordinates outside [0,1] make the function INVALID.
+  assert.equal(parseTimingFunction('cubic-bezier(2,0,1,1)'), null);
+  // steps() with default (end) and explicit positions.
+  assert.deepEqual(parseTimingFunction('steps(4)'), { type: 'steps', n: 4, pos: 'jump-end' });
+  assert.deepEqual(parseTimingFunction('steps(2, start)'), { type: 'steps', n: 2, pos: 'jump-start' });
+  // The linear() function and arbitrary idents are unsupported → null.
+  assert.equal(parseTimingFunction('linear(0, 0.5 25%, 1)'), null);
+  assert.equal(parseTimingFunction('bouncy'), null);
+});
+
+test('wave13: evalTimingFunction — linear identity and steps positions', () => {
+  // linear shortcut is exact (no bisection noise).
+  assert.equal(evalTimingFunction(parseTimingFunction('linear'), 0.3), 0.3);
+  // steps(4, end) at 0.3: floor(1.2)/4 = 0.25 (css-easing-1 §3.9.2).
+  assert.equal(evalTimingFunction(parseTimingFunction('steps(4)'), 0.3), 0.25);
+  // step-start jumps immediately: (floor(0.3)+1)/1 = 1.
+  assert.equal(evalTimingFunction(parseTimingFunction('step-start'), 0.3), 1);
+  // step-end holds at 0 until the end: floor(0.3)/1 = 0.
+  assert.equal(evalTimingFunction(parseTimingFunction('step-end'), 0.3), 0);
+});
+
+test('wave13: sRGB color parse + premultiplied lerp', () => {
+  // Legacy comma rgb() and 4-argument rgb() (modern grammar) both parse.
+  assert.deepEqual(parseSrgbColor('rgb(0, 200, 0)'), { r: 0, g: 200, b: 0, a: 1 });
+  assert.deepEqual(parseSrgbColor('rgb(0, 200, 0, 0)'), { r: 0, g: 200, b: 0, a: 0 });
+  // Unsupported syntaxes refuse instead of guessing.
+  assert.equal(parseSrgbColor('hsl(120, 50%, 50%)'), null);
+  // The measured pin: opaque endpoints lerp per-channel in sRGB
+  // (css-color-4 §13 legacy caveat — Chromium's behavior on these tests).
+  assert.equal(lerpSrgbColors(parseSrgbColor('rgb(0, 200, 0)'), parseSrgbColor('rgb(200, 0, 0)'), 0.5),
+               'rgb(100, 100, 0)');
+  // Alpha-0 endpoints: premultiplied interpolation zeroes the channels —
+  // the transparent-animation-in-body sibling bakes rgba(0, 0, 0, 0).
+  assert.equal(lerpSrgbColors(parseSrgbColor('rgba(0, 200, 0, 0)'), parseSrgbColor('rgba(200, 0, 0, 0)'), 0.5),
+               'rgba(0, 0, 0, 0)');
+});
+
+test('wave13: lerpCssValue — numerics need matching units, colors lerp, junk refuses', () => {
+  // Same-unit scalar lerp.
+  assert.equal(lerpCssValue('0px', '100px', 0.5), '50px');
+  // Bare numbers (opacity-style) lerp too.
+  assert.equal(lerpCssValue('10', '20', 0.25), '12.5');
+  // Unit mismatch is out of scope (no calc() synthesis) → null.
+  assert.equal(lerpCssValue('10px', '50%', 0.5), null);
+  // Identical strings are a static segment regardless of parseability.
+  assert.equal(lerpCssValue('url(a.png)', 'url(a.png)', 0.7), 'url(a.png)');
+});
+
+test('wave13: parseAnimationDecl — first time is duration, second is delay', () => {
+  // The measured shorthand, exactly as extracted from the WPT test.
+  const d = parseAnimationDecl({ animation: 'bgcolor 1000000s cubic-bezier(0,1,1,0) -500000s' });
+  assert.equal(d.name, 'bgcolor');
+  assert.equal(d.durationMs, 1000000 * 1000);
+  assert.equal(d.delayMs, -500000 * 1000);
+  assert.equal(d.easing, 'cubic-bezier(0,1,1,0)');
+  // Longhands override their shorthand slot.
+  const d2 = parseAnimationDecl({
+    'animation-name': 'k', 'animation-duration': '10s', 'animation-delay': '-5s',
+  });
+  assert.equal(d2.name, 'k');
+  assert.equal(d2.durationMs, 10000);
+  assert.equal(d2.delayMs, -5000);
+  // Comma-separated multi-animation lists are out of the bounded scope.
+  assert.equal(parseAnimationDecl({ animation: 'a 1s -0.5s, b 2s' }), null);
+});
+
+test('wave13 PIN: the measured WPT test bakes background-color rgb(100, 100, 0)', () => {
+  // css-backgrounds/animations/background-color-animation-in-body.html:
+  // progress = 500000/1000000 = 0.5; cubic-bezier(0,1,1,0) at 0.5 = 0.5;
+  // rgb(0,200,0) → rgb(200,0,0) at 0.5 = rgb(100, 100, 0) — the exact
+  // uniform color the WPT ref paints.
+  const kf = parseKeyframes(
+    '@keyframes bgcolor { 0% { background-color: rgb(0, 200, 0); } 100% { background-color: rgb(200, 0, 0); } }');
+  const s = sampleKeyframesAnimation(
+    { animation: 'bgcolor 1000000s cubic-bezier(0,1,1,0) -500000s' }, kf);
+  assert.deepEqual(s, {
+    baked: { 'background-color': 'rgb(100, 100, 0)' },
+    dropped: ['animation'],
+  });
+});
+
+test('wave13 PIN: positive-delay and zero-delay controls do NOT sample', () => {
+  const kf = parseKeyframes(
+    '@keyframes bgcolor { 0% { background-color: rgb(0, 200, 0); } 100% { background-color: rgb(200, 0, 0); } }');
+  // Positive delay: the screenshot would race the timeline — boundary rule.
+  assert.equal(sampleKeyframesAnimation(
+    { animation: 'bgcolor 1000000s cubic-bezier(0,1,1,0) 500000s' }, kf), null);
+  // Zero delay (the with-images / with-tableN family): same boundary.
+  assert.equal(sampleKeyframesAnimation({ animation: 'bgcolor 100s' }, kf), null);
+});
+
+test('wave13: out-of-scope declarations extract verbatim (null sample)', () => {
+  const kf = parseKeyframes('@keyframes k { 0% { width: 0px } 100% { width: 100px } }');
+  // Unknown keyframes name — nothing to sample.
+  assert.equal(sampleKeyframesAnimation({ animation: 'ghost 10s -5s' }, kf), null);
+  // Non-normal direction: directed-progress mapping is out of scope.
+  assert.equal(sampleKeyframesAnimation({ animation: 'k 10s -5s reverse' }, kf), null);
+  // Progress ≥ 1 (delay magnitude ≥ duration): fill-mode-dependent.
+  assert.equal(sampleKeyframesAnimation({ animation: 'k 10s -10s' }, kf), null);
+  // Missing bracketing frame: keyframes starting at 50% leave 0–50% to the
+  // UNDERLYING value (css-animations-1 §4), unknowable statically.
+  const partial = parseKeyframes('@keyframes p { 50% { width: 0px } 100% { width: 100px } }');
+  assert.equal(sampleKeyframesAnimation({ animation: 'p 10s -2s' }, partial), null);
+});
+
+test('wave13: per-keyframe timing function governs its own segment', () => {
+  // Mirrors background-color-animation-three-keyframes1.html: -50000s of
+  // 1000000s = progress 0.05, inside the [0%, 10%] segment → local 0.5.
+  // The 0% frame declares no easing, so the ELEMENT-level
+  // cubic-bezier(0,1,1,0) applies → eased 0.5 → rgb(100, 100, 0).
+  const kf = parseKeyframes(
+    '@keyframes bg { 0% { background-color: rgb(0, 200, 0); }' +
+    ' 10% { background-color: rgb(200, 0, 0); animation-timing-function: cubic-bezier(0,1,1,0); }' +
+    ' 100% { background-color: rgb(0, 0, 200); animation-timing-function: cubic-bezier(0,1,1,0); } }');
+  const s = sampleKeyframesAnimation(
+    { animation: 'bg 1000000s cubic-bezier(0,1,1,0) -50000s' }, kf);
+  assert.deepEqual(s.baked, { 'background-color': 'rgb(100, 100, 0)' });
+  // Frame-level easing OVERRIDES the element's: same geometry but the 0%
+  // frame pins `linear`, so eased local = 0.5 still lerps the same pair —
+  // pin via a step function instead to observe the difference: step-end
+  // holds the 0% value across the whole segment.
+  const kf2 = parseKeyframes(
+    '@keyframes bg { 0% { background-color: rgb(0, 200, 0); animation-timing-function: step-end; }' +
+    ' 10% { background-color: rgb(200, 0, 0); } 100% { background-color: rgb(0, 0, 200); } }');
+  const s2 = sampleKeyframesAnimation(
+    { animation: 'bg 1000000s cubic-bezier(0,1,1,0) -50000s' }, kf2);
+  assert.deepEqual(s2.baked, { 'background-color': 'rgb(0, 200, 0)' });
+});
+
+test('wave13: buildComponents bakes body-root animations with the sampled-animation note', () => {
+  // Integration pin — the measured test's shape: body-scope animation +
+  // keyframes. The synthetic __body component must carry the baked color,
+  // no animation-* keys, and the LOUD _lossy/'sampled-animation' marker.
+  const css = 'body { animation: bgcolor 1000000s cubic-bezier(0,1,1,0) -500000s; }';
+  const rules = parseCss(css);
+  const kf = parseKeyframes(
+    '@keyframes bgcolor { 0% { background-color: rgb(0, 200, 0); } 100% { background-color: rgb(200, 0, 0); } }');
+  const built = buildComponents('<body></body>', rules, 'x', null, kf);
+  const body = built.components['x__body'];
+  assert.deepEqual(body.properties, { 'background-color': 'rgb(100, 100, 0)' });
+  assert.equal(body._lossy, true);
+  assert.deepEqual(body._lossyReasons, ['sampled-animation']);
+  assert.ok(built.lossyReasons.includes('sampled-animation'));
+  // Legacy call WITHOUT the keyframes arg: sampling disabled, animation
+  // declaration rides through verbatim (byte-identical pre-wave-13 path).
+  const legacy = buildComponents('<body></body>', rules, 'x');
+  assert.equal(legacy.components['x__body'].properties.animation,
+               'bgcolor 1000000s cubic-bezier(0,1,1,0) -500000s');
+});
+
+test('wave13: element-path sampling drops longhands too and lossy-scans the baked bag', () => {
+  // An element-scoped animation via LONGHANDS; the sampled width lands as
+  // a %-free px value, and every animation-* key is dropped.
+  const css = '.t { animation-name: grow; animation-duration: 100s; animation-delay: -50s; animation-timing-function: linear; }';
+  const rules = parseCss(css);
+  const kf = parseKeyframes('@keyframes grow { 0% { width: 0px } 100% { width: 100px } }');
+  const built = buildComponents('<body><div class="t"></div></body>', rules, 'x', null, kf);
+  const cmp = built.components['x__0'];
+  assert.deepEqual(cmp.properties, { width: '50px' });
+  assert.deepEqual(cmp._lossyReasons, ['sampled-animation']);
 });

@@ -359,7 +359,7 @@ const RX = {
     //   token substitution AND no bundled support tree. Estimated
     //   ~100-150 more `.sub.html` tests caught by this widening.
     //
-    //   wave-8 NOTE — this rule now OVER-fires for one class of test:
+    //   wave-8 NOTE — this rule OVER-fires for one class of test:
     //   extract-fixture.mjs inlines raster support assets < 8 KB as
     //   percent-encoded data URIs (see its "Support-asset inlining"
     //   section), so url()-referenced small rasters like cat.png (1,883 B)
@@ -368,10 +368,19 @@ const RX = {
     //   design — classifyAll must stay a pure function), so the tag was
     //   hand-removed from the three css-break background-image-000/001/002
     //   tests (+ refs) in wpt-buckets.json after their fixtures were
-    //   re-extracted with inlined assets. A future bucket-wpt.mjs
-    //   regeneration will re-add the tag unless this rule grows a
-    //   size-aware post-pass — if you regenerate, re-apply the removal or
-    //   implement that post-pass (TODO, tracked in the wave-8 record).
+    //   re-extracted with inlined assets.
+    //   wave-13 RESOLUTION — the size-aware post-pass the wave-8 TODO
+    //   tracked now exists, in the layer where the delivery truth already
+    //   lives: inject-wpt-block.mjs's applyNaScoreGate is DELIVERY-AWARE —
+    //   it only score-excludes on this tag when the extractor's own
+    //   lossyReasons (stamped by inlineFixtureAssets when an asset is
+    //   genuinely missing / ≥ 8 KB / non-raster) corroborate it. So this
+    //   rule stays pure (no IO), the tag remains an honest STATIC hint in
+    //   wpt-buckets.json, and regenerating the buckets no longer silently
+    //   un-scores tests whose assets the inliner delivers (measured wave-13:
+    //   css-backgrounds background-color-animation-with-images /
+    //   background-334 / background-attachment-350, assets 218–961 B, were
+    //   stale-excluded by the raw tag; scoring denominator moved 9 → 12).
     //   Source: investigations/swarm-002/css-backgrounds__attachment-local-positioning-2.json
     //           investigations/swarm-002/css-images__image-orientation-background-position.json
     //           investigations/swarm-003/css-images__image-orientation-none-cross-origin-border-image.json

@@ -56,6 +56,11 @@ import {
   computePHash,
   computeEdgeSsim,
   computeLabDeltaE,
+  // wave-13 SCORING gate: the round-91 semantic-presence guard the 327-pair
+  // rows[].pairs already carry, reused here against the corpus-v4 WHITE WPT
+  // canvas (third `bg` argument) so browser-ref diffs can detect the
+  // blank-capture-vs-mostly-blank-ref vacuous-pass class.
+  computeSemanticPresence,
 } from '../visual/compare-screenshots-metrics.mjs';
 // The ONE canonical compare-pipeline sanitiser (dot KEPT). This module is the
 // consumer side of the pipeline — its diff globs MUST use the exact same rule
@@ -296,6 +301,12 @@ async function diffWebVsRef(webPath, refPath) {
   // Neither field feeds wptPass (raw ssim ≥ 0.95 stays the one criterion).
   metrics.colorComposite = computeColorComposite(metrics.ssim, metrics.labDeltaE);
   metrics.colorDivergent = isColorDivergent(metrics.histogramKL);
+  // wave-13 SCORING gate (corpus-v4.3): per-image ink coverage against the
+  // WHITE WPT canvas, computed on the SAME padded pair every other metric
+  // sees. a = the platform capture, b = the browser ref (argument order of
+  // this function). Unlike the color signals above this one DOES feed
+  // wptPass — see computePresenceFailed + computeWptPass below.
+  metrics.semanticPresence = computeSemanticPresence(A, B, WPT_CANVAS_BG);
   return metrics;
 }
 
@@ -319,10 +330,91 @@ function checkFuzzyMatch(metrics, fuzzy) {
  *  (true | false | null). This is recorded ALONGSIDE the raw `ssim` (which is
  *  never overwritten), so a future pass-rate computation can use the honest
  *  WPT bar without inflating the SSIM number itself. Pure + exported for
- *  unit tests. */
-function computeWptPass(ssim, fuzzyMatch) {
+ *  unit tests.
+ *
+ *  wave-13 SEMANTIC-PRESENCE gate (corpus-v4.3 SCORING boundary): the third
+ *  argument, `presenceFailed` (computePresenceFailed's result), VETOES the
+ *  pass unconditionally. Why: raw SSIM + fuzzy are both structure/pixel
+ *  budgets over the WHOLE canvas, so a BLANK capture "passes" against a
+ *  mostly-blank ref whose only content is a small widget — measured on the
+ *  wave12-gate: appearance-auto-input-non-widget-001 scored ssim 0.9711 with
+ *  ALL THREE platform captures fully blank, and accent-color-visited scored
+ *  0.9967 blank-vs-a-~13px-checkbox. Those are delivery/render vacuums, not
+ *  renderer agreement; counting them as PASS inflates the corpus pass rate.
+ *  A presence-failed pair is a FAIL regardless of ssim AND regardless of a
+ *  declared fuzzy tolerance (WPT fuzzy budgets assume both sides rendered).
+ *  Default false keeps the two-argument legacy call shape passing. */
+function computeWptPass(ssim, fuzzyMatch, presenceFailed = false) {
+  // The presence veto runs FIRST: a capture that renders none of the ref's
+  // ink can never be a pass, whatever the whole-canvas metrics say.
+  if (presenceFailed === true) return false;
   const ssimPass = typeof ssim === 'number' && ssim >= 0.95;
   return ssimPass || fuzzyMatch === true;
+}
+
+/** The WPT capture canvas background — WHITE, the corpus-v4 boundary
+ *  (capture-browser-ref.mjs CANVAS_BG + every platform's WPT capture mode
+ *  paint white; padToCanvas above pads white). The presence guard counts
+ *  "ink" as deviation from THIS canvas, not the 327-pair dark #1A1A2E. */
+const WPT_CANVAS_BG = { r: 0xFF, g: 0xFF, b: 0xFF };
+
+/** Presence-gate thresholds — calibrated against the wave12-gate manifests
+ *  (tools/titan/runs/wave12-gate/sections; recorded values pinned in
+ *  inject-wpt-block.test.mjs, reproducible by recomputing white-canvas
+ *  coverage on the padded capture/ref pairs):
+ *
+ *  REF_MIN_PCT = 0.02 — the ref must visibly carry ink before asymmetry can
+ *  mean anything. Measured: the SMALLEST visibly-inked ref in the gate is
+ *  accent-color-visited's ~13px checkbox at 0.068 % coverage (3.4× above
+ *  the floor), while genuinely-blank refs (background-color-transparent-
+ *  animation-in-body, background-color-animation-with-zero-alpha — tests
+ *  whose PASS criterion IS "render nothing") measure exactly 0.000 %.
+ *  A blank ref therefore never arms the gate: blank-vs-blank stays a pass.
+ *
+ *  RATIO_MIN = 0.05 — the capture must carry at least 5 % of the ref's ink
+ *  mass. Measured separation: every vacuous pass in the gate has capture
+ *  coverage exactly 0.000 % (ratio 0.0 — appearance-auto-input-non-widget-001
+ *  cap 0.000/ref 1.119; accent-color-visited cap 0.000/ref 0.068; plus the
+ *  blank android capture of background-attachment-fixed-inside-transform-1,
+ *  cap 0.000/ref 7.404), while the WORST substantive pass ratio is 0.157
+ *  (contrast-color-interpolation ios, cap 0.800/ref 5.103). 0.05 sits ~3×
+ *  under the substantive floor and strictly above the measured vacuous
+ *  ceiling of 0.0 — both margins comfortable. */
+const WPT_PRESENCE_REF_MIN_PCT = 0.02;
+const WPT_PRESENCE_RATIO_MIN   = 0.05;
+
+/** wave-13 SEMANTIC-PRESENCE gate predicate (pure + exported for the unit
+ *  calibration pins). Takes the `semanticPresence` block diffWebVsRef stamps
+ *  ({ aCoveragePct: CAPTURE ink %, bCoveragePct: REF ink % } — argument
+ *  order of diffWebVsRef) and answers "does the ref carry visible content
+ *  the capture essentially lacks?".
+ *
+ *  Fails (returns true) only when BOTH hold:
+ *    1. the ref visibly has ink       (bCoveragePct ≥ REF_MIN_PCT), and
+ *    2. the capture carries < 5 % of the ref's ink mass
+ *                                     (aCoveragePct / bCoveragePct < RATIO_MIN).
+ *  Deliberately ONE-directional (ref-has, capture-lacks): the reverse
+ *  asymmetry (capture over-paints) is real divergence the whole-canvas SSIM
+ *  already punishes, and several honest passes over-paint slightly
+ *  (wave12-gate: 3d-rendering-context-and-inline ios cap 5.104/ref 0.856
+ *  still ssim-fails on its own).
+ *  `null`/absent presence (size-mismatch guard in computeSemanticPresence,
+ *  or a pre-v4.3 diff) → false: UNKNOWN presence is not FAILED presence —
+ *  same "unknown ≠ divergent" stance as isColorDivergent above. */
+function computePresenceFailed(semanticPresence) {
+  // Degenerate/missing metric → cannot judge, never veto.
+  if (!semanticPresence || typeof semanticPresence !== 'object') return false;
+  const cap = semanticPresence.aCoveragePct;   // platform capture ink %
+  const ref = semanticPresence.bCoveragePct;   // browser-ref ink %
+  // Non-numeric fields (defensive: hand-edited manifests) → unknown → pass.
+  if (typeof cap !== 'number' || typeof ref !== 'number') return false;
+  // Blank (or sub-floor) ref: nothing to be missing — blank-vs-blank is the
+  // honest pass for "renders nothing" tests. Also keeps the tiny-ink-both-
+  // sides pair (wave12 background-color-animation-with-table2 android,
+  // cap 0.043/ref 0.047) out of the gate's jurisdiction.
+  if (ref < WPT_PRESENCE_REF_MIN_PCT) return false;
+  // The asymmetry test proper: capture ink mass under 5 % of the ref's.
+  return (cap / ref) < WPT_PRESENCE_RATIO_MIN;
 }
 
 /** Color-aware composite score for a browser-ref diff (TITAN-WHITE lane).
@@ -420,11 +512,52 @@ const SCORE_EXCLUDED_TAGS = new Set(['requires-bundled-asset']);
  *  only the SCORING fields are neutralised. Error-shaped diffs (`{error}`)
  *  are left alone.
  *
+ *  wave-13 DELIVERY-AWARE refinement (corpus-v4.3 SCORING boundary): the
+ *  `requires-bundled-asset` tag in wpt-buckets.json is a TEXTUAL
+ *  url(support/…) regex (wpt-not-applicable.mjs Rule 20) that never consults
+ *  the wave-8 asset inliner — extract-fixture.mjs's inlineFixtureAssets()
+ *  inlines raster support assets < MAX_INLINE_ASSET_BYTES (8 KB) as data
+ *  URIs, and only marks the component `_lossy` with reason
+ *  'requires-bundled-asset' when an asset is genuinely UNDELIVERABLE
+ *  (missing / ≥ 8 KB / non-raster). Rule 20 stays a pure string-grep by
+ *  design (the wave-8 no-IO purity constraint documented at its RX comment:
+ *  classifyAll must remain a pure function over ~24k files), so THIS gate is
+ *  the sanctioned IO-adjacent post-pass: it cross-checks the tag against the
+ *  extractor's actual delivery signal (`lossyReasons`, threaded from the
+ *  combined fixture's keyMap — no new IO, the data is already in memory).
+ *  Measured wave-13 staleness this repairs: css-backgrounds
+ *  background-color-animation-with-images / background-334 /
+ *  background-attachment-350 (assets 218–961 B, all inlined; per-test IR
+ *  provably carries data URIs; extractor lossyReasons carry NO
+ *  'requires-bundled-asset') were score-excluded on the raw tag — the
+ *  css-backgrounds scoring denominator moves 9 → 12.
+ *
+ *  Contract per tag: `requires-bundled-asset` excludes ONLY when the
+ *  extractor corroborates it (lossyReasons includes the same tag). A caller
+ *  that supplies NO lossyReasons array at all (undefined/null — e.g. a
+ *  pre-wave-8 combined fixture with no lossy fields in its keyMap) gets the
+ *  CONSERVATIVE legacy behaviour (tag alone excludes): absent delivery
+ *  evidence must not silently promote a test into the scored set.
+ *
  *  @param {string[]|undefined} naTags  notApplicable tags for the test
  *  @param {Array<object|null>} refDiffs diffs to neutralise (mutated in place)
+ *  @param {string[]|undefined} [lossyReasons] extractor lossy reasons for the
+ *         test (keyMap meta.lossyReasons); array ⇒ delivery-aware, absent ⇒
+ *         conservative legacy exclusion
  *  @returns {boolean} true when the test is score-excluded */
-export function applyNaScoreGate(naTags, refDiffs) {
-  const isNa = Array.isArray(naTags) && naTags.some((t) => SCORE_EXCLUDED_TAGS.has(t));
+export function applyNaScoreGate(naTags, refDiffs, lossyReasons) {
+  const isNa = Array.isArray(naTags) && naTags.some((t) => {
+    // Not a harness-delivery tag → never excludes (unchanged wave-8 rule).
+    if (!SCORE_EXCLUDED_TAGS.has(t)) return false;
+    // Delivery-aware branch: when the extractor's lossy record is available
+    // it is the ground truth — the textual tag only excludes if the
+    // extractor ALSO says the asset was undeliverable (same tag string,
+    // stamped by inlineFixtureAssets). Assets it inlined as data URIs ARE
+    // delivered, so the test renders with real inputs and must be scored.
+    if (Array.isArray(lossyReasons)) return lossyReasons.includes(t);
+    // No delivery record supplied → conservative legacy behaviour.
+    return true;
+  });
   if (!isNa) return false;
   for (const d of refDiffs ?? []) {
     // Skip absent platforms (null) and error records — neither carries
@@ -434,6 +567,51 @@ export function applyNaScoreGate(naTags, refDiffs) {
     d.scoreExcluded = true;  // aggregators filter on this stamp
   }
   return true;
+}
+
+/** wave-13 NATIVE-PARITY secondary metric (pure + exported for unit tests).
+ *
+ *  WHY: tests carrying capability notApplicable tags (requires-form-control-
+ *  rendering, requires-float-layout, requires-orthogonal-flow, …) hit a
+ *  KNOWN capability wall against the browser ref — their browser-ref score
+ *  measures the wall, not the runtimes. But the CROSS-PLATFORM pair SSIMs
+ *  (iOS-Android / iOS-web / Android-web) are already computed for the same
+ *  test and answer a different, still-meaningful question: do the three
+ *  runtimes at least agree WITH EACH OTHER on what they render? Surfacing
+ *  that as `nativeParity` lets dashboards visibly distinguish "browser
+ *  parity blocked by <capability tag>, native parity 0.98–1.0" (a wall,
+ *  runtimes consistent) from "native parity ALSO low" (real cross-runtime
+ *  divergence hiding behind the wall). Nothing here feeds wptPass or
+ *  scoreEligible — it is a triage/visibility channel only.
+ *
+ *  Only stamped for tests that carry ≥1 notApplicable tag (the capability-
+ *  walled population; untagged tests' pair data already speaks for itself in
+ *  `pairs`) and only when at least one cross-platform pair has a numeric
+ *  SSIM (single-platform runs → null, dashboards render the gap).
+ *
+ *  @param {object|null} pairs   the per-test aggregated pairs block
+ *                               ({'iOS-Android':{ssim,…}|null, …})
+ *  @param {string[]|undefined} naTags notApplicable tags for the test
+ *  @returns {{pairs: Object<string,number>, min: number, max: number}|null} */
+export function computeNativeParity(pairs, naTags) {
+  // No capability tag → not a walled test → no secondary metric needed.
+  if (!Array.isArray(naTags) || naTags.length === 0) return null;
+  // No cross-platform pair data at all (web-only smoke) → nothing to report.
+  if (!pairs || typeof pairs !== 'object') return null;
+  const parityPairs = {};
+  let min = null, max = null;
+  for (const [kind, p] of Object.entries(pairs)) {
+    // Absent platforms contribute null pairs; skip anything without a
+    // numeric SSIM (error rows carry none) — no silent zero-filling.
+    if (!p || typeof p.ssim !== 'number') continue;
+    parityPairs[kind] = p.ssim;                       // already worst-of-components (buildResults)
+    min = min === null ? p.ssim : Math.min(min, p.ssim);
+    max = max === null ? p.ssim : Math.max(max, p.ssim);
+  }
+  // All pairs missing → null, NOT {pairs:{}}: consumers can trust that a
+  // non-null nativeParity always has a meaningful min/max range.
+  if (min === null) return null;
+  return { pairs: parityPairs, min, max };
 }
 
 /** Glob ONE platform's capture dir for a test's per-component PNGs (all
@@ -460,9 +638,14 @@ async function diffPlatformVsRef({ platformDir, matchingKeys, refPng, fuzzy, cac
     const composed = await stitchPngsVertically(matched, join(platformDir, '_stitched'), cacheKey);
     const diff = await diffWebVsRef(composed, refPng);   // metric fn is platform-agnostic (PNG pair in, metrics out)
     diff.wptFuzzyMatch = checkFuzzyMatch(diff, fuzzy);
-    // WPT-native pass: raw SSIM ≥ 0.95 OR within the declared fuzzy tolerance.
-    // Raw `diff.ssim` is left untouched so downstream can honour both bars.
-    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch);
+    // wave-13 presence gate: stamped on EVERY diff (true/false, uniform for
+    // triage queries — "presenceFailed:true" is the blank-capture beacon).
+    diff.presenceFailed = computePresenceFailed(diff.semanticPresence);
+    // WPT-native pass: raw SSIM ≥ 0.95 OR within the declared fuzzy
+    // tolerance — VETOED by the semantic-presence gate (corpus-v4.3: a blank
+    // capture can no longer "pass" a mostly-blank ref, see computeWptPass).
+    // Raw `diff.ssim` is left untouched so downstream can honour all bars.
+    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed);
     diff.stitchedComponents = matched.length;
     return diff;
   } catch (err) {
@@ -501,8 +684,11 @@ async function diffComposedVsRef({ platformDir, testKey, refPng, fuzzy }) {
   try {
     const diff = await diffWebVsRef(composedPath, refPng);  // one composite PNG vs the ref
     diff.wptFuzzyMatch = checkFuzzyMatch(diff, fuzzy);       // Section 5.3 fuzzy tolerance
-    // WPT-native pass: raw SSIM ≥ 0.95 OR within the declared fuzzy tolerance.
-    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch);
+    // wave-13 presence gate (same stamp + veto as the stitch path — the two
+    // measured wave12 vacuous passes came through THIS composed path).
+    diff.presenceFailed = computePresenceFailed(diff.semanticPresence);
+    // WPT-native pass: raw SSIM ≥ 0.95 OR within fuzzy — presence-vetoed.
+    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed);
     diff.composed = true;                                    // provenance marker
     return diff;
   } catch (err) {
@@ -545,6 +731,15 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     else if (meta.bucket === 'B') bucketB++;
     else bucketC++;
 
+    // The WPT test key (`wpt__<section>__<stem>`) is shared naming between
+    // the composed capture filename (ComposedCaptureGallery.tsx / native
+    // composed inboxes), build-combined-fixture's component roots, and —
+    // crucially for the pair aggregation below — compare-screenshots ROW
+    // names in composed-mode runs. Computed once up here (wave-13) so both
+    // the pair lookup and the browser-ref block share one definition.
+    const refStem = basename(testRel, '.html');
+    const testKey = `wpt__${meta.section}__${refStem}`;
+
     // Aggregate per-pair metrics from the matched manifest rows. For a
     // multi-component test we average the SSIM and union the divergence
     // labels (severest wins — see SEVERITY_RANK).
@@ -557,6 +752,25 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       anyMatched = true;
       for (const k of pairKinds) {
         const p = row.pairs?.[k];
+        if (p) pairAccum[k].push(p);
+      }
+    }
+    // wave-13: composed-mode runs name their compare rows after the ONE
+    // composed capture per test — `<safe(testKey)>.png`, no NNN_ prefix and
+    // no __<idx> suffix — so the per-component lookup above finds nothing
+    // and every composed run recorded `pairs: null` (measured across all 7
+    // wave12-gate section manifests: 0 tests with pairs while rows[] held
+    // full iOS-Android/iOS-web/Android-web SSIMs). Without this the
+    // nativeParity metric below would be permanently null on the very runs
+    // it exists for. rowIndex() files non-`NNN_*.png` rows under their FULL
+    // name, so the composed row lives at `<safe(testKey)>.png`. Composed
+    // and per-component captures are mutually exclusive within one run
+    // (the harness emits one style), so this can't double-count a pair.
+    const composedRow = ix[`${safe(testKey)}.png`];
+    if (composedRow) {
+      anyMatched = true;
+      for (const k of pairKinds) {
+        const p = composedRow.pairs?.[k];
         if (p) pairAccum[k].push(p);
       }
     }
@@ -590,7 +804,8 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     // The stitch-before-diff contract (swarm-002 RC2: compare a vertical
     // composite of ALL per-test captures, never just the first) lives in
     // diffPlatformVsRef and applies uniformly to all three platforms.
-    const refStem = basename(testRel, '.html');
+    // refStem + testKey are computed above (before the pair aggregation) —
+    // the browser-ref path just reuses them.
     const refPng = refsRoot
       ? join(refsRoot, meta.section, `${refStem}.png`)
       : null;
@@ -599,12 +814,6 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     let webRefDiff = null, iosRefDiff = null, androidRefDiff = null;
     if (browserRefAvailable) {
       const cacheKey = safe(testRel.replace(/\.html$/, ''));
-      // WPT test key = `wpt__<section>__<stem>` — matches the composed
-      // capture filename the web harness emits (ComposedCaptureGallery.tsx)
-      // and build-combined-fixture.mjs's `wpt__<section>__<stem>__<idx>`
-      // root naming. section is parts[1] of the test path (meta.section);
-      // stem is the .html basename (refStem, computed above).
-      const testKey = `wpt__${meta.section}__${refStem}`;
       // Each platform prefers the COMPOSED single-PNG diff when its harness
       // produced one (`<safe(testKey)>.png` — WPT_COMPOSED web / composed
       // inbox natives), and falls back to the legacy per-component vertical
@@ -658,7 +867,13 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     // nulls wptPass + stamps scoreExcluded:true on each diff (raw metrics
     // stay for investigators) and surfaces a per-test `scoreEligible`
     // boolean that aggregators MUST filter on.
-    const isNa = applyNaScoreGate(naTags, [webRefDiff, iosRefDiff, androidRefDiff]);
+    // wave-13: the gate is now DELIVERY-AWARE — meta.lossyReasons (the
+    // extractor's actual asset-delivery record from the combined fixture's
+    // keyMap) is threaded in so a stale textual requires-bundled-asset tag
+    // no longer excludes a test whose assets the wave-8 inliner delivered
+    // as data URIs (see applyNaScoreGate's wave-13 comment for the three
+    // measured css-backgrounds cases; denominator 9 → 12 there).
+    const isNa = applyNaScoreGate(naTags, [webRefDiff, iosRefDiff, androidRefDiff], meta.lossyReasons);
     if (isNa) {
       divergence = 'test-not-applicable';
     }
@@ -705,6 +920,14 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       // to null-check; the divergence label is the truth source for "did
       // the override fire" and the tags are the diagnostic colour.
       notApplicableTags: Array.isArray(naTags) ? naTags : [],
+      // wave-13 NATIVE-PARITY secondary metric: for capability-walled tests
+      // (≥1 notApplicable tag) surface the already-computed cross-platform
+      // pair SSIMs so "browser parity blocked by <tag>" runs are visibly
+      // distinguishable from real native divergence. null for untagged
+      // tests and for tagged tests with no cross-platform pair data (see
+      // computeNativeParity). anyMatched gates on the same condition the
+      // `pairs` field uses so the two stay consistent.
+      nativeParity: anyMatched ? computeNativeParity(pairs, naTags) : null,
     };
   }
 
@@ -865,4 +1088,9 @@ export {
   stitchPngsVertically, diffWebVsRef, diffPlatformVsRef, diffComposedVsRef,
   safe, checkFuzzyMatch, computeWptPass,
   computeColorComposite, isColorDivergent, COLOR_DIVERGENT_KL_THRESHOLD,
+  // wave-13 corpus-v4.3 SCORING boundary: the semantic-presence gate
+  // (predicate + its calibrated thresholds) exported so the unit pins can
+  // hold the wave12-gate calibration without re-deriving coverage.
+  computePresenceFailed, WPT_PRESENCE_REF_MIN_PCT, WPT_PRESENCE_RATIO_MIN,
+  WPT_CANVAS_BG,
 };

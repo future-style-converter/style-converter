@@ -1233,3 +1233,35 @@ test('RX export contains the swarm-003 regex panel keys', () => {
     assert.ok(RX.anchorPositionProp instanceof RegExp);
     assert.ok(RX.anchorFunctionCall instanceof RegExp);
 });
+
+// ── wave-13: Rule 20 stays pure; delivery-awareness lives downstream ────────
+//
+// The wave-13 scoring audit measured three css-backgrounds tests
+// (background-color-animation-with-images, background-334,
+// background-attachment-350; assets 218–961 B) stale-excluded by this
+// rule's textual url(support/…) regex even though extract-fixture.mjs's
+// inlineFixtureAssets() had delivered every referenced asset as a data URI.
+// The resolution deliberately does NOT add IO here (classifyAll must stay a
+// pure function over ~24k files — the wave-8 design constraint at the RX
+// comment): the tag remains a STATIC textual hint, and the score-exclusion
+// decision is made delivery-aware in inject-wpt-block.mjs's
+// applyNaScoreGate, which cross-checks the tag against the extractor's
+// lossyReasons. These pins hold both halves of that split.
+
+test('wave13: Rule 20 still fires textually on a small inlinable support asset', () => {
+    // A tiny (would-be-inlined) asset still matches — the rule CANNOT stat
+    // sizes and is not supposed to; the downstream gate decides scoring.
+    const html = '<style>div { background-image: url("support/cat.png"); }</style>';
+    assert.ok(tagsForTest({ html }).includes('requires-bundled-asset'));
+});
+
+test('wave13: module source documents the delivery-aware resolution (no silent re-staling)', async () => {
+    // Source-scan pin: the Rule 20 comment must carry the wave-13
+    // RESOLUTION note pointing at applyNaScoreGate, so a future bucket
+    // regeneration doesn't re-open the stale-exclusion hole out of
+    // ignorance of where the post-pass lives.
+    const { promises: fsp } = await import('node:fs');
+    const src = await fsp.readFile(new URL('./wpt-not-applicable.mjs', import.meta.url), 'utf8');
+    assert.match(src, /wave-13 RESOLUTION/, 'Rule 20 must document the wave-13 delivery-aware post-pass');
+    assert.match(src, /applyNaScoreGate/, 'Rule 20 must name the downstream gate that owns the decision');
+});
