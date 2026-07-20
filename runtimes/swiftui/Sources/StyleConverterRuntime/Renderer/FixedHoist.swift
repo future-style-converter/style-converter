@@ -63,6 +63,57 @@ public enum FixedHoist {
         LayoutExtractor.extract(from: component.properties)?.position == .fixed
     }
 
+    /// Wave 18 (RC1) — does the declaration list carry ANY inset that
+    /// anchors the box to its containing block? Read through the SAME
+    /// LayoutExtractor lane the live PositionApplier consumes (one wire
+    /// decoder — PositionExtractor's InsetRect, where an `auto` or absent
+    /// side is nil and logical InsetInline/InsetBlock longhands are
+    /// already folded to physical per the LTR horizontal-tb
+    /// normalization), so "has an inset" can never disagree with the
+    /// offset the applier will paint. Twin of Compose
+    /// CanvasRootHoist.hasAnyInset — the two rule tables must match.
+    static func hasAnyInset(_ component: IRComponent) -> Bool {
+        guard let inset = LayoutExtractor.extract(from: component.properties)?.inset
+        else { return false }
+        // Any non-nil side = at least one anchoring inset.
+        return inset.top != nil || inset.right != nil
+            || inset.bottom != nil || inset.left != nil
+    }
+
+    /// Wave 18 (RC1) — the static-position class the hoist carves out:
+    /// an ABSOLUTE box with NO inset on either axis sits at its STATIC
+    /// POSITION (css-position-3 §3.1: where it would have been in flow) —
+    /// the wave-17 canvas-origin hoist painted css-sizing abspos-001/002's
+    /// square at (0,0) over the paragraph. Such a ROOT stays in the flow
+    /// stack (split keeps it) and the canvas wraps it in
+    /// [StaticPositionAnchor] so it paints at its slot origin while
+    /// reserving NO flow space (§2.1 — the S5 zero-report, iOS edition).
+    /// FIXED keeps the wave-17 always-hoist behavior (its containing
+    /// block IS the viewport, and every wave-17 css-position green rides
+    /// the canvas anchor). public: split's callers (the composed canvas)
+    /// use the same classifier to attach the anchor — one decision, two
+    /// consumers, mirroring the Compose harness's shouldHoistToCanvasRoot
+    /// gap-injection reuse.
+    /// `hasPositionedAncestor` mirrors the Compose twin's parameter
+    /// (CanvasRootHoist.rendersInFlowAsStaticPosition): an absolute box
+    /// UNDER a positioned ancestor is never in this class — it belongs to
+    /// the wave-8/9 positioned-children machinery even with all-auto
+    /// insets (its static position is inside that ancestor, not a canvas
+    /// slot). Defaulted false because every production call site passes a
+    /// document ROOT (split + the composed canvas), which by definition
+    /// has no ancestor — the parameter exists so the cross-native rule
+    /// tables stay byte-identical for NON-root queries too (the wave-18
+    /// skeptic probe caught the two natives disagreeing on the
+    /// css-sizing fit-content-percentage children without it).
+    public static func rendersInFlowAsStaticPosition(
+        _ component: IRComponent,
+        hasPositionedAncestor: Bool = false
+    ) -> Bool {
+        LayoutExtractor.extract(from: component.properties)?.position == .absolute
+            && !hasPositionedAncestor
+            && !hasAnyInset(component)
+    }
+
     /// Split a document's ROOT list into the in-flow half (rendered in
     /// the canvas's padded flow stack) and the hoisted half (mounted in
     /// the canvas-root FixedHoistOverlay at the unpadded origin).
@@ -85,11 +136,20 @@ public enum FixedHoist {
             // a fixed box inside a hoisted absolute root still anchors at
             // the viewport, not at that root's padding box.
             let stripped = strippingFixedDescendants(root)
-            if ComponentRenderer.isOutOfFlow(root) {
+            if ComponentRenderer.isOutOfFlow(root)
+                && !rendersInFlowAsStaticPosition(root) {
                 // F2/F1 root: the whole box leaves the flow stack — no
                 // space reserved (§2.1), unpadded-canvas anchor. The root
                 // itself paints before its own hoisted descendants
                 // (pre-order = the browser's tree paint order).
+                // Wave 18 (RC1): an ABSOLUTE root with NO inset is exempt —
+                // css-position-3 §3.1 gives it its STATIC position, so it
+                // stays in the flow stack behind StaticPositionAnchor
+                // instead of anchoring at the canvas origin (every wave-17
+                // css-position hoist case carries an inset, so this branch
+                // is strictly additive there). Mixed-axis (one inset only)
+                // still hoists — the auto axis approximates its static
+                // position with the canvas origin (documented, pinned).
                 hoisted.append(stripped.kept)
             } else {
                 // In-flow root: keeps its flow slot, minus any fixed
@@ -231,5 +291,40 @@ public struct FixedHoistOverlay: View {
                 }
             }
         }
+    }
+}
+
+/// Wave 18 (RC1) — the flow-slot mount for a no-inset ABSOLUTE root the
+/// split now KEEPS in flow (see FixedHoist.rendersInFlowAsStaticPosition):
+/// the box must paint at its STATIC position (its slot origin — exactly
+/// where the flow stack placed it) while reserving NO flow space
+/// (css-position-3 §2.1; the S5 zero-report contract, iOS edition — the
+/// twin of Compose CanvasRootHoist.zeroFlowAnchor):
+///   • `.fixedSize()` measures the subtree at its IDEAL size — the
+///     SwiftUI analogue of Compose's unbounded Constraints() measure, so
+///     the box is sized by its own declarations alone (an out-of-flow box
+///     is sized against its containing block, never squeezed by flow
+///     siblings; without it the zero frame below would propose 0×0 and
+///     collapse/wrap the content);
+///   • the zero `.frame(width: 0, height: 0, alignment: .topLeading)`
+///     reports NO extent to the flow stack — the next sibling starts
+///     where this box would have (S5) — while the top-leading alignment
+///     pins the ink at the slot origin; SwiftUI does not clip children to
+///     frames, so the ink overflows exactly like CSS overflow:visible.
+/// public: applied by hoist-aware canvases (the composed WPT canvas) on
+/// flow roots the classifier marks; the dark-stage canvas and the product
+/// renderer never apply it, keeping all committed baselines byte-stable.
+public struct StaticPositionAnchor: ViewModifier {
+    // public: explicit memberwise init — the synthesized one is internal.
+    public init() {}
+
+    // public: ViewModifier witness on a public type must be public.
+    public func body(content: Content) -> some View {
+        content
+            // Ideal-size measure (the unbounded-measure twin) BEFORE the
+            // zero frame so the 0×0 proposal never reaches the content.
+            .fixedSize()
+            // Zero flow report + slot-origin anchor (S5 + static position).
+            .frame(width: 0, height: 0, alignment: .topLeading)
     }
 }

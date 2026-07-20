@@ -17,10 +17,16 @@ enum VisibilityExtractor {
 
     static func extract(from properties: [IRProperty]) -> VisibilityConfig? {
         var cfg = VisibilityConfig()
-        // Logical sides — resolve last with LTR mapping: block → Y,
-        // inline → X. Physical longhands (OverflowX/Y) override logical.
-        var logicalX: OverflowKind? = nil
-        var logicalY: OverflowKind? = nil
+        // Wave-18 cleanup (lane-3 skeptic): logical longhands write their
+        // PHYSICAL axis directly, in declaration order — CSS resolves
+        // same-specificity declarations by order (CSS Cascade §"Order of
+        // Appearance"), and css-logical §4 maps overflow-block → Y,
+        // overflow-inline → X under horizontal-tb (the only writing mode
+        // this renderer supports). The old two-pass fold gave physical
+        // longhands unconditional priority, so the live wire
+        // [OverflowY:"HIDDEN", OverflowBlock:"VISIBLE"] clipped on iOS
+        // while Compose (OverflowExtractor.kt, last-write-wins) and web
+        // left it visible. Byte-parallel with the Compose loop now.
 
         for p in properties {
             switch p.type {
@@ -47,16 +53,15 @@ enum VisibilityExtractor {
             case "OverflowY":
                 if let k = mapOverflow(p.data.stringValue) { cfg.overflowY = k; cfg.touched = true }
             case "OverflowBlock":
-                if let k = mapOverflow(p.data.stringValue) { logicalY = k; cfg.touched = true }
+                // Block axis = Y in horizontal-tb; a later OverflowY (or a
+                // later OverflowBlock) overwrites — cascade order.
+                if let k = mapOverflow(p.data.stringValue) { cfg.overflowY = k; cfg.touched = true }
             case "OverflowInline":
-                if let k = mapOverflow(p.data.stringValue) { logicalX = k; cfg.touched = true }
+                // Inline axis = X in horizontal-tb; same last-write rule.
+                if let k = mapOverflow(p.data.stringValue) { cfg.overflowX = k; cfg.touched = true }
             default: break
             }
         }
-
-        // Fold logical → physical if the physical axis wasn't set.
-        if cfg.overflowX == nil, let lx = logicalX { cfg.overflowX = lx }
-        if cfg.overflowY == nil, let ly = logicalY { cfg.overflowY = ly }
 
         return cfg.touched ? cfg : nil
     }

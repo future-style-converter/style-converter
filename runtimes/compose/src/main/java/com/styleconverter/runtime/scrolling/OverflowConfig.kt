@@ -33,9 +33,39 @@ data class OverflowConfig(
     val hasOverflow: Boolean
         get() = overflowX != OverflowBehavior.VISIBLE || overflowY != OverflowBehavior.VISIBLE
 
+    /**
+     * Used value for the X axis after css-overflow-3 §3.1 coercion (see
+     * [usedOverflow]) — clip decisions must read used, not specified, values.
+     */
+    val usedOverflowX: OverflowBehavior
+        get() = usedOverflow(overflowX, overflowY)
+
+    /** Used value for the Y axis — the §3.1 mirror of [usedOverflowX]. */
+    val usedOverflowY: OverflowBehavior
+        get() = usedOverflow(overflowY, overflowX)
+
+    /**
+     * True when painted ink must be clipped at the box edge on the X axis.
+     * Per css-overflow-3 §3 every non-`visible` used value clips: `hidden`
+     * and `clip` obviously, but ALSO `scroll`/`auto` — a scroll container
+     * always clips to its padding box even before any scrolling happens.
+     */
+    val clipsX: Boolean
+        get() = axisClips(usedOverflowX)
+
+    /** Y-axis twin of [clipsX] — same §3 rule on the vertical used value. */
+    val clipsY: Boolean
+        get() = axisClips(usedOverflowY)
+
+    /**
+     * True when ANY axis needs paint clipping. NOTE: unlike the pre-wave-18
+     * definition this includes `scroll`/`auto` (scroll containers clip, §3)
+     * and is derived from USED values, so `overflow-x: hidden` alone also
+     * clips Y (visible → auto coercion). Single- vs both-axis routing is
+     * the applier's job via [clipsX]/[clipsY].
+     */
     val shouldClip: Boolean
-        get() = overflowX == OverflowBehavior.HIDDEN || overflowY == OverflowBehavior.HIDDEN ||
-                overflowX == OverflowBehavior.CLIP || overflowY == OverflowBehavior.CLIP
+        get() = clipsX || clipsY
 
     val isScrollableX: Boolean
         get() = overflowX == OverflowBehavior.SCROLL || overflowX == OverflowBehavior.AUTO
@@ -50,6 +80,42 @@ data class OverflowConfig(
     /** Get effective clip margin (default 0) */
     val effectiveClipMargin: Dp
         get() = clipMargin ?: 0.dp
+
+    companion object {
+        /**
+         * css-overflow-3 §3.1 used-value coercion, as a pure function so the
+         * iOS twin (`OverflowClipRules.usedOverflow(_:other:)` in
+         * StyleEngine/visibility/AxisClipRect.swift) can be diffed against it
+         * by cross-native probes:
+         *  - `visible` beside a non-{visible,clip} axis is used as `auto`
+         *    (you cannot scroll one axis while the other paints unclipped);
+         *  - `clip` beside a non-{visible,clip} axis is used as `hidden`
+         *    (clip forbids scrolling, so it hardens to the scrollable clip);
+         *  - any pair drawn from {visible, clip} keeps its specified value —
+         *    THIS is the single-axis-clip case WPT css-overflow clip-003
+         *    exercises (`overflow-x: clip` + `overflow-y: visible`).
+         */
+        fun usedOverflow(axis: OverflowBehavior, other: OverflowBehavior): OverflowBehavior {
+            // "The other axis escapes clipping" — the only values §3.1 lets
+            // coexist with an unclipped/unscrolled partner are visible + clip.
+            val otherEscapes = other == OverflowBehavior.VISIBLE || other == OverflowBehavior.CLIP
+            return when {
+                // visible must become a scroll container when its partner is one.
+                axis == OverflowBehavior.VISIBLE && !otherEscapes -> OverflowBehavior.AUTO
+                // clip cannot pair with a scroll container; §3.1 says it hardens to hidden.
+                axis == OverflowBehavior.CLIP && !otherEscapes -> OverflowBehavior.HIDDEN
+                // Everything else is used as specified.
+                else -> axis
+            }
+        }
+
+        /**
+         * css-overflow-3 §3: every used value except `visible` clips painted
+         * ink at the box edge (scroll containers included). Pure twin of iOS
+         * `OverflowClipRules.axisClips(_:)`.
+         */
+        fun axisClips(used: OverflowBehavior): Boolean = used != OverflowBehavior.VISIBLE
+    }
 }
 
 /**

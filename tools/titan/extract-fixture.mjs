@@ -37,6 +37,10 @@
 //     component "<test-stem>__N". When body-scope CSS rules exist
 //     (`body { … }`, `html { … }`, `* { … }`) a synthetic root component
 //     "<test-stem>__body" is emitted FIRST carrying those properties.
+//     wave-17: when that body-root declares an explicit nonzero ABSOLUTE
+//     height, the "__N" components nest under its `children` map instead of
+//     stacking below it as siblings (see BODY-HEIGHT SLOTTING at
+//     buildComponents for the full decision record).
 //   - Inline <style> declarations are flattened into per-component property
 //     dicts via a tiny CSS parser (no jsdom dep — stays in node-stdlib).
 //     Descendant selectors (`ol li`, `.parent .child`) match against each
@@ -3461,6 +3465,83 @@ function collectSubtreeText(node) {
   return out;
 }
 
+// ── wave-17 BODY-HEIGHT SLOTTING (the twice-queued sibling-stacking fix) ─────
+//
+// DIAGNOSIS (wave-15, css-backgrounds/background-attachment-fixed-inside-
+// transform-1): when the test styles `body { height: 4000px }`, the extractor
+// emitted the body-root as a SIZED component and then stacked the body's
+// element children as SIBLING roots BELOW it — so #outer, which overlaps the
+// body in the real page (rotated band around y≈340), rendered at y≈4340 on
+// ALL THREE platforms. With ~90% of both images white, the diff VACUOUSLY
+// passed at 0.96 (flagged by lowContentDensity).
+//
+// DECISION — child-slotting over canvas-min-height (both candidates from the
+// diagnosis were evaluated against the composed-canvas contract):
+//  - Every composed canvas stacks ROOTS in document order in normal flow and
+//    consults the body-root ONLY for the canvas background: web
+//    (apps/web-harness/src/ui/ComposedCaptureGallery.tsx renders composeTree
+//    roots in a block-flow div; resolveCanvasBackground finds meta.role ==
+//    'body-root' in the FLAT v2 component list), Compose
+//    (apps/android-harness/…/ScreenshotCaptureScreen.kt composed column;
+//    resolveComposedCanvasBackground scans the ROOTS list), SwiftUI
+//    (apps/ios-harness/…/CaptureCanvas.swift VStack over split.flow;
+//    canvasBackground scans document.components UNSPLIT).
+//  - There is NO fixture→canvas min-height channel: moving the body height to
+//    a "canvas min-height" would need new IR meta plumbed through the
+//    converter plus all three canvases (4 codebases touched).
+//  - Slotting the body's element children as CHILDREN of the body-root is
+//    (a) the source-truth DOM structure — they ARE <body>'s children, so they
+//    stack from the body's top INSIDE its painted 4000px area exactly like
+//    the real page; (b) extractor-only — the nested-children pipeline
+//    (EXTFIX-A `children` maps → converter → v2 slot/parent → every
+//    renderer's own child loop) already exists and is exercised by every
+//    nested fixture; and (c) height-correct — the body-root child keeps its
+//    explicit height, so the composed canvas's natural height matches the
+//    ref capture's documentHeight (the ref page is 4000px tall too).
+//    Canvas-background lookups keep working: the body-root stays a root
+//    (Android) and stays in the flat v2 list (web/iOS).
+//
+// NARROW TRIGGER (blast-radius-conscious): slotting happens ONLY when the
+// body-root bag declares an explicit, NONZERO, ABSOLUTE height — the only
+// values that materialize as a sized sibling block on every platform (the IR
+// normalizes absolute lengths to px; see schema/spec/02-values.md). Kept
+// byte-for-byte OUTSIDE the trigger, each for a documented reason:
+//  - no height / `auto` / CSS-wide keywords: no sized block, nothing to fix;
+//  - zero heights (`0`, `0px` — the css-overflow body-propagation family):
+//    a 0-height sibling block already stacks children at the canvas top,
+//    identical geometry to nesting;
+//  - percentages (`100%`): resolve against the auto-height composed canvas,
+//    i.e. fall back to auto (CSS 2.2 §10.5) — no push today;
+//  - viewport/font-relative units (`300vh`, `em`) and functions
+//    (`calc-size(…)`): normalize to null in the IR ("runtime-dependent",
+//    schema/spec/02-values.md), so no runtime sizes the sibling block —
+//    byte-identical fixtures; widening to these is a documented follow-up.
+//
+// The absolute-<length> grammar: CSS Values §6.1 absolute units only
+// (px/cm/mm/Q/in/pc/pt), one non-negative number, case-insensitive unit.
+const ABSOLUTE_LENGTH_RE = /^(\d*\.?\d+)(px|cm|mm|q|in|pc|pt)$/i;
+
+/**
+ * True when a body-root property bag declares an explicit nonzero ABSOLUTE
+ * height — the wave-17 slotting trigger (see the decision block above).
+ * `block-size` is the logical alias of `height` in horizontal writing modes
+ * (CSS Logical §4.1 — the corpus default; vertical writing modes would remap
+ * it, an accepted approximation while no body-level vertical-wm test needs
+ * slotting). `height` wins when both appear, mirroring cascade order-of-
+ * appearance being irrelevant for distinct properties (physical beats
+ * logical here only as a deterministic tie-break, documented not silent).
+ * Exported so the unit tests can pin the trigger's edge set.
+ */
+export function bodyDeclaresAbsoluteHeight(props) {
+  // Physical `height` first, then the logical alias (see doc comment).
+  const raw = props?.height ?? props?.['block-size'];
+  if (typeof raw !== 'string') return false; // absent → no trigger
+  const m = ABSOLUTE_LENGTH_RE.exec(raw.trim()); // absolute <length> only
+  // Nonzero magnitude required — zero-height bodies keep the legacy sibling
+  // shape byte-for-byte (identical geometry either way; see trigger notes).
+  return m !== null && parseFloat(m[1]) > 0;
+}
+
 // wave-13 KEYFRAMES-SAMPLER: `keyframes` is the parseKeyframes() map for the
 // same stylesheet the `rules` came from (parseCss skips @-rules, so the two
 // are complementary views of one sheet). Null/omitted = sampling disabled —
@@ -3484,11 +3565,16 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   const mergeCtx = { styledTags: collectStyledTags(rules) };
 
   // Bug 3 + 4: body-root component for body-scope CSS. Stays as a flat
-  // top-level entry (it represents <body> itself; the body's element
-  // children become the __0/__1/... siblings in the components map and
-  // their descendants nest under their respective .children — there's no
-  // need to also nest the __0 siblings inside __body because every
-  // renderer already iterates the components map at the top level).
+  // top-level entry (it represents <body> itself). Where the body's element
+  // children land depends on the wave-17 BODY-HEIGHT SLOTTING trigger
+  // (see the decision block above buildComponents):
+  //  - body WITHOUT an explicit absolute height (the overwhelmingly common
+  //    case): children stay the __0/__1/... SIBLINGS in the components map
+  //    (byte-for-byte the legacy shape — every renderer iterates the map at
+  //    the top level and an unsized body-root occupies ~no flow space);
+  //  - body WITH an explicit nonzero absolute height: children nest under
+  //    __body's `children` map so they stack from the body's top INSIDE its
+  //    painted area, matching the real page instead of below a sized block.
   const root = propsForBodyRoot(rules);
 
   // wave-15 BIDI-EXTRACT part 3: white-space resolver handed to the tree
@@ -3547,6 +3633,38 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     components[`${idPrefix}__body`] = cmp;
   }
 
+  // wave-17 BODY-HEIGHT SLOTTING: decide ONCE, before any sibling is
+  // emitted, whether this document's body children nest under the body-root.
+  // Requires BOTH an emitted body-root component (the trigger is moot
+  // without a parent to slot into) and the explicit-absolute-height bag
+  // (the narrow trigger pinned in bodyDeclaresAbsoluteHeight).
+  const bodyCmp = components[`${idPrefix}__body`];
+  const slotIntoBody = bodyCmp !== undefined && bodyDeclaresAbsoluteHeight(root.props);
+
+  /**
+   * Emit one would-be top-level component: as a CHILD of the body-root when
+   * slotting is active, else as the legacy top-level sibling. The child
+   * entry carries its own `id` field and lives in a map keyed by id —
+   * byte-identical to the shape buildNode's childMap emits (and to the
+   * Kotlin parser's expectation at CssParsing.kt:96), so the converter and
+   * every renderer consume slotted children through the EXACT pipeline the
+   * EXTFIX-A nested descendants already exercise. Ids keep their legacy
+   * `<idPrefix>__N` / `<idPrefix>__text` values in both branches so
+   * per-test grouping (split-combined-ir's slot.parent climb) and diff
+   * churn stay minimal.
+   */
+  const emitTopLevel = (id, cmp) => {
+    if (slotIntoBody) {
+      // Lazily create the map so a childless slotted body (tree.length===0)
+      // emits NO empty `children` key — the omit-when-empty rule EXTFIX-A
+      // pins for minimal fixture diffs.
+      bodyCmp.children ??= {};
+      bodyCmp.children[id] = { id, ...cmp }; // child shape: id + component
+    } else {
+      components[id] = cmp; // legacy sibling shape, byte-for-byte
+    }
+  };
+
   // wave-11 TITAN fix 2: LEADING anonymous body text. Browsers wrap bare
   // text that is a direct <body> child in an anonymous block box (CSS 2.1
   // §9.2.1.1) occupying one line box before the first element — dropping
@@ -3580,7 +3698,11 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       cmp._lossy = true;
       cmp._lossyReasons = ['inline-run-merged'];
     }
-    components[`${idPrefix}__text`] = cmp;
+    // wave-17: leading anonymous body text is a <body> child like any
+    // element, so it rides the same slotting switch — under a sized body it
+    // nests (its line box paints INSIDE the body area, as in the real
+    // page); otherwise it stays the legacy `__text` sibling byte-for-byte.
+    emitTopLevel(`${idPrefix}__text`, cmp);
   }
 
   // EXTFIX-A: walk subtree as a NESTED tree (not flat). depth ≤ 5 covers
@@ -3595,6 +3717,9 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // the body-root or the wave-11 leading-text component already gives
     // the canvas real content (a text-only body now yields its prose as
     // `__text` instead of a phantom 100x100 box).
+    // (wave-17 note: a SLOTTED `__text` is absent from the top-level map,
+    // but slotting requires the `__body` key to exist, so the first clause
+    // already suppresses the placeholder — no slotting-awareness needed.)
     if (!components[`${idPrefix}__body`] && !components[`${idPrefix}__text`]) {
       components[`${idPrefix}__0`] = { properties: { width: '100px', height: '100px' } };
     }
@@ -3746,7 +3871,10 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
 
   tree.forEach((node, idx) => {
     const id = `${idPrefix}__${idx}`;
-    components[id] = buildNode(node, id);
+    // wave-17: top-level body elements route through the slotting switch —
+    // children of a sized body nest under it (source-truth structure);
+    // everything else keeps the legacy `components[id]` sibling emission.
+    emitTopLevel(id, buildNode(node, id));
   });
 
   return {

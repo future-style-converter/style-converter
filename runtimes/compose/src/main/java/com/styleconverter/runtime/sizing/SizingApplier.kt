@@ -30,10 +30,20 @@ import com.styleconverter.runtime.spacing.resolveToDp
 
 object SizingApplier {
 
-    /** Apply [config] to [modifier]. Returns [modifier] unchanged if empty. */
-    fun applySizing(modifier: Modifier, config: SizingConfig): Modifier {
+    /** Apply [config] to [modifier]. Returns [modifier] unchanged if empty.
+     *
+     *  Wave-18 lane 2 (pin P1) — [ctx] is threaded from StyleApplier and
+     *  carries the element's resolved font size plus the measured ch
+     *  advance (ChUnitMetrics), so `width: 63.1ch` resolves against real
+     *  font metrics. The default keeps every legacy call site (flex paths,
+     *  tests) source-compatible and byte-identical for non-font-relative
+     *  values. */
+    fun applySizing(
+        modifier: Modifier,
+        config: SizingConfig,
+        ctx: SpacingContext = SpacingContext(),
+    ): Modifier {
         if (!config.hasSizing) return modifier
-        val ctx = SpacingContext()
         var r = modifier
         // CSS clamp semantics: `effective = max(min, min(width, max))`.
         // Compose's `Modifier.width(W).widthIn(max=M)` does NOT enforce

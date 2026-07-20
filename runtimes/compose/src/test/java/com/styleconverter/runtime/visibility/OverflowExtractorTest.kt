@@ -61,6 +61,27 @@ class OverflowExtractorTest {
     }
 
     @Test
+    fun `physical then logical overflow resolves last-write-wins`() {
+        // Wave-18 cleanup pin (lane-3 skeptic, shared with the iOS twin in
+        // Wave18CleanupParityTests.swift). Live wire, declaration order
+        // preserved by the converter (`overflow-y:hidden; overflow-block:
+        // visible`): [{"type":"OverflowY","data":"HIDDEN"},
+        // {"type":"OverflowBlock","data":"VISIBLE"}]. The cascade's
+        // order-of-appearance rule means the LATER logical declaration
+        // wins on the shared physical axis (css-logical §4 maps block→Y
+        // in horizontal-tb) → visible, no clip.
+        val cfg = OverflowExtractor.extractOverflowConfig(
+            listOf(pair("OverflowY", "\"HIDDEN\""), pair("OverflowBlock", "\"VISIBLE\""))
+        )
+        assertEquals(OverflowBehavior.VISIBLE, cfg.overflowY)
+        // Reverse order: the later PHYSICAL longhand wins → hidden clips.
+        val rev = OverflowExtractor.extractOverflowConfig(
+            listOf(pair("OverflowBlock", "\"VISIBLE\""), pair("OverflowY", "\"HIDDEN\""))
+        )
+        assertEquals(OverflowBehavior.HIDDEN, rev.overflowY)
+    }
+
+    @Test
     fun `unknown overflow keyword falls back to VISIBLE`() {
         // Unrecognized tokens don't crash — they fall through to the CSS
         // initial value (`visible`), matching how browsers behave.

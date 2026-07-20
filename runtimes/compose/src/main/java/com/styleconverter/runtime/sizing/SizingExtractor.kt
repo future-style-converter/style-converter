@@ -141,9 +141,19 @@ object SizingExtractor {
     private fun contentBoxInflation(
         properties: List<Pair<String, JsonElement?>>
     ): Pair<Float, Float> {
-        // Padding, resolved exactly like PaddingApplier will resolve it.
+        // Padding, resolved exactly like PaddingApplier will resolve it —
+        // EXCEPT the percent basis (wave-18 lane 2, pin P13): the frame
+        // inflation is an INTRINSIC-sizing computation and this extractor
+        // runs statically, where no containing-block width is ever known
+        // (parentWidthPx stays null). css-sizing-3 §5.2.1 resolves cyclic
+        // percentages against ZERO in intrinsic sizing, so an indefinite
+        // basis contributes 0 to the frame instead of the legacy viewport
+        // fallback — which inflated `width:100px; padding-left:50%` under
+        // the WPT content-box default to 100 + 195 = 295px while the
+        // browser ref paints 100px (css-sizing abspos-auto-sizing-fit-
+        // content-percentage-003/004).
         val pad = SpacingExtractor.extractPaddingConfig(properties).resolve(isRtl = false)
-        val ctx = SpacingContext()
+        val ctx = SpacingContext(percentIndefiniteAsZero = true)
         fun side(v: LengthValue?): Float = resolveToDp(v, ctx).value.coerceAtLeast(0f)
         // Border band — only sides that actually paint consume space.
         val borders = BorderSideExtractor.extractBorderConfig(properties)

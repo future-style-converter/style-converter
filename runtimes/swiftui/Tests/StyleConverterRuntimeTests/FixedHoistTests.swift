@@ -154,7 +154,15 @@ final class FixedHoistTests: XCTestCase {
         let view = VStack(alignment: .leading, spacing: 0) {
             // Positional identity, same as the harness root loop.
             ForEach(Array(split.flow.enumerated()), id: \.offset) { _, root in
-                ComponentHost(component: root)
+                // Wave 18 (RC1): mirror the harness — a kept no-inset
+                // absolute root mounts behind the zero-report anchor so
+                // it paints at its slot origin with no flow footprint.
+                if FixedHoist.rendersInFlowAsStaticPosition(root) {
+                    ComponentHost(component: root)
+                        .modifier(StaticPositionAnchor())
+                } else {
+                    ComponentHost(component: root)
+                }
             }
         }
         // The ref 358px content box, block-flow origin.
@@ -384,5 +392,95 @@ final class FixedHoistTests: XCTestCase {
         // (202, 2): the fixed box itself at its viewport anchor.
         XCTAssertTrue(isRed(rgb(img, 202, 2)),
                       "the fixed box must still paint at its own unpadded canvas anchor (200,0)")
+    }
+
+    // MARK: - Wave 18 RC1: the inset-aware hoist + the static-position class
+
+    /// css-position-3 §3.1: an absolute box with ALL-AUTO insets sits at
+    /// its STATIC position — the wave-17 canvas-origin hoist painted
+    /// css-sizing abspos-001/002's square at (0,0) over the paragraph.
+    /// Pure classification pins first (twin table of Compose's
+    /// CanvasRootHoistTest RC1 block).
+    func testRC1NoInsetAbsoluteRootStaysInFlow() throws {
+        let noInset = try box(id: "a", position: "ABSOLUTE", w: 100, h: 100, rgb: (0, 0.5, 0))
+        // Classified for the in-flow static-position mount…
+        XCTAssertTrue(FixedHoist.rendersInFlowAsStaticPosition(noInset))
+        // …but NEVER under a positioned ancestor (skeptic fix — the
+        // Compose twin's parameter): such a box belongs to the wave-8/9
+        // positioned-children machinery, not the static-position class
+        // (the cross-native probe caught the natives disagreeing on the
+        // css-sizing fit-content-percentage children without this).
+        XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(
+            noInset, hasPositionedAncestor: true))
+        // …and split keeps it in the FLOW half (no canvas hoist).
+        let split = FixedHoist.split(roots: [noInset])
+        XCTAssertEqual(split.flow.map(\.id), ["a"])
+        XCTAssertTrue(split.hoisted.isEmpty)
+    }
+
+    /// Any single inset keeps the wave-17 canvas hoist (mixed-axis pins
+    /// the documented approximation: the auto axis anchors at the canvas
+    /// origin), and every wave-17 css-position case — all inset-carrying
+    /// — splits byte-identically to before (the regression guard).
+    func testRC1InsetCarryingAbsoluteAndAllFixedStillHoist() throws {
+        let leftOnly = try box(id: "l", position: "ABSOLUTE", left: 100, w: 50, h: 50, rgb: (0, 0, 1))
+        XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(leftOnly))
+        let noInsetFixed = try box(id: "f", position: "FIXED", w: 50, h: 50, rgb: (1, 0, 0))
+        // Fixed keeps the always-hoist rule even with no inset — its
+        // containing block IS the viewport (css-position-3 §3.2).
+        XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(noInsetFixed))
+        let split = FixedHoist.split(roots: [leftOnly, noInsetFixed])
+        XCTAssertTrue(split.flow.isEmpty)
+        XCTAssertEqual(split.hoisted.map(\.id), ["l", "f"])
+    }
+
+    /// Logical insets anchor exactly like physical ones — one wire
+    /// decoder (PositionExtractor folds InsetInline/InsetBlock to
+    /// physical in the LTR horizontal-tb normalization).
+    func testRC1LogicalInsetCountsAsAnchor() throws {
+        let logical = try component(
+            #"{"id":"lg","name":"x","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"InsetInlineStart","data":{"px":24}}]}"#)
+        XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(logical))
+        XCTAssertTrue(FixedHoist.hasAnyInset(logical))
+    }
+
+    /// The raster proof (the abspos-001 geometry): a paragraph-analog
+    /// block followed by a no-inset absolute square — the square must
+    /// paint BELOW the block at the flow x (static position), NOT at the
+    /// unpadded canvas origin, and must reserve no flow space for the
+    /// sibling after it.
+    @MainActor
+    func testRC1StaticPositionPaintsInFlowSlotWithZeroFootprint() throws {
+        let img = try renderComposed([
+            // The "paragraph": a 40px-tall in-flow block.
+            try box(id: "p", w: 100, h: 40, rgb: (0, 0, 1)),
+            // The abspos-001 square: absolute, no insets, 100×100
+            // (pure green — the raster helpers' primary thresholds).
+            try box(id: "sq", position: "ABSOLUTE", w: 100, h: 100, rgb: (0, 1, 0)),
+            // An in-flow sibling AFTER the square (S5 zero-footprint pin).
+            try box(id: "after", w: 40, h: 20, rgb: (1, 0, 0)),
+        ])
+        // Geometry: pad 16 → blue block x16..116 y16..56; the square's
+        // static position is the slot AFTER the block → green ink
+        // x16..116 y56..156 (zero flow report); the red sibling starts at
+        // the SAME y=56 (nothing was reserved) → x16..56 y56..76, painted
+        // ABOVE the green where they overlap (later sibling, tree order).
+        // (2,2): the unpadded canvas origin must stay WHITE — the square
+        // no longer hoists there (the wave-17 overlap bug).
+        XCTAssertTrue(isWhite(rgb(img, 2, 2)),
+                      "no-inset absolute box must not anchor at the canvas origin")
+        // (20,60): the red sibling owns the square's slot origin — the
+        // square reserved NO flow space (S5; red would sit at y=156+ if
+        // the square had kept a flow footprint).
+        XCTAssertTrue(isRed(rgb(img, 20, 60)),
+                      "the in-flow sibling must start where the square's slot began — the square reserved flow space")
+        // (60,60): past red's right edge (x=56) — the square's own ink at
+        // its static position, below the block.
+        XCTAssertTrue(isGreen(rgb(img, 60, 60)),
+                      "the square must paint below the block at its static position")
+        // (60,140): deep in the square's overflow — still green, proving
+        // the full 100px ink drew despite the 0×0 flow report.
+        XCTAssertTrue(isGreen(rgb(img, 60, 140)),
+                      "the square's overflowing ink must draw unclipped past the zero flow report")
     }
 }

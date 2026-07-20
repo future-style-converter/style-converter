@@ -366,7 +366,23 @@ struct ComposedCaptureCanvas: View {
                 // engine's own child loop use — placement parent-data
                 // attached (inert under this VStack), full ComponentRenderer
                 // engine underneath. Zero per-node render difference.
-                ComponentHost(component: root)
+                Group {
+                    // Wave 18 (RC1) — a no-inset ABSOLUTE root stays in
+                    // the flow stack (FixedHoist.split keeps it: its
+                    // static position IS this slot, css-position-3 §3.1)
+                    // but must reserve NO flow space (§2.1). The runtime's
+                    // StaticPositionAnchor measures it at ideal size and
+                    // reports 0×0 to this VStack — the S5 zero-report —
+                    // so the next root starts where this box would have.
+                    // Same classifier `split` used: one decision, two
+                    // consumers, never disagreeing.
+                    if FixedHoist.rendersInFlowAsStaticPosition(root) {
+                        ComponentHost(component: root)
+                            .modifier(StaticPositionAnchor())
+                    } else {
+                        ComponentHost(component: root)
+                    }
+                }
                     // GAP 1 — the UA block margin ABOVE this root: its full
                     // top margin for the first root (the canvas's 16px
                     // padding blocks parent↔child collapse there), or the

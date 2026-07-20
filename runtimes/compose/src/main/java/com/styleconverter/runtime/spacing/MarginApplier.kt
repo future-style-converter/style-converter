@@ -20,8 +20,11 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
+import com.styleconverter.runtime.core.variables.LocalContainingBlock
 
 object MarginApplier {
 
@@ -49,6 +52,50 @@ object MarginApplier {
         if (!effective.hasMargin) return modifier
         val r = effective.resolve(isRtl = isRtl)
 
+        // Wave-18 lane 2 (pins P10/P11/P12) — containing-block PERCENT
+        // margins (CSS 2.1 §8.3: margin-% on every side resolves against
+        // the containing block's inline size) need the renderer's channels,
+        // which only composition can read. Same tri-state as PaddingApplier:
+        // WPT capture uses the LocalContainingBlock width when definite and
+        // 0 when indefinite (css-position-3 §5.1 abspos auto-size — this is
+        // what makes `margin-left: -50%` inside a fit-content abspos box
+        // collapse to 0 like the browser ref); non-WPT keeps the legacy
+        // viewport fallback byte-identical. Percent-free configs (the whole
+        // committed baseline corpus) never enter the composed lane.
+        if (usesContainingBlockPercent(
+                lengthOf(r.top), lengthOf(r.right), lengthOf(r.bottom), lengthOf(r.left))
+        ) {
+            return modifier.composed {
+                // Additive reads of the renderer-owned channels. WPT capture
+                // only: definite channel base (P10) / indefinite → 0 (P11);
+                // outside WPT the unmodified ctx keeps the legacy viewport
+                // fallback (P12) — pixel-identical to the old static path.
+                val cb = LocalContainingBlock.current
+                val wpt = LocalWptCaptureMode.current
+                val pctCtx = if (wpt) {
+                    ctx.copy(parentWidthPx = cb.widthPx, percentIndefiniteAsZero = true)
+                } else ctx
+                applyResolved(Modifier, r, pctCtx)
+            }
+        }
+        // All-static path — byte-identical to the pre-wave-18 applier.
+        return modifier.then(applyResolved(Modifier, r, ctx))
+    }
+
+    /** The LengthValue behind a MarginValue side, null for Auto/absent. */
+    private fun lengthOf(v: MarginValue?): com.styleconverter.runtime.core.types.LengthValue? =
+        (v as? MarginValue.Length)?.value
+
+    /**
+     * The pre-wave-18 body, shared verbatim by the static and composed
+     * lanes so their pixel arithmetic can never diverge — only the
+     * SpacingContext (and therefore the percent base) differs.
+     */
+    private fun applyResolved(
+        modifier: Modifier,
+        r: MarginConfig.Resolved,
+        ctx: SpacingContext,
+    ): Modifier {
         // Resolve each side to either a Dp (for lengths) or Auto. We inspect
         // the Auto pairs BEFORE computing offsets so auto sides contribute 0
         // to the offset math and let the centering modifier do the work.

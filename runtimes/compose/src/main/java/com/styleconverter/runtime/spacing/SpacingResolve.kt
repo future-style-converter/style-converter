@@ -9,6 +9,7 @@ package com.styleconverter.runtime.spacing
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.styleconverter.runtime.PropertyTracker
 import com.styleconverter.runtime.core.types.LengthUnit
 import com.styleconverter.runtime.core.types.LengthValue
 
@@ -34,7 +35,61 @@ data class SpacingContext(
     // Parent content-box width in px for % resolution. Optional — when null
     // we fall back to viewport width so rendering at least looks plausible.
     val parentWidthPx: Float? = null,
+    // Wave-18 lane 2 (pin P1) — the measured advance width of the glyph '0'
+    // at the element's resolved font family + size, in px. This is the CSS
+    // `ch` unit basis (css-values-4 §6.1.3). Null = metrics unavailable at
+    // this call site → resolution falls back to 0.5em, the fallback the
+    // same spec section mandates ("assumed to be 0.5em wide"). Populated by
+    // StyleApplier via ChUnitMetrics when a value in the config uses ch.
+    val chAdvancePx: Float? = null,
+    // Wave-18 lane 2 (pin P11) — percent-basis tri-state switch. When TRUE
+    // a containing-block percentage with NO definite [parentWidthPx]
+    // resolves to 0 (css-position-3 §5.1: inside an abspos auto/fit-content
+    // inline-size the basis is indefinite; css-sizing-3 §5.2.1 resolves
+    // cyclic percentages against zero). When FALSE (the default) the legacy
+    // viewport-width fallback is preserved so the frozen dark-stage corpus
+    // renders byte-identically. Set by the WPT-capture percent paths in
+    // Padding/MarginApplier and by SizingExtractor's content-box inflation.
+    val percentIndefiniteAsZero: Boolean = false,
 )
+
+/**
+ * Pin P10/P11/P12 — the containing-block percentage base in px:
+ *   1. a definite [SpacingContext.parentWidthPx] always wins (P10);
+ *   2. indefinite + [SpacingContext.percentIndefiniteAsZero] → 0 (P11);
+ *   3. indefinite legacy → viewport width (P12, frozen dark-stage rule).
+ * Shared by resolveRelative and the calc() evaluator so a bare `50%` and a
+ * `calc(50% + 0px)` can never disagree about their base.
+ */
+internal fun percentBasePx(ctx: SpacingContext): Float =
+    ctx.parentWidthPx ?: if (ctx.percentIndefiniteAsZero) 0f else ctx.viewportWidthPx
+
+/**
+ * True when [values] contains a containing-block percentage (a Relative
+ * PERCENT length). The appliers use this as the identity gate for the
+ * WPT percent path: px-only configs keep the historical modifier chain
+ * byte-for-byte, so the whole committed baseline corpus is untouched.
+ * (calc() expressions containing % deliberately stay on the legacy path —
+ * documented, not silent: they resolve through evalCalc, whose % arm uses
+ * the SAME percentBasePx tri-state as a bare % — legacy viewport base in
+ * default contexts, ZERO base in percentIndefiniteAsZero intrinsic
+ * contexts (SizingExtractor P13) — until a fixture exercises the
+ * combination. This calc-% asymmetry is SHARED with iOS by design — the
+ * iOS SpacingCalcEvaluator resolves calc-% against its legacy
+ * containingBlockWidth base in the applier lane, and mirrors the zero-base
+ * intrinsic rule via SpacingContext.calcPercentBasisPx (skeptic
+ * follow-up); wave-18 skeptic B3 pinned the pair. Change both or neither.)
+ */
+internal fun usesContainingBlockPercent(vararg values: LengthValue?): Boolean =
+    values.any { it is LengthValue.Relative && it.unit == LengthUnit.PERCENT }
+
+/**
+ * True when [values] contains a ch-unit length (pin P1). StyleApplier uses
+ * this as the gate for measuring the '0' advance — the measurement touches
+ * the platform text engine, so it only runs when a value will consume it.
+ */
+internal fun usesChUnit(vararg values: LengthValue?): Boolean =
+    values.any { it is LengthValue.Relative && it.unit == LengthUnit.CH }
 
 /**
  * Reduce [value] to a concrete Dp. Returns 0.dp when the length is Unknown
@@ -71,22 +126,76 @@ fun resolveToDp(value: LengthValue?, ctx: SpacingContext): Dp {
 private fun resolveRelative(r: LengthValue.Relative, ctx: SpacingContext): Float {
     val v = r.value.toFloat()
     return when (r.unit) {
-        LengthUnit.PERCENT -> (ctx.parentWidthPx ?: ctx.viewportWidthPx) * v / 100f
+        // Containing-block percentage — base picked by the P10/P11/P12
+        // tri-state (definite parent → parent; indefinite → 0 in WPT
+        // capture / viewport legacy). See percentBasePx above.
+        LengthUnit.PERCENT -> percentBasePx(ctx) * v / 100f
         LengthUnit.EM -> v * ctx.fontSizePx
         LengthUnit.REM -> v * ctx.rootFontSizePx
+        // Pin P1 — `ch`: the advance width of '0' in the element's font
+        // (css-values-4 §6.1.3). Measured metrics when the plumbing
+        // provided them (ChUnitMetrics via StyleApplier), else the spec's
+        // own 0.5em fallback. This branch previously fell into the
+        // else→0 arm, collapsing `width: 63.1ch` boxes to nothing
+        // (css-overflow block-ellipsis-001 rendered a blank canvas).
+        LengthUnit.CH -> v * (ctx.chAdvancePx ?: 0.5f * ctx.fontSizePx)
+        // Pin P2 — `ex`: x-height. §6.1.3 mandates a 0.5em assumption
+        // when the metric can't be determined; we don't measure x-height
+        // yet, so the spec constant is the honest resolution.
+        LengthUnit.EX -> v * 0.5f * ctx.fontSizePx
+        // Pin P3 — `ic`: CJK water ideograph advance; §6.1.3 fallback 1em.
+        LengthUnit.IC -> v * ctx.fontSizePx
+        // Pin P4 — `cap`: cap-height. The spec fallback is the font's
+        // ascent, which needs metrics we don't thread here; 1em is the
+        // documented approximation, surfaced via the tracker so the
+        // shortcut is visible in coverage reports, never silent.
+        LengthUnit.CAP -> {
+            PropertyTracker.markUnhandled("SpacingResolve:CAP≈1em")
+            v * ctx.fontSizePx
+        }
+        // Pin P5 — `lh`: the element's line-height. We don't thread the
+        // used line-height; `normal` computes to ≈1.2 × font-size in
+        // every browser default stylesheet, so 1.2em is the approximation.
+        LengthUnit.LH -> v * 1.2f * ctx.fontSizePx
+        // Pin P6 — `rlh`: root line-height, same 1.2 ratio on the root
+        // font size (the harness never styles the root element).
+        LengthUnit.RLH -> v * 1.2f * ctx.rootFontSizePx
         // Viewport-relative units. Compose fronts a small/large/dynamic
         // distinction that we don't meaningfully support yet; treat the three
-        // groups as identical to the classic viewport.
-        LengthUnit.VW, LengthUnit.SVW, LengthUnit.LVW, LengthUnit.DVW -> ctx.viewportWidthPx * v / 100f
-        LengthUnit.VH, LengthUnit.SVH, LengthUnit.LVH, LengthUnit.DVH -> ctx.viewportHeightPx * v / 100f
-        LengthUnit.VMIN, LengthUnit.SVMIN, LengthUnit.LVMIN, LengthUnit.DVMIN ->
+        // groups as identical to the classic viewport. Pins P7/P8: the
+        // logical vi/vb axes map to vw/vh under the horizontal-tb writing
+        // mode (the only mode the renderer supports) — previously vi/vb
+        // fell into the silent else→0 arm.
+        // Container-query lengths ride the same arms: css-contain-3 §9
+        // says cq* fall back to the SMALL viewport size when no eligible
+        // container exists — this runtime has no container context, so
+        // cqw/cqi = vw, cqh/cqb = vh, cqmin/cqmax = vmin/vmax. This is
+        // also what the iOS resolver has always done; the wave-18 skeptic
+        // cross-native probe caught Compose collapsing cq* to 0 instead.
+        LengthUnit.VW, LengthUnit.SVW, LengthUnit.LVW, LengthUnit.DVW,
+        LengthUnit.VI, LengthUnit.SVI, LengthUnit.LVI, LengthUnit.DVI,
+        LengthUnit.CQW, LengthUnit.CQI ->
+            ctx.viewportWidthPx * v / 100f
+        LengthUnit.VH, LengthUnit.SVH, LengthUnit.LVH, LengthUnit.DVH,
+        LengthUnit.VB, LengthUnit.SVB, LengthUnit.LVB, LengthUnit.DVB,
+        LengthUnit.CQH, LengthUnit.CQB ->
+            ctx.viewportHeightPx * v / 100f
+        LengthUnit.VMIN, LengthUnit.SVMIN, LengthUnit.LVMIN, LengthUnit.DVMIN,
+        LengthUnit.CQMIN ->
             minOf(ctx.viewportWidthPx, ctx.viewportHeightPx) * v / 100f
-        LengthUnit.VMAX, LengthUnit.SVMAX, LengthUnit.LVMAX, LengthUnit.DVMAX ->
+        LengthUnit.VMAX, LengthUnit.SVMAX, LengthUnit.LVMAX, LengthUnit.DVMAX,
+        LengthUnit.CQMAX ->
             maxOf(ctx.viewportWidthPx, ctx.viewportHeightPx) * v / 100f
-        // Fallbacks: keep a sane value rather than crashing. Most of these
-        // units (ex/ch/cap/ic/lh/rlh/vi/vb/cq*/fr) aren't used by spacing in
-        // practice. If the pxFallback is present we take it.
-        else -> r.pxFallback?.toFloat() ?: 0f
+        // Pin P9 (amended) — remaining units (fr, wire-drift UNKNOWN, and
+        // Relative-tagged absolute units the converter normally pre-folds
+        // to Exact) have no honest base in this context. Take the
+        // converter's pxFallback when present, else 0 — and RECORD the
+        // fallthrough via the tracker (markUnhandled is Log-free and
+        // JVM-test-safe) so the collapse is auditable, never silent.
+        else -> {
+            PropertyTracker.markUnhandled("SpacingResolve:${r.unit}")
+            r.pxFallback?.toFloat() ?: 0f
+        }
     }
 }
 
@@ -218,11 +327,27 @@ private class CalcParser(private val src: String, private val ctx: SpacingContex
         "pt" -> v * 1.3333334f                     // 1pt = 4/3 px (CSS spec)
         "em" -> v * ctx.fontSizePx
         "rem" -> v * ctx.rootFontSizePx
-        "%" -> (ctx.parentWidthPx ?: ctx.viewportWidthPx) * v / 100f
-        "vw", "svw", "lvw", "dvw" -> ctx.viewportWidthPx * v / 100f
-        "vh", "svh", "lvh", "dvh" -> ctx.viewportHeightPx * v / 100f
-        "vmin", "svmin", "lvmin", "dvmin" -> minOf(ctx.viewportWidthPx, ctx.viewportHeightPx) * v / 100f
-        "vmax", "svmax", "lvmax", "dvmax" -> maxOf(ctx.viewportWidthPx, ctx.viewportHeightPx) * v / 100f
+        // Same P10/P11/P12 tri-state base as resolveRelative — a % inside
+        // calc() must agree with a bare % about its containing block.
+        "%" -> percentBasePx(ctx) * v / 100f
+        // Pins P1–P6 mirrored from resolveRelative (see the table there):
+        // ch = advance of '0' (0.5em fallback), ex = 0.5em, ic/cap = 1em,
+        // lh = 1.2em, rlh = 1.2rem — kept in lockstep per the file rule
+        // "any new unit added to resolveRelative Just Works here too".
+        "ch" -> v * (ctx.chAdvancePx ?: 0.5f * ctx.fontSizePx)
+        "ex" -> v * 0.5f * ctx.fontSizePx
+        "ic", "cap" -> v * ctx.fontSizePx
+        "lh" -> v * 1.2f * ctx.fontSizePx
+        "rlh" -> v * 1.2f * ctx.rootFontSizePx
+        // Logical viewport axes fold onto vw/vh (horizontal-tb, pins P7/P8);
+        // container-query lengths ride the same arms (css-contain-3 §9
+        // no-container fallback — kept in lockstep with resolveRelative).
+        "vw", "svw", "lvw", "dvw", "vi", "svi", "lvi", "dvi", "cqw", "cqi" ->
+            ctx.viewportWidthPx * v / 100f
+        "vh", "svh", "lvh", "dvh", "vb", "svb", "lvb", "dvb", "cqh", "cqb" ->
+            ctx.viewportHeightPx * v / 100f
+        "vmin", "svmin", "lvmin", "dvmin", "cqmin" -> minOf(ctx.viewportWidthPx, ctx.viewportHeightPx) * v / 100f
+        "vmax", "svmax", "lvmax", "dvmax", "cqmax" -> maxOf(ctx.viewportWidthPx, ctx.viewportHeightPx) * v / 100f
         else -> 0f                                 // unknown unit — safe zero
     }
 

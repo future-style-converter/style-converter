@@ -41,6 +41,18 @@ object OutlineApplier {
     /**
      * Apply outline to modifier. The ring paints after drawContent so it
      * sits above the background/border exactly like the browser.
+     *
+     * Outline-vs-clip ordering (wave-18 cleanup, clip-003 audit): this
+     * drawWithContent is chained at StyleApplier step 5, OUTER to the
+     * step-7 overflow clip (Compose modifiers wrap left-to-right, and the
+     * clip's graphicsLayer only bounds draws INNER to it) — so the ring
+     * already escapes the element's OWN overflow clip, matching css-ui-4
+     * §4 (the element's clip cuts its content, never its outline; the
+     * clip-003 ref keeps the red ring on content-clipping squares). The
+     * iOS twin needed an explicit hoist (StyleBuilder.hoistedOutline)
+     * because SwiftUI chains wrap the other way. TODO (both natives,
+     * lane-3): an ANCESTOR scroll/clip container SHOULD clip a
+     * descendant's outline ink — that propagation isn't wired yet.
      */
     fun applyOutline(modifier: Modifier, config: OutlineConfig): Modifier {
         if (!config.hasOutline) return modifier

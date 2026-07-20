@@ -155,6 +155,13 @@ object LayoutFacade {
         // sides (see BlockMarginCollapse) — threaded from the composable
         // renderer because this static chain can't read CompositionLocals.
         collapsedMargin: com.styleconverter.runtime.spacing.CollapsedMargin? = null,
+        // Wave-18 lane 2 (pin P1) — the spacing/sizing resolution context,
+        // built by StyleApplier from the component's typography (font size +
+        // measured ch advance) so font-relative sizing units resolve against
+        // the element's real font. Default keeps every legacy call site
+        // byte-identical (the default context resolves px values unchanged).
+        spacingCtx: com.styleconverter.runtime.spacing.SpacingContext =
+            com.styleconverter.runtime.spacing.SpacingContext(),
     ): Modifier {
         var result = modifier
 
@@ -171,7 +178,8 @@ object LayoutFacade {
         // wrap. This is what makes `width: 250 + padding: 20` render as a
         // 250-wide border-box (matching `* { box-sizing: border-box }` on
         // web and the iOS chain `engineSpacingPadding → engineSizing`).
-        result = SizingApplier.applySizing(result, config.sizing)
+        // The threaded context gives ch/em sizing its font-metric basis.
+        result = SizingApplier.applySizing(result, config.sizing, spacingCtx)
 
         // Apply position (offset and z-index).
         result = PositionApplier.applyPosition(result, config.position)

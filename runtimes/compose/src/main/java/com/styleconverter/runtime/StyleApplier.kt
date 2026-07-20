@@ -513,7 +513,13 @@ object StyleApplier {
         // 4. Layout — sizing + margin + position (NOT padding; see step 8).
         //    The collapse override rides into the margin step so a parent
         //    block container's §8.3.1 plan replaces the block-axis margins.
-        result = LayoutFacade.applyToModifier(result, config.layout, collapsedMargin)
+        //    Wave-18 lane 2 (pin P1): the spacing context carries the
+        //    element's resolved font size and — only when a sizing value
+        //    actually uses the ch unit (zero overhead otherwise) — the
+        //    measured advance of '0' from ChUnitMetrics, so `width: 63.1ch`
+        //    resolves against real font metrics instead of collapsing to 0.
+        val spacingCtx = buildSpacingContext(config)
+        result = LayoutFacade.applyToModifier(result, config.layout, collapsedMargin, spacingCtx)
 
         // 5. Borders (sides and radius). Radius's clip sits between the
         //    outer sizing frame and the background, so the rounded corners
@@ -557,6 +563,38 @@ object StyleApplier {
         result = LayoutFacade.applyPaddingOnly(result, config.layout)
 
         return result
+    }
+
+    /**
+     * Wave-18 lane 2 (pin P1) — the resolution context for font-relative
+     * SIZING units. Font size comes from the extracted typography config
+     * (TextUnit in sp; the runtime's px==sp==dp space makes .value the px
+     * count), defaulting to the CSS 16px. The ch advance is measured only
+     * when a sizing slot actually carries a ch length — ChUnitMetrics hits
+     * the platform text engine, and the corpus overwhelmingly doesn't use
+     * ch, so the gate keeps applyConfig allocation-free on the hot path.
+     */
+    internal fun buildSpacingContext(config: StyleConfig): com.styleconverter.runtime.spacing.SpacingContext {
+        // Element font size in px (css-values-4 §5.1.1 resolved value). A
+        // non-sp TextUnit (em, unspecified) can't be converted statically —
+        // keep the 16px default rather than guessing.
+        val fontSizePx = config.typography.fontSize
+            ?.takeIf { it.type == androidx.compose.ui.unit.TextUnitType.Sp }
+            ?.value ?: 16f
+        // Measure the '0' advance only when some sizing value needs it.
+        val sizing = config.layout.sizing
+        val needsCh = com.styleconverter.runtime.spacing.usesChUnit(
+            sizing.width, sizing.height, sizing.inlineSize, sizing.blockSize,
+            sizing.minWidth, sizing.maxWidth, sizing.minHeight, sizing.maxHeight,
+            sizing.minInlineSize, sizing.maxInlineSize, sizing.minBlockSize, sizing.maxBlockSize,
+        )
+        return com.styleconverter.runtime.spacing.SpacingContext(
+            fontSizePx = fontSizePx,
+            chAdvancePx = if (needsCh) {
+                com.styleconverter.runtime.spacing.ChUnitMetrics
+                    .measure(config.typography.fontFamily, fontSizePx)
+            } else null,
+        )
     }
 
     /**

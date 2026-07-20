@@ -17,8 +17,12 @@ struct PaddingApplier: ViewModifier {
     // The padding to apply. Nil means "not touched" — we still emit the
     // modifier because the caller always chains it; body bails immediately.
     let config: PaddingConfig?
-    // Render context threaded from StyleBuilder (fontSizePx, viewport size).
+    // Render context threaded from StyleBuilder (fontSizePx, viewport size,
+    // and the wave-3 containing-block width channel).
     let context: SpacingContext
+    // Wave-18 lane 2 — WPT capture flag (existing env key, additive read):
+    // selects the P11 indefinite-basis→0 rule for percent sides below.
+    @Environment(\.wptCaptureMode) private var wptCaptureMode
 
     func body(content: Content) -> some View {
         // Fast path: no padding at all.
@@ -37,10 +41,28 @@ struct PaddingApplier: ViewModifier {
             isPercent(t) || isPercent(r) || isPercent(b) || isPercent(l)
 
         if hasPercent {
+            // Wave-18 lane 2 (pins P10/P11) — percent padding resolves
+            // against the CONTAINING BLOCK (CSS 2.1 §8.4), which the
+            // renderer threads through the context: a definite basis
+            // resolves statically (no GeometryReader — the greedy-fill
+            // reader is only kept for the legacy lane), and in WPT capture
+            // an INDEFINITE basis resolves the percent to 0 (css-position-3
+            // §5.1: abspos auto/fit-content ancestors have no definite
+            // inline size — the fix for `padding-left: 50%` painting half a
+            // viewport inside a 100px fit-content box).
+            if let basis = SpacingResolver.percentBasisPx(
+                ctx: context, wptCaptureMode: wptCaptureMode) {
+                return AnyView(
+                    content.padding(edges(top: t, right: r, bottom: b, left: l,
+                                          parentWidth: basis))
+                )
+            }
+            // Legacy lane (P12, non-WPT with no static basis) — the
             // GeometryReader path: reads parent width and multiplies.
             // Fallback when reading returns 0 (measurement passes before
             // layout) is the env-threaded viewport width (#39 — was a
-            // hardcoded 390 canvas literal).
+            // hardcoded 390 canvas literal). Byte-identical to the frozen
+            // dark-stage corpus.
             return AnyView(
                 GeometryReader { geo in
                     let parentW = geo.size.width > 0
