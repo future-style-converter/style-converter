@@ -1,0 +1,33 @@
+{
+ "_snapshot": "corpus-v4.6",
+ "_note": "THE OUT-OF-FLOW CONTRACT lands on the natives: both runtimes positioned fixed elements PARENT-relatively (Compose routed FIXED through the same offset path as RELATIVE with the viewport wrapper as dead code — deleted; iOS merged .fixed into .absolute), and absolute anchored at flow-slot + offset instead of the containing block. The wave-17 canvas-root hoist implements css-position-3 F1-F3 identically on both natives (fixed always hoists to the UNPADDED canvas origin; root absolute likewise per the web-measured ICB rule; nested absolute keeps the positioned-ancestor padding-box machinery; out-of-flow boxes reserve NO flow space), gated so the dark-stage 327 corpus is structurally untouched (hoisting activates only under the composed WPT Host). DEVICE RESULT: css-position 6/6 on ALL THREE platforms (natives: three tests at a PERFECT 1.000, means 0.984/0.985; even the contain:strict clipping lead resolved). The first section in campaign history where every platform passes every scored test — on post-load-extracted DYNAMIC tests.",
+ "artifact": "tools/titan/runs/wave17-gate (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "8875d231",
+ "date": "2026-07-20",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence coverage asymmetry (corpus-v4.3 gate) + extraction-wall exclusion (v4.4) + post-load re-admission (v4.5)",
+ "sampling": "9 sections x 12 bucket-A tests (css-text + css-position joined at this boundary)",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh)",
+ "sections": {
+  "css-position": {
+   "web": {
+    "measured": 6,
+    "meanSsim": 0.9856,
+    "passing": 6
+   },
+   "ios": {
+    "measured": 6,
+    "meanSsim": 0.9854,
+    "passing": 6
+   },
+   "android": {
+    "measured": 6,
+    "meanSsim": 0.984,
+    "passing": 6
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then POST_LOAD_EXTRACT=1 section-runner.sh css-position --all-platforms --max-tests 12 --run-id wave17-gate --foreground."
+}

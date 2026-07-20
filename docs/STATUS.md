@@ -298,7 +298,18 @@ dirs + WPT corpus are gitignored):
   ~0.95 gives the next wave newly-visible real targets. The Android
   composed capture is no longer window-bound (offscreen full-height
   route; the 5132px tall-doc test captures fully — css-backgrounds
-  Android 10/12).
+  Android 10/12). Wave 17 (`tools/titan/results/corpus-v4-6.json`)
+  landed the out-of-flow contract on the natives: both runtimes had
+  positioned `fixed` elements *parent*-relatively (Compose's viewport
+  wrapper was dead code; iOS merged fixed into absolute) and anchored
+  `absolute` at flow-slot + offset. The canvas-root hoist implements
+  css-position-3 identically on both — fixed always hoists to the
+  unpadded canvas origin, out-of-flow boxes reserve no flow space —
+  gated so the 327 dark-stage corpus is structurally untouched.
+  **css-position: 6/6 on all three platforms** (natives at three
+  perfect 1.000s), the first section in campaign history where every
+  platform passes every scored test — on post-load-extracted dynamic
+  tests.
 
 ## Test suites
 
@@ -306,8 +317,8 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1135 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 526 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1148 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 535 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 679 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 

@@ -283,6 +283,19 @@ struct ComposedCaptureCanvas: View {
         rootContainingBlock: Double(width - padding * 2)
     )
 
+    /// Wave 17 (the out-of-flow contract) — the FixedHoist split of the
+    /// root list: out-of-flow ROOTS (absolute + fixed — both anchor at
+    /// the UNPADDED canvas origin per the measured web behavior) and
+    /// `position: fixed` DESCENDANTS at any depth leave the padded flow
+    /// stack entirely (css-position-3 §2.1: no flow space reserved — the
+    /// next in-flow root starts where the hoisted box would have been)
+    /// and mount in the canvas-root overlay attached below. Documents
+    /// with no out-of-flow boxes split to (all, []) — their VStack is
+    /// built from an identical root list, byte-unchanged.
+    private var splitRoots: (flow: [IRComponent], hoisted: [IRComponent]) {
+        FixedHoist.split(roots: document.components)
+    }
+
     /// TITAN Round 4 GAP 1 — the per-root effective UA vertical block
     /// margins (deferring to any IR-declared margin the runtime's
     /// MarginApplier already paints), collapsed into the space to place
@@ -290,8 +303,12 @@ struct ComposedCaptureCanvas: View {
     /// the browser-ref's UA `<p>`/`<hN>`/… block margins the native flush
     /// stack lacked, so a multi-bar test's gaps match the ref. Composed
     /// WPT only — this canvas is built solely by captureComposedDocument.
-    private var stackedSpacing: (leading: [CGFloat], trailing: CGFloat) {
-        let margins = document.components.map {
+    /// Wave 17: computed over the IN-FLOW roots only — hoisted boxes
+    /// occupy no flow space, so they contribute no stack margins (and the
+    /// per-index arrays must match the flow ForEach exactly).
+    private func stackedSpacing(for flowRoots: [IRComponent])
+        -> (leading: [CGFloat], trailing: CGFloat) {
+        let margins = flowRoots.map {
             UABlockMargin.effectiveVertical(tag: $0.meta?.sourceTag,
                                             properties: $0.properties)
         }
@@ -331,15 +348,20 @@ struct ComposedCaptureCanvas: View {
     }
 
     var body: some View {
+        // Wave 17 — split the roots once per body eval (pure transform):
+        // the flow half stacks in the padded VStack below, the hoisted
+        // half mounts in the canvas-root overlay after the frame chain.
+        let split = splitRoots
         // GAP 1 — fold the per-root UA margins (with adjacent collapse and
         // no collapse at the padded top/bottom edges) into per-root spacing.
-        let spacing = stackedSpacing
-        let lastIndex = document.components.count - 1
+        // Wave 17: over the FLOW roots only (hoisted boxes take no space).
+        let spacing = stackedSpacing(for: split.flow)
+        let lastIndex = split.flow.count - 1
         return VStack(alignment: .leading, spacing: 0) {
             // enumerated()+offset id: roots are rendered positionally, never
             // reordered — a stable positional key is correct and avoids
             // relying on component.id uniqueness across a malformed doc.
-            ForEach(Array(document.components.enumerated()), id: \.offset) { idx, root in
+            ForEach(Array(split.flow.enumerated()), id: \.offset) { idx, root in
                 // Identical host shim the per-component canvas and the
                 // engine's own child loop use — placement parent-data
                 // attached (inert under this VStack), full ComponentRenderer
@@ -379,8 +401,25 @@ struct ComposedCaptureCanvas: View {
         // the document body-root's own background COMPOSITED over that white
         // when it declares one (opaque grey for a98rgb-003; translucent
         // rgba blends toward white — wave 15). Any sub-root gap paints this
-        // so seams stay invisible against the ref.
+        // so seams stay invisible against the ref. (The body-root lookup in
+        // canvasBackground reads document.components UNSPLIT on purpose —
+        // its background must paint even if that root were ever hoisted.)
         .background(canvasBackground)
+        // Wave 17 (F1/F2) — the canvas-root out-of-flow overlay: attached
+        // HERE, after the full-width frame chain and OUTSIDE the 16px
+        // `.padding` above, so its top-leading corner is the UNPADDED
+        // canvas origin (0,0) — the viewport containing block fixed boxes
+        // anchor at, and the initial-containing-block corner the measured
+        // web behavior pins for root-level absolute boxes (left:100 →
+        // canvas x=100, not 116). As an overlay it paints ABOVE all
+        // in-flow content (CSS 2.1 Appendix E step 8); order/z-index
+        // resolve inside FixedHoistOverlay's ZStack. Empty hoist list →
+        // no overlay content, view tree otherwise identical.
+        .overlay(alignment: .topLeading) {
+            if !split.hoisted.isEmpty {
+                FixedHoistOverlay(components: split.hoisted)
+            }
+        }
         // Publish the capture geometry so the runtime resolves vw/vh/% and
         // containing blocks against 390×844/358, not the device screen.
         .environment(\.styleViewport, Self.viewport)

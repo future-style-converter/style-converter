@@ -10,9 +10,9 @@ import androidx.compose.ui.unit.dp
  * offset values (top, right, bottom, left, inset-*).
  *
  * ## Compose Mapping
- * - `position: relative` -> `Modifier.offset()`
- * - `position: absolute` -> `Box` with `Modifier.offset()` (needs container handling)
- * - `position: fixed` -> Limited support (would need `Popup` or similar)
+ * - `position: relative` -> `Modifier.absoluteOffset()`
+ * - `position: absolute` -> `Box` with `Modifier.absoluteOffset()` (needs container handling)
+ * - `position: fixed` -> canvas-root overlay anchor ([CanvasRootHoist], wave 17)
  * - `position: sticky` -> Limited support (scroll-aware behavior)
  *
  * ## Logical Properties
@@ -139,8 +139,10 @@ enum class PositionType {
     ABSOLUTE,
 
     /**
-     * Removed from flow, positioned relative to viewport.
-     * Limited support in Compose - would need `Popup` or window-level handling.
+     * Removed from flow, positioned relative to the viewport — the capture
+     * canvas (css-position-3 §3.2). Wave 17: hoisted to the canvas-root
+     * overlay by [CanvasRootHoist]; NOT a Popup (a separate window never
+     * composites into the capture bitmap).
      */
     FIXED,
 
