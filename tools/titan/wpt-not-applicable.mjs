@@ -156,13 +156,29 @@ const RX = {
     //   by the swarm-002 regex; `.remove(` is the genuinely new pattern.
     //   Without this, dozens of bucket-A tests that mutate the DOM via
     //   the bare-node `child.remove()` call escape the heuristic.
+    //
+    //   wave-15 TOP-LAYER widening: adds the top-layer promotion APIs
+    //   `.showPopover(` / `.hidePopover(` / `.togglePopover(` (HTML
+    //   §popover), `.showModal(` (<dialog>), `.requestFullscreen(`
+    //   (Fullscreen API). These calls do not mutate child nodes but they
+    //   DO mutate the rendered tree — the element is promoted into (or
+    //   removed from) the browser's top layer, and `::backdrop` boxes
+    //   appear/disappear as a side effect. The static extractor captures
+    //   the pre-script DOM, so the entire visual output of such a test is
+    //   unreachable exactly like an appendChild mutation. Measured
+    //   wave-15: css-position/overlay/overlay-transition-backdrop.html
+    //   (showPopover()+hidePopover() drive a green ::backdrop; the ref is
+    //   solid green) carried notApplicableTags=[] and its blank-vs-green
+    //   diff was SCORED at 0.54 — the css-position lane's worst row — as
+    //   if it were renderer divergence.
     //   Source: investigations/swarm-001/css-lists__add-inline-child-after-marker-001.json
     //           investigations/swarm-001/css-position__absolute-pos-box-inside-fixed-pos-box-with-changing-height.json
     //           investigations/swarm-002/css-multicol__multicol-clip-scrolled-content-001.json (scrollTop=N)
     //           investigations/swarm-002/css-pseudo__before-dynamic-display-none.json (className mutation)
     //           investigations/swarm-003/css-overflow__block-ellipsis-001.json (.remove(), .replaceWith())
     //           investigations/swarm-003/css-flexbox__anonymous-flex-item-001.json (.remove())
-    scriptDomMutation:  /<script\b(?![^>]*\bsrc=)[^>]*>[\s\S]*?(?:\.appendChild\(|\.insertBefore\(|\.replaceChild\(|\.removeChild\(|\.replaceWith\(|\.insertAdjacentHTML\(|\.innerHTML\s*=|\.outerHTML\s*=|\.setAttribute\(|\.append\(|\.prepend\(|document\.write\(|\.createElement\(|\.className\s*=|\.textContent\s*=|\.id\s*=\s*["']|\.classList\.[a-z]+\s*\(|\.style\.[A-Za-z]+\s*=|\.scrollTop\s*=|\.scrollLeft\s*=|\.remove\s*\(\s*\))/i,
+    //           wave-15 css-position lane finding (overlay-transition-backdrop, top-layer APIs)
+    scriptDomMutation:  /<script\b(?![^>]*\bsrc=)[^>]*>[\s\S]*?(?:\.appendChild\(|\.insertBefore\(|\.replaceChild\(|\.removeChild\(|\.replaceWith\(|\.insertAdjacentHTML\(|\.innerHTML\s*=|\.outerHTML\s*=|\.setAttribute\(|\.append\(|\.prepend\(|document\.write\(|\.createElement\(|\.className\s*=|\.textContent\s*=|\.id\s*=\s*["']|\.classList\.[a-z]+\s*\(|\.style\.[A-Za-z]+\s*=|\.scrollTop\s*=|\.scrollLeft\s*=|\.remove\s*\(\s*\)|\.(?:showPopover|hidePopover|togglePopover|showModal|requestFullscreen)\s*\()/i,
 
     // Rule 5 — requires-print-medium:
     //   `*-print.html` filename suffix, `@media print` rules, or `@page`
@@ -925,7 +941,7 @@ export const RULES = [
     },
     {
         tag: 'requires-script-mutation',
-        description: 'Inline <script> mutates DOM after load (appendChild/insertBefore/innerHTML/...)',
+        description: 'Inline <script> mutates DOM after load (appendChild/insertBefore/innerHTML/top-layer showPopover|showModal/...)',
         swarm001Source: [
             'css-lists__add-inline-child-after-marker-001.json',
             'css-position__absolute-pos-box-inside-fixed-pos-box-with-changing-height.json',

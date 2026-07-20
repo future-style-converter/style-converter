@@ -122,9 +122,15 @@ test('compose: WPT_CANVAS_BACKGROUND is white and the harness routes through the
     'Android per-component canvas must route through the split');
   // The dark stage constant survives for the 327-pair path…
   assert.match(harness, /private val CaptureCanvasBg\s*=\s*Color\(0xFF1A1A2E\)/, 'Android dark stage constant lost');
-  // …and the WPT-only composed fallback is the runtime white.
-  assert.match(harness, /\?: return WPT_CANVAS_BACKGROUND/, 'composed body-root-less fallback must be white');
-  assert.match(harness, /return bg \?: WPT_CANVAS_BACKGROUND/, 'composed no-background fallback must be white');
+  // …and the composed background routes through the wave-15 alpha-composite
+  // helper (composedCanvasBackground: nil -> white; alpha<1 -> source-over
+  // white; opaque -> identity) instead of the old raw ?: white fallbacks —
+  // the raw path painted a sampled rgba(0,0,0,0) body VERBATIM as the
+  // canvas (the measured Android 0.217 row).
+  assert.match(harness, /import com\.styleconverter\.runtime\.core\.renderer\.composedCanvasBackground/,
+    'Android composed resolver must import the alpha-composite helper');
+  assert.match(harness, /return composedCanvasBackground\(bg\)/,
+    'Android composed background must route through composedCanvasBackground');
 });
 
 // ── iOS (SwiftUI runtime helper + harness wiring) ───────────────────────────
@@ -148,8 +154,12 @@ test('swiftui: WPTCanvas is white and the harness routes through the split', () 
   assert.equal(uses.length, 3, 'all three canvas paints must use the resolved background');
   // The dark stage constant survives for the 327-pair path…
   assert.match(harness, /blue:\s*0x2E \/ 255\.0/, 'iOS dark stage constant lost');
-  // …and the WPT-only composed fallback is the runtime white.
-  assert.match(harness, /else \{ return WPTCanvas\.background \}/, 'iOS composed fallback must be white');
+  // …and the composed background routes through the wave-15 alpha-composite
+  // helper (WPTCanvas.composedBackground: nil -> white; alpha<1 ->
+  // source-over white; opaque -> identity) — the old direct fallback let a
+  // sampled rgba(0,0,0,0) body paint verbatim (the measured iOS 0.000 row).
+  assert.match(harness, /return WPTCanvas\.composedBackground\(resolved: resolved\)/,
+    'iOS composed background must route through composedBackground');
 });
 
 // ── corpus-v4.1: the BLACK default-ink sub-boundary ─────────────────────────

@@ -273,7 +273,20 @@ dirs + WPT corpus are gitignored):
   at a uniform 8/12 on all three platforms** — the typographic contract
   holding on virgin tests — and css-position (~0.91, 4–5/12) is the
   next mineable seam. Honest totals: **web 84/106 · iOS 71 · Android
-  68** (not comparable to raw-SSIM v4.2 counts).
+  68** (not comparable to raw-SSIM v4.2 counts). Wave 15
+  (`tools/titan/results/corpus-v4-4.json`) extended the boundary with
+  the extraction-wall exclusion (script execution has no delivery
+  record by construction — css-position honestly reads as an EMPTY
+  eligible set; the widened top-layer rule catches popover/dialog
+  APIs), decoded character references and the `dir` attribute in the
+  extractor (bidi tests carried literal `&#9;` strings), made text
+  collapse white-space-aware, and fixed the native composed-canvas
+  alpha bug (a sampled `rgba(0,0,0,0)` body painted VERBATIM — iOS
+  scored 0.000; both natives now composite over the white canvas):
+  css-backgrounds natives recovered to 0.970 means (Android 9, iOS 10
+  of 12). Queued: the Android window-bound composed capture
+  (scroll-and-stitch), body-root height sibling-stacking, the
+  non-Latin shaping wall.
 
 ## Test suites
 
@@ -281,9 +294,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1131 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 522 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 614 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1135 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 526 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 638 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

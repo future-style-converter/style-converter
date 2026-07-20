@@ -119,6 +119,60 @@ public enum WPTCanvas {
         wptCaptureMode ? background : defaultBackground
     }
 
+    /// Wave 15 (NATIVES-ALPHA) — the COMPOSED-canvas background resolution:
+    /// alpha-composite a body-root's resolved background OVER the white WPT
+    /// canvas instead of painting it verbatim.
+    ///
+    /// WHY: the browser-ref paints the page canvas by CSS compositing — a
+    /// `body { background: rgba(...) }` with alpha < 1 blends source-over
+    /// onto the white `:where(html,body)` canvas (css-color-4 §"transparency";
+    /// the web harness composites the same way for free because its body-root
+    /// div sits ON the white page). The composed native canvases instead
+    /// painted the RESOLVED rgba VERBATIM as the surface color, so
+    /// `background-color-transparent-animation-in-body`'s body background —
+    /// the wave-14 keyframes sampler's CORRECTLY baked `rgba(0,0,0,0)` —
+    /// rendered the whole iOS canvas as premultiplied BLACK on the opaque
+    /// PNG (ImageRenderer flattens alpha onto black), scoring 0.000 against
+    /// the ref's white page. Compositing here makes translucent body
+    /// backgrounds vanish (α=0) or tint (0<α<1) exactly like the ref.
+    ///
+    /// nil (no body-root, or it declares no background) → the corpus-v4
+    /// WHITE canvas — the same fallback the callers previously inlined.
+    /// COMPOSED WPT ONLY: the sole consumer is the harness's
+    /// ComposedCaptureCanvas, so the dark-stage 327-pair path and the
+    /// per-component WPT path never route through this (the mode-split
+    /// pins above hold those surfaces byte-identical).
+    public static func composedBackground(resolved: Color?) -> Color {
+        // No author body background → the white canvas verbatim (the ref's
+        // zero-specificity `:where(html,body){background:#fff}` wins).
+        guard let resolved else { return background }
+        // sRGB component extraction via the UIKit bridge — the same pattern
+        // ComponentRenderer's `rgbComponents` uses: every IR color reaches
+        // here as `Color(.sRGB, …)` (ColorValue.toSwiftUIColor), for which
+        // `getRed` always succeeds.
+        let ui = UIColor(resolved)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        guard ui.getRed(&r, green: &g, blue: &b, alpha: &a) else {
+            // Non-RGB-convertible color (pattern/catalog — unreachable from
+            // the IR path, which only builds `Color(.sRGB, …)`). Returning
+            // the caller's color VERBATIM is the honest pre-wave-15
+            // behavior for this never-taken branch; not a silent drop.
+            return resolved
+        }
+        // Fully opaque → verbatim: source-over with α=1 is the identity, and
+        // skipping the re-pack keeps opaque body backgrounds (a98rgb-003's
+        // grey) bit-identical to their wave-14 rendering.
+        guard a < 1 else { return resolved }
+        // CSS source-over in sRGB gamma space (the browsers' page-canvas
+        // compositing space): out = src·α + white·(1−α), per channel, onto
+        // the fully-opaque white canvas (out α is exactly 1).
+        return Color(.sRGB,
+                     red:     Double(r) * Double(a) + 1.0 * (1.0 - Double(a)),
+                     green:   Double(g) * Double(a) + 1.0 * (1.0 - Double(a)),
+                     blue:    Double(b) * Double(a) + 1.0 * (1.0 - Double(a)),
+                     opacity: 1)
+    }
+
     /// The WPT default TEXT INK — spec BLACK, the corpus-v4.1 ink
     /// sub-boundary within the v4 white-canvas era. Real WPT pages paint
     /// default prose in the UA `color: CanvasText` black; through

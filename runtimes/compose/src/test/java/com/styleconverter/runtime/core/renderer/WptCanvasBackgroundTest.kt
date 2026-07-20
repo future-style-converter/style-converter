@@ -59,6 +59,63 @@ class WptCanvasBackgroundTest {
         )
     }
 
+    // ── wave 15 (NATIVES-ALPHA): composed-canvas alpha compositing ──────────
+    //
+    // The composed canvas paints a body-root's resolved background COMPOSITED
+    // over the white WPT canvas, never verbatim: the browser-ref blends a
+    // translucent `body{background}` source-over onto its white page (and web
+    // composites the same way for free), so a verbatim rgba(0,0,0,0) surface
+    // — the wave-14 sampler's CORRECTLY baked value on
+    // background-color-transparent-animation-in-body — darkened the opaque
+    // capture PNG toward black (iOS scored 0.000; Android had the identical
+    // verbatim bug). These pins hold [composedCanvasBackground], the pure
+    // rule the harness resolver routes through (the twin of iOS
+    // WPTCanvas.composedBackground in WPTCaptureModeTests).
+
+    @Test
+    fun composedCanvas_transparentBodyComposesToWhite() {
+        // The 0.000 reproduction: rgba(0,0,0,0) source-over white IS white —
+        // fully-transparent ink must vanish into the canvas, exactly as the
+        // browser-ref renders the transparent-animation-in-body page.
+        assertEquals(
+            WPT_CANVAS_BACKGROUND,
+            composedCanvasBackground(Color(red = 0f, green = 0f, blue = 0f, alpha = 0f))
+        )
+    }
+
+    @Test
+    fun composedCanvas_halfAlphaRedIsPinkOverWhite() {
+        // The partial-alpha arithmetic: rgba(1,0,0,0.5) over white is the CSS
+        // source-over blend 0.5·src + 0.5·white per channel — opaque pink
+        // (1, 0.5, 0.5). Pins the math, not just the degenerate endpoints.
+        val out = composedCanvasBackground(Color(red = 1f, green = 0f, blue = 0f, alpha = 0.5f))
+        // Channel-wise with a one-quantum tolerance: sRGB Compose Colors pack
+        // channels to 8 bits, so the stored 0.5f alpha reads back as 128/255
+        // (≈0.50196) and the blend lands one quantum off exact 0.5 — a
+        // packing artifact, invisible at capture-PNG precision (±1/255).
+        val q = 1f / 255f
+        assertEquals(1.0f, out.red, q)   // 1·α + 1·(1−α) = 1 for any α.
+        assertEquals(0.5f, out.green, q) // 0·α + 1·(1−α) ≈ 0.5 at α≈0.5.
+        assertEquals(0.5f, out.blue, q)  // Same blend as green.
+        assertEquals(1.0f, out.alpha, q) // Source-over onto opaque → opaque.
+    }
+
+    @Test
+    fun composedCanvas_nullFallsBackToTheWhiteCanvas() {
+        // No body-root / no declared background → the corpus-v4 white canvas
+        // verbatim — the exact fallback the harness resolver always had, so
+        // no-body documents render byte-identically across the wave-15 fix.
+        assertEquals(WPT_CANVAS_BACKGROUND, composedCanvasBackground(null))
+    }
+
+    @Test
+    fun composedCanvas_opaqueBodyReturnsVerbatim() {
+        // A fully-opaque body background (a98rgb-003's grey) takes the α=1
+        // identity path — bit-identical to its wave-14 rendering, no re-pack.
+        val grey = Color(red = 0.4f, green = 0.4f, blue = 0.4f, alpha = 1f)
+        assertEquals(grey, composedCanvasBackground(grey))
+    }
+
     // ── corpus-v4.1: the BLACK default-ink sub-boundary ─────────────────────
     //
     // Within the v4 white-canvas era the WPT default TEXT INK flipped from

@@ -1,0 +1,67 @@
+{
+ "_snapshot": "corpus-v4.4",
+ "_note": "The EXTRACTION-WALL extension of the honest-scoring boundary + three fix families. SCORING: EXTRACTION_WALL_TAGS {requires-script-mutation, requires-script-driven-scroll} excluded unconditionally (script execution has no delivery record by construction — the wave-14-consistent extension; css-position drops to an honestly EMPTY eligible set: all 12 sampled tests are script/top-layer-dependent, incl. 2 newly tagged by the widened Rule-4 top-layer regex showPopover/showModal/requestFullscreen); lowContentDensity triage flag stamped when both sides are >85% background (the vacuous-tall-doc observation). EXTRACTOR TEXT FIDELITY: character references decoded (bidi-tab-001 carried the LITERAL 6-char string &#9;0), dir attribute maps to Direction (dir=auto resolved first-strong at extract, marked lossy), white-space-aware collapse (pre-family preserves). NATIVE ALPHA COMPOSITING: the composed canvas painted a sampled rgba(0,0,0,0) body VERBATIM (iOS scored 0.000, Android 0.217 on the transparent-animation test) — both natives now source-over-composite the resolved body background over the white WPT canvas (pure helpers, unit-pinned, dark-stage untouched). GATE RESULTS: css-backgrounds natives RECOVERED (Android 0.904->0.970 mean, 8->9 passing; iOS 0.886->0.970, 9->10); css-text web 0.943->0.955 (entity/dir fixes; native bidi shaping remainder documented); css-position eligible 12->0 (honest). Remaining known: Android composed capture is PixelCopy-window-bound (docs taller than 844px truncate — scroll-and-stitch queued), body-root Height sibling-stacking (queued, blast radius), non-Latin shaping wall.",
+ "artifact": "tools/titan/runs/wave15-gate (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "e4b689d4",
+ "date": "2026-07-20",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence coverage asymmetry (corpus-v4.3 gate) + extraction-wall exclusion (v4.4)",
+ "sampling": "9 sections x 12 bucket-A tests (css-text + css-position joined at this boundary)",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh)",
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9707,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9702,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9697,
+    "passing": 9
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 0,
+    "meanSsim": null,
+    "passing": 0
+   },
+   "ios": {
+    "measured": 0,
+    "meanSsim": null,
+    "passing": 0
+   },
+   "android": {
+    "measured": 0,
+    "meanSsim": null,
+    "passing": 0
+   }
+  },
+  "css-text": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9551,
+    "passing": 8
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9383,
+    "passing": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9391,
+    "passing": 8
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then section-runner.sh {css-position,css-text,css-backgrounds} --all-platforms --max-tests 12 --run-id wave15-gate --foreground; aggregate filtering scoreExcluded."
+}

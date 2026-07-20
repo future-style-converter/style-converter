@@ -310,14 +310,24 @@ struct ComposedCaptureCanvas: View {
     /// this canvas is WPT-ONLY, so unlike the per-component canvas there is
     /// no dark-stage branch) when there is no body-root or it declares no
     /// background.
+    ///
+    /// Wave 15 (NATIVES-ALPHA) — the resolved color is ALPHA-COMPOSITED
+    /// over the white canvas, never painted verbatim: the ref's page canvas
+    /// blends a translucent `body{background}` source-over onto white, so
+    /// `rgba(0,0,0,0)` must yield WHITE (verbatim it flattened to BLACK on
+    /// the opaque ImageRenderer PNG — the 0.000 on
+    /// background-color-transparent-animation-in-body). The pure decision
+    /// is WPTCanvas.composedBackground (unit-pinned in WPTCaptureModeTests,
+    /// twinned by Compose's composedCanvasBackground).
     private var canvasBackground: Color {
-        guard let bodyRoot = document.components.first(where: {
-                  $0.meta?.role == "body-root"
-              }),
-              let bg = ComponentRenderer.resolvedBackgroundColor(
-                  from: bodyRoot.properties)
-        else { return WPTCanvas.background }
-        return bg
+        // Resolve the body-root's own background through the SAME engine
+        // path the renderer uses (nil when no body-root / no background) …
+        let resolved = document.components
+            .first(where: { $0.meta?.role == "body-root" })
+            .flatMap { ComponentRenderer.resolvedBackgroundColor(from: $0.properties) }
+        // … then let the runtime's pure composed-canvas rule composite it
+        // over the corpus-v4 white (or fall back to white on nil).
+        return WPTCanvas.composedBackground(resolved: resolved)
     }
 
     var body: some View {
@@ -365,10 +375,11 @@ struct ComposedCaptureCanvas: View {
         // Natural (content) height beyond the 600 floor — mirrors the ref's
         // documentHeight capture and the per-component canvas's height rule.
         .fixedSize(horizontal: false, vertical: true)
-        // GAP 2 — the ref canvas background: #1A1A2E by default, or the
-        // document body-root's own background when it declares one (e.g.
-        // a98rgb-003's full-page grey). Any sub-root gap paints this so
-        // seams stay invisible against the ref.
+        // GAP 2 — the ref canvas background: corpus-v4 WHITE by default, or
+        // the document body-root's own background COMPOSITED over that white
+        // when it declares one (opaque grey for a98rgb-003; translucent
+        // rgba blends toward white — wave 15). Any sub-root gap paints this
+        // so seams stay invisible against the ref.
         .background(canvasBackground)
         // Publish the capture geometry so the runtime resolves vw/vh/% and
         // containing blocks against 390×844/358, not the device screen.

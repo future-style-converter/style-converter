@@ -307,6 +307,13 @@ async function diffWebVsRef(webPath, refPath) {
   // this function). Unlike the color signals above this one DOES feed
   // wptPass — see computePresenceFailed + computeWptPass below.
   metrics.semanticPresence = computeSemanticPresence(A, B, WPT_CANVAS_BG);
+  // wave-15 LOW-CONTENT-DENSITY triage flag: true when BOTH images are
+  // > 85 % background (each side's ink coverage < 15 %) — whole-canvas SSIM
+  // is then dominated by background agreement, so a high score can coexist
+  // with misplaced content (measured: attachment-fixed-inside-transform-1,
+  // ssim 0.963 with ~90 % of both images white and the content in the wrong
+  // place). Triage colour only — feeds neither wptPass nor scoreExcluded.
+  metrics.lowContentDensity = computeLowContentDensity(metrics.semanticPresence);
   return metrics;
 }
 
@@ -401,6 +408,44 @@ const WPT_PRESENCE_RATIO_MIN   = 0.05;
  *  `null`/absent presence (size-mismatch guard in computeSemanticPresence,
  *  or a pre-v4.3 diff) → false: UNKNOWN presence is not FAILED presence —
  *  same "unknown ≠ divergent" stance as isColorDivergent above. */
+/** wave-15 LOW-CONTENT-DENSITY triage flag threshold: a side is "mostly
+ *  background" when its white-canvas ink coverage is under 15 % — i.e. more
+ *  than 85 % of the image is the WPT_CANVAS_BG white. Chosen per the wave-15
+ *  metrology observation (css-backgrounds attachment-fixed-inside-transform-1
+ *  passes vs-ref at ssim 0.963 with ~90 % of BOTH images white while the
+ *  actual content is MISPLACED — the body-root Height stacking issue, queued
+ *  separately): when both sides are overwhelmingly background, whole-canvas
+ *  SSIM is dominated by background-vs-background agreement and a "pass" says
+ *  little about where the ink actually landed. */
+const WPT_LOW_CONTENT_DENSITY_MAX_COVERAGE_PCT = 15;
+
+/** wave-15 LOW-CONTENT-DENSITY triage predicate (pure + exported for unit
+ *  pins). Takes the same `semanticPresence` block computePresenceFailed
+ *  consumes ({ aCoveragePct: capture ink %, bCoveragePct: ref ink % }) and
+ *  flags pairs where BOTH images are > 85 % background (coverage < 15 % on
+ *  each side). TRIAGE-ONLY — deliberately feeds NEITHER wptPass nor
+ *  scoreExcluded (same stance as colorComposite/colorDivergent: a visibility
+ *  channel, not a pass/fail input), because low ink density is the NORM for
+ *  WPT reftests (most wave12-gate refs measure under 8 % coverage) — the
+ *  flag means "read this row's SSIM with less confidence", not "this row is
+ *  wrong". Unknown/absent presence → false (unknown ≠ low-density, the
+ *  isColorDivergent stance). */
+export function computeLowContentDensity(semanticPresence) {
+  // Degenerate/missing metric block (size mismatch, pre-v4.3 diff) → cannot
+  // judge density, never flag.
+  if (!semanticPresence || typeof semanticPresence !== 'object') return false;
+  const cap = semanticPresence.aCoveragePct;   // platform capture ink %
+  const ref = semanticPresence.bCoveragePct;   // browser-ref ink %
+  // Non-numeric fields (defensive: hand-edited manifests) → unknown → false.
+  if (typeof cap !== 'number' || typeof ref !== 'number') return false;
+  // BOTH sides must be mostly background — one inked side means the SSIM is
+  // comparing real content and the flag would only add noise.
+  return cap < WPT_LOW_CONTENT_DENSITY_MAX_COVERAGE_PCT
+      && ref < WPT_LOW_CONTENT_DENSITY_MAX_COVERAGE_PCT;
+}
+// Exported for the unit pins alongside the other calibrated constants.
+export { WPT_LOW_CONTENT_DENSITY_MAX_COVERAGE_PCT };
+
 function computePresenceFailed(semanticPresence) {
   // Degenerate/missing metric → cannot judge, never veto.
   if (!semanticPresence || typeof semanticPresence !== 'object') return false;
@@ -500,6 +545,43 @@ function isColorDivergent(histogramKL) {
  *  [NA-excluded]. */
 const SCORE_EXCLUDED_TAGS = new Set(['requires-bundled-asset']);
 
+/** wave-15 EXTRACTION-WALL tags — the honest-scoring boundary's second
+ *  exclusion family. Like SCORE_EXCLUDED_TAGS these mark tests whose score
+ *  measures a HARNESS gap, not renderer divergence — but here the gap is the
+ *  EXTRACTION wall, not asset delivery: the static extractor captures the
+ *  pre-script DOM (wpt-not-applicable.mjs Rule 4 rationale), so a test whose
+ *  visual output depends on post-load script execution (DOM mutation,
+ *  top-layer promotion, script-driven scroll offsets) compares a state the
+ *  pipeline never even attempts to produce. Measured wave-15: 9 of the 12
+ *  scored css-position tests were exactly this wall — the tagger fired
+ *  requires-script-mutation but the gate only excluded on
+ *  requires-bundled-asset, so the wall was scored as renderer failure.
+ *
+ *  UNCONDITIONAL by construction (contrast the delivery-aware
+ *  requires-bundled-asset branch): the wave-13 cross-check works because the
+ *  extractor stamps a per-asset delivery record (lossyReasons from
+ *  inlineFixtureAssets) that can corroborate or refute the textual tag.
+ *  Script execution has NO analogous delivery record — the extractor never
+ *  runs scripts, so there is nothing it could stamp to say "this one was
+ *  actually delivered". With no ground truth to consult, the textual tag is
+ *  the best signal available and excludes on its own; this is the
+ *  wave-14/13-consistent EXTENSION of the boundary, not a loosening of it.
+ *
+ *  Deliberately NARROW like SCORE_EXCLUDED_TAGS: broad capability tags
+ *  (requires-fragmentation, requires-float-layout, …) still describe tests
+ *  the harness DOES deliver and render — those stay scored (the wave-8
+ *  lesson: excluding on any tag gutted the denominator 82 → ~14).
+ *  'requires-script-driven-scroll' (Rule 18) is included because it is a
+ *  strict subset of the same wall — post-script scroll offsets baked into
+ *  the ref are unreachable for the identical no-script-execution reason. */
+const EXTRACTION_WALL_TAGS = new Set([
+  'requires-script-mutation',      // Rule 4  — post-load DOM / top-layer mutation
+  'requires-script-driven-scroll', // Rule 18 — post-load scroll-offset mutation
+]);
+// Exported for unit pins (inject-wpt-block.test.mjs asserts the exact tag
+// set so a silent widening/narrowing of the wall cannot land unreviewed).
+export { EXTRACTION_WALL_TAGS };
+
 /** wave-8 corpus-honesty gate (pure — exported for unit tests): when a test
  *  carries ≥1 HARNESS-DELIVERY tag (SCORE_EXCLUDED_TAGS — not every
  *  notApplicable tag), its browser-ref diffs are EXCLUDED from scoring:
@@ -539,6 +621,14 @@ const SCORE_EXCLUDED_TAGS = new Set(['requires-bundled-asset']);
  *  CONSERVATIVE legacy behaviour (tag alone excludes): absent delivery
  *  evidence must not silently promote a test into the scored set.
  *
+ *  wave-15 EXTRACTION-WALL extension: tags in EXTRACTION_WALL_TAGS
+ *  (requires-script-mutation, requires-script-driven-scroll) exclude
+ *  UNCONDITIONALLY — lossyReasons is never consulted for them, because
+ *  script execution has no delivery record by construction (see the
+ *  EXTRACTION_WALL_TAGS comment). Measured wave-15: 9/12 scored
+ *  css-position tests were the script-mutation wall scored as renderer
+ *  failure.
+ *
  *  @param {string[]|undefined} naTags  notApplicable tags for the test
  *  @param {Array<object|null>} refDiffs diffs to neutralise (mutated in place)
  *  @param {string[]|undefined} [lossyReasons] extractor lossy reasons for the
@@ -547,6 +637,13 @@ const SCORE_EXCLUDED_TAGS = new Set(['requires-bundled-asset']);
  *  @returns {boolean} true when the test is score-excluded */
 export function applyNaScoreGate(naTags, refDiffs, lossyReasons) {
   const isNa = Array.isArray(naTags) && naTags.some((t) => {
+    // wave-15 extraction-wall branch: script-execution tags exclude
+    // UNCONDITIONALLY — no lossyReasons cross-check is possible because the
+    // extractor never runs scripts and so has no delivery record to consult
+    // (full rationale at EXTRACTION_WALL_TAGS above). Checked FIRST so the
+    // delivery-aware bundled-asset branch below stays byte-for-byte the
+    // wave-13 behaviour for its own tag.
+    if (EXTRACTION_WALL_TAGS.has(t)) return true;
     // Not a harness-delivery tag → never excludes (unchanged wave-8 rule).
     if (!SCORE_EXCLUDED_TAGS.has(t)) return false;
     // Delivery-aware branch: when the extractor's lossy record is available

@@ -40,6 +40,9 @@ import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.renderer.LocalWptComposedMode
 import com.styleconverter.runtime.core.renderer.SlotComposer
 import com.styleconverter.runtime.core.renderer.WPT_CANVAS_BACKGROUND
+// Wave 15 — the pure composed-canvas alpha-compositing rule (body background
+// blended source-over onto the white WPT canvas; see resolveComposedCanvasBackground).
+import com.styleconverter.runtime.core.renderer.composedCanvasBackground
 import com.styleconverter.runtime.core.renderer.captureCanvasBackground
 import com.styleconverter.runtime.core.types.ValueExtractors
 import kotlinx.coroutines.delay
@@ -854,13 +857,25 @@ private val ComposedCanvasMinHeight = 600.dp
  * composed path is WPT-ONLY, so unlike the per-component canvas there is no
  * dark-stage branch here). An author body background still wins, exactly as
  * it beats the ref's zero-specificity `:where()` injection.
+ *
+ * Wave 15 (NATIVES-ALPHA): the extracted color is ALPHA-COMPOSITED over the
+ * white canvas rather than painted verbatim — the ref's page canvas blends a
+ * translucent `body{background}` source-over onto white, so `rgba(0,0,0,0)`
+ * must yield WHITE (verbatim it darkened the opaque capture PNG — the iOS
+ * 0.000 on background-color-transparent-animation-in-body had the same
+ * verbatim bug here). The pure decision is the runtime's
+ * [composedCanvasBackground] (unit-pinned in WptCanvasBackgroundTest,
+ * twinned by iOS WPTCanvas.composedBackground).
  */
 internal fun resolveComposedCanvasBackground(roots: List<IRComponent>): Color {
-    val bodyRoot = roots.firstOrNull { it.role == "body-root" }
-        ?: return WPT_CANVAS_BACKGROUND
-    val bg = bodyRoot.properties.firstOrNull { it.type == "BackgroundColor" }
+    // Extract the body-root's own background through the SAME extractor the
+    // renderer uses (null when no body-root / no declared background) …
+    val bg = roots.firstOrNull { it.role == "body-root" }
+        ?.properties?.firstOrNull { it.type == "BackgroundColor" }
         ?.data?.let { ValueExtractors.extractColor(it) }
-    return bg ?: WPT_CANVAS_BACKGROUND
+    // … then let the runtime's pure composed-canvas rule composite it over
+    // the corpus-v4 white (or fall back to white on null).
+    return composedCanvasBackground(bg)
 }
 
 /**
