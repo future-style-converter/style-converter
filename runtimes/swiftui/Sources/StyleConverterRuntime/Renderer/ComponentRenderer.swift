@@ -1065,11 +1065,39 @@ public struct ComponentRenderer: View {
         case .none:
             EmptyView()
         case .block:
-            VStack(
-                alignment: .leading,
-                spacing: gap.row
-            ) {
-                contentOrPlaceholder(style: style)
+            // Lane ios-multichild-multicol — Android parity: Compose
+            // flips a block container carrying ColumnCount/ColumnWidth to
+            // DisplayType.MULTI_COLUMN and distributes ALL its children
+            // greedily across the used columns
+            // (MultiColumnDistributionLayout). Route the multi-child
+            // family through the mirroring MulticolGreedyLayout; the
+            // single-child family keeps the vertical stack below, where
+            // the wave-9 column fill basis and the wave-10 fragmentation
+            // pass already own its parity (byte-identical under the gate).
+            if multicolDistributes(style: style) {
+                MulticolGreedyLayout(
+                    // The §3 inputs, straight from the typed config — the
+                    // same fields MulticolMath consumes everywhere else.
+                    requestedCount: style.columns?.count,
+                    requestedWidthPx: style.columns?.widthPx,
+                    // The used gap through the single shared resolver, so
+                    // slots, fill basis and fragment plan agree.
+                    gapPx: multicolUsedGapPx(style: style)
+                ) {
+                    // Same content pass as every container: leading text
+                    // (if any) and the sorted in-flow children become the
+                    // layout's subviews IN ORDER — exactly the measurables
+                    // Android's RenderContent hands its distribution
+                    // layout (leading text included).
+                    contentOrPlaceholder(style: style)
+                }
+            } else {
+                VStack(
+                    alignment: .leading,
+                    spacing: gap.row
+                ) {
+                    contentOrPlaceholder(style: style)
+                }
             }
         }
         }
@@ -1516,6 +1544,62 @@ public struct ComponentRenderer: View {
         return w > 0 ? w : nil
     }
 
+    // MARK: - Multicol distribution (lane ios-multichild-multicol)
+
+    /// The USED column-gap for a multicol container, in px — the single
+    /// resolver behind the wave-9 fill basis, the wave-10 fragment plan
+    /// AND the greedy distribution slots (they must agree or the fill
+    /// width and the slot width drift apart). A declared ColumnGap/Gap
+    /// resolves through the SAME GapApplier lane the flow container's
+    /// spacing uses; an UNDECLARED gap is `normal`, which for multicol
+    /// containers is 1em (css-align-3 §8.3) — the element's resolved
+    /// font-size, NOT the GapConfig zero default (that zero is right for
+    /// flex/grid, where `normal` means no gap). Non-multicol callers get
+    /// 0 without touching the resolver.
+    private func multicolUsedGapPx(style: ComponentStyle) -> CGFloat {
+        // Only multicol containers consume a column-gap basis.
+        guard style.columns?.isMulticolContainer == true else { return 0 }
+        // Declared gap (Gap shorthand expands to ColumnGap on the
+        // converter, but check both — GapExtractor reads both).
+        if resolvedProperties.contains(where: {
+            $0.type == "ColumnGap" || $0.type == "Gap" }) {
+            // Percent column-gap resolves against the inline axis — the
+            // container's content-box width (the same flexContentSize
+            // subtraction the childCB channel publishes).
+            return GapApplier.resolve(style.spacing.gap,
+                                      context: style.spacing.context,
+                                      parentWidth: flexContentSize(style: style,
+                                                                   vertical: false)).column
+        }
+        // `column-gap: normal` = 1em for multicol (css-align-3 §8.3).
+        return CGFloat(style.spacing.context.fontSizePx)
+    }
+
+    /// The distribution gate: does THIS container route its children
+    /// through MulticolGreedyLayout (Android's greedy multi-child column
+    /// distribution) instead of the block vertical stack?
+    ///
+    /// Android parity map: Compose flips a BLOCK container to
+    /// DisplayType.MULTI_COLUMN whenever ColumnCount/ColumnWidth is
+    /// present (ComponentRenderer.extractDisplayConfig) and routes ALL
+    /// its children through MultiColumnDistributionLayout. iOS keeps the
+    /// SINGLE-child family on its established paths (wave-9 column fill
+    /// + wave-10 fragmentation — both byte-identical under this gate),
+    /// so only 2+ in-flow children distribute; a lone child in column 0
+    /// is visually identical to the vertical stack anyway (D6 pins that
+    /// degenerate case in the shared table).
+    private func multicolDistributes(style: ComponentStyle) -> Bool {
+        // §2: a multicol container needs a non-auto count or width…
+        style.columns?.isMulticolContainer == true
+            // …on a BLOCK container (the Android flip only rewrites
+            // DisplayType.BLOCK; declared flex/grid/inline displays keep
+            // their own formatting context on both platforms)…
+            && style.layout.display == .block
+            // …with 2+ in-flow children (absolute boxes ride the overlay
+            // and never distribute — css-multicol-1 §2 in-flow only).
+            && inFlowChildren.count >= 2
+    }
+
     // MARK: - Content
 
     @ViewBuilder
@@ -1649,29 +1733,35 @@ public struct ComponentRenderer: View {
                                                             style: style)
             // Wave-9 regression fix — the USED column-gap feeding the
             // multicol fill basis (css-multicol-1 §3 via MulticolMath in
-            // wptChildFillWidth). Declared ColumnGap/Gap resolves through
-            // the SAME GapApplier the flow container's spacing uses (one
-            // resolver, two consumers); an UNDECLARED gap is `normal`,
-            // which for multicol containers is 1em (css-align-3 §8.3) —
-            // the element's resolved font-size, NOT the GapConfig zero
-            // default (that zero is right for flex/grid, where `normal`
-            // means no gap). Non-multicol parents never read the value —
-            // 0 short-circuits without touching the resolver.
-            let multicolFillGap: CGFloat = {
-                // Only multicol containers consume a column-gap basis.
-                guard style.columns?.isMulticolContainer == true else { return 0 }
-                // Declared gap (Gap shorthand expands to ColumnGap on the
-                // converter, but check both — GapExtractor reads both).
-                if resolvedProperties.contains(where: {
-                    $0.type == "ColumnGap" || $0.type == "Gap" }) {
-                    // Percent column-gap resolves against the inline axis
-                    // — the container's content-box width (childCB).
-                    return GapApplier.resolve(style.spacing.gap,
-                                              context: style.spacing.context,
-                                              parentWidth: childCB).column
-                }
-                // `column-gap: normal` = 1em for multicol (css-align-3 §8.3).
-                return CGFloat(style.spacing.context.fontSizePx)
+            // wptChildFillWidth). Factored into multicolUsedGapPx (lane
+            // ios-multichild-multicol) because the greedy distribution
+            // container in flowContainer needs the IDENTICAL used gap —
+            // one resolver, three consumers (fill basis, fragment plan,
+            // distribution slots) that agree by construction.
+            let multicolFillGap: CGFloat = multicolUsedGapPx(style: style)
+            // Lane ios-multichild-multicol — css-multicol-1 §2: when THIS
+            // container distributes its children across column boxes
+            // (flowContainer's MulticolGreedyLayout branch), each child's
+            // containing block is the COLUMN box, so the width channel
+            // must publish the §3 USED column width, not the container's
+            // content width — the same override multicolFragmentRow
+            // applies for the single-child fragment clones. Nil when the
+            // container does not distribute (single child / non-multicol)
+            // or its own width is indefinite (no invented geometry).
+            let multicolColumnCB: CGFloat? = {
+                // Only the distribution branch re-parents to column boxes.
+                guard multicolDistributes(style: style), let cb = childCB,
+                      // The same §3 fit the layout itself computes — same
+                      // inputs (content width, config, used gap), so the
+                      // published basis matches the laid-out column width.
+                      let used = MulticolMath.usedColumns(
+                        availableWidthPx: Double(cb),
+                        requestedCount: style.columns?.count,
+                        requestedWidthPx: style.columns?.widthPx,
+                        gapPx: Double(multicolFillGap))
+                else { return nil }
+                // The used per-column inline size in px.
+                return CGFloat(used.widthPx)
             }()
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
                 // Build the child's aggregate once so FlexChildModifier
@@ -1827,8 +1917,13 @@ public struct ComponentRenderer: View {
                                 columnGapPx: multicolFillGap))
                 // Containing block (wave 3): always written — definite
                 // content width or nil — so the channel resets at every
-                // tree level (no grandparent leak).
-                .environment(\.containingBlockWidth, childCB)
+                // tree level (no grandparent leak). Lane
+                // ios-multichild-multicol: under a DISTRIBUTING multicol
+                // container the children's containing block is the COLUMN
+                // box (css-multicol-1 §2), so the used column width wins
+                // when the distribution branch is active (nil otherwise —
+                // every non-distributing container keeps childCB).
+                .environment(\.containingBlockWidth, multicolColumnCB ?? childCB)
                 // Wave 9 — the height basis: always written (definite
                 // content height or nil), same reset discipline.
                 .environment(\.containingBlockHeight, childCBH)

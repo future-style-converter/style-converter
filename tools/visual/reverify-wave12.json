@@ -1,0 +1,869 @@
+{
+ "_snapshot": "reverify-wave12",
+ "_note": "Post-wave-12 full 94-set re-measure at dev a8b2db55 (method identical to reverify-wave4/5: per-category combined fixtures through test-all.sh on the pooled fleet, min SSIM across variants x 3 pairs; child-component rows excluded). THE PROPERTY AXIS IS ESSENTIALLY COMPLETE within current capability tiers: 90/94 hold >= 0.95 (wave-5: 73; wave-4: 72; wave-0: 11), ZERO regressions vs wave-5. The 4 remaining deep rows are all long-classified walls/blocked: BorderImageSlice 0.8073 (the intentionally-named SVG-source blocked-native variant), FontFamily 0.8194 (Cursive — platform cursive stacks, unfixable without bundling fonts), FontSize 0.8641 (keyword-fractional sizes — identical-extents rasterization wall), TextOrientation 0.8687 (Upright — vertical writing-mode capability tier). Movement since wave-5 came from waves 6-12: TextMotion, margin-collapse, decoration ownership, line-height wire, box-sizing basis, grid abspos partition, RTL physical insets, and the typography pipeline maturing.",
+ "devSha": "a8b2db55",
+ "date": "2026-07-20",
+ "method": "per-category combined fixture through test-all.sh on the pooled fleet; min SSIM across variants x pairs",
+ "summary": {
+  "measured": 94,
+  "bands": {
+   "hold": 90,
+   "near-miss": 0,
+   "deep": 4
+  },
+  "wave5Bands": {
+   "hold": 73,
+   "near-miss": 5,
+   "deep": 16
+  },
+  "wave0Hold": 11
+ },
+ "properties": [
+  {
+   "name": "BorderImageSlice",
+   "category": "borders",
+   "minSsim": 0.8073,
+   "worst": "V_svg_source_blocked_native_no_svg_decode",
+   "band": "deep",
+   "wave5": 0.8073,
+   "delta": 0
+  },
+  {
+   "name": "FontFamily",
+   "category": "typography",
+   "minSsim": 0.8194,
+   "worst": "FontFamily_Cursive",
+   "band": "deep",
+   "wave5": 0.8194,
+   "delta": 0
+  },
+  {
+   "name": "FontSize",
+   "category": "typography",
+   "minSsim": 0.8641,
+   "worst": "FontSize_Larger",
+   "band": "deep",
+   "wave5": 0.8601,
+   "delta": 0.004
+  },
+  {
+   "name": "TextOrientation",
+   "category": "typography",
+   "minSsim": 0.8687,
+   "worst": "TextOrientation_Upright",
+   "band": "deep",
+   "wave5": 0.8691,
+   "delta": -0.0004
+  },
+  {
+   "name": "TextTransform",
+   "category": "typography",
+   "minSsim": 0.9533,
+   "worst": "TextTransform_Uppercase",
+   "band": "hold",
+   "wave5": 0.8453,
+   "delta": 0.108
+  },
+  {
+   "name": "TextShadow",
+   "category": "typography",
+   "minSsim": 0.9543,
+   "worst": "TextShadow_Rgba",
+   "band": "hold",
+   "wave5": 0.9452,
+   "delta": 0.0091
+  },
+  {
+   "name": "Color",
+   "category": "color",
+   "minSsim": 0.9548,
+   "worst": "Color_CurrentColor",
+   "band": "hold",
+   "wave5": 0.8969,
+   "delta": 0.0579
+  },
+  {
+   "name": "LetterSpacing",
+   "category": "typography",
+   "minSsim": 0.9585,
+   "worst": "LetterSpacing_Px_4",
+   "band": "hold",
+   "wave5": 0.8539,
+   "delta": 0.1046
+  },
+  {
+   "name": "MaskImage",
+   "category": "effects",
+   "minSsim": 0.9603,
+   "worst": "MaskImage_RepeatingLinear",
+   "band": "hold",
+   "wave5": 0.9603,
+   "delta": 0
+  },
+  {
+   "name": "FontStyle",
+   "category": "typography",
+   "minSsim": 0.9637,
+   "worst": "FontStyle_Italic",
+   "band": "hold",
+   "wave5": 0.8215,
+   "delta": 0.1422
+  },
+  {
+   "name": "TextDecorationLine",
+   "category": "typography",
+   "minSsim": 0.9656,
+   "worst": "TextDecorationLine_Triple",
+   "band": "hold",
+   "wave5": 0.8641,
+   "delta": 0.1015
+  },
+  {
+   "name": "FontWeight",
+   "category": "typography",
+   "minSsim": 0.9703,
+   "worst": "FontWeight_500",
+   "band": "hold",
+   "wave5": 0.8695,
+   "delta": 0.1008
+  },
+  {
+   "name": "Filter",
+   "category": "color",
+   "minSsim": 0.9712,
+   "worst": "F_blur",
+   "band": "hold",
+   "wave5": 0.9721,
+   "delta": -0.0009
+  },
+  {
+   "name": "WordSpacing",
+   "category": "typography",
+   "minSsim": 0.9735,
+   "worst": "WordSpacing_Normal",
+   "band": "hold",
+   "wave5": 0.8684,
+   "delta": 0.1051
+  },
+  {
+   "name": "TextGroupAlign",
+   "category": "typography",
+   "minSsim": 0.9743,
+   "worst": "TextGroupAlign_None",
+   "band": "hold",
+   "wave5": 0.9028,
+   "delta": 0.0715
+  },
+  {
+   "name": "UnicodeBidi",
+   "category": "typography",
+   "minSsim": 0.9743,
+   "worst": "UnicodeBidi_Normal",
+   "band": "hold",
+   "wave5": 0.9028,
+   "delta": 0.0715
+  },
+  {
+   "name": "TextAlign",
+   "category": "typography",
+   "minSsim": 0.9778,
+   "worst": "TextAlign_End",
+   "band": "hold",
+   "wave5": 0.8929,
+   "delta": 0.0849
+  },
+  {
+   "name": "WordWrap",
+   "category": "typography",
+   "minSsim": 0.9788,
+   "worst": "WordWrap_Normal",
+   "band": "hold",
+   "wave5": 0.9614,
+   "delta": 0.0174
+  },
+  {
+   "name": "AspectRatio",
+   "category": "spacing",
+   "minSsim": 0.983,
+   "worst": "Ratio_Auto_With_Explicit",
+   "band": "hold",
+   "wave5": 0.983,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundBlendMode",
+   "category": "color",
+   "minSsim": 0.9835,
+   "worst": "BBM_normal",
+   "band": "hold",
+   "wave5": 0.934,
+   "delta": 0.0495
+  },
+  {
+   "name": "Transform",
+   "category": "transforms",
+   "minSsim": 0.9866,
+   "worst": "T_scaleXY",
+   "band": "hold",
+   "wave5": 0.9866,
+   "delta": 0
+  },
+  {
+   "name": "FontLanguageOverride",
+   "category": "typography",
+   "minSsim": 0.9869,
+   "worst": "FontLanguageOverride_Normal",
+   "band": "hold",
+   "wave5": 0.8746,
+   "delta": 0.1123
+  },
+  {
+   "name": "LineSnap",
+   "category": "typography",
+   "minSsim": 0.9885,
+   "worst": "LineSnap_None",
+   "band": "hold",
+   "wave5": 0.8899,
+   "delta": 0.0986
+  },
+  {
+   "name": "InitialLetter",
+   "category": "typography",
+   "minSsim": 0.9907,
+   "worst": "InitialLetter_Normal",
+   "band": "hold",
+   "wave5": 0.9115,
+   "delta": 0.0792
+  },
+  {
+   "name": "BackgroundClip",
+   "category": "background",
+   "minSsim": 0.9908,
+   "worst": "Clip_PaddingBox",
+   "band": "hold",
+   "wave5": 0.9908,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomStyle",
+   "category": "borders",
+   "minSsim": 0.992,
+   "worst": "S_dashed",
+   "band": "hold",
+   "wave5": 0.992,
+   "delta": 0
+  },
+  {
+   "name": "BorderBlockEndStyle",
+   "category": "borders",
+   "minSsim": 0.9921,
+   "worst": "S_dashed",
+   "band": "hold",
+   "wave5": 0.9921,
+   "delta": 0
+  },
+  {
+   "name": "BorderBlockStartStyle",
+   "category": "borders",
+   "minSsim": 0.9923,
+   "worst": "S_double",
+   "band": "hold",
+   "wave5": 0.9923,
+   "delta": 0
+  },
+  {
+   "name": "BorderInlineStartColor",
+   "category": "borders",
+   "minSsim": 0.9923,
+   "worst": "C_hex",
+   "band": "hold",
+   "wave5": 0.9923,
+   "delta": 0
+  },
+  {
+   "name": "LineHeight",
+   "category": "typography",
+   "minSsim": 0.9927,
+   "worst": "LineHeight_Unitless_1_5",
+   "band": "hold",
+   "wave5": 0.8759,
+   "delta": 0.1168
+  },
+  {
+   "name": "BorderBlockEndColor",
+   "category": "borders",
+   "minSsim": 0.9928,
+   "worst": "C_green",
+   "band": "hold",
+   "wave5": 0.9928,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundColor",
+   "category": "color",
+   "minSsim": 0.9928,
+   "worst": "BC_Transparent",
+   "band": "hold",
+   "wave5": 0.9928,
+   "delta": 0
+  },
+  {
+   "name": "BorderRightStyle",
+   "category": "borders",
+   "minSsim": 0.9929,
+   "worst": "S_dashed",
+   "band": "hold",
+   "wave5": 0.9929,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomWidth",
+   "category": "borders",
+   "minSsim": 0.9931,
+   "worst": "W_medium",
+   "band": "hold",
+   "wave5": 0.9931,
+   "delta": 0
+  },
+  {
+   "name": "BorderBoundary",
+   "category": "borders",
+   "minSsim": 0.9931,
+   "worst": "Bord_parent",
+   "band": "hold",
+   "wave5": 0.9931,
+   "delta": 0
+  },
+  {
+   "name": "BorderStyle",
+   "category": "borders",
+   "minSsim": 0.9936,
+   "worst": "V6_double",
+   "band": "hold",
+   "wave5": 0.9936,
+   "delta": 0
+  },
+  {
+   "name": "BorderEndStartRadius",
+   "category": "borders",
+   "minSsim": 0.9937,
+   "worst": "V2_50pct",
+   "band": "hold",
+   "wave5": 0.9937,
+   "delta": 0
+  },
+  {
+   "name": "BorderRightWidth",
+   "category": "borders",
+   "minSsim": 0.9937,
+   "worst": "W_medium",
+   "band": "hold",
+   "wave5": 0.9937,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomRightRadius",
+   "category": "borders",
+   "minSsim": 0.9939,
+   "worst": "V2_50pct",
+   "band": "hold",
+   "wave5": 0.9939,
+   "delta": 0
+  },
+  {
+   "name": "BorderEndEndRadius",
+   "category": "borders",
+   "minSsim": 0.9939,
+   "worst": "V2_50pct",
+   "band": "hold",
+   "wave5": 0.9939,
+   "delta": 0
+  },
+  {
+   "name": "BorderStartStartRadius",
+   "category": "borders",
+   "minSsim": 0.994,
+   "worst": "V2_50pct",
+   "band": "hold",
+   "wave5": 0.994,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopLeftRadius",
+   "category": "borders",
+   "minSsim": 0.994,
+   "worst": "V2_50pct",
+   "band": "hold",
+   "wave5": 0.994,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopRightRadius",
+   "category": "borders",
+   "minSsim": 0.994,
+   "worst": "V2_50pct",
+   "band": "hold",
+   "wave5": 0.994,
+   "delta": 0
+  },
+  {
+   "name": "BorderBlockStartColor",
+   "category": "borders",
+   "minSsim": 0.9941,
+   "worst": "C_red",
+   "band": "hold",
+   "wave5": 0.9941,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomLeftRadius",
+   "category": "borders",
+   "minSsim": 0.9941,
+   "worst": "V2_50pct",
+   "band": "hold",
+   "wave5": 0.9941,
+   "delta": 0
+  },
+  {
+   "name": "BorderLeftStyle",
+   "category": "borders",
+   "minSsim": 0.9941,
+   "worst": "S_dashed",
+   "band": "hold",
+   "wave5": 0.9941,
+   "delta": 0
+  },
+  {
+   "name": "BorderImageRepeat",
+   "category": "borders",
+   "minSsim": 0.9942,
+   "worst": "V2_stretch",
+   "band": "hold",
+   "wave5": 0.9942,
+   "delta": 0
+  },
+  {
+   "name": "BorderStartEndRadius",
+   "category": "borders",
+   "minSsim": 0.9942,
+   "worst": "V2_50pct",
+   "band": "hold",
+   "wave5": 0.9942,
+   "delta": 0
+  },
+  {
+   "name": "BorderInlineEndColor",
+   "category": "borders",
+   "minSsim": 0.9944,
+   "worst": "C_red",
+   "band": "hold",
+   "wave5": 0.9944,
+   "delta": 0
+  },
+  {
+   "name": "Scale",
+   "category": "transforms",
+   "minSsim": 0.9944,
+   "worst": "V_one_half",
+   "band": "hold",
+   "wave5": 0.9944,
+   "delta": 0
+  },
+  {
+   "name": "ImageRenderingQuality",
+   "category": "appearance",
+   "minSsim": 0.9947,
+   "worst": "Imag_auto",
+   "band": "hold",
+   "wave5": 0.9947,
+   "delta": 0
+  },
+  {
+   "name": "BorderBottomColor",
+   "category": "borders",
+   "minSsim": 0.9947,
+   "worst": "C_green",
+   "band": "hold",
+   "wave5": 0.9947,
+   "delta": 0
+  },
+  {
+   "name": "BorderLeftWidth",
+   "category": "borders",
+   "minSsim": 0.9948,
+   "worst": "W_medium",
+   "band": "hold",
+   "wave5": 0.9948,
+   "delta": 0
+  },
+  {
+   "name": "BorderRightColor",
+   "category": "borders",
+   "minSsim": 0.9948,
+   "worst": "C_green",
+   "band": "hold",
+   "wave5": 0.9948,
+   "delta": 0
+  },
+  {
+   "name": "OutlineWidth",
+   "category": "borders",
+   "minSsim": 0.9954,
+   "worst": "Outl_inherit",
+   "band": "hold",
+   "wave5": 0.9954,
+   "delta": 0
+  },
+  {
+   "name": "Opacity",
+   "category": "color",
+   "minSsim": 0.9955,
+   "worst": "Opacity_Percent",
+   "band": "hold",
+   "wave5": 0.9955,
+   "delta": 0
+  },
+  {
+   "name": "MixBlendMode",
+   "category": "color",
+   "minSsim": 0.9957,
+   "worst": "MBM_multiply",
+   "band": "hold",
+   "wave5": 0.9957,
+   "delta": 0
+  },
+  {
+   "name": "BoxShadow",
+   "category": "borders",
+   "minSsim": 0.9958,
+   "worst": "Shadow_Inset_WithSpread",
+   "band": "hold",
+   "wave5": 0.9958,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundImage",
+   "category": "background",
+   "minSsim": 0.9959,
+   "worst": "BI_radial",
+   "band": "hold",
+   "wave5": 0.9959,
+   "delta": 0
+  },
+  {
+   "name": "BorderLeftColor",
+   "category": "borders",
+   "minSsim": 0.997,
+   "worst": "C_green",
+   "band": "hold",
+   "wave5": 0.997,
+   "delta": 0
+  },
+  {
+   "name": "ColorAdjust",
+   "category": "appearance",
+   "minSsim": 0.9978,
+   "worst": "Colo_inherit",
+   "band": "hold",
+   "wave5": 0.9978,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundAttachment",
+   "category": "background",
+   "minSsim": 0.9982,
+   "worst": "Attachment_Scroll",
+   "band": "hold",
+   "wave5": 0.9982,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopStyle",
+   "category": "borders",
+   "minSsim": 0.9982,
+   "worst": "S_double",
+   "band": "hold",
+   "wave5": 0.9982,
+   "delta": 0
+  },
+  {
+   "name": "BoxDecorationBreak",
+   "category": "borders",
+   "minSsim": 0.9984,
+   "worst": "BoxDecorationBreak_Slice",
+   "band": "hold",
+   "wave5": 0.9984,
+   "delta": 0
+  },
+  {
+   "name": "ClipPath",
+   "category": "effects",
+   "minSsim": 0.9989,
+   "worst": "CP_circle",
+   "band": "hold",
+   "wave5": 0.9989,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundRepeat",
+   "category": "background",
+   "minSsim": 0.999,
+   "worst": "Repeat_Repeat",
+   "band": "hold",
+   "wave5": 0.999,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundSize",
+   "category": "background",
+   "minSsim": 0.999,
+   "worst": "Size_Auto",
+   "band": "hold",
+   "wave5": 0.999,
+   "delta": 0
+  },
+  {
+   "name": "BorderImageWidth",
+   "category": "borders",
+   "minSsim": 0.9997,
+   "worst": "BIW_15",
+   "band": "hold",
+   "wave5": 0.9997,
+   "delta": 0
+  },
+  {
+   "name": "BackgroundPosition",
+   "category": "background",
+   "minSsim": 0.9999,
+   "worst": "Pos_Left_Top",
+   "band": "hold",
+   "wave5": 0.9999,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopColor",
+   "category": "borders",
+   "minSsim": 0.9999,
+   "worst": "C_rgb",
+   "band": "hold",
+   "wave5": 0.9999,
+   "delta": 0
+  },
+  {
+   "name": "BorderImageOutset",
+   "category": "borders",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "BorderTopWidth",
+   "category": "borders",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "BackdropFilter",
+   "category": "effects",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "MaskPosition",
+   "category": "effects",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "MaskRepeat",
+   "category": "effects",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "MaskSize",
+   "category": "effects",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "MaskType",
+   "category": "effects",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "Visibility",
+   "category": "effects",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "Clear",
+   "category": "layout",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "Left",
+   "category": "layout",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "Position",
+   "category": "layout",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "ReadingFlow",
+   "category": "layout",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "ZIndex",
+   "category": "layout",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "Isolation",
+   "category": "performance",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "BoxSizing",
+   "category": "sizing",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "Height",
+   "category": "spacing",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "MarginTrim",
+   "category": "spacing",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 0.8321,
+   "delta": 0.1679
+  },
+  {
+   "name": "PaddingBottom",
+   "category": "spacing",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "PaddingLeft",
+   "category": "spacing",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "PaddingRight",
+   "category": "spacing",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "PaddingTop",
+   "category": "spacing",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "Width",
+   "category": "spacing",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "Rotate",
+   "category": "transforms",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  },
+  {
+   "name": "Translate",
+   "category": "transforms",
+   "minSsim": 1,
+   "worst": "",
+   "band": "hold",
+   "wave5": 1,
+   "delta": 0
+  }
+ ]
+}

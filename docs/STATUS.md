@@ -248,7 +248,20 @@ dirs + WPT corpus are gitignored):
   71/78 — css-grid 1.000/12 perfect, css-break 0.999/12**; Android
   46 → 58; iOS 56 → 59. Remaining: the css-ui form-control wall, the
   native float-layout wall, vertical writing modes, and the
-  out-of-contract multi-child multicol family — all classified.
+  out-of-contract multi-child multicol family — all classified. Wave 13
+  (`tools/visual/reverify-wave12.json`) re-measured the full 94-set:
+  **90/94 properties hold ≥ 0.95** (wave-5: 73; wave-0: 11), zero
+  regressions — the property axis is essentially complete within
+  current capability tiers; the 4 remaining rows are all named walls
+  (SVG-source blocked variant, cursive stacks, keyword-fractional
+  sizes, vertical text). iOS gained Android-parity greedy multi-child
+  multicol distribution (the shared loop extracted pure and pinned
+  identically on both platforms). Metrology follow-ups queued from the
+  residue audit: the browser-ref semanticPresence pass-gate (blank
+  captures can currently "pass" against tiny-widget refs — a
+  corpus-version decision), the static @keyframes t-sampler for
+  negative-delay animation tests, and delivery-aware score-exclusions
+  (three css-backgrounds exclusions are stale post-inliner).
 
 ## Test suites
 
@@ -256,8 +269,8 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1123 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 513 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1131 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 522 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 580 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 

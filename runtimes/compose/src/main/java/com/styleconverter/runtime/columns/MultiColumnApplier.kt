@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.Placeable
 // Constraints.Infinity marks an unbounded block-size — no fragmentainer, so
 // the fragmentation branch never engages there.
 import androidx.compose.ui.unit.Constraints
@@ -583,25 +582,33 @@ object MultiColumnApplier {
                 )
             }
 
-            // Distribute items to columns (balanced distribution) — sized by the USED
-            // count so we never allocate (or greedily fill) columns that don't fit.
-            val columnHeights = IntArray(used.count)
-            val columnItems = Array(used.count) { mutableListOf<Pair<Placeable, Int>>() }
-
-            placeables.forEachIndexed { index, placeable ->
-                // Find column with minimum height
-                val targetColumn = columnHeights.indices.minByOrNull { columnHeights[it] } ?: 0
-                columnItems[targetColumn].add(placeable to columnHeights[targetColumn])
-                columnHeights[targetColumn] += placeable.height
-            }
-
-            val maxHeight = columnHeights.maxOrNull() ?: 0
+            // Distribute items to columns — the greedy min-height heuristic,
+            // extracted PURE into MultiColumnDistribution (lane
+            // ios-multichild-multicol) so the JVM suite and the iOS mirror pin
+            // the identical assignments. Sized by the USED count so we never
+            // allocate (or greedily fill) columns that don't fit.
+            val childHeights = placeables.map { it.height }
+            // One slot (columnIndex, yOffset) per child, in child order —
+            // same choice rule + tie-break as the pre-extraction inline loop.
+            val slots = MultiColumnDistribution.distribute(childHeights, used.count)
+            // Container block-size = the tallest column (== the old
+            // columnHeights.maxOrNull), derived from the same slots.
+            val maxHeight = MultiColumnDistribution.containerBlockSizePx(childHeights, slots)
 
             layout(constraints.maxWidth, maxHeight) {
-                columnItems.forEachIndexed { columnIndex, items ->
+                // Place column-major (all of column 0, then column 1, …) — the
+                // exact placement (= paint) order of the pre-extraction loop,
+                // so any overlapping content keeps its draw order unchanged.
+                for (columnIndex in 0 until used.count) {
+                    // Inline position derives from the used geometry, not the
+                    // distribution: column i starts at i * (width + gap).
                     val x = columnIndex * (columnWidth + gapPx)
-                    items.forEach { (placeable, y) ->
-                        placeable.place(x, y)
+                    slots.forEachIndexed { index, slot ->
+                        // Within a column, insertion order == child order —
+                        // identical to the old per-column item lists.
+                        if (slot.columnIndex == columnIndex) {
+                            placeables[index].place(x, slot.yOffsetPx)
+                        }
                     }
                 }
             }
