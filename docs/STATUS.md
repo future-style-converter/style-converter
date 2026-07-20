@@ -286,7 +286,19 @@ dirs + WPT corpus are gitignored):
   css-backgrounds natives recovered to 0.970 means (Android 9, iOS 10
   of 12). Queued: the Android window-bound composed capture
   (scroll-and-stitch), body-root height sibling-stacking, the
-  non-Latin shaping wall.
+  non-Latin shaping wall. Wave 16 (`tools/titan/results/corpus-v4-5.json`)
+  built the strategic capability: **post-load state extraction** — the
+  pipeline loads the test page in Chromium under the exact ref canvas
+  contract, snapshots a 34-property computed set per element, and bakes
+  the post-script state into the fixture (honest bails for
+  timers/scroll/structural mutation; top-layer declined). Proven on
+  device: css-position went from an empty eligible set to **6 scored
+  tests, web 6/6 passing** (three at a perfect 1.000) — script
+  mutations land as typed IR and render correctly; the natives' 3/6 at
+  ~0.95 gives the next wave newly-visible real targets. The Android
+  composed capture is no longer window-bound (offscreen full-height
+  route; the 5132px tall-doc test captures fully — css-backgrounds
+  Android 10/12).
 
 ## Test suites
 
@@ -296,7 +308,7 @@ dirs + WPT corpus are gitignored):
 | web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1135 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 526 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 638 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 679 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

@@ -23,6 +23,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
@@ -105,7 +109,11 @@ private val TextPropCount = Color(0xFF666666)
  * canvas that mirrors the Chromium browser-ref (tools/titan/capture-browser-ref
  * .mjs): 390dp wide, WHITE (the corpus-v4 canvas — WPT_CANVAS_BACKGROUND, or the
  * body-root's own background), 16dp padding, 600dp min-height, natural height —
- * then PixelCopies that canvas ONCE and saves a single `<safe(testKey)>.png`
+ * then snapshots that canvas ONCE via an OFFSCREEN GraphicsLayer (NOT the
+ * window-bound PixelCopy the per-component path uses — see
+ * captureComposedLayer: a composed document taller than the 844px window must
+ * still capture at full height, matching iOS's window-independent
+ * ImageRenderer) and saves a single `<safe(testKey)>.png`
  * (ScreenshotManager.saveComposedScreenshot). This reproduces the reference
  * page's real layout (bar stacking, gaps, positions) so MULTI-component tests
  * are measured honestly instead of via inject's per-component vertical stitch.
@@ -144,6 +152,16 @@ fun ScreenshotCaptureScreen(
     // PixelCopy capture state
     var shouldCapture by remember { mutableStateOf(false) }
     var cardBoundsInWindow by remember { mutableStateOf<Rect?>(null) }
+
+    // Offscreen composed-capture layer (ANDROID-STITCH lane): the GraphicsLayer
+    // the composed canvas records its full-height draw into. Published from the
+    // composed render branch (SideEffect, once composed) so the capture effect
+    // below can snapshot it WINDOW-INDEPENDENTLY — PixelCopy can only read the
+    // [0,0..390,844] window frame, which truncated any composed document taller
+    // than the window (attachment-fixed-inside-transform-1 composes to 5132px;
+    // web/iOS captured full height, Android captured one white window). Null
+    // outside composed mode and between fixtures.
+    var composedLayer by remember { mutableStateOf<GraphicsLayer?>(null) }
 
     // TITAN inbox-mode state:
     //  - currentFixtureFile: the inbox *.json currently being rendered, so it
@@ -195,6 +213,10 @@ fun ScreenshotCaptureScreen(
             failedCount = 0
             cardBoundsInWindow = null
             shouldCapture = false
+            // Drop the previous fixture's offscreen layer reference — the next
+            // composed render publishes a fresh one (rememberGraphicsLayer per
+            // branch entry); a stale layer must never be snapshotted.
+            composedLayer = null
 
             val jsonString: String = if (inboxMode) {
                 // DO NOT clearScreenshots() in inbox mode — the host feeder owns
@@ -347,24 +369,43 @@ fun ScreenshotCaptureScreen(
         }
     }
 
-    // Capture logic using PixelCopy (COMPOSED path — TITAN Round 3). Fires once
-    // per fixture: the whole composed canvas is captured to ONE bitmap and saved
-    // as `<safe(testKey)>.png`, then the fixture is consumed and the poll loop
-    // re-armed. Only relevant in composed mode (which is always inbox mode), so
-    // it bails out otherwise. Keyed on shouldCapture alone (no per-component
-    // index in this path); ComposedCaptureView re-arms shouldCapture per fixture.
+    // Capture logic (COMPOSED path — TITAN Round 3; OFFSCREEN since the
+    // ANDROID-STITCH lane). Fires once per fixture: the whole composed canvas is
+    // captured to ONE bitmap and saved as `<safe(testKey)>.png`, then the
+    // fixture is consumed and the poll loop re-armed. Only relevant in composed
+    // mode (which is always inbox mode), so it bails out otherwise. Keyed on
+    // shouldCapture alone (no per-component index in this path);
+    // ComposedCaptureView re-arms shouldCapture per fixture.
+    //
+    // UNLIKE the per-component path above, this does NOT PixelCopy the window:
+    // PixelCopy reads the composited WINDOW frame, whose height is the device
+    // window (844px) — any composed document taller than that laid out past the
+    // window edge and truncated (the wave-15 attachment-fixed-inside-transform-1
+    // evidence: doc composes to 5132px, web/iOS saved 390x5132, Android saved
+    // one 390x844 white window). Instead the composed canvas records its full
+    // draw into an offscreen GraphicsLayer at its FULL laid-out size (see
+    // ComposedCaptureCanvas), and we snapshot THAT layer — the native twin of
+    // iOS's window-independent ImageRenderer pass (ScreenshotManager.render).
     LaunchedEffect(shouldCapture) {
         if (!composedMode) return@LaunchedEffect
         if (shouldCapture && roots != null) {
             delay(400) // let Compose finish laying out + compositing the full doc
 
             try {
+                // Bounds still gate readiness (layout must have settled and
+                // reported a non-degenerate canvas) and feed the full-height
+                // log line; the layer itself carries the capture geometry.
                 val bounds = cardBoundsInWindow
-                val bitmap = if (window != null && bounds != null && bounds.width() > 0 && bounds.height() > 0) {
-                    // ONE PixelCopy of the whole composed canvas rect (390 ×
-                    // natural height) — the composited frame with every root's
-                    // paint, exactly as PixelCopy grabs a single component.
-                    captureWithPixelCopy(window, bounds)
+                val layer = composedLayer
+                val bitmap = if (layer != null && bounds != null && bounds.width() > 0 && bounds.height() > 0) {
+                    // Evidence trail for the truncation-class bug: record the
+                    // canvas height actually captured so a feeder log grep can
+                    // verify tall documents came through un-truncated.
+                    Log.i(TAG, "Composed offscreen capture: canvas=${bounds.width()}x${bounds.height()} (window-independent)")
+                    // ONE offscreen snapshot of the whole composed canvas
+                    // (390 × natural height, even when ≫ the window height) —
+                    // the recorded display list with every root's paint.
+                    captureComposedLayer(layer)
                 } else {
                     null
                 }
@@ -381,7 +422,10 @@ fun ScreenshotCaptureScreen(
                     }
                 } else {
                     failedCount++
-                    Log.e(TAG, "Composed PixelCopy failed for: ${key ?: "<no key>"}")
+                    // No silent fallthrough: a missing layer/bounds or a failed
+                    // offscreen snapshot is logged as an explicit failure so the
+                    // feeder's timeout accounting attributes it to this fixture.
+                    Log.e(TAG, "Composed offscreen capture failed for: ${key ?: "<no key>"}")
                 }
             } catch (e: Exception) {
                 failedCount++
@@ -397,6 +441,10 @@ fun ScreenshotCaptureScreen(
             Log.i(TAG, "Titan composed: consumed ${currentFixtureFile?.name}, re-polling")
             roots = null
             composedTestKey = null
+            // The composed branch leaves composition with roots=null, which
+            // releases the rememberGraphicsLayer — clear our reference so the
+            // next fixture can only ever snapshot ITS freshly-published layer.
+            composedLayer = null
             currentIndex = -1
             capturePhase = CapturePhase.LOADING
             pollGeneration++
@@ -425,12 +473,22 @@ fun ScreenshotCaptureScreen(
                         LocalWptCaptureMode provides true,
                         LocalWptComposedMode provides true
                     ) {
+                        // Fresh offscreen record target per composed fixture
+                        // (this branch re-enters composition per fixture, so
+                        // rememberGraphicsLayer allocates anew and auto-releases
+                        // when roots is nulled after the save).
+                        val layer = rememberGraphicsLayer()
+                        // Publish AFTER composition applies (SideEffect — never
+                        // a state write mid-composition) so the capture effect
+                        // snapshots exactly the layer this render records into.
+                        SideEffect { composedLayer = layer }
                         ComposedCaptureView(
                             roots = composedRoots,
                             forceState = forceState,
                             captureWidthDp = captureWidthDp,
                             animationTime = animationTime,
                             keyframes = keyframes,
+                            graphicsLayer = layer,
                             onCanvasPositioned = { bounds -> cardBoundsInWindow = bounds },
                             onRendered = { shouldCapture = true }
                         )
@@ -509,6 +567,64 @@ private suspend fun captureWithPixelCopy(window: Window, bounds: Rect): Bitmap? 
         }
     }
 }
+
+/**
+ * Snapshot the composed canvas's offscreen [GraphicsLayer] to a saveable
+ * software Bitmap (COMPOSED path only — the per-component path keeps
+ * [captureWithPixelCopy] byte-identically).
+ *
+ * Why not PixelCopy: PixelCopy reads the composited WINDOW frame, so its
+ * source rect is clamped to the window's 390x844 — a composed document taller
+ * than the window truncated to one window of pixels (the wave-15
+ * attachment-fixed-inside-transform-1 failure: 5132px doc → 390x844 white).
+ * GraphicsLayer.toImageBitmap() instead renders the layer's RECORDED display
+ * list (captured at the canvas's full laid-out size by the record{} modifier
+ * in ComposedCaptureCanvas) into a bitmap of the LAYER's size — the same
+ * "ideal-size offscreen render" contract as iOS's ImageRenderer
+ * (ScreenshotManager.render, scale 1.0), which is why iOS never had the bug.
+ *
+ * The ImageBitmap is copied to ARGB_8888 because toImageBitmap() may hand back
+ * a HARDWARE-config bitmap on API 28+ (GPU readback), and ScreenshotManager's
+ * PNG encode + any later pixel inspection need a software-accessible config;
+ * copy() performs the readback explicitly.
+ *
+ * Device-gated verification (documented per the campaign's no-emulator gate):
+ * the JVM cannot execute GraphicsLayer, so the full-height behaviour is pinned
+ * by source-scan tests (ComposedFullHeightCaptureTest) and must be confirmed
+ * on-device by a TITAN composed run over attachment-fixed-inside-transform-1
+ * asserting the saved PNG is 390x5132, matching web/iOS.
+ */
+private suspend fun captureComposedLayer(layer: GraphicsLayer): Bitmap? {
+    // Degenerate-layer gate (pure decision, JVM-pinned in
+    // ComposedFullHeightCaptureTest): a zero-area layer means the record
+    // modifier never ran — fail loudly instead of encoding an empty PNG.
+    if (!isCapturableLayerSize(layer.size.width, layer.size.height)) {
+        Log.e(TAG, "Composed layer has degenerate size ${layer.size} — record never ran?")
+        return null
+    }
+    return try {
+        // Render the recorded display list offscreen at full layer size (the
+        // suspend readback documented for Compose 1.7's GraphicsLayer)…
+        val image = layer.toImageBitmap()
+        // …then force a software ARGB_8888 copy for the PNG encoder (see doc).
+        image.asAndroidBitmap().copy(Bitmap.Config.ARGB_8888, false)
+    } catch (e: Exception) {
+        // No silent fallthrough: surface the failure to the capture effect,
+        // which logs it against the fixture's test key.
+        Log.e(TAG, "GraphicsLayer snapshot failed", e)
+        null
+    }
+}
+
+/**
+ * Pure gate for [captureComposedLayer]: a layer is snapshot-worthy only with
+ * strictly positive area on both axes. Extracted (and internal) so the plain
+ * JVM suite can pin the decision without a device — GraphicsLayer itself is
+ * Android-only, but this rule is what stands between a mis-wired record and a
+ * silently-saved empty PNG.
+ */
+internal fun isCapturableLayerSize(width: Int, height: Int): Boolean =
+    width > 0 && height > 0
 
 @Composable
 private fun LoadingView() {
@@ -879,10 +995,21 @@ internal fun resolveComposedCanvasBackground(roots: List<IRComponent>): Color {
 }
 
 /**
- * COMPOSED capture host (TITAN Round 3). No progress chrome — the composed
- * canvas must sit at window origin (0,0) so its PixelCopy rect stays inside the
- * capturable window. The canvas renders the WHOLE document (all roots, document
- * order) and reports its outer rect for a single PixelCopy.
+ * COMPOSED capture host (TITAN Round 3; full-height since the ANDROID-STITCH
+ * lane). No progress chrome — the canvas renders the WHOLE document (all
+ * roots, document order), records its draw into [graphicsLayer] for the
+ * offscreen snapshot, and reports its outer rect (readiness gate + height log).
+ *
+ * The host wraps the canvas in `verticalScroll` for its CONSTRAINTS, not for
+ * scrolling: a plain fillMaxSize Box hands the canvas maxHeight = the 844px
+ * window, and Compose COERCES the measured size into constraints — the canvas
+ * itself came out 844 tall and every root past the window edge was cut (the
+ * wave-15 truncation: attachment-fixed-inside-transform-1 composes to 5132px).
+ * `verticalScroll` measures its child with Constraints.Infinity on the block
+ * axis (the same trick the per-component CaptureView already uses for tall
+ * components), so the canvas lays out at its FULL natural height and the
+ * recorded layer covers all of it. The scroll state is never scrolled —
+ * offset stays 0, content is static, capture stays deterministic.
  */
 @Composable
 private fun ComposedCaptureView(
@@ -891,14 +1018,20 @@ private fun ComposedCaptureView(
     captureWidthDp: Int = 390,
     animationTime: Double? = null,
     keyframes: Map<String, List<com.styleconverter.runtime.core.ir.IRKeyframeStop>> = emptyMap(),
+    graphicsLayer: GraphicsLayer,
     onCanvasPositioned: (Rect) -> Unit,
     onRendered: () -> Unit
 ) {
-    // Top-start alignment (not centred/scrolled like the per-component
-    // CaptureView): the canvas is full 390dp wide and must anchor at the window
-    // top so PixelCopy's rect [0,0 .. 390,height] never runs past the window.
+    // Top-start alignment: the canvas anchors at the window top-left, so the
+    // visible window shows the document head while the offscreen layer holds
+    // the full height (PixelCopy geometry no longer constrains this path).
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            // Unbounded block-axis constraints for the canvas — see the
+            // function doc above. Never scrolled; rememberScrollState() stays
+            // at 0 for the life of the fixture.
+            .verticalScroll(rememberScrollState()),
         contentAlignment = Alignment.TopStart
     ) {
         ComposedCaptureCanvas(
@@ -906,6 +1039,7 @@ private fun ComposedCaptureView(
             forceState = forceState,
             animationTime = animationTime,
             keyframes = keyframes,
+            graphicsLayer = graphicsLayer,
             canvasWidth = captureWidthDp.dp,
             onPositioned = { posInWindow, widthPx, heightPx ->
                 onCanvasPositioned(Rect(
@@ -953,6 +1087,7 @@ private fun ComposedCaptureCanvas(
     forceState: String? = null,
     animationTime: Double? = null,
     keyframes: Map<String, List<com.styleconverter.runtime.core.ir.IRKeyframeStop>> = emptyMap(),
+    graphicsLayer: GraphicsLayer,
     canvasWidth: Dp = CaptureCanvasWidth,
     onPositioned: (androidx.compose.ui.geometry.Offset, Float, Float) -> Unit,
     onRendered: () -> Unit
@@ -996,6 +1131,23 @@ private fun ComposedCaptureCanvas(
         modifier = Modifier
             .width(canvasWidth)
             .heightIn(min = ComposedCanvasMinHeight)
+            // Offscreen full-height record (ANDROID-STITCH lane): re-record the
+            // canvas's ENTIRE draw pass — the background painted by the chained
+            // .background below plus every padded root — into the hoisted
+            // GraphicsLayer at this node's full laid-out size, then draw the
+            // layer back so the on-window render is visually unchanged. record{}
+            // replays the display list into the layer BEFORE any ancestor
+            // (scroll container / window) clip applies, so content past the
+            // 844px window edge is captured intact; the capture effect then
+            // snapshots the layer via GraphicsLayer.toImageBitmap() (the
+            // documented Compose-1.7 composable-to-bitmap path), mirroring
+            // iOS's window-independent ImageRenderer contract. Placed BEFORE
+            // .background in the chain because an earlier draw modifier wraps
+            // the later ones — drawContent() here includes the background fill.
+            .drawWithContent {
+                graphicsLayer.record { this@drawWithContent.drawContent() }
+                drawLayer(graphicsLayer)
+            }
             .background(canvasBackground)
             .testTag("composed-capture-canvas")
             .onGloballyPositioned { coords ->

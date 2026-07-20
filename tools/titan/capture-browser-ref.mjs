@@ -149,7 +149,11 @@ export const CANVAS_BG = '#FFFFFF';
 // refs at the un-segmented refs/<sha>/<section>/ path are ALL stale —
 // none is ever mixed into a v4.1 diff.
 export const CANVAS_REV = 'white-black-ink-font-lh';
-const CANVAS_PAD_PX = 16;
+// wave-16 POST-LOAD: exported (was module-private) so post-load-extract.mjs
+// can frame the TEST page in the identical canvas the ref capture uses —
+// computed geometry snapshotted under a different pad would bake a
+// systematic offset into every overridden inset.
+export const CANVAS_PAD_PX = 16;
 
 // ── corpus-v4.1 FONT pin (header sub-boundary, FONT half) ────────────────────
 //
@@ -200,7 +204,12 @@ const EMBEDDED_FONT_WEIGHTS = [
 // this CSS goes straight to the ref browser and never passes through the
 // converter's value-lowercasing IR path.
 let _interFontFaceCss = null;
-async function interFontFaceCss() {
+// wave-16 POST-LOAD: exported (was module-private) so post-load-extract.mjs
+// injects the SAME embedded Inter faces into the live TEST page — text-driven
+// geometry (wrap points, line boxes) must settle on the same face the ref and
+// the harnesses use, or computed rects would drift per the corpus-v4.1
+// font-pin lesson documented in the header.
+export async function interFontFaceCss() {
   if (_interFontFaceCss !== null) return _interFontFaceCss;
   const faces = [];
   for (const [file, weight] of EMBEDDED_FONT_WEIGHTS) {
@@ -384,14 +393,11 @@ async function renderOne(page, wptRef, testRel) {
   return { dest, cached: false };
 }
 
-/** Render N tests with one shared browser instance. Returns per-test status. */
-export async function captureRefs(testRels, opts = {}) {
-  const wptRef = opts.wptRef ?? await resolveWptRef();
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    // Match capture-screenshots.mjs's flag set so any timer-throttling
-    // weirdness behaves identically across the two capture paths.
-    args: [
+// wave-16 POST-LOAD: the launch flag set, factored to an exported const so
+// post-load-extract.mjs drives the SAME Chromium configuration (CPU raster,
+// no throttling, no focus steal) — the settle/behaviour lessons recorded on
+// each flag below were paid for once and must not fork per capture path.
+export const BROWSER_LAUNCH_ARGS = [
       // Force CPU rasterization — see capture-screenshots.mjs. Two reasons
       // it matters HERE too: (1) rendering a real WPT reference page would
       // otherwise deadlock Page.captureScreenshot the same way the platform
@@ -417,7 +423,17 @@ export async function captureRefs(testRels, opts = {}) {
       '--no-default-browser-check',
       '--no-first-run',
       '--disable-features=Translate,MediaRouter,OptimizationHints',
-    ],
+];
+
+/** Render N tests with one shared browser instance. Returns per-test status. */
+export async function captureRefs(testRels, opts = {}) {
+  const wptRef = opts.wptRef ?? await resolveWptRef();
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    // Match capture-screenshots.mjs's flag set so any timer-throttling
+    // weirdness behaves identically across the two capture paths (the flag
+    // set itself lives in the exported BROWSER_LAUNCH_ARGS above).
+    args: BROWSER_LAUNCH_ARGS,
     protocolTimeout: 300_000,
   });
 

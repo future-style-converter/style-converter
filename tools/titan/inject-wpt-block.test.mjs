@@ -436,9 +436,12 @@ test('wave8: buildResults source carries the scoreEligible contract', async () =
     'results must expose scoreEligible: !isNa');
   // wave-13: the gate call must ALSO thread the extractor's delivery record
   // (meta.lossyReasons) so the requires-bundled-asset exclusion stays
-  // delivery-aware — see the delivery-aware tests below.
-  assert.match(src, /applyNaScoreGate\(naTags,\s*\[webRefDiff,\s*iosRefDiff,\s*androidRefDiff\],\s*meta\.lossyReasons\)/,
-    'the NA gate must neutralise all three browser-ref diffs AND receive the delivery record');
+  // delivery-aware. wave-16: AND the post-load delivery stamp
+  // (meta.postLoadExtracted, strict-true) so wall-tagged tests whose
+  // post-script state post-load-extract.mjs delivered are re-scored — see
+  // the wave-16 gate-interplay tests below.
+  assert.match(src, /applyNaScoreGate\(naTags,\s*\[webRefDiff,\s*iosRefDiff,\s*androidRefDiff\],\s*meta\.lossyReasons,\s*meta\.postLoadExtracted\s*===\s*true\)/,
+    'the NA gate must neutralise all three browser-ref diffs AND receive the delivery record AND the post-load stamp');
 });
 
 // ── wave-13 corpus-v4.3 SCORING boundary ───────────────────────────────────
@@ -779,6 +782,66 @@ test('wave15: broad capability tags STILL do not exclude (wave-8 denominator les
     ['requires-fragmentation', 'requires-float-layout', 'requires-form-control-rendering'],
     [web], []), false);
   assert.equal(web.scoreExcluded, undefined);
+});
+
+// ── wave-16 POST-LOAD gate interplay ───────────────────────────────────────
+//
+// The extraction wall becomes CROSSABLE: post-load-extract.mjs loads the
+// TEST page in Chromium, snapshots per-element computed state after the
+// page's scripts ran, bakes it into the fixture, and stamps
+// `_wpt.postLoadExtracted: true`. That stamp is the delivery record the
+// wave-15 comments said couldn't exist — threaded to the gate as the 4th
+// parameter (via build-combined-fixture's keyMap, the lossyReasons channel).
+
+test('wave16: postLoadExtracted=true re-scores a wall-tagged test', () => {
+  // The wall was "cannot deliver the post-script state"; post-load
+  // delivered it, so the diff measures the RUNTIMES again and must count.
+  const web = { ssim: 0.97, wptPass: true };
+  const isNa = applyNaScoreGate(['requires-script-mutation'], [web], [], true);
+  assert.equal(isNa, false);
+  assert.equal(web.wptPass, true);           // scoring fields untouched
+  assert.equal(web.scoreExcluded, undefined); // not stamped — the test is scored
+});
+
+test('wave16: postLoadExtracted=true re-scores requires-script-driven-scroll too', () => {
+  // Both wall tags are the same no-script-execution gap; the stamp clears
+  // both (a delivered fixture passed the scroll guard, so a scroll-tagged
+  // test that got the stamp really was delivered scroll-free).
+  const ios = { ssim: 0.96, wptPass: true };
+  assert.equal(applyNaScoreGate(['requires-script-driven-scroll'], [ios], [], true), false);
+  assert.equal(ios.scoreExcluded, undefined);
+});
+
+test('wave16: absent/false/truthy-but-not-true stamps keep the wave-15 exclusion', () => {
+  // Strict `=== true` on purpose: only the extractor's explicit stamp may
+  // re-score the wall — undefined (legacy keyMap), false (static-only), and
+  // accidental truthy values (1, 'yes') all stay conservatively excluded.
+  for (const stamp of [undefined, false, 1, 'yes']) {
+    const web = { ssim: 0.54, wptPass: false };
+    assert.equal(applyNaScoreGate(['requires-script-mutation'], [web], [], stamp), true,
+      `stamp ${JSON.stringify(stamp)} must keep the exclusion`);
+    assert.equal(web.wptPass, null);
+    assert.equal(web.scoreExcluded, true);
+  }
+});
+
+test('wave16: the stamp does NOT touch the bundled-asset branch', () => {
+  // Asset delivery has its own ground truth (lossyReasons); post-load says
+  // nothing about assets. A corroborated requires-bundled-asset exclusion
+  // survives even a post-load-extracted fixture.
+  const web = { ssim: 0.30, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-bundled-asset'], [web],
+    ['requires-bundled-asset'], true), true);
+  assert.equal(web.scoreExcluded, true);
+});
+
+test('wave16: keyMap threads postLoadExtracted from the fixture _wpt block', async () => {
+  // Source-scan pin on build-combined-fixture.mjs — the stamp must ride the
+  // keyMap (the same channel lossyReasons uses) or the gate would never see
+  // it. Guards against a refactor silently dropping the wiring.
+  const src = await fs.readFile(new URL('./build-combined-fixture.mjs', import.meta.url), 'utf8');
+  assert.match(src, /postLoadExtracted:\s*fixture\._wpt\?\.postLoadExtracted\s*===\s*true/,
+    'keyMap entries must carry postLoadExtracted from fixture._wpt');
 });
 
 // ── wave-15 LOW-CONTENT-DENSITY triage flag ────────────────────────────────

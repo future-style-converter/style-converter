@@ -92,7 +92,11 @@ async function main() {
       const key = componentKey(testRel, 0);
       components[key] = { properties: { width: '100px', height: '100px' } };
       wptKeyMap[key] = { test: testRel, section, stem, childIndex: 0,
-                         bucket: 'missing', lossy: false };
+                         bucket: 'missing', lossy: false,
+                         // wave-16: a missing fixture certainly delivered no
+                         // post-script state — explicit false keeps the
+                         // score gate's conservative wall exclusion.
+                         postLoadExtracted: false };
       continue;
     }
 
@@ -115,6 +119,13 @@ async function main() {
         lossy:  !!fixture._wpt?.lossy,
         lossyReasons: fixture._wpt?.lossyReasons ?? [],
         fuzzy:  fixture._wpt?.fuzzy ?? null,
+        // wave-16 POST-LOAD: thread the post-load delivery stamp to
+        // inject-wpt-block's score gate (same channel as lossyReasons —
+        // the keyMap is how per-test fixture truth reaches scoring).
+        // true ⇔ tools/titan/post-load-extract.mjs captured the test's
+        // POST-script computed state and baked it into this fixture, so
+        // EXTRACTION_WALL_TAGS no longer score-exclude it.
+        postLoadExtracted: fixture._wpt?.postLoadExtracted === true,
       };
       i++;
     }
