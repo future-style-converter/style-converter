@@ -637,7 +637,10 @@ export function extractOwnText(innerHtml) {
 // containers stay components. <span> is included ONLY because bare spans
 // (no attrs, no matching rules) are pure text wrappers — the attribute +
 // styledTags guards below keep every styled-subject span on the child path.
-const INLINE_MERGE_TAGS = new Set(['strong', 'em', 'b', 'i', 'span', 'code']);
+// wave-16 POST-LOAD: exported so post-load-extract.mjs's in-browser walk can
+// apply the SAME merge filter (same tag set, same predicate inputs) and stay
+// element-for-element aligned with the static traversal.
+export const INLINE_MERGE_TAGS = new Set(['strong', 'em', 'b', 'i', 'span', 'code']);
 
 /** Parse the attribute map out of a raw open tag (`<strong title="x">`).
  *  Mirrors walkChildren's attr scan exactly (same regex, same
@@ -1421,7 +1424,12 @@ const ROOT_SENTINEL_ANCESTOR = {
 //
 // Head-only elements remain skipped during the no-<body> fallback (Bug 5);
 // see `HEAD_ONLY_TAGS` below.
-const HEAD_ONLY_TAGS = new Set([
+// wave-16 POST-LOAD: exported so post-load-extract.mjs can replicate the
+// EXACT same head-only filter inside the live browser walk — the two
+// traversals must agree element-for-element or the computed-style overlay
+// would land on the wrong components (see post-load-extract.mjs's
+// element-mapping contract).
+export const HEAD_ONLY_TAGS = new Set([
   'title', 'meta', 'link', 'style', 'script', 'base', 'head',
 ]);
 
@@ -3771,24 +3779,53 @@ function specSectionOf(testRel) {
 
 // ── CLI ──────────────────────────────────────────────────────────────────────
 async function main() {
-  const inputs = process.argv.slice(2);
+  // wave-16 POST-LOAD activation (opt-in): `--post-load` flag or
+  // POST_LOAD_EXTRACT=1 env (the env form is how section-runner.sh opts a
+  // whole section run in without a script change). When enabled, tests
+  // whose wpt-buckets.json notApplicable tags cross the EXTRACTION WALL
+  // (post-load-extract.mjs's isWallTagged — exactly the tags the score gate
+  // excludes on) get the live-browser computed-state overlay; everything
+  // else keeps the static path byte-identically. The module is imported
+  // DYNAMICALLY so the default static path never pays the puppeteer/sharp
+  // import cost (and so this module stays stdlib-only for its ~24k-file
+  // batch runs).
+  const postLoadEnabled = process.argv.includes('--post-load')
+    || process.env.POST_LOAD_EXTRACT === '1';
+  const inputs = process.argv.slice(2).filter((a) => a !== '--post-load');
   if (inputs.length === 0) {
-    console.error('usage: extract-fixture.mjs <relative-test-path>...');
+    console.error('usage: extract-fixture.mjs [--post-load] <relative-test-path>...');
     console.error('       (paths are repo-relative, e.g. "css/css-color/a98rgb-001.html")');
     process.exit(1);
   }
+  // Lazily-loaded post-load module handle (null while disabled).
+  const postLoad = postLoadEnabled ? await import('./post-load-extract.mjs') : null;
   let ok = 0, fail = 0;
-  for (const rel of inputs) {
-    try {
-      const result = await extractFixture(rel);
-      const written = await writeFixturePair(result);
-      console.log(`extracted ${rel} → ${relative(REPO_ROOT, written.testPath)}` +
-                  (written.refPath ? ` (+ ref)` : ' (ref skipped)'));
-      ok++;
-    } catch (err) {
-      console.error(`FAIL ${rel}: ${err.message ?? err}`);
-      fail++;
+  try {
+    for (const rel of inputs) {
+      try {
+        const result = await extractFixture(rel);
+        // Post-load overlay BEFORE writing so the persisted fixture carries
+        // the baked state + `_wpt.postLoadExtracted` stamp atomically.
+        // Declines/bails leave the fixture byte-identical (the documented
+        // bail-to-static contract) and are surfaced in the log line.
+        let postLoadNote = '';
+        if (postLoad && await postLoad.isWallTagged(rel)) {
+          const outcome = await postLoad.postLoadAugmentFixture(result.fixture, rel);
+          postLoadNote = ` [post-load: ${outcome.status}${outcome.reason ? ` — ${outcome.reason}` : ''}]`;
+        }
+        const written = await writeFixturePair(result);
+        console.log(`extracted ${rel} → ${relative(REPO_ROOT, written.testPath)}` +
+                    (written.refPath ? ` (+ ref)` : ' (ref skipped)') + postLoadNote);
+        ok++;
+      } catch (err) {
+        console.error(`FAIL ${rel}: ${err.message ?? err}`);
+        fail++;
+      }
     }
+  } finally {
+    // Post-load keeps one shared Chromium alive across tests — close it
+    // even when a test threw, or the process would hang on exit.
+    if (postLoad) await postLoad.closePostLoadBrowser();
   }
   console.log(`extract-fixture: ${ok} ok, ${fail} failed`);
   process.exit(fail > 0 ? 2 : 0);

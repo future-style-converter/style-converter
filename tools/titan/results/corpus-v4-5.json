@@ -1,0 +1,50 @@
+{
+ "_snapshot": "corpus-v4.5",
+ "_note": "THE POST-LOAD EXTRACTION CAPABILITY: the pipeline can now genuinely SCORE dynamic (script-mutation) tests instead of excluding them — an opt-in mode loads the TEST page in Chromium under the exact ref canvas contract (shared launch args, white canvas, Inter+line-height injection, fonts.ready+double-rAF settle), snapshots a deliberately-enumerated 34-property computed set per element (traversal-identity-matched to the static extractor), and bakes the post-script state into the fixture (settle-stability/scroll/mapping bails stay honest; top-layer statically declined). applyNaScoreGate re-admits wall-tagged tests carrying postLoadExtracted. PROVEN ON DEVICE: css-position went from an EMPTY eligible set to 6 scored tests — web 6/6 PASSING (hypothetical-dynamic-change-001/002 + block-axis at a PERFECT 1.000) — script mutations land as typed IR (Left {px:100}) and render correctly. The natives measure 3/6 at ~0.952 means: REAL native divergences newly visible (the contain:strict+fixed clipping lead among them — wave-17 targets). ALSO: the Android composed capture is no longer window-bound (offscreen full-height route — verticalScroll for Constraints.Infinity, never scrolled; the 5132px tall-doc test now captures fully; css-backgrounds Android 10/12, +1).",
+ "artifact": "tools/titan/runs/wave16-gate (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "f07e1965",
+ "date": "2026-07-20",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence coverage asymmetry (corpus-v4.3 gate) + extraction-wall exclusion (v4.4) + post-load re-admission (v4.5)",
+ "sampling": "9 sections x 12 bucket-A tests (css-text + css-position joined at this boundary)",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh)",
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9707,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9702,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9682,
+    "passing": 10
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 6,
+    "meanSsim": 0.9856,
+    "passing": 6
+   },
+   "ios": {
+    "measured": 6,
+    "meanSsim": 0.9534,
+    "passing": 3
+   },
+   "android": {
+    "measured": 6,
+    "meanSsim": 0.9521,
+    "passing": 3
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then POST_LOAD_EXTRACT=1 section-runner.sh css-position --all-platforms --max-tests 12 --run-id wave16-gate --foreground (+ css-backgrounds without the env); aggregate filtering scoreExcluded."
+}

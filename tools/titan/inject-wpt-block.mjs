@@ -629,13 +629,32 @@ export { EXTRACTION_WALL_TAGS };
  *  css-position tests were the script-mutation wall scored as renderer
  *  failure.
  *
+ *  wave-16 POST-LOAD refinement: the extraction wall is no longer strictly
+ *  "no delivery record by construction". The opt-in post-load extraction mode
+ *  (tools/titan/post-load-extract.mjs) loads the TEST page in Chromium, lets
+ *  its scripts run, and bakes per-element COMPUTED state into the fixture —
+ *  when it succeeds it stamps `_wpt.postLoadExtracted: true` (threaded here
+ *  as the `postLoadExtracted` parameter via the combined fixture's keyMap,
+ *  exactly like the wave-13 lossyReasons channel). That stamp IS the
+ *  delivery record the wave-15 comment said couldn't exist: the post-script
+ *  state was captured and delivered, so the wall no longer stands between
+ *  the ref and the fixture — the test is scoreEligible again and its
+ *  divergence measures the RUNTIMES. Absent/false keeps the wave-15
+ *  unconditional exclusion byte-for-byte (static extraction never delivers
+ *  post-script state). The stamp deliberately does NOT touch the
+ *  bundled-asset branch: asset delivery has its own ground truth
+ *  (lossyReasons) and post-load says nothing about assets.
+ *
  *  @param {string[]|undefined} naTags  notApplicable tags for the test
  *  @param {Array<object|null>} refDiffs diffs to neutralise (mutated in place)
  *  @param {string[]|undefined} [lossyReasons] extractor lossy reasons for the
  *         test (keyMap meta.lossyReasons); array ⇒ delivery-aware, absent ⇒
  *         conservative legacy exclusion
+ *  @param {boolean} [postLoadExtracted] wave-16: true ⇔ the fixture carries
+ *         `_wpt.postLoadExtracted` (post-load mode delivered the post-script
+ *         state); neutralises EXTRACTION_WALL_TAGS exclusions only
  *  @returns {boolean} true when the test is score-excluded */
-export function applyNaScoreGate(naTags, refDiffs, lossyReasons) {
+export function applyNaScoreGate(naTags, refDiffs, lossyReasons, postLoadExtracted) {
   const isNa = Array.isArray(naTags) && naTags.some((t) => {
     // wave-15 extraction-wall branch: script-execution tags exclude
     // UNCONDITIONALLY — no lossyReasons cross-check is possible because the
@@ -643,7 +662,11 @@ export function applyNaScoreGate(naTags, refDiffs, lossyReasons) {
     // (full rationale at EXTRACTION_WALL_TAGS above). Checked FIRST so the
     // delivery-aware bundled-asset branch below stays byte-for-byte the
     // wave-13 behaviour for its own tag.
-    if (EXTRACTION_WALL_TAGS.has(t)) return true;
+    // wave-16: …unless post-load extraction DELIVERED the post-script state
+    // (postLoadExtracted === true, strict — any other value keeps the
+    // conservative wave-15 exclusion). The wall was the inability to deliver
+    // that state; delivered ⇒ the score measures the runtimes again.
+    if (EXTRACTION_WALL_TAGS.has(t)) return postLoadExtracted !== true;
     // Not a harness-delivery tag → never excludes (unchanged wave-8 rule).
     if (!SCORE_EXCLUDED_TAGS.has(t)) return false;
     // Delivery-aware branch: when the extractor's lossy record is available
@@ -970,7 +993,11 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     // no longer excludes a test whose assets the wave-8 inliner delivered
     // as data URIs (see applyNaScoreGate's wave-13 comment for the three
     // measured css-backgrounds cases; denominator 9 → 12 there).
-    const isNa = applyNaScoreGate(naTags, [webRefDiff, iosRefDiff, androidRefDiff], meta.lossyReasons);
+    // wave-16: meta.postLoadExtracted (threaded from the per-test fixture's
+    // `_wpt.postLoadExtracted` via build-combined-fixture's keyMap, the same
+    // channel lossyReasons rides) re-scores wall-tagged tests whose
+    // post-script state the post-load extractor delivered.
+    const isNa = applyNaScoreGate(naTags, [webRefDiff, iosRefDiff, androidRefDiff], meta.lossyReasons, meta.postLoadExtracted === true);
     if (isNa) {
       divergence = 'test-not-applicable';
     }
@@ -982,6 +1009,10 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       bucket: meta.bucket,
       lossy: !!meta.lossy,
       lossyReasons: meta.lossyReasons ?? [],
+      // wave-16: surfaced so dashboards can distinguish "wall-tagged but
+      // post-load-delivered (scored)" from "wall-tagged, static-only
+      // (excluded)" without re-reading the per-test fixture.
+      postLoadExtracted: meta.postLoadExtracted === true,
       specSection: meta.section,
       components: matchingKeys,
       fuzzy: meta.fuzzy ?? null,
