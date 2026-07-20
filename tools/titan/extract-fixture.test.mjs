@@ -39,6 +39,8 @@ import {
   propsForElement,
   propsForBodyRoot,
   buildComponents,
+  // wave-17 BODY-HEIGHT SLOTTING: the explicit-absolute-height trigger.
+  bodyDeclaresAbsoluteHeight,
   splitAnBOfSelector,
   collectDefinedTags,
   // wave-8: child combinator + support-asset inlining.
@@ -1967,4 +1969,111 @@ test('wave15: buildComponents — non-pre elements keep the legacy collapse byte
   // behaves exactly as before wave-15 — no fixture churn outside pre.
   const built = buildComponents('<body><div>  a\n\tb  </div></body>', [], 'x');
   assert.equal(built.components['x__0']._text, 'a b');
+});
+
+// ── wave-17 BODY-HEIGHT SLOTTING ────────────────────────────────────────────
+//
+// css-backgrounds/background-attachment-fixed-inside-transform-1: the test
+// styles `body { height: 4000px }`. Pre-wave-17 the extractor emitted the
+// body-root as a SIZED sibling block and stacked the body's children BELOW
+// it, so #outer (which overlaps the body in the real page, rotated band
+// around y≈340) rendered at y≈4340 on all three platforms — and the mostly-
+// white diff passed VACUOUSLY at 0.96 (lowContentDensity). The fix slots the
+// body's children INTO the body-root's `children` map when (and only when)
+// the body declares an explicit nonzero ABSOLUTE height. See the decision
+// record above buildComponents in extract-fixture.mjs.
+
+test('wave17: bodyDeclaresAbsoluteHeight — trigger edge set', () => {
+  // Absolute nonzero lengths trigger (the sized-sibling-block failure mode).
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: '4000px' }), true);
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: '3in' }), true);
+  assert.equal(bodyDeclaresAbsoluteHeight({ 'block-size': '200px' }), true);
+  // Fractional + case-insensitive unit forms parse too.
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: '.5PX' }), true);
+  // No height at all → no trigger (the overwhelmingly common corpus case).
+  assert.equal(bodyDeclaresAbsoluteHeight({}), false);
+  assert.equal(bodyDeclaresAbsoluteHeight({ margin: '0' }), false);
+  // auto / CSS-wide keywords → no sized block, no trigger.
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: 'auto' }), false);
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: 'inherit' }), false);
+  // Zero heights (css-overflow body-propagation family) → geometry is
+  // identical either way; stay byte-for-byte on the legacy shape.
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: '0' }), false);
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: '0px' }), false);
+  // Percentages resolve to auto against the auto-height composed canvas;
+  // viewport/font-relative units and functions normalize to null in the IR
+  // (runtime-dependent) — none materialize a sized sibling block today.
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: '100%' }), false);
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: '300vh' }), false);
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: '10em' }), false);
+  assert.equal(bodyDeclaresAbsoluteHeight({ height: 'calc-size(auto, size)' }), false);
+});
+
+test('wave17: sized body slots element children under the body-root (transform-1 shape)', () => {
+  // Mirror of background-attachment-fixed-inside-transform-1.html.
+  const css =
+    'body { height: 4000px; margin: 0 }' +
+    '#outer { margin: 200px; height: 700px; width: 300px }' +
+    '#inner { height: 700px; background-color: lime }';
+  const html = '<body><div id="outer"><div id="inner"></div></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 't');
+  // ONE top-level entry: the body-root. No `t__0` sibling stacked below it.
+  assert.deepEqual(Object.keys(components), ['t__body']);
+  const body = components['t__body'];
+  assert.equal(body._role, 'body-root');
+  // The body-root KEEPS its declared height (it must still paint/measure
+  // 4000px so the composed canvas's natural height matches the ref's
+  // documentHeight) — the height is not stripped or rewritten.
+  assert.equal(body.properties.height, '4000px');
+  // #outer nests under the body-root with its legacy id, in the child-map
+  // shape buildNode emits ({ id, ... } entries keyed by id — the Kotlin
+  // parser contract at CssParsing.kt:96).
+  assert.deepEqual(Object.keys(body.children), ['t__0']);
+  const outer = body.children['t__0'];
+  assert.equal(outer.id, 't__0');
+  assert.equal(outer.properties.margin, '200px');
+  // #inner's own nesting under #outer is untouched by the slotting.
+  assert.equal(outer.children['t__0__0'].properties['background-color'], 'lime');
+});
+
+test('wave17: sized body slots the leading __text run under the body-root too', () => {
+  // Leading anonymous body prose is a <body> child like any element — under
+  // a sized body its line box paints INSIDE the body area (real-page
+  // structure), so it rides the same slotting switch, ahead of __0 in the
+  // child map's insertion order (the renderers' document order).
+  const css = 'body { height: 300px } .t { width: 20px }';
+  const html = '<body>There should be no red:\n<div class="t"></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 't');
+  assert.deepEqual(Object.keys(components), ['t__body']);
+  const kids = Object.keys(components['t__body'].children);
+  assert.deepEqual(kids, ['t__text', 't__0']);
+  assert.equal(components['t__body'].children['t__text']._text, 'There should be no red:');
+});
+
+test('wave17: body WITHOUT explicit height keeps the sibling shape byte-for-byte', () => {
+  // The extractor pin the fix promises: a body that declares no absolute
+  // height — background-only body rules, percentage heights, zero heights —
+  // emits the LEGACY flat shape (body-root + __N siblings), unchanged.
+  for (const bodyDecl of ['background: green', 'height: 100%', 'height: 0px']) {
+    const css = `body { ${bodyDecl} } .t { width: 20px }`;
+    const html = '<body><div class="t"></div></body>';
+    const { components } = buildComponents(html, parseCss(css), 't');
+    // Two top-level entries: the body-root FIRST, then the element sibling.
+    assert.deepEqual(Object.keys(components), ['t__body', 't__0'],
+      `body { ${bodyDecl} } must keep the flat sibling shape`);
+    // No children map materializes on the body-root.
+    assert.equal(components['t__body'].children, undefined);
+    // The sibling keeps the legacy no-id top-level shape.
+    assert.equal(components['t__0'].id, undefined);
+    assert.equal(components['t__0'].properties.width, '20px');
+  }
+});
+
+test('wave17: sized body with NO element children emits no empty children map', () => {
+  // background-attachment-margin-root-001 shape (sized body, empty <body>):
+  // the omit-when-empty rule holds — no `children: {}` key appears.
+  const { components } = buildComponents('<body></body>',
+    parseCss('body { height: 300px }'), 't');
+  assert.deepEqual(Object.keys(components), ['t__body']);
+  assert.equal(components['t__body'].children, undefined);
 });

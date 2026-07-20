@@ -53,6 +53,14 @@ struct SpacingContext: Equatable {
     // since the renderer already flattens inheritance at convert time.
     var fontSizePx: Double = 16.0
 
+    // Wave-18 lane 2 (pin P1) — the measured advance width of the glyph
+    // '0' at the element's resolved font family + size, in px: the CSS
+    // `ch` unit basis (css-values-4 §6.1.3). Populated by StyleBuilder
+    // via ChUnitMetrics only when some length in the style actually uses
+    // ch (zero cost otherwise). Nil = metrics unavailable → the resolver
+    // falls back to the same section's mandated 0.5em assumption.
+    var chAdvancePx: Double? = nil
+
     // Surface dimensions used for vw/vh resolution. Wave 6 (#39): these
     // literals are legacy DEFAULTS only — ComponentRenderer overwrites
     // all three geometry fields from the host-published `styleViewport`
@@ -95,6 +103,21 @@ struct SpacingContext: Equatable {
     // SizeApplier). SizeApplier flips the height axis to allowPercent
     // ONLY when this is non-nil.
     var containingBlockHeightPx: Double? = nil
+
+    // Wave-18 skeptic follow-up — INTRINSIC-sizing percent basis for
+    // calc(): when set, the SpacingCalcEvaluator resolves % operands
+    // against THIS basis instead of the legacy containingBlockWidth
+    // accessor below. The two intrinsic helpers (StyleBuilder
+    // horizontalPaddingPx / verticalPaddingPx, the P13 lane) set it to
+    // `containingBlockWidthPx ?? 0` so a calc-% padding obeys the same
+    // css-sizing-3 §5.2.1 cyclic-percent-to-zero rule a bare % already
+    // follows there — the executed cross-native probe caught calc(50% +
+    // 10px) inflating a content-box frame by 189 on iOS vs Compose's 10
+    // (Compose's evalCalc funnels % through the percentBasePx tri-state,
+    // which its percentIndefiniteAsZero intrinsic context zeroes). Nil
+    // (the default everywhere else) keeps the legacy applier-lane base,
+    // preserving the pinned B3 asymmetry numbers (189/110).
+    var calcPercentBasisPx: Double? = nil
 
     // Resolved percent-width basis: the ancestor-published containing
     // block when known, else the host-published initial containing

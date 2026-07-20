@@ -229,10 +229,22 @@ public struct ComponentRenderer: View {
     /// merged-list consumer (glyph color, border/outline currentColor)
     /// resolves against it instead of the placeholder contrast pick.
     private func mergedProperties(now: Date?) -> [IRProperty] {
-        InheritedText.merge(
+        // Wave 18 (RC6 companion) — the `all: <global>` sole-override
+        // drop, ported from Compose (ComponentRenderer.kt's allReset) so
+        // reset semantics match across natives: when `All` survives to
+        // the merged list, EVERY other declaration (inherited entries
+        // included — the merge runs first, exactly like Compose's
+        // rawProperties ordering) drops, collapsing the element to its
+        // untouched defaults — the observable web behaviour the audit
+        // fixtures pinned. iOS previously extracted All into an inert
+        // GlobalConfig, so `all:initial` boxes kept painting their other
+        // declarations. Note: an unboxed `display:contents` element never
+        // reaches here with All (the RC6 strip removes non-inherited
+        // declarations first), matching Compose's evaluation order.
+        GlobalExtractor.applyingAllReset(to: InheritedText.merge(
             own: InheritedText.resolvingCurrentColorOnColor(
                 motionEffectiveProperties(now: now)),
-            inherited: inheritedTextProperties)
+            inherited: inheritedTextProperties))
     }
 
     /// Wave 9 (#37) — true when the merged list's `Color` arrived ONLY
@@ -611,8 +623,18 @@ public struct ComponentRenderer: View {
 
     // public: explicit memberwise init — the synthesized one is internal,
     // so cross-module callers need this spelled out.
+    // Wave 18 (RC6) — `display: contents` unboxing happens HERE, at the
+    // single entry every render path shares: an unboxable `contents`
+    // component strips to an undecorated pass-through (no box to paint,
+    // css-display-3 §2.5) and every unboxable `contents` CHILD is spliced
+    // out of the children list, so all downstream collection paths
+    // (block flow ForEach, positioned overlay, flex, grid item building)
+    // see the grandchildren as direct children — the
+    // display-contents-alignment-002 grid-item fix. Identity for the
+    // whole contents-free corpus (ContentsUnboxing.resolve returns the
+    // input untouched), keeping every committed baseline byte-stable.
     public init(component: IRComponent) {
-        self.component = component
+        self.component = ContentsUnboxing.resolve(component)
     }
 
     // public: View protocol witness on a public type must be public.
@@ -699,6 +721,41 @@ public struct ComponentRenderer: View {
             // content box instead of losing the bands twice.
             s.size.boxSizing = SizeApplierMath.effectiveBoxSizing(
                 declared: s.size.boxSizing, wptCaptureMode: wptCaptureMode)
+            // Wave 18 (RC2) — abspos INSET-STRETCH sizing (css-position-3
+            // §3.5): an out-of-flow axis with both opposing insets and no
+            // author size sizes to cb − insets, then aspect-ratio resolves
+            // inline-first (the css-sizing abspos-003/004 fix — the ideal-
+            // size measure otherwise collapses an empty stretched box to
+            // 0×0 and the green square never paints). The containing block
+            // arrives on the SAME channels the wave-9 percent lanes use:
+            // the positioned-children loop publishes the ancestor's §3.1
+            // padding box, the hoist overlay the canvas. WPT-capture gated
+            // (mirror of the Compose call site): the whole dark-stage /
+            // 327-pair baseline path keeps today's chain byte-identical,
+            // and resolveFor is additionally the identity whenever nothing
+            // stretches (the S4 guard) — explicit-size boxes never move.
+            if wptCaptureMode, Self.isOutOfFlow(component) {
+                // Insets via the strict {"px":N}-only reader (skeptic
+                // fix): the live converter emits percent insets as BARE
+                // numbers, which the permissive layout7 lane reads as px
+                // for the offset applier — honest to OFFSET with (the
+                // pre-existing approximation) but not to SIZE with, so
+                // the stretch math refuses them (pin S1's conservatism).
+                let stretch = AbsposInsetStretch.resolveFor(
+                    size: s.size,
+                    inset: AbsposInsetStretch.strictInsets(from: component.properties),
+                    cbW: containingBlockWidth.map(Double.init),
+                    cbH: containingBlockHeight.map(Double.init))
+                // Fill ONLY the still-auto axes — resolve() never returns
+                // a value for an author-sized axis, but the nil-guard here
+                // keeps the invariant local and obvious.
+                if let w = stretch.widthPx, s.size.width == nil {
+                    s.size.width = .exact(px: w)
+                }
+                if let h = stretch.heightPx, s.size.height == nil {
+                    s.size.height = .exact(px: h)
+                }
+            }
             if let h = gridStretchHeight, s.size.height == nil {
                 // The injected row height is a border-box FRAME extent
                 // from the parent's stretch plan (css-align-3 §9 sizes

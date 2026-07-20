@@ -1,0 +1,234 @@
+{
+ "_snapshot": "corpus-v4.7",
+ "_note": "THE CORPUS BROADENS TO 12 SECTIONS: css-sizing, css-display and css-overflow first-captured under the mature instrument (honest gate + post-load extraction + white-black-ink-font-lh canvas). Web passed ALL 35 scored new-section tests on first capture (css-sizing a perfect 1.000 mean). The native residue diagnosed to six mechanisms and fixed in one round: (1) abspos STATIC POSITION \u2014 the wave-17 hoist now inset-aware, no-inset absolute stays at its flow slot (css-position-3 \u00a73.1) with the css-position 6/6 regression-guarded; (2) abspos INSET-STRETCH sizing (\u00a73.5 inset-modified containing block) with aspect-ratio inline-priority; (3) percent padding basis \u2014 real containing block threaded, indefinite\u21920 under fit-content abspos; (4) the CH UNIT resolved from font metrics (Android previously collapsed ch to width 0 \u2014 a blank canvas); (5) axis-selective overflow clip (single-axis clip no longer clips both axes); (6) display:contents unboxing on both natives (children spliced into grid/flex item collection) + the iOS all:initial sole-override port. Cross-native skeptic probes (247-component classifier diff, 22-expression calc table through both real evaluators) caught and fixed 4 more divergences pre-gate, including an iOS calc evaluator ported from Compose line-for-line. The body-root height extractor defect (wave-15 finding) fixed by CHILD-SLOTTING: an explicit-height body nests its children in the IR instead of sibling-stacking them below a 4000px block \u2014 its css-backgrounds target test flipped to pass on Android with web at 1.000. DEVICE RESULT: css-sizing 12/12 on ALL THREE platforms (second-ever perfect section; was Android 6/12, iOS 8/12 at first capture), css-display web+iOS 12/12, css-position 6/6 hold, zero regressions across all 12 sections vs their prior runs, 327-net clean. Totals: web 119/134, iOS 107/134, Android 103/134.",
+ "artifact": "tools/titan/runs/wave18-final (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "31542078",
+ "date": "2026-07-20",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence coverage asymmetry (corpus-v4.3 gate) + extraction-wall exclusion (v4.4) + post-load re-admission (v4.5)",
+ "sampling": "12 sections x 12 bucket-A tests (css-sizing + css-display + css-overflow joined at this boundary)",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh)",
+ "totals": {
+  "web": {
+   "passing": 119,
+   "measured": 134
+  },
+  "ios": {
+   "passing": 107,
+   "measured": 134
+  },
+  "android": {
+   "passing": 103,
+   "measured": 134
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9738,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.972,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9689,
+    "passing": 10
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.999,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8447,
+    "passing": 9
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8452,
+    "passing": 9
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9909,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9875,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9807,
+    "passing": 10
+   }
+  },
+  "css-display": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9889,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9806,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9709,
+    "passing": 11
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9917,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9603,
+    "passing": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9524,
+    "passing": 7
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 1,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9562,
+    "passing": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.954,
+    "passing": 8
+   }
+  },
+  "css-overflow": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9944,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.975,
+    "passing": 9
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.9681,
+    "passing": 9
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 6,
+    "meanSsim": 0.9856,
+    "passing": 6
+   },
+   "ios": {
+    "measured": 6,
+    "meanSsim": 0.9854,
+    "passing": 6
+   },
+   "android": {
+    "measured": 6,
+    "meanSsim": 0.984,
+    "passing": 6
+   }
+  },
+  "css-sizing": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9997,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9872,
+    "passing": 12
+   }
+  },
+  "css-text": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9551,
+    "passing": 8
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9415,
+    "passing": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9408,
+    "passing": 8
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9979,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9859,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9791,
+    "passing": 11
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 9,
+    "meanSsim": 0.8908,
+    "passing": 2
+   },
+   "ios": {
+    "measured": 9,
+    "meanSsim": 0.8908,
+    "passing": 2
+   },
+   "android": {
+    "measured": 9,
+    "meanSsim": 0.8898,
+    "passing": 2
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then for each of the 12 sections: POST_LOAD_EXTRACT=1 section-runner.sh <section> --all-platforms --max-tests 12 --run-id wave18-final --foreground."
+}

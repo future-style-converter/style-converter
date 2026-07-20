@@ -309,7 +309,32 @@ dirs + WPT corpus are gitignored):
   **css-position: 6/6 on all three platforms** (natives at three
   perfect 1.000s), the first section in campaign history where every
   platform passes every scored test — on post-load-extracted dynamic
-  tests.
+  tests. Wave 18 (`tools/titan/results/corpus-v4-7.json`) broadened the
+  corpus to **12 sections**: css-sizing, css-display and css-overflow
+  first-captured under the mature instrument — and web passed **all 35
+  scored new-section tests on first capture** (css-sizing a perfect
+  1.000 mean). The native residue diagnosed to six mechanisms, fixed in
+  one round: the wave-17 hoist made inset-aware (no-inset absolute
+  renders at its static position, css-position-3 §3.1, with css-position
+  6/6 regression-guarded), abspos inset-stretch sizing with aspect-ratio
+  inline-priority, percent-padding basis (real containing block;
+  indefinite → 0), the `ch` unit resolved from font metrics (Android had
+  collapsed ch to width 0 — an entirely blank canvas), axis-selective
+  overflow clip, and real `display:contents` unboxing (children spliced
+  into grid/flex item collection) plus the iOS `all:initial`
+  sole-override port. Cross-native skeptic probes (a 247-component
+  classifier diff; a 22-expression calc table run through both real
+  evaluators) caught four more divergences pre-gate — iOS gained a
+  line-for-line port of Compose's calc evaluator, last-write-wins
+  logical-overflow resolution, and outline-outside-own-clip ordering.
+  The wave-15 body-root defect fixed by child-slotting (an
+  explicit-height body nests its children in the IR instead of
+  sibling-stacking them below a 4000px block); its css-backgrounds
+  target flipped to pass on Android, web at 1.000. **css-sizing: 12/12
+  on all three platforms** — the second-ever perfect section (from
+  Android 6/12, iOS 8/12 at first capture); css-display web+iOS 12/12;
+  zero regressions across all 12 sections; 327-net clean. Corpus
+  totals: web 119/134, iOS 107/134, Android 103/134.
 
 ## Test suites
 
@@ -317,9 +342,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1148 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 535 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 679 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1211 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 604 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 684 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

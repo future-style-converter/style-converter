@@ -296,6 +296,32 @@ enum StyleBuilder {
         // PropertyRegistry.migrated so the legacy switch below skips them.
         s.typography = TypographyExtractor.extract(from: properties)
 
+        // Wave-18 lane 2 (pin P1) — the `ch` unit basis: measure the
+        // advance of '0' in the resolved font design + size, but ONLY when
+        // some length in this style actually uses ch (the CoreText lookup
+        // is not free and the corpus overwhelmingly doesn't use ch). The
+        // measured value rides SpacingContext so padding/margin/gap AND
+        // the sizing lane (SizeApplierResolve funnels through
+        // SpacingResolver) all share one basis; nil keeps the resolver on
+        // the css-values-4 §6.1.3 0.5em fallback.
+        if ChUnitMetrics.usesCh([
+            s.size.width, s.size.height,
+            s.size.minWidth, s.size.maxWidth, s.size.minHeight, s.size.maxHeight,
+            s.spacing.padding?.top, s.spacing.padding?.right,
+            s.spacing.padding?.bottom, s.spacing.padding?.left,
+            s.spacing.margin?.top, s.spacing.margin?.right,
+            s.spacing.margin?.bottom, s.spacing.margin?.left,
+        ]) {
+            s.spacing.context.chAdvancePx = ChUnitMetrics.zeroAdvancePx(
+                // Generic-family flags in FontMod.design(for:) precedence
+                // (rounded > monospaced > serif > default) so the measured
+                // font is the one the text will render in.
+                rounded: s.typography?.fontFamilyRounded ?? false,
+                monospaced: s.typography?.fontFamilyMonospace ?? false,
+                serif: s.typography?.fontFamilySerif ?? false,
+                sizePx: s.spacing.context.fontSizePx)
+        }
+
         // Phase 7 step 2 — layout aggregate (flexbox sub-step). The
         // 11 flex properties are listed in `LayoutFlexboxProperty.set`
         // and included in `PropertyRegistry.migrated` so the legacy
@@ -525,7 +551,13 @@ enum StyleBuilder {
         case .grid:     return .grid
         case .inline:   return .inline
         case .none:     return .none
-        case .contents: return .block  // best-effort approximation
+        // Wave 18 (RC6): unboxable `display: contents` never reaches this
+        // switch — ContentsUnboxing strips/splices it at the renderer
+        // entry (css-display-3 §2.5). What still lands here is the KEPT
+        // class only (pseudo-bearing, bucket-carrying, or §2.7-blockified
+        // contents), for which the block box is the documented wrapper
+        // approximation, not a silent fallthrough.
+        case .contents: return .block
         case .block:    return .block
         }
     }
@@ -637,11 +669,25 @@ enum StyleBuilder {
     /// Same resolver lane as backgroundClipInsets above.
     static func horizontalPaddingPx(_ style: ComponentStyle) -> CGFloat {
         guard let p = style.spacing.padding else { return 0 }
-        // Percent padding resolves against the viewport width — the
-        // PaddingApplier fallback basis (same approximation as above).
-        let basis = CGFloat(style.spacing.context.viewportWidth)
+        // Wave-18 lane 2 (pin P13) — this band feeds INTRINSIC-sizing
+        // computations (content-box frame inflation, the min-content
+        // width proposal), where css-sizing-3 §5.2.1 resolves cyclic
+        // percentages against ZERO: a definite ancestor basis from the
+        // env-threaded containing-block channel wins, an indefinite one
+        // contributes nothing. The old viewport basis inflated
+        // `width:100px; padding-left:50%` under the WPT content-box
+        // default to 100 + 195 = 295px while the browser ref paints
+        // 100px (css-sizing abspos-auto-sizing-fit-content-percentage-
+        // 003/004 — the abspos fit-content ancestor publishes nil).
+        let basis = CGFloat(style.spacing.context.containingBlockWidthPx ?? 0)
+        // Skeptic follow-up: a calc-% must use the SAME intrinsic basis a
+        // bare % gets (the `basis` above) — without the override the
+        // evaluator's legacy 358 base inflated calc(50% + 10px) to 189
+        // where Compose's percentIndefiniteAsZero context yields 10.
+        var ictx = style.spacing.context
+        ictx.calcPercentBasisPx = Double(basis)
         func px(_ v: LengthValue) -> CGFloat {
-            switch SpacingResolver.resolve(v, ctx: style.spacing.context, isPadding: true) {
+            switch SpacingResolver.resolve(v, ctx: ictx, isPadding: true) {
             case .px(let n):      return n
             case .percent(let f): return f * basis
             case .auto, .skip:    return 0
@@ -658,11 +704,16 @@ enum StyleBuilder {
     /// resolves percent padding on ALL sides against the inline basis).
     static func verticalPaddingPx(_ style: ComponentStyle) -> CGFloat {
         guard let p = style.spacing.padding else { return 0 }
-        // Percent padding resolves against the viewport width — the
-        // PaddingApplier fallback basis (same approximation as above).
-        let basis = CGFloat(style.spacing.context.viewportWidth)
+        // Wave-18 lane 2 (pin P13) — same intrinsic-sizing basis rule as
+        // horizontalPaddingPx above: definite containing-block width or
+        // zero (css-sizing-3 §5.2.1; CSS resolves percent padding on ALL
+        // sides, vertical included, against the INLINE basis).
+        let basis = CGFloat(style.spacing.context.containingBlockWidthPx ?? 0)
+        // Same calc-% intrinsic-basis override as horizontalPaddingPx.
+        var ictx = style.spacing.context
+        ictx.calcPercentBasisPx = Double(basis)
         func px(_ v: LengthValue) -> CGFloat {
-            switch SpacingResolver.resolve(v, ctx: style.spacing.context, isPadding: true) {
+            switch SpacingResolver.resolve(v, ctx: ictx, isPadding: true) {
             case .px(let n):      return n
             case .percent(let f): return f * basis
             case .auto, .skip:    return 0
@@ -710,6 +761,53 @@ enum StyleBuilder {
         let h: CGFloat? = (size.height == nil && size.minHeight == nil
                            && size.maxHeight == nil) ? 30 : nil
         return (w, h)
+    }
+
+    // ── Wave-18 cleanup (clip-003): outline-vs-own-clip ordering ──────────
+    // css-overflow-3 §3 clips the element's CONTENT; the css-ui-4 §4 outline
+    // is post-layout ink around the border box, which the element's OWN
+    // overflow clip must NOT swallow ("outlines … do not clip" — only
+    // ANCESTOR scroll/clip containers may cut it off; that ancestor
+    // propagation is a documented cross-native TODO, see the Compose twin
+    // note in borders/outline/OutlineApplier.kt). The two helpers below
+    // split the single outline application between two chain slots so
+    // exactly one fires per element:
+    //   • no own clip → the legacy slot inside applyStyle — byte-stable
+    //     for the committed corpus, which never combines outline + clip;
+    //   • own clip → the hoisted slot AFTER engineVisibility's clip.
+
+    /// True when this element's own overflow config clips either axis —
+    /// the same §3.1-coerced decision VisibilityApplier.body makes, so the
+    /// hoist can never disagree with the clip that motivates it.
+    static func ownOverflowClips(_ cfg: VisibilityConfig?) -> Bool {
+        // Untouched/absent config → CSS initial `visible` → no clip.
+        guard let c = cfg, c.touched else { return false }
+        // nil axis = undeclared → initial `visible` (VisibilityApplier).
+        let ox = c.overflowX ?? OverflowKind.visible
+        let oy = c.overflowY ?? OverflowKind.visible
+        // Either clipped axis can swallow outline ink → hoist on either.
+        return OverflowClipRules.axisClips(OverflowClipRules.usedOverflow(ox, other: oy))
+            || OverflowClipRules.axisClips(OverflowClipRules.usedOverflow(oy, other: ox))
+    }
+
+    /// The legacy in-chain outline slot: identity (nil) when the outline
+    /// is hoisted past the element's own clip instead.
+    static func inChainOutline(_ style: ComponentStyle) -> OutlineConfig? {
+        ownOverflowClips(style.visibility) ? nil : style.outline
+    }
+
+    /// The hoisted outline slot: non-nil ONLY when the element clips its
+    /// own overflow AND is actually visible — engineVisibility's
+    /// hidden/collapse treatment (opacity(0) / zero-frame) sits BEFORE
+    /// this slot in the chain, so painting here on a hidden element would
+    /// resurrect its outline (CSS 2.1 §11.2: visibility hides the whole
+    /// box's rendering, outline included).
+    static func hoistedOutline(_ style: ComponentStyle) -> OutlineConfig? {
+        // No own clip → the legacy slot already painted it.
+        guard ownOverflowClips(style.visibility) else { return nil }
+        // Hidden/collapsed element → no ink anywhere, outline included.
+        if let v = style.visibility?.visibility, v != .visible { return nil }
+        return style.outline
     }
 }
 
@@ -934,7 +1032,15 @@ extension View {
                                currentColor: style.text.color)
             // Wave 5: outline-color initial = currentColor (css-ui-4
             // §4.3) — same threading as border sides above.
-            .engineOutline(style.outline, radius: style.borderRadius,
+            // Wave-18 cleanup (clip-003): this slot goes identity (nil)
+            // when the element clips its own overflow — the outline is
+            // then HOISTED past that clip in applyGroupEffects, because
+            // SwiftUI's later-wraps-earlier chain would otherwise let
+            // engineVisibility's clip swallow the ring web/ref paint
+            // (css-ui-4 §4: the element's own clip must not cut its
+            // outline). Un-clipped elements keep this slot byte-for-byte.
+            .engineOutline(StyleBuilder.inChainOutline(style),
+                           radius: style.borderRadius,
                            currentColor: style.text.color)
             .engineBorderMisc(style.borderMisc)
             .engineBoxShadow(style.boxShadow, radius: style.borderRadius)
@@ -988,6 +1094,21 @@ extension View {
             .engineMotionOffset(style.motionOffset, size: style.size,
                                 context: style.spacing.context)
             .engineVisibility(style.visibility)
+            // Wave-18 cleanup (clip-003): the HOISTED outline slot — nil
+            // unless the element clips its own overflow (see the helper
+            // pair on StyleBuilder). Attached AFTER engineVisibility so
+            // the overlay wraps (draws outside) the element's own clip:
+            // css-overflow clips the element's content, while the css-ui-4
+            // §4 outline is post-layout ink the ref/web keep painting (the
+            // clip-003 triptych's red rings on content-clipping squares).
+            // Known approximation: at this chain position the ring no
+            // longer rides transform/opacity modifiers — acceptable until
+            // a fixture combines outline + own-clip + transform. Ancestor
+            // containers clipping a descendant's outline stays a
+            // documented TODO on both natives.
+            .engineOutline(StyleBuilder.hoistedOutline(style),
+                           radius: style.borderRadius,
+                           currentColor: style.text.color)
             .modifier(EffectsModifier(effect: style.effect))
             .engineSpacingMargin(style.spacing.margin, context: style.spacing.context)
             .engineSpacingMarginTrim(style.spacing.marginTrim)

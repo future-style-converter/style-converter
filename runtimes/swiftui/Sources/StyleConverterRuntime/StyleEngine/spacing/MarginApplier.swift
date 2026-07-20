@@ -27,6 +27,9 @@ struct MarginApplier: ViewModifier {
     let config: MarginConfig?
     // Context threads through fontSize + viewport for relative units.
     let context: SpacingContext
+    // Wave-18 lane 2 — WPT capture flag (existing env key, additive read):
+    // selects the containing-block percent basis for margin-% below.
+    @Environment(\.wptCaptureMode) private var wptCaptureMode
 
     func body(content: Content) -> some View {
         // Short-circuit when there's nothing to apply — zero overhead on
@@ -46,6 +49,21 @@ struct MarginApplier: ViewModifier {
         let vAuto = cfg.verticalAutoAlignment
 
         if needsGeo {
+            // Wave-18 lane 2 (pins P10/P11) — margin-% resolves against the
+            // CONTAINING BLOCK inline size (CSS 2.1 §8.3). In WPT capture
+            // the env-threaded channel is authoritative: definite basis →
+            // static resolution, indefinite → 0 (css-position-3 §5.1 —
+            // `margin-left: -50%` inside a fit-content abspos box collapses
+            // to 0 like the browser ref, instead of pulling the child half
+            // a viewport left). Non-WPT keeps the legacy GeometryReader
+            // lane byte-identical (P12).
+            if let basis = SpacingResolver.percentBasisPx(
+                ctx: context, wptCaptureMode: wptCaptureMode) {
+                return AnyView(
+                    build(content, t: t, r: r, b: b, l: l,
+                          parentWidth: basis, hAuto: hAuto, vAuto: vAuto)
+                )
+            }
             return AnyView(
                 GeometryReader { geo in
                     // Fallback when the enclosing layout hasn't given us a

@@ -24,8 +24,10 @@ struct VisibilityConfig: Equatable {
     // `nil` means the property wasn't declared → default visible.
     var visibility: VisibilityKind? = nil
     // Per-axis overflow; CSS initial value is `visible` so nil = unset.
-    // We resolve the effective x/y by folding the logical (block/inline)
-    // props at extract time with a LTR assumption, then physical wins.
+    // Logical (block/inline) longhands write these physical axes at
+    // extract time (horizontal-tb mapping, css-logical §4) in declaration
+    // order — last write wins per the CSS cascade, matching Compose's
+    // OverflowExtractor (wave-18 cleanup; was physical-beats-logical).
     var overflowX: OverflowKind? = nil
     var overflowY: OverflowKind? = nil
     // Touched flag — set by the extractor when anything was declared.

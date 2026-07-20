@@ -201,6 +201,76 @@ class CanvasRootHoistTest {
         assertTrue(CanvasRootHoist.collectCanvasHoisted(doc).isEmpty())
     }
 
+    // ── Wave 18 RC1: the inset-aware hoist + the static-position branch ────
+    // css-position-3 §3.1: an absolute box with ALL-AUTO insets sits at its
+    // STATIC position (where it would have been in flow) — the wave-17
+    // canvas-origin hoist painted css-sizing abspos-001/002's square at
+    // (0,0) over the paragraph. The no-inset branch stays in flow behind
+    // the shared zero-report anchor; every wave-17 css-position hoist case
+    // carries at least one inset (verified over the wave-17 per-test IRs),
+    // so the new branch is strictly additive there.
+
+    @Test fun `RC1 no-inset absolute root does NOT hoist — it renders at its static position`() {
+        val abs = comp("rc1-no-inset", positioned("absolute"))
+        // Not hoisted (the abspos-001/002 fix)…
+        assertFalse(CanvasRootHoist.shouldHoistToCanvasRoot(abs.properties, hasPositionedAncestor = false))
+        // …not intercepted in flow (it renders from its slot)…
+        assertFalse(CanvasRootHoist.interceptsInFlow(abs, hostActive = true, hasPositionedAncestor = false, bypass = null))
+        // …and classified for the in-flow zero-report static-position anchor.
+        assertTrue(CanvasRootHoist.rendersInFlowAsStaticPosition(abs.properties, hasPositionedAncestor = false))
+    }
+
+    @Test fun `RC1 any single inset keeps the canvas hoist — mixed-axis pins the documented approximation`() {
+        // One inset on ONE axis: the inset axis needs the canvas anchor;
+        // the auto axis approximates static position with the canvas
+        // origin (documented approximation — pinned so a change is loud).
+        val leftOnly = comp("rc1-left", positioned("absolute", left = 100.0))
+        assertTrue(CanvasRootHoist.shouldHoistToCanvasRoot(leftOnly.properties, hasPositionedAncestor = false))
+        assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(leftOnly.properties, hasPositionedAncestor = false))
+        val topOnly = comp("rc1-top", positioned("absolute", top = 40.0))
+        assertTrue(CanvasRootHoist.shouldHoistToCanvasRoot(topOnly.properties, hasPositionedAncestor = false))
+    }
+
+    @Test fun `RC1 logical insets anchor exactly like physical ones`() {
+        // css-logical-1 §4.1 (LTR horizontal-tb): inset-inline-start maps
+        // to left — it must count as an anchoring inset (one wire decoder:
+        // PositionExtractor's resolved* accessors).
+        val logical = comp("rc1-logical", listOf(
+            prop("Position", "\"absolute\""),
+            prop("InsetInlineStart", """{"type":"length","px":24}"""),
+        ))
+        assertTrue(CanvasRootHoist.shouldHoistToCanvasRoot(logical.properties, hasPositionedAncestor = false))
+    }
+
+    @Test fun `RC1 fixed keeps the wave-17 canvas anchor even with no inset — kept behavior`() {
+        // css-position-3 §3.2: the viewport IS a no-inset fixed box's
+        // containing block; the wave-17 canvas-origin anchor stays (all
+        // six wave-17 css-position greens ride it).
+        val fixed = comp("rc1-fixed", positioned("fixed"))
+        assertTrue(CanvasRootHoist.shouldHoistToCanvasRoot(fixed.properties, hasPositionedAncestor = false))
+        assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(fixed.properties, hasPositionedAncestor = false))
+    }
+
+    @Test fun `RC1 static-position branch defers to a positioned ancestor — wave-8-9 overlay owns it`() {
+        // Under a positioned ancestor the existing machinery anchors the
+        // no-inset box (flex/grid static alignment lanes) — the new branch
+        // must NOT claim it.
+        val abs = comp("rc1-ancestor", positioned("absolute"))
+        assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(abs.properties, hasPositionedAncestor = true))
+    }
+
+    @Test fun `RC1 walk drops the no-inset absolute root from the overlay — no doubled render`() {
+        // The pure walk mirrors the interception: a no-inset absolute box
+        // gets NO overlay slot (it renders from flow), while its inset
+        // sibling still collects.
+        val noInset = comp("rc1-walk-a", positioned("absolute"))
+        val withInset = comp("rc1-walk-b", positioned("absolute", left = 10.0))
+        assertEquals(
+            listOf(withInset),
+            CanvasRootHoist.collectCanvasHoisted(listOf(noInset, withInset)),
+        )
+    }
+
     // ── The ancestry threading both sides share ────────────────────────────
 
     @Test fun `every non-static position establishes a containing block for descendants`() {

@@ -622,17 +622,57 @@ object ComponentRenderer {
         // baseline — have LocalActive false and skip this block entirely
         // (frozen-baseline byte-stability). Not a silent fallthrough: the
         // component IS rendered, just from the overlay.
+        // Locals read once — the interception, the wave-18 static-position
+        // branch below and the ancestry threading all consume the same
+        // values, so reading them into vals keeps the three in one frame.
+        val hoistHostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist
+            .LocalActive.current
+        val hoistHasPositionedAncestor = com.styleconverter.runtime.layout.position.CanvasRootHoist
+            .LocalHasPositionedAncestor.current
         if (com.styleconverter.runtime.layout.position.CanvasRootHoist.interceptsInFlow(
                 component,
-                hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist
-                    .LocalActive.current,
-                hasPositionedAncestor = com.styleconverter.runtime.layout.position.CanvasRootHoist
-                    .LocalHasPositionedAncestor.current,
+                hostActive = hoistHostActive,
+                hasPositionedAncestor = hoistHasPositionedAncestor,
                 bypass = com.styleconverter.runtime.layout.position.CanvasRootHoist
                     .LocalBypass.current,
             )
         ) {
             return
+        }
+        // ── Wave-18 RC1: the static-position branch the hoist carved out ──
+        // An ABSOLUTE box with NO positioned ancestor and NO inset is NOT
+        // hoisted (css-position-3 §3.1 gives it its STATIC position — the
+        // canvas-origin hoist painted css-sizing abspos-001/002's square at
+        // (0,0) over the paragraph). It renders HERE, in its flow slot, but
+        // as an out-of-flow box: the shared zeroFlowAnchor measures it
+        // unbounded and reports 0×0 so no sibling moves for it (pin S5) and
+        // its ink paints at the slot origin — exactly the static position.
+        // Host-gated: hostless paths (dark stage, every committed baseline)
+        // keep the byte-identical legacy modifier chain.
+        @Suppress("NAME_SHADOWING")
+        val itemModifier =
+            if (hoistHostActive &&
+                com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .rendersInFlowAsStaticPosition(component.properties, hoistHasPositionedAncestor)
+            ) {
+                // Outermost slot, exactly like the overlay's canvasAnchor.
+                itemModifier.then(
+                    com.styleconverter.runtime.layout.position.CanvasRootHoist.zeroFlowAnchor()
+                )
+            } else {
+                itemModifier
+            }
+        // ── Wave-18 RC6: display:contents unboxing (css-display-3 §2.5) ──
+        // Resolve the component ONCE per instance: an unboxable `contents`
+        // component strips to an undecorated pass-through, and every
+        // unboxable `contents` CHILD is spliced out of the children list so
+        // all downstream layout paths (block, positioned overlay, flex,
+        // grid item collection) see the grandchildren as direct children.
+        // Identity for the whole contents-free corpus (same instance out),
+        // so remember{} keys and frozen baselines are untouched.
+        @Suppress("NAME_SHADOWING")
+        val component = androidx.compose.runtime.remember(component) {
+            ContentsUnboxing.resolve(component)
         }
         // ── Wave-7 dynamic-styling resolution (schema/spec/06-dynamic-styling.md)
         // Fold ACTIVE media buckets (§4) then ACTIVE selector buckets (§2)
@@ -822,10 +862,23 @@ object ComponentRenderer {
         // unbounded measure for the px-specified overflow it was built for.
         // Identity (same list instance) for in-flow components and for
         // percent-free lists — the frozen-baseline byte-stability rule.
+        // Wave-18 RC2 rides the same out-of-flow branch: after percents are
+        // px, inject the css-position-3 §3.5 INSET-STRETCH sizes (an axis
+        // with both opposing insets and no author size sizes to cb − insets,
+        // then aspect-ratio resolves inline-first — the abspos-003/004 fix;
+        // the unbounded wave-8 measure otherwise collapses such boxes to
+        // 0×0). WPT-capture gated: every dark-stage/baseline path keeps the
+        // pre-wave-18 list byte-identical (AbsposInsetStretch.inject is
+        // additionally identity whenever nothing stretches).
+        val wptCaptureModeForStretch = LocalWptCaptureMode.current
         val effectiveProperties =
-            if (isOutOfFlowChild(animatedProperties))
-                resolveOutOfFlowPercentSizes(animatedProperties, containingBlock)
-            else animatedProperties
+            if (isOutOfFlowChild(animatedProperties)) {
+                val pctResolved = resolveOutOfFlowPercentSizes(animatedProperties, containingBlock)
+                if (wptCaptureModeForStretch)
+                    com.styleconverter.runtime.layout.position.AbsposInsetStretch
+                        .inject(pctResolved, containingBlock)
+                else pctResolved
+            } else animatedProperties
 
         // Extract property pairs for extractors
         val propertyPairs = effectiveProperties.map { it.type to it.data }

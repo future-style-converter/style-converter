@@ -95,6 +95,26 @@ object CanvasRootHoist {
         positionTypeOf(properties) != PositionType.STATIC
 
     /**
+     * Wave 18 (RC1) — does the declaration list carry ANY inset that
+     * anchors the box to its containing block? Read through the SAME
+     * PositionExtractor the live style chain uses (one wire decoder), so
+     * "has an inset" can never disagree with the offset the applier will
+     * paint. Physical (Left/Top/Right/Bottom) and logical (the
+     * InsetInline / InsetBlock longhands) sides all count — the resolved
+     * accessors fold logical into physical per the engine's LTR horizontal-tb
+     * normalization (css-logical-1 §4.1). An `auto` / absent side
+     * extracts to null and does NOT count: css-position-3 §3.1 gives an
+     * all-auto-inset absolute box its STATIC position, not an anchor.
+     */
+    internal fun hasAnyInset(properties: List<IRProperty>): Boolean =
+        PositionExtractor.extractPositionConfig(properties.map { it.type to it.data })
+            .let {
+                // Any resolved side non-null = at least one anchoring inset.
+                it.resolvedStart != null || it.resolvedEnd != null ||
+                    it.resolvedTop != null || it.resolvedBottom != null
+            }
+
+    /**
      * The hoist decision (pure, from BASE declarations — a selector/media
      * bucket that flips `position` at runtime is out of the emulation's
      * scope, same conservatism as the §8.3.1 collapse plan's B6):
@@ -104,8 +124,19 @@ object CanvasRootHoist {
      *    (left, top), NOT parent + offset);
      *  - ABSOLUTE hoists only when NO positioned ancestor exists — then its
      *    containing block is the initial containing block, i.e. the canvas
-     *    (css-position-3 §3.1; pin S2). With a positioned ancestor the
-     *    wave-8/9 overlay machinery owns it (pin S4).
+     *    (css-position-3 §3.1; pin S2) — AND (wave 18, RC1) only when at
+     *    least ONE inset anchors it there. With all-auto insets the spec
+     *    puts the box at its STATIC POSITION (§3.1: "where it would have
+     *    been in flow"), which the canvas-origin hoist got wrong by a full
+     *    flow offset (css-sizing abspos-001/002: the square painted at
+     *    (0,0) over the paragraph instead of below it) — such boxes stay
+     *    in their flow slot behind [rendersInFlowAsStaticPosition]'s
+     *    zero-report anchor instead. Mixed-axis (inset on ONE axis only)
+     *    still hoists: the inset axis needs the canvas anchor, and the
+     *    auto axis approximates its static position with the canvas
+     *    origin (documented approximation, pinned in CanvasRootHoistTest
+     *    — every wave-17 css-position hoist case carries insets, so this
+     *    branch is strictly additive there).
      * Public (not internal): the harness's composed canvas calls it to zero
      * the UA-margin gap injection for out-of-flow roots (no flow space —
      * a gap Spacer for a hoisted root would be reserved space, violating S5).
@@ -114,13 +145,33 @@ object CanvasRootHoist {
         properties: List<IRProperty>,
         hasPositionedAncestor: Boolean,
     ): Boolean = when (positionTypeOf(properties)) {
-        // Viewport-anchored regardless of ancestry (F1).
+        // Viewport-anchored regardless of ancestry (F1). A no-inset fixed
+        // box keeps the wave-17 canvas-origin anchor (kept behavior).
         PositionType.FIXED -> true
-        // ICB-anchored only without a positioned ancestor (F2).
-        PositionType.ABSOLUTE -> !hasPositionedAncestor
+        // ICB-anchored only without a positioned ancestor (F2), and only
+        // when an inset actually anchors it there (RC1 — see kdoc above).
+        PositionType.ABSOLUTE -> !hasPositionedAncestor && hasAnyInset(properties)
         // static / relative / sticky stay in flow (css-position-3 §2.1).
         else -> false
     }
+
+    /**
+     * Wave 18 (RC1) — the static-position branch the hoist decision above
+     * carved out: an ABSOLUTE box with NO positioned ancestor and NO inset
+     * on either axis renders IN its flow slot (so it paints at its static
+     * position — css-position-3 §3.1) but as an out-of-flow box: measured
+     * unbounded and reporting 0×0 flow size via [zeroFlowAnchor], so no
+     * sibling moves for it (pin S5, reusing the exact overlay-anchor
+     * machinery). ComponentRenderer applies this exactly when a Host is
+     * active; hostless paths (dark stage, 327-pair baseline) never see it.
+     * Pure truth table — pinned in CanvasRootHoistTest.
+     */
+    internal fun rendersInFlowAsStaticPosition(
+        properties: List<IRProperty>,
+        hasPositionedAncestor: Boolean,
+    ): Boolean = positionTypeOf(properties) == PositionType.ABSOLUTE &&
+        !hasPositionedAncestor &&
+        !hasAnyInset(properties)
 
     /**
      * The in-flow interception decision ComponentRenderer applies at the top
@@ -182,25 +233,44 @@ object CanvasRootHoist {
     internal fun hoistedFlowReportPx(): Int = 0
 
     /**
-     * Zero-size overlay anchor: measure the hoisted component UNBOUNDED
+     * Zero-flow anchor — the ONE measurement wrapper both out-of-flow
+     * mounting modes share: measure the component UNBOUNDED
      * (Constraints() == 0..∞ — its own width/height modifiers decide, the
      * same rationale as the wave-8 absposOverflowMeasure), report 0×0 (see
-     * [hoistedFlowReportPx]), and place the ink at (0,0) — the host Box's
-     * top-left, i.e. the unpadded canvas origin. The component's OWN
-     * PositionApplier absoluteOffset(left, top) then lands it at canvas
-     * (left, top); Compose draws beyond a reported size unclipped, matching
-     * CSS overflow:visible.
+     * [hoistedFlowReportPx]) so the box occupies NO flow space
+     * (css-position-3 §2.1 / pin S5), and place the ink at (0,0) — the
+     * slot's own origin. Compose draws beyond a reported size unclipped,
+     * matching CSS overflow:visible.
+     *  - As the overlay's [canvasAnchor], (0,0) is the host Box's
+     *    top-left, i.e. the unpadded canvas origin; the component's OWN
+     *    PositionApplier absoluteOffset(left, top) then lands it at
+     *    canvas (left, top).
+     *  - As the wave-18 static-position anchor (RC1 — see
+     *    [rendersInFlowAsStaticPosition]), (0,0) is the box's FLOW slot
+     *    origin, which IS the static position css-position-3 §3.1 assigns
+     *    an all-auto-inset absolute box; there is no inset offset to add.
+     * internal: ComponentRenderer rides it on the itemModifier channel for
+     * the static-position branch, exactly like Host does for the overlay.
      */
-    private fun canvasAnchor(): Modifier = Modifier.layout { measurable, _ ->
+    internal fun zeroFlowAnchor(): Modifier = Modifier.layout { measurable, _ ->
         // Unbounded measure — the box is sized by its own properties alone.
         val placeable = measurable.measure(Constraints())
-        // Report zero on both axes: no flow/canvas growth from overlay ink.
+        // Report zero on both axes: no flow/canvas growth from the ink.
         layout(hoistedFlowReportPx(), hoistedFlowReportPx()) {
-            // Anchor at the overlay origin; the child's inset offset does
-            // the rest (F1/F2 anchor semantics — insets, not deltas).
+            // Anchor at the slot origin; for hoisted boxes the child's
+            // inset offset does the rest (F1/F2 anchor semantics — insets,
+            // not deltas), for static-position boxes the slot origin IS
+            // the final paint origin.
             placeable.place(0, 0)
         }
     }
+
+    /**
+     * The overlay slot's anchor — the shared [zeroFlowAnchor] applied at
+     * the host Box's top-left (the unpadded canvas origin). Kept as its
+     * own name so the Host wiring reads as the wave-17 contract it pins.
+     */
+    private fun canvasAnchor(): Modifier = zeroFlowAnchor()
 
     /**
      * The canvas-root host. Wrap the document content (INCLUDING its canvas

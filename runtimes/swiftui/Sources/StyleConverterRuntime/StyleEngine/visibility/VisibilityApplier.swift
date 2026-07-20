@@ -6,10 +6,11 @@
 //    visibility: visible → identity
 //    visibility: hidden  → opacity(0) but layout preserved
 //    visibility: collapse → frame(0,0) + .hidden() (layout removed)
-//    overflow hidden|clip → .clipped()
-//    overflow scroll|auto → ScrollView wrapping (best-effort; our
-//      gallery cells aren't deep enough to benefit, so we just clip
-//      and log a TODO until ComponentRenderer supports scroll containers.)
+//    overflow (used value ≠ visible on BOTH axes) → .clipped()
+//    overflow (used value ≠ visible on ONE axis) → .clipShape(AxisClipRect)
+//      — axis-selective clip, css-overflow-3 §3/§3.1 (wave 18 RC4)
+//    overflow scroll|auto → clip only, ScrollView TODO until
+//      ComponentRenderer supports scroll containers
 //
 
 import SwiftUI
@@ -23,21 +24,29 @@ struct VisibilityApplier: ViewModifier {
 
         var v: AnyView = AnyView(content)
 
-        // Overflow — CSS treats hidden + clip identically for our
-        // rendering purposes; scroll/auto route through ScrollView when
-        // an axis was opted-in. We approximate by clipping when either
-        // axis is non-visible, since SwiftUI has no per-axis clip.
-        let ox = cfg.overflowX
-        let oy = cfg.overflowY
-        if shouldClip(ox) || shouldClip(oy) {
+        // Overflow — axis-selective since wave 18 (RC4). Decisions run on
+        // USED values after the css-overflow-3 §3.1 coercion (see
+        // OverflowClipRules): every non-visible used value clips its axis
+        // (§3 — scroll/auto included: a scroll container always clips).
+        // nil = property undeclared → CSS initial `visible`.
+        let ox = cfg.overflowX ?? OverflowKind.visible
+        let oy = cfg.overflowY ?? OverflowKind.visible
+        // Per-axis clip flags from the §3.1-coerced used values.
+        let cx = OverflowClipRules.axisClips(OverflowClipRules.usedOverflow(ox, other: oy))
+        let cy = OverflowClipRules.axisClips(OverflowClipRules.usedOverflow(oy, other: ox))
+        if cx && cy {
+            // Both axes clip → SwiftUI's stock rectangle clip is exact.
             v = AnyView(v.clipped())
+        } else if cx || cy {
+            // Exactly one axis clips (only reachable as visible+clip per
+            // §3.1) → rect clip extended past the box on the visible axis
+            // so ink spills there but not across the clipped axis
+            // (WPT css-overflow clip-003: overflow-x:clip must not clip Y).
+            v = AnyView(v.clipShape(AxisClipRect(clipX: cx, clipY: cy)))
         }
-        if shouldScroll(ox) || shouldScroll(oy) {
-            // TODO: wire a real ScrollView once ComponentRenderer can
-            // host nested scrollers. For now we still .clipped() so
-            // children don't bleed out of the frame.
-            v = AnyView(v.clipped())
-        }
+        // TODO: wire a real ScrollView once ComponentRenderer can host
+        // nested scrollers — scroll/auto currently only clip (via the
+        // axisClips branch above), which matches the unscrolled state.
 
         // Visibility last — it should take precedence over clip.
         switch cfg.visibility {
@@ -56,20 +65,10 @@ struct VisibilityApplier: ViewModifier {
         return v
     }
 
-    // True for overflow values that clip painted content.
-    private func shouldClip(_ k: OverflowKind?) -> Bool {
-        switch k {
-        case .hidden, .clip: return true
-        default: return false
-        }
-    }
-    // True for scrollable overflow values.
-    private func shouldScroll(_ k: OverflowKind?) -> Bool {
-        switch k {
-        case .scroll, .auto: return true
-        default: return false
-        }
-    }
+    // Wave 18: the old shouldClip/shouldScroll helpers collapsed both
+    // axes into one .clipped() (and double-clipped for scroll/auto).
+    // Replaced by OverflowClipRules (AxisClipRect.swift), whose pure
+    // functions are pinned by unit tests and mirrored on Compose.
 }
 
 extension View {
