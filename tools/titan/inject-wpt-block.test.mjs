@@ -715,3 +715,118 @@ test('wave13: buildResults matches composed-mode rows so pairs (and nativeParity
   assert.match(src, /nativeParity:\s*anyMatched\s*\?\s*computeNativeParity\(pairs,\s*naTags\)\s*:\s*null/,
     'results must expose nativeParity wired to computeNativeParity');
 });
+
+// ── wave-15 EXTRACTION-WALL scoring boundary ───────────────────────────────
+//
+// Finding: 9 of the 12 scored css-position tests were the script-mutation
+// wall scored as renderer failure — the tagger fired requires-script-mutation
+// but applyNaScoreGate only excluded on requires-bundled-asset. The wall tags
+// exclude UNCONDITIONALLY: script execution has no delivery record by
+// construction (the extractor never runs scripts, so lossyReasons can never
+// corroborate or refute the tag — contrast the wave-13 delivery-aware
+// bundled-asset branch, which stays byte-for-byte unchanged).
+
+import { EXTRACTION_WALL_TAGS, computeLowContentDensity, WPT_LOW_CONTENT_DENSITY_MAX_COVERAGE_PCT } from './inject-wpt-block.mjs';
+
+test('wave15: EXTRACTION_WALL_TAGS is exactly the two script-execution tags', () => {
+  // Pin the exact set — silently widening the wall (excluding more tests)
+  // or narrowing it (re-scoring the wall) must break a test first.
+  assert.deepEqual([...EXTRACTION_WALL_TAGS].sort(),
+    ['requires-script-driven-scroll', 'requires-script-mutation']);
+});
+
+test('wave15: applyNaScoreGate excludes on requires-script-mutation UNCONDITIONALLY', () => {
+  const web = { ssim: 0.54, wptPass: false };
+  // The css-position lane's worst row: overlay-transition-backdrop's
+  // blank-vs-green diff at 0.54. lossyReasons is an EMPTY ARRAY (the
+  // extractor delivered every static asset — there simply is no asset to be
+  // lossy about); the delivery-aware branch would therefore NOT exclude,
+  // which is exactly the wave-15 bug. The wall branch must exclude anyway.
+  const isNa = applyNaScoreGate(['requires-script-mutation'], [web], []);
+  assert.equal(isNa, true);
+  assert.equal(web.wptPass, null);          // never a real pass/fail
+  assert.equal(web.scoreExcluded, true);    // aggregators filter on this
+  assert.equal(web.ssim, 0.54);             // raw diagnostics stay intact
+});
+
+test('wave15: applyNaScoreGate excludes on requires-script-driven-scroll too', () => {
+  // Rule 18 is the same wall (post-script scroll offsets baked into the
+  // ref) — also unconditional, also regardless of a populated lossy record.
+  const ios = { ssim: 0.71, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-script-driven-scroll'], [ios], ['some-other-reason']), true);
+  assert.equal(ios.wptPass, null);
+  assert.equal(ios.scoreExcluded, true);
+});
+
+test('wave15: the delivery-aware bundled-asset branch is unchanged by the wall', () => {
+  // wave-13 behaviour must survive: a stale textual requires-bundled-asset
+  // tag with a delivery record that does NOT corroborate it stays SCORED.
+  const web = { ssim: 0.97, wptPass: true };
+  assert.equal(applyNaScoreGate(['requires-bundled-asset'], [web], []), false);
+  assert.equal(web.wptPass, true);
+  assert.equal(web.scoreExcluded, undefined);
+  // …and a corroborated tag still excludes (delivery-aware exclusion).
+  const ios = { ssim: 0.30, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-bundled-asset'], [ios], ['requires-bundled-asset']), true);
+  assert.equal(ios.scoreExcluded, true);
+});
+
+test('wave15: broad capability tags STILL do not exclude (wave-8 denominator lesson)', () => {
+  // The wall is narrow: capability tags describe tests the harness delivers
+  // and renders — their divergence is real information and stays scored.
+  const web = { ssim: 0.80, wptPass: false };
+  assert.equal(applyNaScoreGate(
+    ['requires-fragmentation', 'requires-float-layout', 'requires-form-control-rendering'],
+    [web], []), false);
+  assert.equal(web.scoreExcluded, undefined);
+});
+
+// ── wave-15 LOW-CONTENT-DENSITY triage flag ────────────────────────────────
+//
+// Metrology observation: attachment-fixed-inside-transform-1 passes vs-ref
+// at ssim 0.963 with ~90 % of BOTH images white while the actual content is
+// MISPLACED (the body-root Height stacking issue, queued separately) —
+// whole-canvas SSIM was dominated by background-vs-background agreement.
+// The flag is triage colour ONLY: it feeds neither wptPass nor scoreExcluded.
+
+test('wave15: low-content-density threshold is the calibrated pin', () => {
+  // ">85 % of both images is background" ⇔ each side's ink coverage < 15 %.
+  assert.equal(WPT_LOW_CONTENT_DENSITY_MAX_COVERAGE_PCT, 15);
+});
+
+test('wave15: computeLowContentDensity flags the measured vacuous-tall-doc pass', () => {
+  // attachment-fixed-inside-transform-1: ~90 % white on both sides — the
+  // recorded wave12-gate ref coverage is 7.404 % (android row); a capture in
+  // the same regime must flag.
+  assert.equal(computeLowContentDensity({ aCoveragePct: 9.6, bCoveragePct: 7.404 }), true);
+  // Blank-vs-blank (0/0) is trivially low-density too — the presence gate
+  // separately decides pass/fail; this flag just marks low confidence.
+  assert.equal(computeLowContentDensity({ aCoveragePct: 0.0, bCoveragePct: 0.0 }), true);
+});
+
+test('wave15: computeLowContentDensity does NOT flag content-dense pairs', () => {
+  // a98rgb-004 android (recorded wave12-gate): 17.153/17.250 — both sides
+  // above the 15 % bar, SSIM there compares real ink.
+  assert.equal(computeLowContentDensity({ aCoveragePct: 17.153, bCoveragePct: 17.25 }), false);
+  // ONE dense side is enough to skip the flag (the SSIM already compares
+  // real content on that side; flagging would only add noise).
+  assert.equal(computeLowContentDensity({ aCoveragePct: 40.0, bCoveragePct: 7.4 }), false);
+  assert.equal(computeLowContentDensity({ aCoveragePct: 7.4, bCoveragePct: 40.0 }), false);
+});
+
+test('wave15: computeLowContentDensity treats unknown presence as not flagged', () => {
+  // Same "unknown ≠ flagged" stance as computePresenceFailed/isColorDivergent.
+  assert.equal(computeLowContentDensity(null), false);
+  assert.equal(computeLowContentDensity(undefined), false);
+  assert.equal(computeLowContentDensity({}), false);
+  assert.equal(computeLowContentDensity({ aCoveragePct: 'x', bCoveragePct: 5 }), false);
+});
+
+test('wave15: diffWebVsRef stamps lowContentDensity on every browser-ref diff', async () => {
+  // Source-scan pin: the metric assembly must wire the flag off the SAME
+  // semanticPresence block the presence gate consumes, so the two signals
+  // can never diverge in provenance.
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  assert.match(src, /metrics\.lowContentDensity\s*=\s*computeLowContentDensity\(metrics\.semanticPresence\)/,
+    'diffWebVsRef must stamp lowContentDensity from semanticPresence');
+});

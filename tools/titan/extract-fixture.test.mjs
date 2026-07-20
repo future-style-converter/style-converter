@@ -30,6 +30,10 @@ import {
   extractLeadingBodyTextInfo,
   isPureInlineMergeable,
   collectStyledTags,
+  // wave-15 BIDI-EXTRACT: character-reference decode + dir attribute.
+  decodeCharacterReferences,
+  firstStrongDirection,
+  dirAttributeDirection,
   selectorMatches,
   selectorMatchesPseudoElement,
   propsForElement,
@@ -1842,4 +1846,125 @@ test('wave13: element-path sampling drops longhands too and lossy-scans the bake
   const cmp = built.components['x__0'];
   assert.deepEqual(cmp.properties, { width: '50px' });
   assert.deepEqual(cmp._lossyReasons, ['sampled-animation']);
+});
+
+// ── wave-15 BIDI-EXTRACT: character references, dir attribute, pre family ────
+//
+// Pinned against the css-text bidi sources the wave-15 diagnosis named:
+//   tools/wpt/css/css-text/bidi/bidi-tab-001.html   (span dir=ltr>&#9;0)
+//   tools/wpt/css/css-text/bidi/bidi-lines-001.html (white-space: pre lines)
+//   tools/wpt/css/css-text/white-space/tab-bidi-001.html (literal TABs)
+
+test('wave15: decodeCharacterReferences decodes numeric + named refs once', () => {
+  // The load-bearing bidi-tab-001 pin: '&#9;0' is a TAB followed by '0'.
+  assert.equal(decodeCharacterReferences('&#9;0'), '\t0');
+  // Hex form + named XML-core forms.
+  assert.equal(decodeCharacterReferences('&#x41;&lt;b&gt;&quot;&apos;'), 'A<b>"\'');
+  // Single pass, no rescan: '&amp;#9;' is the LITERAL '&#9;', not a TAB —
+  // the same answer the HTML tokenizer gives.
+  assert.equal(decodeCharacterReferences('&amp;#9;'), '&#9;');
+  // Unknown named refs stay verbatim (conservative), bare '&' untouched.
+  assert.equal(decodeCharacterReferences('&nosuchref; a & b'), '&nosuchref; a & b');
+  // Spec-shaped numeric error handling: NUL / out-of-range / surrogate
+  // code points all decode to U+FFFD instead of throwing.
+  assert.equal(decodeCharacterReferences('&#0;&#x110000;&#xD800;'), '���');
+  // Bidi controls from the named subset (RLM is U+200F).
+  assert.equal(decodeCharacterReferences('a&rlm;b'), 'a‏b');
+});
+
+test('wave15: scanners decode refs then apply the white-space rule in that order', () => {
+  // Under the default collapse, a decoded TAB is COLLAPSIBLE white space
+  // (CSS Text §4.1): leading '&#9;' vanishes into the trim — proving the
+  // decode happens BEFORE the collapse, exactly the browser pipeline.
+  assert.equal(extractOwnText('&#9;0'), '0');
+  // Preserve mode (pre family): the decoded TAB survives verbatim.
+  assert.equal(extractOwnTextMerged('&#9;0', null, true).text, '\t0');
+  // Leading-body-text path shares both the decode and the preserve switch.
+  assert.equal(extractLeadingBodyTextInfo('<body>&#9;ok<div></div></body>', null, true).text, '\tok');
+  assert.equal(extractLeadingBodyTextInfo('<body>&#9;ok<div></div></body>', null).text, 'ok');
+  // Preserve mode still yields '' for whitespace-ONLY runs (head-newline
+  // noise in the no-<body> fallback must not become a phantom __text).
+  assert.equal(extractLeadingBodyTextInfo('<body>\n  \n<div></div></body>', null, true).text, '');
+});
+
+test('wave15: firstStrongDirection implements the UAX#9 first-strong approximation', () => {
+  // The bidi-lines-001 word pair: Persian is strong RTL, French strong LTR.
+  assert.equal(firstStrongDirection('فارسی'), 'rtl');
+  assert.equal(firstStrongDirection('français'), 'ltr');
+  // Weak/neutral prefixes (digits, punctuation, space) are skipped — the
+  // FIRST STRONG character decides (UAX#9 P2).
+  assert.equal(firstStrongDirection('123 !? א'), 'rtl');
+  // Hebrew block, presentation forms, and empty/no-strong fallbacks.
+  assert.equal(firstStrongDirection('שלום'), 'rtl');
+  assert.equal(firstStrongDirection(''), 'ltr');
+  assert.equal(firstStrongDirection('123...'), 'ltr');
+});
+
+test('wave15: dirAttributeDirection maps ltr/rtl/auto and rejects invalid values', () => {
+  // The two literal states, ASCII case-insensitively (HTML §15.3.4).
+  assert.equal(dirAttributeDirection({ dir: 'rtl' }), 'rtl');
+  assert.equal(dirAttributeDirection({ dir: 'LTR' }), 'ltr');
+  // dir=auto resolves through the first-strong scan over the given text.
+  assert.equal(dirAttributeDirection({ dir: 'auto' }, 'سلام'), 'rtl');
+  assert.equal(dirAttributeDirection({ dir: 'auto' }, 'Hello'), 'ltr');
+  // bidi-tab-001's intentional `dir=ltrl` typo: invalid value → no
+  // directionality state → null (inherits as if the attribute were absent).
+  assert.equal(dirAttributeDirection({ dir: 'ltrl' }), null);
+  // No dir attribute at all → null.
+  assert.equal(dirAttributeDirection({}), null);
+});
+
+test('wave15: buildComponents — bidi-tab-001 shape: TAB survives pre, dir maps to direction', () => {
+  // Minimal reproduction of the bidi-tab-001 structure: a pre container
+  // whose span child (dir attr keeps it off the inline-merge path) carries
+  // the '&#9;0' text, with resolved white-space INHERITED from the div.
+  const css = 'div { white-space: pre; width: 10ch; } span { background: yellow; }';
+  const rules = parseCss(css);
+  const html = '<body><div dir=rtl><span dir=ltr>&#9;0</span></div></body>';
+  const built = buildComponents(html, rules, 'x');
+  const div = built.components['x__0'];
+  // dir=rtl on the div maps to the CSS direction property at extract time.
+  assert.equal(div.properties.direction, 'rtl');
+  const span = div.children['x__0__0'];
+  // The span inherits white-space: pre from the div, so the decoded TAB
+  // survives into _text — THE wave-15 fix (was the literal 6-char '&#9;0').
+  assert.equal(span._text, '\t0');
+  assert.equal(span.properties.direction, 'ltr');
+});
+
+test('wave15: buildComponents — author direction beats the dir attribute hint', () => {
+  // HTML §15.3.4 maps dir as a PRESENTATIONAL hint: author-origin CSS
+  // (here an inline style, as tab-bidi-001's third rows use) must win.
+  const built = buildComponents(
+    '<body><div dir=rtl style="direction: ltr">x</div></body>', [], 'x');
+  assert.equal(built.components['x__0'].properties.direction, 'ltr');
+});
+
+test('wave15: buildComponents — dir=auto bakes a direction and rides the lossy lane', () => {
+  // dir=auto is resolved at extract time (runtimes cannot re-resolve);
+  // the baked heuristic result must be LOUD via 'dir-auto-resolved'.
+  const built = buildComponents('<body><div dir=auto>سلام</div></body>', [], 'x');
+  const cmp = built.components['x__0'];
+  assert.equal(cmp.properties.direction, 'rtl');
+  assert.equal(cmp._lossy, true);
+  assert.ok(cmp._lossyReasons.includes('dir-auto-resolved'));
+  assert.ok(built.lossyReasons.includes('dir-auto-resolved'));
+});
+
+test('wave15: buildComponents — white-space pre preserves source newlines (bidi-lines-001)', () => {
+  // bidi-lines-001 shape: a pre div whose own text is a newline-separated
+  // run of alternating-direction words. The newlines must survive.
+  const css = 'div { white-space: pre; width: 10em; }';
+  const built = buildComponents(
+    '<body><div>français\nفارسی\nfrançais</div></body>',
+    parseCss(css), 'x');
+  assert.equal(built.components['x__0']._text,
+               'français\nفارسی\nfrançais');
+});
+
+test('wave15: buildComponents — non-pre elements keep the legacy collapse byte-identically', () => {
+  // Sanity guard: without a pre-family rule the collapse (and its trim)
+  // behaves exactly as before wave-15 — no fixture churn outside pre.
+  const built = buildComponents('<body><div>  a\n\tb  </div></body>', [], 'x');
+  assert.equal(built.components['x__0']._text, 'a b');
 });

@@ -1265,3 +1265,53 @@ test('wave13: module source documents the delivery-aware resolution (no silent r
     assert.match(src, /wave-13 RESOLUTION/, 'Rule 20 must document the wave-13 delivery-aware post-pass');
     assert.match(src, /applyNaScoreGate/, 'Rule 20 must name the downstream gate that owns the decision');
 });
+
+// ── wave-15 TOP-LAYER widening: requires-script-mutation matches popover/dialog/fullscreen APIs ──
+//
+// The wave-15 css-position lane audit found overlay-transition-backdrop.html
+// (its ENTIRE output is a green ::backdrop driven by showPopover()+
+// hidePopover(); the ref is solid green) carried notApplicableTags=[] —
+// Rule 4's scriptDomMutation regex had no pattern for the top-layer
+// promotion APIs, so the blank-vs-green diff was SCORED at 0.54, the lane's
+// worst row. Top-layer promotion mutates the rendered tree exactly like an
+// appendChild (the ::backdrop box appears as a side effect of script), so
+// the widening folds it into the existing requires-script-mutation tag
+// rather than minting a new one.
+
+test('requires-script-mutation fires on showPopover()/hidePopover() (wave-15 top-layer widening)', () => {
+    // Real-world signature: the exact <script> body of
+    // css/css-position/overlay/overlay-transition-backdrop.html.
+    const html = '<div popover id="foo"></div><script>\n  foo.showPopover();\n  foo.hidePopover();\n</script>';
+    assert.ok(tagsForTest({ html }).includes('requires-script-mutation'));
+});
+
+test('requires-script-mutation fires on dialog.showModal() (wave-15 top-layer widening)', () => {
+    // <dialog>.showModal() promotes the dialog into the top layer — same
+    // post-script rendered-tree mutation as the popover pair.
+    const html = '<dialog id="d"></dialog><script>document.getElementById("d").showModal();</script>';
+    assert.ok(tagsForTest({ html }).includes('requires-script-mutation'));
+});
+
+test('requires-script-mutation fires on togglePopover() and requestFullscreen() (wave-15)', () => {
+    // The remaining two APIs of the widening set, each alone in a script.
+    const t1 = '<script>foo.togglePopover();</script>';
+    assert.ok(tagsForTest({ html: t1 }).includes('requires-script-mutation'));
+    const t2 = '<script>el.requestFullscreen();</script>';
+    assert.ok(tagsForTest({ html: t2 }).includes('requires-script-mutation'));
+});
+
+test('requires-script-mutation top-layer widening does NOT fire without a call (wave-15)', () => {
+    // A [popover] attribute + CSS alone (no script) is static markup the
+    // extractor delivers fine — the tag must not fire on the attribute or
+    // on the API name appearing outside an inline <script> (e.g. prose).
+    const html = '<style>[popover]::backdrop { background: green; }</style>'
+        + '<div popover>showPopover is mentioned in prose only</div>';
+    assert.equal(tagsForTest({ html }).includes('requires-script-mutation'), false);
+});
+
+test('requires-script-mutation top-layer widening still ignores external <script src> (wave-15)', () => {
+    // The Rule 4 src= exclusion is unchanged: external loads route through
+    // bucket-C's remote-resource rule, not this tag.
+    const html = '<script src="support/popover-helper.js"></script>';
+    assert.equal(tagsForTest({ html }).includes('requires-script-mutation'), false);
+});

@@ -744,18 +744,125 @@ export function isPureInlineMergeable(tag, attrs, innerHtml, styledTags = null) 
  *
  * Exported so the unit tests can pin the contract.
  */
-export function extractOwnTextMerged(innerHtml, mergeCtx = null) {
+export function extractOwnTextMerged(innerHtml, mergeCtx = null, preserveWhitespace = false) {
   // Full result object — callers need both the text and the merge count.
-  return scanOwnText(innerHtml, mergeCtx);
+  // wave-15: `preserveWhitespace` (default false — legacy callers keep the
+  // collapse) is threaded through for elements whose resolved white-space
+  // is in the pre family (see WHITESPACE_PRESERVING + scanOwnText docs).
+  return scanOwnText(innerHtml, mergeCtx, preserveWhitespace);
 }
+
+// ── wave-15 BIDI-EXTRACT part 1: character-reference decoding ────────────────
+//
+// css-text/bidi/bidi-tab-001 root cause: the source markup is
+// `<span dir=ltr>&#9;0</span>` and the extractor copied the LITERAL 6-char
+// string '&#9;0' into `_text` — every runtime then painted an ampersand
+// instead of a TAB, so the tab-vs-bidi interaction under test never existed
+// in the fixture at all. Per HTML §13.2.5 (character reference states), the
+// HTML tokenizer decodes references while producing TEXT tokens, i.e.
+// BEFORE CSS ever sees the characters; our scanner walks raw markup, so we
+// must decode at the equivalent boundary ourselves.
+//
+// WHERE THE BOUNDARY SITS (no double-decode, no re-parse): decoding is
+// applied ONCE, inside the two text scanners (scanOwnText /
+// extractLeadingBodyTextInfo), to the accumulated TEXT buffer — i.e. AFTER
+// tag/text separation is settled (a decoded '<' from `&lt;` can never be
+// mistaken for markup because the scanner has already consumed all tags)
+// and BEFORE the CSS white-space collapse (a decoded TAB is collapsible
+// white space under `white-space: normal` per CSS Text §4.1, and survives
+// under the pre family — exactly the browser pipeline order). Decoding is a
+// single left-to-right String.replace pass that never rescans its own
+// output, so `&amp;#9;` decodes to the LITERAL '&#9;' — the same answer a
+// real HTML tokenizer gives.
+
+// The named character references we decode. HTML defines ~2200 named refs
+// (all case-sensitive); the WPT corpus uses a small stable subset — the XML
+// core five plus the whitespace/bidi-control/punctuation names below. Names
+// NOT in this map are left verbatim (conservative: an unknown `&foo;` stays
+// visible in the capture instead of silently vanishing).
+const NAMED_CHARACTER_REFS = {
+  // XML core five — the escaping set every HTML author uses.
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'",
+  // Non-ASCII spaces — preserved verbatim by the §4.1 ASCII-only collapse,
+  // so decoding them here is what makes NBSP-family tests honest.
+  nbsp: '\u00A0', ensp: '\u2002', emsp: '\u2003', thinsp: '\u2009',
+  // Bidi controls + joiners — load-bearing for the css-text bidi family.
+  // All zero-width/invisible characters, hence escapes not literals.
+  zwnj: '\u200C', zwj: '\u200D', lrm: '\u200E', rlm: '\u200F', shy: '\u00AD',
+  // Common punctuation/symbol names seen across WPT instruction prose.
+  mdash: '—', ndash: '–', hellip: '…', middot: '·',
+  bull: '•', laquo: '«', raquo: '»', copy: '©',
+  times: '×', minus: '−',
+  rarr: '→', larr: '←', uarr: '↑', darr: '↓',
+};
+
+/**
+ * Decode numeric (`&#9;` / `&#x41;`) and known named (`&amp;` …) character
+ * references in a TEXT-ONLY string (markup already stripped by the caller).
+ *
+ * Numeric refs outside Unicode (> U+10FFFF), the NUL code point, and lone
+ * surrogates decode to U+FFFD REPLACEMENT CHARACTER, mirroring the HTML
+ * spec's numeric-character-reference-end error handling (§13.2.5.80) —
+ * String.fromCodePoint would throw on them otherwise. The HTML C1-control
+ * remap table (e.g. `&#150;` → U+2013) is NOT implemented: the corpus
+ * never uses C1 numeric refs, and a raw C1 control renders invisibly on
+ * every platform anyway — documented gap, not a silent one.
+ *
+ * Exported so the unit tests can pin the contract (bidi-tab-001's
+ * '&#9;0' → TAB + '0' is the load-bearing pin).
+ */
+export function decodeCharacterReferences(text) {
+  // Fast path: no ampersand means no reference — return the same string.
+  if (!text || !text.includes('&')) return text;
+  // One alternation, one pass: hex numeric | decimal numeric | named.
+  // Replacements are never rescanned, so `&amp;#9;` → literal '&#9;'.
+  return text.replace(
+    /&(?:#[xX]([0-9a-fA-F]+)|#([0-9]+)|([a-zA-Z][a-zA-Z0-9]*));/g,
+    (whole, hex, dec, name) => {
+      if (hex !== undefined || dec !== undefined) {
+        // Numeric reference — parse in the matching radix.
+        const cp = hex !== undefined ? parseInt(hex, 16) : parseInt(dec, 10);
+        // Spec-shaped error handling: NUL, out-of-range, and surrogate
+        // code points become U+FFFD (see doc comment).
+        if (!Number.isFinite(cp) || cp === 0 || cp > 0x10FFFF ||
+            (cp >= 0xD800 && cp <= 0xDFFF)) return '\uFFFD';
+        return String.fromCodePoint(cp);
+      }
+      // Named reference — exact (case-sensitive) match against our subset;
+      // unknown names stay verbatim (conservative, see map comment).
+      const mapped = NAMED_CHARACTER_REFS[name];
+      return mapped !== undefined ? mapped : whole;
+    },
+  );
+}
+
+// ── wave-15 BIDI-EXTRACT part 3: the pre family ──────────────────────────────
+//
+// `white-space` values whose CSS Text §4.1.1 "Phase I" rules PRESERVE
+// segment breaks and preserve spaces/tabs — text under these must NOT go
+// through the collapse at the bottom of the scanners. `pre-line` is
+// deliberately absent: it preserves newlines but still collapses
+// spaces/tabs, which our binary collapse/preserve switch cannot express —
+// pre-line text takes the collapse path (documented approximation; zero
+// pre-line uses in the current css-text bidi family).
+const WHITESPACE_PRESERVING = new Set(['pre', 'pre-wrap', 'break-spaces']);
 
 /**
  * Shared own-text scanner behind extractOwnText (mergeCtx = null) and
  * extractOwnTextMerged (mergeCtx = { styledTags }). One walker, one
  * whitespace rule, so the two contracts can never drift. Returns
  * `{ text, merged }`.
+ *
+ * wave-15: `preserveWhitespace` (default false — every legacy caller keeps
+ * the collapse) skips the §4.1 collapse entirely for elements whose
+ * resolved `white-space` is in the pre family (see WHITESPACE_PRESERVING):
+ * spaces, tabs, and newlines in the source text — INCLUDING decoded
+ * `&#9;`-style references — reach `_text` verbatim. Caveat carried from
+ * HTML §13.2.5: the spec drops ONE newline immediately after a `<pre>`
+ * open tag; we don't (the corpus styles `white-space: pre` on <div>s,
+ * where no such rule exists).
  */
-function scanOwnText(innerHtml, mergeCtx) {
+function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   // Merge counter — how many pure-inline children were absorbed.
   let merged = 0;
   if (!innerHtml) return { text: '', merged };
@@ -850,6 +957,18 @@ function scanOwnText(innerHtml, mergeCtx) {
     }
     i = cursor;
   }
+  // wave-15 BIDI-EXTRACT part 1: decode character references NOW — after
+  // the tag/text separation above (decoded '<' can't be re-parsed as
+  // markup) and BEFORE the white-space step below (a decoded TAB is
+  // collapsible under `normal` and preserved under the pre family, exactly
+  // the HTML-tokenizer-then-CSS order a browser applies). See the
+  // decodeCharacterReferences doc comment for the boundary rationale.
+  const decodedBuf = decodeCharacterReferences(textBuf);
+  // wave-15 part 3: pre-family elements keep their text VERBATIM — no
+  // collapse, no trim — per CSS Text §4.1.1 (spaces/tabs/segment breaks
+  // are all preserved under pre/pre-wrap/break-spaces). bidi-tab-001's
+  // '\t0' spans and tab-bidi-001's literal-TAB runs depend on this.
+  if (preserveWhitespace) return { text: decodedBuf, merged };
   // Collapse whitespace per CSS white-space:normal default.
   //
   // Bug 3 fix (css-text/hanging-punctuation-first-002): the JS `\s` class
@@ -863,7 +982,7 @@ function scanOwnText(innerHtml, mergeCtx) {
   // every other Unicode space) is preserved verbatim. We collapse the
   // ASCII subset, then trim leading/trailing ASCII spaces only — same
   // [ \t\n\r\f]+ class, not `\s`.
-  const collapsed = textBuf
+  const collapsed = decodedBuf
     .replace(/[ \t\n\r\f]+/g, ' ')
     .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
   // Text plus the wave-12 merge count (0 whenever mergeCtx was null).
@@ -931,9 +1050,16 @@ export function extractLeadingBodyText(html) {
  * `{ styledTags?: Set<string> }` or null (no merging — wave-11 semantics:
  * the run stops at the FIRST renderable element of any kind).
  *
+ * wave-15: `preserveWhitespace` (default false) mirrors scanOwnText — when
+ * the BODY's resolved white-space is in the pre family (buildComponents
+ * derives it from the body-root rule bag), the leading prose keeps its
+ * spaces/tabs/newlines verbatim instead of collapsing. Character
+ * references decode on both paths (same tokenize-then-white-space boundary
+ * as scanOwnText; see decodeCharacterReferences).
+ *
  * Exported so the unit tests can pin the contract.
  */
-export function extractLeadingBodyTextInfo(html, mergeCtx = null) {
+export function extractLeadingBodyTextInfo(html, mergeCtx = null, preserveWhitespace = false) {
   // Merge counter for the leading run — reported to buildComponents.
   let merged = 0;
   // Same body-locator + implicit-<html>/<head> unwrap as
@@ -1032,11 +1158,27 @@ export function extractLeadingBodyTextInfo(html, mergeCtx = null) {
     const c = closeRe.exec(inner);
     i = c ? c.index + c[0].length : n;
   }
+  // wave-15 part 1: decode character references at the same boundary as
+  // scanOwnText — text/tag separation is settled, white-space step is next.
+  const decodedLeading = decodeCharacterReferences(buf);
+  // wave-15 part 3: pre-family body keeps the leading prose verbatim (CSS
+  // Text §4.1.1 — no collapse, no trim); see the preserveWhitespace doc.
+  // Whitespace-ONLY runs still yield '' even under pre: in the no-<body>
+  // fallback the scan crosses head scaffolding, and the newlines BETWEEN
+  // head-only elements are text the HTML parser would have dropped in the
+  // head — emitting them as a phantom `__text` of blank lines would be
+  // markup noise, not prose (documented trade: a genuinely blank-line-led
+  // pre body loses those blanks; zero such tests in the corpus).
+  if (preserveWhitespace) {
+    return /[^ \t\n\r\f]/.test(decodedLeading)
+      ? { text: decodedLeading, merged }
+      : { text: '', merged };
+  }
   // Collapse ASCII whitespace only — same CSS Text §4.1 rule (and the same
   // U+3000-preserving rationale) as extractOwnText above. The merge count
   // rides alongside so buildComponents can lossy-mark the __text component.
   return {
-    text: buf
+    text: decodedLeading
       .replace(/[ \t\n\r\f]+/g, ' ')
       .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, ''),
     merged,
@@ -1147,12 +1289,6 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
     kids.forEach((k, idx) => {
       const seen = typeSeen.get(k.tag) ?? 0;
       typeSeen.set(k.tag, seen + 1);
-      // wave-12: with merging on, ownText absorbs this element's pure-
-      // inline children in reading order (extractOwnTextMerged); the
-      // corresponding kids are dropped by the recursion filter above.
-      // Legacy path (mergeCtx null) is byte-identical to extractOwnText.
-      const ownRes = extractOwnTextMerged(k.innerHtml, mergeCtx);
-      const ownText = ownRes.text;
       // Recurse to capture nested element children, BUT respect maxDepth.
       let children = [];
       const pos = {
@@ -1168,6 +1304,24 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
         siblings: siblingList,
       };
       const childAncestor = { tag: k.tag, attrs: k.attrs, pos };
+      // wave-15 BIDI-EXTRACT part 3: resolve this element's effective
+      // white-space BEFORE extracting its text. buildComponents supplies
+      // `mergeCtx.resolveWhiteSpace` (own matched value → nearest ancestor
+      // with one → body root → 'normal', mirroring CSS inheritance since
+      // white-space is inherited per CSS Text §3); legacy callers without
+      // the resolver keep the unconditional-collapse behaviour. `pos` is
+      // built above ownText now (harmless reorder — pos never depended on
+      // the text; only its isEmpty patch below does).
+      const preserve = mergeCtx?.resolveWhiteSpace
+        ? WHITESPACE_PRESERVING.has(mergeCtx.resolveWhiteSpace(k.tag, k.attrs, ancestors, pos))
+        : false;
+      // wave-12: with merging on, ownText absorbs this element's pure-
+      // inline children in reading order (extractOwnTextMerged); the
+      // corresponding kids are dropped by the recursion filter above.
+      // Legacy path (mergeCtx null) is byte-identical to extractOwnText.
+      // wave-15: pre-family elements keep spaces/tabs/newlines verbatim.
+      const ownRes = extractOwnTextMerged(k.innerHtml, mergeCtx, preserve);
+      const ownText = ownRes.text;
       if (depth + 1 < maxDepth && k.innerHtml) {
         children = recurse(
           k.innerHtml,
@@ -3197,6 +3351,108 @@ export async function extractFixture(testRel) {
  *    `_text: "…"` field on its component when non-empty. Drives
  *    color / font / text-decor tests where the styled subject is text.
  */
+// ── wave-15 BIDI-EXTRACT part 2: the HTML dir attribute ──────────────────────
+//
+// The css-text bidi family drives direction via `<div dir=rtl>` markup, not
+// CSS — and the extractor dropped the attribute entirely, so the IR never
+// carried a Direction property and every runtime rendered LTR. Per HTML
+// §15.3.4 (the dir attribute presentational mapping), `dir=ltr|rtl` maps to
+// the CSS `direction` property (plus `unicode-bidi: isolate`, which we do
+// NOT emit — the runtimes have no unicode-bidi applier and a silent no-op
+// property would muddy the fixture; documented scope cut). The mapping is a
+// UA-origin presentational hint, so any author-origin `direction` (matched
+// rule or inline style) must win — dirAttributeDirection is only consulted
+// when the props bag has no `direction` key.
+
+/**
+ * First-strong direction scan — the UAX#9 P2/P3 approximation behind
+ * `dir=auto`. Walks code points in order; the FIRST one that is strong
+ * decides: strong R/AL → 'rtl', strong L → 'ltr'. No strong character at
+ * all → 'ltr' (HTML §15.3.4's dir=auto fallback when no strong character
+ * is found).
+ *
+ * Approximations vs the real UAX#9 tables (documented, corpus-safe):
+ *  - strong-RTL is detected by BLOCK RANGES (Hebrew, Arabic + supplements,
+ *    Syriac, Thaana, NKo, Samaritan/Mandaic, presentation forms, and the
+ *    SMP historic-RTL + Arabic Math planes) rather than per-character
+ *    Bidi_Class=R/AL lookup — the ranges contain a handful of non-strong
+ *    code points (combining marks, digits) we'd misread as strong R, all
+ *    unreachable as a FIRST character in real text;
+ *  - strong-LTR is approximated as "any other \p{L} letter" — Bidi_Class=L
+ *    covers most letters, and the exceptions (e.g. NSM-class letters) are
+ *    again implausible first-strong candidates;
+ *  - P2's isolate-skipping (ignore chars inside FSI…PDI) is not
+ *    implemented — no isolate controls appear in the corpus.
+ *
+ * Exported so the unit tests can pin 'فارسی' → rtl / 'français' → ltr.
+ */
+export function firstStrongDirection(text) {
+  if (!text) return 'ltr'; // empty → the no-strong-character fallback
+  for (const ch of text) { // for…of iterates CODE POINTS, not UTF-16 units
+    const cp = ch.codePointAt(0);
+    // Strong-RTL block ranges (see doc comment): U+0590–08FF covers
+    // Hebrew/Arabic/Syriac/Thaana/NKo/Samaritan/Mandaic + supplements;
+    // FB1D–FDFD and FE70–FEFC are the presentation forms; 10800–10FFF the
+    // SMP historic RTL scripts; 1E800–1EFFF Adlam + Arabic Math symbols.
+    if ((cp >= 0x0590 && cp <= 0x08FF) ||
+        (cp >= 0xFB1D && cp <= 0xFDFD) ||
+        (cp >= 0xFE70 && cp <= 0xFEFC) ||
+        (cp >= 0x10800 && cp <= 0x10FFF) ||
+        (cp >= 0x1E800 && cp <= 0x1EFFF)) return 'rtl';
+    // Any other letter approximates Bidi_Class=L → strong LTR.
+    if (/\p{L}/u.test(ch)) return 'ltr';
+    // Digits, punctuation, whitespace, controls: weak/neutral — keep going.
+  }
+  return 'ltr'; // scanned everything, nothing strong — HTML's ltr fallback
+}
+
+/**
+ * Map an element's `dir` attribute to a resolved CSS `direction` value, or
+ * null when no mapping applies. `textForAuto` is the text the dir=auto
+ * first-strong scan runs over (HTML §15.3.4 walks the element's TEXT in
+ * tree order; buildNode approximates that with ownText followed by the
+ * descendants' ownText in document order — interleaving between own text
+ * and child text is lost, a documented approximation since ownText itself
+ * already concatenates around child elements).
+ *
+ * Invalid values (e.g. bidi-tab-001's intentional `dir=ltrl` typo) return
+ * null — per HTML §15.3.4 an unrecognised dir value leaves the element in
+ * "no directionality state", i.e. it inherits like the attribute were
+ * absent. Exported so the unit tests can pin the mapping.
+ */
+export function dirAttributeDirection(attrs, textForAuto = '') {
+  // No attrs bag or no dir attribute — nothing to map.
+  const raw = attrs?.dir;
+  if (raw === undefined) return null;
+  const v = raw.trim().toLowerCase(); // dir values are ASCII case-insensitive
+  if (v === 'ltr' || v === 'rtl') return v; // the two literal states
+  // dir=auto: resolve NOW via the first-strong heuristic so the IR carries
+  // a concrete direction (runtimes have no auto-resolution machinery).
+  if (v === 'auto') return firstStrongDirection(textForAuto);
+  return null; // invalid value — no directionality state (see doc comment)
+}
+
+/**
+ * Concatenate a nested-tree node's own text with every descendant's own
+ * text in document order — the text corpus the dir=auto first-strong scan
+ * walks (HTML §15.3.4 descends the subtree; only the first STRONG
+ * character matters, so the lost own-text/child-text interleaving noted on
+ * dirAttributeDirection can only misorder the result when the deciding
+ * strong character sits in a child that precedes part of the parent's own
+ * text — not observed in the corpus). Separator spaces keep adjacent runs
+ * from fusing into artefact tokens (harmless to the scan: space is
+ * neutral).
+ */
+function collectSubtreeText(node) {
+  // Own text first (the common carrier), then children in document order.
+  let out = node.ownText || '';
+  for (const child of node.children ?? []) {
+    const t = collectSubtreeText(child);
+    if (t) out += (out ? ' ' : '') + t;
+  }
+  return out;
+}
+
 // wave-13 KEYFRAMES-SAMPLER: `keyframes` is the parseKeyframes() map for the
 // same stylesheet the `rules` came from (parseCss skips @-rules, so the two
 // are complementary views of one sheet). Null/omitted = sampling disabled —
@@ -3226,6 +3482,38 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // need to also nest the __0 siblings inside __body because every
   // renderer already iterates the components map at the top level).
   const root = propsForBodyRoot(rules);
+
+  // wave-15 BIDI-EXTRACT part 3: white-space resolver handed to the tree
+  // walker via mergeCtx. `white-space` is an INHERITED property (CSS Text
+  // §3), so the effective value for an element is its own matched value
+  // (rules + inline style, via the same propsForElement the component
+  // builder uses — the two can never disagree), else the NEAREST ancestor
+  // that sets one, else the body-root bag, else 'normal'. Cost is
+  // O(depth × rules) per element only when no own value exists — fine for
+  // the ≤5-deep, tens-of-rules WPT corpus. Limits (documented, not
+  // silent): ancestors ABOVE the maxDepth cut and `inherit`/`revert`
+  // keyword indirection are not modelled; the corpus sets pre directly on
+  // the container (`div { white-space: pre }`), which this resolves.
+  mergeCtx.resolveWhiteSpace = (tag, attrs, ancestors, pos) => {
+    // The element's own cascaded value wins (inline style already merged
+    // last inside propsForElement, matching the cascade).
+    const own = propsForElement(rules, tag, attrs, ancestors, pos, effectiveCtx)
+      .props['white-space'];
+    if (own) return own;
+    // Walk ancestors nearest-first — CSS inheritance takes the closest
+    // ancestor's computed value. Each ancestor's own chain is the slice
+    // of the document-order array before it; its pos rides on the entry.
+    for (let i = (ancestors?.length ?? 0) - 1; i >= 0; i--) {
+      const a = ancestors[i];
+      const av = propsForElement(rules, a.tag, a.attrs, ancestors.slice(0, i), a.pos ?? null, effectiveCtx)
+        .props['white-space'];
+      if (av) return av;
+    }
+    // No element in the chain sets it — fall back to the body-root scope
+    // (body/html/:root/* rules), then the CSS initial value.
+    return root.props['white-space'] ?? 'normal';
+  };
+
   if (root.matchedRules > 0 && Object.keys(root.props).length > 0) {
     // wave-13 KEYFRAMES-SAMPLER: the measured WPT test (background-color-
     // animation-in-body) animates <body> itself, so the body-root bag is a
@@ -3269,7 +3557,11 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // so `<body>There should be <strong>no red</strong>: <div>…` yields ONE
   // `__text` component with the full sentence instead of a fragmented
   // prose + block-stacked <strong> pair.
-  const leading = extractLeadingBodyTextInfo(cleaned, mergeCtx);
+  // wave-15 part 3: leading body prose is body-scope text, so its collapse
+  // switches on the BODY's resolved white-space (the body-root rule bag —
+  // no element chain exists above body-level anonymous text).
+  const leadingPreserve = WHITESPACE_PRESERVING.has(root.props['white-space']);
+  const leading = extractLeadingBodyTextInfo(cleaned, mergeCtx, leadingPreserve);
   if (leading.text) {
     const cmp = { properties: {}, _text: leading.text };
     if (leading.merged > 0) {
@@ -3335,6 +3627,19 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // array as inline-run-merged so the existing _lossy/_lossyReasons
     // emission + overall roll-up cover it with no extra branches.
     if (sampled) reasons.push('sampled-animation');
+    // wave-15 BIDI-EXTRACT part 2: HTML `dir` attribute → CSS `direction`.
+    // Presentational-hint precedence (HTML §15.3.4): an author-origin
+    // `direction` already in the props bag (matched rule or inline style)
+    // wins, so the mapping is only consulted when the bag has none.
+    // `dir=auto` resolves NOW via the first-strong scan over the subtree
+    // text (the runtimes cannot re-resolve) — a baked heuristic result, so
+    // it rides the lossy lane as 'dir-auto-resolved' (LOUD, not silent).
+    const dirResolved = ('direction' in props)
+      ? null
+      : dirAttributeDirection(node.attrs, collectSubtreeText(node));
+    if (dirResolved && node.attrs.dir.trim().toLowerCase() === 'auto') {
+      reasons.push('dir-auto-resolved');
+    }
     if (reasons.length) {
       lossyOverall = true;
       reasons.forEach((r) => lossyReasonsOverall.add(r));
@@ -3350,6 +3655,11 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // capture is meaningful even without explicit width/height.
       cmp.properties = { width: '100px', height: '100px' };
     }
+    // wave-15 part 2: land the dir-attribute mapping AFTER the placeholder
+    // decision above — a rule-less, text-less `<div dir=ltr>` should still
+    // read as scaffolding (placeholder box) rather than a styled subject,
+    // so the mapped `direction` is added onto whichever bag survived.
+    if (dirResolved) cmp.properties.direction = dirResolved;
     if (reasons.length) {
       cmp._lossy = true;
       cmp._lossyReasons = reasons;

@@ -2,6 +2,8 @@ package com.styleconverter.runtime.core.renderer
 
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
+// Source-over blend used by the wave-15 composed-canvas background rule below.
+import androidx.compose.ui.graphics.compositeOver
 
 /**
  * Ambient WPT-capture-mode flag for the Compose runtime.
@@ -174,6 +176,53 @@ val WPT_CANVAS_BACKGROUND = Color(0xFFFFFFFF)
  */
 fun captureCanvasBackground(wptCaptureMode: Boolean, defaultBackground: Color): Color =
     if (wptCaptureMode) WPT_CANVAS_BACKGROUND else defaultBackground
+
+/**
+ * Wave 15 (NATIVES-ALPHA) — the COMPOSED-canvas background rule: a body-root's
+ * resolved background is ALPHA-COMPOSITED over the white WPT canvas, never
+ * painted verbatim.
+ *
+ * ## Why composite
+ * The browser-ref paints the page canvas by CSS compositing: a
+ * `body { background: rgba(...) }` with alpha < 1 blends source-over onto the
+ * white `:where(html,body)` canvas (css-color-4 transparency), and the web
+ * harness gets the identical result for free because its body-root div sits ON
+ * the white page. The composed native canvases instead painted the RESOLVED
+ * rgba VERBATIM as the surface color — so
+ * `background-color-transparent-animation-in-body`'s body background (the
+ * wave-14 keyframes sampler's CORRECTLY baked `rgba(0,0,0,0)`) flattened the
+ * whole capture toward BLACK on the opaque PNG instead of vanishing into
+ * white (iOS scored 0.000; this is the Compose twin of
+ * `WPTCanvas.composedBackground` so both natives blend identically).
+ *
+ * ## Contract
+ * - `null` (no body-root, or it declares no background) → the corpus-v4 WHITE
+ *   canvas [WPT_CANVAS_BACKGROUND] — the fallback the harness resolver
+ *   previously inlined, unchanged.
+ * - Fully OPAQUE (alpha >= 1) → the caller's color VERBATIM: source-over with
+ *   α=1 is the identity, and skipping the blend keeps opaque body backgrounds
+ *   (a98rgb-003's grey) bit-identical to their wave-14 rendering.
+ * - Translucent → Compose's [compositeOver] source-over blend onto the white
+ *   canvas (per-channel c·α + white·(1−α), opaque result) — the same sRGB
+ *   gamma-space math the browsers use for the page canvas.
+ *
+ * COMPOSED WPT ONLY: the sole consumer is the harness's
+ * `resolveComposedCanvasBackground` (ScreenshotCaptureScreen.kt), so the
+ * dark-stage 327-pair path and the per-component WPT path never route through
+ * this — the [captureCanvasBackground] mode-split pins hold those surfaces
+ * byte-identical.
+ *
+ * @param resolved the body-root's extracted BackgroundColor, or null.
+ */
+fun composedCanvasBackground(resolved: Color?): Color = when {
+    // No author body background → the white canvas verbatim (the ref's
+    // zero-specificity `:where(html,body){background:#fff}` wins).
+    resolved == null -> WPT_CANVAS_BACKGROUND
+    // Opaque → identity (see contract above — no needless re-pack).
+    resolved.alpha >= 1f -> resolved
+    // Translucent → source-over onto the opaque white canvas.
+    else -> resolved.compositeOver(WPT_CANVAS_BACKGROUND)
+}
 
 /**
  * The WPT default TEXT INK — spec BLACK, the corpus-v4.1 ink sub-boundary

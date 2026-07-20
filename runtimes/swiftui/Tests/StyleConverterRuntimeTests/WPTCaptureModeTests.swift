@@ -258,6 +258,69 @@ final class WPTCaptureModeTests: XCTestCase {
             WPTCanvas.captureBackground(wptCaptureMode: false, defaultBackground: darkStage))
     }
 
+    // MARK: - Composed-canvas alpha compositing (wave 15, NATIVES-ALPHA)
+
+    /// sRGB component extraction for the compositing pins — the same UIKit
+    /// bridge the production helper uses, so the assertions read exactly
+    /// what a capture surface would paint.
+    private func srgb(_ c: Color) -> (r: Double, g: Double, b: Double, a: Double) {
+        // Every color under test is Color(.sRGB, …), for which getRed
+        // always succeeds — force-unwrap keeps a failure loud, not silent.
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        XCTAssertTrue(UIColor(c).getRed(&r, green: &g, blue: &b, alpha: &a),
+                      "sRGB extraction must succeed for Color(.sRGB, …)")
+        return (Double(r), Double(g), Double(b), Double(a))
+    }
+
+    /// The 0.000 reproduction pin: a body-root that resolves to
+    /// `rgba(0,0,0,0)` (background-color-transparent-animation-in-body's
+    /// CORRECTLY baked wave-14 sampler value) must yield the WHITE canvas —
+    /// fully-transparent ink composited source-over onto white IS white,
+    /// exactly as the browser-ref (and web, which composites for free over
+    /// its white page) renders it. Painting it verbatim flattened the
+    /// opaque capture PNG to black.
+    func testComposedBackgroundTransparentBodyComposesToWhite() {
+        let out = srgb(WPTCanvas.composedBackground(
+            resolved: Color(.sRGB, red: 0, green: 0, blue: 0, opacity: 0)))
+        // α=0 → the white canvas shows through untouched, fully opaque.
+        XCTAssertEqual(out.r, 1, accuracy: 1e-9)
+        XCTAssertEqual(out.g, 1, accuracy: 1e-9)
+        XCTAssertEqual(out.b, 1, accuracy: 1e-9)
+        XCTAssertEqual(out.a, 1, accuracy: 1e-9)
+    }
+
+    /// The partial-alpha arithmetic pin: rgba(1,0,0,0.5) over white is the
+    /// CSS source-over blend 0.5·src + 0.5·white per channel — pink
+    /// (1, 0.5, 0.5), opaque. Pins the actual compositing math, not just
+    /// the two degenerate endpoints.
+    func testComposedBackgroundHalfAlphaRedIsPinkOverWhite() {
+        let out = srgb(WPTCanvas.composedBackground(
+            resolved: Color(.sRGB, red: 1, green: 0, blue: 0, opacity: 0.5)))
+        // r: 1·0.5 + 1·0.5 = 1; g/b: 0·0.5 + 1·0.5 = 0.5; α flattens to 1.
+        XCTAssertEqual(out.r, 1.0, accuracy: 1e-9)
+        XCTAssertEqual(out.g, 0.5, accuracy: 1e-9)
+        XCTAssertEqual(out.b, 0.5, accuracy: 1e-9)
+        XCTAssertEqual(out.a, 1.0, accuracy: 1e-9)
+    }
+
+    /// nil (no body-root / no declared background) → the corpus-v4 white
+    /// canvas VERBATIM — the same fallback the harness previously inlined,
+    /// so no-body documents render byte-identically across the wave-15 fix.
+    func testComposedBackgroundNilFallsBackToWhiteCanvas() {
+        XCTAssertEqual(WPTCanvas.composedBackground(resolved: nil),
+                       WPTCanvas.background)
+    }
+
+    /// A fully-OPAQUE body background returns VERBATIM (identity, not a
+    /// re-packed round-trip): source-over with α=1 is the identity, and
+    /// opaque body-root tests (a98rgb-003's grey) must stay bit-identical
+    /// to their wave-14 rendering.
+    func testComposedBackgroundOpaqueBodyReturnsVerbatim() {
+        // a98rgb-003-ish opaque grey — any α=1 color takes the verbatim path.
+        let grey = Color(.sRGB, red: 0.4, green: 0.4, blue: 0.4, opacity: 1)
+        XCTAssertEqual(WPTCanvas.composedBackground(resolved: grey), grey)
+    }
+
     // MARK: - WPT default-ink split (corpus-v4.1: black ink)
 
     /// The corpus-v4.1 default TEXT INK is opaque BLACK: real WPT pages
