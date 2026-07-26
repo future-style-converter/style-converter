@@ -67,7 +67,7 @@ between `properties` and `selectors`):
 | `slot` | object | omit for roots | `{parent, name?}` — structural, MUST round-trip; `name` omitted at the default `"content"` (03-children.md) |
 | `text` | string | omit-when-null | v2 rename of `_text`; empty string `""` is a legal emitted value ("extracted, was empty") |
 | `pseudos` | object | omit-when-null | v2 rename of `_pseudo`; `{before?, after?, marker?}` extractor-shaped payload forwarded verbatim, never flattened |
-| `meta` | object | omit-when-empty | droppable hints grouped: `{sourceTag?, role?}` — v2 home of v1 `_tag`/`_role`; present ⇒ non-empty and strict |
+| `meta` | object | omit-when-empty | droppable hints grouped: `{sourceTag?, role?, attrs?}` — v2 home of v1 `_tag`/`_role`, plus the wave-20 `attrs` widget-identity object (v2 home of the extractor's `_attrs`; present-in-source keys among type/value/checked/multiple/size/alt/min/max/selected/disabled, typed per the extractor contract). Present ⇒ non-empty and strict |
 
 **`children` does not exist in v2** — its presence anywhere is a hard
 validation error (03-children.md §1).

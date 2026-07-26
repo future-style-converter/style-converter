@@ -793,9 +793,23 @@ public struct ComponentRenderer: View {
             // size to their offsets). Wave 9 adds the inline guard: CSS 2.1
             // §10.3.3 fills BLOCK-LEVEL boxes only — a `display: inline`
             // box sizes to its content (§10.3.1) and must never fill.
+            // Wave-20 fix 3 — inline-ATOM guard: UA form controls carry
+            // no Display property on the wire (their inline-block UA
+            // default is unmodeled), so the `.inline` guard below never
+            // fired for them and every width-auto widget child was
+            // stretched to the containing block (appearance-auto-001:
+            // sixteen 500px atoms → InlineAtomBlockLayout wrapped EVERY
+            // measured-width atom onto its own row — the 0.818→0.729
+            // css-ui regression). CSS 2.1 §10.3.9: an inline-block with
+            // width:auto SHRINKS TO FIT, it never fills — so any child
+            // InlineAtomFlow.isAtom recognizes (the same predicate that
+            // routes it into the atom rows) skips the fold and keeps its
+            // UAWidgetIntrinsics/measured size. Non-widget children and
+            // the whole non-WPT flow are untouched.
             if wptCaptureMode, let w = wptBlockFlowFillWidth,
                s.size.width == nil, !Self.isOutOfFlow(component),
-               s.layout.display != .inline {
+               s.layout.display != .inline,
+               !Self.isInlineAtom(component) {
                 // Wave 11: the published fill width is the containing
                 // block's content width — the box's target FRAME extent
                 // (CSS 2.1 §10.3.3: margin+border+padding+content fill
@@ -1173,6 +1187,38 @@ public struct ComponentRenderer: View {
                     // Same content pass as every container — the sorted
                     // in-flow children become the layout's subviews in
                     // order (abspos children ride the overlay, not this).
+                    contentOrPlaceholder(style: style)
+                }
+            } else if let inlineSegments = blockInlineAtomSegments() {
+                // Wave-20 lane W3 — CSS 2.1 §9.4.2 inline atom flow,
+                // composed-WPT capture ONLY (pin P19; the gate lives in
+                // blockInlineAtomSegments): consecutive inline-level UA
+                // widgets / text-only anchors pack into wrapped rows
+                // (css-ui appearance-auto-001's sixteen controls in a
+                // 500px container) instead of stacking in the VStack.
+                // The dark-stage 327 corpus never sets wptCaptureMode,
+                // so its block containers keep the VStack byte-
+                // identically.
+                InlineAtomBlockLayout(
+                    // The pure segmentation over the SAME sorted child
+                    // array contentOrPlaceholder renders — subview
+                    // indices line up by construction (pins P15).
+                    segments: inlineSegments,
+                    // Per-child atom specs from the SHARED UA geometry
+                    // table (UAWidgetIntrinsics — the W2/W3 coordination
+                    // point), index-aligned with the sorted children.
+                    specs: FlexboxApplier.sorted(inFlowChildren).map {
+                        UAWidgetIntrinsics.spec(Self.atomKindOf($0))
+                    },
+                    // Mixed-content text renders as a leading subview
+                    // BEFORE the children — the layout stacks it first.
+                    leadingCount: (component.text?.isEmpty == false) ? 1 : 0,
+                    // The VStack's spacing twin for the stacked items.
+                    spacing: gap.row
+                ) {
+                    // Atoms are OPAQUE: their content renders through the
+                    // normal chain (W2's widget painting mounts inside) —
+                    // this lane owns only their placement.
                     contentOrPlaceholder(style: style)
                 }
             } else {
@@ -1735,27 +1781,119 @@ public struct ComponentRenderer: View {
         guard wptCaptureMode else { return nil }
         // The exact render order of the child subviews (CSS `order`).
         let children = FlexboxApplier.sorted(inFlowChildren)
+        // Wave-20 W3: the container's own Direction keyword decides how
+        // the LOGICAL float/clear members map to physical sides
+        // (css-logical-1 §2.1: rtl swaps inline-start/end). Read from
+        // the container's declared properties only — the engine has no
+        // inherited-direction channel, and the corpus (descendant-
+        // static-position-002/004) declares physical `right` anyway.
+        let rtl = component.properties.contains {
+            $0.type == "Direction" &&
+                ValueExtractors.extractKeyword($0.data)?.uppercased() == "RTL"
+        }
         // Per-sibling facts: float side + the `<br clear>` break shape
         // (childless Clear-only marker — pin P2).
         let facts = children.map {
             FloatRowPacking.facts(from: $0.properties,
-                                  hasChildren: $0.children?.isEmpty == false)
+                                  hasChildren: $0.children?.isEmpty == false,
+                                  rtl: rtl)
         }
         // Segment once; only a plan with an actual run leaves the VStack.
         let segments = FloatRowPacking.segment(facts)
         return segments.contains(where: { $0.isRun }) ? segments : nil
     }
 
+    // MARK: - Inline atom flow (wave-20 lane W3)
+
+    /// The block container's inline-atom plan, or nil when this
+    /// container keeps the plain VStack — the iOS twin of Compose
+    /// ComponentRenderer.blockInlineAtomSegments (pins P15/P19).
+    ///
+    /// nil when ANY of:
+    ///  • not in composed-WPT capture (P19 — the dark-stage 327 corpus
+    ///    must keep the VStack byte-identically);
+    ///  • the sorted in-flow children contain no ≥2 streak of
+    ///    inline-level atoms (run-free containers stay frozen).
+    /// The segmentation runs over the SAME `FlexboxApplier.sorted`
+    /// array contentOrPlaceholder renders, so InlineAtomBlockLayout's
+    /// subview indices line up by construction.
+    private func blockInlineAtomSegments() -> [InlineAtomFlow.Segment]? {
+        // P19 — composed-WPT capture only, mirroring the float gate.
+        guard wptCaptureMode else { return nil }
+        // The exact render order of the child subviews (CSS `order`).
+        let children = FlexboxApplier.sorted(inFlowChildren)
+        // Per-sibling atom facts from the decoded wire: originating tag
+        // (meta.sourceTag), a declared Display override, element
+        // children and text presence (the text-only-anchor guard, P15).
+        // One predicate, two consumers (fix 3): the SAME isInlineAtom
+        // read also guards the wptBlockFlowFillWidth fold, so the set of
+        // children the fold skips and the set the atom rows pack are
+        // equal by construction.
+        let atomFlags = children.map { Self.isInlineAtom($0) }
+        // Segment once; only a plan with an actual run (≥2 consecutive
+        // atoms) leaves the VStack — mirror of the float gate.
+        let segments = InlineAtomFlow.segment(atomFlags)
+        return segments.contains(where: { $0.isRun }) ? segments : nil
+    }
+
+    /// Wave-20 fix 3 — the per-COMPONENT twin of the per-child atom
+    /// facts in blockInlineAtomSegments: does this component itself
+    /// qualify as an inline-level UA-widget atom (P15)? Consumed by the
+    /// wptBlockFlowFillWidth fold guard in `styledContent` — an atom is
+    /// inline-block by UA default (CSS 2.1 §10.3.9 shrink-to-fit), so
+    /// the §10.3.3 block fill must never stretch it. Static + pure so
+    /// the XCTest pins it against the real appearance-auto-001 wire
+    /// without a render surface (the suppressesNamePlaceholder pattern).
+    static func isInlineAtom(_ component: IRComponent) -> Bool {
+        InlineAtomFlow.isAtom(
+            tag: component.meta?.sourceTag,
+            // css-display-3 §2: a declared non-inline display takes the
+            // box out of the inline flow — same read the segmenter does.
+            displayKeyword: component.properties.first(where: { $0.type == "Display" })
+                .flatMap { ValueExtractors.extractKeyword($0.data)?.uppercased() },
+            hasElementChildren: component.children?.isEmpty == false,
+            hasText: component.text?.isEmpty == false
+        )
+    }
+
+    /// A run member's widget kind for the shared UA geometry table
+    /// (UAWidgetIntrinsics). The `type`/`multiple` attributes ride the
+    /// wire as `meta.attrs` (the wave-20 widget-identity contract) and
+    /// are decoded into IRMeta.attrs by lane W2's capsule — an absent
+    /// capsule (pre-wave-20 wires, non-widget tags) folds to the
+    /// textField/menulist defaults exactly like the HTML parser's
+    /// missing-attribute states.
+    static func atomKindOf(_ child: IRComponent) -> UAWidgetIntrinsics.Kind {
+        UAWidgetIntrinsics.kind(
+            tag: child.meta?.sourceTag,
+            // The wire's `type` attribute (present-in-source only).
+            typeAttr: child.meta?.attrs?.type,
+            // The wire's boolean `multiple` presence (listbox height).
+            multiple: child.meta?.attrs?.multiple == true
+        )
+    }
+
     // MARK: - Content
 
     @ViewBuilder
     private func contentOrPlaceholder(style: ComponentStyle) -> some View {
+        // ── Wave-20 lane-W2 UA-widget mount hook (the ONLY renderer entry
+        // for widget content). WPT capture only: a form-control component
+        // (meta.sourceTag + meta.attrs, css-ui-4 §7 appearance ≠ none)
+        // paints its Chromium-lookalike replica INSTEAD of text/children
+        // content — painting lives in StyleEngine/widgets/UAWidget*.
+        // Dark stage: wptCaptureMode is false on every 327 path → no-op.
+        if wptCaptureMode,
+           let spec = UAWidgetsResolve.resolve(component: component,
+                                               properties: resolvedProperties) {
+            UAWidgetView(spec: spec)
+        }
         // The placeholder only appears when the component has NO
         // children at all — a parent whose children are ALL absolutely
         // positioned still renders empty in-flow content (web parity:
         // ComponentRenderer.tsx keys the placeholder on
         // `children.length`), while its boxes arrive via the overlay.
-        if component.children?.isEmpty == false {
+        else if component.children?.isEmpty == false {
             // Bug 1 mixed-content fix — see
             // testing/titan/investigations/swarm-002/css-text-decor__text-decoration-decorating-box-thickness-001.json
             //

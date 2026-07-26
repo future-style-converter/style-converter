@@ -102,9 +102,13 @@ struct TransformsAggregate: Equatable {
     var box: TransformBoxKind? = nil
 
     // 3D container flag — CSS `transform-style: preserve-3d`. SwiftUI
-    // applies all 3D effects in 2D-projection space anyway; we keep the
-    // flag so the applier can wrap in `.drawingGroup()` when set, which
-    // prevents parent rasterisation from flattening the scene.
+    // applies all 3D effects in 2D-projection space anyway; the flag's
+    // render-time job is EXTENDING the 3D rendering context (wave 19 —
+    // the applier publishes the accumulated ancestor matrix to children
+    // for §5.1 backface culling). Wave 20 (B-RC4): the old
+    // `.drawingGroup()` wrap was removed — it rasterised the subtree
+    // clipped to the element's bounds, blanking preserve-3d DIVs whose
+    // only children are abspos faces (auto height 0 → empty texture).
     var preserve3D: Bool = false
 
     // Back-face culling. When true and the ACCUMULATED 3D matrix (own

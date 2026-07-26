@@ -376,4 +376,46 @@ class CssParsingTextAndChildrenTest {
             "explicit null _role must not appear in serialized output"
         )
     }
+
+    /**
+     * wave-20 W1: `_attrs` (widget-identity attributes) is parsed into the
+     * IRComponent's `attrs` field VERBATIM — the converter never interprets
+     * the extractor-owned payload (strings/booleans/numbers per the
+     * extract-fixture.mjs widgetAttrsFor wire contract). The deprecated v1
+     * serializer must keep IGNORING it so `--emit-ir v1` bytes stay frozen
+     * (the same rule `_tag`/`_pseudo` follow; IR v2 emission is pinned in
+     * IRWireV2Test).
+     */
+    @Test
+    fun `_attrs is parsed verbatim and ignored by the v1 serializer`() {
+        // The appearance-checkbox-001 shape: an attributed <input> widget.
+        val input = json.parseToJsonElement(
+            """
+            {
+              "components": {
+                "chk__0": {
+                  "properties": { "appearance": "checkbox" },
+                  "_tag": "input",
+                  "_attrs": { "type": "checkbox", "checked": true, "min": 0.5 }
+                }
+              }
+            }
+            """.trimIndent()
+        ).jsonObject
+
+        val ir = cssParsing(input)
+        // In-memory model carries the payload byte-verbatim (opaque object).
+        val attrs = ir.components[0].attrs
+        assertNotNull(attrs, "Expected attrs forwarded onto IRComponent")
+        assertEquals("checkbox", attrs["type"]!!.jsonPrimitive.content)
+        assertEquals("true", attrs["checked"]!!.jsonPrimitive.content)
+        assertEquals("0.5", attrs["min"]!!.jsonPrimitive.content)
+
+        // The frozen v1 wire never learns about attrs (historical-drop rule).
+        val outString = Json { prettyPrint = false }.encodeToString(ir)
+        assertTrue(
+            !outString.contains("_attrs") && !outString.contains("\"attrs\""),
+            "v1 serializer must not emit attrs in any spelling"
+        )
+    }
 }

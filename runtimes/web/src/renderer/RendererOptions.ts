@@ -120,6 +120,22 @@ export interface RendererOptions {
   forceState?: RuntimeV1Condition | null;
 
   /**
+   * Final transform of the DOM props for a node's element, AFTER the core
+   * assembled identity attributes, widget attrs (WidgetAttrs.ts) and
+   * inline styles — the last word before createElement. Receives the
+   * RESOLVED element name (post-mapTag). Default: identity.
+   * HARNESS DIVERGENCE (wave-20 W1, WPT capture only): the harness adds
+   * `inert` + `tabIndex: -1` to passed-through widget elements so a
+   * capture can never acquire focus rings or interaction state the
+   * browser-ref page (which nothing ever focuses) doesn't show.
+   */
+  decorateProps?: (
+    props: Record<string, unknown>,
+    elementName: string,
+    ctx: RenderContext,
+  ) => Record<string, unknown>;
+
+  /**
    * Group the node's composed children into ordered segments, wrapping
    * some in an extra <div>. Default: none — children render as direct
    * siblings, pure HTML.
@@ -132,6 +148,28 @@ export interface RendererOptions {
    * cover every child index exactly once, in sibling order.
    */
   planChildRuns?: (children: ComposedNode[], ctx: RenderContext) => ChildRunPlan | null;
+
+  /**
+   * Render a separator node BETWEEN two consecutive composed children.
+   * Called once per adjacent (prev, next) sibling pair; a non-null
+   * return is inserted between them as a real React child. Default:
+   * none — children render flush, exactly the pre-hook DOM.
+   * HARNESS DIVERGENCE (wave-20 W2 follow-up, WPT capture only): the
+   * harness returns a real ' ' text node between consecutive
+   * inline-level widget siblings — the source markup separates every
+   * form control by collapsed whitespace (one ~4.16px space advance at
+   * the 16px ref font, the natives' UAWidgetIntrinsics.atomGapPx pin),
+   * and the flat component wire dropped those text nodes, so composed
+   * widget rows packed flush and every wrap point shifted vs the
+   * browser-ref. Not applied inside planChildRuns segments (float runs
+   * are block-level — whitespace between blocks renders nothing per
+   * CSS 2.1 §9.2.2.1 anyway, and the two plans never co-occur today).
+   */
+  renderChildSeparator?: (
+    prev: ComposedNode,
+    next: ComposedNode,
+    ctx: RenderContext,
+  ) => ReactNode | null;
 }
 
 /**

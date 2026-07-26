@@ -9,6 +9,10 @@
 export * from './Composer';
 // Production sourceTag → element policy (denylist + void set).
 export * from './TagMapping';
+// wave-20 W1: wire meta.attrs → DOM-prop policy (widget tag set + mapper).
+export * from './WidgetAttrs';
+// Pseudo-element span renderer (split from NodeRenderer, wave-20 W1).
+export * from './PseudoNodeRenderer';
 // Calibration surface: RenderContext + RendererOptions.
 export * from './RendererOptions';
 // The per-node renderer core.

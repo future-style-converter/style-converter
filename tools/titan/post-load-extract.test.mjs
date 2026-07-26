@@ -16,7 +16,10 @@
 //      values (skip-guarded: fixtures/wpt is a generated artifact, so these
 //      pins only run on a machine that has run the extraction);
 //   9. an optional LIVE end-to-end run (browser + corpus), env-gated so the
-//      default `node --test` stays hermetic and fast.
+//      default `node --test` stays hermetic and fast;
+//  10. wave-20 STRUCTURE extraction (the appendChild family) — the trigger
+//      predicate, serialized-DOM input path, void-closer normalization,
+//      two-stamp adoption, and the adopt→bake composition order.
 //
 // The gate-interplay pins (applyNaScoreGate × postLoadExtracted) live in
 // inject-wpt-block.test.mjs next to the rest of the scoring-gate suite.
@@ -33,6 +36,10 @@ import {
   flattenStaticPaths, staticPathsForHtml,
   mappingMismatch, snapshotsStable,
   componentAtPath, overlayComputedOnComponent, mergePostLoadIntoFixture,
+  // wave-20 STRUCTURE extraction surface (section 10 pins):
+  STRUCTURE_TRIGGER_TAG, shouldStructureExtract,
+  HTML_VOID_TAGS, stripForeignVoidClosers,
+  buildSyntheticHtml, adoptReExtractedFixture, CANVAS_FRAME_STYLE_ID,
 } from './post-load-extract.mjs';
 import { extractBodyTreeNested, buildComponents, parseCss, stripComments, extractInlineStyle, collectStyledTags } from './extract-fixture.mjs';
 
@@ -305,6 +312,29 @@ test('post-load: overlay overrides statics, strips shorthands, pins the basis', 
   assert.equal(cmp._text, 'own text stays');
 });
 
+test('post-load w1: overlay leaves _tag/_attrs untouched (widget identity is structural)', () => {
+  // wave-20 W1: `_attrs` (the widget-identity wire) joins `_text`/`_tag` in
+  // the overlay's untouched set — the computed-state bake writes ONLY into
+  // `properties`, so a checked checkbox stays a checked checkbox after a
+  // post-load geometry overlay.
+  const cmp = {
+    properties: { left: '0' },
+    _tag: 'input',
+    _attrs: { type: 'checkbox', checked: true },
+  };
+  overlayComputedOnComponent(cmp, {
+    position: 'absolute', left: '40px', top: 'auto', right: 'auto', bottom: 'auto',
+    width: '16px', height: '16px', 'background-color': 'rgb(255, 0, 0)',
+    transform: 'none', display: 'inline-block', 'overflow-x': 'visible',
+    'overflow-y': 'visible', 'z-index': 'auto',
+  });
+  // Geometry landed…
+  assert.equal(cmp.properties.left, '40px');
+  // …and the widget identity fields are byte-identical.
+  assert.equal(cmp._tag, 'input');
+  assert.deepEqual(cmp._attrs, { type: 'checkbox', checked: true });
+});
+
 test('post-load: overlay keeps the trailing inset when the leading one is auto', () => {
   const fx = makeFixture();
   const cmp = fx.components.stem__0;
@@ -400,6 +430,156 @@ test('post-load: SHORTHAND_CONFLICTS covers every family the overlay writes', ()
     'border-right', 'border-style', 'border-top', 'border-width',
     'inset', 'margin', 'overflow', 'padding',
   ]);
+});
+
+// ── 10 (wave-20). Structure extraction — the appendChild family ─────────────
+//
+// The former element-mapping BAIL becomes the structure-delivery TRIGGER for
+// the requires-script-mutation population: the live post-script DOM is
+// serialized and re-fed through extract-fixture.mjs (htmlOverride), so
+// created nodes become components. Pins below cover the pure surface: the
+// scope-guarded trigger predicate, the serialized-DOM input path (synthetic
+// document assembly + void-closer normalization + static re-walk), the
+// two-stamp adoption, and the adopt→bake composition order.
+
+test('wave20: shouldStructureExtract fires only for script-mutation drift', () => {
+  const drift = 'element count: static 2 vs browser 8'; // any non-null reason
+  // The trigger: wall-tagged requires-script-mutation AND an actual mismatch.
+  assert.equal(shouldStructureExtract([STRUCTURE_TRIGGER_TAG], drift), true);
+  assert.equal(shouldStructureExtract(['requires-table-layout', STRUCTURE_TRIGGER_TAG], drift), true);
+  // No mismatch → the cheaper state-bake path already ran; never trigger.
+  assert.equal(shouldStructureExtract([STRUCTURE_TRIGGER_TAG], null), false);
+  // Drift on a scroll-only wall (or untagged --force run) keeps the bail —
+  // the delivered capability is structural mutation, nothing else.
+  assert.equal(shouldStructureExtract(['requires-script-driven-scroll'], drift), false);
+  assert.equal(shouldStructureExtract(undefined, drift), false);
+  assert.equal(shouldStructureExtract([], drift), false);
+  // The tag itself is pinned — the trigger scope must not silently widen.
+  assert.equal(STRUCTURE_TRIGGER_TAG, 'requires-script-mutation');
+});
+
+test('wave20: stripForeignVoidClosers removes exactly the foreign void closers', () => {
+  // createElementNS('not-html', 'input') serializes `<input></input>` — the
+  // HTML re-parse ignores the closer, but the regex walker would drop every
+  // following sibling on it (the measured appearance-auto-… failure mode).
+  assert.equal(
+    stripForeignVoidClosers('<div><button></button><input></input><meter></meter></div>'),
+    '<div><button></button><input><meter></meter></div>');
+  // Non-void closers are untouched (meter above), as are open tags and text.
+  assert.equal(stripForeignVoidClosers('<p>a &lt;/input&gt; b</p>'), '<p>a &lt;/input&gt; b</p>');
+  // Case-insensitive + optional whitespace, per HTML tag-name matching.
+  assert.equal(stripForeignVoidClosers('<BR></BR><wbr></wbr >'), '<BR><wbr>');
+  // The void set is the HTML §13.1.2 list — pinned so it can't drift.
+  assert.deepEqual(HTML_VOID_TAGS, [
+    'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+    'link', 'meta', 'param', 'source', 'track', 'wbr',
+  ]);
+});
+
+test('fix5: the serializer stamps the foreign-namespace marker before outerHTML', () => {
+  // Source-scan pin (the htmlOverride wiring convention): namespaces do NOT
+  // survive the outerHTML → regex re-parse round-trip, so the ONLY honest
+  // place to record them is the in-browser serializer, where the live-DOM
+  // clone still answers el.namespaceURI. The stamp + the evaluate wiring
+  // are both pinned so neither half can be dropped silently.
+  const src = readFileSync(new URL('./post-load-extract.mjs', import.meta.url), 'utf8');
+  // The XHTML namespace literal + the per-element namespaceURI gate.
+  assert.match(src, /XHTML_NS = 'http:\/\/www\.w3\.org\/1999\/xhtml'/,
+    'serializer must compare against the XHTML namespace');
+  assert.match(src, /el\.namespaceURI !== XHTML_NS\) el\.setAttribute\(foreignNsMarker, ''\)/,
+    'serializer must stamp every non-XHTML element with the marker');
+  // The evaluate call must thread extract-fixture's marker constant.
+  assert.match(src, /foreignNsMarker: FOREIGN_NS_MARKER_ATTR/,
+    'the marker constant must be the one buildNode gates on');
+});
+
+test('fix5: a marked serialized widget re-extracts with NO widget identity', async () => {
+  // End-to-end over the pure halves: the serialized shape the marker
+  // produces (`<input data-sc-foreign-ns="">`) must flow through the
+  // synthetic-document assembly + static walk and come out identity-free.
+  const { buildComponents, parseCss, FOREIGN_NS_MARKER_ATTR } =
+    await import('./extract-fixture.mjs');
+  const bodyOuter = '<body><div id="div">' +
+    `<input ${FOREIGN_NS_MARKER_ATTR}=""></input>` +   // foreign — closer form
+    '</div></body>';
+  const synthetic = buildSyntheticHtml('<title>t</title><style>div * { width: 1em; }</style>',
+    stripForeignVoidClosers(bodyOuter));
+  // Feed the body through the component builder exactly as extractFixture
+  // would (same rules → same kept-child filter).
+  const { components } = buildComponents(synthetic, parseCss('div * { width: 1em; }'), 'stem');
+  const child = components['stem__0'].children['stem__0__0'];
+  // No `_tag: 'input'`, no `_attrs` — the natives paint a plain box, which
+  // is what the browser paints for a foreign-namespace 'input'.
+  assert.equal(child._tag, undefined);
+  assert.equal(child._attrs, undefined);
+});
+
+test('wave20: serialized-DOM input flows through the static walk with created nodes', async () => {
+  // The serialized live DOM (post-appendChild) as buildSyntheticHtml emits
+  // it: original head around the live body. The static pipeline must see
+  // the CREATED children as first-class walk entries — this is the exact
+  // shape the appearance-auto test serializes to (6 created foreign
+  // children, void closers already normalized).
+  const headInner = '<title>t</title><style>div * { width: 1em; }</style>';
+  const bodyOuter = '<body><p>There should be nothing below:</p>' +
+    '<div id="div"><button></button><input></input><meter></meter></div></body>';
+  const synthetic = buildSyntheticHtml(headInner, stripForeignVoidClosers(bodyOuter));
+  // Explicit skeleton: the live parser already normalized implicit markup,
+  // so the assembled document always takes the explicit-body branch.
+  assert.match(synthetic, /^<!DOCTYPE html>\n<html>\n<head><title>t<\/title>/);
+  const { paths } = await staticPathsForHtml(synthetic, '/nonexistent/test.html');
+  // p at [0]; div at [1]; the three script-created children at [1,0..2].
+  assert.deepEqual(paths.map((p) => `${p.path.join('.')}:${p.tag}`),
+    ['0:p', '1:div', '1.0:button', '1.1:input', '1.2:meter']);
+});
+
+test('wave20: adoptReExtractedFixture swaps content in place and stamps BOTH flags', () => {
+  // The caller (extract-fixture CLI) holds the ORIGINAL fixture reference —
+  // adoption must mutate that object, not return a different one.
+  const fixture = { _wpt: { test: 't.html', bucket: 'A' }, components: { old: {} } };
+  const reFixture = {
+    _wpt: { test: 't.html', bucket: 'A', lossy: false, lossyReasons: [] },
+    components: { 't__0': { properties: { width: '100px' } } },
+  };
+  const ret = adoptReExtractedFixture(fixture, reFixture);
+  assert.equal(ret, fixture);                              // same object identity
+  assert.equal(fixture.components['t__0'].properties.width, '100px'); // new tree
+  assert.equal(fixture.components.old, undefined);         // old tree gone
+  assert.equal(fixture._wpt.lossyReasons.length, 0);       // re-extracted _wpt
+  // BOTH honesty stamps: state delivered AND structure delivered.
+  assert.equal(fixture._wpt.postLoadExtracted, true);
+  assert.equal(fixture._wpt.structureExtracted, true);
+});
+
+test('wave20: adopt-then-bake composition lands computed state on CREATED components', () => {
+  // The ordering constraint: structure first (adopt), state second (merge) —
+  // the overlay must resolve paths against the RE-EXTRACTED tree, i.e. a
+  // script-created child that never existed statically receives its baked
+  // computed geometry.
+  const fixture = { _wpt: { test: 't.html' }, components: { stale: {} } };
+  const reFixture = { _wpt: { test: 't.html' }, components: {
+    't__0': { properties: {}, children: {
+      't__0__0': { properties: {} },                       // the created node
+    } },
+  } };
+  adoptReExtractedFixture(fixture, reFixture);             // structure first
+  const overlaid = mergePostLoadIntoFixture(fixture, 't', [
+    { path: [0], tag: 'div', styles: { position: 'relative' } },
+    { path: [0, 0], tag: 'div', styles: { position: 'absolute', top: '150px' } },
+  ]);                                                      // then state bake
+  assert.equal(overlaid, 2);                               // both mapped
+  const child = fixture.components['t__0'].children['t__0__0'];
+  assert.equal(child.properties.position, 'absolute');     // created node baked
+  assert.equal(child.properties.top, '150px');
+  // Both stamps survive the merge (merge re-stamps postLoadExtracted only).
+  assert.equal(fixture._wpt.structureExtracted, true);
+});
+
+test('wave20: canvas-frame style id is pinned', () => {
+  // The serializer strips the injected frame BY THIS ID — a rename that
+  // misses one side would bake the capture pipeline's canvas CSS into
+  // structure fixtures (double-applied at render time).
+  assert.equal(CANVAS_FRAME_STYLE_ID, '__postLoadCanvasFrame');
 });
 
 // ── 8. The proving set — baked css-position wall fixtures ───────────────────
@@ -521,15 +701,47 @@ test('proving: changing-height → fixed box 300px, bottom-anchored child at 250
 
 // The bail/decline halves of the proving set: their fixtures must NOT carry
 // the stamp — the wave-15 exclusion stays for undelivered tests.
-for (const stem of ['containing-block-change-button', 'containing-block-change-scrollframe']) {
+// wave-20: containing-block-change-button LEFT this list — its appendChild
+// drift is now the structure-extraction TRIGGER, see the wave-20 proving pin
+// below. Scrollframe stays: its bail (scrollTop=400) fires BEFORE the
+// mapping cross-check, so the structure path never engages for it.
+for (const stem of ['containing-block-change-scrollframe']) {
   const p = join(FIXTURES, `${stem}.json`);
   test(`proving: ${stem} stays static (bailed, no stamp)`, { skip: !existsSync(p) }, () => {
-    // button: appendChild structural drift (element-mapping bail);
-    // scrollframe: scrollTop=400 (scroll-offset bail) — both undeliverable.
+    // scrollframe: scrollTop=400 (scroll-offset bail) — undeliverable.
     const fx = JSON.parse(readFileSync(p, 'utf8'));
     assert.equal(fx._wpt.postLoadExtracted, undefined);
+    assert.equal(fx._wpt.structureExtracted, undefined); // wave-20 stamp too
   });
 }
+
+// wave-20 proving pin: the former element-mapping bail case is now the
+// structure-delivery case. Skip-guarded on the wave-20 stamp (fixtures/wpt
+// is generated; a pre-wave-20 artifact skips rather than fails).
+const cbcButtonPath = join(FIXTURES, 'containing-block-change-button.json');
+const cbcButton = (() => {
+  if (!existsSync(cbcButtonPath)) return null;                 // never extracted
+  const fx = JSON.parse(readFileSync(cbcButtonPath, 'utf8'));
+  return fx._wpt?.structureExtracted === true ? fx : null;     // pre-wave-20 → skip
+})();
+test('proving wave-20: containing-block-change-button → appended abspos child delivered', { skip: !cbcButton }, () => {
+  // Script: button.style.position = "relative" (state) THEN
+  // button.appendChild(createElement('div')) (structure). Both must land:
+  // BOTH stamps present, the button carries the baked relative position,
+  // and the script-created child exists as a first-class component with its
+  // post-script computed geometry (top:150px/left:0 per the #button > div
+  // rule, resolved against the now-relative button).
+  assert.equal(cbcButton._wpt.postLoadExtracted, true);        // state stamp
+  assert.equal(cbcButton._wpt.structureExtracted, true);       // structure stamp
+  const btn = cbcButton.components['containing-block-change-button__0'];
+  assert.equal(btn.properties.position, 'relative');           // baked mutation
+  const child = btn.children['containing-block-change-button__0__0'];
+  assert.equal(child.properties.position, 'absolute');         // created node…
+  assert.equal(child.properties.top, '150px');                 // …with baked
+  assert.equal(child.properties.left, '0px');                  // post-script
+  assert.equal(child.properties.width, '100px');               // geometry
+  assert.equal(child.properties['background-color'], 'rgb(0, 128, 0)');
+});
 for (const stem of ['author-overlay-top-layer-removal', 'overlay-transition-backdrop',
                     'overlay-transition-backdrop-entry', 'overlay-button-appearance']) {
   const p = join(FIXTURES, `${stem}.json`);

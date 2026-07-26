@@ -26,6 +26,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
@@ -103,7 +104,15 @@ object IRDocumentDecoder {
     // Keyframe stop envelope (spec 07 §1.2 / schema $defs/keyframeStop —
     // additionalProperties: false, exactly these two keys).
     private val KEYFRAME_STOP_KEYS = setOf("offset", "properties")
-    private val META_KEYS = setOf("sourceTag", "role")
+    // Wave-20 (lane W2): `attrs` joined the meta group — the widget-identity
+    // capsule for form/widget tags (wire contract pinned in IRAttrs' doc).
+    private val META_KEYS = setOf("sourceTag", "role", "attrs")
+    // The ten attributes the wave-20 wire contract allows inside meta.attrs;
+    // anything else is a writer bug and errors like every strict envelope.
+    private val ATTR_KEYS = setOf(
+        "type", "value", "checked", "multiple", "size",
+        "alt", "min", "max", "selected", "disabled"
+    )
     private val PROPERTY_KEYS = setOf("type", "data")
     private val SELECTOR_KEYS = setOf("condition", "properties")
     private val MEDIA_KEYS = setOf("query", "properties")
@@ -274,6 +283,8 @@ object IRDocumentDecoder {
             //   meta.role      → role    (new — v1 dropped `_role` entirely)
             _text = (c["text"] as? JsonPrimitive)?.takeIf { it !is JsonNull }?.contentOrNull,
             _tag = (meta?.get("sourceTag") as? JsonPrimitive)?.contentOrNull,
+            // meta.attrs → attrs (wave-20 widget capsule, `_tag` precedent).
+            attrs = decodeAttrs(meta?.get("attrs"), id),
             slot = slot,
             // pseudos: opaque component-shaped payload forwarded verbatim —
             // generated content never flattens (design §4.2).
@@ -288,6 +299,51 @@ object IRDocumentDecoder {
                 (el as? JsonPrimitive)?.contentOrNull
                     ?: throw IllegalArgumentException("component '$id': variables values must be strings")
             }
+        )
+    }
+
+    /**
+     * Decode the wave-20 `meta.attrs` widget capsule (lane W2). Strict on
+     * the key set (ATTR_KEYS — the wire contract pins exactly ten legal
+     * attributes) but tolerant on VALUE shape within the contract: the
+     * boolean four decode as booleans, min/max as numbers, and `value`
+     * keeps BOTH channels (string verbatim + numeric when the wire sent a
+     * number — meter/progress) so no reader ever re-parses stringly.
+     */
+    private fun decodeAttrs(el: kotlinx.serialization.json.JsonElement?, ownerId: String): IRAttrs? {
+        if (el == null) return null // meta without attrs — the common case
+        val o = el as? JsonObject
+            ?: throw IllegalArgumentException("component '$ownerId': meta.attrs must be an object")
+        requireOnlyKeys(o, ATTR_KEYS, "meta.attrs (in '$ownerId')")
+        // Primitive-or-null accessor: attrs values are always primitives
+        // (strings/booleans/numbers per the contract), never nested.
+        fun p(k: String) = o[k] as? JsonPrimitive
+        // Non-string gate for the typed channels: kotlinx's doubleOrNull/
+        // booleanOrNull ALSO parse quoted strings ("5" → 5.0, "true" →
+        // true) but the iOS reader (IRAttrs.from over IRValue.doubleValue/
+        // boolValue) never coerces strings — the twin decoders must agree
+        // on which channels fill for every wire shape, or an off-contract
+        // writer (numbers as strings) paints different widgets per native
+        // (wave-20 skeptic alignment; contract pins these as JSON
+        // numbers/booleans, so strings simply stay on the string channel).
+        fun num(k: String) = p(k)?.takeIf { !it.isString }?.doubleOrNull
+        fun bool(k: String) = p(k)?.takeIf { !it.isString }?.booleanOrNull
+        return IRAttrs(
+            type = p("type")?.contentOrNull,
+            // String channel: verbatim wire content (numbers stringify —
+            // contentOrNull yields the literal for numeric primitives).
+            value = p("value")?.contentOrNull,
+            // Numeric channel: only when the wire primitive IS a number
+            // (meter/progress value) — see the non-string gate above.
+            valueNumber = num("value"),
+            checked = bool("checked"),
+            multiple = bool("multiple"),
+            selected = bool("selected"),
+            disabled = bool("disabled"),
+            size = p("size")?.contentOrNull,
+            alt = p("alt")?.contentOrNull,
+            min = num("min"),
+            max = num("max")
         )
     }
 

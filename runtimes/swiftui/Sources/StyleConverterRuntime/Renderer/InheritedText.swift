@@ -86,6 +86,12 @@ enum InheritedText {
         // CSS 2.1 §13.3.3 fragmentation: print-only no-ops on mobile,
         // carried so the values flow honestly.
         "Orphans", "Widows",
+        // css-ui-4 §7.1: accent-color is Inherited: yes — a parent's
+        // declaration must reach form-control descendants (wave-20 lane
+        // W2: accent-color-parent-currentcolor declares it on the DIV and
+        // asserts the checkbox inside turns red). The widget painter
+        // reads it off the merged list (UAWidgetsResolve.accentFor).
+        "AccentColor",
     ]
 
     /// Merge the inherited channel UNDER the component's own
@@ -95,13 +101,27 @@ enum InheritedText {
                       inherited: [IRProperty]) -> [IRProperty] {
         // Fast path — nothing flowing down.
         guard !inherited.isEmpty else { return own }
+        // Wave-20 (lane W2) — css-cascade-4 §7.3: `unset` on an INHERITED
+        // property "acts as inherit", and `inherit` says so outright. An
+        // own `Color: unset|inherit` keyword must NOT block the ancestor
+        // value (accent-color-parent-currentcolor's checkbox declares
+        // `color: unset` and must resolve red through the parent). Same
+        // Color-only scope as the Compose twin's mergeInherited fix.
+        let effectiveOwn = own.filter { p in
+            // Keep everything that isn't an inherit-taking Color keyword
+            // (wire shape: {"original":"unset"|"inherit"}, no srgb).
+            guard p.type == "Color", p.data["srgb"] == nil,
+                  let orig = p.data["original"]?.stringValue?.lowercased(),
+                  orig == "unset" || orig == "inherit" else { return true }
+            return false
+        }
         // Types the component declares itself (these block inheritance).
-        let declared = Set(own.map { $0.type })
+        let declared = Set(effectiveOwn.map { $0.type })
         // Parent values first so the child's own later entries would win
         // in any single-pass fold; extractor loops use first-match or
         // last-match per family, so keep the own list intact and only
         // PREPEND the missing inherited entries.
-        return inherited.filter { !declared.contains($0.type) } + own
+        return inherited.filter { !declared.contains($0.type) } + effectiveOwn
     }
 
     /// The subset of a (merged) declaration list that flows to children.

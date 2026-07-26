@@ -170,7 +170,13 @@ object ComponentRenderer {
         "CaptionSide", "BorderCollapse", "BorderSpacing", "EmptyCells",
         // CSS 2.1 §13.3.3 fragmentation: print-only, no-op appliers on
         // the mobile runtimes, but the values flow for honest coverage.
-        "Orphans", "Widows"
+        "Orphans", "Widows",
+        // css-ui-4 §7.1: accent-color is Inherited: yes — a parent's
+        // declaration must reach the form-control descendants (wave-20
+        // lane W2: accent-color-parent-currentcolor puts it on the DIV
+        // and asserts the checkbox inside turns red). The widget painter
+        // reads it off the merged list (UAWidgetsResolve.accentFor).
+        "AccentColor"
     )
 
     /**
@@ -584,14 +590,35 @@ object ComponentRenderer {
      * Merge the inherited channel under the component's own declarations.
      * Pure function (JVM-testable): own properties always win; inherited
      * entries only fill types the component didn't declare.
+     *
+     * Wave-20 (lane W2) refinement — css-cascade-4 §7.3: `unset` on an
+     * INHERITED property "acts as inherit", and an explicit `inherit`
+     * says so outright. An own `Color: unset|inherit` therefore must NOT
+     * shadow the inherited entry (before this fix the keyword blocked
+     * the fold, extractColor yielded nothing, and the element fell to
+     * the default ink — accent-color-parent-currentcolor's checkbox has
+     * `color: unset` and must resolve red through the parent). Scoped to
+     * `Color` only: it is the one keyword shape the corpus exercises,
+     * and wider global-keyword emulation stays out of this merge.
      */
     internal fun mergeInherited(
         own: List<IRProperty>,
         inherited: List<IRProperty>
     ): List<IRProperty> {
         if (inherited.isEmpty()) return own
-        val declaredTypes = own.mapTo(HashSet()) { it.type }
-        return inherited.filter { it.type !in declaredTypes } + own
+        // Drop own inherit-taking Color keywords so the ancestor value
+        // flows in (they carry no paintable data of their own — the wire
+        // shape is {"original":"unset"|"inherit"} with no srgb payload).
+        val effectiveOwn = own.filterNot { p ->
+            p.type == "Color" &&
+                ((p.data as? JsonObject)?.let { d ->
+                    d["srgb"] == null &&
+                        ((d["original"] as? JsonPrimitive)?.contentOrNull
+                            ?.lowercase() in setOf("unset", "inherit"))
+                } == true)
+        }
+        val declaredTypes = effectiveOwn.mapTo(HashSet()) { it.type }
+        return inherited.filter { it.type !in declaredTypes } + effectiveOwn
     }
 
     /**
@@ -1750,6 +1777,16 @@ object ComponentRenderer {
      */
     @Composable
     private fun RenderContent(component: IRComponent, textColor: Color?, displayConfig: DisplayConfig? = null) {
+        // ── Wave-20 lane-W2 UA-widget mount hook (the ONLY renderer entry
+        // for widget content). WPT capture only: a form-control component
+        // (meta.sourceTag + meta.attrs, css-ui-4 §7 appearance ≠ none)
+        // paints its Chromium-lookalike replica INSTEAD of text/children
+        // content — painting lives in widgets/UAWidgets*. Dark stage:
+        // LocalWptCaptureMode is false on every 327-pair path → no-op.
+        if (LocalWptCaptureMode.current) {
+            com.styleconverter.runtime.widgets.UAWidgetsResolve.resolve(component)
+                ?.let { spec -> com.styleconverter.runtime.widgets.UAWidgets.Render(spec); return }
+        }
         if (!component.children.isNullOrEmpty()) {
             // Bug 1: leading _text node — wrapped in a Box so it sits as a
             // sibling of the children. PlaceholderContent uses the parent's
@@ -1884,14 +1921,17 @@ object ComponentRenderer {
                 // The dark-stage 327 corpus never sets the capture local,
                 // so its block child loop stays byte-identical.
                 val floatSegments =
-                    if (LocalWptCaptureMode.current) blockFloatSegments(component.children)
+                    if (LocalWptCaptureMode.current)
+                        blockFloatSegments(component.children, component.properties)
                     else null
-                if (floatSegments == null) {
-                    // No packable run (or dark stage) — the frozen loop.
-                    component.children.forEachIndexed { index, child ->
-                        renderBlockChild(index, child)
-                    }
-                } else {
+                // Wave-20 W3 — inline-level atom flow (css-ui widget rows):
+                // only consulted when no float plan exists, same capture
+                // gate; run-free containers fall through to the frozen loop.
+                val inlineSegments =
+                    if (LocalWptCaptureMode.current && floatSegments == null)
+                        blockInlineAtomSegments(component.children)
+                    else null
+                if (floatSegments != null) {
                     // Segment walk, sibling order preserved: runs render
                     // through the FloatRowLayout adapter (pure packing,
                     // unbounded measure — pins P3-P7), singles keep the
@@ -1902,12 +1942,33 @@ object ComponentRenderer {
                     floatSegments.forEach { seg ->
                         if (seg.isRun) {
                             com.styleconverter.runtime.layout.FloatRowLayout(
-                                strutted = seg.strutted
+                                strutted = seg.strutted,
+                                // P12/P13 — right runs take the mirrored
+                                // packing + right-edge anchoring.
+                                rightPacked = seg.rightRun
                             ) {
                                 // Run members render their full style
                                 // chains; the adapter owns geometry.
-                                seg.indices.forEach { i ->
-                                    RenderComponent(component.children[i])
+                                // Wave-20 W3: placement is the PACKER's —
+                                // suppress the per-child block self-
+                                // alignment wrapper (floatEndAlignment's
+                                // TopEnd fallback, ~2280 below) for RIGHT
+                                // run members so the box is never aligned
+                                // twice. Left runs keep the wave-19
+                                // composition byte-identically (their
+                                // fallback is null anyway).
+                                if (seg.rightRun) {
+                                    CompositionLocalProvider(
+                                        LocalSelfAlignmentHandled provides true
+                                    ) {
+                                        seg.indices.forEach { i ->
+                                            RenderComponent(component.children[i])
+                                        }
+                                    }
+                                } else {
+                                    seg.indices.forEach { i ->
+                                        RenderComponent(component.children[i])
+                                    }
                                 }
                             }
                         } else {
@@ -1915,6 +1976,45 @@ object ComponentRenderer {
                             val i = seg.indices.first()
                             renderBlockChild(i, component.children[i])
                         }
+                    }
+                } else if (inlineSegments != null) {
+                    // Wave-20 W3 — inline atom runs (appearance-auto-001's
+                    // widget rows): consecutive inline-level atoms pack
+                    // horizontally with width-exhaustion wrapping and
+                    // baseline-ish alignment (pins P15-P18); singles keep
+                    // the exact per-child path above, original indices.
+                    inlineSegments.forEach { seg ->
+                        if (seg.isRun) {
+                            // Resolve each member's atom spec ONCE from the
+                            // shared UA geometry table (W2 paints inside
+                            // the same boxes — UAWidgetIntrinsics is the
+                            // coordination point).
+                            val specs = seg.indices.map { i ->
+                                com.styleconverter.runtime.layout.UAWidgetIntrinsics
+                                    .spec(atomKindOf(component.children[i]))
+                            }
+                            com.styleconverter.runtime.layout.InlineFlowLayout(
+                                atoms = specs
+                            ) {
+                                // Atoms are OPAQUE: their content renders
+                                // through the normal chain (W2's widget
+                                // painting mounts inside RenderComponent);
+                                // this lane owns only their placement.
+                                seg.indices.forEach { i ->
+                                    RenderComponent(component.children[i])
+                                }
+                            }
+                        } else {
+                            // Single segment — one child, original index
+                            // (collapse plan + list markers preserved).
+                            val i = seg.indices.first()
+                            renderBlockChild(i, component.children[i])
+                        }
+                    }
+                } else {
+                    // No packable run (or dark stage) — the frozen loop.
+                    component.children.forEachIndexed { index, child ->
+                        renderBlockChild(index, child)
                     }
                 }
             }
@@ -2271,8 +2371,19 @@ object ComponentRenderer {
      * FloatRowPacking.segment twin (pins P1/P2).
      */
     internal fun blockFloatSegments(
-        children: List<IRComponent>
+        children: List<IRComponent>,
+        containerProperties: List<IRProperty> = emptyList()
     ): List<com.styleconverter.runtime.layout.FloatRowPacking.Segment>? {
+        // Wave-20 W3: the container's own Direction keyword decides how
+        // the LOGICAL float/clear members map to physical sides
+        // (css-logical-1 §2.1: rtl swaps inline-start/end). Read from
+        // the container's declared properties only — the engine has no
+        // inherited-direction channel, and the corpus (descendant-
+        // static-position-002/004) declares physical `right` anyway.
+        val rtl = containerProperties.any {
+            it.type == "Direction" &&
+                ValueExtractors.extractKeyword(it.data)?.uppercase() == "RTL"
+        }
         // Per-sibling facts: float side + the `<br clear>` break shape.
         val facts = children.map { child ->
             com.styleconverter.runtime.layout.FloatRowPacking.facts(
@@ -2281,6 +2392,8 @@ object ComponentRenderer {
                 // The clear-break marker must be childless (pin P2) —
                 // a clear on a content box is real layout, out of scope.
                 hasChildren = !child.children.isNullOrEmpty(),
+                // css-logical mapping per the container's direction.
+                rtl = rtl,
             )
         }
         // Segment once; only return a plan when a run actually exists so
@@ -2288,6 +2401,55 @@ object ComponentRenderer {
         val segments = com.styleconverter.runtime.layout.FloatRowPacking.segment(facts)
         return if (segments.any { it.isRun }) segments else null
     }
+
+    /**
+     * Wave-20 W3 — the block child loop's inline-atom plan, or null when
+     * the sibling list contains no packable atom run (pins P15/P19).
+     * Pure over the IR + internal for the JVM pinning suite. An atom is
+     * an inline-level UA widget (meta._tag widget set) or a text-only
+     * anchor — the InlineAtomFlow twins own the predicate; this wrapper
+     * only derives the per-child facts from the decoded IR.
+     */
+    internal fun blockInlineAtomSegments(
+        children: List<IRComponent>
+    ): List<com.styleconverter.runtime.layout.InlineAtomFlow.Segment>? {
+        // Per-sibling atom facts from the decoded wire: originating tag
+        // (meta.sourceTag → _tag), a declared Display override, element
+        // children and text presence (the text-only-anchor guard, P15).
+        val atomFlags = children.map { child ->
+            com.styleconverter.runtime.layout.InlineAtomFlow.isAtom(
+                tag = child._tag,
+                // css-display-3 §2: a declared non-inline display makes
+                // the box block-level — it leaves the inline flow.
+                displayKeyword = child.properties.firstOrNull { it.type == "Display" }
+                    ?.let { ValueExtractors.extractKeyword(it.data)?.uppercase() },
+                hasElementChildren = !child.children.isNullOrEmpty(),
+                hasText = !child._text.isNullOrEmpty(),
+            )
+        }
+        // Segment once; only a plan with an actual run (≥2 consecutive
+        // atoms) leaves the frozen block loop — mirror of the float gate.
+        val segments = com.styleconverter.runtime.layout.InlineAtomFlow.segment(atomFlags)
+        return if (segments.any { it.isRun }) segments else null
+    }
+
+    /**
+     * Wave-20 W3 — a run member's widget kind for the shared UA geometry
+     * table (UAWidgetIntrinsics). The `type`/`multiple` attributes ride
+     * the wire as `meta.attrs` (the wave-20 widget-identity contract)
+     * and are decoded into [IRComponent.attrs] by lane W2's capsule —
+     * an absent capsule (pre-wave-20 wires, non-widget tags) folds to
+     * the TEXT_FIELD/menulist defaults exactly like the HTML parser's
+     * missing-attribute states.
+     */
+    internal fun atomKindOf(child: IRComponent): com.styleconverter.runtime.layout.UAWidgetIntrinsics.Kind =
+        com.styleconverter.runtime.layout.UAWidgetIntrinsics.kind(
+            tag = child._tag,
+            // The wire's `type` attribute (present-in-source only).
+            typeAttr = child.attrs?.type,
+            // The wire's boolean `multiple` presence (listbox height).
+            multiple = child.attrs?.multiple == true,
+        )
 
     /**
      * Extract position type from properties.

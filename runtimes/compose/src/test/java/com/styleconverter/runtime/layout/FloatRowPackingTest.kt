@@ -211,4 +211,152 @@ class FloatRowPackingTest {
             )
         )
     }
+
+    // ── Wave-20 W3 — right/inline-end float runs (P10-P14) ──
+    // Corpus geometry: css-grid descendant-static-position-002/004 —
+    // a green+grey Float:RIGHT 20×40 pair inside a shrink-to-fit abspos
+    // box under a direction:rtl grid; ref paints grey LEFT of green
+    // (grey x40-59, green x60-79).
+
+    @Test
+    fun `right and inline-end floats derive floatsRight under ltr`() {
+        // P10: the physical keyword and the ltr logical alias.
+        assertTrue(FloatRowPacking.facts(cfg(kw("Float", "RIGHT")), false).floatsRight)
+        assertTrue(FloatRowPacking.facts(cfg(kw("Float", "INLINE_END")), false).floatsRight)
+        // Left-family floats never derive the right fact.
+        assertFalse(FloatRowPacking.facts(cfg(kw("Float", "LEFT")), false).floatsRight)
+        assertFalse(FloatRowPacking.facts(cfg(kw("Float", "INLINE_START")), false).floatsRight)
+        // No Float wire at all → plain in-flow content.
+        assertFalse(FloatRowPacking.facts(cfg(), false).floatsRight)
+    }
+
+    @Test
+    fun `rtl swaps the logical float members per css-logical`() {
+        // css-logical-1 §2.1: rtl maps inline-start→right, inline-end→left.
+        assertTrue(FloatRowPacking.facts(cfg(kw("Float", "INLINE_START")), false, rtl = true).floatsRight)
+        assertTrue(FloatRowPacking.facts(cfg(kw("Float", "INLINE_END")), false, rtl = true).floatsLeft)
+        // The physical keywords are direction-independent.
+        assertTrue(FloatRowPacking.facts(cfg(kw("Float", "RIGHT")), false, rtl = true).floatsRight)
+        assertTrue(FloatRowPacking.facts(cfg(kw("Float", "LEFT")), false, rtl = true).floatsLeft)
+    }
+
+    @Test
+    fun `childless right clears break right runs only`() {
+        // P14: BOTH clears either side; RIGHT/INLINE_END clear right (ltr).
+        assertTrue(FloatRowPacking.facts(cfg(kw("Clear", "BOTH")), false).clearBreaksRight)
+        assertTrue(FloatRowPacking.facts(cfg(kw("Clear", "RIGHT")), false).clearBreaksRight)
+        assertTrue(FloatRowPacking.facts(cfg(kw("Clear", "INLINE_END")), false).clearBreaksRight)
+        // §9.5.2 same-side rule: clear:left never breaks a RIGHT run.
+        assertFalse(FloatRowPacking.facts(cfg(kw("Clear", "LEFT")), false).clearBreaksRight)
+        // Content boxes and floating boxes are never break markers.
+        assertFalse(FloatRowPacking.facts(cfg(kw("Clear", "BOTH")), true).clearBreaksRight)
+        assertFalse(
+            FloatRowPacking.facts(cfg(kw("Float", "RIGHT"), kw("Clear", "BOTH")), false)
+                .clearBreaksRight
+        )
+    }
+
+    // Right-float / right-clear fact shorthands for the segmentation pins.
+    private val R = FloatRowPacking.ChildFacts(
+        floatsLeft = false, clearBreaksLeft = false, floatsRight = true
+    )
+    private val BRR = FloatRowPacking.ChildFacts(
+        floatsLeft = false, clearBreaksLeft = false, clearBreaksRight = true
+    )
+
+    @Test
+    fun `right pair segments into one right run`() {
+        // P11: descendant-static-position-002/004's green+grey pair.
+        val segs = FloatRowPacking.segment(listOf(R, R))
+        assertEquals(1, segs.size)
+        assertTrue(segs[0].isRun)
+        assertTrue(segs[0].rightRun)
+        // No trailing clear sibling → un-strutted.
+        assertFalse(segs[0].strutted)
+        assertEquals(listOf(0, 1), segs[0].indices)
+    }
+
+    @Test
+    fun `opposite sides never merge and lone rights stay single`() {
+        // A side flip splits the streak into two independent runs (P11).
+        val segs = FloatRowPacking.segment(listOf(F, F, R, R))
+        assertEquals(2, segs.size)
+        assertTrue(segs[0].isRun); assertFalse(segs[0].rightRun)
+        assertTrue(segs[1].isRun); assertTrue(segs[1].rightRun)
+        // Lone right floats keep the frozen wave-5 end-alignment path.
+        assertTrue(FloatRowPacking.segment(listOf(R, X, R)).none { it.isRun })
+    }
+
+    @Test
+    fun `right run struts only on a same-side clear marker`() {
+        // P14: a right-clear br struts the right run…
+        val strutted = FloatRowPacking.segment(listOf(R, R, BRR))
+        assertTrue(strutted[0].isRun); assertTrue(strutted[0].strutted)
+        // …while a LEFT-only clear marker does not (§9.5.2 same-side).
+        val unstrutted = FloatRowPacking.segment(listOf(R, R, BR))
+        assertTrue(unstrutted[0].isRun); assertFalse(unstrutted[0].strutted)
+    }
+
+    @Test
+    fun `layoutEnd mirrors the grid pair right-to-left`() {
+        // P12: the 002/004 pin — first float (green) flush right at the
+        // run's right edge, grey packs to its LEFT: x = [20, 0], the
+        // exact grey|green order the ref paints (grey x40-59, green
+        // x60-79 once the abspos static position lands at x40).
+        val plan = FloatRowPacking.layoutEnd(
+            widths = listOf(20.0, 20.0),
+            heights = listOf(40.0, 40.0),
+            availableWidth = Double.POSITIVE_INFINITY,
+            strutPx = 0.0,
+        )
+        assertEquals(listOf(20.0, 0.0), plan.x)
+        // Extent + height identical to the left plan (shared rows).
+        assertEquals(40.0, plan.width, 0.0)
+        assertEquals(40.0, plan.height, 0.0)
+    }
+
+    @Test
+    fun `layoutEnd keeps the left plan's rows and mirrors per extent`() {
+        // P12: five 27-wide floats over a 100px block — same 3+2 row
+        // split as the left pin, each x reflected against the 81 extent.
+        val plan = FloatRowPacking.layoutEnd(
+            widths = List(5) { 27.0 },
+            heights = List(5) { 19.0 },
+            availableWidth = 100.0,
+            strutPx = 0.0,
+        )
+        // Mirror of [0,27,54,0,27] against width 81 minus each 27.
+        assertEquals(listOf(54.0, 27.0, 0.0, 54.0, 27.0), plan.x)
+        assertEquals(listOf(0.0, 0.0, 0.0, 19.0, 19.0), plan.y)
+        assertEquals(81.0, plan.width, 0.0)
+        assertEquals(38.0, plan.height, 0.0)
+    }
+
+    // A Float:RIGHT child shell matching the 002/004 wire shape.
+    private fun rightFloatChild(id: String) = IRComponent(
+        id = id, name = id,
+        properties = listOf(kw("Float", "RIGHT"), kw("Width", "IGNORED")),
+    )
+
+    @Test
+    fun `renderer plan packs the right pair and maps rtl logicals`() {
+        // P10/P11 — the 002/004 pair yields one RIGHT run.
+        val plan = ComponentRenderer.blockFloatSegments(
+            listOf(rightFloatChild("green"), rightFloatChild("grey"))
+        )
+        assertEquals(1, plan!!.size)
+        assertTrue(plan[0].isRun)
+        assertTrue(plan[0].rightRun)
+        // css-logical §2.1 — under a Direction:RTL container, a pair of
+        // inline-start floats is a RIGHT run.
+        val rtlPlan = ComponentRenderer.blockFloatSegments(
+            listOf(
+                IRComponent("a", "a", listOf(kw("Float", "INLINE_START"))),
+                IRComponent("b", "b", listOf(kw("Float", "INLINE_START"))),
+            ),
+            containerProperties = listOf(kw("Direction", "RTL")),
+        )
+        assertTrue(rtlPlan!![0].isRun)
+        assertTrue(rtlPlan[0].rightRun)
+    }
 }

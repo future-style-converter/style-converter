@@ -149,6 +149,17 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             else el.jsonObject
         }
 
+        // wave-20 W1: read optional `_attrs` (widget-identity attributes for
+        // form/widget tags, emitted by the extractor's widgetAttrsFor) as an
+        // OPAQUE JsonObject — the extractor owns key set and value typing
+        // (strings / booleans / numbers per its wire contract) and the
+        // converter forwards the object verbatim to v2 `meta.attrs`. Same
+        // null-tolerance as `_pseudo`: JSON null ≡ absent.
+        val attrs = obj["_attrs"]?.let { el ->
+            if (el is kotlinx.serialization.json.JsonNull) null
+            else el.jsonObject
+        }
+
         return CssComponent(
             properties = props,
             selectors = selectors,
@@ -157,7 +168,8 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             text = text,
             role = role,
             tag = tag,
-            pseudos = pseudos
+            pseudos = pseudos,
+            attrs = attrs
         )
     }
 
@@ -329,6 +341,11 @@ fun cssParsing(doc: JsonObject): IRDocument {
             // bytes are untouched.
             tag = component.tag,
             pseudos = component.pseudos,
+            // wave-20 W1: forward `_attrs` verbatim for the v2 wire
+            // (meta.attrs — grouped beside meta.sourceTag). Null on every
+            // non-widget component; the v1 serializer ignores it, so v1
+            // output bytes are untouched (same rule as tag/pseudos).
+            attrs = component.attrs,
             // Forward the custom-property definitions (IR v2 `variables`
             // key). Stays null on fixtures without --* declarations; the
             // legacy v1 serializer ignores it either way, so v1 output

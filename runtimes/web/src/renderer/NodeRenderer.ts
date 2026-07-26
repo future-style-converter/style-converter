@@ -17,7 +17,6 @@
 
 import { createElement, useMemo } from 'react';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
-import type { IRPseudoNode } from '../core/ir/IRModels';
 import { buildStyles, buildVariables } from '../core/renderer/StyleBuilder';
 // Stylesheet path (spec 06): every element carries its `sc-<id>` class so
 // RuleBuilder selector/media rules can target it; forceClassName is the
@@ -26,6 +25,14 @@ import { componentClassName, forceClassName } from '../core/renderer/RuleBuilder
 import type { ComposedNode } from './Composer';
 import type { RenderContext, RendererOptions } from './RendererOptions';
 import { defaultMapTag, VOID_ELEMENTS } from './TagMapping';
+// wave-20 W1: the wire `meta.attrs` → DOM-prop policy (checked/value/
+// multiple/… onto real widget elements; no-op for non-widget elements).
+import { widgetDomProps } from './WidgetAttrs';
+// Pseudo-element span rendering, split out for file size (wave-20 W1);
+// styleFromRawDeclarations is RE-EXPORTED below so existing import sites
+// (tests, downstream tooling) keep resolving through this module.
+import { renderPseudoNode } from './PseudoNodeRenderer';
+export { styleFromRawDeclarations } from './PseudoNodeRenderer';
 
 /** Props for one composed node render. */
 export interface NodeRendererProps {
@@ -35,71 +42,6 @@ export interface NodeRendererProps {
   depth?: number;
   /** Calibration hooks (see RendererOptions). Omit for pure CSS semantics. */
   options?: RendererOptions;
-}
-
-/**
- * Bridge a RAW CSS declarations map (the extractor-owned `pseudos`
- * payload shape, spec 01 — e.g. `{ display: 'block', 'font-weight':
- * 'bold' }`) to a React inline-style object: kebab-case keys camelise
- * (`-webkit-mask` → `WebkitMask` falls out of the same replace), custom
- * properties (`--x`) pass through verbatim (React sets them via
- * setProperty), and non-primitive values are dropped loudly — a nested
- * object here means the payload isn't a declarations map at all.
- */
-export function styleFromRawDeclarations(decls: Record<string, unknown>): CSSProperties {
-  const out: Record<string, unknown> = {};
-  for (const [prop, value] of Object.entries(decls)) {
-    if (typeof value !== 'string' && typeof value !== 'number') {
-      console.warn(`[NodeRenderer] raw declaration "${prop}" has non-primitive value — dropped`);
-      continue;
-    }
-    if (prop.startsWith('--')) { out[prop] = value; continue; }         // custom property, verbatim
-    out[prop.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
-  }
-  return out as CSSProperties;
-}
-
-/**
- * Render one pseudo-element node as an inline <span> (shared verbatim
- * with the old harness renderer — pseudo rendering is a semantic choice,
- * not a capture calibration). The span carries the pseudo rule's styles
- * inline (including `content:` for browser-evaluated counter()/attr()),
- * and materialises the literal `content` string as text. The marker role
- * gets `inline-block` + a trailing 0.5em gap approximating the native
- * marker-side spacing (CSS Lists 3 §4.3).
- */
-function renderPseudoNode(p: IRPseudoNode, role: 'before' | 'after' | 'marker'): ReactElement {
-  // Same engine as component styles: the pseudo rule's declarations
-  // (color, font-*, AND content) reach the inline style attribute.
-  // The wire forwards the extractor's payload VERBATIM (spec 01), and
-  // the WPT extractor emits `properties` as a RAW declarations map
-  // ({ display: 'block', background: 'green' }), not a typed IR list —
-  // bridge that shape straight to inline styles; typed lists keep the
-  // engine path. (Pre-bridge, the raw map crashed buildStyles and took
-  // the whole capture page down with it.)
-  const ps = Array.isArray(p.properties)
-    ? buildStyles(p.properties)
-    : (p.properties && typeof p.properties === 'object')
-      ? styleFromRawDeclarations(p.properties as Record<string, unknown>)
-      : {};
-  // Literal `content:` string — both wire spellings tolerated (`_text`
-  // is what the extractor emits today; `text` is the v2 spelling).
-  const pText = typeof p._text === 'string' ? p._text : (typeof p.text === 'string' ? p.text : '');
-  // Marker-side gap (see the function doc above); other roles inherit flow.
-  const markerStyle: CSSProperties = role === 'marker'
-    ? { display: 'inline-block', marginInlineEnd: '0.5em' }
-    : {};
-  // <span> preserves the inline flow ::before/::after participate in.
-  return createElement(
-    'span',
-    {
-      key: `pseudo-${role}-${p.id}`,                     // stable per role+id
-      'data-pseudo': role,                               // role marker for tooling
-      'data-component-id': p.id,                         // debug identity (may be absent)
-      style: { ...markerStyle, ...(ps as CSSProperties) }, // rule styles win over the gap
-    },
-    pText,                                               // literal content string (may be '')
-  );
 }
 
 /**
@@ -180,9 +122,52 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
       // (uncontrolled, so React never demands an onChange handler).
       voidProps.defaultValue = text;
     }
+    // wave-20 W1: widget-identity attrs from the wire (input is the only
+    // void widget). Applied AFTER the text-derived default above so an
+    // explicit source `value` attribute wins over the text fallback.
+    Object.assign(voidProps, widgetDomProps(elementName, component.meta?.attrs));
     // Same style pipeline as every other element.
     voidProps.style = styleProp;
-    return createElement(elementName, voidProps);
+    // Skin's last word on the props (harness: inert widgets in WPT mode).
+    return createElement(
+      elementName,
+      options?.decorateProps ? options.decorateProps(voidProps, elementName, ctx) : voidProps,
+    );
+  }
+
+  // ── textarea — React-managed content (value lives in props, not DOM
+  // children) ─────────────────────────────────────────────────────────
+  if (elementName === 'textarea') {
+    // React forbids child nodes on <textarea> (the value IS the content);
+    // map the wire text to the uncontrolled initial value instead. The
+    // static serialization is byte-identical to the old text-child path
+    // (`<textarea>…</textarea>`), minus React's console advisory.
+    if (hasChildren) {
+      // No silent fallthrough: composed children cannot live inside a
+      // textarea's character data — warn (capture logs / app consoles)
+      // and drop, exactly like the void-element branch above.
+      console.warn(
+        `[NodeRenderer] component "${component.id}" has sourceTag 'textarea' but ` +
+          `${node.children.length} composed child(ren) — <textarea> holds text only; children not rendered`,
+      );
+    }
+    // Identity props in the shared order (id, name, class, value, style).
+    const taProps: Record<string, unknown> = {
+      'data-component-id': component.id,
+      'data-component-name': component.name,
+      className,
+    };
+    // Wire text is the initial value (uncontrolled — same rule as input).
+    if (hasText) taProps.defaultValue = text;
+    // wave-20 W1: a source `value`-ish attribute set (disabled etc.) —
+    // applied after so explicit wire attrs win over the text fallback.
+    Object.assign(taProps, widgetDomProps(elementName, component.meta?.attrs));
+    taProps.style = styleProp;
+    // Skin's last word, then a childless createElement (React contract).
+    return createElement(
+      elementName,
+      options?.decorateProps ? options.decorateProps(taProps, elementName, ctx) : taProps,
+    );
   }
 
   // ── pseudo-element spans (spec 01 `pseudos`, extractor-owned) ───────
@@ -220,8 +205,24 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
     // RendererOptions.planChildRuns). Null plan = the pure default:
     // every child a direct sibling, byte-identical to the pre-hook DOM.
     const runPlan = options?.planChildRuns ? options.planChildRuns(node.children, ctx) : null;
+    // Optional inter-sibling separator (wave-20 W2 follow-up — see
+    // RendererOptions.renderChildSeparator): a non-null return renders
+    // BETWEEN adjacent siblings (harness: the WPT-mode ' ' text node
+    // between inline widget atoms). Skipped entirely under a runPlan —
+    // float runs are block-level, where whitespace renders nothing
+    // (CSS 2.1 §9.2.2.1), and the two plans never co-occur today.
+    const separator = options?.renderChildSeparator;
     childSlot = !runPlan
-      ? node.children.map((_, index) => renderChild(index))
+      ? node.children.flatMap((_, index) => {
+        const el = renderChild(index);
+        // First child (or no hook): no separator slot before it.
+        if (index === 0 || !separator) return [el];
+        // Ask the skin for the (prev, next) gap node; null = flush.
+        const sep = separator(node.children[index - 1], node.children[index], ctx);
+        // Bare strings need no React key; elements from the hook would —
+        // the harness only ever returns text, keeping this warning-free.
+        return sep !== null && sep !== undefined ? [sep, el] : [el];
+      })
       : runPlan.segments.map((seg, s) =>
         seg.wrapperStyle
           // Wrapped segment: one <div> carrying the skin's run style
@@ -245,14 +246,20 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
 
   // Identity/capture attributes + rule class + inline styles — the exact
   // prop order the old harness renderer used (byte-parity contract).
+  // wave-20 W1: widget attrs slot between the class and the style (only
+  // ever non-empty when the RESOLVED element is a widget tag — a skin's
+  // <div> demotion keeps this an empty spread, byte-identical DOM).
+  const elementProps: Record<string, unknown> = {
+    'data-component-id': component.id,
+    'data-component-name': component.name,
+    className,
+    ...widgetDomProps(elementName, component.meta?.attrs),
+    style: styleProp,
+  };
   return createElement(
     elementName,
-    {
-      'data-component-id': component.id,
-      'data-component-name': component.name,
-      className,
-      style: styleProp,
-    },
+    // Skin's last word on the props (harness: inert widgets in WPT mode).
+    options?.decorateProps ? options.decorateProps(elementProps, elementName, ctx) : elementProps,
     markerNode,   // ::marker first (CSS Lists ordering)
     beforeNode,   // then ::before
     textSlot,     // then the element's own text (or empty-content slot)

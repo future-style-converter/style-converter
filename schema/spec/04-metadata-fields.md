@@ -12,6 +12,11 @@ behavior, caveats included.
 > instead of dropping them — see 01-envelope.md and 03-children.md. The
 > underscore convention itself survives only for future droppable hints;
 > in v2 the sanctioned extension point is a new key inside `meta`.
+> **wave-20 exercised that extension point**: the extractor's `_attrs`
+> (widget-identity attributes for form/widget tags — see
+> `tools/titan/extract-fixture.mjs` `widgetAttrsFor` for the tag set,
+> key allow-list, and value typing) forwards verbatim as `meta.attrs`,
+> an additive omit-when-absent meta key per 05-versioning.md.
 
 ## The underscore rule
 

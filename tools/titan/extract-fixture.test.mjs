@@ -2077,3 +2077,190 @@ test('wave17: sized body with NO element children emits no empty children map', 
   assert.deepEqual(Object.keys(components), ['t__body']);
   assert.equal(components['t__body'].children, undefined);
 });
+
+// ── wave-20 POST-LOAD STRUCTURE: the htmlOverride input source ──────────────
+//
+// post-load-extract.mjs re-feeds the SERIALIZED post-script DOM through
+// extractFixture via `opts.htmlOverride` — the override must swap ONLY the
+// input document, never fork the pipeline. One source pin (the wiring line)
+// plus one corpus-gated behavioral pin (created nodes become components,
+// head-derived fields like the ref link survive).
+
+import { readFileSync as _rfs, existsSync as _exists } from 'node:fs';
+import { join as _join, dirname as _dirname } from 'node:path';
+import { fileURLToPath as _furl } from 'node:url';
+
+test('wave20: extractFixture htmlOverride swaps only the input source', () => {
+  // Source-scan pin (the inject-wpt-block.test convention for wiring): the
+  // override must feed the same `html` variable the disk read feeds — every
+  // downstream step (stylesheets, ref, assets) then runs unchanged on it.
+  const src = _rfs(new URL('./extract-fixture.mjs', import.meta.url), 'utf8');
+  assert.match(src, /const html = opts\.htmlOverride \?\? await fs\.readFile\(testAbs, 'utf8'\)/,
+    'htmlOverride must substitute the html input and nothing else');
+});
+
+// Behavioral pin against the real corpus + bucket index — skip-guarded so
+// the default hermetic run stays green on checkouts without tools/wpt.
+const _repoRoot = _join(_dirname(_furl(import.meta.url)), '..', '..');
+const _wptDir = process.env.WPT_DIR ?? _join(_repoRoot, 'tools', 'wpt');
+const _overrideTest = 'css/css-ui/appearance-auto-non-html-namespace-001.html';
+const _overrideReady = _exists(_join(_wptDir, _overrideTest))
+  && _exists(_join(_repoRoot, 'tools', 'titan', 'wpt-buckets.json'));
+
+test('wave20: htmlOverride makes script-created nodes first-class components', { skip: !_overrideReady }, async () => {
+  const { extractFixture } = await import('./extract-fixture.mjs');
+  // The static document has an EMPTY <div id=div>; the override simulates
+  // the serialized post-script DOM where the script appended two children.
+  const staticHtml = _rfs(_join(_wptDir, _overrideTest), 'utf8');
+  const override = staticHtml.replace('<div id=div></div>',
+    '<div id=div><button></button><meter></meter></div>');
+  const { fixture } = await extractFixture(_overrideTest, { htmlOverride: override });
+  const stem = 'appearance-auto-non-html-namespace-001';
+  // The created children exist as components under the div (path 1 → 1.0/1.1).
+  const div = fixture.components[`${stem}__1`];
+  assert.ok(div.children?.[`${stem}__1__0`], 'created <button> must be a component');
+  assert.ok(div.children?.[`${stem}__1__1`], 'created <meter> must be a component');
+  // Head-derived fields still come from the (identical) head: the rel=match
+  // ref resolves exactly as the static pass resolved it.
+  assert.equal(fixture._wpt.ref, 'css/css-ui/nothing-below-ref.html');
+  // The override path does NOT stamp anything — stamps are the post-load
+  // module's job AFTER its cross-checks pass.
+  assert.equal(fixture._wpt.postLoadExtracted, undefined);
+  assert.equal(fixture._wpt.structureExtracted, undefined);
+});
+
+// ── wave-20 lane W1: widget-identity attributes (_attrs wire) ───────────────
+//
+// The cross-lane wire contract: for form/widget tags, `_attrs` carries ONLY
+// the present-in-source attributes among the ten allow-listed keys, typed
+// strings except booleans (checked/multiple/selected/disabled → true) and
+// numbers-where-numeric (min/max everywhere; value on meter/progress).
+// Pinned here at BOTH altitudes: the pure widgetAttrsFor table and the
+// buildComponents emission (placement beside `_tag`, omit-when-empty).
+
+test('w1: widgetAttrsFor — non-widget tags never emit attrs', async () => {
+  const { widgetAttrsFor } = await import('./extract-fixture.mjs');
+  // <div type=x> is not a widget; attrs stay selector fuel only.
+  assert.equal(widgetAttrsFor('div', { type: 'x' }), null);
+  // Absent/odd tags are equally null (defensive contract edge).
+  assert.equal(widgetAttrsFor(null, { type: 'x' }), null);
+});
+
+test('w1: widgetAttrsFor — present-only keys, allow-list filtered', async () => {
+  const { widgetAttrsFor } = await import('./extract-fixture.mjs');
+  // id/class/style are NOT forwarded; only allow-listed present keys are.
+  const out = widgetAttrsFor('input', { type: 'text', value: 'input-text', id: 'x', class: 'y', style: 'color:red' });
+  assert.deepEqual(out, { type: 'text', value: 'input-text' });
+  // No qualifying attribute at all → null (fixture omits `_attrs` entirely).
+  assert.equal(widgetAttrsFor('input', { id: 'x' }), null);
+  assert.equal(widgetAttrsFor('button', {}), null);
+});
+
+test('w1: widgetAttrsFor — boolean attributes are presence-true', async () => {
+  const { widgetAttrsFor } = await import('./extract-fixture.mjs');
+  // Bare attribute (walkChildren stores '') → true.
+  assert.deepEqual(widgetAttrsFor('input', { type: 'checkbox', checked: '' }),
+    { type: 'checkbox', checked: true });
+  // HTML §2.3.2: any value means true — 'checked="checked"' included.
+  assert.deepEqual(widgetAttrsFor('input', { checked: 'checked' }), { checked: true });
+  assert.deepEqual(widgetAttrsFor('select', { multiple: '' }), { multiple: true });
+  assert.deepEqual(widgetAttrsFor('option', { selected: '' }), { selected: true });
+  assert.deepEqual(widgetAttrsFor('button', { disabled: '' }), { disabled: true });
+});
+
+test('w1: widgetAttrsFor — numeric lanes (min/max always; value on meter/progress)', async () => {
+  const { widgetAttrsFor } = await import('./extract-fixture.mjs');
+  // meter/progress value → Number (HTML §4.10.13/14 float reflections).
+  assert.deepEqual(widgetAttrsFor('meter', { value: '0.5' }), { value: 0.5 });
+  assert.deepEqual(widgetAttrsFor('progress', { value: '0.5' }), { value: 0.5 });
+  // input value stays a STRING even when numeric-looking (text content).
+  assert.deepEqual(widgetAttrsFor('input', { value: '42' }), { value: '42' });
+  // min/max numeric on any widget tag.
+  assert.deepEqual(widgetAttrsFor('input', { type: 'range', min: '-1.5', max: '1e2' }),
+    { type: 'range', min: -1.5, max: 100 });
+  // Non-numeric min/max text stays verbatim (the "where numeric" clause).
+  assert.deepEqual(widgetAttrsFor('input', { min: '2026-01-01' }), { min: '2026-01-01' });
+});
+
+test('w1: buildComponents emits _attrs beside _tag for widget elements', () => {
+  // The appearance-checkbox-001 shape: attributed widgets under a container.
+  const html =
+    '<body><div id="container">' +
+    '<input type="checkbox" checked>' +
+    '<select multiple><option>select-multiple</option></select>' +
+    '<meter value=0.5></meter>' +
+    '</div></body>';
+  const rules = parseCss('#container { width: 500px }');
+  const { components } = buildComponents(html, rules, 'stem');
+  const container = components['stem__0'];
+  // input: type string + checked boolean, riding beside _tag.
+  const input = container.children['stem__0__0'];
+  assert.equal(input._tag, 'input');
+  assert.deepEqual(input._attrs, { type: 'checkbox', checked: true });
+  // select: boolean multiple; its <option> child carries NO attrs (none
+  // authored) — omit-when-empty keeps the child byte-identical.
+  const select = container.children['stem__0__1'];
+  assert.equal(select._tag, 'select');
+  assert.deepEqual(select._attrs, { multiple: true });
+  const option = select.children['stem__0__1__0'];
+  assert.equal(option._tag, 'option');
+  assert.equal(option._attrs, undefined);
+  assert.equal(option._text, 'select-multiple');
+  // meter: unquoted numeric value → Number on the wire.
+  const meter = container.children['stem__0__2'];
+  assert.equal(meter._tag, 'meter');
+  assert.deepEqual(meter._attrs, { value: 0.5 });
+});
+
+test('w1: buildComponents — attribute-free widgets and non-widgets stay byte-identical', () => {
+  // <a>a</a> and <button>button</button> carry no allow-listed attributes:
+  // no `_attrs` key may appear (pre-W1 fixture bytes preserved). A styled
+  // <div> is the non-widget control.
+  const html = '<body><a>a</a><button>button</button><div class="t"></div></body>';
+  const { components } = buildComponents(html, parseCss('.t { color: red }'), 'stem');
+  assert.equal(components['stem__0']._attrs, undefined);
+  assert.equal(components['stem__1']._attrs, undefined);
+  assert.equal(components['stem__2']._attrs, undefined);
+  assert.deepEqual(Object.keys(components['stem__2']), ['properties']);
+});
+
+// ── wave-20 fix 5: the non-HTML-namespace gate ──────────────────────────────
+//
+// createElementNS('not-html', 'input') renders with NO widget chrome (the
+// appearance-auto-non-html-namespace-001 pass condition), but the serialized
+// live DOM flattens namespaces — so post-load-extract's serializer stamps
+// FOREIGN_NS_MARKER_ATTR on non-XHTML elements while el.namespaceURI is
+// still queryable, and buildNode suppresses `_tag`/`_attrs` on the marker.
+
+test('fix5: FOREIGN_NS_MARKER_ATTR is the pinned wire marker', async () => {
+  const { FOREIGN_NS_MARKER_ATTR } = await import('./extract-fixture.mjs');
+  // The literal is a cross-file contract (post-load serializer stamps it,
+  // buildNode gates on it) — pin it so neither side can drift silently.
+  assert.equal(FOREIGN_NS_MARKER_ATTR, 'data-sc-foreign-ns');
+});
+
+test('fix5: the foreign-namespace marker suppresses _tag AND _attrs', async () => {
+  const { FOREIGN_NS_MARKER_ATTR } = await import('./extract-fixture.mjs');
+  // The serialized appearance-auto-non-html-namespace-001 shape: foreign
+  // widget-named elements (marked by the serializer) next to a real one.
+  const html = '<body><div id="div">' +
+    `<input type="checkbox" ${FOREIGN_NS_MARKER_ATTR}="">` +
+    `<button ${FOREIGN_NS_MARKER_ATTR}=""></button>` +
+    '<input type="checkbox">' +
+    '</div></body>';
+  const { components } = buildComponents(html, parseCss('div * { width: 1em }'), 'stem');
+  const div = components['stem__0'];
+  // Foreign elements: generic-container treatment — no widget identity,
+  // so no native ever paints a UA replica the browser-ref doesn't show.
+  const foreignInput = div.children['stem__0__0'];
+  assert.equal(foreignInput._tag, undefined);
+  assert.equal(foreignInput._attrs, undefined);
+  const foreignButton = div.children['stem__0__1'];
+  assert.equal(foreignButton._tag, undefined);
+  assert.equal(foreignButton._attrs, undefined);
+  // The UNMARKED sibling keeps full widget identity — the gate is
+  // per-element, never per-document.
+  const htmlInput = div.children['stem__0__2'];
+  assert.equal(htmlInput._tag, 'input');
+  assert.deepEqual(htmlInput._attrs, { type: 'checkbox' });
+});

@@ -1,19 +1,23 @@
 package com.styleconverter.runtime.layout
 
 // FloatRowPacking — the PURE half of CSS 2.1 §9.5 float row packing
-// (wave-19 lane FLOAT). Byte-parallel twin of iOS
-// StyleEngine/layout/FloatRowPacking.swift — same names, same pinned
-// semantics (P1-P6 in the lane pin table); skeptic probes diff the two.
+// (wave-19 lane FLOAT, extended by wave-20 lane W3). Byte-parallel twin
+// of iOS StyleEngine/layout/FloatRowPacking.swift — same names, same
+// pinned semantics (P1-P6 wave-19, P10-P14 wave-20); skeptic probes
+// diff the two.
 //
-// Scope (narrow, corpus-sufficient — see the lane contract):
+// Scope (narrow, corpus-sufficient — see the lane contracts):
 //  • F1: consecutive same-direction LEFT floats pack into a horizontal
 //    run, wrapping at width exhaustion (§9.5.1 rules 1-3,7 — greedy,
 //    no interleaving with in-flow line boxes).
 //  • F2: a childless clear sibling (the `<br clear>` wire shape) breaks
 //    the run and marks it STRUTTED (§9.5.2 clearance + the br's empty
 //    line box in the composed-WPT ref).
-//  • F4: right/inline-end floats and non-float siblings keep today's
-//    behaviour — they are never absorbed into a run (P1).
+//  • F4 (wave-20 W3 revision): consecutive same-direction RIGHT floats
+//    now ALSO pack — right-to-left from the containing block's right
+//    edge (§9.5.1 rule 1 mirrored; css-grid descendant-static-position-
+//    002/004's float:right pairs). Lone right floats and non-float
+//    siblings keep the frozen paths (wave-5 end-alignment / block flow).
 // The composable adapter lives in FloatRowLayout.kt; this file has no
 // Compose dependency so the JVM pinning suite runs it directly.
 object FloatRowPacking {
@@ -29,15 +33,24 @@ object FloatRowPacking {
      * Per-sibling facts the segmenter consumes — derived ONCE per child
      * from its IR Float/Clear keywords (FloatExtractor is the single
      * owner of float/clear keyword parsing on this platform).
+     * [floatsRight]/[clearBreaksRight] default false so every wave-19
+     * call site (and its pinned constructors) is byte-compatible.
      */
     data class ChildFacts(
         // P1: Float ∈ {LEFT, INLINE_START} — the LTR-normalized engine
-        // treats inline-start as left (css-logical-1 §2.1).
+        // treats inline-start as left (css-logical-1 §2.1). Under an
+        // rtl container the logical members swap (see [facts]).
         val floatsLeft: Boolean,
         // P2: childless + Float=NONE + Clear ∈ {BOTH, LEFT, INLINE_START}
         // — the `<br clear>` IR shape. Clear RIGHT/INLINE_END does NOT
         // clear a left run (§9.5.2: clearance only past same-side floats).
         val clearBreaksLeft: Boolean,
+        // P10: Float ∈ {RIGHT, INLINE_END} (ltr) — the wave-20 right-run
+        // family. Mutually exclusive with [floatsLeft] by construction.
+        val floatsRight: Boolean = false,
+        // P14: the §9.5.2 mirror of [clearBreaksLeft] — childless +
+        // Float=NONE + Clear ∈ {BOTH, RIGHT, INLINE_END} (ltr).
+        val clearBreaksRight: Boolean = false,
     )
 
     /**
@@ -47,23 +60,48 @@ object FloatRowPacking {
      * [hasChildren] guards the clear-break shape: a clear on a CONTENT
      * box is real layout (out of the narrow contract), only the childless
      * `<br>` marker is a pure row break.
+     * [rtl] maps the logical keywords per css-logical-1 §2.1: under
+     * direction:rtl inline-start→right and inline-end→left (wave-20 W3;
+     * defaults false so wave-19 call sites stay LTR-normalized verbatim).
      */
-    fun facts(config: FloatConfig, hasChildren: Boolean): ChildFacts = ChildFacts(
-        // P1 — left-family floats only; RIGHT/INLINE_END keep the wave-5
-        // end-alignment path (F4), NONE is plain in-flow content.
-        floatsLeft = config.float == FloatValue.LEFT ||
-            config.float == FloatValue.INLINE_START,
-        // P2 — the break marker must not itself float and must be
+    fun facts(config: FloatConfig, hasChildren: Boolean, rtl: Boolean = false): ChildFacts {
+        // css-logical-1 §2.1 — the physical side each logical keyword
+        // resolves to under the container's direction.
+        val startIsLeft = !rtl
+        // P1 — left-family floats: physical LEFT plus whichever logical
+        // keyword maps to left under [rtl].
+        val left = config.float == FloatValue.LEFT ||
+            (config.float == FloatValue.INLINE_START && startIsLeft) ||
+            (config.float == FloatValue.INLINE_END && !startIsLeft)
+        // P10 — right-family floats: the exact mirror.
+        val right = config.float == FloatValue.RIGHT ||
+            (config.float == FloatValue.INLINE_END && startIsLeft) ||
+            (config.float == FloatValue.INLINE_START && !startIsLeft)
+        // P2/P14 — the break marker must not itself float and must be
         // childless (the wire's `<br clear>` has neither).
-        clearBreaksLeft = !hasChildren && config.float == FloatValue.NONE &&
-            (config.clear == ClearValue.BOTH || config.clear == ClearValue.LEFT ||
-                config.clear == ClearValue.INLINE_START),
-    )
+        val marker = !hasChildren && config.float == FloatValue.NONE
+        return ChildFacts(
+            floatsLeft = left,
+            // §9.5.2: clearance only past same-side floats — BOTH clears
+            // either side, the logical members resolve per [rtl].
+            clearBreaksLeft = marker &&
+                (config.clear == ClearValue.BOTH || config.clear == ClearValue.LEFT ||
+                    (config.clear == ClearValue.INLINE_START && startIsLeft) ||
+                    (config.clear == ClearValue.INLINE_END && !startIsLeft)),
+            floatsRight = right,
+            clearBreaksRight = marker &&
+                (config.clear == ClearValue.BOTH || config.clear == ClearValue.RIGHT ||
+                    (config.clear == ClearValue.INLINE_END && startIsLeft) ||
+                    (config.clear == ClearValue.INLINE_START && !startIsLeft)),
+        )
+    }
 
     /**
      * One segment of the child list, in sibling order: either a float
-     * RUN (≥2 consecutive left-floats, rendered side-by-side by the
+     * RUN (≥2 consecutive same-side floats, rendered side-by-side by the
      * adapter) or a SINGLE child that keeps the block-flow path.
+     * [rightRun] defaults false so wave-19 pinned Segment values compare
+     * byte-identically.
      */
     data class Segment(
         // Child indices (into the original sibling list) in order.
@@ -73,40 +111,53 @@ object FloatRowPacking {
         // P2/P6: the sibling immediately after the run is a clear-break
         // marker — the adapter applies the line-box strut to this run.
         val strutted: Boolean,
+        // P11: true when the run packs right-to-left from the containing
+        // block's right edge (§9.5.1 rule 1 mirrored, wave-20 W3).
+        val rightRun: Boolean = false,
     )
 
     /**
-     * P1 — split the sibling list into maximal float runs and singles.
-     * A run is ≥2 CONSECUTIVE left-floating siblings; anything else
-     * (clear marker, right float, in-flow box) ends the streak and
-     * renders as a single. Lone left-floats stay singles too — today's
+     * P1/P11 — split the sibling list into maximal float runs and singles.
+     * A run is ≥2 CONSECUTIVE same-side floating siblings; anything else
+     * (clear marker, opposite-side float, in-flow box) ends the streak
+     * and renders as a single. Lone floats stay singles too — today's
      * path already renders one float correctly, and keeping it identical
-     * minimizes the gated surface (F4 conservatism).
+     * minimizes the gated surface (F4 conservatism, both sides).
      */
     fun segment(children: List<ChildFacts>): List<Segment> {
         // Output accumulator — segments in sibling order.
         val out = mutableListOf<Segment>()
-        // Current streak of consecutive left-float indices.
+        // Current streak of consecutive same-side float indices.
         val streak = mutableListOf<Int>()
+        // The streak's side (true = right-family); meaningless when empty.
+        var streakRight = false
         // Flush the open streak: a run when ≥2, singles otherwise.
         // [next] is the index AFTER the streak (or null at the end) —
-        // it decides the strut (P2: a trailing clear-break marker).
+        // it decides the strut (P2/P14: a trailing same-side clear-break).
         fun flush(next: Int?) {
             if (streak.size >= 2) {
                 // The strut fires only when the run is terminated by a
-                // clear-break sibling (the `<br clear>` line box, P6).
-                val strut = next != null && children[next].clearBreaksLeft
-                out.add(Segment(streak.toList(), isRun = true, strutted = strut))
+                // SAME-SIDE clear-break sibling (§9.5.2's same-side rule;
+                // the `<br clear>` line box, P6).
+                val strut = next != null && (
+                    if (streakRight) children[next].clearBreaksRight
+                    else children[next].clearBreaksLeft
+                    )
+                out.add(Segment(streak.toList(), isRun = true, strutted = strut, rightRun = streakRight))
             } else {
                 // 0 or 1 floats — each keeps the plain block path.
                 streak.forEach { out.add(Segment(listOf(it), isRun = false, strutted = false)) }
             }
             streak.clear()
         }
-        // Single pass over the siblings, building streaks.
+        // Single pass over the siblings, building same-side streaks.
         children.forEachIndexed { i, c ->
-            if (c.floatsLeft) {
-                // Extend the current left-float streak.
+            if (c.floatsLeft || c.floatsRight) {
+                // A side flip ends the current streak — left and right
+                // runs never merge (§9.5.1 rule 1 vs its mirror).
+                if (streak.isNotEmpty() && streakRight != c.floatsRight) flush(i)
+                // Extend (or begin) the streak on this child's side.
+                streakRight = c.floatsRight
                 streak.add(i)
             } else {
                 // Streak broken by this sibling — flush, then emit the
@@ -187,5 +238,30 @@ object FloatRowPacking {
         // P6 — strut floor on the total height for strutted runs.
         val height = maxOf(rowTops[row] + rowHeights[row], strutPx)
         return RunLayout(x = xs, y = ys, width = width, height = height)
+    }
+
+    /**
+     * P12 — the RIGHT-run mirror of [layout] (wave-20 W3, CSS 2.1
+     * §9.5.1 rule 1 mirrored: a right float's RIGHT outer edge sits
+     * against the containing block's right edge, the next one packs to
+     * its LEFT). Implemented as a pure reflection of the greedy left
+     * plan against the run extent — row assignment, wrap rule, row
+     * heights and the strut floor are shared byte-for-byte, so every
+     * left-side pin transfers: x'[i] = width − x[i] − w[i]. Each row
+     * right-aligns at the run's right edge (rule 1 per row); the adapter
+     * then anchors that edge at the containing block's right edge (P13).
+     */
+    fun layoutEnd(
+        widths: List<Double>,
+        heights: List<Double>,
+        availableWidth: Double,
+        strutPx: Double,
+    ): RunLayout {
+        // The shared greedy plan — identical rows/heights/extent (P12).
+        val base = layout(widths, heights, availableWidth, strutPx)
+        // Mirror each x against the run extent: first float flush right,
+        // successors extend leftward (§9.5.1 rules 1-3 mirrored).
+        val xs = widths.indices.map { base.width - base.x[it] - widths[it] }
+        return RunLayout(x = xs, y = base.y, width = base.width, height = base.height)
     }
 }

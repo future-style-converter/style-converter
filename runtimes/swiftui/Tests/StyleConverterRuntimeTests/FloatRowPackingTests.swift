@@ -165,4 +165,196 @@ final class FloatRowPackingTests: XCTestCase {
         XCTAssertEqual(150.0, plan.width)
         XCTAssertEqual(18.0, plan.height)
     }
+
+    // ── Wave-20 W3 — right/inline-end float runs (P10-P14) ──
+    // Corpus geometry: css-grid descendant-static-position-002/004 —
+    // a green+grey Float:RIGHT 20×40 pair inside a shrink-to-fit abspos
+    // box under a direction:rtl grid; ref paints grey LEFT of green
+    // (grey x40-59, green x60-79). Every pinned value mirrors
+    // FloatRowPackingTest.kt VERBATIM.
+
+    func testRightAndInlineEndFloatsDeriveFloatsRightUnderLtr() {
+        // P10: the physical keyword and the ltr logical alias.
+        XCTAssertTrue(FloatRowPacking.facts(from: [kw("Float", "RIGHT")], hasChildren: false).floatsRight)
+        XCTAssertTrue(FloatRowPacking.facts(from: [kw("Float", "INLINE_END")], hasChildren: false).floatsRight)
+        // Left-family floats never derive the right fact.
+        XCTAssertFalse(FloatRowPacking.facts(from: [kw("Float", "LEFT")], hasChildren: false).floatsRight)
+        XCTAssertFalse(FloatRowPacking.facts(from: [kw("Float", "INLINE_START")], hasChildren: false).floatsRight)
+        // No Float wire at all → plain in-flow content.
+        XCTAssertFalse(FloatRowPacking.facts(from: [], hasChildren: false).floatsRight)
+    }
+
+    func testRtlSwapsTheLogicalFloatMembersPerCssLogical() {
+        // css-logical-1 §2.1: rtl maps inline-start→right, inline-end→left.
+        XCTAssertTrue(FloatRowPacking.facts(from: [kw("Float", "INLINE_START")], hasChildren: false, rtl: true).floatsRight)
+        XCTAssertTrue(FloatRowPacking.facts(from: [kw("Float", "INLINE_END")], hasChildren: false, rtl: true).floatsLeft)
+        // The physical keywords are direction-independent.
+        XCTAssertTrue(FloatRowPacking.facts(from: [kw("Float", "RIGHT")], hasChildren: false, rtl: true).floatsRight)
+        XCTAssertTrue(FloatRowPacking.facts(from: [kw("Float", "LEFT")], hasChildren: false, rtl: true).floatsLeft)
+    }
+
+    func testChildlessRightClearsBreakRightRunsOnly() {
+        // P14: BOTH clears either side; RIGHT/INLINE_END clear right (ltr).
+        XCTAssertTrue(FloatRowPacking.facts(from: [kw("Clear", "BOTH")], hasChildren: false).clearBreaksRight)
+        XCTAssertTrue(FloatRowPacking.facts(from: [kw("Clear", "RIGHT")], hasChildren: false).clearBreaksRight)
+        XCTAssertTrue(FloatRowPacking.facts(from: [kw("Clear", "INLINE_END")], hasChildren: false).clearBreaksRight)
+        // §9.5.2 same-side rule: clear:left never breaks a RIGHT run.
+        XCTAssertFalse(FloatRowPacking.facts(from: [kw("Clear", "LEFT")], hasChildren: false).clearBreaksRight)
+        // Content boxes and floating boxes are never break markers.
+        XCTAssertFalse(FloatRowPacking.facts(from: [kw("Clear", "BOTH")], hasChildren: true).clearBreaksRight)
+        XCTAssertFalse(
+            FloatRowPacking.facts(from: [kw("Float", "RIGHT"), kw("Clear", "BOTH")], hasChildren: false)
+                .clearBreaksRight
+        )
+    }
+
+    // Right-float / right-clear fact shorthands for the segmentation pins.
+    private var R: FloatRowPacking.ChildFacts {
+        FloatRowPacking.ChildFacts(floatsLeft: false, clearBreaksLeft: false, floatsRight: true)
+    }
+    private var BRR: FloatRowPacking.ChildFacts {
+        FloatRowPacking.ChildFacts(floatsLeft: false, clearBreaksLeft: false, clearBreaksRight: true)
+    }
+
+    func testRightPairSegmentsIntoOneRightRun() {
+        // P11: descendant-static-position-002/004's green+grey pair.
+        let segs = FloatRowPacking.segment([R, R])
+        XCTAssertEqual(1, segs.count)
+        XCTAssertTrue(segs[0].isRun)
+        XCTAssertTrue(segs[0].rightRun)
+        // No trailing clear sibling → un-strutted.
+        XCTAssertFalse(segs[0].strutted)
+        XCTAssertEqual([0, 1], segs[0].indices)
+    }
+
+    func testOppositeSidesNeverMergeAndLoneRightsStaySingle() {
+        // A side flip splits the streak into two independent runs (P11).
+        let segs = FloatRowPacking.segment([F, F, R, R])
+        XCTAssertEqual(2, segs.count)
+        XCTAssertTrue(segs[0].isRun); XCTAssertFalse(segs[0].rightRun)
+        XCTAssertTrue(segs[1].isRun); XCTAssertTrue(segs[1].rightRun)
+        // Lone right floats keep the frozen wave-5 end-alignment path.
+        XCTAssertFalse(FloatRowPacking.segment([R, X, R]).contains(where: { $0.isRun }))
+    }
+
+    func testRightRunStrutsOnlyOnASameSideClearMarker() {
+        // P14: a right-clear br struts the right run…
+        let strutted = FloatRowPacking.segment([R, R, BRR])
+        XCTAssertTrue(strutted[0].isRun); XCTAssertTrue(strutted[0].strutted)
+        // …while a LEFT-only clear marker does not (§9.5.2 same-side).
+        let unstrutted = FloatRowPacking.segment([R, R, BR])
+        XCTAssertTrue(unstrutted[0].isRun); XCTAssertFalse(unstrutted[0].strutted)
+    }
+
+    func testLayoutEndMirrorsTheGridPairRightToLeft() {
+        // P12: the 002/004 pin — first float (green) flush right at the
+        // run's right edge, grey packs to its LEFT: x = [20, 0], the
+        // exact grey|green order the ref paints (grey x40-59, green
+        // x60-79 once the abspos static position lands at x40).
+        let plan = FloatRowPacking.layoutEnd(
+            widths: [20.0, 20.0],
+            heights: [40.0, 40.0],
+            availableWidth: .infinity,
+            strutPx: 0.0
+        )
+        XCTAssertEqual([20.0, 0.0], plan.x)
+        // Extent + height identical to the left plan (shared rows).
+        XCTAssertEqual(40.0, plan.width)
+        XCTAssertEqual(40.0, plan.height)
+    }
+
+    func testLayoutEndKeepsTheLeftPlansRowsAndMirrorsPerExtent() {
+        // P12: five 27-wide floats over a 100px block — same 3+2 row
+        // split as the left pin, each x reflected against the 81 extent.
+        let plan = FloatRowPacking.layoutEnd(
+            widths: [Double](repeating: 27.0, count: 5),
+            heights: [Double](repeating: 19.0, count: 5),
+            availableWidth: 100.0,
+            strutPx: 0.0
+        )
+        // Mirror of [0,27,54,0,27] against width 81 minus each 27.
+        XCTAssertEqual([54.0, 27.0, 0.0, 54.0, 27.0], plan.x)
+        XCTAssertEqual([0.0, 0.0, 0.0, 19.0, 19.0], plan.y)
+        XCTAssertEqual(81.0, plan.width)
+        XCTAssertEqual(38.0, plan.height)
+    }
+
+    // ── Wave-20 fix 6 — the RTL double-mirror regression (002 live IR) ──
+
+    /// Repo-root anchored path to the REAL wave20-final per-test IR — the
+    /// same live-wire pattern ConformanceTests uses (#filePath hops).
+    private static var descendant002IR: URL {
+        URL(fileURLWithPath: #filePath)               // …/FloatRowPackingTests.swift
+            .deletingLastPathComponent()              // StyleConverterRuntimeTests/
+            .deletingLastPathComponent()              // Tests/
+            .deletingLastPathComponent()              // swiftui/
+            .deletingLastPathComponent()              // runtimes/
+            .deletingLastPathComponent()              // repo root
+            .appendingPathComponent("tools/titan/runs/wave20-final/sections/css-grid/per-test-ir/"
+                + "wpt__css-grid__descendant-static-position-002.json")
+    }
+
+    func testDescendantStaticPosition002RightRunKeepsFirstFloatRightmost() throws {
+        // Live-wire pin (skip-guarded like the web suites: hermetic
+        // checkouts without the run directory stay green).
+        let url = Self.descendant002IR
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            throw XCTSkip("wave20-final run directory absent")
+        }
+        let doc = try JSONDecoder().decode(IRDocument.self, from: Data(contentsOf: url))
+        // The v2 decode slot-COMPOSES the flat wire (doc.components are
+        // the composed roots), so the float pair lives nested under the
+        // abspos red box — walk the tree like ConformanceTests does.
+        var found: [String: IRComponent] = [:]
+        func walk(_ cs: [IRComponent]) {
+            for c in cs {
+                found[c.id] = c
+                if let kids = c.children { walk(kids) }
+            }
+        }
+        walk(doc.components)
+        // The abspos red box's two float children (green first, gray
+        // second — source order).
+        let green = try XCTUnwrap(found["descendant-static-position-002__0__0__0__0-031"])
+        let gray = try XCTUnwrap(found["descendant-static-position-002__0__0__0__1-032"])
+        // P10 facts off the REAL wire: both are Float:RIGHT (physical —
+        // the grid root's Direction:RTL does not relabel a physical side).
+        let facts = [green, gray].map {
+            FloatRowPacking.facts(from: $0.properties, hasChildren: false)
+        }
+        XCTAssertTrue(facts.allSatisfy { $0.floatsRight && !$0.floatsLeft })
+        // One right run over the pair — the FloatBlockLayout route.
+        let segs = FloatRowPacking.segment(facts)
+        XCTAssertEqual(1, segs.count)
+        XCTAssertTrue(segs[0].isRun)
+        XCTAssertTrue(segs[0].rightRun)
+        // §9.5.1 rule 1 mirrored: green (FIRST right float) claims the
+        // RIGHTMOST slot — run-relative x [20, 0] over the 40px extent.
+        let plan = FloatRowPacking.layoutEnd(
+            widths: [20.0, 20.0], heights: [40.0, 40.0],
+            availableWidth: .infinity, strutPx: 0.0)
+        XCTAssertEqual([20.0, 0.0], plan.x)
+        // fix 6 — the ambient-RTL counter-mirror: the container inherits
+        // Direction:RTL (the grid root sets \.layoutDirection), so
+        // SwiftUI will flip every place() x by x' = W − x − w. placedX
+        // pre-applies the involution so the ENGINE's flip restores the
+        // physical origin — green stays at 20 (rightmost), gray at 0.
+        // With the abspos box's static position at page x40, that is the
+        // ref's gray x40-59 / green x60-79 band, mirrored right.
+        for (x, w) in [(20.0, 20.0), (0.0, 20.0)] {
+            if #available(iOS 16.0, macOS 13.0, *) {
+                let pre = FloatBlockLayout.placedX(
+                    intendedX: CGFloat(x), memberWidth: CGFloat(w),
+                    boundsWidth: 40, rtl: true)
+                // The engine's own mirror (W − x − w) lands on the
+                // intended physical origin — double flip neutralized.
+                XCTAssertEqual(CGFloat(x), 40 - pre - CGFloat(w), accuracy: 1e-9)
+                // And LTR passes through verbatim (regression guard for
+                // every existing left-run placement).
+                XCTAssertEqual(CGFloat(x), FloatBlockLayout.placedX(
+                    intendedX: CGFloat(x), memberWidth: CGFloat(w),
+                    boundsWidth: 40, rtl: false))
+            }
+        }
+    }
 }

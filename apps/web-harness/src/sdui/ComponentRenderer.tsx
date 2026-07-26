@@ -43,6 +43,10 @@ import { isRuntimeV1Condition } from '@style-converter/web/core/renderer/RuleBui
 // The shared renderer core + its calibration-hook types (issue #41).
 import { NodeRenderer } from '@style-converter/web/renderer/NodeRenderer';
 import type { RenderContext, RendererOptions } from '@style-converter/web/renderer/RendererOptions';
+// wave-20 W1: the package's widget tag set — the WPT-mode passthrough
+// below must stay byte-parallel with the extractor's WIDGET_ATTR_TAGS
+// and the core's attrs-application policy (WidgetAttrs.ts).
+import { WIDGET_TAGS } from '@style-converter/web/renderer/WidgetAttrs';
 // The cross-platform BLOCK FONT layout (atlas checksum cb3c6e411c7b2859):
 // placeholder LABELS render as integer-coordinate 1x1 px rects instead of
 // font-stack text, so all three platforms rasterize labels byte-identically
@@ -452,8 +456,30 @@ const HARNESS_OPTIONS: RendererOptions = {
   decorateStyles: calibrateStyles,
   // Divergence #3: allowlist mapping — except `img`, which bypasses the
   // allowlist into the core's void-element branch (issue #36 web slice:
-  // replaced-element CSS needs a REAL <img> box even on captures).
-  mapTag: (tag) => (tag === 'img' ? 'img' : (tag && TAG_ALLOWLIST.has(tag) ? tag : 'div')),
+  // replaced-element CSS needs a REAL <img> box even on captures), and —
+  // wave-20 W1 (RC2) — except the form/widget tags in WPT capture mode:
+  // the WPT browser-ref paints real Chromium widget chrome, so demoting
+  // `<input type=checkbox checked>` to a <div> WAS the divergence (the
+  // css-ui family captured bare text against native checkboxes). WPT-mode
+  // widgets pass through and the core applies `meta.attrs`; focus-ring
+  // risk is neutralised by the decorateProps inert hook below. The legacy
+  // 327-pair flow (no `?wpt=1`) keeps the demotion byte-for-byte.
+  mapTag: (tag) =>
+    tag === 'img'
+      ? 'img'
+      : (WPT_MODE && tag && WIDGET_TAGS.has(tag))
+        ? tag
+        : (tag && TAG_ALLOWLIST.has(tag) ? tag : 'div'),
+  // wave-20 W1: the last word on element props — WPT-mode widgets get
+  // `inert` (no hover/focus/interaction states, React 19 boolean) plus
+  // `tabIndex: -1` (never sequentially focusable), so a passed-through
+  // control can never acquire a focus ring or interaction chrome the
+  // never-focused browser-ref page doesn't show. Identity for every
+  // other element AND for the whole non-WPT flow (byte-stable DOM).
+  decorateProps: (props, elementName) =>
+    WPT_MODE && WIDGET_TAGS.has(elementName)
+      ? { ...props, inert: true, tabIndex: -1 }
+      : props,
   // Divergence #4: childless components render the placeholder label
   // instead of an empty element, so empty fixtures stay identifiable
   // against iOS/Android placeholders. The LABEL now draws as the shared
@@ -471,6 +497,17 @@ const HARNESS_OPTIONS: RendererOptions = {
   renderEmptyContent: ({ component, styles }) => {
     const text = component.text;
     const hasText = typeof text === 'string' && text.length > 0;
+    // wave-20 W1: WPT-mode widget passthrough renders REAL content — the
+    // bare text node, exactly the source markup shape
+    // (`<button>button</button>`, `<option>select</option>`). The
+    // placeholder span's display:block + padding would perturb native
+    // widget content layout (button centering, option rows) vs the
+    // Chromium ref. The legacy flow never enters: widgets are demoted to
+    // <div> there and keep the placeholder label byte-for-byte.
+    const wTag = component.meta?.sourceTag?.toLowerCase();
+    if (WPT_MODE && wTag && WIDGET_TAGS.has(wTag)) {
+      return hasText ? text : null;
+    }
     // Forward the component's IR-resolved line-height (if any) so the
     // composed-mode line-height pin can DEFER to it — a test that declares
     // its own line-height keeps it; only bare text (no declaration) gets the
@@ -548,6 +585,35 @@ const HARNESS_OPTIONS: RendererOptions = {
           ? { indices: s.indices, wrapperStyle: floatRunWrapperStyle(s.strutted) }
           : { indices: s.indices }),
     };
+  },
+  // Wave-20 W2 follow-up — inter-widget whitespace, WPT capture ONLY.
+  // The source markup separates every form control by collapsed
+  // whitespace (`<input …> <input …>`), which the browser-ref lays out
+  // as one 16px-font space advance (~4.16px — the natives pin it as
+  // UAWidgetIntrinsics.atomGapPx). The flat component wire carries no
+  // inter-element text nodes, so the composed harness packed inline
+  // widgets FLUSH and every wrap point shifted vs the ref (checked on
+  // appearance-auto-001: ref row 2 = textarea 184 + input-button 74 +
+  // input-submit 77 + input-reset 67 + 3 spaces ≈ 414 < 500 content px,
+  // and the 129px range then WRAPS to row 3 — flush packing moved that
+  // boundary). Re-inserting a REAL ' ' text node between consecutive
+  // widget-tag siblings is the DOM-honest mirror: the browser collapses
+  // and measures it natively, flex/grid parents ignore whitespace-only
+  // nodes (css-flexbox-1 §4), and blockified widgets collapse it to
+  // nothing (CSS 2.1 §9.2.2.1) — all self-correcting, no arithmetic
+  // here. Legacy 327-pair flow (no `?wpt=1`) returns null → the DOM
+  // stays byte-identical.
+  renderChildSeparator: (prev, next) => {
+    // P8-style gate: capture calibration only ever fires under ?wpt=1.
+    if (!WPT_MODE) return null;
+    // Both neighbours must be widget-identity tags (the wire-contract
+    // set — byte-parallel with the extractor's WIDGET_ATTR_TAGS and the
+    // natives' P15 atom families).
+    const prevTag = prev.component.meta?.sourceTag?.toLowerCase();
+    const nextTag = next.component.meta?.sourceTag?.toLowerCase();
+    return prevTag && nextTag && WIDGET_TAGS.has(prevTag) && WIDGET_TAGS.has(nextTag)
+      ? ' '
+      : null;
   },
 };
 
