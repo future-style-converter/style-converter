@@ -47,12 +47,23 @@
 //     scan (TOP_LAYER_API_RX) BEFORE launching a browser; conservative on
 //     purpose — a runtime :popover-open probe would MISS the post-hide
 //     overlay-transition state that keeps an element in the top layer.
-//   - NO STRUCTURAL MUTATION. appendChild/remove-style mutations change the
-//     component TREE, not just property values; the static components then
-//     have no counterpart for the new/removed elements. The element-mapping
-//     cross-check (browser walk must match the static walk path-for-path,
-//     tag-for-tag) bails on any structural drift and keeps the exclusion
-//     (delivering these needs post-load STRUCTURE extraction — future work).
+//   - STRUCTURAL MUTATION → STRUCTURE RE-EXTRACTION (wave 20). appendChild /
+//     createElement / removeChild mutations change the component TREE, not
+//     just property values, so the computed overlay has no static counterpart
+//     to land on. The element-mapping cross-check still detects the drift —
+//     but for tests wall-tagged `requires-script-mutation` the former bail
+//     branch is now the TRIGGER: the live post-script DOM is serialized
+//     (body outerHTML + original head, scripts stripped) and fed through the
+//     SAME extract-fixture.mjs pipeline via its `htmlOverride` input, so
+//     created nodes become first-class components and removed nodes vanish.
+//     The 34-property state bake then re-runs against the same live page,
+//     mapped by a SECOND traversal walk whose static side is the serialized
+//     DOM — which matches the live DOM by construction (it was generated
+//     from it). Fixtures produced this way carry BOTH honesty stamps:
+//     `_wpt.postLoadExtracted` and `_wpt.structureExtracted`. Mismatches on
+//     tests NOT tagged `requires-script-mutation` (e.g. scroll-only walls,
+//     --force runs) keep the wave-16 bail — the trigger is scoped to the
+//     population whose wall IS structural mutation.
 //   - NO SCROLL OFFSETS. The IR has no scroll-position model; if any
 //     element (or the document) sits at a non-zero scroll offset after
 //     settle, the visual state depends on it and we bail.
@@ -81,6 +92,9 @@ import {
   stripComments, extractInlineStyle, extractLinkedStylesheets, parseCss,
   collectStyledTags, extractBodyTreeNested,
   HEAD_ONLY_TAGS, INLINE_MERGE_TAGS,
+  // fix 5: the non-XHTML-namespace marker the serializer stamps and
+  // buildNode() gates `_tag`/`_attrs` on — ONE constant, two consumers.
+  FOREIGN_NS_MARKER_ATTR,
   extractFixture, writeFixturePair,
 } from './extract-fixture.mjs';
 // The browser-ref capture's rendering contract: same launch flags, same
@@ -412,6 +426,192 @@ export function mappingMismatch(staticPaths, records) {
   return null; // aligned — safe to overlay
 }
 
+// ── wave-20: post-load STRUCTURE extraction (the appendChild family) ────────
+//
+// The scope-guarded conversion of the element-mapping bail into a delivery
+// path. Everything here is deliberately thin glue over extract-fixture.mjs —
+// the serialized live DOM is just a different INPUT DOCUMENT for the exact
+// static pipeline (extractFixture's htmlOverride), never a re-implementation.
+
+// The one wall tag whose meaning IS structural mutation — the trigger scope.
+// Scroll-only walls (requires-script-driven-scroll) and --force runs keep the
+// wave-16 bail on mismatch: their drift is not the delivered capability.
+export const STRUCTURE_TRIGGER_TAG = 'requires-script-mutation';
+
+/** Pure trigger predicate: convert the mapping-mismatch bail into structure
+ *  re-extraction ONLY when (a) the walks actually disagree (mismatch is a
+ *  non-null description) AND (b) the test is wall-tagged with the structural
+ *  mutation tag. Exported so the tests pin the scope guard exactly. */
+export function shouldStructureExtract(naTags, mismatch) {
+  // No drift → the cheaper state-bake path already handled the test.
+  if (!mismatch) return false;
+  // Drift outside the requires-script-mutation population → honest bail.
+  return Array.isArray(naTags) && naTags.includes(STRUCTURE_TRIGGER_TAG);
+}
+
+// The id stamped on the injected canvas-frame <style> so the serializer can
+// strip it — the canvas contract is the CAPTURE pipeline's own frame (every
+// platform injects it at render time); baking it into the fixture would
+// double-apply it.
+export const CANVAS_FRAME_STYLE_ID = '__postLoadCanvasFrame';
+
+// The HTML void elements (HTML §13.1.2) — tags whose HTML-namespace form
+// never carries an end tag. Needed by the serialization normalizer below.
+export const HTML_VOID_TAGS = [
+  'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+  'link', 'meta', 'param', 'source', 'track', 'wbr',
+];
+
+/** Normalize a serialized live-DOM fragment for the regex-based static
+ *  parser. FOREIGN (non-HTML-namespace) elements — the createElementNS
+ *  family, e.g. appearance-auto-non-html-namespace-001's
+ *  `createElementNS('not-html', 'input')` — serialize WITH explicit end tags
+ *  even for void-named tags (`<input></input>`), because the HTML
+ *  serializer's void rule applies only to the HTML namespace. An HTML
+ *  re-parse simply IGNORES those stray closers (the parser makes the tag
+ *  void again), but the regex walker treats the unmatched `</input>` as a
+ *  structure break and silently DROPS every following sibling (measured:
+ *  static walk 4 vs live walk 8 on that test). Stripping the closers is
+ *  semantics-preserving under the HTML re-parse — HTML-namespace void
+ *  elements never serialize a closer, so only foreign ones can match. A
+ *  foreign void-named element WITH children still cannot round-trip through
+ *  an HTML parse (its children become siblings) — that case lands in the
+ *  structure-remap-mismatch bail, honestly. Exported for the unit pins. */
+export function stripForeignVoidClosers(html) {
+  // One alternation over the void set, case-insensitive, global — closers
+  // only (`</tag >`); open tags are untouched.
+  return html.replace(new RegExp(`</(?:${HTML_VOID_TAGS.join('|')})\\s*>`, 'gi'), '');
+}
+
+/** Pure assembly of the synthetic document the static pipeline re-parses:
+ *  the ORIGINAL head (rel=match link, fuzzy meta, <style>/<link> sheets —
+ *  everything extractFixture reads from the head) around the SERIALIZED
+ *  post-script body. Explicit <html>/<head>/<body> tags on purpose: the
+ *  live parser already normalized implicit-body markup, so the serialized
+ *  form always takes extractBody*'s explicit-body branch — no fallback
+ *  heuristics involved. Exported for the serialized-DOM-input pins. */
+export function buildSyntheticHtml(headInner, bodyOuter) {
+  // bodyOuter is `<body …>…</body>` from the live DOM (outerHTML), so it
+  // brings its own body tags; we only wrap head + html around it.
+  return `<!DOCTYPE html>\n<html>\n<head>${headInner}</head>\n${bodyOuter}\n</html>`;
+}
+
+// wave-20 W1 note — widget attrs ride the serialization round-trip for free:
+// outerHTML preserves source ATTRIBUTES (boolean ones serialize as
+// `checked=""` — still presence, still `true` on the wire), so the
+// re-extraction below emits `_attrs` for script-created widgets exactly as
+// the static pipeline would. Documented loss, not silent: scripted PROPERTY
+// mutations that HTML does not reflect back to attributes (`el.value = 'x'`,
+// `el.checked = true` via IDL) do not serialize and therefore do not reach
+// `_attrs` — same boundary the browser's own outerHTML draws.
+//
+// wave-20 fix 5 — NAMESPACES do NOT ride the round-trip: outerHTML flattens
+// a createElementNS('not-html', 'input') element into plain `<input>` text,
+// and the HTML re-parse puts it back in the HTML namespace — the risk this
+// file's structure-path header always carried. Because the serializer still
+// holds the LIVE DOM (where el.namespaceURI is authoritative), it stamps
+// every non-XHTML element with extract-fixture's FOREIGN_NS_MARKER_ATTR on
+// the CLONE before serializing; buildNode() then suppresses `_tag`/`_attrs`
+// for marked elements, so a foreign 'input' never acquires widget identity
+// (browsers paint NO chrome for it — appearance-auto-non-html-namespace-001
+// renders six empty 1em inline-blocks, not six UA widgets).
+//
+// In-page serializer — runs inside page.evaluate (dependency-free, params
+// serialized). Clones head and body so the LIVE DOM is untouched (the second
+// walk still runs against it afterwards), then strips:
+//   - the injected canvas-frame style (by CANVAS_FRAME_STYLE_ID — see above);
+//   - every <script> element: they already RAN (their effect is the DOM
+//     being serialized), and raw script text with `<`/`>` operators would
+//     needlessly stress the regex-based static parser.
+function inPageSerializer(params) {
+  const { canvasStyleId, foreignNsMarker } = params;
+  const XHTML_NS = 'http://www.w3.org/1999/xhtml';
+  const head = document.head.cloneNode(true);   // deep clone — live head kept
+  const injected = head.querySelector('#' + canvasStyleId);
+  if (injected) injected.remove();              // the capture-pipeline frame
+  for (const s of head.querySelectorAll('script')) s.remove(); // ran already
+  const body = document.body.cloneNode(true);   // deep clone — live body kept
+  for (const s of body.querySelectorAll('script')) s.remove(); // ran already
+  // fix 5: cloneNode preserves namespaces even though outerHTML won't —
+  // mark every foreign element NOW, while the truth is still queryable.
+  // getElementsByTagName('*') enumerates all descendants of the detached
+  // clone; setAttribute on a foreign element is legal (null-namespace
+  // attribute) and serializes as ordinary text the regex walker scans.
+  for (const el of body.getElementsByTagName('*')) {
+    if (el.namespaceURI !== XHTML_NS) el.setAttribute(foreignNsMarker, '');
+  }
+  return { headInner: head.innerHTML, bodyOuter: body.outerHTML };
+}
+
+/** Adopt a re-extracted fixture's content into the ORIGINAL fixture object
+ *  in place (callers hold the reference: extract-fixture's CLI writes the
+ *  object it passed in). The re-extracted `_wpt` block is authoritative —
+ *  same head, so test/ref/bucket/fuzzy are identical, while lossy/
+ *  lossyReasons honestly reflect the POST-script tree. Both honesty stamps
+ *  are applied here: `postLoadExtracted` (the wave-16 delivery record the
+ *  score gate re-admits on) and `structureExtracted` (the wave-20 record
+ *  that the component TREE itself is post-script). Exported for unit pins. */
+export function adoptReExtractedFixture(fixture, reFixture) {
+  fixture._wpt = reFixture._wpt;                // post-script provenance block
+  fixture.components = reFixture.components;    // post-script component tree
+  fixture._wpt.postLoadExtracted = true;        // state delivered (gate key)
+  fixture._wpt.structureExtracted = true;       // structure delivered (gate key)
+  return fixture;
+}
+
+/**
+ * The structure-delivery path, called from postLoadAugmentFixture when
+ * shouldStructureExtract fires. Order is the constraint the header states:
+ * serialize structure → re-extract through the SAME pipeline → SECOND
+ * traversal walk (static side = the serialized DOM, so it matches the live
+ * DOM by construction) → adopt + state-bake. The passed fixture is only
+ * mutated AFTER every cross-check passed — a bail here leaves it
+ * byte-identical (same contract as the wave-16 bails).
+ */
+async function structureExtractFromLivePage(page, fixture, testRel, testAbs, stem) {
+  // 1. Serialize the settled post-script DOM (canvas frame + scripts out),
+  //    then normalize foreign void closers for the regex parser (see
+  //    stripForeignVoidClosers — the createElementNS family's round-trip).
+  const { headInner, bodyOuter } =
+    await page.evaluate(inPageSerializer, {
+      canvasStyleId: CANVAS_FRAME_STYLE_ID,
+      // fix 5: the marker the serializer stamps on non-XHTML elements so
+      // widget identity never survives the namespace-losing re-parse.
+      foreignNsMarker: FOREIGN_NS_MARKER_ATTR,
+    });
+  const syntheticHtml = buildSyntheticHtml(headInner, stripForeignVoidClosers(bodyOuter));
+  // 2. Re-run the FULL static extraction on the serialized document —
+  //    extractFixture's htmlOverride swaps only the input source; stylesheet
+  //    resolution / ref lookup / asset inlining all run against testAbs's
+  //    directory exactly as the static pass did.
+  const reResult = await extractFixture(testRel, { htmlOverride: syntheticHtml });
+  // 3. SECOND traversal identity, computed FROM the serialized document, so
+  //    the state bake maps onto the re-extracted components. styledTags come
+  //    from the synthetic document's OWN rule set (staticPathsForHtml returns
+  //    it) so both sides of this mapping share one merge guard — including
+  //    any <style> a script inserted into the body.
+  const { paths: newPaths, rules: newRules } = await staticPathsForHtml(syntheticHtml, testAbs);
+  const snap3 = await page.evaluate(inPageWalker, {
+    headOnly:    [...HEAD_ONLY_TAGS],
+    inlineMerge: [...INLINE_MERGE_TAGS],
+    styledTags:  [...collectStyledTags(newRules)],
+    maxDepth: 5,
+    propNames: POST_LOAD_COMPUTED_PROPERTIES,
+  });
+  // 4. Defensive remap check: serialized-DOM walk vs live walk SHOULD agree
+  //    by construction — any residual drift (regex-parser blind spot on
+  //    exotic serialized markup) must bail with the fixture untouched, never
+  //    overlay onto wrong components.
+  const remap = mappingMismatch(newPaths, snap3.records);
+  if (remap) return { status: 'bailed', reason: `structure-remap-mismatch (${remap})` };
+  // 5. Adopt the post-script tree, then bake the post-script state onto it —
+  //    both structure AND state are now from the same settled live page.
+  adoptReExtractedFixture(fixture, reResult.fixture);
+  const overlaid = mergePostLoadIntoFixture(fixture, stem, snap3.records);
+  return { status: 'extracted', structure: true, overlaid,
+           elements: newPaths.length, records: snap3.records };
+}
+
 // ── Merge: computed overlay onto the static fixture ──────────────────────────
 
 /** Locate the component object for a walk path inside a fixture built by
@@ -446,8 +646,10 @@ export function componentAtPath(fixture, stem, path) {
  *     expresses those sizes in the element's OWN basis (border-box elements
  *     report border-box px — the block-axis-constraint parents are exactly
  *     this shape); a mismatched basis would re-interpret the baked number;
- *   - `_text`, `_pseudo`, `_tag`, `children` are untouched — static-only
- *     content keeps the static path.
+ *   - `_text`, `_pseudo`, `_tag`, `_attrs`, `children` are untouched —
+ *     static-only content keeps the static path (wave-20 W1: `_attrs`
+ *     joins the list — widget identity is structural, not computed state,
+ *     and the overlay only ever writes into `properties`).
  */
 export function overlayComputedOnComponent(cmp, styles) {
   const props = cmp.properties ?? (cmp.properties = {});
@@ -529,9 +731,12 @@ export async function closePostLoadBrowser() {
  *   - 'declined' — static pre-check says the state is unrepresentable
  *     (top-layer); no browser was launched;
  *   - 'bailed'   — the live page failed a runtime cross-check (unstable /
- *     scrolled / structure drift); fixture left byte-identical, the wave-15
- *     exclusion stays;
- *   - 'extracted' — computed state delivered, fixture stamped.
+ *     scrolled / structure drift outside the requires-script-mutation
+ *     population); fixture left byte-identical, the wave-15 exclusion stays;
+ *   - 'extracted' — computed state delivered, fixture stamped. When the
+ *     wave-20 structure path ran, `structure: true` rides along and the
+ *     fixture ALSO carries `_wpt.structureExtracted` (tree re-extracted from
+ *     the serialized post-script DOM, then state-baked).
  */
 export async function postLoadAugmentFixture(fixture, testRel) {
   const testAbs = join(WPT_DIR, testRel);
@@ -555,8 +760,17 @@ export async function postLoadAugmentFixture(fixture, testRel) {
     // The identical zero-specificity canvas frame the ref capture injects
     // (white canvas, pad, black ink, Inter faces, line-height pin) — see
     // capture-browser-ref.renderOne for the full per-declaration rationale.
-    await page.addStyleTag({
-      content: `
+    // wave-20: injected via evaluate (not addStyleTag) so the tag carries
+    // CANVAS_FRAME_STYLE_ID — the structure serializer must strip it, since
+    // the canvas frame belongs to the CAPTURE pipeline, never the fixture.
+    await page.evaluate(({ id, css }) => {
+      const s = document.createElement('style'); // same effect as addStyleTag
+      s.id = id;                                 // …but identifiable later
+      s.textContent = css;                       // the shared frame contract
+      document.head.appendChild(s);              // head, like addStyleTag did
+    }, {
+      id: CANVAS_FRAME_STYLE_ID,
+      css: `
         ${await interFontFaceCss()}
         :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }
         :where(body) { padding: ${CANVAS_PAD_PX}px; box-sizing: border-box;
@@ -585,6 +799,14 @@ export async function postLoadAugmentFixture(fixture, testRel) {
     const snap1 = await page.evaluate(inPageWalker, params);
     await new Promise((r) => setTimeout(r, 100));
     const snap2 = await page.evaluate(inPageWalker, params);
+    // wave-20 mutation-settled check FIRST: an element-count drift between
+    // the two snapshots means a timer/rAF loop is STILL creating or removing
+    // elements — structure re-extraction would serialize a moving target, so
+    // it bails with its own reason (more diagnostic than the generic
+    // stability bail the same drift would also trip below).
+    if (snap1.records.length !== snap2.records.length) {
+      return { status: 'bailed', reason: 'mutation-not-settled' };
+    }
     if (!snapshotsStable(snap1, snap2)) {
       return { status: 'bailed', reason: 'unstable-after-settle' };
     }
@@ -594,9 +816,20 @@ export async function postLoadAugmentFixture(fixture, testRel) {
         snap2.records.some((r) => r.scrollTop !== 0 || r.scrollLeft !== 0)) {
       return { status: 'bailed', reason: 'scroll-offset-undeliverable' };
     }
-    // Element-mapping cross-check: structure must not have drifted.
+    // Element-mapping cross-check: static walk vs live walk.
     const mismatch = mappingMismatch(staticPaths, snap2.records);
     if (mismatch) {
+      // wave-20 bail-to-trigger conversion: for the requires-script-mutation
+      // population the drift IS the wall — deliver it by re-extracting the
+      // fixture's STRUCTURE from the settled live DOM (see the structure
+      // section above). Everything else keeps the wave-16 bail.
+      if (shouldStructureExtract((await notApplicableIndex())[testRel], mismatch)) {
+        const stem = testRel.split('/').pop().replace(/\.html$/, '');
+        // `await` is load-bearing: a bare `return promise` inside this
+        // try/finally would run the finally (page.close) BEFORE the structure
+        // path finished evaluating against that very page.
+        return await structureExtractFromLivePage(page, fixture, testRel, testAbs, stem);
+      }
       return { status: 'bailed', reason: `element-mapping-mismatch (${mismatch})` };
     }
     // Delivered — overlay + stamp.
@@ -637,8 +870,13 @@ async function main() {
         const outcome = await postLoadAugmentFixture(result.fixture, rel);
         await writeFixturePair(result);                    // write either way
         tally[outcome.status]++;
+        // wave-20: structure-path successes are visibly distinct in the log
+        // (the fixture's component TREE was re-extracted, not just overlaid).
         console.log(`${outcome.status.padEnd(9)} ${rel}` +
-          (outcome.reason ? ` (${outcome.reason})` : ` (${outcome.overlaid} components overlaid)`));
+          (outcome.reason ? ` (${outcome.reason})`
+            : outcome.structure
+              ? ` (structure re-extracted: ${outcome.elements} elements, ${outcome.overlaid} components overlaid)`
+              : ` (${outcome.overlaid} components overlaid)`));
       } catch (err) {
         hardFail++;
         console.error(`ERROR     ${rel}: ${err.message ?? err}`);

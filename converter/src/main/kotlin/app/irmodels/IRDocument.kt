@@ -157,6 +157,14 @@ data class IRComponent(
     // 04 field matrix); v2 forwards it inside `meta.sourceTag`. Ignored
     // by the v1 serializer (matching the historical dropped behavior).
     val tag: String? = null,
+    // wave-20 W1: widget-identity attributes from the extractor's `_attrs`
+    // hint — an OPAQUE object (present-in-source keys among type/value/
+    // checked/multiple/size/alt/min/max/selected/disabled; strings,
+    // booleans, numbers per the extractor's wire contract). v2 forwards
+    // it VERBATIM inside `meta.attrs` (spec 05 sanctions new omit-when-
+    // absent meta keys as v2-additive); the v1 serializer ignores it so
+    // deprecated `--emit-ir v1` bytes stay frozen.
+    val attrs: JsonObject? = null,
     // Generated-content payload from the extractor's `_pseudo` input
     // ({before?, after?, marker?} component-shaped slots). Carried as an
     // opaque JsonObject — pseudo nodes have no independent lifecycle and

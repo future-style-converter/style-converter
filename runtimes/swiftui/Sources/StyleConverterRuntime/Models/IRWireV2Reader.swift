@@ -214,21 +214,38 @@ enum IRWireV2Reader {
                 }
                 pseudos = .object(dict)
             }
-            // meta: strict {sourceTag?, role?}, minProperties 1 — an
-            // empty meta object may never appear on the wire.
+            // meta: strict {sourceTag?, role?, attrs?}, minProperties 1 —
+            // an empty meta object may never appear on the wire. `attrs`
+            // is the wave-20 widget capsule (lane W2 wire contract).
             var meta: IRMeta? = nil
             if c.contains(IRAnyKey("meta")) {
                 let m = try c.nestedContainer(keyedBy: IRAnyKey.self, forKey: IRAnyKey("meta"))
-                let members: Set<String> = ["sourceTag", "role"]
+                let members: Set<String> = ["sourceTag", "role", "attrs"]
                 for k in m.allKeys where !members.contains(k.stringValue) {
-                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role)", path: decoder.codingPath)
+                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role/attrs)", path: decoder.codingPath)
                 }
                 let tag = try m.decodeIfPresent(String.self, forKey: IRAnyKey("sourceTag"))
                 let role = try m.decodeIfPresent(String.self, forKey: IRAnyKey("role"))
-                guard tag != nil || role != nil else {
+                // attrs: strict on the key set (the contract pins exactly
+                // ten legal attributes), tolerant on value shape within it
+                // — the typed coercion lives ONCE in IRAttrs.from.
+                var attrs: IRAttrs? = nil
+                if m.contains(IRAnyKey("attrs")) {
+                    let raw = try m.decode(IRValue.self, forKey: IRAnyKey("attrs"))
+                    guard case .object(let o) = raw else {
+                        throw violation("meta.attrs must be an object", path: decoder.codingPath)
+                    }
+                    let attrKeys: Set<String> = ["type", "value", "checked", "multiple",
+                                                 "size", "alt", "min", "max", "selected", "disabled"]
+                    for k in o.keys where !attrKeys.contains(k) {
+                        throw violation("unknown meta.attrs key '\(k)' (wave-20 wire contract)", path: decoder.codingPath)
+                    }
+                    attrs = IRAttrs.from(object: o)
+                }
+                guard tag != nil || role != nil || attrs != nil else {
                     throw violation("meta present but empty (schema: minProperties 1)", path: decoder.codingPath)
                 }
-                meta = IRMeta(sourceTag: tag, role: role)
+                meta = IRMeta(sourceTag: tag, role: role, attrs: attrs)
             }
             // variables: additive v2 key — "--name" → raw string map
             // (custom-property definitions, css-variables-1 §2). Schema

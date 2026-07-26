@@ -96,7 +96,9 @@ async function main() {
                          // wave-16: a missing fixture certainly delivered no
                          // post-script state — explicit false keeps the
                          // score gate's conservative wall exclusion.
-                         postLoadExtracted: false };
+                         postLoadExtracted: false,
+                         // wave-20: nor any post-script structure.
+                         structureExtracted: false };
       continue;
     }
 
@@ -126,6 +128,12 @@ async function main() {
         // POST-script computed state and baked it into this fixture, so
         // EXTRACTION_WALL_TAGS no longer score-exclude it.
         postLoadExtracted: fixture._wpt?.postLoadExtracted === true,
+        // wave-20 STRUCTURE: the companion stamp — true ⇔ the component
+        // tree was re-extracted from the serialized post-script DOM (the
+        // appendChild family). Rides the same channel; applyNaScoreGate
+        // treats either stamp as the wall's delivery record, and the
+        // manifest surfaces both.
+        structureExtracted: fixture._wpt?.structureExtracted === true,
       };
       i++;
     }

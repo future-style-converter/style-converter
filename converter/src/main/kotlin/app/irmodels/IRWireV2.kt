@@ -210,12 +210,17 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             value.pseudos?.let { put("pseudos", it) }
             // meta: droppable renderer hints, grouped. Omitted entirely
             // when no member has a value so hint-free fixtures stay lean.
-            if (value.tag != null || value.role != null) {
+            if (value.tag != null || value.role != null || value.attrs != null) {
                 put("meta", buildJsonObject {
                     // sourceTag: v2 home of the extractor's `_tag` hint.
                     value.tag?.let { put("sourceTag", it) }
                     // role: v2 home of `_role` (today only "body-root").
                     value.role?.let { put("role", it) }
+                    // attrs (wave-20 W1): v2 home of `_attrs` — the widget-
+                    // identity attribute object, forwarded VERBATIM (the
+                    // extractor owns keys and value typing; spec 05 additive
+                    // meta-key rule).
+                    value.attrs?.let { put("attrs", it) }
                 })
             }
         })
@@ -255,6 +260,9 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             role = meta?.get("role")?.let { el -> if (el is JsonNull) null else el.jsonPrimitive.content },
             slot = slot,
             tag = meta?.get("sourceTag")?.let { el -> if (el is JsonNull) null else el.jsonPrimitive.content },
+            // attrs (wave-20 W1): opaque round-trip — JSON null ≡ absent,
+            // any object comes back byte-verbatim (readers key on the tag).
+            attrs = meta?.get("attrs")?.let { el -> if (el is JsonNull) null else el.jsonObject },
             pseudos = obj["pseudos"]?.jsonObject,
             // variables: "--name" → raw string map, round-tripped verbatim
             // (both key case and value bytes). Missing key → null so a

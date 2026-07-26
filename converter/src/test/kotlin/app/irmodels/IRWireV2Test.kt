@@ -140,6 +140,50 @@ class IRWireV2Test {
         assertEquals("section", byId["a"]!!.tag)
     }
 
+    // ---- wave-20 W1: meta.attrs (widget-identity attributes) ----
+
+    @Test
+    fun `attrs group under meta and round-trip verbatim`() {
+        // The extractor-owned payload: mixed string/boolean/number values
+        // (appearance-checkbox-001's checked input + a numeric meter lane).
+        val payload = buildJsonObject {
+            put("type", "checkbox"); put("checked", true); put("min", 0.5)
+        }
+        val doc = IRDocument(listOf(
+            comp("a", tag = "input").copy(attrs = payload)
+        ))
+        val obj = IRWireV2.encodeDocument(doc)
+        val meta = obj["components"]!!.jsonArray[0].jsonObject["meta"]!!.jsonObject
+        // attrs rides beside sourceTag in the grouped hint object…
+        assertEquals("input", meta["sourceTag"]!!.jsonPrimitive.content)
+        // …and the object is byte-verbatim (opaque forward, never re-typed).
+        assertEquals(payload, meta["attrs"]!!.jsonObject)
+        // Decode restores the same object on the Kotlin field.
+        val decoded = IRWireV2.decodeDocument(obj)
+        assertEquals(payload, decoded.components[0].attrs)
+    }
+
+    @Test
+    fun `attrs alone is enough to emit the meta group`() {
+        // A widget hint could theoretically arrive without tag/role — the
+        // meta emission gate must consider attrs a member in its own right.
+        val payload = buildJsonObject { put("checked", true) }
+        val obj = IRWireV2.encodeDocument(IRDocument(listOf(comp("a").copy(attrs = payload))))
+        val c = obj["components"]!!.jsonArray[0].jsonObject
+        assertEquals(payload, c["meta"]!!.jsonObject["attrs"]!!.jsonObject)
+    }
+
+    @Test
+    fun `absent attrs stays off the wire`() {
+        // No attrs → meta carries only the tag; no `attrs` key materializes
+        // (omit-when-absent — pre-W1 documents stay byte-identical).
+        val obj = IRWireV2.encodeDocument(IRDocument(listOf(comp("a", tag = "input"))))
+        val meta = obj["components"]!!.jsonArray[0].jsonObject["meta"]!!.jsonObject
+        assertEquals(setOf("sourceTag"), meta.keys)
+        // And decode of a meta without attrs yields Kotlin null.
+        assertNull(IRWireV2.decodeDocument(obj).components[0].attrs)
+    }
+
     // ---- hard errors on decode ----
 
     @Test

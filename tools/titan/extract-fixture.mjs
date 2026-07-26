@@ -1446,6 +1446,119 @@ export const HEAD_ONLY_TAGS = new Set([
 // and is faithfully forwarded as `_tag` to the platform renderers.
 const GENERIC_WRAPPER_TAGS = new Set(['div', 'span']);
 
+// ── wave-20 lane W1: widget-identity attributes (the meta.attrs wire) ────────
+//
+// RC1 (the css-ui 7-test family): walkChildren parses every element's
+// attribute map for selector matching, but buildNode never FORWARDED it —
+// `<input type=checkbox checked>` reached the runtimes as a bare `_tag`
+// and every platform painted an attribute-less widget (web additionally
+// demoted it to <div>, RC2). The CROSS-LANE WIRE CONTRACT (all wave-20
+// lanes assume EXACTLY this): for the form/widget tags below, the fixture
+// carries `_attrs` — an object holding ONLY the present-in-source
+// attributes among WIDGET_ATTR_KEYS — and the converter forwards the
+// object VERBATIM as IR v2 `meta.attrs` (the same droppable-hint channel
+// as `_tag` → `meta.sourceTag`; schema/spec/05-versioning.md sanctions a
+// new omit-when-absent key inside `meta` as a v2-additive change).
+
+// The form/widget tags whose browser chrome is attribute-dependent (HTML
+// §4.10 forms + the a/meter/progress widgets the css-ui corpus styles).
+// Exactly the wire-contract set — runtimes mirror it byte-for-byte
+// (runtimes/web/src/renderer/WidgetAttrs.ts WIDGET_TAGS).
+export const WIDGET_ATTR_TAGS = new Set([
+  'a', 'button', 'input', 'textarea', 'select', 'option', 'meter', 'progress',
+]);
+
+// The attribute allow-list: the identity-bearing attributes that change
+// WHICH chrome the browser paints (input `type`), its state (`checked`,
+// `selected`, `disabled`), its content (`value`, `alt`), or its geometry
+// (`size`, `multiple`, `min`/`max`). Everything else (id/class/style) is
+// selector fuel already consumed by propsForElement — never forwarded.
+export const WIDGET_ATTR_KEYS = [
+  'type', 'value', 'checked', 'multiple', 'size', 'alt',
+  'min', 'max', 'selected', 'disabled',
+];
+
+// HTML boolean attributes (HTML §2.3.2): PRESENCE means true — '', the
+// attribute's own name, and any other value are all "true"; absence is the
+// only "false". The wire therefore carries literal `true`, never a string.
+export const WIDGET_BOOLEAN_ATTR_KEYS = new Set([
+  'checked', 'multiple', 'selected', 'disabled',
+]);
+
+// ── wave-20 fix 5: the non-HTML-namespace gate ──────────────────────────────
+//
+// Widget identity (`_tag` → meta.sourceTag + `_attrs` → meta.attrs) is only
+// meaningful for elements in the XHTML namespace: browsers give a
+// createElementNS('not-html', 'input') element NO widget chrome — it renders
+// as a plain unknown element (appearance-auto-non-html-namespace-001 styles
+// them into empty 1em inline-blocks), so forwarding `_tag: 'input'` made the
+// natives paint full UA replicas the browser-ref never shows.
+//
+// WHERE THE NAMESPACE IS KNOWN, honestly:
+//   • the STATIC path (this file's regex walker over authored test HTML) has
+//     it by construction: the HTML parser puts every element the walker can
+//     reach in the HTML namespace — non-HTML namespaces arise only from
+//     createElementNS in script (not executed here) or inside <svg>/<math>
+//     foreign-content subtrees (which carry no widget tags in the corpus and
+//     would be a walker blind spot far beyond widget identity);
+//   • the SERIALIZED-DOM structure path (post-load-extract.mjs, this wave)
+//     LOSES namespaces in the outerHTML → regex re-parse round-trip (the
+//     risk its header notes), so the in-browser serializer — which still
+//     holds the live DOM and therefore el.namespaceURI — stamps every
+//     non-XHTML element with the marker attribute below BEFORE serializing.
+// buildNode() suppresses `_tag`/`_attrs` when the marker is present, giving
+// foreign elements the generic-container treatment (the honest mirror of the
+// browser's no-chrome rendering).
+export const FOREIGN_NS_MARKER_ATTR = 'data-sc-foreign-ns';
+
+// A floating-point number token (HTML §2.3.4.2 valid floating-point
+// number, plus scientific notation) — the gate for the numeric wire lanes.
+const WIDGET_NUMERIC_RX = /^-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
+
+/**
+ * Build the `_attrs` payload for one element, or null when the element is
+ * not a widget tag / carries none of the allow-listed attributes (so bare
+ * widgets and every non-widget fixture stay byte-identical pre/post W1).
+ *
+ * Value typing per the wire contract:
+ *   - booleans (WIDGET_BOOLEAN_ATTR_KEYS) → literal `true` when present;
+ *   - `min`/`max` → Number when the source text is numeric (HTML §4.10.13
+ *     reflects them as floats on meter/progress and as varying types on
+ *     input — a numeric wire value is losslessly reusable everywhere);
+ *   - `value` → Number ONLY on meter/progress (§4.10.13/14: float-valued
+ *     reflections); on <input>/<option>/<button> value is genuinely a
+ *     STRING (a text field's content) and stays verbatim;
+ *   - everything else (type/size/alt) → the raw source string, verbatim.
+ *
+ * Exported so the unit tests pin the contract table exactly.
+ */
+export function widgetAttrsFor(tag, attrs) {
+  // Non-widget tags never emit attrs — widget identity only (contract).
+  if (!tag || !WIDGET_ATTR_TAGS.has(tag)) return null;
+  const out = {};
+  // Walk the allow-list (not the source map) so output key ORDER is the
+  // contract's order — stable fixture bytes independent of authored order.
+  for (const key of WIDGET_ATTR_KEYS) {
+    // Present-only contract: absent source attribute ⇒ absent wire key.
+    if (!attrs || !(key in attrs)) continue;
+    // Boolean lane: presence IS the value (see WIDGET_BOOLEAN_ATTR_KEYS).
+    if (WIDGET_BOOLEAN_ATTR_KEYS.has(key)) { out[key] = true; continue; }
+    // walkChildren stores '' for bare attributes and raw strings otherwise.
+    const raw = String(attrs[key]);
+    // Numeric lanes: min/max everywhere; value on meter/progress only.
+    const numeric = (key === 'min' || key === 'max')
+      || (key === 'value' && (tag === 'meter' || tag === 'progress'));
+    // Numeric text converts; non-numeric text stays verbatim (documented
+    // "numbers where numeric" clause — never a silent NaN).
+    out[key] = (numeric && WIDGET_NUMERIC_RX.test(raw.trim()))
+      ? Number(raw.trim())
+      : raw;
+  }
+  // No qualifying attribute → no `_attrs` field at all (omit-when-empty,
+  // the same rule every other renderer-hint field follows).
+  return Object.keys(out).length > 0 ? out : null;
+}
+
 /**
  * Allow-list of structural / child-indexed pseudo-classes we evaluate. Every
  * other `:foo` selector still causes compoundMatches() to return null (so the
@@ -3206,7 +3319,7 @@ export async function inlineFixtureAssets(fixture, baseDir) {
 //
 // Pure-ish: file reads happen here. Returns objects (not paths). Caller
 // writes via writeFixturePair() below for separation of concerns.
-export async function extractFixture(testRel) {
+export async function extractFixture(testRel, opts = {}) {
   const idx = await bucketIndex();
   const inB = idx.buckets?.B?.includes(testRel);
   const inA = idx.buckets?.A?.includes(testRel);
@@ -3219,7 +3332,14 @@ export async function extractFixture(testRel) {
   const bucket = inA ? 'A' : 'B';
 
   const testAbs = join(WPT_DIR, testRel);
-  const html = await fs.readFile(testAbs, 'utf8');
+  // wave-20 POST-LOAD STRUCTURE: `opts.htmlOverride` substitutes the INPUT
+  // SOURCE only — post-load-extract.mjs feeds the SERIALIZED post-script DOM
+  // (live body + original head) through this same pipeline so script-created
+  // elements become first-class components. Every other step (stylesheet
+  // resolution relative to testAbs, ref lookup, asset inlining, bucket check)
+  // runs unchanged: the override is a different document, not a fork of the
+  // extraction logic.
+  const html = opts.htmlOverride ?? await fs.readFile(testAbs, 'utf8');
   const cleaned = stripComments(html);
 
   const inlineCss = extractInlineStyle(cleaned);
@@ -3840,9 +3960,25 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // `span` are the IR's default container shapes and tagging them would
     // bloat every visual-test-style fixture without conveying new info.
     // Sister F-RENDERER consumes `_tag` as a lowercase HTML element name.
-    if (node.tag && !GENERIC_WRAPPER_TAGS.has(node.tag)) {
+    // wave-20 fix 5: the serialized-DOM path stamps FOREIGN_NS_MARKER_ATTR
+    // on every non-XHTML-namespace element before serialization (see the
+    // marker's banner). A marked element renders with NO tag semantics in
+    // the browser (no widget chrome, no list/heading/table behaviour), so
+    // it gets the generic-container treatment: neither `_tag` nor `_attrs`
+    // is emitted. Static-markup fixtures never carry the marker.
+    const foreignNs = !!(node.attrs && FOREIGN_NS_MARKER_ATTR in node.attrs);
+    if (node.tag && !GENERIC_WRAPPER_TAGS.has(node.tag) && !foreignNs) {
       cmp._tag = node.tag;
     }
+    // wave-20 lane W1: forward the widget-identity attributes (see the
+    // WIDGET_ATTR_TAGS wire-contract banner). Rides beside `_tag` — every
+    // widget tag is non-generic, so a component carrying `_attrs` always
+    // carries `_tag` too, and the runtimes key application on that tag.
+    // Namespace-gated with `_tag` above: a foreign 'input' has no widget
+    // identity to forward (css-ui-4 §7 appearance applies to the HTML
+    // widgets; foreign elements have no UA chrome to configure).
+    const widgetAttrs = foreignNs ? null : widgetAttrsFor(node.tag, node.attrs);
+    if (widgetAttrs) cmp._attrs = widgetAttrs;
     // EXTFIX-A part 1: children → nested IRComponent objects. Same
     // omit-when-empty rule so the fixture diff is minimal for
     // single-element tests (the ~70% case in the corpus). Each child
@@ -3939,7 +4075,10 @@ async function main() {
         let postLoadNote = '';
         if (postLoad && await postLoad.isWallTagged(rel)) {
           const outcome = await postLoad.postLoadAugmentFixture(result.fixture, rel);
-          postLoadNote = ` [post-load: ${outcome.status}${outcome.reason ? ` — ${outcome.reason}` : ''}]`;
+          // wave-20: `+structure` marks the tree-re-extraction path (the
+          // fixture carries _wpt.structureExtracted alongside the state stamp).
+          postLoadNote = ` [post-load: ${outcome.status}${outcome.structure ? '+structure' : ''}` +
+            `${outcome.reason ? ` — ${outcome.reason}` : ''}]`;
         }
         const written = await writeFixturePair(result);
         console.log(`extracted ${rel} → ${relative(REPO_ROOT, written.testPath)}` +

@@ -1,0 +1,104 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "widget-container-001",
+            "name": "Widget_Container",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 500
+                    }
+                }
+            ]
+        },
+        {
+            "id": "widget-checkbox-002",
+            "name": "Widget_CheckedCheckbox",
+            "properties": [
+                {
+                    "type": "Appearance",
+                    "data": {
+                        "type": "checkbox"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "widget-container-001"
+            },
+            "meta": {
+                "sourceTag": "input",
+                "attrs": {
+                    "type": "checkbox",
+                    "checked": true
+                }
+            }
+        },
+        {
+            "id": "widget-meter-003",
+            "name": "Widget_MeterHalf",
+            "properties": [],
+            "slot": {
+                "parent": "widget-container-001"
+            },
+            "meta": {
+                "sourceTag": "meter",
+                "attrs": {
+                    "value": 0.5,
+                    "min": 0,
+                    "max": 1
+                }
+            }
+        },
+        {
+            "id": "widget-select-004",
+            "name": "Widget_SelectMultiple",
+            "properties": [],
+            "slot": {
+                "parent": "widget-container-001"
+            },
+            "meta": {
+                "sourceTag": "select",
+                "attrs": {
+                    "multiple": true
+                }
+            }
+        },
+        {
+            "id": "widget-option-005",
+            "name": "Widget_SelectedOption",
+            "properties": [],
+            "slot": {
+                "parent": "widget-select-004"
+            },
+            "text": "select-multiple",
+            "meta": {
+                "sourceTag": "option",
+                "attrs": {
+                    "value": "sm",
+                    "selected": true
+                }
+            }
+        },
+        {
+            "id": "widget-input-text-006",
+            "name": "Widget_TextInput",
+            "properties": [],
+            "slot": {
+                "parent": "widget-container-001"
+            },
+            "meta": {
+                "sourceTag": "input",
+                "attrs": {
+                    "type": "text",
+                    "value": "input-text",
+                    "size": "12",
+                    "disabled": true
+                }
+            }
+        }
+    ]
+}

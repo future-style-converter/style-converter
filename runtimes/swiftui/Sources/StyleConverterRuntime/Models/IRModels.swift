@@ -122,6 +122,74 @@ public struct IRSlot: Equatable {
     }
 }
 
+/// Wave-20 wire contract (lane W2) — the form/widget attribute capsule
+/// the extractor emits as `meta.attrs` for the widget tags (a, button,
+/// input, textarea, select, option, meter, progress). ONLY present-in-
+/// source attributes among the pinned ten appear; types are pinned by
+/// the contract: strings except checked/multiple/selected/disabled
+/// (booleans) and min/max/value-on-meter-progress (numbers where numeric
+/// — hence the separate `valueNumber` channel so a numeric wire `value`
+/// survives without stringly re-parsing). Droppable meta hint like
+/// `sourceTag`: ignoring it loses fidelity, never correctness.
+// public: read by the widget resolve (StyleEngine/widgets) and tests.
+public struct IRAttrs: Equatable {
+    public let type: String?        // input type ("checkbox", "range", …)
+    public let value: String?       // string-form value attribute
+    public let valueNumber: Double? // numeric wire value (meter/progress)
+    public let checked: Bool?       // checkbox/radio checked presence
+    public let multiple: Bool?      // select multiple presence (listbox)
+    public let selected: Bool?      // option selected presence
+    public let disabled: Bool?      // disabled presence (not yet painted)
+    public let size: String?        // select/input size attribute
+    public let alt: String?         // image-input alt text
+    public let min: Double?         // meter/progress/range min
+    public let max: Double?         // meter/progress/range max
+
+    // internal: constructed by the decode paths and by tests. Defaults
+    // keep pre-attrs construction sites and tests terse.
+    init(type: String? = nil, value: String? = nil, valueNumber: Double? = nil,
+         checked: Bool? = nil, multiple: Bool? = nil, selected: Bool? = nil,
+         disabled: Bool? = nil, size: String? = nil, alt: String? = nil,
+         min: Double? = nil, max: Double? = nil) {
+        self.type = type
+        self.value = value
+        self.valueNumber = valueNumber
+        self.checked = checked
+        self.multiple = multiple
+        self.selected = selected
+        self.disabled = disabled
+        self.size = size
+        self.alt = alt
+        self.min = min
+        self.max = max
+    }
+
+    /// Build from the wire's raw IRValue object — shared by the strict v2
+    /// reader and the lenient path so the coercion rules live ONCE.
+    /// `value` fills BOTH channels when numeric (contract: numbers on
+    /// meter/progress, strings elsewhere).
+    static func from(object o: [String: IRValue]) -> IRAttrs {
+        IRAttrs(
+            type: o["type"]?.stringValue,
+            // String channel: verbatim string, or the numeric literal
+            // re-rendered for numeric wire values (both channels agree).
+            value: o["value"]?.stringValue ?? o["value"]?.doubleValue.map { v in
+                // Trim ".0" so a wire integer prints like its literal.
+                v == v.rounded() ? String(Int(v)) : String(v)
+            },
+            valueNumber: o["value"]?.doubleValue,
+            checked: o["checked"]?.boolValue,
+            multiple: o["multiple"]?.boolValue,
+            selected: o["selected"]?.boolValue,
+            disabled: o["disabled"]?.boolValue,
+            size: o["size"]?.stringValue,
+            alt: o["alt"]?.stringValue,
+            min: o["min"]?.doubleValue,
+            max: o["max"]?.doubleValue
+        )
+    }
+}
+
 /// Droppable renderer hints, grouped (v2 home of v1 `_tag` and `_role`).
 /// A consumer may ignore meta without correctness loss — unlike slot.
 // public: the renderer reads sourceTag for list-marker generation.
@@ -132,11 +200,16 @@ public struct IRMeta: Equatable {
     /// Role marker (today only "body-root") — v2 `role`, v1 `_role`
     /// (which the old Swift model silently dropped; now translated).
     public let role: String?
+    /// Wave-20 widget-identity capsule (`meta.attrs`, the `_tag`
+    /// precedent) — nil for v1 documents and non-widget components.
+    public let attrs: IRAttrs?
 
-    // internal: constructed by the decode paths and by tests.
-    init(sourceTag: String? = nil, role: String? = nil) {
+    // internal: constructed by the decode paths and by tests. The attrs
+    // default keeps every pre-wave-20 construction site compiling.
+    init(sourceTag: String? = nil, role: String? = nil, attrs: IRAttrs? = nil) {
         self.sourceTag = sourceTag
         self.role = role
+        self.attrs = attrs
     }
 }
 
@@ -261,7 +334,11 @@ public struct IRComponent: Decodable {
         // meta: the v2 group wins; otherwise assemble from the v1
         // underscore hints (`_tag`/`_role`) when either is present.
         if let rawMeta = try c.decodeIfPresent(RawMeta.self, forKey: .meta) {
-            meta = IRMeta(sourceTag: rawMeta.sourceTag, role: rawMeta.role)
+            meta = IRMeta(sourceTag: rawMeta.sourceTag, role: rawMeta.role,
+                          // Wave-20: meta.attrs rides the lenient path too
+                          // (standalone component decodes in tests) — the
+                          // shared IRAttrs.from coercion, object-shaped only.
+                          attrs: rawMeta.attrs?.objectValue.map(IRAttrs.from))
         } else {
             let tag = try c.decodeIfPresent(String.self, forKey: ._tag)
             let role = try c.decodeIfPresent(String.self, forKey: ._role)
@@ -280,9 +357,12 @@ public struct IRComponent: Decodable {
     }
 
     /// Synthesized-decode helper for the wire meta object (lenient path).
+    /// `attrs` stays raw IRValue here — IRAttrs.from applies the wave-20
+    /// coercion rules in one shared place.
     private struct RawMeta: Decodable {
         let sourceTag: String?
         let role: String?
+        let attrs: IRValue?
     }
 }
 

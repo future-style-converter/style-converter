@@ -653,8 +653,20 @@ export { EXTRACTION_WALL_TAGS };
  *  @param {boolean} [postLoadExtracted] wave-16: true ⇔ the fixture carries
  *         `_wpt.postLoadExtracted` (post-load mode delivered the post-script
  *         state); neutralises EXTRACTION_WALL_TAGS exclusions only
+ *  @param {boolean} [structureExtracted] wave-20: true ⇔ the fixture carries
+ *         `_wpt.structureExtracted` (the component TREE itself was
+ *         re-extracted from the serialized post-script DOM — the appendChild
+ *         family). Treated exactly like postLoadExtracted: either stamp is a
+ *         delivery record that re-admits wall-tagged tests. Threaded via the
+ *         same keyMap channel.
  *  @returns {boolean} true when the test is score-excluded */
-export function applyNaScoreGate(naTags, refDiffs, lossyReasons, postLoadExtracted) {
+export function applyNaScoreGate(naTags, refDiffs, lossyReasons, postLoadExtracted, structureExtracted) {
+  // wave-20: one delivery boolean for the wall branch — the wall falls when
+  // EITHER stamp says the post-script state/structure was delivered (strict
+  // === true on both, same conservatism as the wave-16 single stamp; in
+  // practice structure fixtures carry BOTH stamps, but the gate must not
+  // depend on that coupling).
+  const delivered = postLoadExtracted === true || structureExtracted === true;
   const isNa = Array.isArray(naTags) && naTags.some((t) => {
     // wave-15 extraction-wall branch: script-execution tags exclude
     // UNCONDITIONALLY — no lossyReasons cross-check is possible because the
@@ -663,10 +675,10 @@ export function applyNaScoreGate(naTags, refDiffs, lossyReasons, postLoadExtract
     // delivery-aware bundled-asset branch below stays byte-for-byte the
     // wave-13 behaviour for its own tag.
     // wave-16: …unless post-load extraction DELIVERED the post-script state
-    // (postLoadExtracted === true, strict — any other value keeps the
-    // conservative wave-15 exclusion). The wall was the inability to deliver
-    // that state; delivered ⇒ the score measures the runtimes again.
-    if (EXTRACTION_WALL_TAGS.has(t)) return postLoadExtracted !== true;
+    // (wave-20: or the post-script STRUCTURE — see `delivered` above). The
+    // wall was the inability to deliver that state; delivered ⇒ the score
+    // measures the runtimes again.
+    if (EXTRACTION_WALL_TAGS.has(t)) return !delivered;
     // Not a harness-delivery tag → never excludes (unchanged wave-8 rule).
     if (!SCORE_EXCLUDED_TAGS.has(t)) return false;
     // Delivery-aware branch: when the extractor's lossy record is available
@@ -997,7 +1009,9 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     // `_wpt.postLoadExtracted` via build-combined-fixture's keyMap, the same
     // channel lossyReasons rides) re-scores wall-tagged tests whose
     // post-script state the post-load extractor delivered.
-    const isNa = applyNaScoreGate(naTags, [webRefDiff, iosRefDiff, androidRefDiff], meta.lossyReasons, meta.postLoadExtracted === true);
+    // wave-20: meta.structureExtracted rides the same keyMap channel — either
+    // delivery stamp re-admits a wall-tagged test (see applyNaScoreGate).
+    const isNa = applyNaScoreGate(naTags, [webRefDiff, iosRefDiff, androidRefDiff], meta.lossyReasons, meta.postLoadExtracted === true, meta.structureExtracted === true);
     if (isNa) {
       divergence = 'test-not-applicable';
     }
@@ -1013,6 +1027,10 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       // post-load-delivered (scored)" from "wall-tagged, static-only
       // (excluded)" without re-reading the per-test fixture.
       postLoadExtracted: meta.postLoadExtracted === true,
+      // wave-20: surfaced alongside — true ⇔ the component tree itself was
+      // re-extracted from the serialized post-script DOM (appendChild
+      // family), not just state-overlaid.
+      structureExtracted: meta.structureExtracted === true,
       specSection: meta.section,
       components: matchingKeys,
       fuzzy: meta.fuzzy ?? null,

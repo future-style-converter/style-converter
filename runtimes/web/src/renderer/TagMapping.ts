@@ -9,6 +9,12 @@
  * because a capture surface must never acquire form-control focus rings,
  * native button chrome differences across headless builds, or network-
  * fetching replaced content that could destabilise screenshot bytes.
+ * wave-20 W1 narrows that divergence to the LEGACY (327-pair) flow only:
+ * in WPT capture mode the harness passes the form/widget tags
+ * (WidgetAttrs.WIDGET_TAGS) through like production does — the WPT
+ * browser-ref paints real Chromium widget chrome, so demotion there was
+ * the divergence — while adding `inert` + `tabIndex:-1` (via
+ * RendererOptions.decorateProps) so focus rings still cannot occur.
  *
  * In production SDUI the calculus flips: `meta.sourceTag` is TRUSTED
  * server content (the converter wrote it from the authored markup), and

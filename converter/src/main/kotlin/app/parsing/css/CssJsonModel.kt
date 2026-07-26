@@ -68,7 +68,14 @@ data class CssComponent(
     // shaped slots) forwarded verbatim. Pseudo nodes never flatten
     // (design §4.2); v2 wire name is `pseudos`. Not @Serializable-typed
     // deeper than JsonObject on purpose — the extractor owns the shape.
-    val pseudos: JsonObject? = null
+    val pseudos: JsonObject? = null,
+    // wave-20 W1: opaque `_attrs` payload — the extractor's widget-identity
+    // attributes for form/widget tags (present-in-source keys among
+    // type/value/checked/multiple/size/alt/min/max/selected/disabled; see
+    // tools/titan/extract-fixture.mjs widgetAttrsFor). Forwarded VERBATIM
+    // as IR v2 `meta.attrs` (IRWireV2.kt) — the converter never interprets
+    // the values, exactly the `_pseudo` opacity contract.
+    val attrs: JsonObject? = null
 )
 
 /**

@@ -358,17 +358,37 @@ dirs + WPT corpus are gitignored):
   120/134, iOS 115/134, Android 114/134**. Named walls this wave:
   vertical-writing-mode multicol layout transposition (css-break
   background-image-001/002) and Compose ancestor-3D matrix propagation
-  (backface-visibility).
+  (backface-visibility). Wave 20 (`tools/titan/results/corpus-v4-9.json`)
+  attacked the css-ui widget wall and gave the instrument its second
+  strategic capability: **post-load STRUCTURE extraction** — when a
+  script mutates DOM structure, the settled live DOM is serialized and
+  re-fed through the same extraction pipeline, so created nodes become
+  first-class components (css-position grew to **7/7 on all three
+  platforms**). Widget identity now flows end-to-end: the extractor
+  emits `meta.attrs` (10-key allowlist, XHTML-namespace-gated) through a
+  converter passthrough + v2 schema extension; the web harness renders
+  REAL form controls in WPT mode (pixel-identical to the ref's Chromium
+  by construction); both natives gained UAWidgets replica modules
+  (shared Chromium-lookalike geometry tables), inline-atom row flow, and
+  right-float run packing — **css-grid 12/12 on all three platforms**,
+  the fifth perfect section. accent-color-visited, the non-widget test,
+  and the createElementNS namespace test all pass everywhere. Residual:
+  the five appearance-alias tests (one shared ref) sit at web 0.827 /
+  natives ~0.876 — the natives now beat web there, and since web paints
+  real Chromium widgets with ref-matching rows, the divergence points at
+  a ref-vs-harness capture contract difference (form-control theming),
+  queued. Zero regressions; 327-net clean. Corpus totals: **web
+  124/136, iOS 121/136, Android 119/136**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 156 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 999 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1269 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 685 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 687 |
+| converter (Kotlin) | `./gradlew :converter:test` | 160 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1014 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1321 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 734 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 710 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

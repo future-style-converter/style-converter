@@ -73,8 +73,8 @@ export interface IRSlot {
 
 /**
  * Droppable renderer hints, grouped (v2 home of v1's `_tag` / `_role`).
- * Omitted entirely when empty; strict (`{sourceTag?, role?}` only) when
- * present — see schema/spec/01-envelope.md.
+ * Omitted entirely when empty; strict (`{sourceTag?, role?, attrs?}`
+ * only) when present — see schema/spec/01-envelope.md.
  */
 export interface IRMeta {
   /**
@@ -86,6 +86,17 @@ export interface IRMeta {
   sourceTag?: string | null;
   /** Freeform authoring role hint (v2 rename of v1 `_role`). Droppable. */
   role?: string | null;
+  /**
+   * wave-20 widget-identity attributes (v2 home of the extractor's
+   * `_attrs`). Emitted only for form/widget sourceTags (a/button/input/
+   * textarea/select/option/meter/progress), only for present-in-source
+   * attributes among {type, value, checked, multiple, size, alt, min,
+   * max, selected, disabled}; booleans are presence-`true`, min/max —
+   * and value on meter/progress — are numbers where numeric, everything
+   * else verbatim source strings (schema/ir-v2.schema.json meta.attrs).
+   * Application policy lives in renderer/WidgetAttrs.ts.
+   */
+  attrs?: Record<string, string | number | boolean> | null;
 }
 
 /**

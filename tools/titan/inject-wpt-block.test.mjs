@@ -439,9 +439,11 @@ test('wave8: buildResults source carries the scoreEligible contract', async () =
   // delivery-aware. wave-16: AND the post-load delivery stamp
   // (meta.postLoadExtracted, strict-true) so wall-tagged tests whose
   // post-script state post-load-extract.mjs delivered are re-scored — see
-  // the wave-16 gate-interplay tests below.
-  assert.match(src, /applyNaScoreGate\(naTags,\s*\[webRefDiff,\s*iosRefDiff,\s*androidRefDiff\],\s*meta\.lossyReasons,\s*meta\.postLoadExtracted\s*===\s*true\)/,
-    'the NA gate must neutralise all three browser-ref diffs AND receive the delivery record AND the post-load stamp');
+  // the wave-16 gate-interplay tests below. wave-20: AND the structure
+  // stamp (meta.structureExtracted, strict-true) — the appendChild family's
+  // delivery record, treated exactly like the state stamp.
+  assert.match(src, /applyNaScoreGate\(naTags,\s*\[webRefDiff,\s*iosRefDiff,\s*androidRefDiff\],\s*meta\.lossyReasons,\s*meta\.postLoadExtracted\s*===\s*true,\s*meta\.structureExtracted\s*===\s*true\)/,
+    'the NA gate must neutralise all three browser-ref diffs AND receive the delivery record AND both post-load stamps');
 });
 
 // ── wave-13 corpus-v4.3 SCORING boundary ───────────────────────────────────
@@ -842,6 +844,57 @@ test('wave16: keyMap threads postLoadExtracted from the fixture _wpt block', asy
   const src = await fs.readFile(new URL('./build-combined-fixture.mjs', import.meta.url), 'utf8');
   assert.match(src, /postLoadExtracted:\s*fixture\._wpt\?\.postLoadExtracted\s*===\s*true/,
     'keyMap entries must carry postLoadExtracted from fixture._wpt');
+});
+
+// ── wave-20 STRUCTURE-EXTRACTION gate interplay ────────────────────────────
+//
+// Structure fixtures (the appendChild family: post-load-extract.mjs
+// serialized the post-script DOM and re-extracted the component TREE) stamp
+// `_wpt.structureExtracted` ALONGSIDE `_wpt.postLoadExtracted`. The gate
+// treats EITHER stamp as the wall's delivery record — threaded as the 5th
+// parameter via the same keyMap channel — so structure delivery must never
+// depend on the state stamp riding along.
+
+test('wave20: structureExtracted=true alone re-scores a wall-tagged test', () => {
+  // 4th param (postLoadExtracted) deliberately false: either stamp delivers.
+  const web = { ssim: 0.97, wptPass: true };
+  const isNa = applyNaScoreGate(['requires-script-mutation'], [web], [], false, true);
+  assert.equal(isNa, false);
+  assert.equal(web.wptPass, true);            // scoring fields untouched
+  assert.equal(web.scoreExcluded, undefined); // the test is scored
+});
+
+test('wave20: non-true structure stamps keep the wave-15 exclusion', () => {
+  // Same strictness as the wave-16 stamp: only the extractor's explicit
+  // `=== true` may re-score the wall.
+  for (const stamp of [undefined, false, 1, 'yes']) {
+    const web = { ssim: 0.54, wptPass: false };
+    assert.equal(applyNaScoreGate(['requires-script-mutation'], [web], [], false, stamp), true,
+      `structure stamp ${JSON.stringify(stamp)} must keep the exclusion`);
+    assert.equal(web.wptPass, null);
+    assert.equal(web.scoreExcluded, true);
+  }
+});
+
+test('wave20: the structure stamp does NOT touch the bundled-asset branch', () => {
+  // Same boundary as the wave-16 stamp: asset delivery has its own ground
+  // truth (lossyReasons) and structure extraction says nothing about assets.
+  const web = { ssim: 0.30, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-bundled-asset'], [web],
+    ['requires-bundled-asset'], false, true), true);
+  assert.equal(web.scoreExcluded, true);
+});
+
+test('wave20: keyMap threads structureExtracted and the manifest surfaces it', async () => {
+  // Source-scan pins: the structure stamp must ride the keyMap channel AND
+  // appear on the per-test manifest row next to postLoadExtracted, so
+  // dashboards can tell tree-re-extracted fixtures from state-only ones.
+  const combined = await fs.readFile(new URL('./build-combined-fixture.mjs', import.meta.url), 'utf8');
+  assert.match(combined, /structureExtracted:\s*fixture\._wpt\?\.structureExtracted\s*===\s*true/,
+    'keyMap entries must carry structureExtracted from fixture._wpt');
+  const inject = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  assert.match(inject, /structureExtracted:\s*meta\.structureExtracted\s*===\s*true/,
+    'the manifest row must surface structureExtracted');
 });
 
 // ── wave-15 LOW-CONTENT-DENSITY triage flag ────────────────────────────────

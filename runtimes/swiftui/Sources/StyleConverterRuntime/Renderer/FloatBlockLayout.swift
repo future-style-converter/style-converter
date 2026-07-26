@@ -43,6 +43,43 @@ struct FloatBlockLayout: Layout {
         let memberX: [Double]?
         /// Run-relative member y (the member's float-row top).
         let memberY: [Double]?
+        /// Wave-20 W3 (P13): true for RIGHT runs — the place pass then
+        /// anchors the run extent at the container's RIGHT edge
+        /// (§9.5.1 rule 1 mirrored) instead of the leading edge.
+        let rightAnchored: Bool
+        /// Wave-20 fix 6: the members' measured margin-box widths (same
+        /// order as memberX). The place pass needs them to COUNTER-mirror
+        /// under an RTL ambient layoutDirection — SwiftUI's mirror is
+        /// x' = W − x − w, so undoing it requires each member's width.
+        let memberW: [Double]?
+    }
+
+    /// Wave-20 fix 6 — the RTL counter-mirror, pure and pinned
+    /// (FloatRowPackingTests.testDescendantStaticPosition002RightRun…).
+    ///
+    /// The packing plans (FloatRowPacking.layout/layoutEnd) produce
+    /// PHYSICAL x origins — the same numbers Compose places verbatim via
+    /// Placeable.place(). SwiftUI's Layout engine, however, mirrors every
+    /// place(at:) x about the layout bounds (x' = bounds.width − x − w)
+    /// whenever the ambient layoutDirection is RTL — probe-verified in
+    /// SkepticRtlGridPlacementTests (an ImageRenderer pixel probe showed
+    /// pre-mirrored physical origins double-flip back to LTR geometry).
+    /// descendant-static-position-002's container declares Direction:RTL
+    /// (TypographyApplier maps it onto \.layoutDirection), so the right
+    /// run's layoutEnd origins were mirrored a SECOND time and the run
+    /// painted in REVERSED order — the first right float (green) landed
+    /// LEFTMOST where CSS 2.1 §9.5.1 rule 1 (mirrored) gives the first
+    /// right float the RIGHTMOST slot (the ref's gray x40-59 / green
+    /// x60-79 pattern; Android, mirror-free place(), passes 002).
+    /// Fix: under RTL, pre-apply the SAME involution to the intended
+    /// physical origin so the engine's flip restores it exactly.
+    static func placedX(intendedX: CGFloat, memberWidth: CGFloat,
+                        boundsWidth: CGFloat, rtl: Bool) -> CGFloat {
+        // LTR: the engine places verbatim — hand it the physical origin.
+        guard rtl else { return intendedX }
+        // RTL: the engine will compute W − x − w; feeding it W − x − w
+        // yields W − (W − x − w) − w = x, the intended physical origin.
+        return boundsWidth - intendedX - memberWidth
     }
 
     /// Measure every top-level item once from one proposal — the size
@@ -55,7 +92,8 @@ struct FloatBlockLayout: Layout {
         // the container's width so the label wraps where the VStack let it.
         for i in 0..<leadingCount where i < subviews.count {
             let s = subviews[i].sizeThatFits(ProposedViewSize(width: proposal.width, height: nil))
-            out.append(Item(size: s, subviewIndices: [i], memberX: nil, memberY: nil))
+            out.append(Item(size: s, subviewIndices: [i], memberX: nil, memberY: nil,
+                            rightAnchored: false, memberW: nil))
         }
         // Segments over the children — subview index = leadingCount + child index.
         for seg in segments {
@@ -72,22 +110,31 @@ struct FloatBlockLayout: Layout {
                 // P3/P4 — pure greedy packing at UNBOUNDED width (see
                 // FloatRowPacking.layout's doc: the synthetic IR frame
                 // width must not drive the wrap for the WPT corpus).
-                let plan = FloatRowPacking.layout(
-                    widths: sizes.map { Double($0.width) },
-                    heights: sizes.map { Double($0.height) },
-                    availableWidth: .infinity,
-                    // P6 — the br line-box strut for `<br clear>`-
-                    // terminated runs; bare height otherwise.
-                    strutPx: seg.strutted ? FloatRowPacking.strutPx : 0.0
-                )
+                // Right runs take the mirrored plan (P12) — shared rows,
+                // x reflected against the run extent, anchored at place.
+                let widths = sizes.map { Double($0.width) }
+                let heights = sizes.map { Double($0.height) }
+                // P6 — the br line-box strut for `<br clear>`-terminated
+                // runs; bare height otherwise.
+                let strut = seg.strutted ? FloatRowPacking.strutPx : 0.0
+                let plan = seg.rightRun
+                    ? FloatRowPacking.layoutEnd(widths: widths, heights: heights,
+                                                availableWidth: .infinity, strutPx: strut)
+                    : FloatRowPacking.layout(widths: widths, heights: heights,
+                                             availableWidth: .infinity, strutPx: strut)
                 out.append(Item(size: CGSize(width: plan.width, height: plan.height),
                                 subviewIndices: idxs,
-                                memberX: plan.x, memberY: plan.y))
+                                memberX: plan.x, memberY: plan.y,
+                                rightAnchored: seg.rightRun,
+                                // fix 6: widths ride along for the RTL
+                                // counter-mirror in the place pass.
+                                memberW: widths))
             } else if let only = idxs.first {
                 // Single segment — one child, stacked exactly like the
                 // VStack proposed it (width-bounded, height-free).
                 let s = subviews[only].sizeThatFits(ProposedViewSize(width: proposal.width, height: nil))
-                out.append(Item(size: s, subviewIndices: [only], memberX: nil, memberY: nil))
+                out.append(Item(size: s, subviewIndices: [only], memberX: nil, memberY: nil,
+                                rightAnchored: false, memberW: nil))
             }
         }
         return out
@@ -127,9 +174,36 @@ struct FloatBlockLayout: Layout {
                 // the SAME unbounded size the measure pass used so the
                 // member keeps its specified geometry (P7) and paints
                 // unclipped past the reported box (overflow:visible).
+                // P13 — RIGHT runs anchor their extent at the container's
+                // right edge (§9.5.1 rule 1 mirrored): the run-relative
+                // origins shift by (bounds.width − extent), which is 0 in
+                // the shrink-to-fit case (container == widest item) and
+                // negative when overconstrained — right floats then
+                // overflow LEFT, exactly like the browser.
+                let runX = item.rightAnchored
+                    ? bounds.maxX - item.size.width
+                    : bounds.minX
+                // fix 6: the plans' origins are PHYSICAL; under an RTL
+                // ambient layoutDirection SwiftUI mirrors every place()
+                // x about the bounds, so pre-mirror (placedX) to make
+                // the engine's flip a no-op — Compose parity restored
+                // (descendant-static-position-002's Direction:RTL
+                // right-float pair kept its first-float-rightmost order).
+                let rtl = subviews.layoutDirection == .rightToLeft
                 for (k, sub) in item.subviewIndices.enumerated() {
+                    // Intended physical origin, bounds-relative — the
+                    // exact coordinate Compose's adapter places.
+                    let physicalX = (runX - bounds.minX) + CGFloat(mx[k])
+                    // Member width for the involution (memberW rides the
+                    // Item precisely for this; runs always carry it).
+                    let w = CGFloat(item.memberW?[k] ?? 0)
                     subviews[sub].place(
-                        at: CGPoint(x: bounds.minX + CGFloat(mx[k]), y: y + CGFloat(my[k])),
+                        at: CGPoint(
+                            x: bounds.minX + Self.placedX(intendedX: physicalX,
+                                                          memberWidth: w,
+                                                          boundsWidth: bounds.width,
+                                                          rtl: rtl),
+                            y: y + CGFloat(my[k])),
                         anchor: .topLeading,
                         proposal: .unspecified)
                 }

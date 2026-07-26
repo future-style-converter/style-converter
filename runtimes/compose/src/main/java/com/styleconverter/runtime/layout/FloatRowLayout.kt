@@ -31,10 +31,20 @@ import kotlin.math.roundToInt
  * reported height is floored at the composed-WPT line-box pin
  * (FloatRowPacking.STRUT_PX, P6) so consecutive rows advance like the
  * ref's empty br line boxes (20px pitch on the justify-self-001 rows).
+ *
+ * [rightPacked] (wave-20 W3, P12/P13) selects the mirrored §9.5.1
+ * packing for `float: right` runs: members pack right-to-left via
+ * FloatRowPacking.layoutEnd, and the run box anchors its RIGHT edge at
+ * the containing block's right edge — when the incoming max width is
+ * finite the run reports THAT width and right-aligns its members inside
+ * it; unbounded (the abspos shrink-to-fit measure) reports the bare run
+ * extent, whose right edge then coincides with the containing block's
+ * (descendant-static-position-002/004: grey|green side by side).
  */
 @Composable
 internal fun FloatRowLayout(
     strutted: Boolean,
+    rightPacked: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     Layout(content = content, modifier = Modifier) { measurables, constraints ->
@@ -48,27 +58,39 @@ internal fun FloatRowLayout(
         val strutPx = if (strutted) FloatRowPacking.STRUT_PX.dp.toPx().toDouble() else 0.0
         // P3/P4 — pure greedy packing at UNBOUNDED available width (see
         // FloatRowPacking.layout's doc for why the synthetic IR frame
-        // width must not drive the wrap for the WPT corpus).
-        val plan = FloatRowPacking.layout(
-            widths = placeables.map { it.width.toDouble() },
-            heights = placeables.map { it.height.toDouble() },
-            availableWidth = Double.POSITIVE_INFINITY,
-            strutPx = strutPx,
-        )
+        // width must not drive the wrap for the WPT corpus). Right runs
+        // take the mirrored plan (P12) — shared rows, reflected x.
+        val widths = placeables.map { it.width.toDouble() }
+        val heights = placeables.map { it.height.toDouble() }
+        val plan =
+            if (rightPacked) FloatRowPacking.layoutEnd(widths, heights, Double.POSITIVE_INFINITY, strutPx)
+            else FloatRowPacking.layout(widths, heights, Double.POSITIVE_INFINITY, strutPx)
         // Report a size the parent block flow can live with (the exact
         // absposReportedAxis coercion): the flow geometry of following
         // siblings stays inside the incoming envelope while the drawn
         // ink overflows — the ref paints the 130px row out of the 100px
         // synthetic root exactly like this.
-        val reportedW = plan.width.roundToInt().coerceIn(constraints.minWidth, constraints.maxWidth)
+        // P13 — a right run in a BOUNDED containing block claims the full
+        // content width so its members (already right-aligned within the
+        // plan extent, offset below) anchor at the containing block's
+        // right edge (§9.5.1 rule 1 mirrored); left runs and unbounded
+        // right runs keep the bare-extent report byte-identically.
+        val reportedW =
+            if (rightPacked && constraints.hasBoundedWidth) constraints.maxWidth
+            else plan.width.roundToInt().coerceIn(constraints.minWidth, constraints.maxWidth)
         val reportedH = plan.height.roundToInt().coerceIn(constraints.minHeight, constraints.maxHeight)
         layout(reportedW, reportedH) {
+            // P13 — right runs shift so the plan's right edge sits on the
+            // reported box's right edge (0 when reported == extent, i.e.
+            // the shrink-to-fit case; negative when overconstrained —
+            // right floats then overflow LEFT, matching the browser).
+            val xOffset = if (rightPacked) reportedW - plan.width.roundToInt() else 0
             // P9 — whole-px placement (roundToInt), ties half-up, the
             // same rounding the abspos measure wrappers pin.
             placeables.forEachIndexed { i, p ->
                 // place() beyond the reported box is legal and draws
                 // unclipped — the overflow half of the P7 contract.
-                p.place(plan.x[i].roundToInt(), plan.y[i].roundToInt())
+                p.place(xOffset + plan.x[i].roundToInt(), plan.y[i].roundToInt())
             }
         }
     }

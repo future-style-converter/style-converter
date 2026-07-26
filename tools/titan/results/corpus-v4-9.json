@@ -1,0 +1,234 @@
+{
+ "_snapshot": "corpus-v4.9",
+ "_note": "THE WIDGET WAVE + POST-LOAD STRUCTURE EXTRACTION: the css-ui appearance wall attacked end-to-end, and the instrument gained its second strategic capability. (1) STRUCTURE EXTRACTION (tools/titan/post-load-extract.mjs): when a script mutates DOM structure (createElement/appendChild family), the settled live DOM is serialized and re-fed through the SAME extract-fixture pipeline (htmlOverride), so created nodes become first-class components with computed state baked on top — the element-mapping-mismatch bail became the scope-guarded trigger; foreign-namespace elements marked in-page before serialization (data-sc-foreign-ns) since HTML re-parse loses namespaces. css-position grew to 7 scored tests: containing-block-change-button re-admitted at web 1.000 / iOS 0.997 / Android 0.987 — SEVEN for seven on all platforms. (2) WIDGET IDENTITY: the extractor emits meta.attrs (10-key allowlist, XHTML-namespace-gated) through a converter passthrough + v2 schema extension + golden; the namespace test recovered on all three (natives were painting phantom widget replicas for not-html createElementNS elements). (3) WEB renders REAL form controls in WPT mode (mapTag passthrough + attrs + inert; React-19 submit/reset value race fixed; word-space text nodes between inline widgets) — accent-color-visited and appearance-auto-input-non-widget-001 pass on all three platforms. (4) NATIVES gained UAWidgets modules (shared geometry tables, Chromium-lookalike replicas: checkbox/radio/button/text/textarea/range/progress/meter/color/menulist/listbox) + inline-atom row flow + right-float run packing — css-grid descendant-static-position-002/004 recovered on BOTH natives (iOS needed the §9.5.1 first-float-claims-rightmost order fix): CSS-GRID 12/12 ON ALL THREE PLATFORMS, the FIFTH perfect section (position, sizing, flexbox, display, grid). Skeptic catches pre-gate: NaN widget geometry (progress max=0, range value=NaN), Compose decode coercion drift, iOS fill-fold stretching atoms to 500px (the 0.729 regression — guarded), submit/reset React race. RESIDUAL: the five appearance-alias tests sit at web 0.827 / Android 0.876 / iOS 0.875 (one shared ref) — the natives now BEAT web there; since the web capture paints real Chromium widgets with ref-matching rows and still scores 0.827, the remaining divergence points at a ref-vs-harness capture contract difference (form-control theming/version), queued for diagnosis. Totals: web 124/136, iOS 121/136, Android 119/136. Zero regressions; 327-net clean (re-run after every fix round).",
+ "artifact": "tools/titan/runs/wave20-final (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "fab64c3c",
+ "date": "2026-07-26",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence coverage asymmetry (corpus-v4.3 gate) + extraction-wall exclusion (v4.4) + post-load re-admission (v4.5) + structure-extraction re-admission (v4.9)",
+ "sampling": "12 sections x 12 bucket-A tests (css-position at 13 candidates, 7 scored)",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh)",
+ "totals": {
+  "web": {
+   "passing": 124,
+   "measured": 136
+  },
+  "ios": {
+   "passing": 121,
+   "measured": 136
+  },
+  "android": {
+   "passing": 119,
+   "measured": 136
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9738,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.972,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9689,
+    "passing": 10
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.999,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8543,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8548,
+    "passing": 10
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9909,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9875,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9807,
+    "passing": 10
+   }
+  },
+  "css-display": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9889,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9809,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9782,
+    "passing": 12
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9904,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9813,
+    "passing": 12
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 1,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9874,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9872,
+    "passing": 12
+   }
+  },
+  "css-overflow": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9944,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.9856,
+    "passing": 10
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.9748,
+    "passing": 10
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 7,
+    "meanSsim": 0.9877,
+    "passing": 7
+   },
+   "ios": {
+    "measured": 7,
+    "meanSsim": 0.987,
+    "passing": 7
+   },
+   "android": {
+    "measured": 7,
+    "meanSsim": 0.9845,
+    "passing": 7
+   }
+  },
+  "css-sizing": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9997,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9872,
+    "passing": 12
+   }
+  },
+  "css-text": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9551,
+    "passing": 8
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9435,
+    "passing": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9433,
+    "passing": 8
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9979,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9882,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9791,
+    "passing": 11
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 10,
+    "meanSsim": 0.9036,
+    "passing": 5
+   },
+   "ios": {
+    "measured": 10,
+    "meanSsim": 0.9284,
+    "passing": 5
+   },
+   "android": {
+    "measured": 10,
+    "meanSsim": 0.9278,
+    "passing": 5
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then for each of the 12 sections: POST_LOAD_EXTRACT=1 section-runner.sh <section> --all-platforms --max-tests 12 --run-id wave20-final --foreground."
+}

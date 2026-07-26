@@ -58,6 +58,32 @@ data class IRSlot(
 )
 
 /**
+ * Wave-20 wire contract (lane W2) — the form/widget attribute capsule the
+ * extractor emits as `meta.attrs` for the widget tags (a, button, input,
+ * textarea, select, option, meter, progress). ONLY present-in-source
+ * attributes among the pinned ten appear; types are pinned by the wire
+ * contract: strings except checked/multiple/selected/disabled (booleans)
+ * and min/max/value-on-meter-progress (numbers where numeric — hence the
+ * separate [valueNumber] channel so a numeric wire `value` survives
+ * without stringly re-parsing). Droppable meta hint like `sourceTag`:
+ * ignoring it loses fidelity, never correctness.
+ */
+@Serializable
+data class IRAttrs(
+    val type: String? = null,      // input type ("checkbox", "range", …)
+    val value: String? = null,     // string-form value attribute
+    val valueNumber: Double? = null, // numeric wire value (meter/progress)
+    val checked: Boolean? = null,  // checkbox/radio checked presence
+    val multiple: Boolean? = null, // select multiple presence (listbox)
+    val selected: Boolean? = null, // option selected presence
+    val disabled: Boolean? = null, // disabled presence (not yet painted)
+    val size: String? = null,      // select/input size attribute
+    val alt: String? = null,       // image-input alt text
+    val min: Double? = null,       // meter/progress/range min
+    val max: Double? = null        // meter/progress/range max
+)
+
+/**
  * A single UI component with its styles.
  *
  * @property id Unique identifier for SDUI (e.g., "button-001")
@@ -99,6 +125,10 @@ data class IRSlot(
  * @property role v2 `meta.role` droppable hint (only value emitted today
  *   is "body-root"). v1 wire spelled it `_role` and this model dropped it
  *   (the documented spec-04 caveat); the v2 decoder closes that gap.
+ * @property attrs Wave-20 widget-identity capsule (see [IRAttrs]) — v2
+ *   wire name `meta.attrs`, riding the meta channel exactly like `_tag`
+ *   (the documented precedent). Null for every v1 document and for
+ *   components the extractor didn't tag (non-widget elements).
  * @property variables CSS custom-property definitions declared on this
  *   component ("--name" → RAW declaration value, verbatim). Additive IR
  *   v2 envelope key (schema/spec/01-envelope.md): names are
@@ -118,6 +148,7 @@ data class IRComponent(
     val children: List<IRComponent>? = null,
     val _text: String? = null,
     val _tag: String? = null,
+    val attrs: IRAttrs? = null,
     val slot: IRSlot? = null,
     val pseudos: JsonObject? = null,
     val role: String? = null,
