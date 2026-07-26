@@ -41,6 +41,21 @@ test('web capture runs the CANONICAL in-place driver in WPT_COMPOSED mode', () =
   );
 });
 
+test('Step 1 extraction engages post-load augmentation itself (RC-A5a)', () => {
+  // extract-fixture.mjs only augments wall-tagged tests (requires-script-
+  // mutation / requires-script-driven-scroll) when POST_LOAD_EXTRACT=1 is in
+  // its environment. section-runner used to rely on the CALLER's ambient
+  // shell for that, so a fresh section run silently re-extracted those tests
+  // static-only — clobbering any earlier post-load stamp and leaving e.g.
+  // css-flexbox/abspos/dynamic-align-self-001 rendering its pre-mutation
+  // state (postLoadExtracted:false). The env must be set on the invocation.
+  assert.match(
+    src,
+    /POST_LOAD_EXTRACT=1 node "\$TITAN_DIR\/extract-fixture\.mjs"/,
+    'Step 1 must run extract-fixture.mjs with POST_LOAD_EXTRACT=1 inline',
+  );
+});
+
 test('Step 5b feeds BOTH natives in composed mode through per-device pool slots', () => {
   assert.match(src, /feed-android\.mjs" --fixtures "\$PERTEST_DIR" --composed/, 'android composed feeder dropped');
   assert.match(src, /feed-ios\.mjs" --fixtures "\$PERTEST_DIR" --composed/, 'ios composed feeder dropped');

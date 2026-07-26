@@ -1406,7 +1406,15 @@ object TextStyleApplier {
                             ?: count["value"]?.jsonPrimitive?.doubleOrNull?.toInt()
                     }
                     else -> null
-                }
+                    // Wave-19 skeptic fix: sub-1 counts are outside the
+                    // css-overflow-4 §5 grammar (<integer [1,∞]>) → clamp
+                    // OFF (null), matching iOS's LineClampExtractor. This
+                    // path feeds ComponentRenderer's effectiveMaxLines →
+                    // Text(maxLines=...), and Compose's TextDelegate hard-
+                    // requires maxLines > 0 — a `line-clamp: 0` wire (the
+                    // converter emits {"type":"lines","count":0.0} for it)
+                    // crashed the render before this guard.
+                }?.takeIf { it >= 1 }
             }
             else -> {
                 // Fallback: try direct value extraction

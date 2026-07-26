@@ -54,7 +54,14 @@ object BordersFacade {
      *                   and second is the JSON data for that property.
      * @return BordersConfig containing configurations for sides and radius.
      */
-    fun extractConfig(properties: List<Pair<String, JsonElement?>>): BordersConfig {
+    fun extractConfig(
+        properties: List<Pair<String, JsonElement?>>,
+        // RC-B1 (TITAN WPT lane) — forwarded to the side/outline extractors'
+        // currentColor bottom-out (WPT capture → spec black ink, dark stage
+        // → the historical #eee). Default false keeps every legacy caller
+        // byte-identical; StyleApplier.extractConfig passes the live flag.
+        wptCaptureMode: Boolean = false,
+    ): BordersConfig {
         // Extract component dimensions for resolving percentage-based border radius
         val componentWidth = properties.find { it.first == "Width" }?.second
             ?.let { com.styleconverter.runtime.core.types.ValueExtractors.extractDp(it) }
@@ -62,9 +69,9 @@ object BordersFacade {
             ?.let { com.styleconverter.runtime.core.types.ValueExtractors.extractDp(it) }
 
         return BordersConfig(
-            sides = BorderSideExtractor.extractBorderConfig(properties),
+            sides = BorderSideExtractor.extractBorderConfig(properties, wptCaptureMode),
             radius = BorderRadiusExtractor.extractRadiusConfig(properties, componentWidth, componentHeight),
-            outline = OutlineExtractor.extractOutlineConfig(properties)
+            outline = OutlineExtractor.extractOutlineConfig(properties, wptCaptureMode)
         )
     }
 

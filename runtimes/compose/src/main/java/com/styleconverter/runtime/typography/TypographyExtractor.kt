@@ -559,7 +559,15 @@ object TypographyExtractor {
             val type = json["type"]?.jsonPrimitive?.toString()?.trim('"')
             if (type == "none") return null
             if (type == "lines") {
+                // Wave-19 skeptic fix: a sub-1 count is outside the
+                // css-overflow-4 §5 grammar (<integer [1,∞]>) → clamp OFF,
+                // matching the iOS twin (LineClampExtractor). Without the
+                // guard a live `line-clamp: 0` wire ({"type":"lines",
+                // "count":0.0} — the converter accepts it) flowed into
+                // Text(maxLines = 0), which Compose's TextDelegate rejects
+                // with require(maxLines > 0) — a render crash.
                 return json["count"]?.jsonPrimitive?.floatOrNull?.toInt()
+                    ?.takeIf { it >= 1 }
             }
         }
         return ValueExtractors.extractInt(json)

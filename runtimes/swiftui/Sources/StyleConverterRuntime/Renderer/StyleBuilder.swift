@@ -85,6 +85,12 @@ struct TextConfig {
     // pairs than a more invasive NSAttributedString-based renderer
     // would risk regressing).
     var textIndentPx: CGFloat?    = nil
+    // Wave 19 — line-clamp's resolved line cap (css-overflow-4 §5). The
+    // TypographyApplier's outer LineLimitMod is CLOBBERED by the label's
+    // own inner `.lineLimit(nil)` (SwiftUI: the modifier closest to the
+    // Text wins), so the cap must ride TextConfig into that inner call —
+    // nil (no clamp) keeps today's unlimited-wrap behavior byte-for-byte.
+    var lineClampLimit: Int?      = nil
     // Fidelity wave 2 — `white-space: nowrap` / `text-wrap: nowrap`
     // (css-text-4 §5.1). PlaceholderLabel maps true to
     // `.fixedSize(horizontal: true)` so the glyph run never soft-wraps.
@@ -393,6 +399,10 @@ enum StyleBuilder {
             s.text.noWrap = agg.noWrap
             s.text.smallCaps = agg.smallCaps
             s.text.shadows = agg.textShadowLayers
+            // Wave 19 — mirror the aggregate's line cap (line-clamp /
+            // max-lines, css-overflow-4 §5) so the label's inner
+            // .lineLimit call can honor it; see TextConfig.lineClampLimit.
+            s.text.lineClampLimit = agg.lineLimit
             // Lane IOS-TEXT bridges — word-spacing render value (fix 2,
             // includes the em/rem-resolved lane), the capitalize flag
             // (fix 6), and the raw numeric weight for the §5.2 face

@@ -105,12 +105,19 @@ object AbsposStaticAlignment {
      * divergence in the runtime's LTR horizontal-tb normalization.
      */
     private fun baseOf(kw: String?): Base? = when (kw?.uppercase()) {
-        // css-align-3 §4.2 start-family keywords.
-        "FLEX-START", "FLEX_START", "START", "SELF-START", "SELF_START" -> Base.START
+        // css-align-3 §4.2 start-family keywords. `left` joins for the
+        // wave-19 justify-content reader (AbsposStaticPosition) —
+        // css-align-3 §5.4: left/right are justify-axis-only and fold to
+        // start/end in this runtime's LTR horizontal-tb normalization
+        // (align-self never emits them, so the flex lane's original
+        // table is unchanged in practice — twin of the Swift table).
+        "FLEX-START", "FLEX_START", "START", "SELF-START", "SELF_START",
+        "LEFT" -> Base.START
         // center + the anchor-positioning fold ItemPlacementExtractor pins.
         "CENTER", "ANCHOR-CENTER", "ANCHOR_CENTER" -> Base.CENTER
-        // end-family keywords.
-        "FLEX-END", "FLEX_END", "END", "SELF-END", "SELF_END" -> Base.END
+        // end-family keywords (+ the LTR `right` fold, see above).
+        "FLEX-END", "FLEX_END", "END", "SELF-END", "SELF_END",
+        "RIGHT" -> Base.END
         // auto/stretch/baseline/unknown → no static-position claim.
         else -> null
     }

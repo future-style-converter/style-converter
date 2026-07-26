@@ -4,6 +4,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.PropertyRegistry
+// RC-B1: mode-split default ink (WPT capture → spec black, dark stage →
+// #eee) for the outline-color currentColor bottom-out below.
+import com.styleconverter.runtime.core.renderer.defaultTextInk
 import com.styleconverter.runtime.core.types.ValueExtractors
 import kotlinx.serialization.json.JsonElement
 
@@ -43,7 +46,14 @@ object OutlineExtractor {
      *                   and second is the JSON data for that property.
      * @return OutlineConfig with extracted outline properties.
      */
-    fun extractOutlineConfig(properties: List<Pair<String, JsonElement?>>): OutlineConfig {
+    fun extractOutlineConfig(
+        properties: List<Pair<String, JsonElement?>>,
+        // RC-B1 (TITAN WPT lane) — same threading as
+        // BorderSideExtractor.extractBorderConfig: default false keeps every
+        // legacy call site (and the dark-stage corpus) byte-identical; the
+        // paint path passes the live flag via BordersFacade.
+        wptCaptureMode: Boolean = false,
+    ): OutlineConfig {
         // css-ui-4 §4.3: the INITIAL outline-color is `currentColor` — the
         // element's used `color`. The old Color.Black default painted a
         // solid-black ring on every fixture that omitted outline-color,
@@ -52,11 +62,15 @@ object OutlineExtractor {
         // color) sat at A-w 0.657 with all five outline-style variants
         // wrong. Resolution order: explicit OutlineColor → the element's
         // own `Color` property (inheritance already folded in by
-        // ComponentRenderer.mergeInherited) → the harness default #EEEEEE
-        // (apps/web-harness/index.html `body { color: #eee }`).
+        // ComponentRenderer.mergeInherited) → the MODE-SPLIT default ink
+        // (defaultTextInk, RC-B1): dark stage keeps the harness #EEEEEE
+        // (apps/web-harness/index.html `body { color: #eee }` — the 327
+        // baselines pin it); WPT capture bottoms out at spec BLACK, the UA
+        // `color: CanvasText` a real WPT page inherits (corpus-v4.1 ink
+        // sub-boundary, mirrored by iOS OutlineApplier.fallbackInk).
         val currentColor = properties.firstOrNull { it.first == "Color" }
             ?.second?.let { ValueExtractors.extractColor(it) }
-            ?: Color(0xFFEEEEEE)
+            ?: defaultTextInk(wptCaptureMode, Color(0xFFEEEEEE))
         var config = OutlineConfig(color = currentColor)
 
         for ((type, data) in properties) {

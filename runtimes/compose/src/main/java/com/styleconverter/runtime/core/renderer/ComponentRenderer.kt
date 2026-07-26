@@ -1846,7 +1846,12 @@ object ComponentRenderer {
                 // parents, which the plan builder gates out, so the two other
                 // branches here never need it).
                 val collapsePlan = LocalBlockCollapsePlan.current
-                component.children.forEachIndexed { index, child ->
+                // The per-child block renderer, factored so the wave-19
+                // float-run segmentation below can re-use it for SINGLE
+                // segments byte-identically (index-aligned with the
+                // original children list — collapse plan + list markers
+                // keep their indices).
+                val renderBlockChild: @Composable (Int, IRComponent) -> Unit = { index, child ->
                     if (listConfig != null && child._tag?.lowercase() == "li") {
                         RenderListItemMarker(child, index, listConfig, inheritedAwareTextColor)
                     } else {
@@ -1868,6 +1873,47 @@ object ComponentRenderer {
                             }
                         } else {
                             RenderComponent(child)
+                        }
+                    }
+                }
+                // Wave-19 lane FLOAT — CSS 2.1 §9.5 float row packing,
+                // composed-WPT capture ONLY (pin P8): consecutive
+                // left-floating block siblings pack side-by-side instead
+                // of stacking in the Column (descendant-static-position-
+                // 001 green+grey pair, justify-self-001's 3/2/5/4 rows).
+                // The dark-stage 327 corpus never sets the capture local,
+                // so its block child loop stays byte-identical.
+                val floatSegments =
+                    if (LocalWptCaptureMode.current) blockFloatSegments(component.children)
+                    else null
+                if (floatSegments == null) {
+                    // No packable run (or dark stage) — the frozen loop.
+                    component.children.forEachIndexed { index, child ->
+                        renderBlockChild(index, child)
+                    }
+                } else {
+                    // Segment walk, sibling order preserved: runs render
+                    // through the FloatRowLayout adapter (pure packing,
+                    // unbounded measure — pins P3-P7), singles keep the
+                    // exact per-child path above. Note floats never
+                    // margin-collapse (§8.3.1 / collapse-plan bail B3),
+                    // so collapsePlan is provably null whenever a run
+                    // exists — run children can skip the collapse local.
+                    floatSegments.forEach { seg ->
+                        if (seg.isRun) {
+                            com.styleconverter.runtime.layout.FloatRowLayout(
+                                strutted = seg.strutted
+                            ) {
+                                // Run members render their full style
+                                // chains; the adapter owns geometry.
+                                seg.indices.forEach { i ->
+                                    RenderComponent(component.children[i])
+                                }
+                            }
+                        } else {
+                            // Single segment — one child, original index.
+                            val i = seg.indices.first()
+                            renderBlockChild(i, component.children[i])
                         }
                     }
                 }
@@ -2035,6 +2081,69 @@ object ComponentRenderer {
     }
 
     /**
+     * Wave 19 (lane FLEX) — the FULL static-position measure for an
+     * abspos child of a flex container, replacing [absposOverflowMeasure]
+     * on the flex loops in WPT capture mode (the grid overlay and the
+     * dark-stage flex path keep the wave-8/18 modifier byte-identically).
+     *
+     * Same unbounded-measure + constraint-fitting report contract as
+     * absposOverflowMeasure (css-position-3 §2.1 — see its docs), but the
+     * placement is PHYSICAL per axis via the shared
+     * [AbsposStaticPosition.axisOffset] twins:
+     *   • [containerWPx]/[containerHPx] carry the container's DEFINITE
+     *     content extents from the IR (AbsposStaticPosition
+     *     .definiteExtentPx) so the FITS case places internally too —
+     *     the wave-18 split (parent align modifier for fits, internal
+     *     shift for overflow) cannot express reversed axes (a vertical-rl
+     *     cross axis is the Row loop's MAIN axis, where no per-child
+     *     align modifier exists — the safe-003 C3 bottom-right anchor);
+     *   • a null extent falls back to the REPORTED box (== the wave-18
+     *     overflow-only correction: fits ⇒ reported == measured ⇒ offset
+     *     0, and the caller's align-modifier fallback owns placement);
+     *   • a null spec contributes 0 (axis owned by an inset, the
+     *     arrangement, or nothing).
+     * roundToInt matches absposOverflowMeasure's whole-px placement.
+     */
+    internal fun absposStaticMeasure(
+        xSpec: com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition.AxisSpec?,
+        ySpec: com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition.AxisSpec?,
+        containerWPx: Double?,
+        containerHPx: Double?
+    ): Modifier = Modifier.layout { measurable, constraints ->
+        // Unbounded measure: the child's own size chain decides (wave 8).
+        val placeable = measurable.measure(androidx.compose.ui.unit.Constraints())
+        // Constraint-fitting report — flow geometry stays byte-identical
+        // to the wave-8 modifier; only placement below differs.
+        val reportedW = absposReportedAxis(placeable.width, constraints.minWidth, constraints.maxWidth)
+        val reportedH = absposReportedAxis(placeable.height, constraints.minHeight, constraints.maxHeight)
+        layout(reportedW, reportedH) {
+            // Per-axis physical offset: IR extent when definite, else the
+            // reported box (overflow-only correction — see the doc).
+            val xOff = xSpec?.let { spec ->
+                kotlin.math.round(
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition.axisOffset(
+                        childPx = placeable.width.toDouble(),
+                        containerPx = containerWPx ?: reportedW.toDouble(),
+                        spec = spec
+                    )
+                ).toInt()
+            } ?: 0
+            val yOff = ySpec?.let { spec ->
+                kotlin.math.round(
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition.axisOffset(
+                        childPx = placeable.height.toDouble(),
+                        containerPx = containerHPx ?: reportedH.toDouble(),
+                        spec = spec
+                    )
+                ).toInt()
+            } ?: 0
+            // Negative/overflowing placement draws unclipped (CSS
+            // overflow:visible) — same contract as the wave-8 modifier.
+            placeable.place(xOff, yOff)
+        }
+    }
+
+    /**
      * Wave-9 companion to [absposOverflowMeasure]: rewrite percentage
      * Width/Height wires ({"type":"percentage","value":N} — the frozen
      * typed-sizing shape) to exact px ({"type":"length","px":…}) against
@@ -2153,6 +2262,34 @@ object ComponentRenderer {
     }
 
     /**
+     * Wave-19 lane FLOAT — the block child loop's float-run plan, or
+     * null when the sibling list contains no packable run (the common
+     * case: the caller then keeps the frozen per-child loop verbatim).
+     * Pure over the IR + internal for the JVM pinning suite. Facts come
+     * from FloatExtractor (the single owner of float/clear keyword
+     * parsing — same reader floatEndAlignment uses) and feed the shared
+     * FloatRowPacking.segment twin (pins P1/P2).
+     */
+    internal fun blockFloatSegments(
+        children: List<IRComponent>
+    ): List<com.styleconverter.runtime.layout.FloatRowPacking.Segment>? {
+        // Per-sibling facts: float side + the `<br clear>` break shape.
+        val facts = children.map { child ->
+            com.styleconverter.runtime.layout.FloatRowPacking.facts(
+                config = com.styleconverter.runtime.layout.FloatExtractor
+                    .extractFloatConfig(child.properties.map { it.type to it.data }),
+                // The clear-break marker must be childless (pin P2) —
+                // a clear on a content box is real layout, out of scope.
+                hasChildren = !child.children.isNullOrEmpty(),
+            )
+        }
+        // Segment once; only return a plan when a run actually exists so
+        // run-free containers never leave the frozen loop.
+        val segments = com.styleconverter.runtime.layout.FloatRowPacking.segment(facts)
+        return if (segments.any { it.isRun }) segments else null
+    }
+
+    /**
      * Extract position type from properties.
      */
     private fun extractPositionType(properties: List<IRProperty>): PositionType {
@@ -2200,6 +2337,10 @@ object ComponentRenderer {
             // flex-grow to weight when the container declares a definite
             // main-axis size.
             val mainSizeDefinite = placeholderFillsParentWidth(component.properties)
+            // Wave 19 (lane FLEX): the abspos static-position resolver is
+            // WPT-capture-gated — the dark-stage 327 corpus keeps the
+            // wave-18 machinery byte-identically (see the loop below).
+            val wptMode = LocalWptCaptureMode.current
             // Sort children by order property
             val sortedChildren = sortByOrder(component.children)
             // Extract the line inputs once; run the static §9.7 pass when
@@ -2271,14 +2412,37 @@ object ComponentRenderer {
                 val childHeightDefinite = hasDefiniteSize(child.properties, widthAxis = false)
                 val stretches = alignSelf == AlignSelf.STRETCH &&
                     !childHeightDefinite && !childIsOutOfFlow
-                // Lane FLEX-SAFE: an out-of-flow child's static position
-                // derives its CROSS alignment from align-self INCLUDING
-                // the safe/unsafe overflow keywords, which ship on the
-                // Generic wire (css-align-3 §4.4; wire pinned in
-                // AbsposStaticAlignment). Row cross axis is vertical; an
-                // explicit vertical inset replaces the static position
-                // (css-position-3 §3.5), so the spec stands down then.
-                val absposCross = if (childIsOutOfFlow &&
+                // Wave 19 (lane FLEX): the FULL static-position resolve —
+                // physical (x,y) claims from the RAW flex-direction /
+                // writing-mode / direction wire (never the extractDisplayConfig
+                // fold, which erases *_REVERSE) + align-self (child, both
+                // channels) + justify-content-as-sole-item (container).
+                // WPT-capture-gated: the dark-stage 327 corpus keeps the
+                // wave-18 machinery below byte-identically.
+                val absposStatic = if (childIsOutOfFlow && wptMode)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition
+                        .resolveStatic(component.properties, child.properties) else null
+                // Definite container CONTENT extents (px) — the internal
+                // placement basis; null (auto/percent) keeps the wave-18
+                // fits-fallback (align modifier + overflow-only shift).
+                val absposCbW = if (absposStatic != null)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition
+                        .definiteExtentPx(component.properties, vertical = false) else null
+                val absposCbH = if (absposStatic != null)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition
+                        .definiteExtentPx(component.properties, vertical = true) else null
+                // The Row arrangement (justify-content) already places the
+                // reported box on X for TYPED keywords — internal x must
+                // stand down then or the offset double-counts (Generic-only
+                // justify never reaches the arrangement, so it stays).
+                val absposX = absposStatic?.x?.takeUnless { absposStatic.justifyTyped }
+                val absposY = absposStatic?.y
+                // Internal ownership per axis: claim + definite extent.
+                val internalY = absposY != null && absposCbH != null
+                // Lane FLEX-SAFE (wave 18, kept as the non-WPT path): the
+                // CROSS-only resolve — align-self incl. safe/unsafe via the
+                // Generic wire; a vertical inset stands it down (§3.5).
+                val absposCross = if (childIsOutOfFlow && absposStatic == null &&
                     !com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
                         .hasCrossInset(child.properties, vertical = true)
                 ) com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
@@ -2286,7 +2450,45 @@ object ComponentRenderer {
 
                 // Build modifier with align and weight
                 var childModifier: Modifier = Modifier
-                childModifier = if (absposCross != null) when (absposCross.base) {
+                // Wave 19: the loop's ALIGN-modifier decision for the
+                // resolver path (y is the Row loop's alignable axis).
+                val staticAlign: Alignment.Vertical? = when {
+                    absposStatic == null -> null // non-WPT path decides below
+                    // Internal placement owns y — pin the reported box to
+                    // the TOP so the internal offset measures from the
+                    // container's physical start edge regardless of the
+                    // Row's align-items-derived verticalAlignment.
+                    internalY -> Alignment.Top
+                    // Claim without a definite extent — the wave-18 fits
+                    // fallback, but by the PHYSICAL outcome: a reversed
+                    // cross axis flips start/end (css-flexbox-1 §5), and
+                    // the overflow half still corrects inside the measure.
+                    absposY != null -> when (absposY.base) {
+                        com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.START ->
+                            if (absposY.reversed) Alignment.Bottom else Alignment.Top
+                        com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.CENTER ->
+                            Alignment.CenterVertically
+                        com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.END ->
+                            if (absposY.reversed) Alignment.Top else Alignment.Bottom
+                    }
+                    // css-position-3 §3.5: an explicit NON-auto inset
+                    // REPLACES the static position on the axis — the
+                    // child's own PositionApplier owns the offset, so
+                    // alignment must pin to the padding-box origin
+                    // (RC-A5b's Android half: dynamic-align-self-001
+                    // painted the green inset-anchored child 100px low
+                    // via align(Bottom)). Auto-tolerant reader (skeptic
+                    // fix): `top: auto` keeps the static position, so an
+                    // auto-only inset falls through to the legacy branch.
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition
+                        .hasNonAutoInset(child.properties, vertical = true) -> Alignment.Top
+                    // No claim at all → the legacy branch below (container
+                    // alignment inheritance / stretch handling) stands.
+                    else -> null
+                }
+                childModifier = if (staticAlign != null) {
+                    childModifier.align(staticAlign)
+                } else if (absposCross != null) when (absposCross.base) {
                     // Static-position base alignment for the REPORTED
                     // (constraint-fitting) box — the overflow half of the
                     // same alignment happens inside absposOverflowMeasure.
@@ -2340,9 +2542,14 @@ object ComponentRenderer {
                     // (flex-abspos-staticpos-align-self-safe-001/002: a
                     // 69px box spilling out of a 50px flex container that
                     // Android was clamping to fit, natives 0.86-0.92).
-                    // Lane FLEX-SAFE: thread the resolved cross alignment
-                    // so overflowing ink centers / safe-falls-back too.
-                    itemModifier = absposOverflowMeasure(absposCross, crossIsVertical = true)
+                    // Wave 19: in WPT capture the FULL physical resolver
+                    // places both axes (reverse directions + writing
+                    // modes); the dark-stage path keeps the wave-18
+                    // cross-only modifier byte-identically.
+                    itemModifier = if (absposStatic != null)
+                        absposStaticMeasure(absposX, absposY, absposCbW, absposCbH)
+                    else
+                        absposOverflowMeasure(absposCross, crossIsVertical = true)
                 } else {
                     resolvedSizes?.get(index)?.let { itemModifier = itemModifier.width(it.toFloat().dp) }
                     if (stretches) itemModifier = itemModifier.fillMaxHeight()
@@ -2378,6 +2585,9 @@ object ComponentRenderer {
             // definite. Compose's weight would otherwise stretch the Column
             // to the full canvas height.
             val mainSizeDefinite = hasDefiniteSize(component.properties, widthAxis = false)
+            // Wave 19 (lane FLEX): same WPT gate as the row loop — the
+            // abspos static resolver never runs on the dark-stage corpus.
+            val wptMode = LocalWptCaptureMode.current
             // Sort children by order property
             val sortedChildren = sortByOrder(component.children)
             // §9.7 line inputs + static resolve — column main axis is
@@ -2425,11 +2635,32 @@ object ComponentRenderer {
                 // alignment still derives their static position but every
                 // sizing branch is gated off below.
                 val childIsOutOfFlow = isOutOfFlowChild(child.properties)
-                // Lane FLEX-SAFE — column twin of the row loop's resolve:
+                // Wave 19 (lane FLEX) — column twin of the row loop's full
+                // resolve: physical (x,y) claims from the RAW wire, WPT
+                // gated (dark-stage keeps the wave-18 machinery below).
+                val absposStatic = if (childIsOutOfFlow && wptMode)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition
+                        .resolveStatic(component.properties, child.properties) else null
+                // Definite container CONTENT extents (same read as the row
+                // loop) — null keeps the wave-18 fits-fallback per axis.
+                val absposCbW = if (absposStatic != null)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition
+                        .definiteExtentPx(component.properties, vertical = false) else null
+                val absposCbH = if (absposStatic != null)
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition
+                        .definiteExtentPx(component.properties, vertical = true) else null
+                // The Column arrangement (justify-content) places the
+                // reported box on Y for TYPED keywords — internal y stands
+                // down then (arrangement double-count gate, row-loop twin).
+                val absposY = absposStatic?.y?.takeUnless { absposStatic.justifyTyped }
+                val absposX = absposStatic?.x
+                // Internal ownership of the loop's alignable axis (x).
+                val internalX = absposX != null && absposCbW != null
+                // Lane FLEX-SAFE (wave 18, kept as the non-WPT path) —
                 // the column cross axis is HORIZONTAL, so the inset gate
                 // checks left/right (css-position-3 §3.5) and the base
                 // maps to horizontal alignments below.
-                val absposCross = if (childIsOutOfFlow &&
+                val absposCross = if (childIsOutOfFlow && absposStatic == null &&
                     !com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
                         .hasCrossInset(child.properties, vertical = false)
                 ) com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
@@ -2437,7 +2668,40 @@ object ComponentRenderer {
 
                 // Build modifier with align and weight
                 var childModifier: Modifier = Modifier
-                childModifier = if (absposCross != null) when (absposCross.base) {
+                // Wave 19: align-modifier decision for the resolver path
+                // (x is the Column loop's alignable axis) — row-loop twin.
+                val staticAlign: Alignment.Horizontal? = when {
+                    absposStatic == null -> null // non-WPT path decides below
+                    // Internal placement owns x — pin the reported box to
+                    // the START edge so the internal offset measures from
+                    // the container's physical left edge regardless of the
+                    // Column's align-items-derived horizontalAlignment.
+                    internalX -> Alignment.Start
+                    // Claim without a definite extent — wave-18 fits
+                    // fallback by the PHYSICAL outcome (reversed flips
+                    // start/end); the overflow half corrects inside.
+                    absposX != null -> when (absposX.base) {
+                        com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.START ->
+                            if (absposX.reversed) Alignment.End else Alignment.Start
+                        com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.CENTER ->
+                            Alignment.CenterHorizontally
+                        com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base.END ->
+                            if (absposX.reversed) Alignment.Start else Alignment.End
+                    }
+                    // css-position-3 §3.5: an explicit NON-auto inset
+                    // replaces the static position — pin to the
+                    // padding-box origin so the child's own
+                    // PositionApplier owns the offset (RC-A5b's Android
+                    // half, column flavour). Auto-tolerant reader
+                    // (skeptic fix) — see the row-loop twin.
+                    com.styleconverter.runtime.layout.flexbox.AbsposStaticPosition
+                        .hasNonAutoInset(child.properties, vertical = false) -> Alignment.Start
+                    // No claim → the legacy branch below stands.
+                    else -> null
+                }
+                childModifier = if (staticAlign != null) {
+                    childModifier.align(staticAlign)
+                } else if (absposCross != null) when (absposCross.base) {
                     // Static-position base alignment of the reported box
                     // (overflow half lives in absposOverflowMeasure) —
                     // horizontal mirror of the row loop's mapping.
@@ -2484,9 +2748,13 @@ object ComponentRenderer {
                     // Wave 8: unbounded measure for the out-of-flow child —
                     // specified size wins and overflows the container
                     // (css-position-3 §2.1; see the row-loop twin for the
-                    // fixture evidence). Lane FLEX-SAFE: column cross axis
-                    // is horizontal — thread the resolved cross alignment.
-                    itemModifier = absposOverflowMeasure(absposCross, crossIsVertical = false)
+                    // fixture evidence). Wave 19: WPT capture routes through
+                    // the full physical resolver; dark-stage keeps the
+                    // wave-18 cross-only modifier byte-identically.
+                    itemModifier = if (absposStatic != null)
+                        absposStaticMeasure(absposX, absposY, absposCbW, absposCbH)
+                    else
+                        absposOverflowMeasure(absposCross, crossIsVertical = false)
                 } else {
                     resolvedSizes?.get(index)?.let { itemModifier = itemModifier.height(it.toFloat().dp) }
                 }
@@ -3702,6 +3970,15 @@ object ComponentRenderer {
                 }
                 "FlexDirection" -> {
                     val keyword = ValueExtractors.extractKeyword(prop.data)?.uppercase()
+                    // AXIS fold only: *_REVERSE picks the same Row/Column
+                    // composable as its forward twin (the main-axis
+                    // ORIENTATION is what the container choice needs). The
+                    // reversal itself is NOT modelled for in-flow item
+                    // order (documented gap), but the wave-19 abspos
+                    // static-position resolver (AbsposStaticPosition) reads
+                    // the RAW wire keyword directly in the flex loops, so
+                    // out-of-flow children DO honor *_REVERSE + writing
+                    // modes — this fold no longer erases reversal for them.
                     flexDirection = when (keyword) {
                         "COLUMN", "COLUMN_REVERSE", "COLUMN-REVERSE" -> FlexDirection.COLUMN
                         else -> FlexDirection.ROW

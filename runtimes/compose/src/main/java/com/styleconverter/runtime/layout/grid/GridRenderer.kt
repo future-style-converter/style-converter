@@ -16,6 +16,13 @@ import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.placement.itemPlacement
 import com.styleconverter.runtime.core.types.ValueExtractors
+// Wave 19: ambient layout direction — RTL grids may inherit direction from
+// an ancestor via the ComponentRenderer RTL provider (css-writing-modes §2).
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+// Wave 19: the single owner of the Direction property parse (typography
+// Phase 6) — reused so grid and text can never disagree about rtl.
+import com.styleconverter.runtime.typography.TextStyleApplier
 // §9.2 static-position machinery shared with the flex abspos path (wave 10) —
 // Spec/Base domain + the safe-aware align-self resolver + the inset gate.
 import com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
@@ -98,9 +105,6 @@ object GridRenderer {
         // anyway (GridExtractor didn't parse the rows-of-arrays shape). The
         // areas grid now feeds ONLY named-line resolution below.
         val areasGridForCount = extractAreasGridV2(component.properties)
-        val columnCount = gridConfig.columnCount
-            ?: areasGridForCount?.maxOfOrNull { it.size }
-            ?: 2
 
         // Definite-width detection. The web reference gives every component
         // `width: fit-content` unless the IR declares a width, so a grid
@@ -151,6 +155,20 @@ object GridRenderer {
             com.styleconverter.runtime.core.placement.ItemPlacementExtractor
                 .extract(it.properties)
         }
+        // Wave-19 RC-B3: the explicit column count comes from the template /
+        // areas grid as before, but a TEMPLATE-LESS grid now enumerates its
+        // IMPLICIT columns per css-grid-1 §7.5 instead of the legacy magic
+        // "2": row auto-flow puts every item in the single implicit column 1;
+        // column auto-flow opens one implicit column per item; explicit
+        // numeric grid-column claims grow the count. Crucially this counts
+        // the POST-SPLICE in-flow claims (flowChildren — display:contents
+        // children were already spliced out by ContentsUnboxing upstream in
+        // RenderComponent), so a contents wrapper can no longer leave a
+        // phantom second track: display-contents-alignment-002's single blue
+        // item now gets ONE full-width auto column like iOS/web, not half.
+        val columnCount = gridConfig.columnCount
+            ?: areasGridForCount?.maxOfOrNull { it.size }
+            ?: implicitColumnCount(gridConfig.autoFlow, claims.map { it.grid })
         val specs = claims.map {
             resolvePlacementSpec(it.grid, columnCount, explicitRowCount, areaMap)
         }
@@ -187,6 +205,21 @@ object GridRenderer {
         // siblings' explicit start/end/stretch win (Android previously
         // ignored justify-items entirely, A-w 0.868).
         val justifyItems = extractJustifyItems(component.properties)
+
+        // Wave-19 RC-A2: container-level CONTENT distribution + direction.
+        // justify-content moves the whole track group inside the content box
+        // (css-align-3 §5.3 — a distinct axis from the per-item justify-self
+        // handled above); DisplayConfig already parses the keyword for the
+        // flex paths, so grid reuses the same single owner.
+        val justifyContent = GridContentDistribution.justifyOf(displayConfig.justifyContent)
+        // direction: rtl — the grid's own Direction property (the wire these
+        // WPT captures carry, e.g. descendant-static-position-002/004) OR an
+        // inherited RTL context (ComponentRenderer provides
+        // LocalLayoutDirection=Rtl for RTL components, and CompositionLocals
+        // flow into descendants — css-writing-modes §2 inheritance).
+        val rtl = TextStyleApplier.extractDirection(component.properties) ==
+            TextStyleApplier.DirectionMode.RTL ||
+            LocalLayoutDirection.current == LayoutDirection.Rtl
 
         // Single-Layout placed grid: both axes resolved in one measure pass
         // so ROW SPANS render (the Column-of-rows structure could only give
@@ -279,6 +312,10 @@ object GridRenderer {
                 rowHeights = resolvedRowHeights,
                 definiteWidth = definiteWidth,
                 cells = placements,
+                // Wave-19 RC-A2: content distribution + rtl ride into the
+                // measure policy so every grid-area origin shifts together.
+                justify = justifyContent,
+                rtl = rtl,
                 modifier = modifier,
                 content = placedCellContent
             )
@@ -302,6 +339,14 @@ object GridRenderer {
                     rowHeights = resolvedRowHeights,
                     definiteWidth = definiteWidth,
                     cells = placements,
+                    // Same wave-19 distribution inputs as the bare-grid shape
+                    // above — the abspos grandchildren anchored inside these
+                    // in-flow items inherit the shift (their static position
+                    // follows their parent box, css-position-3 §3.1), which
+                    // is exactly the descendant-static-position-002/003/004
+                    // failure mode.
+                    justify = justifyContent,
+                    rtl = rtl,
                     modifier = Modifier,
                     content = placedCellContent
                 )
@@ -662,6 +707,56 @@ object GridRenderer {
      * childIndex values index it 1:1 (the wave-8 index-alignment lesson,
      * pinned in GridAbsposPartitionTest). Pure over the IR.
      */
+    /**
+     * Wave-19 RC-B3: implicit column count for a TEMPLATE-LESS grid
+     * (css-grid-1 §7.5 — the implicit grid). Replaces the legacy hard-coded
+     * "2" that manufactured a phantom second track: a grid with no
+     * grid-template-columns has ZERO explicit column tracks, and implicit
+     * columns exist only where placement puts items —
+     *   • row auto-flow (the default): the auto-placement cursor never
+     *     leaves column 1, so ONE implicit column holds every item
+     *     (each on its own row, §8.5 row-major cursor);
+     *   • column auto-flow: the cursor opens a NEW implicit column per
+     *     auto-placed item (§8.5 column-major variant) — one per claim;
+     *   • explicit numeric grid-column lines grow the implicit grid to
+     *     reach the requested tracks (line N needs N−1 columns; a start
+     *     line with `span s` needs start+s−1; a bare span needs s).
+     * The [claims] list is the POST-SPLICE in-flow set (abspos children are
+     * partitioned out per §9 and display:contents wrappers were spliced by
+     * ContentsUnboxing before RenderGrid ran) — counting pre-splice children
+     * was the display-contents-alignment-002 phantom-track failure. Pure
+     * over the claims — pinned in GridContentDistributionTest.
+     */
+    internal fun implicitColumnCount(
+        autoFlow: GridAutoFlow,
+        claims: List<com.styleconverter.runtime.core.placement.GridClaims>
+    ): Int {
+        // Auto-flow contribution: column flow opens a column per item.
+        val flowCols = when (autoFlow) {
+            GridAutoFlow.COLUMN, GridAutoFlow.COLUMN_DENSE -> claims.size
+            // row / row-dense / plain dense: single implicit column.
+            else -> 1
+        }
+        // Explicit-claim contribution: the furthest column any positive
+        // numeric line or span request reaches (§7.5 implicit growth).
+        // Negative lines resolve against the explicit grid and are skipped
+        // here (a template-less explicit grid has only line 1/-1).
+        val claimed = claims.maxOfOrNull { c ->
+            // A span request occupies `s` tracks wherever it anchors.
+            val span = c.colEndSpan ?: c.colStartSpan ?: 1
+            maxOf(
+                // Start line N (+ span) reaches track N+span−1.
+                (c.colStart?.takeIf { it > 0 } ?: 1) + span - 1,
+                // End line N bounds track N−1.
+                (c.colEnd?.takeIf { it > 1 } ?: 0) - 1,
+                // A bare span with auto lines still needs s tracks.
+                span
+            )
+        } ?: 0
+        // At least one implicit column always exists once items place (§7.5).
+        return maxOf(1, flowCols, claimed)
+    }
+
     internal fun partitionOutOfFlow(
         children: List<IRComponent>
     ): Pair<List<IRComponent>, List<IRComponent>> =
@@ -839,6 +934,12 @@ object GridRenderer {
         rowHeights: List<Dp?>,
         definiteWidth: Boolean,
         cells: List<PlacedItem>,
+        // Wave-19 RC-A2: container justify-content (css-align-3 §5.3) — the
+        // whole track group's distribution inside the content box.
+        justify: GridContentDistribution.Justify,
+        // Wave-19 RC-A2: direction:rtl — inline start becomes the RIGHT edge
+        // (column order reversed + group packed right, css-grid-1 §7.1).
+        rtl: Boolean,
         modifier: Modifier,
         content: @Composable () -> Unit
     ) {
@@ -909,12 +1010,40 @@ object GridRenderer {
             val widths = computeTrackWidths(
                 specs, intrinsics, containerW, gapPx, stretch = definiteWidth
             )
-            // Cumulative track start offsets (track i starts after all
-            // previous tracks + gaps).
-            val offsets = FloatArray(columnCount)
-            for (i in 1 until columnCount) {
-                offsets[i] = offsets[i - 1] + widths.getOrElse(i - 1) { 0f } + gapPx
-            }
+            // The track group's own footprint (sum + inner gaps) — the hug
+            // width for indefinite grids AND the distribution no-op extent.
+            val footprint = (widths.sum() + gapPx * (widths.size - 1).coerceAtLeast(0)).toInt()
+            // Grid width: definite grids report the bounded container width;
+            // indefinite ones report the tracks' own footprint (the hug).
+            // (Hoisted above measurement in wave 19 — the distribution
+            // extent below must equal the box the group aligns within.)
+            val gridW = if (definiteWidth && constraints.hasBoundedWidth)
+                constraints.maxWidth
+            else
+                footprint.coerceAtMost(
+                    if (constraints.hasBoundedWidth) constraints.maxWidth else Int.MAX_VALUE
+                )
+            // Wave-19 RC-A2: physical LEFT-edge origin of every column track
+            // — css-align-3 §5.3 content distribution (justify-content) plus
+            // the rtl mirror, replacing the old LTR start-packed prefix sums.
+            // Indefinite grids pass their own footprint → leftover 0 →
+            // distribution no-op, rtl a pure order mirror inside the hug.
+            val origins = GridContentDistribution.trackOrigins(
+                trackWidths = widths.map { it.toDouble() },
+                gap = gapPx.toDouble(),
+                contentExtent = gridW.toDouble(),
+                justify = justify,
+                rtl = rtl
+            )
+            // A cell's physical left edge: the leftmost origin among its
+            // spanned tracks (in LTR that's the start track's origin; in RTL
+            // the LAST spanned logical track sits leftmost). NOTE: spanning
+            // cells under space-* keep the plain gap in cellWidth below, so
+            // a widened distribution gap inside a span is not covered yet —
+            // documented, not silent (no such shape in the corpus).
+            fun cellX(cell: PlacedItem): Float =
+                (cell.col until (cell.col + cell.colSpan).coerceAtMost(columnCount))
+                    .minOfOrNull { origins.getOrElse(it) { 0.0 }.toFloat() } ?: 0f
             fun cellWidth(cell: PlacedItem): Float {
                 var w = 0f
                 for (i in cell.col until (cell.col + cell.colSpan).coerceAtMost(columnCount)) {
@@ -955,20 +1084,17 @@ object GridRenderer {
                 rowOffsets[r] = rowOffsets[r - 1] + resolvedRowH[r - 1] + rowGapPx
             }
             val totalH = resolvedRowH.sum() + rowGapPx * (rowCount - 1).coerceAtLeast(0)
-            // Grid width: definite grids report the bounded container width;
-            // indefinite ones report the tracks' own footprint (the hug).
-            val footprint = (widths.sum() + gapPx * (widths.size - 1).coerceAtLeast(0)).toInt()
-            val gridW = if (definiteWidth && constraints.hasBoundedWidth)
-                constraints.maxWidth
-            else
-                footprint.coerceAtMost(
-                    if (constraints.hasBoundedWidth) constraints.maxWidth else Int.MAX_VALUE
-                )
             layout(gridW, totalH.coerceIn(constraints.minHeight, constraints.maxHeight)) {
                 placeables.forEachIndexed { i, p ->
                     val cell = cells.getOrNull(i) ?: return@forEachIndexed
-                    p.placeRelative(
-                        offsets[cell.col].toInt(),
+                    // place(), NOT placeRelative(): the wave-19 origins are
+                    // already PHYSICAL (rtl mirrored by the pure math above);
+                    // placeRelative would re-mirror them under the ambient
+                    // LocalLayoutDirection=Rtl the RTL provider sets —
+                    // a double flip. In LTR place == placeRelative exactly,
+                    // so every committed LTR baseline is byte-identical.
+                    p.place(
+                        cellX(cell).toInt(),
                         rowOffsets.getOrElse(cell.row) { 0 }
                     )
                 }

@@ -56,6 +56,20 @@ struct CSSGridLayout: Layout {
     /// fix that retired the child-name↔area-name matcher which dropped
     /// unmatched children and duplicated one child per spanned cell.
     var templateAreas: [[String]]? = nil
+    /// Wave-19 RC-A2: container `justify-content` — content distribution of
+    /// the whole track group inside the content box (css-align-3 §5.3, a
+    /// distinct axis from the per-item justifyItems default above). nil =
+    /// unset → the adapter folds it to start.
+    var justifyContent: AlignmentKeyword? = nil
+    // Wave-19 RC-A2 note: there is deliberately NO `rtl` input here.
+    // `direction: rtl` reaches this Layout as the ambient SwiftUI
+    // layoutDirection environment (TypographyApplier sets it from the
+    // Direction wire; ancestors' values inherit down), and SwiftUI itself
+    // mirrors every place(at:) x about the layout bounds under RTL —
+    // probe-verified in SkepticRtlGridPlacementTests. solve() therefore
+    // works purely in LOGICAL inline-start space and the single ambient
+    // mirror produces the physical css-grid-1 §7.1 geometry (column order
+    // reversed, group packed right, overflow past the LEFT edge).
 
     /// Read each subview's grid claims from the placement channel.
     /// nil placement = ANONYMOUS item (the harness's leading `_text`
@@ -136,23 +150,75 @@ struct CSSGridLayout: Layout {
         for w in colWidths { colX.append(colX.last! + w + columnGap) }
         var rowY: [CGFloat] = [0]
         for h in rowHts { rowY.append(rowY.last! + h + rowGap) }
-        // Total = last offset minus the trailing gap.
+        // Total = last offset minus the trailing gap (the group footprint).
         let totalW = max(0, colX.last! - columnGap)
         let totalH = max(0, rowY.last! - rowGap)
+        // Wave-19 RC-A2: the content extent the track group aligns within —
+        // the definite content-box width (the same proposal channel fr/%
+        // sizing already trusts) or, for a fit-content grid, the footprint
+        // itself (leftover 0 → distribution no-op, rtl a pure order mirror).
+        // An INFINITE proposal (unbounded scroller probe) is not a definite
+        // extent (css-align-3 §5.3 needs free space to distribute) — degrade
+        // to the footprint no-op rather than infinite origins.
+        let definiteW: CGFloat? = (containerW?.isFinite == true) ? containerW : nil
+        let extent = definiteW ?? totalW
+        // LOGICAL (inline-start-relative) origin of every column track:
+        // css-align-3 §5.3 justify-content distribution via the pure twin
+        // shared with Compose (GridContentDistribution — identical pins).
+        //
+        // rtl is deliberately NOT forwarded: SwiftUI's Layout engine
+        // mirrors every place(at:) x-coordinate about the layout bounds
+        // (x' = W − x − w) whenever the ambient layoutDirection is RTL —
+        // probe-verified in SkepticRtlGridPlacementTests (an ImageRenderer
+        // pixel probe showed pre-mirrored physical origins double-flip
+        // back to LTR geometry). TypographyApplier sets that environment
+        // from the SAME Direction wire that sets [rtl], so SwiftUI's own
+        // mirror IS the physical flip: solving in logical space here and
+        // letting the environment mirror once yields exactly the twin's
+        // rtl output (both transforms are x' = extent − p − w). This also
+        // covers inherited-only RTL (ancestor Direction:RTL, environment
+        // flows down) and an explicit Direction:LTR override under an RTL
+        // ancestor (env reset to LTR → no mirror) — both for free.
+        // Compose has no such ambient mirror (it uses place(), not
+        // placeRelative()), so the twin keeps applying rtl itself.
+        let origins = GridContentDistribution.trackOrigins(
+            trackWidths: colWidths.map(Double.init),
+            gap: Double(columnGap),
+            contentExtent: Double(extent),
+            justify: GridContentDistribution.justify(of: justifyContent),
+            rtl: false)
         // Cell rectangle per item (span-aware: width spans cover the
         // inner gaps too).
         let frames: [CGRect] = cells.map { cell in
             let c = min(cell.col, max(0, tracks.count - 1))
             let cEnd = min(cell.col + cell.colSpan, tracks.count)
-            let x = colX[c]
-            let w = max(0, colX[cEnd] - columnGap - x)
+            // The cell's LOGICAL left edge: the start track's origin (all
+            // origins are logical/ascending now — the ambient RTL mirror
+            // happens after placement, see the header note). NOTE: spans
+            // under space-* keep the plain gap in the width below — a
+            // widened distribution gap inside a span is not covered yet
+            // (documented, no corpus shape).
+            let x = CGFloat((c..<max(cEnd, c + 1)).compactMap {
+                $0 < origins.count ? origins[$0] : nil
+            }.min() ?? 0)
+            let w = max(0, colX[cEnd] - columnGap - colX[c])
             let r = min(cell.row, max(0, rowCount - 1))
             let rEnd = min(cell.row + cell.rowSpan, rowCount)
             let y = rowY[r]
             let h = max(0, rowY[rEnd] - rowGap - y)
             return CGRect(x: x, y: y, width: w, height: h)
         }
-        return (CGSize(width: totalW, height: totalH), frames, sizes, justify, align)
+        // Wave-19: a DEFINITE grid reports the definite content width, not
+        // the track footprint — the outer SizeApplier .frame then has zero
+        // slack, so its topLeading anchor (which flips to top-RIGHT under
+        // the RTL environment TypographyApplier sets) can never re-position
+        // the grid box; all inline geometry is owned by the origins above.
+        // In LTR this is paint-identical to the old footprint report (the
+        // frame anchored the smaller box at the same top-leading corner).
+        // Indefinite grids keep the footprint hug byte-for-byte (and an
+        // infinite probe reports the footprint, never infinity).
+        return (CGSize(width: definiteW ?? totalW, height: totalH),
+                frames, sizes, justify, align)
     }
 
     /// Report the grid's own size: track sum (fit-content) or the

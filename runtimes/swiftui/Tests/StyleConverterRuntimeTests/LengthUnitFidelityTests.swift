@@ -186,3 +186,32 @@ final class LengthUnitFidelityTests: XCTestCase {
         XCTAssertEqual(StyleBuilder.contentBoxInflation(style).h, 100)
     }
 }
+
+
+// Wave 19 follow-up — the line-clamp cap must survive to the label's
+// inner .lineLimit call (TextConfig.lineClampLimit), because SwiftUI's
+// innermost lineLimit wins and the renderer's label applies one directly
+// (ComponentRenderer ~2566). Pins the StyleBuilder mirror on the LIVE
+// wire shape {"type":"lines","count":2} from
+// wpt__css-overflow__block-ellipsis-001 (wave18-final per-test IR).
+final class LineClampBridgeTests: XCTestCase {
+    // The clamp reaches TextConfig when the wire declares line-clamp: 2.
+    func testLineClampCountReachesTextConfig() throws {
+        let json = #"""
+        {"id":"t","name":"t","properties":[
+          {"type":"LineClamp","data":{"type":"lines","count":2}}
+        ]}
+        """#
+        let comp = try JSONDecoder().decode(IRComponent.self,
+                                            from: Data(json.utf8))
+        let style = StyleBuilder.build(from: comp.properties)
+        XCTAssertEqual(style.text.lineClampLimit, 2,
+            "line-clamp count must ride TextConfig into the inner .lineLimit")
+    }
+    // No clamp declared → nil → the historical unlimited wrap unchanged.
+    func testNoClampKeepsUnlimitedWrap() {
+        let style = StyleBuilder.build(from: [])
+        XCTAssertNil(style.text.lineClampLimit,
+            "absent line-clamp must keep .lineLimit(nil) byte-for-byte")
+    }
+}

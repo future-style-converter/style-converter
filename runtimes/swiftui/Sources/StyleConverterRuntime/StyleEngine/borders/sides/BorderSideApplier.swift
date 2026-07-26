@@ -52,10 +52,31 @@ struct BorderSideApplier: ViewModifier {
     // rendered them light — borders/003_C04 divergence).
     var currentColor: Color? = nil
 
-    // The resolved fallback for colourless sides. 0.933 white == #eee,
-    // matching the web harness body colour that currentColor inherits.
+    // RC-B1 (wave 19, lane INK) — the corpus-v4.1 ink mode-split reaches
+    // the border bottom-out: on the WPT white canvas a real page's inherit
+    // chain ends at the UA `color: CanvasText` BLACK (html.css), so
+    // `border: 1px solid` (colour omitted → currentcolor, css-color-4
+    // §7.1) must paint black like the browser-ref — css-break
+    // background-image-000's whole 0.874 penalty was this fallback
+    // painting #eee frames. The harness capture path sets the ambient
+    // flag (CaptureOverrides.titanInbox); default false keeps the
+    // dark-stage/327-pair side on #eee byte-identically.
+    @Environment(\.wptCaptureMode) private var wptCaptureMode: Bool
+
+    // The resolved fallback for colourless sides — pure static (XCTest
+    // pins the split in WPTCaptureModeTests) shared with OutlineApplier
+    // so border and outline ink can never diverge. Chain: element
+    // `color` → WPTCanvas.captureTextInk (WPT → spec black; dark stage →
+    // 0.933 white == #eee, the web harness body colour). Compose twin:
+    // BorderSideExtractor's defaultTextInk bottom-out.
+    static func fallbackInk(currentColor: Color?, wptCaptureMode: Bool) -> Color {
+        currentColor ?? WPTCanvas.captureTextInk(wptCaptureMode: wptCaptureMode,
+                                                 defaultInk: Color(white: 0.933))
+    }
+
+    // Instance view of the shared chain (the ambient flag + threaded colour).
     private var inheritedColor: Color {
-        currentColor ?? Color(white: 0.933)
+        Self.fallbackInk(currentColor: currentColor, wptCaptureMode: wptCaptureMode)
     }
 
     func body(content: Content) -> some View {

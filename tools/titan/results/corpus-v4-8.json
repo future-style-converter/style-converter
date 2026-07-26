@@ -1,0 +1,234 @@
+{
+ "_snapshot": "corpus-v4.8",
+ "_note": "STATIC POSITION IN FORMATTING CONTEXTS: the wave-18 block-level abspos static-position rule extended to flex and grid containers, plus a narrow float row-packing contract — and css-flexbox and css-display join css-position and css-sizing at 12/12 ON ALL THREE PLATFORMS (four perfect sections). Mechanisms landed (both natives, byte-parallel twins): (1) full flex static-position resolver — ONE axis-mapping table over flexDirection incl *_REVERSE x writing-mode x direction, main axis via justify-content-as-sole-item, cross via align-self, safe-aware, inset-gated per css-position-3 §3.5 with an auto-tolerant gate (the skeptic proved explicit top:auto ships as a property); (2) grid content-distribution offsets (justify-content end/center/space-* on tracks + rtl) folded into every grid area origin — the iOS skeptic caught a DOUBLE RTL FLIP (SwiftUI Layout mirrors place(at:) under ambient RTL; fixed by solving in logical space); (3) float row packing (CSS2.1 §9.5 narrow contract: consecutive same-direction floats pack until width exhaustion, clear:both breaks rows, shrink-to-fit abspos ancestors paint float ink unclipped) on ALL THREE engines — the web engine own br/clear segmentation bug fixed too (justify-self-001 recovered on every platform incl web 0.947→0.981); (4) border/outline currentColor now resolves to WPT black ink instead of the legacy dark-harness #EEE — css-break background-image-000 hit a LITERAL 1.000 on both natives; (5) harness root-stack margin fold now collapses author margins per §8.3.1 INCLUDING through zero-flow-space out-of-flow roots; (6) post-load extraction engagement fixed for style-mutation tests (dynamic-align-self-001 IR now carries the post-script align-self); (7) iOS line-clamp: the count wire key was never read AND the renderer inner .lineLimit(nil) clobbered the outer cap — both fixed, block-ellipsis-001 iOS converged onto Android (0.925/0.924, shared wrap-point metric residual). Compose maxLines=0 crash (line-clamp:0 wire) caught by skeptic pre-gate. DEVICE RESULT: zero regressions, 327-net clean. Totals: web 120/134, iOS 115/134, Android 114/134.",
+ "artifact": "tools/titan/runs/wave19-final (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "1619a5be",
+ "date": "2026-07-26",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence coverage asymmetry (corpus-v4.3 gate) + extraction-wall exclusion (v4.4) + post-load re-admission (v4.5)",
+ "sampling": "12 sections x 12 bucket-A tests",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh)",
+ "totals": {
+  "web": {
+   "passing": 120,
+   "measured": 134
+  },
+  "ios": {
+   "passing": 115,
+   "measured": 134
+  },
+  "android": {
+   "passing": 114,
+   "measured": 134
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9738,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.972,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9689,
+    "passing": 10
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.999,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8543,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8548,
+    "passing": 10
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9909,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9875,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9807,
+    "passing": 10
+   }
+  },
+  "css-display": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9889,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9814,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9787,
+    "passing": 12
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9904,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9813,
+    "passing": 12
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 1,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9839,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.985,
+    "passing": 11
+   }
+  },
+  "css-overflow": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9944,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.9856,
+    "passing": 10
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.9748,
+    "passing": 10
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 6,
+    "meanSsim": 0.9856,
+    "passing": 6
+   },
+   "ios": {
+    "measured": 6,
+    "meanSsim": 0.9854,
+    "passing": 6
+   },
+   "android": {
+    "measured": 6,
+    "meanSsim": 0.984,
+    "passing": 6
+   }
+  },
+  "css-sizing": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9997,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9872,
+    "passing": 12
+   }
+  },
+  "css-text": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9551,
+    "passing": 8
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9435,
+    "passing": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9433,
+    "passing": 8
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9979,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9859,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9791,
+    "passing": 11
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 9,
+    "meanSsim": 0.8908,
+    "passing": 2
+   },
+   "ios": {
+    "measured": 9,
+    "meanSsim": 0.8908,
+    "passing": 2
+   },
+   "android": {
+    "measured": 9,
+    "meanSsim": 0.8898,
+    "passing": 2
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then for each of the 12 sections: POST_LOAD_EXTRACT=1 section-runner.sh <section> --all-platforms --max-tests 12 --run-id wave19-final --foreground."
+}

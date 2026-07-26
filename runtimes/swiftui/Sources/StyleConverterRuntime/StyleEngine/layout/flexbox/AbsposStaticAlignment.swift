@@ -193,8 +193,12 @@ enum AbsposStaticAlignment {
     ///     lane); zero keeps the honest pre-lane geometry, and the
     ///     skip is visible right here rather than silently absorbed.
     /// The declared child px is read as the FRAME extent (the iOS
-    /// chain's border-box status quo — SizeConfig.boxSizing docs);
-    /// content-box-declared children under-count by the band (TODO).
+    /// chain's border-box status quo — SizeConfig.boxSizing docs).
+    /// Wave 19: kept ONLY as the dark-stage branch (byte-stable for the
+    /// 327-pair baseline); WPT capture routes through
+    /// AbsposStaticPosition.staticOffset, which resolves BOTH axes,
+    /// honors *_REVERSE + writing modes, and uses the PAINTED frame
+    /// extent (declared + content-box bands + margins — RC-A6).
     static func staticCrossOffset(flexDirection: FlexDirectionKeyword?,
                                   childProperties: [IRProperty],
                                   containerW: CGFloat?,

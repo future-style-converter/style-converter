@@ -275,7 +275,16 @@ done < "$TESTS_LIST"
 step "Step 1: extract fixtures (n=$N)"
 EXTRACT_LOG="$WORK_DIR/extract.log"
 EXTRACT_RC=0
-node "$TITAN_DIR/extract-fixture.mjs" "${TESTS[@]}" >"$EXTRACT_LOG" 2>&1 || EXTRACT_RC=$?
+# RC-A5a (wave 19): POST_LOAD_EXTRACT=1 is set HERE, not inherited from the
+# caller's environment. extract-fixture.mjs only augments wall-tagged tests
+# (requires-script-mutation / requires-script-driven-scroll — post-load's
+# isWallTagged gate) when this env is present; without it a fresh section run
+# silently re-extracted those tests STATIC-ONLY, clobbering any earlier
+# post-load stamp and leaving e.g. dynamic-align-self-001 rendering its
+# pre-mutation state (postLoadExtracted:false). Engagement must not depend
+# on ambient shell state. All existing stability/scroll/structure bails and
+# the top-layer decline inside post-load-extract.mjs stay intact.
+POST_LOAD_EXTRACT=1 node "$TITAN_DIR/extract-fixture.mjs" "${TESTS[@]}" >"$EXTRACT_LOG" 2>&1 || EXTRACT_RC=$?
 EXTRACTED_OK=$(grep -c '^extracted ' "$EXTRACT_LOG" || true)
 EXTRACTED_FAIL=$(grep -c '^FAIL ' "$EXTRACT_LOG" || true)
 log "extracted=$EXTRACTED_OK failed=$EXTRACTED_FAIL"

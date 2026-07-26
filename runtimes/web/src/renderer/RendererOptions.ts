@@ -118,4 +118,34 @@ export interface RendererOptions {
    * in real apps wants this too. Default: null (base state).
    */
   forceState?: RuntimeV1Condition | null;
+
+  /**
+   * Group the node's composed children into ordered segments, wrapping
+   * some in an extra <div>. Default: none — children render as direct
+   * siblings, pure HTML.
+   * HARNESS DIVERGENCE (wave-19 lane FLOAT, WPT capture only): the
+   * harness wraps each run of ≥2 consecutive left-floating children in
+   * a `display:flow-root; width:max-content` div so float rows break
+   * ONLY at `<br clear>` markers — the captured IR's synthetic 100px
+   * root frames would otherwise wrap the rows at an artifact width the
+   * browser-ref (body-wide containing block) never saw. Segments MUST
+   * cover every child index exactly once, in sibling order.
+   */
+  planChildRuns?: (children: ComposedNode[], ctx: RenderContext) => ChildRunPlan | null;
+}
+
+/**
+ * A child grouping plan (see RendererOptions.planChildRuns): ordered
+ * segments over the composed-children array. A segment with a
+ * `wrapperStyle` renders as one <div> containing its members; a segment
+ * without renders its members as plain siblings.
+ */
+export interface ChildRunPlan {
+  /** Ordered segments — indices into the composed-children array. */
+  segments: Array<{
+    /** Member child indices, in sibling order. */
+    indices: number[];
+    /** Present → wrap the members in a <div> with this inline style. */
+    wrapperStyle?: import('react').CSSProperties;
+  }>;
 }
