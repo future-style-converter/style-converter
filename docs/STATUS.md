@@ -334,17 +334,41 @@ dirs + WPT corpus are gitignored):
   on all three platforms** — the second-ever perfect section (from
   Android 6/12, iOS 8/12 at first capture); css-display web+iOS 12/12;
   zero regressions across all 12 sections; 327-net clean. Corpus
-  totals: web 119/134, iOS 107/134, Android 103/134.
+  totals: web 119/134, iOS 107/134, Android 103/134. Wave 19
+  (`tools/titan/results/corpus-v4-8.json`) extended the static-position
+  rule to flex and grid formatting contexts — **css-flexbox and
+  css-display now 12/12 on all three platforms**, joining css-position
+  and css-sizing at four perfect sections. Landed (byte-parallel twins
+  on both natives): the full flex static-position resolver (one
+  axis-mapping table over flex-direction × writing-mode × direction,
+  main axis via justify-content-as-sole-item, cross via align-self);
+  grid content-distribution offsets (justify-content on tracks + rtl —
+  the skeptic caught a SwiftUI double-RTL-flip, fixed by solving in
+  logical space); a narrow float row-packing contract (CSS2.1 §9.5) on
+  all three engines, including the web engine's own br/clear
+  segmentation bug (justify-self-001 recovered on every platform);
+  border/outline `currentColor` resolving to WPT black ink — css-break
+  background-image-000 hit a literal 1.000 on both natives; the harness
+  root-stack margin fold collapsing through zero-flow-space out-of-flow
+  roots (§8.3.1); post-load extraction engagement for style-mutation
+  tests; and the iOS line-clamp chain (unread `count` wire key + an
+  inner `.lineLimit(nil)` clobbering the cap — block-ellipsis-001
+  converged onto Android at 0.925/0.924, a shared wrap-point metric
+  residual). Zero regressions, 327-net clean. Corpus totals: **web
+  120/134, iOS 115/134, Android 114/134**. Named walls this wave:
+  vertical-writing-mode multicol layout transposition (css-break
+  background-image-001/002) and Compose ancestor-3D matrix propagation
+  (backface-visibility).
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 156 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 992 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1211 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 604 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 684 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 999 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1269 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 685 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 687 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

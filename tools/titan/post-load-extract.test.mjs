@@ -59,6 +59,7 @@ test('post-load: POST_LOAD_COMPUTED_PROPERTIES is the exact deliberate set', () 
     'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color',
     'background-color',
     'transform',
+    'align-self',
     'display', 'overflow-x', 'overflow-y', 'z-index',
   ]);
 });
@@ -68,10 +69,13 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
   // width/height must be concrete px. Silently widening these would bloat
   // every fixture (or bake keywords the converter treats differently).
   assert.deepEqual(Object.keys(WRITE_RULES).sort(),
-    ['bottom', 'height', 'left', 'right', 'top', 'transform', 'width', 'z-index']);
+    ['align-self', 'bottom', 'height', 'left', 'right', 'top', 'transform', 'width', 'z-index']);
   assert.equal(WRITE_RULES.top.deleteWhen, 'auto');
   assert.equal(WRITE_RULES.transform.deleteWhen, 'none');
   assert.equal(WRITE_RULES.width.requirePx, true);
+  // RC-A5a: align-self's initial 'auto' carries no declaration (css-align-3
+  // §6.1) — delete-not-write, so a stale pre-mutation keyword cannot linger.
+  assert.equal(WRITE_RULES['align-self'].deleteWhen, 'auto');
 });
 
 // ── 2. Top-layer decline boundary ───────────────────────────────────────────
@@ -315,6 +319,44 @@ test('post-load: overlay keeps the trailing inset when the leading one is auto',
   assert.equal(cmp.properties.left, undefined);   // stale static '0' removed
   assert.equal(cmp.properties.right, '20px');
   assert.equal(cmp.properties.bottom, '30px');
+});
+
+test('post-load: stale align-self is displaced by the computed keyword (dynamic-align-self-001 shape)', () => {
+  // RC-A5a — the exact css-flexbox/abspos/dynamic-align-self-001 shape: the
+  // abspos flex child statically declares `align-self: end`, the script flips
+  // it to 'start' after load. wave18-final baked the used insets (top/left
+  // 0px) but left the stale 'end' underneath — a runtime that gives
+  // self-alignment priority over the baked insets rendered the PRE-mutation
+  // state (android-ref 0.9416 vs web-ref 0.999 on one fixture). The overlay
+  // must bake the computed post-mutation keyword over the stale static one.
+  const fx = makeFixture();
+  const cmp = fx.components.stem__0;
+  cmp.properties = { display: 'flex', position: 'absolute', width: '100px',
+                     height: '100px', 'background-color': 'green',
+                     'align-self': 'end' };
+  overlayComputedOnComponent(cmp, {
+    position: 'absolute', top: '0px', left: '0px', right: 'auto', bottom: 'auto',
+    width: '100px', height: '100px', 'box-sizing': 'content-box',
+    'background-color': 'rgb(0, 128, 0)', transform: 'none',
+    'align-self': 'start',
+    display: 'flex', 'overflow-x': 'visible', 'overflow-y': 'visible', 'z-index': 'auto',
+  });
+  // The post-script alignment displaced the stale pre-mutation keyword.
+  assert.equal(cmp.properties['align-self'], 'start');
+  // The used insets are baked alongside (top+height ⇒ bottom dropped, §10.6.4).
+  assert.equal(cmp.properties.top, '0px');
+  assert.equal(cmp.properties.left, '0px');
+  assert.equal(cmp.properties.bottom, undefined);
+});
+
+test('post-load: computed align-self auto deletes a stale static keyword', () => {
+  // The delete-not-write arm: a script that RESETS alignment to the initial
+  // 'auto' must remove the stale declaration, not bake the keyword 'auto'.
+  const fx = makeFixture();
+  const cmp = fx.components.stem__0;
+  cmp.properties['align-self'] = 'end';
+  overlayComputedOnComponent(cmp, { 'align-self': 'auto' });
+  assert.equal(cmp.properties['align-self'], undefined);
 });
 
 test('post-load: non-px width/height are delete-not-write', () => {

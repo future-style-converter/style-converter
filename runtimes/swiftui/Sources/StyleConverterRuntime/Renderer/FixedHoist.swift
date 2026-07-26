@@ -164,6 +164,48 @@ public enum FixedHoist {
         return (flow, hoisted)
     }
 
+    /// Wave 19 (RC-A5b) — the CSS 2.1 Appendix E paint SPLIT of the
+    /// hoisted list: a hoisted box with NEGATIVE z-index paints in step 3
+    /// of the root stacking context — BEHIND all in-flow canvas content —
+    /// while everything else keeps the wave-17 step-8 overlay (above).
+    ///
+    /// The wave-17 single `.overlay` mount put the whole hoisted list
+    /// above the flow stack, and SwiftUI's `.zIndex` only reorders
+    /// SIBLINGS of one ZStack — it cannot push overlay content behind
+    /// the overlay's base. So css-flexbox dynamic-align-self-001's
+    /// `z-index:-1` red probe (a hoisted abspos root) painted OVER the
+    /// green abspos child living in its flex parent's positioned-children
+    /// overlay, exactly covering it (both 100×100 at canvas (16,88)) —
+    /// the wave18-final "green never paints" iOS failure. The Compose
+    /// harness never had the bug: CanvasRootHoist.Host mounts flow +
+    /// hoisted slots in ONE Box, where Modifier.zIndex(-1) already sinks
+    /// the red box below the flow child.
+    ///
+    /// The z read rides the SAME ItemPlacementExtractor lane the
+    /// renderer's own negative-z split (ComponentRenderer
+    /// .negativeZChildren) consumes — one wire decoder, so the canvas
+    /// and the per-ancestor overlay can never classify a box differently.
+    /// Hoist-aware canvases mount `behind` as a `.background` layer
+    /// (above the canvas background, below flow content — step 3) and
+    /// `above` as the existing `.overlay` (step 8); document order is
+    /// preserved inside each half (tree-order tie-break within a step).
+    public static func paintPartition(_ hoisted: [IRComponent])
+        -> (behind: [IRComponent], above: [IRComponent]) {
+        // Stable partition — document order survives in both halves.
+        var behind: [IRComponent] = []
+        var above: [IRComponent] = []
+        for c in hoisted {
+            // Appendix E: negative z ⇒ step 3 (behind in-flow content);
+            // zero/auto/positive ⇒ step 8 (above), ties by tree order.
+            if (ItemPlacementExtractor.extract(from: c.properties).paint.zIndex ?? 0) < 0 {
+                behind.append(c)
+            } else {
+                above.append(c)
+            }
+        }
+        return (behind, above)
+    }
+
     /// Recursively remove `position: fixed` descendants from a subtree.
     /// Returns the rebuilt component (identical except for the removed
     /// children — a subtree with no fixed descendants comes back with

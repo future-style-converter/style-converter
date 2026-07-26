@@ -4,6 +4,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.PropertyRegistry
+// RC-B1: the corpus-v4.1 ink mode-split — WPT capture bottoms currentColor
+// out at spec BLACK, the dark stage keeps the historical #eee contract.
+import com.styleconverter.runtime.core.renderer.defaultTextInk
 import com.styleconverter.runtime.core.types.ValueExtractors
 import kotlinx.serialization.json.JsonElement
 
@@ -43,7 +46,16 @@ object BorderSideExtractor {
      *                   and second is the JSON data for that property.
      * @return AllBordersConfig with extracted values for all sides.
      */
-    fun extractBorderConfig(properties: List<Pair<String, JsonElement?>>): AllBordersConfig {
+    fun extractBorderConfig(
+        properties: List<Pair<String, JsonElement?>>,
+        // RC-B1 (TITAN WPT lane) — threads LocalWptCaptureMode into the
+        // currentColor bottom-out below (WPT → spec black; dark stage →
+        // #eee). Default false keeps every width-only call site (band
+        // insets, sizing, margin collapse) and the whole 327-pair dark
+        // corpus byte-identical; only the StyleApplier paint path passes
+        // the live flag (via BordersFacade.extractConfig).
+        wptCaptureMode: Boolean = false,
+    ): AllBordersConfig {
         var top = BorderSideConfig()
         var end = BorderSideConfig()
         var bottom = BorderSideConfig()
@@ -89,16 +101,27 @@ object BorderSideExtractor {
         // color must therefore paint with the text color — NOT black. Our
         // renderer has no full cascade, so the fallback chain is:
         //   1. the element's own `Color` property, if declared;
-        //   2. #eee — the capture harness body color that `color` inherits
-        //      from on web (apps/web-harness/index.html `body { color:#eee }`),
-        //      which is what the browser resolves currentcolor to for these
-        //      fixtures (Borders_C04: web paints a light dotted border,
-        //      Android painted black → 0.8665).
+        //   2. the MODE-SPLIT default ink (defaultTextInk, WptCaptureMode.kt):
+        //      - dark stage (wptCaptureMode=false): #eee — the capture
+        //        harness body color that `color` inherits from on web
+        //        (apps/web-harness/index.html `body { color:#eee }`), which
+        //        is what the browser resolves currentcolor to for those
+        //        fixtures (Borders_C04: web paints a light dotted border,
+        //        Android painted black → 0.8665). The 327 committed
+        //        baselines depend on this side never moving.
+        //      - WPT capture (wptCaptureMode=true): spec BLACK — a real WPT
+        //        page's inherit chain ends at the UA `color: CanvasText`
+        //        black (html.css; corpus-v4.1 ink sub-boundary), so
+        //        `border: 1px solid` (color omitted → currentcolor per
+        //        css-color-4 §7.1) must paint black like the browser-ref.
+        //        RC-B1: css-break background-image-000's whole 0.874
+        //        penalty was this bottom-out painting rgb(238,238,238)
+        //        frames where the ref paints black.
         // extractColor returns null for the `currentcolor` keyword itself, so
         // explicit `border-color: currentColor` declarations land here too.
         val currentColor = properties.firstOrNull { it.first == "Color" }
             ?.second?.let { ValueExtractors.extractColor(it) }
-            ?: Color(0xFFEEEEEE)
+            ?: defaultTextInk(wptCaptureMode, Color(0xFFEEEEEE))
 
         // Apply shorthand values to sides that don't have specific values
         if (sharedWidth != null || sharedColor != null || sharedStyle != null) {

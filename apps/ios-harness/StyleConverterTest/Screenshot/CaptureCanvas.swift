@@ -296,23 +296,59 @@ struct ComposedCaptureCanvas: View {
         FixedHoist.split(roots: document.components)
     }
 
-    /// TITAN Round 4 GAP 1 — the per-root effective UA vertical block
-    /// margins (deferring to any IR-declared margin the runtime's
-    /// MarginApplier already paints), collapsed into the space to place
-    /// ABOVE each root + BELOW the last. See UABlockMargin: this reproduces
-    /// the browser-ref's UA `<p>`/`<hN>`/… block margins the native flush
-    /// stack lacked, so a multi-bar test's gaps match the ref. Composed
-    /// WPT only — this canvas is built solely by captureComposedDocument.
+    /// TITAN Round 4 GAP 1 + RC-A4 (wave 19) — the per-root stack plan.
+    /// Round 4 folded only the UA-INJECTED block margins (deferring to any
+    /// IR-declared side); RC-A4 additionally folds statically-resolvable
+    /// DECLARED block margins into the same collapsed gaps and flags the
+    /// root for a block-margin STRIP (via composedRootBlockMarginStrip), so
+    /// adjacent declared margins collapse to max() like the browser instead
+    /// of stacking (safe-001's 96px vs 76px root pitch). Out-of-flow roots
+    /// (their margins never collapse — §8.3.1 in-flow precondition) and
+    /// non-static value flavors bail to the Round 4 behavior. Composed WPT
+    /// only — this canvas is built solely by captureComposedDocument.
     /// Wave 17: computed over the IN-FLOW roots only — hoisted boxes
     /// occupy no flow space, so they contribute no stack margins (and the
     /// per-index arrays must match the flow ForEach exactly).
-    private func stackedSpacing(for flowRoots: [IRComponent])
-        -> (leading: [CGFloat], trailing: CGFloat) {
-        let margins = flowRoots.map {
-            UABlockMargin.effectiveVertical(tag: $0.meta?.sourceTag,
-                                            properties: $0.properties)
+    private func rootPlans(for flowRoots: [IRComponent]) -> [UABlockMargin.RootStackMargin] {
+        flowRoots.map { root in
+            // Wave-19 follow-up: the RC1 static-position family (the ONLY
+            // out-of-flow roots FixedHoist.split leaves in the flow list —
+            // absolute, no positioned ancestor, no inset) mounts at 0×0
+            // behind StaticPositionAnchor below, so it is margin-
+            // TRANSPARENT: CSS 2.1 §8.3.1 collapses the neighbors' block
+            // margins THROUGH a zero-flow-footprint box into ONE max() gap
+            // (hoisted roots already collapse through by ABSENCE — they
+            // never reach this list). Same classifier the mount uses — one
+            // decision, two consumers, never re-derived.
+            if FixedHoist.rendersInFlowAsStaticPosition(root) {
+                // Its OWN declared margins join the collapse-through set
+                // (§8.3.1's empty-box model — the hypothetical static box's
+                // margins are adjoining) via the SAME resolution as any
+                // other root, then get stripped from its render, so the
+                // slot anchor stays the §8.3.1 hypothetical position and
+                // nothing double-renders. Unresolvable flavors bail inside
+                // rootStackMargin (R4/R5) exactly like opaque roots.
+                let base = UABlockMargin.rootStackMargin(
+                    tag: root.meta?.sourceTag,
+                    declaresTop: UABlockMargin.declaresBlockMarginTop(root.properties),
+                    declaresBottom: UABlockMargin.declaresBlockMarginBottom(root.properties),
+                    staticDeclaredEdges: UABlockMargin.staticDeclaredEdges(root.properties))
+                // Same contribution + strip, flagged transparent so the fold
+                // keeps the adjoining set open across this root's slot.
+                return UABlockMargin.RootStackMargin(
+                    top: base.top, bottom: base.bottom,
+                    stripDeclared: base.stripDeclared, marginTransparent: true)
+            }
+            return UABlockMargin.rootStackMargin(
+                tag: root.meta?.sourceTag,
+                declaresTop: UABlockMargin.declaresBlockMarginTop(root.properties),
+                declaresBottom: UABlockMargin.declaresBlockMarginBottom(root.properties),
+                // The runtime's §8.3.1 classifier (same values MarginApplier
+                // paints); nil for any other out-of-flow root (defensive —
+                // split hoists them all, so none should reach here).
+                staticDeclaredEdges: ComponentRenderer.isOutOfFlow(root)
+                    ? nil : UABlockMargin.staticDeclaredEdges(root.properties))
         }
-        return UABlockMargin.stackedSpacing(margins)
     }
 
     /// TITAN Round 4 GAP 2 — the canvas background. The browser-ref frames
@@ -352,10 +388,21 @@ struct ComposedCaptureCanvas: View {
         // the flow half stacks in the padded VStack below, the hoisted
         // half mounts in the canvas-root overlay after the frame chain.
         let split = splitRoots
-        // GAP 1 — fold the per-root UA margins (with adjacent collapse and
-        // no collapse at the padded top/bottom edges) into per-root spacing.
+        // Wave 19 (RC-A5b) — Appendix E paint split of the hoisted half:
+        // negative-z boxes mount BEHIND flow content (step 3), the rest
+        // keep the wave-17 overlay (step 8). Computed once per body eval.
+        let paint = FixedHoist.paintPartition(split.hoisted)
+        // GAP 1 + RC-A4 — resolve each flow root's plan (UA + static
+        // declared block margins, strip flags), then fold the margins with
+        // adjacent collapse (no collapse at the padded top/bottom edges).
         // Wave 17: over the FLOW roots only (hoisted boxes take no space).
-        let spacing = stackedSpacing(for: split.flow)
+        let plans = rootPlans(for: split.flow)
+        // Wave-19 follow-up: the transparency-aware fold — a margin-
+        // transparent (zero-flow) root keeps the §8.3.1 adjoining set open,
+        // so {prev bottom, transparent margins, next top} emit ONE max() gap
+        // instead of one gap per opaque neighbor (the full plan rides in,
+        // not just the (top, bottom) projection).
+        let spacing = UABlockMargin.stackedSpacing(plans: plans)
         let lastIndex = split.flow.count - 1
         return VStack(alignment: .leading, spacing: 0) {
             // enumerated()+offset id: roots are rendered positionally, never
@@ -383,13 +430,21 @@ struct ComposedCaptureCanvas: View {
                         ComponentHost(component: root)
                     }
                 }
-                    // GAP 1 — the UA block margin ABOVE this root: its full
+                    // RC-A4 — a stripped root renders with its block margins
+                    // ZEROED through the runtime's §8.3.1 override channel:
+                    // the declared values now live in the collapsed paddings
+                    // below, so adjacent declared margins fold to max() like
+                    // the browser. Inline margins are untouched, and the
+                    // renderer rewrites the channel per child (root-only).
+                    // Non-stripped roots write the default nil — identity.
+                    .composedRootBlockMarginStrip(plans[idx].stripDeclared)
+                    // GAP 1 — the block margin ABOVE this root: its full
                     // top margin for the first root (the canvas's 16px
                     // padding blocks parent↔child collapse there), or the
                     // previous root's bottom COLLAPSED with this root's top
-                    // for interior roots. IR-declared margins contribute 0
-                    // here (already painted by MarginApplier inside the host)
-                    // so they are never double-counted.
+                    // for interior roots. Declared margins contribute here
+                    // ONLY when stripped from the host (RC-A4) — never
+                    // double-counted.
                     .padding(.top, spacing.leading[idx])
                     // Only the LAST root carries the trailing bottom margin
                     // (again uncollapsed — the padded bottom edge). Interior
@@ -413,6 +468,22 @@ struct ComposedCaptureCanvas: View {
         // Natural (content) height beyond the 600 floor — mirrors the ref's
         // documentHeight capture and the per-component canvas's height rule.
         .fixedSize(horizontal: false, vertical: true)
+        // Wave 19 (RC-A5b) — the NEGATIVE-z half of the hoisted list
+        // paints in CSS 2.1 Appendix E step 3: behind ALL in-flow canvas
+        // content, above only the canvas background. A `.background`
+        // attached BEFORE the canvasBackground layer sits exactly there
+        // (later .background modifiers paint further behind), and the
+        // same full-frame attach point keeps the unpadded-origin anchor
+        // the overlay half uses. dynamic-align-self-001's z:-1 red probe
+        // otherwise covered the green abspos child pixel-for-pixel (the
+        // wave18 iOS "green never paints" failure — see
+        // FixedHoist.paintPartition). Empty half → no layer, view tree
+        // otherwise identical.
+        .background(alignment: .topLeading) {
+            if !paint.behind.isEmpty {
+                FixedHoistOverlay(components: paint.behind)
+            }
+        }
         // GAP 2 — the ref canvas background: corpus-v4 WHITE by default, or
         // the document body-root's own background COMPOSITED over that white
         // when it declares one (opaque grey for a98rgb-003; translucent
@@ -429,11 +500,13 @@ struct ComposedCaptureCanvas: View {
         // web behavior pins for root-level absolute boxes (left:100 →
         // canvas x=100, not 116). As an overlay it paints ABOVE all
         // in-flow content (CSS 2.1 Appendix E step 8); order/z-index
-        // resolve inside FixedHoistOverlay's ZStack. Empty hoist list →
-        // no overlay content, view tree otherwise identical.
+        // resolve inside FixedHoistOverlay's ZStack. Wave 19 (RC-A5b):
+        // only the NON-negative-z half mounts here — the negative-z half
+        // rides the step-3 background above. Empty half → no overlay
+        // content, view tree otherwise identical.
         .overlay(alignment: .topLeading) {
-            if !split.hoisted.isEmpty {
-                FixedHoistOverlay(components: split.hoisted)
+            if !paint.above.isEmpty {
+                FixedHoistOverlay(components: paint.above)
             }
         }
         // Publish the capture geometry so the runtime resolves vw/vh/% and

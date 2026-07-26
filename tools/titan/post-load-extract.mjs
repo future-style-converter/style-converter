@@ -143,6 +143,17 @@ export const POST_LOAD_COMPUTED_PROPERTIES = [
   // Scripts toggle transforms in the wider wall corpus; computed matrix()
   // is absolute. 'none' is delete-not-write.
   'transform',
+  // RC-A5a (wave 19): self-alignment — the css-flexbox dynamic-change
+  // family mutates it (abspos/dynamic-align-self-001: `child.style.alignSelf
+  // = 'start'` after load). The baked USED insets already encode the
+  // post-mutation position, but the STALE static declaration lingered
+  // underneath ('align-self: end' survived the overlay) and a runtime that
+  // gives self-alignment priority over the baked insets faithfully rendered
+  // the PRE-mutation state (wave18-final: web-ref 0.999 / ios-ref 0.997 /
+  // android-ref 0.9416 on the same fixture). Snapshotting the computed
+  // keyword delivers the post-script value to every runtime and displaces
+  // the stale key. 'auto' (the css-align-3 §6.1 initial) is delete-not-write.
+  'align-self',
   // display gates box generation (script-driven display flips are a whole
   // wall family); overflow-x/y as LONGHANDS (the single `overflow` static
   // shorthand is stripped); z-index orders the overlapping boxes these
@@ -162,6 +173,10 @@ export const WRITE_RULES = {
   left:       { deleteWhen: 'auto' },
   'z-index':  { deleteWhen: 'auto' },   // auto = unstacked, not "0"
   transform:  { deleteWhen: 'none' },   // none = no transform declaration
+  // RC-A5a: 'auto' is align-self's initial value (css-align-3 §6.1 — defer
+  // to the parent's align-items) and carries no declaration; but the static
+  // key is still deleted so a stale pre-mutation keyword cannot linger.
+  'align-self': { deleteWhen: 'auto' },
   width:      { requirePx: true },      // 'auto' (e.g. display:none) → delete
   height:     { requirePx: true },
 };

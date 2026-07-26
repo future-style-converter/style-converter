@@ -107,9 +107,10 @@ struct TransformsAggregate: Equatable {
     // prevents parent rasterisation from flattening the scene.
     var preserve3D: Bool = false
 
-    // Back-face culling. When true and a 3D rotation would show the
-    // reverse side, the view is hidden. Implemented in the applier via
-    // an opacity test on the Y/X rotation angle (approximate).
+    // Back-face culling. When true and the ACCUMULATED 3D matrix (own
+    // rotations × the containing 3D rendering context — wave 19, see
+    // BackfaceCulling.swift) turns the plane's normal away from the
+    // viewer, the applier collapses the view to opacity 0.
     var backfaceHidden: Bool = false
 
     // `perspective` + origin (applies to CHILDREN in CSS; here we apply

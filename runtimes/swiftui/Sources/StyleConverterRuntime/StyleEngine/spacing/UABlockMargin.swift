@@ -135,18 +135,14 @@ public enum UABlockMargin {
     /// §8.3.1). Empty input → empty leading + 0 trailing.
     public static func stackedSpacing(_ margins: [(top: CGFloat, bottom: CGFloat)])
         -> (leading: [CGFloat], trailing: CGFloat) {
-        guard !margins.isEmpty else { return ([], 0) }
-        var leading = [CGFloat](repeating: 0, count: margins.count)
-        // First root: its full top margin (padding blocks collapse above).
-        leading[0] = margins[0].top
-        // Interior roots: collapse the previous root's bottom against this
-        // root's top into a single used gap.
-        for i in 1..<margins.count {
-            leading[i] = collapsed(margins[i - 1].bottom, margins[i].top)
-        }
-        // Below the last root: its full bottom margin (padding blocks
-        // collapse below).
-        let trailing = margins[margins.count - 1].bottom
-        return (leading, trailing)
+        // Delegate to the transparency-aware plan fold (wave-19 follow-up,
+        // ComposedRootStack.swift) with every entry OPAQUE — for all-opaque
+        // stacks the two rules are provably identical (each opaque root
+        // closes the adjoining set: first top preserved, interior gaps
+        // max(prev bottom, own top), last bottom preserved), so every
+        // Round 4 pin stays byte-stable while §8.3.1 lives in ONE place.
+        stackedSpacing(plans: margins.map {
+            RootStackMargin(top: $0.top, bottom: $0.bottom, stripDeclared: false)
+        })
     }
 }

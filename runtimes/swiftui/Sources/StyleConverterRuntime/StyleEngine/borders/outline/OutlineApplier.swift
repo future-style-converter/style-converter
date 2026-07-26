@@ -26,6 +26,10 @@ struct OutlineApplier: ViewModifier {
     // currentColor exactly like colourless border sides do.
     var currentColor: Color? = nil
 
+    // RC-B1 — the ambient WPT flag for the mode-split ink bottom-out
+    // below (same channel BorderSideApplier reads; see its doc).
+    @Environment(\.wptCaptureMode) private var wptCaptureMode: Bool
+
     func body(content: Content) -> some View {
         guard let cfg = config, cfg.hasOutline else { return AnyView(content) }
         // Distance from the border box edge to the outline centreline.
@@ -34,12 +38,14 @@ struct OutlineApplier: ViewModifier {
         // handles that naturally via `.padding` with negative values.
         let outer = cfg.width / 2 + cfg.offset
         // Colour: declared outline-color → element `color` (currentColor,
-        // css-ui-4 §4.3 initial) → the harness's default text colour
-        // #eee, the SAME fallback chain BorderSideApplier uses. The old
-        // `.primary` fallback resolved BLACK in the capture pipeline
-        // while web painted its white currentColor frame
-        // (W5_OutlineGroove 0.747 → the frame flipped tone).
-        let colour = cfg.color ?? currentColor ?? Color(white: 0.933)
+        // css-ui-4 §4.3 initial) → the SHARED mode-split bottom-out
+        // (BorderSideApplier.fallbackInk, RC-B1): dark stage keeps the
+        // harness #eee (the old `.primary` fallback resolved BLACK there
+        // while web painted its light currentColor frame — W5_OutlineGroove
+        // 0.747); WPT capture bottoms out at spec BLACK, the UA CanvasText
+        // ink the browser-ref resolves currentcolor to on the white page.
+        let colour = cfg.color ?? BorderSideApplier.fallbackInk(
+            currentColor: currentColor, wptCaptureMode: wptCaptureMode)
         // Scale up the original radius by the outer distance so the
         // outline curve stays parallel to the element's rounded corners.
         let outlineRadius = grownRadius(radius, by: outer)

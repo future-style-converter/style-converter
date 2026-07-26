@@ -309,8 +309,10 @@ object StyleApplier {
         collapsedMargin: com.styleconverter.runtime.spacing.CollapsedMargin? = null,
         // TITAN WPT lane — LocalWptCaptureMode, read by ComponentRenderer
         // (same static-chain-can't-read-locals rationale as collapsedMargin).
-        // Consumed by the sizing extractor's box-sizing tri-state default;
-        // default false keeps every non-WPT call site byte-identical.
+        // Consumed by the sizing extractor's box-sizing tri-state default,
+        // the RC-B6b relative-width overflow gate, and the RC-B1 border/
+        // outline currentColor ink split; default false keeps every non-WPT
+        // call site byte-identical.
         wptCaptureMode: Boolean = false,
     ): Modifier {
         // Convert to type/data pairs for extractors
@@ -335,14 +337,18 @@ object StyleApplier {
      */
     fun extractConfig(
         properties: List<Pair<String, JsonElement?>>,
-        // TITAN WPT lane — see applyProperties; only the layout/sizing lane
-        // reads it (box-sizing tri-state default), default false everywhere.
+        // TITAN WPT lane — see applyProperties; consumed by the layout/
+        // sizing lane (box-sizing tri-state default + RC-B6b relative-width
+        // overflow) and the borders lane (RC-B1 currentColor ink split),
+        // default false everywhere.
         wptCaptureMode: Boolean = false,
     ): StyleConfig {
         return StyleConfig(
             layout = LayoutFacade.extractConfig(properties, wptCaptureMode),
             colors = ColorExtractor.extractColorConfig(properties),
-            borders = BordersFacade.extractConfig(properties),
+            // RC-B1: the borders lane also reads the WPT flag — its
+            // currentColor bottom-out is mode-split (WPT black / dark #eee).
+            borders = BordersFacade.extractConfig(properties, wptCaptureMode),
             effects = EffectsFacade.extractConfig(properties),
             transforms = TransformExtractor.extractTransformConfig(properties),
             typography = TypographyExtractor.extractTypographyConfig(properties),

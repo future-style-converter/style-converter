@@ -207,13 +207,34 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
       : null;
     // Composed children recurse in flat-array sibling order (spec 03),
     // carrying the SAME options so the skin applies at every depth.
-    childSlot = node.children.map((child, index) =>
-      createElement(NodeRenderer, {
+    const renderChild = (index: number) => {
+      const child = node.children[index];
+      return createElement(NodeRenderer, {
         key: child.component.id || index,
         node: child,
         depth: depth + 1,
         options,
-      }));
+      });
+    };
+    // Optional child-run grouping (wave-19 float-run calibration — see
+    // RendererOptions.planChildRuns). Null plan = the pure default:
+    // every child a direct sibling, byte-identical to the pre-hook DOM.
+    const runPlan = options?.planChildRuns ? options.planChildRuns(node.children, ctx) : null;
+    childSlot = !runPlan
+      ? node.children.map((_, index) => renderChild(index))
+      : runPlan.segments.map((seg, s) =>
+        seg.wrapperStyle
+          // Wrapped segment: one <div> carrying the skin's run style
+          // (float-run BFC), members rendered inside in sibling order.
+          // data-float-run marks the synthetic box for tooling/tests.
+          ? createElement(
+            'div',
+            { key: `run-${s}`, 'data-float-run': '', style: seg.wrapperStyle },
+            seg.indices.map(renderChild),
+          )
+          // Plain segment: members stay direct siblings (keyed array —
+          // React flattens nested arrays with stable keys).
+          : seg.indices.map(renderChild));
   } else {
     // Childless: the empty-content slot (skin: placeholder label;
     // default: the text itself, or nothing — an empty element).

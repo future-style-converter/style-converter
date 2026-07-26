@@ -25,6 +25,11 @@ struct TransformsApplier: ViewModifier {
     // nil straight through, so there's no per-view cost on the common path.
     let config: TransformsAggregate?
 
+    // Wave 19 (RC-B4a) — the accumulated 3D matrix of the containing 3D
+    // rendering context (BackfaceCulling.swift). Identity default = no
+    // context above; publishing/reset happens in Step 4 below.
+    @Environment(\.transforms3DAccumulated) private var inherited3D: CATransform3D
+
     func body(content: Content) -> some View {
         // Short-circuit: nothing to do, return content as-is.
         guard let c = config, c.touched else { return AnyView(content) }
@@ -81,13 +86,36 @@ struct TransformsApplier: ViewModifier {
         // the closest analog to CSS's flatten-prevention semantics.
         if c.preserve3D { v = AnyView(v.drawingGroup()) }
 
-        // Step 4 — BackfaceVisibility: hide when the cumulative Y/X
-        // rotation sends us past 90° (best-effort; SwiftUI lacks a
-        // first-class backface-culling hook).
-        if c.backfaceHidden && isBackFacing(c) {
-            // Collapse to zero opacity but keep layout.
+        // Step 4 — BackfaceVisibility on the ACCUMULATED matrix (wave 19,
+        // RC-B4a; css-transforms-2 §5.1): the element's own rotations
+        // compose with the containing 3D rendering context's matrix, and
+        // the plane is culled when the transformed normal's z component
+        // goes negative (BackfaceCulling.backfaceZ — the WebKit cofactor
+        // test). Replaces the old own-angles-only heuristic, which both
+        // ignored ancestors AND mis-summed mixed X/Y rotations.
+        if BackfaceCulling.isCulled(agg: c, inherited: inherited3D) {
+            // Collapse to zero opacity but keep layout (SwiftUI has no
+            // first-class backface-culling hook).
             v = AnyView(v.opacity(0))
         }
+
+        // Step 4b — context propagation for DESCENDANTS: an element that
+        // establishes/extends a 3D rendering context (perspective ≠ none,
+        // or preserve-3d — css-transforms-2 §4) publishes the accumulated
+        // matrix so nested faces cull against the full ancestor chain
+        // (backface-visibility-hidden-001: container rotateY(45°) reaches
+        // the grandchild faces through this channel). A touched FLAT
+        // element instead RESETS the channel — its subtree is flattened
+        // into its plane, ending the context. Untouched wrappers never
+        // reach this body (the guard above) and pass the channel through,
+        // a documented approximation that only forwards identity anyway.
+        v = AnyView(v.environment(
+            \.transforms3DAccumulated,
+            BackfaceCulling.publishes3DContext(c)
+                ? BackfaceCulling.accumulate(
+                    own: BackfaceCulling.rotationMatrix(of: c),
+                    inherited: inherited3D)
+                : CATransform3DIdentity))
 
         // Step 5 — the `perspective` PROPERTY (css-transforms-2 §6).
         // Wave 5: consumed as the pendingPerspective SEED in Step 1
@@ -204,22 +232,9 @@ struct TransformsApplier: ViewModifier {
         }
     }
 
-    // Heuristic backface test — sums Y/X rotation degrees from the
-    // function list + longhand and returns true if the running angle
-    // lands in the (90°, 270°) range mod 360°.
-    private func isBackFacing(_ agg: TransformsAggregate) -> Bool {
-        // Collect every rotate contribution, including the longhand.
-        var total: CGFloat = 0
-        let all = agg.functions + [agg.rotate].compactMap { $0 }
-        for fn in all {
-            if case .rotate(_, let y, _, let d) = fn, y != 0 { total += d }
-            if case .rotate(let x, _, _, let d) = fn, x != 0 { total += d }
-        }
-        // Normalise to [0, 360) then check "back half".
-        let norm = ((total.truncatingRemainder(dividingBy: 360)) + 360)
-            .truncatingRemainder(dividingBy: 360)
-        return norm > 90 && norm < 270
-    }
+    // Wave 19: the old isBackFacing angle-sum heuristic was deleted —
+    // the culling decision now lives in BackfaceCulling.isCulled (pure,
+    // XCTest-pinned) so it can see the accumulated ancestor matrix.
 }
 
 extension View {

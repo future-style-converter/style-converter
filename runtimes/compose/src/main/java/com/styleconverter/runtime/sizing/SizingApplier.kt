@@ -72,7 +72,9 @@ object SizingApplier {
         // whole existing corpus keeps byte-identical modifier chains.
         r = applyWidth(r, inflateForContentBox(
             clampLength(rawW, minWv, maxWv, ctx),
-            config.boxSizing, config.contentBoxInflateX), ctx)
+            // RC-B6b: the WPT flag rides the config into the width branch
+            // so ch/em widths can take the overflow-aware exact path.
+            config.boxSizing, config.contentBoxInflateX), ctx, config.wptCaptureMode)
         r = applyHeight(r, inflateForContentBox(
             clampLength(rawH, minHv, maxHv, ctx),
             config.boxSizing, config.contentBoxInflateY), ctx)
@@ -187,8 +189,16 @@ object SizingApplier {
         return LengthValue.Exact(px)
     }
 
-    /** Width axis. */
-    private fun applyWidth(m: Modifier, v: LengthValue?, ctx: SpacingContext): Modifier = when (v) {
+    /** Width axis.
+     *
+     *  [wptCaptureMode] (RC-B6b, default false) only changes the NON-%
+     *  Relative branch — see the routing comment there. */
+    private fun applyWidth(
+        m: Modifier,
+        v: LengthValue?,
+        ctx: SpacingContext,
+        wptCaptureMode: Boolean = false,
+    ): Modifier = when (v) {
         null, LengthValue.Unknown, LengthValue.Auto, LengthValue.None -> m  // no override
         // Definite px → the wave-12 overflow-aware exact width (see
         // exactWidth above: Modifier.width semantics when fitting, declared
@@ -199,6 +209,24 @@ object SizingApplier {
             // modifier for that. We clamp to [0,1] since fillMaxWidth rejects
             // values outside that range at runtime.
             m.fillMaxWidth((v.value.toFloat() / 100f).coerceIn(0f, 1f))
+        } else if (wptCaptureMode) {
+            // RC-B6b (WPT capture only): a non-% relative width resolves to
+            // a FIXED px value here (ch via the measured ChUnitMetrics
+            // advance, em/rem via the font context — the same resolveToDp
+            // the else-branch uses), so it is exactly as definite as the
+            // Exact branch above and must get the same css-overflow-3 §3
+            // semantics: measure/place at the DECLARED size and let the ink
+            // overflow the parent (start-anchored) instead of letting
+            // Modifier.width COERCE it into the incoming constraints.
+            // block-ellipsis-001: `width: 63.1ch` (monospace ≈ 605px)
+            // inside the 358px content envelope wrapped at 358px on
+            // Android while the browser-ref wraps at 605px — every wrap
+            // point (and the 2-line clamp geometry) shifted. Gated on the
+            // WPT flag so the dark-stage corpus keeps the historical
+            // coercing Modifier.width byte-identically (the wave-1 "+2px
+            // placeholder" lesson: never move non-WPT geometry from a
+            // sizing lane change).
+            m.exactWidth(resolveToDp(v, ctx))
         } else {
             // Non-% relative (em/vw/…) goes through the spacing resolver.
             m.width(resolveToDp(v, ctx))
@@ -292,9 +320,11 @@ object SizingApplier {
         var r = modifier
         // Lane BX — flex items honour content-box the same way the main
         // lane does (identity unless the item explicitly declared it).
+        // RC-B6b: the WPT relative-overflow routing also rides the config
+        // here so a flex item's ch/em width resolves identically.
         r = applyWidth(r, inflateForContentBox(
             config.width ?: config.inlineSize,
-            config.boxSizing, config.contentBoxInflateX), ctx)
+            config.boxSizing, config.contentBoxInflateX), ctx, config.wptCaptureMode)
         r = applyWidthIn(r, config.minWidth ?: config.minInlineSize,
             config.maxWidth ?: config.maxInlineSize, ctx)
         return r

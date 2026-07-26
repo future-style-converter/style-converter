@@ -53,6 +53,13 @@ import {
   BLOCK_LABEL_ORIGIN_Y,
   layoutBlockLabel,
 } from '@style-converter/web/renderer/BlockFontLabel';
+// Wave-19 lane FLOAT — the float-run segmentation twin (pins P1/P2/P6)
+// behind the planChildRuns hook below (WPT capture only).
+import {
+  floatChildFacts,
+  floatRunWrapperStyle,
+  segmentFloatRuns,
+} from '@style-converter/web/engine/layout/FloatRowPacking';
 import type { ComposedNode } from './Composer';
 
 /**
@@ -502,6 +509,46 @@ const HARNESS_OPTIONS: RendererOptions = {
   resolveImageSource: () => PLACEHOLDER_IMG_SRC,
   // Forced-state capture hook (spec 06 §6) — validated URL param.
   forceState: FORCE_STATE,
+  // Wave-19 lane FLOAT — CSS 2.1 §9.5 float-run grouping, WPT capture
+  // ONLY (pin P8; the legacy 327-pair flow never sets `?wpt=1`, so its
+  // DOM stays byte-identical). Each run of ≥2 consecutive left-floating
+  // children gets a `display:flow-root; width:max-content` wrapper so
+  // float rows break ONLY at `<br clear>` markers: the captured IR's
+  // synthetic 100px root frames otherwise wrap justify-self-001's rows
+  // at an artifact width (3/2/3/2/3/1) the browser-ref — laid against
+  // the ≥360px body — never saw (ref rows 3/2/5/4). See
+  // engine/layout/FloatRowPacking.ts (the natives' pure-packer twin).
+  planChildRuns: (children, ctx) => {
+    // P8 — WPT capture only; every other flow keeps the pure default.
+    if (!WPT_MODE) return null;
+    // Block flow only — flex/grid children are items, not floats
+    // (css-flexbox-1 §3 / css-grid-1 §6: float has no effect on them).
+    const d = ctx.styles.display;
+    if (d === 'flex' || d === 'grid' || d === 'inline-flex' || d === 'inline-grid') return null;
+    // Per-sibling facts through the engine's Float/Clear extractors.
+    const facts = children.map((child) => {
+      // CSS 2.1 §9.7: position:absolute/fixed forces float → none —
+      // an out-of-flow child never joins (or breaks) a run.
+      const outOfFlow = child.component.properties.some(
+        (p) => p.type === 'Position' && (p.data === 'ABSOLUTE' || p.data === 'FIXED'),
+      );
+      if (outOfFlow) return { floatsLeft: false, clearBreaksLeft: false };
+      // The clear-break marker must be childless (pin P2) — a clear on
+      // a content box is real layout, out of the narrow contract.
+      return floatChildFacts(child.component.properties, child.children.length > 0);
+    });
+    // Segment once (pins P1/P2); run-free containers keep the default.
+    const segments = segmentFloatRuns(facts);
+    if (!segments.some((s) => s.isRun)) return null;
+    // Runs wrap (BFC + max-content + optional br strut); singles stay
+    // direct siblings — sibling order is preserved by construction.
+    return {
+      segments: segments.map((s) =>
+        s.isRun
+          ? { indices: s.indices, wrapperStyle: floatRunWrapperStyle(s.strutted) }
+          : { indices: s.indices }),
+    };
+  },
 };
 
 /**

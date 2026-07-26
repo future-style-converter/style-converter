@@ -102,6 +102,10 @@ object SizingExtractor {
         // false, so the tri-state pin (`absent stays null`) still holds on
         // every non-WPT path.
         cfg = cfg.copy(boxSizing = SizingApplier.effectiveBoxSizing(cfg.boxSizing, wptCaptureMode))
+        // RC-B6b — carry the mode on the config so the Applier can route
+        // px-resolvable RELATIVE widths (ch/em/…) through the wave-12
+        // overflow-aware exactWidth in WPT capture (see SizingConfig doc).
+        cfg = cfg.copy(wptCaptureMode = wptCaptureMode)
         // Lane BX — only an EXPLICIT content-box needs the padding+border
         // inflation bands; unset/border-box configs keep 0f so the Applier
         // is a guaranteed no-change on the whole existing fixture corpus.

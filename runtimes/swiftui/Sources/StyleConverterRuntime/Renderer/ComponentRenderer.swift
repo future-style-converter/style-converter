@@ -1148,6 +1148,33 @@ public struct ComponentRenderer: View {
                     // layout (leading text included).
                     contentOrPlaceholder(style: style)
                 }
+            } else if let floatSegments = blockFloatSegments() {
+                // Wave-19 lane FLOAT — CSS 2.1 §9.5 float row packing,
+                // composed-WPT capture ONLY (pin P8; the gate lives in
+                // blockFloatSegments): consecutive left-floating block
+                // siblings pack side-by-side instead of stacking in the
+                // VStack (descendant-static-position-001's green+grey
+                // pair rendered grey BELOW green here; justify-self-001
+                // collapsed its 3/2/5/4 ref rows to a single column).
+                // The dark-stage 327 corpus never sets wptCaptureMode,
+                // so its block containers keep the VStack byte-identically.
+                FloatBlockLayout(
+                    // The pure segmentation over the SAME sorted child
+                    // array contentOrPlaceholder renders — subview
+                    // indices line up by construction (pins P1/P2).
+                    segments: floatSegments,
+                    // Mixed-content text renders as a leading subview
+                    // BEFORE the children (contentOrPlaceholder's Bug-1
+                    // branch) — the layout stacks it first.
+                    leadingCount: (component.text?.isEmpty == false) ? 1 : 0,
+                    // The VStack's spacing twin for the stacked items.
+                    spacing: gap.row
+                ) {
+                    // Same content pass as every container — the sorted
+                    // in-flow children become the layout's subviews in
+                    // order (abspos children ride the overlay, not this).
+                    contentOrPlaceholder(style: style)
+                }
             } else {
                 VStack(
                     alignment: .leading,
@@ -1212,22 +1239,38 @@ public struct ComponentRenderer: View {
         // POSITION: the sole-flex-item hypothetical (css-flexbox-1
         // §4.1), so align-self (incl. the safe/unsafe overflow keywords
         // riding the Generic wire) shifts the child off the overlay's
-        // top-leading anchor on the CROSS axis. Nil for every non-flex
-        // ancestor — their children keep the block-flow anchor.
+        // top-leading anchor. Nil for every non-flex ancestor — their
+        // children keep the block-flow anchor.
         let parentFlexDirection: FlexDirectionKeyword? =
             style.layout7?.display == .flex
                 ? (style.layout7?.flexDirection ?? .row)  // CSS initial: row
                 : nil
         ForEach(Array(children.enumerated()), id: \.offset) { _, child in
-            // Static-position cross shift (0 unless flex parent + an
-            // align-self claim + definite extents — the helper's docs
-            // spell out each honest no-op). Computed per child: the
-            // safe fallback depends on the CHILD's own size.
-            let staticShift = AbsposStaticAlignment.staticCrossOffset(
-                flexDirection: parentFlexDirection,
-                childProperties: child.properties,
-                containerW: childCB,
-                containerH: childCBH)
+            // Static-position shift — computed per child (the safe
+            // fallback depends on the CHILD's own size). Wave 19 (lane
+            // FLEX): WPT capture routes through the FULL physical
+            // resolver (AbsposStaticPosition — both axes, *_REVERSE +
+            // writing modes honored, RC-A6 painted-frame extents); the
+            // dark-stage corpus keeps the wave-18 cross-only shift
+            // byte-identically. Zero for non-flex ancestors either way.
+            let staticShift: CGSize = parentFlexDirection == nil
+                ? .zero
+                : (wptCaptureMode
+                    // Full resolver: raw container wire (the resolved
+                    // declarations — same list the flex container reads)
+                    // + the §3.1 padding-box channels already computed.
+                    ? AbsposStaticPosition.staticOffset(
+                        containerProperties: resolvedProperties,
+                        childProperties: child.properties,
+                        containerW: childCB,
+                        containerH: childCBH,
+                        wptCaptureMode: true)
+                    // Wave-18 machinery, byte-identical for dark stage.
+                    : AbsposStaticAlignment.staticCrossOffset(
+                        flexDirection: parentFlexDirection,
+                        childProperties: child.properties,
+                        containerW: childCB,
+                        containerH: childCBH))
             // Wave 11 (lane IOS grid-abspos, css-grid-1 §9.2) — when
             // THIS positioned ancestor is a GRID container, an
             // inset-less abspos child sits at its static position "as
@@ -1323,7 +1366,17 @@ public struct ComponentRenderer: View {
                 columnGap: gap.column,
                 // Explicit CSS width ⇒ fr/% tracks split the proposal;
                 // otherwise fit-content hug (web harness parity).
-                definiteWidth: style.size.width != nil
+                definiteWidth: style.size.width != nil,
+                // Wave-19 RC-A2: container justify-content — content
+                // distribution of the track group (css-align-3 §5.3); the
+                // aggregate keyword FlexboxExtractor already parses.
+                // Wave-19 RC-A2: direction:rtl is NOT passed — SwiftUI's
+                // ambient layoutDirection environment (set by
+                // TypographyApplier from the same Direction wire, inherited
+                // from ancestors otherwise) mirrors the Layout's placement
+                // itself; CSSGridLayout solves in logical space (see its
+                // header note + SkepticRtlGridPlacementTests).
+                justifyContent: agg?.justifyContent
             ) {
                 contentOrPlaceholder(style: style)
             }
@@ -1366,7 +1419,12 @@ public struct ComponentRenderer: View {
                 definiteWidth: style.size.width != nil,
                 // The named-area map — consumed only by the claims
                 // resolver (css-grid-1 §8.3).
-                templateAreas: agg?.gridTemplateAreas
+                templateAreas: agg?.gridTemplateAreas,
+                // Wave-19 RC-A2: same distribution input as the plain
+                // track-list path above (one behavior, two entries);
+                // direction:rtl rides the ambient layoutDirection
+                // environment, not a Layout input (see CSSGridLayout).
+                justifyContent: agg?.justifyContent
             ) {
                 contentOrPlaceholder(style: style)
             }
@@ -1655,6 +1713,37 @@ public struct ComponentRenderer: View {
             // …with 2+ in-flow children (absolute boxes ride the overlay
             // and never distribute — css-multicol-1 §2 in-flow only).
             && inFlowChildren.count >= 2
+    }
+
+    // MARK: - Float row packing (wave-19 lane FLOAT)
+
+    /// The block container's float-run plan, or nil when this container
+    /// keeps the plain VStack — the iOS twin of Compose
+    /// ComponentRenderer.blockFloatSegments (pins P1/P2/P8).
+    ///
+    /// nil when ANY of:
+    ///  • not in composed-WPT capture (P8 — the dark-stage 327 corpus
+    ///    must keep the VStack byte-identically);
+    ///  • the sorted in-flow children contain no ≥2 streak of
+    ///    left-floating siblings (run-free containers stay frozen).
+    /// The segmentation runs over the SAME `FlexboxApplier.sorted`
+    /// array contentOrPlaceholder renders, so FloatBlockLayout's
+    /// subview indices line up by construction.
+    private func blockFloatSegments() -> [FloatRowPacking.Segment]? {
+        // P8 — composed-WPT capture only (the environment flag the
+        // capture screen sets; property fixtures / dark stage never do).
+        guard wptCaptureMode else { return nil }
+        // The exact render order of the child subviews (CSS `order`).
+        let children = FlexboxApplier.sorted(inFlowChildren)
+        // Per-sibling facts: float side + the `<br clear>` break shape
+        // (childless Clear-only marker — pin P2).
+        let facts = children.map {
+            FloatRowPacking.facts(from: $0.properties,
+                                  hasChildren: $0.children?.isEmpty == false)
+        }
+        // Segment once; only a plan with an actual run leaves the VStack.
+        let segments = FloatRowPacking.segment(facts)
+        return segments.contains(where: { $0.isRun }) ? segments : nil
     }
 
     // MARK: - Content
@@ -2474,7 +2563,12 @@ private struct PlaceholderLabel: View {
             // out on ONE line at full intrinsic width, overflowing the
             // box to the right exactly like the web reference
             // (Typography_C20/C21 previously wrapped to 2 lines).
-            .lineLimit(nil)
+            // Wave 19 — honor line-clamp's cap (css-overflow-4 §5) when
+            // one is configured: this inner .lineLimit is the one SwiftUI
+            // consults (innermost wins over TypographyApplier's outer
+            // LineLimitMod, which the wave-19 skeptic proved inert here).
+            // nil = no clamp = the historical unlimited wrap.
+            .lineLimit(textConfig.lineClampLimit)
             .fixedSize(horizontal: textConfig.noWrap, vertical: true)
             // Fidelity wave 3 — first/last half-leading (CSS 2.1
             // §10.8.1): browsers centre each line's glyphs inside a

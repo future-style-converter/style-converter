@@ -165,8 +165,13 @@ object CanvasRootHoist {
      * machinery). ComponentRenderer applies this exactly when a Host is
      * active; hostless paths (dark stage, 327-pair baseline) never see it.
      * Pure truth table — pinned in CanvasRootHoistTest.
+     * Public (wave-19 follow-up, same precedent as [shouldHoistToCanvasRoot]):
+     * the harness's composed canvas reads it to mark such a root margin-
+     * TRANSPARENT in the root-stack gap fold — CSS 2.1 §8.3.1 collapses the
+     * neighbors' block margins THROUGH a zero-flow-footprint box — using the
+     * SAME decision the renderer's zero-flow anchor rides, never re-deriving.
      */
-    internal fun rendersInFlowAsStaticPosition(
+    fun rendersInFlowAsStaticPosition(
         properties: List<IRProperty>,
         hasPositionedAncestor: Boolean,
     ): Boolean = positionTypeOf(properties) == PositionType.ABSOLUTE &&
@@ -220,6 +225,20 @@ object CanvasRootHoist {
         roots.forEach { walk(it, hasPositionedAncestor) }
         return out
     }
+
+    /**
+     * Wave-19 follow-up — will a [Host] over these roots actually ACTIVATE
+     * (i.e. skip its identity fast path and provide [LocalActive])? True
+     * exactly when the hoist walk finds at least one hoist-eligible box.
+     * The harness's composed canvas needs this because the wave-18 RC1
+     * static-position zero-flow anchor is HOST-GATED in ComponentRenderer:
+     * in a document with no hoisted box, a no-inset absolute root renders
+     * at its natural flow size, so the gap fold must NOT treat it as
+     * margin-transparent there — transparency must mirror the renderer's
+     * real footprint, one walk ([collectCanvasHoisted]), two consumers.
+     */
+    fun hostActivates(roots: List<IRComponent>): Boolean =
+        collectCanvasHoisted(roots).isNotEmpty()
 
     /**
      * The flow size an overlay slot reports to the canvas on EACH axis:

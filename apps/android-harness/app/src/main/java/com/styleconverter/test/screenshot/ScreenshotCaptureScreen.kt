@@ -1114,11 +1114,10 @@ private fun ComposedCaptureCanvas(
     val canvasBackground = androidx.compose.runtime.remember(roots) {
         resolveComposedCanvasBackground(roots)
     }
-    // FIX 1 (UA default margins) — TITAN Round 4b. Per-root effective UA block
-    // margins (IR-declared sides zeroed — the runtime's margin applier already
-    // renders those and wins over UA), then the collapsed vertical gaps to
-    // inject between the stacked roots so the composed page reproduces the ref's
-    // ~16px inter-`<p>` gaps. Pure/testable helpers in UaBlockMargins.kt.
+    // FIX 1 (UA default margins) — TITAN Round 4b — per-root effective UA
+    // block margins, still the source of the HORIZONTAL blockquote/figure
+    // insets below (IR-declared sides zeroed — the runtime's margin applier
+    // renders those and wins over UA). Pure/testable helpers in UaBlockMargins.kt.
     val rootMargins = androidx.compose.runtime.remember(roots) {
         roots.map { root ->
             // Wave-17 out-of-flow roots (fixed, or absolute with no
@@ -1134,8 +1133,82 @@ private fun ComposedCaptureCanvas(
             else effectiveUaMargins(root)
         }
     }
-    val rootGaps = androidx.compose.runtime.remember(rootMargins) {
-        collapsedVerticalGaps(rootMargins.map { it.top to it.bottom })
+    // RC-A4 (wave 19) — per-root VERTICAL stack plan. FIX 1 only folded the
+    // UA-INJECTED margins; IR-DECLARED author margins rendered in full on
+    // BOTH adjacent roots and STACKED (safe-001: 20px+20px = 96px root pitch
+    // vs the ref's collapsed 76px — every later root drifted +20/40/60px).
+    // The plan reads each root's declared block margins through the SAME
+    // classifier the runtime's §8.3.1 machinery uses
+    // (BlockMarginCollapse.blockMarginsOrNull over MarginExtractor.extract),
+    // folds them into the collapsed-gap Spacers, and flags the root for a
+    // block-margin STRIP via the LocalCollapsedMargin override channel the
+    // renderer already honors. Auto/negative/relative/calc margins bail to
+    // the FIX 1 behavior (never new wrongness). Wave-19 follow-up: roots
+    // with ZERO flow footprint (canvas-hoisted, or RC1 static-position
+    // under an active host) are margin-TRANSPARENT — §8.3.1 collapses the
+    // neighbors' margins THROUGH them into ONE gap (see
+    // collapsedRootStackGapsPx); only flow-sized out-of-flow roots still
+    // bail.
+    val rootPlans = androidx.compose.runtime.remember(roots) {
+        // Wave-19 follow-up: whether the CanvasRootHoist.Host below will
+        // actually ACTIVATE — the RC1 static-position zero-flow anchor is
+        // host-gated in ComponentRenderer, so a no-inset absolute root only
+        // has a zero flow footprint when at least one box in the document
+        // hoists. Same walk the Host runs (one decision, two consumers).
+        val hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist
+            .hostActivates(roots)
+        roots.map { root ->
+            // Hoisted roots occupy no flow space (pin S5) — and (wave-19
+            // follow-up) they are margin-TRANSPARENT: a browser collapses
+            // the neighbors' block margins THROUGH an out-of-flow box as if
+            // it were absent (CSS 2.1 §8.3.1 in-flow precondition, §9.3.1),
+            // so the fold keeps ONE adjoining set open across this slot.
+            // Contribution stays (0,0): §8.3.1 "margins of absolutely
+            // positioned boxes do not collapse" — its own declared margins
+            // render in the overlay and never push flow content.
+            if (com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .shouldHoistToCanvasRoot(root.properties, hasPositionedAncestor = false)
+            ) {
+                RootStackMargin(0f, 0f, stripDeclared = false, marginTransparent = true)
+            } else {
+                // Which block sides the IR declares (any Margin* covering them).
+                val declared = declaredMarginSides(root.properties.map { it.type })
+                // Wave-18 RC1 static-position root under an ACTIVE host: it
+                // mounts in its Column slot at 0×0 (zeroFlowAnchor), so it is
+                // margin-transparent too (wave-19 follow-up). Same renderer
+                // decision function — never re-derived here.
+                val staticPos = hostActive &&
+                    com.styleconverter.runtime.layout.position.CanvasRootHoist
+                        .rendersInFlowAsStaticPosition(root.properties, hasPositionedAncestor = false)
+                // Static declared (top, bottom) px via the runtime's §8.3.1
+                // classifier; null bails (out-of-scope value flavors).
+                // Out-of-flow roots that KEEP their flow size (host inactive
+                // — the RC1 anchor never engages) bail too: they render their
+                // own margins in the flow, exactly the pre-fix behavior.
+                // A zero-flow static-position root does NOT bail: its own
+                // declared margins join the collapse-through set (§8.3.1's
+                // empty-box model — the hypothetical static box's margins
+                // are adjoining) and strip from its render like any other
+                // folded root, so its slot anchor stays the §8.3.1
+                // hypothetical position and nothing double-renders.
+                val staticEdges = if (isOutOfFlowRoot(root) && !staticPos) null else
+                    com.styleconverter.runtime.spacing.BlockMarginCollapse
+                        .blockMarginsOrNull(
+                            com.styleconverter.runtime.spacing.MarginExtractor
+                                .extract(root.properties.map { it.type to it.data })
+                        )?.let { it.topPx to it.bottomPx }
+                rootStackMargin(root._tag, "top" in declared, "bottom" in declared, staticEdges)
+                    // Transparency rides the SAME plan entry so the fold and
+                    // the render agree on this root's (zero) flow footprint.
+                    .copy(marginTransparent = staticPos)
+            }
+        }
+    }
+    val rootGaps = androidx.compose.runtime.remember(rootPlans) {
+        // Wave-19 follow-up: the transparency-aware fold — collapses the
+        // whole {prev bottom, transparent roots' margins, next top} set to
+        // ONE §8.3.1 max() gap instead of one gap per opaque neighbor.
+        collapsedRootStackGapsPx(rootPlans)
     }
 
     // `onGloballyPositioned` BEFORE `.padding()` so it reports the full outer
@@ -1221,20 +1294,40 @@ private fun ComposedCaptureCanvas(
                     roots.forEachIndexed { i, root ->
                         // Gap ABOVE this root (collapsed with the previous root's
                         // bottom margin; the first root's is its full top margin).
-                        if (rootGaps[i] > 0) Spacer(Modifier.height(rootGaps[i].dp))
+                        if (rootGaps[i] > 0f) Spacer(Modifier.height(rootGaps[i].dp))
+                        // RC-A4: a stripped root renders with its block margins
+                        // ZEROED through the runtime's §8.3.1 override channel
+                        // (the same substitution MarginApplier performs for
+                        // collapsing block children) — the declared values now
+                        // live in the collapsed gap Spacers instead, so adjacent
+                        // declared margins fold to max() like the browser.
+                        // Inline (left/right) margins are untouched by the
+                        // override and still render on the root. Renderers reset
+                        // the local for children, so the strip is root-only.
+                        val hosted: @androidx.compose.runtime.Composable () -> Unit = {
+                            if (rootPlans[i].stripDeclared) {
+                                androidx.compose.runtime.CompositionLocalProvider(
+                                    com.styleconverter.runtime.spacing.BlockMarginCollapse
+                                        .LocalCollapsedMargin provides
+                                        com.styleconverter.runtime.spacing.CollapsedMargin(0f, 0f)
+                                ) { ComponentHost.Render(root) }
+                            } else {
+                                ComponentHost.Render(root)
+                            }
+                        }
                         val m = rootMargins[i]
                         if (m.left > 0 || m.right > 0) {
                             // Horizontal UA inset (blockquote/figure) — pad the root
                             // box left/right; the runtime renders inside it.
                             Box(modifier = Modifier.padding(start = m.left.dp, end = m.right.dp)) {
-                                ComponentHost.Render(root)
+                                hosted()
                             }
                         } else {
-                            ComponentHost.Render(root)
+                            hosted()
                         }
                     }
                     // Trailing gap = the last root's (uncollapsed) bottom margin.
-                    if (rootGaps[roots.size] > 0) Spacer(Modifier.height(rootGaps[roots.size].dp))
+                    if (rootGaps[roots.size] > 0f) Spacer(Modifier.height(rootGaps[roots.size].dp))
                 }
             }
         }

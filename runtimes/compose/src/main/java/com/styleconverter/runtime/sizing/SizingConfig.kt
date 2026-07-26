@@ -72,6 +72,16 @@ data class SizingConfig(
     // SizingConfig → Modifier function with no extractor re-runs.
     val contentBoxInflateX: Float = 0f,
     val contentBoxInflateY: Float = 0f,
+    // RC-B6b (TITAN WPT lane) — true only when this config was extracted on
+    // the LocalWptCaptureMode capture path (SizingExtractor threads it, the
+    // same plumbing as the boxSizing tri-state above). The Applier reads it
+    // to route px-RESOLVABLE relative widths (ch/em/rem/vw — block-ellipsis
+    // -001's `width: 63.1ch` ≈ 605px) through the wave-12 overflow-aware
+    // exactWidth instead of Modifier.width, whose constraint COERCION
+    // clamped the box to the incoming max and shifted every text wrap
+    // point vs the browser ref. Default false = the dark-stage/327-pair
+    // corpus keeps the coercing Modifier.width byte-identically.
+    val wptCaptureMode: Boolean = false,
 ) {
     /**
      * True if any sizing/aspect-ratio slot was populated. [boxSizing] is
