@@ -111,6 +111,15 @@ function resolveCanvasBackground(doc: IRDocument): string {
 interface ComposedCaptureGalleryProps {
   /** The decoded COMBINED IR document (every WPT test's components, flat). */
   document: IRDocument;
+  /**
+   * B-RC3 isolated-capture filter (`?only=<testKey>` via App.tsx): when
+   * set, mount ONLY the test whose key equals this value — a fresh page
+   * holding a single composed canvas, where headless Chromium paints the
+   * spanner+abspos family correctly (the tall multi-canvas page mis-paints
+   * it ~2312px off despite correct geometry). Undefined ⇒ the full gallery,
+   * byte-identical to the pre-B-RC3 render.
+   */
+  only?: string;
 }
 
 /**
@@ -176,9 +185,18 @@ function groupByTest(combined: IRDocument): { key: string; doc: IRDocument }[] {
   return out;
 }
 
-export function ComposedCaptureGallery({ document }: ComposedCaptureGalleryProps) {
-  // Grouping is pure per document — memoise on document identity.
-  const tests = React.useMemo(() => groupByTest(document), [document]);
+export function ComposedCaptureGallery({ document, only }: ComposedCaptureGalleryProps) {
+  // Grouping is pure per document — memoise on document identity (and on
+  // the isolated-capture filter, which narrows the grouped list). The
+  // filter compares FULL test keys (exact equality, not prefix), so
+  // `wpt__a__b` can never accidentally match `wpt__a__b-2`. A key that
+  // matches nothing yields ZERO canvases and a `data-capture-ready="0"`
+  // sentinel — the isolated driver asserts exactly 1 and fails loudly,
+  // per the no-silent-fallthrough contract.
+  const tests = React.useMemo(() => {
+    const all = groupByTest(document);
+    return only != null ? all.filter((t) => t.key === only) : all;
+  }, [document, only]);
   return (
     <div style={containerStyle}>
       {tests.map(({ key, doc }, index) => (

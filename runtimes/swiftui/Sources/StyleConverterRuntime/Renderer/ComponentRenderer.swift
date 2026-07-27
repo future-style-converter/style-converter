@@ -1153,7 +1153,16 @@ public struct ComponentRenderer: View {
                     requestedWidthPx: style.columns?.widthPx,
                     // The used gap through the single shared resolver, so
                     // slots, fill basis and fragment plan agree.
-                    gapPx: multicolUsedGapPx(style: style)
+                    gapPx: multicolUsedGapPx(style: style),
+                    // Wave-21 wiring hook (lane MULTICOL): per-subview
+                    // spanner-flow roles in contentOrPlaceholder order
+                    // (leading text first) — capture only; nil keeps the
+                    // dark-stage greedy layout byte-identical.
+                    roles: wptCaptureMode
+                        ? MulticolSpannerFlow.rolesFor(
+                            children: FlexboxApplier.sorted(inFlowChildren),
+                            leadingText: component.text?.isEmpty == false)
+                        : nil
                 ) {
                     // Same content pass as every container: leading text
                     // (if any) and the sorted in-flow children become the
@@ -1333,6 +1342,23 @@ public struct ComponentRenderer: View {
             let gridShift = AbsposGridStaticPosition.staticOffset(
                 parentStyle: style,
                 childProperties: child.properties)
+            // Wave-21 wiring hook (lane MULTICOL, B-RC4b) — when THIS
+            // ancestor is a MULTICOL container, an inset-less abspos
+            // following a column-span:all sibling anchors at its
+            // POST-SPANNER static position (css-position-3 §3.1 inside
+            // the css-multicol-1 §6 flow): the pure module resolves the
+            // shared SP-table slot from statically-declared sibling
+            // heights. Zero for every non-multicol ancestor, outside
+            // capture, and when no spanner precedes the child — the
+            // frozen overlay anchor everywhere else.
+            let multicolShift = MulticolAbsposStatic.staticOffset(
+                columns: style.columns,
+                siblings: component.children ?? [],
+                childId: child.id,
+                contentWidthPx: flexContentSize(style: style, vertical: false),
+                gapPx: multicolUsedGapPx(style: style),
+                ctx: style.spacing.context,
+                wptCaptureMode: wptCaptureMode)
             // v2: children render through ComponentHost (placement
             // parent-data attached; inert here — the overlay ZStack
             // reads no layout values).
@@ -1340,11 +1366,12 @@ public struct ComponentRenderer: View {
                 // The static-position offset — applied on the HOST so
                 // the child's own PositionApplier (which only runs for
                 // explicit insets, gated off above) never composes
-                // with it on the same axis. Flex and grid shifts are
-                // mutually exclusive (see above), so adding them keeps
+                // with it on the same axis. Flex, grid and multicol
+                // shifts are mutually exclusive (display is exactly one
+                // of flex/grid/block-multicol), so adding them keeps
                 // exactly one lane's geometry.
-                .offset(x: staticShift.width + gridShift.width,
-                        y: staticShift.height + gridShift.height)
+                .offset(x: staticShift.width + gridShift.width + multicolShift.width,
+                        y: staticShift.height + gridShift.height + multicolShift.height)
                 // Reset the size-injection channels: an absolute child
                 // never stretch-inherits grid/flex geometry (it is not
                 // an item of the parent's formatting context).
@@ -1758,7 +1785,13 @@ public struct ComponentRenderer: View {
             && style.layout.display == .block
             // …with 2+ in-flow children (absolute boxes ride the overlay
             // and never distribute — css-multicol-1 §2 in-flow only).
-            && inFlowChildren.count >= 2
+            // Wave-21 wiring hook (lane MULTICOL): under WPT capture,
+            // spanners don't count — a sole flow child + spanner routes to
+            // the vertical stack where the balanced fragment row owns it.
+            && (wptCaptureMode
+                ? MulticolSpannerFlow.flowCount(
+                    MulticolSpannerFlow.rolesFor(children: inFlowChildren)) >= 2
+                : inFlowChildren.count >= 2)
     }
 
     // MARK: - Float row packing (wave-19 lane FLOAT)
@@ -2118,12 +2151,23 @@ public struct ComponentRenderer: View {
                     verticalWritingMode:
                         WritingModeExtractor.extract(
                             from: resolvedProperties)?.isVertical == true,
-                    siblingCount: children.count,
+                    // Wave-21 wiring hook (lane MULTICOL): under capture
+                    // the "sole child" gate counts FLOW siblings only —
+                    // a 0-height spanner sibling must not veto the
+                    // balanced fragment row (always-balancing-before-
+                    // column-span). Dark stage keeps the raw count.
+                    siblingCount: wptCaptureMode
+                        ? MulticolSpannerFlow.flowCount(
+                            MulticolSpannerFlow.rolesFor(children: children))
+                        : children.count,
                     contentWidthPx: childCB,
                     contentHeightPx: childCBH,
                     gapPx: multicolFillGap,
                     childProperties: child.properties,
-                    ctx: style.spacing.context)
+                    ctx: style.spacing.context,
+                    // Wave-21: unlocks the §7.1 auto-height balanced
+                    // fragmentainer (B-RC5) in capture only.
+                    wptCaptureMode: wptCaptureMode)
                 Group {
                     if let plan = fragPlan {
                         // Fragment pass — F clipped+translated clones of
@@ -2594,6 +2638,23 @@ private struct PlaceholderLabel: View {
         // (Reads the DISPLAY string so a greedily pre-broken run — which
         // contains \n — always counts as multi-line, same as before.)
         let singleLineText = !displayText.contains { $0.isWhitespace }
+        // Wave 21 (lane TEXTDECOR, B-RC7) — unbreakable runs must NOT
+        // emergency-wrap in WPT capture. CSS gives a run with no
+        // soft-wrap opportunity (UAX #14 approximation:
+        // DecorationOps.hasSoftWrapOpportunity — no spaces, no
+        // break-after punctuation, no ideographs) ONE overflowing line
+        // under `overflow-wrap: normal`; SwiftUI instead character-wraps
+        // at the proposal edge. The Chromium refs for
+        // text-decoration-dotted-001/002 keep 'fooשלוםbaz' / 'foobarbaz'
+        // @92px on ONE line overflowing the 390px canvas — the wrap, not
+        // the dots, dominated those scores. `.fixedSize(horizontal:)`
+        // below (the wave-2 noWrap machinery) is the entry point; gated
+        // on wptCaptureMode so the 327-pair baseline path (flag false)
+        // is byte-identical. Twins: Compose gates softWrap under
+        // LocalWptComposedMode, web drops its span's hardcoded
+        // break-word under WPT_COMPOSED_MODE.
+        let wptUnbreakableRun = wptCaptureMode
+            && !DecorationOps.hasSoftWrapOpportunity(displayText)
         // Applier campaign (sub-natural line-height placement) — the
         // signed-half-leading compensation for L < natural content
         // height (LineBoxMetrics.subNaturalOffset header for the full
@@ -2707,7 +2768,9 @@ private struct PlaceholderLabel: View {
             // LineLimitMod, which the wave-19 skeptic proved inert here).
             // nil = no clamp = the historical unlimited wrap.
             .lineLimit(textConfig.lineClampLimit)
-            .fixedSize(horizontal: textConfig.noWrap, vertical: true)
+            // Wave 21 (B-RC7): OR in the WPT unbreakable-run gate — see
+            // the wptUnbreakableRun declaration above for the contract.
+            .fixedSize(horizontal: textConfig.noWrap || wptUnbreakableRun, vertical: true)
             // Fidelity wave 3 — first/last half-leading (CSS 2.1
             // §10.8.1): browsers centre each line's glyphs inside a
             // line box `line-height` tall, so half the leading paints
@@ -2994,18 +3057,37 @@ private struct PlaceholderLabel: View {
         return Text(attr)
     }
 
-    /// Wave-5 gate follow-up — does the owned overlay draw the
-    /// underline for this label? Requires the flag AND a solid
-    /// decoration style: dashed/dotted/wavy/double keep the platform
-    /// built-in (its pattern rendering is closer to web than a solid
-    /// owned rect would be), so those paths lose nothing.
+    /// Wave 21 (lane TEXTDECOR, B-RC8) — the pure op emitter's style
+    /// for this label's decorations, or nil for the two styles the
+    /// overlay does NOT own (`double`/`wavy` — SwiftUI's built-in
+    /// pattern rendering still beats what we can hand-paint for them,
+    /// so underline/line-through keep the platform built-ins there).
+    /// solid/dotted/dashed are owned: DecorationOps paints solid bands,
+    /// Chromium round-cap dot runs, and Blink-fitted dash runs
+    /// (wave-5's solid-only gate let SwiftUI's `.dot` pattern draw the
+    /// dotted tests at built-in geometry — thickness and rhythm both
+    /// wrong vs the ref; see DecorationOps' measured pin table).
+    private var ownedDecorationStyle: DecorationOps.LineStyle? {
+        switch textConfig.decorationStyle {
+        case .solid:  return .solid
+        case .dotted: return .dotted
+        case .dashed: return .dashed
+        // Built-ins keep double/wavy underline/line-through.
+        case .double, .wavy: return nil
+        }
+    }
+
+    /// Wave-5 gate follow-up (extended wave 21) — does the owned
+    /// overlay draw the underline for this label? Requires the flag
+    /// AND an owned style (solid/dotted/dashed — see
+    /// ownedDecorationStyle for the double/wavy carve-out).
     private var ownsUnderline: Bool {
-        textConfig.underline && textConfig.decorationStyle == .solid
+        textConfig.underline && ownedDecorationStyle != nil
     }
 
     /// Same ownership rule for line-through (see ownsUnderline).
     private var ownsStrikethrough: Bool {
-        textConfig.strikethrough && textConfig.decorationStyle == .solid
+        textConfig.strikethrough && ownedDecorationStyle != nil
     }
 
     /// Lane IOS wave 5 (finding 4) + wave-5 gate follow-up — the
@@ -3045,16 +3127,36 @@ private struct PlaceholderLabel: View {
                 message: "text-decoration: line geometry unknown for a "
                     + "soft-wrappable un-pre-broken run — overlay assumes "
                     + "a single line")
+            // Wave 21 (B-RC8) — explicit `text-decoration-thickness`
+            // overrides the auto rule for BOTH the band height and the
+            // underline gap below (css-text-decor-4 §2.4; the dotted
+            // tests declare 10/20/30px on a 92px face).
+            let explicitT = textConfig.decorationThicknessPx
             // Same face + spacing as the render → identical advances.
             let segs = DecorationMetrics.segments(
                 lines: lines,
                 fontSizePx: textConfig.fontSize ?? 16,
+                explicitThicknessPx: explicitT,
                 measure: GreedyLineBreaker.measurer(
                     font: measurementUIFont,
                     letterSpacingPx: textConfig.letterSpacing,
                     wordSpacingPx: textConfig.wordSpacingPx))
             // Line ADVANCE = rendered content height + the CSS leading
             // split's between-lines extra (the label's `.lineSpacing`).
+            //
+            // KNOWN multi-line drift (wave-21 diagnosis, B-RC8 tail,
+            // documented not chased): in composed WPT capture the label
+            // pins its LINE BOX via effectiveLineHeight (frame minHeight
+            // + `.lineSpacing` = L − content height), but this advance
+            // uses measurementUIFont.lineHeight — the resolved RENDER
+            // face's content height. When font resolution diverges
+            // between measurement and render (e.g. an italic synthetic
+            // face) or when the first line box is capped while later
+            // lines are not, line 2+ decoration rows can sit a few px
+            // off the glyph rows. Single-line labels (the whole wave-21
+            // css-text-decor corpus after the B-RC7 no-wrap fix) are
+            // unaffected — the drift needs a device capture to pin an
+            // exact correction, which this lane cannot run.
             let advance = measurementUIFont.lineHeight + lineSpacing
             // Baseline anchor: the RENDER face's ascent — the same
             // number TextKit lays glyphs out with, so the empirical
@@ -3065,49 +3167,97 @@ private struct PlaceholderLabel: View {
             let fontSize = textConfig.fontSize ?? 16
             // §2.2: decoration-color, initial currentColor → text color.
             let color = textConfig.decorationColor ?? resolvedColor
+            // The op emitter's style: owned solid/dotted/dashed, or
+            // solid for the overline-only double/wavy path (underline/
+            // strike keep the built-ins there; an overline in those
+            // styles has NO built-in, so paint it solid and SAY so —
+            // no silent fallthrough).
+            let opStyle = ownedDecorationStyle ?? .solid
+            let _ = (ownedDecorationStyle == nil && textConfig.overline)
+                && PropertyTracker.logOnce(
+                    key: "decoration-overline-style-\(name)",
+                    message: "text-decoration-style double/wavy overline "
+                        + "painted solid (no built-in and no DecorationOps "
+                        + "emitter yet)")
             ZStack(alignment: .topLeading) {
                 ForEach(segs, id: \.index) { seg in
                     // This line box's top edge in the text's own space.
                     let lineTop = CGFloat(seg.index) * advance
                     // css-text-decor-3 §2.1 — each declared line paints
-                    // independently at its own measured offset.
+                    // independently at its own offset. Explicit
+                    // thickness re-anchors each kind via DecorationOps
+                    // (Blink rules, ref-pinned); auto keeps the wave-5
+                    // capture rows (DecorationMetrics) byte-identically.
                     if textConfig.overline {
-                        decorationRow(seg, color: color, y: lineTop
-                            + DecorationMetrics.overlineTop(fontSizePx: fontSize))
+                        decorationRow(seg, style: opStyle, color: color, y: lineTop
+                            + (explicitT.map { DecorationOps.explicitOverlineTop(thicknessPx: $0) }
+                                ?? DecorationMetrics.overlineTop(fontSizePx: fontSize)))
                     }
                     if ownsStrikethrough {
-                        decorationRow(seg, color: color, y: lineTop
-                            + DecorationMetrics.lineThroughTop(
-                                ascentPx: ascent, fontSizePx: fontSize))
+                        decorationRow(seg, style: opStyle, color: color, y: lineTop
+                            + (explicitT.map { DecorationOps.explicitLineThroughTop(
+                                    ascentPx: ascent, fontSizePx: fontSize, thicknessPx: $0) }
+                                ?? DecorationMetrics.lineThroughTop(
+                                    ascentPx: ascent, fontSizePx: fontSize)))
                     }
                     if ownsUnderline {
-                        decorationRow(seg, color: color, y: lineTop
-                            + DecorationMetrics.underlineTop(
-                                ascentPx: ascent, fontSizePx: fontSize))
+                        decorationRow(seg, style: opStyle, color: color, y: lineTop
+                            + (explicitT.map { DecorationOps.explicitUnderlineTop(
+                                    ascentPx: ascent, thicknessPx: $0) }
+                                ?? DecorationMetrics.underlineTop(
+                                    ascentPx: ascent, fontSizePx: fontSize)))
                     }
                 }
             }
         }
     }
 
-    /// One decoration band: the segment's inked advance × the auto
-    /// thickness, aligned to its line by the CSS text-align keyword and
-    /// offset to the kind's measured row (y is relative to the text's
-    /// top-leading corner; negative for a first-line overline, which
-    /// hangs above the line box like Chromium's ink-overflow paint).
+    /// One decoration band: the segment's inked advance × its resolved
+    /// thickness, expanded through DecorationOps into the style's op
+    /// list (solid → one rect byte-identical to the legacy Rectangle;
+    /// dotted → Chromium circle runs; dashed → Blink dash runs), then
+    /// aligned to its line by the CSS text-align keyword and offset to
+    /// the kind's row (y is relative to the text's top-leading corner;
+    /// negative for a first-line overline, which hangs above the line
+    /// box like Chromium's ink-overflow paint).
     private func decorationRow(_ seg: DecorationMetrics.Segment,
+                               style: DecorationOps.LineStyle,
                                color: Color, y: CGFloat) -> some View {
-        Rectangle()
-            .fill(color)
-            // The band: this line's inked advance × the measured auto
-            // thickness (max(1, round(fontSize/11)) — DecorationMetrics).
-            .frame(width: seg.width, height: seg.thickness)
-            // Horizontal placement: shorter lines sit where
-            // `.multilineTextAlignment` puts them, so each row spans
-            // the text bounds and aligns its rect by the same keyword.
-            .frame(maxWidth: .infinity, alignment: decorationRowAlignment)
-            // Vertical placement: the kind's measured row.
-            .offset(y: y)
+        // Band-local ops: left=0/top=0 → the emitter's midY lands at
+        // ~thickness/2 inside a (width × thickness) canvas.
+        let ops = DecorationOps.styleOps(left: 0, top: 0,
+                                         width: seg.width,
+                                         thicknessPx: seg.thickness,
+                                         style: style)
+        // SwiftUI Canvas (iOS 16 floor, matches Package.swift): fill
+        // each op — antialiased like the browser's decoration paint.
+        return Canvas { context, _ in
+            for op in ops {
+                switch op {
+                case let .band(left, top, width, height):
+                    // Dash/solid rect run.
+                    context.fill(Path(CGRect(x: left, y: top, width: width, height: height)),
+                                 with: .color(color))
+                case let .dot(centerX, centerY, radius):
+                    // Round-cap dot (diameter = thickness).
+                    context.fill(Path(ellipseIn: CGRect(x: centerX - radius,
+                                                        y: centerY - radius,
+                                                        width: radius * 2,
+                                                        height: radius * 2)),
+                                 with: .color(color))
+                }
+            }
+        }
+        // The band frame: this line's inked advance × the resolved
+        // thickness — same frame the legacy Rectangle occupied, so
+        // alignment/offset behavior is unchanged.
+        .frame(width: seg.width, height: seg.thickness)
+        // Horizontal placement: shorter lines sit where
+        // `.multilineTextAlignment` puts them, so each row spans
+        // the text bounds and aligns its rect by the same keyword.
+        .frame(maxWidth: .infinity, alignment: decorationRowAlignment)
+        // Vertical placement: the kind's row.
+        .offset(y: y)
     }
 
     /// The overlay-row alignment mirroring CSS text-align — the same

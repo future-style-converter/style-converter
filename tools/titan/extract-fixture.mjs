@@ -305,16 +305,34 @@ export function parseCss(css) {
 // (text nodes nested inside descendant ELEMENTS are NOT included — those
 // live on whatever descendant component owns them, per the per-element
 // `_text` contract). Self-closing/void elements have empty innerHtml + ''.
-function walkChildren(html) {
+//
+// wave-21 B-RC2 (body-level bare text): `opts.collectText` additionally
+// emits the RAW text runs between elements as `{ text: '…' }` items,
+// interleaved in document order with the element items. Default off, so
+// every legacy caller keeps the byte-identical element-only shape. The
+// runs are raw (whitespace preserved) — the consumer decides collapse vs
+// preserve per the resolved white-space, mirroring scanOwnText.
+function walkChildren(html, opts = {}) {
   const out = [];
   let i = 0;
   const n = html.length;
   while (i < n) {
+    // wave-21 B-RC2: in collectText mode capture the WHOLE text run —
+    // including leading whitespace — before the element scan below eats
+    // it. One item per contiguous run; consecutive runs split only by
+    // comments merge later in the consumer (they render adjacent).
+    if (opts.collectText && html[i] !== '<') {
+      const next = html.indexOf('<', i);
+      const end = next < 0 ? n : next;
+      out.push({ text: html.slice(i, end) });
+      i = end;
+      continue;
+    }
     // Skip text whitespace.
     while (i < n && /\s/.test(html[i])) i++;
     if (i >= n) break;
     // If not '<' it's stray text; skip to next '<' or end. Text nodes
-    // never become components — only elements do.
+    // never become components — only elements do (unless collectText).
     if (html[i] !== '<') {
       const next = html.indexOf('<', i);
       i = next < 0 ? n : next;
@@ -487,6 +505,70 @@ const AUTO_CLOSE_TRIGGERS = {
   th:  new Set(['td','th','tr']),
 };
 
+/**
+ * wave-21 A-RC1 HEAD-UNWRAP fix: the ONE shared body-content locator.
+ *
+ * Every walker used to duplicate the same two-step locate: (1) prefer an
+ * explicit <body>…</body>; (2) otherwise peel a leading <html>/<head>/<body>
+ * wrapper with `/^<(html|head|body)\b[^>]*>([\s\S]*?)(?:<\/\1\s*>|$)/i` and
+ * keep GROUP 2 — the wrapper's inner content. That group-2 rule is correct
+ * for <html>/<body> (their content IS the body content) but was a SILENT
+ * TOTAL LOSS for <head>: on a doc shaped
+ *
+ *   <html><head>…</head>   ← head properly closed
+ *     <p>…</p><div></div>  ← body content, but NO <body> tag
+ *   </html>
+ *
+ * iteration 1 unwraps <html> (fine), iteration 2 then matched
+ * `<head>…</head>` and replaced the buffer with the HEAD'S OWN content —
+ * every element after </head> was discarded, the walk found nothing
+ * renderable, and buildComponents emitted a lone 100x100 placeholder with
+ * `lossy: false` (the exact cross-fade-premultiplied-alpha failure this
+ * wave exists for). Per HTML §13.2.6.4.4 ("after head" insertion mode) the
+ * content FOLLOWING a closed <head> is body content, so for a matched
+ * 'head' wrapper we now keep everything AFTER the match instead of group 2.
+ *
+ * A <head> that never closes (regex matched via the `$` alternative) still
+ * unwraps to group 2: with no </head> the head/body boundary is implicit
+ * (§13.2.6.4.3 — body-content tokens implicitly close the head), so head
+ * scaffolding and body content are interleaved in group 2 and the callers'
+ * HEAD_ONLY_TAGS filter separates them — same behaviour as before.
+ *
+ * The loop runs up to THREE peels (was two): a full shell is
+ * <html> → <head> → <body>, and since the head fix keeps the sibling
+ * <body…> wrapper in the buffer (instead of destroying it), a third
+ * iteration must be able to unwrap it (shape: <html><head>…</head><body>
+ * with an unclosed body — bodyMatch requires the close tag, so it lands
+ * here).
+ *
+ * Returns `{ inner, fallback }`: `inner` is the body-content buffer;
+ * `fallback` is true when no explicit <body>…</body> pair existed (callers
+ * use it to decide whether the HEAD_ONLY filter is needed at depth 1).
+ * Exported so the unit tests can pin the head-unwrap contract directly.
+ */
+export function locateBodyContent(html) {
+  // Step 1 — explicit, well-formed <body>…</body> wins outright: its inner
+  // is body content BY DEFINITION and no unwrapping is needed.
+  const bodyMatch = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html);
+  if (bodyMatch) return { inner: bodyMatch[1], fallback: false };
+  // Step 2 — no <body> pair: peel document-shell wrappers front-to-back.
+  let inner = html;
+  for (let unwrap = 0; unwrap < 3; unwrap++) {
+    // Skip an optional <!doctype …> + leading whitespace before the wrapper.
+    const skipped = inner.replace(/^\s*<!doctype\b[^>]*>\s*/i, '').replace(/^\s+/, '');
+    // Lazy group 2 = wrapper content up to its close tag (or EOF via `$`).
+    const wrapMatch = /^<(html|head|body)\b[^>]*>([\s\S]*?)(?:<\/\1\s*>|$)/i.exec(skipped);
+    if (!wrapMatch) break;
+    // A-RC1: a CLOSED head's content is head scaffolding — body content is
+    // what FOLLOWS </head> (HTML §13.2.6.4.4). Detect "closed" by the match
+    // ending in the close tag; an EOF-terminated (`$`) match keeps group 2.
+    const closedHead = wrapMatch[1].toLowerCase() === 'head'
+      && /<\/head\s*>$/i.test(wrapMatch[0]);
+    inner = closedHead ? skipped.slice(wrapMatch[0].length) : wrapMatch[2];
+  }
+  return { inner, fallback: true };
+}
+
 export function extractBodyChildren(html) {
   // Find <body>…</body>. If absent, treat the whole document as the body
   // (minimal WPT tests sometimes omit explicit <body>).
@@ -500,9 +582,13 @@ export function extractBodyChildren(html) {
   // <div>). When in fallback mode we keep the walk wide but filter out
   // HEAD_ONLY_TAGS at emit time. The explicit-<body> path doesn't need
   // this guard because authors don't put <title>/<meta> inside <body>.
-  const bodyMatch = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html);
-  const fallback = !bodyMatch;
-  const inner = bodyMatch ? bodyMatch[1] : html;
+  //
+  // wave-21 A-RC1: the locate + unwrap now goes through the ONE shared
+  // locateBodyContent (head-unwrap fix banner above) so all four walkers
+  // agree on what "body content" is — this site previously skipped the
+  // wrapper peel entirely, emitting a phantom `html` component for
+  // closed-<html> no-<body> docs.
+  const { inner, fallback } = locateBodyContent(html);
   const raw = walkChildren(inner);
   // In fallback mode strip head-only elements; otherwise the inner is body
   // and everything is by definition body content.
@@ -534,23 +620,11 @@ export function extractBodyChildren(html) {
  */
 export function extractBodyTree(html, maxDepth = 3) {
   // Prefer the explicit <body>...</body>. If absent, treat the whole document
-  // as the body and rely on HEAD_ONLY_TAGS + the implicit-<html> unwrap below
-  // to skip head scaffolding.
-  const bodyMatch = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html);
-  let inner = bodyMatch ? bodyMatch[1] : html;
-  // Implicit-<html> case: many minimal WPT tests open <html> but never close
-  // it and never open <body>. Unwrap a leading <html> (and/or <head>) so its
-  // contents are walked at depth 0 — otherwise every body-content element
-  // ends up at depth 1 (which prevents body-scope rules from being noticed
-  // and duplicates the HEAD_ONLY filter). The leading skip tolerates a
-  // <!doctype> and any whitespace before the first significant tag.
-  for (let unwrap = 0; unwrap < 2; unwrap++) {
-    // Skip an optional <!doctype …> + leading whitespace.
-    const skipped = inner.replace(/^\s*<!doctype\b[^>]*>\s*/i, '').replace(/^\s+/, '');
-    const wrapMatch = /^<(html|head|body)\b[^>]*>([\s\S]*?)(?:<\/\1\s*>|$)/i.exec(skipped);
-    if (!wrapMatch) break;
-    inner = wrapMatch[2];
-  }
+  // as the body and rely on HEAD_ONLY_TAGS + the shared wrapper peel to skip
+  // head scaffolding. wave-21 A-RC1: the locate + implicit-<html>/<head>
+  // unwrap is now the ONE shared locateBodyContent (see its banner) — the
+  // closed-<head> shape previously discarded everything after </head> here.
+  const { inner } = locateBodyContent(html);
   const out = [];
   function recurse(fragment, ancestors, depth) {
     const kids = walkChildren(fragment);
@@ -872,7 +946,21 @@ const WHITESPACE_PRESERVING = new Set(['pre', 'pre-wrap', 'break-spaces']);
 function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   // Merge counter — how many pure-inline children were absorbed.
   let merged = 0;
-  if (!innerHtml) return { text: '', merged };
+  // wave-21 B-RC9a REORDER HONESTY: `reordered` flags the case where the
+  // element's own text GLUES ACROSS a child that stays a component — e.g.
+  // 'the quick <u>brown</u> fox' when <u> is styled/non-mergeable: `_text`
+  // becomes 'the quick fox' and the <u> child renders as a SEPARATE block
+  // after it, so the reading order the browser paints (quick→brown→fox) is
+  // NOT the order our renderers paint (quick→fox→brown). That is a lossy
+  // approximation and must be marked ('inline-run-reordered' downstream) —
+  // it previously shipped with lossyReasons []. The full fix (ordered
+  // inline-run splitting on the wire) is a v3 byte-shape change; the flag
+  // keeps the gate honest until then (documented follow-up).
+  let reordered = false;
+  // Set once a NON-absorbed child element (component path) has been seen;
+  // any subsequent non-whitespace own text is by definition out-of-order.
+  let sawKeptChild = false;
+  if (!innerHtml) return { text: '', merged, reordered };
   const n = innerHtml.length;
   const VOID = new Set([
     'area','base','br','col','embed','hr','img','input',
@@ -885,7 +973,12 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
     if (innerHtml[i] !== '<') {
       const next = innerHtml.indexOf('<', i);
       const end = next < 0 ? n : next;
-      textBuf += innerHtml.slice(i, end);
+      const slice = innerHtml.slice(i, end);
+      // B-RC9a: non-whitespace text AFTER a kept child = the glue case.
+      // ASCII-whitespace-only runs (the newline+indent between sibling
+      // tags) collapse away under §4.1 and can't reorder anything.
+      if (sawKeptChild && /[^ \t\n\r\f]/.test(slice)) reordered = true;
+      textBuf += slice;
       i = end;
       continue;
     }
@@ -914,6 +1007,9 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
     if (!tagName) { i = tagOpenEnd + 1; continue; }
     const selfClose = tagOpen.endsWith('/>') || VOID.has(tagName);
     if (selfClose) {
+      // B-RC9a: a void child (<br>, <img>, …) always stays a component —
+      // own text appended after it renders BEFORE it on our side.
+      sawKeptChild = true;
       i = tagOpenEnd + 1;
       continue;
     }
@@ -949,6 +1045,10 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
     // becomes '…green square and no red.' instead of '…and .'. The guard
     // on lastCloseStart skips malformed unclosed tags (their trailing text
     // is picked up as plain parent text by the outer loop anyway).
+    // wave-21 B-RC9a: assume the child stays a component until the merge
+    // branch below absorbs it — the flag is cleared on absorb so a merged
+    // run (which keeps reading order by construction) never trips it.
+    let childKept = true;
     if (mergeCtx && lastCloseStart >= 0) {
       // Child's inner content — the slice between open and close tags.
       const childInner = innerHtml.slice(tagOpenEnd + 1, lastCloseStart);
@@ -958,10 +1058,18 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
       if (isPureInlineMergeable(tagName, attrs, childInner, mergeCtx.styledTags ?? null)) {
         // Absorb the run; the shared whitespace collapse below normalises
         // any boundary spacing per CSS Text §4.1.
+        // B-RC9a: absorbed text landing AFTER a kept sibling still glues
+        // out of order ('<u>x</u> then <em>tail</em>' paints tail before
+        // x on our side), so the post-kept check applies here too.
+        if (sawKeptChild && /[^ \t\n\r\f]/.test(childInner)) reordered = true;
         textBuf += childInner;
         merged++;
+        childKept = false; // absorbed — not a component, order preserved
       }
     }
+    // B-RC9a: a paired child that was NOT absorbed keeps the component
+    // path — remember it so any later own text flags the reorder.
+    if (childKept) sawKeptChild = true;
     i = cursor;
   }
   // wave-15 BIDI-EXTRACT part 1: decode character references NOW — after
@@ -975,7 +1083,7 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   // collapse, no trim — per CSS Text §4.1.1 (spaces/tabs/segment breaks
   // are all preserved under pre/pre-wrap/break-spaces). bidi-tab-001's
   // '\t0' spans and tab-bidi-001's literal-TAB runs depend on this.
-  if (preserveWhitespace) return { text: decodedBuf, merged };
+  if (preserveWhitespace) return { text: decodedBuf, merged, reordered };
   // Collapse whitespace per CSS white-space:normal default.
   //
   // Bug 3 fix (css-text/hanging-punctuation-first-002): the JS `\s` class
@@ -992,8 +1100,9 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   const collapsed = decodedBuf
     .replace(/[ \t\n\r\f]+/g, ' ')
     .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
-  // Text plus the wave-12 merge count (0 whenever mergeCtx was null).
-  return { text: collapsed, merged };
+  // Text plus the wave-12 merge count (0 whenever mergeCtx was null) and
+  // the wave-21 B-RC9a reorder flag (see the declaration comment above).
+  return { text: collapsed, merged, reordered };
 }
 
 /**
@@ -1070,15 +1179,10 @@ export function extractLeadingBodyTextInfo(html, mergeCtx = null, preserveWhites
   // Merge counter for the leading run — reported to buildComponents.
   let merged = 0;
   // Same body-locator + implicit-<html>/<head> unwrap as
-  // extractBodyTreeNested so both walkers agree on what "body content" is.
-  const bodyMatch = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html);
-  let inner = bodyMatch ? bodyMatch[1] : html;
-  for (let unwrap = 0; unwrap < 2; unwrap++) {
-    const skipped = inner.replace(/^\s*<!doctype\b[^>]*>\s*/i, '').replace(/^\s+/, '');
-    const wrapMatch = /^<(html|head|body)\b[^>]*>([\s\S]*?)(?:<\/\1\s*>|$)/i.exec(skipped);
-    if (!wrapMatch) break;
-    inner = wrapMatch[2];
-  }
+  // extractBodyTreeNested so both walkers agree on what "body content" is —
+  // wave-21 A-RC1: both now call the ONE shared locateBodyContent (closed
+  // <head> keeps the content AFTER </head>; see the helper's banner).
+  const { inner } = locateBodyContent(html);
   const n = inner.length;
   // Void set mirrors walkChildren — <link>/<meta>/<base> have no close tag.
   const VOID = new Set([
@@ -1193,6 +1297,94 @@ export function extractLeadingBodyTextInfo(html, mergeCtx = null, preserveWhites
 }
 
 /**
+ * wave-21 B-RC2: body-level bare text BETWEEN and AFTER elements.
+ *
+ * The wave-11 leading-text machinery only rescued prose BEFORE the first
+ * body element; a raw text run between/after elements simply vanished —
+ * css-multicol/auto-fill-auto-size-001-print is an empty styled <div>
+ * followed by the bare words "On the first page", and all three platforms
+ * rendered ONLY the div (the words were dropped with lossy:false). Browsers
+ * wrap every such run in an anonymous block box (CSS 2.1 §9.2.1.1), so each
+ * run must become a `_text` component in document order.
+ *
+ * Returns `Array<{ afterElemIndex, text }>` where `afterElemIndex` is the
+ * COUNT of kept depth-0 elements preceding the run (≥ 1 — the leading run,
+ * afterElemIndex 0, stays the province of extractLeadingBodyTextInfo, whose
+ * merge-absorb semantics this scanner deliberately does not duplicate).
+ * buildComponents emits run k between tree elements k-1 and k, preserving
+ * reading order exactly — no reorder, hence no lossy marker.
+ *
+ * ALIGNMENT CONTRACT: `afterElemIndex` counts elements through the SAME
+ * decisions extractBodyTreeNested's depth-0 filter makes (same
+ * locateBodyContent buffer, same walkChildren pairing, same HEAD_ONLY skip,
+ * same isPureInlineMergeable + seenBlock keep rule), so index k here always
+ * refers to tree[k-1] there. Any drift would attach a run to the wrong gap.
+ *
+ * `preserveWhitespace` mirrors the leading scanner: body-scope prose
+ * collapses per CSS Text §4.1 unless the body's resolved white-space is in
+ * the pre family. Exported so the unit tests can pin the contract.
+ */
+export function extractBodyTextRuns(html, mergeCtx = null, preserveWhitespace = false) {
+  // Same buffer every walker sees (A-RC1 shared locator — load-bearing for
+  // the alignment contract above).
+  const { inner } = locateBodyContent(html);
+  // Interleaved element + text items in document order (B-RC2 walker mode).
+  const items = walkChildren(inner, { collectText: true });
+  const runs = [];
+  // Count of KEPT elements so far — the gap index for the run being built.
+  let keptCount = 0;
+  // Mirrors the depth-0 filter's seenBlock: true once any non-mergeable
+  // element was kept (ends the leading-run absorb window).
+  let seenBlock = false;
+  // Raw accumulator for the current gap's text (may span comment breaks).
+  let buf = '';
+  // Finalize the accumulated text for the gap ENDING here. Leading-gap text
+  // (keptCount === 0) is discarded — extractLeadingBodyTextInfo owns it.
+  const flush = () => {
+    const raw = buf;
+    buf = '';
+    if (keptCount === 0) return;
+    // Character references decode at the same tokenize-then-whitespace
+    // boundary as scanOwnText (wave-15 part 1).
+    const decoded = decodeCharacterReferences(raw);
+    // Pre-family body keeps the run verbatim, but whitespace-ONLY runs are
+    // markup noise in both modes (same trade documented on the leading
+    // scanner); normal mode collapses per CSS Text §4.1 (ASCII class only —
+    // U+3000 et al. are non-collapsible, same rationale as scanOwnText).
+    const text = preserveWhitespace
+      ? (/[^ \t\n\r\f]/.test(decoded) ? decoded : '')
+      : decoded.replace(/[ \t\n\r\f]+/g, ' ').replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
+    if (text) runs.push({ afterElemIndex: keptCount, text });
+  };
+  for (const it of items) {
+    // Text item — accumulate; the run may continue across head-only
+    // scaffolding and absorbed inline elements.
+    if (it.text !== undefined) { buf += it.text; continue; }
+    // Head-only elements are invisible scaffolding (Bug 5) — the run
+    // continues across them exactly as the browser renders it.
+    if (HEAD_ONLY_TAGS.has(it.tag)) continue;
+    // Keep/absorb decision — byte-for-byte the depth-0 filter's rule.
+    const mergeable = mergeCtx
+      ? isPureInlineMergeable(it.tag, it.attrs, it.innerHtml, mergeCtx.styledTags ?? null)
+      : false;
+    if (mergeable && !seenBlock) {
+      // Leading-run absorbed element: its text lives in the `__text`
+      // component (extractLeadingBodyTextInfo). Not kept, not counted —
+      // and only reachable while keptCount === 0 (first kept element is
+      // necessarily non-mergeable), so no between-gap run is affected.
+      continue;
+    }
+    // Kept element — the current gap ends here; the next begins after it.
+    if (!mergeable) seenBlock = true;
+    flush();
+    keptCount++;
+  }
+  // Trailing gap (text after the last element — the auto-fill-print case).
+  flush();
+  return runs;
+}
+
+/**
  * Walk the body subtree and return a NESTED tree shape — each node carries
  * its element children under `children: [...]` and its own text under
  * `ownText`. This is the data source the fixture builder uses to populate
@@ -1236,17 +1428,13 @@ export function extractLeadingBodyTextInfo(html, mergeCtx = null, preserveWhites
  * Null (legacy callers/tests) keeps the pre-wave-12 behaviour exactly.
  */
 export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
-  // Same body-locator + implicit-<html> unwrap logic as extractBodyTree —
-  // factored as a sibling rather than shared so each retains its own
-  // depth bound + ownText extraction without action-at-a-distance.
-  const bodyMatch = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html);
-  let inner = bodyMatch ? bodyMatch[1] : html;
-  for (let unwrap = 0; unwrap < 2; unwrap++) {
-    const skipped = inner.replace(/^\s*<!doctype\b[^>]*>\s*/i, '').replace(/^\s+/, '');
-    const wrapMatch = /^<(html|head|body)\b[^>]*>([\s\S]*?)(?:<\/\1\s*>|$)/i.exec(skipped);
-    if (!wrapMatch) break;
-    inner = wrapMatch[2];
-  }
+  // Same body-locator + implicit-<html>/<head> unwrap as every other walker
+  // — wave-21 A-RC1: the four sites now share the ONE locateBodyContent
+  // (closed <head> keeps the content AFTER </head>; see the helper banner).
+  // Sharing the locator is load-bearing for wave-21 B-RC2 too: the body
+  // text-run scanner (extractBodyTextRuns) aligns its kept-element indices
+  // with this walk, which only holds if both see the SAME inner buffer.
+  const { inner } = locateBodyContent(html);
   // Bug 2 fix (selectors__child-indexed-no-parent): each ancestor entry
   // gains a `pos: {sibIndex, sibCount, sibTypeIndex, sibTypeCount, isEmpty,
   // isRoot}` field so non-rightmost pseudo-classes can be evaluated honestly
@@ -1268,16 +1456,29 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
     // ownText scanner + leading-text scanner use, so absorb/skip decisions
     // can never disagree.
     let seenBlock = false;
-    const kids = rawKids.filter((k) => {
-      if (!mergeCtx) return true; // legacy path — no merging, keep all
-      const mergeable =
-        isPureInlineMergeable(k.tag, k.attrs, k.innerHtml, mergeCtx.styledTags ?? null);
-      if (!mergeable) { seenBlock = true; return true; }
-      // Depth 0: only the leading run was absorbed (into __text); inline
-      // kids after the first kept sibling remain components.
-      if (depth === 0) return seenBlock;
-      // Depth ≥ 1: the parent's merged ownText carries this kid's text.
-      return false;
+    // wave-21 A-RC6: keep each KEPT kid's index within rawKids (`domIdx`) —
+    // the RENDERABLE-sibling position including merge-absorbed inline
+    // elements. CSS Values 5 §5.1 sibling-index() counts ELEMENT siblings
+    // in the DOM; a merge-absorbed <span> is still a DOM element there
+    // (the conic-gradient sibling-index test's leading empty <span> exists
+    // ONLY to make the <div> sibling #2), so the filtered `idx` below is
+    // the wrong number to bake. Documented limit: head-only siblings
+    // inside <body> (rare; corpus puts them in <head>) are not counted.
+    const kids = [];
+    rawKids.forEach((k, rawIdx) => {
+      let keep = true;
+      if (mergeCtx) {
+        const mergeable =
+          isPureInlineMergeable(k.tag, k.attrs, k.innerHtml, mergeCtx.styledTags ?? null);
+        if (!mergeable) { seenBlock = true; }
+        // Depth 0: only the leading run was absorbed (into __text); inline
+        // kids after the first kept sibling remain components.
+        // Depth ≥ 1: the parent's merged ownText carries this kid's text.
+        else keep = depth === 0 ? seenBlock : false;
+      } // legacy path (mergeCtx null) — no merging, keep all
+      // Annotate rather than copy: `domIdx` rides the walker's kid object,
+      // which is private to this recursion (walkChildren allocates fresh).
+      if (keep) { k.domIdx = rawIdx; kids.push(k); }
     });
     // First pass: compute per-sibling position metadata. We pre-walk and
     // count tag occurrences so each child gets its global sib-index AND
@@ -1309,6 +1510,10 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
         // swarm-003 Bug 2 (`:nth-child(N of S)`): full sibling list, in
         // document order. Consumed by evalPseudo's of-selector branch.
         siblings: siblingList,
+        // wave-21 A-RC6: 0-based renderable-sibling index BEFORE the merge
+        // filter (see the kids loop above) — buildComponents bakes
+        // sibling-index() as domSibIndex + 1 (the function is 1-based).
+        domSibIndex: k.domIdx ?? idx,
       };
       const childAncestor = { tag: k.tag, attrs: k.attrs, pos };
       // wave-15 BIDI-EXTRACT part 3: resolve this element's effective
@@ -1349,6 +1554,11 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
       // the run's default styling — bold for <strong> etc. — is dropped).
       // Only set when true, keeping legacy node shapes byte-identical.
       if (ownRes.merged > 0) node.inlineMerged = true;
+      // wave-21 B-RC9a: flag nodes whose ownText glued ACROSS a kept child
+      // (order changed — see scanOwnText's reordered doc) so
+      // buildComponents emits the 'inline-run-reordered' lossy marker.
+      // Only set when true — legacy node shapes stay byte-identical.
+      if (ownRes.reordered) node.inlineReordered = true;
       out.push(node);
     });
     return out;
@@ -1445,6 +1655,44 @@ export const HEAD_ONLY_TAGS = new Set([
 // (list markers, paragraph rhythm, table cell layout, headings, etc.)
 // and is faithfully forwarded as `_tag` to the platform renderers.
 const GENERIC_WRAPPER_TAGS = new Set(['div', 'span']);
+
+// ── wave-22 BR-LINE-CONTEXT: inline-level tags for the <br> height rule ──────
+//
+// wave-21 B-RC1 modeled EVERY bare <br> as a 20px empty line box. That is
+// only correct for a br that STARTS its line (a blank line — the
+// abspos-containing-block-outside-spanner case B-RC1 was pinned against:
+// five consecutive body-level <br>s = five 20px lines in the cached ref).
+// Two measured wave-21 regressions came from applying it unconditionally:
+//   - css-text empty-span-001 (0.908 → 0.760 all three platforms): every
+//     `<span>…</span><br>` line rendered PLUS a 20px blank line — but per
+//     CSS 2.1 §9.5 a br after inline content merely ENDS the current line
+//     box (the ref paints 12 single-spaced lines, no blanks).
+//   - css-flexbox flex-abspos-staticpos-justify-self-001 (0.98 → 0.93 all
+//     three): the `<br clear:both>` float-row breaks gained a 20px stacked
+//     box BETWEEN float rows — but a clear-br's vertical contribution is
+//     CLEARANCE geometry (CSS 2.1 §9.5.2), which the wave-19 float-row
+//     machinery already models (FloatRowPacking strut, pin P6; its contract
+//     comment says "clear markers render as 0-height divs"). Giving the
+//     marker its own height double-counts the line box.
+//
+// The line-context rule (buildNode + its two sibling loops):
+//   height 0  — br preceded by in-flow inline-level content on its line
+//               (it ends the line, contributing no height of its own), OR
+//               br carrying a `clear` declaration (childless clear-br =
+//               the row-break marker; engines own its geometry).
+//   height 20 — br starting its line (blank line — the B-RC1 case).
+//
+// This set answers "does this sibling put inline content on the open line?".
+// HTML phrase/replaced content the corpus uses; display/float/position
+// overrides are consulted separately in buildNode (a `span {display:block}`
+// sibling ends the line instead). Deliberately broader than
+// INLINE_MERGE_TAGS (which gates text ABSORPTION, a stricter contract).
+const INLINE_LEVEL_TAGS = new Set([
+  'span', 'a', 'b', 'i', 'em', 'strong', 'code', 'small', 'sub', 'sup',
+  'u', 's', 'q', 'abbr', 'cite', 'time', 'label', 'mark', 'bdi', 'bdo',
+  'samp', 'kbd', 'var', 'img', 'input', 'select', 'button', 'textarea',
+  'output', 'meter', 'progress', 'ruby', 'rt', 'rb',
+]);
 
 // ── wave-20 lane W1: widget-identity attributes (the meta.attrs wire) ────────
 //
@@ -2444,6 +2692,72 @@ export function propsForBodyRoot(rules) {
     Object.assign(props, r.props);
   }
   return { props, matchedRules };
+}
+
+// ── wave-21 A-RC6: sibling-index() extract-time baking ───────────────────────
+//
+// CSS Values 5 §5.1 tree-counting functions: `sibling-index()` resolves to
+// the element's 1-based index among its element siblings. The converter's
+// value parsers cannot know the document position, so a declaration like
+// `background: conic-gradient(hsl(calc(50deg * sibling-index()) 100% 50%), …)`
+// was unparseable → forwarded raw → dropped by ALL three engines (blank on
+// every platform). The extractor is the one place that DOES know the
+// position, so we bake the index at extract time — same precedent as the
+// wave-15 `dir=auto` first-strong resolution and the wave-13 keyframe
+// sampler: a statically-knowable runtime value is resolved into the fixture
+// and LOUDLY marked ('baked-sibling-index' in _lossyReasons). The marker is
+// informational only — lossyReasons never gates scoring (scoreEligible is
+// driven by the notApplicable tag channel in inject-wpt-block.mjs), it just
+// keeps the dashboard's provenance honest.
+
+/**
+ * Constant-fold trivial `calc(A * B)` products where at most one factor
+ * carries a unit — the shape sibling-index() substitution leaves behind
+ * (`calc(50deg * 2)` → `100deg`, `calc(2 * 30px)` → `60px`). Anything
+ * else (nested parens, +/-/÷, two units, extra terms) is left VERBATIM:
+ * the generic calc() lossy lane already covers those, and partial folds
+ * would risk changing meaning. Exported so unit tests can pin the fold.
+ */
+export function foldTrivialCalcProducts(value) {
+  // One regex pass; each match is an ENTIRE calc(...) whose body is exactly
+  // `<num><unit?> * <num><unit?>` (css-values-4 §10.1 product). The body
+  // charset excludes '(' so nested functions can never half-match.
+  return value.replace(
+    /calc\(\s*(-?(?:\d+\.?\d*|\.\d+))([a-z%]*)\s*\*\s*(-?(?:\d+\.?\d*|\.\d+))([a-z%]*)\s*\)/gi,
+    (m, a, au, b, bu) => {
+      // Two units (e.g. 2px * 3px) is invalid CSS — don't "fix" it, keep
+      // the raw calc so the failure stays visible downstream.
+      if (au && bu) return m;
+      const prod = parseFloat(a) * parseFloat(b);
+      // Guard non-finite results (overflow) — keep the original text.
+      if (!Number.isFinite(prod)) return m;
+      // Trim float noise (0.1*3 → 0.3, not 0.30000000000000004) while
+      // keeping integers clean; 6 decimals is beyond CSS render precision.
+      const num = Number.isInteger(prod) ? String(prod) : String(+prod.toFixed(6));
+      return `${num}${au || bu}`;
+    },
+  );
+}
+
+/**
+ * Substitute `sibling-index()` with the element's 1-based renderable-sibling
+ * index (pos.domSibIndex + 1 — see extractBodyTreeNested's A-RC6 note) in
+ * every string prop, then constant-fold the trivial products the
+ * substitution exposes. MUTATES the bag in place (same contract as
+ * bakeSampledAnimation). Returns true when any value was rewritten so the
+ * caller can add the 'baked-sibling-index' lossy note. Exported for tests.
+ */
+export function bakeSiblingIndex(props, index1) {
+  let baked = false;
+  for (const [k, v] of Object.entries(props)) {
+    // Only string values can carry the function; the () suffix keeps the
+    // match away from any future `sibling-index` keyword usage.
+    if (typeof v !== 'string' || !/sibling-index\(\)/i.test(v)) continue;
+    const substituted = v.replace(/sibling-index\(\)/gi, String(index1));
+    props[k] = foldTrivialCalcProducts(substituted);
+    baked = true;
+  }
+  return baked;
 }
 
 // ── Lossy detection ──────────────────────────────────────────────────────────
@@ -3831,6 +4145,12 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // on pure-inline run merging (see extractBodyTreeNested's doc comment).
   const tree = extractBodyTreeNested(cleaned, 5, mergeCtx);
 
+  // wave-21 B-RC2: body-level bare text BETWEEN/AFTER elements — each run
+  // becomes an ordered `__text<k>` component (run k renders after tree
+  // element k-1; see extractBodyTextRuns' alignment contract). Same
+  // white-space switch as the leading run: both are body-scope prose.
+  const bodyRuns = extractBodyTextRuns(cleaned, mergeCtx, leadingPreserve);
+
   if (tree.length === 0) {
     // No renderable elements at all. Keep the legacy degenerate
     // placeholder so the capture pipeline still produces a row — unless
@@ -3861,10 +4181,25 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
    * id stable and unique even when DOM trees are wide+deep, and matches
    * the IRComponent.id contract (each node has its own id).
    */
-  function buildNode(node, id) {
+  // wave-22 BR-LINE-CONTEXT: `lineCtx` is a PER-SIBLING-SCOPE mutable
+  // accumulator ({ hasInline: boolean }) threaded through each sibling loop
+  // in document order (top-level tree.forEach + the children loop below).
+  // It tracks whether the CURRENT line box already carries in-flow
+  // inline-level content, which decides a <br>'s height (see the
+  // INLINE_LEVEL_TAGS banner for the rule + the two measured wave-21
+  // regressions it repairs). null (recursion-less callers, e.g. unit
+  // fixtures) keeps the wave-21 B-RC1 behaviour for line-start brs.
+  function buildNode(node, id, lineCtx = null) {
     const { props, matchedRules, pseudo } = propsForElement(
       rules, node.tag, node.attrs, node.ancestors, node.pos ?? null, effectiveCtx,
     );
+    // wave-21 A-RC6: bake sibling-index() with this element's 1-based
+    // renderable-sibling position (CSS Values 5 §5.1 — see the baking
+    // section banner). BEFORE the sampler + lossy scan so those see the
+    // folded value (e.g. `calc(50deg * 2)` no longer trips calc lanes).
+    const sibBaked = node.pos
+      ? bakeSiblingIndex(props, node.pos.domSibIndex + 1)
+      : false;
     // wave-13 KEYFRAMES-SAMPLER: element path (e.g. the `.container` divs
     // of the css-backgrounds animation family). Before the lossy scan for
     // the same reason as the body-root call site above.
@@ -3876,6 +4211,13 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // Rides the same reasons array so the existing _lossy/_lossyReasons
     // emission + overall roll-up below cover it with no extra branches.
     if (node.inlineMerged) reasons.push('inline-run-merged');
+    // wave-21 B-RC9a: ownText glued across a kept child — order changed
+    // (see scanOwnText's reordered doc). LOUD marker, honest gate.
+    if (node.inlineReordered) reasons.push('inline-run-reordered');
+    // wave-21 A-RC6: the baked index is a statically-resolved runtime value
+    // — informational provenance marker (never score-excluding; scoring is
+    // gated by notApplicable tags, not lossyReasons).
+    if (sibBaked) reasons.push('baked-sibling-index');
     // wave-13: the sampled-animation LOUD marker rides the same reasons
     // array as inline-run-merged so the existing _lossy/_lossyReasons
     // emission + overall roll-up cover it with no extra branches.
@@ -3898,7 +4240,42 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       reasons.forEach((r) => lossyReasonsOverall.add(r));
     }
     const cmp = { properties: props };
-    if (matchedRules === 0 && Object.keys(props).length === 0 && !node.ownText) {
+    if (node.tag === 'br') {
+      // wave-21 B-RC1: a bare <br> is a LINE BREAK, not a box — the old
+      // path fell into the 100x100 placeholder below, so five body-level
+      // <br>s became a 500px phantom column pushing everything down on all
+      // three platforms (abspos-containing-block-outside-spanner). Emit a
+      // one-line-box spacer instead: height 20px = the pinned REF line box
+      // (capture-browser-ref's REF_LINE_HEIGHT 1.25 × the 16px default —
+      // verified against the cached ref PNG, whose prose after 5 <br>s
+      // starts at y=136 ≈ 16px pad + 5×20px lines + 16px <p> margin),
+      // width 0 so the empty line contributes NO horizontal ink. Any
+      // matched declarations (rare — e.g. a universal reset) spread OVER
+      // the base so an author height/width still wins, honest to cascade.
+      // wave-22 BR-LINE-CONTEXT refinement of the height (see the
+      // INLINE_LEVEL_TAGS banner for the full rule + measured regressions):
+      //   - a br carrying a `clear` declaration is the float-row-break
+      //     marker — its vertical contribution is clearance the engines'
+      //     wave-19 Clear machinery already models (FloatRowPacking strut
+      //     P6 expects a 0-height marker), so height 0 (justify-self-001);
+      //   - a br PRECEDED by inline content on its line just ENDS that
+      //     line (CSS 2.1 §9.5 — no height of its own), so height 0
+      //     (empty-span-001's twelve `<span>…</span><br>` lines);
+      //   - only a LINE-START br is a blank 20px line box (B-RC1's five
+      //     consecutive body-level brs, verified against the cached ref).
+      // Width stays 0 and BOTH dimensions stay explicit in every case so
+      // the 100x100 empty-node placeholder below can never claim a br.
+      const brEndsInlineLine = lineCtx?.hasInline === true;
+      const brIsClearMarker = 'clear' in props;
+      const brHeight = (brEndsInlineLine || brIsClearMarker) ? '0px' : '20px';
+      cmp.properties = { width: '0px', height: brHeight, ...props };
+      // meta.role wire: `_role` → IR v2 `meta.role` (same channel as
+      // 'body-root') so renderers can special-case the break if needed.
+      cmp._role = 'line-break';
+      // A br always terminates the current line — the next sibling starts
+      // a fresh, empty line box.
+      if (lineCtx) lineCtx.hasInline = false;
+    } else if (matchedRules === 0 && Object.keys(props).length === 0 && !node.ownText) {
       // Bug 1 honest fallback: no matching rules + no inline style + no
       // own text — this is the genuine "human instruction" case (or
       // scaffolding wrappers). Still emit a 100x100 placeholder so the
@@ -3907,6 +4284,35 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // empty properties bag — the renderer lays out the text and the
       // capture is meaningful even without explicit width/height.
       cmp.properties = { width: '100px', height: '100px' };
+    }
+    // wave-22 BR-LINE-CONTEXT: non-br siblings update the open-line state
+    // consumed by the br height rule above. Document order is guaranteed —
+    // both sibling loops build strictly in sequence.
+    if (lineCtx && node.tag !== 'br') {
+      // Computed overrides beat tag defaults, mirroring the used-value
+      // rules the engines apply: a floated or absolutely-positioned box is
+      // out of flow (CSS 2.1 §9.7 — it neither joins nor ends the line;
+      // floats specifically must NOT arm `hasInline`, or justify-self-001's
+      // float rows would re-arm the state their clear-brs just cleared),
+      // and an explicit block-family display on an inline tag ends the
+      // line like any block box.
+      const displayVal = String(props.display ?? '').trim().toLowerCase();
+      const floatVal = String(props.float ?? '').trim().toLowerCase();
+      const positionVal = String(props.position ?? '').trim().toLowerCase();
+      const outOfFlow =
+        floatVal === 'left' || floatVal === 'right' ||
+        floatVal === 'inline-start' || floatVal === 'inline-end' ||
+        positionVal === 'absolute' || positionVal === 'fixed';
+      // display:none generates no box at all (CSS 2.1 §9.2.4) — it neither
+      // opens nor closes the line, so the state is left untouched.
+      if (!outOfFlow && displayVal !== 'none') {
+        // In-flow: inline-level content opens/extends the line; block-level
+        // content closes it (the next br would then start a blank line).
+        const inlineLevel = displayVal !== ''
+          ? displayVal.startsWith('inline') || displayVal === 'contents'
+          : INLINE_LEVEL_TAGS.has(node.tag);
+        lineCtx.hasInline = inlineLevel;
+      }
     }
     // wave-15 part 2: land the dir-attribute mapping AFTER the placeholder
     // decision above — a rule-less, text-less `<div dir=ltr>` should still
@@ -3930,12 +4336,19 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       for (const peName of Object.keys(pseudo)) {
         const peProps = pseudo[peName];
         if (!peProps || Object.keys(peProps).length === 0) continue;
+        // wave-21 A-RC6: pseudo bags bake with the HOST's sibling index —
+        // per css-values-5 §5.1 tree-counting resolves against the
+        // originating element for pseudo-elements.
+        const peSibBaked = node.pos
+          ? bakeSiblingIndex(peProps, node.pos.domSibIndex + 1)
+          : false;
         // wave-13 KEYFRAMES-SAMPLER: pseudo-element bags sample too (WPT
         // has ::before animation variants of the same time-stable family).
         const peSampled = bakeSampledAnimation(peProps, keyframes);
         const peReasons = lossyReasonsFor(peProps);
         // Same LOUD marker contract as the host-element path above.
         if (peSampled) peReasons.push('sampled-animation');
+        if (peSibBaked) peReasons.push('baked-sibling-index');
         if (peReasons.length) {
           lossyOverall = true;
           peReasons.forEach((r) => lossyReasonsOverall.add(r));
@@ -3995,9 +4408,16 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // consistent across nesting levels. Each child carries its own
       // `id` field for diff readability + downstream addressing.
       const childMap = {};
+      // wave-22 BR-LINE-CONTEXT: fresh line state per sibling scope. The
+      // parent's ownText renders BEFORE its element children (the
+      // collectSubtreeText ordering approximation documented at its
+      // banner), so a non-empty ownText opens the children's first line
+      // with inline content — a leading child br then ENDS that line
+      // instead of adding a blank one.
+      const childLineCtx = { hasInline: !!node.ownText };
       node.children.forEach((child, i) => {
         const childId = `${id}__${i}`;
-        const childCmp = buildNode(child, childId);
+        const childCmp = buildNode(child, childId, childLineCtx);
         childMap[childId] = { id: childId, ...childCmp };
       });
       cmp.children = childMap;
@@ -4005,12 +4425,32 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     return cmp;
   }
 
+  // wave-22 BR-LINE-CONTEXT: top-level (body-scope) line state. The wave-11
+  // leading `__text` run is body prose BEFORE element 0, so it opens the
+  // first line; the wave-21 B-RC2 `__text<k>` runs are prose in gap k
+  // (immediately before tree element k) and re-open the line there. Both
+  // feed the br height rule in buildNode (see INLINE_LEVEL_TAGS banner).
+  const topLineCtx = { hasInline: !!leading.text };
   tree.forEach((node, idx) => {
     const id = `${idPrefix}__${idx}`;
+    // A bare-text run in THIS gap (rendered before element idx) puts
+    // inline content on the open line — a br element at idx then ends
+    // that line rather than adding a blank 20px one.
+    if (bodyRuns.some((run) => run.afterElemIndex === idx)) topLineCtx.hasInline = true;
     // wave-17: top-level body elements route through the slotting switch —
     // children of a sized body nest under it (source-truth structure);
     // everything else keeps the legacy `components[id]` sibling emission.
-    emitTopLevel(id, buildNode(node, id));
+    emitTopLevel(id, buildNode(node, id, topLineCtx));
+    // wave-21 B-RC2: emit the bare-text run that FOLLOWS element idx (gap
+    // index idx+1), preserving reading order in the insertion-ordered
+    // components map. Ids are `__text1`, `__text2`, … — `__text` (no
+    // suffix) stays the wave-11 leading run for byte-compat. Empty
+    // properties bag on purpose (prose defaults; same as the leading run).
+    for (const run of bodyRuns) {
+      if (run.afterElemIndex !== idx + 1) continue;
+      emitTopLevel(`${idPrefix}__text${run.afterElemIndex}`,
+        { properties: {}, _text: run.text });
+    }
   });
 
   return {

@@ -57,6 +57,25 @@ function isWptComposedMode(): boolean {
 }
 
 /**
+ * Returns the `?only=<testKey>` URL parameter — the B-RC3 ISOLATED composed
+ * capture filter — or null when absent. capture-isolated.mjs re-captures
+ * paint-divergence-prone WPT tests (column-span:all spanner + abspos in one
+ * fixture) on a fresh page holding a SINGLE composed canvas, because
+ * headless Chromium mis-paints those boxes on the tall multi-canvas page
+ * (geometry correct, paint ~2312px off) while a single-canvas page paints
+ * correctly. URLSearchParams.get already percent-decodes, mirroring the
+ * encodeURIComponent in capture-url.mjs. Empty/whitespace values fall
+ * through to the unfiltered gallery (same policy as `?fixture=`), keeping a
+ * malformed URL loud on the driver side (its 1-canvas assertion fails)
+ * instead of silently filtering to nothing here.
+ */
+function getComposedOnly(): string | null {
+  if (typeof window === 'undefined') return null;
+  const v = new URLSearchParams(window.location.search).get('only');
+  return v && v.trim() ? v.trim() : null;
+}
+
+/**
  * Returns the `?fixture=<name>` URL parameter when the page is being
  * driven by the Tier 5 interaction-state harness, or null otherwise.
  *
@@ -92,6 +111,9 @@ export function App() {
   // over the per-component CaptureGallery inside capture mode. Same URL-driven,
   // read-once lifecycle as the other capture-mode flags.
   const [wptComposed] = useState(isWptComposedMode);
+  // Parse `?only=<testKey>` once per mount — the B-RC3 isolated-capture
+  // filter (see getComposedOnly). Only consumed by ComposedCaptureGallery.
+  const [composedOnly] = useState(getComposedOnly);
 
   // Toggle the body class once, before the first render, so the chromeless
   // capture styles apply to #root and body without a flash of the gallery
@@ -247,8 +269,10 @@ export function App() {
     // Composed WPT mode routes to the per-test composed gallery; everything
     // else (the 327-pair baseline AND the legacy per-component WPT path)
     // keeps the flat per-component CaptureGallery unchanged.
+    // `only` (B-RC3) narrows the composed gallery to one test's canvas for
+    // the isolated re-capture; undefined keeps the full gallery unchanged.
     return wptComposed
-      ? <ComposedCaptureGallery document={document} />
+      ? <ComposedCaptureGallery document={document} only={composedOnly ?? undefined} />
       : <CaptureGallery document={document} />;
   }
 

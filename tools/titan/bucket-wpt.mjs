@@ -149,9 +149,27 @@ const RX = {
     // href. Also accept rel="mismatch" tests (still reftests, just
     // with inverted expectation).
     relMatch:    /<link[^>]+rel=["']?(?:match|mismatch)\b[^>]*>/i,
+    // wave-21 bookkeeping 6b: rel="match" ONLY (the strict variant). The
+    // alternation above deliberately accepts rel="mismatch" as "this is a
+    // reftest", but the downstream pipeline (extract-fixture's
+    // extractRefHref, capture-browser-ref's resolveRefPath, the SSIM
+    // compare) can ONLY assert pixel-MATCH — a mismatch-only test's pass
+    // condition is "NOT equal", which our equality gate cannot express.
+    // css/css-text-decor/text-combine-emphasis.html (rel="mismatch" only)
+    // therefore landed in bucket A, failed extraction AND ref capture
+    // loudly, and still got scored as an SSIM-1.0 phantom placeholder row.
+    // The `["']?match` head can never half-match "mismatch": after `rel=`
+    // the literal 'match' must follow the optional quote, and 'mismatch'
+    // starts 'mis'.
+    relMatchStrict: /<link[^>]+rel=["']?match\b[^>]*>/i,
     // We also need the href to extract the ref path for "ref file
-    // missing" detection (Section 4.1 row 12).
-    relMatchHref: /<link[^>]+(?:rel=["']?(?:match|mismatch)\b[^>]+href=["']([^"']+)["']|href=["']([^"']+)["'][^>]+rel=["']?(?:match|mismatch)\b)/i,
+    // missing" detection (Section 4.1 row 12). wave-21: STRICT match-only
+    // (was match|mismatch) — mismatch-only tests now short-circuit to
+    // bucket C before this regex runs, and for tests carrying BOTH links
+    // the href must be the rel="match" one (the ref extract-fixture's
+    // extractRefHref resolves) — the old alternation could return the
+    // NOTREF file when the mismatch link appeared first in the document.
+    relMatchHref: /<link[^>]+(?:rel=["']?match\b[^>]+href=["']([^"']+)["']|href=["']([^"']+)["'][^>]+rel=["']?match\b)/i,
 
     // Section 10 Q9: http(s):// in a *runtime-loaded* href/src → remote
     // resource → bucket-C. We deliberately scope this narrowly because
@@ -253,6 +271,17 @@ function classify(html, testAbsPath) {
     // testharness pages.
     if (!RX.relMatch.test(html)) {
         return { bucket: 'C', reason: 'no rel="match" link' };
+    }
+
+    // wave-21 bookkeeping 6b: a reftest whose ONLY reference link is
+    // rel="mismatch" asserts the page does NOT equal the ref — an
+    // inequality our match-only SSIM pipeline cannot gate (see the
+    // relMatchStrict doc above). Tests carrying BOTH links proceed on
+    // their rel="match" ref as before. Explicit bucket-C keeps the
+    // denominator honest instead of the phantom-placeholder scoring the
+    // wave-21 gate surfaced on text-combine-emphasis.
+    if (!RX.relMatchStrict.test(html)) {
+        return { bucket: 'C', reason: 'mismatch-only reftest (rel="mismatch") — pipeline asserts pixel-match only' };
     }
 
     // Row 1: testharness.js — reftests don't use it; if a test imports

@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.TileMode
+// BlendMode.Plus powers the cross-fade() additive compositor (weighted
+// premultiplied SUM per css-images-4 §2.6.2 — see applyCrossFade).
+import androidx.compose.ui.graphics.BlendMode
 // drawImage addresses destination geometry in integer px (same convention
 // as MaskApplier's tile lattice — the other consumer of these plans).
 import androidx.compose.ui.unit.Dp
@@ -286,9 +289,65 @@ object ColorApplier {
                     "composited in the background-blend-mode path — layer skipped")
                 null
             }
+            // A bare <color> image (cross-fade argument) — a solid brush.
+            is BackgroundImageConfig.SolidColor ->
+                androidx.compose.ui.graphics.SolidColor(image.color)
+            is BackgroundImageConfig.CrossFade -> {
+                // cross-fade() is a MULTI-PASS additive composite, not a
+                // single Brush — it renders via the dedicated drawBehind
+                // path in applyBackgroundImage. Wiring it into the
+                // per-layer blend-mode saveLayer stack is future work; log
+                // so the drop is never silent.
+                warnOnce("cross-fade", "background-image: cross-fade() layers are " +
+                    "not yet composited in the background-blend-mode path — layer skipped")
+                null
+            }
             // `none` IS the rendered result per css-backgrounds-3 §3.1
             // (an image layer that draws nothing) — not a fallthrough.
             is BackgroundImageConfig.None -> null
+        }
+    }
+
+    /**
+     * cross-fade() compositor (css-images-4 §2.6.2, A-RC2). The spec
+     * defines the result as the WEIGHTED SUM of the premultiplied images:
+     * `result = Σ wᵢ × premult(imageᵢ)` — including alpha, so six 10%
+     * layers of an opaque gradient yield EXACTLY alpha 0.6 (the
+     * target-alpha WPT). Sequential src-over stacking would give
+     * 1−0.9⁶ ≈ 0.47 — wrong — so each image draws with alpha = wᵢ and
+     * BlendMode.Plus (component-wise premultiplied ADD) inside an
+     * isolated saveLayer (transparent-black base). Premultiplied-alpha
+     * behaviour (the premultiplied-alpha WPT: 1%-alpha red + opaque
+     * green → translucent green, near-zero red) falls out of Plus
+     * operating on premultiplied components — the same math as the
+     * SwiftUI twin's .plusLighter ZStack.
+     */
+    private fun applyCrossFade(
+        modifier: Modifier,
+        crossFade: BackgroundImageConfig.CrossFade
+    ): Modifier {
+        return modifier.drawBehind {
+            drawIntoCanvas { canvas ->
+                // Isolate the additive stack from the destination: Plus
+                // must accumulate over TRANSPARENT, not over whatever the
+                // box already painted (background-color layers below).
+                canvas.saveLayer(
+                    androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height),
+                    androidx.compose.ui.graphics.Paint()
+                )
+                for (entry in crossFade.entries) {
+                    // Each sub-image contributes wᵢ × its premultiplied
+                    // pixels. brushFor covers gradient/color sub-images;
+                    // url() sub-images have no brush (logged inside).
+                    val brush = brushFor(entry.image) ?: continue
+                    drawRect(
+                        brush = brush,
+                        alpha = entry.weight,
+                        blendMode = BlendMode.Plus
+                    )
+                }
+                canvas.restore()
+            }
         }
     }
 
@@ -319,6 +378,13 @@ object ColorApplier {
         if (image is BackgroundImageConfig.Url) {
             return applyUrlBackground(modifier, image.url, config, layerSize, layerRepeat)
         }
+        // cross-fade() takes the dedicated multi-pass additive path — a
+        // weighted premultiplied SUM cannot be expressed as one Brush.
+        // Size/position/repeat knobs on a cross-fade layer are follow-up
+        // work (no fixture pairs them yet); the composite fills the box.
+        if (image is BackgroundImageConfig.CrossFade) {
+            return applyCrossFade(modifier, image)
+        }
         // For NON-repeating gradients we always want TileMode.Clamp regardless
         // of background-repeat. CSS background-repeat only re-tiles a gradient
         // when an explicit background-size makes the tile smaller than the
@@ -343,7 +409,10 @@ object ColorApplier {
             is BackgroundImageConfig.RadialGradient -> {
                 if (image.repeating)
                     RepeatingGradientHelper.createRepeatingRadialGradient(
-                        centerX = image.centerX, centerY = image.centerY,
+                        // The repeating helper takes plain fractions —
+                        // resolve px centers against the size it is given.
+                        centerX = image.centerX.fraction(size.width),
+                        centerY = image.centerY.fraction(size.height),
                         colorStops = image.colorStops, size = size)
                 else
                     createRadialGradientBrush(image, gradientTileMode)
@@ -351,14 +420,22 @@ object ColorApplier {
             is BackgroundImageConfig.ConicGradient -> {
                 if (image.repeating)
                     RepeatingGradientHelper.createRepeatingConicGradient(
-                        centerX = image.centerX, centerY = image.centerY,
+                        // Same fraction resolution as the radial branch.
+                        centerX = image.centerX.fraction(size.width),
+                        centerY = image.centerY.fraction(size.height),
                         startAngle = image.angle, colorStops = image.colorStops, size = size)
                 else
                     createSweepGradientBrush(image)
             }
+            // A bare <color> image — solid fill of the layer box.
+            is BackgroundImageConfig.SolidColor ->
+                androidx.compose.ui.graphics.SolidColor(image.color)
             // Unreachable: url() layers returned through the bitmap-tile
             // path above; the arm exists only for `when` exhaustiveness.
             is BackgroundImageConfig.Url -> null
+            // Unreachable: cross-fade() returned through applyCrossFade
+            // above; the arm exists only for `when` exhaustiveness.
+            is BackgroundImageConfig.CrossFade -> null
             // `none` draws nothing by definition (css-backgrounds-3 §3.1).
             is BackgroundImageConfig.None -> null
         }
@@ -954,15 +1031,19 @@ object ColorApplier {
         val stops = gradient.colorStops.map { it.position }
         val shape = gradient.shape ?: BackgroundImageConfig.RadialShape.ELLIPSE
         val sizeKw = gradient.size ?: BackgroundImageConfig.RadialSize.FARTHEST_CORNER
-        val cxFrac = gradient.centerX
-        val cyFrac = gradient.centerY
+        // GradientCoord axes (A-RC8): FRACTION or PX — resolved against
+        // the actual draw size below, the only place it exists.
+        val coordX = gradient.centerX
+        val coordY = gradient.centerY
 
         return object : ShaderBrush() {
             override fun createShader(size: Size): Shader {
                 val w = size.width
                 val h = size.height
-                val cx = cxFrac * w
-                val cy = cyFrac * h
+                // fraction(axis) × axis ≡ the px value for PX coords, so
+                // `at 100px 50px` lands exactly 100/50 px from the origin.
+                val cx = coordX.fraction(w) * w
+                val cy = coordY.fraction(h) * h
                 // Distances from centre to each side / corner — CSS spec.
                 val dLeft = cx; val dRight = w - cx
                 val dTop = cy; val dBottom = h - cy
@@ -1094,16 +1175,18 @@ object ColorApplier {
         // `createShader(size)` so the centre is always the actual
         // fraction × draw-size, matching how the linear / radial brushes
         // already work.
-        val cxFrac = gradient.centerX
-        val cyFrac = gradient.centerY
+        // GradientCoord axes (A-RC8) — resolved in createShader like radial.
+        val coordX = gradient.centerX
+        val coordY = gradient.centerY
         val colors = gradient.colorStops.map { it.color }
         val stops = gradient.colorStops.map { it.position }
         // CSS `from` angle, degrees. 0 when the author omitted `from …`.
         val fromDeg = gradient.angle
         return object : ShaderBrush() {
             override fun createShader(size: Size): Shader {
-                val cx = cxFrac * size.width
-                val cy = cyFrac * size.height
+                // fraction × axis ≡ px value for PX coords (see radial).
+                val cx = coordX.fraction(size.width) * size.width
+                val cy = coordY.fraction(size.height) * size.height
                 val shader = android.graphics.SweepGradient(cx, cy, colors.map { it.toArgb() }.toIntArray(),
                                                             if (stops.isEmpty()) null else stops.toFloatArray())
                 // Convention fix: android.graphics.SweepGradient places its

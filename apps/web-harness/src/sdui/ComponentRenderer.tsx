@@ -890,7 +890,23 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLine
         // exception: we drive it from bg luminance to match iOS.
         color,
         textAlign: 'inherit',
-        wordBreak: 'break-word',
+        // Wave 21 (lane TEXTDECOR, B-RC7) — `word-break: break-word` is a
+        // HARNESS default (it keeps long placeholder labels inside their
+        // cards on the 327-pair stage), NOT a CSS initial value: real CSS
+        // gives an unbreakable run (no UAX #14 soft-wrap opportunity) ONE
+        // overflowing line. The Chromium browser-refs for
+        // text-decoration-dotted-001/002 keep 'fooשלוםbaz' / 'foobarbaz'
+        // @92px on a single line overflowing the 390px canvas (the canvas
+        // clips it), while this hardcoded break-word wrapped the run
+        // mid-glyph and sank both tests. Composed WPT capture therefore
+        // drops the harness default and inherits the spec initial
+        // (`word-break: normal`) — an IR-declared WordBreak still lands
+        // via the style engine's own declaration, which wins over this
+        // absent default. Per-component `?wpt=1` and the 327 baseline
+        // never set WPT_COMPOSED_MODE → byte-identical there. Native
+        // twins: Compose gates softWrap, iOS gates fixedSize(horizontal:)
+        // on the same unbreakable-run predicate (DecorationOps twins).
+        ...(WPT_COMPOSED_MODE ? {} : { wordBreak: 'break-word' as const }),
       }}
     >
       {blockLayout !== null ? (

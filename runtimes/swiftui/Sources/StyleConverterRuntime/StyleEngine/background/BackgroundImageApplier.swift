@@ -149,6 +149,13 @@ struct BackgroundImageApplier: ViewModifier {
         // `none` paints Clear regardless of geometry knobs (there is no
         // image to size/position/tile) — keep the stack index math.
         if case .none = layer { return GradientApplier.render(layer) }
+        // cross-fade() always renders through GradientApplier's additive
+        // compositor — the multi-image stack has no single-tile shader,
+        // so size/position/repeat knobs on it are documented follow-up
+        // work (no fixture pairs them yet; full-box like knob-less
+        // gradients). Routing it into the tile view would hit the
+        // breadcrumb no-op there.
+        if case .crossFade = layer { return GradientApplier.render(layer) }
         // Gradient layer: geometry-route only when a knob would change
         // the picture; otherwise the wave-5 full-box path is untouched
         // (every knob-less gradient baseline stays byte-identical).

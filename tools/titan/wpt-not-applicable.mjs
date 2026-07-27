@@ -1359,13 +1359,42 @@ export const RULES = [
         ],
         test: (html /* , _ctx */) => hasAnchorPositioning(html),
     },
+    {
+        // Rule 41 (wave-21 bookkeeping): `.sub.html` filename — the wptserve
+        // SERVER contract, not just the substitution templating Rule 38
+        // (requires-sub-template) covers. A `.sub.html` file is only
+        // meaningful when served by the WPT server (it performs the
+        // server-side {{host}}/{{ports}}/{{domains}} rewrite AND serves the
+        // cross-origin peers those tokens name); rendered from file:// the
+        // raw tokens reach the parser as literal text and every resource
+        // they name 404s. The wave-21 gate run surfaced
+        // css/css-images/cross-fade-cross-origin-orientation.sub.html
+        // reaching extraction with a fixture emitted — the tag makes the
+        // server dependency explicit so the dashboard's denominator can
+        // never quietly include a test our file://-based pipeline cannot
+        // run faithfully. Deliberately filename-only (unambiguous, spec'd
+        // by the WPT file-name-flags contract); token-in-body detection
+        // stays Rule 38's job, so the two rules overlap on typical
+        // `.sub.html` files — a benign double tag, like the existing
+        // cross-origin + sub-template overlap.
+        tag: 'requires-wpt-server',
+        description: '.sub.html filename — needs the wptserve server (substitution + multi-origin serving); file:// rendering is unfaithful',
+        swarm001Source: [],
+        swarm002Source: [],
+        swarm003Source: [
+            // wave-21 gate finding (css-images section): the .sub test
+            // extracted + scored despite the server dependency.
+            'wave-21 css-images cross-fade-cross-origin-orientation.sub',
+        ],
+        test: (html, ctx) => RX.subFilenameSuffix.test(ctx?.testRel ?? ''),
+    },
 ];
 
 // Sanity: keep this in lock-step with the canonical rule count. swarm-001
 // seeded 17 rules; swarm-002 added 12 more (Rules 18..29); swarm-003 added
-// 11 more (Rules 30..40). A drift here means either a rule was dropped or
-// a duplicate was added.
-const EXPECTED_RULE_COUNT = 40;
+// 11 more (Rules 30..40); wave-21 added Rule 41 (requires-wpt-server).
+// A drift here means either a rule was dropped or a duplicate was added.
+const EXPECTED_RULE_COUNT = 41;
 if (RULES.length !== EXPECTED_RULE_COUNT) {
     throw new Error(`wpt-not-applicable: expected exactly ${EXPECTED_RULE_COUNT} rules, got ${RULES.length}`);
 }
@@ -1375,8 +1404,8 @@ if (RULES.length !== EXPECTED_RULE_COUNT) {
 // ---------------------------------------------------------------------------
 
 /**
- * Classify a single test against all 40 rules (17 from swarm-001 + 12 from
- * swarm-002 + 11 from swarm-003).
+ * Classify a single test against all 41 rules (17 from swarm-001 + 12 from
+ * swarm-002 + 11 from swarm-003 + 1 from wave-21: requires-wpt-server).
  *
  * @param {object} args
  * @param {string} args.html       — raw test HTML source

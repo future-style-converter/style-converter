@@ -53,11 +53,19 @@ enum GradientApplier {
             // flavour (header note 3) — dispatch on the base kind.
             switch kind {
             case .radial: return AnyView(radial(shape: "circle", stops: stops,
-                                                cx: 0.5, cy: 0.5))
+                                                cx: .center, cy: .center))
             case .conic:  return AnyView(conic(fromDeg: angle, stops: stops,
-                                               cx: 0.5, cy: 0.5))
+                                               cx: .center, cy: .center))
             case .linear: return AnyView(linear(angle: angle, stops: stops))
             }
+        case .color(let cv):
+            // <color>-as-image (cross-fade argument) — solid fill.
+            // Implementation in CrossFadeApplier.swift (file split).
+            return AnyView(solidColor(cv))
+        case .crossFade(let args):
+            // cross-fade() — weighted premultiplied SUM (§2.6.2).
+            // Implementation in CrossFadeApplier.swift (file split).
+            return AnyView(crossFade(args))
         }
     }
 
@@ -192,11 +200,15 @@ enum GradientApplier {
     // the default `ellipse` the circular SwiftUI gradient is stretched
     // to the box aspect via scaleEffect.
     private static func radial(shape: String?, stops: [BackgroundImageStop],
-                               cx: Double, cy: Double) -> some View {
-        let unitCenter = UnitPoint(x: cx, y: cy)
+                               cx: GradientCoord, cy: GradientCoord) -> some View {
         return GeometryReader { geo in
             let w = geo.size.width
             let h = geo.size.height
+            // Resolve the per-axis coords against the ACTUAL box (A-RC8):
+            // fractions pass through; px centers divide by the axis so
+            // `at 100px 50px` lands exactly 100/50 px from the origin.
+            let unitCenter = UnitPoint(x: cx.fraction(Double(w)),
+                                       y: cy.fraction(Double(h)))
             // Half-diagonal — distance to the farthest corner from the
             // centre (closest match to CSS `farthest-corner` default).
             let halfDiag = sqrt(w * w + h * h) / 2
@@ -229,10 +241,28 @@ enum GradientApplier {
     // AngularGradient is SwiftUI's conic equivalent. CSS's `from <angle>`
     // sets the starting position. The −90° offset maps CSS's 0deg-at-12-
     // o'clock convention onto SwiftUI's trailing-edge zero (wave 1 fix).
+    // FRACTION coords keep the original no-GeometryReader path BYTE-
+    // IDENTICAL (dark-stage 327 protection: every pre-A-RC8 fixture is
+    // percent/keyword-centered); PX coords need the box size, so only
+    // they take the GeometryReader branch.
     private static func conic(fromDeg: Double?, stops: [BackgroundImageStop],
-                              cx: Double, cy: Double) -> some View {
-        AngularGradient(gradient: toGradient(stops),
-                        center: UnitPoint(x: cx, y: cy),
-                        angle: .degrees((fromDeg ?? 0) - 90))
+                              cx: GradientCoord, cy: GradientCoord) -> some View {
+        Group {
+            if cx.kind == .fraction && cy.kind == .fraction {
+                // Legacy path — unchanged view hierarchy for fractions.
+                AngularGradient(gradient: toGradient(stops),
+                                center: UnitPoint(x: cx.value, y: cy.value),
+                                angle: .degrees((fromDeg ?? 0) - 90))
+            } else {
+                // Length centers (A-RC8): resolve px → fraction against
+                // the actual box before building the gradient.
+                GeometryReader { geo in
+                    AngularGradient(gradient: toGradient(stops),
+                                    center: UnitPoint(x: cx.fraction(Double(geo.size.width)),
+                                                      y: cy.fraction(Double(geo.size.height))),
+                                    angle: .degrees((fromDeg ?? 0) - 90))
+                }
+            }
+        }
     }
 }

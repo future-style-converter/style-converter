@@ -248,12 +248,35 @@ async function resolveWptRef() {
   throw new Error('WPT_REF file contains no SHA line');
 }
 
-/** Resolve the on-disk path of the rel="match" reference for a test path. */
+/** Resolve the on-disk path of the rel="match" reference for a test path.
+ *
+ *  wave-21 bookkeeping 6b (text-combine-emphasis investigation): a test can
+ *  be a genuine reftest yet carry ONLY a rel="mismatch" link — its pass
+ *  condition is "does NOT pixel-equal the ref", which this match-asserting
+ *  pipeline cannot capture a comparable reference for (rendering the
+ *  NOTREF would gate on the exact opposite of the test's semantics). Such
+ *  tests throw an error carrying `skipReason: 'mismatch-only-reftest'` so
+ *  captureRefs reports an EXPLICIT SKIP (not a FAIL) and the denominator
+ *  stays honest; bucket-wpt.mjs now also pre-classifies them bucket-C so
+ *  they never reach a section run in the first place. A test with neither
+ *  link keeps the plain no-rel=match error (a real input mistake). */
 export async function resolveRefPath(testRel) {
   const testAbs = join(WPT_DIR, testRel);
   const html = await fs.readFile(testAbs, 'utf8');
   const refHref = extractRefHref(html);
-  if (!refHref) throw new Error(`no rel="match" link in ${testRel}`);
+  if (!refHref) {
+    // Distinguish "inverted reftest" from "not a reftest at all". The
+    // regex mirrors bucket-wpt's relMatch shape; extractRefHref above
+    // already proved there is no rel="match" link, so a mismatch hit here
+    // means mismatch-ONLY.
+    const mismatchOnly = /<link[^>]+rel=["']?mismatch\b/i.test(html);
+    const err = new Error(mismatchOnly
+      ? `mismatch-only reftest (rel="mismatch") in ${testRel} — explicitly skipped: pipeline asserts pixel-match only`
+      : `no rel="match" link in ${testRel}`);
+    // Machine-readable skip marker — consumed by captureRefs' catch.
+    if (mismatchOnly) err.skipReason = 'mismatch-only-reftest';
+    throw err;
+  }
   return refHref.startsWith('/')
     ? join(WPT_DIR, refHref.slice(1))
     : resolve(dirname(testAbs), refHref);
@@ -452,6 +475,18 @@ export async function captureRefs(testRels, opts = {}) {
           process.stderr.write(`  [${i}/${testRels.length}] ${cached ? 'cache' : 'rendered'} ${rel}\n`);
         }
       } catch (err) {
+        // wave-21 6b: mismatch-only reftests are an EXPLICIT SKIP, not a
+        // failure — no ref image can honestly exist for an inverted
+        // assertion (see resolveRefPath). `ok: true` keeps the exit code
+        // clean; `skipped` + `reason` keep the log and any consumer honest
+        // about WHY there is no PNG for this test.
+        if (err.skipReason) {
+          results.push({ test: rel, ok: true, skipped: true, reason: err.skipReason });
+          if (!opts.quiet) {
+            process.stderr.write(`  [${i}/${testRels.length}] SKIP  ${rel}: ${err.message}\n`);
+          }
+          continue;
+        }
         results.push({ test: rel, ok: false, error: err.message ?? String(err) });
         if (!opts.quiet) {
           process.stderr.write(`  [${i}/${testRels.length}] FAIL  ${rel}: ${err.message ?? err}\n`);
@@ -473,9 +508,13 @@ async function main() {
     process.exit(1);
   }
   const { wptRef, results } = await captureRefs(inputs);
-  const ok = results.filter((r) => r.ok).length;
-  const fail = results.length - ok;
-  console.log(`capture-browser-ref: wptRef=${wptRef.slice(0, 12)}  ok=${ok}  fail=${fail}`);
+  // wave-21 6b: report skips as their own column — a skipped mismatch-only
+  // reftest is neither a success (no PNG exists) nor a failure (nothing
+  // broke), and folding it into either would re-hide the denominator.
+  const skipped = results.filter((r) => r.skipped).length;
+  const ok = results.filter((r) => r.ok && !r.skipped).length;
+  const fail = results.length - ok - skipped;
+  console.log(`capture-browser-ref: wptRef=${wptRef.slice(0, 12)}  ok=${ok}  fail=${fail}  skipped=${skipped}`);
   process.exit(fail > 0 ? 1 : 0);
 }
 

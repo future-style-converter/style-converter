@@ -92,3 +92,45 @@ test('resolveRefPath returns the absolute ref path for a real test', { skip: !ex
   assert.ok(ref.endsWith('greensquare-ref.html'), `unexpected ref path: ${ref}`);
   assert.ok(ref.startsWith('/'), 'ref path should be absolute');
 });
+
+// ── wave-21 6b: mismatch-only reftests are an explicit skip ─────────────────
+//
+// css/css-text-decor/text-combine-emphasis.html carries ONLY a
+// rel="mismatch" link (pass = "does NOT equal the ref"), which a
+// match-asserting capture cannot represent. resolveRefPath must throw an
+// error carrying the machine-readable `skipReason` marker so captureRefs
+// reports SKIP (ok:true, skipped:true) instead of FAIL — the wave-21 gate
+// logged this exact test as `FAIL … no rel="match" link`, which then read
+// as capture breakage rather than a structural skip.
+
+const MISMATCH_ONLY_TEST = 'css/css-text-decor/text-combine-emphasis.html';
+const MISMATCH_ONLY_ABS = join(REPO_ROOT, 'tools', 'wpt', MISMATCH_ONLY_TEST);
+
+test('resolveRefPath marks mismatch-only reftests with skipReason', { skip: !existsSync(MISMATCH_ONLY_ABS) }, async () => {
+  await assert.rejects(
+    resolveRefPath(MISMATCH_ONLY_TEST),
+    (err) => {
+      // The marker drives the SKIP branch in captureRefs.
+      assert.equal(err.skipReason, 'mismatch-only-reftest');
+      // Message must say WHY, for the humans reading browser-ref.log.
+      assert.match(err.message, /mismatch-only reftest/);
+      return true;
+    },
+  );
+});
+
+test('resolveRefPath keeps the plain error for tests with NO ref link at all', { skip: !existsSync(SAMPLE_TEST_ABS) }, async () => {
+  // A ref page itself has neither rel="match" nor rel="mismatch" — the
+  // error must NOT carry skipReason (that would silently skip real input
+  // mistakes). a98rgb-001's own ref file is a handy no-link fixture.
+  const refAbs = await resolveRefPath(SAMPLE_TEST);
+  const refRel = refAbs.slice(join(REPO_ROOT, 'tools', 'wpt').length + 1);
+  await assert.rejects(
+    resolveRefPath(refRel),
+    (err) => {
+      assert.equal(err.skipReason, undefined);
+      assert.match(err.message, /no rel="match" link/);
+      return true;
+    },
+  );
+});

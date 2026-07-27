@@ -40,6 +40,14 @@ struct MulticolGreedyLayout: Layout {
     /// multicolUsedGapPx: declared gap via GapApplier, else `normal` =
     /// 1em per css-align-3 §8.3), so slots and fill agree by construction.
     let gapPx: CGFloat
+    /// Wave-21 lane MULTICOL: per-subview spanner-flow roles from
+    /// MulticolSpannerFlow.rolesFor, in the exact order
+    /// contentOrPlaceholder composes the subviews (leading text first).
+    /// Nil — the default and every dark-stage caller (the renderer only
+    /// passes roles under WPT capture) — keeps the greedy layout
+    /// byte-identical; a roles list containing a spanner engages the
+    /// css-multicol-1 §6 spanner-flow plan instead.
+    var roles: [MulticolSpannerFlow.Role]? = nil
 
     /// Everything both protocol methods need, computed from ONE width so
     /// the measure and place passes can never drift (CSSFlexLayout's
@@ -51,6 +59,11 @@ struct MulticolGreedyLayout: Layout {
         let heights: [Double]
         /// The greedy assignment — one slot per subview, index-aligned.
         let slots: [MulticolDistribution.Slot]
+        /// Wave-21: the spanner-flow answer — non-nil ONLY when the roles
+        /// gate engaged; the greedy `slots` above are then empty and every
+        /// consumer reads this plan instead (§6.2 spanner sequencing +
+        /// §6.3 balanced segments + css-position §3.1 static anchors).
+        var spannerPlan: MulticolSpannerFlow.Plan? = nil
     }
 
     /// Build the distribution plan for a definite inline size.
@@ -84,10 +97,58 @@ struct MulticolGreedyLayout: Layout {
         // unbounded height; the SwiftUI analogue proposes (W, nil) — a
         // child with an explicit width keeps it, auto content wraps at W.
         let w = CGFloat(used.widthPx)
+        // ── Wave-21 spanner-flow branch (css-multicol-1 §6) ─────────────
+        // Engages only when the renderer supplied ALIGNED roles containing
+        // a spanner (capture-gated at the call site). Spanners measure at
+        // the FULL container width (§6.2 full-width span); flow children
+        // keep the column-width proposal. Everything else — nil roles,
+        // spanner-free role lists — keeps the greedy path byte-identical.
+        if let roles, roles.contains(.spanner) {
+            // Roles must align 1:1 with subviews; a mismatch means some
+            // child composed differently than the renderer predicted —
+            // bail loudly to greedy (repo no-silent-fallthrough rule).
+            guard roles.count == subviews.count else {
+                PropertyTracker.logOnce(
+                    key: "multicol-spanner-roles-mismatch",
+                    message: "multicol spanner flow: roles/subviews mismatch "
+                        + "(\(roles.count) vs \(subviews.count)) — greedy layout kept")
+                return greedyPlan(used: used, columnWidth: w, subviews: subviews)
+            }
+            // Per-role measure: spanner at container width, flow at W.
+            let heights = zip(roles, subviews).map { role, sub in
+                Double(sub.sizeThatFits(ProposedViewSize(
+                    width: role == .spanner ? widthPx : w, height: nil)).height)
+            }
+            // The shared SP-table plan (pinned identically on Android).
+            let sp = MulticolSpannerFlow.plan(
+                children: zip(heights, roles).map { MulticolSpannerFlow.Child(heightPx: $0, role: $1) },
+                columnCount: used.count)
+            // Whole-child placement approximation: say so once when a
+            // child straddles a balanced boundary (no fragmentation for
+            // multi-child segments — mirrors Android's log).
+            if MulticolSpannerFlow.anyFlowChildCrossesBoundary(
+                children: zip(heights, roles).map { MulticolSpannerFlow.Child(heightPx: $0, role: $1) },
+                columnCount: used.count) {
+                PropertyTracker.logOnce(
+                    key: "multicol-spanner-segment-fragmentation",
+                    message: "multicol spanner flow: segment fragmentation "
+                        + "(multi-child) not implemented — children place whole")
+            }
+            return Plan(used: used, heights: heights, slots: [], spannerPlan: sp)
+        }
+        return greedyPlan(used: used, columnWidth: w, subviews: subviews)
+    }
+
+    /// The pre-wave-21 greedy plan, factored so the spanner branch's
+    /// mismatch bail and the legacy path share one implementation.
+    private func greedyPlan(used: MulticolMath.UsedColumns,
+                            columnWidth w: CGFloat,
+                            subviews: Subviews) -> Plan {
+        // Byte-identical to the original inline body: measure at W…
         let heights = subviews.map {
             Double($0.sizeThatFits(ProposedViewSize(width: w, height: nil)).height)
         }
-        // The shared greedy assignment (D-table-pinned on both platforms).
+        // …then the shared greedy assignment (D-table-pinned on both platforms).
         let slots = MulticolDistribution.distribute(childHeightsPx: heights,
                                                     columnCount: used.count)
         return Plan(used: used, heights: heights, slots: slots)
@@ -116,6 +177,11 @@ struct MulticolGreedyLayout: Layout {
         // Plan once from the proposed width (placeSubviews re-derives the
         // identical plan from bounds.width — pure inputs cannot drift).
         let p = plan(widthPx: w, subviews: subviews)
+        // Wave-21: a spanner-flow plan owns the container block-size —
+        // §6.3 balanced segments + spanner heights (SP-table).
+        if let sp = p.spannerPlan {
+            return CGSize(width: w, height: sp.containerBlockSizePx)
+        }
         // Android reports (constraints.maxWidth, tallest column) — the
         // container spans the full available inline size and is exactly
         // as tall as its lowest-reaching child.
@@ -135,6 +201,27 @@ struct MulticolGreedyLayout: Layout {
         let p = plan(widthPx: bounds.width, subviews: subviews)
         // The used per-column inline size, shared by every slot.
         let w = CGFloat(p.used.widthPx)
+        // ── Wave-21 spanner-flow placement (css-multicol-1 §6) ──────────
+        if let sp = p.spannerPlan {
+            // One slot per subview, index-aligned by construction.
+            for (index, sub) in subviews.enumerated() {
+                let slot = sp.slots[index]
+                // Spanners span all columns: x=0, full container width
+                // (§6.2); flow/static children sit at their column's
+                // inline origin i·(W+G) — the Android placement twin.
+                let x = slot.role == .spanner
+                    ? bounds.minX
+                    : bounds.minX + CGFloat(slot.columnIndex) * (w + gapPx)
+                // The SP-table block offset from the content-box top.
+                sub.place(at: CGPoint(x: x, y: bounds.minY + CGFloat(slot.yPx)),
+                          anchor: .topLeading,
+                          // Spanner proposes the full width; columns W.
+                          proposal: ProposedViewSize(
+                            width: slot.role == .spanner ? bounds.width : w,
+                            height: nil))
+            }
+            return
+        }
         // Place in child order (geometry is disjoint by construction, so
         // order does not change the paint result vs Android's
         // column-major placement — see MultiColumnApplier's layout loop).

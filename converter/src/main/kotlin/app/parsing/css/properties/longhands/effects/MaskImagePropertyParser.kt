@@ -1,195 +1,86 @@
 package app.parsing.css.properties.longhands.effects
 
-import app.irmodels.*
+import app.irmodels.properties.background.BackgroundImageProperty
 import app.irmodels.properties.effects.MaskImageProperty
 import app.irmodels.properties.effects.MaskImageValue
 import app.parsing.css.properties.longhands.PropertyParser
-import app.parsing.css.properties.primitiveParsers.AngleParser
-import app.parsing.css.properties.primitiveParsers.ColorParser
-import app.parsing.css.properties.primitiveParsers.PercentageParser
-import app.parsing.css.properties.primitiveParsers.UrlParser
+import app.parsing.css.properties.longhands.background.BackgroundImagePropertyParser
 
 /**
- * Parser for the `mask-image` CSS property.
+ * Parser for the `mask-image` CSS property (css-masking-1 §7.1).
  *
- * Supports:
- * - none: No mask image
- * - url(): Image from URL
- * - linear-gradient(): Linear gradient
- * - radial-gradient(): Radial gradient
- * - conic-gradient(): Conic gradient
- * - Repeating variants
+ * `mask-image` accepts the SAME `<image>` grammar as `background-image`
+ * (none | url() | the six gradient flavours), so this parser DELEGATES the
+ * per-layer grammar to [BackgroundImagePropertyParser.parseImage] and maps
+ * the result onto [MaskImageValue] — one grammar, two wrappers (A-RC9).
  *
- * Multiple images can be specified as comma-separated values.
+ * WHY delegation: the previous copy re-implemented the grammar and had
+ * already drifted — its conic branch had NO `from <angle>` / `at <pos>`
+ * prefix handling (`from 45deg` was fed to the color-stop parser and
+ * silently dropped), its radial branch ignored size keywords + positions,
+ * and its stop parser predated double-position stops. Every future gradient
+ * fix now lands in both properties automatically.
  */
 object MaskImagePropertyParser : PropertyParser {
 
     override fun parse(value: String): MaskImageProperty? {
-        // CASE-PRESERVATION CONTRACT (mirrors BackgroundImagePropertyParser):
+        // CASE-PRESERVATION CONTRACT (shared with BackgroundImageParser):
         // keywords/function names are ASCII case-insensitive (CSS Syntax L3
-        // §4.3) but url() payloads are case-sensitive author bytes (base64
-        // data URIs, case-sensitive paths). Keep the ORIGINAL bytes and
-        // lower per-layer copies only for matching — the old whole-value
-        // lowercase corrupted data-URI payloads on the wire. The v2 schema
-        // is permissive at property-data leaves (schema/spec/05-versioning.md),
-        // so restoring true bytes is a bug fix, not a wire-shape change.
+        // §4.3) but url() payloads are case-sensitive author bytes. The
+        // delegate handles lowering per-layer; we only split here.
         val trimmed = value.trim()
 
         // Split the ORIGINAL bytes; the splitter is paren-aware and
         // case-agnostic, so layers keep the author's casing.
-        val imageStrings = splitByComma(trimmed)
+        val imageStrings = app.parsing.css.properties.primitiveParsers.TokenizationUtils.splitByComma(trimmed)
         if (imageStrings.isEmpty()) return null
 
-        val images = imageStrings.mapNotNull { parseImage(it.trim()) }
+        // Delegate each layer to the background grammar, then map to the
+        // mask IR union. mask-image keeps the historical all-or-nothing
+        // contract: ANY unmappable layer fails the whole property (the
+        // caller records it as unparsed rather than emitting partial wire).
+        val images = imageStrings.mapNotNull { layer ->
+            BackgroundImagePropertyParser.parseImage(layer.trim())?.let { mapToMask(it) }
+        }
         if (images.size != imageStrings.size) return null
 
         return MaskImageProperty(images)
     }
 
-    // Receives one layer in ORIGINAL author bytes; dispatches on a lowered
-    // copy. url() payloads come from the original; gradient bodies parse
-    // from the lowered copy — every gradient token (color keywords, hex,
-    // angle units, directions) is case-insensitive per CSS Images L3/L4.
-    private fun parseImage(value: String): MaskImageValue? {
-        // Lowered copy used ONLY for prefix matching and gradient parsing.
-        val lower = value.lowercase()
-        return when {
-            lower == "none" -> MaskImageValue.None
-            // url(): UrlParser matches the function name case-insensitively
-            // and returns the payload from the original bytes untouched.
-            lower.startsWith("url(") -> parseUrl(value)
-            lower.startsWith("linear-gradient(") -> parseLinearGradient(lower, repeating = false)
-            lower.startsWith("repeating-linear-gradient(") -> parseLinearGradient(lower, repeating = true)
-            lower.startsWith("radial-gradient(") -> parseRadialGradient(lower, repeating = false)
-            lower.startsWith("repeating-radial-gradient(") -> parseRadialGradient(lower, repeating = true)
-            lower.startsWith("conic-gradient(") -> parseConicGradient(lower, repeating = false)
-            lower.startsWith("repeating-conic-gradient(") -> parseConicGradient(lower, repeating = true)
-            else -> null
-        }
+    // BackgroundImage → MaskImageValue. The two unions are wire-parallel
+    // twins (same JSON shapes, see MaskImageValueSerializer), so mapping is
+    // structural. Returns null for layers the mask union cannot represent —
+    // cross-fade()/color layers (css-images-4 features not yet modelled on
+    // the mask side) — which fails the whole property above, keeping the
+    // loss VISIBLE (unparsed property) instead of silent.
+    private fun mapToMask(image: BackgroundImageProperty.BackgroundImage): MaskImageValue? = when (image) {
+        is BackgroundImageProperty.BackgroundImage.None -> MaskImageValue.None
+        is BackgroundImageProperty.BackgroundImage.Url -> MaskImageValue.Image(image.url)
+        is BackgroundImageProperty.BackgroundImage.LinearGradient ->
+            MaskImageValue.LinearGradient(image.angle, image.colorStops.map { mapStop(it) }, image.repeating)
+        is BackgroundImageProperty.BackgroundImage.RadialGradient ->
+            MaskImageValue.RadialGradient(
+                // Enum twins map by name (both mirror css-images-3 §3.5).
+                image.shape?.let { MaskImageValue.GradientShape.valueOf(it.name) },
+                image.size?.let { MaskImageValue.GradientSize.valueOf(it.name) },
+                image.position?.let { MaskImageValue.Position(it.x, it.y) },
+                image.colorStops.map { mapStop(it) },
+                image.repeating
+            )
+        is BackgroundImageProperty.BackgroundImage.ConicGradient ->
+            MaskImageValue.ConicGradient(
+                image.angle,
+                image.position?.let { MaskImageValue.Position(it.x, it.y) },
+                image.colorStops.map { mapStop(it) },
+                image.repeating
+            )
+        // Not representable in the mask union (yet): global keywords,
+        // raw fallbacks, cross-fade(), bare colors. Null → whole-property
+        // failure above (the pre-delegation parser rejected these too).
+        else -> null
     }
 
-    private fun parseUrl(value: String): MaskImageValue? {
-        val url = UrlParser.parse(value) ?: return null
-        return MaskImageValue.Image(url)
-    }
-
-    private fun parseLinearGradient(value: String, repeating: Boolean): MaskImageValue? {
-        val funcName = if (repeating) "repeating-linear-gradient" else "linear-gradient"
-        val content = extractFunctionContent(value, funcName) ?: return null
-
-        val parts = splitByComma(content)
-        if (parts.isEmpty()) return null
-
-        var angle: IRAngle? = null
-        var colorStopStart = 0
-        val firstPart = parts[0].trim()
-
-        AngleParser.parse(firstPart)?.let {
-            angle = it
-            colorStopStart = 1
-        } ?: run {
-            if (firstPart.startsWith("to ")) {
-                angle = parseDirectionToAngle(firstPart)
-                if (angle != null) colorStopStart = 1
-            }
-        }
-
-        val colorStops = parts.drop(colorStopStart).mapNotNull { parseColorStop(it.trim()) }
-        if (colorStops.isEmpty()) return null
-
-        return MaskImageValue.LinearGradient(angle, colorStops, repeating)
-    }
-
-    private fun parseDirectionToAngle(direction: String): IRAngle? {
-        return when (direction.lowercase()) {
-            "to top" -> IRAngle.fromDegrees(0.0)
-            "to top right", "to right top" -> IRAngle.fromDegrees(45.0)
-            "to right" -> IRAngle.fromDegrees(90.0)
-            "to bottom right", "to right bottom" -> IRAngle.fromDegrees(135.0)
-            "to bottom" -> IRAngle.fromDegrees(180.0)
-            "to bottom left", "to left bottom" -> IRAngle.fromDegrees(225.0)
-            "to left" -> IRAngle.fromDegrees(270.0)
-            "to top left", "to left top" -> IRAngle.fromDegrees(315.0)
-            else -> null
-        }
-    }
-
-    private fun parseRadialGradient(value: String, repeating: Boolean): MaskImageValue? {
-        val funcName = if (repeating) "repeating-radial-gradient" else "radial-gradient"
-        val content = extractFunctionContent(value, funcName) ?: return null
-
-        val parts = splitByComma(content)
-
-        // Check for shape/size/position (e.g., "circle" at start)
-        var shape: MaskImageValue.GradientShape? = null
-        var colorStopStart = 0
-        val firstPart = parts[0].trim()
-
-        when {
-            firstPart.startsWith("circle") -> {
-                shape = MaskImageValue.GradientShape.CIRCLE
-                colorStopStart = 1
-            }
-            firstPart.startsWith("ellipse") -> {
-                shape = MaskImageValue.GradientShape.ELLIPSE
-                colorStopStart = 1
-            }
-        }
-
-        val colorStops = parts.drop(colorStopStart).mapNotNull { parseColorStop(it.trim()) }
-        if (colorStops.isEmpty()) return null
-
-        return MaskImageValue.RadialGradient(shape, null, null, colorStops, repeating)
-    }
-
-    private fun parseConicGradient(value: String, repeating: Boolean): MaskImageValue? {
-        val funcName = if (repeating) "repeating-conic-gradient" else "conic-gradient"
-        val content = extractFunctionContent(value, funcName) ?: return null
-
-        val parts = splitByComma(content)
-        val colorStops = parts.mapNotNull { parseColorStop(it.trim()) }
-        if (colorStops.isEmpty()) return null
-
-        return MaskImageValue.ConicGradient(null, null, colorStops, repeating)
-    }
-
-    private fun parseColorStop(value: String): MaskImageValue.ColorStop? {
-        val parts = value.split("""\s+""".toRegex())
-        if (parts.isEmpty()) return null
-
-        val color = ColorParser.parse(parts[0]) ?: return null
-        val position = if (parts.size > 1) PercentageParser.parse(parts[1]) else null
-
-        return MaskImageValue.ColorStop(color, position)
-    }
-
-    private fun extractFunctionContent(value: String, funcName: String): String? {
-        if (!value.startsWith("$funcName(") || !value.endsWith(")")) return null
-        return value.substring(funcName.length + 1, value.length - 1)
-    }
-
-    private fun splitByComma(value: String): List<String> {
-        val result = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-
-        for (char in value) {
-            when (char) {
-                '(' -> { depth++; current.append(char) }
-                ')' -> { depth--; current.append(char) }
-                ',' -> {
-                    if (depth == 0) {
-                        result.add(current.toString())
-                        current = StringBuilder()
-                    } else {
-                        current.append(char)
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-
-        if (current.isNotEmpty()) result.add(current.toString())
-        return result
-    }
+    // ColorStop twin mapping — identical field shapes on both sides.
+    private fun mapStop(stop: BackgroundImageProperty.ColorStop): MaskImageValue.ColorStop =
+        MaskImageValue.ColorStop(stop.color, stop.position)
 }

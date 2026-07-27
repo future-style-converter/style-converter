@@ -227,18 +227,61 @@ object CanvasRootHoist {
     }
 
     /**
-     * Wave-19 follow-up — will a [Host] over these roots actually ACTIVATE
-     * (i.e. skip its identity fast path and provide [LocalActive])? True
-     * exactly when the hoist walk finds at least one hoist-eligible box.
-     * The harness's composed canvas needs this because the wave-18 RC1
-     * static-position zero-flow anchor is HOST-GATED in ComponentRenderer:
-     * in a document with no hoisted box, a no-inset absolute root renders
-     * at its natural flow size, so the gap fold must NOT treat it as
-     * margin-transparent there — transparency must mirror the renderer's
-     * real footprint, one walk ([collectCanvasHoisted]), two consumers.
+     * Wave 21 (A-RC7) — does ANY box in the document leave normal flow
+     * under a [Host]? Same depth-first walk and positioned-ancestor
+     * threading as [collectCanvasHoisted], but counting BOTH out-of-flow
+     * classes: the hoisted boxes (fixed / inset-anchored absolute) AND the
+     * wave-18 RC1 static-position boxes (no-inset absolute with no
+     * positioned ancestor — they stay in their slot but report 0×0 via
+     * [zeroFlowAnchor]). css-position-3 §2.1 makes no distinction: both
+     * kinds are absolutely positioned and out of flow; only their ANCHOR
+     * differs (§3.1 static position vs inset). Short-circuits on the first
+     * hit — activation needs existence, not the list.
+     */
+    internal fun anyOutOfFlowBox(
+        roots: List<IRComponent>,
+        hasPositionedAncestor: Boolean = false,
+    ): Boolean {
+        // Local recursion carrying the positioned-ancestor flag per level —
+        // the same CSS 2.1 §10.1 threading as collectCanvasHoisted's walk.
+        fun walk(node: IRComponent, ancestorPositioned: Boolean): Boolean {
+            // Either out-of-flow class counts (see kdoc): hoisted overlay…
+            if (shouldHoistToCanvasRoot(node.properties, ancestorPositioned)) return true
+            // …or the in-slot zero-flow static-position class.
+            if (rendersInFlowAsStaticPosition(node.properties, ancestorPositioned)) return true
+            // Children see a positioned ancestor if one already existed OR
+            // this node is itself positioned (CSS 2.1 §10.1).
+            val childFlag = ancestorPositioned || establishesContainingBlock(node.properties)
+            // Recurse in document order (children may be null on leaves).
+            return node.children?.any { walk(it, childFlag) } ?: false
+        }
+        // Roots start from the caller's ancestry context (canvas root: false).
+        return roots.any { walk(it, hasPositionedAncestor) }
+    }
+
+    /**
+     * Will a [Host] over these roots ACTIVATE (provide [LocalActive])?
+     *
+     * Wave 21 (A-RC7): true whenever ANY out-of-flow box exists — hoisted
+     * OR static-position ([anyOutOfFlowBox]) — not merely when a box
+     * hoists. The old hoisted-only activation left a document whose ONLY
+     * out-of-flow boxes are no-inset absolutes (css-images
+     * conic-gradient-line-height-relative-units-001/002: two absolute
+     * roots that must overlap at the canvas origin) rendering them as
+     * ordinary flow blocks with phantom flow space — the RC1 zero-flow
+     * anchor is host-gated in ComponentRenderer and the host never
+     * engaged. iOS is the parity oracle: its composed canvas attaches
+     * StaticPositionAnchor UNGATED (CaptureCanvas.swift — driven only by
+     * FixedHoist.rendersInFlowAsStaticPosition), so Android's activation
+     * must be at least as broad.
+     *
+     * The harness's composed canvas reads this so its §8.3.1 gap fold
+     * treats static-position roots as margin-transparent exactly when the
+     * renderer gives them a zero flow footprint — one decision function,
+     * two consumers, never re-derived.
      */
     fun hostActivates(roots: List<IRComponent>): Boolean =
-        collectCanvasHoisted(roots).isNotEmpty()
+        anyOutOfFlowBox(roots)
 
     /**
      * The flow size an overlay slot reports to the canvas on EACH axis:
@@ -302,13 +345,28 @@ object CanvasRootHoist {
      */
     @Composable
     fun Host(roots: List<IRComponent>, content: @Composable () -> Unit) {
-        // Pure walk, memoized on the document identity.
+        // Pure walks, memoized on the document identity.
         val hoisted = remember(roots) { collectCanvasHoisted(roots) }
-        // Identity fast path: a document with no out-of-flow box renders
-        // with NO host locals and NO wrapper Box — byte-identical to the
-        // pre-wave-17 composed render (baseline discipline).
-        if (hoisted.isEmpty()) {
+        // Wave 21 (A-RC7): activation is BROADER than the overlay — see
+        // hostActivates. hoisted non-empty implies activates (the hoist
+        // class is one of the two the activation walk counts).
+        val activates = remember(roots) { hostActivates(roots) }
+        // Identity fast path: a document with no out-of-flow box AT ALL
+        // renders with NO host locals and NO wrapper Box — byte-identical
+        // to the pre-wave-17 composed render (baseline discipline).
+        if (!activates) {
             content()
+            return
+        }
+        // Wave 21 (A-RC7): out-of-flow boxes exist but NONE hoists (only
+        // static-position absolutes — the conic-gradient-…-001/002 shape).
+        // Provide LocalActive so ComponentRenderer's RC1 zero-flow anchor
+        // engages, but add NO wrapper Box and NO overlay slots: this is a
+        // composition-locals-only change, the layout tree is untouched
+        // (minimal diff from the old fast path — Box's constraint loosening
+        // never enters the picture for these documents).
+        if (hoisted.isEmpty()) {
+            CompositionLocalProvider(LocalActive provides true) { content() }
             return
         }
         // One Box: child 0 is the in-flow document, children 1..n the

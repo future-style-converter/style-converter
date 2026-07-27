@@ -97,6 +97,16 @@ object ComponentRenderer {
         java.util.concurrent.atomic.AtomicBoolean(false)
 
     /**
+     * One-shot gate for the decoration-style solid fallback log (wave
+     * 21, lane TEXTDECOR): `text-decoration-style: double | wavy` have
+     * no op emitters yet and paint solid — the repo's no-silent-
+     * fallthrough rule requires the loss to be surfaced, once per
+     * process (the emitting site recomposes per frame).
+     */
+    private val decorationStyleFallbackLogged =
+        java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /**
      * CSS-inherited properties (css-cascade-4 / per-property "Inherited:
      * yes" tables) that our IR carries. These — and ONLY these — flow from
      * parent to child when the child doesn't declare them itself.
@@ -1645,7 +1655,17 @@ object ComponentRenderer {
                 )
                 MultiColumnApplier.MultiColumnLayout(
                     config = columnConfig,
-                    modifier = modifier
+                    modifier = modifier,
+                    // Wave-21 lane MULTICOL wiring hook (the only renderer
+                    // change): per-child spanner/abspos/flow roles plus the
+                    // declared-block-size flag, in RenderContent's measurable
+                    // order (leading _text first). Null for child-less
+                    // containers; the applier gates the plan behind
+                    // LocalWptCaptureMode itself.
+                    childSpecs = component.children?.let {
+                        com.styleconverter.runtime.columns.MulticolSpannerFlow
+                            .specsFor(it, !component._text.isNullOrEmpty())
+                    }
                 ) {
                     RenderContent(component, textColor, displayConfig)
                 }
@@ -3331,6 +3351,25 @@ object ComponentRenderer {
             true -> maxLines
         }
 
+        // Wave 21 (lane TEXTDECOR, B-RC7) — unbreakable runs must NOT
+        // emergency-wrap in composed WPT capture. CSS gives a run with no
+        // soft-wrap opportunity (UAX #14: no spaces, no break-after
+        // punctuation, no ideographs — DecorationOps.hasSoftWrapOpportunity)
+        // ONE overflowing line under `overflow-wrap: normal`; Compose's
+        // softWrap=true instead breaks mid-run at the constraint edge (an
+        // emergency break CSS reserves for break-word/anywhere). The
+        // Chromium refs for text-decoration-dotted-001/002 keep
+        // 'fooשלוםbaz' / 'foobarbaz' @92px on ONE line overflowing the
+        // 390px canvas — the wrap, not the dots, dominated those scores.
+        // Gated on LocalWptComposedMode so the per-component inbox and the
+        // 327-pair baseline captures stay byte-identical (flag false
+        // there); web twin: ComponentRenderer.tsx suppresses its span's
+        // hardcoded `word-break: break-word` under the same composed gate,
+        // iOS twin: fixedSize(horizontal:) in its PlaceholderLabel chain.
+        val effectiveSoftWrap = wrapConfig.softWrap &&
+            !(LocalWptComposedMode.current &&
+                !com.styleconverter.runtime.typography.DecorationOps.hasSoftWrapOpportunity(displayText))
+
         // Extract additional text style properties. The inherited font-size
         // (parent's RESOLVED px FontSize off the inheritance channel —
         // parents always publish resolved px, see DynamicValueResolver.
@@ -3671,49 +3710,130 @@ object ComponentRenderer {
 
         // text-decoration-line OWNERSHIP (css-text-decor-3 §2.1). The
         // owned pass draws ALL flagged lines — underline, overline AND
-        // line-through — as rects with Chromium-matched geometry instead
-        // of delegating any of them to Compose's 1px built-ins. Device
+        // line-through — with Chromium-matched geometry instead of
+        // delegating any of them to Compose's 1px built-ins. Device
         // evidence (wave-5 gate): web draws pixel-snapped 2px-thick lines
         // at 22px Inter while the built-ins drew 1px at different offsets
         // (Underline 0.809, UnderOver 0.740, Triple 0.737 vs the
         // fixture's 0.8695 no-decoration floor). Geometry from the
         // onTextLayout-captured TextLayoutResult (the same layoutResult
-        // state the emphasis pass reads): one rect per flagged kind per
+        // state the emphasis pass reads): one band per flagged kind per
         // VISUAL line, anchored on getLineBaseline(i) and spanning
         // getLineLeft..getLineRight (each line box gets its own
-        // decoration per spec; the math + the measured-capture oracle
-        // live in TextStyleApplier.decorationSegments so the JVM suite
-        // pins the exact 22px rows). Color: text-decoration-color when
+        // decoration per spec). Color: text-decoration-color when
         // declared, else currentColor == the text color (§2.2 initial).
         // drawWithContent paints AFTER the glyphs — Blink's order for the
         // through/over lines; the underline difference (skip-ink) is
         // documented on decorationSegments.
+        //
+        // Wave 21 (lane TEXTDECOR, B-RC8): the extractor's STYLE and
+        // THICKNESS are no longer dropped on the floor.
+        //   • thickness (css-text-decor-4 §2.4): an explicit
+        //     `text-decoration-thickness` overrides the font-derived
+        //     auto default — bands come from DecorationOps.explicitBands
+        //     (Blink underline gap = max(1, ceil(T/2)), ref-pinned to
+        //     the dotted-001 band tops 207/363/519). The AUTO path keeps
+        //     TextStyleApplier.decorationSegments byte-for-byte (its
+        //     22px oracle + the 327-pair baseline pin those rows).
+        //   • style (css-text-decor-3 §2.3): every band is expanded via
+        //     DecorationOps.styleOps — DOTTED paints Chromium round-cap
+        //     circle runs (≤3px: square dashes), DASHED paints
+        //     Blink-fitted rect runs, SOLID emits the band unchanged
+        //     (legacy captures byte-identical). DOUBLE/WAVY still paint
+        //     solid — surfaced ONCE via logcat below, never silent.
         val ownedDecorations = TextStyleApplier.extractDecorationLineFlags(properties)
         val decorationModifier = if (ownedDecorations.any) {
-            val decorationColor = try {
-                TextStyleApplier.extractTextDecorationConfig(properties)?.color
+            // Full decoration config: color + style + explicit thickness.
+            val decorationConfig = try {
+                TextStyleApplier.extractTextDecorationConfig(properties)
             } catch (e: Exception) {
                 null
             }
-            val ownedDecorationColor = decorationColor ?: effectiveColor
+            val ownedDecorationColor = decorationConfig?.color ?: effectiveColor
+            // Map the applier's style enum onto the pure twin's own enum
+            // (same member set — DecorationOps stays dependency-free so
+            // the JVM pin suite compiles it standalone).
+            val decorationLineStyle = when (decorationConfig?.style) {
+                TextStyleApplier.TextDecorationStyleType.DOUBLE ->
+                    com.styleconverter.runtime.typography.DecorationOps.LineStyle.DOUBLE
+                TextStyleApplier.TextDecorationStyleType.DOTTED ->
+                    com.styleconverter.runtime.typography.DecorationOps.LineStyle.DOTTED
+                TextStyleApplier.TextDecorationStyleType.DASHED ->
+                    com.styleconverter.runtime.typography.DecorationOps.LineStyle.DASHED
+                TextStyleApplier.TextDecorationStyleType.WAVY ->
+                    com.styleconverter.runtime.typography.DecorationOps.LineStyle.WAVY
+                // SOLID and "no config extracted" both paint solid.
+                else -> com.styleconverter.runtime.typography.DecorationOps.LineStyle.SOLID
+            }
+            // Honest limitation, logged once per process (no silent
+            // fallthrough): double/wavy render as solid until they get
+            // their own op emitters.
+            if (com.styleconverter.runtime.typography.DecorationOps.isLossyFallback(decorationLineStyle) &&
+                decorationStyleFallbackLogged.compareAndSet(false, true)
+            ) {
+                android.util.Log.i(
+                    "ComponentRenderer",
+                    "text-decoration-style ${decorationLineStyle.name.lowercase()} " +
+                        "not implemented: painting solid (DecorationOps TODO)"
+                )
+            }
+            val explicitThicknessPx = decorationConfig?.thickness
             Modifier.drawWithContent {
                 drawContent()
                 val layout = layoutResult.value ?: return@drawWithContent
-                TextStyleApplier.decorationSegments(
-                    lineCount = layout.lineCount,
-                    // px==dp==sp space (density 1 harness) — same convention
-                    // as the emphasis radius above.
-                    fontSizePx = effectiveFontSize.value,
-                    flags = ownedDecorations,
-                    lineBaseline = { layout.getLineBaseline(it) },
-                    lineLeft = { layout.getLineLeft(it) },
-                    lineRight = { layout.getLineRight(it) }
-                ).forEach { seg ->
-                    drawRect(
-                        color = ownedDecorationColor,
-                        topLeft = androidx.compose.ui.geometry.Offset(seg.left, seg.top),
-                        size = androidx.compose.ui.geometry.Size(seg.width, seg.thickness)
+                // Per-visual-line bands: explicit thickness → the
+                // Blink-gap twin; auto → the legacy capture-pinned math.
+                val bands = if (explicitThicknessPx != null) {
+                    com.styleconverter.runtime.typography.DecorationOps.explicitBands(
+                        lineCount = layout.lineCount,
+                        // px==dp==sp space (density 1 harness) — same
+                        // convention as the emphasis radius above.
+                        fontSizePx = effectiveFontSize.value,
+                        thicknessPx = explicitThicknessPx,
+                        underline = ownedDecorations.underline,
+                        overline = ownedDecorations.overline,
+                        lineThrough = ownedDecorations.lineThrough,
+                        lineBaseline = { layout.getLineBaseline(it) },
+                        lineLeft = { layout.getLineLeft(it) },
+                        lineRight = { layout.getLineRight(it) }
                     )
+                } else {
+                    TextStyleApplier.decorationSegments(
+                        lineCount = layout.lineCount,
+                        fontSizePx = effectiveFontSize.value,
+                        flags = ownedDecorations,
+                        lineBaseline = { layout.getLineBaseline(it) },
+                        lineLeft = { layout.getLineLeft(it) },
+                        lineRight = { layout.getLineRight(it) }
+                        // Same LineBand shape — the ops expander is one
+                        // code path for both thickness sources.
+                    ).map {
+                        com.styleconverter.runtime.typography.DecorationOps.LineBand(
+                            it.left, it.top, it.width, it.thickness
+                        )
+                    }
+                }
+                bands.forEach { band ->
+                    // Expand the solid band into its style's op list and
+                    // paint each op (rect run / circle run).
+                    com.styleconverter.runtime.typography.DecorationOps.styleOps(
+                        band.left, band.top, band.width, band.thickness, decorationLineStyle
+                    ).forEach { op ->
+                        when (op) {
+                            is com.styleconverter.runtime.typography.DecorationOps.Op.Band ->
+                                drawRect(
+                                    color = ownedDecorationColor,
+                                    topLeft = androidx.compose.ui.geometry.Offset(op.left, op.top),
+                                    size = androidx.compose.ui.geometry.Size(op.width, op.height)
+                                )
+                            is com.styleconverter.runtime.typography.DecorationOps.Op.Dot ->
+                                drawCircle(
+                                    color = ownedDecorationColor,
+                                    radius = op.radius,
+                                    center = androidx.compose.ui.geometry.Offset(op.centerX, op.centerY)
+                                )
+                        }
+                    }
                 }
             }
         } else Modifier
@@ -3948,7 +4068,7 @@ object ComponentRenderer {
                         style = paintedTextStyle,
                         maxLines = effectiveMaxLines,
                         overflow = effectiveOverflow,
-                        softWrap = wrapConfig.softWrap,
+                        softWrap = effectiveSoftWrap,  // wrapConfig.softWrap minus the B-RC7 composed-WPT unbreakable-run gate
                         onTextLayout = { layoutResult.value = it },
                         // decorationModifier no-ops without owned lines;
                         // inside the rotated branch it draws in the
@@ -3993,7 +4113,7 @@ object ComponentRenderer {
             style = paintedTextStyle,
             maxLines = effectiveMaxLines,
             overflow = effectiveOverflow,
-            softWrap = wrapConfig.softWrap,
+            softWrap = effectiveSoftWrap,  // wrapConfig.softWrap minus the B-RC7 composed-WPT unbreakable-run gate
             onTextLayout = { layoutResult.value = it },
             // composedLineBoxSnap (no-op outside composed WPT) tightens the box
             // to the CSS line box before emphasis paints over it; the owned
