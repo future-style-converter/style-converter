@@ -1,88 +1,81 @@
 package app.irmodels.properties.background
 
+// IR model for `background-image` (css-backgrounds-3 §3.1, css-images-3/4).
+// The wire serializer lives in BackgroundImageSerializer.kt (same package) —
+// split out per the ≤200-line file rule when cross-fade() joined the union.
 import app.irmodels.*
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.descriptors.*
-import kotlinx.serialization.encoding.*
-import kotlinx.serialization.json.*
 
 @Serializable
 data class BackgroundImageProperty(
+    // Ordered layer list — CSS source order, index 0 paints on top.
     val images: List<BackgroundImage>
 ) : IRProperty {
     override val propertyName = "background-image"
 
     @Serializable(with = BackgroundImageSerializer::class)
     sealed interface BackgroundImage {
+        // `none` — a layer that paints nothing (css-backgrounds-3 §3.1).
         @Serializable data class None(val unit: Unit = Unit) : BackgroundImage
+        // url() / image() reference — payload bytes preserved case-exactly.
         @Serializable data class Url(val url: IRUrl) : BackgroundImage
+        // linear-gradient() / repeating-linear-gradient() (css-images-3 §3.1).
         @Serializable data class LinearGradient(val angle: IRAngle?, val colorStops: List<ColorStop>, val repeating: Boolean = false) : BackgroundImage
+        // radial-gradient() — shape/size prefix per css-images-3 §3.5.
         @Serializable data class RadialGradient(val shape: GradientShape?, val size: GradientSize?, val position: Position?, val colorStops: List<ColorStop>, val repeating: Boolean = false) : BackgroundImage
+        // conic-gradient() — `from <angle> at <position>` per css-images-4 §3.4.4.
         @Serializable data class ConicGradient(val angle: IRAngle?, val position: Position?, val colorStops: List<ColorStop>, val repeating: Boolean = false) : BackgroundImage
+        // A bare `<color>` used *as an image* — only valid inside
+        // cross-fade() per css-images-4 §2.6.2 (`<cf-image> = <percentage>?
+        // && [ <image> | <color> ]`); modelled as a layer so CrossFade args
+        // stay a homogeneous list of BackgroundImage values.
+        @Serializable data class ColorLayer(val color: IRColor) : BackgroundImage
+        // cross-fade() — css-images-4 §2.6.2. `args` keeps the AUTHORED
+        // per-image weights (null = omitted); the spec's normalization
+        // (fill omitted from the 100% remainder, scale down if the sum
+        // exceeds 100%) is executed by each runtime's CrossFadeMath twin so
+        // all three platforms share one pinned formula. `legacy` records
+        // that the value used the older two-argument trailing-percentage
+        // syntax (`cross-fade(<image>, <image>, <percentage>)`) so the web
+        // runtime can re-serialize to `-webkit-cross-fade()` for engines
+        // that only ship the legacy form.
+        @Serializable data class CrossFade(val args: List<CrossFadeArg>, val legacy: Boolean = false) : BackgroundImage
+        // Global keyword (inherit/initial/unset/revert/revert-layer).
         @Serializable data class Keyword(val keyword: String) : BackgroundImage
+        // Anything unparseable — original author bytes for runtime resolution.
         @Serializable data class Raw(val value: String) : BackgroundImage
     }
 
-    @Serializable data class ColorStop(val color: IRColor, val position: IRPercentage?)
-    @Serializable data class Position(val x: IRPercentage, val y: IRPercentage)
-    enum class GradientShape { CIRCLE, ELLIPSE }
-    enum class GradientSize { CLOSEST_SIDE, CLOSEST_CORNER, FARTHEST_SIDE, FARTHEST_CORNER }
-}
+    // One cross-fade argument: optional authored weight (a CSS
+    // <percentage>, 0–100 domain) plus the image (may be a ColorLayer).
+    @Serializable data class CrossFadeArg(val weight: IRPercentage?, val image: BackgroundImage)
 
-object BackgroundImageSerializer : KSerializer<BackgroundImageProperty.BackgroundImage> {
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("BackgroundImage")
-    override fun serialize(encoder: Encoder, value: BackgroundImageProperty.BackgroundImage) {
-        require(encoder is JsonEncoder)
-        val json = encoder.json
-        encoder.encodeJsonElement(when (value) {
-            is BackgroundImageProperty.BackgroundImage.None -> JsonPrimitive("none")
-            is BackgroundImageProperty.BackgroundImage.Url -> json.encodeToJsonElement(IRUrl.serializer(), value.url)
-            is BackgroundImageProperty.BackgroundImage.LinearGradient -> buildJsonObject {
-                put("type", if (value.repeating) "repeating-linear-gradient" else "linear-gradient")
-                value.angle?.let { put("angle", json.encodeToJsonElement(IRAngle.serializer(), it)) }
-                put("stops", json.encodeToJsonElement(ListSerializer(BackgroundImageProperty.ColorStop.serializer()), value.colorStops))
-            }
-            is BackgroundImageProperty.BackgroundImage.RadialGradient -> buildJsonObject {
-                put("type", if (value.repeating) "repeating-radial-gradient" else "radial-gradient")
-                value.shape?.let { put("shape", it.name.lowercase()) }
-                value.size?.let { put("size", it.name.lowercase().replace("_", "-")) }
-                value.position?.let { put("pos", json.encodeToJsonElement(BackgroundImageProperty.Position.serializer(), it)) }
-                put("stops", json.encodeToJsonElement(ListSerializer(BackgroundImageProperty.ColorStop.serializer()), value.colorStops))
-            }
-            is BackgroundImageProperty.BackgroundImage.ConicGradient -> buildJsonObject {
-                put("type", if (value.repeating) "repeating-conic-gradient" else "conic-gradient")
-                value.angle?.let { put("angle", json.encodeToJsonElement(IRAngle.serializer(), it)) }
-                value.position?.let { put("pos", json.encodeToJsonElement(BackgroundImageProperty.Position.serializer(), it)) }
-                put("stops", json.encodeToJsonElement(ListSerializer(BackgroundImageProperty.ColorStop.serializer()), value.colorStops))
-            }
-            is BackgroundImageProperty.BackgroundImage.Keyword -> JsonPrimitive(value.keyword)
-            is BackgroundImageProperty.BackgroundImage.Raw -> buildJsonObject { put("raw", value.value) }
-        })
-    }
-    override fun deserialize(decoder: Decoder): BackgroundImageProperty.BackgroundImage {
-        require(decoder is JsonDecoder)
-        val element = decoder.decodeJsonElement()
-        return when {
-            element is JsonPrimitive && element.content == "none" -> BackgroundImageProperty.BackgroundImage.None()
-            element is JsonPrimitive && element.content in setOf("inherit", "initial", "unset", "revert", "revert-layer") ->
-                BackgroundImageProperty.BackgroundImage.Keyword(element.content)
-            element is JsonObject && element.containsKey("raw") ->
-                BackgroundImageProperty.BackgroundImage.Raw(element["raw"]!!.jsonPrimitive.content)
-            element is JsonObject && element.containsKey("type") -> {
-                val type = element["type"]!!.jsonPrimitive.content
-                when {
-                    type.contains("linear-gradient") -> {
-                        val angle = element["angle"]?.let { decoder.json.decodeFromJsonElement(IRAngle.serializer(), it) }
-                        val stops = decoder.json.decodeFromJsonElement(ListSerializer(BackgroundImageProperty.ColorStop.serializer()), element["stops"]!!)
-                        BackgroundImageProperty.BackgroundImage.LinearGradient(angle, stops, type.startsWith("repeating"))
-                    }
-                    else -> BackgroundImageProperty.BackgroundImage.None()
-                }
-            }
-            element is JsonObject -> BackgroundImageProperty.BackgroundImage.Url(decoder.json.decodeFromJsonElement(IRUrl.serializer(), element))
-            else -> BackgroundImageProperty.BackgroundImage.None()
+    // One gradient color stop. Double-position stops
+    // (`<color> <pos1> <pos2>`, css-images-4 §3.4.3) are expanded by the
+    // parser into TWO ColorStop entries sharing the color, so this model
+    // stays a single-position pair and every runtime renders the implied
+    // hard stop without new wire shapes.
+    @Serializable data class ColorStop(val color: IRColor, val position: IRPercentage?)
+
+    // Gradient center (`at <position>`). Each axis is a
+    // <length-percentage> (css-images-3 §3.5 / css-values-4 §5.4):
+    // percentages keep their legacy raw-number wire form; lengths ride the
+    // IRLengthPercentage object form ({"px":100} absolute, or
+    // {"original":{"v":1,"u":"LH"}} for runtime-dependent units the
+    // engines resolve where font metrics live). Wire back-compat: every
+    // pre-existing {"x":25,"y":25} payload decodes identically.
+    @Serializable data class Position(val x: IRLengthPercentage, val y: IRLengthPercentage) {
+        companion object {
+            // Convenience for the historical percent-only call sites.
+            fun percent(x: Double, y: Double) = Position(
+                IRLengthPercentage.Percentage(IRPercentage(x)),
+                IRLengthPercentage.Percentage(IRPercentage(y))
+            )
         }
     }
+
+    // Radial ending shape (css-images-3 §3.5).
+    enum class GradientShape { CIRCLE, ELLIPSE }
+    // Radial size keyword (css-images-3 §3.5).
+    enum class GradientSize { CLOSEST_SIDE, CLOSEST_CORNER, FARTHEST_SIDE, FARTHEST_CORNER }
 }

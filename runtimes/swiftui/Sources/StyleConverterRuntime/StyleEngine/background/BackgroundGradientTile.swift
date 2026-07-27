@@ -88,11 +88,19 @@ struct BackgroundGradientTileView: View {
         case .linear(let angle, let stops):
             fillLinear(rect, shaderSize: shaderSize, in: context, angleDeg: angle, stops: stops)
         case .radial(let shape, let stops, let cx, let cy):
+            // Coords resolve against the FRACTIONAL shader tile — the
+            // gradient box per css-images-4 §3.4.1 (px centers divide by
+            // the tile axis; fractions pass through unchanged).
             fillRadial(rect, shaderSize: shaderSize, in: context,
-                       shape: shape, stops: stops, cx: cx, cy: cy)
+                       shape: shape, stops: stops,
+                       cx: cx.fraction(Double(shaderSize.width)),
+                       cy: cy.fraction(Double(shaderSize.height)))
         case .conic(let from, let stops, let cx, let cy):
+            // Same per-axis resolution as radial above.
             fillConic(rect, shaderSize: shaderSize, in: context,
-                      fromDeg: from, stops: stops, cx: cx, cy: cy)
+                      fromDeg: from, stops: stops,
+                      cx: cx.fraction(Double(shaderSize.width)),
+                      cy: cy.fraction(Double(shaderSize.height)))
         case .repeating(let kind, let angle, let stops):
             // Period-less repeating layers equal their plain base flavour
             // (GradientApplier header note 3) — same dispatch here.
@@ -104,13 +112,22 @@ struct BackgroundGradientTileView: View {
             case .conic:  fillConic(rect, shaderSize: shaderSize, in: context,
                                     fromDeg: angle, stops: stops, cx: 0.5, cy: 0.5)
             }
-        case .none, .url:
+        case .color(let cv):
+            // <color>-as-image: a solid fill has no internal geometry —
+            // just fill the snapped tile rect with the resolved color.
+            if case .srgb(let r, let g, let b, let a) = cv {
+                context.fill(Path(rect), with: .color(
+                    Color(red: r, green: g, blue: b, opacity: a)))
+            }
+        case .none, .url, .crossFade:
             // Unreachable: BackgroundImageApplier routes url() to the
-            // raster path and never geometry-routes `none`. Leave a
-            // breadcrumb rather than fall through silently.
+            // raster path, never geometry-routes `none`, and renders
+            // cross-fade() through GradientApplier's compositor (the
+            // multi-image additive stack has no single-tile fill). Leave
+            // a breadcrumb rather than fall through silently.
             PropertyTracker.logOnce(
                 key: "bg-gradient-tile-kind",
-                message: "BackgroundGradientTileView received a non-gradient layer — painting nothing (applier routing bug)")
+                message: "BackgroundImageApplier received a non-gradient layer — painting nothing (applier routing bug)")
         }
     }
 

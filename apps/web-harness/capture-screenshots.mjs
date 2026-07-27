@@ -25,6 +25,17 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { buildCaptureUrl } from './capture-url.mjs';
+// B-RC3 (wave 21) — composed-page paint-divergence guard. The detector
+// flags tests whose IR pairs a `column-span:all` spanner with an
+// out-of-flow (`absolute`/`fixed`) box: headless Chromium mis-paints those
+// ~2312px off ON THE TALL MULTI-CANVAS COMPOSED PAGE ONLY (geometry
+// correct, paint wrong — css-multicol/abspos-containing-block-outside-
+// spanner, web 0.932). Flagged tests skip the batch loop and are
+// re-captured on a fresh single-canvas page (capture-isolated.mjs), where
+// the paint is correct. Both modules are batch-page-free, so importing
+// them here costs nothing on the legacy per-component path.
+import { divergenceProneTestKeys } from './capture-divergence.mjs';
+import { captureIsolatedTest } from './capture-isolated.mjs';
 // The ONE canonical compare-pipeline sanitiser (dot KEPT), shared with the
 // TITAN feeders and inject-wpt-block.mjs so the composed/per-component PNG
 // names this driver writes are globbed back identically downstream. The
@@ -305,6 +316,22 @@ try {
   // (page.$$ and $$eval share querySelectorAll DOM order). Legacy per-
   // component capture keeps the single-screenshot + sharp-crop path verbatim.
   if (wptComposed) {
+    // B-RC3 divergence guard — fetch the EXACT IR the page rendered (the
+    // same-origin /ir-components.json the app itself loaded; App.tsx's
+    // IR_ASSET_PATH) and run the spanner+abspos detector over its per-test
+    // groups. Fetching through the page rather than guessing a filesystem
+    // path guarantees the detector and the render saw identical bytes even
+    // under section-runner's rsync'd per-section vite root.
+    const combinedIr = await page.evaluate(async () =>
+      (await fetch('/ir-components.json')).json()
+    );
+    const prone = divergenceProneTestKeys(combinedIr);
+    // Log the full flagged set up-front — the no-silent-divergence-handling
+    // contract: a reader of capture.log must be able to see exactly which
+    // tests took the isolated path and why.
+    if (prone.size > 0) {
+      console.log(`  divergence guard (B-RC3 spanner+abspos): ${prone.size} test(s) flagged for isolated capture: ${[...prone].join(', ')}`);
+    }
     const handles = await page.$$('[data-capture-canvas]');
     if (handles.length !== manifest.length) {
       throw new Error(`composed capture: handle/manifest length mismatch (${handles.length}/${manifest.length})`);
@@ -312,21 +339,71 @@ try {
     console.log(`  capturing ${manifest.length} composed canvases via per-element screenshots → ${outDir}`);
     let captured = 0;
     let zeroDim = 0;
+    // Flagged tests found on this page — queued for the isolated pass below,
+    // which OVERWRITES their batch PNG with the fresh-page capture.
+    const isolatedQueue = [];
     for (let i = 0; i < manifest.length; i++) {
       const entry = manifest[i];
+      // Zero-dim check FIRST (same order as the pre-B-RC3 loop): a zero-dim
+      // canvas takes no batch shot — and therefore triggers no scroll — on
+      // either driver, keeping the batch scroll sequence byte-identical to
+      // the historical one. A zero-dim PRONE canvas still goes to the
+      // isolated queue: the fresh page re-lays-out from scratch and either
+      // renders it or fails loudly inside captureIsolatedTest.
       if (entry.width <= 0 || entry.height <= 0) {
         console.warn(`  ⚠ composed canvas ${entry.index} (${entry.name}) has zero dimensions — skipping`);
         zeroDim += 1;
+        if (prone.has(entry.name)) isolatedQueue.push(entry.name);
         continue;
       }
-      // Composed filename is the sanitised test key + .png (no index prefix)
-      // — exactly what inject-wpt-block.mjs's composed path globs for.
+      const isProne = prone.has(entry.name);
+      if (isProne) isolatedQueue.push(entry.name);
+      // Screenshot EVERY canvas — including flagged ones. Each element
+      // screenshot scrolls its canvas into view, and that scroll SEQUENCE is
+      // part of the paint environment on this bug-prone page: skipping the
+      // flagged canvases shifted the sequence and flipped the paint of an
+      // UNFLAGGED scroll-sensitive neighbor (css-multicol/abspos-multicol-
+      // in-second-outer-clipped went green→red vs the wave-21 archived
+      // capture — caught by the wave-21 adversarial byte-identity repro).
+      // The flagged test's own PNG is provisional: the isolated pass below
+      // overwrites it, so the ~300ms batch shot is the price of keeping
+      // every unflagged capture byte-identical to the pre-B-RC3 driver.
       const safeName = safe(entry.name);
       await handles[i].screenshot({ path: resolve(outDir, `${safeName}.png`), type: 'png' });
-      captured += 1;
+      // Flagged shots are provisional (their slot is overwritten below), so
+      // count them via `isolated`, not here — keeps the summary honest.
+      if (!isProne) captured += 1;
     }
     if (zeroDim > 0) console.warn(`  ⚠ skipped ${zeroDim} zero-dim composed canvases`);
-    console.log(`✓ captured ${captured} / ${manifest.length} composed canvases`);
+    // A flagged key with no composed canvas means the detector's grouping
+    // and the page's grouping disagreed — impossible while both run
+    // splitCombinedIr's algorithm, so surface it loudly if it ever happens.
+    const manifestNames = new Set(manifest.map((e) => e.name));
+    for (const key of prone) {
+      if (!manifestNames.has(key)) {
+        console.warn(`  ⚠ divergence guard flagged "${key}" but the page rendered no composed canvas for it`);
+      }
+    }
+    // Isolated pass — one fresh single-canvas page per flagged test (the
+    // render is correct there; the multi-canvas paint bug never engages).
+    // Sequential on purpose: each page is short-lived and Chromium under
+    // --disable-gpu rasters serially anyway; parallel pages would only add
+    // memory pressure. A failure THROWS (crashing the capture like any
+    // other screenshot failure) rather than silently leaving a stale or
+    // missing PNG for the compare stage to misread as engine divergence.
+    let isolated = 0;
+    for (const testKey of isolatedQueue) {
+      console.log(`  ↺ isolated capture (B-RC3): ${testKey}`);
+      await captureIsolatedTest({
+        browser, baseUrl, outDir, testKey,
+        wptMode, captureWidth, forceState, animationTime, captureDark,
+      });
+      isolated += 1;
+    }
+    // Summary counts batch + isolated so downstream `grep '✓ captured'`
+    // totals stay honest; the parenthetical keeps the isolated count
+    // auditable at a glance.
+    console.log(`✓ captured ${captured + isolated} / ${manifest.length} composed canvases (${isolated} via isolated pages)`);
   } else {
   // (top-level module code — can't `return` early, so the legacy per-
   //  component single-screenshot + sharp-crop path lives in this else block.)

@@ -946,3 +946,109 @@ test('wave15: diffWebVsRef stamps lowContentDensity on every browser-ref diff', 
   assert.match(src, /metrics\.lowContentDensity\s*=\s*computeLowContentDensity\(metrics\.semanticPresence\)/,
     'diffWebVsRef must stamp lowContentDensity from semanticPresence');
 });
+
+// ── wave-22 HONEST-FRAME scoring (fitToRefFrame / countOverflowInk / fold) ──
+//
+// Pins the anti-dilution mechanism (skeptic-proved on the wave-21 text-decor
+// movers): the legacy union-frame SSIM white-padded BOTH sides, so a capture
+// TALLER than the ref gained mostly-white rows of near-perfect agreement and
+// out-scored an equal-frame capture that was provably closer on content.
+// The honest score runs on the REF's own frame and folds out-of-frame ink
+// in as fully-divergent area — see the helper banner in inject-wpt-block.mjs.
+
+/** White canvas with one black rect — the minimal "page with ink" builder. */
+async function writeInkPng(dir, name, w, h, rect) {
+  const png = new PNG({ width: w, height: h });
+  png.data.fill(0xFF);                       // opaque white canvas
+  const [rx, ry, rw, rh] = rect;
+  for (let y = ry; y < ry + rh; y++) {
+    for (let x = rx; x < rx + rw; x++) {
+      const i = (y * w + x) * 4;
+      png.data[i] = 0; png.data[i + 1] = 0; png.data[i + 2] = 0;  // black ink
+    }
+  }
+  const path = join(dir, name);
+  await fs.writeFile(path, PNG.sync.write(png));
+  return path;
+}
+
+test('wave22: fitToRefFrame is the identity on an already-matching frame', async () => {
+  const { fitToRefFrame } = await import('./inject-wpt-block.mjs');
+  const img = new PNG({ width: 8, height: 8 });
+  img.data.fill(0x11);
+  assert.equal(fitToRefFrame(img, 8, 8), img);  // same object, no copy
+});
+
+test('wave22: fitToRefFrame white-pads a smaller capture and crops a larger one', async () => {
+  const { fitToRefFrame } = await import('./inject-wpt-block.mjs');
+  // Smaller: 2x2 gray into a 4x3 frame → gray overlap, white pad.
+  const small = new PNG({ width: 2, height: 2 });
+  small.data.fill(0x40);
+  const padded = fitToRefFrame(small, 4, 3);
+  assert.equal(padded.width, 4); assert.equal(padded.height, 3);
+  assert.equal(padded.data[0], 0x40);                       // (0,0) copied
+  assert.equal(padded.data[(0 * 4 + 3) * 4], 0xFF);         // (3,0) white pad
+  assert.equal(padded.data[(2 * 4 + 0) * 4], 0xFF);         // (0,2) white pad
+  // Larger: 4x4 gray into a 2x2 frame → cropped copy only.
+  const big = new PNG({ width: 4, height: 4 });
+  big.data.fill(0x40);
+  const cropped = fitToRefFrame(big, 2, 2);
+  assert.equal(cropped.width, 2); assert.equal(cropped.height, 2);
+  assert.equal(cropped.data[(1 * 2 + 1) * 4], 0x40);        // (1,1) copied
+});
+
+test('wave22: countOverflowInk counts only out-of-frame ink, honouring tolerance', async () => {
+  const { countOverflowInk } = await import('./inject-wpt-block.mjs');
+  const img = new PNG({ width: 10, height: 10 });
+  img.data.fill(0xFF);
+  const put = (x, y, v) => { const i = (y * 10 + x) * 4; img.data[i] = v; img.data[i+1] = v; img.data[i+2] = v; };
+  put(3, 8, 0x00);    // below a 10x6 frame → ink
+  put(2, 2, 0x00);    // INSIDE the frame → never counted
+  put(9, 9, 0xF8);    // delta 7 < tolerance 8 → not ink
+  assert.equal(countOverflowInk(img, 10, 6), 1);
+  // Width overflow: same image against a 5x10 frame → (9,9) still under
+  // tolerance, (3,8) now IN frame? x=3 < 5 but y=8 < 10 → in frame; (2,2)
+  // in frame → zero from those; nothing else inked right of x=5.
+  assert.equal(countOverflowInk(img, 5, 10), 0);
+  // Full-frame: nothing outside → 0.
+  assert.equal(countOverflowInk(img, 10, 10), 0);
+});
+
+test('wave22: honest frame — a taller mostly-white WRONG capture no longer out-scores a closer equal-frame one', async () => {
+  const { diffWebVsRef } = await import('./inject-wpt-block.mjs');
+  const dir = await tmpDir('honest-frame');
+  // Ref: 60x60, black bar rows 10-19.
+  const ref = await writeInkPng(dir, 'ref.png', 60, 60, [0, 10, 60, 10]);
+  // Wrong render: 60x240, bar pushed to rows 100-109 (outside the ref
+  // frame entirely) — the wave-21 "wrapped/overflowing" shape whose union
+  // padding used to dilute the score upward.
+  const wrong = await writeInkPng(dir, 'wrong.png', 60, 240, [0, 100, 60, 10]);
+  // Close render: equal frame, bar 4px low (rows 14-23) — honest content
+  // divergence only.
+  const close = await writeInkPng(dir, 'close.png', 60, 60, [0, 14, 60, 10]);
+  const dWrong = await diffWebVsRef(wrong, ref);
+  const dClose = await diffWebVsRef(close, ref);
+  // The closer render must WIN under honest-frame scoring.
+  assert.ok(dClose.ssim > dWrong.ssim,
+    `close ${dClose.ssim} must out-score wrong ${dWrong.ssim}`);
+  // Overflow provenance: the wrong capture's bar is 60x10 = 600 ink px
+  // outside the 60x60 frame, all folded into the mean.
+  assert.equal(dWrong.frame.overflowInkPx, 600);
+  assert.equal(dWrong.frame.capH, 240);
+  assert.equal(dWrong.frame.refH, 60);
+  // The fold direction: honest ssim ≤ the pre-fold ref-frame ssim.
+  assert.ok(dWrong.ssim <= dWrong.frame.ssimRefFrame);
+  // Equal-frame pair: identity fit, zero overflow, fold is a no-op.
+  assert.equal(dClose.frame.overflowInkPx, 0);
+  assert.equal(dClose.ssim, dClose.frame.ssimRefFrame);
+});
+
+test('wave22: identical same-size pair still scores 1.0 (alias tests stay 1.000)', async () => {
+  const { diffWebVsRef } = await import('./inject-wpt-block.mjs');
+  const dir = await tmpDir('honest-identity');
+  const a = await writeInkPng(dir, 'a.png', 40, 40, [5, 5, 20, 8]);
+  const b = await writeInkPng(dir, 'b.png', 40, 40, [5, 5, 20, 8]);
+  const d = await diffWebVsRef(a, b);
+  assert.equal(d.ssim, 1);
+  assert.equal(d.frame.overflowInkPx, 0);
+});

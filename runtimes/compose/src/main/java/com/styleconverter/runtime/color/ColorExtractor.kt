@@ -81,7 +81,10 @@ object ColorExtractor {
             when (type) {
                 "BackgroundColor" -> backgroundColor = ValueExtractors.extractColor(data)
                 "Opacity" -> opacity = extractOpacity(data)
-                "BackgroundImage" -> backgroundImages = extractBackgroundImages(data)
+                // Font context threads through for lh/em gradient centers
+                // (`at 1lh 50px`) — font metrics live HERE, on the
+                // component's own FontSize/LineHeight properties.
+                "BackgroundImage" -> backgroundImages = extractBackgroundImages(data, fontContextOf(properties))
                 "BackgroundClip" -> {
                     // IR shape: array of keyword strings (one per layer),
                     // e.g. ["TEXT"] or ["BORDER_BOX"]. extractKeyword
@@ -210,15 +213,64 @@ object ColorExtractor {
     }
 
     /**
+     * Font metrics needed to resolve lh/em/rem gradient centers at
+     * extract time (the applier never sees runtime-dependent units).
+     * Byte-parallel with the SwiftUI extractor's FontContext.
+     *
+     * @property fontSizePx Element font-size in px (CSS initial 16px).
+     * @property lineHeightPx Used line-height in px: an explicit
+     *   LineHeight multiplier × fontSize, an explicit px value, or the
+     *   `normal` ≈ 1.2 × fontSize ratio — the SAME pin the spacing
+     *   resolver uses for `lh` (SpacingResolve pin P5).
+     */
+    data class FontContext(val fontSizePx: Float, val lineHeightPx: Float) {
+        companion object {
+            /** CSS initials: font-size 16px, line-height normal ≈ 1.2em. */
+            val DEFAULT = FontContext(16f, 19.2f)
+        }
+    }
+
+    /**
+     * Build the FontContext from the component's own property list.
+     * FontSize wire: {"px": N, ...}; LineHeight wire: {"multiplier": M}
+     * (unitless) or {"px": N} (length) — pinned against the live
+     * wave21-gate conic-gradient-line-height-relative-units artifacts
+     * (FontSize {"px":50}, LineHeight {"multiplier":2} → lh = 100px).
+     */
+    internal fun fontContextOf(properties: List<Pair<String, JsonElement?>>): FontContext {
+        // Element font-size in px; absent → CSS initial 16px.
+        val fontPx = properties.firstOrNull { it.first == "FontSize" }?.second
+            ?.let { (it as? JsonObject)?.get("px")?.jsonPrimitive?.floatOrNull }
+            ?: 16f
+        val lh = properties.firstOrNull { it.first == "LineHeight" }?.second as? JsonObject
+        val lineHeightPx = lh?.get("multiplier")?.jsonPrimitive?.floatOrNull?.times(fontPx)
+            ?: lh?.get("px")?.jsonPrimitive?.floatOrNull
+            // `normal` computes to ≈1.2 × font-size — SpacingResolve pin P5.
+            ?: (1.2f * fontPx)
+        return FontContext(fontPx, lineHeightPx)
+    }
+
+    /**
      * Extract background images (gradients, URLs) from IR data.
      *
      * @param data JSON array of background image objects
+     * @param fontCtx Font metrics for lh/em center resolution — callers
+     *   without a property list keep the CSS-initial default.
      * @return List of BackgroundImageConfig objects
      */
-    fun extractBackgroundImages(data: JsonElement?): List<BackgroundImageConfig> {
+    fun extractBackgroundImages(
+        data: JsonElement?,
+        fontCtx: FontContext = FontContext.DEFAULT
+    ): List<BackgroundImageConfig> {
         val array = (data as? JsonArray) ?: return emptyList()
 
-        return array.mapNotNull { element ->
+        return array.mapNotNull { element -> extractImageEntry(element, fontCtx) }
+    }
+
+    // One IR layer entry → config. Split out of extractBackgroundImages so
+    // the cross-fade branch can recurse per argument image.
+    private fun extractImageEntry(element: JsonElement, fontCtx: FontContext): BackgroundImageConfig? {
+        return run {
             // The converter's BackgroundImageProperty serializes url layers
             // in TWO untagged shapes (pinned against live output, wave 9):
             //   "x.png"                          — plain-url layer, a BARE
@@ -229,27 +281,40 @@ object ColorExtractor {
             // silently dropped, so NO url() background ever reached the
             // applier. Handle the bare-string shape first.
             if (element is JsonPrimitive) {
-                val s = element.contentOrNull ?: return@mapNotNull null
+                val s = element.contentOrNull ?: return@run null
                 // `none` as a bare keyword = an image layer that draws
                 // nothing (css-backgrounds-3 §3.1).
-                return@mapNotNull if (s.equals("none", ignoreCase = true)) {
+                return@run if (s.equals("none", ignoreCase = true)) {
                     BackgroundImageConfig.None
                 } else {
                     BackgroundImageConfig.Url(s)
                 }
             }
-            val obj = (element as? JsonObject) ?: return@mapNotNull null
+            val obj = (element as? JsonObject) ?: return@run null
             val type = obj["type"]?.jsonPrimitive?.contentOrNull
 
             when (type) {
                 "linear-gradient" -> extractLinearGradient(obj, repeating = false)
                 "repeating-linear-gradient" -> extractLinearGradient(obj, repeating = true)
-                "radial-gradient" -> extractRadialGradient(obj, repeating = false)
-                "repeating-radial-gradient" -> extractRadialGradient(obj, repeating = true)
-                "conic-gradient" -> extractConicGradient(obj, repeating = false)
-                "repeating-conic-gradient" -> extractConicGradient(obj, repeating = true)
+                "radial-gradient" -> extractRadialGradient(obj, repeating = false, fontCtx)
+                "repeating-radial-gradient" -> extractRadialGradient(obj, repeating = true, fontCtx)
+                "conic-gradient" -> extractConicGradient(obj, repeating = false, fontCtx)
+                "repeating-conic-gradient" -> extractConicGradient(obj, repeating = true, fontCtx)
                 "url" -> BackgroundImageConfig.Url(obj["url"]?.jsonPrimitive?.contentOrNull ?: "")
                 "none" -> BackgroundImageConfig.None
+                // cross-fade() (css-images-4 §2.6.2, A-RC2) — weighted
+                // composite of sub-images; recursion handles the args.
+                "cross-fade" -> extractCrossFade(obj, fontCtx)
+                // A bare <color> used as an image (cross-fade argument).
+                // TWO live wire shapes: the nested {"type":"color",
+                // "color":{srgb,…}} the serializer builds, AND the
+                // flattened {"type":"color","srgb":…,"original":…} that
+                // IRPropertySerializer.deepFlatten emits on the real wire
+                // (it inlines any type+single-object-field pattern —
+                // pinned by the converter run on the premultiplied-alpha
+                // fixture). extractColor reads `srgb` either way.
+                "color" -> ValueExtractors.extractColor(obj["color"] ?: obj)
+                    ?.let { BackgroundImageConfig.SolidColor(it) }
                 // Untagged object carrying a "url" key — the data-URI layer
                 // shape above (the "data": true flag just records that the
                 // converter recognised the scheme; the url string is
@@ -259,6 +324,35 @@ object ColorExtractor {
                 else -> null
             }
         }
+    }
+
+    /**
+     * Extract a cross-fade() layer. Wire (BackgroundImageSerializer.kt):
+     * {"type":"cross-fade","args":[{"weight":10,"image":<layer>},…]}
+     * (absent "weight" = author omitted the percentage). Weights normalize
+     * through the shared CrossFadeMath twin — see that file for the
+     * §2.6.2 rules and the cross-platform pin table.
+     */
+    private fun extractCrossFade(obj: JsonObject, fontCtx: FontContext): BackgroundImageConfig? {
+        val args = (obj["args"] as? JsonArray) ?: return null
+        if (args.isEmpty()) return null
+        // Authored weights: null = omitted (key absent on the wire).
+        val weights = args.map { arg ->
+            (arg as? JsonObject)?.get("weight")?.jsonPrimitive?.floatOrNull?.toDouble()
+        }
+        // Sub-images recurse through the same per-entry extractor.
+        val images = args.map { arg ->
+            (arg as? JsonObject)?.get("image")?.let { extractImageEntry(it, fontCtx) }
+        }
+        // ANY unparseable arg drops the WHOLE function — partially kept
+        // args would silently re-weight the rest (no-silent-fallthrough).
+        if (images.any { it == null }) return null
+        val fractions = com.styleconverter.runtime.background.CrossFadeMath.normalizeWeights(weights)
+        return BackgroundImageConfig.CrossFade(
+            images.mapIndexed { i, img ->
+                BackgroundImageConfig.CrossFadeEntry(fractions[i].toFloat(), img!!)
+            }
+        )
     }
 
     /**
@@ -291,13 +385,16 @@ object ColorExtractor {
      * }
      * ```
      */
-    private fun extractRadialGradient(obj: JsonObject, repeating: Boolean): BackgroundImageConfig.RadialGradient {
+    private fun extractRadialGradient(
+        obj: JsonObject, repeating: Boolean,
+        fontCtx: FontContext = FontContext.DEFAULT
+    ): BackgroundImageConfig.RadialGradient {
         // The IR serializer emits the position under the key "pos" (see
         // BackgroundImageProperty.kt); the legacy "position" key is also
         // tolerated so older snapshots still extract.
         val position = (obj["pos"] ?: obj["position"])?.jsonObject
-        val centerX = position?.get("x")?.jsonPrimitive?.floatOrNull?.div(100f) ?: 0.5f
-        val centerY = position?.get("y")?.jsonPrimitive?.floatOrNull?.div(100f) ?: 0.5f
+        val centerX = extractGradientCoord(position?.get("x"), fontCtx)
+        val centerY = extractGradientCoord(position?.get("y"), fontCtx)
         val stops = extractColorStops(obj["stops"] as? JsonArray)
         // shape/size keywords arrive as plain lowercase strings.
         val shape = obj["shape"]?.jsonPrimitive?.contentOrNull?.let {
@@ -332,16 +429,64 @@ object ColorExtractor {
      * }
      * ```
      */
-    private fun extractConicGradient(obj: JsonObject, repeating: Boolean): BackgroundImageConfig.ConicGradient {
+    private fun extractConicGradient(
+        obj: JsonObject, repeating: Boolean,
+        fontCtx: FontContext = FontContext.DEFAULT
+    ): BackgroundImageConfig.ConicGradient {
         // Same key drift as radial: serializer writes "pos" (BackgroundImageProperty.kt).
         // Legacy "position" key tolerated for older snapshots.
         val position = (obj["pos"] ?: obj["position"])?.jsonObject
-        val centerX = position?.get("x")?.jsonPrimitive?.floatOrNull?.div(100f) ?: 0.5f
-        val centerY = position?.get("y")?.jsonPrimitive?.floatOrNull?.div(100f) ?: 0.5f
+        val centerX = extractGradientCoord(position?.get("x"), fontCtx)
+        val centerY = extractGradientCoord(position?.get("y"), fontCtx)
         // Serializer writes "angle" for conic; "fromAngle" was legacy.
         val angle = (obj["angle"] ?: obj["fromAngle"])?.jsonObject?.get("deg")?.jsonPrimitive?.floatOrNull ?: 0f
         val stops = extractColorStops(obj["stops"] as? JsonArray)
         return BackgroundImageConfig.ConicGradient(centerX, centerY, angle, stops, repeating)
+    }
+
+    /**
+     * One gradient-center axis from the IRLengthPercentage wire
+     * (ValueTypes.kt §IRLengthPercentageSerializer):
+     *   raw number           → percentage → FRACTION(n / 100)
+     *   {"px": N}            → absolute length → PX(N)
+     *   {"original":{v,u}}   → runtime-dependent unit, resolved HERE
+     *     against the component's own font metrics (lh/rlh/em/rem —
+     *     the same ratios SpacingResolve pins: lh = used line-height,
+     *     `normal` ≈ 1.2 × font-size). Unsupported units (vw/ch/…) fall
+     *     back to CENTER with the fallthrough documented here — they
+     *     cannot be resolved without a viewport, and the CSS default
+     *     center is the least-wrong visible answer.
+     * Absent axis → CENTER (the CSS `at` default, css-images-3 §3.5).
+     */
+    internal fun extractGradientCoord(el: JsonElement?, fontCtx: FontContext): GradientCoord {
+        if (el == null) return GradientCoord.CENTER
+        // Raw number = percent (legacy wire; also the keyword mappings).
+        (el as? JsonPrimitive)?.floatOrNull?.let { return GradientCoord.fraction(it / 100f) }
+        val obj = el as? JsonObject ?: return GradientCoord.CENTER
+        // Runtime-dependent unit first — a typed original with pixels
+        // ABSENT is the "null means runtime-dependent" IR convention.
+        val orig = obj["original"] as? JsonObject
+        val hasPx = obj["px"]?.jsonPrimitive?.floatOrNull
+        if (hasPx != null) return GradientCoord.px(hasPx)
+        if (orig != null) {
+            val v = orig["v"]?.jsonPrimitive?.floatOrNull ?: return GradientCoord.CENTER
+            return when (orig["u"]?.jsonPrimitive?.contentOrNull) {
+                // lh = used line-height (multiplier × font-size when the
+                // component declares one; `normal` ≈ 1.2em otherwise).
+                "LH" -> GradientCoord.px(v * fontCtx.lineHeightPx)
+                // rlh anchors to the ROOT line-height; without a root
+                // context here we use the CSS-initial 16px × 1.2 — the
+                // same lockstep ratio SpacingResolve applies.
+                "RLH" -> GradientCoord.px(v * 19.2f)
+                // em/rem — font-relative (css-values-4 §5.2).
+                "EM" -> GradientCoord.px(v * fontCtx.fontSizePx)
+                "REM" -> GradientCoord.px(v * 16f)
+                // Viewport/other units need context this engine doesn't
+                // have — documented fallback to the CSS default center.
+                else -> GradientCoord.CENTER
+            }
+        }
+        return GradientCoord.CENTER
     }
 
     /**

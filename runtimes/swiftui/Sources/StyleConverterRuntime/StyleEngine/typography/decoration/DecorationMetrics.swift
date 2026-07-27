@@ -115,11 +115,19 @@ enum DecorationMetrics {
     /// lines (the label's pre-broken `\n` runs; a non-pre-broken label
     /// is a single line — the same measurer covers it, per the lane
     /// prescription). Lines with zero inked extent are skipped.
+    ///
+    /// Wave 21 (lane TEXTDECOR, B-RC8): `explicitThicknessPx` carries a
+    /// declared `text-decoration-thickness` (css-text-decor-4 §2.4) —
+    /// it overrides the auto rule; nil (the default, so every legacy
+    /// call site and its pinned tests stay byte-identical) keeps the
+    /// font-derived auto thickness above.
     static func segments(lines: [String],
                          fontSizePx: CGFloat,
+                         explicitThicknessPx: CGFloat? = nil,
                          measure: (String) -> CGFloat) -> [Segment] {
-        // One shared thickness per run — CSS resolves it per element.
-        let t = autoThickness(fontSizePx: fontSizePx)
+        // One shared thickness per run — CSS resolves it per element;
+        // an explicit declaration wins over the auto rule.
+        let t = explicitThicknessPx ?? autoThickness(fontSizePx: fontSizePx)
         return lines.enumerated().compactMap { i, line in
             // Empty visual line → no decoration (browser parity).
             let w = line.isEmpty ? 0 : measure(line)

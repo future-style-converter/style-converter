@@ -360,6 +360,95 @@ test('corpus-v4.1 line-height: compose composed ratio is 1.25 and the native def
     'compose composed line-box mode split missing/changed');
 });
 
+// ── wave-21: the composed UA BOX-MODEL contract (padding + box-sizing) ──────
+//
+// THE CONTRACT UNDER TEST: on the composed WPT surface, test content must
+// carry the UA-origin box model — the same box model the browser-ref page
+// gets by rendering raw WPT HTML under the full UA stylesheet. The ref side
+// keeps UA control padding (button 1px 6px, input 1px 2px, textarea 2px…)
+// and the controls' UA `box-sizing: border-box` because its injection only
+// frames html/body at zero specificity; the harness side must therefore
+// REVERT its own universal reset (`* { margin:0; padding:0; box-sizing:
+// border-box }`) and the wpt-mode `content-box` override back to the UA
+// origin on IR-rendered elements. A half-held state — harness reset intact
+// while the ref keeps UA metrics, or a reset creeping into the ref
+// injection — re-opens the measured wave-20 failure: every sourceTag-
+// preserved widget rendered tighter than the ref (narrower buttons, rows
+// drifting upward cumulatively), a flat 3.96% / 9,274px penalty on all five
+// appearance-alias tests sharing appearance-auto-ref.html (web-ref SSIM
+// 0.8267 → 1.0000 pixel-exact once reverted). Same style as the CANVAS_REV
+// pins above: each side's term is scanned from its ONE source of truth so
+// either side drifting fails `node --test tools/titan/*.test.mjs`.
+
+test('wave-21 box model: wpt-composed-mode reverts margin+padding+box-sizing to the UA origin', () => {
+  const html = src('apps/web-harness/index.html');
+  // Extract the composed override rule body (selector through closing brace)
+  // so all three declarations are pinned INSIDE this one rule — a revert
+  // moved to some other selector would not satisfy the composed contract.
+  const rule = /body\.wpt-composed-mode \[data-component-id\],\s*\n\s*body\.wpt-composed-mode \[data-component-id\] \* \{[\s\S]*?\n      \}/.exec(html)?.[0];
+  assert.ok(rule, 'wpt-composed-mode override rule not found in index.html');
+  // margin: the Round-4 GAP-1 term (UA <p>/<h*> margins) must survive…
+  assert.match(rule, /margin: revert;/, 'composed rule lost margin: revert');
+  // …and the wave-21 terms: UA control padding + UA border-box come back.
+  assert.match(rule, /padding: revert;/, 'composed rule lost padding: revert');
+  assert.match(rule, /box-sizing: revert;/, 'composed rule lost box-sizing: revert');
+
+  // CASCADE ORDER is load-bearing: the composed rule and the wpt-mode
+  // `box-sizing: content-box` rule tie on specificity, so `revert` wins in
+  // composed mode ONLY because it is declared LATER in the stylesheet.
+  // Swapping the two rules would silently hand composed controls back to
+  // content-box (the exact wave-20 penalty) while every scan above passes.
+  const wptModeIdx = html.indexOf('body.wpt-mode [data-component-id]');
+  const composedIdx = html.indexOf('body.wpt-composed-mode [data-component-id]');
+  assert.ok(wptModeIdx >= 0, 'wpt-mode box-sizing rule not found in index.html');
+  assert.ok(composedIdx > wptModeIdx, 'composed revert rule must be declared AFTER the wpt-mode content-box rule (equal specificity — later wins)');
+
+  // The per-component `?wpt=1` surface keeps its own contract byte-for-byte:
+  // swarm-003's `content-box` (spec-default box model for width/border
+  // arithmetic) with NO revert terms — composed is the only surface that
+  // reproduces full UA layout.
+  const wptRule = /body\.wpt-mode \[data-component-id\],\s*\n\s*body\.wpt-mode \[data-component-id\] \* \{[\s\S]*?\n      \}/.exec(html)?.[0];
+  assert.ok(wptRule, 'wpt-mode override rule not found in index.html');
+  assert.match(wptRule, /box-sizing: content-box;/, 'wpt-mode per-component rule must keep content-box');
+  assert.doesNotMatch(wptRule, /revert/, 'revert leaked into the per-component wpt-mode rule');
+
+  // The universal reset itself must survive verbatim — it is what the 327
+  // committed baselines were captured under, AND it is the cascade origin
+  // `revert` rolls back FROM (delete it and `revert` becomes a no-op with a
+  // silently different meaning).
+  assert.match(html, /\* \{\s*\n\s*margin: 0;\s*\n\s*padding: 0;\s*\n\s*box-sizing: border-box;\s*\n\s*\}/,
+    'the universal reset (327-pair contract) must survive');
+});
+
+test('wave-21 box model: the ref injection frames only html/body — UA control metrics stay intact', () => {
+  const s = src('tools/titan/capture-browser-ref.mjs');
+  // Extract the ONE injected style block (the addStyleTag template) so the
+  // assertions below scope to what actually reaches the ref page, not to
+  // comments elsewhere in the file.
+  const injected = /page\.addStyleTag\(\{\s*\n\s*content: `([\s\S]*?)`,\s*\n\s*\}\)/.exec(s)?.[1];
+  assert.ok(injected, 'ref addStyleTag injection block not found');
+  // The box-model rules are EXACTLY the zero-specificity html/body frame —
+  // pin both literals so any widening (extra selectors, changed values)
+  // fails here rather than silently re-boxing the ref.
+  assert.ok(injected.includes(':where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }'),
+    'ref html/body frame rule missing/changed');
+  assert.ok(injected.includes(':where(body) { padding: ${CANVAS_PAD_PX}px; box-sizing: border-box;'),
+    'ref body canvas-padding rule missing/changed');
+  // No universal reset and no element/attribute-wide box-model override may
+  // ever enter the injection: the harness reverts TO the UA origin, so the
+  // ref must PRESENT the UA origin — a `* { padding: 0 }` here would strip
+  // the very control padding the composed revert exists to match.
+  assert.doesNotMatch(injected, /^\s*\*\s*[,{]/m, 'universal selector leaked into the ref injection');
+  assert.doesNotMatch(injected, /\[data-component-id\]/, 'harness-only selector leaked into the ref injection');
+  // Count the box-model declarations in the injection: exactly one `margin`,
+  // two `padding`s (frame zero + canvas pad) and one `box-sizing` — all in
+  // the two :where frame rules pinned above. Any additional declaration is
+  // a contract widening that must be reviewed against the harness side.
+  assert.equal((injected.match(/margin:/g) ?? []).length, 1, 'unexpected extra margin declaration in ref injection');
+  assert.equal((injected.match(/padding:/g) ?? []).length, 2, 'unexpected extra padding declaration in ref injection');
+  assert.equal((injected.match(/box-sizing:/g) ?? []).length, 1, 'unexpected extra box-sizing declaration in ref injection');
+});
+
 test('corpus-v4.1 line-height: swiftui ref line box is 20 and stays WPT-gated + IR-deferring', () => {
   const renderer = src('runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift');
   // The calibration constant mirrors the ref pin (16px root x 1.25 = 20).

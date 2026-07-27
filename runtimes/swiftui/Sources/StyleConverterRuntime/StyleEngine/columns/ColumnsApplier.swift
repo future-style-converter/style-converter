@@ -63,6 +63,12 @@ enum ColumnsApplier {
     ///   - ctx: the CONTAINER's spacing context for the resolve (the
     ///     child inherits font-size unless redeclared, so em bases are
     ///     honest for this family; the fixture family is px anyway).
+    ///   - wptCaptureMode: wave-21 lane MULTICOL — true ONLY in composed
+    ///     WPT capture. Unlocks the AUTO-height branch below (§7.1: an
+    ///     unconstrained multicol container always balances, so H =
+    ///     ceil(C/N)); false (the default, and the whole dark-stage
+    ///     corpus) keeps the definite-height-only wave-10 behaviour
+    ///     byte-identically.
     static func fragmentPlan(columns: ColumnsConfig?,
                              verticalWritingMode: Bool,
                              siblingCount: Int,
@@ -70,10 +76,20 @@ enum ColumnsApplier {
                              contentHeightPx: CGFloat?,
                              gapPx: CGFloat,
                              childProperties: [IRProperty],
-                             ctx: SpacingContext) -> FragmentPlan? {
+                             ctx: SpacingContext,
+                             wptCaptureMode: Bool = false) -> FragmentPlan? {
         // §2 gate: only a multicol container (non-auto column-count or
         // column-width) establishes columns to fragment into.
         guard columns?.isMulticolContainer == true else { return nil }
+        // Wave-21: a column-span:all child never fragments — it SPANS the
+        // columns instead of flowing into them (css-multicol-1 §6.2); its
+        // sequencing is the spanner-flow plan's job, not this pass'.
+        // (Not a fallthrough: identity is the correct render for it.)
+        if childProperties.contains(where: {
+            $0.type == "ColumnSpan"
+                && ValueExtractors.extractKeyword($0.data)?.uppercased() == "ALL" }) {
+            return nil
+        }
         // Blocked-platform bail (contract: horizontal-tb only): a
         // vertical writing mode flips the inline/block axes and this
         // pass' geometry would be wrong on both — logOnce (repo
@@ -86,12 +102,9 @@ enum ColumnsApplier {
                     + "renders unfragmented")
             return nil
         }
-        // Definite container geometry or bail: without a definite H
-        // there is no column block-size to break at (an auto-height
-        // multicol box grows to fit, css-break-3 §4.1), and without a
-        // definite U there is no §3 used column width.
-        guard let u = contentWidthPx,
-              let h = contentHeightPx, h > 0 else { return nil }
+        // Definite inline size or bail: without a definite U there is no
+        // §3 used column width to fragment at.
+        guard let u = contentWidthPx else { return nil }
         // §3 used-value fit — the same math (and the same inputs) as
         // the wave-9 column-box fill basis, so the fragment slots and
         // the child's fill width agree by construction.
@@ -100,17 +113,42 @@ enum ColumnsApplier {
                 requestedCount: columns?.count,
                 requestedWidthPx: columns?.widthPx,
                 gapPx: Double(gapPx)) else { return nil }
-        // C — the child's laid-out block-size. Only an explicit
-        // Height/BlockSize resolves statically (SizeExtractor +
-        // SizeApplierResolve, the same lane the flex main plan uses);
-        // percent resolves against H (CSS 2.1 §10.5 — the multicol
-        // container's content height is the child's percent basis).
-        // Auto/content-sized children bail to identity: their laid-out
-        // size is not statically knowable, and the overflow fixture
-        // family always declares C.
+        // H — the column block-size to break at, and C — the child's
+        // laid-out block-size. Only an explicit Height/BlockSize resolves
+        // statically (SizeExtractor + SizeApplierResolve, the same lane
+        // the flex main plan uses); auto/content-sized children bail to
+        // identity (their laid-out size is not statically knowable).
         let childSize = SizeExtractor.extract(from: childProperties)
-        guard let c = SizeApplierResolve.exact(childSize.height, ctx: ctx,
-                                               parent: h) else { return nil }
+        let h: CGFloat
+        let c: CGFloat
+        if let hh = contentHeightPx, hh > 0 {
+            // Wave-10 definite-height branch (css-break-3 §4.1): H is the
+            // container's content-box height; the child's percent height
+            // resolves against it (CSS 2.1 §10.5).
+            h = hh
+            guard let cc = SizeApplierResolve.exact(childSize.height, ctx: ctx,
+                                                    parent: hh) else { return nil }
+            c = cc
+        } else if wptCaptureMode {
+            // Wave-21 AUTO-height branch (B-RC5, capture-only): §7.1 — an
+            // unconstrained multicol container ALWAYS balances, so the
+            // used column block-size is H = ceil(C / N) (the SP-table's
+            // sole-flow fragmentainer; as-column-flex-item: 160/4 → 40).
+            // Percent heights have no basis under an auto parent and
+            // degrade to auto (allowPercent: false) → identity bail.
+            guard let cc = SizeApplierResolve.exact(childSize.height, ctx: ctx,
+                                                    parent: 0,
+                                                    allowPercent: false) else { return nil }
+            c = cc
+            h = (cc / CGFloat(used.count)).rounded(.up)
+            // A degenerate balanced H (0-height child) has nothing to
+            // fragment — identity.
+            guard h > 0 else { return nil }
+        } else {
+            // Dark stage keeps the wave-10 contract: auto-height multicol
+            // grows to fit instead of fragmenting (frozen behaviour).
+            return nil
+        }
         // The geometry itself: nil when C <= H (S2 identity — the fits
         // case never reaches a break point, css-break-3 §4).
         guard let frags = FragmentGeometry.fragments(

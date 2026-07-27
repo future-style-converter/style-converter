@@ -165,3 +165,36 @@ test('buildCaptureUrl: animationTime composes LAST in the fixed hook order', () 
     'http://localhost:3000/?mode=capture&wpt=1&width=250&forceState=hover&animationTime=0.5'
   );
 });
+
+// ── Isolated-capture filter (wave 21 — B-RC3 composed paint divergence) ────
+
+test('buildCaptureUrl: only appends &only=<key> after every other hook', () => {
+  // The isolated re-capture URL: composed mode + the one flagged test.
+  // `only` is LAST in the fixed order so all earlier suffixes keep their
+  // historical byte positions in capture.log greps.
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', true, { wptComposed: true, only: 'wpt__css-multicol__abspos-containing-block-outside-spanner' }),
+    'http://localhost:3000/?mode=capture&wpt=1&wptComposed=1&only=wpt__css-multicol__abspos-containing-block-outside-spanner'
+  );
+});
+
+test('buildCaptureUrl: only is URL-encoded so an odd key cannot corrupt the query', () => {
+  // WPT keys are [a-z0-9._-] today, but a hypothetical key with a query
+  // metacharacter must survive the round-trip (URLSearchParams.get on the
+  // React side percent-decodes symmetrically).
+  assert.equal(
+    buildCaptureUrl('http://localhost:3000', true, { wptComposed: true, only: 'a&b=c' }),
+    'http://localhost:3000/?mode=capture&wpt=1&wptComposed=1&only=a%26b%3Dc'
+  );
+});
+
+test('buildCaptureUrl: absent/empty only leaves the composed URL byte-identical', () => {
+  // The batch composed capture (no isolation) must keep producing the exact
+  // pre-B-RC3 URL — this is the string every wave-20-and-earlier composed
+  // capture.log carries. Empty string is meaningless (would filter to zero
+  // canvases), so it is treated as unset by the truthiness guard.
+  const batch = 'http://localhost:3000/?mode=capture&wpt=1&wptComposed=1';
+  assert.equal(buildCaptureUrl('http://localhost:3000', true, { wptComposed: true }), batch);
+  assert.equal(buildCaptureUrl('http://localhost:3000', true, { wptComposed: true, only: undefined }), batch);
+  assert.equal(buildCaptureUrl('http://localhost:3000', true, { wptComposed: true, only: '' }), batch);
+});

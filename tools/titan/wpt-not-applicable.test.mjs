@@ -17,10 +17,10 @@ import assert from 'node:assert/strict';
 
 import { tagsForTest, classifyAll, RULES, RX } from './wpt-not-applicable.mjs';
 
-// ── Sanity: 40 rules (17 swarm-001 + 12 swarm-002 + 11 swarm-003) ──────────
+// ── Sanity: 41 rules (17 swarm-001 + 12 swarm-002 + 11 swarm-003 + 1 wave-21)
 
-test('RULES exports exactly 40 entries', () => {
-    assert.equal(RULES.length, 40);
+test('RULES exports exactly 41 entries', () => {
+    assert.equal(RULES.length, 41);
 });
 
 test('RULES tags are unique', () => {
@@ -1027,6 +1027,46 @@ test('requires-sub-template does NOT fire on plain .html with literal braces in 
     assert.equal(tagsForTest({
         html, testRel: 'css/css-foo/bar-001.html',
     }).includes('requires-sub-template'), false);
+});
+
+// ── Rule 41 (wave-21): requires-wpt-server ──────────────────────────────────
+
+test('requires-wpt-server fires on .sub.html filename (the wave-21 gate case)', () => {
+    // Positive: the exact wave-21 css-images test that reached extraction
+    // despite depending on wptserve — a .sub.html file needs the server for
+    // substitution AND multi-origin serving; file:// rendering is unfaithful.
+    const tags = tagsForTest({
+        html: '<div></div>',
+        testRel: 'css/css-images/cross-fade-cross-origin-orientation.sub.html',
+    });
+    assert.ok(tags.includes('requires-wpt-server'));
+    // Overlap with Rule 36 is by design (both fire on the filename).
+    assert.ok(tags.includes('requires-sub-template'));
+});
+
+test('requires-wpt-server does NOT fire on a plain .html test', () => {
+    // Negative: an ordinary reftest never carries the tag, even when its
+    // body mentions ".sub.html" as prose (filename-only rule).
+    assert.equal(tagsForTest({
+        html: '<div>see also foo.sub.html</div>',
+        testRel: 'css/css-images/conic-gradient-angle.html',
+    }).includes('requires-wpt-server'), false);
+});
+
+test('requires-wpt-server is filename-anchored (substring ".sub." mid-path does not fire)', () => {
+    // Edge: the suffix regex anchors at end-of-path — a directory named
+    // "x.sub.html" (or a non-suffix .sub. segment) must not fire.
+    assert.equal(tagsForTest({
+        html: '<div></div>',
+        testRel: 'css/css-images/foo.sub.html.bak/bar-001.html',
+    }).includes('requires-wpt-server'), false);
+});
+
+test('requires-wpt-server fires with an empty testRel never crashing (edge: no ctx)', () => {
+    // Edge: tagsForTest with no testRel — the rule must degrade to false,
+    // not throw (ctx?.testRel ?? '' guard).
+    assert.equal(tagsForTest({ html: '<div></div>' })
+        .includes('requires-wpt-server'), false);
 });
 
 // ── Rule 37: requires-cross-origin ──────────────────────────────────────────

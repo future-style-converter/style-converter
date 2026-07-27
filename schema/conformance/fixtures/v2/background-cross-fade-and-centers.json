@@ -1,0 +1,72 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "gradient-center-length-001",
+            "name": "Gradient_LengthCenter",
+            "properties": [
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "conic-gradient",
+                            "angle": { "deg": 45.0 },
+                            "pos": {
+                                "x": { "px": 100.0 },
+                                "y": { "original": { "v": 1.0, "u": "LH" } }
+                            },
+                            "stops": [
+                                {
+                                    "color": { "srgb": { "r": 1.0, "g": 0.0, "b": 0.0 }, "original": "red" },
+                                    "position": 25.0
+                                },
+                                {
+                                    "color": { "srgb": { "r": 0.0, "g": 0.5019607843137255, "b": 0.0 }, "original": "green" },
+                                    "position": null
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "cross-fade-001",
+            "name": "CrossFade_ModernAndLegacy",
+            "properties": [
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "cross-fade",
+                            "args": [
+                                {
+                                    "weight": 10.0,
+                                    "image": {
+                                        "type": "linear-gradient",
+                                        "stops": [
+                                            { "color": { "srgb": { "r": 0.9019607843137255, "g": 0.39215686274509803, "b": 0.396078431372549 }, "original": "#e66465" }, "position": null },
+                                            { "color": { "srgb": { "r": 0.5686274509803921, "g": 0.596078431372549, "b": 0.8980392156862745 }, "original": "#9198e5" }, "position": null }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "image": { "type": "color", "color": { "srgb": { "r": 0.0, "g": 1.0, "b": 0.0, "a": 1.0 }, "original": "color(srgb 0.0 1.0 0.0 / 1.0)" } }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "cross-fade",
+                            "legacy": true,
+                            "args": [
+                                { "weight": 75.0, "image": "a.png" },
+                                { "weight": 25.0, "image": "b.png" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

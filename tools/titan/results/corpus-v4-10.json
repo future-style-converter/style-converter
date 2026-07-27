@@ -1,0 +1,285 @@
+{
+ "_snapshot": "corpus-v4.10",
+ "_note": "THE CORPUS BROADENS TO 15 SECTIONS + THE INSTRUMENT SELF-CORRECTS TWICE MORE. New sections: css-images, css-multicol, css-text-decor. The wave found and fixed a SILENT extraction catastrophe (the head-unwrap regex destroyed all body content for <html><head>...</head> no-<body> WPT docs, marked lossy:false), bare-<br> phantom 100x100 boxes (now a line-context rule: br after inline content or carrying clear = 0px; line-start br = 20px line box), dropped body-level bare text, sibling-index() baked at extract time, and inline-run reorder honesty flags. The gradient parser family: double-position color stops (css-images-4 §3.4.3), length/lh gradient centers, interpolation-method prefix peel, the mask parser degraded-twin deleted, keyword-position axis fixes, and the WEB ENGINE had never applied any gradient center (pos-vs-position field mismatch — corpus-wide fix). cross-fade() implemented end-to-end (IR + parser + three appliers with premultiplied math; web lowers the modern n-ary form onto a nested -webkit-cross-fade chain since capture Chromium rejects unprefixed n-ary). Native text-decoration style/thickness painting (Blink-matched dotted rhythm incl the width==2t phase-0 dot), WPT unbreakable-run no-wrap, multicol spanner semantics (pre-spanner balancing, post-spanner abspos static position, intrinsic block-size), the Android nested-multicol WEDGE fixed (fragmentsState write during measure), Android hostActivates ungated for static-position-only documents, and the composed-page headless PAINT divergence worked around via isolated re-capture (batch scroll sequence preserved byte-identically after the skeptic caught a scroll-ordering regression). SCORING HONESTY: the capture-contract fix (UA padding revert — all five appearance-alias tests hit EXACTLY 1.000 on web) and honest-frame SSIM (score on the ref frame + fold out-of-frame ink as divergence; the old union-frame white padding inflated WRONG wrapped renders above honest ones — zero pass flips, 11 small movers, all frame-mismatched). Bucketer: 295 mismatch-only reftests moved to bucket C (the pipeline asserts pixel-match only — they were scored as SSIM-1.0 phantoms), 71 .sub.html tests tagged requires-wpt-server. DEVICE RESULT: css-flexbox/grid/display/sizing/position all perfect on all three platforms (css-position 7/7), css-multicol web+iOS 12/12, css-images 12/11/11, zero pass-regressions, 327-net clean. Totals: web 163/174, iOS 148/174, Android 146/174. Named residuals: css-ui native replica band (~0.876 — web is now the exact ref; diff native-vs-web pinpoints the remaining widget ink), appearance-menulist-button web 0.554 (new), text-decor native dotted/wrap distance now honestly measured (0.42-0.50), Android multicol spanner 0.939 near-miss, the standing bidi/vertical-writing/appearance walls.",
+ "artifact": "tools/titan/runs/wave21-final (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "3517d1b1",
+ "date": "2026-07-27",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence coverage asymmetry (corpus-v4.3 gate) + extraction-wall exclusion (v4.4) + post-load re-admission (v4.5) + structure-extraction re-admission (v4.9) + honest-frame ssim (v4.10)",
+ "sampling": "15 sections x 12 bucket-A tests",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh)",
+ "totals": {
+  "web": {
+   "passing": 163,
+   "measured": 174
+  },
+  "ios": {
+   "passing": 148,
+   "measured": 174
+  },
+  "android": {
+   "passing": 146,
+   "measured": 174
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9738,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.972,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9689,
+    "passing": 10
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.999,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8543,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8547,
+    "passing": 10
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9909,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9875,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9807,
+    "passing": 10
+   }
+  },
+  "css-display": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9886,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9806,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9779,
+    "passing": 12
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9904,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9812,
+    "passing": 12
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 1,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9874,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9749,
+    "passing": 12
+   }
+  },
+  "css-images": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9975,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9925,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9909,
+    "passing": 11
+   }
+  },
+  "css-multicol": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9984,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9904,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9802,
+    "passing": 11
+   }
+  },
+  "css-overflow": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9944,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.9856,
+    "passing": 10
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.9748,
+    "passing": 10
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 7,
+    "meanSsim": 0.9877,
+    "passing": 7
+   },
+   "ios": {
+    "measured": 7,
+    "meanSsim": 0.987,
+    "passing": 7
+   },
+   "android": {
+    "measured": 7,
+    "meanSsim": 0.9845,
+    "passing": 7
+   }
+  },
+  "css-sizing": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9997,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9872,
+    "passing": 12
+   }
+  },
+  "css-text": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9461,
+    "passing": 8
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9348,
+    "passing": 8
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9338,
+    "passing": 8
+   }
+  },
+  "css-text-decor": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.8899,
+    "passing": 9
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8303,
+    "passing": 4
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8357,
+    "passing": 5
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9979,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9882,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9791,
+    "passing": 11
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9548,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9181,
+    "passing": 5
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9178,
+    "passing": 5
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then for each of the 15 sections: POST_LOAD_EXTRACT=1 section-runner.sh <section> --all-platforms --max-tests 12 --run-id wave21-final --foreground."
+}

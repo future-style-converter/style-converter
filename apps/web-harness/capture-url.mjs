@@ -75,6 +75,24 @@
  *                          both suffixes ride the URL together. Omitted /
  *                          false ⇒ the byte-identical legacy per-component
  *                          gallery.
+ * @param {string} [opts.only] - ISOLATED composed capture (B-RC3 workaround,
+ *                          wave 21): restrict the ComposedCaptureGallery to
+ *                          the ONE test whose key equals this value, so the
+ *                          page mounts a single canvas. Headless Chromium
+ *                          mis-PAINTS abspos boxes whose containing block is
+ *                          promoted outside a `column-span:all` spanner when
+ *                          they sit on the tall multi-canvas composed page
+ *                          (geometry correct, paint ~2312px off —
+ *                          abspos-containing-block-outside-spanner); a fresh
+ *                          single-canvas page paints correctly, so the
+ *                          capture driver re-captures flagged tests through
+ *                          this param. Appended LAST as
+ *                          `&only=<encodeURIComponent(key)>` (URL-encoded —
+ *                          WPT keys are `[a-z0-9._-]` today, but encoding
+ *                          means a future odd key can never corrupt the
+ *                          query string). Only meaningful together with
+ *                          `wptComposed`; omitted ⇒ the full gallery, URL
+ *                          byte-identical to the pre-B-RC3 form.
  * @returns {string} The fully formed URL to navigate to.
  */
 export function buildCaptureUrl(baseUrl, wptMode, opts = {}) {
@@ -98,5 +116,12 @@ export function buildCaptureUrl(baseUrl, wptMode, opts = {}) {
   const stateSuffix = opts.forceState ? `&forceState=${opts.forceState}` : '';
   // `0` is legal (freeze at the initial frame), so test presence, not truth.
   const timeSuffix = opts.animationTime != null ? `&animationTime=${opts.animationTime}` : '';
-  return `${trimmed}/?mode=capture${wptSuffix}${composedSuffix}${widthSuffix}${stateSuffix}${timeSuffix}`;
+  // `&only=<key>` — the B-RC3 isolated-composed-capture filter, appended LAST
+  // so every earlier suffix keeps its historical position in logs/artifacts.
+  // encodeURIComponent guards against any future test key containing a
+  // character with query-string meaning; URLSearchParams on the React side
+  // decodes symmetrically. Empty string is meaningless (would filter to zero
+  // canvases), so the guard is truthiness, not presence.
+  const onlySuffix = opts.only ? `&only=${encodeURIComponent(opts.only)}` : '';
+  return `${trimmed}/?mode=capture${wptSuffix}${composedSuffix}${widthSuffix}${stateSuffix}${timeSuffix}${onlySuffix}`;
 }

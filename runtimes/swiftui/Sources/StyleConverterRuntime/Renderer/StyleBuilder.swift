@@ -145,11 +145,19 @@ struct TextConfig {
     var decorationColor: Color?   = nil
     // Wave-5 gate follow-up (decoration ownership) —
     // `text-decoration-style` (css-text-decor-3 §2.3). The owned
-    // underline/line-through rectangles engage ONLY for `solid`;
-    // dashed/dotted/wavy/double keep the platform built-ins (their
-    // pattern rendering beats a solid owned rect), so the label needs
-    // the style to decide ownership.
+    // underline/line-through pass engages for `solid` and — since
+    // wave 21 (lane TEXTDECOR) — for `dotted`/`dashed`, whose
+    // Chromium-matched op lists come from DecorationOps. `double`/
+    // `wavy` keep the platform built-ins (their pattern rendering
+    // still beats a solid owned rect), so the label needs the style
+    // to decide ownership AND to pick the op emitter.
     var decorationStyle: TextDecorationPattern = .solid
+    // Wave 21 (lane TEXTDECOR, B-RC8) — `text-decoration-thickness`
+    // in px (css-text-decor-4 §2.4). Overrides the owned overlay's
+    // font-derived auto thickness (DecorationMetrics.autoThickness)
+    // and re-anchors the underline gap (DecorationOps.
+    // explicitUnderlineGapPx). nil = auto, byte-identical legacy path.
+    var decorationThicknessPx: CGFloat? = nil
 }
 
 struct EffectConfig {
@@ -426,9 +434,17 @@ enum StyleBuilder {
             s.text.overline = agg.overline
             s.text.decorationColor = agg.decorationColor
             // Wave-5 gate follow-up — decoration style gates the OWNED
-            // underline/line-through pass (solid only; §2.3 patterns
-            // keep the platform built-ins, see TextConfig).
+            // underline/line-through pass; wave 21 (lane TEXTDECOR)
+            // extends ownership to dotted/dashed via DecorationOps
+            // (§2.3 double/wavy still keep the platform built-ins,
+            // see TextConfig).
             s.text.decorationStyle = agg.decorationStyle
+            // Wave 21 (lane TEXTDECOR, B-RC8) — `text-decoration-
+            // thickness` (css-text-decor-4 §2.4). The aggregate parsed
+            // it since Phase 6 but the label never saw it (the exact
+            // silent loss this wave kills): the owned overlay now
+            // overrides the font-derived auto thickness with it.
+            s.text.decorationThicknessPx = agg.decorationThicknessPx
             // Generic-family bridge. Ordering mirrors FontMod.design(for:):
             // rounded > monospaced > serif > default. PlaceholderLabel uses
             // this to call `.system(size:design:)` so the design survives

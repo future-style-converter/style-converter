@@ -379,16 +379,42 @@ dirs + WPT corpus are gitignored):
   a ref-vs-harness capture contract difference (form-control theming),
   queued. Zero regressions; 327-net clean. Corpus totals: **web
   124/136, iOS 121/136, Android 119/136**.
+  Wave 21 (`tools/titan/results/corpus-v4-10.json`) broadened the corpus
+  to **15 sections** (css-images, css-multicol, css-text-decor) and
+  self-corrected the instrument twice more. The capture-contract
+  diagnosis found the harness's own universal CSS reset stripping UA
+  form-control padding — one `revert` rule took **all five
+  appearance-alias tests to exactly 1.000 on web**. Extraction fixes: a
+  silent head-unwrap catastrophe (all body content destroyed for
+  `<head>`-no-`<body>` docs, marked lossy:false), bare-`<br>` phantom
+  boxes replaced by a line-context rule, dropped body-level text,
+  `sibling-index()` baked at extract time, reorder honesty flags. The
+  gradient parser family was overhauled (double-position stops, length
+  centers, interpolation-method peel, mask degraded-twin deleted) and
+  the web engine had **never applied any gradient center** (a
+  `pos`-vs-`position` field mismatch, corpus-wide). `cross-fade()`
+  implemented end-to-end on all three engines with premultiplied math.
+  Native text-decoration style/thickness painting (Blink-matched dotted
+  rhythm), multicol spanner semantics + intrinsic sizing, the Android
+  nested-multicol wedge (a snapshot write during measure), and a
+  headless composed-page paint divergence worked around via isolated
+  re-capture. **Honest-frame SSIM** replaced union-frame scoring (white
+  padding had inflated wrong renders above honest ones — zero pass
+  flips). Bucketer: 295 mismatch-only reftests moved to C, 71 .sub.html
+  tagged requires-wpt-server. Result: css-flexbox/grid/display/sizing/
+  position all perfect on all three platforms, css-multicol web+iOS
+  12/12, css-images 12/11/11, zero pass-regressions, 327-net clean.
+  Corpus totals: **web 163/174, iOS 148/174, Android 146/174**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 160 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1014 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1321 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 734 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 710 |
+| converter (Kotlin) | `./gradlew :converter:test` | 195 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1035 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1385 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 784 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 778 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
 
 ## Roadmap

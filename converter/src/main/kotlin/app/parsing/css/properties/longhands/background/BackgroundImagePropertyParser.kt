@@ -4,8 +4,6 @@ import app.irmodels.*
 import app.irmodels.properties.background.BackgroundImageProperty
 import app.parsing.css.properties.longhands.PropertyParser
 import app.parsing.css.properties.primitiveParsers.AngleParser
-import app.parsing.css.properties.primitiveParsers.ColorParser
-import app.parsing.css.properties.primitiveParsers.PercentageParser
 import app.parsing.css.properties.primitiveParsers.UrlParser
 import app.parsing.css.properties.primitiveParsers.ExpressionDetector
 import app.parsing.css.properties.primitiveParsers.GlobalKeywords
@@ -17,14 +15,17 @@ import app.parsing.css.properties.primitiveParsers.TokenizationUtils
  * Supports:
  * - none: No background image
  * - url(): Image from URL or data URI
- * - linear-gradient(): Linear gradient
- * - radial-gradient(): Radial gradient
- * - conic-gradient(): Conic gradient
- * - repeating-linear-gradient(): Repeating linear gradient
- * - repeating-radial-gradient(): Repeating repeating radial gradient
- * - repeating-conic-gradient(): Repeating conic gradient
+ * - linear-gradient() / repeating-linear-gradient() (css-images-3 §3.1)
+ * - radial-gradient() / repeating-radial-gradient() (css-images-3 §3.5)
+ * - conic-gradient() / repeating-conic-gradient() (css-images-4 §3.4.4)
+ * - cross-fade(): modern n-ary + legacy two-arg syntax (css-images-4 §2.6.2)
  *
  * Multiple images can be specified as comma-separated values.
+ *
+ * This object also OWNS the gradient grammar for `mask-image` —
+ * MaskImagePropertyParser delegates here (one grammar, two wrappers) so the
+ * two parsers can never drift again (the old duplicated mask copy had no
+ * from/at prefix handling and mis-parsed `from 45deg` as a color stop).
  */
 object BackgroundImagePropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
@@ -76,7 +77,9 @@ object BackgroundImagePropertyParser : PropertyParser {
     // parsed from the lowered copy — every token inside a gradient (color
     // keywords, hex digits, angle units, direction keywords) is itself
     // case-insensitive per CSS Images L3/L4, so no author bytes are lost.
-    private fun parseImage(value: String): BackgroundImageProperty.BackgroundImage? {
+    // INTERNAL (not private): MaskImagePropertyParser delegates here so the
+    // mask grammar is this grammar (A-RC9 — one grammar, two wrappers).
+    internal fun parseImage(value: String): BackgroundImageProperty.BackgroundImage? {
         // Lowered copy used ONLY for prefix matching and gradient parsing.
         val lower = value.lowercase()
         return when {
@@ -90,6 +93,11 @@ object BackgroundImagePropertyParser : PropertyParser {
             lower.startsWith("repeating-radial-gradient(") -> parseRadialGradient(lower, repeating = true)
             lower.startsWith("conic-gradient(") -> parseConicGradient(lower, repeating = false)
             lower.startsWith("repeating-conic-gradient(") -> parseConicGradient(lower, repeating = true)
+            // cross-fade() args may contain url() images, so parse from the
+            // ORIGINAL bytes and lower per-token inside (css-images-4 §2.6.2).
+            // Grammar lives in CrossFadeParser (same package — split for
+            // the ≤200-line rule); it recurses back into parseImage.
+            lower.startsWith("cross-fade(") -> CrossFadeParser.parse(value)
             else -> null
         }
     }
@@ -110,8 +118,17 @@ object BackgroundImagePropertyParser : PropertyParser {
         var angle: IRAngle? = null
         var colorStopStart = 0
 
-        // Check if first part is an angle or direction
-        val firstPart = parts[0].trim()
+        // Check if first part is an angle or direction. A
+        // <color-interpolation-method> (`in srgb [longer hue]`, §3.1's `||`
+        // combinator) may ride in the same segment — peel it off FIRST so
+        // `to right in srgb` still yields its direction; its presence also
+        // marks the segment as the syntax prefix even when nothing else
+        // remains (`in oklab, red, blue` — angle stays null, stops start
+        // at the next segment).
+        val rawFirst = parts[0].trim()
+        val strippedFirst = GradientValueParsers.stripInterpolationMethod(rawFirst)
+        if (strippedFirst != null) colorStopStart = 1
+        val firstPart = strippedFirst ?: rawFirst
 
         // Try parsing as angle first
         AngleParser.parse(firstPart)?.let {
@@ -120,35 +137,19 @@ object BackgroundImagePropertyParser : PropertyParser {
         } ?: run {
             // Try parsing as direction keyword (to right, to bottom, to top left, etc.)
             if (firstPart.startsWith("to ")) {
-                angle = parseDirectionToAngle(firstPart)
+                angle = GradientValueParsers.directionToAngle(firstPart)
                 if (angle != null) {
                     colorStopStart = 1
                 }
             }
         }
 
-        // Parse color stops
-        val colorStops = parts.drop(colorStopStart).mapNotNull { parseColorStop(it.trim()) }
+        // Parse color stops — flatMap because a double-position stop
+        // (`red 25% 50%`, css-images-4 §3.4.3) expands into TWO entries.
+        val colorStops = parts.drop(colorStopStart).flatMap { GradientValueParsers.parseColorStops(it.trim()) }
         if (colorStops.isEmpty()) return null
 
         return BackgroundImageProperty.BackgroundImage.LinearGradient(angle, colorStops, repeating)
-    }
-
-    /**
-     * Convert "to right", "to bottom", etc. to angle values.
-     */
-    private fun parseDirectionToAngle(direction: String): IRAngle? {
-        return when (direction.lowercase()) {
-            "to top" -> IRAngle.fromDegrees(0.0)
-            "to top right", "to right top" -> IRAngle.fromDegrees(45.0)
-            "to right" -> IRAngle.fromDegrees(90.0)
-            "to bottom right", "to right bottom" -> IRAngle.fromDegrees(135.0)
-            "to bottom" -> IRAngle.fromDegrees(180.0)
-            "to bottom left", "to left bottom" -> IRAngle.fromDegrees(225.0)
-            "to left" -> IRAngle.fromDegrees(270.0)
-            "to top left", "to left top" -> IRAngle.fromDegrees(315.0)
-            else -> null
-        }
     }
 
     private fun parseRadialGradient(value: String, repeating: Boolean): BackgroundImageProperty.BackgroundImage? {
@@ -175,12 +176,32 @@ object BackgroundImagePropertyParser : PropertyParser {
         var position: BackgroundImageProperty.Position? = null
         var stopStart = 0
 
-        val first = parts[0].trim()
+        // Peel any <color-interpolation-method> off the candidate prefix
+        // (§3.5's `||` combinator, same rationale as the linear case) —
+        // its presence alone marks the segment as the prefix.
+        val rawRadialFirst = parts[0].trim()
+        val strippedRadialFirst = GradientValueParsers.stripInterpolationMethod(rawRadialFirst)
+        val first = strippedRadialFirst ?: rawRadialFirst
+        if (strippedRadialFirst != null && !looksLikeRadialPrefix(first)) {
+            // Method-only prefix (`in oklab, red, blue`) — nothing else to
+            // extract; just skip the segment when parsing stops.
+            stopStart = 1
+        }
         if (looksLikeRadialPrefix(first)) {
             // Split off "at <pos>" first.
             val atIdx = first.indexOf(" at ")
-            val shapeAndSize = if (atIdx >= 0) first.substring(0, atIdx).trim() else first
-            val posPart = if (atIdx >= 0) first.substring(atIdx + 4).trim() else null
+            // "at ..." may also be the WHOLE prefix (position-only form).
+            val startsWithAt = first.startsWith("at ")
+            val shapeAndSize = when {
+                startsWithAt -> ""
+                atIdx >= 0 -> first.substring(0, atIdx).trim()
+                else -> first
+            }
+            val posPart = when {
+                startsWithAt -> first.removePrefix("at ").trim()
+                atIdx >= 0 -> first.substring(atIdx + 4).trim()
+                else -> null
+            }
             // Now tokenise shapeAndSize.
             for (tok in shapeAndSize.split(Regex("\\s+")).filter { it.isNotBlank() }) {
                 when (tok) {
@@ -193,11 +214,12 @@ object BackgroundImagePropertyParser : PropertyParser {
                     // <length-percentage> radii unsupported here; leave size null.
                 }
             }
-            posPart?.let { position = parseRadialPosition(it) }
+            posPart?.let { position = GradientValueParsers.parsePosition(it) }
             stopStart = 1
         }
 
-        val colorStops = parts.drop(stopStart).mapNotNull { parseColorStop(it.trim()) }
+        // flatMap — double-position stops expand to two entries (§3.4.3).
+        val colorStops = parts.drop(stopStart).flatMap { GradientValueParsers.parseColorStops(it.trim()) }
         if (colorStops.isEmpty()) return null
 
         return BackgroundImageProperty.BackgroundImage.RadialGradient(shape, size, position, colorStops, repeating)
@@ -216,34 +238,8 @@ object BackgroundImagePropertyParser : PropertyParser {
         return false
     }
 
-    // Position keywords / percentages → IRPercentage pair anchored at the
-    // box. Mirrors the BackgroundPosition spec subset already supported in
-    // the IR; full <position> grammar (length offsets, edge-relative offsets
-    // like "right 10px top") is a follow-up.
-    private fun parseRadialPosition(value: String): BackgroundImageProperty.Position? {
-        val tokens = value.split(Regex("\\s+")).filter { it.isNotBlank() }
-        if (tokens.isEmpty()) return null
-        fun resolve(tok: String, axis: Int): IRPercentage? = when (tok) {
-            "left" -> IRPercentage(0.0)
-            "right" -> IRPercentage(100.0)
-            "top" -> IRPercentage(0.0)
-            "bottom" -> IRPercentage(100.0)
-            "center" -> IRPercentage(50.0)
-            else -> PercentageParser.parse(tok)
-        }
-        return when (tokens.size) {
-            1 -> {
-                val v = resolve(tokens[0], 0) ?: return null
-                BackgroundImageProperty.Position(v, IRPercentage(50.0))
-            }
-            2 -> {
-                val x = resolve(tokens[0], 0) ?: return null
-                val y = resolve(tokens[1], 1) ?: return null
-                BackgroundImageProperty.Position(x, y)
-            }
-            else -> null
-        }
-    }
+    // (`at <position>` and color-stop micro-grammars live in
+    // GradientValueParsers — split for the ≤200-line rule.)
 
     private fun parseConicGradient(value: String, repeating: Boolean): BackgroundImageProperty.BackgroundImage? {
         val funcName = if (repeating) "repeating-conic-gradient" else "conic-gradient"
@@ -256,7 +252,13 @@ object BackgroundImagePropertyParser : PropertyParser {
         var fromAngle: IRAngle? = null
         var position: BackgroundImageProperty.Position? = null
         var colorStopStart = 0
-        val firstPart = parts[0].trim()
+        // Peel any <color-interpolation-method> off the prefix segment
+        // (§3.4.4's `||` combinator — `from 45deg in oklch` must not lose
+        // its from-angle); method presence alone marks the prefix.
+        val rawConicFirst = parts[0].trim()
+        val strippedConicFirst = GradientValueParsers.stripInterpolationMethod(rawConicFirst)
+        if (strippedConicFirst != null) colorStopStart = 1
+        val firstPart = strippedConicFirst ?: rawConicFirst
 
         // Pull out the "at <pos>" tail (if any) and the "from <angle>"
         // head. Either part may be missing, but they always appear in
@@ -267,29 +269,19 @@ object BackgroundImagePropertyParser : PropertyParser {
             val anglePart = if (atIndex >= 0) afterFrom.substring(0, atIndex).trim() else afterFrom
             fromAngle = AngleParser.parse(anglePart)
             if (atIndex >= 0) {
-                position = parseRadialPosition(afterFrom.substring(atIndex + 4).trim())
+                position = GradientValueParsers.parsePosition(afterFrom.substring(atIndex + 4).trim())
             }
             colorStopStart = 1
         } else if (firstPart.startsWith("at ")) {
-            position = parseRadialPosition(firstPart.removePrefix("at ").trim())
+            position = GradientValueParsers.parsePosition(firstPart.removePrefix("at ").trim())
             colorStopStart = 1
         }
 
-        val colorStops = parts.drop(colorStopStart).mapNotNull { parseColorStop(it.trim()) }
+        // flatMap — double-position stops expand to two entries (§3.4.3).
+        val colorStops = parts.drop(colorStopStart).flatMap { GradientValueParsers.parseColorStops(it.trim()) }
         if (colorStops.isEmpty()) return null
 
         return BackgroundImageProperty.BackgroundImage.ConicGradient(fromAngle, position, colorStops, repeating)
-    }
-
-    private fun parseColorStop(value: String): BackgroundImageProperty.ColorStop? {
-        // Split by space to separate color and position
-        val parts = value.split("""\s+""".toRegex())
-        if (parts.isEmpty()) return null
-
-        val color = ColorParser.parse(parts[0]) ?: return null
-        val position = if (parts.size > 1) PercentageParser.parse(parts[1]) else null
-
-        return BackgroundImageProperty.ColorStop(color, position)
     }
 
 }

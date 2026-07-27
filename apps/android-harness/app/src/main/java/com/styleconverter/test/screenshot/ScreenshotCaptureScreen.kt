@@ -1152,9 +1152,13 @@ private fun ComposedCaptureCanvas(
     val rootPlans = androidx.compose.runtime.remember(roots) {
         // Wave-19 follow-up: whether the CanvasRootHoist.Host below will
         // actually ACTIVATE — the RC1 static-position zero-flow anchor is
-        // host-gated in ComponentRenderer, so a no-inset absolute root only
-        // has a zero flow footprint when at least one box in the document
-        // hoists. Same walk the Host runs (one decision, two consumers).
+        // host-gated in ComponentRenderer. Wave 21 (A-RC7): activation now
+        // fires for ANY out-of-flow box (hoisted OR static-position), so a
+        // document whose only out-of-flow boxes are no-inset absolutes
+        // (conic-gradient-line-height-relative-units-001/002) zero-flows
+        // them too — this fold sees the SAME broadened decision through the
+        // SAME function the Host runs (one decision, two consumers), so
+        // margin transparency and the renderer's footprint stay in lockstep.
         val hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist
             .hostActivates(roots)
         roots.map { root ->

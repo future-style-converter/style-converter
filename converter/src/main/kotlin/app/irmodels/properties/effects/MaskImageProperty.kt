@@ -18,7 +18,12 @@ sealed interface MaskImageValue {
     @Serializable data class ConicGradient(val angle: IRAngle?, val position: Position?, val colorStops: List<ColorStop>, val repeating: Boolean = false) : MaskImageValue
 
     @Serializable data class ColorStop(val color: IRColor, val position: IRPercentage?)
-    @Serializable data class Position(val x: IRPercentage, val y: IRPercentage)
+    // Gradient center — per-axis <length-percentage>, byte-parallel twin of
+    // BackgroundImageProperty.Position (percent = raw number wire form,
+    // length = IRLengthPercentage object form). Widened together with the
+    // background twin so `mask-image: radial-gradient(at 100px 50px, …)`
+    // carries the same wire shape as the background grammar it delegates to.
+    @Serializable data class Position(val x: IRLengthPercentage, val y: IRLengthPercentage)
     enum class GradientShape { CIRCLE, ELLIPSE }
     enum class GradientSize { CLOSEST_SIDE, CLOSEST_CORNER, FARTHEST_SIDE, FARTHEST_CORNER }
 }

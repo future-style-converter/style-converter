@@ -61,6 +61,10 @@ import {
   // canvas (third `bg` argument) so browser-ref diffs can detect the
   // blank-capture-vs-mostly-blank-ref vacuous-pass class.
   computeSemanticPresence,
+  // wave-22 HONEST-FRAME scoring: the per-channel "is this pixel background"
+  // tolerance (8/255) reused by countOverflowInk so "overflow ink" and the
+  // presence gate agree on what counts as ink vs canvas.
+  SEMANTIC_PRESENCE_TOLERANCE,
 } from '../visual/compare-screenshots-metrics.mjs';
 // The ONE canonical compare-pipeline sanitiser (dot KEPT). This module is the
 // consumer side of the pipeline — its diff globs MUST use the exact same rule
@@ -247,6 +251,75 @@ async function stitchPngsVertically(inputPaths, cacheDir, cacheKey) {
   return outPath;
 }
 
+// ── wave-22 HONEST-FRAME scoring helpers ─────────────────────────────────────
+//
+// Mechanism this repairs (skeptic-proved on the wave-21 text-decor movers):
+// the legacy SSIM ran on the UNION frame with BOTH sides white-padded, so a
+// capture TALLER than the ref grew the mean's denominator with rows that are
+// mostly white-vs-white agreement — DILUTING real divergence. Measured:
+// text-decoration-color's wave21-gate captures (390x1124–1136, text WRAPPED —
+// wrong) scored 0.71–0.86 while the wave21-final unwrapped fixes (390x600,
+// provably closer on equal-frame crops: 0.636 vs 0.575) scored LOWER
+// (0.49–0.71). Same inflation on css-text empty-span-001: the wave-20
+// capture with 100px phantom gaps (390x1512, mostly white) out-scored the
+// far-closer wave-21 render. Honest renders must win.
+//
+// The honest frame is the REF's own frame — the fixed 390x600 canvas every
+// browser-ref is captured on:
+//   - capture SHORTER/NARROWER: pad with the WHITE canvas. Neutral where
+//     the ref is white too; automatically divergent where the ref has ink
+//     (white capture pixel vs ref ink → low local SSIM). Unchanged.
+//   - capture TALLER/WIDER: the ref-frame region is compared 1:1, and the
+//     capture's OUT-OF-FRAME INK is folded into the mean as fully-divergent
+//     area: score = mssim_refFrame × A_ref / (A_ref + overflowInkPx).
+//     Out-of-frame WHITE contributes nothing (a white tail over the ref's
+//     white canvas extension is genuinely neutral) — so the denominator can
+//     no longer be inflated by empty rows, and overflow content is punished
+//     instead of hidden.
+
+/** Fit `img` (pngjs PNG) to a W×H frame: white-filled canvas, overlap
+ *  copied top-left aligned. Pure buffer ops (no sharp) — exported for unit
+ *  pins. Returns `img` itself when it already matches the frame. */
+export function fitToRefFrame(img, W, H) {
+  if (img.width === W && img.height === H) return img;
+  const out = new PNG({ width: W, height: H });
+  // White opaque canvas — the corpus-v4 WPT canvas (WPT_CANVAS_BG).
+  out.data.fill(0xFF);
+  // Copy the overlapping rect row by row (crop when img is larger,
+  // white-pad remains when smaller).
+  const copyW = Math.min(img.width, W);
+  const copyH = Math.min(img.height, H);
+  for (let row = 0; row < copyH; row++) {
+    const srcStart = row * img.width * 4;
+    img.data.copy(out.data, row * W * 4, srcStart, srcStart + copyW * 4);
+  }
+  return out;
+}
+
+/** Count the capture pixels OUTSIDE the ref frame (x ≥ W or y ≥ H) that
+ *  carry ink — i.e. deviate from the WHITE WPT canvas by more than the
+ *  shared presence tolerance on any channel. These are the pixels the
+ *  ref-frame crop would silently discard; the honest score counts each as
+ *  fully-divergent area instead. Pure + exported for unit pins. */
+export function countOverflowInk(img, W, H, tolerance = SEMANTIC_PRESENCE_TOLERANCE) {
+  let ink = 0;
+  for (let y = 0; y < img.height; y++) {
+    // Rows fully inside the frame only contribute their right-of-frame
+    // columns; rows below the frame contribute every column.
+    const xStart = y < H ? W : 0;
+    if (xStart >= img.width) continue;
+    for (let x = xStart; x < img.width; x++) {
+      const i = (y * img.width + x) * 4;
+      if (
+        Math.abs(img.data[i]     - 0xFF) > tolerance ||
+        Math.abs(img.data[i + 1] - 0xFF) > tolerance ||
+        Math.abs(img.data[i + 2] - 0xFF) > tolerance
+      ) ink++;
+    }
+  }
+  return ink;
+}
+
 /** Compute a full B1–B7 metric block for a (web, ref) pair. Mirrors
  *  diffPair() in compare-screenshots.mjs but skips the diff-PNG write
  *  (we don't need it for the wpt: block — Phase 5's titan.html dashboard
@@ -260,6 +333,10 @@ async function diffWebVsRef(webPath, refPath) {
   const B = await padToCanvas(b, W, H);
 
   // Pixelmatch with the same threshold as compare-screenshots.mjs.
+  // Deliberately still the UNION frame: mismatch COUNTS (which the WPT
+  // fuzzy budgets consume) must keep seeing overflow ink pixel-for-pixel,
+  // and union counting is already honest for counts (white-vs-white adds
+  // zero mismatches — only means can be diluted, not counts).
   const diff = new PNG({ width: W, height: H });
   const mismatched = pixelmatch(A.data, B.data, diff.data, W, H, {
     threshold: 0.25,
@@ -267,13 +344,31 @@ async function diffWebVsRef(webPath, refPath) {
   });
   const pixelPct = (mismatched / (W * H)) * 100;
 
-  // SSIM
+  // SSIM — wave-22 HONEST-FRAME (see the helper banner above): scored on
+  // the REF's own frame, with the capture's out-of-frame ink folded in as
+  // fully-divergent area. Same-size pairs are byte-identical to the legacy
+  // union-frame score (fitToRefFrame is the identity, overflow is 0).
   let ssimScore = null;
+  let frame = null;
   try {
-    const aImg = { data: new Uint8ClampedArray(A.data), width: W, height: H };
-    const bImg = { data: new Uint8ClampedArray(B.data), width: W, height: H };
+    const refArea = b.width * b.height;
+    const aFit = fitToRefFrame(a, b.width, b.height);
+    const aImg = { data: new Uint8ClampedArray(aFit.data), width: b.width, height: b.height };
+    const bImg = { data: new Uint8ClampedArray(b.data), width: b.width, height: b.height };
     const r = computeSsim(aImg, bImg, { ssim: 'fast' });
-    ssimScore = +r.mssim.toFixed(4);
+    // Overflow-ink fold: every out-of-frame ink pixel joins the mean as
+    // zero-similarity area; out-of-frame WHITE is neutral by construction.
+    const overflowInkPx = countOverflowInk(a, b.width, b.height);
+    ssimScore = +((r.mssim * refArea) / (refArea + overflowInkPx)).toFixed(4);
+    // Provenance block for dashboards/investigators: the frame geometry,
+    // the pre-fold ref-frame SSIM, and the fold input. Null when SSIM
+    // itself failed (error-shaped diffs carry no frame data).
+    frame = {
+      refW: b.width, refH: b.height,
+      capW: a.width, capH: a.height,
+      overflowInkPx,
+      ssimRefFrame: +r.mssim.toFixed(4),
+    };
   } catch { /* leave null */ }
 
   const dssim = computeDssim(ssimScore);
@@ -287,6 +382,11 @@ async function diffWebVsRef(webPath, refPath) {
     pixelMismatchedCount: mismatched,
     pixelMismatchedPct: +pixelPct.toFixed(3),
     ssim: ssimScore,
+    // wave-22 HONEST-FRAME provenance: frame geometry + pre-fold ref-frame
+    // SSIM + overflow-ink count behind the honest `ssim` above (null when
+    // SSIM errored). Lets an investigator separate "content divergence"
+    // from "overflow penalty" without re-reading the captures.
+    frame,
     dssim,
     perChannelSsim,
     edgeSsim,

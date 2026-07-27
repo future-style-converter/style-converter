@@ -98,7 +98,49 @@ data class ColorConfig(
     val hasGradient: Boolean get() = backgroundImages.any {
         it is BackgroundImageConfig.LinearGradient ||
         it is BackgroundImageConfig.RadialGradient ||
-        it is BackgroundImageConfig.ConicGradient
+        it is BackgroundImageConfig.ConicGradient ||
+        // cross-fade() layers composite gradient/color sub-images — they
+        // ride the same brush pipeline, so they count as gradient content.
+        it is BackgroundImageConfig.CrossFade
+    }
+}
+
+/**
+ * One gradient-center axis (`at <position>`, css-images-3 §3.5 /
+ * css-images-4 §3.4.4). CSS allows a full <length-percentage> per axis;
+ * the IR wire carries percents as raw numbers and lengths as objects
+ * (IRLengthPercentageSerializer). The extractor resolves runtime-dependent
+ * units (lh/em/rem) to PX at extract time — font metrics live in the
+ * component's own FontSize/LineHeight properties there — so the applier
+ * only ever sees FRACTION or PX. Byte-parallel twin of the SwiftUI
+ * `GradientCoord` (BackgroundImageConfig.swift): identical kinds and
+ * identical resolve math.
+ */
+data class GradientCoord(val kind: Kind, val value: Float) {
+    enum class Kind {
+        /** 0..1 fraction of the gradient box axis (percent / keyword). */
+        FRACTION,
+        /** Absolute CSS pixels from the box origin (length centers). */
+        PX
+    }
+
+    /**
+     * Resolve to a 0..1 fraction of the given axis size in px. PX on a
+     * degenerate (≤0) axis falls back to center — the CSS default — so a
+     * zero-sized box can never divide by zero.
+     */
+    fun fraction(axisPx: Float): Float = when (kind) {
+        Kind.FRACTION -> value
+        Kind.PX -> if (axisPx > 0f) value / axisPx else 0.5f
+    }
+
+    companion object {
+        /** CSS default center (50%). */
+        val CENTER = GradientCoord(Kind.FRACTION, 0.5f)
+        /** Fraction constructor (percent ÷ 100 done by the caller). */
+        fun fraction(f: Float) = GradientCoord(Kind.FRACTION, f)
+        /** Absolute-pixel constructor. */
+        fun px(v: Float) = GradientCoord(Kind.PX, v)
     }
 }
 
@@ -175,8 +217,11 @@ sealed interface BackgroundImageConfig {
     enum class RadialSize { CLOSEST_SIDE, CLOSEST_CORNER, FARTHEST_SIDE, FARTHEST_CORNER }
 
     data class RadialGradient(
-        val centerX: Float,
-        val centerY: Float,
+        // `at <position>` per axis — FRACTION (percent/keyword) or PX
+        // (length center, A-RC8); resolved against the draw size in the
+        // applier's createShader (the only place the box size exists).
+        val centerX: GradientCoord,
+        val centerY: GradientCoord,
         val colorStops: List<ColorStop>,
         val repeating: Boolean = false,
         // Shape/size are nullable so that fixtures emitting bare
@@ -200,12 +245,33 @@ sealed interface BackgroundImageConfig {
      * @property repeating Whether this is a repeating gradient (limited support in Compose)
      */
     data class ConicGradient(
-        val centerX: Float,
-        val centerY: Float,
+        // `at <position>` per axis — same FRACTION|PX contract as radial.
+        val centerX: GradientCoord,
+        val centerY: GradientCoord,
         val angle: Float,
         val colorStops: List<ColorStop>,
         val repeating: Boolean = false
     ) : BackgroundImageConfig
+
+    /**
+     * A bare `<color>` used AS an image — only produced as a cross-fade()
+     * argument (css-images-4 §2.6.2 `<cf-image>` allows `<color>`).
+     * Renders as a solid fill of the gradient box.
+     */
+    data class SolidColor(val color: Color) : BackgroundImageConfig
+
+    /**
+     * cross-fade() (css-images-4 §2.6.2). Entries carry EFFECTIVE weights
+     * as 0..1 fractions — the extractor runs CrossFadeMath.normalizeWeights
+     * (the shared spec normalization, byte-parallel across all three
+     * platforms) on the authored wire weights. The applier composites
+     * `Σ wᵢ × premultiplied(imageᵢ)` via additive blending; weights summing
+     * below 1 leave the remainder TRANSPARENT (the target-alpha WPT).
+     */
+    data class CrossFade(val entries: List<CrossFadeEntry>) : BackgroundImageConfig
+
+    /** One weighted cross-fade image: effective fraction + sub-image. */
+    data class CrossFadeEntry(val weight: Float, val image: BackgroundImageConfig)
 
     /**
      * URL reference to an image.

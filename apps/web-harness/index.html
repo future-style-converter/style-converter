@@ -91,6 +91,31 @@
       body.wpt-composed-mode [data-component-id],
       body.wpt-composed-mode [data-component-id] * {
         margin: revert;
+        /* padding + box-sizing revert (wave-21 css-ui appearance diagnosis).
+         * The browser-ref renders raw WPT pages with the FULL UA stylesheet,
+         * so native form controls keep their UA padding (button 1px 6px,
+         * input 1px 2px, textarea 2px, select…) and their UA
+         * `box-sizing: border-box`. Our composed capture renders the same
+         * controls as sourceTag-preserved native elements, but the universal
+         * `* { padding: 0 }` reset stripped that padding and the wpt-mode
+         * `box-sizing: content-box` override replaced the controls'
+         * border-box — every widget rendered tighter than the ref (narrower
+         * buttons, shorter rows, cumulative upward drift), a flat 3.96%
+         * pixel penalty across the five appearance-alias tests sharing
+         * appearance-auto-ref.html. `revert` rolls both back to the UA
+         * origin per element: controls regain padding + border-box, while
+         * plain divs/spans keep 0 padding and (via revert → initial)
+         * content-box — the exact value the wpt-mode box-sizing fix wanted,
+         * expressed faithfully. Cascade order: this rule is declared AFTER
+         * the wpt-mode content-box rule, so at equal specificity it wins in
+         * composed mode; the per-component `?wpt=1`-only path and the
+         * 327-pair baseline are untouched. IR-declared padding still wins
+         * (inline style). NOTE: ul/ol also regain their UA
+         * padding-inline-start — matching the ref, but a corpus-wide score
+         * shift on list-rendering composed tests. Verified: appearance-auto/
+         * button/checkbox/listbox/menulist 0.00% vs ref after this rule. */
+        padding: revert;
+        box-sizing: revert;
       }
       html, body {
         width: 100%;

@@ -2264,3 +2264,318 @@ test('fix5: the foreign-namespace marker suppresses _tag AND _attrs', async () =
   assert.equal(htmlInput._tag, 'input');
   assert.deepEqual(htmlInput._attrs, { type: 'checkbox' });
 });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// wave-21 lane: five extraction defects (A-RC1, B-RC1, B-RC2, A-RC6, B-RC9a)
+// ═════════════════════════════════════════════════════════════════════════════
+
+// The new exports under test (dynamic import keeps the top-of-file import
+// list untouched, mirroring the wave-20 widgetAttrsFor test pattern).
+const {
+  locateBodyContent,
+  extractBodyTextRuns,
+  foldTrivialCalcProducts,
+  bakeSiblingIndex,
+} = await import('./extract-fixture.mjs');
+
+// ── A-RC1: head-unwrap silent loss ──────────────────────────────────────────
+
+test('A-RC1: locateBodyContent keeps content AFTER a closed <head> (cross-fade shape)', () => {
+  // The EXACT document shape of css-images/cross-fade-premultiplied-alpha:
+  // <html> wrapper, closed <head>, body content with NO <body> tag.
+  const html = '<!DOCTYPE html>\n<html>\n  <head>\n    <title>t</title>\n' +
+    '    <style>div { width: 200px }</style>\n  </head>\n' +
+    '  <p>There should be nearly no red.</p>\n  <div></div>\n</html>';
+  const { inner, fallback } = locateBodyContent(html);
+  assert.equal(fallback, true); // no <body>…</body> pair in the doc
+  // The buffer must contain the body content…
+  assert.ok(inner.includes('<p>There should be nearly no red.</p>'), `lost body content: ${inner}`);
+  assert.ok(inner.includes('<div></div>'));
+  // …and must NOT be the head's own content (the old group-2 bug).
+  assert.equal(inner.includes('<title>'), false, 'buffer collapsed to head content');
+});
+
+test('A-RC1: an UNCLOSED <head> still unwraps to its interleaved content', () => {
+  // No </head>: the head/body boundary is implicit (HTML §13.2.6.4.3) —
+  // group 2 (everything after <head>) is kept and HEAD_ONLY filtering
+  // separates scaffolding from content downstream. Pre-fix behaviour,
+  // must not regress.
+  const html = '<html><head><style>p { color: red }</style><p>prose</p>';
+  const { inner } = locateBodyContent(html);
+  assert.ok(inner.includes('<p>prose</p>'));
+});
+
+test('A-RC1: explicit <body> pair short-circuits (no unwrap, fallback=false)', () => {
+  const html = '<html><head><title>x</title></head><body><div id=a></div></body></html>';
+  const { inner, fallback } = locateBodyContent(html);
+  assert.equal(fallback, false);
+  assert.equal(inner, '<div id=a></div>');
+});
+
+test('A-RC1: third peel reaches an unclosed <body> after a closed <head>', () => {
+  // <html> → <head> (closed, take-after) → <body…> (unclosed, group 2):
+  // needs all three iterations — the old 2-iteration loop stopped short.
+  const html = '<html><head><title>x</title></head><body class=t><div id=a></div>';
+  const { inner } = locateBodyContent(html);
+  assert.equal(inner.includes('<body'), false, 'body wrapper not peeled');
+  assert.ok(inner.includes('<div id=a>'));
+});
+
+test('A-RC1: cross-fade shape end-to-end — components extracted, no phantom placeholder', () => {
+  const html = '<!DOCTYPE html><html><head><title>t</title>' +
+    '<style>div { margin: 2px; width: 200px; height: 200px }</style></head>' +
+    '<p>There should be nearly no red.</p><div></div></html>';
+  const { components } = buildComponents(html, parseCss('div { margin: 2px; width: 200px; height: 200px }'), 'cf');
+  // Two real components: the instruction <p> (own text) + the styled div.
+  assert.deepEqual(Object.keys(components), ['cf__0', 'cf__1']);
+  assert.equal(components['cf__0']._text, 'There should be nearly no red.');
+  assert.equal(components['cf__1'].properties.width, '200px');
+});
+
+// ── B-RC1: bare <br> → line-break component ─────────────────────────────────
+
+test('B-RC1: a rule-less <br> emits a 0x20 line-break, not the 100x100 placeholder', () => {
+  const { components } = buildComponents('<body><br><p>x</p></body>', [], 'br');
+  const br = components['br__0'];
+  // Height = the pinned REF line box (REF_LINE_HEIGHT 1.25 × 16px = 20px);
+  // width 0 so an empty line carries no horizontal ink.
+  assert.deepEqual(br.properties, { width: '0px', height: '20px' });
+  assert.equal(br._role, 'line-break');
+  assert.equal(br._tag, 'br'); // identity still forwarded
+});
+
+test('B-RC1: five body-level <br>s = five 20px line-breaks (500px phantom killed)', () => {
+  const { components } = buildComponents('<br><br><br><br><br><p>There should be no red.</p>', [], 's');
+  for (let i = 0; i < 5; i++) {
+    assert.deepEqual(components[`s__${i}`].properties, { width: '0px', height: '20px' },
+      `br #${i} not a line-break`);
+  }
+  assert.equal(components['s__5']._text, 'There should be no red.');
+});
+
+test('B-RC1: author declarations on <br> still win over the line-break base', () => {
+  // Cascade honesty: a matched rule's height overrides the synthetic 20px.
+  const { components } = buildComponents('<body><br></body>', parseCss('br { height: 7px }'), 'b');
+  assert.equal(components['b__0'].properties.height, '7px');
+  assert.equal(components['b__0'].properties.width, '0px'); // base survives where unset
+  assert.equal(components['b__0']._role, 'line-break');
+});
+
+// ── wave-22 BR-LINE-CONTEXT: the <br> height rule (B-RC1 refinement) ────────
+//
+// Pins the two measured wave-21 regressions the refinement repairs
+// (css-text empty-span-001 0.908→0.760; css-flexbox
+// flex-abspos-staticpos-justify-self-001 0.98→0.93, all three platforms)
+// while holding B-RC1's own case (the five-consecutive-brs test above)
+// byte-identical.
+
+test('wave-22: a <br> after inline content ends the line — height 0 (empty-span-001 shape)', () => {
+  // The bidi/empty-span-001 body: inline <span> lines separated by <br>.
+  // CSS 2.1 §9.5: the br merely terminates the line box the span opened —
+  // the ref paints single-spaced lines, no 20px blanks between them.
+  const html = '<span dir="auto">1;234;</span><br><span dir="auto">1;2;</span><br>';
+  const { components } = buildComponents(html, [], 'e');
+  assert.equal(components['e__1']._role, 'line-break');
+  assert.deepEqual(components['e__1'].properties, { width: '0px', height: '0px' });
+  assert.deepEqual(components['e__3'].properties, { width: '0px', height: '0px' });
+});
+
+test('wave-22: a clear-carrying <br> is a 0-height row-break marker (justify-self-001 shape)', () => {
+  // The float-row pattern: floated containers broken by `<br clear:both>`.
+  // The marker’s vertical contribution is CLEARANCE (§9.5.2) — the
+  // engines' wave-19 FloatRowPacking strut (pin P6) models the row line
+  // box, so a 20px marker height double-counts it (the measured 0.98→0.93
+  // regression on all three platforms).
+  const css = '.container { float: left; width: 16px; height: 10px } br { clear: both }';
+  const html = '<div class="container"></div><div class="container"></div><br>' +
+    '<div class="container"></div><div class="container"></div><br>';
+  const { components } = buildComponents(html, parseCss(css), 'f');
+  for (const key of ['f__2', 'f__5']) {
+    assert.equal(components[key]._role, 'line-break', `${key} not a line-break`);
+    assert.equal(components[key].properties.height, '0px', `${key} stacked a line box`);
+    assert.equal(components[key].properties.clear, 'both'); // Clear still reaches the wire
+  }
+});
+
+test('wave-22: text<br><br> — first br ends the line (0px), second is a blank line (20px)', () => {
+  // The mixed case: only a LINE-START br produces an empty 20px line box.
+  const { components } = buildComponents('<span id=s>text</span><br><br><p>after</p>', [], 'm');
+  assert.equal(components['m__1'].properties.height, '0px');   // ends the text line
+  assert.equal(components['m__2'].properties.height, '20px');  // blank line proper
+});
+
+test('wave-22: leading body prose arms the line — first <br> ends it, not a blank', () => {
+  // The wave-11 leading `__text` run renders before element 0, so a br at
+  // index 0 terminates the prose line instead of stacking a blank one.
+  const { components } = buildComponents('some prose<br><p>x</p>', [], 'l');
+  assert.equal(components['l__text']._text, 'some prose');
+  assert.equal(components['l__0'].properties.height, '0px');
+});
+
+test('wave-22: a B-RC2 between-gap text run arms the line for the following <br>', () => {
+  // Gap text (`__text<k>`) renders immediately before element k — a br
+  // there ends the prose line (same rule as the leading run).
+  const { components } = buildComponents('<div style="width:10px"></div>gap prose<br><p>x</p>', [], 'g');
+  assert.equal(components['g__text1']._text, 'gap prose');
+  assert.equal(components['g__1'].properties.height, '0px');
+});
+
+test('wave-22: floats do not arm the line — a clearless line-start <br> keeps its 20px', () => {
+  // Out-of-flow siblings neither open nor end the line (§9.7): a br after
+  // floats without `clear` is still a line-start br → blank line box.
+  const css = '.f { float: left; width: 8px; height: 8px }';
+  const { components } = buildComponents('<div class=f></div><br>', parseCss(css), 'n');
+  assert.equal(components['n__1'].properties.height, '20px');
+});
+
+test('wave-22: block sibling closes the line — following <br> is a blank line again', () => {
+  // inline → block → br: the block ended the inline line, so the br opens
+  // (and closes) a fresh empty line box.
+  const { components } = buildComponents(
+    '<span id=a>t</span><div style="width:10px"></div><br>', [], 'k');
+  assert.equal(components['k__2'].properties.height, '20px');
+});
+
+// ── B-RC2: body-level bare text between/after elements ──────────────────────
+
+test('B-RC2: extractBodyTextRuns finds the run AFTER an element (auto-fill-print shape)', () => {
+  // The exact css-multicol/auto-fill-auto-size-001-print body: one styled
+  // empty <div>, then bare prose to EOF, no <body> tag.
+  const html = '<!DOCTYPE html>\n<link rel="match" href="x-ref.html">\n' +
+    '<div style="columns:2"></div>\nOn the first page\n';
+  const runs = extractBodyTextRuns(html, { styledTags: new Set() });
+  assert.deepEqual(runs, [{ afterElemIndex: 1, text: 'On the first page' }]);
+});
+
+test('B-RC2: leading text is NOT duplicated by the runs scanner (leading machinery owns it)', () => {
+  const runs = extractBodyTextRuns('<body>lead text<div></div>tail</body>', { styledTags: new Set() });
+  assert.deepEqual(runs, [{ afterElemIndex: 1, text: 'tail' }]);
+});
+
+test('B-RC2: runs between elements keep their gap indices (order preserved)', () => {
+  const runs = extractBodyTextRuns('<body><div></div>one<p>p</p>two</body>', { styledTags: new Set() });
+  assert.deepEqual(runs, [
+    { afterElemIndex: 1, text: 'one' },
+    { afterElemIndex: 2, text: 'two' },
+  ]);
+});
+
+test('B-RC2: whitespace-only gaps emit nothing (markup noise, not prose)', () => {
+  const runs = extractBodyTextRuns('<body><div></div>\n   \n<p>p</p></body>', { styledTags: new Set() });
+  assert.deepEqual(runs, []);
+});
+
+test('B-RC2: buildComponents emits ordered __text<k> components for the runs', () => {
+  const { components } = buildComponents('<body><div id=d></div>On the first page</body>', [], 'af');
+  // Insertion order IS document order for every renderer: div, then run.
+  assert.deepEqual(Object.keys(components), ['af__0', 'af__text1']);
+  assert.equal(components['af__text1']._text, 'On the first page');
+  assert.deepEqual(components['af__text1'].properties, {});
+});
+
+test('B-RC2: leading __text and a trailing run coexist without collision', () => {
+  const { components } = buildComponents('<body>lead<div id=d></div>tail</body>', [], 'x');
+  assert.deepEqual(Object.keys(components), ['x__text', 'x__0', 'x__text1']);
+  assert.equal(components['x__text']._text, 'lead');
+  assert.equal(components['x__text1']._text, 'tail');
+});
+
+test('B-RC2: run continues across head-only scaffolding (invisible in flow)', () => {
+  const runs = extractBodyTextRuns(
+    '<body><div></div>before <link rel=help href=h> after</body>',
+    { styledTags: new Set() });
+  assert.deepEqual(runs, [{ afterElemIndex: 1, text: 'before after' }]);
+});
+
+// ── A-RC6: sibling-index() extract-time bake ────────────────────────────────
+
+test('A-RC6: foldTrivialCalcProducts folds unit*number and number*unit', () => {
+  assert.equal(foldTrivialCalcProducts('calc(50deg * 2)'), '100deg');
+  assert.equal(foldTrivialCalcProducts('calc(2 * 30px)'), '60px');
+  assert.equal(foldTrivialCalcProducts('calc(0.1 * 3)'), '0.3'); // float noise trimmed
+});
+
+test('A-RC6: foldTrivialCalcProducts leaves non-trivial calc() verbatim', () => {
+  // Sums, nested parens, double units: not products we may fold.
+  assert.equal(foldTrivialCalcProducts('calc(50deg + 2deg)'), 'calc(50deg + 2deg)');
+  assert.equal(foldTrivialCalcProducts('calc(2px * 3px)'), 'calc(2px * 3px)');
+  assert.equal(foldTrivialCalcProducts('calc(var(--x) * 2)'), 'calc(var(--x) * 2)');
+});
+
+test('A-RC6: bakeSiblingIndex substitutes the 1-based index and folds', () => {
+  const props = { background: 'conic-gradient(hsl(calc(50deg * sibling-index()) 100% 50%), green)' };
+  const baked = bakeSiblingIndex(props, 2);
+  assert.equal(baked, true);
+  assert.equal(props.background, 'conic-gradient(hsl(100deg 100% 50%), green)');
+});
+
+test('A-RC6: bakeSiblingIndex is a no-op (returns false) without the function', () => {
+  const props = { width: '100px' };
+  assert.equal(bakeSiblingIndex(props, 3), false);
+  assert.deepEqual(props, { width: '100px' });
+});
+
+test('A-RC6: end-to-end conic-gradient shape — absorbed <span> still counts as sibling #1', () => {
+  // The EXACT css-images/conic-gradient-color-with-sibling-index shape:
+  // an empty unstyled <span> (merge-absorbed at depth 0) then the styled
+  // <div>. sibling-index() counts DOM element siblings, so the div is #2
+  // even though the span never becomes a component.
+  const css = 'div { width: 100px; height: 100px; background: conic-gradient(hsl(calc(50deg * sibling-index()) 100% 50%), green); }';
+  const html = '<!DOCTYPE html><style>' + css + '</style><span></span><div></div>';
+  const { components } = buildComponents(html, parseCss(css), 'cg');
+  const div = components['cg__0'];
+  assert.equal(div.properties.background, 'conic-gradient(hsl(100deg 100% 50%), green)');
+  // LOUD provenance marker — informational, never score-excluding.
+  assert.ok(div._lossyReasons.includes('baked-sibling-index'));
+});
+
+// ── B-RC9a: inline-run reorder honesty ──────────────────────────────────────
+
+test('B-RC9a: mid-run styled span flags inline-run-reordered (the quick <u>brown</u> fox)', () => {
+  // <u> is rule-targeted → non-mergeable → child component; the parent's
+  // _text glues 'the quick fox' and the child paints AFTER it — order
+  // changed, and that must be LOUD (previously lossyReasons []).
+  const css = 'u { text-decoration-color: red }';
+  const { components, lossyReasons } = buildComponents(
+    '<body><p>the quick <u>brown</u> fox</p></body>', parseCss(css), 'r');
+  const p = components['r__0'];
+  assert.equal(p._text, 'the quick fox');
+  assert.ok(p._lossyReasons.includes('inline-run-reordered'));
+  assert.ok(lossyReasons.includes('inline-run-reordered'));
+});
+
+test('B-RC9a: merged runs do NOT flag reorder (order preserved by the splice)', () => {
+  // The standard WPT preamble: <strong> is absorbed IN PLACE — reading
+  // order intact, only inline-run-merged applies.
+  const { components } = buildComponents(
+    '<body><p>square and <strong>no red</strong>.</p></body>', [], 'm');
+  const p = components['m__0'];
+  assert.equal(p._text, 'square and no red.');
+  assert.ok(p._lossyReasons.includes('inline-run-merged'));
+  assert.equal(p._lossyReasons.includes('inline-run-reordered'), false);
+});
+
+test('B-RC9a: text ONLY BEFORE the kept child does not flag (nothing glued across)', () => {
+  const css = 'u { color: red }';
+  const { components } = buildComponents(
+    '<body><p>the quick <u>brown</u></p></body>', parseCss(css), 'nb');
+  const p = components['nb__0'];
+  assert.equal(p._text, 'the quick');
+  assert.equal((p._lossyReasons ?? []).includes('inline-run-reordered'), false);
+});
+
+test('B-RC9a: whitespace-only tail after a kept child does not flag', () => {
+  const css = 'u { color: red }';
+  const { components } = buildComponents(
+    '<body><p>lead <u>styled</u>\n  </p></body>', parseCss(css), 'ws');
+  const p = components['ws__0'];
+  assert.equal((p._lossyReasons ?? []).includes('inline-run-reordered'), false);
+});
+
+test('B-RC9a: text after a VOID child (<br>) flags too (br stays a component)', () => {
+  const { components } = buildComponents(
+    '<body><p>line1<br>line2</p></body>', [], 'v');
+  const p = components['v__0'];
+  assert.equal(p._text, 'line1line2');
+  assert.ok(p._lossyReasons.includes('inline-run-reordered'));
+});

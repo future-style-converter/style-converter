@@ -241,8 +241,20 @@ object MultiColumnApplier {
     fun MultiColumnLayout(
         config: MultiColumnConfig,
         modifier: Modifier = Modifier,
+        // Wave-21 lane MULTICOL: per-measurable roles (flow / spanner /
+        // abspos-static) from MulticolSpannerFlow.rolesFor, in the exact
+        // order RenderContent composes the container's content. Null (the
+        // default, and every legacy caller) keeps the pre-wave-21 layout
+        // byte-identically; non-null engages the css-multicol-1 §6
+        // spanner-flow plan under WPT capture only (gate below).
+        childSpecs: List<MulticolSpannerFlow.ChildSpec>? = null,
         content: @Composable () -> Unit
     ) {
+        // Dark-stage 327 protection: the spanner-flow plan is composed-WPT
+        // capture only (same gate as the wave-19/20 float and inline-atom
+        // lanes) — the dark-stage corpus never sets the capture local, so
+        // its multicol containers keep the frozen greedy layout.
+        val spannerSpecs = if (com.styleconverter.runtime.core.renderer.LocalWptCaptureMode.current) childSpecs else null
         BoxWithConstraints(modifier = modifier) {
             val containerWidth = maxWidth
             val columnCount = config.getEffectiveColumnCount(containerWidth)
@@ -278,6 +290,8 @@ object MultiColumnApplier {
                         config = config,
                         fragmentationAllowed = fragmentationAllowed,
                         containerBlockSizeDefinite = containerBlockSizeDefinite,
+                        // Wave-21: capture-gated spanner-flow roles (see above).
+                        childSpecs = spannerSpecs,
                         content = content
                     )
                 } else {
@@ -286,6 +300,8 @@ object MultiColumnApplier {
                         gap = gap,
                         fragmentationAllowed = fragmentationAllowed,
                         containerBlockSizeDefinite = containerBlockSizeDefinite,
+                        // Wave-21: capture-gated spanner-flow roles (see above).
+                        childSpecs = spannerSpecs,
                         content = content
                     )
                 }
@@ -307,6 +323,9 @@ object MultiColumnApplier {
         // MultiColumnLayout) — the Box loosening below this point destroys
         // hasFixedHeight, so the gate needs it threaded.
         containerBlockSizeDefinite: Boolean,
+        // Wave-21: per-measurable spanner-flow roles (already capture-gated
+        // by MultiColumnLayout); null keeps the legacy layout untouched.
+        childSpecs: List<MulticolSpannerFlow.ChildSpec>? = null,
         content: @Composable () -> Unit
     ) {
         Row(
@@ -328,6 +347,8 @@ object MultiColumnApplier {
             gap = gap,
             fragmentationAllowed = fragmentationAllowed,
             containerBlockSizeDefinite = containerBlockSizeDefinite,
+            // Wave-21: spanner-flow roles ride through to the measure pass.
+            childSpecs = childSpecs,
             content = content
         )
     }
@@ -345,6 +366,8 @@ object MultiColumnApplier {
         fragmentationAllowed: Boolean,
         // Wave-11: boundary-level block-size definiteness (see SimpleMultiColumn).
         containerBlockSizeDefinite: Boolean,
+        // Wave-21: per-measurable spanner-flow roles (see SimpleMultiColumn).
+        childSpecs: List<MulticolSpannerFlow.ChildSpec>? = null,
         content: @Composable () -> Unit
     ) {
         val ruleColor = config.ruleColor ?: Color.Gray
@@ -356,6 +379,8 @@ object MultiColumnApplier {
             gap = gap,
             fragmentationAllowed = fragmentationAllowed,
             containerBlockSizeDefinite = containerBlockSizeDefinite,
+            // Wave-21: spanner-flow roles ride through to the measure pass.
+            childSpecs = childSpecs,
             modifier = Modifier.drawBehind {
                 val gapPx = gap.toPx()
                 val ruleWidthPx = ruleWidth.toPx()
@@ -443,12 +468,28 @@ object MultiColumnApplier {
         // is unreadable here). Default false keeps direct callers
         // (MasonryLayout, unit pins) on the legacy incoming-constraints gate.
         containerBlockSizeDefinite: Boolean = false,
+        // Wave-21 lane MULTICOL: per-measurable spanner-flow roles (already
+        // capture-gated upstream). Null — the default and every legacy /
+        // dark-stage caller — makes the spanner-flow delegation below a
+        // no-op, keeping the frozen paths byte-identical.
+        childSpecs: List<MulticolSpannerFlow.ChildSpec>? = null,
         content: @Composable () -> Unit
     ) {
-        // Measure→draw bridge: the measure pass below writes the fragment list
-        // (empty = unfragmented), the drawWithContent modifier reads it. A
-        // snapshot state so the draw pass re-runs when the list changes;
-        // written only on actual change to avoid needless draw invalidations.
+        // Measure→draw bridge: the layout pass below publishes the fragment
+        // list (empty = unfragmented), the drawWithContent modifier reads it.
+        // Snapshot state so the draw pass re-runs when the list changes.
+        // Wave 21 (B-RC6): the publish happens in the PLACEMENT blocks, never
+        // in the measure body — a measure-body write both (a) executes during
+        // INTRINSIC passes (NodeMeasuringIntrinsics runs the whole measure
+        // lambda for minIntrinsicHeight, and a nested multicol reaches this
+        // layout through the outer's own intrinsic probe) and (b) registers
+        // the measure pass as a snapshot READER via the compare-before-write,
+        // so any later write schedules a remeasure — the nested-multicol
+        // remeasure ping-pong of abspos-multicol-in-second-outer-clipped.
+        // Placement lambdas are skipped by intrinsic measurement and run once
+        // per layout pass, right before draw; mutableStateOf's default
+        // structuralEqualityPolicy makes equal-value republishing a no-op, so
+        // no compare (= no read) is needed to avoid redundant invalidations.
         val fragmentsState = remember { mutableStateOf<List<FragmentGeometry.Fragment>>(emptyList()) }
         Layout(
             content = content,
@@ -495,6 +536,19 @@ object MultiColumnApplier {
                 }
         ) { measurables, constraints ->
             val gapPx = gap.roundToPx()
+            // Wave 21 (B-RC6): css-multicol §3.4's used-width fitting needs a
+            // DEFINITE available inline size. Under an UNBOUNDED measure —
+            // absposOverflowMeasure hands its child Constraints(), so an
+            // abspos multicol with a runtime-dependent width (100% → null)
+            // arrives here with maxWidth == Infinity — the (available -
+            // gaps) / N formula yields half-Infinity (Infinity/2 =
+            // 1_073_741_823), which is NOT a representable Constraints
+            // dimension: the intrinsic probe below built
+            // Constraints(maxWidth = 1073741823) and threw "Can't represent
+            // a width of 1073741823 and height of 0 in Constraints",
+            // crash-looping the app on the one nested-multicol fixture
+            // (css-multicol abspos-multicol-in-second-outer-clipped).
+            val inlineSizeBounded = constraints.maxWidth != Constraints.Infinity
             // css-multicol §3.4 fitting: yields used count >= 1 and width >= 0. The
             // naive (maxWidth - totalGap) / count formula went NEGATIVE for containers
             // narrower than their gaps (WPT …z-ordering-003 #cube: 15px wide with
@@ -503,6 +557,11 @@ object MultiColumnApplier {
             val used = resolveUsedColumns(constraints.maxWidth, columnCount, gapPx)
             // Per-column measure width — guaranteed non-negative by resolveUsedColumns.
             val columnWidth = used.widthPx
+            // Child measuring cap: the used column width under a bounded
+            // container; under an unbounded one keep Infinity — the
+            // half-Infinity columnWidth is geometry garbage and unrepresentable
+            // inside Constraints.copy (same packing limit as the probe crash).
+            val childMaxWidth = if (inlineSizeBounded) columnWidth else Constraints.Infinity
 
             // ---- Fragmentation gate (css-break-3 §4) ----
             // A fragmentainer only exists when the container's block-size is
@@ -516,7 +575,40 @@ object MultiColumnApplier {
             val columnBlockSize = constraints.maxHeight
             val definiteBlockSize =
                 fragmentainerBlockSizePx(containerBlockSizeDefinite, constraints) != null
-            if (definiteBlockSize) {
+            // ---- Wave-21 lane MULTICOL: spanner-flow plan (css-multicol §6) ----
+            // Engages ONLY under composed-WPT capture with aligned roles, for
+            // (a) containers with a column-span:all child — content before the
+            // spanner balances (§6.3), the spanner spans full width, flow
+            // resumes below, and abspos children anchor at their post-spanner
+            // static position (css-position-3 §3.1) — and (b) the auto-height
+            // sole-flow-child balance (§7.1). Everything else returns null
+            // here and falls through to the frozen paths byte-identically
+            // (incl. the wave-10 definite-height branch right below).
+            with(MulticolSpannerFlowMeasure) {
+                measureSpannerFlow(
+                    measurables = measurables,
+                    constraints = constraints,
+                    childSpecs = childSpecs,
+                    usedCount = used.count,
+                    columnWidthPx = columnWidth,
+                    gapPx = gapPx,
+                    definiteBlockSize = definiteBlockSize,
+                    fragmentationAllowed = fragmentationAllowed,
+                    // B-RC6 contract: the helper receives the bridge STATE
+                    // and writes it from its PLACEMENT block only (the
+                    // bridge test pins this file's own touches to 3).
+                    fragmentsBridge = fragmentsState,
+                    logFallback = ::logFragmentationFallbackOnce
+                )?.let { return@Layout it }
+            }
+            // Wave 21 (B-RC6): no fragmentation without a bounded inline size
+            // — the probe/measure widths below would be the unrepresentable
+            // half-Infinity (see inlineSizeBounded above). Not silent: the
+            // bail is logged once like the other fallback reasons.
+            if (definiteBlockSize && !inlineSizeBounded) {
+                logFragmentationFallbackOnce("unbounded inline size (no definite column width to probe)")
+            }
+            if (definiteBlockSize && inlineSizeBounded) {
                 // Probe natural block-sizes via intrinsics — non-destructive
                 // (a measurable may still be measured after an intrinsic
                 // query), so the identity path below stays untouched when
@@ -555,11 +647,15 @@ object MultiColumnApplier {
                         columnGapPx = gapPx,
                         columnCount = used.count
                     )
-                    // Publish for the draw pass (write-on-change only).
-                    if (fragmentsState.value != fragments) fragmentsState.value = fragments
                     // The container itself stays exactly H tall (min==max==H
                     // anyway) and full width, like the legacy path.
                     return@Layout layout(constraints.maxWidth, columnBlockSize) {
+                        // Wave 21 (B-RC6) placement-phase publish for the draw
+                        // pass: placement is skipped by intrinsic measurement
+                        // and registers no measure-pass snapshot read; the
+                        // default structuralEqualityPolicy already swallows
+                        // equal-value republishes (see fragmentsState above).
+                        fragmentsState.value = fragments
                         // Place the child ONCE at the origin; every visible
                         // copy comes from the drawWithContent replay above.
                         placeable.place(0, 0)
@@ -567,17 +663,15 @@ object MultiColumnApplier {
                 }
                 // overflowing == 0 falls through to the legacy path unchanged.
             }
-            // Leaving the fragmentation branch (or never entering it): make
-            // sure a stale fragment list from a previous size doesn't keep
-            // slicing the now-fitting content.
-            if (fragmentsState.value.isNotEmpty()) fragmentsState.value = emptyList()
 
-            // Measure all children with column width constraint
+            // Measure all children with the column-width cap — Infinity (no
+            // cap) when the container's own inline size is unbounded (B-RC6:
+            // the half-Infinity columnWidth would be unrepresentable).
             val placeables = measurables.map { measurable ->
                 measurable.measure(
                     constraints.copy(
                         minWidth = 0,
-                        maxWidth = columnWidth
+                        maxWidth = childMaxWidth
                     )
                 )
             }
@@ -586,20 +680,38 @@ object MultiColumnApplier {
             // extracted PURE into MultiColumnDistribution (lane
             // ios-multichild-multicol) so the JVM suite and the iOS mirror pin
             // the identical assignments. Sized by the USED count so we never
-            // allocate (or greedily fill) columns that don't fit.
+            // allocate (or greedily fill) columns that don't fit. B-RC6: an
+            // UNBOUNDED inline size has no §3.4 used geometry at all — column
+            // x-origins would be multiples of the half-Infinity width — so
+            // everything lays out as ONE column (the degenerate multicol; the
+            // real shrink-to-fit column math is the MULTICOL lane's follow-up).
             val childHeights = placeables.map { it.height }
+            val distributionCount = if (inlineSizeBounded) used.count else 1
             // One slot (columnIndex, yOffset) per child, in child order —
             // same choice rule + tie-break as the pre-extraction inline loop.
-            val slots = MultiColumnDistribution.distribute(childHeights, used.count)
+            val slots = MultiColumnDistribution.distribute(childHeights, distributionCount)
             // Container block-size = the tallest column (== the old
             // columnHeights.maxOrNull), derived from the same slots.
             val maxHeight = MultiColumnDistribution.containerBlockSizePx(childHeights, slots)
+            // Reported inline size: the full bounded width as before; under an
+            // unbounded measure report the widest child instead — layout()
+            // must never report Infinity (css-position-3 §3.6 shrink-to-fit
+            // is the closest CSS analogue for the abspos multicol that lands
+            // here).
+            val layoutWidth = if (inlineSizeBounded) constraints.maxWidth
+                else (placeables.maxOfOrNull { it.width } ?: 0)
 
-            layout(constraints.maxWidth, maxHeight) {
+            layout(layoutWidth, maxHeight) {
+                // Wave 21 (B-RC6) placement-phase reset: leaving (or never
+                // entering) the fragmentation branch must clear any stale
+                // fragment list from a previous size so the draw pass stops
+                // slicing now-fitting content — same placement-block rules as
+                // the publish above (no intrinsic execution, no measure read).
+                fragmentsState.value = emptyList()
                 // Place column-major (all of column 0, then column 1, …) — the
                 // exact placement (= paint) order of the pre-extraction loop,
                 // so any overlapping content keeps its draw order unchanged.
-                for (columnIndex in 0 until used.count) {
+                for (columnIndex in 0 until distributionCount) {
                     // Inline position derives from the used geometry, not the
                     // distribution: column i starts at i * (width + gap).
                     val x = columnIndex * (columnWidth + gapPx)
