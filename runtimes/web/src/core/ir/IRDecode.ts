@@ -222,7 +222,20 @@ function translateV1(components: unknown[]): IRDocument {
     const meta: IRMeta = {};
     if (typeof c._tag === 'string' && c._tag.length > 0) meta.sourceTag = c._tag;
     if (typeof c._role === 'string' && c._role.length > 0) meta.role = c._role;
-    if (meta.sourceTag !== undefined || meta.role !== undefined) out.meta = meta;
+    // wave-22 DECOR: `_decorations` → `meta.decorations`, the same
+    // underscore→meta hop. This path decodes EXTRACTOR-shaped input
+    // directly (the pipeline that hands extract-fixture.mjs output to the
+    // web renderer without a converter hop — spec 04's second column), so
+    // without this the collapsed run would lose its per-line list exactly
+    // where the browser is best equipped to paint it. Entries are carried
+    // verbatim; DecorationSpans owns the keyword filter.
+    if (Array.isArray(c._decorations) && c._decorations.length > 0) {
+      meta.decorations = c._decorations as IRMeta['decorations'];
+    }
+    if (meta.sourceTag !== undefined || meta.role !== undefined
+      || meta.decorations !== undefined) {
+      out.meta = meta;
+    }
     // Composition: nested position becomes a child-side slot ref; roots
     // carry no slot at all (spec 03).
     if (parentId !== null) out.slot = { parent: parentId, name: DEFAULT_SLOT_NAME };

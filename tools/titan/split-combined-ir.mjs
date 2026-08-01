@@ -37,13 +37,20 @@ import { safe } from './safe-name.mjs';
 export { safe };
 
 // The test key of a ROOT component's name. build-combined-fixture prefixes
-// only ROOTS as `wpt__<section>__<stem>__<idx>`, so the test is the first
-// three `__`-delimited segments (`wpt`, `<section>`, `<stem>`); WPT section
-// names and stems use hyphens, never `__`, so those three identify the test
-// unambiguously. Non-`wpt__` root names (defensive) become their own group.
+// only ROOTS as `wpt__<section>__<stem>__<idx>`, so the test key is the
+// root name MINUS the trailing `__<idx>` segment. wave-21 collision fix:
+// this used to take the FIRST THREE `__`-delimited segments, which was only
+// correct while stems never contained `__` — the subdir-encoded stems the
+// fixture-collision fix introduced (`flexbox__monolithic-overflow-001
+// .tentative`) contain `__` by design, and slice(0, 3) would truncate them
+// to the bare subdir name, merging every test in that subdir into one bogus
+// group. Stripping the one trailing child-index segment is exact for BOTH
+// shapes (the index is always the appended `__<idx>`, per componentKey in
+// build-combined-fixture.mjs) and byte-identical to the old rule for every
+// `__`-free stem. Non-`wpt__` root names (defensive) remain their own group.
 export function rootTestKey(rootName) {
   const parts = String(rootName ?? '').split('__');
-  if (parts[0] === 'wpt' && parts.length >= 4) return parts.slice(0, 3).join('__');
+  if (parts[0] === 'wpt' && parts.length >= 4) return parts.slice(0, -1).join('__');
   return String(rootName ?? '');
 }
 

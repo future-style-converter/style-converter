@@ -63,14 +63,29 @@ public extension UABlockMargin {
     }
 
     /// The root's declared (top, bottom) block margins as plain non-negative
-    /// px, through the SAME §8.3.1 classifier the runtime's collapse plan
-    /// uses (MarginCollapse.staticVerticalEdges) — so the strip and the
-    /// render can never disagree about what a margin is worth. Nil when any
-    /// vertical edge is auto / negative / relative / calc (out of the
-    /// static scope — the caller bails to the Round 4 behavior).
+    /// px, through the SAME §8.3.1 px classifier the runtime's collapse plan
+    /// uses (MarginCollapse.staticEdge, reused inside StaticEmMargin.edgePx)
+    /// — so the strip and the render can never disagree about what a margin
+    /// is worth. Nil when any vertical edge is auto / negative / % / vw /
+    /// calc (out of the static scope — the caller bails to the Round 4
+    /// behavior via rootStackMargin's R4/R5 branch).
+    ///
+    /// Wave 22 (B-RC2): `em` is now RESOLVED rather than bailed, against the
+    /// component's OWN declared FontSize (css-values-4 §5.1.1 — the base
+    /// rides the same property list). dotted-001's `margin: .5em` over
+    /// `font-size: 92px` is 46px per edge, which the fold then collapses to
+    /// ONE 46px inter-root gap instead of the two stacked 46s the natives
+    /// painted (measured Android inter-div 92px vs the ref's 46px). The
+    /// widened classifier is a strict SUPERSET on non-em wires — every
+    /// wave-19 R/S/T pin keeps its value — and lives in StaticEmMargins.swift
+    /// (byte-parallel with the Kotlin twin apps/android-harness
+    /// StaticEmMargins.kt) so the runtime's OWN collapse machinery
+    /// (MarginCollapsePlanner / MarginCollapseChildGates) keeps calling the
+    /// narrow MarginCollapse.staticVerticalEdges and the 327-pair dark-stage
+    /// baseline cannot move.
     static func staticDeclaredEdges(_ properties: [IRProperty])
         -> (top: CGFloat, bottom: CGFloat)? {
-        MarginCollapse.staticVerticalEdges(properties)
+        StaticEmMargin.verticalEdges(properties)
     }
 
     /// Resolve one in-flow root's stack contribution — the Kotlin twin's

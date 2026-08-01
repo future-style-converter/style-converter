@@ -15,7 +15,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { promises as fs } from 'node:fs';
 
-import { safe as canonical } from './safe-name.mjs';
+import { safe as canonical, fixtureStem } from './safe-name.mjs';
 import { safe as feedLibSafe } from './feed-lib.mjs';
 import { safe as injectSafe } from './inject-wpt-block.mjs';
 import { safe as splitSafe } from './split-combined-ir.mjs';
@@ -81,5 +81,84 @@ test('web capture drivers import the shared safe() (no inline copy)', async () =
       `${rel} must import the shared sanitiser`);
     assert.doesNotMatch(src, /replace\(\/\[\^A-Za-z0-9\._-\]\/g/,
       `${rel} must not keep an inline safe() copy`);
+  }
+});
+
+// ── fixtureStem: the wave-21 subdir-collision fix ─────────────────────────────
+//
+// extract-fixture.mjs used to flatten css/<section>/<subdir>/<name>.html to
+// fixtures/wpt/<section>/<name>.json — 52 A+B-bucket pairs of nested tests
+// with equal basenames silently overwrote each other (css-break 14, css-grid
+// 13, css-values 14, selectors 1, css-layout-api 10 at the wave-21 pin).
+// fixtureStem() is the ONE derivation every stem consumer now shares:
+// extract-fixture (fixture filename + component idPrefix), build-combined-
+// fixture (component keys + fixture read-back), capture-browser-ref (ref
+// cache PNGs), inject-wpt-block (composed testKey + ref lookup), and
+// post-load-extract (component-id reconstruction).
+
+test('fixtureStem: top-level tests keep the exact historical bare stem', () => {
+  // Depth-3 paths (css/<section>/<name>.html) are the whole pre-fix corpus
+  // shape — byte-identical output means ZERO churn for existing fixtures.
+  assert.equal(fixtureStem('css/css-color/a98rgb-001.html'), 'a98rgb-001');
+  // Dotted stems survive untouched (safe() keeps the dot).
+  assert.equal(
+    fixtureStem('css/css-break/monolithic-overflow-001.tentative.html'),
+    'monolithic-overflow-001.tentative');
+  // Depth-2 defensive shape (css/<name>.html) also keeps the bare stem.
+  assert.equal(fixtureStem('css/orphan.html'), 'orphan');
+});
+
+test('fixtureStem: nested tests encode the subdir chain with __', () => {
+  // The exact wave-21 skeptic example pair — distinct stems now.
+  assert.equal(
+    fixtureStem('css/css-break/flexbox/monolithic-overflow-001.tentative.html'),
+    'flexbox__monolithic-overflow-001.tentative');
+  assert.equal(
+    fixtureStem('css/css-break/grid/monolithic-overflow-001.tentative.html'),
+    'grid__monolithic-overflow-001.tentative');
+  // Multi-level subdir chains keep every segment, in order.
+  assert.equal(
+    fixtureStem('css/CSS2/floats-clear/deep/adjoining-float-001.html'),
+    'floats-clear__deep__adjoining-float-001');
+});
+
+test('fixtureStem: colliding basenames in one section resolve to distinct stems', () => {
+  // Subdir vs TOP-LEVEL collisions (css-break has both shapes for the
+  // monolithic-overflow family) must diverge too: top-level keeps the bare
+  // stem, the nested sibling carries its subdir prefix.
+  const top = fixtureStem('css/css-break/monolithic-overflow-001.tentative.html');
+  const sub = fixtureStem('css/css-break/flexbox/monolithic-overflow-001.tentative.html');
+  assert.notEqual(top, sub);
+  assert.equal(top, 'monolithic-overflow-001.tentative');
+  assert.equal(sub, 'flexbox__monolithic-overflow-001.tentative');
+});
+
+test('fixtureStem: every segment passes through safe() (filesystem-safe)', () => {
+  // The current corpus has no unsafe characters (verified at the wave-21
+  // pin), but a future re-pin must not be able to smuggle one into a
+  // filename — each path segment is sanitised with the canonical class.
+  assert.equal(fixtureStem('css/css-x/sub dir/na:me.html'), 'sub_dir__na_me');
+  // And the sanitiser is the SAME canonical safe() (dot kept).
+  assert.equal(fixtureStem('css/css-x/a.b/c.d.html'), 'a.b__c.d');
+});
+
+test('stem-derivation call sites import the shared fixtureStem (no bare-basename copies)', async () => {
+  // Source pin in the style of the safe() unification test above: every
+  // module that derives a fixture/ref/component stem from a testRel must
+  // import fixtureStem from safe-name.mjs, and the historical
+  // `basename(<...>, '.html')` flattening derivation must not reappear.
+  const sites = [
+    'extract-fixture.mjs',       // fixture filename + buildComponents idPrefix
+    'build-combined-fixture.mjs',// component keys + fixture read-back
+    'capture-browser-ref.mjs',   // ref cache PNG path
+    'inject-wpt-block.mjs',      // composed testKey + ref PNG lookup
+    'post-load-extract.mjs',     // component-id reconstruction stem
+  ];
+  for (const rel of sites) {
+    const src = await fs.readFile(new URL(`./${rel}`, import.meta.url), 'utf8');
+    assert.match(src, /import \{[^}]*fixtureStem[^}]*\} from '\.\/safe-name\.mjs'/,
+      `${rel} must import the shared fixtureStem`);
+    assert.doesNotMatch(src, /basename\([^)]*,\s*'\.html'\)/,
+      `${rel} must not derive a stem by flattening the basename`);
   }
 });

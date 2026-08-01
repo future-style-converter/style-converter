@@ -32,13 +32,18 @@ object UAWidgetsGeometry {
     // range track edge rows y134/y141 and progress edge rows y159/y166
     // both read #B2B2B2 while the checkbox border reads #767676.
     const val TRACK_EDGE = 0xFFB2B2B2L
-    // fix 4: the radio ring's effective stroke width. The ref's ring
-    // samples ≈#8F8F8F-#A1A1A1 at 1px (white ref x183/x195 @ y138 — a
-    // ~1.4px #767676 stroke antialiased over 2 columns), while a plain
-    // 1px AA stroke sampled ≈#CCCCCC on the Android capture — visibly
-    // thinner ink. Circle strokes only: the checkbox's rect stroke sits
-    // on the half-px grid and rasterizes crisp at 1px, matching the ref.
-    const val RING_SW = 1.4f
+    // A-RC4 (wave 22) — the radio ring's stroke width, re-probed. On the
+    // ref the ring's WIDEST row (y139, the circle's horizontal tangent)
+    // carries ink in exactly ONE column, x183 at #999999, and x182/x184
+    // are pure white: total covered width ≈0.75px with the OUTER edge
+    // sitting on x183.0, i.e. exactly the 13px box edge. The wave-20
+    // 1.4px stroke around r=6 spans radius 5.3..6.7 — it bleeds 0.2px
+    // OUTSIDE the atom box and paints two saturated #767676 columns per
+    // side (the wave-21 Android capture reads 229/118/228 across
+    // x176..178 where the ref reads a single 153). 1.0 around r=6 spans
+    // 5.5..6.5: contained in the box, one column per side, closest match
+    // available without also moving the ring radius off the box centre.
+    const val RING_SW = 1.0f
 
     // ── Box geometry (ref-probed, CSS px) ──────────────────────────────
     // NOTE on box sizes: the BORDER-BOX constants here are aligned with
@@ -48,20 +53,36 @@ object UAWidgetsGeometry {
     // this file's own ref measurements.
     const val CHECK = 13f       // checkbox/radio box (13x13, ref x158..170)
     const val CONTROL_H = 21f   // button/textfield height (ref y17..37)
-    const val BUTTON_PAD_X = 7f // button label inset ("button" 54px @ label 40px)
+    // A-RC2/A-RC4: the button's total horizontal chrome band (1px border
+    // + 7px padding per side). Ref-SOLVED off row 2, whose four boxes
+    // chain through three gaps and pin P tightly: with Arial advances
+    // (input-button 70.42, input-submit 72.62) and gap 4.5, the painted
+    // border columns 204/289 (input-button), 294/382 (input-submit) and
+    // 388 (input-reset) force P ∈ [15.98, 16.08] ⇒ 2 × 8. Row 1 then
+    // falls out exactly: 37.07 + 16 = 53.07 wide at x29.48 → ref border
+    // columns 29 and 82. Wave 20's 7 (P=14) was fitted against Inter
+    // advances and under-sized every button by ~1px once the metrics
+    // were corrected.
+    const val BUTTON_PAD_X = 8f
     const val RADIUS = 2f       // button/checkbox corner radius (subtle in ref)
     const val FIELD_W = 153f    // text/search field width (ref x87..239)
     const val FIELD_PAD_X = 4f  // field text inset (ref glyphs from x91)
-    const val AREA_W = 184f     // textarea width (W3 box; ref band x16..198)
+    // A-RC4: textarea border box, ref-probed borders at cols x16/x198
+    // and rows y38/y73 → 183 × 36 (wave 20 read 184 off the inclusive
+    // column count). Mirrors UAWidgetIntrinsics.TEXTAREA — same box.
+    const val AREA_W = 183f
     const val AREA_H = 36f      // textarea height (W3 box; ref band y38..73)
     const val RANGE_W = 129f    // range border box (Blink UA default width)
     const val RANGE_H = 21f     // range box height (W3 control-row box)
-    const val TRACK_W = 127f    // track ink width (ref x19.5..145.5), centered
+    const val TRACK_W = 127f    // track ink width (ref x19..146), centered
     const val TRACK_H = 8f      // track ink height (ref y134..141 incl edges)
-    const val TRACK_X = 3f      // fix 4: track inset from the box left (ref
-                                // track left x19.5 with the range box at
-                                // x16.5 → ~3px; the old x1 put the whole
-                                // track+thumb 2px left of the ref)
+    // A-RC3: track inset from the box left. Wave 20 read the range box
+    // as starting at the content origin and compensated with x3; the box
+    // actually starts at 18 (content 16 + the UA `margin: 2px` this wave
+    // restores in UAWidgetIntrinsics), and the ref's accent-fill left
+    // edge probes x19.0 at row 137 → inset 1. The track is then
+    // symmetric in the box: 1 + 127 + 1 = 129.
+    const val TRACK_X = 1f
     const val TRACK_Y = 6f      // fix 4: track top inset (box top 127.5 →
                                 // ink top 133.5 ≈ y6; was 6.5)
     const val THUMB_R = 8f      // range thumb radius (d16, ref y130..145)
@@ -85,10 +106,42 @@ object UAWidgetsGeometry {
                                 // slab than Chromium's). Cross-lane: W3's
                                 // UAWidgetIntrinsics SELECT fixedHpx pins
                                 // the SAME 19 — the ink now IS the box.
+    // A-RC4: the menulist's label inset and the trailing band (right
+    // padding + dropdown-arrow button + border). Ref-probed/solved on
+    // the "select" menulist: the label ink starts x263 against the box
+    // border col 258 → inset 5 (border 1 + padding 4), and the box must
+    // be wide enough that its right border snaps to col 314 while the
+    // NEXT atom (the listbox, one 4.5 gap later) snaps to col 320 —
+    // which brackets the box at [57.0, 57.5). 34.83 (Arial "select") +
+    // 5 + 17.42 = 57.25 sits mid-bracket. Wave 20's `label + 4 + 16`
+    // produced 54.83 and shoved the listbox 2.4px left.
+    const val MENU_LABEL_X = 5f
+    const val MENU_TRAIL_W = 17.42f
     const val LIST_H = 70f      // listbox height (W3 box; ref y80..149)
     const val LIST_ROW = 17f    // listbox row advance ((70-2)/4)
-    const val FONT = 13.33f     // UA control font-size (Chromium 13.333px)
-    const val LABEL_Y = 3.5f    // label top inset centering FONT in CONTROL_H
+    // A-RC2: the UA control font-size, now sourced from the shared metric
+    // pin so the size the plan measures with and the size it draws with
+    // can never diverge (Chromium's `-webkit-small-control` = 13.3333px).
+    const val FONT = UAControlFontMetrics.CONTROL_FONT_PX
+    // A-RC4: label placement is pinned as a BASELINE offset from the box
+    // top, not a layout-box top offset. WHY: the top offset only lands
+    // right for one face's ascent, and this wave changes the face — a
+    // baseline is face-independent, and each painter subtracts its OWN
+    // measured ascent. Ref-probed 15.0 on two independent controls of
+    // the 21px family: the input-text value (box top 17, glyph bottoms
+    // at y32, 'p' descender y33-34 → baseline 32) and the input-button
+    // label (box top 59, baseline 74).
+    const val LABEL_BASELINE_Y = 15f
+    // A-RC4: menulist label baseline — ref select box top 132, "select"
+    // body rows end y145 with the bottom AA at y146 → baseline 146 → 14.
+    const val MENU_BASELINE_Y = 14f
+    // A-RC4: listbox first-option baseline — ref box top 80, the
+    // "select-multiple" body ends y92 with bottom AA y93 → baseline 93.
+    const val LIST_BASELINE_Y = 13f
+    // A-RC4: textarea content baseline — ref box top 38, "textarea"
+    // body ends y52 with bottom AA y53 → baseline 53 → 15 (the same
+    // 15 as the single-line controls; Blink pads both by border 1 + 2).
+    const val AREA_BASELINE_Y = 15f
     const val FILE_GAP = 6f     // gap between file button and status text
 
     /** Fixed file-input strings (Chromium UA, en locale — the ref's). */
@@ -127,8 +180,9 @@ object UAWidgetsGeometry {
         Kind.PROGRESS -> PROGRESS_W to BAR_H
         Kind.METER -> METER_W to BAR_H
         Kind.COLOR -> COLOR_W to COLOR_H
-        // Menulist: label + 4px inset + 16px arrow zone (ref "select" 56px).
-        Kind.MENULIST -> (measure(spec.label) + FIELD_PAD_X + 16f) to MENU_H
+        // Menulist: label + 5px left inset + the trailing arrow band
+        // (A-RC4 constants above; ref "select" → 57.25px box).
+        Kind.MENULIST -> (measure(spec.label) + MENU_LABEL_X + MENU_TRAIL_W) to MENU_H
         // Listbox: widest option + 3px text inset both sides.
         Kind.LISTBOX -> ((spec.options.maxOfOrNull(measure) ?: 0f) + 6f) to LIST_H
         // File: button + gap + status text, one control-height line.
@@ -176,32 +230,46 @@ object UAWidgetsGeometry {
                         UAWidgetOp.StrokeCircle(6.5f, 6.5f, 6f, BORDER),
                     )
             Kind.BUTTON -> listOf(
-                // Chrome slab + border + centered-band label (pad 7).
+                // Chrome slab + border + label on the ref baseline.
                 UAWidgetOp.FillRRect(0f, 0f, w, CONTROL_H, RADIUS, CHROME),
                 UAWidgetOp.StrokeRRect(0.5f, 0.5f, w - 1, CONTROL_H - 1, RADIUS, BORDER),
-                UAWidgetOp.Label(spec.label, BUTTON_PAD_X, LABEL_Y, FONT, BLACK),
+                UAWidgetOp.Label(spec.label, BUTTON_PAD_X, LABEL_BASELINE_Y, FONT, false, BLACK),
             )
             Kind.TEXTFIELD -> listOf(
                 // White field + border + left-aligned value text.
                 UAWidgetOp.FillRect(0f, 0f, FIELD_W, CONTROL_H, WHITE),
                 UAWidgetOp.StrokeRect(0.5f, 0.5f, FIELD_W - 1, CONTROL_H - 1, BORDER),
-                UAWidgetOp.Label(spec.label, FIELD_PAD_X, LABEL_Y, FONT, BLACK),
+                UAWidgetOp.Label(spec.label, FIELD_PAD_X, LABEL_BASELINE_Y, FONT, false, BLACK),
             )
             Kind.TEXTAREA -> listOf(
                 // White area + border + top-left text + resize grip (two
                 // #767676 diagonals hugging the bottom-right corner).
                 UAWidgetOp.FillRect(0f, 0f, AREA_W, AREA_H, WHITE),
                 UAWidgetOp.StrokeRect(0.5f, 0.5f, AREA_W - 1, AREA_H - 1, BORDER),
-                UAWidgetOp.Label(spec.label, 3f, 2f, FONT, BLACK),
-                UAWidgetOp.Line(AREA_W - 7, AREA_H - 2, AREA_W - 2, AREA_H - 7, 1f, BORDER),
-                UAWidgetOp.Line(AREA_W - 4, AREA_H - 2, AREA_W - 2, AREA_H - 4, 1f, BORDER),
+                // A-RC2: textarea content is the UA MONOSPACE face (mono
+                // = true), not the control sans — the ref's "textarea"
+                // inks 8 chars across x19..81 (7.9px/char) where Arial
+                // would only need 48px total.
+                UAWidgetOp.Label(spec.label, 3f, AREA_BASELINE_Y, FONT, true, BLACK),
+                // A-RC4: the grip diagonals, re-fitted to the 183-wide
+                // box. Ref long arm runs (190.5,71.5)→(196.5,65.5) and
+                // the short one (194.5,71.5)→(196.5,69.5), i.e. 8.5/2.5
+                // in from the right and 2.5/8.5 up from the bottom.
+                UAWidgetOp.Line(AREA_W - 8.5f, AREA_H - 2.5f, AREA_W - 2.5f, AREA_H - 8.5f, 1f, BORDER),
+                UAWidgetOp.Line(AREA_W - 4.5f, AREA_H - 2.5f, AREA_W - 2.5f, AREA_H - 4.5f, 1f, BORDER),
             )
             Kind.RANGE -> run {
-                // fix 4 — track ink (127x8) at (x3, y6) in the 129x21
-                // atom box (ref band x19.5..145.5 × y134..141 against
-                // the box at x16.5/y127.5); thumb center travels
-                // radius-inset across the TRACK, parked at the value
-                // fraction (default 0.5 → ref thumb right edge x90.5).
+                // A-RC3 (wave 22) — track ink (127x8) at (TRACK_X 1,
+                // TRACK_Y 6) in the 129x21 atom box. With the range's
+                // restored UA `margin: 2px` the box now sits at abs
+                // x18/y128, so the track spans abs x19.0..146.0 ×
+                // y134.0..142.0 — the ref's painted band is cols 19..145
+                // × rows 134..141, re-probed this wave (wave 20's
+                // "x3 / box x16.5" note predates both the margin and
+                // TRACK_X 1 and no longer describes this plan). Thumb
+                // center travels radius-inset across the TRACK, parked
+                // at the value fraction (default 0.5 → ref thumb band
+                // y130..145).
                 val cx = TRACK_X + THUMB_R + (spec.fraction ?: 0.5f) * (TRACK_W - 2 * THUMB_R)
                 listOf(
                     // Full chrome track, vertically centered in the box.
@@ -254,19 +322,20 @@ object UAWidgetsGeometry {
                 // ref slab IS the atom box, borders y132..150.
                 UAWidgetOp.FillRRect(0f, 0f, w, MENU_H, RADIUS, WHITE),
                 UAWidgetOp.StrokeRRect(0.5f, 0.5f, w - 1, MENU_H - 1, RADIUS, BORDER),
-                // Label 2.5px under the slab top: 13.33px Inter's ~16px
-                // text line centered in 19 → (19−16)/2 ≈ 1.5 + the ref's
-                // glyph band (ink y140..145 abs, baseline ≈145.5) lands
-                // with y2.5 (old 25-box put it 2px lower).
-                UAWidgetOp.Label(spec.label, FIELD_PAD_X, 2.5f, FONT, BLACK),
+                // Label at the ref baseline, 5px in from the box left
+                // (A-RC4 MENU_LABEL_X / MENU_BASELINE_Y provenance).
+                UAWidgetOp.Label(spec.label, MENU_LABEL_X, MENU_BASELINE_Y, FONT, false, BLACK),
                 // fix 4 — the dropdown arrow is a STROKED CHEVRON (two
                 // ~1.8px arms meeting at the apex), never a filled
                 // triangle: ref rows y138-141 show two ink clusters with
-                // white BETWEEN them. Ref-fit: arms from (w−13.5, 6) and
-                // (w−5.5, 6) to the apex (w−9.5, 10.5) — abs x301.5/
-                // x309.5 → 305.5, y138 → 142.5 on the 57px ref select.
-                UAWidgetOp.Line(w - 13.5f, 6f, w - 9.5f, 10.5f, 1.8f, BLACK),
-                UAWidgetOp.Line(w - 9.5f, 10.5f, w - 5.5f, 6f, 1.8f, BLACK),
+                // white BETWEEN them. A-RC4 re-fit against the ref's
+                // chevron band (abs rows y138..144, arm-top centres
+                // x≈302.7/x≈308.7, apex x≈305.5 on a box at x258 w57.25
+                // → rel w−12.5 / w−6.5, apex w−9.5): the arm tops sit at
+                // y7 and the apex at y12 (wave 20's 6→10.5 drew the
+                // chevron 1px high and 1px too wide on each arm).
+                UAWidgetOp.Line(w - 12.5f, 7f, w - 9.5f, 12f, 1.8f, BLACK),
+                UAWidgetOp.Line(w - 9.5f, 12f, w - 6.5f, 7f, 1.8f, BLACK),
             )
             Kind.LISTBOX -> buildList {
                 // White box + border + up to 4 visible option rows
@@ -274,7 +343,9 @@ object UAWidgetsGeometry {
                 add(UAWidgetOp.FillRect(0f, 0f, w, LIST_H, WHITE))
                 add(UAWidgetOp.StrokeRect(0.5f, 0.5f, w - 1, LIST_H - 1, BORDER))
                 spec.options.take(4).forEachIndexed { i, opt ->
-                    add(UAWidgetOp.Label(opt, 3f, 1f + i * LIST_ROW, FONT, BLACK))
+                    // Baseline-pinned rows (A-RC4): first option baseline
+                    // 13 under the box top, +17 per subsequent row.
+                    add(UAWidgetOp.Label(opt, 3f, LIST_BASELINE_Y + i * LIST_ROW, FONT, false, BLACK))
                 }
             }
             Kind.FILE -> run {
@@ -284,14 +355,16 @@ object UAWidgetsGeometry {
                 listOf(
                     UAWidgetOp.FillRRect(0f, 0f, bw, CONTROL_H, RADIUS, CHROME),
                     UAWidgetOp.StrokeRRect(0.5f, 0.5f, bw - 1, CONTROL_H - 1, RADIUS, BORDER),
-                    UAWidgetOp.Label(FILE_BUTTON, BUTTON_PAD_X, LABEL_Y, FONT, BLACK),
-                    UAWidgetOp.Label(FILE_STATUS, bw + FILE_GAP, LABEL_Y, FONT, BLACK),
+                    UAWidgetOp.Label(FILE_BUTTON, BUTTON_PAD_X, LABEL_BASELINE_Y, FONT, false, BLACK),
+                    UAWidgetOp.Label(FILE_STATUS, bw + FILE_GAP, LABEL_BASELINE_Y, FONT, false, BLACK),
                 )
             }
             // Image input without src: Chromium falls back to the alt
             // text (value when alt is absent). The broken-image glyph is
             // deliberately NOT replicated (small ink; noted lane risk).
-            Kind.IMAGE -> listOf(UAWidgetOp.Label(spec.label, 0f, 1f, FONT, BLACK))
+            // Baseline 13 in the 16px alt-text line (the same 13 the
+            // listbox rows use — one UA control line, border-free box).
+            Kind.IMAGE -> listOf(UAWidgetOp.Label(spec.label, 0f, LIST_BASELINE_Y, FONT, false, BLACK))
             // hidden: the UA sheet says display:none — nothing paints.
             Kind.HIDDEN -> emptyList()
         }

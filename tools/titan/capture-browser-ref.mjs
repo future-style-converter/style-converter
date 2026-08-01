@@ -116,10 +116,17 @@
 import puppeteer from 'puppeteer';
 import { promises as fs } from 'node:fs';
 import { existsSync } from 'node:fs';
-import { resolve, dirname, join, basename } from 'node:path';
+// basename dropped at the wave-21 collision fix — the one stem-derivation
+// site (cachePathFor) now goes through safe-name.mjs's fixtureStem().
+import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { extractRefHref } from './extract-fixture.mjs';
+// The ONE canonical fixture-stem derivation (wave-21 collision fix): the ref
+// cache PNG must be keyed by the SAME subdir-encoded stem the fixture files
+// use, or two nested tests with equal basenames would share one cache slot —
+// the first render's PNG silently serving as the second test's reference.
+import { fixtureStem } from './safe-name.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -290,7 +297,10 @@ export function cachePathFor(wptRef, testRel) {
   // some CSS2 stragglers do), there's no section dir and we bucket it
   // under "css" so the path layout stays uniform.
   const section = parts.length >= 3 ? parts[1] : 'css';
-  const stem = basename(parts[parts.length - 1], '.html');
+  // wave-21 collision fix: subdir-encoded stem (safe-name.mjs fixtureStem)
+  // so nested tests with equal basenames get DISTINCT cache PNGs. Top-level
+  // tests keep the exact historical path — the existing cache stays valid.
+  const stem = fixtureStem(testRel);
   // CANVAS_REV keys the canvas contract (corpus-v4 white canvas — header
   // note): a contract change re-renders every ref instead of silently
   // reusing PNGs captured under the old canvas. run-titan.sh and

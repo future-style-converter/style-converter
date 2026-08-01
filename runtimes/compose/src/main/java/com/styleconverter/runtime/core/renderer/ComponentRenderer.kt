@@ -1827,7 +1827,13 @@ object ComponentRenderer {
                     name = parentText,
                     textColor = inheritedAwareTextColor,
                     properties = component.properties,
-                    rawText = parentText
+                    rawText = parentText,
+                    // Wave 22 (lane DECOR): this run renders the COMPONENT's
+                    // own text, so it owns the component's `meta.decorations`
+                    // list too — the mixed-content sibling of the leaf site
+                    // below. Null for every non-collapsed component.
+                    decorations = com.styleconverter.runtime.typography.DecorationWire
+                        .toDecorationLines(component.decorations)
                 )
             }
 
@@ -2046,7 +2052,13 @@ object ComponentRenderer {
                 name = component.name,
                 textColor = textColor,
                 properties = component.properties,
-                rawText = component._text
+                rawText = component._text,
+                // Wave 22 (lane DECOR): the LEAF site — where a collapsed
+                // inline run lands (the extractor flattens the chain to one
+                // childless text component). `meta.decorations` reaches the
+                // per-line painter from here.
+                decorations = com.styleconverter.runtime.typography.DecorationWire
+                    .toDecorationLines(component.decorations)
             )
         }
     }
@@ -3280,7 +3292,30 @@ object ComponentRenderer {
         textColor: Color?,
         properties: List<IRProperty> = emptyList(),
         itemIndex: Int = 0,
-        rawText: String? = null
+        rawText: String? = null,
+        // Wave 22 (lane DECOR, B-RC4b) — the merged `meta.decorations`
+        // wire for a COLLAPSED inline run: the ordered, ancestor-first
+        // list of every decorating box's line and its OWN color
+        // (css-text-decor-3 §2.1 propagation + §2.2 per-box color). Wire
+        // shape [{line, color?}] with `color` the AUTHORED CSS token
+        // (absent = currentColor), turned into this list by
+        // DecorationWire.toDecorationLines — see its banner for why the
+        // token is resolved in the runtime and not in the converter.
+        //
+        // THREE STATES, all meaningful:
+        //   null  → not a collapsed run (every legacy document): the pass
+        //           synthesizes this component's own three flags exactly
+        //           as before, so the dark-stage 327 baselines cannot move.
+        //   list  → AUTHORITATIVE: it is the complete line set, the
+        //           component's own flags are ignored, and the built-ins
+        //           are suppressed (see `paintedTextStyle` below).
+        //   empty → ALSO authoritative, and it says "no lines": paint
+        //           nothing AND still suppress the built-ins, or the
+        //           merged flat bag repaints what the wire just retired.
+        // The full seam is live: extractor `_decorations` → converter
+        // `meta.decorations` → IRDocumentDecoder → IRComponent.decorations
+        // → DecorationWire → here.
+        decorations: List<com.styleconverter.runtime.typography.DecorationColorOps.DecorationLine>? = null
     ) {
         // When rawText is supplied (the IR's `_text` channel), it wins
         // over the synthesised "Component Name" placeholder. For legacy
@@ -3468,12 +3503,47 @@ object ComponentRenderer {
         // path (per-component inbox, the 327-pair baseline) keeps 1.2× because
         // LocalWptComposedMode is false there, so those captures are byte-
         // identical. An IR-declared line-height still wins (the `if` above).
-        val effectiveLineHeight = if (textStyle.lineHeight != TextUnit.Unspecified)
-            textStyle.lineHeight
-        else
-            composedDefaultLineHeightPx(
-                LocalWptComposedMode.current, effectiveFontSize.value
-            ).sp
+        //
+        // Wave 22 (lane FONT) — the THIRD state, WPT-GATED. An IR that DECLARES
+        // `line-height: normal` (css-fonts-4 §4.3: exactly what `font: 92px
+        // Arial` resets to, now emitted by FontExpander.kt) must fall through to
+        // the FONT's natural metrics, not to the calibration: Chromium renders
+        // that div at Arial's own 1.1499em box (≈105.8px at 92px) because a
+        // directly-matching declaration beats the ref injection's inherited
+        // `:where(body){line-height:1.25}` (115px), and the calibration exists
+        // only to stand in for that inherited rule. Outside WPT capture the
+        // keyword keeps the extractors' historical 1.2× stand-in so the
+        // committed 327-pair baselines never move — see
+        // LineHeightNormal.lineBoxSource for the full table and the stated risk.
+        // ABSENT line-height takes the calibration bit-for-bit in BOTH modes —
+        // that is what the entire rest of the corpus rides on.
+        // The three-state pick is delegated to the shared native decision so
+        // this `when` and SwiftUI's ComponentRenderer.effectiveLineHeight can
+        // never diverge (byte-parallel twins, identical pin tables).
+        val lineBoxSource = com.styleconverter.runtime.typography.LineHeightNormal.lineBoxSource(
+            hasDeclaredValue = textStyle.lineHeight != TextUnit.Unspecified,
+            declaredNormal = com.styleconverter.runtime.typography.LineHeightNormal
+                .isDeclaredNormal(properties),
+            // LocalWptCaptureMode (NOT LocalWptComposedMode) is the exact twin
+            // of SwiftUI's `@Environment(\.wptCaptureMode)` that gates the same
+            // row there — both are false on the 327-pair dark stage, which is
+            // the property that protects the committed baselines.
+            wptCapture = LocalWptCaptureMode.current
+        )
+        val effectiveLineHeight = when (lineBoxSource) {
+            // An explicit numeric/length line-height wins outright (author > us).
+            com.styleconverter.runtime.typography.LineHeightNormal.LineBoxSource.DECLARED ->
+                textStyle.lineHeight
+            // Declared `normal` → stay Unspecified: Compose's Paragraph then
+            // uses the resolved face's ascent+descent, the CSS `normal` model.
+            com.styleconverter.runtime.typography.LineHeightNormal.LineBoxSource.NATURAL ->
+                TextUnit.Unspecified
+            // Nothing declared → the unchanged WPT / native calibration.
+            com.styleconverter.runtime.typography.LineHeightNormal.LineBoxSource.CALIBRATED ->
+                composedDefaultLineHeightPx(
+                    LocalWptComposedMode.current, effectiveFontSize.value
+                ).sp
+        }
 
         // CSS `background-clip: text` plus a `background-image` clips the
         // bg paint to the glyph shape — web typically pairs it with
@@ -3730,11 +3800,15 @@ object ComponentRenderer {
         // THICKNESS are no longer dropped on the floor.
         //   • thickness (css-text-decor-4 §2.4): an explicit
         //     `text-decoration-thickness` overrides the font-derived
-        //     auto default — bands come from DecorationOps.explicitBands
-        //     (Blink underline gap = max(1, ceil(T/2)), ref-pinned to
-        //     the dotted-001 band tops 207/363/519). The AUTO path keeps
-        //     TextStyleApplier.decorationSegments byte-for-byte (its
-        //     22px oracle + the 327-pair baseline pin those rows).
+        //     auto default (Blink underline gap = max(1, ceil(T/2)),
+        //     ref-pinned to the dotted-001 band tops 207/363/519); the
+        //     AUTO path keeps TextStyleApplier.decorationSegments' rows
+        //     byte-for-byte (its 22px oracle + the 327-pair baseline pin
+        //     those rows). Wave 22 folded BOTH rules into
+        //     DecorationColorOps.bandTop — the two former emitters
+        //     (decorationSegments / DecorationOps.explicitBands) survive
+        //     as the pinned reference implementations that
+        //     DecorationWirePinTest compares this pass against.
         //   • style (css-text-decor-3 §2.3): every band is expanded via
         //     DecorationOps.styleOps — DOTTED paints Chromium round-cap
         //     circle runs (≤3px: square dashes), DASHED paints
@@ -3742,7 +3816,23 @@ object ComponentRenderer {
         //     (legacy captures byte-identical). DOUBLE/WAVY still paint
         //     solid — surfaced ONCE via logcat below, never silent.
         val ownedDecorations = TextStyleApplier.extractDecorationLineFlags(properties)
-        val decorationModifier = if (ownedDecorations.any) {
+        // Wave 22 (lane DECOR, B-RC4b) — the ORDERED per-line request
+        // list this pass paints, each entry carrying ITS OWN color
+        // (css-text-decor-3 §2.2: every decorating box paints its line in
+        // its own color, and §2.1 propagates all of them onto the one
+        // collapsed inline run). `decorations` is the merged
+        // `meta.decorations` wire; null (every document today, and every
+        // run the extractor did not collapse) makes resolve() synthesize
+        // this component's own three flags with null colors — literally
+        // the pre-wave-22 band set, order and color, so the dark-stage
+        // 327 baselines cannot move.
+        val decorationRequests = com.styleconverter.runtime.typography.DecorationColorOps.resolve(
+            wire = decorations,
+            underline = ownedDecorations.underline,
+            overline = ownedDecorations.overline,
+            lineThrough = ownedDecorations.lineThrough
+        )
+        val decorationModifier = if (decorationRequests.isNotEmpty()) {
             // Full decoration config: color + style + explicit thickness.
             val decorationConfig = try {
                 TextStyleApplier.extractTextDecorationConfig(properties)
@@ -3781,60 +3871,61 @@ object ComponentRenderer {
             Modifier.drawWithContent {
                 drawContent()
                 val layout = layoutResult.value ?: return@drawWithContent
-                // Per-visual-line bands: explicit thickness → the
-                // Blink-gap twin; auto → the legacy capture-pinned math.
-                val bands = if (explicitThicknessPx != null) {
-                    com.styleconverter.runtime.typography.DecorationOps.explicitBands(
-                        lineCount = layout.lineCount,
-                        // px==dp==sp space (density 1 harness) — same
-                        // convention as the emphasis radius above.
-                        fontSizePx = effectiveFontSize.value,
-                        thicknessPx = explicitThicknessPx,
-                        underline = ownedDecorations.underline,
-                        overline = ownedDecorations.overline,
-                        lineThrough = ownedDecorations.lineThrough,
-                        lineBaseline = { layout.getLineBaseline(it) },
-                        lineLeft = { layout.getLineLeft(it) },
-                        lineRight = { layout.getLineRight(it) }
-                    )
-                } else {
-                    TextStyleApplier.decorationSegments(
-                        lineCount = layout.lineCount,
-                        fontSizePx = effectiveFontSize.value,
-                        flags = ownedDecorations,
-                        lineBaseline = { layout.getLineBaseline(it) },
-                        lineLeft = { layout.getLineLeft(it) },
-                        lineRight = { layout.getLineRight(it) }
-                        // Same LineBand shape — the ops expander is one
-                        // code path for both thickness sources.
-                    ).map {
-                        com.styleconverter.runtime.typography.DecorationOps.LineBand(
-                            it.left, it.top, it.width, it.thickness
-                        )
-                    }
-                }
-                bands.forEach { band ->
-                    // Expand the solid band into its style's op list and
-                    // paint each op (rect run / circle run).
-                    com.styleconverter.runtime.typography.DecorationOps.styleOps(
-                        band.left, band.top, band.width, band.thickness, decorationLineStyle
-                    ).forEach { op ->
-                        when (op) {
+                // Per-visual-line COLORED bands, one per requested line
+                // per visual line, line-major then request order — which
+                // for the legacy (no-wire) request list is exactly the
+                // old underline → overline → line-through sequence.
+                // DecorationColorOps.bandTop carries BOTH thickness
+                // rules: auto reproduces decorationSegments' wave-5
+                // capture rows byte-for-byte, explicit swaps in Blink's
+                // ref-pinned underline gap (the wave-21 explicitBands
+                // rule) — the two former branches, now one call.
+                val bands = com.styleconverter.runtime.typography.DecorationColorOps.bands(
+                    lineCount = layout.lineCount,
+                    // px==dp==sp space (density 1 harness) — same
+                    // convention as the emphasis radius above.
+                    fontSizePx = effectiveFontSize.value,
+                    // `text-decoration-thickness: auto` (css-text-decor-4
+                    // §2.4 initial) — the face-derived rule the wave-5
+                    // captures pinned; passed IN so DecorationColorOps
+                    // stays dependency-free of TextStyleApplier.
+                    autoThicknessPx = TextStyleApplier.decorationThicknessPx(effectiveFontSize.value),
+                    explicitThicknessPx = explicitThicknessPx,
+                    lines = decorationRequests,
+                    lineBaseline = { layout.getLineBaseline(it) },
+                    lineLeft = { layout.getLineLeft(it) },
+                    lineRight = { layout.getLineRight(it) }
+                )
+                // Expand every band into its style's ops, each op TAGGED
+                // with its own line's color, and paint. A dotted
+                // underline in color A and a solid overline in color B
+                // compose for free — style expansion is per band.
+                com.styleconverter.runtime.typography.DecorationColorOps
+                    .ops(bands, decorationLineStyle).forEach { colored ->
+                        // §2.2: a null wire color means `currentColor` →
+                        // the same substitute the pass used before
+                        // (declared text-decoration-color, else the text
+                        // color). IR colors are normalized sRGB 0..1
+                        // (schema/spec/02-values.md), which is exactly
+                        // Compose's Color(r,g,b,a) space — no conversion.
+                        val paint = colored.color?.let {
+                            androidx.compose.ui.graphics.Color(it.r, it.g, it.b, it.a)
+                        } ?: ownedDecorationColor
+                        when (val op = colored.op) {
                             is com.styleconverter.runtime.typography.DecorationOps.Op.Band ->
                                 drawRect(
-                                    color = ownedDecorationColor,
+                                    color = paint,
                                     topLeft = androidx.compose.ui.geometry.Offset(op.left, op.top),
                                     size = androidx.compose.ui.geometry.Size(op.width, op.height)
                                 )
                             is com.styleconverter.runtime.typography.DecorationOps.Op.Dot ->
                                 drawCircle(
-                                    color = ownedDecorationColor,
+                                    color = paint,
                                     radius = op.radius,
                                     center = androidx.compose.ui.geometry.Offset(op.centerX, op.centerY)
                                 )
                         }
                     }
-                }
             }
         } else Modifier
         // Suppress the platform built-ins ONLY where the owned pass draws
@@ -3844,7 +3935,20 @@ object ComponentRenderer {
         // offsets — a visible double-draw. Paths without layout access
         // (list markers, non-label Text sites) keep extractTextDecoration's
         // TextDecoration untouched, so their existing rendering survives.
-        val paintedTextStyle = if (ownedDecorations.any)
+        // Wave 22 (B-RC4b): gated on the RESOLVED request list so a
+        // merged run that inherited an ancestor's underline suppresses
+        // the built-in too. Identical to `ownedDecorations.any` whenever
+        // no merged wire arrived (resolve() synthesizes exactly those
+        // flags), so no committed capture changes.
+        //
+        // …PLUS the authoritative-when-present clause: a PRESENT wire
+        // suppresses the built-ins even when the resolved list is EMPTY.
+        // Without the `decorations != null` disjunct, a wire whose entries
+        // were all unknown keywords would resolve to zero bands here while
+        // `styledTextStyle` still carried TextDecoration.Underline from
+        // the component's merged flat bag — the wire would say "no lines"
+        // and Compose would paint one anyway.
+        val paintedTextStyle = if (decorations != null || decorationRequests.isNotEmpty())
             styledTextStyle.copy(textDecoration = androidx.compose.ui.text.style.TextDecoration.None)
         else styledTextStyle
 
@@ -3896,7 +4000,19 @@ object ComponentRenderer {
         // ONLY (LocalWptComposedMode) so the 327 baseline + per-component inbox
         // path are byte-identical.
         val snapDensity = androidx.compose.ui.platform.LocalDensity.current
-        val refLineBoxPx = with(snapDensity) { effectiveLineHeight.toPx() }
+        // Wave 22 (lane FONT) — `effectiveLineHeight` can now legitimately be
+        // TextUnit.Unspecified (the declared-`normal` state above), and
+        // `TextUnit.toPx()` THROWS on a non-Sp unit, so the conversion is
+        // guarded. 0f is the correct sentinel: it disables the composed
+        // line-box snap below (`refLineBoxPx > 0f`) and nulls
+        // `declaredLineHeightPx`, which is exactly right — with `normal` there
+        // is no CSS-computed box to snap the natural glyph box into, the
+        // natural box IS the answer. Every previously-reachable state still
+        // takes the identical `toPx()` path, so no committed capture moves.
+        val refLineBoxPx =
+            if (effectiveLineHeight != TextUnit.Unspecified)
+                with(snapDensity) { effectiveLineHeight.toPx() }
+            else 0f
         val composedLineBoxSnap: Modifier =
             if (LocalWptComposedMode.current && refLineBoxPx > 0f) {
                 Modifier.layout { measurable, constraints ->

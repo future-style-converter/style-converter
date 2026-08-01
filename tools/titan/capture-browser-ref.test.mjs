@@ -57,12 +57,26 @@ test('cachePathFor preserves SHA verbatim (no truncation)', () => {
   assert.ok(p.includes(sha), `expected SHA in path; got ${p}`);
 });
 
-test('cachePathFor handles deeply-nested test paths', () => {
+test('cachePathFor encodes subdirs into the stem for nested test paths', () => {
   // Some WPT tests live one level deeper, e.g. css/css-flexbox/abspos/foo.html
-  // — section is still the second segment ("css-flexbox"), stem is the
-  // basename of the deepest part.
+  // — section is still the second segment ("css-flexbox"), and the stem is
+  // the SUBDIR-ENCODED fixtureStem (`abspos__foo`), NOT the bare basename.
+  // wave-21 collision fix: with a bare basename, two nested tests with equal
+  // basenames (css-break/flexbox vs css-break/grid monolithic-overflow
+  // family) shared ONE cache slot — the first render's PNG silently served
+  // as the second test's reference.
   const p = cachePathFor('sha', 'css/css-flexbox/abspos/abspos-autopos-htb-ltr.html');
-  assert.match(p, new RegExp(`refs\\${sep}sha\\${sep}white-black-ink-font-lh\\${sep}css-flexbox\\${sep}abspos-autopos-htb-ltr\\.png$`));
+  assert.match(p, new RegExp(`refs\\${sep}sha\\${sep}white-black-ink-font-lh\\${sep}css-flexbox\\${sep}abspos__abspos-autopos-htb-ltr\\.png$`));
+});
+
+test('cachePathFor gives colliding-basename nested tests DISTINCT cache slots', () => {
+  // The exact wave-21 skeptic pair: same section, same basename, different
+  // subdir — these used to flatten to one identical cache path.
+  const a = cachePathFor('sha', 'css/css-break/flexbox/monolithic-overflow-001.tentative.html');
+  const b = cachePathFor('sha', 'css/css-break/grid/monolithic-overflow-001.tentative.html');
+  assert.notEqual(a, b, 'nested tests with equal basenames must not share a ref cache slot');
+  assert.match(a, /flexbox__monolithic-overflow-001\.tentative\.png$/);
+  assert.match(b, /grid__monolithic-overflow-001\.tentative\.png$/);
 });
 
 test('cachePathFor for tests directly under /css/ falls back to "css" section', () => {

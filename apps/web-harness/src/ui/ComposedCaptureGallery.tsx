@@ -127,14 +127,21 @@ interface ComposedCaptureGalleryProps {
  * tools/titan/split-combined-ir.mjs's `rootTestKey` (kept in lock-step by
  * this citation; the harness can't cleanly import a tools/ .mjs under
  * vite+TS). build-combined-fixture.mjs prefixes only ROOTS as
- * `wpt__<section>__<stem>__<idx>`, so the test is the first three
- * `__`-delimited segments (`wpt`, `<section>`, `<stem>`); WPT section names
- * and stems use hyphens, never `__`. Non-`wpt__` roots (defensive) become
- * their own group under their raw name.
+ * `wpt__<section>__<stem>__<idx>`, so the test key is the root name MINUS
+ * the trailing `__<idx>` segment. wave-21 collision fix: this used to take
+ * the FIRST THREE `__`-delimited segments, which was only correct while
+ * stems never contained `__` — the subdir-encoded stems introduced by the
+ * fixture-collision fix (safe-name.mjs fixtureStem, e.g.
+ * `flexbox__monolithic-overflow-001.tentative`) contain `__` by design, and
+ * slice(0, 3) would truncate them to the bare subdir name, merging every
+ * test in that subdir into one bogus composed canvas. Stripping the one
+ * trailing child-index segment is exact for BOTH shapes and byte-identical
+ * to the old rule for every `__`-free stem. Non-`wpt__` roots (defensive)
+ * become their own group under their raw name.
  */
 function rootTestKey(rootName: string | undefined): string {
   const parts = String(rootName ?? '').split('__');
-  if (parts[0] === 'wpt' && parts.length >= 4) return parts.slice(0, 3).join('__');
+  if (parts[0] === 'wpt' && parts.length >= 4) return parts.slice(0, -1).join('__');
   return String(rootName ?? '');
 }
 

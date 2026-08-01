@@ -1,0 +1,104 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "decor-container-001",
+            "name": "Decor_Container",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 500
+                    }
+                }
+            ]
+        },
+        {
+            "id": "decor-chain-002",
+            "name": "Decor_ThreeColourChain",
+            "properties": [
+                {
+                    "type": "TextDecorationLine",
+                    "data": {
+                        "underline": true,
+                        "overline": false,
+                        "lineThrough": false
+                    }
+                },
+                {
+                    "type": "TextDecorationColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.0,
+                            "g": 0.0,
+                            "b": 1.0,
+                            "a": 1.0
+                        },
+                        "original": "blue"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "decor-container-001"
+            },
+            "text": "Black text with blue underline, gray overline and green line-through",
+            "meta": {
+                "decorations": [
+                    {
+                        "line": "underline",
+                        "color": "blue"
+                    },
+                    {
+                        "line": "overline",
+                        "color": "gray"
+                    },
+                    {
+                        "line": "line-through",
+                        "color": "green"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "decor-currentcolor-003",
+            "name": "Decor_CurrentColorEntry",
+            "properties": [],
+            "slot": {
+                "parent": "decor-container-001"
+            },
+            "text": "uncoloured underline inherits currentColor",
+            "meta": {
+                "sourceTag": "span",
+                "decorations": [
+                    {
+                        "line": "underline"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "decor-functional-colour-004",
+            "name": "Decor_FunctionalColourToken",
+            "properties": [],
+            "slot": {
+                "parent": "decor-container-001"
+            },
+            "text": "authored tokens stay authored",
+            "meta": {
+                "sourceTag": "u",
+                "decorations": [
+                    {
+                        "line": "line-through",
+                        "color": "#00ff00"
+                    },
+                    {
+                        "line": "underline",
+                        "color": "rgb(0, 0, 255)"
+                    }
+                ]
+            }
+        }
+    ]
+}

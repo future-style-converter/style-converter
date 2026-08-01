@@ -17,6 +17,62 @@ behavior, caveats included.
 > `tools/titan/extract-fixture.mjs` `widgetAttrsFor` for the tag set,
 > key allow-list, and value typing) forwards verbatim as `meta.attrs`,
 > an additive omit-when-absent meta key per 05-versioning.md.
+> **wave-22 exercised it again**: the extractor's `_decorations` (the
+> ordered per-line decoration list of a *collapsed* inline run — see the
+> `_decorations` banner in `extract-fixture.mjs`) forwards verbatim as
+> `meta.decorations`, same additive rule. Its contract is spelled out
+> below.
+
+## `meta.decorations` — why the colour token is NOT normalized
+
+`meta.decorations` is `[{line, color?}, …]`, ordered **outermost-first**
+(css-text-decor-3 §2.1 propagation order), one line keyword per entry.
+It is **authoritative when present**: it is the complete line set for the
+run, so a reader that honours it must ignore the component's own
+`text-decoration-line` flags. The flat `text-decoration*` longhands that
+survive on a collapsed component are a root-wins merged bag kept for
+readers that drop `meta` — they paint a *subset*, never a superset, so
+neither reader double-paints. **Present-but-empty is still
+authoritative**: a reader that filters the list down to nothing (every
+entry an unknown keyword) must paint **nothing**, not fall back to the
+flat flags.
+
+Unlike every CSS *property* value, `color` here is the **authored CSS
+token** (`"blue"`, `"#00f"`, `"rgb(0, 0, 255)"`), not the normalized sRGB
+leaf of 02-values.md. That is deliberate and it is the `meta.attrs`
+opacity contract, not an oversight:
+
+- `meta` members are **extractor-owned payloads forwarded verbatim**. The
+  converter's property pipeline normalizes *declarations*; it has no
+  declaration here, only a hint object it is contractually opaque to.
+- The three runtimes already own a CSS colour-token parser for exactly
+  this situation (post-`var()` substitution): `CSSTokenParser.color` on
+  iOS, `ValueExtractors.parseCssColorLiteral` on Compose, the browser
+  itself on web. Resolution therefore happens **once per runtime, at
+  decode time**, in the same code path a substituted `var()` colour takes.
+- Consequence, stated honestly and **measured, not hypothetical**: a
+  token outside those parsers' families (hex, `transparent`, the basic
+  named set, plus `rgb()`/`rgba()` on iOS only) resolves to *no colour*
+  on the natives. The runtimes **log** it (`PropertyTracker` / logcat) —
+  never silent — and the painter then substitutes the run's merged
+  `text-decoration-color` leaf, else the text colour. (That substitute is
+  *not* strictly §2.2's `currentColor`; it is right for the outermost
+  entry and is the root's colour for any other.) Web has no such gap: the
+  token goes straight into a `text-decoration-color` declaration the
+  browser parses.
+
+  The corpus already contains a case:
+  `fixtures/wpt/css-text-decor/text-decoration-style-multiple.json` ships
+  `coral` and `skyblue`, which **neither** native table has, so its
+  overline paints coral on Android and iOS while web paints skyblue.
+  `crimson` resolves on Compose but not iOS; `rgb()` on iOS but not
+  Compose. The converter itself resolves all of them
+  (`converter/src/main/kotlin/app/irmodels/ColorConversion.kt` carries the
+  full 148-name css-color-4 table) — the loss is the *price* of the
+  verbatim-forward decision above, not a parser bug, and closing it means
+  either widening both runtime token parsers or adding a normalized
+  sibling field to the entry (a v3-gated wire change). Pinned by
+  `SkepticDecorWireSeamTest.kt` / `SkepticDecorWireSeamTests.swift`.
 
 ## The underscore rule
 

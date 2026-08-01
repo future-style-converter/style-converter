@@ -380,12 +380,21 @@ object TypographyExtractor {
      * Handles formats:
      * - Number (multiplier): 1.5 -> multiplied by base font size (default 16)
      * - Length (IRLength): { "px": 24.0 } -> direct sp value
-     * - Keyword: "normal" -> 1.2 multiplier
+     * - Keyword: "normal" -> the wire's legacy 1.2 compatibility multiplier
+     *   (wave 22, lane FONT: the CSS-correct font-natural reading is applied
+     *   WPT-gated in ComponentRenderer, not here — see the body comment)
      *
      * @param json JSON element containing line height data
      * @return TextUnit in sp, or null if not extractable
      */
     private fun extractLineHeight(json: JsonElement?, fontSizeSp: Float? = null): TextUnit? {
+        // Wave 22 (lane FONT) note — twin of the TextStyleApplier comment: a
+        // DECLARED `line-height: normal` still consumes the wire's legacy 1.2
+        // compatibility multiplier here on purpose. The keyword's CSS-correct
+        // answer (the face's own metrics) is applied WPT-GATED in
+        // ComponentRenderer via LineHeightNormal.lineBoxSource, so the
+        // committed dark-stage baselines that render through this extractor
+        // keep the historical 1.2 box byte-for-byte.
         // The IR emits LineHeight as either `{ "px": N }` (length) or
         // `{ "multiplier": N, "original": ... }` (CSS unitless multiplier).
         // Try the multiplier path first via the JSON-object lookup so

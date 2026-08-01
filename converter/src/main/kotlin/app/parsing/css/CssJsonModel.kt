@@ -1,6 +1,7 @@
 package app.parsing.css
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 
 /**
@@ -75,7 +76,18 @@ data class CssComponent(
     // tools/titan/extract-fixture.mjs widgetAttrsFor). Forwarded VERBATIM
     // as IR v2 `meta.attrs` (IRWireV2.kt) — the converter never interprets
     // the values, exactly the `_pseudo` opacity contract.
-    val attrs: JsonObject? = null
+    val attrs: JsonObject? = null,
+    // wave-22 lane DECOR: opaque `_decorations` payload — the extractor's
+    // ORDERED (outermost-first) per-line decoration list for a COLLAPSED
+    // inline run: [{line, color?}, …] where `line` is exactly one
+    // css-text-decor-3 §2.1 keyword and `color` is the CSS colour token AS
+    // AUTHORED ("blue", "#00f", "rgb(0,0,255)"); absent = currentColor
+    // (§2.2 initial). Forwarded VERBATIM as IR v2 `meta.decorations` — the
+    // converter does NOT normalize the colour tokens to the IR sRGB leaf,
+    // exactly the `_attrs` opacity contract: each runtime resolves the
+    // token with its own CSS token parser at decode time (see
+    // schema/spec/04-metadata-fields.md and the DecorationWire twins).
+    val decorations: JsonArray? = null
 )
 
 /**

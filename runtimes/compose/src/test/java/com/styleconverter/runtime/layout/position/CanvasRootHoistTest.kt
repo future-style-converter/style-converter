@@ -271,6 +271,39 @@ class CanvasRootHoistTest {
         )
     }
 
+    // ── Wave 22 (B-RC3): END-only insets still hoist, and the overlay slot
+    //    anchors them at the canvas END edge ──────────────────────────────
+
+    @Test fun `B-RC3 an end-only-inset absolute root still hoists to the canvas overlay`() {
+        // The live multicol IR (component __7): absolute + Bottom:0 +
+        // Right:0. hasAnyInset must see the END sides — otherwise the RC1
+        // branch would misclassify it as a static-position box and it would
+        // never reach the overlay slot that now anchors it.
+        val endOnly = comp("b-rc3", listOf(
+            prop("Position", "\"absolute\""),
+            prop("Bottom", """{"px":0}"""),
+            prop("Right", """{"px":0}"""),
+        ))
+        assertTrue(CanvasRootHoist.hasAnyInset(endOnly.properties))
+        assertTrue(CanvasRootHoist.shouldHoistToCanvasRoot(endOnly.properties, hasPositionedAncestor = false))
+        assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(endOnly.properties, hasPositionedAncestor = false))
+        // Both root-level red divs of abspos-containing-block-outside-spanner
+        // therefore get their OWN overlay slot — the pre-fix Android capture
+        // painted one 100×100 red region for the two of them because both
+        // slots anchored at (0,0).
+        val startOnly = comp("b-rc3-tl", positioned("absolute", left = 0.0, top = 0.0))
+        assertEquals(
+            listOf(startOnly, endOnly),
+            CanvasRootHoist.collectCanvasHoisted(listOf(startOnly, endOnly)),
+        )
+    }
+
+    @Test fun `B-RC3 the overlay's zero-flow report is unchanged by end anchoring`() {
+        // The end anchor moves the INK only: the slot still reports 0×0, so
+        // a hoisted box never grows the canvas (pin S5, css-position-3 §3).
+        assertEquals(0, CanvasRootHoist.hoistedFlowReportPx())
+    }
+
     // ── The ancestry threading both sides share ────────────────────────────
 
     @Test fun `every non-static position establishes a containing block for descendants`() {

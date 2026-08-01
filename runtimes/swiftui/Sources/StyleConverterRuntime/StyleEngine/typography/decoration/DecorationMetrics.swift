@@ -111,6 +111,48 @@ enum DecorationMetrics {
         -autoThickness(fontSizePx: fontSizePx)
     }
 
+    /// Wave 22 (lane DECOR, B-RC4b) — the per-KIND row for one visual
+    /// line, relative to the LINE-BOX TOP. This is the iOS twin of the
+    /// Compose runtime's DecorationColorOps.bandTop (which is
+    /// baseline-anchored, because Compose reads TextLayoutResult
+    /// baselines while this overlay only knows line-box tops).
+    ///
+    /// It is a pure DISPATCH over the four rules that already existed —
+    /// the wave-5 capture-pinned auto rows above and the wave-21
+    /// ref-pinned explicit-thickness rows in DecorationOps — lifted out
+    /// of the overlay's hardcoded `if overline / if strike / if underline`
+    /// chain so the painter can walk an ORDERED, per-line-coloured
+    /// request list instead (css-text-decor-3 §2.2). Every branch returns
+    /// exactly what the overlay computed inline before, so the
+    /// dark-stage 327 captures cannot move.
+    ///
+    /// `explicitThicknessPx` nil = `text-decoration-thickness: auto`
+    /// (css-text-decor-4 §2.4 initial) → the font-derived rules.
+    static func top(kind: DecorationColorOps.LineKind,
+                    ascentPx: CGFloat,
+                    fontSizePx: CGFloat,
+                    explicitThicknessPx: CGFloat?) -> CGFloat {
+        switch kind {
+        case .overline:
+            // Band BOTTOM flush with the line-box top; explicit swaps T in.
+            return explicitThicknessPx.map { DecorationOps.explicitOverlineTop(thicknessPx: $0) }
+                ?? overlineTop(fontSizePx: fontSizePx)
+        case .lineThrough:
+            // Strike CENTER is thickness-independent; the band straddles it.
+            return explicitThicknessPx.map {
+                DecorationOps.explicitLineThroughTop(ascentPx: ascentPx,
+                                                     fontSizePx: fontSizePx,
+                                                     thicknessPx: $0)
+            } ?? lineThroughTop(ascentPx: ascentPx, fontSizePx: fontSizePx)
+        case .underline:
+            // Gap under the snapped baseline: auto = the measured F·2/22
+            // rule, explicit = Blink's ref-pinned max(1, ceil(T/2)).
+            return explicitThicknessPx.map {
+                DecorationOps.explicitUnderlineTop(ascentPx: ascentPx, thicknessPx: $0)
+            } ?? underlineTop(ascentPx: ascentPx, fontSizePx: fontSizePx)
+        }
+    }
+
     /// Segments for a display string already hard-broken into rendered
     /// lines (the label's pre-broken `\n` runs; a non-pre-broken label
     /// is a single line — the same measurer covers it, per the lane

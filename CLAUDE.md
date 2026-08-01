@@ -108,8 +108,8 @@ machine-checked, not folklore:
   (`schema/spec/05-versioning.md`: v2 is the frozen current wire, v1
   deprecated; unknown property types are tolerated, unknown envelope keys
   are an error).
-- `schema/conformance/fixtures/` — 31 hand-authored golden IR documents
-  (12 v1 + 19 v2 under `fixtures/v2/`), decoded by conformance tests on
+- `schema/conformance/fixtures/` — 34 hand-authored golden IR documents
+  (12 v1 + 22 v2 under `fixtures/v2/`), decoded by conformance tests on
   **all four codebases** (converter, web, compose, swiftui).
 
 ```bash
@@ -254,12 +254,12 @@ Gradle commands need JDK 21):
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 195 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1035 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1385 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 784 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 778 |
-| IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
+| converter (Kotlin) | `./gradlew :converter:test` | 207 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1071 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1481 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 851 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 816 |
+| IR conformance | `node schema/conformance/run.mjs --emit` | 34 goldens (12 v1 + 22 v2) × 4 codebases |
 
 (`npm test` at the root runs every workspace's vitest suite — the web
 runtime plus the web-harness's own capture-pipeline tests.)

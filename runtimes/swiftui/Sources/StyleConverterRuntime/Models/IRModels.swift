@@ -190,6 +190,37 @@ public struct IRAttrs: Equatable {
     }
 }
 
+/// Wave-22 wire contract (lane DECOR) — ONE entry of the
+/// `meta.decorations` list a COLLAPSED inline run carries
+/// (schema/spec/04-metadata-fields.md; producer: the `_decorations`
+/// banner in tools/titan/extract-fixture.mjs).
+///
+/// The list is ORDERED OUTERMOST-FIRST — the css-text-decor-3 §2.1
+/// propagation order, so a descendant's line paints over its ancestors'
+/// where both land on the same row — and AUTHORITATIVE when present: it
+/// is the complete line set for the run, so the painter ignores the
+/// component's own `text-decoration-line` flags there.
+///
+/// Both members stay RAW WIRE STRINGS on purpose. `line` is one of the
+/// three §2.1 keywords (unknown ones survive decode and are dropped +
+/// logged at paint time, spec-05 tolerance rule 1); `color` is the CSS
+/// colour token AS AUTHORED ("blue", "#00f", "rgb(0,0,255)") — the
+/// converter does not normalize it to the IR sRGB leaf (see
+/// 04-metadata-fields.md for why), so resolution happens in
+/// `DecorationWire.decorationLines(from:)` via `CSSTokenParser`. A nil
+/// `color` is `currentColor` (§2.2 initial), never a silent drop.
+// public: read by the renderer's decoration overlay and by tests.
+public struct IRDecoration: Equatable {
+    public let line: String
+    public let color: String?
+
+    // internal: constructed by the decode paths and by tests.
+    init(line: String, color: String? = nil) {
+        self.line = line
+        self.color = color
+    }
+}
+
 /// Droppable renderer hints, grouped (v2 home of v1 `_tag` and `_role`).
 /// A consumer may ignore meta without correctness loss — unlike slot.
 // public: the renderer reads sourceTag for list-marker generation.
@@ -203,13 +234,21 @@ public struct IRMeta: Equatable {
     /// Wave-20 widget-identity capsule (`meta.attrs`, the `_tag`
     /// precedent) — nil for v1 documents and non-widget components.
     public let attrs: IRAttrs?
+    /// Wave-22 per-line decoration list (`meta.decorations`, same additive
+    /// meta channel) — nil for v1 documents and for every run the
+    /// extractor did not collapse. An EMPTY array never reaches here (the
+    /// schema pins minItems 1); emptiness only arises AFTER the paint-time
+    /// keyword filter, and it stays authoritative there.
+    public let decorations: [IRDecoration]?
 
-    // internal: constructed by the decode paths and by tests. The attrs
-    // default keeps every pre-wave-20 construction site compiling.
-    init(sourceTag: String? = nil, role: String? = nil, attrs: IRAttrs? = nil) {
+    // internal: constructed by the decode paths and by tests. The attrs /
+    // decorations defaults keep every earlier construction site compiling.
+    init(sourceTag: String? = nil, role: String? = nil, attrs: IRAttrs? = nil,
+         decorations: [IRDecoration]? = nil) {
         self.sourceTag = sourceTag
         self.role = role
         self.attrs = attrs
+        self.decorations = decorations
     }
 }
 
@@ -338,7 +377,15 @@ public struct IRComponent: Decodable {
                           // Wave-20: meta.attrs rides the lenient path too
                           // (standalone component decodes in tests) — the
                           // shared IRAttrs.from coercion, object-shaped only.
-                          attrs: rawMeta.attrs?.objectValue.map(IRAttrs.from))
+                          attrs: rawMeta.attrs?.objectValue.map(IRAttrs.from),
+                          // Wave-22: same for meta.decorations. Lenient
+                          // means lenient — a malformed entry is SKIPPED
+                          // here (the strict v2 reader is the one that
+                          // errors), and `line` is the only required part.
+                          decorations: rawMeta.decorations?.arrayValue?.compactMap { entry in
+                              guard let line = entry["line"]?.stringValue else { return nil }
+                              return IRDecoration(line: line, color: entry["color"]?.stringValue)
+                          })
         } else {
             let tag = try c.decodeIfPresent(String.self, forKey: ._tag)
             let role = try c.decodeIfPresent(String.self, forKey: ._role)
@@ -363,6 +410,11 @@ public struct IRComponent: Decodable {
         let sourceTag: String?
         let role: String?
         let attrs: IRValue?
+        // Wave-22 lane DECOR: the per-line decoration list rides the
+        // lenient path too (standalone component decodes in tests). Kept
+        // as an opaque IRValue here — the STRICT reader owns the shape
+        // errors; this path only coerces what it recognises.
+        let decorations: IRValue?
     }
 }
 

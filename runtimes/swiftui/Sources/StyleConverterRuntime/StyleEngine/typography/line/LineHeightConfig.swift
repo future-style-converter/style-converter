@@ -19,4 +19,12 @@ struct LineHeightConfig: Equatable {
     /// the IR couldn't pre-resolve to absolute pixels. The applier
     /// multiplies this by the rendered font-size at emit time.
     var multiplier: CGFloat? = nil
+    /// Wave 22 (lane FONT) — the author DECLARED the `normal` keyword
+    /// (css-fonts-4 §4.3: what `font: 92px Arial` resets line-height to).
+    /// Travels ALONGSIDE `multiplier` (the wire pairs the keyword with a legacy
+    /// 1.2 compatibility value), not instead of it: under WPT capture the flag
+    /// wins and the run uses the face's own metrics; elsewhere the number wins
+    /// so the committed dark-stage baselines stay byte-identical.
+    /// See LineHeightNormal.lineBoxSource for the full table + stated risk.
+    var isNormalKeyword: Bool = false
 }

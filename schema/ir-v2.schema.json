@@ -84,7 +84,7 @@
           "additionalProperties": false
         },
         "meta": {
-          "description": "Droppable renderer hints, grouped (v2 home of v1 `_tag` and `_role`; `attrs` added wave-20 under the spec-05 additive meta-key rule). A consumer may ignore meta without correctness loss — unlike slot, which MUST round-trip. Omitted when no member has a value; if present it is non-empty and strict.",
+          "description": "Droppable renderer hints, grouped (v2 home of v1 `_tag` and `_role`; `attrs` added wave-20 and `decorations` wave-22, both under the spec-05 additive meta-key rule). A consumer may ignore meta without correctness loss — unlike slot, which MUST round-trip; dropping `decorations` costs FIDELITY (a collapsed run paints the merged root-wins subset, never a superset), not correctness. Omitted when no member has a value; if present it is non-empty and strict.",
           "type": "object",
           "properties": {
             "sourceTag": {
@@ -111,6 +111,28 @@
                 ]
               },
               "minProperties": 1
+            },
+            "decorations": {
+              "description": "wave-22 per-line text decorations for a COLLAPSED inline run (v2 home of the extractor's `_decorations`, forwarded verbatim by the converter). Emitted ONLY when the extractor flattened a chain of decoration-only inline wrappers into one text run (tools/titan/extract-fixture.mjs, the `_decorations` banner). ORDER is OUTERMOST-FIRST — the css-text-decor-3 §2.1 propagation order, so a descendant's line paints over its ancestors' where both land on the same row. AUTHORITATIVE when present: this is the COMPLETE line set for the run, and a reader that honours it MUST ignore the component's own text-decoration-line flags (the surviving flat longhands are a root-wins merged bag kept for readers that drop meta). `color` is the CSS colour token AS AUTHORED — NOT the IR sRGB leaf: the converter does not normalize it (schema/spec/04-metadata-fields.md), each runtime resolves the token with its own CSS token parser. Omitted `color` = `currentColor` (css-text-decor-3 §2.2 initial), never a silent drop.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "line": {
+                    "description": "Exactly ONE css-text-decor-3 §2.1 line keyword. An element declaring two (`text-decoration: underline overline`) contributes TWO entries sharing one colour, so consumers never re-tokenise. `blink` and `none` never appear (they paint nothing).",
+                    "type": "string",
+                    "enum": ["underline", "overline", "line-through"]
+                  },
+                  "color": {
+                    "description": "The decorating box's `text-decoration-color` as AUTHORED ('blue', '#00f', 'rgb(0,0,255)'). Absent = currentColor.",
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": ["line"],
+                "additionalProperties": false
+              }
             }
           },
           "minProperties": 1,

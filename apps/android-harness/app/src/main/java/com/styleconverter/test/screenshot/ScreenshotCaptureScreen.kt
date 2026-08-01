@@ -1195,12 +1195,19 @@ private fun ComposedCaptureCanvas(
                 // are adjoining) and strip from its render like any other
                 // folded root, so its slot anchor stays the §8.3.1
                 // hypothetical position and nothing double-renders.
+                // Wave 22 (B-RC2): the classifier now also resolves `em`
+                // against the root's OWN declared FontSize (css-values-4
+                // §5.1.1 — the base rides the same property list), because
+                // dotted-001's three `margin: .5em; font-size: 92px` divs
+                // bailed on the relative flavor and painted 46+46 = 92px of
+                // inter-div space where the ref collapses to ONE 46px gap.
+                // StaticEmMargin.verticalEdges is a strict SUPERSET of
+                // BlockMarginCollapse.blockMarginsOrNull on non-em wires
+                // (pin E8), so every wave-19 R/S/T value is unchanged; the
+                // runtime's own §8.3.1 plan still uses the narrow
+                // classifier, keeping the dark-stage baseline byte-stable.
                 val staticEdges = if (isOutOfFlowRoot(root) && !staticPos) null else
-                    com.styleconverter.runtime.spacing.BlockMarginCollapse
-                        .blockMarginsOrNull(
-                            com.styleconverter.runtime.spacing.MarginExtractor
-                                .extract(root.properties.map { it.type to it.data })
-                        )?.let { it.topPx to it.bottomPx }
+                    StaticEmMargin.verticalEdges(root.properties)
                 rootStackMargin(root._tag, "top" in declared, "bottom" in declared, staticEdges)
                     // Transparency rides the SAME plan entry so the fold and
                     // the render agree on this root's (zero) flow footprint.
@@ -1283,7 +1290,20 @@ private fun ComposedCaptureCanvas(
             // The dynamic-value CompositionLocals above deliberately wrap
             // the host so hoisted boxes resolve %/media/keyframes exactly
             // like their in-flow siblings.
-            com.styleconverter.runtime.layout.position.CanvasRootHoist.Host(roots) {
+            // Wave 22 (B-RC3): the canvas extents are the containing block
+            // every hoisted box anchors in (fixed → viewport, css-position-3
+            // §3.2; ICB-anchored absolute → initial containing block, §3.1).
+            // They are needed only to resolve `right`/`bottom`-only insets
+            // from the END edge — 390×600 matches the browser-ref viewport
+            // (tools/titan/capture-browser-ref.mjs: setViewport 390×600 and
+            // the `min-height:100vh` floor this canvas mirrors through
+            // ComposedCanvasMinHeight), so the multicol `bottom:0; right:0`
+            // root lands at (290,500) exactly like the web oracle.
+            com.styleconverter.runtime.layout.position.CanvasRootHoist.Host(
+                roots,
+                canvasWidth = canvasWidth,
+                canvasHeight = ComposedCanvasMinHeight,
+            ) {
                 // Document flow: roots stacked top-to-bottom. FIX 1 injects the
                 // COLLAPSED UA-default vertical margins as Spacers between roots so
                 // the composed page reproduces the browser-ref's inter-`<p>` gaps

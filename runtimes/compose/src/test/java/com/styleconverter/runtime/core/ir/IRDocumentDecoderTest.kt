@@ -126,6 +126,68 @@ class IRDocumentDecoderTest {
         )
     }
 
+    // ── wave-22 lane DECOR: meta.decorations ─────────────────────────────
+
+    @Test
+    fun `v2 meta decorations decode in order with authored colour tokens`() {
+        // The live text-decoration-color__7-008 wire: three decorating
+        // boxes, outermost-first, colours AS AUTHORED (no sRGB leaf here —
+        // DecorationWire resolves the tokens at paint time).
+        val doc = IRDocumentDecoder.decode(
+            """{"irVersion":2,"minReaderVersion":2,"components":[
+                {"id":"a","name":"A","properties":[],"text":"run","meta":{"decorations":[
+                    {"line":"underline","color":"blue"},
+                    {"line":"overline","color":"gray"},
+                    {"line":"line-through"}]}}]}"""
+        )
+        val decorations = doc.components[0].decorations!!
+        assertEquals(3, decorations.size)
+        assertEquals(listOf("underline", "overline", "line-through"), decorations.map { it.line })
+        assertEquals(listOf("blue", "gray", null), decorations.map { it.color })
+    }
+
+    @Test
+    fun `v2 meta decorations tolerates an unknown line keyword at DECODE time`() {
+        // Spec 05 tolerance rule 1: an unknown keyword is a future contract,
+        // not a malformed envelope. The decoder keeps it raw; the paint-time
+        // filter (DecorationWire) drops + logs it. Erroring here would make
+        // a future §2.1 keyword unrenderable instead of merely unpainted.
+        val doc = IRDocumentDecoder.decode(
+            """{"irVersion":2,"minReaderVersion":2,"components":[
+                {"id":"a","name":"A","properties":[],"meta":{"decorations":[{"line":"spiral"}]}}]}"""
+        )
+        assertEquals("spiral", doc.components[0].decorations!![0].line)
+    }
+
+    @Test
+    fun `absent meta decorations stays null`() {
+        // Null (not empty!) is what makes "present but empty" meaningful.
+        val doc = IRDocumentDecoder.decode(
+            """{"irVersion":2,"minReaderVersion":2,"components":[
+                {"id":"a","name":"A","properties":[],"meta":{"sourceTag":"span"}}]}"""
+        )
+        assertNull(doc.components[0].decorations)
+    }
+
+    @Test
+    fun `v2 meta decorations rejects every malformed SHAPE`() {
+        val head = """{"irVersion":2,"minReaderVersion":2,"components":[
+            {"id":"a","name":"A","properties":[],"meta":{"decorations":"""
+        // Not an array.
+        expectError("""$head{"line":"underline"}}}]}""", "must be an array")
+        // Empty array — the converter omits the key instead (minItems 1).
+        expectError("""$head[]}}]}""", "minItems")
+        // Entry not an object.
+        expectError("""$head["underline"]}}]}""", "must be objects")
+        // Unknown entry key (schema: additionalProperties false).
+        expectError("""$head[{"line":"underline","style":"wavy"}]}}]}""", "style")
+        // Missing / non-string `line`.
+        expectError("""$head[{"color":"blue"}]}}]}""", "line")
+        expectError("""$head[{"line":7}]}}]}""", "line")
+        // Non-string `color` — colour tokens are authored CSS text.
+        expectError("""$head[{"line":"underline","color":7}]}}]}""", "color")
+    }
+
     @Test
     fun `v2 component missing name errors`() {
         expectError(

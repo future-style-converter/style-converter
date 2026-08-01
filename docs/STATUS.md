@@ -21,7 +21,7 @@ the full history lives in git history.
   slot/placement wire); the JSON is machine-checked against
   `schema/ir-v2.schema.json` (`schema/ir-v1.schema.json` is the deprecated
   legacy contract for the `--emit-ir v1` compat wire) + the normative spec
-  in [`schema/spec/`](../schema/spec/); 31 golden fixtures (12 v1 + 19 v2)
+  in [`schema/spec/`](../schema/spec/); 34 golden fixtures (12 v1 + 22 v2)
   are decoded by conformance tests on all four codebases
   (`node schema/conformance/run.mjs`).
 
@@ -405,17 +405,36 @@ dirs + WPT corpus are gitignored):
   position all perfect on all three platforms, css-multicol web+iOS
   12/12, css-images 12/11/11, zero pass-regressions, 327-net clean.
   Corpus totals: **web 163/174, iOS 148/174, Android 146/174**.
+  Wave 22 (`tools/titan/results/corpus-v4-11.json`): **css-ui 12/12 on
+  all three platforms** — the sixth perfect section, from 2/9 when the
+  widget wall was first hit — and **css-multicol joins at 12/12** (the
+  seventh). The native widget band was precision-diffed against the
+  pixel-exact web oracle: UA-metric label fonts, the range atom's
+  missing Blink UA margin, ref-probed ink constants, `:not()` selector
+  support in the extractor (menulist-button web 0.554→1.000), and
+  intrinsic-widget empty bags — every alias test now 0.994/0.995 on the
+  natives. Compose's bottom/right inset anchoring bug fixed
+  (`bottom:0;right:0` resolved to the top-left corner). The decorations
+  seam landed end-to-end (extractor → converter meta hop → schema →
+  native decoders → per-line-color painters → web nested spans), with
+  the full 148-name CSS color table now shared by both natives —
+  including CSS-correct gray/darkgray/lightgray (Compose had mapped
+  them to its built-in constants). The `font:` shorthand emits its
+  line-height reset; em margins statically resolve; 52 fixture stem
+  collisions disambiguated; post-load extraction folds
+  collapsed-wrapper records. Zero pass-regressions; 327-net clean.
+  Corpus totals: **web 165/174, Android 156/174, iOS 155/174**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 195 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1035 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1385 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 784 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 778 |
-| IR conformance | `node schema/conformance/run.mjs --emit` | 31 goldens (12 v1 + 19 v2) × 4 codebases |
+| converter (Kotlin) | `./gradlew :converter:test` | 207 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1071 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1481 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 851 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 816 |
+| IR conformance | `node schema/conformance/run.mjs --emit` | 34 goldens (12 v1 + 22 v2) × 4 codebases |
 
 ## Roadmap
 

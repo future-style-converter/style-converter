@@ -454,10 +454,25 @@ test('corpus-v4.1 line-height: swiftui ref line box is 20 and stays WPT-gated + 
   // The calibration constant mirrors the ref pin (16px root x 1.25 = 20).
   assert.match(renderer, /public static let wptRefLineBoxPx: CGFloat = 20/,
     'swiftui ref line box must be the corpus-v4.1 20px');
-  // The gate shape is unchanged: IR-declared wins, then WPT-mode-only pin,
-  // else nil (SwiftUI natural metrics — the untouched product/baseline path).
-  assert.match(renderer, /if let declared \{ return declared \}/,
+  // The gate shape: IR-declared wins, then WPT-mode-only pin, else nil
+  // (SwiftUI natural metrics — the untouched product/baseline path).
+  //
+  // Wave 22 (lane FONT) re-expressed the same decision as a `switch` over the
+  // shared `LineHeightNormal.lineBoxSource`, which added the third
+  // declared-`normal` state. The old literal `if let declared { return
+  // declared }` pin no longer exists, so it is pinned here in its new form —
+  // same three guarantees, one more row.
+  assert.match(renderer, /case \.declared:\s*\n\s*return declared!/,
     'swiftui IR line-height deferral missing');
+  assert.match(renderer, /LineHeightNormal\.lineBoxSource\(hasDeclaredValue: declared != nil/,
+    'swiftui line-box pick must delegate to the shared three-state decision');
+  // Declared `normal` (the `font` shorthand reset, css-fonts-4 §4.3) routes to
+  // the face's own metrics — nil, NOT the 20pt pin — so the single-line
+  // maxHeight cap is released with it.
+  assert.match(renderer, /case \.natural:\s*\n\s*return nil/,
+    'swiftui declared-normal must fall through to natural face metrics');
+  // The ABSENT-line-height row is the one the whole corpus and all 327
+  // committed baselines ride: pinned under WPT capture, nil elsewhere.
   assert.match(renderer, /return wptCaptureMode \? wptRefLineBoxPx : nil/,
     'swiftui line-box pin must stay WPT-mode-gated with a nil product path');
 });

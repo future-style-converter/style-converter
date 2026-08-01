@@ -121,6 +121,19 @@ object PositionApplier {
      * which already handles precedence rules (left over right, top over bottom).
      */
     private fun applyOffset(modifier: Modifier, config: PositionConfig): Modifier {
+        // Wave 22 (B-RC3): these offsets are SIGNED insets from whichever
+        // anchor the box's declared sides select — positive from the start
+        // (left/top) anchor, NEGATIVE from the end (right/bottom) anchor
+        // (css-position-3 §3.5.3). Choosing the anchor is deliberately NOT
+        // this modifier's job: it has no containing-block extent and no
+        // measured box size. The mounting slot owns it — CanvasRootHoist's
+        // overlay anchors an end-only-inset box flush with the canvas edge
+        // (cb − box) and this modifier's `−right` then pulls it inward to
+        // the CSS used position cb − box − right. iOS composes the same two
+        // halves (PositionApplier.anchoredInsetOffset: a `.trailing`/
+        // `.bottom` frame alignment plus the identical negated offset), so
+        // the two natives share one rule table. Where no slot resolves an
+        // extent, the start anchor is kept — EndInsetAnchor's A4.
         val x = config.offsetX
         val y = config.offsetY
 

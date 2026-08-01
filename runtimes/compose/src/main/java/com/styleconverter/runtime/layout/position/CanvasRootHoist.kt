@@ -21,6 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Constraints
+// Dp for the wave-22 canvas extents (converted to device px inside the
+// anchor's Density receiver — see zeroFlowAnchor).
+import androidx.compose.ui.unit.Dp
 // IR model — the hoist decision and the descendant walk are PURE over the IR
 // (JVM-pinned by CanvasRootHoistTest, no Robolectric in this repo).
 import com.styleconverter.runtime.core.ir.IRComponent
@@ -314,16 +317,32 @@ object CanvasRootHoist {
      * internal: ComponentRenderer rides it on the itemModifier channel for
      * the static-position branch, exactly like Host does for the overlay.
      */
-    internal fun zeroFlowAnchor(): Modifier = Modifier.layout { measurable, _ ->
+    internal fun zeroFlowAnchor(
+        // Wave 22 (B-RC3) — the containing block's END edges in this slot's
+        // own coordinate space, or null to keep the slot origin. Non-null
+        // ONLY for an overlay slot whose box anchors from `right`/`bottom`
+        // and whose containing-block extent is known (see [canvasAnchor] +
+        // [EndInsetAnchor]); the defaults keep every existing call site —
+        // ComponentRenderer's RC1 static-position mount and every hoisted
+        // start-anchored box — byte-identical to wave 17/18.
+        endEdgeX: Dp? = null,
+        endEdgeY: Dp? = null,
+    ): Modifier = Modifier.layout { measurable, _ ->
         // Unbounded measure — the box is sized by its own properties alone.
         val placeable = measurable.measure(Constraints())
         // Report zero on both axes: no flow/canvas growth from the ink.
         layout(hoistedFlowReportPx(), hoistedFlowReportPx()) {
-            // Anchor at the slot origin; for hoisted boxes the child's
-            // inset offset does the rest (F1/F2 anchor semantics — insets,
-            // not deltas), for static-position boxes the slot origin IS
-            // the final paint origin.
-            placeable.place(0, 0)
+            // Anchor at the slot origin (start-anchored / static-position
+            // boxes: the child's own inset offset does the rest — F1/F2
+            // anchor semantics, insets not deltas), or flush with the
+            // containing block's END edge when the box declares only
+            // `right`/`bottom` (A5). Dp→px here, inside the Density
+            // receiver, so the arithmetic is in the same device-px space
+            // as placeable.width/height at any screen density.
+            placeable.place(
+                x = EndInsetAnchor.placePx(endEdgeX?.toPx(), placeable.width),
+                y = EndInsetAnchor.placePx(endEdgeY?.toPx(), placeable.height),
+            )
         }
     }
 
@@ -331,8 +350,32 @@ object CanvasRootHoist {
      * The overlay slot's anchor — the shared [zeroFlowAnchor] applied at
      * the host Box's top-left (the unpadded canvas origin). Kept as its
      * own name so the Host wiring reads as the wave-17 contract it pins.
+     *
+     * Wave 22 (B-RC3): a hoisted box whose only inset on an axis is
+     * `right`/`bottom` anchors at the CANVAS's end edge instead, because
+     * for these boxes the canvas IS the containing block (fixed → the
+     * viewport, css-position-3 §3.2; ICB-anchored absolute → the initial
+     * containing block, §3.1 — both are the 390×600 capture canvas the
+     * browser-ref is captured at). Without the canvas extents (a caller
+     * that does not pass them) the start anchor is kept — A4's documented
+     * degradation, identical to wave 17/18 behavior.
      */
-    private fun canvasAnchor(): Modifier = zeroFlowAnchor()
+    private fun canvasAnchor(
+        properties: List<IRProperty>,
+        canvasWidth: Dp?,
+        canvasHeight: Dp?,
+    ): Modifier {
+        // Read the insets through the SAME extractor the live style chain
+        // uses, so the anchor and the offset can never disagree about
+        // which sides are declared.
+        val config = PositionExtractor.extractPositionConfig(properties.map { it.type to it.data })
+        return zeroFlowAnchor(
+            // A1/A2/A3: only an end-only axis gets an end edge; A4: a null
+            // extent keeps the start anchor. One rule table, one owner.
+            endEdgeX = EndInsetAnchor.endEdge(config.anchorsFromEndX, canvasWidth),
+            endEdgeY = EndInsetAnchor.endEdge(config.anchorsFromEndY, canvasHeight),
+        )
+    }
 
     /**
      * The canvas-root host. Wrap the document content (INCLUDING its canvas
@@ -344,7 +387,19 @@ object CanvasRootHoist {
      * this Box — the existing z-order machinery, unchanged.
      */
     @Composable
-    fun Host(roots: List<IRComponent>, content: @Composable () -> Unit) {
+    fun Host(
+        roots: List<IRComponent>,
+        // Wave 22 (B-RC3) — the capture canvas's extents, i.e. the
+        // containing block every hoisted box anchors in (fixed → viewport,
+        // css-position-3 §3.2; ICB-anchored absolute → the initial
+        // containing block, §3.1 — both are the canvas). Needed ONLY to
+        // resolve `right`/`bottom`-only insets from the END edge; nulls
+        // keep the wave-17/18 start anchor for every box (A4). Defaulted so
+        // any caller that has no canvas geometry compiles unchanged.
+        canvasWidth: Dp? = null,
+        canvasHeight: Dp? = null,
+        content: @Composable () -> Unit,
+    ) {
         // Pure walks, memoized on the document identity.
         val hoisted = remember(roots) { collectCanvasHoisted(roots) }
         // Wave 21 (A-RC7): activation is BROADER than the overlay — see
@@ -388,7 +443,14 @@ object CanvasRootHoist {
                     // modifier rides the itemModifier channel (outermost
                     // slot), exactly like absposOverflowMeasure does.
                     com.styleconverter.runtime.core.renderer.ComponentRenderer
-                        .RenderComponent(node, itemModifier = canvasAnchor())
+                        .RenderComponent(
+                            node,
+                            // Per-node anchor (wave 22): start-anchored
+                            // boxes keep the (0,0) canvas origin; an
+                            // end-only-inset box anchors flush with the
+                            // canvas's right/bottom edge.
+                            itemModifier = canvasAnchor(node.properties, canvasWidth, canvasHeight),
+                        )
                 }
             }
         }

@@ -418,4 +418,61 @@ class CssParsingTextAndChildrenTest {
             "v1 serializer must not emit attrs in any spelling"
         )
     }
+
+    /**
+     * wave-22 lane DECOR: `_decorations` (the collapsed inline run's ordered
+     * per-line decoration list) is parsed into the IRComponent's
+     * `decorations` field VERBATIM — entry ORDER, `line` keyword spelling
+     * and the AUTHORED colour token all survive untouched, because the
+     * converter must not normalize what the runtimes' own CSS token parsers
+     * resolve (schema/spec/04-metadata-fields.md). Same v1 freeze rule as
+     * `_attrs`: the deprecated serializer ignores the field entirely.
+     */
+    @Test
+    fun `_decorations is parsed verbatim and ignored by the v1 serializer`() {
+        // The live text-decoration-color__7 shape: three nested decorating
+        // boxes collapsed onto one run, outermost-first.
+        val input = json.parseToJsonElement(
+            """
+            {
+              "components": {
+                "run__0": {
+                  "properties": { "text-decoration": "underline" },
+                  "_text": "collapsed run",
+                  "_decorations": [
+                    { "line": "underline", "color": "blue" },
+                    { "line": "overline", "color": "gray" },
+                    { "line": "line-through" }
+                  ]
+                }
+              }
+            }
+            """.trimIndent()
+        ).jsonObject
+
+        val ir = cssParsing(input)
+        // In-memory model carries the array byte-verbatim (opaque payload).
+        val decorations = ir.components[0].decorations
+        assertNotNull(decorations, "Expected decorations forwarded onto IRComponent")
+        assertEquals(3, decorations.size, "every entry survives — no filtering here")
+        // ORDER is outermost-first and must not be re-sorted.
+        assertEquals("underline", decorations[0].jsonObject["line"]!!.jsonPrimitive.content)
+        assertEquals("overline", decorations[1].jsonObject["line"]!!.jsonPrimitive.content)
+        assertEquals("line-through", decorations[2].jsonObject["line"]!!.jsonPrimitive.content)
+        // Colour tokens stay AUTHORED (no sRGB leaf, no re-spelling)…
+        assertEquals("blue", decorations[0].jsonObject["color"]!!.jsonPrimitive.content)
+        assertEquals("gray", decorations[1].jsonObject["color"]!!.jsonPrimitive.content)
+        // …and an omitted colour stays omitted (currentColor, §2.2 initial).
+        assertTrue(
+            "color" !in decorations[2].jsonObject,
+            "an uncoloured entry must not gain a synthesized colour"
+        )
+
+        // The frozen v1 wire never learns about decorations (historical-drop).
+        val outString = Json { prettyPrint = false }.encodeToString(ir)
+        assertTrue(
+            !outString.contains("_decorations") && !outString.contains("\"decorations\""),
+            "v1 serializer must not emit decorations in any spelling"
+        )
+    }
 }

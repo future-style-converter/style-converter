@@ -97,6 +97,11 @@ import {
   FOREIGN_NS_MARKER_ATTR,
   extractFixture, writeFixturePair,
 } from './extract-fixture.mjs';
+// The ONE canonical fixture-stem derivation (wave-21 collision fix): the
+// overlay/structure paths reconstruct component ids as `<stem>__N…` and must
+// use the SAME subdir-encoded stem extractFixture seeded buildComponents
+// with — see the two derivation sites in postLoadAugmentFixture.
+import { fixtureStem } from './safe-name.mjs';
 // The browser-ref capture's rendering contract: same launch flags, same
 // 390-wide white canvas + pad, same Inter face embed + line-height pin —
 // computed geometry must be measured under the environment the ref PNGs
@@ -651,12 +656,22 @@ export function componentAtPath(fixture, stem, path) {
  *     joins the list — widget identity is structural, not computed state,
  *     and the overlay only ever writes into `properties`).
  */
-export function overlayComputedOnComponent(cmp, styles) {
+export function overlayComputedOnComponent(cmp, styles, opts = {}) {
   const props = cmp.properties ?? (cmp.properties = {});
-  // Shorthand strip — see the SHORTHAND_CONFLICTS doc for the loss note.
-  for (const sh of SHORTHAND_CONFLICTS) delete props[sh];
+  // Wave 22 — `onlyMissing` is the collapsed-wrapper fold mode (see
+  // mergePostLoadIntoFixture): an absorbed element's record must never
+  // overwrite state the absorbing component already carries, and it must
+  // not strip the ancestor's shorthands either (the ancestor's OWN record
+  // handles its own conflicts in normal overlay mode).
+  if (!opts.onlyMissing) {
+    // Shorthand strip — see the SHORTHAND_CONFLICTS doc for the loss note.
+    for (const sh of SHORTHAND_CONFLICTS) delete props[sh];
+  }
   // Enumerated overlay with delete-not-write defaults.
   for (const name of POST_LOAD_COMPUTED_PROPERTIES) {
+    // Fold mode: existing keys win — the absorbing component's authored
+    // + own-record state has precedence over an absorbed wrapper's.
+    if (opts.onlyMissing && props[name] !== undefined) continue;
     const v = styles[name];
     const rule = WRITE_RULES[name];
     // Missing value (defensive — walker always supplies all names): skip.
@@ -691,10 +706,35 @@ export function overlayComputedOnComponent(cmp, styles) {
 export function mergePostLoadIntoFixture(fixture, stem, records) {
   let overlaid = 0; // how many components actually received computed state
   for (const rec of records) {
-    const cmp = componentAtPath(fixture, stem, rec.path);
-    // mappingMismatch() ran before merge, so a miss here is a programming
-    // error — fail LOUDLY rather than silently under-overlaying.
-    if (!cmp) throw new Error(`post-load merge: no component at path ${rec.path.join('.')}`);
+    let cmp = componentAtPath(fixture, stem, rec.path);
+    // Wave 22 — the inline-chain collapse (extract-fixture collapseInlineRun)
+    // absorbs pure decoration wrappers (<s>/<u>/… ) into their parent's
+    // text run, so the live DOM's element walk has MORE nodes than the
+    // fixture tree at exactly those paths. When the record's own path has
+    // no component but the NEAREST MAPPED ANCESTOR carries the collapse
+    // marker (`_decorations`), the element was absorbed by design: fold
+    // its computed state into that ancestor with ancestor-wins precedence
+    // (the ancestor's own record overlays LATER in walk order and would
+    // overwrite conflicts anyway — but we guard explicitly by only
+    // writing keys the ancestor does not already carry from ITS record).
+    // This is honest, not a silent skip: the wrapper's post-script state
+    // that MATTERS (decoration color via currentColor, the recalc-002
+    // shape) is exactly the state the collapse hoisted onto the parent.
+    if (!cmp) {
+      for (let cut = rec.path.length - 1; cut >= 1 && !cmp; cut--) {
+        const anc = componentAtPath(fixture, stem, rec.path.slice(0, cut));
+        if (anc && anc._decorations) cmp = anc;
+      }
+      if (cmp) {
+        overlayComputedOnComponent(cmp, rec.styles, { onlyMissing: true });
+        overlaid++;
+        continue;
+      }
+      // No collapse ancestor either — mappingMismatch() ran before merge,
+      // so this is a programming error: fail LOUDLY rather than silently
+      // under-overlaying.
+      throw new Error(`post-load merge: no component at path ${rec.path.join('.')}`);
+    }
     overlayComputedOnComponent(cmp, rec.styles);
     overlaid++;
   }
@@ -824,7 +864,12 @@ export async function postLoadAugmentFixture(fixture, testRel) {
       // fixture's STRUCTURE from the settled live DOM (see the structure
       // section above). Everything else keeps the wave-16 bail.
       if (shouldStructureExtract((await notApplicableIndex())[testRel], mismatch)) {
-        const stem = testRel.split('/').pop().replace(/\.html$/, '');
+        // wave-21 collision fix: the stem MUST be the same subdir-encoded
+        // fixtureStem() extractFixture seeded buildComponents' idPrefix
+        // with — component ids in the fixture are `<stem>__N…`, so a bare
+        // basename here would rebuild the structure under ids the fixture
+        // doesn't contain for every nested test.
+        const stem = fixtureStem(testRel);
         // `await` is load-bearing: a bare `return promise` inside this
         // try/finally would run the finally (page.close) BEFORE the structure
         // path finished evaluating against that very page.
@@ -832,8 +877,10 @@ export async function postLoadAugmentFixture(fixture, testRel) {
       }
       return { status: 'bailed', reason: `element-mapping-mismatch (${mismatch})` };
     }
-    // Delivered — overlay + stamp.
-    const stem = testRel.split('/').pop().replace(/\.html$/, '');
+    // Delivered — overlay + stamp. wave-21 collision fix: componentAtPath
+    // reconstructs ids as `<stem>__N…`, so the stem must be the SAME
+    // subdir-encoded fixtureStem() the fixture's ids were built from.
+    const stem = fixtureStem(testRel);
     const overlaid = mergePostLoadIntoFixture(fixture, stem, snap2.records);
     return { status: 'extracted', overlaid, records: snap2.records };
   } finally {

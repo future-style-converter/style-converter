@@ -22,6 +22,11 @@
 //   fixtures/wpt/<spec-section>/<test-stem>.json          (the test)
 //   fixtures/wpt/<spec-section>/<test-stem>__ref.json     (the reference)
 //
+//   <test-stem> is safe-name.mjs's fixtureStem(): the bare basename for
+//   top-level tests, and the `<subdir>__…__<basename>` subdir-encoded form
+//   for nested tests (wave-21 collision fix — equal basenames in different
+//   subdirs used to flatten to one file and silently overwrite each other).
+//
 // Performance: tens of files per second is enough for Phase-1 smoke (100
 // tests). Phase 2 will batch this up into a streaming pass for the full
 // 10k-test bucket-A.
@@ -72,6 +77,12 @@
 import { promises as fs } from 'node:fs';
 import { resolve, dirname, join, relative, basename, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// The ONE canonical fixture-stem derivation (wave-21 collision fix): encodes
+// a nested test's subdirectory chain into the stem (`flexbox__monolithic-
+// overflow-001.tentative`) so two tests with equal basenames in different
+// subdirs can never overwrite each other's fixtures/wpt/<section>/ files.
+// Top-level tests keep the historical bare basename. See safe-name.mjs.
+import { fixtureStem } from './safe-name.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -806,6 +817,522 @@ export function isPureInlineMergeable(tag, attrs, innerHtml, styledTags = null) 
   //    the element must exist as a component to receive them.
   if (styledTags && styledTags.has(tag)) return false;
   return true;
+}
+
+// ── wave-22 EX2 B-RC4a: the scoped inline-chain collapse ────────────────────
+//
+// MEASURED PROBLEM (runs/wave21-final/sections/css-text-decor):
+//   css-text-decor/text-decoration-color.html wraps ONE sentence in three
+//   nested styled spans —
+//     <div><span id=blue-underline><span id=gray-overline>
+//          <span id=green-line-through>…text…</span></span></span></div>
+//   Each span carries an `id`, so wave-12's isPureInlineMergeable refuses
+//   them (rule 3: any attribute disqualifies) and the extractor emits FOUR
+//   stacked block components — one empty div plus three ever-narrower
+//   boxes, only the innermost holding text. The ref paints ONE line with
+//   three decoration lines over it. Result: web-ref 0.708, ios-ref 0.495,
+//   android-ref 0.493 — the worst trio in the section.
+//   text-decoration-inset-001/002 (`<h1>the quick <u>brown</u> fox</h1>`)
+//   is the same disease in its other form: the <u> is styled so it stays a
+//   component, h1's own text glues to 'the quick fox', and the wave-21
+//   B-RC9a honesty flag 'inline-run-reordered' fires because our paint
+//   order (quick→fox→brown) is not the browser's (quick→brown→fox).
+//
+// THE COLLAPSE: when EVERY element in a node's subtree is a decoration-only
+// inline wrapper, the whole subtree is ONE inline formatting run — CSS
+// Text §3 / CSS Text Decoration 3 §1.3 ("decorating box"): the run's text
+// is a single sequence and each ancestor's decoration lines all paint over
+// the text they contain. So we flatten the subtree to ONE text run (in
+// document order — no reorder, hence the B-RC9a flag is cleared) and hoist
+// the decorations onto `_decorations`.
+//
+// WIRE CONTRACT (`_decorations` → IR v2 `meta.decorations`; the extension
+// point spec/04-metadata-fields.md sanctions, same lane as wave-20's
+// `_attrs` → `meta.attrs`) — the MINIMAL shape, consumed by lane DECOR:
+//
+//   _decorations: [ { line: "underline", color: "blue" },
+//                   { line: "overline",  color: "gray" },
+//                   { line: "line-through", color: "green" } ]
+//
+//   * ORDER is outermost-first (the collapse root, then each wrapper from
+//     outside in) — the paint order CSS Text Decoration 3 §1.3 gives.
+//   * `line` is exactly ONE line keyword; an element declaring two
+//     (`text-decoration: underline overline`) contributes two entries with
+//     the same color, so consumers never have to re-tokenise.
+//   * `color` is the CSS colour TOKEN as authored, and it STAYS authored
+//     all the way to the runtimes. The converter does NOT normalise it to
+//     the IR sRGB leaf the way it does for a real `text-decoration-color`
+//     DECLARATION: `meta` members are extractor-owned payloads forwarded
+//     verbatim (the wave-20 `meta.attrs` precedent), so the converter
+//     never interprets this object. Each runtime resolves the token with
+//     its own CSS token parser at decode time — `CSSTokenParser.color` on
+//     iOS, `ValueExtractors.parseCssColorLiteral` on Compose (both via
+//     the DecorationWire twins), and the browser itself on web, where the
+//     token goes straight back into a `text-decoration-color`
+//     declaration. Rationale + the known parser-coverage gap:
+//     schema/spec/04-metadata-fields.md.
+//     Omitted when the run resolves to `currentColor`, which is the CSS
+//     initial value (css-text-decor-3 §2.2) — absence means "use the text
+//     colour", it is never a silent drop.
+//   * AUTHORITATIVE when present: `meta.decorations` is the complete set of
+//     lines for the run. The flat `text-decoration*` longhands that survive
+//     on the component are the merged bag old readers already understood
+//     (see the root-wins merge below), so a reader that ignores the key
+//     paints a SUBSET, never a superset — no double-painting either way.
+//
+// The tag list is deliberately TINY. These six are the inline wrappers
+// whose only visual contribution IS a text decoration, so flattening the
+// run cannot lose a font/weight/baseline effect. em/strong/b/i (weight and
+// slant), small/big/code (font), sub/sup (baseline), a/abbr/mark (UA
+// chrome) are all excluded: a chain containing one keeps today's shape.
+export const INLINE_CHAIN_TAGS = new Set([
+  'span', 'u', 's', 'strike', 'ins', 'del',
+]);
+
+// UA decoration defaults, HTML Rendering §15.3.6 ("Phrasing content"):
+//   u, ins { text-decoration: underline }
+//   s, strike, del { text-decoration: line-through }
+// The extractor models no UA stylesheet, so without this table a
+// `<u>`-wrapped run carries text-decoration-COLOR (authored) and no LINE
+// at all — which is precisely why text-decoration-inset-001 renders 'brown'
+// with zero underline today. Used ONLY inside the collapse (see the
+// uaDerived flag below), so no non-collapsed component's flat bag changes.
+const UA_DECORATION_LINE = {
+  u: 'underline', ins: 'underline',
+  s: 'line-through', strike: 'line-through', del: 'line-through',
+};
+
+// css-text-decor-3 §2.1 `text-decoration-line` keywords we model. `blink`
+// is in the grammar but paints nothing static; `none` is handled as the
+// explicit "this element contributes no line" answer, not as a keyword.
+const DECORATION_LINE_KEYWORDS = new Set(['underline', 'overline', 'line-through']);
+
+// css-text-decor-3 §2.3 `text-decoration-style` keywords — recognised only
+// so the shorthand tokeniser can tell a style token from a COLOUR token.
+const DECORATION_STYLE_KEYWORDS = new Set(['solid', 'double', 'dotted', 'dashed', 'wavy']);
+
+// The property allow-list a chain LINK may declare. Everything here is
+// text-decoration state that the collapse either hoists into
+// `_decorations` or folds into the collapsed component's flat bag; a link
+// declaring ANY other property (a colour, a font, a box property) refuses
+// the collapse, which is what keeps the merged flat bag exactly equivalent
+// to the pre-collapse per-component bags. Includes the -webkit- alias
+// because the corpus authors it beside the standard one (dotted-001/002).
+const DECORATION_FAMILY_PROPS = new Set([
+  'text-decoration', '-webkit-text-decoration',
+  'text-decoration-line', 'text-decoration-color', 'text-decoration-style',
+  'text-decoration-thickness', 'text-decoration-inset', 'text-decoration-skip',
+  'text-decoration-skip-ink', 'text-underline-offset', 'text-underline-position',
+]);
+
+// Attributes a chain link may carry. id/class/style are selector fuel that
+// propsForElement has ALREADY consumed into the resolved bag we check, and
+// lang/title are non-visual. Anything else (notably `dir`, which flips
+// bidi, and any presentational attribute) refuses the collapse.
+const INLINE_CHAIN_ALLOWED_ATTRS = new Set(['id', 'class', 'style', 'lang', 'title']);
+
+// UA heading metrics, HTML Rendering §15.3.7. Baked to PIXELS against the
+// 16px root default the browser-ref pins (capture-browser-ref pins
+// font-family + line-height on html/body but leaves font-size at the UA
+// 16px), because an `em` value would land in the IR as `null` (the
+// runtime-dependent rule in schema/spec/02-values.md) and paint nothing.
+//   h1 { font-size: 2em; margin-block: 0.67em; font-weight: bold }
+// → 32px font, 0.67 × 32px = 21.44px block margins.
+const UA_H1_PROPS = {
+  'font-size': '32px', 'font-weight': 'bold',
+  'margin-top': '21.44px', 'margin-bottom': '21.44px',
+};
+// Guard keys: if the collapse root already declares any of these, the UA
+// default is not the used value and we must not invent one.
+const UA_H1_GUARD_PROPS = [
+  'font-size', 'font', 'font-weight', 'margin', 'margin-top', 'margin-bottom',
+  'margin-block', 'margin-block-start', 'margin-block-end',
+];
+
+/**
+ * Paren-aware top-level whitespace tokeniser for a shorthand value, so
+ * `dotted rgb(255, 0, 0) underline` yields three tokens instead of five.
+ * (splitCompounds does the same job for selectors; kept separate because
+ * that one also has to honour selector syntax.)
+ */
+function splitValueTokens(value) {
+  const out = [];
+  let buf = '';
+  let depth = 0;
+  for (const c of String(value)) {
+    if (c === '(') { depth++; buf += c; continue; }
+    if (c === ')') { depth--; buf += c; continue; }
+    if (/[\s,]/.test(c) && depth === 0) { if (buf) { out.push(buf); buf = ''; } continue; }
+    buf += c;
+  }
+  if (buf) out.push(buf);
+  return out;
+}
+
+/**
+ * Resolve ONE element's contribution to a collapsed run's decorations.
+ * Returns `{ lines: string[], color: string|null, uaDerived: boolean }`.
+ *
+ * Cascade order mirrors css-text-decor-3 §2: the `text-decoration-line`
+ * longhand wins over the `text-decoration` shorthand's line component (the
+ * props bag is already cascade-ordered by propsForElement, but a bag may
+ * legitimately hold both, and the longhand is the more specific answer);
+ * `text-decoration-color` likewise wins over the shorthand's colour.
+ * `none` is an explicit answer meaning "this element contributes nothing"
+ * — per §2.1 it never removes an ANCESTOR's decoration, so we simply emit
+ * no entry for this element rather than clearing the list.
+ *
+ * `uaDerived` marks a line that came from UA_DECORATION_LINE rather than
+ * an authored declaration — the caller keeps those OUT of the flat
+ * property bag (see the fold below) so no non-collapsed rendering path
+ * gains a line the pre-wave-22 fixtures never carried.
+ *
+ * Exported so the unit tests can pin the contract.
+ */
+export function decorationContribution(tag, props) {
+  // Shorthand tokens, if any — used as the fallback source for both the
+  // line list and the colour.
+  const shorthand = props['text-decoration'] ?? props['-webkit-text-decoration'];
+  const shTokens = shorthand ? splitValueTokens(shorthand).map((t) => t.toLowerCase()) : [];
+  // Line list: longhand first, else the shorthand's line keywords.
+  const lineSrc = props['text-decoration-line'];
+  let lines = [];
+  let explicit = false;
+  if (typeof lineSrc === 'string') {
+    explicit = true;
+    lines = splitValueTokens(lineSrc)
+      .map((t) => t.toLowerCase())
+      .filter((t) => DECORATION_LINE_KEYWORDS.has(t));
+  } else if (shTokens.length) {
+    // A shorthand is present: it always sets the line component (to `none`
+    // when no keyword appears), so this element's answer is explicit.
+    explicit = true;
+    lines = shTokens.filter((t) => DECORATION_LINE_KEYWORDS.has(t));
+  }
+  // No authored line anywhere → fall back to the UA sheet for u/s/ins/del.
+  let uaDerived = false;
+  if (!explicit && UA_DECORATION_LINE[tag]) {
+    lines = [UA_DECORATION_LINE[tag]];
+    uaDerived = true;
+  }
+  // Colour: longhand wins; else the shorthand's non-line, non-style,
+  // non-thickness token (css-text-decor-3 §2.5 orders the shorthand's
+  // components freely, so identify the colour by elimination).
+  let color = props['text-decoration-color'] ?? null;
+  if (!color && shTokens.length) {
+    const raw = shorthand ? splitValueTokens(shorthand) : [];
+    for (let i = 0; i < raw.length; i++) {
+      const t = shTokens[i];
+      if (DECORATION_LINE_KEYWORDS.has(t) || DECORATION_STYLE_KEYWORDS.has(t)) continue;
+      if (t === 'none' || t === 'blink') continue;
+      // A bare number/length is the (css-text-decor-4) thickness slot.
+      if (/^-?[\d.]/.test(t) || t === 'auto' || t === 'from-font') continue;
+      color = raw[i]; // preserve the AUTHORED casing/spacing of the token
+      break;
+    }
+  }
+  return { lines, color, uaDerived };
+}
+
+/**
+ * Flatten an HTML fragment to its text content, tags removed, in document
+ * order. Used to build a collapsed run's single text string (and, per
+ * element, to decide whether that element's decoration covers the WHOLE
+ * run or only part of it).
+ *
+ * The decode-then-white-space boundary is the SAME one scanOwnText
+ * documents at length: character references decode after tag/text
+ * separation and before the CSS Text §4.1 ASCII-only collapse, which is
+ * the HTML-tokenizer-then-CSS order a browser applies. `preserveWhitespace`
+ * mirrors the pre-family carve-out of every other scanner in this file.
+ *
+ * Exported so the unit tests can pin the contract.
+ */
+export function flattenInlineText(html, preserveWhitespace = false) {
+  if (!html) return '';
+  let buf = '';
+  let i = 0;
+  const n = html.length;
+  while (i < n) {
+    // Text region — everything up to the next '<' is content.
+    if (html[i] !== '<') {
+      const next = html.indexOf('<', i);
+      const end = next < 0 ? n : next;
+      buf += html.slice(i, end);
+      i = end;
+      continue;
+    }
+    // Any markup token (open tag, close tag, comment, PI) contributes no
+    // text: skip to its '>' . Comments were stripped upstream; handling
+    // them here keeps the helper safe for direct unit-test calls.
+    const close = html.indexOf('>', i);
+    i = close < 0 ? n : close + 1;
+  }
+  const decoded = decodeCharacterReferences(buf);
+  if (preserveWhitespace) return decoded;
+  return decoded
+    .replace(/[ \t\n\r\f]+/g, ' ')
+    .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
+}
+
+/**
+ * Strip an element's own open/close tags from its `raw` markup, yielding
+ * the inner markup. walkChildren keeps `raw` (outer) on every node but not
+ * `innerHtml`, and the collapse needs the inner form for its
+ * "did the walker actually see every descendant?" guard.
+ */
+function innerMarkupOf(raw) {
+  if (!raw) return '';
+  return String(raw)
+    .replace(/^<[^>]*>/, '')
+    .replace(/<\/[A-Za-z][A-Za-z0-9-]*\s*>$/, '');
+}
+
+/**
+ * Decide whether a nested-tree node's subtree is a collapsible inline run,
+ * and if so compute everything buildComponents needs.
+ *
+ * `node` is the freshly built NestedNode (children already recursed);
+ * `innerHtml` is the fragment the walker read it from; `rootProps` is the
+ * node's own resolved property bag; `resolveProps(tag, attrs, ancestors,
+ * pos)` returns propsForElement's FULL `{props, pseudo}` result for a
+ * descendant — the SAME function the component builder uses, so the two
+ * can never disagree about what a wrapper declares.
+ *
+ * Returns null when the collapse does not apply — every guard below is a
+ * refusal, never a silent approximation, so anything not matching the
+ * narrow shape keeps its pre-wave-22 fixture bytes exactly.
+ *
+ * Exported so the unit tests can pin the predicate.
+ */
+export function collapseInlineRun(node, innerHtml, rootProps, resolveProps, preserveWhitespace = false) {
+  // Production-only: legacy walkers/tests call extractBodyTreeNested with
+  // no resolver and keep the wave-21 shape byte-for-byte.
+  if (typeof resolveProps !== 'function') return null;
+  // Nothing nested → nothing to collapse (the wave-12 merge already
+  // handled the flat `foo<span>bar</span>baz` case).
+  if (!node.children || node.children.length === 0) return null;
+  // Walk the subtree in document order (pre-order DFS = outermost-first,
+  // which IS the decoration paint order). Any refusal aborts the whole
+  // collapse — partial collapses would lose declarations silently.
+  const links = [];
+  let ok = true;
+  const visit = (d) => {
+    if (!ok) return;
+    // 1. Tag must be a decoration-only inline wrapper (see INLINE_CHAIN_TAGS).
+    if (!INLINE_CHAIN_TAGS.has(d.tag)) { ok = false; return; }
+    // 2. Only non-visual / already-consumed attributes.
+    for (const a of Object.keys(d.attrs ?? {})) {
+      if (!INLINE_CHAIN_ALLOWED_ATTRS.has(a)) { ok = false; return; }
+    }
+    // 3. The walker must have SEEN the whole subtree: a leaf whose inner
+    //    markup still contains '<' means either the maxDepth cut truncated
+    //    it or a wave-12 merge absorbed a child — in both cases we cannot
+    //    prove every descendant is a decoration-only wrapper, so refuse.
+    //    EXCEPTION: a wrapper this same routine already collapsed one
+    //    recursion level down (`chainCollapsed`). extractBodyTreeNested
+    //    recurses depth-first, so `div > span#a > span#b > span#c` reaches
+    //    span#a FIRST and empties its children — without this exception
+    //    the div would then refuse and the outer link's decoration would
+    //    be stranded on a 100x100 placeholder (the exact wave-21 shape of
+    //    text-decoration-color.html's fourth block). The nested result is
+    //    spliced in below instead of re-walking the vanished children.
+    if (d.children.length === 0 && !d.chainCollapsed &&
+        innerMarkupOf(d.raw).includes('<')) { ok = false; return; }
+    // 4. The link may declare ONLY text-decoration state. This is the
+    //    guard that makes the flat-bag fold below lossless: with no other
+    //    property in play, merging the link bags into the root's cannot
+    //    change any non-decoration rendering.
+    const resolved = resolveProps(d.tag, d.attrs, d.ancestors, d.pos ?? null);
+    const p = resolved.props ?? {};
+    for (const key of Object.keys(p)) {
+      if (!DECORATION_FAMILY_PROPS.has(key)) { ok = false; return; }
+    }
+    // 5. A wrapper carrying ::before/::after/::marker generated content is
+    //    NOT a bare inline run — flattening would drop the content the
+    //    test is about (CSS Generated Content L3 §3.2). Refuse.
+    if (resolved.pseudo && Object.keys(resolved.pseudo).length > 0) { ok = false; return; }
+    links.push({ node: d, props: p });
+    // A wrapper the inner recursion already collapsed carries its whole
+    // sub-chain's answer (`decorations` outermost-first, starting with its
+    // OWN entry) plus the declarations it already folded. Splice those in
+    // instead of walking children that no longer exist.
+    if (d.chainCollapsed) {
+      links[links.length - 1].preDecorations = d.decorations ?? [];
+      links[links.length - 1].preExtras = d.collapsedProps ?? {};
+      links[links.length - 1].prePartial = d.inlineChainCollapsed === true;
+      return;
+    }
+    d.children.forEach(visit);
+  };
+  node.children.forEach(visit);
+  if (!ok || links.length === 0) return null;
+  // The run's single text string, in document order.
+  const text = flattenInlineText(innerHtml, preserveWhitespace);
+  if (!text.trim()) return null; // nothing visible to carry — keep today's shape
+  // SCOPE GATE: only decoration-bearing runs collapse. A plain
+  // `<div><span>x</span></div>` (no decoration anywhere) is left exactly as
+  // it is, which is what keeps this change inside the css-text-decor blast
+  // radius instead of rewriting every nested-span fixture in the corpus.
+  const rootContrib = decorationContribution(node.tag, rootProps);
+  const bearing = rootContrib.lines.length > 0 ||
+    links.some((l) => Object.keys(l.props).length > 0 ||
+                      (l.preDecorations?.length ?? 0) > 0 ||
+                      decorationContribution(l.node.tag, l.props).lines.length > 0);
+  if (!bearing) return null;
+  // Build the outermost-first entry list. `covers` records whether the
+  // decorating element contains the WHOLE run — when it does not, painting
+  // its line over the whole run is an approximation and must be marked.
+  const decorations = [];
+  let partial = false;
+  const pushEntry = (contrib, covers) => {
+    for (const line of contrib.lines) {
+      const entry = { line };
+      // Omit the colour when it resolves to currentColor (the CSS initial
+      // value) — absence is the documented "use the text colour" answer.
+      const c = contrib.color ?? rootProps.color ?? null;
+      if (c && String(c).trim().toLowerCase() !== 'currentcolor') entry.color = c;
+      decorations.push(entry);
+      if (!covers) partial = true;
+    }
+  };
+  pushEntry(rootContrib, true); // the root contains the whole run by definition
+  for (const l of links) {
+    // Coverage is measured on the AUTHORED markup (`raw`), which survives
+    // an inner collapse untouched — so this stays correct for spliced
+    // sub-chains too. Recorded on the link because the flat-bag fold below
+    // needs it as well (a UA line only folds when it is EXACT).
+    const covers = flattenInlineText(innerMarkupOf(l.node.raw), preserveWhitespace) === text;
+    l.covers = covers;
+    if (l.preDecorations) {
+      // Already-computed sub-chain: its entries are outermost-first and
+      // already carry their colours. Re-stamping the colour here would
+      // overwrite a descendant's own text-decoration-color with this
+      // link's, so the entries pass through verbatim.
+      for (const e of l.preDecorations) decorations.push({ ...e });
+      // The sub-chain is an approximation if it already was one, or if it
+      // covers only part of THIS (larger) run.
+      if (l.prePartial || (!covers && l.preDecorations.length > 0)) partial = true;
+      continue;
+    }
+    pushEntry(decorationContribution(l.node.tag, l.props), covers);
+  }
+  // Fold the links' AUTHORED decoration declarations into a flat bag the
+  // pre-wave-22 readers still understand. Precedence is OUTERMOST-WINS all
+  // the way down, which is the decorating-box rule of css-text-decor-3
+  // §1.3: the outermost box that establishes the decoration owns it and a
+  // descendant's value does not override it. Root first (never displaced —
+  // exactly what decorating-box-thickness-001 asserts, the div's 10px
+  // thickness beating the span's 1px), then each link in document order,
+  // first writer wins. `_decorations` remains the authoritative full list;
+  // this bag only exists so a reader that ignores the new key still paints
+  // a SUBSET of the correct lines rather than nothing.
+  const extraProps = {};
+  // wave-22 EX2 SKEPTIC: the outermost-wins fold DROPS a link's declaration
+  // whenever an outer box already wrote that key. For `text-decoration-line`
+  // and `text-decoration-color` that loses nothing — `_decorations` carries
+  // both per entry. But `_decorations` entries are `{line, color?}` ONLY, so
+  // a dropped STYLE / THICKNESS / INSET / OFFSET has no channel at all and
+  // vanished silently (measured on css/css-text-decor/
+  // text-decoration-style-multiple.html: three nested spans declaring
+  // `underline solid coral` / `overline dashed skyblue` / `line-through wavy
+  // green` collapsed to a flat `underline solid coral` + three colourful
+  // `_decorations` entries, with `dashed` and `wavy` — the whole subject of
+  // that test — gone and `_lossyReasons: []`). That is exactly the silent
+  // fallthrough the repo's hard rules forbid, so the drop is now LOUD.
+  let declDropped = false;
+  for (const l of links) {
+    // Does THIS link establish a decoration of its own? A link that declares
+    // no line (css-text-decor-3 §1.3's decorating box is then an ancestor)
+    // contributes no decoration for its sub-properties to modify, so its
+    // thickness/style are INERT and dropping them loses nothing — that is
+    // precisely what decorating-box-thickness-001 asserts (the span's 1px
+    // must not affect the div's underline). Only a line-bearing link's
+    // dropped modifiers are a real loss.
+    const dropContrib = l.preDecorations
+      ? null : decorationContribution(l.node.tag, l.props);
+    const linkBearsLine = l.preDecorations
+      ? l.preDecorations.length > 0 : dropContrib.lines.length > 0;
+    // Own bag first, then anything a spliced sub-chain had already folded
+    // (which is by construction deeper, so it only fills remaining gaps).
+    for (const [k, v] of Object.entries({ ...l.props, ...(l.preExtras ?? {}) })) {
+      if (k in rootProps || k in extraProps) {
+        // Displaced by an outer box. Loud only when the value carries
+        // information `_decorations` cannot express AND actually differs
+        // from the winner (an identical redeclaration loses nothing).
+        const winner = (k in rootProps) ? rootProps[k] : extraProps[k];
+        if (linkBearsLine && String(v) !== String(winner) &&
+            carriesUnexpressibleDecoration(k, v)) declDropped = true;
+        continue;
+      }
+      extraProps[k] = v;
+    }
+    // UA-derived lines (the `u`/`s`/`ins`/`del` defaults this file models
+    // because it reads no UA stylesheet) fold into the flat bag ONLY when
+    // the wrapper covers the WHOLE run — then the fold is EXACT and a
+    // reader ignoring `_decorations` still paints the right line over the
+    // right text (css-text-decor's text-decoration-color-recalc-002 is
+    // `<p style="color:red"><s>…</s></p>`: the <s> IS the p's entire
+    // content, so folding `line-through` reproduces the browser exactly).
+    // A PARTIAL wrapper (`the quick <u>brown</u> fox`) is deliberately NOT
+    // folded: widening its line to the whole run in the flat bag would be
+    // a silent over-paint. It stays in `_decorations`, where lane DECOR
+    // owns the decision, and the run carries the 'inline-chain-collapsed'
+    // marker so the widening is never invisible.
+    const ua = l.preDecorations ? null : decorationContribution(l.node.tag, l.props);
+    if (ua?.uaDerived && l.covers && ua.lines.length > 0 &&
+        !('text-decoration' in rootProps) && !('text-decoration-line' in rootProps) &&
+        !('text-decoration' in extraProps) && !('text-decoration-line' in extraProps)) {
+      extraProps['text-decoration-line'] = ua.lines.join(' ');
+    }
+  }
+  // UA heading metrics: an <h1> collapse root renders at 2em/bold with
+  // block margins in the ref, and the extractor models no UA sheet. Only
+  // when the root declares none of the guarded properties itself.
+  let uaHeading = null;
+  if (node.tag === 'h1' && !UA_H1_GUARD_PROPS.some((k) => k in rootProps)) {
+    uaHeading = { ...UA_H1_PROPS };
+  }
+  return { text, decorations, extraProps, uaHeading, partial, declDropped };
+}
+
+// wave-22 EX2 SKEPTIC: the css-text-decor-3 sub-properties that MODIFY an
+// established decoration (§2.3 style, §2.4 thickness, §2.5/§3 offsets and
+// skips). None of them has a slot in a `_decorations` entry (`{line, color}`),
+// so when the outermost-wins fold displaces one it is gone from the fixture
+// entirely — hence the loud marker. `text-decoration-line` / `-color` are
+// deliberately ABSENT from this set: both survive per entry, so displacing
+// them in the flat bag is the documented lossless subset, not a loss.
+const DECORATION_MODIFIER_PROPS = new Set([
+  'text-decoration-style', 'text-decoration-thickness', 'text-decoration-inset',
+  'text-decoration-skip', 'text-decoration-skip-ink',
+  'text-underline-offset', 'text-underline-position',
+]);
+
+/**
+ * Does this displaced declaration carry decoration state `_decorations`
+ * cannot express? True for the modifier longhands above, and for a
+ * `text-decoration` shorthand whose token list holds a STYLE keyword
+ * (css-text-decor-3 §2.3) or a css-text-decor-4 thickness token — the two
+ * shorthand components with no entry field. A shorthand that is only
+ * line + colour keywords is fully re-expressed by the entry list.
+ *
+ * Exported so the unit tests can pin the predicate.
+ */
+export function carriesUnexpressibleDecoration(key, value) {
+  if (DECORATION_MODIFIER_PROPS.has(key)) return true;
+  if (key !== 'text-decoration' && key !== '-webkit-text-decoration') return false;
+  return splitValueTokens(value).some((t) => {
+    const lt = t.toLowerCase();
+    // Line keywords + the two no-paint keywords: expressible (or inert).
+    if (DECORATION_LINE_KEYWORDS.has(lt) || lt === 'none' || lt === 'blink') return false;
+    // Style keyword — no entry field.
+    if (DECORATION_STYLE_KEYWORDS.has(lt)) return true;
+    // Thickness slot (a length/number, `auto`, or `from-font`) — no field.
+    if (/^-?[\d.]/.test(lt) || lt === 'auto' || lt === 'from-font') return true;
+    // Anything else is the colour token, which every entry carries.
+    return false;
+  });
 }
 
 /**
@@ -1559,6 +2086,50 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
       // buildComponents emits the 'inline-run-reordered' lossy marker.
       // Only set when true — legacy node shapes stay byte-identical.
       if (ownRes.reordered) node.inlineReordered = true;
+      // wave-22 EX2 B-RC4a: the scoped inline-chain collapse. Runs LAST,
+      // on the finished node, because it needs the recursed `children` to
+      // prove every descendant is a decoration-only inline wrapper (see
+      // collapseInlineRun's banner for the full contract). `resolveProps`
+      // is supplied only by buildComponents, so every legacy caller of
+      // extractBodyTreeNested keeps its pre-wave-22 tree byte-for-byte.
+      const collapsed = mergeCtx?.resolveProps
+        ? collapseInlineRun(
+            node, k.innerHtml,
+            mergeCtx.resolveProps(k.tag, k.attrs, ancestors, pos).props,
+            mergeCtx.resolveProps, preserve,
+          )
+        : null;
+      if (collapsed) {
+        // The subtree becomes ONE text run: the flattened document-order
+        // text replaces ownText and the wrapper children disappear.
+        node.ownText = collapsed.text;
+        node.children = [];
+        // The run is now painted in true document order, so the wave-21
+        // reorder approximation no longer exists — clearing the flag is
+        // the whole point of the fix, not a suppression of a real loss.
+        delete node.inlineReordered;
+        // Fields buildComponents consumes (see buildNode). All
+        // omit-when-absent so non-collapsed nodes keep their exact shape.
+        node.decorations = collapsed.decorations;
+        node.collapsedProps = collapsed.extraProps;
+        // Marks the node as "already proven a decoration-only inline run"
+        // so an OUTER collapse one recursion level up can splice this
+        // result in rather than refusing on the now-empty children (see
+        // guard 3's exception in collapseInlineRun).
+        node.chainCollapsed = true;
+        if (collapsed.uaHeading) node.uaHeadingProps = collapsed.uaHeading;
+        // Only a PARTIAL-coverage decoration (a wrapper that contains part
+        // of the run, e.g. the <u> in `the quick <u>brown</u> fox`) is an
+        // approximation — its line now paints over the whole run. Full
+        // ancestor chains (div>span>span>span) lose nothing and stay clean.
+        if (collapsed.partial) node.inlineChainCollapsed = true;
+        // wave-22 EX2 SKEPTIC: a line-bearing link's style/thickness/inset/
+        // offset was displaced by an outer box and `_decorations` has no
+        // field for it — the declaration is gone from the fixture, so say so.
+        if (collapsed.declDropped) node.inlineChainDeclDropped = true;
+        // The node is no longer empty (:empty must not match it).
+        pos.isEmpty = false;
+      }
       out.push(node);
     });
     return out;
@@ -1759,6 +2330,34 @@ export const WIDGET_BOOLEAN_ATTR_KEYS = new Set([
 // browser's no-chrome rendering).
 export const FOREIGN_NS_MARKER_ATTR = 'data-sc-foreign-ns';
 
+// ── wave-22 EX2 A-RC1 part 2: rule-less widgets are NOT scaffolding ─────────
+//
+// buildNode's "empty node" branch paints a 100x100 placeholder when an
+// element matched no rule, carries no inline style, and has no own text —
+// the honest reading for a bare `<div>` wrapper. It is the WRONG reading
+// for a form control: `<select id=drop-down-select><option>select</option>
+// </select>` in css-ui/appearance-menulist-button-001 is deliberately
+// EXCLUDED from that test's only rule (`#container > *:not(#drop-down-
+// select)`), so once `:not()` started matching (above) the select became
+// the one child with an empty property bag — and a 100x100 drop-down is a
+// bigger divergence from the ref than the widget it replaced.
+//
+// Per HTML Rendering §15.5 every element below has UA chrome with an
+// INTRINSIC size (a select sizes to its longest option, an input to its
+// `size` attribute, a meter/progress to 5em×1em); rendering it with NO
+// width/height is what every browser does and what all three runtimes
+// already do off `meta.sourceTag` + `meta.attrs`. So these tags opt OUT of
+// the placeholder and keep their empty bag.
+//
+// Deliberately NARROWER than WIDGET_ATTR_TAGS: `a` and `option` are plain
+// inline/text elements with no chrome and no intrinsic box — an empty one
+// really is scaffolding, so they keep the placeholder. Foreign-namespace
+// elements (FOREIGN_NS_MARKER_ATTR) also keep it: they have no UA chrome
+// at all (see the marker's banner), so an intrinsic size would be fiction.
+export const INTRINSIC_WIDGET_TAGS = new Set([
+  'input', 'select', 'textarea', 'button', 'meter', 'progress',
+]);
+
 // A floating-point number token (HTML §2.3.4.2 valid floating-point
 // number, plus scientific notation) — the gate for the numeric wire lanes.
 const WIDGET_NUMERIC_RX = /^-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
@@ -1839,6 +2438,22 @@ const SUPPORTED_PSEUDOS = new Set([
 // they have to be tokenised differently (`:nth-child(2n+1)` vs `:first-child`).
 const SUPPORTED_FUNCTIONAL_PSEUDOS = new Set([
   'nth-child', 'nth-last-child', 'nth-of-type', 'nth-last-of-type',
+  // wave-22 EX2 A-RC1 (css-ui__appearance-menulist-button-001, web-ref
+  // 0.554 vs the 1.000 alias band its eleven sibling appearance-* tests
+  // hold): the ONLY rule in that test is
+  //   `#container > *:not(#drop-down-select) { appearance: menulist-button }`
+  // and `not` was absent from this set, so parseCompound flagged the whole
+  // compound unsupported → the rule matched NOTHING → all 13 widgets fell
+  // into buildNode's `matchedRules === 0 && no props` 100x100 placeholder
+  // branch with no Appearance at all (the wave21-final per-test IR at
+  // runs/wave21-final/sections/css-ui/per-test-ir/…menulist-button-001.json
+  // shows empty `properties` where …button-001.json shows `Appearance`).
+  // Selectors-4 §5.1 defines :not() as the negation pseudo-class taking a
+  // <complex-selector-list>; we support the SINGLE-COMPOUND subset (which
+  // is 100% of the WPT corpus's usage) — see the `not` branch in
+  // parseCompound for the argument validation and evalPseudo for the
+  // negation itself.
+  'not',
 ]);
 
 // swarm-003 Bug 1 (css-lists__counter-001, css-pseudo__before-*,
@@ -1934,6 +2549,13 @@ function parseCompound(compound) {
           else if (compound[k] === ')') depth--;
           if (depth > 0) k++;
         }
+        // wave-22 EX2 A-RC1: an UNBALANCED argument means the compound was
+        // truncated — parseCss splits a selector list on commas without
+        // respecting parens, so `p:not(.a, .b)` arrives here as the
+        // fragment `p:not(.a`. Accepting it would negate against `.a`
+        // alone and MATCH `<p>`, a false positive on a selector the
+        // browser applies only to non-.a, non-.b paragraphs. Refuse.
+        if (depth > 0) { out.unsupported = true; return out; }
         arg = compound.slice(i + 1, k);
         i = k + 1; // past the ')'
       }
@@ -1942,6 +2564,37 @@ function parseCompound(compound) {
         ? SUPPORTED_FUNCTIONAL_PSEUDOS.has(name)
         : SUPPORTED_PSEUDOS.has(name);
       if (!supported) { out.unsupported = true; return out; }
+      // wave-22 EX2 A-RC1: `:not()` needs its ARGUMENT validated here, at
+      // parse time, so an unsupported inner selector fails the WHOLE
+      // compound (rule dropped) rather than silently negating to `true`
+      // and producing FALSE MATCHES — the failure mode the hard rule
+      // "no silent fallthroughs" exists to prevent. Selectors-4 §5.1
+      // takes a <complex-selector-list>; we accept the single-compound
+      // subset only (the corpus's entire usage: `*:not(#id)`,
+      // `div:not(.cls)`), because a comma list or a combinator inside
+      // :not() would need a full sub-matcher we don't have.
+      if (name === 'not') {
+        const innerSel = (arg ?? '').trim();
+        // Empty `:not()` is invalid per the grammar; a comma or any
+        // combinator/whitespace means a list or complex selector — both
+        // outside the supported subset, so drop the rule honestly.
+        if (!innerSel || /[,\s>+~]/.test(innerSel)) { out.unsupported = true; return out; }
+        // Recurse with the SAME parser so the inner compound obeys every
+        // rule the outer one does (attr selectors rejected, unknown
+        // pseudos rejected, nested `:not(:not(x))` rejected because the
+        // inner parse yields a `not` pseudo we refuse just below).
+        const inner = parseCompound(innerSel);
+        // Selectors-4 §5.1: the argument must contain no pseudo-elements.
+        // An unsupported inner (or a nested :not) drops the whole rule.
+        if (inner.unsupported || inner.pseudoElement) { out.unsupported = true; return out; }
+        if (inner.pseudos.some((p) => p.name === 'not')) { out.unsupported = true; return out; }
+        // Carry the PARSED inner alongside the raw text: evalPseudo uses
+        // the text (re-matched through compoundMatches so id/class/tag/
+        // pseudo semantics can never drift between the two paths) and the
+        // parsed form to decide whether positional data is required.
+        out.pseudos.push({ name, arg: innerSel, inner });
+        continue;
+      }
       out.pseudos.push({ name, arg });
       continue;
     }
@@ -2204,6 +2857,30 @@ export function splitAnBOfSelector(arg) {
  * position data — bail and treat the selector as non-matching).
  */
 function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}) {
+  // wave-22 EX2 A-RC1: `:not()` is evaluated BEFORE the `!pos` bail
+  // because negation of a purely structural compound (`*:not(#drop-down-
+  // select)` — the css-ui menulist-button rule) needs no position data at
+  // all; requiring `pos` here would keep the rule unmatched on every
+  // legacy call site that passes none.
+  if (pseudo.name === 'not') {
+    const inner = pseudo.inner;
+    // Defensive: parseCompound only ever pushes a `not` pseudo WITH a
+    // validated `inner`. A missing one means a hand-built pseudo object —
+    // answer "can't evaluate" rather than guessing a negation.
+    if (!inner) return null;
+    // The inner compound carries pseudo-classes (`:not(:first-child)`)
+    // but we have no position metadata: compoundMatches would answer
+    // `false` for the inner, and negating an unknowable `false` would
+    // manufacture a match. Bail to null (caller treats as non-match).
+    if (!pos && inner.pseudos.length > 0) return null;
+    // Re-match through the SAME compound matcher the positive path uses,
+    // then negate — Selectors-4 §5.1: ":not(X) matches elements that are
+    // not represented by X". `null` (unsupported inner) propagates as
+    // null so the rule is dropped, never inverted.
+    const m = compoundMatches(pseudo.arg, tag, attrs ?? {}, pos, ctx);
+    if (m === null) return null;
+    return !m;
+  }
   if (!pos) return null;
   // :root matches the document root; for our purposes that's the synthetic
   // body component (isRoot === true). Anywhere else it's false.
@@ -3688,7 +4365,15 @@ export async function extractFixture(testRel, opts = {}) {
     : resolve(dirname(testAbs), refHref);
   const refRel = relative(WPT_DIR, refAbs).split(sep).join('/');
 
-  const stem = basename(testRel, '.html');
+  // wave-21 collision fix: the stem is the SHARED subdir-encoding derivation
+  // (safe-name.mjs fixtureStem), not a bare basename — nested tests with
+  // equal basenames (css-break/flexbox vs css-break/grid monolithic-overflow
+  // family, 52 colliding A+B pairs) previously flattened to ONE filename and
+  // silently overwrote each other. The stem also seeds buildComponents'
+  // idPrefix below, so component names (`<stem>__N`, `<stem>__body`, …) are
+  // equally collision-free when tests are merged into a combined fixture.
+  // Top-level tests keep the exact historical stem (zero corpus churn).
+  const stem = fixtureStem(testRel);
   const section = specSectionOf(testRel);
 
   // wave-13: pass the keyframes map so the sampler can run (5th arg; the
@@ -4022,6 +4707,17 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // silent): ancestors ABOVE the maxDepth cut and `inherit`/`revert`
   // keyword indirection are not modelled; the corpus sets pre directly on
   // the container (`div { white-space: pre }`), which this resolves.
+  // wave-22 EX2 B-RC4a: resolver handed to the tree walker so the inline-
+  // chain collapse can inspect a descendant's cascaded declarations
+  // through the EXACT propsForElement the component builder uses — the two
+  // can never disagree about what a wrapper declares, which is what makes
+  // "the link declares ONLY text-decoration state" a sound guard rather
+  // than a guess. Returns the FULL result (`{props, matchedRules, pseudo}`)
+  // so the collapse can also refuse a wrapper carrying ::before/::after
+  // generated content, which flattening would silently drop.
+  mergeCtx.resolveProps = (tag, attrs, ancestors, pos) =>
+    propsForElement(rules, tag, attrs, ancestors, pos, effectiveCtx);
+
   mergeCtx.resolveWhiteSpace = (tag, attrs, ancestors, pos) => {
     // The element's own cascaded value wins (inline style already merged
     // last inside propsForElement, matching the cascade).
@@ -4193,6 +4889,16 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     const { props, matchedRules, pseudo } = propsForElement(
       rules, node.tag, node.attrs, node.ancestors, node.pos ?? null, effectiveCtx,
     );
+    // wave-22 EX2 B-RC4a: fold a collapsed inline chain's declarations into
+    // the flat bag FIRST, so every downstream step (sibling-index baking,
+    // keyframe sampling, the lossy scan, the line-context rules) sees the
+    // final bag. Root-wins precedence was already applied when the extras
+    // were computed (collapseInlineRun skips any key the root declares),
+    // so this spread can never override an author declaration on the root.
+    if (node.collapsedProps) Object.assign(props, node.collapsedProps);
+    // UA heading metrics for a collapsed <h1> wrapper (see UA_H1_PROPS) —
+    // the guard list already proved the root declares none of them.
+    if (node.uaHeadingProps) Object.assign(props, node.uaHeadingProps);
     // wave-21 A-RC6: bake sibling-index() with this element's 1-based
     // renderable-sibling position (CSS Values 5 §5.1 — see the baking
     // section banner). BEFORE the sampler + lossy scan so those see the
@@ -4214,6 +4920,20 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // wave-21 B-RC9a: ownText glued across a kept child — order changed
     // (see scanOwnText's reordered doc). LOUD marker, honest gate.
     if (node.inlineReordered) reasons.push('inline-run-reordered');
+    // wave-22 EX2 B-RC4a: LOUD markers for the collapse. The property
+    // folding itself happened above, BEFORE the lossy scan, so a folded
+    // `text-decoration-inset: -0.5em` still trips the em/rem lane.
+    if (node.uaHeadingProps) reasons.push('ua-heading-defaults');
+    // Only PARTIAL-coverage collapses are approximations — a wrapper that
+    // held part of the run now decorates all of it (see the flag's
+    // assignment in extractBodyTreeNested). Full ancestor chains collapse
+    // losslessly and stay unmarked.
+    if (node.inlineChainCollapsed) reasons.push('inline-chain-collapsed');
+    // wave-22 EX2 SKEPTIC: a decoration MODIFIER (style/thickness/inset/
+    // offset) declared by a line-bearing link lost its fold slot to an outer
+    // box and has no `_decorations` field — LOUD, because the declaration is
+    // absent from the fixture entirely (see carriesUnexpressibleDecoration).
+    if (node.inlineChainDeclDropped) reasons.push('inline-chain-decoration-dropped');
     // wave-21 A-RC6: the baked index is a statically-resolved runtime value
     // — informational provenance marker (never score-excluding; scoring is
     // gated by notApplicable tags, not lossyReasons).
@@ -4275,7 +4995,13 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // A br always terminates the current line — the next sibling starts
       // a fresh, empty line box.
       if (lineCtx) lineCtx.hasInline = false;
-    } else if (matchedRules === 0 && Object.keys(props).length === 0 && !node.ownText) {
+    } else if (matchedRules === 0 && Object.keys(props).length === 0 && !node.ownText
+               && !(INTRINSIC_WIDGET_TAGS.has(node.tag)
+                    && !(node.attrs && FOREIGN_NS_MARKER_ATTR in node.attrs))) {
+      // wave-22 EX2 A-RC1 part 2: the `!INTRINSIC_WIDGET_TAGS` guard above
+      // keeps rule-less form controls OUT of this branch — see that set's
+      // banner for why a 100x100 <select> is worse than the UA chrome it
+      // would replace.
       // Bug 1 honest fallback: no matching rules + no inline style + no
       // own text — this is the genuine "human instruction" case (or
       // scaffolding wrappers). Still emit a 100x100 placeholder so the
@@ -4366,6 +5092,18 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // non-empty so component fixtures without text (visual-test.json,
     // fixtures/properties/*) stay byte-identical post-rollout.
     if (node.ownText) cmp._text = node.ownText;
+    // wave-22 EX2 B-RC4a: the merged decoration list for a collapsed
+    // inline chain — `_decorations` on the fixture wire, forwarded by the
+    // converter as IR v2 `meta.decorations` (the additive omit-when-absent
+    // meta key sanctioned by schema/spec/05-versioning.md, same extension
+    // point wave-20's `_attrs` → `meta.attrs` used). Shape + ordering +
+    // the authoritative-when-present rule are pinned in the
+    // collapseInlineRun banner; lane DECOR is the consumer. Emitted only
+    // when the collapse produced at least one line, so every fixture that
+    // does not collapse stays byte-identical.
+    if (node.decorations && node.decorations.length > 0) {
+      cmp._decorations = node.decorations;
+    }
     // Bug 1 fix (css3-counter-styles-101): carry forward the originating
     // HTML element identity so the renderer can branch on it (e.g. wrap
     // children of `<ol>` in `<li>` boxes that trigger native marker

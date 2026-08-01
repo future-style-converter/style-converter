@@ -16,6 +16,9 @@ package app.irmodels
 //   - `_pseudo`→ `pseudos` (generated content stays embedded, renamed)
 //   - `_tag` + `_role` → `meta: {sourceTag?, role?}` (droppable hints,
 //     grouped so the component surface stops accreting underscore keys)
+//   - `_attrs` → `meta.attrs` (wave-20) and `_decorations` →
+//     `meta.decorations` (wave-22): later additive meta members, both
+//     forwarded VERBATIM (spec 05 additive meta-key rule)
 //
 // The legacy v1 codec (IRComponentSerializer in IRDocument.kt) stays
 // untouched for the deprecation window behind `--emit-ir v1`.
@@ -210,7 +213,9 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             value.pseudos?.let { put("pseudos", it) }
             // meta: droppable renderer hints, grouped. Omitted entirely
             // when no member has a value so hint-free fixtures stay lean.
-            if (value.tag != null || value.role != null || value.attrs != null) {
+            if (value.tag != null || value.role != null || value.attrs != null ||
+                value.decorations != null
+            ) {
                 put("meta", buildJsonObject {
                     // sourceTag: v2 home of the extractor's `_tag` hint.
                     value.tag?.let { put("sourceTag", it) }
@@ -221,6 +226,12 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
                     // extractor owns keys and value typing; spec 05 additive
                     // meta-key rule).
                     value.attrs?.let { put("attrs", it) }
+                    // decorations (wave-22 lane DECOR): v2 home of
+                    // `_decorations` — the collapsed inline run's ordered
+                    // per-line list, forwarded VERBATIM (the extractor owns
+                    // entry shape and colour-token spelling; spec 05
+                    // additive meta-key rule, the meta.attrs precedent).
+                    value.decorations?.let { put("decorations", it) }
                 })
             }
         })
@@ -263,6 +274,12 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             // attrs (wave-20 W1): opaque round-trip — JSON null ≡ absent,
             // any object comes back byte-verbatim (readers key on the tag).
             attrs = meta?.get("attrs")?.let { el -> if (el is JsonNull) null else el.jsonObject },
+            // decorations (wave-22 lane DECOR): opaque round-trip — JSON
+            // null ≡ absent, any array comes back byte-verbatim (the
+            // runtimes, not this codec, interpret line + colour tokens).
+            decorations = meta?.get("decorations")?.let { el ->
+                if (el is JsonNull) null else el.jsonArray
+            },
             pseudos = obj["pseudos"]?.jsonObject,
             // variables: "--name" → raw string map, round-tripped verbatim
             // (both key case and value bytes). Missing key → null so a

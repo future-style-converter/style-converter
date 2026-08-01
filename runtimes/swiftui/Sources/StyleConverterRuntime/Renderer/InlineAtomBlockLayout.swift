@@ -109,7 +109,8 @@ struct InlineAtomBlockLayout: Layout {
                     gapPx: UAWidgetIntrinsics.atomGapPx,
                     // P17b (fix 4) — the §10.8.1 line-box strut: rows of
                     // short atoms (checkbox row, the lone progress bar)
-                    // still get the block's 15/5 text metrics, matching
+                    // still get the block's 16/4 text metrics (wave-22
+                    // re-solve), matching
                     // the ref's row pitches.
                     strutAscentPx: UAWidgetIntrinsics.strutAscentPx,
                     strutDescentPx: UAWidgetIntrinsics.strutDescentPx

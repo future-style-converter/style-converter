@@ -476,13 +476,42 @@ public struct ComponentRenderer: View {
     /// pinned `<p>` height, removing the compounding drift. Pure + static
     /// so WPTCaptureModeTests pins it without a render surface (same
     /// pattern as suppressesNamePlaceholder).
+    ///
+    /// Wave 22 (lane FONT) adds the `declaredNormal` third state, WPT-GATED: an
+    /// IR that explicitly declares `line-height: normal` — which css-fonts-4
+    /// §4.3 makes `font: 92px Arial` reset to, now emitted by the converter's
+    /// FontExpander.kt — resolves to the FACE's own metrics under WPT capture.
+    /// Chromium renders that div at Arial's natural 1.1499em box (≈105.8px at
+    /// 92px, hhea asc 1854 + desc 434 + gap 67 over a 2048 upem) because a
+    /// directly-matching declaration beats the ref injection's inherited
+    /// `:where(body){line-height:1.25}`; pinning `wptRefLineBoxPx` there also
+    /// CLAMPED the single-line box (the maxHeight cap in PlaceholderLabel) to
+    /// 20pt for a 92pt run. Outside WPT capture the keyword keeps the
+    /// extractor's historical 1.2× number so the committed baselines never move
+    /// — see LineHeightNormal.lineBoxSource for the table and the stated risk.
+    /// ABSENT line-height is untouched in BOTH modes.
     public static func effectiveLineHeight(declared: CGFloat?,
+                                           declaredNormal: Bool = false,
                                            wptCaptureMode: Bool) -> CGFloat? {
+        // The three-state pick is delegated to the shared native decision so
+        // Compose's placeholder `when` and this function can never diverge.
+        switch LineHeightNormal.lineBoxSource(hasDeclaredValue: declared != nil,
+                                              declaredNormal: declaredNormal,
+                                              wptCapture: wptCaptureMode) {
         // IR-declared line-height always wins (author > our calibration).
-        if let declared { return declared }
+        // Force-unwrap is safe by construction: `.declared` is returned only
+        // when `declared != nil` was passed as the predicate above.
+        case .declared:
+            return declared!
+        // Declared `normal` under WPT capture: nil = SwiftUI's natural metrics,
+        // i.e. the same font-metric lookup the browser reference performs.
+        case .natural:
+            return nil
         // Bare text: pin the ref line box only under WPT capture; otherwise
         // nil = SwiftUI's natural metrics (unchanged product behaviour).
-        return wptCaptureMode ? wptRefLineBoxPx : nil
+        case .calibrated:
+            return wptCaptureMode ? wptRefLineBoxPx : nil
+        }
     }
 
     // MARK: - WPT block-child auto-width fill (wave 9)
@@ -1976,7 +2005,14 @@ public struct ComponentRenderer: View {
                     // Lane IOS-TEXT fix 1 — the content-box wrap width for
                     // the greedy pre-break (leading text wraps exactly like
                     // leaf text: same box, same containing block).
-                    wrapWidth: textWrapWidth(style: style)
+                    wrapWidth: textWrapWidth(style: style),
+                    // Wave 22 (lane DECOR): this run renders the COMPONENT's
+                    // own text, so it owns the component's
+                    // `meta.decorations` list too — the mixed-content
+                    // sibling of the leaf site below. Nil for every
+                    // non-collapsed component.
+                    decorations: DecorationWire.decorationLines(
+                        from: component.meta?.decorations)
                 )
             }
             // Phase 7 step 2: sort children by CSS `order` BEFORE rendering.
@@ -2425,7 +2461,13 @@ public struct ComponentRenderer: View {
                 // greedy pre-break: multi-line real text must break where
                 // Chromium/Compose break (greedy), not where TextKit's
                 // push-out moves the soft break (see GreedyLineBreaker).
-                wrapWidth: textWrapWidth(style: style)
+                wrapWidth: textWrapWidth(style: style),
+                // Wave 22 (lane DECOR): the LEAF site — where a collapsed
+                // inline run lands (the extractor flattens the chain to one
+                // childless text component). `meta.decorations` reaches the
+                // per-line overlay from here.
+                decorations: DecorationWire.decorationLines(
+                    from: component.meta?.decorations)
             )
         }
     }
@@ -2554,6 +2596,31 @@ private struct PlaceholderLabel: View {
     // geometry known → the legacy soft-wrap path, byte-identical.
     var wrapWidth: CGFloat? = nil
 
+    // Wave 22 (lane DECOR, B-RC4b) — the merged `meta.decorations` wire
+    // for a COLLAPSED inline run: the ordered, ancestor-first list of
+    // every decorating box's line and its OWN colour (css-text-decor-3
+    // §2.1 propagation + §2.2 per-box colour). Wire shape
+    // [{line, color?}] with `color` the AUTHORED CSS token (absent =
+    // currentColor), turned into this list by
+    // DecorationWire.decorationLines(from:) — see its banner for why the
+    // token is resolved in the runtime and not in the converter.
+    //
+    // THREE STATES, all meaningful:
+    //   nil   → not a collapsed run (every legacy document):
+    //           `decorationRequests` synthesizes this component's own
+    //           three flags exactly as before, so the dark-stage 327
+    //           captures cannot move.
+    //   list  → AUTHORITATIVE: it is the complete line set, the
+    //           component's own flags are ignored, and the platform
+    //           built-ins are fully suppressed (see `overlayOwns`).
+    //   empty → ALSO authoritative, and it says "no lines": paint nothing
+    //           AND still suppress the built-ins, or the merged flat bag
+    //           repaints what the wire just retired.
+    // The full seam is live: extractor `_decorations` → converter
+    // `meta.decorations` → IRWireV2Reader → IRMeta.decorations →
+    // DecorationWire → here.
+    var decorations: [DecorationColorOps.DecorationLine]? = nil
+
     var body: some View {
         // Resolve the visible string: rawText wins when present (the IR
         // carried explicit element text content), otherwise fall back to
@@ -2614,8 +2681,13 @@ private struct PlaceholderLabel: View {
         // natural metrics — the unchanged product path). Feeds BOTH the
         // leading split and the minHeight frame below so the bar height +
         // baselines track the browser-ref's default-font `<p>`.
+        // (wave 22, lane FONT — `declaredNormal` routes an explicit
+        // `line-height: normal` past the ref-line-box pin to the face's own
+        // metrics; see ComponentRenderer.effectiveLineHeight.)
         let effectiveLineHeight = ComponentRenderer.effectiveLineHeight(
-            declared: textConfig.lineHeight, wptCaptureMode: wptCaptureMode)
+            declared: textConfig.lineHeight,
+            declaredNormal: textConfig.lineHeightIsNormal,
+            wptCaptureMode: wptCaptureMode)
         // Fidelity wave 3 — CSS line-box leading split (CSS 2.1 §10.8):
         // `spacing` makes each line ADVANCE exactly line-height px;
         // `halfLeading` restores the band above the first / below the
@@ -2721,9 +2793,14 @@ private struct PlaceholderLabel: View {
             // whose own flags are false) keep the built-ins — CSS
             // decoration propagation (css-text-decor-3 §2.1) still
             // rides the box-level modifier for them.
+            // Wave 22 (B-RC4b): the gate reads the RESOLVED request list
+            // (overlayOwns) instead of this component's own flags, so a
+            // merged run that inherited an ancestor's underline silences
+            // the built-in too. With no merged wire the predicate is
+            // identical to ownsUnderline / ownsStrikethrough.
             .modifier(OwnedDecorationSuppressor(
-                underline: ownsUnderline,
-                strikethrough: ownsStrikethrough))
+                underline: overlayOwns(.underline),
+                strikethrough: overlayOwns(.lineThrough)))
             // Fidelity wave 2 — text-shadow paints behind the GLYPHS
             // (css-text-decor-3 §4), so the `.shadow` chain attaches
             // right here on the text, before any frame/background can
@@ -3090,6 +3167,63 @@ private struct PlaceholderLabel: View {
         textConfig.strikethrough && ownedDecorationStyle != nil
     }
 
+    /// Wave 22 (lane DECOR, B-RC4b) — the ORDERED per-line decoration
+    /// list this label paints, each entry carrying ITS OWN colour
+    /// (css-text-decor-3 §2.2: every decorating box paints its line in
+    /// its own colour, and §2.1 propagates all of them onto the one
+    /// collapsed inline run). `decorations` is the merged
+    /// `meta.decorations` wire; nil (every document today, and every run
+    /// that was not collapsed) falls back to this component's own three
+    /// flags with nil colours — literally the pre-wave-22 behaviour, so
+    /// the dark-stage 327 captures cannot move.
+    private var decorationRequests: [DecorationColorOps.DecorationLine] {
+        DecorationColorOps.resolve(wire: decorations,
+                                   underline: ownsUnderline,
+                                   overline: textConfig.overline,
+                                   lineThrough: ownsStrikethrough)
+    }
+
+    /// True when the built-in for `kind` must be SUPPRESSED — i.e. when
+    /// this label's decoration is owned by something other than SwiftUI's
+    /// `.underline`/`.strikethrough` modifiers.
+    ///
+    /// TWO regimes, and conflating them was a latent double-draw:
+    ///
+    ///  • A PRESENT wire owns EVERYTHING, unconditionally. The wire is
+    ///    authoritative for the whole run, so no built-in may add to it or
+    ///    survive it. Before wave 22's seam landed, this method was gated
+    ///    on `ownedDecorationStyle != nil` alone, which meant a merged wire
+    ///    combined with `text-decoration-style: double|wavy` (the two
+    ///    styles the overlay does not own) left the gate FALSE while the
+    ///    overlay's own gate — `!decorationRequests.isEmpty`, and the wire
+    ///    makes that non-empty — was TRUE: SwiftUI painted its double
+    ///    underline AND the overlay painted a solid one over it. The same
+    ///    misalignment swallowed the empty-wire contract: an authoritative
+    ///    "no lines" would leave the built-in painting from the merged
+    ///    flat bag. Returning true for every kind fixes both at once.
+    ///
+    ///  • No wire (the legacy path) → unchanged, byte-for-byte: the
+    ///    overlay owns a kind only when it is requested AND the style is
+    ///    one it can draw (solid/dotted/dashed). double/wavy keep
+    ///    SwiftUI's pattern rendering, and `decorationRequests` already
+    ///    excludes those kinds there (ownsUnderline/ownsStrikethrough fold
+    ///    the style test in), so the overlay never draws them either.
+    private func overlayOwns(_ kind: DecorationColorOps.LineKind) -> Bool {
+        // Authoritative wire ⇒ total ownership, empty list included.
+        if decorations != nil { return true }
+        return ownedDecorationStyle != nil && decorationRequests.contains { $0.kind == kind }
+    }
+
+    /// One IR colour leaf → a SwiftUI colour in the sRGB space the IR
+    /// normalizes to (schema/spec/02-values.md: colours are sRGB 0..1
+    /// floats), so a `text-decoration-color` round-trips without a
+    /// working-space conversion. Twin of the Compose painter's
+    /// `Color(red, green, blue, alpha)` construction.
+    private static func decorationColor(_ c: DecorationColorOps.Rgba) -> Color {
+        Color(.sRGB, red: Double(c.r), green: Double(c.g), blue: Double(c.b),
+              opacity: Double(c.a))
+    }
+
     /// Lane IOS wave 5 (finding 4) + wave-5 gate follow-up — the
     /// per-line decoration overlay, now owning ALL THREE decoration
     /// lines. EmptyView unless a decoration the overlay owns was
@@ -3108,7 +3242,13 @@ private struct PlaceholderLabel: View {
     @ViewBuilder
     private func decorationOverlay(displayText: String,
                                    lineSpacing: CGFloat) -> some View {
-        if textConfig.overline || ownsUnderline || ownsStrikethrough {
+        // Wave 22 (B-RC4b): the gate is now the RESOLVED request list —
+        // identical to the old `overline || ownsUnderline ||
+        // ownsStrikethrough` disjunction whenever no merged wire arrived
+        // (DecorationColorOps.resolve synthesizes exactly those flags),
+        // and non-empty for a collapsed run whose lines came from
+        // ancestors this component never declared itself.
+        if !decorationRequests.isEmpty {
             // The rendered lines this label draws (pre-broken runs carry
             // hard \n breaks; everything else is one visual line).
             let lines = displayText.components(separatedBy: "\n")
@@ -3166,46 +3306,62 @@ private struct PlaceholderLabel: View {
             // (16 = the label's web-body default, see `font`).
             let fontSize = textConfig.fontSize ?? 16
             // §2.2: decoration-color, initial currentColor → text color.
+            // This is the CURRENTCOLOR SUBSTITUTE: a request whose own
+            // colour is nil (legacy path, or a wire entry the extractor
+            // left uncoloured) paints in it, exactly as before wave 22.
             let color = textConfig.decorationColor ?? resolvedColor
+            // The ordered per-line list — ancestor-first, each with its
+            // own §2.2 colour (see decorationRequests).
+            let requests = decorationRequests
             // The op emitter's style: owned solid/dotted/dashed, or
             // solid for the overline-only double/wavy path (underline/
             // strike keep the built-ins there; an overline in those
             // styles has NO built-in, so paint it solid and SAY so —
             // no silent fallthrough).
             let opStyle = ownedDecorationStyle ?? .solid
-            let _ = (ownedDecorationStyle == nil && textConfig.overline)
+            // No silent fallthrough, in BOTH regimes where the overlay
+            // draws a style it does not own:
+            //   • overline in double/wavy (no built-in exists at all), and
+            //   • ANY line of a collapsed run in double/wavy — the wire is
+            //     authoritative, so `overlayOwns` suppressed the built-ins
+            //     and this pass is the only painter left.
+            let _ = (ownedDecorationStyle == nil && (textConfig.overline || decorations != nil))
                 && PropertyTracker.logOnce(
                     key: "decoration-overline-style-\(name)",
-                    message: "text-decoration-style double/wavy overline "
-                        + "painted solid (no built-in and no DecorationOps "
-                        + "emitter yet)")
+                    message: "text-decoration-style double/wavy painted solid "
+                        + "(no built-in available for an overline, and a "
+                        + "collapsed-run wire owns every line — no "
+                        + "DecorationOps emitter for double/wavy yet)")
             ZStack(alignment: .topLeading) {
                 ForEach(segs, id: \.index) { seg in
                     // This line box's top edge in the text's own space.
                     let lineTop = CGFloat(seg.index) * advance
-                    // css-text-decor-3 §2.1 — each declared line paints
-                    // independently at its own offset. Explicit
-                    // thickness re-anchors each kind via DecorationOps
-                    // (Blink rules, ref-pinned); auto keeps the wave-5
-                    // capture rows (DecorationMetrics) byte-identically.
-                    if textConfig.overline {
-                        decorationRow(seg, style: opStyle, color: color, y: lineTop
-                            + (explicitT.map { DecorationOps.explicitOverlineTop(thicknessPx: $0) }
-                                ?? DecorationMetrics.overlineTop(fontSizePx: fontSize)))
-                    }
-                    if ownsStrikethrough {
-                        decorationRow(seg, style: opStyle, color: color, y: lineTop
-                            + (explicitT.map { DecorationOps.explicitLineThroughTop(
-                                    ascentPx: ascent, fontSizePx: fontSize, thicknessPx: $0) }
-                                ?? DecorationMetrics.lineThroughTop(
-                                    ascentPx: ascent, fontSizePx: fontSize)))
-                    }
-                    if ownsUnderline {
-                        decorationRow(seg, style: opStyle, color: color, y: lineTop
-                            + (explicitT.map { DecorationOps.explicitUnderlineTop(
-                                    ascentPx: ascent, thicknessPx: $0) }
-                                ?? DecorationMetrics.underlineTop(
-                                    ascentPx: ascent, fontSizePx: fontSize)))
+                    // css-text-decor-3 §2.1 — each requested line paints
+                    // independently at its own offset, and §2.2 — in its
+                    // OWN colour (nil → the currentColor substitute
+                    // above). Request order is ancestor-first, which is
+                    // also the ZStack's bottom-to-top order, so a
+                    // descendant's line paints OVER an ancestor's where
+                    // both land on the same row. (Paint order: §5.1 pins
+                    // the per-KIND order; ancestor-vs-descendant within
+                    // one kind is the extractor's emission order, which
+                    // this ForEach preserves. NOT §2.5 — that section is
+                    // `text-underline-position`; the stale citation
+                    // survived the wave-22 sweep.) Row selection is
+                    // DecorationMetrics.top — a pure dispatch over the
+                    // same four rules the three `if` blocks used before
+                    // (wave-5 auto rows, wave-21 explicit-thickness rows).
+                    // `offset` is the id because the same KIND may legally
+                    // appear twice in a merged chain (two nested boxes
+                    // both underlining) — keying on kind would drop one.
+                    ForEach(Array(requests.enumerated()), id: \.offset) { _, req in
+                        decorationRow(
+                            seg, style: opStyle,
+                            color: req.color.map(Self.decorationColor) ?? color,
+                            y: lineTop + DecorationMetrics.top(
+                                kind: req.kind, ascentPx: ascent,
+                                fontSizePx: fontSize,
+                                explicitThicknessPx: explicitT))
                     }
                 }
             }

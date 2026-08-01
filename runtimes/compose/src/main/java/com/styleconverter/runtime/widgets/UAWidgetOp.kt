@@ -38,10 +38,22 @@ sealed class UAWidgetOp(val pin: String) {
      *  FillTriangle op painted that solid wedge and is retired. */
     class Line(val x1: Float, val y1: Float, val x2: Float, val y2: Float, val sw: Float, val color: Long) :
         UAWidgetOp("line ${f(x1)} ${f(y1)} ${f(x2)} ${f(y2)} ${f(sw)} ${c(color)}")
-    /** Text run, top-left anchored — executed with the platform's Inter
-     *  face at [size]px (labels are the only platform-divergent ink). */
-    class Label(val text: String, val x: Float, val y: Float, val size: Float, val color: Long) :
-        UAWidgetOp("label '${text}' ${f(x)} ${f(y)} ${f(size)} ${c(color)}")
+    /** Text run anchored at ([x], [baseline]) — x is the left edge of the
+     *  advance box, [baseline] the ALPHABETIC baseline measured down from
+     *  the widget box top. A-RC2/A-RC4 (wave 22) moved this off the old
+     *  top-left anchor on purpose: a top offset is only correct for one
+     *  face's ascent, and this wave swaps the label face from Inter to
+     *  the UA control face, so the anchor had to become face-independent.
+     *  Each painter subtracts its OWN measured ascent to place the run.
+     *  [mono] selects the UA MONOSPACE face (textarea content) over the
+     *  Arial-metric control face; the pure width probes in
+     *  UAControlFontMetrics carry the matching advance sets. */
+    class Label(
+        val text: String, val x: Float, val baseline: Float,
+        val size: Float, val mono: Boolean, val color: Long
+    ) : UAWidgetOp(
+        "label '${text}' ${f(x)} ${f(baseline)} ${f(size)} ${if (mono) "mono" else "ua"} ${c(color)}"
+    )
 
     companion object {
         /** Trimmed %.2f so 13.0 pins as "13" and 17.75 as "17.75" — the

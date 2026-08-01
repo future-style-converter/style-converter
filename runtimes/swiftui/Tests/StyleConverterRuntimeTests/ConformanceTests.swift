@@ -173,6 +173,49 @@ final class ConformanceTests: XCTestCase {
         XCTAssertNil(try byName(doc, "TextRole_NoMetadata").meta)
     }
 
+    // MARK: - v2 meta.decorations (wave-22 lane DECOR)
+
+    func testV2MetaDecorations() throws {
+        let doc = try loadV2("decorations.json")
+        // The three-colour chain: ORDER outermost-first, colour tokens
+        // AS AUTHORED (the converter forwards `meta` verbatim — it is NOT
+        // the IR sRGB leaf; DecorationWire resolves it at paint time).
+        let chain = try byName(doc, "Decor_ThreeColourChain")
+        XCTAssertEqual(chain.meta?.decorations?.map { $0.line },
+                       ["underline", "overline", "line-through"])
+        XCTAssertEqual(chain.meta?.decorations?.map { $0.color },
+                       ["blue", "gray", "green"])
+        // An omitted colour stays nil = currentColor (§2.2 initial).
+        let cc = try byName(doc, "Decor_CurrentColorEntry")
+        XCTAssertEqual(cc.meta?.decorations?.count, 1)
+        XCTAssertNil(cc.meta?.decorations?[0].color)
+        // Functional + hex tokens survive verbatim to the runtime.
+        let fn = try byName(doc, "Decor_FunctionalColourToken")
+        XCTAssertEqual(fn.meta?.decorations?.map { $0.color },
+                       ["#00ff00", "rgb(0, 0, 255)"])
+        // A component with no decorations keeps nil (absence ≠ emptiness).
+        XCTAssertNil(try byName(doc, "Decor_Container").meta?.decorations)
+    }
+
+    func testV2MetaDecorationsStrictness() {
+        let head = """
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [], "meta": { "decorations":
+        """
+        // Not an array / empty array / non-object entry / unknown entry key
+        // / missing `line` / non-string colour — all writer bugs.
+        for bad in ["{\"line\":\"underline\"}", "[]", "[\"underline\"]",
+                    "[{\"line\":\"underline\",\"style\":\"wavy\"}]",
+                    "[{\"color\":\"blue\"}]", "[{\"line\":\"underline\",\"color\":7}]"] {
+            XCTAssertThrowsError(try decodeDoc(head + bad + " } } ] }"),
+                                 "meta.decorations \(bad) must be a hard decode error")
+        }
+        // …but an UNKNOWN LINE KEYWORD is tolerated (spec 05 rule 1): a
+        // future §2.1 keyword must decode and be dropped at paint time,
+        // not make the whole document unreadable.
+        XCTAssertNoThrow(try decodeDoc(head + "[{\"line\":\"spiral\"}] } } ] }"))
+    }
+
     // MARK: - v2 strictness: children is a hard error
 
     func testV2ChildrenKeyIsHardError() {
