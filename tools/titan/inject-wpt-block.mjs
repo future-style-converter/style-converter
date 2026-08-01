@@ -1138,6 +1138,8 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       // post-load-delivered (scored)" from "wall-tagged, static-only
       // (excluded)" without re-reading the per-test fixture.
       postLoadExtracted: meta.postLoadExtracted === true,
+      // Wave 23 — informational bidi-bake provenance (see build-combined-fixture).
+      bidiBaked: meta.bidiBaked === true,
       // wave-20: surfaced alongside — true ⇔ the component tree itself was
       // re-extracted from the serialized post-script DOM (appendChild
       // family), not just state-overlaid.

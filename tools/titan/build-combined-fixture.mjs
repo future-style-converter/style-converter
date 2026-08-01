@@ -126,7 +126,8 @@ async function main() {
                          // score gate's conservative wall exclusion.
                          postLoadExtracted: false,
                          // wave-20: nor any post-script structure.
-                         structureExtracted: false };
+                         structureExtracted: false,
+                         bidiBaked: false };
       continue;
     }
 
@@ -162,6 +163,10 @@ async function main() {
         // treats either stamp as the wall's delivery record, and the
         // manifest surfaces both.
         structureExtracted: fixture._wpt?.structureExtracted === true,
+        // Wave 23 — the bidi bake's provenance stamp (informational: bidi
+        // tests are NOT wall-tagged, so this never feeds applyNaScoreGate;
+        // it surfaces on the manifest row for investigators only).
+        bidiBaked: fixture._wpt?.bidiBaked === true,
       };
       i++;
     }
