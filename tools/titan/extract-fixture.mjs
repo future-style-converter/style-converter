@@ -5212,6 +5212,102 @@ export async function writeFixturePair({ fixture, refFixture, section, stem }) {
   return { testPath, refPath };
 }
 
+// ── wave-23 BIDI BAKE: the static trigger ───────────────────────────────────
+//
+// tools/titan/bidi-bake.mjs delivers UAX#9 visual geometry by loading the
+// TEST page in headless Chromium and re-expressing its laid-out text as
+// positioned single-level runs (full rationale in that module's header). The
+// gate for launching that browser lives HERE, in the stdlib-only static
+// extractor, for two reasons:
+//
+//   1. COST — the bake costs a page load per test; a source-level detector
+//      keeps the ~24k-file batch runs on the pure-static path.
+//   2. CONSERVATISM — the bake dissolves normal flow into absolute boxes, so
+//      it must NEVER touch a pure-LTR test. This detector is the promise
+//      that it cannot: no bidi signal in the source ⇒ no browser, no bake,
+//      byte-identical fixture.
+//
+// The three signals below are the complete set of ways CSS/HTML can put a
+// document into bidi processing: RTL-script content, explicit bidi
+// formatting controls, `dir=rtl|auto` attributes, and the two CSS properties
+// (`direction: rtl`, non-normal `unicode-bidi`). `dir=ltr` alone is NOT a
+// signal — an author spelling out the default cannot create a reorder.
+
+/** Strong right-to-left script ranges (Unicode DerivedBidiClass R and AL,
+ *  by block). Shared with bidi-bake.mjs: the same list decides "this test
+ *  triggers", "this element is bidi-affected" (evaluated in-page) and "this
+ *  run mixes directions", so the three can never disagree. Astral ranges are
+ *  included, which is why every consumer iterates by CODE POINT. */
+export const RTL_CODEPOINT_RANGES = [
+  [0x0590, 0x05FF], // Hebrew
+  [0x0600, 0x06FF], // Arabic
+  [0x0700, 0x074F], // Syriac
+  [0x0750, 0x077F], // Arabic Supplement
+  [0x0780, 0x07BF], // Thaana
+  [0x07C0, 0x07FF], // NKo
+  [0x0800, 0x083F], // Samaritan
+  [0x0840, 0x085F], // Mandaic
+  [0x0860, 0x086F], // Syriac Supplement
+  [0x0870, 0x089F], // Arabic Extended-B
+  [0x08A0, 0x08FF], // Arabic Extended-A
+  [0xFB1D, 0xFB4F], // Hebrew presentation forms
+  [0xFB50, 0xFDFF], // Arabic Presentation Forms-A
+  [0xFE70, 0xFEFC], // Arabic Presentation Forms-B (stops before U+FEFF ZWNBSP)
+  [0x10800, 0x10FFF], // RTL historic scripts (Cypriot … Hanifi Rohingya)
+  [0x1E800, 0x1EFFF], // Mende Kikakui, Adlam, Arabic Mathematical Alphabetic
+];
+
+/** Explicit bidi FORMATTING CONTROLS (UAX#9 §2). Kept separate from the
+ *  script ranges because they are a trigger signal only: U+200E LRM is
+ *  strong L, so folding it into the RTL list would make the bake's
+ *  mixed-direction guard bail on perfectly ordinary LTR runs. */
+export const BIDI_CONTROL_CODEPOINTS = [
+  0x200E, 0x200F,                         // LRM, RLM
+  0x202A, 0x202B, 0x202C, 0x202D, 0x202E, // LRE, RLE, PDF, LRO, RLO
+  0x2066, 0x2067, 0x2068, 0x2069,         // LRI, RLI, FSI, PDI
+];
+
+// All three probes are guarded by `(?<![-\w])` rather than `\b`: a plain
+// word boundary matches after a HYPHEN, so `data-dir=rtl` would read as the
+// HTML `dir` attribute and `redirection: rtl` as `direction: rtl`. The
+// lookbehind refuses both a word character and a hyphen before the keyword,
+// which is exactly the CSS/HTML ident boundary.
+
+/** `dir="rtl"` / `dir=auto` (quoted, single-quoted or bare). `dir=ltr` is
+ *  deliberately absent — see the section banner. */
+export const BIDI_DIR_ATTR_RX =
+  /(?<![-\w])dir\s*=\s*(?:"\s*(?:rtl|auto)\s*"|'\s*(?:rtl|auto)\s*'|(?:rtl|auto)\b)/i;
+
+/** `direction: rtl` in any stylesheet or inline style attribute. */
+export const BIDI_DIRECTION_CSS_RX = /(?<![-\w])direction\s*:\s*rtl\b/i;
+
+/** `unicode-bidi:` set to anything other than its initial `normal` — embed,
+ *  isolate, isolate-override, bidi-override, plaintext. */
+export const BIDI_UNICODE_BIDI_CSS_RX = /(?<![-\w])unicode-bidi\s*:\s*(?!normal\b)[a-z-]/i;
+
+/**
+ * Does this test's source put the document into bidi processing? Returns a
+ * short human-readable REASON (logged and carried on the bake outcome) or
+ * null. Comments are stripped first, mirroring every other static pass, so a
+ * commented-out `direction: rtl` cannot arm a browser launch.
+ */
+export function bidiBakeTrigger(html) {
+  const src = stripComments(String(html ?? ''));
+  // Content signal first — it is the one that cannot be faked by markup a
+  // browser would ignore.
+  for (const ch of src) {
+    const cp = ch.codePointAt(0);
+    for (const [lo, hi] of RTL_CODEPOINT_RANGES) {
+      if (cp >= lo && cp <= hi) return 'rtl-codepoint';
+    }
+    if (BIDI_CONTROL_CODEPOINTS.includes(cp)) return 'bidi-control-codepoint';
+  }
+  if (BIDI_DIR_ATTR_RX.test(src)) return 'dir-attribute';
+  if (BIDI_DIRECTION_CSS_RX.test(src)) return 'direction-rtl';
+  if (BIDI_UNICODE_BIDI_CSS_RX.test(src)) return 'unicode-bidi';
+  return null;
+}
+
 // ── specSection helper (mirrors bucket-wpt.mjs) ──────────────────────────────
 function specSectionOf(testRel) {
   const parts = testRel.split('/');
@@ -5233,14 +5329,25 @@ async function main() {
   // batch runs).
   const postLoadEnabled = process.argv.includes('--post-load')
     || process.env.POST_LOAD_EXTRACT === '1';
-  const inputs = process.argv.slice(2).filter((a) => a !== '--post-load');
+  // wave-23 BIDI BAKE activation (opt-in, same shape): `--bidi-bake` flag or
+  // BIDI_BAKE=1 env. Independent of --post-load — one delivers post-SCRIPT
+  // state, the other post-LAYOUT bidi geometry — and when both are on they
+  // compose in that order (structure/state first, then the bidi geometry
+  // measured on the same settled page).
+  const bidiBakeEnabled = process.argv.includes('--bidi-bake')
+    || process.env.BIDI_BAKE === '1';
+  const inputs = process.argv.slice(2)
+    .filter((a) => a !== '--post-load' && a !== '--bidi-bake');
   if (inputs.length === 0) {
-    console.error('usage: extract-fixture.mjs [--post-load] <relative-test-path>...');
+    console.error('usage: extract-fixture.mjs [--post-load] [--bidi-bake] <relative-test-path>...');
     console.error('       (paths are repo-relative, e.g. "css/css-color/a98rgb-001.html")');
     process.exit(1);
   }
   // Lazily-loaded post-load module handle (null while disabled).
   const postLoad = postLoadEnabled ? await import('./post-load-extract.mjs') : null;
+  // Same lazy-import discipline for the bidi bake: it pulls puppeteer, and
+  // the default static path must never pay that cost.
+  const bidiBake = bidiBakeEnabled ? await import('./bidi-bake.mjs') : null;
   let ok = 0, fail = 0;
   try {
     for (const rel of inputs) {
@@ -5258,9 +5365,25 @@ async function main() {
           postLoadNote = ` [post-load: ${outcome.status}${outcome.structure ? '+structure' : ''}` +
             `${outcome.reason ? ` — ${outcome.reason}` : ''}]`;
         }
+        // wave-23 BIDI BAKE, after post-load so it measures the settled tree
+        // the fixture actually carries. The module re-checks the static
+        // trigger itself (it also has a standalone CLI), so a non-bidi test
+        // costs one regex sweep and no browser.
+        let bidiNote = '';
+        if (bidiBake) {
+          const outcome = await bidiBake.bidiBakeFixture(result.fixture, rel);
+          // 'skipped' is the overwhelmingly common outcome (no bidi signal)
+          // and would drown the batch log — only report real activity.
+          if (outcome.status !== 'skipped') {
+            bidiNote = ` [bidi-bake: ${outcome.status}` +
+              (outcome.status === 'baked'
+                ? ` — ${outcome.roots} roots, ${outcome.runs} runs`
+                : ` — ${outcome.reason}`) + ']';
+          }
+        }
         const written = await writeFixturePair(result);
         console.log(`extracted ${rel} → ${relative(REPO_ROOT, written.testPath)}` +
-                    (written.refPath ? ` (+ ref)` : ' (ref skipped)') + postLoadNote);
+                    (written.refPath ? ` (+ ref)` : ' (ref skipped)') + postLoadNote + bidiNote);
         ok++;
       } catch (err) {
         console.error(`FAIL ${rel}: ${err.message ?? err}`);
@@ -5271,6 +5394,9 @@ async function main() {
     // Post-load keeps one shared Chromium alive across tests — close it
     // even when a test threw, or the process would hang on exit.
     if (postLoad) await postLoad.closePostLoadBrowser();
+    // The bidi bake keeps its OWN shared Chromium (post-load-extract's
+    // instance is module-private there); same leak discipline.
+    if (bidiBake) await bidiBake.closeBidiBakeBrowser();
   }
   console.log(`extract-fixture: ${ok} ok, ${fail} failed`);
   process.exit(fail > 0 ? 2 : 0);

@@ -67,6 +67,13 @@ import {
   INTRINSIC_WIDGET_TAGS,
   // wave-22 EX2 SKEPTIC: displaced-decoration-modifier honesty.
   carriesUnexpressibleDecoration,
+  // wave-23 BIDI BAKE: the static trigger that gates the browser launch.
+  bidiBakeTrigger,
+  RTL_CODEPOINT_RANGES,
+  BIDI_CONTROL_CODEPOINTS,
+  BIDI_DIR_ATTR_RX,
+  BIDI_DIRECTION_CSS_RX,
+  BIDI_UNICODE_BIDI_CSS_RX,
 } from './extract-fixture.mjs';
 
 // ── stripComments ───────────────────────────────────────────────────────────
@@ -2959,4 +2966,85 @@ test('SKEPTIC: carriesUnexpressibleDecoration classifies the shorthand component
   assert.equal(carriesUnexpressibleDecoration('text-decoration-color', 'red'), false);
   // A non-decoration key is never this function's business.
   assert.equal(carriesUnexpressibleDecoration('color', 'red'), false);
+});
+
+// ── wave-23 BIDI BAKE: the static trigger ───────────────────────────────────
+//
+// The gate that decides whether tools/titan/bidi-bake.mjs launches a browser
+// for a test. It is the ONLY promise that a pure-LTR test can never be
+// reordered or repositioned by the bake, so its boundaries are pinned hard.
+
+test('wave23: bidiBakeTrigger fires on RTL-script content', () => {
+  assert.equal(bidiBakeTrigger('<p>فارسی</p>'), 'rtl-codepoint');   // Arabic
+  assert.equal(bidiBakeTrigger('<p>שלום</p>'), 'rtl-codepoint');    // Hebrew
+  // Astral RTL (Adlam) — the scan walks CODE POINTS, not UTF-16 units.
+  assert.equal(bidiBakeTrigger('<p>\u{1E900}</p>'), 'rtl-codepoint');
+});
+
+test('wave23: bidiBakeTrigger fires on explicit bidi formatting controls', () => {
+  // U+202E RIGHT-TO-LEFT OVERRIDE with otherwise pure-ASCII content.
+  assert.equal(bidiBakeTrigger('<p>a‮b</p>'), 'bidi-control-codepoint');
+  // U+2067 RIGHT-TO-LEFT ISOLATE.
+  assert.equal(bidiBakeTrigger('<p>⁧x⁩</p>'), 'bidi-control-codepoint');
+});
+
+test('wave23: bidiBakeTrigger fires on dir=rtl|auto but NOT on dir=ltr', () => {
+  assert.equal(bidiBakeTrigger('<div dir=rtl>x</div>'), 'dir-attribute');
+  assert.equal(bidiBakeTrigger('<div dir="rtl">x</div>'), 'dir-attribute');
+  assert.equal(bidiBakeTrigger("<div dir='auto'>x</div>"), 'dir-attribute');
+  assert.equal(bidiBakeTrigger('<div dir = "AUTO">x</div>'), 'dir-attribute');
+  // An author spelling out the default cannot create a reorder.
+  assert.equal(bidiBakeTrigger('<div dir=ltr>x</div>'), null);
+});
+
+test('wave23: bidiBakeTrigger fires on the two bidi CSS properties', () => {
+  assert.equal(bidiBakeTrigger('<style>p { direction: rtl }</style><p>x'), 'direction-rtl');
+  assert.equal(bidiBakeTrigger('<p style="direction:rtl">x'), 'direction-rtl');
+  assert.equal(bidiBakeTrigger('<style>p { unicode-bidi: plaintext }</style><p>x'), 'unicode-bidi');
+  assert.equal(bidiBakeTrigger('<style>p { unicode-bidi:bidi-override }</style><p>x'), 'unicode-bidi');
+  // `direction: ltr` and the initial `unicode-bidi` are not signals.
+  assert.equal(bidiBakeTrigger('<style>p { direction: ltr }</style><p>x'), null);
+  assert.equal(bidiBakeTrigger('<style>p { unicode-bidi: normal }</style><p>x'), null);
+});
+
+test('wave23: bidiBakeTrigger stays silent on ordinary LTR markup', () => {
+  assert.equal(bidiBakeTrigger('<!DOCTYPE html><style>div{color:red}</style><div>Hello</div>'), null);
+  assert.equal(bidiBakeTrigger(''), null);
+  assert.equal(bidiBakeTrigger(undefined), null);
+});
+
+test('wave23: bidiBakeTrigger ignores COMMENTED-OUT bidi (comments strip first)', () => {
+  // A commented declaration cannot reach layout, so it must not arm a
+  // browser launch either — same discipline as every other static pass.
+  assert.equal(bidiBakeTrigger('<style>/* direction: rtl */ p{color:red}</style><p>x'), null);
+  assert.equal(bidiBakeTrigger('<!-- <div dir=rtl>x</div> --><p>y'), null);
+});
+
+test('wave23: the RTL ranges exclude the strong-L and neutral controls', () => {
+  const inRanges = (cp) => RTL_CODEPOINT_RANGES.some(([lo, hi]) => cp >= lo && cp <= hi);
+  assert.equal(inRanges(0x05D0), true);   // Hebrew alef
+  assert.equal(inRanges(0x0627), true);   // Arabic alef
+  assert.equal(inRanges(0xFEFC), true);   // last Arabic Presentation Forms-B letter
+  // U+FEFF ZWNBSP is class BN, not RTL — including it would make the bake's
+  // mixed-run guard bail on any text carrying a stray BOM.
+  assert.equal(inRanges(0xFEFF), false);
+  // U+200E LRM is strong L; it lives in the CONTROL list instead.
+  assert.equal(inRanges(0x200E), false);
+  assert.ok(BIDI_CONTROL_CODEPOINTS.includes(0x200E));
+  assert.ok(BIDI_CONTROL_CODEPOINTS.includes(0x202E));
+  assert.ok(BIDI_CONTROL_CODEPOINTS.includes(0x2069));
+});
+
+test('wave23: the trigger regexes are anchored on word boundaries', () => {
+  // `redirection: rtl` must not read as `direction: rtl`.
+  assert.equal(BIDI_DIRECTION_CSS_RX.test('redirection: rtl'), false);
+  assert.equal(BIDI_DIRECTION_CSS_RX.test('direction: rtl'), true);
+  // `data-dir=rtl` is not the HTML `dir` attribute.
+  assert.equal(BIDI_DIR_ATTR_RX.test('<i data-dir=rtl>'), false);
+  assert.equal(BIDI_DIR_ATTR_RX.test('<i dir=rtl>'), true);
+  // The unicode-bidi probe is a NEGATIVE lookahead on `normal`, so
+  // `normal` alone never matches but `normalise`-shaped values would —
+  // there is no such CSS value, and every real one is caught.
+  assert.equal(BIDI_UNICODE_BIDI_CSS_RX.test('unicode-bidi: normal'), false);
+  assert.equal(BIDI_UNICODE_BIDI_CSS_RX.test('unicode-bidi: isolate'), true);
 });

@@ -463,7 +463,51 @@ public struct ComponentRenderer: View {
     /// 16px default root; web pins the same unitless 1.25
     /// (index.html wpt rules + ComponentRenderer.tsx), Compose the same
     /// ratio (REF_DEFAULT_FONT_LINE_HEIGHT_RATIO 1.25).
+    ///
+    /// Wave 23 — this constant is now the SIXTEEN-PIXEL SPECIALIZATION of
+    /// [wptRefLineHeightRatio] (20 = 16 × 1.25), kept because every other
+    /// consumer of it (FloatRowPacking's `<br clear>` strip,
+    /// UAWidgetIntrinsics' control metrics) is anchored at the ref root font.
+    /// Text runs read the ratio instead — see `effectiveLineHeight`.
     public static let wptRefLineBoxPx: CGFloat = 20
+
+    /// The ref injection's UNITLESS `line-height` (capture-browser-ref.mjs
+    /// REF_LINE_HEIGHT / apps/web-harness/index.html `:where(body)`), i.e. the
+    /// ratio [wptRefLineBoxPx] was derived from: 20 = 16 × 1.25.
+    ///
+    /// Wave 23 (lane DECOR-INSET) — why the RATIO, not the px, is the pin.
+    /// A unitless `line-height` recomputes against EACH element's own
+    /// font-size (css-inline-3 §2.2 / CSS 2.1 §10.8), so the ref's `<h1>` at
+    /// `font-size: 32px` lays out on a 40px line box, not a 20px one. Both
+    /// byte-parallel twins already scale:
+    ///   • web    — `lineHeight: irLineHeight ?? '1.25'` on the placeholder
+    ///     span (apps/web-harness/src/sdui/ComponentRenderer.tsx), a unitless
+    ///     number the browser resolves per element;
+    ///   • Compose — `composedDefaultLineHeightPx(composedWpt, fontSizePx) =
+    ///     fontSizePx * REF_DEFAULT_FONT_LINE_HEIGHT_RATIO` (core/renderer/
+    ///     WptCaptureMode.kt).
+    /// iOS alone pinned the ABSOLUTE 20px, which is only correct at the 16px
+    /// root it was calibrated at. Every non-16px run therefore got a line box
+    /// that was too SHORT, and the sub-natural placement model
+    /// (LineBoxMetrics.subNaturalOffset) translated its glyph run — plus the
+    /// decoration overlay riding along on the same `.offset` — UP by the
+    /// signed half-leading `(L − contentHeight)/2`. Measured on the
+    /// wave22-final css-text-decor captures (390×600, per-test-ir font sizes):
+    ///   • text-decoration-inset-001/002 (`<h1>` @32px): iOS ink+underline band
+    ///     sat 7px above web/Android (iOS underline rows 135-137 vs web 142-144,
+    ///     Android 142-143) → iOS-web 0.94 while Android-web scored 0.98;
+    ///   • text-decoration-color-recalc (@50px): iOS band 99-136 vs web 119-156
+    ///     — 20px higher, the same defect scaled by the same rule.
+    /// A corpus sweep of all 180 wave22-final per-test-ir documents finds
+    /// exactly 4 tests carrying text with a declared font-size ≠ 16 and no
+    /// line-height — the two inset tests, color-recalc, and
+    /// line-through-vertical — i.e. precisely the four css-text-decor rows
+    /// where iOS trails a passing Android-web pair. Nothing else in the corpus
+    /// can move: at 16px this ratio reproduces [wptRefLineBoxPx] exactly.
+    public static let wptRefLineHeightRatio: CGFloat = wptRefLineBoxPx / 16
+    // (= 1.25 exactly — derived from the pinned 20pt box at the 16px root so
+    // the two constants can never drift apart silently; wave-23 drift pin in
+    // tools/titan/wpt-white-canvas.test.mjs asserts this derivation.)
 
     /// The line-height a placeholder text run should lay out with. Outside
     /// WPT capture (the product path + the whole committed baseline corpus)
@@ -490,8 +534,16 @@ public struct ComponentRenderer: View {
     /// extractor's historical 1.2× number so the committed baselines never move
     /// — see LineHeightNormal.lineBoxSource for the table and the stated risk.
     /// ABSENT line-height is untouched in BOTH modes.
+    ///
+    /// Wave 23 (lane DECOR-INSET) — `fontSizePx` is what the CALIBRATED row
+    /// multiplies by [wptRefLineHeightRatio]; it defaults to 16 so every
+    /// legacy call site (and the WPTCaptureModeTests pin that reads
+    /// `wptRefLineBoxPx` back out of it) keeps the exact 20pt it always
+    /// returned. See [wptRefLineHeightRatio] for why a unitless ratio, not an
+    /// absolute px, is the twin-parity pin.
     public static func effectiveLineHeight(declared: CGFloat?,
                                            declaredNormal: Bool = false,
+                                           fontSizePx: CGFloat = 16,
                                            wptCaptureMode: Bool) -> CGFloat? {
         // The three-state pick is delegated to the shared native decision so
         // Compose's placeholder `when` and this function can never diverge.
@@ -509,8 +561,12 @@ public struct ComponentRenderer: View {
             return nil
         // Bare text: pin the ref line box only under WPT capture; otherwise
         // nil = SwiftUI's natural metrics (unchanged product behaviour).
+        // The ref line box is the ratio × THIS run's font-size — the ref's
+        // unitless 1.25 recomputes per element, exactly as web's inline
+        // `lineHeight: '1.25'` and Compose's composedDefaultLineHeightPx do
+        // (wave 23; identical to the old constant at the 16px default).
         case .calibrated:
-            return wptCaptureMode ? wptRefLineBoxPx : nil
+            return wptCaptureMode ? fontSizePx * wptRefLineHeightRatio : nil
         }
     }
 
@@ -2687,6 +2743,11 @@ private struct PlaceholderLabel: View {
         let effectiveLineHeight = ComponentRenderer.effectiveLineHeight(
             declared: textConfig.lineHeight,
             declaredNormal: textConfig.lineHeightIsNormal,
+            // Wave 23 (lane DECOR-INSET) — the CALIBRATED row scales with THIS
+            // run's font-size (the ref's unitless 1.25), so a 32px `<h1>` gets
+            // a 40pt line box instead of the 16px root's 20pt. 16 is the same
+            // default the rest of this label uses for a size-less run.
+            fontSizePx: textConfig.fontSize ?? 16,
             wptCaptureMode: wptCaptureMode)
         // Fidelity wave 3 — CSS line-box leading split (CSS 2.1 §10.8):
         // `spacing` makes each line ADVANCE exactly line-height px;

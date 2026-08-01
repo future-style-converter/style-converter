@@ -424,6 +424,24 @@ dirs + WPT corpus are gitignored):
   collisions disambiguated; post-load extraction folds
   collapsed-wrapper records. Zero pass-regressions; 327-net clean.
   Corpus totals: **web 165/174, Android 156/174, iOS 155/174**.
+  Wave 23 (`tools/titan/results/corpus-v4-12.json`) broke the bidi wall
+  with the instrument's third bake: Chromium's own visual text geometry
+  (per-character client rects grouped into level runs by geometric
+  adjacency — never a UAX#9 reimplementation) re-expressed as ordinary
+  absolutely-positioned single-level text components every engine
+  renders without new machinery. bidi-tab-001 passes on all three
+  platforms; bidi-lines-001 web 1.000/iOS 0.993; the native residual
+  (~0.93) is now isolated to pure Hebrew glyph ink — the standing
+  non-Latin shaping wall. The bake's ink-band verifier independently
+  caught Chromium diverging from css-text-3's neutral-paragraph rule.
+  The iOS decoration insets cleared exactly as the skeptic's calibrated
+  proxy predicted (a line-box cap identity, not the overlay). Three new
+  sections joined: **css-masking and css-lists both 10/12 on every
+  platform at first capture**; css-gaps exposes the unimplemented
+  css-gaps-1 gap-decoration spec on all three engines (the queued
+  feature brief). 18 sections, 210 scored tests; zero pass-regressions;
+  327-net clean. Corpus totals: **web 190/210, iOS 186/210, Android
+  180/210**.
 
 ## Test suites
 
@@ -432,8 +450,8 @@ dirs + WPT corpus are gitignored):
 | converter (Kotlin) | `./gradlew :converter:test` | 207 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1071 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1481 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 851 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 816 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 856 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 872 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 34 goldens (12 v1 + 22 v2) × 4 codebases |
 
 ## Roadmap
