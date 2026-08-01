@@ -160,6 +160,19 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             else el.jsonObject
         }
 
+        // wave-22 lane DECOR: read optional `_decorations` (the ordered
+        // per-line decoration list the extractor hoists onto a COLLAPSED
+        // inline run — see tools/titan/extract-fixture.mjs, the
+        // "_decorations" wire banner) as an OPAQUE JsonArray. Same opacity
+        // contract as `_attrs`: the extractor owns the entry shape
+        // ({line, color?}, colour tokens AS AUTHORED) and the converter
+        // forwards the array verbatim to v2 `meta.decorations`. Same
+        // null-tolerance as `_pseudo`/`_attrs`: JSON null ≡ absent.
+        val decorations = obj["_decorations"]?.let { el ->
+            if (el is kotlinx.serialization.json.JsonNull) null
+            else el.jsonArray
+        }
+
         return CssComponent(
             properties = props,
             selectors = selectors,
@@ -169,7 +182,10 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             role = role,
             tag = tag,
             pseudos = pseudos,
-            attrs = attrs
+            attrs = attrs,
+            // wave-22 lane DECOR: the collapsed run's per-line decoration
+            // list, opaque all the way to the v2 wire (meta.decorations).
+            decorations = decorations
         )
     }
 
@@ -346,6 +362,12 @@ fun cssParsing(doc: JsonObject): IRDocument {
             // non-widget component; the v1 serializer ignores it, so v1
             // output bytes are untouched (same rule as tag/pseudos).
             attrs = component.attrs,
+            // wave-22 lane DECOR: forward `_decorations` verbatim for the
+            // v2 wire (meta.decorations — grouped beside meta.attrs). Null
+            // on every component the extractor did not collapse; the v1
+            // serializer ignores it, so v1 output bytes are untouched
+            // (same rule as tag/pseudos/attrs).
+            decorations = component.decorations,
             // Forward the custom-property definitions (IR v2 `variables`
             // key). Stays null on fixtures without --* declarations; the
             // legacy v1 serializer ignores it either way, so v1 output

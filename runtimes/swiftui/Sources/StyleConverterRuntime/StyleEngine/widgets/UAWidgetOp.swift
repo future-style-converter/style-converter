@@ -29,9 +29,18 @@ enum UAWidgetOp: Equatable {
     /// y138-141 — a filled triangle would be solid across); the old
     /// fillTriangle op painted that solid wedge and is retired.
     case line(x1: CGFloat, y1: CGFloat, x2: CGFloat, y2: CGFloat, sw: CGFloat, color: UInt32)
-    /// Text run, top-left anchored — executed with the platform's Inter
-    /// face at `size`px (labels are the only platform-divergent ink).
-    case label(text: String, x: CGFloat, y: CGFloat, size: CGFloat, color: UInt32)
+    /// Text run anchored at (`x`, `baseline`) — x is the left edge of the
+    /// advance box, `baseline` the ALPHABETIC baseline measured down from
+    /// the widget box top. A-RC2/A-RC4 (wave 22) moved this off the old
+    /// top-left anchor on purpose: a top offset is only correct for one
+    /// face's ascent, and this wave swaps the label face from Inter to
+    /// the UA control face, so the anchor had to become face-independent.
+    /// Each painter subtracts its OWN measured ascent to place the run.
+    /// `mono` selects the UA MONOSPACE face (textarea content) over the
+    /// Arial-metric control face; the pure width probes in
+    /// UAControlFontMetrics carry the matching advance sets.
+    case label(text: String, x: CGFloat, baseline: CGFloat, size: CGFloat,
+               mono: Bool, color: UInt32)
 
     /// Trimmed %.2f so 13.0 pins as "13" and 17.75 as "17.75" — the
     /// Kotlin twin formats identically (byte-parallel pin contract).
@@ -63,8 +72,11 @@ enum UAWidgetOp: Equatable {
             return "strokeCircle \(Self.f(cx)) \(Self.f(cy)) \(Self.f(r)) \(Self.c(color))"
         case let .line(x1, y1, x2, y2, sw, color):
             return "line \(Self.f(x1)) \(Self.f(y1)) \(Self.f(x2)) \(Self.f(y2)) \(Self.f(sw)) \(Self.c(color))"
-        case let .label(text, x, y, size, color):
-            return "label '\(text)' \(Self.f(x)) \(Self.f(y)) \(Self.f(size)) \(Self.c(color))"
+        case let .label(text, x, baseline, size, mono, color):
+            // Byte-parallel with the Kotlin twin: the face token is the
+            // literal "mono"/"ua" so a face drift shows up in the pin.
+            return "label '\(text)' \(Self.f(x)) \(Self.f(baseline)) \(Self.f(size)) "
+                + "\(mono ? "mono" : "ua") \(Self.c(color))"
         }
     }
 }

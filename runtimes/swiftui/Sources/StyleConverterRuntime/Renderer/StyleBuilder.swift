@@ -61,6 +61,13 @@ struct TextConfig {
     var fontItalic: Bool         = false
     var letterSpacing: CGFloat?  = nil
     var lineHeight: CGFloat?     = nil
+    // Wave 22 (lane FONT) — the IR declared `line-height: normal` (css-fonts-4
+    // §4.3, what `font: 92px Arial` resets to). Rides ALONGSIDE `lineHeight`
+    // (which still carries the wire's legacy 1.2 stand-in for the keyword);
+    // ComponentRenderer.effectiveLineHeight prefers this flag ONLY under WPT
+    // capture, so `normal` falls through to the face's natural metrics there
+    // while the committed dark-stage baselines keep the numeric box.
+    var lineHeightIsNormal: Bool = false
     var textAlign: TextAlignment = .leading
     var underline: Bool          = false
     var strikethrough: Bool      = false
@@ -396,6 +403,13 @@ enum StyleBuilder {
             if let it = agg.italic         { s.text.fontItalic = it }
             if let tr = agg.letterSpacingPx { s.text.letterSpacing = tr }
             if let lh = agg.lineHeightPx   { s.text.lineHeight = lh }
+            // Wave 22 (lane FONT) — carry the DECLARED-`normal` signal to the
+            // renderer. Unconditional OR-free assignment is deliberate: the
+            // aggregate is the single source of truth for this element's
+            // line-height, so a numeric declaration (which leaves the flag
+            // false) must be able to clear a stale true, exactly like the
+            // px/multiplier fields above are last-write-wins.
+            s.text.lineHeightIsNormal = agg.lineHeightIsNormal
             if let ti = agg.textIndentPx   { s.text.textIndentPx = ti }
             if let a = agg.textAlign       { s.text.textAlign = a }
             s.text.underline = s.text.underline || agg.underline

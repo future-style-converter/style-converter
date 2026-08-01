@@ -19,6 +19,8 @@ package com.styleconverter.runtime.layout
 // y143 from checkbox top 133, row-4 top 152 from color bottom 152.)
 
 import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.widgets.UAControlFontMetrics
+import com.styleconverter.runtime.widgets.UAWidgetsGeometry
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.renderer.ComponentRenderer
 import kotlinx.serialization.json.Json
@@ -120,23 +122,31 @@ class InlineAtomFlowTest {
     // the ref-measured values the replicas converge on.
     private data class Atom(val w: Double, val h: Double, val d: Double,
                             val mS: Double = 0.0, val mE: Double = 0.0)
+    // A-RC2 (wave 22): the label-driven widths are no longer eyeballed
+    // off the ref — they are computed from the SAME Arial-metric pin the
+    // replica painter measures with, so this flow test and the widget
+    // pin table can never disagree about how wide a control is.
+    private fun ctrl(label: String): Double =
+        UAControlFontMetrics.advance(label, UAWidgetsGeometry.FONT).toDouble()
     private val atoms = listOf(
-        Atom(8.0, 20.0, 5.0),        //  0 a         (measured text)
-        Atom(54.0, 21.0, 6.0),       //  1 button    (measured label)
-        Atom(153.0, 21.0, 6.0),      //  2 input-text     (table)
-        Atom(153.0, 21.0, 6.0),      //  3 input-search   (table)
-        Atom(184.0, 36.0, 0.0),      //  4 textarea       (table)
-        Atom(86.0, 21.0, 6.0),       //  5 input-button  (measured)
-        Atom(89.0, 21.0, 6.0),       //  6 input-submit  (measured)
-        Atom(82.0, 21.0, 6.0),       //  7 input-reset   (measured)
-        Atom(129.0, 21.0, 6.0),      //  8 range          (table)
-        Atom(13.0, 13.0, 3.0, 4.0, 3.0), // 9 checkbox    (table+margins)
-        Atom(13.0, 13.0, 3.0, 4.0, 3.0), // 10 radio      (table+margins)
-        Atom(50.0, 27.0, 9.0),       // 11 color          (table, fix 4)
-        Atom(55.0, 19.0, 8.0),       // 12 select        (measured w, fix 4)
-        Atom(87.0, 70.0, 7.0),       // 13 select-multiple (measured w, fix 4)
-        Atom(80.0, 16.0, 4.5),       // 14 meter          (table, fix 4)
-        Atom(160.0, 16.0, 4.5),      // 15 progress       (table, fix 4)
+        // 'a' in the block's INTER 16px face (hmtx 1150/2048 × 16): the
+        // anchor is prose, not a control, so it keeps the ref's Inter.
+        Atom(8.984375, 20.0, 4.0),                     //  0 a
+        Atom(ctrl("button") + 16.0, 21.0, 6.0),        //  1 button
+        Atom(153.0, 21.0, 6.0),                        //  2 input-text
+        Atom(153.0, 21.0, 6.0),                        //  3 input-search
+        Atom(183.0, 36.0, 0.0),                        //  4 textarea
+        Atom(ctrl("input-button") + 16.0, 21.0, 6.0),  //  5 input-button
+        Atom(ctrl("input-submit") + 16.0, 21.0, 6.0),  //  6 input-submit
+        Atom(ctrl("input-reset") + 16.0, 21.0, 6.0),   //  7 input-reset
+        Atom(129.0, 21.0, 6.0, 2.0, 2.0),              //  8 range
+        Atom(13.0, 13.0, 3.0, 4.5, 3.0),               //  9 checkbox
+        Atom(13.0, 13.0, 3.0, 4.5, 3.0),               // 10 radio
+        Atom(50.0, 27.0, 9.0),                         // 11 color
+        Atom(ctrl("select") + 5.0 + 17.42, 19.0, 8.0), // 12 select
+        Atom(ctrl("select-multiple") + 6.0, 70.0, 7.0),// 13 select-multiple
+        Atom(80.0, 16.0, 3.0),                         // 14 meter
+        Atom(160.0, 16.0, 3.0),                        // 15 progress
     )
 
     private fun plan() = InlineAtomFlow.layout(
@@ -157,68 +167,79 @@ class InlineAtomFlowTest {
     @Test
     fun `appearance-auto rows split 4-4-7-1 like the ref`() {
         val p = plan()
-        // Row membership read off the y coordinates: row tops are 0 /
-        // 21 / 63 / 135 (P17 pitches 21, 42, 72 — see the pitch pin).
-        // Row 1: a+button+input-text+input-search share the first line
-        // (the lane's y17-37 ref band, container-relative y0).
-        assertEquals(0.0, p.y[0], 1e-9)                     // a
-        assertEquals(0.0, p.y[1], 1e-9)                     // button
-        assertEquals(0.0, p.y[2], 1e-9)                     // input-text
-        assertEquals(0.0, p.y[3], 1e-9)                     // input-search
-        // Row 2: the textarea tops the second line (ref y38 → rel 21).
-        assertEquals(21.0, p.y[4], 1e-9)                    // textarea
-        // Buttons hang from the shared baseline: 21 + 36A − 15a = 42.
-        assertEquals(42.0, p.y[5], 1e-9)                    // input-button
-        assertEquals(42.0, p.y[7], 1e-9)                    // input-reset
-        // Row 3 top = 21 + (36+6) = 63 (ref y80 → rel 63): the listbox
-        // is the ascent giant (70 − 7 descent = 63) and tops the row.
-        assertEquals(63.0, p.y[13], 1e-9)                   // select-multiple
-        // Row-3 baseline = 63 + 63A = 126 (abs y143 — checkbox top 133):
-        // range 126 − 15a = 111 (ref box y127.5 → rel 110.5, ±0.5).
-        assertEquals(111.0, p.y[8], 1e-9)                   // range
-        // checkbox/radio: 126 − 10a = 116 (ref y133 → rel 116, exact).
-        assertEquals(116.0, p.y[9], 1e-9)                   // checkbox
-        assertEquals(116.0, p.y[10], 1e-9)                  // radio
-        // color: 126 − 18a = 108 (ref y125 → rel 108, exact).
-        assertEquals(108.0, p.y[11], 1e-9)                  // color
-        // select: 126 − 11a = 115 (ref slab y132 → rel 115, exact).
-        assertEquals(115.0, p.y[12], 1e-9)                  // select
-        // meter rides the same baseline: 126 − 11.5a = 114.5.
-        assertEquals(114.5, p.y[14], 1e-9)                  // meter
-        // Row 4: progress alone at 63 + (63A + 9D) = 135 top; the P17b
-        // strut holds the baseline at 135 + 15, so the 16px bar sits at
-        // 150 − 11.5a = 138.5 (ref box y155.5 → rel 138.5, exact — the
-        // ink band y159.5-166.5 the fix-4 probe measured).
-        assertEquals(138.5, p.y[15], 1e-9)                  // progress
-        assertEquals(0.0, p.x[15], 1e-9)
+        // Wave-22 vertical solve. Row tops are 0 / 22 / 64 / 136 (rel to
+        // the container content origin abs y16), i.e. ABS 16 / 38 / 80 /
+        // 152 — every one of those is a measured ref band. Pitches come
+        // from the corrected strut (ascent 16, descent 4).
+        // Row 1: a+button+input-text+input-search share the first line;
+        // the ANCHOR keeps the row top (ascent 16 = the strut) while the
+        // 21px controls hang 1px lower — abs y17, the ref band.
+        assertEquals(0.0, p.y[0], 1e-6)                     // a (abs 16)
+        assertEquals(1.0, p.y[1], 1e-6)                     // button (abs 17)
+        assertEquals(1.0, p.y[2], 1e-6)                     // input-text
+        assertEquals(1.0, p.y[3], 1e-6)                     // input-search
+        // Row 2 top = 16A + 6D = 22 → abs 38, the ref textarea border row.
+        assertEquals(22.0, p.y[4], 1e-6)                    // textarea
+        // Buttons hang from the shared baseline: 22 + 36A − 15a = 43
+        // (abs 59 — the ref input-button border row).
+        assertEquals(43.0, p.y[5], 1e-6)                    // input-button
+        assertEquals(43.0, p.y[7], 1e-6)                    // input-reset
+        // Row 3 top = 22 + (36+6) = 64 → abs 80: the listbox is the
+        // ascent giant (70 − 7 descent = 63) and tops the row (ref y80).
+        assertEquals(64.0, p.y[13], 1e-6)                   // select-multiple
+        // Row-3 baseline = 64 + 63A = 127 → abs 143. Each atom below is
+        // baseline − (h − d) and matches its ref band EXACTLY:
+        assertEquals(112.0, p.y[8], 1e-6)                   // range   (abs 128)
+        assertEquals(117.0, p.y[9], 1e-6)                   // checkbox(abs 133)
+        assertEquals(117.0, p.y[10], 1e-6)                  // radio   (abs 133)
+        assertEquals(109.0, p.y[11], 1e-6)                  // color   (abs 125)
+        assertEquals(116.0, p.y[12], 1e-6)                  // select  (abs 132)
+        // meter rides the same baseline: 127 − 13a = 114 (off-canvas).
+        assertEquals(114.0, p.y[14], 1e-6)                  // meter
+        // Row 4: progress alone at 64 + (63A + 9D) = 136 top (abs 152);
+        // the strut holds the baseline at 136 + 16, so the 16px bar sits
+        // at 152 − 13a = 139 → abs 155, whose 4px ink inset is the ref's
+        // measured bar band y159..167.
+        assertEquals(139.0, p.y[15], 1e-6)                  // progress
+        assertEquals(0.0, p.x[15], 1e-6)
     }
 
     @Test
     fun `appearance-auto x positions match the ref bands`() {
         val p = plan()
-        // Row 1 cursor walk (gap 4.16): ref input-text at x87−16=71,
-        // input-search at 245−16=229 — the pure walk lands within a px.
-        assertEquals(0.0, p.x[0], 1e-9)
-        assertEquals(12.16, p.x[1], 1e-9)
-        assertEquals(70.32, p.x[2], 1e-9)
-        assertEquals(227.48, p.x[3], 1e-9)
-        // Row 2: textarea flush left; input-button at 188.16 (ref
-        // x204−16=188 — exact to the sub-px).
-        assertEquals(0.0, p.x[4], 1e-9)
-        assertEquals(188.16, p.x[5], 1e-9)
-        assertEquals(278.32, p.x[6], 1e-9)
-        assertEquals(371.48, p.x[7], 1e-9)
-        // Row 3: checkbox origin includes its 4px UA margin-left
-        // (129 range + 4.16 gap + 4 margin).
-        assertEquals(0.0, p.x[8], 1e-9)
-        assertEquals(137.16, p.x[9], 1e-9)
-        // Meter still fits row 3 (ends 465.96 ≤ 500) — the ref clips it
+        // Wave-22 horizontal solve (gap 4.5 = Inter's 16px space
+        // advance). Every expectation below is quoted with the ABS
+        // column (+16) and the ref's PAINTED border column, which
+        // Chromium pixel-snaps — so a residual under 0.5 is exact.
+        // Row 1: button abs 29.48 (ref 29), field abs 87.05 (ref 87),
+        // search abs 244.55 (ref 245).
+        assertEquals(0.0, p.x[0], 1e-6)
+        assertEquals(13.4844, p.x[1], 1e-3)
+        assertEquals(71.0546, p.x[2], 1e-3)
+        assertEquals(228.5546, p.x[3], 1e-3)
+        // Row 2: textarea flush left; input-button abs 203.5 (ref 204),
+        // input-submit abs 294.42 (ref 294), input-reset abs 387.55
+        // (ref 388).
+        assertEquals(0.0, p.x[4], 1e-6)
+        assertEquals(187.5, p.x[5], 1e-3)
+        assertEquals(278.423, p.x[6], 1e-3)
+        assertEquals(371.5465, p.x[7], 1e-3)
+        // Row 3, the band wave 21 missed by 5-7px. Range carries its UA
+        // 2px margin (abs 18 → track ink abs 19, the ref probe); the
+        // checkbox and radio land on their ref columns EXACTLY.
+        assertEquals(2.0, p.x[8], 1e-6)                     // range   (abs 18)
+        assertEquals(142.0, p.x[9], 1e-6)                   // checkbox(abs 158 = ref)
+        assertEquals(167.0, p.x[10], 1e-6)                  // radio   (abs 183 = ref)
+        assertEquals(187.5, p.x[11], 1e-3)                  // color   (abs 203.5, ref 204)
+        assertEquals(242.0, p.x[12], 1e-6)                  // select  (abs 258 = ref)
+        assertEquals(303.7506, p.x[13], 1e-3)               // listbox (abs 319.75, ref 320)
+        // Meter still fits row 3 (ends 479.47 ≤ 500) — the ref clips it
         // past the 390px viewport but it shares the row.
-        assertEquals(385.96, p.x[14], 1e-9)
-        // Flow extent: widest row (row 3); total height = row-4 top 135
-        // + the P17b strut line (15 ascent + 5 descent) = 155.
-        assertEquals(465.96, p.width, 1e-9)
-        assertEquals(155.0, p.height, 1e-9)
+        assertEquals(399.4653, p.x[14], 1e-3)
+        // Flow extent: widest row (row 3); total height = row-4 top 136
+        // + the strut line (16 ascent + 4 descent) = 156.
+        assertEquals(479.4653, p.width, 1e-3)
+        assertEquals(156.0, p.height, 1e-6)
     }
 
     @Test

@@ -25,6 +25,23 @@ enum LineHeightExtractor {
             // only the resolver has. extractPx reads the px form; the
             // multiplier path needs an explicit lookup so it isn't
             // silently dropped.
+            // Wave 22 (lane FONT) — flag the DECLARED-`normal` state
+            // (css-fonts-4 §4.3: what `font: 92px Arial` resets line-height to,
+            // now emitted by the converter's FontExpander). Last-write-wins,
+            // like px/multiplier below, so the flag and the number can never
+            // describe different declarations.
+            //
+            // The wire's legacy 1.2 compatibility multiplier is DELIBERATELY
+            // still read below for this case: the CSS-correct answer is the
+            // face's own metrics, but every committed 327-pair dark-stage
+            // capture of `line-height: normal`
+            // (fixtures/properties/typography/line-height.json →
+            // tools/visual/baseline/iOS__063_Typography_LineHeight.png) was made
+            // with the 1.2 box, and this lane cannot re-capture. The natural
+            // reading is therefore applied WPT-GATED in
+            // ComponentRenderer.effectiveLineHeight, which prefers the flag over
+            // the number only under WPT capture.
+            cfg.isNormalKeyword = LineHeightNormal.isDeclaredNormal(prop.data)
             cfg.px = ValueExtractors.extractPx(prop.data)
             if cfg.px == nil, case .object(let o) = prop.data,
                let mult = o["multiplier"]?.doubleValue {

@@ -193,6 +193,29 @@ class SchemaConformanceTest {
     }
 
     @Test
+    fun `v2 — meta_decorations lands on the runtime model verbatim`() {
+        // Wave-22 lane DECOR. ORDER is outermost-first and colour tokens
+        // stay AS AUTHORED — the converter forwards `meta` verbatim, so
+        // this is NOT the IR sRGB leaf; DecorationWire resolves the token
+        // at paint time (schema/spec/04-metadata-fields.md).
+        val doc = loadV2("decorations.json")
+        val chain = byId(doc, "decor-chain-002").decorations!!
+        assertEquals(listOf("underline", "overline", "line-through"), chain.map { it.line })
+        assertEquals(listOf("blue", "gray", "green"), chain.map { it.color })
+        // An omitted colour stays null = currentColor (§2.2 initial).
+        val cc = byId(doc, "decor-currentcolor-003").decorations!!
+        assertEquals(1, cc.size)
+        assertNull(cc[0].color)
+        // Functional + hex tokens survive verbatim to the runtime.
+        assertEquals(
+            listOf("#00ff00", "rgb(0, 0, 255)"),
+            byId(doc, "decor-functional-colour-004").decorations!!.map { it.color }
+        )
+        // A component with no decorations keeps null (absence ≠ emptiness).
+        assertNull(byId(doc, "decor-container-001").decorations)
+    }
+
+    @Test
     fun `v2 — slot round-trips with default-name reconstruction`() {
         val doc = loadV2("children-nesting.json")
         val child = byId(doc, "child__0-002")

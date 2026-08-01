@@ -90,6 +90,38 @@ describe('decodeIRDocument — v1 translation details', () => {
     expect(c.pseudos?.marker?._text).toBe('1.');
   });
 
+  it('moves _decorations into meta.decorations verbatim (wave-22 lane DECOR)', () => {
+    // The extractor-shaped input path: a COLLAPSED inline run carries the
+    // ordered per-line list under the underscore spelling. The web
+    // renderer is the one consumer that can paint it losslessly, so the
+    // v1 hop must not drop it (spec 04's second column).
+    const doc = decodeIRDocument({
+      components: [
+        {
+          id: 'run-1',
+          name: 'Run',
+          properties: [],
+          _text: 'collapsed run',
+          _decorations: [
+            { line: 'underline', color: 'blue' },
+            { line: 'overline', color: 'gray' },
+            { line: 'line-through' },
+          ],
+        },
+      ],
+    });
+    // ORDER outermost-first, colour tokens AS AUTHORED, absent colour
+    // stays absent (currentColor, css-text-decor-3 §2.2 initial).
+    expect(doc.components[0].meta?.decorations).toEqual([
+      { line: 'underline', color: 'blue' },
+      { line: 'overline', color: 'gray' },
+      { line: 'line-through' },
+    ]);
+    // A component without the hint gains no meta at all (omit-when-empty).
+    expect(decodeIRDocument({ components: [{ id: 'p', name: 'P', properties: [] }] })
+      .components[0].meta).toBeUndefined();
+  });
+
   it('drops empty selectors/media (v2 omit-when-empty) but keeps non-empty', () => {
     const doc = decodeIRDocument({
       components: [

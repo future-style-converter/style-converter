@@ -83,7 +83,8 @@ internal fun InlineFlowLayout(
             gapPx = UAWidgetIntrinsics.ATOM_GAP_PX.dp.toPx().toDouble(),
             // P17b (fix 4) — the §10.8.1 line-box strut: rows of short
             // atoms (checkbox row, the lone progress bar) still get the
-            // block's 15/5 text metrics, matching the ref's row pitches.
+            // block's 16/4 text metrics (wave-22 re-solve), matching the
+            // ref's row pitches.
             strutAscentPx = UAWidgetIntrinsics.STRUT_ASCENT_PX,
             strutDescentPx = UAWidgetIntrinsics.STRUT_DESCENT_PX,
         )

@@ -72,9 +72,33 @@ export interface IRSlot {
 }
 
 /**
+ * One entry of the wave-22 `meta.decorations` list — a single decorating
+ * box's contribution to a COLLAPSED inline run (schema/spec/
+ * 04-metadata-fields.md; producer: the `_decorations` banner in
+ * tools/titan/extract-fixture.mjs).
+ */
+export interface IRDecoration {
+  /**
+   * Exactly ONE css-text-decor-3 §2.1 line keyword. An element declaring
+   * two contributes two entries sharing one colour, so consumers never
+   * re-tokenise. `none`/`blink` never appear (they paint nothing).
+   */
+  line: string;
+  /**
+   * The decorating box's `text-decoration-color` AS AUTHORED ('blue',
+   * '#00f', 'rgb(0,0,255)') — NOT the normalized sRGB leaf every CSS
+   * *property* value carries. On web that is a feature: the token goes
+   * straight back into a `text-decoration-color` declaration and the
+   * browser parses it, so the round trip is lossless by construction.
+   * Absent/null = `currentColor` (§2.2 initial).
+   */
+  color?: string | null;
+}
+
+/**
  * Droppable renderer hints, grouped (v2 home of v1's `_tag` / `_role`).
- * Omitted entirely when empty; strict (`{sourceTag?, role?, attrs?}`
- * only) when present — see schema/spec/01-envelope.md.
+ * Omitted entirely when empty; strict (`{sourceTag?, role?, attrs?,
+ * decorations?}` only) when present — see schema/spec/01-envelope.md.
  */
 export interface IRMeta {
   /**
@@ -97,6 +121,18 @@ export interface IRMeta {
    * Application policy lives in renderer/WidgetAttrs.ts.
    */
   attrs?: Record<string, string | number | boolean> | null;
+  /**
+   * wave-22 per-line decorations for a COLLAPSED inline run (v2 home of
+   * the extractor's `_decorations`). ORDER is OUTERMOST-FIRST — the
+   * css-text-decor-3 §2.1 propagation order — and the list is
+   * AUTHORITATIVE when present: it is the complete line set for the run,
+   * so a renderer that honours it MUST ignore the component's own
+   * `text-decoration-line` (the surviving flat longhands are a root-wins
+   * merged bag kept for readers that drop `meta`). A present-but-EMPTY
+   * list still says "no lines" and must paint nothing.
+   * Application policy lives in renderer/DecorationSpans.ts.
+   */
+  decorations?: IRDecoration[] | null;
 }
 
 /**

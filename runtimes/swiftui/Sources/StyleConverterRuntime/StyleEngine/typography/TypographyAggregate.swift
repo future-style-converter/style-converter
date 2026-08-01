@@ -89,6 +89,14 @@ struct TypographyAggregate: Equatable {
     /// Unitless `line-height` multiplier. Resolved to lineHeightPx in
     /// `TypographyExtractor.finalise(_:)` once fontSizePx is known.
     var lineHeightMultiplier: CGFloat? = nil
+    /// Wave 22 (lane FONT) — the IR DECLARED `line-height: normal`
+    /// (css-fonts-4 §4.3, what the `font` shorthand resets to). Deliberately
+    /// carries NO number: `normal` is a lookup into the rendered face's
+    /// metrics, resolved by the renderer. It is the third state next to
+    /// "a number was declared" (lineHeightPx/Multiplier) and "nothing was
+    /// declared" (all nil) — see LineHeightNormal for why the distinction
+    /// matters to the WPT ref-line-box calibration.
+    var lineHeightIsNormal: Bool = false
     /// `text-indent` in points — applied as `.padding(.leading, …)` on the
     /// first line by the text renderer. Stored here for the future.
     var textIndentPx: CGFloat? = nil

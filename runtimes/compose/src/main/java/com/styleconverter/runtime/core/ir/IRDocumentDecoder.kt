@@ -106,7 +106,12 @@ object IRDocumentDecoder {
     private val KEYFRAME_STOP_KEYS = setOf("offset", "properties")
     // Wave-20 (lane W2): `attrs` joined the meta group — the widget-identity
     // capsule for form/widget tags (wire contract pinned in IRAttrs' doc).
-    private val META_KEYS = setOf("sourceTag", "role", "attrs")
+    // Wave-22 (lane DECOR): `decorations` joined it too — the collapsed
+    // inline run's ordered per-line list (contract in IRDecoration's doc).
+    private val META_KEYS = setOf("sourceTag", "role", "attrs", "decorations")
+    // The two keys ONE `meta.decorations` entry may carry (schema
+    // ir-v2.schema.json meta.decorations.items, additionalProperties:false).
+    private val DECORATION_KEYS = setOf("line", "color")
     // The ten attributes the wave-20 wire contract allows inside meta.attrs;
     // anything else is a writer bug and errors like every strict envelope.
     private val ATTR_KEYS = setOf(
@@ -285,6 +290,10 @@ object IRDocumentDecoder {
             _tag = (meta?.get("sourceTag") as? JsonPrimitive)?.contentOrNull,
             // meta.attrs → attrs (wave-20 widget capsule, `_tag` precedent).
             attrs = decodeAttrs(meta?.get("attrs"), id),
+            // meta.decorations → decorations (wave-22 per-line list, the
+            // same additive meta channel). Absent stays null — which is
+            // what makes "present but empty" a DIFFERENT state downstream.
+            decorations = decodeDecorations(meta?.get("decorations"), id),
             slot = slot,
             // pseudos: opaque component-shaped payload forwarded verbatim —
             // generated content never flattens (design §4.2).
@@ -345,6 +354,61 @@ object IRDocumentDecoder {
             min = num("min"),
             max = num("max")
         )
+    }
+
+    /**
+     * Decode the wave-22 `meta.decorations` per-line list (lane DECOR).
+     * Strict on STRUCTURE exactly like every other v2 envelope level — the
+     * value must be a non-empty array of `{line, color?}` objects, `line`
+     * must be a string — because a malformed shape is a writer bug the
+     * reader must name, not paper over.
+     *
+     * Deliberately NOT strict on the `line` VALUE: an unknown keyword is
+     * the spec-05 tolerance-rule-1 case (a future §2.1 keyword this reader
+     * doesn't paint), so the entry is kept raw here and the PAINT-time
+     * filter in DecorationWire drops + logs it. Keeping the raw string is
+     * what lets that filter empty the list WITHOUT collapsing it back to
+     * "absent" — see [IRComponent.decorations].
+     *
+     * Colour tokens stay AUTHORED (04-metadata-fields.md): resolving them
+     * here would need a Compose `Color`, and the decoder is the wrong
+     * layer to own a colour space. DecorationWire does it at paint time.
+     */
+    private fun decodeDecorations(
+        el: kotlinx.serialization.json.JsonElement?,
+        ownerId: String
+    ): List<IRDecoration>? {
+        if (el == null) return null // meta without decorations — the norm
+        val arr = el as? JsonArray
+            ?: throw IllegalArgumentException("component '$ownerId': meta.decorations must be an array")
+        // Schema pins minItems 1 — the wire never carries an empty array
+        // (the converter omits the key instead), so an empty one is a
+        // writer bug and errors like every other strict envelope.
+        require(arr.isNotEmpty()) {
+            "component '$ownerId': meta.decorations present but empty (schema: minItems 1)"
+        }
+        return arr.map { entryEl ->
+            val o = entryEl as? JsonObject
+                ?: throw IllegalArgumentException("component '$ownerId': meta.decorations entries must be objects")
+            requireOnlyKeys(o, DECORATION_KEYS, "meta.decorations entry (in '$ownerId')")
+            IRDecoration(
+                // `line` is required by the schema; a missing/non-string
+                // one leaves the entry unpaintable and unnameable.
+                line = (o["line"] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
+                    ?: throw IllegalArgumentException(
+                        "component '$ownerId': meta.decorations entry missing string 'line'"
+                    ),
+                // `color` is optional; absent ≡ currentColor (§2.2 initial).
+                // Non-string colour is a writer bug — colour tokens are
+                // authored CSS text, never numbers.
+                color = (o["color"] as? JsonPrimitive)?.let { p ->
+                    require(p.isString) {
+                        "component '$ownerId': meta.decorations 'color' must be an authored CSS token string"
+                    }
+                    p.contentOrNull
+                }
+            )
+        }
     }
 
     /** Shared strict property-list walk for selector/media buckets. */

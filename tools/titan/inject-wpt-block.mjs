@@ -42,7 +42,9 @@
 //   2 — IO error
 
 import { promises as fs } from 'node:fs';
-import { resolve, dirname, join, basename } from 'node:path';
+// basename dropped at the wave-21 collision fix — the one stem-derivation
+// site (the composed testKey / ref-PNG stem) now uses fixtureStem().
+import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 import sharp from 'sharp';
@@ -70,7 +72,12 @@ import {
 // consumer side of the pipeline — its diff globs MUST use the exact same rule
 // the feeders/web capture used to WRITE the filenames, or a key with a "."
 // silently drops a platform column. Sharing the helper guarantees agreement.
-import { safe } from './safe-name.mjs';
+// fixtureStem: the ONE canonical fixture-stem derivation (wave-21 collision
+// fix) — the composed testKey and the browser-ref PNG lookup below must use
+// the SAME subdir-encoded stem the producers (build-combined-fixture's
+// component keys, capture-browser-ref's cache paths) derived, or a nested
+// test would glob for captures/refs under a name nobody wrote.
+import { safe, fixtureStem } from './safe-name.mjs';
 
 const pixelmatch = pixelmatchDefault.default ?? pixelmatchDefault;
 
@@ -969,7 +976,11 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     // crucially for the pair aggregation below — compare-screenshots ROW
     // names in composed-mode runs. Computed once up here (wave-13) so both
     // the pair lookup and the browser-ref block share one definition.
-    const refStem = basename(testRel, '.html');
+    // wave-21 collision fix: the stem is the subdir-encoded fixtureStem()
+    // (safe-name.mjs), matching what build-combined-fixture keyed the roots
+    // as and where capture-browser-ref cached the ref PNG — a bare basename
+    // here would miss both for every nested test. Top-level unchanged.
+    const refStem = fixtureStem(testRel);
     const testKey = `wpt__${meta.section}__${refStem}`;
 
     // Aggregate per-pair metrics from the matched manifest rows. For a

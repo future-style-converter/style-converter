@@ -55,4 +55,98 @@ class DecorationWirePinTest {
         // Absent style → SOLID (the §2.3 initial).
         assertEquals(TextStyleApplier.TextDecorationStyleType.SOLID, cfg.style)
     }
+
+    /**
+     * Wave 22 (lane DECOR, B-RC4b) — the DARK-STAGE 327 GUARD.
+     *
+     * The owned pass no longer calls TextStyleApplier.decorationSegments;
+     * it calls DecorationColorOps.bands with the resolved request list.
+     * That is only safe if the two produce IDENTICAL geometry on the
+     * legacy (no-merged-wire) path, so this pins them equal across the
+     * flag lattice and both capture-pinned font sizes — 22px (the wave-5
+     * decoration oracle: overline rows 18-19, strike 33-34, underline
+     * 43-44 at baseline 41) and 16px (the wave-21/22 WPT default face).
+     *
+     * Lives here rather than in DecorationColorOpsTest because that suite
+     * is deliberately dependency-free and this comparison needs
+     * TextStyleApplier.
+     */
+    @Test
+    fun `colored bands reproduce decorationSegments exactly on the legacy path`() {
+        // Both capture-pinned sizes, with their measured baselines.
+        for ((fontSize, baseline) in listOf(22f to 41f, 16f to 236f)) {
+            // The auto thickness the legacy emitter would have used.
+            val autoT = TextStyleApplier.decorationThicknessPx(fontSize)
+            // Every flag combination that reaches the painter (0..7).
+            for (mask in 0 until 8) {
+                val u = mask and 1 != 0
+                val o = mask and 2 != 0
+                val l = mask and 4 != 0
+                // Legacy: the fixed-order segment emitter.
+                val legacy = TextStyleApplier.decorationSegments(
+                    lineCount = 2, fontSizePx = fontSize,
+                    flags = TextStyleApplier.DecorationLineFlags(u, o, l),
+                    lineBaseline = { baseline + it * 26f },
+                    lineLeft = { 20f }, lineRight = { 232f }
+                )
+                // Wave 22: the colored bands off the synthesized (no-wire)
+                // request list — same order by construction.
+                val colored = DecorationColorOps.bands(
+                    lineCount = 2, fontSizePx = fontSize,
+                    autoThicknessPx = autoT, explicitThicknessPx = null,
+                    lines = DecorationColorOps.resolve(null, u, o, l),
+                    lineBaseline = { baseline + it * 26f },
+                    lineLeft = { 20f }, lineRight = { 232f }
+                )
+                // Same count, same left/top/width/thickness, in order —
+                // and every color null so the painter substitutes the one
+                // resolved color it always did.
+                assertEquals("flags=$mask fs=$fontSize", legacy.size, colored.size)
+                legacy.forEachIndexed { i, seg ->
+                    assertEquals("flags=$mask fs=$fontSize band=$i", seg.left, colored[i].left, 0f)
+                    assertEquals("flags=$mask fs=$fontSize band=$i", seg.top, colored[i].top, 0f)
+                    assertEquals("flags=$mask fs=$fontSize band=$i", seg.width, colored[i].width, 0f)
+                    assertEquals(
+                        "flags=$mask fs=$fontSize band=$i",
+                        seg.thickness, colored[i].thickness, 0f
+                    )
+                    assertNull(colored[i].color)
+                }
+            }
+        }
+    }
+
+    /**
+     * The same guard for the EXPLICIT-thickness path, which used to run
+     * through DecorationOps.explicitBands (wave 21, ref-pinned to the
+     * dotted-001 band tops 207/363/519 at 92px).
+     */
+    @Test
+    fun `colored bands reproduce explicitBands exactly on the explicit path`() {
+        for (t in listOf(10f, 20f, 30f)) {
+            for (mask in 1 until 8) {
+                val u = mask and 1 != 0
+                val o = mask and 2 != 0
+                val l = mask and 4 != 0
+                val legacy = DecorationOps.explicitBands(
+                    lineCount = 1, fontSizePx = 92f, thicknessPx = t,
+                    underline = u, overline = o, lineThrough = l,
+                    lineBaseline = { 202f }, lineLeft = { 62f }, lineRight = { 522f }
+                )
+                val colored = DecorationColorOps.bands(
+                    lineCount = 1, fontSizePx = 92f,
+                    // Deliberately WRONG auto thickness: the explicit one
+                    // must win, so this value may never surface.
+                    autoThicknessPx = 6f, explicitThicknessPx = t,
+                    lines = DecorationColorOps.resolve(null, u, o, l),
+                    lineBaseline = { 202f }, lineLeft = { 62f }, lineRight = { 522f }
+                )
+                assertEquals("t=$t flags=$mask", legacy.size, colored.size)
+                legacy.forEachIndexed { i, band ->
+                    assertEquals("t=$t flags=$mask band=$i", band.top, colored[i].top, 0f)
+                    assertEquals("t=$t flags=$mask band=$i", band.thickness, colored[i].thickness, 0f)
+                }
+            }
+        }
+    }
 }

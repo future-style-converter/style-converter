@@ -84,6 +84,38 @@ data class IRAttrs(
 )
 
 /**
+ * Wave-22 wire contract (lane DECOR) — ONE entry of the `meta.decorations`
+ * list a COLLAPSED inline run carries (schema/spec/04-metadata-fields.md;
+ * producer: the `_decorations` banner in tools/titan/extract-fixture.mjs).
+ *
+ * The list is ORDERED OUTERMOST-FIRST — the css-text-decor-3 §2.1
+ * propagation order, so a descendant's line paints over its ancestors'
+ * where both land on the same row — and AUTHORITATIVE when present: it is
+ * the complete line set for the run, so the painter ignores the
+ * component's own `text-decoration-line` flags there.
+ *
+ * Both members stay RAW WIRE STRINGS on purpose. [line] is normally one
+ * of the three §2.1 keywords, but the DECODER DOES NOT VALIDATE THE VALUE
+ * — an unknown keyword is the spec-05 tolerance-rule-1 case and survives
+ * decode raw, so the PAINT-time filter in DecorationWire can drop + log
+ * it without collapsing a present list back to "absent" (IRDocumentDecoder
+ * .decodeDecorations says the same; the iOS twin's doc comment matches).
+ * [color] is the CSS colour token AS AUTHORED ("blue", "#00f",
+ * "rgb(0,0,255)") — the converter does not normalize it to the IR sRGB
+ * leaf (see 04-metadata-fields.md for why), so resolution happens in
+ * DecorationWire.toDecorationLines via the runtime's own token parser.
+ * A null [color] means the PAINTER substitutes — see that function for
+ * what the substitute actually is (NOT plain currentColor: both painters
+ * fall back to the run's merged `text-decoration-color`, else the text
+ * colour).
+ */
+@Serializable
+data class IRDecoration(
+    val line: String,
+    val color: String? = null
+)
+
+/**
  * A single UI component with its styles.
  *
  * @property id Unique identifier for SDUI (e.g., "button-001")
@@ -129,6 +161,12 @@ data class IRAttrs(
  *   wire name `meta.attrs`, riding the meta channel exactly like `_tag`
  *   (the documented precedent). Null for every v1 document and for
  *   components the extractor didn't tag (non-widget elements).
+ * @property decorations Wave-22 per-line decoration list (see
+ *   [IRDecoration]) — v2 wire name `meta.decorations`, riding the meta
+ *   channel exactly like `attrs`. Null for every v1 document and for every
+ *   run the extractor did not collapse; an EMPTY list is a distinct,
+ *   meaningful state ("authoritative and it says: no lines") that the
+ *   painter must honour by drawing nothing.
  * @property variables CSS custom-property definitions declared on this
  *   component ("--name" → RAW declaration value, verbatim). Additive IR
  *   v2 envelope key (schema/spec/01-envelope.md): names are
@@ -149,6 +187,7 @@ data class IRComponent(
     val _text: String? = null,
     val _tag: String? = null,
     val attrs: IRAttrs? = null,
+    val decorations: List<IRDecoration>? = null,
     val slot: IRSlot? = null,
     val pseudos: JsonObject? = null,
     val role: String? = null,

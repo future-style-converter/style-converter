@@ -59,6 +59,14 @@ import {
   lerpCssValue,
   parseAnimationDecl,
   sampleKeyframesAnimation,
+  // wave-22 EX2 B-RC4a: the scoped inline-chain collapse.
+  collapseInlineRun,
+  decorationContribution,
+  flattenInlineText,
+  INLINE_CHAIN_TAGS,
+  INTRINSIC_WIDGET_TAGS,
+  // wave-22 EX2 SKEPTIC: displaced-decoration-modifier honesty.
+  carriesUnexpressibleDecoration,
 } from './extract-fixture.mjs';
 
 // ── stripComments ───────────────────────────────────────────────────────────
@@ -2531,13 +2539,18 @@ test('A-RC6: end-to-end conic-gradient shape — absorbed <span> still counts as
 
 // ── B-RC9a: inline-run reorder honesty ──────────────────────────────────────
 
-test('B-RC9a: mid-run styled span flags inline-run-reordered (the quick <u>brown</u> fox)', () => {
-  // <u> is rule-targeted → non-mergeable → child component; the parent's
+test('B-RC9a: mid-run styled span flags inline-run-reordered (non-decoration style)', () => {
+  // <span> is rule-targeted → non-mergeable → child component; the parent's
   // _text glues 'the quick fox' and the child paints AFTER it — order
   // changed, and that must be LOUD (previously lossyReasons []).
-  const css = 'u { text-decoration-color: red }';
+  // wave-22 EX2 note: the rule declares `color`, which is NOT in
+  // DECORATION_FAMILY_PROPS, so the B-RC4a inline-chain collapse refuses
+  // this subtree and the wave-21 honesty flag still fires. The
+  // decoration-styled variant of the SAME markup now collapses instead —
+  // pinned in the 'B-RC4a' suite below.
+  const css = 'span { color: red }';
   const { components, lossyReasons } = buildComponents(
-    '<body><p>the quick <u>brown</u> fox</p></body>', parseCss(css), 'r');
+    '<body><p>the quick <span>brown</span> fox</p></body>', parseCss(css), 'r');
   const p = components['r__0'];
   assert.equal(p._text, 'the quick fox');
   assert.ok(p._lossyReasons.includes('inline-run-reordered'));
@@ -2578,4 +2591,372 @@ test('B-RC9a: text after a VOID child (<br>) flags too (br stays a component)', 
   const p = components['v__0'];
   assert.equal(p._text, 'line1line2');
   assert.ok(p._lossyReasons.includes('inline-run-reordered'));
+});
+
+// ── wave-22 EX2 A-RC1: :not() support ───────────────────────────────────────
+//
+// Root cause pinned by the wave21-final per-test IR: css-ui's
+// appearance-menulist-button-001 is styled by exactly ONE rule,
+// `#container > *:not(#drop-down-select) { appearance: menulist-button }`,
+// and 'not' was missing from SUPPORTED_FUNCTIONAL_PSEUDOS — so the compound
+// parsed as unsupported, the rule matched nothing, and all 13 widgets fell
+// into the 100x100 placeholder (web-ref 0.554 against the ~1.000 alias band
+// its eleven sibling appearance-* tests hold).
+
+test('A-RC1 :not() — the menulist-button rule now matches every non-excluded child', () => {
+  const rules = parseCss('#container > *:not(#drop-down-select) { appearance: menulist-button }');
+  const anc = [{ tag: 'div', attrs: { id: 'container' }, pos: { isRoot: false, sibIndex: 0, sibCount: 1 } }];
+  const pos = { isRoot: false, sibIndex: 0, sibCount: 16 };
+  // Every widget EXCEPT the excluded select gets the declaration.
+  assert.equal(propsForElement(rules, 'a', {}, anc, pos).props.appearance, 'menulist-button');
+  assert.equal(propsForElement(rules, 'select', { multiple: '' }, anc, pos).props.appearance, 'menulist-button');
+  // The negated id is the one child left alone — that IS the test's point
+  // ("menulist-button is an alias to auto except on drop-down select").
+  assert.deepEqual(propsForElement(rules, 'select', { id: 'drop-down-select' }, anc, pos).props, {});
+});
+
+test('A-RC1 :not() — tag / class arguments negate correctly', () => {
+  const byTag = parseCss('div:not(p) { color: red }');
+  assert.equal(propsForElement(byTag, 'div', {}, [], null).props.color, 'red');
+  const byClass = parseCss('p:not(.skip) { color: red }');
+  assert.equal(propsForElement(byClass, 'p', {}, [], null).props.color, 'red');
+  assert.deepEqual(propsForElement(byClass, 'p', { class: 'skip' }, [], null).props, {});
+});
+
+test('A-RC1 :not() — an UNSUPPORTED inner selector drops the whole rule (no false match)', () => {
+  // Attribute syntax, selector lists, combinators and nested :not() are all
+  // outside the supported single-compound subset. Each must DROP the rule,
+  // never negate to a blanket match — the "no silent fallthrough" rule.
+  for (const sel of ['p:not([hidden])', 'p:not(.a, .b)', 'p:not(div p)', 'p:not(:not(.x))', 'p:not(::before)', 'p:not()']) {
+    assert.deepEqual(
+      propsForElement(parseCss(`${sel} { color: red }`), 'p', {}, [], null).props, {},
+      `${sel} must not match`);
+  }
+});
+
+test('A-RC1 :not() — a positional inner needs position data, else it bails', () => {
+  const rules = parseCss('p:not(:first-child) { color: red }');
+  // No `pos` → the inner is unknowable; negating an unknowable false would
+  // manufacture a match, so we answer "no match" instead.
+  assert.deepEqual(propsForElement(rules, 'p', {}, [], null).props, {});
+  // With position data the negation is exact.
+  assert.deepEqual(propsForElement(rules, 'p', {}, [], { isRoot: false, sibIndex: 0, sibCount: 2 }).props, {});
+  assert.equal(propsForElement(rules, 'p', {}, [], { isRoot: false, sibIndex: 1, sibCount: 2 }).props.color, 'red');
+});
+
+test('A-RC1 :not() — collectStyledTags reads the compound without adding a phantom tag', () => {
+  // `*:not(#id)` has no concrete host tag, so the merge guard must stay
+  // empty (a phantom '*' entry would block every wave-12 inline merge).
+  assert.deepEqual([...collectStyledTags(parseCss('#c > *:not(#x) { color: red }'))], []);
+  // A concrete host tag still registers.
+  assert.deepEqual([...collectStyledTags(parseCss('span:not(.x) { color: red }'))], ['span']);
+});
+
+// ── wave-22 EX2 A-RC1 part 2: rule-less widgets keep their intrinsic size ────
+
+test('A-RC1 part 2: a rule-less <select> is NOT a 100x100 placeholder', () => {
+  // The css-ui test deliberately excludes #drop-down-select from its only
+  // rule; a 100x100 drop-down diverges from the ref far more than the UA
+  // chrome it replaced (HTML Rendering §15.5 gives it an intrinsic size).
+  const { components } = buildComponents(
+    '<body><select id="drop-down-select"><option>select</option></select></body>', [], 'w');
+  assert.deepEqual(components['w__0'].properties, {});
+  assert.equal(components['w__0']._tag, 'select');
+});
+
+test('A-RC1 part 2: a rule-less <div> still IS a placeholder', () => {
+  // The exemption is narrow — plain wrappers keep the honest empty-node box.
+  const { components } = buildComponents('<body><div><div></div></div></body>', [], 'd');
+  assert.deepEqual(components['d__0'].properties, { width: '100px', height: '100px' });
+});
+
+test('A-RC1 part 2: INTRINSIC_WIDGET_TAGS excludes the chrome-less inline tags', () => {
+  // `a` and `option` are plain inline/text elements — an empty one really
+  // is scaffolding, so they must keep the placeholder.
+  assert.equal(INTRINSIC_WIDGET_TAGS.has('a'), false);
+  assert.equal(INTRINSIC_WIDGET_TAGS.has('option'), false);
+  assert.equal(INTRINSIC_WIDGET_TAGS.has('select'), true);
+});
+
+// ── wave-22 EX2 B-RC4a: the scoped inline-chain collapse ────────────────────
+
+test('B-RC4a flattenInlineText: document order, tags dropped, §4.1 collapse', () => {
+  assert.equal(flattenInlineText('\n  the quick <u>brown</u> fox\n  '), 'the quick brown fox');
+  // Character references decode at the tokenize→white-space boundary.
+  assert.equal(flattenInlineText('a<span>&amp;</span>b'), 'a&b');
+  // Pre-family callers keep every space verbatim.
+  assert.equal(flattenInlineText(' a <b>c</b> ', true), ' a c ');
+});
+
+test('B-RC4a decorationContribution: longhand, shorthand, UA default, none', () => {
+  // Longhand beats the shorthand's line component.
+  assert.deepEqual(
+    decorationContribution('span', { 'text-decoration': 'overline', 'text-decoration-line': 'underline' }),
+    { lines: ['underline'], color: null, uaDerived: false });
+  // Shorthand carries both the line and (by elimination) the colour.
+  assert.deepEqual(
+    decorationContribution('div', { 'text-decoration': 'dotted red underline' }),
+    { lines: ['underline'], color: 'red', uaDerived: false });
+  // Two lines in one declaration → two keywords, consumers get them split.
+  assert.deepEqual(
+    decorationContribution('span', { 'text-decoration-line': 'underline overline' }).lines,
+    ['underline', 'overline']);
+  // HTML Rendering §15.3.6 UA defaults for u/s/ins/del.
+  assert.deepEqual(decorationContribution('u', {}), { lines: ['underline'], color: null, uaDerived: true });
+  assert.deepEqual(decorationContribution('del', {}).lines, ['line-through']);
+  // An authored declaration suppresses the UA fallback, `none` included —
+  // per css-text-decor-3 §2.1 `none` never clears an ANCESTOR's line, it
+  // just means this element contributes nothing.
+  assert.deepEqual(decorationContribution('u', { 'text-decoration': 'none' }).lines, []);
+  // A plain <span> has no UA decoration at all.
+  assert.deepEqual(decorationContribution('span', {}), { lines: [], color: null, uaDerived: false });
+});
+
+test('B-RC4a: div>span>span>span collapses to ONE run with three ordered decorations', () => {
+  // The css-text-decor/text-decoration-color.html shape, verbatim.
+  const css = `
+    #blue-underline  { text-decoration: underline;    text-decoration-color: blue }
+    #gray-overline   { text-decoration: overline;     text-decoration-color: gray }
+    #green-line-through { text-decoration: line-through; text-decoration-color: green }`;
+  const html = '<body><div><span id="blue-underline"><span id="gray-overline">' +
+    '<span id="green-line-through">TEXT</span></span></span></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 'c');
+  const div = components['c__0'];
+  // ONE component — the three stacked narrow boxes are gone.
+  assert.equal(div.children, undefined);
+  assert.equal(div._text, 'TEXT');
+  // Outermost-first, one entry per line keyword, colours as authored.
+  assert.deepEqual(div._decorations, [
+    { line: 'underline', color: 'blue' },
+    { line: 'overline', color: 'gray' },
+    { line: 'line-through', color: 'green' },
+  ]);
+  // A full ancestor chain decorates ALL the run's text — nothing is
+  // approximated, so the collapse marker must NOT fire.
+  assert.equal((div._lossyReasons ?? []).includes('inline-chain-collapsed'), false);
+  // The flat bag still carries a SUBSET (outermost-wins) for readers that
+  // do not know `_decorations` — never a superset, so no double-painting.
+  assert.equal(div.properties['text-decoration'], 'underline');
+  assert.equal(div.properties['text-decoration-color'], 'blue');
+});
+
+test('B-RC4a: u-inside-h1 collapses in document order and clears inline-run-reordered', () => {
+  // css-text-decor/text-decoration-inset-001: the <u> is rule-targeted so
+  // wave-12 keeps it a component, wave-21 then flags the reorder. The
+  // collapse restores true document order, so the flag must go.
+  const css = 'u { text-decoration-color: black; text-decoration-inset: 10px -10px }';
+  const html = '<body><div><h1>\n  the quick <u>brown</u> fox\n</h1></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 'h');
+  const h1 = components['h__0'].children['h__0__0'];
+  assert.equal(h1._text, 'the quick brown fox');
+  assert.equal((h1._lossyReasons ?? []).includes('inline-run-reordered'), false);
+  // The UA underline the extractor models no stylesheet for.
+  assert.deepEqual(h1._decorations, [{ line: 'underline', color: 'black' }]);
+  // The <u> holds only PART of the run, so painting its line over the whole
+  // run IS an approximation — LOUD marker, not a silent widening.
+  assert.ok(h1._lossyReasons.includes('inline-chain-collapsed'));
+  // The link's authored decoration state folds into the flat bag.
+  assert.equal(h1.properties['text-decoration-inset'], '10px -10px');
+});
+
+test('B-RC4a: a collapsed <h1> gains the UA heading metrics (2em/bold/margins in px)', () => {
+  const css = 'u { text-decoration-color: black }';
+  const { components } = buildComponents(
+    '<body><h1>a <u>b</u> c</h1></body>', parseCss(css), 'ua');
+  const h1 = components['ua__0'];
+  // HTML Rendering §15.3.7 baked against the ref's 16px root (see UA_H1_PROPS).
+  assert.equal(h1.properties['font-size'], '32px');
+  assert.equal(h1.properties['font-weight'], 'bold');
+  assert.equal(h1.properties['margin-top'], '21.44px');
+  assert.ok(h1._lossyReasons.includes('ua-heading-defaults'));
+});
+
+test('B-RC4a: an author font-size on the h1 suppresses the UA metrics', () => {
+  const css = 'u { text-decoration-color: black } h1 { font-size: 10px }';
+  const { components } = buildComponents(
+    '<body><h1>a <u>b</u> c</h1></body>', parseCss(css), 'uas');
+  const h1 = components['uas__0'];
+  assert.equal(h1.properties['font-size'], '10px');
+  assert.equal((h1._lossyReasons ?? []).includes('ua-heading-defaults'), false);
+});
+
+test('B-RC4a: the decorating box wins the thickness (root-wins fold)', () => {
+  // css-text-decor/decorating-box/…-thickness-001 asserts exactly this: the
+  // div is the decorating box, so its 10px beats the span's 1px.
+  const css = 'div { text-decoration: underline; text-decoration-thickness: 10px } ' +
+              'span { text-decoration-thickness: 1px }';
+  const { components } = buildComponents(
+    '<body><div>\n  abc\n  <span>x</span>\n  def\n</div></body>', parseCss(css), 't');
+  const div = components['t__0'];
+  assert.equal(div._text, 'abc x def');
+  assert.equal(div.properties['text-decoration-thickness'], '10px');
+  assert.deepEqual(div._decorations, [{ line: 'underline' }]);
+  // The span contributes no LINE, so nothing is painted over text it does
+  // not contain — no approximation marker.
+  assert.equal((div._lossyReasons ?? []).includes('inline-chain-collapsed'), false);
+});
+
+test('B-RC4a: currentColor is expressed by OMITTING the colour key', () => {
+  // css-text-decor-3 §2.2 initial value. Absence means "use the text
+  // colour" — it is the documented answer, never a silent drop.
+  const { components } = buildComponents(
+    '<body><div>a <u>b</u> c</div></body>', parseCss('u { text-decoration-style: wavy }'), 'cc');
+  assert.deepEqual(components['cc__0']._decorations, [{ line: 'underline' }]);
+});
+
+// ── B-RC4a refusals: everything outside the narrow shape keeps today's form ──
+
+test('B-RC4a refusal: a wrapper declaring a NON-decoration property', () => {
+  // decorating-box-001's `<span style="vertical-align:-10px; color:transparent">`.
+  const html = '<body><div>abc <u><span style="vertical-align: -10px; color: transparent">x</span> def</u></div></body>';
+  const { components } = buildComponents(html, parseCss('u { text-decoration-color: black }'), 'r1');
+  assert.equal(components['r1__0']._decorations, undefined);
+  assert.ok(components['r1__0'].children); // stacked shape preserved
+});
+
+test('B-RC4a refusal: a non-decoration-only inline tag anywhere in the subtree', () => {
+  // sub/sup shift the baseline, em/strong change weight/slant — flattening
+  // would lose that, so INLINE_CHAIN_TAGS excludes them.
+  for (const tag of ['sub', 'sup', 'em', 'strong', 'code', 'a']) {
+    assert.equal(INLINE_CHAIN_TAGS.has(tag), false, `${tag} must not be collapsible`);
+  }
+  const html = '<body><div><sub id="d">x</sub></div></body>';
+  const { components } = buildComponents(html, parseCss('#d { text-decoration: underline }'), 'r2');
+  assert.equal(components['r2__0']._decorations, undefined);
+});
+
+test('B-RC4a refusal: a decoration-free nested span (the scope gate)', () => {
+  // No decoration anywhere → no collapse. This gate is what keeps the
+  // change inside the css-text-decor blast radius.
+  const { components } = buildComponents(
+    '<body><div><span id="x">TEXT</span></div></body>', parseCss('#x { color: red }'), 'r3');
+  assert.equal(components['r3__0']._decorations, undefined);
+  assert.ok(components['r3__0'].children);
+});
+
+test('B-RC4a refusal: a wrapper carrying a disallowed attribute', () => {
+  // `dir` flips bidi — collapsing would silently change the run's order.
+  const html = '<body><div><span dir="rtl" id="d">TEXT</span></div></body>';
+  const { components } = buildComponents(html, parseCss('#d { text-decoration: underline }'), 'r4');
+  assert.equal(components['r4__0']._decorations, undefined);
+});
+
+test('B-RC4a refusal: a wrapper with ::before generated content', () => {
+  // CSS Generated Content L3 §3.2 — flattening would drop the content the
+  // test is about.
+  const css = '#d { text-decoration: underline } #d::before { content: "!" }';
+  const { components } = buildComponents(
+    '<body><div><span id="d">TEXT</span></div></body>', parseCss(css), 'r5');
+  assert.equal(components['r5__0']._decorations, undefined);
+});
+
+test('B-RC4a: legacy walkers (no resolver) keep the pre-wave-22 tree exactly', () => {
+  // extractBodyTreeNested called without a mergeCtx resolver — the shape
+  // every pre-wave-22 unit test and direct caller pins.
+  const tree = extractBodyTreeNested(
+    '<body><div><span id="a"><span id="b">T</span></span></div></body>');
+  assert.equal(tree[0].children.length, 1);
+  assert.equal(tree[0].children[0].children.length, 1);
+  assert.equal(tree[0].children[0].children[0].ownText, 'T');
+  assert.equal(tree[0].decorations, undefined);
+});
+
+test('B-RC4a: collapseInlineRun returns null without a resolver', () => {
+  // The production-only gate, pinned directly on the exported predicate.
+  assert.equal(collapseInlineRun({ tag: 'div', children: [{}] }, '<u>x</u>', {}, null), null);
+});
+
+// ── wave-22 EX2 SKEPTIC: displaced decoration MODIFIERS must be loud ────────
+//
+// The outermost-wins fold drops a link's declaration whenever an outer box
+// already wrote that key. `_decorations` entries are `{line, color?}` only,
+// so a dropped STYLE / THICKNESS / INSET / OFFSET has no channel at all and
+// used to vanish with `_lossyReasons: []`. Measured on the real corpus:
+// css/css-text-decor/text-decoration-style-multiple.html nests three spans
+// declaring `underline solid coral` / `overline dashed skyblue` /
+// `line-through wavy green`; the collapse kept the first shorthand and three
+// colourful entries, silently discarding `dashed` and `wavy` — the exact
+// subject of that test. The repo's hard rule forbids that silence.
+
+test('SKEPTIC: a displaced decoration STYLE marks inline-chain-decoration-dropped', () => {
+  // Mirrors text-decoration-style-multiple: every link bears its own line,
+  // so every link's style keyword is live state that the fold discards.
+  const css = '#r { text-decoration: underline solid coral }' +
+              '#a { text-decoration: overline dashed skyblue }' +
+              '#b { text-decoration: line-through wavy green }';
+  const { components, lossyReasons } = buildComponents(
+    '<body><div id="r"><span id="a"><span id="b">AAAA</span></span></div></body>',
+    parseCss(css), 'sk1');
+  const c = components['sk1__0'];
+  // The collapse still happens and the entry list is still complete for the
+  // two fields it HAS — this marker is about the fields it does not have.
+  assert.deepEqual(c._decorations, [
+    { line: 'underline', color: 'coral' },
+    { line: 'overline', color: 'skyblue' },
+    { line: 'line-through', color: 'green' },
+  ]);
+  assert.ok(c._lossyReasons.includes('inline-chain-decoration-dropped'));
+  assert.ok(lossyReasons.includes('inline-chain-decoration-dropped'));
+});
+
+test('SKEPTIC: a displaced THICKNESS on a line-bearing link is loud', () => {
+  const css = '#r { text-decoration: underline; text-decoration-thickness: 10px }' +
+              '#a { text-decoration: overline; text-decoration-thickness: 1px }';
+  const { components } = buildComponents(
+    '<body><div id="r"><span id="a">x</span></div></body>', parseCss(css), 'sk2');
+  assert.ok(components['sk2__0']._lossyReasons.includes('inline-chain-decoration-dropped'));
+});
+
+test('SKEPTIC: decorating-box-thickness-001 stays CLEAN — an inert modifier is no loss', () => {
+  // The exact WPT shape. The span declares NO line, so per css-text-decor-3
+  // §1.3 the div is the decorating box and the span's 1px never paints —
+  // dropping it loses nothing and must NOT raise the marker.
+  const css = 'div { text-decoration: underline; text-decoration-thickness: 10px }' +
+              'span { text-decoration-thickness: 1px }';
+  const { components, lossyReasons } = buildComponents(
+    '<body><div>abc <span>x</span> def</div></body>', parseCss(css), 'sk3');
+  assert.equal(components['sk3__0']._text, 'abc x def');
+  assert.equal(components['sk3__0']._lossy, undefined);
+  assert.ok(!lossyReasons.includes('inline-chain-decoration-dropped'));
+});
+
+test('SKEPTIC: displaced LINE/COLOR alone stays clean (both survive in _decorations)', () => {
+  // text-decoration-color.html's fourth block. Every link's line and colour
+  // is re-expressed per entry, so the flat-bag displacement is the
+  // documented lossless subset — no marker.
+  const css = '#a { text-decoration: underline; text-decoration-color: blue }' +
+              '#b { text-decoration: overline; text-decoration-color: gray }' +
+              '#c { text-decoration: line-through; text-decoration-color: green }';
+  const { components, lossyReasons } = buildComponents(
+    '<body><div><span id="a"><span id="b"><span id="c">T</span></span></span></div></body>',
+    parseCss(css), 'sk4');
+  assert.equal(components['sk4__0']._decorations.length, 3);
+  assert.ok(!lossyReasons.includes('inline-chain-decoration-dropped'));
+});
+
+test('SKEPTIC: an IDENTICAL redeclaration is not a loss', () => {
+  // Same value on both boxes — the fold keeps one and nothing is discarded.
+  const css = '#r { text-decoration: underline wavy red }' +
+              '#a { text-decoration: underline wavy red }';
+  const { components } = buildComponents(
+    '<body><div id="r"><span id="a">x</span></div></body>', parseCss(css), 'sk5');
+  assert.equal(components['sk5__0']._lossy, undefined);
+});
+
+test('SKEPTIC: carriesUnexpressibleDecoration classifies the shorthand components', () => {
+  // Style keyword and thickness token have no `_decorations` field…
+  assert.equal(carriesUnexpressibleDecoration('text-decoration', 'underline dashed red'), true);
+  assert.equal(carriesUnexpressibleDecoration('text-decoration', '3px blue overline'), true);
+  assert.equal(carriesUnexpressibleDecoration('text-decoration', 'underline from-font'), true);
+  // …line + colour do.
+  assert.equal(carriesUnexpressibleDecoration('text-decoration', 'underline overline'), false);
+  assert.equal(carriesUnexpressibleDecoration('text-decoration', 'line-through green'), false);
+  assert.equal(carriesUnexpressibleDecoration('text-decoration', 'none'), false);
+  // The modifier longhands are unexpressible by definition; line/color are not.
+  assert.equal(carriesUnexpressibleDecoration('text-decoration-style', 'wavy'), true);
+  assert.equal(carriesUnexpressibleDecoration('text-underline-offset', '2px'), true);
+  assert.equal(carriesUnexpressibleDecoration('text-decoration-line', 'underline'), false);
+  assert.equal(carriesUnexpressibleDecoration('text-decoration-color', 'red'), false);
+  // A non-decoration key is never this function's business.
+  assert.equal(carriesUnexpressibleDecoration('color', 'red'), false);
 });

@@ -11,6 +11,8 @@ export * from './Composer';
 export * from './TagMapping';
 // wave-20 W1: wire meta.attrs → DOM-prop policy (widget tag set + mapper).
 export * from './WidgetAttrs';
+// wave-22 DECOR: wire meta.decorations → nested decorating-box spans.
+export * from './DecorationSpans';
 // Pseudo-element span renderer (split from NodeRenderer, wave-20 W1).
 export * from './PseudoNodeRenderer';
 // Calibration surface: RenderContext + RendererOptions.

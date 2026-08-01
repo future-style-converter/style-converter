@@ -7,6 +7,8 @@ package app.irmodels
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
@@ -182,6 +184,48 @@ class IRWireV2Test {
         assertEquals(setOf("sourceTag"), meta.keys)
         // And decode of a meta without attrs yields Kotlin null.
         assertNull(IRWireV2.decodeDocument(obj).components[0].attrs)
+    }
+
+    // ---- wave-22 lane DECOR: meta.decorations (per-line decoration list) ----
+
+    @Test
+    fun `decorations group under meta and round-trip verbatim`() {
+        // The live text-decoration-color__7 payload: three decorating boxes
+        // collapsed onto one run, OUTERMOST-FIRST, colours AS AUTHORED.
+        val payload = buildJsonArray {
+            add(buildJsonObject { put("line", "underline"); put("color", "blue") })
+            add(buildJsonObject { put("line", "overline"); put("color", "gray") })
+            add(buildJsonObject { put("line", "line-through"); put("color", "green") })
+        }
+        val doc = IRDocument(listOf(comp("a").copy(decorations = payload)))
+        val obj = IRWireV2.encodeDocument(doc)
+        val meta = obj["components"]!!.jsonArray[0].jsonObject["meta"]!!.jsonObject
+        // The array is byte-verbatim: order kept, colour tokens NOT
+        // normalized to the IR sRGB leaf (the runtimes resolve them).
+        assertEquals(payload, meta["decorations"]!!.jsonArray)
+        // Decode restores the same array on the Kotlin field.
+        val decoded = IRWireV2.decodeDocument(obj)
+        assertEquals(payload, decoded.components[0].decorations)
+    }
+
+    @Test
+    fun `decorations alone is enough to emit the meta group`() {
+        // A collapsed run need carry no tag/role/attrs — the meta emission
+        // gate must count decorations as a member in its own right.
+        val payload = buildJsonArray { add(buildJsonObject { put("line", "underline") }) }
+        val obj = IRWireV2.encodeDocument(IRDocument(listOf(comp("a").copy(decorations = payload))))
+        val c = obj["components"]!!.jsonArray[0].jsonObject
+        assertEquals(payload, c["meta"]!!.jsonObject["decorations"]!!.jsonArray)
+    }
+
+    @Test
+    fun `absent decorations stays off the wire`() {
+        // Not collapsed → no key at all (omit-when-absent: every pre-wave-22
+        // document stays byte-identical).
+        val obj = IRWireV2.encodeDocument(IRDocument(listOf(comp("a", tag = "span"))))
+        val meta = obj["components"]!!.jsonArray[0].jsonObject["meta"]!!.jsonObject
+        assertEquals(setOf("sourceTag"), meta.keys)
+        assertNull(IRWireV2.decodeDocument(obj).components[0].decorations)
     }
 
     // ---- hard errors on decode ----

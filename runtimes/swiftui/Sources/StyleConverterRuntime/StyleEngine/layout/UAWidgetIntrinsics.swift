@@ -15,29 +15,46 @@
 enum UAWidgetIntrinsics {
 
     // P16 — inter-atom gap: the collapsed whitespace between the source
-    // elements is one 16px-default-font space advance (~4.16px in the
-    // ref: input-text ends x239, input-search starts x245 minus the
-    // 1px borders ≈ 4.2).
-    static let atomGapPx: Double = 4.16
+    // elements is ONE space advance of the block's font, and the ref's
+    // block font is the injected Inter at 16px. Wave 22 replaces the
+    // wave-20 eyeball (4.16) with the EXACT value read out of the
+    // harness' own Inter-Regular.ttf hmtx: the space glyph advances 576
+    // design units at unitsPerEm 2048 → 576/2048 × 16 = 4.5px. Ref
+    // proof on appearance-auto-001 row 1 (all edges pixel-snapped by
+    // Chromium, so the model must land within ±0.5 of each): anchor
+    // 8.98 + 4.5 → button box at 29.48 (ref border col 29), + 53.07 +
+    // 4.5 → field at 87.05 (ref 87), + 153 + 4.5 → search at 244.55
+    // (ref 245). At 4.16 the field/search columns came out a full px
+    // early and the whole row-3 x-grid drifted ~0.85px per gap.
+    static let atomGapPx: Double = 4.5
 
     // P17 — text-atom line metrics: the composed-WPT line box is 20 CSS
-    // px (16px ref font × 1.25, the wptRefLineBoxPx pin); the baseline
-    // sits ~5px above its bottom (half-leading 2 + 16px-font descent
-    // ≈3.4 → 5.4, floored to keep row-1's 21px pitch: 15 ascent + 6
-    // field descent = 21, ref y17→y38).
+    // px (16px ref font × 1.25, the wptRefLineBoxPx pin). The descent
+    // (baseline distance up from the line-box bottom) is wave-22
+    // ref-SOLVED at 4, not the wave-20 estimate of 5. Solve: the ref's
+    // row-1 control boxes sit at y17 with the run's content origin at
+    // y16, and every row-1 atom has ascent 15 (21px box − 6 descent), so
+    // the row's ascent must come from the STRUT and must equal 17−16+15
+    // = 16 → line box 20 − 16 = 4. The same 4 keeps the text anchor
+    // itself put: its ascent becomes 20−4 = 16 = the row ascent, so its
+    // box top stays at y16 and the ref's 'a' ink stays at y23..32 (iOS
+    // already matched that band byte-for-byte in wave 21 — the fix must
+    // move the WIDGETS down 1px without moving the prose).
     static let textLineBoxPx: Double = 20.0
-    static let textDescentPx: Double = 5.0
+    static let textDescentPx: Double = 4.0
 
     // P17b (wave-20 fix 4) — the LINE-BOX STRUT metrics: CSS 2.1 §10.8.1
     // gives every line box in an inline formatting context a zero-width
     // inline box with the block's font metrics ("the strut"), so a row
     // holding only short atoms is still at least one text line tall and
     // its baseline never rises above the text baseline. Derived from the
-    // P17 pins (20px line box, 5px descent → 15px ascent). Ref proof:
-    // appearance-auto-001's LAST row holds only the 16px-tall progress
-    // bar (ascent 11.5), yet its ink sits at y159.5-166.5 — exactly
-    // rowTop 152 + strut ascent 15 − progress ascent 11.5 + ink inset 4;
-    // without the strut the row would hug the atom 3.5px higher.
+    // P17 pins (20px line box, 4px descent → 16px ascent). Ref proof of
+    // the wave-22 value: with strut ascent 16 the whole appearance-auto-
+    // 001 stack solves EXACTLY — row 1 top 16 → boxes y17 (ref 17),
+    // row 2 top 16+16+6 = 38 → textarea y38 (ref 38), row 3 top
+    // 38+36+6 = 80 → listbox y80 (ref 80), row 4 top 80+63+9 = 152 →
+    // progress box 152+16−13 = y155, ink y159 (ref 159). At 15 every
+    // one of those bands landed exactly 1px high.
     static let strutAscentPx: Double = textLineBoxPx - textDescentPx
     static let strutDescentPx: Double = textDescentPx
 
@@ -144,23 +161,45 @@ enum UAWidgetIntrinsics {
         // baseline shared with the button row → descent 6.
         case .textField: return AtomSpec(fixedWpx: 153.0, fixedHpx: 21.0, descentPx: 6.0)
         // Range: Blink's 129px default track at the 21px control height;
-        // baseline follows the control row (descent 6).
-        case .range: return AtomSpec(fixedWpx: 129.0, fixedHpx: 21.0, descentPx: 6.0)
-        // Checkbox/radio: 13×13 glyph, Blink UA margins 3px 3px 3px 4px
-        // (horizontal only here — vertical margins fold into descent);
-        // baseline ~3px above the glyph bottom.
+        // baseline follows the control row (descent 6). A-RC3 (wave 22):
+        // html.css gives `input[type=range]` `margin: 2px`, which the
+        // wave-20 table dropped — the range then advanced the row-3
+        // cursor 4px short and every later atom in the row inherited it.
+        // Ref-checked: the range box left is 16 (content origin) + 2 = 18
+        // and the track ink starts at 19 (= box + trackX 1), matching the
+        // ref's accent band whose left edge probes x19.0 at row 137.
+        case .range:
+            return AtomSpec(fixedWpx: 129.0, fixedHpx: 21.0, descentPx: 6.0,
+                            marginStartPx: 2.0, marginEndPx: 2.0)
+        // Checkbox/radio: 13×13 glyph with UA horizontal margins
+        // (vertical margins fold into descent); baseline ~3px above the
+        // glyph bottom. A-RC3 ref-SOLVE of the margins from the row-3
+        // x-grid with gap 4.5 and the range margin-box ending at abs 149:
+        //   checkbox = 149 + 4.5 + mS      → ref 158  ⇒ mS = 4.5
+        //   radio    = 158 + 13 + mE + 4.5 + mS → ref 183 ⇒ mE = 3.0
+        // and those two carry the rest of the row for free: color lands
+        // at 203.5 (ref 204), menulist at 258.0 (ref 258), listbox at
+        // 319.5 (ref 320) — every residual ≤0.5px and snapping the right
+        // way. Wave 20's 4.0/3.0 put the checkbox 5px, the radio 7px and
+        // the listbox 6px LEFT of their ref columns.
         case .checkbox, .radio:
             return AtomSpec(fixedWpx: 13.0, fixedHpx: 13.0, descentPx: 3.0,
-                            marginStartPx: 4.0, marginEndPx: 3.0)
+                            marginStartPx: 4.5, marginEndPx: 3.0)
         // Color swatch: ref x204-253 × y125-151 → 50×27. fix 4: the ref
         // box sits y125-151 against the row-3 baseline y143 (checkbox
         // top 133 + ascent 10) → descent 152−143 = 9 (was 2 — that
         // pinned the swatch 7px high once the listbox descent landed).
         case .color: return AtomSpec(fixedWpx: 50.0, fixedHpx: 27.0, descentPx: 9.0)
-        // Textarea: ref x16-198 × y38-73 → ~184×36 (cols=20 default);
-        // its baseline is the box bottom (descent 0) — that offset is
+        // Textarea: the ref's borders probe at cols x16 and x198 and
+        // rows y38 and y73, i.e. a border box x16.0..199.0 × y38.0..74.0
+        // → 183×36 (cols=20 default), not the 184 wave 20 read off the
+        // inclusive-column band. The 1px matters: the textarea is row 2's
+        // FIRST atom, so its width sets the whole row's cursor (with 183
+        // the input-button lands at 203.5 → ref col 204; with 184 it
+        // landed a px late and the submit/reset chain doubled the error).
+        // Its baseline is the box bottom (descent 0) — that offset is
         // what pushes the sibling buttons 21px down in the ref row 2.
-        case .textarea: return AtomSpec(fixedWpx: 184.0, fixedHpx: 36.0, descentPx: 0.0)
+        case .textarea: return AtomSpec(fixedWpx: 183.0, fixedHpx: 36.0, descentPx: 0.0)
         // Menulist select: label + arrow drive width (measured). fix 4:
         // the ref slab is 19px tall (borders y132..150, probed at the
         // white-black-ink ref x280 column), not the 25 the first cut
@@ -176,16 +215,20 @@ enum UAWidgetIntrinsics {
         // row-3 atom ~7px BELOW its ref band (the Android y120-159 diff
         // concentration) and the progress row 4px late.
         case .listbox: return AtomSpec(fixedWpx: nil, fixedHpx: 70.0, descentPx: 7.0)
-        // Meter: Blink 80×16 gauge. fix 4: descent 4.5 — solved from the
+        // Meter: Blink 80×16 gauge. descent 3.0 — solved from the
         // progress twin below (same Blink gauge baseline); off-canvas in
         // the ref (x≥390) so the progress measurement is the authority.
-        case .meter: return AtomSpec(fixedWpx: 80.0, fixedHpx: 16.0, descentPx: 4.5)
-        // Progress: Blink 160×16 bar (ref last band x16-175). fix 4:
-        // descent 4.5, ref-solved: row-4 top = 152 (row-3 = 63 ascent +
-        // 9 descent below y80), row-4 baseline = 152 + strut ascent 15 =
-        // 167, and the ref ink band y159.5-166.5 puts the box at
-        // y155.5-171.5 → descent = 171.5 − 167 = 4.5 (was 3).
-        case .progress: return AtomSpec(fixedWpx: 160.0, fixedHpx: 16.0, descentPx: 4.5)
+        case .meter: return AtomSpec(fixedWpx: 80.0, fixedHpx: 16.0, descentPx: 3.0)
+        // Progress: Blink 160×16 bar (ref last band x16-175). Wave-22
+        // re-solve against the corrected strut: row-4 top = 152 (row 3 =
+        // 63 ascent + 9 color descent below y80), row-4 ascent = the
+        // strut's 16 (the bar is shorter), and the ref ink band is rows
+        // y159..166 → y159.0..167.0, i.e. box top 155.0 (ink inset 4).
+        // 155 = 152 + 16 − (16 − d) ⇒ d = 3.0. Wave 20's 4.5 only looked
+        // right because the strut was also 1 too small; keeping 4.5 here
+        // would have pushed this row — the ONE band both natives already
+        // matched at wave 21 — 1.5px late.
+        case .progress: return AtomSpec(fixedWpx: 160.0, fixedHpx: 16.0, descentPx: 3.0)
         }
     }
 }

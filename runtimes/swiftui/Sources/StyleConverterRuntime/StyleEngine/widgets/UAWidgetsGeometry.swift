@@ -37,13 +37,18 @@ enum UAWidgetsGeometry {
     // range track edge rows y134/y141 and progress edge rows y159/y166
     // both read #B2B2B2 while the checkbox border reads #767676.
     static let TRACK_EDGE: UInt32 = 0xFFB2B2B2
-    // fix 4: the radio ring's effective stroke width. The ref's ring
-    // samples ≈#8F8F8F-#A1A1A1 at 1px (white ref x183/x195 @ y138 — a
-    // ~1.4px #767676 stroke antialiased over 2 columns), while a plain
-    // 1px AA stroke sampled ≈#CCCCCC on the Android capture — visibly
-    // thinner ink. Circle strokes only: the checkbox's rect stroke sits
-    // on the half-px grid and rasterizes crisp at 1px, matching the ref.
-    static let RING_SW: CGFloat = 1.4
+    // A-RC4 (wave 22) — the radio ring's stroke width, re-probed. On the
+    // ref the ring's WIDEST row (y139, the circle's horizontal tangent)
+    // carries ink in exactly ONE column, x183 at #999999, and x182/x184
+    // are pure white: total covered width ≈0.75px with the OUTER edge
+    // sitting on x183.0, i.e. exactly the 13px box edge. The wave-20
+    // 1.4px stroke around r=6 spans radius 5.3..6.7 — it bleeds 0.2px
+    // OUTSIDE the atom box and paints two saturated #767676 columns per
+    // side (the wave-21 Android capture reads 229/118/228 across
+    // x176..178 where the ref reads a single 153). 1.0 around r=6 spans
+    // 5.5..6.5: contained in the box, one column per side, closest match
+    // available without also moving the ring radius off the box centre.
+    static let RING_SW: CGFloat = 1.0
 
     // ── Box geometry (ref-probed, CSS px) ──────────────────────────────
     // NOTE on box sizes: the BORDER-BOX constants are aligned with lane
@@ -52,20 +57,36 @@ enum UAWidgetsGeometry {
     // Ink bands inside them are this file's own ref measurements.
     static let CHECK: CGFloat = 13       // checkbox/radio box (ref x158..170)
     static let CONTROL_H: CGFloat = 21   // button/textfield height (y17..37)
-    static let BUTTON_PAD_X: CGFloat = 7 // button label inset
+    // A-RC2/A-RC4: the button's total horizontal chrome band (1px border
+    // + 7px padding per side). Ref-SOLVED off row 2, whose four boxes
+    // chain through three gaps and pin P tightly: with Arial advances
+    // (input-button 70.42, input-submit 72.62) and gap 4.5, the painted
+    // border columns 204/289 (input-button), 294/382 (input-submit) and
+    // 388 (input-reset) force P ∈ [15.98, 16.08] ⇒ 2 × 8. Row 1 then
+    // falls out exactly: 37.07 + 16 = 53.07 wide at x29.48 → ref border
+    // columns 29 and 82. Wave 20's 7 (P=14) was fitted against Inter
+    // advances and under-sized every button by ~1px once the metrics
+    // were corrected.
+    static let BUTTON_PAD_X: CGFloat = 8
     static let RADIUS: CGFloat = 2       // button/checkbox corner radius
     static let FIELD_W: CGFloat = 153    // text/search field width (x87..239)
     static let FIELD_PAD_X: CGFloat = 4  // field text inset (glyphs from x91)
-    static let AREA_W: CGFloat = 184     // textarea width (W3 box; x16..198)
+    // A-RC4: textarea border box, ref-probed borders at cols x16/x198
+    // and rows y38/y73 → 183 × 36 (wave 20 read 184 off the inclusive
+    // column count). Mirrors UAWidgetIntrinsics.textarea — same box.
+    static let AREA_W: CGFloat = 183
     static let AREA_H: CGFloat = 36      // textarea height (W3 box; y38..73)
     static let RANGE_W: CGFloat = 129    // range border box (Blink UA width)
     static let RANGE_H: CGFloat = 21     // range box height (W3 control row)
-    static let TRACK_W: CGFloat = 127    // track ink width (x19.5..145.5), centered
+    static let TRACK_W: CGFloat = 127    // track ink width (x19..146), centered
     static let TRACK_H: CGFloat = 8      // track ink height (y134..141 incl edges)
-    static let TRACK_X: CGFloat = 3      // fix 4: track inset from the box left
-                                         // (ref track left x19.5 with the range
-                                         // box at x16.5 → ~3px; the old x1 put
-                                         // the whole track+thumb 2px left)
+    // A-RC3: track inset from the box left. Wave 20 read the range box
+    // as starting at the content origin and compensated with x3; the box
+    // actually starts at 18 (content 16 + the UA `margin: 2px` this wave
+    // restores in UAWidgetIntrinsics), and the ref's accent-fill left
+    // edge probes x19.0 at row 137 → inset 1. The track is then
+    // symmetric in the box: 1 + 127 + 1 = 129.
+    static let TRACK_X: CGFloat = 1
     static let TRACK_Y: CGFloat = 6      // fix 4: track top inset (box top
                                          // 127.5 → ink top 133.5 ≈ y6; was 6.5)
     static let THUMB_R: CGFloat = 8      // range thumb radius (d16)
@@ -91,10 +112,42 @@ enum UAWidgetsGeometry {
                                          // UAWidgetIntrinsics SELECT fixedHpx
                                          // pins the SAME 19 — the ink now IS
                                          // the box.
+    // A-RC4: the menulist's label inset and the trailing band (right
+    // padding + dropdown-arrow button + border). Ref-probed/solved on
+    // the "select" menulist: the label ink starts x263 against the box
+    // border col 258 → inset 5 (border 1 + padding 4), and the box must
+    // be wide enough that its right border snaps to col 314 while the
+    // NEXT atom (the listbox, one 4.5 gap later) snaps to col 320 —
+    // which brackets the box at [57.0, 57.5). 34.83 (Arial "select") +
+    // 5 + 17.42 = 57.25 sits mid-bracket. Wave 20's `label + 4 + 16`
+    // produced 54.83 and shoved the listbox 2.4px left.
+    static let MENU_LABEL_X: CGFloat = 5
+    static let MENU_TRAIL_W: CGFloat = 17.42
     static let LIST_H: CGFloat = 70      // listbox height (W3 box; y80..149)
     static let LIST_ROW: CGFloat = 17    // listbox row advance ((70-2)/4)
-    static let FONT: CGFloat = 13.33     // UA control font-size (Chromium)
-    static let LABEL_Y: CGFloat = 3.5    // label top inset in CONTROL_H
+    // A-RC2: the UA control font-size, now sourced from the shared metric
+    // pin so the size the plan measures with and the size it draws with
+    // can never diverge (Chromium's `-webkit-small-control` = 13.3333px).
+    static let FONT: CGFloat = UAControlFontMetrics.CONTROL_FONT_PX
+    // A-RC4: label placement is pinned as a BASELINE offset from the box
+    // top, not a layout-box top offset. WHY: the top offset only lands
+    // right for one face's ascent, and this wave changes the face — a
+    // baseline is face-independent, and each painter subtracts its OWN
+    // measured ascent. Ref-probed 15.0 on two independent controls of
+    // the 21px family: the input-text value (box top 17, glyph bottoms
+    // at y32, 'p' descender y33-34 → baseline 32) and the input-button
+    // label (box top 59, baseline 74).
+    static let LABEL_BASELINE_Y: CGFloat = 15
+    // A-RC4: menulist label baseline — ref select box top 132, "select"
+    // body rows end y145 with the bottom AA at y146 → baseline 146 → 14.
+    static let MENU_BASELINE_Y: CGFloat = 14
+    // A-RC4: listbox first-option baseline — ref box top 80, the
+    // "select-multiple" body ends y92 with bottom AA y93 → baseline 93.
+    static let LIST_BASELINE_Y: CGFloat = 13
+    // A-RC4: textarea content baseline — ref box top 38, "textarea"
+    // body ends y52 with bottom AA y53 → baseline 53 → 15 (the same
+    // 15 as the single-line controls; Blink pads both by border 1 + 2).
+    static let AREA_BASELINE_Y: CGFloat = 15
     static let FILE_GAP: CGFloat = 6     // file button ↔ status text gap
 
     /// Fixed file-input strings (Chromium UA, en locale — the ref's).
@@ -130,8 +183,9 @@ enum UAWidgetsGeometry {
         case .progress: return (PROGRESS_W, BAR_H)
         case .meter: return (METER_W, BAR_H)
         case .color: return (COLOR_W, COLOR_H)
-        // Menulist: label + 4px inset + 16px arrow zone (ref "select" 56).
-        case .menulist: return (measure(spec.label) + FIELD_PAD_X + 16, MENU_H)
+        // Menulist: label + 5px left inset + the trailing arrow band
+        // (A-RC4 constants above; ref "select" → 57.25px box).
+        case .menulist: return (measure(spec.label) + MENU_LABEL_X + MENU_TRAIL_W, MENU_H)
         // Listbox: widest option + 3px text inset both sides.
         case .listbox: return ((spec.options.map(measure).max() ?? 0) + 6, LIST_H)
         // File: button + gap + status text, one control-height line.
@@ -179,35 +233,51 @@ enum UAWidgetsGeometry {
                 .strokeCircle(cx: 6.5, cy: 6.5, r: 6, color: BORDER),
             ]
         case .button:
-            // Chrome slab + border + centered-band label (pad 7).
+            // Chrome slab + border + label on the ref baseline.
             return [
                 .fillRRect(x: 0, y: 0, w: w, h: CONTROL_H, r: RADIUS, color: CHROME),
                 .strokeRRect(x: 0.5, y: 0.5, w: w - 1, h: CONTROL_H - 1, r: RADIUS, color: BORDER),
-                .label(text: spec.label, x: BUTTON_PAD_X, y: LABEL_Y, size: FONT, color: BLACK),
+                .label(text: spec.label, x: BUTTON_PAD_X, baseline: LABEL_BASELINE_Y,
+                       size: FONT, mono: false, color: BLACK),
             ]
         case .textfield:
             // White field + border + left-aligned value text.
             return [
                 .fillRect(x: 0, y: 0, w: FIELD_W, h: CONTROL_H, color: WHITE),
                 .strokeRect(x: 0.5, y: 0.5, w: FIELD_W - 1, h: CONTROL_H - 1, color: BORDER),
-                .label(text: spec.label, x: FIELD_PAD_X, y: LABEL_Y, size: FONT, color: BLACK),
+                .label(text: spec.label, x: FIELD_PAD_X, baseline: LABEL_BASELINE_Y,
+                       size: FONT, mono: false, color: BLACK),
             ]
         case .textarea:
-            // White area + border + top-left text + the two grip
+            // White area + border + content text + the two grip
             // diagonals hugging the bottom-right corner.
             return [
                 .fillRect(x: 0, y: 0, w: AREA_W, h: AREA_H, color: WHITE),
                 .strokeRect(x: 0.5, y: 0.5, w: AREA_W - 1, h: AREA_H - 1, color: BORDER),
-                .label(text: spec.label, x: 3, y: 2, size: FONT, color: BLACK),
-                .line(x1: AREA_W - 7, y1: AREA_H - 2, x2: AREA_W - 2, y2: AREA_H - 7, sw: 1, color: BORDER),
-                .line(x1: AREA_W - 4, y1: AREA_H - 2, x2: AREA_W - 2, y2: AREA_H - 4, sw: 1, color: BORDER),
+                // A-RC2: textarea content is the UA MONOSPACE face (mono
+                // = true), not the control sans — the ref's "textarea"
+                // inks 8 chars across x19..81 (7.9px/char) where Arial
+                // would only need 48px total.
+                .label(text: spec.label, x: 3, baseline: AREA_BASELINE_Y,
+                       size: FONT, mono: true, color: BLACK),
+                // A-RC4: the grip diagonals, re-fitted to the 183-wide
+                // box. Ref long arm runs (190.5,71.5)→(196.5,65.5) and
+                // the short one (194.5,71.5)→(196.5,69.5), i.e. 8.5/2.5
+                // in from the right and 2.5/8.5 up from the bottom.
+                .line(x1: AREA_W - 8.5, y1: AREA_H - 2.5, x2: AREA_W - 2.5, y2: AREA_H - 8.5, sw: 1, color: BORDER),
+                .line(x1: AREA_W - 4.5, y1: AREA_H - 2.5, x2: AREA_W - 2.5, y2: AREA_H - 4.5, sw: 1, color: BORDER),
             ]
         case .range:
-            // fix 4 — track ink (127x8) at (x3, y6) in the 129x21 atom
-            // box (ref band x19.5..145.5 × y134..141 against the box at
-            // x16.5/y127.5); thumb center travels radius-inset across
-            // the TRACK, parked at the value fraction (default 0.5 →
-            // ref thumb right edge x90.5).
+            // A-RC3 (wave 22) — track ink (127x8) at (TRACK_X 1,
+            // TRACK_Y 6) in the 129x21 atom box. With the range's
+            // restored UA `margin: 2px` the box now sits at abs
+            // x18/y128, so the track spans abs x19.0..146.0 ×
+            // y134.0..142.0 — the ref's painted band is cols 19..145 ×
+            // rows 134..141, re-probed this wave (wave 20's "x3 / box
+            // x16.5" note predates both the margin and TRACK_X 1 and no
+            // longer describes this plan). Thumb center travels
+            // radius-inset across the TRACK, parked at the value
+            // fraction (default 0.5 → ref thumb band y130..145).
             let cx = TRACK_X + THUMB_R + (spec.fraction ?? 0.5) * (TRACK_W - 2 * THUMB_R)
             return [
                 // Full chrome track, vertically centered in the box.
@@ -261,19 +331,21 @@ enum UAWidgetsGeometry {
             return [
                 .fillRRect(x: 0, y: 0, w: w, h: MENU_H, r: RADIUS, color: WHITE),
                 .strokeRRect(x: 0.5, y: 0.5, w: w - 1, h: MENU_H - 1, r: RADIUS, color: BORDER),
-                // Label 2.5px under the slab top: 13.33px Inter's ~16px
-                // text line centered in 19 → (19−16)/2 ≈ 1.5 + the ref's
-                // glyph band (ink y140..145 abs, baseline ≈145.5) lands
-                // with y2.5 (old 25-box put it 2px lower).
-                .label(text: spec.label, x: FIELD_PAD_X, y: 2.5, size: FONT, color: BLACK),
+                // Label at the ref baseline, 5px in from the box left
+                // (A-RC4 MENU_LABEL_X / MENU_BASELINE_Y provenance).
+                .label(text: spec.label, x: MENU_LABEL_X, baseline: MENU_BASELINE_Y,
+                       size: FONT, mono: false, color: BLACK),
                 // fix 4 — the dropdown arrow is a STROKED CHEVRON (two
                 // ~1.8px arms meeting at the apex), never a filled
                 // triangle: ref rows y138-141 show two ink clusters with
-                // white BETWEEN them. Ref-fit: arms from (w−13.5, 6) and
-                // (w−5.5, 6) to the apex (w−9.5, 10.5) — abs x301.5/
-                // x309.5 → 305.5, y138 → 142.5 on the 57px ref select.
-                .line(x1: w - 13.5, y1: 6, x2: w - 9.5, y2: 10.5, sw: 1.8, color: BLACK),
-                .line(x1: w - 9.5, y1: 10.5, x2: w - 5.5, y2: 6, sw: 1.8, color: BLACK),
+                // white BETWEEN them. A-RC4 re-fit against the
+                // ref's chevron band (abs rows y138..144, arm-top centres
+                // x≈302.7/x≈308.7, apex x≈305.5 on a box at x258 w57.25
+                // → rel w−12.5 / w−6.5, apex w−9.5): the arm tops sit at
+                // y7 and the apex at y12 (wave 20's 6→10.5 drew the
+                // chevron 1px high and 1px too wide on each arm).
+                .line(x1: w - 12.5, y1: 7, x2: w - 9.5, y2: 12, sw: 1.8, color: BLACK),
+                .line(x1: w - 9.5, y1: 12, x2: w - 6.5, y2: 7, sw: 1.8, color: BLACK),
             ]
         case .listbox:
             // White box + border + up to 4 visible option rows (size=4
@@ -283,7 +355,10 @@ enum UAWidgetsGeometry {
                 .strokeRect(x: 0.5, y: 0.5, w: w - 1, h: LIST_H - 1, color: BORDER),
             ]
             for (i, opt) in spec.options.prefix(4).enumerated() {
-                ops.append(.label(text: opt, x: 3, y: 1 + CGFloat(i) * LIST_ROW, size: FONT, color: BLACK))
+                // Baseline-pinned rows (A-RC4): first option baseline 13
+                // under the box top, +17 per subsequent row.
+                ops.append(.label(text: opt, x: 3, baseline: LIST_BASELINE_Y + CGFloat(i) * LIST_ROW,
+                                  size: FONT, mono: false, color: BLACK))
             }
             return ops
         case .file:
@@ -293,14 +368,19 @@ enum UAWidgetsGeometry {
             return [
                 .fillRRect(x: 0, y: 0, w: bw, h: CONTROL_H, r: RADIUS, color: CHROME),
                 .strokeRRect(x: 0.5, y: 0.5, w: bw - 1, h: CONTROL_H - 1, r: RADIUS, color: BORDER),
-                .label(text: FILE_BUTTON, x: BUTTON_PAD_X, y: LABEL_Y, size: FONT, color: BLACK),
-                .label(text: FILE_STATUS, x: bw + FILE_GAP, y: LABEL_Y, size: FONT, color: BLACK),
+                .label(text: FILE_BUTTON, x: BUTTON_PAD_X, baseline: LABEL_BASELINE_Y,
+                       size: FONT, mono: false, color: BLACK),
+                .label(text: FILE_STATUS, x: bw + FILE_GAP, baseline: LABEL_BASELINE_Y,
+                       size: FONT, mono: false, color: BLACK),
             ]
         case .image:
             // Image input without src: Chromium falls back to the alt
             // text (value when alt is absent). The broken-image glyph is
             // deliberately NOT replicated (small ink; noted lane risk).
-            return [.label(text: spec.label, x: 0, y: 1, size: FONT, color: BLACK)]
+            // Baseline 13 in the 16px alt-text line (the same 13 the
+            // listbox rows use — one UA control line, border-free box).
+            return [.label(text: spec.label, x: 0, baseline: LIST_BASELINE_Y,
+                           size: FONT, mono: false, color: BLACK)]
         case .hidden:
             // hidden: the UA sheet says display:none — nothing paints.
             return []

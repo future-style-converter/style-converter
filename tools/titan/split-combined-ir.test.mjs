@@ -25,10 +25,33 @@ const combined = {
   ],
 };
 
-test('rootTestKey keys on the first three __-segments of a root name', () => {
+test('rootTestKey strips exactly the trailing __<idx> segment of a root name', () => {
   assert.equal(rootTestKey('wpt__css-color__a98rgb-001__0'), 'wpt__css-color__a98rgb-001');
   assert.equal(rootTestKey('wpt__css-color__a98rgb-001__12'), 'wpt__css-color__a98rgb-001');
   assert.equal(rootTestKey('plain-component'), 'plain-component');
+});
+
+test('rootTestKey keeps subdir-encoded stems intact (wave-21 collision fix)', () => {
+  // fixtureStem() encodes a nested test's subdir chain with the `__` slot
+  // separator (`flexbox__monolithic-overflow-001.tentative`), so stems now
+  // legitimately CONTAIN `__`. The pre-fix "first three segments" rule would
+  // truncate this root to `wpt__css-break__flexbox`, merging every test in
+  // that subdir into one bogus group; stripping only the trailing child
+  // index preserves the full test identity.
+  assert.equal(
+    rootTestKey('wpt__css-break__flexbox__monolithic-overflow-001.tentative__0'),
+    'wpt__css-break__flexbox__monolithic-overflow-001.tentative',
+  );
+  // The colliding sibling from the other subdir resolves to a DIFFERENT key.
+  assert.equal(
+    rootTestKey('wpt__css-break__grid__monolithic-overflow-001.tentative__0'),
+    'wpt__css-break__grid__monolithic-overflow-001.tentative',
+  );
+  // Two-level subdir chains strip only the one trailing index too.
+  assert.equal(
+    rootTestKey('wpt__CSS2__floats-clear__deep__adjoining-float-001__3'),
+    'wpt__CSS2__floats-clear__deep__adjoining-float-001',
+  );
 });
 
 test('testKeyOf walks the slot chain so children group with their root test', () => {

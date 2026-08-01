@@ -259,12 +259,15 @@ object DecorationOps {
 
     /** Inter ascent em — mirrors TextStyleApplier.DECORATION_ASCENT_EM
      *  (private there; the twin files need it, drift is pinned by
-     *  DecorationOpsTest's parity case). */
-    private const val ASCENT_EM = 1984f / 2048f
+     *  DecorationOpsTest's parity case). Wave 22 (lane DECOR): widened
+     *  from private to internal so DecorationColorOps.bandTop reuses THIS
+     *  constant instead of declaring a third copy that could drift. */
+    internal const val ASCENT_EM = 1984f / 2048f
 
     /** Inter strikeout-position em — mirrors
-     *  TextStyleApplier.STRIKEOUT_POSITION_EM (same parity pin). */
-    private const val STRIKEOUT_EM = 671f / 2048f
+     *  TextStyleApplier.STRIKEOUT_POSITION_EM (same parity pin). Widened
+     *  to internal alongside ASCENT_EM for the same single-source reason. */
+    internal const val STRIKEOUT_EM = 671f / 2048f
 
     /**
      * Blink's gap between baseline and underline TOP when a thickness
@@ -280,7 +283,15 @@ object DecorationOps {
         max(1f, ceil(thicknessPx / 2f))
 
     /**
-     * Per-visual-line bands for an EXPLICIT `text-decoration-thickness`
+     * Per-visual-line bands for an EXPLICIT `text-decoration-thickness`.
+     *
+     * Wave 22 (lane DECOR) note: the RENDERER no longer calls this — the
+     * owned pass routes through DecorationColorOps.bands so each band can
+     * carry its own §2.2 colour. This function stays as the ref-pinned
+     * REFERENCE implementation: DecorationWirePinTest asserts the new
+     * path reproduces it exactly across the flag lattice and all three
+     * measured thicknesses, so any drift in the fold fails loudly.
+     *
      * — the thickness-aware twin of TextStyleApplier.decorationSegments
      * (same accessor-lambda shape so the same call site feeds either):
      *   underline    top = round(baseline) + max(1, ceil(T/2))   (ref-pinned)

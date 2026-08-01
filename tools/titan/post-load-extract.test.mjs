@@ -742,8 +742,12 @@ test('proving wave-20: containing-block-change-button → appended abspos child 
   assert.equal(child.properties.width, '100px');               // geometry
   assert.equal(child.properties['background-color'], 'rgb(0, 128, 0)');
 });
-for (const stem of ['author-overlay-top-layer-removal', 'overlay-transition-backdrop',
-                    'overlay-transition-backdrop-entry', 'overlay-button-appearance']) {
+// wave-21 collision fix: the overlay family lives under the css-position
+// OVERLAY subdir (css/css-position/overlay/<name>.html), so its fixture
+// stems carry the `overlay__` subdir prefix per safe-name.mjs fixtureStem —
+// the bare stems here would silently skip these pins forever.
+for (const stem of ['overlay__author-overlay-top-layer-removal', 'overlay__overlay-transition-backdrop',
+                    'overlay__overlay-transition-backdrop-entry', 'overlay__overlay-button-appearance']) {
   const p = join(FIXTURES, `${stem}.json`);
   test(`proving: ${stem} stays static (top-layer decline, no stamp)`, { skip: !existsSync(p) }, () => {
     // The overlay family's signal lives in top-layer/::backdrop rendering —
@@ -776,4 +780,41 @@ test('post-load e2e: live augment delivers Left 100px', { skip: !e2eReady }, asy
   } finally {
     await closePostLoadBrowser(); // never leak the shared browser
   }
+});
+
+// ── Wave 22: collapsed-wrapper fold mode ─────────────────────────────────────
+// The inline-chain collapse absorbs decoration wrappers into their parent's
+// run, so the live DOM walk has records at paths with no component. When the
+// nearest mapped ancestor carries `_decorations`, the record folds into it
+// (existing keys win); without the marker the loud mismatch error stays.
+test('wave-22 fold: absorbed-wrapper record folds into the _decorations ancestor', async () => {
+  const { mergePostLoadIntoFixture } = await import('./post-load-extract.mjs');
+  const fixture = {
+    components: {
+      t__0: { properties: {}, _decorations: [{ line: 'line-through' }] },
+    },
+    _wpt: {},
+  };
+  // Only enumerated POST_LOAD_COMPUTED_PROPERTIES are baked — use two of
+  // them (width, margin-top); the parent record processes FIRST (walk
+  // order), then the absorbed wrapper's folds with existing-keys-win.
+  const records = [
+    { path: [0], styles: { width: '100px' } },               // the parent itself
+    { path: [0, 0], styles: { width: '50px', 'margin-top': '7px' } }, // absorbed <s>
+  ];
+  const n = mergePostLoadIntoFixture(fixture, 't', records);
+  assert.equal(n, 2);
+  // The absorbed record must NOT overwrite the parent's width (existing
+  // key wins) but MAY fill keys the parent's record left absent.
+  assert.equal(fixture.components.t__0.properties.width, '100px');
+  assert.equal(fixture.components.t__0.properties['margin-top'], '7px');
+  assert.equal(fixture._wpt.postLoadExtracted, true);
+});
+
+test('wave-22 fold: a pathless record WITHOUT a _decorations ancestor still fails loudly', async () => {
+  const { mergePostLoadIntoFixture } = await import('./post-load-extract.mjs');
+  const fixture = { components: { t__0: { properties: {} } }, _wpt: {} };
+  assert.throws(
+    () => mergePostLoadIntoFixture(fixture, 't', [{ path: [0, 3], styles: {} }]),
+    /no component at path 0\.3/);
 });

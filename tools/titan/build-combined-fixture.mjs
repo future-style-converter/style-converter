@@ -19,6 +19,14 @@
 // Example: a98rgb-001.html with one body child becomes
 //   wpt__css-color__a98rgb-001__0
 //
+// <test-stem> is safe-name.mjs's fixtureStem(): bare basename for top-level
+// tests; `<subdir>__…__<basename>` for nested tests (wave-21 collision fix),
+// e.g. css/css-break/flexbox/monolithic-overflow-001.tentative.html →
+//   wpt__css-break__flexbox__monolithic-overflow-001.tentative__0
+// Consumers that recover the test key from a root name must therefore strip
+// the TRAILING `__<idx>` segment (split-combined-ir.mjs rootTestKey), never
+// take the "first three __-segments" — the stem itself may contain `__`.
+//
 // We do NOT include refs in the combined fixture for Phase 1 — the
 // browser-ref pipeline already produced a Chromium render under
 // tools/wpt/refs/<sha>/, and the iOS/Android/web "agreement" check is
@@ -33,8 +41,17 @@
 //   2 — IO error
 
 import { promises as fs } from 'node:fs';
-import { resolve, dirname, join, basename, sep } from 'node:path';
+// basename/sep dropped from this import at the wave-21 collision fix — the
+// two stem-derivation sites now go through safe-name.mjs's fixtureStem().
+import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// The ONE canonical fixture-stem derivation (wave-21 collision fix): must
+// match what extract-fixture.mjs used when it WROTE the per-test fixture —
+// nested tests encode their subdirectory chain into the stem
+// (`flexbox__monolithic-overflow-001.tentative`), so both the fixture-file
+// lookup and the `wpt__<section>__<stem>__<idx>` component keys below stay
+// collision-free when two sampled tests share a basename. See safe-name.mjs.
+import { fixtureStem } from './safe-name.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -53,11 +70,18 @@ if (!TESTS_FILE || !OUT_FILE) {
 }
 
 /** Component key matching the spec contract above. Exported in tests via
- *  the keys present in the resulting fixture. */
+ *  the keys present in the resulting fixture.
+ *
+ *  wave-21 collision fix: the stem is fixtureStem(testRel) — subdir-encoded
+ *  for nested tests — NOT the bare basename. Two tests with equal basenames
+ *  in different subdirs (e.g. css-break/flexbox vs css-break/grid) used to
+ *  produce IDENTICAL component keys here, so the second test's components
+ *  silently overwrote the first's in the combined fixture AND in wptKeyMap.
+ *  Top-level tests keep the exact historical key (zero churn). */
 function componentKey(testRel, childIndex) {
   const parts = testRel.split('/');
   const section = parts.length >= 3 ? parts[1] : 'css';
-  const stem = basename(parts[parts.length - 1], '.html');
+  const stem = fixtureStem(testRel);
   return `wpt__${section}__${stem}__${childIndex}`;
 }
 
@@ -77,7 +101,11 @@ async function main() {
   for (const testRel of tests) {
     const parts = testRel.split('/');
     const section = parts.length >= 3 ? parts[1] : 'css';
-    const stem = basename(parts[parts.length - 1], '.html');
+    // wave-21 collision fix: read back the SAME subdir-encoded filename
+    // extract-fixture.mjs wrote (safe-name.mjs fixtureStem) — a bare
+    // basename here would miss every nested test's fixture (and, before
+    // the fix, read whichever colliding sibling was extracted LAST).
+    const stem = fixtureStem(testRel);
     const fixturePath = join(REPO_ROOT, 'fixtures', 'wpt', section, `${stem}.json`);
 
     let fixture;

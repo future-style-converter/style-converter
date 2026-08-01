@@ -165,6 +165,17 @@ data class IRComponent(
     // absent meta keys as v2-additive); the v1 serializer ignores it so
     // deprecated `--emit-ir v1` bytes stay frozen.
     val attrs: JsonObject? = null,
+    // wave-22 lane DECOR: the ORDERED (outermost-first) per-line decoration
+    // list from the extractor's `_decorations` hint — an OPAQUE array of
+    // {line, color?} entries where `line` is one css-text-decor-3 §2.1
+    // keyword and `color` is the CSS colour token AS AUTHORED (absent =
+    // currentColor, the §2.2 initial). v2 forwards it VERBATIM inside
+    // `meta.decorations` (spec 05 additive meta-key rule, the same lane
+    // `meta.attrs` used); the v1 serializer ignores it so deprecated
+    // `--emit-ir v1` bytes stay frozen. Colour NORMALIZATION deliberately
+    // does NOT happen here — see schema/spec/04-metadata-fields.md for why
+    // the runtimes resolve the token themselves.
+    val decorations: JsonArray? = null,
     // Generated-content payload from the extractor's `_pseudo` input
     // ({before?, after?, marker?} component-shaped slots). Carried as an
     // opaque JsonObject — pseudo nodes have no independent lifecycle and

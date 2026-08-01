@@ -335,11 +335,16 @@ class SchemaConformanceTest {
                 assertTrue(slot["parent"]!!.jsonPrimitive.content in ids, "$where slot.parent dangles")
             }
             // meta, when present, is non-empty and strict. `attrs` joined
-            // in wave-20 W1 (widget-identity attributes — spec 05 additive
-            // meta-key rule; payload strictness is the JSON schema's job).
+            // in wave-20 W1 (widget-identity attributes) and `decorations`
+            // in wave-22 lane DECOR (the collapsed run's per-line list) —
+            // both under the spec 05 additive meta-key rule; payload
+            // strictness is the JSON schema's job.
             cmp["meta"]?.jsonObject?.let { meta ->
                 assertTrue(meta.isNotEmpty(), "$where meta present but empty")
-                assertTrue(meta.keys.all { it in setOf("sourceTag", "role", "attrs") }, "$where meta has unknown keys")
+                assertTrue(
+                    meta.keys.all { it in setOf("sourceTag", "role", "attrs", "decorations") },
+                    "$where meta has unknown keys"
+                )
             }
         }
         for (file in fixtures) {

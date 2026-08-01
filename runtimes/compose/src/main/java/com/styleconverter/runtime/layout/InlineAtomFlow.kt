@@ -142,14 +142,17 @@ object InlineAtomFlow {
      * Baselines (P17, §10.8): row ascent A = max(h − descent); atom top
      * y = rowTop + A − (h_i − descent_i); row height = A + max(descent),
      * which reproduces the composed-WPT ref pitches exactly (row 1 → 2
-     * pitch 21 = field ascent 15 + descent 6; row 2 → 3 pitch 42 =
-     * textarea ascent 36 + button descent 6).
+     * pitch 22 = the STRUT's ascent 16 + field descent 6 — wave 22
+     * re-solved the strut, so row 1's ascent comes from the strut, not
+     * from the 21px controls' 15; row 2 → 3 pitch 42 = textarea ascent
+     * 36 + button descent 6).
      *
      * Strut (P17b, wave-20 fix 4 — CSS 2.1 §10.8.1): every line box in
      * an IFC contains a zero-width inline box with the block's font
      * metrics, so each row's ascent/descent are FLOORED at
      * [strutAscentPx]/[strutDescentPx]. The adapters pass the shared
-     * UAWidgetIntrinsics strut pins (15/5 — the 20px composed-WPT line
+     * UAWidgetIntrinsics strut pins (16/4 since wave 22 — the 20px
+     * composed-WPT line
      * box); the defaults 0.0 keep every strut-free geometry pin (and
      * any non-corpus caller) byte-identical to wave-20's cut.
      */

@@ -85,17 +85,19 @@ class UAWidgetsGeometryTest {
 
     @Test
     fun button_chromeSlabHuggingLabel() {
-        // "button" (6 chars × 7px fake) + 2×7 pad = 56 wide, h21 chrome.
+        // "button" (6 chars × 7px fake) + 2×8 chrome band = 58 wide, h21.
+        // Wave 22 (A-RC2/A-RC4): the pad is 8 (border 1 + padding 7) and
+        // the label anchors on the ref BASELINE 15, in the 'ua' face.
         assertEquals(
             listOf(
-                "fillRRect 0 0 56 21 2 #FFEFEFEF",
-                "strokeRRect 0.5 0.5 55 20 2 #FF767676",
-                "label 'button' 7 3.5 13.33 #FF000000",
+                "fillRRect 0 0 58 21 2 #FFEFEFEF",
+                "strokeRRect 0.5 0.5 57 20 2 #FF767676",
+                "label 'button' 8 15 13.33 ua #FF000000",
             ),
             pins(Spec(Kind.BUTTON, label = "button"))
         )
         // Intrinsic box matches the plan's slab.
-        assertEquals(56f to 21f, UAWidgetsGeometry.intrinsicSize(Spec(Kind.BUTTON, label = "button"), measure))
+        assertEquals(58f to 21f, UAWidgetsGeometry.intrinsicSize(Spec(Kind.BUTTON, label = "button"), measure))
     }
 
     @Test
@@ -105,7 +107,7 @@ class UAWidgetsGeometryTest {
             listOf(
                 "fillRect 0 0 153 21 #FFFFFFFF",
                 "strokeRect 0.5 0.5 152 20 #FF767676",
-                "label 'input-text' 4 3.5 13.33 #FF000000",
+                "label 'input-text' 4 15 13.33 ua #FF000000",
             ),
             pins(Spec(Kind.TEXTFIELD, label = "input-text"))
         )
@@ -113,14 +115,16 @@ class UAWidgetsGeometryTest {
 
     @Test
     fun textarea_areaWithResizeGrip() {
-        // 184x36 (the W3 atom box) white + border + text + grip diagonals.
+        // 183x36 (the wave-22 ref-probed W3 atom box) white + border +
+        // MONOSPACE content on baseline 15 + the re-fitted grip
+        // diagonals (ref long arm 190.5,71.5 → 196.5,65.5).
         assertEquals(
             listOf(
-                "fillRect 0 0 184 36 #FFFFFFFF",
-                "strokeRect 0.5 0.5 183 35 #FF767676",
-                "label 'textarea' 3 2 13.33 #FF000000",
-                "line 177 34 182 29 1 #FF767676",
-                "line 180 34 182 32 1 #FF767676",
+                "fillRect 0 0 183 36 #FFFFFFFF",
+                "strokeRect 0.5 0.5 182 35 #FF767676",
+                "label 'textarea' 3 15 13.33 mono #FF000000",
+                "line 174.5 33.5 180.5 27.5 1 #FF767676",
+                "line 178.5 33.5 180.5 31.5 1 #FF767676",
             ),
             pins(Spec(Kind.TEXTAREA, label = "textarea"))
         )
@@ -130,18 +134,18 @@ class UAWidgetsGeometryTest {
 
     @Test
     fun range_defaultValueParksThumbMidTravel() {
-        // fix 4 — 129x21 atom box (W3 table); track ink 127x8 at (x3,y6)
-        // with the refresh's #B2B2B2 hairline (ref bands x19.5..145.5 ×
-        // y134..141 against the box at x16.5/y127.5); f=0.5 → thumb
-        // cx = 3 + 8 + 0.5×111 = 66.5 (ref thumb right edge x90.5 →
-        // center 82.5 = box 16 + 66.5); accent fill left of the thumb
-        // painted OVER the stroke (no gray edge under the ref's blue).
+        // A-RC3 — 129x21 atom box (W3 table) now carrying the UA 2px
+        // margins, so the track ink sits at (x1,y6) inside it: with the
+        // box at abs x18 the ink lands abs x19..146 × y134..142, exactly
+        // the ref bands. f=0.5 → thumb cx = 1 + 8 + 0.5×111 = 64.5, i.e.
+        // abs 82.5 — the ref thumb's measured centre. Accent fill left of
+        // the thumb paints OVER the stroke (no gray edge under the blue).
         assertEquals(
             listOf(
-                "fillRRect 3 6 127 8 4 #FFEFEFEF",
-                "strokeRRect 3.5 6.5 126 7 4 #FFB2B2B2",
-                "fillRRect 3 6 63.5 8 4 #FF0075FF",
-                "fillCircle 66.5 10 8 #FF0075FF",
+                "fillRRect 1 6 127 8 4 #FFEFEFEF",
+                "strokeRRect 1.5 6.5 126 7 4 #FFB2B2B2",
+                "fillRRect 1 6 63.5 8 4 #FF0075FF",
+                "fillCircle 64.5 10 8 #FF0075FF",
             ),
             pins(Spec(Kind.RANGE, fraction = 0.5f))
         )
@@ -205,25 +209,25 @@ class UAWidgetsGeometryTest {
 
     @Test
     fun menulist_whiteSlabLabelAndArrow() {
-        // "select" (6×7=42) + 4 pad + 16 arrow zone = 62 wide (ref 57
-        // with real Inter). fix 4: the slab IS the 19px box (ref borders
+        // "select" (6×7=42 fake) + 5 left inset + 17.42 trailing band =
+        // 64.42 wide. A-RC4: the slab IS the 19px box (ref borders
         // y132..150) and the arrow is a STROKED CHEVRON — two 1.8px arms
-        // from (w−13.5, 6)/(w−5.5, 6) to the apex (w−9.5, 10.5), the ref
-        // ink clusters at x301.5/309.5 → 305.5 with white between the
-        // arms (a filled triangle would be solid across).
+        // from (w−12.5, 7)/(w−6.5, 7) to the apex (w−9.5, 12), matching
+        // the ref's chevron band y138..144 with white between the arms
+        // (a filled triangle would be solid across).
         assertEquals(
             listOf(
-                "fillRRect 0 0 62 19 2 #FFFFFFFF",
-                "strokeRRect 0.5 0.5 61 18 2 #FF767676",
-                "label 'select' 4 2.5 13.33 #FF000000",
-                "line 48.5 6 52.5 10.5 1.8 #FF000000",
-                "line 52.5 10.5 56.5 6 1.8 #FF000000",
+                "fillRRect 0 0 64.42 19 2 #FFFFFFFF",
+                "strokeRRect 0.5 0.5 63.42 18 2 #FF767676",
+                "label 'select' 5 14 13.33 ua #FF000000",
+                "line 51.92 7 54.92 12 1.8 #FF000000",
+                "line 54.92 12 57.92 7 1.8 #FF000000",
             ),
             pins(Spec(Kind.MENULIST, label = "select"))
         )
         // The intrinsic box matches the slab (cross-lane: W3's SELECT
         // AtomSpec pins the same 19px height).
-        assertEquals(62f to 19f, UAWidgetsGeometry.intrinsicSize(Spec(Kind.MENULIST, label = "select"), measure))
+        assertEquals(64.42f to 19f, UAWidgetsGeometry.intrinsicSize(Spec(Kind.MENULIST, label = "select"), measure))
     }
 
     @Test
@@ -236,10 +240,10 @@ class UAWidgetsGeometryTest {
             listOf(
                 "fillRect 0 0 34 70 #FFFFFFFF",
                 "strokeRect 0.5 0.5 33 69 #FF767676",
-                "label 'aa' 3 1 13.33 #FF000000",
-                "label 'bbbb' 3 18 13.33 #FF000000",
-                "label 'c' 3 35 13.33 #FF000000",
-                "label 'dd' 3 52 13.33 #FF000000",
+                "label 'aa' 3 13 13.33 ua #FF000000",
+                "label 'bbbb' 3 30 13.33 ua #FF000000",
+                "label 'c' 3 47 13.33 ua #FF000000",
+                "label 'dd' 3 64 13.33 ua #FF000000",
             ),
             pins(spec)
         )
@@ -249,13 +253,14 @@ class UAWidgetsGeometryTest {
 
     @Test
     fun fileInput_chooseFileButtonPlusStatus() {
-        // "Choose File" (11×7=77) + 14 pad = 91 button; status at 91+6.
+        // "Choose File" (11×7=77 fake) + 16 chrome band = 93 button;
+        // status text one FILE_GAP later at 99.
         assertEquals(
             listOf(
-                "fillRRect 0 0 91 21 2 #FFEFEFEF",
-                "strokeRRect 0.5 0.5 90 20 2 #FF767676",
-                "label 'Choose File' 7 3.5 13.33 #FF000000",
-                "label 'No file chosen' 97 3.5 13.33 #FF000000",
+                "fillRRect 0 0 93 21 2 #FFEFEFEF",
+                "strokeRRect 0.5 0.5 92 20 2 #FF767676",
+                "label 'Choose File' 8 15 13.33 ua #FF000000",
+                "label 'No file chosen' 99 15 13.33 ua #FF000000",
             ),
             pins(Spec(Kind.FILE))
         )
@@ -264,7 +269,7 @@ class UAWidgetsGeometryTest {
     @Test
     fun imageAndHiddenInputs() {
         // image: alt text only (ref shows "def"); hidden: nothing at all.
-        assertEquals(listOf("label 'def' 0 1 13.33 #FF000000"), pins(Spec(Kind.IMAGE, label = "def")))
+        assertEquals(listOf("label 'def' 0 13 13.33 ua #FF000000"), pins(Spec(Kind.IMAGE, label = "def")))
         assertEquals(emptyList<String>(), pins(Spec(Kind.HIDDEN)))
         assertEquals(0f to 0f, UAWidgetsGeometry.intrinsicSize(Spec(Kind.HIDDEN), measure))
     }

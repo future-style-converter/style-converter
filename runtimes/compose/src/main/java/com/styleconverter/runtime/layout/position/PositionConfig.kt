@@ -72,6 +72,59 @@ data class PositionConfig(
         get() = start ?: insetInlineStart
 
     /**
+     * Wave 22 (B-RC3) — does the INLINE axis anchor from the END (right)
+     * edge of the containing block?
+     *
+     * css-position-3 §3.5.3: with `left: auto` and `right` non-auto, the
+     * used inline position is measured from the containing block's RIGHT
+     * edge — `right: 0` on a 100px box inside a 390px containing block
+     * paints at x = 290, NOT at x = 0. When BOTH sides are declared the box
+     * is over-constrained and, in an LTR containing block, `left` wins
+     * (§3.5.3's "ignore right" rule) — so this predicate is false and the
+     * start anchor keeps owning the axis.
+     *
+     * The paired [offsetX] is the SIGNED inset from whichever anchor this
+     * predicate selects (`-right` on an end anchor), so the two compose to
+     * `cbWidth − boxWidth − right`; [EndInsetAnchor] documents and pins the
+     * composition, and CanvasRootHoist's overlay slot applies it. Consumers
+     * that cannot resolve a containing-block extent keep placing at the
+     * start anchor — the pre-wave-22 behavior, honestly degraded.
+     *
+     * The `end`/`insetInlineEnd` merge below is the engine's documented
+     * LTR-horizontal-tb normalization (see the class kdoc): logical
+     * inline-end is folded into the physical right slot at extract time.
+     *
+     * ONLY out-of-flow boxes ([isAbsolutelyPositioned]) anchor this way.
+     * For `position: relative` an inset is NOT an anchor at all — it is a
+     * displacement from the box's STATIC position (css-position-3 §3.4:
+     * `bottom: 160px` moves the box UP 160px and reserves its original
+     * flow space), which [offsetY]'s `-bottom` already renders correctly
+     * from the start anchor. Without this gate the predicate answers true
+     * for such a box and any future consumer that anchors on it would
+     * teleport it to the containing block's end edge — a live corpus
+     * witness exists today: css-backgrounds/background-334's root __2 is
+     * `position: relative; bottom: 160px`. It never reaches the anchor now
+     * (CanvasRootHoist only hoists absolute/fixed), so this gate is
+     * byte-neutral for every current caller and purely a guard for the
+     * nested-containing-block lane that is expected to consume it next.
+     * `sticky` is excluded for the same reason — its insets are scroll
+     * thresholds, not containing-block anchors (css-position-3 §3.6).
+     */
+    val anchorsFromEndX: Boolean
+        get() = isAbsolutelyPositioned && resolvedStart == null && resolvedEnd != null
+
+    /**
+     * Block-axis twin of [anchorsFromEndX] (css-position-3 §3.5.3 applied
+     * to the block axis): `top: auto` + a declared `bottom` anchors the box
+     * at the containing block's BOTTOM edge — `bottom: 0` on a 100px box in
+     * a 600px containing block paints at y = 500. A declared `top` wins
+     * when both are present (over-constrained resolution). Gated on
+     * [isAbsolutelyPositioned] for the reason spelled out on [anchorsFromEndX].
+     */
+    val anchorsFromEndY: Boolean
+        get() = isAbsolutelyPositioned && resolvedTop == null && resolvedBottom != null
+
+    /**
      * Calculate horizontal offset for positioning.
      * Positive values move right, negative values move left.
      *
@@ -79,6 +132,15 @@ data class PositionConfig(
      * For CSS `right: 10px`, the element moves left by 10px (from the right edge).
      *
      * When both are specified, `left` takes precedence (CSS behavior).
+     *
+     * NOTE (wave 22, B-RC3): the `right`/`bottom` branches return a NEGATED
+     * inset, which is only correct RELATIVE TO THE END EDGE — the caller
+     * must first anchor the box there ([anchorsFromEndX]/[anchorsFromEndY]
+     * + [EndInsetAnchor]). Applied from a top-left anchor it lands
+     * `bottom: 0; right: 0` at (0,0) — the diagnosed multicol defect where
+     * the bottom-right red div painted UNDER the top-left one (Android red
+     * ink was exactly one 100×100 for two red divs; the web oracle paints
+     * them at (0,0) and (290,500) on the 390×600 canvas).
      */
     val offsetX: Dp
         get() {

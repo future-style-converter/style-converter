@@ -214,15 +214,16 @@ enum IRWireV2Reader {
                 }
                 pseudos = .object(dict)
             }
-            // meta: strict {sourceTag?, role?, attrs?}, minProperties 1 —
-            // an empty meta object may never appear on the wire. `attrs`
-            // is the wave-20 widget capsule (lane W2 wire contract).
+            // meta: strict {sourceTag?, role?, attrs?, decorations?},
+            // minProperties 1 — an empty meta object may never appear on
+            // the wire. `attrs` is the wave-20 widget capsule (lane W2);
+            // `decorations` is the wave-22 per-line list (lane DECOR).
             var meta: IRMeta? = nil
             if c.contains(IRAnyKey("meta")) {
                 let m = try c.nestedContainer(keyedBy: IRAnyKey.self, forKey: IRAnyKey("meta"))
-                let members: Set<String> = ["sourceTag", "role", "attrs"]
+                let members: Set<String> = ["sourceTag", "role", "attrs", "decorations"]
                 for k in m.allKeys where !members.contains(k.stringValue) {
-                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role/attrs)", path: decoder.codingPath)
+                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role/attrs/decorations)", path: decoder.codingPath)
                 }
                 let tag = try m.decodeIfPresent(String.self, forKey: IRAnyKey("sourceTag"))
                 let role = try m.decodeIfPresent(String.self, forKey: IRAnyKey("role"))
@@ -242,10 +243,57 @@ enum IRWireV2Reader {
                     }
                     attrs = IRAttrs.from(object: o)
                 }
-                guard tag != nil || role != nil || attrs != nil else {
+                // decorations (wave-22 lane DECOR): strict on STRUCTURE —
+                // non-empty array of `{line, color?}` objects with a
+                // string `line` — because a malformed shape is a writer
+                // bug the reader must name. NOT strict on the `line`
+                // VALUE: an unknown keyword is the spec-05 tolerance-rule-1
+                // case (a future §2.1 keyword), so it survives decode and
+                // DecorationWire drops + logs it at paint time. Keeping it
+                // raw is what lets that filter empty the list WITHOUT
+                // collapsing it back to "absent" — see IRDecoration.
+                var decorations: [IRDecoration]? = nil
+                if m.contains(IRAnyKey("decorations")) {
+                    let raw = try m.decode(IRValue.self, forKey: IRAnyKey("decorations"))
+                    guard case .array(let entries) = raw else {
+                        throw violation("meta.decorations must be an array", path: decoder.codingPath)
+                    }
+                    // Schema pins minItems 1 — the converter omits the key
+                    // instead of emitting `[]`, so empty is a writer bug.
+                    guard !entries.isEmpty else {
+                        throw violation("meta.decorations present but empty (schema: minItems 1)", path: decoder.codingPath)
+                    }
+                    decorations = try entries.map { entry in
+                        guard case .object(let e) = entry else {
+                            throw violation("meta.decorations entries must be objects", path: decoder.codingPath)
+                        }
+                        // Entry envelope is closed (additionalProperties:
+                        // false) — style/thickness are deliberately NOT
+                        // per-entry (they are the run's, root-wins).
+                        let entryKeys: Set<String> = ["line", "color"]
+                        for k in e.keys where !entryKeys.contains(k) {
+                            throw violation("unknown meta.decorations entry key '\(k)' (allowed: line/color)", path: decoder.codingPath)
+                        }
+                        guard let line = e["line"]?.stringValue else {
+                            throw violation("meta.decorations entry missing string 'line'", path: decoder.codingPath)
+                        }
+                        // `color` optional; absent ≡ currentColor. A
+                        // non-string colour is a writer bug — colour
+                        // tokens are authored CSS text, never numbers.
+                        var color: String? = nil
+                        if let raw = e["color"] {
+                            guard let s = raw.stringValue else {
+                                throw violation("meta.decorations 'color' must be an authored CSS token string", path: decoder.codingPath)
+                            }
+                            color = s
+                        }
+                        return IRDecoration(line: line, color: color)
+                    }
+                }
+                guard tag != nil || role != nil || attrs != nil || decorations != nil else {
                     throw violation("meta present but empty (schema: minProperties 1)", path: decoder.codingPath)
                 }
-                meta = IRMeta(sourceTag: tag, role: role, attrs: attrs)
+                meta = IRMeta(sourceTag: tag, role: role, attrs: attrs, decorations: decorations)
             }
             // variables: additive v2 key — "--name" → raw string map
             // (custom-property definitions, css-variables-1 §2). Schema

@@ -343,6 +343,12 @@ object CssVariableResolver {
     /**
      * All 147 CSS named colors.
      */
+    // Wave 22 — table values are the CSS css-color-4 §6.1 hex definitions,
+    // NOT Compose's built-in constants: Compose Color.Gray=0x888888 /
+    // DarkGray=0x444444 / LightGray=0xCCCCCC diverge from CSS gray=0x808080 /
+    // darkgray=0xA9A9A9 (lighter than gray — the CSS quirk) / lightgray=
+    // 0xD3D3D3, and the old built-in mappings painted var()-substituted
+    // named grays measurably wrong on Android (wave-22 decoration seam).
     private val namedColors = mapOf(
         "transparent" to Color.Transparent,
         "aliceblue" to Color(0xFFF0F8FF),
@@ -352,9 +358,9 @@ object CssVariableResolver {
         "azure" to Color(0xFFF0FFFF),
         "beige" to Color(0xFFF5F5DC),
         "bisque" to Color(0xFFFFE4C4),
-        "black" to Color.Black,
+        "black" to Color(0xFF000000),
         "blanchedalmond" to Color(0xFFFFEBCD),
-        "blue" to Color.Blue,
+        "blue" to Color(0xFF0000FF),
         "blueviolet" to Color(0xFF8A2BE2),
         "brown" to Color(0xFFA52A2A),
         "burlywood" to Color(0xFFDEB887),
@@ -365,12 +371,12 @@ object CssVariableResolver {
         "cornflowerblue" to Color(0xFF6495ED),
         "cornsilk" to Color(0xFFFFF8DC),
         "crimson" to Color(0xFFDC143C),
-        "cyan" to Color.Cyan,
+        "cyan" to Color(0xFF00FFFF),
         "darkblue" to Color(0xFF00008B),
         "darkcyan" to Color(0xFF008B8B),
         "darkgoldenrod" to Color(0xFFB8860B),
-        "darkgray" to Color.DarkGray,
-        "darkgrey" to Color.DarkGray,
+        "darkgray" to Color(0xFFA9A9A9),
+        "darkgrey" to Color(0xFFA9A9A9),
         "darkgreen" to Color(0xFF006400),
         "darkkhaki" to Color(0xFFBDB76B),
         "darkmagenta" to Color(0xFF8B008B),
@@ -398,8 +404,8 @@ object CssVariableResolver {
         "ghostwhite" to Color(0xFFF8F8FF),
         "gold" to Color(0xFFFFD700),
         "goldenrod" to Color(0xFFDAA520),
-        "gray" to Color.Gray,
-        "grey" to Color.Gray,
+        "gray" to Color(0xFF808080),
+        "grey" to Color(0xFF808080),
         "green" to Color(0xFF008000),
         "greenyellow" to Color(0xFFADFF2F),
         "honeydew" to Color(0xFFF0FFF0),
@@ -416,8 +422,8 @@ object CssVariableResolver {
         "lightcoral" to Color(0xFFF08080),
         "lightcyan" to Color(0xFFE0FFFF),
         "lightgoldenrodyellow" to Color(0xFFFAFAD2),
-        "lightgray" to Color.LightGray,
-        "lightgrey" to Color.LightGray,
+        "lightgray" to Color(0xFFD3D3D3),
+        "lightgrey" to Color(0xFFD3D3D3),
         "lightgreen" to Color(0xFF90EE90),
         "lightpink" to Color(0xFFFFB6C1),
         "lightsalmon" to Color(0xFFFFA07A),
@@ -430,7 +436,7 @@ object CssVariableResolver {
         "lime" to Color(0xFF00FF00),
         "limegreen" to Color(0xFF32CD32),
         "linen" to Color(0xFFFAF0E6),
-        "magenta" to Color.Magenta,
+        "magenta" to Color(0xFFFF00FF),
         "maroon" to Color(0xFF800000),
         "mediumaquamarine" to Color(0xFF66CDAA),
         "mediumblue" to Color(0xFF0000CD),
@@ -465,7 +471,7 @@ object CssVariableResolver {
         "powderblue" to Color(0xFFB0E0E6),
         "purple" to Color(0xFF800080),
         "rebeccapurple" to Color(0xFF663399),
-        "red" to Color.Red,
+        "red" to Color(0xFFFF0000),
         "rosybrown" to Color(0xFFBC8F8F),
         "royalblue" to Color(0xFF4169E1),
         "saddlebrown" to Color(0xFF8B4513),
@@ -489,9 +495,9 @@ object CssVariableResolver {
         "turquoise" to Color(0xFF40E0D0),
         "violet" to Color(0xFFEE82EE),
         "wheat" to Color(0xFFF5DEB3),
-        "white" to Color.White,
+        "white" to Color(0xFFFFFFFF),
         "whitesmoke" to Color(0xFFF5F5F5),
-        "yellow" to Color.Yellow,
+        "yellow" to Color(0xFFFFFF00),
         "yellowgreen" to Color(0xFF9ACD32)
     )
 }

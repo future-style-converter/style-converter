@@ -28,6 +28,9 @@ import { defaultMapTag, VOID_ELEMENTS } from './TagMapping';
 // wave-20 W1: the wire `meta.attrs` → DOM-prop policy (checked/value/
 // multiple/… onto real widget elements; no-op for non-widget elements).
 import { widgetDomProps } from './WidgetAttrs';
+// wave-22 lane DECOR: the wire `meta.decorations` → nested decorating-box
+// spans (per-line colours a single element cannot express).
+import { decorationHostStyle, withDecorationSpans } from './DecorationSpans';
 // Pseudo-element span rendering, split out for file size (wave-20 W1);
 // styleFromRawDeclarations is RE-EXPORTED below so existing import sites
 // (tests, downstream tooling) keep resolving through this module.
@@ -71,9 +74,20 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
   // Skin style decoration (harness: sizing calibration). Default:
   // identity — the element gets exactly what the engine emitted.
   const decorated = options?.decorateStyles ? options.decorateStyles(styles, ctx) : styles;
+  // wave-22 lane DECOR: a collapsed inline run carries the ordered
+  // per-line list in `meta.decorations`, which is AUTHORITATIVE. When it
+  // is present the element stops painting its own (merged, root-wins)
+  // line and the nested wrapper spans below own every line — see
+  // DecorationSpans.ts for why that is both necessary and sufficient on a
+  // real browser. Null for every other component, so their style objects
+  // and DOM stay byte-identical.
+  const decorations = component.meta?.decorations;
+  const hostDecoration = decorationHostStyle(decorations);
   // Variables merge LAST — `--name` keys are disjoint from every regular
-  // CSS key, so this can never clobber a declaration.
-  const styleProp = { ...decorated, ...variableStyles } as CSSProperties;
+  // CSS key, so this can never clobber a declaration. The decoration host
+  // override rides with them: it only ever sets `text-decoration-line`,
+  // which the wrappers are about to re-declare per entry.
+  const styleProp = { ...decorated, ...variableStyles, ...hostDecoration } as CSSProperties;
 
   // Element choice: lowercase the trusted wire tag, then let the skin
   // (or the production default policy) map it to an element name.
@@ -243,6 +257,16 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
       ? options.renderEmptyContent(ctx)
       : (hasText ? text : null);
   }
+
+  // wave-22 lane DECOR — reconstruct the collapsed chain's decorating
+  // boxes around the run's CONTENT, outermost-first, one <span> per
+  // entry. Applied to the content slot (not to the children array): the
+  // extractor only ever collapses a chain whose whole subtree is
+  // decoration-only inline wrappers, which by construction leaves ONE
+  // childless text component. `decorated` supplies the run's shared
+  // decoration style + thickness (per-run, not per-entry). Identity when
+  // there is no wire — every other component's DOM is byte-identical.
+  textSlot = withDecorationSpans(textSlot, decorations, decorated);
 
   // Identity/capture attributes + rule class + inline styles — the exact
   // prop order the old harness renderer used (byte-parity contract).

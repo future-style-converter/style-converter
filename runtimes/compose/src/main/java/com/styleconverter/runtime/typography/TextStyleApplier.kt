@@ -579,6 +579,17 @@ object TextStyleApplier {
     }
 
     private fun extractLineHeight(data: JsonElement, fontSizeSp: Float? = null): TextUnit? {
+        // Wave 22 (lane FONT) note — a DECLARED `line-height: normal` arrives
+        // here as `{"multiplier":1.2,"original":"normal"}` and DELIBERATELY
+        // still consumes that legacy 1.2 compatibility multiplier below. The
+        // keyword's CSS-correct answer is the face's own metrics, but honouring
+        // it on THIS path would move the committed 327-pair dark-stage
+        // baselines (fixtures/properties/typography/line-height.json's
+        // LineHeight_Normal variant renders through here), which this lane may
+        // not re-capture. The override is therefore WPT-GATED one level up, in
+        // ComponentRenderer's placeholder line-box pick — see
+        // LineHeightNormal.lineBoxSource: outside WPT capture this 1.2 value
+        // wins exactly as it always has, byte-for-byte.
         if (data is JsonObject) {
             // Check for pixel value
             data["pixels"]?.jsonPrimitive?.floatOrNull?.let {
