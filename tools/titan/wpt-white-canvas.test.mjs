@@ -473,6 +473,16 @@ test('corpus-v4.1 line-height: swiftui ref line box is 20 and stays WPT-gated + 
     'swiftui declared-normal must fall through to natural face metrics');
   // The ABSENT-line-height row is the one the whole corpus and all 327
   // committed baselines ride: pinned under WPT capture, nil elsewhere.
-  assert.match(renderer, /return wptCaptureMode \? wptRefLineBoxPx : nil/,
+  // Wave 23 (lane iOS-INSETS) made the pin inheritance-aware — fontSizePx x
+  // the derived ratio instead of the flat 20pt constant, so a 92px h1's
+  // line box scales with its font while the 16px identity (16 x 1.25 = 20)
+  // keeps every existing capture byte-stable. The three guarantees this
+  // pin protects are unchanged: WPT-gated, nil product path, ratio
+  // anchored to wptRefLineBoxPx (asserted above at exactly 20).
+  assert.match(renderer, /return wptCaptureMode \? fontSizePx \* wptRefLineHeightRatio : nil/,
     'swiftui line-box pin must stay WPT-mode-gated with a nil product path');
+  // The ratio itself must stay derived from the pinned 20/16 so the two
+  // constants can never drift apart silently.
+  assert.match(renderer, /wptRefLineHeightRatio[^=]*=\s*wptRefLineBoxPx \/ 16/,
+    'swiftui ratio must be derived from wptRefLineBoxPx, not a free literal');
 });

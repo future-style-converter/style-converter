@@ -504,7 +504,10 @@ public struct ComponentRenderer: View {
     /// line-through-vertical — i.e. precisely the four css-text-decor rows
     /// where iOS trails a passing Android-web pair. Nothing else in the corpus
     /// can move: at 16px this ratio reproduces [wptRefLineBoxPx] exactly.
-    public static let wptRefLineHeightRatio: CGFloat = 1.25
+    public static let wptRefLineHeightRatio: CGFloat = wptRefLineBoxPx / 16
+    // (= 1.25 exactly — derived from the pinned 20pt box at the 16px root so
+    // the two constants can never drift apart silently; wave-23 drift pin in
+    // tools/titan/wpt-white-canvas.test.mjs asserts this derivation.)
 
     /// The line-height a placeholder text run should lay out with. Outside
     /// WPT capture (the product path + the whole committed baseline corpus)
