@@ -45,30 +45,38 @@ test('capture-browser-ref: white CANVAS_BG + cache keyed by CANVAS_REV', () => {
   const s = src('tools/titan/capture-browser-ref.mjs');
   // The ref canvas is the corpus-v4 white.
   assert.match(s, /export const CANVAS_BG = '#FFFFFF'/, 'ref canvas must be white');
-  // The cache revision segment keeps pre-v4.1 refs (the line-height-less
-  // black-ink scratch refs at /white-black-ink-font/, v4.0 white-ink refs
-  // at /white/, pre-v4 dark refs at the un-segmented path) out of v4.1
-  // diffs. 'white-black-ink-font-lh' == the full corpus-v4.1 sub-boundary:
-  // black default ink AND the harness Inter font stack AND the
-  // deterministic REF_LINE_HEIGHT pin on the ref.
-  assert.match(s, /export const CANVAS_REV = 'white-black-ink-font-lh'/, 'cache revision segment missing');
+  // The cache revision segment keeps refs from every EARLIER contract (the
+  // line-height-less black-ink scratch refs at /white-black-ink-font/, v4.0
+  // white-ink refs at /white/, pre-v4 dark refs at the un-segmented path,
+  // and now the CSS-padded /white-black-ink-font-lh tree) out of the live
+  // diff. '…-imgpad' == corpus-v4.1 typography PLUS the wave-25 CAL-RC1
+  // image-space frame, which moves every abspos/fixed overlay back into
+  // alignment with the in-flow content it annotates.
+  assert.match(s, /export const CANVAS_REV = 'white-black-ink-font-lh-imgpad'/, 'cache revision segment missing');
   assert.match(s, /join\(REFS_ROOT, wptRef, CANVAS_REV, section/, 'cachePathFor must key on CANVAS_REV');
 });
 
-test('run-titan.sh + section-runner.sh point --refs-root at the black-ink-font-lh revision', () => {
-  // Both orchestrators derive the refs root independently of cachePathFor —
-  // the /white-black-ink-font-lh segment must match CANVAS_REV or every diff
-  // sees no ref (or, worse, a stale line-height-less v4.1-scratch ref).
+test('the shell --refs-root literal is normalised by inject-wpt-block, not pinned to CANVAS_REV', () => {
+  // Both orchestrators pass a LITERAL refs root. Through wave-24 that literal
+  // had to be edited in lock-step with CANVAS_REV or the scorer silently
+  // diffed against the previous contract's refs — a two-file coupling with no
+  // mechanical enforcement outside this test. wave-25 CAL-RC1 removes the
+  // coupling instead of re-asserting it: inject-wpt-block.mjs rewrites a
+  // KNOWN-STALE canvas-rev tail to the live rev (normalizeRefsRoot). So what
+  // this test guards now is that the literal the scripts DO pass is one the
+  // normaliser recognises — an unrecognised segment is left alone, which
+  // would be the silent-stale-ref failure all over again.
+  const stale = /export const KNOWN_STALE_CANVAS_REVS = \[([\s\S]*?)\]/
+    .exec(src('tools/titan/inject-wpt-block.mjs'))?.[1] ?? '';
   for (const sh of ['tools/titan/run-titan.sh', 'tools/titan/section-runner.sh']) {
     const s = src(sh);
-    assert.match(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/white-black-ink-font-lh"/, `${sh}: refs-root missing /white-black-ink-font-lh`);
+    const seg = /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/([A-Za-z0-9._-]+)"/.exec(s)?.[1];
+    assert.ok(seg, `${sh}: --refs-root must carry a canvas-rev segment`);
+    // Either it already IS the live rev, or the normaliser knows how to
+    // upgrade it. Nothing else may ship.
+    assert.ok(seg === 'white-black-ink-font-lh-imgpad' || stale.includes(`'${seg}'`),
+      `${sh}: refs-root segment '${seg}' is neither the live rev nor a KNOWN_STALE_CANVAS_REVS entry`);
     assert.doesNotMatch(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF" /, `${sh}: un-segmented refs-root resurfaced`);
-    assert.doesNotMatch(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/white"/, `${sh}: stale v4.0 white-ink refs-root resurfaced`);
-    assert.doesNotMatch(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/white-black-ink"/, `${sh}: stale ink-only (font-less) refs-root resurfaced`);
-    // NB: the two stale-revision guards above also catch the line-height-less
-    // 'white-black-ink-font' scratch root — the required -lh match plus the
-    // prefix doesNotMatch patterns leave no way to point at it.
-    assert.doesNotMatch(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/white-black-ink-font"\s/, `${sh}: stale line-height-less refs-root resurfaced`);
   }
 });
 
@@ -422,18 +430,44 @@ test('wave-21 box model: wpt-composed-mode reverts margin+padding+box-sizing to 
 
 test('wave-21 box model: the ref injection frames only html/body — UA control metrics stay intact', () => {
   const s = src('tools/titan/capture-browser-ref.mjs');
-  // Extract the ONE injected style block (the addStyleTag template) so the
-  // assertions below scope to what actually reaches the ref page, not to
-  // comments elsewhere in the file.
-  const injected = /page\.addStyleTag\(\{\s*\n\s*content: `([\s\S]*?)`,\s*\n\s*\}\)/.exec(s)?.[1];
-  assert.ok(injected, 'ref addStyleTag injection block not found');
+  // Extract the ONE canvas-frame stylesheet so the assertions below scope to
+  // what actually reaches the page, not to comments elsewhere in the file.
+  // wave-25 round 3: the literal moved out of the `addStyleTag` call into the
+  // exported `canvasFrameCss()` factory, because the two TEST-page bake paths
+  // (post-load-extract.mjs, bidi-bake.mjs) must inject the byte-identical
+  // sheet and their hand-copied versions had already drifted back to the
+  // pre-CAL-RC1 CSS pad. Pinning the factory body therefore pins all THREE
+  // injection sites at once — see the bake-alignment test below.
+  const injected = /export async function canvasFrameCss\(\) \{\s*\n\s*return `([\s\S]*?)`;\s*\n\}/.exec(s)?.[1];
+  assert.ok(injected, 'canvasFrameCss() frame stylesheet not found');
+  // …and the ref capture must actually USE it (a factory nobody calls would
+  // let the real injection drift while every assertion below still passes).
+  assert.match(s, /page\.addStyleTag\(\{\s*\n\s*content: await canvasFrameCss\(\),/,
+    'the ref capture must inject canvasFrameCss(), not a private literal');
   // The box-model rules are EXACTLY the zero-specificity html/body frame —
   // pin both literals so any widening (extra selectors, changed values)
   // fails here rather than silently re-boxing the ref.
   assert.ok(injected.includes(':where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }'),
     'ref html/body frame rule missing/changed');
-  assert.ok(injected.includes(':where(body) { padding: ${CANVAS_PAD_PX}px; box-sizing: border-box;'),
-    'ref body canvas-padding rule missing/changed');
+  // wave-25 CAL-RC1: the 16px canvas pad is GONE from CSS — it is applied to
+  // the raster (padPngBuffer) so abspos/fixed overlays translate with the
+  // in-flow content instead of staying pinned to the ICB origin. `flow-root`
+  // replaces the one load-bearing side effect the padding had (blocking
+  // margin collapse-through at the body edges) WITHOUT establishing an
+  // abspos containing block. A padding declaration reappearing here would
+  // silently reinstate the (-16,-16) internal misalignment.
+  assert.ok(injected.includes(':where(body) { display: flow-root; box-sizing: border-box;'),
+    'ref body frame rule missing/changed');
+  assert.doesNotMatch(injected, /:where\(body\)[^}]*padding:/,
+    'the CSS canvas pad came back on :where(body) — it belongs in image space');
+  // The abspos-containing-block hazard, stated as a guard: none of these may
+  // ever enter the body frame rule, because each would make the body a
+  // containing block for absolutely-positioned descendants and re-introduce
+  // the very offset the image-space pad removes.
+  assert.doesNotMatch(injected, /:where\(body\)[^}]*position:\s*(relative|absolute|fixed|sticky)/,
+    'a positioned body would capture abspos descendants');
+  assert.doesNotMatch(injected, /:where\(body\)[^}]*(transform|filter|perspective|contain):/,
+    'a transform/filter/contain on body would capture abspos descendants');
   // No universal reset and no element/attribute-wide box-model override may
   // ever enter the injection: the harness reverts TO the UA origin, so the
   // ref must PRESENT the UA origin — a `* { padding: 0 }` here would strip
@@ -441,12 +475,56 @@ test('wave-21 box model: the ref injection frames only html/body — UA control 
   assert.doesNotMatch(injected, /^\s*\*\s*[,{]/m, 'universal selector leaked into the ref injection');
   assert.doesNotMatch(injected, /\[data-component-id\]/, 'harness-only selector leaked into the ref injection');
   // Count the box-model declarations in the injection: exactly one `margin`,
-  // two `padding`s (frame zero + canvas pad) and one `box-sizing` — all in
-  // the two :where frame rules pinned above. Any additional declaration is
-  // a contract widening that must be reviewed against the harness side.
+  // ONE `padding` (the html/body frame zero — the canvas pad moved to image
+  // space at wave-25) and one `box-sizing`, all in the two :where frame
+  // rules pinned above. Any additional declaration is a contract widening
+  // that must be reviewed against the harness side.
   assert.equal((injected.match(/margin:/g) ?? []).length, 1, 'unexpected extra margin declaration in ref injection');
-  assert.equal((injected.match(/padding:/g) ?? []).length, 2, 'unexpected extra padding declaration in ref injection');
+  assert.equal((injected.match(/padding:/g) ?? []).length, 1, 'unexpected extra padding declaration in ref injection');
   assert.equal((injected.match(/box-sizing:/g) ?? []).length, 1, 'unexpected extra box-sizing declaration in ref injection');
+});
+
+test('wave-25 round 3: both bake paths load pages in the ref CONTENT space', () => {
+  // THE SKEPTIC FINDING this pins: at CAL-RC1 the ref pipeline moved to a
+  // 358x568 UNPADDED render (the 16px frame became image-space padding of the
+  // PNG), but post-load-extract.mjs and bidi-bake.mjs kept loading test pages
+  // at 390x600 WITH `:where(body){padding:16px}`. Both bakes snapshot COMPUTED
+  // geometry that is replayed inside the composed canvases' content box, so a
+  // 32px-larger ICB silently inflated every viewport-relative value they bake.
+  const refSrc = src('tools/titan/capture-browser-ref.mjs');
+  // The two viewport numbers are DERIVED from the canvas contract, never free
+  // literals — that is what stops the next revision from drifting again.
+  assert.match(refSrc, /export const REF_RENDER_WIDTH = CANVAS_WIDTH - 2 \* CANVAS_PAD_PX;/,
+    'REF_RENDER_WIDTH must stay derived from the canvas width and pad');
+  assert.match(refSrc, /export const REF_RENDER_MIN_HEIGHT = REF_MIN_CANVAS_H - 2 \* CANVAS_PAD_PX;/,
+    'REF_RENDER_MIN_HEIGHT must stay derived from the canvas height floor and pad');
+  // The ref capture itself must set that viewport (it is the oracle the two
+  // bakes are being aligned TO).
+  assert.match(refSrc, /const innerFloor = REF_RENDER_MIN_HEIGHT;/,
+    'the ref capture must render at the shared content-space height floor');
+  assert.match(refSrc, /setViewport\(\{ width: REF_RENDER_WIDTH, height: innerFloor/,
+    'the ref capture must render at REF_RENDER_WIDTH');
+
+  for (const rel of ['tools/titan/post-load-extract.mjs', 'tools/titan/bidi-bake.mjs']) {
+    const bake = src(rel);
+    // One shared sheet — no private template literal may reappear.
+    assert.match(bake, /canvasFrameCss/, `${rel} must import the shared canvas frame`);
+    assert.match(bake, /css: await canvasFrameCss\(\),/,
+      `${rel} must inject the shared canvas frame, not a copy`);
+    // No INLINE stylesheet may be handed to the injector any more: the only
+    // legal shape is `css: await canvasFrameCss(),` asserted above. Scoping
+    // the guard to the `css:` argument (rather than to the selector text)
+    // keeps the prose free to NAME the removed rule while explaining it.
+    assert.doesNotMatch(bake, /css: `/,
+      `${rel} still builds its own frame stylesheet — it must use canvasFrameCss()`);
+    // The viewport: the ref's content space, by imported constant.
+    assert.match(bake,
+      /setViewport\(\{\s*\n?\s*width: REF_RENDER_WIDTH, height: REF_RENDER_MIN_HEIGHT/,
+      `${rel} must lay pages out at the ref content-space viewport`);
+    // …and the pre-CAL-RC1 numbers must be gone from the setViewport call.
+    assert.doesNotMatch(bake, /setViewport\(\{ width: 390, height: 600/,
+      `${rel} still loads at the outer 390x600 canvas`);
+  }
 });
 
 test('corpus-v4.1 line-height: swiftui ref line box is 20 and stays WPT-gated + IR-deferring', () => {

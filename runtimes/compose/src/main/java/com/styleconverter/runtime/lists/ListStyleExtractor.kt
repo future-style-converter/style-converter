@@ -28,6 +28,15 @@ object ListStyleExtractor {
                 "ListStylePosition" ->
                     extractListStylePosition(data)?.let { config.copy(listStylePosition = it) } ?: config
                 "ListStyleImage" -> config.copy(listStyleImage = extractListStyleImage(data))
+                // Wave 25: the UNEXPANDED shorthand. isListStyleProperty
+                // has always claimed this type, so a wire doc carrying it
+                // reached here and then applied NOTHING. It is unreachable
+                // from this repo's converter (pinned by a live run — see
+                // ListStyleShorthand's header) but tolerated by
+                // schema/spec/05-versioning.md, so a foreign producer can
+                // emit it; the branch makes the claim honest.
+                "ListStyle" ->
+                    ListStyleShorthand.apply(config, ValueExtractors.extractKeyword(data))
                 else -> config
             }
         }
@@ -65,14 +74,34 @@ object ListStyleExtractor {
      *
      * Resolution order is the CSS cascade for an inherited property
      * (css-lists-3 §3.1 — all three list-style-* longhands are
-     * "Inherited: yes"; css-cascade-4 §7.3):
+     * "Inherited: yes"; css-cascade-4 §4.3):
      *
      *  1. the container's UA default for [parentTag],
-     *  2. the parent's declarations, which the renderer hands in already
-     *     inheritance-merged (so a value sitting on `body`/an ancestor
-     *     reaches the item too),
+     *  2. the container's declarations, which the renderer hands in
+     *     already inheritance-merged,
      *  3. the item's OWN declarations, which win.
      *
+     * ## Wave 25 — the cascade inversion this order used to have
+     * Slot 2 is a MERGED list, so an ancestor's `list-style-type` used to
+     * arrive there and beat the container's UA default. That is backwards:
+     * css-cascade-4 §4.3 consults inheritance only when the cascade
+     * produced NO value for the element, and the UA sheet's
+     * `ul { list-style-type: disc }` (HTML §15.3.9) IS a declaration on
+     * the container element — so an inherited value can never reach it.
+     * The repair is NOT a fold reorder here (an author declaration on the
+     * container must still beat the UA rule — the live
+     * `marker-text-matches-armenian` `<ol>` declares `armenian` and must
+     * keep it). It happens one step earlier, at the inheritance merge,
+     * where the container's OWN list is still separable from what it
+     * inherited: [ListStyleUaRule.apply] substitutes the UA value for an
+     * ancestor-inherited one. By the time [parentProperties] reaches this
+     * function it is therefore already cascade-correct, and the plain
+     * parent-then-child fold below is right.
+     *
+     * @param parentProperties the container's INHERITANCE-MERGED
+     *   declarations, after [ListStyleUaRule.apply]. `list-style-position`
+     *   and `-image` have no UA declaration on `ul`/`ol`, so an ancestor's
+     *   value for those legitimately still reaches the item through here.
      * @return null when [parentTag] is not a list container — the caller
      *   must then render the child with no marker at all.
      */
@@ -87,7 +116,9 @@ object ListStyleExtractor {
         val base = ListStyleConfig(listStyleType = uaDefault)
         // Steps 2+3 in one fold: parent entries first, child entries last,
         // and the fold is last-wins — so the item's own declaration beats
-        // the inherited one, which beats the UA default.
+        // the container's, which beats the UA default. Correct now that
+        // the container's own list-style-type can no longer be an
+        // ancestor's (ListStyleUaRule, applied at the merge).
         return extractListStyleConfig(
             parentProperties.filter { isListStyleProperty(it.first) } +
                 childProperties.filter { isListStyleProperty(it.first) },
@@ -108,9 +139,18 @@ object ListStyleExtractor {
      * define, instead of css-counter-styles-3 §7.1's "treat an UNDEFINED
      * name as decimal" (they ARE defined — the wire just lost the rule).
      */
-    private fun extractListStyleType(json: JsonElement?): ListStyleType? {
-        val keyword = ValueExtractors.extractKeyword(json)?.lowercase()?.replace("-", "_")
-            ?: return null
+    private fun extractListStyleType(json: JsonElement?): ListStyleType? =
+        ValueExtractors.extractKeyword(json)?.let { typeFromKeyword(it) }
+
+    /**
+     * The counter-style keyword table, split out of [extractListStyleType]
+     * so [ListStyleShorthand] resolves a shorthand's type component from
+     * the SAME table (a second copy would be free to drift). Accepts both
+     * wire spellings — hyphenated (`upper-roman`, what the live css-lists
+     * IR carries) and underscored — and any casing.
+     */
+    internal fun typeFromKeyword(rawKeyword: String): ListStyleType? {
+        val keyword = rawKeyword.lowercase().replace("-", "_")
 
         return when (keyword) {
             "disc" -> ListStyleType.DISC

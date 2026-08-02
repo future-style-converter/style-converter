@@ -103,13 +103,18 @@ import {
 // with — see the two derivation sites in postLoadAugmentFixture.
 import { fixtureStem } from './safe-name.mjs';
 // The browser-ref capture's rendering contract: same launch flags, same
-// 390-wide white canvas + pad, same Inter face embed + line-height pin —
+// 358-wide unpadded white canvas, same Inter face embed + line-height pin —
 // computed geometry must be measured under the environment the ref PNGs
 // (and the harness captures) are produced in, or every overridden inset
 // would carry a systematic offset (corpus-v4.1 font-pin lesson).
+// wave-25 round 3: the frame sheet + the viewport numbers are IMPORTED, not
+// re-typed. The old hand-copied literal here still injected the pre-CAL-RC1
+// `:where(body){padding:16px}` at viewport 390 while the ref had already
+// moved to a zero-pad 358-wide render — a silent 32px surplus in every
+// viewport-relative computed value this module bakes.
 import {
-  BROWSER_LAUNCH_ARGS, CANVAS_BG, CANVAS_PAD_PX,
-  REF_FONT_STACK, REF_LINE_HEIGHT, interFontFaceCss,
+  BROWSER_LAUNCH_ARGS, canvasFrameCss,
+  REF_RENDER_WIDTH, REF_RENDER_MIN_HEIGHT,
 } from './capture-browser-ref.mjs';
 // The scoring authority's wall-tag set — activation must use the EXACT tags
 // the gate excludes on, or the two would disagree about which tests need
@@ -193,6 +198,24 @@ export const POST_LOAD_COMPUTED_PROPERTIES = [
   // corpus gain no key and the overlay stays reviewable — while a `<ol>`
   // (computed `decimal`) or an `inside` marker writes explicitly.
   'list-style-type', 'list-style-position',
+  // wave-25 BD-RC4: the corner radii. filter-effects/
+  // backdrop-filter-border-radius-change is the motivating test — it declares
+  // `border-radius: 75px` (and 5px on the inline twin), then on a
+  // double-rAF after load rewrites BOTH to 150px. The static extractor only
+  // ever sees the pre-mutation 75px/5px, so the capture painted the wrong
+  // corners against a ref drawn at 150px. Computed corner radii resolve to
+  // absolute px per corner, so snapshotting them delivers the post-script
+  // state to all three runtimes.
+  // MEASURED in the pinned headless Chromium (probe over a plain div, a
+  // `border-radius:75px` div, a `50%` div, an elliptical
+  // `border-top-left-radius:10px 20px` div and a `border-radius:5px` span):
+  // the plain div reports '0px' on all four corners; `75px` reports '75px';
+  // a percentage stays '50%' (runtime-resolved, exactly like every other
+  // percentage in the IR); an elliptical corner reports the two-value
+  // '10px 20px' form. All of those are shapes the border-radius parser
+  // already accepts, and only '0px' is delete-not-write (below).
+  'border-top-left-radius', 'border-top-right-radius',
+  'border-bottom-right-radius', 'border-bottom-left-radius',
 ];
 
 // Per-property write rules for the merge. Default (not listed) = write the
@@ -223,6 +246,20 @@ export const WRITE_RULES = {
   // failure mode).
   'list-style-type':     { deleteWhen: 'disc' },
   'list-style-position': { deleteWhen: 'outside' },
+  // wave-25 BD-RC4: '0px' is the CSS-initial corner radius (CSS Backgrounds 3
+  // §5.1 — initial `0`), and it is what the pinned headless Chromium reports
+  // for every un-rounded element (MEASURED, see the property list above). The
+  // overwhelming majority of the corpus is square-cornered, so writing it
+  // would stamp four radius keys onto essentially every component and drown
+  // the overlay diff. Delete-not-write keeps the fixture reviewable while
+  // still removing any stale static key — which is exactly what
+  // backdrop-filter-border-radius-change needs when a script rounds a corner
+  // that started square, and the inverse (a script SQUARING a rounded corner)
+  // would otherwise leave the authored 75px standing.
+  'border-top-left-radius':     { deleteWhen: '0px' },
+  'border-top-right-radius':    { deleteWhen: '0px' },
+  'border-bottom-right-radius': { deleteWhen: '0px' },
+  'border-bottom-left-radius':  { deleteWhen: '0px' },
 };
 
 // Static shorthands the computed longhands displace. When the overlay writes
@@ -251,6 +288,14 @@ export const SHORTHAND_CONFLICTS = [
   // `none`) and NEITHER carries an image leg — both are strictly better
   // off with the baked longhands.
   'list-style',
+  // wave-25 BD-RC4: `border-radius` expands to exactly the four corner
+  // longhands the overlay now bakes — nothing is lost by stripping it, and
+  // leaving it would let the stale pre-mutation `border-radius: 75px` win
+  // over the baked `150px` corners in the runtime cascade (the precise
+  // failure mode backdrop-filter-border-radius-change exhibits). NOT covered
+  // by the existing 'border' entry: the `border` shorthand does not include
+  // radius (CSS Backgrounds 3 §4.5), so the strip has to be named.
+  'border-radius',
 ];
 
 // ── Top-layer decline (static source scan) ───────────────────────────────────
@@ -832,8 +877,17 @@ export async function postLoadAugmentFixture(fixture, testRel) {
   try {
     // Viewport BEFORE goto so the page's own onload layout reads (the
     // dynamic-change family forces layout mid-script) run at the pipeline's
-    // 390-wide canvas, not puppeteer's 800×600 default.
-    await page.setViewport({ width: 390, height: 600, deviceScaleFactor: 1 });
+    // canvas, not puppeteer's 800×600 default.
+    // wave-25 round 3 (BAKE VIEWPORT ALIGNMENT): the pipeline canvas is the
+    // ref's CONTENT space — 358×568, the exact viewport capture-browser-ref
+    // renders at — NOT the 390×600 outer canvas. The 16px frame is applied
+    // to the ref PNG in image space, so a page laid out at 390 with a 16px
+    // body pad has the same content WIDTH but a 32px-larger ICB: `100vw`,
+    // `100vh`, `min-height:100vh` and every ICB-relative computed inset came
+    // back 32px too big and got baked into the fixture.
+    await page.setViewport({
+      width: REF_RENDER_WIDTH, height: REF_RENDER_MIN_HEIGHT, deviceScaleFactor: 1,
+    });
     // file:// so relative resources resolve — same as capture-browser-ref.
     await page.goto('file://' + encodeURI(testAbs), { waitUntil: 'load', timeout: 30_000 });
     // The identical zero-specificity canvas frame the ref capture injects
@@ -849,14 +903,10 @@ export async function postLoadAugmentFixture(fixture, testRel) {
       document.head.appendChild(s);              // head, like addStyleTag did
     }, {
       id: CANVAS_FRAME_STYLE_ID,
-      css: `
-        ${await interFontFaceCss()}
-        :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }
-        :where(body) { padding: ${CANVAS_PAD_PX}px; box-sizing: border-box;
-                       min-height: 100vh; color: #000;
-                       font-family: ${REF_FONT_STACK};
-                       line-height: ${REF_LINE_HEIGHT}; }
-      `,
+      // wave-25 round 3: the SHARED factory, not a copy. Identical bytes to
+      // the sheet capture-browser-ref injects — zero body pad, flow-root
+      // body, the v4.1 ink/font/line-height pins.
+      css: await canvasFrameCss(),
     });
     // fonts.ready + double-rAF: the browser-ref settle lesson — the data-URI
     // Inter faces load async, and geometry snapshotted before the relayout

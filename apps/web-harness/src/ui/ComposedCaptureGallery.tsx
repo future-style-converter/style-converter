@@ -109,10 +109,34 @@ function resolveCanvasBackground(doc: IRDocument): string {
 }
 
 /**
- * The pipeline's default composed-canvas pad — capture-browser-ref.mjs's
- * CANVAS_PAD_PX, injected on the ref as `:where(body) { padding: 16px }`.
+ * The composed canvas's image-space FRAME — capture-browser-ref.mjs's
+ * CANVAS_PAD_PX. Since wave-25 CAL-RC1 the ref renders UNPADDED at 358 wide
+ * and this 16px frame is memcpy'd around the finished PNG (padPngBuffer), so
+ * it is unconditional: no author `body { padding }` can cancel an image-space
+ * translation, it can only add an inset INSIDE the frame.
+ *
+ * The natives read the same number from their runtimes (Compose
+ * `WPT_CANVAS_FRAME_DP`, SwiftUI `WPTCanvas.canvasFramePx`).
  */
-const CANVAS_PAD_DEFAULT = 16;
+export const CANVAS_FRAME_PX = 16;
+
+/**
+ * The ref's RENDER VIEWPORT — `capture-browser-ref.mjs`'s REF_RENDER_WIDTH
+ * (390 − 2×16 = 358) and REF_RENDER_MIN_HEIGHT (600 − 2×16 = 568). This is
+ * the INITIAL CONTAINING BLOCK: what `position: absolute`/`fixed` boxes with
+ * no positioned ancestor anchor against (css-position-3 §3.1/§3.2), and what
+ * `100vw`/`100vh` resolve to in the ref. The inner canvas div below IS this
+ * box, which is how the web canvas reproduces the ref's geometry.
+ */
+export const ICB_WIDTH_PX = 390 - 2 * CANVAS_FRAME_PX;
+export const ICB_MIN_HEIGHT_PX = 600 - 2 * CANVAS_FRAME_PX;
+
+/**
+ * The pipeline's default composed-canvas pad — the FRAME alone, i.e. what a
+ * document whose body-root declares no padding gets. Kept at 16 so every such
+ * capture is byte-identical to wave 24.
+ */
+const CANVAS_PAD_DEFAULT = CANVAS_FRAME_PX;
 
 /** Per-side canvas pad in CSS px. */
 export interface CanvasPadding {
@@ -124,25 +148,41 @@ export interface CanvasPadding {
  * resolveCanvasBackground above, for the other half of the ref's
  * zero-specificity body frame.
  *
- * WHY: capture-browser-ref.mjs injects `:where(body) { padding: 16px }`.
- * `:where()` contributes ZERO specificity (CSS Selectors L4 §17), so a ref
- * that declares its OWN `body { padding: 0 }` (specificity 0,0,1) WINS and
- * paints with no body pad at all. This canvas hardcoded 16px, so every such
- * test's whole render was offset (+16, +16) against its ref — MEASURED as
- * the ENTIRE divergence of css-masking/clip-path-circle-007, whose test and
- * ref both open with `body, div { padding: 0; margin: 0 }`.
+ * WHY (wave 24): capture-browser-ref.mjs used to inject
+ * `:where(body) { padding: 16px }`. `:where()` contributes ZERO specificity
+ * (CSS Selectors L4 §17), so a ref that declared its OWN `body { padding: 0 }`
+ * (specificity 0,0,1) WON and painted with no body pad at all. This canvas
+ * hardcoded 16px, so every such test's whole render was offset (+16, +16)
+ * against its ref — MEASURED as the ENTIRE divergence of
+ * css-masking/clip-path-circle-007, whose test and ref both open with
+ * `body, div { padding: 0; margin: 0 }`.
  *
- * The resolution is PER SIDE and defaults each side to 16 independently,
- * because the cascade is per-longhand: a ref declaring only
- * `padding-left: 0` keeps the injected 16px on the other three sides.
+ * WHY IT CHANGED (wave 25 round 3): at CAL-RC1 the ref stopped injecting a
+ * body padding at all — it renders at 358 wide with `padding: 0` and the
+ * 16px frame is applied to the finished PNG in IMAGE space. So the two halves
+ * wave 24 conflated have SPLIT: the FRAME ([CANVAS_FRAME_PX]) is
+ * unconditional, and the AUTHOR's body padding is an ADDITIONAL inset inside
+ * it, defaulting to ZERO. Each side therefore resolves to `frame + declared`:
+ * nothing declared → 16 (unchanged); `padding: 0` → 16 (wave 24 gave 0 — the
+ * stale calibration this round repairs); `padding: 40px` → 56.
+ *
+ * The canvas SPENDS the two halves differently — the frame on the outer div,
+ * the author part on the inner ICB div (see ComposedTestCanvas) — but this
+ * resolver reports the SUM, because that sum is the cross-platform contract
+ * the two native twins (`resolveComposedCanvasPadding`, `resolvedPadding`)
+ * also return, and keeping the three functions comparable is what stops them
+ * drifting.
+ *
+ * The resolution is PER SIDE, because the cascade is per-longhand: a ref
+ * declaring only `padding-left: 0` leaves the other three at the bare frame.
  * Values are resolved through the same `buildStyles` engine the renderer
  * uses (never a re-implemented parser), and only CONCRETE px are honored —
  * a runtime-dependent length (`1em`, `%`, `calc()`, which the converter
  * emits as unresolved) has no absolute answer here, so that side keeps the
  * 16px default rather than silently guessing.
  *
- * No body-root, or a body-root declaring no padding ⇒ all four sides stay
- * 16, so every other test's capture is byte-identical to before.
+ * No body-root, or a body-root declaring no padding ⇒ all four sides stay at
+ * the bare frame (16), so those captures are byte-identical to before.
  */
 export function resolveCanvasPadding(doc: IRDocument): CanvasPadding {
   const pad: CanvasPadding = {
@@ -186,9 +226,10 @@ export function resolveCanvasPadding(doc: IRDocument): CanvasPadding {
     }
     if (px === null) px = leafPx(irSides[side]);     // the native-parity path
     if (px === null) continue;                       // side not resolvable
-    // CSS 2.1 §8.4 forbids negative padding; clamp defensively so a
-    // malformed IR can never pull content OUTSIDE the canvas frame.
-    pad[side] = Math.max(0, px);
+    // CSS 2.1 §8.4 forbids negative padding; clamp the AUTHOR term so a
+    // malformed IR can never pull content OUTSIDE the canvas frame — then
+    // stack it ON the frame, which no author rule can cancel any more.
+    pad[side] = CANVAS_FRAME_PX + Math.max(0, px);
   }
   return pad;
 }
@@ -343,26 +384,56 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
       data-capture-id={testKey}
       data-capture-name={testKey}
       // Spread the shared frame first, then supply `background` and the four
-      // `padding-*` sides from the per-document resolution (identical to the
-      // pipeline defaults for every test that declares no body background /
-      // padding — those captures are byte-unchanged). composedCanvasStyle
-      // deliberately carries NO `padding` key so the shorthand and these
-      // longhands can never both be serialised into one style object (React
-      // warns on that mix, and the winner would depend on key order).
+      // `padding-*` sides. wave-25 round 3: the OUTER div carries the CANVAS
+      // FRAME only — the ref's image-space pad, which is the same 16px on
+      // every document — while the author's own body padding rides the inner
+      // ICB div below. composedCanvasStyle deliberately carries NO `padding`
+      // key so the shorthand and these longhands can never both be serialised
+      // into one style object (React warns on that mix, and the winner would
+      // depend on key order).
       style={{
         ...composedCanvasStyle,
         background: canvasBackground,
-        paddingTop: `${canvasPadding.top}px`,
-        paddingRight: `${canvasPadding.right}px`,
-        paddingBottom: `${canvasPadding.bottom}px`,
-        paddingLeft: `${canvasPadding.left}px`,
+        paddingTop: `${CANVAS_FRAME_PX}px`,
+        paddingRight: `${CANVAS_FRAME_PX}px`,
+        paddingBottom: `${CANVAS_FRAME_PX}px`,
+        paddingLeft: `${CANVAS_FRAME_PX}px`,
       }}
     >
-      {roots.map((root, i) => (
-        <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
-          <ComponentRenderer node={root} />
-        </RootErrorBoundary>
-      ))}
+      {/* wave-25 round 3 — THE INITIAL CONTAINING BLOCK.
+          MEASURED problem: `position: relative` + `transform` used to sit on
+          the OUTER div, so an abspos/fixed child anchored at that div's
+          PADDING box — the canvas corner. A probe of the live canvas CSS put
+          `left:100px` at canvas x=100 and `right:0;bottom:0` at (380,590),
+          i.e. flush with the IMAGE edge, while in-flow content sat at
+          (16,16). That matched the pre-CAL-RC1 refs (a CSS body pad moves
+          in-flow content only) and is 16px off the new ones.
+          FIX: the positioning/containing-block role moves to this inner div,
+          which IS the ref's render viewport — 358 x 568 minimum, offset
+          (16,16) by the outer frame. The same probe then measures
+          `left:100px` at (116,16), fixed at (16,16) and `right:0;bottom:0`
+          at (364,574) — flush with the CONTENT edge, frame intact: exactly
+          what the image-space-framed ref raster contains.
+          The AUTHOR body padding rides here too (inside the frame, like the
+          ref's own `body { padding }` inside its 358-wide viewport), derived
+          by removing the frame term the resolver added — see
+          resolveCanvasPadding for why that resolver reports the sum. */}
+      <div
+        data-capture-icb
+        style={{
+          ...composedIcbStyle,
+          paddingTop: `${canvasPadding.top - CANVAS_FRAME_PX}px`,
+          paddingRight: `${canvasPadding.right - CANVAS_FRAME_PX}px`,
+          paddingBottom: `${canvasPadding.bottom - CANVAS_FRAME_PX}px`,
+          paddingLeft: `${canvasPadding.left - CANVAS_FRAME_PX}px`,
+        }}
+      >
+        {roots.map((root, i) => (
+          <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
+            <ComponentRenderer node={root} />
+          </RootErrorBoundary>
+        ))}
+      </div>
     </div>
   );
 }
@@ -391,15 +462,13 @@ const containerStyle: React.CSSProperties = {
  *                             sets on `:where(html,body)`; white ink vanishes
  *                             into it on BOTH sides, restoring the reftest
  *                             camouflage the dark stage broke)
- *   - padding 16px per side  (CANVAS_PAD_DEFAULT — the ref's `:where(body)`
- *                             pad; box-sizing:border-box so content is 358px
- *                             wide, mirroring the ref's body content box.
- *                             wave-24 B-RC5: this is the DEFAULT, not a
- *                             constant — a document whose body-root declares
- *                             its own padding overrides it per side, exactly
- *                             as an author `body { padding }` beats the ref's
- *                             zero-specificity injection. See
- *                             resolveCanvasPadding.)
+ *   - padding 16px per side  (CANVAS_FRAME_PX — the ref's image-space frame;
+ *                             box-sizing:border-box so the content box is the
+ *                             358px viewport the ref is RENDERED at. wave-25
+ *                             round 3: unconditional — an author
+ *                             `body { padding }` no longer replaces it, it
+ *                             insets FURTHER on the inner ICB div. See
+ *                             resolveCanvasPadding + composedIcbStyle.)
  *   - min-height 600px       (the ref's `min-height:100vh` floors documentHeight
  *                             at 600 — capture-browser-ref.mjs's docHeight max;
  *                             the canvas grows past 600 when content overflows)
@@ -408,25 +477,23 @@ const containerStyle: React.CSSProperties = {
  *                             surface, deliberately camouflaged on the white
  *                             canvas; see capture-browser-ref.mjs's injection
  *                             note for why a black-ink flip is deferred)
- * `overflow:hidden` + `transform:translateZ(0)` + `position:relative` keep
- * each canvas's paint (and any position:fixed descendant) confined to its
- * own box so one test can't bleed into the next crop — the same isolation
- * CaptureGallery's canvasStyle uses. Note the KEY difference from the
- * per-component WPT canvas (wptCanvasStyle, padding:0): the ref HAS 16px
- * body padding, so the composed canvas must too — the missing 16px offset
- * was part of the stitched path's geometry error.
+ * `overflow:hidden` keeps each canvas's paint confined to its own box so one
+ * test can't bleed into the next crop — the same isolation CaptureGallery's
+ * canvasStyle uses. wave-25 round 3: the `transform:translateZ(0)` +
+ * `position:relative` half of that isolation MOVED to composedIcbStyle
+ * below, because those two declarations are what make a box the containing
+ * block for abspos AND fixed descendants — and that containing block must be
+ * the ref's 358-wide render viewport, not the 390-wide framed image. Fixed
+ * descendants are still confined (the transform still exists, one level in),
+ * so the anti-bleed guarantee is unchanged.
  */
 const composedCanvasStyle: React.CSSProperties = {
   width: '390px',
   minHeight: '600px',
   boxSizing: 'border-box',
-  // wave-24 B-RC5: the pad is NO LONGER a constant here — ComposedTestCanvas
-  // writes the four `padding-*` longhands from resolveCanvasPadding(doc),
-  // which returns 16px per side unless the document's body-root declares its
-  // own (the ref's `:where(body)` pad is zero-specificity and loses to an
-  // author `body { padding }` — see resolveCanvasPadding). Keeping a
-  // shorthand `padding` here as well would mix shorthand+longhand in one
-  // React style object; the default now lives in CANVAS_PAD_DEFAULT.
+  // The four `padding-*` longhands are written by ComposedTestCanvas (all
+  // four = CANVAS_FRAME_PX). Keeping a shorthand `padding` here as well
+  // would mix shorthand+longhand in one React style object.
   background: CANVAS_BG_DEFAULT,
   // corpus-v4.1 BLACK ink (wave-12 catch): this canvas was the ONE surface
   // the v4.1 ink flip missed — inheriting prose (NodeRenderer's bare text
@@ -438,8 +505,35 @@ const composedCanvasStyle: React.CSSProperties = {
   // canvas inheritance).
   color: '#000',
   overflow: 'hidden',
-  transform: 'translateZ(0)',
+};
+
+/**
+ * The INITIAL CONTAINING BLOCK box inside the framed canvas — wave-25
+ * round 3. This div, not the canvas, is the web analogue of the ref's render
+ * VIEWPORT:
+ *   - 358 x 568 minimum   (ICB_WIDTH_PX / ICB_MIN_HEIGHT_PX = the ref's
+ *                          REF_RENDER_WIDTH / REF_RENDER_MIN_HEIGHT; it grows
+ *                          past the floor with content, like the ref's
+ *                          documentHeight capture)
+ *   - position:relative   (makes it the containing block for abspos
+ *     + transform          descendants, and the transform additionally
+ *                          captures `position: fixed` ones — CSS Transforms
+ *                          §3: a transformed element is the containing block
+ *                          for fixed descendants. Both moved here from the
+ *                          outer canvas so out-of-flow boxes anchor at the
+ *                          CONTENT corner (16,16), which is where the
+ *                          image-space-framed ref raster puts them.)
+ *   - transparent         (the outer canvas paints the background, so the
+ *                          frame band shows the page/body colour exactly as
+ *                          the ref's sampled image pad does)
+ * The author body padding (if any) is written on top per side.
+ */
+const composedIcbStyle: React.CSSProperties = {
+  width: '100%',
+  minHeight: `${ICB_MIN_HEIGHT_PX}px`,
+  boxSizing: 'border-box',
   position: 'relative',
+  transform: 'translateZ(0)',
 };
 
 export default ComposedCaptureGallery;

@@ -2,15 +2,23 @@ package com.styleconverter.runtime.layout.position
 
 // Wave 17 — the out-of-flow contract (css-position-3 §2.1/§3.2). One shared
 // mechanism, pinned identically on both natives: FIXED boxes anchor at the
-// VIEWPORT (our capture canvas at its UNPADDED origin), and ABSOLUTE boxes
-// with NO positioned ancestor anchor at the initial containing block — the
-// same unpadded canvas origin the web/Chromium reference measures (the WPT
-// composed capture pinned the ABSOLUTE ancestor `left:100` at canvas
-// (100,0), NOT (116,0), so the ICB anchor is the canvas edge, not the padded
-// body content box). Both kinds leave the flow entirely: no space reserved
-// in the parent (S5), and the parent's flow slot must NOT contribute to the
-// painted position (the diagnosed wave-17 bug added natural-flow position +
-// inset; insets are absolute anchors, not deltas — F3).
+// VIEWPORT, and ABSOLUTE boxes with NO positioned ancestor anchor at the
+// INITIAL CONTAINING BLOCK. Both kinds leave the flow entirely: no space
+// reserved in the parent (S5), and the parent's flow slot must NOT
+// contribute to the painted position (the diagnosed wave-17 bug added
+// natural-flow position + inset; insets are absolute anchors, not deltas
+// — F3).
+//
+// WHERE that viewport/ICB corner IS on the capture surface is the [Host]'s
+// `canvasFrame` parameter, and it MOVED at wave 25 round 3. Wave 17 measured
+// it as the UNPADDED canvas corner (the composed capture pinned an ABSOLUTE
+// root's `left:100` at canvas x=100, not 116) — correct at the time, because
+// the ref pipeline framed its pages with `:where(body){padding:16px}` and CSS
+// padding on a static body moves in-flow content WITHOUT moving out-of-flow
+// content. Wave 25 CAL-RC1 moved that frame into IMAGE space, where the
+// translation applies to every pixel alike, so the ICB corner is now the
+// FRAMED content corner (16,16). See [Host]'s `canvasFrame` doc for the full
+// before/after.
 
 // Compose layout plumbing for the zero-size overlay anchor.
 import androidx.compose.foundation.layout.Box
@@ -22,8 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Constraints
 // Dp for the wave-22 canvas extents (converted to device px inside the
-// anchor's Density receiver — see zeroFlowAnchor).
+// anchor's Density receiver — see zeroFlowAnchor). `dp` for the wave-25
+// zero-frame defaults that keep every pre-existing call site byte-identical.
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 // IR model — the hoist decision and the descendant walk are PURE over the IR
 // (JVM-pinned by CanvasRootHoistTest, no Robolectric in this repo).
 import com.styleconverter.runtime.core.ir.IRComponent
@@ -32,12 +42,14 @@ import com.styleconverter.runtime.core.ir.IRProperty
 /**
  * Canvas-root hoist for out-of-flow boxes.
  *
- * [Host] wraps a composed document's content at the CANVAS ROOT — before the
+ * [Host] wraps a composed document's content at the CANVAS ROOT — outside the
  * canvas padding — and renders every hoist-eligible descendant (any depth;
  * see [collectCanvasHoisted]) in an overlay ABOVE the in-flow content,
- * anchored at the unpadded canvas origin. Each hoisted component's own style
- * chain (PositionApplier's absoluteOffset) then places it at (left, top)
- * from that origin — pins S1–S3. ComponentRenderer's interception (see
+ * anchored at the INITIAL CONTAINING BLOCK's corner, i.e. the canvas origin
+ * translated by the host's `canvasFrame` (wave 25 round 3; zero for callers
+ * that pass no frame). Each hoisted component's own style chain
+ * (PositionApplier's absoluteOffset) then places it at (left, top) from that
+ * origin — pins S1–S3. ComponentRenderer's interception (see
  * [interceptsInFlow]) composes NOTHING for the same components in flow, so
  * siblings take their place (pin S5).
  *
@@ -298,6 +310,34 @@ object CanvasRootHoist {
     internal fun hoistedFlowReportPx(): Int = 0
 
     /**
+     * Wave 25 (round 3) — where an anchor slot places a measured box on ONE
+     * axis, in whole device px. The ENTIRE placement arithmetic of
+     * [zeroFlowAnchor], lifted out of the `Modifier.layout` lambda so it is
+     * pinnable on the JVM (this suite has no Robolectric, so anything left
+     * inside the lambda is untested by construction).
+     *
+     * Two terms, and only two:
+     *  1. [originPx] — the containing block's START corner in the slot's own
+     *     coordinate space. For an overlay slot mounted at the raw canvas
+     *     corner this is the canvas frame (16dp in device px), because the
+     *     ICB is the FRAMED content box under the wave-25 image-space ref
+     *     frame; for ComponentRenderer's static-position mount (whose slot
+     *     origin already IS the flow position) it is 0.
+     *  2. [EndInsetAnchor.placePx] — 0 for a start-anchored axis (the box's
+     *     own PositionApplier offset supplies `left`/`top`), or
+     *     `endEdgePx − boxPx` for an end-only-inset axis (A5), where the end
+     *     edge is measured FROM the same origin.
+     *
+     * Both terms are translations of the same box, so they simply add: a
+     * `left: 100` hoisted root lands at frame + 0 (+100 from its own
+     * applier), and a `right: 0` root at frame + icb − box (−0 from its
+     * applier). Pinned in CanvasRootHoistTest against the css-position guard
+     * coordinates.
+     */
+    internal fun anchorPlacePx(originPx: Int, endEdgePx: Float?, boxPx: Int): Int =
+        originPx + EndInsetAnchor.placePx(endEdgePx, boxPx)
+
+    /**
      * Zero-flow anchor — the ONE measurement wrapper both out-of-flow
      * mounting modes share: measure the component UNBOUNDED
      * (Constraints() == 0..∞ — its own width/height modifiers decide, the
@@ -306,10 +346,11 @@ object CanvasRootHoist {
      * (css-position-3 §2.1 / pin S5), and place the ink at (0,0) — the
      * slot's own origin. Compose draws beyond a reported size unclipped,
      * matching CSS overflow:visible.
-     *  - As the overlay's [canvasAnchor], (0,0) is the host Box's
-     *    top-left, i.e. the unpadded canvas origin; the component's OWN
+     *  - As the overlay's [canvasAnchor], the origin is the host Box's
+     *    top-left plus the canvas frame — the ICB corner (wave 25 round 3;
+     *    the bare Box corner when no frame is passed); the component's OWN
      *    PositionApplier absoluteOffset(left, top) then lands it at
-     *    canvas (left, top).
+     *    ICB (left, top).
      *  - As the wave-18 static-position anchor (RC1 — see
      *    [rendersInFlowAsStaticPosition]), (0,0) is the box's FLOW slot
      *    origin, which IS the static position css-position-3 §3.1 assigns
@@ -327,29 +368,41 @@ object CanvasRootHoist {
         // start-anchored box — byte-identical to wave 17/18.
         endEdgeX: Dp? = null,
         endEdgeY: Dp? = null,
+        // Wave 25 (round 3) — the containing block's START corner in this
+        // slot's own coordinate space. For an overlay slot mounted at the
+        // OUTER canvas origin this is the canvas frame (16, 16), because the
+        // ICB is the framed content box, not the image (see [canvasAnchor]).
+        // Defaults (0, 0) keep ComponentRenderer's RC1 static-position mount
+        // — whose slot origin already IS the flow position — byte-identical.
+        originX: Dp = 0.dp,
+        originY: Dp = 0.dp,
     ): Modifier = Modifier.layout { measurable, _ ->
         // Unbounded measure — the box is sized by its own properties alone.
         val placeable = measurable.measure(Constraints())
         // Report zero on both axes: no flow/canvas growth from the ink.
         layout(hoistedFlowReportPx(), hoistedFlowReportPx()) {
-            // Anchor at the slot origin (start-anchored / static-position
-            // boxes: the child's own inset offset does the rest — F1/F2
-            // anchor semantics, insets not deltas), or flush with the
-            // containing block's END edge when the box declares only
-            // `right`/`bottom` (A5). Dp→px here, inside the Density
-            // receiver, so the arithmetic is in the same device-px space
-            // as placeable.width/height at any screen density.
+            // Anchor at the containing block's START corner (start-anchored
+            // / static-position boxes: the child's own inset offset does the
+            // rest — F1/F2 anchor semantics, insets not deltas), or flush
+            // with its END edge when the box declares only `right`/`bottom`
+            // (A5). The end edge is measured FROM the same origin, so both
+            // branches share the one translation. Dp→px here, inside the
+            // Density receiver, so the arithmetic is in the same device-px
+            // space as placeable.width/height at any screen density.
             placeable.place(
-                x = EndInsetAnchor.placePx(endEdgeX?.toPx(), placeable.width),
-                y = EndInsetAnchor.placePx(endEdgeY?.toPx(), placeable.height),
+                x = anchorPlacePx(originX.roundToPx(), endEdgeX?.toPx(), placeable.width),
+                y = anchorPlacePx(originY.roundToPx(), endEdgeY?.toPx(), placeable.height),
             )
         }
     }
 
     /**
      * The overlay slot's anchor — the shared [zeroFlowAnchor] applied at
-     * the host Box's top-left (the unpadded canvas origin). Kept as its
-     * own name so the Host wiring reads as the wave-17 contract it pins.
+     * the INITIAL CONTAINING BLOCK's corner: the host Box's top-left plus
+     * [Host]'s `canvasFrame` (wave 25 round 3 — the ref's 16px frame is
+     * image-space now, so out-of-flow ink translates with the in-flow ink;
+     * a zero frame reproduces the wave-17 unpadded-corner anchor exactly).
+     * Kept as its own name so the Host wiring reads as the contract it pins.
      *
      * Wave 22 (B-RC3): a hoisted box whose only inset on an axis is
      * `right`/`bottom` anchors at the CANVAS's end edge instead, because
@@ -364,6 +417,7 @@ object CanvasRootHoist {
         properties: List<IRProperty>,
         canvasWidth: Dp?,
         canvasHeight: Dp?,
+        canvasFrame: Dp,
     ): Modifier {
         // Read the insets through the SAME extractor the live style chain
         // uses, so the anchor and the offset can never disagree about
@@ -374,13 +428,19 @@ object CanvasRootHoist {
             // extent keeps the start anchor. One rule table, one owner.
             endEdgeX = EndInsetAnchor.endEdge(config.anchorsFromEndX, canvasWidth),
             endEdgeY = EndInsetAnchor.endEdge(config.anchorsFromEndY, canvasHeight),
+            // Wave 25 (round 3): the ICB's start corner inside the framed
+            // canvas — see [Host]'s canvasFrame parameter. Zero for every
+            // caller that passes no frame, i.e. the wave-17/18 behavior.
+            originX = canvasFrame,
+            originY = canvasFrame,
         )
     }
 
     /**
      * The canvas-root host. Wrap the document content (INCLUDING its canvas
-     * padding — the padding must sit inside so the overlay anchors at the
-     * unpadded origin) and the hoisted overlay in one Box. The overlay is
+     * padding — the padding must sit inside so the overlay's own origin is
+     * the raw canvas corner, from which `canvasFrame` translates it to the
+     * ICB) and the hoisted overlay in one Box. The overlay is
      * composed AFTER the content, so with equal z it paints ABOVE in-flow
      * ink (Compose placement order == CSS tree order for equal z-index);
      * each hoisted component's own Modifier.zIndex still reorders within
@@ -398,6 +458,34 @@ object CanvasRootHoist {
         // any caller that has no canvas geometry compiles unchanged.
         canvasWidth: Dp? = null,
         canvasHeight: Dp? = null,
+        // Wave 25 (round 3) — the CANVAS FRAME: the inset between the outer
+        // capture surface (what PixelCopy grabs) and the INITIAL CONTAINING
+        // BLOCK every hoisted box anchors in.
+        //
+        // Wave 17 pinned this at ZERO from measured evidence: the ref
+        // pipeline injected its 16px canvas frame as `:where(body){padding}`,
+        // and CSS padding on a static body does NOT move out-of-flow boxes
+        // (their containing block is the ICB / the viewport, whose origin is
+        // the canvas corner). So the ref's abspos `left:100` root really did
+        // land at canvas x=100 while its in-flow prose sat at x=116 — the ref
+        // was internally misaligned, and this anchor was calibrated to match
+        // that misalignment.
+        //
+        // Wave 25 CAL-RC1 repaired the ref: the page now renders UNPADDED at
+        // the content width and the frame is added to the PNG in IMAGE space
+        // (capture-browser-ref.mjs padPngBuffer). A raster translation moves
+        // in-flow and out-of-flow ink together, so the same `left:100` root
+        // now lands at image x=116 with its prose. The hoist origin follows.
+        //
+        // [canvasWidth]/[canvasHeight] are the ICB extents (the 358×568
+        // content space at the 390×600 defaults), measured FROM this frame —
+        // so a `right: 0` box lands flush with the content edge and the
+        // frame stays visible, matching the raster.
+        //
+        // Defaulted 0.dp: every caller that passes no frame keeps the exact
+        // wave-17/18/22 placement, so the hostless paths and the frozen
+        // baselines are untouched.
+        canvasFrame: Dp = 0.dp,
         content: @Composable () -> Unit,
     ) {
         // Pure walks, memoized on the document identity.
@@ -425,7 +513,8 @@ object CanvasRootHoist {
             return
         }
         // One Box: child 0 is the in-flow document, children 1..n the
-        // hoisted overlay slots at the shared unpadded origin.
+        // hoisted overlay slots, each translated from this Box's corner to
+        // the ICB corner by canvasFrame (wave 25 round 3).
         Box {
             // Activate interception for the whole in-flow tree.
             CompositionLocalProvider(LocalActive provides true) { content() }
@@ -445,11 +534,14 @@ object CanvasRootHoist {
                     com.styleconverter.runtime.core.renderer.ComponentRenderer
                         .RenderComponent(
                             node,
-                            // Per-node anchor (wave 22): start-anchored
-                            // boxes keep the (0,0) canvas origin; an
-                            // end-only-inset box anchors flush with the
-                            // canvas's right/bottom edge.
-                            itemModifier = canvasAnchor(node.properties, canvasWidth, canvasHeight),
+                            // Per-node anchor (wave 22 + wave 25 round 3):
+                            // start-anchored boxes sit at the ICB's start
+                            // corner (the canvas frame); an end-only-inset
+                            // box anchors flush with the ICB's right/bottom
+                            // edge, both measured inside the frame.
+                            itemModifier = canvasAnchor(
+                                node.properties, canvasWidth, canvasHeight, canvasFrame,
+                            ),
                         )
                 }
             }

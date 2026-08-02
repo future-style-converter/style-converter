@@ -160,6 +160,61 @@ fun composedPlaceholderTextPaddingDp(composedWpt: Boolean): Int = if (composedWp
 val WPT_CANVAS_BACKGROUND = Color(0xFFFFFFFF)
 
 /**
+ * The COMPOSED-capture CANVAS FRAME, in dp — the native twin of the ref
+ * pipeline's image-space pad (`tools/titan/capture-browser-ref.mjs`
+ * CANVAS_PAD_PX). 16 on all four sides of the 390-wide canvas, so the
+ * content space is 358 wide, exactly REF_RENDER_WIDTH.
+ *
+ * ## Why this is now a CONSTANT and not "the body padding"
+ * Through wave 24 the composed canvases treated the 16px inset AS the
+ * ref's injected `:where(body) { padding: 16px }`, which meant a ref
+ * declaring its own `body { padding: 0 }` beat the injection and the canvas
+ * had to drop the inset with it (wave-24 B-RC5, clip-path-circle-007).
+ *
+ * At wave-25 CAL-RC1 the ref pipeline moved that pad OUT of CSS: the page
+ * renders at 358 wide with `:where(html, body) { padding: 0 }` and the 16px
+ * frame is memcpy'd around the finished PNG. An image-space translation has
+ * no cascade and no containing-block semantics, so under the new contract:
+ *   * EVERY ref gets the frame — an author `body { padding }` can no longer
+ *     remove it, only ADD its own inset inside it;
+ *   * in-flow AND out-of-flow content translate by the SAME (+16, +16),
+ *     which is why the canvas-root hoist origin moves here from (0,0);
+ *   * the ref's initial containing block is the 358-wide render viewport,
+ *     NOT the 390-wide image.
+ * Hence: frame = this constant, unconditional; author body padding = an
+ * ADDITIONAL inset resolved per side with a ZERO default (the harnesses'
+ * `resolveComposedCanvasPadding` / `resolvedPadding` / `resolveCanvasPadding`
+ * now return frame + declared). All three platforms pin the same number —
+ * SwiftUI `WPTCanvas.canvasFramePx`, web `CANVAS_FRAME_PX`.
+ */
+const val WPT_CANVAS_FRAME_DP: Float = 16f
+
+/**
+ * The composed canvas's INITIAL CONTAINING BLOCK extent on one axis, in dp:
+ * the outer canvas extent minus the frame on BOTH sides.
+ *
+ * This is the number css-position-3 §3.1/§3.2 anchors out-of-flow boxes
+ * against — the ref's render VIEWPORT (358 × 568 at the 390 × 600 defaults),
+ * not the framed image. It matters for `right`/`bottom`-only insets: a
+ * `right: 0` hoisted box must land flush with the CONTENT edge (image x =
+ * 16 + 358 = 374), leaving the frame visible, exactly as the ref's raster
+ * does. Feeding the outer 390 with the shifted origin would push it to 406
+ * — 16px PAST the canvas.
+ *
+ * Pure so the harness's canvas geometry is pinnable on the JVM (same
+ * extracted-decision style as [captureCanvasBackground]); clamped at zero so
+ * a pathologically narrow capture-width override can never produce a
+ * negative containing block.
+ *
+ * @param canvasExtentDp the outer capture-canvas extent (390 wide / the
+ *   600 min-height floor at the defaults).
+ * @param frameDp the image-space frame per side — [WPT_CANVAS_FRAME_DP].
+ */
+fun composedIcbExtentDp(canvasExtentDp: Float, frameDp: Float = WPT_CANVAS_FRAME_DP): Float =
+    // Two sides of frame come out of the outer extent; never below zero.
+    maxOf(0f, canvasExtentDp - 2f * frameDp)
+
+/**
  * Pure canvas-background decision for the Android capture canvases —
  * extracted (same pattern as [shouldSuppressSynthesizedName]) so the exact
  * mode split is unit-testable on the JVM without a Compose runtime.

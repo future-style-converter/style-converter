@@ -8,8 +8,15 @@ package com.styleconverter.runtime.layout.position
 // style as AbsposOverflowMeasureTest / FragmentGeometryTest wiring pins).
 //
 // Canvas geometry the S-table assumes: 390x600 composed WPT canvas, 16px
-// pad — the overlay anchors at the UNPADDED origin (0,0), so a hoisted
-// box's painted canvas position is exactly its PositionConfig inset offset.
+// frame. The S-table's coordinates are stated in ICB space — the overlay
+// anchors at the INITIAL CONTAINING BLOCK's corner, so a hoisted box's
+// painted ICB position is exactly its PositionConfig inset offset. WHERE the
+// ICB corner sits on the capture surface is the Host's `canvasFrame`: (0,0)
+// through wave 24 (the ref framed pages with a CSS body pad, which moves
+// in-flow content only), (16,16) from wave 25 round 3 (the ref frame became
+// image-space padding of the PNG, which moves everything alike). The
+// canvasFrame pins at the bottom of this file cover that translation; the
+// S-table itself is frame-independent and unchanged.
 
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRProperty
@@ -302,6 +309,58 @@ class CanvasRootHoistTest {
         // The end anchor moves the INK only: the slot still reports 0×0, so
         // a hoisted box never grows the canvas (pin S5, css-position-3 §3).
         assertEquals(0, CanvasRootHoist.hoistedFlowReportPx())
+    }
+
+    // ── Wave 25 round 3: the canvas FRAME translation ─────────────────────
+    //
+    // The ref pipeline's 16px canvas frame moved from CSS (`:where(body)
+    // { padding: 16px }`, which a static body does NOT apply to out-of-flow
+    // descendants) to IMAGE space (padPngBuffer memcpys the rendered PNG into
+    // the middle of a 390-wide canvas). A raster translation cannot tell an
+    // abspos box from a paragraph, so in the NEW refs the two move together
+    // and the hoist origin has to move with them. These pins cover the whole
+    // arithmetic of the anchor — everything zeroFlowAnchor does beyond the
+    // unbounded measure + zero report.
+
+    @Test fun `frame origin translates a start-anchored hoisted box`() {
+        // A `left: 100` hoisted root: the slot places at the ICB corner and
+        // the box's own PositionApplier offset adds the 100. Under the old
+        // unframed refs the corner was 0 (canvas x=100); under the image-space
+        // frame it is 16 (image x=116, where the ref's raster now puts it —
+        // the SAME +16 its in-flow prose gets).
+        assertEquals(0, CanvasRootHoist.anchorPlacePx(originPx = 0, endEdgePx = null, boxPx = 100))
+        assertEquals(16, CanvasRootHoist.anchorPlacePx(originPx = 16, endEdgePx = null, boxPx = 100))
+    }
+
+    @Test fun `frame origin translates an end-anchored hoisted box`() {
+        // css-multicol abspos-containing-block-outside-spanner's second root
+        // (`bottom: 0; right: 0`, 100x100). The end edge is the ICB extent
+        // MEASURED FROM THE FRAME — 358x568, the ref's render viewport — so
+        // the box lands at 16 + 358 − 100 = 274 (and 16 + 568 − 100 = 484).
+        // Feeding the outer 390x600 from a framed origin would push it to
+        // 306/516: 16px PAST the canvas content edge on both axes.
+        assertEquals(274, CanvasRootHoist.anchorPlacePx(16, endEdgePx = 358f, boxPx = 100))
+        assertEquals(484, CanvasRootHoist.anchorPlacePx(16, endEdgePx = 568f, boxPx = 100))
+        // The wave-22 unframed coordinates remain exactly what a zero frame
+        // produces — the frame is a pure translation, it re-derives nothing.
+        assertEquals(258, CanvasRootHoist.anchorPlacePx(0, endEdgePx = 358f, boxPx = 100))
+    }
+
+    @Test fun `a box wider than the ICB still overflows toward the start edge`() {
+        // No floor at 0 (EndInsetAnchor A5's stated rule): a 400-wide
+        // end-anchored box in the 358 ICB anchors at 16 + 358 − 400 = −26 and
+        // overflows past the canvas corner, which is what the browser paints
+        // (css-position-3 §2.1) and what Compose's unclipped place() renders.
+        assertEquals(-26, CanvasRootHoist.anchorPlacePx(16, endEdgePx = 358f, boxPx = 400))
+    }
+
+    @Test fun `the static-position mount keeps a zero origin`() {
+        // ComponentRenderer's RC1 mount rides zeroFlowAnchor with the
+        // DEFAULT origin, because its slot origin already IS the box's flow
+        // (static) position — css-position-3 §3.1. Translating it by the
+        // frame would double-count the canvas padding the flow Column
+        // already applies. This is why the origin parameters default to 0.
+        assertEquals(0, CanvasRootHoist.anchorPlacePx(originPx = 0, endEdgePx = null, boxPx = 42))
     }
 
     // ── The ancestry threading both sides share ────────────────────────────

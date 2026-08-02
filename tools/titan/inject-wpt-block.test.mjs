@@ -1052,3 +1052,188 @@ test('wave22: identical same-size pair still scores 1.0 (alias tests stay 1.000)
   assert.equal(d.ssim, 1);
   assert.equal(d.frame.overflowInkPx, 0);
 });
+
+// ── wave-25 CAL-RC6: the SCORING-HONESTY vetoes ──────────────────────────────
+//
+// Two measured lies motivated this boundary, both from css-gaps in the
+// wave24-final corpus, both scored wptPass=true:
+//   * flex-gap-decorations-001 — the natives paint a FILLED RED square where
+//     the ref's own text reads "filled green square and no red". SSIM 0.9938
+//     (iOS) / 0.9850 (Android): luminance structure is identical, only the
+//     hue is the opposite of the assertion.
+//   * flex-gap-decorations-002 — the natives carry 0.47 % ink against the
+//     ref's 4.43 %, a 9.4× deficit, and still scored 0.9509 because the
+//     canvas is ~95 % white on both sides.
+// The pins below hold the calibration that fixes both WITHOUT flipping a
+// single demonstrably-correct render.
+
+import {
+  computeColorFailed, computeCoverageRatioFailed,
+  WPT_COLOR_FAIL_DELTA_E_MIN, WPT_COVERAGE_RATIO_MAX,
+  normalizeRefsRoot, LIVE_CANVAS_REV, KNOWN_STALE_CANVAS_REVS,
+} from './inject-wpt-block.mjs';
+// The live canvas rev is OWNED by capture-browser-ref.mjs; this import is
+// what keeps the scorer's copy from drifting (see the pin below).
+import { CANVAS_REV } from './capture-browser-ref.mjs';
+
+test('CAL-RC6 colour veto: the measured css-gaps red-square lie now FAILS', () => {
+  // flex-gap-decorations-001, android-ref: histogramKL max 0.1016 (stamp
+  // fires) and mean ΔE 3.137 (well past the 2.3 JND) — a real hue flip.
+  assert.equal(computeColorFailed(true, { mean: 3.137, max: 100, p95: 0.198 }), true);
+  // iOS sibling of the same test: ΔE 2.911.
+  assert.equal(computeColorFailed(true, { mean: 2.911, max: 100, p95: 0 }), true);
+  // And it vetoes the verdict outright, at a passing SSIM.
+  assert.equal(computeWptPass(0.9938, null, false, true, false), false);
+});
+
+test('CAL-RC6 colour veto: pixel-EXACT pairs that carry the stamp still PASS', () => {
+  // THE REFUTATION the calibration produced (documented on
+  // WPT_COLOR_FAIL_DELTA_E_MIN): a bare "colorDivergent ⇒ fail" rule flips 58
+  // wave24-final passes, and some are pixel-exact —
+  // css-color/background-color-rgb-001 web-ref is ssim 1.0000,
+  // pixelMismatchedPct 0.000, mean ΔE 0.00, histogramKL 0.1602. Histogram KL
+  // explodes on near-empty bins, so a handful of AA pixels on a near-uniform
+  // image fabricate the stamp. The ΔE corroboration keeps these passing.
+  assert.equal(computeColorFailed(true, { mean: 0.0, max: 0, p95: 0 }), false);
+  assert.equal(computeColorFailed(true, { mean: 0.08, max: 12, p95: 0 }), false);
+  // …and the two other css-color/css-overflow families that sit at ΔE ≈ 0.01
+  // with KL up to 1.34 (cross-fade-premultiplied-alpha web-ref, ssim 1.0000).
+  assert.equal(computeColorFailed(true, { mean: 0.07, max: 3, p95: 0 }), false);
+  assert.equal(computeWptPass(1, null, false, false, false), true);
+});
+
+test('CAL-RC6 colour veto: unknown colour is not divergent colour', () => {
+  // Stamp absent → nothing to corroborate.
+  assert.equal(computeColorFailed(false, { mean: 40 }), false);
+  assert.equal(computeColorFailed(undefined, { mean: 40 }), false);
+  // Stamp present but ΔE unavailable (degenerate/size-mismatched pair) →
+  // same "unknown ≠ divergent" stance isColorDivergent takes.
+  assert.equal(computeColorFailed(true, null), false);
+  assert.equal(computeColorFailed(true, { mean: NaN }), false);
+  // The JND threshold itself is the calibrated pin.
+  assert.equal(WPT_COLOR_FAIL_DELTA_E_MIN, 2.3);
+});
+
+test('CAL-RC6 coverage-ratio veto: the measured wave24-final flip set', () => {
+  assert.equal(WPT_COVERAGE_RATIO_MAX, 2);
+  // css-gaps/flex-gap-decorations-002 ios+android: 0.47 vs 4.427 (9.4×).
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 0.47, bCoveragePct: 4.427 }), true);
+  // css-color contrast-color-interpolation ios: the green square the ref
+  // demands is entirely absent — 0.8 vs 5.103 (6.4×).
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 0.8, bCoveragePct: 5.103 }), true);
+  // css-transforms/3d-rendering-context-and-inline ios: the capture paints a
+  // RED square under "Nothing should appear except this sentence" — the
+  // OVER-paint direction, which the one-directional presence gate ignored:
+  // 5.104 vs 0.856 (6.0×).
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 5.104, bCoveragePct: 0.856 }), true);
+  assert.equal(computePresenceFailed({ aCoveragePct: 5.104, bCoveragePct: 0.856 }), false);
+  // css-text/boundary-shaping: the capture breaks "office" onto three lines
+  // where the ref shapes one ffi ligature — 0.115 vs 0.372 (3.2×).
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 0.115, bCoveragePct: 0.372 }), true);
+  // css-backgrounds background-color-animation-with-table1: extra table
+  // cells — 0.135 vs 0.047 (2.9×), both far under the old absolute 5 % bar.
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 0.135, bCoveragePct: 0.047 }), true);
+  // css-images/cross-fade-cross-origin-orientation: the image is missing —
+  // 1.986 vs 4.123 (2.08×), the tightest flip in the set.
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 1.986, bCoveragePct: 4.123 }), true);
+});
+
+test('CAL-RC6 coverage-ratio veto: the 1.4–2.0 margin band is deliberately left passing', () => {
+  // These are real but PARTIAL divergences; the conservative first cut keeps
+  // them on the SSIM bar so the flip set contains only verified defects.
+  // change-insets-inside-strict-containment-nested web-ref, 1.65×.
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 8.798, bCoveragePct: 5.326 }), false);
+  // display-contents-details-001 ios-ref, 1.77×.
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 0.303, bCoveragePct: 0.171 }), false);
+  // Exactly at the threshold is a PASS (strict >), so a 2.0× pair survives.
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 2, bCoveragePct: 1 }), false);
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 2.01, bCoveragePct: 1 }), true);
+});
+
+test('CAL-RC6 coverage-ratio veto: blank-vs-blank stays the honest pass', () => {
+  // "Render nothing" IS the pass criterion for several tests
+  // (background-color-transparent-animation-in-body,
+  // background-color-animation-with-zero-alpha) — both sides measure 0.000 %.
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 0, bCoveragePct: 0 }), false);
+  // Sub-floor ink on both sides: no ratio can mean anything there
+  // (background-color-animation-with-table2 android, 0.043/0.047, is an
+  // honest pass the presence gate also declines to judge).
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 0.019, bCoveragePct: 0.001 }), false);
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 0.043, bCoveragePct: 0.047 }), false);
+  // One side blank against an inked one is the strongest asymmetry there is.
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 0, bCoveragePct: 1.119 }), true);
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 7.404, bCoveragePct: 0 }), true);
+  // Unknown/degenerate presence → never a veto.
+  assert.equal(computeCoverageRatioFailed(null), false);
+  assert.equal(computeCoverageRatioFailed({ aCoveragePct: 'x', bCoveragePct: 1 }), false);
+});
+
+test('CAL-RC6: every veto is unconditional — SSIM and fuzzy cannot rescue it', () => {
+  // A perfect SSIM and a satisfied fuzzy budget both lose to each veto.
+  assert.equal(computeWptPass(1, true, true, false, false), false);   // presence
+  assert.equal(computeWptPass(1, true, false, true, false), false);   // colour
+  assert.equal(computeWptPass(1, true, false, false, true), false);   // coverage ratio
+  // Legacy call shapes keep working: the new args default to false.
+  assert.equal(computeWptPass(0.96, null), true);
+  assert.equal(computeWptPass(0.94, null), false);
+  assert.equal(computeWptPass(0.94, true), true);
+});
+
+// ── wave-25 CAL-RC1: --refs-root canvas-rev normalisation ────────────────────
+
+test('normalizeRefsRoot upgrades a known-stale canvas-rev tail to the live rev', () => {
+  // The literal run-titan.sh / section-runner.sh actually pass.
+  assert.equal(
+    normalizeRefsRoot('tools/wpt/refs/9b5435e5/white-black-ink-font-lh'),
+    `tools/wpt/refs/9b5435e5/${LIVE_CANVAS_REV}`);
+  // Older revs upgrade too — none of their PNGs may reach a live diff.
+  assert.equal(normalizeRefsRoot('/a/refs/sha/white'), `/a/refs/sha/${LIVE_CANVAS_REV}`);
+  assert.equal(normalizeRefsRoot('/a/refs/sha/white-black-ink-font'), `/a/refs/sha/${LIVE_CANVAS_REV}`);
+});
+
+test('normalizeRefsRoot leaves the live rev, unknown tails and null alone', () => {
+  const live = `tools/wpt/refs/sha/${LIVE_CANVAS_REV}`;
+  assert.equal(normalizeRefsRoot(live), live);
+  // An unrecognised tail is someone reproducing a historical corpus by hand —
+  // rewriting it would silently take their run somewhere they did not ask for.
+  assert.equal(normalizeRefsRoot('tools/wpt/refs/sha/my-experiment'), 'tools/wpt/refs/sha/my-experiment');
+  // --refs-root omitted, and a single-segment path with no rev tail.
+  assert.equal(normalizeRefsRoot(null), null);
+  assert.equal(normalizeRefsRoot('refs'), 'refs');
+});
+
+test('normalizeRefsRoot sees a stale rev through a TRAILING SEPARATOR', () => {
+  // `--refs-root .../white-black-ink-font-lh/` names the same directory as the
+  // un-slashed spelling, and every downstream join behaves identically — so a
+  // trailing slash must not be able to hide a stale rev. Before the fix the
+  // tail regex could not match through it and the normaliser fell through as
+  // "no rev tail", reading the PREVIOUS canvas contract's refs with no
+  // stderr line and no other symptom: exactly the silent scoring corruption
+  // this function exists to delete.
+  assert.equal(
+    normalizeRefsRoot('tools/wpt/refs/9b5435e5/white-black-ink-font-lh/'),
+    `tools/wpt/refs/9b5435e5/${LIVE_CANVAS_REV}`);
+  // Windows-shaped separator, same hazard.
+  assert.equal(
+    normalizeRefsRoot('C:\\wpt\\refs\\sha\\white\\'),
+    `C:\\wpt\\refs\\sha\\${LIVE_CANVAS_REV}`);
+  // The live rev with a trailing slash is already correct — returned verbatim,
+  // no rewrite and no stderr noise.
+  const liveSlashed = `tools/wpt/refs/sha/${LIVE_CANVAS_REV}/`;
+  assert.equal(normalizeRefsRoot(liveSlashed), liveSlashed);
+  // Degenerate all-separator input must not throw or invent a path.
+  assert.equal(normalizeRefsRoot('/'), '/');
+});
+
+test('the scorer\'s LIVE_CANVAS_REV equals capture-browser-ref\'s CANVAS_REV', () => {
+  // The rev is OWNED by capture-browser-ref.mjs (it writes the tree). This
+  // module keeps a literal copy so the scorer does not drag puppeteer into
+  // its import graph; this pin is what makes the copy safe. A bump that
+  // forgets either side fails here.
+  assert.equal(LIVE_CANVAS_REV, CANVAS_REV);
+  // …and the rev it replaced must be listed as stale, or the shell scripts'
+  // untouched literal would silently keep pointing at the old tree.
+  assert.ok(KNOWN_STALE_CANVAS_REVS.includes('white-black-ink-font-lh'));
+  assert.ok(!KNOWN_STALE_CANVAS_REVS.includes(LIVE_CANVAS_REV),
+    'the live rev must never be listed as stale');
+});

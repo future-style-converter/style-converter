@@ -32,8 +32,19 @@ extension MarginCollapse {
     /// The container's collapse plan, or nil when the legacy sum
     /// behaviour must apply. Pure (component + built style in, plan
     /// out) so MarginCollapseTests pins every gate device-free.
+    ///
+    /// - Parameter uaBlockMargins: wave 25 (lane UAM / BD-RC3): fold each
+    ///   child's UA DEFAULT block margins (p / h1-h6 / ul / ol /
+    ///   blockquote / pre / figure — see UABlockChildMargin.swift) into
+    ///   the plan on every edge the IR leaves undeclared, so a `<p>`
+    ///   nested inside another block gets the 1em the browser-ref's UA
+    ///   sheet gives it. ComponentRenderer passes its ambient
+    ///   `wptCaptureMode`; the default FALSE is the dark-stage identity
+    ///   branch that keeps the 327 committed baselines (and every
+    ///   pre-wave-25 pin) byte-identical.
     static func containerPlan(component: IRComponent,
-                              style: ComponentStyle) -> Plan? {
+                              style: ComponentStyle,
+                              uaBlockMargins: Bool = false) -> Plan? {
         // GATE 1 — block containers only. §8.3.1 collapsing exists in
         // block formatting contexts; flex/grid item margins NEVER
         // collapse (css-flexbox-1 §4 / css-grid-1 §6). `.block` is the
@@ -132,8 +143,15 @@ extension MarginCollapse {
                 logFallback(component, reason: "negative/auto/relative child margin")
                 return nil
             }
-            // Eligible — record the declared edges for the fold.
-            edges.append(e)
+            // Eligible — record the edges for the fold, MERGED with the
+            // child's UA defaults (lane UAM): author declarations win per
+            // edge, undeclared edges take the UA value. With
+            // uaBlockMargins false the merge is the identity, so every
+            // pre-wave-25 plan keeps its exact numbers.
+            edges.append(UABlockMargin.childBlockEdges(tag: child.meta?.sourceTag,
+                                                       properties: child.properties,
+                                                       declared: e,
+                                                       enabled: uaBlockMargins))
         }
         // B10 — nested-hoist chain: a FIRST or LAST child that is itself
         // an eligible unpadded/unbordered block container with children
@@ -150,6 +168,20 @@ extension MarginCollapse {
             logFallback(component, reason: "nested-hoist chain")
             return nil
         }
+        // B11 (lane UAM) — with UA defaults injected, an INTERIOR nested
+        // hoisting container is as dangerous as an edge one: its own
+        // hoisted band would stack on top of the gap this fold emits,
+        // where the browser resolves the whole adjoining chain into ONE
+        // n-ary max (§8.3.1 adjoining chains are transitive). Same pinned
+        // conservatism B10 applies at the edges. Skipped entirely when UA
+        // injection is off, so no pre-wave-25 plan changes shape.
+        if uaBlockMargins, children.contains(where: {
+            isNestedHoistChainChild($0, edgeIsTop: true)
+                || isNestedHoistChainChild($0, edgeIsTop: false)
+        }) {
+            logFallback(component, reason: "nested-hoist chain (ua)")
+            return nil
+        }
         // All-zero margins → the fold would be pure identity; skip the
         // plan so these containers keep the exact legacy view tree.
         guard edges.contains(where: { $0.top > 0 || $0.bottom > 0 }) else { return nil }
@@ -158,10 +190,19 @@ extension MarginCollapse {
         // px from the DECLARED base properties (NOT the override-folded
         // style — reading declared margins is the double-count fix); a
         // non-static own margin bails the whole container.
-        guard let parentOwn = staticVerticalEdges(component.properties) else {
+        guard let parentDeclared = staticVerticalEdges(component.properties) else {
             logFallback(component, reason: "negative/auto/relative parent margin")
             return nil
         }
+        // Lane UAM: the parent's OWN margin must carry its UA default too,
+        // or the hoist band double-counts. A `<blockquote>` parent's 16px
+        // top is painted one level up (its own parent's plan, or the
+        // composed root stack), so the band it adds for a `<p>` first
+        // child must be max(16, 16) − 16 = 0, not the full 16.
+        let parentOwn = UABlockMargin.childBlockEdges(tag: component.meta?.sourceTag,
+                                                      properties: component.properties,
+                                                      declared: parentDeclared,
+                                                      enabled: uaBlockMargins)
         // Fold with the parent-edge hoist gates (§8.3.1 adjoining
         // conditions — padding/border/BFC/definite-height, gates G1-G5)
         // and the declared parent-own margins for the hoist composition.

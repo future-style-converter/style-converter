@@ -90,6 +90,61 @@ function arg(name) {
   return i >= 0 ? process.argv[i + 1] : null;
 }
 
+// ── wave-25 CAL-RC1: the --refs-root canvas-rev normaliser ───────────────────
+//
+// run-titan.sh and section-runner.sh pass a LITERAL
+// `$WPT_DIR/refs/$WPT_REF/<canvas-rev>` as --refs-root. That literal is a
+// second copy of capture-browser-ref.mjs's CANVAS_REV, and through wave-24 the
+// two had to be edited together: bump the constant, forget the scripts, and
+// the scorer keeps reading refs from the PREVIOUS canvas contract — every diff
+// silently measured against stale geometry, with no error anywhere (the PNGs
+// exist; they are just wrong). CAL-RC1 bumps the rev, so instead of paying
+// that coupling again we delete it: a refs-root whose LAST segment is a
+// known-stale rev is rewritten to the live one.
+//
+// Deliberately conservative:
+//   * only a segment in KNOWN_STALE_CANVAS_REVS is rewritten. An unknown tail
+//     is left EXACTLY as given (someone reproducing a historical corpus with a
+//     hand-built path keeps their path), and the swap is announced on stderr —
+//     never silent.
+//   * a root already on the live rev, a null root, and a root with no rev tail
+//     all pass through untouched.
+export const LIVE_CANVAS_REV = 'white-black-ink-font-lh-imgpad';
+// Every canvas contract that has ever produced a refs tree, newest first.
+// Pinned against capture-browser-ref.mjs's CANVAS_REV in the unit tests, so a
+// future bump that forgets to append here fails `node --test`.
+export const KNOWN_STALE_CANVAS_REVS = [
+  'white-black-ink-font-lh',   // corpus-v4.1 typography, CSS-padded frame
+  'white-black-ink-font',      // v4.1 scratch: no line-height pin
+  'white-black-ink',           // ink-only, no font pin
+  'white',                     // corpus-v4.0 white canvas, white ink
+];
+export function normalizeRefsRoot(root) {
+  if (!root) return root;                       // --refs-root omitted → nothing to fix
+  // TRAILING SEPARATORS FIRST. `--refs-root .../white-black-ink-font-lh/` is
+  // the same directory as the un-slashed form and every path join below
+  // behaves identically — but the tail regex cannot see a rev through it, so
+  // without this strip the slashed spelling would fall through as "no rev
+  // tail" and read the STALE tree in complete silence. That is precisely the
+  // failure this normaliser exists to delete, so it must not survive a
+  // one-character edit in run-titan.sh / section-runner.sh.
+  const trimmed = root.replace(/[\\/]+$/, '');
+  if (!trimmed) return root;                    // root was only separators → nothing to fix
+  // Split on both separators so a Windows-shaped path normalises too; the
+  // rejoin below uses whatever separator the caller used.
+  const m = /^(.*)([\\/])([^\\/]+)$/.exec(trimmed);
+  if (!m) return root;                          // single-segment path → no rev tail
+  const [, head, sepChar, tail] = m;
+  if (tail === LIVE_CANVAS_REV) return root;    // already current
+  if (!KNOWN_STALE_CANVAS_REVS.includes(tail)) return root;  // unknown → caller knows best
+  const fixed = `${head}${sepChar}${LIVE_CANVAS_REV}`;
+  // LOUD, never silent: this line is the record that the scorer did not read
+  // the path it was handed.
+  process.stderr.write(`[inject-wpt-block] --refs-root canvas-rev '${tail}' is stale — ` +
+    `reading refs from '${LIVE_CANVAS_REV}' instead\n`);
+  return fixed;
+}
+
 // CLI args parsed lazily inside main() so importing this file from unit
 // tests (which want only the pure helpers like stitchPngsVertically) doesn't
 // trip the usage-check exit. Each main()-only constant is shadowed inside
@@ -98,7 +153,7 @@ const MANIFEST_PATH = arg('--manifest');
 const TESTS_FILE    = arg('--tests');
 const WPT_REF       = arg('--wpt-ref');
 const RUN_ID        = arg('--run-id') || new Date().toISOString();
-const REFS_ROOT     = arg('--refs-root');     // e.g. tools/wpt/refs/<sha>
+const REFS_ROOT     = normalizeRefsRoot(arg('--refs-root'));  // tools/wpt/refs/<sha>/<canvas-rev>
 const CAPTURE_LOG   = arg('--capture-log');   // for duration
 // --combined / --web-dir let the section-runner point at per-section paths.
 // Default mirrors Phase 1's _smoke-combined fixture so run-titan.sh keeps
@@ -457,11 +512,35 @@ function checkFuzzyMatch(metrics, fuzzy) {
  *  renderer agreement; counting them as PASS inflates the corpus pass rate.
  *  A presence-failed pair is a FAIL regardless of ssim AND regardless of a
  *  declared fuzzy tolerance (WPT fuzzy budgets assume both sides rendered).
- *  Default false keeps the two-argument legacy call shape passing. */
-function computeWptPass(ssim, fuzzyMatch, presenceFailed = false) {
+ *  Default false keeps the two-argument legacy call shape passing.
+ *
+ *  wave-25 CAL-RC6 SCORING-HONESTY boundary — two more unconditional vetoes,
+ *  both defaulting false so every legacy call shape still compiles:
+ *
+ *    `colorFailed` (computeColorFailed): the pair's colour MASS diverges.
+ *    SSIM is luminance-structure only — measured, a full red→green repaint
+ *    moves it by 0.0001 — so css-gaps/flex-gap-decorations-001 painted a
+ *    FILLED RED square against a ref whose own text says "filled green
+ *    square and no red" and scored wptPass at ssim 0.9938. Structure agreed
+ *    perfectly; the answer was the opposite of the test's assertion.
+ *
+ *    `coverageRatioFailed` (computeCoverageRatioFailed): the two sides carry
+ *    wildly different amounts of ink. The old presence gate only looked at
+ *    "ref has, capture lacks" past an absolute floor, so a capture painting
+ *    3× the ref's ink (extra table cells), or 1/3 of it (unshaped text), or
+ *    a whole missing image sailed through on background agreement alone.
+ *
+ *  Both are VETOES, exactly like the presence gate: a failing pair cannot be
+ *  rescued by SSIM or by a declared fuzzy budget. */
+function computeWptPass(ssim, fuzzyMatch, presenceFailed = false,
+                        colorFailed = false, coverageRatioFailed = false) {
   // The presence veto runs FIRST: a capture that renders none of the ref's
   // ink can never be a pass, whatever the whole-canvas metrics say.
   if (presenceFailed === true) return false;
+  // Colour-mass veto (CAL-RC6): right shape, wrong answer.
+  if (colorFailed === true) return false;
+  // Ink-mass-asymmetry veto (CAL-RC6): right colours, wrong amount of them.
+  if (coverageRatioFailed === true) return false;
   const ssimPass = typeof ssim === 'number' && ssim >= 0.95;
   return ssimPass || fuzzyMatch === true;
 }
@@ -552,6 +631,109 @@ export function computeLowContentDensity(semanticPresence) {
 }
 // Exported for the unit pins alongside the other calibrated constants.
 export { WPT_LOW_CONTENT_DENSITY_MAX_COVERAGE_PCT };
+
+// ── wave-25 CAL-RC6: the colour-mass veto ────────────────────────────────────
+//
+// Minimum mean CIEDE2000 ΔE for `colorDivergent` to become a PASS/FAIL input
+// rather than triage colour. 2.3 is the classic just-noticeable-difference:
+// below it the two images are the same colour to a human eye.
+//
+// WHY A CORROBORATOR AT ALL — the lane brief asked for "colorDivergent ⇒ hard
+// fail, full stop", and CALIBRATION REFUTED IT. Replaying the wave24-final
+// corpus (720 browser-ref diffs, 587 passing), the bare stamp flips 58 passes
+// — but a chunk of those are PIXEL-EXACT: css-color/background-color-rgb-001
+// web-ref sits at ssim 1.0000, pixelMismatchedPct 0.000, mean ΔE 0.00, and
+// still carries histogramKL 0.1602. Histogram KL divides by near-empty bins,
+// so on a near-uniform image a handful of AA pixels produce a large ratio out
+// of nothing. Hard-failing on the raw stamp would have failed demonstrably
+// correct renders — exactly the "zero TRUE passes may flip" bar. Requiring a
+// perceptual second opinion keeps every one of those (ΔE ≈ 0) and keeps the
+// real cases (ΔE 2.3 … 12.6). The stamp itself is UNCHANGED so the historical
+// triage series stays comparable.
+const WPT_COLOR_FAIL_DELTA_E_MIN = 2.3;
+
+/** wave-25 CAL-RC6 colour-mass veto predicate (pure + exported for the unit
+ *  pins). Fails only when BOTH hold:
+ *    1. the histogram-KL stamp fired (isColorDivergent — some channel's
+ *       distribution genuinely moved), and
+ *    2. the mean CIEDE2000 ΔE is at or above the JND, i.e. a human would
+ *       see the difference.
+ *  Unknown ΔE (null labDeltaE — degenerate/size-mismatched pair) → NOT a
+ *  failure: same "unknown ≠ divergent" stance as isColorDivergent itself. */
+export function computeColorFailed(colorDivergent, labDeltaE) {
+  if (colorDivergent !== true) return false;
+  const mean = labDeltaE?.mean;
+  // No perceptual reading → no corroboration → no veto (the diff still
+  // carries the raw metrics for an investigator).
+  if (typeof mean !== 'number' || !Number.isFinite(mean)) return false;
+  return mean >= WPT_COLOR_FAIL_DELTA_E_MIN;
+}
+
+// ── wave-25 CAL-RC6: the ink-mass-asymmetry veto ─────────────────────────────
+//
+// Maximum tolerated max/min ink-coverage ratio between the two sides.
+//
+// WHAT IT REPLACES: the semanticPresence block echoes `threshold: 5`
+// (SEMANTIC_PRESENCE_EMPTY_PCT) — the absolute "this image is empty" bar — and
+// nothing consumed it as a pass/fail input, so any pair whose two sides both
+// measured under it was scored on whole-canvas SSIM alone. Under 5 % ink the
+// canvas is ≥ 95 % background and SSIM is dominated by background-vs-
+// background agreement, which is how a capture missing an entire image scored
+// 0.9717. The absolute bar is replaced by a RATIO one, applied at every
+// coverage level: it is the asymmetry, not the absolute density, that says the
+// two sides disagree about how much got painted.
+//
+// CALIBRATION on the wave24-final corpus (720 diffs / 587 passes), universal
+// (no absolute bypass), with every flipped family opened and eyeballed:
+//   ratio > 2   → 39 flips   ← chosen
+//   ratio > 2.5 → 38
+//   ratio > 3   → 26
+//   ratio > 5   →  2
+// Every one of the 39 is a verified render defect, sampled across all five
+// affected families: css-text/boundary-shaping (24 pairs; the capture breaks
+// "office" into three lines where the ref shapes one ffi ligature),
+// css-color/animation/contrast-color-interpolation (3; the green square the
+// ref demands is simply absent), css-transforms/3d-rendering-context-and-inline
+// (1; capture paints a RED square under "Nothing should appear except this
+// sentence"), css-backgrounds background-color-animation-with-table1/3/4 (9;
+// capture paints extra table cells), css-images/cross-fade-cross-origin-
+// orientation (1; the image is missing), css-gaps/flex-gap-decorations-002 (2;
+// capture ink 0.47 % vs ref 4.43 %). ZERO true passes flip. The 1.4–2.0 band
+// left alone holds pairs (change-insets-inside-strict-containment-nested,
+// abspos-in-opacity-001/002) whose divergence is real but partial — they stay
+// scored on SSIM, which is the conservative call for a first cut.
+const WPT_COVERAGE_RATIO_MAX = 2;
+
+/** wave-25 CAL-RC6 ink-mass-asymmetry veto predicate (pure + exported for the
+ *  unit pins). Consumes the same `semanticPresence` block the presence gate
+ *  reads ({ aCoveragePct: capture ink %, bCoveragePct: ref ink % }).
+ *
+ *  Deliberately SYMMETRIC, unlike computePresenceFailed: over-painting is as
+ *  wrong as under-painting (the measured red-square-on-a-blank-ref cases are
+ *  over-paints), and the whole-canvas SSIM demonstrably does not punish
+ *  either when the canvas is mostly background.
+ *
+ *  Blank-vs-blank is NOT a failure: when the larger side is itself under the
+ *  presence floor (WPT_PRESENCE_REF_MIN_PCT), neither image carries enough
+ *  ink for a ratio to mean anything — and "render nothing" IS the pass
+ *  criterion for several tests (background-color-transparent-animation-in-
+ *  body, background-color-animation-with-zero-alpha both measure 0.000 %).
+ *  A zero-ink side opposite an inked one is an infinite ratio and fails. */
+export function computeCoverageRatioFailed(semanticPresence) {
+  // Degenerate/missing metric (size mismatch, pre-v4.3 diff) → cannot judge.
+  if (!semanticPresence || typeof semanticPresence !== 'object') return false;
+  const cap = semanticPresence.aCoveragePct;   // platform capture ink %
+  const ref = semanticPresence.bCoveragePct;   // browser-ref ink %
+  // Non-numeric fields (defensive: hand-edited manifests) → unknown → pass.
+  if (typeof cap !== 'number' || typeof ref !== 'number') return false;
+  const mx = Math.max(cap, ref);
+  const mn = Math.min(cap, ref);
+  // Both sides essentially blank → no ink to disagree about.
+  if (mx < WPT_PRESENCE_REF_MIN_PCT) return false;
+  // One side blank, the other inked → the strongest possible asymmetry.
+  if (mn === 0) return true;
+  return (mx / mn) > WPT_COVERAGE_RATIO_MAX;
+}
 
 function computePresenceFailed(semanticPresence) {
   // Degenerate/missing metric → cannot judge, never veto.
@@ -880,11 +1062,18 @@ async function diffPlatformVsRef({ platformDir, matchingKeys, refPng, fuzzy, cac
     // wave-13 presence gate: stamped on EVERY diff (true/false, uniform for
     // triage queries — "presenceFailed:true" is the blank-capture beacon).
     diff.presenceFailed = computePresenceFailed(diff.semanticPresence);
+    // wave-25 CAL-RC6 vetoes: stamped on EVERY diff (true/false, uniform for
+    // triage queries) so a manifest row says WHY it failed without re-running
+    // the metrics. See computeWptPass for what each one means.
+    diff.colorFailed = computeColorFailed(diff.colorDivergent, diff.labDeltaE);
+    diff.coverageRatioFailed = computeCoverageRatioFailed(diff.semanticPresence);
     // WPT-native pass: raw SSIM ≥ 0.95 OR within the declared fuzzy
     // tolerance — VETOED by the semantic-presence gate (corpus-v4.3: a blank
-    // capture can no longer "pass" a mostly-blank ref, see computeWptPass).
+    // capture can no longer "pass" a mostly-blank ref, see computeWptPass)
+    // and by the two wave-25 honesty vetoes above.
     // Raw `diff.ssim` is left untouched so downstream can honour all bars.
-    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed);
+    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed,
+      diff.colorFailed, diff.coverageRatioFailed);
     diff.stitchedComponents = matched.length;
     return diff;
   } catch (err) {
@@ -926,8 +1115,15 @@ async function diffComposedVsRef({ platformDir, testKey, refPng, fuzzy }) {
     // wave-13 presence gate (same stamp + veto as the stitch path — the two
     // measured wave12 vacuous passes came through THIS composed path).
     diff.presenceFailed = computePresenceFailed(diff.semanticPresence);
-    // WPT-native pass: raw SSIM ≥ 0.95 OR within fuzzy — presence-vetoed.
-    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed);
+    // wave-25 CAL-RC6 vetoes — same stamps as the stitch path. BOTH measured
+    // css-gaps scoring lies (001's red-square colour flip, 002's 9.4× ink
+    // deficit) came through THIS composed path.
+    diff.colorFailed = computeColorFailed(diff.colorDivergent, diff.labDeltaE);
+    diff.coverageRatioFailed = computeCoverageRatioFailed(diff.semanticPresence);
+    // WPT-native pass: raw SSIM ≥ 0.95 OR within fuzzy — presence-, colour-
+    // and coverage-ratio-vetoed.
+    diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed,
+      diff.colorFailed, diff.coverageRatioFailed);
     diff.composed = true;                                    // provenance marker
     return diff;
   } catch (err) {
@@ -1352,4 +1548,9 @@ export {
   // hold the wave12-gate calibration without re-deriving coverage.
   computePresenceFailed, WPT_PRESENCE_REF_MIN_PCT, WPT_PRESENCE_RATIO_MIN,
   WPT_CANVAS_BG,
+  // wave-25 CAL-RC6 SCORING-HONESTY boundary: the two new vetoes and their
+  // calibrated thresholds, exported so the unit pins hold the wave24-final
+  // calibration (and the refutation of the bare-colorDivergent rule) without
+  // re-deriving coverage or ΔE.
+  WPT_COLOR_FAIL_DELTA_E_MIN, WPT_COVERAGE_RATIO_MAX,
 };

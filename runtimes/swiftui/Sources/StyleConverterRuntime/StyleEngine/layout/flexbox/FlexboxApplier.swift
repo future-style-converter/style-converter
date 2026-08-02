@@ -15,6 +15,10 @@
 //  `.modifier(...)` cannot reshape the container after the fact. Callers
 //  therefore read `containerDecision(for:)` up-front.
 //
+//  The wrap container itself (`FlowLayout`) moved to FlowLayout.swift at
+//  wave 25 — its §8.4/§9.6 cross-axis pass took this file past the
+//  300-line split threshold.
+//
 
 import SwiftUI
 
@@ -233,102 +237,6 @@ private struct FlexChildModifier: ViewModifier {
             case .stretch:             return .leading
             default:                   return .leading
             }
-        }
-    }
-}
-
-// MARK: - FlowLayout (flex-wrap)
-
-/// Minimal wrapping-row Layout implementation for `flex-wrap: wrap`.
-/// SwiftUI's stacks don't wrap; this custom `Layout` measures each
-/// subview, and breaks to a new line when the current line would exceed
-/// the proposed width. No cross-axis stretching — every child is placed
-/// at its intrinsic size, lines are left-aligned, gaps are horizontal
-/// and vertical spacing inputs. This is the minimum viable FlowLayout
-/// called out in the Phase 7 spec; richer behaviour (justify-content
-/// per line, wrap-reverse, align-content across lines) is a TODO.
-@available(iOS 16.0, *)
-struct FlowLayout: Layout {
-    /// Horizontal gap between items on a single line, in points.
-    var horizontalSpacing: CGFloat = 0
-    /// Vertical gap between wrapped lines, in points.
-    var verticalSpacing: CGFloat = 0
-
-    /// Measures the total wrapped size given the proposed width. When
-    /// width is nil/infinite we fall back to laying everything out on a
-    /// single line — matches the CSS `nowrap` behaviour.
-    func sizeThatFits(
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout ()
-    ) -> CGSize {
-        // Prefer the replacement value SwiftUI passes ("replacingUnspecifiedDimensions"
-        // gives a sane width when the proposal is .unspecified — typically
-        // the container's ideal size).
-        let maxWidth = proposal.replacingUnspecifiedDimensions().width
-        var currentLineWidth: CGFloat = 0
-        var currentLineHeight: CGFloat = 0
-        var totalHeight: CGFloat = 0
-        var maxUsedWidth: CGFloat = 0
-
-        for subview in subviews {
-            // Ask the subview for its ideal size at unspecified proposal
-            // — gives us intrinsic width/height like CSS `flex-basis: auto`.
-            let size = subview.sizeThatFits(.unspecified)
-            // If this item would overflow, wrap to the next line.
-            let wouldOverflow = currentLineWidth + (currentLineWidth > 0 ? horizontalSpacing : 0) + size.width > maxWidth
-            if wouldOverflow && currentLineWidth > 0 {
-                // Commit the finished line.
-                totalHeight += currentLineHeight + verticalSpacing
-                maxUsedWidth = max(maxUsedWidth, currentLineWidth)
-                currentLineWidth = 0
-                currentLineHeight = 0
-            }
-            // Accumulate this item onto the current line.
-            currentLineWidth += (currentLineWidth > 0 ? horizontalSpacing : 0) + size.width
-            currentLineHeight = max(currentLineHeight, size.height)
-        }
-        // Commit the final line.
-        totalHeight += currentLineHeight
-        maxUsedWidth = max(maxUsedWidth, currentLineWidth)
-        return CGSize(width: maxUsedWidth, height: totalHeight)
-    }
-
-    /// Place subviews in wrapping-row order. Coordinates are relative to
-    /// the bounds origin SwiftUI hands us.
-    func placeSubviews(
-        in bounds: CGRect,
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout ()
-    ) {
-        let maxWidth = bounds.width
-        var x: CGFloat = bounds.minX
-        var y: CGFloat = bounds.minY
-        var currentLineHeight: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            // Wrap-decision mirror of sizeThatFits — keep the two in sync.
-            if x + (x > bounds.minX ? horizontalSpacing : 0) + size.width > bounds.minX + maxWidth && x > bounds.minX {
-                // Start a new line at the left edge.
-                y += currentLineHeight + verticalSpacing
-                x = bounds.minX
-                currentLineHeight = 0
-            }
-            // Insert horizontal spacing between items (but not before the first).
-            if x > bounds.minX {
-                x += horizontalSpacing
-            }
-            // `.at: x, y` places the top-leading corner; proposal gives
-            // the subview its intrinsic size so intrinsic layout wins.
-            subview.place(
-                at: CGPoint(x: x, y: y),
-                anchor: .topLeading,
-                proposal: ProposedViewSize(size)
-            )
-            x += size.width
-            currentLineHeight = max(currentLineHeight, size.height)
         }
     }
 }

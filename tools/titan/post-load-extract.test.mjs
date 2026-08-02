@@ -72,6 +72,12 @@ test('post-load: POST_LOAD_COMPUTED_PROPERTIES is the exact deliberate set', () 
     // change-list-style-position-003 mutates the property on <body>, so no
     // element the static extractor sees ever declares it.
     'list-style-type', 'list-style-position',
+    // wave-25 BD-RC4: the corner radii. filter-effects/
+    // backdrop-filter-border-radius-change rewrites border-radius from 75px
+    // to 150px on a double-rAF after load — the static extractor only ever
+    // sees the pre-mutation value, so the corners were painted wrong.
+    'border-top-left-radius', 'border-top-right-radius',
+    'border-bottom-right-radius', 'border-bottom-left-radius',
   ]);
 });
 
@@ -80,7 +86,9 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
   // width/height must be concrete px. Silently widening these would bloat
   // every fixture (or bake keywords the converter treats differently).
   assert.deepEqual(Object.keys(WRITE_RULES).sort(),
-    ['align-self', 'bottom', 'height', 'left', 'list-style-position',
+    ['align-self', 'border-bottom-left-radius', 'border-bottom-right-radius',
+     'border-top-left-radius', 'border-top-right-radius',
+     'bottom', 'height', 'left', 'list-style-position',
      'list-style-type', 'right', 'top', 'transform', 'width', 'z-index']);
   assert.equal(WRITE_RULES.top.deleteWhen, 'auto');
   assert.equal(WRITE_RULES.transform.deleteWhen, 'none');
@@ -93,6 +101,14 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
   // component in every post-load fixture would gain two list-marker keys.
   assert.equal(WRITE_RULES['list-style-type'].deleteWhen, 'disc');
   assert.equal(WRITE_RULES['list-style-position'].deleteWhen, 'outside');
+  // wave-25 BD-RC4: '0px' is the CSS Backgrounds 3 §5.1 initial radius and
+  // what Chromium reports for every square-cornered element (MEASURED). The
+  // corpus is overwhelmingly square-cornered, so writing it would stamp four
+  // radius keys onto nearly every component.
+  for (const corner of ['border-top-left-radius', 'border-top-right-radius',
+                        'border-bottom-right-radius', 'border-bottom-left-radius']) {
+    assert.equal(WRITE_RULES[corner].deleteWhen, '0px', `${corner} must be delete-not-write at 0px`);
+  }
 });
 
 test('post-load b-rc4: an inherited list-style-position mutation lands, initials do not', () => {
@@ -489,6 +505,11 @@ test('post-load: SHORTHAND_CONFLICTS covers every family the overlay writes', ()
   // cascade. Exact-list pin (reviewed change, not drift).
   assert.deepEqual([...SHORTHAND_CONFLICTS].sort(), [
     'background', 'border', 'border-bottom', 'border-color', 'border-left',
+    // wave-25 BD-RC4: `border-radius` expands to exactly the four corner
+    // longhands the overlay now bakes. It is NOT covered by 'border' — the
+    // `border` shorthand excludes radius (CSS Backgrounds 3 §4.5) — so a
+    // surviving `border-radius: 75px` would outrank the baked 150px corners.
+    'border-radius',
     'border-right', 'border-style', 'border-top', 'border-width',
     // wave-24 B-RC4: `list-style` expands to the two longhands the overlay
     // now bakes (plus the image leg it documents as dropped).
@@ -881,4 +902,73 @@ test('wave-22 fold: a pathless record WITHOUT a _decorations ancestor still fail
   assert.throws(
     () => mergePostLoadIntoFixture(fixture, 't', [{ path: [0, 3], styles: {} }]),
     /no component at path 0\.3/);
+});
+
+// ── wave-25 BD-RC4: the corner-radius bake ───────────────────────────────────
+
+test('post-load bd-rc4: a script-rounded corner lands, square corners do not', () => {
+  // The exact backdrop-filter-border-radius-change shape: the element is
+  // authored `border-radius: 75px` and a double-rAF handler rewrites it to
+  // 150px. The static bag therefore carries the STALE shorthand, and the
+  // computed snapshot carries the truth.
+  const target = { properties: { 'border-radius': '75px', 'background-color': 'green' } };
+  overlayComputedOnComponent(target, {
+    'background-color': 'rgb(0, 128, 0)',
+    'border-top-left-radius': '150px',
+    'border-top-right-radius': '150px',
+    'border-bottom-right-radius': '150px',
+    'border-bottom-left-radius': '150px',
+  });
+  // The stale shorthand is stripped, not left to outrank the baked corners.
+  assert.equal(target.properties['border-radius'], undefined);
+  assert.equal(target.properties['border-top-left-radius'], '150px');
+  assert.equal(target.properties['border-bottom-left-radius'], '150px');
+
+  // A square-cornered box reports the CSS initial on all four corners —
+  // delete-not-write, so the overlay adds NO radius keys (the anti-bloat
+  // half of the rule; nearly every component in the corpus is this shape).
+  const plain = { properties: { display: 'block' } };
+  overlayComputedOnComponent(plain, {
+    display: 'block',
+    'border-top-left-radius': '0px',
+    'border-top-right-radius': '0px',
+    'border-bottom-right-radius': '0px',
+    'border-bottom-left-radius': '0px',
+  });
+  for (const c of ['border-top-left-radius', 'border-top-right-radius',
+                   'border-bottom-right-radius', 'border-bottom-left-radius']) {
+    assert.equal(plain.properties[c], undefined, `${c} must not be written at its initial`);
+  }
+});
+
+test('post-load bd-rc4: a script that SQUARES a rounded corner deletes the stale key', () => {
+  // The inverse mutation, and the reason delete-not-write must still DELETE:
+  // an authored 40px corner that the script resets to 0 would otherwise stay
+  // rounded in the fixture forever.
+  const cmp = { properties: { 'border-top-left-radius': '40px' } };
+  overlayComputedOnComponent(cmp, {
+    'border-top-left-radius': '0px',
+    'border-top-right-radius': '0px',
+    'border-bottom-right-radius': '0px',
+    'border-bottom-left-radius': '0px',
+  });
+  assert.equal(cmp.properties['border-top-left-radius'], undefined);
+});
+
+test('post-load bd-rc4: percentage and elliptical corners survive verbatim', () => {
+  // MEASURED computed shapes in the pinned headless Chromium: a `50%` corner
+  // stays a percentage (runtime-resolved, like every other % in the IR) and
+  // an elliptical corner reports the two-value form. Both are shapes the
+  // border-radius parser accepts, so they are written unchanged rather than
+  // being coerced or dropped.
+  const cmp = { properties: {} };
+  overlayComputedOnComponent(cmp, {
+    'border-top-left-radius': '10px 20px',
+    'border-top-right-radius': '50%',
+    'border-bottom-right-radius': '0px',
+    'border-bottom-left-radius': '0px',
+  });
+  assert.equal(cmp.properties['border-top-left-radius'], '10px 20px');
+  assert.equal(cmp.properties['border-top-right-radius'], '50%');
+  assert.equal(cmp.properties['border-bottom-right-radius'], undefined);
 });

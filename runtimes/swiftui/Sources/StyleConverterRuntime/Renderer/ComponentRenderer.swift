@@ -241,10 +241,27 @@ public struct ComponentRenderer: View {
         // declarations. Note: an unboxed `display:contents` element never
         // reaches here with All (the RC6 strip removes non-inherited
         // declarations first), matching Compose's evaluation order.
-        GlobalExtractor.applyingAllReset(to: InheritedText.merge(
-            own: InheritedText.resolvingCurrentColorOnColor(
-                motionEffectiveProperties(now: now)),
-            inherited: inheritedTextProperties))
+        //
+        // Wave 25 (lane LF follow-up) — the UA `list-style-type` rule runs
+        // HERE, the last point that still holds the element's OWN list and
+        // the inherited channel separately. On a list container with no
+        // own declaration, `ul { list-style-type: disc }` / `ol { … decimal }`
+        // (HTML §15.3.9) is a declaration ON the element, so it beats any
+        // ancestor value — css-cascade-4 §4.3 consults inheritance only
+        // when the cascade produced nothing. Returns its input unchanged
+        // for every non-container and every own-declaring container, so no
+        // committed capture moves. See ListStyleUaRule for the full
+        // argument and the nested-list KNOWN GAP.
+        // Hoisted: the UA rule needs the element's OWN list, which the
+        // merge below also consumes — evaluating the transition blend
+        // twice would be pure waste.
+        let ownProperties = motionEffectiveProperties(now: now)
+        return ListStyleUaRule.apply(
+            sourceTag: component.meta?.sourceTag,
+            own: ownProperties,
+            merged: GlobalExtractor.applyingAllReset(to: InheritedText.merge(
+                own: InheritedText.resolvingCurrentColorOnColor(ownProperties),
+                inherited: inheritedTextProperties)))
     }
 
     /// Wave 9 (#37) — true when the merged list's `Color` arrived ONLY
@@ -1014,7 +1031,14 @@ public struct ComponentRenderer: View {
             // component.properties, never the override-folded style — the
             // fix for the nested double-count), so we consume the final
             // band directly. (nil plan / 0,0 → view tree unchanged.)
-            let hoistPlan = MarginCollapse.containerPlan(component: component, style: style)
+            // Lane UAM (BD-RC3): in WPT capture the plan ALSO folds each
+            // child's UA default block margins (the browser-ref renders
+            // with its UA sheet intact — a `<p>` child keeps its 1em).
+            // wptCaptureMode is false on every property-fixture path, so
+            // the 327 dark-stage baselines take the identity branch and
+            // stay byte-identical.
+            let hoistPlan = MarginCollapse.containerPlan(component: component, style: style,
+                                                         uaBlockMargins: wptCaptureMode)
             let bandTop = hoistPlan?.hoistTop ?? 0
             let bandBottom = hoistPlan?.hoistBottom ?? 0
             let positioned = PositionApplier.apply(
@@ -1114,7 +1138,7 @@ public struct ComponentRenderer: View {
             if let k = GridApplier.containerKind(for: agg) { return k }
             return agg.display == .grid ? .lazyVGrid : nil
         }()
-        // Phase 7 step 2: route flex containers through FlexboxApplier's
+        // Phase 7 step 2: route flex containers through the wrap
         // FlowLayout when `flex-wrap: wrap|wrap-reverse` is set.
         if let kind = gridKind {
             // Grid path — LazyVGrid / LazyHGrid / iOS 16 Grid.
@@ -1124,7 +1148,22 @@ public struct ComponentRenderer: View {
            layoutAgg.flexWrap == .wrap || layoutAgg.flexWrap == .wrapReverse {
             FlowLayout(
                 horizontalSpacing: gap.column,
-                verticalSpacing: gap.row
+                verticalSpacing: gap.row,
+                // Wave 25 (CAL-RC5): the cross-axis inputs §8.4/§9.6 need.
+                // `alignItems` nil is the CSS initial `normal` → stretch,
+                // so the wrap path finally sizes a width-only item to its
+                // line (flex-gap-decorations-001/002 rendered empty).
+                alignItems: layoutAgg.alignItems,
+                // Only an explicit CSS cross size creates leftover space
+                // for align-content to distribute — the same definiteness
+                // test CSSFlexLayout applies on the nowrap path.
+                definiteCross: style.size.height != nil,
+                // …and §9.6 distributes only under normal/stretch. Nil
+                // (undeclared) is the initial `normal`, so the default
+                // path is unchanged; a declared center/space-* keyword
+                // now leaves the lines at their hypothetical cross size,
+                // matching the Compose lane's FlexWrapLines gate.
+                alignContent: layoutAgg.alignContent
             ) {
                 contentOrPlaceholder(style: style)
             }
@@ -1816,6 +1855,187 @@ public struct ComponentRenderer: View {
         return CSSFlexMath.mainSizes(items: items, available: available, gap: gap)
     }
 
+    // MARK: - Wrap-flex cross stretch (wave 25, lane ISTRETCH — CAL-RC5)
+
+    /// Static §8.4 stretch plan for a WRAPPING flex row, keyed by
+    /// sorted-child index: the forced cross size each stretch item's own
+    /// paint chain must adopt, or nil when no item stretches / the plan
+    /// is not statically knowable.
+    ///
+    /// WHY THE RENDERER OWNS THIS. `FlowLayout` already sizes the LINES
+    /// (§9.6) and proposes each stretch item its line's cross extent —
+    /// but a SwiftUI proposal is advisory, and an IR child ignores it
+    /// (it answers `sizeThatFits` with its intrinsic cross for every
+    /// proposal, `.infinity` included; measured through the live path in
+    /// FlexWrapStretchTests). Compose has no such gap: `FlexWrapRow`
+    /// measures a stretch item with a FIXED cross band,
+    /// `Constraints(0, main, lineCross, lineCross)`. The iOS equivalent
+    /// of that hard constraint is the FORCED cross frame this plan
+    /// injects — folded into the child's SizeConfig via the
+    /// `gridStretchHeight` channel (same fold the grid row-stretch and
+    /// the column-flex main size use) so the child's background/border
+    /// paint at the line's cross size instead of hugging 30px.
+    ///
+    /// The two runs are the same arithmetic by construction: both call
+    /// `FlexWrapPlan.breakLines` / `.stretchLines`. This one feeds it
+    /// statically-knowable IR facts; `FlowLayout` feeds it measurements.
+    /// Where a fact is NOT static (content-sized item, percent cross, a
+    /// padded/bordered box whose frame depends on box-sizing) the plan
+    /// returns nil for the whole container — an item painted at a size
+    /// the Layout does not place it at would be worse than the wave-24
+    /// hug, so nothing is guessed.
+    ///
+    /// Returns nil for column-direction containers on purpose: FlowLayout
+    /// lays out ROWS whatever `flex-direction` says (see its header), so
+    /// there is no column line geometry to stretch into — injecting the
+    /// inline-axis twin here would contradict the placement.
+    private func flexWrapStretchPlan(style: ComponentStyle,
+                                     children: [IRComponent],
+                                     column: Bool) -> [Int: CGFloat]? {
+        // Row-direction wrap containers only (see the doc note above).
+        guard !column, !children.isEmpty, let parentAgg = style.layout7 else { return nil }
+        // §9.6 fires only under `align-content: normal | stretch` — the
+        // SAME gate FlowLayout applies to the line arithmetic.
+        guard FlexWrapPlan.alignContentStretches(parentAgg.alignContent) else { return nil }
+        // A leading text placeholder is an extra Layout subview, so the
+        // index mapping would shift — bail honestly (same rule as
+        // flexMainPlan).
+        guard component.text?.isEmpty != false else { return nil }
+        // Both axes must be definite: the main axis to break lines
+        // against, the cross axis to have leftover space at all. The
+        // cross test mirrors the `definiteCross:` argument the container
+        // hands FlowLayout, so the two agree on when §9.6 applies.
+        guard style.size.height != nil,
+              let mainAvail = flexContentSize(style: style, vertical: false),
+              let crossAvail = flexContentSize(style: style, vertical: true)
+        else { return nil }
+        let ctx = style.spacing.context
+        // Gaps through the container's own resolver — main is
+        // `column-gap` for a row container, cross is `row-gap`.
+        let gaps = GapApplier.resolve(style.spacing.gap, context: ctx)
+        var mains: [CGFloat] = []
+        var crosses: [CGFloat] = []
+        var stretchy: [Bool] = []
+        for child in children {
+            let cs = SizeExtractor.extract(from: child.properties)
+            // Flex factors — `flex-basis: <length>` wins over `width`
+            // on the main axis (css-flexbox-1 §9.2.3.A).
+            var agg = LayoutAggregate()
+            FlexboxExtractor.extract(from: child.properties, into: &agg)
+            // SKEPTIC (wave 25) — the plan's per-child index must address
+            // the SAME box FlowLayout places, and two display values break
+            // that 1:1 map: `none` contributes no Layout subview at all
+            // (ComponentRenderer short-circuits it), and `contents`
+            // splices the child's OWN children in as siblings. Either one
+            // shifts every later index and changes the item COUNT the
+            // §9.3 line breaking runs over, so the injected cross size
+            // would belong to a different line than the Layout's. Measured
+            // symptom before this guard: three items with the middle one
+            // `display:none` had the plan break 2 lines of 50 while
+            // FlowLayout made ONE 110pt line — the two survivors painted
+            // 50pt tall inside a 110pt band. Refuse the container instead.
+            guard agg.display != DisplayKeyword.none,
+                  agg.display != DisplayKeyword.contents else { return nil }
+            let basisPx: CGFloat? = {
+                if case .px(let p)? = agg.flexBasis { return p }
+                return nil
+            }()
+            // Main size: percent widths resolve against THIS container's
+            // content box, which is the child's containing block.
+            let mainExplicit = SizeApplierResolve.exact(cs.width, ctx: ctx,
+                                                        parent: mainAvail)
+            // A content-derived main size needs text measurement — the
+            // line breaking would be a guess, so abandon the plan.
+            guard let main = basisPx ?? mainExplicit else { return nil }
+            mains.append(main)
+            // Cross size: the §9.4-step-7 input. Percent heights are
+            // refused (allowPercent: false — same conservatism as the
+            // nowrap main plan).
+            let crossExplicit = SizeApplierResolve.exact(cs.height, ctx: ctx,
+                                                         parent: crossAvail,
+                                                         allowPercent: false)
+            // SKEPTIC (wave 25) — a DECLARED cross size this static lane
+            // cannot turn into points (a percent, which `allowPercent:
+            // false` above refuses; a calc()/var() the converter left
+            // unresolved; min/max/fit-content; or the explicit `auto`
+            // keyword) is NOT the same thing as an ABSENT one, and the two
+            // were being conflated: `crossExplicit == nil` fed both the
+            // §8.4 stretch test below and hypotheticalCross's auto branch,
+            // so such an item was counted as stretching AND estimated at
+            // the empty-box floor. Both are fictions — StyleBuilder's fold
+            // only adopts an injected height when `size.height == nil`, so
+            // the item renders at whatever its own declaration resolves to
+            // while the LINE was sized from 30pt that nobody measures.
+            // Measured symptom before this guard: `height: 50%` on one of
+            // four items produced 55 + 10 + 50 = 115pt of lines inside a
+            // declared 110pt box (it overflowed), where the pre-lane hug
+            // stayed at 95. Refuse the whole container — the same
+            // no-guessing rule the padding/margin/content-size arms use.
+            guard cs.height == nil || crossExplicit != nil else { return nil }
+            guard let cross = FlexWrapPlan.hypotheticalCross(
+                explicitCrossPx: crossExplicit,
+                clampedCross: cs.minHeight != nil || cs.maxHeight != nil,
+                isEmptyLeaf: (child.children?.isEmpty ?? true)
+                    && (child.text?.isEmpty ?? true),
+                hasCrossBands: Self.declaresBoxBands(child),
+                // The harness's synthetic minimum box (MinBoxFloor):
+                // 30pt on the product/baseline path, dropped entirely
+                // under WPT capture — so an empty leaf is 0 there.
+                emptyFloorPx: wptCaptureMode ? 0 : (StyleBuilder.minFloor(for: cs).height ?? 0))
+            else { return nil }
+            crosses.append(cross)
+            // §8.3/§8.4 stretch precondition: the resolved alignment is
+            // stretch AND the item has an AUTO cross size (an explicit
+            // height always wins).
+            let align = CSSFlexMath.resolvedAlign(self: agg.alignSelf,
+                                                  items: parentAgg.alignItems)
+            stretchy.append(align == .stretch && crossExplicit == nil)
+        }
+        // §9.3 + §9.4 step 7/8 — identical calls to FlowLayout's.
+        let lines = FlexWrapPlan.breakLines(mainSizes: mains,
+                                            containerMain: mainAvail,
+                                            gap: gaps.column)
+        let base = lines.map { line in
+            (line.first...line.last).map { crosses[$0] }.max() ?? 0
+        }
+        let lineCross = FlexWrapPlan.stretchLines(base: base,
+                                                  containerCross: crossAvail,
+                                                  gap: gaps.row)
+        var plan: [Int: CGFloat] = [:]
+        for (li, line) in lines.enumerated() {
+            for i in line.first...line.last where stretchy[i] {
+                // Only a line that actually GREW injects anything: with
+                // no leftover cross space the item already measures at
+                // the line's cross size, and writing the value anyway
+                // would turn a `minHeight` floor into an exact frame on
+                // boxes the committed corpus renders today.
+                if lineCross[li] > crosses[i] { plan[i] = lineCross[li] }
+            }
+        }
+        return plan.isEmpty ? nil : plan
+    }
+
+    /// Does this component declare padding, a border, or a margin? The
+    /// wrap stretch plan refuses all three:
+    ///  • padding/border inflate the frame by an amount that depends on
+    ///    the effective `box-sizing` (WPT capture flips it to
+    ///    content-box), so the frame extent is not derivable from the IR
+    ///    alone;
+    ///  • a margin makes the item's OUTER cross size (what §9.4 step 7
+    ///    measures, and what FlowLayout sees when it measures the
+    ///    subview) differ from the box size this plan would inject —
+    ///    injecting the line cross as the BOX height would then push the
+    ///    outer size past the line.
+    /// Over-refusal is deliberate: `BorderRadius` paints nothing into
+    /// layout but still bails. A skipped stretch leaves the wave-24
+    /// hug; a wrong one paints at a size the Layout never places.
+    private static func declaresBoxBands(_ component: IRComponent) -> Bool {
+        component.properties.contains {
+            $0.type.hasPrefix("Padding") || $0.type.hasPrefix("Border")
+                || $0.type.hasPrefix("Margin")
+        }
+    }
+
     // MARK: - Text wrap width (lane IOS-TEXT fix 1)
 
     /// The CONTENT-BOX inline size a real-text run wraps at — the input
@@ -2150,6 +2370,18 @@ public struct ComponentRenderer: View {
             let flexMainSizes: [CGFloat]? = isCSSFlex
                 ? flexMainPlan(style: style, children: children, column: isColumn)
                 : nil
+            // Wave 25 (lane ISTRETCH, CAL-RC5) — the WRAP path's twin of
+            // `flexStretch`: FlowLayout only PROPOSES its line cross to a
+            // stretch item and an IR child ignores proposals, so the
+            // forced cross size is injected into the child's own
+            // SizeConfig here (see flexWrapStretchPlan). Nil — hence
+            // completely inert — for every container whose lines have no
+            // leftover cross space to hand out, which is all of the
+            // committed corpus.
+            let flexWrapStretch: [Int: CGFloat]? = isWrapFlex
+                ? flexWrapStretchPlan(style: style, children: children,
+                                      column: isColumn)
+                : nil
             // Fidelity wave 3 — containing-block publication
             // (css-sizing-3 §5.1): children resolve percent widths
             // against THIS box's content width. Definite only when our
@@ -2171,8 +2403,12 @@ public struct ComponentRenderer: View {
             // identical sorted in-flow array, so indices line up by
             // construction). Nil for non-block/ineligible containers —
             // children then keep their declared margins untouched.
+            // Lane UAM (BD-RC3): same UA-default fold as the hoist-band
+            // call in styledContent — the two MUST pass the identical flag
+            // or the bands and the per-child overrides would disagree.
             let collapsePlan = MarginCollapse.containerPlan(component: component,
-                                                            style: style)
+                                                            style: style,
+                                                            uaBlockMargins: wptCaptureMode)
             // Wave-9 regression fix — the USED column-gap feeding the
             // multicol fill basis (css-multicol-1 §3 via MulticolMath in
             // wptChildFillWidth). Factored into multicolUsedGapPx (lane
@@ -2373,7 +2609,13 @@ public struct ComponentRenderer: View {
                 // the child declared no explicit size on that axis.
                 .environment(\.gridStretchHeight,
                              stretchHeights?[index]
-                                ?? (isColumn ? flexMainSizes?[index] : flexStretch))
+                                ?? (isColumn ? flexMainSizes?[index] : flexStretch)
+                                // Wrap-flex §8.4 cross stretch (row
+                                // direction ⇒ the block axis, so this
+                                // channel). Nil for every other parent,
+                                // and the plan itself is nil unless a
+                                // line actually grew.
+                                ?? flexWrapStretch?[index])
                 .environment(\.flexStretchWidth,
                              isColumn ? flexStretch : flexMainSizes?[index])
                 // Wave 9 (extending Round 4): the block-fill channel is

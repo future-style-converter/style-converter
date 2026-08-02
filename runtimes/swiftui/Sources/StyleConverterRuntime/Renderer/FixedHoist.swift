@@ -268,11 +268,22 @@ public enum FixedHoist {
 
 /// The canvas-root mount for the hoisted half of `FixedHoist.split`:
 /// a top-leading ZStack the canvas attaches as an `.overlay` on its
-/// FULL, UNPADDED frame — so each hoisted box's own PositionApplier
-/// (the flexible top-leading frame + inset offset, wave-1 machinery)
-/// resolves `left`/`top` against the unpadded canvas origin (0,0):
-/// exactly the viewport containing block F1 requires and the initial
-/// containing block the wave-17 web evidence pins for absolute roots.
+/// FULL frame, inset by `canvasFrame` — so each hoisted box's own
+/// PositionApplier (the flexible top-leading frame + inset offset,
+/// wave-1 machinery) resolves `left`/`top` against the INITIAL
+/// CONTAINING BLOCK's corner: exactly the viewport containing block F1
+/// requires and the ICB §3.1 gives un-ancestored absolute roots.
+///
+/// Wave 17 pinned that corner at the canvas's own (0,0) from measured
+/// web evidence — correct then, because the ref framed its pages with
+/// `:where(body){padding:16px}` and CSS padding on a static body moves
+/// in-flow content WITHOUT moving out-of-flow content (so the ref's
+/// abspos `left:100` really did land at canvas x=100 while its prose sat
+/// at 116 — the ref was internally misaligned with itself). Wave 25
+/// CAL-RC1 repaired that by moving the frame into IMAGE space, where a
+/// memcpy translates every pixel alike; the ICB corner is therefore the
+/// FRAMED content corner now, and `canvasFrame` is that translation.
+///
 /// Attaching as an overlay also gives Appendix E step 8 for free —
 /// hoisted boxes paint ABOVE all in-flow canvas content, with tree
 /// order and `.zIndex` (applied per box by PositionApplier) breaking
@@ -281,19 +292,30 @@ public struct FixedHoistOverlay: View {
     /// The hoisted boxes, in document pre-order (see FixedHoist.split).
     let components: [IRComponent]
 
+    /// Wave 25 (round 3) — the inset from the attach frame to the
+    /// INITIAL CONTAINING BLOCK, i.e. the composed canvas's image-space
+    /// frame (`WPTCanvas.canvasFramePx`). Defaulted to 0 so any caller
+    /// that mounts on an already-ICB-sized frame — and every pre-wave-25
+    /// call site — is byte-identical.
+    let canvasFrame: CGFloat
+
     // public: explicit memberwise init — the synthesized one is
     // internal, so the harness canvas needs it spelled out.
-    public init(components: [IRComponent]) {
+    public init(components: [IRComponent], canvasFrame: CGFloat = 0) {
         self.components = components
+        self.canvasFrame = canvasFrame
     }
 
     // public: View protocol witness on a public type must be public.
     public var body: some View {
-        // GeometryReader fills the overlay's proposal (the unpadded
-        // canvas frame) and places its child at the top-leading origin —
-        // and hands us the CANVAS size, which IS these boxes' containing
-        // block (css-position-3 §3.1: the viewport for fixed; the
-        // initial containing block for un-ancestored absolute roots).
+        // GeometryReader fills the overlay's proposal and places its child
+        // at the top-leading origin — and hands us its OWN size, which IS
+        // these boxes' containing block (css-position-3 §3.1: the viewport
+        // for fixed; the initial containing block for un-ancestored
+        // absolute roots). The `.padding(canvasFrame)` below shrinks that
+        // proposal from the framed canvas to the ICB, so ONE modifier moves
+        // both the anchor corner and the published containing-block size —
+        // they can never disagree.
         GeometryReader { geo in
             // Top-leading ZStack: the corner every PositionApplier
             // anchored-frame offset resolves from (wave-1 contract).
@@ -321,6 +343,7 @@ public struct FixedHoistOverlay: View {
                         // resolve against the viewport (§3.1), not the
                         // 358px padded root basis the canvas publishes
                         // for in-flow roots.
+                        // (geo is the FRAMED ICB — see the padding below.)
                         .environment(\.containingBlockWidth, geo.size.width)
                         .environment(\.containingBlockHeight, geo.size.height)
                     // Honest limitation (documented, not silent): hoisting
@@ -333,6 +356,14 @@ public struct FixedHoistOverlay: View {
                 }
             }
         }
+        // Wave 25 (round 3) — the frame→ICB inset. Applied OUTSIDE the
+        // GeometryReader so it shrinks the reader's proposal: the ZStack's
+        // top-leading corner becomes the ICB corner (16,16 on the framed
+        // canvas) AND `geo.size` becomes the ICB extent (358 × H−32) that
+        // the two containing-block environment keys above publish. Zero
+        // frame ⇒ SwiftUI's padding is a no-op layout-wise, so every
+        // pre-wave-25 mount is byte-identical.
+        .padding(canvasFrame)
     }
 }
 

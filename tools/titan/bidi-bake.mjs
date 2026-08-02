@@ -123,14 +123,17 @@ import {
 // `<stem>__N…`, so the bake must rebuild them from the same subdir-encoded
 // stem extractFixture seeded buildComponents with (wave-21 collision fix).
 import { fixtureStem } from './safe-name.mjs';
-// The browser-ref rendering contract: same launch flags, same 390-wide white
-// canvas + 16px pad, same embedded Inter faces + line-height pin. Geometry
-// must be measured under the environment the ref PNGs and the harness
-// captures are produced in, or every baked left/top would carry a systematic
-// offset (the corpus-v4.1 font-pin lesson).
+// The browser-ref rendering contract: same launch flags, same 358-wide
+// UNPADDED white canvas, same embedded Inter faces + line-height pin.
+// Geometry must be measured under the environment the ref PNGs and the
+// harness captures are produced in, or every baked left/top would carry a
+// systematic offset (the corpus-v4.1 font-pin lesson).
+// wave-25 round 3: frame sheet and viewport numbers are IMPORTED. The old
+// copy here injected the pre-CAL-RC1 `:where(body){padding:16px}` at
+// viewport 390 — a different box tree from the one the ref rasterises.
 import {
-  BROWSER_LAUNCH_ARGS, CANVAS_BG, CANVAS_PAD_PX,
-  REF_FONT_STACK, REF_LINE_HEIGHT, interFontFaceCss,
+  BROWSER_LAUNCH_ARGS, canvasFrameCss,
+  REF_RENDER_WIDTH, REF_RENDER_MIN_HEIGHT,
 } from './capture-browser-ref.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -973,9 +976,18 @@ export async function bidiBakeFixture(fixture, testRel) {
   const browser = await getBrowser();
   const page = await browser.newPage();
   try {
-    // Viewport BEFORE goto so the page lays out at the pipeline's 390-wide
-    // canvas, not puppeteer's 800×600 default.
-    await page.setViewport({ width: 390, height: 600, deviceScaleFactor: 1 });
+    // Viewport BEFORE goto so the page lays out at the pipeline's canvas,
+    // not puppeteer's 800×600 default.
+    // wave-25 round 3 (BAKE VIEWPORT ALIGNMENT): that canvas is the ref's
+    // CONTENT space (358×568 — capture-browser-ref's own viewport), not the
+    // 390×600 outer image. The 16px frame is applied to the ref PNG in image
+    // space; laying the test page out at 390 with a 16px body pad reproduced
+    // the content width by accident while inflating the ICB by 32px, so
+    // percentage/viewport-relative line boxes resolved against numbers the
+    // ref never used.
+    await page.setViewport({
+      width: REF_RENDER_WIDTH, height: REF_RENDER_MIN_HEIGHT, deviceScaleFactor: 1,
+    });
     await page.goto('file://' + encodeURI(testAbs), { waitUntil: 'load', timeout: 30_000 });
     // The identical zero-specificity canvas frame the ref capture and the
     // post-load bake inject — same constants, same id, so the geometry read
@@ -987,14 +999,10 @@ export async function bidiBakeFixture(fixture, testRel) {
       document.head.appendChild(s);
     }, {
       id: CANVAS_FRAME_STYLE_ID,
-      css: `
-        ${await interFontFaceCss()}
-        :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }
-        :where(body) { padding: ${CANVAS_PAD_PX}px; box-sizing: border-box;
-                       min-height: 100vh; color: #000;
-                       font-family: ${REF_FONT_STACK};
-                       line-height: ${REF_LINE_HEIGHT}; }
-      `,
+      // wave-25 round 3: the SHARED factory (canvasFrameCss) — byte-identical
+      // to the ref capture's and the post-load bake's injection by
+      // construction, not by comment discipline.
+      css: await canvasFrameCss(),
     });
     // fonts.ready + double-rAF: the data-URI Inter faces load async, and
     // glyph boxes read before the relayout with the loaded face would encode
