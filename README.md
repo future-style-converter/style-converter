@@ -43,8 +43,8 @@ Three coverage numbers, all true — and they mean different things:
 
 | claim | number | source of truth |
 |---|---|---|
-| Registration coverage — a triplet exists + claims the IR type (a string-presence facade; does **not** imply native rendering) | **550 / 550 per platform** (Android 550 / 550 · iOS 550 / 550 · Web 550 / 550) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
-| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 18 / 550 · iOS 73 / 550 · Web 508 / 550** | `coverage-audit.mjs` (`real:` line) |
+| Registration coverage — a triplet exists + claims the IR type (a string-presence facade; does **not** imply native rendering) | **558 / 558 per platform** (Android 558 / 558 · iOS 558 / 558 · Web 558 / 558) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
+| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 18 / 558 · iOS 73 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
 | Verified rendering coverage — SSIM ≥ 0.95, every variant, every platform pair | **91/550 (~17%)** | [docs/STATUS.md](docs/STATUS.md) |
 
 `registered` is only a string-presence facade — the triplet exists and
@@ -53,7 +53,7 @@ claims the type, but that alone does not render the property natively. The
 under-counts grouped appliers (one file — e.g. Compose `LayoutApplier.kt`,
 iOS `FlexboxApplier.swift`, web `ScrollMarginApplier.ts` — renders many
 properties but its basename matches at most one IR name, so the raw
-dedicated-applier file counts Android 59 · iOS 115 · Web 522 sit above the
+dedicated-applier file counts Android 59 · iOS 117 · Web 530 sit above the
 per-property floor).
 
 Of the unverified remainder: 419 are blocked on platform capability gaps
@@ -133,7 +133,7 @@ to handle.
 
 ```
 converter/src/main/kotlin/app/
-├── irmodels/            # typed IR: one file per CSS property (550-property catalogue)
+├── irmodels/            # typed IR: one file per CSS property (558-property catalogue)
 └── parsing/css/         # CSS value parsers (longhands, shorthands, primitives)
 
 runtimes/                # ← the three runtime style engines (the product)
@@ -167,7 +167,7 @@ machine-checked, not folklore:
   2020-12): **strict** on the v2 envelope (`irVersion`/`minReaderVersion`,
   flat component list, `slot`/`meta` structures), **permissive** at
   property-data leaves (full leaf strictness is deferred to a future
-  revision — the 550-property surface is still moving). This is what the
+  revision — the 558-property surface is still moving). This is what the
   converter emits by default. `schema/ir-v1.schema.json` is the
   **deprecated** legacy contract for the pre-v2 nested-children wire,
   still emitted byte-for-byte by `--emit-ir v1` for one deprecation window.
@@ -197,11 +197,11 @@ the point.
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 207 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1071 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1481 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 856 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 872 |
+| converter (Kotlin) | `./gradlew :converter:test` | 236 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1084 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1531 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 905 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 887 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 34 goldens (12 v1 + 22 v2) × 4 codebases |
 
 CI (`.github/workflows/ci.yml`) runs the converter, web-runtime,

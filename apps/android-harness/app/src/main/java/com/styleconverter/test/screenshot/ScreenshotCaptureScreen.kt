@@ -954,6 +954,32 @@ internal fun hasVerticalInset(component: IRComponent): Boolean =
 // and future capture modes can reference the same values.
 private val CaptureCanvasWidth   = 390.dp
 private val CaptureCanvasPadding = 16.dp
+
+/**
+ * wave-24 B-RC5 — the composed canvas's resolved per-side pad. PHYSICAL
+ * sides (not start/end): the browser-ref's `:where(body) { padding }` is a
+ * physical-longhand injection and the WPT canvas is always LTR-framed, so
+ * naming the sides left/right keeps this readable against the ref CSS and
+ * against the web/iOS twins. Built by [resolveComposedCanvasPadding].
+ */
+internal data class CanvasPadding(
+    val top: Dp, val right: Dp, val bottom: Dp, val left: Dp,
+) {
+    /** The horizontal inset the canvas content box loses — the number the
+     *  runtime's containing-block channel needs (390 − left − right = 358 at
+     *  the default), replacing the old uniform `padding * 2`. */
+    val horizontal: Dp get() = left + right
+
+    companion object {
+        /** capture-browser-ref.mjs's CANVAS_PAD_PX on all four sides — what
+         *  every document without a padding-declaring body-root gets, so
+         *  those captures stay byte-identical. */
+        val DEFAULT = CanvasPadding(
+            CaptureCanvasPadding, CaptureCanvasPadding,
+            CaptureCanvasPadding, CaptureCanvasPadding,
+        )
+    }
+}
 private val CaptureCanvasBg      = Color(0xFF1A1A2E)
 // Composed-canvas minimum height. Mirrors capture-browser-ref.mjs, whose
 // injected `:where(body){min-height:100vh}` at a 600px viewport floors the ref
@@ -992,6 +1018,54 @@ internal fun resolveComposedCanvasBackground(roots: List<IRComponent>): Color {
     // … then let the runtime's pure composed-canvas rule composite it over
     // the corpus-v4 white (or fall back to white on null).
     return composedCanvasBackground(bg)
+}
+
+/**
+ * wave-24 B-RC5 — the composed canvas's per-side pad, in dp. The native twin
+ * of the web harness's `resolveCanvasPadding` and iOS's
+ * `ComposedCaptureCanvas.resolvedPadding`.
+ *
+ * WHY: capture-browser-ref.mjs frames every reference page with a
+ * ZERO-specificity `:where(body) { padding: 16px }`. Per CSS Selectors L4
+ * §17 `:where()` contributes no specificity, so a ref declaring its OWN
+ * `body { padding: 0 }` (0,0,1) WINS and renders with no body pad. This
+ * canvas hardcoded [CaptureCanvasPadding], so every such test rendered at a
+ * (+16,+16) offset against its ref — MEASURED as the ENTIRE divergence of
+ * css-masking/clip-path-circle-007, whose test and ref both open with
+ * `body, div { padding: 0; margin: 0 }`.
+ *
+ * PER SIDE with an independent 16dp default, because the cascade is
+ * per-longhand: a ref declaring only `padding-left: 0` keeps the injected
+ * 16px on the other three sides. Only CONCRETE px are honored — the
+ * converter emits a runtime-dependent length (`em`, `%`, `calc()`) with no
+ * absolute value, and this canvas has no honest answer for it, so that side
+ * keeps the default rather than silently guessing.
+ *
+ * No body-root, or one declaring no padding ⇒ 16dp on all four sides, i.e.
+ * byte-identical to every pre-wave-24 capture.
+ */
+internal fun resolveComposedCanvasPadding(roots: List<IRComponent>): CanvasPadding {
+    // Same lookup rule as resolveComposedCanvasBackground — one body per doc.
+    val bodyRoot = roots.firstOrNull { it.role == "body-root" }
+        ?: return CanvasPadding.DEFAULT
+    // One reader for all four sides: find the longhand, extract it through the
+    // SAME ValueExtractors.extractDp path the renderer's appliers use, and
+    // keep it only when it resolved to a concrete Dp (null ⇒ property absent
+    // OR runtime-dependent ⇒ this side keeps the 16dp default).
+    fun side(type: String): Dp {
+        val dp = bodyRoot.properties.firstOrNull { it.type == type }
+            ?.data?.let { ValueExtractors.extractDp(it) }
+            ?: return CaptureCanvasPadding
+        // CSS 2.1 §8.4 forbids negative padding; clamp defensively so a
+        // malformed IR can never pull content outside the canvas frame.
+        return if (dp.value < 0f) 0.dp else dp
+    }
+    return CanvasPadding(
+        top    = side("PaddingTop"),
+        right  = side("PaddingRight"),
+        bottom = side("PaddingBottom"),
+        left   = side("PaddingLeft"),
+    )
 }
 
 /**
@@ -1113,6 +1187,16 @@ private fun ComposedCaptureCanvas(
     // resolveCanvasBackground exactly. Pure per document → memoise on identity.
     val canvasBackground = androidx.compose.runtime.remember(roots) {
         resolveComposedCanvasBackground(roots)
+    }
+    // wave-24 B-RC5 (canvas PAD propagation) — the twin of FIX 3 above for
+    // the other half of the ref's zero-specificity body frame. A ref that
+    // declares `body { padding: 0 }` beats the injected
+    // `:where(body){padding:16px}`, so this canvas must too or the whole
+    // render sits (+16,+16) off (clip-path-circle-007). Defaults to 16dp on
+    // every side, so padding-free documents are byte-identical. Pure per
+    // document → memoise on identity alongside the background.
+    val canvasPadding = androidx.compose.runtime.remember(roots) {
+        resolveComposedCanvasPadding(roots)
     }
     // FIX 1 (UA default margins) — TITAN Round 4b — per-root effective UA
     // block margins, still the source of the HORIZONTAL blockquote/figure
@@ -1268,9 +1352,13 @@ private fun ComposedCaptureCanvas(
         androidx.compose.runtime.CompositionLocalProvider(
             com.styleconverter.runtime.core.variables.LocalContainingBlock provides
                 com.styleconverter.runtime.core.variables.ContainingBlock(
-                    // Content box = canvas width − 2×padding (358dp at 390),
-                    // the same containing block the ref's padded body gives.
-                    widthPx = (canvasWidth - CaptureCanvasPadding * 2).value
+                    // Content box = canvas width − the RESOLVED horizontal
+                    // pad (358dp at the 16dp default), the same containing
+                    // block the ref's padded body gives. wave-24 B-RC5: reads
+                    // the resolved pad, not the constant, so a ref that zeroes
+                    // its body padding hands % widths the full 390dp — the
+                    // same number Chromium gives that ref's body content box.
+                    widthPx = (canvasWidth - canvasPadding.horizontal).value
                 ),
             com.styleconverter.runtime.core.media.MediaBucketEvaluator.LocalRenderSurfaceWidthPx provides
                 canvasWidth.value,
@@ -1314,7 +1402,16 @@ private fun ComposedCaptureCanvas(
                 // The 16dp canvas padding lives on THIS Column (moved off the
                 // outer Box, wave 17) so in-flow content keeps the ref's padded
                 // body geometry while the hoist overlay stays unpadded.
-                Column(modifier = Modifier.fillMaxWidth().padding(CaptureCanvasPadding)) {
+                // wave-24 B-RC5: the four sides come from the resolved pad
+                // (16dp each unless the body-root declares its own), applied
+                // as PHYSICAL start/end here because the WPT composed canvas
+                // is always LTR-framed — see CanvasPadding's doc.
+                Column(modifier = Modifier.fillMaxWidth().padding(
+                    start  = canvasPadding.left,
+                    top    = canvasPadding.top,
+                    end    = canvasPadding.right,
+                    bottom = canvasPadding.bottom,
+                )) {
                     roots.forEachIndexed { i, root ->
                         // Gap ABOVE this root (collapsed with the previous root's
                         // bottom margin; the first root's is its full top margin).

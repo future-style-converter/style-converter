@@ -505,31 +505,22 @@ object TextStyleApplier {
         }
     }
 
-    private fun extractFontFamily(data: JsonElement): FontFamily? {
-        // Font family handling - map common names
-        if (data is JsonArray && data.isNotEmpty()) {
-            val firstFont = data[0].jsonPrimitive.contentOrNull?.lowercase()
-            return when {
-                firstFont?.contains("mono") == true -> FontFamily.Monospace
-                firstFont?.contains("serif") == true && !firstFont.contains("sans") -> FontFamily.Serif
-                firstFont?.contains("sans") == true -> FontFamily.SansSerif
-                firstFont?.contains("cursive") == true -> FontFamily.Cursive
-                else -> FontFamily.Default
-            }
-        }
-        if (data is JsonPrimitive) {
-            val font = data.contentOrNull?.lowercase()
-            return when {
-                font?.contains("mono") == true -> FontFamily.Monospace
-                font?.contains("serif") == true && !font.contains("sans") -> FontFamily.Serif
-                font?.contains("sans") == true -> FontFamily.SansSerif
-                font?.contains("cursive") == true -> FontFamily.Cursive
-                // Default sans-serif → bundled Inter for cross-platform parity.
-                else -> InterFontFamily
-            }
-        }
-        return null
-    }
+    /**
+     * Wave 24 (lane LF, B-RC7): delegated to [CssFontFamilyResolver].
+     *
+     * The old body read ONLY `data[0]` of the list form, so the harness
+     * stack `["Inter","-apple-system","system-ui","Segoe UI","Roboto",
+     * "Oxygen","Ubuntu","sans-serif"]` (the shape every WPT-corpus text
+     * component actually carries — pinned in the resolver's KDoc) matched
+     * none of the substring heuristics and fell out at
+     * `FontFamily.Default` (Roboto) while web/iOS painted the bundled
+     * Inter face. It also never recognised the bundled family by NAME.
+     * The shared resolver walks the list per css-fonts-4 §5.2 and claims
+     * `inter` for [InterFontFamily]; the per-name mapping is byte-for-byte
+     * the legacy one, so no other family changes.
+     */
+    private fun extractFontFamily(data: JsonElement): FontFamily? =
+        CssFontFamilyResolver.resolve(data)
 
     private fun extractTextAlign(data: JsonElement): TextAlign? {
         val keyword = ValueExtractors.extractKeyword(data)

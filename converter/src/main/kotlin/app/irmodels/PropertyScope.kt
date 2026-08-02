@@ -56,7 +56,14 @@ enum class PropertyScope {
             // multicol container policy (design: "column-* (multicol)")
             "columns", "column-count", "column-width", "column-fill",
             "column-span", "column-rule", "column-rule-width",
-            "column-rule-style", "column-rule-color"
+            "column-rule-style", "column-rule-color",
+            // gap decorations (CSS Gap Decorations L1): every one of these is
+            // declared ON the flex/grid/multicol container and paints in the
+            // container's own gutters — it never mentions or travels with a
+            // child, so the whole family is CONTAINER-scoped like row-gap.
+            "row-rule", "row-rule-width", "row-rule-style", "row-rule-color",
+            "column-rule-break", "row-rule-break",
+            "column-rule-inset", "row-rule-inset", "rule-overlap"
         )
 
         // ITEM-scoped CSS properties (design §1.3 list, frozen at v2):

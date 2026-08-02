@@ -35,12 +35,17 @@ log()  { echo -e "${G}[doc-check]${N} $*"; }
 warn() { echo -e "${Y}[doc-check]${N} $*" >&2; }
 err()  { echo -e "${R}[doc-check]${N} $*" >&2; FAILED=1; }
 
-# ── Coverage check (550-property catalogue × 3 platforms) ───────────────────
+# ── Coverage check (live-derived catalogue × 3 platforms) ───────────────────
 echo -e "${B}━━━ coverage-audit.mjs vs README/CLAUDE/STATUS ━━━${N}"
 COVERAGE_OUTPUT=$(node tools/visual/coverage-audit.mjs 2>&1)
 ANDROID=$(echo "$COVERAGE_OUTPUT" | grep -oE "android=[0-9]+" | head -1 | cut -d= -f2)
 IOS=$(echo "$COVERAGE_OUTPUT" | grep -oE "ios=[0-9]+" | head -1 | cut -d= -f2)
 WEB=$(echo "$COVERAGE_OUTPUT" | grep -oE "web=[0-9]+" | head -1 | cut -d= -f2)
+# Wave 24 — the catalogue denominator is DERIVED, not hardcoded: the
+# gap-decorations family grew the IR catalogue 550 -> 558, and any future
+# property addition moves it again. Count the *Property.kt files exactly the
+# way coverage-audit's catalogue walk does.
+CATALOG=$(find converter/src/main/kotlin/app/irmodels/properties -name "*Property.kt" | wc -l | tr -d " ")
 
 if [[ -z "$ANDROID" || -z "$IOS" || -z "$WEB" ]]; then
     err "coverage-audit.mjs output missing one of android/ios/web — re-check the script"
@@ -50,17 +55,17 @@ else
     # form. README.md + CLAUDE.md carry the claim in their "status"
     # sections; docs/STATUS.md is the standalone one-page summary.
     for doc in README.md CLAUDE.md docs/STATUS.md; do
-        # Look for any "X / 550" or "X/550" near the platform name. We don't
+        # Look for any "X / 550" or "X/$CATALOG" near the platform name. We don't
         # want to be over-precise: just confirm the live number appears at
         # least once in the doc.
-        if ! grep -qE "$ANDROID *(/| / )550" "$doc" 2>/dev/null; then
-            err "$doc: does not mention android=$ANDROID/550 (live truth)"
+        if ! grep -qE "$ANDROID *(/| / )$CATALOG" "$doc" 2>/dev/null; then
+            err "$doc: does not mention android=$ANDROID/$CATALOG (live truth)"
         fi
-        if ! grep -qE "$IOS *(/| / )550" "$doc" 2>/dev/null; then
-            err "$doc: does not mention ios=$IOS/550 (live truth)"
+        if ! grep -qE "$IOS *(/| / )$CATALOG" "$doc" 2>/dev/null; then
+            err "$doc: does not mention ios=$IOS/$CATALOG (live truth)"
         fi
-        if ! grep -qE "$WEB *(/| / )550" "$doc" 2>/dev/null; then
-            err "$doc: does not mention web=$WEB/550 (live truth)"
+        if ! grep -qE "$WEB *(/| / )$CATALOG" "$doc" 2>/dev/null; then
+            err "$doc: does not mention web=$WEB/$CATALOG (live truth)"
         fi
     done
     [[ "$FAILED" -eq 0 ]] && log "✓ all 3 docs match live coverage"
@@ -201,14 +206,17 @@ done
 # the number STATUS quotes and require README.md + CLAUDE.md to quote the
 # same one.
 echo -e "\n${B}━━━ verified-coverage consistency (STATUS vs README/CLAUDE) ━━━${N}"
+# The verified headline is the round-40 HISTORICAL record: 91 of the
+# then-550 catalogue. It does not track the live catalogue (new properties
+# start unverified), so the extraction pins the historical denominator.
 PASS=$(grep -m1 -i "verified rendering coverage" docs/STATUS.md | grep -oE "[0-9]+ ?/ ?550" | head -1 | grep -oE "^[0-9]+")
 if [[ -z "$PASS" ]]; then
-    err "docs/STATUS.md: could not extract the verified-coverage \"N/550\" headline"
+    err "docs/STATUS.md: could not extract the verified-coverage \"N/$CATALOG\" headline"
 else
-    log "docs/STATUS.md quotes verified coverage $PASS/550"
+    log "docs/STATUS.md quotes verified coverage $PASS/$CATALOG"
     for doc in README.md CLAUDE.md; do
         if grep -qE "$PASS ?/ ?550" "$doc"; then
-            log "✓ $doc mentions verified coverage $PASS/550"
+            log "✓ $doc mentions verified coverage $PASS/$CATALOG"
         else
             err "$doc does NOT mention verified coverage $PASS/550 (the STATUS.md headline)"
         fi

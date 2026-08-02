@@ -38,9 +38,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import com.styleconverter.runtime.lists.ListStyleConfig
 import com.styleconverter.runtime.lists.ListStyleExtractor
-import com.styleconverter.runtime.lists.ListStyleType
 import com.styleconverter.runtime.lists.ListStyleApplier as StyleListApplier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
@@ -60,6 +58,11 @@ import com.styleconverter.runtime.container.ContainerQueryApplier
 import com.styleconverter.runtime.container.ContainerQueryExtractor
 import com.styleconverter.runtime.columns.MultiColumnApplier
 import com.styleconverter.runtime.columns.MultiColumnExtractor
+// Wave-24 gap-decorations draw hook (css-gap-decorations-1) — see the two
+// blocks marked "GAP-DECORATIONS" below; both are inert without the props.
+import com.styleconverter.runtime.columns.gapDecorations
+import com.styleconverter.runtime.columns.gapItemProbe
+import com.styleconverter.runtime.columns.rememberGapDecorationSink
 import com.styleconverter.runtime.table.TableApplier
 import com.styleconverter.runtime.table.TableApplier.TableCell
 import com.styleconverter.runtime.table.TableExtractor
@@ -312,7 +315,15 @@ object ComponentRenderer {
             return CollapsePlanResult(null, null)
         }
         val tag = component._tag?.lowercase()
-        if (tag == "ol" || tag == "ul") return CollapsePlanResult(null, null)
+        // List containers bail: their children render through
+        // RenderListItemMarker, which wraps each item in a marker Row and
+        // has nowhere to hand a collapsed block margin. Wave 24 (lane LF)
+        // widened marker synthesis from {ol,ul} to the full UA list-container
+        // set {ol,ul,menu,dir} (HTML §15.3.9), so this gate MUST read the
+        // same predicate or a <menu> would build a plan whose per-child
+        // margins the marker branch silently drops. Routing both through
+        // uaMarkerDefault makes the two sets un-driftable.
+        if (ListStyleExtractor.uaMarkerDefault(tag) != null) return CollapsePlanResult(null, null)
         // B6: the plan is computed ONCE from base properties, but selector
         // (hover/focus) and media buckets re-style live — a bucket that can
         // touch the parent's padding/border/height/overflow/position could
@@ -699,6 +710,11 @@ object ComponentRenderer {
             } else {
                 itemModifier
             }
+                // ══ GAP-DECORATIONS ITEM PROBE (wave 24) ══ 1 line, and
+                // the identity Modifier for every component whose parent
+                // is not a gap-decorated flex container: the registry
+                // lookup misses and gapItemProbe returns its receiver.
+                .gapItemProbe(component.id)
         // ── Wave-18 RC6: display:contents unboxing (css-display-3 §2.5) ──
         // Resolve the component ONCE per instance: an unboxable `contents`
         // component strips to an undecorated pass-through, and every
@@ -1441,6 +1457,21 @@ object ComponentRenderer {
             com.styleconverter.runtime.layout.ContainerDecision.default,
         flexDecision: com.styleconverter.runtime.layout.flexbox.FlexDecision? = null
     ) {
+        // ══ GAP-DECORATIONS DRAW HOOK (wave 24, css-gap-decorations-1) ══
+        // 6 lines. rememberGapDecorationSink returns null — and
+        // gapDecorations then returns the receiver untouched — for every
+        // component that is not a flex container declaring a painting
+        // *-rule-*; see columns/GapDecorationHook.kt for the dark-stage
+        // byte-stability argument. Must stay the FIRST statement so the
+        // composable call site is unconditional.
+        val gapSink = rememberGapDecorationSink(
+            component, flexDecision != null,
+            flexDecision?.kind == com.styleconverter.runtime.layout.flexbox.FlexContainerKind.Row ||
+                flexDecision?.kind == com.styleconverter.runtime.layout.flexbox.FlexContainerKind.FlowRow
+        )
+        @Suppress("NAME_SHADOWING")
+        val modifier = modifier.gapDecorations(gapSink)
+        // ══ end GAP-DECORATIONS DRAW HOOK ═══════════════════════════════
         // Phase 7b engine-driven flex branch. Only activates when the
         // style-engine produced a FlexDecision; falls through to the legacy
         // displayConfig switch otherwise.
@@ -1837,18 +1868,28 @@ object ComponentRenderer {
                 )
             }
 
-            // Bug 2: precompute list-marker config from the parent _tag
-            // so we don't re-resolve per child. listConfig is non-null
-            // only when the parent is <ol>/<ul>. We feed it to
-            // RenderListItemMarker below.
+            // Bug 2 / wave-24 lane LF (B-RC3 parts 1+2): the marker family
+            // is no longer derived from the parent's source tag ALONE. The
+            // tag only supplies the UA default (HTML §15.3.9); the item's
+            // own `list-style-*` declarations — which is where the live
+            // wire actually puts them (css-lists change-list-style-type-001
+            // carries ListStyleType square/none/upper-roman/decimal on each
+            // <li>, ListStylePosition INSIDE on the <ul>) — override it in
+            // ListStyleExtractor.resolveMarkerConfig, per child.
             val parentTag = component._tag?.lowercase()
-            val isListParent = parentTag == "ol" || parentTag == "ul"
-            val listType = when (parentTag) {
-                "ol" -> ListStyleType.DECIMAL
-                "ul" -> ListStyleType.DISC
-                else -> ListStyleType.NONE
-            }
-            val listConfig = if (isListParent) ListStyleConfig(listStyleType = listType) else null
+            val isListParent = ListStyleExtractor.uaMarkerDefault(parentTag) != null
+            // The parent's list-style declarations, hoisted once (the loop
+            // below runs per child). `component.properties` here is the
+            // INHERITANCE-MERGED list (mergedComponent — the four
+            // list-style types sit in INHERITED_PROPERTY_TYPES), so a
+            // declaration made on an ancestor rather than on the <ul>
+            // itself still reaches the marker. Empty for non-list parents.
+            val parentListPairs: List<Pair<String, kotlinx.serialization.json.JsonElement?>> =
+                if (isListParent) {
+                    component.properties
+                        .filter { ListStyleExtractor.isListStyleProperty(it.type) }
+                        .map { it.type to it.data }
+                } else emptyList()
 
             // Check if this is a positioned container (position: relative)
             val isPositionedContainer = extractPositionType(component.properties) == PositionType.RELATIVE
@@ -1895,8 +1936,9 @@ object ComponentRenderer {
                         if (childPosition == PositionType.ABSOLUTE || childPosition == PositionType.FIXED) {
                             // Render absolutely positioned child with offset
                             RenderAbsoluteChild(child)
-                        } else if (listConfig != null && child._tag?.lowercase() == "li") {
-                            RenderListItemMarker(child, index, listConfig, inheritedAwareTextColor)
+                        } else if (isListParent && child._tag?.lowercase() == "li") {
+                            RenderListItemMarker(
+                                child, index, parentTag, parentListPairs, inheritedAwareTextColor)
                         } else {
                             RenderComponent(child)
                         }
@@ -1915,8 +1957,9 @@ object ComponentRenderer {
                 // original children list — collapse plan + list markers
                 // keep their indices).
                 val renderBlockChild: @Composable (Int, IRComponent) -> Unit = { index, child ->
-                    if (listConfig != null && child._tag?.lowercase() == "li") {
-                        RenderListItemMarker(child, index, listConfig, inheritedAwareTextColor)
+                    if (isListParent && child._tag?.lowercase() == "li") {
+                        RenderListItemMarker(
+                            child, index, parentTag, parentListPairs, inheritedAwareTextColor)
                     } else {
                         // Auto-margin centering for block children is handled
                         // inside RenderComponent's self-alignment wrapper (one
@@ -2064,22 +2107,59 @@ object ComponentRenderer {
     }
 
     /**
-     * Render a <li> child with a leading marker derived from the parent
-     * <ol>/<ul>'s listConfig. Compose has no ::marker pseudo, so we
-     * synthesise a Row(Text(marker) + RenderComponent(child)) which
-     * mirrors the simple-numeric / bullet behaviour the browser would
-     * produce. Marker counter uses 1-based index from the parent's
-     * children list — fine for the basic css-counter-styles tests where
-     * the IR matches the source <li> ordering verbatim.
+     * Render a `<li>` child with its own synthesised marker. Compose has
+     * no `::marker` pseudo, so we emit a Row(Text(marker) +
+     * RenderComponent(child)). Marker counter uses the 1-based index from
+     * the parent's children list — fine for the basic css-counter-styles
+     * tests where the IR matches the source `<li>` ordering verbatim.
+     *
+     * Wave 24 (lane LF, B-RC3 parts 1+2): the marker family is resolved
+     * PER ITEM through [ListStyleExtractor.resolveMarkerConfig] — UA
+     * default from [parentTag], then the parent's (inheritance-merged)
+     * declarations, then the item's OWN. It routes through
+     * [StyleListApplier.getMarker], so the whole counter-style table
+     * (decimal-leading-zero, upper-roman, armenian, hebrew, the kana
+     * sets, …) is now reachable from the renderer instead of only
+     * `•` / `n.`.
+     *
+     * DEFERRED — B-RC3 part 3 (full marker geometry). `list-style-position`
+     * is resolved into the item's ListStyleConfig and pinned by
+     * ListMarkerResolutionTest, but this Row paints it as a leading inline
+     * box for BOTH values. css-lists-3 §3.2 wants `outside` hung in the
+     * item's margin area (marker box outside the principal box, aligned
+     * on the first line's baseline) and `inside` as the first inline box
+     * of the item's content, plus the UA's marker padding rather than the
+     * fixed 4dp below. That rework needs a custom Layout and is out of
+     * this lane's file set.
      */
     @Composable
     private fun RenderListItemMarker(
         child: IRComponent,
         index: Int,
-        listConfig: ListStyleConfig,
+        parentTag: String?,
+        parentListPairs: List<Pair<String, kotlinx.serialization.json.JsonElement?>>,
         textColor: Color?
     ) {
-        val marker = StyleListApplier.getMarker(index, listConfig)
+        // Resolve the item's OWN marker config. Null only if the caller's
+        // isListParent gate and uaMarkerDefault ever disagreed — render
+        // the child bare rather than guess a marker.
+        val listConfig = ListStyleExtractor.resolveMarkerConfig(
+            parentTag,
+            parentListPairs,
+            child.properties.map { it.type to it.data }
+        )
+        val marker = listConfig?.let { StyleListApplier.getMarker(index, it) } ?: ""
+        if (marker.isEmpty()) {
+            // `list-style-type: none` (and the no-config guard). The
+            // browser generates NO marker box at all — css-lists-3 §3.1:
+            // "none: the item has no marker" — so the content must start
+            // at the item's own content edge. The pre-wave-24 code still
+            // emitted Text(" ") + 4dp padding here, shifting every
+            // `none` item right by a space-plus-4dp (live fixture:
+            // change-list-style-type-001's "square to none" rows).
+            RenderComponent(child)
+            return
+        }
         Row(verticalAlignment = Alignment.Top) {
             // Marker text: prefer the explicit textColor from the parent
             // when known so the bullet/number matches the surrounding

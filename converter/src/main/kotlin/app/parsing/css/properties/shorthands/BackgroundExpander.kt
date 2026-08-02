@@ -1,5 +1,11 @@
 package app.parsing.css.properties.shorthands
 
+// The ONE shared "is this colour syntax?" test (named / hex / rgb / hsl /
+// every CSS Color 4-5 function), backed by ColorConversion's complete named
+// table. It replaces the private 26-name list that used to misclassify
+// `background: skyblue` as an image.
+import app.parsing.css.properties.primitiveParsers.ColorSyntaxClassifier
+
 /**
  * Expands the `background` shorthand property into its longhand equivalents.
  *
@@ -11,13 +17,6 @@ package app.parsing.css.properties.shorthands
  * - Combined values: "url(...) no-repeat center/cover"
  */
 object BackgroundExpander : ShorthandExpander {
-
-    private val colorKeywords = setOf(
-        "transparent", "currentcolor", "inherit", "initial", "unset",
-        "black", "white", "red", "green", "blue", "yellow", "orange", "purple",
-        "pink", "gray", "grey", "brown", "cyan", "magenta", "lime", "olive",
-        "navy", "teal", "aqua", "fuchsia", "silver", "maroon"
-    )
 
     private val repeatKeywords = setOf(
         "repeat", "repeat-x", "repeat-y", "no-repeat", "space", "round"
@@ -71,16 +70,29 @@ object BackgroundExpander : ShorthandExpander {
         return parseComplexBackground(trimmed)
     }
 
+    /**
+     * Single membership test for "is this token a colour?", shared by the
+     * whole-value path in [expand] and the per-token path in
+     * [parseSingleLayerBackground].
+     *
+     * Previously this consulted a private 26-name list, so every other CSS
+     * named colour (`skyblue`, `rebeccapurple`, `gold`, …) fell through to
+     * `background-image`, which is invalid CSS and painted nothing. It now
+     * delegates to the one shared [ColorSyntaxClassifier], which reads
+     * ColorConversion's complete named-colour table — the same table
+     * ColorParser uses — so named / hex / rgb / hsl / CSS Color 4-5 function
+     * notations all agree with the longhand parser.
+     */
     private fun isSimpleColor(value: String): Boolean {
-        val lower = value.lowercase()
-        // Named colors
-        if (lower in colorKeywords) return true
-        // Hex colors
-        if (value.startsWith("#")) return true
-        // RGB/RGBA/HSL/HSLA
-        if (lower.startsWith("rgb(") || lower.startsWith("rgba(") ||
-            lower.startsWith("hsl(") || lower.startsWith("hsla(")) return true
-        return false
+        // var() keeps its pre-existing precedence: unresolvable substitutions
+        // stay on the background-image path (isGradientOrImage claims them),
+        // so the wave-6 VarCalcPreservation contract is untouched. This guard
+        // is background-specific, hence here rather than in the classifier.
+        if (value.lowercase().contains("var(")) return false
+        // Everything else goes through the shared syntactic classifier, which
+        // returns false for the layout idents (repeat / cover / fixed / …)
+        // that the other token roles in this expander claim.
+        return ColorSyntaxClassifier.isColorValue(value)
     }
 
     private fun isGradientOrImage(value: String): Boolean {

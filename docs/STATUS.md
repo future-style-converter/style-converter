@@ -29,8 +29,8 @@ the full history lives in git history.
 
 | claim | number | source of truth |
 |---|---|---|
-| Registration coverage — triplet exists + claims the IR type (a string-presence facade; not native rendering) | **550 / 550 per platform** (Android 550 / 550 · iOS 550 / 550 · Web 550 / 550) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
-| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 18 / 550 · iOS 73 / 550 · Web 508 / 550** | `coverage-audit.mjs` (`real:` line) |
+| Registration coverage — triplet exists + claims the IR type (a string-presence facade; not native rendering) | **558 / 558 per platform** (Android 558 / 558 · iOS 558 / 558 · Web 558 / 558) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
+| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 18 / 558 · iOS 73 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
 | Verified rendering coverage — SSIM ≥ 0.95, every variant, every platform pair | **91 / 550 (~17%)** | converged audit campaign, round 40 (below) |
 
 "Registered" is only a string-presence facade — a triplet exists and
@@ -40,7 +40,7 @@ property natively. The stricter real-applier floor counts a dedicated
 (one file — e.g. Compose `LayoutApplier.kt`, iOS `FlexboxApplier.swift`,
 web `ScrollMarginApplier.ts` — renders many properties but its basename
 matches at most one IR name, so the raw dedicated-applier file counts
-Android 59 · iOS 115 · Web 522 sit above the per-property floor). Some
+Android 59 · iOS 117 · Web 530 sit above the per-property floor). Some
 registered appliers are intentional no-op + TODO where no mobile analogue
 exists (speech/, regions/, print/, …).
 
@@ -442,16 +442,38 @@ dirs + WPT corpus are gitignored):
   feature brief). 18 sections, 210 scored tests; zero pass-regressions;
   327-net clean. Corpus totals: **web 190/210, iOS 186/210, Android
   180/210**.
+  Wave 24 (`tools/titan/results/corpus-v4-13.json`) landed the
+  css-gaps-1 **gap-decorations feature** end-to-end: eight new IR
+  properties (the row-rule family, breaks, insets, rule-overlap — the
+  catalogue grew 550 → 558), parsers whose skeptic caught
+  thin/medium/thick being claimed as named *colors* in both rule
+  shorthands, web pass-through emission (capture Chromium implements
+  css-gaps natively), and pure segment-geometry painters on both
+  natives (the SwiftUI lane's cross-line merge model was refuted by a
+  Chrome probe and rewritten to the one-run-per-line truth).
+  flex-gap-decorations-002 passes on all three; on-device geometry
+  calibration is the named residual. The ref cache key now folds in the
+  browser version (grandfathered-claim migration). Canvas-pad
+  resolvers on all three composed canvases: clip-path-circle-007 web
+  1.000 / iOS 0.995 / Android 0.952 all pass; filter-effects web 5 →
+  8/11. Placeholder container guard + list-style bake:
+  change-list-style-position web 0.994. Native markers read the
+  child's own list-style; Compose's list-form font resolver walks the
+  list. Two new sections at first capture: filter-effects
+  (backdrop-filter — natives 1/11, the named native feature gap) and
+  css-values (the attr() family, the queued bake). 20 sections, 233
+  scored; zero pass-regressions; 327-net clean. Corpus totals: **web
+  207/233, iOS 192/233, Android 188/233**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 207 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1071 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1481 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 856 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 872 |
+| converter (Kotlin) | `./gradlew :converter:test` | 236 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1084 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1531 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 905 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 887 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 34 goldens (12 v1 + 22 v2) × 4 codebases |
 
 ## Roadmap

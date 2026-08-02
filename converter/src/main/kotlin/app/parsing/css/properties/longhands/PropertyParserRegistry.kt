@@ -8,6 +8,9 @@ import app.irmodels.properties.scrolling.*
 import app.irmodels.properties.typography.TextDecorationColorProperty
 import app.irmodels.properties.typography.TextEmphasisColorProperty
 import app.irmodels.properties.columns.ColumnRuleColorProperty
+// Gap-decorations row-axis colour twin — constructed through the same
+// colorParser factory, so its IR class must be visible here too.
+import app.irmodels.properties.columns.RowRuleColorProperty
 import app.parsing.css.properties.longhands.PropertyParserFactory.colorParser
 import app.parsing.css.properties.longhands.PropertyParserFactory.paddingParser
 import app.parsing.css.properties.longhands.PropertyParserFactory.marginParser
@@ -447,7 +450,7 @@ object PropertyParserRegistry {
         "text-underline-offset" to TextUnderlineOffsetPropertyParser,
         "text-underline-position" to TextUnderlinePositionPropertyParser,
 
-        // Columns (7 parsers)
+        // Columns (15 parsers)
         "column-span" to ColumnSpanPropertyParser,
         "column-fill" to ColumnFillPropertyParser,
         "column-count" to ColumnCountPropertyParser,
@@ -455,6 +458,19 @@ object PropertyParserRegistry {
         "column-rule-width" to ColumnRuleWidthPropertyParser,
         "column-rule-style" to ColumnRuleStylePropertyParser,
         "column-rule-color" to colorParser(::ColumnRuleColorProperty),
+
+        // Gap decorations (CSS Gap Decorations L1) — the row-axis twins of the
+        // three column-rule longhands plus the four axis-specific/global knobs.
+        // Colour goes through the same shared colorParser factory the column
+        // twin uses, so both emit byte-identical {srgb,original} data.
+        "row-rule-width" to RowRuleWidthPropertyParser,
+        "row-rule-style" to RowRuleStylePropertyParser,
+        "row-rule-color" to colorParser(::RowRuleColorProperty),
+        "column-rule-break" to ColumnRuleBreakPropertyParser,
+        "row-rule-break" to RowRuleBreakPropertyParser,
+        "column-rule-inset" to ColumnRuleInsetPropertyParser,
+        "row-rule-inset" to RowRuleInsetPropertyParser,
+        "rule-overlap" to RuleOverlapPropertyParser,
 
         // Misc (8 parsers)
         "image-rendering" to ImageRenderingPropertyParser,

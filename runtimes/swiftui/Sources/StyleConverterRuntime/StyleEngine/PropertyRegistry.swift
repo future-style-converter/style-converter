@@ -177,6 +177,12 @@ enum PropertyRegistry {
     .union(InteractionsProperty.set)
     .union(PerformanceProperty.set)
     .union(ColumnsProperty.set)
+    // Wave 24 (lane GAPS-I) — css-gaps-1 gap decorations, claimed in the
+    // SAME columns/ category as their column-rule-* twins. Only the NEW
+    // names are unioned here: ColumnRuleColor/Style/Width are already in
+    // ColumnsProperty.set above, and GapDecorationsExtractor reads them
+    // without re-claiming them.
+    .union(GapDecorationsProperty.set)
     .union(TableProperty.set)
     .union(ShapesProperty.set)
     .union(RhythmProperty.set)

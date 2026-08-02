@@ -96,7 +96,11 @@ each platform `PropertyRegistry` so routing is machine-checkable by
   `justify-items`, `gap`/`row-gap`/`column-gap`,
   `grid-template-columns/rows/areas`, `grid-template`, `grid`,
   `grid-auto-columns/rows/flow`, `align-tracks`/`justify-tracks`,
-  `masonry-auto-flow`, `column-*` (multicol).
+  `masonry-auto-flow`, `column-*` (multicol), and the CSS Gap
+  Decorations L1 family — `row-rule`/`row-rule-width|style|color`,
+  `column-rule-break`/`row-rule-break`,
+  `column-rule-inset`/`row-rule-inset`, `rule-overlap` (declared on the
+  container, painted in the container's own gutters).
 - **ITEM-scoped** (declared on the child; packaged as parent-data by the
   runtimes; activates only when it lands in a matching container):
   `align-self`, `justify-self`, `place-self`, `order`, `flex-grow`,

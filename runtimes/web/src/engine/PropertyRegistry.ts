@@ -217,6 +217,13 @@ export const migratedProperties = new Set<string>([
   'ColumnCount', 'ColumnWidth',
   'ColumnRuleStyle', 'ColumnRuleWidth', 'ColumnRuleColor',
   'ColumnSpan', 'ColumnFill',
+  // ── gap decorations (8) — CSS Gap Decorations Level 1, wave 24 ────────
+  // Chromium paints these natively in flex containers, so Web's recovery is
+  // pure pass-through: parse the IR leaf, re-emit the CSS declaration.
+  // csstype-widened in the appliers (draft spec, no csstype keys yet).
+  'RowRuleStyle', 'RowRuleWidth', 'RowRuleColor',
+  'ColumnRuleBreak', 'RowRuleBreak',
+  'ColumnRuleInset', 'RowRuleInset', 'RuleOverlap',
   // ── paging (7) ───────────────────────────────────────────────────────
   'BreakBefore', 'BreakAfter', 'BreakInside',
   'PageBreakBefore', 'PageBreakAfter', 'PageBreakInside', 'MarginBreak',

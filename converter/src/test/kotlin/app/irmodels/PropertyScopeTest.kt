@@ -28,7 +28,13 @@ class PropertyScopeTest {
             "align-tracks", "justify-tracks", "masonry-auto-flow",
             "columns", "column-count", "column-width", "column-fill",
             "column-span", "column-rule", "column-rule-width",
-            "column-rule-style", "column-rule-color"
+            "column-rule-style", "column-rule-color",
+            // CSS Gap Decorations L1 (wave 24): declared on the flex/grid/
+            // multicol container, painted in the container's own gutters —
+            // never child-carried, so CONTAINER exactly like row-gap.
+            "row-rule", "row-rule-width", "row-rule-style", "row-rule-color",
+            "column-rule-break", "row-rule-break",
+            "column-rule-inset", "row-rule-inset", "rule-overlap"
         )
         assertEquals(expected, PropertyScope.containerProperties())
         expected.forEach { assertEquals(PropertyScope.CONTAINER, PropertyScope.of(it), it) }

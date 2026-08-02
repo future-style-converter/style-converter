@@ -1,0 +1,370 @@
+{
+ "_snapshot": "corpus-v4.13",
+ "_note": "THE GAP-DECORATIONS FEATURE + 20 SECTIONS. The css-gaps-1 property family landed end-to-end: 8 new IR models (RowRuleColor/Style/Width, ColumnRuleBreak/RowRuleBreak, ColumnRuleInset/RowRuleInset, RuleOverlap) + parsers + the RowRule shorthand (whose skeptic caught thin/medium/thick keywords being claimed as named COLORS in BOTH the new expander and its pre-existing ColumnRule twin, plus silently-collapsed gap-rule lists and dropped CSS Color 4/5 functions); web emits the family as pass-through CSS (capture Chromium implements css-gaps in flex natively); both natives gained pure segment-geometry painters (line grouping, per-gap segments, intersection breaks, insets incl negative, rule-overlap paint order) — the SwiftUI lane was BROKEN by its own cross-line merge model and rewritten by its skeptic to the Chrome-measured one-run-per-line truth. flex-gap-decorations-002 passes on all three (the beachhead); the painters remaining on-device geometry calibration is the named next-wave residual. The stale-refs diagnosis claim was REFUTED by execution (recaptured refs byte-identical) but the real hole it exposed was closed: the ref cache key now folds in the browser version with a grandfathered-claim migration. Canvas-pad resolvers on ALL THREE composed canvases (body-root padding overrides the 16px frame, per-side, concrete px only, cross-canvas leaf-shape parity): clip-path-circle-007 web 1.000/iOS 0.995/Android 0.952 ALL PASS, filter-effects web 5→8/11 (two at 1.000), css-values attr family +0.07 broad. Placeholder container guard (rule-less containers with children no longer become 100x100 boxes) + list-style bake additions: change-list-style-position-003 web 0.994. Native marker synthesis reads the child own ListStyleType/Position; Compose LIST-form font resolver walks the list and recognizes bundled Inter. BackgroundExpander named colors routed through the full table. TWO NEW SECTIONS at first capture: filter-effects (backdrop-filter: web 8/11; natives 1/11 — the named native feature gap) and css-values (attr() family fails identically everywhere — the queued attr bake). Zero pass-regressions on established sections; 327-net clean. Totals: web 207/233, iOS 192/233, Android 188/233. Seven perfect sections hold.",
+ "artifact": "tools/titan/runs/wave24-final (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "550d1449",
+ "date": "2026-08-02",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence coverage asymmetry (corpus-v4.3 gate) + extraction-wall exclusion (v4.4) + post-load re-admission (v4.5) + structure-extraction re-admission (v4.9) + honest-frame ssim (v4.10)",
+ "sampling": "20 sections x 12 bucket-A tests (filter-effects + css-values joined at this boundary)",
+ "canvasBoundary": "white + black ink + Inter font pin + line-height 1.25 (CANVAS_REV white-black-ink-font-lh) + browser-rev ref cache key (v4.13)",
+ "totals": {
+  "web": {
+   "passing": 207,
+   "measured": 233
+  },
+  "ios": {
+   "passing": 192,
+   "measured": 233
+  },
+  "android": {
+   "passing": 188,
+   "measured": 233
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9743,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9722,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.969,
+    "passing": 10
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.999,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8543,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8547,
+    "passing": 10
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9909,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9875,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9807,
+    "passing": 10
+   }
+  },
+  "css-display": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9886,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9805,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9779,
+    "passing": 12
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9969,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.992,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.983,
+    "passing": 12
+   }
+  },
+  "css-gaps": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9277,
+    "passing": 3
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9217,
+    "passing": 4
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9107,
+    "passing": 3
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 1,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9874,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9749,
+    "passing": 12
+   }
+  },
+  "css-images": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9975,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9925,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9909,
+    "passing": 11
+   }
+  },
+  "css-lists": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9607,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.954,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9568,
+    "passing": 10
+   }
+  },
+  "css-masking": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9867,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.978,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9703,
+    "passing": 11
+   }
+  },
+  "css-multicol": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9992,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.991,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9843,
+    "passing": 12
+   }
+  },
+  "css-overflow": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9944,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.9862,
+    "passing": 10
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.9749,
+    "passing": 10
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 7,
+    "meanSsim": 0.9877,
+    "passing": 7
+   },
+   "ios": {
+    "measured": 7,
+    "meanSsim": 0.987,
+    "passing": 7
+   },
+   "android": {
+    "measured": 7,
+    "meanSsim": 0.9845,
+    "passing": 7
+   }
+  },
+  "css-sizing": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9997,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9872,
+    "passing": 12
+   }
+  },
+  "css-text": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9678,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9576,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9486,
+    "passing": 9
+   }
+  },
+  "css-text-decor": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.972,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8616,
+    "passing": 7
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8716,
+    "passing": 7
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9979,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9882,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9791,
+    "passing": 11
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.996,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9896,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9879,
+    "passing": 12
+   }
+  },
+  "css-values": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.932,
+    "passing": 6
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9299,
+    "passing": 6
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9258,
+    "passing": 6
+   }
+  },
+  "filter-effects": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9606,
+    "passing": 8
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.8018,
+    "passing": 1
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.7724,
+    "passing": 1
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then for each of the 20 sections: POST_LOAD_EXTRACT=1 BIDI_BAKE=1 section-runner.sh <section> --all-platforms --max-tests 12 --run-id wave24-final --foreground."
+}

@@ -277,6 +277,12 @@ struct ComposedCaptureCanvas: View {
     /// channel — SAME numbers as CaptureCanvas.viewport (390×844 viewport,
     /// 358 root containing block) so vw/vh/% resolve identically to the
     /// per-component path and the web reference.
+    ///
+    /// wave-24 B-RC5: this is the 16px-DEFAULT geometry. `body` publishes a
+    /// viewport built from `resolvedPadding` instead, which equals this one
+    /// for every document whose body-root declares no padding. Kept as the
+    /// documented default (and for any non-`body` caller) rather than
+    /// deleted, since the two must never drift apart.
     static let viewport = StyleViewport(
         width: Double(width),
         height: 844,
@@ -383,6 +389,66 @@ struct ComposedCaptureCanvas: View {
         return WPTCanvas.composedBackground(resolved: resolved)
     }
 
+    /// wave-24 B-RC5 — the composed canvas's per-side pad. The twin of
+    /// `canvasBackground` above for the other half of the ref's
+    /// zero-specificity body frame, and of the web harness's
+    /// `resolveCanvasPadding` / Compose's `resolveComposedCanvasPadding`.
+    ///
+    /// WHY: capture-browser-ref.mjs injects `:where(body) { padding: 16px }`.
+    /// `:where()` contributes NO specificity (CSS Selectors L4 §17), so a ref
+    /// declaring its own `body { padding: 0 }` (0,0,1) WINS and renders with
+    /// no body pad. This canvas hardcoded `Self.padding`, so every such test
+    /// rendered at a (+16,+16) offset against its ref — MEASURED as the
+    /// ENTIRE divergence of css-masking/clip-path-circle-007, whose test and
+    /// ref both open with `body, div { padding: 0; margin: 0 }`.
+    ///
+    /// PER SIDE with an independent 16px default, because the cascade is
+    /// per-longhand: a ref declaring only `padding-left: 0` keeps the
+    /// injected 16px elsewhere. Only CONCRETE px are honored — the converter
+    /// emits runtime-dependent lengths (`em`, `%`, `calc()`) with no absolute
+    /// value and this canvas has no honest answer for them, so such a side
+    /// keeps the default instead of guessing. No body-root, or one declaring
+    /// no padding ⇒ 16 on all sides, i.e. every pre-wave-24 capture is
+    /// byte-identical.
+    ///
+    /// The lookup reads `document.components` UNSPLIT, exactly like
+    /// `canvasBackground` — the body's frame must apply even if that root
+    /// were ever hoisted out of the flow stack.
+    var resolvedPadding: EdgeInsets {
+        guard let bodyRoot = document.components
+            .first(where: { $0.meta?.role == "body-root" }) else {
+            return EdgeInsets(top: Self.padding, leading: Self.padding,
+                              bottom: Self.padding, trailing: Self.padding)
+        }
+        // One reader for all four sides. The runtime's ValueExtractors is
+        // module-internal, so this reads the IRLength leaf through IRValue's
+        // PUBLIC accessors — the two absolute-px shapes the wire actually
+        // carries, in the same order Compose's ValueExtractors.extractDp
+        // reads them (its doc records both generations): the top-level
+        // `{"px": N}` and the typed-wrapper `{"original": {"px": N}}`.
+        // Deliberately NOT resolving relative `{v,u}` pairs — the converter
+        // leaves those unresolved because they need a runtime base this
+        // canvas does not own, so such a side keeps the 16px default rather
+        // than inventing a number (no silent fallthrough: the fallback IS
+        // the documented contract, not an accident).
+        func side(_ type: String) -> CGFloat {
+            guard let data = bodyRoot.properties
+                .first(where: { $0.type == type })?.data else { return Self.padding }
+            guard let px = data["px"]?.doubleValue
+                    ?? data["original"]?["px"]?.doubleValue
+            else { return Self.padding }
+            // CSS 2.1 §8.4 forbids negative padding; clamp defensively so a
+            // malformed IR can never pull content outside the canvas frame.
+            return max(0, CGFloat(px))
+        }
+        return EdgeInsets(
+            top: side("PaddingTop"),
+            leading: side("PaddingLeft"),
+            bottom: side("PaddingBottom"),
+            trailing: side("PaddingRight"),
+        )
+    }
+
     var body: some View {
         // Wave 17 — split the roots once per body eval (pure transform):
         // the flow half stacks in the padded VStack below, the hoisted
@@ -397,6 +463,11 @@ struct ComposedCaptureCanvas: View {
         // adjacent collapse (no collapse at the padded top/bottom edges).
         // Wave 17: over the FLOW roots only (hoisted boxes take no space).
         let plans = rootPlans(for: split.flow)
+        // wave-24 B-RC5 — the canvas pad, resolved ONCE per body eval (pure
+        // over `document`): 16px per side unless this document's body-root
+        // declares its own, exactly as an author `body { padding }` beats the
+        // ref's zero-specificity `:where(body)` injection. See resolvedPadding.
+        let pad = resolvedPadding
         // Wave-19 follow-up: the transparency-aware fold — a margin-
         // transparent (zero-flow) root keeps the §8.3.1 adjoining set open,
         // so {prev bottom, transparent margins, next top} emit ONE max() gap
@@ -452,13 +523,18 @@ struct ComposedCaptureCanvas: View {
                     .padding(.bottom, idx == lastIndex ? spacing.trailing : 0)
             }
         }
-        // Constrain the composed content to the 358px ref content box,
-        // anchored at the block-flow origin (top-leading) — same maxWidth
-        // rule the per-component canvas applies to its single component.
-        .frame(maxWidth: Self.width - Self.padding * 2, alignment: .topLeading)
-        // The ref's 16px body padding — the exact offset the stitched path
-        // dropped (web composedCanvasStyle carries it too).
-        .padding(Self.padding)
+        // Constrain the composed content to the ref content box (358px at the
+        // 16px default), anchored at the block-flow origin (top-leading) —
+        // same maxWidth rule the per-component canvas applies to its single
+        // component. wave-24 B-RC5: derived from the RESOLVED pad, so a ref
+        // that zeroes its body padding gets the full 390px content box, the
+        // same number Chromium gives that ref's body.
+        .frame(maxWidth: Self.width - pad.leading - pad.trailing, alignment: .topLeading)
+        // The ref's body padding — the exact offset the stitched path
+        // dropped (web composedCanvasStyle carries it too). wave-24 B-RC5:
+        // 16px per side by default, overridden per side by a body-root that
+        // declares its own (see resolvedPadding).
+        .padding(pad)
         // Frame to the full 390px width (min==max pins it) and floor the
         // height at the ref's 600px min; fixedSize(vertical) below lets the
         // surface adopt its natural height above that floor. Uses the
@@ -511,7 +587,14 @@ struct ComposedCaptureCanvas: View {
         }
         // Publish the capture geometry so the runtime resolves vw/vh/% and
         // containing blocks against 390×844/358, not the device screen.
-        .environment(\.styleViewport, Self.viewport)
+        // wave-24 B-RC5: the root containing block tracks the RESOLVED pad
+        // (Self.viewport's 358 is the 16px-default case, byte-identical);
+        // vw/vh are unaffected — the viewport is the canvas, not the body.
+        .environment(\.styleViewport, StyleViewport(
+            width: Double(Self.width),
+            height: 844,
+            rootContainingBlock: Double(Self.width - pad.leading - pad.trailing)
+        ))
         // GAP 1 (WIDTH half) — publish the 358px content-box width so the
         // runtime stretches each auto-width, in-flow ROOT to full bleed like
         // the browser-ref's block `<p>`/`<div>` (iOS otherwise hugs content).
@@ -520,7 +603,10 @@ struct ComposedCaptureCanvas: View {
         // Composed WPT only (this canvas is built solely by
         // captureComposedDocument), and the fold is additionally gated on
         // wptCaptureMode — the 327-pair baseline never sees it.
-        .environment(\.wptBlockFlowFillWidth, Self.width - Self.padding * 2)
+        // wave-24 B-RC5: the fill width is the RESOLVED content box, so a
+        // ref that zeroes its body padding block-fills to the full 390px —
+        // matching what Chromium gives that ref's unpadded body.
+        .environment(\.wptBlockFlowFillWidth, Self.width - pad.leading - pad.trailing)
         // Same dynamic-capture hooks the per-component canvas carries
         // (pinned light scheme, empty forced set, live clock) so the
         // composed capture is a deterministic base render.

@@ -1,0 +1,148 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "gapdeco-container-001",
+            "name": "GapDeco_BothAxes",
+            "properties": [
+                {
+                    "type": "Display",
+                    "data": "FLEX"
+                },
+                {
+                    "type": "RowGap",
+                    "data": {
+                        "type": "length",
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "ColumnGap",
+                    "data": {
+                        "type": "length",
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "ColumnRuleWidth",
+                    "data": {
+                        "type": "length",
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "ColumnRuleStyle",
+                    "data": "SOLID"
+                },
+                {
+                    "type": "ColumnRuleColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.0,
+                            "g": 0.5019607843137255,
+                            "b": 0.0
+                        },
+                        "original": "green"
+                    }
+                },
+                {
+                    "type": "RowRuleWidth",
+                    "data": {
+                        "type": "length",
+                        "px": 5.0
+                    }
+                },
+                {
+                    "type": "RowRuleStyle",
+                    "data": "SOLID"
+                },
+                {
+                    "type": "RowRuleColor",
+                    "data": {
+                        "srgb": {
+                            "r": 1.0,
+                            "g": 0.8431372549019608,
+                            "b": 0.0
+                        },
+                        "original": "gold"
+                    }
+                },
+                {
+                    "type": "ColumnRuleBreak",
+                    "data": "INTERSECTION"
+                },
+                {
+                    "type": "RowRuleBreak",
+                    "data": "SPANNING_ITEM"
+                },
+                {
+                    "type": "ColumnRuleInset",
+                    "data": {
+                        "px": -2.0
+                    }
+                },
+                {
+                    "type": "RowRuleInset",
+                    "data": {
+                        "px": 0.0
+                    }
+                },
+                {
+                    "type": "RuleOverlap",
+                    "data": "COLUMN_OVER_ROW"
+                }
+            ]
+        },
+        {
+            "id": "gapdeco-relative-002",
+            "name": "GapDeco_RelativeAndKeyword",
+            "properties": [
+                {
+                    "type": "RowRuleInset",
+                    "data": {
+                        "original": {
+                            "v": -25.0,
+                            "u": "PERCENT"
+                        }
+                    }
+                },
+                {
+                    "type": "RowRuleWidth",
+                    "data": {
+                        "type": "keyword",
+                        "value": "THIN"
+                    }
+                },
+                {
+                    "type": "RowRuleColor",
+                    "data": {
+                        "srgb": {
+                            "r": 1.0,
+                            "g": 0.0,
+                            "b": 0.0,
+                            "a": 0.5
+                        },
+                        "original": {
+                            "r": 255,
+                            "g": 0,
+                            "b": 0,
+                            "a": 0.5
+                        }
+                    }
+                },
+                {
+                    "type": "ColumnRuleBreak",
+                    "data": "NORMAL"
+                },
+                {
+                    "type": "RuleOverlap",
+                    "data": "ROW_OVER_COLUMN"
+                }
+            ],
+            "slot": {
+                "parent": "gapdeco-container-001"
+            }
+        }
+    ]
+}

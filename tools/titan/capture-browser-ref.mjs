@@ -6,8 +6,10 @@
 // `*-ref.html` directly in headless Chromium and save it as the
 // "spec-truth" reference image.
 //
-// Cache layout (Section 5.4, revised at the corpus-v4 white-canvas boundary):
-//   tools/wpt/refs/<wpt-sha>/<canvas-rev>/<spec-section>/<test-stem>.png
+// Cache layout (Section 5.4, revised at the corpus-v4 white-canvas boundary,
+// extended at wave-24 with the BROWSER-REV segment):
+//   authoritative: refs/<wpt-sha>/<canvas-rev>/<browser-rev>/<section>/<stem>.png
+//   scorer view  : refs/<wpt-sha>/<canvas-rev>/<section>/<stem>.png
 //
 // We key on the WPT_REF SHA so re-pinning regenerates the cache; the extra
 // <canvas-rev> segment (CANVAS_REV below) keys the CANVAS CONTRACT so a
@@ -16,6 +18,38 @@
 // reproduction. Everything else hits cache on subsequent runs (the corpus
 // is byte-identical for a given pin, so the rendered ref PNG is too within
 // AA noise).
+//
+// ── wave-24 A-RC1: the BROWSER-REV cache segment ─────────────────────────────
+// The three keys above (WPT SHA, canvas contract, test stem) all describe
+// OUR inputs. The fourth input — the Chromium build that rasterises the ref
+// — was unkeyed, so a puppeteer/Chromium upgrade left every previously
+// cached PNG a permanent cache HIT: a rendering bug (or a rendering FIX)
+// in the browser that produced them was frozen into the acceptance signal
+// forever, and the SDUI runtimes were scored against a target no live
+// browser would reproduce. Folding `browser.version()` into the path makes
+// an upgrade a cache MISS, exactly like a WPT re-pin or a canvas change.
+//
+// MIGRATION POLICY (why there are two trees, and which is authoritative):
+//   * The ~10k PNGs of the existing corpus live under the VERSION-LESS
+//     path. Re-rendering all of them at once costs hours, so the versioned
+//     tree is populated LAZILY: `adoptLegacyRef` hard-links an existing
+//     version-less PNG into the versioned slot the first time a section
+//     runs, instead of re-rendering it. Adoption is gated on the CLAIM file
+//     (`.legacy-browser-rev`, see legacyClaimPath): the first versioned run
+//     records "the version-less tree was produced by THIS browser rev". If
+//     a later run sees a different rev, adoption stops dead — every test it
+//     touches re-renders. The claim is never auto-advanced, so a browser
+//     upgrade permanently retires the grandfathered tree, section by
+//     section, without a corpus-wide wipe.
+//   * The version-less tree stays populated as the SCORER VIEW: every
+//     capture mirrors its PNG there (hard link — no extra bytes). That is
+//     what keeps run-titan.sh / section-runner.sh's hardcoded
+//     `--refs-root .../refs/$WPT_REF/<canvas-rev>` (consumed by
+//     inject-wpt-block.mjs) correct with no change to those scripts. It is
+//     a "latest capture wins" view: after an upgrade it holds a MIX of old
+//     and new refs, but every test a run actually captures is refreshed in
+//     that same run, so a scored run always compares against refs from the
+//     browser that is running it.
 //
 // Capture canvas geometry matches the rest of the Style-Converter pipeline
 // so browser-ref images are pixel-comparable against the iOS/Android/web
@@ -289,8 +323,57 @@ export async function resolveRefPath(testRel) {
     : resolve(dirname(testAbs), refHref);
 }
 
-/** Compute the cache PNG path for a given test under a given WPT_REF. */
-export function cachePathFor(wptRef, testRel) {
+// ── wave-24 A-RC1: browser-rev key derivation ────────────────────────────────
+//
+// Puppeteer's `browser.version()` returns a User-Agent-style product string
+// — 'Chrome/150.0.7871.24' on the bundled build, 'HeadlessChrome/141.0.…'
+// on older/`--headless=old` launches. Both name the SAME rasteriser family,
+// so we normalise the product half ('HeadlessChrome' → 'chrome') and keep
+// the FULL four-part build number: Chromium ships paint fixes in patch
+// releases (the class of change this key exists to catch), so milestone-only
+// granularity would still freeze a bug across a patch bump.
+//
+// The result is used as a filesystem path segment, so every character
+// outside [A-Za-z0-9._-] is folded to '-' — a version string is never
+// allowed to escape the cache root via '/' or '..'.
+export const UNKNOWN_BROWSER_REV = 'browser-unknown';
+export function browserRevFrom(versionString) {
+  // No silent fallthrough: a missing/blank version is a REAL condition
+  // (a stubbed browser in a unit test, a CDP hiccup). It gets its own
+  // explicit bucket rather than silently sharing a slot with a real build.
+  const raw = String(versionString ?? '').trim();
+  if (!raw) return UNKNOWN_BROWSER_REV;
+  // 'Product/1.2.3.4' → ['Product', '1.2.3.4']; a bare string with no '/'
+  // keeps the whole thing as the product half and yields no build number.
+  const slash = raw.indexOf('/');
+  const product = (slash >= 0 ? raw.slice(0, slash) : raw).toLowerCase()
+    // 'headlesschrome' and 'chrome' are the same binary in two launch
+    // modes — collapsing them keeps a headless/headful flip from
+    // invalidating an otherwise identical cache.
+    .replace(/^headless/, '');
+  const build = slash >= 0 ? raw.slice(slash + 1).trim() : '';
+  const slug = build ? `${product}-${build}` : product;
+  // Path-segment hardening (see banner) + a length cap so a pathological
+  // UA string cannot produce an unusable filename. Runs of 2+ dots collapse
+  // to one: separators are already folded above, so a literal '..' could
+  // never be a traversal here — but leaving it in a directory name is a
+  // trap for the next reader (and for any shell glob), and no real build
+  // number contains one.
+  const safe = slug.replace(/[^A-Za-z0-9._-]/g, '-').replace(/\.{2,}/g, '.').slice(0, 64);
+  return safe || UNKNOWN_BROWSER_REV;
+}
+
+/** Compute the cache PNG path for a given test under a given WPT_REF.
+ *
+ *  `browserRev` (wave-24 A-RC1) selects WHICH tree:
+ *    - omitted/null → the VERSION-LESS legacy path, byte-identical to the
+ *      pre-wave-24 layout. This is the scorer view that run-titan.sh /
+ *      section-runner.sh hand to inject-wpt-block.mjs as --refs-root, and
+ *      the tree the ~10k already-captured PNGs live in.
+ *    - a slug from browserRevFrom() → the authoritative versioned path,
+ *      one extra segment BESIDE CANVAS_REV.
+ */
+export function cachePathFor(wptRef, testRel, browserRev = null) {
   const parts = testRel.split('/'); // posix
   // Spec section is the second segment when the test lives under
   // css/<section>/.... When a test lives directly under css/ (rare —
@@ -305,14 +388,100 @@ export function cachePathFor(wptRef, testRel) {
   // note): a contract change re-renders every ref instead of silently
   // reusing PNGs captured under the old canvas. run-titan.sh and
   // section-runner.sh derive their --refs-root with the SAME segment.
-  return join(REFS_ROOT, wptRef, CANVAS_REV, section, `${stem}.png`);
+  // The browser-rev segment (when asked for) sits BESIDE it, one level
+  // deeper, so the version-less scorer view keeps its exact historical
+  // shape and the two trees never interleave.
+  return browserRev
+    ? join(REFS_ROOT, wptRef, CANVAS_REV, browserRev, section, `${stem}.png`)
+    : join(REFS_ROOT, wptRef, CANVAS_REV, section, `${stem}.png`);
 }
 
-/** Render a single ref HTML to PNG. Returns the cache path. */
-async function renderOne(page, wptRef, testRel) {
+/** Path of the claim file that credits the version-less tree to one browser
+ *  rev. Lives at the ROOT of the canvas-rev tree (beside the section dirs,
+ *  never inside one) so it can never be mistaken for a ref PNG. See the
+ *  header's MIGRATION POLICY for the state machine it drives. */
+export function legacyClaimPath(wptRef) {
+  return join(REFS_ROOT, wptRef, CANVAS_REV, '.legacy-browser-rev');
+}
+
+/** Read the claim, or null when the version-less tree is unclaimed. */
+async function readLegacyClaim(wptRef) {
+  try {
+    return (await fs.readFile(legacyClaimPath(wptRef), 'utf8')).trim() || null;
+  } catch {
+    // ENOENT is the normal pre-migration state, not an error worth
+    // surfacing: an unclaimed tree is exactly what the first versioned run
+    // expects to find, and it claims it below.
+    return null;
+  }
+}
+
+/** Link `src` to `dest` without copying bytes when the filesystem allows.
+ *
+ *  Hard links (fs.link) make the versioned tree and the scorer view share
+ *  ONE inode, so mirroring ~10k PNGs costs directory entries and nothing
+ *  else. `dest` is unlinked first: puppeteer's page.screenshot() opens its
+ *  target with O_TRUNC, so writing through a live hard link would rewrite
+ *  the other tree's bytes in place. copyFile is the documented fallback for
+ *  the cross-device (EXDEV) and link-unsupported (EPERM) cases — correctness
+ *  first, disk second. */
+async function linkOrCopy(src, dest) {
+  await fs.mkdir(dirname(dest), { recursive: true });
+  await fs.rm(dest, { force: true });
+  try {
+    await fs.link(src, dest);
+  } catch (err) {
+    // No silent fallthrough: say which fallback fired and why, so a
+    // surprising filesystem shows up in the capture log instead of as a
+    // mysterious doubling of tools/wpt/refs.
+    process.stderr.write(`[capture-browser-ref] link ${dest} failed (${err.code ?? err.message}) — copying instead\n`);
+    await fs.copyFile(src, dest);
+  }
+}
+
+/** Make the version-less scorer view point at the versioned PNG.
+ *
+ *  Cheap no-op on the common path: when both paths already resolve to the
+ *  same inode there is nothing to do, which is the state after the first
+ *  mirror of any given ref. */
+async function mirrorToLegacy(versioned, legacy) {
+  try {
+    const [a, b] = await Promise.all([fs.stat(versioned), fs.stat(legacy)]);
+    if (a.dev === b.dev && a.ino === b.ino) return;
+    // Same path, different inode → the legacy entry is a stale copy (or a
+    // pre-wave-24 original that was NOT adopted). The versioned tree is
+    // authoritative, so it wins.
+  } catch {
+    // legacy missing (or unstattable) → fall through and (re)create it.
+  }
+  await linkOrCopy(versioned, legacy);
+}
+
+/** Render a single ref HTML to PNG. Returns the cache path.
+ *
+ *  wave-24 A-RC1 dual-read (header MIGRATION POLICY):
+ *    1. versioned hit  → reuse, mirror to the scorer view, done.
+ *    2. legacy hit AND the version-less tree is claimed by THIS browser
+ *       rev → adopt it into the versioned tree (hard link, no re-render).
+ *    3. otherwise → render, write the versioned PNG, mirror it.
+ *  `adoptable` is resolved ONCE per run by captureRefs (one claim read for
+ *  N tests) and passed in, so step 2 costs a single existsSync per test. */
+async function renderOne(page, wptRef, testRel, browserRev, adoptable) {
   const refAbs = await resolveRefPath(testRel);
-  const dest = cachePathFor(wptRef, testRel);
-  if (existsSync(dest)) return { dest, cached: true };
+  const dest   = cachePathFor(wptRef, testRel, browserRev);
+  const legacy = cachePathFor(wptRef, testRel);           // scorer view
+  if (existsSync(dest)) {
+    await mirrorToLegacy(dest, legacy);
+    return { dest, cached: true };
+  }
+  if (adoptable && existsSync(legacy)) {
+    // Grandfathered ref: the claim file says this browser rev produced the
+    // version-less tree, so the PNG is exactly what a re-render would
+    // produce — adopting it is the whole reason the migration is lazy
+    // rather than a ~10k-page re-render.
+    await linkOrCopy(legacy, dest);
+    return { dest, cached: true, adopted: true };
+  }
 
   await fs.mkdir(dirname(dest), { recursive: true });
 
@@ -423,6 +592,12 @@ async function renderOne(page, wptRef, testRel) {
   ));
 
   await page.screenshot({ path: dest, type: 'png' });
+  // wave-24 A-RC1: the versioned PNG is authoritative; the version-less
+  // tree is the "latest capture wins" scorer view inject-wpt-block.mjs
+  // reads through the shell scripts' hardcoded --refs-root (header
+  // MIGRATION POLICY). Mirroring AFTER the screenshot — never before —
+  // keeps the O_TRUNC hazard documented on linkOrCopy impossible.
+  await mirrorToLegacy(dest, legacy);
   return { dest, cached: false };
 }
 
@@ -470,6 +645,28 @@ export async function captureRefs(testRels, opts = {}) {
     protocolTimeout: 300_000,
   });
 
+  // wave-24 A-RC1: resolve the cache's fourth key — the Chromium build
+  // that will rasterise every ref in this run — ONCE, right after launch.
+  const browserRev = browserRevFrom(await browser.version());
+  // Claim state for the version-less tree, read ONCE for the whole run
+  // (header MIGRATION POLICY): an unclaimed tree is the pre-wave-24 corpus
+  // and is credited to the browser that first runs under versioning; a
+  // tree claimed by a DIFFERENT rev is retired — nothing is adopted from
+  // it, so every test this run touches re-renders under the live browser.
+  const claim = await readLegacyClaim(wptRef);
+  const adoptable = claim === null || claim === browserRev;
+  if (claim === null) {
+    // Establish the claim before any adoption so an interrupted run cannot
+    // leave adopted PNGs behind an unclaimed tree.
+    await fs.mkdir(dirname(legacyClaimPath(wptRef)), { recursive: true });
+    await fs.writeFile(legacyClaimPath(wptRef), `${browserRev}\n`, 'utf8');
+  } else if (!adoptable && !opts.quiet) {
+    // LOUD, never silent: this is the moment a browser upgrade starts
+    // costing real re-renders, and the log is where that shows up.
+    process.stderr.write(`[capture-browser-ref] browser rev ${browserRev} != legacy claim ${claim} ` +
+      `— version-less refs retired; tests in this run re-render\n`);
+  }
+
   const results = [];
   try {
     const page = await browser.newPage();
@@ -479,10 +676,17 @@ export async function captureRefs(testRels, opts = {}) {
     for (const rel of testRels) {
       i++;
       try {
-        const { dest, cached } = await renderOne(page, wptRef, rel);
-        results.push({ test: rel, dest, cached, ok: true });
+        const { dest, cached, adopted } = await renderOne(page, wptRef, rel, browserRev, adoptable);
+        results.push({ test: rel, dest, cached, adopted: !!adopted, ok: true });
         if (!opts.quiet) {
-          process.stderr.write(`  [${i}/${testRels.length}] ${cached ? 'cache' : 'rendered'} ${rel}\n`);
+          // An adoption IS a cache hit (no render happened), so the line
+          // must keep the literal `cache ` prefix section-runner.sh counts
+          // with `grep -c 'cache '` — the adoption note rides as a suffix
+          // instead of replacing the verb, or an all-adopt migration run
+          // would report `rendered=0 cached=0` and read as total failure.
+          const note = adopted ? ' (adopted from the version-less tree)' : '';
+          process.stderr.write(
+            `  [${i}/${testRels.length}] ${cached ? 'cache' : 'rendered'} ${rel}${note}\n`);
         }
       } catch (err) {
         // wave-21 6b: mismatch-only reftests are an EXPLICIT SKIP, not a
@@ -507,7 +711,10 @@ export async function captureRefs(testRels, opts = {}) {
     await browser.close();
   }
 
-  return { wptRef, results };
+  // browserRev rides the return so every caller (and the CLI banner) can
+  // record WHICH Chromium produced this run's refs — the provenance the
+  // pre-wave-24 cache silently dropped.
+  return { wptRef, browserRev, results };
 }
 
 // ── CLI ──────────────────────────────────────────────────────────────────────
@@ -517,14 +724,17 @@ async function main() {
     console.error('usage: capture-browser-ref.mjs <relative-test-path>...');
     process.exit(1);
   }
-  const { wptRef, results } = await captureRefs(inputs);
+  const { wptRef, browserRev, results } = await captureRefs(inputs);
   // wave-21 6b: report skips as their own column — a skipped mismatch-only
   // reftest is neither a success (no PNG exists) nor a failure (nothing
   // broke), and folding it into either would re-hide the denominator.
   const skipped = results.filter((r) => r.skipped).length;
   const ok = results.filter((r) => r.ok && !r.skipped).length;
   const fail = results.length - ok - skipped;
-  console.log(`capture-browser-ref: wptRef=${wptRef.slice(0, 12)}  ok=${ok}  fail=${fail}  skipped=${skipped}`);
+  // wave-24 A-RC1: browserRev in the banner makes ref provenance visible in
+  // every section log (section-runner.sh tees this to browser-ref.log), so a
+  // Chromium upgrade is readable from the archived run instead of invisible.
+  console.log(`capture-browser-ref: wptRef=${wptRef.slice(0, 12)}  browser=${browserRev}  ok=${ok}  fail=${fail}  skipped=${skipped}`);
   process.exit(fail > 0 ? 1 : 0);
 }
 

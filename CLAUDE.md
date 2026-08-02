@@ -56,7 +56,7 @@ JSON input → CSS reader (:converter) → typed IR → runtime style engines
 converter/                       # Gradle :converter — the Kotlin CSS reader
 └── src/main/kotlin/app/
     ├── irmodels/                # typed IR: IRDocument, ValueTypes, one file per property
-    │   └── properties/          # 550-property catalogue, 33 categories
+    │   └── properties/          # 558-property catalogue, 33 categories
     └── parsing/css/
         └── properties/
             ├── longhands/       # per-property parsers + PropertyParserRegistry
@@ -254,11 +254,11 @@ Gradle commands need JDK 21):
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 207 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1071 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1481 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 856 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 872 |
+| converter (Kotlin) | `./gradlew :converter:test` | 236 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1084 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1531 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 905 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 887 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 34 goldens (12 v1 + 22 v2) × 4 codebases |
 
 (`npm test` at the root runs every workspace's vitest suite — the web
@@ -299,8 +299,8 @@ local-only for now.
 
 Three different numbers, all true — do not conflate them:
 
-- **Registration coverage: 550 / 550 per platform** (Android 550 / 550,
-  iOS 550 / 550, Web 550 / 550). Every property in the 550-property IR
+- **Registration coverage: 558 / 558 per platform** (Android 558 / 558,
+  iOS 558 / 558, Web 558 / 558). Every property in the 558-property IR
   catalogue (33 categories) has a registered Config/Extractor/Applier
   triplet on all three platforms — `node tools/visual/coverage-audit.mjs`
   is the source of truth (`tools/visual/COVERAGE.md`). But "registered" is
@@ -308,14 +308,14 @@ Three different numbers, all true — do not conflate them:
   type — it does NOT mean a dedicated applier renders the property natively.
   Some registered appliers are intentional no-op + TODO where no mobile
   analogue exists (speech/, regions/, print/, …).
-- **Real-applier floor: Android 18 / 550 · iOS 73 / 550 · Web 508 / 550**.
+- **Real-applier floor: Android 18 / 558 · iOS 73 / 558 · Web 516 / 558**.
   The stricter per-property bar — a dedicated `<Name>Applier.<ext>` file
   exists — is far lower on mobile (`coverage-audit.mjs` prints it as the
   `real:` line, alongside `registered:`). Caveat: `real` under-counts
   grouped appliers — files like Compose `LayoutApplier.kt`, iOS
   `FlexboxApplier.swift`, or web `ScrollMarginApplier.ts` render many
   properties from one file whose basename matches at most one IR name, so
-  the raw dedicated-applier file counts (Android 59 · iOS 115 · Web 522)
+  the raw dedicated-applier file counts (Android 59 · iOS 117 · Web 530)
   sit above this per-property floor. (Web `real` is 508 not 509 because
   `print/SizeApplier.ts` and `sizing/SizeApplier.ts` both map to the single
   IR `Size` property and de-dupe.)

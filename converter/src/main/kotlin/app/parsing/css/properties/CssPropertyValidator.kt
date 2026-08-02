@@ -193,6 +193,14 @@ object CssPropertyValidator {
         "column-rule-width", "column-rule-style", "column-rule-color",
         "column-span", "column-fill",
 
+        // Gap decorations (CSS Gap Decorations Level 1). The validator runs
+        // FIRST in the pipeline, so every name registered in
+        // PropertyParserRegistry must appear here or the declaration is
+        // silently dropped (pinned by ValidatorRegistryParityTest).
+        "row-rule", "row-rule-width", "row-rule-style", "row-rule-color",
+        "column-rule-break", "row-rule-break",
+        "column-rule-inset", "row-rule-inset", "rule-overlap",
+
         // Lists
         "list-style", "list-style-type", "list-style-position", "list-style-image",
 
