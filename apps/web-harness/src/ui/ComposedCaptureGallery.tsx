@@ -108,6 +108,91 @@ function resolveCanvasBackground(doc: IRDocument): string {
   return typeof bg === 'string' && bg.length > 0 ? bg : CANVAS_BG_DEFAULT;
 }
 
+/**
+ * The pipeline's default composed-canvas pad — capture-browser-ref.mjs's
+ * CANVAS_PAD_PX, injected on the ref as `:where(body) { padding: 16px }`.
+ */
+const CANVAS_PAD_DEFAULT = 16;
+
+/** Per-side canvas pad in CSS px. */
+export interface CanvasPadding {
+  top: number; right: number; bottom: number; left: number;
+}
+
+/**
+ * wave-24 B-RC5 — BODY/ROOT PADDING PROPAGATION. The exact twin of
+ * resolveCanvasBackground above, for the other half of the ref's
+ * zero-specificity body frame.
+ *
+ * WHY: capture-browser-ref.mjs injects `:where(body) { padding: 16px }`.
+ * `:where()` contributes ZERO specificity (CSS Selectors L4 §17), so a ref
+ * that declares its OWN `body { padding: 0 }` (specificity 0,0,1) WINS and
+ * paints with no body pad at all. This canvas hardcoded 16px, so every such
+ * test's whole render was offset (+16, +16) against its ref — MEASURED as
+ * the ENTIRE divergence of css-masking/clip-path-circle-007, whose test and
+ * ref both open with `body, div { padding: 0; margin: 0 }`.
+ *
+ * The resolution is PER SIDE and defaults each side to 16 independently,
+ * because the cascade is per-longhand: a ref declaring only
+ * `padding-left: 0` keeps the injected 16px on the other three sides.
+ * Values are resolved through the same `buildStyles` engine the renderer
+ * uses (never a re-implemented parser), and only CONCRETE px are honored —
+ * a runtime-dependent length (`1em`, `%`, `calc()`, which the converter
+ * emits as unresolved) has no absolute answer here, so that side keeps the
+ * 16px default rather than silently guessing.
+ *
+ * No body-root, or a body-root declaring no padding ⇒ all four sides stay
+ * 16, so every other test's capture is byte-identical to before.
+ */
+export function resolveCanvasPadding(doc: IRDocument): CanvasPadding {
+  const pad: CanvasPadding = {
+    top: CANVAS_PAD_DEFAULT, right: CANVAS_PAD_DEFAULT,
+    bottom: CANVAS_PAD_DEFAULT, left: CANVAS_PAD_DEFAULT,
+  };
+  // Same lookup rule as resolveCanvasBackground — a document has one body.
+  const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
+  if (!bodyRoot) return pad;
+  // One engine pass; the applier emits paddingTop/… as CSS length strings.
+  const styles = buildStyles(bodyRoot.properties) as Record<string, unknown>;
+  const sides: Array<[keyof CanvasPadding, string]> = [
+    ['top', 'paddingTop'], ['right', 'paddingRight'],
+    ['bottom', 'paddingBottom'], ['left', 'paddingLeft'],
+  ];
+  // Wave 24 (skeptic B1) — the three composed canvases must honor the SAME
+  // IR leaf shapes. The natives read the raw leaf ({px:N} or the wrapped
+  // {original:{px:N}} pxFallback); buildStyles here re-emits the AUTHOR's
+  // unit for wrapped leaves (correct for the engine, wrong for the canvas
+  // frame, which wants the resolved px). So: engine string first, then the
+  // raw-leaf fallback identical to the native resolvers.
+  const irSides: Record<keyof CanvasPadding, string> = {
+    top: 'PaddingTop', right: 'PaddingRight',
+    bottom: 'PaddingBottom', left: 'PaddingLeft',
+  };
+  const leafPx = (name: string): number | null => {
+    const prop = (bodyRoot.properties as Array<{ type: string; data?: unknown }>)
+      .find((pr) => pr.type === name);
+    const d = prop?.data as { px?: unknown; original?: { px?: unknown } } | undefined;
+    if (typeof d?.px === 'number') return d.px;
+    if (typeof d?.original?.px === 'number') return d.original.px;
+    return null;                                     // unresolved (em/%/calc)
+  };
+  for (const [side, key] of sides) {
+    const raw = styles[key];
+    let px: number | null = null;
+    if (typeof raw === 'string') {
+      // Concrete px only (see doc): anything else falls through to the leaf.
+      const m = /^(-?\d+(?:\.\d+)?)px$/.exec(raw.trim());
+      if (m) px = parseFloat(m[1]);
+    }
+    if (px === null) px = leafPx(irSides[side]);     // the native-parity path
+    if (px === null) continue;                       // side not resolvable
+    // CSS 2.1 §8.4 forbids negative padding; clamp defensively so a
+    // malformed IR can never pull content OUTSIDE the canvas frame.
+    pad[side] = Math.max(0, px);
+  }
+  return pad;
+}
+
 interface ComposedCaptureGalleryProps {
   /** The decoded COMBINED IR document (every WPT test's components, flat). */
   document: IRDocument;
@@ -243,6 +328,11 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
   // grey page) is matched instead of diffed against a dark canvas. Pure per
   // document — memoise on identity alongside the composition above.
   const canvasBackground = React.useMemo(() => resolveCanvasBackground(doc), [doc]);
+  // wave-24 B-RC5: the canvas pad honors the document's body-root padding
+  // (falling back to 16px per side) so a ref that zeroes its body pad is
+  // matched instead of diffed at a (+16,+16) offset — clip-path-circle-007's
+  // whole divergence. Pure per document, memoised like the background.
+  const canvasPadding = React.useMemo(() => resolveCanvasPadding(doc), [doc]);
   return (
     <div
       data-capture-canvas
@@ -252,10 +342,21 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
       // which is exactly what inject-wpt-block.mjs's composed path globs for.
       data-capture-id={testKey}
       data-capture-name={testKey}
-      // Spread the shared frame first, then override just `background` with the
-      // per-document resolved color (identical to the default for every test
-      // that declares no body background — so those captures are unchanged).
-      style={{ ...composedCanvasStyle, background: canvasBackground }}
+      // Spread the shared frame first, then supply `background` and the four
+      // `padding-*` sides from the per-document resolution (identical to the
+      // pipeline defaults for every test that declares no body background /
+      // padding — those captures are byte-unchanged). composedCanvasStyle
+      // deliberately carries NO `padding` key so the shorthand and these
+      // longhands can never both be serialised into one style object (React
+      // warns on that mix, and the winner would depend on key order).
+      style={{
+        ...composedCanvasStyle,
+        background: canvasBackground,
+        paddingTop: `${canvasPadding.top}px`,
+        paddingRight: `${canvasPadding.right}px`,
+        paddingBottom: `${canvasPadding.bottom}px`,
+        paddingLeft: `${canvasPadding.left}px`,
+      }}
     >
       {roots.map((root, i) => (
         <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
@@ -290,9 +391,15 @@ const containerStyle: React.CSSProperties = {
  *                             sets on `:where(html,body)`; white ink vanishes
  *                             into it on BOTH sides, restoring the reftest
  *                             camouflage the dark stage broke)
- *   - padding 16px           (CANVAS_PAD_PX — the ref's `:where(body)` pad;
- *                             box-sizing:border-box so content is 358px wide,
- *                             mirroring the ref's body content box)
+ *   - padding 16px per side  (CANVAS_PAD_DEFAULT — the ref's `:where(body)`
+ *                             pad; box-sizing:border-box so content is 358px
+ *                             wide, mirroring the ref's body content box.
+ *                             wave-24 B-RC5: this is the DEFAULT, not a
+ *                             constant — a document whose body-root declares
+ *                             its own padding overrides it per side, exactly
+ *                             as an author `body { padding }` beats the ref's
+ *                             zero-specificity injection. See
+ *                             resolveCanvasPadding.)
  *   - min-height 600px       (the ref's `min-height:100vh` floors documentHeight
  *                             at 600 — capture-browser-ref.mjs's docHeight max;
  *                             the canvas grows past 600 when content overflows)
@@ -313,7 +420,13 @@ const composedCanvasStyle: React.CSSProperties = {
   width: '390px',
   minHeight: '600px',
   boxSizing: 'border-box',
-  padding: '16px',
+  // wave-24 B-RC5: the pad is NO LONGER a constant here — ComposedTestCanvas
+  // writes the four `padding-*` longhands from resolveCanvasPadding(doc),
+  // which returns 16px per side unless the document's body-root declares its
+  // own (the ref's `:where(body)` pad is zero-specificity and loses to an
+  // author `body { padding }` — see resolveCanvasPadding). Keeping a
+  // shorthand `padding` here as well would mix shorthand+longhand in one
+  // React style object; the default now lives in CANVAS_PAD_DEFAULT.
   background: CANVAS_BG_DEFAULT,
   // corpus-v4.1 BLACK ink (wave-12 catch): this canvas was the ONE surface
   // the v4.1 ink flip missed — inheriting prose (NodeRenderer's bare text

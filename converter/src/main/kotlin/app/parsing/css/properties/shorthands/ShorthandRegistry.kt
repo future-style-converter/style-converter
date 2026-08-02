@@ -109,6 +109,11 @@ object ShorthandRegistry {
         // Columns
         "column-rule" to ColumnRuleExpander,
 
+        // Gap decorations (CSS Gap Decorations L1 §4.4) — the row-axis
+        // shorthand; expands to row-rule-width/style/color exactly as
+        // column-rule expands to its three column-axis longhands.
+        "row-rule" to RowRuleExpander,
+
         // Font
         "font" to FontExpander,
         "font-variant" to FontVariantExpander,

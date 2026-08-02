@@ -13,8 +13,11 @@ import { sep } from 'node:path';
 import {
   cachePathFor,
   resolveRefPath,
+  browserRevFrom,
+  legacyClaimPath,
   CANVAS_BG,
   CANVAS_REV,
+  UNKNOWN_BROWSER_REV,
 } from './capture-browser-ref.mjs';
 
 // ── the corpus-v4 white-canvas contract ─────────────────────────────────────
@@ -84,6 +87,94 @@ test('cachePathFor for tests directly under /css/ falls back to "css" section', 
   // section helper in the bucketer hands them "css".
   const p = cachePathFor('sha', 'css/orphan.html');
   assert.match(p, /refs.sha.white-black-ink-font-lh.css.orphan\.png$/);
+});
+
+// ── wave-24 A-RC1: the browser-rev cache key ────────────────────────────────
+//
+// The cache used to key on OUR inputs only (WPT SHA, canvas contract, test
+// stem). The Chromium build that rasterises the ref was unkeyed, so a
+// browser upgrade left every cached PNG a permanent HIT and froze that
+// browser's paint behaviour — bug or fix — into the acceptance signal. These
+// pins hold the derivation (what counts as "a different browser") and the
+// two-tree layout the lazy migration depends on.
+
+test('browserRevFrom slugs a puppeteer product string into a path segment', () => {
+  // The exact shape puppeteer's browser.version() returns on the bundled
+  // build this repo pins today.
+  assert.equal(browserRevFrom('Chrome/150.0.7871.24'), 'chrome-150.0.7871.24');
+});
+
+test('browserRevFrom collapses HeadlessChrome onto chrome', () => {
+  // Same binary, two launch modes — a headless/headful flip must NOT
+  // invalidate an otherwise identical cache, or every local headful debug
+  // session would re-render the corpus.
+  assert.equal(browserRevFrom('HeadlessChrome/150.0.7871.24'), 'chrome-150.0.7871.24');
+  assert.equal(browserRevFrom('HeadlessChrome/150.0.7871.24'), browserRevFrom('Chrome/150.0.7871.24'));
+});
+
+test('browserRevFrom keeps the FULL build number, not just the milestone', () => {
+  // Chromium ships paint fixes in patch releases — the precise class of
+  // change this key exists to catch. Milestone-only granularity would let
+  // a patch bump keep serving refs from the pre-fix rasteriser.
+  assert.notEqual(browserRevFrom('Chrome/150.0.7871.24'), browserRevFrom('Chrome/150.0.7871.25'));
+  assert.notEqual(browserRevFrom('Chrome/150.0.7871.24'), browserRevFrom('Chrome/151.0.7900.1'));
+});
+
+test('browserRevFrom hardens the slug against path traversal', () => {
+  // The slug becomes a filesystem path segment; a '/' or '..' in a UA
+  // string must never escape the refs root.
+  const rev = browserRevFrom('Chrome/../../etc/passwd');
+  assert.doesNotMatch(rev, /[/\\]/, 'no path separators may survive');
+  assert.ok(!rev.includes('..'), `traversal survived: ${rev}`);
+});
+
+test('browserRevFrom buckets an unusable version explicitly, never silently', () => {
+  // A blank/absent version is a real condition (stubbed browser, CDP
+  // hiccup). It gets its OWN bucket rather than sharing a slot with a
+  // real build — no silent fallthrough.
+  assert.equal(browserRevFrom(''), UNKNOWN_BROWSER_REV);
+  assert.equal(browserRevFrom(null), UNKNOWN_BROWSER_REV);
+  assert.equal(browserRevFrom(undefined), UNKNOWN_BROWSER_REV);
+  assert.notEqual(UNKNOWN_BROWSER_REV, browserRevFrom('Chrome/150.0.7871.24'));
+});
+
+test('browserRevFrom tolerates a product string with no build number', () => {
+  assert.equal(browserRevFrom('Chromium'), 'chromium');
+});
+
+test('cachePathFor inserts the browser rev BESIDE the canvas rev', () => {
+  const rev = browserRevFrom('Chrome/150.0.7871.24');
+  const p = cachePathFor('abc123', 'css/css-gaps/flex/flex-gap-decorations-001.html', rev);
+  assert.match(p, new RegExp(
+    `refs\\${sep}abc123\\${sep}white-black-ink-font-lh\\${sep}chrome-150\\.0\\.7871\\.24` +
+    `\\${sep}css-gaps\\${sep}flex__flex-gap-decorations-001\\.png$`));
+});
+
+test('cachePathFor WITHOUT a browser rev keeps the historical scorer path', () => {
+  // run-titan.sh / section-runner.sh hand inject-wpt-block.mjs the
+  // version-less `.../refs/$WPT_REF/white-black-ink-font-lh` root. The
+  // 2-arg call must stay byte-identical to the pre-wave-24 layout or every
+  // scored pair would lose its reference.
+  const p = cachePathFor('abc123', 'css/css-gaps/flex/flex-gap-decorations-001.html');
+  assert.match(p, new RegExp(
+    `refs\\${sep}abc123\\${sep}white-black-ink-font-lh\\${sep}css-gaps\\${sep}flex__flex-gap-decorations-001\\.png$`));
+  // …and the two must be DIFFERENT paths, or the segment does nothing.
+  assert.notEqual(p, cachePathFor('abc123', 'css/css-gaps/flex/flex-gap-decorations-001.html', 'chrome-150.0.7871.24'));
+});
+
+test('a browser upgrade changes the cache path (the whole point of the key)', () => {
+  const a = cachePathFor('sha', 'css/css-color/a98rgb-001.html', browserRevFrom('Chrome/150.0.7871.24'));
+  const b = cachePathFor('sha', 'css/css-color/a98rgb-001.html', browserRevFrom('Chrome/151.0.7900.1'));
+  assert.notEqual(a, b, 'an upgrade must MISS the cache, not silently reuse the old rasteriser');
+});
+
+test('legacyClaimPath sits at the canvas-rev root, outside every section dir', () => {
+  // The claim file credits the version-less tree to one browser rev (the
+  // lazy-migration state machine). It must never live inside a section dir
+  // where a glob for refs could pick it up as a PNG.
+  const p = legacyClaimPath('abc123');
+  assert.match(p, new RegExp(`refs\\${sep}abc123\\${sep}white-black-ink-font-lh\\${sep}\\.legacy-browser-rev$`));
+  assert.doesNotMatch(p, /\.png$/);
 });
 
 // ── resolveRefPath ──────────────────────────────────────────────────────────

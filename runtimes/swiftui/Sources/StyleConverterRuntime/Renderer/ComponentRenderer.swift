@@ -1062,6 +1062,14 @@ public struct ComponentRenderer: View {
     // so they paint above the container's background/border (CSS 2.1
     // Appendix E step 8 vs steps 2–4); see the three-stage build there.
 
+    /// Wave 24 (lane GAPS-I) — this component's css-gaps-1 gap
+    /// decorations, or nil when it declares none of the family. Read by
+    /// the flex container branches below (the painter) and by the child
+    /// loop (the per-item anchor gate).
+    private var gapDecorationsConfig: GapDecorationsConfig? {
+        GapDecorationsExtractor.extract(from: component.properties)
+    }
+
     /// The normal-flow container for this component's IN-FLOW children
     /// (block / flex / grid selection). Split out of the container
     /// build by the wave-3 absolute-positioning fix so the overlay wrap
@@ -1120,6 +1128,15 @@ public struct ComponentRenderer: View {
             ) {
                 contentOrPlaceholder(style: style)
             }
+            // Wave 24 (lane GAPS-I): the gap-decorations painter. This
+            // is the WRAP flex path — the only one that can produce the
+            // multi-line geometry the css-gaps flex tests exercise. The
+            // modifier is a no-op (returns the container unchanged) for
+            // every container without an active rule, which is all of
+            // the committed corpus.
+            .gapDecorations(gapDecorationsConfig,
+                            mainHorizontal: !(layoutAgg.flexDirection == .column
+                                                || layoutAgg.flexDirection == .columnReverse))
         } else {
         switch style.layout.display {
         case .flexRow:
@@ -1159,6 +1176,10 @@ public struct ComponentRenderer: View {
                 ) {
                     contentOrPlaceholder(style: style)
                 }
+                // Wave 24 (lane GAPS-I): the NOWRAP row path still has
+                // item gaps to decorate — flex-gap-decorations-008 paints
+                // five column rules on a single overflowing line.
+                .gapDecorations(gapDecorationsConfig, mainHorizontal: true)
             } else {
                 // Childless flex → block path, exactly like the empty
                 // grid: the placeholder hugs top-leading and the outer
@@ -1186,6 +1207,11 @@ public struct ComponentRenderer: View {
                 ) {
                     contentOrPlaceholder(style: style)
                 }
+                // Wave 24 (lane GAPS-I): column-direction twin. Here the
+                // ITEM gaps are the ROW gaps, so the row-rule-* family
+                // paints between items and column-rule-* between lines —
+                // the swap lives in GapDecorationSegments.build.
+                .gapDecorations(gapDecorationsConfig, mainHorizontal: false)
             } else {
                 // Web parity (display→block rewrite for empty containers);
                 // see the .flexRow comment for the full rationale.
@@ -2099,6 +2125,13 @@ public struct ComponentRenderer: View {
             let isWrapFlex = parentAgg?.flexWrap == .wrap
                 || parentAgg?.flexWrap == .wrapReverse
             let isCSSFlex = parentAgg?.display == .flex && !isWrapFlex
+            // Wave 24 (lane GAPS-I, css-gaps-1): does THIS container
+            // paint gap decorations? Computed once for the whole child
+            // loop; false for every component in the committed corpus
+            // (no fixture carries a *-rule-* property that resolves to
+            // ink), so the per-child anchor below attaches nowhere and
+            // the baseline view tree is byte-identical.
+            let gapDecorActive = gapDecorationsConfig?.isActive == true
             // Column flex? Decides which axis counts as "cross" for the
             // stretch checks below.
             let isColumn = parentAgg?.flexDirection == .column
@@ -2206,18 +2239,50 @@ public struct ComponentRenderer: View {
                 }()
                 // Bug 2 list-marker — when the parent's source tag is an
                 // ordered/unordered list and this child is an <li>,
-                // prepend a numeric/bullet marker. SwiftUI has no
-                // ::marker pseudo, so we emit it inline via an HStack
-                // with a leading Text. Markers follow the simple-numeric
-                // algorithm: 1-based index + ". " for <ol>, "• " for
-                // <ul>. Honors only the common cases; full CSS Counter
-                // Styles L3 (arabic-indic, lower-roman, etc.) requires
-                // the ListStyleType property on the <li> which existing
-                // iOS appliers already extract — we leave that to a
-                // follow-up. (v2 rename: the hint now lives at
-                // meta.sourceTag, formerly `_tag`.)
+                // prepend a marker. SwiftUI has no ::marker pseudo, so we
+                // emit it inline via an HStack with a leading Text.
+                //
+                // Wave 24 (lane LF, B-RC3 parts 1+2): the marker is no
+                // longer hard-coded to "1." for <ol> / a bullet for <ul>.
+                // The tag supplies only the UA default (HTML §15.3.9); the
+                // ITEM's own list-style-* declarations — which is where the
+                // live wire puts them (tools/titan/runs/wave23-final/
+                // sections/css-lists/per-test-ir/wpt__css-lists__change-
+                // list-style-type-001.json carries ListStyleType square /
+                // none / upper-roman / decimal on each <li> and
+                // ListStylePosition INSIDE on the <ul>) — override it,
+                // inheritance-aware: `childInherited` is this container's
+                // already-merged inheritable set (list-style-* are
+                // "Inherited: yes", css-lists-3 §3.1), so a declaration
+                // made on an ancestor reaches the item too. ListMarkerText
+                // then owns the full css-counter-styles-3 §6 table.
+                //
+                // DEFERRED — B-RC3 part 3 (full marker geometry). The
+                // resolved `position` is carried on ListMarkerConfig and
+                // pinned by tests, but this HStack still paints the marker
+                // as a plain leading inline box for BOTH values;
+                // css-lists-3 §3.2 wants `outside` hung in the item's
+                // margin area and `inside` as the item's first inline box,
+                // with the UA marker padding instead of the fixed 4pt.
+                // That needs a custom Layout — out of this lane's scope.
+                // (v2 rename: the tag hint lives at meta.sourceTag.)
                 let parentTag = (component.meta?.sourceTag ?? "").lowercased()
                 let isListItem = (child.meta?.sourceTag ?? "").lowercased() == "li"
+                // "" whenever no marker box exists: not a list item, not a
+                // list container, or `list-style-type: none` (css-lists-3
+                // §3.1 — the item then has NO marker at all, so its content
+                // must start at its own content edge; the pre-wave-24 code
+                // still reserved a Text + 4pt spacing for those rows).
+                let markerText: String = {
+                    guard isListItem,
+                          let cfg = ListMarkerResolver.resolve(
+                            parentTag: parentTag,
+                            parentProperties: childInherited,
+                            childProperties: child.properties)
+                    else { return "" }
+                    return ListMarkerText.marker(index: index, config: cfg)
+                }()
+                let isMarkerRow = !markerText.isEmpty
                 // Wave 10 — the fragmentation contract (css-break-3 §4):
                 // a multicol container's single in-flow child whose
                 // block-size C exceeds the column block-size H breaks
@@ -2266,9 +2331,9 @@ public struct ComponentRenderer: View {
                         // the child, one per column (multicolFragmentRow
                         // below documents the modifier-order argument).
                         multicolFragmentRow(child: child, plan: plan)
-                    } else if isListItem && (parentTag == "ol" || parentTag == "ul") {
+                    } else if isMarkerRow {
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text(parentTag == "ol" ? "\(index + 1)." : "•")
+                            Text(markerText)
                             if !isCSSFlex, let ca = childAgg, let pa = parentAgg {
                                 // Marker rows keep the legacy decoration;
                                 // the host's placement inside the HStack
@@ -2325,8 +2390,7 @@ public struct ComponentRenderer: View {
                              Self.wptChildFillWidth(
                                 parentDisplay: style.layout.display,
                                 wptCaptureMode: wptCaptureMode,
-                                isMarkerRow: isListItem && (parentTag == "ol"
-                                                            || parentTag == "ul"),
+                                isMarkerRow: isMarkerRow,
                                 parentContentWidth: childCB,
                                 // Wave-9 regression fix: multicol parents
                                 // publish the §3 USED column width as the
@@ -2365,6 +2429,13 @@ public struct ComponentRenderer: View {
                 // child resolves var() against exactly its slot-parent
                 // chain (TK_TwoLevelShadow's mid `--accent` repaint).
                 .environment(\.cssVariables, mergedVariables)
+                // Wave 24 (lane GAPS-I): publish this item's resolved
+                // bounds so the container's gap-decoration painter can
+                // group lines and place rules. A transparent modifier
+                // (anchorPreference changes neither layout nor paint),
+                // and only attached at all when the container declares
+                // gap decorations — see gapDecorationItemFrame.
+                .gapDecorationItemFrame(index: index, active: gapDecorActive)
             }
         } else if Self.suppressesNamePlaceholder(component,
                                                  wptCaptureMode: wptCaptureMode) {

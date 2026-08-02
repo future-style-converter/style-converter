@@ -68,6 +68,10 @@ test('post-load: POST_LOAD_COMPUTED_PROPERTIES is the exact deliberate set', () 
     'transform',
     'align-self',
     'display', 'overflow-x', 'overflow-y', 'z-index',
+    // wave-24 B-RC4: the css-lists dynamic family. Both are INHERITED, and
+    // change-list-style-position-003 mutates the property on <body>, so no
+    // element the static extractor sees ever declares it.
+    'list-style-type', 'list-style-position',
   ]);
 });
 
@@ -76,13 +80,71 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
   // width/height must be concrete px. Silently widening these would bloat
   // every fixture (or bake keywords the converter treats differently).
   assert.deepEqual(Object.keys(WRITE_RULES).sort(),
-    ['align-self', 'bottom', 'height', 'left', 'right', 'top', 'transform', 'width', 'z-index']);
+    ['align-self', 'bottom', 'height', 'left', 'list-style-position',
+     'list-style-type', 'right', 'top', 'transform', 'width', 'z-index']);
   assert.equal(WRITE_RULES.top.deleteWhen, 'auto');
   assert.equal(WRITE_RULES.transform.deleteWhen, 'none');
   assert.equal(WRITE_RULES.width.requirePx, true);
   // RC-A5a: align-self's initial 'auto' carries no declaration (css-align-3
   // §6.1) — delete-not-write, so a stale pre-mutation keyword cannot linger.
   assert.equal(WRITE_RULES['align-self'].deleteWhen, 'auto');
+  // wave-24 B-RC4: the CSS Lists 3 initials (MEASURED as Chromium's
+  // computed values for a plain <div>). Without delete-not-write, EVERY
+  // component in every post-load fixture would gain two list-marker keys.
+  assert.equal(WRITE_RULES['list-style-type'].deleteWhen, 'disc');
+  assert.equal(WRITE_RULES['list-style-position'].deleteWhen, 'outside');
+});
+
+test('post-load b-rc4: an inherited list-style-position mutation lands, initials do not', () => {
+  // The exact change-list-style-position-003 shape: `document.body.style
+  // .listStylePosition = "inside"` after load. No element declares it
+  // statically, so the fixture's marker stayed `outside` while the ref
+  // painted `inside`.
+  const inside = { properties: { display: 'list-item' } };
+  overlayComputedOnComponent(inside, {
+    display: 'list-item',
+    'list-style-type': 'decimal',
+    'list-style-position': 'inside',      // inherited from the mutated body
+  });
+  assert.equal(inside.properties['list-style-position'], 'inside');
+  assert.equal(inside.properties['list-style-type'], 'decimal');
+
+  // A plain non-list box reports the CSS initials — delete-not-write, so
+  // the overlay must add NEITHER key (the anti-bloat half of the rule).
+  const plain = { properties: { display: 'block' } };
+  overlayComputedOnComponent(plain, {
+    display: 'block',
+    'list-style-type': 'disc',
+    'list-style-position': 'outside',
+  });
+  assert.equal(plain.properties['list-style-type'], undefined);
+  assert.equal(plain.properties['list-style-position'], undefined);
+});
+
+test('post-load b-rc4: a STALE static list-style-position is deleted, never left to linger', () => {
+  // The inverse mutation (script switches `inside` → the initial
+  // `outside`): the computed value carries no declaration, but the static
+  // key MUST still go, or the runtime would render the pre-script marker.
+  const cmp = { properties: { 'list-style-position': 'inside', 'list-style-type': 'square' } };
+  overlayComputedOnComponent(cmp, {
+    'list-style-position': 'outside',
+    'list-style-type': 'disc',
+  });
+  assert.equal(cmp.properties['list-style-position'], undefined, 'stale position lingered');
+  assert.equal(cmp.properties['list-style-type'], undefined, 'stale type lingered');
+});
+
+test('post-load b-rc4: the list-style SHORTHAND is stripped so it cannot outrank the baked longhands', () => {
+  // contain-style-dynamic-002's exact static shape (`list-style: inside
+  // decimal`). Leaving it in place would let the runtime cascade re-assert
+  // the pre-mutation position over the appended longhand.
+  const cmp = { properties: { 'list-style': 'inside decimal' } };
+  overlayComputedOnComponent(cmp, {
+    'list-style-type': 'decimal',
+    'list-style-position': 'outside',     // script switched it back
+  });
+  assert.equal(cmp.properties['list-style'], undefined, 'shorthand survived the strip');
+  assert.equal(cmp.properties['list-style-type'], 'decimal');
 });
 
 // ── 2. Top-layer decline boundary ───────────────────────────────────────────
@@ -428,7 +490,9 @@ test('post-load: SHORTHAND_CONFLICTS covers every family the overlay writes', ()
   assert.deepEqual([...SHORTHAND_CONFLICTS].sort(), [
     'background', 'border', 'border-bottom', 'border-color', 'border-left',
     'border-right', 'border-style', 'border-top', 'border-width',
-    'inset', 'margin', 'overflow', 'padding',
+    // wave-24 B-RC4: `list-style` expands to the two longhands the overlay
+    // now bakes (plus the image leg it documents as dropped).
+    'inset', 'list-style', 'margin', 'overflow', 'padding',
   ]);
 });
 

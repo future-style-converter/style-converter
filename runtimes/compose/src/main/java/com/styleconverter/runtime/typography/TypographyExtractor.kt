@@ -260,23 +260,28 @@ object TypographyExtractor {
     /**
      * Extract font family from IR data.
      *
-     * Handles formats:
-     * - String keyword: "sans-serif", "serif", "monospace", "cursive"
+     * Wave 24 (lane LF, B-RC7): unified onto [CssFontFamilyResolver], the
+     * SAME resolver TextStyleApplier uses. The old body ran the payload
+     * through `ValueExtractors.extractKeyword`, which returns null for a
+     * `JsonArray` — and the canonical converter wire for FontFamily is
+     * ALWAYS an array (verified live: `["monospace"]`, `["Helvetica
+     * Neue","Helvetica","Arial","sans-serif"]`). So every real
+     * declaration extracted as null here, silently handing
+     * `ChUnitMetrics.measure` (StyleApplier.buildSpacingContext, the `ch`
+     * unit basis) and `TypographyApplier.buildTextStyle` a null family
+     * while the glyphs on screen were painted from a DIFFERENT resolver.
+     * One resolver now answers both.
+     *
+     * Handles formats (see [CssFontFamilyResolver.families]):
+     * - Array of names: ["Inter", "sans-serif"] — the canonical wire
      * - Object with families array: { "families": ["Roboto", "sans-serif"] }
+     * - String keyword: "sans-serif", "serif", "monospace", "cursive"
      *
      * @param json JSON element containing font family data
      * @return FontFamily, or null if not extractable
      */
-    private fun extractFontFamily(json: JsonElement?): FontFamily? {
-        val familyName = ValueExtractors.extractKeyword(json) ?: return null
-        return when (familyName.lowercase()) {
-            "serif" -> FontFamily.Serif
-            "sans-serif" -> FontFamily.SansSerif
-            "monospace" -> FontFamily.Monospace
-            "cursive" -> FontFamily.Cursive
-            else -> FontFamily.Default
-        }
-    }
+    private fun extractFontFamily(json: JsonElement?): FontFamily? =
+        CssFontFamilyResolver.resolve(json)
 
     /**
      * Extract font size from IR data.

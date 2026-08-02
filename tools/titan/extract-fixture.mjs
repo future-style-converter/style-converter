@@ -4996,8 +4996,29 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // a fresh, empty line box.
       if (lineCtx) lineCtx.hasInline = false;
     } else if (matchedRules === 0 && Object.keys(props).length === 0 && !node.ownText
+               && !(node.children && node.children.length > 0)
                && !(INTRINSIC_WIDGET_TAGS.has(node.tag)
                     && !(node.attrs && FOREIGN_NS_MARKER_ATTR in node.attrs))) {
+      // wave-24 B-RC2: the `!node.children` guard above keeps rule-less
+      // CONTAINERS out of this branch. The placeholder's premise is "this
+      // element has no content of its own, so give the canvas SOMETHING
+      // non-degenerate" — but a rule-less `<ul>` wrapping kept `<li>`
+      // children HAS content: the children the walker already decided to
+      // keep, emitted into `cmp.children` a few lines below. Forcing
+      // 100x100 on such a wrapper does not add a placeholder, it CLIPS a
+      // real subtree into a hard 100×100 box (and, worse, pins a width the
+      // children's own layout should have derived). MEASURED on
+      // css-lists/change-list-style-type-001: its ten un-classed `<ul>`s
+      // match no rule and carry no own text, so all ten became 100×100
+      // boxes hosting their `<li>` — a column of clipped squares against a
+      // ref that is ten full-width list rows. With the guard they emit an
+      // EMPTY properties bag, exactly like the `ownText` case documented
+      // below: the renderer lays the subtree out at UA defaults and the
+      // capture is meaningful without an invented width/height.
+      // Note the guard reads the TREE node's kept children (the same array
+      // the `cmp.children` map is built from), not the raw DOM — an
+      // element whose every child was dropped by the walker really is
+      // empty and correctly keeps the placeholder.
       // wave-22 EX2 A-RC1 part 2: the `!INTRINSIC_WIDGET_TAGS` guard above
       // keeps rule-less form controls OUT of this branch — see that set's
       // banner for why a 100x100 <select> is worse than the UA chrome it

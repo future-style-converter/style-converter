@@ -17,7 +17,21 @@ See `CLAUDE.md` → *Per-property contract*.
 - ColumnSpan
 - ColumnWidth
 
+CSS Gap Decorations Level 1 (wave 24) — same category, same folder:
+
+- ColumnRuleBreak
+- ColumnRuleInset
+- RowRuleBreak
+- RowRuleColor
+- RowRuleInset
+- RowRuleStyle
+- RowRuleWidth
+- RuleOverlap
+
 ## Status
 
-Empty — properties migrate in one-at-a-time from `../StyleBuilder.ts` as
-they're implemented per the `testing/ROLLOUT.md` phase plan.
+All 16 properties ship a Config/Extractor/Applier triplet, dispatched from
+`_dispatch.ts` (`applyColumnsPhase10`). The gap-decorations family is a pure
+pass-through: Chromium paints gap decorations natively in flex containers, so
+Web's recovery is parser + verbatim CSS emission — no painted segments. Its
+eight keys are csstype-widened because css-gaps-1 is still a draft.

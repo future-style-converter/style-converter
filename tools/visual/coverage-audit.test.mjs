@@ -35,13 +35,13 @@ test('emits both REGISTERED totals and REAL totals + applierFiles', () => {
   // Registered (string-presence) block — the historical, backward-compatible
   // shape other consumers may read.
   assert.equal(typeof j.totals, 'object');
-  assert.equal(j.totals.ir, 550, 'IR catalogue is 550 properties');
+  assert.equal(j.totals.ir, 558, 'IR catalogue is 558 properties');
   for (const p of ['android', 'ios', 'web']) {
     assert.equal(typeof j.totals[p], 'number', `totals.${p} present`);
   }
   // Real (dedicated-applier-file) block — the honesty signal added here.
   assert.equal(typeof j.realTotals, 'object', 'realTotals present');
-  assert.equal(j.realTotals.ir, 550);
+  assert.equal(j.realTotals.ir, 558);
   for (const p of ['android', 'ios', 'web']) {
     assert.equal(typeof j.realTotals[p], 'number', `realTotals.${p} present`);
   }
@@ -52,12 +52,12 @@ test('emits both REGISTERED totals and REAL totals + applierFiles', () => {
   }
 });
 
-test('every platform is fully REGISTERED (the 550/550 claim)', () => {
+test('every platform is fully REGISTERED (the 558/558 claim)', () => {
   const j = runJson();
   // The registration facade is complete on all three platforms — that is the
   // exact over-count the REAL signal exists to expose.
   for (const p of ['android', 'ios', 'web']) {
-    assert.equal(j.totals[p], 550, `${p} registers all 550`);
+    assert.equal(j.totals[p], 558, `${p} registers all 558`);
   }
   assert.equal(j.passed, true, 'gate passes on the registered signal');
 });
@@ -71,11 +71,11 @@ test('REAL is a strict, honest lower bound below REGISTERED', () => {
       j.realTotals[p] <= j.totals[p],
       `${p}: real (${j.realTotals[p]}) <= registered (${j.totals[p]})`,
     );
-    // And real must be strictly below the 550 facade — the whole point of the
+    // And real must be strictly below the 558 facade — the whole point of the
     // honesty fix is that string-presence over-counts real rendering.
     assert.ok(
-      j.realTotals[p] < 550,
-      `${p}: real (${j.realTotals[p]}) is below the 550 facade`,
+      j.realTotals[p] < 558,
+      `${p}: real (${j.realTotals[p]}) is below the 558 facade`,
     );
     // Some real appliers exist on every platform.
     assert.ok(j.realTotals[p] > 0, `${p}: has at least one real applier`);

@@ -2671,10 +2671,36 @@ test('A-RC1 part 2: a rule-less <select> is NOT a 100x100 placeholder', () => {
   assert.equal(components['w__0']._tag, 'select');
 });
 
-test('A-RC1 part 2: a rule-less <div> still IS a placeholder', () => {
-  // The exemption is narrow — plain wrappers keep the honest empty-node box.
+test('A-RC1 part 2: a rule-less LEAF <div> still IS a placeholder', () => {
+  // The widget exemption is narrow — a plain EMPTY wrapper keeps the honest
+  // empty-node box. wave-24 B-RC2 narrowed the branch by a second guard
+  // (kept children), so the assertion moved to the INNER div: it is the one
+  // with neither rules, own text, nor children.
   const { components } = buildComponents('<body><div><div></div></div></body>', [], 'd');
-  assert.deepEqual(components['d__0'].properties, { width: '100px', height: '100px' });
+  const inner = components['d__0'].children['d__0__0'];
+  assert.deepEqual(inner.properties, { width: '100px', height: '100px' });
+});
+
+test('B-RC2: a rule-less CONTAINER is NOT a placeholder — its children are its content', () => {
+  // wave-24 B-RC2. The placeholder's premise is "no content of its own"; a
+  // wrapper with KEPT children has content, and forcing 100×100 clips that
+  // subtree into a hard box instead of adding a placeholder. Measured on
+  // css-lists/change-list-style-type-001, whose ten un-classed <ul>s (no
+  // matching rule, no own text) each became a 100×100 square hosting their
+  // <li> against a ref of ten full-width list rows.
+  const { components } = buildComponents('<body><div><div></div></div></body>', [], 'd');
+  assert.deepEqual(components['d__0'].properties, {},
+    'rule-less container must emit an EMPTY bag, like the ownText case');
+  // The child is still emitted — the guard changes the parent's bag only.
+  assert.equal(Object.keys(components['d__0'].children).length, 1);
+});
+
+test('B-RC2: a container whose children were all DROPPED keeps the placeholder', () => {
+  // The guard reads the TREE node's KEPT children, not the raw DOM: an
+  // element the walker emptied really is an empty node. A comment-only
+  // wrapper is the narrow case — nothing survives the walk.
+  const { components } = buildComponents('<body><div><!-- gone --></div></body>', [], 'c');
+  assert.deepEqual(components['c__0'].properties, { width: '100px', height: '100px' });
 });
 
 test('A-RC1 part 2: INTRINSIC_WIDGET_TAGS excludes the chrome-less inline tags', () => {

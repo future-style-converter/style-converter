@@ -178,6 +178,21 @@ export const POST_LOAD_COMPUTED_PROPERTIES = [
   // shorthand is stripped); z-index orders the overlapping boxes these
   // tests paint ('auto' is delete-not-write).
   'display', 'overflow-x', 'overflow-y', 'z-index',
+  // wave-24 B-RC4: the css-lists dynamic family's subjects. Both are
+  // INHERITED (CSS Lists 3 §3), and the mutation is typically made on an
+  // ANCESTOR — css-lists/change-list-style-position-003 runs
+  // `document.body.style.listStylePosition = "inside"` after load, so no
+  // element the static extractor can see ever declares it, and the marker
+  // stays `outside` in the fixture while the ref paints it `inside`.
+  // Snapshotting the COMPUTED value delivers the inherited post-script
+  // state to every element that actually renders a marker. Both are
+  // delete-not-write at their CSS-initial values (MEASURED in the pinned
+  // headless Chromium against both css-lists change-* tests: a plain
+  // `<div>`/`<body>` reports `list-style-type: disc` /
+  // `list-style-position: outside`), so the ~all non-list elements of the
+  // corpus gain no key and the overlay stays reviewable — while a `<ol>`
+  // (computed `decimal`) or an `inside` marker writes explicitly.
+  'list-style-type', 'list-style-position',
 ];
 
 // Per-property write rules for the merge. Default (not listed) = write the
@@ -198,6 +213,16 @@ export const WRITE_RULES = {
   'align-self': { deleteWhen: 'auto' },
   width:      { requirePx: true },      // 'auto' (e.g. display:none) → delete
   height:     { requirePx: true },
+  // wave-24 B-RC4: the CSS-initial values of the two list properties (CSS
+  // Lists 3 §3.1/§3.2 — `disc` and `outside`), MEASURED as what Chromium
+  // reports for a non-list element in the pinned headless build. They carry
+  // no declaration, so writing them would stamp a list-marker property onto
+  // every div in the corpus; the matching static key is still DELETED so a
+  // stale pre-mutation `list-style-position: outside` cannot linger under a
+  // script that switched it (the whole change-list-style-position-003
+  // failure mode).
+  'list-style-type':     { deleteWhen: 'disc' },
+  'list-style-position': { deleteWhen: 'outside' },
 };
 
 // Static shorthands the computed longhands displace. When the overlay writes
@@ -212,6 +237,20 @@ export const SHORTHAND_CONFLICTS = [
   'border', 'border-width', 'border-style', 'border-color',
   'border-top', 'border-right', 'border-bottom', 'border-left',
   'overflow',
+  // wave-24 B-RC4: `list-style` expands to type + position + IMAGE. The
+  // overlay now bakes the first two, so a surviving shorthand could
+  // re-assert the stale pre-mutation position over them in the runtime
+  // cascade — the exact failure the strip exists to prevent. Documented
+  // loss, same class as `background`'s non-color legs: the list-style-IMAGE
+  // leg is dropped (Chromium resolves it to an absolute file:// URL that
+  // would defeat extract-fixture's asset inlining, so snapshotting it is
+  // not an option). MEASURED scope of that loss on the pinned corpus: of
+  // the 4,593 wall-tagged (post-load-eligible) tests, exactly 2 use the
+  // `list-style` shorthand at all (css-contain/contain-style-dynamic-002
+  // `inside decimal`, css-view-transitions/…/implicit-stacking-context
+  // `none`) and NEITHER carries an image leg — both are strictly better
+  // off with the baked longhands.
+  'list-style',
 ];
 
 // ── Top-layer decline (static source scan) ───────────────────────────────────
