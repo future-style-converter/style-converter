@@ -464,6 +464,26 @@ dirs + WPT corpus are gitignored):
   css-values (the attr() family, the queued bake). 20 sections, 233
   scored; zero pass-regressions; 327-net clean. Corpus totals: **web
   207/233, iOS 192/233, Android 188/233**.
+  Wave 25 (`tools/titan/results/corpus-v5-0.json`) is the **image-pad
+  boundary** — the most consequential instrument correction since the
+  white canvas. The ref contract itself was broken: `:where(body)
+  {padding:16px}` cannot move `position:absolute` overlays in ref pages,
+  so any ref using abs-positioned expected-result bars was internally
+  misaligned by (−16,−16) — painting *correctly* was penalized (92–100%
+  of every css-gaps mismatch). Refs now render unpadded at 358×568 and
+  the 16px frame is added in image space; the out-of-flow contract
+  migrated on all three platforms (css-position 7/7 held); both bake
+  paths share one injection factory with the ref pipeline. Scoring
+  gained the colorDivergent+ΔE≥2.3 hard fail and the coverage-ratio
+  gate — 57 predicted dishonest passes flipped, zero true passes lost.
+  With the fixed ref, the wave-24 gap painters were vindicated:
+  **css-gaps web 12/12, natives 11/12** (from 2–6/12), alongside three
+  general flex fixes (wrapping main-axis gap, shrink-0 overflow,
+  cross-axis stretch). The **attr() bake** (the fourth) took css-values
+  to 11/12 everywhere. UA block margins extended to block descendants.
+  Corpus totals under the strictest contract yet: **web 202/233, iOS
+  188/233, Android 183/233** — down ~5 per platform in exchange for
+  honesty. Six sections perfect on all three platforms; 327-net clean.
 
 ## Test suites
 
@@ -471,9 +491,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 236 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1084 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1531 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 905 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 887 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1608 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 964 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 968 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 34 goldens (12 v1 + 22 v2) × 4 codebases |
 
 ## Roadmap

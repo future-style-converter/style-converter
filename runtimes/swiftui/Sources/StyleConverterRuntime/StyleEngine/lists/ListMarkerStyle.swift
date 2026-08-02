@@ -76,13 +76,31 @@ enum ListMarkerResolver {
     ///
     /// Order is the CSS cascade for an inherited property (css-lists-3
     /// §3.1 — all three `list-style-*` longhands are "Inherited: yes";
-    /// css-cascade-4 §7.3):
+    /// css-cascade-4 §4.3):
     ///   1. the container's UA default for `parentTag`,
-    ///   2. the parent's declarations — the caller passes the already
-    ///      inheritance-filtered set (`InheritedText.inheritable`), so a
-    ///      value declared on an ancestor rather than on the `<ul>` still
-    ///      reaches the item,
+    ///   2. the container's declarations — the caller passes the already
+    ///      inheritance-merged set (`InheritedText.inheritable`),
     ///   3. the item's OWN declarations, which win.
+    ///
+    /// ## Wave 25 — the cascade inversion this order used to have
+    /// Slot 2 is a MERGED list, so an ancestor's `list-style-type` used to
+    /// arrive there and beat the container's UA default. That is
+    /// backwards: css-cascade-4 §4.3 consults inheritance only when the
+    /// cascade produced NO value for the element, and the UA sheet's
+    /// `ul { list-style-type: disc }` (HTML §15.3.9) IS a declaration on
+    /// the container element. The repair is NOT a fold reorder here — an
+    /// author declaration on the container must still beat the UA rule
+    /// (the live `marker-text-matches-armenian` `<ol>` declares `armenian`
+    /// and must keep it). It happens one step earlier, at the inheritance
+    /// merge, where the container's OWN list is still separable from what
+    /// it inherited: `ListStyleUaRule.apply` substitutes the UA value for
+    /// an ancestor-inherited one. By the time `parentProperties` reaches
+    /// this function it is already cascade-correct, so the plain
+    /// parent-then-child fold below is right.
+    ///
+    /// `list-style-position` and `-image` have no UA declaration on
+    /// `ul`/`ol`, so an ancestor's value for those legitimately still
+    /// reaches the item through slot 2.
     ///
     /// - Returns: `nil` when `parentTag` is not a list container.
     static func resolve(parentTag: String?,
@@ -99,6 +117,21 @@ enum ListMarkerResolver {
                 if let t = markerType(from: p.data) { cfg.type = t }
             case "ListStylePosition":
                 if let pos = markerPosition(from: p.data) { cfg.position = pos }
+            // Wave 25: the UNEXPANDED shorthand. InheritedText.inheritedTypes
+            // has always carried "ListStyle" down the inheritance channel,
+            // but no branch here applied it — a wire doc carrying the
+            // shorthand claimed the property and rendered nothing. It is
+            // unreachable from this repo's converter (pinned by a live run
+            // — see ListStyleShorthand's header) but tolerated by
+            // schema/spec/05-versioning.md, so a foreign producer can emit
+            // it. `image` is deliberately dropped: ListMarkerConfig models
+            // no marker image and ListMarkerText paints glyphs only.
+            case "ListStyle":
+                if let expansion = ListStyleShorthand
+                    .expand(ValueExtractors.extractKeyword(p.data)) {
+                    cfg.type = expansion.type
+                    cfg.position = expansion.position
+                }
             default: break
             }
         }
@@ -117,9 +150,17 @@ enum ListMarkerResolver {
     /// UNDEFINED name as decimal" (they ARE defined — the wire lost the
     /// rule). Same decision as the Compose twin.
     static func markerType(from data: IRValue?) -> ListMarkerType? {
-        guard let kw = ValueExtractors.extractKeyword(data)?
-            .lowercased().replacingOccurrences(of: "_", with: "-")
-        else { return nil }
+        guard let kw = ValueExtractors.extractKeyword(data) else { return nil }
+        return markerType(fromKeyword: kw)
+    }
+
+    /// The counter-style keyword table, split out of `markerType(from:)`
+    /// so ListStyleShorthand resolves a shorthand's type component from
+    /// the SAME table (a second copy would be free to drift). Accepts both
+    /// wire spellings — hyphenated (`upper-roman`, what the live css-lists
+    /// IR carries) and underscored — and any casing.
+    static func markerType(fromKeyword rawKeyword: String) -> ListMarkerType? {
+        let kw = rawKeyword.lowercased().replacingOccurrences(of: "_", with: "-")
         switch kw {
         case "disc": return .disc
         case "circle": return .circle

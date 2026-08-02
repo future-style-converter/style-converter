@@ -142,14 +142,15 @@ final class FixedHoistTests: XCTestCase {
 
     /// Rasterize a root list through a REPLICA of the composed canvas's
     /// exact frame chain (ComposedCaptureCanvas: 358 content box, 16px
-    /// pad, 390 wide, 600 min height, white, canvas-root overlay) at
+    /// frame, 390 wide, 600 min height, white, canvas-root overlay) at
     /// scale 1. wptCaptureMode is ON — the composed canvas only ever
     /// runs in WPT capture (name placeholders suppressed, content-box
     /// default), so the raster matches the production composed path.
     @MainActor
     private func renderComposed(_ roots: [IRComponent]) throws -> (px: [UInt8], w: Int, h: Int) {
         // The wave-17 split under test: flow half → padded VStack,
-        // hoisted half → the unpadded canvas-root overlay.
+        // hoisted half → the canvas-root overlay, whose own `canvasFrame`
+        // inset places it at the INITIAL CONTAINING BLOCK corner.
         let split = FixedHoist.split(roots: roots)
         let view = VStack(alignment: .leading, spacing: 0) {
             // Positional identity, same as the harness root loop.
@@ -167,19 +168,25 @@ final class FixedHoistTests: XCTestCase {
         }
         // The ref 358px content box, block-flow origin.
         .frame(maxWidth: 390 - 32, alignment: .topLeading)
-        // The ref's 16px body padding — what hoisted boxes must escape.
-        .padding(16)
+        // The canvas frame (the ref's image-space pad, CANVAS_PAD_PX).
+        .padding(WPTCanvas.canvasFramePx)
         // Full 390 width, 600 min height (the ref min-height:100vh floor).
         .frame(minWidth: 390, maxWidth: 390, minHeight: 600, alignment: .topLeading)
         // Natural height above the floor, like the harness canvas.
         .fixedSize(horizontal: false, vertical: true)
         // Corpus-v4 white canvas → "unpainted" is assertable.
         .background(Color.white)
-        // The wave-17 overlay: attached OUTSIDE the padding, on the full
-        // unpadded frame — its top-leading corner is canvas (0,0).
+        // The wave-17 overlay: attached OUTSIDE the padding, on the FULL
+        // frame, then inset by `canvasFrame` to the ICB corner — the exact
+        // production wiring (ComposedCaptureCanvas passes Self.padding to
+        // both z-partitions). Wave 25 round 3 moved that corner from the
+        // raw canvas (0,0) to the framed content corner (16,16), because
+        // the ref's frame became an image-space translation that moves
+        // abspos and in-flow ink alike.
         .overlay(alignment: .topLeading) {
             if !split.hoisted.isEmpty {
-                FixedHoistOverlay(components: split.hoisted)
+                FixedHoistOverlay(components: split.hoisted,
+                                  canvasFrame: WPTCanvas.canvasFramePx)
             }
         }
         // Same capture geometry the harness publishes (390×844, 358 CB).
@@ -227,55 +234,64 @@ final class FixedHoistTests: XCTestCase {
         c.r < 25 && c.g < 25 && c.b < 25
     }
 
-    // MARK: - S1: root-level fixed → unpadded canvas (100, 0)
+    // MARK: - S1: root-level fixed → ICB (100, 0) = canvas (116, 16)
 
-    /// A root `position: fixed; left: 100; top: 0` box must paint at
-    /// canvas (100, 0) — OUTSIDE the 16px pad (F1: the viewport is the
-    /// containing block; the canvas pad is body padding, not an inset
-    /// basis) — and reserve no flow space.
+    /// A root `position: fixed; left: 100; top: 0` box must paint at ICB
+    /// (100, 0) — F1: the viewport is the containing block — and reserve no
+    /// flow space. Wave 25 round 3: the ICB corner is the FRAMED content
+    /// corner, so that lands at canvas (116, 16). Through wave 24 it was
+    /// canvas (100, 0), matching refs whose CSS body pad moved only in-flow
+    /// content; the image-space frame moves the ref's fixed boxes too.
     @MainActor
-    func testS1RootFixedAnchorsAtUnpaddedCanvasOrigin() throws {
+    func testS1RootFixedAnchorsAtTheIcbCorner() throws {
         let img = try renderComposed([
             try box(id: "f", position: "FIXED", left: 100, top: 0,
                     w: 50, h: 50, rgb: (1, 0, 0)),
         ])
-        // (102, 2): just inside the box's (100, 0) corner — a padded
-        // anchor would put the corner at (116, 16), leaving this white.
-        XCTAssertTrue(isRed(rgb(img, 102, 2)),
-                      "root fixed left:100/top:0 must anchor at UNPADDED canvas (100,0) — a white sample means the 16px pad leaked into the fixed containing block")
-        // (98, 2): left of the box — proves the box did not smear from 0.
-        XCTAssertTrue(isWhite(rgb(img, 98, 2)),
+        // (118, 18): just inside the box's canvas (116, 16) corner.
+        XCTAssertTrue(isRed(rgb(img, 118, 18)),
+                      "root fixed left:100/top:0 must anchor at the ICB corner — canvas (116,16) under the wave-25 image-space frame")
+        // (102, 2): the OLD wave-17 anchor (100,0) — must be white now, or
+        // the overlay is still mounting at the raw canvas corner.
+        XCTAssertTrue(isWhite(rgb(img, 102, 2)),
+                      "canvas (100,0) must be white — the hoist origin is still the unframed canvas corner")
+        // (114, 18): left of the box — proves it did not smear from 16.
+        XCTAssertTrue(isWhite(rgb(img, 114, 18)),
                       "canvas left of the fixed box must stay white — the box is anchoring left of its declared inset")
-        // (152, 52): past the 50×50 span — no runaway fill.
-        XCTAssertTrue(isWhite(rgb(img, 152, 52)),
+        // (168, 68): past the 50×50 span from (116,16) — no runaway fill.
+        XCTAssertTrue(isWhite(rgb(img, 168, 68)),
                       "past the fixed box's 50px span the canvas must stay white")
     }
 
-    // MARK: - S2: root-level absolute → unpadded canvas (100, 0)
+    // MARK: - S2: root-level absolute → ICB (100, 0) = canvas (116, 16)
 
-    /// Same anchor for a root ABSOLUTE box — the measured web behavior:
-    /// with no positioned ancestor, the initial containing block is the
-    /// unpadded canvas (left:100 lands at x=100, never 116).
+    /// Same anchor for a root ABSOLUTE box: with no positioned ancestor its
+    /// containing block is the INITIAL containing block — the ref's render
+    /// viewport, which the image-space frame places at canvas (16,16). So
+    /// `left:100` lands at x=116, sharing the offset its in-flow siblings
+    /// get (wave 17 measured x=100 against the pre-CAL-RC1 refs, where the
+    /// CSS body pad moved in-flow content only).
     @MainActor
-    func testS2RootAbsoluteAnchorsAtUnpaddedCanvasOrigin() throws {
+    func testS2RootAbsoluteAnchorsAtTheIcbCorner() throws {
         let img = try renderComposed([
             try box(id: "a", position: "ABSOLUTE", left: 100, top: 0,
                     w: 50, h: 50, rgb: (0, 0, 1)),
         ])
-        // (102, 2): inside the (100, 0)-anchored box (see S1 rationale).
-        XCTAssertTrue(isBlue(rgb(img, 102, 2)),
-                      "root absolute left:100/top:0 must anchor at UNPADDED canvas (100,0) — the initial containing block is the canvas, not its padded content box")
-        // (98, 2) / (152, 52): outside the box on both sides — white.
-        XCTAssertTrue(isWhite(rgb(img, 98, 2)))
-        XCTAssertTrue(isWhite(rgb(img, 152, 52)))
+        // (118, 18): inside the canvas (116, 16) anchor (see S1 rationale).
+        XCTAssertTrue(isBlue(rgb(img, 118, 18)),
+                      "root absolute left:100/top:0 must anchor at the ICB corner — canvas (116,16), the same frame its in-flow siblings sit inside")
+        // (114, 18) / (168, 68): outside the box on both sides — white.
+        XCTAssertTrue(isWhite(rgb(img, 114, 18)))
+        XCTAssertTrue(isWhite(rgb(img, 168, 68)))
     }
 
     // MARK: - S3: fixed child of a moved relative parent (the raster proof)
 
     /// THE diagnosed-bug pin: a fixed child (left:116, top:16) of an
-    /// in-flow RELATIVE parent painted at (116, 16) must land at canvas
-    /// (116, 16) — its OWN viewport anchor — never at parent + offset
-    /// = (232, 32). The parent must still paint at its relative slot.
+    /// in-flow RELATIVE parent painted at canvas (116, 16) must land at ITS
+    /// OWN viewport anchor — ICB (116, 16), i.e. canvas (132, 32) under the
+    /// wave-25 frame — never at parent + offset = (232, 32). The parent
+    /// must still paint at its relative slot.
     @MainActor
     func testS3FixedChildOfMovedRelativeParentDoesNotCompound() throws {
         // Parent: in flow at (16,16) + relative left:100 → paints at
@@ -291,14 +307,17 @@ final class FixedHoistTests: XCTestCase {
                 #"{"type":"Height","data":{"type":"length","px":30.0}},"# +
                 #"{"type":"BackgroundColor","data":{"srgb":{"r":1.0,"g":0.0,"b":0.0}}}]}"#)
         let img = try renderComposed([parent])
-        // (118, 18): inside the child's OWN canvas anchor (116..146 both
-        // axes) — and the child paints ABOVE the parent it overlaps
-        // (fixed boxes paint over in-flow content, Appendix E step 8).
-        XCTAssertTrue(isRed(rgb(img, 118, 18)),
-                      "the fixed child must paint at ITS OWN canvas (116,16) — viewport anchor, above the overlapping parent")
-        // (160, 60): inside the parent (116..166, 16..66) but outside the
-        // child — the relative parent still paints at its moved slot.
-        XCTAssertTrue(isBlue(rgb(img, 160, 60)),
+        // (134, 34): inside the child's OWN anchor — ICB (116,16) = canvas
+        // (132..162, 32..62) — and the child paints ABOVE the parent it
+        // overlaps (fixed boxes paint over in-flow content, Appendix E
+        // step 8).
+        XCTAssertTrue(isRed(rgb(img, 134, 34)),
+                      "the fixed child must paint at ITS OWN ICB anchor (116,16) = canvas (132,32) — viewport anchor, above the overlapping parent")
+        // (120, 20): inside the parent (canvas 116..166, 16..66) but LEFT
+        // of the child — the relative parent still paints at its moved
+        // flow slot, which the frame does NOT move again (its 16px inset
+        // is the flow Column's padding, already counted).
+        XCTAssertTrue(isBlue(rgb(img, 120, 20)),
                       "the relative parent must still paint at flow origin + relative offset (116,16)")
         // (234, 34): where the COMPOUNDED bug would paint the child
         // (parent (116,16) + child inset (116,16) = (232,32)) — white.
@@ -308,14 +327,16 @@ final class FixedHoistTests: XCTestCase {
 
     // MARK: - S4: absolute child anchors at its ancestor's padding box
 
-    /// A hoisted absolute ANCESTOR at (50, 40) with a 5px border and an
-    /// absolute child at left:10/top:10: the child anchors at the
-    /// ancestor's PADDING box (css-position-3 §3.1, the wave-8 overlay
-    /// inset) → canvas x = 50 + 5 + 10 = 65, y = 40 + 5 + 10 = 55.
+    /// A hoisted absolute ANCESTOR at ICB (50, 40) — canvas (66, 56) under
+    /// the wave-25 frame — with a 5px border and an absolute child at
+    /// left:10/top:10: the child anchors at the ancestor's PADDING box
+    /// (css-position-3 §3.1, the wave-8 overlay inset) → canvas
+    /// x = 66 + 5 + 10 = 81, y = 56 + 5 + 10 = 71. The frame translates the
+    /// hoisted ancestor; the child's padding-box basis is unchanged.
     @MainActor
     func testS4AbsoluteChildAnchorsAtAncestorPaddingBox() throws {
-        // Ancestor: absolute root (hoisted, unpadded anchor (50,40)),
-        // 60×60 content + 5px solid black border, blue background.
+        // Ancestor: absolute root (hoisted, ICB anchor (50,40) = canvas
+        // (66,56)), 60×60 content + 5px solid black border, blue background.
         let ancestor = try component(#"""
         {"id":"anc","name":"x","properties":[
           {"type":"Position","data":"ABSOLUTE"},
@@ -349,19 +370,20 @@ final class FixedHoistTests: XCTestCase {
         ]}
         """#)
         let img = try renderComposed([ancestor])
-        // (67, 57): inside the child's (65, 55) anchor — padding-box
-        // basis (50+5+10). A border-box anchor would start it at (60,50);
-        // a canvas-anchored child would start at (10,10).
-        XCTAssertTrue(isRed(rgb(img, 67, 57)),
-                      "the absolute child must anchor at the ancestor's PADDING box: 50 + 5 border + 10 inset = 65 (css-position-3 §3.1)")
-        // (52, 42): inside the ancestor's 5px border band — still black,
-        // proving the ancestor itself anchored at unpadded (50, 40).
-        XCTAssertTrue(isBlack(rgb(img, 52, 42)),
-                      "the hoisted ancestor's border corner must sit at unpadded canvas (50,40)")
-        // (60, 50): inside the padding box but LEFT of the child's 65px
+        // (83, 73): inside the child's (81, 71) anchor — padding-box basis
+        // (66+5+10). A border-box anchor would start it at (76,66); a
+        // canvas-anchored child would start at (10,10).
+        XCTAssertTrue(isRed(rgb(img, 83, 73)),
+                      "the absolute child must anchor at the ancestor's PADDING box: 66 + 5 border + 10 inset = 81 (css-position-3 §3.1)")
+        // (68, 58): inside the ancestor's 5px border band — still black,
+        // proving the ancestor itself anchored at ICB (50,40) = canvas
+        // (66,56).
+        XCTAssertTrue(isBlack(rgb(img, 68, 58)),
+                      "the hoisted ancestor's border corner must sit at the ICB anchor (50,40) = canvas (66,56)")
+        // (76, 66): inside the padding box but LEFT of the child's 81px
         // anchor — ancestor background, not child ink (no border-box or
         // canvas mis-anchor).
-        XCTAssertTrue(isBlue(rgb(img, 60, 50)),
+        XCTAssertTrue(isBlue(rgb(img, 76, 66)),
                       "between the padding-box origin and the child's inset the ancestor background must show — the child is anchoring at the border box or the canvas")
     }
 
@@ -389,9 +411,10 @@ final class FixedHoistTests: XCTestCase {
         // occupies the flow.
         XCTAssertTrue(isWhite(rgb(img, 20, 60)),
                       "below the in-flow sibling the canvas must be white — something is still occupying the fixed box's old slot")
-        // (202, 2): the fixed box itself at its viewport anchor.
-        XCTAssertTrue(isRed(rgb(img, 202, 2)),
-                      "the fixed box must still paint at its own unpadded canvas anchor (200,0)")
+        // (218, 18): the fixed box itself at its viewport anchor — ICB
+        // (200,0) = canvas (216,16) under the wave-25 frame.
+        XCTAssertTrue(isRed(rgb(img, 218, 18)),
+                      "the fixed box must still paint at its own ICB anchor (200,0) = canvas (216,16)")
     }
 
     // MARK: - Wave 18 RC1: the inset-aware hoist + the static-position class

@@ -160,4 +160,45 @@ class WptCanvasBackgroundTest {
             defaultTextInk(wptCaptureMode = false, defaultInk = stageInk)
         )
     }
+
+    // ── wave-25 round 3: the composed canvas FRAME + ICB extents ──────────
+
+    @Test
+    fun canvasFrameIsTheRefImagePad() {
+        // The ONE number all three platforms read for the ref's image-space
+        // frame (capture-browser-ref.mjs CANVAS_PAD_PX = 16). It is NOT the
+        // author-beatable body padding any more: since CAL-RC1 the ref
+        // renders unpadded at 358 and the frame is memcpy'd around the PNG,
+        // so no cascade can cancel it.
+        assertEquals(16f, WPT_CANVAS_FRAME_DP, 0f)
+    }
+
+    @Test
+    fun icbExtentIsTheRefRenderViewport() {
+        // 390 − 2×16 = 358 = capture-browser-ref.mjs REF_RENDER_WIDTH, and
+        // 600 − 2×16 = 568 = REF_RENDER_MIN_HEIGHT. This is the containing
+        // block out-of-flow boxes anchor in (css-position-3 §3.1/§3.2) — the
+        // ref's render VIEWPORT, not the framed 390×600 image.
+        assertEquals(358f, composedIcbExtentDp(390f), 0f)
+        assertEquals(568f, composedIcbExtentDp(600f), 0f)
+    }
+
+    @Test
+    fun icbExtentTracksAnOverriddenCaptureWidth() {
+        // CAPTURE_WIDTH can widen the canvas (docs/DYNAMIC_CAPTURE.md §2);
+        // the frame is per-side and constant, so the ICB tracks it.
+        assertEquals(468f, composedIcbExtentDp(500f), 0f)
+        // An explicit frame is honoured (the parameter exists so the pin can
+        // demonstrate the arithmetic, not so callers can invent frames).
+        assertEquals(390f, composedIcbExtentDp(390f, frameDp = 0f), 0f)
+    }
+
+    @Test
+    fun icbExtentNeverGoesNegative() {
+        // A pathologically narrow capture-width override must not hand the
+        // anchor a negative containing block (it would place end-anchored
+        // boxes off the far side of the canvas). Clamped at zero instead.
+        assertEquals(0f, composedIcbExtentDp(20f), 0f)
+        assertEquals(0f, composedIcbExtentDp(0f), 0f)
+    }
 }

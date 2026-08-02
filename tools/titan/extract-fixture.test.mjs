@@ -3074,3 +3074,82 @@ test('wave23: the trigger regexes are anchored on word boundaries', () => {
   assert.equal(BIDI_UNICODE_BIDI_CSS_RX.test('unicode-bidi: normal'), false);
   assert.equal(BIDI_UNICODE_BIDI_CSS_RX.test('unicode-bidi: isolate'), true);
 });
+
+// ── wave-25 ATTR BAKE: end-to-end through buildComponents ────────────────────
+//
+// The unit surface of the bake lives in attr-bake.test.mjs; these pins cover
+// the INTEGRATION — that the substitution really reaches the emitted
+// component bag, carries its LOUD marker, and rolls up to the fixture level.
+
+test('wave25: attr() bakes on the element bag, with the baked-attr marker', () => {
+  // The exact css-values/attr-length-valid-zero shape: a same-rule
+  // `width: 200px` overridden by a typed attr() whose attribute is "0".
+  const css = '#o { background: red; width: 200px; width: attr(data-test type(<length>)); height: 200px; }';
+  const html = '<!DOCTYPE html><style>' + css + '</style>'
+    + '<body><div id="o" data-test="0"></div></body>';
+  const { components, lossyReasons } = buildComponents(html, parseCss(css), 'ab');
+  assert.equal(components['ab__0'].properties.width, '0');
+  assert.ok(components['ab__0']._lossyReasons.includes('baked-attr'));
+  assert.ok(lossyReasons.includes('baked-attr'));
+});
+
+test('wave25: attr() inside max() folds to the bare length', () => {
+  // css-values/attr-in-max — the degenerate one-argument max() the
+  // converter would otherwise classify as an unresolvable expression.
+  const css = '#o { width: max(attr(data-test type(<length>))); height: 200px; }';
+  const html = '<!DOCTYPE html><style>' + css + '</style>'
+    + '<body><div id="o" data-test="200px"></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 'am');
+  assert.equal(components['am__0'].properties.width, '200px');
+});
+
+test('wave25: a typed attr() with no value and no fallback becomes `unset`', () => {
+  const css = 'span { background-color: attr(data-foo type(<color>)); }';
+  const html = '<!DOCTYPE html><style>' + css + '</style>'
+    + '<body><span data-foo="green">a</span><span>b</span></body>';
+  const { components } = buildComponents(html, parseCss(css), 'ss');
+  assert.equal(components['ss__0'].properties['background-color'], 'green');
+  assert.equal(components['ss__1'].properties['background-color'], 'unset');
+  assert.ok(components['ss__1']._lossyReasons.includes('attr-invalid-at-computed-value-time'));
+});
+
+test('wave25: a ::after attr() resolves against its ORIGINATING element', () => {
+  const css = '#o::after { content: attr(data-mark, "fallback"); }';
+  const html = '<!DOCTYPE html><style>' + css + '</style>'
+    + '<body><div id="o" data-mark="hit"></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 'pe');
+  const after = components['pe__0']._pseudo.after;
+  assert.equal(after.properties.content, '"hit"');
+  assert.ok(after._lossyReasons.includes('baked-attr'));
+});
+
+test('wave25: a namespace-qualified attr() ships verbatim + attr-unresolved', () => {
+  const css = '#o { background: attr(*|bar type(*)); height: 100px; }';
+  const html = '<!DOCTYPE html><style>' + css + '</style>'
+    + '<body><div id="o" bar="red"></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 'ns');
+  assert.equal(components['ns__0'].properties.background, 'attr(*|bar type(*))');
+  assert.ok(components['ns__0']._lossyReasons.includes('attr-unresolved'));
+});
+
+test('wave25: the body-root scope is flagged, never baked', () => {
+  // No single originating element exists for an html/body/:root bag.
+  const css = 'body { background: attr(data-x type(<color>), green); height: 10px; }';
+  const html = '<!DOCTYPE html><style>' + css + '</style><body><p>x</p></body>';
+  const { components } = buildComponents(html, parseCss(css), 'br');
+  assert.equal(components['br__body'].properties.background,
+    'attr(data-x type(<color>), green)');
+  assert.ok(components['br__body']._lossyReasons.includes('attr-unresolved'));
+});
+
+test('wave25: an attr()-free document is untouched by the bake', () => {
+  // The corpus-identity guarantee, at the integration level: no marker, no
+  // rewrite, no _lossy flag introduced anywhere.
+  const css = 'div { width: 100px; height: 100px; background: green; }';
+  const html = '<!DOCTYPE html><style>' + css + '</style><body><div></div></body>';
+  const { components, lossyOverall, lossyReasons } = buildComponents(html, parseCss(css), 'na');
+  assert.deepEqual(components['na__0'].properties,
+    { width: '100px', height: '100px', background: 'green' });
+  assert.equal(lossyOverall, false);
+  assert.deepEqual(lossyReasons, []);
+});

@@ -31,6 +31,11 @@ import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.types.ValueExtractors
 import com.styleconverter.runtime.StyleApplier
 import com.styleconverter.runtime.scrolling.OverflowExtractor
+// Wave 25 CAL-RC4 — the unclamped §9.7 main-size pins. Imported (not
+// fully-qualified like the rest of the flexbox package) because Kotlin has
+// no call syntax for a top-level extension function outside its package.
+import com.styleconverter.runtime.layout.flexbox.flexMainWidthPin
+import com.styleconverter.runtime.layout.flexbox.flexMainHeightPin
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -302,11 +307,33 @@ object ComponentRenderer {
      *  - B7/B8: every child's block-axis margins must be plain non-negative
      *    px (auto/negative/relative are outside the emulation — see
      *    BlockMarginCollapse.blockMarginsOrNull), as must the parent's own;
+     *  - B11 (wave 25, lane UAM — only when [uaBlockMargins] is on): ANY
+     *    child that is itself a hoisting block container bails, not just
+     *    the first/last of B10. With UA defaults injected, nearly every
+     *    prose child carries a block margin, so an INTERIOR nested
+     *    container's hoisted band would compound with the sibling gap the
+     *    parent's own fold already emits (the browser resolves both into
+     *    ONE n-ary max — §8.3.1 adjoining chains are transitive). Bailing
+     *    is the same pinned conservatism B10 already applies at the edges;
+     *    with UA injection OFF the check is skipped entirely, so every
+     *    declared-margin plan (and the 327 corpus) is byte-identical.
      *  - at least one collapsible margin must be non-zero, so margin-less
      *    corpora build no plan and render byte-identically to the frozen
      *    baseline.
+     *
+     * @param uaBlockMargins wave 25 (lane UAM / BD-RC3): fold each child's
+     *   UA DEFAULT block margins (p / h1-h6 / ul / ol / blockquote / pre /
+     *   figure — see spacing/UaBlockChildMargins.kt) into the plan on every
+     *   edge the IR leaves undeclared, so a `<p>` nested inside another
+     *   block gets the 1em the browser-ref's UA sheet gives it. The
+     *   renderer passes its ambient `LocalWptCaptureMode`; the default
+     *   FALSE is the dark-stage identity branch that keeps the 327
+     *   committed baselines (and every pre-wave-25 pin) byte-identical.
      */
-    internal fun blockCollapsePlanFor(component: IRComponent): CollapsePlanResult {
+    internal fun blockCollapsePlanFor(
+        component: IRComponent,
+        uaBlockMargins: Boolean = false,
+    ): CollapsePlanResult {
         // Structural silence cases first (correct to skip, nothing to log).
         val children = component.children
         if (children.isNullOrEmpty()) return CollapsePlanResult(null, null)
@@ -405,12 +432,35 @@ object ComponentRenderer {
         ) {
             return CollapsePlanResult(null, "nested-hoist chain")
         }
-        // Per-child block-axis margins — all must be plain positive px.
+        // B11 (lane UAM): with UA defaults injected, an INTERIOR nested
+        // hoisting container is as dangerous as an edge one — its own
+        // hoisted band would stack on top of the gap this fold emits,
+        // where the browser resolves the whole adjoining chain into one
+        // max(). Skipped entirely when UA injection is off, so no
+        // pre-wave-25 plan changes shape.
+        if (uaBlockMargins && children.any {
+                isNestedHoistChainChild(it, edgeIsTop = true) ||
+                    isNestedHoistChainChild(it, edgeIsTop = false)
+            }
+        ) {
+            return CollapsePlanResult(null, "nested-hoist chain (ua)")
+        }
+        // Per-child block-axis margins — all must be plain positive px,
+        // then MERGED with the child's UA defaults (lane UAM): author
+        // declarations win per edge, undeclared edges take the UA value.
+        // With [uaBlockMargins] false the merge is the identity.
         val childMargins = children.map { child ->
-            com.styleconverter.runtime.spacing.BlockMarginCollapse.blockMarginsOrNull(
-                com.styleconverter.runtime.spacing.SpacingExtractor
-                    .extractMarginConfig(child.properties.map { it.type to it.data })
-            ) ?: return CollapsePlanResult(null, "auto/negative/relative child margin")
+            val declared = com.styleconverter.runtime.spacing.BlockMarginCollapse
+                .blockMarginsOrNull(
+                    com.styleconverter.runtime.spacing.SpacingExtractor
+                        .extractMarginConfig(child.properties.map { it.type to it.data })
+                ) ?: return CollapsePlanResult(null, "auto/negative/relative child margin")
+            com.styleconverter.runtime.spacing.uaChildBlockEdges(
+                sourceTag = child._tag,
+                propertyTypes = child.properties.map { it.type },
+                declared = declared,
+                enabled = uaBlockMargins,
+            )
         }
         // No collapsible margin anywhere → no plan (baseline-identity path).
         if (childMargins.all { it.topPx == 0f && it.bottomPx == 0f }) {
@@ -419,11 +469,22 @@ object ComponentRenderer {
         // Parent's own block-axis margins feed the hoist max() composition;
         // out-of-scope parent flavors bail (the hoist math would be wrong).
         val parentPairs = component.properties.map { it.type to it.data }
-        val parentOwn = com.styleconverter.runtime.spacing.BlockMarginCollapse
+        val parentDeclared = com.styleconverter.runtime.spacing.BlockMarginCollapse
             .blockMarginsOrNull(
                 com.styleconverter.runtime.spacing.SpacingExtractor
                     .extractMarginConfig(parentPairs)
             ) ?: return CollapsePlanResult(null, "auto/negative/relative parent margin")
+        // Lane UAM: the parent's OWN margin must carry its UA default too,
+        // or the hoist band double-counts. A `<blockquote>` parent's 16px
+        // top is painted one level up (its own parent's plan, or the
+        // composed root stack), so the band it adds for a `<p>` first
+        // child must be max(16, 16) − 16 = 0, not the full 16.
+        val parentOwn = com.styleconverter.runtime.spacing.uaChildBlockEdges(
+            sourceTag = component._tag,
+            propertyTypes = component.properties.map { it.type },
+            declared = parentDeclared,
+            enabled = uaBlockMargins,
+        )
         // Edge gates (§8.3.1 adjoining conditions: padding/border/BFC/height).
         val gates = com.styleconverter.runtime.spacing.BlockMarginCollapse
             .hoistGates(parentPairs)
@@ -816,7 +877,21 @@ object ComponentRenderer {
         // Uses the DYNAMIC-RESOLVED list so bucket overrides and resolved
         // light-dark colors participate in inheritance like any other value.
         val inheritedProperties = LocalInheritedProperties.current
-        val rawProperties = mergeInherited(schemeResolvedProperties, inheritedProperties)
+        // Wave 25 (lane LF follow-up) — the UA `list-style-type` rule runs
+        // HERE, the last point that still holds the element's OWN list and
+        // the inherited channel separately. On a list container with no own
+        // declaration, `ul { list-style-type: disc }` / `ol { … decimal }`
+        // (HTML §15.3.9) is a declaration ON the element, so it beats any
+        // ancestor value — css-cascade-4 §4.3 consults inheritance only
+        // when the cascade produced nothing. Identity (same list instance)
+        // for every non-container and every own-declaring container, so no
+        // committed capture moves. See ListStyleUaRule for the full
+        // argument and the nested-list KNOWN GAP.
+        val rawProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
+            component._tag,
+            schemeResolvedProperties,
+            mergeInherited(schemeResolvedProperties, inheritedProperties)
+        )
 
         // CSS `all: initial|inherit|unset|revert|revert-layer` resets every
         // other property to its respective global value. We can't synthesize
@@ -1507,6 +1582,17 @@ object ComponentRenderer {
             // sub-config yet (TODO phase7/step5 folds spacing into LayoutConfig).
             val rowGap = displayConfig.rowGap
             val columnGap = displayConfig.columnGap
+            // Wave 25 CAL-RC2: fold both gaps into ALL FOUR arrangements
+            // once, here. The wrapping branches below used to read
+            // flexDecision.horizontalArrangement / .verticalArrangement —
+            // the justify-content-ONLY mapping — so `column-gap` vanished
+            // from every wrapping flex row and `row-gap` from every
+            // wrapping flex column. Reading axes.* instead means no branch
+            // can reach a gap-free main-axis arrangement any more (see
+            // layout/flexbox/FlexAxes.kt for the byte-stability argument:
+            // with 0dp gaps every field is the same object as before).
+            val axes = com.styleconverter.runtime.layout.flexbox
+                .FlexAxes.of(flexDecision, rowGap, columnGap)
             when (flexDecision.kind) {
                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.Row -> {
                     // Gap + justify-content COMPOSE, they don't compete:
@@ -1519,8 +1605,7 @@ object ComponentRenderer {
                     // non-distributing keywords, mirroring the legacy
                     // toRowArrangement path. Hoisted so the intrinsic flex
                     // path inside RenderRowContent re-uses the same values.
-                    val rowArrangement = com.styleconverter.runtime.layout.flexbox
-                        .FlexboxApplier.mainAxisHorizontal(flexDecision.justify, columnGap)
+                    val rowArrangement = axes.mainHorizontal
                     Row(
                         modifier = modifier,
                         horizontalArrangement = rowArrangement,
@@ -1537,8 +1622,7 @@ object ComponentRenderer {
                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.Column -> {
                     // Same gap/justify composition as the Row branch —
                     // hoisted for the intrinsic path too.
-                    val columnArrangement = com.styleconverter.runtime.layout.flexbox
-                        .FlexboxApplier.mainAxisVertical(flexDecision.justify, rowGap)
+                    val columnArrangement = axes.mainVertical
                     Column(
                         modifier = modifier,
                         verticalArrangement = columnArrangement,
@@ -1553,20 +1637,81 @@ object ComponentRenderer {
                     return
                 }
                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.FlowRow -> {
+                    // Wave 25 CAL-RC5: a wrapping row whose items must
+                    // stretch to their LINE's cross size (css-flexbox-1
+                    // §8.4 + §9.4 step 8) cannot be expressed with
+                    // FlowRow — its lines never grow into a definite
+                    // container height, which is why css-gaps
+                    // flex-gap-decorations-001/002 (width-only children,
+                    // auto height) captured EMPTY on Android. The plan is
+                    // null whenever no item actually stretches or the
+                    // container needs a RenderContent feature the wrap
+                    // layout doesn't emit, so every other wrapping row
+                    // keeps the frozen FlowRow path.
+                    val stretchPlan = wrapRowStretchPlan(component, displayConfig)
+                    if (stretchPlan != null) {
+                        com.styleconverter.runtime.layout.flexbox.FlexWrapRow(
+                            modifier = modifier,
+                            mainArrangement = axes.mainHorizontal,
+                            mainGap = axes.columnGap,
+                            crossGap = axes.rowGap,
+                            cross = stretchPlan,
+                            containerCross = flexDecision.verticalAlignment,
+                            // Skeptic wave-25 fix: §9.4 step 8 (grow the
+                            // lines into a definite container cross size)
+                            // is an `align-content: normal | stretch`
+                            // rule. extractDisplayConfig already folds
+                            // `normal`/absent into STRETCH, so this reads
+                            // false only for an EXPLICIT non-stretch
+                            // keyword (flexbox-baseline-multi-line-horiz-
+                            // 003/004 declare `align-content: center` with
+                            // a 100px height and were being stretched).
+                            alignContentStretches =
+                                displayConfig.alignContent == AlignContent.STRETCH
+                        ) {
+                            // One measurable per flex item, index-aligned
+                            // with the plan — same 1:1 wrapper the
+                            // intrinsic row path uses, and the same
+                            // `order` sort the non-wrapping flex branches
+                            // apply (css-flexbox-1 §5.4).
+                            sortByOrder(component.children!!).forEach { child ->
+                                Box(propagateMinConstraints = true) {
+                                    RenderComponent(child, Modifier)
+                                }
+                            }
+                        }
+                        return
+                    }
                     FlowRow(
                         modifier = modifier,
-                        horizontalArrangement = flexDecision.horizontalArrangement,
-                        verticalArrangement = Arrangement.spacedBy(rowGap)
+                        // CAL-RC2: was flexDecision.horizontalArrangement —
+                        // justify-only, so column-gap was dropped.
+                        horizontalArrangement = axes.mainHorizontal,
+                        verticalArrangement = axes.crossVertical
                     ) {
                         RenderContent(component, textColor, displayConfig)
                     }
                     return
                 }
                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.FlowColumn -> {
+                    // NOT a silent fallthrough: the column flavour keeps
+                    // FlowColumn deliberately. Its cross axis is INLINE,
+                    // and the web reference this platform is compared
+                    // against gives every unsized child `width:
+                    // fit-content` (apps/web-harness ComponentRenderer.tsx)
+                    // — a definite cross size, so §8.3 stretch degrades to
+                    // flex-start there too. That is the same rationale
+                    // columnCrossPlacements already carries for the
+                    // non-wrapping column path; implementing wrap-stretch
+                    // here would make Android the ONLY platform that
+                    // stretches. TODO(wave26): revisit together with the
+                    // harness's fit-content calibration.
                     FlowColumn(
                         modifier = modifier,
-                        verticalArrangement = flexDecision.verticalArrangement,
-                        horizontalArrangement = Arrangement.spacedBy(columnGap)
+                        // CAL-RC2: was flexDecision.verticalArrangement —
+                        // justify-only, so row-gap was dropped.
+                        verticalArrangement = axes.mainVertical,
+                        horizontalArrangement = axes.crossHorizontal
                     ) {
                         RenderContent(component, textColor, displayConfig)
                     }
@@ -1727,8 +1872,15 @@ object ComponentRenderer {
                     // border-0 parent). Gated to true BLOCK containers — the
                     // else-branch can also catch residual display values, and
                     // §8.3.1 only applies to block flow.
+                    // Lane UAM (BD-RC3): in WPT capture the plan ALSO folds
+                    // each child's UA default block margins (the browser-ref
+                    // renders with its UA sheet intact — a `<p>` child keeps
+                    // its 1em). LocalWptCaptureMode is false on every
+                    // property-fixture path, so the 327 dark-stage baselines
+                    // take the identity branch and stay byte-identical.
                     val collapse =
-                        if (displayConfig.type == DisplayType.BLOCK) blockCollapsePlanFor(component)
+                        if (displayConfig.type == DisplayType.BLOCK)
+                            blockCollapsePlanFor(component, LocalWptCaptureMode.current)
                         else CollapsePlanResult(null, null)
                     // No-silent-fallthrough: an in-scope-looking container we
                     // skipped for an unemulated value flavor logs once.
@@ -2825,7 +2977,20 @@ object ComponentRenderer {
                     else
                         absposOverflowMeasure(absposCross, crossIsVertical = true)
                 } else {
-                    resolvedSizes?.get(index)?.let { itemModifier = itemModifier.width(it.toFloat().dp) }
+                    // Wave 25 CAL-RC4: the pin must be UNCLAMPED. Row hands
+                    // each child only the main-axis space its predecessors
+                    // left, and Modifier.width() constrains its request into
+                    // that — so an overflowing line (6×50px `flex-shrink: 0`
+                    // items in a 200px container, css-gaps
+                    // flex-gap-decorations-008) squeezed its tail items to
+                    // slivers instead of overflowing. §9.7's output IS the
+                    // used main size; flexMainWidthPin forces it and lets the
+                    // surplus overflow. Identical to Modifier.width whenever
+                    // the line fits (the forced constraints are then already
+                    // inside the incoming ones).
+                    resolvedSizes?.get(index)?.let {
+                        itemModifier = itemModifier.flexMainWidthPin(it.toFloat().dp)
+                    }
                     if (stretches) itemModifier = itemModifier.fillMaxHeight()
                 }
 
@@ -3030,7 +3195,13 @@ object ComponentRenderer {
                     else
                         absposOverflowMeasure(absposCross, crossIsVertical = false)
                 } else {
-                    resolvedSizes?.get(index)?.let { itemModifier = itemModifier.height(it.toFloat().dp) }
+                    // Wave 25 CAL-RC4, column twin: same unclamped pin, block
+                    // axis. A Column squeezes its tail children exactly the
+                    // way a Row squeezes its tail items once the resolved
+                    // sizes exceed the container's height.
+                    resolvedSizes?.get(index)?.let {
+                        itemModifier = itemModifier.flexMainHeightPin(it.toFloat().dp)
+                    }
                 }
 
                 Box(modifier = childModifier) {
@@ -3157,6 +3328,72 @@ object ComponentRenderer {
             )
         }
         return FlexLineSpec(contentMain, gap, items)
+    }
+
+    /**
+     * Wave 25 CAL-RC5 — the wrapping ROW's cross-placement plan, or null to
+     * keep the frozen FlowRow path.
+     *
+     * Returns a list index-aligned with `sortByOrder(component.children)`
+     * (the order FlexWrapRow's content lambda emits) ONLY when at least one
+     * item genuinely stretches, so a wrapping container that needs nothing
+     * from the custom layout never enters it.
+     *
+     * STRETCH ELIGIBILITY is the CSS rule, not an approximation:
+     * css-flexbox-1 §8.3 — `align-self: auto` resolves to the container's
+     * `align-items`, whose initial value `normal` behaves as `stretch` in a
+     * flex container (which is why extractDisplayConfig defaults alignItems
+     * to STRETCH), and stretch only applies to an item whose CROSS size
+     * (height, for a row) is `auto`.
+     *
+     * The four null gates are the RenderContent features FlexWrapRow's
+     * content lambda does not reproduce. Each is a real behaviour, not a
+     * hedge — falling into the wrap layout would silently drop it:
+     *   1. a leading `_text` run (rendered as an inline sibling),
+     *   2. list markers (`<li>` children of a list parent),
+     *   3. non-static children (abspos/fixed get RenderAbsoluteChild; a
+     *      negative-z relative child gets the backdrop layer),
+     *   4. no children at all (the childless case is demoted to Box far
+     *      above this call, so this is belt-and-braces).
+     */
+    private fun wrapRowStretchPlan(
+        component: IRComponent,
+        displayConfig: DisplayConfig
+    ): List<com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement>? {
+        val children = component.children
+        if (children.isNullOrEmpty()) return null
+        if (!component._text.isNullOrEmpty()) return null
+        if (ListStyleExtractor.uaMarkerDefault(component._tag?.lowercase()) != null) return null
+        if (children.any { extractPositionType(it.properties) != PositionType.STATIC }) return null
+        // `normal` and `stretch` both arrive here as STRETCH — see the
+        // extractDisplayConfig AlignItems mapping's `else` arm.
+        val containerStretches = displayConfig.alignItems == AlignItems.STRETCH
+        val plan = sortByOrder(children).map { child ->
+            val alignSelf = com.styleconverter.runtime.core.placement
+                .ItemPlacementExtractor.extract(child.properties).alignSelf
+            // A declared height makes the item's cross size definite, and
+            // §8.3 then degrades stretch to flex-start.
+            val crossAuto = !hasDefiniteSize(child.properties, widthAxis = false)
+            when (alignSelf) {
+                AlignSelf.FLEX_START -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.START
+                AlignSelf.FLEX_END -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.END
+                AlignSelf.CENTER -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.CENTER
+                // Baseline has no Compose cross-axis equivalent — the same
+                // flex-start approximation FlexboxApplier documents.
+                AlignSelf.BASELINE -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.START
+                AlignSelf.STRETCH ->
+                    if (crossAuto) com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH
+                    else com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.START
+                // AUTO → inherit the container's align-items.
+                AlignSelf.AUTO ->
+                    if (containerStretches && crossAuto)
+                        com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH
+                    else com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.DEFAULT
+            }
+        }
+        return plan.takeIf {
+            it.contains(com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH)
+        }
     }
 
     /**

@@ -1,6 +1,9 @@
 package com.styleconverter.test.screenshot
 
 import com.styleconverter.runtime.core.ir.IRComponent
+// Wave 25 (lane UAM): the single Kotlin owner of the UA vertical table —
+// shared with the runtime's block-CHILD fold so root and descendant agree.
+import com.styleconverter.runtime.spacing.uaVerticalBlockMargins
 
 /**
  * Pure user-agent default block-margin model for the COMPOSED WPT capture
@@ -41,24 +44,25 @@ data class UaMargins(val top: Int, val bottom: Int, val left: Int, val right: In
  * against). Tags with no block margin in the UA sheet (div/section/article/
  * header/footer/main/nav/aside) and unknown/null tags return [UaMargins.ZERO].
  */
-fun uaBlockMargins(sourceTag: String?): UaMargins = when (sourceTag?.lowercase()) {
-    // <p>: 1em top+bottom.
-    "p" -> UaMargins(16, 16, 0, 0)
-    // Headings: margin scales with the heading's own (larger/smaller) font.
-    "h1" -> UaMargins(21, 21, 0, 0) // 0.67em of 2em    ≈ 21px
-    "h2" -> UaMargins(19, 19, 0, 0) // 0.83em of 1.5em  ≈ 19px
-    "h3" -> UaMargins(16, 16, 0, 0) // 1em of 1.17em    ≈ 16px (ref-calibrated)
-    "h4" -> UaMargins(21, 21, 0, 0) // 1.33em of 1em    ≈ 21px
-    "h5" -> UaMargins(27, 27, 0, 0) // 1.67em of 0.83em ≈ 27px
-    "h6" -> UaMargins(37, 37, 0, 0) // 2.33em of 0.67em ≈ 37px
-    // Lists: 1em top+bottom (left padding is list-marker inset, not margin).
-    "ul", "ol" -> UaMargins(16, 16, 0, 0)
-    // blockquote / figure: 1em block margins + 40px left/right insets.
-    "blockquote" -> UaMargins(16, 16, 40, 40)
-    "figure" -> UaMargins(16, 16, 40, 40)
-    // <pre>: 1em top+bottom.
-    "pre" -> UaMargins(16, 16, 0, 0)
-    else -> UaMargins.ZERO
+fun uaBlockMargins(sourceTag: String?): UaMargins {
+    // Wave 25 (lane UAM): the VERTICAL half is no longer duplicated here.
+    // The runtime owns the ONE Kotlin copy of the table (spacing/
+    // UaBlockChildMargins.uaVerticalBlockMargins) because the block-CHILD
+    // fold in ComponentRenderer needs it too — a root and a descendant
+    // must never disagree about what a `<p>` margin is worth. Values are
+    // unchanged (p 16 · h1 21 · h2 19 · h3 16 · h4 21 · h5 27 · h6 37 ·
+    // ul/ol/blockquote/pre/figure 16 · everything else 0), so every
+    // Round-4 / RC-A4 pin in UaBlockMarginsTest keeps its number.
+    val (top, bottom) = uaVerticalBlockMargins(sourceTag)
+    // The HORIZONTAL half stays local: only blockquote and figure carry a
+    // UA inline inset (`margin: 1em 40px`), and §8.3.1 collapses the block
+    // axis only — so the child fold has no use for these and the runtime
+    // table deliberately omits them.
+    val inline = when (sourceTag?.lowercase()) {
+        "blockquote", "figure" -> 40
+        else -> 0
+    }
+    return UaMargins(top.toInt(), bottom.toInt(), inline, inline)
 }
 
 /**

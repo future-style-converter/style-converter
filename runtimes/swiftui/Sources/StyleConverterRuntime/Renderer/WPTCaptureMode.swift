@@ -108,6 +108,46 @@ public enum WPTCanvas {
     /// The corpus-v4 WPT canvas white. `Color(white: 1)` == #FFFFFF.
     public static let background = Color(white: 1)
 
+    /// The COMPOSED-capture CANVAS FRAME, in points — the iOS twin of the
+    /// ref pipeline's image-space pad (`tools/titan/capture-browser-ref.mjs`
+    /// CANVAS_PAD_PX) and of Compose's `WPT_CANVAS_FRAME_DP`. 16 on all four
+    /// sides of the 390-wide canvas, so the content space is 358 wide —
+    /// exactly REF_RENDER_WIDTH.
+    ///
+    /// ## Why this is a CONSTANT and not "the body padding"
+    /// Through wave 24 the composed canvases treated the 16pt inset AS the
+    /// ref's injected `:where(body) { padding: 16px }`, so a ref declaring
+    /// its own `body { padding: 0 }` beat the injection and the canvas had
+    /// to drop the inset with it (wave-24 B-RC5, clip-path-circle-007).
+    ///
+    /// At wave-25 CAL-RC1 the ref moved that pad OUT of CSS: the page renders
+    /// at 358 wide with `padding: 0`, and the 16px frame is memcpy'd around
+    /// the finished PNG. An image-space translation has no cascade and no
+    /// containing-block semantics, so under the new contract:
+    ///   * EVERY ref gets the frame — an author `body { padding }` can only
+    ///     ADD an inset inside it, never remove it;
+    ///   * in-flow AND out-of-flow content translate by the SAME (+16,+16),
+    ///     which is why `FixedHoistOverlay` now takes a `canvasFrame`;
+    ///   * the ref's initial containing block is the 358-wide render
+    ///     viewport, NOT the 390-wide image.
+    public static let canvasFramePx: CGFloat = 16
+
+    /// The composed canvas's INITIAL CONTAINING BLOCK extent on one axis:
+    /// the outer canvas extent minus the frame on BOTH sides (358 × 568 at
+    /// the 390 × 600 defaults). This is what css-position-3 §3.1/§3.2
+    /// anchors out-of-flow boxes against — the ref's render viewport, not
+    /// the framed image.
+    ///
+    /// Matters for `right`/`bottom`-only insets: a `right: 0` hoisted box
+    /// must land flush with the CONTENT edge (image x = 16 + 358 = 374),
+    /// leaving the frame visible exactly as the ref's raster does. Clamped
+    /// at zero so a degenerate canvas can never yield a negative containing
+    /// block. Twin of Compose's `composedIcbExtentDp`.
+    public static func icbExtent(canvasExtent: CGFloat,
+                                 frame: CGFloat = canvasFramePx) -> CGFloat {
+        max(0, canvasExtent - 2 * frame)
+    }
+
     /// Pure canvas-background decision for the iOS capture canvases — the
     /// 1:1 twin of Compose's `captureCanvasBackground` (unit-pinned in
     /// WPTCaptureModeTests so the mode split can never silently drift).

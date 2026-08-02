@@ -218,6 +218,14 @@ final class AbsposFlexOverlayRasterTests: XCTestCase {
     /// the ComposedCaptureCanvas layering exactly: flow content, then
     /// `.background { FixedHoistOverlay(behind) }`, then white, then
     /// `.overlay { FixedHoistOverlay(above) }`.
+    ///
+    /// The one deliberate difference from production (wave-25 round 3): both
+    /// overlays mount with the DEFAULT zero `canvasFrame`, because this
+    /// replica has no canvas padding to escape — its subject is the Appendix
+    /// E paint ORDER of the two z-partitions, and the frame is a pure
+    /// translation applied identically to both, so adding it would move every
+    /// sample by 16 without testing anything new. The frame's own geometry is
+    /// pinned in FixedHoistTests (S1–S5, on the full 390×600 replica).
     @MainActor
     func testNegativeZHoistedRootPaintsBehindPositionedOverlayChild() throws {
         let red = try redProbe()

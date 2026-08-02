@@ -441,12 +441,24 @@ struct BorderSideApplier: ViewModifier {
         let r = w / 2
         // Distance of the centreline from the box's outer edge.
         let mid = w / 2
-        // Even spacing between the two inset end-dot centres; a single
-        // dot centres on the edge midpoint (edge shorter than one pitch).
+        // Even spacing between the two inset end-dot centres.
         let step = n > 1 ? (len - w) / CGFloat(n - 1) : 0
         for i in 0..<n {
-            // Distance along the edge of this dot's centre.
-            let d = n > 1 ? r + step * CGFloat(i) : len / 2
+            // Distance along the edge of this dot's centre. The n == 1
+            // case (dottedDotCount returns 1 exactly when len < 2w) used
+            // to centre the dot
+            // on the edge MIDPOINT; wave 25 measured Chromium and it does
+            // not. Rendering `border-bottom: <w>px dotted` at lengths
+            // 1.0/1.4/1.8/1.9 × w for w = 10, 6 and 4 in the
+            // capture-browser-ref recipe's Chromium puts the single dot's
+            // centre at exactly `start + w/2` in all twelve cases — flush
+            // with the run's START, never centred. That is also what the
+            // gap-rule painter (GapDecorationsPainter.drawDots, `at = 0`)
+            // already did, so this makes the two dotted painters agree.
+            // Corpus-inert: the dotted fixtures are 6px rules on ≥ 80px
+            // boxes, i.e. n ≥ 2 everywhere, so no committed baseline byte
+            // can move.
+            let d = r + step * CGFloat(i)
             // Map (along-edge distance, centreline inset) to x/y.
             let centre: CGPoint
             switch side {

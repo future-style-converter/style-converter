@@ -447,4 +447,36 @@ final class WPTCaptureModeTests: XCTestCase {
         // Over-padded degenerate floors at zero, never negative.
         XCTAssertEqual(SizeApplierMath.declaredFromFrame(40, inflate: 72), 0)
     }
+
+    // MARK: - wave-25 round 3: the composed canvas FRAME + ICB extents
+
+    /// The ONE number all three platforms read for the ref's image-space
+    /// frame (capture-browser-ref.mjs CANVAS_PAD_PX = 16, Compose
+    /// WPT_CANVAS_FRAME_DP, web CANVAS_FRAME_PX). Since CAL-RC1 it is NOT
+    /// the author-beatable body padding: the ref renders unpadded at 358
+    /// and the frame is memcpy'd around the finished PNG, so no cascade
+    /// can cancel it.
+    func testCanvasFrameIsTheRefImagePad() {
+        XCTAssertEqual(WPTCanvas.canvasFramePx, 16)
+    }
+
+    /// The ICB is the ref's RENDER VIEWPORT, not the framed image:
+    /// 390 − 2×16 = 358 (REF_RENDER_WIDTH) and 600 − 2×16 = 568
+    /// (REF_RENDER_MIN_HEIGHT). This is what out-of-flow boxes anchor
+    /// against (css-position-3 §3.1/§3.2), so a `right: 0` box lands flush
+    /// with the CONTENT edge and the frame stays visible.
+    func testIcbExtentIsTheRefRenderViewport() {
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 390), 358)
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 600), 568)
+        // An explicit zero frame is the identity — the frame is a pure
+        // translation of the canvas, it re-derives nothing.
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 390, frame: 0), 390)
+    }
+
+    /// A degenerate canvas must never yield a NEGATIVE containing block:
+    /// end-anchored boxes would be placed off the far side of the surface.
+    func testIcbExtentNeverGoesNegative() {
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 20), 0)
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 0), 0)
+    }
 }

@@ -83,6 +83,17 @@ import { fileURLToPath } from 'node:url';
 // subdirs can never overwrite each other's fixtures/wpt/<section>/ files.
 // Top-level tests keep the historical bare basename. See safe-name.mjs.
 import { fixtureStem } from './safe-name.mjs';
+// wave-25 THE ATTR BAKE (the fourth bake): css-values-5 §7 attr() reads the
+// element's OWN attributes, which this extractor already parses — so the
+// substitution is statically resolvable HERE and nowhere downstream. Static
+// + stdlib-only, so it is a plain top-level import (unlike the puppeteer-
+// bearing post-load / bidi bakes, which stay lazily imported in main()).
+// The module short-circuits on values without an `attr(` token, so the
+// non-attr corpus is byte-identical by construction. See attr-bake.mjs.
+import {
+  bakeAttr, hasAttrFunction,
+  ATTR_BAKED_REASON, ATTR_UNRESOLVED_REASON, ATTR_IACVT_REASON,
+} from './attr-bake.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -4749,6 +4760,14 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // The LOUD marker: baked fixtures always carry the sampled-animation
     // lossy note (see the sampler section banner).
     if (rootSampled) reasons.push('sampled-animation');
+    // wave-25 ATTR BAKE — DELIBERATELY NOT BAKED at root scope. This bag is
+    // the MERGE of every html / body / :root / * rule, so it has no single
+    // originating element whose attributes attr() could read (css-values-5
+    // §7 resolves against one element, not a scope). Rather than guess an
+    // element, we leave the declaration verbatim and say so out loud.
+    if (Object.values(root.props).some(hasAttrFunction)) {
+      reasons.push(ATTR_UNRESOLVED_REASON);
+    }
     if (reasons.length) {
       lossyOverall = true;
       reasons.forEach((r) => lossyReasonsOverall.add(r));
@@ -4906,6 +4925,13 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     const sibBaked = node.pos
       ? bakeSiblingIndex(props, node.pos.domSibIndex + 1)
       : false;
+    // wave-25 ATTR BAKE: substitute css-values-5 §7 attr() against THIS
+    // element's own attribute bag (the originating element, per spec).
+    // Ordered alongside the sibling-index bake and BEFORE the sampler +
+    // lossy scan for the identical reason: every later step must see the
+    // final value (a baked `width: 0` must not still read as `attr(…)`,
+    // and a baked `2em` must trip the em/rem lane).
+    const attrBaked = bakeAttr(props, node.attrs);
     // wave-13 KEYFRAMES-SAMPLER: element path (e.g. the `.container` divs
     // of the css-backgrounds animation family). Before the lossy scan for
     // the same reason as the body-root call site above.
@@ -4938,6 +4964,15 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // — informational provenance marker (never score-excluding; scoring is
     // gated by notApplicable tags, not lossyReasons).
     if (sibBaked) reasons.push('baked-sibling-index');
+    // wave-25 ATTR BAKE — three LOUD, mutually independent markers (a bag
+    // can bake one declaration, bail on another and poison a third):
+    // 'baked-attr' is informational provenance like the sibling index;
+    // 'attr-unresolved' says a form we do not model still ships raw;
+    // 'attr-invalid-at-computed-value-time' says a declaration was rewritten
+    // to `unset` because attr() produced the guaranteed-invalid value.
+    if (attrBaked.baked) reasons.push(ATTR_BAKED_REASON);
+    if (attrBaked.unresolved) reasons.push(ATTR_UNRESOLVED_REASON);
+    if (attrBaked.iacvt) reasons.push(ATTR_IACVT_REASON);
     // wave-13: the sampled-animation LOUD marker rides the same reasons
     // array as inline-run-merged so the existing _lossy/_lossyReasons
     // emission + overall roll-up cover it with no extra branches.
@@ -5089,6 +5124,11 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
         const peSibBaked = node.pos
           ? bakeSiblingIndex(peProps, node.pos.domSibIndex + 1)
           : false;
+        // wave-25 ATTR BAKE: a pseudo-element's attr() reads the
+        // ORIGINATING element's attributes (css-values-5 §7), which is
+        // exactly the host `node.attrs` bag — so `::before { content:
+        // attr(data-mark, "…") }` resolves against the host's data-mark.
+        const peAttrBaked = bakeAttr(peProps, node.attrs);
         // wave-13 KEYFRAMES-SAMPLER: pseudo-element bags sample too (WPT
         // has ::before animation variants of the same time-stable family).
         const peSampled = bakeSampledAnimation(peProps, keyframes);
@@ -5096,6 +5136,10 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
         // Same LOUD marker contract as the host-element path above.
         if (peSampled) peReasons.push('sampled-animation');
         if (peSibBaked) peReasons.push('baked-sibling-index');
+        // Same three-marker contract as the host bag above.
+        if (peAttrBaked.baked) peReasons.push(ATTR_BAKED_REASON);
+        if (peAttrBaked.unresolved) peReasons.push(ATTR_UNRESOLVED_REASON);
+        if (peAttrBaked.iacvt) peReasons.push(ATTR_IACVT_REASON);
         if (peReasons.length) {
           lossyOverall = true;
           peReasons.forEach((r) => lossyReasonsOverall.add(r));

@@ -1,0 +1,370 @@
+{
+ "_snapshot": "corpus-v5.0",
+ "_note": "THE IMAGE-PAD BOUNDARY — the most consequential instrument correction since the white canvas. The wave-25 calibration proved the ref canvas contract itself was broken: :where(body){padding:16px} cannot move position:absolute overlays in REF pages (body is not a containing block), so every ref using abs-positioned expected-result bars was INTERNALLY misaligned by (-16,-16) — and painting correctly was PENALIZED (92-100% of every css-gaps mismatch was this artifact; iOS/Android lost score BY implementing the feature). The new contract: refs render UNPADDED at 358x568 (the old content box — wrap points byte-stable, display:flow-root replacing the padding load-bearing collapse block) and the 16px frame is added in IMAGE space (pngjs, border-ring-sampled pad color), translating in-flow and out-of-flow ref content identically. CANVAS_REV: white-black-ink-font-lh-imgpad. The out-of-flow contract migrated on ALL THREE platforms (hoist anchors at the padded origin via one shared frame constant + ICB extents 358x568; web gained a dedicated data-capture-icb div; both bake paths aligned to the ref viewport with a SHARED canvasFrameCss factory so the three injection sites cannot drift again) — css-position 7/7 HELD through the migration. SCORING HONESTY: colorDivergent now hard-fails WITH a CIEDE2000 >= 2.3 second opinion (the bare stamp would have failed pixel-exact renders — histogramKL fabricates it on near-uniform images), and the absolute low-content bypass became a symmetric coverage-RATIO gate (max/min > 2). 57 predicted flips landed, 0 true passes lost: css-text boundary-shaping x8 (tiny-ink dishonest passes), css-backgrounds animation family, multicol color divergences, transforms 3d-context. THE FEATURES: css-gaps recovered to web 12/12 / natives 11/12 (from 2-6/12 — the wave-24 painters were RIGHT; the ref was wrong; plus Compose FlowRow main-axis gap [a general wrapping-flex defect], shrink-0 overflow, cross-axis stretch hard-constraints on both natives, iOS painter surface union-bbox); css-values 11/12 everywhere (the ATTR BAKE — typed attr() resolved at extract time, the fourth bake); css-lists 11/10/10 (marker child-props + shorthand honesty); UA block margins extended to block DESCENDANTS on both natives; post-load bake grew border-radius + list-style longhands. Totals: web 202/233, iOS 188/233, Android 183/233 — DOWN ~5 per platform in exchange for the honest contract; six sections perfect on all three (position 7/7, sizing, flexbox, display, grid, ui). Zero regressions in the 327 dark stage.",
+ "artifact": "tools/titan/runs/wave25-final (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "32fdece7",
+ "date": "2026-08-02",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence + coverage-RATIO (max/min>2) + colorDivergent-with-dE>=2.3 + extraction-wall exclusion + post-load/structure re-admission (corpus-v5.0 gate)",
+ "sampling": "20 sections x 12 bucket-A tests",
+ "canvasBoundary": "white + black ink + Inter pin + line-height 1.25 + IMAGE-SPACE 16px frame (CANVAS_REV white-black-ink-font-lh-imgpad) + browser-rev cache key",
+ "totals": {
+  "web": {
+   "passing": 202,
+   "measured": 233
+  },
+  "ios": {
+   "passing": 188,
+   "measured": 233
+  },
+  "android": {
+   "passing": 183,
+   "measured": 233
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.974,
+    "passing": 6
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9719,
+    "passing": 6
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9689,
+    "passing": 6
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9973,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8539,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8543,
+    "passing": 9
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9887,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9875,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9807,
+    "passing": 10
+   }
+  },
+  "css-display": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9886,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9805,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9779,
+    "passing": 12
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9954,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9919,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9829,
+    "passing": 12
+   }
+  },
+  "css-gaps": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9955,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9858,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9753,
+    "passing": 11
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 1,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9874,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9749,
+    "passing": 12
+   }
+  },
+  "css-images": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.995,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9901,
+    "passing": 9
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9884,
+    "passing": 9
+   }
+  },
+  "css-lists": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9603,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9566,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9578,
+    "passing": 10
+   }
+  },
+  "css-masking": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9869,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.978,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9664,
+    "passing": 10
+   }
+  },
+  "css-multicol": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9992,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.991,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9843,
+    "passing": 9
+   }
+  },
+  "css-overflow": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9943,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.9862,
+    "passing": 10
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.9748,
+    "passing": 10
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 7,
+    "meanSsim": 0.9918,
+    "passing": 7
+   },
+   "ios": {
+    "measured": 7,
+    "meanSsim": 0.9901,
+    "passing": 7
+   },
+   "android": {
+    "measured": 7,
+    "meanSsim": 0.9876,
+    "passing": 7
+   }
+  },
+  "css-sizing": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9997,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9872,
+    "passing": 12
+   }
+  },
+  "css-text": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9678,
+    "passing": 3
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9576,
+    "passing": 2
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9486,
+    "passing": 1
+   }
+  },
+  "css-text-decor": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9699,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8619,
+    "passing": 7
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.872,
+    "passing": 7
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9977,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.988,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9786,
+    "passing": 10
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9888,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.987,
+    "passing": 12
+   }
+  },
+  "css-values": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9973,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9952,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9916,
+    "passing": 11
+   }
+  },
+  "filter-effects": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9279,
+    "passing": 4
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.8488,
+    "passing": 3
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.8103,
+    "passing": 3
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then for each of the 20 sections: POST_LOAD_EXTRACT=1 BIDI_BAKE=1 section-runner.sh <section> --all-platforms --max-tests 12 --run-id wave25-final --foreground."
+}

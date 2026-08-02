@@ -241,8 +241,13 @@ struct CaptureCanvas: View {
 /// The framing MIRRORS tools/titan/capture-browser-ref.mjs and the web
 /// composedCanvasStyle EXACTLY so the two images are pixel-comparable:
 ///   - width       390 px            (CANVAS_WIDTH)
-///   - content box 358 px            (390 − 2×16, the ref body content box)
-///   - padding     16 px all sides   (CANVAS_PAD_PX / the ref `:where(body)` pad)
+///   - content box 358 px            (390 − 2×16 = REF_RENDER_WIDTH, the
+///                                    viewport the ref is RENDERED at)
+///   - frame       16 px all sides   (CANVAS_PAD_PX — since wave-25 CAL-RC1
+///                                    the ref applies it to the finished PNG
+///                                    in IMAGE space, so it is unconditional
+///                                    and an author `body { padding }` adds
+///                                    INSIDE it; see `resolvedPadding`)
 ///   - background  WHITE             (CANVAS_BG — the ref html+body bg
 ///                                    since the corpus-v4 white-canvas
 ///                                    boundary; WPTCanvas.background)
@@ -265,9 +270,18 @@ struct ComposedCaptureCanvas: View {
     /// CaptureOverrides.captureWidth): the WPT browser-ref is always
     /// captured at 390, so the composed comparison surface is too.
     static let width: CGFloat = 390
-    /// Uniform 16px pad — the ref's `:where(body) { padding }`. Content box
-    /// is therefore 390 − 32 = 358, mirroring the ref body content box.
-    static let padding: CGFloat = 16
+    /// The composed canvas's image-space FRAME — 16px per side, so the
+    /// content space is 390 − 32 = 358, exactly the viewport
+    /// capture-browser-ref.mjs renders at (REF_RENDER_WIDTH).
+    ///
+    /// wave-25 round 3: read from the runtime's shared constant rather than
+    /// spelled here, so Compose (`WPT_CANVAS_FRAME_DP`), SwiftUI and web
+    /// (`CANVAS_FRAME_PX`) can never disagree about the ref's frame. It is no
+    /// longer "the ref's `:where(body)` padding": that injection is gone, and
+    /// the frame is now applied to the ref PNG in image space, which no
+    /// author rule can cancel. See `resolvedPadding` for the frame/author
+    /// split that replaced it.
+    static let padding: CGFloat = WPTCanvas.canvasFramePx
     /// Minimum canvas height — the ref's `min-height:100vh` floors
     /// capture-browser-ref.mjs's docHeight at 600; the surface grows past
     /// 600 when the composed content is taller.
@@ -394,22 +408,32 @@ struct ComposedCaptureCanvas: View {
     /// zero-specificity body frame, and of the web harness's
     /// `resolveCanvasPadding` / Compose's `resolveComposedCanvasPadding`.
     ///
-    /// WHY: capture-browser-ref.mjs injects `:where(body) { padding: 16px }`.
-    /// `:where()` contributes NO specificity (CSS Selectors L4 §17), so a ref
-    /// declaring its own `body { padding: 0 }` (0,0,1) WINS and renders with
-    /// no body pad. This canvas hardcoded `Self.padding`, so every such test
-    /// rendered at a (+16,+16) offset against its ref — MEASURED as the
-    /// ENTIRE divergence of css-masking/clip-path-circle-007, whose test and
-    /// ref both open with `body, div { padding: 0; margin: 0 }`.
+    /// WHY (wave 24): capture-browser-ref.mjs used to inject
+    /// `:where(body) { padding: 16px }`. `:where()` contributes NO
+    /// specificity (CSS Selectors L4 §17), so a ref declaring its own
+    /// `body { padding: 0 }` (0,0,1) WON and rendered with no body pad. This
+    /// canvas hardcoded `Self.padding`, so every such test rendered at a
+    /// (+16,+16) offset against its ref — MEASURED as the ENTIRE divergence
+    /// of css-masking/clip-path-circle-007, whose test and ref both open
+    /// with `body, div { padding: 0; margin: 0 }`.
     ///
-    /// PER SIDE with an independent 16px default, because the cascade is
-    /// per-longhand: a ref declaring only `padding-left: 0` keeps the
-    /// injected 16px elsewhere. Only CONCRETE px are honored — the converter
-    /// emits runtime-dependent lengths (`em`, `%`, `calc()`) with no absolute
-    /// value and this canvas has no honest answer for them, so such a side
-    /// keeps the default instead of guessing. No body-root, or one declaring
-    /// no padding ⇒ 16 on all sides, i.e. every pre-wave-24 capture is
-    /// byte-identical.
+    /// WHY IT CHANGED (wave 25 round 3): at CAL-RC1 the ref stopped injecting
+    /// a body padding at all. It renders at 358 wide with `padding: 0` and
+    /// the 16px frame is memcpy'd around the finished PNG. An image-space
+    /// translation has no cascade, so the two halves wave 24 conflated have
+    /// SPLIT: the FRAME (`Self.padding`) is unconditional, and the AUTHOR's
+    /// body padding is an ADDITIONAL inset inside it, defaulting to ZERO.
+    /// Each side therefore resolves to `frame + declared`: nothing declared →
+    /// 16 (unchanged, so every capture without a body pad is byte-identical);
+    /// `padding: 0` → 16 (wave 24 gave 0 — the stale calibration this round
+    /// repairs); `padding: 40px` → 56.
+    ///
+    /// PER SIDE, because the cascade is per-longhand: a ref declaring only
+    /// `padding-left: 0` leaves the other three at the bare frame. Only
+    /// CONCRETE px are honored — the converter emits runtime-dependent
+    /// lengths (`em`, `%`, `calc()`) with no absolute value and this canvas
+    /// has no honest answer for them, so such a side keeps the bare frame
+    /// instead of guessing.
     ///
     /// The lookup reads `document.components` UNSPLIT, exactly like
     /// `canvasBackground` — the body's frame must apply even if that root
@@ -437,9 +461,10 @@ struct ComposedCaptureCanvas: View {
             guard let px = data["px"]?.doubleValue
                     ?? data["original"]?["px"]?.doubleValue
             else { return Self.padding }
-            // CSS 2.1 §8.4 forbids negative padding; clamp defensively so a
-            // malformed IR can never pull content outside the canvas frame.
-            return max(0, CGFloat(px))
+            // CSS 2.1 §8.4 forbids negative padding; clamp the AUTHOR term so
+            // a malformed IR can never pull content outside the frame — and
+            // stack it ON the frame, which no author rule can cancel now.
+            return Self.padding + max(0, CGFloat(px))
         }
         return EdgeInsets(
             top: side("PaddingTop"),
@@ -557,7 +582,11 @@ struct ComposedCaptureCanvas: View {
         // otherwise identical.
         .background(alignment: .topLeading) {
             if !paint.behind.isEmpty {
-                FixedHoistOverlay(components: paint.behind)
+                // wave-25 round 3: the frame inset rides BOTH z-partitions —
+                // a negative-z hoisted box anchors in the same ICB as a
+                // positive-z one (Appendix E reorders paint, not geometry).
+                FixedHoistOverlay(components: paint.behind,
+                                  canvasFrame: Self.padding)
             }
         }
         // GAP 2 — the ref canvas background: corpus-v4 WHITE by default, or
@@ -569,20 +598,30 @@ struct ComposedCaptureCanvas: View {
         // its background must paint even if that root were ever hoisted.)
         .background(canvasBackground)
         // Wave 17 (F1/F2) — the canvas-root out-of-flow overlay: attached
-        // HERE, after the full-width frame chain and OUTSIDE the 16px
-        // `.padding` above, so its top-leading corner is the UNPADDED
-        // canvas origin (0,0) — the viewport containing block fixed boxes
-        // anchor at, and the initial-containing-block corner the measured
-        // web behavior pins for root-level absolute boxes (left:100 →
-        // canvas x=100, not 116). As an overlay it paints ABOVE all
-        // in-flow content (CSS 2.1 Appendix E step 8); order/z-index
-        // resolve inside FixedHoistOverlay's ZStack. Wave 19 (RC-A5b):
-        // only the NON-negative-z half mounts here — the negative-z half
-        // rides the step-3 background above. Empty half → no overlay
-        // content, view tree otherwise identical.
+        // HERE, after the full-width frame chain and OUTSIDE the `.padding`
+        // above, so it sees the WHOLE capture surface and applies its own
+        // `canvasFrame` inset to reach the initial containing block. One
+        // owner for that corner (the overlay), instead of two modifiers that
+        // could drift.
+        //
+        // Wave 17 pinned the corner at the UNPADDED canvas origin (0,0) from
+        // measured web behavior — an absolute root's `left:100` landed at
+        // canvas x=100, not 116 — which was right while the ref framed its
+        // pages with a CSS body pad that moves in-flow content only. Wave 25
+        // CAL-RC1 moved that frame into IMAGE space, so ref abspos content
+        // now translates with its prose and the corner is (16,16); hence the
+        // `canvasFrame: Self.padding` argument.
+        //
+        // As an overlay it paints ABOVE all in-flow content (CSS 2.1
+        // Appendix E step 8); order/z-index resolve inside
+        // FixedHoistOverlay's ZStack. Wave 19 (RC-A5b): only the
+        // NON-negative-z half mounts here — the negative-z half rides the
+        // step-3 background above. Empty half → no overlay content, view
+        // tree otherwise identical.
         .overlay(alignment: .topLeading) {
             if !paint.above.isEmpty {
-                FixedHoistOverlay(components: paint.above)
+                FixedHoistOverlay(components: paint.above,
+                                  canvasFrame: Self.padding)
             }
         }
         // Publish the capture geometry so the runtime resolves vw/vh/% and
