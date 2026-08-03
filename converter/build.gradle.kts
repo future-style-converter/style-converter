@@ -1,7 +1,7 @@
 plugins {
     application
-    kotlin("jvm") version "2.4.0"
-    kotlin("plugin.serialization") version "2.4.0"
+    kotlin("jvm") version "2.4.10"
+    kotlin("plugin.serialization") version "2.4.10"
 }
 
 repositories {
@@ -17,8 +17,8 @@ dependencies {
     // toolchain and clearer parameterised test ergonomics. JUnit 6 unifies
     // Jupiter and Platform version numbers (launcher is 6.x, not 1.x).
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:6.1.1")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:6.1.2")
 }
 
 application {
