@@ -80,7 +80,14 @@ data class IRAttrs(
     val size: String? = null,      // select/input size attribute
     val alt: String? = null,       // image-input alt text
     val min: Double? = null,       // meter/progress/range min
-    val max: Double? = null        // meter/progress/range max
+    val max: Double? = null,       // meter/progress/range max
+    // wave-27 lane CBAKE: `<ol start>` — the ordered list's counter origin
+    // (HTML §4.4.5), a VERBATIM string like every member of the disjoint
+    // ol/li attr lane. Appended LAST so the wave-20 widget field order (and
+    // every positional construction of it) is untouched. Decoded for wire
+    // completeness; Compose paints the baked [IRComponent.markerText]
+    // instead of counting from it. Twin of Swift IRAttrs.start.
+    val start: String? = null
 )
 
 /**
@@ -167,6 +174,17 @@ data class IRDecoration(
  *   run the extractor did not collapse; an EMPTY list is a distinct,
  *   meaningful state ("authoritative and it says: no lines") that the
  *   painter must honour by drawing nothing.
+ * @property markerText Wave-27 RESOLVED list-marker string for one `<li>`
+ *   — v2 wire name `meta.markerText`, riding the meta channel exactly like
+ *   `attrs`. Produced by the extractor's counter-style bake, which owns the
+ *   whole css-counter-styles-3 §6 resolution (predefined table, §4 range,
+ *   §7.1.4 fallback, §3.1.5 suffix) plus the `<ol start>` / `<li value>`
+ *   ordinal the IR has no property for. AUTHORITATIVE when present: the
+ *   renderer must render it INSTEAD of calling
+ *   [com.styleconverter.runtime.lists.StyleListApplier.getMarker], never
+ *   as well. Null for every v1 document, every non-`<li>` component, and
+ *   every marker family the bake leaves to this runtime's own table
+ *   (the §6.1 bullets, `none`, and unmodelled counter styles).
  * @property variables CSS custom-property definitions declared on this
  *   component ("--name" → RAW declaration value, verbatim). Additive IR
  *   v2 envelope key (schema/spec/01-envelope.md): names are
@@ -188,6 +206,7 @@ data class IRComponent(
     val _tag: String? = null,
     val attrs: IRAttrs? = null,
     val decorations: List<IRDecoration>? = null,
+    val markerText: String? = null,
     val slot: IRSlot? = null,
     val pseudos: JsonObject? = null,
     val role: String? = null,

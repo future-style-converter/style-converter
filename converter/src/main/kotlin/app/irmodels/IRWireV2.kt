@@ -214,7 +214,7 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             // meta: droppable renderer hints, grouped. Omitted entirely
             // when no member has a value so hint-free fixtures stay lean.
             if (value.tag != null || value.role != null || value.attrs != null ||
-                value.decorations != null
+                value.decorations != null || value.markerText != null
             ) {
                 put("meta", buildJsonObject {
                     // sourceTag: v2 home of the extractor's `_tag` hint.
@@ -232,6 +232,12 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
                     // entry shape and colour-token spelling; spec 05
                     // additive meta-key rule, the meta.attrs precedent).
                     value.decorations?.let { put("decorations", it) }
+                    // markerText (wave-27 lane CBAKE): v2 home of
+                    // `_markerText` — the resolved list-marker string for a
+                    // `<li>`, forwarded VERBATIM (the extractor owns the
+                    // css-counter-styles-3 §6 spelling; spec 05 additive
+                    // meta-key rule, the meta.attrs precedent).
+                    value.markerText?.let { put("markerText", it) }
                 })
             }
         })
@@ -279,6 +285,12 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             // runtimes, not this codec, interpret line + colour tokens).
             decorations = meta?.get("decorations")?.let { el ->
                 if (el is JsonNull) null else el.jsonArray
+            },
+            // markerText (wave-27 lane CBAKE): opaque round-trip — JSON
+            // null ≡ absent, any string comes back byte-verbatim (the
+            // runtimes render it; this codec never re-derives it).
+            markerText = meta?.get("markerText")?.let { el ->
+                if (el is JsonNull) null else el.jsonPrimitive.content
             },
             pseudos = obj["pseudos"]?.jsonObject,
             // variables: "--name" → raw string map, round-tripped verbatim

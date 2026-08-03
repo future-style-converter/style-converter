@@ -12,7 +12,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { NodeRenderer } from '../../src/renderer/NodeRenderer';
-import { WIDGET_TAGS, widgetDomProps } from '../../src/renderer/WidgetAttrs';
+import { WIDGET_TAGS, LIST_ATTR_TAGS, widgetDomProps } from '../../src/renderer/WidgetAttrs';
 import type { ComposedNode } from '../../src/renderer/Composer';
 import type { IRComponent } from '../../src/core/ir/IRModels';
 
@@ -181,5 +181,31 @@ describe('NodeRenderer applies wire attrs onto real widget elements', () => {
     // The React-19 inert boolean + the focusability suppression landed.
     expect(out).toContain('inert=""');
     expect(out).toContain('tabindex="-1"');
+  });
+});
+
+// ── wave-27 lane CBAKE: the LIST-ORDINAL attr lane ─────────────────────────
+//
+// `<ol start>` / `<li value>` ride the same `meta.attrs` envelope through a
+// DISJOINT tag set, so the browser can synthesise `::marker` with the right
+// counter origin. The disjointness is the contract worth pinning: WIDGET_TAGS
+// also drives inert/tabIndex and an unconditional inter-sibling space in the
+// harness, and folding `ol` into it would have moved unrelated captures.
+describe('list-ordinal attrs (wave-27)', () => {
+  it('applies start on <ol> and value on <li>', () => {
+    expect(widgetDomProps('ol', { start: '1860' })).toEqual({ start: '1860' });
+    expect(widgetDomProps('li', { value: '4' })).toEqual({ value: '4' });
+  });
+
+  it('keeps the list lane disjoint from the widget lane', () => {
+    for (const tag of LIST_ATTR_TAGS) expect(WIDGET_TAGS.has(tag)).toBe(false);
+    // A non-list, non-widget element still gets nothing at all.
+    expect(widgetDomProps('div', { start: '3' })).toEqual({});
+  });
+
+  it('serialises start onto a real <ol> element', () => {
+    const out = html(node(comp({ meta: { sourceTag: 'ol', attrs: { start: '1860' } } })),
+      { mapTag: (t) => t ?? 'div' });
+    expect(out).toContain('start="1860"');
   });
 });

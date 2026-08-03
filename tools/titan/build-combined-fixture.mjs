@@ -127,7 +127,10 @@ async function main() {
                          postLoadExtracted: false,
                          // wave-20: nor any post-script structure.
                          structureExtracted: false,
-                         bidiBaked: false };
+                         bidiBaked: false,
+                         // Wave 27 — a missing fixture certainly baked no
+                         // list markers either (explicit, never inferred).
+                         counterStyleBaked: false };
       continue;
     }
 
@@ -167,6 +170,12 @@ async function main() {
         // tests are NOT wall-tagged, so this never feeds applyNaScoreGate;
         // it surfaces on the manifest row for investigators only).
         bidiBaked: fixture._wpt?.bidiBaked === true,
+        // Wave 27 — the counter-style bake's provenance stamp (same
+        // informational channel as bidiBaked: list tests are not
+        // wall-tagged, so it never feeds applyNaScoreGate; it tells an
+        // investigator whether a row's markers were resolved upstream or
+        // synthesised by each runtime's own table).
+        counterStyleBaked: fixture._wpt?.counterStyleBaked === true,
       };
       i++;
     }

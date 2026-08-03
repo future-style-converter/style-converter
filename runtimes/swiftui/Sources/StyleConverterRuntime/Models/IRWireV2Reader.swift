@@ -221,9 +221,10 @@ enum IRWireV2Reader {
             var meta: IRMeta? = nil
             if c.contains(IRAnyKey("meta")) {
                 let m = try c.nestedContainer(keyedBy: IRAnyKey.self, forKey: IRAnyKey("meta"))
-                let members: Set<String> = ["sourceTag", "role", "attrs", "decorations"]
+                // `markerText` is the wave-27 baked list marker (lane CBAKE).
+                let members: Set<String> = ["sourceTag", "role", "attrs", "decorations", "markerText"]
                 for k in m.allKeys where !members.contains(k.stringValue) {
-                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role/attrs/decorations)", path: decoder.codingPath)
+                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role/attrs/decorations/markerText)", path: decoder.codingPath)
                 }
                 let tag = try m.decodeIfPresent(String.self, forKey: IRAnyKey("sourceTag"))
                 let role = try m.decodeIfPresent(String.self, forKey: IRAnyKey("role"))
@@ -236,8 +237,11 @@ enum IRWireV2Reader {
                     guard case .object(let o) = raw else {
                         throw violation("meta.attrs must be an object", path: decoder.codingPath)
                     }
+                    // Wave-27 added `start` for the disjoint ol/li ordinal
+                    // lane (HTML §4.4.5) — eleven legal attributes now.
                     let attrKeys: Set<String> = ["type", "value", "checked", "multiple",
-                                                 "size", "alt", "min", "max", "selected", "disabled"]
+                                                 "size", "alt", "min", "max", "selected",
+                                                 "disabled", "start"]
                     for k in o.keys where !attrKeys.contains(k) {
                         throw violation("unknown meta.attrs key '\(k)' (wave-20 wire contract)", path: decoder.codingPath)
                     }
@@ -290,10 +294,16 @@ enum IRWireV2Reader {
                         return IRDecoration(line: line, color: color)
                     }
                 }
-                guard tag != nil || role != nil || attrs != nil || decorations != nil else {
+                // markerText (wave-27 lane CBAKE): a plain string, so there
+                // is no shape to validate beyond "string" — the schema pins
+                // minLength 1 and the converter omits the key otherwise.
+                let markerText = try m.decodeIfPresent(String.self, forKey: IRAnyKey("markerText"))
+                guard tag != nil || role != nil || attrs != nil || decorations != nil
+                        || markerText != nil else {
                     throw violation("meta present but empty (schema: minProperties 1)", path: decoder.codingPath)
                 }
-                meta = IRMeta(sourceTag: tag, role: role, attrs: attrs, decorations: decorations)
+                meta = IRMeta(sourceTag: tag, role: role, attrs: attrs,
+                              decorations: decorations, markerText: markerText)
             }
             // variables: additive v2 key — "--name" → raw string map
             // (custom-property definitions, css-variables-1 §2). Schema

@@ -100,6 +100,30 @@ describe('wave-20 W1 — WPT mode widget passthrough', () => {
     expect(out).toMatch(/<button[^>]*>button<\/button>/);
   });
 
+  // ── wave-27 lane CBAKE B-RC2: `<li>` joins the bare-text early return ──
+  //
+  // The placeholder path wraps an item's text in a `display: block` span,
+  // which opens a new block box AFTER the browser's `::marker` — so under
+  // `list-style-position: inside` (the whole css-counter-styles corpus)
+  // the marker landed on its own line and every item was twice as tall as
+  // the reference. Pinned here at the DOM altitude, where the divergence
+  // actually lives.
+  it('li text renders BARE so ::marker shares the item\'s first line box', () => {
+    const out = render(node(comp({ text: '\u17e1\u17e8\u17e6\u17e0', meta: { sourceTag: 'li' } })));
+    expect(out).toContain('<li');
+    // No wrapper element at all between <li> and its text.
+    expect(out).toMatch(/<li[^>]*>\u17e1\u17e8\u17e6\u17e0<\/li>/);
+    expect(out).not.toContain('<span');
+  });
+
+  it('the li fix does NOT drag li into the widget lane', () => {
+    // WIDGET_TAGS also drives `inert` + `tabIndex:-1` and an unconditional
+    // inter-sibling space; a list item must acquire none of that.
+    const out = render(node(comp({ text: 'x', meta: { sourceTag: 'li' } })));
+    expect(out).not.toContain('inert');
+    expect(out).not.toContain('tabindex');
+  });
+
   it('appearance:none still suppresses chrome — the CSS lands on the real input', () => {
     // css-ui-4 §7: a real Chromium input with `appearance:none` paints no
     // native chrome. Our job is only to DELIVER the declaration onto the

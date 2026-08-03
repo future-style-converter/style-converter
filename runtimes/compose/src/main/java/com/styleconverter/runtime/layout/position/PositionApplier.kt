@@ -2,6 +2,9 @@ package com.styleconverter.runtime.layout.position
 
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.ui.Modifier
+// The value form of the offset this applier emits — see [resolvedOffset],
+// which the backdrop draw node reads because it sits OUTER of this step.
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 
@@ -112,6 +115,45 @@ object PositionApplier {
         }
 
         return result
+    }
+
+    /**
+     * The offset [applyPosition] will actually emit for [config], as a value
+     * instead of a modifier — the exact analogue of
+     * `MarginApplier.resolvedInsets`.
+     *
+     * ## Why this exists (wave-27 backdrop fix)
+     * `StyleApplier` installs the effects step (step 3) OUTSIDE the layout
+     * step (step 4), and this applier's `absoluteOffset` is the last thing
+     * step 4 chains. A draw node at step 3 is therefore OUTER of the offset:
+     * its `positionInWindow()` and its local draw origin both describe the
+     * element's UN-offset slot, while the element's own background/borders
+     * (steps 5–6, INNER of the offset) paint at the offset one.
+     *
+     * The backdrop lane is the one consumer that has to reconcile the two —
+     * it samples the canvas at a window coordinate AND paints into that draw
+     * space, so a dropped offset mis-places both halves *consistently* (the
+     * patch looked like a perfect filter of the wrong rectangle: measured on
+     * `backdrop-filter-basic.html`, the inverted patch landed at the parent
+     * colorbox's origin, exactly the child's `left:50px; top:50px` short).
+     *
+     * Returning the value from the same `config.offsetX`/`offsetY` reads
+     * [applyOffset] uses — behind the same `hasPosition`/STATIC gates — means
+     * the backdrop node and the layout chain can never disagree about how far
+     * the box moved. Zero for a static (or offsetless) element, which is the
+     * overwhelming majority and costs them nothing.
+     */
+    fun resolvedOffset(config: PositionConfig): DpOffset {
+        // Gate 1 — mirrors applyPosition's own first line: no positioning
+        // properties at all means no modifier was chained, so no offset.
+        if (!config.hasPosition) return DpOffset.Zero
+        // Gate 2 — mirrors the STATIC branch of applyPosition's `when`: a
+        // static box ignores its insets entirely (css-position-3 §2), and is
+        // the only type that does NOT route through applyOffset.
+        if (config.type == PositionType.STATIC) return DpOffset.Zero
+        // Every other type (relative / absolute / fixed / sticky) calls
+        // applyOffset, which reads exactly these two accessors.
+        return DpOffset(config.offsetX, config.offsetY)
     }
 
     /**

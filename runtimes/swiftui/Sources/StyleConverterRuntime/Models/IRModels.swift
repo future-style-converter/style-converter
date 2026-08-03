@@ -144,13 +144,18 @@ public struct IRAttrs: Equatable {
     public let alt: String?         // image-input alt text
     public let min: Double?         // meter/progress/range min
     public let max: Double?         // meter/progress/range max
+    /// Wave-27 lane CBAKE: `<ol start>` — the ordered list's counter origin
+    /// (HTML §4.4.5), a VERBATIM string like every member of the disjoint
+    /// ol/li attr lane. Decoded for wire completeness; this runtime paints
+    /// the baked `IRMeta.markerText` instead of counting from it.
+    public let start: String?
 
     // internal: constructed by the decode paths and by tests. Defaults
     // keep pre-attrs construction sites and tests terse.
     init(type: String? = nil, value: String? = nil, valueNumber: Double? = nil,
          checked: Bool? = nil, multiple: Bool? = nil, selected: Bool? = nil,
          disabled: Bool? = nil, size: String? = nil, alt: String? = nil,
-         min: Double? = nil, max: Double? = nil) {
+         min: Double? = nil, max: Double? = nil, start: String? = nil) {
         self.type = type
         self.value = value
         self.valueNumber = valueNumber
@@ -162,6 +167,7 @@ public struct IRAttrs: Equatable {
         self.alt = alt
         self.min = min
         self.max = max
+        self.start = start
     }
 
     /// Build from the wire's raw IRValue object — shared by the strict v2
@@ -185,7 +191,11 @@ public struct IRAttrs: Equatable {
             size: o["size"]?.stringValue,
             alt: o["alt"]?.stringValue,
             min: o["min"]?.doubleValue,
-            max: o["max"]?.doubleValue
+            max: o["max"]?.doubleValue,
+            // wave-27: the ol/li lane is verbatim strings throughout — the
+            // argument order here must mirror the initializer's, so `start`
+            // sits last exactly as it does in the declaration above.
+            start: o["start"]?.stringValue
         )
     }
 }
@@ -240,15 +250,27 @@ public struct IRMeta: Equatable {
     /// schema pins minItems 1); emptiness only arises AFTER the paint-time
     /// keyword filter, and it stays authoritative there.
     public let decorations: [IRDecoration]?
+    /// Wave-27 RESOLVED list-marker string for one `<li>` (`meta.markerText`,
+    /// same additive meta channel as `attrs`). The extractor's counter-style
+    /// bake owns the whole css-counter-styles-3 §6 resolution — predefined
+    /// table, §4 range, §7.1.4 fallback, §3.1.5 suffix — plus the `<ol start>`
+    /// ordinal the IR carries no property for. AUTHORITATIVE when present:
+    /// the renderer paints it INSTEAD of calling `ListMarkerText.marker`,
+    /// never as well. nil for v1 documents, non-`<li>` components, and every
+    /// marker family the bake leaves to this runtime (§6.1 bullets, `none`,
+    /// unmodelled counter styles).
+    public let markerText: String?
 
     // internal: constructed by the decode paths and by tests. The attrs /
-    // decorations defaults keep every earlier construction site compiling.
+    // decorations / markerText defaults keep every earlier construction
+    // site compiling.
     init(sourceTag: String? = nil, role: String? = nil, attrs: IRAttrs? = nil,
-         decorations: [IRDecoration]? = nil) {
+         decorations: [IRDecoration]? = nil, markerText: String? = nil) {
         self.sourceTag = sourceTag
         self.role = role
         self.attrs = attrs
         self.decorations = decorations
+        self.markerText = markerText
     }
 }
 
@@ -385,7 +407,10 @@ public struct IRComponent: Decodable {
                           decorations: rawMeta.decorations?.arrayValue?.compactMap { entry in
                               guard let line = entry["line"]?.stringValue else { return nil }
                               return IRDecoration(line: line, color: entry["color"]?.stringValue)
-                          })
+                          },
+                          // Wave-27: the baked list-marker string rides the
+                          // lenient path too — a plain string, no coercion.
+                          markerText: rawMeta.markerText)
         } else {
             let tag = try c.decodeIfPresent(String.self, forKey: ._tag)
             let role = try c.decodeIfPresent(String.self, forKey: ._role)
@@ -415,6 +440,10 @@ public struct IRComponent: Decodable {
         // as an opaque IRValue here — the STRICT reader owns the shape
         // errors; this path only coerces what it recognises.
         let decorations: IRValue?
+        // Wave-27 lane CBAKE: the resolved list-marker string. A plain
+        // String? — there is no shape to get wrong, so the lenient and
+        // strict readers agree by construction.
+        let markerText: String?
     }
 }
 

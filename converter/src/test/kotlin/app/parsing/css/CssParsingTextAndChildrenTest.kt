@@ -475,4 +475,55 @@ class CssParsingTextAndChildrenTest {
             "v1 serializer must not emit decorations in any spelling"
         )
     }
+
+    /**
+     * wave-27 lane CBAKE: `_markerText` (the RESOLVED list-marker string one
+     * `<li>` renders — representation + suffix per css-counter-styles-3 §6,
+     * already resolved against `<ol start>` and the item's ordinal) is parsed
+     * onto the IRComponent's `markerText` field VERBATIM. The converter must
+     * never re-derive or re-spell it: only the extractor has the counter
+     * origin, and only it walked the §6 table. Same v1 freeze rule as
+     * `_attrs`/`_decorations` — the deprecated serializer ignores the field.
+     */
+    @Test
+    fun `_markerText is parsed verbatim and ignored by the v1 serializer`() {
+        // The live css3-counter-styles-159 shape: <ol start='1860'> whose one
+        // item resolves to the cambodian representation of 1860 plus ".".
+        val input = json.parseToJsonElement(
+            """
+            {
+              "components": {
+                "list__0": {
+                  "properties": { "list-style-position": "inside" },
+                  "_tag": "ol",
+                  "_attrs": { "start": "1860" },
+                  "children": {
+                    "list__0__0": {
+                      "properties": { "list-style-type": "cambodian" },
+                      "_tag": "li",
+                      "_markerText": "\u17e1\u17e8\u17e6\u17e0."
+                    }
+                  }
+                }
+              }
+            }
+            """.trimIndent()
+        ).jsonObject
+
+        val ir = cssParsing(input)
+        // The <ol> keeps the ordinal attribute (the disjoint list attr lane).
+        assertEquals("1860", ir.components[0].attrs!!["start"]!!.jsonPrimitive.content)
+        // The child <li> carries the baked marker string byte-verbatim.
+        val item = ir.components[0].children!![0]
+        assertEquals("\u17e1\u17e8\u17e6\u17e0.", item.markerText)
+        // A component with no `_markerText` must not gain one.
+        assertNull(ir.components[0].markerText)
+
+        // The frozen v1 wire never learns about markerText (historical-drop).
+        val outString = Json { prettyPrint = false }.encodeToString(ir)
+        assertTrue(
+            !outString.contains("_markerText") && !outString.contains("\"markerText\""),
+            "v1 serializer must not emit markerText in any spelling"
+        )
+    }
 }

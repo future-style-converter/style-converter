@@ -2524,6 +2524,13 @@ public struct ComponentRenderer: View {
                 // must start at its own content edge; the pre-wave-24 code
                 // still reserved a Text + 4pt spacing for those rows).
                 let markerText: String = {
+                    // Wave 27 (lane CBAKE): a BAKED marker wins outright.
+                    // `meta.markerText` is the extractor's full
+                    // css-counter-styles-3 §6 resolution — the counter style
+                    // AND the `<ol start>` ordinal, neither of which
+                    // ListMarkerResolver can see — so re-deriving it here
+                    // could only be worse. Absent ⇒ the local table below.
+                    if let baked = child.meta?.markerText { return baked }
                     guard isListItem,
                           let cfg = ListMarkerResolver.resolve(
                             parentTag: parentTag,
@@ -2582,8 +2589,22 @@ public struct ComponentRenderer: View {
                         // below documents the modifier-order argument).
                         multicolFragmentRow(child: child, plan: plan)
                     } else if isMarkerRow {
-                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        // Wave 27 (lane NMARK, B-RC5 + B-RC6). The
+                        // synthesized marker box must not RESIZE the
+                        // item's principal box on either axis. Both
+                        // wave-26 defects came from this one row; see
+                        // ListMarkerRow for the measured evidence and
+                        // the css-lists-3 §3.2 argument behind each of
+                        // the two constants it names.
+                        HStack(alignment: ListMarkerRow.rowAlignment(
+                                    itemExposesTextBaseline:
+                                        ListMarkerRow.itemExposesTextBaseline(child)),
+                               spacing: ListMarkerRow.gapPt) {
+                            // B-RC5: shrink-to-fit, never compressed by
+                            // whatever inline space the item's declared
+                            // width happens to leave over.
                             Text(markerText)
+                                .fixedSize(horizontal: true, vertical: true)
                             if !isCSSFlex, let ca = childAgg, let pa = parentAgg {
                                 // Marker rows keep the legacy decoration;
                                 // the host's placement inside the HStack

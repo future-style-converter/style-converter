@@ -342,7 +342,11 @@ class SchemaConformanceTest {
             cmp["meta"]?.jsonObject?.let { meta ->
                 assertTrue(meta.isNotEmpty(), "$where meta present but empty")
                 assertTrue(
-                    meta.keys.all { it in setOf("sourceTag", "role", "attrs", "decorations") },
+                    // wave-27 lane CBAKE added `markerText` under the same
+                    // spec-05 additive meta-key rule as attrs/decorations.
+                    meta.keys.all {
+                        it in setOf("sourceTag", "role", "attrs", "decorations", "markerText")
+                    },
                     "$where meta has unknown keys"
                 )
             }

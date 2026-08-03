@@ -34,8 +34,17 @@ data class BackdropSample(
  * origin — while filter-effects-2 §2 samples and clips the BORDER box.
  *
  * This value is the difference: where the border box starts inside the draw
- * node ([localLeft]/[localTop] — the resolved top/left margins) and how big it
- * is ([width]/[height] — the node minus both margin bands on each axis).
+ * node ([localLeft]/[localTop]) and how big it is ([width]/[height] — the node
+ * minus both margin bands on each axis).
+ *
+ * [localLeft]/[localTop] carry TWO contributions, both of them "steps that run
+ * INSIDE this draw node and move the painted box":
+ *  1. the resolved top/left MARGIN bands (step 4's `absolutePadding`), and
+ *  2. the resolved POSITION offset (step 4's `absoluteOffset` — a relative /
+ *     absolute / fixed / sticky box's used inset).
+ * Both are pure translations of the element's paint relative to the draw
+ * node's own origin, so they add, and every consumer (sample rect, patch
+ * placement, border-box clip) needs the sum rather than either half.
  */
 data class BackdropBorderBox(
     val localLeft: Float,
@@ -87,10 +96,20 @@ object BackdropSampleGeometry {
      *   translates with `offset` for negative ones — an offset moves the whole
      *   node (patch included) and does NOT change its size, so a negative
      *   margin contributes nothing to subtract here.
+     * @param positionOffsetXPx/[positionOffsetYPx] the element's resolved
+     *   POSITION offset in px (`PositionApplier.resolvedOffset` — the very
+     *   `absoluteOffset` step 4 is about to chain), 0 for a static box. Added
+     *   to the local origin and NOT to the size: `Modifier.absoluteOffset`
+     *   translates its child without resizing it, so the draw node's box stays
+     *   the same shape and only its contents slide. SIGNED on purpose — a
+     *   `right`/`bottom` inset resolves negative (PositionConfig.offsetX), and
+     *   a negative `left` moves the box left; both must translate the patch
+     *   the same way they translate the element's own background.
      * @return null when the border box is degenerate — margins alone can eat
      *   the node (a min-size floor plus a large margin), and a zero/negative
      *   box has nothing to sample. Null is a refusal, matching
      *   [sample]'s: nothing is painted rather than something plausible.
+     *   The position offset can never trigger this: it does not touch the size.
      */
     fun borderBox(
         nodeWidth: Float,
@@ -99,6 +118,8 @@ object BackdropSampleGeometry {
         marginTopPx: Float,
         marginRightPx: Float,
         marginBottomPx: Float,
+        positionOffsetXPx: Float = 0f,
+        positionOffsetYPx: Float = 0f,
     ): BackdropBorderBox? {
         // Clamp each band at 0 so a caller that hands us a negative value
         // (or a Dp that resolved below zero) can never GROW the border box.
@@ -110,7 +131,15 @@ object BackdropSampleGeometry {
         val width = nodeWidth - left - right
         val height = nodeHeight - top - bottom
         if (width <= 0f || height <= 0f) return null
-        return BackdropBorderBox(localLeft = left, localTop = top, width = width, height = height)
+        // The position offset rides on the ORIGIN only (see the param KDoc):
+        // it slides the painted box inside an unchanged draw node, exactly
+        // like the margin band does, so the two simply add.
+        return BackdropBorderBox(
+            localLeft = left + positionOffsetXPx,
+            localTop = top + positionOffsetYPx,
+            width = width,
+            height = height,
+        )
     }
 
     /**

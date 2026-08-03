@@ -2,7 +2,9 @@ package com.styleconverter.runtime.core.renderer
 
 import androidx.compose.ui.graphics.Color
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -114,6 +116,80 @@ class WptCanvasBackgroundTest {
         // identity path — bit-identical to its wave-14 rendering, no re-pack.
         val grey = Color(red = 0.4f, green = 0.4f, blue = 0.4f, alpha = 1f)
         assertEquals(grey, composedCanvasBackground(grey))
+    }
+
+    // ── wave 27 A-RC1: the CONTAINMENT gate on canvas propagation ───────────
+    //
+    // The propagation the composed canvas implements is NOT unconditional.
+    // css-backgrounds-3 §2.11.2 propagates the root/body background to the
+    // canvas only while that element is ON the propagation path, and
+    // css-contain-2 §3.5 takes it off that path as soon as it has ANY
+    // containment — a contained body paints its background on its OWN box and
+    // the canvas keeps the UA default.
+    //
+    // MEASURED (wave-27 gate, css-contain): contain-body-bg-001..004 declare
+    // `body { background: red; contain: layout|paint|size|style }` over a
+    // white 300×200 `<p>` and share one PURE WHITE reference ("Test passes if
+    // there is no red"). All four scored 0.6204 on Android — the whole capture
+    // flooded red. These pins hold the shared rule (web
+    // `bodyRootHasContainment`, iOS `WPTCanvas.containmentBlocksPropagation`).
+
+    @Test
+    fun containmentGate_absentOrNoneIsNotContainment() {
+        // No declaration at all — the overwhelmingly common case, and the one
+        // that keeps every pre-wave-27 capture byte-identical.
+        assertFalse(containmentBlocksCanvasPropagation(null))
+        // An empty list is a malformed leaf, not evidence of containment.
+        assertFalse(containmentBlocksCanvasPropagation(emptyList()))
+        // css-contain-2 §2: `none` is the initial value and applies NO
+        // containment, so the body stays on the propagation path.
+        assertFalse(containmentBlocksCanvasPropagation(listOf("NONE")))
+    }
+
+    @Test
+    fun containmentGate_anyKeywordBlocksRegardlessOfKind() {
+        // contain-body-bg-001..004 set layout / paint / size / style and ALL
+        // match the same all-white reference, so the gate cannot grade by
+        // kind; strict/content are the shorthand keywords of the same family.
+        for (kw in listOf("LAYOUT", "PAINT", "SIZE", "STYLE", "STRICT", "CONTENT")) {
+            assertTrue(kw, containmentBlocksCanvasPropagation(listOf(kw)))
+        }
+        // A multi-keyword list (`contain: size style`) needs only one token.
+        assertTrue(containmentBlocksCanvasPropagation(listOf("SIZE", "STYLE")))
+        // Case/whitespace tolerance — the reader hands tokens through verbatim.
+        assertTrue(containmentBlocksCanvasPropagation(listOf(" layout ")))
+    }
+
+    @Test
+    fun composedCanvas_containedBodyKeepsTheWhiteCanvas() {
+        // contain-body-bg-001's exact shape: an OPAQUE red body background
+        // that would otherwise take the α=1 identity path straight onto the
+        // canvas. The gate fires BEFORE the color is read, so the canvas
+        // stays white and the body-root paints its own red box (which the
+        // test's white `<p>` then covers — the ref's reading).
+        val red = Color(red = 1f, green = 0f, blue = 0f, alpha = 1f)
+        assertEquals(
+            WPT_CANVAS_BACKGROUND,
+            composedCanvasBackground(red, contained = true)
+        )
+        // Translucent ink is gated identically — no blend, just the canvas.
+        assertEquals(
+            WPT_CANVAS_BACKGROUND,
+            composedCanvasBackground(
+                Color(red = 1f, green = 0f, blue = 0f, alpha = 0.5f),
+                contained = true
+            )
+        )
+    }
+
+    @Test
+    fun composedCanvas_uncontainedDefaultIsUnchanged() {
+        // The `contained` parameter defaults to false, so every existing
+        // caller and every non-contained document keeps its wave-26 result:
+        // an opaque body background still paints the whole canvas.
+        val grey = Color(red = 0.4f, green = 0.4f, blue = 0.4f, alpha = 1f)
+        assertEquals(grey, composedCanvasBackground(grey))
+        assertEquals(grey, composedCanvasBackground(grey, contained = false))
     }
 
     // ── corpus-v4.1: the BLACK default-ink sub-boundary ─────────────────────

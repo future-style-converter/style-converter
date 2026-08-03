@@ -173,6 +173,18 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             else el.jsonArray
         }
 
+        // wave-27 lane CBAKE: read optional `_markerText` (the resolved
+        // list-marker string one `<li>` renders — see the counter-style bake
+        // banner in tools/titan/counter-style-bake.mjs) as an opaque STRING.
+        // Same opacity + null-tolerance contract as `_attrs`/`_decorations`:
+        // the extractor owns the spelling (css-counter-styles-3 §6
+        // representation + suffix), the converter forwards it verbatim to v2
+        // `meta.markerText`, and JSON null ≡ absent.
+        val markerText = obj["_markerText"]?.let { el ->
+            if (el is kotlinx.serialization.json.JsonNull) null
+            else el.jsonPrimitive.content
+        }
+
         return CssComponent(
             properties = props,
             selectors = selectors,
@@ -185,7 +197,10 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             attrs = attrs,
             // wave-22 lane DECOR: the collapsed run's per-line decoration
             // list, opaque all the way to the v2 wire (meta.decorations).
-            decorations = decorations
+            decorations = decorations,
+            // wave-27 lane CBAKE: the baked list-marker string, opaque all
+            // the way to the v2 wire (meta.markerText).
+            markerText = markerText
         )
     }
 
@@ -368,6 +383,11 @@ fun cssParsing(doc: JsonObject): IRDocument {
             // serializer ignores it, so v1 output bytes are untouched
             // (same rule as tag/pseudos/attrs).
             decorations = component.decorations,
+            // wave-27 lane CBAKE: forward `_markerText` verbatim for the v2
+            // wire (meta.markerText — grouped beside meta.attrs). Null on
+            // every component that is not a baked `<li>`; the v1 serializer
+            // ignores it, so v1 output bytes are untouched.
+            markerText = component.markerText,
             // Forward the custom-property definitions (IR v2 `variables`
             // key). Stays null on fixtures without --* declarations; the
             // legacy v1 serializer ignores it either way, so v1 output

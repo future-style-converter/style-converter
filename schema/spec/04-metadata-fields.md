@@ -22,6 +22,50 @@ behavior, caveats included.
 > `_decorations` banner in `extract-fixture.mjs`) forwards verbatim as
 > `meta.decorations`, same additive rule. Its contract is spelled out
 > below.
+> **wave-27 exercised it a third time**: the extractor's `_markerText`
+> (the *resolved* list-marker string for one `<li>` — see the counter-
+> style bake banner in `tools/titan/counter-style-bake.mjs`) forwards
+> verbatim as `meta.markerText`, same additive rule. Contract below.
+
+## `meta.markerText` — why the marker string is resolved upstream
+
+A list marker is a pure function of three inputs: the resolved
+`list-style-type`, the counter origin (`<ol start>` / `<li value>`), and
+the item's position. Only the first rides the IR as a property. The
+other two had **no wire at all**, and a counter style outside a runtime's
+own keyword table (`arabic-indic`, `cambodian`, …) silently degraded to
+that runtime's `<ol>` UA default. `meta.markerText` closes both gaps with
+one droppable string instead of three new channels.
+
+- **Resolved upstream, not normalized.** css-counter-styles-3 §6 is a
+  closed table and §2/§4/§7.1 are closed algorithms, so the extractor
+  computes the representation, applies the §4 `range` gate and the
+  §7.1.4 `fallback` chain, and appends the §3.1.5 `suffix`. The
+  converter forwards the result verbatim — the same opacity contract
+  `meta.attrs` and `meta.decorations` established.
+- **The suffix carries no trailing space.** The spec's initial `suffix`
+  is `"."` *followed by a space*; both native runtimes already supply
+  that gap themselves (Compose renders `Text("$marker ")` with a 4dp end
+  padding, SwiftUI an `HStack(spacing: 4)`), and their pre-existing
+  tables emit `"1."`. Keeping the space would double it.
+- **Authoritative when present**, exactly like `meta.decorations`: a
+  reader that honours `markerText` must not *also* synthesise a marker
+  from `ListStyleType`. Readers that drop `meta` keep their own table
+  and paint a *worse* marker, never a doubled one.
+- **Absence is meaningful and never silent.** The key is omitted for the
+  ordinal-independent §6.1 bullets (out of scope by design — the
+  runtimes already paint those), for `list-style-type: none`, for a
+  `list-style-image` marker, and for any counter style the bake does not
+  model. The last case additionally raises the extractor's
+  `counter-style-unsupported` lossy reason, and a document with dynamic
+  counters (`counter-increment`/`counter-reset`/`counter()`/
+  `counters()`/`@counter-style`/`<script>`) bails whole under the same
+  reason.
+- **`meta.attrs` gained `start` in the same wave.** `ol`/`li` form a
+  *disjoint* attr lane from the wave-20 widget tags (`start`, `value`,
+  verbatim strings) so the web renderer — the one platform that paints a
+  real `<ol>` and lets the browser synthesise `::marker` — gets native
+  numbering instead of a baked string.
 
 ## `meta.decorations` — why the colour token is NOT normalized
 

@@ -598,8 +598,15 @@ const HARNESS_OPTIONS: RendererOptions = {
     // widget content layout (button centering, option rows) vs the
     // Chromium ref. The legacy flow never enters: widgets are demoted to
     // <div> there and keep the placeholder label byte-for-byte.
+    // wave-27 lane CBAKE B-RC2 — `<li>` joins that early return. The
+    // placeholder path wraps the item's text in a `display: block` span,
+    // which starts a new block box AFTER the browser's `::marker` — so
+    // under `list-style-position: inside` (the whole css-counter-styles
+    // corpus) the marker landed on its own line and every item was twice
+    // as tall as the reference. A bare text node keeps the marker and the
+    // content in one line box, which is exactly the source markup shape.
     const wTag = component.meta?.sourceTag?.toLowerCase();
-    if (WPT_MODE && wTag && WIDGET_TAGS.has(wTag)) {
+    if (WPT_MODE && wTag && (WIDGET_TAGS.has(wTag) || wTag === 'li')) {
       return hasText ? text : null;
     }
     // Forward the component's IR-resolved line-height (if any) so the

@@ -5,6 +5,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import com.styleconverter.runtime.borders.radius.BorderRadiusConfig
 // The resolved margin bands this node has to strip back off — see the
@@ -67,6 +68,22 @@ internal fun Modifier.backdropFilterTwoPass(
     // very function the layout step's absolutePadding comes from, so the two
     // can never disagree. Default NONE keeps a margin-less element unchanged.
     marginInsets: MarginInsets = MarginInsets.NONE,
+    // wave-27 fix — the element's resolved POSITION offset. This node is also
+    // OUTER of the position half of step 4 (`PositionApplier.applyPosition` →
+    // `Modifier.absoluteOffset`), so `positionInWindow()` reports the box's
+    // UN-offset slot and this draw scope's origin is that same un-offset
+    // corner — while the element's background/borders (steps 5–6, INNER of
+    // the offset) paint at the offset one. Sampling and painting there put a
+    // perfectly-filtered patch on the WRONG rectangle: measured on
+    // `backdrop-filter-basic.html`, Android's inverted patch landed on the
+    // parent colorbox at canvas (26,116) instead of the child's own
+    // (76,166) — its `left:50px; top:50px` short in both axes, which is also
+    // why the whole magenta/black/green figure collapsed to one flat magenta
+    // square (SSIM 0.881 vs iOS 0.966 on an invert-only test with no blur in
+    // it at all). Threaded like marginInsets rather than re-derived: it comes
+    // from PositionApplier.resolvedOffset, the value form of the very
+    // modifier step 4 chains, so the two can never drift.
+    positionOffset: DpOffset = DpOffset.Zero,
     // wave-26 skeptic fix — the element's own `opacity`. filter-effects-2 §2
     // composites the FILTERED BACKDROP into the element's group, so the
     // element's opacity attenuates it: `backdrop-filter-basic-opacity.html`
@@ -83,9 +100,11 @@ internal fun Modifier.backdropFilterTwoPass(
     // One holder per modifier-chain instance, captured by both lambdas below.
     val slot = BackdropSlot()
     return this
-        // Layout publishes the MARGIN box's origin (this node is outer of the
-        // margin step — see marginInsets); the border box's origin is that
-        // plus the top/left bands, added at draw time where Dp→px is legal.
+        // Layout publishes the UN-OFFSET MARGIN box's origin (this node is
+        // outer of BOTH halves of step 4 — see marginInsets and
+        // positionOffset); the border box's origin is that plus the top/left
+        // bands plus the position offset, all added at draw time where Dp→px
+        // is legal.
         // positionInWindow() (not boundsInWindow()) because the latter CLIPS
         // to the window, and the composed canvas is routinely taller than the
         // 844px window — a clipped origin would mis-place every patch below
@@ -111,11 +130,20 @@ internal fun Modifier.backdropFilterTwoPass(
                 marginTopPx = marginInsets.top.toPx(),
                 marginRightPx = marginInsets.right.toPx(),
                 marginBottomPx = marginInsets.bottom.toPx(),
+                // Dp→px is only legal inside draw (Density is the scope), the
+                // same reason the margin bands convert here and not at the
+                // call site.
+                positionOffsetXPx = positionOffset.x.toPx(),
+                positionOffsetYPx = positionOffset.y.toPx(),
             )
             if (backdrop != null && box != null && origin != Offset.Unspecified) {
                 // Window space → backdrop-image space: the pass-A bitmap's
                 // origin is the canvas's own top-left. The border box's own
-                // origin is the node's plus the left/top margin bands.
+                // origin is the node's plus `box.localLeft/localTop` — which
+                // now carries the left/top margin bands AND the position
+                // offset (BackdropBorderBox), so the sampled rectangle and
+                // the painted patch move together and stay under the pixels
+                // the element actually covers.
                 val canvasOrigin = coordinator.canvasOriginInWindow
                 BackdropPainter.paint(
                     scope = this,

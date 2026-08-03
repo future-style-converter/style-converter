@@ -34,6 +34,22 @@ export const WIDGET_TAGS: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * wave-27 lane CBAKE — the LIST-ORDINAL tags, a lane DISJOINT from
+ * WIDGET_TAGS. `<ol start>` (HTML §4.4.5) and `<li value>` (§4.4.8) are
+ * the counter origin the browser needs to number a list; without them
+ * every captured `<ol start='1860'>` painted "1." while the reference
+ * painted "1860.". Byte-parallel with the extractor's LIST_ATTR_TAGS.
+ *
+ * Kept SEPARATE from WIDGET_TAGS on purpose: that set is not merely an
+ * attribute allow-list — the harness's ComponentRenderer also keys tag
+ * passthrough, the `inert` + `tabIndex:-1` decoration, and an
+ * unconditional inter-sibling ' ' separator off it. Folding `ol` in would
+ * have injected that separator between every adjacent pair of lists in
+ * the corpus. Only `widgetDomProps` consults this set.
+ */
+export const LIST_ATTR_TAGS: ReadonlySet<string> = new Set(['ol', 'li']);
+
+/**
  * The button-like <input> type states (HTML §4.10.5.1.20-22: Submit
  * Button / Reset Button / Button) — the states whose `value` IS the
  * rendered label, not editable form text. React 19's initInput
@@ -71,7 +87,7 @@ export function widgetDomProps(
 ): Record<string, unknown> {
   // No wire attrs, or the skin resolved a non-widget element (e.g. the
   // legacy-capture <div> demotion) → nothing to apply, byte-stable DOM.
-  if (!attrs || !WIDGET_TAGS.has(elementName)) return {};
+  if (!attrs || !(WIDGET_TAGS.has(elementName) || LIST_ATTR_TAGS.has(elementName))) return {};
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(attrs)) {
     switch (key) {
@@ -102,6 +118,9 @@ export function widgetDomProps(
           // meter/progress: float-valued display attributes (HTML
           // §4.10.13/14) — not form state, React accepts `value` plainly.
           // option/button: the plain `value` content attribute.
+          // li (wave-27): the ordinal override of HTML §4.4.8 — the wire
+          // carries it as a verbatim string and the browser re-parses it,
+          // so no numeric coercion happens on this lane.
           out.value = value;
         }
         break;
@@ -120,6 +139,7 @@ export function widgetDomProps(
       case 'min':       // range/meter/progress lower bound
       case 'max':       // range/meter/progress upper bound
       case 'disabled':  // grayed widget chrome + inertness
+      case 'start':     // wave-27: <ol> counter origin (HTML §4.4.5)
         out[key] = value;
         break;
       default:
