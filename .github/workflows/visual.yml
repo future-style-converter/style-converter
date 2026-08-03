@@ -80,7 +80,7 @@ jobs:
       - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: '21' }
       - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
       # Pre-install so test-all.sh's own `npm install` fallback never fires.
       # Web capture is skipped in this job → no puppeteer Chrome download.
@@ -161,7 +161,7 @@ jobs:
       - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: '21' }
       - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
       - name: Install node deps (compare pipeline)
         run: PUPPETEER_SKIP_DOWNLOAD=1 npm ci
@@ -188,7 +188,7 @@ jobs:
       - uses: actions/setup-java@v5
         with: { distribution: temurin, java-version: '21' }
       - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: npm, cache-dependency-path: package-lock.json }
       # NO PUPPETEER_SKIP_DOWNLOAD here — unlike ci.yml's unit-test jobs,
       # this job actually launches Chrome, so let puppeteer's postinstall
