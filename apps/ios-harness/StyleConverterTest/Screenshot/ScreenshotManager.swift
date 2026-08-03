@@ -11,6 +11,9 @@
 
 import SwiftUI
 import UIKit
+// Lane BF-I: BackdropPlate + the `backdropPass` environment channel used by
+// the two-pass backdrop render below come from the runtime package.
+import StyleConverterRuntime
 
 enum ScreenshotManager {
 
@@ -100,6 +103,48 @@ enum ScreenshotManager {
         let renderer = ImageRenderer(content: view)
         renderer.scale = 1.0
         return renderer.uiImage
+    }
+
+    /// Lane BF-I — the TWO-PASS backdrop render.
+    ///
+    /// CSS `backdrop-filter` filters what is painted BEHIND an element, and
+    /// SwiftUI has no API for that. The runtime implements it as two
+    /// ImageRenderer passes over the same canvas:
+    ///
+    ///   PASS A  `backdropPass = .sampling` — every backdrop element
+    ///           suppresses its own paint (layout untouched), so the
+    ///           resulting raster IS their backdrop;
+    ///   PASS B  `backdropPass = .compositing(plate)` — each backdrop
+    ///           element crops that raster to its own border box, filters
+    ///           the crop, and draws it underneath itself.
+    ///
+    /// `twoPass: false` calls `render` directly — the SAME single
+    /// ImageRenderer pass, on the same view, that every capture used before
+    /// this lane. Callers derive the flag from
+    /// `BackdropCapture.needsTwoPass`, so a document that declares no
+    /// `backdrop-filter` cannot take the new path at all.
+    ///
+    /// A failed pass A (ImageRenderer returning nil, or a UIImage with no
+    /// CGImage) falls back to the single-pass render rather than returning
+    /// nil: a capture with un-filtered backdrops is the pre-lane rendering,
+    /// while a missing PNG would stall the feeder's poll loop.
+    @MainActor
+    static func renderBackdropTwoPass<V: View>(_ view: V, twoPass: Bool) -> UIImage? {
+        // No backdrop element on this surface → the untouched path.
+        guard twoPass else { return render(view) }
+        // PASS A. Same scale as the real capture, because the plate is
+        // sampled in its own pixels.
+        guard let sampled = render(view.environment(\.backdropPass, .sampling)),
+              let plate = sampled.cgImage else { return render(view) }
+        // 1.0 — `render` pins ImageRenderer.scale to 1 (1pt == 1px across
+        // platforms), so the plate maps points to pixels 1:1. Spelled from
+        // the produced image rather than assumed, so a future scale change
+        // in `render` cannot silently mis-crop every backdrop.
+        let scale = sampled.scale
+        // PASS B — the capture that is actually saved.
+        return render(view.environment(\.backdropPass,
+                                       .compositing(BackdropPlate(image: plate,
+                                                                  scale: scale))))
     }
 
     /// Hi-res variant for the B-EXT typography probes

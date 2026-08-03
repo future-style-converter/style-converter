@@ -506,7 +506,34 @@ object StyleApplier {
         //    The border-radius config rides along so the box-shadow painter
         //    can shape its perimeter like the border box (spread ring on a
         //    `border-radius: 50%` element = concentric ellipse, not a rect).
-        result = EffectsFacade.apply(result, config.effects, config.borders.radius)
+        // wave-26 skeptic fix: the element's own opacity rides along for the
+        // two-pass backdrop path. ColorApplier's `Modifier.alpha` lands at
+        // step 6 (INSIDE this node), so it can never attenuate the filtered
+        // backdrop the backdrop painter draws here — but filter-effects-2 §2
+        // composites that image into the element's group, so the group's
+        // opacity must apply to it (`backdrop-filter-basic-opacity.html`:
+        // `opacity: 0` on the inverting box, ref = the UNFILTERED backdrop).
+        // wave-26 skeptic fix #2: the resolved MARGIN bands ride along too.
+        // The effects step is chained OUTSIDE the margin step below, and
+        // MarginApplier emits positive margins as `Modifier.absolutePadding`,
+        // so the backdrop draw node's box is the MARGIN box — while
+        // filter-effects-2 §2 samples and clips the BORDER box. Read from
+        // MarginApplier.resolvedInsets, i.e. literally the numbers step 4 is
+        // about to add, with the SAME collapse override and the SAME default
+        // SpacingContext SpacingApplier.applyMargin uses.
+        result = EffectsFacade.apply(
+            result, config.effects, config.borders.radius,
+            elementAlpha = config.colors.opacity ?: 1f,
+            // Gated on the property actually being declared: the resolve is
+            // cheap but not free, and every element in the corpus would pay
+            // it for a value only the backdrop path can consume.
+            marginInsets = if (config.effects.filters.hasBackdropFilters)
+                com.styleconverter.runtime.spacing.MarginApplier.resolvedInsets(
+                    config = config.layout.margin,
+                    collapsed = collapsedMargin,
+                )
+            else com.styleconverter.runtime.spacing.MarginInsets.NONE,
+        )
 
         // 3.5. Mask — applied INSIDE EffectsFacade.apply (step 3), which
         //    extracts its own MaskConfig from the same properties. A
@@ -779,7 +806,10 @@ object StyleApplier {
         // Mask included: EffectsFacade.apply runs MaskApplier once via its
         // own MaskConfig — a second config.mask pass here squared the mask
         // alpha exactly like the applyConfig duplicate did (see step 3.5).
-        result = EffectsFacade.apply(result, config.effects, config.borders.radius)
+        result = EffectsFacade.apply(
+            result, config.effects, config.borders.radius,
+            elementAlpha = config.colors.opacity ?: 1f,
+        )
         result = TransformApplier.applyTransforms(result, config.transforms)
         if (config.writingMode.hasWritingMode) {
             result = WritingModeApplier.applyWritingMode(result, config.writingMode)

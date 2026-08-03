@@ -177,6 +177,13 @@ struct CaptureCanvas: View {
                 // Wave 7 — the dynamic-styling capture hooks ride the same
                 // environment channel (see the block on the flow branch).
                 .modifier(DynamicCaptureHooks())
+                // Lane BF-I — name this surface as the backdrop-canvas root
+                // so a `backdrop-filter` element can ask GeometryReader for
+                // its border box in the SAME space the pass-A plate was
+                // rendered in. Naming a coordinate space changes neither
+                // layout nor paint, so it is unconditional: on the
+                // single-pass baseline path nothing ever reads it.
+                .backdropCanvasRoot()
         } else {
         // Critical: explicit alignment on the outer frame.
         //
@@ -217,6 +224,9 @@ struct CaptureCanvas: View {
             // Wave 7 — the dynamic-styling capture hooks: forced state,
             // pinned scheme, and the forced-run marker.
             .modifier(DynamicCaptureHooks())
+            // Lane BF-I — backdrop-canvas root (see the out-of-flow branch
+            // above for why this is unconditional and paint-neutral).
+            .backdropCanvasRoot()
         }
     }
 }
@@ -286,6 +296,14 @@ struct ComposedCaptureCanvas: View {
     /// capture-browser-ref.mjs's docHeight at 600; the surface grows past
     /// 600 when the composed content is taller.
     static let minHeight: CGFloat = 600
+
+    /// wave-26 (lane RES residual 2) — the canvas's laid-out OUTER height,
+    /// frozen after the first measurement (see the GeometryReader at the end
+    /// of `body`). Seeded at the floor so the very first evaluation already
+    /// publishes the historical 568 ICB height rather than a degenerate 0.
+    @State private var measuredCanvasHeight: CGFloat = ComposedCaptureCanvas.minHeight
+    /// The freeze latch for the measurement above (one read per document).
+    @State private var canvasHeightFrozen: Bool = false
 
     /// The capture geometry published to the runtime's styleViewport
     /// channel — SAME numbers as CaptureCanvas.viewport (390×844 viewport,
@@ -359,7 +377,7 @@ struct ComposedCaptureCanvas: View {
                     top: base.top, bottom: base.bottom,
                     stripDeclared: base.stripDeclared, marginTransparent: true)
             }
-            return UABlockMargin.rootStackMargin(
+            let base = UABlockMargin.rootStackMargin(
                 tag: root.meta?.sourceTag,
                 declaresTop: UABlockMargin.declaresBlockMarginTop(root.properties),
                 declaresBottom: UABlockMargin.declaresBlockMarginBottom(root.properties),
@@ -368,6 +386,17 @@ struct ComposedCaptureCanvas: View {
                 // split hoists them all, so none should reach here).
                 staticDeclaredEdges: ComponentRenderer.isOutOfFlow(root)
                     ? nil : UABlockMargin.staticDeclaredEdges(root.properties))
+            // wave-26 (lane RES residual 3a): fold in the HOIST BAND the
+            // root's own §8.3.1 plan would otherwise paint as padding OUTSIDE
+            // its styled box. Both are outer spacing in the same adjoining
+            // region, so leaving each owner to emit its own ADDED where the
+            // browser takes ONE max() (worked example in withHoistBand's
+            // doc). The band comes from the runtime's own planner, so the
+            // number folded here is exactly the number suppressed on the
+            // root's render below — one decision, two consumers.
+            return UABlockMargin.withHoistBand(
+                base,
+                band: UABlockMargin.composedRootHoistBand(root, uaBlockMargins: true))
         }
     }
 
@@ -534,6 +563,14 @@ struct ComposedCaptureCanvas: View {
                     // renderer rewrites the channel per child (root-only).
                     // Non-stripped roots write the default nil — identity.
                     .composedRootBlockMarginStrip(plans[idx].stripDeclared)
+                    // wave-26 (lane RES residual 3a) — this root's §8.3.1
+                    // HOIST BAND is folded into `spacing` above
+                    // (UABlockMargin.withHoistBand), so the renderer must NOT
+                    // paint it a second time outside the root's styled box.
+                    // Keyed on the root's id, and the extractor's ids are
+                    // hierarchical, so the suppression cannot reach a
+                    // descendant container — every nested band is unchanged.
+                    .composedRootHoistBandSuppressed(root.id)
                     // GAP 1 — the block margin ABOVE this root: its full
                     // top margin for the first root (the canvas's 16px
                     // padding blocks parent↔child collapse there), or the
@@ -625,15 +662,74 @@ struct ComposedCaptureCanvas: View {
             }
         }
         // Publish the capture geometry so the runtime resolves vw/vh/% and
-        // containing blocks against 390×844/358, not the device screen.
-        // wave-24 B-RC5: the root containing block tracks the RESOLVED pad
-        // (Self.viewport's 358 is the 16px-default case, byte-identical);
-        // vw/vh are unaffected — the viewport is the canvas, not the body.
+        // containing blocks against the CAPTURE surface, not the device
+        // screen. wave-24 B-RC5: the root containing block tracks the
+        // RESOLVED pad (358 in the 16px-default case).
+        //
+        // wave-26 (lane RES residual 2): the vw/vh/media basis is the ref's
+        // RENDER viewport — 358 × 568-or-content — not the 390×844 this used
+        // to publish. capture-browser-ref.mjs lays each ref page out in a
+        // REF_RENDER_WIDTH × max(scrollHeight, REF_RENDER_MIN_HEIGHT) viewport
+        // and memcpy's the 16px frame onto the finished PNG, where no `vw`
+        // and no media query can observe it; the old 390 gave every
+        // viewport-relative value a 32px surplus the ref never had, and the
+        // 844 was the device window, unrelated to anything the ref sees.
+        // `styleViewport.width` feeds BOTH `viewportWidth` and the runtime-v1
+        // media surface width in ComponentRenderer, so one number fixes both.
+        // Composed capture only (this canvas) — the per-component canvas
+        // keeps its own viewport and the dark stage is untouched. Measured
+        // blast radius on the sampled corpus: ZERO (bucket-A excludes every
+        // viewport-unit test by construction — see the Compose twin's
+        // WptComposedGeometry.composedViewportFor for the full count).
         .environment(\.styleViewport, StyleViewport(
-            width: Double(Self.width),
-            height: 844,
+            // The ref's REF_RENDER_WIDTH — outer canvas minus the frame.
+            width: Double(WPTCanvas.icbExtent(canvasExtent: Self.width)),
+            // The ref's second-pass viewport height: the measured canvas
+            // extent floored at 600, minus the frame per side. Frozen after
+            // the first measurement below, mirroring the ref's single
+            // re-layout (and making a `100vh` document terminate).
+            height: Double(WPTCanvas.icbExtent(
+                canvasExtent: max(measuredCanvasHeight, Self.minHeight))),
             rootContainingBlock: Double(Self.width - pad.leading - pad.trailing)
         ))
+        // wave-26 (lane RES residual 2) — measure the canvas's laid-out OUTER
+        // height and freeze it. A transparent background GeometryReader is the
+        // standard SwiftUI read-your-own-size idiom (Color.clear takes the
+        // proposal and changes neither layout nor paint); the freeze latch is
+        // what mirrors capture-browser-ref.mjs's TWO-PASS rule — it measures
+        // at the floor viewport once, re-lays-out once, and never re-measures.
+        //
+        // HONEST LIMITATION (recorded, not silent): the composed capture runs
+        // through ImageRenderer (captureComposedDocument), which renders the
+        // tree SYNCHRONOUSLY — a preference-driven @State write is not
+        // guaranteed to produce a second render pass within one snapshot. So
+        // on a document TALLER than the 600 floor the published `100vh` basis
+        // may stay at the seeded 568 rather than the grown value. That seed is
+        // exactly the wave-25 number, so nothing regresses, and the sampled
+        // corpus cannot observe it: bucket-A excludes every viewport-unit test
+        // by construction (bucket-wpt.mjs RX.viewportUnit — 215/20,008 files
+        // across the 20 sections, all bucket B). The OUT-OF-FLOW half of the
+        // same geometry is unaffected either way: FixedHoistOverlay reads its
+        // live GeometryReader size inside the same layout pass, which is why
+        // residual 1 (the constant ICB height) was an Android-only defect.
+        // Closing this properly needs a two-pass composed render, which is the
+        // backdrop lane's machinery (renderBackdropTwoPass) — out of scope for
+        // a change whose measured blast radius is zero.
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(key: ComposedCanvasHeightKey.self,
+                                       value: proxy.size.height)
+            }
+        )
+        .onPreferenceChange(ComposedCanvasHeightKey.self) { h in
+            // Latch: the FIRST non-degenerate measurement wins and nothing
+            // re-measures afterwards, so the published `100vh` basis cannot
+            // feed back into the layout that produced it.
+            if !canvasHeightFrozen, h > 0 {
+                canvasHeightFrozen = true
+                measuredCanvasHeight = h
+            }
+        }
         // GAP 1 (WIDTH half) — publish the 358px content-box width so the
         // runtime stretches each auto-width, in-flow ROOT to full bleed like
         // the browser-ref's block `<p>`/`<div>` (iOS otherwise hugs content).
@@ -650,6 +746,11 @@ struct ComposedCaptureCanvas: View {
         // (pinned light scheme, empty forced set, live clock) so the
         // composed capture is a deterministic base render.
         .modifier(DynamicCaptureHooks())
+        // Lane BF-I — the backdrop-canvas root, attached OUTERMOST so the
+        // named space covers the whole 390-wide composed surface, which is
+        // exactly what the pass-A plate is a raster of. Paint-neutral, so
+        // documents without a `backdrop-filter` are byte-unchanged.
+        .backdropCanvasRoot()
     }
 }
 
@@ -687,5 +788,25 @@ struct DynamicCaptureHooks: ViewModifier {
                 (CaptureOverrides.forceState.map { "force-state-\($0)" }
                     ?? "capture-canvas")
                 + (CaptureOverrides.animationTimeRaw.map { "+animation-time-\($0)" } ?? ""))
+    }
+}
+
+/// wave-26 (lane RES residual 2) — the composed canvas's own laid-out OUTER
+/// height, propagated from a transparent background GeometryReader to the
+/// canvas's `onPreferenceChange` latch.
+///
+/// A PreferenceKey (rather than an `onAppear` read) because it fires on every
+/// layout pass, so the value is the SETTLED height rather than whatever the
+/// first appearance happened to see; the canvas's freeze latch then keeps only
+/// the first non-degenerate reading, which is exactly the ref's one-re-layout
+/// rule (capture-browser-ref.mjs measures at the floor viewport and never
+/// re-measures). `reduce` takes the MAXIMUM so a future second reader could
+/// never shrink the canvas extent below a real measurement.
+struct ComposedCanvasHeightKey: PreferenceKey {
+    /// No canvas measured yet — the latch ignores this value.
+    static let defaultValue: CGFloat = 0
+    /// Combine sibling readings by max (see the type doc).
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }

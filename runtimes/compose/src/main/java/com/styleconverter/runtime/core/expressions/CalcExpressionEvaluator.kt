@@ -89,11 +89,18 @@ object CalcExpressionEvaluator {
         val density = LocalDensity.current
         val variables = LocalCssVariables.current
 
+        // Wave 26 (lane RES residual 2): a COMPOSED WPT capture publishes the
+        // ref's render viewport (358 × 568-or-content — see
+        // core/renderer/WptComposedGeometry.kt); every other path leaves the
+        // channel null and keeps the historical LocalConfiguration screen dp,
+        // so the dark-stage 327 baselines resolve calc() identically.
+        val composedViewport =
+            com.styleconverter.runtime.core.renderer.LocalComposedViewport.current
         val context = EvalContext(
             containerWidth = containerWidth?.value,
             containerHeight = containerHeight?.value,
-            viewportWidth = config.screenWidthDp.toFloat(),
-            viewportHeight = config.screenHeightDp.toFloat(),
+            viewportWidth = composedViewport?.widthPx ?: config.screenWidthDp.toFloat(),
+            viewportHeight = composedViewport?.heightPx ?: config.screenHeightDp.toFloat(),
             variables = variables.variables
         )
 

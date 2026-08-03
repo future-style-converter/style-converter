@@ -125,6 +125,94 @@ public extension UABlockMargin {
                                stripDeclared: true)
     }
 
+    /// Wave 26 (lane RES residual 3a) — the HOIST BAND one composed ROOT will
+    /// emit, exposed to the harness so its stack fold can own that spacing
+    /// instead of letting it stack on top (see `withHoistBand`).
+    ///
+    /// PUBLIC because the iOS harness cannot see `MarginCollapse` /
+    /// `ComponentStyle` (module-internal); a thin accessor keeps the planner
+    /// itself unexported. The style is built through the SAME
+    /// `StyleBuilder.build(from:)` the renderer uses, so the number returned
+    /// here is the number the renderer would have painted — one decision,
+    /// two consumers. Returns (0, 0) whenever no plan exists (childless root,
+    /// bailed container, closed edge gates), i.e. "this root emits no band".
+    ///
+    /// ## Why the component is UNBOXED first
+    /// The harness SUPPRESSES the renderer's band unconditionally for every
+    /// composed root, so this accessor must return EXACTLY what the renderer
+    /// would have painted — under-reporting deletes real spacing just as
+    /// over-reporting adds phantom spacing. `ComponentRenderer.init` runs
+    /// `ContentsUnboxing.resolve` before anything reads the child list, so a
+    /// `display: contents` first child is SPLICED OUT and the plan sees the
+    /// grandchild. Planning over the raw component saw the wrapper instead:
+    /// `<div><div style="display:contents"><h5></div><p></div>` reported a
+    /// 0px band here while the renderer planned 27 (the `<h5>`'s UA margin),
+    /// so the suppression deleted 27px the fold never added. Identity for the
+    /// whole contents-free corpus (`resolve` returns the same instance).
+    ///
+    /// The block-only / grid / row-gap pre-conditions need no repetition
+    /// here: unlike the Compose twin, `MarginCollapsePlanner.containerPlan`
+    /// carries them INSIDE the planner (GATE 1/2/4), so both consumers on
+    /// this platform already read one gated number.
+    ///
+    /// Twin of Compose's `ComponentRenderer.composedRootHoistBand`.
+    static func composedRootHoistBand(_ component: IRComponent,
+                                      uaBlockMargins: Bool)
+        -> (top: CGFloat, bottom: CGFloat) {
+        // Same `display: contents` resolution the renderer's init performs.
+        let resolved = ContentsUnboxing.resolve(component)
+        // Same builder the renderer runs — never a re-derivation.
+        let style = StyleBuilder.build(from: resolved.properties)
+        guard let plan = MarginCollapse.containerPlan(component: resolved,
+                                                      style: style,
+                                                      uaBlockMargins: uaBlockMargins)
+        else { return (0, 0) }
+        return (plan.hoistTop, plan.hoistBottom)
+    }
+
+    /// Wave 26 (lane RES residual 3a) — fold a root's HOIST BAND into its
+    /// stack contribution. Byte-parallel twin of the Kotlin
+    /// `withHoistBand(plan:band:)` in apps/android-harness UaBlockMargins.kt.
+    ///
+    /// ## The double count
+    /// A composed root's outer block spacing had TWO independent owners: this
+    /// stack fold (the per-root leading/trailing pads) and the renderer's own
+    /// `MarginCollapse.Plan.hoistTop/hoistBottom` band (transparent padding
+    /// outside the root's styled box, carrying the first/last child's margin
+    /// that escapes through an open parent edge). Both are outer spacing in
+    /// the SAME adjoining-margin region, so they ADDED where CSS 2.1 §8.3.1
+    /// takes ONE max() over the whole chain: with a previous root ending in a
+    /// 40px bottom margin, a `<blockquote>` root (UA 16) whose first child is
+    /// an `<h5>` (UA 27) rendered max(40,16) = 40 plus max(16,27) − 16 = 11
+    /// → 51px against the browser's max(40, 16, 27) = 40.
+    ///
+    /// ## The model (ONE owner)
+    /// The band is `max(rootOwnEdge, childEdge) − rootOwnEdge`, so
+    /// `rootOwnEdge + band` is exactly the root's COLLAPSED-THROUGH edge.
+    /// Adding it here lets the existing n-ary max resolve the whole chain,
+    /// and the renderer is told to emit no band for this root (the
+    /// `hoistBandSuppressedFor` channel). Subtracting the band from the pad
+    /// instead CANNOT work: two adjacent band-carrying roots (A's last child
+    /// bottom 16, B's first child top 16) would need pad = 16 − 16 − 16 =
+    /// −16, which floors at 0 and renders 32.
+    ///
+    /// Margin-TRANSPARENT roots return unchanged: they occupy no flow space,
+    /// so their subtree's band never displaces flow siblings.
+    ///
+    /// - Parameter band: the root's `(hoistTop, hoistBottom)` from the
+    ///   runtime's own `MarginCollapse.containerPlan` — the SAME plan the
+    ///   renderer would have painted, never a re-derivation.
+    static func withHoistBand(_ plan: RootStackMargin,
+                              band: (top: CGFloat, bottom: CGFloat)) -> RootStackMargin {
+        // Zero-flow roots never contribute to the stack pads at all.
+        guard !plan.marginTransparent else { return plan }
+        // Opaque root: its stack edges become the collapsed-through values.
+        return RootStackMargin(top: plan.top + band.top,
+                               bottom: plan.bottom + band.bottom,
+                               stripDeclared: plan.stripDeclared,
+                               marginTransparent: false)
+    }
+
     /// Wave-19 follow-up — the ONE §8.3.1 gap fold, now aware of margin-
     /// TRANSPARENT roots (see RootStackMargin.marginTransparent). The Round 4
     /// tuple `stackedSpacing` delegates here with every entry opaque, so the
@@ -208,5 +296,16 @@ public extension View {
     func composedRootBlockMarginStrip(_ strip: Bool) -> some View {
         environment(\.marginCollapseOverride,
                     strip ? MarginCollapseOverride(top: 0, bottom: 0) : nil)
+    }
+
+    /// Wave 26 (lane RES residual 3a) — band-suppression bridge for the
+    /// composed canvas: the hosted ROOT with this `id` renders WITHOUT its
+    /// §8.3.1 hoist band, because the canvas's stack fold already folded that
+    /// band into its gaps (`UABlockMargin.withHoistBand`). Keyed on the id so
+    /// the suppression cannot reach a descendant container (hierarchical ids
+    /// — see HoistBandSuppressedForKey). Twin of the Compose harness's
+    /// `LocalHoistBandSuppressedFor provides root.id`.
+    func composedRootHoistBandSuppressed(_ id: String) -> some View {
+        environment(\.hoistBandSuppressedFor, id)
     }
 }

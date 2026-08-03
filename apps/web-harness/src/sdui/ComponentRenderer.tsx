@@ -163,6 +163,100 @@ interface ComponentRendererProps {
 }
 
 /**
+ * wave-26 lane WWS — the extractor's inter-sibling whitespace marker.
+ *
+ * Byte-parallel with `WS_AFTER_ROLE` in tools/titan/extract-fixture.mjs:
+ * the extractor stamps `_role: 'ws-after'` on the EARLIER of two adjacent
+ * siblings when SOURCE whitespace separated them, and the converter
+ * forwards `_role` verbatim as IR v2 `meta.role` (the schema's documented
+ * open-ended marker channel). Reading it here is what keeps the separator
+ * below honest: the harness never invents a space, it only replays one the
+ * source really had. Absent marker = flush source = flush DOM.
+ */
+const WS_AFTER_ROLE = 'ws-after';
+
+/**
+ * Did the source separate THIS sibling from the next one with whitespace?
+ * The single read point for the marker — the extractor's banner promises
+ * that promoting `_role: 'ws-after'` to a first-class `meta.wsAfter`
+ * boolean (when a wire lane does the converter + schema hop) is a one-line
+ * change on each side, and this function is the web side of that line.
+ */
+function isWsAfterMarked(node: ComposedNode): boolean {
+  return node.component.meta?.role === WS_AFTER_ROLE;
+}
+
+/**
+ * wave-26 lane WWS — sourceTags whose UA default display is inline-level,
+ * consulted ONLY when the component declares no `display` of its own.
+ * Byte-parallel with the extractor's INLINE_LEVEL_TAGS set. A component
+ * with neither a declared display nor an inline-default tag is treated as
+ * block-level, which is the conservative answer: whitespace between block
+ * boxes renders nothing anyway (CSS 2.1 §9.2.2.1), so withholding the
+ * separator there costs no pixels.
+ */
+const INLINE_LEVEL_SOURCE_TAGS: ReadonlySet<string> = new Set([
+  'span', 'a', 'b', 'i', 'em', 'strong', 'code', 'small', 'sub', 'sup',
+  'u', 's', 'q', 'abbr', 'cite', 'time', 'label', 'mark', 'bdi', 'bdo',
+  'samp', 'kbd', 'var', 'img', 'input', 'select', 'button', 'textarea',
+  'output', 'meter', 'progress', 'ruby', 'rt', 'rb',
+]);
+
+/**
+ * wave-26 lane WWS — container `white-space` values under which a source
+ * whitespace run does NOT collapse to a single space advance, so the
+ * separator must decline. `pre` / `pre-wrap` / `break-spaces` preserve
+ * spaces AND segment breaks (the extractor's WHITESPACE_PRESERVING set);
+ * `pre-line` collapses spaces but preserves the segment break — in every
+ * one of the four the ref paints a LINE BREAK where this hook would have
+ * painted a space, which is a different wrong answer, not a fix.
+ */
+const WHITESPACE_PRESERVING_CONTAINERS: ReadonlySet<string> = new Set([
+  'pre', 'pre-wrap', 'pre-line', 'break-spaces',
+]);
+
+/**
+ * The component's DECLARED `display` keyword in CSS spelling
+ * ('inline-block', 'flex', 'inline flow-root', …), or null when the wire
+ * declares none. Mirrors detectDisplayType's tolerant data reading — the
+ * engine emits `Display` either as a bare keyword string or as a
+ * `{keyword}`/`{type}` object — but returns the RAW keyword instead of
+ * collapsing it into the coarse DisplayType bucket, because the separator
+ * predicate has to distinguish `inline-grid` (inline-level) from `grid`
+ * (block-level) and detectDisplayType maps both to 'grid'.
+ */
+function declaredDisplayKeyword(properties: IRProperty[]): string | null {
+  for (const prop of properties) {
+    if (prop.type !== 'Display') continue;
+    const keyword = typeof prop.data === 'string'
+      ? prop.data
+      : (prop.data as Record<string, unknown>)?.keyword ?? (prop.data as Record<string, unknown>)?.type;
+    // IR keywords arrive SHOUTY_SNAKE from the Kotlin converter and
+    // lowercase-hyphenated from hand-authored fixtures — normalise both.
+    if (typeof keyword === 'string') return keyword.toLowerCase().replace(/_/g, '-');
+  }
+  return null;
+}
+
+/**
+ * wave-26 lane WWS — is this composed sibling an INLINE-LEVEL box, i.e.
+ * one that occupies horizontal space on a line where a collapsed space
+ * advance is visible?
+ *
+ * Declared display wins outright (css-display-3 §2): anything spelled
+ * `inline*` — inline, inline-block, inline-flex, inline-grid, inline-table,
+ * the two-value `inline flow-root` — is inline-level; every other declared
+ * value (block, flex, grid, table, list-item, contents, none) is not.
+ * With no declared display the UA default decides, via the tag set above.
+ */
+function isInlineLevelSibling(node: ComposedNode): boolean {
+  const declared = declaredDisplayKeyword(node.component.properties);
+  if (declared !== null) return declared.startsWith('inline');
+  const tag = node.component.meta?.sourceTag?.toLowerCase();
+  return !!tag && INLINE_LEVEL_SOURCE_TAGS.has(tag);
+}
+
+/**
  * Detect the display/layout type from properties.
  */
 type DisplayType = 'block' | 'flex-row' | 'flex-column' | 'grid' | 'inline' | 'none';
@@ -603,7 +697,32 @@ const HARNESS_OPTIONS: RendererOptions = {
   // nothing (CSS 2.1 §9.2.2.1) — all self-correcting, no arithmetic
   // here. Legacy 327-pair flow (no `?wpt=1`) returns null → the DOM
   // stays byte-identical.
-  renderChildSeparator: (prev, next) => {
+  //
+  // Wave-26 lane WWS EXTENDS that rule past the widget families to ANY
+  // adjacent inline-level pair, because the same dropped text nodes move
+  // ordinary inline-block boxes too. MEASURED: filter-effects'
+  // backdrop-filter-clip-rect-2 lays three 100px `display:inline-block`
+  // boxes per row, one per source line; the ref collapses each newline+
+  // indent to one space advance and puts them at x = 0 / 104.5 / 209
+  // while our flush canvas put them at 0 / 100 / 200 — boxes 2 and 3 off
+  // by 4.5 and 9 px, the whole 0.924 web gap, and on wider rows the same
+  // displacement walks the wrap boundary.
+  //
+  // Both figures are MEASURED (puppeteer, ref page under the real
+  // capture-browser-ref.mjs injection: Inter @16px, line-height 1.25);
+  // with the separator in place the composed boxes land on 0 / 104.5 / 209
+  // — an EXACT match, not an approach. The 4.16px in the wave-20 widget
+  // rule's comment above is a different face's advance; do not unify them.
+  // Nothing here does arithmetic on the number: the hook emits a real text
+  // node and the browser measures the advance in the capture's own font.
+  //
+  // The extension is gated on the extractor's `ws-after` marker
+  // (meta.role — see WS_AFTER_ROLE), so it can only ever REPLAY whitespace
+  // the source really had; a flush-authored `<span>a</span><span>b</span>`
+  // carries no marker and keeps its flush DOM. The wave-20 widget rule
+  // above stays UNCONDITIONAL: it predates the marker, its captures are
+  // baselined against it, and re-gating it would silently move css-ui.
+  renderChildSeparator: (prev, next, ctx) => {
     // P8-style gate: capture calibration only ever fires under ?wpt=1.
     if (!WPT_MODE) return null;
     // Both neighbours must be widget-identity tags (the wire-contract
@@ -611,9 +730,53 @@ const HARNESS_OPTIONS: RendererOptions = {
     // natives' P15 atom families).
     const prevTag = prev.component.meta?.sourceTag?.toLowerCase();
     const nextTag = next.component.meta?.sourceTag?.toLowerCase();
-    return prevTag && nextTag && WIDGET_TAGS.has(prevTag) && WIDGET_TAGS.has(nextTag)
-      ? ' '
-      : null;
+    if (prevTag && nextTag && WIDGET_TAGS.has(prevTag) && WIDGET_TAGS.has(nextTag)) return ' ';
+    // ── wave-26 WWS: the inline-level extension ──────────────────────
+    // COMPOSED capture only. The composed canvas is the one surface that
+    // reproduces the ref PAGE's line boxes, so an inter-atom advance is
+    // meaningful there; the per-component `?wpt=1` capture crops each
+    // component on its own canvas with no page geometry to match, and
+    // widening it would move captures no ref-page comparison reads.
+    if (!WPT_COMPOSED_MODE) return null;
+    // The source must actually have separated them (the whole honesty
+    // gate — see WS_AFTER_ROLE). Marker sits on the EARLIER sibling.
+    if (!isWsAfterMarked(prev)) return null;
+    // Only an INLINE FORMATTING CONTEXT turns a collapsed space into a
+    // visible advance. Flex/grid containers drop whitespace-only children
+    // outright (css-flexbox-1 §4 / css-grid-1 §6), so a separator there is
+    // dead DOM bytes — skip explicitly rather than lean on that.
+    const d = ctx.styles.display;
+    if (d === 'flex' || d === 'grid' || d === 'inline-flex' || d === 'inline-grid') return null;
+    // A whitespace-PRESERVING container replays the run verbatim instead of
+    // collapsing it (CSS Text §4.1.1): the ref shows the source's real
+    // newline + indent there, and injecting one space would substitute a
+    // different wrong answer for the current one. Out of contract — the
+    // preserved-run case needs the ordered inline-run wire, not this hook.
+    // Set mirrors the extractor's WHITESPACE_PRESERVING plus `pre-line`
+    // (which collapses spaces but KEEPS the newline, so the ref breaks the
+    // line where we would have put a space).
+    //
+    // KNOWN REACH LIMIT, measured not assumed: `ctx.styles` is the RAW
+    // engine output for THIS container's own declared properties, so the
+    // gate catches `white-space` declared ON the container and NOT a value
+    // inherited from an ancestor — `<div style="white-space:pre"><div>
+    // <span>a</span> <span>b</span></div></div>` still emits the space.
+    // Resolving that needs the inherited cascade, which this hook has no
+    // handle on (it sees prev/next/container, not the ancestor chain).
+    // Bounded cost: in an inherited-pre context the ref paints a LINE BREAK
+    // and both our variants keep one line, so the separator moves an
+    // already-wrong layout by one space advance — it cannot turn a passing
+    // comparison into a failing one. Promote to a resolved-style read when
+    // the renderer grows an inheritance context.
+    const ws = ctx.styles.whiteSpace;
+    if (typeof ws === 'string' && WHITESPACE_PRESERVING_CONTAINERS.has(ws)) return null;
+    // Both neighbours must be inline-level, or there is no line box for
+    // the advance to land on (whitespace between blocks paints nothing —
+    // CSS 2.1 §9.2.2.1 — so this is precision, not correctness).
+    if (!isInlineLevelSibling(prev) || !isInlineLevelSibling(next)) return null;
+    // A REAL collapsed-whitespace text node: the browser measures the
+    // advance in the capture's own font, exactly as it does in the ref.
+    return ' ';
   },
 };
 

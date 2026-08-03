@@ -96,7 +96,21 @@ object EffectsFacade {
         modifier: Modifier,
         config: EffectsConfig,
         radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
-            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE,
+        // wave-26 skeptic fix — the element's own `opacity`, consumed ONLY by
+        // the backdrop path (filter-effects-2 §2 composites the filtered
+        // backdrop into the element's group, so the group's opacity
+        // attenuates it; ColorApplier's alpha layer sits INSIDE this chain and
+        // cannot reach it). Defaulted, so nothing else in the chain changes.
+        elementAlpha: Float = 1f,
+        // wave-26 skeptic fix — the element's resolved margin bands, consumed
+        // ONLY by the backdrop path. The whole effects step is chained OUTSIDE
+        // the margin step (StyleApplier steps 3 then 4, and MarginApplier
+        // emits positive margins as `absolutePadding`), so the backdrop draw
+        // node is sized by the MARGIN box while filter-effects-2 §2 samples
+        // and clips the BORDER box. Defaulted, so nothing else changes.
+        marginInsets: com.styleconverter.runtime.spacing.MarginInsets =
+            com.styleconverter.runtime.spacing.MarginInsets.NONE,
     ): Modifier {
         var result = modifier
 
@@ -109,12 +123,41 @@ object EffectsFacade {
         // Apply mask (determines visible region based on image/gradient)
         result = MaskApplier.applyMask(result, config.mask)
 
+        // BACKDROP filter — before the shadow, and therefore OUTER of it.
+        //
+        // wave-26 skeptic fix. The backdrop node suppresses this element's
+        // paint during pass A by returning before `drawContent()`; anything
+        // chained OUTSIDE it still paints. ShadowApplier draws via
+        // `drawBehind`, so while the shadow sat outside the backdrop node the
+        // element's OWN box-shadow was painted into the pass-A canvas and then
+        // sampled back as part of its own backdrop — a shadow that showed up
+        // blurred/inverted underneath the box that cast it. filter-effects-2
+        // §2 puts the element's shadow in the ELEMENT's paint, above the
+        // filtered backdrop, never in the Backdrop Root Image.
+        //
+        // Minimal ordering on purpose: only the BACKDROP half moved out here.
+        // The foreground `filter` chain stays below the shadow exactly where
+        // it has always been, so every committed shadow capture (and the
+        // shadow pins that go with them) is untouched.
+        result = FilterApplier.applyBackdropFilters(
+            result, config.filters, radiusConfig, elementAlpha, marginInsets,
+        )
+
         // Apply shadows (they render behind the content, shaped by the
         // element's border-radius — see radiusConfig KDoc above)
         result = ShadowApplier.applyShadow(result, config.shadows, radiusConfig)
 
-        // Apply filters
-        result = FilterApplier.applyFilters(result, config.filters)
+        // Apply the element's own `filter` chain — its own pixels only, so it
+        // must NOT reach the backplate installed above. Second half of the
+        // wave-26 ordering fix: the foreground chain used to be appended
+        // BEFORE the backdrop registration inside applyFilters, i.e. its
+        // `Modifier.blur`/`graphicsLayer(renderEffect)`/`alpha` layers wrapped
+        // the backdrop draw node, so an element declaring both
+        // `backdrop-filter: invert(1)` and `filter: invert(1)` inverted its
+        // backdrop TWICE and landed back on the unfiltered colour. Both
+        // natives had that bug; both now paint the backplate outside the
+        // foreground chain (iOS: FilterApplier.body step order).
+        result = FilterApplier.applyForegroundFilters(result, config.filters)
 
         return result
     }
@@ -137,11 +180,15 @@ object EffectsFacade {
     ): Modifier {
         var result = modifier
 
-        // Apply shadows first (they render behind the content)
+        // Backdrop before the shadow, for the same reason as [apply]: the
+        // element's own shadow must not paint into its own pass-A backdrop.
+        result = FilterApplier.applyBackdropFilters(result, config.filters)
+
+        // Apply shadows (they render behind the content)
         result = ShadowApplier.applyShadowWithRadius(result, config.shadows, cornerRadius)
 
-        // Apply filters
-        result = FilterApplier.applyFilters(result, config.filters)
+        // Apply the element's own filter chain, inside both of the above.
+        result = FilterApplier.applyForegroundFilters(result, config.filters)
 
         return result
     }

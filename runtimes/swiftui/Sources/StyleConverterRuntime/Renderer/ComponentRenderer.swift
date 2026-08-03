@@ -60,6 +60,10 @@ public struct ComponentRenderer: View {
     // values. Nil = no plan (root, non-block parent, ineligible margins)
     // → declared margins apply untouched. See MarginCollapse.swift.
     @Environment(\.marginCollapseOverride) private var marginCollapseOverride
+    // Wave 26 (lane RES residual 3a) — the id of the ONE component whose
+    // §8.3.1 hoist band the HOST owns (the composed root stack folds it into
+    // its gaps instead). nil everywhere else; see HoistBandSuppressedForKey.
+    @Environment(\.hoistBandSuppressedFor) private var hoistBandSuppressedFor
 
     // TITAN Round 4 (GAP 1, WIDTH half) — the composed-WPT block-flow
     // fill-width channel (WPTCaptureMode.swift). nil everywhere but the
@@ -1039,8 +1043,18 @@ public struct ComponentRenderer: View {
             // stay byte-identical.
             let hoistPlan = MarginCollapse.containerPlan(component: component, style: style,
                                                          uaBlockMargins: wptCaptureMode)
-            let bandTop = hoistPlan?.hoistTop ?? 0
-            let bandBottom = hoistPlan?.hoistBottom ?? 0
+            // Wave 26 (lane RES residual 3a): a composed ROOT's band is owned
+            // by the harness's root-stack fold, which folds this exact number
+            // into the same §8.3.1 max() as the root's own margin. Emitting it
+            // here too would ADD where the browser takes ONE max — see
+            // HoistBandSuppressedForKey for the worked example and why
+            // subtraction cannot express it. The channel names one id and the
+            // extractor's ids are hierarchical, so a nested container never
+            // matches and keeps its band byte-identically.
+            let bandSuppressed = MarginCollapse.suppressesHoistBand(
+                suppressedForId: hoistBandSuppressedFor, componentId: component.id)
+            let bandTop = bandSuppressed ? 0 : (hoistPlan?.hoistTop ?? 0)
+            let bandBottom = bandSuppressed ? 0 : (hoistPlan?.hoistBottom ?? 0)
             let positioned = PositionApplier.apply(
                 bandTop > 0 || bandBottom > 0
                     ? AnyView(styledBox.padding(EdgeInsets(top: bandTop, leading: 0,

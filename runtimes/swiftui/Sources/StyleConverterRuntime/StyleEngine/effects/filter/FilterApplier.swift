@@ -18,41 +18,82 @@
 //    sepia              → approximate with .saturation + hue shift (no native API)
 //    drop-shadow        → .shadow(color:, radius:, x:, y:)
 //
-//  BackdropFilter has no first-class SwiftUI API. Per cross-platform
-//  parity (web + Android both no-op when there is no parent backdrop
-//  content), iOS now no-ops as well. A real impl would wrap content in
-//  UIVisualEffectView via UIViewRepresentable; documented in body().
+//  BackdropFilter has no first-class SwiftUI API. Since lane BF-I it is
+//  rendered by the TWO-PASS capture in StyleEngine/effects/backdrop (see
+//  BackdropPass.swift for the passes and the backdrop-root boundary);
+//  `cfg.backdrop` — untouched here since Phase 8 — is that lane's
+//  registration point, in step 2 of body() below. It is attached OUTSIDE
+//  the foreground chain on purpose; see the comment there.
 //
 
 import SwiftUI
 
 struct FilterApplier: ViewModifier {
     let config: FilterConfig?
+    /// The element's border radius, forwarded to the backdrop applier so
+    /// the backplate is clipped to the same rounded border box as the
+    /// element's own background. Defaults to nil so the only non-engine
+    /// caller shape (`engineFilter(_:)` without a radius) keeps compiling
+    /// and keeps square-box behaviour.
+    var radius: BorderRadiusConfig? = nil
+    /// The element's CSS `opacity` PROPERTY (not the filter function).
+    /// Wave 26 skeptic P8: StyleBuilder attaches `.engineOpacity` at 1108,
+    /// INNER of this modifier (1131), so the backplate `.background` escapes
+    /// it — an `opacity: 0` element painted a full-strength backplate where
+    /// the browser ref (backdrop-filter-basic-opacity) paints nothing. The
+    /// Compose twin threads `elementAlpha` for the same reason; the backplate
+    /// must fade with the element it belongs to.
+    var elementOpacity: Double = 1
 
     func body(content: Content) -> some View {
         // Short-circuit — nil / untouched means identity.
         guard let cfg = config, cfg.touched else { return AnyView(content) }
 
-        // Step 1: backdrop filter. SwiftUI has no first-class backdrop-blur
-        // API. Web (BackdropFilterApplier.ts) emits actual CSS backdrop-filter
-        // and Android (BackdropBlurApplier.kt) ships a RenderEffect-based
-        // blur on API 31+. So both DO render backdrop-filter when there's
-        // parent backdrop content. Previously iOS emitted `.thinMaterial`
-        // which added a visible gray rectangle EVEN WITHOUT parent content,
-        // diverging from web/Android (which both correctly no-op when there's
-        // no backdrop to blur). Removing the .thinMaterial brings iOS into
-        // line with that behavior. TODO: implement true iOS backdrop-blur
-        // via UIVisualEffectView wrapper for fixtures with parent content.
+        // Step 1: foreground filter chain — the element's OWN pixels.
+        // Iterate in declared order so the visual effect of
+        // `blur(4) brightness(120)` differs from `brightness(120) blur(4)` —
+        // SwiftUI modifier order matches CSS function order here (outermost
+        // applied last).
         var v: AnyView = AnyView(content)
-        // (No backdrop application here. Tier 1 BackdropFilter fixture
-        //  passes ≥ 0.95 across iOS+Android+web after this change.)
-
-        // Step 2: foreground filter chain. Iterate in declared order so
-        // the visual effect of `blur(4) brightness(120)` differs from
-        // `brightness(120) blur(4)` — SwiftUI modifier order matches CSS
-        // function order here (outermost applied last).
         for fn in cfg.filter {
             v = AnyView(applyOne(fn, to: v))
+        }
+
+        // Step 2: backdrop filter, attached AFTER (hence OUTSIDE) the
+        // foreground chain. SwiftUI has no first-class backdrop API (web
+        // emits real CSS `backdrop-filter`; Android has RenderEffect on API
+        // 31+). Phase 8 shipped `.thinMaterial` here, which painted a grey
+        // rectangle even with nothing behind the element, and that was then
+        // removed — leaving iOS a documented no-op.
+        //
+        // Lane BF-I replaces the no-op with the two-pass capture: pass A
+        // renders the canvas with this element's paint suppressed, pass B
+        // crops that raster to this element's border box, filters it, and
+        // draws it underneath. The modifier is IDENTITY unless a capture
+        // path publishes `backdropPass` (default `.disabled`), so every
+        // committed baseline and every SDUI app render is unchanged.
+        //
+        // ORDER IS LOAD-BEARING (wave-26 skeptic fix #3). This modifier was
+        // attached BEFORE the loop above, so the foreground chain wrapped the
+        // backplate: `backdrop-filter: invert(1)` plus `filter: invert(1)`
+        // inverted the sampled backdrop a SECOND time and landed back on the
+        // unfiltered colour — an executed double-apply, not a theoretical
+        // one. filter-effects-2 §2 draws the filtered backdrop under the
+        // element's paint and outside the element's own `filter`, which is
+        // what attaching it out here gives (`.background` paints beneath the
+        // already-filtered content, and no foreground modifier is outer of
+        // it). Pass A is unaffected: `.opacity(0)` out here still suppresses
+        // the whole filtered subtree.
+        if !cfg.backdrop.isEmpty {
+            // Plan first (pure): the invert/blur subset this lane executes —
+            // ALL-OR-NOTHING, so a chain carrying anything else plans to
+            // identity and the applier logs the refusal once.
+            let plan = BackdropPlan.plan(from: cfg.backdrop)
+            // opacity <= 0: the element contributes nothing — mirror the
+            // Compose twin's early-out (no backplate, no pass-A cost).
+            if elementOpacity > 0 {
+                v = AnyView(v.modifier(BackdropApplier(plan: plan, radius: radius, elementOpacity: elementOpacity)))
+            }
         }
         return v
     }
@@ -105,8 +146,14 @@ struct FilterApplier: ViewModifier {
 }
 
 extension View {
-    // Chain helper; identity on nil.
-    func engineFilter(_ config: FilterConfig?) -> some View {
-        modifier(FilterApplier(config: config))
+    // Chain helper; identity on nil. `radius` is the element's border
+    // radius — used ONLY to clip the lane BF-I backdrop backplate to the
+    // rounded border box; it does not affect the foreground filter chain,
+    // and defaults to nil (square) for callers that have no radius in hand.
+    func engineFilter(_ config: FilterConfig?,
+                      radius: BorderRadiusConfig? = nil,
+                      elementOpacity: Double = 1) -> some View {
+        modifier(FilterApplier(config: config, radius: radius,
+                               elementOpacity: elementOpacity))
     }
 }

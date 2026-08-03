@@ -16,6 +16,9 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
+// The two-pass backdrop render lives in its own module (effects/backdrop/);
+// this applier is only its registration point — see applyBackdropFilters.
+import com.styleconverter.runtime.effects.backdrop.backdropFilterTwoPass
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -47,7 +50,43 @@ object FilterApplier {
      * @param config The filter configuration
      * @return Modified modifier with filters applied
      */
-    fun applyFilters(modifier: Modifier, config: FilterConfig): Modifier {
+    fun applyFilters(
+        modifier: Modifier,
+        config: FilterConfig,
+        // The element's own border-radius, threaded in for the backdrop path:
+        // filter-effects-2 §2 clips the filtered backdrop to the BORDER BOX,
+        // rounded corners included (backdrop-filter-clip-rect.html asserts
+        // exactly that). Defaults to NONE so every existing call site keeps
+        // its behaviour and its committed captures.
+        radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE,
+        // The element's own `opacity`, for the backdrop path only. Element
+        // filters ignore it (ColorApplier's alpha layer already covers them,
+        // sitting INSIDE this chain). Defaults to 1 = fully opaque, so every
+        // existing call site keeps its behaviour and its committed captures.
+        elementAlpha: Float = 1f,
+        // The element's resolved margin bands, for the backdrop path only —
+        // see applyBackdropFilters. Default NONE = "border box == this node".
+        marginInsets: com.styleconverter.runtime.spacing.MarginInsets =
+            com.styleconverter.runtime.spacing.MarginInsets.NONE,
+    ): Modifier {
+        // Backdrop FIRST (outermost in chain order), foreground filters after,
+        // so a caller that wants both in one call gets the same relative order
+        // EffectsFacade builds by hand. The two halves are separate public
+        // entry points because EffectsFacade has to interleave the shadow step
+        // between them — see applyBackdropFilters' KDoc.
+        var result = applyBackdropFilters(modifier, config, radiusConfig, elementAlpha, marginInsets)
+        result = applyForegroundFilters(result, config)
+        return result
+    }
+
+    /**
+     * The `filter` half of [applyFilters]: the element's OWN pixels.
+     *
+     * Split out so EffectsFacade can place the element's box-shadow BETWEEN
+     * the backdrop node and this chain (see [applyBackdropFilters]).
+     */
+    fun applyForegroundFilters(modifier: Modifier, config: FilterConfig): Modifier {
         var result = modifier
 
         // Separate filters by type for optimal application
@@ -83,11 +122,6 @@ object FilterApplier {
         // Apply opacity last
         opacityFilters.forEach { opacity ->
             result = result.alpha(opacity.amount.coerceIn(0f, 1f))
-        }
-
-        // Handle backdrop filters
-        if (config.hasBackdropFilters) {
-            result = applyBackdropFilters(result, config.backdropFilters)
         }
 
         return result
@@ -182,39 +216,114 @@ object FilterApplier {
     }
 
     /**
-     * Apply backdrop filters.
+     * Apply backdrop filters — the registration point for the two-pass
+     * backdrop render (effects/backdrop/).
      *
-     * CSS `backdrop-filter` is supposed to filter what is BEHIND the
-     * element (the parent's already-painted pixels), not the element
-     * itself. Compose's `Modifier.blur()` and `RenderEffect` applied via
-     * `graphicsLayer` blur the element's own rendering — including its
-     * children. Wiring `backdrop-filter: blur(10px)` to `Modifier.blur()`
-     * therefore obliterates foreground content: `Glass_Effect`
-     * (rgba(255,255,255,0.2) box with placeholder text) was rendering
-     * with the "Glass Effect" label literally blurred into invisibility,
-     * dragging iOS-Android SSIM and producing a clearly broken capture.
+     * ## Why this used to be a no-op
+     * CSS `backdrop-filter` filters what is BEHIND the element, not the
+     * element itself. Compose's `Modifier.blur()` / `graphicsLayer`
+     * `RenderEffect` filter the element's OWN rendering including its
+     * children, so wiring `backdrop-filter: blur(10px)` to them obliterated
+     * foreground content (`Glass_Effect` rendered its label blurred into
+     * invisibility). Dropping the filter entirely was the lesser wrong, and
+     * that is what shipped: the KDoc's own conclusion was that a real
+     * implementation "would need to capture the parent layer, blur the
+     * snapshot, and composite".
      *
-     * There is no clean Compose API to blur "what's drawn behind me"
-     * without restructuring the render tree (you'd need to capture the
-     * parent layer, blur the snapshot, and composite). Until that
-     * restructuring lands, the right behaviour is to NOT apply the blur
-     * to the foreground at all. The translucent background still tints
-     * the underlying canvas (matching iOS's `.thinMaterial` visual at
-     * least in mid-grey-ness), and the placeholder text is now visible.
-     * That's a perceptual win even though the soft-edge cosmetic of a
-     * real frosted blur is lost.
+     * ## What replaces it
+     * Exactly that, made possible by the fact that the composed WPT canvas is
+     * a CONTROLLED tree we render twice
+     * ([com.styleconverter.runtime.effects.backdrop.BackdropPassCoordinator]):
+     * pass A records the canvas with every backdrop element's paint
+     * suppressed (that recording IS the backdrop root image), pass B samples
+     * the patch under each element's border box, runs the chain over it,
+     * draws it, and lets the element paint on top.
      *
-     * Color-matrix backdrop filters (grayscale/contrast/etc) have the
-     * same correctness problem and are dropped on the same grounds.
+     * Three gates keep this from touching anything it should not:
+     *  1. the coordinator is DISABLED unless a two-pass host armed it for a
+     *     document that actually declares `backdrop-filter`;
+     *  2. the chain must be renderable by this lane (invert + blur only) —
+     *     anything else refuses ALL-OR-NOTHING and keeps the historical no-op
+     *     rather than rendering a recognised prefix. iOS's BackdropPlan.plan
+     *     enforces the identical rule, so the two natives never paint
+     *     different things for the same mixed chain;
+     *  3. with no pass-A image published, the installed modifier degenerates
+     *     to a plain `drawContent()`.
+     * Together they make the per-component capture path and the committed
+     * 327-pair dark-stage baseline byte-identical to before this lane.
+     *
+     * ## Why this is a separate entry point from [applyForegroundFilters]
+     * EffectsFacade must chain the element's own box-shadow BETWEEN the two.
+     * The shadow paints via `drawBehind`, so with the shadow OUTER of this
+     * node its ink lands on the pass-A canvas — i.e. the element's own shadow
+     * ends up inside its own sampled backdrop, which filter-effects-2 §2 does
+     * not do (a box-shadow is part of the ELEMENT's paint, drawn above the
+     * filtered backdrop, not part of the backdrop). Installing this node
+     * OUTSIDE the shadow makes pass A's early return suppress the shadow too.
      */
-    private fun applyBackdropFilters(
+    fun applyBackdropFilters(
         modifier: Modifier,
-        filters: List<FilterFunction>
+        config: FilterConfig,
+        radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE,
+        elementAlpha: Float = 1f,
+        // The element's resolved margin bands: this node ends up OUTER of the
+        // margin step (StyleApplier step 4 emits margins as absolutePadding),
+        // so it is sized by the MARGIN box while the spec samples and clips
+        // the BORDER box. See BackdropSampleGeometry.borderBox.
+        marginInsets: com.styleconverter.runtime.spacing.MarginInsets =
+            com.styleconverter.runtime.spacing.MarginInsets.NONE,
     ): Modifier {
-        // Intentional no-op: see kdoc above. Applying these filters via
-        // graphicsLayer/Modifier.blur destroys foreground content, which
-        // is worse than the loss of the cosmetic blur effect.
-        return modifier
+        // Gate 0 — `backdrop-filter` absent entirely. Cheapest possible out,
+        // and the reason every non-backdrop element pays nothing for this lane.
+        if (!config.hasBackdropFilters) return modifier
+
+        // Gate 1 — plain (non-snapshot) read, so this decision is made once
+        // while the chain is built and can never trigger a recomposition that
+        // would discard the per-element position slots mid-capture.
+        val coordinator = com.styleconverter.runtime.effects.backdrop
+            .BackdropPassCoordinator.current
+        if (!coordinator.enabled) return modifier
+
+        // Gate 2 — invert + blur only; null means "not renderable here", for
+        // the WHOLE chain. Logged rather than dropped in silence (CLAUDE.md:
+        // no silent fallthroughs) so a capture log names the chain that was
+        // refused instead of implying a complete render — the same disclosure
+        // BackdropLog.reportOnce prints on iOS.
+        val chain = com.styleconverter.runtime.effects.backdrop.BackdropChain.of(
+            config.backdropFilters,
+        ) ?: run {
+            // `BackdropChain.of` returns null for TWO different reasons, and
+            // only one of them is a refusal. `backdrop-filter: none` (and a
+            // chain of nothing but `none`) is an exact IDENTITY: nothing was
+            // dropped, so announcing a refusal would put a false miss in the
+            // capture log — the mirror of iOS's `BackdropPlan.isRefused`,
+            // which deliberately excludes the identities. Only an
+            // out-of-lane-scope function is disclosed.
+            val outOfScope = config.backdropFilters.filter {
+                it !is FilterFunction.None &&
+                    it !is FilterFunction.Invert &&
+                    it !is FilterFunction.Blur
+            }
+            if (outOfScope.isNotEmpty()) {
+                android.util.Log.w(
+                    "BackdropChain",
+                    "backdrop-filter chain refused wholesale (lane scope is invert + blur): " +
+                        outOfScope.joinToString { it::class.simpleName ?: "?" },
+                )
+            }
+            return modifier
+        }
+
+        // Registered: the element now suppresses its paint during pass A and
+        // draws its filtered backdrop during pass B.
+        return modifier.backdropFilterTwoPass(
+            chain = chain,
+            radiusConfig = radiusConfig,
+            coordinator = coordinator,
+            marginInsets = marginInsets,
+            elementAlpha = elementAlpha,
+        )
     }
 
     /**

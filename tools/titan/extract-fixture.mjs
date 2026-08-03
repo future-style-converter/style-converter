@@ -334,9 +334,32 @@ export function parseCss(css) {
 // every legacy caller keeps the byte-identical element-only shape. The
 // runs are raw (whitespace preserved) — the consumer decides collapse vs
 // preserve per the resolved white-space, mirroring scanOwnText.
+//
+// wave-26 lane WWS (inter-sibling whitespace): each ELEMENT item may also
+// carry `wsAfter: true` — "at least one ASCII whitespace character stood
+// between this element's end tag and whatever markup came next at this
+// level". The walker used to discard that fact (the `while (/\s/) i++`
+// skip below), which is why the flat component wire cannot tell
+// `<div></div> <div></div>` (one collapsed space advance in the browser)
+// from `<div></div><div></div>` (flush). Emitted ONLY when whitespace was
+// really there, so no consumer can ever manufacture a space the source
+// did not have. Absent = "no whitespace" — the conservative default.
 function walkChildren(html, opts = {}) {
   const out = [];
   let i = 0;
+  // Index into `out` of the most recently pushed ELEMENT item (text items
+  // from collectText mode never claim it) — the item a whitespace run
+  // found here belongs to. -1 until the first element is pushed: leading
+  // whitespace precedes every element and separates nothing.
+  let lastElemIdx = -1;
+  // Stamp `wsAfter` on that element when `run` holds any of the five
+  // CSS Text §4.1 collapsible characters. Same [ \t\n\r\f] class (never
+  // JS `\s`) the own-text collapse uses, so U+00A0 / U+3000 — which are
+  // NOT collapsible whitespace and carry their own advance as real text —
+  // can never be mistaken for a separator.
+  const markWs = (run) => {
+    if (lastElemIdx >= 0 && /[ \t\n\r\f]/.test(run)) out[lastElemIdx].wsAfter = true;
+  };
   const n = html.length;
   while (i < n) {
     // wave-21 B-RC2: in collectText mode capture the WHOLE text run —
@@ -346,18 +369,46 @@ function walkChildren(html, opts = {}) {
     if (opts.collectText && html[i] !== '<') {
       const next = html.indexOf('<', i);
       const end = next < 0 ? n : next;
+      // wave-26 WWS: the run is about to become its own text item, but it
+      // ALSO separated the previous element from the next one — record
+      // that before the item push (which never moves `lastElemIdx`).
+      markWs(html.slice(i, end));
       out.push({ text: html.slice(i, end) });
       i = end;
       continue;
     }
     // Skip text whitespace.
+    // wave-26 WWS: remember where the skip started so the discarded run
+    // can still answer "did whitespace separate these two siblings?".
+    const wsStart = i;
     while (i < n && /\s/.test(html[i])) i++;
+    markWs(html.slice(wsStart, i));
     if (i >= n) break;
     // If not '<' it's stray text; skip to next '<' or end. Text nodes
     // never become components — only elements do (unless collectText).
     if (html[i] !== '<') {
       const next = html.indexOf('<', i);
-      i = next < 0 ? n : next;
+      const end = next < 0 ? n : next;
+      // Stray non-whitespace text also marks, when the run carries ANY
+      // collapsible whitespace. DELIBERATE APPROXIMATION, not the strict
+      // source-derived rule the rest of this lane follows — say so plainly:
+      //   * `</b> and <b>` — the leading run was already consumed (and
+      //     marked) by the whitespace skip above, so this call is redundant
+      //     but harmless; `</b>foo <b>` is the case it really carries, and
+      //     there the trailing space genuinely abuts the next element.
+      //   * `</b>foo bar<b>` — NO whitespace touches either tag, yet the
+      //     internal space still marks. That is an OVER-report against a
+      //     literal reading of the marker ("source whitespace separated
+      //     these two"). It is kept because the wire DROPS the stray text
+      //     entirely: the ref paints `foo bar` between the boxes, so a
+      //     one-space floor is strictly closer than flush, never further.
+      // Bounded, not assumed: measured across 155 extractable WPT reftests
+      // (12 sections), loose-vs-strict marker counts were IDENTICAL — 485
+      // vs 485, zero over-reports — so this branch's approximation does not
+      // fire anywhere in the live corpus. Tighten to a trailing-whitespace
+      // test (`/[ \t\n\r\f]$/`) if a future fixture ever exercises it.
+      markWs(html.slice(i, end));
+      i = end;
       continue;
     }
     // Skip comments / DOCTYPE / processing instructions defensively (they
@@ -482,6 +533,11 @@ function walkChildren(html, opts = {}) {
       raw: html.slice(i, elementEnd),
       innerHtml: html.slice(innerStart, innerEnd),
     });
+    // wave-26 WWS: this is now the element any following whitespace run
+    // belongs to. Text items (collectText) deliberately never claim it —
+    // a run between element A and element B is A's `wsAfter` whether or
+    // not the walker also emitted it as a standalone text item.
+    lastElemIdx = out.length - 1;
     i = elementEnd;
   }
   return out;
@@ -2087,6 +2143,16 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
         children,
         pos,
       };
+      // wave-26 lane WWS: carry the walker's inter-sibling whitespace fact
+      // onto the tree node so buildNode can stamp the `ws-after` marker
+      // (see the WS_AFTER_ROLE banner). Set only when true, so every node
+      // whose source packed siblings flush keeps its exact legacy shape.
+      // KNOWN UNDER-REPORT (conservative by design): the flag describes the
+      // gap to the NEXT WALKER ITEM, and the merge filter above may drop an
+      // absorbed pure-inline element out of that gap — `<div/><span>x</span>
+      // <div/>` therefore reads as "no whitespace" between the two divs.
+      // Under-reporting only ever withholds a space; it can never add one.
+      if (k.wsAfter) node.wsAfter = true;
       // wave-12: flag nodes that absorbed inline runs so buildComponents
       // emits the 'inline-run-merged' lossy marker (honest approximation:
       // the run's default styling — bold for <strong> etc. — is dropped).
@@ -2275,6 +2341,90 @@ const INLINE_LEVEL_TAGS = new Set([
   'samp', 'kbd', 'var', 'img', 'input', 'select', 'button', 'textarea',
   'output', 'meter', 'progress', 'ruby', 'rt', 'rb',
 ]);
+
+// ── wave-26 lane WWS: the inter-sibling whitespace marker (the ws-after wire) ─
+//
+// MEASURED PROBLEM (corpus-v5.0, filter-effects 0.9279 mean):
+//   backdrop-filter-clip-rect-2 stacks three `display:inline-block` boxes
+//   per row, written one per source line —
+//     <div class="no-bf">
+//       <div class="box"></div>
+//       <div class="box"></div>
+//       <div class="box"></div>
+//     </div>
+//   The browser-ref collapses each newline+indent run to ONE space advance,
+//   so the ref's boxes sit at x = 0, 104.5, 209. Our flat component wire
+//   dropped those text nodes entirely, the composed canvas packed the boxes
+//   FLUSH at 0, 100, 200, and boxes 2 and 3 landed 4.5 and 9 px left of the
+//   ref — the whole 0.924 web gap, with the same displacement shifting
+//   row-wrap boundaries on wider fixtures.
+//
+//   MEASURED, not inferred (puppeteer, ref page under the real
+//   capture-browser-ref.mjs injection — Inter @16px + line-height 1.25):
+//   the collapsed space advance is 4.5px, giving ref x = 0 / 104.5 / 209.
+//   Do NOT reuse the wave-20 UAWidgetIntrinsics.atomGapPx 4.16 figure here:
+//   that constant was measured on a different face and does not describe
+//   this stage. The renderer injects a REAL text node and lets the browser
+//   measure the advance in the capture's own font, so the number above is
+//   documentation, never arithmetic the code depends on.
+//
+// WIRE CONTRACT (`_role: 'ws-after'` → IR v2 `meta.role`): the earlier of
+// two adjacent siblings is stamped when SOURCE WHITESPACE separated them.
+//
+//   * CHANNEL CHOICE. `meta.role` is the marker channel the v2 schema
+//     already declares "open-ended string by design so future markers need
+//     no schema change" (schema/ir-v2.schema.json), and it is already
+//     multi-valued here — 'body-root' (the synthetic body component) and
+//     'line-break' (a <br>). Riding it means this lane needs NO converter,
+//     schema, or IR-type change: `_role` is read by CssParsing.kt, emitted
+//     as `meta.role` by IRWireV2.kt, and forwarded verbatim by the web
+//     decoder today. A first-class `meta.wsAfter` boolean would be a
+//     cleaner name but is a six-file wire change (converter model + parser
+//     + IR model + v2 serializer + schema + runtime types) and belongs to a
+//     wire lane, not here. Documented follow-up: promote it when that lane
+//     runs; the harness reads through ONE predicate (isWsAfterMarked in
+//     apps/web-harness/src/sdui/ComponentRenderer.tsx), so it is a
+//     one-line swap on each side.
+//   * PRECEDENCE, stated rather than silent: a component that ALREADY owns
+//     a role keeps it. Only 'line-break' can collide (body-root is the
+//     synthetic root and never has a sibling), and a <br> is never an
+//     inline ATOM in the consumer's predicate — it ends a line rather than
+//     occupying inline space — so the withheld marker costs nothing. The
+//     collision is asserted by a unit test rather than left to inspection.
+//   * DIRECTION: stamped on the EARLIER sibling ("whitespace follows me"),
+//     matching the renderer hook's (prev, next) gap call.
+//   * NEVER stamped on the LAST sibling: trailing whitespace before the
+//     parent's close tag separates nothing, and a marker there would be a
+//     standing invitation to invent a trailing space.
+//   * OMIT-WHEN-ABSENT: fixtures whose siblings are flush carry nothing, so
+//     every hand-authored fixture (fixtures/visual-test.json,
+//     fixtures/properties/**) — which this extractor never touches anyway —
+//     and every re-extracted flush-source WPT fixture stay byte-identical.
+const WS_AFTER_ROLE = 'ws-after';
+
+/**
+ * Stamp the wave-26 `ws-after` marker on one emitted component.
+ *
+ * @param cmp        the fixture component object being emitted (mutated).
+ * @param node       its tree node — `node.wsAfter` is walkChildren's fact.
+ * @param hasNextSib whether a following SIBLING component exists; the
+ *                   marker describes a GAP, so the last child never gets it.
+ * Returns the marker actually applied (or null), so callers and tests read
+ * the decision instead of re-deriving it.
+ */
+export function stampWsAfter(cmp, node, hasNextSib) {
+  // No following sibling → no gap to describe (see the banner's LAST rule).
+  if (!hasNextSib) return null;
+  // The walker found no collapsible whitespace between the two elements —
+  // the source packed them flush and the renderers must too.
+  if (!node?.wsAfter) return null;
+  // PRECEDENCE, stated not silent: an existing role wins. Today that is
+  // only 'line-break' (a <br>), which is never an inline atom downstream,
+  // so nothing is lost — but say it out loud rather than overwrite.
+  if (cmp._role) return null;
+  cmp._role = WS_AFTER_ROLE;
+  return WS_AFTER_ROLE;
+}
 
 // ── wave-20 lane W1: widget-identity attributes (the meta.attrs wire) ────────
 //
@@ -5218,9 +5368,14 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // with inline content — a leading child br then ENDS that line
       // instead of adding a blank one.
       const childLineCtx = { hasInline: !!node.ownText };
+      // wave-26 lane WWS: the last child's `wsAfter` describes the gap to
+      // the parent's close tag, which separates nothing — so the stamp is
+      // gated on having a following sibling (see the WS_AFTER_ROLE banner).
+      const lastChildIdx = node.children.length - 1;
       node.children.forEach((child, i) => {
         const childId = `${id}__${i}`;
         const childCmp = buildNode(child, childId, childLineCtx);
+        stampWsAfter(childCmp, child, i < lastChildIdx);
         childMap[childId] = { id: childId, ...childCmp };
       });
       cmp.children = childMap;
@@ -5243,7 +5398,16 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // wave-17: top-level body elements route through the slotting switch —
     // children of a sized body nest under it (source-truth structure);
     // everything else keeps the legacy `components[id]` sibling emission.
-    emitTopLevel(id, buildNode(node, id, topLineCtx));
+    const topCmp = buildNode(node, id, topLineCtx);
+    // wave-26 lane WWS: body-level siblings get the same marker. It is
+    // load-bearing only on the wave-17 SLOTTING path (children of a sized
+    // body become real siblings under the body-root, where the renderer's
+    // (prev, next) separator hook runs); unslotted top-level components are
+    // composed roots the hook never pairs, so the marker is inert there —
+    // stamped anyway so the wire says the same thing about the same source
+    // regardless of which emission path a document happens to take.
+    stampWsAfter(topCmp, node, idx < tree.length - 1);
+    emitTopLevel(id, topCmp);
     // wave-21 B-RC2: emit the bare-text run that FOLLOWS element idx (gap
     // index idx+1), preserving reading order in the insertion-ordered
     // components map. Ids are `__text1`, `__text2`, … — `__text` (no
