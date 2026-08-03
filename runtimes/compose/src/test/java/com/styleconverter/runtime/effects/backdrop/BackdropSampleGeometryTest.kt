@@ -109,4 +109,96 @@ class BackdropSampleGeometryTest {
         assertNull(BackdropSampleGeometry.sample(500, 10, 40, 40, 0, 390, 600))
         assertNull(BackdropSampleGeometry.sample(10, -80, 40, 40, 0, 390, 600))
     }
+
+    // ── the POSITION offset (wave-27 accuracy fix) ────────────────────────
+    //
+    // The backdrop draw node is installed at StyleApplier step 3, OUTER of
+    // step 4 — and step 4 ends with PositionApplier's `absoluteOffset`. So the
+    // node's own origin is the element's UN-offset slot while its background
+    // and borders (steps 5–6, inner of the offset) paint at the offset one.
+    // borderBox folds the offset into the local origin; these pin that it is
+    // an origin-only translation and that it composes with the margin bands.
+
+    @Test
+    fun `position offset moves the border box origin only`() {
+        // backdrop-filter-basic.html: the 100x100 filterbox declares
+        // `left: 50px; top: 50px` inside its positioned parent. Before this,
+        // the patch was sampled and painted at (0,0) of the draw node — the
+        // PARENT colorbox's corner — which is exactly the measured Android
+        // failure (one flat magenta square at canvas (26,116) where the ref
+        // has green + black + a magenta overlap starting at (76,166)).
+        val box = BackdropSampleGeometry.borderBox(
+            nodeWidth = 100f, nodeHeight = 100f,
+            marginLeftPx = 0f, marginTopPx = 0f,
+            marginRightPx = 0f, marginBottomPx = 0f,
+            positionOffsetXPx = 50f, positionOffsetYPx = 50f,
+        )!!
+        assertEquals(50f, box.localLeft, 0f)
+        assertEquals(50f, box.localTop, 0f)
+        // absoluteOffset translates without resizing — the box keeps its size.
+        assertEquals(100f, box.width, 0f)
+        assertEquals(100f, box.height, 0f)
+    }
+
+    @Test
+    fun `position offset adds to the margin bands`() {
+        // Both contributions are translations of the painted box inside an
+        // unchanged draw node, so they sum: a 10px left margin plus a
+        // `left: 30px` inset puts the border box 40px into the node.
+        val box = BackdropSampleGeometry.borderBox(
+            nodeWidth = 140f, nodeHeight = 90f,
+            marginLeftPx = 10f, marginTopPx = 8f,
+            marginRightPx = 20f, marginBottomPx = 12f,
+            positionOffsetXPx = 30f, positionOffsetYPx = -4f,
+        )!!
+        assertEquals(40f, box.localLeft, 0f)
+        assertEquals(4f, box.localTop, 0f)
+        // Size is still node minus BOTH margin bands, offset-independent.
+        assertEquals(110f, box.width, 0f)
+        assertEquals(70f, box.height, 0f)
+    }
+
+    @Test
+    fun `a negative position offset moves the box the other way`() {
+        // A `right`/`bottom` inset resolves NEGATIVE (PositionConfig.offsetX),
+        // and so does a literal `left: -20px`. Unlike a negative MARGIN — which
+        // must never grow the box — a negative offset is a real translation and
+        // has to be honoured with its sign, or the patch drifts the wrong way.
+        val box = BackdropSampleGeometry.borderBox(
+            nodeWidth = 80f, nodeHeight = 60f,
+            marginLeftPx = 0f, marginTopPx = 0f,
+            marginRightPx = 0f, marginBottomPx = 0f,
+            positionOffsetXPx = -20f, positionOffsetYPx = -12f,
+        )!!
+        assertEquals(-20f, box.localLeft, 0f)
+        assertEquals(-12f, box.localTop, 0f)
+        assertEquals(80f, box.width, 0f)
+        assertEquals(60f, box.height, 0f)
+    }
+
+    @Test
+    fun `a static element is byte-identical to the pre-offset geometry`() {
+        // The overwhelming majority of elements. Defaulted parameters mean the
+        // committed captures cannot move: same numbers as before the fix.
+        val withDefault = BackdropSampleGeometry.borderBox(200f, 100f, 0f, 0f, 0f, 0f)!!
+        assertEquals(0f, withDefault.localLeft, 0f)
+        assertEquals(0f, withDefault.localTop, 0f)
+        assertEquals(200f, withDefault.width, 0f)
+        assertEquals(100f, withDefault.height, 0f)
+    }
+
+    @Test
+    fun `an offset can never turn a valid border box into a refusal`() {
+        // The refusal test is on the SIZE, which the offset does not touch —
+        // so a huge inset still yields a box (the sample() clamp is what
+        // decides an off-canvas box has nothing to read).
+        val box = BackdropSampleGeometry.borderBox(
+            nodeWidth = 40f, nodeHeight = 40f,
+            marginLeftPx = 0f, marginTopPx = 0f,
+            marginRightPx = 0f, marginBottomPx = 0f,
+            positionOffsetXPx = 5000f, positionOffsetYPx = 5000f,
+        )
+        assertEquals(40f, box!!.width, 0f)
+        assertEquals(5000f, box.localLeft, 0f)
+    }
 }

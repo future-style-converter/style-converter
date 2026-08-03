@@ -533,6 +533,22 @@ object StyleApplier {
                     collapsed = collapsedMargin,
                 )
             else com.styleconverter.runtime.spacing.MarginInsets.NONE,
+            // wave-27 fix — the resolved POSITION offset, the second half of
+            // the same "step 3 is chained OUTSIDE step 4" correction the
+            // margin bands above make. `LayoutFacade.applyToModifier` ends
+            // with `PositionApplier.applyPosition`, whose `absoluteOffset`
+            // slides the element's own paint (background at step 6, borders
+            // at step 5) away from this draw node's origin; the backdrop
+            // painter has to slide with it or it filters the rectangle the
+            // box USED to occupy. Read from PositionApplier.resolvedOffset —
+            // literally the value form of the modifier step 4 emits, so the
+            // two cannot disagree. Gated on the property being declared for
+            // the same reason as the margin read: only the backdrop path
+            // consumes it, and every other element would pay for nothing.
+            positionOffset = if (config.effects.filters.hasBackdropFilters)
+                com.styleconverter.runtime.layout.position.PositionApplier
+                    .resolvedOffset(config.layout.position)
+            else androidx.compose.ui.unit.DpOffset.Zero,
         )
 
         // 3.5. Mask — applied INSIDE EffectsFacade.apply (step 3), which
@@ -806,6 +822,12 @@ object StyleApplier {
         // Mask included: EffectsFacade.apply runs MaskApplier once via its
         // own MaskConfig — a second config.mask pass here squared the mask
         // alpha exactly like the applyConfig duplicate did (see step 3.5).
+        // No positionOffset here, deliberately: this entry point exists for
+        // callers that hand LAYOUT to a container, so there is no
+        // `absoluteOffset` of ours for the backdrop node to compensate for —
+        // whatever the container places is already the element's final slot.
+        // (It is also unreferenced today; the composed WPT canvas and every
+        // live render go through applyConfig above.)
         result = EffectsFacade.apply(
             result, config.effects, config.borders.radius,
             elementAlpha = config.colors.opacity ?: 1f,

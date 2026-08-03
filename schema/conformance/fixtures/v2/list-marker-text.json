@@ -1,0 +1,94 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "marker-list-001",
+            "name": "Marker_OrderedList",
+            "properties": [
+                {
+                    "type": "ListStylePosition",
+                    "data": "INSIDE"
+                }
+            ],
+            "meta": {
+                "sourceTag": "ol",
+                "attrs": {
+                    "start": "1860"
+                }
+            }
+        },
+        {
+            "id": "marker-item-baked-002",
+            "name": "Marker_BakedCambodian",
+            "properties": [
+                {
+                    "type": "ListStyleType",
+                    "data": "cambodian"
+                }
+            ],
+            "slot": {
+                "parent": "marker-list-001"
+            },
+            "text": "១៨៦០",
+            "meta": {
+                "sourceTag": "li",
+                "markerText": "១៨៦០."
+            }
+        },
+        {
+            "id": "marker-item-fallback-003",
+            "name": "Marker_ArmenianOutOfRange",
+            "properties": [
+                {
+                    "type": "ListStyleType",
+                    "data": "armenian"
+                }
+            ],
+            "slot": {
+                "parent": "marker-list-001"
+            },
+            "text": "10000",
+            "meta": {
+                "sourceTag": "li",
+                "markerText": "10000."
+            }
+        },
+        {
+            "id": "marker-item-override-004",
+            "name": "Marker_ItemValueOverride",
+            "properties": [
+                {
+                    "type": "ListStyleType",
+                    "data": "upper-roman"
+                }
+            ],
+            "slot": {
+                "parent": "marker-list-001"
+            },
+            "meta": {
+                "sourceTag": "li",
+                "attrs": {
+                    "value": "4"
+                },
+                "markerText": "IV."
+            }
+        },
+        {
+            "id": "marker-item-unbaked-005",
+            "name": "Marker_BulletOutOfScope",
+            "properties": [
+                {
+                    "type": "ListStyleType",
+                    "data": "square"
+                }
+            ],
+            "slot": {
+                "parent": "marker-list-001"
+            },
+            "meta": {
+                "sourceTag": "li"
+            }
+        }
+    ]
+}

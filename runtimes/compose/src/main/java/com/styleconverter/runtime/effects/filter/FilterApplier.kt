@@ -273,6 +273,13 @@ object FilterApplier {
         // the BORDER box. See BackdropSampleGeometry.borderBox.
         marginInsets: com.styleconverter.runtime.spacing.MarginInsets =
             com.styleconverter.runtime.spacing.MarginInsets.NONE,
+        // The element's resolved POSITION offset: this node is likewise OUTER
+        // of step 4's `absoluteOffset`, so without it the backplate is sampled
+        // AND painted at the element's un-offset slot — a perfect filter of
+        // the wrong rectangle. See BackdropModifier.positionOffset for the
+        // measured failure it repairs.
+        positionOffset: androidx.compose.ui.unit.DpOffset =
+            androidx.compose.ui.unit.DpOffset.Zero,
     ): Modifier {
         // Gate 0 — `backdrop-filter` absent entirely. Cheapest possible out,
         // and the reason every non-backdrop element pays nothing for this lane.
@@ -322,6 +329,7 @@ object FilterApplier {
             radiusConfig = radiusConfig,
             coordinator = coordinator,
             marginInsets = marginInsets,
+            positionOffset = positionOffset,
             elementAlpha = elementAlpha,
         )
     }

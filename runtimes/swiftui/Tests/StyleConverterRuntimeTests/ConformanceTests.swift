@@ -216,6 +216,40 @@ final class ConformanceTests: XCTestCase {
         XCTAssertNoThrow(try decodeDoc(head + "[{\"line\":\"spiral\"}] } } ] }"))
     }
 
+    // MARK: - wave-27 lane CBAKE: meta.markerText + the ol/li attr lane
+
+    /// The baked list marker decodes verbatim off the `list-marker-text`
+    /// golden, and `meta.attrs.start` joins the strict attr key set.
+    ///
+    /// Why the DECODE is the unit under test rather than the renderer read:
+    /// ComponentRenderer's preference is one line (`child.meta?.markerText`),
+    /// but a reader that rejected or dropped the key would make that line
+    /// dead and silent. TWIN of the Compose `IRDocumentDecoderTest` case.
+    func testV2MetaMarkerTextAndListAttrs() throws {
+        let doc = try loadV2("list-marker-text.json")
+        // The cambodian representation of 1860 plus the §3.1.5 suffix.
+        XCTAssertEqual(try byName(doc, "Marker_BakedCambodian").meta?.markerText, "\u{17E1}\u{17E8}\u{17E6}\u{17E0}.")
+        // §4 range + §7.1.4 fallback resolved upstream, not here.
+        XCTAssertEqual(try byName(doc, "Marker_ArmenianOutOfRange").meta?.markerText, "10000.")
+        // The ordered-list counter origin rides the disjoint ol/li lane.
+        XCTAssertEqual(try byName(doc, "Marker_OrderedList").meta?.attrs?.start, "1860")
+        XCTAssertEqual(try byName(doc, "Marker_ItemValueOverride").meta?.attrs?.value, "4")
+        // A §6.1 bullet is out of the bake's scope BY DESIGN — no key at
+        // all, which is what keeps this runtime on its own marker table.
+        XCTAssertNil(try byName(doc, "Marker_BulletOutOfScope").meta?.markerText)
+    }
+
+    /// `markerText` is additive, not a licence to invent siblings: an
+    /// unknown meta key next to it is still a hard error (spec 05 rule 3).
+    func testV2UnknownMetaKeyStillErrorsBesideMarkerText() {
+        let json = """
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [],
+            "meta": { "markerText": "1.", "markerFont": "x" } } ] }
+        """
+        XCTAssertThrowsError(try decodeDoc(json))
+    }
+
     // MARK: - v2 strictness: children is a hard error
 
     func testV2ChildrenKeyIsHardError() {

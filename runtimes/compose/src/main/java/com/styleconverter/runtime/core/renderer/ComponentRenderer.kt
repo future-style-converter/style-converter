@@ -43,6 +43,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import com.styleconverter.runtime.lists.ListMarkerTextStyle
 import com.styleconverter.runtime.lists.ListStyleExtractor
 import com.styleconverter.runtime.lists.ListStyleApplier as StyleListApplier
 import androidx.compose.ui.draw.drawBehind
@@ -2112,6 +2113,32 @@ object ComponentRenderer {
             // here IS the inheritance-merged list — see mergedComponent).
             val inheritedAwareTextColor = textColor
                 ?: runCatching { TextStyleApplier.extractTextColor(component.properties) }.getOrNull()
+            // Wave 27 (lane NMARK, B-RC8) — the marker's font, resolved
+            // from the SAME inheritance-merged list one line above
+            // resolves its colour. Computed here rather than inside
+            // RenderListItemMarker so both marker call sites below share
+            // one resolution (and one failure mode: a malformed
+            // typography payload falls back to the empty TextStyle, which
+            // is exactly the pre-wave-27 Material default — no marker
+            // ever disappears because of this line).
+            //
+            // SKEPTIC FIX (wave 27): `inheritedFontSizeSp` is threaded, as
+            // it is at EVERY other extractTextStyle call site (line ~3940,
+            // ContentApplier). Without it a RELATIVE font-size on the
+            // container (`em` / `%` / `larger` — the wire leaves those
+            // unresolved by design, CLAUDE.md's "null means
+            // runtime-dependent") resolved against the extractor's
+            // hard-coded 16sp browser default while the container's OWN
+            // text resolved the same declaration against the real
+            // inherited base, so marker and item disagreed — exactly the
+            // divergence this lane set out to remove.
+            val inheritedMarkerFontSizeSp =
+                com.styleconverter.runtime.core.variables.DynamicValueResolver
+                    .fontSizePxOf(LocalInheritedProperties.current)
+            val inheritedMarkerTextStyle = runCatching {
+                TextStyleApplier.extractTextStyle(
+                    component.properties, inheritedMarkerFontSizeSp)
+            }.getOrDefault(TextStyle())
             if (!parentText.isNullOrEmpty()) {
                 PlaceholderContent(
                     name = parentText,
@@ -2197,7 +2224,8 @@ object ComponentRenderer {
                             RenderAbsoluteChild(child)
                         } else if (isListParent && child._tag?.lowercase() == "li") {
                             RenderListItemMarker(
-                                child, index, parentTag, parentListPairs, inheritedAwareTextColor)
+                                child, index, parentTag, parentListPairs,
+                                inheritedAwareTextColor, inheritedMarkerTextStyle)
                         } else {
                             RenderComponent(child)
                         }
@@ -2218,7 +2246,8 @@ object ComponentRenderer {
                 val renderBlockChild: @Composable (Int, IRComponent) -> Unit = { index, child ->
                     if (isListParent && child._tag?.lowercase() == "li") {
                         RenderListItemMarker(
-                            child, index, parentTag, parentListPairs, inheritedAwareTextColor)
+                            child, index, parentTag, parentListPairs,
+                            inheritedAwareTextColor, inheritedMarkerTextStyle)
                     } else {
                         // Auto-margin centering for block children is handled
                         // inside RenderComponent's self-alignment wrapper (one
@@ -2423,7 +2452,14 @@ object ComponentRenderer {
         index: Int,
         parentTag: String?,
         parentListPairs: List<Pair<String, kotlinx.serialization.json.JsonElement?>>,
-        textColor: Color?
+        textColor: Color?,
+        // Wave 27 (lane NMARK, B-RC8) — the CONTAINER's inheritance-merged
+        // text style, resolved by the caller at the same place it resolves
+        // `textColor` so the two can never come from different property
+        // lists. css-lists-3 §3.2: the marker inherits from its originating
+        // element, so this is the marker's font. Narrowed to the
+        // character-level fields by ListMarkerTextStyle.forItem below.
+        inheritedTextStyle: TextStyle
     ) {
         // Resolve the item's OWN marker config. Null only if the caller's
         // isListParent gate and uaMarkerDefault ever disagreed — render
@@ -2433,7 +2469,13 @@ object ComponentRenderer {
             parentListPairs,
             child.properties.map { it.type to it.data }
         )
-        val marker = listConfig?.let { StyleListApplier.getMarker(index, it) } ?: ""
+        // Wave 27 (lane CBAKE): a BAKED marker wins outright. `meta.markerText`
+        // is the extractor's full css-counter-styles-3 §6 resolution — the
+        // counter style AND the `<ol start>` ordinal, neither of which
+        // [ListStyleExtractor.resolveMarkerConfig] can see — so re-deriving
+        // it here could only be worse. Absent ⇒ the local table, unchanged.
+        val marker = child.markerText
+            ?: listConfig?.let { StyleListApplier.getMarker(index, it) } ?: ""
         if (marker.isEmpty()) {
             // `list-style-type: none` (and the no-config guard). The
             // browser generates NO marker box at all — css-lists-3 §3.1:
@@ -2446,16 +2488,62 @@ object ComponentRenderer {
             return
         }
         Row(verticalAlignment = Alignment.Top) {
-            // Marker text: prefer the explicit textColor from the parent
-            // when known so the bullet/number matches the surrounding
-            // text. The trailing space mimics the browser's default
-            // marker suffix when list-style-position is outside.
+            // Marker text: the trailing space mimics the browser's
+            // default marker suffix when list-style-position is outside.
+            //
+            // Wave 27 (lane NMARK, B-RC8) — two repairs, both visible on
+            // the wave27-gate arabic-indic capture:
+            //
+            //  1. `style`. This Text carried a colour and NOTHING else,
+            //     so it painted at Compose's Material default (~14sp)
+            //     while the item inherited `font-size: 25px`. The marker
+            //     inherits from its originating element (css-lists-3
+            //     §3.2), so it now takes the LIST CONTAINER's resolved
+            //     style, narrowed to the character-level fields by
+            //     ListMarkerTextStyle.forItem. Container, not `<li>` —
+            //     that gap, and the fact that iOS shares it exactly, is
+            //     documented under "Honest scope" in
+            //     ListMarkerTextStyle. The explicit `textColor`
+            //     still wins inside that call, so a document that only
+            //     ever declared colour renders exactly as before.
+            //
+            //  2. `Modifier.alignByBaseline()`. `Alignment.Top` stacked
+            //     the two boxes by their TOP edges, which put the marker
+            //     and the item's text on different baselines the moment
+            //     their line boxes differed in height (which, at 14sp vs
+            //     25px, was always). The marker is the item's first
+            //     inline box and shares the line's baseline. Compose
+            //     resolves an ABSENT `FirstBaseline` — the bidi-baked
+            //     items have no in-flow text at all — back to the
+            //     cross-axis origin, i.e. exactly the `Alignment.Top`
+            //     this replaces, so those rows are unchanged. The iOS
+            //     twin spells that same two-case rule out explicitly in
+            //     StyleEngine/lists/ListMarkerRow.swift, because SwiftUI
+            //     falls back to the item's BOTTOM edge instead.
+            //
+            //     BOTH children take the modifier: `alignByBaseline` is a
+            //     RowScope parent-data claim, and a row with only ONE
+            //     baseline-aligned child has nothing to align it against,
+            //     so marking the marker alone would be an inert no-op.
+            //     `itemModifier` is documented (see RenderComponent's
+            //     @param) as the OUTERMOST modifier, which is what puts
+            //     the claim on the Row's direct child where parent data
+            //     is read.
+            //     The separate `color = textColor ?: Color.Unspecified`
+            //     argument is GONE, not lost: forItem folds `textColor`
+            //     in with the identical precedence (explicit wins, null
+            //     falls through to the inherited value, and an
+            //     Unspecified result still bottoms out at
+            //     LocalContentColor inside Text). Keeping both would have
+            //     left two places deciding one colour.
             Text(
                 text = "$marker ",
-                color = textColor ?: Color.Unspecified,
-                modifier = Modifier.padding(end = 4.dp)
+                style = ListMarkerTextStyle.forItem(inheritedTextStyle, textColor),
+                modifier = Modifier
+                    .alignByBaseline()
+                    .padding(end = 4.dp)
             )
-            RenderComponent(child)
+            RenderComponent(child, Modifier.alignByBaseline())
         }
     }
 

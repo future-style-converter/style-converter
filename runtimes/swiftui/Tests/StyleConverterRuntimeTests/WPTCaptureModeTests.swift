@@ -321,6 +321,68 @@ final class WPTCaptureModeTests: XCTestCase {
         XCTAssertEqual(WPTCanvas.composedBackground(resolved: grey), grey)
     }
 
+    // MARK: - wave 27 A-RC1: the containment gate on canvas propagation
+
+    /// The propagation `composedBackground` implements is NOT unconditional.
+    /// css-backgrounds-3 §2.11.2 propagates the root/body background to the
+    /// canvas only while that element is ON the propagation path, and
+    /// css-contain-2 §3.5 takes it off that path as soon as it has ANY
+    /// containment — a contained body paints its background on its OWN box
+    /// and the canvas keeps the UA default.
+    ///
+    /// MEASURED (wave-27 gate, css-contain): contain-body-bg-001..004 declare
+    /// `body { background: red; contain: layout|paint|size|style }` over a
+    /// white 300×200 `<p>` and share one PURE WHITE reference ("Test passes
+    /// if there is no red"). All four scored 0.6268 on iOS — the whole
+    /// capture flooded red. These pins hold the shared rule (web
+    /// `bodyRootHasContainment`, Compose `containmentBlocksCanvasPropagation`).
+    func testContainmentGateAbsentOrNoneIsNotContainment() {
+        // No declaration — the common case, and the one that keeps every
+        // pre-wave-27 capture byte-identical.
+        XCTAssertFalse(WPTCanvas.containmentBlocksPropagation(nil))
+        // An empty list is a malformed leaf, not evidence of containment.
+        XCTAssertFalse(WPTCanvas.containmentBlocksPropagation([]))
+        // css-contain-2 §2: `none` is the initial value and applies NO
+        // containment, so the body stays on the propagation path.
+        XCTAssertFalse(WPTCanvas.containmentBlocksPropagation(["NONE"]))
+    }
+
+    /// Any containment keyword blocks, regardless of KIND: the four WPT
+    /// variants set layout / paint / size / style and all match the SAME
+    /// all-white reference, so the gate cannot grade by kind.
+    func testContainmentGateAnyKeywordBlocks() {
+        for kw in ["LAYOUT", "PAINT", "SIZE", "STYLE", "STRICT", "CONTENT"] {
+            XCTAssertTrue(WPTCanvas.containmentBlocksPropagation([kw]), kw)
+        }
+        // A multi-keyword list (`contain: size style`) needs only one token.
+        XCTAssertTrue(WPTCanvas.containmentBlocksPropagation(["SIZE", "STYLE"]))
+        // Case/whitespace tolerance — the reader hands tokens through verbatim.
+        XCTAssertTrue(WPTCanvas.containmentBlocksPropagation([" layout "]))
+    }
+
+    /// contain-body-bg-001's exact shape: an OPAQUE red body background that
+    /// would otherwise take the α=1 identity path straight onto the canvas.
+    /// The gate fires BEFORE the color is read, so the canvas stays white and
+    /// the body-root paints its own red box — which the test's own white
+    /// `<p>` then covers, the ref's reading.
+    func testComposedBackgroundContainedBodyKeepsWhiteCanvas() {
+        let red = Color(.sRGB, red: 1, green: 0, blue: 0, opacity: 1)
+        XCTAssertEqual(WPTCanvas.composedBackground(resolved: red, contained: true),
+                       WPTCanvas.background)
+        // Translucent ink is gated identically — no blend, just the canvas.
+        let halfRed = Color(.sRGB, red: 1, green: 0, blue: 0, opacity: 0.5)
+        XCTAssertEqual(WPTCanvas.composedBackground(resolved: halfRed, contained: true),
+                       WPTCanvas.background)
+    }
+
+    /// `contained` defaults to false, so every existing caller and every
+    /// non-contained document keeps its wave-26 result verbatim.
+    func testComposedBackgroundUncontainedDefaultUnchanged() {
+        let grey = Color(.sRGB, red: 0.4, green: 0.4, blue: 0.4, opacity: 1)
+        XCTAssertEqual(WPTCanvas.composedBackground(resolved: grey), grey)
+        XCTAssertEqual(WPTCanvas.composedBackground(resolved: grey, contained: false), grey)
+    }
+
     // MARK: - WPT default-ink split (corpus-v4.1: black ink)
 
     /// The corpus-v4.1 default TEXT INK is opaque BLACK: real WPT pages

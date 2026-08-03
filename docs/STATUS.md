@@ -21,7 +21,7 @@ the full history lives in git history.
   slot/placement wire); the JSON is machine-checked against
   `schema/ir-v2.schema.json` (`schema/ir-v1.schema.json` is the deprecated
   legacy contract for the `--emit-ir v1` compat wire) + the normative spec
-  in [`schema/spec/`](../schema/spec/); 34 golden fixtures (12 v1 + 22 v2)
+  in [`schema/spec/`](../schema/spec/); 36 golden fixtures (12 v1 + 24 v2)
   are decoded by conformance tests on all four codebases
   (`node schema/conformance/run.mjs`).
 
@@ -500,17 +500,32 @@ dirs + WPT corpus are gitignored):
   snapshot** — the instrument's determinism is now measured, not
   asserted. Totals: **web 203/233, iOS 190/233, Android 182/233**;
   327-net clean.
+  Wave 27 (`tools/titan/results/corpus-v5-2.json`) grew the corpus to
+  **22 sections** and landed **the fifth bake**. css-contain: web
+  3→11/12 via the canvas containment gate (a contained body leaves the
+  background-propagation path), the body-root pseudo-element leak fix
+  (~32 corpus files), and the non-animatable keyframe set.
+  css-counter-styles: web 4→11/12 via counter-style-bake.mjs (the §6
+  predefined table + five systems + `ol@start`; the skeptic killed
+  `<ol reversed>` baking forward, negative-ordinal empty markers, and
+  shorthand silent-decimal). css-lists web 12/12 — a new perfect web
+  section. The Android backdrop gap was **one term**: the backdrop
+  draw node sat outer of `absoluteOffset`, sampling a pixel-perfect
+  filter of the wrong rectangle (both alternate suspects disproven
+  with device evidence) — filter-effects Android 2→4/11. Five more
+  Dependabot PRs merged through the CI gate. Totals: **web 226/257,
+  iOS 202/257, Android 194/257**; 327-net clean.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 236 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1084 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1698 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1012 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 975 |
-| IR conformance | `node schema/conformance/run.mjs --emit` | 34 goldens (12 v1 + 22 v2) × 4 codebases |
+| converter (Kotlin) | `./gradlew :converter:test` | 237 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1088 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1724 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1023 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1019 |
+| IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap
 

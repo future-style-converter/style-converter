@@ -714,20 +714,22 @@ test('proving: hypothetical-dynamic-change-002 → child follows abspos ancestor
 
 const hyp3 = provingFixture('hypothetical-dynamic-change-003');
 test('proving: hypothetical-dynamic-change-003 → relative ancestor: 100px offset baked, +16 canvas pad on the child', { skip: !hyp3 }, () => {
-  // Relative ancestor: `left` stays the RELATIVE offset (100px) — but the
-  // ancestor is IN-FLOW, so the pipeline's injected 16px body pad (the
-  // canvas contract every capture shares — capture-browser-ref.renderOne)
-  // shifts its static position to x=16, and the fixed child's resolved
-  // hypothetical static position is 16+100 = 116px. This is the browser
-  // TRUTH under the canvas contract (the static path's runtime layout
-  // produces the same in-flow shift) — pinned so a canvas-contract change
-  // that moves it breaks a test first.
+  // Relative ancestor: `left` stays the RELATIVE offset (100px). Under the
+  // wave-25 IMGPAD contract the bake renders UNPADDED at the ref viewport
+  // (canvasFrameCss injects no body padding), so baked coordinates live in
+  // CONTENT space: the in-flow ancestor's static position is x=0 and the
+  // fixed child's resolved hypothetical static position is exactly 100px.
+  // The 16px frame is applied at RENDER time (image-space pad on refs, the
+  // canvas frame on captures) — never baked into fixture coordinates.
+  // This pin fired exactly as designed when the contract changed at wave
+  // 25 (it froze the old padded-bake truth of 116px); re-pinned to the
+  // imgpad truth so the NEXT contract change breaks a test first again.
   const anc = hyp3.components['hypothetical-dynamic-change-003__0'];
   assert.equal(anc.properties.position, 'relative');
   assert.equal(anc.properties.left, '100px');
   const child = anc.children['hypothetical-dynamic-change-003__0__0'];
   assert.equal(child.properties.position, 'fixed');
-  assert.equal(child.properties.left, '116px');
+  assert.equal(child.properties.left, '100px');
   assert.equal(child.properties['background-color'], 'rgb(0, 128, 0)');
 });
 

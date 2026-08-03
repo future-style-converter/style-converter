@@ -76,6 +76,8 @@ import {
   BIDI_UNICODE_BIDI_CSS_RX,
   // wave-26 lane WWS: the inter-sibling whitespace marker.
   stampWsAfter,
+  // wave-27 A-RC2: root-scope pseudo-element routing.
+  isListItemDisplay,
 } from './extract-fixture.mjs';
 
 // ── stripComments ───────────────────────────────────────────────────────────
@@ -3253,4 +3255,242 @@ test('wave26 WWS: nested tree nodes carry the walker fact', () => {
   const kids = tree[0].children;
   assert.equal(kids[0].wsAfter, true);   // <b> … whitespace … <i>
   assert.equal(kids[1].wsAfter, undefined); // <i><u> written flush
+});
+
+// ── wave-27 A-RC2: root-scope pseudo-element rules stop leaking ─────────────
+//
+// `parseCompound` accepts `html::before` (needTag 'html', pseudoElement
+// 'before'), and propsForBodyRoot's acceptance tests all keyed on the TAG
+// alone — so the rule's declarations were `Object.assign`-ed straight into
+// the BODY's own bag. Two wrongs at once, both MEASURED on css-contain's
+// contain-body-dir / contain-body-w-m families and css-writing-modes'
+// wm-propagation family (26 bucket-A tests):
+//   1. the GENERATED box was lost (no `_pseudo` bucket existed for the root),
+//   2. its declarations CLOBBERED the body's (`background: orange` became the
+//      body's own background, which then flooded the canvas through the
+//      body→canvas propagation channel wave-27 A-RC1 gates).
+// Per CSS Generated Content L3 §3.2 `content` is only honoured ON a
+// pseudo-element, and per Selectors-4 §3.3 a `::pseudo` rule styles the
+// generated box, never its originating element.
+
+test('wave27 A-RC2: html::before goes to the pseudo bucket, not the body bag', () => {
+  // contain-body-dir-001's exact stylesheet, trimmed to the two rules.
+  const rules = parseCss(
+    'html::before { content: ""; width: 100px; height: 100px;' +
+    ' background: orange; display: block }' +
+    ' body { width: 200px; height: 200px; direction: rtl; contain: layout }'
+  );
+  const { props, pseudo } = propsForBodyRoot(rules);
+  // The body's OWN declarations survive untouched — and nothing else.
+  assert.deepEqual(props, {
+    width: '200px', height: '200px', direction: 'rtl', contain: 'layout',
+  });
+  // The generated box's declarations land whole in the `before` bucket,
+  // with their own 100px geometry intact (the body's 200px no longer
+  // clobbers them, and `background: orange` no longer clobbers the body).
+  assert.deepEqual(pseudo.before, {
+    content: '""', width: '100px', height: '100px',
+    background: 'orange', display: 'block',
+  });
+});
+
+test('wave27 A-RC2: ::before and ::after get separate buckets', () => {
+  // css-writing-modes/wm-propagation-002 declares both on html.
+  const rules = parseCss(
+    'html::before { content: "a" } html::after { content: "b" } body { margin: 0 }'
+  );
+  const { props, pseudo } = propsForBodyRoot(rules);
+  assert.deepEqual(props, { margin: '0' });
+  assert.equal(pseudo.before.content, '"a"');
+  assert.equal(pseudo.after.content, '"b"');
+});
+
+test('wave27 A-RC2: same-pseudo rules cascade last-write-wins', () => {
+  // Same cascade contract propsForElement's pseudo bucket already has.
+  const rules = parseCss(
+    ':root::before { content: "a"; color: red } html::before { color: blue }'
+  );
+  const { pseudo } = propsForBodyRoot(rules);
+  assert.deepEqual(pseudo.before, { content: '"a"', color: 'blue' });
+});
+
+test('wave27 A-RC2: a bare ::marker is dropped unless the root is a list item', () => {
+  // css-lists / css-pseudo author `::marker { … }` with no tag — a UNIVERSAL
+  // marker rule. propsForElement already attaches it to every real <li>;
+  // hanging it on the html/body root too would paint a phantom marker,
+  // because css-lists-3 §3.1 only generates a ::marker box for a box with
+  // `display: list-item`. So at ROOT scope it is dropped (31 bucket-A tests).
+  const dropped = propsForBodyRoot(parseCss('::marker { font-family: monospace }'));
+  assert.equal(dropped.pseudo.marker, undefined);
+  assert.deepEqual(dropped.props, {});     // and it never reaches the flat bag
+  // …but a root that IS a list item keeps it, so the rule is a real gate.
+  const kept = propsForBodyRoot(parseCss(
+    'body { display: list-item } ::marker { font-family: monospace }'
+  ));
+  assert.deepEqual(kept.pseudo.marker, { 'font-family': 'monospace' });
+});
+
+test('wave27 A-RC2: isListItemDisplay accepts the two-value display syntax', () => {
+  // css-display-3 §2 spells the same box as `block flow list-item` etc.
+  assert.equal(isListItemDisplay('list-item'), true);
+  assert.equal(isListItemDisplay('BLOCK FLOW LIST-ITEM'), true);
+  assert.equal(isListItemDisplay('inline list-item'), true);
+  // Everything else — including the html/body initial value and absence.
+  assert.equal(isListItemDisplay('block'), false);
+  assert.equal(isListItemDisplay(undefined), false);
+  assert.equal(isListItemDisplay(''), false);
+});
+
+test('wave27 A-RC2: the body-root component carries the root _pseudo bucket', () => {
+  // End-to-end through buildComponents: the generated box must reach the
+  // fixture as a real `_pseudo` entry (the SAME wire shape the per-element
+  // path emits), so the converter's `_pseudo` → v2 `pseudos` rename and all
+  // three renderers' pseudo-span paths render it with no new code.
+  const html = '<body><p>hi</p></body>';
+  const rules = parseCss(
+    'html::before { content: ""; background: orange; display: block }' +
+    ' body { direction: rtl }'
+  );
+  const { components } = buildComponents(html, rules, 't');
+  const body = components['t__body'];
+  assert.deepEqual(body.properties, { direction: 'rtl' });
+  assert.deepEqual(body._pseudo.before.properties, {
+    content: '""', background: 'orange', display: 'block',
+  });
+  assert.equal(body._role, 'body-root');
+});
+
+test('wave27 A-RC2: a pseudo-only root still emits the body-root', () => {
+  // The pre-A-RC2 emit gate looked at the flat bag alone, which was only
+  // sound while pseudo declarations were (wrongly) merged into it. A
+  // document whose ONLY root-scope rule is a pseudo one still needs the
+  // synthetic root — it is the box the generated content hangs off.
+  const { components } = buildComponents(
+    '<body><p>hi</p></body>', parseCss('html::before { content: "x" }'), 't'
+  );
+  assert.deepEqual(components['t__body'].properties, {});
+  assert.equal(components['t__body']._pseudo.before.properties.content, '"x"');
+});
+
+test('wave27 A-RC2: a root without pseudo rules emits no _pseudo key', () => {
+  // Omit-when-empty, exactly like the per-element path — every pre-wave-27
+  // fixture without root pseudo rules stays byte-identical.
+  const { components } = buildComponents(
+    '<body><p>hi</p></body>', parseCss('body { color: red }'), 't'
+  );
+  assert.equal(components['t__body']._pseudo, undefined);
+});
+
+// ── wave-27 A-RC3: non-animatable keyframe declarations are ignored ─────────
+//
+// css-animations-1 §4: "Properties that aren't animatable are ignored in
+// these rules, with the exception of `animation-timing-function` …".
+// MEASURED (css-contain/contain-animation-001): the test declares
+// `div { contain: strict; animation: … paused }` with
+// `@keyframes bad { from { contain: none } }` and asserts in its own
+// <meta name=assert> that "the contain property is not animatable" — its ref
+// is a plain 100px green square. That test survives today only by accident
+// (its animation-delay is 0, so the sampler's strictly-negative-delay
+// boundary rejects it first); give it a negative delay and the sampler would
+// bake `contain: none` into the fixture, deleting the containment under test.
+
+test('wave27 A-RC3: a keyframes block of only non-animatable props never samples', () => {
+  // contain-animation-001 with the one guard removed (negative delay), so
+  // ONLY the new rule can stop the bake.
+  const kf = parseKeyframes('@keyframes bad { from { contain: none } }');
+  const props = {
+    contain: 'strict', 'animation-name': 'bad',
+    'animation-duration': '1s', 'animation-delay': '-0.5s',
+    'animation-play-state': 'paused',
+  };
+  // null = "out of scope, extract verbatim" — i.e. the STATIC cascade, which
+  // is exactly what the browser paints for a non-animatable property.
+  assert.equal(sampleKeyframesAnimation(props, kf), null);
+});
+
+test('wave27 A-RC3: animatable siblings still bake around an ignored one', () => {
+  // §4 ignores only the non-animatable DECLARATIONS, not the whole block:
+  // `opacity` must still sample while `contain` is dropped.
+  const kf = parseKeyframes(
+    '@keyframes mix { from { contain: none; opacity: 0 } to { contain: strict; opacity: 1 } }'
+  );
+  const out = sampleKeyframesAnimation({
+    'animation-name': 'mix', 'animation-duration': '1s',
+    'animation-delay': '-0.5s', 'animation-timing-function': 'linear',
+  }, kf);
+  assert.deepEqual(Object.keys(out.baked), ['opacity']);
+  assert.equal(out.baked.opacity, '0.5');
+});
+
+test('wave27 A-RC3: animation-* declarations inside a keyframe are ignored', () => {
+  // The same §4 paragraph's other half. animation-timing-function is the
+  // spec's ONE exception and never reaches the set — parseKeyframeBody
+  // lifts it into the frame's `easing` before the sampler sees it.
+  const kf = parseKeyframes(
+    '@keyframes a { from { animation-duration: 2s } to { animation-duration: 3s } }'
+  );
+  assert.equal(sampleKeyframesAnimation({
+    'animation-name': 'a', 'animation-duration': '1s', 'animation-delay': '-0.5s',
+  }, kf), null);
+});
+
+test('wave27 A-RC3: contain-animation-001 extracts with its static contain', () => {
+  // The end-to-end shape: the fixture keeps `contain: strict` from the
+  // cascade and the keyframe value never appears.
+  const rules = parseCss(
+    'div { contain: strict; animation-duration: 1s; animation-name: bad;' +
+    ' animation-play-state: paused }'
+  );
+  const kf = parseKeyframes('@keyframes bad { from { contain: none } }');
+  const { components } = buildComponents('<body><div>x</div></body>', rules, 't', null, kf);
+  assert.equal(components['t__0'].properties.contain, 'strict');
+});
+
+// ── wave-27 lane CBAKE: the LIST-ORDINAL attr lane ──────────────────────────
+//
+// `<ol start>` / `<li value>` ride the same `_attrs` envelope as the wave-20
+// widget attributes but through a DISJOINT tag+key set, so the web renderer
+// can paint native list numbering. Pinned at both altitudes: the pure
+// widgetAttrsFor table and the buildComponents emission beside `_tag`.
+
+test('cbake: widgetAttrsFor — ol/li forward start/value as verbatim strings', async () => {
+  const { widgetAttrsFor } = await import('./extract-fixture.mjs');
+  // `start` is the ordered-list counter origin (HTML §4.4.5).
+  assert.deepEqual(widgetAttrsFor('ol', { start: '1860' }), { start: '1860' });
+  // Numeric-looking but NOT coerced — the DOM re-parses it, and keeping the
+  // lane string-only avoids a second numeric-typing rule on the wire.
+  assert.equal(typeof widgetAttrsFor('ol', { start: '10' }).start, 'string');
+  // `value` is the per-item ordinal override (HTML §4.4.8).
+  assert.deepEqual(widgetAttrsFor('li', { value: '4' }), { value: '4' });
+});
+
+test('cbake: the list lane is allow-listed and omit-when-empty', async () => {
+  const { widgetAttrsFor } = await import('./extract-fixture.mjs');
+  // Selector fuel (id/class/style) and non-lane attributes never forward.
+  assert.deepEqual(widgetAttrsFor('ol', { start: '3', id: 'x', type: 'a', reversed: '' }),
+    { start: '3' });
+  // No qualifying attribute at all → no `_attrs` field at all.
+  assert.equal(widgetAttrsFor('ol', { id: 'x' }), null);
+  assert.equal(widgetAttrsFor('li', {}), null);
+  // The widget lane is unreachable from a list tag: `checked` would be a
+  // presence-boolean on an <input> but is simply not in the list lane.
+  assert.equal(widgetAttrsFor('li', { checked: '' }), null);
+});
+
+test('cbake: the two lanes stay disjoint', async () => {
+  const { widgetAttrsFor, WIDGET_ATTR_TAGS, LIST_ATTR_TAGS } =
+    await import('./extract-fixture.mjs');
+  // No tag may claim both lanes — the whole point of the separate sets
+  // (WIDGET_TAGS also drives inert/tabIndex and the inter-sibling space).
+  for (const t of LIST_ATTR_TAGS) assert.equal(WIDGET_ATTR_TAGS.has(t), false, t);
+  // `start` on a widget tag is not forwarded (it is not a widget attribute).
+  assert.equal(widgetAttrsFor('input', { start: '3' }), null);
+});
+
+test('cbake: buildComponents emits `_attrs` beside `_tag` for <ol start>', () => {
+  const { components } = buildComponents(
+    "<body><ol start='1860'><li>x</li></ol></body>", parseCss('ol { color: red }'), 't');
+  const ol = components['t__0'];
+  assert.equal(ol._tag, 'ol');
+  assert.deepEqual(ol._attrs, { start: '1860' });
 });

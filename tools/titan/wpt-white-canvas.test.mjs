@@ -104,6 +104,27 @@ test('web: WPT canvases are white; the 327-pair canvas keeps the dark stage', ()
   // Composed default = the white ref canvas; author body background wins.
   assert.match(composed, /const CANVAS_BG_DEFAULT = '#FFFFFF'/, 'composed default must be white');
   assert.doesNotMatch(composed, /background: '#1A1A2E'/, 'composed gallery still paints a dark canvas');
+  // wave-27 A-RC1 — the CONTAINMENT gate, the web third of the same rule
+  // (Android/iOS pins below). css-backgrounds-3 §2.11.2 propagates the body
+  // background to the canvas only while the body is ON the propagation path;
+  // css-contain-2 §3.5 removes a CONTAINED body from it (measured:
+  // contain-body-bg-001..004 flooded red at 0.6274 on web).
+  assert.match(composed, /export function bodyRootHasContainment/,
+    'web containment gate helper missing/changed');
+  assert.match(composed, /if \(bodyRootHasContainment\(bodyRoot\)\) return CANVAS_BG_DEFAULT;/,
+    'web composed background must apply the containment gate');
+  // The PADDING resolver stays UNGATED — §3.5 is about the background
+  // propagation path only, and the pad models the ref's image-space frame
+  // plus the author body inset, neither of which containment touches.
+  // Anchor first: a bare `indexOf(...)` that misses returns -1, and
+  // `slice(-1)` would hand the assertion a ONE-CHARACTER haystack that can
+  // never match — the scan would pass vacuously if the resolver is ever
+  // renamed. Assert the anchor exists before slicing on it.
+  const padAt = composed.indexOf('export function resolveCanvasPadding');
+  assert.ok(padAt >= 0, 'web canvas PADDING resolver anchor not found — scan would be vacuous');
+  const padFn = composed.slice(padAt);
+  assert.ok(!/bodyRootHasContainment/.test(padFn.slice(0, 3000)),
+    'web canvas PADDING must not be gated on containment');
 });
 
 test('web: index.html flips the stage white only under the wpt body classes', () => {
@@ -137,8 +158,30 @@ test('compose: WPT_CANVAS_BACKGROUND is white and the harness routes through the
   // canvas (the measured Android 0.217 row).
   assert.match(harness, /import com\.styleconverter\.runtime\.core\.renderer\.composedCanvasBackground/,
     'Android composed resolver must import the alpha-composite helper');
-  assert.match(harness, /return composedCanvasBackground\(bg\)/,
+  assert.match(harness, /composedCanvasBackground\(\s*\n\s*bg,/,
     'Android composed background must route through composedCanvasBackground');
+  // wave-27 A-RC1 — the CONTAINMENT gate. css-backgrounds-3 §2.11.2
+  // propagates the body background to the canvas only while the body is ON
+  // the propagation path, and css-contain-2 §3.5 removes a CONTAINED body
+  // from it. The gate must be wired on the composed resolver (measured:
+  // contain-body-bg-001..004 flooded red at 0.6204 on Android), and the
+  // decision must be the SHARED runtime rule so the three canvases agree.
+  assert.match(runtime, /fun containmentBlocksCanvasPropagation\(containTokens: List<String>\?\): Boolean/,
+    'compose containment gate helper missing/changed');
+  assert.match(harness, /import com\.styleconverter\.runtime\.core\.renderer\.containmentBlocksCanvasPropagation/,
+    'Android composed resolver must import the containment gate');
+  assert.match(harness, /contained = containmentBlocksCanvasPropagation\(contain\)/,
+    'Android composed background must apply the containment gate');
+  // The PADDING resolver stays UNGATED — §3.5 is about the background
+  // propagation path only, and the pad models the ref's image-space frame
+  // plus the author body inset, neither of which containment touches.
+  // Anchor first — see the web pin: a missed indexOf yields -1 and
+  // `slice(-1)` makes the scan pass on a one-character haystack.
+  const padAt = harness.indexOf('fun resolveComposedCanvasPadding');
+  assert.ok(padAt >= 0, 'Android canvas PADDING resolver anchor not found — scan would be vacuous');
+  const padFn = harness.slice(padAt);
+  assert.ok(!/containmentBlocksCanvasPropagation/.test(padFn.slice(0, 3000)),
+    'Android canvas PADDING must not be gated on containment');
 });
 
 // ── iOS (SwiftUI runtime helper + harness wiring) ───────────────────────────
@@ -166,8 +209,25 @@ test('swiftui: WPTCanvas is white and the harness routes through the split', () 
   // helper (WPTCanvas.composedBackground: nil -> white; alpha<1 ->
   // source-over white; opaque -> identity) — the old direct fallback let a
   // sampled rgba(0,0,0,0) body paint verbatim (the measured iOS 0.000 row).
-  assert.match(harness, /return WPTCanvas\.composedBackground\(resolved: resolved\)/,
+  assert.match(harness, /WPTCanvas\.composedBackground\(\s*\n\s*resolved: resolved,/,
     'iOS composed background must route through composedBackground');
+  // wave-27 A-RC1 — the CONTAINMENT gate, the iOS twin of the Android pin
+  // above. css-contain-2 §3.5 removes a contained body from
+  // css-backgrounds-3 §2.11.2's propagation path (measured: contain-body-bg-
+  // 001..004 flooded red at 0.6268 on iOS), and the decision must be the
+  // SHARED runtime rule so the three canvases can never drift.
+  assert.match(runtime, /public static func containmentBlocksPropagation\(_ containTokens: \[String\]\?\) -> Bool/,
+    'swiftui containment gate helper missing/changed');
+  assert.match(harness, /contained: WPTCanvas\.containmentBlocksPropagation\(contain\)/,
+    'iOS composed background must apply the containment gate');
+  // The PADDING resolver stays UNGATED — see the Android pin's rationale.
+  // Anchor first — see the web pin: a missed indexOf yields -1 and
+  // `slice(-1)` makes the scan pass on a one-character haystack.
+  const padAt = harness.indexOf('var resolvedPadding');
+  assert.ok(padAt >= 0, 'iOS canvas PADDING resolver anchor not found — scan would be vacuous');
+  const padVar = harness.slice(padAt);
+  assert.ok(!/containmentBlocksPropagation/.test(padVar.slice(0, 3000)),
+    'iOS canvas PADDING must not be gated on containment');
 });
 
 // ── corpus-v4.1: the BLACK default-ink sub-boundary ─────────────────────────

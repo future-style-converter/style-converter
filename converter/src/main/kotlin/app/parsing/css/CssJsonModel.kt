@@ -87,7 +87,15 @@ data class CssComponent(
     // exactly the `_attrs` opacity contract: each runtime resolves the
     // token with its own CSS token parser at decode time (see
     // schema/spec/04-metadata-fields.md and the DecorationWire twins).
-    val decorations: JsonArray? = null
+    val decorations: JsonArray? = null,
+    // wave-27 lane CBAKE: the extractor's `_markerText` hint — the RESOLVED
+    // list-marker string for one `<li>` (representation + suffix, e.g.
+    // "١٨٦٠." or "ՔՋՂԹ."), computed at extract time from css-counter-styles-3
+    // §6 because the two inputs a native cannot see — an unmodelled counter
+    // style and `<ol start>` — are both statically known there. A plain
+    // string, forwarded VERBATIM as IR v2 `meta.markerText`; the converter
+    // never re-derives or validates it (the `_attrs` opacity contract).
+    val markerText: String? = null
 )
 
 /**

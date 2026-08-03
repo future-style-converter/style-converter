@@ -182,7 +182,25 @@ public enum WPTCanvas {
     /// ComposedCaptureCanvas, so the dark-stage 327-pair path and the
     /// per-component WPT path never route through this (the mode-split
     /// pins above hold those surfaces byte-identical).
-    public static func composedBackground(resolved: Color?) -> Color {
+    ///
+    /// wave-27 A-RC1 — the CONTAINMENT gate (`contained`). The propagation
+    /// this implements is NOT unconditional: css-backgrounds-3 §2.11.2
+    /// propagates the root/body background to the canvas only while that
+    /// element is on the propagation path, and css-contain-2 §3.5 takes it
+    /// off that path as soon as it has ANY containment — a contained body
+    /// paints its background on its OWN box and the canvas keeps the UA
+    /// default. MEASURED on the wave-27 gate: css-contain/contain-body-bg-
+    /// 001..004 (`body { background: red; contain: layout|paint|size|style }`,
+    /// refs pure white — "Test passes if there is no red") each scored ~0.63
+    /// on iOS with the whole capture flooded red. With `contained` true the
+    /// canvas stays white and the body-root paints its own red box, which the
+    /// test's own white `<p>` covers — the ref's reading exactly. Defaults to
+    /// false so every non-contained document stays byte-identical to wave 26.
+    public static func composedBackground(resolved: Color?,
+                                          contained: Bool = false) -> Color {
+        // wave-27 A-RC1: containment removes the body from the propagation
+        // path BEFORE any color is considered (css-contain-2 §3.5).
+        if contained { return background }
         // No author body background → the white canvas verbatim (the ref's
         // zero-specificity `:where(html,body){background:#fff}` wins).
         guard let resolved else { return background }
@@ -211,6 +229,43 @@ public enum WPTCanvas {
                      green:   Double(g) * Double(a) + 1.0 * (1.0 - Double(a)),
                      blue:    Double(b) * Double(a) + 1.0 * (1.0 - Double(a)),
                      opacity: 1)
+    }
+
+    /// wave-27 A-RC1 — does a body-root's `Contain` leaf remove it from the
+    /// background-propagation path? Pure so the rule is XCTest-pinnable
+    /// (WPTCaptureModeTests), and twinned 1:1 by Compose's
+    /// `containmentBlocksCanvasPropagation` and the web harness's
+    /// `bodyRootHasContainment` — three canvases, one rule.
+    ///
+    /// TRUE iff at least one token is a real containment keyword, i.e.
+    /// anything except `NONE`. css-contain-2 §3.5 does not grade by
+    /// containment KIND, and the WPT family proves it: contain-body-bg-001..
+    /// 004 set layout / paint / size / style respectively and all four match
+    /// the SAME all-white reference, so any one alone blocks propagation. A
+    /// nil or empty list is not containment, and neither is `contain: none`
+    /// (`["NONE"]`).
+    ///
+    /// ## The merged html+body caveat
+    /// The extractor's `propsForBodyRoot` merges every `html` / `body` /
+    /// `:root` / `*` rule into ONE synthetic body-root, so this cannot tell
+    /// `html { contain: … }` from `body { contain: … }`. Harmless for THIS
+    /// question and the corpus proves it — contain-html-bg-001..004
+    /// (containment on html) and contain-body-bg-001..004 (on body) declare
+    /// the same expectation and match the same reference. It would only
+    /// matter for a document that contains one element and propagates a
+    /// background off the other, which no WPT reftest exercises; the honest
+    /// fix there is a wire that keeps html and body apart, not a guess here.
+    ///
+    /// - Parameter containTokens: the `Contain` leaf's keyword list
+    ///   (uppercase, as the converter's `ContainProperty.values` emits), or
+    ///   nil when the body-root declares no `contain` at all.
+    public static func containmentBlocksPropagation(_ containTokens: [String]?) -> Bool {
+        // `contains(where:)` over the non-NONE tokens: nil/empty short-circuit
+        // to false, so a document without `contain` keeps wave-26 propagation.
+        guard let containTokens else { return false }
+        return containTokens.contains {
+            $0.trimmingCharacters(in: .whitespaces).uppercased() != "NONE"
+        }
     }
 
     /// The WPT default TEXT INK — spec BLACK, the corpus-v4.1 ink

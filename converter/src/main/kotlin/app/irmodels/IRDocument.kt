@@ -176,6 +176,16 @@ data class IRComponent(
     // does NOT happen here — see schema/spec/04-metadata-fields.md for why
     // the runtimes resolve the token themselves.
     val decorations: JsonArray? = null,
+    // wave-27 lane CBAKE: the RESOLVED list-marker string for one `<li>`,
+    // from the extractor's `_markerText` hint — representation + suffix per
+    // css-counter-styles-3 §6 (e.g. "١٨٦٠.", "ՔՋՂԹ."), already resolved
+    // against `<ol start>` and the item's ordinal. v2 forwards it VERBATIM
+    // inside `meta.markerText` (spec 05 additive meta-key rule, the same
+    // lane `meta.attrs` used); the v1 serializer ignores it so deprecated
+    // `--emit-ir v1` bytes stay frozen. AUTHORITATIVE when present: a
+    // runtime that honours it must NOT also synthesise a marker from
+    // `ListStyleType` — see schema/spec/04-metadata-fields.md.
+    val markerText: String? = null,
     // Generated-content payload from the extractor's `_pseudo` input
     // ({before?, after?, marker?} component-shaped slots). Carried as an
     // opaque JsonObject — pseudo nodes have no independent lifecycle and

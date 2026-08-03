@@ -94,6 +94,12 @@ import {
   bakeAttr, hasAttrFunction,
   ATTR_BAKED_REASON, ATTR_UNRESOLVED_REASON, ATTR_IACVT_REASON,
 } from './attr-bake.mjs';
+// wave-27 THE COUNTER-STYLE BAKE (the fifth bake): a list marker is a pure
+// function of (resolved list-style-type, <ol start>, item position) and
+// css-counter-styles-3 §6 is a closed table, so — like the attr bake and
+// unlike the post-load/bidi bakes — it needs no browser and stays a plain
+// top-level import. It short-circuits on fixtures with no list at all.
+import * as counterBake from './counter-style-bake.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -2465,6 +2471,33 @@ export const WIDGET_BOOLEAN_ATTR_KEYS = new Set([
   'checked', 'multiple', 'selected', 'disabled',
 ]);
 
+// ── wave-27 lane CBAKE: the LIST-ORDINAL attribute lane ─────────────────────
+//
+// `<ol start='1860'>` is the other half of a list marker (the first is
+// `list-style-type`, which already rides as an IR property). Nothing on the
+// wire carried it, so the web harness — the one platform that renders a
+// REAL <ol> and lets Blink synthesise ::marker — numbered every list from 1
+// while the source said 1860 (css/css-counter-styles/*/css3-counter-styles-
+// {102,107,117,159}). Forwarding it verbatim fixes web natively; the two
+// natives get the resolved marker STRING instead (counter-style-bake.mjs).
+//
+// WHY A SEPARATE SET, not three more entries in WIDGET_ATTR_TAGS: that set
+// is not just an attribute allow-list. runtimes/web mirrors it as
+// WIDGET_TAGS, and the harness ComponentRenderer keys three OTHER
+// behaviours off it — WPT-mode tag passthrough, the `inert` + `tabIndex:-1`
+// decoration, and an UNCONDITIONAL ' ' separator between adjacent widget
+// siblings. Adding `ol` there would inject that separator between every
+// pair of adjacent <ol>s in the whole corpus. The lanes stay disjoint.
+export const LIST_ATTR_TAGS = new Set(['ol', 'li']);
+
+// `start` is the ordered list's counter origin (HTML §4.4.5); `value` is a
+// per-item override that also RESETS the sequence (HTML §4.4.8). Both are
+// forwarded as the VERBATIM source string — `value` is already a
+// WIDGET_ATTR_KEYS member whose non-meter/progress typing is "string", and
+// keeping `start` in the same lane avoids a second numeric-typing rule for
+// one attribute the DOM re-parses anyway.
+export const LIST_ATTR_KEYS = ['start', 'value'];
+
 // ── wave-20 fix 5: the non-HTML-namespace gate ──────────────────────────────
 //
 // Widget identity (`_tag` → meta.sourceTag + `_attrs` → meta.attrs) is only
@@ -2541,6 +2574,19 @@ const WIDGET_NUMERIC_RX = /^-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
  * Exported so the unit tests pin the contract table exactly.
  */
 export function widgetAttrsFor(tag, attrs) {
+  // wave-27 lane CBAKE: the list-ordinal lane is disjoint from the widget
+  // lane (see LIST_ATTR_TAGS) — same `_attrs` envelope, its own tag set,
+  // its own two keys, all verbatim strings. Handled first and returned
+  // early so no widget typing rule can ever reach an <ol>/<li>.
+  if (tag && LIST_ATTR_TAGS.has(tag)) {
+    const list = {};
+    // Allow-list order, present-only, verbatim — the same three contract
+    // rules the widget lane below follows.
+    for (const key of LIST_ATTR_KEYS) {
+      if (attrs && key in attrs) list[key] = String(attrs[key]);
+    }
+    return Object.keys(list).length > 0 ? list : null;
+  }
   // Non-widget tags never emit attrs — widget identity only (contract).
   if (!tag || !WIDGET_ATTR_TAGS.has(tag)) return null;
   const out = {};
@@ -3450,11 +3496,37 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
  * `html`, or `*` (root-level scopes) and returns the merged property bag.
  * The fixture builder uses this to emit a synthetic root component.
  *
- * Returns `{ props, matchedRules }`. Cascade order matches parseCss output
- * (last write wins for same-specificity).
+ * Returns `{ props, matchedRules, pseudo }`. Cascade order matches parseCss
+ * output (last write wins for same-specificity).
+ *
+ * wave-27 A-RC2 — PSEUDO-ELEMENT RULES NO LONGER LEAK INTO THE FLAT BAG.
+ * `parseCompound` accepts `html::before` (needTag 'html', pseudoElement
+ * 'before'), and every acceptance test below passed on the TAG alone, so a
+ * rule like css-contain/contain-body-dir-001's
+ * `html::before { content:""; width:100px; height:100px; background:orange;
+ * display:block }` was `Object.assign`-ed straight into the BODY's own
+ * declarations. Two wrongs at once, both MEASURED on that family:
+ *   1. the generated box was LOST — no `_pseudo` bucket was ever built for
+ *      the root, so nothing rendered the orange 100×100 square; and
+ *   2. its declarations CLOBBERED the body's (background:orange became the
+ *      body's own background, `content:""`/`display:block` rode along),
+ *      which then flooded the whole canvas through the body→canvas
+ *      background-propagation channel A-RC1 gates.
+ * Per CSS Generated Content L3 §3.2 a `content` declaration is only honoured
+ * ON a pseudo-element, and per Selectors-4 §3.3 a `::pseudo` rule styles the
+ * generated box, never its originating element. So pseudo-element rules are
+ * routed into a `pseudo` bucket — `{ before?: {...}, after?: {...} }`,
+ * EXACTLY the shape `propsForElement` returns — which buildComponents turns
+ * into the body-root's `cmp._pseudo`, so the generated box renders as a real
+ * pseudo box on the root instead of vandalising the body's bag.
  */
 export function propsForBodyRoot(rules) {
   const props = {};
+  // wave-27 A-RC2: per-pseudo-element bucket for root-scope `::before` /
+  // `::after` / `::marker` rules. Key is the pe name, value the merged
+  // declaration dict — the same shape (and the same last-write-wins cascade)
+  // `propsForElement` builds, so the emit site can treat both identically.
+  const pseudo = {};
   let matchedRules = 0;
   for (const r of rules) {
     // We treat body / html / * / :root (and combinations like `html, body`)
@@ -3527,9 +3599,46 @@ export function propsForBodyRoot(rules) {
     // a `:root` marker present.
     if (!hasRootMarker && !parsed.needTag) continue;
     matchedRules++;
+    // wave-27 A-RC2 — THE SPLIT. A rule whose rightmost compound carries a
+    // pseudo-element styles the GENERATED box (Selectors-4 §3.3), not the
+    // root element, so its declarations go to the pe bucket; only true
+    // host-element rules merge into the flat root bag as before. Without
+    // this branch `html::before { background: orange }` became the BODY's
+    // background (see the banner's measured contain-body-dir family).
+    if (parsed.pseudoElement) {
+      // Last write wins per pe, mirroring propsForElement's cascade.
+      if (!pseudo[parsed.pseudoElement]) pseudo[parsed.pseudoElement] = {};
+      Object.assign(pseudo[parsed.pseudoElement], r.props);
+      continue;
+    }
     Object.assign(props, r.props);
   }
-  return { props, matchedRules };
+  // css-lists-3 §3.1: a `::marker` box is generated ONLY by a box with
+  // `display: list-item`. The acceptance rules above deliberately admit a
+  // BARE `::marker { … }` (no tag ⇒ `hasRootMarker` true), which is a
+  // UNIVERSAL marker rule — it belongs to every real list item, and
+  // propsForElement already attaches it to each `<li>`'s own `_pseudo`.
+  // Hanging it on the html/body root too would paint a phantom marker on
+  // the page root, so it is dropped HERE, once the merged bag is complete
+  // and `display` is knowable. Not a silent loss: the identical rule still
+  // reaches every list item through propsForElement — this scope is the
+  // only place it does not apply.
+  if (pseudo.marker && !isListItemDisplay(props.display)) delete pseudo.marker;
+  return { props, matchedRules, pseudo };
+}
+
+/**
+ * Is a `display` declaration one that generates a ::marker box? css-lists-3
+ * §3.1 ties markers to `display: list-item`, which the css-display-3 §2
+ * two-value grammar also spells as `<display-outside>? list-item`
+ * (`block flow list-item`, `inline list-item`, …). Case-insensitive, and a
+ * missing declaration is NOT a list item (the html/body initial `display`
+ * is `block`). Exported for the unit suite.
+ */
+export function isListItemDisplay(value) {
+  if (typeof value !== 'string') return false;         // undeclared ⇒ not list-item
+  // Token scan rather than equality so the two-value syntax passes too.
+  return value.toLowerCase().split(/\s+/).includes('list-item');
 }
 
 // ── wave-21 A-RC6: sibling-index() extract-time baking ───────────────────────
@@ -3693,6 +3802,55 @@ const ANIMATION_LONGHANDS = new Set([
   'animation', 'animation-name', 'animation-duration', 'animation-delay',
   'animation-timing-function', 'animation-iteration-count',
   'animation-direction', 'animation-fill-mode', 'animation-play-state',
+]);
+
+// ── wave-27 A-RC3: properties a @keyframes block may NOT animate ────────────
+//
+// css-animations-1 §4 (Keyframes) is explicit: "Properties that aren't
+// animatable are ignored in these rules, with the exception of
+// `animation-timing-function`, the behavior of which is described below."
+// parseKeyframeBody already implements the animation-timing-function carve-out
+// (it lifts the declaration into the frame's `easing`); this set implements the
+// other half — the declarations that must be IGNORED outright.
+//
+// MEASURED (wave-27 gate, css-contain/contain-animation-001): the test declares
+// `div { contain: strict; animation: … paused }` with `@keyframes bad { from {
+// contain: none } }`, and its own `<meta name=assert>` reads "the contain
+// property is not animatable". The correct render is the STATIC cascade —
+// `contain: strict` — and its ref is a plain 100px green square. That test
+// survives today only by accident: `animation-delay` is 0, so the sampler's
+// strictly-negative-delay boundary rejects it before any property is read. Give
+// the same test a negative delay (or let a future wave widen that boundary) and
+// the sampler would happily bake `contain: none` into the fixture, silently
+// deleting the containment under test. This set closes that hole at the spec
+// level rather than relying on an unrelated guard.
+//
+// Membership rule: ONLY properties whose defining spec states "Animation type:
+// not animatable". Each entry carries its citation. Deliberately conservative —
+// a property listed here can never be sampled, so guessing would silently drop
+// legitimate bakes; anything whose animation type is `discrete` (e.g.
+// `display`, `visibility`) stays OUT and keeps riding the normal path.
+const KEYFRAME_NON_ANIMATABLE = new Set([
+  // css-contain-2 §1.1 `contain` — "Animation type: not animatable".
+  // The measured case above.
+  'contain',
+  // css-will-change-1 §2 `will-change` — "Animation type: not animatable".
+  'will-change',
+  // css-writing-modes-4: `direction` §2.1, `unicode-bidi` §2.2,
+  // `writing-mode` §3.1, `text-orientation` §5.1, `text-combine-upright`
+  // §9.1 — every one is "Animation type: not animatable" (they change the
+  // box's inline/block axes, which has no interpolable midpoint).
+  'direction', 'unicode-bidi', 'writing-mode', 'text-orientation',
+  'text-combine-upright',
+  // css-animations-1 §4 again, second sentence of the same paragraph: the
+  // `animation-*` properties themselves are ignored inside a keyframe (the
+  // spec's ONE exception, animation-timing-function, never reaches this set
+  // — parseKeyframeBody consumes it into the frame's `easing`). Without
+  // these a `@keyframes x { to { animation-duration: 2s } }` would be
+  // "sampled" into a bogus static declaration.
+  'animation', 'animation-name', 'animation-duration', 'animation-delay',
+  'animation-iteration-count', 'animation-direction', 'animation-fill-mode',
+  'animation-play-state',
 ]);
 
 // Offset comparison epsilon: keyframe offsets and progress are exact
@@ -4104,6 +4262,14 @@ export function parseAnimationDecl(props) {
       // <single-animation-play-state>: paused samples identically at t=0
       // (the WPT engineering makes the value time-stable either way), so
       // like fill-mode it's consumed but not recorded.
+      // wave-27 A-RC3 — why that is SOUND, not lucky: css-animations-1 §4.2
+      // says an animation that is `paused` from the start has its hold time
+      // fixed at the animation's start, and Web-Animations §4.8.3.1 puts
+      // that start at local time 0 ⇒ iteration progress (-delay)/duration —
+      // the EXACT progress this sampler computes for the running case. A
+      // paused animation therefore needs no separate branch; what it does
+      // need is that non-animatable keyframe declarations never reach the
+      // sample at all (KEYFRAME_NON_ANIMATABLE, contain-animation-001).
       if (!gotPlay && ['running', 'paused'].includes(low)) {
         gotPlay = true; continue;
       }
@@ -4209,9 +4375,22 @@ export function sampleKeyframesAnimation(props, keyframesMap) {
   const elementTf = parseTimingFunction(anim.easing); // element-level easing (may be null)
   const baked = {};                                // sampled property → CSS value
   // Union of properties any frame declares = the animated property set.
+  // wave-27 A-RC3: MINUS the properties css-animations-1 §4 says a keyframe
+  // may not carry ("Properties that aren't animatable are ignored in these
+  // rules"). See KEYFRAME_NON_ANIMATABLE for the list + the measured case.
   const animatable = new Set();
-  for (const f of frames) for (const k of Object.keys(f.props)) animatable.add(k);
-  if (animatable.size === 0) return null;          // keyframes body was all-invalid/empty
+  for (const f of frames) {
+    for (const k of Object.keys(f.props)) {
+      if (KEYFRAME_NON_ANIMATABLE.has(k)) continue; // §4: ignored, not sampled
+      animatable.add(k);
+    }
+  }
+  // Empty here now covers TWO honest cases, both meaning "this @keyframes
+  // block cannot change the render": an all-invalid body, and a body whose
+  // every declaration is non-animatable (contain-animation-001). Returning
+  // null leaves the STATIC cascade untouched — which is exactly what the
+  // browser paints.
+  if (animatable.size === 0) return null;          // nothing animatable to sample
   for (const prop of animatable) {
     // css-animations-1 §4 keyframe selection is PER PROPERTY: only frames
     // declaring this property participate in its segment lookup.
@@ -4899,7 +5078,19 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     return root.props['white-space'] ?? 'normal';
   };
 
-  if (root.matchedRules > 0 && Object.keys(root.props).length > 0) {
+  // wave-27 A-RC2: the root's pseudo-element buckets (`html::before`, …),
+  // now that propsForBodyRoot keeps them OUT of the flat bag. Computed here
+  // so the emit gate below can see them.
+  const rootPseudo = root.pseudo ?? {};
+  const rootPseudoNames = Object.keys(rootPseudo)
+    .filter((pe) => Object.keys(rootPseudo[pe] ?? {}).length > 0);
+  // wave-27 A-RC2: a document whose ONLY root-scope rule is a pseudo one
+  // (`html::before { content:"" }` with no `body {}` rule at all) still needs
+  // the synthetic root — it is the box the generated content hangs off. The
+  // pre-A-RC2 gate looked at `root.props` alone, which was sound only while
+  // pseudo declarations were (wrongly) merged into that same bag.
+  if (root.matchedRules > 0 &&
+      (Object.keys(root.props).length > 0 || rootPseudoNames.length > 0)) {
     // wave-13 KEYFRAMES-SAMPLER: the measured WPT test (background-color-
     // animation-in-body) animates <body> itself, so the body-root bag is a
     // primary sampling site. Runs BEFORE the lossy scan so the scan sees
@@ -4927,6 +5118,48 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       cmp._lossy = true;
       cmp._lossyReasons = reasons;
     }
+    // wave-27 A-RC2 — the root's GENERATED boxes. Same `_pseudo` wire shape
+    // the per-element path below emits (`{ before?: { properties, _lossy?,
+    // _lossyReasons? } }`), so the converter's `_pseudo` → v2 `pseudos`
+    // rename and all three renderers' pseudo-span paths consume the root's
+    // generated content through the EXACT code that already renders every
+    // `div::before` — nothing new downstream.
+    //
+    // The per-bag bakes deliberately mirror the ROOT bag above, not the
+    // per-element bag below:
+    //   * sampled-animation: yes — a `html::before` can carry the same
+    //     time-stable negative-delay animation the root bag samples;
+    //   * attr(): NOT baked, reported. css-values-5 §7 resolves attr()
+    //     against the pseudo-element's ORIGINATING element, and this scope
+    //     is a MERGE of html/body/:root/* rules with no single originating
+    //     element — the identical reason the root bag refuses to bake it;
+    //   * sibling-index(): not baked, for the same no-single-element reason
+    //     (the root bag never bakes it either).
+    const pseudoOut = {};
+    for (const peName of rootPseudoNames) {
+      const peProps = rootPseudo[peName];
+      // Sample first so the lossy scan sees baked values (root-bag order).
+      const peSampled = bakeSampledAnimation(peProps, keyframes);
+      const peReasons = lossyReasonsFor(peProps);
+      if (peSampled) peReasons.push('sampled-animation');
+      if (Object.values(peProps).some(hasAttrFunction)) {
+        peReasons.push(ATTR_UNRESOLVED_REASON);
+      }
+      if (peReasons.length) {
+        lossyOverall = true;
+        peReasons.forEach((x) => lossyReasonsOverall.add(x));
+      }
+      const peEntry = { properties: peProps };
+      if (peReasons.length) {
+        peEntry._lossy = true;
+        peEntry._lossyReasons = peReasons;
+      }
+      pseudoOut[peName] = peEntry;
+    }
+    // Omit-when-empty, exactly like the per-element path: a root with no
+    // generated content emits NO `_pseudo` key, so every pre-A-RC2 fixture
+    // without root pseudo rules stays byte-identical.
+    if (Object.keys(pseudoOut).length > 0) cmp._pseudo = pseudoOut;
     // Tag the synthetic root so downstream consumers can recognise it.
     cmp._role = 'body-root';
     components[`${idPrefix}__body`] = cmp;
@@ -5544,6 +5777,17 @@ function specSectionOf(testRel) {
   return 'css';
 }
 
+/** Re-read one test's AUTHORED source for the counter bake's dynamic gate.
+ *  Deliberately NOT threaded out of extractFixture: under `--post-load` that
+ *  function may have run on a SERIALIZED post-script DOM, and the gate must
+ *  see the `<script>` the serializer already executed away. A missing file
+ *  cannot happen here (extractFixture just read it) but an empty string is
+ *  the safe answer — it means "no dynamic signal", and the bake still has
+ *  its own per-item declines. */
+async function readTestSource(testRel) {
+  try { return await fs.readFile(join(WPT_DIR, testRel), 'utf8'); } catch { return ''; }
+}
+
 // ── CLI ──────────────────────────────────────────────────────────────────────
 async function main() {
   // wave-16 POST-LOAD activation (opt-in): `--post-load` flag or
@@ -5610,9 +5854,26 @@ async function main() {
                 : ` — ${outcome.reason}`) + ']';
           }
         }
+        // wave-27 lane CBAKE — the counter-style bake runs LAST, on the tree
+        // the fixture will actually carry: post-load may have re-extracted
+        // the structure and the bidi bake may have moved an item's text into
+        // a positioned child, and the marker belongs to the `<li>` that
+        // survives both. Unlike the other bakes it is pure (no browser, no
+        // opt-in flag): css-counter-styles-3 §6 is a closed table, so the
+        // cost on a list-free fixture is one JSON.stringify gate and the
+        // result is byte-identical. The AUTHORED source is passed (not any
+        // post-load rewrite) because the dynamic-counter gate is about what
+        // the test SAYS, and a `<script>` is exactly what post-load ran.
+        const counterOutcome = counterBake.bakeCounterStyles(
+          result.fixture, await readTestSource(rel));
+        const counterNote = counterOutcome.status === 'skipped' ? ''
+          : ` [counter-bake: ${counterOutcome.status} — ${counterOutcome.stamped} markers` +
+            `${counterOutcome.declined ? `, ${counterOutcome.declined} declined` : ''}` +
+            `${counterOutcome.reason ? ` (${counterOutcome.reason})` : ''}]`;
         const written = await writeFixturePair(result);
         console.log(`extracted ${rel} → ${relative(REPO_ROOT, written.testPath)}` +
-                    (written.refPath ? ` (+ ref)` : ' (ref skipped)') + postLoadNote + bidiNote);
+                    (written.refPath ? ` (+ ref)` : ' (ref skipped)')
+                    + postLoadNote + bidiNote + counterNote);
         ok++;
       } catch (err) {
         console.error(`FAIL ${rel}: ${err.message ?? err}`);

@@ -111,6 +111,15 @@ object EffectsFacade {
         // and clips the BORDER box. Defaulted, so nothing else changes.
         marginInsets: com.styleconverter.runtime.spacing.MarginInsets =
             com.styleconverter.runtime.spacing.MarginInsets.NONE,
+        // wave-27 fix — the element's resolved POSITION offset, consumed ONLY
+        // by the backdrop path. The other half of the same "step 3 is outside
+        // step 4" problem marginInsets fixes: step 4 chains
+        // `PositionApplier.applyPosition` → `Modifier.absoluteOffset`, so an
+        // offset box paints its background (step 6) at the offset slot while
+        // this draw node still sits at the un-offset one. Defaulted, so
+        // nothing else in the chain changes.
+        positionOffset: androidx.compose.ui.unit.DpOffset =
+            androidx.compose.ui.unit.DpOffset.Zero,
     ): Modifier {
         var result = modifier
 
@@ -141,6 +150,7 @@ object EffectsFacade {
         // shadow pins that go with them) is untouched.
         result = FilterApplier.applyBackdropFilters(
             result, config.filters, radiusConfig, elementAlpha, marginInsets,
+            positionOffset,
         )
 
         // Apply shadows (they render behind the content, shaped by the

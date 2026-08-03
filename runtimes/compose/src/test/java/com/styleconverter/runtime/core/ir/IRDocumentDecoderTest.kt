@@ -196,4 +196,41 @@ class IRDocumentDecoderTest {
             "name"
         )
     }
+
+    /**
+     * Wave 27, lane CBAKE — `meta.markerText` decodes onto
+     * [IRComponent.markerText] verbatim, and `meta.attrs.start` joins the
+     * strict attr key set. Live shape: css3-counter-styles-159's
+     * `<ol start='1860'><li>` under `list-style-type: cambodian`.
+     *
+     * Why the DECODE is the unit under test rather than the renderer read:
+     * the renderer's preference is two lines (`child.markerText ?: …`), but
+     * a decoder that dropped the key would make those two lines dead and
+     * silent. TWIN of the iOS `ConformanceTests` markerText case.
+     */
+    @Test
+    fun `v2 meta markerText and attrs start decode verbatim`() {
+        val doc = IRDocumentDecoder.decode(
+            """{"irVersion":2,"minReaderVersion":2,"components":[
+                {"id":"ol","name":"L","properties":[],
+                 "meta":{"sourceTag":"ol","attrs":{"start":"1860"}}},
+                {"id":"li","name":"I","properties":[],"slot":{"parent":"ol"},
+                 "meta":{"sourceTag":"li","markerText":"\u17e1\u17e8\u17e6\u17e0."}}]}"""
+        )
+        assertEquals("1860", doc.components[0].attrs?.start)
+        assertEquals("\u17e1\u17e8\u17e6\u17e0.", doc.components[1].markerText)
+        // Absence stays null — that is what keeps the renderer on its own
+        // counter-style table for every unbaked list in the corpus.
+        assertNull(doc.components[0].markerText)
+    }
+
+    @Test
+    fun `v2 rejects an unknown meta key even next to markerText`() {
+        expectError(
+            """{"irVersion":2,"minReaderVersion":2,"components":[
+                {"id":"a","name":"A","properties":[],
+                 "meta":{"markerText":"1.","markerFont":"x"}}]}""",
+            "markerFont"
+        )
+    }
 }

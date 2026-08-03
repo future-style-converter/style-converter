@@ -108,15 +108,19 @@ object IRDocumentDecoder {
     // capsule for form/widget tags (wire contract pinned in IRAttrs' doc).
     // Wave-22 (lane DECOR): `decorations` joined it too — the collapsed
     // inline run's ordered per-line list (contract in IRDecoration's doc).
-    private val META_KEYS = setOf("sourceTag", "role", "attrs", "decorations")
+    // Wave-27 (lane CBAKE): `markerText` joined it — the resolved list-
+    // marker string for one `<li>` (contract in [IRComponent.markerText]).
+    private val META_KEYS = setOf("sourceTag", "role", "attrs", "decorations", "markerText")
     // The two keys ONE `meta.decorations` entry may carry (schema
     // ir-v2.schema.json meta.decorations.items, additionalProperties:false).
     private val DECORATION_KEYS = setOf("line", "color")
     // The ten attributes the wave-20 wire contract allows inside meta.attrs;
     // anything else is a writer bug and errors like every strict envelope.
+    // Wave-27 (lane CBAKE) added `start` for the disjoint ol/li ordinal
+    // lane (HTML §4.4.5) — same envelope, verbatim-string typing.
     private val ATTR_KEYS = setOf(
         "type", "value", "checked", "multiple", "size",
-        "alt", "min", "max", "selected", "disabled"
+        "alt", "min", "max", "selected", "disabled", "start"
     )
     private val PROPERTY_KEYS = setOf("type", "data")
     private val SELECTOR_KEYS = setOf("condition", "properties")
@@ -294,6 +298,11 @@ object IRDocumentDecoder {
             // same additive meta channel). Absent stays null — which is
             // what makes "present but empty" a DIFFERENT state downstream.
             decorations = decodeDecorations(meta?.get("decorations"), id),
+            // meta.markerText → markerText (wave-27 baked list marker, the
+            // same additive meta channel as attrs/decorations). A plain
+            // string forwarded verbatim; absence keeps the renderer on its
+            // own counter-style table.
+            markerText = (meta?.get("markerText") as? JsonPrimitive)?.contentOrNull,
             slot = slot,
             // pseudos: opaque component-shaped payload forwarded verbatim —
             // generated content never flattens (design §4.2).
@@ -352,7 +361,11 @@ object IRDocumentDecoder {
             size = p("size")?.contentOrNull,
             alt = p("alt")?.contentOrNull,
             min = num("min"),
-            max = num("max")
+            max = num("max"),
+            // wave-27 lane CBAKE: the ordered-list counter origin. Verbatim
+            // string lane (the extractor never coerces it) — Compose does
+            // not count from it; only the web runtime does, natively.
+            start = p("start")?.contentOrNull
         )
     }
 

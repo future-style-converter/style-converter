@@ -94,18 +94,80 @@ const CANVAS_BG_DEFAULT = '#FFFFFF';
  * "author body background wins over the zero-specificity default" exactly.
  * When there is no body-root, or it declares no background, we fall back to
  * the #1A1A2E default so every other test is byte-identical to before.
+ *
+ * wave-27 A-RC1 — THE CONTAINMENT GATE. The propagation above was
+ * UNCONDITIONAL, and css-backgrounds-3 §2.11.2 says it must not be: the
+ * root/body background is propagated to the canvas only while that element is
+ * ON the propagation path, and css-contain-2 §3.5 removes it from that path
+ * the moment it has ANY containment ("The background of the root element or
+ * the body element … is not propagated if [it] has containment"). A contained
+ * body paints its background on its OWN box and the canvas keeps the UA
+ * default. MEASURED on the wave-27 gate: css-contain/contain-body-bg-001..004
+ * (`body { background: red; contain: layout|paint|size|style }`, whose refs
+ * are pure white — "Test passes if there is no red") each scored 0.62 against
+ * the ref, our whole capture flooded red. Gating on
+ * [bodyRootHasContainment] restores the ref's reading: the body's own 300×200
+ * red box, fully covered by the test's own white 300×200 `<p>`.
  */
-function resolveCanvasBackground(doc: IRDocument): string {
+export function resolveCanvasBackground(doc: IRDocument): string {
   // The IR marks the document body with meta.role: 'body-root' (see the
   // per-test IR docs). First such component wins — a document has one body.
   const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
   if (!bodyRoot) return CANVAS_BG_DEFAULT;
+  // wave-27 A-RC1: containment takes the body OFF the propagation path, so
+  // the canvas keeps its default and the body-root component paints its own
+  // background itself (it renders as a normal box in the composed tree).
+  if (bodyRootHasContainment(bodyRoot)) return CANVAS_BG_DEFAULT;
   // Resolve via the engine so the color string matches what the runtime would
   // paint (rgba(...) / color-mix(...) / etc.), never a re-implemented parser.
   const bg = buildStyles(bodyRoot.properties).backgroundColor;
   // Only override when the body-root actually declared a background; a bare
   // body-root role marker (no BackgroundColor) keeps the pipeline default.
   return typeof bg === 'string' && bg.length > 0 ? bg : CANVAS_BG_DEFAULT;
+}
+
+/**
+ * wave-27 A-RC1 — does the body-root carry containment? Pure, exported, and
+ * twinned 1:1 by Compose's `containmentBlocksCanvasPropagation` and SwiftUI's
+ * `WPTCanvas.containmentBlocksPropagation`, so the three composed canvases can
+ * never drift on this decision.
+ *
+ * Reads the IR `Contain` leaf, whose wire shape is the converter's
+ * `ContainProperty.values` list of uppercase keywords (`["LAYOUT"]`,
+ * `["STRICT"]`, `["SIZE","STYLE"]`, and `contain: none` → `["NONE"]`). A
+ * single bare string is accepted too — the same defensive shape Compose's
+ * `extractContainValues` already tolerates for this leaf.
+ *
+ * TRUE iff at least one token is a real containment keyword, i.e. anything
+ * except `NONE`. css-contain-2 §3.5 does not grade by containment KIND: the
+ * WPT family proves it, since layout / paint / size / style each block
+ * propagation on their own (contain-body-bg-001..004 all match the SAME
+ * all-white reference). An empty or absent list is NOT containment.
+ *
+ * ── THE MERGED html+body CAVEAT (read before trusting this at spec level) ──
+ * The extractor's `propsForBodyRoot` merges EVERY `html` / `body` / `:root` /
+ * `*` rule into ONE synthetic body-root bag, so this function cannot tell
+ * `html { contain: layout }` from `body { contain: layout }` — both arrive as
+ * the same `Contain` leaf on the same component. For the propagation question
+ * that conflation is harmless and the corpus proves it: css-contain's
+ * contain-html-bg-001..004 (containment on html) and contain-body-bg-001..004
+ * (containment on body) declare the SAME expectation and match the SAME
+ * reference — either element having containment removes the propagation. It
+ * would matter for a document that contains one element and propagates a
+ * background off the OTHER (e.g. `html { contain: layout }` +
+ * `body { background: red }` where the spec still propagates from body,
+ * because it is html that left the path); WPT has no such reftest, and the
+ * honest fix is a wire that keeps html and body apart, not a guess here.
+ */
+export function bodyRootHasContainment(bodyRoot: IRComponent): boolean {
+  const prop = (bodyRoot.properties as Array<{ type: string; data?: unknown }> | undefined)
+    ?.find((p) => p.type === 'Contain');
+  if (!prop) return false;                       // no `contain` declaration at all
+  const d = prop.data;
+  // Array wire (the converter's normal emission) or a bare keyword string.
+  const tokens = Array.isArray(d) ? d : (typeof d === 'string' ? [d] : []);
+  // Any token that is not `none` is containment; `["NONE"]` and `[]` are not.
+  return tokens.some((t) => typeof t === 'string' && t.trim().toUpperCase() !== 'NONE');
 }
 
 /**

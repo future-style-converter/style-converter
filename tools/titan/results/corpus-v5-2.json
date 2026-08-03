@@ -1,0 +1,404 @@
+{
+ "_snapshot": "corpus-v5.2",
+ "_note": "22 SECTIONS + THE FIFTH BAKE + THE ONE-TERM BACKDROP FIX. css-contain joined and web recovered 3/12→11/12 in one wave: the canvas containment gate (css-contain-2 §3.5 removes a contained body from the css-backgrounds-3 §2.11.2 propagation path — the wave-15 body-root channel was unconditional) + the body-root PSEUDO-ELEMENT leak (propsForBodyRoot merged html::before declarations into the body bag, clobbering geometry and losing the generated box — now routed to the body-root _pseudo bucket, ~32 corpus files) + the KEYFRAME_NON_ANIMATABLE set (css-animations-1 §4: contain/will-change/writing-mode family ignored by the sampler — contain-animation survived only by accident before). css-counter-styles joined and web recovered 4/12→11/12 via THE FIFTH BAKE (counter-style-bake.mjs: the css-counter-styles-3 §6 predefined table + numeric/additive/alphabetic/cyclic/fixed + range/fallback/suffix + ol@start/li@value folded into ordinals; the skeptic killed <ol reversed> baking FORWARD, negative-ordinal empty markers, and shorthand silent-decimal substitution) + the web li bare-text fix (css-lists web 12/12 — a new perfect web section). THE ANDROID BACKDROP GAP WAS ONE TERM: the backdrop draw node sits outer of absoluteOffset, so it sampled and painted a pixel-perfect filter of the WRONG rectangle (both color-space and snapshot-path suspects DISPROVEN with device evidence: invert byte-exact rgb(255,127,255); the hardware RenderEffect path ran every time). PositionApplier.resolvedOffset threaded like the margin/alpha precedents: basic 0.881→0.955 PASS, opacity-2 0.991 PASS, color vetoes cleared, filter-effects Android 2/11→4/11. Native marker fixes (iOS bidi-baked li missing-marker + 2.2x height; Compose marker typography at inherited size + first-baseline). Dependabot: 5 more merged through the CI gate (#49/#52/#53/#82 + #91 earlier), #86/#51 rebasing. Known-divergent passes documented: contain-dir families pass ~0.96 with a residual body-root pseudo-box geometry divergence (the queued follow-up). Native counter-marker rendering still trails the bake (Android 3/12, iOS 5/12) — marker consumption is the queued follow-up. Totals: web 226/257, iOS 202/257, Android 194/257. 327-net clean (a transient device-contention capture truncation was chased to ground and ruled out as a code defect).",
+ "artifact": "tools/titan/runs/wave27-final (gitignored)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "devSha": "f9b7a99b",
+ "date": "2026-08-04",
+ "bucket": "A",
+ "passThreshold": 0.95,
+ "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence + coverage-RATIO (max/min>2) + colorDivergent-with-dE>=2.3 + extraction-wall exclusion + post-load/structure re-admission (corpus-v5.0 gate)",
+ "sampling": "22 sections x 12 bucket-A tests (css-contain + css-counter-styles joined at this boundary)",
+ "canvasBoundary": "white + black ink + Inter pin + line-height 1.25 + IMAGE-SPACE 16px frame (CANVAS_REV white-black-ink-font-lh-imgpad) + browser-rev cache key",
+ "totals": {
+  "web": {
+   "passing": 226,
+   "measured": 257
+  },
+  "ios": {
+   "passing": 202,
+   "measured": 257
+  },
+  "android": {
+   "passing": 194,
+   "measured": 257
+  }
+ },
+ "sections": {
+  "css-backgrounds": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.974,
+    "passing": 6
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9719,
+    "passing": 6
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9689,
+    "passing": 6
+   }
+  },
+  "css-break": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9973,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8539,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8543,
+    "passing": 9
+   }
+  },
+  "css-color": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9887,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9875,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9807,
+    "passing": 10
+   }
+  },
+  "css-contain": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9799,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9631,
+    "passing": 7
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.957,
+    "passing": 7
+   }
+  },
+  "css-counter-styles": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9834,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.906,
+    "passing": 5
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.8552,
+    "passing": 3
+   }
+  },
+  "css-display": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9886,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9805,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9779,
+    "passing": 12
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9954,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9919,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9829,
+    "passing": 12
+   }
+  },
+  "css-gaps": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9955,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9858,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9753,
+    "passing": 11
+   }
+  },
+  "css-grid": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 1,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9874,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9749,
+    "passing": 12
+   }
+  },
+  "css-images": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.995,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9901,
+    "passing": 9
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9884,
+    "passing": 9
+   }
+  },
+  "css-lists": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9955,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9558,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9583,
+    "passing": 10
+   }
+  },
+  "css-masking": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9869,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.978,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9664,
+    "passing": 10
+   }
+  },
+  "css-multicol": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9992,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.991,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9843,
+    "passing": 9
+   }
+  },
+  "css-overflow": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9943,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.9862,
+    "passing": 10
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.9748,
+    "passing": 10
+   }
+  },
+  "css-position": {
+   "web": {
+    "measured": 7,
+    "meanSsim": 0.9918,
+    "passing": 7
+   },
+   "ios": {
+    "measured": 7,
+    "meanSsim": 0.9901,
+    "passing": 7
+   },
+   "android": {
+    "measured": 7,
+    "meanSsim": 0.9876,
+    "passing": 7
+   }
+  },
+  "css-sizing": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9997,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9872,
+    "passing": 12
+   }
+  },
+  "css-text": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9678,
+    "passing": 3
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9576,
+    "passing": 2
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9486,
+    "passing": 1
+   }
+  },
+  "css-text-decor": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9699,
+    "passing": 10
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.8619,
+    "passing": 7
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.872,
+    "passing": 7
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9977,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.988,
+    "passing": 10
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9786,
+    "passing": 10
+   }
+  },
+  "css-ui": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9951,
+    "passing": 12
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9888,
+    "passing": 12
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.987,
+    "passing": 12
+   }
+  },
+  "css-values": {
+   "web": {
+    "measured": 12,
+    "meanSsim": 0.9973,
+    "passing": 11
+   },
+   "ios": {
+    "measured": 12,
+    "meanSsim": 0.9952,
+    "passing": 11
+   },
+   "android": {
+    "measured": 12,
+    "meanSsim": 0.9916,
+    "passing": 11
+   }
+  },
+  "filter-effects": {
+   "web": {
+    "measured": 11,
+    "meanSsim": 0.9385,
+    "passing": 5
+   },
+   "ios": {
+    "measured": 11,
+    "meanSsim": 0.843,
+    "passing": 5
+   },
+   "android": {
+    "measured": 11,
+    "meanSsim": 0.8165,
+    "passing": 4
+   }
+  }
+ },
+ "reproduce": "provision-devices.sh, then for each of the 22 sections: POST_LOAD_EXTRACT=1 BIDI_BAKE=1 section-runner.sh <section> --all-platforms --max-tests 12 --run-id wave27-final --foreground."
+}

@@ -55,6 +55,9 @@ import com.styleconverter.runtime.core.renderer.composedIcbExtentDp
 // Wave 15 — the pure composed-canvas alpha-compositing rule (body background
 // blended source-over onto the white WPT canvas; see resolveComposedCanvasBackground).
 import com.styleconverter.runtime.core.renderer.composedCanvasBackground
+// wave-27 A-RC1 — the shared containment gate on body→canvas background
+// propagation (css-contain-2 §3.5); see resolveComposedCanvasBackground.
+import com.styleconverter.runtime.core.renderer.containmentBlocksCanvasPropagation
 import com.styleconverter.runtime.core.renderer.captureCanvasBackground
 import com.styleconverter.runtime.core.types.ValueExtractors
 // wave-26 lane BF-A — the two-pass backdrop-filter render. The composed WPT
@@ -1091,16 +1094,53 @@ private val ComposedCanvasMinHeight =
  * verbatim bug here). The pure decision is the runtime's
  * [composedCanvasBackground] (unit-pinned in WptCanvasBackgroundTest,
  * twinned by iOS WPTCanvas.composedBackground).
+ *
+ * wave-27 A-RC1: the propagation is now GATED on containment. css-contain-2
+ * §3.5 removes a contained root/body from css-backgrounds-3 §2.11.2's
+ * propagation path, so the canvas keeps the UA white and the body-root paints
+ * its own box (contain-body-bg-001..004 flooded red at ~0.62 before this).
+ * The decision itself is the runtime's pure
+ * [containmentBlocksCanvasPropagation] so all three canvases share one rule.
  */
 internal fun resolveComposedCanvasBackground(roots: List<IRComponent>): Color {
+    // A document has one body — first `body-root` wins, same as web/iOS.
+    val bodyRoot = roots.firstOrNull { it.role == "body-root" }
     // Extract the body-root's own background through the SAME extractor the
     // renderer uses (null when no body-root / no declared background) …
-    val bg = roots.firstOrNull { it.role == "body-root" }
+    val bg = bodyRoot
         ?.properties?.firstOrNull { it.type == "BackgroundColor" }
         ?.data?.let { ValueExtractors.extractColor(it) }
-    // … then let the runtime's pure composed-canvas rule composite it over
-    // the corpus-v4 white (or fall back to white on null).
-    return composedCanvasBackground(bg)
+    // … read its `Contain` leaf as the keyword list the converter emits
+    // (`["LAYOUT"]`, `["STRICT"]`, `contain: none` → `["NONE"]`) …
+    val contain = bodyRoot
+        ?.properties?.firstOrNull { it.type == "Contain" }
+        ?.data?.let { containKeywords(it) }
+    // … then let the runtime's pure composed-canvas rule apply the wave-27
+    // containment gate and composite the rest over the corpus-v4 white.
+    return composedCanvasBackground(
+        bg,
+        contained = containmentBlocksCanvasPropagation(contain),
+    )
+}
+
+/**
+ * wave-27 A-RC1 — read a `Contain` IR leaf as its keyword list, for
+ * [containmentBlocksCanvasPropagation]. Deliberately a LOCAL reader and not
+ * a call into PerformanceExtractor: that extractor expands `strict`/`content`
+ * into their component keywords and DROPS `none` to an empty set, both of
+ * which erase the distinction this gate needs (`none` must stay visible so
+ * the shared rule — not this reader — decides). Handles the two shapes the
+ * wire actually carries, in the same order the applier-side reader does:
+ * the normal keyword ARRAY, and a bare keyword STRING (space-separated).
+ * Anything else yields null, which the gate reads as "no containment".
+ */
+private fun containKeywords(data: JsonElement): List<String>? = when (data) {
+    // Normal emission: ContainProperty.values serialized as a string array.
+    is JsonArray -> data.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }
+    // Defensive: a single primitive, possibly a space-separated keyword list.
+    is JsonPrimitive -> data.contentOrNull?.trim()?.split(Regex("\\s+"))
+    // Objects / null / anything else: not a keyword list — no containment.
+    else -> null
 }
 
 /**

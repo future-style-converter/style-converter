@@ -421,15 +421,50 @@ struct ComposedCaptureCanvas: View {
     /// background-color-transparent-animation-in-body). The pure decision
     /// is WPTCanvas.composedBackground (unit-pinned in WPTCaptureModeTests,
     /// twinned by Compose's composedCanvasBackground).
+    ///
+    /// wave-27 A-RC1: the propagation is now GATED on containment.
+    /// css-contain-2 §3.5 removes a contained root/body from
+    /// css-backgrounds-3 §2.11.2's propagation path, so the canvas keeps the
+    /// UA white and the body-root paints its own box (contain-body-bg-001..004
+    /// flooded red at ~0.63 before this). The decision itself is the runtime's
+    /// pure `WPTCanvas.containmentBlocksPropagation`, so all three composed
+    /// canvases share exactly one rule.
     private var canvasBackground: Color {
+        // A document has one body — first `body-root` wins, same as web/Android.
+        let bodyRoot = document.components.first(where: { $0.meta?.role == "body-root" })
         // Resolve the body-root's own background through the SAME engine
         // path the renderer uses (nil when no body-root / no background) …
-        let resolved = document.components
-            .first(where: { $0.meta?.role == "body-root" })
+        let resolved = bodyRoot
             .flatMap { ComponentRenderer.resolvedBackgroundColor(from: $0.properties) }
-        // … then let the runtime's pure composed-canvas rule composite it
-        // over the corpus-v4 white (or fall back to white on nil).
-        return WPTCanvas.composedBackground(resolved: resolved)
+        // … read its `Contain` leaf as the keyword list the converter emits
+        // (`["LAYOUT"]`, `["STRICT"]`, `contain: none` → `["NONE"]`) …
+        let contain = bodyRoot.flatMap { Self.containKeywords(of: $0) }
+        // … then let the runtime's pure composed-canvas rule apply the
+        // containment gate and composite the rest over the corpus-v4 white.
+        return WPTCanvas.composedBackground(
+            resolved: resolved,
+            contained: WPTCanvas.containmentBlocksPropagation(contain))
+    }
+
+    /// wave-27 A-RC1 — read a component's `Contain` IR leaf as its keyword
+    /// list, for `WPTCanvas.containmentBlocksPropagation`. Deliberately a
+    /// LOCAL reader rather than the performance extractor: that one expands
+    /// `strict`/`content` into component keywords and drops `none` to an
+    /// empty set, both of which erase the distinction this gate needs
+    /// (`none` must stay visible so the SHARED rule, not this reader,
+    /// decides). Handles the two shapes the wire carries — the normal
+    /// keyword ARRAY, and a bare (possibly space-separated) keyword STRING.
+    /// Anything else yields nil, which the gate reads as "no containment".
+    private static func containKeywords(of component: IRComponent) -> [String]? {
+        guard let data = component.properties
+            .first(where: { $0.type == "Contain" })?.data else { return nil }
+        // Normal emission: ContainProperty.values as a string array.
+        if let arr = data.arrayValue { return arr.compactMap { $0.stringValue } }
+        // Defensive: a single primitive holding one or more keywords.
+        if let s = data.stringValue {
+            return s.split(whereSeparator: { $0.isWhitespace }).map(String.init)
+        }
+        return nil                       // objects / numbers / null — not a list
     }
 
     /// wave-24 B-RC5 — the composed canvas's per-side pad. The twin of

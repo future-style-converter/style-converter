@@ -133,6 +133,18 @@ export interface IRMeta {
    * Application policy lives in renderer/DecorationSpans.ts.
    */
   decorations?: IRDecoration[] | null;
+  /**
+   * wave-27 resolved list-marker string for one `<li>` (v2 home of the
+   * extractor's `_markerText`) — representation + suffix per
+   * css-counter-styles-3 §6, already resolved against `<ol start>` and
+   * the item's ordinal. Modelled so the type mirrors the wire, but the
+   * web renderer DELIBERATELY DOES NOT CONSUME IT: it emits a real
+   * `<ol>`/`<li>` and lets the browser synthesise `::marker` from the
+   * component's `list-style-type` plus the forwarded `start` attribute,
+   * which is a better oracle than any string we could bake. The two
+   * native runtimes — which have no `::marker` — are the readers.
+   */
+  markerText?: string | null;
 }
 
 /**

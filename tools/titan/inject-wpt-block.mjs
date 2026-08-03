@@ -1336,6 +1336,10 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       postLoadExtracted: meta.postLoadExtracted === true,
       // Wave 23 — informational bidi-bake provenance (see build-combined-fixture).
       bidiBaked: meta.bidiBaked === true,
+      // Wave 27 — informational counter-style-bake provenance (see
+      // build-combined-fixture); true ⇔ ≥1 `<li>` marker was resolved
+      // upstream instead of by the runtime's own keyword table.
+      counterStyleBaked: meta.counterStyleBaked === true,
       // wave-20: surfaced alongside — true ⇔ the component tree itself was
       // re-extracted from the serialized post-script DOM (appendChild
       // family), not just state-overlaid.
