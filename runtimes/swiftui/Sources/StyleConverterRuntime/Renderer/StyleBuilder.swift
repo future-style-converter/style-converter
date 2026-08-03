@@ -1123,7 +1123,13 @@ extension View {
             //   4. transforms warp the finished view (rotate/scale/translate)
             //   5. visibility/overflow gates what escapes the frame.
             .engineMask(style.mask)
-            .engineFilter(style.filter)
+            // Lane BF-I: the radius rides along so a `backdrop-filter`
+            // backplate is clipped to the SAME rounded border box the
+            // element's own background is (filter-effects-2 §2). It is inert
+            // for the foreground filter chain and for every element that
+            // declares no backdrop-filter.
+            .engineFilter(style.filter, radius: style.borderRadius,
+                          elementOpacity: style.opacity?.alpha ?? 1)
             .engineClipPath(style.clipPath)
             .engineTransforms(style.transforms)
             // Fidelity wave 2 — CSS Motion Path (motion-1 §4). Composes

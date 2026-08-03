@@ -260,6 +260,47 @@ data class RootStackMargin(
 )
 
 /**
+ * Wave 26 (lane RES residual 3a) — fold a root's HOIST BAND into its stack
+ * contribution.
+ *
+ * ## The double count
+ * A composed root's outer block spacing had TWO independent owners: this
+ * root-stack fold (a Spacer between roots) and the renderer's own
+ * `BlockCollapsePlan.hoistTopPx/hoistBottomPx` band (transparent padding
+ * outside the root's border box, for the first/last child's margin that
+ * escapes through an open parent edge). Both are outer spacing in the SAME
+ * adjoining-margin region, so they ADDED where CSS 2.1 §8.3.1 takes ONE
+ * max() over the whole chain. With a previous root ending in a 40px bottom
+ * margin, a `<blockquote>` root (UA 16) whose first child is an `<h5>` (UA
+ * 27) rendered 40 (fold) + 11 (band) = 51px against the browser's
+ * max(40, 16, 27) = 40.
+ *
+ * ## The model (ONE owner)
+ * The band is `max(rootOwnEdge, childEdge) − rootOwnEdge`, so
+ * `rootOwnEdge + band` is exactly the root's COLLAPSED-THROUGH edge. Adding
+ * the band here makes this fold see that collapsed edge and resolve the whole
+ * chain with its existing n-ary max; the renderer is told to emit no band for
+ * this root (BlockMarginCollapse.LocalHoistBandSuppressedFor). Subtracting
+ * the band from the emitted gap instead CANNOT work: two adjacent band-
+ * carrying roots (A's last child bottom 16, B's first child top 16) would
+ * need gap = 16 − 16 − 16 = −16, which floors at 0 and renders 32.
+ *
+ * Margin-TRANSPARENT roots are returned unchanged: they occupy no flow space
+ * (hoisted to the canvas overlay, or the RC1 static-position 0×0 anchor), so
+ * whatever band their own subtree emits never displaces flow siblings and
+ * must not enter the gap math.
+ *
+ * @param band the root's `(hoistTopPx, hoistBottomPx)` from the runtime's
+ *   ComponentRenderer.composedRootHoistBand — the SAME plan the renderer
+ *   would have painted, never a re-derivation.
+ */
+fun withHoistBand(plan: RootStackMargin, band: Pair<Float, Float>): RootStackMargin =
+    // Zero-flow roots never contribute to the stack gaps at all (see kdoc).
+    if (plan.marginTransparent) plan
+    // Opaque root: its stack edges become the collapsed-through values.
+    else plan.copy(topPx = plan.topPx + band.first, bottomPx = plan.bottomPx + band.second)
+
+/**
  * Resolve one in-flow root's stack contribution. Pure — pinned in
  * UaBlockMarginsTest (R1–R7), byte-parallel with the Swift twin
  * (UABlockMargin.rootStackMargin).

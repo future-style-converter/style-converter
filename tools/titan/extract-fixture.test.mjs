@@ -74,6 +74,8 @@ import {
   BIDI_DIR_ATTR_RX,
   BIDI_DIRECTION_CSS_RX,
   BIDI_UNICODE_BIDI_CSS_RX,
+  // wave-26 lane WWS: the inter-sibling whitespace marker.
+  stampWsAfter,
 } from './extract-fixture.mjs';
 
 // ── stripComments ───────────────────────────────────────────────────────────
@@ -3152,4 +3154,103 @@ test('wave25: an attr()-free document is untouched by the bake', () => {
     { width: '100px', height: '100px', background: 'green' });
   assert.equal(lossyOverall, false);
   assert.deepEqual(lossyReasons, []);
+});
+
+// ── wave-26 lane WWS: the inter-sibling whitespace marker ────────────────────
+//
+// Contract under test (see extract-fixture.mjs's WS_AFTER_ROLE banner):
+// walkChildren records whether COLLAPSIBLE source whitespace separated two
+// adjacent elements; buildComponents replays that fact as `_role:
+// 'ws-after'` on the EARLIER sibling, and the web harness consumes it as
+// `meta.role` to re-insert one real ' ' text node. The tests below pin the
+// three properties the honesty argument rests on: it fires when whitespace
+// was there, it NEVER fires when it wasn't, and it never claims the last
+// sibling (whose trailing gap separates nothing).
+
+test('wave26 WWS: whitespace-separated siblings carry the ws-after marker', () => {
+  // backdrop-filter-clip-rect-2's exact shape — three inline-block boxes,
+  // one per source line, inside a block container. The ref collapses each
+  // newline+indent to one space advance; without the marker the composed
+  // canvas packed them flush and boxes 2/3 landed 4 and 8 px left.
+  const css = '.box { display: inline-block; width: 100px; height: 100px; }';
+  const html = '<!DOCTYPE html><style>' + css + '</style><body><div class="row">\n'
+    + '  <div class="box"></div>\n'
+    + '  <div class="box"></div>\n'
+    + '  <div class="box"></div>\n'
+    + '</div></body>';
+  const { components } = buildComponents(html, parseCss(css), 'ws');
+  const kids = components['ws__0'].children;
+  // Boxes 0 and 1 have a following sibling AND source whitespace after them.
+  assert.equal(kids['ws__0__0']._role, 'ws-after');
+  assert.equal(kids['ws__0__1']._role, 'ws-after');
+  // Box 2 is last — its trailing newline separates it from a close tag.
+  assert.equal(kids['ws__0__2']._role, undefined);
+});
+
+test('wave26 WWS: flush-authored siblings carry NO marker', () => {
+  // The anti-invention pin. Source packed the boxes with no whitespace, so
+  // the wire must say so and the renderer must keep them flush — this is
+  // the property that makes the harness extension safe to turn on.
+  const css = '.box { display: inline-block; width: 100px; height: 100px; }';
+  const html = '<!DOCTYPE html><style>' + css + '</style>'
+    + '<body><div class="row"><div class="box"></div><div class="box"></div></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 'flush');
+  const kids = components['flush__0'].children;
+  assert.equal(kids['flush__0__0']._role, undefined);
+  assert.equal(kids['flush__0__1']._role, undefined);
+});
+
+test('wave26 WWS: non-breaking space is NOT a separator', () => {
+  // CSS Text §4.1 lists exactly five collapsible characters; U+00A0 is not
+  // one of them — it is real text with its own advance. Marking it would
+  // double the gap, so the walker's [ \t\n\r\f] class must reject it.
+  const css = '.box { display: inline-block; width: 10px; height: 10px; }';
+  const html = '<!DOCTYPE html><style>' + css + '</style>'
+    + '<body><div class="row"><div class="box"></div> <div class="box"></div></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 'nb');
+  assert.equal(components['nb__0'].children['nb__0__0']._role, undefined);
+});
+
+test('wave26 WWS: body-level siblings are marked too', () => {
+  // Top-level elements become real siblings under the body-root on the
+  // wave-17 slotting path, where the renderer's separator hook does pair
+  // them — so the same source fact must reach the same wire shape.
+  const css = 'span { display: inline-block; width: 10px; height: 10px; }';
+  const html = '<!DOCTYPE html><style>' + css + '</style>'
+    + '<body><span></span>\n<span></span></body>';
+  const { components } = buildComponents(html, parseCss(css), 'top');
+  assert.equal(components['top__0']._role, 'ws-after');
+  assert.equal(components['top__1']._role, undefined);
+});
+
+test('wave26 WWS: stampWsAfter never overwrites an existing role', () => {
+  // Stated precedence (banner): 'line-break' — the only role that can
+  // collide — wins, and the caller learns the marker was withheld from the
+  // return value instead of the decision being invisible.
+  const br = { properties: {}, _role: 'line-break' };
+  assert.equal(stampWsAfter(br, { wsAfter: true }, true), null);
+  assert.equal(br._role, 'line-break');
+});
+
+test('wave26 WWS: stampWsAfter is a no-op without a following sibling', () => {
+  // A gap needs two sides. Trailing whitespace before the parent's close
+  // tag separates nothing, so the last sibling stays unmarked.
+  const last = { properties: {} };
+  assert.equal(stampWsAfter(last, { wsAfter: true }, false), null);
+  assert.equal(last._role, undefined);
+  // …and a marked node with a sibling does get stamped, so the guard above
+  // is proving the gate and not merely that the helper never fires.
+  const mid = { properties: {} };
+  assert.equal(stampWsAfter(mid, { wsAfter: true }, true), 'ws-after');
+  assert.equal(mid._role, 'ws-after');
+});
+
+test('wave26 WWS: nested tree nodes carry the walker fact', () => {
+  // extractBodyTreeNested is the shared tree the fixture emitter reads;
+  // pin the flag there too so a future refactor of buildComponents cannot
+  // silently lose the signal between the walker and the wire.
+  const tree = extractBodyTreeNested('<body><div><b>a</b> <i>b</i><u>c</u></div></body>');
+  const kids = tree[0].children;
+  assert.equal(kids[0].wsAfter, true);   // <b> … whitespace … <i>
+  assert.equal(kids[1].wsAfter, undefined); // <i><u> written flush
 });

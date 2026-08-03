@@ -81,6 +81,55 @@ object BlockMarginCollapse {
      */
     val LocalCollapsedMargin = compositionLocalOf<CollapsedMargin?> { null }
 
+    /**
+     * Wave 26 (lane RES residual 3a) — HOIST-BAND suppression channel for the
+     * composed capture's ROOT slots.
+     *
+     * ## The double count this closes
+     * A composed root's block-edge spacing has TWO owners: the harness's root
+     * -stack fold emits it as a Spacer between roots (collapsedRootStackGapsPx),
+     * and this container's own plan emits `hoistTopPx/hoistBottomPx` as
+     * transparent padding outside the root's border box. Both are transparent
+     * outer spacing in the SAME adjoining-margin region, so they ADD where
+     * CSS 2.1 §8.3.1 takes ONE max() over the whole chain. Concretely, with a
+     * previous root ending in a 40px bottom margin, a `<blockquote>` root
+     * (UA 16) whose first child is an `<h5>` (UA 27): the fold emits
+     * max(40, 16) = 40 and the band adds max(16, 27) − 16 = 11 → 51px, where
+     * the browser gives max(40, 16, 27) = 40.
+     *
+     * ## Why suppression and not subtraction
+     * Subtracting the band from the gap cannot work: two adjacent band-
+     * carrying roots (A's last child bottom 16, B's first child top 16) need
+     * gap = 16 − 16 − 16 = −16, which floors at 0 and renders 32. The only
+     * model that reproduces the ref is ONE owner — so the root-stack fold
+     * takes the root's COLLAPSED-THROUGH edges (own margin max'd with the
+     * hoisted child edge, via [composedRootHoistBand]) and this local tells
+     * the root's own container branch to emit NO band.
+     *
+     * ## Why it carries an ID, not a Boolean
+     * Scope must be exactly ONE level — a nested container still emits its
+     * own band. A Boolean flag would need an explicit reset on every path
+     * that renders children (block, flex, grid, marker rows, overlays), and
+     * ONE missed reset silently deletes a descendant's band. Keyed on the
+     * flagged component's `id` instead, the scope is leak-proof by
+     * construction and needs no reset: the extractor's ids are hierarchical
+     * (`<root>__<i>`, a child extending its parent's id — tools/titan/
+     * extract-fixture.mjs), so a descendant's id can never EQUAL its
+     * ancestor's. Default null ⇒ nothing is ever suppressed on any
+     * non-composed path, so the 327 dark-stage baselines are byte-identical.
+     * The id is also what the SwiftUI twin can key on (IRComponent is a
+     * value type there), which keeps the two pin tables literally identical.
+     */
+    val LocalHoistBandSuppressedFor = compositionLocalOf<String?> { null }
+
+    /**
+     * Pure predicate for the channel above — true iff [componentId] is
+     * exactly the id the host flagged. Byte-parallel twin of Swift's
+     * `MarginCollapse.suppressesHoistBand`.
+     */
+    fun suppressesHoistBand(suppressedForId: String?, componentId: String): Boolean =
+        suppressedForId != null && suppressedForId == componentId
+
     /** Hoist eligibility per parent edge (see [hoistGates]). */
     data class HoistGates(val top: Boolean, val bottom: Boolean)
 

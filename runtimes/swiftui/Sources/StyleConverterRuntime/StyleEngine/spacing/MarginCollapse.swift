@@ -63,6 +63,44 @@ extension EnvironmentValues {
     }
 }
 
+/// Wave 26 (lane RES residual 3a) — HOIST-BAND suppression channel for the
+/// composed capture's ROOT slots. Twin of Compose's
+/// `BlockMarginCollapse.LocalHoistBandSuppressedFor`.
+///
+/// ## The double count this closes
+/// A composed root's outer block spacing had TWO owners: the harness's
+/// root-stack fold (`ComposedRootStack.stackedSpacing`, painted as the
+/// per-root leading/trailing padding) and the root's OWN plan band
+/// (`Plan.hoistTop/hoistBottom`, painted as transparent padding outside its
+/// styled box). Both are outer spacing in the SAME adjoining-margin region,
+/// so they ADDED where CSS 2.1 §8.3.1 takes ONE max() over the whole chain:
+/// with a previous root ending in a 40px bottom margin, a `<blockquote>`
+/// root (UA 16) whose first child is an `<h5>` (UA 27) rendered
+/// max(40,16) = 40 plus max(16,27) − 16 = 11 → 51px against the browser's
+/// max(40, 16, 27) = 40.
+///
+/// ## Why an id and not a Bool
+/// The suppression must cover exactly ONE level. A Bool would need an
+/// explicit reset on every child-rendering path and one miss silently
+/// deletes a descendant's band; keying on the flagged component's `id` is
+/// leak-proof by construction, because the extractor's ids are hierarchical
+/// (`<root>__<i>` — tools/titan/extract-fixture.mjs) so a descendant's id can
+/// never EQUAL its ancestor's. Default nil ⇒ nothing suppressed on any
+/// non-composed path, so the 327 dark-stage baselines are byte-identical.
+private struct HoistBandSuppressedForKey: EnvironmentKey {
+    static let defaultValue: String? = nil
+}
+
+extension EnvironmentValues {
+    /// The `id` of the single component whose hoist band the host owns, or
+    /// nil (the default, and the value everywhere outside the composed root
+    /// loop). See HoistBandSuppressedForKey for the full argument.
+    var hoistBandSuppressedFor: String? {
+        get { self[HoistBandSuppressedForKey.self] }
+        set { self[HoistBandSuppressedForKey.self] = newValue }
+    }
+}
+
 // Pure namespace — never instantiated (mirrors StyleBuilder et al.).
 enum MarginCollapse {
 
@@ -237,6 +275,18 @@ enum MarginCollapse {
         if let own = parentOwnEdge { return max(childEdge, own) - own }
         // No own margin supplied: full child band (defensive fallback).
         return childEdge
+    }
+
+    /// Wave 26 (lane RES residual 3a) — pure predicate for the
+    /// `hoistBandSuppressedFor` channel: true iff `componentId` is exactly
+    /// the id the host flagged. Byte-parallel twin of Compose's
+    /// `BlockMarginCollapse.suppressesHoistBand`.
+    static func suppressesHoistBand(suppressedForId: String?,
+                                    componentId: String) -> Bool {
+        // nil channel (every non-composed path) suppresses nothing.
+        guard let flagged = suppressedForId else { return false }
+        // Exact id match — hierarchical ids make descendants un-matchable.
+        return flagged == componentId
     }
 
     // MARK: - Override application (child side)

@@ -479,4 +479,44 @@ final class WPTCaptureModeTests: XCTestCase {
         XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 20), 0)
         XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 0), 0)
     }
+
+    // MARK: - Wave 26 (lane RES residual 2) — the PUBLISHED viewport basis.
+    //
+    // Byte-parallel with the Compose twin's WptComposedGeometryTest: the
+    // composed canvas publishes the REF's render viewport as the vw/vh and
+    // runtime-v1 media basis, not the 390-wide framed image (and not the
+    // 844-tall device window). capture-browser-ref.mjs lays each ref page out
+    // at REF_RENDER_WIDTH × max(scrollHeight, REF_RENDER_MIN_HEIGHT) and adds
+    // the 16px frame to the finished PNG in IMAGE space, where no `vw` and no
+    // media query can see it.
+
+    func testPublishedViewportBasisIsTheRefRenderViewport() {
+        // Width: 358, the exact number the ref lays out at.
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 390), 358)
+        // Height on a floor-height canvas: 568 (the historical value, so
+        // every capture whose content fits the floor is byte-identical).
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: max(600, 600)), 568)
+    }
+
+    func testPublishedViewportHeightGrowsWithTheDocument() {
+        // A 1200-tall composed canvas (frame + 1168 of flow) publishes 1168 —
+        // the ref's second-pass viewport height — so a `100vh` value and a
+        // `bottom: 0` hoisted box agree with the raster instead of both
+        // pinning the 568 floor. `max(measured, minHeight)` is the canvas's
+        // own floor rule, spelled here exactly as the harness applies it.
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: max(1200, 600)), 1168)
+        // One point past the floor already tracks the content.
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: max(601, 600)), 569)
+        // A degenerate mid-layout measurement still floors, never stubs.
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: max(0, 600)), 568)
+    }
+
+    func testPublishedViewportIsNeverTheFramedImage() {
+        // Dark-stage guard in pin form: the published basis must NEVER equal
+        // the outer image extent — that equality was the wave-25 shape, and
+        // it is the only one that could re-base a capture's vw by 32pt.
+        XCTAssertNotEqual(WPTCanvas.icbExtent(canvasExtent: 390), 390)
+        XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 900),
+                       900 - 2 * WPTCanvas.canvasFramePx)
+    }
 }

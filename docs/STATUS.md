@@ -484,6 +484,22 @@ dirs + WPT corpus are gitignored):
   Corpus totals under the strictest contract yet: **web 202/233, iOS
   188/233, Android 183/233** — down ~5 per platform in exchange for
   honesty. Six sections perfect on all three platforms; 327-net clean.
+  Wave 26 (`tools/titan/results/corpus-v5-1.json`) landed
+  **backdrop-filter** on both natives — a two-pass controlled-canvas
+  model (pass A renders the composed canvas with backdrop elements'
+  paint suppressed; pass B samples, filters, clips to the border box,
+  and paints under the element) with a skeptic-arbitrated unified
+  contract (one blur edge model, all-or-nothing chains, foreground
+  filters outside the backplate, element opacity attenuating it). iOS
+  validates the model (basic 0.966, box-shadow 0.978, opacity twins
+  0.999 — 3/11 → 5/11); web's inter-inline-block whitespace fix took
+  clip-rect-2 to exactly 1.000; Android's backplate paints but carries
+  an accuracy gap (0.881 vs iOS 0.966) — the named follow-up. And the
+  headline: after a full worktree recycle, ref-cache rebuild, and
+  emulator-pool swap, **18 of 20 sections byte-matched the v5.0
+  snapshot** — the instrument's determinism is now measured, not
+  asserted. Totals: **web 203/233, iOS 190/233, Android 182/233**;
+  327-net clean.
 
 ## Test suites
 
@@ -491,9 +507,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 236 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1084 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1608 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 964 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 968 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1698 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1012 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 975 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 34 goldens (12 v1 + 22 v2) × 4 codebases |
 
 ## Roadmap

@@ -130,6 +130,16 @@ struct ScreenshotCaptureView: View {
         let canvas = CaptureCanvas(component: component)
             .environment(\.styleKeyframes, document.keyframes)
 
+        // Lane BF-I deliberately does NOT two-pass here. This is the
+        // BUNDLED property-fixture path behind the committed 327-pair
+        // dark-stage baselines, including
+        // fixtures/properties/effects/backdrop-filter.json — whose boxes
+        // are standalone crops with nothing behind them but the stage, so a
+        // backdrop pass would cost time and could only move pixels the
+        // baselines pin. Single pass, unchanged call, byte-identical
+        // captures; the WPT paths below (captureAllComponents /
+        // captureComposedDocument), where a backdrop element actually has
+        // neighbours, are where the two-pass runs.
         if let image = ScreenshotManager.render(canvas) {
             ScreenshotManager.save(image: image, index: index, name: component.name)
         }
@@ -283,7 +293,14 @@ func captureAllComponents(_ document: IRDocument) {
         let canvas = CaptureCanvas(component: component)
             .environment(\.styleKeyframes, document.keyframes)
             .environment(\.wptCaptureMode, CaptureOverrides.titanInbox)
-        if let image = ScreenshotManager.render(canvas) {
+        // Lane BF-I — a component that declares `backdrop-filter` is
+        // captured in two passes so the filter runs over what is painted
+        // BEHIND it (ScreenshotManager.renderBackdropTwoPass). The
+        // predicate is per-component here because this loop's capture
+        // surface is one component; everything else takes the identical
+        // single-pass `render` call this line used before the lane.
+        if let image = ScreenshotManager.renderBackdropTwoPass(
+            canvas, twoPass: BackdropCapture.needsTwoPass([component])) {
             ScreenshotManager.save(image: image, index: index, name: component.name)
         }
     }
@@ -328,8 +345,13 @@ func captureComposedDocument(_ document: IRDocument, pngName: String) {
     let canvas = ComposedCaptureCanvas(document: document)
         .environment(\.styleKeyframes, document.keyframes)
         .environment(\.wptCaptureMode, true)
-    // ONE ImageRenderer pass → ONE composite PNG named for the test key.
-    if let image = ScreenshotManager.render(canvas) {
+    // ONE composite PNG named for the test key. Normally ONE ImageRenderer
+    // pass; two (lane BF-I) when the doc declares `backdrop-filter`
+    // anywhere, so those elements can filter what is painted behind them —
+    // the composed canvas is exactly the surface where a backdrop element
+    // HAS neighbours to sample, unlike the per-component crops.
+    if let image = ScreenshotManager.renderBackdropTwoPass(
+        canvas, twoPass: BackdropCapture.needsTwoPass(document.components)) {
         ScreenshotManager.saveComposed(image: image, filename: pngName)
     }
 }

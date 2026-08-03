@@ -26,6 +26,26 @@ import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.variables.LocalContainingBlock
 
+/**
+ * The four physical margin bands this applier turns into `absolutePadding`,
+ * i.e. the amount by which the LAYOUT box of every modifier chained OUTSIDE
+ * the margin step exceeds the element's border box.
+ *
+ * Read by the two-pass backdrop lane (effects run at StyleApplier step 3,
+ * OUTER of the margin step 4), which must sample and clip the BORDER box —
+ * filter-effects-2 §2 — not the inflated margin box it is actually sized by.
+ */
+data class MarginInsets(val left: Dp, val top: Dp, val right: Dp, val bottom: Dp) {
+    /** True when no side inflates the box — the common case, and a fast out. */
+    val isZero: Boolean
+        get() = left.value == 0f && top.value == 0f && right.value == 0f && bottom.value == 0f
+
+    companion object {
+        /** All-zero insets: border box == margin box. */
+        val NONE = MarginInsets(0.dp, 0.dp, 0.dp, 0.dp)
+    }
+}
+
 object MarginApplier {
 
     fun apply(
@@ -80,6 +100,47 @@ object MarginApplier {
         }
         // All-static path — byte-identical to the pre-wave-18 applier.
         return modifier.then(applyResolved(Modifier, r, ctx))
+    }
+
+    /**
+     * The positive margin bands [apply] would chain as `absolutePadding`, as a
+     * value — WITHOUT building a Modifier.
+     *
+     * Deliberately shares [lengthOrZero] and the same `coerceAtLeast(0.dp)`
+     * clamp with [applyResolved], so the number the backdrop lane subtracts is
+     * literally the number the layout step added. Anything that changed one
+     * without the other would put the patch back on the margin box.
+     *
+     * KNOWN LIMIT, stated rather than hidden: the composed percent lane in
+     * [apply] (WPT capture reading `LocalContainingBlock`) cannot be
+     * reproduced from a plain function — a `margin: 10%` on a backdrop element
+     * under WPT capture resolves here against [ctx]'s viewport fallback, so
+     * the border box would be off by the difference. No corpus fixture
+     * combines `backdrop-filter` with a percentage margin; if one arrives, the
+     * fix is to thread the resolved insets from the composed lane instead.
+     */
+    fun resolvedInsets(
+        config: MarginConfig,
+        ctx: SpacingContext = SpacingContext(),
+        isRtl: Boolean = false,
+        collapsed: CollapsedMargin? = null,
+    ): MarginInsets {
+        // Same collapse substitution + same "nothing declared" short circuit
+        // as apply(), so the two agree on the no-margin fast path too.
+        val effective =
+            if (collapsed != null) BlockMarginCollapse.applyOverride(config, collapsed)
+            else config
+        if (!effective.hasMargin) return MarginInsets.NONE
+        val r = effective.resolve(isRtl = isRtl)
+        // Only the POSITIVE component of each side inflates the layout box;
+        // the negative remainder rides Modifier.offset, which translates the
+        // node without resizing it (see applyResolved).
+        return MarginInsets(
+            left = lengthOrZero(r.left, ctx).coerceAtLeast(0.dp),
+            top = lengthOrZero(r.top, ctx).coerceAtLeast(0.dp),
+            right = lengthOrZero(r.right, ctx).coerceAtLeast(0.dp),
+            bottom = lengthOrZero(r.bottom, ctx).coerceAtLeast(0.dp),
+        )
     }
 
     /** The LengthValue behind a MarginValue side, null for Auto/absent. */

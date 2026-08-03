@@ -24,6 +24,9 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+// Pass A's snapshot crosses from the capture path (android.graphics.Bitmap)
+// into the runtime's painter (Compose ImageBitmap) through this adapter.
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
@@ -54,6 +57,13 @@ import com.styleconverter.runtime.core.renderer.composedIcbExtentDp
 import com.styleconverter.runtime.core.renderer.composedCanvasBackground
 import com.styleconverter.runtime.core.renderer.captureCanvasBackground
 import com.styleconverter.runtime.core.types.ValueExtractors
+// wave-26 lane BF-A — the two-pass backdrop-filter render. The composed WPT
+// canvas is the only backdrop root the runtime can render honestly (a
+// controlled tree we can paint twice), so the host hook lives here: arm the
+// coordinator per fixture, snapshot pass A, publish it, capture pass B.
+import com.styleconverter.runtime.effects.backdrop.BackdropPass
+import com.styleconverter.runtime.effects.backdrop.BackdropPassCoordinator
+import com.styleconverter.runtime.effects.backdrop.documentDeclaresBackdropFilter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.serialization.json.JsonArray
@@ -259,6 +269,21 @@ fun ScreenshotCaptureScreen(
             // comparable with normal captures.
             val document = IRDocumentDecoder.decode(jsonString)
             val composed = SlotComposer.compose(document)
+            // Arm (or explicitly disarm) the two-pass backdrop render BEFORE
+            // the roots reach composition — the coordinator's `enabled` flag
+            // is read while modifier chains are built, so it must be settled
+            // by then. Only the COMPOSED canvas hosts the two passes (it is
+            // the single controlled backdrop root); the per-component path
+            // always disarms, which is what keeps its captures — and the
+            // committed 327-pair dark-stage baseline — byte-identical.
+            val wantsBackdropPass = composedMode && documentDeclaresBackdropFilter(composed)
+            BackdropPassCoordinator.current.beginDocument(wantsBackdropPass)
+            if (wantsBackdropPass) {
+                // Grep-able evidence that the two-pass path actually engaged
+                // for this fixture (same gate philosophy as the run-config
+                // marker line above).
+                Log.i(TAG, "Backdrop two-pass armed for this fixture")
+            }
             roots = composed
             // Wire keyframes ride the same decode (additive envelope key);
             // omit-when-empty on the wire → empty map = zero footprint.
@@ -402,6 +427,35 @@ fun ScreenshotCaptureScreen(
                 // log line; the layer itself carries the capture geometry.
                 val bounds = cardBoundsInWindow
                 val layer = composedLayer
+
+                // ── PASS A (wave-26 lane BF-A) ───────────────────────────
+                // When this fixture declares backdrop-filter, the frame that
+                // just settled is the SAMPLE pass: every backdrop element
+                // suppressed its own paint, so the recorded layer IS the
+                // backdrop root image (filter-effects-2 §2). Snapshot it,
+                // publish it, and let the SAME layout repaint as the
+                // composite pass — the flip writes snapshot state read only
+                // in draw lambdas, so nothing recomposes or re-measures and
+                // the two passes are pixel-comparable by construction.
+                val backdropCoordinator = BackdropPassCoordinator.current
+                if (backdropCoordinator.pass == BackdropPass.SAMPLE) {
+                    val passA = layer?.let { captureComposedLayer(it) }
+                    if (passA != null) {
+                        Log.i(TAG, "Backdrop pass A captured: ${passA.width}x${passA.height}")
+                        backdropCoordinator.beginCompositePass(passA.asImageBitmap())
+                        // One settle for the repaint, same order of magnitude
+                        // as the pre-capture settle above.
+                        delay(250)
+                    } else {
+                        // No silent fallthrough: without a backdrop image the
+                        // elements would paint half-filtered. Disarm instead —
+                        // they fall back to the historical no-op and the
+                        // failure is attributable in the feeder's log.
+                        Log.e(TAG, "Backdrop pass A failed — falling back to unfiltered backdrops")
+                        backdropCoordinator.reset()
+                        delay(250)
+                    }
+                }
                 val bitmap = if (layer != null && bounds != null && bounds.width() > 0 && bounds.height() > 0) {
                     // Evidence trail for the truncation-class bug: record the
                     // canvas height actually captured so a feeder log grep can
@@ -450,6 +504,11 @@ fun ScreenshotCaptureScreen(
             // releases the rememberGraphicsLayer — clear our reference so the
             // next fixture can only ever snapshot ITS freshly-published layer.
             composedLayer = null
+            // Drop the pass-A bitmap and disarm the two-pass render with it:
+            // the next fixture re-arms from its OWN IR scan, so a backdrop
+            // document can never leak its backdrop image into the fixture
+            // that follows it.
+            BackdropPassCoordinator.current.reset()
             currentIndex = -1
             capturePhase = CapturePhase.LOADING
             pollGeneration++
@@ -1005,14 +1064,12 @@ private val CaptureCanvasBg      = Color(0xFF1A1A2E)
 // PNG height at 600 (docHeight = max(scrollHeight, 600)); the web composed
 // canvas uses the same `minHeight:600px`. Matching it keeps the composed PNG's
 // dark tail identical to the ref's when content is shorter than 600dp.
-private val ComposedCanvasMinHeight = 600.dp
-// wave-25 round 3 — the composed canvas's INITIAL CONTAINING BLOCK height:
-// the ref renders at REF_MIN_CANVAS_H − 2×pad (568) and the image frame
-// restores the 600 floor, so a `bottom: 0` hoisted box lands flush with the
-// CONTENT bottom — 16dp above the image edge, exactly where the ref's raster
-// puts it. Derived through the runtime's pure helper (the width twin is
-// computed per-canvas from the live width, which CAPTURE_WIDTH can override).
-private val ComposedIcbHeight = composedIcbExtentDp(ComposedCanvasMinHeight.value).dp
+// wave-26 (lane RES): the literal moved into the runtime
+// (COMPOSED_CANVAS_MIN_HEIGHT_DP) because composedIcbHeightDp needs the same
+// floor — a number spelled in two places is how the old constant ICB height
+// drifted from the ref in the first place. Value unchanged (600).
+private val ComposedCanvasMinHeight =
+    com.styleconverter.runtime.core.renderer.COMPOSED_CANVAS_MIN_HEIGHT_DP.dp
 
 /**
  * Resolve the composed canvas background (FIX 3, TITAN Round 4b) — the native
@@ -1212,6 +1269,34 @@ private fun ComposedCaptureCanvas(
         onRendered()
     }
 
+    // wave-26 (lane RES residual 1) — the composed canvas's MEASURED outer
+    // height in dp, frozen after the first real measurement.
+    //
+    // Mirrors capture-browser-ref.mjs's TWO-PASS document-height rule exactly:
+    // lay out once at the floor viewport, read the document height, set the
+    // viewport to THAT number, screenshot — the ref never re-measures. Freezing
+    // here reproduces the same single re-layout and, crucially, makes the
+    // published `100vh` basis below deterministic instead of a
+    // measure↔publish oscillation. Seeded at the floor so the very first
+    // composition already anchors end-inset boxes at 568 (the wave-25
+    // behaviour) rather than at a degenerate zero.
+    var measuredCanvasHeightDp by androidx.compose.runtime.remember(roots) {
+        androidx.compose.runtime.mutableStateOf(ComposedCanvasMinHeight.value)
+    }
+    // The freeze latch for the state above (one measurement per fixture).
+    var canvasHeightFrozen by androidx.compose.runtime.remember(roots) {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
+    // Density for the px→dp conversion of the measured size below. The
+    // runtime works in a px==dp space, so the ICB numbers MUST be dp.
+    val canvasDensity = androidx.compose.ui.platform.LocalDensity.current
+    // The ICB the hoist overlay and the viewport channel both anchor in.
+    // Width from the LIVE canvas (CAPTURE_WIDTH can override it); height from
+    // the frozen measurement, floored — both minus the frame per side.
+    val composedIcbHeight =
+        com.styleconverter.runtime.core.renderer.composedIcbHeightDp(measuredCanvasHeightDp).dp
+    val composedIcbWidth = composedIcbExtentDp(canvasWidth.value).dp
+
     // FIX 3 (body/root background propagation) — TITAN Round 4b. The ref frames
     // every page with a ZERO-specificity `:where(html,body){background:WHITE}`
     // (the corpus-v4 canvas),
@@ -1333,6 +1418,20 @@ private fun ComposedCaptureCanvas(
                     // Transparency rides the SAME plan entry so the fold and
                     // the render agree on this root's (zero) flow footprint.
                     .copy(marginTransparent = staticPos)
+                    // wave-26 (lane RES residual 3a): fold in the HOIST BAND
+                    // the root's own §8.3.1 plan would otherwise emit as
+                    // padding OUTSIDE its border box. Both are outer spacing
+                    // in the same adjoining region, so leaving each owner to
+                    // emit its own ADDED where the browser takes ONE max()
+                    // (worked example in withHoistBand's kdoc). The band is
+                    // read through the runtime's own plan builder, so the
+                    // number folded here is exactly the number suppressed at
+                    // the render below — one decision, two consumers.
+                    .let { plan ->
+                        val band = com.styleconverter.runtime.core.renderer.ComponentRenderer
+                            .composedRootHoistBand(root, uaBlockMargins = true)
+                        withHoistBand(plan, band.topPx to band.bottomPx)
+                    }
             }
         }
     }
@@ -1364,6 +1463,14 @@ private fun ComposedCaptureCanvas(
             // .background in the chain because an earlier draw modifier wraps
             // the later ones — drawContent() here includes the background fill.
             .drawWithContent {
+                // wave-26 lane BF-A — two-pass invalidation anchor. Reading
+                // the coordinator's pass HERE (a snapshot read inside the
+                // canvas's own draw) is what guarantees the layer is
+                // RE-RECORDED when the coordinator flips SAMPLE→COMPOSITE. A
+                // descendant's invalidation alone is not enough to rely on:
+                // the whole point of the flip is that the layer must hold the
+                // composite pass's display list when the capture reads it.
+                BackdropPassCoordinator.current.pass
                 graphicsLayer.record { this@drawWithContent.drawContent() }
                 drawLayer(graphicsLayer)
             }
@@ -1372,6 +1479,24 @@ private fun ComposedCaptureCanvas(
             .onGloballyPositioned { coords ->
                 val pos = coords.positionInWindow()
                 onPositioned(pos, coords.size.width.toFloat(), coords.size.height.toFloat())
+                // wave-26 lane BF-A — the pass-A bitmap's origin IS this
+                // canvas's top-left, and backdrop elements report their own
+                // box in window space, so the coordinator needs this offset to
+                // map one into the other. Published from the same callback
+                // that already reports the outer rect, so the origin and the
+                // capture geometry can never disagree.
+                BackdropPassCoordinator.current.publishCanvasOrigin(pos)
+                // wave-26 (lane RES residual 1): the SAME laid-out height the
+                // capture snapshots, in dp, threaded into the ICB extents
+                // computed above. Frozen after the first non-degenerate
+                // measurement — the ref measures once and re-lays-out once,
+                // and freezing is what makes a `100vh` document terminate
+                // instead of oscillating between measure and publish.
+                if (!canvasHeightFrozen && coords.size.height > 0) {
+                    canvasHeightFrozen = true
+                    measuredCanvasHeightDp =
+                        with(canvasDensity) { coords.size.height.toDp().value }
+                }
             }
             // Wave 17: the canvas padding lives OFF this outer Box and on the
             // in-flow Column below, so the CanvasRootHoist overlay (hosted
@@ -1399,8 +1524,28 @@ private fun ComposedCaptureCanvas(
                     // same number Chromium gives that ref's body content box.
                     widthPx = (canvasWidth - canvasPadding.horizontal).value
                 ),
+            // wave-26 (lane RES residual 2): the runtime-v1 media width basis
+            // is the ref's RENDER viewport (358 at the 390 default), not the
+            // framed 390 image. capture-browser-ref.mjs lays the ref page out
+            // in a REF_RENDER_WIDTH viewport and memcpy's the 16px frame onto
+            // the finished PNG, where no media query can observe it — so a
+            // `(max-width: 380px)` bucket is ACTIVE in the ref and was
+            // INACTIVE here. Composed capture only (this canvas), so the
+            // per-component 390 basis and the dark stage are untouched.
             com.styleconverter.runtime.core.media.MediaBucketEvaluator.LocalRenderSurfaceWidthPx provides
-                canvasWidth.value,
+                composedIcbWidth.value,
+            // wave-26 (lane RES residual 2): the SAME viewport for vw/vh —
+            // the runtime's DynamicValueResolver rewrites vw/vh/vmin/vmax
+            // against this channel when it is non-null and keeps its
+            // historical LocalConfiguration screen-dp basis when it is null
+            // (every non-composed path), so the 327 dark-stage baselines
+            // never see it. Height is the frozen measured ICB extent, which
+            // is what the ref's second-pass viewport is.
+            com.styleconverter.runtime.core.renderer.LocalComposedViewport provides
+                com.styleconverter.runtime.core.renderer.composedViewportFor(
+                    canvasWidthDp = canvasWidth.value,
+                    measuredCanvasHeightDp = measuredCanvasHeightDp,
+                ),
             com.styleconverter.runtime.core.states.DynamicStyleResolver.LocalForcedStates provides
                 (forceState?.let { setOf(it) } ?: emptySet()),
             com.styleconverter.runtime.animations.KeyframeAnimationDriver.LocalDocumentKeyframes provides
@@ -1437,10 +1582,23 @@ private fun ComposedCaptureCanvas(
             com.styleconverter.runtime.layout.position.CanvasRootHoist.Host(
                 roots,
                 // Width from the LIVE canvas (CAPTURE_WIDTH can override it),
-                // height from the fixed 600 floor — both minus the frame on
-                // both sides, via the runtime's pure helper.
-                canvasWidth = composedIcbExtentDp(canvasWidth.value).dp,
-                canvasHeight = ComposedIcbHeight,
+                // height from the FROZEN measured canvas extent floored at
+                // 600 — both minus the frame on both sides, via the runtime's
+                // pure helpers.
+                //
+                // wave-26 (lane RES residual 1): the height was a CONSTANT
+                // composedIcbExtentDp(600) = 568, i.e. the ref's FLOOR rather
+                // than the ref's height. capture-browser-ref.mjs sets its
+                // second viewport to max(scrollHeight, 568), so on a document
+                // taller than the floor the ref's ICB grows with the content
+                // and a `bottom: 0` hoisted box lands at the CONTENT bottom —
+                // Android anchored it 568dp from the canvas top instead
+                // (iOS reads its live geo.size.height, web's ICB div grows
+                // with the page, so the defect was Android-only). Short
+                // documents still resolve to 568, so every wave-25 capture
+                // whose content fits the floor is byte-identical.
+                canvasWidth = composedIcbWidth,
+                canvasHeight = composedIcbHeight,
                 canvasFrame = CaptureCanvasFrame,
             ) {
                 // Document flow: roots stacked top-to-bottom. FIX 1 injects the
@@ -1476,16 +1634,31 @@ private fun ComposedCaptureCanvas(
                         // Inline (left/right) margins are untouched by the
                         // override and still render on the root. Renderers reset
                         // the local for children, so the strip is root-only.
+                        // wave-26 (lane RES residual 3a): this root's HOIST
+                        // BAND is now folded into rootGaps above (see
+                        // withHoistBand), so the renderer must NOT emit it a
+                        // second time as padding outside the root's border
+                        // box. The channel names this exact root's id, and the
+                        // extractor's ids are hierarchical, so the suppression
+                        // cannot leak to a descendant container — no reset
+                        // plumbing, and nothing outside this loop is ever
+                        // suppressed.
                         val hosted: @androidx.compose.runtime.Composable () -> Unit = {
-                            if (rootPlans[i].stripDeclared) {
-                                androidx.compose.runtime.CompositionLocalProvider(
-                                    com.styleconverter.runtime.spacing.BlockMarginCollapse
-                                        .LocalCollapsedMargin provides
+                            androidx.compose.runtime.CompositionLocalProvider(
+                                com.styleconverter.runtime.spacing.BlockMarginCollapse
+                                    .LocalHoistBandSuppressedFor provides root.id,
+                                // RC-A4 strip rides the SAME provider call: a
+                                // stripped root's block margins are ZEROED
+                                // (they live in the gap Spacers instead), an
+                                // unstripped root keeps null = "no override",
+                                // which is the channel's default and therefore
+                                // byte-identical to the pre-wave-26 branch.
+                                com.styleconverter.runtime.spacing.BlockMarginCollapse
+                                    .LocalCollapsedMargin provides
+                                    (if (rootPlans[i].stripDeclared)
                                         com.styleconverter.runtime.spacing.CollapsedMargin(0f, 0f)
-                                ) { ComponentHost.Render(root) }
-                            } else {
-                                ComponentHost.Render(root)
-                            }
+                                    else null),
+                            ) { ComponentHost.Render(root) }
                         }
                         val m = rootMargins[i]
                         if (m.left > 0 || m.right > 0) {

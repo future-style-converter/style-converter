@@ -285,4 +285,79 @@ class UaBlockMarginsTest {
             listOf(opaque(8f, 8f), transparent(0f, 0f), opaque(8f, 8f)))
         assertEquals(listOf(8f, 8f, 0f, 8f), gaps)
     }
+
+    // ── Wave 26 (lane RES residual 3a) — the ROOT-STACK DOUBLE-COUNT fold ──
+    //
+    // B1..B6 pin `withHoistBand`, the step that gives a composed root's outer
+    // block spacing exactly ONE owner. Byte-parallel with the Swift twin
+    // (ComposedRootStackTests, same B-names and numbers) and with the band
+    // producer's own pins (runtimes/compose RootHoistBandTest).
+
+    @Test
+    fun b1_zeroBandLeavesThePlanUntouched() {
+        // The already-correct shape (blockquote root + <p> child: band 0 on
+        // both edges) must stay byte-identical — every pre-wave-26 capture
+        // whose roots emit no band is unmoved by this residual.
+        val plan = opaque(16f, 16f)
+        assertEquals(plan, withHoistBand(plan, 0f to 0f))
+    }
+
+    @Test
+    fun b2_bandJoinsTheStackEdgeAsTheCollapsedThroughValue() {
+        // blockquote root (own 16) whose first/last child is an <h5> (27):
+        // the renderer's band is max(16,27) − 16 = 11, so the folded edge is
+        // 16 + 11 = 27 — precisely the collapsed-through margin the browser
+        // takes into the adjoining chain.
+        val folded = withHoistBand(opaque(16f, 16f), 11f to 11f)
+        assertEquals(27f, folded.topPx, 0f)
+        assertEquals(27f, folded.bottomPx, 0f)
+        // The strip/transparency flags ride through unchanged.
+        assertEquals(true, folded.stripDeclared)
+        assertEquals(false, folded.marginTransparent)
+    }
+
+    @Test
+    fun b3_theDoubleCountThatUsedToRender_isGone() {
+        // THE DEFECT, end to end. Roots: [prev with a 40px bottom margin,
+        // blockquote (own 16) whose first child is an <h5> (27)].
+        //   BEFORE: gap = max(40,16) = 40, PLUS the renderer's 11px band
+        //           painted outside the root → 51px of spacing.
+        //   BROWSER: one adjoining set {40, 16, 27} → max = 40.
+        //   NOW: the band is folded in (root edge 27) and suppressed on the
+        //        render, so the fold alone emits max(40, 27) = 40.
+        val prev = opaque(0f, 40f)
+        val root = withHoistBand(opaque(16f, 16f), 11f to 11f)
+        val gaps = collapsedRootStackGapsPx(listOf(prev, root))
+        assertEquals(40f, gaps[1], 0f)
+    }
+
+    @Test
+    fun b4_twoAdjacentBandCarryingRoots_collapseToOneGap() {
+        // The case that PROVES subtraction cannot express this: root A (own
+        // 0) whose last child has a 16px bottom, root B (own 0) whose first
+        // child has a 16px top. Both bands are 16. Folded edges are 16/16, so
+        // the §8.3.1 fold emits ONE 16px gap. Subtracting the two bands from
+        // that gap would give −16 → floored 0 → 0+16+16 = 32 rendered.
+        val a = withHoistBand(opaque(0f, 0f), 16f to 16f)
+        val b = withHoistBand(opaque(0f, 0f), 16f to 16f)
+        assertEquals(listOf(16f, 16f, 16f), collapsedRootStackGapsPx(listOf(a, b)))
+    }
+
+    @Test
+    fun b5_transparentRootsNeverTakeABand() {
+        // A zero-flow root (canvas-hoisted, or the RC1 static-position
+        // anchor) displaces no flow sibling, so whatever its subtree emits
+        // must not enter the gap math — returned verbatim, band ignored.
+        val t = transparent(4f, 4f)
+        assertEquals(t, withHoistBand(t, 16f to 16f))
+    }
+
+    @Test
+    fun b6_asymmetricBandsFoldPerEdge() {
+        // Edge gates resolve independently (§8.3.1 is per edge): a root with
+        // a padded TOP and an open bottom folds only the bottom band.
+        val folded = withHoistBand(opaque(0f, 0f), 0f to 16f)
+        assertEquals(0f, folded.topPx, 0f)
+        assertEquals(16f, folded.bottomPx, 0f)
+    }
 }

@@ -268,6 +268,83 @@ object ComponentRenderer {
     )
 
     /**
+     * Wave 26 (lane RES residual 3a) — the HOIST BAND one composed ROOT will
+     * emit, exposed to the harness so its root-stack fold can own that
+     * spacing instead of letting it stack on top (see
+     * [com.styleconverter.runtime.spacing.BlockMarginCollapse.LocalHoistBandSuppressedFor]
+     * for the full double-count argument).
+     *
+     * PUBLIC because the Android harness is a separate Gradle module and
+     * cannot see [blockCollapsePlanFor]'s `internal` visibility; a thin
+     * accessor keeps the plan builder itself unexported. Returns (0, 0)
+     * whenever no plan exists — a childless root, a bailed container, or a
+     * closed edge gate — which is exactly "this root emits no band", so the
+     * caller needs no null handling.
+     *
+     * ## Why this reproduces the renderer's PRE-CONDITIONS, not just its plan
+     * The harness SUPPRESSES the renderer's band unconditionally for every
+     * composed root, so this accessor must return EXACTLY what the renderer
+     * would have painted — under-reporting deletes real spacing just as
+     * over-reporting adds phantom spacing. [blockCollapsePlanFor] alone is
+     * not that number: the renderer only reaches it through two gates the
+     * builder itself does not carry —
+     *   1. `ContentsUnboxing.resolve`, which splices `display: contents`
+     *      children out before the plan sees the child list, and
+     *   2. `displayConfig.type == DisplayType.BLOCK` — §8.3.1 collapsing is
+     *      block-flow only, so a `display: flex | grid | inline-block |
+     *      table` root, and a `column-count`/`column-width` root (which
+     *      extractDisplayConfig maps to MULTI_COLUMN), emit NO band at all.
+     * Without gate 2 a `display:flex` root of `<p>` children reported
+     * (16, 16) here while the renderer painted nothing, and the harness fold
+     * added 16px above and below it. The SwiftUI twin has never had this
+     * hole — its `MarginCollapsePlanner.containerPlan` carries the
+     * block-only guard INSIDE the planner (GATE 1), so both consumers there
+     * read one gated number; this is the Compose alignment.
+     *
+     * KNOWN residual (recorded, not silent): the renderer derives its
+     * `displayConfig` from the BUCKET-RESOLVED property list, while a
+     * harness-side static fold can only see the base list. A selector/media
+     * bucket that re-declares `Display` on a composed ROOT would therefore
+     * still diverge — `Display` is not in [gateAffectingParentBucketType]'s
+     * bail set. No corpus fixture declares a bucket `Display` on a root;
+     * closing it needs the active-bucket set threaded to the harness fold.
+     *
+     * @param component the composed ROOT component.
+     * @param uaBlockMargins the caller's WPT-capture flag, threaded straight
+     *   into the plan builder so the band the harness folds is the SAME
+     *   number the renderer would have painted (one decision, two consumers).
+     */
+    fun composedRootHoistBand(
+        component: IRComponent,
+        uaBlockMargins: Boolean,
+    ): com.styleconverter.runtime.spacing.CollapsedMargin {
+        val none = com.styleconverter.runtime.spacing.CollapsedMargin(0f, 0f)
+        // Gate 1 — the renderer plans over the UNBOXED component (RenderComponent
+        // resolves `display: contents` before anything reads the child list), so
+        // planning over the raw one would see a different first/last child.
+        // Identity for the whole contents-free corpus.
+        val resolved = ContentsUnboxing.resolve(component)
+        // Gate 2 — block flow only, the renderer's own pre-condition at the
+        // block branch (`displayConfig.type == DisplayType.BLOCK`). Read through
+        // the SAME extractor so the two can never disagree about a keyword.
+        val display = try {
+            extractDisplayConfig(resolved.properties).type
+        } catch (e: Exception) {
+            // extractDisplayConfig's own catch-all default (see the renderer).
+            DisplayType.BLOCK
+        }
+        if (display != DisplayType.BLOCK) return none
+        // Same builder the block branch runs — never a re-derivation.
+        val plan = blockCollapsePlanFor(resolved, uaBlockMargins).plan
+            ?: return none
+        // The band is the plan's parent-edge hoist, top and bottom.
+        return com.styleconverter.runtime.spacing.CollapsedMargin(
+            topPx = plan.hoistTopPx,
+            bottomPx = plan.hoistBottomPx,
+        )
+    }
+
+    /**
      * Build the §8.3.1 collapse plan for a block container, or decide to
      * fall back. Pure over the IR (JVM-pinnable). Implements the UNIFIED
      * collapse gate contract's container-level bails B1-B10 (shared
@@ -926,8 +1003,13 @@ object ComponentRenderer {
         //  - containing block (% base) from the width channel — provided by
         //    the harness capture root (CaptureCanvas content box) and
         //    re-derived per level from each parent's resolved content box;
-        //  - viewport from LocalConfiguration (screen dp — the runtime's
-        //    px==dp space, matching every other IR px→dp conversion);
+        //  - viewport from the host-published [LocalComposedViewport] when a
+        //    composed WPT capture provides one (wave 26, lane RES residual 2
+        //    — the ref's 358 × 568-or-content RENDER viewport, see
+        //    WptComposedGeometry.kt), else LocalConfiguration screen dp (the
+        //    runtime's px==dp space, matching every other IR px→dp
+        //    conversion) — which is what EVERY non-composed path still gets,
+        //    so the 327 dark-stage baselines are untouched;
         //  - parent font size from the inheritance channel (the parent
         //    always publishes RESOLVED px FontSize, see fontSizePxOf);
         //  - root font size: 16px residual constant — fixtures never style
@@ -935,11 +1017,16 @@ object ComponentRenderer {
         //    inherits is the honest value (documented in the resolver).
         val containingBlock = com.styleconverter.runtime.core.variables.LocalContainingBlock.current
         val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+        // null on every non-composed path → the two elvis fallbacks below are
+        // the historical LocalConfiguration basis, verbatim.
+        val composedViewport = LocalComposedViewport.current
         val dynCtx = com.styleconverter.runtime.core.variables.DynamicValueResolver.Context(
             containingBlockWidthPx = containingBlock.widthPx,
             containingBlockHeightPx = containingBlock.heightPx,
-            viewportWidthPx = configuration.screenWidthDp.toFloat(),
-            viewportHeightPx = configuration.screenHeightDp.toFloat(),
+            viewportWidthPx = composedViewport?.widthPx
+                ?: configuration.screenWidthDp.toFloat(),
+            viewportHeightPx = composedViewport?.heightPx
+                ?: configuration.screenHeightDp.toFloat(),
             parentFontSizePx = com.styleconverter.runtime.core.variables.DynamicValueResolver
                 .fontSizePxOf(inheritedProperties)
                 ?: com.styleconverter.runtime.core.variables.DynamicValueResolver.DEFAULT_FONT_SIZE_PX,
@@ -1887,6 +1974,21 @@ object ComponentRenderer {
                     collapse.fallbackReason?.let { logCollapseFallbackOnce(it, component.id) }
                     val plan = collapse.plan
                     if (plan != null) {
+                        // Wave 26 (lane RES residual 3a): a composed ROOT's
+                        // band is owned by the harness's root-stack gap fold
+                        // (it folds `composedRootHoistBand` into the same
+                        // §8.3.1 max() as the root's own margin), so emitting
+                        // it here too would ADD where the browser takes ONE
+                        // max. The channel names the exact root's id, and the
+                        // extractor's ids are hierarchical, so a nested
+                        // container never matches and keeps its band
+                        // byte-identically without any reset plumbing.
+                        val suppressBand = com.styleconverter.runtime.spacing
+                            .BlockMarginCollapse.suppressesHoistBand(
+                                com.styleconverter.runtime.spacing.BlockMarginCollapse
+                                    .LocalHoistBandSuppressedFor.current,
+                                component.id,
+                            )
                         // Hoisted edge margins become TRANSPARENT spacing
                         // OUTSIDE the whole style chain (`modifier` carries
                         // the parent's own margin → size → bg): chaining the
@@ -1896,11 +1998,16 @@ object ComponentRenderer {
                         // sits outside the parent's border box.
                         Column(
                             modifier = Modifier
-                                .padding(top = plan.hoistTopPx.dp, bottom = plan.hoistBottomPx.dp)
+                                .padding(
+                                    top = if (suppressBand) 0.dp else plan.hoistTopPx.dp,
+                                    bottom = if (suppressBand) 0.dp else plan.hoistBottomPx.dp,
+                                )
                                 .then(modifier)
                         ) {
                             // Publish the per-child applied margins for
-                            // RenderContent's index-aligned child loop.
+                            // RenderContent's index-aligned child loop. No
+                            // suppression reset is needed here — the channel
+                            // is identity-keyed (see suppressesHoistBand).
                             CompositionLocalProvider(LocalBlockCollapsePlan provides plan) {
                                 RenderContent(component, textColor, displayConfig)
                             }
@@ -2221,8 +2328,34 @@ object ComponentRenderer {
                                 // through the normal chain (W2's widget
                                 // painting mounts inside RenderComponent);
                                 // this lane owns only their placement.
+                                //
+                                // Wave 26 (lane RES residual 3b): each member
+                                // still gets its §8.3.1 APPLIED margins from
+                                // the container's plan, exactly like
+                                // renderBlockChild above. The float-run branch
+                                // may skip this because a float can never
+                                // margin-collapse (bail B3 ⇒ the plan is
+                                // provably null whenever a float run exists);
+                                // an inline ATOM has no such guarantee — bail
+                                // B2 only fires on a DECLARED non-inline
+                                // Display, while InlineAtomFlow.isAtom accepts
+                                // an undeclared-Display <input>/<select>/
+                                // <button>/<a>. So a `<div><p style=
+                                // "margin:10px"><button><button></div>` builds
+                                // a real plan AND an atom run: dropping the
+                                // override rendered each button's own
+                                // uncollapsed margins instead of the plan's
+                                // max()-folded ones. Providing null is a no-op
+                                // (RenderComponent's read is null-tolerant),
+                                // so run-with-no-plan is byte-identical.
                                 seg.indices.forEach { i ->
-                                    RenderComponent(component.children[i])
+                                    CompositionLocalProvider(
+                                        com.styleconverter.runtime.spacing
+                                            .BlockMarginCollapse.LocalCollapsedMargin
+                                            provides collapsePlan?.perChild?.getOrNull(i)
+                                    ) {
+                                        RenderComponent(component.children[i])
+                                    }
                                 }
                             }
                         } else {

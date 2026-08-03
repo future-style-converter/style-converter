@@ -30,6 +30,18 @@ data class SpacingContext(
     // Root font size in px for rem resolution. Defaults to the CSS default.
     val rootFontSizePx: Float = 16f,
     // Viewport width/height in px for vw/vh/vmin/vmax.
+    //
+    // KNOWN GAP (wave 26, lane RES residual 2 — recorded, not silent): these
+    // are the FROZEN device-surface defaults, and no caller overrides them.
+    // Under a COMPOSED WPT capture the viewport is the ref's 358 × 568-or-
+    // content render box (core/renderer/WptComposedGeometry.kt), which the
+    // renderer DOES honour on the primary path — DynamicValueResolver
+    // rewrites vw/vh/vmin/vmax to px BEFORE any applier builds a
+    // SpacingContext, so a composed capture never reaches the numbers below.
+    // They are only observable if a viewport unit escapes that pre-pass;
+    // routing them too needs a viewport channel through the non-composable
+    // StyleApplier.buildSpacingContext chain, which would also move the
+    // frozen dark-stage defaults, so it is deliberately deferred.
     val viewportWidthPx: Float = 390f,
     val viewportHeightPx: Float = 844f,
     // Parent content-box width in px for % resolution. Optional — when null

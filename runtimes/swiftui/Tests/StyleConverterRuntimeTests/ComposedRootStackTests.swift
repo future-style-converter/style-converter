@@ -222,4 +222,225 @@ final class ComposedRootStackTests: XCTestCase {
         XCTAssertEqual(s.leading, [8, 8, 0])
         XCTAssertEqual(s.trailing, 8)
     }
+
+    // MARK: - B1-B6: wave 26 (lane RES residual 3a) — the ROOT-STACK
+    // DOUBLE-COUNT fold. Byte-parallel with the Kotlin twin
+    // (apps/android-harness UaBlockMarginsTest, same B-names and numbers)
+    // and with the band producer's own pins (composedRootHoistBand below).
+
+    func testB1ZeroBandLeavesThePlanUntouched() {
+        // The already-correct shape (blockquote root + <p> child: band 0 on
+        // both edges) stays byte-identical — every pre-wave-26 capture whose
+        // roots emit no band is unmoved by this residual.
+        let plan = opaque(16, 16)
+        XCTAssertEqual(UABlockMargin.withHoistBand(plan, band: (top: 0, bottom: 0)), plan)
+    }
+
+    func testB2BandJoinsTheStackEdgeAsTheCollapsedThroughValue() {
+        // blockquote root (own 16) whose first/last child is an <h5> (27):
+        // the renderer's band is max(16,27) − 16 = 11, so the folded edge is
+        // 16 + 11 = 27 — the collapsed-through margin the browser takes into
+        // the adjoining chain.
+        let folded = UABlockMargin.withHoistBand(opaque(16, 16), band: (top: 11, bottom: 11))
+        XCTAssertEqual(folded.top, 27)
+        XCTAssertEqual(folded.bottom, 27)
+        // Flags ride through unchanged.
+        XCTAssertTrue(folded.stripDeclared)
+        XCTAssertFalse(folded.marginTransparent)
+    }
+
+    func testB3TheDoubleCountThatUsedToRenderIsGone() {
+        // THE DEFECT, end to end. Roots: [prev with a 40px bottom margin,
+        // blockquote (own 16) whose first child is an <h5> (27)].
+        //   BEFORE: pad = max(40,16) = 40, PLUS the renderer's 11px band
+        //           painted outside the root -> 51px of spacing.
+        //   BROWSER: one adjoining set {40, 16, 27} -> max = 40.
+        //   NOW: the band is folded in (root edge 27) and suppressed on the
+        //        render, so the fold alone emits max(40, 27) = 40.
+        let prev = opaque(0, 40)
+        let root = UABlockMargin.withHoistBand(opaque(16, 16), band: (top: 11, bottom: 11))
+        XCTAssertEqual(UABlockMargin.stackedSpacing(plans: [prev, root]).leading[1], 40)
+    }
+
+    func testB4TwoAdjacentBandCarryingRootsCollapseToOneGap() {
+        // The case that PROVES subtraction cannot express this: root A (own
+        // 0) whose last child has a 16px bottom, root B (own 0) whose first
+        // child has a 16px top. Both bands are 16, folded edges 16/16, so
+        // the §8.3.1 fold emits ONE 16px gap. Subtracting the two bands from
+        // that gap would give -16 -> floored 0 -> 0+16+16 = 32 rendered.
+        let a = UABlockMargin.withHoistBand(opaque(0, 0), band: (top: 16, bottom: 16))
+        let b = UABlockMargin.withHoistBand(opaque(0, 0), band: (top: 16, bottom: 16))
+        let s = UABlockMargin.stackedSpacing(plans: [a, b])
+        XCTAssertEqual(s.leading, [16, 16])
+        XCTAssertEqual(s.trailing, 16)
+    }
+
+    func testB5TransparentRootsNeverTakeABand() {
+        // A zero-flow root (the RC1 static-position anchor on iOS) displaces
+        // no flow sibling, so whatever its subtree emits must not enter the
+        // gap math — returned verbatim, band ignored.
+        let t = transparent(4, 4)
+        XCTAssertEqual(UABlockMargin.withHoistBand(t, band: (top: 16, bottom: 16)), t)
+    }
+
+    func testB6AsymmetricBandsFoldPerEdge() {
+        // Edge gates resolve independently (§8.3.1 is per edge): a root with
+        // a padded TOP and an open bottom folds only the bottom band.
+        let folded = UABlockMargin.withHoistBand(opaque(0, 0), band: (top: 0, bottom: 16))
+        XCTAssertEqual(folded.top, 0)
+        XCTAssertEqual(folded.bottom, 16)
+    }
+
+    // MARK: - The band PRODUCER + the suppression channel (twins of the
+    // Compose RootHoistBandTest pins).
+
+    /// A 20px prose bar with a source tag and no declared margins — the UA
+    /// table supplies its block edges when uaBlockMargins is on.
+    private func bar(_ id: String, _ tag: String) throws -> IRComponent {
+        let json = """
+        {"id":"\(id)","name":"\(id)","meta":{"sourceTag":"\(tag)"},
+         "properties":[{"type":"Height","data":{"type":"length","px":20.0}}]}
+        """
+        return try JSONDecoder().decode(IRComponent.self, from: Data(json.utf8))
+    }
+
+    /// An UNPADDED block root (explicit padding-0 longhands are the live wire
+    /// shape) with the given tag and one child — both edge gates open.
+    private func root(_ id: String, _ tag: String, childTag: String,
+                      padTop: Double = 0.0) throws -> IRComponent {
+        let json = """
+        {"id":"\(id)","name":"\(id)","meta":{"sourceTag":"\(tag)"},
+         "properties":[
+           {"type":"Display","data":"block"},
+           {"type":"Width","data":{"type":"length","px":300.0}},
+           {"type":"PaddingTop","data":{"px":\(padTop)}},
+           {"type":"PaddingRight","data":{"px":0.0}},
+           {"type":"PaddingBottom","data":{"px":0.0}},
+           {"type":"PaddingLeft","data":{"px":0.0}}],
+         "children":[
+           {"id":"\(id)__0","name":"c","meta":{"sourceTag":"\(childTag)"},
+            "properties":[{"type":"Height","data":{"type":"length","px":20.0}}]}]}
+        """
+        return try JSONDecoder().decode(IRComponent.self, from: Data(json.utf8))
+    }
+
+    func testB1BandBlockquoteWithProseChildIsZero() throws {
+        // max(16, 16) − 16 = 0 on both edges: the plan already composes
+        // against the parent's OWN UA margin, so the root stack alone owns
+        // the 16.
+        let b = UABlockMargin.composedRootHoistBand(
+            try root("r1", "blockquote", childTag: "p"), uaBlockMargins: true)
+        XCTAssertEqual(b.top, 0)
+        XCTAssertEqual(b.bottom, 0)
+    }
+
+    func testB2BandBiggerChildMarginEscapesAsTheExcessOnly() throws {
+        // <h5> child (UA 27) under a blockquote root (UA 16): band 11.
+        let b = UABlockMargin.composedRootHoistBand(
+            try root("r2", "blockquote", childTag: "h5"), uaBlockMargins: true)
+        XCTAssertEqual(b.top, 11)
+        XCTAssertEqual(b.bottom, 11)
+    }
+
+    func testB4BandDarkStageBranchSeesNoUaMarginsAtAll() throws {
+        // uaBlockMargins = false is the property-fixture pipeline: no UA
+        // table, no declared margins => no plan => no band. The 327
+        // committed baselines ride this branch.
+        let b = UABlockMargin.composedRootHoistBand(
+            try root("r4", "blockquote", childTag: "h5"), uaBlockMargins: false)
+        XCTAssertEqual(b.top, 0)
+        XCTAssertEqual(b.bottom, 0)
+    }
+
+    func testB6BandChildlessRootHasNoBand() throws {
+        // The (0,0) contract for "no plan": a leaf root emits nothing, so
+        // the harness fold needs no nil handling.
+        let b = UABlockMargin.composedRootHoistBand(try bar("r6", "p"),
+                                                    uaBlockMargins: true)
+        XCTAssertEqual(b.top, 0)
+        XCTAssertEqual(b.bottom, 0)
+    }
+
+    func testSuppressionChannelMatchesExactlyOneIdAndNeverLeaks() {
+        // nil channel (every non-composed path) suppresses nothing.
+        XCTAssertFalse(MarginCollapse.suppressesHoistBand(suppressedForId: nil,
+                                                          componentId: "r1"))
+        // The flagged root matches …
+        XCTAssertTrue(MarginCollapse.suppressesHoistBand(suppressedForId: "r1",
+                                                         componentId: "r1"))
+        // … and nothing else does, including its own descendants: the
+        // extractor's ids are hierarchical (`<root>__<i>`), so a child id
+        // always EXTENDS its ancestor's and can never equal it.
+        XCTAssertFalse(MarginCollapse.suppressesHoistBand(suppressedForId: "r1",
+                                                          componentId: "r1__0"))
+        XCTAssertFalse(MarginCollapse.suppressesHoistBand(suppressedForId: "r1",
+                                                          componentId: "r2"))
+    }
+
+    // MARK: - B7/B8 — the accessor must report EXACTLY what the renderer
+    // paints. The harness suppresses the renderer's band UNCONDITIONALLY, so
+    // an accessor that under-reports deletes real spacing just as one that
+    // over-reports adds phantom spacing. Byte-parallel with the Kotlin twin.
+
+    func testB7NonBlockRootEmitsNoBandBecauseTheRendererPaintsNone() throws {
+        // §8.3.1 collapsing is block-flow only. `MarginCollapsePlanner`
+        // carries that guard INSIDE the planner (GATE 1/2/4), so both this
+        // accessor and the renderer already read one gated number — pinned
+        // so it can never migrate to the call site the way Compose's had.
+        for display in ["flex", "grid", "inline-block"] {
+            let b = UABlockMargin.composedRootHoistBand(
+                try displayRoot(display), uaBlockMargins: true)
+            XCTAssertEqual(b.top, 0, "display: \(display) top")
+            XCTAssertEqual(b.bottom, 0, "display: \(display) bottom")
+        }
+    }
+
+    func testB8DisplayContentsFirstChildIsUnboxedBeforePlanning() throws {
+        // `ComponentRenderer.init` runs ContentsUnboxing.resolve before
+        // anything reads the child list, so the renderer plans against the
+        // GRANDCHILD. Planning against the raw tree saw the wrapper `<div>`
+        // (UA 0) and reported a 0 band while the renderer planned 27 (the
+        // `<h5>`'s UA margin) — and the unconditional suppression then
+        // deleted those 27px outright.
+        let b = UABlockMargin.composedRootHoistBand(try contentsRoot(),
+                                                    uaBlockMargins: true)
+        XCTAssertEqual(b.top, 27)
+        XCTAssertEqual(b.bottom, 16)
+    }
+
+    /// A two-`<p>`-child root carrying an explicit `display` keyword.
+    private func displayRoot(_ display: String) throws -> IRComponent {
+        let json = """
+        {"id":"r7","name":"r7","meta":{"sourceTag":"div"},
+         "properties":[
+           {"type":"Display","data":"\(display)"},
+           {"type":"PaddingTop","data":{"px":0.0}},
+           {"type":"PaddingBottom","data":{"px":0.0}}],
+         "children":[
+           {"id":"r7__0","name":"c","meta":{"sourceTag":"p"},
+            "properties":[{"type":"Height","data":{"type":"length","px":20.0}}]},
+           {"id":"r7__1","name":"c","meta":{"sourceTag":"p"},
+            "properties":[{"type":"Height","data":{"type":"length","px":20.0}}]}]}
+        """
+        return try JSONDecoder().decode(IRComponent.self, from: Data(json.utf8))
+    }
+
+    /// `<div><div style="display:contents"><h5></div><p></div>`.
+    private func contentsRoot() throws -> IRComponent {
+        let json = """
+        {"id":"r8","name":"r8","meta":{"sourceTag":"div"},
+         "properties":[
+           {"type":"Display","data":"block"},
+           {"type":"PaddingTop","data":{"px":0.0}},
+           {"type":"PaddingBottom","data":{"px":0.0}}],
+         "children":[
+           {"id":"r8__0","name":"w","meta":{"sourceTag":"div"},
+            "properties":[{"type":"Display","data":"contents"}],
+            "children":[{"id":"r8__0__0","name":"c","meta":{"sourceTag":"h5"},
+              "properties":[{"type":"Height","data":{"type":"length","px":20.0}}]}]},
+           {"id":"r8__1","name":"c","meta":{"sourceTag":"p"},
+            "properties":[{"type":"Height","data":{"type":"length","px":20.0}}]}]}
+        """
+        return try JSONDecoder().decode(IRComponent.self, from: Data(json.utf8))
+    }
 }
