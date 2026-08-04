@@ -262,7 +262,15 @@ export const CANVAS_BG = '#FFFFFF';
 // pre-imgpad ref is geometrically stale for abspos-overlay tests, so the rev
 // bump retires them; the browser-rev-keyed cache re-renders LAZILY (each
 // section pays for its own refs the first time it runs under the new rev).
-export const CANVAS_REV = 'white-black-ink-font-lh-imgpad';
+// '-htmlpins' (wave-30 A5) marks the fifth leg: the three INHERITED pins
+// (color / font-family / line-height) moved from `:where(body)` to
+// `:where(html)`, so a ref declaring one of them at :root/html is no longer
+// clobbered by a specified value on <body> (full mechanism at
+// canvasFrameCss's A5 note). Every pre-htmlpins ref of such a page rasterised
+// the WRONG ink/face/rhythm and must never reach a live diff, so the rev bump
+// retires the whole tree; refs of pages with no root-scope text declaration
+// re-render byte-identically, they just pay the lazy re-render once.
+export const CANVAS_REV = 'white-black-ink-font-lh-imgpad-htmlpins';
 // wave-16 POST-LOAD: exported (was module-private) so post-load-extract.mjs
 // can frame the TEST page in the identical canvas the ref capture uses —
 // computed geometry snapshotted under a different pad would bake a
@@ -405,18 +413,54 @@ export async function interFontFaceCss() {
  *      viewport, so `height: 100%` children resolve against the same number
  *      they did under the pre-CAL-RC1 padded body (header AUDIT note).
  *    * `color` / `font-family` / `line-height` — the corpus-v4.1 ink + font
- *      + rhythm pins (inherited text properties; no containing-block hazard).
+ *      + rhythm pins. These are INHERITED text properties and live on
+ *      `:where(html)`, NOT on the body — see the A5 note below.
+ *
+ *  ── wave-30 A5: the INHERITED pins move to :where(html) ────────────────────
+ *  THE DEFECT (measured, not theoretical). `:where()` makes a rule
+ *  zero-SPECIFICITY, which settles selector-vs-selector contests on the SAME
+ *  element. It does nothing about the CASCADE-vs-INHERITANCE contest one
+ *  level down: CSS Cascade 5 §6.2 says a SPECIFIED value on an element always
+ *  wins over an INHERITED one, whatever the specificity that produced it —
+ *  inheritance is only consulted when the cascade yields nothing for that
+ *  element. So a ref that declares `:root { color: green }` (or `html { … }`)
+ *  and relies on <body> INHERITING it was silently overridden: our
+ *  `:where(body){ color:#000 }` supplied a specified value on body, body's
+ *  descendants inherited BLACK, and the ref rasterised black ink where the
+ *  spec truth was green. Our harness captures — which render the same author
+ *  CSS with no such body rule — were CORRECT and scored as failures against a
+ *  wrong target.
+ *  MEASURED: css/selectors/child-indexed-no-parent-ref.html renders
+ *  rgb(0,0,0) under the body pins and rgb(0,128,0) under the html pins;
+ *  corpus-wide 31 reference files declare one of the three inherited
+ *  properties at :root/html without restating it on body.
+ *  THE FIX: hoist exactly the three INHERITED pins to `:where(html)`. Then a
+ *  root-scope author rule beats them ON THE ROOT (same element, author origin
+ *  beats… no — same origin, but `:where()` is specificity 0 and the author's
+ *  `:root`/`html` selector is not, so the author wins the cascade there), and
+ *  body inherits the AUTHOR's value because nothing supplies a specified
+ *  value on body any more. A ref with no root-scope declaration is
+ *  byte-identical to before: html gets the pin, body inherits it, every
+ *  descendant inherits it.
+ *  WHAT STAYS ON BODY: `display: flow-root`, `box-sizing`, `min-height` and
+ *  the body half of `margin/padding/background`. All four are NON-inherited,
+ *  so hoisting them would change nothing on body — and flow-root/min-height
+ *  are specifically ABOUT the body box (BFC containment, viewport fill), so
+ *  moving them would break the CAL-RC1 geometry contract outright.
+ *  `background` legitimately stays on both (canvas propagation reads the
+ *  root's, then the body's — html.css UA behaviour).
  *
  *  async because the embedded @font-face payloads are read from disk once
  *  per process (interFontFaceCss memoises them). */
 export async function canvasFrameCss() {
   return `
       ${await interFontFaceCss()}
-      :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }
-      :where(body) { display: flow-root; box-sizing: border-box;
-                     min-height: 100vh; color: #000;
+      :where(html) { color: #000;
                      font-family: ${REF_FONT_STACK};
                      line-height: ${REF_LINE_HEIGHT}; }
+      :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }
+      :where(body) { display: flow-root; box-sizing: border-box;
+                     min-height: 100vh; }
     `;
 }
 

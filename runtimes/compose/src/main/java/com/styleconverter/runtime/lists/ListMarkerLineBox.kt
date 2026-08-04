@@ -131,11 +131,56 @@ object ListMarkerLineBox {
      *   value converted at the call site's density).
      */
     fun snappedHeightPx(lineCount: Int, refLineBoxPx: Float): Int? =
+        snappedHeightPx(prefixExactPx = 0f, lineCount = lineCount,
+            refLineBoxPx = refLineBoxPx)
+
+    /**
+     * The same height, but ROUNDED AGAINST THE ACCUMULATED POSITION
+     * instead of in isolation — wave 30, lane 3 (fix B3). Compose-only:
+     * iOS already reproduces the reference pitch.
+     *
+     * ## The defect (measured on the LIVE wave29-final section)
+     * Every composed line box is quantised independently, so a CSS box of
+     * 31.25px reports 31 on EVERY row and the error accumulates down the
+     * document. Row groups of `wpt__css-counter-styles__armenian__
+     * css3-counter-styles-007` (24 single-`<li>` `<ol>`s at `font-size:
+     * 25px`, i.e. a 31.25px line box), first ink row of each:
+     *
+     * | row | web | Android | iOS |
+     * |-----|-----|---------|-----|
+     * | 2   | 93  | 96 (+3) | 95 (+2) |
+     * | 10  | 343 | 344 (+1)| 345 (+2) |
+     * | 15  | 499 | 499 (0) | 501 (+2) |
+     * | 20  | 656 | 653 (−3)| 656 (0) |
+     * | 25  | 812 | 808 (−4)| 813 (+1) |
+     *
+     * Android's OFFSET marches −0.25px per row (+3 → −4 over 23 rows)
+     * while iOS holds a constant +1..+2; web renders 27 ink groups and
+     * Android only 26, the last row having fallen out of the 6px the
+     * document lost. iOS's pitch already averages 31.25, which is why
+     * this repair is deliberately NOT mirrored.
+     *
+     * ## The rule
+     * Round the ACCUMULATED position, not the per-row height: a row whose
+     * exact line boxes above it total [prefixExactPx] claims
+     * `round(prefix + n·L) − round(prefix)`. Successive 31.25px rows then
+     * read 31, 32, 31, 31, … (`Math.round` is half-UP, so the 62.5
+     * boundary goes to 63) and the k-th row's TOP lands on
+     * `round(k · 31.25)` — the browser's own sub-pixel stacking, expressed
+     * in the integer heights Compose's layout pass can carry.
+     *
+     * @param prefixExactPx the EXACT (unrounded) total of every line box
+     *   stacked above this one in the same stacking container. 0 for the
+     *   first row, which makes this identical to the isolated rounding
+     *   above — so a container with one row is byte-unchanged.
+     */
+    fun snappedHeightPx(prefixExactPx: Float, lineCount: Int, refLineBoxPx: Float): Int? =
         if (lineCount <= 0) null
         // Rounded, not truncated, and floored at zero — the item's snap
         // spells the same expression, and a shared rounding rule is what
         // keeps the two boxes landing on the same integer pixel.
-        else Math.round(lineCount * refLineBoxPx).coerceAtLeast(0)
+        else (Math.round(prefixExactPx + lineCount * refLineBoxPx) -
+            Math.round(prefixExactPx)).coerceAtLeast(0)
 
     /**
      * The snap as a `Modifier`, for the marker `Text` in the row.
@@ -151,12 +196,30 @@ object ListMarkerLineBox {
      * @param lineCount a LAMBDA reading the live `TextLayoutResult`, not a
      *   captured value: the layout block must re-read it on the frame it
      *   settles instead of freezing the initial 0.
+     * @param prefixExactPx wave 30 (lane 3, fix B3) — given THIS row's
+     *   exact line-box total, returns the exact total of every row stacked
+     *   above it (see [RowPitchAccumulator]). Defaults to the constant 0,
+     *   i.e. the isolated per-row rounding this function has always done,
+     *   so every caller that does not opt in is byte-unchanged. Called
+     *   only once the line count has settled, so a pre-settle frame never
+     *   registers a 0-height row into the accumulator's order.
      */
-    fun snap(refLineBoxPx: Float, lineCount: () -> Int): Modifier =
+    fun snap(
+        refLineBoxPx: Float,
+        // Declared BEFORE `lineCount` although it is the optional one:
+        // `lineCount` must stay last so the existing trailing-lambda call
+        // form `snap(31.25f) { lines }` keeps binding to it.
+        prefixExactPx: (Float) -> Float = { 0f },
+        lineCount: () -> Int
+    ): Modifier =
         if (refLineBoxPx <= 0f) Modifier
         else Modifier.layout { measurable, constraints ->
             val placeable = measurable.measure(constraints)
-            val target = snappedHeightPx(lineCount(), refLineBoxPx)
+            val lines = lineCount()
+            val target =
+                if (lines <= 0) null
+                else snappedHeightPx(
+                    prefixExactPx(lines * refLineBoxPx), lines, refLineBoxPx)
             if (target == null) {
                 layout(placeable.width, placeable.height) { placeable.place(0, 0) }
             } else {

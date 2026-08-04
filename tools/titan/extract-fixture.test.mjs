@@ -1275,12 +1275,16 @@ test('wave8: splitSelectorChain protects functional-pseudo arguments', () => {
     { compounds: ['ul', ':nth-child(2n + 1)'], combinators: [' '] });
 });
 
-test('wave8: splitSelectorChain rejects sibling combinators and malformed chains', () => {
-  assert.equal(splitSelectorChain('div + p'), null);   // next-sibling unsupported
-  assert.equal(splitSelectorChain('div ~ p'), null);   // subsequent-sibling unsupported
+test('wave8: splitSelectorChain rejects malformed chains', () => {
+  // wave-30 A2 REVISED THIS PIN: `div + p` / `div ~ p` used to return null
+  // ("sibling combinators unsupported"). They now tokenise — see the
+  // wave-30 tests below. Only MALFORMED chains still bail.
   assert.equal(splitSelectorChain('> div'), null);     // leading child — malformed
   assert.equal(splitSelectorChain('div >'), null);     // trailing child — malformed
   assert.equal(splitSelectorChain('a >> b'), null);    // double child — malformed
+  assert.equal(splitSelectorChain('div +'), null);     // trailing sibling — malformed
+  assert.equal(splitSelectorChain('+ div'), null);     // leading sibling — malformed
+  assert.equal(splitSelectorChain('a + ~ b'), null);   // doubled combinator
 });
 
 test('wave8: child combinator matches only the IMMEDIATE parent', () => {
@@ -1528,10 +1532,13 @@ test('wave12: collectStyledTags collects rightmost-compound tags only', () => {
     'span::before { content: "x" }' +  // pseudo-element host span → collected
     '.flex > div { width: 10px }' +    // rightmost div → collected
     '* { margin: 0 }' +                // universal — deliberately NOT collected
-    'code + b { color: blue }',        // sibling combinator → unsupported, skipped
+    // wave-30 A2 REVISED THIS PIN: sibling combinators now tokenise, so the
+    // rightmost compound `b` IS the rule's host and must be guarded — the
+    // pre-A2 code skipped the rule entirely and let <b> be merged away.
+    'code + b { color: blue }',        // rightmost b → collected
   );
   const tags = collectStyledTags(rules);
-  assert.deepEqual([...tags].sort(), ['div', 'em', 'span', 'strong']);
+  assert.deepEqual([...tags].sort(), ['b', 'div', 'em', 'span', 'strong']);
 });
 
 test('wave12: extractBodyTreeNested absorbs the preamble strong (no child node)', () => {
@@ -3654,4 +3661,572 @@ test('S-RC2: a pre-family element keeps the decoded newlines verbatim', () => {
     + '<div id="s3">&NewLine;&NewLine;</div>';
   const { components } = buildComponents(html, parseCss('div#s3 { white-space: pre; font-size: 100px }'), 'nl');
   assert.equal(components.nl__0._text, '\n\n');
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// wave-30 lane A: the extractor's selector engine
+//   A1 :dir()  ·  A2 sibling combinators + the styledTags fallback
+//   A3 the unsupported-rule count  ·  A4 root-inheritance BAKE-DOWN
+//   A7 UA hyperlink styling
+// ═════════════════════════════════════════════════════════════════════════════
+
+// New exports under test — dynamic import, same pattern as the blocks above.
+const {
+  resolveDirectionality,
+  countUnsupportedRules,
+  bodyDeclaresInheritedProperty,
+  shouldSlotBodyChildren,
+  rootInheritedBakeProps,
+  uaLinkProps,
+} = await import('./extract-fixture.mjs');
+
+// ── A1: :dir() (Selectors-4 §11.2) ──────────────────────────────────────────
+
+test('wave30 A1: :dir(ltr) matches an element whose own dir attribute is ltr', () => {
+  // dir-selector-ltr-001's whole assertion, at the matcher level.
+  assert.equal(selectorMatches('div:dir(ltr)', 'div', { dir: 'ltr' }), true);
+  assert.equal(selectorMatches('div:dir(rtl)', 'div', { dir: 'ltr' }), false);
+  assert.equal(selectorMatches('div:dir(rtl)', 'div', { dir: 'RTL' }), true); // ASCII-ci
+});
+
+test('wave30 A1: an INVALID :dir() argument drops the whole rule', () => {
+  // CSS 2.2 §4.1.7 — an invalid selector invalidates its rule. This is what
+  // makes dir-selector-ltr-002 / -003 pass: the red rule must never apply.
+  for (const sel of ['div:dir(ltrr)', 'div:dir(ltr, rtl)', 'div:dir()',
+    'div:dir(auto)', 'div:dir(LTR extra)']) {
+    assert.equal(selectorMatches(sel, 'div', { dir: 'ltr' }), false, sel);
+  }
+});
+
+test('wave30 A1: ltr-002 / ltr-003 keep painting their green base', () => {
+  // End-to-end shape of both tests: the base rule paints green, the invalid
+  // :dir() rule would paint red, and the fixture must show green.
+  const html = '<body><div dir="ltr"></div></body>';
+  for (const bad of ['div:dir(ltrr)', 'div:dir(ltr, rtl)']) {
+    const css = `div { width:100px; height:100px; background-color:green } ${bad} { background-color:red }`;
+    const { components } = buildComponents(html, parseCss(css), 't');
+    assert.equal(components.t__0.properties['background-color'], 'green', bad);
+  }
+});
+
+test('wave30 A1: ltr-001 now paints green (the rule that was dropped)', () => {
+  const css = 'div { width:100px; height:100px; background-color:red }'
+            + ' div:dir(ltr) { background-color:green }';
+  const { components } = buildComponents(
+    '<body><div dir="ltr"></div></body>', parseCss(css), 't');
+  assert.equal(components.t__0.properties['background-color'], 'green');
+});
+
+test('wave30 A1: resolveDirectionality walks own attr → ancestors → ltr', () => {
+  // Rung 1 — own attribute.
+  assert.equal(resolveDirectionality({ dir: 'rtl' }), 'rtl');
+  // Rung 1, dir=auto — first-strong over the stamped subtree text.
+  assert.equal(resolveDirectionality({ dir: 'auto' }, { subtreeText: 'فارسی' }), 'rtl');
+  assert.equal(resolveDirectionality({ dir: 'auto' }, { subtreeText: 'français' }), 'ltr');
+  // Rung 2 — nearest ancestor wins over a farther one.
+  assert.equal(resolveDirectionality({}, null, [
+    { tag: 'div', attrs: { dir: 'rtl' } },
+    { tag: 'div', attrs: { dir: 'ltr' } },
+  ]), 'ltr');
+  assert.equal(resolveDirectionality({}, null, [
+    { tag: 'div', attrs: { dir: 'rtl' } },
+    { tag: 'div', attrs: {} },
+  ]), 'rtl');
+  // An INVALID dir value leaves "no directionality state" (HTML §15.3.4) —
+  // the element inherits as if the attribute were absent.
+  assert.equal(resolveDirectionality({ dir: 'ltrl' }, null,
+    [{ tag: 'div', attrs: { dir: 'rtl' } }]), 'rtl');
+  // Rung 3 — the document default.
+  assert.equal(resolveDirectionality({}), 'ltr');
+  assert.equal(resolveDirectionality({}, null, []), 'ltr');
+});
+
+test('wave30 A1: :dir() reads the ATTRIBUTE, never the CSS direction property', () => {
+  // Selectors-4 §11.2. dir-selector-change-001 sets `direction: ltr` in CSS
+  // and `dir=rtl` from script; the attribute decides. Here the ancestor
+  // carries only the CSS property in its resolved bag — which the matcher
+  // never sees — so the element stays at the ltr default.
+  assert.equal(selectorMatches('div:dir(rtl)', 'div', { style: 'direction:rtl' }), false);
+  assert.equal(selectorMatches('div:dir(ltr)', 'div', { style: 'direction:rtl' }), true);
+});
+
+test('wave30 A1: :dir() inherits through the ancestor chain at match time', () => {
+  const ancestors = [{ tag: 'div', attrs: { dir: 'rtl' } }, { tag: 'div', attrs: {} }];
+  assert.equal(selectorMatches('span:dir(rtl)', 'span', {}, ancestors), true);
+  assert.equal(selectorMatches('span:dir(ltr)', 'span', {}, ancestors), false);
+});
+
+// ── A2: sibling combinators (Selectors-4 §15.4 / §15.5) ─────────────────────
+
+test('wave30 A2: splitSelectorChain tokenises + and ~', () => {
+  assert.deepEqual(splitSelectorChain('div + p'),
+    { compounds: ['div', 'p'], combinators: ['+'] });
+  assert.deepEqual(splitSelectorChain('div~p'),
+    { compounds: ['div', 'p'], combinators: ['~'] });
+  assert.deepEqual(splitSelectorChain('.a > .b + .c .d'),
+    { compounds: ['.a', '.b', '.c', '.d'], combinators: ['>', '+', ' '] });
+  // The `+` of an An+B argument is NOT a combinator (paren depth).
+  assert.deepEqual(splitSelectorChain('p:nth-child(2n + 1)'),
+    { compounds: ['p:nth-child(2n + 1)'], combinators: [] });
+});
+
+// A one-parent sibling scope: three element children, the subject is index 2.
+const SIBS = [
+  { tag: 'div', attrs: { id: 'x' } },
+  { tag: 'em', attrs: {} },
+  { tag: 'span', attrs: {} },
+];
+const SUBJECT_POS = { isRoot: false, sibIndex: 2, sibCount: 3, siblings: SIBS };
+const ONE_PARENT = [{ tag: 'body', attrs: {}, pos: { isRoot: true } }];
+
+test('wave30 A2: + matches ONLY the immediately preceding sibling', () => {
+  assert.equal(selectorMatches('em + span', 'span', {}, ONE_PARENT, SUBJECT_POS), true);
+  // #x is two slots back — adjacency must refuse it.
+  assert.equal(selectorMatches('#x + span', 'span', {}, ONE_PARENT, SUBJECT_POS), false);
+});
+
+test('wave30 A2: ~ matches ANY preceding sibling', () => {
+  assert.equal(selectorMatches('#x ~ span', 'span', {}, ONE_PARENT, SUBJECT_POS), true);
+  assert.equal(selectorMatches('em ~ span', 'span', {}, ONE_PARENT, SUBJECT_POS), true);
+  // A tag that is not among the preceding siblings still misses.
+  assert.equal(selectorMatches('code ~ span', 'span', {}, ONE_PARENT, SUBJECT_POS), false);
+});
+
+test('wave30 A2: a sibling rule never matches without sibling metadata', () => {
+  // No `pos` at all ⇒ adjacency is unprovable ⇒ honest miss, NOT a degrade
+  // to a descendant match (which would style boxes the browser does not).
+  assert.equal(selectorMatches('em + span', 'span', {}, ONE_PARENT), false);
+  // …and with no ancestor chain either, the structural-chain bail applies.
+  assert.equal(selectorMatches('em + span', 'span', {}), false);
+});
+
+test('wave30 A2: sibling steps do not consume the ancestor budget', () => {
+  // `body em + span`: the descendant step still has <body> available after
+  // the sibling step, because siblings share one parent.
+  assert.equal(selectorMatches('body em + span', 'span', {}, ONE_PARENT, SUBJECT_POS), true);
+  assert.equal(selectorMatches('main em + span', 'span', {}, ONE_PARENT, SUBJECT_POS), false);
+});
+
+test('wave30 A2: a sibling compound resolves :dir() from the shared chain', () => {
+  // The mechanism selectors__dir-selector-auto-direction-change-001 needs:
+  // `:dir(ltr) + #target` asks about the PREVIOUS SIBLING's directionality.
+  const sibs = [
+    { tag: 'div', attrs: { dir: 'rtl' } },
+    { tag: 'div', attrs: { id: 'target' } },
+  ];
+  const pos = { isRoot: false, sibIndex: 1, sibCount: 2, siblings: sibs };
+  assert.equal(selectorMatches(':dir(rtl) + #target', 'div', { id: 'target' },
+    ONE_PARENT, pos), true);
+  assert.equal(selectorMatches(':dir(ltr) + #target', 'div', { id: 'target' },
+    ONE_PARENT, pos), false);
+});
+
+test('wave30 A2: a dir=auto sibling resolves from its stamped subtree text', () => {
+  // The walker stamps `subtreeText` onto each entry of the shared sibling
+  // list precisely so this works (see extractBodyTreeNested's second pass).
+  const mk = (text) => [
+    { tag: 'div', attrs: { dir: 'auto' }, subtreeText: text },
+    { tag: 'div', attrs: { id: 'target' } },
+  ];
+  for (const [text, expect] of [['رسمية', false], ['LTR', true]]) {
+    const sibs = mk(text);
+    const pos = { isRoot: false, sibIndex: 1, sibCount: 2, siblings: sibs };
+    assert.equal(
+      selectorMatches(':dir(ltr) + #target', 'div', { id: 'target' }, ONE_PARENT, pos),
+      expect, text);
+  }
+});
+
+test('wave30 A2: extractBodyTreeNested stamps subtreeText on pos AND siblings', () => {
+  const tree = extractBodyTreeNested(
+    '<body><div dir="auto"><span>رسمية</span></div><div id="t"></div></body>', 5);
+  assert.equal(tree[0].pos.subtreeText, 'رسمية');
+  // Shared sibling list carries the same scalars (never a pos back-reference,
+  // which would make the tree cyclic).
+  assert.equal(tree[1].pos.siblings[0].subtreeText, 'رسمية');
+  assert.equal(tree[1].pos.siblings[1].isEmpty, true);
+  assert.doesNotThrow(() => JSON.stringify(tree));
+});
+
+test('wave30 A2b: collectStyledTags raw-scans a MALFORMED chain', () => {
+  // `> span` cannot be tokenised, so no host compound is identifiable; the
+  // guard over-protects rather than letting <span> be merged away.
+  assert.ok(collectStyledTags([{ selector: '> span', props: { color: 'red' } }]).has('span'));
+  // Class / id / pseudo tokens must NOT leak in as tag names.
+  const tags = collectStyledTags([{ selector: '.note >> #x:first-child', props: { color: 'red' } }]);
+  assert.deepEqual([...tags].sort(), []);
+});
+
+test('wave30 A2: dir-selector-change-001 keeps its <span> as a component', () => {
+  // The measured regression: with `#x:dir(rtl) + span` dropped, styledTags
+  // was empty, the span was inline-merged into its parent's text, and the
+  // lime box vanished from the fixture entirely.
+  const css = '#x:dir(rtl) + span { background-color: lime } #outer { direction:ltr }';
+  const html = '<body><div id="outer"><div><div id="x"></div>'
+             + '<span>The background color should be lime</span></div></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 't');
+  const inner = components.t__0.children.t__0__0;
+  const span = inner.children.t__0__0__1;
+  assert.equal(span._text, 'The background color should be lime');
+  // Statically the dir attribute is absent (the script adds it), so the lime
+  // is NOT baked here — post-load's computed overlay delivers it. What this
+  // pin guards is that the component EXISTS to receive it.
+  assert.equal(span.properties['background-color'], undefined);
+});
+
+test('wave30 A2: a static + rule that DOES match bakes its declaration', () => {
+  const css = '#x:dir(ltr) + span { background-color: lime }';
+  const html = '<body><div><div id="x"></div><span>t</span></div></body>';
+  const { components } = buildComponents(html, parseCss(css), 't');
+  assert.equal(components.t__0.children.t__0__1.properties['background-color'], 'lime');
+});
+
+// ── A3: the unsupported-rule count ──────────────────────────────────────────
+
+test('wave30 A3: countUnsupportedRules counts what the matcher drops', () => {
+  const rules = parseCss(
+    'div { color: red }' +               // matchable
+    'p[hidden] { color: red }' +         // attribute selector → dropped
+    'a:hover { color: red }' +           // unmodelled pseudo → dropped
+    'div:dir(ltrr) { color: red }' +     // invalid :dir() argument → dropped
+    '.a + .b { color: red }' +           // sibling combinator → NOW matchable
+    'p::first-line { color: red }'       // unmodelled pseudo-element → dropped
+  );
+  assert.equal(countUnsupportedRules(rules), 4);
+  assert.equal(countUnsupportedRules([]), 0);
+  assert.equal(countUnsupportedRules(undefined), 0);
+});
+
+test('wave30 A3: an unsupported NON-rightmost compound still counts', () => {
+  // selectorMatchesPseudoElement pre-flights every compound, so a rule whose
+  // ancestor compound is unsupported matches nothing either.
+  assert.equal(countUnsupportedRules(parseCss('[data-x] span { color: red }')), 1);
+});
+
+// ── A4: root-inheritance BAKE-DOWN ──────────────────────────────────────────
+//
+// The gate finding that produced this shape: delivering root inheritance by
+// SLOTTING (nesting the body children under an UNSIZED body-root) held on web
+// but cost both natives ~0.16 SSIM on text-decoration-inset-001/002, and
+// restructured 342 corpus fixtures while doing it. The trigger set is
+// unchanged; only the delivery is. These pins are the contract:
+//   1. the trigger set is exactly the closed list (unchanged from wave-30);
+//   2. slotting fires on the HEIGHT arm ONLY;
+//   3. the baked values are the root's, on the top-level children;
+//   4. the child's own declaration wins (css-cascade-4 §7.3);
+//   5. …including via a shorthand that COVERS the longhand;
+//   6. the copy is LOUD.
+
+test('wave30 A4: bodyDeclaresInheritedProperty fires on inherited props only', () => {
+  assert.equal(bodyDeclaresInheritedProperty({ color: 'red' }), true);
+  assert.equal(bodyDeclaresInheritedProperty({ 'font-size': '50px' }), true);
+  assert.equal(bodyDeclaresInheritedProperty({ direction: 'rtl' }), true);
+  assert.equal(bodyDeclaresInheritedProperty({ 'caret-color': 'orange' }), true);
+  // Non-inherited declarations change nothing for the children.
+  assert.equal(bodyDeclaresInheritedProperty({ 'background-color': 'red' }), false);
+  assert.equal(bodyDeclaresInheritedProperty({ margin: '0', contain: 'layout' }), false);
+  assert.equal(bodyDeclaresInheritedProperty({}), false);
+  assert.equal(bodyDeclaresInheritedProperty(null), false);
+});
+
+test('wave30 A4: the trigger set is the pinned closed list', () => {
+  // Pinned member-by-member: a silent widening changes what every top-level
+  // component in the corpus carries, and must never land unreviewed.
+  for (const p of ['font-size', 'font-family', 'font-weight', 'font-style',
+    'color', 'line-height', 'direction', 'caret-color', 'letter-spacing',
+    'word-spacing', 'text-align', 'visibility']) {
+    assert.equal(bodyDeclaresInheritedProperty({ [p]: 'x' }), true, p);
+  }
+  // Inherited but deliberately OUTSIDE the list (the documented gap) — and
+  // non-inherited properties, which could never matter.
+  for (const p of ['white-space', 'text-indent', 'cursor', 'quotes',
+    'background-color', 'padding', 'height', 'contain']) {
+    assert.equal(bodyDeclaresInheritedProperty({ [p]: 'x' }), false, p);
+  }
+});
+
+test('wave30 A4: shouldSlotBodyChildren fires on the HEIGHT arm ONLY', () => {
+  // The gate finding: an inherited-only root must NOT restructure the
+  // document, because the resulting unsized-parent shape mis-renders on both
+  // natives (inset-001 android 0.9742→0.8162 · ios 0.9576→0.8160).
+  assert.equal(shouldSlotBodyChildren({ height: '4000px' }), true);   // wave-17
+  assert.equal(shouldSlotBodyChildren({ color: 'red' }), false);      // baked
+  assert.equal(shouldSlotBodyChildren({ 'font-size': '50px' }), false);
+  assert.equal(shouldSlotBodyChildren({ height: '0px' }), false);
+  assert.equal(shouldSlotBodyChildren({ 'background-color': 'red' }), false);
+  // Both together: the height arm still wins and the document nests.
+  assert.equal(shouldSlotBodyChildren({ height: '4000px', color: 'red' }), true);
+});
+
+test('wave30 A4: rootInheritedBakeProps copies only declared trigger props', () => {
+  assert.deepEqual(
+    rootInheritedBakeProps({ 'font-size': '50px', 'caret-color': 'orange' }, {}),
+    { 'font-size': '50px', 'caret-color': 'orange' });
+  // Non-trigger keys on the root are never handed down, inherited or not.
+  assert.equal(
+    rootInheritedBakeProps({ 'background-color': 'red', 'white-space': 'pre' }, {}),
+    null);
+  // Nothing to give / nobody to give it to.
+  assert.equal(rootInheritedBakeProps({}, {}), null);
+  assert.equal(rootInheritedBakeProps(null, {}), null);
+  assert.equal(rootInheritedBakeProps({ color: 'red' }, null), null);
+});
+
+test('wave30 A4: the child\'s OWN declaration beats the root (cascade §7.3)', () => {
+  // The child declares font-size itself → it keeps 9px and only `color`
+  // is handed down.
+  assert.deepEqual(
+    rootInheritedBakeProps({ 'font-size': '50px', color: 'red' },
+      { 'font-size': '9px' }),
+    { color: 'red' });
+  // Every trigger prop declared → nothing left to bake.
+  assert.equal(
+    rootInheritedBakeProps({ color: 'red' }, { color: 'green' }), null);
+});
+
+test('wave30 A4: a shorthand that COVERS the longhand suppresses the bake', () => {
+  // css-fonts-4 §6: `font` sets size/family/weight/style and resets
+  // line-height, so none of the five may be baked over it — even though
+  // their names never appear in the child's bag.
+  assert.equal(
+    rootInheritedBakeProps(
+      { 'font-size': '50px', 'font-family': 'serif', 'font-weight': '700',
+        'font-style': 'italic', 'line-height': '2' },
+      { font: '12px serif' }),
+    null);
+  // …but `font` says nothing about colour, which still comes down.
+  assert.deepEqual(
+    rootInheritedBakeProps({ 'font-size': '50px', color: 'red' },
+      { font: '12px serif' }),
+    { color: 'red' });
+  // css-ui-4 §7.2: `caret` covers caret-color.
+  assert.equal(
+    rootInheritedBakeProps({ 'caret-color': 'orange' }, { caret: 'auto' }), null);
+  // css-cascade-4 §3.2: `all` covers every longhand EXCEPT direction.
+  assert.deepEqual(
+    rootInheritedBakeProps(
+      { 'font-size': '50px', color: 'red', direction: 'rtl' }, { all: 'unset' }),
+    { direction: 'rtl' });
+});
+
+test('wave30 A4: an inherited root declaration BAKES onto the body children', () => {
+  // caret-color-visited-inheritance's shape: the 50px must reach the text.
+  const { components, lossyReasons } = buildComponents(
+    '<body><main><a href="">link</a></main></body>',
+    parseCss(':root { font-size: 50px; caret-color: orange }'), 't');
+  assert.equal(components.t__body._role, 'body-root');
+  // SHAPE: the <main> stays a top-level SIBLING — no nesting, no unsized
+  // slotted parent for the natives to mis-size.
+  assert.equal(components.t__body.children, undefined);
+  assert.equal(components.t__0._tag, 'main');
+  // VALUES: the root's declarations now ride on the child's own bag.
+  assert.equal(components.t__0.properties['font-size'], '50px');
+  assert.equal(components.t__0.properties['caret-color'], 'orange');
+  // …and the root keeps its own bag untouched (the composed canvases read it).
+  assert.equal(components.t__body.properties['font-size'], '50px');
+  // LOUD, once, and rolled up to the document.
+  assert.deepEqual(components.t__0._lossyReasons, ['body-inherited-baked']);
+  assert.equal(components.t__0._lossy, true);
+  assert.ok(lossyReasons.includes('body-inherited-baked'));
+  // The DEEPER <a> is untouched: it inherits from <main> through each
+  // runtime's own INHERITED_PROPERTY_TYPES merge — only the top-level hop
+  // was ever missing.
+  const a = components.t__0.children.t__0__0;
+  assert.equal(a.properties['font-size'], undefined);
+});
+
+test('wave30 A4: the bake reaches body-level TEXT runs too', () => {
+  // A bare body text run is a body child like any element — prose rendered
+  // at the root's font-size, not the 16px default.
+  const { components } = buildComponents(
+    '<body>lead<div>x</div></body>', parseCss('body { color: red }'), 't');
+  assert.equal(components.t__text.properties.color, 'red');
+  assert.ok(components.t__text._lossyReasons.includes('body-inherited-baked'));
+});
+
+test('wave30 A4: a NON-inherited-only root bag stays byte-for-byte legacy', () => {
+  // No trigger property → no bake, no marker, no shape change.
+  const { components } = buildComponents(
+    '<body><div></div></body>', parseCss('body { background-color: red }'), 't');
+  assert.equal(components.t__body.children, undefined);
+  assert.deepEqual(components.t__0.properties, { width: '100px', height: '100px' });
+  assert.equal(components.t__0._lossy, undefined);
+});
+
+test('wave30 A4: the bake runs AFTER the empty-node placeholder decision', () => {
+  // The 100x100 placeholder means "this element declares nothing of its
+  // own" — a handed-down value must not disguise that, or a scaffolding
+  // wrapper would silently become a styled subject with no box.
+  const { components } = buildComponents(
+    '<body><div></div></body>', parseCss('body { color: red }'), 't');
+  assert.equal(components.t__0.properties.width, '100px');
+  assert.equal(components.t__0.properties.height, '100px');
+  assert.equal(components.t__0.properties.color, 'red');
+});
+
+test('wave30 A4: a SLOTTED (sized) body is NOT also baked', () => {
+  // Under the height arm the children are real descendants, so every
+  // runtime's inherited merge already hands them the root's values through
+  // the wire's parent edge — copying on top would turn an inherited value
+  // into an own declaration.
+  const { components } = buildComponents(
+    '<body><div>x</div></body>',
+    parseCss('body { height: 4000px; color: red }'), 't');
+  const child = components.t__body.children.t__0;
+  assert.equal(child.properties.color, undefined);
+  assert.equal(child._lossyReasons, undefined);
+});
+
+test('wave30 A4: no emitted body-root means no bake', () => {
+  // With no root-scope rule there is no inheritance SOURCE in the fixture,
+  // so there is nothing to hand down — same gate slotting uses.
+  const { components } = buildComponents(
+    '<body><div>x</div></body>', parseCss('div { color: red }'), 't');
+  assert.equal(components.t__body, undefined);
+  assert.equal(components.t__0._lossyReasons, undefined);
+});
+
+// ── A7: UA hyperlink styling (HTML Rendering §15.5.2) ───────────────────────
+
+test('wave30 A7: uaLinkProps fills the UA rule for an <a href>', () => {
+  assert.deepEqual(uaLinkProps('a', { href: '' }, {}),
+    { color: '#0000EE', 'text-decoration-line': 'underline' });
+  // An <a> with NO href is not a hyperlink (HTML §4.6.1).
+  assert.equal(uaLinkProps('a', { name: 'top' }, {}), null);
+  assert.equal(uaLinkProps('span', { href: 'x' }, {}), null);
+});
+
+test('wave30 A7: author declarations beat the UA origin, per property', () => {
+  // CSS Cascade 5 §6.1. The cascade is per-property, so declaring one does
+  // not suppress the other.
+  assert.deepEqual(uaLinkProps('a', { href: 'x' }, { color: 'red' }),
+    { 'text-decoration-line': 'underline' });
+  assert.deepEqual(uaLinkProps('a', { href: 'x' }, { 'text-decoration': 'none' }),
+    { color: '#0000EE' });
+  assert.deepEqual(uaLinkProps('a', { href: 'x' }, { 'text-decoration-line': 'overline' }),
+    { color: '#0000EE' });
+  // Both declared → nothing left to fill.
+  assert.equal(uaLinkProps('a', { href: 'x' },
+    { color: 'red', '-webkit-text-decoration': 'none' }), null);
+});
+
+test('wave30 A7: the bake rides a LOUD lossy marker', () => {
+  const { components, lossyReasons } = buildComponents(
+    '<body><a href="">link</a></body>', parseCss('body { color: green }'), 't');
+  const a = components.t__0;   // top-level sibling (A4 bakes, never slots)
+  // The UA rule is on the ELEMENT, so it beats the root's INHERITED green —
+  // which is why A4's bake-down must not overwrite it (uaLinkProps ran
+  // inside buildNode, so `color` was already in the bag when the bake's
+  // author-wins guard looked).
+  assert.equal(a.properties.color, '#0000EE');
+  assert.equal(a.properties['text-decoration-line'], 'underline');
+  assert.ok(a._lossyReasons.includes('ua-link-styling-baked'));
+  assert.ok(lossyReasons.includes('ua-link-styling-baked'));
+});
+
+test('wave30 A7: an author colour on the link suppresses the UA colour', () => {
+  const { components } = buildComponents(
+    '<body><a href="">link</a></body>', parseCss('a { color: green }'), 't');
+  assert.equal(components.t__0.properties.color, 'green');
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//   wave-30 fix-T1: A7's author-wins guard must also see the rules the
+//   matcher DROPPED
+// ═════════════════════════════════════════════════════════════════════════════
+
+const { uaLinkSuppressedProps, selectorCouldTargetLink } =
+  await import('./extract-fixture.mjs');
+
+test('fix-T1: selectorCouldTargetLink sees link-state pseudos and bare `a` tags', () => {
+  // Link-state pseudo-classes (Selectors-4 §11), wherever they sit.
+  for (const sel of ['a:link', ':visited', 'p :any-link', '#x:local-link',
+    ':target-current', 'main :is(a:visited > :where(.a + span))']) {
+    assert.equal(selectorCouldTargetLink(sel), true, sel);
+  }
+  // A bare `a` TAG at the head of a compound — start, after a combinator,
+  // after a comma, or inside a functional pseudo.
+  for (const sel of ['a', 'div a', 'div > a', 'p, a', ':is(a)', 'a[href]']) {
+    assert.equal(selectorCouldTargetLink(sel), true, sel);
+  }
+  // …and NOT a class/id/ident that merely starts with the letter a.
+  for (const sel of ['.a', '#a', 'div.a', 'article', 'span.abc + .a',
+    'div:hover', '[data-a]']) {
+    assert.equal(selectorCouldTargetLink(sel), false, sel);
+  }
+});
+
+test('fix-T1: a DROPPED link rule suppresses only the UA property it declares', () => {
+  // `a:link` is an unsupported compound (`:link` is not in SUPPORTED_PSEUDOS),
+  // so the matcher never applies the rule and the resolved bag the A7 guard
+  // reads has no `color` in it at all.
+  assert.equal(countUnsupportedRules(parseCss('a:link { color: red }')), 1);
+  assert.deepEqual([...uaLinkSuppressedProps(parseCss('a:link { color: red }'))],
+    ['color']);
+  // Per-property: a dropped decoration rule leaves the UA colour alone.
+  assert.deepEqual([...uaLinkSuppressedProps(
+    parseCss('a:visited { text-decoration: none }'))], ['text-decoration-line']);
+  // Both spellings, one rule.
+  assert.deepEqual([...uaLinkSuppressedProps(
+    parseCss('a:link { color: red; -webkit-text-decoration: none }'))].sort(),
+    ['color', 'text-decoration-line']);
+});
+
+test('fix-T1: an unrelated dropped rule suppresses nothing', () => {
+  // `div:hover` is dropped too (unmodelled pseudo) — but it neither targets
+  // links nor declares a UA link property, so the bake must be untouched.
+  assert.deepEqual([...uaLinkSuppressedProps(parseCss('div:hover { width: 10px }'))], []);
+  // A link-targeting DROPPED rule that declares neither UA property.
+  assert.deepEqual([...uaLinkSuppressedProps(parseCss('a:link { width: 10px }'))], []);
+  // A link rule the matcher CAN apply is handled by the existing resolved-bag
+  // guard, not by this one — no double-counting.
+  assert.deepEqual([...uaLinkSuppressedProps(parseCss('a { color: green }'))], []);
+});
+
+test('fix-T1: css-color/color-mix-currentcolor-visited no longer gets a wrong blue', () => {
+  // The test's whole sheet. `a:link { color: red }` is dropped, so pre-fix the
+  // element resolved to an empty bag and A7 baked UA #0000EE over the author's
+  // red — a GUARANTEED-wrong pixel. The underline still bakes (nothing
+  // declares a decoration).
+  const rules = parseCss('a:link { color: red } a:visited { color: green } '
+    + 'span { background-color: color-mix(in srgb, currentcolor, white 75%) }');
+  const { components } = buildComponents('<body><a href=""><span>x</span></a></body>', rules, 't');
+  const a = components.t__0;
+  assert.equal(a.properties.color, undefined, 'UA blue must not be baked');
+  assert.equal(a.properties['text-decoration-line'], 'underline');
+});
+
+test('fix-T1: selectors/is-where-visited no longer gets a wrong blue', () => {
+  // `:visited, :link { color: black }` — parseCss explodes the list into two
+  // rules, both dropped, both declaring `color`.
+  const rules = parseCss(':visited, :link { color: black } '
+    + '#parent1 :is(:visited) { color: green }');
+  assert.deepEqual([...uaLinkSuppressedProps(rules)], ['color']);
+  const { components } = buildComponents('<body><a href="">a</a></body>', rules, 't');
+  assert.equal(components.t__0.properties.color, undefined);
+  assert.equal(components.t__0.properties['text-decoration-line'], 'underline');
+});
+
+test('fix-T1: a plain <a href> with no dropped link rules still bakes both', () => {
+  const { components } = buildComponents('<body><a href="x">hi</a></body>',
+    parseCss('div:hover { width: 10px }'), 't');
+  assert.equal(components.t__0.properties.color, '#0000EE');
+  assert.equal(components.t__0.properties['text-decoration-line'], 'underline');
+  assert.ok(components.t__0._lossyReasons.includes('ua-link-styling-baked'));
+  // …and with no rules at all (the pure A7 path).
+  const bare = buildComponents('<body><a href="x">hi</a></body>', [], 't');
+  assert.equal(bare.components.t__0.properties.color, '#0000EE');
+});
+
+test('fix-T1: the suppression is a per-property argument to uaLinkProps', () => {
+  // Pinned at the unit level so a caller that forgets to thread the set
+  // degrades to the OLD behaviour visibly rather than silently.
+  assert.deepEqual(uaLinkProps('a', { href: '' }, {}, new Set(['color'])),
+    { 'text-decoration-line': 'underline' });
+  assert.equal(uaLinkProps('a', { href: '' }, {},
+    new Set(['color', 'text-decoration-line'])), null);
+  assert.deepEqual(uaLinkProps('a', { href: '' }, {}, new Set()),
+    { color: '#0000EE', 'text-decoration-line': 'underline' });
+  // Not a hyperlink → still null, suppression or not.
+  assert.equal(uaLinkProps('a', {}, {}, new Set()), null);
 });

@@ -977,26 +977,66 @@ function parseAttrsFromTagOpen(tagOpen) {
  * non-inherited universal props on an anonymous inline run are a corner
  * accepted under the 'inline-run-merged' lossy marker.
  *
- * Rules splitSelectorChain/parseCompound reject (sibling combinators,
- * attr selectors, unknown pseudos) are skipped: our matcher drops those
- * rules everywhere, so they can't style a child component either — the
- * merge loses nothing the engine would have applied.
+ * Rules parseCompound rejects (attr selectors, unknown pseudos) are
+ * skipped: our matcher drops those rules everywhere, so they can't style a
+ * child component either — the merge loses nothing the engine would have
+ * applied.
+ *
+ * wave-30 A2b — the MALFORMED-CHAIN fallback. When splitSelectorChain
+ * returns null the selector could not be tokenised at all, so we cannot say
+ * which compound is the rule's host; the pre-A2b code then contributed
+ * NOTHING and the merge went ahead unguarded. That is the asymmetric-cost
+ * case: keeping a `<span>` as its own component costs an extra (correctly
+ * placed, unstyled) box, while merging it away can delete the very element
+ * the rule was written to style. So we raw-scan the selector text for bare
+ * tag names and over-protect. Scoped to the null-chain path on purpose — a
+ * chain that DID tokenise has an identified host compound, and widening the
+ * guard to every parseCompound-unsupported rule would keep spans out of the
+ * inline merge corpus-wide (a real layout change: an unmerged inline element
+ * becomes a stacked block component).
  *
  * Exported so the unit tests can pin the guard.
  */
 export function collectStyledTags(rules) {
   const out = new Set();
   for (const r of rules) {
-    // Tokenise the selector into compounds; null = unsupported chain
-    // (sibling combinators / malformed) — rule never matches, skip.
+    // Tokenise the selector into compounds; null = malformed chain — we
+    // cannot identify the host compound, so fall back to the raw scan.
     const chain = splitSelectorChain(r.selector);
-    if (!chain || chain.compounds.length === 0) continue;
+    if (!chain || chain.compounds.length === 0) {
+      for (const t of rawScanSelectorTags(r.selector)) out.add(t);
+      continue;
+    }
     // Only the rightmost compound identifies the rule's HOST element.
     const parsed = parseCompound(chain.compounds[chain.compounds.length - 1]);
     if (parsed.unsupported) continue; // unmatchable rule — can't style anything
     // Record the concrete host tag; '*' is excluded (see doc comment).
     if (parsed.needTag && parsed.needTag !== '*') out.add(parsed.needTag);
   }
+  return out;
+}
+
+/**
+ * wave-30 A2b: last-resort tag harvest from a selector our tokeniser could
+ * not decompose. Pulls every bare tag-name token — an identifier NOT
+ * preceded by `.`, `#`, `:`, `-`, `[`, `=`, `"`, `'` or a word character, so
+ * class names (`.note`), ids (`#x`), pseudo names (`:first-child`, whose
+ * `first` and `child` are joined by `-`), attribute names/values and
+ * `An+B`-style arguments never leak in — and lower-cases them to match
+ * parseCompound's `needTag` normalisation.
+ *
+ * Over-collection is the intended failure mode (see collectStyledTags): a tag
+ * that never actually hosts a rule merely keeps its element out of the inline
+ * merge, whereas under-collection deletes a styled element. Only INLINE_MERGE
+ * tags can be affected at all, since the guard is consulted nowhere else.
+ */
+function rawScanSelectorTags(selector) {
+  const out = [];
+  if (typeof selector !== 'string') return out;
+  // [^\w.#:\-[="'] as the preceding character, or start-of-string.
+  const re = /(^|[^\w.#:[\-="'])([A-Za-z][A-Za-z0-9]*)/g;
+  let m;
+  while ((m = re.exec(selector)) !== null) out.push(m[2].toLowerCase());
   return out;
 }
 
@@ -2370,6 +2410,39 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
       }
       out.push(node);
     });
+    // wave-30 A1/A2 — SECOND PASS: stamp the two facts a `:dir()` / `:empty`
+    // compound needs about an element it is NOT the subject of.
+    //
+    // `subtreeText` is the dir=auto text corpus (HTML §15.3.4's first-strong
+    // scan walks the element's whole subtree; see collectSubtreeText, whose
+    // own-text-then-children-in-order concatenation this reproduces in O(n)
+    // by reusing the children's already-stamped values instead of re-walking).
+    // It must exist BEFORE match time because :dir() can be asked about this
+    // element from three directions — as the subject, as an ancestor of the
+    // subject, or as a preceding SIBLING (`:dir(ltr) + #target`, the whole
+    // point of selectors__dir-selector-auto-direction-change-001) — and the
+    // matcher holds no tree handle in any of them.
+    //
+    // Stamped on BOTH the node's own `pos` and its entry in the SHARED
+    // `siblings` list, as plain scalars. Deliberately not a back-reference to
+    // `pos`: `pos.siblings[i].pos === pos` would make the tree cyclic and
+    // break every JSON round-trip through it.
+    //
+    // Runs after the sibling loop so it sees each node's FINAL text — the
+    // wave-22 inline-chain collapse rewrites ownText and empties children.
+    // Known ordering limit (documented, not silent): mergeCtx.resolveWhiteSpace
+    // and mergeCtx.resolveProps run DURING the loop, so a `:dir(auto)` rule
+    // consulted by those two resolvers still sees an unstamped pos and falls
+    // back to ltr. No corpus test resolves white-space or a collapse guard
+    // through a :dir() selector.
+    out.forEach((node, i) => {
+      const parts = [node.ownText || ''];
+      for (const child of node.children ?? []) parts.push(child.pos?.subtreeText || '');
+      const text = parts.filter(Boolean).join(' ');
+      node.pos.subtreeText = text;
+      siblingList[i].subtreeText = text;
+      siblingList[i].isEmpty = node.pos.isEmpty;
+    });
     return out;
   }
   return recurse(inner, [], 0);
@@ -2816,7 +2889,29 @@ const SUPPORTED_FUNCTIONAL_PSEUDOS = new Set([
   // parseCompound for the argument validation and evalPseudo for the
   // negation itself.
   'not',
+  // wave-30 A1 (selectors__dir-selector-ltr-001, web-ref 0.395 against the
+  // filled-green-square ref): the ONLY rule that paints the subject green is
+  // `div:dir(ltr) { background-color: green }`, and `dir` was absent from
+  // this set — so parseCompound flagged the compound unsupported, the rule
+  // matched NOTHING, and the div kept the `div { background-color: red }`
+  // base (the wave29-final per-test IR at
+  // runs/wave29-final/sections/selectors/per-test-ir/…ltr-001.json carries
+  // BackgroundColor red where the ref is green).
+  // Selectors-4 §11.2 defines :dir() as taking a SINGLE <ident> that is
+  // either `ltr` or `rtl`; any other argument makes the selector invalid,
+  // which per CSS 2.2 §4.1.7 invalidates the whole rule. parseCompound
+  // enforces exactly that (see the `dir` branch there), which is what keeps
+  // dir-selector-ltr-002 (`:dir(ltrr)`) and -003 (`:dir(ltr, rtl)`) painting
+  // their green base instead of the red the invalid rule would have applied.
+  'dir',
 ]);
+
+// wave-30 A1: the two directionality states Selectors-4 §11.2 accepts as the
+// :dir() argument. Matching is ASCII case-insensitive because the argument is
+// a CSS <ident> keyword (CSS Syntax 3 §3.1 — keywords are case-insensitive),
+// NOT the HTML `dir` attribute value (which HTML §15.3.4 also compares
+// ASCII-case-insensitively, so the two agree).
+const DIR_PSEUDO_ARGS = new Set(['ltr', 'rtl']);
 
 // swarm-003 Bug 1 (css-lists__counter-001, css-pseudo__before-*,
 // css-counter-styles__*): pseudo-elements we model. Rules whose rightmost
@@ -2957,6 +3052,28 @@ function parseCompound(compound) {
         out.pseudos.push({ name, arg: innerSel, inner });
         continue;
       }
+      // wave-30 A1: `:dir()` needs its ARGUMENT validated here, at parse
+      // time, for the same "no silent fallthroughs" reason `:not()` does —
+      // except the consequence runs the other way. Selectors-4 §11.2's
+      // grammar is `:dir( <ident> )` with `ltr` / `rtl` the only meaningful
+      // values; ANY other argument is an invalid selector, and CSS 2.2
+      // §4.1.7 says an invalid selector invalidates the ENTIRE rule. So an
+      // unrecognised argument must mark the compound unsupported (rule
+      // dropped), never "matches nothing but the rule survives" and never a
+      // lenient fallback to ltr. That is not a conservatism dodge — it is
+      // literally what dir-selector-ltr-002 (`div:dir(ltrr) { …red }`) and
+      // -003 (`div:dir(ltr, rtl) { …red }`) assert: both tests pass ONLY
+      // because the red rule is thrown away by the parser.
+      if (name === 'dir') {
+        const dirArg = (arg ?? '').trim().toLowerCase();
+        // A comma (`ltr, rtl`) or any internal whitespace means more than
+        // one component value reached the single-<ident> slot — invalid.
+        if (!DIR_PSEUDO_ARGS.has(dirArg)) { out.unsupported = true; return out; }
+        // Store the NORMALISED keyword so evalPseudo compares two lowercase
+        // strings and can never re-derive a different answer than we did.
+        out.pseudos.push({ name, arg: dirArg });
+        continue;
+      }
       out.pseudos.push({ name, arg });
       continue;
     }
@@ -3059,13 +3176,18 @@ export function splitCompounds(sel) {
   return out;
 }
 
+// wave-30 A2: the three EXPLICIT combinator characters Selectors-4 §15
+// defines (the fourth, descendant, is whitespace). Kept as one constant so
+// the tokeniser below and the matcher in selectorMatchesPseudoElement can
+// never drift on which characters are combinators.
+const EXPLICIT_COMBINATORS = new Set(['>', '+', '~']);
+
 /**
  * wave-8 (css-flexbox abspos-autopos family + css-break): tokenise a full
  * selector into its compound chain WITH combinators. Selectors-4 §15 defines
  * four combinators: descendant (whitespace), child (`>`), next-sibling (`+`),
- * subsequent-sibling (`~`). We model descendant + child; sibling combinators
- * stay unsupported (the extractor has no sibling-adjacency matcher and a
- * silent downgrade of `div + p` to `div p` would over-match).
+ * subsequent-sibling (`~`). wave-30 A2 completes the set — all four are now
+ * modelled.
  *
  * Why this exists: the previous pipeline (splitCompounds + a blanket
  * `/[>+~]/` reject in selectorMatchesPseudoElement) dropped every rule
@@ -3075,38 +3197,48 @@ export function splitCompounds(sel) {
  * placeholder children with no styles (the all-platform ~0.90 scores were
  * the corrupted fixture, not the renderers).
  *
- * Returns `{ compounds: string[], combinators: string[] }` where
- * `combinators[i]` relates `compounds[i]` to `compounds[i+1]` and is either
- * `' '` (descendant) or `'>'` (child). Returns null when the selector uses
- * sibling combinators (`+`/`~`) or is malformed (leading/trailing/double
- * `>`), so callers treat the rule as unsupported — same bail contract the
- * old regex reject had.
+ * wave-30 A2 does the same for `+` / `~`. The wave-8 reason for excluding
+ * them ("the extractor has no sibling-adjacency matcher") stopped being true
+ * when swarm-003 Bug 2 put the full sibling list on every element's `pos`
+ * for `:nth-child(An+B of S)`: `pos.siblings` + `pos.sibIndex` ARE the
+ * adjacency data, so the matcher can now answer `+`/`~` exactly instead of
+ * dropping the rule. MEASURED cost of the drop
+ * (selectors__dir-selector-change-001): the only rule in the test is
+ * `#x:dir(rtl) + span { background-color: lime }`; dropping it also emptied
+ * collectStyledTags, so the `<span>` under test was inline-MERGED into its
+ * parent's text and the lime box vanished from the fixture entirely (the
+ * wave29-final per-test IR has no span component at all).
  *
- * Paren-aware like splitCompounds: whitespace and `>` inside a functional
- * pseudo's argument (`:nth-child(2n + 1)`) never split. Exported for unit
+ * Returns `{ compounds: string[], combinators: string[] }` where
+ * `combinators[i]` relates `compounds[i]` to `compounds[i+1]` and is one of
+ * `' '` (descendant), `'>'` (child), `'+'` (next-sibling) or `'~'`
+ * (subsequent-sibling). Returns null when the selector is malformed
+ * (leading / trailing / doubled combinator), so callers treat the rule as
+ * unsupported — same bail contract the old regex reject had.
+ *
+ * Paren-aware like splitCompounds: whitespace and combinator characters
+ * inside a functional pseudo's argument (`:nth-child(2n + 1)`, where the `+`
+ * is An+B syntax and NOT a combinator) never split. Exported for unit
  * testing.
  */
 export function splitSelectorChain(sel) {
-  // Sibling combinators unsupported — bail early. `+` inside parens (An+B
-  // arguments like `:nth-child(2n+1)`) must NOT trip this, so the check
-  // walks with paren depth rather than a flat regex.
   const compounds = [];
   const combinators = [];
   let buf = '';
   let depth = 0;
-  // The combinator that will bind the NEXT compound to the previous one.
-  // null = none seen yet (plain whitespace run → descendant at flush time).
-  let pendingChild = false;
+  // The explicit combinator that will bind the NEXT compound to the previous
+  // one. null = none seen in this separator run → descendant at flush time.
+  let pending = null;
   // Flush the accumulated compound buffer, recording the combinator that
-  // separated it from the previous compound (child if a `>` was seen in
-  // the separator run, descendant otherwise).
+  // separated it from the previous compound (the explicit one seen in the
+  // separator run, descendant otherwise).
   const flush = () => {
     if (!buf) return true;
-    if (compounds.length > 0) combinators.push(pendingChild ? '>' : ' ');
-    else if (pendingChild) return false; // leading `>` — malformed
+    if (compounds.length > 0) combinators.push(pending ?? ' ');
+    else if (pending) return false; // leading combinator — malformed
     compounds.push(buf);
     buf = '';
-    pendingChild = false;
+    pending = null;
     return true;
   };
   for (let i = 0; i < sel.length; i++) {
@@ -3114,29 +3246,65 @@ export function splitSelectorChain(sel) {
     if (c === '(') { depth++; buf += c; continue; }
     if (c === ')') { depth--; buf += c; continue; }
     if (depth > 0) { buf += c; continue; } // inside a functional pseudo arg
-    if (c === '+' || c === '~') return null; // sibling combinators — unsupported
-    if (c === '>') {
-      // Child combinator between compounds. Flush whatever compound was
-      // being read; a second `>` before any new compound text (`a >> b`)
-      // is malformed CSS — bail.
+    if (EXPLICIT_COMBINATORS.has(c)) {
+      // Explicit combinator between compounds. Flush whatever compound was
+      // being read; a second combinator before any new compound text
+      // (`a >> b`, `a + ~ b`) is malformed CSS — bail.
       if (!flush()) return null;
-      if (pendingChild) return null; // double `>` with no compound between
-      if (compounds.length === 0) return null; // leading `>` — malformed
-      pendingChild = true;
+      if (pending) return null; // doubled combinator with nothing between
+      if (compounds.length === 0) return null; // leading combinator — malformed
+      pending = c;
       continue;
     }
     if (/\s/.test(c)) {
       // Top-level whitespace: compound boundary (descendant combinator
-      // unless a `>` already marked this separator run as child).
+      // unless an explicit one already marked this separator run).
       if (!flush()) return null;
       continue;
     }
     buf += c;
   }
   if (!flush()) return null;
-  // Trailing `>` with no right-hand compound (`.a >`) is malformed.
-  if (pendingChild) return null;
+  // Trailing combinator with no right-hand compound (`.a >`, `.a +`).
+  if (pending) return null;
   return { compounds, combinators };
+}
+
+/**
+ * wave-30 A2: synthesise the position metadata for entry `k` of a `siblings`
+ * list so a sibling-combinator compound can be matched with the SAME
+ * compoundMatches the subject and ancestor compounds go through (one matcher,
+ * no semantics drift).
+ *
+ * `siblings` entries carry `{ tag, attrs }` plus the two extra facts
+ * extractBodyTreeNested's second pass stamps on them (`isEmpty` for `:empty`,
+ * `subtreeText` for `:dir(auto)`); everything positional is DERIVED here so
+ * the walker never has to store a per-sibling pos (which would make the tree
+ * cyclic — see the stamping comment there).
+ *
+ * `sibTypeIndex` / `sibTypeCount` are counted over the list rather than
+ * guessed, so `:nth-of-type` on a sibling compound is exact, not degraded.
+ */
+function siblingPositionMeta(siblings, k) {
+  const me = siblings[k];
+  let typeIndex = 0;  // 0-based rank among same-tag siblings before k
+  let typeCount = 0;  // total same-tag siblings
+  for (let i = 0; i < siblings.length; i++) {
+    if (siblings[i]?.tag !== me.tag) continue;
+    typeCount++;
+    if (i < k) typeIndex++;
+  }
+  return {
+    isRoot: false,
+    sibIndex: k, sibCount: siblings.length,
+    sibTypeIndex: typeIndex, sibTypeCount: typeCount,
+    // Stamped facts — absent on legacy hand-built sibling lists, where the
+    // conservative defaults ("not empty", "no text") keep `:empty` from
+    // matching and leave `:dir(auto)` on HTML's ltr fallback.
+    isEmpty: me?.isEmpty === true,
+    subtreeText: me?.subtreeText ?? '',
+    siblings,
+  };
 }
 
 /**
@@ -3215,10 +3383,17 @@ export function splitAnBOfSelector(arg) {
  * harvested from `<script>` blocks by collectDefinedTags() — when
  * absent, only built-in tags answer true for `:defined`.
  *
+ * `ancestors` (wave-30 A1): the element's ancestor chain in document order
+ * (immediate parent LAST), the same array selectorMatchesPseudoElement walks.
+ * Consumed ONLY by `:dir()`, whose answer is an INHERITED HTML concept (see
+ * resolveDirectionality) rather than a positional one. null = no chain
+ * available (legacy direct callers); the resolver then falls back to the
+ * element's own `dir` attribute and finally to HTML's ltr default.
+ *
  * Returns null when `pos` is missing (caller can't evaluate without
  * position data — bail and treat the selector as non-matching).
  */
-function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}) {
+function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}, ancestors = null) {
   // wave-22 EX2 A-RC1: `:not()` is evaluated BEFORE the `!pos` bail
   // because negation of a purely structural compound (`*:not(#drop-down-
   // select)` — the css-ui menulist-button rule) needs no position data at
@@ -3239,9 +3414,27 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}) {
     // then negate — Selectors-4 §5.1: ":not(X) matches elements that are
     // not represented by X". `null` (unsupported inner) propagates as
     // null so the rule is dropped, never inverted.
-    const m = compoundMatches(pseudo.arg, tag, attrs ?? {}, pos, ctx);
+    const m = compoundMatches(pseudo.arg, tag, attrs ?? {}, pos, ctx, ancestors);
     if (m === null) return null;
     return !m;
+  }
+  // wave-30 A1: `:dir()` is evaluated BEFORE the `!pos` bail for the same
+  // reason `:not()` is — an element's directionality is an HTML tree fact
+  // (HTML §3.2.6.4 / §15.3.4), not a sibling position, so requiring `pos`
+  // here would leave every legacy call site's `:dir()` rule unmatched.
+  // Selectors-4 §11.2: ":dir(ltr) matches elements whose directionality is
+  // ltr". Note it is deliberately NOT the CSS `direction` property — that
+  // distinction is load-bearing for dir-selector-change-001, whose stylesheet
+  // sets `#outer { direction: ltr }` while the script sets `dir="rtl"`, and
+  // whose ref proves the ATTRIBUTE wins for :dir().
+  if (pseudo.name === 'dir') {
+    // parseCompound already normalised the argument to 'ltr' | 'rtl' and
+    // rejected everything else, so this is a plain string compare.
+    // `ctx.documentDir` is the `<html dir>` / `<body dir>` rung the body-only
+    // ancestor chain cannot carry (see resolveDirectionality rung 2b);
+    // undefined on legacy direct callers, which keeps the old ladder.
+    return resolveDirectionality(attrs, pos, ancestors, ctx?.documentDir ?? null)
+      === pseudo.arg;
   }
   if (!pos) return null;
   // :root matches the document root; for our purposes that's the synthetic
@@ -3320,7 +3513,10 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}) {
         // (you can't be the Nth `p` among `:defined` siblings if you
         // yourself aren't `:defined`). Mirror the browser behaviour.
         const hostMatches = ofSelectors.some((s) => {
-          const r = compoundMatches(s, tag, attrs ?? {}, pos, ctx);
+          // wave-30 A1: the host's own ancestor chain rides along so an
+          // `of S` filter containing `:dir()` inherits directionality
+          // exactly like the subject compound does.
+          const r = compoundMatches(s, tag, attrs ?? {}, pos, ctx, ancestors);
           return r === true;
         });
         if (!hostMatches) return false;
@@ -3340,7 +3536,9 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}) {
           // the filter, just exercise simple `:defined` / type / class.
           const sibPos = { isRoot: false, sibIndex: s, sibCount: sibs.length };
           const matches = ofSelectors.some((selStr) => {
-            const r = compoundMatches(selStr, sib.tag, sib.attrs ?? {}, sibPos, ctx);
+            // Siblings share the host's ancestor chain by definition, so the
+            // same array resolves their inherited directionality (wave-30 A1).
+            const r = compoundMatches(selStr, sib.tag, sib.attrs ?? {}, sibPos, ctx, ancestors);
             return r === true;
           });
           if (matches) {
@@ -3367,7 +3565,8 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}) {
               if (sib.tag !== tag) continue;
               const sibPos = { isRoot: false, sibIndex: s, sibCount: sibs.length };
               const matches = ofSelectors.some((selStr) => {
-                const r = compoundMatches(selStr, sib.tag, sib.attrs ?? {}, sibPos, ctx);
+                // Same ancestor chain as the host — see the sibling filter above.
+                const r = compoundMatches(selStr, sib.tag, sib.attrs ?? {}, sibPos, ctx, ancestors);
                 return r === true;
               });
               if (matches) {
@@ -3412,13 +3611,20 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}) {
  * from selectorMatches → propsForElement. Default empty object keeps
  * legacy call sites green.
  *
+ * `ancestors` (wave-30 A1): the ancestor chain of the element BEING MATCHED
+ * (document order, immediate parent last). Only `:dir()` reads it, because
+ * directionality is inherited down the tree (HTML §3.2.6.4) and cannot be
+ * decided from tag/attrs/pos alone. Every caller that has a chain must pass
+ * the one belonging to THIS element — a sibling step passes the shared
+ * parent chain, an ancestor step passes that ancestor's own prefix.
+ *
  * NOTE: this function only checks the host-element side of the compound;
  * the `pseudoElement` field on parseCompound's output is observed by
  * selectorMatchesPseudoElement(), not here. Returning `true` here means
  * "the compound's host-side filters match"; the caller may still need to
  * dispatch the rule onto a pseudo-element bucket.
  */
-function compoundMatches(compound, tag, attrs, pos = null, ctx = {}) {
+function compoundMatches(compound, tag, attrs, pos = null, ctx = {}, ancestors = null) {
   const parsed = parseCompound(compound);
   if (parsed.unsupported) return null;
   if (parsed.needTag && parsed.needTag !== '*' && parsed.needTag !== tag) return false;
@@ -3432,7 +3638,7 @@ function compoundMatches(compound, tag, attrs, pos = null, ctx = {}) {
   // child-indexed ones (false unless we can prove otherwise) — the safe
   // default is "rule doesn't match this element", NOT "rule matches".
   for (const ps of parsed.pseudos) {
-    const result = evalPseudo(ps, pos, tag, attrs, ctx);
+    const result = evalPseudo(ps, pos, tag, attrs, ctx, ancestors);
     if (result !== true) return false;
   }
   return true;
@@ -3457,9 +3663,13 @@ function compoundMatches(compound, tag, attrs, pos = null, ctx = {}) {
  *     IMMEDIATE parent (last `ancestors` entry); chains (`A > B > C`)
  *     consume ancestors right-to-left. No legacy fallback: without an
  *     ancestor chain a child-combinator rule never matches.
+ *   - sibling combinators: `A + B` (next-sibling, Selectors-4 §15.4) and
+ *     `A ~ B` (subsequent-sibling, §15.5) — wave-30 A2, resolved against
+ *     the subject's `pos.siblings` list. Same no-legacy-fallback rule as
+ *     `>`: without an ancestor chain the rule never matches.
  *
- * Attribute selectors / `+`/`~` sibling combinators are unsupported —
- * when they appear anywhere in the selector we skip the rule.
+ * Attribute selectors are unsupported — when they appear anywhere in the
+ * selector we skip the rule.
  *
  * Returns boolean. For pseudo-element-aware matching (`::before`/`::after`/
  * `::marker` rules that should attach to a synthetic child bucket) use
@@ -3514,7 +3724,9 @@ export function selectorMatchesPseudoElement(
   if (parsedLast.unsupported) return null;
   // Position metadata for the element itself drives rightmost-compound
   // pseudo evaluation (e.g. `.foo:first-child` against this very element).
-  const lastResult = compoundMatches(last, tag, attrs, pos, ctx);
+  // wave-30 A1: the ancestor chain rides along so a subject-side `:dir()`
+  // can inherit its directionality from an ancestor's `dir` attribute.
+  const lastResult = compoundMatches(last, tag, attrs, pos, ctx, ancestors);
   if (lastResult !== true) return null;
   const pe = parsedLast.pseudoElement || '';
   // Single-compound selector — done.
@@ -3528,9 +3740,10 @@ export function selectorMatchesPseudoElement(
   // Without ancestors, preserve the legacy "rightmost compound only"
   // fallback for pure-DESCENDANT chains so old call sites (and the
   // existing test 'descendant — applies last compound') keep passing.
-  // Child chains get NO such degrade: `.flex > div` matching any bare
-  // `<div>` would be a structural over-match, so we bail honestly.
-  if (!ancestors) return combinators.includes('>') ? null : pe;
+  // Structural chains get NO such degrade: `.flex > div` matching any bare
+  // `<div>` would be a structural over-match, and so would `.a + div`, so we
+  // bail honestly (wave-30 A2 extends the wave-8 rule to `+`/`~`).
+  if (!ancestors) return combinators.some((c) => EXPLICIT_COMBINATORS.has(c)) ? null : pe;
   /**
    * Right-to-left chain matcher with backtracking (Selectors-4 §16 match
    * semantics, evaluated right-to-left like real engines):
@@ -3545,34 +3758,113 @@ export function selectorMatchesPseudoElement(
    *     negative when the greedy nearest `.b` candidate has the wrong
    *     parent. Chains in the WPT corpus are ≤3 compounds, so the
    *     backtracking cost is negligible.
+   *   - wave-30 A2: '+' (Selectors-4 §15.4) pins compounds[ci] to the
+   *     IMMEDIATELY PRECEDING sibling of whatever matched compounds[ci+1];
+   *     '~' (§15.5) lets it match ANY preceding sibling, with the same
+   *     backtracking. Sibling steps do NOT consume an ancestor — siblings
+   *     share one parent, so `maxIdx` is passed through unchanged.
+   *
+   * `curPos` is the position metadata of the element compounds[ci+1] matched
+   * (the subject itself at the first step). Sibling steps read its
+   * `siblings` / `sibIndex`; ancestor steps replace it with the matched
+   * ancestor's own pos as they climb.
+   *
    * Each ancestor entry carries its own position metadata so pseudos on
    * non-rightmost compounds (e.g. `:root:first-child .target`) evaluate
    * against the right element. The synthetic `:root` sentinel ancestor
    * prepended in propsForElement has `isRoot: true` so the Selectors-4
    * §6.4.1 carve-out fires.
    */
-  const matchPrefix = (ci, maxIdx) => {
+  const matchPrefix = (ci, maxIdx, curPos) => {
     if (ci < 0) return true; // whole chain consumed — match
     const rel = combinators[ci]; // relates compounds[ci] → compounds[ci+1]
+    if (rel === '+' || rel === '~') {
+      // Sibling combinators. The candidate set is the entries of the
+      // CURRENT element's own sibling list that precede it: exactly one for
+      // '+' (adjacency), all of them for '~'.
+      const sibs = curPos?.siblings;
+      const here = curPos?.sibIndex;
+      // No sibling metadata ⇒ adjacency is unprovable. Answer "no match"
+      // rather than degrading to a descendant/any-element match, which
+      // would apply the rule to boxes the browser never styles.
+      if (!Array.isArray(sibs) || typeof here !== 'number') return false;
+      // Both flavours scan leftwards from the nearest preceding sibling;
+      // '+' simply stops after that first candidate.
+      const stop = rel === '+' ? here - 1 : 0;
+      for (let k = here - 1; k >= stop; k--) {
+        const sib = sibs[k];
+        if (!sib) continue;
+        const sibPos = siblingPositionMeta(sibs, k);
+        // A sibling's ancestor chain is the current element's chain down to
+        // its parent — `ancestors[0…maxIdx]` — which is what `:dir()` on the
+        // sibling compound needs to inherit from (wave-30 A1).
+        if (compoundMatches(compounds[ci], sib.tag, sib.attrs ?? {}, sibPos, ctx,
+          ancestors.slice(0, maxIdx + 1)) === true
+            && matchPrefix(ci - 1, maxIdx, sibPos)) return true;
+      }
+      return false;
+    }
     if (rel === '>') {
       // Child combinator: compounds[ci] must match the IMMEDIATE parent
       // (the highest ancestor index still available). No scan, no
       // backtracking at this step — the child relation is exact.
       if (maxIdx < 0) return false; // ran out of ancestors
       const a = ancestors[maxIdx];
-      if (compoundMatches(compounds[ci], a.tag, a.attrs, a.pos ?? null, ctx) !== true) return false;
-      return matchPrefix(ci - 1, maxIdx - 1);
+      if (compoundMatches(compounds[ci], a.tag, a.attrs, a.pos ?? null, ctx,
+        ancestors.slice(0, maxIdx)) !== true) return false;
+      return matchPrefix(ci - 1, maxIdx - 1, a.pos ?? null);
     }
     // Descendant combinator: try every remaining ancestor from nearest to
     // farthest, backtracking into the rest of the chain on each candidate.
     for (let j = maxIdx; j >= 0; j--) {
       const a = ancestors[j];
-      if (compoundMatches(compounds[ci], a.tag, a.attrs, a.pos ?? null, ctx) === true
-          && matchPrefix(ci - 1, j - 1)) return true;
+      if (compoundMatches(compounds[ci], a.tag, a.attrs, a.pos ?? null, ctx,
+        ancestors.slice(0, j)) === true
+          && matchPrefix(ci - 1, j - 1, a.pos ?? null)) return true;
     }
     return false;
   };
-  return matchPrefix(compounds.length - 2, ancestors.length - 1) ? pe : null;
+  return matchPrefix(compounds.length - 2, ancestors.length - 1, pos) ? pe : null;
+}
+
+/**
+ * wave-30 A3: how many of these rules can the static matcher NEVER apply?
+ *
+ * A rule is counted when its selector cannot be reduced to a matchable
+ * chain — either splitSelectorChain refuses it (malformed) or ANY compound
+ * comes back `unsupported` from parseCompound (attribute selector, an
+ * unmodelled pseudo like `:has()` / `:hover`, an invalid `:dir()` argument,
+ * a pseudo-element we do not generate). Those rules are silently absent from
+ * every component's cascade, so the static fixture is a document the browser
+ * would never paint.
+ *
+ * NOT a lossy marker and NOT an error: a dropped rule is often perfectly
+ * correct (an INVALID selector — `:dir(ltrr)` — SHOULD drop its rule, and a
+ * `:hover` rule genuinely does not apply to a static capture). The number is
+ * a TRIGGER INPUT: post-load-extract.mjs reads it to decide that a live
+ * browser — which understands every selector we do not — is worth consulting
+ * for this test. See shouldPostLoadExtract there for the trigger contract.
+ *
+ * Counts RULES, not selectors: parseCss has already exploded each
+ * comma-separated selector list into one rule per selector, so
+ * `p:hover, div { … }` contributes exactly 1 here (the `p:hover` half),
+ * matching the fact that only that half is missing from the cascade.
+ *
+ * Exported so the unit tests and post-load-extract share ONE definition of
+ * "the matcher dropped this".
+ */
+export function countUnsupportedRules(rules) {
+  let n = 0;
+  for (const r of rules ?? []) {
+    const chain = splitSelectorChain(r.selector);
+    // Malformed / untokenisable selector — nothing to match against.
+    if (!chain || chain.compounds.length === 0) { n++; continue; }
+    // Any unsupported compound kills the WHOLE rule in our matcher
+    // (selectorMatchesPseudoElement pre-flights every compound), so the
+    // count must use the same all-compounds test, not just the rightmost.
+    if (chain.compounds.some((c) => parseCompound(c).unsupported)) n++;
+  }
+  return n;
 }
 
 /** Compute IR property dict for a body element by collecting every CSS
@@ -4938,7 +5230,16 @@ export async function extractFixture(testRel, opts = {}) {
     // marks the test as ref-missing in the wpt block.
   }
 
-  return { fixture, refFixture, refRel, section, stem };
+  // wave-30 A3: surface how many of the test's own rules the static matcher
+  // dropped. Deliberately OUTSIDE `fixture` — this is a fact about the
+  // EXTRACTION, not part of the wire the converter and the three runtimes
+  // consume (schema/spec/05-versioning.md: unknown envelope keys are an
+  // error, so a diagnostic must not ride in the document). post-load-extract
+  // reads it to widen its activation gate; see shouldPostLoadExtract.
+  return {
+    fixture, refFixture, refRel, section, stem,
+    unsupportedRules: countUnsupportedRules(rules),
+  };
 }
 
 /**
@@ -5059,6 +5360,107 @@ export function dirAttributeDirection(attrs, textForAuto = '') {
 }
 
 /**
+ * wave-30 A1: resolve the DIRECTIONALITY of an element for `:dir()`
+ * (Selectors-4 §11.2). Returns 'ltr' | 'rtl' — never null, because the
+ * pseudo-class is a total function: HTML §3.2.6.4 gives every element a
+ * directionality, defaulting to the document's, which is ltr absent any
+ * `dir` attribute.
+ *
+ * Resolution order, straight out of HTML §3.2.6.4 "the directionality of an
+ * element":
+ *   1. the element's OWN `dir` attribute (ltr / rtl literal, or `auto`
+ *      resolved by the first-strong scan over its text — dirAttributeDirection
+ *      does both, and returns null for an invalid value, which HTML says
+ *      leaves the element in "no directionality state", i.e. inheriting);
+ *   2. otherwise the NEAREST ANCESTOR carrying a directionality state
+ *      (inheritance — walk the chain from the immediate parent upwards);
+ *   3. otherwise 'ltr'.
+ *
+ * DELIBERATELY NOT CONSULTED: the CSS `direction` property. Selectors-4
+ * §11.2 is explicit that :dir() matches on the HTML directionality, and the
+ * two can disagree — dir-selector-change-001 sets `#outer { direction: ltr }`
+ * in CSS while the script sets `dir="rtl"`, and its ref proves the attribute
+ * decides. Reading the CSS property here would invert that test.
+ *
+ * `pos.subtreeText` / `ancestor.pos.subtreeText` is the dir=auto text corpus
+ * stamped by extractBodyTreeNested's second pass (see there). When it is
+ * absent — legacy direct callers that pass no `pos`, or the pre-recursion
+ * white-space resolution inside the walker — a `dir=auto` element scans an
+ * EMPTY string and therefore resolves to HTML's no-strong-character fallback
+ * 'ltr'. Documented degradation, not a silent one: every production match
+ * (propsForElement ← buildNode) runs after the stamp.
+ *
+ * Exported so the unit tests can pin each rung of the ladder.
+ */
+export function resolveDirectionality(attrs, pos = null, ancestors = null, documentDir = null) {
+  // Rung 1 — the element's own attribute wins outright.
+  const own = dirAttributeDirection(attrs, pos?.subtreeText ?? '');
+  if (own) return own;
+  // Rung 2 — nearest ancestor with a directionality state. The chain is in
+  // document order, so walking DOWN the indices walks UP the tree; the first
+  // hit is the nearest ancestor, exactly like CSS inheritance.
+  for (let i = (ancestors?.length ?? 0) - 1; i >= 0; i--) {
+    const a = ancestors[i];
+    const d = dirAttributeDirection(a?.attrs, a?.pos?.subtreeText ?? '');
+    if (d) return d;
+  }
+  // Rung 2b — the DOCUMENT-ELEMENT rung. `ancestors` is the BODY subtree
+  // chain: extractBodyTreeNested walks body's descendants only, and the
+  // synthetic `:root` sentinel propsForElement prepends carries `attrs: {}`.
+  // So `<html dir="rtl">` / `<body dir="rtl">` — both genuine ancestors that
+  // DO carry a directionality state per HTML §3.2.6.4 — were invisible here
+  // and every body descendant fell to the ltr default.
+  // MEASURED (skeptic-1, wave-30): selectors/dir-style-02a.html is
+  // `<html dir="rtl">` with `:dir(ltr){color:blue} :dir(rtl){color:lime}`;
+  // three of its six top-level divs (default-direction, inherit-default, and
+  // the invalid `dir="foopy"` one) baked `blue` where the ref paints `lime`,
+  // and post-load could NOT repair it because `color` is not in
+  // POST_LOAD_COMPUTED_PROPERTIES. documentDirectionality() supplies the
+  // missing rung; null (legacy direct callers) keeps the old ladder exactly.
+  if (documentDir) return documentDir;
+  // Rung 3 — the document default when nothing in the tree declares one.
+  return 'ltr';
+}
+
+/**
+ * The directionality declared by the DOCUMENT ELEMENT chain — the `dir`
+ * attribute on `<body>` (nearer) else `<html>` (farther), per HTML §3.2.6.4's
+ * inheritance walk. Returns 'ltr' | 'rtl', or null when neither declares a
+ * valid one (so resolveDirectionality keeps its own default).
+ *
+ * `dir="auto"` on html/body resolves through dirAttributeDirection with an
+ * `dir="auto"` on html/body is SKIPPED rather than answered: the first-strong
+ * scan over a whole document is not something this string-scanning extractor
+ * can do honestly, and `dirAttributeDirection` with an empty corpus would
+ * silently answer 'ltr' — a guess dressed as a fact. Skipping lets the OUTER
+ * candidate answer instead (`<html dir=rtl><body dir=auto>` → rtl), and when
+ * nothing else declares one the caller's own 'ltr' default applies, so the
+ * behaviour is never worse than before this rung existed. Same
+ * documented-degradation contract as the `pos.subtreeText` note above.
+ *
+ * Exported for the unit pins.
+ */
+export function documentDirectionality(html) {
+  if (typeof html !== 'string') return null;
+  // <body> is the nearer ancestor of every component we emit, so it wins.
+  for (const re of [/<body\b([^>]*)>/i, /<html\b([^>]*)>/i]) {
+    const m = re.exec(html);
+    if (!m) continue;
+    // Lookbehind excludes a preceding word char or hyphen so `data-dir=…`,
+    // `aria-dir=…` and any `*dir` custom attribute cannot be read as `dir`.
+    const d = /(?<![\w-])dir\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(m[1]);
+    if (!d) continue;
+    const val = d[2] ?? d[3] ?? d[4] ?? '';
+    // `auto` is unanswerable here (see the doc comment) — fall through to the
+    // outer candidate instead of letting the empty-corpus scan guess 'ltr'.
+    if (val.trim().toLowerCase() === 'auto') continue;
+    const resolved = dirAttributeDirection({ dir: val }, '');
+    if (resolved) return resolved;
+  }
+  return null;
+}
+
+/**
  * Concatenate a nested-tree node's own text with every descendant's own
  * text in document order — the text corpus the dir=auto first-strong scan
  * walks (HTML §15.3.4 descends the subtree; only the first STRONG
@@ -5156,6 +5558,344 @@ export function bodyDeclaresAbsoluteHeight(props) {
   return m !== null && parseFloat(m[1]) > 0;
 }
 
+// ── wave-30 A4: root-scope INHERITANCE, delivered by BAKE-DOWN ──────────────
+//
+// The wave-17 trigger above is about GEOMETRY (a sized body pushes its
+// siblings down). This block is about INHERITANCE, and it is the same bug seen
+// from the other side: while the body's element children are emitted as
+// SIBLINGS of the body-root, they are not its descendants on any platform, so
+// nothing the body-root declares inherits into them.
+//
+// MEASURED (wave-30, selectors__caret-color-visited-inheritance): the test's
+// only root-scope rule is `:root { font-size: 50px; caret-color: orange }`.
+// The wave29-final per-test IR
+// (runs/wave29-final/sections/selectors/per-test-ir/…caret-color-visited-
+// inheritance.json) shows FontSize 50px sitting on the `body-root` component
+// and the `<main>` / `<a>` components carrying `properties: []` — so the
+// 50px never reaches the text under test and every platform paints it at the
+// 16px default.
+//
+// WHY NOT SLOTTING (the wave-30 gate finding, and the reason this block is a
+// BAKE and not a second arm of shouldSlotBodyChildren). Reusing the wave-17
+// nesting for this case looks free — the children really ARE <body>'s
+// children — but the two cases differ in ONE load-bearing way: the wave-17
+// body-root is SIZED (an explicit nonzero absolute height), and an
+// inheritance-only body-root is NOT. Nesting children under an UNSIZED parent
+// is a shape the natives render differently from the web:
+//   text-decoration-inset-001  android 0.9742 → 0.8162 · ios 0.9576 → 0.8160
+//   text-decoration-inset-002  android 0.9733 → 0.8097 · ios 0.9567 → 0.8098
+// (tools/titan/runs/wave30-final vs wave29-final; web held 0.987 on both, so
+// the divergence is the natives' unsized-container sizing, not a fixture bug
+// they alone see). 342 corpus fixtures took that shape change — a latent mine
+// under every future native run, in exchange for a repair that does not need
+// the nesting at all.
+//
+// WHAT THE BAKE DOES INSTEAD: copy each declared trigger property from the
+// body-root bag onto every TOP-LEVEL body-child component that does not
+// itself declare it. That is exactly the hop that was missing — the runtimes
+// already thread inherited properties from a component to its descendants
+// (Compose ComponentRenderer.INHERITED_PROPERTY_TYPES + LocalInheritedProperties,
+// SwiftUI InheritedText, web DOM inheritance), so children DEEPER in a
+// subtree inherit naturally once the top-level hop carries the value. The
+// body-root's own bag is left untouched: the composed canvases read its
+// background/padding off it (resolveComposedCanvasBackground on Android, the
+// flat-v2 body-root scan on web/iOS), and the component tree keeps the
+// byte-for-byte wave-29 SIBLING shape every native renderer is scored on.
+//
+// SCOPE — only properties that INHERIT (CSS Cascade 5 §4.1: an inherited
+// property's initial cascade step is the parent's computed value). A
+// non-inherited root declaration (`background`, `margin`, `contain`, …)
+// changes nothing for the children, so including it would rewrite bags for no
+// gain. The list below is deliberately the closed set the corpus's root-scope
+// rules actually use, not every inherited property in the catalogue: each
+// entry is one we have SEEN at body/html/:root scope, and widening it further
+// is a measurable follow-up rather than a guess.
+//
+// KNOWN, DELIBERATE GAP: an inherited property OUTSIDE this trigger set that
+// the body-root declares (say `white-space`, which the runtimes DO carry in
+// their inherited sets) is still not delivered to the children. That gap is
+// identical to wave-29's and is the price of the closed list; widening the
+// list is the follow-up, and it now costs a value copy rather than a
+// corpus-wide restructure.
+//
+// `direction` is on the list because it is the one inherited property whose
+// loss is silently invisible: an RTL body with LTR-rendered children looks
+// like a renderer bug, not a fixture bug.
+const ROOT_INHERITED_TRIGGER_PROPS = [
+  'font-size',       // CSS Fonts 4 §3.5  — the measured caret-color case
+  'font-family',     // CSS Fonts 4 §3.1
+  'font-weight',     // CSS Fonts 4 §3.2
+  'font-style',      // CSS Fonts 4 §3.4
+  'color',           // CSS Color 4 §3.1
+  'line-height',     // CSS Inline 3 §4.1
+  'direction',       // CSS Writing Modes 4 §2.1 (see note above)
+  'caret-color',     // CSS UI 4 §7.1
+  'letter-spacing',  // CSS Text 4 §8.1
+  'word-spacing',    // CSS Text 4 §8.2
+  'text-align',      // CSS Text 4 §7.1
+  'visibility',      // CSS Display / CSS 2.2 §11.2
+];
+
+/**
+ * True when a body-root property bag declares at least one INHERITED
+ * property the children need to receive (see the banner above for the scope
+ * argument and the measured case). Exported so the unit tests can pin the
+ * exact trigger set — a silent widening of this list changes what every
+ * top-level component carries corpus-wide and must never land unreviewed.
+ */
+export function bodyDeclaresInheritedProperty(props) {
+  if (!props) return false;
+  // Presence is the trigger, not the value: even `font-size: inherit` at
+  // root scope is a declaration the children must see resolved, and the
+  // runtimes' own cascade is what interprets it.
+  return ROOT_INHERITED_TRIGGER_PROPS.some((p) => props[p] !== undefined);
+}
+
+/**
+ * The ONE slotting decision. GEOMETRY ONLY (wave-17): an explicit nonzero
+ * absolute height on the body-root, because a SIZED body-root sibling pushes
+ * the real content below the viewport and only nesting puts it back.
+ *
+ * The wave-30 inheritance case is deliberately NOT an arm here — see the
+ * bake-down banner above for the measured native regressions an UNSIZED
+ * slotted parent caused (text-decoration-inset-001/002, ~0.97 → ~0.81 on both
+ * natives) and why a value copy delivers the same repair with no shape change.
+ * Exported for the unit pins.
+ */
+export function shouldSlotBodyChildren(props) {
+  return bodyDeclaresAbsoluteHeight(props);
+}
+
+// Shorthands whose presence in a child's own bag means the child ALREADY
+// decides the longhand, so the root's value must not be baked over it
+// (css-cascade-4 §3.2: a shorthand sets every longhand it covers, including
+// the ones it does not name — `font: 12px serif` resets line-height to
+// `normal`). Keyed by trigger longhand; only the shorthands that actually
+// cover a member of the trigger set appear.
+const INHERITED_COVERING_SHORTHANDS = {
+  // css-fonts-4 §6: the `font` shorthand sets font-style/weight/size/
+  // family AND resets line-height — all five are trigger props.
+  'font-size': ['font'],
+  'font-family': ['font'],
+  'font-weight': ['font'],
+  'font-style': ['font'],
+  'line-height': ['font'],
+  // css-ui-4 §7.2: `caret: <color> || <caret-shape>`.
+  'caret-color': ['caret'],
+};
+
+// css-cascade-4 §3.2: `all` is the shorthand for EVERY property EXCEPT
+// custom properties, `direction` and `unicode-bidi`. A child declaring `all`
+// has therefore spoken about every trigger prop but that one, so this set
+// names the carve-out rather than folding `all` into the per-longhand map
+// above — where the exception would have been invisible.
+const ALL_SHORTHAND_EXEMPT = new Set(['direction']);
+
+/**
+ * The bake-down (wave-30 A4, reworked after the gate finding). Returns the
+ * subset of `rootProps`' trigger properties to copy onto ONE top-level
+ * body-child bag, or `null` when the child needs nothing.
+ *
+ * AUTHOR BEATS INHERITED — css-cascade-4 §7.3: inheritance is the step that
+ * runs when the cascade produced no value for the element, so a child's OWN
+ * declaration of the same property always wins. Two guards implement that:
+ *   1. the child declares the longhand itself;
+ *   2. the child declares a shorthand that covers the longhand (see
+ *      INHERITED_COVERING_SHORTHANDS / ALL_SHORTHAND_EXEMPT) — the longhand
+ *      is set even though its name never appears in the bag.
+ * Non-destructive: the returned object is fresh and `childProps` is only
+ * read, so the caller decides ordering and marking.
+ *
+ * Exported for the unit pins (the guards are the whole correctness story).
+ */
+export function rootInheritedBakeProps(rootProps, childProps) {
+  if (!rootProps || !childProps) return null;
+  const out = {};
+  for (const prop of ROOT_INHERITED_TRIGGER_PROPS) {
+    const value = rootProps[prop];
+    if (value === undefined) continue;            // root never declared it
+    if (childProps[prop] !== undefined) continue; // guard 1: own longhand
+    // guard 2: a shorthand the child declares already covers this longhand.
+    const covers = INHERITED_COVERING_SHORTHANDS[prop] ?? [];
+    if (covers.some((sh) => childProps[sh] !== undefined)) continue;
+    if (!ALL_SHORTHAND_EXEMPT.has(prop) && childProps.all !== undefined) continue;
+    out[prop] = value;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
+// The LOUD marker. A component wearing it carries a value its own source
+// element never declared — the root's, delivered by copy because the fixture
+// wire has no body→child inheritance edge for an unslotted body. Reading a
+// baked `font-size: 50px` as an author declaration would be wrong, so the
+// reason says where it came from.
+const ROOT_INHERITED_REASON = 'body-inherited-baked';
+
+// ── wave-30 A7: UA LINK STYLING ────────────────────────────────────────────
+//
+// HTML Rendering §15.5.2 gives every hyperlink a UA-origin rule:
+//   :link  { color: #0000EE; text-decoration: underline; cursor: pointer }
+// The extractor models only AUTHOR declarations, so an `<a href>` with no
+// author `color` shipped with an EMPTY properties bag and every platform
+// painted it in the inherited/default black with no underline. That is a
+// two-way visual miss against any browser-rendered ref containing a link.
+//
+// WHY IT IS SAFE TO BAKE, and why it is UA ORIGIN and not just "a default":
+// CSS Cascade 5 §6.1 orders UA-origin declarations BELOW author-origin ones,
+// so an author rule on the link must win — hence the presence guards below,
+// which fill a key only when the element's own resolved bag has none. And
+// because this is a rule on the ELEMENT (not inheritance), it correctly
+// beats an inherited `color` from an ancestor: `body { color: green }` with
+// `<a href>` still paints blue in every browser, which is exactly what an
+// unconditional-on-absence fill reproduces.
+//
+// SCOPE — `<a>` WITH an `href` attribute, because HTML §4.6.1 makes href the
+// thing that turns an <a> into a hyperlink, and Selectors-4 §11.1 matches
+// `:link` on precisely that. A bare `<a name=…>` anchor gets nothing.
+//
+// DELIBERATELY NOT MODELLED — `:visited`. Selectors-4 §11.1 and the privacy
+// carve-out around it mean a visited link paints #551A8B, and NOTHING in a
+// static HTML source says whether the user has visited a URL; the browser
+// refs were rasterised in a fresh profile, but "fresh profile" is an
+// assumption about the capture environment, not a fact in the document. We
+// bake the :link colour only and say so out loud via the marker below, so a
+// residual purple-vs-blue divergence stays visible as OUR approximation
+// rather than being silently papered over.
+const UA_LINK_PROPS = {
+  // HTML Rendering §15.5.2's `-webkit-link` system colour resolves to
+  // #0000EE in the Chromium the browser refs were rasterised with.
+  color: '#0000EE',
+  // The LONGHAND, not the `text-decoration` shorthand: the shorthand also
+  // resets text-decoration-color/style/thickness to their initials, which
+  // would silently overwrite author longhands that the guard below cannot
+  // see individually.
+  'text-decoration-line': 'underline',
+};
+
+// Author declarations that mean "the UA default is not the used value here".
+// Keyed per UA property so a link that declares only a colour still gets the
+// underline (and vice versa) — the cascade is per-property, not per-rule.
+const UA_LINK_GUARDS = {
+  // Any spelling that sets the element's own colour.
+  color: ['color'],
+  // Both the longhand and the shorthand that contains it, plus the -webkit-
+  // alias the corpus authors beside the standard one.
+  'text-decoration-line': [
+    'text-decoration-line', 'text-decoration', '-webkit-text-decoration',
+  ],
+};
+
+// The LOUD marker. Named for what it is — a UA rule we baked into an
+// author-origin fixture — so a reader of `_lossyReasons` can tell this
+// component's blue from a declared blue, and so the :visited gap above has
+// a visible home.
+const UA_LINK_REASON = 'ua-link-styling-baked';
+
+// Link-state pseudo-classes (Selectors-4 §11) — ANY of these in a selector
+// means the rule is about hyperlinks, whether or not it also names the tag.
+// `(?![\w-])` stops `:link` from swallowing a hypothetical `:linkish`.
+const UA_LINK_STATE_PSEUDO_RX =
+  /:(?:link|visited|any-link|local-link|target-current)(?![\w-])/i;
+// A bare `a` TAG at the head of a compound: start-of-selector, or right after
+// a combinator / comma / functional-pseudo paren. The leading-char class
+// deliberately excludes `.` and `#`, so `.a` (class "a") and `#a` (id "a")
+// do NOT read as the anchor element.
+const UA_LINK_BARE_A_RX = /(?:^|[\s>+~,(])a(?![\w-])/i;
+
+/**
+ * wave-30 fix-T1: could this selector text style a hyperlink? Deliberately
+ * TEXTUAL, not parsed — it is asked only about rules the matcher already
+ * REFUSED to parse (see uaLinkSuppressedProps), so a structured answer is
+ * not available and a conservative over-match is the safe direction.
+ * Exported so the unit tests can pin both halves of the test.
+ */
+export function selectorCouldTargetLink(selector) {
+  const sel = String(selector ?? '');
+  return UA_LINK_STATE_PSEUDO_RX.test(sel) || UA_LINK_BARE_A_RX.test(sel);
+}
+
+/**
+ * wave-30 fix-T1: the UA link properties this stylesheet forbids us to bake.
+ *
+ * The author-wins guard inside uaLinkProps consults the element's RESOLVED
+ * bag — which by construction contains only rules the matcher could apply.
+ * Every rule the matcher DROPPED (countUnsupportedRules counts exactly
+ * these) is invisible there, so a sheet whose only colour declaration for
+ * links is `a:link { color: red }` (css-color/color-mix-currentcolor-visited)
+ * or `:visited, :link { color: black }` (selectors/is-where-visited) looked
+ * to A7 like a sheet that declared nothing — and got UA `#0000EE` baked over
+ * an author colour. That is a GUARANTEED-wrong pixel, not an approximation.
+ *
+ * So: a dropped rule whose selector could target links (link-state pseudo or
+ * a bare `a` compound) and which declares one of the UA properties SUPPRESSES
+ * that property's bake document-wide. Not "guess the author's value" — we
+ * cannot resolve a selector we could not parse — but "decline to invent a UA
+ * value we know is contradicted". Status quo ante (no bake, so the renderer
+ * paints inherited/initial) is the honest fallback.
+ *
+ * Returns a Set of UA_LINK_PROPS keys. Document-scoped, not per element: a
+ * dropped selector's subject set is exactly what we failed to compute.
+ *
+ * MEASURED blast radius over the pinned corpus (33,643 documents, 499 with an
+ * `<a href>` and a <style> block): 52 documents suppress at least one UA
+ * property — 50 `color` (the whole `:visited` family: css-cascade
+ * all-prop-*-visited, css-color color-mix/relative-currentcolor-visited,
+ * css-pseudo selection-link-001..003, the 13 css-overflow scroll-target-group
+ * tests, …) and 2 `text-decoration-line`.
+ *
+ * STATED COST, not hidden: those 2 are css-text-decor/invalidation/
+ * text-decoration-thickness{,-ref}, whose dropped `:link { text-decoration:
+ * underline }` declares the SAME underline the UA would have baked — so for
+ * them the decline loses a line the old bake got right by coincidence. We
+ * take that trade knowingly: matching the value would mean pretending we
+ * resolved a selector we could not parse, and the 50 colour cases it repairs
+ * were each a guaranteed-wrong pixel.
+ */
+export function uaLinkSuppressedProps(rules) {
+  const out = new Set();
+  for (const r of rules ?? []) {
+    // The SAME droppedness test countUnsupportedRules uses — one definition
+    // of "the matcher never applies this rule", so the two can never drift.
+    const chain = splitSelectorChain(r.selector);
+    const dropped = !chain || chain.compounds.length === 0
+      || chain.compounds.some((c) => parseCompound(c).unsupported);
+    if (!dropped) continue;
+    if (!selectorCouldTargetLink(r.selector)) continue;
+    // Per-property, matching the per-property cascade: a dropped
+    // `a:link { color: red }` must not stop the UA underline from baking.
+    for (const [key, spellings] of Object.entries(UA_LINK_GUARDS)) {
+      if (spellings.some((g) => r.props?.[g] !== undefined)) out.add(key);
+    }
+  }
+  return out;
+}
+
+/**
+ * wave-30 A7: the UA-origin declarations to fold into a hyperlink's bag, or
+ * null when the element is not a hyperlink / the author already decided
+ * every one of them. `props` is the element's RESOLVED author bag (matched
+ * rules + inline style), which is what the cascade compares against.
+ * `suppressed` (wave-30 fix-T1) is the uaLinkSuppressedProps set for the
+ * sheet — UA properties contradicted by a rule the matcher dropped, which
+ * the resolved bag can never reveal. Exported so the unit tests can pin the
+ * fill, the guards and the suppression.
+ */
+export function uaLinkProps(tag, attrs, props, suppressed = null) {
+  // Hyperlink identity per HTML §4.6.1 / Selectors-4 §11.1 — an <a> with an
+  // href attribute, whatever its value (`href=""` is still a hyperlink).
+  if (tag !== 'a' || attrs?.href === undefined) return null;
+  const out = {};
+  for (const [key, value] of Object.entries(UA_LINK_PROPS)) {
+    // Author-origin beats UA-origin (CSS Cascade 5 §6.1): skip any UA
+    // property the element already decides through ANY of its spellings.
+    if (UA_LINK_GUARDS[key].some((g) => props?.[g] !== undefined)) continue;
+    // …and skip any the sheet decides through a rule we could not parse.
+    if (suppressed?.has(key)) continue;
+    out[key] = value;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
 // wave-13 KEYFRAMES-SAMPLER: `keyframes` is the parseKeyframes() map for the
 // same stylesheet the `rules` came from (parseCss skips @-rules, so the two
 // are complementary views of one sheet). Null/omitted = sampling disabled —
@@ -5170,7 +5910,15 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // The ctx is empty `{}` when neither a caller-provided one nor any
   // <script> registration exists, which is the byte-identical-fixture
   // path for the existing visual-test corpus.
-  const effectiveCtx = ctx ?? { definedTags: collectDefinedTags(cleaned) };
+  const baseCtx = ctx ?? { definedTags: collectDefinedTags(cleaned) };
+  // The document-element directionality rung for `:dir()` (see
+  // resolveDirectionality rung 2b): `<html dir>` / `<body dir>` are real
+  // ancestors of every component, but the walker's chain starts INSIDE body,
+  // so the fact has to travel on the ctx. A caller-supplied `documentDir`
+  // wins (unit-test injection); otherwise it is read from the source here.
+  // Copied, never mutated in place, so a caller's ctx object is untouched.
+  const effectiveCtx = baseCtx.documentDir !== undefined ? baseCtx
+    : { ...baseCtx, documentDir: documentDirectionality(cleaned) };
   // wave-12 EXTRACTOR-INLINE: merge context for pure-inline run merging.
   // styledTags guards the merge — any tag a rule directly targets keeps
   // its child-component path so the declarations under test survive (see
@@ -5178,17 +5926,27 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // only legacy direct calls to the walkers (unit tests) run without it.
   const mergeCtx = { styledTags: collectStyledTags(rules) };
 
+  // wave-30 fix-T1: computed ONCE per sheet (it is a fact about the rule
+  // list, not about any element) and handed to every uaLinkProps call below.
+  const uaLinkSuppressed = uaLinkSuppressedProps(rules);
+
   // Bug 3 + 4: body-root component for body-scope CSS. Stays as a flat
   // top-level entry (it represents <body> itself). Where the body's element
-  // children land depends on the wave-17 BODY-HEIGHT SLOTTING trigger
-  // (see the decision block above buildComponents):
-  //  - body WITHOUT an explicit absolute height (the overwhelmingly common
+  // children land depends on the slotting trigger (shouldSlotBodyChildren —
+  // see the decision block above buildComponents):
+  //  - body declaring no nonzero absolute height (the overwhelmingly common
   //    case): children stay the __0/__1/... SIBLINGS in the components map
   //    (byte-for-byte the legacy shape — every renderer iterates the map at
-  //    the top level and an unsized body-root occupies ~no flow space);
-  //  - body WITH an explicit nonzero absolute height: children nest under
-  //    __body's `children` map so they stack from the body's top INSIDE its
-  //    painted area, matching the real page instead of below a sized block.
+  //    the top level and an unsized body-root occupies ~no flow space). If
+  //    the root ALSO declares an inherited trigger property, each sibling
+  //    receives that value by the wave-30 A4 bake-down (rootInheritedBakeProps
+  //    — a value copy, not a shape change);
+  //  - body WITH an explicit nonzero absolute height (wave-17): children nest
+  //    under __body's `children` map so they stack from the body's top INSIDE
+  //    its painted area, matching the real page instead of below a sized
+  //    block.
+  // The root bag itself is never rewritten by either path — the composed
+  // canvases read background/padding straight off it.
   const root = propsForBodyRoot(rules);
 
   // wave-15 BIDI-EXTRACT part 3: white-space resolver handed to the tree
@@ -5320,13 +6078,33 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     components[`${idPrefix}__body`] = cmp;
   }
 
-  // wave-17 BODY-HEIGHT SLOTTING: decide ONCE, before any sibling is
-  // emitted, whether this document's body children nest under the body-root.
-  // Requires BOTH an emitted body-root component (the trigger is moot
-  // without a parent to slot into) and the explicit-absolute-height bag
-  // (the narrow trigger pinned in bodyDeclaresAbsoluteHeight).
+  // wave-17 BODY-HEIGHT SLOTTING: decide ONCE, before any sibling is emitted,
+  // whether this document's body children nest under the body-root. Requires
+  // BOTH an emitted body-root component (the trigger is moot without a parent
+  // to slot into) and the SIZED-body geometry trigger pinned in
+  // shouldSlotBodyChildren.
   const bodyCmp = components[`${idPrefix}__body`];
-  const slotIntoBody = bodyCmp !== undefined && bodyDeclaresAbsoluteHeight(root.props);
+  const slotIntoBody = bodyCmp !== undefined && shouldSlotBodyChildren(root.props);
+
+  // wave-30 A4 (reworked): the ROOT-INHERITANCE bake-down. Same decision
+  // point, same once-per-document evaluation, but it delivers VALUES instead
+  // of restructuring — see the rootInheritedBakeProps banner for the measured
+  // native regressions that ruled out a second slotting arm.
+  //
+  // Gated on `bodyCmp !== undefined` for the same reason slotting is: a
+  // document whose root-scope rules produced no emitted body-root has no
+  // inheritance SOURCE in the fixture at all, so there is nothing to hand
+  // down and inventing one would widen the blast radius past the trigger.
+  //
+  // Gated on `!slotIntoBody` because the two repairs are alternatives, not
+  // partners: under a SIZED body the children are already real descendants of
+  // the body-root, so every runtime's inherited-property merge hands them the
+  // root's values through the wire's own parent edge. Baking on top would
+  // duplicate the declaration onto the child's own bag, which is NOT the same
+  // thing — an own declaration outranks the parent's for any deeper cascade
+  // question — so the slotted path is left exactly as wave-17 shipped it.
+  const bakeRootInherited = bodyCmp !== undefined && !slotIntoBody
+    && bodyDeclaresInheritedProperty(root.props);
 
   /**
    * Emit one would-be top-level component: as a CHILD of the body-root when
@@ -5348,6 +6126,27 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       bodyCmp.children ??= {};
       bodyCmp.children[id] = { id, ...cmp }; // child shape: id + component
     } else {
+      // wave-30 A4 bake-down: THIS is the missing hop. A top-level body child
+      // is the one level CSS inheritance cannot reach on the sibling wire, so
+      // the root's declared trigger properties are copied onto its own bag
+      // here — after buildNode has finished (so the 100x100 empty-node
+      // placeholder decision, the br sizing and the UA bakes all still see
+      // the element's REAL declarations, never a handed-down one), and only
+      // for keys the child does not already speak for.
+      if (bakeRootInherited) {
+        const baked = rootInheritedBakeProps(root.props, cmp.properties);
+        if (baked) {
+          // Appended, so an author declaration keeps its position in the bag
+          // and a reader can see at a glance which keys arrived by copy.
+          Object.assign(cmp.properties, baked);
+          // LOUD, once per affected component (a bag is baked exactly once —
+          // emitTopLevel runs once per top-level id).
+          cmp._lossy = true;
+          cmp._lossyReasons = [...(cmp._lossyReasons ?? []), ROOT_INHERITED_REASON];
+          lossyOverall = true;
+          lossyReasonsOverall.add(ROOT_INHERITED_REASON);
+        }
+      }
       components[id] = cmp; // legacy sibling shape, byte-for-byte
     }
   };
@@ -5456,6 +6255,13 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // UA heading metrics for a collapsed <h1> wrapper (see UA_H1_PROPS) —
     // the guard list already proved the root declares none of them.
     if (node.uaHeadingProps) Object.assign(props, node.uaHeadingProps);
+    // wave-30 A7: UA hyperlink styling (HTML Rendering §15.5.2). Folded
+    // HERE, alongside the other UA bake and before the sibling-index /
+    // attr() / keyframe passes and the lossy scan, so every later step sees
+    // the final bag. uaLinkProps has already applied the author-wins guards,
+    // so this assign can never overwrite a declaration.
+    const uaLink = uaLinkProps(node.tag, node.attrs, props, uaLinkSuppressed);
+    if (uaLink) Object.assign(props, uaLink);
     // wave-21 A-RC6: bake sibling-index() with this element's 1-based
     // renderable-sibling position (CSS Values 5 §5.1 — see the baking
     // section banner). BEFORE the sampler + lossy scan so those see the
@@ -5488,6 +6294,12 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // folding itself happened above, BEFORE the lossy scan, so a folded
     // `text-decoration-inset: -0.5em` still trips the em/rem lane.
     if (node.uaHeadingProps) reasons.push('ua-heading-defaults');
+    // wave-30 A7 — LOUD marker for the baked UA hyperlink rule. It also
+    // carries the :visited gap (see the UA_LINK_PROPS banner): a component
+    // wearing this reason is painting the UNVISITED colour by construction,
+    // so a purple-vs-blue residual against a ref is OUR approximation and
+    // must be read as such, not as a renderer divergence.
+    if (uaLink) reasons.push(UA_LINK_REASON);
     // Only PARTIAL-coverage collapses are approximations — a wrapper that
     // held part of the run now decorates all of it (see the flag's
     // assignment in extractBodyTreeNested). Full ancestor chains collapse
@@ -5986,7 +6798,12 @@ async function main() {
         // Declines/bails leave the fixture byte-identical (the documented
         // bail-to-static contract) and are surfaced in the log line.
         let postLoadNote = '';
-        if (postLoad && await postLoad.isWallTagged(rel)) {
+        // wave-30 A3: activation now has TWO routes — the bucketer's
+        // extraction-wall tags (wave-16) OR a static rule pass that dropped
+        // ≥1 rule as unsupported (countUnsupportedRules above, surfaced on
+        // `result.unsupportedRules`). See shouldPostLoadExtract's banner for
+        // why a dropped rule is exactly the "ask the browser" signal.
+        if (postLoad && await postLoad.shouldPostLoadExtractFor(rel, result.unsupportedRules)) {
           const outcome = await postLoad.postLoadAugmentFixture(result.fixture, rel);
           // wave-20: `+structure` marks the tree-re-extraction path (the
           // fixture carries _wpt.structureExtracted alongside the state stamp).

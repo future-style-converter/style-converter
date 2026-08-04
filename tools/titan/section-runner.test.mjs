@@ -51,9 +51,29 @@ test('Step 1 extraction engages post-load augmentation itself (RC-A5a)', () => {
   // state (postLoadExtracted:false). The env must be set on the invocation.
   assert.match(
     src,
-    /POST_LOAD_EXTRACT=1 node "\$TITAN_DIR\/extract-fixture\.mjs"/,
+    /POST_LOAD_EXTRACT=1 (?:[A-Z_]+=\S+ )*node "\$TITAN_DIR\/extract-fixture\.mjs"/,
     'Step 1 must run extract-fixture.mjs with POST_LOAD_EXTRACT=1 inline',
   );
+});
+
+test('Step 1 extraction engages the bidi bake itself (wave-30 fix-T3)', () => {
+  // Same contract, same failure mode as POST_LOAD_EXTRACT above: the bidi
+  // bake is opt-in (`--bidi-bake` / BIDI_BAKE=1, see extract-fixture main()),
+  // and left to the caller's ambient shell it engaged only by accident. A
+  // fresh `section-runner.sh selectors` without it silently reproduced
+  // dir-selector-change-003/004 in LOGICAL order where wave29-final had the
+  // measured visual order, with no marker to explain the drift.
+  assert.match(
+    src,
+    /(?:^|\s)BIDI_BAKE=1 (?:[A-Z_]+=\S+ )*node "\$TITAN_DIR\/extract-fixture\.mjs"/m,
+    'Step 1 must run extract-fixture.mjs with BIDI_BAKE=1 inline',
+  );
+  // Both pins ride the SAME invocation — a second, separate extract call
+  // would re-extract and clobber, so pin them to one line.
+  const line = src.split('\n').find((l) => l.includes('node "$TITAN_DIR/extract-fixture.mjs"'));
+  assert.ok(line, 'Step 1 extract invocation not found');
+  assert.ok(line.includes('POST_LOAD_EXTRACT=1') && line.includes('BIDI_BAKE=1'),
+    `both env pins must be on the one extract invocation, got: ${line}`);
 });
 
 test('Step 5b feeds BOTH natives in composed mode through per-device pool slots', () => {

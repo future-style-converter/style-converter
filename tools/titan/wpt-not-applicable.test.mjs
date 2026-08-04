@@ -15,13 +15,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { tagsForTest, classifyAll, RULES, RX } from './wpt-not-applicable.mjs';
+import {
+    tagsForTest, classifyAll, RULES, RX,
+    NON_LATIN_PREDEFINED_COUNTER_STYLES,
+    shadowedCounterStyleNames,
+} from './wpt-not-applicable.mjs';
 
-// ── Sanity: 42 rules (17 swarm-001 + 12 swarm-002 + 11 swarm-003 + 1 wave-21
-//    requires-wpt-server + 1 wave-29 browser-ref-divergent)
+// ── Sanity: 43 rules (17 swarm-001 + 12 swarm-002 + 11 swarm-003 + 1 wave-21
+//    requires-wpt-server + 1 wave-29 browser-ref-divergent + 1 wave-30
+//    requires-non-latin-font-parity)
 
-test('RULES exports exactly 42 entries', () => {
-    assert.equal(RULES.length, 42);
+test('RULES exports exactly 43 entries', () => {
+    assert.equal(RULES.length, 43);
 });
 
 test('RULES tags are unique', () => {
@@ -1552,4 +1557,263 @@ test('Rule 42 handles a ::selection SELECTOR LIST as one block (active-selection
     const html = '<style>div { color: transparent; } '
         + 'div#a::selection , hr#b::selection { color: lime; }</style>';
     assert.equal(tagsForTest({ html }).includes('browser-ref-divergent'), false);
+});
+
+// ── Rule 43 (wave-30 B4b): requires-non-latin-font-parity ───────────────────
+//
+// The one NATIVE-ONLY rule, and the first tag in this file whose exclusion is
+// PER PLATFORM. It names a FONT BOUNDARY: the pipeline pins Inter (Latin +
+// Greek + Cyrillic) on all four surfaces, so a test painting §6 non-Latin
+// counter-style glyphs sends the ref and web to the same macOS CoreText
+// fallback while Compose and SwiftUI each resolve their own — a typographic
+// ceiling on the native SSIM that no runtime work can lift. Measured across
+// css-counter-styles: web 0.9623–0.9986 (11/12 pass), natives 0.7244–0.9917
+// and degrading with glyph count. Full table at the rule's banner.
+//
+// The pins below hold the three things that make it safe: the CLOSED §6
+// table (a silent widening would exclude native diffs that are genuinely
+// comparable), the three declaration shapes that count as a USE, and the
+// deliberate declines — Latin/Greek styles, §6.1 bullets, prose mentions.
+
+const NLF = 'requires-non-latin-font-parity';
+
+test('Rule 43 fires on a list-style-type naming a §6 non-Latin system (arabic-indic 102 shape)', () => {
+    // The exact declaration css3-counter-styles-102.html carries.
+    const html = '<title>arabic-indic, 10+</title>'
+        + '<style>ol li { list-style-type: arabic-indic; }</style>'
+        + '<ol start="10"><li>x</ol>';
+    assert.ok(tagsForTest({ html }).includes(NLF));
+});
+
+test('Rule 43 fires through the list-style SHORTHAND (css-lists marker-text-matches-armenian)', () => {
+    // `list-style: armenian inside` — the style name is one component of the
+    // shorthand, so a longhand-only match would miss the whole family.
+    const html = '<style>ol { list-style: armenian inside; }</style>';
+    assert.ok(tagsForTest({ html }).includes(NLF));
+});
+
+test('Rule 43 fires on counter()/counters() whose LAST argument is a non-Latin style', () => {
+    // css-lists/counter-004 and counters-004 verbatim: the style is the last
+    // argument (css-lists-3 §4.3), after the counter name and the separator.
+    const one = '<style>#test span::before { content: counter(c, georgian); }</style>';
+    const two = '<style>#test span::before { content: counters(c, ".", georgian); }</style>';
+    assert.ok(tagsForTest({ html: one }).includes(NLF));
+    assert.ok(tagsForTest({ html: two }).includes(NLF));
+});
+
+test('Rule 43 fires on `system: extends <non-Latin>` (counter-style-at-rule/redefine-builtin)', () => {
+    // §3.1: an extending style reuses the base style's SYMBOLS, so it paints
+    // the same non-Latin glyphs under an arbitrary name. redefine-builtin.html
+    // names its style `hebrew` but the GLYPHS come from cjk-decimal — which is
+    // why the rule reads the `extends` operand, not the at-rule's own name.
+    const html = '<style>@counter-style hebrew { system: extends cjk-decimal; }</style>';
+    assert.ok(tagsForTest({ html }).includes(NLF));
+});
+
+test('Rule 43 does NOT fire on the ASCII / Greek predefined systems', () => {
+    // The deliberate boundary: Inter covers Latin, Greek and Cyrillic, so
+    // these four surfaces keep the SAME face and the comparison stays fair.
+    // lower-greek is the load-bearing case — it is non-Latin SCRIPT but not
+    // outside the bundled coverage, and the corpus has three passing tests
+    // (css3-counter-styles-027..029) that must not be excluded.
+    for (const style of ['decimal', 'decimal-leading-zero', 'lower-alpha', 'upper-latin',
+        'lower-roman', 'upper-roman', 'lower-greek']) {
+        const html = `<style>ol { list-style-type: ${style}; }</style>`;
+        assert.equal(tagsForTest({ html }).includes(NLF), false, `${style} must NOT fire`);
+    }
+});
+
+test('Rule 43 does NOT fire on the §6.1 bullet styles', () => {
+    // Ordinal-independent and drawn rather than text-shaped on the natives —
+    // no glyph, no font boundary.
+    for (const style of ['disc', 'circle', 'square', 'disclosure-open', 'disclosure-closed', 'none']) {
+        const html = `<style>ul { list-style-type: ${style}; }</style>`;
+        assert.equal(tagsForTest({ html }).includes(NLF), false, `${style} must NOT fire`);
+    }
+});
+
+test('Rule 43 reads STYLE BLOCKS ONLY — title/meta prose cannot arm it', () => {
+    // Every one of these tests spells the style name in its <title> and its
+    // <meta name=assert>, and 461 further corpus documents mention a §6 name
+    // in prose alone (css-writing-modes "the first six Hebrew letters",
+    // css-text "japanese hiragana" titles, …). A whole-document scan would
+    // fire on all of them.
+    const html = '<title>arabic-indic, 10+</title>'
+        + '<meta name="assert" content="list-style-type: arabic-indic produces numbers after 9">'
+        + '<p>Test passes if the two columns are the same.</p>';
+    assert.equal(tagsForTest({ html }).includes(NLF), false);
+});
+
+test('Rule 43 does NOT fire on list-style-image / a quoted string marker', () => {
+    // Both are the false-positive shapes a substring match would invent:
+    // `url(georgian-bullet.png)` names an IMAGE, `"hebrew"` a literal STRING
+    // marker (css-counter-styles-3 §6 allows <string> in list-style-type).
+    // Neither is a style-name position, so neither may fire.
+    const img = '<style>ol { list-style-image: url(georgian-bullet.png); }</style>';
+    const shorthandImg = '<style>ol { list-style: url(armenian.png) none; }</style>';
+    const str = '<style>ol { list-style-type: "hebrew"; }</style>';
+    assert.equal(tagsForTest({ html: img }).includes(NLF), false);
+    assert.equal(tagsForTest({ html: shorthandImg }).includes(NLF), false);
+    assert.equal(tagsForTest({ html: str }).includes(NLF), false);
+});
+
+test('Rule 43 does NOT fire when a non-Latin name is only the counter NAME', () => {
+    // `counter(hebrew)` names a COUNTER called hebrew and renders it in the
+    // default `decimal` style (css-lists-3 §4.3) — ASCII digits, no boundary.
+    // Only the LAST argument is a style position, which is what this pins.
+    const html = '<style>span::before { content: counter(hebrew); }</style>';
+    assert.equal(tagsForTest({ html }).includes(NLF), false);
+});
+
+test('Rule 43 ignores a COMMENTED-OUT declaration (css-syntax-3 comment stripping)', () => {
+    const html = '<style>ol { /* list-style-type: tibetan; */ list-style-type: decimal; }</style>';
+    assert.equal(tagsForTest({ html }).includes(NLF), false);
+});
+
+test('Rule 43 matches whole IDENTS, never a substring of a longer word', () => {
+    // The corpus lesson: the only "urdu" matches in tools/wpt/css live inside
+    // "tURDUcken" (css-gcpm ipsum prose). `urdu` is not a §6 style and is not
+    // in the table — but the ident boundary is what stops the NEXT such
+    // coincidence, so pin it on a name that IS in the table.
+    const html = '<style>ol { list-style-type: pseudo-thai-ish; }</style>';
+    assert.equal(tagsForTest({ html }).includes(NLF), false);
+});
+
+test('Rule 43 is stateless across calls (the /g/ panel regexes are matchAll-cloned)', () => {
+    // The three Rule 43 entries in RX are the only GLOBAL regexes on the
+    // shared panel. String.matchAll clones the regex rather than advancing
+    // the original's lastIndex, so repeated classification of the same input
+    // must give the same answer — a `.test()` on a /g/ regex would alternate.
+    const html = '<style>ol { list-style-type: bengali; }</style>';
+    for (let i = 0; i < 4; i++) assert.ok(tagsForTest({ html }).includes(NLF), `call ${i}`);
+});
+
+test('Rule 43 table is the CLOSED css-counter-styles-3 §6 non-Latin set', () => {
+    // Membership is the exclusion's blast radius: every name here removes both
+    // native platforms from the denominator for every test using it. Pinned
+    // exactly, so a widening is a reviewed edit and not a typo.
+    assert.equal(NON_LATIN_PREDEFINED_COUNTER_STYLES.size, 41);
+    // §6.2 numeric (19) — one non-ASCII digit block each; khmer is the §6.2
+    // alias of cambodian and both must be present.
+    for (const n of ['arabic-indic', 'bengali', 'cambodian', 'khmer', 'cjk-decimal',
+        'devanagari', 'gujarati', 'gurmukhi', 'kannada', 'lao', 'malayalam', 'mongolian',
+        'myanmar', 'oriya', 'persian', 'tamil', 'telugu', 'thai', 'tibetan']) {
+        assert.ok(NON_LATIN_PREDEFINED_COUNTER_STYLES.has(n), `${n} missing`);
+    }
+    // §6.2 alphabetic kana (4) + additive letter-numerals (5).
+    for (const n of ['hiragana', 'hiragana-iroha', 'katakana', 'katakana-iroha',
+        'armenian', 'upper-armenian', 'lower-armenian', 'georgian', 'hebrew']) {
+        assert.ok(NON_LATIN_PREDEFINED_COUNTER_STYLES.has(n), `${n} missing`);
+    }
+    // §6.3 complex (13).
+    for (const n of ['cjk-earthly-branch', 'cjk-heavenly-stem', 'cjk-ideographic',
+        'ethiopic-numeric', 'japanese-formal', 'japanese-informal', 'korean-hangul-formal',
+        'korean-hanja-formal', 'korean-hanja-informal', 'simp-chinese-formal',
+        'simp-chinese-informal', 'trad-chinese-formal', 'trad-chinese-informal']) {
+        assert.ok(NON_LATIN_PREDEFINED_COUNTER_STYLES.has(n), `${n} missing`);
+    }
+    // …and the names that must NEVER be admitted. `urdu` is not a §6 style at
+    // all (the spec spells the extended-Arabic-Indic digits `persian`);
+    // lower-greek is §6 but INSIDE Inter's coverage.
+    for (const n of ['decimal', 'decimal-leading-zero', 'lower-alpha', 'upper-alpha',
+        'lower-latin', 'upper-latin', 'lower-roman', 'upper-roman', 'lower-greek',
+        'disc', 'circle', 'square', 'disclosure-open', 'disclosure-closed', 'none', 'urdu']) {
+        assert.equal(NON_LATIN_PREDEFINED_COUNTER_STYLES.has(n), false, `${n} must NOT be in the table`);
+    }
+});
+
+test('Rule 43 rides classifyAll and coexists with the other tags on the same test', () => {
+    // css3-counter-styles-102 carries requires-form-control-rendering and
+    // requires-bundled-font too; the histogram must count all of them, and the
+    // per-platform gate downstream keys on this ONE tag out of the list.
+    const html = '<style>ol li { list-style-type: bengali; }</style><ol><li>x</ol>';
+    const { notApplicable, tagHistogram } = classifyAll([
+        { rel: 'css/css-counter-styles/bengali/css3-counter-styles-117.html', html },
+    ]);
+    assert.ok(notApplicable['css/css-counter-styles/bengali/css3-counter-styles-117.html'].includes(NLF));
+    assert.equal(tagHistogram[NLF], 1);
+});
+
+// ── wave-30 fix-T4: Rule 43 must not fire on an AUTHOR-SHADOWED §6 name ─────
+//
+// css-counter-styles-3 §5 puts author `@counter-style` rules in the cascade
+// alongside the predefined ones, and later wins. Verified in Chromium: a page
+// carrying `@counter-style bengali { system: numeric; symbols: "0" … "9" }`
+// plus `list-style-type: bengali` renders ASCII digits identical to `decimal`.
+// Every surface shapes those from Inter — there is no fallback face, so the
+// font boundary Rule 43 names does not exist for that document and firing
+// would score-exclude two perfectly comparable native diffs.
+//
+// The decline is deliberately ASYMMETRIC: we fire unless the redefinition is
+// PROVABLY non-Latin. Corpus impact of the fix, measured over all 33,643
+// documents: 319 → 319, zero documents affected — the only §6 name any
+// corpus document shadows is `hebrew` in
+// css-counter-styles/counter-style-at-rule/redefine-builtin.html, and it does
+// so with `system: extends cjk-decimal`, which IS provably non-Latin.
+
+test('Rule 43 fix-T4: an author redefinition with ASCII symbols declines the name', () => {
+    const html = '<style>@counter-style bengali { system: numeric; '
+        + 'symbols: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"; } '
+        + 'ol li { list-style-type: bengali; }</style><ol><li>x</ol>';
+    assert.deepEqual([...shadowedCounterStyleNames(
+        html.replace(/^[\s\S]*<style>|<\/style>[\s\S]*$/g, ''))], ['bengali']);
+    assert.equal(tagsForTest({ html }).includes(NLF), false);
+});
+
+test('Rule 43 fix-T4: a shadow that EXTENDS a non-Latin style still fires', () => {
+    // `system: extends thai` reuses Thai digits (§3.1) — the boundary is real.
+    const html = '<style>@counter-style thai { system: extends thai; } '
+        + 'ol { list-style-type: thai; }</style>';
+    assert.deepEqual([...shadowedCounterStyleNames('@counter-style thai { system: extends thai; }')], []);
+    assert.ok(tagsForTest({ html }).includes(NLF));
+    // …and a shadow whose OWN symbols carry non-ASCII codepoints.
+    const glyphs = '<style>@counter-style bengali { system: numeric; '
+        + 'symbols: "০" "১" "২"; } ol { list-style-type: bengali }</style>';
+    assert.ok(tagsForTest({ html: glyphs }).includes(NLF));
+    // …and one that spells them as CSS escapes instead of literal codepoints.
+    const escaped = '<style>@counter-style bengali { system: numeric; '
+        + 'symbols: \\09E6 \\09E7 \\09E8; } ol { list-style-type: bengali }</style>';
+    assert.ok(tagsForTest({ html: escaped }).includes(NLF));
+});
+
+test('Rule 43 fix-T4: extending a SHADOWED name declines too', () => {
+    // `x` inherits the AUTHOR's ASCII symbols, not §6's Bengali digits, so the
+    // Use-3 `system: extends` route must respect the same decline.
+    const html = '<style>@counter-style bengali { system: numeric; symbols: "0" "1"; } '
+        + '@counter-style x { system: extends bengali; } ol { list-style-type: x }</style>';
+    assert.equal(tagsForTest({ html }).includes(NLF), false);
+});
+
+test('Rule 43 fix-T4: an empty or non-§6 @counter-style block shadows nothing', () => {
+    // A block with no descriptor cannot be a valid counter style (§3), so it
+    // cannot take the name over.
+    assert.deepEqual([...shadowedCounterStyleNames('@counter-style bengali { }')], []);
+    assert.ok(tagsForTest({ html: '<style>@counter-style bengali {} '
+        + 'ol { list-style-type: bengali }</style>' }).includes(NLF));
+    // A name that was never in the §6 table is irrelevant to the rule.
+    assert.deepEqual([...shadowedCounterStyleNames(
+        '@counter-style my-disc { system: cyclic; symbols: "x"; }')], []);
+});
+
+test('Rule 43 fix-T4: css-counter-styles/redefine-builtin still fires (measured member)', () => {
+    // The ONLY corpus document that shadows a §6 name. Its `hebrew`
+    // redefinition extends cjk-decimal, so the boundary survives — and the
+    // sheet's other `system: extends` arms Use 3 independently.
+    const css = '@counter-style none { system: extends lower-roman; } '
+        + '@counter-style decimal { system: extends upper-roman; } '
+        + '@counter-style disc { system: extends decimal; } '
+        + '@counter-style hebrew { system: extends cjk-decimal; }';
+    assert.deepEqual([...shadowedCounterStyleNames(css)], []);
+    assert.ok(tagsForTest({ html: `<style>${css}</style>` }).includes(NLF));
+});
+
+test('Rule 43 fix-T4: the 319-fire baseline members are untouched (spot-check)', () => {
+    // Three families from the measured table, one per use site, all with NO
+    // author @counter-style anywhere — the fix must be a pure narrowing.
+    assert.ok(tagsForTest({ html: '<style>ol li { list-style-type: bengali; }</style>' }).includes(NLF));
+    assert.ok(tagsForTest({ html: '<style>ol { list-style: armenian inside; }</style>' }).includes(NLF));
+    assert.ok(tagsForTest({ html: '<style>span::before { content: counter(c, georgian); }</style>' }).includes(NLF));
+    assert.ok(tagsForTest({ html: '<style>@counter-style x { system: extends arabic-indic; }</style>' }).includes(NLF));
+    // And the deliberate declines stay declined.
+    assert.equal(tagsForTest({ html: '<style>ol { list-style-type: lower-greek }</style>' }).includes(NLF), false);
 });

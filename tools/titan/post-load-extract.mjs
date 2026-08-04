@@ -641,6 +641,54 @@ export function shouldStructureExtract(naTags, mismatch) {
   return Array.isArray(naTags) && naTags.includes(STRUCTURE_TRIGGER_TAG);
 }
 
+/** wave-30 A3 — the SECOND activation route into post-load mode.
+ *
+ *  Until now the gate was exactly `hasWallTag(naTags)`: a test earned a live
+ *  browser only if the bucketer had recognised, from its SOURCE, a capability
+ *  the static extractor cannot deliver. That misses the class where the
+ *  static pass itself already knows it fell short: extract-fixture's rule
+ *  pass DROPPED one or more rules because our selector matcher cannot model
+ *  them (countUnsupportedRules over there defines the count exactly).
+ *
+ *  A dropped rule means the fixture's cascade is missing declarations the
+ *  browser applies. The live page has no such gap — Chromium implements
+ *  every selector — and post-load mode's whole job is to overlay the
+ *  browser's COMPUTED state onto the components. So "the matcher dropped a
+ *  rule" is precisely the signal that consulting the browser is worth the
+ *  page load, and it costs nothing when the answer agrees.
+ *
+ *  MEASURED motivating case (wave-30): the selectors section's dir family.
+ *  `:dir()` was an unmodelled pseudo, so e.g.
+ *  dir-selector-auto-direction-change-001's
+ *  `:dir(ltr) + #target { background-color: green }` was dropped and the
+ *  fixture shipped the `#target { … red }` base — the exact opposite of the
+ *  test's assertion, with no wall tag to explain it.
+ *
+ *  This route WIDENS eligibility only; every downstream honesty guard is
+ *  unchanged (settle stability, scroll offsets, anchor insets, element
+ *  mapping, pseudo re-derivation). It also does NOT grant the delivery stamp
+ *  by itself — `postLoadExtracted` is still written only by a run that
+ *  passed those guards.
+ *
+ *  Pure and exported so the tests pin both routes and their independence. */
+export function shouldPostLoadExtract(naTags, unsupportedRules = 0) {
+  // Route 1 (wave-16): the bucketer's extraction-wall tags.
+  if (hasWallTag(naTags)) return true;
+  // Route 2 (wave-30 A3): our own rule pass reported a gap. Guard the type
+  // so a missing/NaN count can never open the gate by accident.
+  return Number.isFinite(unsupportedRules) && unsupportedRules >= 1;
+}
+
+/** Async convenience for the two CLIs: the wave-30 A3 gate for a
+ *  repo-relative test path, looked up in the SAME notApplicable map
+ *  isWallTagged reads, so the two activation helpers can never disagree
+ *  about a test's tags. `unsupportedRules` comes from the static pass
+ *  (extract-fixture's `result.unsupportedRules`); omitting it degrades this
+ *  to exactly isWallTagged. */
+export async function shouldPostLoadExtractFor(testRel, unsupportedRules = 0) {
+  return shouldPostLoadExtract((await notApplicableIndex())[testRel], unsupportedRules);
+}
+
 // The id stamped on the injected canvas-frame <style> so the serializer can
 // strip it — the canvas contract is the CAPTURE pipeline's own frame (every
 // platform injects it at render time); baking it into the fixture would
@@ -1040,7 +1088,16 @@ async function rePseudoFromLivePage(page, fixture, testRel, html, testAbs) {
 export function componentAtPath(fixture, stem, path) {
   // Top-level id is `${stem}__${first index}`.
   let id = `${stem}__${path[0]}`;
-  let cmp = fixture.components?.[id];
+  // BODY SLOTTING (wave-17 sized body / wave-30 A4 inherited-prop body):
+  // buildComponents' emitTopLevel moves the body's would-be top-level
+  // children INTO `${stem}__body`.children while KEEPING their `${stem}__N`
+  // ids verbatim. The walk `path` is a TREE path and knows nothing of that
+  // move, and mappingMismatch compares tree paths, so it passes and the
+  // lookup then fell through to the loud `no component at path 0` throw.
+  // Look in the slotted map as a second home for the SAME id — not a
+  // fallback heuristic: the two maps are mutually exclusive by construction.
+  let cmp = fixture.components?.[id]
+    ?? fixture.components?.[`${stem}__body`]?.children?.[id];
   // Each further index descends one children level, extending the id.
   for (let i = 1; cmp && i < path.length; i++) {
     id = `${id}__${path[i]}`;
@@ -1253,7 +1310,16 @@ export async function postLoadAugmentFixture(fixture, testRel) {
       inlineMerge: [...INLINE_MERGE_TAGS],
       // styledTags from the SAME rule set the static tree used — recompute
       // here so both sides of the mapping share one guard.
-      styledTags: [...collectStyledTags(parseCss(extractInlineStyle(stripComments(html))))],
+      // wave-30 A2 follow-on: the LINKED sheets are appended too. The static
+      // side (staticPathsForHtml) has always assembled inline + linked CSS,
+      // so an inline-only guard here could disagree about which inline
+      // elements merge, drift the element counts, and bail a deliverable
+      // test on a phantom mapping mismatch. Latent before wave-30; teaching
+      // collectStyledTags sibling-combinator hosts made a linked
+      // `code + b { … }` newly capable of triggering it, so the two sides are
+      // aligned now rather than after the first mystery bail.
+      styledTags: [...collectStyledTags(parseCss(
+        extractInlineStyle(stripComments(html)) + await linkedCssTextFor(html, testAbs)))],
       maxDepth: 5,
       propNames: POST_LOAD_COMPUTED_PROPERTIES,
     };
@@ -1354,13 +1420,41 @@ async function main() {
   try {
     for (const rel of inputs) {
       try {
-        // Activation gate: only wall-tagged tests get post-load treatment.
-        if (!force && !(await isWallTagged(rel))) {
-          console.log(`skip      ${rel} (no extraction-wall tag)`);
+        // wave-30 A3: the static pass now runs FIRST, because its
+        // `unsupportedRules` count is the second activation route (see
+        // shouldPostLoadExtract). Reordering costs a stdlib-only extraction
+        // on skipped tests and buys the gate its input; the skip branch
+        // still writes NOTHING, so the CLI's on-disk behaviour for
+        // non-activated tests is unchanged.
+        //
+        // wave-30 fix-T2: that reordering ALSO put extract-fixture's own
+        // rejections ahead of the gate, so an input the gate would have
+        // SKIPPED became a hard ERROR — `post-load-extract.mjs
+        // css/CSS2/abspos/abspos-in-block-in-inline-in-relpos-inline.html`
+        // (bucket C, which extract-fixture refuses by design with "is not in
+        // bucket A or B") skipped cleanly before A3 and threw after it. The
+        // catch restores the skip WITHOUT giving up route 2: a failed static
+        // pass simply has no `unsupportedRules` to offer, so the gate is
+        // re-asked on route 1 (wall tags) alone, which needs no static input.
+        // A test the gate ACTIVATES still surfaces the real error.
+        let result;
+        try {
+          result = await extractFixture(rel);              // static pass
+        } catch (err) {
+          if (!force && !(await shouldPostLoadExtractFor(rel, 0))) {
+            console.log(`skip      ${rel} (no extraction-wall tag; static pass declined: ${err.message ?? err})`);
+            tally.skipped++;
+            continue;
+          }
+          throw err;                                       // → ERROR row below
+        }
+        // Activation gate: wall-tagged tests, plus tests whose own rule pass
+        // reported dropped rules.
+        if (!force && !(await shouldPostLoadExtractFor(rel, result.unsupportedRules))) {
+          console.log(`skip      ${rel} (no extraction-wall tag, no dropped rules)`);
           tally.skipped++;
           continue;
         }
-        const result = await extractFixture(rel);          // static pass
         const outcome = await postLoadAugmentFixture(result.fixture, rel);
         await writeFixturePair(result);                    // write either way
         tally[outcome.status]++;

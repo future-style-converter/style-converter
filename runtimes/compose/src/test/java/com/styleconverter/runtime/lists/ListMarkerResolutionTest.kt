@@ -162,6 +162,20 @@ class ListMarkerResolutionTest {
     private fun prop(type: String, wire: String) =
         com.styleconverter.runtime.core.ir.IRProperty(type, json(wire))
 
+    /**
+     * The list-style half of [ListStyleUaRule.apply]'s output.
+     *
+     * Wave 30 (lane 3, fix B5) added a SECOND UA declaration to the same
+     * rule — `ul, menu, dir, ol { padding-inline-start: 40px }` (HTML
+     * §15.3.9) — so every container path now also carries a `PaddingLeft`
+     * entry. The wave-25 cases below are about the TYPE cascade and are
+     * kept focused on it by dropping that entry here; the padding has its
+     * own pins under "Wave 30".
+     */
+    private fun listStyleOnly(
+        properties: List<com.styleconverter.runtime.core.ir.IRProperty>
+    ) = properties.filter { ListStyleExtractor.isListStyleProperty(it.type) }
+
     @Test
     fun anAncestorTypeLosesToTheContainersUaRule() {
         // The inversion: `<div style="list-style-type:square"><ul><li>`.
@@ -171,8 +185,8 @@ class ListMarkerResolutionTest {
         // paints a disc, not a square.
         val ancestor = listOf(prop("ListStyleType", "\"square\""))
         val corrected = ListStyleUaRule.apply("ul", own = emptyList(), merged = ancestor)
-        assertEquals(1, corrected.size)
-        assertEquals("ListStyleType", corrected[0].type)
+        assertEquals(1, listStyleOnly(corrected).size)
+        assertEquals("ListStyleType", listStyleOnly(corrected)[0].type)
         assertEquals("•", marker("ul", corrected.map { it.type to it.data }, emptyList()))
         // …and on an <ol> the UA value is decimal, not the ancestor's square.
         assertEquals("1.",
@@ -189,8 +203,11 @@ class ListMarkerResolutionTest {
         // "fix" attempts that merely reorder the fold.
         val own = listOf(prop("ListStyleType", "\"armenian\""))
         val merged = ListStyleUaRule.apply("ol", own = own, merged = own)
-        // Same instance back — the rule did not fire.
-        assertSame(own, merged)
+        // The TYPE half did not fire — the own declaration is returned
+        // verbatim. (Not `assertSame` any more: wave 30's padding half
+        // appends to the same list, so the instance changes while the
+        // list-style content does not.)
+        assertEquals(own, listStyleOnly(merged))
         assertEquals("Ա.", marker("ol", merged.map { it.type to it.data }, emptyList()))
     }
 
@@ -198,14 +215,148 @@ class ListMarkerResolutionTest {
     fun theUaRuleIsInertOutsideListContainers() {
         val ancestor = listOf(prop("ListStyleType", "\"square\""))
         // Not a list container ⇒ the UA sheet declares nothing ⇒ untouched.
+        // Still `assertSame`: NEITHER half of the rule applies off a
+        // container, so the identity fast-path is intact for every
+        // non-list element in the corpus.
         assertSame(ancestor, ListStyleUaRule.apply("div", emptyList(), ancestor))
         assertSame(ancestor, ListStyleUaRule.apply(null, emptyList(), ancestor))
         // A container with nothing inherited ⇒ nothing to displace.
         val onlyPosition = listOf(prop("ListStylePosition", "\"INSIDE\""))
-        assertSame(onlyPosition, ListStyleUaRule.apply("ul", emptyList(), onlyPosition))
+        assertEquals(onlyPosition,
+            listStyleOnly(ListStyleUaRule.apply("ul", emptyList(), onlyPosition)))
         // The unexpanded shorthand counts as an own type declaration.
         val ownShorthand = listOf(prop("ListStyle", "\"square\""))
-        assertSame(ancestor, ListStyleUaRule.apply("ul", ownShorthand, ancestor))
+        assertEquals(ancestor,
+            listStyleOnly(ListStyleUaRule.apply("ul", ownShorthand, ancestor)))
+    }
+
+    // ── Wave 30 (lane 3, fix B5): the UA `padding-inline-start` ─────────
+
+    /**
+     * Every px value the rule's output carries for [type], in order.
+     *
+     * [type] defaults to `PaddingLeft`, the physical side the UA
+     * `padding-inline-start` maps to under the default `direction: ltr`;
+     * the rtl cases below pass `PaddingRight` (css-logical-1 §2.1).
+     */
+    private fun paddingPx(
+        properties: List<com.styleconverter.runtime.core.ir.IRProperty>,
+        type: String = "PaddingLeft"
+    ): List<Double> = properties.filter { it.type == type }.map {
+        (it.data as kotlinx.serialization.json.JsonObject)["px"]!!
+            .let { px -> (px as kotlinx.serialization.json.JsonPrimitive).content.toDouble() }
+    }
+
+    @Test
+    fun aListContainerWithNoAuthorPaddingTakesTheUa40px() {
+        // HTML §15.3.9 `ul, menu, dir, ol { padding-inline-start: 40px }`.
+        // The live shape: change-list-style-type-001's ten `<ul>`s declare
+        // ListStylePosition and nothing else, and both natives laid their
+        // items out 40px left of web (ink columns 17 vs 56) because nothing
+        // supplied this.
+        for (tag in listOf("ul", "ol", "menu", "dir")) {
+            val merged = ListStyleUaRule.apply(
+                tag, emptyList(), listOf(prop("ListStylePosition", "\"INSIDE\"")))
+            assertEquals("$tag must take the UA padding",
+                listOf(ListStyleUaRule.UA_PADDING_INLINE_START_PX), paddingPx(merged))
+        }
+        // A non-container gets nothing — the identity path above.
+        assertEquals(emptyList<Double>(), paddingPx(ListStyleUaRule.apply(
+            "div", emptyList(), listOf(prop("ListStylePosition", "\"INSIDE\"")))))
+    }
+
+    @Test
+    fun anAuthorInlineStartPaddingBeatsTheUaRule() {
+        // css-cascade-4 §6.1. The live shape: css3-counter-styles-007's
+        // `<ol>` declares `padding-left: 8em` and must keep exactly that —
+        // injecting 40px beside it would double-indent every one of its
+        // 24 rows. Under the default ltr all three spellings block it: the
+        // physical longhand for THIS direction, the logical longhand, and
+        // the `Padding` shorthand — the last one defensive only, since the
+        // converter's PaddingExpander always expands `padding` and no
+        // `PaddingProperty` exists in the 558-property catalogue.
+        assertEquals(listOf(128.0),
+            paddingPx(ListStyleUaRule.apply("ol",
+                listOf(prop("PaddingLeft", """{"px":128.0}""")),
+                listOf(prop("PaddingLeft", """{"px":128.0}""")))))
+        for (declared in listOf("PaddingInlineStart", "Padding")) {
+            val own = listOf(prop(declared, """{"px":128.0}"""))
+            assertEquals("$declared must block the UA padding",
+                emptyList<Double>(), paddingPx(ListStyleUaRule.apply("ol", own, own)))
+        }
+    }
+
+    // ── Wave 30 fix round (lane N, fix N1): the direction mapping ───────
+
+    @Test
+    fun anRtlContainerTakesTheUaPaddingOnTheRight() {
+        // css-logical-1 §2.1: the inline-START side of a `direction: rtl`
+        // box is the RIGHT one, so HTML §15.3.9's `padding-inline-start:
+        // 40px` must land there. The first cut of B5 injected the physical
+        // `PaddingLeft` unconditionally — 40px on the wrong edge AND 40px
+        // missing on the right, an 80px relative error on every rtl list.
+        // Live exposure: fixtures/wpt/css-lists/list-marker-symbol-bidi.json
+        // carries five `direction: rtl` `<ul>`s.
+        val ua = ListStyleUaRule.UA_PADDING_INLINE_START_PX
+        val rtl = listOf(prop("Direction", "\"RTL\""),
+            prop("ListStylePosition", "\"INSIDE\""))
+        val rtlOut = ListStyleUaRule.apply("ul", rtl, rtl)
+        assertEquals(listOf(ua), paddingPx(rtlOut, "PaddingRight"))
+        assertEquals(emptyList<Double>(), paddingPx(rtlOut, "PaddingLeft"))
+        // ltr — declared explicitly and (above) by absence — still lands
+        // on the left, so no committed ltr capture moves.
+        val ltr = listOf(prop("Direction", "\"LTR\""),
+            prop("ListStylePosition", "\"INSIDE\""))
+        assertEquals(listOf(ua), paddingPx(ListStyleUaRule.apply("ul", ltr, ltr)))
+        // `direction` is Inherited: yes (css-writing-modes-4 §2.1) and sits
+        // in ComponentRenderer.INHERITED_PROPERTY_TYPES, so an ANCESTOR's
+        // rtl reaches the container through the merged list alone.
+        assertEquals(listOf(ua), paddingPx(
+            ListStyleUaRule.apply("ul", emptyList(), listOf(prop("Direction", "\"RTL\""))),
+            "PaddingRight"))
+        // A garbage/unresolved keyword is ltr, the CSS initial value.
+        val junk = listOf(prop("Direction", "\"sideways\""))
+        assertEquals(listOf(ua), paddingPx(ListStyleUaRule.apply("ul", junk, junk)))
+    }
+
+    @Test
+    fun theAuthorBlockFollowsTheSameDirectionMapping() {
+        val ua = ListStyleUaRule.UA_PADDING_INLINE_START_PX
+        val dir = prop("Direction", "\"RTL\"")
+        // padding-right ON an rtl container IS its inline start ⇒ blocks.
+        val ownRight = listOf(dir, prop("PaddingRight", """{"px":128.0}"""))
+        assertEquals(listOf(128.0),
+            paddingPx(ListStyleUaRule.apply("ol", ownRight, ownRight), "PaddingRight"))
+        // padding-LEFT on the same rtl container says nothing about the
+        // inline start (css-logical-1 §2.1), so both declarations survive
+        // the cascade exactly as they do in a browser: the author's 128px
+        // on the left, the UA's 40px on the right.
+        val ownLeft = listOf(dir, prop("PaddingLeft", """{"px":128.0}"""))
+        val mixed = ListStyleUaRule.apply("ol", ownLeft, ownLeft)
+        assertEquals(listOf(ua), paddingPx(mixed, "PaddingRight"))
+        assertEquals(listOf(128.0), paddingPx(mixed, "PaddingLeft"))
+        // The logical longhand — and the defensive `Padding` guard — block
+        // in BOTH directions, since they name the same side the UA does.
+        for (declared in listOf("PaddingInlineStart", "Padding")) {
+            val own = listOf(dir, prop(declared, """{"px":128.0}"""))
+            val out = ListStyleUaRule.apply("ol", own, own)
+            assertEquals("$declared must block the rtl UA padding",
+                emptyList<Double>(), paddingPx(out, "PaddingRight"))
+            assertEquals(emptyList<Double>(), paddingPx(out, "PaddingLeft"))
+        }
+    }
+
+    @Test
+    fun theDirectionHelpersAreTheSingleMapping() {
+        // The two natives are diffed against these, so pin them directly.
+        assertEquals("PaddingLeft", ListStyleUaRule.startPaddingType(false))
+        assertEquals("PaddingRight", ListStyleUaRule.startPaddingType(true))
+        // Last entry wins, the fold convention this package uses.
+        assertEquals(true, ListStyleUaRule.isRtl(
+            listOf(prop("Direction", "\"LTR\""), prop("Direction", "\"rtl\""))))
+        assertEquals(false, ListStyleUaRule.isRtl(
+            listOf(prop("Direction", "\"RTL\""), prop("Direction", "\"LTR\""))))
+        assertEquals(false, ListStyleUaRule.isRtl(emptyList()))
     }
 
     @Test

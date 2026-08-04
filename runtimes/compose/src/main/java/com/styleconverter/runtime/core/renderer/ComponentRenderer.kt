@@ -15,6 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.graphics.Color
+// Wave 30 (lane 3, fix B6): the marker SHAPE needs the glyph's resolved
+// ink at composition time (a draw scope cannot read a CompositionLocal),
+// and `Color.takeOrElse` is a top-level extension — importable only by name.
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -2095,6 +2099,18 @@ object ComponentRenderer {
      */
     @Composable
     private fun RenderContent(component: IRComponent, textColor: Color?, displayConfig: DisplayConfig? = null) {
+        // ── wave-30 lane-3 OWN-DISPLAY marker (fix B1, see
+        // lists/ListItemMarkerGate.kt). css-lists-3 §3.1 attaches the
+        // ::marker to the BOX, not the tag: a `display: list-item` element
+        // that is not an `<li>` under a list container generates one too,
+        // and both natives painted nothing for it. Emitted FIRST — ahead of
+        // the root ::before below — because CSS orders ::marker before
+        // ::before (the same ordering web's NodeRenderer spells out at its
+        // `markerNode` positional argument). Null for every component that
+        // is not a self-marking `inside` list item, i.e. for the entire
+        // 327-pair dark stage and every tagged `<li>` (those keep the
+        // parent-loop RenderListItemMarker path).
+        RenderOwnListMarker(component, textColor)
         // ── wave-28 lane-PG ROOT-SCOPE generated box (see RootPseudoBox.kt).
         // This function is the ONE content emitter every layout branch calls,
         // so emitting here puts the box FIRST in the container's flow —
@@ -2292,7 +2308,28 @@ object ComponentRenderer {
                 // segments byte-identically (index-aligned with the
                 // original children list — collapse plan + list markers
                 // keep their indices).
+                // Wave 30 (lane 3, fix B3) — the row-pitch residual carrier
+                // for this stacking container. `current ?: remember{…}` is
+                // the OUTERMOST-owns rule spelled out in ComposedRowPitch:
+                // a nested container inherits its ancestor's accumulator, so
+                // a row's prefix is every line box stacked above it in the
+                // capture, not just within its immediate parent. That is the
+                // shape css3-counter-styles-007 needs — its 24 rows are 24
+                // separate `<ol>`s under one wrapper, each an only child.
+                // Null outside composed WPT capture, where no provider is
+                // installed and the isolated per-row rounding stands.
+                val rowPitchAccumulator =
+                    if (LocalWptComposedMode.current)
+                        com.styleconverter.runtime.lists.LocalRowPitchAccumulator.current
+                            ?: androidx.compose.runtime.remember {
+                                com.styleconverter.runtime.lists.RowPitchAccumulator()
+                            }
+                    else null
                 val renderBlockChild: @Composable (Int, IRComponent) -> Unit = { index, child ->
+                    // Provided only when non-null so the dark-stage 327 pairs
+                    // and the per-component inbox path keep their exact
+                    // composition shape, not merely their pixels.
+                    ProvidingRowPitch(rowPitchAccumulator) {
                     if (isListParent && child._tag?.lowercase() == "li") {
                         RenderListItemMarker(
                             child, index, parentTag, parentListPairs,
@@ -2317,6 +2354,7 @@ object ComponentRenderer {
                         } else {
                             RenderComponent(child)
                         }
+                    }
                     }
                 }
                 // Wave-19 lane FLOAT — CSS 2.1 §9.5 float row packing,
@@ -2470,6 +2508,122 @@ object ComponentRenderer {
     }
 
     /**
+     * Install a [com.styleconverter.runtime.lists.RowPitchAccumulator] for
+     * [content], or emit [content] verbatim when there is none.
+     *
+     * Wave 30 (lane 3, fix B3). The null arm is not an optimisation: it
+     * keeps the COMPOSITION SHAPE of every non-composed-WPT path
+     * byte-identical (no extra provider node per block child), which is
+     * the same discipline the collapse-plan provider a few lines above
+     * follows.
+     */
+    @Composable
+    private fun ProvidingRowPitch(
+        accumulator: com.styleconverter.runtime.lists.RowPitchAccumulator?,
+        content: @Composable () -> Unit
+    ) {
+        if (accumulator == null) content()
+        else CompositionLocalProvider(
+            com.styleconverter.runtime.lists.LocalRowPitchAccumulator provides accumulator,
+            content = content
+        )
+    }
+
+    /**
+     * The `::marker` a box generates from its OWN `display: list-item`
+     * (css-lists-3 §3.1) — wave 30, lane 3 (fix B1). Twin of iOS's
+     * `ComponentRenderer.ownListMarker`.
+     *
+     * The gate, the four predicates behind it and the MEASURED reason
+     * `outside` is excluded all live in
+     * [com.styleconverter.runtime.lists.ListItemMarkerGate]; this function
+     * is only the paint.
+     *
+     * ## Why a LEADING LINE BOX and not a row
+     * css-lists-3 §3.2 makes an `inside` marker the item's FIRST INLINE
+     * BOX. The item's own in-flow content on all three runtimes is
+     * BLOCK-level ([PlaceholderContent] for text, a Column of children
+     * otherwise), so the marker can never share a line with it and owns a
+     * line box of its own at the top of the item's content — which is
+     * exactly what the web runtime produces (`1.` on one line, `text` on
+     * the next, ink rows 46–65 / 76–82 of the live
+     * change-list-style-position-003 web capture). It is NOT an overlay:
+     * an overlay reports zero size and would leave the item's block
+     * content 20px too high, which is the current defect. It is NOT a Row
+     * either: a Row would put the marker BESIDE the item's content, which
+     * neither the browser nor web does for block content.
+     *
+     * The `Box` is height-pinned to the resolved line box rather than
+     * wrapping the glyph, so an item whose marker resolves through a
+     * fallback face with a taller natural line cannot stretch its own
+     * content down — the same rule [ListMarkerLineBox] imposes on the
+     * marker rows.
+     */
+    @Composable
+    private fun RenderOwnListMarker(component: IRComponent, textColor: Color?) {
+        val pairs = component.properties.map { it.type to it.data }
+        if (!com.styleconverter.runtime.lists.ListItemMarkerGate
+                .rendersOwnLeadingMarker(component._tag, pairs)) return
+        val config = com.styleconverter.runtime.lists.ListItemMarkerGate
+            .ownMarkerConfig(pairs)
+        val marker = com.styleconverter.runtime.lists.ListItemMarkerGate
+            .ownMarkerText(pairs)
+        // The marker inherits from its originating element (css-lists-3
+        // §3.2) — which HERE is the component itself, not a container, so
+        // this is the one marker call site with the exact font the browser
+        // would use (the honest-scope gap ListMarkerTextStyle documents for
+        // the row path does not apply).
+        val inheritedFontSizeSp = com.styleconverter.runtime.core.variables
+            .DynamicValueResolver.fontSizePxOf(LocalInheritedProperties.current)
+        val baseStyle = runCatching {
+            TextStyleApplier.extractTextStyle(component.properties, inheritedFontSizeSp)
+        }.getOrDefault(TextStyle())
+        val lineBox = ListMarkerLineBox.resolve(
+            declaredLineHeight = baseStyle.lineHeight,
+            fontSize = baseStyle.fontSize,
+            declaredNormal = com.styleconverter.runtime.typography
+                .LineHeightNormal.isDeclaredNormal(component.properties),
+            wptCapture = LocalWptCaptureMode.current,
+            composedWpt = LocalWptComposedMode.current
+        )
+        val markerStyle = ListMarkerTextStyle.forItem(
+            baseStyle.copy(lineHeight = lineBox),
+            textColor ?: runCatching {
+                TextStyleApplier.extractTextColor(component.properties)
+            }.getOrNull()
+        )
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val markerFontSizePx = with(density) {
+            (if (markerStyle.fontSize != TextUnit.Unspecified) markerStyle.fontSize
+            else ListMarkerLineBox.DEFAULT_FONT_SIZE_SP.sp).toPx()
+        }
+        // Unspecified line box ⇒ no height pin, i.e. the declared-`normal`
+        // state where the face's own metrics ARE the CSS answer — the same
+        // three-state resolution every other run in the runtime makes.
+        val lineBoxModifier =
+            if (lineBox != TextUnit.Unspecified)
+                Modifier.height(with(density) { lineBox.toDp() })
+            else Modifier
+        Box(modifier = lineBoxModifier, contentAlignment = Alignment.CenterStart) {
+            Text(
+                text = marker,
+                style = markerStyle,
+                // Shrink-to-fit ::marker box (css-lists-3 §3.2) — the same
+                // fix B2 puts on the two row call sites.
+                softWrap = false,
+                modifier = com.styleconverter.runtime.lists.ListMarkerSymbol.paint(
+                    type = config.listStyleType,
+                    markerText = marker,
+                    fontSizePx = markerFontSizePx,
+                    color = markerStyle.color.takeOrElse {
+                        androidx.compose.material3.LocalContentColor.current
+                    }
+                )
+            )
+        }
+    }
+
+    /**
      * Render a `<li>` child with its own synthesised marker. Compose has
      * no `::marker` pseudo, so we emit a Row(Text(marker) +
      * RenderComponent(child)). Marker counter uses the 1-based index from
@@ -2559,13 +2713,49 @@ object ComponentRenderer {
         // byte-identical. Density is read here because a Modifier factory
         // is not a composable scope.
         val markerSnapDensity = androidx.compose.ui.platform.LocalDensity.current
+        // Wave 30 (lane 3, fix B3) — the residual carrier the snap rounds
+        // its ACCUMULATED position against. Null outside composed WPT (no
+        // provider is installed there), which is exactly the isolated
+        // per-row rounding every other capture path keeps.
+        val markerRowPitch = com.styleconverter.runtime.lists
+            .LocalRowPitchAccumulator.current
         val markerLineBoxSnapModifier = if (LocalWptComposedMode.current) {
             ListMarkerLineBox.snap(
                 refLineBoxPx = if (markerStyle.lineHeight != TextUnit.Unspecified)
                     with(markerSnapDensity) { markerStyle.lineHeight.toPx() } else 0f,
-                lineCount = { markerLayout.value?.lineCount ?: 0 }
+                lineCount = { markerLayout.value?.lineCount ?: 0 },
+                // Keyed by the ITEM's IR id: stable across measure passes
+                // (the idempotence the accumulator's ordering contract
+                // depends on) and unique per row within a capture.
+                prefixExactPx = { exact ->
+                    markerRowPitch?.prefixFor(child.id, exact) ?: 0f
+                }
             )
         } else Modifier
+        // Wave 30 (lane 3, fix B6) — the disc/circle/square SHAPE that
+        // replaces the symbol glyph's ink. `Modifier` (a no-op) for every
+        // numeric/alphabetic style and for every baked string that does
+        // not match our own symbol table, so nothing but the three UA
+        // symbols changes. Resolved once, shared by both placements below.
+        val markerSymbolPaint = com.styleconverter.runtime.lists.ListMarkerSymbol.paint(
+            type = listConfig?.listStyleType
+                ?: com.styleconverter.runtime.lists.ListStyleType.DISC,
+            markerText = marker,
+            // The marker's own resolved size, bottoming out at the same
+            // browser default `PlaceholderContent` uses when nothing up
+            // the chain declared one (ListMarkerLineBox.DEFAULT_FONT_SIZE_SP).
+            fontSizePx = with(markerSnapDensity) {
+                (if (markerStyle.fontSize != TextUnit.Unspecified) markerStyle.fontSize
+                else ListMarkerLineBox.DEFAULT_FONT_SIZE_SP.sp).toPx()
+            },
+            // A draw scope cannot read a CompositionLocal, so the ink the
+            // glyph would have taken is resolved here — same three-step
+            // fallback `Text` itself applies (explicit style colour, then
+            // the ambient content colour).
+            color = markerStyle.color.takeOrElse {
+                androidx.compose.material3.LocalContentColor.current
+            }
+        )
         // Does the item's principal box carry a first text baseline at
         // all? Drives BOTH wave-28 decisions (which placement, and — in
         // the row — whether a baseline claim is meaningful).
@@ -2623,7 +2813,31 @@ object ComponentRenderer {
                 Text(
                     text = marker,
                     style = markerStyle,
+                    // Wave 30 (lane 3, fix B2) — css-lists-3 §3.2 makes the
+                    // ::marker box shrink-to-fit inline-level content, sized
+                    // by its glyphs and never by the space its item leaves
+                    // over. `softWrap = false` is the closest Compose gets:
+                    // it pins the run to ONE line, so a narrow constraint
+                    // can no longer wrap the glyphs.
+                    //
+                    // HONEST SCOPE (corrected in the wave-30 fix round): it
+                    // is NOT "the Compose spelling of `.fixedSize`", the
+                    // claim this comment used to make. `Text` still measures
+                    // against the incoming maxWidth, and its DEFAULT
+                    // `TextOverflow.Clip` truncates whatever does not fit —
+                    // where SwiftUI's `.fixedSize(horizontal:true,
+                    // vertical:true)` takes the ideal width and OVERFLOWS
+                    // its slot, painting every glyph. The two therefore
+                    // still disagree for a marker wider than its constraint;
+                    // that residual is inert on THIS branch by construction,
+                    // because ListMarkerRow.insideMarkerOverlay measures
+                    // with unbounded `Constraints()` and reports a zero
+                    // size, so no constraint ever reaches the glyphs. Set
+                    // here anyway so the two call sites agree about what a
+                    // marker box is.
+                    softWrap = false,
                     modifier = ListMarkerRow.insideMarkerOverlay()
+                        .then(markerSymbolPaint)
                 )
             }
             return
@@ -2707,12 +2921,52 @@ object ComponentRenderer {
             Text(
                 text = marker,
                 style = markerStyle,
+                // Wave 30 (lane 3, fix B2) — the one-line ::marker run
+                // (css-lists-3 §3.2 wants the box shrink-to-fit). THIS is
+                // the call site where it bites: the marker is a Row sibling
+                // measured against whatever inline space the item's declared
+                // width leaves, and the same over-constraint that made
+                // SwiftUI compress its marker to zero width (see
+                // ListMarkerRow's header, point 1) makes Compose wrap the
+                // glyphs onto a second line — which the line-box snap below
+                // then faithfully doubles the marker's height for.
+                //
+                // HONEST SCOPE (corrected in the wave-30 fix round): this is
+                // NOT "the Compose spelling of `.fixedSize(horizontal:true,
+                // vertical:true)`", as this comment used to claim. It stops
+                // the WRAP, not the constraint: `Text` still measures
+                // against the incoming maxWidth and its default
+                // `TextOverflow.Clip` truncates the excess, where iOS's
+                // `.fixedSize` keeps the ideal width and lets the marker
+                // overflow its slot with every glyph painted. So for a
+                // marker whose single-line width exceeds the space the row
+                // leaves it, Compose now paints a CLIPPED marker where iOS
+                // paints a full one — a smaller and non-compounding
+                // divergence than the wrapped-and-doubled line box it
+                // replaces (that one fed the snap and moved the whole row),
+                // but a divergence, and it is stated rather than implied.
+                softWrap = false,
                 // The line-count channel the snap reads (see markerLineBox
                 // + markerLineBoxSnap): Compose reports it after layout,
                 // and writing the state re-runs the layout block, not the
                 // composition.
                 onTextLayout = { markerLayout.value = it },
                 modifier = markerBaselineClaim(aligns)
+                    // Wave 30 (lane 3, fix B6) — the painted disc/circle/
+                    // square.
+                    //
+                    // CHAIN ORDER, corrected in the wave-30 fix round: this
+                    // draw modifier is written BEFORE the snap, which makes
+                    // it the OUTER of the two — so the size its DrawScope
+                    // reads is the size the snap REPORTS, i.e. the snapped
+                    // height, not the glyph's natural one. (The previous
+                    // comment claimed the opposite.) It is self-neutralising
+                    // rather than a bug: ListMarkerSymbol.topPx CENTRES the
+                    // shape in whatever height reaches it, and the snap's
+                    // trim is symmetric — it re-places the glyph band at
+                    // (target − natural) / 2 — so the shape and the ink it
+                    // replaces stay centred on the same line box either way.
+                    .then(markerSymbolPaint)
                     // Wave 29 (lane MP) — the composed-WPT line-box snap the
                     // ITEM's text run has always had. Without it the marker
                     // box keeps its FACE's natural line (measured h=34 for a

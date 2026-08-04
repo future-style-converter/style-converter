@@ -51,8 +51,11 @@ test('capture-browser-ref: white CANVAS_BG + cache keyed by CANVAS_REV', () => {
   // and now the CSS-padded /white-black-ink-font-lh tree) out of the live
   // diff. '…-imgpad' == corpus-v4.1 typography PLUS the wave-25 CAL-RC1
   // image-space frame, which moves every abspos/fixed overlay back into
-  // alignment with the in-flow content it annotates.
-  assert.match(s, /export const CANVAS_REV = 'white-black-ink-font-lh-imgpad'/, 'cache revision segment missing');
+  // alignment with the in-flow content it annotates. '…-htmlpins' == the
+  // wave-30 A5 fifth leg: the three INHERITED pins moved to `:where(html)`,
+  // retiring every ref of a page that declares color/font-family/line-height
+  // at :root/html (those rasterised the CLOBBERED value — see canvasFrameCss).
+  assert.match(s, /export const CANVAS_REV = 'white-black-ink-font-lh-imgpad-htmlpins'/, 'cache revision segment missing');
   assert.match(s, /join\(REFS_ROOT, wptRef, CANVAS_REV, section/, 'cachePathFor must key on CANVAS_REV');
 });
 
@@ -70,12 +73,24 @@ test('the shell --refs-root literal is normalised by inject-wpt-block, not pinne
     .exec(src('tools/titan/inject-wpt-block.mjs'))?.[1] ?? '';
   for (const sh of ['tools/titan/run-titan.sh', 'tools/titan/section-runner.sh']) {
     const s = src(sh);
-    const seg = /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/([A-Za-z0-9._-]+)"/.exec(s)?.[1];
-    assert.ok(seg, `${sh}: --refs-root must carry a canvas-rev segment`);
-    // Either it already IS the live rev, or the normaliser knows how to
-    // upgrade it. Nothing else may ship.
-    assert.ok(seg === 'white-black-ink-font-lh-imgpad' || stale.includes(`'${seg}'`),
-      `${sh}: refs-root segment '${seg}' is neither the live rev nor a KNOWN_STALE_CANVAS_REVS entry`);
+    // wave-30 fix-T3: matchAll, not a single .exec. section-runner.sh passes
+    // --refs-root TWICE (Step 7 and the Step 7.5 recovery re-inject), and the
+    // non-global exec validated only the FIRST — a stale segment left behind
+    // on the recovery path would have shipped unseen, silently diffing the
+    // recovered manifest against a previous contract's refs.
+    const segs = [...s.matchAll(/--refs-root "\$WPT_DIR\/refs\/\$WPT_REF\/([A-Za-z0-9._-]+)"/g)]
+      .map((m) => m[1]);
+    assert.ok(segs.length > 0, `${sh}: --refs-root must carry a canvas-rev segment`);
+    for (const seg of segs) {
+      // Either it already IS the live rev, or the normaliser knows how to
+      // upgrade it. Nothing else may ship — on EVERY occurrence.
+      assert.ok(seg === 'white-black-ink-font-lh-imgpad-htmlpins' || stale.includes(`'${seg}'`),
+        `${sh}: refs-root segment '${seg}' is neither the live rev nor a KNOWN_STALE_CANVAS_REVS entry`);
+    }
+    // Every --refs-root in the file must have been captured by the pattern
+    // above; an occurrence the regex cannot see is an unvalidated occurrence.
+    assert.equal(segs.length, (s.match(/--refs-root /g) ?? []).length,
+      `${sh}: a --refs-root occurrence is not in the validated segment form`);
     assert.doesNotMatch(s, /--refs-root "\$WPT_DIR\/refs\/\$WPT_REF" /, `${sh}: un-segmented refs-root resurfaced`);
   }
 });
@@ -247,9 +262,15 @@ test('swiftui: WPTCanvas is white and the harness routes through the split', () 
 
 test('corpus-v4.1: the ref injection paints spec-black default ink', () => {
   const s = src('tools/titan/capture-browser-ref.mjs');
-  // The injected zero-specificity body default is the UA CanvasText black.
-  assert.match(s, /min-height: 100vh; color: #000;/, 'ref injection must pin the spec-black default ink');
-  // The v4.0 white-ink injection must never resurface.
+  // The injected zero-specificity default is the UA CanvasText black.
+  // wave-30 A5: it hangs off `:where(html)` now, not the tail of the body
+  // rule — `color` is INHERITED, and a specified value on body beat any
+  // author `:root { color }` outright (CSS Cascade 5 §6.2), silently
+  // clobbering 31 refs. The anchor moved with it so this scan keeps pinning
+  // the real injection rather than a string that no longer exists.
+  assert.match(s, /:where\(html\) \{ color: #000;/, 'ref injection must pin the spec-black default ink');
+  // The v4.0 white-ink injection must never resurface, at either anchor.
+  assert.doesNotMatch(s, /:where\(html\) \{ color: #fff;/, 'v4.0 white default ink resurfaced in the ref injection');
   assert.doesNotMatch(s, /min-height: 100vh; color: #fff;/, 'v4.0 white default ink resurfaced in the ref injection');
 });
 
@@ -269,11 +290,18 @@ test('corpus-v4.1 font: the ref injection pins the harness Inter stack + embeds 
   // The stack constant exists and leads with the bundled Inter.
   assert.match(s, /export const REF_FONT_STACK =\s*\n\s*"'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif"/,
     'REF_FONT_STACK missing/changed');
-  // The :where(body) injection consumes it (zero specificity — author
+  // The :where(html) injection consumes it (zero specificity — author
   // font rules in the ref must still win, like a UA default). The block no
   // longer closes on this declaration — the v4.1 line-height pin follows it
   // (its own scan below holds that ordering).
-  assert.match(s, /font-family: \$\{REF_FONT_STACK\};/, 'ref injection must apply REF_FONT_STACK');
+  // wave-30 A5: the rule moved from :where(body) to :where(html) because
+  // font-family is INHERITED and a specified value on body beat a :root
+  // author declaration outright (CSS Cascade 5 §6.2). The `:where(html) {
+  // color: #000;` prefix in the pattern is what holds the new scope — on the
+  // body rule the assertion would still have matched, which is exactly how
+  // the clobber survived four waves.
+  assert.match(s, /:where\(html\) \{ color: #000;\s*\n\s*font-family: \$\{REF_FONT_STACK\};/,
+    'ref injection must apply REF_FONT_STACK on the ROOT, not on body');
   // The harness's own Inter faces are embedded so 'Inter' resolves in the
   // ref browser (raw WPT HTML has no @font-face of its own).
   assert.match(s, /\$\{await interFontFaceCss\(\)\}/, 'ref injection must embed the Inter @font-face preamble');
@@ -379,11 +407,50 @@ test('corpus-v4.1 line-height: the ref injection pins a deterministic unitless 1
   const s = src('tools/titan/capture-browser-ref.mjs');
   // The pin constant exists at the lock-step value (20px @ the 16px root).
   assert.match(s, /export const REF_LINE_HEIGHT = '1\.25'/, 'REF_LINE_HEIGHT missing/changed');
-  // The :where(body) injection consumes it (zero specificity — author
+  // The :where(html) injection consumes it (zero specificity — author
   // line-height rules in the ref must still win, like a UA default), on the
   // same declaration block as the ink + font pins.
+  // wave-30 A5: that block is now the ROOT block — line-height is INHERITED,
+  // and a specified value on body beat any author `:root { line-height }`
+  // (CSS Cascade 5 §6.2). The trio must stay together AND stay on html.
   assert.match(s, /font-family: \$\{REF_FONT_STACK\};\s*\n\s*line-height: \$\{REF_LINE_HEIGHT\}; \}/,
     'ref injection must apply REF_LINE_HEIGHT at zero specificity');
+});
+
+test('wave-30 A5: the ref frame splits INHERITED pins from the body box rules', () => {
+  // THE DEFECT: `:where()` zeroes SPECIFICITY, which only decides contests on
+  // the SAME element. One level down CSS Cascade 5 §6.2 makes a SPECIFIED
+  // value beat an INHERITED one at any specificity — so `:where(body){
+  // color:#000 }` silently overrode every ref that declared `:root { color:
+  // green }` and relied on body inheriting it. MEASURED on
+  // css/selectors/child-indexed-no-parent-ref.html: rgb(0,0,0) under the body
+  // pins, rgb(0,128,0) under the html pins; 31 reference files corpus-wide
+  // declare one of the three at :root/html without restating it on body.
+  // This scan is what stops the trio drifting back onto body — nothing else
+  // in the suite would notice, because a body-scoped pin renders IDENTICALLY
+  // on every ref that has no root-scope text declaration (the vast majority).
+  const s = src('tools/titan/capture-browser-ref.mjs');
+  const injected = /export async function canvasFrameCss\(\) \{\s*\n\s*return `([\s\S]*?)`;\s*\n\}/.exec(s)?.[1];
+  assert.ok(injected, 'canvasFrameCss() frame stylesheet not found');
+  const bodyRule = /:where\(body\)\s*\{([^}]*)\}/.exec(injected)?.[1];
+  assert.ok(bodyRule, ':where(body) rule missing from the canvas frame');
+  // The three INHERITED properties must not appear in the body-only rule.
+  for (const prop of ['color', 'font-family', 'line-height']) {
+    assert.doesNotMatch(bodyRule, new RegExp(`(?<![-\\w])${prop}\\s*:`),
+      `'${prop}' is INHERITED — on :where(body) it clobbers :root author rules`);
+  }
+  // …and they must all be present in the root-only rule, in one block.
+  // Asserted as ONE ordered literal rather than by extracting the block:
+  // in SOURCE text the `${REF_FONT_STACK}` placeholder carries a `}` of its
+  // own, so a `[^}]*` block grab truncates mid-rule (it does not at runtime,
+  // where capture-browser-ref.test.mjs pins the EXPANDED sheet instead).
+  assert.match(injected,
+    /:where\(html\) \{ color: #000;\s*\n\s*font-family: \$\{REF_FONT_STACK\};\s*\n\s*line-height: \$\{REF_LINE_HEIGHT\}; \}/,
+    'the three INHERITED pins must sit together on :where(html)');
+  // The NON-inherited body geometry is untouched by the hoist — moving any of
+  // these would break the CAL-RC1 contract the tests above hold.
+  assert.match(bodyRule, /display: flow-root;/, 'body BFC lost in the hoist');
+  assert.match(bodyRule, /min-height: 100vh;/, 'body viewport fill lost in the hoist');
 });
 
 test('corpus-v4.1 line-height: web wpt stage + composed placeholder pin the ref value', () => {
