@@ -27,6 +27,9 @@ import {
   padColorFor,
   parseHexRgb,
   UNKNOWN_BROWSER_REV,
+  canvasFrameCss,
+  REF_FONT_STACK,
+  REF_LINE_HEIGHT,
 } from './capture-browser-ref.mjs';
 
 // ── the corpus-v4 white-canvas contract ─────────────────────────────────────
@@ -41,7 +44,7 @@ test('CANVAS_BG is the corpus-v4 white canvas', () => {
   assert.equal(CANVAS_BG, '#FFFFFF');
 });
 
-test('CANVAS_REV names the wave-25 image-pad cache revision', () => {
+test('CANVAS_REV names the wave-30 html-pins cache revision', () => {
   // The ONE literal pin on the rev string — every other assertion in this
   // file interpolates CANVAS_REV, so a deliberate bump costs one line here
   // and a drifted one fails loudly.
@@ -53,7 +56,11 @@ test('CANVAS_REV names the wave-25 image-pad cache revision', () => {
   // off their own in-flow content. Every earlier rev (…-lh, …-font, white/,
   // and the un-segmented pre-v4 dark tree) is geometrically stale for
   // abspos-overlay refs and must never be mixed into a diff.
-  assert.equal(CANVAS_REV, 'white-black-ink-font-lh-imgpad');
+  // '-htmlpins' = the wave-30 A5 fifth leg: the three INHERITED pins moved to
+  // `:where(html)`, so a ref declaring color/font-family/line-height at
+  // :root/html is no longer clobbered by a specified value on <body>. Every
+  // pre-htmlpins ref of such a page rasterised the WRONG ink and is stale.
+  assert.equal(CANVAS_REV, 'white-black-ink-font-lh-imgpad-htmlpins');
 });
 
 test('REF_RENDER_WIDTH + REF_MIN_CANVAS_H reproduce the historical canvas', () => {
@@ -67,6 +74,73 @@ test('REF_RENDER_WIDTH + REF_MIN_CANVAS_H reproduce the historical canvas', () =
   // The measurement floor the renderer uses is the outer floor minus the pad,
   // so a short ref still yields exactly 600 after framing.
   assert.equal((REF_MIN_CANVAS_H - 2 * CANVAS_PAD_PX) + 2 * CANVAS_PAD_PX, REF_MIN_CANVAS_H);
+});
+
+// ── wave-30 A5: the INHERITED pins live on :where(html), never on body ──────
+//
+// THE BUG THESE PIN AGAINST (measured, css/selectors/child-indexed-no-parent-
+// ref.html): `:where()` zeroes SPECIFICITY, which only settles contests on
+// the SAME element. One level down, CSS Cascade 5 §6.2 says a SPECIFIED value
+// always beats an INHERITED one regardless of the specificity that produced
+// it — so `:where(body){ color:#000 }` silently overrode every ref that
+// declared `:root { color: green }` and let body inherit it. The ref
+// rasterised BLACK where spec truth is GREEN, and our (correct) harness
+// captures were scored as failures against that wrong target.
+//
+// Splitting the rules by INHERITANCE is the whole fix, so the split is what
+// these tests hold. Structural, not cosmetic: fold the three declarations
+// back onto :where(body) and the clobber returns with no other symptom.
+// A live-browser confirmation of the cascade claim is out of scope for
+// `node --test` (headless by contract, see the file header) — it was measured
+// with puppeteer at implementation time and re-derivable from the rule text
+// pinned here.
+
+/** Pull one `:where(<sel>) { … }` declaration block out of the frame sheet.
+ *  Returns null when the rule is absent, so a missing rule fails as a clear
+ *  assertion rather than a TypeError on `.includes`. */
+function frameRule(css, selector) {
+  const rx = new RegExp(`:where\\(${selector.replace(/[()[\]{}*+?.\\^$|]/g, '\\$&')}\\)\\s*\\{([^}]*)\\}`);
+  return rx.exec(css)?.[1] ?? null;
+}
+
+test('wave-30 A5: the three inherited pins sit on :where(html)', async () => {
+  const css = await canvasFrameCss();
+  const html = frameRule(css, 'html');
+  assert.ok(html, ':where(html) rule missing from the canvas frame');
+  // The corpus-v4.1 ink + font + rhythm trio, all INHERITED properties, all
+  // on the ROOT so an author `:root`/`html` rule wins the cascade there and
+  // body inherits the AUTHOR's value.
+  assert.match(html, /color:\s*#000;/, 'ink pin left the root rule');
+  assert.ok(html.includes(REF_FONT_STACK), 'font pin left the root rule');
+  assert.ok(html.includes(`line-height: ${REF_LINE_HEIGHT};`), 'rhythm pin left the root rule');
+});
+
+test('wave-30 A5: :where(body) carries NO inherited text property', async () => {
+  // This is the assertion the defect would have failed. `:where(html, body)`
+  // is a different literal and is matched separately below, so this scopes to
+  // the body-only rule.
+  const css = await canvasFrameCss();
+  const body = frameRule(css, 'body');
+  assert.ok(body, ':where(body) rule missing from the canvas frame');
+  assert.doesNotMatch(body, /(?<![-\w])color\s*:/, 'the ink pin came back on body — it clobbers :root refs');
+  assert.doesNotMatch(body, /font-family\s*:/, 'the font pin came back on body — it clobbers :root refs');
+  assert.doesNotMatch(body, /line-height\s*:/, 'the rhythm pin came back on body — it clobbers :root refs');
+});
+
+test('wave-30 A5: the NON-inherited body frame is untouched by the hoist', async () => {
+  const css = await canvasFrameCss();
+  const body = frameRule(css, 'body');
+  // flow-root (margin-collapse containment), box-sizing + min-height
+  // (viewport fill) are all NON-inherited and all specifically ABOUT the body
+  // box — hoisting them would break the CAL-RC1 geometry contract, so the
+  // hoist must have left them exactly where they were.
+  assert.match(body, /display:\s*flow-root;/, 'body BFC lost');
+  assert.match(body, /box-sizing:\s*border-box;/, 'body box-sizing lost');
+  assert.match(body, /min-height:\s*100vh;/, 'body viewport fill lost');
+  // margin/padding/background legitimately stay on BOTH (canvas propagation
+  // reads the root's background then the body's — html.css UA behaviour).
+  assert.ok(css.includes(':where(html, body) { margin: 0; padding: 0; background: '),
+    'the shared html/body box+canvas rule must survive the hoist');
 });
 
 // ── wave-25 CAL-RC1: the image-space frame ──────────────────────────────────

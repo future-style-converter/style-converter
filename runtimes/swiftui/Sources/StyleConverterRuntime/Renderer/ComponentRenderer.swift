@@ -2255,6 +2255,22 @@ public struct ComponentRenderer: View {
 
     @ViewBuilder
     private func contentOrPlaceholder(style: ComponentStyle) -> some View {
+        // ── wave-30 lane-3 OWN-DISPLAY marker (fix B1, see
+        // StyleEngine/lists/ListItemMarkerGate.swift). css-lists-3 §3.1
+        // attaches the ::marker to the BOX, not the tag: a
+        // `display: list-item` element that is not an `<li>` under a list
+        // container generates one too, and both natives painted nothing for
+        // it. Emitted FIRST — ahead of the root ::before below — because CSS
+        // orders ::marker before ::before (the same ordering web's
+        // NodeRenderer spells out at its `markerNode` positional argument).
+        // Skipped for every component that is not a self-marking `inside`
+        // list item, i.e. for the whole 327-pair dark stage and every tagged
+        // `<li>` (those keep the parent-loop markerPlacement path).
+        if ListItemMarkerGate.rendersOwnLeadingMarker(
+                sourceTag: component.meta?.sourceTag,
+                properties: resolvedProperties) {
+            ownListMarker(style: style)
+        }
         // ── wave-28 lane-PG ROOT-SCOPE generated box (see RootPseudoBox.swift).
         // This function is the ONE content emitter every container branch
         // calls, so emitting here puts the box FIRST in the flow — exactly
@@ -2640,6 +2656,31 @@ public struct ComponentRenderer: View {
                         markerPlacement(child: child, markerText: markerText,
                                         insideOverlay: markerInsideOverlay,
                                         exposesBaseline: markerExposesBaseline,
+                                        // Wave 30 (lane 3, fix B6) — the
+                                        // resolved counter style and the
+                                        // marker run's font size, the two
+                                        // inputs the painted disc/circle/
+                                        // square needs. `.disc` for the nil
+                                        // config is the initial value of
+                                        // list-style-type (css-lists-3 §3.1)
+                                        // and only ever reaches a baked
+                                        // marker under a non-list parent,
+                                        // where the string guard in
+                                        // ListMarkerSymbol.shape(for:
+                                        // markerText:) declines anyway.
+                                        // The font size is the CONTAINER's,
+                                        // which is the same honest-scope
+                                        // limitation ListMarkerTextStyle
+                                        // documents for the marker's font on
+                                        // BOTH natives.
+                                        markerType: markerConfig?.type ?? .disc,
+                                        // 16 = the browser's inherited body
+                                        // default, the same bottom-out
+                                        // `effectiveLineHeight(fontSizePx:)`
+                                        // defaults to and the Compose twin
+                                        // spells ListMarkerLineBox
+                                        // .DEFAULT_FONT_SIZE_SP.
+                                        markerFontSizePx: style.text.fontSize ?? 16,
                                         isCSSFlex: isCSSFlex,
                                         childAgg: childAgg, parentAgg: parentAgg)
                     } else if isCSSFlex {
@@ -2999,10 +3040,16 @@ public struct ComponentRenderer: View {
     /// The marker `Text` is identical in both: `.fixedSize()` because the
     /// ::marker box is inline-level shrink-to-fit content sized by its
     /// glyphs (css-lists-3 §3.2, B-RC5) — never by whatever inline space
-    /// the item's declared width leaves over.
+    /// the item's declared width leaves over. Wave 30 (lane 3, fix B6)
+    /// adds `.listMarkerSymbol` to both: for `disc`/`circle`/`square` it
+    /// swaps the glyph's INK for the painted Chromium symbol while keeping
+    /// the box the glyph measured (see ListMarkerSymbol) — a no-op for
+    /// every other counter style.
     @ViewBuilder
     private func markerPlacement(child: IRComponent, markerText: String,
                                  insideOverlay: Bool, exposesBaseline: Bool,
+                                 markerType: ListMarkerType,
+                                 markerFontSizePx: CGFloat,
                                  isCSSFlex: Bool,
                                  childAgg: LayoutAggregate?,
                                  parentAgg: LayoutAggregate?) -> some View {
@@ -3032,6 +3079,9 @@ public struct ComponentRenderer: View {
                 .overlay(alignment: .topLeading) {
                     Text(markerText)
                         .fixedSize(horizontal: true, vertical: true)
+                        .listMarkerSymbol(type: markerType,
+                                          markerText: markerText,
+                                          fontSizePx: markerFontSizePx)
                 }
         } else {
             // `outside`, or an item whose in-flow text the marker must
@@ -3044,10 +3094,69 @@ public struct ComponentRenderer: View {
                    spacing: ListMarkerRow.gapPt) {
                 Text(markerText)
                     .fixedSize(horizontal: true, vertical: true)
+                    .listMarkerSymbol(type: markerType,
+                                      markerText: markerText,
+                                      fontSizePx: markerFontSizePx)
                 markerItemView(child: child, isCSSFlex: isCSSFlex,
                                childAgg: childAgg, parentAgg: parentAgg)
             }
         }
+    }
+
+    /// The `::marker` a box generates from its OWN `display: list-item`
+    /// (css-lists-3 §3.1) — wave 30, lane 3 (fix B1). Twin of Compose's
+    /// `ComponentRenderer.RenderOwnListMarker`.
+    ///
+    /// The gate, the four predicates behind it and the MEASURED reason
+    /// `outside` is excluded all live in `ListItemMarkerGate`; this
+    /// function is only the paint.
+    ///
+    /// ## Why a LEADING LINE BOX and not an HStack
+    /// css-lists-3 §3.2 makes an `inside` marker the item's FIRST INLINE
+    /// BOX. The item's own in-flow content on all three runtimes is
+    /// BLOCK-level (`PlaceholderLabel` for text, a stack of children
+    /// otherwise), so the marker can never share a line with it and owns a
+    /// line box of its own at the top of the item's content — which is
+    /// exactly what the web runtime produces (`1.` on one line, `text` on
+    /// the next; ink rows 46–65 / 76–82 of the live
+    /// change-list-style-position-003 web capture). It is NOT an
+    /// `.overlay`: an overlay never participates in sizing and would leave
+    /// the item's block content 20px too high, which IS the current
+    /// defect. It is NOT an HStack either: that would put the marker
+    /// BESIDE the item's content, which neither the browser nor web does
+    /// for block content.
+    ///
+    /// The `.frame(height:)` pins the resolved line box rather than
+    /// wrapping the glyph, so an item whose marker resolves through a
+    /// fallback face with a taller natural line cannot stretch its own
+    /// content down. `alignment: .leading` centres the glyph vertically in
+    /// that box (SwiftUI's `.leading` is horizontal-leading +
+    /// vertical-centre) and, with no width in the frame, leaves the
+    /// horizontal placement to the enclosing `VStack(alignment: .leading)`.
+    @ViewBuilder
+    private func ownListMarker(style: ComponentStyle) -> some View {
+        let markerText = ListItemMarkerGate.ownMarkerText(resolvedProperties)
+        // The marker inherits from its originating element (css-lists-3
+        // §3.2) — which HERE is the component itself, so this is the one
+        // marker call site whose font really is the item's (the
+        // honest-scope gap ListMarkerTextStyle documents for the row path
+        // does not apply). 16 = the browser's inherited body default, the
+        // same bottom-out `effectiveLineHeight(fontSizePx:)` defaults to.
+        let fontSizePx = style.text.fontSize ?? 16
+        Text(markerText)
+            // Shrink-to-fit ::marker box (css-lists-3 §3.2) — the same
+            // rule both row placements above carry.
+            .fixedSize(horizontal: true, vertical: true)
+            .listMarkerSymbol(
+                type: ListItemMarkerGate.ownMarkerConfig(resolvedProperties).type,
+                markerText: markerText,
+                fontSizePx: fontSizePx)
+            .frame(height: ComponentRenderer.effectiveLineHeight(
+                        declared: style.text.lineHeight,
+                        declaredNormal: style.text.lineHeightIsNormal,
+                        fontSizePx: fontSizePx,
+                        wptCaptureMode: wptCaptureMode),
+                   alignment: .leading)
     }
 }
 
@@ -3157,16 +3266,23 @@ private struct PlaceholderLabel: View {
         // css-text-3 §4.1.2, and the space-split below would collapse
         // them: a glyph-content rewrite; those modes take the legacy
         // soft-wrap path), and a break opportunity existing at all.
-        let displayText: String = {
+        //
+        // Wave 30 (lane LINEBOX) — the closure now also reports WHETHER it
+        // ran. A pre-broken string's `\n`s ARE TextKit's line breaks (every
+        // line fits `avail` by construction), so downstream the rendered line
+        // COUNT is exact and the line box can be pinned; on any early-return
+        // path TextKit still owns the breaking and the count is a guess. Only
+        // the flag is new — every `return` value below is unchanged.
+        let broken: (text: String, preBroken: Bool) = {
             guard let cb = wrapWidth, !textConfig.noWrap,
                   !textConfig.preservesSpaces,
-                  transformedText.contains(" ") else { return transformedText }
+                  transformedText.contains(" ") else { return (transformedText, false) }
             // Text width available inside the label: the content box
             // minus the 4px breathing inset each side (dropped in WPT
             // capture, mirroring the padding gate below) and the
             // text-indent leading pad — both shrink the line box.
             let avail = cb - (wptCaptureMode ? 0 : 8) - (textConfig.textIndentPx ?? 0)
-            guard avail > 0 else { return transformedText }
+            guard avail > 0 else { return (transformedText, false) }
             // Measure with the EXACT resolved render face + spacing so
             // the fit test uses the advances TextKit renders with.
             let lines = GreedyLineBreaker.lines(
@@ -3179,8 +3295,10 @@ private struct PlaceholderLabel: View {
             // Hard newlines force TextKit to OUR break positions — its
             // push-out strategy only relocates SOFT breaks, and every
             // pre-broken line fits `avail` by construction.
-            return lines.joined(separator: "\n")
+            return (lines.joined(separator: "\n"), true)
         }()
+        // The rendered string — identical to the pre-wave-30 `displayText`.
+        let displayText = broken.text
         // TITAN Round 4 (GAP 1, height half) — the line-height this run
         // lays out with: the IR-declared value when present (defer to it),
         // else the ref line box (20px — corpus-v4.1) in WPT capture, else nil (SwiftUI
@@ -3238,18 +3356,47 @@ private struct PlaceholderLabel: View {
         // break-word under WPT_COMPOSED_MODE.
         let wptUnbreakableRun = wptCaptureMode
             && !DecorationOps.hasSoftWrapOpportunity(displayText)
+        // Wave 30 (lane LINEBOX) — the composed-WPT LINE-BOX PIN, i.e. the
+        // Round-4 single-line cap above GENERALIZED to every run whose
+        // rendered line count is known. See LineBoxMetrics.pinnedBoxHeight
+        // for the defect it repairs (iOS drove the block advance off the
+        // face's rounded natural height + the CSS leading, so a `<p>`
+        // advanced 36.64px where the ref advances 36.00) and for why the
+        // arm is WPT-only. The count is exact when TextKit cannot add lines
+        // to what we hand it:
+        //   • `singleLineText`  — no whitespace at all, the Round-4 proxy;
+        //   • `textConfig.noWrap` / `wptUnbreakableRun` — wrapping is off
+        //     (css-text-4 §5.1) or there is no soft-wrap opportunity;
+        //   • `broken.preBroken` — the greedy pre-break rewrote every soft
+        //     break as a hard one and each line fits `avail` by construction.
+        // Anything else (unknown wrap width, preserved-whitespace modes)
+        // stays UNPINNED — an under-counted pin would ride the next sibling
+        // up, which is worse than the drift it would remove.
+        let lineCountIsExact = singleLineText || textConfig.noWrap
+            || wptUnbreakableRun || broken.preBroken
+        let pinnedBoxHeight = LineBoxMetrics.pinnedBoxHeight(
+            lineHeightPx: effectiveLineHeight,
+            // `line-clamp` truncates the block to N line boxes (css-overflow-4
+            // §5) — the `.lineLimit` below is what TextKit obeys, so the pin
+            // must count the same lines it renders, not the pre-broken string.
+            lineCount: LineBoxMetrics.renderedLineCount(
+                displayText, clampLimit: textConfig.lineClampLimit),
+            lineCountIsExact: lineCountIsExact,
+            wptCapture: wptCaptureMode)
         // Applier campaign (sub-natural line-height placement) — the
         // signed-half-leading compensation for L < natural content
         // height (LineBoxMetrics.subNaturalOffset header for the full
-        // model). Gated OFF for the WPT single-line path: there the
-        // Round-4 maxHeight cap compresses the frame to exactly L and
-        // the `.center` alignment already overflows the glyph band
-        // evenly above/below — i.e. the browser's negative-half-leading
-        // placement — so adding the offset would double-shift those
-        // calibrated captures. Every other path (the whole product
-        // renderer) keeps the frame uncompressed at natural height and
-        // needs the explicit translation. 0 whenever L ≥ natural.
-        let subNaturalShift: CGFloat = (wptCaptureMode && singleLineText)
+        // model). Gated OFF for every PINNED box: there the frame is
+        // compressed to exactly N × L and the `.center` alignment already
+        // overflows the glyph band evenly above/below — i.e. the browser's
+        // negative-half-leading placement — so adding the offset would
+        // double-shift those calibrated captures. Every other path (the
+        // whole product renderer) keeps the frame uncompressed at natural
+        // height and needs the explicit translation. 0 whenever L ≥ natural.
+        // (Wave 30: the gate reads the PIN instead of `wptCaptureMode &&
+        // singleLineText` — the pin is a strict superset of that condition,
+        // so the single-line captures keep the identical zero.)
+        let subNaturalShift: CGFloat = pinnedBoxHeight != nil
             ? 0
             : LineBoxMetrics.subNaturalOffset(lineHeightPx: effectiveLineHeight,
                                               fontSizePx: textConfig.fontSize ?? 16,
@@ -3396,14 +3543,19 @@ private struct PlaceholderLabel: View {
             // only for the single-line half-leading case where the
             // line box (minHeight) exceeds the glyph height.
             .frame(maxWidth: fillWidth ? .infinity : nil,
-                   minHeight: effectiveLineHeight,
-                   // Round 4 — in composed WPT capture, CAP a single-line box
-                   // to exactly the ref line box (glyphs overflow like the
+                   // Wave 30 — a PINNED box sets the floor at its own N × L
+                   // (a 2-line pinned run must not floor at one line box);
+                   // unpinned keeps the single-line-box floor it always had.
+                   minHeight: pinnedBoxHeight ?? effectiveLineHeight,
+                   // Round 4 — in composed WPT capture, CAP the box to
+                   // exactly N ref line boxes (glyphs overflow like the
                    // browser's line-height:18) so forced-Inter bars stop
-                   // drifting; multi-line/other paths keep the floor-only
-                   // frame (maxHeight nil) so nothing is clipped.
-                   maxHeight: (wptCaptureMode && singleLineText)
-                       ? effectiveLineHeight : nil,
+                   // drifting; every other path keeps the floor-only frame
+                   // (maxHeight nil) so nothing is clipped. Wave 30 widened
+                   // the cap from "single-line run" to "known line count" —
+                   // see pinnedBoxHeight above; at N = 1 it is the identical
+                   // number the Round-4 expression produced.
+                   maxHeight: pinnedBoxHeight,
                    alignment: Alignment(horizontal: fillHorizontal,
                                         vertical: .center))
             .fixedSize(horizontal: false, vertical: true)

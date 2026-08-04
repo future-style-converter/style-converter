@@ -1334,3 +1334,148 @@ test('wave29 S-RC3: a plain capability tag still scores (denominator intact)', (
   assert.equal(web.wptPass, false);
   assert.equal(web.scoreExcluded, undefined);
 });
+
+// ── wave-30 B4(b): NATIVE_FONT_PARITY_TAGS, the PER-PLATFORM family ────────
+//
+// The first exclusion in this file that is not one boolean for all three
+// platforms. It names a FONT BOUNDARY: ref and web share the Chromium-macOS
+// fallback face for §6 non-Latin counter-style glyphs, Compose and SwiftUI
+// each resolve their own, so native-vs-ref SSIM is typography-bound while
+// web-vs-ref stays an honest measurement. Measured across css-counter-styles
+// (runs/wave29-final): web 0.9623–0.9986 with 11/12 passing, natives
+// 0.7244–0.9917 degrading with glyph count.
+//
+// The pins hold the asymmetry itself — web untouched, natives neutralised,
+// `scoreEligible` unaffected — because a refactor that folded this into
+// applyNaScoreGate would silently drop the one honest column in the family.
+
+import {
+  applyNativeFontParityGate, NATIVE_FONT_PARITY_TAGS,
+  NATIVE_FONT_PARITY_PLATFORMS, NATIVE_FONT_PARITY_STAMP,
+} from './inject-wpt-block.mjs';
+
+test('wave30 B4b: the family and its platform list are exactly pinned', () => {
+  // Membership is blast radius: each tag removes BOTH natives from the
+  // denominator for every test carrying it.
+  assert.deepEqual([...NATIVE_FONT_PARITY_TAGS], ['requires-non-latin-font-parity']);
+  // 'web-ref' being ABSENT is the whole contract of this family.
+  assert.deepEqual([...NATIVE_FONT_PARITY_PLATFORMS], ['ios-ref', 'android-ref']);
+  assert.equal(NATIVE_FONT_PARITY_STAMP, 'native-font-parity');
+});
+
+test('wave30 B4b: natives are neutralised, web-ref is untouched', () => {
+  // The measured arabic-indic 102 row: web 0.9791 pass, ios 0.8807 fail,
+  // android 0.7791 fail. After the gate the two native verdicts are gone and
+  // the web verdict — the one that measures our counter algorithm — remains.
+  const web = { ssim: 0.9791, wptPass: true };
+  const ios = { ssim: 0.8807, wptPass: false };
+  const android = { ssim: 0.7791, wptPass: false };
+  const stamped = applyNativeFontParityGate(['requires-non-latin-font-parity'],
+    { 'web-ref': web, 'ios-ref': ios, 'android-ref': android });
+  assert.deepEqual(stamped, ['ios-ref', 'android-ref']);
+  assert.equal(web.wptPass, true);
+  assert.equal(web.scoreExcluded, undefined);
+  assert.equal(ios.wptPass, null);
+  assert.equal(ios.scoreExcluded, 'native-font-parity');
+  assert.equal(android.wptPass, null);
+  assert.equal(android.scoreExcluded, 'native-font-parity');
+});
+
+test('wave30 B4b: PASSING native diffs are excluded too — the boundary cuts both ways', () => {
+  // arabic-indic 103: ios 0.9917 T, android 0.9658 T. Keeping these would be
+  // the dishonest half-measure — whether a member of this family clears 0.95
+  // is decided by how many fallback glyphs it paints, not by runtime
+  // correctness, so a pass is the same measurement as a failure.
+  const ios = { ssim: 0.9917, wptPass: true };
+  const android = { ssim: 0.9658, wptPass: true };
+  applyNativeFontParityGate(['requires-non-latin-font-parity'],
+    { 'ios-ref': ios, 'android-ref': android });
+  assert.equal(ios.wptPass, null);
+  assert.equal(android.wptPass, null);
+  assert.equal(ios.scoreExcluded, 'native-font-parity');
+});
+
+test('wave30 B4b: raw metrics survive on every platform', () => {
+  // Only the SCORING fields are neutralised — an investigator asking "how far
+  // off was the fallback face?" must still be able to read the number. Same
+  // stance as applyNaScoreGate.
+  const ios = { ssim: 0.8040, pixelMismatchedPct: 4.2, pHash: 11, wptPass: false };
+  applyNativeFontParityGate(['requires-non-latin-font-parity'], { 'ios-ref': ios });
+  assert.equal(ios.ssim, 0.8040);
+  assert.equal(ios.pixelMismatchedPct, 4.2);
+  assert.equal(ios.pHash, 11);
+});
+
+test('wave30 B4b: absent platforms and error-shaped diffs are skipped', () => {
+  // A platform with no captures this run contributes null; an error record
+  // carries no scoring fields to neutralise. Neither may be stamped, and
+  // neither may throw.
+  const err = { error: 'ref missing' };
+  const stamped = applyNativeFontParityGate(['requires-non-latin-font-parity'],
+    { 'web-ref': null, 'ios-ref': null, 'android-ref': err });
+  assert.deepEqual(stamped, []);
+  assert.equal(err.scoreExcluded, undefined);
+  // …and a missing diffs bag at all is a no-op, not a crash.
+  assert.deepEqual(applyNativeFontParityGate(['requires-non-latin-font-parity'], undefined), []);
+});
+
+test('wave30 B4b: an untagged test (or no tags at all) is never touched', () => {
+  const ios = { ssim: 0.80, wptPass: false };
+  assert.deepEqual(applyNativeFontParityGate(['requires-form-control-rendering'], { 'ios-ref': ios }), []);
+  assert.deepEqual(applyNativeFontParityGate(undefined, { 'ios-ref': ios }), []);
+  assert.deepEqual(applyNativeFontParityGate([], { 'ios-ref': ios }), []);
+  assert.equal(ios.wptPass, false);
+  assert.equal(ios.scoreExcluded, undefined);
+});
+
+test('wave30 B4b: the tag does NOT belong to any WHOLE-TEST exclusion family', () => {
+  // scoreEligible must stay TRUE — the test is still scored, on web. If this
+  // tag ever entered SCORE_EXCLUDED/WALL/REF_UNACHIEVABLE, applyNaScoreGate
+  // would null the web verdict too and the family's one honest column (which
+  // includes armenian 008's REAL 0.9435 web failure) would vanish.
+  const web = { ssim: 0.9791, wptPass: true };
+  const ios = { ssim: 0.8807, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-non-latin-font-parity'], [web, ios], []), false);
+  assert.equal(web.wptPass, true);
+  assert.equal(web.scoreExcluded, undefined);
+  assert.equal(ios.scoreExcluded, undefined);   // untouched by THAT gate
+  assert.equal(EXTRACTION_WALL_TAGS.has('requires-non-latin-font-parity'), false);
+  assert.equal(REF_UNACHIEVABLE_TAGS.has('requires-non-latin-font-parity'), false);
+});
+
+test('wave30 B4b: the stamp is TRUTHY so every existing aggregator filter holds', () => {
+  // aggregate-sections.mjs and the corpus recipes filter with `if
+  // (d.scoreExcluded)`. The string keeps them byte-for-byte correct while
+  // recording WHY one platform left a denominator its sibling stayed in —
+  // `true` would make a font boundary indistinguishable from a delivery gap.
+  const ios = { ssim: 0.8365, wptPass: false };
+  applyNativeFontParityGate(['requires-non-latin-font-parity'], { 'ios-ref': ios });
+  assert.ok(ios.scoreExcluded, 'stamp must be truthy for the existing filters');
+  assert.notEqual(ios.scoreExcluded, true, 'the reason must be readable off the diff');
+});
+
+test('wave30 B4b: buildResults source carries the CALLER CONTRACT + the result field', async () => {
+  // Source-scan pin, same discipline as the wave-8 `scoreEligible: !isNa`
+  // pin above — and for the same reason: applyNativeFontParityGate's JSDoc
+  // states a CALLER CONTRACT ("run this only when applyNaScoreGate did NOT
+  // already exclude the whole test") that no unit assertion could reach,
+  // because the pure function cannot see whether the whole-test gate fired.
+  //
+  // MEASURED GAP THIS CLOSES (skeptic-3, wave-30): deleting the `isNa ? [] :`
+  // guard from buildResults left all 89 tests in this file green. With the
+  // guard gone, a test carrying BOTH a whole-test family (undeliverable
+  // asset / extraction wall / unachievable ref) and this one would have its
+  // `scoreExcluded: true` OVERWRITTEN with 'native-font-parity' on both
+  // natives — silently downgrading "the harness never delivered the inputs"
+  // to "the natives lack a face", which is exactly the confusion the string
+  // stamp exists to prevent. Zero tests carry both families today; this pin
+  // is what keeps that from becoming a silent wrong answer when one does.
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  assert.match(src, /const fontParityExcluded = isNa \? \[\] : applyNativeFontParityGate\(naTags, \{/,
+    'the per-platform gate must run ONLY when the whole-test gate did not fire');
+  // …and the per-test result must surface which platforms it stamped, or a
+  // manifest reader sees `scoreEligible: true` with no way to learn that two
+  // of the three columns left the denominator.
+  assert.match(src, /nativeFontParityExcluded: fontParityExcluded,/,
+    'results must expose nativeFontParityExcluded');
+});

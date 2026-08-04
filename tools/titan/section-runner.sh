@@ -284,7 +284,18 @@ EXTRACT_RC=0
 # pre-mutation state (postLoadExtracted:false). Engagement must not depend
 # on ambient shell state. All existing stability/scroll/structure bails and
 # the top-layer decline inside post-load-extract.mjs stay intact.
-POST_LOAD_EXTRACT=1 node "$TITAN_DIR/extract-fixture.mjs" "${TESTS[@]}" >"$EXTRACT_LOG" 2>&1 || EXTRACT_RC=$?
+# wave-30 fix-T3: BIDI_BAKE=1 is pinned HERE for exactly the same reason and
+# with exactly the same failure mode. extract-fixture's bidi bake is opt-in
+# (`--bidi-bake` / BIDI_BAKE=1, see its main()), and the bake is what gives an
+# RTL test its measured visual order. Left to the ambient shell it engaged
+# only when the operator happened to export it: wave29-final's
+# selectors/dir-selector-change-003 and -004 carry baked bidi geometry that a
+# fresh `section-runner.sh selectors` reproduced WITHOUT, silently downgrading
+# those two tests to logical order with no marker to explain the drift.
+# Engagement must not depend on ambient shell state — same contract as
+# POST_LOAD_EXTRACT above. The two are independent and compose (state first,
+# then bidi geometry measured on the same settled page).
+POST_LOAD_EXTRACT=1 BIDI_BAKE=1 node "$TITAN_DIR/extract-fixture.mjs" "${TESTS[@]}" >"$EXTRACT_LOG" 2>&1 || EXTRACT_RC=$?
 EXTRACTED_OK=$(grep -c '^extracted ' "$EXTRACT_LOG" || true)
 EXTRACTED_FAIL=$(grep -c '^FAIL ' "$EXTRACT_LOG" || true)
 log "extracted=$EXTRACTED_OK failed=$EXTRACTED_FAIL"

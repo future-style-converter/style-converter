@@ -32,6 +32,9 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// wave-30 fix-T2: the CLI skip/error split is control flow inside main(), so
+// the pin has to drive the real process. The skip path is stdlib-only.
+import { spawnSync } from 'node:child_process';
 
 import {
   POST_LOAD_COMPUTED_PROPERTIES, WRITE_RULES, SHORTHAND_CONFLICTS,
@@ -1242,4 +1245,105 @@ test('skeptic-29: the gate arms on a linked-only pseudo rule, and only then', as
   assert.equal(hasPseudoElementRules(src2), false);
   assert.equal(hasPseudoElementRules(await linkedCssTextFor(src2, testAbs)), false);
   await rm(dir, { recursive: true, force: true });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// wave-30 A3: the SECOND activation route (dropped rules)
+// ═════════════════════════════════════════════════════════════════════════════
+
+const { shouldPostLoadExtract } = await import('./post-load-extract.mjs');
+const { countUnsupportedRules } = await import('./extract-fixture.mjs');
+
+test('wave30 A3: route 1 (wall tags) is unchanged', () => {
+  // Zero dropped rules — the gate must still open on the wall tags alone,
+  // exactly as the wave-16 isWallTagged gate did.
+  assert.equal(shouldPostLoadExtract(['requires-script-mutation'], 0), true);
+  assert.equal(shouldPostLoadExtract(['requires-script-driven-scroll'], 0), true);
+  assert.equal(shouldPostLoadExtract(['requires-anchor-positioning-runtime'], 0), true);
+  assert.equal(shouldPostLoadExtract(['requires-float-layout'], 0), false);
+  assert.equal(shouldPostLoadExtract(undefined, 0), false);
+});
+
+test('wave30 A3: route 2 opens on ≥1 dropped rule, with no wall tag', () => {
+  assert.equal(shouldPostLoadExtract([], 1), true);
+  assert.equal(shouldPostLoadExtract(['requires-float-layout'], 7), true);
+  assert.equal(shouldPostLoadExtract(undefined, 3), true);
+  // …and stays shut at zero.
+  assert.equal(shouldPostLoadExtract([], 0), false);
+});
+
+test('wave30 A3: a non-numeric count can never open the gate', () => {
+  // Defensive: a caller that forgot to thread the count through must degrade
+  // to route 1 rather than accidentally activating the whole corpus.
+  assert.equal(shouldPostLoadExtract([], undefined), false);
+  assert.equal(shouldPostLoadExtract([], NaN), false);
+  assert.equal(shouldPostLoadExtract([], null), false);
+  assert.equal(shouldPostLoadExtract([]), false);
+});
+
+test('wave30 A3: the count and the gate agree on a real dir-family sheet', () => {
+  // dir-selector-auto-direction-change-001's stylesheet before wave-30 A1:
+  // the `:dir(ltr) + #target` rule was the dropped one. Post-A1 it is
+  // matchable, so the gate for THIS test now rests on its wall tag (which
+  // bucket-wpt's CharacterData supplement grants it) — pinned here so a
+  // regression in either half is visible.
+  const post = countUnsupportedRules(parseCss(
+    '#target { background-color: red } :dir(ltr) + #target { background-color: green }'));
+  assert.equal(post, 0);
+  assert.equal(shouldPostLoadExtract([], post), false);
+  assert.equal(shouldPostLoadExtract(['requires-script-mutation'], post), true);
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// wave-30 fix-T2: the A3 reordering must not turn a SKIP into an ERROR
+// ═════════════════════════════════════════════════════════════════════════════
+
+// A3 moved the static pass AHEAD of the activation gate so the gate could read
+// `unsupportedRules`. That also moved extract-fixture's own INPUT REJECTIONS
+// ahead of the gate, so an input the gate would have skipped started throwing:
+//
+//   node tools/titan/post-load-extract.mjs \
+//     css/CSS2/abspos/abspos-in-block-in-inline-in-relpos-inline.html
+//
+// is a bucket-C document that extract-fixture refuses by design ("is not in
+// bucket A or B"). Pre-A3 it printed one `skip` line and exited 0; post-A3 it
+// printed `ERROR` and exited 1 — a CLI regression on the whole non-qualifying
+// population. The pins below drive the real CLI, because the regression lived
+// in the CLI's control flow and nowhere else. The skip path never launches a
+// browser, so this stays a sub-second, hermetic subprocess test.
+const CLI_SKIP_INPUT = 'css/CSS2/abspos/abspos-in-block-in-inline-in-relpos-inline.html';
+const cliReady = existsSync(join(WPT_DIR, CLI_SKIP_INPUT));
+
+test('fix-T2: a non-bucket-A/B input is a clean SKIP, not an error', { skip: !cliReady }, () => {
+  const r = spawnSync(process.execPath,
+    [join(REPO_ROOT, 'tools', 'titan', 'post-load-extract.mjs'), CLI_SKIP_INPUT],
+    { encoding: 'utf8', cwd: REPO_ROOT });
+  assert.equal(r.status, 0, `expected exit 0, got ${r.status}\n${r.stdout}\n${r.stderr}`);
+  assert.match(r.stdout, /^skip {6}css\/CSS2\/abspos\/abspos-in-block-in-inline-in-relpos-inline\.html/m);
+  // The tally must COUNT it as skipped, not swallow it silently.
+  assert.match(r.stdout, /skipped=1 errors=0/);
+  assert.doesNotMatch(r.stdout + r.stderr, /^ERROR/m);
+});
+
+test('fix-T2: --force still surfaces the static pass failure as a hard error', { skip: !cliReady }, () => {
+  // The skip is a GATE decision, not a blanket catch: a run that explicitly
+  // asks for this test (or a wall-tagged one, route 1) must still see the
+  // real error and exit non-zero. Otherwise the fix would have hidden every
+  // extraction failure in the activated population too.
+  const r = spawnSync(process.execPath,
+    [join(REPO_ROOT, 'tools', 'titan', 'post-load-extract.mjs'), '--force', CLI_SKIP_INPUT],
+    { encoding: 'utf8', cwd: REPO_ROOT });
+  assert.equal(r.status, 1, 'a forced run must still fail loudly');
+  assert.match(r.stderr, /ERROR\s+.*is not in bucket A or B/);
+  assert.match(r.stdout, /skipped=0 errors=1/);
+});
+
+test('fix-T2: the CLI asks the gate on route 1 when the static pass threw', () => {
+  // The catch re-asks shouldPostLoadExtractFor with an unsupportedRules count
+  // of 0 — route 2 has no input when the static pass never produced one. This
+  // pins the semantics of that degraded call: wall tags still open the gate
+  // (so the error surfaces), everything else closes it (so the run skips).
+  assert.equal(shouldPostLoadExtract(['requires-script-mutation'], 0), true);
+  assert.equal(shouldPostLoadExtract(['requires-float-layout'], 0), false);
+  assert.equal(shouldPostLoadExtract(undefined, 0), false);
 });

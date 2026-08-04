@@ -552,6 +552,39 @@ dirs + WPT corpus are gitignored):
   scored; zero regressions; 327-net clean. Totals: **web 241/279, iOS
   220/279, Android 213/279**. Seven web-perfect sections; six perfect
   on all three platforms.
+  Wave 30 (`tools/titan/results/corpus-v5-5.json`) was the selector
+  engine wave. **selectors: natives PERFECT 12/12 both, web 11/12**
+  (from 6/6/5): the extractor gained `:dir()` (the HTML §3.2.6.4
+  directionality ladder, including the document element) and the
+  `+`/`~` sibling combinators; the post-load gate widened to a second
+  route (any rule dropped as unsupported earns the computed-style bake
+  — 4.9% corpus fire rate, measured); root-scope inherited properties
+  bake down onto top-level body children (value-only,
+  `body-inherited-baked` — the first cut slotted them under an unsized
+  body-root, which both natives mis-rendered identically at 0.816;
+  caught at the gate, reworked, re-gated clean). UA link styling bakes
+  `#0000EE`+underline with per-property suppression when a dropped
+  rule could target links (52 wrong bakes repaired, skeptic-found).
+  The ref contract moved to `…-imgpad-htmlpins`: the `:where(body)`
+  inherited pins clobbered refs declaring color/font/line-height at
+  `:root` (29 refs, 23 moved; child-indexed-no-parent web now 1.0000
+  pixel-exact). iOS line-box calibration pins composed text boxes to
+  N × declared line box (device A/B over 300 docs: 117 improved,
+  3 micro-regressions, paragraph pitch exactly 36.0). Native markers:
+  `display:list-item` leading-line-box model (position-003
+  0.93→0.995/0.993 both natives), Compose accumulated-position row
+  rounding, direction-aware UA 40px list padding, bullet shapes at
+  0.35em. A **fourth, per-platform exclusion family** landed:
+  `requires-non-latin-font-parity` (Rule 43, css-counter-styles-3 §6
+  table, author-shadow guard) excludes android/ios diffs only — web
+  stays scored; css-counter-styles' native denominator honestly drops
+  to 0/0 pending the font-boundary wave (bundle Noto faces in all four
+  pipelines, then delete the rule). css-tables joined at first
+  capture: web 10/11, iOS 7/11, Android 6/11 — the abspos-table head
+  degrades gracefully without native table layout, exactly as the
+  recon probe predicted. 26 sections; zero regressions elsewhere;
+  327-net clean. Totals: **web 256/290, iOS 229/277, Android
+  222/277**.
 
 ## Test suites
 
@@ -559,9 +592,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 237 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1095 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1783 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1035 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1075 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1815 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1069 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1163 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

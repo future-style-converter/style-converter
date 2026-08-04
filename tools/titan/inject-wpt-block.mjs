@@ -109,11 +109,15 @@ function arg(name) {
 //     never silent.
 //   * a root already on the live rev, a null root, and a root with no rev tail
 //     all pass through untouched.
-export const LIVE_CANVAS_REV = 'white-black-ink-font-lh-imgpad';
+export const LIVE_CANVAS_REV = 'white-black-ink-font-lh-imgpad-htmlpins';
 // Every canvas contract that has ever produced a refs tree, newest first.
 // Pinned against capture-browser-ref.mjs's CANVAS_REV in the unit tests, so a
 // future bump that forgets to append here fails `node --test`.
 export const KNOWN_STALE_CANVAS_REVS = [
+  // wave-30 A5: inherited text pins still on :where(body), so any ref
+  // declaring color/font-family/line-height at :root/html rasterised the
+  // CLOBBERED value (capture-browser-ref.mjs canvasFrameCss A5 note).
+  'white-black-ink-font-lh-imgpad',
   'white-black-ink-font-lh',   // corpus-v4.1 typography, CSS-padded frame
   'white-black-ink-font',      // v4.1 scratch: no line-height pin
   'white-black-ink',           // ink-only, no font pin
@@ -921,7 +925,10 @@ const EXTRACTION_WALL_TAGS = new Set([
 export { EXTRACTION_WALL_TAGS };
 
 /** wave-29 S-RC3 REF-UNACHIEVABLE tags — the honest-scoring boundary's THIRD
- *  and last exclusion family, and the only one that is not about us.
+ *  WHOLE-TEST exclusion family, and the only one that is not about us.
+ *  (wave-30 added a FOURTH family below, NATIVE_FONT_PARITY_TAGS; it is not
+ *  listed here because it excludes PER PLATFORM and so never routes through
+ *  applyNaScoreGate. This comment used to say "third and last".)
  *
  *  The other two families both say "our pipeline could not deliver the input"
  *  — SCORE_EXCLUDED_TAGS for assets, EXTRACTION_WALL_TAGS for post-load state
@@ -960,6 +967,105 @@ const REF_UNACHIEVABLE_TAGS = new Set([
 // Exported for unit pins, same discipline as EXTRACTION_WALL_TAGS: the exact
 // membership of an exclusion family must never widen unreviewed.
 export { REF_UNACHIEVABLE_TAGS };
+
+/** wave-30 B4(b) NATIVE FONT-PARITY tags — the honest-scoring boundary's
+ *  FOURTH family, and the first that is PER-PLATFORM rather than per-test.
+ *
+ *  The other three families all answer "is this test scorable at all?" with
+ *  one boolean for every platform, because the thing they name (an
+ *  undeliverable asset, an unexecuted script, a wrong ref) is the same on all
+ *  three. This one is not: it names a FONT BOUNDARY between the two native
+ *  rasterisers and the Chromium-macOS one that produced the ref.
+ *
+ *  The pipeline pins one face end to end — capture-browser-ref.mjs's
+ *  REF_FONT_STACK plus the embedded Inter Regular/Bold, mirrored by the web
+ *  harness, Compose's InterFontFamily and the iOS registered "Inter". Inter
+ *  covers Latin, Greek and Cyrillic and nothing else, so a test painting
+ *  glyphs outside that coverage sends each surface to a DIFFERENT fallback:
+ *  ref and web both land on the same macOS CoreText face (fair comparison
+ *  preserved), Compose lands on the emulator's Noto subset and SwiftUI on
+ *  Apple's system faces. Different advance widths and glyph shapes for the
+ *  SAME correct string ⇒ the native SSIM against the ref is bounded by
+ *  typography, not by anything the runtimes compute.
+ *
+ *  MEASURED (runs/wave29-final/sections/css-counter-styles/manifest.json, all
+ *  12 scored tests; full table at wpt-not-applicable.mjs Rule 43):
+ *  web clears 0.95 on 11 of 12 (0.9623–0.9986) while the natives run
+ *  0.7244–0.9917 and degrade monotonically with GLYPH COUNT — the "10+"
+ *  members (arabic-indic 102, armenian 007, bengali 117, cambodian 159)
+ *  collapse to 0.72–0.88 while their "1-9" siblings pass. That is a per-glyph
+ *  typographic residue accumulating, not a wrong marker string; the web
+ *  column is the proof our counter ALGORITHM is right.
+ *
+ *  SO THE EXCLUSION IS NATIVE-ONLY. web-ref keeps its score and keeps feeding
+ *  headline numbers — excluding it would hide the one honest measurement in
+ *  the family (including armenian 008's REAL 0.9435 web failure, the §7.1.4
+ *  fallback divergence, which is not font-bound and must stay visible).
+ *  `scoreEligible` therefore stays TRUE: the test IS still scored, just not
+ *  on every platform, and a per-test boolean cannot express that.
+ *
+ *  NO RE-ADMISSION STAMP, but a real closing move: bundle a Noto subset
+ *  covering the css-counter-styles-3 §6 scripts in ALL FOUR pipelines (ref
+ *  @font-face payload, web harness /fonts, Compose res/font, iOS registered
+ *  faces) and bump CANVAS_REV so every Latin-only-stack ref retires. The four
+ *  surfaces then share a face again and this tag is DELETED, not weakened. */
+const NATIVE_FONT_PARITY_TAGS = new Set([
+  'requires-non-latin-font-parity', // Rule 43 — §6 non-Latin counter styles (wave-30)
+]);
+// Exported for unit pins, same discipline as the three families above.
+export { NATIVE_FONT_PARITY_TAGS };
+
+/** The per-diff platform keys the font-parity family neutralises — exactly
+ *  the two NATIVE rasterisers. 'web-ref' is deliberately absent and that
+ *  absence is the whole contract, so it is pinned rather than inlined. */
+export const NATIVE_FONT_PARITY_PLATFORMS = Object.freeze(['ios-ref', 'android-ref']);
+
+/** The value stamped on `scoreExcluded` for this family.
+ *
+ *  A STRING, not `true`. Every existing aggregator filters on truthiness
+ *  (`if (d.scoreExcluded) continue`), so a string keeps them byte-for-byte
+ *  correct — while a reader that wants to know WHY one platform dropped out
+ *  of a denominator its siblings stayed in can read the reason straight off
+ *  the diff. `true` would make a per-platform font boundary indistinguishable
+ *  from a whole-test delivery gap in the manifest. */
+export const NATIVE_FONT_PARITY_STAMP = 'native-font-parity';
+
+/** wave-30 B4(b) per-platform gate (pure — exported for unit tests).
+ *
+ *  Neutralises the SCORING fields (`wptPass` → null, `scoreExcluded` →
+ *  NATIVE_FONT_PARITY_STAMP) on the two native browser-ref diffs of a
+ *  font-parity-tagged test, and leaves 'web-ref' completely untouched. Raw
+ *  metrics (ssim, pixelMismatchedPct, pHash, …) survive on every platform,
+ *  exactly like applyNaScoreGate — an investigator asking "how far off was
+ *  the fallback face?" must still be able to read the number.
+ *
+ *  CALLER CONTRACT: run this only when applyNaScoreGate did NOT already
+ *  exclude the whole test. A test carrying both families is wholly excluded,
+ *  and overwriting the `true` stamp with this string would silently downgrade
+ *  "the harness never delivered the inputs" to "the natives lack a face".
+ *
+ *  @param {string[]|undefined} naTags  notApplicable tags for the test
+ *  @param {Object<string,object|null>} diffsByPlatform browser-ref diffs keyed
+ *         by the SAME platform labels the manifest uses ('web-ref' /
+ *         'ios-ref' / 'android-ref'); mutated in place. Absent platforms
+ *         (null — no captures this run) and error-shaped diffs are skipped:
+ *         neither carries scoring fields to neutralise.
+ *  @returns {string[]} the platform keys actually stamped, in
+ *         NATIVE_FONT_PARITY_PLATFORMS order (empty ⇒ the gate did not fire,
+ *         or fired with no native captures present) */
+export function applyNativeFontParityGate(naTags, diffsByPlatform) {
+  const fires = Array.isArray(naTags) && naTags.some((t) => NATIVE_FONT_PARITY_TAGS.has(t));
+  if (!fires) return [];
+  const stamped = [];
+  for (const key of NATIVE_FONT_PARITY_PLATFORMS) {
+    const d = diffsByPlatform?.[key];
+    if (!d || typeof d !== 'object' || d.error) continue;
+    d.wptPass = null;                            // never a real pass/fail: the face differs
+    d.scoreExcluded = NATIVE_FONT_PARITY_STAMP;  // aggregators filter on truthiness
+    stamped.push(key);
+  }
+  return stamped;
+}
 
 /** wave-8 corpus-honesty gate (pure — exported for unit tests): when a test
  *  carries ≥1 HARNESS-DELIVERY tag (SCORE_EXCLUDED_TAGS — not every
@@ -1427,6 +1533,16 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     if (isNa) {
       divergence = 'test-not-applicable';
     }
+    // wave-30 B4(b) PER-PLATFORM font-parity gate. Runs only when the test was
+    // NOT wholly excluded above: a test carrying both families is already
+    // neutralised on every platform, and re-stamping the two native diffs
+    // would downgrade "the harness never delivered the inputs" to "the natives
+    // lack a face" in the manifest (see applyNativeFontParityGate's caller
+    // contract). The test-level `divergence` label deliberately does NOT flip
+    // — web-ref is still scored, so the label still means something.
+    const fontParityExcluded = isNa ? [] : applyNativeFontParityGate(naTags, {
+      'web-ref': webRefDiff, 'ios-ref': iosRefDiff, 'android-ref': androidRefDiff,
+    });
 
     results[testRel] = {
       // wave-8: the one boolean scoring paths filter on. false ⇔ the test
@@ -1484,6 +1600,13 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       // to null-check; the divergence label is the truth source for "did
       // the override fire" and the tags are the diagnostic colour.
       notApplicableTags: Array.isArray(naTags) ? naTags : [],
+      // wave-30 B4(b): the platform keys whose browser-ref diff was
+      // score-excluded by the NATIVE font boundary while the others kept
+      // scoring. Always present (empty array = the gate did not fire), same
+      // no-null-check convention as notApplicableTags — a dashboard reading
+      // `scoreEligible: true` next to a two-entry array here is looking at a
+      // test scored on web only, which is exactly what happened.
+      nativeFontParityExcluded: fontParityExcluded,
       // wave-13 NATIVE-PARITY secondary metric: for capability-walled tests
       // (≥1 notApplicable tag) surface the already-computed cross-platform
       // pair SSIMs so "browser parity blocked by <tag>" runs are visibly

@@ -74,6 +74,97 @@ enum LineBoxMetrics {
         return (leading, leading / 2)
     }
 
+    // MARK: - Wave 30 (lane LINEBOX) — the composed-WPT LINE-BOX PIN
+
+    /// The rendered line count of a DISPLAY string: hard `\n` breaks + 1.
+    ///
+    /// For a run the greedy pre-break rewrote (PlaceholderLabel's
+    /// `broken.preBroken`) this IS TextKit's line count — the breaker only
+    /// emits lines that fit the measured `avail`, and TextKit's push-out
+    /// strategy relocates SOFT breaks only. For any other run it is a floor,
+    /// which is why [pinnedBoxHeight] refuses to pin those.
+    /// - Parameter clampLimit: `line-clamp`'s line cap (css-overflow-4 §5)
+    ///   when one is configured. A clamped block generates AT MOST that many
+    ///   line boxes — the rest are not laid out at all — so the pin must
+    ///   count the clamp, not the string. Measured: without this cap
+    ///   css-overflow/line-clamp/block-ellipsis-001 (a 4-line run clamped to
+    ///   2) pinned a 4-line box and lost 0.039 SSIM against its web pair.
+    static func renderedLineCount(_ displayText: String,
+                                  clampLimit: Int? = nil) -> Int {
+        // reduce, not split(): an empty trailing line ("a\n") still counts,
+        // exactly like a browser's empty last line box (CSS 2.1 §9.4.2).
+        let hard = displayText.reduce(1) { $1 == "\n" ? $0 + 1 : $0 }
+        // A clamp only ever REMOVES line boxes (a 2-line clamp on a 1-line
+        // run still renders one), hence min, and a non-positive limit is
+        // treated as "no clamp" — the same guard LineClampApplier applies.
+        guard let cap = clampLimit, cap > 0 else { return hard }
+        return min(hard, cap)
+    }
+
+    /// The height a text box must OCCUPY when the declared/calibrated line
+    /// box — not the rendered face's natural metrics — drives block advance:
+    /// `lineCount × line-height`, or nil to keep today's natural height.
+    ///
+    /// ## Why this exists (wave-30 diagnosis A6/B7)
+    /// CSS 2.1 §10.8 makes a block's height the SUM OF ITS LINE BOXES, each
+    /// exactly `line-height` tall; the face's ascent/descent choose where the
+    /// glyphs sit INSIDE a line box, never how far down the next block
+    /// starts. SwiftUI has no line-box concept: a `Text`'s reported height is
+    /// whatever the face measures, ROUNDED UP by the platform's text engine,
+    /// and [leading]'s `.padding(.vertical:)` then adds the CSS leading ON
+    /// TOP of that already-rounded number. On iOS (where `UIFont.lineHeight`
+    /// is the raw unrounded ascent+descent, 19.359375pt for Inter @16 —
+    /// (1984 + 494) / 2048 × 16) the rounding and the leading are BOTH ~0.64
+    /// and the box came out `L + leading` instead of `L`:
+    ///
+    ///     box = ceil(19.359375) + (20 − 19.359375) = 20.640625   (want 20)
+    ///
+    /// Device-measured on the composed WPT canvas (a `<p>` root = box + the
+    /// UA 16px collapsed block margin, UABlockMargin): iOS advanced 36.64px
+    /// per paragraph where Chromium, web and Compose all advance exactly
+    /// 36 — the whole of iOS's 0.8985 residual on
+    /// selectors/child-indexed-no-parent, which stacks 9 of them. Compose
+    /// never had the defect: it hands Compose's `TextStyle.lineHeight` the
+    /// declared box directly (LineHeightNormal.lineBoxSource /
+    /// composedDefaultLineHeightPx), and Compose's line box IS that number.
+    /// This is the iOS twin of that: pin the frame, so the platform's
+    /// text-height rounding can never leak into the block advance.
+    ///
+    /// Mac Catalyst — the ONLY surface the unit tests can run on — CANNOT
+    /// see the defect: `UIFont.lineHeight` there is already integral (20.0
+    /// for Inter @16, macOS rounds ascent/descent), so `leading` is 0 and
+    /// `ceil` is identity. That is why the pins below are arithmetic
+    /// (LineBoxPinTests) plus a Catalyst raster case built on a DECLARED
+    /// line-height, where the leading is non-zero on both platforms.
+    ///
+    /// - Parameters:
+    ///   - lineHeightPx: the used line box (ComponentRenderer
+    ///     .effectiveLineHeight — nil = `normal`/natural metrics, which has
+    ///     no declared box to pin to).
+    ///   - lineCount: [renderedLineCount] of the string actually rendered.
+    ///   - lineCountIsExact: the caller KNOWS TextKit cannot add lines
+    ///     (pre-broken, un-wrappable, or `white-space: nowrap`). A guessed
+    ///     count must not pin: an under-count would make the box shorter
+    ///     than the text and every following sibling would ride up.
+    ///   - wptCapture: composed-WPT capture only — the product renderer and
+    ///     the committed 327-pair baseline corpus keep the natural-height
+    ///     box byte-for-byte, the same scoping rule Compose states in
+    ///     LineHeightNormal.lineBoxSource for its own corrected arm.
+    static func pinnedBoxHeight(lineHeightPx: CGFloat?,
+                                lineCount: Int,
+                                lineCountIsExact: Bool,
+                                wptCapture: Bool) -> CGFloat? {
+        // Product path: unchanged (see the scoping note above).
+        guard wptCapture else { return nil }
+        // `normal`/undeclared: there is no authored box — natural metrics
+        // are the correct answer, and pinning would invent one.
+        guard let lh = lineHeightPx, lh > 0 else { return nil }
+        // A guessed line count is worse than no pin (see `lineCountIsExact`).
+        guard lineCountIsExact, lineCount >= 1 else { return nil }
+        // §10.8: N line boxes of exactly `line-height` each.
+        return lh * CGFloat(lineCount)
+    }
+
     /// Applier campaign (sub-natural line-height placement) — the
     /// compensating glyph-run translation for `line-height` BELOW the
     /// natural content height (e.g. `line-height: 1` on Inter, whose

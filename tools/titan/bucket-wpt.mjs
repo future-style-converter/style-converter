@@ -41,7 +41,8 @@
 
 import { promises as fs } from 'node:fs';
 import { resolve, dirname, join, relative, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+// pathToFileURL (wave-30 A3) backs the entry-point guard at the bottom.
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 // Architectural-exclusion rules surfaced by swarm-001. We import the
 // pre-classifier as a separate module so the bucketer stays focused on
@@ -437,6 +438,46 @@ async function resolveWptRef() {
 // ---------------------------------------------------------------------------
 // Main.
 // ---------------------------------------------------------------------------
+// ── wave-30 A3: the CharacterData-mutation supplement ───────────────────────
+//
+// wpt-not-applicable.mjs Rule 4 (`requires-script-mutation`) recognises DOM
+// mutation through ELEMENT-level APIs — appendChild, innerHTML, className,
+// setAttribute, classList, style.*, and friends. It does not recognise
+// mutation of a TEXT NODE's contents through the CharacterData interface
+// (DOM §4.10: `.data`, `.nodeValue`, and the `.replaceData(` /
+// `.appendData(` / `.insertData(` / `.deleteData(` methods).
+//
+// MEASURED MISS (wave-30, selectors section): the entire script of
+// css/selectors/dir-selector-auto-direction-change-001.html is
+//     inner.offsetTop;
+//     inner.firstChild.data = "LTR";
+// which flips a `dir=auto` subtree from Arabic (rtl) to Latin (ltr) and is
+// the ONLY reason `:dir(ltr) + #target { background-color: green }` starts
+// matching. The test carried tags [requires-bundled-font, requires-inline-FC]
+// — no mutation tag — so post-load-extract skipped it and the fixture shipped
+// the pre-script red square against a green-square ref.
+//
+// Scoped exactly like Rule 4: an INLINE `<script>` (no `src=`) containing one
+// of the CharacterData write patterns. `.textContent =` is deliberately NOT
+// repeated here — Rule 4 already covers it.
+//
+// TODO(wave-30, lane ownership): this belongs in wpt-not-applicable.mjs's
+// Rule 4 regex next to the other mutation patterns; it lives here only
+// because the wave-30 lane split made that file another lane's. Folding it
+// in is a pure move — this function's regex is the exact alternation to add,
+// and this block should be DELETED at the same time so the catalogue stays
+// the single source of truth for what a tag means.
+const CHARACTER_DATA_MUTATION_RX =
+    /<script\b(?![^>]*\bsrc=)[^>]*>[\s\S]*?(?:\.data\s*=|\.nodeValue\s*=|\.(?:replaceData|appendData|insertData|deleteData)\s*\()/i;
+
+/** Tags contributed by the CharacterData supplement — `[]` or the one Rule-4
+ *  tag. Kept as a list-returning function so folding it back into the
+ *  catalogue is a deletion here and an alternation edit there. Exported for
+ *  the unit pins. */
+export function characterDataMutationTags(html) {
+    return CHARACTER_DATA_MUTATION_RX.test(html ?? '') ? ['requires-script-mutation'] : [];
+}
+
 async function main() {
     // Verify the corpus is materialised. A friendly error here saves
     // contributors from a cryptic ENOENT at the first readFile.
@@ -509,7 +550,13 @@ async function main() {
             refRel,
         });
 
-        return { rel, bucket: cls.bucket, reason: cls.reason, tags };
+        // wave-30 A3: supplement the catalogue's Rule 4 with the CHARACTER
+        // DATA mutation patterns it does not recognise (see
+        // characterDataMutationTags' banner for the measured miss).
+        return {
+            rel, bucket: cls.bucket, reason: cls.reason,
+            tags: [...new Set([...tags, ...characterDataMutationTags(html)])],
+        };
     });
 
     // Phase 3: assemble the spec-shape JSON (Section 4.1 example).
@@ -625,7 +672,16 @@ async function main() {
     process.stdout.write(`\nDone in ${(Date.now() - t0) / 1000}s.\n`);
 }
 
-main().catch((err) => {
-    console.error('bucket-wpt: fatal:', err);
-    process.exit(2);
-});
+// wave-30 A3: run main() only when this file IS the entry point. It was an
+// unconditional call, which meant the module could not be imported at all —
+// a unit test for characterDataMutationTags() above would have walked the
+// whole ~24k-file corpus on import. Same guard shape post-load-extract.mjs
+// uses. The CLI contract (`node tools/titan/bucket-wpt.mjs`) is unchanged;
+// pathToFileURL normalises the argv path so the comparison holds regardless
+// of how the script was spelled on the command line.
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+    main().catch((err) => {
+        console.error('bucket-wpt: fatal:', err);
+        process.exit(2);
+    });
+}

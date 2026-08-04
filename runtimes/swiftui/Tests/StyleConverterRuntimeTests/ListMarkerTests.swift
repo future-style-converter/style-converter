@@ -163,6 +163,18 @@ final class ListMarkerTests: XCTestCase {
 
     // MARK: - Wave 25 item 1: the UA rule beats an ANCESTOR's declaration
 
+    /// The list-style half of `ListStyleUaRule.apply`'s output.
+    ///
+    /// Wave 30 (lane 3, fix B5) added a SECOND UA declaration to the same
+    /// rule — `ul, menu, dir, ol { padding-inline-start: 40px }` (HTML
+    /// §15.3.9) — so every container path now also carries a `PaddingLeft`
+    /// entry. The wave-25 cases below are about the TYPE cascade and are
+    /// kept focused on it by dropping that entry here; the padding has its
+    /// own pins under "Wave 30".
+    private func listStyleOnly(_ properties: [IRProperty]) -> [IRProperty] {
+        properties.filter { $0.type.hasPrefix("ListStyle") }
+    }
+
     /// TWIN of the Compose cases in ListMarkerResolutionTest.kt.
     func testAnAncestorTypeLosesToTheContainersUaRule() {
         // The inversion: `<div style="list-style-type:square"><ul><li>`.
@@ -172,8 +184,8 @@ final class ListMarkerTests: XCTestCase {
         // paints a disc, not a square.
         let ancestor = [IRProperty(type: "ListStyleType", data: .string("square"))]
         let corrected = ListStyleUaRule.apply(sourceTag: "ul", own: [], merged: ancestor)
-        XCTAssertEqual(corrected.count, 1)
-        XCTAssertEqual(corrected[0].type, "ListStyleType")
+        XCTAssertEqual(listStyleOnly(corrected).count, 1)
+        XCTAssertEqual(listStyleOnly(corrected)[0].type, "ListStyleType")
         XCTAssertEqual(marker("ul", corrected, []), "\u{2022}")
         // …and on an <ol> the UA value is decimal, not the ancestor's square.
         XCTAssertEqual(
@@ -188,7 +200,7 @@ final class ListMarkerTests: XCTestCase {
         // "fix" attempts that merely reorder the fold.
         let own = [IRProperty(type: "ListStyleType", data: .string("armenian"))]
         let merged = ListStyleUaRule.apply(sourceTag: "ol", own: own, merged: own)
-        XCTAssertEqual(merged.map { $0.type }, ["ListStyleType"])
+        XCTAssertEqual(listStyleOnly(merged).map { $0.type }, ["ListStyleType"])
         XCTAssertEqual(marker("ol", merged, []), "\u{0531}.")
     }
 
@@ -202,7 +214,7 @@ final class ListMarkerTests: XCTestCase {
             .square)
         // A container with nothing inherited ⇒ nothing to displace.
         let onlyPosition = ListStyleUaRule.apply(sourceTag: "ul", own: [], merged: ulInside)
-        XCTAssertEqual(onlyPosition.map { $0.type }, ["ListStylePosition"])
+        XCTAssertEqual(listStyleOnly(onlyPosition).map { $0.type }, ["ListStylePosition"])
         // The unexpanded shorthand counts as an own type declaration.
         let ownShorthand = [IRProperty(type: "ListStyle", data: .string("square"))]
         XCTAssertEqual(
@@ -211,6 +223,145 @@ final class ListMarkerTests: XCTestCase {
                                             own: ownShorthand,
                                             merged: ancestor)[0].data),
             .square)
+    }
+
+    // MARK: - Wave 30 (lane 3, fix B5): the UA `padding-inline-start`
+
+    /// Every px value the rule's output carries for `type`, in order.
+    ///
+    /// `type` defaults to `PaddingLeft`, the physical side the UA
+    /// `padding-inline-start` maps to under the default `direction: ltr`;
+    /// the rtl cases below pass `PaddingRight` (css-logical-1 §2.1).
+    private func paddingPx(_ properties: [IRProperty],
+                           _ type: String = "PaddingLeft") -> [Double] {
+        properties.filter { $0.type == type }.compactMap {
+            guard case .object(let o) = $0.data else { return nil }
+            switch o["px"] {
+            case .double(let d): return d
+            case .int(let i): return Double(i)
+            default: return nil
+            }
+        }
+    }
+
+    func testAListContainerWithNoAuthorPaddingTakesTheUa40px() {
+        // HTML §15.3.9 `ul, menu, dir, ol { padding-inline-start: 40px }`.
+        // The live shape: change-list-style-type-001's ten `<ul>`s declare
+        // ListStylePosition and nothing else, and both natives laid their
+        // items out 40px left of web (ink columns 17 vs 56) because nothing
+        // supplied this.
+        for tag in ["ul", "ol", "menu", "dir"] {
+            let merged = ListStyleUaRule.apply(sourceTag: tag, own: [], merged: ulInside)
+            XCTAssertEqual(paddingPx(merged),
+                           [ListStyleUaRule.uaPaddingInlineStartPx],
+                           "\(tag) must take the UA padding")
+        }
+        // A non-container gets nothing — the identity path.
+        XCTAssertEqual(
+            paddingPx(ListStyleUaRule.apply(sourceTag: "div", own: [], merged: ulInside)),
+            [])
+    }
+
+    func testAnAuthorInlineStartPaddingBeatsTheUaRule() {
+        // css-cascade-4 §6.1. The live shape: css3-counter-styles-007's
+        // `<ol>` declares `padding-left: 8em` and must keep exactly that —
+        // injecting 40px beside it would double-indent every one of its
+        // 24 rows. Under the default ltr all three spellings block it: the
+        // physical longhand for THIS direction, the logical longhand, and
+        // the `Padding` shorthand — the last one defensive only, since the
+        // converter's PaddingExpander always expands `padding` and no
+        // `PaddingProperty` exists in the 558-property catalogue.
+        let authored = [IRProperty(type: "PaddingLeft",
+                                   data: .object(["px": .double(128)]))]
+        XCTAssertEqual(paddingPx(ListStyleUaRule.apply(sourceTag: "ol",
+                                                       own: authored,
+                                                       merged: authored)), [128])
+        for declared in ["PaddingInlineStart", "Padding"] {
+            let own = [IRProperty(type: declared, data: .object(["px": .double(128)]))]
+            XCTAssertEqual(paddingPx(ListStyleUaRule.apply(sourceTag: "ol",
+                                                           own: own, merged: own)), [],
+                           "\(declared) must block the UA padding")
+        }
+    }
+
+    // MARK: - Wave 30 fix round (lane N, fix N1): the direction mapping
+
+    /// TWIN of the Compose cases
+    /// `anRtlContainerTakesTheUaPaddingOnTheRight` /
+    /// `theAuthorBlockFollowsTheSameDirectionMapping` /
+    /// `theDirectionHelpersAreTheSingleMapping`.
+    func testAnRtlContainerTakesTheUaPaddingOnTheRight() {
+        // css-logical-1 §2.1: the inline-START side of a `direction: rtl`
+        // box is the RIGHT one, so HTML §15.3.9's `padding-inline-start:
+        // 40px` must land there. The first cut of B5 injected the physical
+        // `PaddingLeft` unconditionally — 40px on the wrong edge AND 40px
+        // missing on the right, an 80px relative error on every rtl list.
+        // Live exposure: fixtures/wpt/css-lists/list-marker-symbol-bidi.json
+        // carries five `direction: rtl` `<ul>`s.
+        let ua = ListStyleUaRule.uaPaddingInlineStartPx
+        let rtl = [IRProperty(type: "Direction", data: .string("RTL"))] + ulInside
+        let rtlOut = ListStyleUaRule.apply(sourceTag: "ul", own: rtl, merged: rtl)
+        XCTAssertEqual(paddingPx(rtlOut, "PaddingRight"), [ua])
+        XCTAssertEqual(paddingPx(rtlOut, "PaddingLeft"), [])
+        // ltr — declared explicitly and (in the case above) by absence —
+        // still lands on the left, so no committed ltr capture moves.
+        let ltr = [IRProperty(type: "Direction", data: .string("LTR"))] + ulInside
+        XCTAssertEqual(
+            paddingPx(ListStyleUaRule.apply(sourceTag: "ul", own: ltr, merged: ltr)), [ua])
+        // `direction` is Inherited: yes (css-writing-modes-4 §2.1) and sits
+        // in InheritedText.inheritedTypes, so an ANCESTOR's rtl reaches the
+        // container through the merged list alone.
+        let inherited = [IRProperty(type: "Direction", data: .string("RTL"))]
+        XCTAssertEqual(
+            paddingPx(ListStyleUaRule.apply(sourceTag: "ul", own: [], merged: inherited),
+                      "PaddingRight"), [ua])
+        // A garbage/unresolved keyword is ltr, the CSS initial value.
+        let junk = [IRProperty(type: "Direction", data: .string("sideways"))]
+        XCTAssertEqual(
+            paddingPx(ListStyleUaRule.apply(sourceTag: "ul", own: junk, merged: junk)), [ua])
+    }
+
+    func testTheAuthorBlockFollowsTheSameDirectionMapping() {
+        let ua = ListStyleUaRule.uaPaddingInlineStartPx
+        let dir = IRProperty(type: "Direction", data: .string("RTL"))
+        // padding-right ON an rtl container IS its inline start ⇒ blocks.
+        let ownRight = [dir, IRProperty(type: "PaddingRight",
+                                        data: .object(["px": .double(128)]))]
+        XCTAssertEqual(
+            paddingPx(ListStyleUaRule.apply(sourceTag: "ol", own: ownRight, merged: ownRight),
+                      "PaddingRight"), [128])
+        // padding-LEFT on the same rtl container says nothing about the
+        // inline start (css-logical-1 §2.1), so both declarations survive
+        // the cascade exactly as they do in a browser: the author's 128px
+        // on the left, the UA's 40px on the right.
+        let ownLeft = [dir, IRProperty(type: "PaddingLeft",
+                                       data: .object(["px": .double(128)]))]
+        let mixed = ListStyleUaRule.apply(sourceTag: "ol", own: ownLeft, merged: ownLeft)
+        XCTAssertEqual(paddingPx(mixed, "PaddingRight"), [ua])
+        XCTAssertEqual(paddingPx(mixed, "PaddingLeft"), [128])
+        // The logical longhand — and the defensive `Padding` guard — block
+        // in BOTH directions, since they name the same side the UA does.
+        for declared in ["PaddingInlineStart", "Padding"] {
+            let own = [dir, IRProperty(type: declared, data: .object(["px": .double(128)]))]
+            let out = ListStyleUaRule.apply(sourceTag: "ol", own: own, merged: own)
+            XCTAssertEqual(paddingPx(out, "PaddingRight"), [],
+                           "\(declared) must block the rtl UA padding")
+            XCTAssertEqual(paddingPx(out, "PaddingLeft"), [])
+        }
+    }
+
+    func testTheDirectionHelpersAreTheSingleMapping() {
+        // The two natives are diffed against these, so pin them directly.
+        XCTAssertEqual(ListStyleUaRule.startPaddingType(rtl: false), "PaddingLeft")
+        XCTAssertEqual(ListStyleUaRule.startPaddingType(rtl: true), "PaddingRight")
+        // Last entry wins, the fold convention this package uses.
+        XCTAssertTrue(ListStyleUaRule.isRtl([
+            IRProperty(type: "Direction", data: .string("LTR")),
+            IRProperty(type: "Direction", data: .string("rtl"))]))
+        XCTAssertFalse(ListStyleUaRule.isRtl([
+            IRProperty(type: "Direction", data: .string("RTL")),
+            IRProperty(type: "Direction", data: .string("LTR"))]))
+        XCTAssertFalse(ListStyleUaRule.isRtl([]))
     }
 
     func testPositionAndImageStillInheritFromAnAncestor() {

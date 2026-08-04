@@ -795,6 +795,40 @@ const RX = {
     //   BACKGROUND still paints its glyphs) would fire signal 1 spuriously.
     //   Non-global so `.test()` is stateless on this shared panel.
     colorTransparentDecl: /(?<![-\w])color\s*:\s*transparent\b/i,
+
+    // Rule 43 — requires-non-latin-font-parity:
+    //   The three declaration shapes that USE a predefined counter style
+    //   (full rationale at hasNonLatinPredefinedCounterStyle's banner). All
+    //   three are GLOBAL because `String.matchAll` requires it — and that is
+    //   still stateless on this shared panel: matchAll CLONES the regex and
+    //   iterates the clone, so the panel entry's own `lastIndex` never moves
+    //   (unlike a `.test()` on a /g/ regex, which is why every other entry
+    //   here is deliberately non-global). All three are ident-bounded on the
+    //   left so a longhand never matches inside a longer property name.
+    //     * `list-style-type` and the `list-style` shorthand — and NOTHING
+    //       else in that family. `list-style-image: url(georgian.png)` must
+    //       not fire, which is why the optional group is `(?:-type)?` and not
+    //       `(?:-\w+)?`: after `list-style` the pattern demands either `-type`
+    //       or the colon itself, so `-image`/`-position` fall through.
+    //     * `counter()` / `counters()` — css-lists-3 §4.3 puts the style name
+    //       in the LAST argument. `[^()]*` keeps the match inside one
+    //       functional notation (it can never cross a nested paren, which is
+    //       also why an `attr()`/`var()` nested inside simply declines).
+    //     * `@counter-style … system: extends <name>` — css-counter-styles-3
+    //       §3.1: an extending style inherits the base style's SYMBOLS, so it
+    //       paints exactly the same non-Latin glyphs.
+    listStyleTypeDecl:  /(?<![-\w])list-style(?:-type)?\s*:\s*([^;{}]+)/gi,
+    counterFunctionCall:/(?<![-\w])counters?\s*\(([^()]*)\)/gi,
+    counterStyleExtends:/(?<![-\w])system\s*:\s*extends\s+([A-Za-z][\w-]*)/gi,
+    //     * an AUTHOR `@counter-style <name> { … }` block — name + body. The
+    //       body class is `[^{}]*` because css-counter-styles-3 §3's
+    //       <declaration-list> can never contain a nested block, so one
+    //       brace-free run is the whole rule. See the shadow decline below.
+    counterStyleBlock:  /@counter-style\s+([A-Za-z][\w-]*)\s*\{([^{}]*)\}/gi,
+    //     * the two SYMBOL-bearing descriptors (§3.2 `symbols`, §3.3
+    //       `additive-symbols`) — read only to ask whether a redefinition's
+    //       glyphs are provably outside Inter's coverage.
+    counterStyleSymbols:/(?<![-\w])(?:additive-)?symbols\s*:\s*([^;}]*)/gi,
 };
 
 // Helper: detect ANY runtime-selection signal (pseudo-element OR API call).
@@ -1087,6 +1121,257 @@ function hasUnreachableOsDefaultSelection(html) {
         }
     }
     return true;
+}
+
+// ── wave-30 B4(b): the NON-LATIN FONT-BOUNDARY detector (Rule 43) ───────────
+//
+// A NATIVE-ONLY exclusion, and the first tag in this file that is neither a
+// harness gap nor a ref defect: it names a FONT BOUNDARY. The pipeline pins
+// one text face end to end (capture-browser-ref.mjs REF_FONT_STACK + the
+// embedded Inter Regular/Bold, mirrored by the web harness's html/body stack,
+// Compose InterFontFamily and the iOS registered "Inter"). Inter covers
+// Latin, Greek and Cyrillic — and NOTHING else. The moment a test paints a
+// glyph outside that coverage, each of the four surfaces silently resolves a
+// DIFFERENT fallback face:
+//   * the ref and the web harness both run Chromium on macOS and land on the
+//     same CoreText fallback, so web-vs-ref stays a fair comparison;
+//   * Compose on the Android emulator falls back to the platform's own
+//     Noto subset, and SwiftUI on the iOS simulator to Apple's system faces.
+// Different faces mean different advance widths, different glyph shapes and
+// different vertical metrics for the SAME correct string, so the native SSIM
+// against a Chromium-macOS-rasterised ref is bounded by typography, not by
+// anything the runtimes compute. No geometry fix reaches the 0.95 gate.
+//
+// MEASURED (tools/titan/runs/wave29-final/sections/css-counter-styles/
+// manifest.json — all 12 scored tests of the section, web/ios/android-ref):
+//
+//   arabic-indic 101   web 0.9932 T · ios 0.9791 T · android 0.9287 F
+//   arabic-indic 102   web 0.9791 T · ios 0.8807 F · android 0.7791 F
+//   arabic-indic 103   web 0.9986 T · ios 0.9917 T · android 0.9658 T
+//   armenian     006   web 0.9950 T · ios 0.9471 F · android 0.9455 F
+//   armenian     007   web 0.9829 T · ios 0.8040 F · android 0.8040 F
+//   armenian     008   web 0.9435 F · ios 0.9310 F · android 0.9190 F
+//   armenian     009   web 0.9971 T · ios 0.9844 T · android 0.9674 T
+//   bengali      116   web 0.9922 T · ios 0.9557 T · android 0.9388 F
+//   bengali      117   web 0.9675 T · ios 0.8133 F · android 0.7380 F
+//   bengali      118   web 0.9971 T · ios 0.9876 T · android 0.9756 T
+//   cambodian    158   web 0.9917 T · ios 0.9569 T · android 0.9409 F
+//   cambodian    159   web 0.9623 T · ios 0.8365 F · android 0.7244 F
+//
+// The shape is the argument. WEB clears the gate on 11 of 12 — it renders the
+// same glyphs with the same face as the ref, so the counter ALGORITHM is
+// provably right on our side (and 008 failing on web too is a REAL, separate
+// divergence: the armenian 10000 §7.1.4 fallback. It is not font-bound and it
+// stays scored on web, exactly as this tag intends). The natives degrade
+// monotonically with GLYPH COUNT: the "1-9" members (103/009/118) pass, the
+// "10+" members (102/007/117/159 — three-and-four-digit ordinals, the most
+// glyphs per line) collapse to 0.72–0.88. That is a per-glyph typographic
+// residue accumulating, not a wrong marker string.
+//
+// SCOPE — DELIBERATELY THE WHOLE FAMILY, PASSES INCLUDED. The tag fires on
+// every test using a non-Latin predefined system, not only the failures, and
+// that costs 9 currently-PASSING native diffs (ios 101/103/009/116/118/158,
+// android 103/009/118) alongside the 15 failing ones. Keeping the passes
+// would be the dishonest half-measure: whether a given test clears 0.95 is
+// decided by how many fallback glyphs it happens to paint, not by runtime
+// correctness, so a pass here is the same measurement as a failure and must
+// leave the denominator with it.
+//
+// PER-PLATFORM, NOT PER-TEST. web-ref keeps scoring — the boundary is only
+// between Chromium-macOS and the two native rasterisers. inject-wpt-block.mjs
+// therefore does NOT put this tag in any of the three whole-test exclusion
+// families; it gets its own per-platform gate (applyNativeFontParityGate),
+// and `scoreEligible` stays true because the test IS still honestly scored on
+// one platform.
+//
+// HOW IT CLOSES: bundle the same non-Latin faces (a Noto subset covering the
+// §6 scripts) in ALL FOUR pipelines — ref injection (@font-face data URIs
+// alongside the Inter payload in capture-browser-ref.mjs's
+// EMBEDDED_FONT_WEIGHTS), the web harness's /fonts, Compose res/font and the
+// iOS registered-face list — then bump CANVAS_REV again so every ref
+// rasterised against the Latin-only stack retires. At that point the four
+// surfaces share a face again, the boundary is gone, and this tag is DELETED
+// (not weakened). Until then it is the honest label.
+
+/** css-counter-styles-3 §6 predefined counter styles whose SYMBOLS fall
+ *  OUTSIDE the bundled Inter face's Latin/Greek/Cyrillic coverage — i.e. the
+ *  closed set of style names that force each surface onto its own fallback.
+ *  Transcribed from the spec's §6.2 (simple numeric / alphabetic / additive)
+ *  and §6.3 (complex, algorithmic) tables and cross-checked name-for-name
+ *  against tools/titan/counter-style-bake.mjs's PREDEFINED table (which is
+ *  the same §6 transcription, minus the §6.3 complex styles it declines to
+ *  bake) — so a name here that the bake also knows is spelled identically.
+ *
+ *  DELIBERATELY ABSENT, each for a stated reason — this is a boundary, not a
+ *  blanket:
+ *    * `decimal`, `decimal-leading-zero`, `lower/upper-alpha`,
+ *      `lower/upper-latin`, `lower/upper-roman` — ASCII. Inter covers them.
+ *    * `lower-greek` — Greek IS in Inter's coverage, so all four surfaces
+ *      keep the same face and the comparison stays fair. Including it would
+ *      exclude tests that are not font-bound at all.
+ *    * §6.1 `disc`/`circle`/`square`/`disclosure-open`/`disclosure-closed` —
+ *      ordinal-independent bullets, drawn (not text-shaped) on the natives.
+ *    * `urdu` — NOT a §6 predefined style. It appears in older lists drafts
+ *      and in some UA keyword tables, but css-counter-styles-3 spells the
+ *      extended-Arabic-Indic digits `persian`; there is no `urdu` entry in
+ *      §6 and none in counter-style-bake.mjs's table. Corpus check: the only
+ *      four-letter "urdu" matches in tools/wpt/css are inside the word
+ *      "tURDUcken" (css-gcpm/using-strings-003.html ipsum text) — which is
+ *      itself the reason this rule reads STYLE BLOCKS ONLY and matches whole
+ *      idents, never a substring of running prose. */
+const NON_LATIN_PREDEFINED_COUNTER_STYLES = new Set([
+    // §6.2 simple numeric — one non-ASCII 0-9 digit block each.
+    'arabic-indic', 'bengali', 'cambodian', 'khmer', 'cjk-decimal', 'devanagari',
+    'gujarati', 'gurmukhi', 'kannada', 'lao', 'malayalam', 'mongolian', 'myanmar',
+    'oriya', 'persian', 'tamil', 'telugu', 'thai', 'tibetan',
+    // §6.2 simple alphabetic — the four kana orders (no kana in Inter).
+    'hiragana', 'hiragana-iroha', 'katakana', 'katakana-iroha',
+    // §6.2 simple additive — Armenian / Georgian / Hebrew letter numerals.
+    'armenian', 'upper-armenian', 'lower-armenian', 'georgian', 'hebrew',
+    // §6.3 complex — CJK/Ethiopic algorithmic systems.
+    'cjk-earthly-branch', 'cjk-heavenly-stem', 'cjk-ideographic', 'ethiopic-numeric',
+    'japanese-formal', 'japanese-informal',
+    'korean-hangul-formal', 'korean-hanja-formal', 'korean-hanja-informal',
+    'simp-chinese-formal', 'simp-chinese-informal',
+    'trad-chinese-formal', 'trad-chinese-informal',
+]);
+// Exported so the unit pins can assert the exact membership (a silent
+// widening would score-exclude native diffs that are genuinely comparable)
+// and so a future font-boundary wave can diff it against the bake's table.
+export { NON_LATIN_PREDEFINED_COUNTER_STYLES };
+
+/** Does this declaration VALUE name a non-Latin predefined counter style?
+ *
+ *  Tokenised into whole CSS idents rather than substring-matched, because a
+ *  substring match on this table is a false-positive machine: `list-style:
+ *  url(georgian-bullet.png) none` names no counter style at all. `url(…)` and
+ *  quoted strings are stripped FIRST for exactly that reason — css-lists-3
+ *  §3 lets the `list-style` shorthand carry a `<image>` and
+ *  css-counter-styles-3 §6 lets `list-style-type` be a `<string>`, and
+ *  neither is a style-name position. */
+function valueNamesNonLatinCounterStyle(value, shadowed = null) {
+    const cleaned = String(value ?? '')
+        .replace(/url\([^)]*\)/gi, ' ')          // <image> position, never a style name
+        .replace(/"[^"]*"|'[^']*'/g, ' ');       // <string> marker, never a style name
+    for (const [ident] of cleaned.matchAll(/[A-Za-z][\w-]*/g)) {
+        const name = ident.toLowerCase();
+        // wave-30 fix-T4: the author took this name over with a definition we
+        // could not prove non-Latin — the glyphs are no longer the §6 ones.
+        if (shadowed?.has(name)) continue;
+        if (NON_LATIN_PREDEFINED_COUNTER_STYLES.has(name)) return true;
+    }
+    return false;
+}
+
+/** wave-30 fix-T4: is THIS `@counter-style` body provably outside Inter's
+ *  Latin/Greek/Cyrillic coverage? Only two signals count, both positive and
+ *  both cheap — the question is never "is it Latin?" (unanswerable from a
+ *  string) but "can we PROVE it is not?":
+ *
+ *    1. `system: extends <non-latin §6 name>` (css-counter-styles-3 §3.1) —
+ *       the extending style reuses the base's symbols verbatim.
+ *    2. a `symbols` / `additive-symbols` descriptor (§3.2 / §3.3) carrying a
+ *       non-ASCII codepoint, or ANY `\` escape (`\0995` is how a sheet spells
+ *       U+0995 without relying on the charset, and a CSS escape in a symbol
+ *       position is overwhelmingly a non-ASCII codepoint — treated as proof
+ *       in the FIRE direction, which is the conservative side here).
+ *
+ *  Everything else answers false, i.e. "not proven", which makes the caller
+ *  DECLINE the name. */
+function counterStyleRedefinitionIsNonLatin(body) {
+    for (const m of String(body).matchAll(RX.counterStyleExtends)) {
+        if (NON_LATIN_PREDEFINED_COUNTER_STYLES.has(m[1].toLowerCase())) return true;
+    }
+    for (const m of String(body).matchAll(RX.counterStyleSymbols)) {
+        // eslint-disable-next-line no-control-regex
+        if (/[^\x00-\x7F]/.test(m[1]) || m[1].includes('\\')) return true;
+    }
+    return false;
+}
+
+/** wave-30 fix-T4: §6 predefined names this sheet's AUTHOR has taken over
+ *  with a redefinition we cannot prove paints non-Latin glyphs.
+ *
+ *  css-counter-styles-3 §5 is explicit that an author `@counter-style`
+ *  competes in the cascade with the predefined styles and, being later in
+ *  cascade order, WINS. Chromium agrees (verified): a page carrying
+ *  `@counter-style bengali { system: numeric; symbols: "0" "1" … "9" }` and
+ *  `list-style-type: bengali` renders ASCII digits identical to `decimal` —
+ *  every surface shapes them from Inter, there is no fallback face, and the
+ *  font boundary Rule 43 names simply does not exist for that document. Firing
+ *  there would score-exclude two perfectly comparable native diffs.
+ *
+ *  Deliberately ASYMMETRIC, and this is the honest half: proving a
+ *  redefinition non-Latin is easy (see above), proving it Latin is not — a
+ *  `system: numeric` with symbols we cannot classify, or an INVALID rule the
+ *  UA drops entirely (§3: an invalid @counter-style is ignored, so the
+ *  predefined style survives), both land in the same "unknown" bucket. We
+ *  DECLINE on unknown: an over-decline costs a native diff that may be
+ *  font-bound (visible as a low score, investigable), an over-fire costs a
+ *  measurement we can never get back. An empty body is skipped outright —
+ *  a block with no descriptor at all cannot be a valid counter style and so
+ *  cannot shadow anything. */
+function shadowedCounterStyleNames(css) {
+    const out = new Set();
+    for (const m of String(css).matchAll(RX.counterStyleBlock)) {
+        const name = m[1].toLowerCase();
+        // Only §6 non-Latin names matter — a `@counter-style my-disc { … }`
+        // never armed the rule in the first place.
+        if (!NON_LATIN_PREDEFINED_COUNTER_STYLES.has(name)) continue;
+        if (!m[2].includes(':')) continue;                    // no descriptors
+        if (counterStyleRedefinitionIsNonLatin(m[2])) continue; // still non-Latin
+        out.add(name);
+    }
+    return out;
+}
+// Exported so the unit pins can assert the decline set directly, without
+// having to infer it from a whole-rule boolean.
+export { shadowedCounterStyleNames };
+
+/** Rule 43 predicate — does this test USE a non-Latin predefined counter
+ *  style? Three use sites, all read off STYLE BLOCKS ONLY (styleSheetTextOf,
+ *  the same precision device Rule 42 uses): every one of these tests spells
+ *  the style name in its `<title>` ("arabic-indic, 10+") and in its
+ *  `<meta name="assert">` prose, so a whole-document scan would fire on the
+ *  PROSE of any test that merely mentions a script name.
+ *
+ *  KNOWN LIMIT, stated rather than hidden: a style named only in an inline
+ *  `style=` attribute is not seen. Measured over the corpus this costs
+ *  nothing — every non-Latin counter-style use in tools/wpt/css sits in a
+ *  `<style>` block — and the alternative (scanning attributes too) re-opens
+ *  the prose false-positive the style-block scope closes. */
+function hasNonLatinPredefinedCounterStyle(html) {
+    const css = styleSheetTextOf(html);
+    if (css === '') return false;
+    // wave-30 fix-T4: names the author redefined out of the §6 glyph set.
+    // Computed ONCE and threaded through all three use sites, so a shadowed
+    // name cannot arm the rule from any of them.
+    const shadowed = shadowedCounterStyleNames(css);
+    // Use 1 — `list-style-type: <name>` / the `list-style` shorthand.
+    for (const m of css.matchAll(RX.listStyleTypeDecl)) {
+        if (valueNamesNonLatinCounterStyle(m[1], shadowed)) return true;
+    }
+    // Use 2 — `counter(name, <style>)` / `counters(name, sep, <style>)`
+    // (css-lists-3 §4.3: the style is the LAST argument, and defaults to
+    // `decimal` when omitted). Only the last argument is examined, so a
+    // COUNTER literally named `hebrew` cannot arm the rule from the first
+    // argument position.
+    for (const m of css.matchAll(RX.counterFunctionCall)) {
+        const args = m[1].split(',');
+        if (args.length < 2) continue;                    // no style argument
+        if (valueNamesNonLatinCounterStyle(args[args.length - 1], shadowed)) return true;
+    }
+    // Use 3 — `@counter-style X { system: extends <name> }` (§3.1: the
+    // extending style reuses the base style's symbols, so it paints the same
+    // non-Latin glyphs even though its own name is arbitrary).
+    for (const m of css.matchAll(RX.counterStyleExtends)) {
+        const base = m[1].toLowerCase();
+        // fix-T4: extending a name the author redefined inherits the AUTHOR's
+        // symbols, not §6's — same decline, same reason.
+        if (shadowed.has(base)) continue;
+        if (NON_LATIN_PREDEFINED_COUNTER_STYLES.has(base)) return true;
+    }
+    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -1631,14 +1916,39 @@ export const RULES = [
         ],
         test: (html /* , _ctx */) => hasUnreachableOsDefaultSelection(html),
     },
+    {
+        // Rule 43 (wave-30 B4b): the first PER-PLATFORM tag — see the long
+        // banner above hasNonLatinPredefinedCounterStyle for the measured
+        // css-counter-styles table (web clears the gate on 11 of 12 with the
+        // same face as the ref; the two natives, on their own fallback faces,
+        // degrade monotonically with glyph count down to 0.72).
+        //
+        // Like `browser-ref-divergent` the tag does NOT start with
+        // `requires-`… except that it does, and deliberately: this one IS a
+        // harness gap, just a per-platform one. What the natives lack is the
+        // FACE, not a layout capability — hence `-font-parity` rather than a
+        // capability noun. inject-wpt-block.mjs keeps it out of all three
+        // whole-test exclusion families and gives it a per-platform gate, so
+        // `scoreEligible` stays true and web-ref keeps scoring honestly.
+        tag: 'requires-non-latin-font-parity',
+        description: 'Uses a css-counter-styles-3 §6 predefined counter style outside the bundled Inter face coverage; the ref and web share a Chromium-macOS fallback face while Compose/SwiftUI resolve their own, so native-vs-ref SSIM is font-bound (measured 0.72–0.98 across css-counter-styles while web holds 0.96–1.00). NATIVE-ONLY exclusion; closable by bundling Noto faces in all four pipelines + a CANVAS_REV bump.',
+        swarm001Source: [],
+        swarm002Source: [],
+        swarm003Source: [
+            // wave-30 B4(b) measurement, re-derivable from the committed run.
+            'wave-30 css-counter-styles 12/12 (runs/wave29-final/sections/css-counter-styles/manifest.json)',
+        ],
+        test: (html /* , _ctx */) => hasNonLatinPredefinedCounterStyle(html),
+    },
 ];
 
 // Sanity: keep this in lock-step with the canonical rule count. swarm-001
 // seeded 17 rules; swarm-002 added 12 more (Rules 18..29); swarm-003 added
 // 11 more (Rules 30..40); wave-21 added Rule 41 (requires-wpt-server);
-// wave-29 added Rule 42 (browser-ref-divergent).
+// wave-29 added Rule 42 (browser-ref-divergent); wave-30 added Rule 43
+// (requires-non-latin-font-parity).
 // A drift here means either a rule was dropped or a duplicate was added.
-const EXPECTED_RULE_COUNT = 42;
+const EXPECTED_RULE_COUNT = 43;
 if (RULES.length !== EXPECTED_RULE_COUNT) {
     throw new Error(`wpt-not-applicable: expected exactly ${EXPECTED_RULE_COUNT} rules, got ${RULES.length}`);
 }
@@ -1648,9 +1958,10 @@ if (RULES.length !== EXPECTED_RULE_COUNT) {
 // ---------------------------------------------------------------------------
 
 /**
- * Classify a single test against all 42 rules (17 from swarm-001 + 12 from
+ * Classify a single test against all 43 rules (17 from swarm-001 + 12 from
  * swarm-002 + 11 from swarm-003 + 1 from wave-21: requires-wpt-server + 1
- * from wave-29: browser-ref-divergent).
+ * from wave-29: browser-ref-divergent + 1 from wave-30:
+ * requires-non-latin-font-parity).
  *
  * @param {object} args
  * @param {string} args.html       — raw test HTML source
