@@ -15,9 +15,16 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+// The inset path shifts its whole clip+hole block with one canvas transform
+// (see applyInsetShadows for why it can't use the pure-rect seam).
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
+// The resolved position offset rides in as a value (DpOffset) — see the
+// positionOffset param KDoc on applyFullShadow for why the shadow painter,
+// chained OUTER of the layout offset, has to translate by it.
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
 /**
@@ -73,9 +80,11 @@ object ShadowApplier {
         modifier: Modifier,
         config: ShadowConfig,
         radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
-            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE,
+        // Threaded through from EffectsFacade — see applyFullShadow's KDoc.
+        positionOffset: DpOffset = DpOffset.Zero,
     ): Modifier {
-        return applyFullShadow(modifier, config, 0.dp, radiusConfig)
+        return applyFullShadow(modifier, config, 0.dp, radiusConfig, positionOffset)
     }
 
     /**
@@ -87,6 +96,19 @@ object ShadowApplier {
      *   [radiusConfig] is supplied by the caller).
      * @param radiusConfig Per-corner border-radius (Dp + paint-time
      *   percentage fractions) driving the shadow perimeter shape.
+     * @param positionOffset The element's resolved position offset —
+     *   `PositionApplier.resolvedOffset`, literally the value form of the
+     *   `absoluteOffset` StyleApplier's step 4 chains INNER of this draw
+     *   node. The shadow paints in the step-3 node's space, i.e. at the
+     *   element's UN-offset layout slot, while the element's own
+     *   background/borders (steps 5–6) paint at the offset one — so every
+     *   shadow layer must translate by this value or a positioned element
+     *   casts its shadow at the slot it never visually occupied (the same
+     *   wave-27 geometry correction the backdrop lane already carries;
+     *   measured on WPT `backdrop-filter-box-shadow.html`, where the grey
+     *   shadow of a `position:absolute; top:125px; left:75px` box painted
+     *   up in the explanatory-text band). Defaulted to zero, so every
+     *   static-element caller — the overwhelming majority — is untouched.
      * @return Modified modifier with shadows applied.
      */
     fun applyFullShadow(
@@ -94,7 +116,8 @@ object ShadowApplier {
         config: ShadowConfig,
         cornerRadius: Dp = 0.dp,
         radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
-            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE,
+        positionOffset: DpOffset = DpOffset.Zero,
     ): Modifier {
         if (!config.hasShadow) return modifier
 
@@ -106,12 +129,12 @@ object ShadowApplier {
 
         // Apply outset shadows first (drawn behind content)
         if (outsetShadows.isNotEmpty()) {
-            resultModifier = applyOutsetShadows(resultModifier, outsetShadows, cornerRadius, radiusConfig)
+            resultModifier = applyOutsetShadows(resultModifier, outsetShadows, cornerRadius, radiusConfig, positionOffset)
         }
 
         // Apply inset shadows (drawn over content, clipped to bounds)
         if (insetShadows.isNotEmpty()) {
-            resultModifier = applyInsetShadows(resultModifier, insetShadows, cornerRadius)
+            resultModifier = applyInsetShadows(resultModifier, insetShadows, cornerRadius, positionOffset)
         }
 
         return resultModifier
@@ -144,7 +167,9 @@ object ShadowApplier {
         shadows: List<ShadowData>,
         cornerRadius: Dp,
         radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
-            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE
+            com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE,
+        // The element's resolved position offset — see applyFullShadow KDoc.
+        positionOffset: DpOffset = DpOffset.Zero,
     ): Modifier {
         // NOTE: no elevation fast path. The old code routed a single
         // 0-offset/0-spread shadow through Modifier.shadow(elevation) —
@@ -155,6 +180,15 @@ object ShadowApplier {
         // and its 40px reach. Every shadow now takes the BlurMaskFilter
         // path below, which honors color/blur/shape exactly.
         return modifier.drawBehind {
+            // Resolve the position offset once for all layers: this draw
+            // node sits OUTER of step 4's absoluteOffset, so its local
+            // origin is the UN-offset slot and every perimeter below must
+            // slide by the same amount the element itself is about to
+            // (composed via ShadowGeometry.outsetShadowRect, the pure-math
+            // seam the JVM unit suite pins — the zero case degenerates to
+            // the pre-fix formula, keeping static captures byte-identical).
+            val posXPx = positionOffset.x.toPx()
+            val posYPx = positionOffset.y.toPx()
             // CSS spec: "Shadows are rendered in back-to-front order: the
             // FIRST shadow in the list is on top of the stack." We iterate
             // the list in REVERSE so the last-listed shadow is drawn first
@@ -214,11 +248,19 @@ object ShadowApplier {
                     val legacy = CornerRadius(cornerRadius.toPx() + spreadGrow, cornerRadius.toPx() + spreadGrow)
                     val useConfig = radiusConfig.hasRadius
                     val shadowShape = RoundRect(
-                        rect = Rect(
-                            left = offsetX - spread,
-                            top = offsetY - spread,
-                            right = size.width + offsetX + spread,
-                            bottom = size.height + offsetY + spread
+                        // Perimeter = border box translated by (position
+                        // offset + shadow offset), inflated by spread —
+                        // the pure-math seam ShadowGeometry owns (and the
+                        // unit suite pins), so the draw code can't drift
+                        // from the tested formula.
+                        rect = ShadowGeometry.outsetShadowRect(
+                            widthPx = size.width,
+                            heightPx = size.height,
+                            shadowOffsetXPx = offsetX,
+                            shadowOffsetYPx = offsetY,
+                            spreadPx = spread,
+                            positionOffsetXPx = posXPx,
+                            positionOffsetYPx = posYPx,
                         ),
                         topLeft = if (useConfig) corner(radiusConfig.topStart, radiusConfig.topStartFraction) else legacy,
                         topRight = if (useConfig) corner(radiusConfig.topEnd, radiusConfig.topEndFraction) else legacy,
@@ -244,95 +286,110 @@ object ShadowApplier {
     private fun applyInsetShadows(
         modifier: Modifier,
         shadows: List<ShadowData>,
-        cornerRadius: Dp
+        cornerRadius: Dp,
+        // The element's resolved position offset — see applyFullShadow KDoc.
+        positionOffset: DpOffset = DpOffset.Zero,
     ): Modifier {
         return modifier.drawWithContent {
-            // Draw the content first
+            // Draw the content first. NOT translated: the content chain
+            // already contains step 4's absoluteOffset, so it lands at the
+            // offset slot on its own — only OUR shadow geometry below is
+            // authored in this node's un-offset local space.
             drawContent()
 
-            // Create clip path for the element bounds
-            val clipPath = Path().apply {
-                if (cornerRadius > 0.dp) {
-                    addRoundRect(
-                        RoundRect(
-                            left = 0f,
-                            top = 0f,
-                            right = size.width,
-                            bottom = size.height,
-                            cornerRadius = CornerRadius(cornerRadius.toPx())
-                        )
-                    )
-                } else {
-                    addRect(Rect(0f, 0f, size.width, size.height))
-                }
-            }
+            // One canvas transform shifts the whole inset block — bounds
+            // clip, outer rect, and inner hole together — so the clip can
+            // never shear away from the hole. Unlike the outset path this
+            // can't route through the ShadowGeometry rect seam: the hole
+            // is an android.graphics.Path (a throwing stub in the JVM unit
+            // suite), so the translate keeps all three pieces on one
+            // transform instead of hand-offsetting each coordinate.
+            translate(left = positionOffset.x.toPx(), top = positionOffset.y.toPx()) {
 
-            // Draw inset shadows clipped to bounds
-            clipPath(clipPath, ClipOp.Intersect) {
-                for (shadowData in shadows) {
-                    drawIntoCanvas { canvas ->
-                        // For inset shadows, we draw a large rect with a hole
-                        // and apply blur to create the inner shadow effect
-                        val offsetX = shadowData.offsetX.toPx()
-                        val offsetY = shadowData.offsetY.toPx()
-                        val spread = shadowData.spreadRadius.toPx()
-                        val blur = shadowData.blurRadius.toPx()
-                        val radius = cornerRadius.toPx()
-
-                        val nativePaint = android.graphics.Paint().apply {
-                            isAntiAlias = true
-                            color = shadowData.color.toArgb()
-
-                            // Same CSS→Skia radius conversion as the outset
-                            // path (derivation in blurMaskRadius) — the raw
-                            // CSS radius over-blurred inset shadows by the
-                            // same ~2.3× factor. Guard: BlurMaskFilter
-                            // throws on radius ≤ 0.
-                            val maskRadius = blurMaskRadius(blur)
-                            if (maskRadius > 0f) {
-                                maskFilter = android.graphics.BlurMaskFilter(
-                                    maskRadius,
-                                    android.graphics.BlurMaskFilter.Blur.NORMAL
-                                )
-                            }
-                        }
-
-                        // Create the inset shadow by drawing the negative space
-                        // The shadow is drawn at the edges by using a path with a hole
-                        val outerPadding = blur + spread.coerceAtLeast(0f) + 50f
-                        val path = android.graphics.Path().apply {
-                            // Outer rect (large, outside visible area)
-                            addRect(
-                                -outerPadding,
-                                -outerPadding,
-                                size.width + outerPadding,
-                                size.height + outerPadding,
-                                android.graphics.Path.Direction.CW
+                // Create clip path for the element bounds
+                val clipPath = Path().apply {
+                    if (cornerRadius > 0.dp) {
+                        addRoundRect(
+                            RoundRect(
+                                left = 0f,
+                                top = 0f,
+                                right = size.width,
+                                bottom = size.height,
+                                cornerRadius = CornerRadius(cornerRadius.toPx())
                             )
+                        )
+                    } else {
+                        addRect(Rect(0f, 0f, size.width, size.height))
+                    }
+                }
 
-                            // Inner rect (hole where no shadow appears)
-                            // Offset and contracted by spread
-                            val innerLeft = offsetX + spread
-                            val innerTop = offsetY + spread
-                            val innerRight = size.width + offsetX - spread
-                            val innerBottom = size.height + offsetY - spread
+                // Draw inset shadows clipped to bounds
+                clipPath(clipPath, ClipOp.Intersect) {
+                    for (shadowData in shadows) {
+                        drawIntoCanvas { canvas ->
+                            // For inset shadows, we draw a large rect with a hole
+                            // and apply blur to create the inner shadow effect
+                            val offsetX = shadowData.offsetX.toPx()
+                            val offsetY = shadowData.offsetY.toPx()
+                            val spread = shadowData.spreadRadius.toPx()
+                            val blur = shadowData.blurRadius.toPx()
+                            val radius = cornerRadius.toPx()
 
-                            if (radius > 0f) {
-                                addRoundRect(
-                                    innerLeft, innerTop, innerRight, innerBottom,
-                                    (radius - spread).coerceAtLeast(0f),
-                                    (radius - spread).coerceAtLeast(0f),
-                                    android.graphics.Path.Direction.CCW
-                                )
-                            } else {
-                                addRect(
-                                    innerLeft, innerTop, innerRight, innerBottom,
-                                    android.graphics.Path.Direction.CCW
-                                )
+                            val nativePaint = android.graphics.Paint().apply {
+                                isAntiAlias = true
+                                color = shadowData.color.toArgb()
+
+                                // Same CSS→Skia radius conversion as the outset
+                                // path (derivation in blurMaskRadius) — the raw
+                                // CSS radius over-blurred inset shadows by the
+                                // same ~2.3× factor. Guard: BlurMaskFilter
+                                // throws on radius ≤ 0.
+                                val maskRadius = blurMaskRadius(blur)
+                                if (maskRadius > 0f) {
+                                    maskFilter = android.graphics.BlurMaskFilter(
+                                        maskRadius,
+                                        android.graphics.BlurMaskFilter.Blur.NORMAL
+                                    )
+                                }
                             }
-                        }
 
-                        canvas.nativeCanvas.drawPath(path, nativePaint)
+                            // Create the inset shadow by drawing the negative space
+                            // The shadow is drawn at the edges by using a path with a hole
+                            val outerPadding = blur + spread.coerceAtLeast(0f) + 50f
+                            val path = android.graphics.Path().apply {
+                                // Outer rect (large, outside visible area)
+                                addRect(
+                                    -outerPadding,
+                                    -outerPadding,
+                                    size.width + outerPadding,
+                                    size.height + outerPadding,
+                                    android.graphics.Path.Direction.CW
+                                )
+
+                                // Inner rect (hole where no shadow appears)
+                                // Offset and contracted by spread
+                                val innerLeft = offsetX + spread
+                                val innerTop = offsetY + spread
+                                val innerRight = size.width + offsetX - spread
+                                val innerBottom = size.height + offsetY - spread
+
+                                if (radius > 0f) {
+                                    addRoundRect(
+                                        innerLeft, innerTop, innerRight, innerBottom,
+                                        (radius - spread).coerceAtLeast(0f),
+                                        (radius - spread).coerceAtLeast(0f),
+                                        android.graphics.Path.Direction.CCW
+                                    )
+                                } else {
+                                    addRect(
+                                        innerLeft, innerTop, innerRight, innerBottom,
+                                        android.graphics.Path.Direction.CCW
+                                    )
+                                }
+                            }
+
+                            canvas.nativeCanvas.drawPath(path, nativePaint)
+                        }
                     }
                 }
             }

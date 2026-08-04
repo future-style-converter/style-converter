@@ -542,10 +542,15 @@ object StyleApplier {
             // painter has to slide with it or it filters the rectangle the
             // box USED to occupy. Read from PositionApplier.resolvedOffset —
             // literally the value form of the modifier step 4 emits, so the
-            // two cannot disagree. Gated on the property being declared for
-            // the same reason as the margin read: only the backdrop path
-            // consumes it, and every other element would pay for nothing.
-            positionOffset = if (config.effects.filters.hasBackdropFilters)
+            // two cannot disagree. Gated on a consumer being declared, for
+            // the same reason as the margin read: every other element would
+            // pay the resolve for nothing. TWO lanes consume it now: the
+            // backdrop path, and (same defect, found next on WPT
+            // `backdrop-filter-box-shadow.html`) the box-shadow painter,
+            // whose `drawBehind` also lives at this step and was painting a
+            // positioned element's shadow at its UN-offset layout slot.
+            positionOffset = if (config.effects.filters.hasBackdropFilters ||
+                config.effects.shadows.hasShadow)
                 com.styleconverter.runtime.layout.position.PositionApplier
                     .resolvedOffset(config.layout.position)
             else androidx.compose.ui.unit.DpOffset.Zero,

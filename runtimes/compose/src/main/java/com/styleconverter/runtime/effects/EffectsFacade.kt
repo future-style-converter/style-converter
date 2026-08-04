@@ -111,13 +111,17 @@ object EffectsFacade {
         // and clips the BORDER box. Defaulted, so nothing else changes.
         marginInsets: com.styleconverter.runtime.spacing.MarginInsets =
             com.styleconverter.runtime.spacing.MarginInsets.NONE,
-        // wave-27 fix — the element's resolved POSITION offset, consumed ONLY
-        // by the backdrop path. The other half of the same "step 3 is outside
-        // step 4" problem marginInsets fixes: step 4 chains
-        // `PositionApplier.applyPosition` → `Modifier.absoluteOffset`, so an
-        // offset box paints its background (step 6) at the offset slot while
-        // this draw node still sits at the un-offset one. Defaulted, so
-        // nothing else in the chain changes.
+        // wave-27 fix — the element's resolved POSITION offset, consumed by
+        // the two lanes that DRAW in this step's un-offset space: the
+        // backdrop path and the box-shadow painter. The other half of the
+        // same "step 3 is outside step 4" problem marginInsets fixes: step 4
+        // chains `PositionApplier.applyPosition` → `Modifier.absoluteOffset`,
+        // so an offset box paints its background (step 6) at the offset slot
+        // while this step's draw nodes still sit at the un-offset one — the
+        // backdrop filtered the rectangle the box used to occupy, and the
+        // shadow (same defect, found next) painted its Gaussian at the
+        // un-offset slot on WPT `backdrop-filter-box-shadow.html`. Defaulted,
+        // so nothing else in the chain changes.
         positionOffset: androidx.compose.ui.unit.DpOffset =
             androidx.compose.ui.unit.DpOffset.Zero,
     ): Modifier {
@@ -154,8 +158,13 @@ object EffectsFacade {
         )
 
         // Apply shadows (they render behind the content, shaped by the
-        // element's border-radius — see radiusConfig KDoc above)
-        result = ShadowApplier.applyShadow(result, config.shadows, radiusConfig)
+        // element's border-radius — see radiusConfig KDoc above). The
+        // position offset rides along because the shadow draws via
+        // `drawBehind` at THIS step — outer of the layout offset — so a
+        // positioned element's shadow must slide to the offset slot with
+        // the box that casts it (css-backgrounds-3 §7.1 attaches the shadow
+        // to the box, not to its abandoned layout slot).
+        result = ShadowApplier.applyShadow(result, config.shadows, radiusConfig, positionOffset)
 
         // Apply the element's own `filter` chain — its own pixels only, so it
         // must NOT reach the backplate installed above. Second half of the
