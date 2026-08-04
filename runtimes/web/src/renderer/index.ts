@@ -15,6 +15,8 @@ export * from './WidgetAttrs';
 export * from './DecorationSpans';
 // Pseudo-element span renderer (split from NodeRenderer, wave-20 W1).
 export * from './PseudoNodeRenderer';
+// wave-28 PG: root-scope generated-box placement (the html::before pin).
+export * from './RootPseudoPlacement';
 // Calibration surface: RenderContext + RendererOptions.
 export * from './RendererOptions';
 // The per-node renderer core.

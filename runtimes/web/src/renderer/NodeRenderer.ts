@@ -36,6 +36,10 @@ import { decorationHostStyle, withDecorationSpans } from './DecorationSpans';
 // (tests, downstream tooling) keep resolving through this module.
 import { renderPseudoNode } from './PseudoNodeRenderer';
 export { styleFromRawDeclarations } from './PseudoNodeRenderer';
+// wave-28 lane PG: root-scope (`html::before`) generated boxes are placed
+// by the ROOT's inline direction, not the contained body's — see
+// RootPseudoPlacement.ts for the measured divergence and the spec chain.
+import { rootPseudoPlacementStyle } from './RootPseudoPlacement';
 
 /** Props for one composed node render. */
 export interface NodeRendererProps {
@@ -186,11 +190,17 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
 
   // ── pseudo-element spans (spec 01 `pseudos`, extractor-owned) ───────
   const pseudo = component.pseudos;
+  // wave-28 lane PG: a bucket hanging off the synthetic body-root holds a
+  // box the CSS generated on the DOCUMENT ROOT (`html::before`), not on the
+  // body — so when containment takes the body off the propagation path its
+  // `direction: rtl` must not decide where that box sits. Null for every
+  // other component, so their spans are byte-identical to wave 27.
+  const rootPlacement = rootPseudoPlacementStyle(component);
   // CSS orders ::marker before ::before, both before the inline content;
   // ::after trails everything (including real children).
-  const markerNode = pseudo?.marker ? renderPseudoNode(pseudo.marker, 'marker') : null;
-  const beforeNode = pseudo?.before ? renderPseudoNode(pseudo.before, 'before') : null;
-  const afterNode = pseudo?.after ? renderPseudoNode(pseudo.after, 'after') : null;
+  const markerNode = pseudo?.marker ? renderPseudoNode(pseudo.marker, 'marker', rootPlacement) : null;
+  const beforeNode = pseudo?.before ? renderPseudoNode(pseudo.before, 'before', rootPlacement) : null;
+  const afterNode = pseudo?.after ? renderPseudoNode(pseudo.after, 'after', rootPlacement) : null;
 
   // ── content assembly ────────────────────────────────────────────────
   // Children are passed as POSITIONAL createElement arguments (marker,

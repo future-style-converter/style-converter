@@ -43,8 +43,18 @@ export function styleFromRawDeclarations(decls: Record<string, unknown>): CSSPro
  * and materialises the literal `content` string as text. The marker role
  * gets `inline-block` + a trailing 0.5em gap approximating the native
  * marker-side spacing (CSS Lists 3 §4.3).
+ *
+ * `placement` (wave-28 lane PG) is the ROOT-SCOPE placement pin computed by
+ * RootPseudoPlacement.rootPseudoPlacementStyle — null/undefined for every
+ * ordinary element's pseudo, so those spans stay byte-identical. It sits
+ * between the marker gap and the author declarations: a calibration the
+ * author's own rule can still override, never one that overrides it.
  */
-export function renderPseudoNode(p: IRPseudoNode, role: 'before' | 'after' | 'marker'): ReactElement {
+export function renderPseudoNode(
+  p: IRPseudoNode,
+  role: 'before' | 'after' | 'marker',
+  placement?: CSSProperties | null,
+): ReactElement {
   // Same engine as component styles: the pseudo rule's declarations
   // (color, font-*, AND content) reach the inline style attribute.
   // The wire forwards the extractor's payload VERBATIM (spec 01), and
@@ -72,7 +82,10 @@ export function renderPseudoNode(p: IRPseudoNode, role: 'before' | 'after' | 'ma
       key: `pseudo-${role}-${p.id}`,                     // stable per role+id
       'data-pseudo': role,                               // role marker for tooling
       'data-component-id': p.id,                         // debug identity (may be absent)
-      style: { ...markerStyle, ...(ps as CSSProperties) }, // rule styles win over the gap
+      // Order = precedence: marker gap, then the root-scope placement pin
+      // (wave-28 lane PG — see RootPseudoPlacement), then the author's own
+      // declarations, which win over both.
+      style: { ...markerStyle, ...(placement ?? {}), ...(ps as CSSProperties) },
     },
     pText,                                               // literal content string (may be '')
   );

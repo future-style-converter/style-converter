@@ -129,5 +129,68 @@ enum ListMarkerRow {
     /// the marker padding. The real value is UA-defined and per-counter-
     /// style (css-lists-3 §3.2's marker padding), which is still the
     /// deferred B-RC3 part 3 work documented at the call site.
+    ///
+    /// Wave 28 (lane MC): the Compose twin now shares this exact value and
+    /// nothing else — it used to paint `"\(marker) "`, stacking a trailing
+    /// space (~7dp at the 25px these items inherit) on top of its own 4dp
+    /// padding. That extra space was a silent Android-vs-iOS divergence on
+    /// every marker row; it is gone.
     static let gapPt: CGFloat = 4
+
+    /// Must this item's marker be painted INSIDE the item's own box — a
+    /// zero-impact overlay that cannot move or resize it — instead of
+    /// being prepended as an HStack sibling? Twin of Compose's
+    /// `ListMarkerRow.rendersInsideOverlay`.
+    ///
+    /// ## The defect (wave 28, measured on the LIVE wave27-final section)
+    /// tools/titan/runs/wave27-final/sections/css-counter-styles/ — the
+    /// baked `meta.markerText` IS consumed (the digits and the `<ol start>`
+    /// ordinals paint correctly) yet only 5/12 iOS tests score. Measuring
+    /// the ink columns of …/{screenshots,ios-screenshots}/wpt__css-counter-
+    /// styles__arabic-indic__css3-counter-styles-101.png:
+    ///
+    ///     platform | marker x | reference-glyph x
+    ///     web      | 217–233  | 244–253
+    ///     iOS      | 217–235  | 264–280
+    ///
+    /// The marker lands right; the item does not. The HStack makes the
+    /// marker a SIBLING, so the item's principal box starts at
+    /// `markerWidth + gapPt`, and every item here holds one absolutely
+    /// positioned glyph at `left: 39.72px` that css-position-3 §2.1
+    /// anchors to that box — so the whole reference column inherits the
+    /// displacement (up to ~70px on the wide `start:10000` markers of
+    /// -102/-007/-117/-159, the four rows scoring 0.60–0.86).
+    ///
+    /// ## Both gates are load-bearing
+    /// - `.inside` only. css-lists-3 §3.2 puts an `inside` marker in the
+    ///   item's content but an `outside` marker in the item's MARGIN area,
+    ///   left of the border box — drawing that one at the content-box
+    ///   origin would move it right by its own width. `outside` keeps the
+    ///   HStack (whose own displacement of the item is the still-deferred
+    ///   B-RC3 part-3 geometry, called out at the renderer's marker
+    ///   branch — not silently dropped here). `nil` keeps it too:
+    ///   unknown position ⇒ unchanged behaviour. REACHABILITY (measured,
+    ///   wave-28 skeptic pass — the earlier note here named the wrong
+    ///   case): `ListMarkerResolver.resolve` returns nil on exactly ONE
+    ///   condition, `uaDefault(sourceTag: parentTag) == nil`, i.e. the
+    ///   PARENT is not a list container — never because of the child. The
+    ///   renderer's marker branch is gated on a non-empty marker STRING,
+    ///   which a baked `meta.markerText` supplies for any child, so nil
+    ///   reaches here exactly when a producer bakes a marker under a
+    ///   non-list parent. An UNTAGGED child under a real `<ol>` resolves a
+    ///   NON-nil config (the container's own `list-style-position`), so it
+    ///   is not this arm's case at all: with no in-flow text it takes the
+    ///   overlay. (Compose gates its branch on `isListParent` instead, so
+    ///   the nil arm is unreachable there — a pre-existing divergence in
+    ///   which children get a synthesized marker, not one this lane made.)
+    /// - the item must expose no in-flow text. An `inside` marker on an
+    ///   item that HAS text must push that text along the line, and an
+    ///   overlay does not — it would paint the marker ON TOP of the first
+    ///   word. KNOWN GAP, deliberately narrow: it shows only when such an
+    ///   item ALSO anchors an out-of-flow descendant, a shape the corpus
+    ///   does not contain.
+    static func rendersInsideOverlay(position: ListMarkerPosition?,
+                                     itemExposesTextBaseline: Bool) -> Bool {
+        position == .inside && !itemExposesTextBaseline
+    }
 }

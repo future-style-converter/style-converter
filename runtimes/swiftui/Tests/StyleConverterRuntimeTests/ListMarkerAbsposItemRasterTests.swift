@@ -153,26 +153,34 @@ final class ListMarkerAbsposItemRasterTests: XCTestCase {
     }
 
     /// Contiguous horizontal ink bands: one per rendered item row, as
-    /// `(top, bottom, leftmostX)`. Measuring bands rather than exact glyph
-    /// rects keeps the pins independent of which font the system
-    /// substitutes for the arabic-indic digits.
-    private func inkBands(_ img: (px: [UInt8], w: Int, h: Int)) -> [(top: Int, bottom: Int, left: Int)] {
-        var bands: [(top: Int, bottom: Int, left: Int)] = []
-        var cur: (top: Int, bottom: Int, left: Int)?
+    /// `(top, bottom, leftmostX, rightmostX)`. Measuring bands rather than
+    /// exact glyph rects keeps the pins independent of which font the
+    /// system substitutes for the arabic-indic digits.
+    ///
+    /// Wave 28 (lane MC) added `right`: the item's absolutely positioned
+    /// reference glyph is the band's RIGHTMOST ink, so that edge is what
+    /// moves when the marker displaces the item's principal box.
+    private func inkBands(_ img: (px: [UInt8], w: Int, h: Int))
+        -> [(top: Int, bottom: Int, left: Int, right: Int)] {
+        var bands: [(top: Int, bottom: Int, left: Int, right: Int)] = []
+        var cur: (top: Int, bottom: Int, left: Int, right: Int)?
         for y in 0..<img.h {
             let xs = (0..<img.w).filter { x in
                 let i = (y * img.w + x) * 4
                 return img.px[i] < 128 && img.px[i + 1] < 128 && img.px[i + 2] < 128
             }
-            guard let first = xs.first else {
+            guard let first = xs.first, let last = xs.last else {
                 if let c = cur { bands.append(c); cur = nil }
                 continue
             }
             if var c = cur, y == c.bottom + 1 {
-                c.bottom = y; c.left = min(c.left, first); cur = c
+                c.bottom = y
+                c.left = min(c.left, first)
+                c.right = max(c.right, last)
+                cur = c
             } else {
                 if let c = cur { bands.append(c) }
-                cur = (top: y, bottom: y, left: first)
+                cur = (top: y, bottom: y, left: first, right: last)
             }
         }
         if let c = cur { bands.append(c) }
@@ -236,6 +244,56 @@ final class ListMarkerAbsposItemRasterTests: XCTestCase {
             "marker-free pitch \(pitch)px ≠ 31.25px — the out-of-flow child "
             + "IS sizing its containing block, which would be a second, "
             + "separate defect from the marker row this lane repaired")
+    }
+
+    // MARK: - Wave 28 (lane MC): the marker must not MOVE the item either
+
+    /// Generating a marker box must leave the item's principal box exactly
+    /// where a marker-free item's would be.
+    ///
+    /// A/B against the SAME tree with the marker suppressed, which makes
+    /// the pin independent of the marker's own glyph width and of which
+    /// font the system substitutes. The item's absolutely positioned
+    /// reference glyph is the band's rightmost ink; css-position-3 §2.1
+    /// anchors it to the ITEM's box, so if the marker displaced that box
+    /// the two runs' right edges diverge by `markerWidth + gapPt`.
+    ///
+    /// This is the iOS half of the wave-28 diagnosis: on the live
+    /// wave27-final capture the reference column sat at x≈264–280 against
+    /// the browser-ref's 244–253, on every one of the 12
+    /// css-counter-styles tests, purely from this displacement.
+    @MainActor
+    func testInsideMarkerDoesNotDisplaceTheItemsPrincipalBox() throws {
+        let withMarker = inkBands(try render(try counterStyles101()))
+        let markerFree = inkBands(try render(
+            try counterStyles101(listStyleType: "none", markerText: nil)))
+        XCTAssertEqual(withMarker.count, 2, "with marker: \(withMarker)")
+        XCTAssertEqual(markerFree.count, 2, "marker-free: \(markerFree)")
+        for (i, pair) in zip(withMarker, markerFree).enumerated() {
+            XCTAssertEqual(Double(pair.0.right), Double(pair.1.right), accuracy: 2.0,
+                "item \(i): the abspos reference glyph's right edge moved from "
+                + "\(pair.1.right) (no marker) to \(pair.0.right) (marker) — the "
+                + "`inside` marker is displacing the item's principal box, but "
+                + "css-lists-3 §3.2 makes it the item's FIRST INLINE BOX, inside "
+                + "that box and unable to move it")
+        }
+    }
+
+    /// The placement truth table — the cheap, raster-free half, and the
+    /// one a future refactor is most likely to widen by accident.
+    func testInsideOverlayPlacementIsChosenPerPositionAndContent() {
+        // The counter-styles shape: `inside`, no in-flow text ⇒ overlay.
+        XCTAssertTrue(ListMarkerRow.rendersInsideOverlay(
+            position: .inside, itemExposesTextBaseline: false))
+        // An item WITH text needs the marker to push it along the line.
+        XCTAssertFalse(ListMarkerRow.rendersInsideOverlay(
+            position: .inside, itemExposesTextBaseline: true))
+        // `outside` belongs in the item's margin area, not at its origin.
+        XCTAssertFalse(ListMarkerRow.rendersInsideOverlay(
+            position: .outside, itemExposesTextBaseline: false))
+        // Unresolvable position ⇒ unchanged behaviour, never a guess.
+        XCTAssertFalse(ListMarkerRow.rendersInsideOverlay(
+            position: nil, itemExposesTextBaseline: false))
     }
 
     // MARK: - The constants themselves

@@ -515,15 +515,29 @@ dirs + WPT corpus are gitignored):
   with device evidence) — filter-effects Android 2→4/11. Five more
   Dependabot PRs merged through the CI gate. Totals: **web 226/257,
   iOS 202/257, Android 194/257**; 327-net clean.
+  Wave 28 (`tools/titan/results/corpus-v5-3.json`) resolved the
+  contain-dir known-divergent passes on the natives (**css-contain
+  7→11/12 on both** — the body-root `::before` box now places per
+  inline-start semantics under rtl), fixed the inside-marker model
+  (css-lists-3 §3.2: the marker is the item's first inline box, not a
+  displacing sibling — plus Compose's alignByBaseline extent bug),
+  landed Compose nested end-inset anchoring (two skeptic-caught
+  regressions fixed pre-gate), and merged the spun-off shadow-offset
+  session's PR (filter-effects Android 4→5/11). Two new sections at
+  first capture: css-pseudo (the active-selection family — wall-or-bake
+  candidate) and css-anchor-position (the anchored-geometry post-load
+  eligibility extension is the queued cheap path). 24 sections, 277
+  scored; zero regressions; 327-net clean. Totals: **web 231/277, iOS
+  212/277, Android 204/277**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 237 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1088 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1731 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1023 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1095 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1771 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1035 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1019 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
