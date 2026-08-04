@@ -2255,6 +2255,23 @@ public struct ComponentRenderer: View {
 
     @ViewBuilder
     private func contentOrPlaceholder(style: ComponentStyle) -> some View {
+        // ── wave-28 lane-PG ROOT-SCOPE generated box (see RootPseudoBox.swift).
+        // This function is the ONE content emitter every container branch
+        // calls, so emitting here puts the box FIRST in the flow — exactly
+        // where web's NodeRenderer puts its ::before span and where Compose's
+        // RenderContent puts its twin. Nil for every component that is not a
+        // body-root carrying a paintable `pseudos` bucket, i.e. for the whole
+        // 327-pair dark stage and for every ordinary element.
+        if let pseudoSpec = RootPseudo.specFor(component: component, role: "before") {
+            RootPseudoBoxView(
+                spec: pseudoSpec,
+                // css-contain-1 §3.1: a contained body does not propagate its
+                // direction to the viewport, so the root-owned box keeps the
+                // root's own `ltr` and sits physically left.
+                pinInlineStart: RootPseudo.containmentBlocksDirectionPropagation(
+                    RootPseudo.containKeywords(of: component))
+            )
+        }
         // ── Wave-20 lane-W2 UA-widget mount hook (the ONLY renderer entry
         // for widget content). WPT capture only: a form-control component
         // (meta.sourceTag + meta.attrs, css-ui-4 §7 appearance ≠ none)
@@ -2507,14 +2524,20 @@ public struct ComponentRenderer: View {
                 // made on an ancestor reaches the item too. ListMarkerText
                 // then owns the full css-counter-styles-3 §6 table.
                 //
-                // DEFERRED — B-RC3 part 3 (full marker geometry). The
-                // resolved `position` is carried on ListMarkerConfig and
-                // pinned by tests, but this HStack still paints the marker
-                // as a plain leading inline box for BOTH values;
-                // css-lists-3 §3.2 wants `outside` hung in the item's
-                // margin area and `inside` as the item's first inline box,
-                // with the UA marker padding instead of the fixed 4pt.
-                // That needs a custom Layout — out of this lane's scope.
+                // Wave 28 (lane MC): the resolved `position` now CHANGES
+                // the placement instead of only being carried. An
+                // `inside` marker on an item with no in-flow text paints
+                // INSIDE the item's box, through an overlay that cannot
+                // move or resize it — css-lists-3 §3.2 makes it the item's
+                // first inline box. Everything else keeps the HStack.
+                //
+                // STILL DEFERRED — the rest of B-RC3 part 3: `outside` is
+                // painted as a leading inline box rather than hung in the
+                // item's margin area, an `inside` marker on an item that
+                // DOES have text still displaces that item's box, and the
+                // gap is the fixed ListMarkerRow.gapPt rather than the
+                // UA's per-counter-style marker padding. Those need a
+                // custom Layout — out of scope here.
                 // (v2 rename: the tag hint lives at meta.sourceTag.)
                 let parentTag = (component.meta?.sourceTag ?? "").lowercased()
                 let isListItem = (child.meta?.sourceTag ?? "").lowercased() == "li"
@@ -2523,6 +2546,18 @@ public struct ComponentRenderer: View {
                 // §3.1 — the item then has NO marker at all, so its content
                 // must start at its own content edge; the pre-wave-24 code
                 // still reserved a Text + 4pt spacing for those rows).
+                //
+                // Wave 28 (lane MC): the config is resolved ONCE, outside
+                // the string closure. It used to be computed inside it and
+                // thrown away — and skipped entirely on the baked path —
+                // so `list-style-position` was unreachable for exactly the
+                // items that carry a baked marker, which is every item in
+                // the counter-styles corpus. `rendersInsideOverlay` needs
+                // it. Nil only when the parent is not a list container.
+                let markerConfig = ListMarkerResolver.resolve(
+                    parentTag: parentTag,
+                    parentProperties: childInherited,
+                    childProperties: child.properties)
                 let markerText: String = {
                     // Wave 27 (lane CBAKE): a BAKED marker wins outright.
                     // `meta.markerText` is the extractor's full
@@ -2530,16 +2565,24 @@ public struct ComponentRenderer: View {
                     // AND the `<ol start>` ordinal, neither of which
                     // ListMarkerResolver can see — so re-deriving it here
                     // could only be worse. Absent ⇒ the local table below.
+                    // (Deliberately NOT gated on `isListItem`: a producer
+                    // may bake a marker onto an untagged child, and wave 27
+                    // honours it. Unchanged.)
                     if let baked = child.meta?.markerText { return baked }
-                    guard isListItem,
-                          let cfg = ListMarkerResolver.resolve(
-                            parentTag: parentTag,
-                            parentProperties: childInherited,
-                            childProperties: child.properties)
-                    else { return "" }
+                    guard isListItem, let cfg = markerConfig else { return "" }
                     return ListMarkerText.marker(index: index, config: cfg)
                 }()
                 let isMarkerRow = !markerText.isEmpty
+                // Wave 28 (lane MC): which of the two placements this
+                // marker takes. See ListMarkerRow.rendersInsideOverlay for
+                // the measured column table and why both gates matter.
+                // Computed ONCE — it drives both the placement choice and,
+                // in the row placement, the cross-axis alignment.
+                let markerExposesBaseline =
+                    ListMarkerRow.itemExposesTextBaseline(child)
+                let markerInsideOverlay = ListMarkerRow.rendersInsideOverlay(
+                    position: markerConfig?.position,
+                    itemExposesTextBaseline: markerExposesBaseline)
                 // Wave 10 — the fragmentation contract (css-break-3 §4):
                 // a multicol container's single in-flow child whose
                 // block-size C exceeds the column block-size H breaks
@@ -2589,34 +2632,16 @@ public struct ComponentRenderer: View {
                         // below documents the modifier-order argument).
                         multicolFragmentRow(child: child, plan: plan)
                     } else if isMarkerRow {
-                        // Wave 27 (lane NMARK, B-RC5 + B-RC6). The
-                        // synthesized marker box must not RESIZE the
-                        // item's principal box on either axis. Both
-                        // wave-26 defects came from this one row; see
-                        // ListMarkerRow for the measured evidence and
-                        // the css-lists-3 §3.2 argument behind each of
-                        // the two constants it names.
-                        HStack(alignment: ListMarkerRow.rowAlignment(
-                                    itemExposesTextBaseline:
-                                        ListMarkerRow.itemExposesTextBaseline(child)),
-                               spacing: ListMarkerRow.gapPt) {
-                            // B-RC5: shrink-to-fit, never compressed by
-                            // whatever inline space the item's declared
-                            // width happens to leave over.
-                            Text(markerText)
-                                .fixedSize(horizontal: true, vertical: true)
-                            if !isCSSFlex, let ca = childAgg, let pa = parentAgg {
-                                // Marker rows keep the legacy decoration;
-                                // the host's placement inside the HStack
-                                // is invisible to the outer Layout (layout
-                                // values don't cross container boundaries)
-                                // — same as the pre-v2 no-spec behaviour.
-                                ComponentHost(component: child)
-                                    .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
-                            } else {
-                                ComponentHost(component: child)
-                            }
-                        }
+                        // Wave 27 (lane NMARK, B-RC5 + B-RC6) + wave 28
+                        // (lane MC). The synthesized marker box must not
+                        // MOVE or RESIZE the item's principal box; the two
+                        // placements and the evidence for each live in
+                        // ListMarkerRow.
+                        markerPlacement(child: child, markerText: markerText,
+                                        insideOverlay: markerInsideOverlay,
+                                        exposesBaseline: markerExposesBaseline,
+                                        isCSSFlex: isCSSFlex,
+                                        childAgg: childAgg, parentAgg: parentAgg)
                     } else if isCSSFlex {
                         // CSSFlexLayout parent — the flex claims ride the
                         // ItemPlacement layout value ComponentHost
@@ -2944,6 +2969,83 @@ public struct ComponentRenderer: View {
                            alignment: .topLeading)
                     // Clip to the column rect — the pass' clip step.
                     .clipped()
+            }
+        }
+    }
+
+    /// The item's principal box as the marker branch renders it, with the
+    /// legacy flexbox decoration a non-`CSSFlexLayout` parent still needs.
+    /// Factored out (wave 28, lane MC) so the two placements below build
+    /// the SAME item view — a second copy would be free to drift.
+    @ViewBuilder
+    private func markerItemView(child: IRComponent, isCSSFlex: Bool,
+                                childAgg: LayoutAggregate?,
+                                parentAgg: LayoutAggregate?) -> some View {
+        if !isCSSFlex, let ca = childAgg, let pa = parentAgg {
+            // Marker rows keep the legacy decoration; the host's placement
+            // inside the row is invisible to the outer Layout (layout
+            // values don't cross container boundaries) — same as the
+            // pre-v2 no-spec behaviour.
+            ComponentHost(component: child)
+                .modifier(FlexboxApplier.childModifier(for: ca, parent: pa))
+        } else {
+            ComponentHost(component: child)
+        }
+    }
+
+    /// One `<li>`'s marker, in whichever of the two placements
+    /// `ListMarkerRow.rendersInsideOverlay` chose. Wave 28, lane MC.
+    ///
+    /// The marker `Text` is identical in both: `.fixedSize()` because the
+    /// ::marker box is inline-level shrink-to-fit content sized by its
+    /// glyphs (css-lists-3 §3.2, B-RC5) — never by whatever inline space
+    /// the item's declared width leaves over.
+    @ViewBuilder
+    private func markerPlacement(child: IRComponent, markerText: String,
+                                 insideOverlay: Bool, exposesBaseline: Bool,
+                                 isCSSFlex: Bool,
+                                 childAgg: LayoutAggregate?,
+                                 parentAgg: LayoutAggregate?) -> some View {
+        if insideOverlay {
+            // `list-style-position: inside` on an item with no in-flow
+            // text: the marker is the item's FIRST INLINE BOX, so it lives
+            // INSIDE the principal box and must not move it. `.overlay`
+            // never participates in its host's sizing, so the item keeps
+            // both its origin — which is what its absolutely positioned
+            // descendants anchor to, css-position-3 §2.1 — and its
+            // declared height (css-sizing-3 §5.1).
+            //
+            // `.topLeading` = the item's border-box origin. KNOWN
+            // APPROXIMATION: §3.2 wants the CONTENT-box origin, so an item
+            // with its own padding/border would offset the marker by that
+            // much; no `<li>` in the counter-styles corpus declares
+            // either, and closing it needs the item's resolved box metrics
+            // here. Twin of the Compose overlay's identical note.
+            //
+            // `.overlay` (above) rather than `.background` (below): in the
+            // browser an inside marker paints above the item's own
+            // background but below its positioned descendants, and we
+            // cannot split those layers — painting above at least keeps an
+            // item with an opaque background from swallowing its marker.
+            markerItemView(child: child, isCSSFlex: isCSSFlex,
+                           childAgg: childAgg, parentAgg: parentAgg)
+                .overlay(alignment: .topLeading) {
+                    Text(markerText)
+                        .fixedSize(horizontal: true, vertical: true)
+                }
+        } else {
+            // `outside`, or an item whose in-flow text the marker must
+            // push along the line: the leading-inline-box row. Its
+            // cross-axis alignment is still chosen per item (B-RC6) —
+            // SwiftUI falls back to a baseline-less view's BOTTOM edge,
+            // which would hang the marker's ascent outside the item.
+            HStack(alignment: ListMarkerRow.rowAlignment(
+                        itemExposesTextBaseline: exposesBaseline),
+                   spacing: ListMarkerRow.gapPt) {
+                Text(markerText)
+                    .fixedSize(horizontal: true, vertical: true)
+                markerItemView(child: child, isCSSFlex: isCSSFlex,
+                               childAgg: childAgg, parentAgg: parentAgg)
             }
         }
     }

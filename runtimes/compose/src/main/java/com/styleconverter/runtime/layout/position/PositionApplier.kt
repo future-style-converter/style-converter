@@ -176,6 +176,14 @@ object PositionApplier {
         // `.bottom` frame alignment plus the identical negated offset), so
         // the two natives share one rule table. Where no slot resolves an
         // extent, the start anchor is kept — EndInsetAnchor's A4.
+        //
+        // Wave 28 (lane NE): there are TWO such slots now. The canvas-hoist
+        // overlay owns ROOT-level boxes; a box with a POSITIONED ANCESTOR is
+        // mounted by [PositionedAncestorAnchor] instead (the wave-8/9
+        // RenderAbsoluteChild path, which anchored every child at the slot
+        // origin and so painted `right:20; bottom:20` at (−20,−20)). Both
+        // slots delegate to the same EndInsetAnchor arithmetic, so this
+        // modifier's half of the composition is unchanged for either.
         val x = config.offsetX
         val y = config.offsetY
 

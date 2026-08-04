@@ -125,6 +125,23 @@ data class PositionConfig(
         get() = isAbsolutelyPositioned && resolvedTop == null && resolvedBottom != null
 
     /**
+     * Wave 28 (lane NE) — does EITHER axis anchor from the containing
+     * block's end edge? The one gate a mounting slot needs to decide
+     * between the start-anchored placement (every frozen baseline) and the
+     * end-anchored mount ([PositionedAncestorAnchor.endAnchoredMeasure]).
+     *
+     * Deliberately an OR, not a per-axis pair: a mixed box (`left: 16;
+     * bottom: 0` — EndInsetAnchorTest's A3 mixed case) needs the anchored
+     * mount for its block axis while its inline axis keeps the slot origin,
+     * and the mount resolves the two axes independently. Both predicates are
+     * already gated on [isAbsolutelyPositioned], so relative / sticky /
+     * static boxes — whose insets are displacements or scroll thresholds,
+     * never containing-block anchors — answer false here too.
+     */
+    val anchorsFromEndAnyAxis: Boolean
+        get() = anchorsFromEndX || anchorsFromEndY
+
+    /**
      * Calculate horizontal offset for positioning.
      * Positive values move right, negative values move left.
      *

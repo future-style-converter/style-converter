@@ -43,6 +43,12 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+// Wave 28 (lane MC): the marker-row geometry decisions — twin of iOS's
+// StyleEngine/lists/ListMarkerRow.swift. `markerBaselineClaim` is a
+// top-level RowScope extension, so it must be imported by name rather
+// than qualified at the call site.
+import com.styleconverter.runtime.lists.ListMarkerRow
+import com.styleconverter.runtime.lists.markerBaselineClaim
 import com.styleconverter.runtime.lists.ListMarkerTextStyle
 import com.styleconverter.runtime.lists.ListStyleExtractor
 import com.styleconverter.runtime.lists.ListStyleApplier as StyleListApplier
@@ -2088,6 +2094,25 @@ object ComponentRenderer {
      */
     @Composable
     private fun RenderContent(component: IRComponent, textColor: Color?, displayConfig: DisplayConfig? = null) {
+        // ── wave-28 lane-PG ROOT-SCOPE generated box (see RootPseudoBox.kt).
+        // This function is the ONE content emitter every layout branch calls,
+        // so emitting here puts the box FIRST in the container's flow —
+        // exactly where web's NodeRenderer puts its ::before span and where
+        // SwiftUI's contentOrPlaceholder puts its twin. Null for every
+        // component that is not a body-root carrying a paintable `pseudos`
+        // bucket, i.e. for the entire 327-pair dark stage and for every
+        // ordinary element's ::before (those still ride ContentApplier).
+        rootPseudoSpecFor(component, "before")?.let { spec ->
+            RootPseudoBox(
+                spec = spec,
+                // css-contain-1 §3.1: a contained body does not propagate its
+                // direction to the viewport, so the root-owned box keeps the
+                // root's own `ltr` and sits physically left.
+                pinInlineStart = containmentBlocksDirectionPropagation(containKeywordsOf(component)),
+            )
+        }
+        // (A root-scope `::after` cannot ride this LEADING emitter; the gap
+        // is reported once by rootPseudoSpecFor, not silently dropped.)
         // ── Wave-20 lane-W2 UA-widget mount hook (the ONLY renderer entry
         // for widget content). WPT capture only: a form-control component
         // (meta.sourceTag + meta.attrs, css-ui-4 §7 appearance ≠ none)
@@ -2436,15 +2461,20 @@ object ComponentRenderer {
      * sets, …) is now reachable from the renderer instead of only
      * `•` / `n.`.
      *
-     * DEFERRED — B-RC3 part 3 (full marker geometry). `list-style-position`
-     * is resolved into the item's ListStyleConfig and pinned by
-     * ListMarkerResolutionTest, but this Row paints it as a leading inline
-     * box for BOTH values. css-lists-3 §3.2 wants `outside` hung in the
-     * item's margin area (marker box outside the principal box, aligned
-     * on the first line's baseline) and `inside` as the first inline box
-     * of the item's content, plus the UA's marker padding rather than the
-     * fixed 4dp below. That rework needs a custom Layout and is out of
-     * this lane's file set.
+     * Wave 28 (lane MC): `list-style-position` now CHANGES the placement
+     * instead of only being resolved and carried. An `inside` marker on an
+     * item with no in-flow text is painted INSIDE the item's box, through
+     * a zero-size overlay that cannot move or resize it — css-lists-3 §3.2
+     * makes it the item's first inline box. Everything else keeps the Row.
+     *
+     * STILL DEFERRED — the rest of B-RC3 part 3. `outside` is still
+     * painted as a leading inline box rather than hung in the item's
+     * margin area (marker box outside the principal box, aligned on the
+     * first line's baseline), an `inside` marker on an item that DOES have
+     * text still displaces that item's box, and the gap is still the fixed
+     * [ListMarkerRow.gapDp] rather than the UA's per-counter-style marker
+     * padding. Those need a custom Layout and the item's resolved box
+     * metrics at this call site.
      */
     @Composable
     private fun RenderListItemMarker(
@@ -2487,9 +2517,67 @@ object ComponentRenderer {
             RenderComponent(child)
             return
         }
+        // Wave 28 (lane MC) — the marker's typography, hoisted so BOTH
+        // placements below paint with one resolution rather than two.
+        val markerStyle = ListMarkerTextStyle.forItem(inheritedTextStyle, textColor)
+        // Does the item's principal box carry a first text baseline at
+        // all? Drives BOTH wave-28 decisions (which placement, and — in
+        // the row — whether a baseline claim is meaningful).
+        val exposesBaseline = ListMarkerRow.itemExposesTextBaseline(child)
+        if (ListMarkerRow.rendersInsideOverlay(
+                listConfig?.listStylePosition, exposesBaseline)) {
+            // Wave 28 (lane MC), defect 1 — `list-style-position: inside`
+            // on an item with no in-flow content. css-lists-3 §3.2 makes
+            // the marker the item's FIRST INLINE BOX: it lives INSIDE the
+            // principal box, so it must not move that box. The Row below
+            // did move it, and the live counter-styles items anchor an
+            // absolutely positioned reference glyph to it
+            // (css-position-3 §2.1), so the whole reference column
+            // inherited the displacement — see ListMarkerRow's header
+            // for the measured columns.
+            //
+            // The Box sizes itself from the item ALONE: the marker's
+            // modifier reports a zero size (ListMarkerRow.insideMarkerOverlay),
+            // which also retires the vertical half of the same defect —
+            // a marker taller than a definite-height item can no longer
+            // stretch it (css-sizing-3 §5.1).
+            //
+            // Marker drawn LAST = on top. In the browser an inside marker
+            // paints above the item's own background (it is the item's
+            // content) but BELOW its positioned descendants; we cannot
+            // split those two layers here, and painting it on top keeps
+            // an item with an opaque background from swallowing its
+            // marker entirely. The remaining deviation needs the marker
+            // and the positioned glyph to physically overlap, which the
+            // css-lists geometry never does.
+            Box {
+                RenderComponent(child)
+                Text(
+                    text = marker,
+                    style = markerStyle,
+                    modifier = ListMarkerRow.insideMarkerOverlay()
+                )
+            }
+            return
+        }
         Row(verticalAlignment = Alignment.Top) {
-            // Marker text: the trailing space mimics the browser's
-            // default marker suffix when list-style-position is outside.
+            // Wave 28 (lane MC) — whether a baseline claim means anything
+            // for THIS item. See repair 2 below.
+            val aligns = ListMarkerRow.alignsByBaseline(exposesBaseline)
+            // Marker text.
+            //
+            // Wave 28 (lane MC) — the trailing space is GONE. It was
+            // described as "the browser's default marker suffix", but the
+            // suffix is already inside the baked `meta.markerText` (and
+            // inside StyleListApplier.getMarker's "n." for the unbaked
+            // table); the space was a SECOND gap stacked on the 4dp
+            // padding, worth ~7dp at the 25px these items inherit, and
+            // the iOS twin never had it. That was a pure Android-vs-iOS
+            // divergence on every marker row. The gap is now the shared
+            // ListMarkerRow.gapDp alone. Safe for the committed captures:
+            // a marker row needs `sourceTag` on both container and item,
+            // and no file outside fixtures/wpt/ carries a tag at all, so
+            // nothing under tools/visual/baseline/ builds one.
             //
             // Wave 27 (lane NMARK, B-RC8) — two repairs, both visible on
             // the wave27-gate arabic-indic capture:
@@ -2512,12 +2600,24 @@ object ComponentRenderer {
             //     and the item's text on different baselines the moment
             //     their line boxes differed in height (which, at 14sp vs
             //     25px, was always). The marker is the item's first
-            //     inline box and shares the line's baseline. Compose
-            //     resolves an ABSENT `FirstBaseline` — the bidi-baked
-            //     items have no in-flow text at all — back to the
-            //     cross-axis origin, i.e. exactly the `Alignment.Top`
-            //     this replaces, so those rows are unchanged. The iOS
-            //     twin spells that same two-case rule out explicitly in
+            //     inline box and shares the line's baseline.
+            //
+            //     WAVE 28 CORRECTION — the claim that followed here, that
+            //     Compose "resolves an ABSENT FirstBaseline back to the
+            //     cross-axis origin, i.e. exactly the Alignment.Top this
+            //     replaces, so those rows are unchanged", is wrong about
+            //     the row's EXTENT. RowColumnImpl reads an unspecified
+            //     alignment line as offset 0, then sizes the row as
+            //     max(baselineOffset) + max(height − baselineOffset) — so
+            //     the marker's whole ascent is added ABOVE a baseline-less
+            //     item instead of overlapping it. Measured on the live
+            //     wave27-final capture: 43px pitch for a `height: 31.25px`
+            //     item, and a first row 8px late, on Android only (iOS had
+            //     already chosen per item). The claim is now MADE TRUE by
+            //     construction — `aligns` is false for exactly the
+            //     baseline-less items, and both children then fall back to
+            //     the Row's `Alignment.Top`. The iOS twin spells the same
+            //     two-case rule out in
             //     StyleEngine/lists/ListMarkerRow.swift, because SwiftUI
             //     falls back to the item's BOTTOM edge instead.
             //
@@ -2537,13 +2637,12 @@ object ComponentRenderer {
             //     LocalContentColor inside Text). Keeping both would have
             //     left two places deciding one colour.
             Text(
-                text = "$marker ",
-                style = ListMarkerTextStyle.forItem(inheritedTextStyle, textColor),
-                modifier = Modifier
-                    .alignByBaseline()
-                    .padding(end = 4.dp)
+                text = marker,
+                style = markerStyle,
+                modifier = markerBaselineClaim(aligns)
+                    .padding(end = ListMarkerRow.gapDp)
             )
-            RenderComponent(child, Modifier.alignByBaseline())
+            RenderComponent(child, markerBaselineClaim(aligns))
         }
     }
 
@@ -2568,10 +2667,49 @@ object ComponentRenderer {
      * the unbounded measure a 69px child of a 50px positioned container
      * silently clamped to 50px (flex-abspos-staticpos-align-self-safe-001/
      * 002 natives 0.86-0.92 while web overflowed correctly).
+     *
+     * Wave 28 (lane NE): the mount is chosen per child. A box whose only
+     * inset on an axis is `right`/`bottom` anchors from the containing
+     * block's END edge (css-position-3 §3.5.3) — the wave-22 rule table the
+     * canvas-hoist slot already applies to ROOT-level boxes, which this
+     * NESTED slot never had: every child was placed at the slot origin, so
+     * the child's own `−right`/`−bottom` offset (PositionConfig.offsetX/Y)
+     * moved it OUTSIDE the parent's top-left corner instead of inward from
+     * its bottom-right (position-right-bottom.json's RB_Px painted at
+     * (−20,−20), not (220,60)). [PositionedAncestorAnchor] is that mount and
+     * subsumes the unbounded measure; every other child — start-anchored,
+     * over-constrained or inset-free — keeps [absposOverflowMeasure]
+     * byte-identically, which is the frozen-baseline guarantee.
      */
     @Composable
     private fun RenderAbsoluteChild(child: IRComponent) {
-        RenderComponent(child, absposOverflowMeasure())
+        // Read the insets through the SAME extractor the child's own style
+        // chain will use, so the mount and the offset can never disagree
+        // about which sides are declared (the rule CanvasRootHoist
+        // .canvasAnchor follows for the root-level slot).
+        // anchorGate, NOT the bare extractor: this call site reads the RAW
+        // wire while the child's own style chain reads the
+        // DynamicValueResolver-resolved one, and the two disagree about a
+        // `calc()`/`var()`/`%` START inset (see anchorGate's kdoc — a raw
+        // `left: calc(10px + 5px)` reads as absent here and as +15dp there,
+        // which would compose anchor and offset from opposite edges).
+        val positionConfig = com.styleconverter.runtime.layout.position.PositionedAncestorAnchor
+            .anchorGate(child.properties.map { it.type to it.data })
+        RenderComponent(
+            child,
+            if (com.styleconverter.runtime.layout.position.PositionedAncestorAnchor
+                    .anchors(positionConfig)
+            ) {
+                // End-anchored mount (A1/A5) — fills + anchors the axes that
+                // declare only right/bottom, wave-8 measure for the rest.
+                com.styleconverter.runtime.layout.position.PositionedAncestorAnchor
+                    .endAnchoredMeasure(positionConfig)
+            } else {
+                // The wave-8 mount, verbatim (A2/A3/A4 and every in-flow-
+                // anchored box).
+                absposOverflowMeasure()
+            },
+        )
     }
 
     /**
