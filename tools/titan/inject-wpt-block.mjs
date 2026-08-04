@@ -862,14 +862,104 @@ const SCORE_EXCLUDED_TAGS = new Set(['requires-bundled-asset']);
  *  lesson: excluding on any tag gutted the denominator 82 → ~14).
  *  'requires-script-driven-scroll' (Rule 18) is included because it is a
  *  strict subset of the same wall — post-script scroll offsets baked into
- *  the ref are unreachable for the identical no-script-execution reason. */
+ *  the ref are unreachable for the identical no-script-execution reason.
+ *
+ *  wave-29 ANCHOR extension — the wall is not only about SCRIPTS. The two
+ *  original members share a mechanism (post-load script execution), but the
+ *  DEFINING property of this set is narrower and mechanism-free: the
+ *  pipeline cannot deliver the input the ref was rendered from, so the
+ *  resulting diff measures the harness, not the runtimes.
+ *  `requires-anchor-positioning-runtime` (wpt-not-applicable.mjs Rule 40)
+ *  meets that bar for a NON-script reason: CSS Anchor Positioning L1 makes
+ *  the anchored box's used position a function of ANOTHER element's border
+ *  box, resolved at layout time. None of the three runtimes implements it,
+ *  and the per-component card surface additionally severs the .anchor /
+ *  .anchored DOM relationship the resolution needs — so the fixture that
+ *  reaches the runtimes provably lacks the geometry the ref encodes.
+ *  Measured (wave28-final css-anchor-position, 12 tests): 8 of the 9 scored
+ *  tests failed, web/ios/android-ref SSIM spanning 0.536–0.987 (the bulk of
+ *  the anchor-center-overflow family sits at 0.54–0.74). On 7 of those 8 the
+ *  three platforms agree to within 0.03 of each other — the signature of a
+ *  shared MISSING INPUT, not three independent renderer bugs (three
+ *  unrelated renderers do not agree to that precision on a divergence they
+ *  each invented). The exception is anchor-center-overflow-005 (web 0.842 vs
+ *  ios 0.612 / android 0.610): there the shared missing input is compounded
+ *  by a real web-vs-native divergence, so it is NOT evidence for this wall —
+ *  it is recorded here so the argument is not read as stronger than the
+ *  data. Numbers re-derived from
+ *  tools/titan/runs/wave28-final/sections/css-anchor-position/manifest.json.
+ *
+ *  Re-admission is the SAME post-load stamp, and it is not a formality:
+ *  post-load-extract.mjs's 34-property bake snapshots `top/right/bottom/
+ *  left` as CSSOM RESOLVED values, which for an out-of-flow box are the
+ *  USED insets — i.e. the anchored position AFTER Chromium resolved
+ *  position-anchor / position-area / anchor-center, so a baked anchor
+ *  fixture is scored again and its divergence measures the runtimes.
+ *  That premise holds only SOMETIMES, and the bake does not assume it:
+ *  post-load-extract.mjs's anchorInsetMismatch() re-measures resolved-vs-
+ *  painted per anchored box and bails (`anchor-inset-undeliverable`) when
+ *  Chromium kept the alignment shift out of the serialized inset. MEASURED
+ *  end-to-end over this section: 3 of 12 bake (anchor-center-002,
+ *  -no-default, -safe), 6 bail anchor-inset-undeliverable, 3 bail on scroll.
+ *  Corpus-wide the same run over every bucket-A/B test this tag newly gates
+ *  (87 of them, all previously scored): 78 bake and stay scored, 9 become
+ *  score-excluded. The three anchor-center-scroll-* tests stay excluded:
+ *  they carry requires-script-driven-scroll too, and the bake's
+ *  NO-SCROLL-OFFSETS scope boundary bails on them (no scroll model in IR).
+ *
+ *  This is why the tag joins the set rather than SCORE_EXCLUDED_TAGS:
+ *  score-exclusion alone would hide the failures without ever offering a
+ *  route back, and the wall set is the only family post-load-extract.mjs
+ *  activates on (its hasWallTag() imports THIS constant). */
 const EXTRACTION_WALL_TAGS = new Set([
-  'requires-script-mutation',      // Rule 4  — post-load DOM / top-layer mutation
-  'requires-script-driven-scroll', // Rule 18 — post-load scroll-offset mutation
+  'requires-script-mutation',            // Rule 4  — post-load DOM / top-layer mutation
+  'requires-script-driven-scroll',       // Rule 18 — post-load scroll-offset mutation
+  'requires-anchor-positioning-runtime', // Rule 40 — anchored geometry (wave-29)
 ]);
 // Exported for unit pins (inject-wpt-block.test.mjs asserts the exact tag
 // set so a silent widening/narrowing of the wall cannot land unreviewed).
 export { EXTRACTION_WALL_TAGS };
+
+/** wave-29 S-RC3 REF-UNACHIEVABLE tags — the honest-scoring boundary's THIRD
+ *  and last exclusion family, and the only one that is not about us.
+ *
+ *  The other two families both say "our pipeline could not deliver the input"
+ *  — SCORE_EXCLUDED_TAGS for assets, EXTRACTION_WALL_TAGS for post-load state
+ *  — and both therefore have (or could have) a delivery record that re-admits
+ *  the test. This family says something categorically different: the
+ *  COMMITTED REF IS NOT A REACHABLE TARGET. The ref PNG was rasterised by
+ *  headless Chromium from the reftest's `*-ref.html`; when that same Chromium
+ *  renders the TEST page it does not reproduce its own ref, so the SSIM
+ *  ceiling for ANY Chrome-faithful renderer sits below the 0.95 gate. Scoring
+ *  a runtime against it measures a browser bug.
+ *
+ *  MEASURED (wave-29, the sole member's four tests, headless Chromium 151
+ *  under capture-browser-ref.mjs's exact canvas contract, diffed with
+ *  diffWebVsRef against refs/<sha>/white-black-ink-font-lh-imgpad/css-pseudo):
+ *  active-selection-051/052/053/054 all score 0.9394 — Chromium vs its own
+ *  ref. Same-family controls active-selection-056 (1.0000) and -057 (0.9543)
+ *  clear the gate and are deliberately NOT tagged (the Rule 42 detector
+ *  declines on both). Full mechanism — `color: transparent` plus a
+ *  `::selection` block with no valid `color`, where the pass condition is the
+ *  OS-default highlight FOREGROUND that Chromium declines to apply — is
+ *  documented at wpt-not-applicable.mjs Rule 42.
+ *
+ *  UNCONDITIONAL, with NO re-admission route, and that asymmetry is the
+ *  point:
+ *    - lossyReasons cannot corroborate it (the extractor's delivery record
+ *      describes OUR inputs; the defect is in the target);
+ *    - the post-load / structure stamps cannot re-admit it (running the
+ *      test's scripts in Chromium reproduces precisely the render that
+ *      diverges — that IS the measurement above);
+ *    - so the branch below is checked BEFORE both and ignores every stamp.
+ *  If a future WPT re-pin lands a corrected ref, the fix is to re-render the
+ *  refs and DELETE this tag, not to weaken the gate. */
+const REF_UNACHIEVABLE_TAGS = new Set([
+  'browser-ref-divergent', // Rule 42 — OS-default highlight foreground (wave-29)
+]);
+// Exported for unit pins, same discipline as EXTRACTION_WALL_TAGS: the exact
+// membership of an exclusion family must never widen unreviewed.
+export { REF_UNACHIEVABLE_TAGS };
 
 /** wave-8 corpus-honesty gate (pure — exported for unit tests): when a test
  *  carries ≥1 HARNESS-DELIVERY tag (SCORE_EXCLUDED_TAGS — not every
@@ -934,6 +1024,14 @@ export { EXTRACTION_WALL_TAGS };
  *  bundled-asset branch: asset delivery has its own ground truth
  *  (lossyReasons) and post-load says nothing about assets.
  *
+ *  wave-29 S-RC3 REF-UNACHIEVABLE extension: tags in REF_UNACHIEVABLE_TAGS
+ *  exclude UNCONDITIONALLY and are checked BEFORE both other branches —
+ *  neither lossyReasons nor the post-load/structure stamps are consulted,
+ *  because the defect is in the committed REF, not in anything this pipeline
+ *  delivers (see that constant's comment for the measurement). This is the
+ *  one exclusion family with no route back: a corrected ref, not a stamp, is
+ *  what retires it.
+ *
  *  @param {string[]|undefined} naTags  notApplicable tags for the test
  *  @param {Array<object|null>} refDiffs diffs to neutralise (mutated in place)
  *  @param {string[]|undefined} [lossyReasons] extractor lossy reasons for the
@@ -957,6 +1055,13 @@ export function applyNaScoreGate(naTags, refDiffs, lossyReasons, postLoadExtract
   // depend on that coupling).
   const delivered = postLoadExtracted === true || structureExtracted === true;
   const isNa = Array.isArray(naTags) && naTags.some((t) => {
+    // wave-29 S-RC3 ref-unachievable branch, checked FIRST and returning
+    // unconditionally: the committed ref is not a target any Chrome-faithful
+    // renderer can hit, so neither the extractor's delivery record nor the
+    // post-load/structure stamps are relevant evidence (full rationale at
+    // REF_UNACHIEVABLE_TAGS above). Deliberately ABOVE the wall branch so a
+    // test carrying both families can never be re-admitted by `delivered`.
+    if (REF_UNACHIEVABLE_TAGS.has(t)) return true;
     // wave-15 extraction-wall branch: script-execution tags exclude
     // UNCONDITIONALLY — no lossyReasons cross-check is possible because the
     // extractor never runs scripts and so has no delivery record to consult

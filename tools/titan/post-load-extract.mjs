@@ -22,8 +22,13 @@
 //   3. computed values OVERRIDE the statically-parsed properties per
 //      element (computed px are absolute, so they land as plain px
 //      declarations the converter already handles); static-only content
-//      (`_text`, `_pseudo`, the synthetic `__body`/`__text` components)
-//      keeps the static path;
+//      (`_text`, the synthetic `__body`/`__text` components) keeps the
+//      static path. wave-29 S-RC5: `_pseudo` left that list — a pseudo bag
+//      is a SELECTOR-MATCH RESULT over the element's attributes, and a
+//      class-only mutation (the commonest WPT dynamic-reftest shape) changes
+//      it without changing structure, so the bags are re-derived from the
+//      settled DOM through the same serialize → re-extract round-trip the
+//      structure path uses (see the S-RC5 banner);
 //   4. the fixture is stamped `_wpt.postLoadExtracted: true`; the
 //      wpt-buckets.json `requires-script-mutation` tag stays untouched for
 //      provenance, and inject-wpt-block's applyNaScoreGate re-scores the
@@ -67,6 +72,17 @@
 //   - NO SCROLL OFFSETS. The IR has no scroll-position model; if any
 //     element (or the document) sits at a non-zero scroll offset after
 //     settle, the visual state depends on it and we bail.
+//   - NO PRE-ALIGNMENT ANCHOR INSETS (wave 29). The bake's premise is that
+//     an out-of-flow box's CSSOM resolved inset IS its used inset. For
+//     ANCHOR-ALIGNED boxes that premise fails: Chromium applies the
+//     anchor-center alignment shift during layout and never folds it back
+//     into the serialized value, so `left` can resolve "6px" on a box that
+//     paints 24px in. anchorInsetMismatch measures resolved-vs-painted per
+//     anchored box and bails (`anchor-inset-undeliverable`) rather than
+//     stamping a fixture "delivered" with the box in the wrong place —
+//     the test keeps its wall exclusion, which is the honest outcome.
+//     Scoped to anchor-flavoured alignment so no pre-wave-29 population
+//     changes behaviour.
 //
 // ACTIVATION (opt-in): extract-fixture.mjs's CLI invokes this module only
 // when POST_LOAD_EXTRACT=1 (or --post-load) is set AND the test carries an
@@ -460,12 +476,56 @@ function inPageWalker(params) {
       // Rect cross-check: rounded to 2 dp so the stability comparison isn't
       // defeated by float formatting while still catching any real movement.
       const r = el.getBoundingClientRect();
+      // wave-29 ANCHOR delivery probe. The whole bake rests on "for an
+      // out-of-flow box, the CSSOM resolved inset IS the used inset". That
+      // premise is FALSE for anchor-aligned boxes: MEASURED in the pinned
+      // headless Chromium on css-anchor-position/anchor-center-overflow-001,
+      // an `.anchored { inset: 6px; place-self: anchor-center }` box reports
+      // resolved left "6px" while it PAINTS at 24px from its containing
+      // block's padding edge — the anchor-center alignment shift is applied
+      // during layout and never folded back into the serialized value. Baking
+      // the resolved string would position the box 18px wrong and then stamp
+      // the fixture "delivered". So measure the discrepancy here, where
+      // offsetParent is reachable, and let the caller bail on it.
+      //
+      // Scoped to anchor-flavoured alignment ONLY (not every out-of-flow
+      // box): `margin:auto` centering and plain `align-self:center` on
+      // abspos produce the same kind of delta, and those populations have
+      // been delivering since wave-16 — widening this probe to them would
+      // retro-bail shipped work on an untested premise.
+      let anchorInsetDelta = null;
+      const oof = cs.position === 'absolute' || cs.position === 'fixed';
+      const anchorAligned = /anchor/i.test(cs.alignSelf) || /anchor/i.test(cs.justifySelf);
+      if (oof && anchorAligned && cs.top !== 'auto' && cs.left !== 'auto') {
+        // Containing block padding edge — what top/left are measured from.
+        // offsetParent is null for fixed-position boxes (and for boxes in a
+        // display:none subtree), whose CB is the initial containing block:
+        // its padding edge is the viewport origin, so 0/0 is correct.
+        const op = el.offsetParent;
+        let cbTop = 0, cbLeft = 0;
+        if (op) {
+          const orr = op.getBoundingClientRect();
+          const ocs = getComputedStyle(op);
+          cbTop  = orr.top  + parseFloat(ocs.borderTopWidth);
+          cbLeft = orr.left + parseFloat(ocs.borderLeftWidth);
+        }
+        // The rect is the BORDER box; `top`/`left` position the MARGIN box.
+        const paintedTop  = r.top  - cbTop  - parseFloat(cs.marginTop);
+        const paintedLeft = r.left - cbLeft - parseFloat(cs.marginLeft);
+        anchorInsetDelta = [
+          +(parseFloat(cs.top)  - paintedTop).toFixed(2),
+          +(parseFloat(cs.left) - paintedLeft).toFixed(2),
+        ];
+      }
       records.push({
         path, tag, styles,
         rect: { x: +r.x.toFixed(2), y: +r.y.toFixed(2),
                 width: +r.width.toFixed(2), height: +r.height.toFixed(2) },
         // Scroll guard inputs — the IR has no scroll-offset model.
         scrollTop: el.scrollTop, scrollLeft: el.scrollLeft,
+        // null on every non-anchor-aligned element (the whole pre-wave-29
+        // corpus), so the settle-stability JSON comparison is unaffected.
+        anchorInsetDelta,
       });
       // Filter 3: bounded recursion, same cap as the static walk.
       if (depth + 1 < maxDepth) walk(el, path, depth + 1);
@@ -490,6 +550,49 @@ function inPageWalker(params) {
  *  so serialization is deterministic. */
 export function snapshotsStable(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/** wave-29 ANCHOR delivery cross-check (pure — exported for unit pins).
+ *
+ *  Reads the per-record `anchorInsetDelta` the walker measured (see its
+ *  comment for the measurement and why it is scoped to anchor-aligned
+ *  out-of-flow boxes) and answers ONE question: would baking the resolved
+ *  insets put every anchored box where the browser actually paints it?
+ *
+ *  This is the honesty valve for the wave-29 wall extension. Admitting
+ *  `requires-anchor-positioning-runtime` to EXTRACTION_WALL_TAGS makes the
+ *  anchor population post-load ELIGIBLE, and a successful bake stamps
+ *  `postLoadExtracted` — which re-admits the test to scoring on the claim
+ *  that the input was delivered. Without this guard that claim would be
+ *  false for the anchor-center-overflow family (MEASURED on 001 and 004: 36
+ *  of the 96 anchored boxes in the raw DOM — 36 of the 48 that survive the
+ *  walker's depth cap to become components — off by up to 50px) and the
+ *  re-admitted tests would be scored as
+ *  renderer failures for geometry the harness got wrong. Bailing keeps the
+ *  wall exclusion, which is the honest outcome: not delivered, not scored.
+ *
+ *  Tolerance is half a device pixel — the same sub-pixel bar the rest of
+ *  the pipeline uses; the walker already rounded to 2 dp.
+ *
+ *  @param {Array<object>} records walker records
+ *  @param {number} [tol] max |resolved − painted| px before it is a mismatch
+ *  @returns {string|null} null when deliverable, else a diagnostic string */
+export function anchorInsetMismatch(records, tol = 0.5) {
+  let probed = 0, bad = 0, worst = 0, worstPath = null;
+  for (const r of records ?? []) {
+    // null ⇒ not an anchor-aligned out-of-flow box; nothing to verify.
+    if (!Array.isArray(r.anchorInsetDelta)) continue;
+    probed++;
+    // Worst axis decides — a box wrong on either axis is wrong.
+    const d = Math.max(Math.abs(r.anchorInsetDelta[0]), Math.abs(r.anchorInsetDelta[1]));
+    if (d > tol) bad++;
+    if (d > worst) { worst = d; worstPath = (r.path ?? []).join('.'); }
+  }
+  // No anchored boxes probed, or every one lands where it resolves ⇒ the
+  // resolved insets ARE the used/anchored offsets and the bake delivers.
+  if (bad === 0) return null;
+  return `${bad}/${probed} anchor-aligned boxes: resolved inset != painted offset ` +
+         `(worst ${worst.toFixed(2)}px at path ${worstPath})`;
 }
 
 /** Element-mapping cross-check: the browser walk must agree with the static
@@ -693,12 +796,237 @@ async function structureExtractFromLivePage(page, fixture, testRel, testAbs, ste
   //    overlay onto wrong components.
   const remap = mappingMismatch(newPaths, snap3.records);
   if (remap) return { status: 'bailed', reason: `structure-remap-mismatch (${remap})` };
+  // 4b. wave-29 anchor guard, applied to the RE-WALKED records too: the
+  //     structure path bakes snap3, so it owes the same "the insets we bake
+  //     are the anchored offsets" promise the overlay path makes. A test can
+  //     reach here carrying both wall tags (script mutation AND anchor
+  //     positioning), and stamping it delivered on pre-alignment insets
+  //     would be the same dishonesty by a different route.
+  const anchorGap3 = anchorInsetMismatch(snap3.records);
+  if (anchorGap3) {
+    return { status: 'bailed', reason: `anchor-inset-undeliverable (${anchorGap3})` };
+  }
   // 5. Adopt the post-script tree, then bake the post-script state onto it —
   //    both structure AND state are now from the same settled live page.
   adoptReExtractedFixture(fixture, reResult.fixture);
   const overlaid = mergePostLoadIntoFixture(fixture, stem, snap3.records);
   return { status: 'extracted', structure: true, overlaid,
            elements: newPaths.length, records: snap3.records };
+}
+
+// ── wave-29 S-RC5: the POST-LOAD PSEUDO BAG ─────────────────────────────────
+//
+// THE HOLE. overlayComputedOnComponent's contract says `_text`, `_pseudo`,
+// `_tag`, `_attrs`, `children` "keep the static path" — sound for the first
+// four (they are structural identity or authored text, which a style mutation
+// does not touch) but WRONG for `_pseudo`. A pseudo bag is not structure: it
+// is the SELECTOR-MATCH RESULT of the `::before`/`::after`/`::marker` rules
+// against the element's attributes, and the single most common thing a WPT
+// dynamic reftest mutates is exactly those attributes.
+//
+// MEASURED (css-pseudo/before-dynamic-display-none, the VETO that opened
+// this): the stylesheet is
+//     #id::before      { content:"FAIL"; position:absolute; …; background:red }
+//     #id.none::before { display: none }
+// and the script is `id.offsetTop; id.className = "none"`. The mutation is
+// PURELY a class change, so the element walk is structurally identical, the
+// state bake takes the (cheap) overlay path, and no structure re-extraction
+// ever runs. The overlay then rewrites `properties` from getComputedStyle
+// while `_pseudo.before` keeps its STATIC value — the pre-mutation bag with
+// `content: "FAIL"`, a 100x100 red absolute box. The fixture was stamped
+// `postLoadExtracted: true` and re-admitted to scoring while still painting
+// the exact FAIL box the test exists to prove is gone.
+//
+// THE FIX, and why it is this one. The class list only decides which rules
+// match, so the honest re-derivation is to re-run the SELECTOR MATCH against
+// the post-mutation DOM — and the pipeline already owns a component that does
+// precisely that: the static extractor. The structure path (wave-20) proved
+// the serialize → `extractFixture(htmlOverride)` round-trip, so the cheapest
+// correct implementation reuses BOTH halves of it — the same inPageSerializer
+// (so a pseudo re-derivation and a structure re-extraction can never disagree
+// about what "the post-load DOM" is) and the same static builder (so the bag
+// SHAPE — merge order, sibling-index bake, attr() bake, animation sampling,
+// per-pseudo lossy markers — cannot drift from a second implementation).
+// Re-implementing pseudo matching against a scraped class list would have
+// forked all of that.
+//
+// SCOPE, three guards, in cost order:
+//   1. Only post-load-extracted tests reach here at all (this module's own
+//      activation gate). The pure static path never calls it.
+//   2. `hasPseudoElementRules` — no `::before`/`::after`/`::marker` rule in
+//      the source means no bag can exist on either side of the mutation, so
+//      the extra page.evaluate + re-extraction are skipped entirely. This is
+//      what keeps the cost off the ~99% of wall-tagged tests with no
+//      generated content.
+//   3. `pseudoRemapMismatch` — the two component ID SPACES must be identical
+//      before anything is copied. They are by construction (mappingMismatch
+//      already passed, so live structure == static structure == serialized
+//      structure), so a mismatch means a regex-parser blind spot on exotic
+//      serialized markup; it BAILS the whole post-load rather than copying
+//      onto the wrong components. A bail leaves the fixture byte-identical,
+//      the wall exclusion stands, and the test is honestly not scored.
+//
+// The structure path needs none of this: adoptReExtractedFixture already
+// replaces the WHOLE component tree with the re-extracted one, so its pseudo
+// bags are post-load by construction.
+
+/** Does the source declare any pseudo-element rule the extractor can build a
+ *  bag from? Matches the three names buildComponents supports (extract-fixture
+ *  selectorMatchesPseudoElement: before / after / marker), in either the CSS3
+ *  `::` or the CSS2 legacy `:` spelling. Comments are stripped first so a
+ *  commented-out rule cannot cost a browser round-trip. Deliberately scans the
+ *  WHOLE source, not just <style> blocks, so an inline `style=` attribute or
+ *  an odd `<style>`-less spelling still arms it — this gate must err toward
+ *  RUNNING (a false "no rules" silently restores the stale-bag bug).
+ *
+ *  SCOPE (skeptic-29 correction): the string it is handed is the only thing
+ *  it can see. `<link rel=stylesheet>` sheets are NOT resolved here — the
+ *  caller must append their text (linkedCssTextFor below) before asking.
+ *  The original wave-29 comment claimed the re-extraction resolved them
+ *  anyway; it does (extractFixture assembles inline + linked CSS), but this
+ *  gate SHORT-CIRCUITS BEFORE that re-extraction ever runs, so a test whose
+ *  only ::before rule lives in a linked sheet would have skipped the repair
+ *  entirely. Measured corpus reach of that hole: 1 wall-tagged test
+ *  (css-tables/tentative/table-height-redistribution, bucket B), so the fix
+ *  is cheap insurance rather than a live regression. Exported for pins. */
+export function hasPseudoElementRules(html) {
+  return /::?(?:before|after|marker)\b/i.test(stripComments(String(html ?? '')));
+}
+
+/** Resolve a test's `<link rel=stylesheet>` hrefs to raw CSS text, mirroring
+ *  extractFixture's own linked-stylesheet loop exactly (http(s) skipped
+ *  because the bucketer already filtered remote deps; a missing file is
+ *  tolerated, not fatal — some WPT tests link optional resources). Used ONLY
+ *  to feed hasPseudoElementRules, so an unreadable sheet degrades to the
+ *  pre-existing inline-only behaviour rather than failing the extraction.
+ *  Exported for pins. */
+export async function linkedCssTextFor(html, testAbs) {
+  let out = '';
+  for (const href of extractLinkedStylesheets(stripComments(String(html ?? '')))) {
+    if (/^https?:\/\//i.test(href)) continue;         // remote — bucketer filtered
+    const cssAbs = href.startsWith('/')
+      ? join(WPT_DIR, href.slice(1))                  // corpus-absolute href
+      : resolve(dirname(testAbs), href);              // test-relative href
+    try { out += '\n' + await fs.readFile(cssAbs, 'utf8'); } catch { /* tolerated */ }
+  }
+  return out;
+}
+
+/** Flatten a fixture's component tree to `Map<id, cmp>`, descending the
+ *  `children` maps. Used to compare two trees by ID SPACE and to copy the
+ *  pseudo bags across. Exported for pins. */
+export function flattenComponents(fixture) {
+  const out = new Map();
+  const visit = (map) => {
+    for (const [id, cmp] of Object.entries(map ?? {})) {
+      out.set(id, cmp);
+      if (cmp && typeof cmp === 'object' && cmp.children) visit(cmp.children);
+    }
+  };
+  visit(fixture?.components);
+  return out;
+}
+
+/** Cross-check: do the ORIGINAL and RE-EXTRACTED trees address the same
+ *  components? Returns a human-readable mismatch description, or null when
+ *  the ID spaces are identical. Same defensive role mappingMismatch plays for
+ *  the state bake — pseudo bags are keyed by component, so a divergent ID
+ *  space means a copy would land generated content on the wrong box. */
+export function pseudoRemapMismatch(originalIds, reIds) {
+  if (originalIds.length !== reIds.length) {
+    return `component count: static ${originalIds.length} vs post-load ${reIds.length}`;
+  }
+  // Both trees are produced by the same builder walking in document order,
+  // so a positional compare is the strictest (and cheapest) identity check.
+  for (let i = 0; i < originalIds.length; i++) {
+    if (originalIds[i] !== reIds[i]) {
+      return `id[${i}]: static ${originalIds[i]} vs post-load ${reIds[i]}`;
+    }
+  }
+  return null;
+}
+
+/** Copy every re-derived `_pseudo` bag onto the original components, keyed by
+ *  component id. SET and DELETE are both load-bearing: a mutation that ADDS a
+ *  matching rule must add the bag, and — the before-dynamic-display-none
+ *  shape — a mutation that changes which rules match must replace it. Nothing
+ *  else on the component is touched: `properties` belongs to the computed
+ *  overlay that runs next, and `_text`/`_tag`/`_attrs`/`children` really are
+ *  structural identity the mutation did not change (mappingMismatch proved
+ *  it). Returns the number of components whose bag actually changed, for the
+ *  CLI log line. Exported for pins. */
+export function applyPostLoadPseudoBags(original, reExtracted) {
+  let changed = 0;
+  for (const [id, cmp] of original) {
+    const reCmp = reExtracted.get(id);
+    const next = reCmp?._pseudo;
+    const prev = cmp._pseudo;
+    // Compare serialized form: the bags are plain JSON built by the same
+    // builder in the same key order, so this is an exact value compare and
+    // an unchanged bag leaves the object graph untouched.
+    if (JSON.stringify(prev ?? null) === JSON.stringify(next ?? null)) continue;
+    if (next === undefined) delete cmp._pseudo; else cmp._pseudo = next;
+    changed++;
+  }
+  return changed;
+}
+
+/** Union the re-extracted fixture's lossy record into the original's.
+ *  Direction is deliberate — reasons are ADDED, never subtracted. A reason
+ *  that belonged to a pseudo bag the mutation removed cannot be attributed
+ *  back (the static record is a flat set with no per-bag provenance), and
+ *  over-reporting lossiness is the safe error: applyNaScoreGate consults
+ *  lossyReasons only to CONFIRM a `requires-bundled-asset` exclusion, so an
+ *  extra reason can never promote a test into the scored set, while a missing
+ *  one could hide a real delivery gap. */
+export function unionLossyRecord(fixture, reFixture) {
+  const merged = new Set([
+    ...(fixture._wpt?.lossyReasons ?? []),
+    ...(reFixture._wpt?.lossyReasons ?? []),
+  ]);
+  fixture._wpt.lossyReasons = [...merged];
+  fixture._wpt.lossy = fixture._wpt.lossy === true || reFixture._wpt?.lossy === true;
+}
+
+/**
+ * Re-derive the `_pseudo` bags from the settled post-load DOM, for the
+ * OVERLAY (non-structure) path. Returns `{ status: 'ok', changed }` or
+ * `{ status: 'bailed', reason }`; on 'ok' the fixture's pseudo bags (and its
+ * lossy record) have been updated in place, on 'bailed' it is untouched.
+ * See the section banner for the full rationale and scope guards.
+ */
+async function rePseudoFromLivePage(page, fixture, testRel, html, testAbs) {
+  // Guard 2 — nothing to re-derive without a pseudo-element rule anywhere.
+  // skeptic-29: the gate must see the SAME sheets the fixture's bags were
+  // built from, so linked stylesheets are appended before asking. The read
+  // only happens when the inline source alone did not already arm the gate,
+  // so the common case still costs zero IO.
+  if (!hasPseudoElementRules(html)
+      && !hasPseudoElementRules(await linkedCssTextFor(html, testAbs))) {
+    return { status: 'ok', changed: 0, skipped: true };
+  }
+  // Serialize the settled DOM with the SAME serializer the structure path
+  // uses (canvas frame + scripts stripped, foreign namespaces marked), then
+  // the same void-closer normalization for the regex-based static parser.
+  const { headInner, bodyOuter } = await page.evaluate(inPageSerializer, {
+    canvasStyleId: CANVAS_FRAME_STYLE_ID,
+    foreignNsMarker: FOREIGN_NS_MARKER_ATTR,
+  });
+  const syntheticHtml = buildSyntheticHtml(headInner, stripForeignVoidClosers(bodyOuter));
+  // Re-run the FULL static extraction on the post-load document. Only its
+  // `_pseudo` bags are consumed — `properties` are about to be overwritten by
+  // the computed overlay, which is strictly better state than any re-parse.
+  const reResult = await extractFixture(testRel, { htmlOverride: syntheticHtml });
+  // Guard 3 — identical ID spaces, checked BEFORE any mutation.
+  const original = flattenComponents(fixture);
+  const reMap = flattenComponents(reResult.fixture);
+  const remap = pseudoRemapMismatch([...original.keys()], [...reMap.keys()]);
+  if (remap) return { status: 'bailed', reason: `pseudo-remap-mismatch (${remap})` };
+  const changed = applyPostLoadPseudoBags(original, reMap);
+  // Only touch the lossy record when a bag actually moved — a no-op
+  // re-derivation must leave the fixture byte-identical.
+  if (changed > 0) unionLossyRecord(fixture, reResult.fixture);
+  return { status: 'ok', changed };
 }
 
 // ── Merge: computed overlay onto the static fixture ──────────────────────────
@@ -735,10 +1063,15 @@ export function componentAtPath(fixture, stem, path) {
  *     expresses those sizes in the element's OWN basis (border-box elements
  *     report border-box px — the block-axis-constraint parents are exactly
  *     this shape); a mismatched basis would re-interpret the baked number;
- *   - `_text`, `_pseudo`, `_tag`, `_attrs`, `children` are untouched —
- *     static-only content keeps the static path (wave-20 W1: `_attrs`
- *     joins the list — widget identity is structural, not computed state,
- *     and the overlay only ever writes into `properties`).
+ *   - `_text`, `_pseudo`, `_tag`, `_attrs`, `children` are untouched HERE —
+ *     this function only ever writes into `properties` (wave-20 W1: `_attrs`
+ *     joined the list — widget identity is structural, not computed state).
+ *     wave-29 S-RC5 note: `_pseudo` is still untouched by THIS function, but
+ *     it is no longer "static-only content" — rePseudoFromLivePage re-derives
+ *     the bags from the settled DOM before the overlay runs. The division of
+ *     labour is deliberate: computed style is a per-PROPERTY overlay, a
+ *     pseudo bag is a whole selector-match result that only the static
+ *     builder can rebuild.
  */
 export function overlayComputedOnComponent(cmp, styles, opts = {}) {
   const props = cmp.properties ?? (cmp.properties = {});
@@ -945,6 +1278,15 @@ export async function postLoadAugmentFixture(fixture, testRel) {
         snap2.records.some((r) => r.scrollTop !== 0 || r.scrollLeft !== 0)) {
       return { status: 'bailed', reason: 'scroll-offset-undeliverable' };
     }
+    // wave-29 anchor guard: the resolved insets we are about to bake must
+    // BE the anchored offsets. Checked before the mapping cross-check
+    // because it is cheaper and its bail is more diagnostic — a fixture that
+    // maps perfectly but carries pre-alignment insets is the worse failure
+    // (it would be stamped delivered and re-scored). See anchorInsetMismatch.
+    const anchorGap = anchorInsetMismatch(snap2.records);
+    if (anchorGap) {
+      return { status: 'bailed', reason: `anchor-inset-undeliverable (${anchorGap})` };
+    }
     // Element-mapping cross-check: static walk vs live walk.
     const mismatch = mappingMismatch(staticPaths, snap2.records);
     if (mismatch) {
@@ -966,12 +1308,28 @@ export async function postLoadAugmentFixture(fixture, testRel) {
       }
       return { status: 'bailed', reason: `element-mapping-mismatch (${mismatch})` };
     }
+    // wave-29 S-RC5: re-derive the `_pseudo` bags from the settled DOM
+    // BEFORE the overlay + stamp. Order matters twice over: (a) its bail
+    // must leave the fixture byte-identical, which is only true while
+    // mergePostLoadIntoFixture has not yet written the computed state or the
+    // delivery stamp; (b) it is the last cross-check, so a fixture that
+    // reaches the stamp has passed every "the thing we are about to call
+    // delivered really is post-load" test — including generated content
+    // (see the S-RC5 banner: a class-only mutation keeps the cheap overlay
+    // path, so this is the ONLY place that repair can happen).
+    const pseudo = await rePseudoFromLivePage(page, fixture, testRel, html, testAbs);
+    if (pseudo.status === 'bailed') {
+      return { status: 'bailed', reason: pseudo.reason };
+    }
     // Delivered — overlay + stamp. wave-21 collision fix: componentAtPath
     // reconstructs ids as `<stem>__N…`, so the stem must be the SAME
     // subdir-encoded fixtureStem() the fixture's ids were built from.
     const stem = fixtureStem(testRel);
     const overlaid = mergePostLoadIntoFixture(fixture, stem, snap2.records);
-    return { status: 'extracted', overlaid, records: snap2.records };
+    return { status: 'extracted', overlaid, records: snap2.records,
+             // Surfaced in the CLI/extract-fixture log line so a bag repair
+             // is visible in a batch run rather than silent.
+             pseudoRederived: pseudo.changed };
   } finally {
     await page.close(); // one page per test; browser is shared
   }
@@ -1012,7 +1370,11 @@ async function main() {
           (outcome.reason ? ` (${outcome.reason})`
             : outcome.structure
               ? ` (structure re-extracted: ${outcome.elements} elements, ${outcome.overlaid} components overlaid)`
-              : ` (${outcome.overlaid} components overlaid)`));
+              // wave-29 S-RC5: a re-derived pseudo bag is a REPAIR (the
+              // fixture was about to be stamped delivered with pre-mutation
+              // generated content) — never let it land silently.
+              : ` (${outcome.overlaid} components overlaid` +
+                `${outcome.pseudoRederived ? `, ${outcome.pseudoRederived} pseudo bags re-derived` : ''})`));
       } catch (err) {
         hardFail++;
         console.error(`ERROR     ${rel}: ${err.message ?? err}`);

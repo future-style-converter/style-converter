@@ -2,6 +2,9 @@ package com.styleconverter.runtime.lists
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+// The bundled face the marker falls back to when nothing declared one —
+// the item's own bottom-out (see the fontFamily comment below).
+import com.styleconverter.runtime.typography.InterFontFamily
 
 /**
  * The typography a synthesized `::marker` box paints with — wave 27,
@@ -76,7 +79,50 @@ object ListMarkerTextStyle {
             // "Inherited: yes" (css-fonts-4 §1.1), so the marker's are
             // the item's.
             fontSize = inherited.fontSize,
-            fontFamily = inherited.fontFamily,
+            // Wave 29 (lane MP) — the UNDECLARED case bottoms out at the
+            // bundled Inter, the SAME bottom-out
+            // `ComponentRenderer.PlaceholderContent` applies to the item's
+            // own text (`textStyle.fontFamily ?: InterFontFamily`). It was
+            // `inherited.fontFamily` alone, i.e. NULL for every document
+            // that never declares `font-family` — and a null family is not
+            // "the item's font", it is Compose's SYSTEM face. One CSS
+            // `font-family`, two different primary faces on one line box.
+            //
+            // HONEST SCOPE, measured and NOT assumed: this is NOT what
+            // closed the row-pitch drift. An on-device A/B (emulator-5558,
+            // css3-counter-styles-007) with the snap forced off left the
+            // marker measuring h=34 exactly as before —
+            // [ListMarkerLineBox]'s snap is what closed the pitch.
+            //
+            // SKEPTIC CORRECTION (wave 29): an earlier revision of this
+            // comment went on to claim the bottom-out was a LATIN-only
+            // parity fix that "cannot matter" for Armenian/Bengali/Khmer,
+            // on the reasoning that Inter covers none of them so the same
+            // system fallback face resolves either way. Four staged A/B
+            // builds refuted that reasoning — naming Inter as the PRIMARY
+            // family changes which fallback face Compose resolves, and that
+            // face's natural line box differs:
+            //   • snap off, three mechanics fields only, NO bottom-out →
+            //     every row height byte-identical to wave 28 (bengali-117
+            //     pitch 33.00, capture 896). The mechanics fields alone
+            //     really do move no row height.
+            //   • snap off, bottom-out added → bengali-117 pitch 33.00 →
+            //     33.76 and capture 896 → 920; bengali-116 32.50 → 33.40;
+            //     armenian-007 unchanged at 33.80. Bengali resolves a
+            //     DIFFERENT fallback under Inter; Armenian does not.
+            //   • final config, bottom-out removed → armenian-008 −0.0130,
+            //     bengali-117 −0.0209, armenian-007 −0.0077, armenian-006
+            //     −0.0044, bengali-116 −0.0021 SSIM; arabic-indic and
+            //     cambodian move ≤ +0.0009.
+            //   • css-lists (the LATIN markers this line was supposed to be
+            //     for) is a WASH either way: ±0.004 with no pass flip,
+            //     10/12 both ways.
+            // So the bottom-out earns its place, but on the NON-Latin
+            // corpus — the opposite of the original rationale. It is kept
+            // for the CSS reason (one `font-family` must not resolve two
+            // primary faces on one line box) with the measured effect
+            // stated honestly.
+            fontFamily = inherited.fontFamily ?: InterFontFamily,
             fontWeight = inherited.fontWeight,
             fontStyle = inherited.fontStyle,
             // The marker's line box must match the item's, or a
@@ -89,5 +135,33 @@ object ListMarkerTextStyle {
             // DELIBERATELY ABSENT: textAlign, textIndent, lineBreak —
             // paragraph-level, already applied by the item itself. See
             // the "Why NARROWED" note above.
+            // Wave 29 (lane MP) — the three LINE-BOX MECHANICS fields.
+            // Not CSS properties: they are how this runtime makes Compose
+            // behave like CSS, set by `TextStyleApplier.extractTextStyle`
+            // on every text run and then dropped here, because a
+            // positional `TextStyle(...)` ctor does not inherit them.
+            //   • platformStyle — `includeFontPadding = false`, or the
+            //     marker's first line carries the font's top/bottom
+            //     padding while the item's does not.
+            //   • lineHeightStyle — Center/None, the distribution rule
+            //     that decides WHERE in the box the baseline sits; two
+            //     boxes of equal height with different distributions put
+            //     their baselines apart, and a baseline-aligned Row is
+            //     `max(baseline) + max(height − baseline)`, i.e. it grows
+            //     by exactly that disagreement.
+            //   • textMotion — `TextMotion.Animated`, the linear/subpixel
+            //     advances the ref (Chrome) uses; without it the marker
+            //     alone reverted to hinted quantized advances, which the
+            //     item's own snap-mirroring comment in ComponentRenderer
+            //     calls out as cumulative first-line glyph drift.
+            // MEASURED: on the Armenian corpus these three moved glyph ink
+            // sub-pixel and did NOT change the row's height on their own
+            // (the fallback face's win/hhea metrics happen to coincide) —
+            // they are here so marker and item cannot resolve their shared
+            // line box through two different sets of rules, which is the
+            // class of bug this whole lane is.
+            platformStyle = inherited.platformStyle,
+            lineHeightStyle = inherited.lineHeightStyle,
+            textMotion = inherited.textMotion,
         )
 }

@@ -3494,3 +3494,164 @@ test('cbake: buildComponents emits `_attrs` beside `_tag` for <ol start>', () =>
   assert.equal(ol._tag, 'ol');
   assert.deepEqual(ol._attrs, { start: '1860' });
 });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// wave-29 lane SELECTION: two extraction defects (S-RC1 PHANTOM BODY, S-RC2)
+// ═════════════════════════════════════════════════════════════════════════════
+
+// New exports under test — dynamic import, same pattern as the wave-21 block.
+const {
+  maskNonMarkupForBodyScan,
+  isBeforeBodyPrefix,
+} = await import('./extract-fixture.mjs');
+
+// ── S-RC1: the phantom-body hole (locateBodyContent step 1.5) ───────────────
+
+// The EXACT document shape of css-pseudo/active-selection-051..057: bare head
+// scaffolding after the doctype (no <html>, no <head> wrapper), then a <body>
+// start tag that NEVER closes. Step 1 needs a </body>; step 2 anchors at ^ and
+// finds <meta>, not html/head/body — so before step 1.5 the buffer stayed the
+// WHOLE document and the bare <body …> start tag became a phantom component.
+const UNCLOSED_BODY_DOC = '<!DOCTYPE html>\n\n  <meta charset="UTF-8">\n'
+  + '  <title>t</title>\n  <link rel="match" href="x-ref.html">\n'
+  + '  <style>div { color: transparent }</style>\n'
+  + '  <script>function startTest(){}</script>\n'
+  + '  <body onload="startTest();">\n\n'
+  + '  <p>Test passes if "Selected Text" appears selected.\n\n'
+  + '  <div id="test">Selected Text</div>\n';
+
+test('S-RC1: locateBodyContent slices at an UNCLOSED <body> that is not the first tag', () => {
+  const { inner, fallback } = locateBodyContent(UNCLOSED_BODY_DOC);
+  assert.equal(fallback, true);                       // no <body>…</body> PAIR
+  assert.ok(inner.includes('<p>Test passes'), `lost body content: ${inner}`);
+  assert.ok(inner.includes('<div id="test">'));
+  // The head scaffolding — and crucially the <body> START TAG itself — must
+  // be gone: its survival is what manufactured the phantom component.
+  assert.equal(/<body\b/i.test(inner), false, 'body start tag survived into the buffer');
+  assert.equal(inner.includes('<title>'), false);
+  assert.equal(inner.includes('<script>'), false);
+});
+
+test('S-RC1: the unclosed-body shape emits NO phantom `body` component', () => {
+  // End-to-end: two real components (the instruction <p> and the styled div)
+  // and nothing else. Pre-fix this produced THREE, the first a 100x100
+  // placeholder built from the bare <body …> start tag.
+  const { components } = buildComponents(
+    UNCLOSED_BODY_DOC, parseCss('div { color: transparent }'), 'as');
+  assert.deepEqual(Object.keys(components), ['as__0', 'as__1']);
+  assert.equal(components.as__0._tag, 'p');
+  assert.equal(components.as__1.properties.color, 'transparent');
+});
+
+test('S-RC1: a well-formed <body>…</body> pair still short-circuits at step 1', () => {
+  // Step 1.5 must never run when step 1 already answered — fallback stays
+  // false so the callers keep skipping the HEAD_ONLY filter.
+  const html = '<html><head><title>x</title></head><body><div id=a></div></body></html>';
+  const { inner, fallback } = locateBodyContent(html);
+  assert.equal(fallback, false);
+  assert.equal(inner, '<div id=a></div>');
+});
+
+test('S-RC1 guard 1: a <body> inside a SCRIPT string cannot be sliced at', () => {
+  // cssom/computed-style-002's shape: `frmDoc.write('<body …>…')`. The masked
+  // scan blanks raw-text element content, so the real document (which has no
+  // body tag at all) falls through to the step-2 peel unchanged.
+  const html = '<!DOCTYPE html>\n<div id="real">x</div>\n'
+    + '<script>frmDoc.write(\'<body style="margin:0"><div style="width:100%"></div>\');</script>';
+  const { inner } = locateBodyContent(html);
+  assert.ok(inner.includes('<div id="real">x</div>'), 'real content dropped');
+});
+
+test('S-RC1 guard 1: a <body> inside a COMMENT cannot be sliced at', () => {
+  // css-flexbox/flexbox-root-node-001b's shape: prose about "no explicit
+  // <body>" in a comment ahead of the real markup.
+  const html = '<!DOCTYPE html>\n<!-- checks display:flex on the root with no explicit <body>. -->\n'
+    + '<html style="display: flex"><head><title>t</title></head>\n<div id="real">x</div>\n</html>';
+  const { inner } = locateBodyContent(html);
+  assert.ok(inner.includes('<div id="real">x</div>'));
+});
+
+test('S-RC1 guard 1: a <body> inside an ATTRIBUTE VALUE cannot be sliced at', () => {
+  // css-writing-modes/orthogonal-root-resize-icb-001's shape: the body tag
+  // lives in an iframe `src="data:text/html,…<body …>…"` AFTER the real
+  // content, so slicing there would have thrown the <p> and the <iframe> away.
+  const html = '<!DOCTYPE html>\n<html>\n  <link rel="help" href="x">\n'
+    + '  <p>Test passes if there is a filled green square.</p>\n'
+    + '  <iframe id="f" src="data:text/html,<!DOCTYPE html><body style=\'margin:0\'>'
+    + '<div style=\'width:10px\'></div>"></iframe>\n</html>';
+  const { inner } = locateBodyContent(html);
+  assert.ok(inner.includes('<p>Test passes'), 'lost the instruction paragraph');
+  assert.ok(inner.includes('<iframe id="f"'), 'lost the iframe');
+});
+
+test('S-RC1 guard 2: a <body> AFTER real content is the ignorable parse error', () => {
+  // css-contain/content-visibility/slot-content-visibility-3-crash's shape.
+  // Per HTML §13.2.6.4.7 a <body> start tag seen while already IN BODY is a
+  // parse error the parser ignores (it only merges attributes), so the
+  // implicit body — which already holds the <div> — must not be truncated.
+  const html = '<!DOCTYPE html>\n<link rel=author href="mailto:x">\n'
+    + '<div><span>content</span></div>\n<body hidden>\n<span id="late"></span>\n';
+  const { inner } = locateBodyContent(html);
+  assert.ok(inner.includes('<div><span>content</span></div>'),
+    'truncated at an ignorable <body> parse error');
+});
+
+test('S-RC1: maskNonMarkupForBodyScan is LENGTH-PRESERVING (indices stay valid)', () => {
+  // The whole slice-the-original trick depends on this: a shorter mask would
+  // make every match index point at the wrong byte of the real document.
+  const html = '<!-- c --><style>a{}</style><script>1<2</script><p title="<body>">x</p>';
+  const masked = maskNonMarkupForBodyScan(html);
+  assert.equal(masked.length, html.length);
+  // …and every non-markup region really is blanked.
+  assert.equal(/<body/i.test(masked), false);
+  assert.equal(masked.includes('1<2'), false);
+  // The surviving markup is still findable at its ORIGINAL offset.
+  assert.equal(masked.indexOf('<p '), html.indexOf('<p '));
+});
+
+test('S-RC1: isBeforeBodyPrefix accepts head scaffolding and rejects flow content', () => {
+  assert.equal(isBeforeBodyPrefix('<!DOCTYPE html>\n  <meta charset="UTF-8">\n  '), true);
+  assert.equal(isBeforeBodyPrefix('<html><head></head>'), true);
+  assert.equal(isBeforeBodyPrefix('   \n\t '), true);          // whitespace only
+  assert.equal(isBeforeBodyPrefix('<div></div>'), false);      // flow element
+  assert.equal(isBeforeBodyPrefix('<p>prose'), false);
+  // Non-whitespace TEXT also opens the body (§13.2.6.4.4 character token).
+  assert.equal(isBeforeBodyPrefix('<meta charset="UTF-8">stray text'), false);
+});
+
+// ── S-RC2: the &NewLine; / &Tab; named references ───────────────────────────
+
+test('S-RC2: decodeCharacterReferences decodes &NewLine; and &Tab;', () => {
+  // active-selection-057's subtest3 is literally `&NewLine;&NewLine;`.
+  assert.equal(decodeCharacterReferences('&NewLine;&NewLine;'), '\n\n');
+  assert.equal(decodeCharacterReferences('a&Tab;b'), 'a\tb');
+  // Both spellings of TAB must now agree (the numeric one shipped in wave-15).
+  assert.equal(decodeCharacterReferences('&Tab;'), decodeCharacterReferences('&#9;'));
+});
+
+test('S-RC2: the named-reference lookup stays CASE-SENSITIVE', () => {
+  // HTML's table spells these with capitals; `&newline;` and `&tab;` are NOT
+  // defined names, so the conservative "unknown names stay verbatim" contract
+  // must keep them visible rather than silently decoding them.
+  assert.equal(decodeCharacterReferences('&newline;'), '&newline;');
+  assert.equal(decodeCharacterReferences('&tab;'), '&tab;');
+  assert.equal(decodeCharacterReferences('&NEWLINE;'), '&NEWLINE;');
+});
+
+test('S-RC2: &amp;NewLine; still decodes to the LITERAL string (no rescan)', () => {
+  // The single left-to-right pass never rescans its own output — the same
+  // answer a real HTML tokenizer gives.
+  assert.equal(decodeCharacterReferences('&amp;NewLine;'), '&NewLine;');
+});
+
+test('S-RC2: a pre-family element keeps the decoded newlines verbatim', () => {
+  // The end-to-end shape of active-selection-057 subtest3: `white-space: pre`
+  // routes the text through the preserve path, so the two decoded U+000A
+  // survive into `_text` instead of collapsing to a single space. Undecoded,
+  // this component painted the literal 18-char '&NewLine;&NewLine;' at
+  // font-size:100px — the opposite of the test's "nothing viewable" assert.
+  const html = '<style>div#s3 { white-space: pre; font-size: 100px }</style>'
+    + '<div id="s3">&NewLine;&NewLine;</div>';
+  const { components } = buildComponents(html, parseCss('div#s3 { white-space: pre; font-size: 100px }'), 'nl');
+  assert.equal(components.nl__0._text, '\n\n');
+});
