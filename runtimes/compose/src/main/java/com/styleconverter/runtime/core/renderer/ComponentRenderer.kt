@@ -47,6 +47,7 @@ import kotlinx.serialization.json.put
 // StyleEngine/lists/ListMarkerRow.swift. `markerBaselineClaim` is a
 // top-level RowScope extension, so it must be imported by name rather
 // than qualified at the call site.
+import com.styleconverter.runtime.lists.ListMarkerLineBox
 import com.styleconverter.runtime.lists.ListMarkerRow
 import com.styleconverter.runtime.lists.markerBaselineClaim
 import com.styleconverter.runtime.lists.ListMarkerTextStyle
@@ -2163,7 +2164,30 @@ object ComponentRenderer {
             val inheritedMarkerTextStyle = runCatching {
                 TextStyleApplier.extractTextStyle(
                     component.properties, inheritedMarkerFontSizeSp)
-            }.getOrDefault(TextStyle())
+            }.getOrDefault(TextStyle()).let { base ->
+                // Wave 29 (lane MP) — the marker's LINE BOX, pinned to the
+                // same one [PlaceholderContent] gives the item's own text.
+                // Extraction leaves `lineHeight` Unspecified whenever no
+                // `line-height` was declared, and the marker `Text` was the
+                // only run in the runtime that then fell through to the
+                // resolved FACE's natural metrics instead of the three-state
+                // resolution every other run makes. A Row is as tall as its
+                // tallest child, so a marker box taller than the item's
+                // pinned box became the ROW's height: measured +2.75px on
+                // EVERY row of css3-counter-styles-007 (34px pitch vs web's
+                // 31–32 and iOS's 31), accumulating to a 920px capture
+                // against web's 885. See ListMarkerLineBox for the
+                // on-device isolation. Resolved HERE, beside the
+                // colour and the font, so both marker call sites below share
+                // one resolution and the CompositionLocals are read once.
+                base.copy(lineHeight = ListMarkerLineBox.resolve(
+                    declaredLineHeight = base.lineHeight,
+                    fontSize = base.fontSize,
+                    declaredNormal = com.styleconverter.runtime.typography
+                        .LineHeightNormal.isDeclaredNormal(component.properties),
+                    wptCapture = LocalWptCaptureMode.current,
+                    composedWpt = LocalWptComposedMode.current))
+            }
             if (!parentText.isNullOrEmpty()) {
                 PlaceholderContent(
                     name = parentText,
@@ -2520,6 +2544,28 @@ object ComponentRenderer {
         // Wave 28 (lane MC) — the marker's typography, hoisted so BOTH
         // placements below paint with one resolution rather than two.
         val markerStyle = ListMarkerTextStyle.forItem(inheritedTextStyle, textColor)
+        // Wave 29 (lane MP) — the marker's own TextLayoutResult, the line
+        // count [ListMarkerLineBox.snap] needs. A marker token never wraps
+        // in the corpus, but the count is READ rather than assumed: an
+        // assumed 1 would silently mis-size the one document that ever
+        // wraps one, and the item's snap reads it too.
+        val markerLayout = androidx.compose.runtime.remember {
+            androidx.compose.runtime.mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null)
+        }
+        // The snap itself, built once per marker: the resolved CSS line box
+        // in px (Unspecified ⇒ 0f ⇒ no modifier — the declared-`normal`
+        // state, where the face's natural box IS the CSS answer), and the
+        // composed-WPT gate that keeps every other capture path
+        // byte-identical. Density is read here because a Modifier factory
+        // is not a composable scope.
+        val markerSnapDensity = androidx.compose.ui.platform.LocalDensity.current
+        val markerLineBoxSnapModifier = if (LocalWptComposedMode.current) {
+            ListMarkerLineBox.snap(
+                refLineBoxPx = if (markerStyle.lineHeight != TextUnit.Unspecified)
+                    with(markerSnapDensity) { markerStyle.lineHeight.toPx() } else 0f,
+                lineCount = { markerLayout.value?.lineCount ?: 0 }
+            )
+        } else Modifier
         // Does the item's principal box carry a first text baseline at
         // all? Drives BOTH wave-28 decisions (which placement, and — in
         // the row — whether a baseline claim is meaningful).
@@ -2552,6 +2598,28 @@ object ComponentRenderer {
             // css-lists geometry never does.
             Box {
                 RenderComponent(child)
+                // NO line-box snap here, deliberately (wave 29, lane MP).
+                // This marker already reports a ZERO size, so the snap's
+                // HEIGHT half would be inert — but its ½px re-centring
+                // would still move the drawn glyph ~1px up against the
+                // wave-28 overlay origin these tests were tuned on, and
+                // this branch has no row whose pitch it could fix. The
+                // scope of the lane is the ROW's extent.
+                //
+                // SKEPTIC CORRECTION (wave 29): omitting the snap here is
+                // VERIFIED — an A/B build with `markerLineBoxSnapModifier`
+                // forced off produced BYTE-IDENTICAL captures for all three
+                // `list-style-position: inside` documents
+                // (css3-counter-styles-101/102/103), so the snap really is
+                // inert on this branch. What is NOT byte-identical is the
+                // branch's ink, because `markerStyle` itself is a wave-29
+                // output: the line-box pin above plus the three mechanics
+                // fields and the family bottom-out in ListMarkerTextStyle
+                // all reach this `Text` too. MEASURED against the wave-28
+                // captures: 101 moved 262 px, 102 2112 px, 103 60 px (SSIM
+                // +0.0002 / +0.0011 / +0.0002 — a marginal improvement, not
+                // a wash by luck). Stated so a later lane re-tuning the
+                // overlay origin knows this branch already moved once.
                 Text(
                     text = marker,
                     style = markerStyle,
@@ -2639,7 +2707,21 @@ object ComponentRenderer {
             Text(
                 text = marker,
                 style = markerStyle,
+                // The line-count channel the snap reads (see markerLineBox
+                // + markerLineBoxSnap): Compose reports it after layout,
+                // and writing the state re-runs the layout block, not the
+                // composition.
+                onTextLayout = { markerLayout.value = it },
                 modifier = markerBaselineClaim(aligns)
+                    // Wave 29 (lane MP) — the composed-WPT line-box snap the
+                    // ITEM's text run has always had. Without it the marker
+                    // box keeps its FACE's natural line (measured h=34 for a
+                    // 31.25px CSS box, because the Armenian marker resolves
+                    // through a system fallback face) and, this Row being
+                    // baseline-aligned, the ROW inherits that height: the
+                    // 34px pitch against web's 31–32 and iOS's 31. Composed
+                    // WPT only — every other capture path is untouched.
+                    .then(markerLineBoxSnapModifier)
                     .padding(end = ListMarkerRow.gapDp)
             )
             RenderComponent(child, markerBaselineClaim(aligns))

@@ -741,8 +741,35 @@ const RX = {
     //   lost and the scene renders as a collapsed row of disconnected
     //   framelets.
     //   Source: investigations/swarm-003/css-anchor-position__auto-margins-position-area.json
-    anchorPositionProp: /\b(?:position-anchor|anchor-name|position-area|position-try-fallbacks)\s*:/i,
+    //
+    //   wave-29 DETECTOR HONESTY (lane ANCHOR): the original two regexes
+    //   below only saw anchor positioning declared as a PROPERTY NAME or a
+    //   FUNCTION CALL. CSS Anchor Positioning L1 also lands as
+    //     (a) a VALUE keyword — `align-self: anchor-center`,
+    //         `place-self: anchor-center`, `justify-self: safe anchor-center`
+    //         (css-align-3 §4.1 self-alignment + anchor-pos-1 §6), and
+    //     (b) two further PROPERTY names the original alternation missed:
+    //         `anchor-scope:` (anchor-pos-1 §3.2 — scopes which anchor names
+    //         a subtree can see; anchor-center-overflow-00{1..5} all declare
+    //         it) and `position-visibility:` (anchor-pos-1 §7 — hides the
+    //         anchored box when the anchor scrolls out).
+    //   Measured miss before this fix (wave28-final css-anchor-position
+    //   section): anchor-center-002.html and anchor-center-no-default.html —
+    //   both pure `align-self: anchor-center` — carried NO anchor tag at all,
+    //   so the wall gate and post-load activation could never see them.
+    //   Split into three named regexes (not one mega-alternation) so a unit
+    //   pin can assert each signal family independently.
+    anchorPositionProp: /\b(?:position-anchor|anchor-name|position-area|position-try-fallbacks|anchor-scope|position-visibility)\s*:/i,
     anchorFunctionCall: /\banchor(?:-size)?\s*\(/i,
+    //   VALUE-side signal: the `anchor-center` self/content-alignment
+    //   keyword, optionally preceded by the css-align-3 `safe`/`unsafe`
+    //   overflow-alignment qualifier, on any of the six alignment
+    //   longhands/shorthands that accept it. Anchored to a `:` + the
+    //   property name so a bare mention of the word in prose/title text
+    //   (e.g. `<title>… 'anchor-center' behaves as 'center' …`) does NOT
+    //   fire — titles are the single most common false-positive source in
+    //   this corpus.
+    anchorCenterValue: /\b(?:place-self|place-items|align-self|align-items|justify-self|justify-items)\s*:\s*(?:[a-z-]+\s+)?anchor-center\b/i,
 
     // Rule 17 — crash-test-blank-ref:
     //   WPT crash regression tests (`*-crash.html`, `*-refcrash.html`)
@@ -757,6 +784,17 @@ const RX = {
     crashFilename:      /-(?:crash|refcrash)\.html$/i,
     blankRefName:       /(?:^|\/)reference\/blank\.html$/i,
     aboutBlankHref:     /about:blank/i,
+
+    // Rule 42 — browser-ref-divergent:
+    //   `color: transparent` declared anywhere in the stylesheet — signal 1
+    //   of the ref-unachievable OS-default-highlight shape (full rationale
+    //   at hasUnreachableOsDefaultSelection's banner). The `(?<![-\w])`
+    //   lookbehind is the same ident-boundary guard the bidi probes use: a
+    //   plain `\b` would also match after a hyphen, so `background-color:
+    //   transparent` (which is IRRELEVANT here — a transparent selection
+    //   BACKGROUND still paints its glyphs) would fire signal 1 spuriously.
+    //   Non-global so `.test()` is stateless on this shared panel.
+    colorTransparentDecl: /(?<![-\w])color\s*:\s*transparent\b/i,
 };
 
 // Helper: detect ANY runtime-selection signal (pseudo-element OR API call).
@@ -844,11 +882,21 @@ function hasSharedInlineFcPattern(html) {
 }
 
 // Helper: detect anchor-positioning signal. Used by Rule 40.
-// Either a position-anchor/anchor-name/position-area/position-try-fallbacks
-// property declaration OR an anchor()/anchor-size() functional notation
-// anywhere in the source.
+// THREE independent signal families, any one of which means the test's
+// geometry is decided by CSS Anchor Positioning L1 (see the RX comment for
+// the wave-29 honesty audit that added families 1b and 3):
+//   1. a property NAME declaration — position-anchor / anchor-name /
+//      position-area / position-try-fallbacks / anchor-scope /
+//      position-visibility;
+//   2. an anchor() / anchor-size() functional notation in any value;
+//   3. the `anchor-center` alignment VALUE keyword (optionally `safe`/
+//      `unsafe` qualified) on an alignment longhand/shorthand.
+// Deliberately OR-ed, never AND-ed: a test needs only one of these for its
+// used box geometry to depend on machinery the runtimes do not implement.
 function hasAnchorPositioning(html) {
-    return RX.anchorPositionProp.test(html) || RX.anchorFunctionCall.test(html);
+    return RX.anchorPositionProp.test(html)
+        || RX.anchorFunctionCall.test(html)
+        || RX.anchorCenterValue.test(html);
 }
 
 // Helper: detect viewport-sized-text-ref signal. Used by Rule 38.
@@ -888,6 +936,157 @@ function hasCanvasShapeSensitive3d(html) {
     if (!has3d) return false;
     // If display:inline is present too, Rule 26 owns this test.
     return !RX.displayInline.test(html);
+}
+
+// ── wave-29 S-RC3: the REF-UNACHIEVABLE detector (Rule 42) ──────────────────
+//
+// Every other rule in this file names something OUR pipeline cannot do. This
+// one names something CHROMIUM cannot do — a reftest whose committed
+// browser-ref PNG is a target the very browser that rasterised the ref does
+// not hit when it renders the TEST page. Scoring a runtime against such a ref
+// measures a browser bug, not the runtime, and no amount of runtime work can
+// clear the 0.95 gate.
+//
+// MEASURED (wave-29, headless Chromium 151, the pipeline's own canvas
+// contract — capture-browser-ref.mjs's canvasFrameCss + REF_RENDER_WIDTH +
+// padPngBuffer — diffed against the committed
+// refs/<sha>/white-black-ink-font-lh-imgpad/css-pseudo/*.png with
+// inject-wpt-block.mjs's diffWebVsRef):
+//
+//   active-selection-051  ssim 0.9394   ← Chromium's OWN render of the test
+//   active-selection-052  ssim 0.9394
+//   active-selection-053  ssim 0.9394
+//   active-selection-054  ssim 0.9394
+//   active-selection-056  ssim 1.0000   ← same family, NOT divergent
+//   active-selection-057  ssim 0.9543   ← same family, NOT divergent
+//
+// The ceiling for 051..054 is 0.9394, i.e. UNDER the 0.95 gate, so a
+// perfectly Chrome-faithful renderer still fails. 056/057 clear it, which is
+// why the rule below must not fire on them.
+//
+// WHY the four diverge (pixel-level, from the same measurement): the ref
+// (active-selection-051-ref.html) is byte-for-byte the test MINUS the
+// `color: transparent` and the `::selection` block, so its selected div
+// paints BLACK glyphs on the OS highlight. The test sets `color: transparent`
+// on the div and gives `div::selection` a declaration block with no usable
+// `color` (an unknown property `foo: bar` in -051, an EMPTY block in -052, an
+// invalid value `color: foo` in -053, an invalid `background-color: bar` in
+// -054). Per css-pseudo-4 §highlight-cascade the UA must then fall back to
+// its OS-DEFAULT highlight colours — including the highlight FOREGROUND,
+// which is what would make the transparent text visible again. Chromium does
+// not do that: it keeps the originating element's used `color` (transparent)
+// and paints only the highlight background. Measured colour histograms of the
+// 390x600 captures: ref = 3849 black px + 14009 highlight px, Chromium's test
+// render = 911 black px (the unselected instruction prose only) + 18540
+// highlight px — the glyphs are simply absent, replaced by highlight fill.
+// All four tests carry WPT's `should` flag, i.e. the assertion is SHOULD-level
+// and a UA is permitted to fail it, which is exactly what Chromium does.
+//
+// THE TAG IS NOT AN EXTRACTION WALL. There is no post-load bake, no asset
+// inlining and no future runtime work that re-admits these tests: the target
+// itself is wrong. It therefore joins inject-wpt-block.mjs's
+// REF_UNACHIEVABLE_TAGS (a third, unconditional exclusion family) rather than
+// EXTRACTION_WALL_TAGS or SCORE_EXCLUDED_TAGS.
+
+/** CSS Color 4 §6.1 named colours + the two colour-ish keywords, as a CLOSED
+ *  spec table. Used ONLY to answer "is this `color:` value a colour at all?"
+ *  — the rule needs to tell -053's invalid `color: foo` apart from a real but
+ *  unusual keyword like `rebeccapurple`, and a partial list would silently
+ *  reclassify a valid colour as invalid and over-fire the exclusion. */
+const CSS_NAMED_COLORS = new Set(('aliceblue antiquewhite aqua aquamarine azure beige bisque black ' +
+    'blanchedalmond blue blueviolet brown burlywood cadetblue chartreuse chocolate coral ' +
+    'cornflowerblue cornsilk crimson cyan darkblue darkcyan darkgoldenrod darkgray darkgreen ' +
+    'darkgrey darkkhaki darkmagenta darkolivegreen darkorange darkorchid darkred darksalmon ' +
+    'darkseagreen darkslateblue darkslategray darkslategrey darkturquoise darkviolet deeppink ' +
+    'deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite forestgreen fuchsia gainsboro ' +
+    'ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink indianred indigo ivory ' +
+    'khaki lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan ' +
+    'lightgoldenrodyellow lightgray lightgreen lightgrey lightpink lightsalmon lightseagreen ' +
+    'lightskyblue lightslategray lightslategrey lightsteelblue lightyellow lime limegreen linen ' +
+    'magenta maroon mediumaquamarine mediumblue mediumorchid mediumpurple mediumseagreen ' +
+    'mediumslateblue mediumspringgreen mediumturquoise mediumvioletred midnightblue mintcream ' +
+    'mistyrose moccasin navajowhite navy oldlace olive olivedrab orange orangered orchid ' +
+    'palegoldenrod palegreen paleturquoise palevioletred papayawhip peachpuff peru pink plum ' +
+    'powderblue purple rebeccapurple red rosybrown royalblue saddlebrown salmon sandybrown ' +
+    'seagreen seashell sienna silver skyblue slateblue slategray slategrey snow springgreen ' +
+    'steelblue tan teal thistle tomato turquoise violet wheat white whitesmoke yellow yellowgreen ' +
+    'transparent currentcolor').split(' '));
+
+/** CSS Color 4 §7 SYSTEM colours + the CSS-wide keywords. Both are valid
+ *  `color` values, so a `::selection { color: Highlight }` or
+ *  `{ color: inherit }` must count as "the author DID specify a colour" and
+ *  keep the rule from firing. */
+const CSS_COLOR_KEYWORDS = new Set(('canvas canvastext linktext visitedtext activetext buttonface ' +
+    'buttontext buttonborder field fieldtext highlight highlighttext selecteditem selecteditemtext ' +
+    'mark marktext graytext accentcolor accentcolortext ' +
+    'inherit initial unset revert revert-layer').split(' '));
+
+/** Concatenate every <style>…</style> block and strip CSS comments. The rule
+ *  below MUST run on stylesheet text, not raw HTML: all four tests spell the
+ *  selector out in their `<meta name="assert" content="… div::selection …">`
+ *  prose, so a whole-document scan matches the PROSE and then walks forward
+ *  into the first unrelated `{ … }` it finds. */
+function styleSheetTextOf(html) {
+    const blocks = [];
+    for (const m of String(html ?? '').matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
+        blocks.push(m[1]);
+    }
+    // Single space per comment — css-syntax-3 treats a comment as a token
+    // separator, same convention as extract-fixture.mjs's stripComments.
+    return blocks.join('\n').replace(/\/\*[\s\S]*?\*\//g, ' ');
+}
+
+/** Is `value` a COLOUR (or a CSS-wide keyword standing in for one)?
+ *  Deliberately PERMISSIVE — every "maybe" answers true, because a false
+ *  "valid" only makes Rule 42 decline (safe), while a false "invalid" would
+ *  score-exclude a test that is genuinely reachable. Accepts any hex token,
+ *  any functional notation (rgb() hsl() oklch() color-mix() light-dark()
+ *  var() — including ones this table has never heard of), and the two closed
+ *  keyword tables above. */
+function isColorValue(value) {
+    const s = String(value ?? '').trim().toLowerCase().replace(/\s*!important$/, '');
+    if (s === '') return false;                     // `color:` with no value
+    if (/^#[0-9a-f]{3,8}$/.test(s)) return true;    // #rgb #rgba #rrggbb #rrggbbaa
+    if (/^[a-z-]+\(/.test(s)) return true;          // ANY functional notation
+    return CSS_NAMED_COLORS.has(s) || CSS_COLOR_KEYWORDS.has(s);
+}
+
+// Helper: detect the ref-unachievable OS-default-highlight-foreground shape.
+// Used by Rule 42. Both signals are REQUIRED (see the banner for why each is
+// load-bearing):
+//   1. `color: transparent` somewhere in the stylesheet — without it the
+//      selected text is visible from its own colour and the OS highlight
+//      foreground never decides the render.
+//   2. at least one `::selection` rule, and NO `::selection` rule anywhere
+//      supplying a usable `color` — which is what hands the foreground to the
+//      UA's OS default, the step Chromium skips.
+// Coarse-grained by design, exactly like every other rule here: it does NOT
+// verify that the `color: transparent` rule and the `::selection` rule select
+// the SAME element (classifyAll is a pure whole-corpus string pass with no
+// selector engine). Measured precision at that coarseness: over all 33,643
+// corpus documents the pair of signals co-occurs in exactly four files —
+// active-selection-051..054 — and in none of the other 146 files that use
+// ::selection (highlight-paired-cascade-001, target-text-005 and
+// selection-background-painting-order all declare a real `::selection`
+// colour and are declined by signal 2).
+function hasUnreachableOsDefaultSelection(html) {
+    const css = styleSheetTextOf(html);
+    // Signal 1 — the lookbehind refuses `background-color` / `-webkit-color`.
+    if (!RX.colorTransparentDecl.test(css)) return false;
+    // Signal 2 — collect every ::selection declaration block. `[^{}]*`
+    // between the pseudo and its `{` keeps the match inside one rule prelude
+    // (it can never cross a brace), so a selector list like
+    // `div#a::selection , hr#b::selection { … }` is matched once, correctly.
+    const blocks = [...css.matchAll(/::selection[^{}]*\{([^{}]*)\}/gi)].map((m) => m[1]);
+    if (blocks.length === 0) return false;
+    for (const block of blocks) {
+        for (const decl of block.matchAll(/(?<![-\w])color\s*:\s*([^;}]+)/gi)) {
+            // Any usable colour anywhere means the author DID specify the
+            // highlight foreground — no OS fallback, no divergence, decline.
+            if (isColorValue(decl[1])) return false;
+        }
+    }
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -1350,12 +1549,29 @@ export const RULES = [
         test: (html /* , _ctx */) => hasCanvasShapeSensitive3d(html),
     },
     {
+        // wave-29 (lane ANCHOR): this tag is now an EXTRACTION WALL tag
+        // (inject-wpt-block.mjs EXTRACTION_WALL_TAGS). Rationale, and why
+        // no SECOND `requires-anchor-positioning` tag was minted alongside
+        // it: the wall this tag names and the wall the lane asked for are
+        // the same wall — none of the three runtimes implements anchor
+        // positioning, so the anchored box's used position is unreachable
+        // for them, exactly as post-script DOM state is unreachable for the
+        // static extractor. Minting a near-duplicate tag would double-tag
+        // all 469 already-tagged tests, split the histogram, and leave two
+        // detectors free to drift; instead the DETECTOR was widened (see the
+        // RX comment) so the tag now covers the anchor-center value form it
+        // used to miss. Post-load re-admission comes for free from
+        // applyNaScoreGate's generic wall branch: the 34-property state bake
+        // snapshots USED insets, which IS the anchored geometry.
         tag: 'requires-anchor-positioning-runtime',
-        description: 'position-anchor / anchor-name / position-area / anchor() — needs scene-reconstruction render mode',
+        description: 'position-anchor / anchor-name / anchor-scope / position-area / anchor() / anchor-center — anchored geometry no runtime computes (extraction-wall tag; post-load inset bake re-admits)',
         swarm001Source: [],
         swarm002Source: [],
         swarm003Source: [
             'css-anchor-position__auto-margins-position-area.json',
+            // wave-29 detector-honesty finding: pure `align-self:
+            // anchor-center` tests the old two-regex detector never saw.
+            'wave28-final css-anchor-position anchor-center-002 / anchor-center-no-default',
         ],
         test: (html /* , _ctx */) => hasAnchorPositioning(html),
     },
@@ -1388,13 +1604,41 @@ export const RULES = [
         ],
         test: (html, ctx) => RX.subFilenameSuffix.test(ctx?.testRel ?? ''),
     },
+    {
+        // Rule 42 (wave-29 S-RC3): the first REF-UNACHIEVABLE rule — see the
+        // long banner above hasUnreachableOsDefaultSelection for the measured
+        // evidence (Chromium's own render of these four tests tops out at
+        // ssim 0.9394 against the committed ref, under the 0.95 gate) and for
+        // why 056/057 of the same family must NOT fire (1.0000 / 0.9543).
+        //
+        // The tag deliberately does NOT start with `requires-`: every other
+        // tag in this file names a capability the HARNESS lacks, and reading
+        // this one as a harness gap would be exactly backwards. It names a
+        // defect in the ACCEPTANCE TARGET. inject-wpt-block.mjs gives it its
+        // own exclusion family (REF_UNACHIEVABLE_TAGS) for the same reason:
+        // there is no delivery stamp and no post-load bake that re-admits it,
+        // because nothing about our pipeline is what is wrong.
+        tag: 'browser-ref-divergent',
+        description: 'Chromium itself cannot reach the committed ref: author color:transparent + a ::selection block with no valid color, whose pass condition is the OS-default highlight FOREGROUND that Chromium does not apply (css-pseudo-4 §highlight-cascade; WPT `should` flag). Measured Chrome-vs-ref ceiling 0.9394 < 0.95.',
+        swarm001Source: [],
+        swarm002Source: [],
+        swarm003Source: [
+            // wave-29 selection-diagnosis measurement, re-derivable with
+            // headless Chromium + capture-browser-ref.mjs's canvas contract
+            // + inject-wpt-block.mjs's diffWebVsRef against
+            // refs/<sha>/white-black-ink-font-lh-imgpad/css-pseudo/*.png.
+            'wave-29 css-pseudo active-selection-051..054 (0.9394 Chrome-vs-ref ceiling)',
+        ],
+        test: (html /* , _ctx */) => hasUnreachableOsDefaultSelection(html),
+    },
 ];
 
 // Sanity: keep this in lock-step with the canonical rule count. swarm-001
 // seeded 17 rules; swarm-002 added 12 more (Rules 18..29); swarm-003 added
-// 11 more (Rules 30..40); wave-21 added Rule 41 (requires-wpt-server).
+// 11 more (Rules 30..40); wave-21 added Rule 41 (requires-wpt-server);
+// wave-29 added Rule 42 (browser-ref-divergent).
 // A drift here means either a rule was dropped or a duplicate was added.
-const EXPECTED_RULE_COUNT = 41;
+const EXPECTED_RULE_COUNT = 42;
 if (RULES.length !== EXPECTED_RULE_COUNT) {
     throw new Error(`wpt-not-applicable: expected exactly ${EXPECTED_RULE_COUNT} rules, got ${RULES.length}`);
 }
@@ -1404,8 +1648,9 @@ if (RULES.length !== EXPECTED_RULE_COUNT) {
 // ---------------------------------------------------------------------------
 
 /**
- * Classify a single test against all 41 rules (17 from swarm-001 + 12 from
- * swarm-002 + 11 from swarm-003 + 1 from wave-21: requires-wpt-server).
+ * Classify a single test against all 42 rules (17 from swarm-001 + 12 from
+ * swarm-002 + 11 from swarm-003 + 1 from wave-21: requires-wpt-server + 1
+ * from wave-29: browser-ref-divergent).
  *
  * @param {object} args
  * @param {string} args.html       — raw test HTML source

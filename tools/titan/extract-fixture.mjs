@@ -629,12 +629,150 @@ const AUTO_CLOSE_TRIGGERS = {
  * `fallback` is true when no explicit <body>…</body> pair existed (callers
  * use it to decide whether the HEAD_ONLY filter is needed at depth 1).
  * Exported so the unit tests can pin the head-unwrap contract directly.
+ *
+ * ── wave-29 S-RC1 PHANTOM BODY (step 1.5) ──────────────────────────────────
+ *
+ * The step-1 → step-2 pair still had a hole: a document whose <body …> start
+ * tag is NOT the first thing after the doctype and which never closes. The
+ * whole css-pseudo/active-selection family is exactly that shape —
+ *
+ *   <!DOCTYPE html>
+ *     <meta charset="UTF-8">      ← head scaffolding, NOT wrapped in <head>
+ *     <title>…</title> <link…> <style>…</style> <script>…</script>
+ *   <body onload="startTest();">  ← never closed
+ *     <p>Test passes if …
+ *     <div id="test">Selected Text</div>
+ *
+ * — and it fell through BOTH steps. Step 1 needs a `</body>` (absent). Step 2
+ * anchors its wrapper regex at `^` after the doctype, and the first tag there
+ * is `<meta>`, not html/head/body, so the loop breaks on iteration 0 and the
+ * buffer stays the ENTIRE document. Downstream, walkChildren then emits a
+ * `body` component for the bare unclosed start tag — an element with no
+ * content, which buildComponents renders as a 100x100 phantom placeholder
+ * sitting on top of the real <p>/<div>. Every SSIM comparison for these tests
+ * was scored against a fixture carrying a box the browser never painted.
+ *
+ * Step 1.5 closes it with the spec rule the other two steps already lean on:
+ * per HTML §13.2.6.4.4 an end tag for `body` is OPTIONAL, so a start tag with
+ * no matching close is well-formed and everything after it is body content.
+ *
+ * TWO honesty guards keep this from over-firing, both derived from the same
+ * insertion-mode reading (§13.2.6.4.7 "in body"): a `<body>` start tag seen
+ * while ALREADY in body is a parse error that the parser IGNORES (it only
+ * merges attributes onto the existing body element). So the tag we slice at
+ * must be the one that actually OPENS the body:
+ *
+ *   1. MASKED SCAN — the `<body` we match must be real markup, not text that
+ *      merely looks like a tag. `maskNonMarkupForBodyScan` blanks comments,
+ *      <script>/<style>/<title>/<noscript> element contents and quoted
+ *      attribute values to same-length runs of spaces, so indices still line
+ *      up against the original string. Without it six corpus documents fire
+ *      on a `<body>` written inside a JS string
+ *      (cssom/computed-style-002 `frmDoc.write('<body …')`), inside a prose
+ *      comment (css-flexbox/flexbox-root-node-001b) or — the damaging one —
+ *      inside an attribute: css-writing-modes/orthogonal-root-resize-icb-001
+ *      has `<iframe src="data:text/html,…<body style='margin:0;'>…">`, and
+ *      slicing there would have thrown away the real <p> and <iframe>.
+ *
+ *   2. HEAD-ONLY PREFIX — everything before the start tag must be markup the
+ *      parser can still be in "before head" / "in head" / "after head" mode
+ *      for: the doctype, whitespace, and start/end tags drawn only from
+ *      BODY_PREFIX_TAGS. A non-head element (or non-whitespace text) before
+ *      the tag means the body was ALREADY implicitly opened, so this `<body>`
+ *      is the ignorable-parse-error kind and slicing at it would silently
+ *      drop everything the implicit body already contains
+ *      (css-contain/content-visibility/slot-content-visibility-3-crash puts
+ *      `<body hidden>` after a real <div>/<template>/<span> subtree).
+ *
+ * When either guard declines, step 1.5 is a no-op and control falls through
+ * to the step-2 peel — the pre-wave-29 behaviour, byte for byte.
  */
+
+/** Element names whose CONTENT is never markup we want to scan for a body
+ *  start tag. <script>/<style> are raw-text elements and <title>/<noscript>
+ *  are escapable-raw-text/parser-state-dependent (HTML §13.2.5.1) — a
+ *  `<body>` written inside any of them is TEXT to the tokenizer, never a
+ *  tag. Blanking the whole element (tags included) is fine: step 1.5 only
+ *  ever slices at a point AFTER a match, and the prefix guard treats a
+ *  blanked run as the whitespace it now is. */
+const BODY_SCAN_RAWTEXT_RX =
+  /<(script|style|title|noscript)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
+
+/** Quoted attribute values, blanked so `src="…<body …>…"` cannot be mistaken
+ *  for a tag. Applied AFTER comment + raw-text blanking so a stray `="` in a
+ *  comment or a JS string can never mis-pair the quotes here. */
+const BODY_SCAN_ATTR_VALUE_RX = /=\s*("[^"]*"|'[^']*')/g;
+
+/** Tags the HTML parser tolerates BEFORE the body opens — the "in head"
+ *  element set (§13.2.6.4.4) plus the two shell wrappers. Anything else
+ *  implicitly opens the body, which is what guard 2 tests for. */
+const BODY_PREFIX_TAGS = new Set([
+  'html', 'head',                                    // document shell wrappers
+  'base', 'basefont', 'bgsound', 'link', 'meta',     // metadata, void
+  'title', 'style', 'script', 'noscript', 'template', // metadata, with content
+]);
+
+/**
+ * Blank every region of `html` whose bytes are not tag markup, preserving
+ * LENGTH so a match index maps straight back onto the original string.
+ * Exported so the unit tests can pin the masking contract directly.
+ */
+export function maskNonMarkupForBodyScan(html) {
+  // Same-length blank: one space per original character. Newlines become
+  // spaces too — irrelevant, since the mask is only ever scanned for tags.
+  const blank = (m) => ' '.repeat(m.length);
+  // Comments first: they can legally contain anything, including `<script>`.
+  let out = html.replace(/<!--[\s\S]*?-->/g, blank);
+  // Then raw-text elements, then attribute values (see the RX doc comments
+  // above for why this order is the safe one).
+  out = out.replace(BODY_SCAN_RAWTEXT_RX, blank);
+  out = out.replace(BODY_SCAN_ATTR_VALUE_RX, blank);
+  return out;
+}
+
+/**
+ * Guard 2: is everything in `prefix` (a MASKED slice ending just before a
+ * `<body …>` start tag) still "before the body" per the HTML insertion
+ * modes? True only when the prefix holds nothing but the doctype,
+ * whitespace, and start/end tags from BODY_PREFIX_TAGS.
+ * Exported for direct unit pinning.
+ */
+export function isBeforeBodyPrefix(prefix) {
+  // Drop the doctype — it is a document-level token, not an element.
+  let rest = prefix.replace(/<!doctype\b[^>]*>/i, ' ');
+  // Also drop any remaining markup declaration / processing-instruction-ish
+  // token (`<!…>`, `<?…>`); the tokenizer treats them as comments/bogus and
+  // neither opens the body.
+  rest = rest.replace(/<[!?][^>]*>/g, ' ');
+  // Walk every start/end tag: an unlisted name means the body already opened.
+  const tagRx = /<\/?([a-zA-Z][\w-]*)\b[^>]*>/g;
+  let m;
+  while ((m = tagRx.exec(rest)) !== null) {
+    if (!BODY_PREFIX_TAGS.has(m[1].toLowerCase())) return false;
+  }
+  // Finally: non-whitespace TEXT outside those tags also opens the body
+  // (§13.2.6.4.4 — a character token in "after head" mode inserts <body>).
+  // Strip the tags we just validated and require the remainder be blank.
+  return rest.replace(tagRx, '').trim() === '';
+}
+
 export function locateBodyContent(html) {
   // Step 1 — explicit, well-formed <body>…</body> wins outright: its inner
   // is body content BY DEFINITION and no unwrapping is needed.
   const bodyMatch = /<body\b[^>]*>([\s\S]*?)<\/body>/i.exec(html);
   if (bodyMatch) return { inner: bodyMatch[1], fallback: false };
+  // Step 1.5 — S-RC1: an UNCLOSED <body …> anywhere in the document (see the
+  // banner above). Scan the masked copy so only real markup can match, then
+  // require the head-only prefix before slicing.
+  const masked = maskNonMarkupForBodyScan(html);
+  const openBody = /<body\b[^>]*>/i.exec(masked);
+  if (openBody && isBeforeBodyPrefix(masked.slice(0, openBody.index))) {
+    // Everything after the start tag is body content. `fallback: true` is
+    // both literally accurate (no <body>…</body> PAIR existed) and the safe
+    // choice: it keeps the callers' HEAD_ONLY_TAGS filter on, so an in-body
+    // <script>/<style> still cannot manufacture a phantom component.
+    return { inner: html.slice(openBody.index + openBody[0].length), fallback: true };
+  }
   // Step 2 — no <body> pair: peel document-shell wrappers front-to-back.
   let inner = html;
   for (let unwrap = 0; unwrap < 3; unwrap++) {
@@ -1475,6 +1613,23 @@ const NAMED_CHARACTER_REFS = {
   bull: '•', laquo: '«', raquo: '»', copy: '©',
   times: '×', minus: '−',
   rarr: '→', larr: '←', uarr: '↑', darr: '↓',
+  // wave-29 S-RC2 — the two ASCII-whitespace names. HTML's named-reference
+  // table spells them with capitals (`&NewLine;` = U+000A LINE FEED,
+  // `&Tab;` = U+0009 CHARACTER TABULATION) and the lookup below is
+  // case-sensitive by design, so these keys must carry that exact casing.
+  // Load-bearing for css-pseudo/active-selection-057, whose third subtest is
+  // `<div id="subtest3">&NewLine;&NewLine;</div>` under `white-space: pre`:
+  // the test asserts that div paints nothing because both references are
+  // line-break CONTROL characters, not glyphs. Undecoded, `_text` carried
+  // the literal 18-character string '&NewLine;&NewLine;' and every runtime
+  // painted ampersand prose at font-size:100px — the exact opposite of the
+  // "nothing should be painted or viewable" assertion. Decoded, the
+  // pre-family preserve path (WHITESPACE_PRESERVING) keeps both newlines
+  // verbatim and the div becomes the empty two-line box the browser draws.
+  // `&Tab;` rides along as the same-class name for U+0009: the numeric
+  // `&#9;` spelling is already decoded (wave-15 bidi-tab-001), so omitting
+  // its named twin would be an arbitrary split of one tokenizer rule.
+  NewLine: '\n', Tab: '\t',
 };
 
 /**
@@ -5835,7 +5990,12 @@ async function main() {
           const outcome = await postLoad.postLoadAugmentFixture(result.fixture, rel);
           // wave-20: `+structure` marks the tree-re-extraction path (the
           // fixture carries _wpt.structureExtracted alongside the state stamp).
+          // wave-29 S-RC5: `+pseudo(N)` marks the pseudo-bag re-derivation —
+          // N generated-content bags that the class/attribute mutation moved
+          // and that would otherwise have shipped at their pre-mutation
+          // value inside a fixture stamped "delivered".
           postLoadNote = ` [post-load: ${outcome.status}${outcome.structure ? '+structure' : ''}` +
+            `${outcome.pseudoRederived ? `+pseudo(${outcome.pseudoRederived})` : ''}` +
             `${outcome.reason ? ` — ${outcome.reason}` : ''}]`;
         }
         // wave-23 BIDI BAKE, after post-load so it measures the settled tree

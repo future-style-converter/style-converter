@@ -733,11 +733,42 @@ test('wave13: buildResults matches composed-mode rows so pairs (and nativeParity
 
 import { EXTRACTION_WALL_TAGS, computeLowContentDensity, WPT_LOW_CONTENT_DENSITY_MAX_COVERAGE_PCT } from './inject-wpt-block.mjs';
 
-test('wave15: EXTRACTION_WALL_TAGS is exactly the two script-execution tags', () => {
+test('wave29: EXTRACTION_WALL_TAGS is exactly the three delivery-wall tags', () => {
   // Pin the exact set — silently widening the wall (excluding more tests)
   // or narrowing it (re-scoring the wall) must break a test first.
-  assert.deepEqual([...EXTRACTION_WALL_TAGS].sort(),
-    ['requires-script-driven-scroll', 'requires-script-mutation']);
+  // wave-29 (lane ANCHOR) added requires-anchor-positioning-runtime: a
+  // NON-script member, admitted on the set's real defining property (the
+  // pipeline cannot deliver the input the ref encodes), not on its original
+  // shared mechanism. See the constant's comment for the measured evidence.
+  assert.deepEqual([...EXTRACTION_WALL_TAGS].sort(), [
+    'requires-anchor-positioning-runtime',
+    'requires-script-driven-scroll',
+    'requires-script-mutation',
+  ]);
+});
+
+test('wave29: applyNaScoreGate excludes anchor tests, post-load stamp re-admits', () => {
+  // The measured wave28-final worst row: anchor-center-overflow-004 at
+  // web-ref 0.536 — scored as renderer failure because the anchor tag was
+  // not a wall tag. lossyReasons is an EMPTY ARRAY (every static asset was
+  // delivered; there is no asset to be lossy about), so only the wall
+  // branch can exclude it.
+  const web = { ssim: 0.536, wptPass: false };
+  assert.equal(
+    applyNaScoreGate(['requires-anchor-positioning-runtime'], [web], []), true);
+  assert.equal(web.wptPass, null);          // never a real pass/fail
+  assert.equal(web.scoreExcluded, true);    // aggregators filter on this
+  assert.equal(web.ssim, 0.536);            // raw diagnostics stay intact
+
+  // …and the post-load bake's stamp re-admits it: the 34-property bake
+  // snapshots used insets, which IS the anchored geometry, so the diff
+  // measures the runtimes again. Same generic wall branch as wave-16.
+  const baked = { ssim: 0.536, wptPass: false };
+  assert.equal(
+    applyNaScoreGate(['requires-anchor-positioning-runtime'], [baked], [], true),
+    false);
+  assert.equal(baked.wptPass, false);       // untouched — a real fail again
+  assert.equal(baked.scoreExcluded, undefined);
 });
 
 test('wave15: applyNaScoreGate excludes on requires-script-mutation UNCONDITIONALLY', () => {
@@ -1236,4 +1267,70 @@ test('the scorer\'s LIVE_CANVAS_REV equals capture-browser-ref\'s CANVAS_REV', (
   assert.ok(KNOWN_STALE_CANVAS_REVS.includes('white-black-ink-font-lh'));
   assert.ok(!KNOWN_STALE_CANVAS_REVS.includes(LIVE_CANVAS_REV),
     'the live rev must never be listed as stale');
+});
+
+// ── wave-29 S-RC3: REF_UNACHIEVABLE_TAGS, the third exclusion family ────────
+//
+// Unlike the other two families this one is not about our pipeline: the
+// committed ref is a target Chromium itself does not hit when it renders the
+// test page (measured 0.9394 on css-pseudo/active-selection-051..054, under
+// the 0.95 gate). It therefore excludes UNCONDITIONALLY, with no delivery
+// record and no stamp that re-admits — the pins below are exactly that
+// asymmetry, since a future refactor that folded this branch into either of
+// the other two would silently restore the dishonest score.
+
+import { REF_UNACHIEVABLE_TAGS } from './inject-wpt-block.mjs';
+
+test('wave29 S-RC3: REF_UNACHIEVABLE_TAGS is exactly browser-ref-divergent', () => {
+  // Pin the exact membership: this family has NO route back, so admitting a
+  // tag to it permanently removes those tests from the denominator.
+  assert.deepEqual([...REF_UNACHIEVABLE_TAGS], ['browser-ref-divergent']);
+});
+
+test('wave29 S-RC3: browser-ref-divergent excludes and neutralises the diffs', () => {
+  const web = { ssim: 0.9394, wptPass: false };
+  const ios = { ssim: 0.91, wptPass: false };
+  assert.equal(applyNaScoreGate(['browser-ref-divergent'], [web, ios], []), true);
+  assert.equal(web.wptPass, null);
+  assert.equal(web.scoreExcluded, true);
+  assert.equal(ios.wptPass, null);
+  assert.equal(ios.scoreExcluded, true);
+});
+
+test('wave29 S-RC3: the post-load / structure stamps do NOT re-admit it', () => {
+  // The wall branch falls to `delivered`; this one must not. Running the
+  // test's scripts in Chromium reproduces precisely the diverging render —
+  // that IS the measurement — so a stamp is not evidence of anything here.
+  const web = { ssim: 0.9394, wptPass: false };
+  assert.equal(
+    applyNaScoreGate(['browser-ref-divergent'], [web], [], true, true), true);
+  assert.equal(web.scoreExcluded, true);
+});
+
+test('wave29 S-RC3: it excludes even alongside a wall tag a stamp would re-admit', () => {
+  // Ordering pin: the ref-unachievable branch is checked FIRST, so a test
+  // carrying BOTH families cannot be re-admitted through the wall branch.
+  const web = { ssim: 0.9394, wptPass: false };
+  assert.equal(
+    applyNaScoreGate(['requires-script-mutation', 'browser-ref-divergent'],
+      [web], [], true, true), true);
+  assert.equal(web.scoreExcluded, true);
+});
+
+test('wave29 S-RC3: lossyReasons is never consulted for it', () => {
+  // Contrast requires-bundled-asset, which only excludes when the extractor
+  // corroborates. An empty lossy record must not un-exclude this tag.
+  const web = { ssim: 0.9394, wptPass: false };
+  assert.equal(applyNaScoreGate(['browser-ref-divergent'], [web], []), true);
+  const web2 = { ssim: 0.9394, wptPass: false };
+  assert.equal(applyNaScoreGate(['browser-ref-divergent'], [web2], ['percentage']), true);
+});
+
+test('wave29 S-RC3: a plain capability tag still scores (denominator intact)', () => {
+  // The wave-8 lesson pinned once more against the NEW branch: adding a
+  // third family must not start excluding the broad capability tags.
+  const web = { ssim: 0.80, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-runtime-selection'], [web], []), false);
+  assert.equal(web.wptPass, false);
+  assert.equal(web.scoreExcluded, undefined);
 });

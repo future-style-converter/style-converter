@@ -17,10 +17,11 @@ import assert from 'node:assert/strict';
 
 import { tagsForTest, classifyAll, RULES, RX } from './wpt-not-applicable.mjs';
 
-// ── Sanity: 41 rules (17 swarm-001 + 12 swarm-002 + 11 swarm-003 + 1 wave-21)
+// ── Sanity: 42 rules (17 swarm-001 + 12 swarm-002 + 11 swarm-003 + 1 wave-21
+//    requires-wpt-server + 1 wave-29 browser-ref-divergent)
 
-test('RULES exports exactly 41 entries', () => {
-    assert.equal(RULES.length, 41);
+test('RULES exports exactly 42 entries', () => {
+    assert.equal(RULES.length, 42);
 });
 
 test('RULES tags are unique', () => {
@@ -1195,6 +1196,78 @@ test('requires-anchor-positioning-runtime does NOT fire on plain position:absolu
     assert.equal(tagsForTest({ html }).includes('requires-anchor-positioning-runtime'), false);
 });
 
+// ── Rule 40, wave-29 detector-honesty widening (lane ANCHOR) ────────────────
+//
+// The original two-regex detector saw anchor positioning only as a property
+// NAME or a FUNCTION CALL. Two real corpus populations escaped it, both
+// measured in the wave28-final css-anchor-position section:
+//   * `align-self: anchor-center` with no other anchor syntax
+//     (anchor-center-002.html, anchor-center-no-default.html) — untagged,
+//     therefore never wall-gated and never post-load eligible;
+//   * `anchor-scope:` (anchor-center-overflow-00{1..5}) — those tests were
+//     tagged via their position-anchor declarations, so the miss was latent,
+//     but a test using anchor-scope alone would have escaped.
+// Each family gets its own pin so a regex edit cannot silently drop one.
+
+test('wave29: anchor tag fires on the bare align-self:anchor-center value', () => {
+    // anchor-center-002.html's whole anchor signal, verbatim in shape.
+    const html = '<div class="item" style="align-self: anchor-center"></div>';
+    assert.ok(tagsForTest({ html }).includes('requires-anchor-positioning-runtime'));
+});
+
+test('wave29: anchor tag fires on safe/unsafe-qualified anchor-center', () => {
+    // css-align-3 §5.1 overflow-alignment qualifier — anchor-center-safe.html
+    // uses BOTH `justify-self: safe anchor-center` and `align-self: safe
+    // anchor-center`. The optional-qualifier group must accept it.
+    for (const decl of ['justify-self: safe anchor-center',
+                        'align-self: unsafe anchor-center']) {
+        const html = `<style>.infobox { ${decl}; }</style>`;
+        assert.ok(tagsForTest({ html }).includes('requires-anchor-positioning-runtime'),
+            `expected anchor tag for "${decl}"`);
+    }
+});
+
+test('wave29: anchor tag fires on place-self / justify-items anchor-center', () => {
+    // anchor-center-overflow-001.html uses the `place-self` shorthand; the
+    // *-items content-distribution forms accept the keyword too.
+    for (const decl of ['place-self: anchor-center',
+                        'place-items: anchor-center',
+                        'justify-items: anchor-center',
+                        'align-items: anchor-center']) {
+        const html = `<style>.anchored { ${decl}; }</style>`;
+        assert.ok(tagsForTest({ html }).includes('requires-anchor-positioning-runtime'),
+            `expected anchor tag for "${decl}"`);
+    }
+});
+
+test('wave29: anchor tag fires on anchor-scope and position-visibility', () => {
+    for (const decl of ['anchor-scope: --tl, --tr',
+                        'position-visibility: anchors-visible']) {
+        const html = `<style>.container { ${decl}; }</style>`;
+        assert.ok(tagsForTest({ html }).includes('requires-anchor-positioning-runtime'),
+            `expected anchor tag for "${decl}"`);
+    }
+});
+
+test('wave29: anchor-center in prose/title text does NOT fire (false-positive guard)', () => {
+    // The exact title of anchor-center-002.html. WPT titles name the feature
+    // under test constantly, so a bare word-match on `anchor-center` would
+    // tag hundreds of unrelated files; the regex requires a property name +
+    // colon before the keyword.
+    const title = "<title>Tests that 'anchor-center' behaves as 'center' in non-OOF layout modes</title>";
+    assert.equal(tagsForTest({ html: title }).includes('requires-anchor-positioning-runtime'), false);
+    // Nor does the keyword as ordinary body text, or as a class name.
+    const body = '<div class="anchor-center">anchor-center</div>';
+    assert.equal(tagsForTest({ html: body }).includes('requires-anchor-positioning-runtime'), false);
+});
+
+test('wave29: plain center alignment does NOT fire the anchor tag', () => {
+    // anchor-center-002-ref.html is exactly this — the ref must stay
+    // untagged or the ref/test pair would diverge in eligibility.
+    const html = '<style>.item { align-self: center; justify-self: center; }</style>';
+    assert.equal(tagsForTest({ html }).includes('requires-anchor-positioning-runtime'), false);
+});
+
 // ── F-G-TAGS-2 widening: requires-script-mutation now matches .remove() ────
 
 test('requires-script-mutation fires on bare .remove() call (F-G-TAGS-2 widening)', () => {
@@ -1272,6 +1345,8 @@ test('RX export contains the swarm-003 regex panel keys', () => {
     assert.ok(RX.perspectiveLengthProp instanceof RegExp);
     assert.ok(RX.anchorPositionProp instanceof RegExp);
     assert.ok(RX.anchorFunctionCall instanceof RegExp);
+    // wave-29: the third anchor signal family (value-side anchor-center).
+    assert.ok(RX.anchorCenterValue instanceof RegExp);
 });
 
 // ── wave-13: Rule 20 stays pure; delivery-awareness lives downstream ────────
@@ -1354,4 +1429,127 @@ test('requires-script-mutation top-layer widening still ignores external <script
     // bucket-C's remote-resource rule, not this tag.
     const html = '<script src="support/popover-helper.js"></script>';
     assert.equal(tagsForTest({ html }).includes('requires-script-mutation'), false);
+});
+
+// ── Rule 42 (wave-29 S-RC3): browser-ref-divergent ──────────────────────────
+//
+// The one REF-UNACHIEVABLE rule: `color: transparent` + a `::selection` block
+// with no valid `color`, i.e. the pass condition is the OS-default highlight
+// FOREGROUND that Chromium declines to apply. Measured Chrome-vs-ref ceiling
+// on the four matching tests is 0.9394, under the 0.95 gate — see the rule's
+// banner in wpt-not-applicable.mjs for the full measurement.
+//
+// Four positives (one per authored flavour of "no valid color"), plus the two
+// same-family negatives that DO clear the gate, plus the boundary cases.
+
+// The shared prelude of active-selection-051..054: the meta assert spells the
+// selector out in PROSE, which is exactly what forces the detector to read
+// <style> blocks rather than the raw document.
+const SEL_PROSE = '<meta name="assert" content="the selector div::selection has an '
+    + 'invalid declaration block, so the UA should use the OS-default highlight colors">';
+
+test('Rule 42 fires on an UNKNOWN PROPERTY in the ::selection block (active-selection-051)', () => {
+    const html = SEL_PROSE
+        + '<style>div { color: transparent; font-size: 300%; } div::selection { foo: bar; }</style>'
+        + '<div id="test">Selected Text</div>';
+    assert.ok(tagsForTest({ html }).includes('browser-ref-divergent'));
+});
+
+test('Rule 42 fires on an EMPTY ::selection block (active-selection-052)', () => {
+    const html = SEL_PROSE
+        + '<style>div { color: transparent; font-size: 300%; } div::selection { }</style>'
+        + '<div id="test">Selected Text</div>';
+    assert.ok(tagsForTest({ html }).includes('browser-ref-divergent'));
+});
+
+test('Rule 42 fires on an INVALID color VALUE in the ::selection block (active-selection-053)', () => {
+    // `foo` is not a colour — this is the case the CSS_NAMED_COLORS table
+    // exists for (a partial table would have to guess, and guessing "valid"
+    // here would silently drop the exclusion).
+    const html = SEL_PROSE
+        + '<style>div { color: transparent; } div::selection { color: foo; }</style>'
+        + '<div id="test">Selected Text</div>';
+    assert.ok(tagsForTest({ html }).includes('browser-ref-divergent'));
+});
+
+test('Rule 42 fires when only an invalid BACKGROUND-color is declared (active-selection-054)', () => {
+    // `background-color: bar` leaves the FOREGROUND unspecified, which is the
+    // signal — and the `(?<![-\w])` lookbehind must not read the hyphenated
+    // property as the `color` declaration signal 2 looks for.
+    const html = SEL_PROSE
+        + '<style>div { color: transparent; } div::selection { background-color: bar; }</style>'
+        + '<div id="test">Selected Text</div>';
+    assert.ok(tagsForTest({ html }).includes('browser-ref-divergent'));
+});
+
+test('Rule 42 does NOT fire when the ::selection block declares a real color (active-selection-056 shape)', () => {
+    // -056 measures 1.0000 against its ref: the author pinned the highlight
+    // colours, so no OS default is consulted and nothing diverges.
+    const html = '<style>div { font-size: 100px; } '
+        + 'div::selection { background-color: transparent; color: red; }</style>'
+        + '<div id="test">&nbsp;<br><br></div>';
+    assert.equal(tagsForTest({ html }).includes('browser-ref-divergent'), false);
+});
+
+test('Rule 42 does NOT fire without a `color: transparent` (active-selection-057 shape)', () => {
+    // -057 measures 0.9543 — it clears the gate. Its ::selection rules carry
+    // `color: red` and only BACKGROUND-color is transparent, so BOTH signals
+    // are absent; either absence alone must be enough to decline.
+    const html = '<style>div#subtest1 { background-color: transparent; height: 100px; } '
+        + 'div#subtest1::selection { color: red; }</style>'
+        + '<div id="subtest1">&nbsp;</div>';
+    assert.equal(tagsForTest({ html }).includes('browser-ref-divergent'), false);
+});
+
+test('Rule 42 does NOT fire on `color: transparent` with no ::selection rule at all', () => {
+    // Signal 2 missing: transparent text is just invisible text — nothing
+    // about the ref is unreachable.
+    const html = '<style>div { color: transparent; }</style><div>x</div>';
+    assert.equal(tagsForTest({ html }).includes('browser-ref-divergent'), false);
+});
+
+test('Rule 42 does NOT fire on a ::selection rule with no `color: transparent` anywhere', () => {
+    // Signal 1 missing: the selected text is visible from its own colour, so
+    // the OS highlight FOREGROUND never decides the render.
+    const html = '<style>div { color: black; } div::selection { }</style><div>x</div>';
+    assert.equal(tagsForTest({ html }).includes('browser-ref-divergent'), false);
+});
+
+test('Rule 42 treats system colors, CSS-wide keywords and functional notations as valid colors', () => {
+    // Each of these is a real `color` value, so each must decline. If any were
+    // misread as invalid the exclusion would over-fire onto a scorable test.
+    for (const value of ['Highlight', 'inherit', 'currentColor', 'rebeccapurple',
+                         '#3838e0c0', 'var(--a)', 'light-dark(green, blue)',
+                         'color-mix(in srgb, red, blue)']) {
+        const html = `<style>div { color: transparent; } div::selection { color: ${value}; }</style>`;
+        assert.equal(tagsForTest({ html }).includes('browser-ref-divergent'), false,
+            `expected '${value}' to count as a valid color`);
+    }
+});
+
+test('Rule 42 reads STYLE BLOCKS ONLY — the meta-assert prose cannot arm or disarm it', () => {
+    // The prose alone (no <style>) must not fire: with no stylesheet there is
+    // no `color: transparent` and no ::selection rule, only words about them.
+    assert.equal(tagsForTest({ html: SEL_PROSE }).includes('browser-ref-divergent'), false);
+    // And prose declaring a colour must not DISARM a stylesheet that omits
+    // one — the `color: red` below lives in the meta content, not the sheet.
+    const armed = '<meta name="assert" content="div::selection { color: red }">'
+        + '<style>div { color: transparent; } div::selection { }</style>';
+    assert.ok(tagsForTest({ html: armed }).includes('browser-ref-divergent'));
+});
+
+test('Rule 42 ignores a COMMENTED-OUT ::selection color (css-syntax-3 comment stripping)', () => {
+    // The comment is not a declaration; the block still supplies no colour.
+    const html = '<style>div { color: transparent; } '
+        + 'div::selection { /* color: red; */ }</style>';
+    assert.ok(tagsForTest({ html }).includes('browser-ref-divergent'));
+});
+
+test('Rule 42 handles a ::selection SELECTOR LIST as one block (active-selection-057 prelude shape)', () => {
+    // `a::selection , b::selection { … }` must be read as a single rule whose
+    // one declaration block is inspected once — the `[^{}]*` between pseudo
+    // and brace can never cross a brace, so the prelude stays intact.
+    const html = '<style>div { color: transparent; } '
+        + 'div#a::selection , hr#b::selection { color: lime; }</style>';
+    assert.equal(tagsForTest({ html }).includes('browser-ref-divergent'), false);
 });

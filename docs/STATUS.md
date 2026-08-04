@@ -529,6 +529,29 @@ dirs + WPT corpus are gitignored):
   eligibility extension is the queued cheap path). 24 sections, 277
   scored; zero regressions; 327-net clean. Totals: **web 231/277, iOS
   212/277, Android 204/277**.
+  Wave 29 (`tools/titan/results/corpus-v5-4.json`) was the honesty
+  triad. **css-pseudo web 4→7/7 (perfect)**: docs with an *unclosed*
+  `<body ...>` start tag fell through `locateBodyContent` and rendered
+  as a phantom 100×100 box — fixed with a guarded step 1.5 (non-markup
+  masking + before-body prefix check), plus `&NewLine;`/`&Tab;` named
+  references and a post-load `_pseudo`-bag re-derivation through the
+  same extractFixture round-trip (class-only mutations now land).
+  The four `active-selection-051..054` tests joined the new
+  `REF_UNACHIEVABLE_TAGS` family (Rule 42 `browser-ref-divergent`):
+  Chromium itself fails those reftests, so no runtime score against the
+  ref is meaningful — unconditional exclusion, no stamp re-admits.
+  css-anchor-position honest at 2/3 ×3: a crux probe proved Chromium
+  never folds the anchor-center alignment shift into serialized insets
+  (up to 50px), so the bake *cannot* deliver that family — the new
+  `anchorInsetMismatch` guard bails (`anchor-inset-undeliverable`)
+  rather than minting dishonest geometry; `calc(anchor())` cases do
+  serialize as used offsets and pass. Android marker-row pitch fixed
+  on-device (34→31px, matching web/iOS). selectors joined at first
+  capture: 6/6/5 of 12, every failure a 0.95–0.999 near-miss veto (the
+  `:dir()` family is queued diagnosis material). 25 sections, 279
+  scored; zero regressions; 327-net clean. Totals: **web 241/279, iOS
+  220/279, Android 213/279**. Seven web-perfect sections; six perfect
+  on all three platforms.
 
 ## Test suites
 
@@ -536,9 +559,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 237 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1095 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1771 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1783 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1035 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1019 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1075 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

@@ -106,13 +106,36 @@ class ListMarkerTextStyleTest {
     }
 
     @Test
-    fun `an empty inherited style narrows to an empty marker style`() {
+    fun `an empty inherited style narrows to an empty marker style plus Inter`() {
         // The renderer's failure fallback: a malformed typography payload
         // yields TextStyle(), and forItem must not invent anything from it
         // — the marker then paints at the platform default exactly as it
-        // did before this lane, rather than vanishing.
+        // did before wave 27, rather than vanishing.
+        //
+        // WAVE 29 (lane MP) — with ONE deliberate exception, the font
+        // FAMILY. It used to be `TextStyle()` verbatim; the family is now
+        // the bundled Inter, which is what the ITEM's own text run has
+        // always bottomed out at (ComponentRenderer's placeholder branches:
+        // `textStyle.fontFamily ?: InterFontFamily`). A null family is not
+        // "the item's font" — it is Compose's SYSTEM face, so the same CSS
+        // `font-family` produced two different primary faces for marker and
+        // item, and hence two different natural line boxes on the row.
+        // css-lists-3 §3.2 makes the marker inherit from its originating
+        // element, so it must land on the item's face, not the platform's.
         val marker = ListMarkerTextStyle.forItem(TextStyle())
-        assertEquals(TextStyle(), marker)
+        assertEquals(
+            TextStyle(fontFamily = com.styleconverter.runtime.typography.InterFontFamily),
+            marker)
+    }
+
+    @Test
+    fun `a declared family beats the Inter bottom-out`() {
+        // The bottom-out is only for the UNDECLARED case. An author
+        // `font-family` is "Inherited: yes" (css-fonts-4 §1.1) and reaches
+        // the marker through the container's merged style — substituting
+        // Inter for it would be a silent override, not a fallback.
+        val marker = ListMarkerTextStyle.forItem(itemStyle)
+        assertEquals(FontFamily.Serif, marker.fontFamily)
     }
 
     @Test

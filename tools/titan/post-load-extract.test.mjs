@@ -27,12 +27,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
+// skeptic-29: the linked-stylesheet gate pins write a throwaway corpus tree.
+import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   POST_LOAD_COMPUTED_PROPERTIES, WRITE_RULES, SHORTHAND_CONFLICTS,
-  TOP_LAYER_API_RX, postLoadDecline, hasWallTag,
+  TOP_LAYER_API_RX, postLoadDecline, hasWallTag, anchorInsetMismatch,
   flattenStaticPaths, staticPathsForHtml,
   mappingMismatch, snapshotsStable,
   componentAtPath, overlayComputedOnComponent, mergePostLoadIntoFixture,
@@ -200,6 +203,72 @@ test('post-load: hasWallTag fires on exactly the extraction-wall tags', () => {
   assert.equal(hasWallTag(['requires-float-layout']), false);
   assert.equal(hasWallTag([]), false);
   assert.equal(hasWallTag(undefined), false);
+});
+
+test('post-load: wave-29 anchor tag activates the bake', () => {
+  // Admitting requires-anchor-positioning-runtime to EXTRACTION_WALL_TAGS is
+  // what makes the css-anchor-position population eligible for the bake at
+  // all — the exclusion (applyNaScoreGate) and the remedy (this activation)
+  // read ONE set, so they can never disagree about which tests need
+  // delivery. Pinned so a revert of the wall entry breaks activation loudly.
+  assert.equal(hasWallTag(['requires-anchor-positioning-runtime']), true);
+  // The anchor-center-scroll-* trio carries BOTH tags: still activated here
+  // (either tag suffices), and it is the bake's own NO-SCROLL-OFFSETS scope
+  // boundary — not activation — that bails them back to the static path.
+  assert.equal(hasWallTag(
+    ['requires-anchor-positioning-runtime', 'requires-script-driven-scroll']), true);
+});
+
+// ── 3b. wave-29 anchor-inset delivery guard ─────────────────────────────────
+//
+// The bake rests on "for an out-of-flow box the CSSOM resolved inset IS the
+// used inset". MEASURED counter-example (pinned headless Chromium,
+// css-anchor-position/anchor-center-overflow-001): an `.anchored { inset:
+// 6px; place-self: anchor-center }` box resolves left "6px" but PAINTS 24px
+// from its containing block's padding edge. Baking the resolved string would
+// misplace it by 18px and stamp the fixture delivered — re-admitting the
+// test to scoring on geometry the harness got wrong. anchorInsetMismatch is
+// the valve; these pins are its contract.
+
+test('post-load: anchorInsetMismatch is null when no anchored box was probed', () => {
+  // The entire pre-wave-29 corpus: the walker writes null for every element
+  // that is not an anchor-aligned out-of-flow box, so the guard must be a
+  // strict no-op there (this is what makes the change non-regressive).
+  assert.equal(anchorInsetMismatch([]), null);
+  assert.equal(anchorInsetMismatch([{ path: [0], anchorInsetDelta: null }]), null);
+  assert.equal(anchorInsetMismatch([{ path: [0] }]), null);   // field absent
+  assert.equal(anchorInsetMismatch(undefined), null);          // no records
+});
+
+test('post-load: anchorInsetMismatch passes boxes that land where they resolve', () => {
+  // anchor-center-safe / anchor-center-no-default: anchor() insets and
+  // static-position anchor-center DO serialize as the used offset, so the
+  // bake genuinely delivers and the test must be re-admitted.
+  assert.equal(anchorInsetMismatch([
+    { path: [0], anchorInsetDelta: [0, 0] },
+    { path: [1], anchorInsetDelta: [0.25, -0.5] },   // sub-pixel: still fine
+  ]), null);
+});
+
+test('post-load: anchorInsetMismatch fires on a pre-alignment inset', () => {
+  // The overflow family's shape: some boxes fine, some off by whole pixels.
+  const msg = anchorInsetMismatch([
+    { path: [0, 0, 0], anchorInsetDelta: [0, 0] },
+    { path: [0, 0, 3], anchorInsetDelta: [0, -18] },  // the measured 18px
+  ]);
+  assert.ok(msg, 'expected a mismatch description');
+  assert.match(msg, /1\/2 anchor-aligned boxes/);
+  assert.match(msg, /worst 18\.00px/);
+  assert.match(msg, /path 0\.0\.3/);                  // locatable in the DOM
+});
+
+test('post-load: anchorInsetMismatch takes the worst of the two axes', () => {
+  // A box correct in the block axis but wrong in the inline axis is wrong.
+  assert.ok(anchorInsetMismatch([{ path: [1], anchorInsetDelta: [0, 76.59] }]));
+  assert.ok(anchorInsetMismatch([{ path: [1], anchorInsetDelta: [-50, 0] }]));
+  // Tolerance is caller-overridable but defaults to half a device pixel.
+  assert.equal(anchorInsetMismatch([{ path: [1], anchorInsetDelta: [0.5, 0] }]), null);
+  assert.ok(anchorInsetMismatch([{ path: [1], anchorInsetDelta: [0.51, 0] }]));
 });
 
 // ── 4. Traversal identity ───────────────────────────────────────────────────
@@ -973,4 +1042,204 @@ test('post-load bd-rc4: percentage and elliptical corners survive verbatim', () 
   assert.equal(cmp.properties['border-top-left-radius'], '10px 20px');
   assert.equal(cmp.properties['border-top-right-radius'], '50%');
   assert.equal(cmp.properties['border-bottom-right-radius'], undefined);
+});
+
+// ── 11. wave-29 S-RC5: the POST-LOAD PSEUDO BAG ─────────────────────────────
+//
+// The hole these pin: a pseudo bag is a SELECTOR-MATCH RESULT over the host's
+// attributes, not structure — so a class-only mutation changes it while the
+// element walk stays identical, the cheap overlay path runs, and the bag was
+// left at its PRE-mutation value inside a fixture stamped
+// `postLoadExtracted: true`. Measured on css-pseudo/before-dynamic-display-none
+// (`#id::before{content:"FAIL";…red}` + `#id.none::before{display:none}` +
+// `id.className = "none"`): the delivered fixture still carried the 100x100
+// red FAIL box the test exists to prove is gone.
+//
+// The pure surface is pinned here; the live browser round-trip
+// (rePseudoFromLivePage) is exercised by the env-gated end-to-end section
+// above and by running the extractor against the corpus.
+
+import {
+  hasPseudoElementRules, flattenComponents, linkedCssTextFor,
+  pseudoRemapMismatch, applyPostLoadPseudoBags, unionLossyRecord,
+} from './post-load-extract.mjs';
+
+test('S-RC5 gate: hasPseudoElementRules fires on every buildable pseudo name', () => {
+  // The three names buildComponents can build a bag from, in both the CSS3
+  // `::` and the CSS2 legacy `:` spelling.
+  for (const sel of ['#id::before', '#id::after', 'li::marker',
+                     '#id:before', '#id:after']) {
+    assert.ok(hasPseudoElementRules(`<style>${sel} { content: "x" }</style>`), sel);
+  }
+});
+
+test('S-RC5 gate: hasPseudoElementRules declines when no pseudo rule exists', () => {
+  // This is the cost guard: it keeps the extra page.evaluate + re-extraction
+  // off the ~99% of wall-tagged tests with no generated content at all.
+  assert.equal(hasPseudoElementRules('<style>div { color: red }</style><div>x</div>'), false);
+  // A pseudo-CLASS is not a pseudo-ELEMENT and must not arm the gate.
+  assert.equal(hasPseudoElementRules('<style>li:first-child { color: red }</style>'), false);
+});
+
+test('S-RC5 gate: a COMMENTED-OUT pseudo rule does not cost a round-trip', () => {
+  assert.equal(hasPseudoElementRules('<!-- #id::before { content: "x" } -->'), false);
+});
+
+test('S-RC5: flattenComponents walks the nested children maps', () => {
+  const fixture = { components: {
+    s__0: { properties: {} },
+    s__1: { properties: {}, children: {
+      s__1__0: { properties: {} },
+      s__1__1: { properties: {}, children: { s__1__1__0: { properties: {} } } },
+    } },
+  } };
+  assert.deepEqual([...flattenComponents(fixture).keys()],
+    ['s__0', 's__1', 's__1__0', 's__1__1', 's__1__1__0']);
+  // Defensive: a fixture with no components is an empty map, not a throw.
+  assert.equal(flattenComponents({}).size, 0);
+});
+
+test('S-RC5: pseudoRemapMismatch accepts identical ID spaces, rejects drift', () => {
+  assert.equal(pseudoRemapMismatch(['a', 'b'], ['a', 'b']), null);
+  // Count drift — the common signal when the serialized DOM re-parses into a
+  // different tree than the live walk saw.
+  assert.match(pseudoRemapMismatch(['a', 'b'], ['a']), /component count: static 2 vs post-load 1/);
+  // Positional drift at equal counts.
+  assert.match(pseudoRemapMismatch(['a', 'b'], ['a', 'c']), /id\[1\]: static b vs post-load c/);
+});
+
+test('S-RC5: applyPostLoadPseudoBags REPLACES a stale bag (before-dynamic-display-none)', () => {
+  // The measured shape: static match on `class="open"` gives the FAIL box;
+  // the post-load match on `class="none"` adds the `display: none` that
+  // removes it.
+  const stale = { properties: {}, _pseudo: { before: { properties: {
+    content: '"FAIL"', position: 'absolute', width: '100px',
+    height: '100px', 'background-color': 'red',
+  } } } };
+  const original = new Map([['x__0', stale]]);
+  const fresh = new Map([['x__0', { _pseudo: { before: { properties: {
+    content: '"FAIL"', position: 'absolute', width: '100px',
+    height: '100px', 'background-color': 'red', display: 'none',
+  } } } }]]);
+  assert.equal(applyPostLoadPseudoBags(original, fresh), 1);
+  assert.equal(stale._pseudo.before.properties.display, 'none');
+});
+
+test('S-RC5: applyPostLoadPseudoBags ADDS a bag the mutation newly matched', () => {
+  const cmp = { properties: {} };                       // no bag statically
+  const original = new Map([['x__0', cmp]]);
+  const fresh = new Map([['x__0', { _pseudo: { after: { properties: { content: '"OK"' } } } }]]);
+  assert.equal(applyPostLoadPseudoBags(original, fresh), 1);
+  assert.deepEqual(cmp._pseudo, { after: { properties: { content: '"OK"' } } });
+});
+
+test('S-RC5: applyPostLoadPseudoBags DELETES a bag the mutation stopped matching', () => {
+  const cmp = { properties: {}, _pseudo: { before: { properties: { content: '"X"' } } } };
+  const original = new Map([['x__0', cmp]]);
+  const fresh = new Map([['x__0', { properties: {} }]]);  // no bag post-load
+  assert.equal(applyPostLoadPseudoBags(original, fresh), 1);
+  assert.equal('_pseudo' in cmp, false, 'stale key left behind');
+});
+
+test('S-RC5: an unchanged bag is a NO-OP (byte-identical fixture)', () => {
+  const bag = { before: { properties: { content: '"X"' } } };
+  const cmp = { properties: {}, _pseudo: bag };
+  const original = new Map([['x__0', cmp]]);
+  // Deep-equal but distinct object — the value compare must see them as same.
+  const fresh = new Map([['x__0', { _pseudo: { before: { properties: { content: '"X"' } } } }]]);
+  assert.equal(applyPostLoadPseudoBags(original, fresh), 0);
+  assert.equal(cmp._pseudo, bag, 'object identity replaced on a no-op');
+});
+
+test('S-RC5: applyPostLoadPseudoBags touches nothing but _pseudo', () => {
+  // `properties` belongs to the computed overlay that runs next;
+  // `_text`/`_tag`/`_attrs`/`children` are structural identity mappingMismatch
+  // already proved unchanged.
+  const cmp = { properties: { color: 'red' }, _text: 'PASS', _tag: 'div',
+                _attrs: { type: 'checkbox' }, children: { 'x__0__0': {} } };
+  applyPostLoadPseudoBags(new Map([['x__0', cmp]]),
+    new Map([['x__0', { properties: { color: 'blue' }, _text: 'other',
+                        _pseudo: { before: { properties: {} } } }]]));
+  assert.deepEqual(cmp.properties, { color: 'red' });
+  assert.equal(cmp._text, 'PASS');
+  assert.equal(cmp._tag, 'div');
+  assert.deepEqual(cmp._attrs, { type: 'checkbox' });
+  assert.deepEqual(Object.keys(cmp.children), ['x__0__0']);
+});
+
+test('S-RC5: unionLossyRecord ADDS reasons and never subtracts them', () => {
+  // Direction pin: a reason belonging to a bag the mutation removed cannot be
+  // attributed back (the static record is a flat set), and over-reporting is
+  // the safe error — applyNaScoreGate only reads lossyReasons to CONFIRM a
+  // requires-bundled-asset exclusion, so an extra reason cannot promote a
+  // test into the scored set.
+  const fixture = { _wpt: { lossy: false, lossyReasons: ['percentage'] } };
+  unionLossyRecord(fixture, { _wpt: { lossy: true, lossyReasons: ['sampled-animation'] } });
+  assert.deepEqual(fixture._wpt.lossyReasons.sort(), ['percentage', 'sampled-animation']);
+  assert.equal(fixture._wpt.lossy, true);
+  // An already-lossy fixture stays lossy even when the re-extraction is clean.
+  const f2 = { _wpt: { lossy: true, lossyReasons: ['percentage'] } };
+  unionLossyRecord(f2, { _wpt: { lossy: false, lossyReasons: [] } });
+  assert.equal(f2._wpt.lossy, true);
+  assert.deepEqual(f2._wpt.lossyReasons, ['percentage']);
+});
+
+// ── skeptic-29: the S-RC5 gate must see LINKED stylesheets ──────────────────
+//
+// hasPseudoElementRules is handed a string and can only see that string. The
+// wave-29 gate was handed the raw test source alone, so a test whose only
+// ::before rule lives in a `<link rel=stylesheet>` sheet skipped the whole
+// pseudo re-derivation — the exact stale-bag bug S-RC5 exists to fix — while
+// the fixture was still stamped postLoadExtracted:true. Measured corpus reach
+// was 1 wall-tagged test, so these pins guard a hole rather than a fire.
+
+test('skeptic-29: linkedCssTextFor resolves test-relative and corpus-absolute hrefs', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'plx-linked-'));
+  const wptDir = join(dir, 'wpt');
+  await mkdir(join(wptDir, 'css', 'sub'), { recursive: true });
+  await mkdir(join(wptDir, 'shared'), { recursive: true });
+  // A test-RELATIVE sheet next to the test, and a corpus-ABSOLUTE one at /shared.
+  await writeFile(join(wptDir, 'css', 'sub', 'local.css'), '#a::before { content: "L" }');
+  await writeFile(join(wptDir, 'shared', 'g.css'), '#b::after { content: "G" }');
+  const testAbs = join(wptDir, 'css', 'sub', 't.html');
+  const html = '<link rel="stylesheet" href="local.css">'
+             + '<link rel="stylesheet" href="/shared/g.css">'
+             + '<link rel="stylesheet" href="https://example.test/remote.css">'
+             + '<link rel="stylesheet" href="missing.css">'
+             + '<div id=a></div>';
+  // WPT_DIR is read at module load, so drive the absolute leg through a
+  // child process that sets it — the relative leg is checked in-process.
+  const relOnly = await linkedCssTextFor(
+    '<link rel="stylesheet" href="local.css"><link rel="stylesheet" href="missing.css">', testAbs);
+  assert.match(relOnly, /#a::before/);            // resolved next to the test
+  assert.ok(hasPseudoElementRules(relOnly));      // …and it arms the gate
+  // A missing sheet is tolerated (no throw) and a remote one is skipped —
+  // both mirror extractFixture's own loop.
+  const noneReadable = await linkedCssTextFor(
+    '<link rel="stylesheet" href="https://example.test/x.css">'
+    + '<link rel="stylesheet" href="nope.css">', testAbs);
+  assert.equal(hasPseudoElementRules(noneReadable), false);
+  assert.equal(typeof noneReadable, 'string');
+  // The full html above still parses without throwing.
+  assert.equal(typeof (await linkedCssTextFor(html, testAbs)), 'string');
+  await rm(dir, { recursive: true, force: true });
+});
+
+test('skeptic-29: the gate arms on a linked-only pseudo rule, and only then', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'plx-linked2-'));
+  await writeFile(join(dir, 'pseudo.css'), '.x::marker { color: red }');
+  await writeFile(join(dir, 'plain.css'), '.x { color: red }');
+  const testAbs = join(dir, 't.html');
+  // Source alone: no pseudo rule anywhere in the HTML text.
+  const src = '<link rel="stylesheet" href="pseudo.css"><ul><li class=x>a</li></ul>';
+  assert.equal(hasPseudoElementRules(src), false,
+    'the raw source must NOT arm the gate — that is the whole hole');
+  assert.ok(hasPseudoElementRules(await linkedCssTextFor(src, testAbs)),
+    'the linked sheet must arm it');
+  // Control: a linked sheet with no pseudo rule must still decline, so the
+  // fix cannot turn the gate into "always run" (its cost guard would be gone).
+  const src2 = '<link rel="stylesheet" href="plain.css"><ul><li class=x>a</li></ul>';
+  assert.equal(hasPseudoElementRules(src2), false);
+  assert.equal(hasPseudoElementRules(await linkedCssTextFor(src2, testAbs)), false);
+  await rm(dir, { recursive: true, force: true });
 });
