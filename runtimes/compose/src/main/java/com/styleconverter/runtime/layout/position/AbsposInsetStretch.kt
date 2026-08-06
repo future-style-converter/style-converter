@@ -64,9 +64,29 @@ object AbsposInsetStretch {
      *    explicit-size + ratio boxes (abspos-001/002) keep the existing
      *    SizingApplier aspect-ratio path untouched, and every committed
      *    baseline render is byte-identical.
+     *  - S5 (wave 31, css-tables-3 §"Abspos tables"): a TABLE box's
+     *    available space "can never exceed the available space of the
+     *    containing block" (the assert text of css-tables/
+     *    absolute-tables-008…011). The inset-modified containing block is
+     *    NOT that bound: a NEGATIVE start inset makes cb − start − end
+     *    LARGER than cb, and a table — unlike a block — does not stretch
+     *    into it. Measured on absolute-tables-009 (cb 100×100, `left:
+     *    -100; right: 0`): S1 hands 100 − (−100) − 0 = 200, and both
+     *    natives painted a 200×100 green band where the Chromium ref
+     *    paints 100×100 (frozen captures, wave30-final/sections/
+     *    css-tables — Android 0.9398 FAIL, iOS 0.9503). Clamping the
+     *    candidate to the containing-block extent reproduces the ref.
+     *    Applies to TABLE boxes ONLY (`isTable`) so every non-table
+     *    abspos stretch — the whole css-position / css-sizing baseline —
+     *    stays byte-identical; a block box legitimately stretches past
+     *    its containing block under a negative inset (css-position-3
+     *    §3.5.3 has no such clamp).
      *
      * All parameters are px in the runtime's px==dp space; `ratio` is
-     * CSS width/height (> 0), null when absent or auto-only.
+     * CSS width/height (> 0), null when absent or auto-only. `isTable`
+     * is the css-display-3 table-ish classification of THIS box (see
+     * [isTableBox]) and defaults to false so every pre-wave-31 call site
+     * keeps S1 verbatim.
      */
     fun resolve(
         cbW: Double?, cbH: Double?,
@@ -74,14 +94,19 @@ object AbsposInsetStretch {
         explicitW: Double?, explicitH: Double?,
         hasExplicitW: Boolean, hasExplicitH: Boolean,
         ratio: Double?,
+        isTable: Boolean = false,
     ): Resolved {
         // S1 — per-axis stretch candidates. coerceAtLeast(0): a box whose
         // insets exceed the containing block clamps to zero, never
         // negative (css-position-3 §3.5.3's over-constrained floor).
+        // S5 folds in as a per-axis ceiling: for a table the candidate may
+        // never exceed the containing block's own extent (css-tables-3).
+        fun clampToCb(candidate: Double, cb: Double) =
+            if (isTable) minOf(candidate, cb) else candidate
         val stretchW = if (!hasExplicitW && left != null && right != null && cbW != null)
-            (cbW - left - right).coerceAtLeast(0.0) else null
+            clampToCb((cbW - left - right).coerceAtLeast(0.0), cbW) else null
         val stretchH = if (!hasExplicitH && top != null && bottom != null && cbH != null)
-            (cbH - top - bottom).coerceAtLeast(0.0) else null
+            clampToCb((cbH - top - bottom).coerceAtLeast(0.0), cbH) else null
         // S4 — identity guard: no stretch anywhere → nothing to inject.
         if (stretchW == null && stretchH == null) return NONE
         // S2 — start from the plain stretch result.
@@ -161,7 +186,53 @@ object AbsposInsetStretch {
         return side.second
     }
 
-    fun inject(properties: List<IRProperty>, cb: ContainingBlock): List<IRProperty> {
+    /**
+     * Is this box a TABLE box for S5's purposes (css-display-3 §2:
+     * `table` and `inline-table` both generate a table wrapper box, and
+     * css-tables-3's abspos available-space rule is written against the
+     * table box, not the caption/row/cell internals)?
+     *
+     * Two channels, in css-cascade order:
+     *  1. A DECLARED `Display` always wins. Read from the raw wire
+     *     because the runtime's DisplayConfig enum predates the table
+     *     lane and folds several table-internal keywords together; the
+     *     serialized keyword is the honest source (the converter emits
+     *     SCREAMING_SNAKE — `"TABLE"` / `"INLINE_TABLE"`). Last
+     *     declaration wins, matching every other reader in this file.
+     *     A declared non-table display makes this NOT a table even on a
+     *     `<table>` element (css-display-3 §2).
+     *  2. With NO declared display, the originating tag's UA default
+     *     decides — `<table>` is `display: table` per the HTML UA
+     *     stylesheet, and the converter does NOT serialize UA defaults.
+     *     This channel is load-bearing, not belt-and-braces: the live
+     *     absolute-tables-008…011 IRs carry the table ONLY as
+     *     `meta.sourceTag: "table"` with no Display property at all
+     *     (absolute-tables-016 is the one that declares `display:
+     *     table` in author CSS), so S5 would never fire on the very
+     *     tests it was measured against. `tag` is [IRComponent._tag].
+     *
+     * Anything else is NOT a table — S5 then never fires and S1 is
+     * byte-identical.
+     *
+     * Twin: AbsposInsetStretch.isTableBox(from:tag:) on iOS.
+     */
+    fun isTableBox(properties: List<IRProperty>, tag: String? = null): Boolean {
+        val kw = (properties.lastOrNull { it.type == "Display" }?.data as? JsonPrimitive)
+            ?.contentOrNull
+        if (kw != null) {
+            return kw.equals("TABLE", ignoreCase = true) ||
+                kw.equals("INLINE_TABLE", ignoreCase = true)
+        }
+        // UA default. Only `<table>` maps to `display: table`; no HTML
+        // element defaults to `inline-table`.
+        return tag?.equals("table", ignoreCase = true) == true
+    }
+
+    fun inject(
+        properties: List<IRProperty>,
+        cb: ContainingBlock,
+        tag: String? = null,
+    ): List<IRProperty> {
         // Author sizes: any recognized Width/Height (or logical alias)
         // that isn't `auto` counts as explicit; exact px carries a value
         // for the ratio step, non-px explicit (min-content/…) blocks
@@ -196,6 +267,9 @@ object AbsposInsetStretch {
             explicitW = wPx, explicitH = hPx,
             hasExplicitW = hasW, hasExplicitH = hasH,
             ratio = ratio,
+            // S5 — the css-tables-3 available-space ceiling applies to
+            // table boxes only; every other box keeps S1 verbatim.
+            isTable = isTableBox(properties, tag),
         )
         // Identity out when nothing resolved (S4) — keeps remember{} keys
         // and every downstream fast path stable.

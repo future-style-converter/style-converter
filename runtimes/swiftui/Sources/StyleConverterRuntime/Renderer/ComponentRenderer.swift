@@ -851,7 +851,17 @@ public struct ComponentRenderer: View {
                     size: s.size,
                     inset: AbsposInsetStretch.strictInsets(from: component.properties),
                     cbW: containingBlockWidth.map(Double.init),
-                    cbH: containingBlockHeight.map(Double.init))
+                    cbH: containingBlockHeight.map(Double.init),
+                    // Wave 31 (lane T) — S5's css-tables-3 available-space
+                    // ceiling. Table-only, so every non-table abspos
+                    // stretch keeps the wave-18 result byte-identically.
+                    // `meta.sourceTag` supplies the UA display: the live
+                    // absolute-tables-008…011 IRs carry `<table>` with NO
+                    // Display property, so the declared-keyword channel
+                    // alone never sees them.
+                    isTable: AbsposInsetStretch.isTableBox(
+                        from: component.properties,
+                        tag: component.meta?.sourceTag))
                 // Fill ONLY the still-auto axes — resolve() never returns
                 // a value for an author-sized axis, but the nil-guard here
                 // keeps the invariant local and obvious.
@@ -860,6 +870,57 @@ public struct ComponentRenderer: View {
                 }
                 if let h = stretch.heightPx, s.size.height == nil {
                     s.size.height = .exact(px: h)
+                }
+                // Wave 31 (lane T) — CSS 2.1 §10.3.7 / §10.6.4 AUTO-MARGIN
+                // resolution, one step after the stretch so the used size
+                // it reads is final (the spec order too). Solves the auto
+                // margins arithmetically and folds the START margin into
+                // the start inset, so anchoredInsetOffset paints the used
+                // position; the auto margins are then zeroed so
+                // MarginApplier's frame-expanding H/VAutoFrameModifier —
+                // which can only ever produce the symmetric,
+                // inset-ignoring answer — cannot re-apply the same rule.
+                // Identity (Fold.none) for every box whose split is 0/0 or
+                // whose axis has an auto inset/size, which is the entire
+                // corpus except css-tables/absolute-tables-016.
+                let autoMargin = AbsposAutoMargin.resolveFor(
+                    margin: s.spacing.margin,
+                    size: s.size,
+                    inset: AbsposInsetStretch.strictInsets(from: component.properties),
+                    cbW: containingBlockWidth.map(Double.init),
+                    cbH: containingBlockHeight.map(Double.init))
+                // The `s.layout7 != nil` guard is not defensive noise: the
+                // aggregate is where `position: absolute` itself lives, so
+                // a nil one on a box the isOutOfFlow gate accepted would
+                // mean the two readers disagree — synthesising an empty
+                // aggregate here would silently DEMOTE the box to static.
+                // Nil therefore degrades to the pre-wave-31 render, which
+                // is the honest answer (and unreachable in the corpus).
+                if !autoMargin.isNone, s.layout7 != nil {
+                    // The inset write-back rides layout7 — the same
+                    // InsetRect PositionApplier reads for the anchored
+                    // offset. A nil axis is left exactly as extracted.
+                    var rect = s.layout7?.inset ?? InsetRect()
+                    if let l = autoMargin.leftPx { rect.left = l }
+                    if let t = autoMargin.topPx { rect.top = t }
+                    s.layout7?.inset = rect
+                    // Zero the solved margins, PER SIDE. Deliberately ZERO
+                    // rather than the solved values: a margin renders as a
+                    // real outer `.padding` band here, so writing the
+                    // solved 30px would grow the footprint on top of the
+                    // inset fold that already carries the whole
+                    // displacement — an out-of-flow box's used position
+                    // depends only on the START margin, now inside `rect`.
+                    //
+                    // Only sides that were genuinely `auto` are cleared: a
+                    // DECLARED margin keeps its value so it still paints
+                    // its own band (skeptic bug 2 — clearing it moved
+                    // `margin-left:10%; margin-right:auto` to x=0 where
+                    // Chromium paints x=16 with margins `16px 44px`).
+                    if autoMargin.clearsLeftMargin { s.spacing.margin?.left = .exact(px: 0) }
+                    if autoMargin.clearsRightMargin { s.spacing.margin?.right = .exact(px: 0) }
+                    if autoMargin.clearsTopMargin { s.spacing.margin?.top = .exact(px: 0) }
+                    if autoMargin.clearsBottomMargin { s.spacing.margin?.bottom = .exact(px: 0) }
                 }
             }
             if let h = gridStretchHeight, s.size.height == nil {

@@ -804,14 +804,63 @@ test('bug1-fextractor: buildComponents emits _tag for non-generic elements', () 
   assert.equal(ol.children[firstChildKey]._tag, 'li');
 });
 
-test('bug1-fextractor: buildComponents omits _tag for generic <div>/<span>', () => {
+test('bug1-fextractor: buildComponents omits _tag for the generic <div>', () => {
   // A bare <div class="t"> mirrors the shape of every visual-test fixture
   // — adding `_tag: "div"` here would balloon hundreds of existing fixtures
   // for zero renderer benefit (the renderer already defaults to div/Box).
-  const html = '<body><div class="t"></div><span class="u">x</span></body>';
+  const html = '<body><div class="t"></div></body>';
   const { components } = buildComponents(html, parseCss(''), 'stem');
   assert.equal(components['stem__0']._tag, undefined);
-  assert.equal(components['stem__1']._tag, undefined);
+});
+
+// ── wave-31 lane S: `span` forwarding ──────────────────────────────────────
+//
+// <span> left GENERIC_WRAPPER_TAGS. A <div> is a block container and so is
+// the renderers' default box, so withholding its tag costs nothing; a
+// <span> is an INLINE box (css-display-3 §2.1) and the default box is not,
+// so a surviving span rendered as a block <div> on web and destroyed the
+// inline formatting context around it. The web harness TAG_ALLOWLIST has
+// accepted 'span' since wave-26 — it just never received one.
+
+test('lane-s: a surviving <span> carries _tag:"span"', () => {
+  // `id` disqualifies the span from isPureInlineMergeable (rule 3), so it
+  // survives as a component — the CSS2/abspos/static-inside-inline-001
+  // shape, and the 274-test corpus population measured for this change.
+  const html = '<body><span id="inline">X</span></body>';
+  const { components } = buildComponents(html, parseCss(''), 'stem');
+  assert.equal(components['stem__0']._tag, 'span');
+  assert.equal(components['stem__0']._text, 'X');
+});
+
+test('lane-s: span forwarding does NOT change the inline merge', () => {
+  // The merge machinery is untouched: a pure-inline, attribute-less,
+  // un-styled <span> is still ABSORBED into the parent's `_text` and never
+  // becomes a component, so it has no `_tag` to carry. Only spans that
+  // survive the merge gained the field.
+  const html = '<body><div class="t">a <span>b</span> c</div></body>';
+  const { components } = buildComponents(html, parseCss(''), 'stem');
+  assert.equal(components['stem__0']._text, 'a b c');
+  assert.equal(components['stem__0'].children, undefined);
+  // …and a styled span (rule 4: a rule targets the tag) survives WITH tag.
+  const styled = buildComponents(
+    '<body><div class="t">a <span>b</span></div></body>',
+    parseCss('span { color: red }'),
+    'stem',
+  ).components;
+  const kid = styled['stem__0'].children[Object.keys(styled['stem__0'].children)[0]];
+  assert.equal(kid._tag, 'span');
+});
+
+test('lane-s: <div> stays the only generic wrapper', () => {
+  // Regression pin for the set itself — if a future wave adds a member,
+  // this test states the contract it has to satisfy: the tag is only
+  // "generic" when the platform default box already renders it correctly.
+  const html = '<body><div class="t"><span id="s">x</span></div></body>';
+  const { components } = buildComponents(html, parseCss(''), 'stem');
+  const outer = components['stem__0'];
+  assert.equal(outer._tag, undefined, '<div> keeps no tag');
+  const kid = outer.children[Object.keys(outer.children)[0]];
+  assert.equal(kid._tag, 'span', '<span> now carries its tag');
 });
 
 test('bug1-fextractor: buildComponents emits _tag for the canonical text-styling tags', () => {
@@ -2608,6 +2657,50 @@ test('B-RC9a: text after a VOID child (<br>) flags too (br stays a component)', 
     '<body><p>line1<br>line2</p></body>', [], 'v');
   const p = components['v__0'];
   assert.equal(p._text, 'line1line2');
+  assert.ok(p._lossyReasons.includes('inline-run-reordered'));
+});
+
+// ── wave-31 lane S: the reorder BAIL, pinned ───────────────────────────────
+//
+// The wire cannot express run/child/run (see the scanOwnText banner's
+// wave-31 section for the measurement and the deferred `_runs` design), so
+// the ONLY contract this wave can pin is the honesty one: the shape that
+// loses the order must say so, at BOTH levels, on the exact markup of the
+// CSS2 test that motivated the lane. If a future wave lands `_runs`, these
+// assertions are the ones that get to flip.
+
+test('lane-s bail: the CSS2 static-inside-inline shape flags, component AND fixture', () => {
+  // CSS2/abspos/static-inside-inline-001 verbatim: an out-of-flow div
+  // authored BEFORE the span's text. The div is styled (`#abspos`) so it
+  // survives as a child; 'X' lands in `_text` and paints first, which
+  // flips the abspos' static position — the quantity the test asserts
+  // (§10.6.4 over the §9.4.2 zero-height line box).
+  const css = '#abspos { position: absolute; width: 100px; height: 100px }';
+  const { components, lossyReasons } = buildComponents(
+    '<body><div id="wrapper"><span id="inline"><div id="abspos"></div> X </span></div></body>',
+    parseCss(css), 'css2');
+  const wrapper = components['css2__0'];
+  const span = wrapper.children[Object.keys(wrapper.children)[0]];
+  // The span survived the merge (it has an id) and carries its tag…
+  assert.equal(span._tag, 'span');
+  // …its text was glued ahead of the child that was authored before it…
+  assert.equal(span._text, 'X');
+  // …and BOTH honesty levels record it: the component and the fixture.
+  assert.ok(span._lossyReasons.includes('inline-run-reordered'));
+  assert.ok(lossyReasons.includes('inline-run-reordered'));
+});
+
+test('lane-s bail: an out-of-flow reorder is NOT quietly downgraded', () => {
+  // The narrow "all preceding kept children are out-of-flow" family (6
+  // components corpus-wide) is where the in-flow paint order genuinely
+  // does NOT move — only the static position does. It is tempting to
+  // treat that as lossless; it is not, and it must keep the same LOUD
+  // marker as an in-flow reorder until a renderer can place the box.
+  const css = '.abs { position: absolute }';
+  const { components } = buildComponents(
+    '<body><p><span class="abs"></span>tail</p></body>', parseCss(css), 'oof');
+  const p = components['oof__0'];
+  assert.equal(p._text, 'tail');
   assert.ok(p._lossyReasons.includes('inline-run-reordered'));
 });
 

@@ -585,6 +585,32 @@ dirs + WPT corpus are gitignored):
   recon probe predicted. 26 sections; zero regressions elsewhere;
   327-net clean. Totals: **web 256/290, iOS 229/277, Android
   222/277**.
+  Wave 31 (`tools/titan/results/corpus-v5-6.json`) brought CSS2 into
+  the corpus and made **selectors the seventh all-three-perfect
+  section (12/12 × 3)**. Span-tag forwarding: `<span>` left the
+  generic-wrapper set, so a surviving span stamps its tag and web
+  renders a real inline span instead of a block placeholder that
+  split the line box — 377 fixtures gained the tag with zero property
+  drift (deep-diffed), native inertness device-proven (41/41 Android
+  captures byte-identical); it recovered dir-selector-change-001 on
+  web. The inline-run reorder was measured NOT bounded (1,203
+  components across 472 fixtures) — honest hard bail shipped; the v3
+  `_runs` wire design is written into the extractor banner. **CSS2
+  first capture: web 11/12, iOS 9/12, Android 5/12** — the same-wave
+  §10.3.7 auto-margin work (AbsposAutoMargin twins; the skeptic
+  Chromium-probed two spec bugs pre-gate — declared opposite margins
+  dropped from free space, percent margins deleted opposite auto —
+  both fixed to 14/14 Chromium parity) beat the recon's native
+  ceiling on iOS, and lifted css-tables Android 6→8/11. The font
+  boundary was **attempted and honestly declined**: measurement
+  showed ref-only Noto pinning regresses iOS (Chromium-macOS and iOS
+  resolve Arabic to the same face today — pinning the ref destroys
+  accidental parity), the Armenian counter gap is one wrap point (not
+  glyph ink), and neither native has per-character font-fallback
+  machinery (Compose's is API 29 vs minSdk 24); Rule 43 stays intact
+  with the real closing move specified in its banner. filter-effects
+  web 5→6/11. 27 sections; zero regressions; 327-net clean. Totals:
+  **web 269/302, iOS 238/289, Android 229/289**.
 
 ## Test suites
 
@@ -592,9 +618,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 237 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1095 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1815 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1069 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1163 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1848 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1099 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1169 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap
