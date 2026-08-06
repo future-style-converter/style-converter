@@ -1751,6 +1751,79 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   // it previously shipped with lossyReasons []. The full fix (ordered
   // inline-run splitting on the wire) is a v3 byte-shape change; the flag
   // keeps the gate honest until then (documented follow-up).
+  //
+  // ── wave-31 lane S: MEASURED, and the bail is deliberate ────────────────
+  //
+  // WHERE THE ORDER IS LOST: nowhere in this scanner — it is lost at the
+  // WIRE. `_text` is a single string field on the component and every
+  // renderer paints it BEFORE the children array (web's NodeRenderer says
+  // so at its mixed-content branch: "text renders BEFORE the children (the
+  // wire has no interleaved inline-runs shape yet)"; Compose and SwiftUI
+  // do the same). So the moment a non-mergeable child sits BETWEEN two
+  // text nodes, the fixture can only express run+child (order kept) or
+  // child+run (order lost) — never run/child/run. This scanner does the
+  // only honest thing available: it concatenates in reading order and
+  // says so.
+  //
+  // CANONICAL VICTIM (the wave-31 CSS2 unblocker):
+  //   CSS2/abspos/static-inside-inline-001 —
+  //     <span id=inline><div id=abspos></div> X </span>
+  //   The div is styled (`#abspos`), so it survives as a child; 'X' lands
+  //   in the span's `_text` and paints FIRST. The test asserts the abspos'
+  //   STATIC POSITION (§10.6.4): with the div first the preceding inline
+  //   fragment is empty → zero-height line box (§9.4.2) → top = 0; with
+  //   'X' first the fragment carries text → 100px line → top = 100. Our
+  //   order flips the very quantity under test. (-002 wants the 100px
+  //   answer and is accidentally right; -003 is -001 with a border.)
+  //
+  // BLAST SET, enumerated on the committed corpus (1838 tests re-extracted,
+  // probe _diag31/lane-s): 1203 components across 472 fixture files in 14
+  // spec sections carry this flag — css-lists 37, css-content 29,
+  // css-contain 28, css-writing-modes 25, css-text-decor 23, css-pseudo 17,
+  // css-align 9, css-backgrounds 8, … Child-shape histogram: 163 span,
+  // 139 bdi, 91 li·li·li, 82 rt×5, 81 br, 72 div. These are REAL in-flow
+  // reorders (ruby annotations, bdi runs, list items) — not a corner.
+  //
+  // WHY NO FIX HERE (the bounded-fix probe, and why it failed):
+  //   The obvious bounded shape is "split the run at the non-mergeable
+  //   child": emit the trailing text as a synthesized anonymous LAST child
+  //   so document order survives as run/child/run siblings. It is bounded
+  //   in the EXTRACTOR and unbounded everywhere else —
+  //     • it invents components, so every id-keyed downstream artifact
+  //       moves (screenshot names, manifest keyMaps, per-test-ir);
+  //     • the synthesized child is a childless text component, which every
+  //       renderer paints through its PLACEHOLDER path — a `display:block`
+  //       span on web, a labelled box on both natives. A block box inside
+  //       an inline box splits it (CSS 2.1 §9.2.1.1), so the split would
+  //       re-break the very line box it was meant to preserve unless all
+  //       THREE renderers first learn an inline anonymous-text-run box.
+  //       That is a renderer-contract change on three platforms, i.e. the
+  //       same v3 wire work wave-21 deferred, wearing a disguise.
+  //   Narrowing to "the preceding kept children are ALL out-of-flow" (the
+  //   CSS2 shape, where the loss is purely the static position and no
+  //   in-flow content moves at all) bounds the BLAST — 6 components corpus
+  //   wide, 5 more mixed — but not the WORK: it needs the identical
+  //   three-platform anonymous-run box. Bounded blast, unbounded cost.
+  //
+  // THE BAIL (what this wave ships): the flag stays LOUD and stays on the
+  // wire. Verified end-to-end on the re-extracted corpus: of 472 files
+  // carrying a flagged component, 0 TEST fixtures fail to propagate the
+  // reason into `_wpt.lossyReasons` (285 __ref fixtures carry no lossy
+  // summary at all — refs use the `{ref, of, specSection}` block; that is
+  // a separate, reported gap, not a dropped reason). build-combined-fixture
+  // forwards `_wpt.lossyReasons` into the keyMap and inject-wpt-block
+  // stamps it on every manifest row, so an affected test is scored WITH its
+  // approximation on the record, never silently.
+  //
+  // DESIGN FOR THE FUTURE WAVE (v3 `_runs`): replace the single `_text`
+  // string with an ordered content list — `_runs: [{text}, {child: id},
+  // {text}]` — defaulting to `[{text: _text}, …children]` for every
+  // fixture that does not carry it, so the corpus stays byte-identical
+  // until a fixture opts in. Each renderer gains ONE inline anonymous-run
+  // box (web: a bare text node in the children walk; Compose: an inline
+  // AnnotatedString segment; SwiftUI: a Text run in the same HStack), and
+  // this flag becomes the assertion that a fixture needed `_runs` and did
+  // not get them.
   let reordered = false;
   // Set once a NON-absorbed child element (component path) has been seen;
   // any subsequent non-whitespace own text is by definition out-of-order.
@@ -2536,7 +2609,57 @@ export const HEAD_ONLY_TAGS = new Set([
 // just without the field). Every other tag carries real semantic weight
 // (list markers, paragraph rhythm, table cell layout, headings, etc.)
 // and is faithfully forwarded as `_tag` to the platform renderers.
-const GENERIC_WRAPPER_TAGS = new Set(['div', 'span']);
+//
+// ── wave-31 lane S: `span` LEAVES the set ────────────────────────────────
+//
+// The original reasoning ("div and span are the IR's default container
+// shapes") holds for <div> and is FALSE for <span>. A <div> is a block
+// container and the renderers' default box IS a block container, so
+// withholding the tag costs nothing. A <span> is an INLINE box
+// (css-display-3 §2.1 — outer display `inline`, the UA default for every
+// phrase element), and the default box is not: web's harness mapTag fell
+// through to `<div>`, so every span that SURVIVED the inline merge was
+// re-parented as a block container and the inline formatting context
+// around it was destroyed — the exact opposite of the source markup.
+//
+// The web harness has been ready for this since wave-26: 'span' is in
+// apps/web-harness/src/sdui/ComponentRenderer.tsx's TAG_ALLOWLIST with a
+// "Bug 2" banner explaining that CSS-Containment-2's
+// `content-visibility: hidden` hinges on the non-atomic-inline
+// distinction — but the allowlist entry was dead code, because this set
+// meant `_tag: 'span'` was never put on the wire for it to accept.
+// Same for the wave-26 WWS inter-sibling whitespace separator, whose
+// INLINE_LEVEL_SOURCE_TAGS read (`isInlineLevelSibling`) lists 'span'
+// first and could never see one.
+//
+// SCOPE — this changes NOTHING about the merge machinery. A pure-inline
+// `<span>` with no attributes and no tag-targeting rule is still absorbed
+// into the parent's `_text` by isPureInlineMergeable / collapseInlineRun
+// and never becomes a component at all. The change is only that a span
+// which survives AS a component now carries its identity, exactly like
+// the <p>/<h1>/<td>/<a> that always did.
+//
+// NATIVES ARE INERT to the new value (audited wave-31 lane S, both
+// runtimes, every `_tag` / `meta.sourceTag` consumer):
+//   • ListStyleExtractor.uaMarkerDefault / ListMarkerResolver.uaDefault —
+//     switch over {ol, ul, menu, dir}; 'span' → null, same as absent.
+//   • ListItemMarkerGate.rendersOwnLeadingMarker — only `== "li"`
+//     short-circuits; 'span' takes the identical path as null.
+//   • uaVerticalBlockMargins / UABlockMargin.vertical(forTag:) — the UA
+//     block-margin table's `else` branch is (0, 0), which is what an
+//     absent tag already resolved to (HTML §15.3 declares no margin for
+//     phrase content).
+//   • UAWidgetsResolve.kindFor / UAWidgetIntrinsics.kind — keyed on the
+//     widget tag set (input/select/button/textarea/option); 'span' → nil.
+//   • InlineAtomFlow.isAtom — `t in WIDGET_TAGS || t == "a"`; 'span' →
+//     false, byte-identical to the null-tag early return.
+//   • ComponentRenderer list-parent branches — `parentTag in {ol,ul,
+//     menu,dir}` and `child._tag == "li"`; both false.
+//   • ContentsUnboxing forwards `_tag` verbatim (no branch).
+// So the fixture drift below is a WEB-side behaviour change only; the
+// natives read the same field and reach the same code path they reached
+// with no field at all.
+const GENERIC_WRAPPER_TAGS = new Set(['div']);
 
 // ── wave-22 BR-LINE-CONTEXT: inline-level tags for the <br> height rule ──────
 //
@@ -6522,9 +6645,12 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // Bug 1 fix (css3-counter-styles-101): carry forward the originating
     // HTML element identity so the renderer can branch on it (e.g. wrap
     // children of `<ol>` in `<li>` boxes that trigger native marker
-    // generation). We emit `_tag` only for non-generic tags — `div` and
-    // `span` are the IR's default container shapes and tagging them would
-    // bloat every visual-test-style fixture without conveying new info.
+    // generation). We emit `_tag` only for non-generic tags — `div` is
+    // the IR's default container shape and tagging it would bloat every
+    // visual-test-style fixture without conveying new info. (`span` left
+    // the generic set in wave-31 lane S — see the GENERIC_WRAPPER_TAGS
+    // banner: an inline box is NOT the default box, so its tag is real
+    // information the web renderer needs.)
     // Sister F-RENDERER consumes `_tag` as a lowercase HTML element name.
     // wave-20 fix 5: the serialized-DOM path stamps FOREIGN_NS_MARKER_ATTR
     // on every non-XHTML-namespace element before serialization (see the

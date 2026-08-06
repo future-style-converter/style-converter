@@ -54,23 +54,48 @@ enum AbsposInsetStretch {
     ///    explicit-size + ratio boxes (abspos-001/002) keep the existing
     ///    SizeApplier aspect-ratio path untouched, and every committed
     ///    baseline render is byte-identical.
+    ///  - S5 (wave 31, css-tables-3 §"Abspos tables"): a TABLE box's
+    ///    available space "can never exceed the available space of the
+    ///    containing block" (the assert text of css-tables/
+    ///    absolute-tables-008…011). The inset-modified containing block is
+    ///    NOT that bound: a NEGATIVE start inset makes cb − start − end
+    ///    LARGER than cb, and a table — unlike a block — does not stretch
+    ///    into it. Measured on absolute-tables-009 (cb 100×100, `left:
+    ///    -100; right: 0`): S1 hands 100 − (−100) − 0 = 200, and both
+    ///    natives painted a 200×100 green band where the Chromium ref
+    ///    paints 100×100 (frozen captures, wave30-final/sections/
+    ///    css-tables — iOS 0.9503, Android 0.9398 FAIL). Clamping the
+    ///    candidate to the containing-block extent reproduces the ref.
+    ///    Applies to TABLE boxes ONLY (`isTable`) so every non-table
+    ///    abspos stretch — the whole css-position / css-sizing baseline —
+    ///    stays byte-identical; a block box legitimately stretches past
+    ///    its containing block under a negative inset (css-position-3
+    ///    §3.5.3 has no such clamp).
     ///
     /// All parameters are px; `ratio` is CSS width/height (> 0), nil when
-    /// absent or auto-only.
+    /// absent or auto-only. `isTable` is the css-display-3 table-ish
+    /// classification of THIS box (see [isTableBox]) and defaults to
+    /// false so every pre-wave-31 call site keeps S1 verbatim.
     static func resolve(
         cbW: Double?, cbH: Double?,
         left: Double?, right: Double?, top: Double?, bottom: Double?,
         explicitW: Double?, explicitH: Double?,
         hasExplicitW: Bool, hasExplicitH: Bool,
-        ratio: Double?
+        ratio: Double?,
+        isTable: Bool = false
     ) -> Resolved {
         // S1 — per-axis stretch candidates. max(0, …): a box whose insets
         // exceed the containing block clamps to zero, never negative
         // (css-position-3 §3.5.3's over-constrained floor).
+        // S5 folds in as a per-axis ceiling: for a table the candidate may
+        // never exceed the containing block's own extent (css-tables-3).
+        func clampToCb(_ candidate: Double, _ cb: Double) -> Double {
+            isTable ? min(candidate, cb) : candidate
+        }
         let stretchW: Double? = (!hasExplicitW && left != nil && right != nil && cbW != nil)
-            ? max(0, cbW! - left! - right!) : nil
+            ? clampToCb(max(0, cbW! - left! - right!), cbW!) : nil
         let stretchH: Double? = (!hasExplicitH && top != nil && bottom != nil && cbH != nil)
-            ? max(0, cbH! - top! - bottom!) : nil
+            ? clampToCb(max(0, cbH! - top! - bottom!), cbH!) : nil
         // S4 — identity guard: no stretch anywhere → nothing to inject.
         if stretchW == nil && stretchH == nil { return none }
         // S2 — start from the plain stretch result.
@@ -141,6 +166,45 @@ enum AbsposInsetStretch {
             || rect.top != nil || rect.bottom != nil) ? rect : nil
     }
 
+    /// Is this box a TABLE box for S5's purposes (css-display-3 §2:
+    /// `table` and `inline-table` both generate a table wrapper box, and
+    /// css-tables-3's abspos available-space rule is written against the
+    /// table box, not the caption/row/cell internals)?
+    ///
+    /// Two channels, in css-cascade order:
+    ///  1. A DECLARED `Display` always wins. Read from the raw wire
+    ///     because the runtime's DisplayKeyword enum predates the table
+    ///     lane and has no table member; the serialized keyword is the
+    ///     honest source (the converter emits SCREAMING_SNAKE —
+    ///     `"TABLE"` / `"INLINE_TABLE"`). Last declaration wins, matching
+    ///     every other reader in this file. A declared non-table display
+    ///     makes this NOT a table even on a `<table>` element
+    ///     (css-display-3 §2).
+    ///  2. With NO declared display, the originating tag's UA default
+    ///     decides — `<table>` is `display: table` per the HTML UA
+    ///     stylesheet, and the converter does NOT serialize UA defaults.
+    ///     This channel is load-bearing, not belt-and-braces: the live
+    ///     absolute-tables-008…011 IRs carry the table ONLY as
+    ///     `meta.sourceTag: "table"` with no Display property at all
+    ///     (absolute-tables-016 is the one that declares `display:
+    ///     table` in author CSS), so S5 would never fire on the very
+    ///     tests it was measured against. `tag` is IRComponent's decoded
+    ///     `meta.sourceTag`.
+    ///
+    /// Anything else is NOT a table — S5 then never fires and S1 is
+    /// byte-identical.
+    ///
+    /// Twin: AbsposInsetStretch.isTableBox(properties, tag) on Compose.
+    static func isTableBox(from properties: [IRProperty], tag: String? = nil) -> Bool {
+        if let kw = properties.last(where: { $0.type == "Display" })?.data.stringValue {
+            let upper = kw.uppercased()
+            return upper == "TABLE" || upper == "INLINE_TABLE"
+        }
+        // UA default. Only `<table>` maps to `display: table`; no HTML
+        // element defaults to `inline-table`.
+        return tag?.lowercased() == "table"
+    }
+
     /// iOS-side style fold: apply the resolver to a built ComponentStyle's
     /// size config, reading the insets from [strictInsets] (px-honest
     /// sides only — see its doc; FixedHoist's hasAnyInset keeps the
@@ -153,7 +217,8 @@ enum AbsposInsetStretch {
     /// Pure over the config — pinned in AbsposInsetStretchTests.
     static func resolveFor(size: SizeConfig,
                            inset: InsetRect?,
-                           cbW: Double?, cbH: Double?) -> Resolved {
+                           cbW: Double?, cbH: Double?,
+                           isTable: Bool = false) -> Resolved {
         // Author-size classification per axis: any non-auto LengthValue
         // counts as explicit; exact px carries a value for the ratio step;
         // non-px explicit (min-content/…) blocks both stretch and
@@ -182,6 +247,9 @@ enum AbsposInsetStretch {
             bottom: (inset?.bottom).map(Double.init),
             explicitW: w.px, explicitH: h.px,
             hasExplicitW: w.has, hasExplicitH: h.has,
-            ratio: ratio)
+            ratio: ratio,
+            // S5 — the css-tables-3 available-space ceiling applies to
+            // table boxes only; every other box keeps S1 verbatim.
+            isTable: isTable)
     }
 }

@@ -211,4 +211,86 @@ class AbsposInsetStretchTest {
         val out = AbsposInsetStretch.inject(props, ContainingBlock(500f, 400f))
         assertEquals("""{"type":"length","px":350.0}""", out.last { it.type == "Height" }.data.toString())
     }
+
+    // ── Wave-31 lane T: S5, the css-tables-3 available-space ceiling ───────
+
+    @Test fun `S5 - absolute-tables-009 clamps the table stretch to the containing block`() {
+        // The live IR: cb 100×100, `left:-100; right:0`, no author width.
+        // S1 alone hands 100 − (−100) − 0 = 200 and both natives painted a
+        // 200×100 green band (wave30-final captures) where the ref paints
+        // 100×100 — css-tables-3: an abspos table's available space can
+        // never exceed the containing block's.
+        val r = resolve(cbW = 100.0, cbH = 100.0, left = -100.0, right = 0.0)
+        assertEquals(200.0, r.widthPx!!, 1e-9)
+        val table = AbsposInsetStretch.resolve(
+            100.0, 100.0, -100.0, 0.0, null, null,
+            null, null, false, false, null, /* isTable = */ true,
+        )
+        assertEquals(100.0, table.widthPx!!, 1e-9)
+    }
+
+    @Test fun `S5 - a non-negative inset pair is unaffected by the table clamp`() {
+        // cb − start − end is already ≤ cb whenever both insets are ≥ 0,
+        // so the clamp is a no-op for the ordinary shape — the reason it
+        // can be table-scoped without any per-test carve-out.
+        val block = AbsposInsetStretch.resolve(
+            500.0, 400.0, 10.0, 30.0, 20.0, 30.0,
+            null, null, false, false, null, false,
+        )
+        val table = AbsposInsetStretch.resolve(
+            500.0, 400.0, 10.0, 30.0, 20.0, 30.0,
+            null, null, false, false, null, true,
+        )
+        assertEquals(block.widthPx!!, table.widthPx!!, 1e-9)
+        assertEquals(block.heightPx!!, table.heightPx!!, 1e-9)
+    }
+
+    @Test fun `S5 - the clamp applies to the block axis too`() {
+        val table = AbsposInsetStretch.resolve(
+            100.0, 100.0, null, null, -50.0, 0.0,
+            null, null, false, false, null, true,
+        )
+        assertEquals(100.0, table.heightPx!!, 1e-9)
+    }
+
+    @Test fun `isTableBox reads the live SCREAMING_SNAKE Display wire`() {
+        assertEquals(true, AbsposInsetStretch.isTableBox(listOf(prop("Display", "\"TABLE\""))))
+        assertEquals(true, AbsposInsetStretch.isTableBox(listOf(prop("Display", "\"INLINE_TABLE\""))))
+        // A table-INTERNAL box is not the table box css-tables-3 §abspos
+        // addresses, and an absent Display + absent tag is never a table.
+        assertEquals(false, AbsposInsetStretch.isTableBox(listOf(prop("Display", "\"TABLE_CELL\""))))
+        assertEquals(false, AbsposInsetStretch.isTableBox(listOf(prop("Display", "\"BLOCK\""))))
+        assertEquals(false, AbsposInsetStretch.isTableBox(emptyList()))
+    }
+
+    @Test fun `isTableBox falls back to the tag's UA display`() {
+        // The live absolute-tables-008…011 shape: a `<table>` with NO
+        // Display property (the converter does not serialize UA
+        // defaults). Without this channel S5 never fires on them.
+        assertEquals(true, AbsposInsetStretch.isTableBox(emptyList(), "table"))
+        assertEquals(false, AbsposInsetStretch.isTableBox(emptyList(), "div"))
+        assertEquals(false, AbsposInsetStretch.isTableBox(emptyList(), "td"))
+        // css-display-3 §2 — a DECLARED display always wins over the tag.
+        assertEquals(
+            false,
+            AbsposInsetStretch.isTableBox(listOf(prop("Display", "\"BLOCK\"")), "table"),
+        )
+    }
+
+    @Test fun `inject clamps the live absolute-tables-009 table wire`() {
+        // End-to-end on the exact live shape — which carries NO Display
+        // property, only the `<table>` tag — so the wire wrapper's isTable
+        // plumbing (declared keyword AND tag fallback) is pinned too.
+        val props = listOf(
+            prop("Position", "\"ABSOLUTE\""),
+            prop("Height", """{"type":"length","px":100}"""),
+            prop("Left", """{"px":-100}"""),
+            prop("Right", """{"px":0}"""),
+        )
+        val out = AbsposInsetStretch.inject(props, ContainingBlock(100f, 100f), "table")
+        assertEquals("""{"type":"length","px":100.0}""", out.last { it.type == "Width" }.data.toString())
+        // Without the tag the same wire is a plain block box → 200.
+        val block = AbsposInsetStretch.inject(props, ContainingBlock(100f, 100f))
+        assertEquals("""{"type":"length","px":200.0}""", block.last { it.type == "Width" }.data.toString())
+    }
 }

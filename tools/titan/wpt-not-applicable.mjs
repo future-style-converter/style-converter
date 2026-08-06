@@ -1192,6 +1192,81 @@ function hasUnreachableOsDefaultSelection(html) {
 // rasterised against the Latin-only stack retires. At that point the four
 // surfaces share a face again, the boundary is gone, and this tag is DELETED
 // (not weakened). Until then it is the honest label.
+//
+// ── wave-31 lane F: THE CLOSING MOVE WAS ATTEMPTED AND MEASURED. It does not
+// close from the ref side, and the four steps above are NECESSARY BUT NOT
+// SUFFICIENT. Recorded here so the next wave starts from the measurement
+// instead of re-deriving it. Everything below was executed end-to-end on the
+// wave30-final corpus and then REVERTED; nothing of it is in the tree.
+//
+// (a) THE CORPUS SURFACE IS SMALLER THAN THE TABLE. Re-deriving the fire list
+//     over all 312 wave-30 docs: Rule 43 fires on 13, spanning FOUR systems
+//     only — armenian (5 docs), arabic-indic (3), bengali (3), cambodian (2).
+//     `georgian`, `hebrew`, the kana orders, every CJK system and the rest of
+//     the §6 table are NEVER exercised by this corpus. Six further docs carry
+//     literal non-Latin INK without naming a §6 style, and those ARE scored on
+//     the natives today: css-text/bidi/bidi-lines-001+002 (Arabic/PERSIAN
+//     prose — "فارسی"/"سلام", NOT Hebrew as the wave-23 ledger records),
+//     bidi/empty-span-001 + selectors/dir-selector-change-004 +
+//     css-text-decor/text-decoration-dotted-001 (Hebrew),
+//     selectors/dir-selector-auto-direction-change-001 (Arabic), and
+//     css-text-decor/ruby-text-decoration-01 (CJK + kana).
+//
+// (b) THE FACES EXIST AND FIT. Noto Sans Arabic / Armenian / Bengali / Hebrew
+//     / Khmer Regular, OFL 1.1, ~550 KB total, every needed codepoint present
+//     (cmap-verified with fontTools). Reproducible:
+//       curl -L -o NotoSans<S>-Regular.ttf \
+//         https://raw.githubusercontent.com/notofonts/notofonts.github.io/main/fonts/NotoSans<S>/hinted/ttf/NotoSans<S>-Regular.ttf
+//     sha256: Arabic bdff3e56…ef48 · Armenian 720df88c…ce1e · Bengali
+//     b55c62ee…3193 · Hebrew cdefaf8e…02ee · Khmer e66675f2…e605.
+//
+// (c) THE DIAGNOSIS IN THIS BANNER IS WRONG FOR ARMENIAN — it is not "a
+//     per-glyph typographic residue accumulating". Measured on armenian 007
+//     (ref vs the frozen Android capture, per-row ink extents): median row
+//     ADVANCE is 31px on all four surfaces, median glyph INK HEIGHT is 18px on
+//     all four, and rows 0–19 agree to within 2–4px of width. The face is
+//     already effectively the same. The entire 0.78 comes from ONE wrap point:
+//     the ref measures row 20 at ~158px against ~156px of available width and
+//     wraps it to two lines; Android measures the same string ~3px narrower
+//     (~2%), keeps it on one line, and every row below shifts by exactly one
+//     31px advance — 27 ref rows vs 26 native rows, 885px vs 854px of canvas.
+//     So the lever is ADVANCE WIDTH at a single threshold, not glyph shape.
+//     Bundling should still fix it (same outlines → same advances, and
+//     Chromium and Android share Skia), but the failure mode to verify against
+//     is "does row 20 wrap the same way", not "do the glyphs look closer".
+//
+// (d) PINNING THE REF ALONE MAKES THE CORPUS WORSE, which is why this must
+//     land as ONE four-pipeline change or not at all. With the five faces in
+//     REF_FONT_STACK + EMBEDDED_FONT_WEIGHTS and CANVAS_REV bumped to
+//     '…-htmlpins-nlfonts', the SCORED literal-ink docs of (a) moved:
+//       bidi-lines-001   ios 0.9926 → 0.9559 (−0.037)   web 0.9999 → 0.9604
+//       bidi-lines-002   ios 0.9358 → 0.9344            web 0.9930 → 0.9846
+//       dir-selector-change-004  ios 0.9958 → 0.9938    web 1.0000 → 0.9930
+//     The web deltas are an artifact (frozen captures vs a moved ref; they
+//     recover once the harness re-renders). The iOS delta is REAL and does not
+//     recover: Chromium-on-macOS and iOS resolve Arabic to the SAME system
+//     face today, so the un-pinned status quo gives iOS an accidental parity
+//     that pinning Noto in the ref destroys. Armenian barely moved at all
+//     (web 0.9829 → 0.9835), confirming macOS already falls back to a
+//     Noto-equivalent Armenian face.
+//
+// (e) THE NATIVE HALF HAS NO MECHANISM YET, and this is the actual blocker.
+//     A CSS font stack matches PER CHARACTER (css-fonts-4 §5.2); neither
+//     native runtime has an equivalent, and neither has any cascade machinery
+//     today (grep: no CustomFallbackBuilder / kCTFontCascadeListAttribute
+//     anywhere in runtimes/ or apps/). Compose's `FontFamily(Font…)` selects
+//     ONE face by weight/style and leaves per-glyph fallback to the system
+//     chain, so pinning needs `Typeface.CustomFallbackBuilder` behind a custom
+//     `AndroidFont`/`TypefaceLoader` — and that API is **API 29** while
+//     runtimes/compose is `minSdk = 24`, so the pin cannot be unconditional
+//     without an API gate that reopens the boundary on older devices. iOS
+//     needs a `kCTFontCascadeListAttribute` descriptor threaded through
+//     ComponentRenderer's `.custom("Inter", size:)` resolution. Until BOTH
+//     exist, bundling faces changes only the ref and regresses (d).
+//
+// NET: Rule 43 is NOT narrowed by wave 31, and no system is removed from the
+// table below — nothing is bundled in the engines, so nothing is closable.
+// The table stays as it is until the (e) machinery lands on both natives.
 
 /** css-counter-styles-3 §6 predefined counter styles whose SYMBOLS fall
  *  OUTSIDE the bundled Inter face's Latin/Greek/Cyrillic coverage — i.e. the

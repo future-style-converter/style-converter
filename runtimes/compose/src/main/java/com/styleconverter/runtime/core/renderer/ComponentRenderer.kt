@@ -1101,10 +1101,27 @@ object ComponentRenderer {
         val effectiveProperties =
             if (isOutOfFlowChild(animatedProperties)) {
                 val pctResolved = resolveOutOfFlowPercentSizes(animatedProperties, containingBlock)
-                if (wptCaptureModeForStretch)
-                    com.styleconverter.runtime.layout.position.AbsposInsetStretch
-                        .inject(pctResolved, containingBlock)
-                else pctResolved
+                if (wptCaptureModeForStretch) {
+                    val stretched = com.styleconverter.runtime.layout.position.AbsposInsetStretch
+                        // `_tag` (meta.sourceTag) supplies the UA display
+                        // for S5's table classification: the live
+                        // absolute-tables-008…011 IRs carry `<table>` with
+                        // NO Display property, so the declared-keyword
+                        // channel alone never sees them.
+                        .inject(pctResolved, containingBlock, component._tag)
+                    // Wave-31 lane T rides the same out-of-flow branch, one
+                    // step LATER: with the used size now known, resolve any
+                    // `auto` margins per CSS 2.1 §10.3.7 (inline) / §10.6.4
+                    // (block) and fold the solved START margin into the
+                    // start inset — the absolute-tables-016 fix, where the
+                    // block axis was never centred at all (the §10.3.3
+                    // `autoMarginAlignment` path below covers the inline
+                    // axis only, and only symmetrically). Identity for
+                    // every box whose split is 0/0 or whose axis has an
+                    // auto inset/size, i.e. everything else in the corpus.
+                    com.styleconverter.runtime.layout.position.AbsposAutoMargin
+                        .inject(stretched, containingBlock)
+                } else pctResolved
             } else animatedProperties
 
         // Extract property pairs for extractors

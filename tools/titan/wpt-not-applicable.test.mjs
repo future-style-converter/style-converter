@@ -1722,6 +1722,31 @@ test('Rule 43 table is the CLOSED css-counter-styles-3 §6 non-Latin set', () =>
     }
 });
 
+test('Rule 43 keeps the four systems the corpus actually exercises (wave-31)', () => {
+    // wave-31 lane F re-derived the fire list over all 312 wave-30 docs: Rule
+    // 43 fires on 13 tests spanning exactly these four systems. They are the
+    // ONLY §6 names whose exclusion is currently costing measurements, so they
+    // are the four a "narrow the rule" wave will reach for first — and the
+    // four that must NOT be removed until both natives can pin a face.
+    //
+    // The gate is not "are the fonts bundled" but "can the ENGINES pin them".
+    // Compose resolves one face per weight and leaves per-glyph fallback to
+    // the system chain (`Typeface.CustomFallbackBuilder` is API 29 vs
+    // `minSdk = 24`); iOS needs a `kCTFontCascadeListAttribute` descriptor in
+    // ComponentRenderer's `.custom("Inter", size:)` path. Neither exists —
+    // grep for either name in runtimes/ or apps/ and you get nothing. Wave 31
+    // measured what happens if you bundle faces anyway and pin only the ref:
+    // iOS bidi-lines-001 REGRESSED 0.9926 → 0.9559, because Chromium-on-macOS
+    // and iOS resolve Arabic to the same system face today and pinning Noto in
+    // the ref alone destroys that accidental parity. Full write-up in the
+    // wave-31 section of hasNonLatinPredefinedCounterStyle's banner.
+    for (const n of ['armenian', 'arabic-indic', 'bengali', 'cambodian']) {
+        assert.ok(NON_LATIN_PREDEFINED_COUNTER_STYLES.has(n),
+            `${n} is exercised by the corpus and must stay in the table until ` +
+            'both native runtimes can pin the face (see the wave-31 banner)');
+    }
+});
+
 test('Rule 43 rides classifyAll and coexists with the other tags on the same test', () => {
     // css3-counter-styles-102 carries requires-form-control-rendering and
     // requires-bundled-font too; the histogram must count all of them, and the

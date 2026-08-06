@@ -250,4 +250,97 @@ final class AbsposInsetStretchTests: XCTestCase {
             cbW: 500, cbH: 400)
         XCTAssertEqual(r.heightPx, 350)
     }
+
+    // MARK: - Wave-31 lane T: S5, the css-tables-3 available-space ceiling
+
+    /// absolute-tables-009's live shape: cb 100×100, `left:-100; right:0`,
+    /// no author width. S1 alone hands 100 − (−100) − 0 = 200 and both
+    /// natives painted a 200×100 green band (wave30-final captures) where
+    /// the ref paints 100×100 — css-tables-3: an abspos table's available
+    /// space can never exceed the containing block's.
+    func testS5ClampsTheTableStretchToTheContainingBlock() {
+        XCTAssertEqual(resolve(cbW: 100, cbH: 100, left: -100, right: 0).widthPx, 200)
+        let table = AbsposInsetStretch.resolve(
+            cbW: 100, cbH: 100, left: -100, right: 0, top: nil, bottom: nil,
+            explicitW: nil, explicitH: nil,
+            hasExplicitW: false, hasExplicitH: false,
+            ratio: nil, isTable: true)
+        XCTAssertEqual(table.widthPx, 100)
+    }
+
+    /// cb − start − end is already ≤ cb whenever both insets are ≥ 0, so
+    /// the clamp is a no-op for the ordinary shape — the reason it can be
+    /// table-scoped without any per-test carve-out.
+    func testS5IsANoOpForNonNegativeInsets() {
+        let block = AbsposInsetStretch.resolve(
+            cbW: 500, cbH: 400, left: 10, right: 30, top: 20, bottom: 30,
+            explicitW: nil, explicitH: nil,
+            hasExplicitW: false, hasExplicitH: false, ratio: nil, isTable: false)
+        let table = AbsposInsetStretch.resolve(
+            cbW: 500, cbH: 400, left: 10, right: 30, top: 20, bottom: 30,
+            explicitW: nil, explicitH: nil,
+            hasExplicitW: false, hasExplicitH: false, ratio: nil, isTable: true)
+        XCTAssertEqual(block.widthPx, table.widthPx)
+        XCTAssertEqual(block.heightPx, table.heightPx)
+    }
+
+    /// The ceiling is per-axis — the block axis clamps identically.
+    func testS5ClampsTheBlockAxisToo() {
+        let table = AbsposInsetStretch.resolve(
+            cbW: 100, cbH: 100, left: nil, right: nil, top: -50, bottom: 0,
+            explicitW: nil, explicitH: nil,
+            hasExplicitW: false, hasExplicitH: false, ratio: nil, isTable: true)
+        XCTAssertEqual(table.heightPx, 100)
+    }
+
+    /// The live wire spells the keyword SCREAMING_SNAKE; a table-INTERNAL
+    /// box is not the table box css-tables-3 §abspos addresses.
+    func testIsTableBoxReadsTheLiveDisplayWire() throws {
+        func box(_ display: String?) throws -> [IRProperty] {
+            let body = display.map { "[{\"type\":\"Display\",\"data\":\"\($0)\"}]" } ?? "[]"
+            return try JSONDecoder().decode(
+                IRComponent.self,
+                from: Data("{\"id\":\"c\",\"name\":\"c\",\"properties\":\(body)}".utf8)
+            ).properties
+        }
+        XCTAssertTrue(AbsposInsetStretch.isTableBox(from: try box("TABLE")))
+        XCTAssertTrue(AbsposInsetStretch.isTableBox(from: try box("INLINE_TABLE")))
+        XCTAssertFalse(AbsposInsetStretch.isTableBox(from: try box("TABLE_CELL")))
+        XCTAssertFalse(AbsposInsetStretch.isTableBox(from: try box("BLOCK")))
+        XCTAssertFalse(AbsposInsetStretch.isTableBox(from: try box(nil)))
+        // The live absolute-tables-008…011 shape: a `<table>` with NO
+        // Display property (the converter does not serialize UA
+        // defaults). Without this channel S5 never fires on them.
+        XCTAssertTrue(AbsposInsetStretch.isTableBox(from: try box(nil), tag: "table"))
+        XCTAssertFalse(AbsposInsetStretch.isTableBox(from: try box(nil), tag: "div"))
+        XCTAssertFalse(AbsposInsetStretch.isTableBox(from: try box(nil), tag: "td"))
+        // css-display-3 §2 — a DECLARED display always wins over the tag.
+        XCTAssertFalse(AbsposInsetStretch.isTableBox(from: try box("BLOCK"), tag: "table"))
+    }
+
+    /// End-to-end on the exact live absolute-tables-009 shape — which
+    /// carries NO Display property, only the `<table>` tag — so the
+    /// resolveFor → resolve isTable plumbing is pinned too.
+    func testResolveForClampsTheLiveTableWire() throws {
+        let comp = try JSONDecoder().decode(IRComponent.self, from: Data(#"""
+        {"id":"c","name":"c","properties":[
+          {"type":"Position","data":"ABSOLUTE"},
+          {"type":"Height","data":{"type":"length","px":100}},
+          {"type":"Left","data":{"px":-100}},
+          {"type":"Right","data":{"px":0}}
+        ],"meta":{"sourceTag":"table"}}
+        """#.utf8))
+        let style = StyleBuilder.build(from: comp.properties)
+        let inset = AbsposInsetStretch.strictInsets(from: comp.properties)
+        let r = AbsposInsetStretch.resolveFor(
+            size: style.size, inset: inset, cbW: 100, cbH: 100,
+            isTable: AbsposInsetStretch.isTableBox(
+                from: comp.properties, tag: comp.meta?.sourceTag))
+        XCTAssertEqual(r.widthPx, 100)
+        // Without the table classification the same wire is a plain block
+        // box and S1 hands the unclamped inset-modified extent.
+        let block = AbsposInsetStretch.resolveFor(
+            size: style.size, inset: inset, cbW: 100, cbH: 100)
+        XCTAssertEqual(block.widthPx, 200)
+    }
 }

@@ -605,8 +605,32 @@ const HARNESS_OPTIONS: RendererOptions = {
     // corpus) the marker landed on its own line and every item was twice
     // as tall as the reference. A bare text node keeps the marker and the
     // content in one line box, which is exactly the source markup shape.
+    // wave-31 lane S — `<span>` joins the same early return, for the same
+    // reason one level down. The extractor started forwarding `_tag: 'span'`
+    // this wave (tools/titan/extract-fixture.mjs GENERIC_WRAPPER_TAGS
+    // banner), so TAG_ALLOWLIST finally maps a surviving span to a real
+    // <span> element — but the placeholder path then put a
+    // `display: block` span INSIDE it, and a block box inside an inline box
+    // splits the inline into anonymous block boxes (CSS 2.1 §9.2.1.1). The
+    // element was inline; its CONTENT was not; the line box the test
+    // measures never formed. A bare text node is the source markup shape —
+    // `<span>X</span>` — so the span's text participates in the parent's
+    // inline formatting context exactly like the browser-ref's.
+    //
+    // A textless span returns null (same as `li`), which leaves
+    // `<span class="sc-…"></span>`: an EMPTY inline box, which is precisely
+    // what the source has. The old placeholder emitted a 0-content BLOCK
+    // there, which broke the line just as hard as a text one.
+    //
+    // SCOPE — 'span' only, not the whole inline family. <em>/<strong>/<b>/
+    // <i>/<code>… have carried their tags since wave-1 and their composed
+    // scores are frozen in runs/wave30-final; giving them the same
+    // treatment is the right follow-up but it is a SEPARATE measurable
+    // change, not a side effect of putting spans on the wire. Composed-WPT
+    // only (WPT_MODE): the 327-pair baseline never sets `?wpt=1`, so every
+    // committed capture keeps the placeholder byte-for-byte.
     const wTag = component.meta?.sourceTag?.toLowerCase();
-    if (WPT_MODE && wTag && (WIDGET_TAGS.has(wTag) || wTag === 'li')) {
+    if (WPT_MODE && wTag && (WIDGET_TAGS.has(wTag) || wTag === 'li' || wTag === 'span')) {
       return hasText ? text : null;
     }
     // Forward the component's IR-resolved line-height (if any) so the
