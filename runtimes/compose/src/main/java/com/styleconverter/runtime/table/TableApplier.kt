@@ -316,8 +316,20 @@ object TableApplier {
             modifier = modifier
                 .then(cellModifier)
                 .fillMaxHeight()
-                .then(borderModifier)
-                .padding(8.dp),
+                .then(borderModifier),
+            // Wave 32 (lane P) — the fabricated `.padding(8.dp)` that used
+            // to sit here is GONE. It had no CSS basis: the HTML UA sheet
+            // gives `td { padding: 1px }`, and the wire already carries that
+            // as the cell's own PaddingTop/Right/Bottom/Left, which the cell
+            // now applies itself (a `table-cell` renders through the BLOCK
+            // path from this wave on — see TableBoxTree.rendersAsBlockContainer).
+            // The 8dp was therefore a pure DOUBLE-COUNT, and it compounds
+            // across a row: it inflated every preceding cell by 16dp and then
+            // offset the current cell's content by another 8. MEASURED on
+            // css-tables/abspos-container-change-dynamic-001, whose lime
+            // abspos landed at [54,33] against the reference's [33,18] —
+            // exactly the (+21,+15) the two paddings plus the inflated first
+            // cell predict.
             contentAlignment = Alignment.CenterStart,
             content = content
         )

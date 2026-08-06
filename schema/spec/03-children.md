@@ -124,9 +124,12 @@ at debug level by PropertyTracker, no error, no visual effect — same as
 
 1. **Text (`text`):** stays ON the component as leaf content — text is
    content, not a sibling component, so it does not flatten into the
-   list. The leading text run renders before injected children; true
-   interleaved inline flow is explicitly deferred to a future optional
-   `contentRuns` field (documented limitation carried over from v1).
+   list. The leading text run renders before injected children —
+   **unless** the component also carries `meta.runs` (§4.1), the ordered
+   inline-content list that supersedes that placement. (Before wave-32
+   the interleaved case had no wire at all and this clause deferred it
+   to "a future optional `contentRuns` field"; `meta.runs` IS that
+   field, landed under the 05-versioning.md additive meta-key rule.)
 2. **Generated content (`pseudos`):** never flattened. Pseudo components
    have no independent lifecycle, can never be composed externally, and
    per CSS spec `::before`/`::after` of a grid/flex container ARE items
@@ -147,6 +150,68 @@ at debug level by PropertyTracker, no error, no visual effect — same as
    non-positioned parent to a distant ancestor is explicitly
    **UNSUPPORTED** in v2 (affected WPT titan cases get a not-applicable
    rule).
+
+### 4.1 Inline runs: `meta.runs` (the anonymous-run box)
+
+`text` is ONE string and the flat list has ONE sibling order, so a
+component can express `run + children` or `children + run` — never
+`run / child / run`. The moment a kept child sits BETWEEN two text
+nodes (`the quick <u>brown</u> fox` with a styled `<u>`), the reading
+order the browser paints is not the order the wire describes. Through
+wave-31 the extractor said so out loud and shipped the concatenation
+(the `inline-run-reordered` lossy reason, 1,203 components across 472
+fixture files). `meta.runs` is the wire that fixes it.
+
+**Shape.** An array, in DOCUMENT order, of entries that are each
+*exactly one* of:
+
+| entry | meaning |
+|---|---|
+| `{"text": "…"}` | an anonymous inline run — a bare text node at this position |
+| `{"child": "<key>"}` | the child component with that authoring key sits at this position |
+
+**Which key?** `child` carries the child's **authoring key** — the map
+key the producer assigned — *not* its `id`. This is the one place
+`meta.runs` deviates from `slot.parent`, and it is deliberate: the
+converter **mints** ids at the flatten boundary
+(`<lowercased-name>-<NNN>`, §5 rule 1), so a producer-written id names
+nothing after the hop. The authoring key does round-trip — it becomes
+the child's `name`. Readers resolve against `name` first and MAY fall
+back to `id`; in the extractor-direct pipeline (extractor output handed
+straight to the web renderer, no converter) the two are the same string,
+so both resolutions agree. The alternative — teaching `IRFlattener` to
+rewrite `runs.child` alongside `slot.parent` — was rejected because it
+would make the converter a co-owner of an otherwise opaque hint (see
+04-metadata-fields.md).
+
+**Rules, all frozen with the key:**
+
+1. **Order is the payload.** The array is the component's inline content
+   in document order. Nothing else on the component encodes it.
+2. **Authoritative when present.** A reader that honours `runs` paints
+   the entries in order and MUST NOT *also* paint `text`, nor paint a
+   referenced child a second time from the sibling walk.
+3. **Additive, not a break.** `text` stays on the wire carrying the
+   pre-wave-32 concatenation, so a reader that ignores `meta.runs`
+   behaves exactly as it did before the key existed — the same lossy
+   result, no decode failure. This is why the key rides `meta`
+   (droppable hints) and not the structural envelope.
+4. **Unreferenced children still render**, after the runs, in flat-list
+   sibling order. The emitter references every kept child today; the
+   rule exists so a partial `runs` can never make a box disappear.
+5. **Dangling `child` keys are a renderer-side warn-and-skip**, mirroring
+   the dangling-`slot.parent` rule (§2). The converter never resolves
+   them — `meta.runs` is opaque all the way through the hop.
+6. **Whitespace at a run boundary is meaningful** (it is the inter-run
+   word space). Only the FIRST run is leading-trimmed and only the LAST
+   run trailing-trimmed: the same CSS Text §4.1 trim the whole-element
+   `text` gets, applied to the ends of the *sequence* instead of to
+   every entry.
+7. **An anonymous run is an INLINE box, not a block.** Renderers must
+   emit it as a bare text node in the content walk — never as a
+   synthesized child component with a placeholder box, because a block
+   box inside an inline box splits it (CSS 2.1 §9.2.1.1) and would
+   re-break the very line box the key exists to preserve.
 
 ## 5. The authoring input stays nested — forever
 

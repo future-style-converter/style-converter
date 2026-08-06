@@ -110,10 +110,17 @@ object IRDocumentDecoder {
     // inline run's ordered per-line list (contract in IRDecoration's doc).
     // Wave-27 (lane CBAKE): `markerText` joined it — the resolved list-
     // marker string for one `<li>` (contract in [IRComponent.markerText]).
-    private val META_KEYS = setOf("sourceTag", "role", "attrs", "decorations", "markerText")
+    // Wave-32 (lane R): `runs` joined it — the ordered inline-content list
+    // for a component whose own text interleaves with its kept children
+    // (contract in [IRRun] + schema/spec/03-children.md §4.1).
+    private val META_KEYS = setOf("sourceTag", "role", "attrs", "decorations", "markerText", "runs")
     // The two keys ONE `meta.decorations` entry may carry (schema
     // ir-v2.schema.json meta.decorations.items, additionalProperties:false).
     private val DECORATION_KEYS = setOf("line", "color")
+    // The two keys ONE `meta.runs` entry may carry, of which exactly one is
+    // present (schema ir-v2.schema.json meta.runs.items — minProperties 1,
+    // maxProperties 1, additionalProperties false).
+    private val RUN_KEYS = setOf("text", "child")
     // The ten attributes the wave-20 wire contract allows inside meta.attrs;
     // anything else is a writer bug and errors like every strict envelope.
     // Wave-27 (lane CBAKE) added `start` for the disjoint ol/li ordinal
@@ -303,6 +310,9 @@ object IRDocumentDecoder {
             // string forwarded verbatim; absence keeps the renderer on its
             // own counter-style table.
             markerText = (meta?.get("markerText") as? JsonPrimitive)?.contentOrNull,
+            // meta.runs → runs (wave-32 ordered inline content, the same
+            // additive meta channel as attrs/decorations/markerText).
+            runs = decodeRuns(meta?.get("runs"), id),
             slot = slot,
             // pseudos: opaque component-shaped payload forwarded verbatim —
             // generated content never flattens (design §4.2).
@@ -421,6 +431,59 @@ object IRDocumentDecoder {
                     p.contentOrNull
                 }
             )
+        }
+    }
+
+    /**
+     * Decode the wave-32 `meta.runs` ordered inline-content list (lane R).
+     *
+     * Strict where the schema is strict — an array, non-empty, entries are
+     * objects carrying EXACTLY ONE of `text` / `child` — because every one
+     * of those is a writer bug that would silently reorder painted content,
+     * which is the failure this whole wire exists to remove. Note the two
+     * asymmetries, both deliberate:
+     *   - `text` may be the EMPTY STRING (a producer is allowed to emit one;
+     *     the renderer simply paints nothing for it), so the presence test
+     *     is on the key, not on the content;
+     *   - `child` may NOT be empty: an empty key can never resolve, so it is
+     *     a bug rather than a no-op.
+     * Resolution of `child` against the composed children — including the
+     * dangling case, which spec 03 §4.1 rule 5 makes a warn-and-skip — is
+     * the RENDERER's job, not the decoder's.
+     */
+    private fun decodeRuns(
+        el: kotlinx.serialization.json.JsonElement?,
+        ownerId: String
+    ): List<IRRun>? {
+        if (el == null) return null // meta without runs — the norm
+        val arr = el as? JsonArray
+            ?: throw IllegalArgumentException("component '$ownerId': meta.runs must be an array")
+        // Schema pins minItems 1 — the producer omits the key rather than
+        // emitting an empty list, so an empty one is a writer bug.
+        require(arr.isNotEmpty()) {
+            "component '$ownerId': meta.runs present but empty (schema: minItems 1)"
+        }
+        return arr.map { entryEl ->
+            val o = entryEl as? JsonObject
+                ?: throw IllegalArgumentException("component '$ownerId': meta.runs entries must be objects")
+            requireOnlyKeys(o, RUN_KEYS, "meta.runs entry (in '$ownerId')")
+            val textEl = o["text"] as? JsonPrimitive
+            val childEl = o["child"] as? JsonPrimitive
+            require((textEl != null) != (childEl != null)) {
+                "component '$ownerId': meta.runs entry must carry exactly one of 'text' / 'child'"
+            }
+            if (textEl != null) {
+                require(textEl.isString) {
+                    "component '$ownerId': meta.runs 'text' must be a string"
+                }
+                IRRun(text = textEl.contentOrNull ?: "")
+            } else {
+                val key = childEl!!.takeIf { it.isString }?.contentOrNull
+                require(!key.isNullOrEmpty()) {
+                    "component '$ownerId': meta.runs 'child' must be a non-empty authoring key"
+                }
+                IRRun(child = key)
+            }
         }
     }
 

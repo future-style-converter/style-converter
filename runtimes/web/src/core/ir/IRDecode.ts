@@ -232,8 +232,20 @@ function translateV1(components: unknown[]): IRDocument {
     if (Array.isArray(c._decorations) && c._decorations.length > 0) {
       meta.decorations = c._decorations as IRMeta['decorations'];
     }
+    // wave-32 lane R: `_runs` → `meta.runs`, the same underscore→meta hop
+    // as `_decorations` above and for the same reason — this path decodes
+    // EXTRACTOR-shaped input directly (spec 04's second column), and
+    // without it the interleaved inline order would be lost precisely in
+    // the pipeline that hands fixtures straight to the browser. Entries
+    // are carried verbatim; NodeRenderer owns the resolution + skip rules.
+    // NB the `child` refs are authoring keys, which in THIS path are also
+    // the children's ids (the extractor stamps `id` on each child and this
+    // visitor reuses it verbatim), so name- and id-resolution coincide.
+    if (Array.isArray(c._runs) && c._runs.length > 0) {
+      meta.runs = c._runs as IRMeta['runs'];
+    }
     if (meta.sourceTag !== undefined || meta.role !== undefined
-      || meta.decorations !== undefined) {
+      || meta.decorations !== undefined || meta.runs !== undefined) {
       out.meta = meta;
     }
     // Composition: nested position becomes a child-side slot ref; roots

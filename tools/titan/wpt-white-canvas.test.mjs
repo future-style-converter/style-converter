@@ -370,11 +370,16 @@ test('corpus-v4.1 swiftui: WPTCanvas.textInk is black and both bottom-outs route
   assert.match(runtime, /wptCaptureMode \? textInk : defaultInk/, 'swiftui ink-split helper missing/changed');
 
   const renderer = src('runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift');
-  // Both currentColor bottom-out call sites (leading-text + leaf label)
-  // route through the split — count them so a third un-routed consumer of
-  // defaultTextColor can't slip back in.
+  // Every currentColor bottom-out call site routes through the split —
+  // count them so an UN-routed consumer of defaultTextColor can't slip back
+  // in. Three since wave-32 lane R: leading-text label, leaf label, and the
+  // inline anonymous-run label (`inlineRunLabel`), which is the SAME run as
+  // the leading-text one, moved to its slot in the child walk — so it must
+  // bottom out identically or a `_runs` component's glyphs would change ink
+  // purely by being interleaved. The `doesNotMatch` below is the real guard;
+  // this count is what makes a NEW site visible rather than silent.
   const routed = renderer.match(/WPTCanvas\.captureTextInk\(\s*\n\s*wptCaptureMode: wptCaptureMode,\s*\n\s*defaultInk: InheritedText\.defaultTextColor\)/g) ?? [];
-  assert.equal(routed.length, 2, 'both iOS currentColor bottom-outs must route through the ink split');
+  assert.equal(routed.length, 3, 'every iOS currentColor bottom-out must route through the ink split');
   assert.doesNotMatch(renderer, /\? InheritedText\.defaultTextColor : nil/,
     'an iOS currentColor bottom-out bypasses the ink split');
   // The no-color PlaceholderLabel fallback is black in WPT mode…

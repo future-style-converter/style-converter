@@ -1460,7 +1460,17 @@ public struct ComponentRenderer: View {
                     alignment: .leading,
                     spacing: gap.row
                 ) {
-                    contentOrPlaceholder(style: style)
+                    // Wave-32 lane R: the PLAIN block stack is the one
+                    // container whose subviews nothing indexes — the three
+                    // custom Layouts above (float rows, inline atoms, and the
+                    // multicol/flex branches) align their measurables to the
+                    // sorted child array plus `leadingCount`, so an extra
+                    // anonymous-run subview would shift every one of them.
+                    // Interleaving is therefore requested HERE and only here;
+                    // every other branch keeps the pre-wave-32 content pass
+                    // (leading text, then children) byte-for-byte. See
+                    // InlineRunPlan's "HONEST SCOPE" note.
+                    contentOrPlaceholder(style: style, interleaveRuns: true)
                 }
             }
         }
@@ -2314,8 +2324,49 @@ public struct ComponentRenderer: View {
 
     // MARK: - Content
 
+    /// Wave-32 lane R — ONE anonymous inline run, painted at its slot in the
+    /// child walk.
+    ///
+    /// Routed through `PlaceholderLabel` for the same reason the leading-text
+    /// site is: SwiftUI's `Text` inherits no styling, so a bare `Text(run)`
+    /// would drop the component's font, colour, line-height and text-indent
+    /// and the run would not match the glyphs around it. Every argument here
+    /// is the leading-text call's argument — this is the SAME run, moved.
+    ///
+    /// `decorations` is deliberately NOT threaded: the wave-22 inline-chain
+    /// collapse drops `_runs` along with the children it flattens, so the two
+    /// keys can never co-occur on one component and there is no list to pass.
     @ViewBuilder
-    private func contentOrPlaceholder(style: ComponentStyle) -> some View {
+    private func inlineRunLabel(_ text: String, style: ComponentStyle) -> some View {
+        PlaceholderLabel(
+            name: text,
+            // Same currentColor bottom-out as the leading-text label: spec
+            // BLACK under the WPT ref injection, the stage default otherwise.
+            color: style.text.color
+                ?? (currentColorBottomsOut
+                        ? WPTCanvas.captureTextInk(
+                            wptCaptureMode: wptCaptureMode,
+                            defaultInk: InheritedText.defaultTextColor)
+                        : nil),
+            textConfig: style.text,
+            backgroundColor: style.backgroundColor,
+            clipTextGradient: nil,
+            fillWidth: style.size.width != nil,
+            wptCaptureMode: wptCaptureMode,
+            wrapWidth: textWrapWidth(style: style)
+        )
+    }
+
+    ///
+    /// Wave-32 lane R: `interleaveRuns` is opt-in per CALL SITE, not derived
+    /// from the component. Only the plain block `VStack` passes true — every
+    /// other branch hands its subviews to a custom `Layout` that indexes them
+    /// against the sorted child array plus a `leadingCount`, so an extra
+    /// anonymous-run subview would silently shift every placement. False
+    /// keeps this function byte-identical to wave 31.
+    @ViewBuilder
+    private func contentOrPlaceholder(style: ComponentStyle,
+                                      interleaveRuns: Bool = false) -> some View {
         // ── wave-30 lane-3 OWN-DISPLAY marker (fix B1, see
         // StyleEngine/lists/ListItemMarkerGate.swift). css-lists-3 §3.1
         // attaches the ::marker to the BOX, not the tag: a
@@ -2381,7 +2432,23 @@ public struct ComponentRenderer: View {
             // Known limitation: leading-only; full inline-flow ordering
             // would need an interleaved inlineRuns IR shape.
             // (v2 rename: the wire field is `text`, formerly `_text`.)
-            if let t = component.text, !t.isEmpty {
+            // ── Wave-32 lane R: the ordered inline content ──────────────
+            // `meta.runs` says where this component's own text sits RELATIVE
+            // to its children (spec 03 §4.1) — the shape the single `text`
+            // string cannot express, and the one the CSS2 static-position
+            // family is decided by. When a plan resolves it is
+            // AUTHORITATIVE: the leading label below is suppressed (its
+            // string is the concatenation the runs were split FROM, so
+            // painting both would double the glyphs) and each run is emitted
+            // at its slot in the child walk instead. nil — hence completely
+            // inert — for every component without the key, for every
+            // non-plain container (see the `interleaveRuns` doc), and for a
+            // list the fold cannot express (InlineRunPlan.resolve's proof).
+            let runPlan = interleaveRuns
+                ? InlineRunPlan.resolve(component.meta?.runs,
+                                        children: FlexboxApplier.sorted(inFlowChildren))
+                : nil
+            if let t = component.text, !t.isEmpty, runPlan == nil {
                 PlaceholderLabel(
                     name: t,
                     // Wave-5 gate follow-up — same currentColor
@@ -2550,6 +2617,19 @@ public struct ComponentRenderer: View {
                 return CGFloat(used.widthPx)
             }()
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
+                // Wave-32 lane R: the anonymous inline runs that precede THIS
+                // child, emitted immediately before it so the wire's document
+                // order survives into the stack. Empty (hence no extra
+                // subview at all) for every index the plan does not name, and
+                // for every container that did not ask to interleave — so the
+                // view tree outside the ~1,138-component `_runs` population is
+                // untouched. Routed through PlaceholderLabel, exactly like the
+                // leading-text site above, so a run picks up the parent's
+                // TextConfig (font, colour, line-height) rather than SwiftUI's
+                // inherited-nothing default.
+                ForEach(Array((runPlan?.before[index] ?? []).enumerated()), id: \.offset) { _, runText in
+                    inlineRunLabel(runText, style: style)
+                }
                 // Build the child's aggregate once so FlexChildModifier
                 // (legacy wrap path) and the stretch env computation can
                 // read align-self / flex-basis / flex-grow without
@@ -2840,6 +2920,13 @@ public struct ComponentRenderer: View {
                 // and only attached at all when the container declares
                 // gap decorations — see gapDecorationItemFrame.
                 .gapDecorationItemFrame(index: index, active: gapDecorActive)
+            }
+            // Wave-32 lane R: runs after the LAST referenced child. Empty for
+            // every plan that ends on a child (and for every container that
+            // did not interleave), so this adds no subview outside the
+            // `_runs` population.
+            ForEach(Array((runPlan?.trailing ?? []).enumerated()), id: \.offset) { _, runText in
+                inlineRunLabel(runText, style: style)
             }
         } else if Self.suppressesNamePlaceholder(component,
                                                  wptCaptureMode: wptCaptureMode) {

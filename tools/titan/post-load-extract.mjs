@@ -1238,6 +1238,113 @@ export async function closePostLoadBrowser() {
   if (_browser) { await _browser.close(); _browser = null; }
 }
 
+// ── wave-32 lane R: WEDGED-CHROMIUM RECOVERY ─────────────────────────────────
+//
+// THE FAILURE (skeptic finding, wave-31). The browser is SHARED across a
+// whole batch — 1,850 tests in a corpus re-extraction, a full section in
+// section-runner.sh. When the Chromium process dies or its DevTools pipe
+// wedges, every remaining test inherits the corpse: each one opens a page
+// against a dead target, waits out `protocolTimeout` (300 s) or the goto
+// timeout (30 s), and fails. The batch does not stop — it BURNS. At 300 s a
+// test, a wedge 200 tests from the end costs ~17 hours of nothing, and the
+// run's only signal is a wall of identical timeouts whose real cause scrolled
+// off the top.
+//
+// THE CONTRACT (three parts, all deliberate):
+//  1. RECOGNISE, don't guess. `isWedgedBrowserError` matches only the
+//     puppeteer/CDP transport failures that mean "this browser instance is
+//     unusable" — protocol timeout, target/session/connection closed, a
+//     crashed target. A page-level failure (navigation timeout on a slow
+//     file://, an evaluate throwing) is NOT a wedge and must keep its
+//     existing behaviour, or a genuine per-test bug would be masked by a
+//     relaunch loop.
+//  2. DISCARD, don't close. A wedged browser cannot answer `close()` either
+//     — awaiting it is how a recovery path itself hangs. The handle is
+//     dropped and the process killed best-effort, so the NEXT getBrowser()
+//     launches a fresh instance.
+//  3. RETRY THE FAILED TEST EXACTLY ONCE, then bail to static. The failed
+//     test is the one we have least reason to trust, and re-running it on a
+//     fresh browser is what "continue FROM the failed test" means (as opposed
+//     to skipping it and continuing after it). A second wedge on a fresh
+//     instance is not transport noise — it is that test killing Chromium —
+//     so it takes the ordinary bail-to-static path with a LOUD reason rather
+//     than relaunching forever.
+//
+// Retrying is safe against the bail-to-static contract: the fixture is only
+// mutated at the very end of a successful pass (mergePostLoadIntoFixture /
+// structureExtractFromLivePage), so a mid-way wedge leaves it byte-identical
+// and the second attempt starts from the same input the first did.
+
+/** The CDP/puppeteer transport failures that mean "this browser is dead". */
+const WEDGED_BROWSER_RX =
+  /protocoltimeout|runtime\.callfunctionon timed out|target closed|session closed|connection closed|websocket is not open|target crashed|browser has disconnected|protocol error/i;
+
+/**
+ * Is this error a wedged-browser transport failure (as opposed to a
+ * page-level failure the caller should keep handling itself)?
+ *
+ * Deliberately message-based: puppeteer does not export stable error classes
+ * for the whole set, and the strings above are the ones its transport layer
+ * actually produces. Exported so the contract is unit-pinned rather than
+ * asserted only by a live wedge nobody can reproduce on demand.
+ */
+export function isWedgedBrowserError(err) {
+  if (!err) return false;
+  const text = `${err.name ?? ''} ${err.message ?? err}`;
+  // A NAVIGATION timeout is a page fact, not a transport fact — the browser
+  // is alive and the next test will run fine. Excluded explicitly so the
+  // generic /timed out/ shapes above cannot swallow it.
+  if (/navigation timeout|waiting for selector/i.test(text)) return false;
+  return WEDGED_BROWSER_RX.test(text);
+}
+
+/**
+ * Drop the shared browser WITHOUT awaiting a clean close (see contract 2).
+ * Best-effort kill so the OS reclaims the process; any error here is itself
+ * a symptom of the wedge and must not replace the original failure.
+ */
+export async function discardPostLoadBrowser() {
+  const dead = _browser;
+  _browser = null;                    // next getBrowser() launches fresh
+  if (!dead) return;
+  try {
+    const proc = dead.process?.();
+    if (proc) proc.kill('SIGKILL');   // do not negotiate with a wedged pipe
+  } catch { /* already gone — nothing to reclaim */ }
+}
+
+/**
+ * Run one browser-backed attempt with wedge recovery (contract 3).
+ *
+ * Pure control flow over two injected effects, so the retry policy is
+ * testable without a real Chromium: `attempt()` performs the work and
+ * `discard()` throws the browser away.
+ *
+ * @returns the attempt's result, or a `bailed` outcome when a fresh browser
+ *          wedged on the same test too.
+ */
+export async function runWithBrowserRecovery(attempt, discard = discardPostLoadBrowser) {
+  try {
+    return await attempt();
+  } catch (err) {
+    // Not a transport failure → the caller's own error, unchanged.
+    if (!isWedgedBrowserError(err)) throw err;
+    await discard();
+    try {
+      return await attempt();
+    } catch (err2) {
+      if (!isWedgedBrowserError(err2)) throw err2;
+      // A fresh instance wedged on the same input: this test kills Chromium.
+      // Leave the browser discarded so the REST of the batch runs clean.
+      await discard();
+      return {
+        status: 'bailed',
+        reason: `browser-wedged-twice (${(err2.message ?? err2).toString().slice(0, 120)})`,
+      };
+    }
+  }
+}
+
 /**
  * Run post-load extraction for one test and (on success) bake the result
  * into `fixture` in place. Returns `{ status, reason?, records? }` where
@@ -1253,6 +1360,15 @@ export async function closePostLoadBrowser() {
  *     the serialized post-script DOM, then state-baked).
  */
 export async function postLoadAugmentFixture(fixture, testRel) {
+  // wave-32 lane R: one wedge-recovery wrapper around the real pass (see the
+  // WEDGED-CHROMIUM RECOVERY banner). Every existing status flows through
+  // untouched; the only new outcome is 'bailed' with a browser-wedged-twice
+  // reason, which is the ordinary bail-to-static path.
+  return runWithBrowserRecovery(() => postLoadAugmentOnce(fixture, testRel));
+}
+
+/** The single post-load pass. Wrapped by postLoadAugmentFixture. */
+async function postLoadAugmentOnce(fixture, testRel) {
   const testAbs = join(WPT_DIR, testRel);
   const html = await fs.readFile(testAbs, 'utf8');
   // Static decline first — cheap, and avoids a browser launch for the
@@ -1397,7 +1513,11 @@ export async function postLoadAugmentFixture(fixture, testRel) {
              // is visible in a batch run rather than silent.
              pseudoRederived: pseudo.changed };
   } finally {
-    await page.close(); // one page per test; browser is shared
+    // wave-32 lane R: a wedged browser cannot close its page either, and an
+    // exception thrown HERE would replace the transport error the recovery
+    // wrapper needs to see. Swallow it — the page dies with the process the
+    // discard path is about to kill.
+    await page.close().catch(() => {}); // one page per test; browser is shared
   }
 }
 

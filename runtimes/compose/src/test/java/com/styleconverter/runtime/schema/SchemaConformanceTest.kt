@@ -216,6 +216,62 @@ class SchemaConformanceTest {
     }
 
     @Test
+    fun `v2 — meta_runs lands on the runtime model in document order`() {
+        // Wave-32 lane R. `_text` is ONE string and the child list has ONE
+        // order, so the wire could say `run + children` or `children + run`
+        // but never `run / child / run` — the shape `the quick <u>brown</u>
+        // fox` needs when the <u> survives as a child (spec 03 §4.1).
+        val doc = loadV2("inline-runs.json")
+        val glued = byId(doc, "runs-glued-002")
+        val runs = glued.runs!!
+        assertEquals(3, runs.size)
+        assertEquals("the quick ", runs[0].text)
+        assertEquals("Runs_UnderlinedWord", runs[1].child)
+        assertEquals(" fox", runs[2].text)
+        // Exactly one member per entry — the decoder proves the shape so the
+        // renderer never has to ask which one wins.
+        assertNull(runs[0].child)
+        assertNull(runs[1].text)
+        // `text` is STILL on the component carrying the pre-wave-32
+        // concatenation — that is what makes meta.runs ADDITIVE.
+        assertEquals("the quick fox", glued._text)
+        // The reference is the AUTHORING KEY (the child's `name`), never the
+        // converter-minted id: the converter re-ids at the flatten boundary,
+        // so a producer-written id would name nothing after the hop.
+        val underlined = byId(doc, "runs-glued-underline-003")
+        assertEquals(underlined.name, runs[1].child)
+        assertTrue("the ref must not be the minted id", underlined.id != runs[1].child)
+        // A whitespace-only run between two children is the inter-run word
+        // space (rule 6) and survives decode un-trimmed.
+        assertEquals(" ", byId(doc, "runs-ws-only-006").runs!![1].text)
+        // Absence stays null — that is what keeps every other component on
+        // the pre-wave-32 leading-text path.
+        assertNull(underlined.runs)
+    }
+
+    @Test
+    fun `v2 strict — a malformed meta_runs entry is a hard decode error`() {
+        // Every one of these is a writer bug that would silently REORDER
+        // painted content, which is the exact failure the wire exists to
+        // remove — so it must be loud, not tolerated.
+        val head = """{"irVersion":2,"minReaderVersion":2,"components":[
+            {"id":"a","name":"A","properties":[],"meta":{"runs":"""
+        // Not an array / empty array / non-object entry / both keys /
+        // neither key / unknown key / empty child key.
+        assertThrowsIae(head + """{"text":"x"}}}]}""", "array")
+        assertThrowsIae(head + """[]}}]}""", "empty")
+        assertThrowsIae(head + """["x"]}}]}""", "objects")
+        assertThrowsIae(head + """[{"text":"a","child":"b"}]}}]}""", "exactly one")
+        assertThrowsIae(head + """[{}]}}]}""", "exactly one")
+        assertThrowsIae(head + """[{"tail":"a"}]}}]}""", "tail")
+        assertThrowsIae(head + """[{"child":""}]}}]}""", "non-empty")
+        // …but the EMPTY STRING is a legal `text` (a producer may emit one;
+        // the renderer simply paints nothing for it).
+        val ok = IRDocumentDecoder.decode(head + """[{"text":""},{"child":"b"}]}}]}""")
+        assertEquals("", ok.components[0].runs!![0].text)
+    }
+
+    @Test
     fun `v2 — slot round-trips with default-name reconstruction`() {
         val doc = loadV2("children-nesting.json")
         val child = byId(doc, "child__0-002")

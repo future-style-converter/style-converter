@@ -1815,20 +1815,59 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   // stamps it on every manifest row, so an affected test is scored WITH its
   // approximation on the record, never silently.
   //
-  // DESIGN FOR THE FUTURE WAVE (v3 `_runs`): replace the single `_text`
-  // string with an ordered content list — `_runs: [{text}, {child: id},
-  // {text}]` — defaulting to `[{text: _text}, …children]` for every
-  // fixture that does not carry it, so the corpus stays byte-identical
-  // until a fixture opts in. Each renderer gains ONE inline anonymous-run
-  // box (web: a bare text node in the children walk; Compose: an inline
-  // AnnotatedString segment; SwiftUI: a Text run in the same HStack), and
-  // this flag becomes the assertion that a fixture needed `_runs` and did
-  // not get them.
+  // ── wave-32 lane R: THE BAIL IS LIFTED — `_runs` shipped ────────────────
+  //
+  // The design wave-31 wrote here is now the code below it. `_runs` is an
+  // ORDERED content list — `[{text}, {child: <authoring key>}, {text}]` —
+  // emitted ONLY for the components this flag fires on, i.e. exactly the
+  // 1,203-component / 472-file population enumerated above. Every other
+  // component carries no key at all, so the rest of the corpus stays
+  // byte-identical (that is what makes the wire additive rather than a v3
+  // break — see schema/spec/03-children.md §4.1 and 05-versioning.md's
+  // additive meta-key rule, the wave-22 `_decorations` precedent).
+  //
+  // WHAT CHANGED vs the wave-31 design note, and why:
+  //   * The reference is the child's AUTHORING KEY, not "id". The converter
+  //     MINTS ids (`<lowercased-name>-<NNN>`) at the flatten boundary, so an
+  //     id written here names nothing after the hop; the authoring key
+  //     survives as the child's `name`. In the extractor-direct pipeline the
+  //     three spellings coincide, so both resolutions agree.
+  //   * `_text` STAYS on the component, carrying this scanner's
+  //     concatenation. A reader that ignores `_runs` therefore behaves
+  //     exactly as it did before the key existed — same (lossy) paint, no
+  //     decode failure. `_runs` is authoritative only for readers that
+  //     honour it.
+  //   * The reorder REASON is retired per-component, and only when the runs
+  //     actually emitted: buildNode drops 'inline-run-reordered' from the
+  //     lossy list for a component carrying `_runs`, and keeps it for every
+  //     component where the alignment check below refused (see alignRuns).
+  //
+  // The three renderers each gained ONE inline anonymous-run box, per the
+  // design: web a bare text node in the children walk (NodeRenderer +
+  // InlineRuns.ts), Compose and SwiftUI a text run emitted at its slot in
+  // the same content pass their children walk uses.
   let reordered = false;
+  // wave-32 lane R: the ordered raw pieces, built alongside `textBuf` in
+  // ONE walk so the two can never disagree about what the element's own
+  // content is. Entries are `{t:'text', raw}` (verbatim source text, still
+  // encoded and un-collapsed — the two normalisation steps run once, at the
+  // bottom, exactly as they do for `textBuf`) and `{t:'el', tag}` for a
+  // child that stays a component. Merge-absorbed children contribute their
+  // inner text to the CURRENT text piece, which is precisely why an
+  // absorbed run never produces a `_runs` entry: it is already in reading
+  // order by construction.
+  const segments = [];
+  /** Append source text, coalescing with a preceding text piece. */
+  const pushText = (s) => {
+    if (!s) return;
+    const last = segments[segments.length - 1];
+    if (last && last.t === 'text') last.raw += s;
+    else segments.push({ t: 'text', raw: s });
+  };
   // Set once a NON-absorbed child element (component path) has been seen;
   // any subsequent non-whitespace own text is by definition out-of-order.
   let sawKeptChild = false;
-  if (!innerHtml) return { text: '', merged, reordered };
+  if (!innerHtml) return { text: '', merged, reordered, runProto: null };
   const n = innerHtml.length;
   const VOID = new Set([
     'area','base','br','col','embed','hr','img','input',
@@ -1847,6 +1886,8 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
       // tags) collapse away under §4.1 and can't reorder anything.
       if (sawKeptChild && /[^ \t\n\r\f]/.test(slice)) reordered = true;
       textBuf += slice;
+      // wave-32 lane R: the same bytes, recorded at their position.
+      pushText(slice);
       i = end;
       continue;
     }
@@ -1878,6 +1919,10 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
       // B-RC9a: a void child (<br>, <img>, …) always stays a component —
       // own text appended after it renders BEFORE it on our side.
       sawKeptChild = true;
+      // wave-32 lane R: a void child occupies a position in the inline
+      // flow exactly like a paired one (a <br> IS the line break the
+      // surrounding runs sit either side of).
+      segments.push({ t: 'el', tag: tagName });
       i = tagOpenEnd + 1;
       continue;
     }
@@ -1931,13 +1976,21 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
         // x on our side), so the post-kept check applies here too.
         if (sawKeptChild && /[^ \t\n\r\f]/.test(childInner)) reordered = true;
         textBuf += childInner;
+        // wave-32 lane R: an absorbed run is TEXT at this position — it
+        // coalesces with the neighbouring pieces, which is why merging can
+        // never produce a `_runs` entry of its own.
+        pushText(childInner);
         merged++;
         childKept = false; // absorbed — not a component, order preserved
       }
     }
     // B-RC9a: a paired child that was NOT absorbed keeps the component
     // path — remember it so any later own text flags the reorder.
-    if (childKept) sawKeptChild = true;
+    if (childKept) {
+      sawKeptChild = true;
+      // wave-32 lane R: its position in the inline flow, recorded.
+      segments.push({ t: 'el', tag: tagName });
+    }
     i = cursor;
   }
   // wave-15 BIDI-EXTRACT part 1: decode character references NOW — after
@@ -1951,7 +2004,17 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   // collapse, no trim — per CSS Text §4.1.1 (spaces/tabs/segment breaks
   // are all preserved under pre/pre-wrap/break-spaces). bidi-tab-001's
   // '\t0' spans and tab-bidi-001's literal-TAB runs depend on this.
-  if (preserveWhitespace) return { text: decodedBuf, merged, reordered };
+  // wave-32 lane R: the run list, built from the SAME pieces the buffer was
+  // built from and normalised by the SAME two steps — only per piece, and
+  // with the trim applied to the ENDS OF THE SEQUENCE rather than to every
+  // entry. That distinction is the whole point (spec 03 §4.1 rule 6):
+  // `the quick <u>brown</u> fox` must keep the space before AND after the
+  // child, so trimming each run individually would silently delete two word
+  // spaces the browser paints. Computed only when the reorder fired —
+  // every other component discards it unread, so the common path pays one
+  // boolean.
+  const runProto = reordered ? buildRunProto(segments, preserveWhitespace) : null;
+  if (preserveWhitespace) return { text: decodedBuf, merged, reordered, runProto };
   // Collapse whitespace per CSS white-space:normal default.
   //
   // Bug 3 fix (css-text/hanging-punctuation-first-002): the JS `\s` class
@@ -1968,9 +2031,110 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   const collapsed = decodedBuf
     .replace(/[ \t\n\r\f]+/g, ' ')
     .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
-  // Text plus the wave-12 merge count (0 whenever mergeCtx was null) and
-  // the wave-21 B-RC9a reorder flag (see the declaration comment above).
-  return { text: collapsed, merged, reordered };
+  // Text plus the wave-12 merge count (0 whenever mergeCtx was null), the
+  // wave-21 B-RC9a reorder flag (see the declaration comment above) and the
+  // wave-32 lane R run list (null unless the reorder fired).
+  return { text: collapsed, merged, reordered, runProto };
+}
+
+/**
+ * wave-32 lane R — turn scanOwnText's raw ordered pieces into the run list
+ * shape `_runs` ships: `[{ text }, { el: <n-th kept child> }, …]`.
+ *
+ * The element entries are still POSITIONAL (`el: k`, the k-th kept child in
+ * scan order) rather than keyed: only the tree walker knows the children's
+ * authoring keys, and only IT can prove the two enumerations agree. That
+ * proof lives in alignRuns; this function's contract stops at "same pieces,
+ * same order, normalised".
+ *
+ * NORMALISATION, mirroring scanOwnText's bottom exactly:
+ *  1. character references decode per piece — a reference never spans a
+ *     child element, so per-piece and whole-buffer decoding agree byte for
+ *     byte (see decodeCharacterReferences for the tokenizer-order rationale);
+ *  2. `preserveWhitespace` (the pre family) skips step 3 entirely;
+ *  3. otherwise the CSS Text §4.1 ASCII collapse runs per piece, and the
+ *     TRIM runs only on the sequence's outer edges — leading whitespace off
+ *     the first piece if it is text, trailing off the last if it is text.
+ *
+ * Pieces that normalise to the empty string are dropped: they carry no
+ * glyphs and no box, and an empty entry would only add a zero-length text
+ * node downstream. A whitespace-ONLY piece between two children is NOT
+ * empty — it is the inter-run word space and survives as `{ text: ' ' }`.
+ *
+ * Exported for the unit tests (the normalisation rules above are the part
+ * most likely to drift silently).
+ */
+export function buildRunProto(segments, preserveWhitespace = false) {
+  if (!segments || segments.length === 0) return null;
+  // Step 1 + 3a: per-piece decode, then per-piece collapse (pre family
+  // keeps its spaces/tabs/segment breaks verbatim, CSS Text §4.1.1).
+  const normalised = segments.map((seg) => {
+    if (seg.t !== 'text') return seg;
+    const decoded = decodeCharacterReferences(seg.raw);
+    return { t: 'text', raw: preserveWhitespace ? decoded : decoded.replace(/[ \t\n\r\f]+/g, ' ') };
+  });
+  // Step 3b: the OUTER trim. Same ASCII class as the whole-buffer trim; the
+  // pre family is exempt for the same reason it skips the collapse.
+  if (!preserveWhitespace) {
+    const first = normalised[0];
+    if (first && first.t === 'text') first.raw = first.raw.replace(/^[ \t\n\r\f]+/, '');
+    const last = normalised[normalised.length - 1];
+    if (last && last.t === 'text') last.raw = last.raw.replace(/[ \t\n\r\f]+$/, '');
+  }
+  // Emit, numbering the element entries in scan order so alignRuns can key
+  // them against the tree walker's kept-children array.
+  const out = [];
+  let keptSeq = 0;
+  for (const seg of normalised) {
+    // `tag` rides along purely so alignRuns can PROVE the two walks agree
+    // (see its banner); it never reaches the wire.
+    if (seg.t === 'el') { out.push({ el: keptSeq, tag: seg.tag }); keptSeq += 1; continue; }
+    if (seg.raw.length > 0) out.push({ text: seg.raw });
+  }
+  return out.length > 0 ? out : null;
+}
+
+/**
+ * wave-32 lane R — prove that scanOwnText's kept-element enumeration and
+ * the tree walker's kept-children array describe the SAME elements, then
+ * rewrite the positional `{el:k}` entries as `{childIndex:k}`.
+ *
+ * WHY A PROOF AND NOT AN ASSUMPTION. The two walks are different code:
+ * scanOwnText decides "kept" from `isPureInlineMergeable` alone, while
+ * `recurse` first drops HEAD_ONLY_TAGS (a body-level `<style>`), then
+ * applies the SAME mergeable predicate, and finally stops recursing at
+ * `maxDepth` (which leaves a node with kept elements in its source but an
+ * EMPTY children array). Any of those makes the k-th scanned element a
+ * different thing from the k-th child — and a `_runs` list that names the
+ * wrong box is worse than no list at all, because it silently reorders
+ * content instead of loudly approximating it.
+ *
+ * So the check is total: same COUNT, and same TAG at every position. On any
+ * mismatch this returns null, the component ships without `_runs`, and the
+ * 'inline-run-reordered' reason stays on it — the wave-21 bail, still loud,
+ * exactly where the new wire cannot prove itself.
+ *
+ * @param proto    buildRunProto's output (`{text}` / `{el}` entries).
+ * @param children the tree walker's KEPT children, in document order.
+ * @returns `[{text}|{childIndex}]`, or null when the two walks disagree.
+ */
+export function alignRuns(proto, children) {
+  if (!proto || proto.length === 0) return null;
+  const kids = children ?? [];
+  const els = proto.filter((e) => e.el !== undefined);
+  // Count first — the cheap half of the proof, and the one that catches
+  // maxDepth truncation and head-only filtering alike.
+  if (els.length !== kids.length) return null;
+  // Tag equality at every position — catches the case where both walks
+  // kept the same NUMBER of elements but not the same ones.
+  for (let k = 0; k < els.length; k += 1) {
+    if (els[k].tag !== kids[k].tag) return null;
+  }
+  // A single-entry list says nothing the plain `_text` channel does not
+  // already say, so it is not worth a wire key (and a lone `{child}` with
+  // no text is not a reorder at all).
+  if (proto.length < 2) return null;
+  return proto.map((e) => (e.el === undefined ? { text: e.text } : { childIndex: e.el }));
 }
 
 /**
@@ -2437,6 +2601,16 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
       // buildComponents emits the 'inline-run-reordered' lossy marker.
       // Only set when true — legacy node shapes stay byte-identical.
       if (ownRes.reordered) node.inlineReordered = true;
+      // wave-32 lane R: the ordered content list, but ONLY once the two
+      // walks have proven they describe the same children (see alignRuns).
+      // Emitted for exactly the population `inlineReordered` marks, so no
+      // component outside that set gains a byte; when alignRuns refuses,
+      // the node keeps `inlineReordered` alone and buildNode ships the
+      // wave-21 bail unchanged.
+      if (ownRes.reordered) {
+        const aligned = alignRuns(ownRes.runProto, children);
+        if (aligned) node.runs = aligned;
+      }
       // wave-22 EX2 B-RC4a: the scoped inline-chain collapse. Runs LAST,
       // on the finished node, because it needs the recursed `children` to
       // prove every descendant is a decoration-only inline wrapper (see
@@ -2459,6 +2633,13 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
         // reorder approximation no longer exists — clearing the flag is
         // the whole point of the fix, not a suppression of a real loss.
         delete node.inlineReordered;
+        // wave-32 lane R: the collapse just emptied `children`, so any run
+        // list computed above names boxes that no longer exist. Drop it —
+        // the flattened run IS the document order now, and `_text` alone
+        // expresses it. (The two features can therefore never co-occur on
+        // one component, which is why `_decorations` and `_runs` need no
+        // precedence rule between them.)
+        delete node.runs;
         // Fields buildComponents consumes (see buildNode). All
         // omit-when-absent so non-collapsed nodes keep their exact shape.
         node.decorations = collapsed.decorations;
@@ -6412,7 +6593,15 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     if (node.inlineMerged) reasons.push('inline-run-merged');
     // wave-21 B-RC9a: ownText glued across a kept child — order changed
     // (see scanOwnText's reordered doc). LOUD marker, honest gate.
-    if (node.inlineReordered) reasons.push('inline-run-reordered');
+    //
+    // wave-32 lane R RETIREMENT, per component and only when EARNED: a
+    // component that ships `_runs` no longer approximates anything — the
+    // wire carries the true document order and all three renderers read it
+    // — so the reason comes off. A component whose alignment check refused
+    // (alignRuns returned null: head-only sibling, maxDepth truncation, a
+    // walk disagreement) keeps it, because for that one the loss is real
+    // and unchanged. This is the only place the two states are told apart.
+    if (node.inlineReordered && !node.runs) reasons.push('inline-run-reordered');
     // wave-22 EX2 B-RC4a: LOUD markers for the collapse. The property
     // folding itself happened above, BEFORE the lossy scan, so a folded
     // `text-decoration-inset: -0.5em` still trips the em/rem lane.
@@ -6687,6 +6876,19 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // consistent across nesting levels. Each child carries its own
       // `id` field for diff readability + downstream addressing.
       const childMap = {};
+      // wave-32 lane R: the run list's `{childIndex:k}` entries become
+      // `{child: <authoring key>}` HERE, because this is the loop that
+      // mints the keys — `${id}__${k}`, the same string that becomes the
+      // child's map key and (after the converter hop) its `name`. Emitted
+      // before the loop body only in the sense that it reads the same
+      // formula; the loop below is what actually creates the children.
+      if (node.runs) {
+        cmp._runs = node.runs.map((entry) => (
+          entry.childIndex === undefined
+            ? { text: entry.text }
+            : { child: `${id}__${entry.childIndex}` }
+        ));
+      }
       // wave-22 BR-LINE-CONTEXT: fresh line state per sibling scope. The
       // parent's ownText renders BEFORE its element children (the
       // collectSubtreeText ordering approximation documented at its

@@ -118,14 +118,59 @@ enum ContainingBlockBasis {
         // SizeApplier.inflatedAxis tri-state, where only an explicit
         // .contentBox reinterprets the declared slot).
         if style.size.boxSizing == .contentBox {
-            // Degenerate declared sizes (0) still publish nil.
-            return box > 0 ? box : nil
+            // Wave 32 (lane P) — a declared size of ZERO is DEFINITE.
+            // See `zeroIsDefinite` below for why the old `> 0` guard was
+            // the css-tables/absolute-tables-015 defect.
+            return zeroIsDefinite(box)
         }
         // Border box − padding − borders = content box (CSS 2.1 §8.1).
         let v = box - paddingBand(style: style, vertical: vertical)
                     - borderBand(style: style, vertical: vertical)
-        // Degenerate (over-padded) boxes publish nil, never negative.
-        return v > 0 ? v : nil
+        // Clamped at 0 and published — never negative, never nil.
+        return zeroIsDefinite(v)
+    }
+
+    /// A DEFINITE basis of zero, clamped — the wave-32 (lane P) repair of
+    /// the `> 0 ? … : nil` guards that used to sit on both bases.
+    ///
+    /// ## Why zero had to stop meaning "indefinite"
+    /// The two guards conflated three different things: a size that is
+    /// genuinely unknown (fit-content / auto — which really must publish
+    /// nil so `%` children fall back per channel), a size that is
+    /// legitimately **0**, and an over-padded box whose content box would
+    /// come out negative. CSS treats only the first as indefinite:
+    /// css-sizing-3 §5.1 resolves a `<percentage>` against the containing
+    /// block's size whatever that size is, and CSS 2.1 §10.4 clamps a used
+    /// width at 0 rather than letting it go negative or become auto.
+    ///
+    /// ## The measured defect
+    /// css-tables/absolute-tables-015 declares `table { position: absolute;
+    /// width: 0 }` holding `td { width: 100% }` with a red background and
+    /// two 100×50 green inline-blocks. `definiteBorderBox` answered 0, the
+    /// guard turned that into nil, the `td`'s `100%` therefore had no basis
+    /// and fell back to the canvas width — so iOS painted a 258×100 RED
+    /// band at [116,88..373,187] beside the green square. The reference and
+    /// Android both carry green only. (Android is the parity oracle here:
+    /// its capture is byte-clean at GREEN 100×100 [16,88..115,187] with no
+    /// red at all.) With a definite 0 basis the `td` resolves to 0, the red
+    /// never paints, and the two fixed-size green spans still stack to the
+    /// 100×100 square the reference shows.
+    ///
+    /// ## Blast radius, enumerated before the change
+    /// Across all 27 frozen wave31-final sections (324 tests) exactly ONE
+    /// component has a degenerate axis basis AND a percentage-sized
+    /// descendant on that axis — `absolute-tables-015__1__0` itself. 100
+    /// other zero-sized boxes exist in the corpus; none has a percentage
+    /// descendant, so none can observe this channel change.
+    ///
+    /// Note this deliberately does NOT implement the css-tables-3 table
+    /// width algorithm (used width = max(declared, min-content)); it fixes
+    /// the channel that was lying about definiteness. The two agree on
+    /// this test because the cell's contents are fixed-size, and the
+    /// remaining gap is recorded in the lane report.
+    private static func zeroIsDefinite(_ v: CGFloat) -> CGFloat {
+        // Negative bases are not a thing CSS produces — clamp, don't nil.
+        max(0, v)
     }
 
     /// PADDING-box basis (absolutely-positioned children, css-position-3
@@ -153,12 +198,15 @@ enum ContainingBlockBasis {
         // the padding band (borders never belong to the padding box).
         if style.size.boxSizing == .contentBox {
             let v = box + paddingBand(style: style, vertical: vertical)
-            // Degenerate declared sizes (0 content + 0 padding) → nil.
-            return v > 0 ? v : nil
+            // Wave 32 (lane P): a zero padding box is DEFINITE, not
+            // unknown — same reasoning as [zeroIsDefinite], applied to the
+            // abspos basis so an abspos child of a zero-sized positioned
+            // ancestor resolves its `%` against 0 instead of the canvas.
+            return zeroIsDefinite(v)
         }
         // Border box − borders = padding box (padding NOT subtracted).
         let v = box - borderBand(style: style, vertical: vertical)
-        // Degenerate boxes publish nil, never negative.
-        return v > 0 ? v : nil
+        // Clamped at 0 and published — never negative, never nil.
+        return zeroIsDefinite(v)
     }
 }

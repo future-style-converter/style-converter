@@ -260,6 +260,41 @@ describe('IR v2 golden fixtures — web runtime conformance', () => {
     expect(buildStyles(byName(doc, 'abs-claim__2').properties)).toBeTypeOf('object');
   });
 
+  // wave-32 lane R — the ordered inline-content list. The DECODE is the
+  // unit here (the render plan is pinned in InlineRuns.test.ts): a reader
+  // that dropped or rejected `meta.runs` would make the renderer's whole
+  // interleave path dead and silent, which is the failure this catches.
+  it('inline-runs: meta.runs decodes verbatim, in document order', () => {
+    const doc = loadV2('inline-runs.json');
+    // `the quick <u>brown</u> fox` — a child GLUED between two text runs,
+    // the shape `text` + sibling order cannot express (spec 03 §4.1).
+    const glued = byName(doc, 'Runs_TextGluedAcrossChild');
+    expect(glued.meta?.runs).toEqual([
+      { text: 'the quick ' },
+      { child: 'Runs_UnderlinedWord' },
+      { text: ' fox' },
+    ]);
+    // `text` is STILL on the wire carrying the pre-wave-32 concatenation —
+    // that is exactly what makes meta.runs additive rather than a break.
+    expect(glued.text).toBe('the quick fox');
+    // The reference is the AUTHORING KEY (the child's `name`), never the
+    // converter-minted id — pin both spellings so a future id-based
+    // rewrite of the emitter fails here instead of in a capture.
+    const underlined = byName(doc, 'Runs_UnderlinedWord');
+    expect(glued.meta?.runs?.[1].child).toBe(underlined.name);
+    expect(glued.meta?.runs?.[1].child).not.toBe(underlined.id);
+    // A child BEFORE the text: the CSS2 static-inside-inline shape, where
+    // the whole assertion under test is box-vs-text order.
+    expect(byName(doc, 'Runs_ChildBeforeText').meta?.runs?.[0]).toEqual({
+      child: 'Runs_AbsposBox',
+    });
+    // A whitespace-only run between two children is the inter-run word
+    // space (rule 6) and must survive decode un-trimmed.
+    expect(byName(doc, 'Runs_WhitespaceOnlyRunBetweenChildren').meta?.runs?.[1]).toEqual({ text: ' ' });
+    // Omit-when-absent: a component with no interleave carries no key.
+    expect(underlined.meta?.runs).toBeUndefined();
+  });
+
   // ---- gate rules (spec 05) ----
 
   it('gate: refuses a document whose minReaderVersion exceeds the runtime', () => {

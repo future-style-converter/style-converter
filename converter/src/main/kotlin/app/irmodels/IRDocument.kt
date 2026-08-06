@@ -186,6 +186,21 @@ data class IRComponent(
     // runtime that honours it must NOT also synthesise a marker from
     // `ListStyleType` — see schema/spec/04-metadata-fields.md.
     val markerText: String? = null,
+    // wave-32 lane R: the ORDERED inline-content list from the extractor's
+    // `_runs` hint — an OPAQUE array of `{text}` / `{child}` entries in
+    // DOCUMENT order. Emitted only for an element whose own text
+    // interleaves with kept element children (`the quick <u>brown</u> fox`
+    // where the `<u>` survives as a child), i.e. exactly the case the
+    // single `text` string cannot express. AUTHORITATIVE when present: a
+    // reader that honours it paints the entries in order and MUST NOT also
+    // paint `text` or a referenced child a second time; a reader that does
+    // not, keeps painting `text` then the children and gets the same
+    // (lossy) result it got before v2 gained this key. v2 forwards it
+    // VERBATIM inside `meta.runs` (spec 05 additive meta-key rule, the same
+    // lane `meta.attrs`/`meta.decorations` used); the v1 serializer ignores
+    // it so deprecated `--emit-ir v1` bytes stay frozen. Child ids are NOT
+    // resolved here — see schema/spec/04-metadata-fields.md.
+    val runs: JsonArray? = null,
     // Generated-content payload from the extractor's `_pseudo` input
     // ({before?, after?, marker?} component-shaped slots). Carried as an
     // opaque JsonObject — pseudo nodes have no independent lifecycle and

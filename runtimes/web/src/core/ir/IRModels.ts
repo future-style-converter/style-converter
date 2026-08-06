@@ -96,9 +96,32 @@ export interface IRDecoration {
 }
 
 /**
+ * One entry of the wave-32 `meta.runs` list — either an anonymous inline
+ * text run or the position of one child box in the inline flow
+ * (schema/spec/03-children.md §4.1; producer: the `_runs` banner in
+ * tools/titan/extract-fixture.mjs).
+ *
+ * EXACTLY ONE key is set. Modelled as a union rather than
+ * `{text?, child?}` so a malformed both-keys entry is a type error at
+ * every consumer instead of a silent precedence question.
+ */
+export type IRRun =
+  /** A bare text node at this position in the content walk. */
+  | { text: string; child?: undefined }
+  /**
+   * The child at this position, named by its AUTHORING KEY — which is the
+   * child's `name` on the v2 wire and (extractor-direct pipeline) also its
+   * `id`. NOT the converter-minted id: the converter re-ids at the flatten
+   * boundary, so an id written by the producer would name nothing after
+   * the hop (schema/spec/04-metadata-fields.md).
+   */
+  | { child: string; text?: undefined };
+
+/**
  * Droppable renderer hints, grouped (v2 home of v1's `_tag` / `_role`).
  * Omitted entirely when empty; strict (`{sourceTag?, role?, attrs?,
- * decorations?}` only) when present — see schema/spec/01-envelope.md.
+ * decorations?, markerText?, runs?}` only) when present — see
+ * schema/spec/01-envelope.md.
  */
 export interface IRMeta {
   /**
@@ -145,6 +168,25 @@ export interface IRMeta {
    * native runtimes — which have no `::marker` — are the readers.
    */
   markerText?: string | null;
+  /**
+   * wave-32 ORDERED inline-content list (v2 home of the extractor's
+   * `_runs`) — the component's own text and its kept children INTERLEAVED
+   * in document order, the one shape the single `text` string cannot
+   * express (`the quick <u>brown</u> fox` with a surviving `<u>`).
+   *
+   * AUTHORITATIVE when present: NodeRenderer paints the entries in order,
+   * does NOT also paint `text`, and does NOT paint a referenced child a
+   * second time from the sibling walk. Children this list does not
+   * reference still render, after the runs, in sibling order (spec 03
+   * §4.1 rule 4) — so a partial list can never make a box disappear.
+   *
+   * Each `{text}` entry is an INLINE anonymous run: a bare text node in
+   * the children walk, never a wrapper element. A block box inside an
+   * inline box splits it (CSS 2.1 §9.2.1.1), which would re-break the
+   * very line box this key exists to preserve — the measured wave-31
+   * "span lesson".
+   */
+  runs?: IRRun[] | null;
 }
 
 /**

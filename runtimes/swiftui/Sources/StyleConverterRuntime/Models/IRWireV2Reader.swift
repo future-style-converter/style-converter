@@ -222,9 +222,11 @@ enum IRWireV2Reader {
             if c.contains(IRAnyKey("meta")) {
                 let m = try c.nestedContainer(keyedBy: IRAnyKey.self, forKey: IRAnyKey("meta"))
                 // `markerText` is the wave-27 baked list marker (lane CBAKE).
-                let members: Set<String> = ["sourceTag", "role", "attrs", "decorations", "markerText"]
+                // `runs` is the wave-32 ordered inline-content list (lane R).
+                let members: Set<String> = ["sourceTag", "role", "attrs", "decorations",
+                                            "markerText", "runs"]
                 for k in m.allKeys where !members.contains(k.stringValue) {
-                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role/attrs/decorations/markerText)", path: decoder.codingPath)
+                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role/attrs/decorations/markerText/runs)", path: decoder.codingPath)
                 }
                 let tag = try m.decodeIfPresent(String.self, forKey: IRAnyKey("sourceTag"))
                 let role = try m.decodeIfPresent(String.self, forKey: IRAnyKey("role"))
@@ -298,12 +300,56 @@ enum IRWireV2Reader {
                 // is no shape to validate beyond "string" — the schema pins
                 // minLength 1 and the converter omits the key otherwise.
                 let markerText = try m.decodeIfPresent(String.self, forKey: IRAnyKey("markerText"))
+                // runs (wave-32 lane R): strict where the schema is strict —
+                // a non-empty array whose entries are objects carrying
+                // EXACTLY ONE of `text` / `child`. Every one of those is a
+                // writer bug that would silently reorder painted content,
+                // which is the failure this wire exists to remove. Two
+                // deliberate asymmetries: `text` MAY be the empty string (a
+                // producer is allowed to emit one; the renderer paints
+                // nothing for it), while `child` may NOT be — an empty key
+                // can never resolve. Resolving the key against the composed
+                // children, including the dangling warn-and-skip of spec 03
+                // §4.1 rule 5, is the RENDERER's job, not decode's.
+                var runs: [IRRun]? = nil
+                if m.contains(IRAnyKey("runs")) {
+                    let raw = try m.decode(IRValue.self, forKey: IRAnyKey("runs"))
+                    guard case .array(let entries) = raw else {
+                        throw violation("meta.runs must be an array", path: decoder.codingPath)
+                    }
+                    guard !entries.isEmpty else {
+                        throw violation("meta.runs present but empty (schema: minItems 1)", path: decoder.codingPath)
+                    }
+                    runs = try entries.map { entry in
+                        guard case .object(let e) = entry else {
+                            throw violation("meta.runs entries must be objects", path: decoder.codingPath)
+                        }
+                        let entryKeys: Set<String> = ["text", "child"]
+                        for k in e.keys where !entryKeys.contains(k) {
+                            throw violation("unknown meta.runs entry key '\(k)' (allowed: text/child)", path: decoder.codingPath)
+                        }
+                        guard e.count == 1 else {
+                            throw violation("meta.runs entry must carry exactly one of 'text' / 'child'", path: decoder.codingPath)
+                        }
+                        if let rawText = e["text"] {
+                            guard let t = rawText.stringValue else {
+                                throw violation("meta.runs 'text' must be a string", path: decoder.codingPath)
+                            }
+                            return IRRun(text: t)
+                        }
+                        guard let key = e["child"]?.stringValue, !key.isEmpty else {
+                            throw violation("meta.runs 'child' must be a non-empty authoring key", path: decoder.codingPath)
+                        }
+                        return IRRun(child: key)
+                    }
+                }
                 guard tag != nil || role != nil || attrs != nil || decorations != nil
-                        || markerText != nil else {
+                        || markerText != nil || runs != nil else {
                     throw violation("meta present but empty (schema: minProperties 1)", path: decoder.codingPath)
                 }
                 meta = IRMeta(sourceTag: tag, role: role, attrs: attrs,
-                              decorations: decorations, markerText: markerText)
+                              decorations: decorations, markerText: markerText,
+                              runs: runs)
             }
             // variables: additive v2 key — "--name" → raw string map
             // (custom-property definitions, css-variables-1 §2). Schema

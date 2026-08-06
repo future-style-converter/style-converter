@@ -185,6 +185,20 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             else el.jsonPrimitive.content
         }
 
+        // wave-32 lane R: read optional `_runs` (the extractor's ordered
+        // inline-content list — see the "_runs" wire banner in
+        // tools/titan/extract-fixture.mjs) as an OPAQUE JsonArray. Same
+        // opacity contract as `_decorations`: the extractor owns the entry
+        // shape ({text} | {child}), the ORDER is the whole payload, and the
+        // converter forwards the array verbatim to v2 `meta.runs` without
+        // ever resolving a `child` id against the children map. Same
+        // null-tolerance as `_pseudo`/`_attrs`/`_decorations`: JSON null ≡
+        // absent.
+        val runs = obj["_runs"]?.let { el ->
+            if (el is kotlinx.serialization.json.JsonNull) null
+            else el.jsonArray
+        }
+
         return CssComponent(
             properties = props,
             selectors = selectors,
@@ -200,7 +214,10 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             decorations = decorations,
             // wave-27 lane CBAKE: the baked list-marker string, opaque all
             // the way to the v2 wire (meta.markerText).
-            markerText = markerText
+            markerText = markerText,
+            // wave-32 lane R: the ordered inline-content list, opaque all
+            // the way to the v2 wire (meta.runs).
+            runs = runs
         )
     }
 
@@ -388,6 +405,12 @@ fun cssParsing(doc: JsonObject): IRDocument {
             // every component that is not a baked `<li>`; the v1 serializer
             // ignores it, so v1 output bytes are untouched.
             markerText = component.markerText,
+            // wave-32 lane R: forward `_runs` verbatim for the v2 wire
+            // (meta.runs — grouped beside meta.decorations). Null on every
+            // component whose own text does not interleave with its kept
+            // children; the v1 serializer ignores it, so v1 output bytes
+            // are untouched (same rule as tag/pseudos/attrs/decorations).
+            runs = component.runs,
             // Forward the custom-property definitions (IR v2 `variables`
             // key). Stays null on fixtures without --* declarations; the
             // legacy v1 serializer ignores it either way, so v1 output

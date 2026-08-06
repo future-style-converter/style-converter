@@ -78,6 +78,9 @@ import {
   stampWsAfter,
   // wave-27 A-RC2: root-scope pseudo-element routing.
   isListItemDisplay,
+  // wave-32 lane R: the ordered inline-content list (`_runs`).
+  buildRunProto,
+  alignRuns,
 } from './extract-fixture.mjs';
 
 // ── stripComments ───────────────────────────────────────────────────────────
@@ -2615,13 +2618,31 @@ test('B-RC9a: mid-run styled span flags inline-run-reordered (non-decoration sty
   // this subtree and the wave-21 honesty flag still fires. The
   // decoration-styled variant of the SAME markup now collapses instead —
   // pinned in the 'B-RC4a' suite below.
+  // wave-32 lane R: the flag's JOB is done here — `_runs` now carries the
+  // true order, so the component ships the wire instead of the marker.
   const css = 'span { color: red }';
   const { components, lossyReasons } = buildComponents(
     '<body><p>the quick <span>brown</span> fox</p></body>', parseCss(css), 'r');
   const p = components['r__0'];
+  // `_text` is UNCHANGED — the concatenation stays on the wire for readers
+  // that drop meta, which is what makes `_runs` additive.
   assert.equal(p._text, 'the quick fox');
-  assert.ok(p._lossyReasons.includes('inline-run-reordered'));
-  assert.ok(lossyReasons.includes('inline-run-reordered'));
+  // The order the browser paints, now expressible:
+  assert.deepEqual(p._runs, [
+    { text: 'the quick ' },
+    { child: 'r__0__0' },
+    { text: ' fox' },
+  ]);
+  // …and the word spaces either side of the child SURVIVE (they are
+  // interior to the sequence, so only its outer edges were trimmed).
+  assert.equal(p._runs[0].text.endsWith(' '), true);
+  assert.equal(p._runs[2].text.startsWith(' '), true);
+  // Reason retired, at BOTH levels — nothing is being approximated now.
+  assert.equal((p._lossyReasons ?? []).includes('inline-run-reordered'), false);
+  assert.equal(lossyReasons.includes('inline-run-reordered'), false);
+  // The referenced key is the child's map key, i.e. its `name` after the
+  // converter hop (the converter mints ids, so an id would dangle there).
+  assert.ok(Object.keys(p.children).includes('r__0__0'));
 });
 
 test('B-RC9a: merged runs do NOT flag reorder (order preserved by the splice)', () => {
@@ -2652,24 +2673,35 @@ test('B-RC9a: whitespace-only tail after a kept child does not flag', () => {
   assert.equal((p._lossyReasons ?? []).includes('inline-run-reordered'), false);
 });
 
-test('B-RC9a: text after a VOID child (<br>) flags too (br stays a component)', () => {
+test('B-RC9a: a VOID child (<br>) takes its position in the run list too', () => {
+  // wave-32 lane R: a <br> is a component (the wave-21 B-RC1 line-box
+  // spacer), so it occupies a slot in the inline flow exactly like a
+  // paired child — and the two text runs are on either side of it, which
+  // is the whole reason `_text` read 'line1line2' before.
   const { components } = buildComponents(
     '<body><p>line1<br>line2</p></body>', [], 'v');
   const p = components['v__0'];
   assert.equal(p._text, 'line1line2');
-  assert.ok(p._lossyReasons.includes('inline-run-reordered'));
+  assert.deepEqual(p._runs, [
+    { text: 'line1' },
+    { child: 'v__0__0' },
+    { text: 'line2' },
+  ]);
+  assert.equal((p._lossyReasons ?? []).includes('inline-run-reordered'), false);
 });
 
-// ── wave-31 lane S: the reorder BAIL, pinned ───────────────────────────────
+// ── wave-32 lane R: the reorder bail LIFTED ────────────────────────────────
 //
-// The wire cannot express run/child/run (see the scanOwnText banner's
-// wave-31 section for the measurement and the deferred `_runs` design), so
-// the ONLY contract this wave can pin is the honesty one: the shape that
-// loses the order must say so, at BOTH levels, on the exact markup of the
-// CSS2 test that motivated the lane. If a future wave lands `_runs`, these
-// assertions are the ones that get to flip.
+// Wave-31 pinned the honesty contract here and wrote: "If a future wave
+// lands `_runs`, these assertions are the ones that get to flip." This is
+// that wave, and these are those assertions, flipped: the shape that used
+// to lose the order now carries it, on the exact markup of the CSS2 test
+// that motivated the lane. What did NOT change is the honesty rule itself —
+// the reason is retired per component and ONLY when `_runs` actually
+// emitted; the alignment-refusal test below keeps the bail pinned for the
+// population the new wire cannot prove itself on.
 
-test('lane-s bail: the CSS2 static-inside-inline shape flags, component AND fixture', () => {
+test('lane-r: the CSS2 static-inside-inline shape now ships the true order', () => {
   // CSS2/abspos/static-inside-inline-001 verbatim: an out-of-flow div
   // authored BEFORE the span's text. The div is styled (`#abspos`) so it
   // survives as a child; 'X' lands in `_text` and paints first, which
@@ -2683,25 +2715,162 @@ test('lane-s bail: the CSS2 static-inside-inline shape flags, component AND fixt
   const span = wrapper.children[Object.keys(wrapper.children)[0]];
   // The span survived the merge (it has an id) and carries its tag…
   assert.equal(span._tag, 'span');
-  // …its text was glued ahead of the child that was authored before it…
+  // …`_text` still reads 'X' (the fallback channel is untouched)…
   assert.equal(span._text, 'X');
-  // …and BOTH honesty levels record it: the component and the fixture.
-  assert.ok(span._lossyReasons.includes('inline-run-reordered'));
-  assert.ok(lossyReasons.includes('inline-run-reordered'));
+  // …but `_runs` now says what the browser paints: the abspos BOX first,
+  // then the text. That is the quantity the WPT test asserts (§10.6.4 over
+  // the §9.4.2 zero-height line box), and we were flipping it.
+  const spanKey = Object.keys(wrapper.children)[0];
+  assert.deepEqual(span._runs, [
+    { child: `${spanKey}__0` },
+    { text: ' X' },
+  ]);
+  // Both honesty levels are clean — the approximation is gone, not hidden.
+  assert.equal((span._lossyReasons ?? []).includes('inline-run-reordered'), false);
+  assert.equal(lossyReasons.includes('inline-run-reordered'), false);
 });
 
-test('lane-s bail: an out-of-flow reorder is NOT quietly downgraded', () => {
+test('lane-r: an out-of-flow reorder is expressed, not downgraded', () => {
   // The narrow "all preceding kept children are out-of-flow" family (6
   // components corpus-wide) is where the in-flow paint order genuinely
-  // does NOT move — only the static position does. It is tempting to
-  // treat that as lossless; it is not, and it must keep the same LOUD
-  // marker as an in-flow reorder until a renderer can place the box.
+  // does NOT move — only the static position does. Wave-31 refused to call
+  // that lossless while no renderer could place the box; wave-32 places it,
+  // so the list is emitted here exactly as it is for an in-flow reorder.
+  // The RULE is unchanged: expressible → wire; not expressible → marker.
   const css = '.abs { position: absolute }';
   const { components } = buildComponents(
     '<body><p><span class="abs"></span>tail</p></body>', parseCss(css), 'oof');
   const p = components['oof__0'];
   assert.equal(p._text, 'tail');
+  assert.deepEqual(p._runs, [{ child: 'oof__0__0' }, { text: 'tail' }]);
+  assert.equal((p._lossyReasons ?? []).includes('inline-run-reordered'), false);
+});
+
+// ── wave-32 lane R: the run list's own contract ────────────────────────────
+
+test('lane-r: no interleave → no `_runs` key at all (the additive guarantee)', () => {
+  // The corpus stays byte-identical outside the 1,203-component population
+  // BECAUSE of this: a component whose text does not glue across a kept
+  // child gains nothing. Three shapes that must all stay bare.
+  const css = 'u { color: red }';
+  // (a) text only BEFORE the child — reading order already correct.
+  const before = buildComponents(
+    '<body><p>the quick <u>brown</u></p></body>', parseCss(css), 'a').components['a__0'];
+  assert.equal(before._runs, undefined);
+  // (b) merge-absorbed run — spliced IN PLACE, so order was never lost.
+  const merged = buildComponents(
+    '<body><p>square and <strong>no red</strong>.</p></body>', [], 'b').components['b__0'];
+  assert.equal(merged._runs, undefined);
+  // (c) plain leaf text, no children at all.
+  const leaf = buildComponents('<body><p>just text</p></body>', [], 'c').components['c__0'];
+  assert.equal(leaf._runs, undefined);
+});
+
+test('lane-r: a whitespace-only run between two children survives', () => {
+  // spec 03 §4.1 rule 6 — that space IS the inter-run word space and has
+  // real advance width in the ref; collapsing it away is how the flat wire
+  // used to pack inline-block boxes 4.5px too far left (the wave-26 ws-after
+  // measurement). Only the sequence's OUTER edges are trimmed.
+  const css = 'u { color: red }';
+  const { components } = buildComponents(
+    '<body><p>  <u>a</u> <u>b</u> tail</p></body>', parseCss(css), 'w');
+  const p = components['w__0'];
+  assert.deepEqual(p._runs, [
+    // The LEADING piece was whitespace-only and sits at the sequence's
+    // outer edge, so the §4.1 trim emptied it and it is dropped…
+    { child: 'w__0__0' },
+    // …while the INTERIOR one is the word space between the two boxes and
+    // is kept verbatim.
+    { text: ' ' },
+    { child: 'w__0__1' },
+    { text: ' tail' },
+  ]);
+});
+
+test('lane-r: buildRunProto trims only the ENDS of the sequence', () => {
+  // The unit under test is the normalisation rule, isolated from the walk:
+  // per-piece collapse, sequence-edge trim. Trimming each piece would eat
+  // two word spaces here and silently re-join words the browser separates.
+  const proto = buildRunProto([
+    { t: 'text', raw: '\n  the quick ' },
+    { t: 'el', tag: 'u' },
+    { t: 'text', raw: ' fox \n ' },
+  ]);
+  assert.deepEqual(proto, [
+    { text: 'the quick ' },
+    { el: 0, tag: 'u' },
+    { text: ' fox' },
+  ]);
+});
+
+test('lane-r: buildRunProto keeps the pre family verbatim', () => {
+  // CSS Text §4.1.1: under `white-space: pre` neither the collapse nor the
+  // trim applies — the same exemption scanOwnText's buffer path takes.
+  const proto = buildRunProto([
+    { t: 'text', raw: '  a\tb\n' },
+    { t: 'el', tag: 'span' },
+  ], true);
+  assert.deepEqual(proto, [{ text: '  a\tb\n' }, { el: 0, tag: 'span' }]);
+});
+
+test('lane-r: buildRunProto decodes references per piece', () => {
+  // Decoding runs AFTER the tag/text split and BEFORE the white-space step,
+  // per piece — a reference can never span a child element, so this agrees
+  // byte for byte with the whole-buffer decode.
+  const proto = buildRunProto([
+    { t: 'text', raw: 'a&amp;b ' },
+    { t: 'el', tag: 'br' },
+    { t: 'text', raw: ' &#9;c' },
+  ]);
+  assert.deepEqual(proto, [{ text: 'a&b ' }, { el: 0, tag: 'br' }, { text: ' c' }]);
+});
+
+test('lane-r: alignRuns REFUSES when the two walks disagree (bail preserved)', () => {
+  // The proof, not an assumption — scanOwnText and the tree walker are
+  // different code, and a list that names the wrong box silently reorders
+  // content instead of loudly approximating it.
+  const proto = [{ text: 'a' }, { el: 0, tag: 'u' }, { text: 'b' }];
+  // Count mismatch (maxDepth truncation / head-only sibling dropped).
+  assert.equal(alignRuns(proto, []), null);
+  // Tag mismatch at a position (both kept one element, not the same one).
+  assert.equal(alignRuns(proto, [{ tag: 'span' }]), null);
+  // Agreement → the positional entries become child indices.
+  assert.deepEqual(alignRuns(proto, [{ tag: 'u' }]), [
+    { text: 'a' }, { childIndex: 0 }, { text: 'b' },
+  ]);
+  // A single-entry list says nothing `_text` does not already say.
+  assert.equal(alignRuns([{ el: 0, tag: 'u' }], [{ tag: 'u' }]), null);
+});
+
+test('lane-r: a refused alignment KEEPS the wave-21 marker', () => {
+  // The reachable refusal in the live pipeline: a HEAD_ONLY tag inside the
+  // body. `recurse` drops it before the merge filter, so it never becomes a
+  // child, while scanOwnText (which knows only the mergeable predicate)
+  // counts it as one. The walks disagree, alignRuns refuses — and the
+  // component must then ship the wave-21 bail, unchanged. Retirement is per
+  // component and only when EARNED.
+  const { components, lossyReasons } = buildComponents(
+    '<body><p>lead <style>i{color:red}</style> tail</p></body>', [], 'd');
+  const p = components['d__0'];
+  assert.equal(p._runs, undefined);
+  // CSS text never leaks into `_text`; the two prose runs glued instead.
+  assert.equal(p._text, 'lead tail');
   assert.ok(p._lossyReasons.includes('inline-run-reordered'));
+  assert.ok(lossyReasons.includes('inline-run-reordered'));
+});
+
+test('lane-r: a collapsed inline chain drops the run list with the children', () => {
+  // The wave-22 collapse flattens the subtree into ONE run and empties
+  // `children`, so any list computed for it names boxes that no longer
+  // exist. The two features can therefore never co-occur, which is why
+  // `_decorations` and `_runs` need no precedence rule between them.
+  const css = 'u { text-decoration: underline }';
+  const { components } = buildComponents(
+    '<body><p>the quick <u>brown</u> fox</p></body>', parseCss(css), 'e');
+  const p = components['e__0'];
+  assert.equal(p._runs, undefined);
+  assert.equal(p._text, 'the quick brown fox');
+  assert.ok(p._decorations);
 });
 
 // ── wave-22 EX2 A-RC1: :not() support ───────────────────────────────────────

@@ -1,0 +1,182 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "runs-container-001",
+            "name": "Runs_Container",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 400
+                    }
+                }
+            ]
+        },
+        {
+            "id": "runs-glued-002",
+            "name": "Runs_TextGluedAcrossChild",
+            "properties": [],
+            "slot": {
+                "parent": "runs-container-001"
+            },
+            "text": "the quick fox",
+            "meta": {
+                "sourceTag": "p",
+                "runs": [
+                    {
+                        "text": "the quick "
+                    },
+                    {
+                        "child": "Runs_UnderlinedWord"
+                    },
+                    {
+                        "text": " fox"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "runs-glued-underline-003",
+            "name": "Runs_UnderlinedWord",
+            "properties": [
+                {
+                    "type": "TextDecorationLine",
+                    "data": {
+                        "underline": true,
+                        "overline": false,
+                        "lineThrough": false
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "runs-glued-002"
+            },
+            "text": "brown",
+            "meta": {
+                "sourceTag": "u"
+            }
+        },
+        {
+            "id": "runs-child-first-004",
+            "name": "Runs_ChildBeforeText",
+            "properties": [],
+            "slot": {
+                "parent": "runs-container-001"
+            },
+            "text": "X",
+            "meta": {
+                "sourceTag": "span",
+                "runs": [
+                    {
+                        "child": "Runs_AbsposBox"
+                    },
+                    {
+                        "text": " X"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "runs-abspos-005",
+            "name": "Runs_AbsposBox",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 50
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "runs-child-first-004"
+            }
+        },
+        {
+            "id": "runs-ws-only-006",
+            "name": "Runs_WhitespaceOnlyRunBetweenChildren",
+            "properties": [],
+            "slot": {
+                "parent": "runs-container-001"
+            },
+            "meta": {
+                "runs": [
+                    {
+                        "child": "Runs_FirstBox"
+                    },
+                    {
+                        "text": " "
+                    },
+                    {
+                        "child": "Runs_SecondBox"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "runs-ws-first-007",
+            "name": "Runs_FirstBox",
+            "properties": [],
+            "slot": {
+                "parent": "runs-ws-only-006"
+            }
+        },
+        {
+            "id": "runs-ws-second-008",
+            "name": "Runs_SecondBox",
+            "properties": [],
+            "slot": {
+                "parent": "runs-ws-only-006"
+            }
+        },
+        {
+            "id": "runs-unreferenced-009",
+            "name": "Runs_UnreferencedChildStillRenders",
+            "properties": [],
+            "slot": {
+                "parent": "runs-container-001"
+            },
+            "text": "lead",
+            "meta": {
+                "runs": [
+                    {
+                        "text": "lead"
+                    },
+                    {
+                        "child": "Runs_ReferencedChild"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "runs-referenced-010",
+            "name": "Runs_ReferencedChild",
+            "properties": [],
+            "slot": {
+                "parent": "runs-unreferenced-009"
+            }
+        },
+        {
+            "id": "runs-trailing-011",
+            "name": "Runs_TrailingUnreferencedChild",
+            "properties": [],
+            "slot": {
+                "parent": "runs-unreferenced-009"
+            }
+        }
+    ]
+}

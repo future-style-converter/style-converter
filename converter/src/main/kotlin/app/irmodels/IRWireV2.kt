@@ -214,7 +214,8 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             // meta: droppable renderer hints, grouped. Omitted entirely
             // when no member has a value so hint-free fixtures stay lean.
             if (value.tag != null || value.role != null || value.attrs != null ||
-                value.decorations != null || value.markerText != null
+                value.decorations != null || value.markerText != null ||
+                value.runs != null
             ) {
                 put("meta", buildJsonObject {
                     // sourceTag: v2 home of the extractor's `_tag` hint.
@@ -238,6 +239,12 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
                     // css-counter-styles-3 §6 spelling; spec 05 additive
                     // meta-key rule, the meta.attrs precedent).
                     value.markerText?.let { put("markerText", it) }
+                    // runs (wave-32 lane R): v2 home of `_runs` — the
+                    // ordered inline-content list ({text}|{child} entries in
+                    // document order), forwarded VERBATIM (the extractor
+                    // owns the split points and the child ids; spec 05
+                    // additive meta-key rule, the meta.attrs precedent).
+                    value.runs?.let { put("runs", it) }
                 })
             }
         })
@@ -291,6 +298,12 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             // runtimes render it; this codec never re-derives it).
             markerText = meta?.get("markerText")?.let { el ->
                 if (el is JsonNull) null else el.jsonPrimitive.content
+            },
+            // runs (wave-32 lane R): opaque round-trip — JSON null ≡
+            // absent, any array comes back byte-verbatim (the runtimes,
+            // not this codec, resolve `child` ids against the flat list).
+            runs = meta?.get("runs")?.let { el ->
+                if (el is JsonNull) null else el.jsonArray
             },
             pseudos = obj["pseudos"]?.jsonObject,
             // variables: "--name" → raw string map, round-tripped verbatim

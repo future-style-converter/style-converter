@@ -26,6 +26,39 @@ behavior, caveats included.
 > (the *resolved* list-marker string for one `<li>` — see the counter-
 > style bake banner in `tools/titan/counter-style-bake.mjs`) forwards
 > verbatim as `meta.markerText`, same additive rule. Contract below.
+> **wave-32 exercised it a fourth time**: the extractor's `_runs` (the
+> ordered inline-content list of an element whose own text interleaves
+> with its kept children — see the `_runs` banner in
+> `extract-fixture.mjs`) forwards verbatim as `meta.runs`, same additive
+> rule. Its full contract lives in 03-children.md §4.1; the converter-hop
+> note is below.
+
+## `meta.runs` — why the converter never rewrites a `child` key
+
+`meta.runs` entries name children. It would be easy to make the converter
+resolve those names against the flattened list — rewriting them to the
+minted ids the way `IRFlattener` already stamps `slot.parent` — and fail
+loudly on a dangling one. It is the wrong place for both, and the field
+is shaped so that neither is needed:
+
+- **The converter re-ids, so the reference is the AUTHORING KEY.** The
+  converter mints `<lowercased-name>-<NNN>` at the flatten boundary while
+  the authoring key survives verbatim as the child's `name`
+  (03-children.md §5 rule 1). Pinning `child` to the authoring key makes
+  the payload correct on BOTH sides of the hop with zero converter
+  involvement — and correct in the extractor-direct pipeline too, where
+  key, `name` and `id` are one string. Rewriting instead would turn an
+  *opaque forwarded hint* into a field the converter co-owns, the exact
+  coupling `meta.attrs` and `meta.decorations` were designed to avoid.
+- **Dangling is already a defined, non-fatal state.** 03-children.md §2
+  makes a dangling `slot.parent` a composer-side warn; §4.1 rule 5 makes
+  a dangling `runs.child` a renderer-side warn-and-skip. Both keep a
+  malformed document *renderable*, which is the whole point of putting
+  the field in the droppable-hints group.
+
+So the hop is byte-verbatim: `_runs` → `CssComponent.runs` (opaque
+`JsonArray`) → `IRComponent.runs` → `meta.runs`. The v1 serializer
+ignores it, so `--emit-ir v1` bytes stay frozen.
 
 ## `meta.markerText` — why the marker string is resolved upstream
 
@@ -141,6 +174,7 @@ underscore **at the JSON boundary** (`IRComponentSerializer`,
 | `_tag` | yes (non-generic lowercase tags only) | **no — dropped** (`CssParsing.parseComponent` never reads it) | yes | yes | yes |
 | `_pseudo` | yes (`{before?, after?, marker?}` component-shaped slots) | **no — dropped** | yes (`PseudoElements`) | no | no |
 | `_lossy` / `_lossyReasons` | yes (extractor diagnostics) | no — dropped | no (tooling-only) | no | no |
+| `_runs` (v2 `meta.runs`, wave-32) | yes (interleaved inline content only) | **yes** (opaque `JsonArray`, omit-when-absent) | yes (`NodeRenderer` content walk) | yes (`ComponentRenderer.RenderContent`) | yes (`ComponentRenderer.contentOrPlaceholder`) |
 
 Two honest gaps fall out of the matrix, both **current-behavior, kept as
 caveats** rather than silently papered over:

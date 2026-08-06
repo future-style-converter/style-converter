@@ -611,16 +611,42 @@ dirs + WPT corpus are gitignored):
   with the real closing move specified in its banner. filter-effects
   web 5→6/11. 27 sections; zero regressions; 327-net clean. Totals:
   **web 269/302, iOS 238/289, Android 229/289**.
+  Wave 32 (`tools/titan/results/corpus-v5-7.json`) landed the **v3
+  `meta.runs` wire** — the inline anonymous-run box deferred since
+  wave 21. An ordered `[{text}|{child}]` list rides the same meta hop
+  as `_decorations` (schema + spec §4.1 with seven frozen rules + a
+  new conformance golden decoded by all four codebases); the extractor
+  emits it exactly where the old `inline-run-reordered` bail fired
+  (1,138 components across 456 files; 69 keep the honest bail), web
+  renders text runs as bare text nodes, and the natives consume run
+  ORDER in plain block containers (order, not inline layout — scoped,
+  null-fallback pinned). CSS2 static-inside-inline-001/-003 went
+  0.956→0.999 on web with the green square byte-exact on the ref box,
+  and **CSS2 Android jumped 5→9/12, level with iOS** — helped by the
+  Compose table-model fix: TABLE_CELL/TABLE_CAPTION are block
+  containers per css-tables-3 §2.1 (the cell re-entry had erased
+  childless children into placeholders), implied-tbody splicing, the
+  positioned-`<td>` containing-block mirror repair, and a fabricated
+  8dp cell padding removed. iOS gained the zero-is-definite
+  containing-block clamp (absolute-tables-015 0.904→0.997). css-tables
+  now Android 9/11, iOS 8/11. absolute-tables-010 was **reclassified
+  by evidence**: all three engines faithfully render an IR in which
+  the extractor flattened the wrapper nesting — an extractor-structure
+  item, not an engine defect. Post-load gained wedged-Chromium
+  recovery. Operational contract: pre-`_runs` harness builds hard-fail
+  the new meta key, so gates force fresh installs. 27 sections; zero
+  regressions; 327-net clean. Totals: **web 269/302, iOS 239/289,
+  Android 234/289**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 237 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1095 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1848 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1099 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1169 |
+| converter (Kotlin) | `./gradlew :converter:test` | 242 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1111 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1869 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1115 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1182 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

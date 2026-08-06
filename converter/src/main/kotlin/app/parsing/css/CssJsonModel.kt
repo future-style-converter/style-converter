@@ -95,7 +95,19 @@ data class CssComponent(
     // style and `<ol start>` — are both statically known there. A plain
     // string, forwarded VERBATIM as IR v2 `meta.markerText`; the converter
     // never re-derives or validates it (the `_attrs` opacity contract).
-    val markerText: String? = null
+    val markerText: String? = null,
+    // wave-32 lane R: opaque `_runs` payload — the extractor's ORDERED
+    // inline-content list for an element whose own text INTERLEAVES with
+    // kept element children: [{text}|{child}, …] in document order, where
+    // `child` is the id of one of this component's children. It replaces
+    // the single `_text` string as the authoritative content order for
+    // readers that understand it (`_text` stays on the wire, carrying the
+    // pre-wave-32 concatenation, so a runs-unaware reader is byte-for-byte
+    // unchanged). Forwarded VERBATIM as IR v2 `meta.runs` — the converter
+    // never re-orders, re-splits or validates the entries, exactly the
+    // `_decorations` opacity contract (schema/spec/03-children.md §"Inline
+    // runs" and schema/spec/04-metadata-fields.md).
+    val runs: JsonArray? = null
 )
 
 /**
