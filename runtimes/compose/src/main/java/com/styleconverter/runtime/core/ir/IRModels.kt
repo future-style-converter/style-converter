@@ -194,6 +194,33 @@ data class IRDecoration(
  *   guaranteed-invalid, schema/spec/02-values.md) is the style engine's
  *   job — the decoder only round-trips the map.
  */
+/**
+ * Wave-32 wire contract (lane R) — ONE entry of the `meta.runs` list an
+ * INTERLEAVING component carries (schema/spec/03-children.md §4.1;
+ * producer: the `_runs` banner in tools/titan/extract-fixture.mjs).
+ *
+ * `_text` is ONE string and the child list has ONE order, so the wire could
+ * say `run + children` or `children + run` but never `run / child / run` —
+ * the shape `the quick <u>brown</u> fox` needs when the `<u>` survives as a
+ * child. `meta.runs` is that ordering, and ORDER IS THE WHOLE PAYLOAD.
+ *
+ * EXACTLY ONE member is non-null, enforced at decode
+ * (IRDocumentDecoder.decodeRuns) rather than by the type, because the wire
+ * shape is `{text}` | `{child}` and a Kotlin sealed hierarchy would not
+ * round-trip it any more safely than this pair does.
+ *
+ * [child] is the referenced child's AUTHORING KEY — its `name` on the
+ * converter-emitted wire, and also its `id` in the extractor-direct
+ * pipeline. NOT the converter-minted id: the converter re-ids at the
+ * flatten boundary, so an id written by the producer would name nothing
+ * after the hop (schema/spec/04-metadata-fields.md).
+ */
+@Serializable
+data class IRRun(
+    val text: String? = null,
+    val child: String? = null
+)
+
 @Serializable
 data class IRComponent(
     val id: String,
@@ -207,6 +234,14 @@ data class IRComponent(
     val attrs: IRAttrs? = null,
     val decorations: List<IRDecoration>? = null,
     val markerText: String? = null,
+    // Wave-32 (lane R): the ORDERED inline-content list (`meta.runs`) — the
+    // component's own text and its kept children INTERLEAVED in document
+    // order. AUTHORITATIVE when present: RenderContent paints the entries in
+    // order and must NOT also paint [_text], nor paint a referenced child a
+    // second time. Null for every component whose text does not glue across
+    // a child, which is all but ~1,138 of the committed corpus — see
+    // [IRRun] and schema/spec/03-children.md §4.1.
+    val runs: List<IRRun>? = null,
     val slot: IRSlot? = null,
     val pseudos: JsonObject? = null,
     val role: String? = null,

@@ -70,7 +70,7 @@
         },
         "slot": { "$ref": "#/$defs/slot" },
         "text": {
-          "description": "v2 rename of v1 `_text` — element text content, now a STRUCTURAL field (text is content, not a droppable hint). Omitted when null; empty string IS a legal emitted value ('extracted, was empty'). Leading text run renders before injected children (mixed-inline-content limitation carried over — spec 03 edge cases).",
+          "description": "v2 rename of v1 `_text` — element text content, now a STRUCTURAL field (text is content, not a droppable hint). Omitted when null; empty string IS a legal emitted value ('extracted, was empty'). Leading text run renders before injected children (mixed-inline-content limitation carried over — spec 03 edge cases) UNLESS the component also carries `meta.runs`, which supersedes this field's placement (and only its placement — the string stays here verbatim for readers that drop meta).",
           "type": "string"
         },
         "pseudos": {
@@ -84,7 +84,7 @@
           "additionalProperties": false
         },
         "meta": {
-          "description": "Droppable renderer hints, grouped (v2 home of v1 `_tag` and `_role`; `attrs` added wave-20, `decorations` wave-22 and `markerText` wave-27, all under the spec-05 additive meta-key rule). A consumer may ignore meta without correctness loss — unlike slot, which MUST round-trip; dropping `decorations` costs FIDELITY (a collapsed run paints the merged root-wins subset, never a superset), not correctness. Omitted when no member has a value; if present it is non-empty and strict.",
+          "description": "Droppable renderer hints, grouped (v2 home of v1 `_tag` and `_role`; `attrs` added wave-20, `decorations` wave-22, `markerText` wave-27 and `runs` wave-32, all under the spec-05 additive meta-key rule). A consumer may ignore meta without correctness loss — unlike slot, which MUST round-trip; dropping `decorations` costs FIDELITY (a collapsed run paints the merged root-wins subset, never a superset), and dropping `runs` costs inline ORDER (text first, then the children — the pre-wave-32 approximation the sibling `text` field still spells out), not correctness. Omitted when no member has a value; if present it is non-empty and strict.",
           "type": "object",
           "properties": {
             "sourceTag": {
@@ -138,6 +138,28 @@
               "description": "wave-27 RESOLVED list-marker string for one `<li>` (v2 home of the extractor's `_markerText`, forwarded verbatim by the converter). Emitted ONLY by the counter-style bake (tools/titan/counter-style-bake.mjs), which resolves css-counter-styles-3 §6 — the predefined table, the numeric/alphabetic/additive systems, §4 range checking and the §7.1.4 fallback chain — against the item's ordinal, itself derived from `<ol start>` / `<li value>` on meta.attrs. The string is representation + the style's §3.1.5 suffix WITHOUT its trailing space, because both native runtimes supply the marker-to-content gap themselves (Compose a trailing space + 4dp, SwiftUI an HStack spacing of 4). AUTHORITATIVE when present: a reader that honours it MUST NOT also synthesise a marker from the component's ListStyleType. Never emitted for the ordinal-independent §6.1 bullets, for `list-style-type: none`, or for a marker whose counter style the bake does not model — those cases carry no key at all and leave each runtime on its own table.",
               "type": "string",
               "minLength": 1
+            },
+            "runs": {
+              "description": "wave-32 ORDERED inline-content list (v2 home of the extractor's `_runs`, forwarded verbatim by the converter). Emitted ONLY for a component whose own text INTERLEAVES with its kept element children — `the quick <u>brown</u> fox` where the `<u>` survives as a child — i.e. exactly the shape the single `text` string cannot express (tools/titan/extract-fixture.mjs, the `_runs` banner; before wave-32 the extractor marked these components `inline-run-reordered` and shipped the concatenation). ORDER IS THE PAYLOAD: entries are in DOCUMENT order and each is EXACTLY ONE of `{text}` (an anonymous inline run) or `{child}` (the id of one of this component's slot children). AUTHORITATIVE when present: a reader that honours it paints the entries in order and MUST NOT paint `text` as well, NOR paint a referenced child a second time from the sibling walk; children NOT referenced here still render, after the runs, in sibling order. A reader that ignores it keeps painting `text` then the children — the pre-wave-32 (lossy) result, which is why this key is additive and not a break. `child` ids are NOT validated against the document here (the converter never resolves them); a dangling id is a renderer-side warn-and-skip, mirroring the dangling-slot rule.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "description": "One anonymous inline text run, already through the extractor's character-reference decode + CSS Text §4.1 white-space step. Whitespace at a run boundary is MEANINGFUL (it is the inter-run word space), so only the FIRST run is leading-trimmed and only the LAST run trailing-trimmed — the same trim the whole-element `text` gets, applied to the ends of the sequence rather than to every entry.",
+                    "type": "string"
+                  },
+                  "child": {
+                    "description": "The AUTHORING KEY of one of this component's children — the map key the producer assigned, which survives onto the v2 wire as that child's `name` (schema/spec/03-children.md §5 rule 1). Deliberately NOT the `id`: the converter MINTS ids ('<lowercased-name>-<NNN>') at the flatten boundary, so an id written by the producer would name nothing after the hop, whereas the authoring key round-trips unchanged. Readers resolve against the child's `name` first and MAY fall back to `id` (in the extractor-direct pipeline, which skips the converter, the two are the same string). Marks WHERE in the inline flow that child box sits.",
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "minProperties": 1,
+                "maxProperties": 1,
+                "additionalProperties": false
+              }
             }
           },
           "minProperties": 1,

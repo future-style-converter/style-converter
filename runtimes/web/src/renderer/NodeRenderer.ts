@@ -40,6 +40,9 @@ export { styleFromRawDeclarations } from './PseudoNodeRenderer';
 // by the ROOT's inline direction, not the contained body's — see
 // RootPseudoPlacement.ts for the measured divergence and the spec chain.
 import { rootPseudoPlacementStyle } from './RootPseudoPlacement';
+// wave-32 lane R: the wire `meta.runs` → an ordered render plan over the
+// composed children (the inline anonymous-run box) — see InlineRuns.ts.
+import { resolveRuns } from './InlineRuns';
 
 /** Props for one composed node render. */
 export interface NodeRendererProps {
@@ -209,8 +212,10 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
   let textSlot: ReactNode = null;
   let childSlot: ReactNode = null;
   if (hasChildren) {
-    // Mixed content: text renders BEFORE the children (the wire has no
-    // interleaved inline-runs shape yet). Default is a bare text node.
+    // Mixed content: text renders BEFORE the children — the pre-wave-32
+    // approximation, still the default because it is what the `text`
+    // string alone can say. `meta.runs` (below) supersedes it whenever the
+    // producer measured a real interleave. Default is a bare text node.
     textSlot = hasText
       ? (options?.renderText ? options.renderText(text as string, ctx) : text)
       : null;
@@ -225,6 +230,47 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
         options,
       });
     };
+    // ── wave-32 lane R: the inline anonymous-run box ────────────────────
+    //
+    // `meta.runs` is the ordered inline content (spec 03 §4.1): the
+    // component's own text and its kept children INTERLEAVED, the one
+    // shape `text` + sibling order cannot express. When it is present it
+    // is AUTHORITATIVE — the `text` slot is dropped (its string is the
+    // concatenation `runs` was split FROM, so painting both would double
+    // the glyphs) and every referenced child renders AT ITS RUN SLOT
+    // instead of in the sibling walk.
+    //
+    // WHY A BARE TEXT NODE AND NOT A WRAPPER: a `{text}` entry is an
+    // anonymous INLINE run. Wrapping it in an element — the obvious
+    // shape, and the one wave-31 measured and rejected — puts a box
+    // inside the inline flow; a block-level one splits the containing
+    // inline box (CSS 2.1 §9.2.1.1) and re-breaks the very line box the
+    // interleave exists to preserve. `createElement` accepts strings as
+    // children directly, so the run costs no DOM node at all.
+    //
+    // The two calibration hooks below (planChildRuns, renderChildSeparator)
+    // are DELIBERATELY skipped on this path, and neither loses anything:
+    // a float run is block-level packing, which by definition is not the
+    // inline flow `runs` describes; and the separator hook exists to
+    // re-invent the inter-sibling space the flat wire dropped — a space
+    // `runs` now carries for real, as a whitespace-only text entry.
+    const inlineRuns = resolveRuns(component.meta?.runs, node.children, component.id);
+    if (inlineRuns) {
+      // The runs own the content slot; the sibling walk carries only the
+      // children the list did NOT name (spec 03 §4.1 rule 4), so a
+      // referenced child can never be painted twice (rule 2).
+      textSlot = inlineRuns.entries.map((entry) =>
+        entry.kind === 'text'
+          // Skin hook parity: an interleaved run is still the component's
+          // OWN text, so the harness's renderText calibration applies to
+          // it exactly as it does to the leading-text slot above.
+          ? (options?.renderText ? options.renderText(entry.text, ctx) : entry.text)
+          : renderChild(entry.index),
+      );
+      childSlot = inlineRuns.unreferenced.length > 0
+        ? inlineRuns.unreferenced.map(renderChild)
+        : null;
+    } else {
     // Optional child-run grouping (wave-19 float-run calibration — see
     // RendererOptions.planChildRuns). Null plan = the pure default:
     // every child a direct sibling, byte-identical to the pre-hook DOM.
@@ -260,6 +306,7 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
           // Plain segment: members stay direct siblings (keyed array —
           // React flattens nested arrays with stable keys).
           : seg.indices.map(renderChild));
+    }
   } else {
     // Childless: the empty-content slot (skin: placeholder label;
     // default: the text itself, or nothing — an empty element).

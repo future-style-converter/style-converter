@@ -1347,3 +1347,100 @@ test('fix-T2: the CLI asks the gate on route 1 when the static pass threw', () =
   assert.equal(shouldPostLoadExtract(['requires-float-layout'], 0), false);
   assert.equal(shouldPostLoadExtract(undefined, 0), false);
 });
+
+// ── wave-32 lane R: wedged-Chromium recovery ────────────────────────────────
+//
+// The browser is SHARED across a whole batch (1,850 tests in a corpus
+// re-extraction). When Chromium dies or its DevTools pipe wedges, every
+// remaining test used to inherit the corpse and wait out `protocolTimeout`
+// (300 s) — a wedge 200 tests from the end burned ~17 hours producing
+// nothing, with the real cause scrolled off the top of the log. The recovery
+// contract is pinned here rather than left to a live wedge nobody can
+// reproduce on demand: recognise the transport failure, discard (never
+// close) the instance, retry the failed test ONCE on a fresh one, then bail
+// to static loudly.
+
+test('wedge recovery: recognises transport failures, not page failures', async () => {
+  const { isWedgedBrowserError } = await import('./post-load-extract.mjs');
+  // The puppeteer/CDP transport shapes that mean "this instance is dead".
+  for (const msg of [
+    'ProtocolError: Runtime.callFunctionOn timed out. Increase the protocolTimeout',
+    'Protocol error (Page.navigate): Target closed',
+    'Session closed. Most likely the page has been closed.',
+    'Error: Connection closed',
+    'Target crashed',
+    'Browser has disconnected',
+  ]) {
+    assert.equal(isWedgedBrowserError(new Error(msg)), true, msg);
+  }
+  // A PAGE-level failure is not a wedge: the browser is alive and the next
+  // test will run fine, so relaunching would only mask a per-test bug.
+  for (const msg of [
+    'Navigation timeout of 30000 ms exceeded',
+    'waiting for selector `#x` failed',
+    'Evaluation failed: TypeError: x is not a function',
+  ]) {
+    assert.equal(isWedgedBrowserError(new Error(msg)), false, msg);
+  }
+  assert.equal(isWedgedBrowserError(null), false);
+});
+
+test('wedge recovery: one wedge → discard, retry, succeed', async () => {
+  const { runWithBrowserRecovery } = await import('./post-load-extract.mjs');
+  let attempts = 0;
+  let discards = 0;
+  const result = await runWithBrowserRecovery(
+    async () => {
+      attempts += 1;
+      if (attempts === 1) throw new Error('Protocol error: Target closed');
+      return { status: 'extracted' };
+    },
+    async () => { discards += 1; },
+  );
+  // "Continue FROM the failed test" — the same test re-runs on a fresh
+  // instance rather than being skipped.
+  assert.deepEqual(result, { status: 'extracted' });
+  assert.equal(attempts, 2);
+  assert.equal(discards, 1, 'the wedged instance must be thrown away exactly once');
+});
+
+test('wedge recovery: a second wedge bails to static instead of looping', async () => {
+  const { runWithBrowserRecovery } = await import('./post-load-extract.mjs');
+  let attempts = 0;
+  let discards = 0;
+  const result = await runWithBrowserRecovery(
+    async () => { attempts += 1; throw new Error('ProtocolError: protocolTimeout exceeded'); },
+    async () => { discards += 1; },
+  );
+  // A fresh instance wedging on the same input is not transport noise — it
+  // is that test killing Chromium, so it takes the bail-to-static path.
+  assert.equal(result.status, 'bailed');
+  assert.match(result.reason, /browser-wedged-twice/);
+  assert.equal(attempts, 2, 'exactly one retry — never an unbounded relaunch loop');
+  // Discarded again so the REST of the batch starts from a fresh browser.
+  assert.equal(discards, 2);
+});
+
+test('wedge recovery: a non-transport error propagates untouched', async () => {
+  const { runWithBrowserRecovery } = await import('./post-load-extract.mjs');
+  let attempts = 0;
+  let discards = 0;
+  await assert.rejects(
+    () => runWithBrowserRecovery(
+      async () => { attempts += 1; throw new Error('Navigation timeout of 30000 ms exceeded'); },
+      async () => { discards += 1; },
+    ),
+    /Navigation timeout/,
+  );
+  // No retry, no discard — a genuine per-test failure must stay visible.
+  assert.equal(attempts, 1);
+  assert.equal(discards, 0);
+});
+
+test('wedge recovery: discardPostLoadBrowser is a no-op when nothing launched', async () => {
+  const { discardPostLoadBrowser } = await import('./post-load-extract.mjs');
+  // Contract 2 — DISCARD, never close: a wedged browser cannot answer
+  // close() either, so the recovery path must not await one. With no
+  // instance at all this must simply return.
+  await discardPostLoadBrowser();
+});

@@ -2063,18 +2063,70 @@ object ComponentRenderer {
 
     /**
      * Render table content - rows and cells.
+     *
+     * ## Wave 32 (lane P) — two corrections, both of which were DROPPING boxes
+     *
+     * **(1) Row groups are spliced (css-tables-3 §2.1).** HTML parsing
+     * inserts an implied `<tbody>`, so the extracted wire is
+     * table → TABLE_ROW_GROUP → TABLE_ROW → TABLE_CELL. The pre-wave-32
+     * loop read the tbody as a row and the tr as a cell, putting every real
+     * `<td>` one level below the code that looks for it.
+     * [TableBoxTree.rowsOf] returns `children` UNCHANGED when no group is
+     * present, so every table that already hands rows directly (the shape
+     * most extracted fixtures carry, e.g. css-tables/absolute-tables-016)
+     * is byte-identical to the frozen baseline.
+     *
+     * **(2) The positioned-ancestor mirror is restored.** This function
+     * renders GRANDCHILDREN — `RenderComponent(cellComponent)` — so the
+     * intermediate row/cell component's own `RenderComponent` never runs,
+     * and neither does the `LocalHasPositionedAncestor` provider it would
+     * have installed. `CanvasRootHoist` requires the composition side and
+     * the pure walk (`collectCanvasHoisted`, which reads the REAL IR tree)
+     * to answer that question identically — its kdoc: "the two MUST mirror
+     * each other or a component gets dropped from flow but never overlaid."
+     * On css-tables/abspos-container-change-dynamic-001 they disagreed
+     * about the `position: relative` `<td>`: the composition side saw no
+     * positioned ancestor and hoisted the lime abspos away, while the walk
+     * saw one and gave it no overlay slot. Result: Android's capture held
+     * 160 non-white pixels (the "A"/"B" glyphs) against the reference's
+     * 10 070. Publishing the flag for each synthesized level puts both
+     * sides back on the same answer.
      */
     @Composable
     private fun RenderTableContent(component: IRComponent, textColor: Color?) {
-        if (!component.children.isNullOrEmpty()) {
-            component.children.forEach { rowComponent ->
-                // Each child is a table row
+        // The table's own row list, with any row group spliced away.
+        val rows = com.styleconverter.runtime.table.TableBoxTree.rowsOf(component.children)
+        // Does the TABLE box itself establish the containing block? Read
+        // through the hoist's own predicate so this can never drift from
+        // the pure walk. OR-ed with whatever the enclosing context already
+        // published, exactly as RenderComponent's childHasPositionedAncestor
+        // does one level up.
+        val tableEstablishes = com.styleconverter.runtime.layout.position.CanvasRootHoist
+            .LocalHasPositionedAncestor.current ||
+            com.styleconverter.runtime.table.TableBoxTree.establishesContainingBlock(component)
+        if (rows.isNotEmpty()) {
+            rows.forEach { rowComponent ->
+                // Each child is a table row. A row group that was spliced
+                // away cannot itself be positioned in this corpus, but the
+                // ROW can be — thread it the same way.
+                val rowEstablishes = tableEstablishes ||
+                    com.styleconverter.runtime.table.TableBoxTree
+                        .establishesContainingBlock(rowComponent)
                 TableApplier.TableRow {
                     if (!rowComponent.children.isNullOrEmpty()) {
                         rowComponent.children.forEach { cellComponent ->
-                            // Each grandchild is a table cell
+                            // Each grandchild is a table cell. The cell's
+                            // OWN RenderComponent runs below and publishes
+                            // its own flag for the cell's subtree; what this
+                            // provider supplies is the ancestry the skipped
+                            // table/row levels owe it.
                             TableCell {
-                                RenderComponent(cellComponent)
+                                CompositionLocalProvider(
+                                    com.styleconverter.runtime.layout.position.CanvasRootHoist
+                                        .LocalHasPositionedAncestor provides rowEstablishes
+                                ) {
+                                    RenderComponent(cellComponent)
+                                }
                             }
                         }
                     } else {
@@ -2221,7 +2273,43 @@ object ComponentRenderer {
                     wptCapture = LocalWptCaptureMode.current,
                     composedWpt = LocalWptComposedMode.current))
             }
-            if (!parentText.isNullOrEmpty()) {
+            // ── Wave 32 (lane R): the inline anonymous-run box ──────────────
+            //
+            // `meta.runs` is the component's inline content in DOCUMENT order
+            // (spec 03 §4.1) — the shape the single `_text` string cannot
+            // express, and the one the CSS2 static-position family is decided
+            // by. When a plan resolves it is AUTHORITATIVE: the leading-text
+            // box below is suppressed (its string is the concatenation the
+            // runs were split FROM, so painting both would double the glyphs)
+            // and each referenced child renders AT ITS RUN SLOT.
+            //
+            // SCOPE, stated rather than silent. The plan is consumed by the
+            // PLAIN block loop only. A positioned container (lane P's Box
+            // branch) and the two composed-capture packing layouts (float
+            // rows, inline atoms) index their subviews against
+            // `component.children` and would have to learn a synthetic
+            // measurable to host a run — that is a layout-contract change,
+            // not an ordering one. For those three, [inlineRunPlan] resolves
+            // to null and the container keeps the pre-wave-32 behaviour
+            // (leading text, then children) EXACTLY, so nothing is lost or
+            // painted twice; what is lost is the ordering fix, and the
+            // fixture still carries `_runs` for the platforms that read it.
+            val inlineRunPlan = run {
+                if (component.runs.isNullOrEmpty()) return@run null
+                // Lane P's branch: subviews are placed by the overlay/z-order
+                // walk, not this loop.
+                if (extractPositionType(component.properties) == PositionType.RELATIVE) return@run null
+                // The two packing layouts, recomputed here from the SAME pure
+                // functions the block branch calls below (both are cheap and
+                // side-effect-free), so the suppression decision above and the
+                // consumption decision further down can never disagree.
+                if (LocalWptCaptureMode.current) {
+                    if (blockFloatSegments(component.children, component.properties) != null) return@run null
+                    if (blockInlineAtomSegments(component.children) != null) return@run null
+                }
+                InlineRunPlan.resolve(component.runs, component.children)
+            }
+            if (!parentText.isNullOrEmpty() && inlineRunPlan == null) {
                 PlaceholderContent(
                     name = parentText,
                     textColor = inheritedAwareTextColor,
@@ -2497,6 +2585,44 @@ object ComponentRenderer {
                             val i = seg.indices.first()
                             renderBlockChild(i, component.children[i])
                         }
+                    }
+                } else if (inlineRunPlan != null) {
+                    // Wave 32 (lane R) — the ordered inline content. Text runs
+                    // and child boxes emit in WIRE order through the SAME
+                    // per-child renderer the frozen loop uses (original
+                    // indices, so the collapse plan and list markers keep
+                    // theirs). A run is an anonymous inline box on the wire;
+                    // Compose's Column has no line box, so it lands as a
+                    // stacked text box — the same approximation the leading
+                    // `_text` box always was, now at the right POSITION. See
+                    // InlineRunPlan's "HONEST SCOPE" note.
+                    inlineRunPlan.entries.forEach { entry ->
+                        when (entry) {
+                            is InlineRunPlan.Entry.Text -> PlaceholderContent(
+                                name = entry.text,
+                                textColor = inheritedAwareTextColor,
+                                properties = component.properties,
+                                rawText = entry.text,
+                                // A run belongs to the COMPONENT's own text, so
+                                // it carries the component's decoration list —
+                                // exactly like the leading-text site above.
+                                // (The extractor never co-emits the two: the
+                                // wave-22 collapse drops `_runs` with the
+                                // children it flattens, so this is null here.)
+                                decorations = com.styleconverter.runtime.typography.DecorationWire
+                                    .toDecorationLines(component.decorations)
+                            )
+                            is InlineRunPlan.Entry.Child ->
+                                renderBlockChild(entry.index, component.children[entry.index])
+                        }
+                    }
+                    // Rule 4 — children the list did not name still render,
+                    // after the runs, in sibling order. Empty for every
+                    // fixture the extractor emits (it references every kept
+                    // child), so this loop is a no-op in practice and exists
+                    // so a partial list can never make a box disappear.
+                    inlineRunPlan.unreferenced.forEach { i ->
+                        renderBlockChild(i, component.children[i])
                     }
                 } else {
                     // No packable run (or dark stage) — the frozen loop.
@@ -5383,7 +5509,30 @@ object ComponentRenderer {
                         "FLEX" -> DisplayType.FLEX_ROW // Default flex is row
                         "INLINE_FLEX", "INLINE-FLEX" -> DisplayType.FLEX_ROW
                         "GRID" -> DisplayType.GRID
-                        "TABLE", "TABLE_ROW", "TABLE-ROW", "TABLE_CELL", "TABLE-CELL" -> DisplayType.TABLE
+                        // Wave 32 (lane P) — css-tables-3 §2.1: a table-CELL
+                        // (and a table-CAPTION) "establishes a block
+                        // container box for its contents"; it does NOT
+                        // re-enter table layout. Sending them to
+                        // DisplayType.TABLE made a cell re-run the row/cell
+                        // synthesizer over its OWN content, turning every
+                        // child-less child into a PlaceholderContent text run
+                        // — no background, no box. MEASURED on
+                        // CSS2/abspos/static-inside-table-cell, whose
+                        // `display:table-cell` div holds a green abspos and a
+                        // red decoy: Android painted NEITHER (capture carries
+                        // only the header glyphs) while iOS painted the green
+                        // 100×100 at the reference's [16,88..115,187].
+                        // BLOCK routes them through RenderContent, which is
+                        // where the positioned-container branch (CSS 2.2
+                        // §10.1 padding-box anchor), the mixed-content text
+                        // run, and every ordinary paint applier live.
+                        // The cell's table CHROME is unaffected: the
+                        // synthesizer still wraps each cell in
+                        // TableApplier.TableCell before calling
+                        // RenderComponent on it.
+                        "TABLE", "TABLE_ROW", "TABLE-ROW" -> DisplayType.TABLE
+                        "TABLE_CELL", "TABLE-CELL",
+                        "TABLE_CAPTION", "TABLE-CAPTION" -> DisplayType.BLOCK
                         "INLINE", "INLINE_BLOCK", "INLINE-BLOCK" -> DisplayType.INLINE
                         "NONE" -> DisplayType.NONE
                         else -> DisplayType.BLOCK

@@ -228,6 +228,57 @@ class IRWireV2Test {
         assertNull(IRWireV2.decodeDocument(obj).components[0].decorations)
     }
 
+    // ---- wave-32 lane R: meta.runs (the ordered inline-content list) ----
+
+    @Test
+    fun `runs group under meta and round-trip verbatim`() {
+        // The canonical interleave: `the quick <u>brown</u> fox`, where the
+        // <u> survives as a child. Order IS the payload (spec 03 §4.1), so
+        // the assertion that matters is that the converter neither re-orders
+        // nor re-splits nor resolves the child id.
+        val payload = buildJsonArray {
+            add(buildJsonObject { put("text", "the quick ") })
+            add(buildJsonObject { put("child", "runs-glued-underline-003") })
+            add(buildJsonObject { put("text", " fox") })
+        }
+        val doc = IRDocument(listOf(comp("a").copy(runs = payload)))
+        val obj = IRWireV2.encodeDocument(doc)
+        val meta = obj["components"]!!.jsonArray[0].jsonObject["meta"]!!.jsonObject
+        assertEquals(payload, meta["runs"]!!.jsonArray)
+        val decoded = IRWireV2.decodeDocument(obj)
+        assertEquals(payload, decoded.components[0].runs)
+    }
+
+    @Test
+    fun `runs alone is enough to emit the meta group`() {
+        // An interleaving component need carry no tag/role/attrs — the meta
+        // emission gate must count runs as a member in its own right.
+        val payload = buildJsonArray { add(buildJsonObject { put("child", "b") }) }
+        val obj = IRWireV2.encodeDocument(IRDocument(listOf(comp("a").copy(runs = payload))))
+        val c = obj["components"]!!.jsonArray[0].jsonObject
+        assertEquals(payload, c["meta"]!!.jsonObject["runs"]!!.jsonArray)
+    }
+
+    @Test
+    fun `absent runs stays off the wire`() {
+        // No interleave → no key at all (omit-when-absent: every pre-wave-32
+        // document stays byte-identical, which is what makes this additive).
+        val obj = IRWireV2.encodeDocument(IRDocument(listOf(comp("a", tag = "span"))))
+        val meta = obj["components"]!!.jsonArray[0].jsonObject["meta"]!!.jsonObject
+        assertEquals(setOf("sourceTag"), meta.keys)
+        assertNull(IRWireV2.decodeDocument(obj).components[0].runs)
+    }
+
+    @Test
+    fun `runs with a dangling child id still decodes`() {
+        // Spec 03 §4.1 rule 5: dangling is a RENDERER-side warn-and-skip, not
+        // a converter error — the hop is opaque, so a document naming an id
+        // no component carries must survive the round-trip intact.
+        val payload = buildJsonArray { add(buildJsonObject { put("child", "nobody-here") }) }
+        val obj = IRWireV2.encodeDocument(IRDocument(listOf(comp("a").copy(runs = payload))))
+        assertEquals(payload, IRWireV2.decodeDocument(obj).components[0].runs)
+    }
+
     // ---- hard errors on decode ----
 
     @Test

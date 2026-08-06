@@ -231,6 +231,37 @@ public struct IRDecoration: Equatable {
     }
 }
 
+/// Wave-32 wire contract (lane R) — ONE entry of the `meta.runs` list an
+/// INTERLEAVING component carries (schema/spec/03-children.md §4.1;
+/// producer: the `_runs` banner in tools/titan/extract-fixture.mjs).
+///
+/// `text` is ONE string and the child list has ONE order, so the wire
+/// could say `run + children` or `children + run` but never
+/// `run / child / run` — the shape `the quick <u>brown</u> fox` needs when
+/// the `<u>` survives as a child. `meta.runs` is that ordering, and ORDER
+/// IS THE WHOLE PAYLOAD.
+///
+/// EXACTLY ONE member is non-nil, enforced at decode (both readers) rather
+/// than by the type: the wire shape is `{text}` | `{child}`, and an enum
+/// would not round-trip it any more safely than this pair does.
+///
+/// `child` is the referenced child's AUTHORING KEY — its `name` on the
+/// converter-emitted wire, and also its `id` in the extractor-direct
+/// pipeline. NOT the converter-minted id: the converter re-ids at the
+/// flatten boundary, so a producer-written id would name nothing after the
+/// hop (schema/spec/04-metadata-fields.md).
+// public: read by the renderer's inline-run plan and by tests.
+public struct IRRun: Equatable {
+    public let text: String?
+    public let child: String?
+
+    // internal: constructed by the decode paths and by tests.
+    init(text: String? = nil, child: String? = nil) {
+        self.text = text
+        self.child = child
+    }
+}
+
 /// Droppable renderer hints, grouped (v2 home of v1 `_tag` and `_role`).
 /// A consumer may ignore meta without correctness loss — unlike slot.
 // public: the renderer reads sourceTag for list-marker generation.
@@ -260,17 +291,27 @@ public struct IRMeta: Equatable {
     /// marker family the bake leaves to this runtime (§6.1 bullets, `none`,
     /// unmodelled counter styles).
     public let markerText: String?
+    /// Wave-32 ORDERED inline-content list (`meta.runs`, same additive meta
+    /// channel as `decorations`) — the component's own text and its kept
+    /// children INTERLEAVED in document order. AUTHORITATIVE when present:
+    /// the renderer paints the entries in order, does NOT also paint
+    /// `text`, and does NOT paint a referenced child a second time. nil for
+    /// v1 documents and for every component whose text does not glue across
+    /// a child. See `IRRun` and schema/spec/03-children.md §4.1.
+    public let runs: [IRRun]?
 
     // internal: constructed by the decode paths and by tests. The attrs /
-    // decorations / markerText defaults keep every earlier construction
-    // site compiling.
+    // decorations / markerText / runs defaults keep every earlier
+    // construction site compiling.
     init(sourceTag: String? = nil, role: String? = nil, attrs: IRAttrs? = nil,
-         decorations: [IRDecoration]? = nil, markerText: String? = nil) {
+         decorations: [IRDecoration]? = nil, markerText: String? = nil,
+         runs: [IRRun]? = nil) {
         self.sourceTag = sourceTag
         self.role = role
         self.attrs = attrs
         self.decorations = decorations
         self.markerText = markerText
+        self.runs = runs
     }
 }
 
@@ -410,7 +451,19 @@ public struct IRComponent: Decodable {
                           },
                           // Wave-27: the baked list-marker string rides the
                           // lenient path too — a plain string, no coercion.
-                          markerText: rawMeta.markerText)
+                          markerText: rawMeta.markerText,
+                          // Wave-32: the ordered inline-content list. Lenient
+                          // means lenient — an entry that is neither a `text`
+                          // string nor a non-empty `child` key is SKIPPED here
+                          // (the strict v2 reader is the one that errors), so
+                          // the surviving entries keep their document order.
+                          runs: rawMeta.runs?.arrayValue?.compactMap { entry in
+                              if let t = entry["text"]?.stringValue { return IRRun(text: t) }
+                              if let k = entry["child"]?.stringValue, !k.isEmpty {
+                                  return IRRun(child: k)
+                              }
+                              return nil
+                          })
         } else {
             let tag = try c.decodeIfPresent(String.self, forKey: ._tag)
             let role = try c.decodeIfPresent(String.self, forKey: ._role)
@@ -444,6 +497,11 @@ public struct IRComponent: Decodable {
         // String? — there is no shape to get wrong, so the lenient and
         // strict readers agree by construction.
         let markerText: String?
+        // Wave-32 lane R: the ordered inline-content list rides the lenient
+        // path too (standalone component decodes in tests). Kept as an
+        // opaque IRValue — the STRICT reader owns the shape errors; this
+        // path only coerces what it recognises.
+        let runs: IRValue?
     }
 }
 

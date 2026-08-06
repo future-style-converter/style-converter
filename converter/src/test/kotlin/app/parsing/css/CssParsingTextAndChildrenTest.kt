@@ -477,6 +477,73 @@ class CssParsingTextAndChildrenTest {
     }
 
     /**
+     * wave-32 lane R: `_runs` (the ordered inline-content list of an element
+     * whose own text INTERLEAVES with its kept children) is parsed onto the
+     * IRComponent's `runs` field VERBATIM. Two things the converter must NOT
+     * do are asserted here rather than left to inspection: it must not
+     * re-order or re-split the entries (order IS the payload, spec 03 §4.1),
+     * and it must not resolve a `child` id against the children map — the
+     * ids in `_runs` are the extractor's, and the flattener mints its own
+     * (schema/spec/04-metadata-fields.md, "why the converter never resolves
+     * a `child` id"). Same v1 freeze rule as `_attrs`/`_decorations`.
+     */
+    @Test
+    fun `_runs is parsed verbatim and ignored by the v1 serializer`() {
+        // The canonical shape: `the quick <u>brown</u> fox` with a styled <u>
+        // that survives as a child, so the run is split around it.
+        val input = json.parseToJsonElement(
+            """
+            {
+              "components": {
+                "glue__0": {
+                  "properties": { "color": "green" },
+                  "_text": "the quick fox",
+                  "_runs": [
+                    { "text": "the quick " },
+                    { "child": "glue__0__0" },
+                    { "text": " fox" }
+                  ],
+                  "children": {
+                    "glue__0__0": {
+                      "id": "glue__0__0",
+                      "properties": { "text-decoration": "underline" },
+                      "_text": "brown"
+                    }
+                  }
+                }
+              }
+            }
+            """.trimIndent()
+        ).jsonObject
+
+        val ir = cssParsing(input)
+        // In-memory model carries the array byte-verbatim (opaque payload).
+        val runs = ir.components[0].runs
+        assertNotNull(runs, "Expected runs forwarded onto IRComponent")
+        assertEquals(3, runs.size, "every entry survives — no filtering here")
+        // ORDER is document order and must not be re-sorted or merged.
+        assertEquals("the quick ", runs[0].jsonObject["text"]!!.jsonPrimitive.content)
+        assertEquals("glue__0__0", runs[1].jsonObject["child"]!!.jsonPrimitive.content)
+        assertEquals(" fox", runs[2].jsonObject["text"]!!.jsonPrimitive.content)
+        // Boundary whitespace is MEANINGFUL (spec 03 §4.1 rule 6) — the
+        // converter must not trim it into the neighbouring entry.
+        assertTrue(
+            runs[0].jsonObject["text"]!!.jsonPrimitive.content.endsWith(" "),
+            "the trailing space of an interior run is the inter-run word space"
+        )
+        // `_text` stays on the component carrying the pre-wave-32
+        // concatenation — that is what makes `meta.runs` ADDITIVE.
+        assertEquals("the quick fox", ir.components[0].text)
+
+        // The frozen v1 wire never learns about runs (historical-drop rule).
+        val outString = Json { prettyPrint = false }.encodeToString(ir)
+        assertTrue(
+            !outString.contains("_runs") && !outString.contains("\"runs\""),
+            "v1 serializer must not emit runs in any spelling"
+        )
+    }
+
+    /**
      * wave-27 lane CBAKE: `_markerText` (the RESOLVED list-marker string one
      * `<li>` renders — representation + suffix per css-counter-styles-3 §6,
      * already resolved against `<ol start>` and the item's ordinal) is parsed

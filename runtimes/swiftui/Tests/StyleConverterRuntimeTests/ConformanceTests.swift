@@ -250,6 +250,78 @@ final class ConformanceTests: XCTestCase {
         XCTAssertThrowsError(try decodeDoc(json))
     }
 
+    // MARK: - wave-32 lane R: meta.runs (the ordered inline-content list)
+
+    /// The ordered inline content decodes off the `inline-runs` golden, in
+    /// DOCUMENT order, with the authoring-key reference intact.
+    ///
+    /// Why the DECODE is the unit under test rather than the renderer read:
+    /// ComponentRenderer's consumption is a plan lookup per child, but a
+    /// reader that rejected or dropped the key would make that lookup dead
+    /// and silent. TWIN of the Compose `SchemaConformanceTest` case.
+    func testV2MetaRunsDecodesInDocumentOrder() throws {
+        let doc = try loadV2("inline-runs.json")
+        let glued = try byName(doc, "Runs_TextGluedAcrossChild")
+        let runs = try XCTUnwrap(glued.meta?.runs)
+        XCTAssertEqual(runs.count, 3)
+        XCTAssertEqual(runs[0].text, "the quick ")
+        XCTAssertEqual(runs[1].child, "Runs_UnderlinedWord")
+        XCTAssertEqual(runs[2].text, " fox")
+        // Exactly one member per entry — the decoder proves the shape so the
+        // renderer never has to ask which one wins.
+        XCTAssertNil(runs[0].child)
+        XCTAssertNil(runs[1].text)
+        // `text` is STILL on the component carrying the pre-wave-32
+        // concatenation — that is what makes meta.runs ADDITIVE, not a break.
+        XCTAssertEqual(glued.text, "the quick fox")
+        // The reference is the AUTHORING KEY (the child's `name`), never the
+        // converter-minted id: the converter re-ids at the flatten boundary,
+        // so a producer-written id would name nothing after the hop.
+        let underlined = try byName(doc, "Runs_UnderlinedWord")
+        XCTAssertEqual(runs[1].child, underlined.name)
+        XCTAssertNotEqual(runs[1].child, underlined.id)
+        // A whitespace-only run between two children is the inter-run word
+        // space (spec 03 §4.1 rule 6) and survives decode un-trimmed.
+        let wsOnly = try XCTUnwrap(try byName(doc, "Runs_WhitespaceOnlyRunBetweenChildren").meta?.runs)
+        XCTAssertEqual(wsOnly[1].text, " ")
+        // Absence stays nil — what keeps every other component on the
+        // pre-wave-32 leading-text path.
+        XCTAssertNil(underlined.meta?.runs)
+    }
+
+    /// Every malformed `meta.runs` shape is a HARD decode error. Each one
+    /// would silently reorder painted content — the exact failure this wire
+    /// exists to remove — so tolerating any of them would be worse than the
+    /// bail it replaced.
+    func testV2MetaRunsStrictness() {
+        let head = """
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [], "meta": { "runs":
+        """
+        // Not an array / empty array / non-object entry / both keys /
+        // neither key / unknown key / empty child key.
+        for bad in ["{\"text\":\"x\"}", "[]", "[\"x\"]",
+                    "[{\"text\":\"a\",\"child\":\"b\"}]", "[{}]",
+                    "[{\"tail\":\"a\"}]", "[{\"child\":\"\"}]"] {
+            XCTAssertThrowsError(try decodeDoc(head + bad + " } } ] }"),
+                                 "meta.runs \(bad) must be a hard decode error")
+        }
+        // …but the EMPTY STRING is a legal `text`: a producer may emit one
+        // and the renderer simply paints nothing for it.
+        XCTAssertNoThrow(try decodeDoc(head + "[{\"text\":\"\"},{\"child\":\"b\"}] } } ] }"))
+    }
+
+    /// `runs` is additive, not a licence to invent siblings: an unknown meta
+    /// key next to it is still a hard error (spec 05 rule 3).
+    func testV2UnknownMetaKeyStillErrorsBesideRuns() {
+        let json = """
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "a-1", "name": "A", "properties": [],
+            "meta": { "runs": [ { "text": "x" } ], "runFont": "y" } } ] }
+        """
+        XCTAssertThrowsError(try decodeDoc(json))
+    }
+
     // MARK: - v2 strictness: children is a hard error
 
     func testV2ChildrenKeyIsHardError() {

@@ -343,9 +343,11 @@ class SchemaConformanceTest {
                 assertTrue(meta.isNotEmpty(), "$where meta present but empty")
                 assertTrue(
                     // wave-27 lane CBAKE added `markerText` under the same
-                    // spec-05 additive meta-key rule as attrs/decorations.
+                    // spec-05 additive meta-key rule as attrs/decorations;
+                    // wave-32 lane R added `runs` (the ordered inline-content
+                    // list — schema/spec/03-children.md §4.1) the same way.
                     meta.keys.all {
-                        it in setOf("sourceTag", "role", "attrs", "decorations", "markerText")
+                        it in setOf("sourceTag", "role", "attrs", "decorations", "markerText", "runs")
                     },
                     "$where meta has unknown keys"
                 )
