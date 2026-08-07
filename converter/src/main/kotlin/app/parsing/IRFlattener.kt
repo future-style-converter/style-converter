@@ -69,7 +69,10 @@ object IRFlattener {
         doc.components.forEach { root -> walk(root, null) }
         // Document-level keyframes ride through untouched: flattening is a
         // component-tree transform; keyframe sets have no composition and
-        // no slot semantics (schema/spec/07-animations.md).
-        return IRDocument(flat, keyframes = doc.keyframes)
+        // no slot semantics (schema/spec/07-animations.md). fontFaces ride
+        // through for the identical reason — css-fonts-4 §4.1 scopes a face
+        // to the document's font database, so it has no parent to be
+        // re-slotted under (schema/spec/01-envelope.md §5).
+        return IRDocument(flat, keyframes = doc.keyframes, fontFaces = doc.fontFaces)
     }
 }

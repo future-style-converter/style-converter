@@ -29,6 +29,7 @@ import type {
   IRMedia,
   IRKeyframes,
   IRKeyframeStop,
+  IRFontFace,
 } from './IRModels';
 
 /** Highest wire version this runtime implements (spec 05 discovery rule). */
@@ -79,7 +80,47 @@ export function decodeIRDocument(raw: unknown): IRDocument {
   // emission rule so a re-encode of the decoded doc stays shape-faithful.
   const keyframes = decodeKeyframes(doc.keyframes);
   if (keyframes) out.keyframes = keyframes;
+  // fontFaces: additive v2 minor-revision key (spec 01 §5) — same
+  // attach-only-when-non-empty rule as keyframes above.
+  const fontFaces = decodeFontFaces(doc.fontFaces);
+  if (fontFaces) out.fontFaces = fontFaces;
   return out;
+}
+
+/**
+ * Decode the document-level `fontFaces` list (spec 01 §5) with this file's
+ * standard decode-side tolerance posture: structurally malformed entries are
+ * DROPPED rather than crashing the whole document (schema validation is CI's
+ * job — schema/conformance). Kept rules mirror `$defs/fontFace`: the entry
+ * is an object carrying non-empty string `family` and `src`; `weight` and
+ * `style` survive only as non-empty strings and are otherwise omitted, so a
+ * consumer applying the css-fonts-4 initial and one reading an explicit
+ * value land on the same face.
+ *
+ * ORDER IS PRESERVED — css-fonts-4 §4.1 makes a later face with the same
+ * (family, weight, style) win, so a reordering decode would silently change
+ * which file renders.
+ *
+ * Returns undefined when nothing valid survives (omit-when-empty out, so a
+ * re-encode of the decoded doc stays shape-faithful).
+ */
+function decodeFontFaces(raw: unknown): IRFontFace[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out: IRFontFace[] = [];
+  for (const entry of raw as unknown[]) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+    const f = entry as Raw;
+    // family + src are REQUIRED (schema): a face with no name is
+    // unreferenceable and one with no src names no file — either way there
+    // is nothing to render, so dropping beats inventing a default.
+    if (typeof f.family !== 'string' || f.family.length === 0) continue;
+    if (typeof f.src !== 'string' || f.src.length === 0) continue;
+    const face: IRFontFace = { family: f.family, src: f.src };
+    if (typeof f.weight === 'string' && f.weight.length > 0) face.weight = f.weight;
+    if (typeof f.style === 'string' && f.style.length > 0) face.style = f.style;
+    out.push(face);
+  }
+  return out.length > 0 ? out : undefined;
 }
 
 /**

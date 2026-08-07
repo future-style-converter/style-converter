@@ -111,10 +111,10 @@ class InlineBlockAtomTest {
         )
     }
 
-    // ───────────────────────── B5 — bands must be zero ───────────────────
+    // ───────────────────────── B5 — margins zero, bands box-sized ────────
 
-    @Test fun `B5 - a non-zero margin padding or border refuses`() {
-        for (t in listOf("MarginLeft", "PaddingTop", "BorderRightWidth", "MarginInlineStart")) {
+    @Test fun `B5 - a non-zero margin refuses on any spelling`() {
+        for (t in listOf("MarginLeft", "MarginTop", "MarginInlineStart", "MarginBlockEnd")) {
             assertNull(
                 t,
                 InlineBlockAtom.spec(box("INLINE_BLOCK", 100.0, 100.0) + len(t, 4.0), false, false, false)
@@ -128,6 +128,122 @@ class InlineBlockAtomTest {
         val props = box("INLINE_BLOCK", 100.0, 100.0) +
             len("PaddingTop", 0.0) + len("PaddingLeft", 0.0) + len("MarginTop", 0.0)
         assertNotNull(InlineBlockAtom.spec(props, false, false, false))
+    }
+
+    @Test fun `B5 - wave33's all-zero-band sites are byte-identical under H2`() {
+        // The wave-33 gate forced every band to zero. Both wave-34 branches
+        // ADD 0 on such a box, so every site wave 33 admitted keeps its
+        // exact AtomSpec — which is what makes backdrop-filter-boundary and
+        // appearance-auto-non-html-namespace-001 unmoved.
+        for (bs in listOf(null, "CONTENT_BOX", "BORDER_BOX")) {
+            val props = box("INLINE_BLOCK", 160.0, 90.0) +
+                len("PaddingLeft", 0.0) + len("BorderTopWidth", 0.0) +
+                (bs?.let { prop("BoxSizing", "\"$it\"") } ?: emptyList())
+            val spec = InlineBlockAtom.spec(props, false, false, false)
+            assertNotNull("box-sizing=$bs", spec)
+            assertEquals(160.0, spec!!.fixedWpx!!, 0.0)
+            assertEquals(90.0, spec.fixedHpx!!, 0.0)
+        }
+    }
+
+    // ── H2 (wave 34): the box-sizing-aware band read ─────────────────────
+
+    @Test fun `H2 - border-box keeps the wire px as the OUTER border box`() {
+        // backdrop-filter-clip-rect-2's exact shape: `box-sizing:
+        // border-box; width/height: 100px; border: 10px`. css-sizing-3 §3
+        // puts the bands INSIDE the declared size, so the atom is 100x100
+        // and the three boxes pack 100 + 4.5 + 100 + 4.5 + 100 = 309.
+        val props = box("INLINE_BLOCK", 100.0, 100.0) +
+            prop("BoxSizing", "\"BORDER_BOX\"") +
+            len("BorderTopWidth", 10.0) + len("BorderRightWidth", 10.0) +
+            len("BorderBottomWidth", 10.0) + len("BorderLeftWidth", 10.0)
+        val spec = InlineBlockAtom.spec(props, false, false, false)
+        assertNotNull(spec)
+        assertEquals(100.0, spec!!.fixedWpx!!, 0.0)
+        assertEquals(100.0, spec.fixedHpx!!, 0.0)
+    }
+
+    @Test fun `H2 - border-box tolerates a band shape this rule cannot read`() {
+        // Under border-box the outer box is the declared px WHATEVER the
+        // band is, so a % padding does not need to be resolvable.
+        val props = box("INLINE_BLOCK", 100.0, 100.0) +
+            prop("BoxSizing", "\"BORDER_BOX\"") +
+            prop("PaddingLeft", """{"type":"percentage","value":25}""")
+        assertNotNull(InlineBlockAtom.spec(props, false, false, false))
+    }
+
+    @Test fun `H2 - content-box ADDS the padding and border bands`() {
+        // css-sizing-3 §3: the declared size is the CONTENT box, so the
+        // atom's outer border box is 100 + 4 + 6 wide and 100 + 2 + 8 tall.
+        val props = box("INLINE_BLOCK", 100.0, 100.0) +
+            prop("BoxSizing", "\"CONTENT_BOX\"") +
+            len("PaddingLeft", 4.0) + len("PaddingTop", 2.0) +
+            len("BorderRightWidth", 6.0) + prop("BorderRightStyle", "\"SOLID\"") +
+            len("BorderBottomWidth", 8.0) + prop("BorderBottomStyle", "\"SOLID\"")
+        val spec = InlineBlockAtom.spec(props, false, false, false)
+        assertNotNull(spec)
+        assertEquals(110.0, spec!!.fixedWpx!!, 0.0)
+        assertEquals(110.0, spec.fixedHpx!!, 0.0)
+    }
+
+    @Test fun `H2 - an UNSET box-sizing is content-box under the WPT gate`() {
+        // This predicate is composed-WPT-only (P19), where
+        // SizingApplier.effectiveBoxSizing(null, true) == CONTENT_BOX.
+        val props = box("INLINE_BLOCK", 100.0, 50.0) + len("PaddingRight", 7.0)
+        val spec = InlineBlockAtom.spec(props, false, false, false)
+        assertNotNull(spec)
+        assertEquals(107.0, spec!!.fixedWpx!!, 0.0)
+        assertEquals(50.0, spec.fixedHpx!!, 0.0)
+    }
+
+    @Test fun `H2 - a none or hidden border side bands at zero`() {
+        // CSS 2.1 §8.5.3 — used width 0, matching BorderSideConfig.hasBorder
+        // on both natives. clip-rect-2's `border-style: none` box is this.
+        for (kw in listOf("NONE", "HIDDEN")) {
+            val props = box("INLINE_BLOCK", 100.0, 100.0) +
+                len("BorderLeftWidth", 10.0) + prop("BorderLeftStyle", "\"$kw\"")
+            val spec = InlineBlockAtom.spec(props, false, false, false)
+            assertNotNull(kw, spec)
+            assertEquals(kw, 100.0, spec!!.fixedWpx!!, 0.0)
+        }
+    }
+
+    @Test fun `H2 - content-box refuses the three unknowable band shapes`() {
+        // 1. a non-exact band value (the % basis is a measure question).
+        assertNull(
+            "percent padding",
+            InlineBlockAtom.spec(
+                box("INLINE_BLOCK", 100.0, 100.0) +
+                    prop("PaddingLeft", """{"type":"percentage","value":25}"""),
+                false, false, false,
+            )
+        )
+        // 2. a non-zero LOGICAL band (physical mapping is writing-mode aware).
+        assertNull(
+            "logical padding",
+            InlineBlockAtom.spec(
+                box("INLINE_BLOCK", 100.0, 100.0) + len("PaddingInlineStart", 5.0),
+                false, false, false,
+            )
+        )
+        // 3. a visible border-style with NO width — the `medium` initial the
+        //    two natives resolve differently (Compose 0 / iOS 3).
+        assertNull(
+            "styled width-less border",
+            InlineBlockAtom.spec(
+                box("INLINE_BLOCK", 100.0, 100.0) + prop("BorderTopStyle", "\"SOLID\""),
+                false, false, false,
+            )
+        )
+    }
+
+    @Test fun `H2 - an unreadable box-sizing keyword refuses rather than guesses`() {
+        assertNull(
+            InlineBlockAtom.spec(
+                box("INLINE_BLOCK", 100.0, 100.0) + prop("BoxSizing", "\"WHAT_BOX\""),
+                false, false, false,
+            )
+        )
     }
 
     // ───────────────────────── B6 — the baseline ─────────────────────────
@@ -210,6 +326,123 @@ class InlineBlockAtomTest {
         // Line box 1 = ascent 50 + strut descent 4 ⇒ row 2 top at 54.
         assertEquals(listOf(0.0, 54.0), plan.y)
         assertEquals(108.0, plan.height, 0.0)
+    }
+
+    // ── H1 (wave 34): the composed-canvas ROOT flow facade ───────────────
+
+    @Test fun `H1 - rootBox is spec projected to scalars`() {
+        val b = InlineBlockAtom.rootBox(box("INLINE_BLOCK", 100.0, 100.0), false, false, false)
+        assertEquals(InlineBlockAtom.RootBox(100.0, 100.0), b)
+        // A non-atom root keeps the harness's frozen block stack.
+        assertNull(InlineBlockAtom.rootBox(box("BLOCK", 100.0, 100.0), false, false, false))
+    }
+
+    @Test fun `H1 - the target document segments into p then a 3-box run`() {
+        // CSS2/abspos/static-inside-inline-block: root 0 is the prose <p>
+        // (no Display, so not an atom), roots 1-3 the inline-blocks.
+        val boxes = listOf(
+            null,
+            InlineBlockAtom.RootBox(100.0, 100.0),
+            InlineBlockAtom.RootBox(100.0, 100.0),
+            InlineBlockAtom.RootBox(100.0, 100.0),
+        )
+        // rootGaps in the harness are [16 above <p>, 16 above root 1, 0, 0].
+        val segs = InlineBlockAtom.rootSegments(boxes, listOf(16.0, 16.0, 0.0, 0.0))
+        assertNotNull(segs)
+        assertEquals(
+            listOf(
+                InlineBlockAtom.RootSegment(listOf(0), false),
+                InlineBlockAtom.RootSegment(listOf(1, 2, 3), true),
+            ),
+            segs,
+        )
+    }
+
+    @Test fun `H1 - a run-free document gets NO plan so the harness stays frozen`() {
+        // Every composed section but two is this case — the null return is
+        // what keeps their captures byte-identical.
+        assertNull(InlineBlockAtom.rootSegments(listOf(null, null, null), listOf(0.0, 0.0, 0.0)))
+        // A LONE atom is not a run either (the ≥2 rule the segmenter pins).
+        assertNull(
+            InlineBlockAtom.rootSegments(
+                listOf(null, InlineBlockAtom.RootBox(10.0, 10.0), null),
+                listOf(0.0, 0.0, 0.0),
+            )
+        )
+    }
+
+    @Test fun `H3 - a run with a real block gap inside it refuses and stacks`() {
+        // Dropping that gap would silently lose layout, so the whole run
+        // degrades to singles and the harness stacks it exactly as before.
+        val boxes = listOf(
+            InlineBlockAtom.RootBox(100.0, 100.0),
+            InlineBlockAtom.RootBox(100.0, 100.0),
+        )
+        assertNull(InlineBlockAtom.rootSegments(boxes, listOf(0.0, 16.0)))
+        // The gap ABOVE the first member is the caller's and never gates.
+        assertNotNull(InlineBlockAtom.rootSegments(boxes, listOf(16.0, 0.0)))
+    }
+
+    @Test fun `H1 - the target run packs to the ref's 121x88 green box`() {
+        // Three 100x100 roots in the composed canvas's 358px content width.
+        val plan = InlineBlockAtom.rootRowPlan(
+            widthsPx = List(3) { 100.0 },
+            heightsPx = List(3) { 100.0 },
+            availableWidthPx = 358.0,
+            gapPx = InlineBlockAtom.ROOT_ATOM_GAP_PX,
+        )
+        // One row: 3x100 + 2x4.5 = 309 <= 358. The MIDDLE box (the red one
+        // holding the green abspos child) starts at run-relative 104.5, so
+        // the harness's 16px frame puts it at image x = 120.5 -> the 121
+        // column the browser-ref rasterises.
+        assertEquals(listOf(0.0, 104.5, 209.0), plan.xPx)
+        assertEquals(listOf(0.0, 0.0, 0.0), plan.yPx)
+        assertEquals(309.0, plan.widthPx, 0.0)
+        // Row height = ascent 100 (the boxes) + descent 4 (the §10.8.1
+        // strut) — the classic below-inline-block gap. 16 pad + 16 gap +
+        // a 40px two-line <p> + 16 gap = the ref's y = 88.
+        assertEquals(104.0, plan.heightPx, 0.0)
+    }
+
+    @Test fun `H1 - anchor-center-overflow-005's four roots wrap 3 plus 1`() {
+        // 4x100 + 3x4.5 = 413.5 > 358, so the 4th box starts row 2 at the
+        // first row's full height (100 + the 4px strut descent).
+        val plan = InlineBlockAtom.rootRowPlan(
+            widthsPx = List(4) { 100.0 },
+            heightsPx = List(4) { 100.0 },
+            availableWidthPx = 358.0,
+            gapPx = InlineBlockAtom.ROOT_ATOM_GAP_PX,
+        )
+        assertEquals(listOf(0.0, 104.5, 209.0, 0.0), plan.xPx)
+        assertEquals(listOf(0.0, 0.0, 0.0, 104.0), plan.yPx)
+        assertEquals(208.0, plan.heightPx, 0.0)
+    }
+
+    @Test fun `H1 - the root row plan is the nested row plan`() {
+        // The facade must be a pure re-expression of InlineAtomFlow.layout
+        // with the inline-block family's fixed answers, never a second
+        // packer — this pins the two against each other.
+        val direct = InlineAtomFlow.layout(
+            widths = List(3) { 100.0 },
+            heights = List(3) { 100.0 },
+            descents = List(3) { 0.0 },
+            marginStarts = List(3) { 0.0 },
+            marginEnds = List(3) { 0.0 },
+            availableWidth = 358.0,
+            gapPx = UAWidgetIntrinsics.ATOM_GAP_PX,
+            strutAscentPx = UAWidgetIntrinsics.STRUT_ASCENT_PX,
+            strutDescentPx = UAWidgetIntrinsics.STRUT_DESCENT_PX,
+        )
+        val viaFacade = InlineBlockAtom.rootRowPlan(
+            widthsPx = List(3) { 100.0 },
+            heightsPx = List(3) { 100.0 },
+            availableWidthPx = 358.0,
+            gapPx = InlineBlockAtom.ROOT_ATOM_GAP_PX,
+        )
+        assertEquals(direct.x, viaFacade.xPx)
+        assertEquals(direct.y, viaFacade.yPx)
+        assertEquals(direct.width, viaFacade.widthPx, 0.0)
+        assertEquals(direct.height, viaFacade.heightPx, 0.0)
     }
 
     // ───────────────────────── wire helpers ──────────────────────────────

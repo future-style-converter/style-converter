@@ -299,14 +299,15 @@ const RX = {
     contenteditable:    /\bcontenteditable(?:=["']?(?:true|""|plaintext-only)["']?)?\b/i,
 
     // Rule 15 — requires-font-face:
-    //   `@font-face { src: url(…) }` referencing a font asset. The IR
-    //   doesn't model webfonts; the renderers can't load arbitrary .ttf/
-    //   .woff at capture time.
-    //   We deliberately allow `@font-face { src: local(…) }` (system font
-    //   reference) because that doesn't need an asset fetch — but the
-    //   browser-ref still depends on the local font being installed, so
-    //   even a local reference is shaky. For now we conservatively match
-    //   ANY @font-face usage.
+    //   `@font-face { src: url(…) }` referencing a font asset.
+    //   NOT the rule's predicate any more — wave-34 lane F2 replaced the
+    //   whole-document token scan with declaresFontFaceRule() below, which
+    //   requires an actual at-RULE (`@font-face` followed by `{`) rather
+    //   than the word. Kept here as the table's documentation of the token,
+    //   and pinned by the RX-shape unit test; the rule body no longer calls
+    //   it. The 9 documents that mention the at-rule only in a <title>, an
+    //   assertion string or a commented-out JS line used to be excluded by
+    //   this pattern for a face they never create.
     //   Source: investigations/swarm-001/css-fonts__downloadable-font-print.json
     fontFace:           /@font-face\b/i,
 
@@ -1449,6 +1450,91 @@ function hasNonLatinPredefinedCounterStyle(html) {
     return false;
 }
 
+// ── wave-34 lane F2: Rule 15 requires an actual at-RULE ─────────────────────
+//
+// WHAT CHANGED IN THE PIPELINE, AND WHAT DID NOT. Wave 34 opened the
+// @font-face delivery channel: the extractor scans the sheet, resolves the
+// `src` url() against the corpus and emits a DOCUMENT-level `fontFaces` list
+// (schema/spec/01-envelope.md §5), and the web harness turns each entry into
+// a real `@font-face` rule served off its /wpt-font/ route. That closes the
+// WEB half of the wall — web-vs-ref now shapes the same outlines the ref does
+// (css-text/boundary-shaping-001…010 assert on "fi"/"ffi" LIGATURES that only
+// the declared LinLibertine face carries; before this wave the assertion was
+// unobservable on our side of the diff).
+//
+// IT DOES NOT CLOSE THE NATIVE HALF, so this tag still fires and still
+// excludes the test WHOLE. Neither native runtime has a face-registration
+// hook (Compose's `FontFamily(Font…)` picks one bundled face; SwiftUI resolves
+// `.custom("Inter", size:)`) — the SAME missing machinery Rule 43's wave-31
+// note (e) measured for the non-Latin boundary. Admitting these tests now
+// would score two platforms that provably cannot paint the author's glyphs:
+// dishonest in the direction that flatters us.
+//
+// THE CLOSING MOVE, spelled out so the next wave does not re-derive it:
+//   1. land face registration on both natives — `Typeface.Builder` fed from
+//      IRDocument.fontFaces[].src on Compose, CTFontManagerRegisterFontsForURL
+//      threaded into ComponentRenderer's font resolution on SwiftUI. Both
+//      decoders already carry the list; only the registration hop is missing.
+//   2. RE-TAG per-platform, exactly as Rule 43 is: add this tag to
+//      inject-wpt-block.mjs's NATIVE_FONT_PARITY_TAGS so web-ref keeps
+//      scoring and only the natives are stamped — a ONE-LINE set membership
+//      change, in a file wave-34 lane F2 does not own, which is why the
+//      whole-test arm survives this wave.
+//   3. only then delete the whole-test exclusion.
+//
+// WHAT WAS NARROWED, and it is a PURE narrowing — MEASURED on the corpus
+// basis Rule 43's notes use (all 33,643 `tools/wpt/css/**/*.html` documents):
+// 1639 → 1630 fires, 9 declined, ZERO widened. Widening the sweep to `.xht`
+// and `.htm` as well (47,065 documents) gives 2027 → 2018 — the SAME nine
+// documents, so the narrowing is basis-independent. The old
+// predicate was `/@font-face\b/i` over the whole document: it fired on the
+// WORD, wherever it appeared. The 9 it should never have fired on create no
+// face at all — they name the at-rule in a `<title>` ("CSS Values and Units
+// Test: lh depending on @font-face"), in a testharness assertion string
+// ("Line-height and lh before @font-face loads"), or in a commented-out JS
+// line (css-fonts/test_font_family_parsing). `@font-face` without a following
+// `{` is not an at-rule (css-syntax-3 §5.4 consumes an at-rule only up to a
+// `{` block or a `;`), so this arm is DECIDABLE, not a heuristic.
+//
+// Everything else keeps the pre-wave-34 fire, deliberately:
+//   * a face built from SCRIPT (16 corpus documents: `sheet.insertRule(
+//     "@font-face …")`, css-cascade/layer-font-face-override's per-case
+//     template literals, the css-fonts/font-display generator) still fires —
+//     the token+brace test sees the string in the JS source and cannot tell
+//     it from markup, which is the conservative answer here;
+//   * `src: local(…)` still fires. It needs no asset fetch, but the ref
+//     depends on the named face being INSTALLED on the capture machine while
+//     the harnesses have no way to reach it — the boundary is real, only its
+//     cause differs.
+//
+// ── A NARROWING THAT WAS BUILT, MEASURED AND REVERTED (recorded so the next
+// wave does not rebuild it). The obvious second arm is "a face the document
+// DECLARES BUT NEVER USES paints nothing, so every surface stays on its own
+// default and there is no boundary". It was implemented in full — @font-face
+// blocks parsed for their `font-family` descriptors, blocks excised from the
+// sheet so a descriptor could not count as its own use, then every
+// `font-family`/`font` value in stylesheet text and in inline `style=`
+// attributes scanned for those names with ident boundaries. Corpus impact:
+// ZERO documents. WPT declares faces in order to use them, so the arm was
+// pure surface with no measurement behind it and it is not in the tree. One
+// finding from the attempt IS load-bearing and is preserved above: any future
+// scan of font-selecting VALUES must admit quotes, because `font: 20px/1
+// "orientation"` (the ~700-document css-writing-modes text-orientation
+// family) puts the family in a `<string>` and a quote-excluding value class
+// silently declined every one of them.
+
+/** Rule 15 predicate: does this document declare an actual `@font-face`
+ *  at-RULE (the token followed by its block), as opposed to merely naming the
+ *  at-rule in prose? Exported so the unit pins can exercise the boundary
+ *  directly and so the wave that re-tags this rule per-platform has one
+ *  named predicate to move. */
+export function declaresFontFaceRule(html) {
+    // css-syntax-3 §5.4: an at-rule's prelude runs to a `{` block or a `;`.
+    // `@font-face` with neither is a mention, not a rule — and a mention
+    // creates no face for any surface to diverge on.
+    return /@font-face\s*\{/i.test(String(html ?? ''));
+}
+
 // ---------------------------------------------------------------------------
 // Rule definitions, in evaluation order. ALL rules run per-test; multiple
 // tags may fire (a test that imports a webfont AND uses `@media print`
@@ -1611,11 +1697,14 @@ export const RULES = [
     },
     {
         tag: 'requires-font-face',
-        description: '@font-face — needs webfont loading, not in IR',
+        description: 'An actual @font-face at-rule. Wave-34 delivers the file to the WEB (the IR now carries a document-level `fontFaces` list — spec 01 §5 — and the harness injects real @font-face rules off /wpt-font/), but NEITHER native runtime can register a face, so the four surfaces still shape different outlines and the exclusion stays whole-test. Closable by native face registration + a per-platform re-tag (NATIVE_FONT_PARITY_TAGS) — see the banner above declaresFontFaceRule.',
         swarm001Source: [
             'css-fonts__downloadable-font-print.json',
         ],
-        test: (html /* , _ctx */) => RX.fontFace.test(html),
+        // wave-34 narrowing: the token must introduce an actual at-RULE.
+        // A <title>/assert-string/comment mention creates no face, so there
+        // is no boundary to exclude for (9 corpus documents; see the banner).
+        test: (html /* , _ctx */) => declaresFontFaceRule(html),
     },
     {
         tag: 'requires-view-transitions',

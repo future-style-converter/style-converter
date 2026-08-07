@@ -2816,7 +2816,14 @@ object ComponentRenderer {
             else Modifier
         Box(modifier = lineBoxModifier, contentAlignment = Alignment.CenterStart) {
             Text(
-                text = marker,
+                // Wave 34 (lane F1) — the ::marker run is exactly where the
+                // non-Latin counter systems paint (css-counter-styles-3 §6
+                // `armenian` / `arabic-indic` / `bengali` / `cambodian`), so
+                // the per-script fallback spans have to reach THIS Text and
+                // not only the item's own content. Identity outside WPT
+                // capture and for any Latin/ASCII marker ("1.", "•").
+                text = com.styleconverter.runtime.typography.font
+                    .ScriptFallbackFonts.annotate(marker, LocalWptCaptureMode.current),
                 style = markerStyle,
                 // Shrink-to-fit ::marker box (css-lists-3 §3.2) — the same
                 // fix B2 puts on the two row call sites.
@@ -3021,7 +3028,12 @@ object ComponentRenderer {
                 // a wash by luck). Stated so a later lane re-tuning the
                 // overlay origin knows this branch already moved once.
                 Text(
-                    text = marker,
+                    // Wave 34 (lane F1) — per-script fallback spans, same
+                    // rule as the other two ::marker call sites. This is the
+                    // `list-style-position: inside` branch, i.e. the one the
+                    // arabic-indic 101/102/103 documents actually take.
+                    text = com.styleconverter.runtime.typography.font
+                        .ScriptFallbackFonts.annotate(marker, LocalWptCaptureMode.current),
                     style = markerStyle,
                     // Wave 30 (lane 3, fix B2) — css-lists-3 §3.2 makes the
                     // ::marker box shrink-to-fit inline-level content, sized
@@ -3129,7 +3141,12 @@ object ComponentRenderer {
             //     LocalContentColor inside Text). Keeping both would have
             //     left two places deciding one colour.
             Text(
-                text = marker,
+                // Wave 34 (lane F1) — per-script fallback spans, same rule as
+                // the other two ::marker call sites. This is the OUTSIDE
+                // marker row (`list-style-position: outside`), the branch the
+                // armenian / bengali / cambodian documents take.
+                text = com.styleconverter.runtime.typography.font
+                    .ScriptFallbackFonts.annotate(marker, LocalWptCaptureMode.current),
                 style = markerStyle,
                 // Wave 30 (lane 3, fix B2) — the one-line ::marker run
                 // (css-lists-3 §3.2 wants the box shrink-to-fit). THIS is
@@ -5038,6 +5055,23 @@ object ComponentRenderer {
             )
         } else annotatedText
 
+        // Wave 34 (lane F1) — PER-SCRIPT FONT FALLBACK. css-fonts-4 §5.2
+        // matches a font stack per CHARACTER; Compose's FontFamily selects
+        // ONE face for the whole Text and hands the rest to an opaque
+        // platform cascade (Typeface.CustomFallbackBuilder, the API that
+        // would pin it, is API 29 against this module's minSdk 24). So a
+        // document painting Armenian / Arabic-Indic / Bengali / Khmer /
+        // Hebrew text resolved the emulator's own Noto subset while the
+        // browser-ref resolved CoreText's — different advances, different
+        // wrap points, an SSIM bounded by typography (the Rule-43 boundary
+        // in tools/titan/wpt-not-applicable.mjs). ScriptFallbackFonts splits
+        // the run by script and installs a BUNDLED face per run, which is
+        // ordinary text layout and needs no blocked API. Identity outside
+        // WPT capture AND for any string with no target-script codepoint —
+        // it returns `spacedText` itself, so the 327 baselines cannot move.
+        val scriptedText = com.styleconverter.runtime.typography.font
+            .ScriptFallbackFonts.applyTo(spacedText, LocalWptCaptureMode.current)
+
         // CSS overflow is VISIBLE by default: text that exceeds its box
         // paints past the border box (CSS 2.1 §11.1.1 — overflow applies to
         // the box, and the initial value clips nothing). Compose Text
@@ -5508,9 +5542,12 @@ object ComponentRenderer {
             androidx.compose.ui.layout.Layout(
                 content = {
                     Text(
-                        // spacedText = annotatedText + word-spacing spans
-                        // (identity when word-spacing is absent/zero).
-                        text = spacedText,
+                        // scriptedText = spacedText (= annotatedText +
+                        // word-spacing spans, identity when word-spacing is
+                        // absent/zero) + the wave-34 per-script fallback
+                        // spans (identity outside WPT capture and for any
+                        // Latin-only string).
+                        text = scriptedText,
                         // paintedTextStyle == styledTextStyle unless the
                         // owned decoration pass is active (built-ins
                         // stripped there — see paintedTextStyle above).
@@ -5554,9 +5591,11 @@ object ComponentRenderer {
         }
 
         Text(
-            // spacedText = annotatedText + word-spacing spans (identity when
-            // word-spacing is absent/zero — baseline byte-identical).
-            text = spacedText,
+            // scriptedText = spacedText (= annotatedText + word-spacing
+            // spans, identity when word-spacing is absent/zero — baseline
+            // byte-identical) + the wave-34 per-script fallback spans
+            // (identity outside WPT capture and for any Latin-only string).
+            text = scriptedText,
             // paintedTextStyle == styledTextStyle unless the owned
             // decoration pass is active (built-ins stripped there).
             style = paintedTextStyle,

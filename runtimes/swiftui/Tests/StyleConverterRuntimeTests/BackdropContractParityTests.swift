@@ -29,7 +29,7 @@ import XCTest
 
 final class BackdropContractParityTests: XCTestCase {
 
-    // MARK: - clause 1: the sample table (border box grown by 3σ, clamped)
+    // MARK: - clause 1: the sample table (the BORDER BOX, clamped)
 
     /// One row of the shared table. Field order matches the Kotlin twin's
     /// `Row` so the two tables can be read side by side.
@@ -46,39 +46,55 @@ final class BackdropContractParityTests: XCTestCase {
     }
 
     private let table: [Row] = [
-        // Invert-only chain: σ=0 → pad 0 → the sample IS the border box, and
-        // the keep rect is the whole crop. backdrop-filter-basic.html geometry.
+        // Invert-only chain: the sample IS the border box, and the keep rect
+        // is the whole crop. backdrop-filter-basic.html geometry.
         Row(name: "interior, no blur", elemLeft: 60, elemTop: 150, elemW: 100, elemH: 100,
             sigma: 0, srcW: 390, srcH: 600,
             expect: BackdropSample(srcLeft: 60, srcTop: 150, width: 100, height: 100,
                                    dstLeft: 0, dstTop: 0),
             keep: [0, 0, 100, 100]),
-        // blur(10px) → pad 30 on every side, all of it available.
+        // blur(10px) over the SAME box → the SAME sample. σ does not widen the
+        // rect (wave-34: filter-effects-2 §2 clips the backdrop to the border
+        // box first); TileMode.MIRROR / mirrorPad supply the rest.
         Row(name: "interior, blur 10", elemLeft: 100, elemTop: 100, elemW: 50, elemH: 50,
             sigma: 10, srcW: 390, srcH: 600,
-            expect: BackdropSample(srcLeft: 70, srcTop: 70, width: 110, height: 110,
-                                   dstLeft: -30, dstTop: -30),
-            keep: [30, 30, 50, 50]),
-        // Box hugging the canvas origin: the padded rect would start at
-        // (-30,-30). Clamped to the plate; edge duplication covers the rest.
-        Row(name: "clamped at the canvas origin", elemLeft: 0, elemTop: 0, elemW: 50, elemH: 50,
-            sigma: 10, srcW: 390, srcH: 600,
-            expect: BackdropSample(srcLeft: 0, srcTop: 0, width: 80, height: 80,
+            expect: BackdropSample(srcLeft: 100, srcTop: 100, width: 50, height: 50,
                                    dstLeft: 0, dstTop: 0),
             keep: [0, 0, 50, 50]),
-        // Same on the far edges.
-        Row(name: "clamped at the far edges", elemLeft: 360, elemTop: 570, elemW: 30, elemH: 30,
+        // Box hugging the canvas origin: nothing to clamp, because the sample
+        // never reaches outside the box in the first place.
+        Row(name: "box at the canvas origin", elemLeft: 0, elemTop: 0, elemW: 50, elemH: 50,
             sigma: 10, srcW: 390, srcH: 600,
-            expect: BackdropSample(srcLeft: 330, srcTop: 540, width: 60, height: 60,
-                                   dstLeft: -30, dstTop: -30),
-            keep: [30, 30, 30, 30]),
+            expect: BackdropSample(srcLeft: 0, srcTop: 0, width: 50, height: 50,
+                                   dstLeft: 0, dstTop: 0),
+            keep: [0, 0, 50, 50]),
+        // Same on the far edges: the box ends exactly at 390x600.
+        Row(name: "box at the far edges", elemLeft: 360, elemTop: 570, elemW: 30, elemH: 30,
+            sigma: 10, srcW: 390, srcH: 600,
+            expect: BackdropSample(srcLeft: 360, srcTop: 570, width: 30, height: 30,
+                                   dstLeft: 0, dstTop: 0),
+            keep: [0, 0, 30, 30]),
         // The element itself hangs off the LEFT edge: the crop is narrower
         // than the border box, and the keep rect says which strip it covers.
+        // This is now the ONLY way the clamp can bite.
         Row(name: "element overhangs the left edge", elemLeft: -10, elemTop: 10,
             elemW: 40, elemH: 20, sigma: 0, srcW: 390, srcH: 600,
             expect: BackdropSample(srcLeft: 0, srcTop: 10, width: 30, height: 20,
                                    dstLeft: 10, dstTop: 0),
             keep: [0, 0, 30, 20]),
+        // …and blurring it does not change that: still the on-canvas strip.
+        Row(name: "element overhangs the left edge, blurred", elemLeft: -10, elemTop: 10,
+            elemW: 40, elemH: 20, sigma: 10, srcW: 390, srcH: 600,
+            expect: BackdropSample(srcLeft: 0, srcTop: 10, width: 30, height: 20,
+                                   dstLeft: 10, dstTop: 0),
+            keep: [0, 0, 30, 20]),
+        // A box running off the BOTTOM-RIGHT: clamped on two sides, dst stays
+        // zero because only the far edges moved.
+        Row(name: "element overhangs bottom-right", elemLeft: 370, elemTop: 580,
+            elemW: 40, elemH: 40, sigma: 10, srcW: 390, srcH: 600,
+            expect: BackdropSample(srcLeft: 370, srcTop: 580, width: 20, height: 20,
+                                   dstLeft: 0, dstTop: 0),
+            keep: [0, 0, 20, 20]),
         // Refusals — nothing to filter / nothing to read / nothing on canvas.
         Row(name: "zero width refuses", elemLeft: 10, elemTop: 10, elemW: 0, elemH: 40,
             sigma: 0, srcW: 390, srcH: 600, expect: nil, keep: nil),
@@ -92,12 +108,38 @@ final class BackdropContractParityTests: XCTestCase {
 
     func testSampleTableMatchesTheCrossNativePins() {
         for row in table {
-            let pad = BackdropSampleGeometry.blurPadPx(row.sigma)
             let got = BackdropSampleGeometry.sample(
                 elemLeft: row.elemLeft, elemTop: row.elemTop,
                 elemWidth: row.elemW, elemHeight: row.elemH,
-                padPx: pad, srcWidth: row.srcW, srcHeight: row.srcH)
+                srcWidth: row.srcW, srcHeight: row.srcH)
             XCTAssertEqual(got, row.expect, "sample[\(row.name)]")
+        }
+    }
+
+    func testTheSampleRectIsSigmaIndependent() {
+        // The wave-34 edge-model claim, stated directly rather than inferred
+        // from the table: for one box, EVERY σ gives the same sample. If a
+        // grow term ever comes back, this is the assertion that catches it.
+        let baseline = BackdropSampleGeometry.sample(
+            elemLeft: 100, elemTop: 100, elemWidth: 50, elemHeight: 50,
+            srcWidth: 390, srcHeight: 600)
+        XCTAssertEqual(baseline, BackdropSample(srcLeft: 100, srcTop: 100,
+                                                width: 50, height: 50,
+                                                dstLeft: 0, dstTop: 0))
+        // The table's own σ column is the input set: 0 (invert-only), 10
+        // (backdrop-filter-basic-blur), and the boundary fixture's largest.
+        for sigma in [0.0, 2.5, 10.0, 96.0] {
+            let plan = sigma <= 0 ? BackdropPlan.plan(from: [])
+                                  : BackdropPlan.plan(from: [.blur(radius: sigma)])
+            // Compute σ the way the applier does, then assert it changed
+            // nothing about the rect the applier asks for.
+            XCTAssertEqual(Double(plan.totalBlurSigma), sigma, accuracy: 1e-3)
+            XCTAssertEqual(
+                BackdropSampleGeometry.sample(
+                    elemLeft: 100, elemTop: 100, elemWidth: 50, elemHeight: 50,
+                    srcWidth: 390, srcHeight: 600),
+                baseline,
+                "sample must not depend on sigma=\(sigma)")
         }
     }
 
@@ -119,19 +161,19 @@ final class BackdropContractParityTests: XCTestCase {
         }
     }
 
-    func testBlurPadTableMatchesTheCrossNativePins() {
-        // 3σ, rounded UP. NOT BackdropBlur.padding's 3σ+1 — that is the
-        // separate replicate band applied inside the Gaussian, and it stays
-        // one pixel wider to absorb CoreImage's σ→kernel rounding.
-        XCTAssertEqual(BackdropSampleGeometry.blurPadPx(0), 0)
-        XCTAssertEqual(BackdropSampleGeometry.blurPadPx(-3), 0)
-        XCTAssertEqual(BackdropSampleGeometry.blurPadPx(10), 30)
-        XCTAssertEqual(BackdropSampleGeometry.blurPadPx(2.5), 8)
-        // Two 3px blurs compose in quadrature to σ = √18 ≈ 4.2426 → pad 13.
+    func testBlurSigmaCompositionMatchesTheCrossNativePins() {
+        // σ still has to be computed identically on both natives — it drives
+        // the Gaussian itself, and here also the width of BackdropBlur's
+        // mirror band. What it no longer drives is the sample rect (see the
+        // σ-independence pin above), which is why this test only asserts the
+        // composition.
+        XCTAssertEqual(BackdropPlan.plan(from: []).totalBlurSigma, 0, accuracy: 1e-4)
+        XCTAssertEqual(BackdropPlan.plan(from: [.blur(radius: 10)]).totalBlurSigma,
+                       10, accuracy: 1e-4)
+        // Two 3px blurs compose in quadrature to σ = √18 ≈ 4.2426.
         let quadrature = BackdropPlan.plan(from: [.blur(radius: 3), .blur(radius: 3)])
             .totalBlurSigma
         XCTAssertEqual(quadrature, 4.2426, accuracy: 1e-3)
-        XCTAssertEqual(BackdropSampleGeometry.blurPadPx(Double(quadrature)), 13)
     }
 
     // MARK: - clause 2: all-or-nothing admission

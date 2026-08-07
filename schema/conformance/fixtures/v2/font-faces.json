@@ -1,0 +1,60 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "ligaturebox-001",
+            "name": "LigatureBox",
+            "text": "office",
+            "meta": {
+                "sourceTag": "p"
+            },
+            "properties": [
+                {
+                    "type": "FontFamily",
+                    "data": [
+                        "test"
+                    ]
+                },
+                {
+                    "type": "FontSize",
+                    "data": {
+                        "type": "length",
+                        "px": 36.0
+                    }
+                }
+            ]
+        },
+        {
+            "id": "boldbox-002",
+            "name": "BoldBox",
+            "text": "waffle",
+            "properties": [
+                {
+                    "type": "FontFamily",
+                    "data": [
+                        "test"
+                    ]
+                },
+                {
+                    "type": "FontWeight",
+                    "data": {
+                        "weight": 700
+                    }
+                }
+            ]
+        }
+    ],
+    "fontFaces": [
+        {
+            "family": "test",
+            "src": "css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff"
+        },
+        {
+            "family": "test",
+            "src": "fonts/Ahem.ttf",
+            "weight": "400 700",
+            "style": "oblique 20deg"
+        }
+    ]
+}

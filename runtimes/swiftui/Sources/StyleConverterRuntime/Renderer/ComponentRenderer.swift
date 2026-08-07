@@ -126,6 +126,13 @@ public struct ComponentRenderer: View {
     // Mirrors the web harness's ?wpt=1 WPT_MODE empty-visible-text path.
     @Environment(\.wptCaptureMode) private var wptCaptureMode
 
+    // Wave 34 (lane T) — the enclosing TABLE box's used `border-spacing`
+    // (CSS 2.1 §17.6.1). Declared on the table, but SPENT by the row it
+    // encloses (between its cells) and by the table itself (its outer
+    // band + between its rows), so it travels one level down as ambient
+    // state. Nil outside any table. See TableSeparatedLayout.swift.
+    @Environment(\.tableBorderSpacing) private var tableBorderSpacing
+
     // Wave 8 (#35) — motion inputs. The document keyframes map arrives
     // from the host (spec 07 §1.2 — @keyframes are document-scoped)…
     @Environment(\.styleKeyframes) private var styleKeyframes
@@ -1370,7 +1377,37 @@ public struct ComponentRenderer: View {
             // single-child family keeps the vertical stack below, where
             // the wave-9 column fill basis and the wave-10 fragmentation
             // pass already own its parity (byte-identical under the gate).
-            if multicolDistributes(style: style) {
+            if let track = tableTrackPlan() {
+                // Wave-34 lane T (T1) — CSS 2.1 §17.6.1 separated-borders
+                // TRACK placement, composed-WPT capture ONLY (the gate
+                // lives in tableTrackPlan): a declared `table` /
+                // `table-row-group` / `table-row` box places its children
+                // on the §17.6.1 tracks instead of stacking them in the
+                // VStack. The row is the one that matters — its cells run
+                // in the INLINE direction, and iOS stacked them
+                // vertically, which is why abspos-container-change-
+                // dynamic-001's lime abspos landed at (16,38) instead of
+                // the reference's (33,18). The dark-stage 327 corpus never
+                // sets wptCaptureMode and declares no table display at
+                // all, so its block containers keep the VStack byte-
+                // identically.
+                TableSeparatedLayout(
+                    axis: track.axis,
+                    spacing: track.spacing,
+                    bandWidth: track.bandWidth,
+                    bandHeight: track.bandHeight
+                ) {
+                    // Same content pass as every other container — the
+                    // sorted in-flow children become the layout's
+                    // subviews IN ORDER (abspos children ride the
+                    // overlay, not this).
+                    contentOrPlaceholder(style: style)
+                }
+                // The table box publishes its used spacing for the rows
+                // below it; a row / row group publishes nothing and lets
+                // its table's value flow through untouched.
+                .environment(\.tableBorderSpacing, track.publish ?? tableBorderSpacing)
+            } else if multicolDistributes(style: style) {
                 MulticolGreedyLayout(
                     // The §3 inputs, straight from the typed config — the
                     // same fields MulticolMath consumes everywhere else.
@@ -2279,6 +2316,100 @@ public struct ComponentRenderer: View {
     /// The segmentation runs over the SAME `FlexboxApplier.sorted`
     /// array contentOrPlaceholder renders, so FloatBlockLayout's
     /// subview indices line up by construction.
+    // MARK: - Table separated tracks (wave-34 lane T)
+
+    /// One box's resolved CSS 2.1 §17.6.1 track plan — the parameters
+    /// `TableSeparatedLayout` needs, plus what (if anything) this box
+    /// publishes to its descendants.
+    struct TableTrackPlan {
+        /// `.vertical` for the table box and its row groups; `.horizontal`
+        /// for a row, whose cells run in the inline direction.
+        let axis: TableSeparatedLayout.Axis
+        /// Spacing inserted between successive children.
+        let spacing: CGFloat
+        /// §17.6.1's outer band, horizontal half (table box only).
+        let bandWidth: CGFloat
+        /// §17.6.1's outer band, vertical half (table box only).
+        let bandHeight: CGFloat
+        /// Non-nil only for a TABLE box: the used spacing its rows read.
+        let publish: TableSeparatedTracks.Spacing?
+    }
+
+    /// The §17.6.1 track plan for THIS box, or nil when it keeps the plain
+    /// VStack — the iOS analogue of the `blockFloatSegments` /
+    /// `blockInlineAtomSegments` gates below.
+    ///
+    /// nil when ANY of:
+    ///  • not in composed-WPT capture — the dark-stage 327 corpus must
+    ///    keep the VStack byte-identically (it declares no table display
+    ///    anywhere, so this is belt-and-braces, not the load-bearing gate);
+    ///  • this box's DECLARED `display` is not a table / row-group / row
+    ///    (`TableBoxTree.roleOf` reads the keyword ONLY — see its doc for
+    ///    why `meta.sourceTag` is deliberately not a second channel here);
+    ///  • it has no in-flow children, so there are no tracks to place.
+    ///
+    /// The plan runs over the SAME `inFlowChildren` array
+    /// `contentOrPlaceholder` renders, so subview indices line up by
+    /// construction — the discipline every custom Layout in this file
+    /// shares.
+    private func tableTrackPlan() -> TableTrackPlan? {
+        // Composed-WPT capture only, mirroring the float / inline-atom gates.
+        guard wptCaptureMode else { return nil }
+        // css-tables-3 §2.1 role from the declared keyword.
+        let role = TableBoxTree.roleOf(resolvedProperties)
+        let arrangement = TableSeparatedTracks.arrangement(role)
+        guard arrangement != .none else { return nil }
+        // No children ⇒ no tracks; the box keeps its ordinary box painting.
+        guard !inFlowChildren.isEmpty else { return nil }
+        if role == .table {
+            // The table box owns the value. A nil answer means
+            // `border-collapse: collapse` — §17.6.2's model has NO
+            // border-spacing ("the border-spacing property is ignored"),
+            // but its rows still stack and its cells still run inline, so
+            // the tracks stay and only their spacing goes to zero.
+            let used = TableSeparatedTracks.usedSpacing(
+                properties: resolvedProperties,
+                // The HTML UA sheet's 2px is keyed on the `<table>`
+                // ELEMENT, and meta.sourceTag is its only sighting — the
+                // same channel AbsposCbUsedHeight's H3 lane reads.
+                sourceTag: component.meta?.sourceTag) ?? .zero
+            return TableTrackPlan(
+                axis: .vertical,
+                // §17.6.1: successive rows are separated by the VERTICAL
+                // border-spacing.
+                spacing: CGFloat(used.verticalPx),
+                // …and the table box carries the outer band on all four
+                // sides, which is what puts its first cell at +2,+2.
+                bandWidth: TableSeparatedTracks.outerBandApplies(role)
+                    ? CGFloat(used.horizontalPx) : 0,
+                bandHeight: TableSeparatedTracks.outerBandApplies(role)
+                    ? CGFloat(used.verticalPx) : 0,
+                publish: used)
+        }
+        // Row group / row: the value was published by the enclosing table.
+        // Nil (no table ancestor) degrades to the CSS initial 0 rather
+        // than inventing a band — a stray `display: table-row` still lays
+        // its cells out inline, which is the part §17.6.1 and §17.6.2 agree on.
+        let inherited = tableBorderSpacing ?? .zero
+        switch arrangement {
+        case .blockStack:
+            // A row group is transparent for row ordering (§2.1): it
+            // stacks rows exactly like the table, but sits INSIDE the
+            // table's band, so it adds none of its own.
+            return TableTrackPlan(axis: .vertical,
+                                  spacing: CGFloat(inherited.verticalPx),
+                                  bandWidth: 0, bandHeight: 0, publish: nil)
+        case .inlineRow:
+            // The fix: cells of a row run in the inline direction,
+            // separated by the HORIZONTAL border-spacing.
+            return TableTrackPlan(axis: .horizontal,
+                                  spacing: CGFloat(inherited.horizontalPx),
+                                  bandWidth: 0, bandHeight: 0, publish: nil)
+        case .none:
+            return nil
+        }
+    }
+
     private func blockFloatSegments() -> [FloatRowPacking.Segment]? {
         // P8 — composed-WPT capture only (the environment flag the
         // capture screen sets; property fixtures / dark stage never do).
@@ -3314,7 +3445,18 @@ public struct ComponentRenderer: View {
             markerItemView(child: child, isCSSFlex: isCSSFlex,
                            childAgg: childAgg, parentAgg: parentAgg)
                 .overlay(alignment: .topLeading) {
-                    Text(markerText)
+                    // Wave 34 (lane F1) — per-script font runs. The ::marker
+                    // is exactly where the non-Latin counter systems paint
+                    // (css-counter-styles-3 §6 `armenian` / `arabic-indic` /
+                    // `bengali` / `cambodian`), so the bundled fallback faces
+                    // have to reach THIS Text and not only the item's own
+                    // content. Identity outside WPT capture and for any
+                    // Latin/ASCII marker ("1.", "•"). This is the
+                    // `list-style-position: inside` branch — the one the
+                    // arabic-indic 101/102/103 documents take.
+                    Text(ScriptFallbackFonts.annotate(markerText,
+                                                      enabled: wptCaptureMode,
+                                                      size: markerFontSizePx))
                         .fixedSize(horizontal: true, vertical: true)
                         .listMarkerSymbol(type: markerType,
                                           markerText: markerText,
@@ -3329,7 +3471,12 @@ public struct ComponentRenderer: View {
             HStack(alignment: ListMarkerRow.rowAlignment(
                         itemExposesTextBaseline: exposesBaseline),
                    spacing: ListMarkerRow.gapPt) {
-                Text(markerText)
+                // Wave 34 (lane F1) — per-script font runs, same rule as the
+                // inside-overlay branch above. This is the OUTSIDE marker row,
+                // the branch the armenian / bengali / cambodian documents take.
+                Text(ScriptFallbackFonts.annotate(markerText,
+                                                  enabled: wptCaptureMode,
+                                                  size: markerFontSizePx))
                     .fixedSize(horizontal: true, vertical: true)
                     .listMarkerSymbol(type: markerType,
                                       markerText: markerText,
@@ -3380,7 +3527,11 @@ public struct ComponentRenderer: View {
         // does not apply). 16 = the browser's inherited body default, the
         // same bottom-out `effectiveLineHeight(fontSizePx:)` defaults to.
         let fontSizePx = style.text.fontSize ?? 16
-        Text(markerText)
+        // Wave 34 (lane F1) — per-script font runs, same rule as the two row
+        // placements above (`display: list-item` on a non-`<li>` box).
+        Text(ScriptFallbackFonts.annotate(markerText,
+                                          enabled: wptCaptureMode,
+                                          size: fontSizePx))
             // Shrink-to-fit ::marker box (css-lists-3 §3.2) — the same
             // rule both row placements above carry.
             .fixedSize(horizontal: true, vertical: true)
@@ -3528,7 +3679,12 @@ private struct PlaceholderLabel: View {
                 measure: GreedyLineBreaker.measurer(
                     font: measurementUIFont,
                     letterSpacingPx: textConfig.letterSpacing,
-                    wordSpacingPx: textConfig.wordSpacingPx))
+                    wordSpacingPx: textConfig.wordSpacingPx,
+                    // Wave 34 (lane F1) — measure with the same bundled
+                    // per-script faces the render installs, or the greedy
+                    // pre-break would fit non-Latin text against CoreText's
+                    // cascade advances and break where neither surface wraps.
+                    scriptFallback: wptCaptureMode))
             // Hard newlines force TextKit to OUR break positions — its
             // push-out strategy only relocates SOFT breaks, and every
             // pre-broken line fits `avail` by construction.
@@ -4025,13 +4181,35 @@ private struct PlaceholderLabel: View {
     /// byte-stable. The attribute construction lives in
     /// `WordSpacingApplier.kernedRun` (pure, XCTest-pinned).
     private func wordSpacedText(_ s: String) -> Text {
+        // Wave 34 (lane F1) — PER-SCRIPT FONT FALLBACK. css-fonts-4 §5.2
+        // matches a font stack per CHARACTER; `.custom("Inter", size:)`
+        // picks ONE face for the whole Text and leaves everything Inter
+        // cannot draw to CoreText's opaque default cascade (there is no
+        // cascade-list hook on `Font`). That made every Armenian /
+        // Arabic-Indic / Bengali / Khmer / Hebrew run resolve Apple's system
+        // faces while the browser-ref resolved Chromium-on-macOS's own pick
+        // — the Rule-43 typography boundary. ScriptFallbackFonts writes a
+        // `.font` attribute per script run over the bundled Noto faces,
+        // which is ordinary AttributedString layout. Gated on
+        // `wptCaptureMode` (false on every 327-baseline path) AND on the
+        // string actually carrying a target-script scalar, so both the
+        // no-fallback and the not-in-WPT cases keep the exact pre-lane
+        // `Text(String)` / `Text(attr)` they had.
+        let scriptFallback = wptCaptureMode && ScriptRunSegmenter.needsFallback(s)
+        let size = textConfig.fontSize ?? 16
         // nil = nothing for the kern lane to do (letter-spacing alone
-        // stays on the legacy box-level tracking) → plain-string Text.
+        // stays on the legacy box-level tracking) → plain-string Text,
+        // unless the script lane has spans of its own to install.
         guard let attr = WordSpacingApplier.kernedRun(
             text: s,
             letterSpacingPx: textConfig.letterSpacing,
-            wordSpacingPx: textConfig.wordSpacingPx) else { return Text(s) }
-        return Text(attr)
+            wordSpacingPx: textConfig.wordSpacingPx) else {
+            guard scriptFallback else { return Text(s) }
+            return Text(ScriptFallbackFonts.annotate(s, enabled: true, size: size))
+        }
+        return Text(ScriptFallbackFonts.apply(to: attr,
+                                              enabled: scriptFallback,
+                                              size: size))
     }
 
     /// Wave 21 (lane TEXTDECOR, B-RC8) — the pure op emitter's style
@@ -4180,7 +4358,12 @@ private struct PlaceholderLabel: View {
                 measure: GreedyLineBreaker.measurer(
                     font: measurementUIFont,
                     letterSpacingPx: textConfig.letterSpacing,
-                    wordSpacingPx: textConfig.wordSpacingPx))
+                    wordSpacingPx: textConfig.wordSpacingPx,
+                    // Wave 34 (lane F1) — measure with the same bundled
+                    // per-script faces the render installs, or the greedy
+                    // pre-break would fit non-Latin text against CoreText's
+                    // cascade advances and break where neither surface wraps.
+                    scriptFallback: wptCaptureMode))
             // Line ADVANCE = rendered content height + the CSS leading
             // split's between-lines extra (the label's `.lineSpacing`).
             //

@@ -43,19 +43,22 @@ enum IRWireV2Reader {
 
     // MARK: - Document envelope
 
-    /// Decode the `{irVersion, minReaderVersion, components, keyframes?}`
-    /// envelope from an already-opened string-keyed container. Returns the
-    /// FLAT component list in wire order (the sibling-order contract) plus
-    /// the optional document-level keyframes map (spec 07 §1.2 — nil when
-    /// the wire omitted the key, which is the omit-when-empty contract).
+    /// Decode the `{irVersion, minReaderVersion, components, keyframes?,
+    /// fontFaces?}` envelope from an already-opened string-keyed container.
+    /// Returns the FLAT component list in wire order (the sibling-order
+    /// contract) plus the optional document-level keyframes map (spec 07
+    /// §1.2) and @font-face list (spec 01 §5) — each nil when the wire
+    /// omitted the key, which is the omit-when-empty contract.
     static func decodeEnvelope(from c: KeyedDecodingContainer<IRAnyKey>,
                                codingPath: [CodingKey]) throws
-        -> (components: [IRComponent], keyframes: [String: [IRKeyframeStop]]?) {
+        -> (components: [IRComponent], keyframes: [String: [IRKeyframeStop]]?,
+            fontFaces: [IRFontFace]?) {
         // Rule 2 (spec 05): unknown document-level keys are an error.
         // `keyframes` is the sanctioned wave-8 additive minor-revision key
-        // (spec 07 §1.2; schema properties.keyframes).
+        // (spec 07 §1.2; schema properties.keyframes); `fontFaces` is the
+        // wave-34 one (spec 01 §5; schema properties.fontFaces).
         let allowed: Set<String> = ["irVersion", "minReaderVersion",
-                                    "components", "keyframes"]
+                                    "components", "keyframes", "fontFaces"]
         for k in c.allKeys where !allowed.contains(k.stringValue) {
             throw violation("unknown envelope key '\(k.stringValue)' in v2 document (spec 05: unknown envelope keys MUST error)", path: codingPath)
         }
@@ -109,7 +112,67 @@ enum IRWireV2Reader {
             }
             keyframes = sets
         }
-        return (flat, keyframes)
+        // Optional document-level @font-face list (spec 01 §5). Strict shape
+        // mirrors schema $defs/fontFace: a non-empty array of objects
+        // carrying only the four known descriptors, `family` and `src`
+        // REQUIRED and non-empty. Strict even though the SwiftUI renderer
+        // does not yet register faces (no CTFontManagerRegisterFontsForURL
+        // hop exists) — an envelope structure this reader claims to speak
+        // must be well-formed or fail loudly, or a writer bug would hide
+        // until the wave that finally wires registration.
+        var fontFaces: [IRFontFace]? = nil
+        if c.contains(IRAnyKey("fontFaces")) {
+            var arr = try c.nestedUnkeyedContainer(forKey: IRAnyKey("fontFaces"))
+            var faces: [IRFontFace] = []
+            while !arr.isAtEnd {
+                faces.append(try arr.decode(FontFaceWire.self).face)
+            }
+            // Schema: minItems 1 — omit-when-empty is the additive contract,
+            // so an empty array on the wire is a writer bug.
+            guard !faces.isEmpty else {
+                throw violation("fontFaces present but empty (schema: minItems 1)", path: codingPath)
+            }
+            fontFaces = faces
+        }
+        return (flat, keyframes, fontFaces)
+    }
+
+    // MARK: - @font-face wire shape (spec 01 §5)
+
+    /// Strict `@font-face` entry decoder (schema $defs/fontFace):
+    /// `{family, src, weight?, style?}` only. `weight`/`style` stay STRINGS
+    /// rather than typed values because css-fonts-4 §4.4 permits a weight
+    /// RANGE ("400 700") and §4.5 an oblique angle — neither has a typed
+    /// equivalent, and collapsing either would destroy the face-matching
+    /// input the future registration hop needs.
+    private struct FontFaceWire: Decodable {
+        let face: IRFontFace
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: IRAnyKey.self)
+            let allowed: Set<String> = ["family", "src", "weight", "style"]
+            for k in c.allKeys where !allowed.contains(k.stringValue) {
+                throw violation("unknown fontFaces entry key '\(k.stringValue)' (schema: additionalProperties false)",
+                                path: decoder.codingPath)
+            }
+            let family = try c.decode(String.self, forKey: IRAnyKey("family"))
+            guard !family.isEmpty else {
+                throw violation("fontFaces entry 'family' must be non-empty", path: decoder.codingPath)
+            }
+            let src = try c.decode(String.self, forKey: IRAnyKey("src"))
+            guard !src.isEmpty else {
+                throw violation("fontFaces entry 'src' must be non-empty", path: decoder.codingPath)
+            }
+            // Absent stays nil, never defaulted to the css-fonts-4 initial
+            // literal: "omitted" and "explicitly normal" must remain
+            // distinguishable for the consumer that eventually matches faces.
+            face = IRFontFace(
+                family: family,
+                src: src,
+                weight: try c.decodeIfPresent(String.self, forKey: IRAnyKey("weight")),
+                style: try c.decodeIfPresent(String.self, forKey: IRAnyKey("style"))
+            )
+        }
     }
 
     // MARK: - Keyframe stop wire shape (spec 07 §1.2)

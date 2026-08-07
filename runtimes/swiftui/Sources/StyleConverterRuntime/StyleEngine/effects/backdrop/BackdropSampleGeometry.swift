@@ -5,31 +5,52 @@
 //  "Which backdrop pixels may this element read?" — the byte-parallel twin of
 //  runtimes/compose/.../effects/backdrop/BackdropSampleGeometry.kt.
 //
-//  WHY THIS FILE EXISTS (wave-26 skeptic fix #1). The lane originally cropped
-//  the element's border box out of the plate FIRST and then blurred that crop
-//  with its OWN edge pixels replicated. That feeds the Gaussian pixels that do
-//  not exist in the document: content just outside the border box — the very
-//  content a browser's backdrop blur pulls in — was replaced by a smear of the
-//  box's own edge. Measured gap against Compose on a black|green plate split
-//  flush against a blur(8px) box's left edge: (0,204,51) one pixel inside the
-//  edge, where the browser and the Compose twin give (0,117,29).
+//  THE SAMPLE RECT IS THE BORDER BOX — IT NEVER GROWS WITH σ (wave-34 lane B).
 //
-//  The spec model (filter-effects-2 §2), which BOTH natives now implement:
-//    • the filter reads the Backdrop Root Image, so the sample rect is the
-//      border box EXPANDED by the blur's 3σ support;
-//    • that rect is CLAMPED to the image — the canvas has no pixels outside
-//      itself — and only there does edge duplication kick in (Compose:
-//      Shader.TileMode.CLAMP; here: BackdropBlur's replicate pad, now applied
-//      at the PADDED crop's boundary, which coincides with the canvas edge
-//      exactly where the clamp above bit);
-//    • the filtered result is cropped BACK to the border box afterwards.
+//  filter-effects-2 §2 (Backdrop Filter Algorithm) clips the Backdrop Root
+//  Image to the element's border box BEFORE the filter runs, and only then
+//  asks the filter for its edge behaviour. Content outside the border box is
+//  therefore NEVER an input: a blurred backdrop must not import the pixels
+//  next to the box, only extensions of the box's own edge.
+//
+//  Wave 26 shipped the opposite reading (grow the sample by the blur's 3σ
+//  support, then cut back). Wave 34 refuted it with the corpus's own boundary
+//  case — css/filter-effects/backdrop-filter-boundary.html, whose six `.fg`
+//  boxes sit 5px inside a 160x90 `.bg` on a lime page and whose WPT assertion
+//  is literally "No lime green should be brought in to the blurred regions".
+//  Measured on the frozen wave33-final captures (mean absolute error per tile
+//  against the Chrome 151 ref PNG, blur 3/6/12/24/48/96, `_diag34/laneB`):
+//
+//    grow-by-3σ model     1.6 / 3.6 / 80.5 / 19.7 / 25.6 / 99.3   ← wave 26
+//    border box + clamp   1.6 / 2.5 / 77.5 / 10.6 / 22.3 / 89.8
+//    border box + MIRROR  1.5 / 1.8 / 72.6 /  0.8 /  0.3 / 76.7   ← this file
+//    iOS capture          1.6 / 3.5 / 79.9 / 19.5 / 25.3 / 99.2
+//
+//  The iOS row reproduces the grow-by-3σ row term for term, which is what
+//  identifies the model as the cause; the web capture (Chrome's own
+//  `backdrop-filter`) is byte-identical to the ref on four of the six tiles,
+//  so the ref IS the browser's behaviour and not an artefact of the WPT
+//  reference file's simulation. Tiles 3 and 6 carry a residual common to all
+//  three platforms (the ref frame clips content at x=374, our composed canvas
+//  at 390) that no filter model can move.
+//
+//  The extension model is MIRROR, not clamp: the numbers above separate the
+//  two, and the WPT reference file (`support/simulate-backdrop-blur.js`)
+//  builds its expectation from `scale(-1)` copies of the element's own
+//  border-box crop — Skia's `SkTileMode::kMirror`, which is what Chrome hands
+//  the backdrop image. Compose gets it from `Shader.TileMode.MIRROR`; here it
+//  is BackdropBlur's `mirrorPad`.
+//
+//  What remains here: the border box CLAMPED to the plate — the canvas has no
+//  pixels outside itself, so an element hanging off it samples only the strip
+//  that exists and `keepRect` says which part of the box that covers.
 //
 //  Everything here is integer pixel arithmetic with no CoreGraphics types, so
 //  the numbers can be diffed against the Kotlin table function-for-function
 //  (BackdropMathTests' cross-native pin table).
 //
 
-// Foundation for ceil/max/min only — deliberately no CoreGraphics import, so
+// Foundation for max/min only — deliberately no CoreGraphics import, so
 // nothing in this file can drift into point space.
 import Foundation
 
@@ -38,10 +59,10 @@ import Foundation
 /// - `srcLeft`/`srcTop`/`width`/`height`: the rectangle to read from the plate
 ///   (plate pixel space, ALWAYS inside the plate's bounds).
 /// - `dstLeft`/`dstTop`: where that crop's origin sits relative to the
-///   element's BORDER BOX origin. Zero for an unpadded, fully-inside sample;
-///   negative once the blur padding reaches left/up, which is the whole point —
-///   pixels from OUTSIDE the box are in the buffer the Gaussian runs over, and
-///   the border-box crop that follows the filter cuts them back off.
+///   element's BORDER BOX origin. Zero whenever the border box is fully on the
+///   canvas — which is the normal case, since the sample rect IS the border
+///   box — and positive only when the box overhangs the canvas's top/left edge
+///   and the clamp had to start the crop inside it.
 struct BackdropSample: Equatable {
     let srcLeft: Int
     let srcTop: Int
@@ -53,24 +74,14 @@ struct BackdropSample: Equatable {
 
 enum BackdropSampleGeometry {
 
-    /// How far outside the border box a blur of standard deviation `sigma`
-    /// can still pull visible energy from: 3σ, the conventional Gaussian
-    /// truncation (>99.7% of the kernel mass), rounded UP so the sample is
-    /// never a pixel short of what the kernel reads. 0 for a chain with no
-    /// blur, which collapses the sample to the border box exactly.
-    ///
-    /// Identical to `BackdropSampleGeometry.blurPadPx` on Compose — NOT to
-    /// `BackdropBlur.padding(forSigmaPixels:)`, which is the separate
-    /// replicate band applied INSIDE the blur and carries one extra pixel of
-    /// slack for CoreImage's σ→kernel rounding.
-    static func blurPadPx(_ sigmaPixels: Double) -> Int {
-        sigmaPixels <= 0 ? 0 : Int(ceil(3.0 * sigmaPixels))
-    }
-
     /// Compute the crop for an element whose border box sits at
     /// (`elemLeft`, `elemTop`) with size `elemWidth`×`elemHeight` in the
-    /// plate's pixel space, padded by `padPx` on every side and clamped into a
-    /// `srcWidth`×`srcHeight` plate.
+    /// plate's pixel space, clamped into a `srcWidth`×`srcHeight` plate.
+    ///
+    /// There is deliberately NO pad parameter: filter-effects-2 §2 clips the
+    /// backdrop to the border box before filtering, so the sample rect is the
+    /// border box for every chain — see the file header for the measurement
+    /// that refuted the wave-26 grow-by-3σ reading.
     ///
     /// Returns nil when there is nothing to sample — a degenerate element
     /// (zero width/height: `backdrop-filter-zero-size.html`), a degenerate
@@ -82,7 +93,6 @@ enum BackdropSampleGeometry {
         elemTop: Int,
         elemWidth: Int,
         elemHeight: Int,
-        padPx: Int,
         srcWidth: Int,
         srcHeight: Int
     ) -> BackdropSample? {
@@ -90,14 +100,14 @@ enum BackdropSampleGeometry {
         guard elemWidth > 0, elemHeight > 0 else { return nil }
         guard srcWidth > 0, srcHeight > 0 else { return nil }
 
-        // Requested (padded) rect in plate space, then clamped into the plate.
-        // The clamp is what makes an element at the canvas edge legal: we read
-        // the pixels that exist, and the blur's replicate band extends them —
-        // the spec's edge-duplication rule, and Compose's TileMode.CLAMP.
-        let left = max(0, elemLeft - padPx)
-        let top = max(0, elemTop - padPx)
-        let right = min(srcWidth, elemLeft + elemWidth + padPx)
-        let bottom = min(srcHeight, elemTop + elemHeight + padPx)
+        // The border box in plate space, clamped into the plate. The clamp is
+        // what makes an element at the canvas edge legal: we read the pixels
+        // that exist, and the blur's mirror band extends them — the spec's
+        // edge behaviour, and Compose's TileMode.MIRROR.
+        let left = max(0, elemLeft)
+        let top = max(0, elemTop)
+        let right = min(srcWidth, elemLeft + elemWidth)
+        let bottom = min(srcHeight, elemTop + elemHeight)
 
         // Fully off-canvas (or clamped to nothing) → nothing to sample.
         guard right > left, bottom > top else { return nil }
@@ -119,9 +129,9 @@ enum BackdropSampleGeometry {
     /// back to once the chain has run.
     ///
     /// Split out from `sample` because it is a second, independent clamp: the
-    /// padded rect can be clipped by the plate on the outside (handled above)
-    /// AND the border box itself can hang off the canvas, in which case only
-    /// part of it exists in the crop. Returns nil when the two do not overlap
+    /// border box can hang off the canvas, in which case only part of it
+    /// exists in the crop and the uncovered strip must stay unpainted rather
+    /// than be smeared by a stretched draw. Returns nil when the two do not overlap
     /// at all, which `sample`'s own guards already exclude — the check is kept
     /// so the function is total rather than relying on a caller invariant.
     static func keepRect(

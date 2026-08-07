@@ -179,9 +179,12 @@ final class BackdropMathTests: XCTestCase {
         XCTAssertEqual((try rgb(blurred, edge, h / 2)).0, 128, accuracy: 12)
     }
 
-    /// EDGE REPLICATION: a uniform crop must survive a blur unchanged. With
+    /// EDGE EXTENSION: a uniform crop must survive a blur unchanged. With
     /// CoreImage's default transparent-black surround the border pixels
-    /// would darken — the halo the browser never paints.
+    /// would darken — the halo the browser never paints. (Uniform input is
+    /// the one case where mirror and replicate agree, so this test survives
+    /// the wave-34 model change unchanged; the two are separated by
+    /// testTheBlurCannotReachOutsideTheBorderBox and the corpus.)
     func testBlurKeepsUniformCropUniformAtTheBorder() throws {
         let src = try makeImage(24, 24) { _, _ in (200, 60, 30) }
         let out = try XCTUnwrap(BackdropBlur.blur(src, sigmaPixels: 5))
@@ -206,8 +209,8 @@ final class BackdropMathTests: XCTestCase {
 
     // MARK: - 4. crop (points → plate pixels)
 
-    /// A fully-inside box with NO padding (blur-free chain) crops to its own
-    /// rect, with a zero local origin and a keep rect covering the whole crop.
+    /// A fully-inside box crops to its own rect, with a zero local origin and
+    /// a keep rect covering the whole crop.
     func testCropInsidePlate() throws {
         let plate = BackdropPlate(image: try makeImage(100, 50) { _, _ in (1, 2, 3) },
                                   scale: 1)
@@ -219,33 +222,34 @@ final class BackdropMathTests: XCTestCase {
         XCTAssertEqual(crop.localRect, CGRect(x: 0, y: 0, width: 30, height: 20))
     }
 
-    /// PADDED crop (wave-26 skeptic fix #1): a blur chain grows the sample by
-    /// 3σ on every side so the Gaussian sees the real document pixels around
-    /// the box, and `keepRect` says where the border box sits inside it.
-    func testCropGrowsByThePadAndReportsTheBorderBoxInside() throws {
+    /// BORDER-BOX crop (wave-34 lane B): the sample is the element's own box,
+    /// with no σ term, and `keepRect` is therefore the whole crop.
+    ///
+    /// filter-effects-2 §2 clips the backdrop to the border box BEFORE the
+    /// filter runs; the mirror band inside `BackdropBlur` supplies whatever
+    /// the Gaussian wants beyond it. See BackdropSampleGeometry's header for
+    /// the per-tile measurement against the Chrome ref that refuted the
+    /// wave-26 grow-by-3σ crop.
+    func testCropIsTheBorderBoxRegardlessOfBlur() throws {
         let plate = BackdropPlate(image: try makeImage(200, 200) { _, _ in (1, 2, 3) },
                                   scale: 1)
         let crop = try XCTUnwrap(BackdropImageOps.crop(
-            plate, elementFrame: CGRect(x: 100, y: 100, width: 50, height: 50),
-            padPixels: 30))
-        XCTAssertEqual(crop.image.width, 110, "50 + 2×30")
-        XCTAssertEqual(crop.image.height, 110)
-        XCTAssertEqual(crop.keepRect, CGRect(x: 30, y: 30, width: 50, height: 50))
+            plate, elementFrame: CGRect(x: 100, y: 100, width: 50, height: 50)))
+        XCTAssertEqual(crop.image.width, 50, "the border box, not 50 + 2×3σ")
+        XCTAssertEqual(crop.image.height, 50)
+        XCTAssertEqual(crop.keepRect, CGRect(x: 0, y: 0, width: 50, height: 50))
         // The kept pixels still land exactly on the element's own box.
         XCTAssertEqual(crop.localRect, CGRect(x: 0, y: 0, width: 50, height: 50))
     }
 
-    /// At the plate's own boundary the pad is CLAMPED — there are no pixels
-    /// outside the canvas — and the blur's replicate band takes over there,
-    /// which is exactly filter-effects-2 §2's edge duplication (and Compose's
-    /// Shader.TileMode.CLAMP).
-    func testPaddedCropClampsAtThePlateBoundary() throws {
+    /// A box at the plate's own boundary needs no clamp any more — the sample
+    /// never reaches outside the box, so the origin case is the ordinary one.
+    func testCropAtThePlateBoundaryNeedsNoClamp() throws {
         let plate = BackdropPlate(image: try makeImage(200, 200) { _, _ in (1, 2, 3) },
                                   scale: 1)
         let crop = try XCTUnwrap(BackdropImageOps.crop(
-            plate, elementFrame: CGRect(x: 0, y: 0, width: 50, height: 50),
-            padPixels: 30))
-        XCTAssertEqual(crop.image.width, 80, "pad available on the inside edge only")
+            plate, elementFrame: CGRect(x: 0, y: 0, width: 50, height: 50)))
+        XCTAssertEqual(crop.image.width, 50)
         XCTAssertEqual(crop.keepRect, CGRect(x: 0, y: 0, width: 50, height: 50))
         XCTAssertEqual(crop.localRect, CGRect(x: 0, y: 0, width: 50, height: 50))
     }
@@ -280,44 +284,85 @@ final class BackdropMathTests: XCTestCase {
 
     // MARK: - 4b. filter-then-cut-back, over a plate with real structure
 
-    /// THE FIX, measured. A plate split black|green at x = 100; a 40×40 box
-    /// whose LEFT edge sits flush on the split, blurred by σ = 8.
+    /// THE WAVE-34 FIX, measured. A plate split black|green at x = 100; a
+    /// 40×40 box whose LEFT edge sits flush on the split, blurred by σ = 8.
     ///
-    /// Spec model (this code, and Compose): the sample reaches 3σ = 24px to
-    /// the left, so the Gaussian mixes real BLACK into the box's leftmost
-    /// column and the green there lands near half strength.
+    /// Wave 26 grew the sample 3σ to the left so the Gaussian mixed the BLACK
+    /// outside the box in, pulling the box's leftmost column down to ≈(0,117,29).
+    /// filter-effects-2 §2 says the opposite: the backdrop is CLIPPED TO THE
+    /// BORDER BOX before the filter runs, so black on the other side of the
+    /// box's edge is not an input at all and the column stays green.
     ///
-    /// Old crop-then-blur model: the crop started AT the split, its own edge
-    /// column was replicated outwards, and the leftmost column stayed pure
-    /// green — measured (0,204,51) where the spec gives ≈(0,117,29).
-    func testPaddedSampleLetsOutsideContentReachTheBlur() throws {
+    /// The corpus is the arbiter, not this synthetic plate:
+    /// css/filter-effects/backdrop-filter-boundary.html asserts in so many
+    /// words that "No lime green should be brought in to the blurred regions",
+    /// and under the grown sample both natives imported exactly that lime —
+    /// error growing with σ, 1.6 → 99.2 mean absolute error per tile against
+    /// the Chrome 151 ref, while Chrome's own capture tracked the ref to 0.0.
+    func testTheBlurCannotReachOutsideTheBorderBox() throws {
         let plate = BackdropPlate(
             image: try makeImage(200, 80) { x, _ in x < 100 ? (0, 0, 0) : (0, 204, 51) },
             scale: 1)
         let box = CGRect(x: 100, y: 20, width: 40, height: 40)
         let sigma: CGFloat = 8
-        let pad = BackdropSampleGeometry.blurPadPx(Double(sigma))
-        XCTAssertEqual(pad, 24, "3σ, rounded up")
-        let crop = try XCTUnwrap(BackdropImageOps.crop(plate, elementFrame: box,
-                                                       padPixels: pad))
+        let crop = try XCTUnwrap(BackdropImageOps.crop(plate, elementFrame: box))
+        XCTAssertEqual(crop.image.width, 40, "the sample is the border box")
         let out = try XCTUnwrap(BackdropImageOps.filtered(
             crop, ops: [.blur(sigma: sigma)], scale: 1))
-        // Cut back to the border box exactly.
         XCTAssertEqual(out.width, 40)
         XCTAssertEqual(out.height, 40)
-        // Leftmost column: the step edge's 50% crossing, NOT untouched green.
+        // Leftmost column: untouched green. A value near 102 means the
+        // wave-26 grown sample is back and the black outside is bleeding in.
         let edge = try rgb(out, 0, 20)
-        XCTAssertEqual(edge.1, 102, accuracy: 20,
-                       "green at the box's left edge should be ~half — got \(edge.1); "
-                       + "a value near 204 means the crop-then-blur model is back")
-        // Deep inside the box (≫3σ from the split) the green is intact.
+        XCTAssertEqual(edge.1, 204, accuracy: 6,
+                       "green at the box's left edge must survive — got \(edge.1); "
+                       + "a value near 102 means the grown-sample model is back")
+        // Deep inside the box the green is intact too (uniform crop in, out).
         let inside = try rgb(out, 39, 20)
         XCTAssertEqual(inside.1, 204, accuracy: 4)
     }
 
-    /// The cut-back is exact for a blur-free chain too: pad 0 → the crop IS
-    /// the border box, and `filtered` returns it unchanged in size.
-    func testFilteredCutsBackToTheBorderBoxWithoutPadding() throws {
+    /// The mirror band is what makes the box's own edge survive the Gaussian:
+    /// with CoreImage's default transparent-black surround, a uniform crop
+    /// would fade at its border. Same plate, box fully inside the green half.
+    func testTheMirrorBandKeepsAUniformCropUniform() throws {
+        let plate = BackdropPlate(
+            image: try makeImage(200, 80) { x, _ in x < 100 ? (0, 0, 0) : (0, 204, 51) },
+            scale: 1)
+        let crop = try XCTUnwrap(BackdropImageOps.crop(
+            plate, elementFrame: CGRect(x: 140, y: 20, width: 40, height: 40)))
+        let out = try XCTUnwrap(BackdropImageOps.filtered(
+            crop, ops: [.blur(sigma: 8)], scale: 1))
+        for (x, y) in [(0, 0), (39, 0), (0, 39), (39, 39), (20, 20)] {
+            let px = try rgb(out, x, y)
+            XCTAssertEqual(px.1, 204, accuracy: 4, "green at (\(x),\(y))")
+        }
+    }
+
+    /// The mirror grid's two pure rules, pinned without a raster: how many
+    /// reflected copies a band needs, and which of them are flipped.
+    func testMirrorPadGridRules() {
+        // A band narrower than the tile still needs one reflection each side.
+        XCTAssertEqual(BackdropBlur.mirrorCopies(pad: 10, extent: 40), 1)
+        XCTAssertEqual(BackdropBlur.mirrorCopies(pad: 40, extent: 40), 1)
+        // Wider than the tile → integer-ceiling many copies (the WPT
+        // reference file's copiesX/copiesY).
+        XCTAssertEqual(BackdropBlur.mirrorCopies(pad: 41, extent: 40), 2)
+        XCTAssertEqual(BackdropBlur.mirrorCopies(pad: 289, extent: 150), 2)
+        // Degenerate inputs ask for nothing.
+        XCTAssertEqual(BackdropBlur.mirrorCopies(pad: 0, extent: 40), 0)
+        XCTAssertEqual(BackdropBlur.mirrorCopies(pad: 10, extent: 0), 0)
+        // Parity: the centre tile is upright, every odd step out is flipped.
+        XCTAssertFalse(BackdropBlur.mirrorFlips(0))
+        XCTAssertTrue(BackdropBlur.mirrorFlips(1))
+        XCTAssertTrue(BackdropBlur.mirrorFlips(-1))
+        XCTAssertFalse(BackdropBlur.mirrorFlips(2))
+        XCTAssertFalse(BackdropBlur.mirrorFlips(-2))
+    }
+
+    /// `filtered` is size-preserving for an on-canvas box: the crop IS the
+    /// border box, so the cut-back is the identity.
+    func testFilteredKeepsTheBorderBoxSize() throws {
         let plate = BackdropPlate(image: try makeImage(60, 60) { _, _ in (30, 100, 200) },
                                   scale: 1)
         let crop = try XCTUnwrap(BackdropImageOps.crop(

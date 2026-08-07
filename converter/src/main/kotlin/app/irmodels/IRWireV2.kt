@@ -34,6 +34,8 @@ import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -95,6 +97,31 @@ object IRWireV2 {
                     }
                 })
             }
+            // fontFaces: document-level @font-face declarations (wave 34 —
+            // schema/spec/01-envelope.md §5). ADDITIVE minor-revision key
+            // (spec 05), same omit-when-empty discipline as `keyframes`, so
+            // every pre-wave-34 document stays byte-identical. Entry order is
+            // DOCUMENT order and is load-bearing (css-fonts-4 §4.1: a later
+            // face with the same family/weight/style wins), so the list is
+            // emitted in arrival order and never sorted. Descriptors ride
+            // VERBATIM — see IRFontFace's note on why weight/style are not
+            // normalized like property values are.
+            if (!doc.fontFaces.isNullOrEmpty()) {
+                put("fontFaces", buildJsonArray {
+                    doc.fontFaces.forEach { face ->
+                        add(buildJsonObject {
+                            put("family", face.family)
+                            put("src", face.src)
+                            // Omit-when-null, not emit-the-initial: the schema
+                            // defines absence AS the css-fonts-4 initial, and
+                            // writing "normal" would make two byte-different
+                            // documents mean the same thing.
+                            face.weight?.let { put("weight", it) }
+                            face.style?.let { put("style", it) }
+                        })
+                    }
+                })
+            }
         }
     }
 
@@ -133,7 +160,23 @@ object IRWireV2 {
                 )
             }
         }
-        return IRDocument(components, keyframes = keyframes)
+        // fontFaces: fully round-trips (unlike keyframe stop properties) —
+        // every field is a plain string, so there is no typed payload to
+        // stub. Strict on the two REQUIRED descriptors: a face without a
+        // family is unreferenceable and one without a src names no file, so
+        // either omission is a writer bug, not a tolerated wire state.
+        val fontFaces = obj["fontFaces"]?.jsonArray?.map { el ->
+            val f = el.jsonObject
+            IRFontFace(
+                family = f["family"]?.jsonPrimitive?.content
+                    ?: throw IllegalArgumentException("fontFaces entry without 'family'"),
+                src = f["src"]?.jsonPrimitive?.content
+                    ?: throw IllegalArgumentException("fontFaces entry without 'src'"),
+                weight = f["weight"]?.jsonPrimitive?.content,
+                style = f["style"]?.jsonPrimitive?.content
+            )
+        }
+        return IRDocument(components, keyframes = keyframes, fontFaces = fontFaces)
     }
 }
 

@@ -35,6 +35,48 @@ export interface IRDocument {
    * a dangling reference is a defined no-op (§1.3), never an error.
    */
   keyframes?: IRKeyframes;
+  /**
+   * Document-level `@font-face` declarations (schema/spec/01-envelope.md §5)
+   * — the wire twin of CSS `@font-face` at-rules, which css-fonts-4 §4.1
+   * scopes to the DOCUMENT's font database rather than to any element.
+   * ADDITIVE v2 minor-revision key, omit-when-empty: absent on every
+   * pre-wave-34 document (and structurally impossible on legacy v1 wire),
+   * so the committed-baseline path never sees it.
+   *
+   * DROPPABLE: a reader that ignores it renders referencing elements in its
+   * fallback face — degraded fidelity, never wrong structure. That is why
+   * entries carry a resource PATH (resolved against the consumer's own
+   * asset root) instead of a payload. The web HARNESS consumes this today
+   * (apps/web-harness/src/sdui/useFontFaces.ts injects real @font-face
+   * rules); the ENGINE deliberately does not — a face is a document-level
+   * resource, not a per-property style, so nothing in src/engine/ reads it.
+   */
+  fontFaces?: IRFontFace[];
+}
+
+/**
+ * One `@font-face` declaration (spec 01 §5).
+ *
+ * `weight`/`style` are the css-fonts-4 §4.4/§4.5 DESCRIPTORS as authored,
+ * not typed values: §4.4 permits a RANGE (`'400 700'`) and §4.5 an oblique
+ * angle (`'oblique 20deg'`), neither of which the IR's numeric/keyword
+ * forms can express. Absent means the spec initial (`normal`) — never a
+ * substituted literal, so "omitted" and "explicitly normal" stay
+ * distinguishable.
+ */
+export interface IRFontFace {
+  /** The `font-family` descriptor (§4.2), already UNQUOTED by the writer. */
+  family: string;
+  /**
+   * Path to the font FILE, relative to the producing pipeline's corpus root
+   * (`tools/wpt/` for the titan extractor). A path, never a payload — an
+   * inlined face costs 50–500 KB per entry against ~70 bytes here.
+   */
+  src: string;
+  /** The `font-weight` descriptor as authored; absent = the §4.4 initial. */
+  weight?: string;
+  /** The `font-style` descriptor as authored; absent = the §4.5 initial. */
+  style?: string;
 }
 
 /**

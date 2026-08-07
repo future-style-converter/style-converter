@@ -87,17 +87,14 @@ struct BackdropApplier: ViewModifier {
             // margin modifier is attached OUTSIDE this one in StyleBuilder's
             // chain, so no margin band has to be subtracted here.)
             let box = geo.frame(in: .named(BackdropCanvas.spaceName))
-            // How far outside the border box the chain's blur can still read.
-            // σ is declared in points and the plate may be hi-res, so the
-            // conversion to plate pixels happens here — same rule as the
-            // blur op's own `sigma * scale` in BackdropImageOps.apply.
-            let pad = BackdropSampleGeometry.blurPadPx(
-                Double(plan.totalBlurSigma * plate.scale))
-            // Crop (padded) → filter → cut back to the border box. Any step
-            // returning nil (off-canvas element, CoreGraphics/CoreImage
-            // refusing the buffer) means NO backplate is drawn, i.e. the
-            // pre-lane rendering — never a partial one.
-            if let crop = BackdropImageOps.crop(plate, elementFrame: box, padPixels: pad),
+            // Crop the BORDER BOX → filter → keep. No σ term: filter-effects-2
+            // §2 clips the backdrop to the border box before filtering, and
+            // BackdropBlur's mirror band supplies whatever the Gaussian wants
+            // beyond it (see BackdropSampleGeometry's header for the wave-34
+            // measurement). Any step returning nil (off-canvas element,
+            // CoreGraphics/CoreImage refusing the buffer) means NO backplate is
+            // drawn, i.e. the pre-lane rendering — never a partial one.
+            if let crop = BackdropImageOps.crop(plate, elementFrame: box),
                let filtered = BackdropImageOps.filtered(crop,
                                                         ops: plan.ops,
                                                         scale: plate.scale) {

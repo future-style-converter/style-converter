@@ -56,7 +56,7 @@ internal object BackdropRenderEffects {
             // Blit the crop 1:1. The source rect is already clamped inside the
             // bitmap by BackdropSampleGeometry, so this can never read out of
             // bounds; anything the blur wants BEYOND it comes from the
-            // effect's TileMode.CLAMP — the spec's edge duplication.
+            // effect's TileMode.MIRROR — the spec's edge behaviour, measured.
             rc.drawBitmap(
                 backdrop.asAndroidBitmap(),
                 android.graphics.Rect(
@@ -73,9 +73,9 @@ internal object BackdropRenderEffects {
         }
         val canvas = drawContext.canvas.nativeCanvas
         val save = canvas.save()
-        // Place the (possibly padded, hence possibly negative) crop origin,
-        // measured from the BORDER box — so shift by the border box's own
-        // position inside this draw node first.
+        // Place the crop origin, measured from the BORDER box — so shift by
+        // the border box's own position inside this draw node first. dstLeft/
+        // dstTop are zero unless the box overhangs the canvas's top/left edge.
         canvas.translate(originX + sample.dstLeft.toFloat(), originY + sample.dstTop.toFloat())
         canvas.drawRenderNode(node)
         canvas.restoreToCount(save)
@@ -105,12 +105,19 @@ internal object BackdropRenderEffects {
                     // blur(0) is the identity — skip rather than ask the
                     // platform for a zero-radius effect.
                     if (sigma <= 0f) effect
-                    // TileMode.CLAMP: the backdrop root's edge pixels extend
-                    // outward, so a box at the canvas edge blurs against a
-                    // duplicated edge instead of fading to transparent.
+                    // TileMode.MIRROR: the node's bounds ARE the element's
+                    // border box (BackdropSampleGeometry no longer grows the
+                    // sample), so this is the edge model filter-effects-2 §2
+                    // asks for once the backdrop has been clipped — and it is
+                    // the one Chrome ships: Skia's SkTileMode::kMirror, which
+                    // the WPT reference file support/simulate-backdrop-blur.js
+                    // reproduces with `scale(-1)` copies of the same crop.
+                    // Wave-34 measurement (BackdropSampleGeometry's header):
+                    // mirror tracks the Chrome ref to ≤1.8 MAE per tile on
+                    // backdrop-filter-boundary where clamp gives up to 41.9.
                     else if (effect == null)
-                        RenderEffect.createBlurEffect(sigma, sigma, Shader.TileMode.CLAMP)
-                    else RenderEffect.createBlurEffect(sigma, sigma, effect, Shader.TileMode.CLAMP)
+                        RenderEffect.createBlurEffect(sigma, sigma, Shader.TileMode.MIRROR)
+                    else RenderEffect.createBlurEffect(sigma, sigma, effect, Shader.TileMode.MIRROR)
                 }
             }
         }

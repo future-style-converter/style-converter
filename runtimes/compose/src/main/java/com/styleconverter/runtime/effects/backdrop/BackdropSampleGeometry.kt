@@ -1,6 +1,5 @@
 package com.styleconverter.runtime.effects.backdrop
 
-import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 
@@ -10,10 +9,10 @@ import kotlin.math.min
  * @param srcLeft/srcTop/width/height the rectangle to read from the pass-A
  *   bitmap (canvas pixel space, ALWAYS inside the bitmap's bounds).
  * @param dstLeft/dstTop where that crop lands in the element's own draw space
- *   (border-box local px, origin at the element's top-left). Negative when the
- *   blur padding reaches outside the element, which is exactly the point: the
- *   painter draws the padded patch and lets the border-box clip cut it back,
- *   so pixels from OUTSIDE the box still feed the Gaussian.
+ *   (border-box local px, origin at the element's top-left). Zero whenever the
+ *   border box is fully on the canvas — which is the normal case, since the
+ *   sample rect IS the border box — and positive only when the box overhangs
+ *   the canvas's top/left edge and the crop had to start inside it.
  */
 data class BackdropSample(
     val srcLeft: Int,
@@ -56,32 +55,54 @@ data class BackdropBorderBox(
 /**
  * Pure geometry for "what part of the backdrop does this element see".
  *
- * filter-effects-2 §2: the filtered region is the Backdrop Root Image
- * restricted to the element's border box, and the filter operates on that
- * image with the backdrop root's edges duplicated (edge clamp) — a blurred
- * backdrop must not fade into transparency at the root boundary. The split of
- * responsibilities here:
+ * THE SAMPLE RECT IS THE BORDER BOX — IT NEVER GROWS WITH σ (wave-34 lane B).
  *
- *  - this file decides WHICH pixels are available (a padded crop, clamped to
- *    the backdrop image's real bounds);
- *  - the painter's `TileMode.CLAMP` supplies what lies past that clamp by
- *    duplicating edge pixels — the spec's edge behaviour, and the reason the
- *    crop is allowed to be smaller than the requested padded rect.
+ * filter-effects-2 §2 (Backdrop Filter Algorithm) clips the Backdrop Root
+ * Image to the element's border box BEFORE the filter runs, and only then
+ * asks the filter for its edge behaviour. Content outside the border box is
+ * therefore NEVER an input: a blurred backdrop must not import the pixels
+ * next to the box, only extensions of the box's own edge.
+ *
+ * Wave 26 shipped the opposite reading (grow the sample by the blur's 3σ
+ * support, then cut back). Wave 34 refuted it with the corpus's own
+ * boundary case — css/filter-effects/backdrop-filter-boundary.html, whose
+ * six `.fg` boxes sit 5px inside a 160x90 `.bg` on a lime page and whose
+ * WPT assertion is literally "No lime green should be brought in to the
+ * blurred regions". Measured on the frozen wave33-final captures (mean
+ * absolute error per tile against the Chrome 151 ref PNG, blur 3/6/12/24/
+ * 48/96, `_diag34/laneB`):
+ *
+ *   grow-by-3σ model     1.6 / 3.6 / 80.5 / 19.7 / 25.6 / 99.3   ← wave 26
+ *   border box + clamp   1.6 / 2.5 / 77.5 / 10.6 / 22.3 / 89.8
+ *   border box + MIRROR  1.5 / 1.8 / 72.6 /  0.8 /  0.3 / 76.7   ← this file
+ *   iOS capture          1.6 / 3.5 / 79.9 / 19.5 / 25.3 / 99.2
+ *
+ * The iOS row reproduces the grow-by-3σ row term for term, which is what
+ * identifies the model as the cause; the web capture (Chrome's own
+ * `backdrop-filter`) is byte-identical to the ref on four of the six tiles,
+ * so the ref IS the browser's behaviour and not an artefact of the WPT
+ * reference file's simulation. Tiles 3 and 6 carry a residual common to all
+ * three platforms (the ref frame clips content at x=374, our composed canvas
+ * at 390) that no filter model can move.
+ *
+ * The extension model is MIRROR, not clamp: the numbers above separate the
+ * two, and the WPT reference file (`support/simulate-backdrop-blur.js`)
+ * builds its expectation from `scale(-1)` copies of the element's own
+ * border-box crop — Skia's `SkTileMode::kMirror`, which is what Chrome
+ * hands the backdrop image.
+ *
+ * The split of responsibilities here:
+ *
+ *  - this file decides WHICH pixels exist (the border box, clamped to the
+ *    backdrop image's real bounds — an element may hang off the canvas);
+ *  - the painter's `TileMode.MIRROR` supplies everything outside that rect
+ *    by reflecting it, which is both the spec's edge behaviour and the
+ *    measured browser one.
  *
  * Everything here is integer pixel math with no Android types so it pins on
  * the JVM (BackdropSampleGeometryTest).
  */
 object BackdropSampleGeometry {
-
-    /**
-     * How far outside the border box a blur of standard deviation [sigmaPx]
-     * can still pull visible energy from: 3σ, the conventional Gaussian
-     * truncation (>99.7% of the kernel mass). Rounded UP so the sample never
-     * comes up a pixel short of what the kernel reads; 0 for a chain with no
-     * blur, which collapses the sample to the border box exactly.
-     */
-    fun blurPadPx(sigmaPx: Float): Int =
-        if (sigmaPx <= 0f) 0 else ceil(3.0 * sigmaPx).toInt()
 
     /**
      * Strip the resolved MARGIN bands off the backdrop draw node's box, so
@@ -145,8 +166,13 @@ object BackdropSampleGeometry {
     /**
      * Compute the crop for an element whose border box sits at
      * ([elemLeft], [elemTop]) with size [elemWidth]×[elemHeight] in the
-     * backdrop image's pixel space, padded by [padPx] on every side and
-     * clamped into a [srcWidth]×[srcHeight] backdrop image.
+     * backdrop image's pixel space, clamped into a [srcWidth]×[srcHeight]
+     * backdrop image.
+     *
+     * There is deliberately NO pad parameter: filter-effects-2 §2 clips the
+     * backdrop to the border box before filtering, so the sample rect is the
+     * border box for every chain — see the file header for the measurement
+     * that refuted the wave-26 grow-by-3σ reading.
      *
      * Returns null when there is nothing to sample — a degenerate element
      * (zero width/height: `backdrop-filter-zero-size.html`), a degenerate
@@ -159,7 +185,6 @@ object BackdropSampleGeometry {
         elemTop: Int,
         elemWidth: Int,
         elemHeight: Int,
-        padPx: Int,
         srcWidth: Int,
         srcHeight: Int,
     ): BackdropSample? {
@@ -167,14 +192,14 @@ object BackdropSampleGeometry {
         if (elemWidth <= 0 || elemHeight <= 0) return null
         if (srcWidth <= 0 || srcHeight <= 0) return null
 
-        // Requested (padded) rect in backdrop-image space, then clamped into
-        // the image. The clamp is what makes an element at the canvas edge
-        // legal: we read the pixels that exist and let TileMode.CLAMP
-        // extend them, per the spec's edge-duplication rule.
-        val left = max(0, elemLeft - padPx)
-        val top = max(0, elemTop - padPx)
-        val right = min(srcWidth, elemLeft + elemWidth + padPx)
-        val bottom = min(srcHeight, elemTop + elemHeight + padPx)
+        // The border box in backdrop-image space, clamped into the image. The
+        // clamp is what makes an element at the canvas edge legal: we read the
+        // pixels that exist and let TileMode.MIRROR extend them, per the
+        // spec's edge behaviour.
+        val left = max(0, elemLeft)
+        val top = max(0, elemTop)
+        val right = min(srcWidth, elemLeft + elemWidth)
+        val bottom = min(srcHeight, elemTop + elemHeight)
 
         // Fully off-canvas (or clamped to nothing) → nothing to sample.
         if (right <= left || bottom <= top) return null
@@ -185,8 +210,9 @@ object BackdropSampleGeometry {
             width = right - left,
             height = bottom - top,
             // Element-local placement of the crop: how far the crop's origin
-            // sits from the border box's origin. Zero for an unpadded,
-            // fully-inside sample; negative once padding reaches left/up.
+            // sits from the border box's origin. Zero for a box fully on the
+            // canvas; positive only when the box overhangs the top/left edge
+            // and the clamp above had to move the crop inwards.
             dstLeft = left - elemLeft,
             dstTop = top - elemTop,
         )

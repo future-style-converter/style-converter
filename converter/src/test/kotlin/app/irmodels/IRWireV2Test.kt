@@ -313,4 +313,70 @@ class IRWireV2Test {
         }
         assertFailsWith<IllegalArgumentException> { IRWireV2.decodeDocument(future) }
     }
+
+    // ---- wave-34 lane F2: the document-level @font-face list (spec 01 §5) ----
+
+    @Test
+    fun `fontFaces round-trips with descriptors verbatim and order preserved`() {
+        val doc = IRDocument(
+            listOf(comp("a")),
+            fontFaces = listOf(
+                IRFontFace(family = "test", src = "css/css-text/x/Lin.woff"),
+                // A css-fonts-4 §4.4 weight RANGE and a §4.5 oblique ANGLE:
+                // neither has a normalized IR form, so the converter is a
+                // courier for both — collapsing either would destroy the
+                // face-matching input the consumer needs.
+                IRFontFace(family = "test", src = "fonts/Ahem.ttf",
+                    weight = "400 700", style = "oblique 20deg")
+            )
+        )
+        val wire = IRWireV2.encodeDocument(doc)
+        val arr = wire["fontFaces"]!!.jsonArray
+        assertEquals(2, arr.size)
+        // Order is payload: §4.1 makes a later face with the same
+        // (family, weight, style) win, so the list is emitted in arrival
+        // order and never sorted.
+        assertEquals("css/css-text/x/Lin.woff", arr[0].jsonObject["src"]!!.jsonPrimitive.content)
+        assertEquals("400 700", arr[1].jsonObject["weight"]!!.jsonPrimitive.content)
+        assertEquals("oblique 20deg", arr[1].jsonObject["style"]!!.jsonPrimitive.content)
+        // Omit-when-null, not emit-the-initial: the schema defines ABSENCE
+        // as the css-fonts-4 initial, so writing "normal" would make two
+        // byte-different documents mean the same thing.
+        assertFalse(arr[0].jsonObject.containsKey("weight"))
+        assertFalse(arr[0].jsonObject.containsKey("style"))
+        // Full round-trip — every field is a plain string, so unlike
+        // keyframe stop properties there is no decode stub here.
+        val back = IRWireV2.decodeDocument(wire)
+        assertEquals(doc.fontFaces, back.fontFaces)
+    }
+
+    @Test
+    fun `a document without fontFaces omits the envelope key entirely`() {
+        // The additive-key guarantee (spec 05): every pre-wave-34 document
+        // must stay byte-identical.
+        val wire = IRWireV2.encodeDocument(IRDocument(listOf(comp("a"))))
+        assertFalse(wire.containsKey("fontFaces"))
+        assertNull(IRWireV2.decodeDocument(wire).fontFaces)
+        // An EMPTY list is treated as absent too — omit-when-empty.
+        assertFalse(IRWireV2.encodeDocument(
+            IRDocument(listOf(comp("a")), fontFaces = emptyList())).containsKey("fontFaces"))
+    }
+
+    @Test
+    fun `decoding a fontFaces entry without a required descriptor is refused`() {
+        // A face with no family is unreferenceable and one with no src names
+        // no file: either omission is a writer bug, not a wire state to
+        // tolerate.
+        for (bad in listOf(
+            buildJsonObject { put("src", "a.woff") },
+            buildJsonObject { put("family", "x") }
+        )) {
+            val doc = buildJsonObject {
+                put("irVersion", 2); put("minReaderVersion", 2)
+                putJsonArray("components") {}
+                putJsonArray("fontFaces") { add(bad) }
+            }
+            assertFailsWith<IllegalArgumentException> { IRWireV2.decodeDocument(doc) }
+        }
+    }
 }

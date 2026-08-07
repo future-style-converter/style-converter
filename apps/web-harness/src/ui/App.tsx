@@ -17,6 +17,11 @@ import { useHotReload } from '@style-converter/web/debug/hotreload/HotReloadMana
 // document's @keyframes rules (built by the engine's RuleBuilder from
 // the decoded `IRDocument.keyframes`), for ALL render modes.
 import { useDynamicRules } from '../sdui/useDynamicRules';
+// Document-level @font-face mount (spec 01 §5, wave-34 lane F2): the IR's
+// `fontFaces` list becomes real @font-face rules pointing at the corpus
+// through vite.config.ts's /wpt-font/ route. Harness-side, not engine-side —
+// a face is a document RESOURCE, not a per-property style (see the hook).
+import { useFontFaces } from '../sdui/useFontFaces';
 
 const IR_ASSET_PATH = '/ir-components.json';
 
@@ -241,6 +246,13 @@ export function App() {
   // animations, and interactive browsing all resolve identically. Must
   // sit with the other unconditional hooks, above the mode early-returns.
   useDynamicRules(document);
+
+  // Register the document's @font-face declarations (spec 01 §5). Sits with
+  // the other unconditional hooks for the same reason useDynamicRules does —
+  // every mode must resolve text against the same faces — and it must run
+  // BEFORE any layout the capture measures, which useInsertionEffect
+  // guarantees. Face-free documents mount nothing.
+  useFontFaces(document);
 
   // Fixture mode: render exactly one component (looked up by name) inside
   // a FixtureCanvas with the data-testid + tabIndex + ready-sentinel

@@ -141,5 +141,28 @@ data class CssKeyframeStop(
 @Serializable
 data class CssComponents(
     val components: Map<String, CssComponent>,
-    val keyframes: Map<String, List<CssKeyframeStop>>? = null
+    val keyframes: Map<String, List<CssKeyframeStop>>? = null,
+    val fontFaces: List<CssFontFace>? = null
+)
+
+/**
+ * One authored `@font-face` declaration (wave 34 —
+ * schema/spec/01-envelope.md §5).
+ *
+ * Authoring shape is already the WIRE shape: unlike every other authored
+ * structure in this file, nothing here needs typing or normalization on the
+ * way to the IR. `family` arrives unquoted, and `weight`/`style` are
+ * css-fonts-4 §4.4/§4.5 DESCRIPTORS — a `font-weight` range (`400 700`) has
+ * no numeric 100–900 equivalent and an oblique angle has no keyword one, so
+ * the converter is a courier here, not a parser. See IRFontFace.
+ *
+ * `src` is a path to the font FILE relative to the producing pipeline's
+ * corpus root, never a payload and never absolute (spec 01 §5).
+ */
+@Serializable
+data class CssFontFace(
+    val family: String,
+    val src: String,
+    val weight: String? = null,
+    val style: String? = null
 )

@@ -1661,10 +1661,27 @@ private fun ComposedCaptureCanvas(
                     end    = canvasPadding.right,
                     bottom = canvasPadding.bottom,
                 )) {
-                    roots.forEachIndexed { i, root ->
-                        // Gap ABOVE this root (collapsed with the previous root's
-                        // bottom margin; the first root's is its full top margin).
-                        if (rootGaps[i] > 0f) Spacer(Modifier.height(rootGaps[i].dp))
+                    // wave-34 lane H (H1) — the per-root inline-block boxes and
+                    // the ROOT segment plan. `rootSegments` is null for every
+                    // document with no ≥2 run of declared inline-block roots,
+                    // which is all but two tests in the whole frozen corpus, and
+                    // the null branch below is the frozen stacking loop verbatim.
+                    // See ComposedRootInlineFlow.kt for the enumerated blast
+                    // radius and why the RULES live in the runtime facade.
+                    val rootBoxes = composedRootInlineBoxes(roots)
+                    val rootSegments = com.styleconverter.runtime.layout.InlineBlockAtom
+                        .rootSegments(
+                            boxes = rootBoxes,
+                            // H3 reads the gap ABOVE each root — rootGaps is
+                            // roots+1 long ([before…, …, afterLast]), so the
+                            // trailing entry is dropped here.
+                            blockGapsAbovePx = rootGaps.take(roots.size).map { it.toDouble() },
+                        )
+                    // The per-root render, extracted VERBATIM from the frozen
+                    // loop so both walks below emit the identical node for a
+                    // given root — only the PLACEMENT ever differs.
+                    val renderRootAt: @androidx.compose.runtime.Composable (Int) -> Unit = { i ->
+                        val root = roots[i]
                         // RC-A4: a stripped root renders with its block margins
                         // ZEROED through the runtime's §8.3.1 override channel
                         // (the same substitution MarginApplier performs for
@@ -1709,6 +1726,43 @@ private fun ComposedCaptureCanvas(
                             }
                         } else {
                             hosted()
+                        }
+                    }
+                    if (rootSegments == null) {
+                        // The FROZEN document flow: roots stacked top-to-bottom,
+                        // one gap Spacer above each.
+                        roots.indices.forEach { i ->
+                            // Gap ABOVE this root (collapsed with the previous root's
+                            // bottom margin; the first root's is its full top margin).
+                            if (rootGaps[i] > 0f) Spacer(Modifier.height(rootGaps[i].dp))
+                            renderRootAt(i)
+                        }
+                    } else {
+                        // wave-34 H1 — the segment walk. A RUN of consecutive
+                        // inline-block roots becomes ONE §9.4.2 row item (the
+                        // gap above its FIRST member is the block gap that
+                        // still applies — the interior ones are gone because
+                        // inline-level siblings on a line box have none, which
+                        // H3 already proved is a no-op here); every other
+                        // segment is a single root stacked exactly as above.
+                        rootSegments.forEach { seg ->
+                            val memberBoxes = seg.indices.mapNotNull { rootBoxes[it] }
+                            if (seg.isRun && memberBoxes.size == seg.indices.size) {
+                                val first = seg.indices.first()
+                                if (rootGaps[first] > 0f) Spacer(Modifier.height(rootGaps[first].dp))
+                                ComposedRootInlineRow(memberBoxes) {
+                                    seg.indices.forEach { renderRootAt(it) }
+                                }
+                            } else {
+                                // A run whose boxes went missing between the plan
+                                // and here is a harness bug, not layout state:
+                                // stack its members like the frozen loop rather
+                                // than place them against a short plan.
+                                seg.indices.forEach { i ->
+                                    if (rootGaps[i] > 0f) Spacer(Modifier.height(rootGaps[i].dp))
+                                    renderRootAt(i)
+                                }
+                            }
                         }
                     }
                     // Trailing gap = the last root's (uncollapsed) bottom margin.

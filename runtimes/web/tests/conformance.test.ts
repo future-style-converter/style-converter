@@ -222,6 +222,58 @@ describe('IR v2 golden fixtures — web runtime conformance', () => {
     }
   });
 
+  // ---- wave-34 lane F2: document-level @font-face (spec 01 §5) ----
+
+  it('font-faces: the document-level list decodes, order + descriptors intact', () => {
+    const doc = loadV2('font-faces.json');
+    const faces = doc.fontFaces!;
+    // ORDER is payload: css-fonts-4 §4.1 makes a later face with the same
+    // (family, weight, style) win, so a reordering decode would silently
+    // change which file renders.
+    expect(faces).toHaveLength(2);
+    expect(faces[0]).toEqual({
+      family: 'test',
+      src: 'css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff',
+    });
+    // Omitted descriptors stay ABSENT — never substituted with the
+    // §4.4/§4.5 initial literal, so a consumer applying the spec initial and
+    // one reading an explicit value land on the same face.
+    expect(faces[0].weight).toBeUndefined();
+    // The descriptors that cannot be normalised ride AS AUTHORED: a weight
+    // RANGE has no numeric 100–900 form, an oblique ANGLE no keyword form.
+    expect(faces[1].weight).toBe('400 700');
+    expect(faces[1].style).toBe('oblique 20deg');
+  });
+
+  it('font-faces: absent on every pre-wave-34 golden (omit-when-empty)', () => {
+    // The additive-key guarantee — a document that declares no face must be
+    // byte-identical to before the key existed.
+    expect(loadV2('text-and-role.json').fontFaces).toBeUndefined();
+    expect(loadV1('text-and-role.json').fontFaces).toBeUndefined();
+  });
+
+  it('font-faces: malformed entries are dropped, never half-decoded', () => {
+    // Decode-side tolerance posture (schema validation is CI's job): an
+    // entry missing a REQUIRED descriptor names no renderable face, so
+    // dropping beats inventing a default. Whole-list absence when nothing
+    // survives keeps a re-encode shape-faithful.
+    const decode = (fontFaces: unknown) =>
+      decodeIRDocument({ irVersion: 2, minReaderVersion: 2, components: [], fontFaces })
+        .fontFaces;
+    expect(decode([{ src: 'a.woff' }])).toBeUndefined();          // no family
+    expect(decode([{ family: 'x' }])).toBeUndefined();            // no src
+    expect(decode([{ family: '', src: 'a.woff' }])).toBeUndefined();
+    expect(decode([])).toBeUndefined();
+    expect(decode({})).toBeUndefined();                            // wrong container
+    // A valid entry alongside a malformed one survives alone.
+    expect(decode([{ family: 'x' }, { family: 'y', src: 'b.woff' }]))
+      .toEqual([{ family: 'y', src: 'b.woff' }]);
+    // Non-string weight/style are dropped rather than coerced — "400" and
+    // 400 would otherwise become the same face descriptor.
+    expect(decode([{ family: 'y', src: 'b.woff', weight: 700, style: '' }]))
+      .toEqual([{ family: 'y', src: 'b.woff' }]);
+  });
+
   // ---- v2-only composition goldens ----
 
   it('slot-composition: 3-level tree via slots, 6 components, order-stable', () => {

@@ -31,7 +31,7 @@ import java.io.File
 
 class BackdropContractParityTest {
 
-    // ── clause 1: the sample table (border box grown by 3σ, clamped) ──────
+    // ── clause 1: the sample table (the BORDER BOX, clamped) ─────────────
 
     /**
      * One row of the shared table. Kept as a data class so the Kotlin and
@@ -50,24 +50,34 @@ class BackdropContractParityTest {
     )
 
     private val table = listOf(
-        // Invert-only chain: σ=0 → pad 0 → the sample IS the border box, and
-        // the keep rect is the whole crop. backdrop-filter-basic.html geometry.
+        // Invert-only chain: the sample IS the border box, and the keep rect
+        // is the whole crop. backdrop-filter-basic.html geometry.
         Row("interior, no blur", 60, 150, 100, 100, 0f, 390, 600,
             BackdropSample(60, 150, 100, 100, 0, 0), listOf(0, 0, 100, 100)),
-        // blur(10px) → pad 30 on every side, all of it available.
+        // blur(10px) over the SAME box → the SAME sample. σ does not widen the
+        // rect (wave-34: filter-effects-2 §2 clips the backdrop to the border
+        // box first); TileMode.MIRROR / mirrorPad supply the rest.
         Row("interior, blur 10", 100, 100, 50, 50, 10f, 390, 600,
-            BackdropSample(70, 70, 110, 110, -30, -30), listOf(30, 30, 50, 50)),
-        // Box hugging the canvas origin: the padded rect would start at
-        // (-30,-30). Clamped to the plate; edge duplication covers the rest.
-        Row("clamped at the canvas origin", 0, 0, 50, 50, 10f, 390, 600,
-            BackdropSample(0, 0, 80, 80, 0, 0), listOf(0, 0, 50, 50)),
-        // Same on the far edges.
-        Row("clamped at the far edges", 360, 570, 30, 30, 10f, 390, 600,
-            BackdropSample(330, 540, 60, 60, -30, -30), listOf(30, 30, 30, 30)),
+            BackdropSample(100, 100, 50, 50, 0, 0), listOf(0, 0, 50, 50)),
+        // Box hugging the canvas origin: nothing to clamp, because the sample
+        // never reaches outside the box in the first place.
+        Row("box at the canvas origin", 0, 0, 50, 50, 10f, 390, 600,
+            BackdropSample(0, 0, 50, 50, 0, 0), listOf(0, 0, 50, 50)),
+        // Same on the far edges: the box ends exactly at 390x600.
+        Row("box at the far edges", 360, 570, 30, 30, 10f, 390, 600,
+            BackdropSample(360, 570, 30, 30, 0, 0), listOf(0, 0, 30, 30)),
         // The element itself hangs off the LEFT edge: the crop is narrower
         // than the border box, and the keep rect says which strip it covers.
+        // This is now the ONLY way the clamp can bite.
         Row("element overhangs the left edge", -10, 10, 40, 20, 0f, 390, 600,
             BackdropSample(0, 10, 30, 20, 10, 0), listOf(0, 0, 30, 20)),
+        // …and blurring it does not change that: still the on-canvas strip.
+        Row("element overhangs the left edge, blurred", -10, 10, 40, 20, 10f, 390, 600,
+            BackdropSample(0, 10, 30, 20, 10, 0), listOf(0, 0, 30, 20)),
+        // A box running off the BOTTOM-RIGHT: clamped on two sides, dst stays
+        // zero because only the far edges moved.
+        Row("element overhangs bottom-right", 370, 580, 40, 40, 10f, 390, 600,
+            BackdropSample(370, 580, 20, 20, 0, 0), listOf(0, 0, 20, 20)),
         // Refusals — nothing to filter / nothing to read / nothing on canvas.
         Row("zero width refuses", 10, 10, 0, 40, 0f, 390, 600, null, null),
         Row("zero height refuses", 10, 10, 40, 0, 0f, 390, 600, null, null),
@@ -78,13 +88,41 @@ class BackdropContractParityTest {
     @Test
     fun `sample table matches the cross-native pins`() {
         for (row in table) {
-            val pad = BackdropSampleGeometry.blurPadPx(row.sigma)
             val got = BackdropSampleGeometry.sample(
                 elemLeft = row.elemLeft, elemTop = row.elemTop,
                 elemWidth = row.elemW, elemHeight = row.elemH,
-                padPx = pad, srcWidth = row.srcW, srcHeight = row.srcH,
+                srcWidth = row.srcW, srcHeight = row.srcH,
             )
             assertEquals("sample[${row.name}]", row.expect, got)
+        }
+    }
+
+    @Test
+    fun `the sample rect is sigma-independent`() {
+        // The wave-34 edge-model claim, stated directly rather than inferred
+        // from the table: for one box, EVERY σ gives the same sample. If a
+        // grow term ever comes back, this is the assertion that catches it.
+        val baseline = BackdropSampleGeometry.sample(
+            elemLeft = 100, elemTop = 100, elemWidth = 50, elemHeight = 50,
+            srcWidth = 390, srcHeight = 600,
+        )
+        assertEquals(BackdropSample(100, 100, 50, 50, 0, 0), baseline)
+        // The table's own σ column is the input set: 0 (invert-only), 10
+        // (backdrop-filter-basic-blur), and the boundary fixture's largest.
+        for (sigma in listOf(0f, 2.5f, 10f, 96f)) {
+            val chain = if (sigma <= 0f) BackdropChain(emptyList())
+            else BackdropChain(listOf(BackdropOp.Blur(sigma.dp)))
+            // Compute σ the way the painter does, then assert it changed
+            // nothing about the rect the painter asks for.
+            assertEquals(sigma, chain.totalBlurSigmaPx { it.value }, 1e-3f)
+            assertEquals(
+                "sample must not depend on sigma=$sigma",
+                baseline,
+                BackdropSampleGeometry.sample(
+                    elemLeft = 100, elemTop = 100, elemWidth = 50, elemHeight = 50,
+                    srcWidth = 390, srcHeight = 600,
+                ),
+            )
         }
     }
 
@@ -115,18 +153,21 @@ class BackdropContractParityTest {
     }
 
     @Test
-    fun `blur pad table matches the cross-native pins`() {
-        // 3σ, rounded UP. NOT BackdropBlur.padding's 3σ+1 on iOS — that is the
-        // separate replicate band applied inside the Gaussian.
-        assertEquals(0, BackdropSampleGeometry.blurPadPx(0f))
-        assertEquals(0, BackdropSampleGeometry.blurPadPx(-3f))
-        assertEquals(30, BackdropSampleGeometry.blurPadPx(10f))
-        assertEquals(8, BackdropSampleGeometry.blurPadPx(2.5f))
-        // Two 3px blurs compose in quadrature to σ = √18 ≈ 4.2426 → pad 13.
+    fun `blur sigma composition matches the cross-native pins`() {
+        // σ still has to be computed identically on both natives — it drives
+        // the Gaussian itself (and, on iOS, the width of the mirror band).
+        // What it no longer drives is the sample rect (see the σ-independence
+        // pin above), which is why this test only asserts the composition.
+        assertEquals(0f, BackdropChain(emptyList()).totalBlurSigmaPx { it.value }, 1e-4f)
+        assertEquals(
+            10f,
+            BackdropChain(listOf(BackdropOp.Blur(10.dp))).totalBlurSigmaPx { it.value },
+            1e-4f,
+        )
+        // Two 3px blurs compose in quadrature to σ = √18 ≈ 4.2426.
         val quadrature = BackdropChain(listOf(BackdropOp.Blur(3.dp), BackdropOp.Blur(3.dp)))
             .totalBlurSigmaPx { it.value }
         assertEquals(4.2426f, quadrature, 1e-3f)
-        assertEquals(13, BackdropSampleGeometry.blurPadPx(quadrature))
     }
 
     // ── clause 2: all-or-nothing admission ───────────────────────────────

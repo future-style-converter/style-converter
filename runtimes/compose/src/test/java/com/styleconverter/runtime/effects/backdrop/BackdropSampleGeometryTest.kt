@@ -1,9 +1,10 @@
 package com.styleconverter.runtime.effects.backdrop
 
 // Pins "which backdrop pixels does this element see" — the half of the
-// two-pass render that decides whether a blurred backdrop matches the ref at
-// the canvas edge (filter-effects-2 §2 edge duplication) and whether a
-// degenerate box refuses instead of drawing something plausible-but-wrong.
+// two-pass render that decides whether a blurred backdrop matches the ref
+// (filter-effects-2 §2: the backdrop is clipped to the BORDER BOX before the
+// filter runs, so the sample never grows with σ) and whether a degenerate box
+// refuses instead of drawing something plausible-but-wrong.
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -11,79 +12,101 @@ import org.junit.Test
 
 class BackdropSampleGeometryTest {
 
-    // ── padding ───────────────────────────────────────────────────────────
-
-    @Test
-    fun `no blur means no padding`() {
-        // An invert-only chain samples exactly the border box.
-        assertEquals(0, BackdropSampleGeometry.blurPadPx(0f))
-    }
-
-    @Test
-    fun `padding is three sigma rounded up`() {
-        // 3σ carries >99.7% of the kernel; rounding UP means the sample is
-        // never a pixel short of what the Gaussian reads.
-        assertEquals(30, BackdropSampleGeometry.blurPadPx(10f))
-        assertEquals(8, BackdropSampleGeometry.blurPadPx(2.5f))
-    }
-
-    // ── the unpadded (invert) sample ──────────────────────────────────────
+    // ── the sample rect IS the border box ────────────────────────────────
 
     @Test
     fun `interior box samples itself one to one`() {
         // backdrop-filter-basic.html geometry: the 100x100 filterbox at
         // (60,150) over a green backdrop, no blur.
-        val s = BackdropSampleGeometry.sample(60, 150, 100, 100, 0, 390, 600)!!
+        val s = BackdropSampleGeometry.sample(60, 150, 100, 100, 390, 600)!!
         assertEquals(60, s.srcLeft)
         assertEquals(150, s.srcTop)
         assertEquals(100, s.width)
         assertEquals(100, s.height)
-        // Unpadded and fully inside → the crop lands at the box's own origin.
+        // Fully inside → the crop lands at the box's own origin.
         assertEquals(0, s.dstLeft)
         assertEquals(0, s.dstTop)
     }
 
-    // ── the padded (blur) sample ──────────────────────────────────────────
-
     @Test
-    fun `padded interior sample reaches outside the box`() {
-        // The patch is drawn at a NEGATIVE element-local offset and the
-        // border-box clip cuts it back — that is how pixels from outside the
-        // box feed the Gaussian inside it.
-        val s = BackdropSampleGeometry.sample(100, 100, 50, 50, 30, 390, 600)!!
-        assertEquals(70, s.srcLeft)
-        assertEquals(70, s.srcTop)
-        assertEquals(110, s.width) // 50 + 2×30
-        assertEquals(110, s.height)
-        assertEquals(-30, s.dstLeft)
-        assertEquals(-30, s.dstTop)
-    }
-
-    @Test
-    fun `sample clamps at the backdrop root edges`() {
-        // A box hugging the canvas origin: the padded rect would start at
-        // (-30,-30), which does not exist. We clamp to the image and let the
-        // painter's TileMode_CLAMP duplicate the edge pixels — the spec's
-        // edge behaviour, and the reason this returns a SMALLER crop instead
-        // of refusing.
-        val s = BackdropSampleGeometry.sample(0, 0, 50, 50, 30, 390, 600)!!
-        assertEquals(0, s.srcLeft)
-        assertEquals(0, s.srcTop)
-        assertEquals(80, s.width) // 50 + 30 on the inside edge only
-        assertEquals(0, s.dstLeft) // crop origin == box origin again
+    fun `a blurred box samples exactly the same rect`() {
+        // The wave-34 edge model: filter-effects-2 §2 clips the backdrop to
+        // the border box BEFORE filtering, so no σ widens this rect. The
+        // Gaussian's out-of-box appetite is fed by TileMode.MIRROR (Compose)
+        // / BackdropBlur.mirrorPad (iOS) instead. Refuting evidence for the
+        // wave-26 grow-by-3σ model is in BackdropSampleGeometry's header:
+        // backdrop-filter-boundary imported the lime page background that the
+        // WPT test explicitly forbids.
+        //
+        // The function no longer TAKES a sigma, so "same rect for every σ" is
+        // structural — this test pins the rect the painter now asks for.
+        val s = BackdropSampleGeometry.sample(100, 100, 50, 50, 390, 600)!!
+        assertEquals(100, s.srcLeft)
+        assertEquals(100, s.srcTop)
+        assertEquals(50, s.width)
+        assertEquals(50, s.height)
+        assertEquals(0, s.dstLeft)
         assertEquals(0, s.dstTop)
     }
 
     @Test
-    fun `sample clamps at the far edges too`() {
-        // 390-wide canvas, box flush against the right/bottom of a 600 image.
-        val s = BackdropSampleGeometry.sample(360, 570, 30, 30, 30, 390, 600)!!
-        assertEquals(330, s.srcLeft)
-        assertEquals(540, s.srcTop)
-        assertEquals(60, s.width) // 330..390
-        assertEquals(60, s.height) // 540..600
-        assertEquals(-30, s.dstLeft)
-        assertEquals(-30, s.dstTop)
+    fun `a box at the backdrop root edges needs no clamp`() {
+        // A box hugging the canvas origin used to be the interesting case
+        // (the 3σ grow ran off the plate). With the border-box sample there
+        // is nothing outside to clamp, blurred or not.
+        val s = BackdropSampleGeometry.sample(0, 0, 50, 50, 390, 600)!!
+        assertEquals(0, s.srcLeft)
+        assertEquals(0, s.srcTop)
+        assertEquals(50, s.width)
+        assertEquals(50, s.height)
+        assertEquals(0, s.dstLeft)
+        assertEquals(0, s.dstTop)
+    }
+
+    @Test
+    fun `a box flush against the far edges needs no clamp either`() {
+        // 390-wide canvas, box ending exactly at the right/bottom of a 600
+        // image.
+        val s = BackdropSampleGeometry.sample(360, 570, 30, 30, 390, 600)!!
+        assertEquals(360, s.srcLeft)
+        assertEquals(570, s.srcTop)
+        assertEquals(30, s.width)
+        assertEquals(30, s.height)
+        assertEquals(0, s.dstLeft)
+        assertEquals(0, s.dstTop)
+    }
+
+    // ── the one remaining clamp: a box that OVERHANGS the canvas ──────────
+
+    @Test
+    fun `an overhanging box samples only the strip that exists`() {
+        // The border box starts 10px left of the canvas. We read the 30px
+        // that exist; dstLeft says the crop sits 10px into the box, and the
+        // painter leaves the uncovered strip unpainted rather than smearing
+        // it. (The mirror band inside the blur then extends this crop, which
+        // is the plate boundary's own edge behaviour.)
+        val s = BackdropSampleGeometry.sample(-10, 10, 40, 20, 390, 600)!!
+        assertEquals(0, s.srcLeft)
+        assertEquals(10, s.srcTop)
+        assertEquals(30, s.width)
+        assertEquals(20, s.height)
+        assertEquals(10, s.dstLeft)
+        assertEquals(0, s.dstTop)
+    }
+
+    @Test
+    fun `an overhanging box's crop is smaller than its border box`() {
+        // Compose has no explicit keepRect (the painter's border-box clip does
+        // that job); the arithmetic the Swift twin's keepRect states is
+        // restated here in the same closed form so the two suites agree.
+        val s = BackdropSampleGeometry.sample(-10, 10, 40, 20, 390, 600)!!
+        // Border-box origin inside the crop = −dst; intersect with the crop.
+        val boxLeft = -s.dstLeft
+        val boxTop = -s.dstTop
+        assertEquals(0, maxOf(0, boxLeft))
+        assertEquals(0, maxOf(0, boxTop))
+        assertEquals(30, minOf(s.width, boxLeft + 40) - maxOf(0, boxLeft))
+        assertEquals(20, minOf(s.height, boxTop + 20) - maxOf(0, boxTop))
     }
 
     // ── refusals ──────────────────────────────────────────────────────────
@@ -92,22 +115,22 @@ class BackdropSampleGeometryTest {
     fun `zero sized element refuses`() {
         // backdrop-filter-zero-size.html — nothing to filter, and the painter
         // must draw nothing rather than a degenerate patch.
-        assertNull(BackdropSampleGeometry.sample(10, 10, 0, 40, 0, 390, 600))
-        assertNull(BackdropSampleGeometry.sample(10, 10, 40, 0, 0, 390, 600))
+        assertNull(BackdropSampleGeometry.sample(10, 10, 0, 40, 390, 600))
+        assertNull(BackdropSampleGeometry.sample(10, 10, 40, 0, 390, 600))
     }
 
     @Test
     fun `empty backdrop refuses`() {
         // A failed / not-yet-published pass A must never be sampled.
-        assertNull(BackdropSampleGeometry.sample(10, 10, 40, 40, 0, 0, 0))
+        assertNull(BackdropSampleGeometry.sample(10, 10, 40, 40, 0, 0))
     }
 
     @Test
     fun `fully off canvas element refuses`() {
         // Hoisted/overflowing boxes can sit entirely outside the canvas; the
         // clamped rect is then empty and there is nothing honest to draw.
-        assertNull(BackdropSampleGeometry.sample(500, 10, 40, 40, 0, 390, 600))
-        assertNull(BackdropSampleGeometry.sample(10, -80, 40, 40, 0, 390, 600))
+        assertNull(BackdropSampleGeometry.sample(500, 10, 40, 40, 390, 600))
+        assertNull(BackdropSampleGeometry.sample(10, -80, 40, 40, 390, 600))
     }
 
     // ── the POSITION offset (wave-27 accuracy fix) ────────────────────────
