@@ -512,6 +512,16 @@ function walkChildren(html, opts = {}) {
         elementEnd = n;
         innerStart = tagOpenEnd + 1;
         innerEnd = n;
+      } else if (lastCloseStart < 0 &&
+                 adoptsUnclosedBody(tagOpen, html, tagOpenEnd + 1, n)) {
+        // wave-33 lane N (N1 WRAPPER FLATTENING) — the LOAD-BEARING
+        // unclosed-wrapper adoption. Same end-of-fragment body the
+        // auto-closing branch above grants, but for a tag whose end tag is
+        // NOT spec-omittable; see adoptsUnclosedBody for the gate and for
+        // why it is deliberately narrower than the raw HTML5 rule.
+        elementEnd = n;
+        innerStart = tagOpenEnd + 1;
+        innerEnd = n;
       } else {
         elementEnd = cursor;
         innerStart = tagOpenEnd + 1;
@@ -588,6 +598,119 @@ const AUTO_CLOSE_TRIGGERS = {
   td:  new Set(['td','th','tr']),
   th:  new Set(['td','th','tr']),
 };
+
+// ── wave-33 lane N (N1): the LOAD-BEARING unclosed-wrapper adoption ──────────
+//
+// MEASURED PROBLEM (runs/wave32-final/sections/css-tables, absolute-tables-010
+// .tentative — the wave-32 reclassification):
+//
+//   <div class="container" style="margin-left: 100px;">
+//     <div style="margin-left: -100px;">
+//       <table>…</table>          ← position:absolute, height:100px, green
+//   </div>                        ← ONE `</div>` for TWO `<div>` openers
+//
+// walkChildren pairs that single `</div>` with the OUTER div (its depth
+// counter hits the closer at depth 2→1 and stores it as `lastCloseStart`),
+// so the outer div's inner buffer STOPS before it. The INNER div is then
+// left with no `</div>` anywhere in its fragment: `lastCloseStart` stays -1,
+// the final `else` branch below sets innerEnd === elementEnd === cursor ===
+// tagOpenEnd + 1, and the element is emitted with a ZERO-LENGTH body. Its
+// real content is re-walked from right after the open tag — so the abspos
+// <table> comes out a SIBLING of the -100px wrapper instead of its child.
+//
+// That flattening is not cosmetic. CSS 2.1 §10.3.7 / css-position-3 §3.3
+// define an abspos box's static position as the position its hypothetical
+// box would have had in its PARENT's content flow; with the wrapper gone
+// from the parent chain, no runtime can subtract the wrapper's -100px
+// margin, and all three engines faithfully paint the green square at x=116
+// where the ref has it at x=16.
+//
+// THE SPEC RULE would be blunt: HTML Living Standard §13.2.6.5 ("an
+// end-of-file token" pops every still-open element) says an unmatched open
+// tag is closed by its PARENT's close, i.e. its body runs to end-of-
+// fragment, full stop. Applying that unconditionally was MEASURED over all
+// 10681 bucket-A tests: 115 fixtures drift, and 15 of them LOSE content —
+// because the tree walk is depth-capped at 5, and a document like
+// css-text/text-transform/text-transform-capitalize-035.html (six
+// `<div lang=…>` blocks each terminated by a typo'd `<div>` instead of
+// `</div>`, so TWELVE unclosed divs nest 12 deep) pushes half its text past
+// the cap, where extractBodyTreeNested silently drops it. Flat-but-complete
+// beats nested-but-truncated, so the blunt rule is not the trade we want.
+//
+// THE GATE (deliberately narrower than the spec, and honest about it): adopt
+// the end-of-fragment body only when BOTH hold —
+//
+//   1. the adopted body actually CONTAINS an element (`<tag`). With no
+//      element inside, adoption changes no structure at all — the text was
+//      already reachable — so we leave those bytes on the pre-wave-33 path.
+//   2. the wrapper is LOAD-BEARING: its own `style=` attribute declares at
+//      least one BOX-AFFECTING property. Those are exactly the declarations
+//      whose effect on the children is only computable THROUGH the parent
+//      link — offsets (margin/padding/border/inset), containing-block
+//      establishment (position/transform), and the box's own extent
+//      (width/height/display/float/overflow). A wrapper with no such
+//      declaration contributes nothing a child needs its parent for, so
+//      nesting it buys nothing and only spends depth budget.
+//
+// WHY THE `style=` ATTRIBUTE AND NOT THE MATCHED CASCADE: the direction of
+// the failure modes is asymmetric here, and opposite to the styledTags
+// guard's. Over-adopting DELETES content at the depth cap; under-adopting
+// merely keeps today's flat-but-complete emission. So the conservative
+// choice is the signal the walker can see locally and that authors use
+// precisely when the wrapper's geometry is the point of the test. The known
+// under-fix — a wrapper whose box geometry comes from a STYLESHEET rule
+// (`div { margin-top: 1em }`) stays flattened — is stated, not hidden;
+// capitalize-035 above is exactly that shape and is exactly the case we do
+// NOT want adopted.
+
+/** Box-affecting property prefixes: a declaration whose effect on a CHILD is
+ *  only expressible through the parent link (offsets, containing block,
+ *  extent). Matched as a prefix so every longhand/logical variant is covered
+ *  — `margin-inline-start`, `border-block-end-width`, `inset-inline`, … */
+const BOX_AFFECTING_PROPERTY_PREFIXES = [
+  'margin', 'padding', 'border', 'position', 'inset',
+  'top', 'right', 'bottom', 'left',
+  'transform', 'translate', 'rotate', 'scale', 'perspective',
+  'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
+  'display', 'float', 'clear', 'overflow', 'box-sizing', 'zoom',
+];
+
+/** Does `styleAttr` (the raw contents of a `style="…"` attribute) declare at
+ *  least one BOX_AFFECTING_PROPERTY_PREFIXES property? Split on top-level
+ *  `;` is enough: a property NAME can never contain `;` or `(`, so we only
+ *  need the text left of each `:`. */
+export function hasBoxAffectingInlineStyle(styleAttr) {
+  if (typeof styleAttr !== 'string' || styleAttr.length === 0) return false;
+  for (const decl of styleAttr.split(';')) {
+    const colon = decl.indexOf(':');
+    if (colon < 0) continue;
+    const prop = decl.slice(0, colon).trim().toLowerCase();
+    if (!prop) continue;
+    if (BOX_AFFECTING_PROPERTY_PREFIXES.some((p) => prop === p || prop.startsWith(`${p}-`))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** The N1 gate itself (see the banner above). `tagOpen` is the element's raw
+ *  open tag, `html`/`from`/`n` bound the body it WOULD adopt.
+ *  Exported so the unit tests can pin the gate without going through a walk. */
+export function adoptsUnclosedBody(tagOpen, html, from, n) {
+  // Condition 1 — adoption must actually change the structure. `indexOf('<')`
+  // is enough: comments/DOCTYPE were stripped upstream, and a bare `<` in
+  // text is not legal HTML, so any `<` after the opener starts an element.
+  if (from >= n) return false;
+  const firstTag = html.indexOf('<', from);
+  if (firstTag < 0 || firstTag >= n) return false;
+  // Condition 2 — the wrapper must be load-bearing. Read the `style=`
+  // attribute straight off the raw open tag (walkChildren parses attrs a few
+  // lines later; doing it here would mean parsing twice for every element,
+  // whereas this branch is reached only for genuinely unclosed tags).
+  const m = /\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(tagOpen);
+  if (!m) return false;
+  return hasBoxAffectingInlineStyle(m[1] ?? m[2] ?? m[3] ?? '');
+}
 
 /**
  * wave-21 A-RC1 HEAD-UNWRAP fix: the ONE shared body-content locator.
@@ -977,10 +1100,62 @@ function parseAttrsFromTagOpen(tagOpen) {
  * non-inherited universal props on an anonymous inline run are a corner
  * accepted under the 'inline-run-merged' lossy marker.
  *
- * Rules parseCompound rejects (attr selectors, unknown pseudos) are
- * skipped: our matcher drops those rules everywhere, so they can't style a
- * child component either — the merge loses nothing the engine would have
- * applied.
+ * wave-33 lane N (N2) — THE RIGHTMOST-UNSUPPORTED GUARD HOLE (deferred from
+ * wave-30 A2). The pre-wave-33 code `continue`d on an unsupported rightmost
+ * compound with the reasoning "our matcher drops those rules everywhere, so
+ * they can't style a child component either — the merge loses nothing".
+ * That reasoning is only half true, and the missing half is the whole bug:
+ * dropping the RULE is fine, but the merge ALSO deletes the ELEMENT. For
+ *
+ *     span[hidden] { … }        b:hover { … }
+ *
+ * the `<span>` / `<b>` under test carries no attribute the guard notices,
+ * so isPureInlineMergeable absorbs it into its parent's `_text` and the box
+ * ceases to exist. After that NO channel can deliver those declarations —
+ * not the static matcher, not the post-load overlay, not the attr bake —
+ * because there is no component left to deliver them to. The rule was
+ * dropped AND its subject was deleted.
+ *
+ * So an unsupported rightmost compound now contributes its TAG, when the tag
+ * is identifiable. Two sources, in order:
+ *   1. `parsed.needTag` — parseCompound walks the compound left-to-right and
+ *      records the type selector BEFORE it hits whatever it refuses, so
+ *      `b:hover` already arrives here with needTag `b`.
+ *   2. the compound's LEADING type selector, for the early-outs that return
+ *      before the walk starts — the `compound.includes('[')` bail, which is
+ *      exactly the `span[hidden]` shape.
+ * Nothing wider: the same asymmetry the A2b fallback names applies
+ * (over-protecting keeps a correctly-placed unstyled box, under-protecting
+ * deletes the box under test), but the A2b raw scan harvests EVERY bare
+ * identifier in the selector text, which here would pull ancestor tags
+ * (`div span[hidden]` → `div`) and functional-pseudo arguments into the
+ * guard for no measured benefit.
+ *
+ * MEASURED COST, stated rather than implied (wave-33 lane N-finish, the
+ * HEAD-vs-patched A/B; the frozen wave32-final gate caps every section at 12
+ * tests and does NOT contain these, so each number is a fresh HEAD-side run
+ * at the same cap). Corpus-wide this guard changes exactly 3 of the 10681
+ * bucket-A tests, none of which loses text or a component — but it is NOT a
+ * uniform win on the ref:
+ *
+ *   selectors-4/lang-021              0.9999 patched, wptPass (no HEAD run)
+ *   css-text/letter-spacing-204       0.7554 → 0.7554   (unmoved)
+ *   CSS2/selector/lang-pseudoclass-001 0.7774 → 0.7684  (−0.0090, REGRESSED)
+ *
+ * The regression is not the guard misfiring — the `<em>` it saves is the
+ * rule's subject and MUST survive. It is the cost of the split itself, and
+ * the cause is upstream of this function: `<p>…green <em>…</em></p>` splits
+ * into parent `_text` + child, and the boundary SPACE is dropped, because
+ * extractOwnText trims and the wave-32 lane R `_runs` list — the one channel
+ * that preserves inter-run spaces ("the quick <u>brown</u> fox must keep the
+ * space before AND after the child") — is emitted ONLY when the reorder
+ * fired. Text-then-child never reorders, so no `_runs`, so "green" and "and"
+ * render welded. HEAD hit the identical trim on every ALREADY-guarded inline
+ * child; this lane only routes two more tests onto that pre-existing path.
+ * Fixing it means widening the `_runs` emission condition, which is the
+ * lane-R wire contract, not this guard — recorded as the follow-up rather
+ * than smuggled in at the end of a lane. Do NOT "fix" it by reverting the
+ * guard: that trades a 0.009 SSIM dent for a deleted element.
  *
  * wave-30 A2b — the MALFORMED-CHAIN fallback. When splitSelectorChain
  * returns null the selector could not be tokenised at all, so we cannot say
@@ -989,11 +1164,22 @@ function parseAttrsFromTagOpen(tagOpen) {
  * case: keeping a `<span>` as its own component costs an extra (correctly
  * placed, unstyled) box, while merging it away can delete the very element
  * the rule was written to style. So we raw-scan the selector text for bare
- * tag names and over-protect. Scoped to the null-chain path on purpose — a
- * chain that DID tokenise has an identified host compound, and widening the
- * guard to every parseCompound-unsupported rule would keep spans out of the
- * inline merge corpus-wide (a real layout change: an unmerged inline element
- * becomes a stacked block component).
+ * tag names and over-protect. The RAW SCAN stays scoped to the null-chain
+ * path on purpose — a chain that DID tokenise has an identified host
+ * compound, so harvesting every bare identifier out of its selector text
+ * would guard ancestor tags and pseudo arguments for nothing.
+ *
+ * This paragraph used to reject the NARROWER move too, warning that "widening
+ * the guard to every parseCompound-unsupported rule would keep spans out of
+ * the inline merge corpus-wide (a real layout change: an unmerged inline
+ * element becomes a stacked block component)". wave-33 lane N made exactly
+ * that move for the RIGHTMOST compound (the N2 note above) and MEASURED the
+ * feared cost instead of arguing it: 3 of 10681 bucket-A tests change at all,
+ * none loses text or a component, and the layout change is real on exactly
+ * one of them (−0.0090 SSIM, see the N2 table). "Corpus-wide" was the right
+ * mechanism and the wrong magnitude — the sentence is kept, corrected, rather
+ * than quietly deleted, so the next lane inherits the measurement and not the
+ * fear.
  *
  * Exported so the unit tests can pin the guard.
  */
@@ -1008,12 +1194,35 @@ export function collectStyledTags(rules) {
       continue;
     }
     // Only the rightmost compound identifies the rule's HOST element.
-    const parsed = parseCompound(chain.compounds[chain.compounds.length - 1]);
-    if (parsed.unsupported) continue; // unmatchable rule — can't style anything
+    const rightmost = chain.compounds[chain.compounds.length - 1];
+    const parsed = parseCompound(rightmost);
+    if (parsed.unsupported) {
+      // wave-33 lane N (N2): the rule is unmatchable, but its SUBJECT must
+      // still survive the inline merge — see the doc comment above.
+      const tag = parsed.needTag ?? leadingTypeSelector(rightmost);
+      if (tag && tag !== '*') out.add(tag);
+      continue;
+    }
     // Record the concrete host tag; '*' is excluded (see doc comment).
     if (parsed.needTag && parsed.needTag !== '*') out.add(parsed.needTag);
   }
   return out;
+}
+
+/**
+ * wave-33 lane N (N2): the LEADING type selector of a compound, lower-cased,
+ * or null when the compound does not start with one. Per Selectors-4 §5.1 a
+ * type selector may only appear at the START of a compound, so anchoring at
+ * index 0 is the complete rule — `span[hidden]` → `span`, `.note` → null,
+ * `*[hidden]` → null, `#x` → null. Deliberately NOT a scan: see the guard
+ * hole note in collectStyledTags for why the A2b raw scan is too wide here.
+ *
+ * Exported so the unit tests can pin the extraction rule.
+ */
+export function leadingTypeSelector(compound) {
+  if (typeof compound !== 'string') return null;
+  const m = /^([A-Za-z][A-Za-z0-9-]*)/.exec(compound);
+  return m ? m[1].toLowerCase() : null;
 }
 
 /**
@@ -1950,6 +2159,19 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
         lastCloseStart = c.index;
         cursor = c.index + c[0].length;
       }
+    }
+    // wave-33 lane N (N1): keep this scanner and walkChildren agreeing about
+    // where an UNCLOSED child ends. walkChildren now grants a load-bearing
+    // unclosed wrapper the end-of-fragment body (adoptsUnclosedBody); if we
+    // did not mirror that here, the wrapper's inner text would be counted
+    // TWICE — once as the parent's own `_text` (this scanner falling through
+    // with cursor === tagOpenEnd + 1) and once as the adopted child's own
+    // text in the tree walk. MEASURED on css-break/inline-skipping-
+    // fragmentainer-001, whose `<span style="position:relative">` loses its
+    // `</span>` to an outer div's close-pairing: the `&nbsp;` was emitted on
+    // both the span and its parent. Same gate, same fragment, one answer.
+    if (lastCloseStart < 0 && adoptsUnclosedBody(tagOpen, innerHtml, tagOpenEnd + 1, n)) {
+      cursor = n;
     }
     // wave-12 EXTRACTOR-INLINE: pure-inline run merging. When merging is
     // on and this child is a text-only phrase element with no attributes

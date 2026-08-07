@@ -1441,8 +1441,13 @@ public struct ComponentRenderer: View {
                     // Per-child atom specs from the SHARED UA geometry
                     // table (UAWidgetIntrinsics — the W2/W3 coordination
                     // point), index-aligned with the sorted children.
+                    // Wave-33 C2 — a DECLARED inline-block carries its
+                    // geometry on the wire, so its spec comes from the same
+                    // predicate that admitted it to the run; everything
+                    // else resolves through the UA table as before.
                     specs: FlexboxApplier.sorted(inFlowChildren).map {
-                        UAWidgetIntrinsics.spec(Self.atomKindOf($0))
+                        Self.inlineBlockAtomSpec($0, container: component.properties)
+                            ?? UAWidgetIntrinsics.spec(Self.atomKindOf($0))
                     },
                     // Mixed-content text renders as a leading subview
                     // BEFORE the children — the layout stacks it first.
@@ -1501,6 +1506,42 @@ public struct ComponentRenderer: View {
         positionedChildren(style: style, children: overlayChildren)
     }
 
+    /// Wave 33 (lane C) — the §3.1 PADDING-box height of an AUTO-height
+    /// positioned ancestor, for its abspos children only.
+    ///
+    /// `ContainingBlockBasis.paddingBox(vertical: true)` answers nil when
+    /// this box's own `height` is indefinite, because that basis is built
+    /// from the DECLARED size. CSS 2.2 §10.6.4 nonetheless resolves an
+    /// abspos percentage height against the containing block's USED
+    /// height, and §10.5's degradation to `auto` exempts absolutely
+    /// positioned boxes by its own wording. `AbsposCbUsedHeight`
+    /// evaluates §10.6.3 statically over the in-flow children and refuses
+    /// (nil) everything it cannot know — so this is a pure ADDITION to
+    /// what resolves, never an override.
+    ///
+    /// The `+ paddingBand` converts §10.6.3's CONTENT height into the
+    /// §3.1 padding box the caller's channel is denominated in, through
+    /// the SAME resolver `paddingBox` subtracts with, so the basis and the
+    /// wave-8 overlay anchor cannot drift apart.
+    ///
+    /// WPT-capture gated, matching the AbsposInsetStretch / AbsposAutoMargin
+    /// precedent: every dark-stage baseline render stays byte-identical.
+    private func absposUsedPaddingBoxHeight(style: ComponentStyle) -> CGFloat? {
+        guard wptCaptureMode else { return nil }
+        guard let contentH = AbsposCbUsedHeight.contentHeightPx(
+            ancestor: resolvedProperties,
+            // meta.sourceTag is the only sighting of a bare `<table>` —
+            // the converter never serializes UA defaults (H3's tag lane).
+            ancestorTag: component.meta?.sourceTag,
+            // Own text / inline runs make the content height a line-box
+            // question no static rule can answer (H4).
+            ancestorHasOwnContent: !(component.text ?? "").isEmpty
+                || !(component.meta?.runs ?? []).isEmpty,
+            children: (component.children ?? []).map(\.properties)
+        ) else { return nil }
+        return CGFloat(contentH) + ContainingBlockBasis.paddingBand(style: style, vertical: true)
+    }
+
     /// Shared renderer for positioned children — used by BOTH halves of
     /// the wave-5 z-split (overlay ≥ 0, background < 0) so environment
     /// resets stay identical.
@@ -1523,7 +1564,21 @@ public struct ComponentRenderer: View {
         // ancestor height − painted borders, or nil when indefinite so
         // the child's percent height keeps degrading to auto. This is
         // the fix for the gate capture's zero-area `height: 100%` child.
+        // Wave 33 (lane C) — when the DECLARED channel above has nothing
+        // (this ancestor's `height` is auto), fall back to its USED
+        // content height under CSS 2.2 §10.6.3 plus its own padding band,
+        // i.e. the §3.1 PADDING box the declared lane would have
+        // published. §10.5's percent-height degradation exempts
+        // absolutely positioned boxes by its own wording, and §10.6.4
+        // resolves their percentage against the used height — which is
+        // knowable here because the ancestor's in-flow content is
+        // measured before its out-of-flow descendants are placed. The
+        // declared lane always wins (this is `??`, never an override),
+        // and the rule refuses everything it cannot evaluate statically,
+        // so the only corpus box it moves is absolute-tables-007's green
+        // table. See AbsposCbUsedHeight's H1–H7 pin table.
         let childCBH = ContainingBlockBasis.paddingBox(style: style, vertical: true)
+            ?? absposUsedPaddingBoxHeight(style: style)
         // Lane FLEX-SAFE — when THIS positioned ancestor is a flex
         // container, an inset-less abspos child sits at its STATIC
         // POSITION: the sole-flex-item hypothetical (css-flexbox-1
@@ -2278,11 +2333,45 @@ public struct ComponentRenderer: View {
         // read also guards the wptBlockFlowFillWidth fold, so the set of
         // children the fold skips and the set the atom rows pack are
         // equal by construction.
-        let atomFlags = children.map { Self.isInlineAtom($0) }
+        // Wave-33 lane C (C2) — the SECOND atom family: an author-declared
+        // `display: inline-block` box with a definite size. Same §9.4.2
+        // packing, different geometry SOURCE (the wire, not the UA table),
+        // so it enters the identical run. Deliberately OR'd here and NOT
+        // folded into `isInlineAtom`: that predicate's other consumer is
+        // the wptBlockFlowFillWidth guard, and a declared inline-block
+        // already carries its own width, so widening it there would change
+        // a fold this lane has not measured.
+        let atomFlags = children.map {
+            Self.isInlineAtom($0) || Self.inlineBlockAtomSpec($0, container: component.properties) != nil
+        }
         // Segment once; only a plan with an actual run (≥2 consecutive
         // atoms) leaves the VStack — mirror of the float gate.
         let segments = InlineAtomFlow.segment(atomFlags)
         return segments.contains(where: { $0.isRun }) ? segments : nil
+    }
+
+    /// Wave-33 lane C (C2) — the declared-inline-block AtomSpec for one
+    /// child, or nil when it is not that family. Split out so the two
+    /// consumers (the segmenter above and the run's spec resolution in
+    /// `styledContent`) read the SAME predicate and can never disagree
+    /// about which children are in the run. Static + pure so the XCTest
+    /// pins it against the real wire without a render surface.
+    static func inlineBlockAtomSpec(
+        _ component: IRComponent,
+        container: [IRProperty]
+    ) -> UAWidgetIntrinsics.AtomSpec? {
+        InlineBlockAtom.spec(
+            properties: component.properties,
+            // B6 — own text / inline runs are the statically visible
+            // line-box source; either moves the baseline off the bottom
+            // margin edge (§10.8.1) and the box leaves this lane.
+            hasOwnText: component.text?.isEmpty == false,
+            hasOwnRuns: component.meta?.runs?.isEmpty == false,
+            // B7 — the strut pins are solved for the harness's default line
+            // box; a declared container line-height invalidates them
+            // (absolute-tables-013's `line-height: 0` <td>).
+            containerDeclaresLineHeight: container.contains { $0.type == "LineHeight" }
+        )
     }
 
     /// Wave-20 fix 3 — the per-COMPONENT twin of the per-child atom

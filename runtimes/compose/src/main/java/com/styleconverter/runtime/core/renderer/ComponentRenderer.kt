@@ -106,6 +106,21 @@ import com.styleconverter.runtime.content.CounterStateProvider
 object ComponentRenderer {
 
     /**
+     * Wave 33 (lane C) — the draw order of a `z-index: auto` POSITIONED
+     * descendant, CSS 2.1 Appendix E step 8.
+     *
+     * Fractional on purpose: it must sit strictly ABOVE everything Compose
+     * leaves at the implicit 0 (the in-flow, non-positioned siblings of
+     * Appendix E step 4, and the negative-z backdrop layer) and strictly
+     * BELOW any author-declared positive `z-index` (step 9), which
+     * PositionApplier applies as the integer the author wrote. Any value
+     * in (0, 1) satisfies both; 0.5 is the midpoint.
+     *
+     * See [absposPaintOrder] for where it applies and why.
+     */
+    private const val AUTO_Z_POSITIONED_DESCENDANT = 0.5f
+
+    /**
      * One-shot gate for the multi-line sub-natural line-height log — the
      * honest-limitation notice (line boxes stay uncompressed; only the
      * glyph-run PLACEMENT is compensated) must appear once per process,
@@ -1100,7 +1115,25 @@ object ComponentRenderer {
         val wptCaptureModeForStretch = LocalWptCaptureMode.current
         val effectiveProperties =
             if (isOutOfFlowChild(animatedProperties)) {
-                val pctResolved = resolveOutOfFlowPercentSizes(animatedProperties, containingBlock)
+                // Wave-33 lane C — the ABSPOS view of the containing block.
+                // css-position-3 §3.1 makes an out-of-flow box's containing
+                // block the positioned ancestor's PADDING box, and CSS 2.2
+                // §10.6.4 resolves its percentage height against that box's
+                // USED height; §10.5's "compute to auto" degradation
+                // explicitly exempts absolutely positioned boxes. So when
+                // the declared-size channel had nothing (auto-height
+                // ancestor) but the §10.6.3 static evaluation did, the
+                // out-of-flow lane — and ONLY the out-of-flow lane — sees
+                // the used height in `heightPx`. Identity (same instance)
+                // whenever the ancestor's height was already definite or
+                // the rule refused (AbsposCbUsedHeight H1–H7), which is
+                // every component in the corpus except
+                // absolute-tables-007's green table.
+                val absposCb =
+                    if (containingBlock.heightPx == null && containingBlock.absHeightPx != null) {
+                        containingBlock.copy(heightPx = containingBlock.absHeightPx)
+                    } else containingBlock
+                val pctResolved = resolveOutOfFlowPercentSizes(animatedProperties, absposCb)
                 if (wptCaptureModeForStretch) {
                     val stretched = com.styleconverter.runtime.layout.position.AbsposInsetStretch
                         // `_tag` (meta.sourceTag) supplies the UA display
@@ -1108,7 +1141,7 @@ object ComponentRenderer {
                         // absolute-tables-008…011 IRs carry `<table>` with
                         // NO Display property, so the declared-keyword
                         // channel alone never sees them.
-                        .inject(pctResolved, containingBlock, component._tag)
+                        .inject(pctResolved, absposCb, component._tag)
                     // Wave-31 lane T rides the same out-of-flow branch, one
                     // step LATER: with the used size now known, resolve any
                     // `auto` margins per CSS 2.1 §10.3.7 (inline) / §10.6.4
@@ -1120,7 +1153,7 @@ object ComponentRenderer {
                     // every box whose split is 0/0 or whose axis has an
                     // auto inset/size, i.e. everything else in the corpus.
                     com.styleconverter.runtime.layout.position.AbsposAutoMargin
-                        .inject(stretched, containingBlock)
+                        .inject(stretched, absposCb)
                 } else pctResolved
             } else animatedProperties
 
@@ -1517,9 +1550,37 @@ object ComponentRenderer {
         // The containing block THIS component establishes for its children:
         // its resolved content box (width channel, CSS 2.1 §10.1). Unknown
         // axes stay null — resolution then leaves child % values untouched.
-        val childContainingBlock = androidx.compose.runtime.remember(effectiveProperties, containingBlock) {
-            com.styleconverter.runtime.core.variables.DynamicValueResolver
+        val childContainingBlock = androidx.compose.runtime.remember(
+            effectiveProperties, containingBlock, component.children, wptCaptureModeForStretch,
+        ) {
+            val declared = com.styleconverter.runtime.core.variables.DynamicValueResolver
                 .childContainingBlock(effectiveProperties, containingBlock)
+            // Wave-33 lane C — the auto-height ABSPOS fallback. When the
+            // declared channel above found no block size (this box's height
+            // is `auto`), evaluate CSS 2.2 §10.6.3 statically over the
+            // in-flow children and publish the result on the abspos-only
+            // side channel; the out-of-flow branch at the top of
+            // RenderComponent is its sole reader, so in-flow `%` heights
+            // keep degrading per §10.5 exactly as before. WPT-capture
+            // gated so all 363 committed dark-stage baselines are
+            // byte-identical by construction, matching the
+            // AbsposInsetStretch / AbsposAutoMargin precedent.
+            if (!wptCaptureModeForStretch || declared.heightPx != null) declared
+            else declared.copy(
+                absHeightPx = com.styleconverter.runtime.layout.position.AbsposCbUsedHeight
+                    .contentHeightPx(
+                        ancestor = effectiveProperties,
+                        // `_tag` (meta.sourceTag) is the only sighting of a
+                        // bare `<table>`: the converter never serializes UA
+                        // defaults (same channel AbsposInsetStretch.S5 uses).
+                        ancestorTag = component._tag,
+                        // Own text / inline runs make the content height a
+                        // line-box question no static rule can answer (H4).
+                        ancestorHasOwnContent =
+                            !component._text.isNullOrEmpty() || !component.runs.isNullOrEmpty(),
+                        children = component.children.orEmpty().map { it.properties },
+                    )?.toFloat(),
+            )
         }
         // Wave-17 positioned-ancestor channel (CSS 2.1 §10.1): descendants
         // of a positioned box (position != static) have a positioned
@@ -2478,7 +2539,7 @@ object ComponentRenderer {
                 // gate; run-free containers fall through to the frozen loop.
                 val inlineSegments =
                     if (LocalWptCaptureMode.current && floatSegments == null)
-                        blockInlineAtomSegments(component.children)
+                        blockInlineAtomSegments(component.children, component.properties)
                     else null
                 if (floatSegments != null) {
                     // Segment walk, sibling order preserved: runs render
@@ -2539,8 +2600,14 @@ object ComponentRenderer {
                             // the same boxes — UAWidgetIntrinsics is the
                             // coordination point).
                             val specs = seg.indices.map { i ->
-                                com.styleconverter.runtime.layout.UAWidgetIntrinsics
-                                    .spec(atomKindOf(component.children[i]))
+                                // Wave-33 C2 — a DECLARED inline-block
+                                // carries its geometry on the wire, so its
+                                // spec comes from the same predicate that
+                                // admitted it to the run; everything else
+                                // resolves through the UA table as before.
+                                inlineBlockAtomSpec(component.children[i], component.properties)
+                                    ?: com.styleconverter.runtime.layout.UAWidgetIntrinsics
+                                        .spec(atomKindOf(component.children[i]))
                             }
                             com.styleconverter.runtime.layout.InlineFlowLayout(
                                 atoms = specs
@@ -3174,8 +3241,7 @@ object ComponentRenderer {
         // which would compose anchor and offset from opposite edges).
         val positionConfig = com.styleconverter.runtime.layout.position.PositionedAncestorAnchor
             .anchorGate(child.properties.map { it.type to it.data })
-        RenderComponent(
-            child,
+        val mount =
             if (com.styleconverter.runtime.layout.position.PositionedAncestorAnchor
                     .anchors(positionConfig)
             ) {
@@ -3187,8 +3253,84 @@ object ComponentRenderer {
                 // The wave-8 mount, verbatim (A2/A3/A4 and every in-flow-
                 // anchored box).
                 absposOverflowMeasure()
-            },
-        )
+            }
+        RenderComponent(child, absposPaintOrder(child).then(mount))
+    }
+
+    /**
+     * Wave 33 (lane C) — CSS 2.1 Appendix E paint order for a `z-index:
+     * auto` positioned child of a `position: relative` container.
+     *
+     * ## The measured defect
+     * The positioned-container branch of [RenderContent] emits every child
+     * into ONE `Box` in DOCUMENT order, and a Compose `Box` draws later
+     * children on top. Appendix E does not: step 4 paints the in-flow,
+     * non-positioned block boxes, and step 8 paints the positioned
+     * descendants with `z-index: auto | 0`. So an abspos child that comes
+     * FIRST in the source must still paint LAST.
+     *
+     * css-tables/absolute-tables-007 is the pixel proof. Its relative
+     * wrapper holds `[abspos green table, in-flow red 100px block]` in that
+     * order; once the wave-33 cb-height channel gave the green table its
+     * 100×100 used size, Compose painted it and then painted the red block
+     * straight over it — a probe with the two children SWAPPED
+     * (_diag33/laneC/probe, red first) rendered the identical IR fully
+     * GREEN, isolating draw order from sizing. The Chromium ref is green.
+     *
+     * ## Why a fractional z and not a reorder
+     * `Modifier.zIndex` reorders DRAWING without touching measurement,
+     * placement or composition identity, so nothing else in the tree can
+     * observe it. The value 0.5 places the box exactly where Appendix E
+     * does: above the in-flow siblings and the negative-z backdrop layer
+     * (both implicit 0 — step 4), below any DECLARED positive `z-index`
+     * (step 9), above any declared negative one (step 3). A child that
+     * declares its own `z-index` is left alone entirely: `PositionApplier`
+     * already puts that value on the child's own chain, and an outer
+     * wrapper z would shadow it (the outer node's z is what orders it in
+     * the container).
+     *
+     * ## Blast radius, enumerated before the change
+     * Only a container whose abspos child PRECEDES an in-flow sibling can
+     * observe this — everything else already drew in Appendix-E order by
+     * accident of document order. Across all 27 frozen wave32-final
+     * sections that is THREE tests (css-tables/absolute-tables-007,
+     * css-multicol/abspos-multicol-in-second-outer-clipped,
+     * css-text/bidi/bidi-lines-002), and across the committed dark-stage
+     * fixtures exactly ONE (fixtures/fidelity/trees/block-flow.json, whose
+     * abspos red 60×30 at (20,10) is currently overpainted by the in-flow
+     * orange 100×30 at (0,0) — the same defect, and the same divergence
+     * from web). WPT-capture gated so that fixture's committed baseline
+     * does NOT move in this wave; re-baselining it is a deferred item, not
+     * a claim that the dark-stage path is right.
+     */
+    @Composable
+    private fun absposPaintOrder(child: IRComponent): Modifier =
+        // Capture-gated: the 363 committed dark-stage baselines stay
+        // byte-identical, matching the AbsposInsetStretch / AbsposAutoMargin
+        // precedent for renderer-behaviour corrections.
+        autoZForPositionedChild(child.properties, LocalWptCaptureMode.current)
+            ?.let { Modifier.zIndex(it) } ?: Modifier
+
+    /**
+     * The pure half of [absposPaintOrder] — the draw order to FORCE on a
+     * positioned child, or null to leave its chain untouched. Pure over the
+     * IR so the whole decision is JVM-pinnable without Robolectric.
+     *
+     * - Outside WPT capture → null (the frozen dark-stage guarantee).
+     * - A DECLARED `z-index` → null. PositionApplier already puts that
+     *   value on the child's own chain, and an outer wrapper z would
+     *   shadow it (the outer node's z is what orders it in the container).
+     * - Otherwise → [AUTO_Z_POSITIONED_DESCENDANT], Appendix E step 8.
+     */
+    internal fun autoZForPositionedChild(
+        properties: List<IRProperty>,
+        wptCaptureMode: Boolean,
+    ): Float? {
+        if (!wptCaptureMode) return null
+        if (com.styleconverter.runtime.core.placement.ItemPlacementExtractor
+                .zIndex(properties) != null
+        ) return null
+        return AUTO_Z_POSITIONED_DESCENDANT
     }
 
     /**
@@ -3513,7 +3655,13 @@ object ComponentRenderer {
      * only derives the per-child facts from the decoded IR.
      */
     internal fun blockInlineAtomSegments(
-        children: List<IRComponent>
+        children: List<IRComponent>,
+        // Wave-33 C2 — the CONTAINER's own declarations, read only for
+        // InlineBlockAtom's B7 line-box gate. Defaulted so every existing
+        // wave-20 caller and JVM pin keeps its exact signature (and its
+        // exact widget-lane behaviour: B7 can only ever REFUSE the new
+        // inline-block family, never touch a UA widget atom).
+        containerProperties: List<IRProperty> = emptyList(),
     ): List<com.styleconverter.runtime.layout.InlineAtomFlow.Segment>? {
         // Per-sibling atom facts from the decoded wire: originating tag
         // (meta.sourceTag → _tag), a declared Display override, element
@@ -3527,13 +3675,43 @@ object ComponentRenderer {
                     ?.let { ValueExtractors.extractKeyword(it.data)?.uppercase() },
                 hasElementChildren = !child.children.isNullOrEmpty(),
                 hasText = !child._text.isNullOrEmpty(),
-            )
+            // Wave-33 lane C (C2) — the SECOND atom family: an
+            // author-declared `display: inline-block` box with a definite
+            // size. Same §9.4.2 packing, different geometry SOURCE (the
+            // wire, not the UA table), so it enters the identical run.
+            // See InlineBlockAtom's B1–B6 gate table and its enumerated
+            // 8-test blast radius.
+            ) || inlineBlockAtomSpec(child, containerProperties) != null
         }
         // Segment once; only a plan with an actual run (≥2 consecutive
         // atoms) leaves the frozen block loop — mirror of the float gate.
         val segments = com.styleconverter.runtime.layout.InlineAtomFlow.segment(atomFlags)
         return if (segments.any { it.isRun }) segments else null
     }
+
+    /**
+     * Wave-33 lane C (C2) — the declared-inline-block AtomSpec for one
+     * child, or null when it is not that family. Split out so the two
+     * consumers (the segmenter above and the run's spec resolution in
+     * the block child loop) read the SAME predicate and can never
+     * disagree about which children are in the run.
+     */
+    internal fun inlineBlockAtomSpec(
+        child: IRComponent,
+        containerProperties: List<IRProperty>,
+    ): com.styleconverter.runtime.layout.UAWidgetIntrinsics.AtomSpec? =
+        com.styleconverter.runtime.layout.InlineBlockAtom.spec(
+            properties = child.properties,
+            // B6 — own text / inline runs are the statically visible
+            // line-box source; either moves the baseline off the bottom
+            // margin edge (§10.8.1) and the box leaves this lane.
+            hasOwnText = !child._text.isNullOrEmpty(),
+            hasOwnRuns = !child.runs.isNullOrEmpty(),
+            // B7 — the strut pins are solved for the harness's default
+            // line box; a declared container line-height invalidates them
+            // (absolute-tables-013's `line-height: 0` <td>).
+            containerDeclaresLineHeight = containerProperties.any { it.type == "LineHeight" },
+        )
 
     /**
      * Wave-20 W3 — a run member's widget kind for the shared UA geometry
