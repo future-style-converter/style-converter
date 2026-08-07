@@ -637,6 +637,32 @@ dirs + WPT corpus are gitignored):
   the new meta key, so gates force fresh installs. 27 sections; zero
   regressions; 327-net clean. Totals: **web 269/302, iOS 239/289,
   Android 234/289**.
+  Wave 33 (`tools/titan/results/corpus-v5-8.json`): **css-tables
+  perfect on web (11/11) and Android (11/11), iOS 10/11**. The
+  extractor's wrapper-nesting fix — an unclosed tag whose depth
+  counter consumed the closer left the `-100px` wrapper childless, so
+  the abspos table emitted as its sibling and no engine could compute
+  the §10.3.7 static position; a conservative adoption gate (measured
+  against the HTML-spec blunt rule, which loses content via the
+  depth-5 recursion cap) re-parents it, and absolute-tables-010
+  flipped on **all three platforms** with zero engine changes (corpus
+  drift: 9 of 10,681 fixtures, no violations). The containing-block
+  used-height channel landed on both natives (`AbsposCbUsedHeight`
+  twins, CSS 2.2 §10.6.3 behind a 7-gate refusal table, abspos-only)
+  plus a Compose CSS 2.1 Appendix-E paint-order fix —
+  absolute-tables-007 flipped on both natives. The inline-block atom
+  family joined the wave-20 inline flow (author `display:inline-block`
+  boxes feed the pinned §9.4.2 packer): backdrop-filter-boundary
+  +0.28 on both natives. The **inline-FC ROI was measured before
+  building**: the native line-box gap is worth 4 cells, not 40 — of
+  105 failing native cells, 4 are stacking-recoverable, 18 are
+  common-mode with web (extractor-side splits behind the font wall),
+  77 have no stacking term; the campaign will NOT build a native
+  inline formatting context. One harness item queued from that
+  diagnosis: composed-canvas document ROOTS stack in the harness's own
+  Column. 27 sections; zero regressions; 327-net clean. Totals:
+  **web 270/302, iOS 241/289, Android 236/289**. Eight web-perfect
+  sections.
 
 ## Test suites
 
@@ -644,9 +670,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 242 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1111 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1869 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1115 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1182 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1912 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1154 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1190 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

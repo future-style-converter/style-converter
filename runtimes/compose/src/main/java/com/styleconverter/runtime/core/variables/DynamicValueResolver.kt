@@ -45,7 +45,28 @@ import kotlinx.serialization.json.put
  */
 data class ContainingBlock(
     val widthPx: Float? = null,
-    val heightPx: Float? = null
+    val heightPx: Float? = null,
+    /**
+     * Wave 33 (lane C) — the ABSPOS-ONLY block-axis fallback: the
+     * ancestor's USED content height under CSS 2.2 §10.6.3, published
+     * when [heightPx] is null because the ancestor's block size is `auto`.
+     *
+     * A separate field rather than a value folded into [heightPx] because
+     * the two answer DIFFERENT questions. CSS 2.2 §10.5 degrades a
+     * percentage height to `auto` when the containing block's height
+     * "is not specified explicitly and this element is not absolutely
+     * positioned" — the escape clause is the whole point: an ABSPOS box's
+     * containing block is the positioned ancestor's PADDING box
+     * (css-position-3 §3.1) and §10.6.4 resolves its percentage against
+     * that box's USED height, which is known because the ancestor's own
+     * in-flow content is measured before its out-of-flow descendants are
+     * placed. An IN-FLOW child gets no such escape and must keep seeing
+     * null here, so only ComponentRenderer's out-of-flow branch reads
+     * this field. Null whenever [heightPx] is definite (nothing to fall
+     * back to) or the §10.6.3 rule refused to answer
+     * ([com.styleconverter.runtime.layout.position.AbsposCbUsedHeight]).
+     */
+    val absHeightPx: Float? = null
 )
 
 /**

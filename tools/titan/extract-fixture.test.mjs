@@ -81,6 +81,11 @@ import {
   // wave-32 lane R: the ordered inline-content list (`_runs`).
   buildRunProto,
   alignRuns,
+  // wave-33 lane N: the load-bearing unclosed-wrapper adoption (N1) and the
+  // rightmost-unsupported merge-guard hole (N2).
+  hasBoxAffectingInlineStyle,
+  adoptsUnclosedBody,
+  leadingTypeSelector,
 } from './extract-fixture.mjs';
 
 // ── stripComments ───────────────────────────────────────────────────────────
@@ -4491,4 +4496,144 @@ test('fix-T1: the suppression is a per-property argument to uaLinkProps', () => 
     { color: '#0000EE', 'text-decoration-line': 'underline' });
   // Not a hyperlink → still null, suppression or not.
   assert.equal(uaLinkProps('a', {}, {}, new Set()), null);
+});
+
+// ── wave-33 lane N (N1): the load-bearing unclosed-wrapper adoption ──────────
+
+test('N1: hasBoxAffectingInlineStyle recognises the offset/CB/extent set', () => {
+  // Offsets — the wrapper's content edge is where its children start.
+  assert.equal(hasBoxAffectingInlineStyle('margin-left: -100px'), true);
+  assert.equal(hasBoxAffectingInlineStyle('padding:4px'), true);
+  assert.equal(hasBoxAffectingInlineStyle('border-block-end-width: 2px'), true);
+  // Containing-block establishment.
+  assert.equal(hasBoxAffectingInlineStyle('position:relative;'), true);
+  assert.equal(hasBoxAffectingInlineStyle('transform: translateX(4px)'), true);
+  // Extent.
+  assert.equal(hasBoxAffectingInlineStyle('display: inline-block; color: red'), true);
+  assert.equal(hasBoxAffectingInlineStyle('overflow: hidden'), true);
+  assert.equal(hasBoxAffectingInlineStyle('width:50px'), true);
+  // NOT box-affecting — paint-only / inherited text properties.
+  assert.equal(hasBoxAffectingInlineStyle('color: red; background: green'), false);
+  assert.equal(hasBoxAffectingInlineStyle('font-size: 2em'), false);
+  // Prefix matching must not fire on an unrelated property that merely
+  // starts with the same letters (`border` vs `border-spacing` is a real
+  // prefix and SHOULD fire; `overflow-wrap` is a text property but is
+  // accepted by design — over-adopting a wrapper is the cheap direction).
+  assert.equal(hasBoxAffectingInlineStyle('widows: 2'), false);
+  assert.equal(hasBoxAffectingInlineStyle('topical: x'), false);
+  // Degenerate inputs never throw and never adopt.
+  assert.equal(hasBoxAffectingInlineStyle(''), false);
+  assert.equal(hasBoxAffectingInlineStyle(null), false);
+  assert.equal(hasBoxAffectingInlineStyle('not-a-declaration'), false);
+});
+
+test('N1: adoptsUnclosedBody needs BOTH an element body and a load-bearing style', () => {
+  const body = '<div style="margin-left:-100px"><table></table>';
+  const open = '<div style="margin-left:-100px">';
+  const from = open.length;
+  // Both conditions hold.
+  assert.equal(adoptsUnclosedBody(open, body, from, body.length), true);
+  // No element in the adopted body — adoption would change no structure.
+  const textOnly = `${open}just text`;
+  assert.equal(adoptsUnclosedBody(open, textOnly, from, textOnly.length), false);
+  // Empty body.
+  assert.equal(adoptsUnclosedBody(open, open, from, open.length), false);
+  // Not load-bearing: no style attribute at all, or a paint-only one.
+  const plain = '<div class=container>';
+  const plainBody = `${plain}<table></table>`;
+  assert.equal(adoptsUnclosedBody(plain, plainBody, plain.length, plainBody.length), false);
+  const paint = '<div style="color:red">';
+  const paintBody = `${paint}<table></table>`;
+  assert.equal(adoptsUnclosedBody(paint, paintBody, paint.length, paintBody.length), false);
+  // Single-quoted and unquoted style attributes parse the same.
+  const sq = "<div style='width:10px'>";
+  const sqBody = `${sq}<i></i>`;
+  assert.equal(adoptsUnclosedBody(sq, sqBody, sq.length, sqBody.length), true);
+});
+
+test('N1: css-tables/absolute-tables-010 — the abspos table keeps its wrapper', () => {
+  // The real shape: ONE `</div>` for TWO `<div>`s, so the outer div's
+  // close-pairing consumes it and the inner -100px wrapper is left unclosed.
+  // Pre-wave-33 the wrapper came out EMPTY and the <table> became its
+  // SIBLING, which deletes the parent link the abspos static position
+  // (CSS 2.1 §10.3.7) is computed from.
+  const html = '<body><div class="container" style="margin-left: 100px;">'
+    + '<div style="margin-left: -100px;"><table><td>X</td></table></div></body>';
+  const tree = extractBodyTreeNested(html, 5, null);
+  assert.equal(tree.length, 1);
+  const container = tree[0];
+  assert.equal(container.children.length, 1, 'the table must NOT be a sibling');
+  const wrapper = container.children[0];
+  assert.equal(wrapper.attrs.style, 'margin-left: -100px;');
+  assert.equal(wrapper.children.length, 1);
+  assert.equal(wrapper.children[0].tag, 'table');
+});
+
+test('N1: a NON-load-bearing unclosed wrapper still flattens (the depth budget)', () => {
+  // text-transform-capitalize-035's shape — six `<div lang=…>` blocks each
+  // terminated by a typo'd `<div>`. Adopting these nests 12 deep, past the
+  // maxDepth-5 walk, where the tail is silently dropped. Flat-but-complete
+  // beats nested-but-truncated, so a wrapper with no box-affecting INLINE
+  // style keeps the pre-wave-33 emission.
+  const html = '<body><div lang=ca><span>a</span><div><div lang=sc><span>b</span><div></body>';
+  const tree = extractBodyTreeNested(html, 5, null);
+  const tags = tree.map((n) => n.tag);
+  assert.deepEqual(tags, ['div', 'span', 'div', 'div', 'span', 'div']);
+});
+
+test('N1: the own-text scanner adopts on the SAME gate as the tree walker', () => {
+  // Both walkers must agree about where an unclosed child ends, or the
+  // child's text is counted twice — once as the parent's own text (scanner
+  // falling through) and once as the adopted child's (tree walk).
+  // css-break/inline-skipping-fragmentainer-001's `<span
+  // style="position:relative">` is the measured case.
+  const inner = '<span style="position:relative;">TEXT<div style="width:50px"></div>';
+  assert.equal(extractOwnText(inner), '', 'the span owns TEXT, not its parent');
+  // Without a load-bearing style the scanner keeps its legacy fallthrough,
+  // exactly matching walkChildren's zero-length emission.
+  assert.equal(extractOwnText('<span>TEXT<div></div>'), 'TEXT');
+});
+
+// ── wave-33 lane N (N2): the rightmost-unsupported merge-guard hole ──────────
+
+test('N2: leadingTypeSelector is anchored, not a scan', () => {
+  assert.equal(leadingTypeSelector('span[hidden]'), 'span');
+  assert.equal(leadingTypeSelector('B:hover'), 'b');
+  assert.equal(leadingTypeSelector('em::first-line'), 'em');
+  // No leading type selector — nothing to protect.
+  assert.equal(leadingTypeSelector('.note[hidden]'), null);
+  assert.equal(leadingTypeSelector('#x[hidden]'), null);
+  assert.equal(leadingTypeSelector('*[hidden]'), null);
+  assert.equal(leadingTypeSelector(':hover'), null);
+  assert.equal(leadingTypeSelector(''), null);
+  assert.equal(leadingTypeSelector(null), null);
+});
+
+test('N2: an unsupported RIGHTMOST compound still guards its tag', () => {
+  // The two diagnosed shapes. Pre-wave-33 both contributed nothing, so the
+  // styled element was inline-merged away and the declarations became
+  // undeliverable by ANY channel.
+  assert.deepEqual([...collectStyledTags([{ selector: 'span[hidden]' }])], ['span']);
+  assert.deepEqual([...collectStyledTags([{ selector: 'b:hover' }])], ['b']);
+  // The tag is taken from the RIGHTMOST compound only — an ancestor tag in
+  // the chain is not protected (it needs element descendants to match, and
+  // a mergeable child is text-only by definition).
+  assert.deepEqual([...collectStyledTags([{ selector: 'div span[hidden]' }])], ['span']);
+  // Nothing identifiable → nothing added (no widening to the A2b raw scan).
+  assert.deepEqual([...collectStyledTags([{ selector: '.note:hover' }])], []);
+  assert.deepEqual([...collectStyledTags([{ selector: '*[hidden]' }])], []);
+  // Supported rules are unchanged.
+  assert.deepEqual([...collectStyledTags([{ selector: 'code' }])], ['code']);
+});
+
+test('N2: the guarded span survives the inline merge', () => {
+  // selectors-4/lang-021's shape: `span:lang(...)` is unsupported, and the
+  // inner <span> is attribute-free text-only — exactly what
+  // isPureInlineMergeable absorbs. Keeping it is the whole point of the test.
+  const rules = parseCss('span:lang("*-gb") { color: green }');
+  const styled = collectStyledTags(rules);
+  assert.equal(styled.has('span'), true);
+  assert.equal(isPureInlineMergeable('span', {}, 'green text', styled), false);
+  // …and with the guard empty (pre-fix behaviour) it would have merged.
+  assert.equal(isPureInlineMergeable('span', {}, 'green text', new Set()), true);
 });
