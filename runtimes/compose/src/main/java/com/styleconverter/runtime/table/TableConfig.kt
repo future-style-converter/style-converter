@@ -29,7 +29,22 @@ data class TableConfig(
     /** Caption position */
     val captionSide: CaptionSide = CaptionSide.TOP,
     /** Empty cells visibility */
-    val emptyCells: EmptyCells = EmptyCells.SHOW
+    val emptyCells: EmptyCells = EmptyCells.SHOW,
+    /**
+     * Wave 34 (lane T) — the USED `border-spacing` (CSS 2.1 §17.6.1),
+     * resolved by [TableSeparatedTracks.usedSpacing]: the declared value
+     * when there is one, the HTML UA sheet's 2px for a bare `<table>`
+     * ELEMENT otherwise, and null under `border-collapse: collapse`
+     * (§17.6.2 ignores border-spacing entirely).
+     *
+     * Distinct from [borderSpacingHorizontal]/[borderSpacingVertical],
+     * which stay exactly what the WIRE declared — [hasTableConfig] reads
+     * those, and folding a UA default into them would flip that predicate
+     * for every table in the corpus.
+     *
+     * Null default keeps every pre-wave-34 construction byte-identical.
+     */
+    val usedSpacing: TableSeparatedTracks.Spacing? = null
 ) {
     val hasTableConfig: Boolean
         get() = layout != TableLayout.AUTO ||
@@ -43,14 +58,19 @@ data class TableConfig(
         get() = if (borderCollapse == BorderCollapse.COLLAPSE) {
             0.dp
         } else {
-            borderSpacingHorizontal ?: 0.dp
+            // Wave 34 (lane T): the §17.6.1 used value when the extractor
+            // resolved one — that is the lane carrying the HTML UA 2px for
+            // a bare `<table>`. It can only DIFFER from the line below when
+            // a source tag was supplied, so every existing call site keeps
+            // its exact number.
+            usedSpacing?.horizontalPx?.dp ?: borderSpacingHorizontal ?: 0.dp
         }
 
     val effectiveSpacingVertical: Dp
         get() = if (borderCollapse == BorderCollapse.COLLAPSE) {
             0.dp
         } else {
-            borderSpacingVertical ?: 0.dp
+            usedSpacing?.verticalPx?.dp ?: borderSpacingVertical ?: 0.dp
         }
 }
 

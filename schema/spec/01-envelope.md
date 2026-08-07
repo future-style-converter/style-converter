@@ -47,8 +47,66 @@ Implementing code:
   `name → [{offset: 0..1, properties: [{type,data}…]}]`, offset-sorted.
   Omit-when-empty so pre-motion documents stay byte-identical. Full
   contract: 07-animations.md §1; golden: `v2/keyframes.json`.
+- `fontFaces` (optional, **additive minor-revision key** — wave 34):
+  document-level webfont declarations. Full contract: §5 below;
+  golden: `v2/font-faces.json`.
 - No other top-level keys exist. Validators reject unknown top-level
   keys (`additionalProperties: false`).
+
+## §5 `fontFaces` — the document-level webfont list
+
+```json
+"fontFaces": [
+  { "family": "test",
+    "src": "css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff",
+    "weight": "400 700",
+    "style": "oblique 20deg" }
+]
+```
+
+The wire twin of CSS `@font-face`. It sits at the **document** level and
+not on a component because css-fonts-4 §4.1 puts a face in the
+*document's font database*, not on any element — the same reason
+`keyframes` is document-level.
+
+| key | presence | rule |
+|---|---|---|
+| `family` | required | the `font-family` descriptor (§4.2), **unquoted**. `"test"` and `test` are the same family and normalize to the same string, so no consumer re-tokenises. |
+| `src` | required | path to the font **file**, relative to the producing pipeline's corpus root (`tools/wpt/` for the titan extractor). From the FIRST `url()` arm of the §4.3 `<font-src-list>`; `local()` arms are never emitted. |
+| `weight` | omit-when-absent | the `font-weight` descriptor **as authored** (§4.4) — a single value or a range (`"400 700"`). Absent = the §4.4 initial `normal`. |
+| `style` | omit-when-absent | the `font-style` descriptor **as authored** (§4.5). Absent = the §4.5 initial `normal`. |
+
+Entry order is **document order** and is meaningful: §4.1 makes a later
+face with the same `(family, weight, style)` win.
+
+**Why a path and not a payload.** An inlined face costs 50–500 KB raw
+(3× that percent-encoded, ~1.3× base64) *per entry*, and a combined
+section document carries tens of tests; the path costs ~70 bytes and
+every consumer that can reach the corpus can reach the file. Absolute
+paths are forbidden for the same reason fixtures are committed — they do
+not survive the machine hop. The producer guarantees the file existed on
+disk at emit time, so a reader that resolves it and finds nothing is
+looking at a corrupted asset root, not a tolerated wire state.
+
+**Droppable, but not a `meta` member.** Ignoring `fontFaces` costs
+FIDELITY (referencing elements render in the reader's fallback face),
+never structure — the same posture as the component-level `meta` group
+(04-metadata-fields.md). It is nonetheless a top-level key rather than a
+new document-level `meta` object: there is no document `meta` today, and
+minting one to hold a single member would freeze a larger surface than
+the member itself. A future second droppable document-level hint is the
+point at which grouping earns its keep.
+
+**Consumption is deliberately asymmetric today, and readers must not
+infer more than the key states.** The key says *this document declares
+this face and here is its file*. It does not promise any reader loaded
+it. As of wave 34 the web harness injects a real `@font-face` rule from
+each entry; the Compose and SwiftUI runtimes **decode and ignore** it
+(neither has a runtime face-registration hook yet), which is why the
+entry carries a file path a future native hop can hand straight to
+`Typeface.Builder` / `CTFontManagerRegisterFontsForURL`. The WPT
+classifier keeps excluding `@font-face` tests whole
+(`requires-font-face`) until that native half lands.
 
 ## v2 component
 

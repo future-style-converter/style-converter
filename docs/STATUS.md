@@ -663,16 +663,49 @@ dirs + WPT corpus are gitignored):
   Column. 27 sections; zero regressions; 327-net clean. Totals:
   **web 270/302, iOS 241/289, Android 236/289**. Eight web-perfect
   sections.
+  Wave 34 (`tools/titan/results/corpus-v5-9.json`) was the maximum
+  wave — nine builder lanes. **css-tables is perfect on all three
+  platforms** (the iOS separated-borders track model with the §17.6.1
+  2px UA band, arithmetically cross-checked against the converter's
+  own serialized geometry; dynamic-001 iOS 0.9489→1.0000). The
+  harness learned root row-flow (consecutive inline-level document
+  roots pack per §9.4.2 instead of stacking in the canvas Column):
+  static-inside-inline-block and clip-rect-2 flipped on both natives,
+  each landing at its probe ceiling exactly — CSS2 natives 10/12,
+  filter-effects natives 6/11. The backdrop edge model was corrected
+  against browser ground truth (Chrome mirrors at the sample edge;
+  the wave-26 grow-by-3σ decision had never checked a browser) — the
+  lime-bleed signature now matches Chrome to 0.2. The font boundary
+  shipped honestly asymmetric: per-script run-split fallback + five
+  checksummed Noto faces on both natives, enabled on Android
+  (measured +0.14), disabled on iOS (measured −0.31 — its system
+  faces are already metrically Noto); the '10+' family does not
+  converge, so Rule 43 stays intact and no ref-rev was bumped. The
+  `meta.fontFaces` wire landed end-to-end (schema + golden × 4
+  codebases + the web /wpt-font/ route); the section-pipeline hop is
+  the named next step. `_runs` generalized to every text+child
+  interleave (935 files, addition-only proven); `:has()` went static.
+  Two sections joined: **css-cascade 10/10/10** and
+  **css-writing-modes with web perfect 12/12** at first capture.
+  Depth honesty, measured web-only: at --max-tests 24 the seven
+  perfect sections hold 67/82 in the tail — only css-position stays
+  perfect; the gate is NOT expanded until natives are measured at
+  depth. The transforms premise was refuted (the real gap is
+  css-transforms-1 §3 transform-as-containing-block, designed for
+  wave 35), and the two natives' out-of-flow rule tables were found
+  to have diverged (parity item). 29 sections; zero regressions;
+  327-net clean. Totals: **web 292/326, iOS 262/313, Android
+  254/313**. Nine web-perfect sections.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 242 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1111 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1912 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1154 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1190 |
+| converter (Kotlin) | `./gradlew :converter:test` | 245 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1116 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1988 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1234 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1219 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

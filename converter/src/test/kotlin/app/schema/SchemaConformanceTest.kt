@@ -359,14 +359,35 @@ class SchemaConformanceTest {
             // additive revision (spec 05 process; spec 07 defines the
             // timeline shape) — optional, omitted when no @keyframes.
             val requiredDocKeys = setOf("irVersion", "minReaderVersion", "components")
+            // wave-34 lane F2: "fontFaces" joined the envelope under the same
+            // spec-05 additive rule (spec 01 §5 defines the entry shape).
+            val optionalDocKeys = setOf("keyframes", "fontFaces")
             assertTrue(
                 doc.keys.containsAll(requiredDocKeys),
                 "${file.name}: v2 document must carry the version pair + components, found ${doc.keys}"
             )
             assertTrue(
-                (requiredDocKeys + "keyframes").containsAll(doc.keys),
-                "${file.name}: v2 document has unknown envelope keys: ${doc.keys - requiredDocKeys - "keyframes"}"
+                (requiredDocKeys + optionalDocKeys).containsAll(doc.keys),
+                "${file.name}: v2 document has unknown envelope keys: ${doc.keys - requiredDocKeys - optionalDocKeys}"
             )
+            // When present, fontFaces is a non-empty list whose every entry
+            // carries the two REQUIRED descriptors as non-blank strings; the
+            // per-key strictness (additionalProperties:false) is the JSON
+            // Schema's job, the SHAPE contract is pinned here.
+            doc["fontFaces"]?.jsonArray?.let { faces ->
+                assertTrue(faces.isNotEmpty(), "${file.name}: fontFaces present but empty")
+                faces.forEachIndexed { i, el ->
+                    val f = el.jsonObject
+                    assertTrue(
+                        f["family"]?.jsonPrimitive?.content?.isNotBlank() == true,
+                        "${file.name}: fontFaces[$i] missing 'family'"
+                    )
+                    assertTrue(
+                        f["src"]?.jsonPrimitive?.content?.isNotBlank() == true,
+                        "${file.name}: fontFaces[$i] missing 'src'"
+                    )
+                }
+            }
             // When present, keyframes is a non-empty name → stop-list map
             // (offset ORDER is the JSON Schema's job; here we pin shape).
             doc["keyframes"]?.jsonObject?.let { kf ->

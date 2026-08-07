@@ -84,14 +84,46 @@ enum GreedyLineBreaker {
     /// word-spacing ADDS to the kern of each space character
     /// (css-text-3 §8.1 — word-separator advance), mirroring the render
     /// path in PlaceholderLabel.wordSpacedText.
+    /// - Parameter scriptFallback: wave 34 (lane F1) — when true, the SAME
+    ///   per-script bundled faces the render lane installs
+    ///   (`ScriptFallbackFonts`) are written over this measurement string
+    ///   too. Without it the fit test would measure Armenian / Arabic-Indic
+    ///   / Bengali / Khmer / Hebrew text through CoreText's cascade while
+    ///   the render used Noto, so the greedy pre-break would put line
+    ///   breaks where NEITHER surface wraps — and the whole point of this
+    ///   lane is that a wrap point is the residual (the Rule-43 banner's
+    ///   item (c): armenian-007's 0.78 is ONE wrap point, not glyph ink).
+    ///   Defaults false so every pre-lane call site and XCTest pin keeps
+    ///   its exact advances.
     static func measurer(font: UIFont,
                          letterSpacingPx: CGFloat?,
-                         wordSpacingPx: CGFloat?) -> (String) -> CGFloat {
+                         wordSpacingPx: CGFloat?,
+                         scriptFallback: Bool = false) -> (String) -> CGFloat {
         return { s in
             // Base attributes: the render face + uniform tracking.
             var attrs: [NSAttributedString.Key: Any] = [.font: font]
             if let t = letterSpacingPx { attrs[.kern] = t }
             let a = NSMutableAttributedString(string: s, attributes: attrs)
+            // Per-script faces, at the SAME point size as the base font so
+            // the substituted glyphs measure at the size they render. The
+            // segmenter emits UTF-16 offsets, which is exactly the index
+            // space NSMutableAttributedString ranges use.
+            // `substitutionEnabled` is the platform's MEASURED verdict on
+            // whether bundled faces improve ref parity (see its banner). It
+            // gates measurement and render together — measuring with a face
+            // the render does not install is the one combination that breaks
+            // where NEITHER surface wraps.
+            if scriptFallback, ScriptFallbackFonts.substitutionEnabled,
+               ScriptRunSegmenter.needsFallback(s) {
+                for run in ScriptRunSegmenter.segment(s) {
+                    guard let f = ScriptFallbackFonts.uiFont(for: run.script,
+                                                            size: font.pointSize)
+                    else { continue }
+                    a.addAttribute(.font, value: f,
+                                   range: NSRange(location: run.start,
+                                                  length: run.end - run.start))
+                }
+            }
             // Word-spacing: extra kern on each word separator, ON TOP of
             // tracking (CSS adds both to the separator's advance).
             // Lane IOS wave 5 (finding 6) — separators are U+0020 SPACE

@@ -23,11 +23,45 @@
       "type": "object",
       "minProperties": 1,
       "additionalProperties": { "$ref": "#/$defs/keyframeSet" }
+    },
+    "fontFaces": {
+      "description": "Document-level webfont declarations (schema/spec/01-envelope.md §5) — the wire twin of CSS @font-face at-rules, which css-fonts-4 §4.1 scopes to the document's font database rather than to any element, exactly like @keyframes. ADDITIVE minor-revision key (spec 05 change process): omitted entirely when the document declares no deliverable face, so pre-wave-34 documents are byte-identical and remain valid. DROPPABLE: a reader that ignores this key renders every referencing element in its fallback face — degraded FIDELITY, never wrong structure — which is why entries carry a resource PATH the reader resolves against its own asset root instead of a payload it must decode. Order is DOCUMENT order and is meaningful: css-fonts-4 §4.1 makes a later face with the same (family, weight, style) win. Ground truth: converter/src/main/kotlin/app/irmodels/IRWireV2.kt + tools/titan/extract-fixture.mjs scanFontFaces/resolveFontFaces.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/fontFace" }
     }
   },
   "required": ["irVersion", "minReaderVersion", "components"],
   "additionalProperties": false,
   "$defs": {
+    "fontFace": {
+      "description": "One @font-face declaration. STRICT envelope like every other v2 structure: exactly these four keys, of which family and src are required.",
+      "type": "object",
+      "properties": {
+        "family": {
+          "description": "The `font-family` descriptor (css-fonts-4 §4.2), UNQUOTED — the authored <string> and <custom-ident> spellings ('test' and test) name the same family and normalize to the same string here, so a consumer never re-tokenises. Matched against the family names in element `font-family` values.",
+          "type": "string",
+          "minLength": 1
+        },
+        "src": {
+          "description": "Path to the font FILE, relative to the corpus root of the pipeline that produced the document (the WPT mirror root, tools/wpt/, for the titan extractor). NOT a payload and NOT an absolute path: an absolute path would not survive the machine hop, and an inlined face costs 3–780 KB per entry against ~70 bytes here. Resolved from the FIRST url() arm of the css-fonts-4 §4.3 <font-src-list>; local() arms are never emitted (they name an installed system face, not a file), and the producer guarantees the file existed on disk at emit time. Consumers join it to their own asset root — the web harness serves it under /wpt-font/, a native reader would register the same file with Typeface.Builder / CTFontManagerRegisterFontsForURL.",
+          "type": "string",
+          "minLength": 1
+        },
+        "weight": {
+          "description": "The `font-weight` descriptor AS AUTHORED (css-fonts-4 §4.4) — a single value ('700', 'bold') or a RANGE ('400 700'). NOT normalized to the IR's numeric 100–900 form: this is a descriptor on a face, not a computed property value, and a range has no numeric equivalent. Omitted = the §4.4 initial `normal`, never a silent 400.",
+          "type": "string",
+          "minLength": 1
+        },
+        "style": {
+          "description": "The `font-style` descriptor AS AUTHORED (css-fonts-4 §4.5) — 'normal', 'italic', 'oblique', or an oblique angle/range ('oblique 20deg'). Omitted = the §4.5 initial `normal`.",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": ["family", "src"],
+      "additionalProperties": false
+    },
     "component": {
       "description": "One UI component. Serialized by IRComponentV2Serializer (converter/src/main/kotlin/app/irmodels/IRWireV2.kt): id/name/properties always present; variables omitted when the component declares no custom properties; selectors/media omitted when empty; slot omitted for roots; text/pseudos omitted when null; meta omitted when it would be empty. `children` is deliberately ABSENT from this definition — additionalProperties:false makes any v2 document carrying a children key a hard validation error.",
       "type": "object",

@@ -245,7 +245,29 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
         }
     }
 
-    return CssComponents(components, keyframes)
+    // Document-level `fontFaces` block (wave 34, schema/spec/01-envelope.md §5):
+    // [ { "family": "test", "src": "css/…/X.woff", "weight"?, "style"? }, … ].
+    // Mirrors CSS @font-face being document-scoped (css-fonts-4 §4.1). An
+    // entry missing either REQUIRED descriptor is skipped with the same
+    // mapNotNull tolerance the keyframe-stop parser uses above — a face with
+    // no family is unreferenceable and one with no src names no file, so
+    // neither can be rendered and inventing a default would be worse than
+    // dropping it. Order is preserved: §4.1 makes a later same-key face win.
+    val fontFaces = doc["fontFaces"]?.jsonArray?.mapNotNull { el ->
+        val o = el.jsonObject
+        val family = o["family"]?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
+            ?: return@mapNotNull null
+        val src = o["src"]?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
+            ?: return@mapNotNull null
+        CssFontFace(
+            family = family,
+            src = src,
+            weight = o["weight"]?.jsonPrimitive?.content?.takeIf { it.isNotBlank() },
+            style = o["style"]?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
+        )
+    }
+
+    return CssComponents(components, keyframes, fontFaces)
 }
 
 /**
@@ -427,5 +449,17 @@ fun cssParsing(doc: JsonObject): IRDocument {
     // one canonical shape. Null when the input authored none, so the v2
     // serializer omits the envelope key and pre-motion documents stay
     // byte-identical (spec 05 additive-revision rule).
-    return IRDocument(irComponents, keyframes = convertKeyframesToIR(components.keyframes))
+    return IRDocument(
+        irComponents,
+        keyframes = convertKeyframesToIR(components.keyframes),
+        // Document-level @font-face list (wave 34, spec 01 §5). No typing
+        // pass: the authored shape IS the wire shape (see CssFontFace), so
+        // this is a straight structural hop — the ONE place the converter is
+        // a courier rather than a normalizer, and deliberately so. Null when
+        // the input authored none, so the v2 serializer omits the envelope
+        // key and every pre-wave-34 document stays byte-identical.
+        fontFaces = components.fontFaces?.takeIf { it.isNotEmpty() }?.map { f ->
+            IRFontFace(family = f.family, src = f.src, weight = f.weight, style = f.style)
+        }
+    )
 }

@@ -93,10 +93,10 @@ final class InlineBlockAtomTests: XCTestCase {
             hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false))
     }
 
-    // MARK: - B5, bands must be zero
+    // MARK: - B5, margins zero, bands box-sized
 
-    func testB5ANonZeroMarginPaddingOrBorderRefuses() throws {
-        for t in ["MarginLeft", "PaddingTop", "BorderRightWidth", "MarginInlineStart"] {
+    func testB5ANonZeroMarginRefusesOnAnySpelling() throws {
+        for t in ["MarginLeft", "MarginTop", "MarginInlineStart", "MarginBlockEnd"] {
             XCTAssertNil(InlineBlockAtom.spec(
                 properties: try box("INLINE_BLOCK", 100, 100, extra: len(t, 4)),
                 hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false), t)
@@ -110,6 +110,114 @@ final class InlineBlockAtomTests: XCTestCase {
             properties: try props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
                                   len("Height", 100), len("PaddingTop", 0),
                                   len("PaddingLeft", 0), len("MarginTop", 0)),
+            hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false))
+    }
+
+    func testB5Wave33AllZeroBandSitesAreByteIdenticalUnderH2() throws {
+        // The wave-33 gate forced every band to zero. Both wave-34 branches
+        // ADD 0 on such a box, so every site wave 33 admitted keeps its
+        // exact AtomSpec — which is what makes backdrop-filter-boundary and
+        // appearance-auto-non-html-namespace-001 unmoved.
+        for bs in [nil, "CONTENT_BOX", "BORDER_BOX"] as [String?] {
+            var entries = [kw("Display", "INLINE_BLOCK"), len("Width", 160), len("Height", 90),
+                           len("PaddingLeft", 0), len("BorderTopWidth", 0)]
+            if let bs { entries.append(kw("BoxSizing", bs)) }
+            let spec = try XCTUnwrap(InlineBlockAtom.spec(
+                properties: props(entries), hasOwnText: false, hasOwnRuns: false,
+                containerDeclaresLineHeight: false), bs ?? "unset")
+            XCTAssertEqual(spec.fixedWpx, 160)
+            XCTAssertEqual(spec.fixedHpx, 90)
+        }
+    }
+
+    // MARK: - H2 (wave 34), the box-sizing-aware band read
+
+    func testH2BorderBoxKeepsTheWirePxAsTheOuterBorderBox() throws {
+        // backdrop-filter-clip-rect-2's exact shape: `box-sizing:
+        // border-box; width/height: 100px; border: 10px`. css-sizing-3 §3
+        // puts the bands INSIDE the declared size, so the atom is 100×100
+        // and the three boxes pack 100 + 4.5 + 100 + 4.5 + 100 = 309.
+        let spec = try XCTUnwrap(InlineBlockAtom.spec(
+            properties: props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
+                              len("Height", 100), kw("BoxSizing", "BORDER_BOX"),
+                              len("BorderTopWidth", 10), len("BorderRightWidth", 10),
+                              len("BorderBottomWidth", 10), len("BorderLeftWidth", 10)),
+            hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false))
+        XCTAssertEqual(spec.fixedWpx, 100)
+        XCTAssertEqual(spec.fixedHpx, 100)
+    }
+
+    func testH2BorderBoxToleratesABandShapeThisRuleCannotRead() throws {
+        // Under border-box the outer box is the declared px WHATEVER the
+        // band is, so a % padding does not need to be resolvable.
+        XCTAssertNotNil(InlineBlockAtom.spec(
+            properties: try props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
+                                  len("Height", 100), kw("BoxSizing", "BORDER_BOX"),
+                                  #"{"type":"PaddingLeft","data":{"type":"percentage","value":25}}"#),
+            hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false))
+    }
+
+    func testH2ContentBoxAddsThePaddingAndBorderBands() throws {
+        // css-sizing-3 §3: the declared size is the CONTENT box, so the
+        // atom's outer border box is 100 + 4 + 6 wide and 100 + 2 + 8 tall.
+        let spec = try XCTUnwrap(InlineBlockAtom.spec(
+            properties: props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
+                              len("Height", 100), kw("BoxSizing", "CONTENT_BOX"),
+                              len("PaddingLeft", 4), len("PaddingTop", 2),
+                              len("BorderRightWidth", 6), kw("BorderRightStyle", "SOLID"),
+                              len("BorderBottomWidth", 8), kw("BorderBottomStyle", "SOLID")),
+            hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false))
+        XCTAssertEqual(spec.fixedWpx, 110)
+        XCTAssertEqual(spec.fixedHpx, 110)
+    }
+
+    func testH2AnUnsetBoxSizingIsContentBoxUnderTheWPTGate() throws {
+        // This predicate is composed-WPT-only (P19), where
+        // SizeApplier.effectiveBoxSizing(nil, true) == .contentBox.
+        let spec = try XCTUnwrap(InlineBlockAtom.spec(
+            properties: box("INLINE_BLOCK", 100, 50, extra: len("PaddingRight", 7)),
+            hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false))
+        XCTAssertEqual(spec.fixedWpx, 107)
+        XCTAssertEqual(spec.fixedHpx, 50)
+    }
+
+    func testH2ANoneOrHiddenBorderSideBandsAtZero() throws {
+        // CSS 2.1 §8.5.3 — used width 0, matching BorderSideConfig.hasBorder
+        // on both natives. clip-rect-2's `border-style: none` box is this.
+        for style in ["NONE", "HIDDEN"] {
+            let spec = try XCTUnwrap(InlineBlockAtom.spec(
+                properties: props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
+                                  len("Height", 100), len("BorderLeftWidth", 10),
+                                  kw("BorderLeftStyle", style)),
+                hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false), style)
+            XCTAssertEqual(spec.fixedWpx, 100, style)
+        }
+    }
+
+    func testH2ContentBoxRefusesTheThreeUnknowableBandShapes() throws {
+        // 1. a non-exact band value (the % basis is a measure question).
+        XCTAssertNil(InlineBlockAtom.spec(
+            properties: try props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
+                                  len("Height", 100),
+                                  #"{"type":"PaddingLeft","data":{"type":"percentage","value":25}}"#),
+            hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false),
+            "percent padding")
+        // 2. a non-zero LOGICAL band (physical mapping is writing-mode aware).
+        XCTAssertNil(InlineBlockAtom.spec(
+            properties: try box("INLINE_BLOCK", 100, 100, extra: len("PaddingInlineStart", 5)),
+            hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false),
+            "logical padding")
+        // 3. a visible border-style with NO width — the `medium` initial the
+        //    two natives resolve differently (Compose 0 / iOS 3).
+        XCTAssertNil(InlineBlockAtom.spec(
+            properties: try box("INLINE_BLOCK", 100, 100, extra: kw("BorderTopStyle", "SOLID")),
+            hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false),
+            "styled width-less border")
+    }
+
+    func testH2AnUnreadableBoxSizingKeywordRefusesRatherThanGuesses() throws {
+        XCTAssertNil(InlineBlockAtom.spec(
+            properties: try box("INLINE_BLOCK", 100, 100, extra: kw("BoxSizing", "WHAT_BOX")),
             hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false))
     }
 
@@ -196,6 +304,117 @@ final class InlineBlockAtomTests: XCTestCase {
         // Line box 1 = ascent 50 + strut descent 4 ⇒ row 2 top at 54.
         XCTAssertEqual(plan.y, [0, 54])
         XCTAssertEqual(plan.height, 108)
+    }
+
+    // MARK: - H1 (wave 34), the composed-canvas ROOT flow facade
+
+    func testH1RootBoxIsSpecProjectedToScalars() throws {
+        let b = InlineBlockAtom.rootBox(properties: try box("INLINE_BLOCK", 100, 100),
+                                        hasOwnText: false, hasOwnRuns: false,
+                                        containerDeclaresLineHeight: false)
+        XCTAssertEqual(b, InlineBlockAtom.RootBox(widthPx: 100, heightPx: 100))
+        // A non-atom root keeps the harness's frozen block stack.
+        XCTAssertNil(InlineBlockAtom.rootBox(properties: try box("BLOCK", 100, 100),
+                                             hasOwnText: false, hasOwnRuns: false,
+                                             containerDeclaresLineHeight: false))
+    }
+
+    func testH1TheTargetDocumentSegmentsIntoPThenA3BoxRun() throws {
+        // CSS2/abspos/static-inside-inline-block: root 0 is the prose <p>
+        // (no Display, so not an atom), roots 1–3 the inline-blocks.
+        let boxes: [InlineBlockAtom.RootBox?] = [
+            nil,
+            InlineBlockAtom.RootBox(widthPx: 100, heightPx: 100),
+            InlineBlockAtom.RootBox(widthPx: 100, heightPx: 100),
+            InlineBlockAtom.RootBox(widthPx: 100, heightPx: 100),
+        ]
+        // The harness's leading gaps are [16 above <p>, 16 above root 1, 0, 0].
+        let segs = try XCTUnwrap(InlineBlockAtom.rootSegments(
+            boxes: boxes, blockGapsAbovePx: [16, 16, 0, 0]))
+        XCTAssertEqual(segs, [
+            InlineBlockAtom.RootSegment(indices: [0], isRun: false),
+            InlineBlockAtom.RootSegment(indices: [1, 2, 3], isRun: true),
+        ])
+    }
+
+    func testH1ARunFreeDocumentGetsNoPlanSoTheHarnessStaysFrozen() {
+        // Every composed section but two is this case — the nil return is
+        // what keeps their captures byte-identical.
+        XCTAssertNil(InlineBlockAtom.rootSegments(boxes: [nil, nil, nil],
+                                                  blockGapsAbovePx: [0, 0, 0]))
+        // A LONE atom is not a run either (the ≥2 rule the segmenter pins).
+        XCTAssertNil(InlineBlockAtom.rootSegments(
+            boxes: [nil, InlineBlockAtom.RootBox(widthPx: 10, heightPx: 10), nil],
+            blockGapsAbovePx: [0, 0, 0]))
+    }
+
+    func testH3ARunWithARealBlockGapInsideItRefusesAndStacks() {
+        // Dropping that gap would silently lose layout, so the whole run
+        // degrades to singles and the harness stacks it exactly as before.
+        let boxes: [InlineBlockAtom.RootBox?] = [
+            InlineBlockAtom.RootBox(widthPx: 100, heightPx: 100),
+            InlineBlockAtom.RootBox(widthPx: 100, heightPx: 100),
+        ]
+        XCTAssertNil(InlineBlockAtom.rootSegments(boxes: boxes, blockGapsAbovePx: [0, 16]))
+        // The gap ABOVE the first member is the caller's and never gates.
+        XCTAssertNotNil(InlineBlockAtom.rootSegments(boxes: boxes, blockGapsAbovePx: [16, 0]))
+    }
+
+    func testH1TheTargetRunPacksToTheRefs121x88GreenBox() {
+        // Three 100×100 roots in the composed canvas's 358px content width.
+        let plan = InlineBlockAtom.rootRowPlan(
+            widthsPx: Array(repeating: 100, count: 3),
+            heightsPx: Array(repeating: 100, count: 3),
+            availableWidthPx: 358,
+            gapPx: InlineBlockAtom.rootAtomGapPx)
+        // One row: 3×100 + 2×4.5 = 309 ≤ 358. The MIDDLE box (the red one
+        // holding the green abspos child) starts at run-relative 104.5, so
+        // the harness's 16px frame puts it at image x = 120.5 → the 121
+        // column the browser-ref rasterises.
+        XCTAssertEqual(plan.xPx, [0, 104.5, 209])
+        XCTAssertEqual(plan.yPx, [0, 0, 0])
+        XCTAssertEqual(plan.widthPx, 309)
+        // Row height = ascent 100 (the boxes) + descent 4 (the §10.8.1
+        // strut). 16 pad + 16 gap + a 40px two-line <p> + 16 gap = y 88.
+        XCTAssertEqual(plan.heightPx, 104)
+    }
+
+    func testH1AnchorCenterOverflow005sFourRootsWrap3Plus1() {
+        // 4×100 + 3×4.5 = 413.5 > 358, so the 4th box starts row 2 at the
+        // first row's full height (100 + the 4px strut descent).
+        let plan = InlineBlockAtom.rootRowPlan(
+            widthsPx: Array(repeating: 100, count: 4),
+            heightsPx: Array(repeating: 100, count: 4),
+            availableWidthPx: 358,
+            gapPx: InlineBlockAtom.rootAtomGapPx)
+        XCTAssertEqual(plan.xPx, [0, 104.5, 209, 0])
+        XCTAssertEqual(plan.yPx, [0, 0, 0, 104])
+        XCTAssertEqual(plan.heightPx, 208)
+    }
+
+    func testH1TheRootRowPlanIsTheNestedRowPlan() {
+        // The facade must be a pure re-expression of InlineAtomFlow.layout
+        // with the inline-block family's fixed answers, never a second
+        // packer — this pins the two against each other.
+        let direct = InlineAtomFlow.layout(
+            widths: Array(repeating: 100, count: 3),
+            heights: Array(repeating: 100, count: 3),
+            descents: Array(repeating: 0, count: 3),
+            marginStarts: Array(repeating: 0, count: 3),
+            marginEnds: Array(repeating: 0, count: 3),
+            availableWidth: 358,
+            gapPx: UAWidgetIntrinsics.atomGapPx,
+            strutAscentPx: UAWidgetIntrinsics.strutAscentPx,
+            strutDescentPx: UAWidgetIntrinsics.strutDescentPx)
+        let viaFacade = InlineBlockAtom.rootRowPlan(
+            widthsPx: Array(repeating: 100, count: 3),
+            heightsPx: Array(repeating: 100, count: 3),
+            availableWidthPx: 358,
+            gapPx: InlineBlockAtom.rootAtomGapPx)
+        XCTAssertEqual(direct.x, viaFacade.xPx)
+        XCTAssertEqual(direct.y, viaFacade.yPx)
+        XCTAssertEqual(direct.width, viaFacade.widthPx)
+        XCTAssertEqual(direct.height, viaFacade.heightPx)
     }
 
     // MARK: - Helpers

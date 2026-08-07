@@ -581,6 +581,57 @@ final class ConformanceTests: XCTestCase {
         XCTAssertEqual(asDouble(member(rotate.data, "deg")), 180.0)
     }
 
+    // MARK: - wave-34 lane F2: document-level @font-face (spec 01 §5)
+
+    func testV2FontFaces() throws {
+        let doc = try loadV2("font-faces.json")
+        let faces = try XCTUnwrap(doc.fontFaces, "font-faces.json must carry fontFaces")
+        // ORDER is payload: css-fonts-4 §4.1 makes a later face with the
+        // same (family, weight, style) win, so a reordering decode would
+        // silently change which file renders.
+        XCTAssertEqual(faces.count, 2)
+        XCTAssertEqual(faces[0].family, "test")
+        XCTAssertEqual(faces[0].src,
+                       "css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff")
+        // Omitted descriptors stay nil — never substituted with the
+        // §4.4/§4.5 initial literal, so "omitted" and "explicitly normal"
+        // stay distinguishable for the registration hop that does not exist
+        // on this platform yet.
+        XCTAssertNil(faces[0].weight)
+        XCTAssertNil(faces[0].style)
+        // The descriptors that cannot be normalised ride AS AUTHORED: a
+        // weight RANGE has no numeric 100–900 form, an oblique ANGLE no
+        // keyword form.
+        XCTAssertEqual(faces[1].weight, "400 700")
+        XCTAssertEqual(faces[1].style, "oblique 20deg")
+    }
+
+    func testV2FontFacesAbsentIsNil() throws {
+        // Absent-vs-empty discipline: omit-when-empty on the wire means
+        // every pre-wave-34 golden must come back nil, not [].
+        XCTAssertNil(try loadV2("text-and-role.json").fontFaces)
+        // …and a v1 document structurally cannot carry the key.
+        XCTAssertNil(try load("text-and-role.json").fontFaces)
+    }
+
+    func testV2FontFacesStrictErrors() throws {
+        // Strict even though the SwiftUI renderer does not register faces
+        // yet: the spec-05 tolerance rule covers unknown property TYPES, not
+        // a malformed envelope structure this reader claims to speak.
+        let head = #"{"irVersion":2,"minReaderVersion":2,"components":[],"#
+        XCTAssertThrowsError(try decodeDoc(head + #""fontFaces":[]}"#),
+                             "empty fontFaces must fail (schema minItems 1)")
+        XCTAssertThrowsError(try decodeDoc(head + #""fontFaces":[{"src":"a.woff"}]}"#),
+                             "fontFaces entry without family must fail")
+        XCTAssertThrowsError(try decodeDoc(head + #""fontFaces":[{"family":"x"}]}"#),
+                             "fontFaces entry without src must fail")
+        XCTAssertThrowsError(try decodeDoc(head + #""fontFaces":[{"family":"","src":"a.woff"}]}"#),
+                             "empty family must fail")
+        XCTAssertThrowsError(
+            try decodeDoc(head + #""fontFaces":[{"family":"x","src":"a.woff","format":"woff"}]}"#),
+            "unknown fontFaces entry key must fail (additionalProperties false)")
+    }
+
     func testFontWeightKeywords() throws {
         let doc = try load("font-weight-keywords.json")
         let bold = try byName(doc, "FontWeight_BoldKeyword").properties[0]

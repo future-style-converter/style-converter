@@ -211,6 +211,34 @@ describe('NodeRenderer — the inline anonymous-run box', () => {
     expect(out.indexOf('data-component-id="abs-1"')).toBeLessThan(out.indexOf(' X'));
   });
 
+  it('flows a text-then-child list on ONE line (the wave-34 widening)', () => {
+    // wave-34 lane R widened the producer's emission: a component whose own
+    // text simply PRECEDES a kept child now ships a list too, because the
+    // §4.1 trim on `text` deletes the boundary space there
+    // (`<p>the quick <u>brown</u></p>` renders welded without it).
+    // Renderer-side that is the SAME contract as the glue case — but the
+    // pin that matters is the one the flat path could not give: the run and
+    // the child are siblings in ONE inline flow, with no element boundary
+    // between the text and the box, so the line does not break between them.
+    const u = comp({ id: 'u-2', name: 'w__0__0', text: 'brown', meta: { sourceTag: 'u' } });
+    const p = comp({
+      id: 'p-2',
+      name: 'w__0',
+      // `text` still carries the TRIMMED concatenation — the additive rule.
+      text: 'the quick',
+      meta: { sourceTag: 'p', runs: [{ text: 'the quick ' }, { child: 'w__0__0' }] },
+    });
+    const out = html(node(p, [node(u)]));
+    // The boundary space survives, and it is a bare text node adjoining the
+    // child's box — no wrapper element between them.
+    expect(out).toContain('the quick <');
+    expect(out).not.toContain('the quick<');
+    // The trimmed `text` is NOT painted a second time (rule 2).
+    expect(out.match(/the quick/g)?.length).toBe(1);
+    // Document order: run first, then the box.
+    expect(out.indexOf('the quick')).toBeLessThan(out.indexOf('data-component-id="u-2"'));
+  });
+
   it('leaves a component without meta.runs byte-identical', () => {
     const kid = comp({ id: 'k-1', name: 'kid', text: 'KID' });
     const host = comp({ id: 'h-1', name: 'host', text: 'LEAD' });

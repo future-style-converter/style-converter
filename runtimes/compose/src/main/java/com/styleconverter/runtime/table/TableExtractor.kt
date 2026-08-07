@@ -10,7 +10,25 @@ import kotlinx.serialization.json.JsonObject
  */
 object TableExtractor {
 
-    fun extractTableConfig(properties: List<Pair<String, JsonElement?>>): TableConfig {
+    /**
+     * @param properties the table box's own resolved declarations.
+     * @param sourceTag its `meta.sourceTag` (`IRComponent._tag`), for the
+     *   HTML UA `border-spacing` lane — wave 34, lane T.
+     *
+     *   Defaults to null, which reproduces the pre-wave-34 result
+     *   BYTE-FOR-BYTE: `TableSeparatedTracks.usedSpacing` then answers the
+     *   CSS initial 0 and `TableConfig.usedSpacing` changes nothing about
+     *   what `effectiveSpacing*` returns. The default exists because the
+     *   one call site that can supply the tag lives in
+     *   `core/renderer/ComponentRenderer.kt`, outside lane T's owned
+     *   regions; threading `component._tag` there is what turns the UA
+     *   lane on for Android, and it is recorded as a deferred item rather
+     *   than reached across an ownership boundary.
+     */
+    fun extractTableConfig(
+        properties: List<Pair<String, JsonElement?>>,
+        sourceTag: String? = null
+    ): TableConfig {
         var layout = TableLayout.AUTO
         var borderCollapse = BorderCollapse.SEPARATE
         var spacingHorizontal: androidx.compose.ui.unit.Dp? = null
@@ -38,7 +56,14 @@ object TableExtractor {
             borderSpacingHorizontal = spacingHorizontal,
             borderSpacingVertical = spacingVertical,
             captionSide = captionSide,
-            emptyCells = emptyCells
+            emptyCells = emptyCells,
+            // Wave 34 (lane T) — the §17.6.1 USED border-spacing, which is
+            // not always the declared one: an undeclared `<table>` takes
+            // the HTML UA sheet's 2px (§15.3.3), and the collapsing model
+            // takes none at all. Computed by the shared decision table so
+            // the two natives cannot disagree; null passes through to the
+            // legacy declared-only path below.
+            usedSpacing = TableSeparatedTracks.usedSpacing(properties, sourceTag)
         )
     }
 

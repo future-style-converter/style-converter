@@ -91,8 +91,14 @@ object IRDocumentDecoder {
         "irVersion", "minReaderVersion", "components",
         // additive v2 minor revision (spec 07 §1.2): document-level named
         // @keyframes sets, omit-when-empty.
-        "keyframes"
+        "keyframes",
+        // wave-34 lane F2, same additive rule (spec 01 §5): document-level
+        // @font-face declarations, omit-when-empty.
+        "fontFaces"
     )
+    // The four descriptors ONE `fontFaces` entry may carry (schema
+    // ir-v2.schema.json $defs/fontFace — additionalProperties:false).
+    private val FONT_FACE_KEYS = setOf("family", "src", "weight", "style")
     private val COMPONENT_KEYS = setOf(
         "id", "name", "properties", "selectors", "media",
         "slot", "text", "pseudos", "meta",
@@ -167,8 +173,48 @@ object IRDocumentDecoder {
                     el as? JsonObject ?: throw IllegalArgumentException("component entries must be objects")
                 )
             },
-            keyframes = decodeKeyframes(obj["keyframes"])
+            keyframes = decodeKeyframes(obj["keyframes"]),
+            fontFaces = decodeFontFaces(obj["fontFaces"])
         )
+    }
+
+    /**
+     * Decode the document-level `fontFaces` envelope key (spec 01 §5 /
+     * schema $defs/fontFace). Strict like every other v2 envelope level:
+     * a non-empty array of objects carrying only the four known descriptors,
+     * of which `family` and `src` are REQUIRED non-blank strings.
+     *
+     * Strictness is deliberate even though the runtime does not yet USE the
+     * result. The tolerance rule that lets a reader skip an unknown property
+     * TYPE (spec 05) is about the 550-property value surface; an envelope
+     * structure this reader claims to speak must either be well-formed or
+     * fail loudly, or a writer bug would sit undetected until the wave that
+     * finally wires face registration.
+     */
+    private fun decodeFontFaces(el: kotlinx.serialization.json.JsonElement?): List<IRFontFace>? {
+        if (el == null) return null // omit-when-empty wire rule → no faces
+        val arr = el as? JsonArray
+            ?: throw IllegalArgumentException("document 'fontFaces' must be an array of @font-face entries")
+        // Schema pins minItems 1 — an empty array is a writer bug.
+        require(arr.isNotEmpty()) { "document 'fontFaces' present but empty (minItems 1)" }
+        return arr.mapIndexed { i, faceEl ->
+            val f = faceEl as? JsonObject
+                ?: throw IllegalArgumentException("fontFaces[$i] must be an object")
+            requireOnlyKeys(f, FONT_FACE_KEYS, "fontFaces[$i]")
+            val family = (f["family"] as? JsonPrimitive)?.contentOrNull
+            require(!family.isNullOrBlank()) { "fontFaces[$i] missing non-empty 'family'" }
+            val src = (f["src"] as? JsonPrimitive)?.contentOrNull
+            require(!src.isNullOrBlank()) { "fontFaces[$i] missing non-empty 'src'" }
+            IRFontFace(
+                family = family,
+                src = src,
+                // Absent = the css-fonts-4 initial `normal`; never defaulted
+                // to a literal here, so "omitted" and "explicitly normal"
+                // stay distinguishable for the future registration hop.
+                weight = (f["weight"] as? JsonPrimitive)?.contentOrNull,
+                style = (f["style"] as? JsonPrimitive)?.contentOrNull
+            )
+        }
     }
 
     /**

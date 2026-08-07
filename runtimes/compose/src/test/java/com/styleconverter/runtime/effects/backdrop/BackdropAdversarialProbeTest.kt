@@ -56,12 +56,10 @@ private class PatchRaster(
         radii: BackdropCornerRadii?,
     ): IntArray {
         val out = IntArray(boxW * boxH) { NOTHING }
-        val sigma = chain.totalBlurSigmaPx { dp -> dp.value } // emulator density 160 => 1dp == 1px
-        val pad = BackdropSampleGeometry.blurPadPx(sigma)
         val s = BackdropSampleGeometry.sample(
             elemLeft = elemLeft, elemTop = elemTop,
             elemWidth = boxW, elemHeight = boxH,
-            padPx = pad, srcWidth = srcW, srcHeight = srcH,
+            srcWidth = srcW, srcHeight = srcH,
         ) ?: return out // refusal: nothing drawn, element paints as before
         val matrix = colourMatrixOf(chain)
         for (y in 0 until boxH) for (x in 0 until boxW) {
@@ -285,9 +283,10 @@ class BackdropAdversarialProbeTest {
 
     @Test
     fun `a box hanging off the LEFT edge draws only the covered strip`() {
-        // The lane's suite covers the padded left clamp (dst == 0) but never a
-        // box whose ORIGIN is negative, where dst must go POSITIVE.
-        val s = BackdropSampleGeometry.sample(-20, 10, 100, 40, 0, 390, 600)!!
+        // A box whose ORIGIN is negative is now the only case where the clamp
+        // bites at all (the sample rect is the border box), and dst must go
+        // POSITIVE so the uncovered strip stays unpainted.
+        val s = BackdropSampleGeometry.sample(-20, 10, 100, 40, 390, 600)!!
         assertEquals(0, s.srcLeft)
         assertEquals(80, s.width)
         assertEquals(20, s.dstLeft) // canvas x=0 lands at element-local x=20
@@ -319,33 +318,36 @@ class BackdropAdversarialProbeTest {
     // ── PROBE 4 — blur geometry (the value the raster cannot compute) ──────
 
     @Test
-    fun `edge-pixels fixture geometry — blur 30px pads by 90 and clamps at the canvas origin`() {
+    fun `edge-pixels fixture geometry — blur 30px still samples exactly the border box`() {
         // fixtures/wpt/filter-effects/backdrop-filter-edge-pixels.json — the
         // converter emits blur r.px = 30, FilterExtractor -> Blur(30.dp), and
         // the emulator runs at 160dpi so 1dp == 1px.
         val chain = BackdropChain.of(listOf(FilterFunction.Blur(30.dp)))!!
         val sigma = chain.totalBlurSigmaPx { d -> d.value }
         assertEquals(30f, sigma, 1e-4f)
-        assertEquals(90, BackdropSampleGeometry.blurPadPx(sigma))
         // The .box sits at the page origin; with the canvas's 16px frame that
-        // is (16,16), 102x102 with its 1px blue border.
-        val s = BackdropSampleGeometry.sample(16, 16, 102, 102, 90, 390, 600)!!
-        assertEquals(0, s.srcLeft)
-        assertEquals(0, s.srcTop)
-        // Right/bottom are NOT clamped (16+102+90 = 208 < 390 and < 600).
-        assertEquals(208, s.width)
-        assertEquals(208, s.height)
-        // The crop starts 16px up-left of the box, so the patch is placed at a
-        // negative element-local offset and the border-box clip cuts it back.
-        assertEquals(-16, s.dstLeft)
-        assertEquals(-16, s.dstTop)
+        // is (16,16), 102x102 with its 1px blue border. This fixture was THE
+        // reason the wave-26 grow model looked safe — a box at the plate edge.
+        // Under the wave-34 edge model (filter-effects-2 §2 clips the backdrop
+        // to the border box first) the σ never enters the rect at all, and
+        // TileMode.MIRROR supplies what the Gaussian wants beyond it.
+        val s = BackdropSampleGeometry.sample(16, 16, 102, 102, 390, 600)!!
+        assertEquals(16, s.srcLeft)
+        assertEquals(16, s.srcTop)
+        assertEquals(102, s.width)
+        assertEquals(102, s.height)
+        // Nothing was clamped, so the patch lands at the box's own origin.
+        assertEquals(0, s.dstLeft)
+        assertEquals(0, s.dstTop)
     }
 
     @Test
-    fun `blur composes in quadrature for padding but each op still blurs in CSS order`() {
+    fun `blur composes in quadrature but each op still blurs in CSS order`() {
+        // σ composition still matters — it drives the Gaussian itself (and,
+        // on iOS, the width of the mirror band). It just no longer touches
+        // the sample rect.
         val chain = BackdropChain.of(listOf(FilterFunction.Blur(3.dp), FilterFunction.Blur(4.dp)))!!
         assertEquals(5f, chain.totalBlurSigmaPx { d -> d.value }, 1e-4f)
-        assertEquals(15, BackdropSampleGeometry.blurPadPx(5f))
         assertEquals(2, chain.ops.size)
     }
 
@@ -515,7 +517,7 @@ class BackdropAdversarialProbeTest {
             elemTop = Math.round(100f + box.localTop),
             elemWidth = Math.round(box.width),
             elemHeight = Math.round(box.height),
-            padPx = 0, srcWidth = 390, srcHeight = 600,
+            srcWidth = 390, srcHeight = 600,
         )!!
         assertEquals(110, sample.srcLeft)
         assertEquals(106, sample.srcTop)

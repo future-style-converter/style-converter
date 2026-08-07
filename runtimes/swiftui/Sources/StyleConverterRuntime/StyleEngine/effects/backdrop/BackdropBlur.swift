@@ -6,30 +6,33 @@
 //
 //  Two things make this more than a one-line CIGaussianBlur call:
 //
-//  1. EDGE REPLICATION. CoreImage treats everything outside a CIImage's
+//  1. EDGE EXTENSION. CoreImage treats everything outside a CIImage's
 //     extent as TRANSPARENT BLACK, so blurring a buffer pulls transparency
 //     in from beyond its edges and its border fades out — a dark halo the
-//     browser never paints. Fix: pad the input with REPLICATED edge pixels,
+//     browser never paints. Fix: pad the input with MIRRORED edge pixels,
 //     blur the padded image, then crop back to the original rect. The band
 //     has to cover the kernel's SUPPORT — measured at ~3σ for
 //     CIGaussianBlur, see `padding(forSigmaPixels:)` — so nothing outside
 //     the padded image can reach a kept pixel.
 //
-//     WHERE THAT REPLICATION IS ALLOWED TO BITE (wave-26 skeptic fix #1).
-//     This function is now handed the element's border box ALREADY GROWN by
-//     3σ and clamped to the plate (BackdropSampleGeometry.sample, called
-//     from BackdropImageOps.crop), and the caller cuts the border box back
-//     out afterwards (BackdropImageOps.filtered). So the replicated band
-//     sits 3σ away from every kept pixel EXCEPT where the grow ran into the
-//     plate's own boundary — which is exactly the one place
-//     filter-effects-2 §2 asks for edge duplication, and exactly what the
-//     Compose twin's Shader.TileMode.CLAMP does past its bitmap's bounds.
+//     WHY MIRROR AND NOT REPLICATE (wave-34 lane B). This function is handed
+//     exactly the element's BORDER BOX (BackdropSampleGeometry.sample, via
+//     BackdropImageOps.crop) because filter-effects-2 §2 clips the backdrop
+//     to the border box before the filter runs — so the band IS the spec's
+//     edge behaviour, on every pixel of every edge, not just at the canvas
+//     boundary. Measured against the Chrome 151 ref for
+//     backdrop-filter-boundary (per-tile MAE, blur 3…96): replicate gives
+//     1.6 / 2.5 / 77.5 / 10.6 / 22.3 / 89.8, mirror gives
+//     1.5 / 1.8 / 72.6 / 0.8 / 0.3 / 76.7. The WPT reference file
+//     (support/simulate-backdrop-blur.js) builds its expectation from
+//     `scale(-1)` copies of the same crop — Skia's SkTileMode::kMirror,
+//     which is what the Compose twin now asks RenderEffect for.
 //
-//     Before that fix this file received the bare border box and replicated
-//     the ELEMENT's own edge, so content just outside the box never fed the
-//     Gaussian. Measured gap on a black|green plate split flush against a
-//     blur(8px) box's left edge: crop-then-blur held (0,204,51) one pixel
-//     inside the edge where the spec model gives (0,117,29).
+//     Wave 26 instead grew the crop by 3σ so the Gaussian saw the document
+//     pixels next to the box. That is what the corpus refuted: the six
+//     blurred tiles of backdrop-filter-boundary imported the lime page
+//     background the test explicitly forbids, and the iOS capture's error
+//     row reproduced the grown-sample model term for term.
 //
 //  2. COLOUR SPACE. CSS filter functions operate in sRGB —
 //     filter-effects-1 pins `color-interpolation-filters: sRGB` for the
@@ -58,7 +61,7 @@ enum BackdropBlur {
     /// 1.0 on Xcode 26 — CIGaussianBlur's radius IS the σ.
     static let ciRadiusPerSigma: CGFloat = 1.0
 
-    /// Replicate-padding width in pixels for a given σ — the guard band the
+    /// Mirror-padding width in pixels for a given σ — the guard band the
     /// header describes.
     ///
     /// MEASURED, not assumed. The band has to cover CIGaussianBlur's KERNEL
@@ -84,7 +87,7 @@ enum BackdropBlur {
         return CIContext(options: [.workingColorSpace: srgb, .outputColorSpace: srgb])
     }()
 
-    /// Blur `image` by `sigmaPixels` standard deviations, with replicated
+    /// Blur `image` by `sigmaPixels` standard deviations, with mirrored
     /// edges. Returns an image with the SAME pixel dimensions as the input.
     ///
     /// A non-positive σ returns the input unchanged (identity blur — the
@@ -92,8 +95,8 @@ enum BackdropBlur {
     static func blur(_ image: CGImage, sigmaPixels: CGFloat) -> CGImage? {
         guard sigmaPixels > 0 else { return image }
         let pad = padding(forSigmaPixels: sigmaPixels)
-        // Step 1 — grow the crop with replicated edge pixels.
-        guard let padded = replicatePad(image, pad: pad) else { return nil }
+        // Step 1 — grow the crop with mirrored edge pixels.
+        guard let padded = mirrorPad(image, pad: pad) else { return nil }
         // Step 2 — Gaussian over the padded image.
         guard let filter = CIFilter(name: "CIGaussianBlur") else { return nil }
         filter.setValue(CIImage(cgImage: padded), forKey: kCIInputImageKey)
@@ -109,60 +112,81 @@ enum BackdropBlur {
         return ciContext.createCGImage(output, from: keep)
     }
 
-    /// Grow `image` by `pad` pixels on every side, filling the new band by
-    /// replicating the outermost row/column/corner pixel — the "clamp to
-    /// edge" rule a browser's backdrop sampling gets for free by owning the
-    /// whole canvas.
+    /// How many mirrored copies are needed on each side to cover `pad` pixels
+    /// of band given a tile of extent `extent` — `ceil(pad / extent)`, floored
+    /// at 1 so a band narrower than one tile still gets its reflection.
     ///
-    /// All coordinates below are spelled out because the two APIs disagree
-    /// about which way is up: `CGImage.cropping(to:)` is IMAGE space (row 0
-    /// at the TOP) while `CGContext.draw(_:in:)` is USER space (y grows
-    /// UPWARD from the bottom). Each strip's destination rect is therefore
-    /// derived from the top-down band it must fill.
-    static func replicatePad(_ image: CGImage, pad: Int) -> CGImage? {
+    /// Pure integer arithmetic, split out so the unit suite can pin it without
+    /// a raster. Mirrors the WPT reference file's `copiesX`/`copiesY`
+    /// (css/filter-effects/support/simulate-backdrop-blur.js), which is the
+    /// oracle this whole edge model was measured against.
+    static func mirrorCopies(pad: Int, extent: Int) -> Int {
+        guard extent > 0, pad > 0 else { return 0 }
+        // Integer ceiling division — (pad + extent − 1) / extent.
+        return max(1, (pad + extent - 1) / extent)
+    }
+
+    /// True when the tile at grid index `i` (0 = the centre tile) is drawn
+    /// flipped on that axis: every ODD step away from the centre reflects.
+    ///
+    /// Pure, and exported for the unit pins for the same reason as above: the
+    /// parity rule IS the mirror model, so it is worth asserting directly
+    /// rather than inferring it from a blurred raster.
+    static func mirrorFlips(_ i: Int) -> Bool { abs(i) % 2 == 1 }
+
+    /// Grow `image` by `pad` pixels on every side, filling the new band with
+    /// MIRRORED copies of the image — Skia's `SkTileMode::kMirror`, which is
+    /// the edge behaviour Chrome hands a backdrop-filter's clipped backdrop
+    /// (see the file header for the per-tile measurement, and the Compose
+    /// twin's `Shader.TileMode.MIRROR`).
+    ///
+    /// A band wider than the image needs more than one reflection, exactly
+    /// like the WPT reference file's copy grid; `mirrorCopies` sizes it.
+    ///
+    /// The vertical bookkeeping the replicate version needed is gone: every
+    /// tile is a whole-image draw, so `CGContext.draw(_:in:)`'s user-space
+    /// (y-up) convention applies identically to all of them and the flip is
+    /// taken about each tile's own centre. Whether the grid index counts up
+    /// or down is therefore immaterial — the parity pattern is symmetric.
+    static func mirrorPad(_ image: CGImage, pad: Int) -> CGImage? {
         let w = image.width, h = image.height
-        // Degenerate source — nothing to replicate from.
+        // Degenerate source — nothing to mirror from.
         guard w > 0, h > 0, pad > 0 else { return image }
         guard let ctx = BackdropImageOps.workingContext(like: image,
                                                         width: w + 2 * pad,
                                                         height: h + 2 * pad)
         else { return nil }
-        // Nearest-neighbour so a 1-px source strip is copied, not smoothed.
+        // Nearest-neighbour: every draw is 1:1 (possibly flipped), never
+        // resampled, so interpolation could only blur the copy.
         ctx.interpolationQuality = .none
         let p = CGFloat(pad), fw = CGFloat(w), fh = CGFloat(h)
-        // Centre — the original pixels, inset by the pad on every side.
-        ctx.draw(image, in: CGRect(x: p, y: p, width: fw, height: fh))
-        // Edge sources, in image space.
-        let topRow    = image.cropping(to: CGRect(x: 0, y: 0, width: w, height: 1))
-        let bottomRow = image.cropping(to: CGRect(x: 0, y: h - 1, width: w, height: 1))
-        let leftCol   = image.cropping(to: CGRect(x: 0, y: 0, width: 1, height: h))
-        let rightCol  = image.cropping(to: CGRect(x: w - 1, y: 0, width: 1, height: h))
-        // Top band fills the padded image's TOP rows, which in user space
-        // sit ABOVE the centre (y from p+h to p+h+p).
-        if let topRow { ctx.draw(topRow, in: CGRect(x: p, y: p + fh, width: fw, height: p)) }
-        // Bottom band — the padded image's LAST rows, user-space y 0…p.
-        if let bottomRow { ctx.draw(bottomRow, in: CGRect(x: p, y: 0, width: fw, height: p)) }
-        // Left/right bands span the centre's rows; no vertical ambiguity.
-        if let leftCol { ctx.draw(leftCol, in: CGRect(x: 0, y: p, width: p, height: fh)) }
-        if let rightCol { ctx.draw(rightCol, in: CGRect(x: p + fw, y: p, width: p, height: fh)) }
-        // Corners — one source pixel each, stretched into a pad×pad square.
-        // Image-space (0,0) is the TOP-left pixel, so it fills the top-left
-        // square, whose user-space origin is (0, p+h).
-        let corners: [(CGRect, CGRect)] = [
-            (CGRect(x: 0, y: 0, width: 1, height: 1),
-             CGRect(x: 0, y: p + fh, width: p, height: p)),          // top-left
-            (CGRect(x: w - 1, y: 0, width: 1, height: 1),
-             CGRect(x: p + fw, y: p + fh, width: p, height: p)),     // top-right
-            (CGRect(x: 0, y: h - 1, width: 1, height: 1),
-             CGRect(x: 0, y: 0, width: p, height: p)),               // bottom-left
-            (CGRect(x: w - 1, y: h - 1, width: 1, height: 1),
-             CGRect(x: p + fw, y: 0, width: p, height: p)),          // bottom-right
-        ]
-        for (src, dst) in corners {
-            // A nil crop can only mean a degenerate source rect, already
-            // excluded by the w/h guard above; skip rather than fail the
-            // whole pad so a pathological image still blurs its interior.
-            if let pixel = image.cropping(to: src) { ctx.draw(pixel, in: dst) }
+        let cx = mirrorCopies(pad: pad, extent: w)
+        let cy = mirrorCopies(pad: pad, extent: h)
+        for j in -cy...cy {
+            for i in -cx...cx {
+                // Tile (i,j)'s destination, with the centre tile inset by the
+                // pad on every side. Tiles that fall outside the context are
+                // clipped away by CoreGraphics, so no bounds test is needed.
+                let dst = CGRect(x: p + CGFloat(i) * fw, y: p + CGFloat(j) * fh,
+                                 width: fw, height: fh)
+                let fx: CGFloat = mirrorFlips(i) ? -1 : 1
+                let fy: CGFloat = mirrorFlips(j) ? -1 : 1
+                if fx == 1, fy == 1 {
+                    // Unflipped tile — the centre and every even step out.
+                    ctx.draw(image, in: dst)
+                    continue
+                }
+                // Flip about the tile's own centre so the reflection shares
+                // its edge column/row with the neighbour it mirrors (kMirror
+                // duplicates the edge pixel; a flip about the EDGE would drop
+                // it and shift the whole band by one).
+                ctx.saveGState()
+                ctx.translateBy(x: dst.midX, y: dst.midY)
+                ctx.scaleBy(x: fx, y: fy)
+                ctx.translateBy(x: -dst.midX, y: -dst.midY)
+                ctx.draw(image, in: dst)
+                ctx.restoreGState()
+            }
         }
         return ctx.makeImage()
     }

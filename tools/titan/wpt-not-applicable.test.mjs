@@ -17,6 +17,8 @@ import assert from 'node:assert/strict';
 
 import {
     tagsForTest, classifyAll, RULES, RX,
+    // wave-34 lane F2: Rule 15's named predicate (the at-RULE boundary).
+    declaresFontFaceRule,
     NON_LATIN_PREDEFINED_COUNTER_STYLES,
     shadowedCounterStyleNames,
 } from './wpt-not-applicable.mjs';
@@ -378,6 +380,54 @@ test('requires-font-face fires on @font-face with src: local()', () => {
 test('requires-font-face does NOT fire on font-family alone (system font)', () => {
     const html = '<style>div { font-family: "Helvetica", sans-serif; }</style>';
     assert.equal(tagsForTest({ html }).includes('requires-font-face'), false);
+});
+
+// ── wave-34 lane F2: Rule 15 requires an actual at-RULE ─────────────────────
+//
+// MEASURED over all 47,065 corpus documents: 2027 → 2018 fires, 9 declined,
+// zero widened. The declined nine name the at-rule in a <title>, in a
+// testharness assertion string, or in a commented-out JS line — none creates
+// a face, so none has the font boundary this tag exists to exclude for.
+
+test('Rule 15: a PROSE mention of @font-face creates no face and declines', () => {
+    // The three real corpus shapes, verbatim in structure.
+    const title = '<title>CSS Values and Units Test: lh depending on @font-face</title>';
+    assert.equal(tagsForTest({ html: title }).includes('requires-font-face'), false);
+    const assertion = '<script>promise_test(() => {}, "Line-height and lh before @font-face loads");</script>';
+    assert.equal(tagsForTest({ html: assertion }).includes('requires-font-face'), false);
+    const commented = '<script>// { namelist: "\\@font-face", single: true },</script>';
+    assert.equal(tagsForTest({ html: commented }).includes('requires-font-face'), false);
+    // …and the predicate itself, which is what a future per-platform re-tag
+    // will move.
+    assert.equal(declaresFontFaceRule(title), false);
+    assert.equal(declaresFontFaceRule(null), false);
+});
+
+test('Rule 15: whitespace between the token and its block still fires', () => {
+    // css-syntax-3 §5.4 allows whitespace in the prelude; `@font-face\n{` is
+    // a real corpus spelling, and missing it would be a false decline.
+    assert.ok(declaresFontFaceRule('<style>@font-face\n  {\n font-family: F; src: url(a.woff); }</style>'));
+    assert.ok(declaresFontFaceRule('<style>@FONT-FACE { font-family: F; src: url(a.woff) }</style>'));
+});
+
+test('Rule 15: a SCRIPT-built face keeps the conservative fire', () => {
+    // 16 corpus documents build faces from JS. The static sheet cannot show
+    // them, so the token+brace test seeing the string in the JS source is the
+    // right answer here — a decline would admit a test whose ref paints a
+    // face no harness can reach.
+    const html = '<script>sheet.insertRule("@font-face { font-family: F; src: url(a.woff) }");</script>';
+    assert.ok(tagsForTest({ html }).includes('requires-font-face'));
+});
+
+test('Rule 15: the exclusion is still WHOLE-TEST, not per-platform', () => {
+    // Wave 34 gave the WEB a real face (the IR's document-level `fontFaces`
+    // list + the harness's /wpt-font/ route) but neither native runtime can
+    // register one, so the tag must NOT have joined the per-platform family
+    // yet. This pin is what a future wave flips together with the native
+    // registration hop — see the banner above declaresFontFaceRule.
+    const entry = RULES.find((r) => r.tag === 'requires-font-face');
+    assert.ok(entry, 'Rule 15 must still exist');
+    assert.match(entry.description, /native/i);
 });
 
 // ── Rule 16: requires-view-transitions ──────────────────────────────────────

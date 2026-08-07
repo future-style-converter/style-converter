@@ -473,6 +473,55 @@ class SchemaConformanceTest {
         }
     }
 
+    // ── wave-34 lane F2: the document-level @font-face list (spec 01 §5) ──
+
+    @Test
+    fun `v2 — fontFaces decodes off the document, descriptors verbatim`() {
+        val doc = loadV2("font-faces.json")
+        val faces = requireNotNull(doc.fontFaces) { "font-faces.json must carry fontFaces" }
+        // ORDER is payload: css-fonts-4 §4.1 makes a later face with the
+        // same (family, weight, style) win, so a reordering decode would
+        // silently change which file renders.
+        assertEquals(2, faces.size)
+        assertEquals("test", faces[0].family)
+        assertEquals("css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff", faces[0].src)
+        // Omitted descriptors stay NULL — never defaulted to the §4.4/§4.5
+        // initial literal, so "omitted" and "explicitly normal" remain
+        // distinguishable for the registration hop that does not exist yet.
+        assertNull(faces[0].weight)
+        assertNull(faces[0].style)
+        // …and the descriptors that cannot be normalised ride as authored:
+        // a weight RANGE has no numeric 100–900 form, an oblique ANGLE no
+        // keyword form.
+        assertEquals("400 700", faces[1].weight)
+        assertEquals("oblique 20deg", faces[1].style)
+    }
+
+    @Test
+    fun `v2 — a document without fontFaces decodes to null, not empty`() {
+        // Absent-vs-empty discipline: the key is omit-when-empty on the
+        // wire, so every pre-wave-34 golden must come back null.
+        assertNull(loadV2("text-and-role.json").fontFaces)
+    }
+
+    @Test
+    fun `v2 strict — malformed fontFaces entries are hard decode errors`() {
+        // The runtime does not USE faces yet, and strictness is still right:
+        // the spec-05 tolerance rule covers unknown property TYPES, not a
+        // malformed envelope structure this reader claims to speak. A quiet
+        // skip would hide the writer bug until the registration wave.
+        val head = """{"irVersion":2,"minReaderVersion":2,"components":[],"""
+        assertThrowsIae("""$head"fontFaces":[]}""", "empty")                       // minItems 1
+        assertThrowsIae("""$head"fontFaces":{}}""", "array")                       // wrong type
+        assertThrowsIae("""$head"fontFaces":[{"src":"a.woff"}]}""", "family")      // family required
+        assertThrowsIae("""$head"fontFaces":[{"family":"x"}]}""", "src")           // src required
+        assertThrowsIae("""$head"fontFaces":[{"family":"","src":"a.woff"}]}""", "family")
+        assertThrowsIae(
+            """$head"fontFaces":[{"family":"x","src":"a.woff","format":"woff"}]}""",
+            "format"                                                               // closed key set
+        )
+    }
+
     @Test
     fun `v2 composer — Mode B zero-slot documents pass through as roots`() {
         val doc = IRDocumentDecoder.decode(

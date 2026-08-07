@@ -254,6 +254,16 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
     // inline flow `runs` describes; and the separator hook exists to
     // re-invent the inter-sibling space the flat wire dropped — a space
     // `runs` now carries for real, as a whitespace-only text entry.
+    //
+    // wave-34 lane R MEASURED that argument instead of leaving it as an
+    // argument. The producer widened emission from "the reorder fired" to
+    // "own text and element children interleave at all", which grew the
+    // population by 515 components across the bucket-A corpus — a big
+    // enough jump that "floats are not inline flow" deserved a count. Of
+    // those 515 newly-listed components, the number carrying a float run
+    // (≥2 consecutive left-floating children, the only shape planChildRuns
+    // groups) is ZERO. The skip is inert on the new population, not merely
+    // defensible on it.
     const inlineRuns = resolveRuns(component.meta?.runs, node.children, component.id);
     if (inlineRuns) {
       // The runs own the content slot; the sibling walk carries only the

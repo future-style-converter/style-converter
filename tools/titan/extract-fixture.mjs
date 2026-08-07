@@ -2232,11 +2232,51 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   // entry. That distinction is the whole point (spec 03 §4.1 rule 6):
   // `the quick <u>brown</u> fox` must keep the space before AND after the
   // child, so trimming each run individually would silently delete two word
-  // spaces the browser paints. Computed only when the reorder fired —
-  // every other component discards it unread, so the common path pays one
-  // boolean.
-  const runProto = reordered ? buildRunProto(segments, preserveWhitespace) : null;
-  if (preserveWhitespace) return { text: decodedBuf, merged, reordered, runProto };
+  // spaces the browser paints.
+  //
+  // ── wave-34 lane R: THE EMISSION CONDITION, WIDENED ─────────────────────
+  //
+  // wave-32 gated the list on `reordered` — own text appearing AFTER a kept
+  // child. That is the case where the concatenation paints in the WRONG
+  // ORDER, and it is genuinely the only case where `_text` alone is a LIE.
+  // But it is not the only case where `_text` alone is LOSSY, and wave-33
+  // lane N measured the difference on the ref:
+  //
+  //   `<p>…green <em>…</em></p>` — text, then a kept child, nothing after.
+  //   No reorder (our paint order IS document order), so wave-32 emitted no
+  //   runs; `_text` therefore carried the COLLAPSED-AND-TRIMMED buffer and
+  //   the boundary space between 'green' and the `<em>` was gone. The two
+  //   words render welded. CSS Text §4.1 rule 4 collapses that space to one
+  //   space; it does not delete it — the deletion is purely an artifact of
+  //   trimming a buffer whose true end is an element boundary, not the end
+  //   of the line. Cost on the record: CSS2/selector/lang-pseudoclass-001
+  //   0.7774 → 0.7684 when wave-33 lane N routed two more tests onto that
+  //   pre-existing path (see splitSelectorChain's N2 note, which recorded
+  //   this widening as the follow-up rather than smuggling it in).
+  //
+  // So the condition becomes: emit whenever the component's own text and its
+  // kept element children INTERLEAVE AT ALL — i.e. there is at least one
+  // element segment AND the own-text buffer is non-empty after normalisation.
+  // `reordered` stays in the disjunction because it is a superset guard for
+  // the pre family (where `hasOwnText` is measured on the un-collapsed
+  // buffer) and because retiring it here would couple two independent facts.
+  //
+  // WHAT THE WIDENING DOES *NOT* COVER, deliberately: a component whose own
+  // text normalises to the EMPTY string — the `<div>\n<span/>\n<b/>\n</div>`
+  // shape, where the only own text is the inter-sibling newline+indent. That
+  // whitespace is real (the browser paints one word space between the two
+  // inline children) but it is ALREADY on the wire, as the wave-26 `ws-after`
+  // marker; emitting it a second time as a `{text:' '}` run would double the
+  // space on every renderer that honours both. The `ws-after` channel owns
+  // the child/child boundary; `_runs` owns the text/child boundary. One fact,
+  // one channel — see the WS_AFTER_ROLE banner for the other half.
+  //
+  // The list stays ADDITIVE at the wire: `_text` is untouched (still the
+  // concatenation), `alignRuns` still refuses unless the two walks prove they
+  // describe the same children, and a reader that ignores `_runs` paints
+  // exactly what it painted before. The only new bytes are on components that
+  // genuinely interleave.
+  const sawElementChild = segments.some((s) => s.t === 'el');
   // Collapse whitespace per CSS white-space:normal default.
   //
   // Bug 3 fix (css-text/hanging-punctuation-first-002): the JS `\s` class
@@ -2250,12 +2290,23 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
   // every other Unicode space) is preserved verbatim. We collapse the
   // ASCII subset, then trim leading/trailing ASCII spaces only — same
   // [ \t\n\r\f]+ class, not `\s`.
-  const collapsed = decodedBuf
+  // wave-34 lane R: the pre family keeps its buffer VERBATIM (§4.1.1), so
+  // `text` is `decodedBuf` there and `collapsed` is never consulted; the
+  // single expression below keeps the two paths' own-text answer in ONE
+  // place, which is what the interleave test needs to read.
+  const collapsed = preserveWhitespace ? decodedBuf : decodedBuf
     .replace(/[ \t\n\r\f]+/g, ' ')
     .replace(/^[ \t\n\r\f]+|[ \t\n\r\f]+$/g, '');
+  // wave-34 lane R: the widened gate (see the banner above). Computed AFTER
+  // the normalisation because "has own text" is a fact about the SHIPPED
+  // `_text`, not about the raw buffer — a component whose only own text is
+  // inter-sibling indentation must stay on the `ws-after` channel.
+  const runProto = (reordered || (sawElementChild && collapsed.length > 0))
+    ? buildRunProto(segments, preserveWhitespace)
+    : null;
   // Text plus the wave-12 merge count (0 whenever mergeCtx was null), the
   // wave-21 B-RC9a reorder flag (see the declaration comment above) and the
-  // wave-32 lane R run list (null unless the reorder fired).
+  // wave-32 lane R run list (null unless the component interleaves).
   return { text: collapsed, merged, reordered, runProto };
 }
 
@@ -2697,7 +2748,14 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
   // `:root` entry) so existing selectorMatches() tests stay green. The
   // synthetic root is injected in propsForElement() at match time, which
   // is the only call site that consumes pos data.
-  function recurse(fragment, ancestors, depth) {
+  /**
+   * wave-34 lane R: `domSink` is an out-parameter — the caller hands in an
+   * object and this level fills `domSink.list` with its DOM-TRUTHFUL child
+   * list (see the domKids banner below). It exists because the parent needs
+   * that list even when the level produced ZERO components (every child
+   * merged away), which is precisely the case `pos.kids` must not miss.
+   */
+  function recurse(fragment, ancestors, depth, domSink = null) {
     // Head-only scaffolding never becomes components (Bug 5), at any depth.
     const rawKids = walkChildren(fragment).filter((k) => !HEAD_ONLY_TAGS.has(k.tag));
     // wave-12 EXTRACTOR-INLINE: drop the pure-inline kids whose text was
@@ -2733,7 +2791,45 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
       // Annotate rather than copy: `domIdx` rides the walker's kid object,
       // which is private to this recursion (walkChildren allocates fresh).
       if (keep) { k.domIdx = rawIdx; kids.push(k); }
+      else k.mergedAway = true;
     });
+    // ── wave-34 lane R: THE DOM-TRUTHFUL CHILD LIST (`:has()`'s handle) ────
+    //
+    // Every other position fact this walker stamps is about OUR COMPONENT
+    // TREE, because that is what the pseudo is asked about at render time.
+    // `:has()` is different: Selectors-4 §5.4 asks whether the DOM contains
+    // a matching element, and the browser's answer counts merge-absorbed
+    // inline children — which our component tree has already thrown away.
+    //
+    // MEASURED, and the reason this list exists at all:
+    //   selectors/dir-pseudo-in-has.html — `.ltr:has(*:dir(ltr))` over
+    //   `<div class="ltr"><span></span></div>`. The stylesheet targets no
+    //   `span`, so wave-12's isPureInlineMergeable absorbs it and the div
+    //   ships with NO children. Answering `:has()` off the component list
+    //   would say "no descendant" and silently paint the div red — and,
+    //   worse, would say it CONFIDENTLY, since a parse-supported `:has()`
+    //   no longer feeds countUnsupportedRules and so no longer earns the
+    //   wave-30 A3 post-load browser that was covering this test.
+    //
+    // So the list runs over `rawKids`, not `kids`. Entries for KEPT children
+    // are back-filled from their node's own `pos` in the second pass below;
+    // entries for MERGED children are complete HERE, because
+    // isPureInlineMergeable's rule 2 refuses any child containing `<` — a
+    // merged element provably has NO element descendants, so `kids: []` is a
+    // fact about it and not a truncation guess.
+    const domKids = rawKids.map((k) => (k.mergedAway
+      ? {
+        tag: k.tag,
+        attrs: k.attrs,
+        // Provably childless (rule 2), so the subtree scan can stop here.
+        kids: [],
+        // `:empty` (Selectors-4 §6.6) — no children AND no text.
+        isEmpty: !(k.innerHtml ?? '').trim(),
+        // `:dir(auto)`'s first-strong corpus is just its text (no elements).
+        subtreeText: (k.innerHtml ?? '').replace(/[ \t\n\r\f]+/g, ' ').trim(),
+      }
+      : { tag: k.tag, attrs: k.attrs }));
+    if (domSink) domSink.list = domKids;
     // First pass: compute per-sibling position metadata. We pre-walk and
     // count tag occurrences so each child gets its global sib-index AND
     // its tag-typed sib-index (drives `:nth-of-type` / `:first-of-type`).
@@ -2788,13 +2884,45 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
       // wave-15: pre-family elements keep spaces/tabs/newlines verbatim.
       const ownRes = extractOwnTextMerged(k.innerHtml, mergeCtx, preserve);
       const ownText = ownRes.text;
+      // wave-34 lane R — THE RELATIONAL METADATA (`pos.kids`), for `:has()`.
+      //
+      // Selectors-4 §5.4 asks a question no other pseudo asks: not "where is
+      // this element among its siblings" but "what is UNDERNEATH it". So the
+      // matcher needs a handle on the subtree, and the walker is the only
+      // code that has one.
+      //
+      // The handle is FREE: the child level's own `siblingList` is already
+      // allocated (every child's `pos.siblings` points at it), and it already
+      // carries exactly the fields compoundMatches needs — `tag`, `attrs`,
+      // plus the second pass's `isEmpty` / `subtreeText`. Pointing `kids` at
+      // that same array costs one reference per node and stays ACYCLIC (it
+      // only ever points DOWN the tree, unlike the `pos.siblings[i].pos`
+      // back-reference the second pass's banner explains we must not create).
+      //
+      // WHEN IT IS DELIBERATELY LEFT UNDEFINED: the `maxDepth` cut. Below the
+      // cut the walker knows the element HAS element children but never
+      // enumerated them, so an empty list there would be a silent lie —
+      // `div:has(span)` would answer "no span" about a subtree we never
+      // looked at. Undefined instead makes evalPseudo's `has` branch answer
+      // null, which drops the rule and (via countUnsupportedRules) routes the
+      // test to the post-load browser that CAN see it. No silent fallthrough.
+      const kidSink = {};
+      let walkedKids = false;
       if (depth + 1 < maxDepth && k.innerHtml) {
         children = recurse(
           k.innerHtml,
           [...ancestors, childAncestor],
           depth + 1,
+          kidSink,
         );
+        walkedKids = true;
+      } else if (!k.innerHtml) {
+        // Empty element — "no children" is a FACT here, not a truncation.
+        walkedKids = true;
       }
+      // The DOM-truthful list the recursion just filled (see the domKids
+      // banner): every element child, merged-away ones included.
+      if (walkedKids) pos.kids = kidSink.list ?? [];
       pos.isEmpty = children.length === 0 && !ownText;
       const node = {
         tag: k.tag, attrs: k.attrs, raw: k.raw,
@@ -2825,11 +2953,16 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
       if (ownRes.reordered) node.inlineReordered = true;
       // wave-32 lane R: the ordered content list, but ONLY once the two
       // walks have proven they describe the same children (see alignRuns).
-      // Emitted for exactly the population `inlineReordered` marks, so no
-      // component outside that set gains a byte; when alignRuns refuses,
-      // the node keeps `inlineReordered` alone and buildNode ships the
-      // wave-21 bail unchanged.
-      if (ownRes.reordered) {
+      // When alignRuns refuses, the node keeps `inlineReordered` alone (if
+      // it had it) and buildNode ships the wave-21 bail unchanged.
+      //
+      // wave-34 lane R: the gate is now `runProto` itself rather than
+      // `reordered` — scanOwnText decides the emission population (own text
+      // AND at least one kept element child; see its widening banner), and
+      // this call site only asks whether the two walks agree. The reorder
+      // FLAG keeps its own independent life below: a widened, non-reordered
+      // component never had it, so retiring it stays a no-op there.
+      if (ownRes.runProto) {
         const aligned = alignRuns(ownRes.runProto, children);
         if (aligned) node.runs = aligned;
       }
@@ -2918,6 +3051,25 @@ export function extractBodyTreeNested(html, maxDepth = 5, mergeCtx = null) {
       node.pos.subtreeText = text;
       siblingList[i].subtreeText = text;
       siblingList[i].isEmpty = node.pos.isEmpty;
+      // wave-34 lane R: the third stamped fact, and the reason it must live
+      // on the SIBLING entry and not only on `pos`. `:has()` is asked about
+      // an element we are not the subject of in exactly the same three
+      // directions `:dir()` is, and the corpus proves the sibling direction
+      // is real: selectors/nth-child-of-has.html's
+      // `div:nth-child(even of :has(span))` renumbers among the SIBLINGS
+      // matching S, and evalPseudo's of-selector branch matches each sibling
+      // through siblingPositionMeta — which can only forward what the entry
+      // carries. `undefined` propagates faithfully (a maxDepth-truncated
+      // node stays undecidable for a sibling asker too).
+      siblingList[i].kids = node.pos.kids;
+      // …and the same three facts onto THIS level's DOM-truthful entry, at
+      // its raw index (merged entries were already complete at construction).
+      const dk = domKids[kids[i].domIdx];
+      if (dk) {
+        dk.kids = node.pos.kids;
+        dk.isEmpty = node.pos.isEmpty;
+        dk.subtreeText = text;
+      }
     });
     return out;
   }
@@ -3415,6 +3567,30 @@ const SUPPORTED_FUNCTIONAL_PSEUDOS = new Set([
   // parseCompound for the argument validation and evalPseudo for the
   // negation itself.
   'not',
+  // wave-34 lane R — `:has()`, the relational pseudo-class (Selectors-4 §5.4:
+  // ":has() matches an element if any of the relative selectors in its
+  // argument, when absolutised against that element, match at least one
+  // element"). It was the largest single unmodelled-selector population left
+  // in the corpus: 28 bucket-A tests carry a `:has(` token, and every one of
+  // them fed countUnsupportedRules → the wave-30 A3 post-load route, i.e. we
+  // paid a browser page-load to answer a question about STATIC MARKUP.
+  //
+  // SUPPORTED SUBSET (what the `has` branch in parseCompound validates):
+  // an OPTIONAL leading combinator — none (descendant, the §5.4 default),
+  // `>`, `+`, `~` — followed by exactly ONE compound. That is the whole of
+  // the corpus's reachable usage: `:has(> span)` / `:has(> .a)`
+  // (selectors/has-style-sharing-001…006), `:has(span)` (…-007, inside a
+  // `:not()`), `:has(.c)` / `:has(span)` as an `of S` argument
+  // (selectors/nth-child-of-has + the two invalidation twins), and
+  // `:has(*:dir(ltr))` (selectors/dir-pseudo-in-has).
+  //
+  // REFUSED, honestly, each feeding the post-load route rather than a guess:
+  // a nested `:has()`; a pseudo-element in the argument (§5.4 forbids it);
+  // more than one compound (`:has(~ .item > :nth-child(2))` —
+  // selectors/invalidation/has-with-nth-child-sibling-remove); and a
+  // relative-selector LIST, which parseCss's paren-blind comma split already
+  // hands us as an unbalanced fragment (the wave-22 depth guard below).
+  'has',
   // wave-30 A1 (selectors__dir-selector-ltr-001, web-ref 0.395 against the
   // filled-green-square ref): the ONLY rule that paints the subject green is
   // `div:dir(ltr) { background-color: green }`, and `dir` was absent from
@@ -3466,7 +3642,7 @@ const SUPPORTED_PSEUDO_ELEMENTS = new Set(['before', 'after', 'marker']);
  * instead of the host's flat `properties`. Per Selectors-4 §3.3 the
  * pseudo-element MUST be the last token in the rightmost compound.
  */
-function parseCompound(compound) {
+function parseCompound(compound, isSubject = true) {
   const out = {
     needTag: null, needId: null, needClasses: [],
     pseudos: [], pseudoElement: null, unsupported: false,
@@ -3576,6 +3752,82 @@ function parseCompound(compound) {
         // pseudo semantics can never drift between the two paths) and the
         // parsed form to decide whether positional data is required.
         out.pseudos.push({ name, arg: innerSel, inner });
+        continue;
+      }
+      // wave-34 lane R: `:has()` — the RELATIVE selector is validated here,
+      // at parse time, for the same reason `:not()` is: an argument we
+      // cannot evaluate must drop the RULE, never degrade to a guess. The
+      // asymmetry `:not()` warns about applies with double force, because
+      // `:has()` most often appears in the corpus INSIDE a `:not()`
+      // (has-style-sharing-007), where an unknowable inner answer would be
+      // inverted into a confident false match.
+      //
+      // Selectors-4 §5.4 + §16: the argument is a <relative-selector-list>,
+      // each entry `<combinator>? <complex-selector>` absolutised against
+      // the subject (`:has(.a)` means `:has(:scope .a)`). We accept the
+      // leading combinator plus ONE compound and refuse the rest.
+      if (name === 'has') {
+        // ── wave-34 lane R: SUBJECT-SIDE ONLY, and the measurement that
+        // drew the line ─────────────────────────────────────────────────────
+        //
+        // `:has()` on a NON-rightmost compound asks the relational question
+        // about an ANCESTOR of the subject (`:has(> .a) .b` — "a `.b` inside
+        // something that has an `.a` child"). We can evaluate that: the
+        // ancestor entries carry `pos.kids` like everyone else. We decline it
+        // anyway, because evaluating it makes the fixture WORSE:
+        //
+        //   selectors/has-style-sharing-003 — `:has(> .a) .b { green }` with
+        //   `.b { purple }` LATER in the sheet. Chromium paints the first
+        //   `.b` GREEN (specificity 0,2,0 beats 0,1,0). propsForElement has
+        //   no specificity — it is last-write-wins in document order — so our
+        //   static answer is purple. Today that costs nothing, because the
+        //   dropped `:has()` rule feeds countUnsupportedRules and the wave-30
+        //   A3 route hands the test to the browser, which bakes
+        //   `background-color: rgb(0, 128, 0)` (MEASURED, probe
+        //   _diag34/laneR: postLoadAugmentFixture status 'extracted',
+        //   6 overlaid). Accepting the compound would delete that route and
+        //   ship the purple — a confident wrong answer replacing a correct
+        //   one. Same shape, same verdict, on selectors/featureless-005
+        //   (`:has(.t2) .t2`), where accepting flips a green box to red.
+        //
+        // Every corpus instance of the ancestor-side form is that shape, and
+        // every SUBJECT-side instance is competition-free (has-style-sharing
+        // -001/-002/-007, dir-pseudo-in-has, nth-child-of-has, has-nesting) —
+        // so the line is not a hedge, it is where the evidence puts it. When
+        // the cascade grows specificity ordering, drop the flag and re-measure.
+        if (!isSubject) { out.unsupported = true; return out; }
+        let rel = (arg ?? '').trim();
+        // Empty `:has()` is invalid per the grammar. A comma means a
+        // relative-selector LIST — but note it can rarely reach us intact,
+        // since parseCss's paren-blind comma split turns `p:has(.a, .b)`
+        // into the unbalanced fragment `p:has(.a`, already refused above.
+        if (!rel || rel.includes(',')) { out.unsupported = true; return out; }
+        // The leading combinator, defaulting to descendant (§5.4: an
+        // omitted combinator is the descendant combinator).
+        let comb = ' ';
+        if (rel[0] === '>' || rel[0] === '+' || rel[0] === '~') {
+          comb = rel[0];
+          rel = rel.slice(1).trim();
+          if (!rel) { out.unsupported = true; return out; }
+        }
+        // What remains must be a SINGLE compound: any residual whitespace or
+        // combinator is a complex relative selector (`~ .item > :nth-child(2)`
+        // — selectors/invalidation/has-with-nth-child-sibling-remove), which
+        // needs a sub-chain matcher rooted at each candidate. Out of scope,
+        // refused loudly rather than approximated.
+        if (/[\s>+~]/.test(rel)) { out.unsupported = true; return out; }
+        // Same parser, same rules — attr selectors rejected, unknown pseudos
+        // rejected, and a NESTED `:has()` rejected just below.
+        const inner = parseCompound(rel);
+        // §5.4: the argument must contain no pseudo-elements.
+        if (inner.unsupported || inner.pseudoElement) { out.unsupported = true; return out; }
+        // Nesting is explicitly invalid per §5.4 ("`:has()` is not valid
+        // within `:has()`"), and we could not evaluate it anyway.
+        if (inner.pseudos.some((p) => p.name === 'has')) { out.unsupported = true; return out; }
+        // `arg` carries the compound TEXT (evalPseudo re-matches it through
+        // compoundMatches so the two paths can never drift); `comb` carries
+        // the absolutised relation; `inner` is kept for symmetry with `not`.
+        out.pseudos.push({ name, arg: rel, comb, inner });
         continue;
       }
       // wave-30 A1: `:dir()` needs its ARGUMENT validated here, at parse
@@ -3829,8 +4081,115 @@ function siblingPositionMeta(siblings, k) {
     // matching and leave `:dir(auto)` on HTML's ltr fallback.
     isEmpty: me?.isEmpty === true,
     subtreeText: me?.subtreeText ?? '',
+    // wave-34 lane R: the relational handle for `:has()`, forwarded VERBATIM
+    // — including `undefined`. There is no conservative default available
+    // here: `[]` would assert "this sibling has no children" (a silent lie
+    // below the maxDepth cut) and any non-empty guess would be worse. An
+    // absent handle makes the `has` branch answer null, which drops the rule.
+    kids: me?.kids,
     siblings,
   };
+}
+
+/**
+ * wave-34 lane R — does this `pos` carry the handle `:has()` needs?
+ *
+ * ONE predicate, consulted from two places (the `:has()` branch itself and
+ * the `:not()` inversion guard) so the two can never disagree about what
+ * "decidable" means. `kids` is the walker's relational stamp (see
+ * extractBodyTreeNested); it is deliberately absent below the maxDepth cut
+ * and on every legacy hand-built `pos`.
+ *
+ * The sibling forms (`:has(+ x)` / `:has(~ x)`) need `siblings`/`sibIndex`
+ * instead, but requiring `kids` for them too is the conservative direction:
+ * both stamps come from the same walker in the same pass, so a pos that has
+ * one has the other, and a pos that has neither must refuse either way.
+ */
+function hasRelationalMeta(pos) {
+  return Array.isArray(pos?.kids);
+}
+
+/**
+ * wave-34 lane R — evaluate `:has(<relative-selector>)` (Selectors-4 §5.4).
+ *
+ * The spec's definition is "absolutise the relative selector against the
+ * subject (`:has(.a)` ≡ `:has(:scope .a)`), then match it against the tree;
+ * `:has()` is true when at least one element matches". Because parseCompound
+ * has already restricted the argument to `<combinator>? <one compound>`, the
+ * absolutised form is exactly "some element in the set the combinator names
+ * matches this compound", and the four combinators name four sets:
+ *
+ *   (none)  every DESCENDANT          — §5.4's default, `:scope .a`
+ *   `>`     every CHILD               — `:scope > .a`
+ *   `+`     the next sibling only     — `:scope + .a`
+ *   `~`     every FOLLOWING sibling   — `:scope ~ .a`
+ *
+ * Note the sibling sets look FORWARD. That is the one place `:has()` reads
+ * opposite to the sibling COMBINATORS in selectorMatchesPseudoElement, which
+ * scan backwards from the subject: there the subject is the right-hand side
+ * of `A + B`, here it is the left-hand side of `:scope + A`.
+ *
+ * Candidates are matched through the SAME compoundMatches every other
+ * compound goes through, with a correctly-extended ancestor chain, so a
+ * pseudo inside the argument (`:has(*:dir(ltr))` —
+ * selectors/dir-pseudo-in-has) resolves exactly as it would if the element
+ * were the subject of its own rule.
+ *
+ * @returns true / false, or null when the tree handle is missing (the
+ *          maxDepth cut) — null drops the rule, never guesses.
+ */
+function evalHas(pseudo, pos, tag, attrs, ctx, ancestors) {
+  // No relational stamp ⇒ we never enumerated the subtree. Refuse.
+  if (!hasRelationalMeta(pos)) return null;
+  const comb = pseudo.comb ?? ' ';
+  const sel = pseudo.arg;
+  // The subject's own entry, for candidates whose chain runs THROUGH it.
+  const selfEntry = { tag, attrs: attrs ?? {}, pos };
+  const baseChain = ancestors ?? [];
+
+  if (comb === '+' || comb === '~') {
+    // Forward sibling scan. Siblings share the subject's parent, so they
+    // share its ancestor chain verbatim (the same reasoning the backward
+    // sibling step in selectorMatchesPseudoElement uses).
+    const sibs = pos.siblings;
+    const here = pos.sibIndex;
+    if (!Array.isArray(sibs) || typeof here !== 'number') return null;
+    const stop = comb === '+' ? here + 1 : sibs.length - 1;
+    for (let k = here + 1; k <= stop && k < sibs.length; k += 1) {
+      const sib = sibs[k];
+      if (!sib) continue;
+      if (compoundMatches(sel, sib.tag, sib.attrs ?? {}, siblingPositionMeta(sibs, k),
+        ctx, ancestors) === true) return true;
+    }
+    return false;
+  }
+
+  // Child / descendant. `deep` is the only difference: the child form stops
+  // at one level, the descendant form recurses.
+  const deep = comb !== '>';
+  /** @returns true | false | null (null = an unenumerated subtree). */
+  const scan = (list, chain) => {
+    let sawUnknown = false;
+    for (let k = 0; k < list.length; k += 1) {
+      const cand = list[k];
+      if (!cand) continue;
+      const candPos = siblingPositionMeta(list, k);
+      if (compoundMatches(sel, cand.tag, cand.attrs ?? {}, candPos, ctx, chain) === true) {
+        return true;
+      }
+      if (!deep) continue;
+      // Recurse. A candidate whose own subtree was never enumerated makes
+      // the WHOLE answer unknowable — but only if nothing else matches, so
+      // remember it and keep looking rather than bailing early (a positive
+      // found later is still a correct `true`; §5.4 is existential).
+      if (!Array.isArray(cand.kids)) { sawUnknown = true; continue; }
+      const sub = scan(cand.kids, [...chain, { tag: cand.tag, attrs: cand.attrs ?? {}, pos: candPos }]);
+      if (sub === true) return true;
+      if (sub === null) sawUnknown = true;
+    }
+    return sawUnknown ? null : false;
+  };
+  return scan(pos.kids, [...baseChain, selfEntry]);
 }
 
 /**
@@ -3936,6 +4295,19 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}, ancestors =
     // `false` for the inner, and negating an unknowable `false` would
     // manufacture a match. Bail to null (caller treats as non-match).
     if (!pos && inner.pseudos.length > 0) return null;
+    // wave-34 lane R — THE INVERSION HAZARD, closed. compoundMatches folds
+    // "I cannot decide this pseudo" into plain `false` (its loop is
+    // `result !== true → return false`), which the negation below would turn
+    // into a confident MATCH. That is harmless for every pre-wave-34 pseudo,
+    // whose undecidable case is already caught by the `!pos` guard above, but
+    // `:has()` is undecidable in a NEW way — the subject may carry full
+    // position metadata and still be missing the relational handle (a
+    // maxDepth-truncated subtree, or a legacy hand-built `pos`). The corpus
+    // shape is real: selectors/has-style-sharing-007's only rule is
+    // `.special.cousin:not(:has(span))`, so a wrong answer here paints the
+    // wrong box blue. Refuse instead — null drops the rule, and
+    // countUnsupportedRules routes the test to the browser that can see it.
+    if (inner.pseudos.some((p) => p.name === 'has') && !hasRelationalMeta(pos)) return null;
     // Re-match through the SAME compound matcher the positive path uses,
     // then negate — Selectors-4 §5.1: ":not(X) matches elements that are
     // not represented by X". `null` (unsupported inner) propagates as
@@ -3944,6 +4316,10 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}, ancestors =
     if (m === null) return null;
     return !m;
   }
+  // wave-34 lane R — `:has()`, evaluated BEFORE the `!pos` bail so the bail's
+  // own answer (null, "cannot evaluate") is reached through THIS branch's
+  // explicit reasoning rather than by falling through it.
+  if (pseudo.name === 'has') return evalHas(pseudo, pos, tag, attrs, ctx, ancestors);
   // wave-30 A1: `:dir()` is evaluated BEFORE the `!pos` bail for the same
   // reason `:not()` is — an element's directionality is an HTML tree fact
   // (HTML §3.2.6.4 / §15.3.4), not a sibling position, so requiring `pos`
@@ -4060,7 +4436,17 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}, ancestors =
           // compound's own pseudo-classes (if any) are evaluated against
           // a fresh pos so we don't recurse into nth-child-of-S inside
           // the filter, just exercise simple `:defined` / type / class.
-          const sibPos = { isRoot: false, sibIndex: s, sibCount: sibs.length };
+          // wave-34 lane R: the ONE field added to the minimal pos — the
+          // relational handle. `:has()` is the first `of S` filter that asks
+          // about the sibling's SUBTREE rather than its own identity, and
+          // selectors/nth-child-of-has.html
+          // (`div:nth-child(even of :has(span))`) is exactly that shape: with
+          // no handle every sibling answers "no span", the filtered set is
+          // empty, and the rule silently applies to nothing. Deliberately
+          // NOT the full siblingPositionMeta — the comment above explains why
+          // the positional fields stay minimal, and widening them would
+          // change `of S` answers far outside `:has()`.
+          const sibPos = { isRoot: false, sibIndex: s, sibCount: sibs.length, kids: sib?.kids };
           const matches = ofSelectors.some((selStr) => {
             // Siblings share the host's ancestor chain by definition, so the
             // same array resolves their inherited directionality (wave-30 A1).
@@ -4089,7 +4475,9 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}, ancestors =
             for (let s = 0; s < sibs.length; s++) {
               const sib = sibs[s];
               if (sib.tag !== tag) continue;
-              const sibPos = { isRoot: false, sibIndex: s, sibCount: sibs.length };
+              // wave-34 lane R: same one-field addition as the child-indexed
+              // loop above — see its note for why only `kids` widens.
+              const sibPos = { isRoot: false, sibIndex: s, sibCount: sibs.length, kids: sib?.kids };
               const matches = ofSelectors.some((selStr) => {
                 // Same ancestor chain as the host — see the sibling filter above.
                 const r = compoundMatches(selStr, sib.tag, sib.attrs ?? {}, sibPos, ctx, ancestors);
@@ -4261,7 +4649,12 @@ export function selectorMatchesPseudoElement(
   // rule bails uniformly (legacy behaviour: unsupported ANYWHERE in the
   // chain → null, never a partial match).
   for (let ci = 0; ci < compounds.length - 1; ci++) {
-    if (parseCompound(compounds[ci]).unsupported) return null;
+    // wave-34 lane R: `isSubject = false` — these are the ancestor/sibling
+    // compounds, where `:has()` is declined (see its branch in parseCompound).
+    // Because this pre-flight bails FIRST, matchPrefix below never reaches a
+    // relational ancestor compound, which is why its own compoundMatches
+    // calls can keep the permissive default.
+    if (parseCompound(compounds[ci], false).unsupported) return null;
   }
   // Without ancestors, preserve the legacy "rightmost compound only"
   // fallback for pure-DESCENDANT chains so old call sites (and the
@@ -4388,7 +4781,13 @@ export function countUnsupportedRules(rules) {
     // Any unsupported compound kills the WHOLE rule in our matcher
     // (selectorMatchesPseudoElement pre-flights every compound), so the
     // count must use the same all-compounds test, not just the rightmost.
-    if (chain.compounds.some((c) => parseCompound(c).unsupported)) n++;
+    // wave-34 lane R: the rightmost compound is the SUBJECT, every other one
+    // is not — the identical split selectorMatchesPseudoElement applies, so
+    // the counter and the matcher can never disagree about which rules the
+    // static pass really applies (that agreement is the whole contract of
+    // this function's "ONE definition" docstring).
+    const lastIdx = chain.compounds.length - 1;
+    if (chain.compounds.some((c, ci) => parseCompound(c, ci === lastIdx).unsupported)) n++;
   }
   return n;
 }
@@ -5613,6 +6012,260 @@ export async function inlineFixtureAssets(fixture, baseDir) {
   return { inlined: totalInlined, unresolved: totalUnresolved };
 }
 
+// ── wave-34 lane F2 (F2a): the @font-face SCAN ───────────────────────────────
+//
+// THE WALL THIS OPENS. `@font-face` is the ONE at-rule that changes what
+// glyphs a page paints, and until this wave the pipeline dropped it on the
+// floor: parseCss skips every @-rule by design (see its banner), so a test
+// declaring `@font-face { font-family: test; src: url(resources/X.woff) }`
+// plus `body { font: 36px test }` reached the IR carrying the FAMILY NAME
+// and no face. The ref — raw WPT HTML rendered by Chromium, which fetches
+// the .woff off disk — painted the author's face; all three harnesses fell
+// through the unknown family to the bundled Inter sans. COMMON-MODE by
+// construction: every surface diverges from the ref in the same direction,
+// so the three-way capture agreement looks healthy while every ref diff is
+// typography-bound. Measured shape: css-text/boundary-shaping-001…010 (ten
+// docs, all `font: 36px test` over a LinLibertine face chosen precisely
+// because it carries the "fi"/"ffi" LIGATURES the tests assert on) —
+// no ligature exists in Inter, so the assertion is unobservable on our side.
+//
+// WHAT THIS SCAN IS, AND WHAT IT IS NOT. It is a self-contained descriptor
+// reader over the SAME comment-stripped stylesheet text parseCss already
+// receives, plus a disk-resolution step for the `src` url() payload. It does
+// NOT touch the rule walker, the element walker or the text scanner — the
+// @font-face block is invisible to all three and stays that way. Its whole
+// output is one DOCUMENT-level list (`fixture.fontFaces`, the authoring twin
+// of the IR v2 `fontFaces` envelope key — schema/spec/01-envelope.md §5),
+// because CSS scopes @font-face to the document exactly like @keyframes:
+// css-fonts-4 §4.1 puts the rule in the document's font database, not on any
+// element.
+//
+// DELIVERY IS ASYMMETRIC THIS WAVE, AND THE ASYMMETRY IS THE HONEST PART:
+//   * WEB consumes it — apps/web-harness/src/sdui/useFontFaces.ts turns each
+//     entry into a real `@font-face` rule whose src points at the corpus file
+//     through the harness's /wpt-font/ static route (vite.config.ts).
+//   * The NATIVES do not. Neither Compose nor SwiftUI has a runtime
+//     face-registration hook yet (the same missing machinery Rule 43's
+//     wave-31 note (e) measured for the non-Latin boundary). They DECODE the
+//     key — all four readers do, so the wire is not a web-only dialect — and
+//     ignore it. That is why the entry carries the font FILE PATH rather than
+//     an inlined payload: a future native hop registers the file with
+//     `Typeface.Builder` / `CTFontManagerRegisterFontsForURL` from exactly
+//     this string, with no re-derivation.
+// Rule 15 (`requires-font-face`, wpt-not-applicable.mjs) therefore still
+// fires and still excludes these tests whole — see its banner for why
+// narrowing it needs the native half first.
+//
+// WHY A PATH AND NOT A data: URI. The support-asset inliner above caps at
+// 8 KB and percent-encodes (3x). A real webfont is 50–500 KB (LinLibertine
+// is 261 KB → ~780 KB of fixture text each), and a combined section fixture
+// carries tens of tests. The path costs ~70 bytes and every consumer that
+// can reach the corpus can reach the file.
+
+/** WPT-corpus-root-relative form of an absolute path under WPT_DIR, or null
+ *  when the path escapes the corpus. Forward-slashed on every platform so the
+ *  emitted fixture is byte-identical on macOS and Linux (the same
+ *  normalisation extractFixture applies to `refRel`).
+ *
+ *  Containment is checked on the RESOLVED path, not on the author's token:
+ *  `url(../../../../etc/passwd)` resolves outside the corpus and must yield
+ *  null rather than a path a harness static route would then serve. */
+export function wptRelativePath(abs) {
+  const rel = relative(WPT_DIR, abs).split(sep).join('/');
+  // `..` prefix (or an absolute leftover on Windows-style roots) means the
+  // resolved target is not inside the corpus — decline, never clamp.
+  if (!rel || rel === '..' || rel.startsWith('../')) return null;
+  return rel;
+}
+
+/** Font file extensions the @font-face channel will deliver, mapped to the
+ *  css-fonts-4 §4.3 `format()` keyword. Deliberately a CLOSED table and
+ *  deliberately NOT the raster table above: a `src: url(x.png)` is not a
+ *  font, and admitting one would hand the harness a resource the browser
+ *  rejects with a console error instead of a loud decline here. */
+const FONT_FORMATS = {
+  woff2: 'woff2',
+  woff:  'woff',
+  ttf:   'truetype',
+  otf:   'opentype',
+  ttc:   'collection',
+  otc:   'collection',
+};
+
+/** Strip the quotes off a CSS `<string>` token, or return an unquoted token
+ *  unchanged. css-fonts-4 §4.2 lets `font-family` inside @font-face be either
+ *  a `<string>` ("test") or a `<custom-ident>` sequence (test), and the two
+ *  spellings name the SAME family — so both must normalise identically or the
+ *  harness would inject a face nothing references. */
+function unquoteCssString(tok) {
+  const t = String(tok ?? '').trim();
+  if (t.length >= 2 && (t[0] === '"' || t[0] === "'") && t[t.length - 1] === t[0]) {
+    return t.slice(1, -1);
+  }
+  return t;
+}
+
+/** Split one @font-face body into its descriptor declarations on top-level
+ *  `;`. Paren depth and quote state are tracked because CSS Syntax 3
+ *  §4.3.5-6 make a ';' inside `url(…)` or inside a `<string>` a LITERAL —
+ *  a naive `body.split(';')` would shred `src: url(a;b.woff)` into two
+ *  unusable halves and silently lose the face. */
+function splitDescriptors(body) {
+  const out = [];
+  let cur = '';
+  let depth = 0;      // '(' nesting
+  let quote = null;   // active quote char, or null
+  for (const ch of String(body ?? '')) {
+    if (quote) {
+      cur += ch;
+      if (ch === quote) quote = null;   // (no escape handling: CSS escapes
+      continue;                          //  in a font path are not a WPT shape)
+    }
+    if (ch === '"' || ch === "'") { quote = ch; cur += ch; continue; }
+    if (ch === '(') { depth++; cur += ch; continue; }
+    if (ch === ')') { depth = Math.max(0, depth - 1); cur += ch; continue; }
+    if (ch === ';' && depth === 0) { if (cur.trim()) out.push(cur.trim()); cur = ''; continue; }
+    cur += ch;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+
+/**
+ * Scan a stylesheet for `@font-face` blocks and return one raw entry per
+ * block, in document order.
+ *
+ * PURE — no disk access, no path resolution: the `src` field is the author's
+ * FIRST url() payload verbatim (or null when the block declares only
+ * `local()` / no usable src). Resolution is the caller's job
+ * (resolveFontFaces below), which keeps this half unit-testable without a
+ * corpus on disk.
+ *
+ * Returns `Array<{ family, src, weight, style }>` where family is the
+ * unquoted family name, and weight/style are the descriptor strings as
+ * authored (null when the block omits them — css-fonts-4 §4.4/§4.5 initial
+ * values are `normal` for both, and letting the consumer apply the initial
+ * keeps this function a reader, not an interpreter).
+ *
+ * Blocks with no `font-family` descriptor are DROPPED: css-fonts-4 §4.1
+ * makes both `font-family` and `src` required, and a nameless face can never
+ * be referenced, so emitting it would be inventing a font.
+ */
+export function scanFontFaces(css) {
+  const out = [];
+  // Same depth-counting block walk parseKeyframes uses — a regex alone
+  // cannot find the matching '}' once a descriptor value contains braces.
+  const re = /@font-face\s*\{/gi;
+  let m;
+  while ((m = re.exec(css)) !== null) {
+    let depth = 1;                                  // we are inside the block's '{'
+    let i = re.lastIndex;                           // first char of the block body
+    while (i < css.length && depth > 0) {
+      if (css[i] === '{') depth++;
+      else if (css[i] === '}') depth--;
+      i++;
+    }
+    const body = css.slice(re.lastIndex, i - 1);    // descriptors between the braces
+    re.lastIndex = i;                               // resume after this block
+    // Descriptor split. NOT splitTopLevel — that helper only implements
+    // comma and whitespace modes. A ';' inside `url(...)` or a quoted
+    // string is a literal (CSS Syntax 3 §4.3.5-6), so the split tracks
+    // paren depth and quote state; everything else is a separator.
+    const desc = {};
+    for (const declRaw of splitDescriptors(body)) {
+      const colon = declRaw.indexOf(':');
+      if (colon < 0) continue;
+      const k = declRaw.slice(0, colon).trim().toLowerCase();
+      const v = declRaw.slice(colon + 1).trim().replace(/\s*!important\s*$/i, '').trim();
+      if (!k || !v) continue;
+      desc[k] = v;
+    }
+    const family = unquoteCssString(desc['font-family'] ?? '');
+    // §4.1: a face with no family name is unreferenceable — drop, never guess.
+    if (!family) continue;
+    // First url() in the <font-src-list>. `local()` arms are SKIPPED rather
+    // than recorded: a local() reference names an installed system face, and
+    // this channel delivers FILES. A block that is local()-only yields
+    // src: null and the caller drops it (Rule 15 keeps excluding the test —
+    // the ref's system face is still unreachable from our side).
+    let src = null;
+    for (const arm of splitTopLevel(desc['src'] ?? '', ',')) {
+      const um = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)"'\s]+))\s*\)/i.exec(arm);
+      if (!um) continue;                            // local(…) or a malformed arm
+      const payload = (um[1] ?? um[2] ?? um[3] ?? '').trim();
+      if (!payload) continue;
+      src = payload;
+      break;                                        // §4.3: first usable arm wins
+    }
+    out.push({
+      family,
+      src,
+      // As authored. `font-weight: 400 700` (a §4.4 RANGE) and `font-style:
+      // oblique 20deg` both survive verbatim — this reader does not collapse
+      // them, because the web consumer re-emits the same descriptor text.
+      weight: desc['font-weight'] ?? null,
+      style:  desc['font-style'] ?? null,
+    });
+  }
+  return out;
+}
+
+/**
+ * Resolve the raw entries from scanFontFaces against the corpus and return
+ * the DELIVERABLE subset, in document order.
+ *
+ * An entry survives only when ALL of these hold, and each decline is a
+ * DELIBERATE drop rather than a silent pass-through of an unusable string:
+ *   1. it named a url() (local()-only faces carry no file);
+ *   2. the payload is corpus-resolvable — not `data:` (already inline, and
+ *      nothing to deliver), not http(s)/protocol-relative (Rule 37's
+ *      remote-resource domain), not a `{{…}}` WPT sub-template (Rule 36);
+ *   3. the resolved path stays INSIDE the corpus (wptRelativePath);
+ *   4. the extension is a real font format (FONT_FORMATS);
+ *   5. the file EXISTS on disk. Emitting a path to a missing file would
+ *      hand the harness a guaranteed 404 and put a fabricated fact on the
+ *      wire — the whole failure mode this channel exists to end.
+ *
+ * `baseDir` is the directory of the document the CSS came from; a leading
+ * '/' is WPT-server-root-relative, matching the convention extractFixture
+ * already uses for rel="match", <link rel=stylesheet> and inlineUrlsInValue.
+ *
+ * DE-DUPLICATED on (family, src, weight, style): WPT sheets routinely
+ * declare the same face twice (once per @media arm), and a duplicate
+ * @font-face rule is a no-op in CSS but a doubled payload on the wire.
+ */
+export async function resolveFontFaces(rawFaces, baseDir) {
+  const out = [];
+  const seen = new Set();
+  for (const f of rawFaces) {
+    if (!f?.src) continue;                                  // (1) local()-only
+    if (urlPayloadOutOfScope(f.src)) continue;              // (2) data:/remote/template
+    const abs = f.src.startsWith('/')
+      ? join(WPT_DIR, f.src.slice(1))
+      : resolve(baseDir, f.src);
+    const rel = wptRelativePath(abs);
+    if (!rel) continue;                                     // (3) escapes the corpus
+    const ext = /\.([A-Za-z0-9]+)$/.exec(rel)?.[1]?.toLowerCase();
+    if (!ext || !FONT_FORMATS[ext]) continue;               // (4) not a font file
+    try {
+      await fs.access(abs);
+    } catch {
+      continue;                                             // (5) not on disk
+    }
+    const entry = { family: f.family, src: rel };
+    // Omit-when-absent, exactly the wire's omit-when-empty discipline: a
+    // consumer applying the css-fonts-4 initial (`normal`) and a consumer
+    // reading an explicit "normal" must land on the same face.
+    if (f.weight) entry.weight = String(f.weight);
+    if (f.style) entry.style = String(f.style);
+    const key = `${entry.family} ${entry.src} ${entry.weight ?? ''} ${entry.style ?? ''}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(entry);
+  }
+  return out;
+}
+
 // ── Main extractor ───────────────────────────────────────────────────────────
 //
 // extractFixture(testRel) → { fixture, refFixture }
@@ -5693,6 +6346,15 @@ export async function extractFixture(testRel, opts = {}) {
   // 4th stays the ctx default — buildComponents harvests :defined itself).
   const built = buildComponents(cleaned, rules, stem, null, keyframes);
 
+  // wave-34 lane F2 (F2a): the document-level @font-face list. Scanned off
+  // the SAME comment-stripped sheet parseCss and parseKeyframes read (all
+  // three see inline <style> plus every resolved <link rel=stylesheet>), then
+  // resolved against the test file's directory — the identical base the
+  // support-asset inliner uses. Emitted omit-when-empty, so every fixture
+  // without a webfont is byte-identical to before this wave. See the
+  // "@font-face SCAN" section banner for the delivery asymmetry.
+  const fontFaces = await resolveFontFaces(scanFontFaces(allCss), dirname(testAbs));
+
   const fixture = {
     _wpt: {
       test:   testRel,
@@ -5703,6 +6365,7 @@ export async function extractFixture(testRel, opts = {}) {
       specSection: section,
       ...(fuzzy ? { fuzzy } : {}),
     },
+    ...(fontFaces.length ? { fontFaces } : {}),
     components: built.components,
   };
 
@@ -5741,8 +6404,17 @@ export async function extractFixture(testRel, opts = {}) {
     // ever animates).
     const refKeyframes = parseKeyframes(refCss);
     const refBuilt = buildComponents(refCleaned, refRules, `${stem}__ref`, null, refKeyframes);
+    // wave-34 lane F2: the ref half of the @font-face scan, resolved against
+    // the REF file's dir. Symmetric with the keyframes sampler above for the
+    // same reason — the ref is normally a static page with no webfont, but a
+    // test/ref pair must stay comparable if one ever grows a face (the
+    // boundary-shaping family's refs deliberately do NOT declare the test
+    // font; that ASYMMETRY is the assertion, and dropping the key on one side
+    // only would hide it).
+    const refFontFaces = await resolveFontFaces(scanFontFaces(refCss), dirname(refAbs));
     refFixture = {
       _wpt: { ref: refRel, of: testRel, specSection: section },
+      ...(refFontFaces.length ? { fontFaces: refFontFaces } : {}),
       components: refBuilt.components,
     };
     // wave-8: refs paint the same support assets (background-image-000-ref
@@ -7178,6 +7850,52 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
 }
 
 /** Persist the {fixture, refFixture} pair into fixtures/wpt/<section>/. */
+/**
+ * wave-34 lane R — drop a `meta.runs` list that a downstream bake has
+ * INVALIDATED.
+ *
+ * THE INVARIANT the extractor guarantees at emission (scanOwnText +
+ * alignRuns): a component that carries `_runs` always carries a NON-EMPTY
+ * `_text` too, and the list always contains at least one `{text}` entry.
+ * Both halves follow from the emission gate — a run list is only computed
+ * when the collapsed own-text buffer is non-empty (or the reorder fired,
+ * which needs non-whitespace text after a kept child), and buildRunProto
+ * drops pieces that normalise to nothing. Spec 03 §4.1 rule 3 says the same
+ * thing from the wire's side: `text` STAYS, carrying the concatenation the
+ * runs were split from.
+ *
+ * So `_runs` WITHOUT `_text` cannot come from this extractor. It means a
+ * later stage removed the text — and exactly one does:
+ * bidi-bake's applyBidiBakePlan `delete cmp._text` on every root, box and
+ * hide, re-emitting the text as absolutely-positioned child components at
+ * measured left/top. After that the component has no inline flow left to
+ * order, and a surviving run list makes every reader that honours it paint
+ * the dissolved text a SECOND time, inline, on top of the positioned boxes.
+ *
+ * MEASURED (css-text/boundary-shaping-009, the RTL family): its second div
+ * already hit this in wave-32 — `_runs` from the reorder path surviving the
+ * bake — and wave-34's widening extended it to the first div, moving the
+ * test 0.9394 → 0.9283 against the ref. This sweep is the fix, and it is
+ * deliberately at the PRODUCER: `_runs` is read by all three runtimes, so a
+ * renderer-side guard would have to be written three times and would still
+ * ship a self-contradictory fixture.
+ *
+ * Returns the number of lists dropped, for the extraction log.
+ */
+export function dropStaleRuns(fixture) {
+  let dropped = 0;
+  const walk = (map) => {
+    for (const cmp of Object.values(map ?? {})) {
+      if (!cmp || typeof cmp !== 'object') continue;
+      // The text is gone but the order list is not — the stale pair.
+      if (Array.isArray(cmp._runs) && !cmp._text) { delete cmp._runs; dropped += 1; }
+      if (cmp.children) walk(cmp.children);
+    }
+  };
+  walk(fixture?.components);
+  return dropped;
+}
+
 export async function writeFixturePair({ fixture, refFixture, section, stem }) {
   const dir = join(OUT_ROOT, section);
   await fs.mkdir(dir, { recursive: true });
@@ -7380,6 +8098,10 @@ async function main() {
                 ? ` — ${outcome.roots} roots, ${outcome.runs} runs`
                 : ` — ${outcome.reason}`) + ']';
           }
+          // wave-34 lane R: the bake DISSOLVES inline flow (see
+          // dropStaleRuns) — sweep the run lists it just invalidated.
+          const stale = dropStaleRuns(result.fixture) + dropStaleRuns(result.refFixture);
+          if (stale > 0) bidiNote += ` [stale-runs dropped: ${stale}]`;
         }
         // wave-27 lane CBAKE — the counter-style bake runs LAST, on the tree
         // the fixture will actually carry: post-load may have re-extracted

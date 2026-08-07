@@ -141,8 +141,31 @@ object TableApplier {
                     Spacer(modifier = Modifier.height(config.effectiveSpacingVertical))
                 }
 
-                // Table body with vertical spacing
+                // Table body with vertical spacing, inside §17.6.1's OUTER
+                // band.
+                //
+                // Wave 34 (lane T) — CSS 2.1 §17.6.1: "the distance between
+                // the border of the table box and the borders of the cells
+                // on the edge of the table is the border-spacing". Before
+                // this the runtime spent border-spacing only BETWEEN rows
+                // and cells, so a table's first cell sat flush against the
+                // table's own edge — half of why Android painted
+                // abspos-container-change-dynamic-001's lime abspos at
+                // x=30 instead of the reference's 33.
+                //
+                // `effectiveSpacing*` is 0 for the collapsing model and for
+                // every table whose used spacing is 0, and the band is then
+                // skipped entirely rather than applied as `padding(0.dp)` —
+                // no extra layout node, so those tables stay byte-identical.
+                val bandH = config.effectiveSpacingHorizontal
+                val bandV = config.effectiveSpacingVertical
+                val bodyModifier = if (bandH > 0.dp || bandV > 0.dp) {
+                    Modifier.padding(horizontal = bandH, vertical = bandV)
+                } else {
+                    Modifier
+                }
                 Column(
+                    modifier = bodyModifier,
                     verticalArrangement = if (config.borderCollapse == BorderCollapse.SEPARATE) {
                         Arrangement.spacedBy(config.effectiveSpacingVertical)
                     } else {

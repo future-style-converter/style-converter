@@ -61,10 +61,11 @@ object BackdropPainter {
         // element with left/top margin. Every draw below is offset by it.
         val originX = box.localLeft
         val originY = box.localTop
-        // σ of the whole chain, then the 3σ sample padding (0 without blur).
-        val sigma = chain.totalBlurSigmaPx { dp -> dp.toPx() }
-        val pad = BackdropSampleGeometry.blurPadPx(sigma)
-        // Which backdrop pixels this element may read (clamped into the image).
+        // Which backdrop pixels this element may read: the BORDER BOX, clamped
+        // into the image. No σ term — filter-effects-2 §2 clips the backdrop to
+        // the border box before filtering, and TileMode.MIRROR (below) supplies
+        // everything the Gaussian wants beyond it. See BackdropSampleGeometry's
+        // header for the wave-34 measurement that refuted the grow-by-3σ model.
         val sample = BackdropSampleGeometry.sample(
             elemLeft = elemLeftPx,
             elemTop = elemTopPx,
@@ -72,7 +73,6 @@ object BackdropPainter {
             // same pixel the element's own paint uses.
             elemWidth = Math.round(boxW),
             elemHeight = Math.round(boxH),
-            padPx = pad,
             srcWidth = backdrop.width,
             srcHeight = backdrop.height,
         )
@@ -81,7 +81,7 @@ object BackdropPainter {
             // patch, and says so once, instead of leaving a plausible-looking
             // wrong rectangle behind.
             Log.w(TAG, "backdrop sample empty: box=${boxW}x$boxH at ($elemLeftPx,$elemTopPx) " +
-                "src=${backdrop.width}x${backdrop.height} pad=$pad")
+                "src=${backdrop.width}x${backdrop.height}")
             return@with
         }
 
@@ -93,9 +93,9 @@ object BackdropPainter {
         if (clip != null) {
             clipPath(clip) { drawPatch(this, backdrop, sample, chain, alpha, originX, originY) }
         } else {
-            // Square box: the patch is already drawn inside the box for an
-            // unpadded sample, but a BLURRED sample is padded and must be cut
-            // back to the border box — hence the explicit rect clip.
+            // Square box: the sample IS the border box, so the patch already
+            // lands inside it — the rect clip stays as the belt-and-braces cut
+            // for a fractional box whose rounded pixel size overshoots by one.
             clipRect(
                 left = originX, top = originY,
                 right = originX + boxW, bottom = originY + boxH,

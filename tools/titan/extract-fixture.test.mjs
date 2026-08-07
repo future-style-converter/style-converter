@@ -2754,21 +2754,54 @@ test('lane-r: an out-of-flow reorder is expressed, not downgraded', () => {
 // ── wave-32 lane R: the run list's own contract ────────────────────────────
 
 test('lane-r: no interleave → no `_runs` key at all (the additive guarantee)', () => {
-  // The corpus stays byte-identical outside the 1,203-component population
-  // BECAUSE of this: a component whose text does not glue across a kept
-  // child gains nothing. Three shapes that must all stay bare.
+  // The corpus stays byte-identical outside the interleaving population
+  // BECAUSE of this: a component whose own text and children do not meet
+  // gains nothing. Three shapes that must all stay bare.
+  //
+  // wave-34 lane R: case (a) — text BEFORE a kept child — MOVED OUT of this
+  // list and into its own test below. It is an interleave (the text ends at
+  // an element boundary, not at the end of the line), and shipping only
+  // `_text` there deletes the boundary space. The additive guarantee itself
+  // is unchanged: the shapes here still gain nothing.
   const css = 'u { color: red }';
-  // (a) text only BEFORE the child — reading order already correct.
-  const before = buildComponents(
-    '<body><p>the quick <u>brown</u></p></body>', parseCss(css), 'a').components['a__0'];
-  assert.equal(before._runs, undefined);
-  // (b) merge-absorbed run — spliced IN PLACE, so order was never lost.
+  // (a) merge-absorbed run — spliced IN PLACE, so there is no element
+  //     boundary inside the content at all.
   const merged = buildComponents(
     '<body><p>square and <strong>no red</strong>.</p></body>', [], 'b').components['b__0'];
   assert.equal(merged._runs, undefined);
-  // (c) plain leaf text, no children at all.
+  // (b) plain leaf text, no children at all.
   const leaf = buildComponents('<body><p>just text</p></body>', [], 'c').components['c__0'];
   assert.equal(leaf._runs, undefined);
+  // (c) children with NO own text — the only own text is the inter-sibling
+  //     newline+indent, which normalises away. That boundary belongs to the
+  //     wave-26 `ws-after` channel; emitting it here too would double the
+  //     space on any renderer honouring both.
+  const wsOnly = buildComponents(
+    '<body><p>\n  <u>a</u>\n  <u>b</u>\n</p></body>', parseCss(css), 'd').components['d__0'];
+  assert.equal(wsOnly._text, undefined);
+  assert.equal(wsOnly._runs, undefined);
+});
+
+test('lane-r: text-then-child DOES interleave — the boundary space rides the list', () => {
+  // wave-34 lane R, the wave-33 lane N follow-up made good. `<p>…green
+  // <em>…</em></p>` paints in document order, so wave-32's reorder-only gate
+  // shipped no list — and `_text`'s CSS Text §4.1 trim then deleted the space
+  // between 'quick' and the child, welding two words the browser separates.
+  // §4.1 collapses that space to ONE space; it never deletes it. The trim is
+  // only correct at the END OF THE CONTENT, and here the content continues.
+  const css = 'u { color: red }';
+  const { components } = buildComponents(
+    '<body><p>the quick <u>brown</u></p></body>', parseCss(css), 'a');
+  const p = components['a__0'];
+  // `_text` is untouched — the fallback channel still carries the trimmed
+  // concatenation, so a reader that ignores `_runs` behaves exactly as it
+  // did before the key existed (that is what makes the wire additive).
+  assert.equal(p._text, 'the quick');
+  // …and the list carries the space the trim ate.
+  assert.deepEqual(p._runs, [{ text: 'the quick ' }, { child: 'a__0__0' }]);
+  // No reorder happened, so no reorder marker is retired — there was never
+  // one to retire. The two facts stay independent.
+  assert.equal((p._lossyReasons ?? []).includes('inline-run-reordered'), false);
 });
 
 test('lane-r: a whitespace-only run between two children survives', () => {
@@ -4636,4 +4669,363 @@ test('N2: the guarded span survives the inline merge', () => {
   assert.equal(isPureInlineMergeable('span', {}, 'green text', styled), false);
   // …and with the guard empty (pre-fix behaviour) it would have merged.
   assert.equal(isPureInlineMergeable('span', {}, 'green text', new Set()), true);
+});
+
+// ── wave-34 lane F2 (F2a): the @font-face SCAN ───────────────────────────────
+//
+// Self-contained import block (not folded into the file's top list) because
+// this region is owned by a different lane than the _runs/text regions above
+// — ESM hoists it identically, and a separate statement cannot conflict.
+import {
+  scanFontFaces,
+  resolveFontFaces,
+  wptRelativePath,
+} from './extract-fixture.mjs';
+import { join as joinPath } from 'node:path';
+import { fileURLToPath as fileUrlToPath } from 'node:url';
+
+// The corpus root the resolver measures against — same derivation the
+// module uses, so these tests read the real mirror when it is present.
+const F2_REPO_ROOT = joinPath(fileUrlToPath(import.meta.url), '..', '..', '..');
+const F2_WPT_DIR = process.env.WPT_DIR ?? joinPath(F2_REPO_ROOT, 'tools', 'wpt');
+
+test('F2a: scanFontFaces reads family/src/weight/style off a block', () => {
+  // The css-text/boundary-shaping-001 shape, verbatim: this is the family
+  // the whole wall is named after.
+  const faces = scanFontFaces(
+    '@font-face {\n  font-family: test;\n' +
+    '  src: url(resources/LinLibertine_Re-4.7.5.woff);\n}\n' +
+    'body { font: 36px test; }');
+  assert.equal(faces.length, 1);
+  assert.equal(faces[0].family, 'test');
+  assert.equal(faces[0].src, 'resources/LinLibertine_Re-4.7.5.woff');
+  // Omitted descriptors stay null — the css-fonts-4 §4.4/§4.5 initial is the
+  // CONSUMER's to apply; inventing "normal" here would make "omitted" and
+  // "explicitly normal" indistinguishable downstream.
+  assert.equal(faces[0].weight, null);
+  assert.equal(faces[0].style, null);
+});
+
+test('F2a: quoted and unquoted family spellings normalise identically', () => {
+  // css-fonts-4 §4.2 lets the descriptor be a <string> or a <custom-ident>;
+  // both name the SAME family, so a consumer must never re-tokenise.
+  for (const spelling of ['test', '"test"', "'test'"]) {
+    const [f] = scanFontFaces(`@font-face { font-family: ${spelling}; src: url(a.woff); }`);
+    assert.equal(f.family, 'test', `spelling ${spelling}`);
+  }
+});
+
+test('F2a: descriptors that CANNOT be normalised ride verbatim', () => {
+  // A §4.4 weight RANGE has no numeric 100–900 equivalent and a §4.5
+  // oblique ANGLE has no keyword one. Collapsing either would destroy the
+  // face-matching input, so this reader is a courier for both.
+  const [f] = scanFontFaces(
+    "@font-face { font-family: X; src: url(a.otf); " +
+    'font-weight: 400 700; font-style: oblique 20deg; }');
+  assert.equal(f.weight, '400 700');
+  assert.equal(f.style, 'oblique 20deg');
+});
+
+test('F2a: the FIRST url() arm of a font-src-list wins; local() is skipped', () => {
+  // css-fonts-4 §4.3: arms are tried in order. A local() arm names an
+  // INSTALLED system face, which this channel (which delivers FILES) cannot
+  // carry — so it is skipped rather than recorded as a fake path.
+  const [f] = scanFontFaces(
+    '@font-face { font-family: X; ' +
+    "src: local(Helvetica), url(first.woff2) format('woff2'), url(second.woff); }");
+  assert.equal(f.src, 'first.woff2');
+  // A local()-ONLY block yields src: null (and resolveFontFaces drops it).
+  const [only] = scanFontFaces('@font-face { font-family: Y; src: local(Arial); }');
+  assert.equal(only.src, null);
+});
+
+test('F2a: a nameless face is DROPPED, never guessed', () => {
+  // §4.1 makes font-family required; a face with no name is unreferenceable,
+  // so emitting one would be inventing a font.
+  assert.deepEqual(scanFontFaces('@font-face { src: url(a.woff); }'), []);
+});
+
+test('F2a: multiple blocks keep DOCUMENT order', () => {
+  // §4.1: a later face with the same (family, weight, style) WINS, so order
+  // is payload — a reordering scan would silently change which file renders.
+  const faces = scanFontFaces(
+    '@font-face { font-family: A; src: url(1.woff); }' +
+    '@font-face { font-family: B; src: url(2.woff); }' +
+    '@font-face { font-family: A; src: url(3.woff); }');
+  assert.deepEqual(faces.map((f) => `${f.family}:${f.src}`),
+    ['A:1.woff', 'B:2.woff', 'A:3.woff']);
+});
+
+test('F2a: the block walk survives braces and semicolons inside values', () => {
+  // A naive `body.split(';')` shreds `url(a;b.woff)`; a regex-only block
+  // finder loses the matching '}' the moment a descriptor carries one.
+  const [f] = scanFontFaces(
+    '@font-face { font-family: X; src: url("a;b.woff"); ' +
+    'unicode-range: U+0-7F; }\n.after { color: red }');
+  assert.equal(f.src, 'a;b.woff');
+  // …and the rule AFTER the block is not swallowed into it.
+  const two = scanFontFaces(
+    '@font-face { font-family: X; src: url(a.woff) }\n' +
+    '@media screen { p { color: red } }\n' +
+    '@font-face { font-family: Y; src: url(b.woff) }');
+  assert.deepEqual(two.map((f2) => f2.family), ['X', 'Y']);
+});
+
+test('F2a: wptRelativePath declines anything outside the corpus', () => {
+  // Containment is checked on the RESOLVED path — the author's token is
+  // untrusted third-party text, and a prefix test on it would miss `..`.
+  assert.equal(wptRelativePath(joinPath(F2_WPT_DIR, 'css', 'x.woff')), 'css/x.woff');
+  assert.equal(wptRelativePath(joinPath(F2_WPT_DIR, '..', 'secrets.woff')), null);
+  assert.equal(wptRelativePath(F2_WPT_DIR), null);
+});
+
+test('F2a: resolveFontFaces drops every undeliverable arm', async () => {
+  const base = joinPath(F2_WPT_DIR, 'css', 'css-text', 'boundary-shaping');
+  const out = await resolveFontFaces([
+    { family: 'a', src: null, weight: null, style: null },                       // local()-only
+    { family: 'b', src: 'data:font/ttf;base64,AA', weight: null, style: null },  // already inline
+    { family: 'c', src: 'https://x.example/f.woff', weight: null, style: null }, // remote
+    { family: 'd', src: '//cdn.example/f.woff', weight: null, style: null },     // protocol-relative
+    { family: 'e', src: '{{host}}/f.woff', weight: null, style: null },          // WPT template
+    { family: 'f', src: '../../../../escape.woff', weight: null, style: null },  // escapes corpus
+    { family: 'g', src: 'resources/cat.png', weight: null, style: null },        // not a font
+    { family: 'h', src: 'resources/absent.woff', weight: null, style: null },    // not on disk
+  ], base);
+  // Every arm above is undeliverable for a DIFFERENT stated reason, and none
+  // may reach the wire: a path to a missing file is a fabricated fact.
+  assert.deepEqual(out, []);
+});
+
+test('F2a: resolveFontFaces emits a corpus-relative path, de-duplicated', async (t) => {
+  const base = joinPath(F2_WPT_DIR, 'css', 'css-text', 'boundary-shaping');
+  const rel = 'resources/LinLibertine_Re-4.7.5.woff';
+  const probe = await resolveFontFaces([{ family: 'test', src: rel, weight: null, style: null }], base);
+  if (probe.length === 0) {
+    // The mirror is gitignored (tools/titan/fetch-wpt.sh populates it), so
+    // skip rather than fail on a corpus-less checkout — the pure half above
+    // already pins the reader.
+    t.skip('WPT corpus mirror not present');
+    return;
+  }
+  assert.deepEqual(probe, [{
+    family: 'test',
+    src: 'css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff',
+  }]);
+  // Same face declared twice (the per-@media-arm shape WPT sheets use) is
+  // ONE wire entry: a duplicate @font-face is a no-op in CSS but a doubled
+  // payload here.
+  const dupes = await resolveFontFaces([
+    { family: 'test', src: rel, weight: null, style: null },
+    { family: 'test', src: rel, weight: null, style: null },
+    { family: 'test', src: rel, weight: '700', style: null },   // different key — kept
+  ], base);
+  assert.equal(dupes.length, 2);
+  assert.equal(dupes[1].weight, '700');
+  // Omit-when-absent on the wire: no weight/style keys at all when the
+  // author declared none.
+  assert.deepEqual(Object.keys(dupes[0]), ['family', 'src']);
+});
+
+// ── wave-34 lane R: `:has()`, the relational pseudo-class ───────────────────
+//
+// Selectors-4 §5.4. Every assertion below is anchored to a real corpus test
+// (named in its comment), because the whole point of the lane was to stop
+// paying a browser page-load to answer questions about static markup.
+
+test('lane-r34: :has(> X) — the child form (has-style-sharing-001)', () => {
+  // `:has(> span) { background: green }` over `<div><span></span></div>` +
+  // a bare `<div></div>`. The FIRST div goes green, the second does not —
+  // that is the entire assertion of has-style-sharing-001/-002.
+  const css = 'div { background: blue } :has(> span) { background: green } '
+            + 'span { display: inline-block }';
+  const { components } = buildComponents(
+    '<body><div><span></span></div><div></div></body>', parseCss(css), 'h');
+  assert.equal(components.h__0.properties.background, 'green');
+  assert.equal(components.h__1.properties.background, 'blue');
+});
+
+test('lane-r34: the child form does NOT reach a grandchild', () => {
+  // `:scope > .a` is exact — a `.a` one level deeper must not satisfy it,
+  // or `:has(>)` would silently become the descendant form.
+  const css = ':has(> .a) { background: green } b { color: red }';
+  const { components } = buildComponents(
+    '<body><div><b><i class="a"></i></b></div></body>', parseCss(css), 'g');
+  assert.equal(components.g__0.properties.background, undefined);
+});
+
+test('lane-r34: the default (descendant) form reaches any depth', () => {
+  const css = ':has(.a) { background: green } b { color: red } i { color: red }';
+  const { components } = buildComponents(
+    '<body><div><b><i class="a"></i></b></div></body>', parseCss(css), 'd');
+  assert.equal(components.d__0.properties.background, 'green');
+});
+
+test('lane-r34: the sibling forms look FORWARD, not backward', () => {
+  // `:has(+ X)` / `:has(~ X)` put the SUBJECT on the left of the combinator —
+  // the mirror image of the `A + B` sibling steps in selectorMatchesPseudoElement.
+  const css = '.p:has(+ .q) { color: green } .r:has(~ .t) { color: blue } p { margin: 0 }';
+  const { components } = buildComponents(
+    '<body><p class="p"></p><p class="q"></p><p class="r"></p><p></p><p class="t"></p></body>',
+    parseCss(css), 's');
+  assert.equal(components.s__0.properties.color, 'green');   // .p + .q  ✓
+  assert.equal(components.s__2.properties.color, 'blue');    // .r ~ .t  ✓ (gap of one)
+  // …and the backward reading must NOT fire: `.q` precedes nothing matching.
+  assert.equal(components.s__1.properties.color, undefined);
+});
+
+test('lane-r34: adjacency is exact for `+`', () => {
+  const css = '.p:has(+ .t) { color: green } p { margin: 0 }';
+  const { components } = buildComponents(
+    '<body><p class="p"></p><p></p><p class="t"></p></body>', parseCss(css), 'x');
+  assert.equal(components.x__0.properties.color, undefined);
+});
+
+test('lane-r34: a MERGE-ABSORBED child is still a DOM element to :has()', () => {
+  // selectors/dir-pseudo-in-has.html. The stylesheet targets no `span`, so
+  // wave-12's inline merge absorbs it and the div ships with NO children —
+  // but the browser's `:has()` sees it. Answering off the component tree
+  // would paint the div red, CONFIDENTLY (a parse-supported `:has()` no
+  // longer earns the post-load browser that used to cover this test).
+  const css = 'div { background: red } .ltr:has(*:dir(ltr)) { background: green }';
+  const { components } = buildComponents(
+    '<body><div class="ltr"><span></span></div></body>', parseCss(css), 'm');
+  assert.equal(components.m__0.properties.background, 'green');
+  // Proof the span really was absorbed (i.e. the test is testing what it says).
+  assert.equal(components.m__0.children, undefined);
+});
+
+test('lane-r34: :dir() inside :has() inherits through the SUBJECT', () => {
+  // The candidate's ancestor chain must be extended with the subject and
+  // every element walked through, or `<div dir=rtl><span></span></div>`
+  // would answer ltr for the span and paint the .rtl case red.
+  const css = 'div { background: red } .rtl:has(*:dir(rtl)) { background: green }';
+  const { components } = buildComponents(
+    '<body><div dir="rtl" class="rtl"><span></span></div></body>', parseCss(css), 'r');
+  assert.equal(components.r__0.properties.background, 'green');
+});
+
+test('lane-r34: :not(:has(…)) is evaluated, not inverted blindly', () => {
+  // selectors/has-style-sharing-007: `.special.cousin:not(:has(span))`.
+  const css = '.cousin { background: purple } .special.cousin:not(:has(span)) { background: blue }';
+  const { components } = buildComponents(
+    '<body><div class="cousin special"><span></span></div>'
+    + '<div class="cousin special"></div></body>', parseCss(css), 'n');
+  assert.equal(components.n__0.properties.background, 'purple'); // has a span → not() false
+  assert.equal(components.n__1.properties.background, 'blue');   // no span   → not() true
+});
+
+test('lane-r34: an UNDECIDABLE :has() inside :not() drops the rule', () => {
+  // The inversion hazard: compoundMatches folds "cannot decide" into `false`,
+  // and `!false` is a confident match. With no relational metadata at all
+  // (a legacy direct call site, or a maxDepth-truncated subtree) the answer
+  // must be null — rule dropped — never `true`.
+  assert.equal(selectorMatches('div:not(:has(span))', 'div', {}), false);
+  // The positive form is equally refused (never a silent "no descendant").
+  assert.equal(selectorMatches('div:has(span)', 'div', {}), false);
+});
+
+test('lane-r34: the refused argument shapes stay unsupported (post-load route)', () => {
+  // Each of these must still COUNT as a dropped rule, which is what routes
+  // the test to the live browser instead of a guess.
+  assert.equal(countUnsupportedRules(parseCss(
+    'div:has(~ .item > :nth-child(2)) { color: red }')), 1);   // complex relative selector
+  assert.equal(countUnsupportedRules(parseCss(
+    'div:has(:has(span)) { color: red }')), 1);                 // nested :has()
+  assert.equal(countUnsupportedRules(parseCss(
+    'div:has(span::before) { color: red }')), 1);               // pseudo-element in the arg
+  assert.equal(countUnsupportedRules(parseCss(
+    'div:has() { color: red }')), 1);                           // empty argument
+  assert.equal(countUnsupportedRules(parseCss(
+    'div:has([hidden]) { color: red }')), 1);                    // attr selector in the arg
+  // …while the supported shapes no longer count.
+  assert.equal(countUnsupportedRules(parseCss(
+    'div:has(> span) { color: red } .a:has(+ .b) { color: red } p:has(i) { color: red }')), 0);
+});
+
+test('lane-r34: :has(> X) inside an `of S` clause renumbers correctly', () => {
+  // selectors/nth-child-of-has.html — `div:nth-child(even of :has(span))`.
+  // The `of S` filter matches each SIBLING through a minimal pos, so the
+  // relational handle has to ride on the sibling entry too or the filtered
+  // set comes back empty and the rule silently applies to nothing.
+  const css = 'div { background: red } div:nth-child(even of :has(span)) { background: green }';
+  const html = '<body><div class="c">'
+    + '<div></div>'                 // 1 — no span
+    + '<div><span></span></div>'    // 2 — span #1  → filtered index 1 (odd)
+    + '<div></div>'                 // 3
+    + '<div><span></span></div>'    // 4 — span #2  → filtered index 2 (EVEN) ✓
+    + '</div></body>';
+  const { components } = buildComponents(html, parseCss(css), 'o');
+  const kids = components.o__0.children;
+  const ids = Object.keys(kids);
+  assert.equal(kids[ids[1]].properties.background, 'red');
+  assert.equal(kids[ids[3]].properties.background, 'green');
+});
+
+test('lane-r34: :has() on an ANCESTOR compound is declined, not evaluated', () => {
+  // The measured line (see the branch in parseCompound): `:has(> .a) .b`
+  // is evaluable but its cascade is not — our matcher has no specificity, so
+  // the later `.b { purple }` would beat the green Chromium paints. Declining
+  // keeps the rule counted, which keeps the test on the post-load browser.
+  assert.equal(countUnsupportedRules(parseCss(
+    ':has(> .a) .b { background: green } .b { background: purple }')), 1);
+  const { components } = buildComponents(
+    '<body><div><span class="b"></span><span class="a"></span></div></body>',
+    parseCss(':has(> .a) .b { background: green } .b { background: purple } span { display: inline-block }'),
+    'p');
+  const kids = components.p__0.children;
+  assert.equal(kids[Object.keys(kids)[0]].properties.background, 'purple');
+  // …while the SUBJECT-side form of the very same relation is applied.
+  assert.equal(countUnsupportedRules(parseCss('.b:has(> .a) { background: green }')), 0);
+});
+
+// ── wave-34 lane R: the stale-run sweep (the bidi-bake interaction) ─────────
+
+const { dropStaleRuns } = await import('./extract-fixture.mjs');
+
+test('lane-r34: dropStaleRuns removes a run list whose text was dissolved', () => {
+  // The shape bidi-bake's applyBidiBakePlan leaves behind: `_text` deleted,
+  // the content re-emitted as absolutely-positioned children, `_runs` still
+  // naming a text run that no longer exists on the component. Painting it
+  // would double the glyphs on top of the positioned boxes — MEASURED at
+  // −0.0111 SSIM on css-text/boundary-shaping-009.
+  const fixture = {
+    components: {
+      baked: {
+        properties: { position: 'relative' },
+        _runs: [{ text: 'السلام' }, { child: 'baked__0' }],
+        children: {
+          baked__0: { id: 'baked__0', properties: { position: 'absolute', left: '100px' } },
+        },
+      },
+      // …and an UNBAKED neighbour, whose pair is intact, must be untouched.
+      intact: {
+        properties: {},
+        _text: 'the quick',
+        _runs: [{ text: 'the quick ' }, { child: 'intact__0' }],
+        children: { intact__0: { id: 'intact__0', _text: 'brown' } },
+      },
+    },
+  };
+  assert.equal(dropStaleRuns(fixture), 1);
+  assert.equal(fixture.components.baked._runs, undefined);
+  assert.deepEqual(fixture.components.intact._runs,
+    [{ text: 'the quick ' }, { child: 'intact__0' }]);
+  // Idempotent, and null-safe for the ref-less half of a fixture pair.
+  assert.equal(dropStaleRuns(fixture), 0);
+  assert.equal(dropStaleRuns(undefined), 0);
+  assert.equal(dropStaleRuns({}), 0);
+});
+
+test('lane-r34: the sweep reaches nested children', () => {
+  const fixture = {
+    components: {
+      a: {
+        properties: {},
+        _text: 'x',
+        children: { a__0: { id: 'a__0', _runs: [{ text: 'y' }, { child: 'a__0__0' }] } },
+      },
+    },
+  };
+  assert.equal(dropStaleRuns(fixture), 1);
+  assert.equal(fixture.components.a.children.a__0._runs, undefined);
 });

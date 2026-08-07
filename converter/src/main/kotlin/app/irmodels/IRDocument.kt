@@ -421,6 +421,14 @@ object IRComponentSerializer : KSerializer<IRComponent> {
  *   `--emit-ir v1` path) can never leak the field into the frozen v1
  *   bytes; the v2 codec (IRWireV2.encodeDocument) reads it directly and
  *   emits the additive `keyframes` envelope key, omit-when-empty.
+ * @property fontFaces Document-level `@font-face` declarations (wave 34 —
+ *   see IRFontFace below and schema/spec/01-envelope.md §5). Document-level
+ *   for the same reason `keyframes` is: css-fonts-4 §4.1 puts a face in the
+ *   DOCUMENT's font database, not on any element. Marked @Transient for the
+ *   identical reason — the plugin-generated serializer drives the frozen,
+ *   DEPRECATED `--emit-ir v1` bytes and must never learn a v2-only key;
+ *   IRWireV2.encodeDocument reads the field directly and emits the additive
+ *   `fontFaces` envelope key, omit-when-empty.
  */
 @Serializable
 data class IRDocument(
@@ -428,7 +436,49 @@ data class IRDocument(
     // Fully qualified: plain @Transient would be ambiguous between
     // kotlinx.serialization.Transient (wanted) and kotlin.jvm.Transient.
     @kotlinx.serialization.Transient
-    val keyframes: Map<String, List<IRKeyframeStop>>? = null
+    val keyframes: Map<String, List<IRKeyframeStop>>? = null,
+    @kotlinx.serialization.Transient
+    val fontFaces: List<IRFontFace>? = null
+)
+
+/**
+ * One document-level `@font-face` declaration (schema/spec/01-envelope.md §5
+ * — the wire twin of one CSS `@font-face` at-rule).
+ *
+ * ## Wire shape (IR v2 additive key, spec 05 minor-revision process)
+ * ```json
+ * "fontFaces": [ { "family": "test", "src": "css/…/X.woff",
+ *                  "weight": "400 700", "style": "oblique 20deg" }, … ]
+ * ```
+ *
+ * DELIBERATELY UNNORMALIZED, unlike every property value the converter
+ * touches. These are DESCRIPTORS on a face, not computed values on an
+ * element: css-fonts-4 §4.4 lets `font-weight` be a RANGE (`400 700`) which
+ * has no numeric 100–900 equivalent, and §4.5 lets `font-style` carry an
+ * oblique angle. Collapsing either would destroy the face-matching input the
+ * consumer needs, so the converter forwards them verbatim — the same opacity
+ * contract `meta.decorations` colours ride under.
+ *
+ * @property family The `font-family` descriptor (§4.2), already UNQUOTED by
+ *   the producer: the authored `<string>` and `<custom-ident>` spellings name
+ *   the same family, so both arrive as the same bare string.
+ * @property src Path to the font FILE, relative to the producing pipeline's
+ *   corpus root (`tools/wpt/` for the titan extractor). A path and not a
+ *   payload — spec 01 §5 carries the size argument. The producer guarantees
+ *   the file existed on disk at emit time.
+ * @property weight The `font-weight` descriptor as authored, or null for the
+ *   §4.4 initial `normal`. Never defaulted to "400" here: a consumer that
+ *   applies the spec initial and one that reads an explicit value must land
+ *   on the same face, and inventing a value would break that.
+ * @property style The `font-style` descriptor as authored, or null for the
+ *   §4.5 initial `normal`.
+ */
+@Serializable
+data class IRFontFace(
+    val family: String,
+    val src: String,
+    val weight: String? = null,
+    val style: String? = null
 )
 
 /**

@@ -47,6 +47,20 @@ public struct IRDocument: Decodable {
     /// and always nil for v1 documents (the v1 wire structurally cannot
     /// carry the field — IRDocument.kt marks it @Transient).
     public let keyframes: [String: [IRKeyframeStop]]?
+    /// Wave 34 — document-level `@font-face` declarations (spec 01 §5): the
+    /// wire twin of CSS `@font-face` at-rules, which css-fonts-4 §4.1 scopes
+    /// to the document's font database. nil when the wire omitted the key
+    /// (omit-when-empty) and always nil for v1 documents (the v1 wire
+    /// structurally cannot carry it — IRDocument.kt marks it @Transient).
+    ///
+    /// DECODED BUT NOT YET CONSUMED, and that is the honest state as of wave
+    /// 34: ComponentRenderer resolves text through `.custom("Inter", size:)`
+    /// and the runtime has no `CTFontManagerRegisterFontsForURL` hop, so an
+    /// element referencing a declared family still renders in the bundled
+    /// Inter. The field exists so the wire is not a web-only dialect and so
+    /// that hop, when it lands, reads the file path off the document instead
+    /// of re-deriving it.
+    public let fontFaces: [IRFontFace]?
 
     // public: hand-written Decodable witness on a public type.
     public init(from decoder: Decoder) throws {
@@ -59,6 +73,7 @@ public struct IRDocument: Decodable {
             irVersion = IRWireV2Reader.irVersion
             flatComponents = envelope.components
             keyframes = envelope.keyframes
+            fontFaces = envelope.fontFaces
             // Composition is a COMPOSER concern (spec 03): rebuild the
             // preview tree from slot refs; dangling parents become roots.
             components = IRComposer.compose(envelope.components)
@@ -73,8 +88,42 @@ public struct IRDocument: Decodable {
             // The v1 codec structurally cannot carry keyframes (spec 07):
             // nil, never [] — same absent-vs-empty discipline as children.
             keyframes = nil
+            // …and the same for fontFaces (spec 01 §5, wave 34): the v1
+            // serializer never learned the field, so a v1 document carrying
+            // one would be a forgery, not a face.
+            fontFaces = nil
             components = try c.decode([IRComponent].self, forKey: IRAnyKey("components"))
         }
+    }
+}
+
+// MARK: - @font-face (wave 34 — spec 01 §5)
+
+/// One document-level `@font-face` declaration.
+///
+/// `weight` and `style` are the css-fonts-4 §4.4/§4.5 DESCRIPTORS as
+/// authored — Strings, not typed values, because a weight may be a RANGE
+/// ("400 700") and a style an oblique angle ("oblique 20deg"), neither of
+/// which the IR's numeric/keyword forms can express. nil means the spec
+/// initial (`normal`), never a substituted literal.
+// public: published on IRDocument, which hosts read.
+public struct IRFontFace: Equatable {
+    /// The `font-family` descriptor (§4.2), already UNQUOTED by the writer.
+    public let family: String
+    /// Path to the font FILE, relative to the producing pipeline's corpus
+    /// root. A path, never a payload (spec 01 §5 carries the size argument).
+    public let src: String
+    /// The `font-weight` descriptor as authored; nil = the §4.4 initial.
+    public let weight: String?
+    /// The `font-style` descriptor as authored; nil = the §4.5 initial.
+    public let style: String?
+
+    // public: constructed by the wire decoder and tests.
+    public init(family: String, src: String, weight: String? = nil, style: String? = nil) {
+        self.family = family
+        self.src = src
+        self.weight = weight
+        self.style = style
     }
 }
 

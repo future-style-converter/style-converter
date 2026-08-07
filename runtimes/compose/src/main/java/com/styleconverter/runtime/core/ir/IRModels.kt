@@ -13,11 +13,47 @@ import kotlinx.serialization.json.JsonObject
  *   the offset-sorted stop lists. null when the wire omitted the key
  *   (omit-when-empty rule) and for every v1 document — the legacy path
  *   never carried keyframes, so the default keeps v1 decode byte-stable.
+ * @property fontFaces Document-level `@font-face` declarations (additive IR
+ *   v2 minor revision — schema/spec/01-envelope.md §5). null when the wire
+ *   omitted the key (omit-when-empty rule) and for every v1 document.
+ *
+ *   DECODED BUT NOT YET CONSUMED, and that is the honest state as of wave
+ *   34: Compose selects one face per weight/style through
+ *   `FontFamily(Font(...))` and has no runtime hook to register an arbitrary
+ *   file into the resolver, so every component referencing a declared family
+ *   still renders in the bundled Inter. The field exists so the wire is not
+ *   a web-only dialect and so the future registration hop reads the file
+ *   path off the document instead of re-deriving it — `Typeface.Builder`
+ *   takes exactly this string joined to the harness's asset root.
  */
 @Serializable
 data class IRDocument(
     val components: List<IRComponent>,
-    val keyframes: Map<String, List<IRKeyframeStop>>? = null
+    val keyframes: Map<String, List<IRKeyframeStop>>? = null,
+    val fontFaces: List<IRFontFace>? = null
+)
+
+/**
+ * One document-level `@font-face` declaration (schema/spec/01-envelope.md §5).
+ *
+ * @property family The `font-family` descriptor (css-fonts-4 §4.2), already
+ *   UNQUOTED by the writer — matched against the family names in an
+ *   element's `font-family` value.
+ * @property src Path to the font FILE, relative to the producing pipeline's
+ *   corpus root. A path, never a payload (spec 01 §5 carries the size
+ *   argument); the writer guarantees the file existed at emit time.
+ * @property weight The `font-weight` descriptor AS AUTHORED (§4.4) — may be
+ *   a RANGE ("400 700"), which is why this is a String and not the IR's
+ *   numeric 100–900 form. null = the §4.4 initial `normal`.
+ * @property style The `font-style` descriptor AS AUTHORED (§4.5) — may carry
+ *   an oblique angle ("oblique 20deg"). null = the §4.5 initial `normal`.
+ */
+@Serializable
+data class IRFontFace(
+    val family: String,
+    val src: String,
+    val weight: String? = null,
+    val style: String? = null
 )
 
 /**

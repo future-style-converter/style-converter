@@ -2,14 +2,16 @@
 //  BackdropImageOps.swift
 //  StyleEngine/effects/backdrop — lane BF-I.
 //
-//  Pass-B pixel work: crop the element's border box — GROWN by the blur's
-//  3σ support — out of the pass-A plate, run the planned ops over those
-//  pixels, then cut the result back to the border box.
+//  Pass-B pixel work: crop the element's BORDER BOX out of the pass-A plate
+//  and run the planned ops over those pixels.
 //
-//  The grow/cut-back pair is wave-26 skeptic fix #1 and is what makes this
-//  file byte-parallel with the Compose twin: the integer rects come from the
-//  shared BackdropSampleGeometry, and only the plate's own boundary triggers
-//  edge duplication (BackdropBlur's replicate pad ≡ Shader.TileMode.CLAMP).
+//  The crop never grows with σ (wave-34 lane B — filter-effects-2 §2 clips the
+//  backdrop to the border box BEFORE filtering; see BackdropSampleGeometry's
+//  header for the measurement). What the Gaussian wants beyond that rect comes
+//  from BackdropBlur's mirror pad ≡ the Compose twin's Shader.TileMode.MIRROR,
+//  which is what makes the two files byte-parallel. The cut-back to `keepRect`
+//  survives for one case only: a border box that hangs off the canvas, where
+//  the clamp made the crop smaller than the box.
 //
 //  Everything here is a PURE CGImage → CGImage transform (no SwiftUI, no
 //  view tree), which is what lets the unit suite pin the arithmetic
@@ -29,24 +31,22 @@
 import CoreGraphics
 import Foundation
 
-/// A PADDED crop of the plate, the border box inside it, and where the kept
+/// The border-box crop of the plate, the kept rect inside it, and where those
 /// pixels belong in the element's own coordinates.
 ///
-/// Three rects, because the pipeline has three coordinate spaces and the
-/// wave-26 fix depends on not confusing them:
-///  - `image` covers the border box GROWN by the blur's 3σ support, clamped
-///    to the plate. That growth is the fix: the Gaussian must see the real
-///    document pixels next to the box, not a smear of the box's own edge.
-///  - `keepRect` is the border box's own extent INSIDE that padded buffer,
-///    in crop-local pixels — where the filtered result is cut back to.
+/// Three rects, because the pipeline has three coordinate spaces:
+///  - `image` covers the element's border box, clamped to the plate. It is
+///    exactly the border box unless the box hangs off the canvas.
+///  - `keepRect` is the part of the border box the crop actually covers, in
+///    crop-local pixels — the identity for every on-canvas element.
 ///  - `localRect` is where the kept pixels land in the element's local POINT
 ///    space. Non-zero origin / smaller size only when the border box hangs
 ///    off the canvas, in which case the uncovered strip stays unpainted
 ///    instead of being smeared by a stretched draw.
 struct BackdropCrop {
-    /// The padded, clamped plate pixels — the filter chain's input.
+    /// The clamped border-box plate pixels — the filter chain's input.
     let image: CGImage
-    /// The border box inside `image`, in crop-local pixels (top-left origin).
+    /// The kept region inside `image`, in crop-local pixels (top-left origin).
     let keepRect: CGRect
     /// Where the kept pixels belong, in points, relative to the element's
     /// top-left corner.
@@ -57,22 +57,17 @@ enum BackdropImageOps {
 
     // MARK: - crop
 
-    /// Crop `plate` to the element's border box GROWN by `padPixels` on every
-    /// side (filter-effects-2 §2 — the filter reads the backdrop root image,
-    /// not a pre-cut box), clamped into the plate.
+    /// Crop `plate` to the element's border box (filter-effects-2 §2 — the
+    /// backdrop image is clipped to the border box before the filter runs),
+    /// clamped into the plate.
     ///
     /// `elementFrame` is the element's frame in the backdrop-canvas
     /// coordinate space (what GeometryReader reports), i.e. the SAME space
     /// the plate was rendered in — so the mapping is a pure scale, with no
     /// offset term. CGImage cropping is in image space (origin top-left),
     /// which is also the canvas space's origin, so no y-flip either.
-    ///
-    /// `padPixels` is 0 for a blur-free chain, which collapses this back to
-    /// the plain border-box crop (identical pixels to the pre-fix behaviour
-    /// for every invert-only fixture).
     static func crop(_ plate: BackdropPlate,
-                     elementFrame: CGRect,
-                     padPixels: Int = 0) -> BackdropCrop? {
+                     elementFrame: CGRect) -> BackdropCrop? {
         // Points → plate pixels. `.integral` expands to whole-pixel bounds
         // so a fractional layout frame never drops the edge pixel column
         // that the element actually covers.
@@ -87,7 +82,6 @@ enum BackdropImageOps {
             elemTop: Int(box.minY),
             elemWidth: Int(box.width),
             elemHeight: Int(box.height),
-            padPx: padPixels,
             srcWidth: plate.image.width,
             srcHeight: plate.image.height
         ) else { return nil }
@@ -119,14 +113,14 @@ enum BackdropImageOps {
 
     // MARK: - filter-then-cut-back
 
-    /// Run `ops` over a padded crop and cut the result back to the border box.
+    /// Run `ops` over the border-box crop and keep the part of the box the
+    /// crop actually covers.
     ///
     /// This is the order filter-effects-2 §2 specifies and the order the
-    /// Compose twin executes (sample a padded rect → RenderEffect chain →
-    /// clip to the border box). Doing it the other way round — the lane's
-    /// original crop-then-blur — replaces the document pixels just outside the
-    /// box with a replica of the box's own edge, which is visibly wrong over
-    /// any non-uniform backdrop.
+    /// Compose twin executes (sample the border box → RenderEffect chain →
+    /// clip to the border box). The cut-back is the IDENTITY for every element
+    /// fully on the canvas; it only bites when the clamp in
+    /// `BackdropSampleGeometry.sample` had to shrink the crop.
     ///
     /// Returns nil if any step fails, so the applier paints no backplate
     /// rather than a partially-filtered one.
@@ -134,8 +128,8 @@ enum BackdropImageOps {
                          ops: [BackdropOp],
                          scale: CGFloat) -> CGImage? {
         guard let out = apply(ops, to: crop.image, scale: scale) else { return nil }
-        // Blur-free chains sample exactly the border box, so the cut-back is
-        // the identity — skip the allocation rather than round-trip a CGImage.
+        // The common case: the crop IS the kept rect — skip the allocation
+        // rather than round-trip a CGImage.
         if Int(crop.keepRect.width) == out.width, Int(crop.keepRect.height) == out.height,
            crop.keepRect.minX == 0, crop.keepRect.minY == 0 {
             return out

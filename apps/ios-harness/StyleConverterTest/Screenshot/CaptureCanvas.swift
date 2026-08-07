@@ -538,6 +538,54 @@ struct ComposedCaptureCanvas: View {
         )
     }
 
+    /// One composed ROOT's rendered node, WITHOUT the block gaps around it —
+    /// extracted VERBATIM from the frozen root ForEach (wave-34 lane H) so
+    /// both walks in `body` emit the identical view for a given root and only
+    /// the PLACEMENT ever differs. The two `.padding`s stay at the call sites
+    /// because a run's members carry no block gaps of their own: their
+    /// spacing is the §9.4.2 packer's, not §8.3.1's.
+    @ViewBuilder
+    private func rootBody(_ idx: Int, _ root: IRComponent,
+                          plans: [UABlockMargin.RootStackMargin]) -> some View {
+        // Identical host shim the per-component canvas and the engine's own
+        // child loop use — placement parent-data attached (inert under this
+        // VStack), full ComponentRenderer engine underneath. Zero per-node
+        // render difference.
+        Group {
+            // Wave 18 (RC1) — a no-inset ABSOLUTE root stays in
+            // the flow stack (FixedHoist.split keeps it: its
+            // static position IS this slot, css-position-3 §3.1)
+            // but must reserve NO flow space (§2.1). The runtime's
+            // StaticPositionAnchor measures it at ideal size and
+            // reports 0×0 to this VStack — the S5 zero-report —
+            // so the next root starts where this box would have.
+            // Same classifier `split` used: one decision, two
+            // consumers, never disagreeing.
+            if FixedHoist.rendersInFlowAsStaticPosition(root) {
+                ComponentHost(component: root)
+                    .modifier(StaticPositionAnchor())
+            } else {
+                ComponentHost(component: root)
+            }
+        }
+        // RC-A4 — a stripped root renders with its block margins
+        // ZEROED through the runtime's §8.3.1 override channel:
+        // the declared values now live in the collapsed paddings
+        // at the call site, so adjacent declared margins fold to max()
+        // like the browser. Inline margins are untouched, and the
+        // renderer rewrites the channel per child (root-only).
+        // Non-stripped roots write the default nil — identity.
+        .composedRootBlockMarginStrip(plans[idx].stripDeclared)
+        // wave-26 (lane RES residual 3a) — this root's §8.3.1
+        // HOIST BAND is folded into `spacing` in `body`
+        // (UABlockMargin.withHoistBand), so the renderer must NOT
+        // paint it a second time outside the root's styled box.
+        // Keyed on the root's id, and the extractor's ids are
+        // hierarchical, so the suppression cannot reach a
+        // descendant container — every nested band is unchanged.
+        .composedRootHoistBandSuppressed(root.id)
+    }
+
     var body: some View {
         // Wave 17 — split the roots once per body eval (pure transform):
         // the flow half stacks in the padded VStack below, the hoisted
@@ -564,60 +612,69 @@ struct ComposedCaptureCanvas: View {
         // not just the (top, bottom) projection).
         let spacing = UABlockMargin.stackedSpacing(plans: plans)
         let lastIndex = split.flow.count - 1
+        // wave-34 lane H (H1) — the per-root inline-block boxes and the ROOT
+        // segment plan. `rootSegments` is nil for every document with no ≥2
+        // run of declared inline-block roots, which is all but two tests in
+        // the whole frozen corpus, and the nil branch below is the frozen
+        // root ForEach verbatim. See ComposedRootInlineFlow.swift for the
+        // enumerated blast radius and why the RULES live in the runtime
+        // facade rather than here.
+        let rootBoxes = composedRootInlineBoxes(split.flow)
+        let rootSegments = InlineBlockAtom.rootSegments(
+            boxes: rootBoxes,
+            // H3 reads the gap ABOVE each root — `spacing.leading` is exactly
+            // that array, index-aligned with `split.flow`.
+            blockGapsAbovePx: spacing.leading.map { Double($0) })
         return VStack(alignment: .leading, spacing: 0) {
-            // enumerated()+offset id: roots are rendered positionally, never
-            // reordered — a stable positional key is correct and avoids
-            // relying on component.id uniqueness across a malformed doc.
-            ForEach(Array(split.flow.enumerated()), id: \.offset) { idx, root in
-                // Identical host shim the per-component canvas and the
-                // engine's own child loop use — placement parent-data
-                // attached (inert under this VStack), full ComponentRenderer
-                // engine underneath. Zero per-node render difference.
-                Group {
-                    // Wave 18 (RC1) — a no-inset ABSOLUTE root stays in
-                    // the flow stack (FixedHoist.split keeps it: its
-                    // static position IS this slot, css-position-3 §3.1)
-                    // but must reserve NO flow space (§2.1). The runtime's
-                    // StaticPositionAnchor measures it at ideal size and
-                    // reports 0×0 to this VStack — the S5 zero-report —
-                    // so the next root starts where this box would have.
-                    // Same classifier `split` used: one decision, two
-                    // consumers, never disagreeing.
-                    if FixedHoist.rendersInFlowAsStaticPosition(root) {
-                        ComponentHost(component: root)
-                            .modifier(StaticPositionAnchor())
+            if let segments = rootSegments {
+                // wave-34 H1 — the segment walk. A RUN of consecutive
+                // inline-block roots becomes ONE §9.4.2 row item carrying the
+                // block gap above its FIRST member (the interior ones are
+                // gone because inline-level siblings on a line box have none,
+                // which H3 already proved is a no-op here); every other
+                // segment is a single root laid out exactly as below.
+                ForEach(Array(segments.enumerated()), id: \.offset) { _, seg in
+                    let memberBoxes = seg.indices.compactMap { rootBoxes[$0] }
+                    if seg.isRun, memberBoxes.count == seg.indices.count {
+                        ComposedRootInlineRow(boxes: memberBoxes) {
+                            ForEach(seg.indices, id: \.self) { i in
+                                rootBody(i, split.flow[i], plans: plans)
+                            }
+                        }
+                        .padding(.top, spacing.leading[seg.indices[0]])
+                        .padding(.bottom,
+                                 seg.indices.contains(lastIndex) ? spacing.trailing : 0)
                     } else {
-                        ComponentHost(component: root)
+                        // A run whose boxes went missing between the plan and
+                        // here is a harness bug, not layout state: stack its
+                        // members like the frozen ForEach rather than place
+                        // them against a short plan.
+                        ForEach(seg.indices, id: \.self) { i in
+                            rootBody(i, split.flow[i], plans: plans)
+                                .padding(.top, spacing.leading[i])
+                                .padding(.bottom, i == lastIndex ? spacing.trailing : 0)
+                        }
                     }
                 }
-                    // RC-A4 — a stripped root renders with its block margins
-                    // ZEROED through the runtime's §8.3.1 override channel:
-                    // the declared values now live in the collapsed paddings
-                    // below, so adjacent declared margins fold to max() like
-                    // the browser. Inline margins are untouched, and the
-                    // renderer rewrites the channel per child (root-only).
-                    // Non-stripped roots write the default nil — identity.
-                    .composedRootBlockMarginStrip(plans[idx].stripDeclared)
-                    // wave-26 (lane RES residual 3a) — this root's §8.3.1
-                    // HOIST BAND is folded into `spacing` above
-                    // (UABlockMargin.withHoistBand), so the renderer must NOT
-                    // paint it a second time outside the root's styled box.
-                    // Keyed on the root's id, and the extractor's ids are
-                    // hierarchical, so the suppression cannot reach a
-                    // descendant container — every nested band is unchanged.
-                    .composedRootHoistBandSuppressed(root.id)
-                    // GAP 1 — the block margin ABOVE this root: its full
-                    // top margin for the first root (the canvas's 16px
-                    // padding blocks parent↔child collapse there), or the
-                    // previous root's bottom COLLAPSED with this root's top
-                    // for interior roots. Declared margins contribute here
-                    // ONLY when stripped from the host (RC-A4) — never
-                    // double-counted.
-                    .padding(.top, spacing.leading[idx])
-                    // Only the LAST root carries the trailing bottom margin
-                    // (again uncollapsed — the padded bottom edge). Interior
-                    // bottoms are folded into the next root's leading gap.
-                    .padding(.bottom, idx == lastIndex ? spacing.trailing : 0)
+            } else {
+                // enumerated()+offset id: roots are rendered positionally, never
+                // reordered — a stable positional key is correct and avoids
+                // relying on component.id uniqueness across a malformed doc.
+                ForEach(Array(split.flow.enumerated()), id: \.offset) { idx, root in
+                    rootBody(idx, root, plans: plans)
+                        // GAP 1 — the block margin ABOVE this root: its full
+                        // top margin for the first root (the canvas's 16px
+                        // padding blocks parent↔child collapse there), or the
+                        // previous root's bottom COLLAPSED with this root's top
+                        // for interior roots. Declared margins contribute here
+                        // ONLY when stripped from the host (RC-A4) — never
+                        // double-counted.
+                        .padding(.top, spacing.leading[idx])
+                        // Only the LAST root carries the trailing bottom margin
+                        // (again uncollapsed — the padded bottom edge). Interior
+                        // bottoms are folded into the next root's leading gap.
+                        .padding(.bottom, idx == lastIndex ? spacing.trailing : 0)
+                }
             }
         }
         // Constrain the composed content to the ref content box (358px at the

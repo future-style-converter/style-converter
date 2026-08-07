@@ -84,6 +84,19 @@ let package = Package(
                 "StyleEngine/transforms/README.md",
                 "StyleEngine/typography/README.md",
             ],
+            // Wave 34 (lane F1) — the five bundled per-script fallback faces
+            // (Noto Sans Arabic / Armenian / Bengali / Hebrew / Khmer
+            // Regular, ~537 KB, OFL 1.1). They ship INSIDE the runtime, not
+            // in the harness app, because the runtime is what registers them
+            // with Core Text (StyleEngine/typography/font/
+            // ScriptFallbackFonts.swift `registered`) — a consumer gets
+            // per-script fallback with no integration step. `.process`
+            // flattens Resources/Fonts/*.ttf to the bundle root, which is
+            // what makes the `Bundle.module.url(forResource:withExtension:)`
+            // lookup there a plain basename lookup.
+            resources: [
+                .process("Resources"),
+            ],
             swiftSettings: [
                 // The engine was authored under Swift 5 language mode
                 // (project.yml SWIFT_VERSION 5.9). Pin the mode so the
