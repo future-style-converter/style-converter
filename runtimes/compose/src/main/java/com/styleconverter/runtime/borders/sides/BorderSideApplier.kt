@@ -325,8 +325,10 @@ object BorderSideApplier {
         }
         // Even spacing with first/last dot centers inset r from each end so
         // the dots stay fully inside the box (Chromium keeps corner dots
-        // flush with the adjacent side's edge).
-        val step = (len - width) / (count - 1).toFloat()
+        // flush with the adjacent side's edge). Extracted to a helper (wave
+        // 35, lane B8) purely so the JVM suite can pin the PITCH against the
+        // measured WPT refs, not just the dot COUNT — see dottedDotStep.
+        val step = dottedDotStep(len, width, count)
         val ux = dx / len
         val uy = dy / len
         for (i in 0 until count) {
@@ -352,6 +354,34 @@ object BorderSideApplier {
         val pitches = kotlin.math.floor((len - width) / (2f * width) + 0.5f).toInt()
         return kotlin.math.max(1, pitches + 1)
     }
+
+    /**
+     * Center-to-center PITCH of a fitted dotted side: the span between the
+     * two inset end-dot centers, `len - width`, shared evenly across the
+     * `count - 1` intervals. A single-dot side has no interval → 0.
+     *
+     * Extracted from [drawDotted] verbatim (wave 35, lane B8) — same
+     * expression, no behaviour change — so the pitch can be pinned against
+     * the frozen WPT ref PNGs instead of only being asserted indirectly
+     * through a raster. Measured on
+     * tools/wpt/refs/9b5435e5…/white-black-ink-font-lh-imgpad-htmlpins/
+     * css-align/, whose `.block { border: 5px dotted blue }` boxes give
+     * four independent geometries (w = 5 throughout):
+     *   len 90 (justify-self-static-position-001, 80px box + 2×5 border)
+     *     → 10 dots, pitch 9.444  (ref dot lefts 67,77,86,95,105,114,124,
+     *       133,143,152 — top edge; 17,27,36,45,55,64,74,83,93,102 — left)
+     *   len 85 (align-self-static-position-001, width:75% of 100px)
+     *     → 9 dots, pitch 10.0    (ref 67,77,87,97,107,117,127,137,147)
+     *   len 60 (same test, height:50%)
+     *     → 7 dots, pitch 9.167   (ref 17,26,35,45,54,63,72)
+     * The len-90 case is a SECOND independent witness for the half-up
+     * rounding in [dottedDotCount]: (90-5)/10 = 8.5 exactly, and Chromium
+     * paints 10 dots (9 pitches), which ties-to-even would have made 9.
+     * Internal for the JVM suite; the iOS twin carries dottedDotStep with
+     * identical arithmetic and the same pin table.
+     */
+    internal fun dottedDotStep(len: Float, width: Float, count: Int): Float =
+        if (count > 1) (len - width) / (count - 1).toFloat() else 0f
 
     /**
      * Render CSS `border-style: double` — two parallel 1/3-width lines with

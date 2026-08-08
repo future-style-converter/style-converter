@@ -125,6 +125,50 @@ final class FixedHoistTests: XCTestCase {
         XCTAssertTrue(split.hoisted.isEmpty)
     }
 
+    /// Wave 35 (lane B1) — the ONE row of the cross-native out-of-flow rule
+    /// table where this file and its Compose twin deliberately DISAGREE,
+    /// pinned so the divergence is a decision on the record rather than a
+    /// drift nobody re-derives.
+    ///
+    /// Shape: a nested inset-anchored ABSOLUTE box with NO positioned and NO
+    /// transformed ancestor anywhere above it.
+    ///   • Chromium (probe A, _diag35/laneB1/probe-chromium.mjs): the
+    ///     INITIAL CONTAINING BLOCK is the containing block — the box lands
+    ///     at (20,10) in viewport space, not at its parent.
+    ///   • Compose `CanvasRootHoist.shouldHoistToCanvasRoot`: hoists it,
+    ///     i.e. implements the browser rule.
+    ///   • This file: keeps it, i.e. anchors it at the parent's padding box.
+    ///
+    /// The conservative clause is kept ON PURPOSE and the reason is measured:
+    /// the IR's positioned-ancestor chain is LOSSY. Of the six frozen tests
+    /// carrying this shape (_diag35/laneB1/scan-oof2.mjs), four are
+    /// css-writing-modes available-size-00x, whose `body > div { position:
+    /// relative }` never reaches the wire — the extractor drops that
+    /// descendant-combinator rule, so the IR claims "no positioned ancestor"
+    /// for a box that demonstrably has one. iOS passes all four by keeping
+    /// them in place; Compose hoists them to the canvas corner and FAILS
+    /// available-size-001/012 at 0.8998. Adopting the browser-correct clause
+    /// here would trade four green cells for none. The defect to fix is the
+    /// extractor, not this table — named as a follow-up, not silently lived
+    /// with.
+    func testEXPECTED_DIVERGENCE_nestedInsetAbsoluteWithNoContainingBlockAncestor() throws {
+        // A plain STATIC wrapper — no position, no transform — holding an
+        // inset-anchored absolute child two levels down.
+        let wrapper = try box(
+            id: "w", w: 200, h: 200, rgb: (0, 0, 1),
+            childrenJSON:
+                #"{"id":"nested","name":"nested","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Left","data":{"px":20.0}},{"type":"Top","data":{"px":10.0}}]}"#)
+        let split = FixedHoist.split(roots: [wrapper])
+        // iOS side of the divergence: the box stays in the tree.
+        XCTAssertEqual(split.flow[0].children?.map(\.id), ["nested"],
+                       "EXPECTED DIVERGENCE: iOS keeps a nested absolute where Compose hoists it to the ICB — see this test's doc comment for the measured reason")
+        XCTAssertTrue(split.hoisted.isEmpty)
+        // …and it is NOT the transform clause doing it: no ancestor in this
+        // tree establishes a transform containing block, so the wave-35 veto
+        // is provably inert here and the divergence is the wave-17 clause.
+        XCTAssertFalse(TransformContainingBlock.establishes(wrapper))
+    }
+
     /// Fixed-free documents split to (identity, []) — the composed
     /// canvas's view tree is then built from an identical root list.
     func testSplitIsIdentityForFixedFreeDocuments() throws {

@@ -233,6 +233,53 @@ try {
   await page.evaluate(() =>
     document.fonts?.ready ?? Promise.resolve()
   );
+
+  // ── wave-35 lane B2: the @font-face DELIVERY gate ──────────────────────────
+  //
+  // `fonts.ready` resolves when the font pipeline goes idle — including when
+  // every declared face FAILED to fetch. That distinction is invisible in the
+  // screenshot: useFontFaces.ts sets `font-display: block`, so a face that
+  // never arrives falls back to Inter and paints perfectly plausible text in
+  // the WRONG typeface. That is the exact failure the whole @font-face channel
+  // exists to end, so the run must SAY which families actually resolved.
+  //
+  // The check is `document.fonts.check()` against each family the harness
+  // mounted (read back off the managed <style>, so this measures what the page
+  // really registered rather than what we think it should have). Non-fatal by
+  // design: one unreachable corpus font must not take down a section's other
+  // 40 tests, and the manifest's per-test delivery stamp is where the scoring
+  // consequence lives (tools/titan/build-combined-fixture.mjs →
+  // inject-wpt-block.mjs's Rule 15 gate). Loud, then honest.
+  const fontReport = await page.evaluate(() => {
+    const styleEl = document.getElementById('sc-wpt-font-faces');
+    if (!styleEl || !styleEl.textContent) return null;
+    // The mounted rules are built by useFontFaces.buildFontFaceCss, so the
+    // family always appears as a quoted <string> — one regex recovers them.
+    const families = [...styleEl.textContent.matchAll(/font-family:\s*"((?:[^"\\]|\\.)*)"/g)]
+      .map((m) => m[1].replace(/\\(.)/g, '$1'));
+    const uniq = [...new Set(families)];
+    return uniq.map((f) => ({
+      family: f,
+      // A size is required by the shorthand grammar `check()` parses; 36px
+      // matches the css-text/boundary-shaping documents this channel targets
+      // and the value is irrelevant to whether the FACE is available.
+      loaded: (() => { try { return document.fonts.check(`36px "${f}"`); } catch { return false; } })(),
+    }));
+  });
+  if (fontReport) {
+    for (const f of fontReport) {
+      console.log(`  [fonts] ${f.loaded ? 'LOADED' : 'NOT LOADED'} @font-face family "${f.family}"`);
+    }
+    const missing = fontReport.filter((f) => !f.loaded).map((f) => f.family);
+    if (missing.length) {
+      console.warn(`  ⚠️  ${missing.length} @font-face famil${missing.length === 1 ? 'y' : 'ies'} ` +
+                   `did NOT load (${missing.join(', ')}) — those captures render the FALLBACK face`);
+    }
+    // A face that loaded LATE still needs one more settle: `font-display:
+    // block` swaps the invisible text in on load, and that swap reflows every
+    // line box the screenshot is about to record.
+    await page.evaluate(() => new Promise((r) => setTimeout(r, 50)));
+  }
   // Brief post-render settle. We can't use requestAnimationFrame here —
   // headless Chrome throttles (and in some versions outright suppresses)
   // RAF callbacks when the page isn't actually being painted to a display,

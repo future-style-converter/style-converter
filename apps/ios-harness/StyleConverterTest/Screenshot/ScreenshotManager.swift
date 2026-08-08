@@ -220,6 +220,25 @@ enum ScreenshotManager {
         return dir
     }
 
+    /// TITAN @font-face sandbox (wave-35 lane B2).
+    ///
+    /// A SIBLING of `inboxDirectory`, not a subdirectory: `nextFixtureURL`
+    /// lists the inbox for `.json`, so a font living under it would be inert
+    /// but confusing. The host feeder (tools/titan/feed-ios.mjs) copies each
+    /// font file the fed document declares to `<this dir>/<fontFaces[].src>`,
+    /// preserving the corpus-relative path VERBATIM — which is the whole
+    /// contract with `DocumentFontRegistry`: it resolves
+    /// `fontsDirectory.appendingPathComponent(face.src)` with no name
+    /// mangling, so no escaping rule can drift between host and device.
+    ///
+    /// Unlike `inboxDirectory` this does NOT create the directory. Absence is
+    /// a meaningful state — it means this run's feeder pushed no faces — and
+    /// the registry's decline path reports it with the family AND the path.
+    static var fontsDirectory: URL {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return docs.appendingPathComponent("fonts", isDirectory: true)
+    }
+
     /// Polls the inbox for the oldest *.json fixture. Returns its URL or
     /// nil if the inbox is empty. The caller is responsible for deleting
     /// the file after it's been processed (so a crash mid-render doesn't

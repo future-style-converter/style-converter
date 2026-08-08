@@ -3305,7 +3305,15 @@ public struct ComponentRenderer: View {
                 // childless text component). `meta.decorations` reaches the
                 // per-line overlay from here.
                 decorations: DecorationWire.decorationLines(
-                    from: component.meta?.decorations)
+                    from: component.meta?.decorations),
+                // Wave 35 (lane B5) — the upright-vertical gate. Reads the
+                // MERGED list because `writing-mode` / `text-orientation` are
+                // inherited and normally sit on an ancestor. nil for every run
+                // that is not an all-upright (CJK / kana / FULLWIDTH) run in a
+                // `vertical-*` mode, i.e. for every other component in the
+                // frozen corpus, which therefore renders byte-identically.
+                verticalUprightStack: VerticalUprightGate.stack(
+                    properties: resolvedProperties, text: component.text)
             )
         }
     }
@@ -3624,6 +3632,13 @@ private struct PlaceholderLabel: View {
     // DecorationWire → here.
     var decorations: [DecorationColorOps.DecorationLine]? = nil
 
+    // Wave 35 (lane B5) — non-nil ⇒ this run is an UPRIGHT vertical run
+    // (css-writing-modes-4 §5.1) and the value is the side line 1 stacks on.
+    // Decided ONCE at the call site by `VerticalUprightGate.stack`, which
+    // reads the MERGED property list; nil (the default, and every call site
+    // that does not pass it) keeps the frozen horizontal chain byte for byte.
+    var verticalUprightStack: LineStack? = nil
+
     var body: some View {
         // Resolve the visible string: rawText wins when present (the IR
         // carried explicit element text content), otherwise fall back to
@@ -3812,7 +3827,32 @@ private struct PlaceholderLabel: View {
         // LinearGradient, so when bg-clip:text is on we replace the
         // foreground colour with the gradient.
         return Group {
-            if let g = clipTextGradient {
+            // Wave 35 (lane B5) — the UPRIGHT vertical run. Glyphs stand up
+            // and stack DOWN each line; lines stack across the block axis.
+            // The layout plans at MEASURE time (the wrap budget is the
+            // block-axis proposal) and places the `fallback` slot — the two
+            // frozen branches below, verbatim — whenever it declines, so a
+            // run this gate admits can never render WORSE than before.
+            if let stack = verticalUprightStack {
+                VerticalUprightTextFlow(text: displayText, stack: stack) {
+                    if let g = clipTextGradient {
+                        textView.foregroundStyle(g)
+                    } else {
+                        textView.foregroundColor(resolvedColor)
+                    }
+                } glyph: { slot in
+                    // One code point, styled exactly like the run it came
+                    // from. `wordSpacedText` is identity on a single glyph
+                    // (there is no separator to space) but is used anyway so
+                    // the two paths build their `Text` the same way.
+                    let g = wordSpacedText(slot).font(font)
+                    if let grad = clipTextGradient {
+                        g.foregroundStyle(grad)
+                    } else {
+                        g.foregroundColor(resolvedColor)
+                    }
+                }
+            } else if let g = clipTextGradient {
                 textView.foregroundStyle(g)
             } else {
                 textView.foregroundColor(resolvedColor)
@@ -4034,7 +4074,27 @@ private struct PlaceholderLabel: View {
         // matrix-skewed UIFont (SwiftUI's `.italic()` can't slant a
         // family that ships no italic face — it silently no-ops).
         var interFaceName: String? = nil
-        if textConfig.fontDesign == .default {
+        // wave-35 lane B2 — a face this DOCUMENT declared via `@font-face`
+        // outranks everything below it. css-fonts-4 §5 consults the document's
+        // own font database before any system or generic face, so a test
+        // saying `@font-face { font-family: test; src: url(Lin.woff) }` plus
+        // `font: 36px test` must shape with THAT file — the bundled-Inter
+        // default under it is what made css-text/boundary-shaping's "fi"
+        // ligature assertions unobservable on iOS. `fontFaceName` is the
+        // PostScript name CoreText reported at registration (StyleBuilder set
+        // it via DocumentFontRegistry); nil for every face-free document, so
+        // the Inter/system branches below are untouched in the normal case.
+        if let declaredFace = textConfig.fontFaceName {
+            f = .custom(declaredFace, size: size)
+            // Weight is NOT baked: the declared file provides one concrete
+            // face, so a `font-weight` on the element still has to be applied
+            // by CoreText's synthesis path below — the same treatment the
+            // legacy `.custom("Inter")` branch gets. `interFaceName` stays nil
+            // on purpose, which routes an italic request to `.italic()` rather
+            // than the fixed Inter shear: a declared family MAY ship a real
+            // italic face (a second @font-face with `font-style: italic`), and
+            // shearing over a real italic would be a visible lie.
+        } else if textConfig.fontDesign == .default {
             // css-fonts-4 §5.2 concrete-face selection over the installed
             // Inter faces (Regular/Medium/Bold/Black in the harness):
             // CoreText's `.weight()` nearest-face heuristic rounds DOWN

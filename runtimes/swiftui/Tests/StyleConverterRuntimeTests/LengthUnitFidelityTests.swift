@@ -53,6 +53,39 @@ final class LengthUnitFidelityTests: XCTestCase {
         }
     }
 
+    // wave-35 lane B9 — the THREE-WAY pin on the second percentage spelling.
+    // `{"type":"percentage","percentage":N}` is the kotlinx-POLYMORPHIC
+    // encoding of MaxWidthProperty.MaxValue's `@SerialName("percentage") data
+    // class PercentageValue(val percentage: IRPercentage)` — the class
+    // discriminator writes `type`, the constructor parameter name writes the
+    // payload — and MaxHeightProperty reuses that value type, so
+    // `max-height: 100%` reaches every runtime this way. Wire shape copied
+    // verbatim from runs/wave34-depth/sections/css-sizing/out/tmpOutput.json
+    // (aspect-ratio__abspos-008__1__0's MaxHeight); never invented.
+    //
+    // Swift has read both keys since the wave-1 Sizing_MaxWidthPercent
+    // fixture, while web and Compose read only `value` and DROPPED the
+    // declaration — measured on web as css-sizing/aspect-ratio/abspos-008
+    // painting 240×240 against a 100×100 ref (0.8415 → 0.9990 once fixed),
+    // because CSS Sizing 4 §4.1 had no max-height left to transfer through
+    // `aspect-ratio: 1/1`. This pin exists so the platform that was already
+    // right can never quietly become the outlier in the other direction.
+    func testPolymorphicPercentageKeyDecodesLikeValueKey() {
+        let v = extractLength(.object(["type": .string("percentage"),
+                                       "percentage": .double(100)]))
+        guard case .relative(100, .percent, nil) = v else {
+            return XCTFail("expected .relative(100, .percent, nil), got \(v)")
+        }
+        // The pre-existing key still wins when a shape carries both, so the
+        // widening can never change a value that already decoded.
+        let both = extractLength(.object(["type": .string("percentage"),
+                                          "value": .double(25),
+                                          "percentage": .double(99)]))
+        guard case .relative(25, .percent, nil) = both else {
+            return XCTFail("expected .relative(25, .percent, nil), got \(both)")
+        }
+    }
+
     // ── P1: ch — measured advance, spec 0.5em fallback ──────────────────────
 
     func testChFallsBackToHalfAnEm() {

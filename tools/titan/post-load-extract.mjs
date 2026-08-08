@@ -1106,6 +1106,113 @@ export function componentAtPath(fixture, stem, path) {
   return cmp ?? null;
 }
 
+// ── wave-35 lane B9: the BAR-CONTROL author-box suppression ─────────────────
+//
+// THE MECHANISM (Blink, not a guess). LayoutTheme::IsControlStyled() asks, for
+// a small set of appearance parts — the button family and kProgressBarPart —
+// `style.HasAuthorBackground() || style.HasAuthorBorder()`. Those two flags
+// are set by the PRESENCE of an author declaration in the family, NOT by its
+// value: `border-width: 0px` from an author sheet sets HasAuthorBorder just
+// as `border: 4px solid` does. When either is set the part is dropped and the
+// control devolves to its non-native fallback.
+//
+// THE ARTIFACT. The computed overlay above bakes `background-color` and all
+// twelve `border-*-{width,style,color}` longhands onto EVERY element it keeps.
+// On a `<progress>` those computed values are the UA's own — `0px` / `none` /
+// transparent — so re-stating them changes no CSS value whatsoever, but it
+// moves them from the UA origin into the AUTHOR origin, which is precisely the
+// distinction Blink keys the native theme on. The capture then paints Blink's
+// appearance:none fallback (html.css `progress::-webkit-progress-value {
+// background-color: green }` / `::-webkit-progress-bar { … gray }`) against a
+// browser-ref showing real chrome.
+//
+// MEASURED (probe at _diag35/B9/run-progress2.mjs, scored with the campaign
+// diffWebVsRef against the frozen white-black-ink ref for
+// css-ui/appearance-progress-bar-002):
+//     base only ................ 0.9865   (native chrome — the ref)
+//     base + border-width ...... 0.9796   ← flips
+//     base + border-style ...... 0.9796   ← flips
+//     base + border-color ...... 0.9796   ← flips
+//     base + background-color .. 0.9796   ← flips
+// All four families flip it INDEPENDENTLY, which is exactly the two-flag
+// contract above, and 0.9796 is the frozen wave34-depth score for that test
+// (0.9782) reproduced by the probe. The capture's own pixels confirm the
+// mechanism: #008000 / #808080, the two html.css fallback colours, not the
+// #0075FF / #EFEFEF the ref paints.
+//
+// THE GATE, deliberately narrow on three axes:
+//   1. TAG — `progress` and `meter` only. These are the two controls whose UA
+//      default for both families IS the CSS-initial value, so "computed equals
+//      the default" is decidable here with no per-tag UA probe. `button` and
+//      `input` have NON-initial UA borders/backgrounds and would need that
+//      probe to be handled honestly; they are deliberately left alone.
+//   2. NO AUTHOR DECLARATION — the static bag must carry no key in either
+//      family. If the author styled the control, the ref's Blink flagged it
+//      too, and both sides devolve; suppressing would then be the divergence.
+//   3. COMPUTED EQUALS THE DEFAULT — every border width `0px`, every style
+//      `none`, background fully transparent. This is what keeps a POST-LOAD
+//      SCRIPT mutation (`progress.style.border = '2px solid'`) landing exactly
+//      as before: its computed value is not the default, so nothing is
+//      suppressed and the bake proceeds.
+// (border-color is suppressed only alongside a zero-width `none` border, where
+// it paints nothing by construction — no ink can be lost.)
+//
+// GATE NEUTRALITY, measured not asserted: this code only ever runs under
+// post-load extraction. All 14 progress/meter components in the 29 frozen
+// wave34-final gate slices belong to the `css-ui/appearance-*-001` family,
+// every one of which has `postLoadExtracted: false` — so no gate row enters
+// this function at all and no gate number can move.
+
+/** The two bar controls whose UA default border/background IS the CSS-initial
+ *  value — see the banner for why the button/input family is excluded. */
+export const BAR_CONTROL_TAGS = new Set(['progress', 'meter']);
+
+/** Static-bag keys that mean "the author declared this family" — the fixture
+ *  spelling of Blink's HasAuthorBorder / HasAuthorBackground. Longhands are
+ *  matched by prefix, so `border-top-color` and `background-image` count. */
+const AUTHOR_BOX_PREFIXES = ['border', 'background'];
+
+/** The keys the suppression withholds: the four widths, four styles, four
+ *  colours, and background-color. */
+const BAR_SUPPRESSIBLE = [
+  'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+  'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style',
+  'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color',
+  'background-color',
+];
+
+/** Fully-transparent computed background, as Chromium serialises it. */
+const TRANSPARENT_RX = /^rgba\(0,\s*0,\s*0,\s*0\)$/;
+
+/**
+ * Decide which enumerated keys the overlay must NOT write for this component.
+ * Returns an empty Set for everything that is not a default-boxed bar control
+ * — i.e. for the overwhelming majority of the corpus this is one tag test.
+ *
+ * @param cmp    the fixture component (carries `_tag` from the static build)
+ * @param styles the computed snapshot for this element
+ * @param props  the STATIC property bag, read BEFORE the shorthand strip
+ */
+export function barControlAuthorBoxSuppression(cmp, styles, props) {
+  const EMPTY = new Set();
+  // Axis 1 — tag.
+  if (!BAR_CONTROL_TAGS.has(String(cmp?._tag ?? '').toLowerCase())) return EMPTY;
+  // Axis 2 — the author must not have touched either family. Any key whose
+  // name starts with `border` or `background` counts, shorthand or longhand.
+  for (const key of Object.keys(props ?? {})) {
+    if (AUTHOR_BOX_PREFIXES.some((p) => key.startsWith(p))) return EMPTY;
+  }
+  // Axis 3 — the computed box must still be the UA default. A script that
+  // gave the control a real border or background fails this and keeps the
+  // bake, so no post-script state is ever lost.
+  for (const side of ['top', 'right', 'bottom', 'left']) {
+    if (styles[`border-${side}-width`] !== '0px') return EMPTY;
+    if (styles[`border-${side}-style`] !== 'none') return EMPTY;
+  }
+  if (!TRANSPARENT_RX.test(String(styles['background-color'] ?? ''))) return EMPTY;
+  return new Set(BAR_SUPPRESSIBLE);
+}
+
 /**
  * Overlay one element's computed snapshot onto its component's properties.
  * Contract (unit-pinned):
@@ -1132,6 +1239,10 @@ export function componentAtPath(fixture, stem, path) {
  */
 export function overlayComputedOnComponent(cmp, styles, opts = {}) {
   const props = cmp.properties ?? (cmp.properties = {});
+  // wave-35 lane B9 — the BAR-CONTROL author-box suppression. Computed
+  // BEFORE the shorthand strip below, because it has to read the STATIC
+  // author bag while it is still intact.
+  const barSuppress = barControlAuthorBoxSuppression(cmp, styles, props);
   // Wave 22 — `onlyMissing` is the collapsed-wrapper fold mode (see
   // mergePostLoadIntoFixture): an absorbed element's record must never
   // overwrite state the absorbing component already carries, and it must
@@ -1146,6 +1257,10 @@ export function overlayComputedOnComponent(cmp, styles, opts = {}) {
     // Fold mode: existing keys win — the absorbing component's authored
     // + own-record state has precedence over an absorbed wrapper's.
     if (opts.onlyMissing && props[name] !== undefined) continue;
+    // wave-35 lane B9 — skip the manufactured author box (see
+    // barControlAuthorBoxSuppression). Nothing to delete: the suppression
+    // only fires when the static bag carries no key in these families.
+    if (barSuppress.has(name)) continue;
     const v = styles[name];
     const rule = WRITE_RULES[name];
     // Missing value (defensive — walker always supplies all names): skip.

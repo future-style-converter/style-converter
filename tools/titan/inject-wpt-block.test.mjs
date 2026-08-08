@@ -23,6 +23,8 @@ import {
   stitchPngsVertically, safe, checkFuzzyMatch, computeWptPass,
   computeColorComposite, isColorDivergent, COLOR_DIVERGENT_KL_THRESHOLD,
   applyNaScoreGate,
+  // wave-35 lane B2 — the Rule 15 font-face wall's membership pin.
+  FONT_FACE_WALL_TAGS,
 } from './inject-wpt-block.mjs';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -442,8 +444,66 @@ test('wave8: buildResults source carries the scoreEligible contract', async () =
   // the wave-16 gate-interplay tests below. wave-20: AND the structure
   // stamp (meta.structureExtracted, strict-true) — the appendChild family's
   // delivery record, treated exactly like the state stamp.
-  assert.match(src, /applyNaScoreGate\(naTags,\s*\[webRefDiff,\s*iosRefDiff,\s*androidRefDiff\],\s*meta\.lossyReasons,\s*meta\.postLoadExtracted\s*===\s*true,\s*meta\.structureExtracted\s*===\s*true\)/,
-    'the NA gate must neutralise all three browser-ref diffs AND receive the delivery record AND both post-load stamps');
+  // wave-35: AND the font-face delivery stamp (meta.fontFacesDelivered,
+  // strict-true) — the Rule 15 wall's own delivery record, threaded through
+  // the identical keyMap channel. A gate call that drops it would silently
+  // exclude every requires-font-face test even when the section's combined
+  // document carries the file.
+  assert.match(src, /applyNaScoreGate\(naTags,\s*\[webRefDiff,\s*iosRefDiff,\s*androidRefDiff\],\s*meta\.lossyReasons,\s*meta\.postLoadExtracted\s*===\s*true,\s*meta\.structureExtracted\s*===\s*true,\s*meta\.fontFacesDelivered\s*===\s*true\)/,
+    'the NA gate must neutralise all three browser-ref diffs AND receive the delivery record AND both post-load stamps AND the font-face stamp');
+});
+
+// ── wave-35 lane B2: the Rule 15 FONT-FACE delivery wall ───────────────────
+//
+// Same shape as the wave-16 post-load pins below: the tag alone excludes, the
+// delivery stamp re-admits, and the stamp is strict-true so an old combined
+// fixture with no stamp at all keeps the conservative arm.
+
+test('wave35: FONT_FACE_WALL_TAGS is exactly the Rule 15 tag', () => {
+  // Membership pin — this set decides whether a whole family of tests is
+  // scored, so a silent widening must never land unreviewed (same discipline
+  // as EXTRACTION_WALL_TAGS' own pin).
+  assert.deepEqual([...FONT_FACE_WALL_TAGS], ['requires-font-face']);
+});
+
+test('wave35: requires-font-face excludes when no face was delivered', () => {
+  const diffs = [{ ssim: 0.98, wptPass: false }];
+  assert.equal(applyNaScoreGate(['requires-font-face'], diffs, [], false, false, false), true);
+  assert.equal(diffs[0].wptPass, null);
+  assert.equal(diffs[0].scoreExcluded, true);
+});
+
+test('wave35: an absent font-face stamp keeps the conservative exclusion', () => {
+  // undefined ⇒ the caller has no font channel at all (a pre-wave-35 combined
+  // fixture). Absence of evidence must not promote a test into the scored set.
+  const diffs = [{ ssim: 0.98, wptPass: false }];
+  assert.equal(applyNaScoreGate(['requires-font-face'], diffs, [], false, false, undefined), true);
+});
+
+test('wave35: the delivery stamp re-admits a requires-font-face test', () => {
+  const diffs = [{ ssim: 0.98, wptPass: false }];
+  assert.equal(applyNaScoreGate(['requires-font-face'], diffs, [], false, false, true), false);
+  // Untouched: a re-admitted test keeps its real pass/fail, which is the
+  // whole point — the score measures the runtimes again.
+  assert.equal(diffs[0].wptPass, false);
+  assert.equal(diffs[0].scoreExcluded, undefined);
+});
+
+test('wave35: the font stamp does NOT re-admit the script-mutation wall', () => {
+  // The two walls have DIFFERENT delivery records; a font file says nothing
+  // about whether a script ran. Cross-re-admission would be the exact
+  // dishonesty the separate sets exist to prevent.
+  const diffs = [{ ssim: 0.98, wptPass: false }];
+  assert.equal(applyNaScoreGate(['requires-script-mutation'], diffs, [], false, false, true), true);
+});
+
+test('wave35: post-load stamps do NOT re-admit a font-starved test', () => {
+  // …and the converse. A test carrying both families stays excluded until
+  // BOTH records are delivered.
+  const diffs = [{ ssim: 0.98, wptPass: false }];
+  assert.equal(applyNaScoreGate(['requires-font-face'], diffs, [], true, true, false), true);
+  const both = [{ ssim: 0.98, wptPass: false }];
+  assert.equal(applyNaScoreGate(['requires-font-face', 'requires-script-mutation'], both, [], true, true, true), false);
 });
 
 // ── wave-13 corpus-v4.3 SCORING boundary ───────────────────────────────────

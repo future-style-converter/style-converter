@@ -127,6 +127,36 @@ const RX = {
     //           investigations/swarm-001/css-view-transitions__animating-new-content-subset.json
     keyframes:          /@keyframes\b/i,
     animationProp:      /\banimation(?:-name)?\s*:\s*[a-zA-Z_-]/i,
+    //   wave-35 B7 — the WEB ANIMATIONS API half of the same wall. The two
+    //   regexes above only see CSS-declared animations; a test that builds its
+    //   timeline in script (`el.animate(…)`, `new Animation(…)`,
+    //   `new KeyframeEffect(…)`, `document.getAnimations()`) needs the very
+    //   same UA runtime and is just as unreachable for a static extractor,
+    //   yet carried no animation tag at all.
+    //   MEASURED PRECISION (whole corpus, the Rule 42/43 device — all 46,937
+    //   `tools/wpt/css/**/*.{html,xht}` documents):
+    //     - 340 documents carry a Web-Animations signal;
+    //     - 151 of those carry NO CSS `@keyframes`/`animation:` at all, i.e.
+    //       Rule 3 missed every one of them before this wave;
+    //     - 151/151 contain a real `<script>` element, so not one hit is a
+    //       stray mention in prose, a comment, or an attribute value;
+    //     - 10 of the 151 are bucket-A (the only ones whose tags ever surface
+    //       in a run): css-forms 2, css-pseudo 2, css-text 4,
+    //       css-view-transitions 2. All ten were hand-read and all ten drive
+    //       rendering through the timeline — e.g.
+    //       css-pseudo/backdrop-animate-002.html animates `::backdrop` with
+    //       `target.animate({opacity:[0.1,0.1], …}, {duration: Infinity})`,
+    //       and css-text/letter-spacing/letter-spacing-animating-letter-spacing.html
+    //       drives `target.animate({letterSpacing:['0px','40px']}, 40)` then
+    //       pauses it at a set time. Two of the ten
+    //       (letter-spacing-animating-letter-spacing, word-spacing-animating-
+    //       word-spacing) previously carried ZERO architectural tags — they
+    //       were presented as fully applicable while being unreachable.
+    //   Deliberately NOT matched: the SVG `<animate>` ELEMENT (no `.animate(`
+    //   call shape), and `animation` CSS declarations (already covered above).
+    //   Bucketing is untouched: notApplicable is an axis orthogonal to A/B/C
+    //   (bucket-wpt.mjs's own note), so this adds a label, never a demotion.
+    waapiTimeline:      /(?:\.\s*animate\s*\(|new\s+(?:Animation|KeyframeEffect)\s*\(|\bgetAnimations\s*\(\s*\))/,
 
     // Rule 4 — requires-script-mutation:
     //   Inline `<script>` that runs after load and mutates the DOM
@@ -1577,12 +1607,23 @@ export const RULES = [
     },
     {
         tag: 'requires-animation-runtime',
-        description: '@keyframes / animation property requires UA timeline execution between extraction and capture',
+        description: '@keyframes / animation property / Web Animations API requires UA timeline execution between extraction and capture',
         swarm001Source: [
             'css-backgrounds__background-color-animation-with-table1.json',
             'css-view-transitions__animating-new-content-subset.json',
         ],
-        test: (html /* , _ctx */) => RX.keyframes.test(html) || RX.animationProp.test(html),
+        // wave-35 B7 adds the script-built-timeline arm — see RX.waapiTimeline
+        // for the corpus-wide precision audit behind it. The tag stays a
+        // CEILING, not a verdict: a document can carry it and still extract to
+        // an exact static render, because extract-fixture.mjs's @keyframes
+        // sampler resolves time-stable CSS animations (negative delay, paused,
+        // steps() dwell, degenerate endpoints) and stamps those fixtures
+        // 'sampled-animation'. Read the two together — this tag says "a
+        // timeline exists", `_lossyReasons: ['sampled-animation']` says "and it
+        // was statically resolved". Narrowing the tag itself would require the
+        // bucketer to run the extractor, inverting the pipeline's layering.
+        test: (html /* , _ctx */) => RX.keyframes.test(html) || RX.animationProp.test(html)
+            || RX.waapiTimeline.test(html),
     },
     {
         tag: 'requires-script-mutation',

@@ -81,6 +81,22 @@ struct TransformsApplier: ViewModifier {
         if let r = c.rotate    { v = AnyView(applyFunction(r, to: v, anchor: anchor)) }
         if let s = c.scale     { v = AnyView(applyFunction(s, to: v, anchor: anchor)) }
 
+        // Step 2b — NON-INVERTIBLE used transform (wave 35, lane B1).
+        // css-transforms-1 §3: "If the transform is not invertible, the
+        // element and its content are not rendered." A rotateX/rotateY of
+        // exactly ±90° collapses the box edge-on, and SwiftUI does NOT
+        // collapse with it: `ProjectionTransform` with a zero-determinant
+        // slice falls back to IDENTITY, so Rotate3DEffect drew the box
+        // UNROTATED at full size (3d-rendering-context-and-inline rendered a
+        // solid red 100×100 square where web and Android render blank —
+        // i-ref 0.9554). Hiding it here reproduces the browser: opacity 0
+        // keeps the box in layout (§3 removes it from PAINT, not from flow)
+        // and reuses the exact channel Step 4's backface culling uses.
+        // SingularTransform carries the pure predicate, its numeric proof
+        // that transform-origin cannot change the answer, and the measured
+        // two-box blast radius over the frozen corpus.
+        if SingularTransform.isSingular(c) { v = AnyView(v.opacity(0)) }
+
         // Step 3 — `transform-style: preserve-3d` emits NO modifier here
         // (wave 20, B-RC4). The old `.drawingGroup()` wrap was backwards
         // twice over: (a) drawingGroup FLATTENS the subtree into one

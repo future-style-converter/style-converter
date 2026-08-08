@@ -85,6 +85,57 @@ final class BordersTests: XCTestCase {
         XCTAssertEqual(BorderSideApplier.dottedDotCount(length: 100, width: 0), 0)
     }
 
+    // css-align WPT ref pins (wave 35, lane B8) — byte-parallel twin of
+    // BorderFidelityWave2Test's `css-align …` cases on Android.
+    //
+    // The css-align abspos first-12 all frame their static-position boxes
+    // with `.block { border: 5px dotted blue }`, so the section's frozen
+    // Chromium refs are a SECOND, independent oracle for this painter —
+    // one measured before the section ever entered a device run. Dot
+    // lattices read straight off
+    //   tools/wpt/refs/9b5435e5…/white-black-ink-font-lh-imgpad-htmlpins/
+    //     css-align/abspos__justify-self-static-position-001.png
+    //     css-align/abspos__align-self-static-position-001.png
+    // by counting the blue (0,0,255) runs on the border centre rows/cols.
+    func testDottedLatticeMatchesCssAlignRefs() {
+        // justify-self-static-position-001: .block is 80x80 content + 5px
+        // borders = 90x90 outer. Ref dot LEFT edges on the top border row:
+        // 67 77 86 95 105 114 124 133 143 152 → 10 dots, first flush with
+        // the box's outer left. The left border column repeats it:
+        // 17 27 36 45 55 64 74 83 93 102 — the same 10-dot lattice.
+        let n90 = BorderSideApplier.dottedDotCount(length: 90, width: 5)
+        XCTAssertEqual(n90, 10)
+        // Pitch = (90 - 5) / 9 = 9.444 — matches the ref's alternating
+        // 9/10px integer starts (mean 9.44 across the nine intervals).
+        XCTAssertEqual(BorderSideApplier.dottedDotStep(length: 90, width: 5, count: n90),
+                       9.4444, accuracy: 0.001)
+        // SECOND witness for the half-up rounding: (90 - 5) / (2 x 5) = 8.5
+        // pitches EXACTLY — the same tie the Borders_C01 fix was made for,
+        // at a completely different scale. Ties-to-even would paint 9 dots
+        // and phase-shift the edge from the second dot on.
+        XCTAssertEqual(BorderSideApplier.dottedDotCount(length: 90, width: 5), 10)
+
+        // align-self-static-position-001: .block is width:75% height:50% of
+        // a 100x100 container → 75x50 content + 5px borders = 85x60 outer.
+        // Ref top-border dot lefts: 67 77 87 97 107 117 127 137 147 → 9
+        // dots at a dead-exact 10px pitch.
+        let horiz = BorderSideApplier.dottedDotCount(length: 85, width: 5)
+        XCTAssertEqual(horiz, 9)
+        XCTAssertEqual(BorderSideApplier.dottedDotStep(length: 85, width: 5, count: horiz),
+                       10, accuracy: 0.001)
+        // Ref left-border dot tops: 17 26 35 45 54 63 72 → 7 dots at
+        // (60 - 5) / 6 = 9.167 (the ref's 9/9/10/9/9/9 integer starts).
+        let vert = BorderSideApplier.dottedDotCount(length: 60, width: 5)
+        XCTAssertEqual(vert, 7)
+        XCTAssertEqual(BorderSideApplier.dottedDotStep(length: 60, width: 5, count: vert),
+                       9.1667, accuracy: 0.001)
+
+        // dottedDotStep must not divide by (count - 1) == 0 — the
+        // single-dot branch in drawDotted never reads it, but the helper
+        // is callable, so the guard is pinned here.
+        XCTAssertEqual(BorderSideApplier.dottedDotStep(length: 6, width: 6, count: 1), 0)
+    }
+
     // Blink Dark()/Light() 3D palette (color.cc) — dark band scales
     // every channel by the SUBTRACTIVE multiplier max(0, (v−0.33)/v)
     // with v = max channel; light band is the declared colour except

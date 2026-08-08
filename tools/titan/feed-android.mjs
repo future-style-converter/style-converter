@@ -35,7 +35,8 @@ import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseArgs, expectedPngNames, composedPngName, pngIsValid } from './feed-lib.mjs';
+import { parseArgs, expectedPngNames, composedPngName, pngIsValid,
+         documentFontSrcs, resolveFontFile } from './feed-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -45,6 +46,13 @@ const PKG = 'com.styleconverter.test';
 const ACTIVITY = `${PKG}/.MainActivity`;
 const INBOX_DIR = `/sdcard/Android/data/${PKG}/files/inbox`;
 const SHOT_DIR = `/sdcard/Android/data/${PKG}/files/test_screenshots`;
+// wave-35 lane B2 — the @font-face sandbox. A SIBLING of the inbox, not a
+// subdirectory of it: ScreenshotManager.nextFixtureFile() lists the inbox for
+// `*.json`, so a font under it would be inert but confusing, and a future
+// listing change would trip over it. The runtime reads File(FONTS_DIR, src)
+// with the corpus-relative path preserved verbatim (see feed-lib.mjs's hop
+// banner), which is why the pushes below mkdir the src's parent chain.
+const FONTS_DIR = `/sdcard/Android/data/${PKG}/files/fonts`;
 
 const log = (m) => process.stderr.write(`[feed-android] ${m}\n`);
 
@@ -111,8 +119,12 @@ async function waitForPngs(adbx, expected, timeoutSec) {
  *  app — one bad fixture costs one timeout, not the whole tail of the batch. */
 async function resetAndLaunch(adbx, opts) {
   adbx(['shell', 'am', 'force-stop', PKG]);
-  adbx(['shell', 'rm', '-rf', INBOX_DIR, SHOT_DIR]);
-  adbx(['shell', 'mkdir', '-p', INBOX_DIR, SHOT_DIR]);
+  // wave-35: FONTS_DIR joins the wipe. A face registered from a PREVIOUS
+  // run's file would be the worst possible stale state — the capture would
+  // shape correctly-looking glyphs from the wrong file with no error anywhere
+  // — so the fonts sandbox gets the same idempotence guarantee the inbox has.
+  adbx(['shell', 'rm', '-rf', INBOX_DIR, SHOT_DIR, FONTS_DIR]);
+  adbx(['shell', 'mkdir', '-p', INBOX_DIR, SHOT_DIR, FONTS_DIR]);
   try { adbx(['logcat', '-c']); } catch { /* logcat clear is best-effort */ }
   // Match the shared 390×844 @160dpi capture canvas. Composed mode layers
   // `--ez titanComposed true`: same inbox poll, whole doc onto one canvas.
@@ -133,6 +145,39 @@ async function resetAndLaunch(adbx, opts) {
     if (!marked) await new Promise((r) => setTimeout(r, 250));
   }
   return marked;
+}
+
+/** wave-35 lane B2 — push this document's @font-face FILES into the device's
+ *  fonts sandbox, preserving the corpus-relative path verbatim.
+ *
+ *  Called BEFORE the IR reaches the inbox, and that ordering is the contract:
+ *  the app registers faces at decode time, so a font arriving after its
+ *  document would register too late to shape the capture — and with
+ *  `font-display: block`-equivalent semantics absent on the native side, the
+ *  capture would silently record the fallback face.
+ *
+ *  Returns { pushed, declined } for the feeder's per-fixture log. A decline is
+ *  never fatal: the runtimes degrade to their bundled face and stamp the miss,
+ *  which is the wave-34 behaviour this hop improves on rather than replaces.
+ *  Failing the fixture instead would hide every OTHER property it measures. */
+function pushFontFaces(adbx, doc, opts) {
+  const srcs = documentFontSrcs(doc);
+  if (srcs.length === 0 || !opts.wptDir) return { pushed: 0, declined: srcs.length };
+  let pushed = 0, declined = 0;
+  const madeDirs = new Set();
+  for (const src of srcs) {
+    const abs = resolveFontFile(opts.wptDir, src, { resolve: path.resolve, existsSync, statSync });
+    if (!abs) { declined++; log(`  font DECLINED (unresolvable/not a font): ${src}`); continue; }
+    // `adb push` will not create intermediate directories, and the relative
+    // chain is what the runtime resolves against — so mkdir the parent once
+    // per distinct directory (WPT font paths cluster in one resources/ dir).
+    const remote = `${FONTS_DIR}/${src}`;
+    const parent = remote.slice(0, remote.lastIndexOf('/'));
+    if (!madeDirs.has(parent)) { adbx(['shell', 'mkdir', '-p', parent]); madeDirs.add(parent); }
+    try { adbx(['push', abs, remote]); pushed++; }
+    catch (e) { declined++; log(`  font PUSH FAILED: ${src} — ${e.message}`); }
+  }
+  return { pushed, declined };
 }
 
 /** Pull one PNG to the host and verify it decodes; retry the pull ONCE on the
@@ -236,6 +281,11 @@ async function main() {
       : expectedPngNames(doc);
     const wantDevice = expected.map((e) => e.deviceFile);
     const t0 = Date.now();
+    // wave-35: faces FIRST — see pushFontFaces' ordering contract.
+    const fonts = pushFontFaces(adbx, doc, opts);
+    if (fonts.pushed || fonts.declined) {
+      log(`  ${base}: fonts pushed=${fonts.pushed} declined=${fonts.declined}`);
+    }
     // Push into the inbox under a unique, FIFO-ordered name (index prefix
     // guarantees uniqueness even if two fixtures share a basename).
     adbx(['push', fx, `${INBOX_DIR}/${String(i).padStart(4, '0')}-${base}`]);

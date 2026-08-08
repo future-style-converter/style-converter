@@ -91,6 +91,25 @@ object CanvasRootHoist {
     internal val LocalHasPositionedAncestor = compositionLocalOf { false }
 
     /**
+     * Wave 35 (lane B1) — true when ANY ancestor in the composition
+     * establishes a containing block through a USED TRANSFORM rather than
+     * through `position` ([TransformContainingBlock]: transform / the
+     * individual transform properties / perspective / preserve-3d /
+     * will-change transform). Separate from [LocalHasPositionedAncestor]
+     * because the two claim DIFFERENT descendant classes: a positioned
+     * ancestor is the containing block for ABSOLUTE descendants only
+     * (css-position-3 §3.1), while a transformed one also claims FIXED
+     * descendants (css-transforms-1 §3 / css-transforms-2 §6). Folding them
+     * into one flag would have let a `position: relative` ancestor swallow a
+     * fixed descendant, breaking pin S3 (a fixed child of an in-flow
+     * relative parent paints at the canvas corner).
+     *
+     * Provided by ComponentRenderer for every transform-CB component's
+     * subtree, exactly mirroring the pure walk in [collectCanvasHoisted].
+     */
+    internal val LocalHasTransformedAncestor = compositionLocalOf { false }
+
+    /**
      * The component's resolved position keyword, via the same
      * PositionExtractor the live style chain uses — one decoder for the
      * wire keyword, so the hoist decision can never disagree with the
@@ -108,6 +127,20 @@ object CanvasRootHoist {
      */
     internal fun establishesContainingBlock(properties: List<IRProperty>): Boolean =
         positionTypeOf(properties) != PositionType.STATIC
+
+    /**
+     * Wave 35 (lane B1) — css-transforms-1 §3 / css-transforms-2 §6: a box
+     * with a used transform is the containing block for its positioned
+     * descendants of BOTH classes. Delegates the whole clause table to
+     * [TransformContainingBlock] (the twin of the Swift
+     * `TransformContainingBlock`), so the hoist decision and the Swift
+     * `FixedHoist.split` can never disagree about what "transformed" means.
+     * Threaded down the composition as [LocalHasTransformedAncestor] and
+     * down the pure walk as `ancestorTransformed`, exactly like the
+     * positioned flag above.
+     */
+    internal fun establishesTransformContainingBlock(properties: List<IRProperty>): Boolean =
+        TransformContainingBlock.establishes(properties)
 
     /**
      * Wave 18 (RC1) — does the declaration list carry ANY inset that
@@ -159,13 +192,28 @@ object CanvasRootHoist {
     fun shouldHoistToCanvasRoot(
         properties: List<IRProperty>,
         hasPositionedAncestor: Boolean,
+        // Wave 35 (lane B1) — does an ancestor establish a containing block
+        // through a USED TRANSFORM (css-transforms-1 §3 / css-transforms-2
+        // §6: transform / individual transform properties / perspective /
+        // preserve-3d / will-change transform)? Such an ancestor claims BOTH
+        // out-of-flow classes, so it vetoes the hoist for fixed AND absolute
+        // descendants alike. Defaulted false so every pre-wave-35 call site
+        // (and every hostless path) keeps the exact wave-17/18 truth table.
+        hasTransformedAncestor: Boolean = false,
     ): Boolean = when (positionTypeOf(properties)) {
-        // Viewport-anchored regardless of ancestry (F1). A no-inset fixed
-        // box keeps the wave-17 canvas-origin anchor (kept behavior).
-        PositionType.FIXED -> true
-        // ICB-anchored only without a positioned ancestor (F2), and only
-        // when an inset actually anchors it there (RC1 — see kdoc above).
-        PositionType.ABSOLUTE -> !hasPositionedAncestor && hasAnyInset(properties)
+        // Viewport-anchored (F1) UNLESS a transformed ancestor has taken over
+        // the containing block — css-transforms-2 §6 is the one rule that
+        // pulls a fixed box back out of the viewport. Chromium-measured
+        // (probes C/D/E in _diag35/laneB1/probe-chromium.mjs: fixed under
+        // transform, under perspective and under preserve-3d all anchor at
+        // the styled ancestor, never at the viewport). A no-inset fixed box
+        // with no such ancestor keeps the wave-17 canvas-origin anchor.
+        PositionType.FIXED -> !hasTransformedAncestor
+        // ICB-anchored only without ANY containing-block ancestor — positioned
+        // (F2, css-position-3 §3.1) or transformed (probe B) — and only when
+        // an inset actually anchors it there (RC1 — see kdoc above).
+        PositionType.ABSOLUTE ->
+            !hasPositionedAncestor && !hasTransformedAncestor && hasAnyInset(properties)
         // static / relative / sticky stay in flow (css-position-3 §2.1).
         else -> false
     }
@@ -205,9 +253,14 @@ object CanvasRootHoist {
         hostActive: Boolean,
         hasPositionedAncestor: Boolean,
         bypass: IRComponent?,
+        // Wave 35 (lane B1) — the transform-CB ancestry, defaulted so every
+        // pre-wave-35 caller keeps the exact wave-17 truth table.
+        hasTransformedAncestor: Boolean = false,
     ): Boolean = hostActive &&
         bypass !== component &&
-        shouldHoistToCanvasRoot(component.properties, hasPositionedAncestor)
+        shouldHoistToCanvasRoot(
+            component.properties, hasPositionedAncestor, hasTransformedAncestor,
+        )
 
     /**
      * Depth-first, document-order walk collecting every hoist-eligible
@@ -223,21 +276,30 @@ object CanvasRootHoist {
     internal fun collectCanvasHoisted(
         roots: List<IRComponent>,
         hasPositionedAncestor: Boolean = false,
+        // Wave 35 (lane B1) — the transform-CB half of the ancestry; see
+        // [LocalHasTransformedAncestor] for why it is a SECOND flag.
+        hasTransformedAncestor: Boolean = false,
     ): List<IRComponent> {
         // Accumulator in visit order (document order).
         val out = mutableListOf<IRComponent>()
-        // Local recursion carrying the positioned-ancestor flag per level.
-        fun walk(node: IRComponent, ancestorPositioned: Boolean) {
+        // Local recursion carrying BOTH ancestry flags per level.
+        fun walk(node: IRComponent, ancestorPositioned: Boolean, ancestorTransformed: Boolean) {
             // Collect the node itself when the shared decision says hoist.
-            if (shouldHoistToCanvasRoot(node.properties, ancestorPositioned)) out += node
+            if (shouldHoistToCanvasRoot(node.properties, ancestorPositioned, ancestorTransformed)) {
+                out += node
+            }
             // Children see a positioned ancestor if one already existed OR
-            // this node is itself positioned (CSS 2.1 §10.1).
-            val childFlag = ancestorPositioned || establishesContainingBlock(node.properties)
+            // this node is itself positioned (CSS 2.1 §10.1)…
+            val childPositioned = ancestorPositioned || establishesContainingBlock(node.properties)
+            // …and a transformed ancestor on the same OR-accumulating rule
+            // (css-transforms-1 §3 — a used transform never un-establishes).
+            val childTransformed =
+                ancestorTransformed || establishesTransformContainingBlock(node.properties)
             // Recurse in document order (children may be null on leaves).
-            node.children?.forEach { walk(it, childFlag) }
+            node.children?.forEach { walk(it, childPositioned, childTransformed) }
         }
         // Roots start from the caller's ancestry context (canvas root: false).
-        roots.forEach { walk(it, hasPositionedAncestor) }
+        roots.forEach { walk(it, hasPositionedAncestor, hasTransformedAncestor) }
         return out
     }
 
@@ -256,22 +318,35 @@ object CanvasRootHoist {
     internal fun anyOutOfFlowBox(
         roots: List<IRComponent>,
         hasPositionedAncestor: Boolean = false,
+        // Wave 35 (lane B1) — same second ancestry flag as the collect walk;
+        // the two walks MUST stay one-for-one or activation and the overlay
+        // list disagree.
+        hasTransformedAncestor: Boolean = false,
     ): Boolean {
-        // Local recursion carrying the positioned-ancestor flag per level —
-        // the same CSS 2.1 §10.1 threading as collectCanvasHoisted's walk.
-        fun walk(node: IRComponent, ancestorPositioned: Boolean): Boolean {
+        // Local recursion carrying both ancestry flags per level — the same
+        // threading as collectCanvasHoisted's walk.
+        fun walk(node: IRComponent, ancestorPositioned: Boolean, ancestorTransformed: Boolean): Boolean {
             // Either out-of-flow class counts (see kdoc): hoisted overlay…
-            if (shouldHoistToCanvasRoot(node.properties, ancestorPositioned)) return true
-            // …or the in-slot zero-flow static-position class.
+            if (shouldHoistToCanvasRoot(node.properties, ancestorPositioned, ancestorTransformed)) {
+                return true
+            }
+            // …or the in-slot zero-flow static-position class. Deliberately
+            // NOT gated on the transform flag: a no-inset absolute box sits
+            // at its static position whichever ancestor is its containing
+            // block (css-position-3 §3.1), so the zero-flow anchor is right
+            // either way and the wave-21 activation breadth is unchanged.
             if (rendersInFlowAsStaticPosition(node.properties, ancestorPositioned)) return true
             // Children see a positioned ancestor if one already existed OR
-            // this node is itself positioned (CSS 2.1 §10.1).
-            val childFlag = ancestorPositioned || establishesContainingBlock(node.properties)
+            // this node is itself positioned (CSS 2.1 §10.1); likewise for
+            // the transform-CB flag (css-transforms-1 §3).
+            val childPositioned = ancestorPositioned || establishesContainingBlock(node.properties)
+            val childTransformed =
+                ancestorTransformed || establishesTransformContainingBlock(node.properties)
             // Recurse in document order (children may be null on leaves).
-            return node.children?.any { walk(it, childFlag) } ?: false
+            return node.children?.any { walk(it, childPositioned, childTransformed) } ?: false
         }
         // Roots start from the caller's ancestry context (canvas root: false).
-        return roots.any { walk(it, hasPositionedAncestor) }
+        return roots.any { walk(it, hasPositionedAncestor, hasTransformedAncestor) }
     }
 
     /**

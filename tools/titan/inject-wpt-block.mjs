@@ -924,6 +924,59 @@ const EXTRACTION_WALL_TAGS = new Set([
 // set so a silent widening/narrowing of the wall cannot land unreviewed).
 export { EXTRACTION_WALL_TAGS };
 
+/** wave-35 lane B2 FONT-FACE DELIVERY tags — the extraction wall's newest
+ *  member, and the one with the cleanest delivery record of them all.
+ *
+ *  THE WALL. `requires-font-face` (wpt-not-applicable.mjs Rule 15) names a
+ *  test whose visible assertion depends on a font FILE the author declared:
+ *  css-text/boundary-shaping-001…008 all say `@font-face { font-family: test;
+ *  src: url(LinLibertine_Re-4.7.5.woff) }` plus `body { font: 36px test }`
+ *  precisely because that face carries the "fi"/"ffi" LIGATURES the tests
+ *  assert on. When the pipeline delivers no face, all four surfaces shape with
+ *  a fallback that HAS no such ligature, so the diff against the ref measures
+ *  a missing input — the extraction wall's exact definition (see
+ *  EXTRACTION_WALL_TAGS: "the pipeline cannot deliver the input the ref was
+ *  rendered from").
+ *
+ *  WHY IT IS A SEPARATE SET rather than a fourth member of that one: its
+ *  delivery record is a DIFFERENT stamp. The wall set re-admits on
+ *  postLoadExtracted / structureExtracted, which say nothing about fonts; this
+ *  one re-admits on `fontFacesDelivered`, threaded through the identical
+ *  keyMap channel by build-combined-fixture.mjs. Merging the sets would make
+ *  a post-load bake silently re-admit a font-starved test.
+ *
+ *  THE STAMP IS NOT A FORMALITY, and it is stricter than "the extractor saw an
+ *  @font-face". It is true only when the section's combined document actually
+ *  carries every face this test declared, UNSHADOWED — a later test claiming
+ *  the same (family, weight, style) slot with a different file takes the slot
+ *  (css-fonts-4 §4.1 last-wins, enforced first-wins at the merge) and the
+ *  loser is stamped FALSE, because its text would shape from a sibling test's
+ *  file. Downstream of that stamp the file reaches all four surfaces: the web
+ *  harness mounts it off /wpt-font/ (vite.config.ts), and the two feeders copy
+ *  it into the device sandboxes where each runtime's DocumentFontRegistry
+ *  registers it (Compose `Font(file:)`, CoreText
+ *  `CTFontManagerRegisterFontsForURL`).
+ *
+ *  MEASURED before this wave (runs/wave34-final, the 8 tests corpus-wide that
+ *  carry the tag — all css-text/boundary-shaping): every one scored
+ *  web/ios/android-ref 0.9765–0.9811 and FAILED, each on `coverageRatioFailed`
+ *  (capture ink 0.115–0.121% against the ref's 0.357–0.372% — the fallback
+ *  face paints roughly a third of the ref's ink). Three unrelated renderers
+ *  agreeing to within 0.005 of each other while all three sit the same
+ *  distance from the ref is the signature of a shared MISSING INPUT, not of
+ *  three independent renderer bugs — the same argument that put the anchor
+ *  tag in the wall set.
+ *
+ *  Undelivered ⇒ excluded, delivered ⇒ scored. Neither arm flatters us: the
+ *  first stops counting a delivery gap as a renderer failure, and the second
+ *  refuses the excuse the moment the face is actually on the page. */
+const FONT_FACE_WALL_TAGS = new Set([
+  'requires-font-face', // Rule 15 — an author-declared @font-face file (wave-35)
+]);
+// Exported for unit pins, same discipline as the sets above: the exact
+// membership of an exclusion family must never widen unreviewed.
+export { FONT_FACE_WALL_TAGS };
+
 /** wave-29 S-RC3 REF-UNACHIEVABLE tags — the honest-scoring boundary's THIRD
  *  WHOLE-TEST exclusion family, and the only one that is not about us.
  *  (wave-30 added a FOURTH family below, NATIVE_FONT_PARITY_TAGS; it is not
@@ -1152,8 +1205,13 @@ export function applyNativeFontParityGate(naTags, diffsByPlatform) {
  *         family). Treated exactly like postLoadExtracted: either stamp is a
  *         delivery record that re-admits wall-tagged tests. Threaded via the
  *         same keyMap channel.
+ *  @param {boolean} [fontFacesDelivered] wave-35: true ⇔ the combined document
+ *         carries every `@font-face` this test declared, unshadowed (the
+ *         `_wpt.keyMap[…].fontFacesDelivered` stamp build-combined-fixture.mjs
+ *         writes). Re-admits FONT_FACE_WALL_TAGS only — it says nothing about
+ *         scripts, so it never touches the other branches.
  *  @returns {boolean} true when the test is score-excluded */
-export function applyNaScoreGate(naTags, refDiffs, lossyReasons, postLoadExtracted, structureExtracted) {
+export function applyNaScoreGate(naTags, refDiffs, lossyReasons, postLoadExtracted, structureExtracted, fontFacesDelivered) {
   // wave-20: one delivery boolean for the wall branch — the wall falls when
   // EITHER stamp says the post-script state/structure was delivered (strict
   // === true on both, same conservatism as the wave-16 single stamp; in
@@ -1179,6 +1237,12 @@ export function applyNaScoreGate(naTags, refDiffs, lossyReasons, postLoadExtract
     // wall was the inability to deliver that state; delivered ⇒ the score
     // measures the runtimes again.
     if (EXTRACTION_WALL_TAGS.has(t)) return !delivered;
+    // wave-35 font-face branch: the same wall shape with its OWN delivery
+    // record (full rationale at FONT_FACE_WALL_TAGS). Strict === true, like
+    // every stamp here: a caller with no font channel at all (an old combined
+    // fixture whose keyMap predates the stamp) gets the conservative arm, so
+    // absence of evidence never promotes a test into the scored set.
+    if (FONT_FACE_WALL_TAGS.has(t)) return fontFacesDelivered !== true;
     // Not a harness-delivery tag → never excludes (unchanged wave-8 rule).
     if (!SCORE_EXCLUDED_TAGS.has(t)) return false;
     // Delivery-aware branch: when the extractor's lossy record is available
@@ -1529,7 +1593,9 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     // post-script state the post-load extractor delivered.
     // wave-20: meta.structureExtracted rides the same keyMap channel — either
     // delivery stamp re-admits a wall-tagged test (see applyNaScoreGate).
-    const isNa = applyNaScoreGate(naTags, [webRefDiff, iosRefDiff, androidRefDiff], meta.lossyReasons, meta.postLoadExtracted === true, meta.structureExtracted === true);
+    // wave-35: meta.fontFacesDelivered rides the same keyMap channel as the
+    // two stamps above and re-admits the Rule 15 font-face wall (and only it).
+    const isNa = applyNaScoreGate(naTags, [webRefDiff, iosRefDiff, androidRefDiff], meta.lossyReasons, meta.postLoadExtracted === true, meta.structureExtracted === true, meta.fontFacesDelivered === true);
     if (isNa) {
       divergence = 'test-not-applicable';
     }
@@ -1565,6 +1631,10 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       // re-extracted from the serialized post-script DOM (appendChild
       // family), not just state-overlaid.
       structureExtracted: meta.structureExtracted === true,
+      // Wave 35 — surfaced beside the other delivery stamps so a dashboard can
+      // tell "font-face tagged but DELIVERED (scored)" from "font-face tagged,
+      // no file (excluded)" without re-reading the combined fixture.
+      fontFacesDelivered: meta.fontFacesDelivered === true,
       specSection: meta.section,
       components: matchingKeys,
       fuzzy: meta.fuzzy ?? null,

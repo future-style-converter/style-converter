@@ -696,16 +696,46 @@ dirs + WPT corpus are gitignored):
   to have diverged (parity item). 29 sections; zero regressions;
   327-net clean. Totals: **web 292/326, iOS 262/313, Android
   254/313**. Nine web-perfect sections.
+  Wave 35 (`tools/titan/results/corpus-v6-0.json`) was the 20× wave,
+  and it changed what a wave is. **The corpus boundary moved to
+  depth-48**: 29 sections × 48 bucket-A tests on all three platforms
+  (v5.x sampled 12) — totals **web 1054/1333 (79.1%), iOS 869/1305
+  (66.6%), Android 815/1302 (62.6%)**, the honest full-depth numbers
+  the wave-34 depth probe predicted. The wave also shipped the
+  **first full-corpus web map**
+  (`tools/titan/results/webmap-v1.json`): all 65 bucket-A sections,
+  10,201 tests scored web-only at full cap — **7,138 pass (70.0%)**
+  — with 1,164 of the 3,060 failing cells mechanism-classified
+  (`webmap-v1-classification.json`) and the top mining opportunities
+  ranked (object-fit 154 cells, grid-lanes 384, size containment 104,
+  print/paged 136, gap decorations 76…). Nine builder lanes landed:
+  the css-transforms-1 §3 transform-as-containing-block rule
+  (**Android css-transforms 10→12/12 device-confirmed**, iOS 12/12),
+  the §3 singular-transform rule, the Appendix-E product un-gate,
+  fontFaces delivery end-to-end + the font-shorthand root bake
+  (boundary-shaping now renders its downloaded serif — and honestly
+  scores *lower*: the wall moved from font-not-delivered to real
+  shaping divergence), the multicol Android color triad (red→green),
+  a software gaussian (per-tile MAE 6.2→0.16), web inline tags (+17
+  web passes), vertical-text-flow twins, and depth-tail fixes
+  (fieldset/legend +0.20). The 327-net went red once at the gate — a
+  placeholder-floor ternary in the web harness flipped by the widened
+  Max*/Min* percentage wire — root-caused by live DOM probe, fixed
+  size-derived-only with a control run proving the gate, 109/109 web
+  captures byte-identical. Known opens recorded: the committed iOS
+  baseline for 004_Sizing_MaxWidthPercent carries no box
+  (pre-existing), and basic-blur's capture moved deterministically
+  under the runtime-wide gaussian fix. Zero regressions elsewhere.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 245 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1116 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 1988 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1234 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1219 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1119 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2049 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1277 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1268 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

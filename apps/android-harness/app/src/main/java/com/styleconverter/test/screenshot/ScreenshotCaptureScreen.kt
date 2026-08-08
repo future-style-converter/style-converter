@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.typography.font.DocumentFontRegistry
 import com.styleconverter.runtime.core.renderer.ComponentHost
 import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.renderer.LocalWptComposedMode
@@ -271,6 +272,21 @@ fun ScreenshotCaptureScreen(
             // compose for both modes — that is what makes WPT captures
             // comparable with normal captures.
             val document = IRDocumentDecoder.decode(jsonString)
+            // wave-35 lane B2 — register this document's `@font-face` files
+            // BEFORE composition. Ordering is load-bearing: Compose resolves
+            // `font-family` while modifier chains are built, so a face
+            // registered after the roots reach composition would arrive too
+            // late to shape the capture and the screenshot would silently
+            // record the fallback. Called UNCONDITIONALLY (including with a
+            // null list, which clears): the inbox renders many documents in
+            // one process and a leftover face from the previous one would
+            // shadow this one's same-named family.
+            val faceCount = DocumentFontRegistry.register(document.fontFaces, screenshotManager.getFontsDir())
+            if (document.fontFaces?.isNotEmpty() == true) {
+                val rep = DocumentFontRegistry.lastReport
+                Log.i(TAG, "@font-face: declared=${rep.declared} registered=$faceCount" +
+                        if (rep.declined.isEmpty()) "" else " DECLINED=${rep.declined.joinToString(",")}")
+            }
             val composed = SlotComposer.compose(document)
             // Arm (or explicitly disarm) the two-pass backdrop render BEFORE
             // the roots reach composition — the coordinator's `enabled` flag

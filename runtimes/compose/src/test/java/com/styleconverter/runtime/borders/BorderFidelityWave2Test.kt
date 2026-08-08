@@ -122,6 +122,69 @@ class BorderFidelityWave2Test {
         assertEquals(0, BorderSideApplier.dottedDotCount(100f, 0f))
     }
 
+    // ── 2a. css-align WPT ref pins (wave 35, lane B8) ───────────────────
+    //
+    // The css-align abspos first-12 all frame their static-position boxes
+    // with `.block { border: 5px dotted blue }`, so the section's frozen
+    // Chromium refs are a SECOND, independent oracle for this painter —
+    // one that was measured before the section ever entered a device run.
+    // Dot lattices read straight off
+    //   tools/wpt/refs/9b5435e5…/white-black-ink-font-lh-imgpad-htmlpins/
+    //     css-align/abspos__justify-self-static-position-001.png
+    //     css-align/abspos__align-self-static-position-001.png
+    // by counting the blue (0,0,255) runs on the border centre rows/cols.
+    // Every geometry below is w = 5; the three lengths are the outer box
+    // edges (content + 2×5 border) of the two `.block` shapes.
+
+    @Test
+    fun `css-align 90px dotted edge matches the Chromium ref lattice`() {
+        // justify-self-static-position-001: .block is 80x80 content + 5px
+        // borders = 90x90 outer. Ref dot LEFT edges on the top border row:
+        // 67 77 86 95 105 114 124 133 143 152 → 10 dots, first flush with
+        // the box's outer left (67). The left border column repeats it:
+        // 17 27 36 45 55 64 74 83 93 102 → the same 10-dot lattice.
+        val n = BorderSideApplier.dottedDotCount(90f, 5f)
+        assertEquals(10, n)
+        // Pitch = (90 - 5) / 9 = 9.444 — matches the ref's alternating
+        // 9/10px integer starts (mean 9.44 across the nine intervals).
+        assertEquals(9.4444f, BorderSideApplier.dottedDotStep(90f, 5f, n), 0.001f)
+    }
+
+    @Test
+    fun `css-align 90px edge is a second witness for half-up rounding`() {
+        // (90 - 5) / (2 x 5) = 8.5 pitches EXACTLY — the same tie the
+        // Borders_C01 fix was made for, at a completely different scale.
+        // Chromium paints 10 dots (9 pitches, half-up); ties-to-even would
+        // paint 9 and put the whole edge out of phase from the second dot
+        // on. This pin fails loudly if anyone "simplifies" the floor(x+0.5)
+        // in dottedDotCount back to kotlin.math.round.
+        assertEquals(10, BorderSideApplier.dottedDotCount(90f, 5f))
+    }
+
+    @Test
+    fun `css-align 75 percent block dotted edges match the Chromium ref`() {
+        // align-self-static-position-001: .block is width:75% height:50% of
+        // a 100x100 container → 75x50 content + 5px borders = 85x60 outer.
+        // Ref top-border dot lefts: 67 77 87 97 107 117 127 137 147 → 9
+        // dots at a dead-exact 10px pitch.
+        val horiz = BorderSideApplier.dottedDotCount(85f, 5f)
+        assertEquals(9, horiz)
+        assertEquals(10f, BorderSideApplier.dottedDotStep(85f, 5f, horiz), 0.001f)
+        // Ref left-border dot tops: 17 26 35 45 54 63 72 → 7 dots at
+        // (60 - 5) / 6 = 9.167 (the ref's 9/9/10/9/9/9 integer starts).
+        val vert = BorderSideApplier.dottedDotCount(60f, 5f)
+        assertEquals(7, vert)
+        assertEquals(9.1667f, BorderSideApplier.dottedDotStep(60f, 5f, vert), 0.001f)
+    }
+
+    @Test
+    fun `dotted step is zero when a side fits a single dot`() {
+        // dottedDotStep must not divide by (count - 1) == 0 — the
+        // single-dot branch in drawDotted never reads it, but the helper
+        // is internal and callable, so the guard is pinned here.
+        assertEquals(0f, BorderSideApplier.dottedDotStep(6f, 6f, 1), 0f)
+    }
+
     // ── 2b. Dashed intervals (width-conditional on:off rhythm) ──────────
 
     @Test

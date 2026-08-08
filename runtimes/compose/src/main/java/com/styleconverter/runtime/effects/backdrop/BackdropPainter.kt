@@ -122,10 +122,37 @@ object BackdropPainter {
         originX: Float,
         originY: Float,
     ) = with(scope) {
+        // ── Wave-35 lane B3: SOFTWARE BLUR path ───────────────────────────
+        // RenderEffect's blur lands 6.2–9.4 MAE from the Chrome ref on the
+        // measured corpus, while the browser's OWN kernel (Skia's three-pass
+        // box, exact parity rule) computed over the same plate lands at ~0.1
+        // — the two tables in BackdropSoftBlur's header, with the off-device
+        // model check that separates kernel shape from pipeline error.
+        // A blurred chain therefore convolves here instead, with the same
+        // MIRROR edge model the hardware path asks for. Returns null (→ the
+        // hardware path below, unchanged) for every chain WITHOUT a blur, for
+        // a degenerate σ/crop, and for a plate software cannot read, so
+        // every invert-only fixture keeps its frozen render byte-for-byte.
+        BackdropImageOps.render(backdrop, sample, chain) { it.toPx() }?.let { patch ->
+            drawImage(
+                image = patch,
+                // The patch IS the crop, so it blits 1:1 at the crop's own
+                // border-box-relative origin — the exact placement the
+                // software fallback below uses.
+                dstOffset = IntOffset(
+                    sample.dstLeft + Math.round(originX),
+                    sample.dstTop + Math.round(originY),
+                ),
+                dstSize = IntSize(sample.width, sample.height),
+                // Element opacity composites the FILTERED patch, matching
+                // RenderNode.setAlpha's after-the-effect order.
+                alpha = alpha,
+            )
+            return@with
+        }
         // Hardware path (API 31+): a RenderNode carrying the chain as a
-        // RenderEffect. This is the only Android API that runs a true Gaussian
-        // with an explicit edge TileMode, and chaining colour-filter effects
-        // onto it reproduces the CSS function order exactly.
+        // RenderEffect. Still the route for every colour-matrix-only chain
+        // (exact there) and for a plate the software path cannot read.
         val hardware = drawContext.canvas.nativeCanvas.isHardwareAccelerated
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && hardware) {
             BackdropRenderEffects.draw(scope, backdrop, sample, chain, alpha, originX, originY)

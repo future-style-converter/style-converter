@@ -1,6 +1,7 @@
 package com.styleconverter.runtime.typography
 
 import androidx.compose.ui.text.font.FontFamily
+import com.styleconverter.runtime.typography.font.DocumentFontRegistry
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -113,6 +114,18 @@ object CssFontFamilyResolver {
         // converter already strips quotes, but hand-authored IR may not.
         val name = rawName.trim().trim('"', '\'').lowercase()
         if (name.isEmpty()) return null
+
+        // ── wave-35 lane B2: the DOCUMENT font database, consulted FIRST.
+        // css-fonts-4 §5 resolves a family name against the document's own
+        // @font-face database before any system or generic face, so a document
+        // that declared `@font-face { font-family: test; … }` must get THAT
+        // file even if the name collides with a generic or with `Inter`. The
+        // registry is empty for every document that declared no face (the
+        // overwhelming majority), so this is a single map lookup on an empty
+        // map and every pre-wave-35 capture keeps its exact resolution.
+        if (!DocumentFontRegistry.isEmpty()) {
+            DocumentFontRegistry.resolve(name)?.let { return it }
+        }
 
         // ── The BUNDLED family. This is the B-RC7 fix: `Inter` is the head
         // of the harness font stack on all three platforms (web

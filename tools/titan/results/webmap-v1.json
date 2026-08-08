@@ -1,0 +1,4797 @@
+{
+  "_note": "WAVE-36 MINING MAP + corpus-wide web-map totals, derived from the wave35-webmap web-only full-capability TITAN run (65 sections, every bucket-A test in each section, no --max-tests sampling). ONE ROW PER SECTION. Definitions: `scored` = tests with scoreEligible:true in the section manifest (the same notion the frozen 3-platform gate calls `measured`); `ineligible` = bucket-A tests excluded before scoring by the extraction wall / not-applicable admission rules; `pass` = browserRef.diffs[\"web-ref\"].wptPass, i.e. ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence, coverage-RATIO (max/min>2) and colorDivergent-with-meanDeltaE>=2.3; `ge95` = raw ssim>=0.95 ignoring the vetoes, so (ge95 - pass) is the veto-only tranche; `meanSsim` = mean over scored cells. WEB ONLY - these numbers are NOT comparable to the 3-platform corpus-v5.x snapshots, which sample 12 tests per section on all three runtimes. Sections sorted alphabetically for diff stability; rank by failing cells is derivable from the `fail` column. miningMap is ranked by (failing cells x plausibility of a single shared fix); the plausibility weight is a judgement call, the cells and metrics are measured.",
+  "artifact": "tools/titan/runs/wave35-webmap (gitignored)",
+  "generatedFor": "wave-36 planning",
+  "date": "2026-08-08",
+  "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+  "canvasBoundary": "white-black-ink-font-lh-imgpad-htmlpins",
+  "platforms": [
+    "web"
+  ],
+  "bucket": "A",
+  "passThreshold": 0.95,
+  "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence + coverage-RATIO (max/min>2) + colorDivergent-with-meanDeltaE>=2.3",
+  "sampling": "65 sections x ALL bucket-A tests (no per-section cap)",
+  "totals": {
+    "sections": 65,
+    "tests": 10681,
+    "ineligible": 479,
+    "scored": 10202,
+    "pass": 7138,
+    "fail": 3064,
+    "passPct": 70.0,
+    "ge95": 7791,
+    "vetoOnlyFailures": 653,
+    "meanSsim": 0.949
+  },
+  "crossCuttingSignals": {
+    "_note": "Corpus-wide signatures that cut across sections. Each is a cheap triage filter over the manifests, not a section.",
+    "nearPassFailing": {
+      "n": 654,
+      "meaning": "ssim >= 0.95 already; only a semantic veto (presence / color-mass / coverage-ratio) blocks the pass. The render is structurally close.",
+      "bySection": [
+        {
+          "section": "css-images",
+          "n": 56
+        },
+        {
+          "section": "css-ui",
+          "n": 52
+        },
+        {
+          "section": "css-shadow",
+          "n": 50
+        },
+        {
+          "section": "css-highlight-api",
+          "n": 34
+        },
+        {
+          "section": "mediaqueries",
+          "n": 33
+        },
+        {
+          "section": "css-sizing",
+          "n": 32
+        },
+        {
+          "section": "css-view-transitions",
+          "n": 32
+        },
+        {
+          "section": "css-values",
+          "n": 30
+        },
+        {
+          "section": "css-will-change",
+          "n": 28
+        },
+        {
+          "section": "css-lists",
+          "n": 23
+        },
+        {
+          "section": "css-color",
+          "n": 22
+        },
+        {
+          "section": "css-grid",
+          "n": 22
+        }
+      ]
+    },
+    "colourFlip": {
+      "n": 131,
+      "filter": "ssim >= 0.98 AND pHashHamming <= 5 AND colorFailed",
+      "meaning": "Structure is pixel-identical to the ref but the ink is painted in the test's own FAIL colour (pixelMismatchedPct == ink coverage, labDeltaE p95 == 0, mean >= 2.3). These are single-boolean feature assertions: the WPT test says \"green if the feature works\" and we paint red. Cheapest class in the corpus - one behaviour flag per family.",
+      "bySection": [
+        {
+          "section": "css-shadow",
+          "n": 19
+        },
+        {
+          "section": "css-will-change",
+          "n": 19
+        },
+        {
+          "section": "mediaqueries",
+          "n": 17
+        },
+        {
+          "section": "css-break",
+          "n": 12
+        },
+        {
+          "section": "css-color",
+          "n": 8
+        },
+        {
+          "section": "css-values",
+          "n": 8
+        },
+        {
+          "section": "css-images",
+          "n": 7
+        },
+        {
+          "section": "css-view-transitions",
+          "n": 7
+        },
+        {
+          "section": "css-sizing",
+          "n": 5
+        },
+        {
+          "section": "css-grid",
+          "n": 4
+        }
+      ],
+      "exemplar": "css-will-change/will-change-stacking-context-opacity-1: ssim 1.0000, pHash 0, edgeSsim 1.0, ink 4.274% both sides, dE mean 3.085 / p95 0."
+    },
+    "structureExactInkMass": {
+      "n": 101,
+      "filter": "ssim >= 0.95 AND pHashHamming <= 10 AND (coverageRatio OR presence veto) AND NOT color",
+      "meaning": "Layout agrees; a discrete small element is missing from (or extra in) the capture. One missing box per family.",
+      "bySection": [
+        {
+          "section": "css-ui",
+          "n": 50
+        },
+        {
+          "section": "css-highlight-api",
+          "n": 22
+        },
+        {
+          "section": "css-text-decor",
+          "n": 5
+        },
+        {
+          "section": "css-backgrounds",
+          "n": 4
+        },
+        {
+          "section": "css-pseudo",
+          "n": 4
+        },
+        {
+          "section": "css-lists",
+          "n": 3
+        },
+        {
+          "section": "motion",
+          "n": 3
+        },
+        {
+          "section": "css-transforms",
+          "n": 2
+        },
+        {
+          "section": "CSS2",
+          "n": 1
+        },
+        {
+          "section": "css-anchor-position",
+          "n": 1
+        }
+      ],
+      "exemplar": "css-ui/compute-kind-widget-generated: 44 cells all at ssim 0.9782 exactly, capture ink 0.544% vs ref 1.094% (exactly half the widget)."
+    },
+    "frameHeightDelta": {
+      "_finding": "NOT a defect class. capH-refH == +16 on 4937 of 10202 scored cells and is the harness body-margin convention (it appears on 4006 PASSING cells). The honest-frame fold already absorbs it.",
+      "failingCellsWhereOverflowFoldCostsOver0_02Ssim": 101
+    },
+    "notApplicableTagHistogram": [
+      {
+        "tag": "requires-fragmentation",
+        "n": 2049
+      },
+      {
+        "tag": "requires-form-control-rendering",
+        "n": 1390
+      },
+      {
+        "tag": "requires-float-layout",
+        "n": 904
+      },
+      {
+        "tag": "requires-bundled-asset",
+        "n": 844
+      },
+      {
+        "tag": "requires-script-mutation",
+        "n": 809
+      },
+      {
+        "tag": "requires-inline-FC",
+        "n": 781
+      },
+      {
+        "tag": "requires-viewport-canvas",
+        "n": 682
+      },
+      {
+        "tag": "requires-orthogonal-flow",
+        "n": 645
+      },
+      {
+        "tag": "requires-table-layout",
+        "n": 615
+      },
+      {
+        "tag": "requires-containment",
+        "n": 602
+      },
+      {
+        "tag": "requires-shared-inline-FC",
+        "n": 570
+      },
+      {
+        "tag": "requires-bundled-font",
+        "n": 469
+      },
+      {
+        "tag": "requires-pseudo-element-rendering",
+        "n": 403
+      },
+      {
+        "tag": "requires-containing-block-layout",
+        "n": 370
+      },
+      {
+        "tag": "requires-print-medium",
+        "n": 276
+      },
+      {
+        "tag": "requires-document-tree",
+        "n": 271
+      },
+      {
+        "tag": "requires-gap-decorations",
+        "n": 250
+      },
+      {
+        "tag": "requires-multicol-fragmentation",
+        "n": 249
+      },
+      {
+        "tag": "requires-viewport-sized-text-ref",
+        "n": 245
+      },
+      {
+        "tag": "requires-animation-runtime",
+        "n": 240
+      }
+    ]
+  },
+  "miningMap": [
+    {
+      "rank": 1,
+      "opportunity": "css-images: object-fit contain/cover/fill on replaced elements",
+      "section": "css-images",
+      "mechanism": "ReplacedElement object-fit scaling + <img> intrinsic sizing",
+      "cells": 154,
+      "scoredInFamily": 196,
+      "alreadyPassingInFamily": 42,
+      "medianSsimFailing": 0.9045,
+      "nearPassCells": 16,
+      "failVetoes": {
+        "coverageRatio": 124,
+        "colorMass": 48,
+        "presence": 12
+      },
+      "plausibility": "very-high",
+      "yieldScore": 138.6,
+      "exemplarWorstTests": [
+        "object-fit-containcontainintrinsicsize-png-001i.tentative",
+        "object-view-box-fit-fill-img",
+        "object-view-box-fit-fill-svg",
+        "object-view-box-fit-contain-video"
+      ],
+      "evidence": "154 failing of 196 scored (132 object-fit + 22 object-view-box). Perfect control group inside the family: object-fit:none passes 18/32 and scale-down 18/32, while contain 0/32, cover 0/32 and fill 0/32 - every scaling keyword fails, the non-scaling keyword passes. Ink tells the same story: capture 0.94% vs ref 5.98% on the -e/-o/-p (embed/object/picture) variants and 7.26% vs 5.98% on -i (img), i.e. the image is drawn at intrinsic size instead of fitted to the content box. All 40 <img> (-i) variants fail regardless of keyword - a second, nested sub-mechanism. One applier, one control group."
+    },
+    {
+      "rank": 2,
+      "opportunity": "css-grid: grid-lanes (Grid L3 lanes / masonry track flow)",
+      "section": "css-grid",
+      "mechanism": "grid-lanes track flow: intrinsic sizing, alignment, auto-repeat, baseline, dense packing",
+      "cells": 384,
+      "scoredInFamily": 438,
+      "alreadyPassingInFamily": 54,
+      "medianSsimFailing": 0.8019,
+      "nearPassCells": 13,
+      "failVetoes": {
+        "coverageRatio": 186,
+        "colorMass": 186,
+        "presence": 11
+      },
+      "plausibility": "medium",
+      "yieldScore": 115.2,
+      "exemplarWorstTests": [
+        "grid-lanes-grid-placement-named-lines-001",
+        "grid-lanes-item-placement-006",
+        "grid-lanes-align-content-001",
+        "column-track-sizing-001"
+      ],
+      "evidence": "The single largest coherent pool in the corpus: 384 failing of 438 scored, 87.7% of the grid-lanes tree. Non-lanes css-grid passes 342/435 (78.6%) - so classic grid works and the lanes algorithm is simply absent. Sub-directories all fail together (intrinsic-sizing 54, alignment 51, tentative/item-placement 35, auto-repeat 34+36, baseline 28, dense-packing 25, grid-placement 14), which is what one missing algorithm looks like. Plausibility is only medium because the fix is a layout algorithm, not a property."
+    },
+    {
+      "rank": 3,
+      "opportunity": "css-gaps: gap decorations paint (row/column rule)",
+      "section": "css-gaps",
+      "mechanism": "gap-decorations painting across grid / subgrid / multicol / flex",
+      "cells": 76,
+      "scoredInFamily": 284,
+      "alreadyPassingInFamily": 208,
+      "medianSsimFailing": 0.8792,
+      "nearPassCells": 0,
+      "failVetoes": {
+        "coverageRatio": 3,
+        "colorMass": 24,
+        "presence": 0
+      },
+      "plausibility": "high",
+      "yieldScore": 53.2,
+      "exemplarWorstTests": [
+        "grid-gap-decorations-048",
+        "grid-gap-decorations-049",
+        "grid-gap-decorations-018",
+        "grid-gap-decorations-050"
+      ],
+      "evidence": "76 failing of 284 scored, uniformly spread over grid (45), multicol (12), subgrid (9) and flex (8) - one paint pass reused by four layout modes. Median ssim 0.879 with only 3 coverage vetoes and 24 colour vetoes, i.e. the boxes are in the right place and the rule ink is missing/miscoloured rather than mislaid. The na tag requires-gap-decorations fires 250x corpus-wide, so the pool grows if the harness admits more of it."
+    },
+    {
+      "rank": 4,
+      "opportunity": "css-contain: size containment suppressing content contribution",
+      "section": "css-contain",
+      "mechanism": "contain:size / content-visibility intrinsic-size suppression",
+      "cells": 104,
+      "scoredInFamily": 280,
+      "alreadyPassingInFamily": 176,
+      "medianSsimFailing": 0.9101,
+      "nearPassCells": 10,
+      "failVetoes": {
+        "coverageRatio": 55,
+        "colorMass": 47,
+        "presence": 3
+      },
+      "plausibility": "high",
+      "yieldScore": 52.0,
+      "exemplarWorstTests": [
+        "contain-size-block-001",
+        "contain-size-flex-001",
+        "contain-size-grid-005",
+        "contain-size-063"
+      ],
+      "evidence": "104 failing of 280 scored; requires-containment tags 101 of the 104. 81 of them carry a capture/ref height mismatch beyond the benign +16 convention, which is the exact signature of \"we let contained content contribute its size and the ref does not\". contain-size-* alone is 37 failing / 72 scored with 35 passing siblings, so the harness already renders the surrounding box correctly."
+    },
+    {
+      "rank": 5,
+      "opportunity": "print medium: page boxes, page margins, paginated fragmentation",
+      "section": "css-page",
+      "mechanism": "@page box model + print-medium capture (css-page, CSS2/pagination, css-break/table, printing)",
+      "cells": 136,
+      "scoredInFamily": 276,
+      "alreadyPassingInFamily": 140,
+      "medianSsimFailing": 0.8594,
+      "nearPassCells": 19,
+      "failVetoes": {
+        "coverageRatio": 69,
+        "colorMass": 47,
+        "presence": 17
+      },
+      "plausibility": "medium",
+      "yieldScore": 47.6,
+      "exemplarWorstTests": [
+        "page-size-010-print",
+        "page-box-008-print",
+        "float-page-break-inside-avoid-6-print",
+        "page-background-005-print"
+      ],
+      "evidence": "136 failing of 276 scored corpus-wide on *-print tests (css-page 86 of 157, plus CSS2/pagination 17, css-break/table 32, printing 5). 140 already pass, so the print capture path works - what is missing is @page geometry (page-size-010, page-box-008, page-background-005 are the worst cells at ssim 0.14-0.39). requires-print-medium tags 276 cells, requires-fragmentation 2049 - this is the gateway to the largest blocked tier."
+    },
+    {
+      "rank": 6,
+      "opportunity": "css-shapes: shape-outside float exclusion geometry",
+      "section": "css-shapes",
+      "mechanism": "shape-outside exclusion areas for circle / ellipse / inset / shape-box",
+      "cells": 68,
+      "scoredInFamily": 101,
+      "alreadyPassingInFamily": 33,
+      "medianSsimFailing": 0.8158,
+      "nearPassCells": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 4,
+        "presence": 0
+      },
+      "plausibility": "high",
+      "yieldScore": 47.6,
+      "exemplarWorstTests": [
+        "shape-outside-content-box-002",
+        "shape-outside-padding-box-002",
+        "shape-outside-circle-035",
+        "shape-outside-ellipse-035"
+      ],
+      "evidence": "68 failing of 101 scored and - uniquely among the big pools - ZERO coverage/presence vetoes and only 4 colour vetoes: every failure is a pure SSIM shortfall, i.e. the right ink in the wrong place. That is a geometry bug, not a delivery gap. Uniform families: shape-box 22, circle 12, inset 10, ellipse 8. requires-float-layout is the top na tag, so the float exclusion path is the shared owner."
+    },
+    {
+      "rank": 7,
+      "opportunity": "css-ui: kind-of-widget fallback rendering (progress / meter / caret)",
+      "section": "css-ui",
+      "mechanism": "generated widget box for form controls under appearance fallback",
+      "cells": 44,
+      "scoredInFamily": 802,
+      "alreadyPassingInFamily": 758,
+      "medianSsimFailing": 0.9782,
+      "nearPassCells": 44,
+      "failVetoes": {
+        "coverageRatio": 44,
+        "colorMass": 0,
+        "presence": 0
+      },
+      "plausibility": "very-high",
+      "yieldScore": 41.8,
+      "exemplarWorstTests": [
+        "kind-of-widget-fallback-progress-background-attachment-001",
+        "kind-of-widget-fallback-progress-background-clip-001",
+        "kind-of-widget-fallback-progress-background-color-001",
+        "kind-of-widget-fallback-progress-background-image-001"
+      ],
+      "evidence": "The most uniform signature in the corpus: 44 cells at ssim 0.9782 EXACTLY, all vetoed by coverage-ratio and nothing else, capture ink 0.544% vs ref 1.094% on every one - the widget is drawn at exactly half its ink. css-ui otherwise passes 843/926 (91.0%), so this is one generated box in an otherwise healthy section. Pairs with css-forms base-appearance (10 more cells: progress/meter/textarea/input-number *-base-appearance-rendering)."
+    },
+    {
+      "rank": 8,
+      "opportunity": "css-content: quotes / open-quote content strings",
+      "section": "css-content",
+      "mechanism": "content: open-quote / close-quote with the quotes property and nesting depth",
+      "cells": 48,
+      "scoredInFamily": 60,
+      "alreadyPassingInFamily": 12,
+      "medianSsimFailing": 0.7892,
+      "nearPassCells": 6,
+      "failVetoes": {
+        "coverageRatio": 45,
+        "colorMass": 2,
+        "presence": 2
+      },
+      "plausibility": "high",
+      "yieldScore": 38.4,
+      "exemplarWorstTests": [
+        "quotes-034",
+        "quotes-028",
+        "quotes-029",
+        "quotes-023"
+      ],
+      "evidence": "48 failing of 60 scored - the worst pass rate of any mid-size section (20.0%) - and 36 of the 48 are the quotes-0NN family. 45 of 48 carry the coverage-ratio veto and 41 a height mismatch: the quote glyphs are simply absent, so the lines reflow. requires-bundled-font (16) is the secondary owner for the non-ASCII quote marks. One content-generation path."
+    },
+    {
+      "rank": 9,
+      "opportunity": "css-overflow: line-clamp block ellipsis",
+      "section": "css-overflow",
+      "mechanism": "-webkit-line-clamp / line-clamp:auto block-ellipsis line truncation",
+      "cells": 57,
+      "scoredInFamily": 219,
+      "alreadyPassingInFamily": 162,
+      "medianSsimFailing": 0.9226,
+      "nearPassCells": 3,
+      "failVetoes": {
+        "coverageRatio": 8,
+        "colorMass": 9,
+        "presence": 0
+      },
+      "plausibility": "high",
+      "yieldScore": 37.1,
+      "exemplarWorstTests": [
+        "line-clamp-auto-042",
+        "webkit-line-clamp-043",
+        "line-clamp-auto-022.tentative",
+        "line-clamp-auto-021.tentative"
+      ],
+      "evidence": "57 failing of 219 scored - and 162 already pass, so the clamp box exists and only the truncation arithmetic is off. Median ssim 0.923 with just 8 coverage and 9 colour vetoes; the failures are line-count-off-by-N, not missing content. Tight family names (line-clamp-auto-0NN, webkit-line-clamp-0NN) make a single fix verifiable across all 57."
+    },
+    {
+      "rank": 10,
+      "opportunity": "css-viewport: the zoom property",
+      "section": "css-viewport",
+      "mechanism": "CSS zoom: used-value scaling of lengths, spacing and stroke",
+      "cells": 41,
+      "scoredInFamily": 42,
+      "alreadyPassingInFamily": 1,
+      "medianSsimFailing": 0.9097,
+      "nearPassCells": 10,
+      "failVetoes": {
+        "coverageRatio": 34,
+        "colorMass": 5,
+        "presence": 5
+      },
+      "plausibility": "very-high",
+      "yieldScore": 36.9,
+      "exemplarWorstTests": [
+        "border-spacing",
+        "zoom-pseudo-image",
+        "text-stroke-width",
+        "border-spacing-without-border"
+      ],
+      "evidence": "Near-total section failure from one property: 41 failing of 42 scored, ONE pass. Both subtrees are zoom (zoom/ 29, zoom/explicit-inherit 12). Worst cells are border-spacing, border-width, letter-spacing, text-stroke-width - all \"a length that must be multiplied by the effective zoom\". 34 of 41 carry the coverage-ratio veto, consistent with ink drawn at 1x against a ref drawn at Nx. Smallest surface / largest section-level swing on the map."
+    },
+    {
+      "rank": 11,
+      "opportunity": "css-highlight-api: ::highlight() painting",
+      "section": "css-highlight-api",
+      "mechanism": "custom highlight pseudo painting over inline runs",
+      "cells": 43,
+      "scoredInFamily": 62,
+      "alreadyPassingInFamily": 19,
+      "medianSsimFailing": 0.9862,
+      "nearPassCells": 34,
+      "failVetoes": {
+        "coverageRatio": 41,
+        "colorMass": 1,
+        "presence": 0
+      },
+      "plausibility": "high",
+      "yieldScore": 36.5,
+      "exemplarWorstTests": [
+        "custom-highlight-painting-text-decoration-001",
+        "custom-highlight-dynamic-font-metrics-001",
+        "custom-highlight-painting-overlapping-highlights-002",
+        "highlight-text-across-elements"
+      ],
+      "evidence": "43 failing of 62 scored, 41 vetoed by coverage-ratio, median ssim 0.986 and 34 of them already at ssim >= 0.95 - the text is laid out correctly and the highlight fill is simply not painted (highlight-text: capture ink 0.189% vs ref 0.503%; custom-highlight-container-metrics-001: 0.360% vs 1.041%). The painting/ subtree is 40 of the 43. requires-runtime-selection tags all 43, so admitting a static highlight bake is the whole lane."
+    },
+    {
+      "rank": 12,
+      "opportunity": "mediaqueries: media-query evaluation at the capture viewport",
+      "section": "mediaqueries",
+      "mechanism": "aspect-ratio / device-aspect-ratio / calc() / custom-media MQ evaluation",
+      "cells": 35,
+      "scoredInFamily": 44,
+      "alreadyPassingInFamily": 9,
+      "medianSsimFailing": 0.9837,
+      "nearPassCells": 33,
+      "failVetoes": {
+        "coverageRatio": 14,
+        "colorMass": 23,
+        "presence": 2
+      },
+      "plausibility": "very-high",
+      "yieldScore": 31.5,
+      "exemplarWorstTests": [
+        "at-custom-media-basic",
+        "prefers-color-scheme-svg-image",
+        "mq-case-insensitive-001",
+        "mq-invalid-media-type-001"
+      ],
+      "evidence": "35 failing of 44 scored with 33 already at ssim >= 0.95 and 17 of them in the colour-flip class (ssim 0.999, pHash 0, ink 5.159% vs 5.188%) - the layout is byte-right and we are painting the fail colour because the query evaluated the wrong way. Zero na tags on the whole section: nothing here is architecturally blocked. aspect-ratio-001..006, device-aspect-ratio-002/003 and mq-calc-001 fail identically, which is one evaluator."
+    },
+    {
+      "rank": 13,
+      "opportunity": "css-lists: list marker box + counter-style symbol resolution",
+      "section": "css-lists",
+      "mechanism": "::marker generation, inline/inline-block marker placement, counter-style symbols",
+      "cells": 74,
+      "scoredInFamily": 156,
+      "alreadyPassingInFamily": 82,
+      "medianSsimFailing": 0.9184,
+      "nearPassCells": 23,
+      "failVetoes": {
+        "coverageRatio": 30,
+        "colorMass": 0,
+        "presence": 11
+      },
+      "plausibility": "medium-high",
+      "yieldScore": 29.6,
+      "exemplarWorstTests": [
+        "inline-list-marker",
+        "inline-block-list-marker",
+        "inline-block-list",
+        "inline-list"
+      ],
+      "evidence": "74 failing of 156 scored. Two entangled owners visible in the tags: requires-pseudo-element-rendering (54) for the marker box and the lossy reason counter-style-unsupported (44) for the symbol text. Worst cells are the placement family (inline-list-marker, inline-block-list-marker, inline-list at ssim 0.42-0.50) - marker boxes landing in the wrong inline context. 82 already pass, so the ordinary block marker works."
+    },
+    {
+      "rank": 14,
+      "opportunity": "css-will-change: will-change creating stacking context / fixed-pos containing block",
+      "section": "css-will-change",
+      "mechanism": "will-change as a stacking-context and containing-block trigger",
+      "cells": 32,
+      "scoredInFamily": 43,
+      "alreadyPassingInFamily": 11,
+      "medianSsimFailing": 1,
+      "nearPassCells": 28,
+      "failVetoes": {
+        "coverageRatio": 1,
+        "colorMass": 30,
+        "presence": 0
+      },
+      "plausibility": "very-high",
+      "yieldScore": 28.8,
+      "exemplarWorstTests": [
+        "will-change-transform-image",
+        "will-change-fixedpos-cb-002",
+        "will-change-fixedpos-cb-005",
+        "will-change-fixpos-cb-position-1"
+      ],
+      "evidence": "32 failing of 43 scored, 19 of them pure colour-flips: will-change-stacking-context-{opacity,filter,mask,clip-path,mix-blend-mode,perspective,position,isolation,offset-path,backdrop-filter}-1 all score ssim 1.0000 with pHash 0 and identical 4.274% ink on both sides - pixel-perfect structure, fail-colour ink. The second family (will-change-fixpos-cb-*) is the containing-block half. Two boolean predicates in one property."
+    },
+    {
+      "rank": 15,
+      "opportunity": "css-shadow: flattened shadow tree + :host/::slotted selector matching",
+      "section": "css-shadow",
+      "mechanism": "shadow-root flattening, slot assignment, :host()/::slotted()/:has(::slotted) matching",
+      "cells": 56,
+      "scoredInFamily": 105,
+      "alreadyPassingInFamily": 49,
+      "medianSsimFailing": 0.9571,
+      "nearPassCells": 50,
+      "failVetoes": {
+        "coverageRatio": 28,
+        "colorMass": 24,
+        "presence": 6
+      },
+      "plausibility": "medium-high",
+      "yieldScore": 28.0,
+      "exemplarWorstTests": [
+        "shadow-reassign-dynamic-001",
+        "shadow-reassign-dynamic-004",
+        "exportparts-layered",
+        "shadow-reassign-dynamic-002"
+      ],
+      "evidence": "56 failing of 105 scored but 50 of the 56 are already at ssim >= 0.95 and 19 are colour-flips (has-slotted-001/003, host-has-001/002, host-descendant-003, css-scoping-shadow-nested-slot-display-override) - the flattened tree renders, the selectors do not match. requires-shadow-dom tags 55 of 56, so this needs an architectural decision first; once taken, the per-test work is selector matching, not layout."
+    },
+    {
+      "rank": 16,
+      "opportunity": "css-masking: clip-path basic shapes and document-element clipping",
+      "section": "css-masking",
+      "mechanism": "clip-path circle/ellipse/inset/rect geometry + clip on the document element",
+      "cells": 39,
+      "scoredInFamily": 126,
+      "alreadyPassingInFamily": 87,
+      "medianSsimFailing": 0.9054,
+      "nearPassCells": 8,
+      "failVetoes": {
+        "coverageRatio": 30,
+        "colorMass": 18,
+        "presence": 2
+      },
+      "plausibility": "high",
+      "yieldScore": 27.3,
+      "exemplarWorstTests": [
+        "clip-path-document-element-will-change",
+        "clip-path-document-element",
+        "clip-path-circle-farthest-corner",
+        "clip-path-circle-closest-corner"
+      ],
+      "evidence": "39 failing of 126 scored with 87 passing - the mask/clip plumbing works and specific shape geometry does not. clip-path/ is 25 of the 39, and the worst cells are the reference-box keywords (clip-path-circle-farthest-corner / closest-corner, clip-path-rect-001/002) plus clip-path-document-element - i.e. radius resolution against the reference box. Note 51 of 177 tests are ineligible here, the highest exclusion rate of any large section."
+    },
+    {
+      "rank": 17,
+      "opportunity": "css-images: image-set() never resolves to a paintable image",
+      "section": "css-images",
+      "mechanism": "image-set() resolution for background-image and content",
+      "cells": 28,
+      "scoredInFamily": 36,
+      "alreadyPassingInFamily": 8,
+      "medianSsimFailing": 0.9705,
+      "nearPassCells": 25,
+      "failVetoes": {
+        "coverageRatio": 28,
+        "colorMass": 0,
+        "presence": 28
+      },
+      "plausibility": "very-high",
+      "yieldScore": 26.6,
+      "exemplarWorstTests": [
+        "image-set-repeating-radial-gradient-rendering",
+        "image-set-repeating-linear-gradient-rendering",
+        "image-set-repeating-conic-gradient-rendering",
+        "image-set-radial-gradient-rendering"
+      ],
+      "evidence": "28 failing of 36 scored, and every single one measures capture ink 0.000% against ref 4.274% - image-set() paints NOTHING, in a tight ssim band of 0.944-0.971. Both the presence AND coverage-ratio vetoes fire on all 28. The gradient variants (image-set-{conic,radial,repeating-linear}-gradient-rendering) prove the underlying gradient painters work when reached directly. One resolution step in one function."
+    },
+    {
+      "rank": 18,
+      "opportunity": "css-writing-modes: orthogonal flows and logical/physical mapping",
+      "section": "css-writing-modes",
+      "mechanism": "orthogonal flow sizing + vertical writing-mode logical-to-physical mapping",
+      "cells": 74,
+      "scoredInFamily": 136,
+      "alreadyPassingInFamily": 62,
+      "medianSsimFailing": 0.8734,
+      "nearPassCells": 5,
+      "failVetoes": {
+        "coverageRatio": 10,
+        "colorMass": 32,
+        "presence": 5
+      },
+      "plausibility": "medium",
+      "yieldScore": 25.9,
+      "exemplarWorstTests": [
+        "logical-physical-mapping-001",
+        "direction-upright-001",
+        "direction-upright-002",
+        "slr-alongside-vlr-floats"
+      ],
+      "evidence": "74 failing of 136 scored, requires-orthogonal-flow the dominant tag. That tag fires on 638 scored cells corpus-wide (279 failing) - css-grid, css-flexbox, css-ruby, css-text-decor and css-align all inherit from the same missing capability, so the blast radius is ~4x the section. Worst cells (logical-physical-mapping-001, direction-upright-001/002, the vrl/slr float families at ssim 0.54-0.59) point at the axis-swap itself."
+    },
+    {
+      "rank": 19,
+      "opportunity": "css-view-transitions: snapshot pseudo tree (large pool, architecture-blocked)",
+      "section": "css-view-transitions",
+      "mechanism": "::view-transition pseudo tree + captured old/new snapshots",
+      "cells": 142,
+      "scoredInFamily": 192,
+      "alreadyPassingInFamily": 50,
+      "medianSsimFailing": 0.9087,
+      "nearPassCells": 32,
+      "failVetoes": {
+        "coverageRatio": 90,
+        "colorMass": 103,
+        "presence": 41
+      },
+      "plausibility": "low",
+      "yieldScore": 21.3,
+      "exemplarWorstTests": [
+        "far-away-capture",
+        "new-content-has-scrollbars",
+        "root-to-shared-animation-incoming",
+        "new-content-root-scrollbar-with-fixed-background"
+      ],
+      "evidence": "Listed for size, not for cheapness: 142 failing of 192 scored, the 3rd largest pool. But requires-view-transitions tags all 142, requires-animation-runtime 117 and requires-document-tree 113 - it needs a live transition runtime the static IR does not model. 32 cells are already near-pass, so a partial static bake of the snapshot pseudo tree could harvest a slice without the runtime. Do not schedule this ahead of the single-property lanes above."
+    },
+    {
+      "rank": 20,
+      "opportunity": "css-images: gradient hue interpolation in polar colour spaces",
+      "section": "css-images",
+      "mechanism": "lch/oklch hue interpolation, powerless/missing components, none-interpolation",
+      "cells": 30,
+      "scoredInFamily": 76,
+      "alreadyPassingInFamily": 46,
+      "medianSsimFailing": 0.9292,
+      "nearPassCells": 10,
+      "failVetoes": {
+        "coverageRatio": 13,
+        "colorMass": 20,
+        "presence": 12
+      },
+      "plausibility": "high",
+      "yieldScore": 21.0,
+      "exemplarWorstTests": [
+        "gradient-single-stop-none-interpolation",
+        "gradient-hue-direction",
+        "gradient-border-box",
+        "gradient-content-box"
+      ],
+      "evidence": "30 failing of 76 scored, 20 vetoed on colour mass - structure agrees, the ramp is wrong. The failing names name the mechanism exactly: gradient-{increasing,decreasing}-hue-lch, gradient-hue-direction, gradient-powerless-hue-{lch,oklch}, gradient-analogous-missing-components-004, gradient-single-stop-none-interpolation. 46 gradients already pass, so this is the CSS Color 4 interpolation rules, not the painter."
+    }
+  ],
+  "sections": [
+    {
+      "section": "CSS2",
+      "tests": 287,
+      "scored": 285,
+      "ineligible": 2,
+      "pass": 223,
+      "fail": 62,
+      "passPct": 78.2,
+      "ge95": 230,
+      "meanSsim": 0.957,
+      "meanSsimFailing": 0.8194,
+      "nearPassFailing": 7,
+      "failVetoes": {
+        "coverageRatio": 20,
+        "colorMass": 18,
+        "presence": 4,
+        "ssimOnly": 28
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-table-layout",
+          "n": 19
+        },
+        {
+          "tag": "requires-fragmentation",
+          "n": 17
+        },
+        {
+          "tag": "requires-print-medium",
+          "n": 17
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "s-11-1-1b-005",
+          "ssim": 0.0001,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "inline-block-baseline-015",
+          "ssim": 0.098,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "inline-block-baseline-016",
+          "ssim": 0.107,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "float-page-break-inside-avoid-6-print",
+          "ssim": 0.2935,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "inherit-computed-002",
+          "ssim": 0.6001,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "compositing",
+      "tests": 48,
+      "scored": 41,
+      "ineligible": 7,
+      "pass": 36,
+      "fail": 5,
+      "passPct": 87.8,
+      "ge95": 36,
+      "meanSsim": 0.9587,
+      "meanSsimFailing": 0.6904,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 4,
+        "colorMass": 3,
+        "presence": 1,
+        "ssimOnly": 1
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-float-layout",
+          "n": 1
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 1
+        },
+        {
+          "tag": "requires-script-mutation",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "root-element-blend-mode",
+          "ssim": 0.0031,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "root-element-background-transparency",
+          "ssim": 0.8084,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "root-element-opacity-change",
+          "ssim": 0.8344,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "mix-blend-mode-stacking-context-creates-isolation",
+          "ssim": 0.8612,
+          "vetoes": []
+        },
+        {
+          "test": "root-element-opacity",
+          "ssim": 0.9449,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-align",
+      "tests": 54,
+      "scored": 54,
+      "ineligible": 0,
+      "pass": 22,
+      "fail": 32,
+      "passPct": 40.7,
+      "ge95": 25,
+      "meanSsim": 0.8304,
+      "meanSsimFailing": 0.717,
+      "nearPassFailing": 3,
+      "failVetoes": {
+        "coverageRatio": 7,
+        "colorMass": 11,
+        "presence": 0,
+        "ssimOnly": 19
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-inline-FC",
+          "n": 13
+        },
+        {
+          "tag": "requires-float-layout",
+          "n": 13
+        },
+        {
+          "tag": "requires-pseudo-element-rendering",
+          "n": 9
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "align-content-block-overflow-000",
+          "ssim": 0.4254,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "align-content-block-break-content-020",
+          "ssim": 0.4846,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "align-content-block-break-overflow-020",
+          "ssim": 0.4908,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "align-content-block-break-content-010",
+          "ssim": 0.5377,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "self-align-safe-unsafe-flex-003",
+          "ssim": 0.5408,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-anchor-position",
+      "tests": 122,
+      "scored": 83,
+      "ineligible": 39,
+      "pass": 65,
+      "fail": 18,
+      "passPct": 78.3,
+      "ge95": 70,
+      "meanSsim": 0.9714,
+      "meanSsimFailing": 0.8988,
+      "nearPassFailing": 5,
+      "failVetoes": {
+        "coverageRatio": 11,
+        "colorMass": 2,
+        "presence": 1,
+        "ssimOnly": 6
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-anchor-positioning-runtime",
+          "n": 18
+        },
+        {
+          "tag": "requires-script-mutation",
+          "n": 7
+        },
+        {
+          "tag": "requires-viewport-canvas",
+          "n": 6
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "position-area-anchor-001",
+          "ssim": 0.769,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "anchor-css-zoom",
+          "ssim": 0.7958,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "anchor-size-css-zoom",
+          "ssim": 0.8299,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "position-try-order-logical",
+          "ssim": 0.8303,
+          "vetoes": []
+        },
+        {
+          "test": "anchor-position-005-print",
+          "ssim": 0.869,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-animations",
+      "tests": 15,
+      "scored": 15,
+      "ineligible": 0,
+      "pass": 8,
+      "fail": 7,
+      "passPct": 53.3,
+      "ge95": 13,
+      "meanSsim": 0.9778,
+      "meanSsimFailing": 0.9555,
+      "nearPassFailing": 5,
+      "failVetoes": {
+        "coverageRatio": 4,
+        "colorMass": 2,
+        "presence": 4,
+        "ssimOnly": 1
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-animation-runtime",
+          "n": 7
+        },
+        {
+          "tag": "requires-shadow-dom",
+          "n": 3
+        },
+        {
+          "tag": "requires-document-tree",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "animate-font-size-with-margin-override",
+          "ssim": 0.8895,
+          "vetoes": []
+        },
+        {
+          "test": "parent-after-change-style-pseudo-element-flicker",
+          "ssim": 0.9381,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "animation-delay-011",
+          "ssim": 0.9565,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "animation-name-in-shadow-part-outer-match",
+          "ssim": 0.9565,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "animation-name-in-shadow-part",
+          "ssim": 0.9565,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-backgrounds",
+      "tests": 525,
+      "scored": 290,
+      "ineligible": 235,
+      "pass": 210,
+      "fail": 80,
+      "passPct": 72.4,
+      "ge95": 222,
+      "meanSsim": 0.9405,
+      "meanSsimFailing": 0.7946,
+      "nearPassFailing": 13,
+      "failVetoes": {
+        "coverageRatio": 37,
+        "colorMass": 28,
+        "presence": 4,
+        "ssimOnly": 37
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-bundled-asset",
+          "n": 26
+        },
+        {
+          "tag": "requires-table-layout",
+          "n": 7
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 4
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "border-radius-clipping-002",
+          "ssim": 0.0,
+          "vetoes": []
+        },
+        {
+          "test": "background-attachment-margin-root-002",
+          "ssim": 0.339,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "clip-text-on-body-propagated-to-root",
+          "ssim": 0.3486,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "clip-text-on-root",
+          "ssim": 0.3486,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "background-attachment-margin-root-001",
+          "ssim": 0.4511,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-borders",
+      "tests": 58,
+      "scored": 58,
+      "ineligible": 0,
+      "pass": 33,
+      "fail": 25,
+      "passPct": 56.9,
+      "ge95": 35,
+      "meanSsim": 0.9324,
+      "meanSsimFailing": 0.8697,
+      "nearPassFailing": 2,
+      "failVetoes": {
+        "coverageRatio": 5,
+        "colorMass": 9,
+        "presence": 1,
+        "ssimOnly": 15
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-bundled-font",
+          "n": 1
+        },
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 1
+        },
+        {
+          "tag": "requires-viewport-canvas",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "border-shape-stroke-from-border",
+          "ssim": 0.5526,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "corner-shape-overflow-clip-margin",
+          "ssim": 0.701,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "border-shape-background-origin-border-box",
+          "ssim": 0.7617,
+          "vetoes": []
+        },
+        {
+          "test": "border-shape-inset-shadow",
+          "ssim": 0.8369,
+          "vetoes": []
+        },
+        {
+          "test": "border-shape-two-shapes-shadow",
+          "ssim": 0.8383,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-box",
+      "tests": 67,
+      "scored": 67,
+      "ineligible": 0,
+      "pass": 46,
+      "fail": 21,
+      "passPct": 68.7,
+      "ge95": 46,
+      "meanSsim": 0.9606,
+      "meanSsimFailing": 0.9287,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 7,
+        "colorMass": 9,
+        "presence": 0,
+        "ssimOnly": 11
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-fragmentation",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "block-container-non-adjoining-item",
+          "ssim": 0.8039,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "block-container-block-in-inline-006",
+          "ssim": 0.8983,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "block-container-replaced-block",
+          "ssim": 0.9033,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "block-container-block-end-self-collapsing-and-border",
+          "ssim": 0.9173,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "block-container-replaced-block-start",
+          "ssim": 0.919,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-break",
+      "tests": 962,
+      "scored": 962,
+      "ineligible": 0,
+      "pass": 872,
+      "fail": 90,
+      "passPct": 90.6,
+      "ge95": 887,
+      "meanSsim": 0.9775,
+      "meanSsimFailing": 0.7948,
+      "nearPassFailing": 15,
+      "failVetoes": {
+        "coverageRatio": 8,
+        "colorMass": 25,
+        "presence": 0,
+        "ssimOnly": 59
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-fragmentation",
+          "n": 69
+        },
+        {
+          "tag": "requires-table-layout",
+          "n": 34
+        },
+        {
+          "tag": "requires-print-medium",
+          "n": 22
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "break-inside-avoid-min-block-size-2",
+          "ssim": 0.3711,
+          "vetoes": []
+        },
+        {
+          "test": "block-max-height-001b",
+          "ssim": 0.4756,
+          "vetoes": []
+        },
+        {
+          "test": "block-max-height-002b",
+          "ssim": 0.4756,
+          "vetoes": []
+        },
+        {
+          "test": "block-max-height-003b",
+          "ssim": 0.4756,
+          "vetoes": []
+        },
+        {
+          "test": "block-min-height-001b",
+          "ssim": 0.4829,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-cascade",
+      "tests": 43,
+      "scored": 42,
+      "ineligible": 1,
+      "pass": 23,
+      "fail": 19,
+      "passPct": 54.8,
+      "ge95": 37,
+      "meanSsim": 0.962,
+      "meanSsimFailing": 0.9223,
+      "nearPassFailing": 14,
+      "failVetoes": {
+        "coverageRatio": 17,
+        "colorMass": 3,
+        "presence": 1,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-document-tree",
+          "n": 8
+        },
+        {
+          "tag": "requires-shadow-dom",
+          "n": 4
+        },
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 3
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "initial-background-color",
+          "ssim": 0.5414,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "scope-part",
+          "ssim": 0.7946,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "scope-visited",
+          "ssim": 0.876,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "scope-pseudo-element",
+          "ssim": 0.8813,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "scope-ua-shadow-host",
+          "ssim": 0.9476,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-color",
+      "tests": 223,
+      "scored": 223,
+      "ineligible": 0,
+      "pass": 159,
+      "fail": 64,
+      "passPct": 71.3,
+      "ge95": 181,
+      "meanSsim": 0.9761,
+      "meanSsimFailing": 0.9291,
+      "nearPassFailing": 22,
+      "failVetoes": {
+        "coverageRatio": 19,
+        "colorMass": 39,
+        "presence": 8,
+        "ssimOnly": 18
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-document-tree",
+          "n": 15
+        },
+        {
+          "tag": "requires-table-layout",
+          "n": 8
+        },
+        {
+          "tag": "requires-runtime-selection",
+          "n": 2
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "color-layers-no-blend-mode",
+          "ssim": 0.5189,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "display-p3-linear-002",
+          "ssim": 0.7977,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "prophoto-rgb-002",
+          "ssim": 0.7977,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "oklch-010",
+          "ssim": 0.8323,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "lch-010",
+          "ssim": 0.8497,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-color-adjust",
+      "tests": 2,
+      "scored": 2,
+      "ineligible": 0,
+      "pass": 1,
+      "fail": 1,
+      "passPct": 50.0,
+      "ge95": 2,
+      "meanSsim": 0.9752,
+      "meanSsimFailing": 0.9504,
+      "nearPassFailing": 1,
+      "failVetoes": {
+        "coverageRatio": 1,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [],
+      "worstTests": [
+        {
+          "test": "color-scheme-rule-cache",
+          "ssim": 0.9504,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-conditional",
+      "tests": 19,
+      "scored": 18,
+      "ineligible": 1,
+      "pass": 11,
+      "fail": 7,
+      "passPct": 61.1,
+      "ge95": 13,
+      "meanSsim": 0.9191,
+      "meanSsimFailing": 0.813,
+      "nearPassFailing": 2,
+      "failVetoes": {
+        "coverageRatio": 5,
+        "colorMass": 7,
+        "presence": 3,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-animation-runtime",
+          "n": 1
+        },
+        {
+          "tag": "requires-script-mutation",
+          "n": 1
+        },
+        {
+          "tag": "requires-containment",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "no-layout-containment-fixedpos",
+          "ssim": 0.4991,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "container-units-gradient-invalidation",
+          "ssim": 0.7366,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "container-units-sharing-via-rule-node",
+          "ssim": 0.7667,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "at-media-whitespace-optional-001",
+          "ssim": 0.8663,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "at-media-whitespace-optional-002",
+          "ssim": 0.8663,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-contain",
+      "tests": 280,
+      "scored": 280,
+      "ineligible": 0,
+      "pass": 176,
+      "fail": 104,
+      "passPct": 62.9,
+      "ge95": 186,
+      "meanSsim": 0.9461,
+      "meanSsimFailing": 0.8696,
+      "nearPassFailing": 10,
+      "failVetoes": {
+        "coverageRatio": 55,
+        "colorMass": 47,
+        "presence": 3,
+        "ssimOnly": 36
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-containment",
+          "n": 101
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 22
+        },
+        {
+          "tag": "requires-float-layout",
+          "n": 19
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "contain-size-block-001",
+          "ssim": 0.5088,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "contain-size-flex-001",
+          "ssim": 0.5778,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "contain-size-grid-005",
+          "ssim": 0.5778,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "contain-size-063",
+          "ssim": 0.5965,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "contain-size-multicol-003",
+          "ssim": 0.5974,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-content",
+      "tests": 60,
+      "scored": 60,
+      "ineligible": 0,
+      "pass": 12,
+      "fail": 48,
+      "passPct": 20.0,
+      "ge95": 18,
+      "meanSsim": 0.8544,
+      "meanSsimFailing": 0.8189,
+      "nearPassFailing": 6,
+      "failVetoes": {
+        "coverageRatio": 45,
+        "colorMass": 2,
+        "presence": 2,
+        "ssimOnly": 3
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-bundled-font",
+          "n": 16
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 4
+        },
+        {
+          "tag": "requires-attr-function",
+          "n": 3
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "quotes-034",
+          "ssim": 0.6977,
+          "vetoes": []
+        },
+        {
+          "test": "quotes-028",
+          "ssim": 0.701,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "quotes-029",
+          "ssim": 0.7144,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "quotes-023",
+          "ssim": 0.7291,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "quotes-030",
+          "ssim": 0.7342,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-counter-styles",
+      "tests": 200,
+      "scored": 200,
+      "ineligible": 0,
+      "pass": 160,
+      "fail": 40,
+      "passPct": 80.0,
+      "ge95": 169,
+      "meanSsim": 0.9643,
+      "meanSsimFailing": 0.8682,
+      "nearPassFailing": 9,
+      "failVetoes": {
+        "coverageRatio": 27,
+        "colorMass": 4,
+        "presence": 19,
+        "ssimOnly": 13
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-non-latin-font-parity",
+          "n": 29
+        },
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 22
+        },
+        {
+          "tag": "requires-pseudo-element-rendering",
+          "n": 19
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "counter-korean-hanja-formal-extended",
+          "ssim": 0.6234,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "counter-japanese-formal-extended",
+          "ssim": 0.6328,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "disclosure-styles",
+          "ssim": 0.6387,
+          "vetoes": []
+        },
+        {
+          "test": "counter-japanese-informal-extended",
+          "ssim": 0.6548,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "counter-korean-hanja-informal-extended",
+          "ssim": 0.6565,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-display",
+      "tests": 50,
+      "scored": 49,
+      "ineligible": 1,
+      "pass": 42,
+      "fail": 7,
+      "passPct": 85.7,
+      "ge95": 42,
+      "meanSsim": 0.9635,
+      "meanSsimFailing": 0.786,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 3,
+        "colorMass": 0,
+        "presence": 1,
+        "ssimOnly": 4
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 4
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 3
+        },
+        {
+          "tag": "requires-script-mutation",
+          "n": 2
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "display-contents-sharing-001",
+          "ssim": 0.6891,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "display-contents-fieldset-002",
+          "ssim": 0.6987,
+          "vetoes": []
+        },
+        {
+          "test": "display-contents-dynamic-fieldset-legend-001",
+          "ssim": 0.7181,
+          "vetoes": []
+        },
+        {
+          "test": "display-flow-root-001",
+          "ssim": 0.7725,
+          "vetoes": []
+        },
+        {
+          "test": "display-flow-root-list-item-001",
+          "ssim": 0.8045,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-flexbox",
+      "tests": 730,
+      "scored": 730,
+      "ineligible": 0,
+      "pass": 639,
+      "fail": 91,
+      "passPct": 87.5,
+      "ge95": 641,
+      "meanSsim": 0.9745,
+      "meanSsimFailing": 0.8312,
+      "nearPassFailing": 2,
+      "failVetoes": {
+        "coverageRatio": 18,
+        "colorMass": 22,
+        "presence": 5,
+        "ssimOnly": 63
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 20
+        },
+        {
+          "tag": "requires-float-layout",
+          "n": 13
+        },
+        {
+          "tag": "requires-bundled-asset",
+          "n": 7
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "overflow-area-002",
+          "ssim": 0.4059,
+          "vetoes": []
+        },
+        {
+          "test": "flex-container-min-content-001",
+          "ssim": 0.4772,
+          "vetoes": []
+        },
+        {
+          "test": "flex-direction-with-element-insert",
+          "ssim": 0.4978,
+          "vetoes": []
+        },
+        {
+          "test": "gap-002-rl",
+          "ssim": 0.5172,
+          "vetoes": []
+        },
+        {
+          "test": "gap-002-lr",
+          "ssim": 0.5244,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-font-loading",
+      "tests": 5,
+      "scored": 5,
+      "ineligible": 0,
+      "pass": 4,
+      "fail": 1,
+      "passPct": 80.0,
+      "ge95": 4,
+      "meanSsim": 0.967,
+      "meanSsimFailing": 0.8926,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 1
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-script-mutation",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "fontface-descriptor-updates",
+          "ssim": 0.8926,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-fonts",
+      "tests": 72,
+      "scored": 63,
+      "ineligible": 9,
+      "pass": 52,
+      "fail": 11,
+      "passPct": 82.5,
+      "ge95": 52,
+      "meanSsim": 0.9588,
+      "meanSsimFailing": 0.805,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 3,
+        "colorMass": 2,
+        "presence": 0,
+        "ssimOnly": 8
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-font-face",
+          "n": 6
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 1
+        },
+        {
+          "tag": "requires-bundled-font",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "separators",
+          "ssim": 0.6472,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "font-size-adjust-order-001",
+          "ssim": 0.648,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "font-size-adjust-014",
+          "ssim": 0.7256,
+          "vetoes": []
+        },
+        {
+          "test": "standard-font-family",
+          "ssim": 0.7382,
+          "vetoes": []
+        },
+        {
+          "test": "italic-oblique-fallback",
+          "ssim": 0.7554,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-forms",
+      "tests": 14,
+      "scored": 14,
+      "ineligible": 0,
+      "pass": 4,
+      "fail": 10,
+      "passPct": 28.6,
+      "ge95": 6,
+      "meanSsim": 0.8982,
+      "meanSsimFailing": 0.8627,
+      "nearPassFailing": 2,
+      "failVetoes": {
+        "coverageRatio": 2,
+        "colorMass": 7,
+        "presence": 0,
+        "ssimOnly": 1
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 10
+        },
+        {
+          "tag": "requires-document-tree",
+          "n": 2
+        },
+        {
+          "tag": "requires-viewport-canvas",
+          "n": 2
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "progress-base-appearance-rendering.tentative",
+          "ssim": 0.8105,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "meter-base-appearance-custom-style-value-dynamic-rendering.tentative",
+          "ssim": 0.8225,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "meter-base-appearance-custom-style-initial-rendering.tentative",
+          "ssim": 0.831,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "textarea-base-appearance-rendering.tentative",
+          "ssim": 0.8334,
+          "vetoes": []
+        },
+        {
+          "test": "input-text-base-appearance-rendering",
+          "ssim": 0.8518,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-gaps",
+      "tests": 285,
+      "scored": 284,
+      "ineligible": 1,
+      "pass": 208,
+      "fail": 76,
+      "passPct": 73.2,
+      "ge95": 208,
+      "meanSsim": 0.9496,
+      "meanSsimFailing": 0.8418,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 3,
+        "colorMass": 24,
+        "presence": 0,
+        "ssimOnly": 50
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-gap-decorations",
+          "n": 64
+        },
+        {
+          "tag": "requires-fragmentation",
+          "n": 52
+        },
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 7
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "grid-gap-decorations-048",
+          "ssim": 0.5523,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "grid-gap-decorations-049",
+          "ssim": 0.5755,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "grid-gap-decorations-018",
+          "ssim": 0.5977,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "grid-gap-decorations-050",
+          "ssim": 0.5979,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "grid-gap-decorations-051",
+          "ssim": 0.5985,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-grid",
+      "tests": 876,
+      "scored": 873,
+      "ineligible": 3,
+      "pass": 396,
+      "fail": 477,
+      "passPct": 45.4,
+      "ge95": 418,
+      "meanSsim": 0.8627,
+      "meanSsimFailing": 0.7538,
+      "nearPassFailing": 22,
+      "failVetoes": {
+        "coverageRatio": 209,
+        "colorMass": 218,
+        "presence": 11,
+        "ssimOnly": 193
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-fragmentation",
+          "n": 273
+        },
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 61
+        },
+        {
+          "tag": "requires-containing-block-layout",
+          "n": 24
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "grid-lanes-grid-placement-named-lines-001",
+          "ssim": 0.1107,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "grid-lanes-item-placement-006",
+          "ssim": 0.1501,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "grid-lanes-align-content-001",
+          "ssim": 0.1588,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "column-track-sizing-001",
+          "ssim": 0.1719,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "grid-lanes-item-placement-007",
+          "ssim": 0.2047,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-highlight-api",
+      "tests": 62,
+      "scored": 62,
+      "ineligible": 0,
+      "pass": 19,
+      "fail": 43,
+      "passPct": 30.6,
+      "ge95": 53,
+      "meanSsim": 0.971,
+      "meanSsimFailing": 0.9638,
+      "nearPassFailing": 34,
+      "failVetoes": {
+        "coverageRatio": 41,
+        "colorMass": 1,
+        "presence": 0,
+        "ssimOnly": 2
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-runtime-selection",
+          "n": 43
+        },
+        {
+          "tag": "requires-script-mutation",
+          "n": 5
+        },
+        {
+          "tag": "requires-containment",
+          "n": 2
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "custom-highlight-painting-text-decoration-001",
+          "ssim": 0.6105,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "custom-highlight-dynamic-font-metrics-001",
+          "ssim": 0.7856,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "custom-highlight-painting-overlapping-highlights-002",
+          "ssim": 0.8915,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "highlight-text-across-elements",
+          "ssim": 0.9222,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "custom-highlight-font-metrics-003",
+          "ssim": 0.9341,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-image-animation",
+      "tests": 1,
+      "scored": 1,
+      "ineligible": 0,
+      "pass": 1,
+      "fail": 0,
+      "passPct": 100.0,
+      "ge95": 1,
+      "meanSsim": 0.9934,
+      "meanSsimFailing": null,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [],
+      "worstTests": []
+    },
+    {
+      "section": "css-images",
+      "tests": 367,
+      "scored": 366,
+      "ineligible": 1,
+      "pass": 136,
+      "fail": 230,
+      "passPct": 37.2,
+      "ge95": 192,
+      "meanSsim": 0.9233,
+      "meanSsimFailing": 0.8866,
+      "nearPassFailing": 56,
+      "failVetoes": {
+        "coverageRatio": 165,
+        "colorMass": 85,
+        "presence": 48,
+        "ssimOnly": 5
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-inline-FC",
+          "n": 138
+        },
+        {
+          "tag": "requires-float-layout",
+          "n": 131
+        },
+        {
+          "tag": "requires-bundled-asset",
+          "n": 128
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "svg-script-is-ignored",
+          "ssim": 0.0,
+          "vetoes": []
+        },
+        {
+          "test": "image-orientation-default",
+          "ssim": 0.4245,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "image-orientation-from-image-composited",
+          "ssim": 0.4245,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "image-orientation-from-image",
+          "ssim": 0.4245,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "gradient-single-stop-none-interpolation",
+          "ssim": 0.5311,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-inline",
+      "tests": 25,
+      "scored": 24,
+      "ineligible": 1,
+      "pass": 8,
+      "fail": 16,
+      "passPct": 33.3,
+      "ge95": 8,
+      "meanSsim": 0.8436,
+      "meanSsimFailing": 0.7658,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 2,
+        "presence": 0,
+        "ssimOnly": 14
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-inline-FC",
+          "n": 4
+        },
+        {
+          "tag": "requires-script-mutation",
+          "n": 4
+        },
+        {
+          "tag": "requires-float-layout",
+          "n": 3
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "text-box-trim-accumulation-001",
+          "ssim": 0.529,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "text-box-trim-accumulation-004",
+          "ssim": 0.5803,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "text-box-trim-float-clear-br-002",
+          "ssim": 0.7293,
+          "vetoes": []
+        },
+        {
+          "test": "text-box-trim-atomic-inline-001",
+          "ssim": 0.7304,
+          "vetoes": []
+        },
+        {
+          "test": "text-box-trim-float-clear-br-003",
+          "ssim": 0.7399,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-layout-api",
+      "tests": 1,
+      "scored": 1,
+      "ineligible": 0,
+      "pass": 0,
+      "fail": 1,
+      "passPct": 0.0,
+      "ge95": 1,
+      "meanSsim": 0.9565,
+      "meanSsimFailing": 0.9565,
+      "nearPassFailing": 1,
+      "failVetoes": {
+        "coverageRatio": 1,
+        "colorMass": 0,
+        "presence": 1,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-script-mutation",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "fixed-block-size-quirky-body.https",
+          "ssim": 0.9565,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-lists",
+      "tests": 156,
+      "scored": 156,
+      "ineligible": 0,
+      "pass": 82,
+      "fail": 74,
+      "passPct": 52.6,
+      "ge95": 105,
+      "meanSsim": 0.9374,
+      "meanSsimFailing": 0.8847,
+      "nearPassFailing": 23,
+      "failVetoes": {
+        "coverageRatio": 30,
+        "colorMass": 0,
+        "presence": 11,
+        "ssimOnly": 44
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-pseudo-element-rendering",
+          "n": 54
+        },
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 47
+        },
+        {
+          "tag": "requires-float-layout",
+          "n": 4
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "inline-list-marker",
+          "ssim": 0.4226,
+          "vetoes": []
+        },
+        {
+          "test": "inline-block-list-marker",
+          "ssim": 0.4572,
+          "vetoes": []
+        },
+        {
+          "test": "inline-block-list",
+          "ssim": 0.4596,
+          "vetoes": []
+        },
+        {
+          "test": "inline-list",
+          "ssim": 0.4707,
+          "vetoes": []
+        },
+        {
+          "test": "list-marker-symbol-bidi",
+          "ssim": 0.5571,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-logical",
+      "tests": 6,
+      "scored": 6,
+      "ineligible": 0,
+      "pass": 2,
+      "fail": 4,
+      "passPct": 33.3,
+      "ge95": 2,
+      "meanSsim": 0.598,
+      "meanSsimFailing": 0.4052,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 4
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-float-layout",
+          "n": 4
+        },
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 2
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "logical-values-float-clear-2",
+          "ssim": 0.2355,
+          "vetoes": []
+        },
+        {
+          "test": "logical-values-float-clear-1",
+          "ssim": 0.2562,
+          "vetoes": []
+        },
+        {
+          "test": "logical-values-float-clear-3",
+          "ssim": 0.5258,
+          "vetoes": []
+        },
+        {
+          "test": "logical-values-float-clear-4",
+          "ssim": 0.6034,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-masking",
+      "tests": 177,
+      "scored": 126,
+      "ineligible": 51,
+      "pass": 87,
+      "fail": 39,
+      "passPct": 69.0,
+      "ge95": 95,
+      "meanSsim": 0.9582,
+      "meanSsimFailing": 0.8722,
+      "nearPassFailing": 8,
+      "failVetoes": {
+        "coverageRatio": 30,
+        "colorMass": 18,
+        "presence": 2,
+        "ssimOnly": 7
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-viewport-canvas",
+          "n": 4
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 3
+        },
+        {
+          "tag": "requires-animation-runtime",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "clip-path-document-element-will-change",
+          "ssim": 0.5367,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "clip-path-document-element",
+          "ssim": 0.5367,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "clip-path-circle-farthest-corner",
+          "ssim": 0.6848,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "clip-path-circle-closest-corner",
+          "ssim": 0.7405,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "clip-path-rect-001",
+          "ssim": 0.7955,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-multicol",
+      "tests": 279,
+      "scored": 277,
+      "ineligible": 2,
+      "pass": 241,
+      "fail": 36,
+      "passPct": 87.0,
+      "ge95": 243,
+      "meanSsim": 0.9801,
+      "meanSsimFailing": 0.8786,
+      "nearPassFailing": 2,
+      "failVetoes": {
+        "coverageRatio": 1,
+        "colorMass": 4,
+        "presence": 0,
+        "ssimOnly": 31
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-fragmentation",
+          "n": 36
+        },
+        {
+          "tag": "requires-multicol-fragmentation",
+          "n": 33
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 17
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "multicol-span-all-005",
+          "ssim": 0.3528,
+          "vetoes": []
+        },
+        {
+          "test": "multicol-span-all-rule-001",
+          "ssim": 0.6131,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "multicol-span-all-010",
+          "ssim": 0.6609,
+          "vetoes": []
+        },
+        {
+          "test": "multicol-span-all-004",
+          "ssim": 0.671,
+          "vetoes": []
+        },
+        {
+          "test": "nested-past-fragmentation-line",
+          "ssim": 0.8185,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-nesting",
+      "tests": 13,
+      "scored": 13,
+      "ineligible": 0,
+      "pass": 8,
+      "fail": 5,
+      "passPct": 61.5,
+      "ge95": 12,
+      "meanSsim": 0.9471,
+      "meanSsimFailing": 0.8712,
+      "nearPassFailing": 4,
+      "failVetoes": {
+        "coverageRatio": 4,
+        "colorMass": 2,
+        "presence": 0,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-script-mutation",
+          "n": 3
+        },
+        {
+          "tag": "requires-shadow-dom",
+          "n": 3
+        },
+        {
+          "tag": "requires-pseudo-element-rendering",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "nesting-type-selector",
+          "ssim": 0.517,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "host-nesting-001",
+          "ssim": 0.9559,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "host-nesting-003",
+          "ssim": 0.9559,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "host-nesting-005",
+          "ssim": 0.9559,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "nest-containing-forgiving",
+          "ssim": 0.9713,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-overflow",
+      "tests": 394,
+      "scored": 375,
+      "ineligible": 19,
+      "pass": 265,
+      "fail": 110,
+      "passPct": 70.7,
+      "ge95": 282,
+      "meanSsim": 0.9517,
+      "meanSsimFailing": 0.8675,
+      "nearPassFailing": 17,
+      "failVetoes": {
+        "coverageRatio": 40,
+        "colorMass": 25,
+        "presence": 12,
+        "ssimOnly": 62
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-viewport-sized-text-ref",
+          "n": 56
+        },
+        {
+          "tag": "requires-viewport-canvas",
+          "n": 50
+        },
+        {
+          "tag": "requires-shared-inline-FC",
+          "n": 44
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "scrollbar-gutter-root-both-edges",
+          "ssim": 0.2455,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "scrollbar-gutter-root",
+          "ssim": 0.2491,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "overflow-body-propagation-009",
+          "ssim": 0.3547,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "overflow-body-propagation-008",
+          "ssim": 0.3559,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "overflow-body-propagation-007",
+          "ssim": 0.3568,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-page",
+      "tests": 157,
+      "scored": 157,
+      "ineligible": 0,
+      "pass": 71,
+      "fail": 86,
+      "passPct": 45.2,
+      "ge95": 83,
+      "meanSsim": 0.87,
+      "meanSsimFailing": 0.769,
+      "nearPassFailing": 12,
+      "failVetoes": {
+        "coverageRatio": 57,
+        "colorMass": 45,
+        "presence": 15,
+        "ssimOnly": 17
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-print-medium",
+          "n": 86
+        },
+        {
+          "tag": "requires-fragmentation",
+          "n": 30
+        },
+        {
+          "tag": "requires-shared-inline-FC",
+          "n": 7
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "page-size-010-print",
+          "ssim": 0.142,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "page-box-008-print",
+          "ssim": 0.2498,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "page-background-005-print",
+          "ssim": 0.3439,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "page-box-003-print",
+          "ssim": 0.3777,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "auto-margins-001-print",
+          "ssim": 0.3874,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-paint-api",
+      "tests": 2,
+      "scored": 2,
+      "ineligible": 0,
+      "pass": 0,
+      "fail": 2,
+      "passPct": 0.0,
+      "ge95": 2,
+      "meanSsim": 0.9918,
+      "meanSsimFailing": 0.9918,
+      "nearPassFailing": 2,
+      "failVetoes": {
+        "coverageRatio": 1,
+        "colorMass": 1,
+        "presence": 1,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [],
+      "worstTests": [
+        {
+          "test": "geometry-with-float-size.https",
+          "ssim": 0.9836,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "overdraw.https",
+          "ssim": 1,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-position",
+      "tests": 152,
+      "scored": 100,
+      "ineligible": 52,
+      "pass": 94,
+      "fail": 6,
+      "passPct": 94.0,
+      "ge95": 94,
+      "meanSsim": 0.9869,
+      "meanSsimFailing": 0.8463,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 6
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-containing-block-layout",
+          "n": 6
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 4
+        },
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 2
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "position-absolute-root-element-flex",
+          "ssim": 0.7907,
+          "vetoes": []
+        },
+        {
+          "test": "position-absolute-root-element-grid",
+          "ssim": 0.7907,
+          "vetoes": []
+        },
+        {
+          "test": "position-fixed-root-element-flex",
+          "ssim": 0.8139,
+          "vetoes": []
+        },
+        {
+          "test": "position-fixed-root-element-grid",
+          "ssim": 0.8139,
+          "vetoes": []
+        },
+        {
+          "test": "position-absolute-semi-replaced-stretch-other",
+          "ssim": 0.9264,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-pseudo",
+      "tests": 125,
+      "scored": 119,
+      "ineligible": 6,
+      "pass": 82,
+      "fail": 37,
+      "passPct": 68.9,
+      "ge95": 89,
+      "meanSsim": 0.9596,
+      "meanSsimFailing": 0.8953,
+      "nearPassFailing": 7,
+      "failVetoes": {
+        "coverageRatio": 11,
+        "colorMass": 3,
+        "presence": 2,
+        "ssimOnly": 24
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-pseudo-element-rendering",
+          "n": 28
+        },
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 22
+        },
+        {
+          "tag": "requires-runtime-selection",
+          "n": 9
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "first-line-line-height-001",
+          "ssim": 0.6781,
+          "vetoes": []
+        },
+        {
+          "test": "first-letter-exclude-inline-child-marker",
+          "ssim": 0.7361,
+          "vetoes": []
+        },
+        {
+          "test": "first-line-line-height-002",
+          "ssim": 0.772,
+          "vetoes": []
+        },
+        {
+          "test": "selection-textarea-011",
+          "ssim": 0.7993,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "marker-content-018",
+          "ssim": 0.8179,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-rhythm",
+      "tests": 15,
+      "scored": 15,
+      "ineligible": 0,
+      "pass": 10,
+      "fail": 5,
+      "passPct": 66.7,
+      "ge95": 15,
+      "meanSsim": 0.9743,
+      "meanSsimFailing": 0.9582,
+      "nearPassFailing": 5,
+      "failVetoes": {
+        "coverageRatio": 5,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [],
+      "worstTests": [
+        {
+          "test": "block-level-embed-margins-affected-by-block-step-size",
+          "ssim": 0.9559,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "block-level-object-margins-affected-by-block-step-size",
+          "ssim": 0.9559,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "block-level-video-margins-affected-by-block-step-size",
+          "ssim": 0.9559,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "zero-outer-size-rounded-up-to-block-step-size",
+          "ssim": 0.9559,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "definite-height-rounds-up-to-step-unit",
+          "ssim": 0.9673,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-ruby",
+      "tests": 65,
+      "scored": 65,
+      "ineligible": 0,
+      "pass": 16,
+      "fail": 49,
+      "passPct": 24.6,
+      "ge95": 18,
+      "meanSsim": 0.8414,
+      "meanSsimFailing": 0.798,
+      "nearPassFailing": 2,
+      "failVetoes": {
+        "coverageRatio": 17,
+        "colorMass": 6,
+        "presence": 1,
+        "ssimOnly": 32
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-bundled-font",
+          "n": 35
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 12
+        },
+        {
+          "tag": "requires-shared-inline-FC",
+          "n": 9
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "block-ruby-004",
+          "ssim": 0.3389,
+          "vetoes": []
+        },
+        {
+          "test": "ruby-layout-internal-boxes",
+          "ssim": 0.3826,
+          "vetoes": []
+        },
+        {
+          "test": "block-ruby-003",
+          "ssim": 0.4079,
+          "vetoes": []
+        },
+        {
+          "test": "rbc-rtc-basic-001",
+          "ssim": 0.4341,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "ruby-intrinsic-isize-003",
+          "ssim": 0.436,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-scroll-snap",
+      "tests": 18,
+      "scored": 11,
+      "ineligible": 7,
+      "pass": 2,
+      "fail": 9,
+      "passPct": 18.2,
+      "ge95": 2,
+      "meanSsim": 0.8807,
+      "meanSsimFailing": 0.8565,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 4,
+        "colorMass": 4,
+        "presence": 0,
+        "ssimOnly": 5
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-viewport-canvas",
+          "n": 4
+        },
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 3
+        },
+        {
+          "tag": "requires-containing-block-layout",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "direction-rtl",
+          "ssim": 0.6778,
+          "vetoes": []
+        },
+        {
+          "test": "scroll-snap-writing-mode-000",
+          "ssim": 0.8304,
+          "vetoes": []
+        },
+        {
+          "test": "writing-mode-horizontal-tb",
+          "ssim": 0.8684,
+          "vetoes": []
+        },
+        {
+          "test": "writing-mode-vertical-lr",
+          "ssim": 0.8684,
+          "vetoes": []
+        },
+        {
+          "test": "writing-mode-vertical-rl",
+          "ssim": 0.8684,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-scrollbars",
+      "tests": 9,
+      "scored": 9,
+      "ineligible": 0,
+      "pass": 7,
+      "fail": 2,
+      "passPct": 77.8,
+      "ge95": 7,
+      "meanSsim": 0.8796,
+      "meanSsimFailing": 0.4581,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 2,
+        "colorMass": 1,
+        "presence": 0,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 1
+        },
+        {
+          "tag": "requires-viewport-canvas",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "transparent-on-root",
+          "ssim": 0.0001,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "textarea-scrollbar-width-none",
+          "ssim": 0.916,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-shadow",
+      "tests": 106,
+      "scored": 105,
+      "ineligible": 1,
+      "pass": 49,
+      "fail": 56,
+      "passPct": 46.7,
+      "ge95": 99,
+      "meanSsim": 0.9801,
+      "meanSsimFailing": 0.9688,
+      "nearPassFailing": 50,
+      "failVetoes": {
+        "coverageRatio": 28,
+        "colorMass": 24,
+        "presence": 6,
+        "ssimOnly": 4
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-shadow-dom",
+          "n": 55
+        },
+        {
+          "tag": "requires-script-mutation",
+          "n": 31
+        },
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 4
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "shadow-reassign-dynamic-001",
+          "ssim": 0.8919,
+          "vetoes": []
+        },
+        {
+          "test": "shadow-reassign-dynamic-004",
+          "ssim": 0.8919,
+          "vetoes": []
+        },
+        {
+          "test": "exportparts-layered",
+          "ssim": 0.9049,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "shadow-reassign-dynamic-002",
+          "ssim": 0.9054,
+          "vetoes": []
+        },
+        {
+          "test": "scoped-reference-animation-001",
+          "ssim": 0.925,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-shapes",
+      "tests": 102,
+      "scored": 102,
+      "ineligible": 0,
+      "pass": 33,
+      "fail": 69,
+      "passPct": 32.4,
+      "ge95": 33,
+      "meanSsim": 0.8605,
+      "meanSsimFailing": 0.8021,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 4,
+        "presence": 0,
+        "ssimOnly": 65
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-float-layout",
+          "n": 68
+        },
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 26
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 2
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "shape-outside-content-box-002",
+          "ssim": 0.5248,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "shape-outside-padding-box-002",
+          "ssim": 0.6036,
+          "vetoes": []
+        },
+        {
+          "test": "shape-outside-circle-035",
+          "ssim": 0.6408,
+          "vetoes": []
+        },
+        {
+          "test": "shape-outside-ellipse-035",
+          "ssim": 0.6418,
+          "vetoes": []
+        },
+        {
+          "test": "shape-outside-content-box-001",
+          "ssim": 0.6529,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-sizing",
+      "tests": 413,
+      "scored": 413,
+      "ineligible": 0,
+      "pass": 314,
+      "fail": 99,
+      "passPct": 76.0,
+      "ge95": 346,
+      "meanSsim": 0.965,
+      "meanSsimFailing": 0.8731,
+      "nearPassFailing": 32,
+      "failVetoes": {
+        "coverageRatio": 61,
+        "colorMass": 38,
+        "presence": 13,
+        "ssimOnly": 24
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-containment",
+          "n": 22
+        },
+        {
+          "tag": "requires-float-layout",
+          "n": 15
+        },
+        {
+          "tag": "requires-bundled-asset",
+          "n": 14
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "clone-nowrap-intrinsic-size",
+          "ssim": 0.4176,
+          "vetoes": []
+        },
+        {
+          "test": "slice-nowrap-intrinsic-size",
+          "ssim": 0.4176,
+          "vetoes": []
+        },
+        {
+          "test": "clone-nowrap-intrinsic-size-bidi",
+          "ssim": 0.4187,
+          "vetoes": []
+        },
+        {
+          "test": "slice-nowrap-intrinsic-size-bidi",
+          "ssim": 0.4187,
+          "vetoes": []
+        },
+        {
+          "test": "clone-intrinsic-size",
+          "ssim": 0.4305,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-tables",
+      "tests": 127,
+      "scored": 125,
+      "ineligible": 2,
+      "pass": 96,
+      "fail": 29,
+      "passPct": 76.8,
+      "ge95": 96,
+      "meanSsim": 0.9653,
+      "meanSsimFailing": 0.876,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 6,
+        "colorMass": 6,
+        "presence": 3,
+        "ssimOnly": 21
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-table-layout",
+          "n": 29
+        },
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 5
+        },
+        {
+          "tag": "requires-document-tree",
+          "n": 3
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "toggle-row-display-property-001",
+          "ssim": 0.6826,
+          "vetoes": []
+        },
+        {
+          "test": "html-display-table",
+          "ssim": 0.7685,
+          "vetoes": []
+        },
+        {
+          "test": "subpixel-table-cell-height-001",
+          "ssim": 0.7944,
+          "vetoes": []
+        },
+        {
+          "test": "baseline-vertical",
+          "ssim": 0.8028,
+          "vetoes": []
+        },
+        {
+          "test": "visibility-collapse-colspan-003",
+          "ssim": 0.8155,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-text",
+      "tests": 440,
+      "scored": 440,
+      "ineligible": 0,
+      "pass": 311,
+      "fail": 129,
+      "passPct": 70.7,
+      "ge95": 323,
+      "meanSsim": 0.9516,
+      "meanSsimFailing": 0.8524,
+      "nearPassFailing": 12,
+      "failVetoes": {
+        "coverageRatio": 20,
+        "colorMass": 4,
+        "presence": 2,
+        "ssimOnly": 107
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-shared-inline-FC",
+          "n": 97
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 58
+        },
+        {
+          "tag": "requires-bundled-font",
+          "n": 46
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "word-space-transform-010",
+          "ssim": 0.3357,
+          "vetoes": []
+        },
+        {
+          "test": "text-transform-multiple-001",
+          "ssim": 0.3723,
+          "vetoes": []
+        },
+        {
+          "test": "word-space-transform-011",
+          "ssim": 0.4577,
+          "vetoes": []
+        },
+        {
+          "test": "word-space-transform-012",
+          "ssim": 0.5154,
+          "vetoes": []
+        },
+        {
+          "test": "letter-spacing-206",
+          "ssim": 0.5669,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-text-decor",
+      "tests": 193,
+      "scored": 193,
+      "ineligible": 0,
+      "pass": 166,
+      "fail": 27,
+      "passPct": 86.0,
+      "ge95": 171,
+      "meanSsim": 0.9812,
+      "meanSsimFailing": 0.8988,
+      "nearPassFailing": 5,
+      "failVetoes": {
+        "coverageRatio": 5,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 22
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 13
+        },
+        {
+          "tag": "requires-bundled-font",
+          "n": 11
+        },
+        {
+          "tag": "requires-float-layout",
+          "n": 6
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "text-decoration-inset-025",
+          "ssim": 0.4413,
+          "vetoes": []
+        },
+        {
+          "test": "text-decoration-inset-orthogonal-block-001",
+          "ssim": 0.7469,
+          "vetoes": []
+        },
+        {
+          "test": "text-emphasis-punctuation-2",
+          "ssim": 0.7669,
+          "vetoes": []
+        },
+        {
+          "test": "text-decoration-thickness-length-rounding-min-val",
+          "ssim": 0.8336,
+          "vetoes": []
+        },
+        {
+          "test": "text-underline-position-001b",
+          "ssim": 0.8618,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-transforms",
+      "tests": 368,
+      "scored": 347,
+      "ineligible": 21,
+      "pass": 296,
+      "fail": 51,
+      "passPct": 85.3,
+      "ge95": 312,
+      "meanSsim": 0.9788,
+      "meanSsimFailing": 0.8976,
+      "nearPassFailing": 16,
+      "failVetoes": {
+        "coverageRatio": 25,
+        "colorMass": 14,
+        "presence": 13,
+        "ssimOnly": 21
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "wpt-canvas-shape-sensitive",
+          "n": 16
+        },
+        {
+          "tag": "requires-viewport-canvas",
+          "n": 7
+        },
+        {
+          "tag": "requires-document-tree",
+          "n": 5
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "huge-length-tiny-scale",
+          "ssim": 0.0,
+          "vetoes": []
+        },
+        {
+          "test": "transform-abspos-001",
+          "ssim": 0.7797,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "transform-abspos-002",
+          "ssim": 0.7797,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "transform-abspos-003",
+          "ssim": 0.7797,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "transform-abspos-004",
+          "ssim": 0.7797,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-transitions",
+      "tests": 2,
+      "scored": 2,
+      "ineligible": 0,
+      "pass": 1,
+      "fail": 1,
+      "passPct": 50.0,
+      "ge95": 1,
+      "meanSsim": 0.9704,
+      "meanSsimFailing": 0.9407,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 1
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-script-mutation",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "transition-test",
+          "ssim": 0.9407,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-typed-om",
+      "tests": 5,
+      "scored": 5,
+      "ineligible": 0,
+      "pass": 0,
+      "fail": 5,
+      "passPct": 0.0,
+      "ge95": 1,
+      "meanSsim": 0.917,
+      "meanSsimFailing": 0.917,
+      "nearPassFailing": 1,
+      "failVetoes": {
+        "coverageRatio": 4,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 1
+      },
+      "topVetoKindsFailing": [],
+      "worstTests": [
+        {
+          "test": "width-by-clamp-px-em",
+          "ssim": 0.9053,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "width-by-max-px-em",
+          "ssim": 0.9053,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "width-by-min-px-em",
+          "ssim": 0.9053,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "rotate-by-added-angle",
+          "ssim": 0.9123,
+          "vetoes": []
+        },
+        {
+          "test": "background-image-gradient",
+          "ssim": 0.9566,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-ui",
+      "tests": 926,
+      "scored": 926,
+      "ineligible": 0,
+      "pass": 843,
+      "fail": 83,
+      "passPct": 91.0,
+      "ge95": 895,
+      "meanSsim": 0.9916,
+      "meanSsimFailing": 0.9408,
+      "nearPassFailing": 52,
+      "failVetoes": {
+        "coverageRatio": 56,
+        "colorMass": 11,
+        "presence": 1,
+        "ssimOnly": 17
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-form-control-rendering",
+          "n": 50
+        },
+        {
+          "tag": "requires-bundled-asset",
+          "n": 11
+        },
+        {
+          "tag": "requires-viewport-sized-text-ref",
+          "n": 9
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "outline-auto-width-001",
+          "ssim": 0.6744,
+          "vetoes": []
+        },
+        {
+          "test": "box-sizing-009",
+          "ssim": 0.6969,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "box-sizing-008",
+          "ssim": 0.7082,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "compute-kind-widget-fallback-props-revert-001",
+          "ssim": 0.7379,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "native-appearance-disabled-for-value-unset",
+          "ssim": 0.7427,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "css-values",
+      "tests": 115,
+      "scored": 114,
+      "ineligible": 1,
+      "pass": 68,
+      "fail": 46,
+      "passPct": 59.6,
+      "ge95": 98,
+      "meanSsim": 0.9529,
+      "meanSsimFailing": 0.8993,
+      "nearPassFailing": 30,
+      "failVetoes": {
+        "coverageRatio": 33,
+        "colorMass": 15,
+        "presence": 2,
+        "ssimOnly": 4
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-calc-size",
+          "n": 5
+        },
+        {
+          "tag": "requires-bundled-font",
+          "n": 5
+        },
+        {
+          "tag": "requires-font-face",
+          "n": 5
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "max-20-arguments",
+          "ssim": 0.5417,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "calc-in-media-queries-001",
+          "ssim": 0.5535,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "calc-in-media-queries-002",
+          "ssim": 0.5535,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "inline-cache-base-uri-cssom",
+          "ssim": 0.5535,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "max-unitless-zero-invalid",
+          "ssim": 0.5535,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-view-transitions",
+      "tests": 195,
+      "scored": 192,
+      "ineligible": 3,
+      "pass": 50,
+      "fail": 142,
+      "passPct": 26.0,
+      "ge95": 82,
+      "meanSsim": 0.8824,
+      "meanSsimFailing": 0.8449,
+      "nearPassFailing": 32,
+      "failVetoes": {
+        "coverageRatio": 90,
+        "colorMass": 103,
+        "presence": 41,
+        "ssimOnly": 31
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-view-transitions",
+          "n": 142
+        },
+        {
+          "tag": "requires-animation-runtime",
+          "n": 117
+        },
+        {
+          "tag": "requires-document-tree",
+          "n": 113
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "far-away-capture",
+          "ssim": 0.2117,
+          "vetoes": []
+        },
+        {
+          "test": "new-content-has-scrollbars",
+          "ssim": 0.2761,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "root-to-shared-animation-incoming",
+          "ssim": 0.3056,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "new-content-root-scrollbar-with-fixed-background",
+          "ssim": 0.3375,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "old-content-root-scrollbar-with-fixed-background",
+          "ssim": 0.3375,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-viewport",
+      "tests": 44,
+      "scored": 42,
+      "ineligible": 2,
+      "pass": 1,
+      "fail": 41,
+      "passPct": 2.4,
+      "ge95": 11,
+      "meanSsim": 0.861,
+      "meanSsimFailing": 0.8576,
+      "nearPassFailing": 10,
+      "failVetoes": {
+        "coverageRatio": 34,
+        "colorMass": 5,
+        "presence": 5,
+        "ssimOnly": 6
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-document-tree",
+          "n": 15
+        },
+        {
+          "tag": "requires-containment",
+          "n": 6
+        },
+        {
+          "tag": "requires-shared-inline-FC",
+          "n": 5
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "border-spacing",
+          "ssim": 0.3335,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "zoom-pseudo-image",
+          "ssim": 0.5541,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "text-stroke-width",
+          "ssim": 0.6329,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "border-spacing-without-border",
+          "ssim": 0.6336,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "border-width",
+          "ssim": 0.6527,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-will-change",
+      "tests": 45,
+      "scored": 43,
+      "ineligible": 2,
+      "pass": 11,
+      "fail": 32,
+      "passPct": 25.6,
+      "ge95": 39,
+      "meanSsim": 0.983,
+      "meanSsimFailing": 0.9773,
+      "nearPassFailing": 28,
+      "failVetoes": {
+        "coverageRatio": 1,
+        "colorMass": 30,
+        "presence": 0,
+        "ssimOnly": 2
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-pseudo-element-rendering",
+          "n": 2
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "will-change-transform-image",
+          "ssim": 0.8934,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "will-change-fixedpos-cb-002",
+          "ssim": 0.9148,
+          "vetoes": []
+        },
+        {
+          "test": "will-change-fixedpos-cb-005",
+          "ssim": 0.9148,
+          "vetoes": []
+        },
+        {
+          "test": "will-change-fixpos-cb-position-1",
+          "ssim": 0.9452,
+          "vetoes": [
+            "color-mass"
+          ]
+        },
+        {
+          "test": "will-change-fixpos-cb-height-1",
+          "ssim": 0.9559,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "css-writing-modes",
+      "tests": 136,
+      "scored": 136,
+      "ineligible": 0,
+      "pass": 62,
+      "fail": 74,
+      "passPct": 45.6,
+      "ge95": 67,
+      "meanSsim": 0.9076,
+      "meanSsimFailing": 0.8406,
+      "nearPassFailing": 5,
+      "failVetoes": {
+        "coverageRatio": 10,
+        "colorMass": 32,
+        "presence": 5,
+        "ssimOnly": 34
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-orthogonal-flow",
+          "n": 69
+        },
+        {
+          "tag": "requires-bundled-asset",
+          "n": 30
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 22
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "logical-physical-mapping-001",
+          "ssim": 0.5356,
+          "vetoes": []
+        },
+        {
+          "test": "direction-upright-001",
+          "ssim": 0.5489,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "direction-upright-002",
+          "ssim": 0.6151,
+          "vetoes": []
+        },
+        {
+          "test": "slr-alongside-vlr-floats",
+          "ssim": 0.6525,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "vrl-text-orientation-sideways-alongside-vrl-floats",
+          "ssim": 0.6841,
+          "vetoes": [
+            "color-mass"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "cssom",
+      "tests": 8,
+      "scored": 8,
+      "ineligible": 0,
+      "pass": 5,
+      "fail": 3,
+      "passPct": 62.5,
+      "ge95": 7,
+      "meanSsim": 0.9776,
+      "meanSsimFailing": 0.9412,
+      "nearPassFailing": 2,
+      "failVetoes": {
+        "coverageRatio": 3,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-script-mutation",
+          "n": 2
+        },
+        {
+          "tag": "requires-shadow-dom",
+          "n": 2
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "all-initial-csstext",
+          "ssim": 0.9119,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "adoptedstylesheets-adopt-style-subresource.tentative",
+          "ssim": 0.9559,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "adoptedstylesheets-adopt-style.tentative",
+          "ssim": 0.9559,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "cssom-view",
+      "tests": 10,
+      "scored": 7,
+      "ineligible": 3,
+      "pass": 6,
+      "fail": 1,
+      "passPct": 85.7,
+      "ge95": 6,
+      "meanSsim": 0.98,
+      "meanSsimFailing": 0.9107,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 1
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-script-driven-scroll",
+          "n": 1
+        },
+        {
+          "tag": "requires-script-mutation",
+          "n": 1
+        },
+        {
+          "tag": "requires-shadow-dom",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "scrollIntoView-should-treat-slot-as-scroll-container",
+          "ssim": 0.9107,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "fill-stroke",
+      "tests": 1,
+      "scored": 1,
+      "ineligible": 0,
+      "pass": 0,
+      "fail": 1,
+      "passPct": 0.0,
+      "ge95": 0,
+      "meanSsim": 0.8685,
+      "meanSsimFailing": 0.8685,
+      "nearPassFailing": 0,
+      "failVetoes": {
+        "coverageRatio": 0,
+        "colorMass": 0,
+        "presence": 0,
+        "ssimOnly": 1
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-inline-FC",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "paint-order-001",
+          "ssim": 0.8685,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "filter-effects",
+      "tests": 139,
+      "scored": 133,
+      "ineligible": 6,
+      "pass": 93,
+      "fail": 40,
+      "passPct": 69.9,
+      "ge95": 100,
+      "meanSsim": 0.9484,
+      "meanSsimFailing": 0.8534,
+      "nearPassFailing": 7,
+      "failVetoes": {
+        "coverageRatio": 17,
+        "colorMass": 22,
+        "presence": 6,
+        "ssimOnly": 15
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-animation-runtime",
+          "n": 9
+        },
+        {
+          "tag": "requires-viewport-canvas",
+          "n": 7
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 6
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "filter-function-repeating-radial-gradient",
+          "ssim": 0.3934,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "filter-function-repeating-linear-gradient",
+          "ssim": 0.4032,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "backdrop-filter-root-element",
+          "ssim": 0.5402,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "filter-with-mix-blend-mode",
+          "ssim": 0.5435,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "backdrop-filter-plus-mask-large",
+          "ssim": 0.6023,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "mediaqueries",
+      "tests": 44,
+      "scored": 44,
+      "ineligible": 0,
+      "pass": 9,
+      "fail": 35,
+      "passPct": 20.5,
+      "ge95": 42,
+      "meanSsim": 0.9727,
+      "meanSsimFailing": 0.9659,
+      "nearPassFailing": 33,
+      "failVetoes": {
+        "coverageRatio": 14,
+        "colorMass": 23,
+        "presence": 2,
+        "ssimOnly": 0
+      },
+      "topVetoKindsFailing": [],
+      "worstTests": [
+        {
+          "test": "at-custom-media-basic",
+          "ssim": 0.5414,
+          "vetoes": [
+            "presence",
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "prefers-color-scheme-svg-image",
+          "ssim": 0.9095,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "mq-case-insensitive-001",
+          "ssim": 0.9549,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "mq-invalid-media-type-001",
+          "ssim": 0.9549,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "mq-invalid-media-type-002",
+          "ssim": 0.9549,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "motion",
+      "tests": 73,
+      "scored": 73,
+      "ineligible": 0,
+      "pass": 46,
+      "fail": 27,
+      "passPct": 63.0,
+      "ge95": 64,
+      "meanSsim": 0.9782,
+      "meanSsimFailing": 0.9535,
+      "nearPassFailing": 18,
+      "failVetoes": {
+        "coverageRatio": 17,
+        "colorMass": 3,
+        "presence": 0,
+        "ssimOnly": 8
+      },
+      "topVetoKindsFailing": [],
+      "worstTests": [
+        {
+          "test": "offset-path-coord-box-004",
+          "ssim": 0.8769,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "offset-path-ray-013",
+          "ssim": 0.9103,
+          "vetoes": []
+        },
+        {
+          "test": "offset-path-shape-circle-002",
+          "ssim": 0.9234,
+          "vetoes": []
+        },
+        {
+          "test": "offset-path-shape-ellipse-002",
+          "ssim": 0.9234,
+          "vetoes": []
+        },
+        {
+          "test": "offset-path-ray-015",
+          "ssim": 0.9271,
+          "vetoes": []
+        }
+      ]
+    },
+    {
+      "section": "printing",
+      "tests": 15,
+      "scored": 15,
+      "ineligible": 0,
+      "pass": 10,
+      "fail": 5,
+      "passPct": 66.7,
+      "ge95": 12,
+      "meanSsim": 0.9674,
+      "meanSsimFailing": 0.9112,
+      "nearPassFailing": 2,
+      "failVetoes": {
+        "coverageRatio": 2,
+        "colorMass": 0,
+        "presence": 1,
+        "ssimOnly": 3
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-print-medium",
+          "n": 5
+        },
+        {
+          "tag": "requires-animation-runtime",
+          "n": 1
+        },
+        {
+          "tag": "requires-script-mutation",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "zero-size-001-print.tentative",
+          "ssim": 0.869,
+          "vetoes": []
+        },
+        {
+          "test": "zero-size-002-print.tentative",
+          "ssim": 0.869,
+          "vetoes": []
+        },
+        {
+          "test": "zero-size-003-print.tentative",
+          "ssim": 0.869,
+          "vetoes": []
+        },
+        {
+          "test": "animations-shadow-print",
+          "ssim": 0.967,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "background-image-print",
+          "ssim": 0.982,
+          "vetoes": [
+            "presence",
+            "coverage-ratio"
+          ]
+        }
+      ]
+    },
+    {
+      "section": "selectors",
+      "tests": 153,
+      "scored": 153,
+      "ineligible": 0,
+      "pass": 135,
+      "fail": 18,
+      "passPct": 88.2,
+      "ge95": 141,
+      "meanSsim": 0.9851,
+      "meanSsimFailing": 0.8925,
+      "nearPassFailing": 6,
+      "failVetoes": {
+        "coverageRatio": 8,
+        "colorMass": 2,
+        "presence": 4,
+        "ssimOnly": 9
+      },
+      "topVetoKindsFailing": [
+        {
+          "tag": "requires-script-mutation",
+          "n": 4
+        },
+        {
+          "tag": "requires-shadow-dom",
+          "n": 4
+        },
+        {
+          "tag": "requires-inline-FC",
+          "n": 1
+        }
+      ],
+      "worstTests": [
+        {
+          "test": "selector-structural-pseudo-root",
+          "ssim": 0.5414,
+          "vetoes": [
+            "color-mass",
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "nth-child-specificity-2",
+          "ssim": 0.8382,
+          "vetoes": []
+        },
+        {
+          "test": "nth-last-child-specificity-2",
+          "ssim": 0.8386,
+          "vetoes": []
+        },
+        {
+          "test": "nth-child-of-nesting",
+          "ssim": 0.8587,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        },
+        {
+          "test": "nth-last-child-of-nesting",
+          "ssim": 0.8587,
+          "vetoes": [
+            "coverage-ratio"
+          ]
+        }
+      ]
+    }
+  ],
+  "reproduce": "per section: section-runner.sh <section> --web-only --run-id wave35-webmap --foreground; then read tools/titan/runs/wave35-webmap/sections/<section>/manifest.json -> wpt.results[*].browserRef.diffs[\"web-ref\"]."
+}

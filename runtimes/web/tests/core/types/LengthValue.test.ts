@@ -67,6 +67,34 @@ describe('extractLength', () => {
       .toEqual({ kind: 'relative', value: 50, unit: 'percent' });
   });
 
+  // wave-35 lane B9 — the SECOND live spelling of the same percentage value.
+  // MaxWidthProperty.MaxValue is a kotlinx polymorphic sealed variant
+  // (`@SerialName("percentage") data class PercentageValue(val percentage:
+  // IRPercentage)`), so the discriminator writes `type` and the constructor
+  // parameter name writes `percentage` — MaxHeightProperty reuses that type,
+  // which is why `max-height: 100%` reaches the wire as this shape. Reading
+  // only `value` decoded it to {kind:'unknown'}, and SizeExtractor DROPS
+  // unknown lengths, so the declaration vanished silently: WPT
+  // css-sizing/aspect-ratio/abspos-008 lost the max-height that CSS Sizing 4
+  // §4.1 transfers through `aspect-ratio: 1/1`, painting a 240×240 box
+  // against the ref's 100×100 (composed-vs-ref SSIM 0.8415, wave34-depth).
+  it('handles { type:"percentage", percentage:N } (Max*/Min* sizing spelling)', () => {
+    expect(extractLength({ type: 'percentage', percentage: 100 }))
+      .toEqual({ kind: 'relative', value: 100, unit: 'percent' });
+  });
+
+  it('prefers `value` over `percentage` when a shape carries both', () => {
+    // Widening-only contract: the pre-existing key still wins, so no value
+    // that parsed before this change can decode differently now.
+    expect(extractLength({ type: 'percentage', value: 25, percentage: 99 }))
+      .toEqual({ kind: 'relative', value: 25, unit: 'percent' });
+  });
+
+  it('still returns unknown for a percentage envelope with no numeric payload', () => {
+    // The fall-through is preserved: a malformed envelope must NOT become 0%.
+    expect(extractLength({ type: 'percentage' })).toEqual({ kind: 'unknown' });
+  });
+
   it('handles { fr:N } grid-fraction shape', () => {
     expect(extractLength({ fr: 2 })).toEqual({ kind: 'fraction', fr: 2 });
   });

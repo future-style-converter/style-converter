@@ -103,6 +103,13 @@ export function splitCombinedIr(combined) {
     // Only carry keyframes when the source had them (additive v2 key;
     // omitting keeps pre-motion docs byte-identical to a hand-authored one).
     if (combined.keyframes) doc.keyframes = combined.keyframes;
+    // Wave 35 lane B2 — the same carry for `fontFaces` (spec 01 §5), and for
+    // the same reason: @font-face is DOCUMENT-scoped (css-fonts-4 §4.1), so a
+    // split doc must keep the whole database or a test whose face was declared
+    // by a sibling sheet would shape with a fallback. The natives' feeders
+    // read this list to decide which font FILES to push onto the device, so
+    // dropping it here would silently un-deliver every native face.
+    if (combined.fontFaces) doc.fontFaces = combined.fontFaces;
     docs.push({ key, doc });
   }
   return docs;

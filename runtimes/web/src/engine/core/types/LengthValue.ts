@@ -6,6 +6,8 @@
 //   lengths-container.json  -> { type:'length', original:{v,u:'CQW'|...} }
 //   lengths-intrinsic.json  -> bare string "auto" | "min-content" | "max-content"
 //   lengths-special.json    -> { type:'percentage', value:N } or { fr:N }
+//   Max*/Min* sizing        -> { type:'percentage', percentage:N } (the
+//       kotlinx-polymorphic spelling of the same value — see extractLength)
 //   Many property shapes also pass raw { px:N } (no 'type' wrapper).
 
 // Exhaustive list of CSS length units we recognise (lowercased per IR convention).
@@ -139,9 +141,46 @@ export function extractLength(data: unknown): LengthValue {
     return { kind: 'calc', expression: inner };
   }
 
-  // Percentage envelope: { type:'percentage', value:N } — quirk #2.
-  if (obj.type === 'percentage' && typeof obj.value === 'number') {
-    return { kind: 'relative', value: obj.value, unit: 'percent' };
+  // Percentage envelope — quirk #2. TWO payload keys exist on the frozen v2
+  // wire and BOTH are live, because the converter reaches this JSON through
+  // two different serializers:
+  //
+  //   { type:'percentage', value:N }      — hand-written serializers that
+  //       spell the payload out (WidthProperty.WidthValueSerializer:
+  //       `put("type","percentage"); put("value", …)` — so Width / Height /
+  //       BlockSize / InlineSize land here).
+  //   { type:'percentage', percentage:N } — kotlinx POLYMORPHIC encoding of a
+  //       `@SerialName("percentage") data class PercentageValue(val
+  //       percentage: IRPercentage)` variant, where the class discriminator
+  //       supplies `type` and the CONSTRUCTOR PARAMETER NAME supplies the
+  //       payload key. MaxWidthProperty.MaxValue is exactly that shape, and
+  //       MaxHeightProperty reuses it — so Max/Min width+height land here.
+  //
+  // Reading only `value` silently dropped the whole Max*/Min* percentage
+  // family: extractLength returned {kind:'unknown'} and SizeExtractor's
+  // `if (len.kind === 'unknown') return;` threw the declaration away with no
+  // trace. MEASURED consequence — WPT css-sizing/aspect-ratio/abspos-008
+  // (`aspect-ratio:1/1; max-height:100%` in a 100px-tall relative parent):
+  // with max-height gone the browser had nothing to transfer through the
+  // ratio (CSS Sizing 4 §4.1 transferred size suggestion), so the abspos box
+  // shrink-to-fit to its 240px max-content instead of the ref's 100px, and
+  // the ratio squared that into a 240×240 green box against a 100×100 ref
+  // (composed-vs-ref SSIM 0.8415, wave34-depth). abspos-014 shares the shape.
+  //
+  // The Swift twin has read both keys since the wave-1 Sizing_MaxWidthPercent
+  // fixture (`(o["value"] ?? o["percentage"])`, StyleEngine/core/types/
+  // LengthValue.swift) — web and Compose were the two outliers, so this is a
+  // parity repair, not a new wire tolerance. Widening only: the second key is
+  // read ONLY when the first is absent, and the shape it rescues previously
+  // fell all the way through to {kind:'unknown'}, so no value that parses
+  // today can change.
+  if (obj.type === 'percentage') {
+    if (typeof obj.value === 'number') {
+      return { kind: 'relative', value: obj.value, unit: 'percent' };
+    }
+    if (typeof obj.percentage === 'number') {
+      return { kind: 'relative', value: obj.percentage, unit: 'percent' };
+    }
   }
 
   // 'type:length' wrapper (quirk #1): unwrap and continue with the inner shape.
