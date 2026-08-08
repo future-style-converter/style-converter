@@ -1635,8 +1635,66 @@ export const RULES = [
         test: (html /* , _ctx */) => RX.scriptDomMutation.test(html),
     },
     {
+        // ── wave-36 M6: THE PRINT/PAGED CAPABILITY DECISION — REFUSED ────
+        //
+        // The wave-36 mining map ranked "print medium: page boxes, page
+        // margins, paginated fragmentation" at #5 (136 failing cells) and
+        // asked whether this tag should join an inject-wpt-block.mjs
+        // EXCLUSION FAMILY the way animation-runtime and scroll-state
+        // effectively have — i.e. whether paged media is a CAPABILITY TIER
+        // the static composed canvas cannot deliver.
+        //
+        // IT IS NOT, and the measurement is unambiguous. THE ANSWER TURNS
+        // ON A FACT ABOUT THE REFS, not about pagination: capture-browser-
+        // ref.mjs never calls `emulateMediaType('print')`. Every committed
+        // ref PNG is a SCREEN rasterisation of the reftest's `*-ref.html`.
+        // For most `-print` tests that ref-html states the paged outcome in
+        // screen-inert markup (a `page-break-before: always` that does
+        // nothing at screen), so the acceptance target is a plain screen
+        // render any faithful renderer can hit — pagination never enters
+        // the comparison at all.
+        //
+        // MEASURED (wave-36 M6, all 275 scored tests corpus-wide carrying
+        // this tag, from runs/wave35-webmap). Method — the Rule 42/43
+        // ceiling method: render the TEST page in the refs' own headless
+        // Chromium under capture-browser-ref.mjs's exact canvas contract
+        // (canvasFrameCss + REF_RENDER_WIDTH/REF_RENDER_MIN_HEIGHT +
+        // padPngBuffer) and diff it against the committed ref with
+        // inject-wpt-block.mjs's diffWebVsRef. Chromium is the ceiling for
+        // any Chrome-faithful renderer:
+        //
+        //     Chromium ceiling ≥ 0.95 (ref REACHABLE at screen) : 193 / 275
+        //     Chromium ceiling <  0.95 (ref unreachable)        :  82 / 275
+        //     …of the 141 tests we ALREADY PASS, ceiling ≥ 0.95 : 140 / 141
+        //
+        // So a blanket exclusion on this tag would score-exclude 193 tests
+        // whose targets Chromium proves are reachable — 141 of them cells
+        // we currently PASS. PRECISION 82/275 = 0.298. Every cheap static
+        // narrowing was measured against the same ground truth and is no
+        // better: `@page` present 0.383, `@page { size }` 0.380, a forced
+        // `break-before/after` 0.268, and even a full normalised
+        // test-vs-ref SOURCE DELTA (which achieves recall 1.000) lands at
+        // 0.304. There is no textual signature; the 82 are separable only
+        // by per-test measurement, which this module's <60s / 24k-file
+        // budget cannot run.
+        //
+        // THE WAVE-8 RULE THEREFORE STANDS UNCHANGED: broad capability tags
+        // describe tests the harness DOES deliver and render, and they stay
+        // SCORED. inject-wpt-block.mjs carries the matching negative pin
+        // (`requires-print-medium` must be in NO exclusion family) so this
+        // decision cannot be silently reversed.
+        //
+        // WHAT WOULD CHANGE THE ANSWER — and it is a real closing move, not
+        // a formality: give the pipeline a print medium on BOTH sides
+        // (emulateMediaType('print') + a page-box canvas in
+        // capture-browser-ref.mjs, mirrored by a paged capture stage) and
+        // bump CANVAS_REV. Then the 82 become reachable and the tag becomes
+        // ordinary. Until then their failures are honestly OURS, and the 53
+        // failures with a ≥0.95 ceiling are ordinary bugs — 8 of which
+        // wave-36 M6 fixed outright (the `<table border=1>` presentational
+        // mapping in extract-fixture.mjs; see htmlTablePresentationProps).
         tag: 'requires-print-medium',
-        description: '*-print.html filename, @media print, or @page — paged-media rendering',
+        description: '*-print.html filename, @media print, or @page — paged-media rendering. SCORED, NOT EXCLUDED: measured over all 275 scored tests carrying it, the refs\' own Chromium reaches the committed ref at screen medium on 193 (and on 140 of the 141 we already pass), so an exclusion would have precision 0.298. See the wave-36 M6 banner above.',
         swarm001Source: [
             'css-page__background-image-only-for-print.json',
             'css-multicol__auto-fill-auto-size-001-print.json',

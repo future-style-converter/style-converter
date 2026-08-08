@@ -71,18 +71,50 @@ object PerformanceExtractor {
         )
     }
 
+    /**
+     * One `contain` token → the primitive keywords it stands for
+     * (css-contain-1 §2: `strict` = size+layout+paint+style,
+     * `content` = layout+paint+style, `none` = nothing).
+     *
+     * Wave-36 lane M4 — this used to live INSIDE the [JsonPrimitive] branch
+     * only, so the shorthand keywords were expanded on a wire shape the
+     * converter never emits. `ContainProperty` is a single-field data class
+     * over `List<ContainValue>`, which kotlinx.serialization flattens to a
+     * BARE ARRAY (measured on the wave-35 css-contain corpus IR:
+     * `{"type":"Contain","data":["STRICT"]}`), and the array branch below
+     * passed the raw token through — so `["STRICT"]` produced the set
+     * {"STRICT"}, every flag stayed false and `hasContainment` was false.
+     * Shared by both branches now, which is what makes the two paths honest
+     * twins of each other and of the web `parseContain`.
+     */
+    private fun expandContainToken(token: String): Set<String> = when (token) {
+        "NONE" -> emptySet()
+        "STRICT" -> setOf("LAYOUT", "PAINT", "SIZE", "STYLE")
+        "CONTENT" -> setOf("LAYOUT", "PAINT", "STYLE")
+        // Hyphenated spellings reach us from the space-separated string form;
+        // the enum form arrives underscored (INLINE_SIZE). Normalise to the
+        // underscored names extractContainConfig() tests for.
+        "INLINE-SIZE" -> setOf("INLINE_SIZE")
+        "BLOCK-SIZE" -> setOf("BLOCK_SIZE")
+        else -> setOf(token)
+    }
+
     private fun extractContainValues(data: JsonElement): Set<String> {
         return when (data) {
             is JsonPrimitive -> {
                 val content = data.contentOrNull?.uppercase() ?: return emptySet()
-                when (content) {
-                    "NONE" -> emptySet()
-                    "STRICT" -> setOf("LAYOUT", "PAINT", "SIZE", "STYLE")
-                    "CONTENT" -> setOf("LAYOUT", "PAINT", "STYLE")
-                    else -> content.split(" ").map { it.trim().uppercase() }.toSet()
-                }
+                content.split(" ")
+                    .mapNotNull { it.trim().takeIf(String::isNotEmpty)?.uppercase() }
+                    .flatMap { expandContainToken(it) }
+                    .toSet()
             }
-            is JsonArray -> data.mapNotNull { it.jsonPrimitive.contentOrNull?.uppercase() }.toSet()
+            // Normal emission. `jsonPrimitive` THROWS on a non-primitive
+            // element (the same trap the WillChange branch below documents),
+            // so the cast is guarded rather than assumed.
+            is JsonArray -> data
+                .mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.uppercase() }
+                .flatMap { expandContainToken(it) }
+                .toSet()
             is JsonObject -> {
                 val result = mutableSetOf<String>()
                 data["layout"]?.jsonPrimitive?.contentOrNull?.let { if (it == "true") result.add("LAYOUT") }

@@ -20,7 +20,11 @@ package com.styleconverter.runtime.rendering
 //   * ImageOrientation: `<angle> flip?` OR `none | from-image`. `flip`
 //     alone (no angle) means 0deg flip.
 //   * ImageResolution: DPI + DPCM are normalized to DPPX internally.
-//   * Zoom: Normal / Reset / Percentage / Number (no length form).
+//   * Zoom: Normal / Reset / Percentage / Number (no length form). Owned
+//     here for REGISTRY purposes only — the property has a real dedicated
+//     triplet (ZoomConfig/ZoomExtractor/ZoomApplier in this folder) that
+//     StyleApplier chains outermost, so unlike its neighbours it is not a
+//     coverage-only claim.
 //   * ForcedColorAdjust has a Raw catch-all; appliers must validate.
 //   * ContentVisibility / FieldSizing / InputSecurity / InterpolateSize /
 //     PrintColorAdjust are strict enums.

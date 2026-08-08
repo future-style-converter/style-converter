@@ -100,6 +100,33 @@ one droppable string instead of three new channels.
   real `<ol>` and lets the browser synthesise `::marker` — gets native
   numbering instead of a baked string.
 
+## `meta.attrs.src` — the replaced-element source (wave-36)
+
+A third *disjoint* attr lane: `img`, `embed`, `object`, `video`. These
+are **replaced elements**, and `object-fit` / `object-position` /
+`object-view-box` are the CSS that decides how their content is scaled
+into the box — so a wire that carries the properties but not the content
+describes a scaling of nothing. `src` closes that.
+
+- **One canonical key, whatever the markup spelled.** `src` on
+  `img`/`embed`, `data` on `object` (HTML §4.8.7), `poster` on `video`
+  (§4.8.9 — the poster frame is what a still capture paints, and it is
+  object-fit-scaled like any other replaced content). Normalizing is in
+  keeping with the lane's siblings, which already retype rather than
+  mirror (`checked` → literal `true`, `min`/`max` → Number).
+- **A path, never a payload.** The value is a **producer-relative path**
+  (or a `data:` URI the author already inlined) — the same
+  consumer-resolves contract the document-level `fontFaces[].src` uses
+  (01-envelope.md §5), and for the same two reasons: only the consumer
+  knows where its asset origin is, and inlining is quadratically
+  expensive when a corpus reuses a handful of images across thousands of
+  element references.
+- **Absence is meaningful.** The key is omitted when the source
+  attribute is absent, empty, or names something the producer could not
+  deliver (remote URL, non-image format, missing file). A consumer that
+  sees no `src` must fall back to its own policy — a placeholder, alt
+  text, an empty box — never to a fabricated path.
+
 ## `meta.decorations` — why the colour token is NOT normalized
 
 `meta.decorations` is `[{line, color?}, …]`, ordered **outermost-first**

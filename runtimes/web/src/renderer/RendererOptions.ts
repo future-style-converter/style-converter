@@ -102,11 +102,16 @@ export interface RendererOptions {
 
   /**
    * Supply the `src` for a node whose element resolves to <img>.
-   * Default: none — the wire carries no image source yet (the wave-9
-   * IR content-contract gap), so the element renders with alt text
-   * only rather than the renderer inventing bytes. HARNESS DIVERGENCE:
-   * the harness injects a deterministic inline SVG placeholder so
-   * object-fit/position captures have stable pixels.
+   * Default (wave-36): the wire's own `meta.attrs.src` when present,
+   * verbatim — the extractor forwards the replaced element's source as a
+   * producer-relative PATH, the same contract `fontFaces[].src` uses, and
+   * the consumer is the only party that knows where its asset origin is.
+   * With no wire src the element renders with alt text only, rather than
+   * the renderer inventing bytes.
+   * HARNESS DIVERGENCE: the harness resolves that path against its
+   * /wpt-image/ corpus route, and falls back to a deterministic inline SVG
+   * placeholder when the wire carries no source, so object-fit/position
+   * captures always have stable pixels.
    */
   resolveImageSource?: (ctx: RenderContext) => string | undefined;
 

@@ -198,13 +198,30 @@ public struct IRAttrs: Equatable {
     /// ol/li attr lane. Decoded for wire completeness; this runtime paints
     /// the baked `IRMeta.markerText` instead of counting from it.
     public let start: String?
+    /// Wave-36 lane M1: the REPLACED-ELEMENT SOURCE — a third disjoint attr
+    /// lane (img/embed/object/video). ONE canonical key whatever the markup
+    /// spelled (`src` on img/embed, `data` on object per HTML §4.8.7,
+    /// `poster` on video per §4.8.9), carrying a PRODUCER-RELATIVE PATH or a
+    /// `data:` URI — never a payload — on the same consumer-resolves
+    /// contract as the document-level `fontFaces[].src`
+    /// (schema/spec/04-metadata-fields.md).
+    ///
+    /// DECODED, NOT YET PAINTED. This runtime has no asset origin for a
+    /// producer-relative corpus path (a device cannot read the host's disk —
+    /// the same asymmetry the @font-face channel documents), so the field
+    /// exists so the strict v2 reader ACCEPTS the key rather than throwing on
+    /// a wire the web consumer needs. Painting it is the named follow-up: a
+    /// bundling hop like the feeders' --wpt-dir copy, then an `Image` in
+    /// ComponentRenderer. Twin of Kotlin IRAttrs.src.
+    public let src: String?
 
     // internal: constructed by the decode paths and by tests. Defaults
     // keep pre-attrs construction sites and tests terse.
     init(type: String? = nil, value: String? = nil, valueNumber: Double? = nil,
          checked: Bool? = nil, multiple: Bool? = nil, selected: Bool? = nil,
          disabled: Bool? = nil, size: String? = nil, alt: String? = nil,
-         min: Double? = nil, max: Double? = nil, start: String? = nil) {
+         min: Double? = nil, max: Double? = nil, start: String? = nil,
+         src: String? = nil) {
         self.type = type
         self.value = value
         self.valueNumber = valueNumber
@@ -217,6 +234,7 @@ public struct IRAttrs: Equatable {
         self.min = min
         self.max = max
         self.start = start
+        self.src = src
     }
 
     /// Build from the wire's raw IRValue object — shared by the strict v2
@@ -244,7 +262,11 @@ public struct IRAttrs: Equatable {
             // wave-27: the ol/li lane is verbatim strings throughout — the
             // argument order here must mirror the initializer's, so `start`
             // sits last exactly as it does in the declaration above.
-            start: o["start"]?.stringValue
+            start: o["start"]?.stringValue,
+            // wave-36 lane M1: the replaced element's image source. Verbatim
+            // string lane, same as `start` — a path (or data: URI), never a
+            // payload, and never coerced.
+            src: o["src"]?.stringValue
         )
     }
 }

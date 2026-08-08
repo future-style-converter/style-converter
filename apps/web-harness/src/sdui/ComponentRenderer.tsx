@@ -156,6 +156,72 @@ const PLACEHOLDER_IMG_SRC =
   "%3Crect width='100' height='100' fill='%23808080'/%3E" +
   "%3Ccircle cx='50' cy='50' r='30' fill='%234a4a4a'/%3E%3C/svg%3E";
 
+// ── wave-36 lane M1: the REAL replaced-element source ────────────────────────
+//
+// The placeholder above exists because "nothing on today's wire carries the
+// image SOURCE". As of wave-36 something does: the extractor forwards the
+// corpus-relative path of `<img src>` / `<embed src>` / `<object data>` /
+// `<video poster>` as `meta.attrs.src` (tools/titan/extract-fixture.mjs,
+// REPLACED_SRC_TAGS), and vite.config.ts serves the corpus under the prefix
+// below. So a WPT capture can finally scale the image the test is about
+// instead of a grey disc.
+//
+// WHY THAT WAS THE WHOLE BUG. object-fit decides HOW replaced content is
+// scaled into its box; with fixed 100×100 placeholder bytes the box, the
+// keyword and the position were all correct and the pixels were still wrong
+// — measured on the wave-35 web map as 154 of 196 scored css-images object-*
+// cells, with `object-fit: none` captures at 10.3% ink against a 1.9% ref
+// (the 100×100 placeholder floods a 48×32 box the real 16×8 image barely
+// dots) and every `<embed>`/`<object>`/`<video>` capture at 0.9% against
+// 10.1% (those tags are outside TAG_ALLOWLIST and painted nothing at all).
+//
+// The placeholder STAYS as the fallback: the legacy 327-pair fixtures carry
+// no `meta.attrs.src`, so their captures are byte-identical, and a wire whose
+// src the extractor declined to deliver still gets stable bytes rather than a
+// broken-image glyph.
+const WPT_IMAGE_ROUTE = '/wpt-image/';
+
+/**
+ * The corpus path a component's replaced content should paint, as a URL —
+ * or undefined when the wire carries none.
+ *
+ * `data:` and absolute URLs pass through verbatim (self-contained already —
+ * the extractor forwards an authored data: URI unchanged); everything else is
+ * a corpus-relative path and gets the route prefix. Each segment is
+ * percent-encoded because the corpus has spaces and parentheses in some
+ * support paths — the route decodes with decodeURIComponent, so the two
+ * halves must agree on the escaping. `/` separators are preserved (encoding
+ * them would defeat the route's own path resolution).
+ */
+function wptImageSrc(component: { meta?: { attrs?: Record<string, unknown> | null } | null }): string | undefined {
+  const raw = component.meta?.attrs?.src;
+  if (typeof raw !== 'string' || raw.length === 0) return undefined;
+  if (/^(?:data:|https?:|\/\/)/i.test(raw)) return raw;
+  return WPT_IMAGE_ROUTE + raw.split('/').map(encodeURIComponent).join('/');
+}
+
+/**
+ * sourceTags whose content the wire delivers as an image and that the
+ * harness therefore paints through a real `<img>` element.
+ *
+ * HARNESS DIVERGENCE, and a deliberate one. `embed` and `object` are on the
+ * PRODUCTION renderer's DENYLISTED_TAGS (runtimes/web/src/renderer/
+ * TagMapping.ts — "external-document embedding"), so the package will never
+ * emit them and neither will this harness: rendering a real `<embed>` would
+ * hand third-party corpus content a nested browsing context inside the
+ * capture page. What Chromium paints for `<embed src="x.png">` / `<object
+ * data="x.png">` is an image document, and `<video poster>` paints the poster
+ * frame — in all three cases an `<img>` with the same source and the same
+ * object-fit/object-position produces the same pixels, verified against the
+ * browser-ref for this family. So the harness maps them to `<img>`: same
+ * paint, none of the embedding surface.
+ *
+ * GATED on the wire actually carrying a source. Without one there is nothing
+ * an <img> could paint that a <div> doesn't, and the demotion to <div> stays
+ * byte-identical for every fixture that predates this lane.
+ */
+const REPLACED_IMG_SOURCE_TAGS: ReadonlySet<string> = new Set(['embed', 'object', 'video']);
+
 interface ComponentRendererProps {
   /** Composed node: the flat-wire component + its slot-composed children. */
   node: ComposedNode;
@@ -694,12 +760,20 @@ const HARNESS_OPTIONS: RendererOptions = {
   // widgets pass through and the core applies `meta.attrs`; focus-ring
   // risk is neutralised by the decorateProps inert hook below. The legacy
   // 327-pair flow (no `?wpt=1`) keeps the demotion byte-for-byte.
-  mapTag: (tag) =>
+  // wave-36 lane M1 adds ONE branch: in WPT capture mode a replaced element
+  // whose source the wire delivers (embed/object/video — see
+  // REPLACED_IMG_SOURCE_TAGS) resolves to <img> so the browser applies the
+  // component's object-fit/object-position to real content. Every other
+  // input to this function is unchanged, and the branch cannot fire outside
+  // `?wpt=1` or without a wire src, so the 327-pair DOM stays byte-identical.
+  mapTag: (tag, ctx) =>
     tag === 'img'
       ? 'img'
-      : (WPT_MODE && tag && WIDGET_TAGS.has(tag))
-        ? tag
-        : (tag && TAG_ALLOWLIST.has(tag) ? tag : 'div'),
+      : (WPT_MODE && tag && REPLACED_IMG_SOURCE_TAGS.has(tag) && wptImageSrc(ctx.component) !== undefined)
+        ? 'img'
+        : (WPT_MODE && tag && WIDGET_TAGS.has(tag))
+          ? tag
+          : (tag && TAG_ALLOWLIST.has(tag) ? tag : 'div'),
   // wave-20 W1: the last word on element props — WPT-mode widgets get
   // `inert` (no hover/focus/interaction states, React 19 boolean) plus
   // `tabIndex: -1` (never sequentially focusable), so a passed-through
@@ -808,12 +882,14 @@ const HARNESS_OPTIONS: RendererOptions = {
   // font-* reach the glyphs via inheritance, and tests/tooling can
   // target the run. The package default is a bare text node.
   renderText: (text) => <span>{text}</span>,
-  // Divergence #5: deterministic inline placeholder src for <img> —
-  // nothing on today's wire carries the image SOURCE (the extractor
-  // forwards `_tag: 'img'` → meta.sourceTag but never reads `src`, and
-  // spec 01 defines no replaced-element content contract), so the
-  // harness substitutes fixed bytes → fixed pixels → stable captures.
-  resolveImageSource: () => PLACEHOLDER_IMG_SRC,
+  // Divergence #5: the image source for <img>. The wire's own
+  // `meta.attrs.src` wins when it has one (wave-36 lane M1 — a corpus path
+  // routed through /wpt-image/, see wptImageSrc); otherwise the harness
+  // substitutes the deterministic placeholder, which is what keeps a
+  // source-less <img> at fixed bytes → fixed pixels → stable captures. The
+  // hook is still the ONE place a src is chosen, so the core stays free of
+  // harness routing knowledge.
+  resolveImageSource: (ctx) => wptImageSrc(ctx.component) ?? PLACEHOLDER_IMG_SRC,
   // Forced-state capture hook (spec 06 §6) — validated URL param.
   forceState: FORCE_STATE,
   // Wave-19 lane FLOAT — CSS 2.1 §9.5 float-run grouping, WPT capture
@@ -1212,18 +1288,40 @@ function PlaceholderContent({ name, text, backgroundColor, explicitColor, irLine
         // measured natural Inter rhythm), so the OLD 18px calibration became
         // the divergence: ref paragraphs advanced 36px top-to-top, ours 34px,
         // re-accumulating 2px per bar (the whole css-color/css-break collapse
-        // of the first v4.1 run). The pin now mirrors the ref value — UNITLESS
-        // '1.25' so it recomputes against the span's own font-size exactly
-        // like the ref's inherited number (and like index.html's wpt-stage
-        // rule, which this duplicates deliberately: the span must stay pinned
-        // even if an intermediate ancestor ever grows a line-height).
+        // of the first v4.1 run). The value itself is unchanged — what changed
+        // in wave-36 (lane M4) is WHERE it comes from when the IR declares none.
+        //
+        // WAVE-36 CORRECTION — the fallback is `inherit`, not a re-stated
+        // '1.25'. The v4.1 cut re-stated the literal here so "the span stays
+        // pinned even if an intermediate ancestor ever grows a line-height".
+        // That defence is precisely backwards: line-height is an INHERITED
+        // property, the ref pins it at ZERO specificity on `:where(html)`
+        // (capture-browser-ref.mjs) exactly so an author declaration one level
+        // up wins for every descendant — and a re-statement on the innermost
+        // text span can never lose, so it clobbered every ancestor-declared
+        // line-height in the corpus. MEASURED on
+        // css/css-overflow/line-clamp/line-clamp-009: `.clamp { font: 16px/32px
+        // serif }` sits on the clamp component, the text lives in a CHILD
+        // component with no declaration of its own, so `irLineHeight` was
+        // undefined and this pin forced 16 x 1.25 = 20px. Capture yellow box
+        // 80px (4 x 20) vs ref 128px (4 x 32) — the clamp COUNT and the
+        // ellipsis were already correct; only the rhythm was wrong. 53 of the
+        // 57 failing line-clamp cells in the wave-35 web map declare a
+        // line-height (28 of them with no `line-clamp: auto` involvement).
+        //
+        // `inherit` keeps the span's declaration (nothing is "detached") while
+        // resolving through the real cascade: an ancestor component's inline
+        // line-height when there is one, otherwise index.html's wpt-stage rule
+        // (`body.wpt-composed-mode #root { line-height: 1.25 }`), which is the
+        // SAME unitless ref number and the same shape the ref uses. Bare text
+        // with no ancestor declaration is therefore byte-identical to before.
         //   • Composed WPT mode ONLY — the per-component `?wpt=1` path and the
         //     327-pair baseline never set WPT_COMPOSED_MODE, so both are byte-
         //     identical to before.
-        //   • DEFER to an IR-declared line-height (irLineHeight): a test that
-        //     sets its own line-height keeps it; only bare text (no declaration,
-        //     i.e. inheriting Inter's `normal`) gets the ref-matching default.
-        ...(WPT_COMPOSED_MODE ? { lineHeight: irLineHeight ?? '1.25' } : {}),
+        //   • DEFER to an IR-declared line-height (irLineHeight) FIRST: a
+        //     component that declares its own keeps it without a cascade round
+        //     trip; everything else inherits.
+        ...(WPT_COMPOSED_MODE ? { lineHeight: irLineHeight ?? 'inherit' } : {}),
         // fontSize/fontWeight/letterSpacing/textTransform/etc. all
         // inherit by default — don't set them explicitly. Colour is the
         // exception: we drive it from bg luminance to match iOS.

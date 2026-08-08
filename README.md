@@ -44,7 +44,7 @@ Three coverage numbers, all true — and they mean different things:
 | claim | number | source of truth |
 |---|---|---|
 | Registration coverage — a triplet exists + claims the IR type (a string-presence facade; does **not** imply native rendering) | **558 / 558 per platform** (Android 558 / 558 · iOS 558 / 558 · Web 558 / 558) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
-| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 18 / 558 · iOS 73 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
+| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 19 / 558 · iOS 74 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
 | Verified rendering coverage — SSIM ≥ 0.95, every variant, every platform pair | **91/550 (~17%)** | [docs/STATUS.md](docs/STATUS.md) |
 
 `registered` is only a string-presence facade — the triplet exists and
@@ -53,7 +53,7 @@ claims the type, but that alone does not render the property natively. The
 under-counts grouped appliers (one file — e.g. Compose `LayoutApplier.kt`,
 iOS `FlexboxApplier.swift`, web `ScrollMarginApplier.ts` — renders many
 properties but its basename matches at most one IR name, so the raw
-dedicated-applier file counts Android 59 · iOS 117 · Web 530 sit above the
+dedicated-applier file counts Android 60 · iOS 119 · Web 530 sit above the
 per-property floor).
 
 Of the unverified remainder: 419 are blocked on platform capability gaps
@@ -197,11 +197,11 @@ the point.
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 245 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1119 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2049 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1277 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1268 |
+| converter (Kotlin) | `./gradlew :converter:test` | 258 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1188 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2092 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1306 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1338 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 CI (`.github/workflows/ci.yml`) runs the converter, web-runtime,

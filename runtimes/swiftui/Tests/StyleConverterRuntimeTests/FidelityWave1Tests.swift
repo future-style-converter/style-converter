@@ -157,7 +157,9 @@ final class FidelityWave1Tests: XCTestCase {
 
     // MARK: - Min-box floor (web-harness parity)
 
-    /// Floor truth table: 50/30 only when the axis has NO width/min/max.
+    /// Floor truth table: 50/30 only when the axis has NO width and NO
+    /// min-*. A max-* CAP does not disable it (wave-36 M6 honesty sweep —
+    /// see StyleBuilder.minFloor's parity note).
     func testMinFloorDecision() {
         // Nothing declared → both floors.
         var s = SizeConfig()
@@ -170,10 +172,26 @@ final class FidelityWave1Tests: XCTestCase {
         // min-height constraint kills the block floor.
         s.minHeight = .exact(px: 10)
         XCTAssertNil(StyleBuilder.minFloor(for: s).height)
-        // max-width alone also disables the inline floor (web: max → '0').
+        // wave-36 M6: max-width ALONE keeps the inline floor — this is the
+        // exact shape of fixtures/visual-test.json `Sizing_MaxWidthPercent`
+        // (`max-width: 80%; height: 50px`, no width), whose committed
+        // web/Android baselines both carry the 50×50 purple square that the
+        // old max-suppressing gate erased from the iOS one.
         var s2 = SizeConfig()
         s2.maxWidth = .exact(px: 40)
+        XCTAssertEqual(StyleBuilder.minFloor(for: s2).width, 50)
+        s2.height = .exact(px: 50)
+        XCTAssertNil(StyleBuilder.minFloor(for: s2).height)
+        XCTAssertEqual(StyleBuilder.minFloor(for: s2).width, 50)
+        // …and a max-* cap PLUS a declared width still disables it (the web
+        // branch's `(styles.width) ? '0' : '50px'` and Compose's
+        // hasExplicitWidth both agree on this arm).
+        s2.width = .exact(px: 12)
         XCTAssertNil(StyleBuilder.minFloor(for: s2).width)
+        // Block-axis twin, kept in lock-step so the two axes cannot drift.
+        var s3 = SizeConfig()
+        s3.maxHeight = .exact(px: 40)
+        XCTAssertEqual(StyleBuilder.minFloor(for: s3).height, 30)
     }
 
     // MARK: - background-clip shrink bands (CSS Backgrounds 3 §2.4)

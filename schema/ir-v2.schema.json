@@ -132,10 +132,10 @@
               "minLength": 1
             },
             "attrs": {
-              "description": "wave-20 widget-identity attributes (v2 home of the extractor's `_attrs`, forwarded verbatim by the converter). Emitted for form/widget sourceTags (a/button/input/textarea/select/option/meter/progress) and — wave-27, the disjoint LIST-ORDINAL lane — for ol/li, whose markers depend on `start` (HTML §4.4.5) and per-item `value` (§4.4.8). ONLY present-in-source attributes among the eleven keys below appear. Value typing per the extractor contract (tools/titan/extract-fixture.mjs widgetAttrsFor): checked/multiple/selected/disabled are presence-booleans (`true`); min/max — and value on meter/progress — are numbers where the source text is numeric; the ol/li lane is verbatim strings throughout; everything else is the verbatim source string.",
+              "description": "wave-20 widget-identity attributes (v2 home of the extractor's `_attrs`, forwarded verbatim by the converter). Emitted for form/widget sourceTags (a/button/input/textarea/select/option/meter/progress) and — wave-27, the disjoint LIST-ORDINAL lane — for ol/li, whose markers depend on `start` (HTML §4.4.5) and per-item `value` (§4.4.8). ONLY present-in-source attributes among the twelve keys below appear. Value typing per the extractor contract (tools/titan/extract-fixture.mjs widgetAttrsFor): checked/multiple/selected/disabled are presence-booleans (`true`); min/max — and value on meter/progress — are numbers where the source text is numeric; the ol/li lane is verbatim strings throughout; everything else is the verbatim source string. `src` is the wave-36 REPLACED-SOURCE lane, a third disjoint tag set (img/embed/object/video): the canonical key for the replaced element's image source whatever attribute spelled it in the markup (`src` on img/embed, `data` on object per HTML §4.8.7, `poster` on video per §4.8.9), carrying a PRODUCER-RELATIVE PATH or a `data:` URI — never a payload — on the same consumer-resolves contract as the document-level `fontFaces[].src`.",
               "type": "object",
               "propertyNames": {
-                "enum": ["type", "value", "checked", "multiple", "size", "alt", "min", "max", "selected", "disabled", "start"]
+                "enum": ["type", "value", "checked", "multiple", "size", "alt", "min", "max", "selected", "disabled", "start", "src"]
               },
               "additionalProperties": {
                 "anyOf": [

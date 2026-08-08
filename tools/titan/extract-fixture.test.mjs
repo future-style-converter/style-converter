@@ -43,6 +43,8 @@ import {
   bodyDeclaresAbsoluteHeight,
   splitAnBOfSelector,
   collectDefinedTags,
+  // wave-36 M7 BODY-ANCESTOR: the synthetic <html>/<body> scaffolding.
+  DOCUMENT_SENTINEL_ANCESTORS,
   // wave-8: child combinator + support-asset inlining.
   splitSelectorChain,
   percentEncodeBytes,
@@ -1049,6 +1051,67 @@ test('bug2c: propsForBodyRoot accepts :root with the always-true pseudo carve-ou
   );
   const { props } = propsForBodyRoot(rules);
   assert.equal(props.color, 'green');
+});
+
+// ── wave-36 M7 BODY-ANCESTOR: `body …` / `html …` scoping rules ────────────
+//
+// The component walker's ancestor chain starts INSIDE <body>, so a top-level
+// component reached propsForElement with `ancestors = []`. Prepending only a
+// `:root`-tagged sentinel meant `body` never appeared in any chain, and every
+// rule whose non-rightmost compound is `body` — `body > div`, the single most
+// common WPT scoping idiom (89 scored corpus tests, 48 of them failing) —
+// matched nothing at all. css-logical/logical-values-float-clear-1 rendered
+// its floats correctly inside a container that had silently lost
+// `width: 20em; margin: 1em; padding: 2px; border: 1px solid silver`.
+
+test('m7: the injected document chain is <html> then <body>, in document order', () => {
+  // Shape pin — the matcher consumes the chain right-to-left, so `body` MUST
+  // be last (the immediate parent of every top-level component).
+  assert.deepEqual(DOCUMENT_SENTINEL_ANCESTORS.map((a) => a.tag), ['html', 'body']);
+  // The root keeps the Selectors-4 §6.4.1 carve-out metadata.
+  assert.equal(DOCUMENT_SENTINEL_ANCESTORS[0].pos.isRoot, true);
+  // body is the 2nd of the document element's 2 element children
+  // (HTML §13.2.6.4 always synthesises <head> + <body>), and the only body.
+  assert.equal(DOCUMENT_SENTINEL_ANCESTORS[1].pos.sibIndex, 1);
+  assert.equal(DOCUMENT_SENTINEL_ANCESTORS[1].pos.sibCount, 2);
+  assert.equal(DOCUMENT_SENTINEL_ANCESTORS[1].pos.sibTypeCount, 1);
+});
+
+test('m7: `body > div` reaches a TOP-LEVEL component (the css-logical regression)', () => {
+  // Verbatim from css/css-logical/logical-values-float-clear-1.html.
+  const rules = parseCss(
+    'body > div { width: 20em; margin: 1em; padding: 2px; border: 1px solid silver }',
+  );
+  const { props } = propsForElement(rules, 'div', { class: 'ltr' }, []);
+  assert.equal(props.width, '20em');
+  assert.equal(props.border, '1px solid silver');
+});
+
+test('m7: `body > div` does NOT reach a NESTED div (the child combinator still bites)', () => {
+  // The float subject inside the container has a `div` parent, not `body`.
+  const rules = parseCss('body > div { width: 20em }');
+  const { props } = propsForElement(rules, 'div', { class: 'is' }, [{ tag: 'div', attrs: {} }]);
+  assert.equal(props.width, undefined);
+});
+
+test('m7: `body span` and `html body p` descend through the synthetic chain', () => {
+  const rules = parseCss('body span { color: green } html body p { color: blue }');
+  assert.equal(propsForElement(rules, 'span', {}, []).props.color, 'green');
+  assert.equal(propsForElement(rules, 'p', {}, []).props.color, 'blue');
+  // …and one level deeper, where `body` is no longer the immediate parent.
+  assert.equal(
+    propsForElement(rules, 'span', {}, [{ tag: 'div', attrs: {} }]).props.color,
+    'green',
+  );
+});
+
+test('m7: `:root > x` correctly stops matching body children', () => {
+  // Browser truth: the document element's only element children are <head>
+  // and <body>, so `:root > div` matches nothing in the body subtree. The
+  // pre-M7 single-sentinel chain wrongly made every top-level component a
+  // child of :root. Descendant `:root div` must still match.
+  const rules = parseCss(':root > div { color: red } :root div { color: green }');
+  assert.equal(propsForElement(rules, 'div', {}, []).props.color, 'green');
 });
 
 // ── Bug 3: U+3000 IDEOGRAPHIC SPACE preserved in own-text ──────────────────
@@ -4376,12 +4439,18 @@ test('wave30 A4: the trigger set is the pinned closed list', () => {
   // component in the corpus carries, and must never land unreviewed.
   for (const p of ['font-size', 'font-family', 'font-weight', 'font-style',
     'color', 'line-height', 'direction', 'caret-color', 'letter-spacing',
-    'word-spacing', 'text-align', 'visibility']) {
+    'word-spacing', 'text-align', 'visibility',
+    // wave-36 lane M3: `quotes` (css-content-3 §2.2) joins the list — the
+    // reviewed widening this pin exists to force. Motivating cells:
+    // css-content quotes-031 (`body { quotes: "‹" "›" }`, 0.8701) and
+    // quotes-032 (`body { quotes: none }`, 0.8822), both painting the
+    // initial `auto` marks because the root declaration reached nothing.
+    'quotes']) {
     assert.equal(bodyDeclaresInheritedProperty({ [p]: 'x' }), true, p);
   }
   // Inherited but deliberately OUTSIDE the list (the documented gap) — and
   // non-inherited properties, which could never matter.
-  for (const p of ['white-space', 'text-indent', 'cursor', 'quotes',
+  for (const p of ['white-space', 'text-indent', 'cursor',
     'background-color', 'padding', 'height', 'contain']) {
     assert.equal(bodyDeclaresInheritedProperty({ [p]: 'x' }), false, p);
   }
@@ -5322,4 +5391,297 @@ test('lane-r34: the sweep reaches nested children', () => {
   };
   assert.equal(dropStaleRuns(fixture), 1);
   assert.equal(fixture.components.a.children.a__0._runs, undefined);
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// wave-36 M6 — HTML §15.3.3 TABLE PRESENTATIONAL ATTRIBUTES
+//
+// Every expectation below was READ OFF the ref pipeline's own headless
+// Chromium (_diag36/M6/probe-attrs.mjs), not off the spec prose, because the
+// acceptance target is that browser's render and Blink's
+// HTMLTableElement::ParseBorderWidthAttribute diverges from a naive reading
+// of "rules for parsing non-negative integers" on exactly the spellings the
+// corpus uses (`border=""`, `border="border"`, `border="yes"`, `border="-3"`).
+// ═════════════════════════════════════════════════════════════════════════════
+
+const {
+  parseHtmlNonNegativeInteger,
+  tableBorderAttrWidthPx,
+  tableCellPaddingPx,
+  nearestTableAncestor,
+  htmlTablePresentationProps,
+} = await import('./extract-fixture.mjs');
+
+test('wave36 M6: parseHtmlNonNegativeInteger follows HTML §2.4.4.2', () => {
+  assert.equal(parseHtmlNonNegativeInteger('0'), 0);
+  assert.equal(parseHtmlNonNegativeInteger('1'), 1);
+  assert.equal(parseHtmlNonNegativeInteger('+7'), 7);
+  // Trailing junk is IGNORED, not an error — `border="3px"` renders 3px.
+  assert.equal(parseHtmlNonNegativeInteger('3px'), 3);
+  assert.equal(parseHtmlNonNegativeInteger('1.9'), 1);
+  // Leading ASCII whitespace is skipped; NBSP is not ASCII whitespace.
+  assert.equal(parseHtmlNonNegativeInteger('  \t5'), 5);
+  assert.equal(parseHtmlNonNegativeInteger(' 5'), null);
+  // Errors: empty, negative, non-numeric.
+  assert.equal(parseHtmlNonNegativeInteger(''), null);
+  assert.equal(parseHtmlNonNegativeInteger('-3'), null);
+  assert.equal(parseHtmlNonNegativeInteger('border'), null);
+  assert.equal(parseHtmlNonNegativeInteger(undefined), null);
+});
+
+test('wave36 M6: tableBorderAttrWidthPx mirrors Blink on every corpus spelling', () => {
+  // Measured in the ref's Chromium — see the block banner.
+  assert.equal(tableBorderAttrWidthPx({}), 0);                    // no attribute
+  assert.equal(tableBorderAttrWidthPx({ border: '0' }), 0);       // explicit zero
+  assert.equal(tableBorderAttrWidthPx({ border: '1' }), 1);       // the 8 print tests
+  assert.equal(tableBorderAttrWidthPx({ border: '2' }), 2);
+  assert.equal(tableBorderAttrWidthPx({ border: '5' }), 5);
+  assert.equal(tableBorderAttrWidthPx({ border: '3px' }), 3);
+  // Present-but-unparseable is 1px, NOT 0 — attribute PRESENCE decides.
+  assert.equal(tableBorderAttrWidthPx({ border: '' }), 1);
+  assert.equal(tableBorderAttrWidthPx({ border: 'border' }), 1);
+  assert.equal(tableBorderAttrWidthPx({ border: 'yes' }), 1);
+  assert.equal(tableBorderAttrWidthPx({ border: '-3' }), 1);
+  assert.equal(tableBorderAttrWidthPx({ border: '1.9' }), 1);
+  // css-tables/html-to-css-mapping-2's two-billion value clamps like Blink's.
+  assert.equal(tableBorderAttrWidthPx({ border: '2026722966' }), 33554400);
+});
+
+test('wave36 M6: tableCellPaddingPx defaults to the 1px `revert` cannot restore', () => {
+  assert.equal(tableCellPaddingPx({}), 1);
+  assert.equal(tableCellPaddingPx({ cellpadding: '0' }), 0);
+  assert.equal(tableCellPaddingPx({ cellpadding: '7' }), 7);
+  // Unparseable keeps Blink's seeded default rather than collapsing to 0.
+  assert.equal(tableCellPaddingPx({ cellpadding: 'x' }), 1);
+});
+
+test('wave36 M6: nearestTableAncestor picks the INNER table', () => {
+  const outer = { tag: 'table', attrs: { border: '5' } };
+  const inner = { tag: 'table', attrs: { border: '1' } };
+  assert.equal(nearestTableAncestor([outer, { tag: 'tr', attrs: {} },
+    { tag: 'td', attrs: {} }, inner, { tag: 'tr', attrs: {} }]), inner);
+  assert.equal(nearestTableAncestor([{ tag: 'div', attrs: {} }]), null);
+  assert.equal(nearestTableAncestor(null), null);
+});
+
+test('wave36 M6: <table border=1> bakes the outset frame and the inset cell rules', () => {
+  const table = { tag: 'table', attrs: { border: '1' } };
+  // The table box: 1px outset on all four sides, no padding, no spacing.
+  assert.deepEqual(htmlTablePresentationProps('table', table.attrs, [], {}), {
+    unmodelled: false,
+    props: {
+      'border-top-width': '1px', 'border-top-style': 'outset',
+      'border-right-width': '1px', 'border-right-style': 'outset',
+      'border-bottom-width': '1px', 'border-bottom-style': 'outset',
+      'border-left-width': '1px', 'border-left-style': 'outset',
+    },
+  });
+  // A cell of that table: 1px INSET (never the table's width) + 1px padding.
+  const cell = htmlTablePresentationProps('td', {},
+    [table, { tag: 'tbody', attrs: {} }, { tag: 'tr', attrs: {} }], {});
+  assert.equal(cell.props['border-left-width'], '1px');
+  assert.equal(cell.props['border-left-style'], 'inset');
+  assert.equal(cell.props['padding-left'], '1px');
+  // …and a wide frame does NOT widen the cell rules (the spec's asymmetry).
+  const wide = htmlTablePresentationProps('td', {},
+    [{ tag: 'table', attrs: { border: '5' } }, { tag: 'tr', attrs: {} }], {});
+  assert.equal(wide.props['border-top-width'], '1px');
+  assert.equal(
+    htmlTablePresentationProps('table', { border: '5' }, [], {})
+      .props['border-top-width'], '5px');
+});
+
+test('wave36 M6: a bare <table> still gives its cells the 1px UA padding', () => {
+  const cell = htmlTablePresentationProps('td', {},
+    [{ tag: 'table', attrs: {} }, { tag: 'tr', attrs: {} }], {});
+  assert.deepEqual(cell.props, {
+    'padding-top': '1px', 'padding-right': '1px',
+    'padding-bottom': '1px', 'padding-left': '1px',
+  });
+  // …and nothing at all for the table box itself.
+  assert.equal(htmlTablePresentationProps('table', {}, [], {}), null);
+  // A cell with no table ancestor gets nothing rather than a guessed default.
+  assert.equal(htmlTablePresentationProps('td', {}, [{ tag: 'div', attrs: {} }], {}), null);
+  // Non-table boxes are never touched — rows and row groups included.
+  assert.equal(htmlTablePresentationProps('tr', {},
+    [{ tag: 'table', attrs: { border: '1' } }], {}), null);
+  assert.equal(htmlTablePresentationProps('div', {}, [], {}), null);
+});
+
+test('wave36 M6: cellpadding / cellspacing override the defaults', () => {
+  const t = { tag: 'table', attrs: { cellpadding: '0', cellspacing: '10' } };
+  assert.deepEqual(htmlTablePresentationProps('table', t.attrs, [], {}).props,
+    { 'border-spacing': '10px' });
+  // cellpadding=0 is a real zero, not "absent" — the cell fill still emits.
+  assert.deepEqual(htmlTablePresentationProps('td', {}, [t, { tag: 'tr', attrs: {} }], {}).props,
+    {
+      'padding-top': '0px', 'padding-right': '0px',
+      'padding-bottom': '0px', 'padding-left': '0px',
+    });
+  // No cellspacing attribute → the UA 2px default is NOT emitted (scope cut).
+  assert.equal(htmlTablePresentationProps('table', { cellpadding: '3' }, [], {}), null);
+});
+
+test('wave36 M6: an author declaration beats the presentation hint', () => {
+  const t = { tag: 'table', attrs: { border: '1' } };
+  const chain = [t, { tag: 'tr', attrs: {} }];
+  // Any padding spelling suppresses the WHOLE padding fill; the border fill
+  // is independent and still lands.
+  const padDecided = htmlTablePresentationProps('td', {}, chain, { 'padding-inline': '4px' });
+  assert.equal(padDecided.props['padding-top'], undefined);
+  assert.equal(padDecided.props['border-top-style'], 'inset');
+  // Any border spelling suppresses the WHOLE border fill; padding survives.
+  const borderDecided = htmlTablePresentationProps('td', {}, chain, { border: '2px dashed red' });
+  assert.equal(borderDecided.props['border-top-width'], undefined);
+  assert.equal(borderDecided.props['padding-top'], '1px');
+  // A declared border-spacing wins over cellspacing.
+  assert.equal(htmlTablePresentationProps('table', { cellspacing: '10' }, [],
+    { 'border-spacing': '3px' }), null);
+  // border-COLOR alone leaves the UA width/style in force (not a guard).
+  assert.equal(htmlTablePresentationProps('table', { border: '1' }, [],
+    { 'border-color': 'red' }).props['border-top-style'], 'outset');
+});
+
+test('wave36 M6: rules/frame/bordercolor decline the whole bake, loudly', () => {
+  for (const attr of ['rules', 'frame', 'bordercolor']) {
+    const t = { tag: 'table', attrs: { border: '1', [attr]: 'x' } };
+    const onTable = htmlTablePresentationProps('table', t.attrs, [], {});
+    assert.deepEqual(onTable, { props: {}, unmodelled: true },
+      `${attr} must decline on the table`);
+    // The decline propagates to the cells — no half-modelled border box.
+    assert.deepEqual(
+      htmlTablePresentationProps('td', {}, [t, { tag: 'tr', attrs: {} }], {}),
+      { props: {}, unmodelled: true }, `${attr} must decline on the cells`);
+  }
+});
+
+test('wave36 M6: buildComponents emits the frame end-to-end for the 8 print tests', () => {
+  // The exact markup of CSS2/pagination/rowgroup-page-break-inside-avoid-4-print.
+  const html = '<table border="1"><tbody><tr><td><p>2</p></td></tr></tbody></table>';
+  const { components } = buildComponents(html, [], 'x');
+  const flat = [];
+  (function walk(map) {
+    for (const c of Object.values(map ?? {})) {
+      flat.push(c);
+      if (c.children) walk(c.children);
+    }
+  })(components);
+  const table = flat.find((c) => c._tag === 'table');
+  const td = flat.find((c) => c._tag === 'td');
+  assert.equal(table.properties['border-top-style'], 'outset');
+  assert.equal(table.properties['border-top-width'], '1px');
+  assert.equal(td.properties['border-top-style'], 'inset');
+  assert.equal(td.properties['padding-top'], '1px');
+  // …and both wear the loud provenance marker.
+  assert.ok(table._lossyReasons.includes('html-table-presentation-baked'));
+  assert.ok(td._lossyReasons.includes('html-table-presentation-baked'));
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// wave-36 lane M3: QUOTES + GENERATED CONTENT
+//   M3-a  the LEGACY ONE-COLON pseudo-element notation (Selectors-3 §7.1)
+//   M3-b  `quotes` joins the root-inherited bake-down (css-content-3 §2.2)
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ── M3-a: `:before` / `:after` are the CSS1/CSS2 spelling of the same
+// pseudo-elements `::before` / `::after` name. Selectors-3 §7.1 REQUIRES a
+// UA to accept both. parseCompound implemented only `::`, so a single colon
+// fell through to the pseudo-CLASS branch, came back `unsupported`, and the
+// whole rule was dropped before extraction — the generated box never existed
+// on the wire (measured: 17 failing bucket-A cells across 8 sections, every
+// one with capture ink 0.00% against a ref that paints the generated text).
+
+test('wave36 M3-a: :before is the legacy spelling of ::before and lands in the same bucket', () => {
+  // The exact shape of css/css-content/attr-case-sensitivity-001.html.
+  const html = '<body><div id="gencon" foo="a"></div></body>';
+  const rules = parseCss('div#gencon:before { content: attr(foo) }');
+  const { components } = buildComponents(html, rules, 'legacy');
+  const div = components['legacy__0'];
+  assert.ok(div._pseudo, 'one-colon :before must build a _pseudo bucket');
+  // attr() bakes against the HOST's attributes (wave-25 ATTR BAKE), exactly
+  // as it does for the `::` spelling — the alias changes the SELECTOR only.
+  assert.equal(div._pseudo.before.properties.content, '"a"');
+  // …and the declaration must NOT leak onto the host box (CSS GC L3 §3.2).
+  assert.equal(div.properties.content, undefined);
+});
+
+test('wave36 M3-a: :after resolves identically to ::after through the matcher', () => {
+  // selectorMatchesPseudoElement returns the pseudo NAME on a match, so the
+  // two spellings must return the same string for the same element.
+  assert.equal(selectorMatchesPseudoElement('p:after', 'p', {}), 'after');
+  assert.equal(selectorMatchesPseudoElement('p::after', 'p', {}), 'after');
+  assert.equal(selectorMatchesPseudoElement('p:before', 'p', {}), 'before');
+  // A non-matching host still returns null, not a bare pseudo name.
+  assert.equal(selectorMatchesPseudoElement('div:before', 'p', {}), null);
+});
+
+test('wave36 M3-a: the alias never grants support the :: spelling lacks', () => {
+  // :first-line / :first-letter ARE grandfathered by Selectors-3 §7.1, but
+  // they are not in SUPPORTED_PSEUDO_ELEMENTS — so both spellings must land
+  // on the same honest refusal rather than the alias smuggling them in.
+  assert.equal(selectorMatchesPseudoElement('p:first-line', 'p', {}), null);
+  assert.equal(selectorMatchesPseudoElement('p::first-line', 'p', {}), null);
+  assert.equal(selectorMatchesPseudoElement('p:first-letter', 'p', {}), null);
+  // `::marker` is CSS-Pseudo-4 and has NO one-colon form — `:marker` is an
+  // unknown pseudo-CLASS and must stay unsupported.
+  assert.equal(selectorMatchesPseudoElement('li:marker', 'li', {}), null);
+  assert.equal(selectorMatchesPseudoElement('li::marker', 'li', {}), 'marker');
+});
+
+test('wave36 M3-a: the rightmost-token rule (Selectors-4 §3.3) holds for the alias', () => {
+  // Anything trailing the pseudo name inside the compound is invalid for the
+  // `::` spelling and must be equally invalid for the one-colon one.
+  assert.equal(selectorMatchesPseudoElement('p:before.x', 'p', { class: 'x' }), null);
+  assert.equal(selectorMatchesPseudoElement('p::before.x', 'p', { class: 'x' }), null);
+  // A functional argument is not a thing any CSS1/2 pseudo-element takes.
+  assert.equal(selectorMatchesPseudoElement('p:before(2)', 'p', {}), null);
+  // Real pseudo-CLASSES whose names merely START with the same letters keep
+  // working — the alias is an exact-name set, not a prefix test.
+  assert.equal(selectorMatches('p:first-child', 'p', {}, null, { sibIndex: 0, siblings: ['p'] }), true);
+});
+
+test('wave36 M3-a: a one-colon pseudo-element rule stops counting as unsupported', () => {
+  // countUnsupportedRules is the post-load activation trigger (wave-30 A3).
+  // A rule we can now apply statically must no longer buy a browser page
+  // load — that is the whole point of modelling it.
+  assert.equal(countUnsupportedRules(parseCss('div:before { content: "x" }')), 0);
+  assert.equal(countUnsupportedRules(parseCss('div::before { content: "x" }')), 0);
+  // …while the genuinely unmodelled ones still do.
+  assert.equal(countUnsupportedRules(parseCss('div:first-line { color: red }')), 1);
+  assert.equal(countUnsupportedRules(parseCss('div:hover { color: red }')), 1);
+});
+
+// ── M3-b: `quotes` (css-content-3 §2.2) joins ROOT_INHERITED_TRIGGER_PROPS.
+// `body { quotes: none }` sat on the body-root bag while the `<p>`/`<q>`
+// components are its SIBLINGS on the wire, so the declaration reached
+// nothing and every capture painted the initial `auto` curly marks
+// (quotes-032 0.8822, quotes-031 0.8701 in wave36-M3-base).
+
+test('wave36 M3-b: a root `quotes` declaration arms the inherited-bake trigger', () => {
+  assert.equal(bodyDeclaresInheritedProperty({ quotes: 'none' }), true);
+  assert.equal(bodyDeclaresInheritedProperty({ quotes: '"‹" "›"' }), true);
+  // Nothing else changed: a bag with no trigger property still answers false.
+  assert.equal(bodyDeclaresInheritedProperty({ 'background-color': 'red' }), false);
+});
+
+test('wave36 M3-b: the root `quotes` value is baked onto top-level body children', () => {
+  // quotes-032's exact shape: the declaration is on <body>, the <p> is a
+  // sibling of the body-root component, and its <q> descendants inherit
+  // through the renderer's own DOM once the top-level hop carries it.
+  const html = '<body><p>One <q>two</q></p></body>';
+  const rules = parseCss('body { quotes: none }');
+  const { components } = buildComponents(html, rules, 'q32');
+  const p = components['q32__0'];
+  assert.equal(p.properties.quotes, 'none');
+  assert.ok(p._lossyReasons.includes('body-inherited-baked'));
+});
+
+test('wave36 M3-b: a child that declares its own `quotes` is never overwritten', () => {
+  // css-cascade-4 §7.3: the child's own declaration outranks a value handed
+  // down from its parent. `quotes` has no covering shorthand, so the generic
+  // per-longhand guard is the whole contract.
+  const html = '<body><p class="inner">One <q>two</q></p></body>';
+  const rules = parseCss('body { quotes: none } .inner { quotes: auto }');
+  const { components } = buildComponents(html, rules, 'q33');
+  assert.equal(components['q33__0'].properties.quotes, 'auto');
 });

@@ -100,6 +100,25 @@ import {
 // unlike the post-load/bidi bakes — it needs no browser and stays a plain
 // top-level import. It short-circuits on fixtures with no list at all.
 import * as counterBake from './counter-style-bake.mjs';
+// wave-36 lane M3 THE GENERATED-CONTENT TEXT BAKE: a pseudo bag's `content`
+// declaration reaches the web renderer as an INLINE STYLE on a real <span>,
+// and Blink paints nothing for a <string> there (css-content-3 §2.1 element
+// replacement is implemented for <image> only) — so every `::before {
+// content: "x" }` in the corpus shipped a text-less box. This module
+// resolves the <string>/<quote> half of the value into the `_text` field
+// PseudoNodeRenderer already reads. Stdlib-only and browser-free like the
+// attr and counter-style bakes; see its header for the refusal set and the
+// measured population.
+import * as generatedContentBake from './generated-content-bake.mjs';
+// wave-36 THE WIDGET-APPEARANCE BAKE (the sixth bake): the css-ui
+// compute-kind-widget family establishes author-origin appearance-disabling
+// declarations from a GENERATED script whose declared values are, by
+// construction, identical to the UA's — so its only observable effect is
+// the widget's switch to fallback rendering, and that switch is statically
+// derivable from the script's own text. Stdlib-only like the attr and
+// counter-style bakes, and it short-circuits to a no-op ([] rules) on every
+// document without the idiom. See widget-appearance-bake.mjs.
+import * as widgetAppearanceBake from './widget-appearance-bake.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -3116,14 +3135,21 @@ export function collectDefinedTags(html) {
 }
 
 /**
- * Synthetic `:root` ancestor injected at match time (NOT in the public
- * ancestors chain). Selectors-4 §3.4.3 + §6.4.1 carve-out: the document
- * root has `isRoot:true` so child-indexed pseudos all match. We model the
- * root as if it were the sole sibling of itself (sibCount/typeCount = 1)
- * so anyone evaluating `:nth-of-type(1)` on it sees the expected truth.
+ * Synthetic document-element ancestor injected at match time (NOT in the
+ * public ancestors chain). Selectors-4 §3.4.3 + §6.4.1 carve-out: the
+ * document root has `isRoot:true` so child-indexed pseudos all match. We
+ * model the root as if it were the sole sibling of itself (sibCount/
+ * typeCount = 1) so anyone evaluating `:nth-of-type(1)` on it sees the
+ * expected truth.
+ *
+ * wave-36 M7: the tag is `html`, not `:root`. `:root` is a pseudo-class and
+ * carries no type selector, so it still matches this entry through
+ * `pos.isRoot` (evalPseudo's `root` branch) — but a bare `html` TYPE
+ * compound (`html body div`, `html > body > div`) now matches too, which
+ * the old `:root`-tagged sentinel could never do.
  */
 const ROOT_SENTINEL_ANCESTOR = {
-  tag: ':root', attrs: {},
+  tag: 'html', attrs: {},
   pos: {
     isRoot: true,
     sibIndex: 0, sibCount: 1,
@@ -3131,6 +3157,47 @@ const ROOT_SENTINEL_ANCESTOR = {
     isEmpty: false,
   },
 };
+
+/**
+ * wave-36 M7 (BODY-ANCESTOR): the second synthetic ancestor — `<body>`.
+ *
+ * The component walker's ancestor chain starts INSIDE body (buildComponents:
+ * every component IS a body descendant), so a top-level component arrived at
+ * `propsForElement` with `ancestors = []`. Prepending only the root sentinel
+ * meant `body` could never appear in a chain, and therefore EVERY rule whose
+ * non-rightmost compound is `body` — `body > div`, `body span`, `body * + *`,
+ * the single most common WPT scoping idiom — silently matched nothing. The
+ * declarations under test (widths, borders, margins on `body > div`) were
+ * dropped wholesale, which is why css-logical's float/clear tests render the
+ * right floats inside the wrong (border-less, full-bleed) container.
+ *
+ * Per HTML §13.2.6.4 the parser always synthesises `<head>` and `<body>` as
+ * the document element's only two element children, so body is honestly the
+ * 2nd of 2 element children (`sibIndex: 1, sibCount: 2`) and the only `body`
+ * of its type (`sibTypeIndex: 0, sibTypeCount: 1`). Attributes are left empty:
+ * the static extractor has no obligation to model `<body class>` (script-
+ * mutated in the corpus' only such test), and an empty bag is strictly closer
+ * to the truth than "no body exists at all".
+ */
+const BODY_SENTINEL_ANCESTOR = {
+  tag: 'body', attrs: {},
+  pos: {
+    isRoot: false,
+    sibIndex: 1, sibCount: 2,
+    sibTypeIndex: 0, sibTypeCount: 1,
+    isEmpty: false,
+  },
+};
+
+/**
+ * The document scaffolding every component hangs under, in document order
+ * (outermost first) — exactly the shape `selectorMatchesPseudoElement`
+ * consumes right-to-left. Frozen so no caller can mutate the shared bag.
+ */
+const DOCUMENT_SENTINEL_ANCESTORS = Object.freeze([
+  ROOT_SENTINEL_ANCESTOR, BODY_SENTINEL_ANCESTOR,
+]);
+export { DOCUMENT_SENTINEL_ANCESTORS };
 
 // Bug 1 fix (pilot-001 / css-color/color-001): the previous implementation
 // dropped <p>, <noscript>, <script>, <h1..h3> via an INSTRUCTION_TAGS set
@@ -3519,6 +3586,142 @@ export function widgetAttrsFor(tag, attrs) {
   return Object.keys(out).length > 0 ? out : null;
 }
 
+// ── wave-36 lane M1: the REPLACED-ELEMENT SOURCE lane ───────────────────────
+//
+// THE GAP THIS CLOSES. `object-fit` / `object-position` are the CSS that
+// decides HOW a replaced element's content is scaled inside its box — and
+// until this wave nothing on the wire carried the content at all. The
+// extractor forwarded `_tag: 'img'` and the harness substituted a fixed
+// 100×100 grey-disc placeholder (ComponentRenderer's PLACEHOLDER_IMG_SRC,
+// "the wave-9 IR content-contract gap"), so every capture scaled the WRONG
+// image: right box, right keyword, wrong pixels. MEASURED on the wave-35
+// full-corpus web map (tools/titan/results/webmap-v1.json rank 1): 154 of
+// the 196 scored css-images object-* cells fail, and the family splits by
+// SOURCE ELEMENT, not by keyword — `-i` (<img src>) 42/43 fail, `-e`
+// (<embed src>) 30/42, `-o` (<object data>) 30/42, `-p` (<video poster>)
+// 30/42. The ink numbers name the mechanism twice over: the `-e/-o/-p`
+// captures carry 0.945% ink against the ref's 10.103% (the element painted
+// NOTHING — those tags are outside the harness allowlist and demote to a
+// bare <div>), while the `-i` captures carry 10.326% against a ref's 1.883%
+// on `object-fit: none` (the 100×100 placeholder floods a 48×32 box the
+// real 16×8 image would barely dot).
+//
+// WHAT RIDES: the corpus-relative PATH of the source file, in `_attrs.src`,
+// which the converter already forwards verbatim as IR v2 `meta.attrs` (an
+// opaque JsonObject — no converter change, no schema change; the same
+// additive channel wave-20 opened for widget identity). A PATH and not a
+// payload, exactly as `fontFaces[].src` does (schema/spec/01-envelope.md
+// §5): inlining these as data URIs would have cost ~4.6 MB of extra JSON on
+// css-images alone (the corpus reuses eight support images across ~2,600
+// element references, and percent-encoding is 3× the raw bytes), and the
+// consumer that needs the file already has a corpus route.
+//
+// CANONICAL KEY `src`, whatever the HTML attribute was spelled: <img>/
+// <embed> use `src`, <object> uses `data` (HTML §4.8.7), <video> uses
+// `poster` (§4.8.9 — the poster frame IS what a still capture paints, and
+// it is object-fit-scaled like any other replaced content). Normalising is
+// in keeping with the `_attrs` contract, which already retypes rather than
+// mirrors (`checked` → literal `true`, `min`/`max` → Number).
+//
+// DISJOINT from WIDGET_ATTR_TAGS and LIST_ATTR_TAGS by construction — no
+// tag appears in two of the three sets, so the merge in buildNode can never
+// have a key collision. `<input type=image src=…>` is deliberately NOT here:
+// `input` is a widget tag with its own lane, and a form control's image is a
+// different measurable.
+export const REPLACED_SRC_TAGS = new Map([
+  ['img',    'src'],
+  ['embed',  'src'],
+  ['object', 'data'],
+  ['video',  'poster'],
+]);
+
+/**
+ * Build the `{ src }` half of `_attrs` for one replaced element, or null.
+ *
+ * PURE — the value is the author's payload VERBATIM (relative path, '/'-
+ * rooted path, or data: URI). Corpus resolution, the format gate and the
+ * on-disk existence check all happen later, in resolveReplacedSrc(), for the
+ * same reason resolveFontFaces is split off scanFontFaces: the scan half
+ * stays unit-testable without a corpus on disk.
+ *
+ * Exported so the unit tests pin the tag→attribute table exactly.
+ */
+export function replacedSrcFor(tag, attrs) {
+  if (!tag || !attrs) return null;
+  const key = REPLACED_SRC_TAGS.get(tag);
+  if (!key) return null;                      // not a replaced element we deliver
+  const raw = attrs[key];
+  if (typeof raw !== 'string') return null;   // absent attribute ⇒ absent wire key
+  const v = raw.trim();
+  // A bare `src=""` names the document itself (HTML §4.8.4.1) — never an
+  // image. Omit-when-empty, same rule as every other renderer-hint field.
+  return v ? { src: v } : null;
+}
+
+/** Image formats the replaced-source lane will deliver, as a CLOSED table —
+ *  the same discipline as FONT_FORMATS and for the same reason: an
+ *  `<object data="x.pdf">` or `<embed src="y.html">` is not an image, and
+ *  admitting one would put a path on the wire that the harness's image
+ *  route refuses to serve. Byte-parallel with IMAGE_CONTENT_TYPES in
+ *  apps/web-harness/vite.config.ts (the route that resolves these paths);
+ *  SVG is IN here although the CSS url() inliner above excludes it, because
+ *  that exclusion is about percent-encoding a text payload into a fixture,
+ *  which this lane does not do. */
+export const REPLACED_IMAGE_FORMATS = new Set([
+  'png', 'gif', 'jpg', 'jpeg', 'webp', 'bmp', 'ico', 'svg', 'avif',
+]);
+
+/** Lossy reason for a replaced element whose source could not be delivered.
+ *  DELIBERATELY NOT 'requires-bundled-asset' — see the roll-up in
+ *  inlineFixtureAssets for why reusing that tag would silently move tests
+ *  out of the scoring denominator. */
+export const REPLACED_SRC_LOSSY_REASON = 'requires-replaced-source';
+
+/**
+ * Resolve one author-written replaced-element source against the corpus.
+ *
+ * Returns the corpus-relative path the harness route can serve, a `data:`
+ * URI verbatim (already self-contained — nothing to deliver), or `null` when
+ * the reference is UNDELIVERABLE. Every null is a deliberate decline, and
+ * the caller turns it into the honest 'requires-bundled-asset' marker rather
+ * than leaving a path no platform can fetch on the wire:
+ *   1. http(s)/protocol-relative/`{{…}}` template — Rule 37's remote domain;
+ *   2. the resolved path escapes the corpus (wptRelativePath);
+ *   3. the extension is not an image format we serve;
+ *   4. the file is not on disk — emitting it would hand the harness a
+ *      guaranteed 404, the exact failure this channel exists to end.
+ *
+ * `baseDir` is the directory of the document the markup came from; a leading
+ * '/' is WPT-server-root-relative, the same convention rel="match",
+ * <link rel=stylesheet>, inlineUrlsInValue and resolveFontFaces all use.
+ */
+export async function resolveReplacedSrc(payload, baseDir) {
+  const v = String(payload ?? '').trim();
+  if (!v) return null;
+  // data: is already the content — pass it straight through (the corpus does
+  // author inline images, and there is nothing for a route to resolve).
+  if (/^data:/i.test(v)) return v;
+  if (urlPayloadOutOfScope(v)) return null;                 // (1) remote / template
+  // Query + fragment are addressing, not path: strip before resolution so
+  // `support/x.png?foo` still finds the file (the harness route strips the
+  // same way on the serving side).
+  const pathOnly = v.split(/[?#]/)[0];
+  if (!pathOnly) return null;
+  const abs = pathOnly.startsWith('/')
+    ? join(WPT_DIR, pathOnly.slice(1))
+    : resolve(baseDir, pathOnly);
+  const rel = wptRelativePath(abs);
+  if (!rel) return null;                                    // (2) escapes the corpus
+  const ext = /\.([A-Za-z0-9]+)$/.exec(rel)?.[1]?.toLowerCase();
+  if (!ext || !REPLACED_IMAGE_FORMATS.has(ext)) return null; // (3) not an image
+  try {
+    await fs.access(abs);
+  } catch {
+    return null;                                            // (4) not on disk
+  }
+  return rel;
+}
+
 /**
  * Allow-list of structural / child-indexed pseudo-classes we evaluate. Every
  * other `:foo` selector still causes compoundMatches() to return null (so the
@@ -3627,6 +3830,50 @@ const DIR_PSEUDO_ARGS = new Set(['ltr', 'rtl']);
 // Selectors-4 §3.3; we enforce that in parseCompound below.
 const SUPPORTED_PSEUDO_ELEMENTS = new Set(['before', 'after', 'marker']);
 
+// ── wave-36 lane M3: the LEGACY ONE-COLON pseudo-element notation ───────────
+//
+// THE HOLE. Selectors-3 §7.1 (and CSS 2.1 §5.10 before it) is explicit:
+//   "for compatibility with existing style sheets, user agents must also
+//    accept the previous one-colon notation for pseudo-elements introduced
+//    in CSS levels 1 and 2 (namely, :first-line, :first-letter, :before and
+//    :after)."
+// parseCompound implemented only the `::` half. A single `:` fell through to
+// the pseudo-CLASS branch, where `before`/`after` are (correctly) absent from
+// SUPPORTED_PSEUDO_CLASSES — so the compound came back `unsupported` and the
+// WHOLE RULE was dropped before extraction. The generated box never existed:
+// no `_pseudo` bucket, no `content`, nothing for any runtime to render.
+//
+// MEASURED (the wave35-webmap full-corpus web map, bucket-A tests carrying a
+// one-colon `:before`/`:after`): 24 tests across 8 sections, 17 of them
+// FAILING, and the failure signature is the same everywhere — capture ink
+// 0.00% against a ref that paints the generated text:
+//   css-content/attr-case-sensitivity-001  0.9891  ink 0.00 / 0.23
+//   css-content/attr-case-sensitivity-002  0.9900  ink 0.00 / 0.20
+//   css-counter-styles/counter-name-case-sensitive        ink 0.00 / 0.33
+//   css-counter-styles/hebrew/counter-hebrew-nested       ink 0.00 / 3.15
+//   css-contain/contain-style-counters-005                ink 0.00 / 0.24
+//   css-animations/animation-delay-011                    ink 0.00 / 4.27
+//   css-animations/parent-after-change-style-…-flicker    ink 0.00 / 4.27
+//   css-lists/counter-reset-increment-overflow-underflow  ink 0.00 / 2.89
+// plus the CSS2/generated-content before-after-positioned-002/003/004 family
+// this lane's brief names (`#test:after, #test:before { content:"" … }`).
+//
+// SCOPE — exactly the four CSS1/CSS2 pseudo-elements the spec grandfathers,
+// and nothing else. `::marker` is CSS-Pseudo-4 and has NO one-colon form, so
+// `:marker` stays a (rejected) pseudo-class; `:first-line`/`:first-letter`
+// are listed because the spec grandfathers them, but they are NOT in
+// SUPPORTED_PSEUDO_ELEMENTS, so they resolve to the SAME "unsupported"
+// answer their `::` spelling already gives — the alias must not smuggle in
+// support the `::` path does not have.
+//
+// The rightmost-token rule (Selectors-4 §3.3) is enforced identically to the
+// `::` branch: anything after the pseudo name inside the compound (a class,
+// an id, a functional argument) makes the compound unsupported rather than
+// silently mis-attaching.
+const LEGACY_ONE_COLON_PSEUDO_ELEMENTS = new Set([
+  'before', 'after', 'first-line', 'first-letter',
+]);
+
 /**
  * Parse a single compound selector into a structured form. Returns
  * `{ needTag, needId, needClasses, pseudos: [{name, arg?}],
@@ -3697,6 +3944,30 @@ function parseCompound(compound, isSubject = true) {
       let j = i + 1;
       while (j < n && /[A-Za-z0-9-]/.test(compound[j])) j++;
       const name = compound.slice(i + 1, j).toLowerCase();
+      // wave-36 lane M3: the LEGACY ONE-COLON ALIAS (Selectors-3 §7.1 — see
+      // the LEGACY_ONE_COLON_PSEUDO_ELEMENTS banner). `p:before` names the
+      // ::before PSEUDO-ELEMENT, not a pseudo-class, so it must take the
+      // branch above's semantics verbatim — including the two rules that
+      // make that branch honest:
+      //   * rightmost-token (Selectors-4 §3.3): `j !== n` means something
+      //     trails the pseudo name inside this compound (a class, an id, a
+      //     `(`-argument that no CSS1/2 pseudo-element takes) — invalid, so
+      //     the whole compound is unsupported, exactly as `p::before.x` is;
+      //   * the SUPPORTED set gate: `:first-line`/`:first-letter` resolve to
+      //     unsupported, byte-identical to their `::` spelling, so the alias
+      //     never grants support the canonical notation lacks.
+      // Placed BEFORE the functional-argument scan below so a `(` after the
+      // name is caught by the `j !== n` test rather than parsed as an nth-
+      // style argument for a name that can never be functional.
+      if (LEGACY_ONE_COLON_PSEUDO_ELEMENTS.has(name)) {
+        if (j !== n || !SUPPORTED_PSEUDO_ELEMENTS.has(name)) {
+          out.unsupported = true;
+          return out;
+        }
+        out.pseudoElement = name;
+        i = j;
+        continue;
+      }
       i = j;
       let arg = null;
       if (compound[i] === '(') {
@@ -4820,12 +5091,15 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
   // 'marker'; value is the merged property dict from every rule matching
   // that pseudo on this host. Last-write-wins per CSS cascade order.
   const pseudo = {};
-  // Bug 2 fix: inject the synthetic `:root` ancestor at the head of the
+  // Bug 2 fix: inject the synthetic document scaffolding at the head of the
   // chain so selectors like `:root:first-child #a` find a `:root` to
   // match against. We only do this when an ancestor chain was supplied
   // (callers that pass `null` are the legacy direct-call test surface
   // which wouldn't expect the sentinel to appear in their fixtures).
-  const chain = ancestors ? [ROOT_SENTINEL_ANCESTOR, ...ancestors] : null;
+  // wave-36 M7: the scaffolding is `html` THEN `body` (see
+  // DOCUMENT_SENTINEL_ANCESTORS) — the walker's chain starts inside body, so
+  // without the body entry no `body …` / `body > …` rule could ever match.
+  const chain = ancestors ? [...DOCUMENT_SENTINEL_ANCESTORS, ...ancestors] : null;
   for (const r of rules) {
     const m = selectorMatchesPseudoElement(r.selector, tag, attrs, chain, pos, ctx);
     if (m === null) continue;
@@ -6233,8 +6507,13 @@ export async function inlineUrlsInValue(value, baseDir) {
 /**
  * Walk a built fixture's component tree (top-level components, nested
  * `children` maps, and `_pseudo` buckets) rewriting url() references in
- * every string property value. Components left with un-deliverable url()
- * refs gain `_lossy: true` + 'requires-bundled-asset' in `_lossyReasons`;
+ * every string property value AND — wave-36 lane M1 — resolving the
+ * replaced-element `_attrs.src` paths buildNode wrote verbatim. Both are
+ * the same job (turn an author-written asset reference into something a
+ * platform can actually fetch) against the same `baseDir`, so they share
+ * one walk and one lossy roll-up rather than duplicating the traversal.
+ * Components left with un-deliverable url() refs gain `_lossy: true` +
+ * 'requires-bundled-asset' in `_lossyReasons`;
  * the fixture's `_wpt.lossy`/`_wpt.lossyReasons` roll up the same flag
  * when the `_wpt` block carries lossy fields (test fixtures do; ref
  * fixtures' minimal `_wpt` doesn't and is left untouched).
@@ -6245,6 +6524,11 @@ export async function inlineUrlsInValue(value, baseDir) {
 export async function inlineFixtureAssets(fixture, baseDir) {
   let totalInlined = 0;
   let totalUnresolved = 0;
+  // wave-36 lane M1 counters — kept SEPARATE from the url() lane's so the
+  // two delivery gaps never blur into one number (and so the src lane can
+  // carry its own, non-score-excluding, lossy reason; see below).
+  let srcDelivered = 0;
+  let totalUnresolvedSrc = 0;
   // Per-component visitor: rewrite properties, then recurse into _pseudo
   // buckets and nested children (both keyed maps of component-shaped
   // objects, per buildComponents' contract).
@@ -6275,6 +6559,28 @@ export async function inlineFixtureAssets(fixture, baseDir) {
         }
       }
     }
+    // wave-36 lane M1: resolve the replaced element's source. buildNode put
+    // the author's payload here VERBATIM (relative path / '/'-rooted path /
+    // data: URI); this is where it becomes a corpus-relative path the
+    // harness image route can serve. An undeliverable reference DROPS the
+    // key — a fabricated path is worse than an honest absence, because the
+    // harness then falls back to its documented placeholder instead of
+    // painting a broken-image glyph.
+    let unresolvedSrcHere = 0;
+    if (cmp._attrs && typeof cmp._attrs.src === 'string') {
+      const resolved = await resolveReplacedSrc(cmp._attrs.src, baseDir);
+      if (resolved === null) {
+        delete cmp._attrs.src;
+        // Omit-when-empty all the way down: a component whose ONLY attr was
+        // an undeliverable src carries no `_attrs` at all, so its bytes match
+        // a component that never had one.
+        if (Object.keys(cmp._attrs).length === 0) delete cmp._attrs;
+        unresolvedSrcHere++;
+      } else {
+        cmp._attrs.src = resolved;
+        srcDelivered++;
+      }
+    }
     if (unresolvedHere > 0) {
       // Honest lossy marker — no silent fallthrough: the value still
       // carries a path no platform can deliver, so the component (and the
@@ -6283,6 +6589,23 @@ export async function inlineFixtureAssets(fixture, baseDir) {
       cmp._lossy = true;
       const reasons = new Set(cmp._lossyReasons ?? []);
       reasons.add('requires-bundled-asset');
+      cmp._lossyReasons = [...reasons];
+    }
+    if (unresolvedSrcHere > 0) {
+      // Same honesty, DELIBERATELY A DIFFERENT TAG. `requires-bundled-asset`
+      // is score-EXCLUDING: inject-wpt-block's applyNaScoreGate drops a test
+      // from the scored set when wpt-not-applicable Rule 20's textual tag is
+      // CORROBORATED by that reason (SCORE_EXCLUDED_TAGS). Rule 20's regex
+      // already matches every `<img src="support/…">` in the corpus, so
+      // reusing the tag here would silently move tests OUT of the scoring
+      // denominator the moment one image failed to resolve — a scored-set
+      // change dressed as an asset note. This lane reports its own delivery
+      // gap on its own channel (the same open-string convention bidi-bake
+      // uses for BIDI_BAKE_LOSSY_REASON) and cannot flip any scoreEligible.
+      totalUnresolvedSrc += unresolvedSrcHere;
+      cmp._lossy = true;
+      const reasons = new Set(cmp._lossyReasons ?? []);
+      reasons.add(REPLACED_SRC_LOSSY_REASON);
       cmp._lossyReasons = [...reasons];
     }
     // Children map: `{ childId: { id, properties, … } }` (NOT an array —
@@ -6301,7 +6624,20 @@ export async function inlineFixtureAssets(fixture, baseDir) {
     reasons.add('requires-bundled-asset');
     fixture._wpt.lossyReasons = [...reasons];
   }
-  return { inlined: totalInlined, unresolved: totalUnresolved };
+  // wave-36 lane M1: same roll-up, own reason (see the per-component note).
+  if (totalUnresolvedSrc > 0 && fixture._wpt && 'lossy' in fixture._wpt) {
+    fixture._wpt.lossy = true;
+    const reasons = new Set(fixture._wpt.lossyReasons ?? []);
+    reasons.add(REPLACED_SRC_LOSSY_REASON);
+    fixture._wpt.lossyReasons = [...reasons];
+  }
+  return {
+    inlined: totalInlined,
+    unresolved: totalUnresolved,
+    // Additive fields — every pre-wave-36 caller reads the first two only.
+    srcDelivered,
+    srcUnresolved: totalUnresolvedSrc,
+  };
 }
 
 // ── wave-34 lane F2 (F2a): the @font-face SCAN ───────────────────────────────
@@ -6637,6 +6973,25 @@ export async function extractFixture(testRel, opts = {}) {
   // wave-13: pass the keyframes map so the sampler can run (5th arg; the
   // 4th stays the ctx default — buildComponents harvests :defined itself).
   const built = buildComponents(cleaned, rules, stem, null, keyframes);
+
+  // wave-36 lane M3: THE GENERATED-CONTENT TEXT BAKE. Runs here — after
+  // buildComponents (which is where the `_pseudo` bags and their attr()
+  // resolutions are finalised) and before the fixture object is assembled —
+  // because the quote depth it maintains is a DOCUMENT-ORDER counter over
+  // the whole tree (css-content-3 §2.1), which no per-node hook can own.
+  // Refusals leave the bag byte-identical; see generated-content-bake.mjs.
+  {
+    const gc = generatedContentBake.bakeGeneratedContentText(built.components);
+    if (gc.baked > 0) {
+      // Same LOUD provenance contract as every other bake: the fixture-level
+      // record gains the marker so the dashboard's lossy lane sees that this
+      // document carries extractor-computed text, not runtime-read text.
+      built.lossyOverall = true;
+      if (!built.lossyReasons.includes(generatedContentBake.GENERATED_CONTENT_BAKED_REASON)) {
+        built.lossyReasons.push(generatedContentBake.GENERATED_CONTENT_BAKED_REASON);
+      }
+    }
+  }
 
   // wave-34 lane F2 (F2a): the document-level @font-face list. Scanned off
   // the SAME comment-stripped sheet parseCss and parseKeyframes read (all
@@ -7124,6 +7479,28 @@ const ROOT_INHERITED_TRIGGER_PROPS = [
   'word-spacing',    // CSS Text 4 §8.2
   'text-align',      // CSS Text 4 §7.1
   'visibility',      // CSS Display / CSS 2.2 §11.2
+  // wave-36 lane M3: `quotes` (css-content-3 §2.2 — inherited, initial
+  // `auto`). This is the banner's "KNOWN, DELIBERATE GAP" being closed for
+  // one measured property, not a widening on principle.
+  //
+  // MEASURED (wave36-M3-base, the css-content section re-run at full cap):
+  // quotes-031 `body { quotes: "‹" "›" }` scored 0.8701 and quotes-032
+  // `body { quotes: none }` scored 0.8822 — and the capture for BOTH paints
+  // the DEFAULT curly marks. The declaration sat on the body-root bag, the
+  // `<p>`/`<q>` components are the body's SIBLINGS on the wire, so nothing
+  // delivered it: the web harness renders a real `<q>` and Blink's UA rule
+  // `q::before { content: open-quote }` then read the initial `auto` instead
+  // of the author's list. quotes-033 (`body { quotes:none }` +
+  // `.inner { quotes:auto }`) is the same root declaration with an element
+  // override that only becomes observable once the root value arrives.
+  //
+  // It qualifies on the banner's own SCOPE test — it inherits, so the root
+  // declaration really is the children's cascade input — and it needs no
+  // entry in INHERITED_COVERING_SHORTHANDS: no CSS shorthand sets `quotes`
+  // (css-content-3 defines it as a standalone longhand), so no child
+  // declaration can decide it other than by naming it, which the generic
+  // `childProps[prop] !== undefined` guard already honours.
+  'quotes',          // css-content-3 §2.2
 ];
 
 /**
@@ -7715,6 +8092,261 @@ export function uaLinkProps(tag, attrs, props, suppressed = null) {
   return Object.keys(out).length > 0 ? out : null;
 }
 
+// ── wave-36 M6: HTML TABLE PRESENTATIONAL ATTRIBUTES ────────────────────────
+//
+// THE GAP. Eight CSS2/pagination tests (row-page-break-inside-avoid-1/-2,
+// rowgroup-page-break-inside-avoid-4..8, table-page-break-inside-avoid-5)
+// fail the web-ref diff at ssim 0.899–0.906 with NO veto firing, and the
+// wave-35 classification army root-caused all eight to ONE line of markup:
+// `<table border="1">`. Their blue cells are pixel-identical to the ref
+// (27,531 blue px on both sides of rowgroup-5) — the whole diff is the
+// table's 1px frame, the cells' 1px rules, and a 3px origin shift.
+//
+// Measured decomposition (rowgroup-4, ref column x=16… at y=25):
+//   x=16 grey  → the table's `border-left: 1px outset`
+//   x=17,18    → `border-spacing: 2px`   (the browser UA sheet; we ALREADY
+//                have this, because the web runtime renders a real <table>)
+//   x=19 grey  → the cell's `border-left: 1px inset`
+//   x=20 white → the cell's `padding-left: 1px`
+//   x=21 blue  → content
+// Our capture paints blue at x=18 — border-spacing only. Three of the five
+// pixels are missing, and all three come from HTML's table presentational
+// attribute machinery (HTML Standard §15.3.3 "Tables"), which the extractor
+// never modelled: `meta.attrs` is emitted for form/widget tags only, so
+// `border=` never reaches the DOM the web runtime builds.
+//
+// WHY THE HARNESS RESET CANNOT COVER IT. index.html's composed-mode rule
+// already says `padding: revert` on every IR element precisely to restore UA
+// padding — and it does NOT restore the cell's 1px. Probed in the ref's own
+// Chromium: `td { padding: revert }` computes to 0px while a bare `<td>`
+// computes to 1px, because Blink's cell padding is a PRESENTATION-ATTRIBUTE
+// style (HTMLTableCellElement::AdditionalPresentationAttributeStyle reading
+// the owner table's cellpadding, defaulting to 1) and not a UA-stylesheet
+// declaration `revert` can roll back to. The only honest fix is to put the
+// mapping in the IR, which is also the only fix the two NATIVE runtimes can
+// ever see — they have no browser UA sheet at all.
+//
+// THE MAPPING, verified against the ref's own headless Chromium rather than
+// read off the spec prose (probe: _diag36/M6/probe-attrs.mjs):
+//   table[border]      → border-<side>-width: <n>px, border-<side>-style: outset
+//   its cells          → border-<side>-width: 1px,   border-<side>-style: inset
+//   table[cellpadding] → cell padding: <n>px      (DEFAULT 1px when absent)
+//   table[cellspacing] → border-spacing: <n>px    (default 2px = UA sheet,
+//                                                  see the scope cut below)
+// `<n>` follows Blink's HTMLTableElement::ParseBorderWidthAttribute: the HTML
+// "rules for parsing non-negative integers", with the attribute's PRESENCE
+// (not its parseability) deciding — `border=""`, `border="border"`,
+// `border="yes"`, `border="-3"` and `border="1.9"` all render 1px, `border="0"`
+// renders none, `border="3px"` renders 3px. Every one of those spellings is in
+// the corpus and every one is pinned in the unit tests.
+//
+// SCOPE CUTS — documented, never silent:
+//   - `rules=` / `frame=` (3 corpus tests) additionally set
+//     `border-collapse: collapse` and `border-style: hidden` on the table plus
+//     per-group internal borders. Modelling half of that would make those
+//     tests WORSE, so a table carrying either attribute declines the WHOLE
+//     bake and is marked with the unmodelled reason below.
+//   - `bordercolor=` turns outset/inset into SOLID in that colour. Zero
+//     corpus occurrences, so it is not modelled; a table carrying it takes
+//     the same decline path as rules/frame.
+//   - the UA `border-spacing: 2px` DEFAULT is not emitted, only the
+//     `cellspacing` override. On web the browser supplies it (the universal
+//     reset touches margin/padding/box-sizing only), so emitting it would be
+//     a no-op there while widening the corpus-wide byte diff; the natives
+//     lose it, which is a known native-only gap, not a web one.
+//   - the cascade guard is PER BOX and ALL-OR-NOTHING per family (any author
+//     padding spelling on a cell suppresses the whole padding fill, any
+//     author border spelling suppresses the whole border fill). Presentation
+//     hints lose to every author declaration (HTML §15.2), so erring toward
+//     "do not bake" is the direction that can only under-claim.
+//
+// The bake is UA-origin-shaped exactly like wave-30's UA_LINK_PROPS: folded
+// only where the author bag is silent, and marked LOUDLY so `_lossyReasons`
+// says where the pixels came from.
+
+/** The bake fired on this component (table frame, cell rules, cell padding
+ *  and/or border-spacing). Provenance only — the fixture is MORE faithful. */
+const HTML_TABLE_PRESENTATION_REASON = 'html-table-presentation-baked';
+/** The table carries a presentational attribute this module does not model
+ *  (`rules` / `frame` / `bordercolor`), so NOTHING was baked for it or its
+ *  cells. The loud half of the scope cut above. */
+const HTML_TABLE_PRESENTATION_UNMODELLED_REASON = 'html-table-presentation-unmodelled';
+export { HTML_TABLE_PRESENTATION_REASON, HTML_TABLE_PRESENTATION_UNMODELLED_REASON };
+
+/** Attributes whose table-level effect (border-collapse / border-style:hidden
+ *  / per-group rules / solid recolouring) this module does not model. Their
+ *  presence disables the bake for the whole table subtree. */
+const TABLE_UNMODELLED_ATTRS = ['rules', 'frame', 'bordercolor'];
+
+/** Blink clamps a presentational border width at the LayoutUnit ceiling —
+ *  `border="2026722966"` (css-tables/html-to-css-mapping-2) computes to
+ *  33554400px, not two billion. Mirrored so one absurd corpus value cannot
+ *  hand the converter a number no layout engine would honour. */
+const TABLE_BORDER_MAX_PX = 33554400;
+
+/** The four physical sides, in the order the CSS shorthand names them. */
+const TABLE_BORDER_SIDES = ['top', 'right', 'bottom', 'left'];
+
+/** Every author spelling that decides a box's PADDING. Any one of them on a
+ *  cell suppresses the whole cellpadding fill (see the all-or-nothing scope
+ *  cut). Logical spellings included: we cannot know the writing mode here,
+ *  and over-guarding only ever declines to bake. */
+const TABLE_PADDING_GUARDS = [
+  'padding',
+  'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+  'padding-block', 'padding-block-start', 'padding-block-end',
+  'padding-inline', 'padding-inline-start', 'padding-inline-end',
+];
+
+/** Every author spelling that decides a box's BORDER width or style. Any one
+ *  of them suppresses the whole border fill on that box. `border-color` is
+ *  deliberately absent: a colour alone leaves the UA width/style in force. */
+const TABLE_BORDER_GUARDS = [
+  'border', 'border-width', 'border-style',
+  'border-top', 'border-right', 'border-bottom', 'border-left',
+  'border-block', 'border-block-start', 'border-block-end',
+  'border-inline', 'border-inline-start', 'border-inline-end',
+  ...TABLE_BORDER_SIDES.flatMap((s) => [`border-${s}-width`, `border-${s}-style`]),
+  'border-block-start-width', 'border-block-start-style',
+  'border-block-end-width', 'border-block-end-style',
+  'border-inline-start-width', 'border-inline-start-style',
+  'border-inline-end-width', 'border-inline-end-style',
+];
+
+/** Table-internal box tags. Row groups and rows are NOT cells: HTML's
+ *  presentational border/padding hints land on `td`/`th` only (Blink:
+ *  HTMLTableCellElement::AdditionalPresentationAttributeStyle). */
+const TABLE_CELL_TAGS = new Set(['td', 'th']);
+
+/**
+ * The HTML "rules for parsing non-negative integers" (HTML §2.4.4.2),
+ * reduced to what a presentational attribute needs: skip leading ASCII
+ * whitespace, accept an optional `+`, then collect ASCII digits and IGNORE
+ * whatever follows (so `3px` → 3 and `1.9` → 1). A leading `-`, a leading
+ * non-digit, or an empty string is an ERROR and returns null — the caller
+ * decides what an error means for its attribute.
+ *
+ * Exported so the unit tests can pin each spelling the corpus actually uses.
+ */
+export function parseHtmlNonNegativeInteger(raw) {
+  if (raw === undefined || raw === null) return null;
+  // HTML's ASCII whitespace set (tab, LF, FF, CR, space) — NOT \s, which
+  // also eats NBSP and would parse a value the browser rejects.
+  const s = String(raw).replace(/^[\t\n\f\r ]+/, '');
+  const m = /^\+?(\d+)/.exec(s);
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * The used `border` presentational width for a `<table>`, in CSS pixels, or
+ * 0 when the table draws no presentational frame.
+ *
+ * Mirrors Blink's HTMLTableElement::ParseBorderWidthAttribute exactly:
+ * absent attribute → 0; present-but-unparseable (including the empty string)
+ * → 1; parseable → the parsed value, so `border="0"` legitimately means "no
+ * border". Clamped at TABLE_BORDER_MAX_PX.
+ *
+ * Exported for unit pins — this function is the whole difference between the
+ * 8 failing pagination tests and their refs.
+ */
+export function tableBorderAttrWidthPx(attrs) {
+  const raw = attrs?.border;
+  if (raw === undefined) return 0;              // no attribute → no frame
+  const n = parseHtmlNonNegativeInteger(raw);
+  if (n === null) return 1;                     // present but junk → 1px
+  return Math.min(n, TABLE_BORDER_MAX_PX);
+}
+
+/**
+ * The used cell padding for a table's cells, in CSS pixels. Blink seeds
+ * HTMLTableElement's padding_ at 1 and only a parseable `cellpadding`
+ * replaces it, so an absent OR unparseable attribute both mean 1px — which
+ * is the pixel `padding: revert` cannot restore (see the banner).
+ */
+export function tableCellPaddingPx(attrs) {
+  const n = parseHtmlNonNegativeInteger(attrs?.cellpadding);
+  return n === null ? 1 : n;
+}
+
+/**
+ * The nearest ancestor `<table>` of a node, given the walker's ancestor chain
+ * (document order, immediate parent LAST), or null. Nearest-ancestor rather
+ * than the chain head so a cell of an INNER table takes the inner table's
+ * attributes — the same subject the UA rules `table[border] > … > td` select.
+ */
+export function nearestTableAncestor(ancestors) {
+  for (let i = (ancestors?.length ?? 0) - 1; i >= 0; i--) {
+    if (ancestors[i]?.tag === 'table') return ancestors[i];
+  }
+  return null;
+}
+
+/**
+ * wave-36 M6: the HTML §15.3.3 presentational-attribute declarations to fold
+ * into a table box's bag, or null when nothing applies.
+ *
+ * @param {string} tag        the element's tag name (already lowercased)
+ * @param {object} attrs      the element's own attribute bag
+ * @param {Array<{tag,attrs}>|null} ancestors  walker chain, parent LAST
+ * @param {object} props      the element's RESOLVED author bag (matched
+ *                            rules + inline style) — the cascade guard
+ * @returns {{props: object, unmodelled: boolean}|null}
+ *          `props` are the declarations to assign; `unmodelled` is true when
+ *          an owning table carries rules/frame/bordercolor and the bake
+ *          declined (in which case `props` is empty).
+ */
+export function htmlTablePresentationProps(tag, attrs, ancestors, props) {
+  const isCell = TABLE_CELL_TAGS.has(tag);
+  if (tag !== 'table' && !isCell) return null;
+  // The table whose attributes decide this box: itself, or (for a cell) the
+  // nearest enclosing table. A cell with no table ancestor in the chain —
+  // the walker's depth cut, or a stray `<td>` — gets nothing rather than a
+  // guessed default, because we cannot see the cellpadding that would apply.
+  const table = tag === 'table' ? { tag, attrs } : nearestTableAncestor(ancestors);
+  if (!table) return null;
+  // Scope cut, LOUD: a presentational attribute we do not model changes the
+  // table's border MODEL (collapse / hidden / solid recolour), so baking the
+  // half we do model would be worse than baking nothing.
+  if (TABLE_UNMODELLED_ATTRS.some((a) => table.attrs?.[a] !== undefined)) {
+    return { props: {}, unmodelled: true };
+  }
+  const out = {};
+  const borderPx = tableBorderAttrWidthPx(table.attrs);
+  // ── the frame / rules half ────────────────────────────────────────────
+  // Both halves are gated on the SAME non-zero table border, exactly like the
+  // paired UA rules: `table[border]` outset on the table, `1px inset` on its
+  // cells. A cell never carries a width other than 1px, whatever `border=`
+  // said — that asymmetry is in the spec's own rule text.
+  if (borderPx > 0 && !TABLE_BORDER_GUARDS.some((g) => props?.[g] !== undefined)) {
+    const width = isCell ? 1 : borderPx;
+    const style = isCell ? 'inset' : 'outset';
+    for (const side of TABLE_BORDER_SIDES) {
+      out[`border-${side}-width`] = `${width}px`;
+      out[`border-${side}-style`] = style;
+    }
+  }
+  // ── the cellpadding half (cells only) ─────────────────────────────────
+  // Unconditional on the border attribute: a bare `<table>` still gives its
+  // cells 1px, which is the pixel our captures have been missing corpus-wide.
+  if (isCell && !TABLE_PADDING_GUARDS.some((g) => props?.[g] !== undefined)) {
+    const pad = `${tableCellPaddingPx(table.attrs)}px`;
+    out['padding-top'] = pad;
+    out['padding-right'] = pad;
+    out['padding-bottom'] = pad;
+    out['padding-left'] = pad;
+  }
+  // ── the cellspacing half (table only) ─────────────────────────────────
+  // Only the OVERRIDE is emitted; the 2px UA default is the browser's job on
+  // web and a stated native gap (see the scope cuts).
+  if (tag === 'table' && props?.['border-spacing'] === undefined) {
+    const spacing = parseHtmlNonNegativeInteger(table.attrs?.cellspacing);
+    if (spacing !== null) out['border-spacing'] = `${spacing}px`;
+  }
+  return Object.keys(out).length > 0 ? { props: out, unmodelled: false } : null;
+}
+
 // wave-13 KEYFRAMES-SAMPLER: `keyframes` is the parseKeyframes() map for the
 // same stylesheet the `rules` came from (parseCss skips @-rules, so the two
 // are complementary views of one sheet). Null/omitted = sampling disabled —
@@ -7748,6 +8380,13 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // wave-30 fix-T1: computed ONCE per sheet (it is a fact about the rule
   // list, not about any element) and handed to every uaLinkProps call below.
   const uaLinkSuppressed = uaLinkSuppressedProps(rules);
+
+  // wave-36 THE WIDGET-APPEARANCE BAKE: the recognised generated script's
+  // mutated element set, expressed as synthetic marker RULES so the real
+  // selector matcher decides which elements it hit (see the module banner).
+  // Computed once per document; `[]` for everything without the idiom, which
+  // is the short-circuit that keeps the rest of the corpus byte-identical.
+  const appearanceDisablingRules = widgetAppearanceBake.appearanceDisablingRules(cleaned);
 
   // Bug 3 + 4: body-root component for body-scope CSS. Stays as a flat
   // top-level entry (it represents <body> itself). Where the body's element
@@ -8081,6 +8720,38 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // so this assign can never overwrite a declaration.
     const uaLink = uaLinkProps(node.tag, node.attrs, props, uaLinkSuppressed);
     if (uaLink) Object.assign(props, uaLink);
+    // wave-36 M6: HTML §15.3.3 table presentational attributes (see the
+    // htmlTablePresentationProps banner). Folded in the SAME slot and for
+    // the same reason as the two UA bakes above — before every later pass —
+    // and with the same author-wins guarantee, so this assign can never
+    // overwrite a declaration either.
+    const tablePres = htmlTablePresentationProps(
+      node.tag, node.attrs, node.ancestors, props,
+    );
+    if (tablePres) Object.assign(props, tablePres.props);
+    // wave-36 THE WIDGET-APPEARANCE BAKE (the sixth bake) — same slot, same
+    // reason as the three bakes above: the resolved bag is complete (matched
+    // rules + inline style + the UA folds), so the element's own
+    // `appearance` declaration is knowable, and every later pass sees the
+    // final value. The `length` guard is the corpus-wide short-circuit: no
+    // recognised script ⇒ not even a selector match is attempted.
+    if (appearanceDisablingRules.length > 0) {
+      // Matched through the REAL matcher (combinators, ids, :nth-child, …)
+      // rather than a private selector reimplementation — only the match
+      // COUNT is read, so the synthetic marker declaration can never leak
+      // into this element's property bag.
+      const hit = propsForElement(
+        appearanceDisablingRules, node.tag, node.attrs,
+        node.ancestors, node.pos ?? null, effectiveCtx,
+      ).matchedRules > 0;
+      const widgetAppearance = widgetAppearanceBake.widgetFallbackAppearance(
+        node.tag, node.attrs, props.appearance, hit,
+      );
+      // Overrides an author `appearance` ON PURPOSE (the search-text
+      // reference renders `none` over a declared `textfield`) — see the
+      // module banner's ref-pinned table.
+      if (widgetAppearance) props.appearance = widgetAppearance;
+    }
     // wave-21 A-RC6: bake sibling-index() with this element's 1-based
     // renderable-sibling position (CSS Values 5 §5.1 — see the baking
     // section banner). BEFORE the sampler + lossy scan so those see the
@@ -8127,6 +8798,14 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // so a purple-vs-blue residual against a ref is OUR approximation and
     // must be read as such, not as a renderer divergence.
     if (uaLink) reasons.push(UA_LINK_REASON);
+    // wave-36 M6 — the two LOUD halves of the table presentational bake.
+    // 'baked' is provenance (a 1px cell rule in this fixture came from the
+    // markup's `border=`, not from a stylesheet); 'unmodelled' is the scope
+    // cut speaking for itself — this table carries rules/frame/bordercolor
+    // and therefore ships with NO presentational geometry at all, so a
+    // border-model divergence against the ref is ours and is stated.
+    if (tablePres?.unmodelled) reasons.push(HTML_TABLE_PRESENTATION_UNMODELLED_REASON);
+    else if (tablePres) reasons.push(HTML_TABLE_PRESENTATION_REASON);
     // Only PARTIAL-coverage collapses are approximations — a wrapper that
     // held part of the run now decorates all of it (see the flag's
     // assignment in extractBodyTreeNested). Full ancestor chains collapse
@@ -8374,7 +9053,18 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // identity to forward (css-ui-4 §7 appearance applies to the HTML
     // widgets; foreign elements have no UA chrome to configure).
     const widgetAttrs = foreignNs ? null : widgetAttrsFor(node.tag, node.attrs);
-    if (widgetAttrs) cmp._attrs = widgetAttrs;
+    // wave-36 lane M1: the replaced-element SOURCE rides the same `_attrs`
+    // envelope (see the REPLACED_SRC_TAGS banner). The two lanes' tag sets
+    // are disjoint, so this merge can never collide — it is a merge and not
+    // an `else` purely so a future overlap fails loudly in a diff rather
+    // than silently dropping one lane's keys. Namespace-gated with `_tag`
+    // above for the same reason: a foreign-namespace 'img' has no replaced
+    // content semantics (it is a plain unknown element, no UA chrome).
+    const replacedSrc = foreignNs ? null : replacedSrcFor(node.tag, node.attrs);
+    const mergedAttrs = (widgetAttrs || replacedSrc)
+      ? { ...(replacedSrc ?? {}), ...(widgetAttrs ?? {}) }
+      : null;
+    if (mergedAttrs) cmp._attrs = mergedAttrs;
     // EXTFIX-A part 1: children → nested IRComponent objects. Same
     // omit-when-empty rule so the fixture diff is minimal for
     // single-element tests (the ~70% case in the corpus). Each child

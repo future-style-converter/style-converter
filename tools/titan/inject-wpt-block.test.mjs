@@ -1539,3 +1539,58 @@ test('wave30 B4b: buildResults source carries the CALLER CONTRACT + the result f
   assert.match(src, /nativeFontParityExcluded: fontParityExcluded,/,
     'results must expose nativeFontParityExcluded');
 });
+
+// ── wave-36 M6: THE REFUSED FAMILY — a NEGATIVE pin ─────────────────────────
+//
+// Every test above pins what an exclusion family CONTAINS. This one pins what
+// no family may contain. `requires-print-medium` was formally proposed for an
+// exclusion family in wave-36 (the mining map's #5 opportunity, 136 failing
+// cells) and REFUSED on measurement: over all 275 scored tests carrying the
+// tag, the refs' own headless Chromium — rendering the TEST page under
+// capture-browser-ref.mjs's exact canvas contract — reaches the committed ref
+// on 193, including 140 of the 141 cells our pipeline already passes. The
+// refs are rasterised in SCREEN medium (capture-browser-ref.mjs never calls
+// emulateMediaType('print')), so for most `-print` tests pagination never
+// enters the diff at all. Precision of the proposed exclusion: 0.298.
+//
+// Without this pin the refusal lives only in prose, and prose does not fail a
+// build. The full rationale is on REFUSED_EXCLUSION_TAGS in the module and in
+// wpt-not-applicable.mjs's Rule 5 banner.
+
+import {
+  REFUSED_EXCLUSION_TAGS, SCORE_EXCLUDED_TAGS,
+} from './inject-wpt-block.mjs';
+
+test('wave36 M6: the refused tags are in NO exclusion family', () => {
+  assert.deepEqual([...REFUSED_EXCLUSION_TAGS], ['requires-print-medium']);
+  const families = {
+    SCORE_EXCLUDED_TAGS,
+    EXTRACTION_WALL_TAGS,
+    FONT_FACE_WALL_TAGS,
+    REF_UNACHIEVABLE_TAGS,
+    NATIVE_FONT_PARITY_TAGS,
+  };
+  for (const tag of REFUSED_EXCLUSION_TAGS) {
+    for (const [name, set] of Object.entries(families)) {
+      assert.equal(set.has(tag), false,
+        `${tag} was measured and REFUSED — it must not be in ${name}`);
+    }
+  }
+});
+
+test('wave36 M6: a print-medium tag alone never score-excludes a test', () => {
+  // End-to-end through the gate, with the three delivery stamps in their
+  // most exclusion-friendly state (all false / absent): a test whose ONLY
+  // notApplicable tag is requires-print-medium keeps its score.
+  const web = { ssim: 0.9278, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-print-medium'], [web]), false);
+  assert.equal(web.wptPass, false);
+  assert.equal(web.scoreExcluded, undefined);
+  // …and it does not become excludable in the company of the other broad
+  // capability tags the 8 repaired CSS2/pagination tests actually carry.
+  const web2 = { ssim: 0.9278, wptPass: false };
+  assert.equal(applyNaScoreGate(
+    ['requires-fragmentation', 'requires-print-medium', 'requires-table-layout'],
+    [web2]), false);
+  assert.equal(web2.wptPass, false);
+});

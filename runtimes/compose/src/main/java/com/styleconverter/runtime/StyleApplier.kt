@@ -74,6 +74,7 @@ import com.styleconverter.runtime.typography.ruby.RubyConfig
 import com.styleconverter.runtime.typography.ruby.RubyExtractor
 import com.styleconverter.runtime.layout.advanced.OffsetPathConfig
 import com.styleconverter.runtime.layout.advanced.OffsetPathExtractor
+import com.styleconverter.runtime.rendering.ZoomApplier
 import com.styleconverter.runtime.rendering.ZoomConfig
 import com.styleconverter.runtime.rendering.ZoomExtractor
 import com.styleconverter.runtime.transforms.Transform3DConfig
@@ -436,6 +437,18 @@ object StyleApplier {
         // CSS rendering model: transforms, clip, opacity, and visibility apply to the
         // ENTIRE element (including background). In Compose, modifier order is outer→inner,
         // so these "whole-element" effects must come FIRST (outermost) in the chain.
+
+        // -1. Zoom (css-viewport-1 §"The zoom property") — THE outermost
+        //     node, ahead of even isolation. `zoom` multiplies the element's
+        //     USED values (every length, spacing band, border width, font
+        //     size) AND the layout slot it occupies, so every step below —
+        //     transforms, effects, sizing, margin, borders, background,
+        //     padding — has to sit INSIDE it to be multiplied. Identity
+        //     unless the IR carried a real factor, so the 327-pair corpus
+        //     outside the three Zoom_* fixtures is byte-identical.
+        //     See rendering/ZoomApplier.kt for the measure-then-scale
+        //     mechanism and its byte-parallel SwiftUI twin.
+        result = ZoomApplier.applyZoom(result, config.zoom)
 
         // 0. Isolation — `isolation: isolate` creates a new stacking/blending
         //    context. We apply it as the outermost modifier so the offscreen

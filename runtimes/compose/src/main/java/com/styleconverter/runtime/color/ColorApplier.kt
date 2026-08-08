@@ -922,6 +922,57 @@ object ColorApplier {
     }
 
     /**
+     * The paintable stop list for a gradient — wave-36 lane M8.
+     *
+     * css-images-3 §3.4.4 (and §3.4.1's "premultiplied ramp") define the
+     * degenerate ONE-stop gradient: `linear-gradient(green)`,
+     * `linear-gradient(to right, green 90%)` and
+     * `repeating-linear-gradient(green 50px)` all paint the gradient box
+     * UNIFORMLY in that colour — there is no second stop to ramp toward, so
+     * every position on the gradient line takes the sole stop's colour.
+     * Chromium, WebKit and this repo's web + SwiftUI runtimes all do exactly
+     * that (SwiftUI's LinearGradient paints a solid fill for a one-entry stop
+     * array, which is why iOS already passes the family).
+     *
+     * Compose's LinearGradientShader / RadialGradientShader / SweepGradient
+     * all require at least two entries, so every brush factory below used to
+     * `return null` on a one-stop gradient. Returning null does NOT paint
+     * nothing — it makes the background layer fall through, so the WPT
+     * `gradient-single-stop-00{1..8}` tests (an abspos RED div behind a
+     * gradient-painted GREEN div) rasterised RED on Android while ref, web
+     * and iOS rasterised GREEN. Eight depth-48 cells, one guard.
+     *
+     * Contract: null ⇒ genuinely unpaintable (no stops at all — the brush
+     * factory keeps its early return, so a malformed payload still fails
+     * visibly rather than inventing a colour); a one-stop list is widened to
+     * the same colour at 0 and 1, which every shader renders as the uniform
+     * fill the spec asks for; two-or-more is returned untouched, so every
+     * pre-wave-36 capture is byte-identical.
+     *
+     * Pure (list in, list out) and internal so JUnit pins it without a
+     * DrawScope. The SwiftUI twin is behavioural, not textual: its
+     * `GradientApplier.resolveStops` already carries a one-stop list through
+     * (`max(1, count - 1)` guards the even-spread divide) and
+     * `srgbSubdivided` short-circuits on `count < 2`.
+     */
+    internal fun paintableStops(stops: List<ColorStop>): List<ColorStop>? = when {
+        // No stops at all — nothing the spec can tell us to paint.
+        stops.isEmpty() -> null
+        // The degenerate one-stop ramp: the same colour at both ends of the
+        // gradient line. Positions are forced to 0/1 rather than reusing the
+        // declared position because a sole stop's position is irrelevant to
+        // the painted result (§3.4.4 fixes every earlier stop to the first
+        // stop's colour and every later one to the last stop's colour — with
+        // one stop those are the same colour, so the box is uniform).
+        stops.size == 1 -> listOf(
+            stops[0].copy(position = 0f),
+            stops[0].copy(position = 1f)
+        )
+        // The overwhelming case: leave the declared ramp exactly as it is.
+        else -> stops
+    }
+
+    /**
      * Create a linear gradient Brush from configuration.
      *
      * CSS angle conversion:
@@ -944,12 +995,14 @@ object ColorApplier {
         gradient: BackgroundImageConfig.LinearGradient,
         tileMode: TileMode = TileMode.Clamp
     ): Brush? {
-        if (gradient.colorStops.size < 2) return null
+        // wave-36 lane M8: widen the degenerate one-stop ramp to a uniform
+        // fill; null still means "no stops at all" and keeps the early return.
+        val paintStops = paintableStops(gradient.colorStops) ?: return null
 
         // Shader inputs are size-independent; hoist them out of the
         // per-frame createShader call.
-        val colors = gradient.colorStops.map { it.color }
-        val stops = gradient.colorStops.map { it.position }
+        val colors = paintStops.map { it.color }
+        val stops = paintStops.map { it.position }
         val angle = gradient.angle
 
         return object : ShaderBrush() {
@@ -1017,7 +1070,9 @@ object ColorApplier {
         gradient: BackgroundImageConfig.RadialGradient,
         tileMode: TileMode = TileMode.Clamp
     ): Brush? {
-        if (gradient.colorStops.size < 2) return null
+        // wave-36 lane M8 — same one-stop widening as the linear factory;
+        // see [paintableStops] for the §3.4.4 rule and the eight cells.
+        val paintStops = paintableStops(gradient.colorStops) ?: return null
 
         // CSS radial gradients have two distinct radii (rx, ry) when the
         // ending shape is `ellipse` (the default), and a single radius
@@ -1027,8 +1082,8 @@ object ColorApplier {
         // extends. Compose's Brush.radialGradient is circular-only, so we
         // emit a custom RadialGradientShader and pre-stretch the bounds to
         // simulate the elliptical shape.
-        val colors = gradient.colorStops.map { it.color }
-        val stops = gradient.colorStops.map { it.position }
+        val colors = paintStops.map { it.color }
+        val stops = paintStops.map { it.position }
         val shape = gradient.shape ?: BackgroundImageConfig.RadialShape.ELLIPSE
         val sizeKw = gradient.size ?: BackgroundImageConfig.RadialSize.FARTHEST_CORNER
         // GradientCoord axes (A-RC8): FRACTION or PX — resolved against
@@ -1164,7 +1219,9 @@ object ColorApplier {
     private fun createSweepGradientBrush(
         gradient: BackgroundImageConfig.ConicGradient
     ): Brush? {
-        if (gradient.colorStops.size < 2) return null
+        // wave-36 lane M8 — same one-stop widening as the linear factory;
+        // see [paintableStops] for the §3.4.4 rule and the eight cells.
+        val paintStops = paintableStops(gradient.colorStops) ?: return null
 
         // The previous implementation multiplied the centre fraction by
         // a hard-coded 500px and passed Offset(cx*500, cy*500) into
@@ -1178,8 +1235,8 @@ object ColorApplier {
         // GradientCoord axes (A-RC8) — resolved in createShader like radial.
         val coordX = gradient.centerX
         val coordY = gradient.centerY
-        val colors = gradient.colorStops.map { it.color }
-        val stops = gradient.colorStops.map { it.position }
+        val colors = paintStops.map { it.color }
+        val stops = paintStops.map { it.position }
         // CSS `from` angle, degrees. 0 when the author omitted `from …`.
         val fromDeg = gradient.angle
         return object : ShaderBrush() {

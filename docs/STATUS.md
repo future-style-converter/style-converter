@@ -30,7 +30,7 @@ the full history lives in git history.
 | claim | number | source of truth |
 |---|---|---|
 | Registration coverage — triplet exists + claims the IR type (a string-presence facade; not native rendering) | **558 / 558 per platform** (Android 558 / 558 · iOS 558 / 558 · Web 558 / 558) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
-| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 18 / 558 · iOS 73 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
+| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 19 / 558 · iOS 74 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
 | Verified rendering coverage — SSIM ≥ 0.95, every variant, every platform pair | **91 / 550 (~17%)** | converged audit campaign, round 40 (below) |
 
 "Registered" is only a string-presence facade — a triplet exists and
@@ -40,7 +40,7 @@ property natively. The stricter real-applier floor counts a dedicated
 (one file — e.g. Compose `LayoutApplier.kt`, iOS `FlexboxApplier.swift`,
 web `ScrollMarginApplier.ts` — renders many properties but its basename
 matches at most one IR name, so the raw dedicated-applier file counts
-Android 59 · iOS 117 · Web 530 sit above the per-property floor). Some
+Android 60 · iOS 119 · Web 530 sit above the per-property floor). Some
 registered appliers are intentional no-op + TODO where no mobile analogue
 exists (speech/, regions/, print/, …).
 
@@ -726,16 +726,43 @@ dirs + WPT corpus are gitignored):
   baseline for 004_Sizing_MaxWidthPercent carries no box
   (pre-existing), and basic-blur's capture moved deterministically
   under the runtime-wide gaussian fix. Zero regressions elsewhere.
+  Wave 36 (`tools/titan/results/corpus-v6-1.json`) mined the map —
+  eight lanes on the ranked opportunities. **Object-fit** (#1, 154
+  cells): the full image-delivery chain landed (extractor
+  `meta.attrs.src` replaced-element lane, the `/wpt-image/` route,
+  an `img.decode()` capture gate, schema-additive across all four
+  codebases) plus a converter `<position>` grammar rewrite — the old
+  parser read tokens positionally, so `top right` reached the
+  runtimes axis-swapped in six of every seven boxes across 132
+  tests: css-images full-cap 136→266/365. **Shape-outside** was
+  never emitted on web — emission + a shaped-float gate: css-shapes
+  33→83/102. **Size containment** fixed at the extractor
+  (css-contain +45 full-cap); the quote-depth bake landed;
+  the widget 0.9782 cluster (progress/meter appearance) fixed; the
+  **zoom** property landed on web *and then converged on both
+  natives* after the dark-stage net went red exactly as predicted —
+  real measure-then-scale zoom triplets, cross-pairs ≥0.99, nine
+  Zoom baselines + the iOS 004 divergence repaired (the only
+  baseline changes). The print/paged decision was **measured, not
+  assumed**: `requires-print-medium` stays scored; the `border="1"`
+  presentational-attribute mapping recovered the non-paged print
+  failures instead; two deliberate honest cell losses shipped
+  (cancelling-error scoring lies repaired). The monospace-quirk
+  glyph-advance fix lifted css-overflow natives +6/+9. Grid-lanes
+  (384 cells) is confirmed masonry — a feature brief, not a bug
+  hunt. Depth-48 gate: zero regressions, net clean. Totals:
+  **web 1079/1333 (81.0%), iOS 880/1305 (67.4%), Android 835/1301
+  (64.2%)**. css-grid web perfect 48/48 at depth.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 245 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1119 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2049 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1277 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1268 |
+| converter (Kotlin) | `./gradlew :converter:test` | 258 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1188 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2092 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1306 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1338 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

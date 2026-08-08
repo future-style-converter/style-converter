@@ -254,11 +254,11 @@ Gradle commands need JDK 21):
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 245 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1119 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2049 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1277 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1268 |
+| converter (Kotlin) | `./gradlew :converter:test` | 258 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1188 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2092 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1306 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1338 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 (`npm test` at the root runs every workspace's vitest suite — the web
@@ -308,14 +308,14 @@ Three different numbers, all true — do not conflate them:
   type — it does NOT mean a dedicated applier renders the property natively.
   Some registered appliers are intentional no-op + TODO where no mobile
   analogue exists (speech/, regions/, print/, …).
-- **Real-applier floor: Android 18 / 558 · iOS 73 / 558 · Web 516 / 558**.
+- **Real-applier floor: Android 19 / 558 · iOS 74 / 558 · Web 516 / 558**.
   The stricter per-property bar — a dedicated `<Name>Applier.<ext>` file
   exists — is far lower on mobile (`coverage-audit.mjs` prints it as the
   `real:` line, alongside `registered:`). Caveat: `real` under-counts
   grouped appliers — files like Compose `LayoutApplier.kt`, iOS
   `FlexboxApplier.swift`, or web `ScrollMarginApplier.ts` render many
   properties from one file whose basename matches at most one IR name, so
-  the raw dedicated-applier file counts (Android 59 · iOS 117 · Web 530)
+  the raw dedicated-applier file counts (Android 60 · iOS 119 · Web 530)
   sit above this per-property floor. (Web `real` is 508 not 509 because
   `print/SizeApplier.ts` and `sizing/SizeApplier.ts` both map to the single
   IR `Size` property and de-dupe.)

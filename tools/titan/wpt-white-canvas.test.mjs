@@ -477,14 +477,30 @@ test('corpus-v4.1 line-height: web wpt stage + composed placeholder pin the ref 
   assert.ok(baseRule, 'base html/body rule not found in index.html');
   assert.doesNotMatch(baseRule, /line-height/, 'the dark-stage html/body rule must not grow a line-height');
 
-  // The composed placeholder default mirrors the same unitless value (the
-  // span re-states it so an ancestor's line-height can never detach it),
-  // still deferring to an IR-declared line-height first.
+  // The composed placeholder default INHERITS the stage number instead of
+  // re-stating it (wave-36 lane M4). The v4.1 cut hard-coded the literal on
+  // the span so "an ancestor's line-height can never detach it" — but
+  // line-height is an INHERITED property and the ref pins it at ZERO
+  // specificity on :where(html) precisely so an author declaration one level
+  // up wins for every descendant. A re-statement on the innermost text span
+  // can never lose, so it clobbered every ancestor-declared line-height:
+  // measured on css/css-overflow/line-clamp/line-clamp-009, whose `.clamp`
+  // carries `font: 16px/32px serif` while the text sits in a CHILD component
+  // — capture box 80px (4 x 20) against the ref's 128px (4 x 32).
+  // `inherit` resolves to the ancestor's inline value when there is one and
+  // otherwise to the wpt-stage rule asserted above, i.e. the same refLh, so
+  // bare text is unchanged. The stage rule is now the ONE place the number
+  // lives on the web surface — which is why the assertion above (wptRule
+  // includes `line-height: ${refLh}`) is the load-bearing pin.
   const tsx = src('apps/web-harness/src/sdui/ComponentRenderer.tsx');
-  assert.match(tsx, new RegExp(`WPT_COMPOSED_MODE \\? \\{ lineHeight: irLineHeight \\?\\? '${refLh.replace('.', '\\.')}' \\} : \\{\\}`),
-    'composed placeholder default must pin the ref line-height (after IR deferral)');
-  // The Round-4 default-serif 18px calibration must never resurface.
+  assert.match(tsx, /WPT_COMPOSED_MODE \? \{ lineHeight: irLineHeight \?\? 'inherit' \} : \{\}/,
+    'composed placeholder must defer to IR then INHERIT the stage line-height');
+  // Neither stale hard-coded calibration may resurface on the span: the
+  // Round-4 default-serif 18px, nor the v4.1 re-stated ref number (which is
+  // correct as a STAGE default and wrong as a per-span re-statement).
   assert.doesNotMatch(tsx, /irLineHeight \?\? '18px'/, 'stale Round-4 18px composed pin resurfaced');
+  assert.doesNotMatch(tsx, new RegExp(`irLineHeight \\?\\? '${refLh.replace('.', '\\.')}'`),
+    'the span must not re-state the stage line-height — it clobbers ancestor declarations');
 });
 
 test('corpus-v4.1 line-height: compose composed ratio is 1.25 and the native default survives', () => {
