@@ -39,6 +39,36 @@
 //    = max(1, ceil(t/2)), Blink's ComputeUnderlineOffsetAuto gap term
 //    (third_party/blink/renderer/core/layout/text_decoration_offset.cc).
 //
+//  WAVE-35 (lane B8) CLOSEOUT — text-decoration-dotted-001/002 are
+//  GLYPH-ADVANCE-BOUND, not painter-bound. Wave 34 left both at ~0.53
+//  composed-vs-ref (iOS 0.5303/0.5416, Android 0.5303/0.5778) and lane B
+//  skipped them; this wave pixel-diffed them against the frozen refs and
+//  the residual is NOT attributable to anything in this file:
+//    • Underline GAP: bandTop − glyph-ink-bottom = 5 / 10 / 15 px for
+//      T = 10 / 20 / 30 on the ref AND on both natives — explicitUnder
+//      lineGapPx is exact on all three.
+//    • Band HEIGHT (10/20/30) and dot DIAMETER (10/20/30) — exact.
+//    • Dot PHASE: first dot's left edge sits on x = 62 on ref and both
+//      natives — exact.
+//    • Dot RHYTHM: feeding each platform's OWN measured run width W back
+//      through selectBestDashGap reproduces its observed pitches for all
+//      three thicknesses simultaneously to < 0.25px residual. The
+//      pitches differ only because W does: ref 460.1 / 409.1 (001 / 002)
+//      vs Android 489.3 / 417.7 and iOS 371.1 / 445.9 — a −19%…+9% text
+//      ADVANCE divergence at 92px, i.e. font fallback, not dash fitting.
+//    • Layer split (red decoration ink vs black glyph ink, scored
+//      separately): red 0.85–0.90, black 0.65–0.66. The glyph raster is
+//      the dominant loss (glyph ink is 71 rows tall vs the ref's 69) and
+//      the per-line block advance is 158/163 vs the ref's 156.
+//    Counterfactuals on the frozen captures: re-aligning every band
+//    vertically buys +0.03…+0.12; clipping to the ref's content right
+//    edge buys +0.002. Both together still land at 0.61–0.67. So even a
+//    perfect decoration painter cannot pass these two tests — they are
+//    bounded by text metrics (a css-text / metric-probe concern), and
+//    should be classified `blocked-platform: glyph-advance`, not
+//    `failing`. Probes: _diag35/b8/{scan,runs,solveW,attrib,inkiso}.mjs,
+//    validated by reproducing the frozen manifest numbers exactly.
+//
 //  Pure CoreGraphics CGFloat only — no SwiftUI/view code — so the
 //  XCTest suite pins every branch without a raster (the
 //  DecorationMetrics / GreedyLineBreaker test pattern).

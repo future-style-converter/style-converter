@@ -14,10 +14,20 @@ import assert from 'node:assert/strict';
 import { promises as fs } from 'node:fs';
 import { PNG } from 'pngjs';
 
+import { existsSync, statSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+
 import {
   parseArgs, safe, deviceSafeName, expectedPngNames, composedPngName,
   parentCreatesContext, composeRoots, flattenComponents, pngIsValid,
+  // wave-35 lane B2 — the @font-face file hop shared by both feeders.
+  documentFontSrcs, resolveFontFile,
 } from './feed-lib.mjs';
+
+/** The fs probes resolveFontFile takes by injection (so the pure resolution
+ *  rules can be pinned without stubbing the module's imports). */
+const fsProbes = { resolve, existsSync, statSync };
 
 // ── parseArgs ────────────────────────────────────────────────────────────────
 
@@ -215,4 +225,77 @@ test('timed-out fixtures get ONE warm tail-retry (cold-start holes)', async () =
   assert.match(src, /tail-retry/, 'tail-retry pass dropped');
   assert.match(src, /timedOutRows\.length < fixtures\.length/, 'all-timed-out (dead device) guard dropped');
   assert.match(src, /row\.retried = true/, 'retried rows must be marked in the summary');
+});
+
+// ── wave-35 lane B2: the @font-face file hop ────────────────────────────────
+//
+// The hop writes files into an app sandbox from a path that arrived out of a
+// third-party corpus, so the DECLINE rules matter more than the happy path:
+// every one of them is the difference between "the runtime falls back to its
+// bundled face" and "the harness copied an arbitrary file onto a device".
+
+test('documentFontSrcs returns each distinct src in document order', () => {
+  const doc = { fontFaces: [
+    { family: 'a', src: 'x/A.woff' },
+    { family: 'a', src: 'x/A.woff', weight: '700' },  // same FILE, second face
+    { family: 'b', src: 'x/B.ttf' },
+  ] };
+  // Deduped: pushing the same 261 KB file once per weight would multiply the
+  // slowest step of a native section run for no gain.
+  assert.deepEqual(documentFontSrcs(doc), ['x/A.woff', 'x/B.ttf']);
+});
+
+test('documentFontSrcs is empty for a document with no faces', () => {
+  assert.deepEqual(documentFontSrcs({}), []);
+  assert.deepEqual(documentFontSrcs({ fontFaces: null }), []);
+  assert.deepEqual(documentFontSrcs(null), []);
+  // A malformed entry names no file — dropping it here keeps the feeder from
+  // logging a decline for something that was never a candidate.
+  assert.deepEqual(documentFontSrcs({ fontFaces: [{ family: 'a' }] }), []);
+});
+
+test('resolveFontFile resolves a real corpus-relative font file', async (t) => {
+  const root = await fs.mkdtemp(join(tmpdir(), 'w35b2-fonts-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  await fs.mkdir(join(root, 'css', 'res'), { recursive: true });
+  const target = join(root, 'css', 'res', 'Lin.woff');
+  await fs.writeFile(target, 'not really a font, but a real file');
+  assert.equal(resolveFontFile(root, 'css/res/Lin.woff', fsProbes), target);
+});
+
+test('resolveFontFile DECLINES traversal, absolute paths and URLs', async (t) => {
+  const root = await fs.mkdtemp(join(tmpdir(), 'w35b2-fonts-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  // Containment is checked on the RESOLVED path — a `..` chain that escapes
+  // must never become a file this hop writes into an app sandbox.
+  assert.equal(resolveFontFile(root, '../../../etc/passwd.woff', fsProbes), null);
+  assert.equal(resolveFontFile(root, '/etc/passwd.woff', fsProbes), null);
+  assert.equal(resolveFontFile(root, 'https://evil.example/x.woff', fsProbes), null);
+  assert.equal(resolveFontFile(null, 'css/res/Lin.woff', fsProbes), null);
+});
+
+test('resolveFontFile DECLINES a non-font extension even when the file exists', async (t) => {
+  const root = await fs.mkdtemp(join(tmpdir(), 'w35b2-fonts-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  await fs.writeFile(join(root, 'payload.sh'), '#!/bin/sh\necho hi');
+  // The extension table is CLOSED so this route can never become a general
+  // file copier for whatever a corpus path happens to point at.
+  assert.equal(resolveFontFile(root, 'payload.sh', fsProbes), null);
+  // …and an admitted extension that is ABSENT is still a decline, not a guess.
+  assert.equal(resolveFontFile(root, 'missing.woff2', fsProbes), null);
+});
+
+test('feed-android pushes fonts BEFORE the IR reaches the inbox', async () => {
+  // Source-scan pin on the ordering CONTRACT: the app registers faces at
+  // decode time, so a font pushed after its document registers too late to
+  // shape the capture and the screenshot silently records the fallback.
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  const fontsAt = src.indexOf('const fonts = pushFontFaces(');
+  const inboxAt = src.indexOf("adbx(['push', fx, `${INBOX_DIR}");
+  assert.ok(fontsAt > 0 && inboxAt > 0, 'both push sites must exist');
+  assert.ok(fontsAt < inboxAt, 'fonts must be pushed before the IR');
+  // The fonts sandbox must be wiped with the inbox: a face left from a
+  // previous run is the worst stale state here (it LOOKS like text).
+  assert.match(src, /rm', '-rf', INBOX_DIR, SHOT_DIR, FONTS_DIR/,
+    'the fonts dir must join the reset wipe');
 });

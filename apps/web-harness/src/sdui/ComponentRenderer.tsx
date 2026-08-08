@@ -473,16 +473,82 @@ function calibrateStyles(styles: CSSStyles, ctx: RenderContext): CSSStyles {
     // Dynamic-sizing carve-out (see bucketsDeclareSizing above): when a
     // bucket redeclares geometry, the size-derived floor collapses to '0'
     // so the !important bucket rule owns the used value at every width.
+    //
+    // wave-35 lane B9 follow-up — the max-* suppression is SIZE-DERIVED
+    // ONLY. The paragraph above conflates two different floors that this
+    // one ternary produced:
+    //
+    //   (a) the SIZE-DERIVED floor `min-width: <the declared width>`,
+    //       which is what actually broke `width: 300; max-width: 50`
+    //       (used width = max(min, min(width, max)) = max(300, 50) = 300);
+    //   (b) the hard 50/30 px PLACEHOLDER floor, which exists because a
+    //       childless capture box has NO intrinsic inline contribution at
+    //       all — PlaceholderContent's block-label span is `height: 0`
+    //       with an `position: absolute` svg (see the ZERO LAYOUT
+    //       FOOTPRINT comment there), so `width: fit-content` resolves to
+    //       exactly 0px and the box disappears.
+    //
+    // Zeroing (a) under a declared max-* is correct and stays. Zeroing (b)
+    // was collateral: with no declared width there is no size-derived
+    // floor for the max-* to fight, so dropping the placeholder floor just
+    // hands the box a 0px used width.
+    //
+    // MEASURED (this is the wave-35 regression this branch repairs):
+    // fixtures/visual-test.json `Sizing_MaxWidthPercent`
+    // (`max-width: 80%; height: 50px; background: #8e44ad`, no width).
+    // Lane B9 widened the engine's extractLength to read the
+    // `{type:'percentage', percentage:N}` wire for Max*/Min*, so
+    // `styles.maxWidth` became '80%' where it had previously been dropped
+    // — the box went from `min-width: 50px` (a 50x50 purple square, the
+    // committed baseline on all three platforms) to `min-width: 0` →
+    // `width: fit-content` → 0px → NO BOX AT ALL (2,500 px of diff, the
+    // one regression in the 327-capture net). The percentage itself is
+    // fine: the capture canvas is a definite 390px border-box with 16px
+    // padding, so 80% resolves against a 358px containing block to
+    // 286.4px and never binds. Nothing here is cyclic.
+    //
+    // This also restores PARITY with the natives, which never had the
+    // max-* suppression at all: Compose gates the identical floor on
+    // `hasExplicitWidth = any { type in [Width, MinWidth, InlineSize,
+    // MinInlineSize] }` (runtimes/compose/.../core/renderer/
+    // ComponentRenderer.kt) — MaxWidth is deliberately NOT in that list —
+    // and SwiftUI's MinBoxFloor mirrors it. That is exactly why both
+    // natives still render the 50x50 square byte-identically to baseline.
+    //
+    // Blast radius, MEASURED over fixtures/visual-test.json: only two of
+    // the 109 components declare any max-* at all. `Sizing_MinMax`
+    // declares `min-width: 100px` explicitly, so it bottoms out in the
+    // FIRST disjunct and never reaches this branch; `Sizing_MaxWidthPercent`
+    // is the regression itself. Every other capture is untouched by
+    // construction, and the four other reachable states are unchanged:
+    // buckets → '0' (either capping state), capped + declared width → '0',
+    // uncapped → the pre-existing `width || 50px`.
     minWidth: aspectRatioInlineUnconstrained
       ? (hasChildren ? 'min-content' : undefined)
       : (styles.minWidth || styles.minInlineSize ||
-        ((styles.maxWidth || styles.maxInlineSize) ? '0'
-          : (bucketsDeclareSizing ? '0' : (styles.width || styles.inlineSize || '50px')))),
+        (bucketsDeclareSizing ? '0'
+          : (styles.maxWidth || styles.maxInlineSize)
+            // Capped axis: suppress only the size-derived floor (a). With
+            // no declared width there is none, so the placeholder floor
+            // (b) survives — a max-* cap is a ceiling, not a reason to
+            // let the box collapse below the shared 50px minimum.
+            ? ((styles.width || styles.inlineSize) ? '0' : '50px')
+            // Uncapped axis: the historical floor, byte-for-byte.
+            : (styles.width || styles.inlineSize || '50px'))),
+    // Block-axis twin of the same rule. `max-height` with no declared
+    // height collapses a childless box to 0px for exactly the same reason
+    // (the block-label span contributes no height either), and Compose's
+    // `hasExplicitHeight` gate likewise omits MaxHeight. No component in
+    // fixtures/visual-test.json declares a max-height, so this half moves
+    // no committed capture — it is kept in lock-step with the inline axis
+    // so the two can't drift into different answers for the same question.
     minHeight: aspectRatioBlockUnconstrained
       ? (hasChildren ? 'min-content' : undefined)
       : (styles.minHeight || styles.minBlockSize ||
-        ((styles.maxHeight || styles.maxBlockSize) ? '0'
-          : (bucketsDeclareSizing ? '0' : (styles.height || styles.blockSize || '30px')))),
+        (bucketsDeclareSizing ? '0'
+          : (styles.maxHeight || styles.maxBlockSize)
+            ? ((styles.height || styles.blockSize) ? '0' : '30px')
+            : (styles.height || styles.blockSize || '30px'))),
     // Empty grid/flex → behave like a block so the placeholder doesn't get
     // inflated by track/flex sizing. Applied AFTER the spread so it always
     // wins for empty containers; explicit `display` from styles is dropped
@@ -513,6 +579,36 @@ const TAG_ALLOWLIST = new Set([
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th',
   'details', 'summary',
+  // wave-35 lane B9 — the FIELDSET/LEGEND pair. These are form-ASSOCIATED
+  // but not form CONTROLS: neither takes input, neither acquires a focus
+  // ring, and neither is in WIDGET_TAGS — so the "captures must not acquire
+  // form-control behaviour" reason that keeps <input>/<button> out does not
+  // reach them. What they DO carry is a UA box model no other element has
+  // and no <div> can imitate: html.css gives <fieldset> a 2px groove border,
+  // asymmetric block padding (0.35em top / 0.625em bottom), 0.75em inline
+  // padding, `min-inline-size: min-content` and a 2px inline margin, and it
+  // NOTCHES that border around the rendered <legend>, which is laid out
+  // inside the border-box instead of the content flow (HTML §15.3.9 "the
+  // fieldset and legend elements"). Demoting both to <div> erased all of it.
+  //
+  // MEASURED on the frozen wave34-depth css-display slice (all three are
+  // composed-vs-ref fails there): display-contents-fieldset-nested-legend
+  // painted P / legend / ASS as three bare block lines with no box at all —
+  // 0.272% ink coverage against the ref's 0.906%, a 3.3× deficit, at SSIM
+  // 0.9449. The other two (display-contents-fieldset-002 0.6987,
+  // display-contents-dynamic-fieldset-legend-001 0.7181) are the same
+  // missing chrome multiplied over 17 and 16 fieldsets.
+  //
+  // The notch is the reason this has to be TAG mapping and not CSS: it is
+  // not expressible as a border declaration at all, so the ONLY way a
+  // capture can show it is to hand the browser a real <fieldset>/<legend>
+  // and let the same UA stylesheet that drew the ref draw ours.
+  //
+  // Blast radius, MEASURED over the corpus: 53 of the 10681 bucket-A tests
+  // contain `<fieldset` and 31 contain `<legend` (0.5%), and NONE of them
+  // appear in any of the 29 frozen wave34-final gate slices — so this
+  // mapping cannot move a single gate number by construction.
+  'fieldset', 'legend',
   'blockquote', 'q',
   'dl', 'dt', 'dd',
   'figure', 'figcaption',
@@ -531,6 +627,46 @@ const TAG_ALLOWLIST = new Set([
   // Inline-level structural tags follow the same pattern — they need
   // to remain inline for surrounding inline-flow / generated-content
   // / whitespace-collapse rules to behave correctly.
+  'strong', 'em', 'b', 'i', 'u', 's', 'mark', 'small', 'sub', 'sup',
+  'code', 'kbd', 'samp', 'var', 'cite', 'dfn', 'abbr', 'time',
+]);
+
+/**
+ * wave-35 lane B4 — the members of TAG_ALLOWLIST whose UA default display
+ * is INLINE, i.e. every tag the allowlist maps to a real non-atomic inline
+ * box. This is exactly the set for which the placeholder path's
+ * `display: block` content wrapper is a category error (see
+ * renderEmptyContent below): the element is an inline box, so a block box
+ * inside it splits the inline into anonymous block boxes (CSS 2.1
+ * §9.2.1.1) and destroys the very line box the test measures.
+ *
+ * MUST stay a SUBSET of TAG_ALLOWLIST — a tag outside the allowlist is
+ * mapped to <div> (a block container), where the placeholder wrapper is
+ * correct and load-bearing. The `renders as its own inline element` pin in
+ * ComponentRenderer.spanInline.test.tsx checks that subset relation end to
+ * end (render → assert the emitted element name) so the two literals can
+ * never silently drift apart.
+ *
+ * Deliberately EXCLUDED, each for a reason, not an oversight:
+ *   - `label`, `bdi`, `bdo`, `rt`, `rb` — inline-level on the wire but NOT
+ *     in TAG_ALLOWLIST, so they render as <div>; promoting them is a
+ *     tag-MAPPING change, a different measurable.
+ *   - `a`, `button`, `input`, `select`, `textarea`, `option`, `meter`,
+ *     `progress` — WIDGET_TAGS, already served by the first branch of the
+ *     same early return (wave-20 W1); `img` bypasses into the core's
+ *     void-element path.
+ *
+ * Measured population this closes (deduped by section+component across the
+ * archived bucket-A run IRs, childless components only, span excluded
+ * because wave-31 already covered it): q 123 · em 4 · code 3 · sub 1 ·
+ * sup 1 · b 1 = 133 leaves. `q` dominates and is almost entirely the
+ * css-content `quotes-0NN` family, where the UA `content: open-quote` /
+ * `close-quote` pseudos are inline and were being split off the text by
+ * exactly this wrapper — which is why css-content is scored alongside the
+ * four sections the lane brief named.
+ */
+const INLINE_ALLOWLISTED_TAGS: ReadonlySet<string> = new Set([
+  'span', 'q',
   'strong', 'em', 'b', 'i', 'u', 's', 'mark', 'small', 'sub', 'sup',
   'code', 'kbd', 'samp', 'var', 'cite', 'dfn', 'abbr', 'time',
 ]);
@@ -622,15 +758,24 @@ const HARNESS_OPTIONS: RendererOptions = {
     // what the source has. The old placeholder emitted a 0-content BLOCK
     // there, which broke the line just as hard as a text one.
     //
-    // SCOPE — 'span' only, not the whole inline family. <em>/<strong>/<b>/
-    // <i>/<code>… have carried their tags since wave-1 and their composed
-    // scores are frozen in runs/wave30-final; giving them the same
-    // treatment is the right follow-up but it is a SEPARATE measurable
-    // change, not a side effect of putting spans on the wire. Composed-WPT
-    // only (WPT_MODE): the 327-pair baseline never sets `?wpt=1`, so every
-    // committed capture keeps the placeholder byte-for-byte.
+    // wave-35 lane B4 — the rest of the inline family joins, which is the
+    // follow-up wave-31 scoped OUT and named ("a SEPARATE measurable
+    // change"). Taking it now, as its own measurable, because the argument
+    // is tag-independent: `<em>`, `<code>`, `<q>`, `<sub>`… are every bit
+    // as non-atomic-inline as `<span>`, so a `display: block` wrapper
+    // splits their line box by the same CSS 2.1 §9.2.1.1 rule. The one
+    // thing that was genuinely span-specific in wave-31 was the WIRE — the
+    // extractor had just started emitting `_tag: 'span'` — and the other
+    // inline tags have carried their tags since wave-1, so this half was
+    // always the only half missing. The gate is INLINE_ALLOWLISTED_TAGS
+    // (above): tags the allowlist maps to a real inline element, never a
+    // <div>-demoted one, where the placeholder wrapper is still correct.
+    //
+    // Composed-WPT only (WPT_MODE): the 327-pair baseline never sets
+    // `?wpt=1`, so every committed capture keeps the placeholder
+    // byte-for-byte — same gate wave-27 and wave-31 shipped behind.
     const wTag = component.meta?.sourceTag?.toLowerCase();
-    if (WPT_MODE && wTag && (WIDGET_TAGS.has(wTag) || wTag === 'li' || wTag === 'span')) {
+    if (WPT_MODE && wTag && (WIDGET_TAGS.has(wTag) || wTag === 'li' || INLINE_ALLOWLISTED_TAGS.has(wTag))) {
       return hasText ? text : null;
     }
     // Forward the component's IR-resolved line-height (if any) so the

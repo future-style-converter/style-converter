@@ -93,6 +93,37 @@ class LengthValueTest {
         assertEquals(LengthValue.Relative(50.0, LengthUnit.PERCENT, null), v)
     }
 
+    // wave-35 lane B9 — the SECOND live spelling of the same percentage value,
+    // byte-parallel with the web twin's
+    // `handles { type:"percentage", percentage:N }` case.
+    // MaxWidthProperty.MaxValue is a kotlinx POLYMORPHIC sealed variant
+    // (`@SerialName("percentage") data class PercentageValue(val percentage:
+    // IRPercentage)`), so the class discriminator writes `type` while the
+    // CONSTRUCTOR PARAMETER NAME writes `percentage`; MaxHeightProperty reuses
+    // that value type, which is why `max-height: 100%` reaches the wire this
+    // way. Reading only `value` returned Unknown and the declaration was
+    // dropped — measured on the web twin as WPT
+    // css-sizing/aspect-ratio/abspos-008 losing the max-height that CSS
+    // Sizing 4 §4.1 transfers through `aspect-ratio: 1/1` (240×240 painted
+    // against a 100×100 ref, composed-vs-ref SSIM 0.8415 in wave34-depth).
+    @Test fun `percentage sizing also accepts the polymorphic percentage key`() {
+        val v = extractLength(parse("""{"type":"percentage","percentage":100.0}"""))
+        assertEquals(LengthValue.Relative(100.0, LengthUnit.PERCENT, null), v)
+    }
+
+    // Widening-only contract: the pre-existing `value` key still wins, so no
+    // shape that decoded before this change can decode differently now.
+    @Test fun `percentage prefers value over percentage when both present`() {
+        val v = extractLength(parse("""{"type":"percentage","value":25.0,"percentage":99.0}"""))
+        assertEquals(LengthValue.Relative(25.0, LengthUnit.PERCENT, null), v)
+    }
+
+    // The Unknown fall-through is preserved: a payload-less envelope must NOT
+    // silently become 0%.
+    @Test fun `percentage envelope with no numeric payload stays Unknown`() {
+        assertEquals(LengthValue.Unknown, extractLength(parse("""{"type":"percentage"}""")))
+    }
+
     @Test fun `grid fraction is Fraction variant`() {
         // Quirk 4: fr is grid-track shape, not an IRLength.
         val v = extractLength(parse("""{"fr":2.0}"""))

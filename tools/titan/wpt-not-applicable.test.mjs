@@ -105,6 +105,45 @@ test('requires-animation-runtime does NOT fire on `transition:` (different prope
     assert.equal(tagsForTest({ html }).includes('requires-animation-runtime'), false);
 });
 
+// wave-35 B7 — the Web Animations API arm. Each positive below is the literal
+// call shape of a bucket-A corpus test that carried NO animation tag before
+// this wave; see RX.waapiTimeline for the 46,937-document precision audit.
+
+test('wave35 B7: requires-animation-runtime fires on Element.animate()', () => {
+    // css-pseudo/backdrop-animate-002.html — a ::backdrop animation built
+    // entirely in script, with no CSS @keyframes anywhere in the document.
+    const html = '<dialog id=t></dialog><script>t.animate({opacity:[0.1,0.1]},'
+        + '{pseudoElement:"::backdrop",duration:Infinity});</script>';
+    assert.ok(tagsForTest({ html }).includes('requires-animation-runtime'));
+});
+
+test('wave35 B7: requires-animation-runtime fires on a paused scripted timeline', () => {
+    // css-text/letter-spacing/letter-spacing-animating-letter-spacing.html —
+    // one of the two bucket-A tests that previously carried ZERO tags.
+    const html = '<div id=target>x</div><script>const a = target.animate('
+        + "{letterSpacing:['0px','40px']}, 40); a.pause(); a.currentTime = 20;</script>";
+    assert.ok(tagsForTest({ html }).includes('requires-animation-runtime'));
+});
+
+test('wave35 B7: requires-animation-runtime fires on getAnimations() and the WAAPI constructors', () => {
+    // css-view-transitions/scoped/rotation-on-scoped-element.html drives
+    // document.getAnimations(); the constructors are the same wall.
+    assert.ok(tagsForTest({ html: '<script>document.getAnimations().forEach(a => a.finish());</script>' })
+        .includes('requires-animation-runtime'));
+    assert.ok(tagsForTest({ html: '<script>new Animation(new KeyframeEffect(el, null));</script>' })
+        .includes('requires-animation-runtime'));
+});
+
+test('wave35 B7: the WAAPI arm does NOT fire on the SVG <animate> element or prose', () => {
+    // SVG SMIL is a different wall (and a different rule); the call-shape
+    // regex requires a `.animate(` invocation, which markup never produces.
+    assert.equal(tagsForTest({ html: '<svg><rect><animate attributeName="x" to="10"/></rect></svg>' })
+        .includes('requires-animation-runtime'), false);
+    // A bare mention in prose has no call parens either.
+    assert.equal(tagsForTest({ html: '<p>This test does not animate anything.</p>' })
+        .includes('requires-animation-runtime'), false);
+});
+
 // ── Rule 4: requires-script-mutation ────────────────────────────────────────
 
 test('requires-script-mutation fires on inline script with appendChild', () => {

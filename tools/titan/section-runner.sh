@@ -401,6 +401,26 @@ mkdir -p "$WEB_SHOTS_DIR"
 
 # Spin up vite in its own process group so we can kill the whole tree on
 # exit (mirrors test-all.sh's vite handling at lines 671-700).
+#
+# ── wave-35 lane B2: the @font-face ASSET HOP for the section pipeline ──────
+#
+# vite.config.ts's /wpt-font/ route resolves the IR's corpus-relative
+# `fontFaces[].src` against a corpus root it derives as
+# `<config dir>/../../tools/wpt` — correct for the canonical apps/web-harness/,
+# WRONG for this rsync'd copy, which sits at
+# runs/<id>/sections/<section>/web/ and would resolve to the nonexistent
+# runs/<id>/sections/tools/wpt. Every font request would 404 and every face
+# would silently fall back — the exact "screenshot records the wrong typeface
+# with no error anywhere" failure useFontFaces.ts's font-display:block guard
+# exists to prevent.
+#
+# The route already honours WPT_DIR for exactly this reason (same env var
+# extract-fixture.mjs reads), so the hop is one exported variable rather than
+# a copy step: the corpus stays the single source of truth, and no stale copy
+# under a per-section public/ can shadow a corpus update. (Contrast the
+# NATIVE hop, which must copy — a device cannot read the host's disk; see the
+# --wpt-dir flag threaded to the two feeders in Step 5b.)
+export WPT_DIR
 set +m
 ( cd "$WEB_ROOT" && exec npx vite --port "$PORT" >"$WORK_DIR/vite.log" 2>&1 ) &
 VITE_PID=$!
@@ -578,18 +598,26 @@ if [[ "$PLATFORM_SCOPE" == "all" ]]; then
     # honesty quick-wins); --composed = one <safe(testKey)>.png per test.
     # Separate log files (appended to CAPTURE_LOG after) so the two feeders'
     # concurrent output can't interleave mid-line.
+    #
+    # wave-35 lane B2 — `--wpt-dir` is the NATIVE half of the @font-face asset
+    # hop. The web half is a static route over the host's corpus (see the
+    # WPT_DIR export at Step 5); a device has no such reach, so each feeder
+    # reads the per-test doc's `fontFaces[].src`, resolves it under this root
+    # and COPIES the file into the app's own sandbox (adb push /
+    # simctl container copy) beside the IR it is about to feed. Same
+    # fixture-copy channel, one directory over.
     FEED_ANDROID_PID="" ; FEED_IOS_PID=""
     if [[ -n "$ANDROID_DEV" ]]; then
       log "android slot: $ANDROID_DEV — feeding (composed)"
       node "$TITAN_DIR/feed-android.mjs" --fixtures "$PERTEST_DIR" --composed \
-        --udid "$ANDROID_DEV" $ANDROID_FLAGS \
+        --udid "$ANDROID_DEV" $ANDROID_FLAGS --wpt-dir "$WPT_DIR" \
         --out "$ANDROID_SHOTS_DIR" --timeout-per-fixture 180 >"$WORK_DIR/feed-android.log" 2>&1 &
       FEED_ANDROID_PID=$!
     fi
     if [[ -n "$IOS_DEV" ]]; then
       log "ios slot: $IOS_DEV — feeding (composed)"
       node "$TITAN_DIR/feed-ios.mjs" --fixtures "$PERTEST_DIR" --composed \
-        --udid "$IOS_DEV" $IOS_FLAGS \
+        --udid "$IOS_DEV" $IOS_FLAGS --wpt-dir "$WPT_DIR" \
         --out "$IOS_SHOTS_DIR" --timeout-per-fixture 180 >"$WORK_DIR/feed-ios.log" 2>&1 &
       FEED_IOS_PID=$!
     fi

@@ -104,8 +104,25 @@ private struct FontMod: ViewModifier {
         // CSS way of calling `.custom(_:)` — SwiftUI silently falls back
         // to system on miss, so the UIFont probe here only narrows the
         // lookup; it doesn't reject already-installed faces.
+        // wave-35 lane B2 — the DOCUMENT font database is consulted FIRST, and
+        // per NAME rather than after the whole walk. css-fonts-4 §5 resolves a
+        // family against the document's own @font-face database before any
+        // system face, so `font-family: test, Arial` must take the declared
+        // `test` file even though "Arial" is installed and "test" is not.
+        // DocumentFontRegistry maps the CSS name to the PostScript name
+        // CoreText reported for the registered file — `UIFont(name: "test")`
+        // would still miss, which is why the mapping exists at all. The
+        // registry is empty for every document that declared no face, so this
+        // is a dictionary miss on an empty dictionary and every pre-wave-35
+        // capture keeps its exact resolution.
+        let registry = DocumentFontRegistry.shared
         let resolvedName: String? = agg.fontFamilyNames
-            .first(where: { UIFont(name: $0, size: 12) != nil })
+            .lazy
+            .compactMap { name -> String? in
+                if let mapped = registry.resolvedName(for: name) { return mapped }
+                return UIFont(name: name, size: 12) != nil ? name : nil
+            }
+            .first
             ?? agg.fontFamilyPrimary
         if let name = resolvedName {
             // Use `.custom(_:size:)` when we have an explicit face.

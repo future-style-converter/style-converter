@@ -107,6 +107,10 @@ import {
   HEAD_ONLY_TAGS, INLINE_MERGE_TAGS,
   bidiBakeTrigger, RTL_CODEPOINT_RANGES,
   extractFixture, writeFixturePair,
+  // wave-34 lane R's post-bake sweep. The bake dissolves inline flow, which
+  // invalidates any `meta.runs` order list the extractor emitted for the same
+  // component; see the CLI's call site for why THIS module must run it too.
+  dropStaleRuns,
 } from './extract-fixture.mjs';
 // The wave-16/20 post-load module's PURE cross-check surface. The traversal
 // identity (static paths ⇄ browser walk) is exactly the mapping this bake
@@ -446,16 +450,83 @@ export function boxProperties(rect, origin) {
   };
 }
 
-/** Property map for a baked ROOT: the used border-box size, plus the
- *  containing block its children need. `position: relative` is added ONLY
- *  when the element is statically positioned — with no insets it moves
- *  nothing, it just establishes the containing block. An already-positioned
- *  root keeps its own scheme. */
+/**
+ * Property map for a baked ROOT: the used border-box size, the containing
+ * block its children need, and — wave 35 — the RETIREMENT of the paragraph
+ * inputs this bake has just consumed.
+ *
+ * `position: relative` is added ONLY when the element is statically
+ * positioned — with no insets it moves nothing, it just establishes the
+ * containing block. An already-positioned root keeps its own scheme.
+ *
+ * ## Why the root's `direction` / `unicode-bidi` / `text-align` must go
+ *
+ * A bake root is the paragraph whose UAX#9 reorder this module RESOLVED:
+ * after [applyBidiBakePlan] runs, the root has no `_text` left and every
+ * surviving descendant is an absolutely positioned box carrying Chromium's
+ * own PHYSICAL used rect (boxProperties / runProperties). The declarations
+ * that DROVE that reorder — `direction: rtl`, a non-normal `unicode-bidi`,
+ * `text-align: start` — are therefore spent INPUTS. Leaving them on the
+ * wire invites a second application of the very computation the bake
+ * already performed, and [runProperties] has always stated the same rule
+ * for the runs ("no longer inherits a paragraph direction, an alignment or
+ * a font from boxes the bake dissolved"). The root was simply missed: the
+ * runs were made context-free while the box that CONTAINS them still
+ * advertised the pre-bake paragraph.
+ *
+ * ## The measured cost of leaving them (wave-34 captures, bidi-lines-002)
+ *
+ * Web is immune — CSS `left` is physical (css-position-3 §3.1), so Blink
+ * ignores the stale `direction` for boxes that declare one, and the web
+ * capture matches the browser ref at SSIM 0.993. Both natives mirror it:
+ *
+ *   • Android places an abspos child in a `Box` whose `Alignment.TopStart`
+ *     is LAYOUT-DIRECTION-AWARE, so the child's slack is handed to the
+ *     RIGHT edge before its (correctly physical) `absoluteOffset` applies:
+ *     x = contentRight − runWidth + left. Measured on the `Hello` run
+ *     (left 28.3, width 77.12, content right 358) → ink from x309; the
+ *     `سلام` run (left 256.53) left the canvas entirely. SSIM 0.9311.
+ *   • iOS anchors with `.frame(alignment: .leading)` under an ambient
+ *     `.rightToLeft`, which mirrors the whole box: x = contentRight −
+ *     left − width. Measured 338.7 for the left-10.09 runs (ink x343) and
+ *     27.9 for the left-320.89 run (ink x32) — an exact mirror. SSIM
+ *     0.9358.
+ *
+ * Both are genuine native defects against css-position-3 §3.1 and are
+ * reported as such (PositionedAncestorAnchor.kt's own banner already names
+ * the `Alignment.TopStart` hazard). This function does NOT paper over
+ * them: it stops the bake from SHIPPING an input it has already spent, so
+ * a baked fixture no longer depends on how a runtime resolves a paragraph
+ * direction it must never see.
+ *
+ * The three emitted values are the CSS initial values for the two
+ * inherited paragraph properties plus the physical spelling of the
+ * alignment, chosen over DELETING the declarations because deletion would
+ * re-expose the root to an ancestor's inherited `direction` (the bake root
+ * is not always the document root), and because every descendant inherits
+ * from here — one statement neutralises the whole baked subtree.
+ */
 export function rootProperties(rect, position) {
   const props = {
     width:  px(rect.width),
     height: px(rect.height),
     'box-sizing': 'border-box',
+    // The reorder is already in the coordinates; the paragraph direction
+    // that produced it is spent. `ltr` (the CSS initial value) makes the
+    // baked subtree's physical left/top mean physical left/top on every
+    // runtime, whatever its logical-inset machinery does.
+    direction: 'ltr',
+    // `unicode-bidi: plaintext | isolate | bidi-override` are the OTHER
+    // reorder inputs the browser walk consumed (ISOLATION_UNICODE_BIDI).
+    // With no `_text` left on the root there is nothing to isolate, and
+    // `normal` is the initial value — see css-writing-modes-4 §2.2.
+    'unicode-bidi': 'normal',
+    // `text-align: start` is direction-relative by definition. The root
+    // holds no in-flow text after the bake, so the only thing this can
+    // still do is flip an engine's line-box alignment for a descendant
+    // that inherits it. `left` is the physical spelling of the value the
+    // measured geometry was taken under.
+    'text-align': 'left',
   };
   if (position === 'static') props.position = 'relative';
   return props;
@@ -1060,12 +1131,26 @@ async function main() {
       try {
         const result = await extractFixture(rel);          // static pass
         const outcome = await bidiBakeFixture(result.fixture, rel);
+        // Wave 35 — THE SWEEP THIS CLI WAS MISSING. extract-fixture.mjs's
+        // `--bidi-bake` path calls dropStaleRuns immediately after the bake
+        // (its own call site cites the invariant: `_runs` without `_text` can
+        // only mean a later stage dissolved the inline flow). This CLI is the
+        // OTHER entry point into the same bake and skipped it, so it emitted a
+        // fixture the section pipeline can never emit: the root's positioned
+        // runs PLUS a surviving order list that makes every runs-honouring
+        // reader paint the dissolved text a second time, inline, on top of
+        // them. Measured on bidi-lines-002 baked through this CLI — a phantom
+        // "Hello سلام" on the box's first line, web-vs-ref 0.993 → 0.9737.
+        // Same call, same order, same log shape as the extract-fixture path,
+        // so the two entry points can no longer disagree about the wire.
+        const stale = dropStaleRuns(result.fixture) + dropStaleRuns(result.refFixture);
         await writeFixturePair(result);                    // write either way
         tally[outcome.status]++;
         console.log(`${outcome.status.padEnd(8)} ${rel}` +
           (outcome.status === 'baked'
             ? ` (${outcome.roots} roots, ${outcome.runs} runs — ${outcome.trigger})`
-            : ` (${outcome.reason})`));
+            : ` (${outcome.reason})`) +
+          (stale > 0 ? ` [stale-runs dropped: ${stale}]` : ''));
       } catch (err) {
         hardFail++;
         console.error(`ERROR    ${rel}: ${err.message ?? err}`);

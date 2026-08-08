@@ -59,6 +59,9 @@ import {
   lerpCssValue,
   parseAnimationDecl,
   sampleKeyframesAnimation,
+  // wave-35 B7: the non-negative-delay stability window.
+  iterationProgressAt,
+  CAPTURE_WINDOW_MS,
   // wave-22 EX2 B-RC4a: the scoped inline-chain collapse.
   collapseInlineRun,
   decorationContribution,
@@ -1852,14 +1855,151 @@ test('wave13 PIN: the measured WPT test bakes background-color rgb(100, 100, 0)'
   });
 });
 
-test('wave13 PIN: positive-delay and zero-delay controls do NOT sample', () => {
+test('wave13 PIN: positive-delay and drifting zero-delay controls do NOT sample', () => {
   const kf = parseKeyframes(
     '@keyframes bgcolor { 0% { background-color: rgb(0, 200, 0); } 100% { background-color: rgb(200, 0, 0); } }');
-  // Positive delay: the screenshot would race the timeline — boundary rule.
+  // Positive delay with NO fill: the whole capture window sits in the before
+  // phase, where the effect value is the element's UNDERLYING value (Web
+  // Animations §4.8.4.1) — unknowable statically.
   assert.equal(sampleKeyframesAnimation(
     { animation: 'bgcolor 1000000s cubic-bezier(0,1,1,0) 500000s' }, kf), null);
-  // Zero delay (the with-images / with-tableN family): same boundary.
+  // wave-35 B7 restated this leg. Zero delay is no longer refused per se —
+  // this particular animation is refused because it genuinely DRIFTS: over
+  // 100s the colour moves rgb(0, 200, 0) → rgb(1, 199, 0) inside the 1000 ms
+  // capture window, so the two window ends disagree. (The zero-delay cases
+  // that DO sample — with-images, contrast-color, rotate — are pinned below.)
   assert.equal(sampleKeyframesAnimation({ animation: 'bgcolor 100s' }, kf), null);
+});
+
+// ── wave-35 B7: the stability window (non-negative-delay sampling) ──────────
+//
+// Every pin below is the arithmetic of a REAL corpus test, named in its
+// comment, and every admission is justified by the spec citation carried in
+// extract-fixture.mjs's STABILITY WINDOW banner.
+
+test('wave35 B7: @keyframes names accept the dashed-ident forms', () => {
+  // css-animations-1 §4 types the name as <custom-ident>; css-values-4 §3.2 /
+  // CSS Syntax 3 §4.3.11 admit a leading '-' and the '--' dashed prefix. The
+  // measured case is css-color/animation/contrast-color-interpolation.html.
+  assert.deepEqual(Object.keys(parseKeyframes('@keyframes --anim { from { opacity: 0 } }')), ['--anim']);
+  assert.deepEqual(Object.keys(parseKeyframes('@keyframes -anim { from { opacity: 0 } }')), ['-anim']);
+  assert.deepEqual(Object.keys(parseKeyframes('@keyframes plain { from { opacity: 0 } }')), ['plain']);
+  // A bare digit run is not a valid identifier — still refused.
+  assert.deepEqual(Object.keys(parseKeyframes('@keyframes 123 { from { opacity: 0 } }')), []);
+});
+
+test('wave35 B7: contrast-color() resolves to the higher-WCAG-contrast pole', () => {
+  // css-color-5 §5: the function returns black or white, whichever contrasts
+  // more with its argument (WCAG 2.1 relative luminance).
+  assert.deepEqual(parseSrgbColor('contrast-color(white)'), { r: 0, g: 0, b: 0, a: 1 });
+  assert.deepEqual(parseSrgbColor('contrast-color(black)'), { r: 255, g: 255, b: 255, a: 1 });
+  assert.deepEqual(parseSrgbColor('contrast-color(yellow)'), { r: 0, g: 0, b: 0, a: 1 });
+  assert.deepEqual(parseSrgbColor('contrast-color(navy)'), { r: 255, g: 255, b: 255, a: 1 });
+  // An argument the sampler cannot parse refuses rather than guessing.
+  assert.equal(parseSrgbColor('contrast-color(hsl(120, 50%, 50%))'), null);
+});
+
+test('wave35 B7: composite values interpolate component-wise', () => {
+  // css-values-4 §7 componentwise interpolation; css-backgrounds-3 §5.4 types
+  // box-shadow that way. The measured pair from contrast-color-interpolation.
+  assert.equal(lerpCssValue('contrast-color(white) 100px 0px', 'lime 100px 0px', 0.5),
+               'rgb(0, 128, 0) 100px 0px');
+  // css-transforms/individual-transform/animation/individual-transform-combine
+  // #div-2: `scale: 1 1` → `scale: 3 1` at 0.5.
+  assert.equal(lerpCssValue('1 1', '3 1', 0.5), '2 1');
+  // Differing component counts, and any single uninterpolable component,
+  // refuse the WHOLE value — no half-interpolated composites.
+  assert.equal(lerpCssValue('red 1px', 'blue 1px 2px', 0.5), null);
+  assert.equal(lerpCssValue('red solid', 'blue dashed', 0.5), null);
+  // A single paren-wrapped token is not a composite (path() stays out).
+  assert.equal(lerpCssValue("path(nonzero, 'M0,0h1z')", "path(nonzero, 'M2,2h3z')", 0.5), null);
+});
+
+test('wave35 B7: iterationProgressAt implements the Web-Animations phases', () => {
+  const base = { durationMs: 1000, delayMs: 2000, iterations: 1, fill: 'none', paused: false };
+  // BEFORE phase without a backwards fill: no effect value (§4.8.4.1).
+  assert.equal(iterationProgressAt(base, 0), null);
+  assert.equal(iterationProgressAt({ ...base, fill: 'backwards' }, 0), 0);
+  assert.equal(iterationProgressAt({ ...base, fill: 'both' }, 0), 0);
+  // ACTIVE phase: progress is local time / duration.
+  assert.equal(iterationProgressAt(base, 2500), 0.5);
+  // AFTER phase without a forwards fill: no effect value (§4.8.4.3).
+  assert.equal(iterationProgressAt(base, 9000), null);
+  assert.equal(iterationProgressAt({ ...base, fill: 'forwards' }, 9000), 1);
+  // `infinite` never reaches the after phase.
+  assert.equal(iterationProgressAt({ ...base, iterations: Infinity }, 1e9), null); // p ≥ 1 → out of scope
+  // paused collapses EVERY wall time to local time 0 (css-animations-1 §4.2 +
+  // Web Animations §4.8.3.1) — the clip-path test's `-5s paused` shape.
+  const paused = { durationMs: 10000, delayMs: -5000, iterations: 1, fill: 'none', paused: true };
+  assert.equal(iterationProgressAt(paused, 0), 0.5);
+  assert.equal(iterationProgressAt(paused, 60000), 0.5);
+});
+
+test('wave35 B7 PIN: css-color/animation/contrast-color-interpolation bakes green', () => {
+  // `animation: --anim 2000s steps(2, start) both` over
+  // `from { box-shadow: contrast-color(white) 100px 0px }` →
+  // `to { box-shadow: lime 100px 0px }`.
+  // steps(2, jump-start) outputs 0.5 for the WHOLE first half of the duration
+  // (css-easing-1 §3.9.2), i.e. 1000 SECONDS — three orders of magnitude wider
+  // than the capture window. contrast-color(white) = black, and black → lime
+  // at 0.5 is rgb(0, 128, 0), which is exactly the `green` its reference
+  // (/css/reference/ref-filled-green-100px-square-only.html) paints.
+  const kf = parseKeyframes('@keyframes --anim { from { box-shadow: contrast-color(white) 100px 0px; }'
+    + ' to { box-shadow: lime 100px 0px; } }');
+  assert.deepEqual(sampleKeyframesAnimation({ animation: '--anim 2000s steps(2, start) both' }, kf), {
+    baked: { 'box-shadow': 'rgb(0, 128, 0) 100px 0px' },
+    dropped: ['animation'],
+  });
+});
+
+test('wave35 B7 PIN: background-color-animation-with-images bakes the progress-0 blue', () => {
+  // `animation: blue-anim 100s` (delay ZERO) over endpoints ONE 8-bit step
+  // apart. Its committed reference bakes the static declaration
+  // `background-color: rgb(0, 0, 199)` — the progress-0 value — so the
+  // reftest itself asserts the t=0 answer.
+  const kf = parseKeyframes('@keyframes blue-anim { 0% { background-color: rgb(0, 0, 199); }'
+    + ' 100% { background-color: rgb(0, 0, 200); } }');
+  assert.deepEqual(sampleKeyframesAnimation({ animation: 'blue-anim 100s' }, kf), {
+    baked: { 'background-color': 'rgb(0, 0, 199)' },
+    dropped: ['animation'],
+  });
+  // The SIBLING declaration in the very same test drifts in its SERIALIZED
+  // form (the premultiplied lerp of two alpha-0 colours re-serializes to
+  // `rgba(0, 0, 0, 0)`), so it is refused. Byte identity is deliberately
+  // stricter than render identity: refusing costs nothing (the verbatim path
+  // renders the same transparent box) while guessing could not be undone.
+  const kfT = parseKeyframes('@keyframes t { 0% { background-color: rgba(0, 200, 0, 0); }'
+    + ' 100% { background-color: rgba(200, 0, 0, 0); } }');
+  assert.equal(sampleKeyframesAnimation({ animation: 't 100s' }, kfT), null);
+});
+
+test('wave35 B7 PIN: identical endpoints and from,to lists bake; fill spans the window', () => {
+  // css-transforms/animation/rotate-animation-with-will-change-transform-001:
+  // `animation: a linear 10s infinite` over `from`/`to` both `0 1 0 44deg`.
+  const kfRot = parseKeyframes('@keyframes a { from { rotate: 0 1 0 44deg; } to { rotate: 0 1 0 44deg; } }');
+  assert.deepEqual(sampleKeyframesAnimation({ animation: 'a linear 10s infinite' }, kfRot).baked,
+                   { rotate: '0 1 0 44deg' });
+  // A 1s `both`-filled animation: t=0 is the active phase at progress 0 and
+  // t=CAPTURE_WINDOW_MS is the after phase at progress 1 — DIFFERENT phases,
+  // same value, because `from, to` declares one value at both offsets.
+  // (css-animations/animation-name-in-nested-shadow's shape.)
+  assert.equal(CAPTURE_WINDOW_MS, 1000);
+  const kfBoth = parseKeyframes('@keyframes doc { from, to { background-color: lightgreen } }');
+  assert.deepEqual(sampleKeyframesAnimation(
+    { 'animation-name': 'doc', 'animation-duration': '1s', 'animation-fill-mode': 'both' }, kfBoth).baked,
+    { 'background-color': 'lightgreen' });
+  // Drop the fill and the after-phase end has NO effect value → refuse.
+  assert.equal(sampleKeyframesAnimation(
+    { 'animation-name': 'doc', 'animation-duration': '1s' }, kfBoth), null);
+});
+
+test('wave35 B7 PIN: contain-animation-001 still refuses (non-animatable beats the new path)', () => {
+  // The wave-27 A-RC3 hole this closed: a paused, ZERO-delay animation now
+  // clears the delay boundary, so KEYFRAME_NON_ANIMATABLE is the ONLY thing
+  // keeping `contain: none` out of the fixture. It holds.
+  const kf = parseKeyframes('@keyframes bad { from { contain: none; } }');
+  assert.equal(sampleKeyframesAnimation(
+    { 'animation-duration': '1s', 'animation-name': 'bad', 'animation-play-state': 'paused' }, kf), null);
 });
 
 test('wave13: out-of-scope declarations extract verbatim (null sample)', () => {
@@ -3978,6 +4118,8 @@ const {
   shouldSlotBodyChildren,
   rootInheritedBakeProps,
   uaLinkProps,
+  parseFontShorthand,
+  rootPropsWithFontShorthand,
 } = await import('./extract-fixture.mjs');
 
 // ── A1: :dir() (Selectors-4 §11.2) ──────────────────────────────────────────
@@ -4342,6 +4484,158 @@ test('wave30 A4: the bake reaches body-level TEXT runs too', () => {
     '<body>lead<div>x</div></body>', parseCss('body { color: red }'), 't');
   assert.equal(components.t__text.properties.color, 'red');
   assert.ok(components.t__text._lossyReasons.includes('body-inherited-baked'));
+});
+
+// ── wave-35 lane FX: the font-SHORTHAND bake ────────────────────────────────
+//
+// The measured shape: css/css-text/boundary-shaping/*.html declare their whole
+// typography as `body { font: 36px test }` and nothing else, so every longhand
+// trigger was absent and the bake never fired — the three text components of
+// `of<span class=a>f</span>ice` shipped empty bags and painted 16px Inter
+// against a browser-ref painting 36px LinLibertine.
+
+test('wave35 FX: parseFontShorthand derives the §3.7 size/family form', () => {
+  // The corpus shape, and the minimum grammar: size + family.
+  assert.deepEqual(parseFontShorthand('36px test'),
+    { 'font-size': '36px', 'line-height': 'normal', 'font-family': 'test' });
+  assert.deepEqual(parseFontShorthand('16px serif'),
+    { 'font-size': '16px', 'line-height': 'normal', 'font-family': 'serif' });
+  // The full pre-size run + an explicit line-height + a family LIST.
+  assert.deepEqual(parseFontShorthand('italic bold 16px/1.2 X, serif'), {
+    'font-style': 'italic', 'font-weight': 'bold', 'font-size': '16px',
+    'line-height': '1.2', 'font-family': 'X, serif',
+  });
+  // css-fonts-4 §3.4 `oblique <angle>` is ONE font-style value.
+  assert.deepEqual(parseFontShorthand('oblique 20deg 16px serif'), {
+    'font-style': 'oblique 20deg', 'font-size': '16px',
+    'line-height': 'normal', 'font-family': 'serif',
+  });
+  // Numeric weight, a variant + stretch keyword that are parsed then dropped
+  // (neither is a trigger property), and a QUOTED family name surviving whole.
+  assert.deepEqual(
+    parseFontShorthand('small-caps 700 condensed 1.2em "Lucida Grande", sans-serif'), {
+      'font-weight': '700', 'font-size': '1.2em', 'line-height': 'normal',
+      'font-family': '"Lucida Grande", sans-serif',
+    });
+  // `normal` is legal in all four pre-size slots and names none of them —
+  // consumed, never emitted (it is every slot's initial value anyway).
+  assert.deepEqual(parseFontShorthand('normal normal normal 16px/normal Arial'), {
+    'font-size': '16px', 'line-height': 'normal', 'font-family': 'Arial',
+  });
+});
+
+test('wave35 FX: the `/` delimiter binds through any whitespace (syntax-3 §5)', () => {
+  // All four spellings are the SAME declaration — the bug FontExpander.kt's
+  // joinSlashRuns exists for, ported so the two readings cannot diverge.
+  const want = { 'font-size': '12px', 'line-height': '30px', 'font-family': 'Georgia' };
+  for (const v of ['12px/30px Georgia', '12px/ 30px Georgia',
+    '12px /30px Georgia', '12px / 30px Georgia']) {
+    assert.deepEqual(parseFontShorthand(v), want, v);
+  }
+});
+
+test('wave35 FX: the REFUSALS are honest — no half-derived font', () => {
+  // <system-family-name> (css-fonts-4 §3.7): resolved from the PLATFORM font
+  // database, so there is no size and no family in the document to derive.
+  for (const kw of ['caption', 'icon', 'menu', 'message-box', 'small-caption',
+    'status-bar', 'MENU']) {
+    assert.equal(parseFontShorthand(kw), null, kw);
+  }
+  // The CSS-wide keywords set every longhand to "ask the cascade again", and
+  // the fixture wire has no cascade to ask.
+  for (const kw of ['inherit', 'initial', 'unset', 'revert', 'revert-layer']) {
+    assert.equal(parseFontShorthand(kw), null, kw);
+  }
+  // var() — unresolvable by construction; after it, even WHICH token is the
+  // size is unknowable.
+  assert.equal(parseFontShorthand('var(--x) serif'), null);
+  assert.equal(parseFontShorthand('16px var(--f)'), null);
+  // Structurally invalid: missing family, missing size, an unrecognised token
+  // before the size, an out-of-range numeric weight, a dangling slash.
+  for (const v of ['16px', 'serif', 'wibble 16px serif', '1200 16px serif',
+    '16px/ Georgia', 'bold 100 16px serif', '', '   ']) {
+    assert.equal(parseFontShorthand(v), null, JSON.stringify(v));
+  }
+  assert.equal(parseFontShorthand(undefined), null);
+  assert.equal(parseFontShorthand(null), null);
+});
+
+test('wave35 FX: derived longhands agree with the converter\'s FontExpander', () => {
+  // PARITY PIN. The body-root keeps its `font` shorthand and :converter
+  // expands it with FontExpander.kt; the children get THIS function's
+  // derivation. Any disagreement would put one document's root and its own
+  // children on two different readings of the same declaration. The three
+  // decisions that could drift are pinned here:
+  //   1. §4.3 — a shorthand with no `/<line-height>` RESETS it to `normal`
+  //      (FontExpander.kt's closing `result["line-height"] = "normal"`).
+  assert.equal(parseFontShorthand('36px test')['line-height'], 'normal');
+  //   2. an explicit `/<line-height>` wins over that reset.
+  assert.equal(parseFontShorthand('36px/2 test')['line-height'], '2');
+  //   3. the system-font path emits NO size and NO line-height on either side.
+  assert.equal(parseFontShorthand('menu'), null);
+});
+
+test('wave35 FX: a root `font` shorthand fires the trigger and BAKES', () => {
+  assert.equal(bodyDeclaresInheritedProperty({ font: '36px test' }), true);
+  // …but a refused form does not — the bake stays exactly as it was.
+  assert.equal(bodyDeclaresInheritedProperty({ font: 'menu' }), false);
+  assert.equal(bodyDeclaresInheritedProperty({ font: 'inherit' }), false);
+  assert.deepEqual(rootInheritedBakeProps({ font: '36px test' }, {}),
+    { 'font-size': '36px', 'font-family': 'test', 'line-height': 'normal' });
+});
+
+test('wave35 FX: every existing guard still beats a DERIVED longhand', () => {
+  // Guard 2 (INHERITED_COVERING_SHORTHANDS): the child's own `font` covers
+  // all five, so a root `font` hands down nothing at all.
+  assert.equal(
+    rootInheritedBakeProps({ font: '36px test' }, { font: '12px serif' }), null);
+  // Guard 1: the child's own longhand wins per property — it keeps 9px and
+  // only the keys it never spoke about arrive.
+  assert.deepEqual(
+    rootInheritedBakeProps({ font: '36px test' }, { 'font-size': '9px' }),
+    { 'font-family': 'test', 'line-height': 'normal' });
+  // `all` covers every derived longhand (none of the five is `direction`).
+  assert.equal(
+    rootInheritedBakeProps({ font: '36px test' }, { all: 'unset' }), null);
+});
+
+test('wave35 FX: the author\'s explicit longhand beats the derived one', () => {
+  // Declaration order is not recoverable from the flattened root bag, so the
+  // explicit longhand wins — the only merge order that cannot change a byte
+  // any pre-FX fixture already baked.
+  const merged = rootPropsWithFontShorthand(
+    { font: '36px test', 'font-family': 'sans-serif' });
+  assert.equal(merged['font-family'], 'sans-serif');
+  assert.equal(merged['font-size'], '36px');       // still filled from the shorthand
+  assert.equal(merged.font, '36px test');          // the shorthand itself is kept
+  // No `font` key, or a refused one → the SAME OBJECT back, no allocation and
+  // provably no behaviour change.
+  const plain = { color: 'red' };
+  assert.equal(rootPropsWithFontShorthand(plain), plain);
+  const sys = { font: 'menu' };
+  assert.equal(rootPropsWithFontShorthand(sys), sys);
+});
+
+test('wave35 FX: end-to-end — boundary-shaping\'s text gets the @font-face family', () => {
+  // The exact corpus shape: `body { font: 36px test }` over
+  // `of<span class=a>f</span>ice`, where `test` is the @font-face family
+  // lane B2 delivers as fixture.fontFaces.
+  const { components, lossyReasons } = buildComponents(
+    '<body>of<span class=a>f</span>ice</body>',
+    parseCss('body { font: 36px test } .a { vertical-align: initial }'), 't');
+  for (const id of ['t__text', 't__0', 't__text1']) {
+    assert.equal(components[id].properties['font-family'], 'test', id);
+    assert.equal(components[id].properties['font-size'], '36px', id);
+    assert.equal(components[id].properties['line-height'], 'normal', id);
+    assert.ok(components[id]._lossyReasons.includes('body-inherited-baked'), id);
+  }
+  // The span keeps its OWN declaration alongside the baked ones.
+  assert.equal(components.t__0.properties['vertical-align'], 'initial');
+  // The root's own bag is untouched — it still carries the shorthand, which
+  // the converter expands for the composed canvas.
+  assert.equal(components.t__body.properties.font, '36px test');
+  assert.equal(components.t__body.properties['font-family'], undefined);
+  assert.ok(lossyReasons.includes('body-inherited-baked'));
 });
 
 test('wave30 A4: a NON-inherited-only root bag stays byte-for-byte legacy', () => {

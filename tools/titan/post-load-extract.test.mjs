@@ -42,6 +42,8 @@ import {
   flattenStaticPaths, staticPathsForHtml,
   mappingMismatch, snapshotsStable,
   componentAtPath, overlayComputedOnComponent, mergePostLoadIntoFixture,
+  // wave-35 lane B9 — the bar-control author-box suppression surface.
+  BAR_CONTROL_TAGS, barControlAuthorBoxSuppression,
   // wave-20 STRUCTURE extraction surface (section 10 pins):
   STRUCTURE_TRIGGER_TAG, shouldStructureExtract,
   HTML_VOID_TAGS, stripForeignVoidClosers,
@@ -483,6 +485,119 @@ test('post-load w1: overlay leaves _tag/_attrs untouched (widget identity is str
   // …and the widget identity fields are byte-identical.
   assert.equal(cmp._tag, 'input');
   assert.deepEqual(cmp._attrs, { type: 'checkbox', checked: true });
+});
+
+// ── wave-35 lane B9: the bar-control author-box suppression ─────────────────
+//
+// Blink's LayoutTheme::IsControlStyled() drops kProgressBarPart when
+// `HasAuthorBackground() || HasAuthorBorder()`, and those flags are set by the
+// PRESENCE of an author declaration, not its value — so re-stating a
+// <progress>'s own UA `0px / none / transparent` box as an author declaration
+// devolves it to the html.css green-on-gray fallback. Measured on
+// css-ui/appearance-progress-bar-002 (see the banner in post-load-extract.mjs
+// for the four-way isolation probe).
+//
+// The shared computed snapshot of a pristine <progress>: everything the
+// overlay enumerates, with the UA default box.
+const BAR_STYLES = {
+  position: 'static', top: 'auto', right: 'auto', bottom: 'auto', left: 'auto',
+  width: '160px', height: '16px', 'box-sizing': 'border-box',
+  'margin-top': '0px', 'margin-right': '0px', 'margin-bottom': '0px', 'margin-left': '0px',
+  'padding-top': '0px', 'padding-right': '0px', 'padding-bottom': '0px', 'padding-left': '0px',
+  'border-top-width': '0px', 'border-right-width': '0px',
+  'border-bottom-width': '0px', 'border-left-width': '0px',
+  'border-top-style': 'none', 'border-right-style': 'none',
+  'border-bottom-style': 'none', 'border-left-style': 'none',
+  'border-top-color': 'rgb(0, 0, 0)', 'border-right-color': 'rgb(0, 0, 0)',
+  'border-bottom-color': 'rgb(0, 0, 0)', 'border-left-color': 'rgb(0, 0, 0)',
+  'background-color': 'rgba(0, 0, 0, 0)',
+  transform: 'none', display: 'inline-block',
+  'overflow-x': 'visible', 'overflow-y': 'visible', 'z-index': 'auto',
+};
+
+test('post-load B9: a default-boxed <progress> gets NO manufactured author border/background', () => {
+  const cmp = { properties: {}, _tag: 'progress', _attrs: { value: 0.5 } };
+  overlayComputedOnComponent(cmp, { ...BAR_STYLES });
+  const p = cmp.properties;
+  // The whole author box is withheld — all four widths, styles, colours…
+  for (const side of ['top', 'right', 'bottom', 'left']) {
+    assert.equal(p[`border-${side}-width`], undefined);
+    assert.equal(p[`border-${side}-style`], undefined);
+    assert.equal(p[`border-${side}-color`], undefined);
+  }
+  // …and the transparent background that alone is enough to flip the flag.
+  assert.equal(p['background-color'], undefined);
+  // Everything OUTSIDE the two families still bakes normally — the
+  // suppression is about origin, not about skipping the overlay.
+  assert.equal(p.width, '160px');
+  assert.equal(p.height, '16px');
+  assert.equal(p['box-sizing'], 'border-box');
+  assert.equal(p.display, 'inline-block');
+  // Widget identity untouched (the wave-20 W1 contract).
+  assert.equal(cmp._tag, 'progress');
+  assert.deepEqual(cmp._attrs, { value: 0.5 });
+});
+
+test('post-load B9: a SCRIPT-set border on a <progress> still bakes (axis 3)', () => {
+  // The hole the computed-equals-default axis closes: a post-load mutation
+  // gives the control a real border, so nothing may be suppressed.
+  const cmp = { properties: {}, _tag: 'progress' };
+  overlayComputedOnComponent(cmp, {
+    ...BAR_STYLES,
+    'border-top-width': '2px', 'border-right-width': '2px',
+    'border-bottom-width': '2px', 'border-left-width': '2px',
+    'border-top-style': 'solid', 'border-right-style': 'solid',
+    'border-bottom-style': 'solid', 'border-left-style': 'solid',
+    'background-color': 'rgb(255, 0, 0)',
+  });
+  assert.equal(cmp.properties['border-top-width'], '2px');
+  assert.equal(cmp.properties['border-left-style'], 'solid');
+  assert.equal(cmp.properties['background-color'], 'rgb(255, 0, 0)');
+});
+
+test('post-load B9: an AUTHOR-styled <progress> still bakes (axis 2)', () => {
+  // When the author styled the control, the browser-ref's Blink flagged it
+  // too and BOTH sides devolve — suppressing would be the divergence. Any
+  // border-/background- key in the static bag disables the suppression, even
+  // one whose computed value is still the default.
+  const cmp = { properties: { 'background-image': 'none' }, _tag: 'progress' };
+  overlayComputedOnComponent(cmp, { ...BAR_STYLES });
+  assert.equal(cmp.properties['background-color'], 'rgba(0, 0, 0, 0)');
+  assert.equal(cmp.properties['border-top-width'], '0px');
+});
+
+test('post-load B9: suppression is scoped to progress/meter (axis 1)', () => {
+  // BAR_CONTROL_TAGS is exactly the pair whose UA default box IS the
+  // CSS-initial value. <button>/<input> have NON-initial UA boxes and would
+  // need a per-tag UA probe to be handled honestly — they stay on the old
+  // path, byte-for-byte.
+  assert.deepEqual([...BAR_CONTROL_TAGS].sort(), ['meter', 'progress']);
+  for (const tag of ['button', 'input', 'select', 'textarea', 'div']) {
+    const cmp = { properties: {}, _tag: tag };
+    overlayComputedOnComponent(cmp, { ...BAR_STYLES });
+    assert.equal(cmp.properties['background-color'], 'rgba(0, 0, 0, 0)', tag);
+    assert.equal(cmp.properties['border-top-width'], '0px', tag);
+  }
+  // …and a <meter> with the same snapshot IS suppressed.
+  const meter = { properties: {}, _tag: 'meter' };
+  overlayComputedOnComponent(meter, { ...BAR_STYLES });
+  assert.equal(meter.properties['background-color'], undefined);
+});
+
+test('post-load B9: the suppression predicate is pure and reports the exact key set', () => {
+  const keys = barControlAuthorBoxSuppression({ _tag: 'progress' }, BAR_STYLES, {});
+  assert.deepEqual([...keys].sort(), [
+    'background-color',
+    'border-bottom-color', 'border-bottom-style', 'border-bottom-width',
+    'border-left-color', 'border-left-style', 'border-left-width',
+    'border-right-color', 'border-right-style', 'border-right-width',
+    'border-top-color', 'border-top-style', 'border-top-width',
+  ]);
+  // Every suppressible key is one the overlay actually enumerates — a typo
+  // here would silently suppress nothing.
+  for (const k of keys) assert.ok(POST_LOAD_COMPUTED_PROPERTIES.includes(k), k);
+  // Non-bar tags get the empty set (the majority path — one tag test).
+  assert.equal(barControlAuthorBoxSuppression({ _tag: 'div' }, BAR_STYLES, {}).size, 0);
 });
 
 test('post-load: overlay keeps the trailing inset when the leading one is auto', () => {

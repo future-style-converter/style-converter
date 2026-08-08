@@ -15,6 +15,12 @@ enum WritingModeExtractor {
             touched = true
             let kw = ValueExtractors.extractKeyword(prop.data)?.lowercased() ?? ""
             cfg.isVertical = kw.hasPrefix("vertical") || kw.hasPrefix("sideways")
+            // Wave 35 (lane B5) — keep the keyword too. Parsed through the
+            // shared `WritingModeValue.from` so the wire's `VERTICAL_RL` and
+            // the CSS `vertical-rl` spelling land on the same case, and an
+            // unknown keyword bottoms out at `.horizontalTb` exactly as the
+            // `isVertical` read above bottoms out at false.
+            cfg.mode = WritingModeValue.from(keyword: kw)
         }
         return touched ? cfg : nil
     }

@@ -254,12 +254,31 @@ test('boxProperties: used border-box rect, relative to the containing block', ()
 
 test('rootProperties: adds position:relative only for a STATIC root', () => {
   assert.deepEqual(rootProperties({ width: 346.19, height: 246 }, 'static'), {
-    width: '346.19px', height: '246px', 'box-sizing': 'border-box', position: 'relative',
+    width: '346.19px', height: '246px', 'box-sizing': 'border-box',
+    // Wave 35: the consumed paragraph inputs are retired on the root — see
+    // the next test for why they have to be.
+    direction: 'ltr', 'unicode-bidi': 'normal', 'text-align': 'left',
+    position: 'relative',
   });
   // An already-positioned root keeps its own scheme — relative would be a
   // no-op there, but overwriting `absolute` would move the box.
   assert.equal(rootProperties({ width: 10, height: 10 }, 'absolute').position, undefined);
   assert.equal(rootProperties({ width: 10, height: 10 }, 'relative').position, undefined);
+});
+
+test('rootProperties: retires the paragraph inputs the bake consumed', () => {
+  // The reorder rides the descendants' PHYSICAL left/top from here on, so a
+  // baked root must not still advertise the direction that produced it: a
+  // runtime that re-applies it mirrors the whole subtree (measured on
+  // wave-34 bidi-lines-002 — iOS 0.9358, Android 0.9311 against the browser
+  // ref, both an exact mirror of Chromium's coordinates, while web — for
+  // which `left` is physical — sat at 0.993).
+  for (const scheme of ['static', 'relative', 'absolute']) {
+    const p = rootProperties({ width: 100, height: 50 }, scheme);
+    assert.equal(p.direction, 'ltr', `${scheme}: direction must be neutralised`);
+    assert.equal(p['unicode-bidi'], 'normal', `${scheme}: unicode-bidi must be neutralised`);
+    assert.equal(p['text-align'], 'left', `${scheme}: text-align must be physical`);
+  }
 });
 
 test('runProperties: the context-free run box', () => {
@@ -714,4 +733,26 @@ test('bidi-bake: extract-fixture.mjs wires the opt-in activation + browser close
   // …and it must run AFTER the post-load augmentation, so it measures the
   // settled tree the fixture actually carries.
   assert.ok(src.indexOf('postLoadAugmentFixture') < src.indexOf('bidiBakeFixture'));
+});
+
+test('bidi-bake: THIS module\'s CLI sweeps stale run lists too', () => {
+  // Wave 35 — the two entry points into the same bake must emit the same
+  // wire. extract-fixture.mjs's `--bidi-bake` path has called dropStaleRuns
+  // since wave 34; this module's own CLI did not, so a fixture baked through
+  // `node tools/titan/bidi-bake.mjs …` shipped `_runs` WITHOUT `_text` —
+  // the self-contradictory pair whose only possible meaning is "a later
+  // stage dissolved this inline flow". Measured on bidi-lines-002 baked via
+  // this CLI: a phantom inline copy of the dissolved text painted over the
+  // positioned runs, web-vs-ref 0.993 → 0.9737. Source-scan pin (same
+  // convention as the wiring test above) because `main()` is a process
+  // entry point, not a callable unit.
+  const src = readFileSync(join(__dirname, 'bidi-bake.mjs'), 'utf8');
+  assert.match(src, /dropStaleRuns,?\n?/);                      // imported
+  assert.match(src, /dropStaleRuns\(result\.fixture\) \+ dropStaleRuns\(result\.refFixture\)/);
+  // …and the sweep must run AFTER the bake (it exists to clean up what the
+  // bake dissolved) and BEFORE the fixture is written.
+  assert.ok(src.indexOf('await bidiBakeFixture(result.fixture, rel)')
+            < src.indexOf('dropStaleRuns(result.fixture)'));
+  assert.ok(src.indexOf('dropStaleRuns(result.fixture)')
+            < src.indexOf('await writeFixturePair(result)'));
 });

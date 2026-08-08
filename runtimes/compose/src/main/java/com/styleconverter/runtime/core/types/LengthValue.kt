@@ -108,6 +108,8 @@ internal fun parseLengthUnit(name: String?): LengthUnit {
  *   { "type": "length", "px": N, "original": … } → Exact (absolute inputs)
  *   { "type": "length", "original": { v, u } }   → Relative (no px fallback)
  *   { "type": "percentage", "value": N }         → Relative(PERCENT)
+ *   { "type": "percentage", "percentage": N }    → Relative(PERCENT) (the
+ *       kotlinx-polymorphic spelling — Max/Min width+height; see below)
  *   { "px": N }                                  → Exact  (raw shape, e.g. PaddingTop)
  *   { "original": { v, u } }                     → Relative (raw, pxFallback=null)
  *   { "calc": "…" }                              → Calc
@@ -152,9 +154,50 @@ fun extractLength(json: JsonElement?): LengthValue {
     // verbatim so later CalcExpressionEvaluator runs can resolve it.
     (json["expr"] as? JsonPrimitive)?.content?.let { return LengthValue.Calc(it) }
 
-    // Percentages on sizing properties use their own wrapper shape.
+    // Percentages on sizing properties use their own wrapper shape — and the
+    // frozen v2 wire carries the payload under TWO different keys, because
+    // the converter reaches this JSON through two different serializers:
+    //
+    //   {"type":"percentage","value":N}      — hand-written serializers that
+    //       spell the payload out (WidthProperty.WidthValueSerializer does
+    //       `put("type","percentage"); put("value", …)`), so Width / Height /
+    //       BlockSize / InlineSize land here.
+    //   {"type":"percentage","percentage":N} — kotlinx POLYMORPHIC encoding of
+    //       a `@SerialName("percentage") data class PercentageValue(val
+    //       percentage: IRPercentage)` variant: the class discriminator writes
+    //       `type` and the CONSTRUCTOR PARAMETER NAME writes the payload key.
+    //       MaxWidthProperty.MaxValue is exactly that shape and
+    //       MaxHeightProperty reuses it, so Max/Min width+height land here.
+    //
+    // Reading only `value` made the whole Max*/Min* percentage family decode
+    // to Unknown, i.e. the declaration was dropped with no trace. MEASURED on
+    // the web twin of this same gap — WPT css-sizing/aspect-ratio/abspos-008
+    // (`aspect-ratio:1/1; max-height:100%` inside a 100px-tall relative
+    // parent): with max-height gone there is nothing to transfer through the
+    // ratio (CSS Sizing 4 §4.1 transferred size suggestion), so the box takes
+    // its 240px max-content and the ratio squares it into 240×240 against a
+    // 100×100 ref (composed-vs-ref SSIM 0.8415, wave34-depth).
+    //
+    // The Swift twin has read both keys since the wave-1 Sizing_MaxWidthPercent
+    // fixture (`(o["value"] ?? o["percentage"])`), so this is a parity repair,
+    // not a new wire tolerance. Widening only: `percentage` is consulted ONLY
+    // when `value` is absent, and that shape previously returned Unknown.
+    //
+    // DOWNSTREAM NOTE (not silent): on Compose these values stop being dropped
+    // and start flowing through the platform's normal percent path —
+    // SizingApplier.toDpOrNull → SpacingResolve.resolveToDp → percentBasePx,
+    // i.e. the definite parent width when one is threaded and the viewport
+    // fallback otherwise (pins P10/P11/P12). That is the SAME approximation
+    // every other percent length on this platform already carries, and it is
+    // what iOS has always done for this shape; the alternative — keeping the
+    // declaration invisible to the applier — is the thing that was wrong.
+    // Corpus exposure MEASURED over all 315 archived run IRs: 27 components
+    // total across 10 property types, and ZERO in the 29 frozen wave34-final
+    // gate slices.
     if ((json["type"] as? JsonPrimitive)?.content == "percentage") {
-        val v = json["value"]?.jsonPrimitive?.doubleOrNull ?: return LengthValue.Unknown
+        val v = json["value"]?.jsonPrimitive?.doubleOrNull
+            ?: json["percentage"]?.jsonPrimitive?.doubleOrNull
+            ?: return LengthValue.Unknown
         return LengthValue.Relative(v, LengthUnit.PERCENT, pxFallback = null)
     }
 

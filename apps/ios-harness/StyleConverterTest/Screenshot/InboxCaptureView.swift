@@ -94,6 +94,21 @@ struct InboxCaptureView: View {
                 "[TITAN] IR decode failed for \(url.lastPathComponent)\n".utf8))
             return
         }
+        // wave-35 lane B2 — register this document's `@font-face` files BEFORE
+        // any capture. Ordering is load-bearing: CoreText must know the face
+        // before Text measures, so a registration after the render would
+        // arrive too late to shape the capture and the screenshot would
+        // silently record the fallback. Called UNCONDITIONALLY (a nil list
+        // clears): this view renders many documents in one process and a
+        // leftover face from the previous one would shadow this one's
+        // same-named family.
+        let faceCount = DocumentFontRegistry.shared.register(
+            document.fontFaces, baseDirectory: ScreenshotManager.fontsDirectory)
+        if let faces = document.fontFaces, !faces.isEmpty {
+            let rep = DocumentFontRegistry.shared.lastReport
+            print("[TITAN] @font-face: declared=\(rep.declared) registered=\(faceCount)" +
+                  (rep.declined.isEmpty ? "" : " DECLINED=\(rep.declined.joined(separator: ","))"))
+        }
         // TITAN WPT Round 3: composed sub-flag (titanComposed) switches this
         // per-fixture render between the two capture footings. Both consume
         // the IDENTICAL decoded IRDocument; only the capture GEOMETRY differs.

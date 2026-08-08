@@ -842,12 +842,20 @@ object ComponentRenderer {
             .LocalActive.current
         val hoistHasPositionedAncestor = com.styleconverter.runtime.layout.position.CanvasRootHoist
             .LocalHasPositionedAncestor.current
+        // Wave 35 (lane B1) — the SECOND ancestry channel (css-transforms-1
+        // §3 / css-transforms-2 §6): an ancestor with a used transform is
+        // the containing block for fixed AND absolute descendants, so it
+        // vetoes the hoist for both. Read next to the positioned flag so the
+        // interception below sees one consistent ancestry frame.
+        val hoistHasTransformedAncestor = com.styleconverter.runtime.layout.position.CanvasRootHoist
+            .LocalHasTransformedAncestor.current
         if (com.styleconverter.runtime.layout.position.CanvasRootHoist.interceptsInFlow(
                 component,
                 hostActive = hoistHostActive,
                 hasPositionedAncestor = hoistHasPositionedAncestor,
                 bypass = com.styleconverter.runtime.layout.position.CanvasRootHoist
                     .LocalBypass.current,
+                hasTransformedAncestor = hoistHasTransformedAncestor,
             )
         ) {
             return
@@ -1597,6 +1605,17 @@ object ComponentRenderer {
                 .LocalHasPositionedAncestor.current ||
                 com.styleconverter.runtime.layout.position.CanvasRootHoist
                     .establishesContainingBlock(component.properties)
+        // Wave-35 (lane B1) — the TRANSFORM half of the same channel
+        // (css-transforms-1 §3 / css-transforms-2 §6). Kept separate from the
+        // positioned flag because the two claim different descendant classes:
+        // only a transformed ancestor pulls a FIXED box out of the viewport.
+        // Same OR-accumulating rule and the same raw-declaration basis, so it
+        // mirrors CanvasRootHoist.collectCanvasHoisted's second flag exactly.
+        val childHasTransformedAncestor =
+            com.styleconverter.runtime.layout.position.CanvasRootHoist
+                .LocalHasTransformedAncestor.current ||
+                com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .establishesTransformContainingBlock(component.properties)
         val inheritanceWrappedContent: @Composable () -> Unit = {
             CompositionLocalProvider(
                 LocalInheritedProperties provides inheritableForChildren,
@@ -1626,7 +1645,12 @@ object ComponentRenderer {
                 // value is never read past the LocalActive gate, and
                 // providing it costs no layout node.
                 com.styleconverter.runtime.layout.position.CanvasRootHoist
-                    .LocalHasPositionedAncestor provides childHasPositionedAncestor
+                    .LocalHasPositionedAncestor provides childHasPositionedAncestor,
+                // Wave-35 (lane B1): the transform-CB twin of the line above.
+                // Provided unconditionally for the same reason — outside a
+                // host it is never read past the LocalActive gate.
+                com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .LocalHasTransformedAncestor provides childHasTransformedAncestor
             ) {
                 wrappedContent()
             }
@@ -2006,6 +2030,31 @@ object ComponentRenderer {
                 val columnConfig = MultiColumnExtractor.extractMultiColumnConfig(
                     component.properties.map { it.type to it.data }
                 )
+                // ── Wave-35 lane B3: css-multicol-1 §6.2 DESCENDANT spanner
+                // promotion (columns/MulticolDescendantSpanner.kt). A
+                // `column-span: all` element one level down was classified as
+                // an ordinary column item, and its ink-free wrapper carries
+                // the browser's POST-hoist used height of 0 — which Compose's
+                // Modifier.height(0.dp) propagates as a hard 0 max-height onto
+                // the spanner, collapsing it (ancestor-toggle-spanner-001
+                // captured pure RED where every other platform is GREEN).
+                // The rewrite lifts the descendant's own ColumnSpan onto the
+                // wrapper and drops the clamping sizing declarations; the
+                // wrapper STAYS in the tree, so the positioned-ancestor
+                // channel CanvasRootHoist mirrors is untouched. IDENTITY for
+                // every other container, so the frozen corpus is byte-stable.
+                // Resolved ONCE per instance (same remember{} discipline as
+                // ContentsUnboxing at RenderComponent's entry) so both the
+                // role classification and the content pass see one tree, and
+                // capture-gated like the wave-21 hook it feeds: the dark-stage
+                // 327-pair corpus never sets LocalWptCaptureMode, so its
+                // multicol containers take the identity branch provably.
+                val multicolCapture = LocalWptCaptureMode.current
+                val multicolComponent = androidx.compose.runtime.remember(component, multicolCapture) {
+                    if (multicolCapture)
+                        com.styleconverter.runtime.columns.MulticolDescendantSpanner.resolve(component)
+                    else component
+                }
                 MultiColumnApplier.MultiColumnLayout(
                     config = columnConfig,
                     modifier = modifier,
@@ -2015,12 +2064,12 @@ object ComponentRenderer {
                     // order (leading _text first). Null for child-less
                     // containers; the applier gates the plan behind
                     // LocalWptCaptureMode itself.
-                    childSpecs = component.children?.let {
+                    childSpecs = multicolComponent.children?.let {
                         com.styleconverter.runtime.columns.MulticolSpannerFlow
-                            .specsFor(it, !component._text.isNullOrEmpty())
+                            .specsFor(it, !multicolComponent._text.isNullOrEmpty())
                     }
                 ) {
-                    RenderContent(component, textColor, displayConfig)
+                    RenderContent(multicolComponent, textColor, displayConfig)
                 }
             }
             DisplayType.INLINE -> {
@@ -2409,7 +2458,42 @@ object ComponentRenderer {
                 } else emptyList()
 
             // Check if this is a positioned container (position: relative)
-            val isPositionedContainer = extractPositionType(component.properties) == PositionType.RELATIVE
+            // Wave 35 (lane B1) — OR-ed in: a box with a used transform is a
+            // containing block for its out-of-flow descendants exactly like a
+            // `position: relative` one (css-transforms-1 §3 / css-transforms-2
+            // §6), so its abspos children must take the SAME Box + anchored
+            // mount instead of stacking as ordinary Column siblings.
+            //
+            // Measured need — backface-visibility-hidden-001. Its `.card` is a
+            // STATIC `transform-style: preserve-3d` box holding two abspos
+            // 100×100 faces at top/left 50px. Chromium resolves both against
+            // `.card` (probe: _diag35/laneB1/probe-icb-shape.mjs reports
+            // cb=card for both faces), i.e. they OVERLAP. Without this clause
+            // the wave-35 hoist veto drops them into `.card`'s block Column,
+            // where the first face reserves 100px and the second lands 100px
+            // lower — strictly worse than the hoist it replaces.
+            //
+            // Blast radius, enumerated before the change
+            // (_diag35/laneB1/scan-tfparent.mjs over all 29 frozen sections):
+            // FIVE components in the whole corpus are transform-CB containers
+            // with out-of-flow children, and FOUR of them are already
+            // `position: relative` — so this OR flips exactly ONE container,
+            // backface-visibility-hidden-001's `.card`. Nothing in the
+            // dark-stage fixtures carries the shape at all (scan-fixtures.mjs).
+            //
+            // The `hasOutOfFlowChild` conjunct is what keeps that number at
+            // one: this whole branch swaps the block Column for a
+            // `Box(fillMaxSize())`, so a transform-CB container with only
+            // IN-FLOW children (every `transform:` box in the corpus with
+            // kids) must keep its block layout untouched. The out-of-flow
+            // child is both the reason the branch exists and its gate.
+            val transformCbHostsOutOfFlowChild =
+                com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .establishesTransformContainingBlock(component.properties) &&
+                    component.children.any { isOutOfFlowChild(it.properties) }
+            val isPositionedContainer =
+                extractPositionType(component.properties) == PositionType.RELATIVE ||
+                    transformCbHostsOutOfFlowChild
 
             if (isPositionedContainer) {
                 // CSS 2.1 §9.9.1 / Appendix E: a child with NEGATIVE z-index
@@ -3319,13 +3403,36 @@ object ComponentRenderer {
      * from web). WPT-capture gated so that fixture's committed baseline
      * does NOT move in this wave; re-baselining it is a deferred item, not
      * a claim that the dark-stage path is right.
+     *
+     * ## Wave 35 (lane B1) — the gate is GONE, and why that was safe
+     * The wave-33 capture gate was a schedule decision, not a correctness
+     * one: Appendix E is Appendix E on the product path too, and iOS never
+     * had the gate at all (`ComponentRenderer.outOfFlowChildren` mounts the
+     * positioned half as an unconditional `.overlay`, so SwiftUI has always
+     * painted step 8 above step 4 for every consumer). Android was the
+     * odd platform out — an SDUI host embedding this runtime got a DIFFERENT
+     * paint order from the same IR depending on a capture flag it cannot
+     * see.
+     *
+     * The gate's stated cost of removal — "block-flow.json's committed
+     * baseline moves" — was re-measured before pulling it, and it does not
+     * exist. _diag35/laneB1/scan-appendixE.mjs enumerates every fixture
+     * component in the repo carrying the observable shape (a `position:
+     * relative` container whose z-index-less out-of-flow child precedes an
+     * in-flow sibling) and cross-references the result against the 363
+     * committed `tools/visual/baseline` PNG names: 87 components match, all
+     * 87 report `baseline=none`, and the single non-WPT match is exactly
+     * `fixtures/fidelity/trees/block-flow.json`'s `B_RelativeAnchor` —
+     * which was never baselined. So there is no committed dark-stage
+     * capture that can observe this change; the un-gate is byte-neutral for
+     * the frozen set by enumeration, not by hope.
      */
     @Composable
     private fun absposPaintOrder(child: IRComponent): Modifier =
-        // Capture-gated: the 363 committed dark-stage baselines stay
-        // byte-identical, matching the AbsposInsetStretch / AbsposAutoMargin
-        // precedent for renderer-behaviour corrections.
-        autoZForPositionedChild(child.properties, LocalWptCaptureMode.current)
+        // Un-gated (wave 35): Appendix E step 8 is the paint order for every
+        // consumer of this renderer, product path included — see the kdoc's
+        // enumeration for why no committed baseline can observe it.
+        autoZForPositionedChild(child.properties)
             ?.let { Modifier.zIndex(it) } ?: Modifier
 
     /**
@@ -3333,17 +3440,21 @@ object ComponentRenderer {
      * positioned child, or null to leave its chain untouched. Pure over the
      * IR so the whole decision is JVM-pinnable without Robolectric.
      *
-     * - Outside WPT capture → null (the frozen dark-stage guarantee).
      * - A DECLARED `z-index` → null. PositionApplier already puts that
      *   value on the child's own chain, and an outer wrapper z would
      *   shadow it (the outer node's z is what orders it in the container).
      * - Otherwise → [AUTO_Z_POSITIONED_DESCENDANT], Appendix E step 8.
+     *
+     * Wave 35 (lane B1): the `wptCaptureMode` parameter is GONE, not
+     * defaulted. Appendix E does not have a capture mode, and leaving a
+     * `wptCaptureMode = true` default in place would have kept a dead knob
+     * that a future caller could silently flip back to the divergent
+     * order — see [absposPaintOrder]'s kdoc for the enumeration proving the
+     * committed dark-stage baselines cannot observe the un-gate.
      */
     internal fun autoZForPositionedChild(
         properties: List<IRProperty>,
-        wptCaptureMode: Boolean,
     ): Float? {
-        if (!wptCaptureMode) return null
         if (com.styleconverter.runtime.core.placement.ItemPlacementExtractor
                 .zIndex(properties) != null
         ) return null
@@ -5539,53 +5650,57 @@ object ComponentRenderer {
                 // corpus can't distinguish).
                 else -> 90f
             }
-            androidx.compose.ui.layout.Layout(
-                content = {
-                    Text(
-                        // scriptedText = spacedText (= annotatedText +
-                        // word-spacing spans, identity when word-spacing is
-                        // absent/zero) + the wave-34 per-script fallback
-                        // spans (identity outside WPT capture and for any
-                        // Latin-only string).
-                        text = scriptedText,
-                        // paintedTextStyle == styledTextStyle unless the
-                        // owned decoration pass is active (built-ins
-                        // stripped there — see paintedTextStyle above).
-                        style = paintedTextStyle,
-                        maxLines = effectiveMaxLines,
-                        overflow = effectiveOverflow,
-                        softWrap = effectiveSoftWrap,  // wrapConfig.softWrap minus the B-RC7 composed-WPT unbreakable-run gate
-                        onTextLayout = { layoutResult.value = it },
-                        // decorationModifier no-ops without owned lines;
-                        // inside the rotated branch it draws in the
-                        // PRE-rotation frame, so the lines ride the
-                        // rotated glyph run.
-                        modifier = Modifier.padding(4.dp).then(emphasisModifier).then(decorationModifier)
-                    )
-                }
-            ) { measurables, constraints ->
-                // Swap the axes: the text's inline axis runs along the
-                // box's block axis, so its wrap width is the incoming
-                // HEIGHT budget (unbounded → let it be a single line).
-                val swapped = androidx.compose.ui.unit.Constraints(
-                    minWidth = 0,
-                    maxWidth = if (constraints.hasBoundedHeight) constraints.maxHeight else androidx.compose.ui.unit.Constraints.Infinity,
-                    minHeight = 0,
-                    maxHeight = if (constraints.hasBoundedWidth) constraints.maxWidth else androidx.compose.ui.unit.Constraints.Infinity
+            // The sideways glyph run itself — unchanged; only its wrapper
+            // moved (to VerticalTextFlowLayout.VerticalRotatedTextRun, which
+            // is the same swap/coerce/centre-rotate measure policy verbatim).
+            val verticalGlyphRun: @Composable () -> Unit = {
+                Text(
+                    // scriptedText = spacedText (= annotatedText +
+                    // word-spacing spans, identity when word-spacing is
+                    // absent/zero) + the wave-34 per-script fallback
+                    // spans (identity outside WPT capture and for any
+                    // Latin-only string).
+                    text = scriptedText,
+                    // paintedTextStyle == styledTextStyle unless the
+                    // owned decoration pass is active (built-ins
+                    // stripped there — see paintedTextStyle above).
+                    style = paintedTextStyle,
+                    maxLines = effectiveMaxLines,
+                    overflow = effectiveOverflow,
+                    softWrap = effectiveSoftWrap,  // wrapConfig.softWrap minus the B-RC7 composed-WPT unbreakable-run gate
+                    onTextLayout = { layoutResult.value = it },
+                    // decorationModifier no-ops without owned lines;
+                    // inside the rotated branch it draws in the
+                    // PRE-rotation frame, so the lines ride the
+                    // rotated glyph run.
+                    modifier = Modifier.padding(4.dp).then(emphasisModifier).then(decorationModifier)
                 )
-                val placeable = measurables.first().measure(swapped)
-                // Report the rotated footprint (width↔height swapped).
-                val w = placeable.height.coerceIn(constraints.minWidth, constraints.maxWidth)
-                val h = placeable.width.coerceIn(constraints.minHeight, constraints.maxHeight)
-                layout(w, h) {
-                    // Center-rotate: place the child so its center lands at
-                    // the wrapper's center, then spin it about that center.
-                    val x = (w - placeable.width) / 2
-                    val y = (h - placeable.height) / 2
-                    placeable.placeWithLayer(x, y) {
-                        rotationZ = rotation
-                    }
-                }
+            }
+            // Wave 35 (lane B5) — css-writing-modes-4 §5.1 `text-orientation`.
+            // A run whose glyphs are Vertical_Orientation U (CJK, kana,
+            // FULLWIDTH forms) stands UPRIGHT inside the vertical line; the
+            // rotated wrapper above cannot draw that, because it spins the
+            // glyphs and the line stacking together. VerticalTextFlow decides
+            // (pure, twinned with the Swift module of the same name) and
+            // VerticalUprightTextFlow typesets it — declining back to the
+            // rotated run when the wrap budget is unbounded. Every ASCII run,
+            // every `sideways-*` mode and every `text-orientation: sideways`
+            // answers ROTATED here, i.e. the frozen tree below, byte for byte.
+            val uprightStack = verticalUprightStack(writingModeConfig, displayText)
+            if (uprightStack != null) {
+                VerticalUprightTextFlow(
+                    text = displayText,
+                    stack = uprightStack,
+                    rotatedRun = { VerticalRotatedTextRun(rotation, run = verticalGlyphRun) },
+                    // One upright glyph, styled exactly like the run it came
+                    // from. No 4dp padding here (each glyph IS a line box —
+                    // padding per glyph would insert 8dp of leading between
+                    // every character) and no maxLines/softWrap plumbing (a
+                    // single code point cannot wrap).
+                    uprightGlyph = { glyph -> Text(text = glyph, style = paintedTextStyle) },
+                )
+            } else {
+                VerticalRotatedTextRun(rotation, run = verticalGlyphRun)
             }
             return
         }
@@ -5837,6 +5952,30 @@ object ComponentRenderer {
                     ValueExtractors.extractDp(prop.data)?.let { columnGap = it }
                 }
             }
+        }
+
+        // ── Wave-35 lane B3: order-independent multicol promotion ─────────
+        // css-multicol-1 §2: `column-count`/`column-width` turn a BLOCK
+        // container into a multi-column one — the two declarations are not
+        // in competition, `display: block` is the multicol container's OWN
+        // display. The loop above, however, is order-sensitive: the
+        // ColumnCount arm only promotes `if (displayType == BLOCK)`, and a
+        // LATER `Display: BLOCK` arm then writes BLOCK straight back over
+        // the promotion. The extractor's wire order is the emitter's, not
+        // the author's, so whether a container reached the multicol layout
+        // at all depended on which key post-load-extract happened to write
+        // first. Measured over the whole frozen wave34-final gate: exactly
+        // TWO components carry ColumnCount BEFORE their Display and are
+        // block-ish after it — css-multicol ancestor-toggle-spanner-001 and
+        // -002, both of which render their `columns: 2` box as a plain
+        // block today (-001 captures pure RED where every other platform is
+        // GREEN). Re-asserting the promotion here makes the decision depend
+        // on the DECLARATIONS rather than their order, and touches nothing
+        // else in the corpus.
+        if (displayType == DisplayType.BLOCK &&
+            properties.any { it.type == "ColumnCount" || it.type == "ColumnWidth" }
+        ) {
+            displayType = DisplayType.MULTI_COLUMN
         }
 
         return DisplayConfig(

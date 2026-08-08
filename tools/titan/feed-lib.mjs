@@ -62,7 +62,86 @@ export function parseArgs(argv) {
     // and expect ONE `<safe(testKey)>.png` per fixture instead of the
     // per-component `%03d_<safeName>.png` set. Default off ⇒ legacy behaviour.
     composed: has('--composed'),
+    // wave-35 lane B2: WPT corpus root the per-test doc's `fontFaces[].src`
+    // resolves against, so the feeder can copy the font FILE into the device
+    // sandbox. null ⇒ no font hop (every pre-wave-35 caller), which degrades
+    // to exactly the wave-34 behaviour: the natives decode the list and
+    // render with their bundled face.
+    wptDir: get('--wpt-dir'),
   };
+}
+
+// ── wave-35 lane B2: the @font-face file hop (shared by both feeders) ────────
+//
+// The IR carries a corpus-relative PATH, never a payload (extract-fixture.mjs
+// explains why: a real webfont is 50–500 KB). The web harness serves that path
+// off a static route over the host's corpus; a device cannot reach the host's
+// disk at all, so the native half must COPY — and the copy rides the feeders'
+// existing fixture channel, one directory over from the inbox:
+//
+//   Android:  /sdcard/Android/data/<pkg>/files/fonts/<src>   (adb push)
+//   iOS:      <app data container>/Documents/fonts/<src>     (host fs copy)
+//
+// The RELATIVE PATH IS PRESERVED VERBATIM under that root, and that is the
+// whole contract with the two runtimes: each `DocumentFontRegistry` resolves
+// `File(fontsDir, face.src)` / `fontsDir.appending(face.src)` with no name
+// mangling, so there is no shared escaping rule to drift between four
+// codebases. Two faces from different corpus directories therefore cannot
+// collide even when their basenames match.
+
+/** The font file extensions the wire admits (spec 01 §5), mirroring
+ *  extract-fixture.mjs's FONT_FORMATS and vite.config.ts's
+ *  FONT_CONTENT_TYPES. A CLOSED table on purpose: this function decides what
+ *  gets written into an app sandbox, so it must never become a general file
+ *  copier for whatever a corpus path happens to point at. */
+const FONT_EXTENSIONS = new Set(['woff2', 'woff', 'ttf', 'otf', 'ttc', 'otc']);
+
+/** Every distinct, usable `fontFaces[].src` in a decoded IR document, in
+ *  document order. Pure — no disk access; the caller resolves.
+ *
+ *  Deduped because css-fonts-4 §4.1 lets many faces (weights/styles) name one
+ *  file, and pushing the same 261 KB woff once per face would multiply the
+ *  slowest step of a native section run for no gain. */
+export function documentFontSrcs(doc) {
+  const faces = doc?.fontFaces;
+  if (!Array.isArray(faces)) return [];
+  const out = [];
+  const seen = new Set();
+  for (const f of faces) {
+    const src = typeof f?.src === 'string' ? f.src.trim() : '';
+    if (!src || seen.has(src)) continue;
+    seen.add(src);
+    out.push(src);
+  }
+  return out;
+}
+
+/** Resolve one `src` under the corpus root, or null when it is not a font
+ *  file this hop will carry.
+ *
+ *  The corpus is third-party content and `src` came out of it, so the checks
+ *  mirror vite.config.ts's route rather than trusting the producer:
+ *    * containment is tested on the RESOLVED absolute path (a `..` chain or an
+ *      absolute token must never let a fixture name a file outside the corpus
+ *      and get it written into an app's sandbox);
+ *    * the extension must be one the wire admits;
+ *    * the file must exist and be a regular file.
+ *  A null return is a DECLINE, never a clamp — the caller logs it and the
+ *  runtimes degrade to their bundled face with the loud stamp. */
+export function resolveFontFile(wptDir, src, { resolve, existsSync, statSync }) {
+  if (!wptDir || typeof src !== 'string' || src === '') return null;
+  if (src.startsWith('/') || /^[a-z][a-z0-9+.-]*:/i.test(src)) return null;
+  const root = resolve(wptDir);
+  const abs = resolve(root, src);
+  if (abs !== root && !abs.startsWith(root + '/')) return null;
+  const ext = /\.([A-Za-z0-9]+)$/.exec(abs)?.[1]?.toLowerCase();
+  if (!ext || !FONT_EXTENSIONS.has(ext)) return null;
+  try {
+    if (!existsSync(abs) || !statSync(abs).isFile()) return null;
+  } catch {
+    return null;
+  }
+  return abs;
 }
 
 // ── Filename derivation (mirror of the Android capture path) ─────────────────

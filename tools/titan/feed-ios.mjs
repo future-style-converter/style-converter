@@ -39,6 +39,9 @@ import { PNG } from 'pngjs';
 // feed-lib.mjs, inject-wpt-block.mjs, split-combined-ir.mjs and the web
 // capture drivers so every host-side filename is sanitised identically.
 import { safe } from './safe-name.mjs';
+// wave-35 lane B2: the @font-face file hop, shared byte-for-byte with
+// feed-android.mjs so the two natives resolve and decline identically.
+import { documentFontSrcs, resolveFontFile } from './feed-lib.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..', '..');
@@ -223,6 +226,10 @@ export function parseArgs(argv) {
   const out = {
     fixtures: null, out: null, timeoutPerFixture: 30,
     udid: null, appPath: null, noBuild: false, composed: false, help: false,
+    // wave-35 lane B2: WPT corpus root the per-test doc's `fontFaces[].src`
+    // resolves against (same flag + semantics as feed-lib's parseArgs). null
+    // ⇒ no font hop, which degrades to exactly the wave-34 behaviour.
+    wptDir: null,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -236,6 +243,7 @@ export function parseArgs(argv) {
     // `<testKey>.json`, launch the app with SIMCTL_CHILD_TITAN_COMPOSED=1,
     // and pull ONE `<safe(testKey)>.png` per test (no per-component stitch).
     else if (a === '--composed') out.composed = true;
+    else if (a === '--wpt-dir') out.wptDir = argv[++i];
     else if (a === '--help' || a === '-h') out.help = true;
   }
   // Guard against a non-numeric / non-positive timeout silently disabling the
@@ -397,6 +405,14 @@ async function main() {
   const container = cont.stdout.trim();
   const inboxDir = join(container, 'Documents', 'inbox');
   const shotsDir = join(container, 'Documents', 'test_screenshots');
+  // wave-35 lane B2 — the @font-face sandbox, a SIBLING of the inbox for the
+  // same reason as Android's (the app's nextFixtureURL globs the inbox for
+  // `.json`; fonts belong out of that listing). Wiped on entry so a face from
+  // a previous run can never shape this one's capture — a stale font is the
+  // worst kind of stale state here, since the result LOOKS like text.
+  const fontsDir = join(container, 'Documents', 'fonts');
+  await fs.rm(fontsDir, { recursive: true, force: true });
+  await fs.mkdir(fontsDir, { recursive: true });
   await fs.mkdir(inboxDir, { recursive: true }); // exist before first push (app creates lazily)
   await clearPngs(shotsDir);
   // Drain any stragglers from a prior run so the queue starts clean.
@@ -442,6 +458,25 @@ async function main() {
 
     await clearPngs(shotsDir);           // idempotence: no stale PNGs from fixture n-1
     const t0 = Date.now();
+    // wave-35 lane B2 — copy this document's @font-face FILES into the app's
+    // sandbox BEFORE the IR reaches the inbox. Ordering is the contract: the
+    // app registers faces at decode time (CTFontManagerRegisterFontsForURL),
+    // so a file arriving after its document registers too late to shape the
+    // capture and the screenshot would silently record the fallback face.
+    // A decline is never fatal — the runtime degrades to the bundled face and
+    // stamps the miss (failing the fixture would hide every other property it
+    // measures).
+    for (const src of documentFontSrcs(doc)) {
+      const abs = resolveFontFile(args.wptDir, src, { resolve, existsSync, statSync });
+      if (!abs) { console.error(`[feed-ios] ${label}: font DECLINED (unresolvable/not a font): ${src}`); continue; }
+      // The corpus-relative path is preserved verbatim under fontsDir — the
+      // runtime's DocumentFontRegistry resolves exactly this join, so there is
+      // no escaping rule to drift between the four codebases.
+      const dest = join(fontsDir, src);
+      await fs.mkdir(dirname(dest), { recursive: true });
+      try { await fs.copyFile(abs, dest); }
+      catch (err) { console.error(`[feed-ios] ${label}: font COPY FAILED ${src} — ${err.message}`); }
+    }
     // Push via a temp name + rename so the app never reads a half-written JSON
     // (nextFixtureURL only sees `.json` files; the rename is atomic in-dir).
     // The tmp is dot-prefixed so its `.tmp` extension is skipped by the

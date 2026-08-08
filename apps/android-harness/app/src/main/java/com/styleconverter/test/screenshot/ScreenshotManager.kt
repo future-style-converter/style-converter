@@ -253,6 +253,30 @@ class ScreenshotManager(private val context: Context) {
     }
 
     /**
+     * TITAN @font-face sandbox (wave-35 lane B2).
+     *
+     * A SIBLING of [inboxDir], not a subdirectory: [nextFixtureFile] lists the
+     * inbox for `*.json`, so a font living under it would be inert but
+     * confusing. The host feeder (tools/titan/feed-android.mjs) `adb push`es
+     * each font file the fed document declares to
+     * `<this dir>/<fontFaces[].src>`, preserving the corpus-relative path
+     * VERBATIM — which is the whole contract with
+     * [com.styleconverter.runtime.typography.font.DocumentFontRegistry]: it
+     * resolves `File(fontsDir, face.src)` with no name mangling, so there is
+     * no escaping rule that could drift between host and device.
+     *
+     * Note it is NOT created here. Absence is a meaningful state — it means
+     * this run's feeder pushed no faces — and the registry's decline path
+     * already reports it with the family AND the path.
+     */
+    fun getFontsDir(): File =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            File(context.getExternalFilesDir(null), "fonts")
+        } else {
+            File(Environment.getExternalStorageDirectory(), "fonts")
+        }
+
+    /**
      * Returns the oldest *.json fixture currently in the inbox, or null
      * if the inbox is empty. Oldest-first matches the FIFO semantics the
      * host pushes in.

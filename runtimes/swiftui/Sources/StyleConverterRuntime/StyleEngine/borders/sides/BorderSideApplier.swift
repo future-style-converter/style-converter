@@ -236,6 +236,32 @@ struct BorderSideApplier: ViewModifier {
         return max(1, pitches + 1)
     }
 
+    // Centre-to-centre PITCH of a fitted dotted edge: the span between the
+    // two inset end-dot centres, `len - w`, shared evenly across the
+    // `n - 1` intervals. A single-dot edge has no interval → 0.
+    //
+    // Extracted from drawDotted verbatim (wave 35, lane B8) — same
+    // expression, no behaviour change — so the pitch can be pinned against
+    // the frozen WPT ref PNGs instead of only being asserted indirectly
+    // through a raster. Measured on
+    // tools/wpt/refs/9b5435e5…/white-black-ink-font-lh-imgpad-htmlpins/
+    // css-align/, whose `.block { border: 5px dotted blue }` boxes give
+    // four independent geometries (w = 5 throughout):
+    //   len 90 (justify-self-static-position-001, 80px box + 2×5 border)
+    //     → 10 dots, pitch 9.444  (ref dot lefts 67,77,86,95,105,114,124,
+    //       133,143,152 — top edge; 17,27,36,45,55,64,74,83,93,102 — left)
+    //   len 85 (align-self-static-position-001, width:75% of 100px)
+    //     → 9 dots, pitch 10.0    (ref 67,77,87,97,107,117,127,137,147)
+    //   len 60 (same test, height:50%)
+    //     → 7 dots, pitch 9.167   (ref 17,26,35,45,54,63,72)
+    // The len-90 case is a SECOND independent witness for the half-up
+    // rounding in dottedDotCount: (90-5)/10 = 8.5 exactly, and Chromium
+    // paints 10 dots (9 pitches), which ties-to-even would have made 9.
+    // Byte-parallel twin of Android's BorderSideApplier.dottedDotStep.
+    static func dottedDotStep(length len: CGFloat, width w: CGFloat, count n: Int) -> CGFloat {
+        n > 1 ? (len - w) / CGFloat(n - 1) : 0
+    }
+
     // Blink's Color::Dark()/Light() two-tone palette for the 3D border
     // styles (groove/ridge/inset/outset). 3D shading is UA-defined, so
     // the web reference engine's own arithmetic is the contract
@@ -441,8 +467,11 @@ struct BorderSideApplier: ViewModifier {
         let r = w / 2
         // Distance of the centreline from the box's outer edge.
         let mid = w / 2
-        // Even spacing between the two inset end-dot centres.
-        let step = n > 1 ? (len - w) / CGFloat(n - 1) : 0
+        // Even spacing between the two inset end-dot centres. Extracted to
+        // a helper (wave 35, lane B8) purely so the XCTest suite can pin the
+        // PITCH against the measured WPT refs, not just the dot COUNT —
+        // see dottedDotStep.
+        let step = Self.dottedDotStep(length: len, width: w, count: n)
         for i in 0..<n {
             // Distance along the edge of this dot's centre. The n == 1
             // case (dottedDotCount returns 1 exactly when len < 2w) used

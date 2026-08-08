@@ -83,6 +83,13 @@ struct TextConfig {
     // and 069_Typography_FontMono came out in default sans-serif on iOS
     // while Android + Web both rendered serif/mono correctly.
     var fontDesign: Font.Design  = .default
+    // wave-35 lane B2 — the PLATFORM font name for a family this document
+    // declared via `@font-face`, as reported by CoreText when
+    // DocumentFontRegistry registered the file (the CSS name, e.g. "test", is
+    // not a name `.custom(_:size:)` understands — hence the mapping). nil for
+    // every document that declared no face, which keeps the Inter/system pick
+    // in ComponentRenderer.font byte-for-byte identical to wave 34.
+    var fontFaceName: String?     = nil
     // CSS `text-indent` in points. SwiftUI has no direct first-line-indent
     // API, so PlaceholderLabel applies this as a leading padding on the
     // glyph wrapper. That matches the visible result for the common case
@@ -470,6 +477,20 @@ enum StyleBuilder {
             } else if agg.fontFamilySerif {
                 s.text.fontDesign = .serif
             }
+            // wave-35 lane B2 — the DOCUMENT @font-face bridge, and it needs
+            // the SAME treatment the generic-family bridge above needed for
+            // the same reason: PlaceholderLabel attaches `.font(...)` directly
+            // on its inner Text, which wins over the container-level font
+            // TypographyApplier sets, so a declared face resolved only there
+            // would silently lose on exactly the WPT text the channel exists
+            // for. Walk the family list in css-fonts-4 §5.2 order and take the
+            // first name this document registered; nil (the universal case —
+            // no document declared a face) leaves the Inter/system pick below
+            // byte-for-byte unchanged.
+            s.text.fontFaceName = agg.fontFamilyNames
+                .lazy
+                .compactMap { DocumentFontRegistry.shared.resolvedName(for: $0) }
+                .first
         }
 
         // Compatibility bridge — ComponentRenderer reads `text.color`

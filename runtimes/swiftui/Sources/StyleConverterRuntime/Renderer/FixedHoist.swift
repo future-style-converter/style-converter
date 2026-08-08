@@ -28,7 +28,10 @@
 //  MOUNTING the box at the right corner. `split` statically rewrites a
 //  document's root list:
 //    • position:fixed DESCENDANTS at ANY depth are stripped from their
-//      parent's children and hoisted (F1 — viewport containing block);
+//      parent's children and hoisted (F1 — viewport containing block),
+//      UNLESS an ancestor with a used transform has taken that containing
+//      block over (wave 35, lane B1 — css-transforms-2 §6; the rule table
+//      is StyleEngine/layout/position/TransformContainingBlock.swift);
 //    • out-of-flow ROOTS (absolute + fixed) are hoisted whole (F2 — the
 //      initial containing block IS the canvas for a root-level box);
 //    • everything else stays byte-identical, so nested absolute boxes
@@ -123,9 +126,38 @@ public enum FixedHoist {
     ///   • every out-of-flow ROOT (absolute + fixed — both anchor at the
     ///     unpadded canvas per the wave-17 web pixel evidence), itself
     ///     first stripped of its own fixed descendants;
-    ///   • every `position: fixed` DESCENDANT of any root, at any depth.
+    ///   • every `position: fixed` DESCENDANT of any root, at any depth,
+    ///     EXCEPT one whose containing block a transformed ancestor has
+    ///     taken over (wave 35, lane B1 — css-transforms-1 §3 /
+    ///     css-transforms-2 §6; see `strippingFixedDescendants`).
     /// Nested ABSOLUTE descendants are never touched — they keep the
     /// wave-8/9 positioned-ancestor padding-box containing block.
+    ///
+    /// ── PARITY NOTE, measured (wave 35, lane B1) ────────────────────────
+    /// That last clause is where this rule table still DIVERGES from its
+    /// Compose twin: `CanvasRootHoist.shouldHoistToCanvasRoot` hoists a
+    /// nested inset-anchored ABSOLUTE box to the initial containing block
+    /// when no positioned (and now no transformed) ancestor exists, while
+    /// `split` leaves every nested absolute where it is.
+    ///
+    /// Chromium says COMPOSE is right in the abstract — probe A in
+    /// _diag35/laneB1/probe-chromium.mjs nests an inset absolute two levels
+    /// under un-positioned wrappers and Chromium anchors it at the ICB
+    /// (20,10), not at the parent. The clause is nevertheless NOT adopted
+    /// here, and the reason is measured rather than aesthetic: the IR's
+    /// positioned-ancestor chain is LOSSY. In the six frozen tests that
+    /// carry this shape (scan-oof2.mjs), four are css-writing-modes
+    /// available-size-00x, whose `body > div { position: relative }` never
+    /// reaches the wire at all — the extractor drops the descendant-combinator
+    /// rule, so the IR claims "no positioned ancestor" for a box that has
+    /// one. iOS's conservative clause renders them correctly by accident and
+    /// PASSES all four; Compose's spec-correct clause hoists them to the
+    /// canvas corner and FAILS available-size-001/012 at 0.8998. Adopting
+    /// the ICB clause here would trade four green cells for zero.
+    /// The defect to fix is therefore the extractor's lost `position:
+    /// relative`, not this table; until it is fixed the divergence is
+    /// deliberate, pinned in FixedHoistTests (the parity matrix marks this
+    /// one row EXPECTED-DIVERGENT) and named as a follow-up.
     public static func split(roots: [IRComponent])
         -> (flow: [IRComponent], hoisted: [IRComponent]) {
         // Accumulators preserve document order across both halves.
@@ -134,8 +166,12 @@ public enum FixedHoist {
         for root in roots {
             // Fixed descendants strip out of EVERY root (in-flow or not):
             // a fixed box inside a hoisted absolute root still anchors at
-            // the viewport, not at that root's padding box.
-            let stripped = strippingFixedDescendants(root)
+            // the viewport, not at that root's padding box — UNLESS a
+            // transformed ancestor has taken the containing block over
+            // (wave 35, lane B1; see strippingFixedDescendants). A ROOT has
+            // no ancestors, so the walk starts with the flag clear and the
+            // root's OWN transform (if any) is folded in one level down.
+            let stripped = strippingFixedDescendants(root, hasTransformedAncestor: false)
             if ComponentRenderer.isOutOfFlow(root)
                 && !rendersInFlowAsStaticPosition(root) {
                 // F2/F1 root: the whole box leaves the flow stack — no
@@ -212,10 +248,30 @@ public enum FixedHoist {
     /// its ORIGINAL children array untouched) plus the removed boxes in
     /// document pre-order. The component ITSELF is never classified
     /// here — root-level classification is `split`'s job.
-    static func strippingFixedDescendants(_ component: IRComponent)
+    ///
+    /// Wave 35 (lane B1) — `hasTransformedAncestor` is the css-transforms-1
+    /// §3 / css-transforms-2 §6 veto: an ancestor with a USED transform
+    /// (`TransformContainingBlock`, the byte-parallel twin of Compose's rule
+    /// table) is the containing block for FIXED descendants too, so such a
+    /// box must NOT be stripped to the viewport overlay. Left in place it
+    /// takes the ordinary out-of-flow route — ComponentRenderer's
+    /// `outOfFlowChildren` ZStack overlay on its parent — which anchors it at
+    /// that parent's padding box, exactly what the browser does (probe C/D/E
+    /// in _diag35/laneB1/probe-chromium.mjs). The flag accumulates with OR:
+    /// a used transform never un-establishes a containing block.
+    ///
+    /// Defaulted false so the parameter is additive — every pre-wave-35 call
+    /// site (tests included) keeps the wave-17 always-strip behaviour.
+    static func strippingFixedDescendants(_ component: IRComponent,
+                                          hasTransformedAncestor: Bool = false)
         -> (kept: IRComponent, hoisted: [IRComponent]) {
         // Leaf (nil children): nothing to strip, return verbatim.
         guard let children = component.children else { return (component, []) }
+        // Children see a transform-CB ancestor if one already existed OR
+        // THIS component establishes one (css-transforms-1 §3). Computed
+        // once per level, not per child.
+        let childTransformed = hasTransformedAncestor
+            || TransformContainingBlock.establishes(component)
         // Walk children in order, recursing FIRST so a fixed grandchild
         // inside a kept child hoists too (any depth).
         var keptChildren: [IRComponent] = []
@@ -225,18 +281,24 @@ public enum FixedHoist {
         // fixed-free trees reference-identical to their input.
         var changed = false
         for child in children {
-            if isFixed(child) {
+            if isFixed(child) && !childTransformed {
                 // F1: the fixed box leaves its parent entirely — no flow
                 // space, no parent-anchored inset basis. Its own subtree
                 // is stripped too (a fixed box nested in a fixed box
                 // also anchors at the viewport).
-                let sub = strippingFixedDescendants(child)
+                let sub = strippingFixedDescendants(child,
+                                                    hasTransformedAncestor: childTransformed)
                 hoisted.append(sub.kept)
                 hoisted.append(contentsOf: sub.hoisted)
                 changed = true
             } else {
-                // Kept child — recurse for deeper fixed descendants.
-                let sub = strippingFixedDescendants(child)
+                // Kept child — recurse for deeper fixed descendants. This
+                // branch now also carries the wave-35 case: a fixed child
+                // whose containing block a transformed ancestor claimed
+                // (`childTransformed`), which stays in the tree and renders
+                // through its parent's out-of-flow overlay.
+                let sub = strippingFixedDescendants(child,
+                                                    hasTransformedAncestor: childTransformed)
                 keptChildren.append(sub.kept)
                 hoisted.append(contentsOf: sub.hoisted)
                 // Rebuild only if the recursion actually changed it.

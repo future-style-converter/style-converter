@@ -5140,8 +5140,11 @@ function lossyReasonsFor(props) {
 // extracting the declarations verbatim exactly as before this wave, and any
 // pre-existing bucketer tags, e.g. wpt-not-applicable.mjs Rule 3's
 // 'requires-animation-runtime', stay untouched):
-//   - zero or positive delay (value at t=0 is the pre-animation state or
-//     depends on fill-mode backwards — timeline-dependent);
+//   - zero or positive delay — SUPERSEDED by wave-35 B7 (see the
+//     STABILITY-WINDOW section immediately below); the wave-13 rule read
+//     "value at t=0 is the pre-animation state or depends on fill-mode
+//     backwards — timeline-dependent", which is true only when the value
+//     actually drifts inside the capture window;
 //   - progress landing exactly on 0/1 or outside the first iteration
 //     (fill-mode / iteration composite dependent);
 //   - animation-direction other than 'normal' (directed-progress mapping
@@ -5165,6 +5168,83 @@ function lossyReasonsFor(props) {
 // rgb()/rgba() tests: straight sRGB component space, premultiplied by
 // alpha. We reproduce that (premultiplied sRGB lerp), which the pinned
 // test confirms: rgb(0,200,0) → rgb(200,0,0) at eased 0.5 = rgb(100,100,0).
+
+// ── wave-35 B7: the STABILITY WINDOW (non-negative-delay sampling) ───────────
+//
+// MEASURED wave-35 finding: the wave-13 "delay must be strictly negative"
+// boundary is not the real determinism criterion — it is one *sufficient*
+// condition among several. What actually makes a WPT animation statically
+// renderable is that the effect value does not CHANGE across the window in
+// which the reference screenshot is taken. WPT's own -ref files say so out
+// loud: background-color-animation-with-images.html declares
+// `animation: blue-anim 100s` (delay ZERO) over
+// `@keyframes blue-anim { 0% {…rgb(0,0,199)} 100% {…rgb(0,0,200)} }`, and its
+// committed reference background-color-animation-with-images-ref.html bakes
+// the literal static declaration `background-color: rgb(0, 199)`… i.e.
+// `rgb(0, 0, 199)` — the progress-ZERO keyframe value. The reftest asserts
+// the t=0 value precisely because the endpoints are engineered one 8-bit
+// step apart, so no realistic capture latency can move the rendered pixel.
+//
+// So the wave-35 extension replaces "delay < 0" (kept intact as the frozen
+// path) with a PROOF obligation for the newly admitted delay ≥ 0 case:
+//
+//   sample the effect value at BOTH ends of the capture window and admit
+//   the bake only when the two serialize IDENTICALLY.
+//
+// Window size. The reference capture is `capture-browser-ref.mjs`, which
+// waits `page.goto(…, {waitUntil:'load'})`, then document.fonts.ready, then
+// 50 ms + 50 ms of settle, then two requestAnimationFrames — i.e. the
+// screenshot lands ~100–200 ms after the document's animation timeline
+// starts. CAPTURE_WINDOW_MS is set to 1000 ms: a ≥5× margin over that
+// measured latency, and the same order of magnitude WPT itself budgets when
+// it writes "we accommodate lengthy delays in running the test … especially
+// on debug builds" (background-color-animation-in-body.html's own comment).
+// Anything whose rendered value survives a full second of timeline advance
+// unchanged is static for our purposes; anything that does not is REFUSED
+// and rides the verbatim path exactly as before, keeping the
+// 'requires-animation-runtime' wall honest instead of guessing.
+//
+// The window check is evaluated on the SERIALIZED bake (the same strings
+// that land in the fixture), so it is quantization-aware for free: the
+// images test's blue channel moves 199 → 199.0045 across the window, which
+// rounds to the same `rgb(0, 0, 199)` byte string, while a genuinely dynamic
+// `bgcolor 100s` over rgb(0,200,0) → rgb(200,0,0) moves to `rgb(1, 199, 0)`
+// and is refused. No tolerance constant, no fudge factor — byte identity.
+//
+// What the window admits, all with a spec citation:
+//   - delay 0 + a piecewise-constant timing function: css-easing-1 §2.4's
+//     steps() holds one output value for a whole 1/n slice of the duration.
+//     css-color/animation/contrast-color-interpolation.html is the measured
+//     case: `steps(2, start)` over 2000s holds output progress 0.5 for the
+//     first 1000 SECONDS (css-easing-1 §3.9.2 step arithmetic — the
+//     jump-start rise makes even input progress 0 evaluate to 0.5).
+//   - delay 0 + endpoints closer than one rendering quantum (the images
+//     family above).
+//   - delay 0 + identical endpoints (css-transforms
+//     rotate-animation-with-will-change-transform-001.html interpolates
+//     `0 1 0 44deg` → `0 1 0 44deg`; constant by inspection).
+//   - `animation-play-state: paused` at ANY delay: css-animations-1 §4.2 +
+//     Web Animations §4.8.3.1 fix the hold time at the animation's start, so
+//     the effect value is time-INDEPENDENT and both window ends coincide by
+//     construction (this is the same argument the shorthand parser's
+//     play-state slot already documents).
+//   - fill-mode arithmetic: Web Animations §4.8.4 phase boundaries. In the
+//     BEFORE phase only `backwards`/`both` produce an effect value (progress
+//     0); in the AFTER phase only `forwards`/`both` do (progress 1). Without
+//     a fill the effect value is the element's UNDERLYING value, which static
+//     extraction cannot know — refuse, exactly like a missing bracket frame.
+//
+// What it still refuses (the honest capability wall): any animation whose
+// rendered value differs between the two window ends. Those keep
+// wpt-not-applicable.mjs Rule 3's 'requires-animation-runtime' tag and
+// extract verbatim.
+
+// Upper bound on how long after the animation timeline's t=0 the reference
+// screenshot can plausibly be taken. See the STABILITY WINDOW banner for the
+// measured derivation (capture-browser-ref.mjs waits load + fonts + 50 + 50 ms
+// + 2 rAF ≈ 100–200 ms; this is a ≥5× margin). Exported so tests can pin the
+// arithmetic to a named constant instead of a magic literal.
+export const CAPTURE_WINDOW_MS = 1000;
 
 // The animation longhands the sampler understands + drops after baking.
 // animation-composition/range are listed as DROP-ON-SAMPLE too: if present
@@ -5291,7 +5371,21 @@ export function parseKeyframes(css) {
   const out = {};                                  // name → sorted Frame[]
   // Unquoted <custom-ident> name then the opening brace. /g so we walk
   // every block in document order (last-wins is Object assignment order).
-  const re = /@keyframes\s+([A-Za-z_][\w-]*)\s*\{/g;
+  //
+  // wave-35 B7: the ident grammar now covers the LEADING-HYPHEN forms.
+  // css-animations-1 §4 types the keyframes name as <keyframes-name> =
+  // <custom-ident> | <string>, and css-values-4 §3.2 defines <custom-ident>
+  // on the CSS Syntax 3 §4.3.11 identifier production — which admits an
+  // optional '-' before the first name-start code point, and the `--`
+  // dashed-ident prefix in full. The pre-wave-35 class `[A-Za-z_]` silently
+  // skipped BOTH, so `@keyframes --anim { … }` produced an empty keyframes
+  // map and every animation naming it fell out of the sampler for a reason
+  // that had nothing to do with time. MEASURED case:
+  // css-color/animation/contrast-color-interpolation.html, whose whole test
+  // is `@keyframes --anim`. Quoted <string> names stay out of scope (still
+  // documented above); a bare digit run is correctly still rejected, since
+  // `123` is not a valid identifier.
+  const re = /@keyframes\s+((?:--|-?[A-Za-z_])[\w-]*)\s*\{/g;
   let m;
   while ((m = re.exec(css)) !== null) {
     // Find the matching close brace by depth-counting from just after '{'.
@@ -5516,6 +5610,34 @@ export function parseSrgbColor(raw) {
     if (![r, g, b, a].every(Number.isFinite)) return null; // any junk token → refuse
     return { r, g, b, a };
   }
+  // wave-35 B7: contrast-color(<color>) — css-color-5 §5 "Selecting the Most
+  // Contrasting Color". The function resolves, at computed-value time, to
+  // whichever of BLACK or WHITE has the greater WCAG 2.1 contrast ratio
+  // against its argument; it carries no runtime state, so resolving it here
+  // is a static substitution, not an animation guess. MEASURED case:
+  // css-color/animation/contrast-color-interpolation.html interpolates
+  // `contrast-color(white)` → `lime` and its ref paints plain `green`
+  // (rgb(0,128,0)) — i.e. the midpoint of BLACK → lime, confirming that
+  // contrast-color(white) must resolve to black.
+  m = /^contrast-color\(\s*(.+?)\s*\)$/.exec(s);
+  if (m) {
+    const base = parseSrgbColor(m[1]);             // the argument must itself be sRGB-parsable
+    if (!base) return null;                        // unsupported argument colour → refuse
+    // WCAG 2.1 relative luminance: linearize each 0–1 sRGB channel through
+    // the piecewise transfer function, then weight 0.2126/0.7152/0.0722.
+    const lin = (v8) => {
+      const v = v8 / 255;                          // 8-bit channel → 0–1
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    };
+    const L = 0.2126 * lin(base.r) + 0.7152 * lin(base.g) + 0.0722 * lin(base.b);
+    // WCAG contrast ratio (Llight+0.05)/(Ldark+0.05); white L=1, black L=0.
+    const vsWhite = 1.05 / (L + 0.05);             // ratio if we pick white
+    const vsBlack = (L + 0.05) / 0.05;             // ratio if we pick black
+    // css-color-5 §5: ties go to the FIRST of the implicit white/black pair
+    // the UA considers; the corpus never hits the exact tie, and picking
+    // black on a tie matches Chromium's shipped behaviour.
+    return vsBlack >= vsWhite ? { r: 0, g: 0, b: 0, a: 1 } : { r: 255, g: 255, b: 255, a: 1 };
+  }
   return null;                                     // unsupported color syntax
 }
 
@@ -5566,6 +5688,40 @@ export function lerpCssValue(aRaw, bRaw, t) {
     // 4-decimal round strips float noise; unit rides through verbatim.
     return `${Math.round(v * 10000) / 10000}${m1[2]}`;
   }
+  // wave-35 B7 — COMPOSITE family: a value made of several whitespace-
+  // separated components interpolates COMPONENT-WISE. css-values-4 §7
+  // ("Combining Values: Interpolation…") defines interpolation of a
+  // multi-component value as the componentwise interpolation of its parts,
+  // and css-backgrounds-3 §5.4 types `box-shadow` exactly that way (each
+  // shadow's colour and its <length>s interpolate independently). MEASURED
+  // case: css-color/animation/contrast-color-interpolation.html interpolates
+  // `contrast-color(white) 100px 0px` → `lime 100px 0px`, which no scalar
+  // family can express.
+  //
+  // Deliberately bounded, in the sampler's house style:
+  //   - both sides must split (at paren depth 0, so `rgb(0, 128, 0)` stays
+  //     ONE component) into the SAME number of components — a differing
+  //     count means a component was added/omitted and the spec's fallback is
+  //     the by-computed-value/discrete path, which we refuse rather than
+  //     guess;
+  //   - at least TWO components, so this never shadows the scalar branch;
+  //   - every component pair must itself be interpolable by this function —
+  //     one refusal refuses the whole value (no half-interpolated composites);
+  //   - comma-separated LISTS (`box-shadow: a, b`) are out of scope: list
+  //     interpolation needs per-item padding rules we do not model. The
+  //     recursion below only ever sees whitespace components because a comma
+  //     survives inside a component and then fails its own pair check.
+  const p1 = splitTopLevel(av, null);              // depth-0 whitespace components
+  const p2 = splitTopLevel(bv, null);
+  if (p1.length >= 2 && p1.length === p2.length) {
+    const parts = [];                              // interpolated components, in order
+    for (let i = 0; i < p1.length; i++) {
+      const c = lerpCssValue(p1[i], p2[i], t);     // recurse into the leaf families
+      if (c === null) return null;                 // one uninterpolable component → refuse all
+      parts.push(c);
+    }
+    return parts.join(' ');                        // re-serialize with single spaces
+  }
   return null;                                     // out-of-scope value family — refuse
 }
 
@@ -5591,8 +5747,15 @@ export function parseAnimationDecl(props) {
     return undefined;                              // longhand absent
   };
   // Spec defaults per css-animations-1 §7 initial values.
+  // wave-35 B7 adds `fill` and `paused`: the wave-13 sampler could discard
+  // both (a strictly-negative delay always lands in the ACTIVE phase, where
+  // fill is irrelevant, and a paused animation samples identically at t=0),
+  // but the stability-window path evaluates the effect at two DIFFERENT
+  // times, so the phase arithmetic in iterationProgressAt needs them.
+  // Initial values: animation-fill-mode: none, animation-play-state: running
+  // (css-animations-1 §5, §6).
   const spec = { name: null, durationMs: 0, delayMs: 0, easing: 'ease',
-                 iterations: 1, direction: 'normal' };
+                 iterations: 1, direction: 'normal', fill: 'none', paused: false };
   let sawAny = false;                              // did ANY animation declaration exist?
   const sh = getProp('animation');                 // the shorthand, if present
   if (sh !== undefined) {
@@ -5625,11 +5788,13 @@ export function parseAnimationDecl(props) {
       if (!gotDir && ['normal', 'reverse', 'alternate', 'alternate-reverse'].includes(low)) {
         spec.direction = low; gotDir = true; continue;
       }
-      // <single-animation-fill-mode>: parsed to keep the token from being
-      // mistaken for the name; the VALUE is irrelevant inside the active
-      // phase (css-animations-1 §5.4) so it isn't recorded.
+      // <single-animation-fill-mode>: irrelevant inside the active phase
+      // (css-animations-1 §5.4), which is the only place the frozen
+      // negative-delay path samples — but wave-35 B7's stability window can
+      // land a window end in the BEFORE or AFTER phase, where fill decides
+      // whether an effect value exists at all, so the value is now recorded.
       if (!gotFill && ['none', 'forwards', 'backwards', 'both'].includes(low)) {
-        gotFill = true; continue;
+        spec.fill = low; gotFill = true; continue;
       }
       // <single-animation-play-state>: paused samples identically at t=0
       // (the WPT engineering makes the value time-stable either way), so
@@ -5642,8 +5807,12 @@ export function parseAnimationDecl(props) {
       // paused animation therefore needs no separate branch; what it does
       // need is that non-animatable keyframe declarations never reach the
       // sample at all (KEYFRAME_NON_ANIMATABLE, contain-animation-001).
+      // wave-35 B7 records the flag rather than dropping it, because the
+      // stability window evaluates two DISTINCT times: `paused` collapses
+      // both to local time 0 (the hold-time argument above), which is what
+      // makes a paused animation provably static at any delay.
       if (!gotPlay && ['running', 'paused'].includes(low)) {
-        gotPlay = true; continue;
+        spec.paused = low === 'paused'; gotPlay = true; continue;
       }
       // Anything else is the <keyframes-name> — claim once.
       if (!gotName) { spec.name = tok; gotName = true; continue; }
@@ -5697,54 +5866,77 @@ export function parseAnimationDecl(props) {
     if (!['normal', 'reverse', 'alternate', 'alternate-reverse'].includes(v.toLowerCase())) return null;
     spec.direction = v.toLowerCase();
   }
-  // fill-mode / play-state longhands: consumed for the sawAny signal only —
-  // both are provably irrelevant to a sample strictly inside the active
-  // phase (fill: §5.4; paused: t=0 value identical), mirroring the
-  // shorthand slots above.
-  if (getProp('animation-fill-mode') !== undefined) sawAny = true;
-  if (getProp('animation-play-state') !== undefined) sawAny = true;
+  // fill-mode / play-state longhands. wave-13 consumed these for the sawAny
+  // signal only; wave-35 B7 records their values for the same reason the
+  // shorthand slots now do (phase arithmetic + the paused hold-time
+  // collapse). Junk values refuse rather than silently defaulting.
+  const lhFill = getProp('animation-fill-mode');   // fill-mode longhand
+  if (lhFill !== undefined) {
+    sawAny = true;
+    const v = single(lhFill); if (v === null) return null;
+    if (!['none', 'forwards', 'backwards', 'both'].includes(v.toLowerCase())) return null;
+    spec.fill = v.toLowerCase();
+  }
+  const lhPlay = getProp('animation-play-state');  // play-state longhand
+  if (lhPlay !== undefined) {
+    sawAny = true;
+    const v = single(lhPlay); if (v === null) return null;
+    if (!['running', 'paused'].includes(v.toLowerCase())) return null;
+    spec.paused = v.toLowerCase() === 'paused';
+  }
   if (!sawAny) return null;                        // no animation declarations at all
   return spec;
 }
 
 /**
- * THE SAMPLER. Given a component's merged props bag and the stylesheet's
- * parsed @keyframes map, decide whether the declared animation is the WPT
- * time-stable negative-delay pattern and, if so, statically compute every
- * keyframed property at `progress = -delay / duration`.
- *
- * Returns `{ baked: {prop: cssValue}, dropped: [animPropKeys] }` on
- * success, or null when ANY scope-boundary rule (see the section banner)
- * fires — null means "extract verbatim exactly as before this wave";
- * partial bakes never happen (one uninterpolable property aborts the
- * whole sample, keeping the fixture honest). Exported for tests.
+ * Iteration progress of a single-animation `anim` at wall time `tMs`
+ * measured from the document's animation timeline origin, or null when no
+ * effect value exists at that instant (the UNDERLYING value applies, which
+ * static extraction cannot know). Web Animations §4.8.4 phase boundaries +
+ * css-animations-1 §5 (animation-fill-mode) / §6 (animation-play-state).
+ * Direction is assumed `normal` — the caller rejects everything else before
+ * getting here, so no directed-progress mapping is needed. Exported so the
+ * phase arithmetic can be pinned directly. wave-35 B7.
  */
-export function sampleKeyframesAnimation(props, keyframesMap) {
-  if (!keyframesMap) return null;                  // no @keyframes were parsed at all
-  // Fast path + the drop list: every animation-* key present (original
-  // spelling preserved for deletion by the caller).
-  const animKeys = Object.keys(props).filter((k) => ANIMATION_LONGHANDS.has(k.toLowerCase()));
-  if (animKeys.length === 0) return null;          // nothing animation-related on this component
-  const anim = parseAnimationDecl(props);          // resolve shorthand+longhands
-  if (!anim) return null;                          // unparseable / multi-animation — boundary
-  if (!anim.name || anim.name.toLowerCase() === 'none') return null; // no keyframes to run
-  const frames = keyframesMap[anim.name];          // the referenced @keyframes block
-  if (!frames || frames.length === 0) return null; // undeclared / empty name — boundary
-  if (!(anim.durationMs > 0)) return null;         // zero/negative duration never advances
-  // ★ THE boundary rule: only a strictly NEGATIVE delay is time-stable —
-  // zero/positive delays mean the screenshot races the timeline (out of
-  // scope by design; the declarations ride through verbatim).
-  if (!(anim.delayMs < 0)) return null;
-  // Web-Animations §4.8.3.1: at local time 0, iteration progress is
-  // (-delay)/duration for the first iteration.
-  const progress = -anim.delayMs / anim.durationMs;
-  // Must land strictly INSIDE the active phase's first iteration: at 0/1
-  // or beyond, the rendered value depends on fill-mode / iteration
-  // compositing (css-animations-1 §5.4) — out of scope.
-  if (!(progress > 0 && progress < 1)) return null;
-  if (!(progress < anim.iterations)) return null;  // count must cover the sample point
-  if (anim.direction !== 'normal') return null;    // directed-progress mapping — boundary
-  const elementTf = parseTimingFunction(anim.easing); // element-level easing (may be null)
+export function iterationProgressAt(anim, tMs) {
+  // css-animations-1 §6 + Web Animations §4.8.3.1: an animation that is
+  // `paused` from the start never advances — its hold time is fixed at the
+  // animation's start, i.e. local time 0 — so EVERY wall time samples the
+  // same effect value. Collapsing t to 0 is what makes a paused animation
+  // provably static regardless of how wide the capture window is.
+  const t = anim.paused ? 0 : tMs;
+  // Active duration = iteration duration × iteration count (Web Animations
+  // §4.8.2); `infinite` never ends, so the after phase is unreachable.
+  const activeDur = anim.iterations === Infinity ? Infinity : anim.durationMs * anim.iterations;
+  if (t < anim.delayMs) {
+    // BEFORE phase (§4.8.4.1). Only a backwards-filling animation produces
+    // an effect value here, and it is the first iteration's start value.
+    return (anim.fill === 'backwards' || anim.fill === 'both') ? 0 : null;
+  }
+  const local = t - anim.delayMs;                  // local time inside the active interval
+  if (Number.isFinite(activeDur) && local >= activeDur) {
+    // AFTER phase (§4.8.4.3). Only a forwards-filling animation produces an
+    // effect value, and (direction normal) it is the final progress 1.
+    return (anim.fill === 'forwards' || anim.fill === 'both') ? 1 : null;
+  }
+  const p = local / anim.durationMs;               // overall progress in iterations
+  // Iterations beyond the first composite differently per direction/count;
+  // the sampler's bounded scope stops at iteration 0 (same rule the frozen
+  // negative-delay path enforced via `progress < 1`).
+  if (p >= 1) return null;
+  return p;
+}
+
+/**
+ * Evaluate every animatable keyframed property at iteration `progress` and
+ * return `{prop: cssValue}`, or null when the sample is out of scope (no
+ * animatable declarations, a missing bracketing keyframe, an unsupported
+ * easing, or an uninterpolable value pair). Split out of
+ * sampleKeyframesAnimation by wave-35 B7 so the stability window can call it
+ * twice — once per window end — without duplicating the §4 keyframe
+ * selection. Behaviour on the frozen negative-delay path is unchanged.
+ */
+function sampleFramesAt(frames, progress, elementTf) {
   const baked = {};                                // sampled property → CSS value
   // Union of properties any frame declares = the animated property set.
   // wave-27 A-RC3: MINUS the properties css-animations-1 §4 says a keyframe
@@ -5767,31 +5959,131 @@ export function sampleKeyframesAnimation(props, keyframesMap) {
     // css-animations-1 §4 keyframe selection is PER PROPERTY: only frames
     // declaring this property participate in its segment lookup.
     const pf = frames.filter((f) => prop in f.props);
-    // prev = nearest frame at-or-before progress; next = nearest at-or-after.
-    let prev = null, next = null;                  // bracketing frames
+    // Web Animations §4.10.2 (Calculating the interval endpoints): endpoint
+    // A is the property-specific keyframe with the largest offset ≤ progress,
+    // endpoint B the one with the smallest offset STRICTLY GREATER than
+    // progress. wave-35 B7 fixed B: it used to be "smallest offset ≥
+    // progress", which collapses A and B whenever progress lands exactly on
+    // a keyframe and therefore skipped the interval's timing function
+    // entirely. That is invisible for every bezier easing (they all map
+    // local 0 → 0) but WRONG for a step function that rises at its start:
+    // css-color/animation/contrast-color-interpolation.html samples at
+    // progress 0 under `steps(2, start)`, whose output at input 0 is 0.5
+    // (css-easing-1 §3.9.2), so the correct value is the interval MIDPOINT,
+    // not the `from` keyframe. The shortcut below keeps the frozen path
+    // byte-identical for the bezier case.
+    let prev = null, next = null;                  // interval endpoints A and B
     for (const f of pf) {                          // frames are offset-sorted ascending
       if (f.offset <= progress + KF_EPS) prev = f; // keeps advancing → last one ≤ progress
-      if (next === null && f.offset >= progress - KF_EPS) next = f; // first one ≥ progress
+      if (next === null && f.offset > progress + KF_EPS) next = f; // first one strictly after
     }
-    // Missing bracket ⇒ the §4 fallback is the element's UNDERLYING value,
-    // which static extraction can't know — abort the whole sample.
-    if (!prev || !next) return null;
-    if (prev === next || Math.abs(next.offset - prev.offset) < KF_EPS) {
-      baked[prop] = prev.props[prop];              // progress sits ON a frame — exact value, no easing
-      continue;
+    // Missing endpoint A ⇒ the §4 fallback is the element's UNDERLYING
+    // value, which static extraction can't know — abort the whole sample.
+    if (!prev) return null;
+    if (!next) {
+      // No keyframe after `progress`. Spec-correct ONLY when the animation
+      // has reached its final 100% keyframe (progress ≥ 1 under a forwards
+      // fill, or a keyframe list that ends exactly at progress): the value
+      // is that keyframe's. A list that stops SHORT of 100% leaves the tail
+      // to the underlying value (§4) — unknowable, so refuse.
+      if (prev.offset >= 1 - KF_EPS || progress >= 1 - KF_EPS) {
+        baked[prop] = prev.props[prop];
+        continue;
+      }
+      return null;
     }
-    // Segment-local progress in [0,1] between the bracketing frames.
+    // Segment-local progress in [0,1] between the interval endpoints.
     const local = (progress - prev.offset) / (next.offset - prev.offset);
     // css-animations-1 "Timing functions for keyframes": a tf declared ON
     // the previous keyframe governs this segment; else the element's.
     const tf = prev.easing !== undefined ? parseTimingFunction(prev.easing) : elementTf;
     if (!tf) return null;                          // unsupported easing — refuse, don't mis-ease
     const eased = evalTimingFunction(tf, local);   // eased (possibly overshooting) progress
+    // Spelling-preserving shortcut: when the segment sits exactly on
+    // endpoint A and the governing timing function maps 0 → 0 (true of every
+    // <cubic-bezier>, whose P0 is pinned at (0,0) by css-easing-1 §2.3, and
+    // of steps() with jump-end/jump-none), the effect value IS endpoint A's
+    // declared value. Taking it verbatim rather than through the lerp keeps
+    // the author's spelling (`#00c800` stays `#00c800` instead of
+    // re-serializing as `rgb(0, 200, 0)`), which is what makes this refactor
+    // byte-identical on the frozen wave-13 path. The comparison uses KF_EPS,
+    // not `=== 0`: cubicBezierY bisects, so it returns ~1e-19 rather than a
+    // hard zero at x=0 — mathematically 0, numerically not.
+    if (local <= KF_EPS && eased <= KF_EPS) {
+      baked[prop] = prev.props[prop];
+      continue;
+    }
     const v = lerpCssValue(prev.props[prop], next.props[prop], eased); // interpolate the pair
     if (v === null) return null;                   // uninterpolable value family — abort whole sample
     baked[prop] = v;                               // record the sampled value
   }
-  return { baked, dropped: animKeys };             // success — caller bakes + drops
+  return baked;
+}
+
+/**
+ * THE SAMPLER. Given a component's merged props bag and the stylesheet's
+ * parsed @keyframes map, decide whether the declared animation renders a
+ * TIME-STABLE value at screenshot time and, if so, statically compute every
+ * keyframed property at that value.
+ *
+ * Two admission paths, both documented in the section banners above:
+ *   - wave-13 (frozen): a strictly NEGATIVE delay places local time 0 at
+ *     `progress = -delay / duration` strictly inside the first iteration.
+ *   - wave-35 B7: a non-negative delay, admitted only when the bake is
+ *     byte-identical at both ends of the measured CAPTURE_WINDOW_MS.
+ *
+ * Returns `{ baked: {prop: cssValue}, dropped: [animPropKeys] }` on
+ * success, or null when ANY scope-boundary rule fires — null means "extract
+ * verbatim exactly as before"; partial bakes never happen (one
+ * uninterpolable property aborts the whole sample, keeping the fixture
+ * honest). Exported for tests.
+ */
+export function sampleKeyframesAnimation(props, keyframesMap) {
+  if (!keyframesMap) return null;                  // no @keyframes were parsed at all
+  // Fast path + the drop list: every animation-* key present (original
+  // spelling preserved for deletion by the caller).
+  const animKeys = Object.keys(props).filter((k) => ANIMATION_LONGHANDS.has(k.toLowerCase()));
+  if (animKeys.length === 0) return null;          // nothing animation-related on this component
+  const anim = parseAnimationDecl(props);          // resolve shorthand+longhands
+  if (!anim) return null;                          // unparseable / multi-animation — boundary
+  if (!anim.name || anim.name.toLowerCase() === 'none') return null; // no keyframes to run
+  const frames = keyframesMap[anim.name];          // the referenced @keyframes block
+  if (!frames || frames.length === 0) return null; // undeclared / empty name — boundary
+  if (!(anim.durationMs > 0)) return null;         // zero/negative duration never advances
+  if (anim.direction !== 'normal') return null;    // directed-progress mapping — boundary
+  const elementTf = parseTimingFunction(anim.easing); // element-level easing (may be null)
+
+  if (anim.delayMs < 0) {
+    // ── FROZEN wave-13 path — deliberately left byte-for-byte intact ──────
+    // Web-Animations §4.8.3.1: at local time 0, iteration progress is
+    // (-delay)/duration for the first iteration.
+    const progress = -anim.delayMs / anim.durationMs;
+    // Must land strictly INSIDE the active phase's first iteration: at 0/1
+    // or beyond, the rendered value depends on fill-mode / iteration
+    // compositing (css-animations-1 §5.4) — out of scope.
+    if (!(progress > 0 && progress < 1)) return null;
+    if (!(progress < anim.iterations)) return null; // count must cover the sample point
+    const baked = sampleFramesAt(frames, progress, elementTf);
+    return baked ? { baked, dropped: animKeys } : null;
+  }
+
+  // ── wave-35 B7 path: non-negative delay + a two-point stability proof ───
+  // Evaluate the effect at both ends of the capture window. Both ends must
+  // HAVE an effect value (no unfilled before/after phase) and the two bakes
+  // must serialize identically — see the STABILITY WINDOW banner for why
+  // byte identity is the right criterion and where the window comes from.
+  const pStart = iterationProgressAt(anim, 0);                  // timeline origin
+  const pEnd   = iterationProgressAt(anim, CAPTURE_WINDOW_MS);  // latest plausible screenshot
+  if (pStart === null || pEnd === null) return null;            // underlying value — unknowable
+  const bakedStart = sampleFramesAt(frames, pStart, elementTf);
+  if (!bakedStart) return null;                                 // out of scope at t=0
+  const bakedEnd = sampleFramesAt(frames, pEnd, elementTf);
+  if (!bakedEnd) return null;                                   // out of scope at the window edge
+  const keys = Object.keys(bakedStart);
+  // Same property set AND same serialized value for every one of them.
+  if (keys.length !== Object.keys(bakedEnd).length) return null;
+  for (const k of keys) if (bakedStart[k] !== bakedEnd[k]) return null; // drifts → genuinely dynamic
+  return { baked: bakedStart, dropped: animKeys }; // proved static — bake it
 }
 
 /** In-place integration shim for buildComponents: run the sampler on one
@@ -6846,7 +7138,13 @@ export function bodyDeclaresInheritedProperty(props) {
   // Presence is the trigger, not the value: even `font-size: inherit` at
   // root scope is a declaration the children must see resolved, and the
   // runtimes' own cascade is what interprets it.
-  return ROOT_INHERITED_TRIGGER_PROPS.some((p) => props[p] !== undefined);
+  //
+  // wave-35 lane FX: read the bag through the font-shorthand derivation, so a
+  // root whose ONLY typography declaration is `font: 36px test` fires the
+  // trigger it plainly is. Identity for every bag without a derivable `font`,
+  // so no pre-FX fixture's trigger answer moves.
+  const effective = rootPropsWithFontShorthand(props);
+  return ROOT_INHERITED_TRIGGER_PROPS.some((p) => effective[p] !== undefined);
 }
 
 /**
@@ -6889,6 +7187,322 @@ const INHERITED_COVERING_SHORTHANDS = {
 // above — where the exception would have been invisible.
 const ALL_SHORTHAND_EXEMPT = new Set(['direction']);
 
+// ── wave-35 lane FX: THE FONT-SHORTHAND BAKE ───────────────────────────────
+//
+// THE HOLE THIS CLOSES. Every trigger property above is a LONGHAND, and the
+// bake reads the root bag by longhand name. But the single most common way a
+// WPT document sets the document base font is the SHORTHAND:
+//
+//     body { font: 36px test }        (css/css-text/boundary-shaping/*, ×8)
+//
+// `bodyDeclaresInheritedProperty` saw no `font-size` key, no `font-family`
+// key, and answered false — so the bake never engaged and the three text
+// components of `of<span class=a>f</span>ice` shipped with EMPTY bags. Every
+// platform then painted them at the harness's own 16px Inter default while
+// the browser-ref painted 36px LinLibertine with the `ffi` ligature the test
+// is actually about. Lane B2 delivered the FACE (fixture.fontFaces →
+// useFontFaces → a real @font-face rule); this lane delivers the FAMILY NAME
+// that selects it. Without both halves the downloaded face is registered and
+// never referenced.
+//
+// WHY DERIVE LONGHANDS AND NOT COPY THE SHORTHAND. Baking the raw `font`
+// string onto the child would be one line, and it would be wrong twice over:
+//   * `font` is a RESETTING shorthand — dropping `font: 36px test` on a child
+//     that declares its own `font-weight` silently resets that weight to
+//     `normal`, so the child's own author declaration would lose to a value
+//     handed down from its parent. That inverts css-cascade-4 §7.3, which is
+//     the one rule this whole bake exists to respect.
+//   * the per-longhand guards below (`childProps[prop] !== undefined`) could
+//     no longer fire per property: a child declaring only `font-family`
+//     would have to refuse the whole shorthand, losing the size too.
+// Deriving the longhands keeps the bake PER-PROPERTY, so each one meets the
+// same two guards every other trigger property already meets.
+//
+// PARITY WITH THE CONVERTER IS THE CONTRACT. The body-root component keeps
+// its `font` shorthand in its own bag, and :converter expands it with
+// FontExpander.kt. If this function derived a DIFFERENT longhand set than
+// that expander, one document would carry two disagreeing readings of the
+// same declaration — the root's and its children's. So the grammar,
+// the token classes and the css-fonts-4 §4.3 `line-height` reset below are
+// deliberately the same decisions FontExpander.kt makes, and the unit pins
+// assert the overlap explicitly.
+//
+// WHAT IS REFUSED, LOUDLY AND ON PURPOSE (parseFontShorthand returns null,
+// and the bake then behaves exactly as it did before this lane — no
+// derivation, no marker, no drift):
+//   * <system-family-name> — `font: menu`, `caption`, `icon`, `message-box`,
+//     `small-caption`, `status-bar`. css-fonts-4 §3.7 resolves these from the
+//     PLATFORM's font database, so there is no size and no family to derive:
+//     any value we invented would be a guess about the capture host.
+//   * the CSS-wide keywords (`inherit`, `initial`, `unset`, `revert`,
+//     `revert-layer`). They set every longhand to a keyword whose meaning is
+//     "ask the cascade again", and the fixture wire has no cascade to ask.
+//   * anything carrying `var()` — unresolvable by construction (the same
+//     rule the IR states as "null means runtime-dependent").
+//   * a value that does not parse as the §3.7 size/family form at all: a
+//     missing size, a missing family, an unrecognised token before the size.
+//     CSS 2.2 §4.2 drops an invalid declaration whole; so do we, rather than
+//     bake half of a value we did not understand.
+const FONT_SH_SYSTEM_FAMILIES = new Set([
+  'caption', 'icon', 'menu', 'message-box', 'small-caption', 'status-bar',
+]);
+// css-cascade-5 §7 — the CSS-wide keywords, valid on every property.
+const FONT_SH_CSS_WIDE = new Set([
+  'inherit', 'initial', 'unset', 'revert', 'revert-layer',
+]);
+// The pre-size modifier keywords, css-fonts-4 §3.7:
+//   [ <'font-style'> || <font-variant-css2> || <'font-weight'> || <font-width-css3> ]?
+// `normal` is legal in ALL FOUR slots and says nothing about which, so it is
+// consumed generically rather than assigned — exactly what FontExpander.kt
+// does (its `!= "normal"` guards on the variant/stretch arms).
+const FONT_SH_STYLE_KEYWORDS = new Set(['italic', 'oblique']);
+const FONT_SH_VARIANT_KEYWORDS = new Set(['small-caps']);
+const FONT_SH_WEIGHT_KEYWORDS = new Set(['bold', 'bolder', 'lighter']);
+const FONT_SH_STRETCH_KEYWORDS = new Set([
+  'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
+  'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded',
+]);
+// <absolute-size> | <relative-size>, css-fonts-4 §3.5. NOTE `small-caps` is a
+// distinct token from `small`, so the variant keyword can never be mistaken
+// for a size — tokens are compared whole, never by prefix.
+const FONT_SH_SIZE_KEYWORDS = new Set([
+  'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large',
+  'xxx-large', 'larger', 'smaller',
+]);
+// A <length> or <percentage>. The unit list is CLOSED on purpose: the
+// converter's isSizeValue uses `[a-z%]*`, which happily reads `20deg` as a
+// size — harmless there because the angle arm runs first, but this function
+// has to refuse unknown tokens rather than guess, so the units are spelled
+// out. Font-relative and viewport units are ADMITTED, not resolved: the
+// converter emits `null` for them (CLAUDE.md's "null means runtime-dependent"
+// row), which is the same honest non-answer the root itself gets.
+const FONT_SH_LENGTH_RX =
+  /^[+-]?(?:\d+\.?\d*|\.\d+)(?:px|pt|pc|in|cm|mm|q|em|rem|ex|ch|cap|ic|lh|rlh|vw|vh|vi|vb|vmin|vmax|svw|svh|lvw|lvh|dvw|dvh|%)$/i;
+// css-values-4 §8.4 <angle>, for the `oblique <angle>` form of font-style.
+const FONT_SH_ANGLE_RX = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:deg|grad|rad|turn)$/i;
+// A bare <number> in the pre-size run is a numeric font-weight (css-fonts-4
+// §3.2 — 1 to 1000). It can never be a font-size: `font-size` has no unitless
+// form, which is exactly what makes this position unambiguous.
+const FONT_SH_NUMBER_RX = /^\d+\.?\d*$/;
+
+/** Quote- and paren-aware whitespace tokeniser for a `font` value. Mirrors
+ *  FontExpander.kt's `tokenize` so `"Lucida Grande"` and `url(a b)` survive
+ *  as single tokens and a `/` inside either can never be seen as the
+ *  size/line-height delimiter. */
+function fontShorthandTokens(value) {
+  const out = [];
+  let cur = '';
+  let quote = null;   // the open quote char, or null
+  let depth = 0;      // paren nesting
+  for (const ch of value) {
+    if ((ch === '"' || ch === "'") && depth === 0) {
+      if (quote === null) quote = ch;
+      else if (ch === quote) quote = null;
+      cur += ch;
+    } else if (ch === '(') { depth++; cur += ch; }
+    else if (ch === ')') { depth--; cur += ch; }
+    else if (/\s/.test(ch) && depth === 0 && quote === null) {
+      if (cur) { out.push(cur); cur = ''; }
+    } else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+/** Re-join a `<font-size> / <line-height>` run the tokeniser split apart.
+ *  css-syntax-3 §5 allows whitespace on either side of the delimiter, so
+ *  `16px/2`, `16px/ 2`, `16px /2` and `16px / 2` are the same declaration.
+ *  Straight port of FontExpander.kt's joinSlashRuns, for the same reason it
+ *  exists there: without it `16px / 2 Georgia` reads `/ 2 Georgia` as the
+ *  family and confidently reports the wrong line-height. Merging happens on
+ *  TOKEN BOUNDARIES only, so a quoted `"Foo/Bar"` family is untouchable. */
+function joinFontSlashRuns(tokens) {
+  const out = [];
+  let i = 0;
+  while (i < tokens.length) {
+    let t = tokens[i];
+    i++;
+    // `16px /2` and `16px / 2`: a token STARTING with the delimiter belongs
+    // to the size before it.
+    if (t.startsWith('/') && out.length > 0) {
+      out[out.length - 1] += t;
+      // A lone `/` still needs its right-hand side pulled in.
+      if (out[out.length - 1].endsWith('/') && i < tokens.length) {
+        out[out.length - 1] += tokens[i];
+        i++;
+      }
+      continue;
+    }
+    // `16px/ 2`: a token ENDING with the delimiter is missing its RHS.
+    if (t.endsWith('/') && i < tokens.length) { t += tokens[i]; i++; }
+    out.push(t);
+  }
+  return out;
+}
+
+/** True when `t` is a <font-size> the §3.7 grammar accepts in the size slot. */
+function isFontShorthandSize(t) {
+  const lower = t.toLowerCase();
+  return FONT_SH_SIZE_KEYWORDS.has(lower) || FONT_SH_LENGTH_RX.test(lower);
+}
+
+/** True when `t` is a <'line-height'> (css-inline-3 §4.1): the `normal`
+ *  keyword, a unitless <number>, a <length> or a <percentage>. */
+function isFontShorthandLineHeight(t) {
+  const lower = t.toLowerCase();
+  return lower === 'normal' || FONT_SH_NUMBER_RX.test(lower)
+      || FONT_SH_LENGTH_RX.test(lower);
+}
+
+/**
+ * Derive the INHERITED longhands a body-root `font` shorthand declares, per
+ * the css-fonts-4 §3.7 grammar
+ *
+ *   [ [ <'font-style'> || <font-variant-css2> || <'font-weight'> ||
+ *       <font-width-css3> ]? <'font-size'> [ / <'line-height'> ]?
+ *     <'font-family'># ] | <system-family-name>
+ *
+ * Returns a fresh bag of longhands, or `null` for every form listed in the
+ * REFUSED paragraph of the banner above. Only longhands that are members of
+ * ROOT_INHERITED_TRIGGER_PROPS are emitted — `font-variant` and
+ * `font-stretch` are PARSED (they have to be, or the size slot cannot be
+ * located) and then dropped, because nothing downstream would bake them and
+ * emitting a key no consumer reads is how dead wire shape accumulates.
+ *
+ * The css-fonts-4 §4.3 `line-height` RESET is emitted: a shorthand with no
+ * `/<line-height>` component sets line-height to `normal`, and saying so is
+ * the whole difference between the ref (whose body resets, so its text sits
+ * in the FACE's natural line box) and our capture (whose sibling text
+ * components otherwise inherit the harness's `line-height: 1.25` calibration
+ * from index.html / capture-browser-ref.mjs REF_LINE_HEIGHT). Omitting it
+ * would also put the children in direct disagreement with their own
+ * body-root, which the converter's FontExpander DOES reset.
+ *
+ * Exported for the unit pins — the refusal set is the correctness story.
+ */
+export function parseFontShorthand(value) {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const lower = trimmed.toLowerCase();
+  // Refusal 1+2: system families and the CSS-wide keywords, whole-value forms.
+  if (FONT_SH_SYSTEM_FAMILIES.has(lower)) return null;
+  if (FONT_SH_CSS_WIDE.has(lower)) return null;
+  // Refusal 3: var() anywhere. A substitution we cannot perform makes every
+  // slot after it unknowable, including which token IS the size.
+  if (/(^|[^\w-])var\s*\(/i.test(trimmed)) return null;
+
+  const tokens = joinFontSlashRuns(fontShorthandTokens(trimmed));
+  if (tokens.length < 2) return null;   // §3.7 needs at least <size> <family>
+
+  const out = {};
+  let i = 0;
+  let seenStyle = false, seenVariant = false, seenWeight = false, seenStretch = false;
+  // ── the optional pre-size run ──────────────────────────────────────────
+  while (i < tokens.length) {
+    const raw = tokens[i];
+    const t = raw.toLowerCase();
+    // The size ENDS the run. Checked first so a size keyword can never be
+    // mistaken for a modifier (they are disjoint sets, but the order makes
+    // that independent of the sets staying disjoint).
+    if (isFontShorthandSize(t.split('/')[0])) break;
+    if (t === 'oblique' && !seenStyle) {
+      seenStyle = true;
+      // `oblique <angle>` (css-fonts-4 §3.4) — the angle is part of the value.
+      if (i + 1 < tokens.length && FONT_SH_ANGLE_RX.test(tokens[i + 1])) {
+        out['font-style'] = `${raw} ${tokens[i + 1]}`;
+        i += 2;
+      } else {
+        out['font-style'] = raw;
+        i += 1;
+      }
+      continue;
+    }
+    if (t === 'normal') {
+      // Legal in all four slots and identifying none of them. Consumed and
+      // dropped: `normal` is the initial value of every slot it could fill,
+      // so emitting it would add a longhand that changes nothing.
+      i += 1;
+      continue;
+    }
+    if (FONT_SH_STYLE_KEYWORDS.has(t) && !seenStyle) {
+      seenStyle = true; out['font-style'] = raw; i += 1; continue;
+    }
+    if (FONT_SH_WEIGHT_KEYWORDS.has(t) && !seenWeight) {
+      seenWeight = true; out['font-weight'] = raw; i += 1; continue;
+    }
+    if (FONT_SH_NUMBER_RX.test(t) && !seenWeight) {
+      // Numeric font-weight, css-fonts-4 §3.2 (1–1000). Out of range is not a
+      // weight and not a size either, so it fails the whole parse below.
+      const n = Number(t);
+      if (!(n >= 1 && n <= 1000)) return null;
+      seenWeight = true; out['font-weight'] = raw; i += 1; continue;
+    }
+    if (FONT_SH_VARIANT_KEYWORDS.has(t) && !seenVariant) {
+      // Parsed to advance past it; NOT emitted (not a trigger property).
+      seenVariant = true; i += 1; continue;
+    }
+    if (FONT_SH_STRETCH_KEYWORDS.has(t) && !seenStretch) {
+      seenStretch = true; i += 1; continue;    // parsed, not emitted — as above
+    }
+    // Refusal 4: a token before the size that is none of the above. We do not
+    // know what it means, so we do not know where the size is either.
+    return null;
+  }
+
+  // ── the size, and the optional /line-height riding on it ───────────────
+  if (i >= tokens.length) return null;                 // no size at all
+  const sizeToken = tokens[i];
+  i += 1;
+  const slash = sizeToken.indexOf('/');
+  const sizeRaw = slash < 0 ? sizeToken : sizeToken.slice(0, slash);
+  const lhRaw   = slash < 0 ? null      : sizeToken.slice(slash + 1);
+  if (!isFontShorthandSize(sizeRaw)) return null;
+  out['font-size'] = sizeRaw;
+  if (lhRaw !== null) {
+    // A slash with nothing after it, or a value that is not a line-height,
+    // makes the declaration invalid — dropped whole (CSS 2.2 §4.2).
+    if (!lhRaw || !isFontShorthandLineHeight(lhRaw)) return null;
+    out['line-height'] = lhRaw;
+  } else {
+    // css-fonts-4 §4.3: the shorthand RESETS line-height when the component
+    // is absent. See the doc comment for why this matters on the WPT stage.
+    out['line-height'] = 'normal';
+  }
+
+  // ── the family list — everything left, in the author's own spelling ────
+  if (i >= tokens.length) return null;                 // no family
+  // Re-joined with single spaces: the tokeniser only ever split on top-level
+  // whitespace runs, so this reproduces the author's list (quoted names and
+  // the `,` separators ride inside the tokens) modulo whitespace collapsing,
+  // which is not significant between CSS component values.
+  out['font-family'] = tokens.slice(i).join(' ');
+  return out;
+}
+
+/**
+ * `rootProps` as the bake should READ it: the author's own keys, plus any
+ * longhands derivable from a `font` shorthand it declares.
+ *
+ * MERGE ORDER — the author's explicit longhand WINS over the derived one.
+ * The flattened root bag has lost declaration order across rules
+ * (rootScopeProps' `Object.assign` keeps a key's FIRST insertion position but
+ * its LAST value), so "later declaration wins" is not recoverable here and
+ * guessing it could silently flip an existing fixture's baked value. Letting
+ * the explicit longhand win is the choice that cannot regress anything: every
+ * root that already declared the longhand bakes exactly the byte it baked
+ * before this lane, and the derivation only ever FILLS keys that were absent.
+ *
+ * Returns `rootProps` itself (not a copy) when there is nothing to derive, so
+ * the overwhelmingly common no-`font` case allocates nothing.
+ */
+export function rootPropsWithFontShorthand(rootProps) {
+  if (!rootProps || rootProps.font === undefined) return rootProps;
+  const derived = parseFontShorthand(rootProps.font);
+  if (!derived) return rootProps;            // refused — identical behaviour
+  return { ...derived, ...rootProps };       // author longhands overwrite
+}
+
 /**
  * The bake-down (wave-30 A4, reworked after the gate finding). Returns the
  * subset of `rootProps`' trigger properties to copy onto ONE top-level
@@ -6908,9 +7522,16 @@ const ALL_SHORTHAND_EXEMPT = new Set(['direction']);
  */
 export function rootInheritedBakeProps(rootProps, childProps) {
   if (!rootProps || !childProps) return null;
+  // wave-35 lane FX: the root's `font` shorthand contributes its longhands
+  // HERE, not at the copy site, so every derived longhand meets the identical
+  // per-property guards below. The child's own `font` shorthand keeps beating
+  // all five of them through INHERITED_COVERING_SHORTHANDS — a child that
+  // declares `font` has already spoken about size, family, weight, style and
+  // line-height, whether or not it named them.
+  const effectiveRoot = rootPropsWithFontShorthand(rootProps);
   const out = {};
   for (const prop of ROOT_INHERITED_TRIGGER_PROPS) {
-    const value = rootProps[prop];
+    const value = effectiveRoot[prop];
     if (value === undefined) continue;            // root never declared it
     if (childProps[prop] !== undefined) continue; // guard 1: own longhand
     // guard 2: a shorthand the child declares already covers this longhand.
