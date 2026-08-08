@@ -1,0 +1,5324 @@
+{
+ "_note": "WAVE-37 LANE W5 — the two remaining undecided pools of webmap-v1, MEASURED. Both decisions are REFUSALS, and both are enforced in code: the tags/proposals live on inject-wpt-block.mjs REFUSED_EXCLUSION_TAGS with negative pins in inject-wpt-block.test.mjs. Numbers derived from the frozen wave35-webmap section manifests (gitignored) — the per-test rows below are the durable copy. The scorer was validated first by re-running diffWebVsRef + the three veto predicates over 18 frozen capture/ref pairs spread across both sections: 18/18 reproduced SSIM, pixel counts, all three vetoes and wptPass exactly.",
+ "artifact": "wave37-W5-decisions",
+ "date": "2026-08-08",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "canvasBoundary": "white-black-ink-font-lh-imgpad-htmlpins",
+ "source": "tools/titan/runs/wave35-webmap (web-only, full capability, every bucket-A test)",
+ "decisions": {
+  "css-view-transitions": {
+   "verdict": "REFUSED — requires-view-transitions stays SCORED, added to REFUSED_EXCLUSION_TAGS",
+   "wall": "REAL. ::view-transition / -group / -image-pair / -old / -new are UA-generated top-layer boxes holding snapshot images. They are not in the DOM, so neither the static extractor nor post-load-extract.mjs (which walks real elements for computed styles) can ever serialize them. 178 of 195 tests DID bake post-load and it changed nothing about the pseudo tree.",
+   "whyRefusedAnyway": "The wall is not separable from an accidentally-deliverable subset. A transition frozen at .ready shows the OLD snapshot, which IS the pre-script DOM.",
+   "scored": 192,
+   "pass": 50,
+   "fail": 142,
+   "passingCellsWithRealInk": 47,
+   "passingCellsAtSsim1": 21,
+   "passingCellsNearBlank": 3,
+   "precisionOfWholeTagExclusion": 0.74,
+   "barToBeat": "the accepted families sit at 1.000 (Rule 42 browser-ref-divergent, Rule 15 font-face) or an effective ~1.0 (Rule 40 anchor: 0.89 raw, but its post-load stamp re-admitted 78 of 87)",
+   "narrowingsMeasured": [
+    {
+     "narrowing": "tag (whole section)",
+     "fires": 195,
+     "failingCellsHidden": 145,
+     "passingCellsSilenced": 50,
+     "precision": 0.744
+    },
+    {
+     "narrowing": "::view-transition{…paint…}",
+     "fires": 95,
+     "failingCellsHidden": 85,
+     "passingCellsSilenced": 10,
+     "precision": 0.895
+    },
+    {
+     "narrowing": "::view-transition-image-pair",
+     "fires": 80,
+     "failingCellsHidden": 62,
+     "passingCellsSilenced": 18,
+     "precision": 0.775
+    },
+    {
+     "narrowing": "pseudo styled with transform",
+     "fires": 19,
+     "failingCellsHidden": 17,
+     "passingCellsSilenced": 2,
+     "precision": 0.895
+    },
+    {
+     "narrowing": "pseudo styled with width/height",
+     "fires": 26,
+     "failingCellsHidden": 23,
+     "passingCellsSilenced": 3,
+     "precision": 0.885
+    },
+    {
+     "narrowing": "pseudo styled with clip/object-fit",
+     "fires": 28,
+     "failingCellsHidden": 24,
+     "passingCellsSilenced": 4,
+     "precision": 0.857
+    },
+    {
+     "narrowing": "group animation-delay",
+     "fires": 12,
+     "failingCellsHidden": 8,
+     "passingCellsSilenced": 4,
+     "precision": 0.667
+    },
+    {
+     "narrowing": "any ::view-transition-old rule",
+     "fires": 160,
+     "failingCellsHidden": 128,
+     "passingCellsSilenced": 32,
+     "precision": 0.8
+    },
+    {
+     "narrowing": "startViewTransition() call",
+     "fires": 191,
+     "failingCellsHidden": 145,
+     "passingCellsSilenced": 46,
+     "precision": 0.759
+    },
+    {
+     "narrowing": "normalised test-vs-ref source delta > 0.6",
+     "fires": 59,
+     "failingCellsHidden": 53,
+     "passingCellsSilenced": 6,
+     "precision": 0.898
+    }
+   ],
+   "closingMove": "a view-transition CAPTURE mode — drive the transition in the ref browser and serialize the settled pseudo tree as ordinary boxes — not an exclusion"
+  },
+  "css-page": {
+   "verdict": "REFUSED — @page canvas simulation is NOT bounded; requires-print-medium stays SCORED (wave-36 M6 decision re-confirmed from the other direction)",
+   "decisiveFact": "capture-browser-ref.mjs never calls emulateMediaType('print'), so every ref is a SCREEN-medium render. All 157 css-page ref PNGs are 390 px wide (CANVAS_WIDTH) no matter what @page size the test declares; ref HEIGHT varies (600…2304) because a screen render is one continuous flow. The refs instead hand-encode the expected PAGED result as ordinary DOM at that width.",
+   "distinctRefPngWidths": [
+    390
+   ],
+   "passingCellsThatDeclareAtPageSize": [
+    {
+     "t": "basic-pagination-001-print",
+     "atPageSize": "293px",
+     "refPng": "390x600"
+    },
+    {
+     "t": "basic-pagination-002-print",
+     "atPageSize": "293px",
+     "refPng": "390x600"
+    },
+    {
+     "t": "monolithic-overflow-031-print",
+     "atPageSize": "400px 300px",
+     "refPng": "390x1532"
+    },
+    {
+     "t": "page-rule-specificity-001-print",
+     "atPageSize": "portrait",
+     "refPng": "390x600"
+    },
+    {
+     "t": "page-rule-specificity-002-print",
+     "atPageSize": "portrait",
+     "refPng": "390x600"
+    },
+    {
+     "t": "page-size-001-print",
+     "atPageSize": "300px 400px",
+     "refPng": "390x944"
+    },
+    {
+     "t": "page-size-002-print",
+     "atPageSize": "300px 50px",
+     "refPng": "390x600"
+    },
+    {
+     "t": "page-size-003-print",
+     "atPageSize": "300px 100px",
+     "refPng": "390x600"
+    },
+    {
+     "t": "page-size-006-print",
+     "atPageSize": "200px 320px",
+     "refPng": "390x944"
+    },
+    {
+     "t": "page-size-011-print",
+     "atPageSize": "a5",
+     "refPng": "390x600"
+    },
+    {
+     "t": "page-size-013-print",
+     "atPageSize": "500px",
+     "refPng": "390x600"
+    },
+    {
+     "t": "page-size-014-print",
+     "atPageSize": "500px",
+     "refPng": "390x600"
+    }
+   ],
+   "scored": 157,
+   "pass": 71,
+   "fail": 86,
+   "failuresByNeed": {
+    "fragmentation": 58,
+    "orthogonal-flow": 6,
+    "margin-box-grid": 25,
+    "script-mutation": 1,
+    "page-box-paint": 19,
+    "print-media-resolution": 1,
+    "paged-other": 8
+   },
+   "failuresWithASingleNeed": {
+    "fragmentation": 33,
+    "margin-box-grid": 12,
+    "paged-other": 8,
+    "page-box-paint": 3
+   },
+   "largestBoundedSubMechanism": "the 12 margin-boxes/* cells needing ONLY the CSS Paged Media §5.3 sixteen-box margin grid — still a feature (the auto/percentage dimension algorithm), not a canvas tweak",
+   "ordinaryRendererBugs": 0,
+   "note": "the 8 failures no signal claimed were hand-read and are paged too: subpixel-page-size-* (page overflow), page-margin-negative*/auto-negative* (negative page margins), safe-printable-inset-* (page-margin-safety), media-queries-003 (<frameset> + print MQ)"
+  }
+ },
+ "rows": {
+  "css-view-transitions": [
+   {
+    "t": "3d-transform-incoming",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9681,
+    "capInkPct": 4.354,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "wpt-canvas-shape-sensitive"
+    ]
+   },
+   {
+    "t": "3d-transform-outgoing",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9033,
+    "capInkPct": 4.354,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "wpt-canvas-shape-sensitive"
+    ]
+   },
+   {
+    "t": "animating-new-content-subset",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9957,
+    "capInkPct": 4.316,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "animating-new-content",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9715,
+    "capInkPct": 4.316,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "animation-name-ua-prefix",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 0,
+    "refInkPct": 0,
+    "postLoadExtracted": false,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime"
+    ]
+   },
+   {
+    "t": "auto-name-from-id-shadow",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.5621,
+    "capInkPct": 4.274,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-shadow-dom",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "auto-name-from-id",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.555,
+    "capInkPct": 8.547,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "auto-name",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.555,
+    "capInkPct": 8.547,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "break-inside-avoid-child",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9872,
+    "capInkPct": 36.716,
+    "refInkPct": 34.665,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-fragmentation",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "capture-with-offscreen-child-translated",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8093,
+    "capInkPct": 4.274,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "capture-with-offscreen-child",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9182,
+    "capInkPct": 4.274,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "capture-with-opacity-zero-child",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9182,
+    "capInkPct": 4.274,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "capture-with-visibility-hidden-child",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9182,
+    "capInkPct": 4.274,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "capture-with-visibility-mixed-descendants",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9215,
+    "capInkPct": 3.538,
+    "refInkPct": 87.782,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "class-specificity",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8773,
+    "capInkPct": 4.274,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "clip-path-larger-than-border-box-on-child-of-named-element",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9067,
+    "capInkPct": 4.316,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "column-span-during-transition-doesnt-skip",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9879,
+    "capInkPct": 31.966,
+    "refInkPct": 30.598,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-fragmentation",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "content-smaller-than-box-size",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9986,
+    "capInkPct": 0.085,
+    "refInkPct": 0.043,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "content-visibility-auto-shared-element",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.3755,
+    "capInkPct": 7.633,
+    "refInkPct": 10.341,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "content-with-child-with-transparent-background",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9977,
+    "capInkPct": 2.179,
+    "refInkPct": 2.137,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "content-with-transform-new-image",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9746,
+    "capInkPct": 15.323,
+    "refInkPct": 12.821,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "content-with-transform-old-image",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8597,
+    "capInkPct": 21.282,
+    "refInkPct": 12.821,
+    "postLoadExtracted": false,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "content-with-transparent-background",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9977,
+    "capInkPct": 1.111,
+    "refInkPct": 1.068,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "css-tags-paint-order-with-entry",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8084,
+    "capInkPct": 12.863,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "css-tags-paint-order",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7984,
+    "capInkPct": 12.863,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "css-tags-shared-element",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9587,
+    "capInkPct": 5.385,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "dialog-in-top-layer-during-transition-new",
+    "scored": false,
+    "pass": false,
+    "ssim": 0.9645,
+    "capInkPct": 4.316,
+    "refInkPct": 8.547,
+    "postLoadExtracted": false,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-form-control-rendering",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "dialog-in-top-layer-during-transition-old",
+    "scored": false,
+    "pass": false,
+    "ssim": 0.9647,
+    "capInkPct": 4.316,
+    "refInkPct": 8.547,
+    "postLoadExtracted": false,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-form-control-rendering",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "element-is-grouping-during-animation",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.918,
+    "capInkPct": 4.274,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "wpt-canvas-shape-sensitive"
+    ]
+   },
+   {
+    "t": "element-stops-grouping-after-animation",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9639,
+    "capInkPct": 4.274,
+    "refInkPct": 6.144,
+    "postLoadExtracted": true,
+    "freeze": "finished-new-dom",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "wpt-canvas-shape-sensitive"
+    ]
+   },
+   {
+    "t": "element-with-overflow",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8497,
+    "capInkPct": 5.011,
+    "refInkPct": 9.936,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "empty-render-target-capture",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "escaped-name",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 12.821,
+    "refInkPct": 12.821,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "far-away-capture",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.2117,
+    "capInkPct": 9.107,
+    "refInkPct": 7.404,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "fractional-box-new",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9754,
+    "capInkPct": 4.274,
+    "refInkPct": 97.561,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "fractional-box-old",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9754,
+    "capInkPct": 4.274,
+    "refInkPct": 97.561,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "fractional-box-with-overflow-children-new",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9757,
+    "capInkPct": 4.639,
+    "refInkPct": 97.561,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "fractional-box-with-overflow-children-old",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9757,
+    "capInkPct": 4.639,
+    "refInkPct": 97.561,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "fractional-box-with-shadow-new",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9763,
+    "capInkPct": 6.206,
+    "refInkPct": 97.561,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "fractional-box-with-shadow-old",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9763,
+    "capInkPct": 6.206,
+    "refInkPct": 97.561,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "fragmented-at-start-ignored",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8977,
+    "capInkPct": 44.953,
+    "refInkPct": 87.147,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-fragmentation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "fragmented-during-transition-skips",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9196,
+    "capInkPct": 24.992,
+    "refInkPct": 44.628,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-fragmentation",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "hit-test-unpainted-element",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9656,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "hit-test-unrelated-element",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 8.547,
+    "refInkPct": 8.547,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "html-becomes-fixed",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9969,
+    "capInkPct": 1.538,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "inline-child-with-composited-filter",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9949,
+    "capInkPct": 9.638,
+    "refInkPct": 6.195,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "wpt-canvas-shape-sensitive"
+    ]
+   },
+   {
+    "t": "inline-child-with-filter",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9949,
+    "capInkPct": 9.638,
+    "refInkPct": 6.195,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "inline-child-with-overflow-shadow",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.5653,
+    "capInkPct": 9.359,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "japanese-tag",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8171,
+    "capInkPct": 25.762,
+    "refInkPct": 6.777,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-bundled-font",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-below-and-on-top-of-viewport-partially-onscreen-new",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9903,
+    "capInkPct": 25.641,
+    "refInkPct": 24.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-below-and-on-top-of-viewport-partially-onscreen-old",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9903,
+    "capInkPct": 25.641,
+    "refInkPct": 24.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-below-viewport-offscreen-new",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7962,
+    "capInkPct": 0,
+    "refInkPct": 24.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-below-viewport-offscreen-old",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7962,
+    "capInkPct": 0,
+    "refInkPct": 24.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-left-of-viewport-offscreen-new",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.86,
+    "capInkPct": 0.043,
+    "refInkPct": 15.299,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-left-of-viewport-offscreen-old",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.86,
+    "capInkPct": 0.043,
+    "refInkPct": 15.299,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-on-top-of-viewport-offscreen-new",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7918,
+    "capInkPct": 0.043,
+    "refInkPct": 24.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-on-top-of-viewport-offscreen-old",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7918,
+    "capInkPct": 0.043,
+    "refInkPct": 24.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-right-and-left-of-viewport-partially-onscreen-new",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8173,
+    "capInkPct": 6.667,
+    "refInkPct": 15.299,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-right-and-left-of-viewport-partially-onscreen-old",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8173,
+    "capInkPct": 6.667,
+    "refInkPct": 15.299,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-right-of-viewport-offscreen-new",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8656,
+    "capInkPct": 0,
+    "refInkPct": 15.299,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "massive-element-right-of-viewport-offscreen-old",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8656,
+    "capInkPct": 0,
+    "refInkPct": 15.299,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "match-element-name",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.555,
+    "capInkPct": 8.547,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "named-element-with-fix-pos-child-new",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 8.547,
+    "refInkPct": 8.547,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "named-element-with-fix-pos-child-old",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 8.547,
+    "refInkPct": 8.547,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "names-are-tree-scoped",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.891,
+    "capInkPct": 17.094,
+    "refInkPct": 4.274,
+    "postLoadExtracted": false,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-shadow-dom",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "nested-elements-in-overflow",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.4812,
+    "capInkPct": 5.342,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "nested/group-children-sizing-with-border-props",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8735,
+    "capInkPct": 28.655,
+    "refInkPct": 21.718,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "nested/group-children-sizing-with-border",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8744,
+    "capInkPct": 28.744,
+    "refInkPct": 22.015,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "nested/group-children-sizing",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8723,
+    "capInkPct": 27.093,
+    "refInkPct": 17.678,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "nested/nested-parent-changes-transform-twice",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "nested/nested-parent-changes-transform",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "nested/nested-position-with-border",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9273,
+    "capInkPct": 9.173,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "nested/rotated-container",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 4.369,
+    "refInkPct": 4.369,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "nested/rounded-border-clipper",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9483,
+    "capInkPct": 2.075,
+    "refInkPct": 2.137,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-and-old-sizes-match",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 3.036,
+    "refInkPct": 3.036,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "new-content-ancestor-clipped-2",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8097,
+    "capInkPct": 17.094,
+    "refInkPct": 17.094,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "new-content-ancestor-clipped",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9176,
+    "capInkPct": 24.573,
+    "refInkPct": 32.051,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "new-content-captures-clip-path",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9671,
+    "capInkPct": 2.179,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-captures-different-size",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9401,
+    "capInkPct": 11.041,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-captures-opacity",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9539,
+    "capInkPct": 12.821,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-captures-positioned-spans",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9733,
+    "capInkPct": 0.889,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-captures-root",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9579,
+    "capInkPct": 5.855,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-containment",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-changes-overflow-left",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9829,
+    "capInkPct": 4.274,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-changes-overflow",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.887,
+    "capInkPct": 4.701,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-container-writing-modes",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8033,
+    "capInkPct": 25.762,
+    "refInkPct": 6.777,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-element-writing-modes",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.918,
+    "capInkPct": 9.933,
+    "refInkPct": 6.8,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-flat-transform-ancestor",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9664,
+    "capInkPct": 0.567,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "wpt-canvas-shape-sensitive"
+    ]
+   },
+   {
+    "t": "new-content-from-root-display-none",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 6.777,
+    "refInkPct": 6.777,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-has-scrollbars",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.2761,
+    "capInkPct": 100,
+    "refInkPct": 85.859,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "new-content-intrinsic-aspect-ratio",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7321,
+    "capInkPct": 8.547,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-is-empty-div",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8824,
+    "capInkPct": 6.41,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-object-fit-fill",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9711,
+    "capInkPct": 4.316,
+    "refInkPct": 1.068,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-object-fit-none",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9583,
+    "capInkPct": 4.316,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-object-view-box-clip-path",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9519,
+    "capInkPct": 5.474,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "new-content-object-view-box-overflow-clipped",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9528,
+    "capInkPct": 7.885,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "new-content-object-view-box-overflow",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9528,
+    "capInkPct": 7.885,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "new-content-preserve-3d-ancestor",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8979,
+    "capInkPct": 4.274,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "wpt-canvas-shape-sensitive"
+    ]
+   },
+   {
+    "t": "new-content-root-scrollbar-with-fixed-background",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.3375,
+    "capInkPct": 0.025,
+    "refInkPct": 88.949,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-scaling",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8569,
+    "capInkPct": 1.538,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-transform-change-001",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.995,
+    "capInkPct": 4.344,
+    "refInkPct": 3.974,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-transform-position-fixed",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9303,
+    "capInkPct": 100,
+    "refInkPct": 88.949,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-with-object-view-box",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8858,
+    "capInkPct": 4.274,
+    "refInkPct": 100,
+    "postLoadExtracted": false,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-with-overflow-zoomed",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.6241,
+    "capInkPct": 19.444,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-content-with-overflow",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8137,
+    "capInkPct": 20.299,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-element-on-start",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8792,
+    "capInkPct": 9.573,
+    "refInkPct": 95.726,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "new-root-vertical-writing-mode",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7837,
+    "capInkPct": 24.655,
+    "refInkPct": 3.846,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "no-named-elements",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.66,
+    "capInkPct": 100,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "no-painting-while-render-blocked",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 17.094,
+    "refInkPct": 17.094,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "no-root-capture",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.89,
+    "capInkPct": 21.503,
+    "refInkPct": 8.683,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "nothing-captured",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.89,
+    "capInkPct": 21.503,
+    "refInkPct": 8.683,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-containment",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "object-view-box-new-image",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7877,
+    "capInkPct": 25.846,
+    "refInkPct": 12.821,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "object-view-box-old-image",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.6727,
+    "capInkPct": 25.846,
+    "refInkPct": 12.821,
+    "postLoadExtracted": false,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-captures-clip-path",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.964,
+    "capInkPct": 2.179,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-captures-different-size",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9354,
+    "capInkPct": 11.041,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-captures-opacity",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.95,
+    "capInkPct": 12.821,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-captures-root",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9566,
+    "capInkPct": 5.812,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-container-writing-modes",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8139,
+    "capInkPct": 25.762,
+    "refInkPct": 6.777,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-element-writing-modes",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8171,
+    "capInkPct": 25.762,
+    "refInkPct": 6.777,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-has-scrollbars",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.361,
+    "capInkPct": 100,
+    "refInkPct": 89.383,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-intrinsic-aspect-ratio",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7321,
+    "capInkPct": 8.547,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-is-empty-div",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.887,
+    "capInkPct": 8.547,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-object-fit-fill",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9711,
+    "capInkPct": 4.316,
+    "refInkPct": 1.068,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-object-fit-none",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9583,
+    "capInkPct": 4.316,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-object-view-box-clip-path",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9519,
+    "capInkPct": 5.474,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "old-content-object-view-box-overflow",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9528,
+    "capInkPct": 7.885,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "old-content-root-scrollbar-with-fixed-background",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.3375,
+    "capInkPct": 0.025,
+    "refInkPct": 88.949,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-with-object-view-box",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8858,
+    "capInkPct": 4.274,
+    "refInkPct": 100,
+    "postLoadExtracted": false,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-with-overflow-zoomed",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.6241,
+    "capInkPct": 19.444,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-content-with-overflow",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8137,
+    "capInkPct": 20.299,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "old-root-vertical-writing-mode",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9537,
+    "capInkPct": 4.427,
+    "refInkPct": 3.846,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "outer-padding-inner-background",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.956,
+    "capInkPct": 4.274,
+    "refInkPct": 8.547,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-rendering-invalidation",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.4682,
+    "capInkPct": 100,
+    "refInkPct": 17.094,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-entry",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-exit",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-match-ident",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-match-multiple-wildcard",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-match-multiple",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-match-wildcard-no-star",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-match-wildcard",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-mismatch-ident",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-mismatch-partial",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-mismatch-wildcard",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-multiple-vt-classes",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-new-with-class-old-without",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-old-with-class-new-without",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-view-transition-group",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "pseudo-with-classes-view-transition-image-pair",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.915,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "root-captured-as-different-tag",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9566,
+    "capInkPct": 5.812,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "root-style-change-during-animation",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.7139,
+    "capInkPct": 4.316,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-containment",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "root-to-shared-animation-end",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.5698,
+    "capInkPct": 100,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "root-to-shared-animation-incoming",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.3056,
+    "capInkPct": 100,
+    "refInkPct": 100,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "root-to-shared-animation-start",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9231,
+    "capInkPct": 100,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/active-pseudo",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9087,
+    "capInkPct": 11.218,
+    "refInkPct": 11.218,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/centered-paint-offset",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9372,
+    "capInkPct": 20.192,
+    "refInkPct": 20.192,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/clip-on-target-in-callback-2",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9864,
+    "capInkPct": 20.769,
+    "refInkPct": 20.769,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/clip-on-target-in-callback",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 20.769,
+    "refInkPct": 20.769,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/display-change",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9087,
+    "capInkPct": 11.218,
+    "refInkPct": 11.218,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/fractional-border-shift",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 0.174,
+    "refInkPct": 0.174,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/implicit-contain",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9445,
+    "capInkPct": 3.663,
+    "refInkPct": 3.663,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/nested-scope",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9927,
+    "capInkPct": 38.462,
+    "refInkPct": 38.462,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/new-content",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9087,
+    "capInkPct": 11.218,
+    "refInkPct": 11.218,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/old-content",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9087,
+    "capInkPct": 11.218,
+    "refInkPct": 11.218,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/overflow-excludes-pseudo",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9922,
+    "capInkPct": 33.747,
+    "refInkPct": 33.548,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-driven-scroll",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "scoped/paint-order",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9559,
+    "capInkPct": 1.624,
+    "refInkPct": 8.547,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/pause-rendering-resize",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9178,
+    "capInkPct": 8.884,
+    "refInkPct": 8.884,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-containment",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/pause-rendering",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9621,
+    "capInkPct": 27.12,
+    "refInkPct": 25.821,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-containment",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/rotation-on-scoped-element",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 14.876,
+    "refInkPct": 14.876,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/scrolled-target-position-rtl",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9903,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "scoped/scrolled-target-position",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9904,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "scoped/scroller-with-child",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8542,
+    "capInkPct": 10.473,
+    "refInkPct": 19.983,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scoped/shadow-dom",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9636,
+    "capInkPct": 0,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-shadow-dom",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scroller-child-abspos",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 21.368,
+    "refInkPct": 21.368,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scroller-child",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9848,
+    "capInkPct": 79.915,
+    "refInkPct": 76.496,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "scroller",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions",
+     "requires-viewport-canvas"
+    ]
+   },
+   {
+    "t": "set-current-time-transform",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9342,
+    "capInkPct": 4.274,
+    "refInkPct": 0.342,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "set-current-time",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9693,
+    "capInkPct": 0,
+    "refInkPct": 4.274,
+    "postLoadExtracted": true,
+    "freeze": "paused",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "set-universal-specificity",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8766,
+    "capInkPct": 4.274,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "shadow-part-with-class-inside-shadow-important",
+    "scored": true,
+    "pass": false,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": false,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-shadow-dom",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "shadow-part-with-class-inside-shadow",
+    "scored": true,
+    "pass": false,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": false,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-shadow-dom",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "shadow-part-with-class",
+    "scored": true,
+    "pass": false,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": false,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-shadow-dom",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "shadow-part-with-name-nested",
+    "scored": true,
+    "pass": false,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": false,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-shadow-dom",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "shadow-part-with-name-overridden-by-important",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": false,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-shadow-dom",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "shadow-part-with-name",
+    "scored": true,
+    "pass": false,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": false,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-shadow-dom",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "snapshot-containing-block-includes-scrollbar-gutter",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9132,
+    "capInkPct": 17.094,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "span-with-overflowing-text-hidden",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9245,
+    "capInkPct": 3.06,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "transform-origin-view-transition-group",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8796,
+    "capInkPct": 6.453,
+    "refInkPct": 6.198,
+    "postLoadExtracted": true,
+    "freeze": "delayed-group",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "transformed-element-scroll-transform",
+    "scored": false,
+    "pass": false,
+    "ssim": 0.998,
+    "capInkPct": 1.096,
+    "refInkPct": 0.859,
+    "postLoadExtracted": false,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-driven-scroll",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "view-transition-name-is-backdrop-filter-root",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 17.094,
+    "refInkPct": 17.094,
+    "postLoadExtracted": false,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions",
+     "wpt-canvas-shape-sensitive"
+    ]
+   },
+   {
+    "t": "view-transition-name-is-grouping",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 4.274,
+    "refInkPct": 4.274,
+    "postLoadExtracted": false,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-view-transitions",
+     "wpt-canvas-shape-sensitive"
+    ]
+   },
+   {
+    "t": "view-transition-name-on-document-root",
+    "scored": true,
+    "pass": true,
+    "ssim": 1,
+    "capInkPct": 7.479,
+    "refInkPct": 7.479,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation"
+    ]
+   },
+   {
+    "t": "view-transition-name-removed-mid-transition",
+    "scored": true,
+    "pass": true,
+    "ssim": 0.9999,
+    "capInkPct": 7.479,
+    "refInkPct": 7.479,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "view-transition-waituntil-animation-manipulation",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9065,
+    "capInkPct": 4.274,
+    "refInkPct": 86.899,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "web-animations-api-parse-pseudo-argument",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8483,
+    "capInkPct": 8.547,
+    "refInkPct": 6.41,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "web-animations-api",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.8483,
+    "capInkPct": 8.547,
+    "refInkPct": 6.41,
+    "postLoadExtracted": true,
+    "freeze": "other",
+    "pseudoRootPainted": false,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-containment",
+     "requires-document-tree",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   },
+   {
+    "t": "writing-mode-container-resize",
+    "scored": true,
+    "pass": false,
+    "ssim": 0.9268,
+    "capInkPct": 4.274,
+    "refInkPct": 24.759,
+    "postLoadExtracted": true,
+    "freeze": "ready-old-snapshot",
+    "pseudoRootPainted": true,
+    "tags": [
+     "requires-animation-runtime",
+     "requires-document-tree",
+     "requires-orthogonal-flow",
+     "requires-script-mutation",
+     "requires-view-transitions"
+    ]
+   }
+  ],
+  "css-page": [
+   {
+    "t": "background-image-only-for-print",
+    "pass": true,
+    "ssim": 0.9809,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 616,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "basic-pagination-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "293px",
+    "needs": []
+   },
+   {
+    "t": "basic-pagination-002-print",
+    "pass": true,
+    "ssim": 0.9824,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "293px",
+    "needs": []
+   },
+   {
+    "t": "basic-pagination-003-print",
+    "pass": false,
+    "ssim": 0.8981,
+    "refPngW": 390,
+    "refPngH": 618,
+    "capPngH": 600,
+    "atPageSize": "293px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "body-background-slr-print",
+    "pass": false,
+    "ssim": 0.7327,
+    "refPngW": 390,
+    "refPngH": 1252,
+    "capPngH": 620,
+    "atPageSize": "800px 600px",
+    "needs": [
+     "fragmentation",
+     "orthogonal-flow"
+    ]
+   },
+   {
+    "t": "body-background-srl-print",
+    "pass": false,
+    "ssim": 0.7845,
+    "refPngW": 390,
+    "refPngH": 772,
+    "capPngH": 620,
+    "atPageSize": "800px 600px",
+    "needs": [
+     "fragmentation",
+     "orthogonal-flow"
+    ]
+   },
+   {
+    "t": "body-background-vlr-print",
+    "pass": false,
+    "ssim": 0.8842,
+    "refPngW": 390,
+    "refPngH": 732,
+    "capPngH": 600,
+    "atPageSize": "800px 600px",
+    "needs": [
+     "fragmentation",
+     "orthogonal-flow"
+    ]
+   },
+   {
+    "t": "body-background-vrl-print",
+    "pass": false,
+    "ssim": 0.8842,
+    "refPngW": 390,
+    "refPngH": 732,
+    "capPngH": 600,
+    "atPageSize": "800px 600px",
+    "needs": [
+     "fragmentation",
+     "orthogonal-flow"
+    ]
+   },
+   {
+    "t": "cssom/dynamic-001-print",
+    "pass": false,
+    "ssim": 0.5063,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid",
+     "script-mutation"
+    ]
+   },
+   {
+    "t": "fixedpos-009-print",
+    "pass": true,
+    "ssim": 0.9886,
+    "refPngW": 390,
+    "refPngH": 1168,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "fixedpos-010-print",
+    "pass": false,
+    "ssim": 0.7344,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "400px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "fixedpos-011-print",
+    "pass": false,
+    "ssim": 0.8827,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "fixedpos-with-link-with-inline-child-print",
+    "pass": true,
+    "ssim": 0.9703,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "layers-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "layers-002-print",
+    "pass": true,
+    "ssim": 0.9768,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "layers-003-print",
+    "pass": true,
+    "ssim": 0.9735,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "layers-004-print",
+    "pass": true,
+    "ssim": 0.987,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "margin-boxes/alignment-001-print",
+    "pass": false,
+    "ssim": 0.8236,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "0.7em",
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/auto-margins-001-print",
+    "pass": false,
+    "ssim": 0.3874,
+    "refPngW": 390,
+    "refPngH": 634,
+    "capPngH": 600,
+    "atPageSize": "500px 400px",
+    "needs": [
+     "margin-box-grid",
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "margin-boxes/auto-margins-002-print",
+    "pass": false,
+    "ssim": 0.4233,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px 440px",
+    "needs": [
+     "margin-box-grid",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "margin-boxes/auto-margins-003-print",
+    "pass": false,
+    "ssim": 0.5608,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px 400px",
+    "needs": [
+     "margin-box-grid",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "margin-boxes/background-001-print",
+    "pass": false,
+    "ssim": 0.8803,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-001-print",
+    "pass": false,
+    "ssim": 0.9369,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "400px",
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-002-print",
+    "pass": false,
+    "ssim": 0.9113,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-003-print",
+    "pass": false,
+    "ssim": 0.9651,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-004-print",
+    "pass": false,
+    "ssim": 0.9403,
+    "refPngW": 390,
+    "refPngH": 1736,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid",
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-005-print",
+    "pass": false,
+    "ssim": 0.938,
+    "refPngW": 390,
+    "refPngH": 1736,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid",
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-006-print",
+    "pass": false,
+    "ssim": 0.938,
+    "refPngW": 390,
+    "refPngH": 1736,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid",
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-007-print",
+    "pass": false,
+    "ssim": 0.938,
+    "refPngW": 390,
+    "refPngH": 1736,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid",
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-008-print",
+    "pass": true,
+    "ssim": 0.9845,
+    "refPngW": 390,
+    "refPngH": 2304,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "margin-boxes/content-009-print",
+    "pass": true,
+    "ssim": 0.9844,
+    "refPngW": 390,
+    "refPngH": 2304,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "margin-boxes/content-010-print",
+    "pass": false,
+    "ssim": 0.9885,
+    "refPngW": 390,
+    "refPngH": 2304,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid",
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-011-print",
+    "pass": false,
+    "ssim": 0.988,
+    "refPngW": 390,
+    "refPngH": 2304,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid",
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-012-print",
+    "pass": false,
+    "ssim": 0.987,
+    "refPngW": 390,
+    "refPngH": 2304,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "margin-box-grid",
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "margin-boxes/content-013-print",
+    "pass": true,
+    "ssim": 0.9648,
+    "refPngW": 390,
+    "refPngH": 2304,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "margin-boxes/dimensions-001-print",
+    "pass": false,
+    "ssim": 0.8431,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px 400px",
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/dimensions-002-print",
+    "pass": false,
+    "ssim": 0.769,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px 400px",
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/dimensions-010-print",
+    "pass": false,
+    "ssim": 0.8449,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "650px 500px",
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/inapplicable-properties-print",
+    "pass": false,
+    "ssim": 0.8572,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "400px",
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/overconstrained-001-print",
+    "pass": false,
+    "ssim": 0.5178,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px 400px",
+    "needs": [
+     "margin-box-grid",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "margin-boxes/paint-order-001-print",
+    "pass": false,
+    "ssim": 0.3967,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px 400px",
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/paint-order-002-print",
+    "pass": false,
+    "ssim": 0.3967,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px 400px",
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "margin-boxes/paint-order-003-print",
+    "pass": false,
+    "ssim": 0.5285,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 616,
+    "atPageSize": "500px",
+    "needs": [
+     "margin-box-grid"
+    ]
+   },
+   {
+    "t": "media-queries-001-print",
+    "pass": false,
+    "ssim": 0.9996,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "10in",
+    "needs": [
+     "fragmentation",
+     "print-media-resolution"
+    ]
+   },
+   {
+    "t": "media-queries-003-print",
+    "pass": false,
+    "ssim": 0.9106,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "paged-other"
+    ]
+   },
+   {
+    "t": "monolithic-overflow-023-print",
+    "pass": false,
+    "ssim": 0.7871,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 768,
+    "atPageSize": "600px",
+    "needs": [
+     "paged-other"
+    ]
+   },
+   {
+    "t": "monolithic-overflow-025-print",
+    "pass": false,
+    "ssim": 0.9101,
+    "refPngW": 390,
+    "refPngH": 762,
+    "capPngH": 600,
+    "atPageSize": "100px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "monolithic-overflow-027-print",
+    "pass": false,
+    "ssim": 0.621,
+    "refPngW": 390,
+    "refPngH": 2304,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "monolithic-overflow-028-print",
+    "pass": false,
+    "ssim": 0.621,
+    "refPngW": 390,
+    "refPngH": 2304,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "monolithic-overflow-029-print",
+    "pass": false,
+    "ssim": 0.6305,
+    "refPngW": 390,
+    "refPngH": 2304,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "monolithic-overflow-030-print",
+    "pass": false,
+    "ssim": 0.9579,
+    "refPngW": 390,
+    "refPngH": 800,
+    "capPngH": 616,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "monolithic-overflow-031-print",
+    "pass": true,
+    "ssim": 0.9756,
+    "refPngW": 390,
+    "refPngH": 1532,
+    "capPngH": 807,
+    "atPageSize": "400px 300px",
+    "needs": []
+   },
+   {
+    "t": "monolithic-overflow-032-print.tentative",
+    "pass": false,
+    "ssim": 0.8908,
+    "refPngW": 390,
+    "refPngH": 1952,
+    "capPngH": 1852,
+    "atPageSize": "400px 300px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-background-001-print",
+    "pass": false,
+    "ssim": 0.8874,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-background-002-print",
+    "pass": false,
+    "ssim": 0.9177,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "300px 50px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-background-003-print",
+    "pass": false,
+    "ssim": 0.6389,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px 250px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-background-004-print",
+    "pass": false,
+    "ssim": 0.5943,
+    "refPngW": 390,
+    "refPngH": 832,
+    "capPngH": 600,
+    "atPageSize": "500px 300px",
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-background-005-print",
+    "pass": false,
+    "ssim": 0.3439,
+    "refPngW": 390,
+    "refPngH": 812,
+    "capPngH": 600,
+    "atPageSize": "600px 300px",
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-background-image-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 616,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-box-000-print",
+    "pass": false,
+    "ssim": 0.76,
+    "refPngW": 390,
+    "refPngH": 620,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-box-001-print",
+    "pass": false,
+    "ssim": 0.9334,
+    "refPngW": 390,
+    "refPngH": 800,
+    "capPngH": 700,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-box-002-print",
+    "pass": false,
+    "ssim": 0.5663,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-box-003-print",
+    "pass": false,
+    "ssim": 0.3777,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-box-005-print",
+    "pass": false,
+    "ssim": 0.6601,
+    "refPngW": 390,
+    "refPngH": 1232,
+    "capPngH": 600,
+    "atPageSize": "400px",
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-box-006-print",
+    "pass": false,
+    "ssim": 0.6384,
+    "refPngW": 390,
+    "refPngH": 832,
+    "capPngH": 600,
+    "atPageSize": "400px",
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-box-008-print",
+    "pass": false,
+    "ssim": 0.2498,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 876,
+    "atPageSize": "400px 800px",
+    "needs": [
+     "fragmentation",
+     "page-box-paint",
+     "orthogonal-flow"
+    ]
+   },
+   {
+    "t": "page-box-010-print",
+    "pass": false,
+    "ssim": 0.7958,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-box-011-print",
+    "pass": false,
+    "ssim": 0.7323,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-left-right-001-print",
+    "pass": false,
+    "ssim": 0.9118,
+    "refPngW": 390,
+    "refPngH": 832,
+    "capPngH": 600,
+    "atPageSize": "600px 300px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-left-right-002-print",
+    "pass": false,
+    "ssim": 0.9109,
+    "refPngW": 390,
+    "refPngH": 832,
+    "capPngH": 600,
+    "atPageSize": "600px 300px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-margin-004-print",
+    "pass": false,
+    "ssim": 0.8285,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "300px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-margin-005-print",
+    "pass": false,
+    "ssim": 0.9129,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "600px 300px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-margin-006-print",
+    "pass": false,
+    "ssim": 0.7181,
+    "refPngW": 390,
+    "refPngH": 696,
+    "capPngH": 600,
+    "atPageSize": "6in",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-margin-007-print",
+    "pass": false,
+    "ssim": 0.6275,
+    "refPngW": 390,
+    "refPngH": 1432,
+    "capPngH": 632,
+    "atPageSize": "400px 200px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-margin-auto-and-non-zero-print",
+    "pass": false,
+    "ssim": 0.6265,
+    "refPngW": 390,
+    "refPngH": 704,
+    "capPngH": 600,
+    "atPageSize": "20em 7em",
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-margin-auto-negative-print.tentative",
+    "pass": false,
+    "ssim": 0.7043,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "300px",
+    "needs": [
+     "paged-other"
+    ]
+   },
+   {
+    "t": "page-margin-auto-print",
+    "pass": false,
+    "ssim": 0.8249,
+    "refPngW": 390,
+    "refPngH": 704,
+    "capPngH": 600,
+    "atPageSize": "20em 7em",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-margin-negative-print.tentative",
+    "pass": false,
+    "ssim": 0.7043,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "300px",
+    "needs": [
+     "paged-other"
+    ]
+   },
+   {
+    "t": "page-name-000-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-001-print",
+    "pass": false,
+    "ssim": 0.8701,
+    "refPngW": 390,
+    "refPngH": 605,
+    "capPngH": 600,
+    "atPageSize": "2in 3in",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-name-002-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-003-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-abspos-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-abspos-002-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-abspos-003-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-and-break-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-and-break-002-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-and-break-003-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-and-break-004-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-display-none-child-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-fixed-pos-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-flex-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-flex-002-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-flex-003-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-flex-004-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-float-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-float-002-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-img-001-print",
+    "pass": false,
+    "ssim": 0.9536,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-name-img-002-print",
+    "pass": false,
+    "ssim": 0.9549,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-name-img-003-print",
+    "pass": false,
+    "ssim": 0.9537,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-name-img-004-print",
+    "pass": false,
+    "ssim": 0.9549,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-name-inline-block-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-inline-block-002-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-inline-block-003-print",
+    "pass": true,
+    "ssim": 0.998,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-margin-001-print",
+    "pass": true,
+    "ssim": 0.9704,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-margin-002-print",
+    "pass": true,
+    "ssim": 0.9764,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-orthogonal-writing-001-print",
+    "pass": true,
+    "ssim": 0.9917,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-orthogonal-writing-002-print",
+    "pass": true,
+    "ssim": 0.9936,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-orthogonal-writing-003-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-orthogonal-writing-004-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-propagated-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-propagated-002-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-propagated-003-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-propagated-004-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-propagated-005-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-propagated-006-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-propagated-007-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-propagated-008-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-propagated-009-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-siblings-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-siblings-002-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-siblings-003-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-siblings-004-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-siblings-005-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-name-table-001-print",
+    "pass": false,
+    "ssim": 0.892,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "5in",
+    "needs": [
+     "fragmentation",
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "page-name-zero-height-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "page-orientation-on-landscape-001-print",
+    "pass": false,
+    "ssim": 0.7787,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "landscape",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-orientation-on-portrait-001-print",
+    "pass": false,
+    "ssim": 0.8819,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "portrait",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-orientation-on-square-001-print",
+    "pass": false,
+    "ssim": 0.8648,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "3in 3in",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-rule-specificity-001-print",
+    "pass": true,
+    "ssim": 0.983,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "portrait",
+    "needs": []
+   },
+   {
+    "t": "page-rule-specificity-002-print",
+    "pass": true,
+    "ssim": 0.983,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "portrait",
+    "needs": []
+   },
+   {
+    "t": "page-rule-specificity-003-print",
+    "pass": false,
+    "ssim": 0.9856,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "landscape",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-size-001-print",
+    "pass": true,
+    "ssim": 0.9823,
+    "refPngW": 390,
+    "refPngH": 944,
+    "capPngH": 600,
+    "atPageSize": "300px 400px",
+    "needs": []
+   },
+   {
+    "t": "page-size-002-print",
+    "pass": true,
+    "ssim": 0.9764,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "300px 50px",
+    "needs": []
+   },
+   {
+    "t": "page-size-003-print",
+    "pass": true,
+    "ssim": 0.9764,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "300px 100px",
+    "needs": []
+   },
+   {
+    "t": "page-size-004-print",
+    "pass": false,
+    "ssim": 0.9365,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "320px 200px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-size-005-print",
+    "pass": false,
+    "ssim": 0.9471,
+    "refPngW": 390,
+    "refPngH": 932,
+    "capPngH": 932,
+    "atPageSize": "320px 200px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-size-006-print",
+    "pass": true,
+    "ssim": 0.9583,
+    "refPngW": 390,
+    "refPngH": 944,
+    "capPngH": 842,
+    "atPageSize": "200px 320px",
+    "needs": []
+   },
+   {
+    "t": "page-size-007-print",
+    "pass": false,
+    "ssim": 0.4172,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 1292,
+    "atPageSize": "200px 160px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-size-008-print",
+    "pass": false,
+    "ssim": 0.4472,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 1292,
+    "atPageSize": "200px 160px",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-size-010-print",
+    "pass": false,
+    "ssim": 0.142,
+    "refPngW": 390,
+    "refPngH": 964,
+    "capPngH": 1904,
+    "atPageSize": "letter",
+    "needs": [
+     "fragmentation"
+    ]
+   },
+   {
+    "t": "page-size-011-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "a5",
+    "needs": []
+   },
+   {
+    "t": "page-size-012-print",
+    "pass": false,
+    "ssim": 0.8512,
+    "refPngW": 390,
+    "refPngH": 832,
+    "capPngH": 600,
+    "atPageSize": "600px 400px",
+    "needs": [
+     "fragmentation",
+     "orthogonal-flow"
+    ]
+   },
+   {
+    "t": "page-size-013-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px",
+    "needs": []
+   },
+   {
+    "t": "page-size-014-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "500px",
+    "needs": []
+   },
+   {
+    "t": "page-visibility-hidden-001-print",
+    "pass": true,
+    "ssim": 1,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "pseudo-first-margin-001-print",
+    "pass": true,
+    "ssim": 0.9768,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "pseudo-first-margin-002-print",
+    "pass": true,
+    "ssim": 0.9768,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "pseudo-first-margin-003-print",
+    "pass": true,
+    "ssim": 0.9768,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "pseudo-first-margin-004-print",
+    "pass": true,
+    "ssim": 0.9768,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "remote-origin-iframe-print",
+    "pass": true,
+    "ssim": 0.9936,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 616,
+    "atPageSize": null,
+    "needs": []
+   },
+   {
+    "t": "root-element-display-none-print",
+    "pass": false,
+    "ssim": 0.9705,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "page-box-paint"
+    ]
+   },
+   {
+    "t": "subpixel-page-size-001-print",
+    "pass": false,
+    "ssim": 0.8368,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "400px 123.9px",
+    "needs": [
+     "paged-other"
+    ]
+   },
+   {
+    "t": "subpixel-page-size-002-print",
+    "pass": false,
+    "ssim": 0.8374,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "400px 123.1px",
+    "needs": [
+     "paged-other"
+    ]
+   },
+   {
+    "t": "tentative/safe-printable-inset-001-print",
+    "pass": false,
+    "ssim": 0.8052,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "paged-other"
+    ]
+   },
+   {
+    "t": "tentative/safe-printable-inset-002-print",
+    "pass": false,
+    "ssim": 0.8043,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": null,
+    "needs": [
+     "paged-other"
+    ]
+   },
+   {
+    "t": "tentative/safe-printable-inset-003-print",
+    "pass": false,
+    "ssim": 0.7847,
+    "refPngW": 390,
+    "refPngH": 600,
+    "capPngH": 600,
+    "atPageSize": "400px 250px",
+    "needs": [
+     "margin-box-grid",
+     "page-box-paint"
+    ]
+   }
+  ]
+ },
+ "reproduce": "per section: tools/titan/section-runner.sh <section> --web-only --run-id <id>; then read tools/titan/runs/<id>/sections/<section>/manifest.json -> wpt.results[*].browserRef.diffs[\"web-ref\"] (wptPass, ssim, semanticPresence). The scorer itself is re-validatable without a run: import diffWebVsRef + computePresenceFailed + computeColorFailed + computeCoverageRatioFailed from tools/titan/inject-wpt-block.mjs and re-score any frozen capture/ref pair — the wave-37 W5 check did 18 and reproduced every field. The refusals themselves are enforced by the negative pins in tools/titan/inject-wpt-block.test.mjs.",
+ "verification": {
+  "_note": "Both sections re-run web-only at HEAD (wave-36-final) with run-id wave37-W5, against the pre-FX wave35-webmap map they were classified from. Lane W5 changes nothing the pipeline executes — the refused constant is read only by unit pins and every other edit is a comment — so any delta here belongs to wave-36, not to this lane.",
+  "css-page": {
+   "runId": "wave37-W5",
+   "map": {
+    "scored": 157,
+    "pass": 71
+   },
+   "head": {
+    "scored": 157,
+    "pass": 75
+   },
+   "delta": 4,
+   "flips": [
+    {
+     "t": "page-name-img-001-print",
+     "direction": "gained",
+     "mapSsim": 0.9536,
+     "headSsim": 1
+    },
+    {
+     "t": "page-name-img-002-print",
+     "direction": "gained",
+     "mapSsim": 0.9549,
+     "headSsim": 1
+    },
+    {
+     "t": "page-name-img-003-print",
+     "direction": "gained",
+     "mapSsim": 0.9537,
+     "headSsim": 1
+    },
+    {
+     "t": "page-name-img-004-print",
+     "direction": "gained",
+     "mapSsim": 0.9549,
+     "headSsim": 1
+    }
+   ],
+   "cellsLost": 0,
+   "precisionOfWholeTagExclusionAtHead": 0.522
+  },
+  "css-view-transitions": {
+   "runId": "wave37-W5",
+   "map": {
+    "scored": 192,
+    "pass": 50
+   },
+   "head": {
+    "scored": 192,
+    "pass": 54
+   },
+   "delta": 4,
+   "flips": [
+    {
+     "t": "massive-element-right-and-left-of-viewport-partially-onscreen-new",
+     "direction": "gained",
+     "mapSsim": 0.8173,
+     "headSsim": 0.9903
+    },
+    {
+     "t": "massive-element-right-and-left-of-viewport-partially-onscreen-old",
+     "direction": "gained",
+     "mapSsim": 0.8173,
+     "headSsim": 0.9903
+    },
+    {
+     "t": "no-root-capture",
+     "direction": "gained",
+     "mapSsim": 0.89,
+     "headSsim": 0.9617
+    },
+    {
+     "t": "nothing-captured",
+     "direction": "gained",
+     "mapSsim": 0.89,
+     "headSsim": 0.9617
+    }
+   ],
+   "cellsLost": 0,
+   "precisionOfWholeTagExclusionAtHead": 0.719
+  }
+ }
+}

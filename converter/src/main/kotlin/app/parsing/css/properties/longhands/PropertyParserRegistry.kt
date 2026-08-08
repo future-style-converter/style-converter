@@ -853,7 +853,9 @@ object PropertyParserRegistry {
         "view-transition-group" to ViewTransitionGroupPropertyParser,
 
         // Webkit/vendor-prefixed properties (aliased to standard parsers)
-        "-webkit-line-clamp" to LineClampPropertyParser,
+        // Same IR property, PRE-`auto` grammar (css-overflow-4 Appendix A) —
+        // see WebkitLineClampPropertyParser in LineClampPropertyParser.kt.
+        "-webkit-line-clamp" to WebkitLineClampPropertyParser,
         "-webkit-background-clip" to BackgroundClipPropertyParser,
         "-webkit-box-orient" to BoxOrientPropertyParser,
 

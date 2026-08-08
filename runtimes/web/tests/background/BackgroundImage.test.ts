@@ -150,6 +150,117 @@ describe('BackgroundImage', () => {
     expect(applyBackgroundImage(cfg).backgroundImage).toBe('none');
   });
 
+  // ── wave-37 lane W2: the <color-interpolation-method> carry ────────────
+  it('re-emits the authored interpolation method inside the syntax prefix', () => {
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'linear-gradient', angle: { deg: 90 }, stops: redBlueStops,
+        interp: 'in hsl increasing hue',
+      }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage)
+      .toBe('linear-gradient(90deg in hsl increasing hue, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))');
+  });
+
+  it('carries the method on radial and conic too', () => {
+    const r = extractBackgroundImage([
+      p('BackgroundImage', [{ type: 'radial-gradient', shape: 'circle', stops: redBlueStops, interp: 'in oklch' }]),
+    ]);
+    expect(applyBackgroundImage(r).backgroundImage).toContain('radial-gradient(circle in oklch,');
+    const c = extractBackgroundImage([
+      p('BackgroundImage', [{ type: 'conic-gradient', angle: { deg: 45 }, stops: redBlueStops, interp: 'in lch longer hue' }]),
+    ]);
+    expect(applyBackgroundImage(c).backgroundImage).toContain('conic-gradient(from 45deg in lch longer hue,');
+  });
+
+  it('emits a method-only radial prefix without a stray leading comma', () => {
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{ type: 'radial-gradient', stops: redBlueStops, interp: 'in oklab' }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toContain('radial-gradient(in oklab,');
+  });
+
+  it('drops an interp value outside the closed grammar rather than emitting it', () => {
+    // Wire text is never trusted into a declaration: an unknown colour space
+    // would invalidate the whole gradient in the browser.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{ type: 'linear-gradient', angle: { deg: 90 }, stops: redBlueStops, interp: 'in nonesuch' }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))');
+  });
+
+  it('drops a hue method riding a RECTANGULAR space (css-color-4 §12.4)', () => {
+    // `in oklab longer hue` does not parse — re-emitting it would delete the
+    // whole declaration, so the clause is dropped and the ramp survives.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{ type: 'linear-gradient', angle: { deg: 90 }, stops: redBlueStops, interp: 'in oklab longer hue' }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))');
+  });
+
+  it('keeps a bare rectangular space', () => {
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{ type: 'linear-gradient', angle: { deg: 90 }, stops: redBlueStops, interp: 'in oklab' }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toContain('linear-gradient(90deg in oklab,');
+  });
+
+  it('a gradient with no interp key is byte-identical to before', () => {
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{ type: 'linear-gradient', angle: { deg: 90 }, stops: redBlueStops }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))');
+  });
+
+  // ── wave-37 lane W2: the {raw:…} <image> passthrough ────────────────────
+  it('passes a single-layer image-set() through verbatim', () => {
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{ raw: 'image-set(url("/images/green.png") 1x)' }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe('image-set(url("/images/green.png") 1x)');
+  });
+
+  it('passes a raw gradient whose stops the converter could not type', () => {
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{ raw: 'linear-gradient(to right in lch increasing hue, lch(50% 100% 0deg), lch(50% 100% 80deg))' }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toContain('lch(50% 100% 0deg)');
+  });
+
+  it('refuses a raw value that is not an <image> function', () => {
+    const cfg = extractBackgroundImage([p('BackgroundImage', [{ raw: 'var(--bg)' }])]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBeUndefined();
+  });
+
+  it('refuses raw values that could escape the declaration or are unbalanced', () => {
+    for (const raw of [
+      'image-set(url(a.png) 1x); color: red',   // ';' would end the declaration
+      'image-set(url(a.png) 1x',                // unbalanced
+      'image-set(url(a.png) 1x) junk',          // trailing junk after the function
+      'linear-gradient(red, blue) } body {',    // '}' escape attempt
+    ]) {
+      const cfg = extractBackgroundImage([p('BackgroundImage', [{ raw }])]);
+      expect(applyBackgroundImage(cfg).backgroundImage).toBeUndefined();
+    }
+  });
+
+  it('never lets a raw layer into a MULTI-layer declaration', () => {
+    // One invalid layer would invalidate the comma-joined value and take the
+    // valid siblings down with it — the only regression this feature could
+    // cause, so multi-layer raws stay dropped.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [
+        { type: 'linear-gradient', angle: { deg: 90 }, stops: redBlueStops },
+        { raw: 'image-set(url(a.png) 1x)' },
+      ]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))');
+  });
+
   it('wraps multiple bare-string URLs as comma-joined url() layers [Bug 5]', () => {
     // The image-orientation test fixture in particular emits two
     // adjacent absolutely-positioned divs each with a single bare-string

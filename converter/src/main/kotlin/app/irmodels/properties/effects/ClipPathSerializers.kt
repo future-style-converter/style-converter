@@ -88,14 +88,39 @@ object ClipPathShapeSerializer : KSerializer<ClipPathProperty.Shape> {
             is ClipPathProperty.Shape.Path -> buildJsonObject {
                 put("type", "path")
                 put("d", value.d)
+                // Optional `<fill-rule>` (css-shapes-2 §3.2). Omitted when
+                // absent so pre-wave-37 `path('M…')` fixtures keep their
+                // exact bytes; present only for the two-argument form.
+                value.fillRule?.let { put("rule", it) }
             }
             is ClipPathProperty.Shape.Rect -> buildJsonObject {
                 put("type", "rect")
-                value.top?.let { put("t", json.encodeToJsonElement(IRLength.serializer(), it)) } ?: put("t", "auto")
-                value.right?.let { put("r", json.encodeToJsonElement(IRLength.serializer(), it)) } ?: put("r", "auto")
-                value.bottom?.let { put("b", json.encodeToJsonElement(IRLength.serializer(), it)) } ?: put("b", "auto")
-                value.left?.let { put("l", json.encodeToJsonElement(IRLength.serializer(), it)) } ?: put("l", "auto")
+                // WAVE-37 W3 — THE ELVIS-ON-PUT BUG THIS REPLACES. These
+                // four lines used to read
+                //   value.top?.let { put("t", …) } ?: put("t", "auto")
+                // which looks like "emit the length, else emit auto" but
+                // is not: `JsonObjectBuilder.put` returns the PREVIOUS
+                // element for that key, which is always null on a fresh
+                // key. So `?.let { put(...) }` evaluated to null even on
+                // the success path and the elvis fired every time,
+                // overwriting each side with "auto". EVERY rect() clip
+                // path in the corpus therefore reached the runtimes as
+                // rect(auto auto auto auto) — clip-path-rect-001…004.
+                // Spelled as an if/else, the value branch cannot be
+                // swallowed by the return type of `put`.
+                if (value.top != null) put("t", json.encodeToJsonElement(IRLength.serializer(), value.top)) else put("t", "auto")
+                if (value.right != null) put("r", json.encodeToJsonElement(IRLength.serializer(), value.right)) else put("r", "auto")
+                if (value.bottom != null) put("b", json.encodeToJsonElement(IRLength.serializer(), value.bottom)) else put("b", "auto")
+                if (value.left != null) put("l", json.encodeToJsonElement(IRLength.serializer(), value.left)) else put("l", "auto")
                 value.round?.let { put("round", json.encodeToJsonElement(IRLength.serializer(), it)) }
+            }
+            // css-shapes-2 §4 shape() — verbatim passthrough, same
+            // treatment as Path's SVG `d` string. See the doc comment on
+            // [ClipPathProperty.Shape.ShapeFunction] for why nothing here
+            // can be pre-computed.
+            is ClipPathProperty.Shape.ShapeFunction -> buildJsonObject {
+                put("type", "shape")
+                put("fn", value.text)
             }
             is ClipPathProperty.Shape.Xywh -> buildJsonObject {
                 put("type", "xywh")
@@ -138,7 +163,12 @@ object ClipPathShapeSerializer : KSerializer<ClipPathProperty.Shape> {
             "polygon" -> ClipPathProperty.Shape.Polygon(
                 json.decodeFromJsonElement(ListSerializer(ClipPathProperty.Point.serializer()), obj["points"]!!)
             )
-            "path" -> ClipPathProperty.Shape.Path(obj["d"]?.jsonPrimitive?.content ?: "")
+            "path" -> ClipPathProperty.Shape.Path(
+                obj["d"]?.jsonPrimitive?.content ?: "",
+                obj["rule"]?.jsonPrimitive?.content,
+            )
+            // Mirror of the ShapeFunction serialize branch above.
+            "shape" -> ClipPathProperty.Shape.ShapeFunction(obj["fn"]?.jsonPrimitive?.content ?: "")
             "rect" -> ClipPathProperty.Shape.Rect(
                 obj["t"]?.let { if (it is JsonPrimitive && it.content == "auto") null else json.decodeFromJsonElement(IRLength.serializer(), it) },
                 obj["r"]?.let { if (it is JsonPrimitive && it.content == "auto") null else json.decodeFromJsonElement(IRLength.serializer(), it) },

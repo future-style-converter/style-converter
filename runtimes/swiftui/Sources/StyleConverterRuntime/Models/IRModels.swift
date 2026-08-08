@@ -362,6 +362,18 @@ public struct IRMeta: Equatable {
     /// marker family the bake leaves to this runtime (§6.1 bullets, `none`,
     /// unmodelled counter styles).
     public let markerText: String?
+    /// Wave-37 COMPUTED content language of this component's source element
+    /// (`meta.lang`, same additive meta channel as `attrs`). ALREADY
+    /// RESOLVED by the producer through HTML §3.2.6.2's own-lang →
+    /// nearest-ancestor → `<html>`/`<body>` ladder, because the flat v2
+    /// component list has no parent edge a reader could walk. VERBATIM as
+    /// authored ("eN-Us" stays "eN-Us"): RFC 4647 matching is
+    /// case-insensitive and subtag-truncating, so consumers lowercase at
+    /// LOOKUP, never at decode. nil when the document declares no language,
+    /// which is the "use the default locale" state every pre-wave-37
+    /// document is in. Droppable: ignoring it costs LOCALE fidelity (CLDR
+    /// quote pairs, generic-family font fallback), never correctness.
+    public let lang: String?
     /// Wave-32 ORDERED inline-content list (`meta.runs`, same additive meta
     /// channel as `decorations`) — the component's own text and its kept
     /// children INTERLEAVED in document order. AUTHORITATIVE when present:
@@ -372,16 +384,17 @@ public struct IRMeta: Equatable {
     public let runs: [IRRun]?
 
     // internal: constructed by the decode paths and by tests. The attrs /
-    // decorations / markerText / runs defaults keep every earlier
+    // decorations / markerText / lang / runs defaults keep every earlier
     // construction site compiling.
     init(sourceTag: String? = nil, role: String? = nil, attrs: IRAttrs? = nil,
          decorations: [IRDecoration]? = nil, markerText: String? = nil,
-         runs: [IRRun]? = nil) {
+         lang: String? = nil, runs: [IRRun]? = nil) {
         self.sourceTag = sourceTag
         self.role = role
         self.attrs = attrs
         self.decorations = decorations
         self.markerText = markerText
+        self.lang = lang
         self.runs = runs
     }
 }
@@ -523,6 +536,11 @@ public struct IRComponent: Decodable {
                           // Wave-27: the baked list-marker string rides the
                           // lenient path too — a plain string, no coercion.
                           markerText: rawMeta.markerText,
+                          // Wave-37: the computed content language rides the
+                          // lenient path too — a plain string, no coercion
+                          // and deliberately no lowercasing (RFC 4647
+                          // matching normalises at lookup, not at decode).
+                          lang: rawMeta.lang,
                           // Wave-32: the ordered inline-content list. Lenient
                           // means lenient — an entry that is neither a `text`
                           // string nor a non-empty `child` key is SKIPPED here
@@ -568,6 +586,10 @@ public struct IRComponent: Decodable {
         // String? — there is no shape to get wrong, so the lenient and
         // strict readers agree by construction.
         let markerText: String?
+        // Wave-37 lane W4: the computed content language. A plain String?
+        // for the same reason markerText is — there is no shape to get
+        // wrong, so the lenient and strict readers agree by construction.
+        let lang: String?
         // Wave-32 lane R: the ordered inline-content list rides the lenient
         // path too (standalone component decodes in tests). Kept as an
         // opaque IRValue — the STRICT reader owns the shape errors; this

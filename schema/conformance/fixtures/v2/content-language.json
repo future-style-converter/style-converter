@@ -1,0 +1,103 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "lang-root-001",
+            "name": "Lang_DocumentRoot",
+            "properties": [
+                {
+                    "type": "FontFamily",
+                    "data": [
+                        "serif"
+                    ]
+                }
+            ],
+            "meta": {
+                "role": "body-root",
+                "lang": "fr"
+            }
+        },
+        {
+            "id": "lang-inherited-002",
+            "name": "Lang_InheritedFromDocument",
+            "properties": [],
+            "slot": {
+                "parent": "lang-root-001"
+            },
+            "text": "un deux trois",
+            "meta": {
+                "sourceTag": "p",
+                "lang": "fr"
+            }
+        },
+        {
+            "id": "lang-own-003",
+            "name": "Lang_OwnAttributeWins",
+            "properties": [],
+            "slot": {
+                "parent": "lang-inherited-002"
+            },
+            "text": "一 二 三",
+            "meta": {
+                "sourceTag": "q",
+                "lang": "ja"
+            }
+        },
+        {
+            "id": "lang-verbatim-004",
+            "name": "Lang_VerbatimCaseAndSubtags",
+            "properties": [],
+            "slot": {
+                "parent": "lang-root-001"
+            },
+            "text": "case is preserved",
+            "meta": {
+                "sourceTag": "p",
+                "lang": "eN-Us"
+            }
+        },
+        {
+            "id": "lang-extended-005",
+            "name": "Lang_ExtendedSubtagsSurvive",
+            "properties": [],
+            "slot": {
+                "parent": "lang-root-001"
+            },
+            "text": "truncating lookup is the consumer's job",
+            "meta": {
+                "sourceTag": "p",
+                "lang": "DE-LATN-DE"
+            }
+        },
+        {
+            "id": "lang-beside-marker-006",
+            "name": "Lang_BesideMarkerText",
+            "properties": [],
+            "slot": {
+                "parent": "lang-root-001"
+            },
+            "text": "item",
+            "meta": {
+                "sourceTag": "li",
+                "markerText": "1.",
+                "lang": "he-IL",
+                "attrs": {
+                    "value": "1"
+                }
+            }
+        },
+        {
+            "id": "lang-absent-007",
+            "name": "Lang_AbsentMeansUnknown",
+            "properties": [],
+            "slot": {
+                "parent": "lang-root-001"
+            },
+            "text": "no language declared anywhere",
+            "meta": {
+                "sourceTag": "p"
+            }
+        }
+    ]
+}

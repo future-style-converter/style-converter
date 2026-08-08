@@ -110,6 +110,15 @@ import * as counterBake from './counter-style-bake.mjs';
 // attr and counter-style bakes; see its header for the refusal set and the
 // measured population.
 import * as generatedContentBake from './generated-content-bake.mjs';
+// wave-37 lane W8 THE COUNTER TREE (the seventh bake): the generated-content
+// bake's single largest refusal is `counter()` / `counters()` — 3,151 of the
+// corpus's 3,695 `content` declarations — because resolving one needs the
+// css-lists-3 §4 counter tree, which no per-node hook can own. This module is
+// that tree; it rewrites each call into the literal <string> it resolves to,
+// leaving the generated-content bake to do what it already does. Stdlib-only
+// and browser-free like the attr / counter-style bakes, and it short-circuits
+// on any fixture with no `counter` substring at all.
+import * as counterTreeBake from './counter-bake.mjs';
 // wave-36 THE WIDGET-APPEARANCE BAKE (the sixth bake): the css-ui
 // compute-kind-widget family establishes author-origin appearance-disabling
 // declarations from a GENERATED script whose declared values are, by
@@ -269,70 +278,277 @@ export function extractRefHref(html) {
 //     blocks are re-scanned by parseKeyframes() (wave-13 sampler section)
 //     — this parser still skips them so rule extraction stays unchanged.
 //
-// Returns: Array<{ selector: string, props: Record<string,string> }>
+// wave-37 lane W8 — TWO CARVE-OUTS FROM "skip @-rules entirely".
+// `@layer` and `@scope` are GROUPING at-rules: their bodies are ordinary
+// style rules that DO apply to the document, so skipping the body threw the
+// declarations away outright. MEASURED on the wave36-final depth-48 gate:
+// 9 css-cascade cells (revert-layer-001/002/003/005/007/009/012/015,
+// layer-media-toggle) and 7 more (@scope) fail with the capture showing only
+// the caption line because the one rule that paints the green square lives
+// inside `@layer { … }`. Both are now DESCENDED INTO:
+//   • `@layer <names>;` registers layer order (first mention wins);
+//     `@layer [<name>] { … }` tags every rule inside with `layerName`,
+//     resolved to a numeric `layerIdx` (declaration order) at the end.
+//   • `@scope (<start>) [to (<end>)] { … }` rewrites each inner selector:
+//     `:scope` → the start selector, otherwise `<start> <sel>` (descendant).
+//     The `to (<end>)` scoping LIMIT is not modelled — it can only ever make
+//     a rule apply too WIDELY, never drop one that should paint, and every
+//     corpus test that uses it is shadow-DOM bound anyway.
+// Every OTHER at-rule (@media, @supports, @font-face, @keyframes, …) keeps
+// the byte-identical skip, so no non-layer/non-scope fixture moves.
+//
+// Returns: Array<{ selector, props, layerName?, layerIdx?, important? }>
+//   `layerName`/`layerIdx` appear ONLY on rules that came from a `@layer`
+//   block and `important` ONLY when the rule carries `!important`, so a
+//   sheet with neither produces the exact historical object shape.
 export function parseCss(css) {
   const rules = [];
-  // Track brace nesting so we can skip @media / @supports bodies wholesale.
-  let i = 0;
-  const n = css.length;
-  while (i < n) {
-    // Skip whitespace.
-    while (i < n && /\s/.test(css[i])) i++;
-    if (i >= n) break;
-    // @-rule: skip to matching '}'.
-    if (css[i] === '@') {
-      // Scan to either ';' (one-liner like @charset) or '{' (block).
-      let depth = 0;
-      let saw = false;
-      while (i < n) {
-        const ch = css[i];
-        if (ch === '{') { depth++; saw = true; i++; continue; }
-        if (ch === '}') { depth--; i++; if (depth === 0 && saw) break; continue; }
-        if (ch === ';' && !saw) { i++; break; }
-        i++;
-      }
-      continue;
-    }
-    // Read selector list up to '{'.
-    const selStart = i;
-    while (i < n && css[i] !== '{') i++;
-    if (i >= n) break;
-    const selectorList = css.slice(selStart, i).trim();
-    i++; // consume '{'
-    // Read body up to matching '}'.
-    const bodyStart = i;
-    let depth = 1;
-    while (i < n && depth > 0) {
-      const ch = css[i];
-      if (ch === '{') depth++;
-      else if (ch === '}') depth--;
-      i++;
-    }
-    const body = css.slice(bodyStart, i - 1);
-    // Parse declarations.
-    const props = {};
-    for (const decl of body.split(';')) {
-      const colon = decl.indexOf(':');
-      if (colon < 0) continue;
-      const k = decl.slice(0, colon).trim();
-      let v = decl.slice(colon + 1).trim();
-      if (!k || !v) continue;
-      // Strip !important — IR has no concept of it; the rendered value wins.
-      v = v.replace(/\s*!important\s*$/i, '').trim();
-      // Skip custom properties (the bucketer flagged them as B already).
-      if (k.startsWith('--')) continue;
-      props[k] = v;
-    }
-    if (Object.keys(props).length === 0) continue;
-    // One rule per selector in the comma-list, so each element maps cleanly
-    // to its own component.
-    for (const sel of selectorList.split(',')) {
-      const s = sel.trim();
-      if (!s) continue;
-      rules.push({ selector: s, props });
-    }
+  // Layer names in DECLARATION order — the css-cascade-5 §6.4.1 layer order.
+  // A name's position is fixed by its FIRST appearance, whether that is a
+  // `@layer a, b;` statement or the first `@layer a { … }` block, which is
+  // exactly what layer-media-toggle.html depends on (`@layer foo, bar;`
+  // declared before the blocks makes `bar`'s green beat `foo`'s red).
+  const layerOrder = [];
+  const registerLayer = (name) => {
+    if (!layerOrder.includes(name)) layerOrder.push(name);
+    return name;
+  };
+  // Anonymous `@layer { … }` blocks are each their OWN layer (§6.4.1) and
+  // can never be re-opened by name, so a monotonic counter is a faithful
+  // identity for them. revert-layer-007's four anonymous layers are the
+  // reason this must not collapse to a single bucket.
+  let anonSeq = 0;
+  scanRules(css, { layerPath: [], scopeStart: null, inScope: false });
+  // Second pass: names → numeric ranks. Deferred because a layer's index is
+  // only final once the whole sheet has been seen.
+  for (const r of rules) {
+    if (r.layerName != null) r.layerIdx = layerOrder.indexOf(r.layerName);
   }
   return rules;
+
+  /** Rewrite one inner selector for the enclosing `@scope` prelude.
+   *  Returns null when the rule cannot be expressed statically (a `:scope`
+   *  reference under an IMPLICIT `@scope { … }`, whose root is the owning
+   *  <style>'s parent element — a DOM fact this sheet-only parser cannot
+   *  see, so we decline rather than mis-target it). */
+  function applyScope(sel, ctx) {
+    if (!ctx.inScope) return sel;
+    if (/:scope\b/.test(sel)) {
+      if (!ctx.scopeStart) return null;
+      // `:scope::before` → `#before_test > main::before`; `:scope span` →
+      // `#before_test > main span`. Substitution keeps combinators intact.
+      return sel.replace(/:scope\b/g, ctx.scopeStart);
+    }
+    // No `:scope` → the rule is implicitly scoped to descendants of the root
+    // (css-cascade-6 §3.1). An implicit `@scope { … }` has no static root, so
+    // the rule is unwrapped unprefixed — the closest honest approximation.
+    return ctx.scopeStart ? `${ctx.scopeStart} ${sel}` : sel;
+  }
+
+  function scanRules(src, ctx) {
+    let i = 0;
+    const n = src.length;
+    while (i < n) {
+      // Skip whitespace.
+      while (i < n && /\s/.test(src[i])) i++;
+      if (i >= n) break;
+      if (src[i] === '@') {
+        // Read the at-keyword so `@layer`/`@scope` can be told apart from
+        // the at-rules that stay skipped.
+        let nameEnd = i + 1;
+        while (nameEnd < n && /[-\w]/.test(src[nameEnd])) nameEnd++;
+        const atName = src.slice(i + 1, nameEnd).toLowerCase();
+        // Prelude runs to the block's `{` or the statement's `;`.
+        let j = nameEnd;
+        while (j < n && src[j] !== '{' && src[j] !== ';') j++;
+        const prelude = src.slice(nameEnd, j).trim();
+        if (j >= n) break;
+        if (src[j] === ';') {
+          // Statement at-rule. `@layer a, b;` is the ONE that carries
+          // meaning here: it fixes layer order without opening a block.
+          if (atName === 'layer' && prelude) {
+            for (const nm of prelude.split(',')) {
+              const t = nm.trim();
+              if (t) registerLayer([...ctx.layerPath, t].join('.'));
+            }
+          }
+          i = j + 1;
+          continue;
+        }
+        // Block at-rule — find the matching '}'.
+        const bodyStart = j + 1;
+        let depth = 1;
+        let k = bodyStart;
+        while (k < n && depth > 0) {
+          const ch = src[k];
+          if (ch === '{') depth++;
+          else if (ch === '}') depth--;
+          k++;
+        }
+        const body = src.slice(bodyStart, depth === 0 ? k - 1 : k);
+        if (atName === 'layer') {
+          // `@layer name { … }` re-opens (or opens) a named layer; a bare
+          // `@layer { … }` opens a fresh anonymous one. Nested layers
+          // qualify with a dot, matching the spec's `outer.inner` naming.
+          const leaf = prelude || `#anon${anonSeq++}`;
+          const path = [...ctx.layerPath, leaf];
+          registerLayer(path.join('.'));
+          scanRules(body, { ...ctx, layerPath: path });
+        } else if (atName === 'scope') {
+          // `(<start>)` is the first parenthesised group of the prelude; a
+          // bare `@scope { … }` (implicit root) leaves scopeStart null.
+          const m = /^\(([^)]*)\)/.exec(prelude);
+          scanRules(body, { ...ctx, inScope: true, scopeStart: m ? m[1].trim() : null });
+        }
+        // Every other at-rule keeps the historical wholesale skip.
+        i = k;
+        continue;
+      }
+      // Read selector list up to '{'.
+      const selStart = i;
+      while (i < n && src[i] !== '{') i++;
+      if (i >= n) break;
+      const selectorList = src.slice(selStart, i).trim();
+      i++; // consume '{'
+      // Read body up to matching '}'.
+      const bodyStart = i;
+      let depth = 1;
+      while (i < n && depth > 0) {
+        const ch = src[i];
+        if (ch === '{') depth++;
+        else if (ch === '}') depth--;
+        i++;
+      }
+      const body = src.slice(bodyStart, i - 1);
+      // Parse declarations.
+      const props = {};
+      // Which of them carried `!important`. Recorded (not just stripped)
+      // because css-cascade-5 §6.4.4 REVERSES layer order for important
+      // declarations — revert-layer-005/012 turn entirely on that.
+      const important = {};
+      for (const decl of body.split(';')) {
+        const colon = decl.indexOf(':');
+        if (colon < 0) continue;
+        const k = decl.slice(0, colon).trim();
+        let v = decl.slice(colon + 1).trim();
+        if (!k || !v) continue;
+        // Strip !important — IR has no concept of it; the rendered value wins.
+        const bang = /\s*!important\s*$/i.test(v);
+        v = v.replace(/\s*!important\s*$/i, '').trim();
+        // Skip custom properties (the bucketer flagged them as B already).
+        if (k.startsWith('--')) continue;
+        props[k] = v;
+        if (bang) important[k] = true;
+      }
+      if (Object.keys(props).length === 0) continue;
+      const hasImportant = Object.keys(important).length > 0;
+      const layerName = ctx.layerPath.length ? ctx.layerPath.join('.') : null;
+      // One rule per selector in the comma-list, so each element maps cleanly
+      // to its own component.
+      for (const sel of selectorList.split(',')) {
+        const s = sel.trim();
+        if (!s) continue;
+        const scoped = applyScope(s, ctx);
+        if (scoped === null) continue;
+        const rule = { selector: scoped, props };
+        if (layerName != null) rule.layerName = layerName;
+        if (hasImportant) rule.important = important;
+        rules.push(rule);
+      }
+    }
+  }
+}
+
+/** The number of `@layer`s a parsed sheet declared. Used as the rank of the
+ *  IMPLICIT OUTER LAYER: css-cascade-5 §6.4.1 puts unlayered author styles
+ *  AFTER every explicit layer in declaration order, which is precisely what
+ *  makes them win normal declarations and lose important ones. */
+export function layerCountOf(rules) {
+  let max = -1;
+  for (const r of rules) if (typeof r.layerIdx === 'number' && r.layerIdx > max) max = r.layerIdx;
+  return max + 1;
+}
+
+/** css-cascade-5 §7.3 `revert-layer`, and §5 `all`. */
+const REVERT_LAYER = 'revert-layer';
+
+/**
+ * Resolve one element's declarations through the LAYERED cascade.
+ *
+ * `groups` are the declaration bags that matched, in document order, each
+ * `{ rank, props, important?, inline? }`:
+ *   • rank — the layer's declaration index; the implicit outer layer is
+ *     `layerCount`, the style attribute `layerCount + 1`.
+ *   • inline — style-attribute bag. Per the §6.4.4 sort order the style
+ *     attribute is compared BEFORE layers, so it beats every layer at the
+ *     same importance (in both directions).
+ *
+ * Sort order per property (highest wins): important > normal; within each,
+ * inline > layered; within layered, LATER layer for normal declarations and
+ * EARLIER layer for important ones; ties broken by document order.
+ *
+ * `revert-layer` then re-runs the same resolution over only the declarations
+ * from layers declared EARLIER than the winner's — recursively, which is
+ * what makes revert-layer-007's four-deep chain land back on the green in
+ * the first layer. `all: revert-layer` applies that to every property that
+ * has any declaration at all.
+ *
+ * @returns a plain `{ prop: value }` bag — no revert-layer keywords survive.
+ */
+export function resolveLayeredCascade(groups, layerCount) {
+  const cands = [];
+  let order = 0;
+  for (const g of groups) {
+    for (const [name, value] of Object.entries(g.props)) {
+      cands.push({
+        name, value, rank: g.rank, order: order++,
+        important: !!(g.important && g.important[name]),
+        inline: !!g.inline,
+      });
+    }
+  }
+  const names = new Set(cands.filter((c) => c.name !== 'all').map((c) => c.name));
+  // `all: revert-layer` is a revert-layer declaration for EVERY property the
+  // element has a declaration for (revert-layer-003 reverts width, height and
+  // background-color in one line).
+  for (const c of cands.filter((c) => c.name === 'all' && c.value === REVERT_LAYER)) {
+    for (const name of names) {
+      cands.push({ ...c, name, order: c.order });
+    }
+  }
+  const better = (a, b) => {
+    if (a.important !== b.important) return a.important;
+    if (a.inline !== b.inline) return a.inline;
+    if (a.rank !== b.rank) return a.important ? a.rank < b.rank : a.rank > b.rank;
+    return a.order > b.order;
+  };
+  const resolveOne = (name, maxRank, depth) => {
+    // A pathological revert-layer cycle cannot happen (maxRank strictly
+    // decreases) but the guard keeps a malformed sheet from spinning.
+    if (depth > 32) return undefined;
+    let best = null;
+    for (const c of cands) {
+      if (c.name !== name || c.rank >= maxRank) continue;
+      if (best === null || better(c, best)) best = c;
+    }
+    if (best === null) return undefined;
+    if (best.value === REVERT_LAYER) return resolveOne(name, best.rank, depth + 1);
+    return best.value;
+  };
+  const out = {};
+  for (const name of names) {
+    const v = resolveOne(name, layerCount + 2, 0);
+    if (v !== undefined) out[name] = v;
+  }
+  return out;
+}
+
+/** True when a declaration bag needs the layered resolver — i.e. it carries a
+ *  `revert-layer` value. Rules that merely SIT in a layer also need it, but
+ *  that is tested on the rule itself; this covers the style attribute. */
+function hasRevertLayer(props) {
+  for (const v of Object.values(props)) if (v === REVERT_LAYER) return true;
+  return false;
 }
 
 // ── Body element walker ──────────────────────────────────────────────────────
@@ -5100,28 +5316,66 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
   // DOCUMENT_SENTINEL_ANCESTORS) — the walker's chain starts inside body, so
   // without the body entry no `body …` / `body > …` rule could ever match.
   const chain = ancestors ? [...DOCUMENT_SENTINEL_ANCESTORS, ...ancestors] : null;
+  // wave-37 lane W8: the matched bags are collected FIRST so the layered
+  // path can see all of them at once. `buckets['']` is the host, the rest
+  // are pseudo-element names.
+  const buckets = { '': [] };
   for (const r of rules) {
     const m = selectorMatchesPseudoElement(r.selector, tag, attrs, chain, pos, ctx);
     if (m === null) continue;
     matchedRules.push(r);
-    if (m === '') {
-      // Host-element match — merge into the regular props bag.
-      Object.assign(props, r.props);
-    } else {
-      // Pseudo-element match — merge into the bucket for that pe name.
-      if (!pseudo[m]) pseudo[m] = {};
-      Object.assign(pseudo[m], r.props);
-    }
+    (buckets[m] ??= []).push(r);
   }
-  // Inline style="..." trumps everything.
+  // Inline style="..." — parsed once, importance kept for the layered path.
+  const inlineProps = {};
+  const inlineImportant = {};
   if (attrs.style) {
     for (const decl of attrs.style.split(';')) {
       const colon = decl.indexOf(':');
       if (colon < 0) continue;
       const k = decl.slice(0, colon).trim();
-      const v = decl.slice(colon + 1).trim().replace(/\s*!important\s*$/i, '').trim();
-      if (k && v && !k.startsWith('--')) props[k] = v;
+      const raw = decl.slice(colon + 1).trim();
+      const v = raw.replace(/\s*!important\s*$/i, '').trim();
+      if (k && v && !k.startsWith('--')) {
+        inlineProps[k] = v;
+        if (/\s*!important\s*$/i.test(raw)) inlineImportant[k] = true;
+      }
     }
+  }
+  // THE GATE. Unless a `@layer` rule matched, or some declaration says
+  // `revert-layer`, nothing about this element's cascade is layered — take
+  // the historical last-write-wins path so every non-layer fixture in the
+  // corpus stays byte-identical.
+  const layered = matchedRules.some((r) => typeof r.layerIdx === 'number')
+    || matchedRules.some((r) => hasRevertLayer(r.props))
+    || hasRevertLayer(inlineProps);
+  if (!layered) {
+    for (const r of buckets['']) Object.assign(props, r.props);
+    for (const [m, rs] of Object.entries(buckets)) {
+      if (m === '') continue;
+      pseudo[m] = {};
+      for (const r of rs) Object.assign(pseudo[m], r.props);
+    }
+    // Inline style="..." trumps everything.
+    Object.assign(props, inlineProps);
+    return { props, matchedRules: matchedRules.length, pseudo };
+  }
+  // Layered path — css-cascade-5 §6.4.4 sort order, `revert-layer` resolved.
+  const layerCount = layerCountOf(rules);
+  const toGroup = (r) => ({
+    rank: typeof r.layerIdx === 'number' ? r.layerIdx : layerCount,
+    props: r.props,
+    important: r.important,
+  });
+  Object.assign(props, resolveLayeredCascade(
+    [...buckets[''].map(toGroup),
+      { rank: layerCount + 1, props: inlineProps, important: inlineImportant, inline: true }],
+    layerCount,
+  ));
+  for (const [m, rs] of Object.entries(buckets)) {
+    if (m === '') continue;
+    // A pseudo-element bucket has no style attribute of its own.
+    pseudo[m] = resolveLayeredCascade(rs.map(toGroup), layerCount);
   }
   return { props, matchedRules: matchedRules.length, pseudo };
 }
@@ -6974,6 +7228,26 @@ export async function extractFixture(testRel, opts = {}) {
   // 4th stays the ctx default — buildComponents harvests :defined itself).
   const built = buildComponents(cleaned, rules, stem, null, keyframes);
 
+  // wave-37 lane W8: THE COUNTER TREE BAKE, a strict PRE-PASS to the
+  // generated-content bake below. It rewrites `counter()` / `counters()`
+  // inside a `content` declaration into the literal CSS <string> they
+  // resolve to, so the next bake — which refuses every counter call today,
+  // 3,151 of them corpus-wide — sees a pure <string> sequence and writes
+  // `_text` through its existing path. Runs on `built.components` (before
+  // the fixture object exists), so the lossy stamp is rolled up onto
+  // `built` here rather than onto a `_wpt` that does not exist yet — the
+  // same shape the generated-content bake below uses. See counter-bake.mjs
+  // for the scope model and its reference derivation.
+  {
+    const ct = counterTreeBake.bakeCounters({ components: built.components }, cleaned);
+    if (ct.resolved > 0) {
+      built.lossyOverall = true;
+      if (!built.lossyReasons.includes(counterTreeBake.COUNTER_BAKED_REASON)) {
+        built.lossyReasons.push(counterTreeBake.COUNTER_BAKED_REASON);
+      }
+    }
+  }
+
   // wave-36 lane M3: THE GENERATED-CONTENT TEXT BAKE. Runs here — after
   // buildComponents (which is where the `_pseudo` bags and their attr()
   // resolutions are finalised) and before the fixture object is assembled —
@@ -6981,7 +7255,14 @@ export async function extractFixture(testRel, opts = {}) {
   // the whole tree (css-content-3 §2.1), which no per-node hook can own.
   // Refusals leave the bag byte-identical; see generated-content-bake.mjs.
   {
-    const gc = generatedContentBake.bakeGeneratedContentText(built.components);
+    // wave-37 lane W4: the document element chain's language is the third
+    // argument — the PARENT language of every top-level component, which in
+    // the common unslotted shape are SIBLINGS of the body-root and so have
+    // no parent edge the walk could read it from. It is what resolves
+    // `quotes: auto` (css-content-3 §2.2.1) into real CLDR marks.
+    const gc = generatedContentBake.bakeGeneratedContentText(
+      built.components, null, documentLanguage(cleaned),
+    );
     if (gc.baked > 0) {
       // Same LOUD provenance contract as every other bake: the fixture-level
       // record gains the marker so the dashboard's lossy lane sees that this
@@ -7302,6 +7583,122 @@ export function documentDirectionality(html) {
     const resolved = dirAttributeDirection({ dir: val }, '');
     if (resolved) return resolved;
   }
+  return null;
+}
+
+// ── THE LANG WIRE (wave-37 lane W4) ─────────────────────────────────────────
+//
+// WHAT WAS MISSING, measured. The `lang` attribute is the ONE piece of source
+// state that changes how the SAME declarations paint, and nothing in the
+// pipeline carried it. Two mechanisms depend on it and both were silently
+// running on the browser's default locale in every capture:
+//
+//   1. `quotes: auto` (css-content-3 §2.2.1) — the UA's `q::before {
+//      content: open-quote }` picks a CLDR quote pair keyed by the content
+//      language. With no lang attribute anywhere in the harness DOM every
+//      `<q>` in the corpus painted the ROOT pair (“ ” / ‘ ’), so the whole
+//      css-content `quotes-004…027` family (one test per language) captured
+//      English marks against Amharic « ›, French « «, Japanese 「 『 refs.
+//   2. Chromium's font FALLBACK for a generic family. `font: 32px serif`
+//      under `<html lang="ja">` resolves to a Japanese serif face — for the
+//      LATIN text too, which is why the quotes-016 reference wraps its
+//      English sentence in three lines where our capture used two. The
+//      bucketer already tagged those six tests `requires-bundled-font`; the
+//      font was never missing, the LANGUAGE that selects it was.
+//
+// MEASURED before this lane (tools/titan/runs/wave37-W4-base, css-content
+// --web-only full cap, 60 tests): 37 pass. The lang-family fails were
+// quotes-014/016/018/025/026/027 (Devanagari + CJK, 0.776…0.812) and
+// quotes-029…034 (mixed-language and explicit-pair-list variants).
+//
+// WIRE CONTRACT (`_lang` → IR v2 `meta.lang`, the additive meta key
+// schema/spec/05-versioning.md sanctions — same extension point wave-20's
+// `_attrs`, wave-22's `_decorations`, wave-27's `_markerText` and wave-32's
+// `_runs` used):
+//
+//   * The value is the element's COMPUTED content language (HTML §3.2.6.2):
+//     its own `lang` attribute, else the nearest ancestor's, else the
+//     document element chain's (`<body lang>` nearer, `<html lang>` farther).
+//     Already RESOLVED, so a consumer never has to walk anything — the flat
+//     v2 component list has no parent edge to walk in the first place.
+//   * VERBATIM as authored. `lang="eN-Us"` ships as `eN-Us`, not `en-US`:
+//     BCP-47 matching is case-insensitive (RFC 4647 §2.1) and every consumer
+//     lowercases at lookup, so canonicalising here would only destroy the
+//     round-trip and make the fixture lie about the source.
+//   * OMITTED when the document declares no language at all — absence means
+//     "unknown", which is exactly what the browser's own default-locale
+//     behaviour is, so a lang-free document's fixture stays byte-identical.
+//   * `lang=""` is the HTML spelling of "explicitly unknown" (§3.2.6.2) and
+//     therefore STOPS the walk without emitting a key — it must not fall
+//     through to an outer `lang`, or the empty attribute would do nothing.
+//
+// The attribute-name regex uses the same `(?<![\w-])` lookbehind as the `dir`
+// scan above so `data-lang=`, `xml:lang=`, `hreflang=` and any `*lang`
+// custom attribute cannot be misread as `lang`. (`xml:lang` is deliberately
+// out: in a text/html document it is a no-op for language determination —
+// HTML §3.2.6.2 only honours it in XML documents — and no bucket-A test
+// uses it.)
+
+/** Read a `lang` attribute value off an attrs bag, or null when absent. */
+function langAttrOf(attrs) {
+  if (!attrs || typeof attrs !== 'object') return null;
+  // The walkers lowercase attribute NAMES (parseAttrsFromTagOpen), so one
+  // key lookup covers `lang`, `LANG` and `Lang`.
+  const raw = attrs.lang;
+  return typeof raw === 'string' ? raw.trim() : null;
+}
+
+/**
+ * The language declared by the DOCUMENT ELEMENT chain — the `lang` attribute
+ * on `<body>` (nearer) else `<html>` (farther), the twin of
+ * documentDirectionality's ladder and for the identical reason: both are
+ * genuine ancestors of every component we emit, but the walker's chain
+ * starts INSIDE body, so the fact has to travel on the ctx.
+ *
+ * Returns the authored string, `''` for an explicit `lang=""` (the "unknown"
+ * spelling, which the caller must not fall through), or null when neither
+ * element declares one.
+ *
+ * Exported for the unit pins.
+ */
+export function documentLanguage(html) {
+  if (typeof html !== 'string') return null;
+  for (const re of [/<body\b([^>]*)>/i, /<html\b([^>]*)>/i]) {
+    const m = re.exec(html);
+    if (!m) continue;
+    // `(?<![\w:-])` — the `dir` scan's lookbehind PLUS a colon, so `hreflang`,
+    // `data-lang` and `xml:lang` are all excluded. The colon matters here and
+    // not for `dir`: `xml:lang` is a real attribute that HTML §3.2.6.2
+    // deliberately ignores in a text/html document, so reading it would be a
+    // wrong answer rather than a nonexistent one.
+    const l = /(?<![\w:-])lang\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(m[1]);
+    if (!l) continue;
+    return (l[2] ?? l[3] ?? l[4] ?? '').trim();
+  }
+  return null;
+}
+
+/**
+ * The COMPUTED content language for one element (HTML §3.2.6.2): its own
+ * `lang`, else the nearest ancestor that declares one, else the document
+ * element chain's. Returns null when nothing declares a language, and null
+ * for an explicit `lang=""` — see the wire contract above.
+ *
+ * `ancestors` is the walker's chain in OUTERMOST-FIRST order, so the nearest
+ * declaring ancestor is found by scanning it backwards.
+ *
+ * Exported for the unit pins.
+ */
+export function resolveLanguage(attrs, ancestors = null, documentLang = null) {
+  const own = langAttrOf(attrs);
+  if (own !== null) return own === '' ? null : own;
+  if (Array.isArray(ancestors)) {
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      const a = langAttrOf(ancestors[i]?.attrs);
+      if (a !== null) return a === '' ? null : a;
+    }
+  }
+  if (typeof documentLang === 'string') return documentLang === '' ? null : documentLang;
   return null;
 }
 
@@ -8368,8 +8765,15 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // so the fact has to travel on the ctx. A caller-supplied `documentDir`
   // wins (unit-test injection); otherwise it is read from the source here.
   // Copied, never mutated in place, so a caller's ctx object is untouched.
-  const effectiveCtx = baseCtx.documentDir !== undefined ? baseCtx
+  const withDocDir = baseCtx.documentDir !== undefined ? baseCtx
     : { ...baseCtx, documentDir: documentDirectionality(cleaned) };
+  // wave-37 lane W4 — the same ctx rung for the LANG wire. `<html lang>` /
+  // `<body lang>` are ancestors of every component but sit outside the
+  // body-subtree chain the walker builds, so resolveLanguage's last rung has
+  // to be handed down here. Caller-supplied wins (unit-test injection); the
+  // copy keeps a caller's ctx object untouched, exactly like the dir rung.
+  const effectiveCtx = withDocDir.documentLang !== undefined ? withDocDir
+    : { ...withDocDir, documentLang: documentLanguage(cleaned) };
   // wave-12 EXTRACTOR-INLINE: merge context for pure-inline run merging.
   // styledTags guards the merge — any tag a rule directly targets keeps
   // its child-component path so the declarations under test survive (see
@@ -8533,6 +8937,13 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     if (Object.keys(pseudoOut).length > 0) cmp._pseudo = pseudoOut;
     // Tag the synthetic root so downstream consumers can recognise it.
     cmp._role = 'body-root';
+    // wave-37 lane W4 — the body-root IS the `<body>` element, so its computed
+    // content language is the document chain's own answer (there is no nearer
+    // declaration to find). Emitted for the same reason the per-element path
+    // emits it: under the wave-17 SLOTTING arm the body's children are real
+    // descendants of this component, and a renderer that puts `lang` on the
+    // host is then the one thing that makes the subtree shape correctly.
+    if (effectiveCtx.documentLang) cmp._lang = effectiveCtx.documentLang;
     components[`${idPrefix}__body`] = cmp;
   }
 
@@ -9065,6 +9476,17 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       ? { ...(replacedSrc ?? {}), ...(widgetAttrs ?? {}) }
       : null;
     if (mergedAttrs) cmp._attrs = mergedAttrs;
+    // wave-37 lane W4 — THE LANG WIRE (see the resolveLanguage banner). The
+    // element's COMPUTED content language, already walked, emitted
+    // omit-when-absent so every lang-free document keeps its exact bytes.
+    // NOT namespace-gated the way `_tag`/`_attrs` are: `lang` is inherited
+    // text state, not tag semantics — an SVG `<text>` inside a `<div lang=ja>`
+    // shapes with the same Japanese face the surrounding prose does, so
+    // withholding it there would be the lie, not the caution.
+    const computedLang = resolveLanguage(
+      node.attrs, node.ancestors, effectiveCtx.documentLang ?? null,
+    );
+    if (computedLang) cmp._lang = computedLang;
     // EXTFIX-A part 1: children → nested IRComponent objects. Same
     // omit-when-empty rule so the fixture diff is minimal for
     // single-element tests (the ~70% case in the corpus). Each child

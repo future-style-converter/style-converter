@@ -12,7 +12,7 @@ iOS 16+, Swift 5 language mode.
 ```bash
 # from the repo root — needs Xcode 15+
 xcodebuild test -scheme StyleConverterRuntime \
-  -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'   # XCTest suite (1306 tests)
+  -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'   # XCTest suite (1321 tests)
 ```
 
 Rendered and screenshot-tested by [`apps/ios-harness/`](../../apps/ios-harness/)

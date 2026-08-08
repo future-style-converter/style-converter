@@ -258,6 +258,36 @@ class IRDocumentDecoderTest {
         assertNull(doc.components[0].attrs?.start)
     }
 
+    /**
+     * Wave 37, lane W4 (THE LANG WIRE) — `meta.lang` decodes onto
+     * [IRComponent.lang] VERBATIM and joins the strict META_KEYS set.
+     *
+     * Why the DECODE is the unit under test rather than a paint: this
+     * decoder is STRICT on the meta key set, so before this wave a document
+     * carrying `meta.lang` would have THROWN — and the css-content quotes
+     * family is exactly such a document. Accepting the key (and keeping the
+     * authored spelling, because RFC 4647 matching normalises at LOOKUP) is
+     * the wire contract; consuming it for font/locale selection is the named
+     * follow-up. TWIN of the iOS `ConformanceTests` content-language case.
+     */
+    @Test
+    fun `v2 meta lang decodes verbatim, uncanonicalised`() {
+        val doc = IRDocumentDecoder.decode(
+            """{"irVersion":2,"minReaderVersion":2,"components":[
+                {"id":"p","name":"P","properties":[],
+                 "meta":{"sourceTag":"p","lang":"eN-Us"}},
+                {"id":"q","name":"Q","properties":[],"slot":{"parent":"p"},
+                 "meta":{"sourceTag":"q","lang":"zh-Hant"}},
+                {"id":"r","name":"R","properties":[],"slot":{"parent":"p"},
+                 "meta":{"sourceTag":"q"}}]}"""
+        )
+        // Case and subtags survive exactly as authored — no lowercasing.
+        assertEquals("eN-Us", doc.components[0].lang)
+        assertEquals("zh-Hant", doc.components[1].lang)
+        // Absence stays null: "unknown language", i.e. the default locale.
+        assertNull(doc.components[2].lang)
+    }
+
     @Test
     fun `v2 rejects an unknown meta key even next to markerText`() {
         expectError(

@@ -6,14 +6,17 @@ package app.irmodels.properties.background
 // WIRE CONTRACT (frozen shapes, see schema/spec/05-versioning.md):
 //   "none"                                  — bare string
 //   {"url": …} / bare string url            — via IRUrl.serializer()
-//   {"type":"linear-gradient","angle":…,"stops":[…]}
-//   {"type":"radial-gradient","shape":…,"size":…,"pos":{x,y},"stops":[…]}
-//   {"type":"conic-gradient","angle":…,"pos":{x,y},"stops":[…]}
+//   {"type":"linear-gradient","angle":…,"stops":[…],"interp":"in oklch"?}
+//   {"type":"radial-gradient","shape":…,"size":…,"pos":{x,y},"stops":[…],"interp":…?}
+//   {"type":"conic-gradient","angle":…,"pos":{x,y},"stops":[…],"interp":…?}
 //   {"type":"color","color":{…IRColor…}}    — cross-fade color argument
 //   {"type":"cross-fade","args":[{"weight":10,"image":…},…],"legacy":true?}
 //   {"raw": …}                              — unparseable fallback
 // Position axes serialize through IRLengthPercentage: percent = raw number
 // (byte-identical to the historical {"x":25,"y":25}), length = object.
+// "interp" (wave-37) is the authored <color-interpolation-method>; the key is
+// OMITTED whenever the author wrote none, so every pre-wave-37 gradient's
+// bytes are unchanged.
 import app.irmodels.*
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -45,6 +48,8 @@ object BackgroundImageSerializer : KSerializer<BackgroundImageProperty.Backgroun
             // runtime-side, keeping absent-vs-explicit distinguishable).
             value.angle?.let { put("angle", json.encodeToJsonElement(IRAngle.serializer(), it)) }
             put("stops", json.encodeToJsonElement(ListSerializer(BackgroundImageProperty.ColorStop.serializer()), value.colorStops))
+            // Optional <color-interpolation-method> — key absent when unwritten.
+            value.interp?.let { put("interp", it) }
         }
         is BackgroundImageProperty.BackgroundImage.RadialGradient -> buildJsonObject {
             put("type", if (value.repeating) "repeating-radial-gradient" else "radial-gradient")
@@ -54,6 +59,7 @@ object BackgroundImageSerializer : KSerializer<BackgroundImageProperty.Backgroun
             // NOTE: key is "pos" — runtimes read (pos ?? position).
             value.position?.let { put("pos", json.encodeToJsonElement(BackgroundImageProperty.Position.serializer(), it)) }
             put("stops", json.encodeToJsonElement(ListSerializer(BackgroundImageProperty.ColorStop.serializer()), value.colorStops))
+            value.interp?.let { put("interp", it) }
         }
         is BackgroundImageProperty.BackgroundImage.ConicGradient -> buildJsonObject {
             put("type", if (value.repeating) "repeating-conic-gradient" else "conic-gradient")
@@ -61,6 +67,7 @@ object BackgroundImageSerializer : KSerializer<BackgroundImageProperty.Backgroun
             value.angle?.let { put("angle", json.encodeToJsonElement(IRAngle.serializer(), it)) }
             value.position?.let { put("pos", json.encodeToJsonElement(BackgroundImageProperty.Position.serializer(), it)) }
             put("stops", json.encodeToJsonElement(ListSerializer(BackgroundImageProperty.ColorStop.serializer()), value.colorStops))
+            value.interp?.let { put("interp", it) }
         }
         // <color> as a cross-fade image argument (css-images-4 §2.6.2).
         is BackgroundImageProperty.BackgroundImage.ColorLayer -> buildJsonObject {
@@ -109,16 +116,18 @@ object BackgroundImageSerializer : KSerializer<BackgroundImageProperty.Backgroun
                 // Shared optional sub-decoders (absent key → null).
                 val angle = element["angle"]?.let { json.decodeFromJsonElement(IRAngle.serializer(), it) }
                 val pos = element["pos"]?.let { json.decodeFromJsonElement(BackgroundImageProperty.Position.serializer(), it) }
+                // Optional interpolation method — absent key decodes to null.
+                val interp = element["interp"]?.jsonPrimitive?.contentOrNull
                 when {
                     type.endsWith("linear-gradient") -> BackgroundImageProperty.BackgroundImage.LinearGradient(
-                        angle, json.decodeFromJsonElement(stopsSer, element["stops"]!!), type.startsWith("repeating"))
+                        angle, json.decodeFromJsonElement(stopsSer, element["stops"]!!), type.startsWith("repeating"), interp)
                     type.endsWith("radial-gradient") -> BackgroundImageProperty.BackgroundImage.RadialGradient(
                         // Shape/size decode from their lowercase keyword forms.
                         element["shape"]?.jsonPrimitive?.content?.let { BackgroundImageProperty.GradientShape.valueOf(it.uppercase()) },
                         element["size"]?.jsonPrimitive?.content?.let { BackgroundImageProperty.GradientSize.valueOf(it.uppercase().replace("-", "_")) },
-                        pos, json.decodeFromJsonElement(stopsSer, element["stops"]!!), type.startsWith("repeating"))
+                        pos, json.decodeFromJsonElement(stopsSer, element["stops"]!!), type.startsWith("repeating"), interp)
                     type.endsWith("conic-gradient") -> BackgroundImageProperty.BackgroundImage.ConicGradient(
-                        angle, pos, json.decodeFromJsonElement(stopsSer, element["stops"]!!), type.startsWith("repeating"))
+                        angle, pos, json.decodeFromJsonElement(stopsSer, element["stops"]!!), type.startsWith("repeating"), interp)
                     // Accept BOTH color-layer wire shapes: the nested
                     // {"color":{…}} this serializer emits AND the flattened
                     // {"type":"color","srgb":…,"original":…} produced by

@@ -170,6 +170,19 @@ struct TypographyAggregate: Equatable {
     /// for those keywords (honest per-spec rendering; pre-breaking
     /// preserved text is future work).
     var preservesSpaces: Bool = false
+    /// Wave 37 (lane W7) — the resolved `hyphens` keyword (css-text-3
+    /// §6.1), lower-cased: "none" | "manual" | "auto", nil when the
+    /// element declared none (the initial value `manual` applies).
+    /// Two consumers, both in PlaceholderLabel and both via
+    /// SoftHyphenPolicy:
+    ///   • `none` deletes U+00AD from the string — TextKit honours soft
+    ///     hyphens unconditionally, so that is the only seam;
+    ///   • `auto` VETOES the unbreakable-word overflow rule, because
+    ///     under `auto` the word is breakable (by dictionary) and the ref
+    ///     does break it — we just cannot.
+    /// nil / "manual" leave both off, i.e. every legacy document renders
+    /// byte-identically.
+    var hyphensMode: String? = nil
     /// `line-clamp` / `max-lines` — the smaller of the two wins when both set.
     var lineLimit: Int? = nil
     /// `text-overflow: ellipsis` → `.truncationMode(.tail)`. When nil we

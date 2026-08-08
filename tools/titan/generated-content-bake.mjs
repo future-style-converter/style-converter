@@ -159,6 +159,139 @@ export function unescapeCssString(body) {
   return out;
 }
 
+// ── THE CLDR QUOTE TABLE (wave-37 lane W4) ─────────────────────────────────
+//
+// `quotes: auto` (css-content-3 §2.2.1) resolves to "typographically
+// appropriate quotes for the content language of the element". Until this
+// wave the wire carried no language at all, so parseQuotesValue REPORTED
+// `auto` and applyQuoteKeyword painted nothing under it — the documented
+// refusal this lane closes. `meta.lang` (schema/spec/04-metadata-fields.md)
+// is the missing input.
+//
+// PROVENANCE — every pair below is READ OFF a reference in this repo, not
+// copied from memory. The css-content `quotes-0NN` family is one test per
+// language whose last `<p>` spells the expected marks as character
+// references; `quotes-034-ref.html` adds de/fi. The command that enumerated
+// them (kept here so the table is reproducible, not folklore):
+//
+//   cd tools/wpt/css/css-content
+//   for n in 004 … 027; do
+//     printf '%s %s :: %s\n' "$n" \
+//       "$(grep -o 'html lang="[^"]*"' quotes-$n.html)" "$(tail -1 quotes-$n.html)"
+//   done
+//
+// LANGUAGES THE CORPUS ACTUALLY TESTS (the enumeration the lane brief asked
+// for): am ar bn chr el fa fr fr-CH gu he hi hu ja km ko lo my nl pa ta th
+// zh zh-Hans zh-Hant (quotes-004…027, one file each) plus en de fi
+// (quotes-034/035's fallback matrix). Fourteen of those resolve to the CLDR
+// ROOT pair and are therefore NOT listed individually — the root default
+// below answers them, and listing them would only invite drift between two
+// spellings of one fact. They are, verified against their refs:
+//   bn chr gu hi km ko lo my pa ta th zh zh-Hans en  →  “ ” / ‘ ’
+//
+// NOT REF-VERIFIED, marked inline: the LEVEL-2 pair for `de` and `fi`. Their
+// references exercise level 1 only (a single `<q>`), so level 2 is CLDR's
+// value carried on faith. Every other entry has both levels on a reference.
+//
+// Anything outside this table falls to the root pair — which is exactly what
+// Blink does for an unknown tag (quotes-034 pins it with `lang="aa"` and
+// `lang="zz"`, both expecting the root marks), so the fallback is a MEASURED
+// behaviour and not a shrug.
+const CLDR_QUOTE_ROOT = [
+  { open: '“', close: '”' },   // “ ”
+  { open: '‘', close: '’' },   // ‘ ’
+];
+
+const CLDR_QUOTE_PAIRS = {
+  // am — quotes-004: «አንድ ‹ሁለት› ሦስት»
+  am: [{ open: '«', close: '»' }, { open: '‹', close: '›' }],
+  // ar — quotes-005 (dir=rtl): ”واحد ’اثنينل‘ ثلاثة“ — the marks are the
+  // MIRROR of the root pair, not the root pair, so this cannot fall through.
+  ar: [{ open: '”', close: '“' }, { open: '’', close: '‘' }],
+  // de — quotes-034-ref: „de FALLBACK“. Level 2 is CLDR ‚ ‘ (NOT ref-verified).
+  de: [{ open: '„', close: '“' }, { open: '‚', close: '‘' }],
+  // el — quotes-008: «ένα “δύο” τρία»
+  el: [{ open: '«', close: '»' }, { open: '“', close: '”' }],
+  // fa — quotes-009: «یک ‹دو› سه»
+  fa: [{ open: '«', close: '»' }, { open: '‹', close: '›' }],
+  // fi — quotes-034-ref: ”fi FALLBACK”. Level 2 is CLDR ’ ’ (NOT ref-verified).
+  fi: [{ open: '”', close: '”' }, { open: '’', close: '’' }],
+  // fr — quotes-010: «un «deux» trois» — BOTH levels are the guillemets.
+  fr: [{ open: '«', close: '»' }, { open: '«', close: '»' }],
+  // fr-CH — quotes-011: «un ‹deux› trois». A REGION entry that must beat the
+  // `fr` truncation, which is the whole reason lookup tries the full tag first.
+  'fr-ch': [{ open: '«', close: '»' }, { open: '‹', close: '›' }],
+  // he — quotes-013 (dir=rtl): ”אחת ’שתיים’ שלוש”
+  he: [{ open: '”', close: '”' }, { open: '’', close: '’' }],
+  // hu — quotes-015: „egy »kettő« három”
+  hu: [{ open: '„', close: '”' }, { open: '»', close: '«' }],
+  // ja — quotes-016: 「一 『二』 三」
+  ja: [{ open: '「', close: '」' }, { open: '『', close: '』' }],
+  // nl — quotes-021: ‘een ‘twee’ drie’ — both levels the SINGLE marks, which
+  // is the root pair's LEVEL 2 at level 1, so it cannot fall through either.
+  nl: [{ open: '‘', close: '’' }, { open: '‘', close: '’' }],
+  // zh-Hant — quotes-026: 「一 『二』 三」. `zh` and `zh-Hans` (quotes-027 /
+  // quotes-025) are the ROOT pair and deliberately absent, so a bare `zh`
+  // truncates past this SCRIPT entry into the root default, exactly as the
+  // two references demand.
+  'zh-hant': [{ open: '「', close: '」' }, { open: '『', close: '』' }],
+};
+
+/**
+ * RFC 4647 §3.4 "Lookup" against the table above: case-insensitive, then
+ * progressively truncate the last subtag until something matches, skipping a
+ * single-character (singleton) subtag on the way out because a lone `x`/`u`
+ * is never a lookup key of its own.
+ *
+ * Returns a `parseQuotesValue`-shaped `{ kind: 'pairs', pairs }` so callers
+ * can use it wherever an explicit pair list would go.
+ *
+ * MEASURED against the corpus's own fallback matrix: quotes-034 pins
+ * fr-FR→fr, en-EN→en(root), fi-FI→fi, de-DE→de, he-HE→he, ja-JA→ja and
+ * aa/zz→root; quotes-035 pins the case-insensitivity (FR→fr, eN-Us→en,
+ * Fi→fi, JA→ja) and the extra-subtag truncation (DE-LATN-DE→de, he-IL→he).
+ *
+ * Exported for the pins.
+ */
+export function quotesForLanguage(lang) {
+  if (typeof lang !== 'string' || lang.trim() === '') {
+    return { kind: 'pairs', pairs: CLDR_QUOTE_ROOT };
+  }
+  let subtags = lang.trim().toLowerCase().split('-').filter(Boolean);
+  while (subtags.length > 0) {
+    const hit = CLDR_QUOTE_PAIRS[subtags.join('-')];
+    if (hit) return { kind: 'pairs', pairs: hit };
+    subtags.pop();
+    // §3.4 step 3: a truncation that leaves a singleton at the end must drop
+    // it too — `fr-latn-fr-x-foobar` goes …-x → fr-latn-fr, never "…-x".
+    if (subtags.length > 0 && subtags[subtags.length - 1].length === 1) subtags.pop();
+  }
+  return { kind: 'pairs', pairs: CLDR_QUOTE_ROOT };
+}
+
+/**
+ * Turn a parsed `quotes` value into one a quote keyword can be applied
+ * against: `auto` becomes the CLDR pair list for `lang`, everything else is
+ * returned unchanged.
+ *
+ * WHOSE LANGUAGE. Not the element's own — its PARENT's. css-content-3
+ * §2.2.1 was amended by csswg-drafts#5478 so that a quotation's marks belong
+ * to the text that CONTAINS it, and the corpus pins the distinction
+ * explicitly: quotes-030 asserts "based on the parent language (not the
+ * language of the element itself)" and its reference renders
+ * `One “two <span lang=ja>‘three <span lang=fr>『four』</span>’</span>”` —
+ * the `lang="ja"` element's own marks are ENGLISH (its parent's language)
+ * and the `lang="fr"` element's are JAPANESE. The walk below therefore
+ * resolves a component's own ::before/::after against the language it
+ * INHERITED, and hands its own language down to its children.
+ *
+ * Exported for the pins.
+ */
+export function resolveAutoQuotes(quotes, lang) {
+  if (!quotes || quotes.kind !== 'auto') return quotes;
+  return quotesForLanguage(lang);
+}
+
 // The four quote keywords (css-content-3 §2.1 `<quote>`). Split into the
 // pair that EMITS a mark and the `no-` pair that only moves the depth.
 const QUOTE_KEYWORDS = new Set([
@@ -227,12 +360,13 @@ export function parseContentComponents(value) {
  * Parse a computed `quotes` value (css-content-3 §2.2) into
  * `{ kind: 'auto' | 'none' | 'pairs', pairs }`, or null when unparseable.
  *
- * `auto` is reported, not resolved: resolving it needs the CLDR table keyed
- * by the element's CONTENT LANGUAGE, which this wire does not carry (the
- * `lang` attribute is not forwarded — see the lane's deferred list). The
- * caller therefore emits no mark for a quote under `auto`, which leaves the
- * capture exactly where it is today rather than inventing an English pair
- * for a Japanese document.
+ * `auto` is REPORTED here and RESOLVED by the caller, one step later:
+ * resolving it needs the CLDR table keyed by the element's content language
+ * (see quotesForLanguage / resolveAutoQuotes), and the language is a fact
+ * about the WALK — the parent's, not this value's — so a value parser is the
+ * wrong place to consume it. Wave-36 shipped this function with `auto`
+ * painting nothing at all, because the `lang` attribute did not reach the
+ * wire; wave-37's `meta.lang` closed that, and the refusal with it.
  *
  * Exported for the pins.
  */
@@ -285,6 +419,10 @@ export function parseQuotesValue(value) {
  * goes negative and no mark is rendered, which the clamp + `atZero` guard
  * below implement.
  *
+ * `quotes` must already be RESOLVED (wave-37): `auto` never reaches here —
+ * resolveAutoQuotes turns it into a real pair list at the walk, so the only
+ * non-`pairs` kind left is `none`, which paints nothing by definition.
+ *
  * Exported for the pins.
  */
 export function applyQuoteKeyword(name, state, quotes) {
@@ -296,7 +434,8 @@ export function applyQuoteKeyword(name, state, quotes) {
   if (name === 'open-quote') {
     const idx = Math.min(state.depth, quotes.pairs.length - 1);
     state.depth += 1;
-    // `none` and (for now) `auto` paint nothing — see parseQuotesValue.
+    // `none` paints nothing — see parseQuotesValue (and the resolved-quotes
+    // note above: `auto` cannot reach here any more).
     if (quotes.kind !== 'pairs') return '';
     return quotes.pairs[idx].open;
   }
@@ -378,7 +517,9 @@ export function declaresStyleContainment(props) {
  * Mutates the tree in place. Returns `{ baked, refused }` counts so the
  * caller can log and stamp the fixture's lossy record.
  */
-export function bakeGeneratedContentText(components, inheritedQuotes = null) {
+export function bakeGeneratedContentText(
+  components, inheritedQuotes = null, documentLang = null,
+) {
   const state = { depth: 0 };
   let baked = 0;
   let refused = 0;
@@ -437,16 +578,25 @@ export function bakeGeneratedContentText(components, inheritedQuotes = null) {
     if (typeof content === 'string') resolveContentText(content, state, quotes);
   };
 
-  const visit = (map, quotesIn, foreignIn = false) => {
+  const visit = (map, quotesIn, foreignIn = false, langIn = null) => {
     for (const cmp of Object.values(map ?? {})) {
       if (!cmp || typeof cmp !== 'object') continue;
       // Once inside <svg>/<math> every descendant is in that namespace too.
       const foreign = foreignIn || opensForeignNamespace(cmp);
       // Own `quotes` declaration shadows the inherited one for this subtree.
       const own = cmp.properties?.quotes;
-      const quotes = (typeof own === 'string' && parseQuotesValue(own))
+      const declared = (typeof own === 'string' && parseQuotesValue(own))
         ? parseQuotesValue(own)
         : quotesIn;
+      // wave-37 lane W4 — THE LANG RUNG. `_lang` is the extractor's already
+      // RESOLVED content language (schema/spec/04-metadata-fields.md), so
+      // this walk does no inheritance of its own: it just remembers what the
+      // PARENT carried, because that — not the element's own tag — is the
+      // language a quotation's marks belong to (see resolveAutoQuotes for
+      // the quotes-030 reference that pins the distinction).
+      const ownLang = (typeof cmp._lang === 'string' && cmp._lang !== '')
+        ? cmp._lang : langIn;
+      const quotes = resolveAutoQuotes(declared, langIn);
       // css-contain-1 §3.3 — style containment SCOPES the quote counter to
       // this element's subtree: it inherits the current depth and its own
       // changes are rolled back on the way out (see the banner's four-test
@@ -461,7 +611,10 @@ export function bakeGeneratedContentText(components, inheritedQuotes = null) {
       // second synthesised marker, and the renderers honour it.
       markerOnlyDepth(cmp._pseudo?.marker, quotes);
       bakeBag(cmp._pseudo?.before, quotes, foreign);
-      visit(cmp.children, quotes, foreign);
+      // Children inherit the DECLARED value (still `auto` when it was auto)
+      // together with THIS element's language, so each level resolves `auto`
+      // against its own parent's language rather than re-using ours.
+      visit(cmp.children, declared, foreign, ownLang);
       bakeBag(cmp._pseudo?.after, quotes, foreign);
       if (contained) state.depth = savedDepth;
     }
@@ -469,7 +622,12 @@ export function bakeGeneratedContentText(components, inheritedQuotes = null) {
 
   // Initial `quotes` is the document's — `auto` unless a caller supplies the
   // root value (the body-root's bag, which the root-inherited bake has
-  // already copied onto every top-level child anyway).
-  visit(components, parseQuotesValue(inheritedQuotes ?? 'auto'));
+  // already copied onto every top-level child anyway). The initial LANGUAGE
+  // is the document element chain's (`<html lang>` / `<body lang>`), which
+  // is the parent language of every top-level component — the extractor
+  // hands it in, because in the common unslotted shape those components are
+  // SIBLINGS of the body-root and no walk could find it from here.
+  visit(components, parseQuotesValue(inheritedQuotes ?? 'auto'), false,
+        typeof documentLang === 'string' && documentLang !== '' ? documentLang : null);
   return { baked, refused };
 }

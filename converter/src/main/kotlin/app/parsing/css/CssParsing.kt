@@ -185,6 +185,17 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             else el.jsonPrimitive.content
         }
 
+        // wave-37 lane W4 (THE LANG WIRE): read optional `_lang` (the
+        // element's COMPUTED content language — see the LANG WIRE banner in
+        // tools/titan/extract-fixture.mjs) as an opaque STRING. Same opacity
+        // + null-tolerance contract as `_markerText`: the extractor owns the
+        // spelling (the authored BCP-47 tag, uncanonicalised), the converter
+        // forwards it verbatim to v2 `meta.lang`, and JSON null ≡ absent.
+        val lang = obj["_lang"]?.let { el ->
+            if (el is kotlinx.serialization.json.JsonNull) null
+            else el.jsonPrimitive.content
+        }
+
         // wave-32 lane R: read optional `_runs` (the extractor's ordered
         // inline-content list — see the "_runs" wire banner in
         // tools/titan/extract-fixture.mjs) as an OPAQUE JsonArray. Same
@@ -215,6 +226,9 @@ fun JsonInputToCssComponents(doc: JsonObject): CssComponents {
             // wave-27 lane CBAKE: the baked list-marker string, opaque all
             // the way to the v2 wire (meta.markerText).
             markerText = markerText,
+            // wave-37 lane W4: the computed content language, opaque all the
+            // way to the v2 wire (meta.lang).
+            lang = lang,
             // wave-32 lane R: the ordered inline-content list, opaque all
             // the way to the v2 wire (meta.runs).
             runs = runs
@@ -427,6 +441,11 @@ fun cssParsing(doc: JsonObject): IRDocument {
             // every component that is not a baked `<li>`; the v1 serializer
             // ignores it, so v1 output bytes are untouched.
             markerText = component.markerText,
+            // wave-37 lane W4: forward `_lang` verbatim for the v2 wire
+            // (meta.lang — grouped beside meta.markerText). Null on every
+            // component whose document declares no language; the v1
+            // serializer ignores it, so v1 output bytes are untouched.
+            lang = component.lang,
             // wave-32 lane R: forward `_runs` verbatim for the v2 wire
             // (meta.runs — grouped beside meta.decorations). Null on every
             // component whose own text does not interleave with its kept

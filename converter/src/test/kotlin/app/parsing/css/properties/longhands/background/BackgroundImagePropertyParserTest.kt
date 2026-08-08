@@ -287,6 +287,68 @@ class BackgroundImagePropertyParserTest {
         assertEquals(2, g.colorStops.size)
     }
 
+    // ---- interpolation method CARRIED, not just stripped (wave-37 W2) --
+    // Peeling the method off saved the angle beside it; DROPPING it made
+    // every polar-space gradient render an sRGB ramp on the one platform
+    // that can interpolate correctly. The method now rides the optional
+    // `interp` key — absent whenever the author wrote none, so the frozen
+    // wire for a plain gradient does not move.
+
+    @Test
+    fun `hue interpolation method is carried on the linear gradient`() {
+        val g = layer("linear-gradient(to right in hsl increasing hue, red, orange)")
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g)
+        assertEquals("in hsl increasing hue", g.interp)
+        assertEquals(90.0, g.angle!!.degrees)          // direction still survives
+    }
+
+    @Test
+    fun `space-only interpolation method is carried`() {
+        val g = layer("linear-gradient(in oklab, red, blue)")
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g)
+        assertEquals("in oklab", g.interp)
+    }
+
+    @Test
+    fun `radial and conic carry their interpolation methods too`() {
+        val r = layer("radial-gradient(circle in lch longer hue, red, blue)")
+        assertIs<BackgroundImageProperty.BackgroundImage.RadialGradient>(r)
+        assertEquals("in lch longer hue", r.interp)
+        val c = layer("conic-gradient(from 45deg in oklch, red, blue)")
+        assertIs<BackgroundImageProperty.BackgroundImage.ConicGradient>(c)
+        assertEquals("in oklch", c.interp)
+    }
+
+    @Test
+    fun `a gradient without a method carries a null interp and no wire key`() {
+        val g = layer("linear-gradient(to right, red, blue)")
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g)
+        assertNull(g.interp)
+        // Wire pin: the key must be ABSENT, not null — that is what makes
+        // this additive rather than a byte-shape change.
+        val wire = Json.encodeToJsonElement(BackgroundImageSerializer, g).jsonObject
+        assertTrue("interp" !in wire)
+    }
+
+    @Test
+    fun `interp round-trips through the wire`() {
+        val g = layer("linear-gradient(to right in hsl longer hue, red, blue)")
+        val wire = Json.encodeToJsonElement(BackgroundImageSerializer, g).jsonObject
+        assertEquals("in hsl longer hue", wire["interp"]!!.jsonPrimitive.content)
+        val back = Json.decodeFromJsonElement(BackgroundImageSerializer, wire)
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(back)
+        assertEquals("in hsl longer hue", back.interp)
+    }
+
+    @Test
+    fun `a color-mix stop does not fabricate an interpolation method`() {
+        // The `in srgb` inside color-mix() is inside parens — the same
+        // paren-aware tokenizer guards the CARRY path as the strip path.
+        val g = layer("linear-gradient(color-mix(in srgb, red, blue), green)")
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g)
+        assertNull(g.interp)
+    }
+
     // ---- position keyword axes (skeptic follow-up) -------------------
     // css-values-4 §5.4: side keywords are axis-locked, never positional —
     // `at top` is top-CENTER and `at bottom left` ≡ `at left bottom`.

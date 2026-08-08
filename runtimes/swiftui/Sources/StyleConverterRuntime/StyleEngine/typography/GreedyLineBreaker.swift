@@ -75,6 +75,45 @@ enum GreedyLineBreaker {
         return out
     }
 
+    /// Wave 37 (lane W7, rule B) — does any committed line overflow the
+    /// wrap width WITH NOWHERE LEFT TO BREAK?
+    ///
+    /// `lines(text:maxWidth:measure:)` guarantees a fit for every line
+    /// EXCEPT one holding a single word wider than `maxWidth`, which CSS
+    /// 2.1 §9.5 / css-text-3 §5.2 require to overflow the line box rather
+    /// than break (the emergency break is reserved for `overflow-wrap:
+    /// break-word|anywhere` / `word-break: break-all`). TextKit does not
+    /// know that, so the caller must take the run out of the
+    /// width-constrained layout — see the `.fixedSize(horizontal:)` gate
+    /// in PlaceholderLabel.
+    ///
+    /// BOTH halves matter. This breaker splits on SPACES only, so its
+    /// "word" is coarser than UAX #14's: `regu-lation` (a real U+002D
+    /// hyphen-minus, class HY) and `foo\u{200B}bar` are one word here but
+    /// two break opportunities to the platform breaker — and there the
+    /// platform is RIGHT, `hyphens` does not govern them. Firing on such
+    /// a line stops a wrap the ref performs: measured on iOS
+    /// css-text/hyphens-none-012 (the `regu-lation imple-menta-tion` box)
+    /// 0.8548 → 0.8431 with the width-only test, restored by this
+    /// per-line `hasSoftWrapOpportunity` veto. So an overflowing line
+    /// only counts when it is genuinely unbreakable — the same predicate
+    /// wave 21 applied to a whole run, applied here per line.
+    ///
+    /// `tolerance` absorbs the sub-point rounding between the fit test
+    /// (`NSAttributedString.size().width`, fractional) and the width the
+    /// layout actually proposes; without it a line that measured exactly
+    /// `maxWidth` could report as overflowing on a ½-point difference and
+    /// pull a perfectly fitting run out of the constrained layout.
+    static func hasUnbreakableOverflowingLine(_ lines: [String],
+                                              maxWidth: CGFloat,
+                                              tolerance: CGFloat = 0.5,
+                                              measure: (String) -> CGFloat) -> Bool {
+        lines.contains {
+            measure($0) > maxWidth + tolerance
+                && !DecorationOps.hasSoftWrapOpportunity($0)
+        }
+    }
+
     // MARK: - Production measurer (TextKit metrics)
 
     /// A measurer over the EXACT resolved render font + spacing values,

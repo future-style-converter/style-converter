@@ -146,6 +146,15 @@ struct TextConfig {
     // greedy pre-break OFF: its space-split would collapse preserved
     // runs — a glyph-content rewrite the spec forbids.
     var preservesSpaces: Bool     = false
+    // Wave 37 (lane W7) — the resolved `hyphens` keyword (css-text-3
+    // §6.1), lower-cased. Rides TextConfig because the label owns its
+    // own string and its own wrap decision: `none` is spent by deleting
+    // U+00AD before the greedy pre-break measures the run (the only seam
+    // SwiftUI Text gives us — TextKit honours soft hyphens
+    // unconditionally and ImageRenderer cannot rasterise the UIKit label
+    // that would expose NSParagraphStyle), and `auto` vetoes the
+    // unbreakable-word overflow rule. nil / `manual` = byte-identical.
+    var hyphensMode: String?      = nil
     // Lane IOS wave 5 (finding 4) — `text-decoration-line: overline`
     // (css-text-decor-3 §2.1). SwiftUI Text has no overline API, so
     // PlaceholderLabel overlays one Rectangle per rendered line at the
@@ -483,6 +492,11 @@ enum StyleBuilder {
             // Lane IOS wave 5 (finding 3) — preserved-whitespace gate
             // for the greedy pre-break (css-text-3 §4.1.2).
             s.text.preservesSpaces = agg.preservesSpaces
+            // Wave 37 (lane W7) — the `hyphens` keyword (css-text-3
+            // §6.1). Mirrored like `preservesSpaces` (last-write-wins,
+            // no OR): a `manual` declaration on the element must clear
+            // an inherited `none` that reached this aggregate.
+            s.text.hyphensMode = agg.hyphensMode
             // Lane IOS wave 5 (finding 4) — overline flag + decoration
             // color for the label's per-line Rectangle overlay
             // (css-text-decor-3 §2.1/§2.2).

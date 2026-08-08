@@ -96,6 +96,15 @@ data class CssComponent(
     // string, forwarded VERBATIM as IR v2 `meta.markerText`; the converter
     // never re-derives or validates it (the `_attrs` opacity contract).
     val markerText: String? = null,
+    // wave-37 lane W4 (THE LANG WIRE): the extractor's `_lang` hint — the
+    // element's COMPUTED content language (HTML §3.2.6.2: own `lang`, else
+    // the nearest ancestor's, else the `<html>`/`<body>` chain's), already
+    // resolved because the flat v2 component list has no parent edge a reader
+    // could walk. A plain string, forwarded VERBATIM as IR v2 `meta.lang` —
+    // NOT canonicalised (BCP-47 matching is case-insensitive and
+    // subtag-truncating per RFC 4647, so consumers lowercase at lookup), the
+    // same `_attrs` opacity contract every other meta hint rides.
+    val lang: String? = null,
     // wave-32 lane R: opaque `_runs` payload — the extractor's ORDERED
     // inline-content list for an element whose own text INTERLEAVES with
     // kept element children: [{text}|{child}, …] in document order, where

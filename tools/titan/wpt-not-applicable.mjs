@@ -860,6 +860,45 @@ const RX = {
     //       `additive-symbols`) — read only to ask whether a redefinition's
     //       glyphs are provably outside Inter's coverage.
     counterStyleSymbols:/(?<![-\w])(?:additive-)?symbols\s*:\s*([^;}]*)/gi,
+
+    // Rule 44 — requires-grid-lanes:
+    //   The CSS Grid Level 3 "lanes" (formerly masonry) LAYOUT MODE, in the
+    //   three spellings the spec has passed through and the corpus still
+    //   mixes (full rationale + the wave-37 W1 measurement at
+    //   declaresGridLanesLayout's banner).
+    //
+    //   ANCHORED ON THE DISPLAY TYPE (and the one track-list keyword that
+    //   turns an ordinary grid into a lanes grid) — deliberately NOT on the
+    //   lanes-only PROPERTY names (`masonry-auto-flow`, `item-pack`,
+    //   `item-flow`, `flow-tolerance`, `lane-gap`, …). Two reasons, one
+    //   measured and one about mechanism:
+    //     * measured — css-cascade/all-prop-revert-layer.html enumerates
+    //       EVERY registered property, `masonry-auto-flow: ordered` among
+    //       them, while asserting `revert-layer`. A property-name alternation
+    //       tags it; the display anchor declines. That was the only corpus
+    //       false positive the loose form added (654 files vs 634).
+    //     * mechanism — a lanes property on a box that is not a lanes
+    //       container changes NOTHING about the render, so it cannot be
+    //       evidence for a lanes capability tier.
+    //   Coverage is not the cost: over the 437 scored css-grid/grid-lanes
+    //   cells in the committed web map the display anchor fires on 436 —
+    //   byte-identical recall to the loose alternation. The single miss is
+    //   grid-lanes-intrinsic-sizing-rows-007-ref.html, a REF file WPT also
+    //   ships as a chained test, which declares only `grid-lanes-track`
+    //   custom elements.
+    //
+    //   `(?:inline[\s-]+)?` covers both `display: inline grid-lanes` (the
+    //   css-display-3 two-value form the corpus overwhelmingly uses) and a
+    //   hyphenated `inline-masonry` legacy spelling; the `\b` on each keyword
+    //   keeps `grid-lanes-track` (an element name in the refs) from arming a
+    //   `display:` match it never appears in.
+    displayGridLanes:   /display\s*:\s*(?:inline[\s-]+)?grid-lanes\b/i,
+    displayMasonry:     /display\s*:\s*(?:inline[\s-]+)?masonry\b/i,
+    //   The ORIGINAL css-grid-3 spelling: `masonry` as a whole track list on
+    //   one axis. Scoped to a single declaration (`[^;{}]*` can never cross a
+    //   `;` or a block boundary) so an unrelated `masonry` word later in the
+    //   sheet cannot be dragged into the match.
+    gridTemplateMasonry:/grid-template-(?:rows|columns)\s*:[^;{}]*\bmasonry\b/i,
 };
 
 // Helper: detect ANY runtime-selection signal (pseudo-element OR API call).
@@ -1565,6 +1604,166 @@ export function declaresFontFaceRule(html) {
     return /@font-face\s*\{/i.test(String(html ?? ''));
 }
 
+/** wave-37 W1 — Rule 44 `requires-grid-lanes`: does this test establish a CSS
+ *  Grid Level 3 LANES (formerly "masonry") container?
+ *
+ *  WHAT THE TAG NAMES. css-grid-3's lanes algorithm flows items into the
+ *  shortest track rather than onto a fixed row/column grid. The corpus
+ *  spells it three ways and this predicate accepts all three:
+ *  `display: grid-lanes` / `display: inline grid-lanes` (the current
+ *  spelling — 620 of the 1089 files under css/css-grid/grid-lanes/),
+ *  `display: masonry` (the intermediate one) and `grid-template-rows|columns:
+ *  masonry` (the original).
+ *
+ *  THE MEASUREMENT (wave-37 lane W1). The capture Chromium — 151.0.7922.47,
+ *  the SAME build that rasterised every committed ref — implements NONE of
+ *  them. Probed under capture-browser-ref.mjs's own launch flags:
+ *  `CSS.supports` is false for display:grid-lanes, display:inline grid-lanes,
+ *  display:masonry, grid-template-rows:masonry, item-pack, item-flow and
+ *  masonry-auto-flow, and a `display: grid-lanes` element computes to
+ *  `display: block` — the declaration is dropped as invalid. The reftest REFS
+ *  do not use the syntax at all: they hand-build the masonry picture out of
+ *  `display: inline-grid` plus per-column `display: flex` stacks, which is
+ *  why they show the lanes geometry while the TEST page shows a block/inline
+ *  fallback.
+ *
+ *  So the target is unreachable — but only MOSTLY, and that is the whole
+ *  reason this tag is INFORMATIONAL. Applying the Rule 42/43 ceiling method
+ *  (render the TEST in the refs' own Chromium under the ref canvas contract,
+ *  diff with inject-wpt-block's diffWebVsRef + the four veto stamps) to all
+ *  438 scored css-grid/grid-lanes cells of the committed web map:
+ *
+ *    437 measured (row-track-sizing-001 is unmeasurable — its page is
+ *        14484 px tall, past Chromium's screenshot limit)
+ *    363 UNREACHABLE — Chromium cannot reproduce its own ref
+ *     74 REACHABLE   — of which 52 are cells the pipeline ALREADY PASSES
+ *                      and 22 are ordinary failures with a ≥0.95 ceiling
+ *
+ *  Precision of a whole-tag exclusion: 362/436 = 0.830 for this predicate,
+ *  0.842 for the best narrowing measured (also require the matched REF not to
+ *  declare the syntax — 14 refs do, and both sides then fall back together).
+ *  Against 1.000 for Rule 42 and the font-face wall, and with 48–54 currently
+ *  PASSING cells inside the tagged set, that is the wave-8 denominator failure
+ *  again: excluding would silence 74 reachable targets — including 22 real
+ *  bugs the map had buried under "masonry" — to hide 363 unreachable ones.
+ *  The tag therefore stays SCORED; see inject-wpt-block.mjs's
+ *  REFUSED_EXCLUSION_TAGS discipline, and the pin in this module's test file
+ *  that asserts membership in none of the five exclusion families.
+ *
+ *  WHAT THE 22 REACHABLE FAILURES ACTUALLY ARE (they are not grid work):
+ *  14 are `contain-intrinsic-size` + `contain: size` on a fallback block box
+ *  (the ceiling is 1.0000 and our capture is BLANK — css-contain, not
+ *  css-grid), 5 are harness-canvas gaps (capture clipped at the 600 px floor
+ *  while the ref grows to 832; `html` background not propagated; a `body`
+ *  font shorthand not reaching the component card), 2 are contenteditable and
+ *  1 is subgrid margin. None is a converter grid parser or a web grid
+ *  emission defect — measured, our capture sits at the Chromium ceiling on
+ *  the unreachable set (median ceilSsim − curSsim = 0.0008, 230 of 363 within
+ *  0.02).
+ *
+ *  HOW THIS CLOSES. Not by weakening the gate: either the corpus is re-pinned
+ *  to a Chromium that ships Grid L3 lanes (then the refs are re-rendered, the
+ *  ceiling rises, and the tag becomes an ordinary capability label), or a
+ *  runtime grows a real lanes layout — which would BEAT the passthrough
+ *  ceiling, since the refs encode geometry a lanes-capable renderer can hit
+ *  and Chromium-on-the-test cannot.
+ *
+ *  Pure + exported so the unit pins can hold each spelling independently. */
+export function declaresGridLanesLayout(html) {
+    const s = String(html ?? '');
+    return RX.displayGridLanes.test(s)
+        || RX.displayMasonry.test(s)
+        || RX.gridTemplateMasonry.test(s);
+}
+
+// ── wave-37 lane W7: the HYPHENATION-DICTIONARY boundary (Rule 45) ──────────
+//
+// A NATIVE-ONLY, INFORMATIONAL tag. It names the one half of css-text-3 §6.1
+// that neither native runtime can reach, and it is deliberately narrow: only
+// `hyphens: auto` ON LANGUAGE-TAGGED CONTENT.
+//
+// WHY THE LANGUAGE TAG IS THE WHOLE RULE. §6.1 defines `auto` as breaking
+// "at appropriate hyphenation points … as determined by … a hyphenation
+// resource appropriate to the LANGUAGE of the text", and WPT asserts the
+// contrapositive directly: css-text/hyphens-auto-001's own title is "no
+// automatic hyphenation without language tagging". So an `auto` declaration
+// with no language in scope must render EXACTLY like `manual` — which is what
+// both natives do — and tagging it would be a false positive that costs a
+// real, earned pass. Measured on the private-sim gate for this lane:
+//
+//   hyphens-auto-001         (NO lang)  ios 0.7451 → 0.9950  ← now PASSES
+//   hyphens-auto-min-content (NO lang)  ios 0.9849 · android 0.9696 (passes)
+//
+// Both are excluded by the `lang` half of the predicate and keep scoring.
+//
+// WHAT THE NATIVES ACTUALLY LACK. Not the dictionaries — the SELECTOR for
+// them. Android's Minikin ships hyphenation resources and Compose can ask for
+// them (`TextStyle.hyphens = Hyphens.Auto`), but only for a language, and the
+// IR wire carries no language channel at all (no `lang` on the component, no
+// document-level locale): the converter never emits one, so nothing can pick
+// a dictionary. iOS has the second wall on top: TextKit's hyphenation lives
+// on NSParagraphStyle/CTTypesetter, reachable only through a UIKit label, and
+// ImageRenderer refuses to rasterise platform views (see the SwiftUI
+// GreedyLineBreaker banner for that measurement). So `auto` degrades to
+// `manual`'s explicit opportunities on both, which each runtime now says out
+// loud (PropertyTracker breadcrumb, wave-37 lane W7).
+//
+// MEASURED — the nine language-tagged `auto` cells in the wave-36 depth-48
+// gate (runs/wave36-final/sections/css-text/manifest.json; the ios column is
+// this lane's post-fix re-capture, android is the frozen gate):
+//
+//   hyphenate-character-002    web 0.9350 F · ios 0.8808 F · android 0.8917 F
+//   hyphenate-limit-chars-001  web 0.9073 F · ios 0.8548 F · android 0.8523 F
+//   hyphens-auto-010           web 0.9990 T · ios 0.8497 F · android 0.9444 F
+//   hyphens-auto-control       web 1.0000 T · ios 0.8778 F · android 0.9553 T
+//   hyphens-auto-inline-010    web 0.9990 T · ios 0.9246 F · android 0.9110 F
+//   hyphens-auto-last-word-001 web 0.9459 F · ios 0.9112 F · android 0.9053 F
+//   hyphens-out-of-flow-002    web 0.9412 F · ios 0.8876 F · android 0.8586 F
+//   hyphens-punctuation-001    web 1.0000 T · ios 0.9386 F · android 0.8878 F
+//   hyphens-span-002           web 1.0000 T · ios 0.8876 F · android 0.8664 F
+//
+// The shape is the argument, exactly as for Rule 43: WEB clears the gate on
+// 5 of 9 with the ref's own hyphenation, so the surrounding layout is provably
+// right on our side (and the four web failures are separate, non-hyphenation
+// divergences that must stay scored). The natives are 0/9 and 1/9 — bounded
+// by a resource, not by anything the runtimes compute.
+//
+// INFORMATIONAL, and that is a decision, not an oversight. Wiring it would
+// need a per-platform exclusion family in inject-wpt-block.mjs (the shape
+// `requires-non-latin-font-parity` uses: keep `scoreEligible` true, null
+// `wptPass` on the two native diffs only, stamp `scoreExcluded`). This lane
+// owns neither that file's families nor the denominators they move, so the
+// tag ships as a NAME with its measurement attached and changes no score.
+// The next wave that wants to spend it needs exactly three things: a
+// `NATIVE_HYPHENATION_TAGS` set holding this tag, its own stamp string, and a
+// gate call beside `applyNativeFontParityGate` — plus a re-measurement,
+// because rule B (wave-37 W7's unbreakable-word overflow) moved four of the
+// nine cells and may move more once Compose grows the same rule.
+//
+// HOW IT CLOSES for real: put a language on the wire (an IR `lang` channel
+// the extractor fills from the nearest `lang`/`xml:lang` ancestor), then
+// Android can switch `TextStyle.hyphens` on and iOS can consult
+// CFStringGetHyphenationLocationBeforeIndex from inside GreedyLineBreaker —
+// both are dictionary lookups the platforms already ship. At that point the
+// tag is DELETED, not weakened.
+//
+// Pure + exported so the unit pins can hold each half independently.
+export function needsHyphenationDictionary(html) {
+    const s = String(html ?? '');
+    // Half 1 — an `auto` hyphenation declaration. Tolerates any whitespace
+    // around the colon (the corpus authors both `hyphens:auto` and
+    // `hyphens: auto`); `-webkit-hyphens`/`-ms-hyphens` prefixed spellings
+    // are covered by the same match because the suffix is what anchors.
+    if (!/\bhyphens\s*:\s*auto\b/i.test(s)) return false;
+    // Half 2 — a language in scope. `lang=`/`xml:lang=` on ANY element (the
+    // WPT idiom is `<body lang="en">` or a per-div `lang`), or a `:lang()`
+    // selector, which is how the i18n subdirectory tags its cases. Requiring
+    // a letter after the `=` rejects `lang=""` (explicitly UNKNOWN language,
+    // which per §6.1 must NOT hyphenate — same reading as no tag at all).
+    return /\b(?:xml:)?lang\s*=\s*["']?[a-zA-Z]/.test(s)
+        || /:lang\(/i.test(s);
+}
+
 // ---------------------------------------------------------------------------
 // Rule definitions, in evaluation order. ALL rules run per-test; multiple
 // tags may fire (a test that imports a webfont AND uses `@media print`
@@ -1693,6 +1892,25 @@ export const RULES = [
         // failures with a ≥0.95 ceiling are ordinary bugs — 8 of which
         // wave-36 M6 fixed outright (the `<table border=1>` presentational
         // mapping in extract-fixture.mjs; see htmlTablePresentationProps).
+        //
+        // wave-37 W5 — the SIMULATION half of the same question, refused on
+        // the same fact. If the tag cannot be excluded, could the harness
+        // instead honour `@page { size / margin }` on the composed canvas?
+        // No: ALL 157 css-page ref PNGs are 390 px wide (CANVAS_WIDTH) even
+        // where the test declares `size: 293px / 300px 50px / 400px 300px /
+        // a5 / portrait`, because the refs are screen-medium renders. The
+        // refs instead hand-encode the expected PAGED result as ordinary DOM
+        // at that width (page-margin-007-print-ref.html: seven 300 px
+        // `.pagebox` divs for a 400×200 page with 50 px margins), so a
+        // page-sized canvas would move us AWAY from the target and would
+        // relayout the 12 currently-passing cells that declare a non-canvas
+        // `@page size`. Classification of the 86 css-page failures (a test
+        // may need several): fragmentation 58, the §5.3 sixteen-box margin
+        // grid 25, page-box painting 19, orthogonal flow 6, print-medium
+        // media-query resolution 1, script mutation 1; 12 `margin-boxes/*`
+        // cells need the margin grid alone — the largest bounded
+        // sub-mechanism, and still a feature rather than a canvas tweak. Full
+        // table on inject-wpt-block.mjs's REFUSED_EXCLUSION_TAGS.
         tag: 'requires-print-medium',
         description: '*-print.html filename, @media print, or @page — paged-media rendering. SCORED, NOT EXCLUDED: measured over all 275 scored tests carrying it, the refs\' own Chromium reaches the committed ref at screen medium on 193 (and on 140 of the 141 we already pass), so an exclusion would have precision 0.298. See the wave-36 M6 banner above.',
         swarm001Source: [
@@ -1806,6 +2024,20 @@ export const RULES = [
         test: (html /* , _ctx */) => declaresFontFaceRule(html),
     },
     {
+        // wave-37 W5 — MEASURED AND REFUSED as an exclusion family. The wall
+        // this tag names is real and unreachable by construction (the
+        // ::view-transition pseudo tree is UA-generated, top-layer, and holds
+        // snapshot IMAGES — it is not in the DOM, so neither the static
+        // extractor nor post-load-extract.mjs's computed-style bake can ever
+        // serialize it), but 50 of the 192 scored css-view-transitions cells
+        // PASS anyway: a transition frozen at `.ready` with
+        // `animation-play-state: paused` shows the OLD snapshot, which IS the
+        // pre-script DOM. Excluding on the tag = precision 0.740, and ten
+        // narrowings all top out at ~0.90. Full table on
+        // inject-wpt-block.mjs's REFUSED_EXCLUSION_TAGS, enforced by the
+        // negative pin in inject-wpt-block.test.mjs. The tag is a LABEL only:
+        // it must keep firing (the dashboard reads it) and must never join an
+        // exclusion set without beating 0.740 first.
         tag: 'requires-view-transitions',
         description: 'document.startViewTransition() / ::view-transition-* / view-transition-name',
         swarm001Source: [
@@ -2203,15 +2435,70 @@ export const RULES = [
         ],
         test: (html /* , _ctx */) => hasNonLatinPredefinedCounterStyle(html),
     },
+    {
+        // Rule 44 (wave-37 W1): the CSS Grid Level 3 LANES layout mode — the
+        // corpus' single largest coherent failing pool (384 of 438 scored
+        // css-grid/grid-lanes cells in the committed web map, the mining
+        // map's rank-2 opportunity).
+        //
+        // INFORMATIONAL, and that is a MEASURED decision, not an oversight:
+        // the capture Chromium implements none of the syntax (a probe of its
+        // own launch flags has CSS.supports false on every spelling and
+        // `display:grid-lanes` computing to `block`), so 363 of the 437
+        // measurable cells are unreachable by any Chrome-faithful renderer —
+        // but 74 are reachable and 52 of THOSE already pass. Precision 0.830
+        // (0.842 for the best narrowing) is below the 1.000 the accepted
+        // exclusion families sit at and the exclusion would cost real passes,
+        // so the tag names the tier and changes no score. Full argument, the
+        // ceiling table and the closing move: declaresGridLanesLayout's
+        // banner above; the refusal is pinned in wpt-not-applicable.test.mjs
+        // against all five families exported by inject-wpt-block.mjs.
+        tag: 'requires-grid-lanes',
+        description: 'Establishes a CSS Grid L3 lanes/masonry container (display:grid-lanes | display:masonry | grid-template-rows|columns:masonry). The capture Chromium 151 implements none of these — the declaration is dropped and the box falls back to block/inline — while the reftest refs hand-build the lanes geometry from inline-grid + flex, so 363 of 437 scored cells are unreachable for any Chrome-faithful renderer. INFORMATIONAL ONLY: 74 cells ARE reachable (52 already passing), so the tag is in no exclusion family and never changes scoreEligible.',
+        swarm001Source: [],
+        swarm002Source: [],
+        swarm003Source: [
+            // wave-37 W1 measurement, re-derivable from the committed map +
+            // the frozen refs (recipe in declaresGridLanesLayout's banner).
+            'wave-37 css-grid grid-lanes 437/438 ceiling (results/webmap-v1.json rank 2)',
+        ],
+        test: (html /* , _ctx */) => declaresGridLanesLayout(html),
+    },
+    {
+        // Rule 45 (wave-37 W7): the hyphenation-dictionary boundary — see
+        // the long banner above needsHyphenationDictionary for the measured
+        // nine-cell table (web 5/9 with the ref's own hyphenation, iOS 0/9,
+        // Android 1/9) and for why the `lang` half of the predicate is the
+        // whole rule (untagged `auto` must render like `manual`, which is
+        // what both natives do — and the untagged cells now PASS).
+        //
+        // NATIVE-ONLY and INFORMATIONAL: like `requires-grid-lanes` it is in
+        // no exclusion family, so `scoreEligible` is untouched and every
+        // platform keeps scoring. The wiring recipe for a future wave that
+        // wants to spend it is in the banner.
+        tag: 'requires-hyphenation-dictionary',
+        description: 'Declares `hyphens: auto` on language-tagged content (lang= / xml:lang= / :lang()). css-text-3 §6.1 makes the break points a LANGUAGE-dependent dictionary lookup; the IR wire carries no language channel, so neither native can select a dictionary (and iOS additionally has no ImageRenderer-safe TextKit hyphenation seam) — `auto` degrades to `manual` there. Measured on the wave-36 depth-48 gate: web 5/9, iOS 0/9, Android 1/9 across the language-tagged css-text/hyphens cells. NATIVE-ONLY and INFORMATIONAL: in no exclusion family, never changes scoreEligible. Untagged `auto` is deliberately NOT matched — it must render like `manual` (WPT hyphens-auto-001), and it does.',
+        swarm001Source: [],
+        swarm002Source: [],
+        swarm003Source: [
+            // wave-37 W7 measurement: the frozen gate manifest for the
+            // android/web columns, plus this lane's private-sim re-capture
+            // for the iOS column (recipe in the banner above).
+            'wave-37 css-text/hyphens 9 language-tagged auto cells (runs/wave36-final/sections/css-text/manifest.json)',
+        ],
+        test: (html /* , _ctx */) => needsHyphenationDictionary(html),
+    },
 ];
 
 // Sanity: keep this in lock-step with the canonical rule count. swarm-001
 // seeded 17 rules; swarm-002 added 12 more (Rules 18..29); swarm-003 added
 // 11 more (Rules 30..40); wave-21 added Rule 41 (requires-wpt-server);
 // wave-29 added Rule 42 (browser-ref-divergent); wave-30 added Rule 43
-// (requires-non-latin-font-parity).
+// (requires-non-latin-font-parity); wave-37 added Rule 44
+// (requires-grid-lanes — INFORMATIONAL, in no exclusion family) and Rule 45
+// (requires-hyphenation-dictionary — NATIVE-ONLY, also INFORMATIONAL).
 // A drift here means either a rule was dropped or a duplicate was added.
-const EXPECTED_RULE_COUNT = 43;
+const EXPECTED_RULE_COUNT = 45;
 if (RULES.length !== EXPECTED_RULE_COUNT) {
     throw new Error(`wpt-not-applicable: expected exactly ${EXPECTED_RULE_COUNT} rules, got ${RULES.length}`);
 }
@@ -2221,10 +2508,10 @@ if (RULES.length !== EXPECTED_RULE_COUNT) {
 // ---------------------------------------------------------------------------
 
 /**
- * Classify a single test against all 43 rules (17 from swarm-001 + 12 from
+ * Classify a single test against all 44 rules (17 from swarm-001 + 12 from
  * swarm-002 + 11 from swarm-003 + 1 from wave-21: requires-wpt-server + 1
  * from wave-29: browser-ref-divergent + 1 from wave-30:
- * requires-non-latin-font-parity).
+ * requires-non-latin-font-parity + 1 from wave-37: requires-grid-lanes).
  *
  * @param {object} args
  * @param {string} args.html       — raw test HTML source

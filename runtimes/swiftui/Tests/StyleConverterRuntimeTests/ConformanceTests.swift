@@ -269,6 +269,37 @@ final class ConformanceTests: XCTestCase {
         XCTAssertNil(try byName(doc, "I").meta?.attrs?.start)
     }
 
+    // MARK: - wave-37 lane W4: meta.lang (the computed content language)
+
+    /// The element's COMPUTED content language decodes verbatim off the
+    /// `content-language` golden, and `lang` joins the strict meta key set.
+    ///
+    /// Why the DECODE is the unit under test rather than a paint: the v2
+    /// reader is STRICT on the meta key set, so before this wave a document
+    /// carrying `meta.lang` would have THROWN — and the css-content quotes
+    /// family is exactly such a document. VERBATIM matters as much as
+    /// accepted: RFC 4647 matching is case-insensitive and subtag-truncating,
+    /// so a reader that lowercased at decode would silently rewrite what the
+    /// source said. TWIN of the Compose `IRDocumentDecoderTest` case.
+    func testV2MetaLangDecodesVerbatim() throws {
+        let doc = try loadV2("content-language.json")
+        // The document element chain's language reaches the body-root…
+        XCTAssertEqual(try byName(doc, "Lang_DocumentRoot").meta?.lang, "fr")
+        // …and the producer already resolved inheritance for every element.
+        XCTAssertEqual(try byName(doc, "Lang_InheritedFromDocument").meta?.lang, "fr")
+        // An own attribute wins over what it inherited.
+        XCTAssertEqual(try byName(doc, "Lang_OwnAttributeWins").meta?.lang, "ja")
+        // Case and extra subtags survive — normalisation is a LOOKUP concern.
+        XCTAssertEqual(try byName(doc, "Lang_VerbatimCaseAndSubtags").meta?.lang, "eN-Us")
+        XCTAssertEqual(try byName(doc, "Lang_ExtendedSubtagsSurvive").meta?.lang, "DE-LATN-DE")
+        // It coexists with the other meta members rather than replacing them.
+        let li = try byName(doc, "Lang_BesideMarkerText")
+        XCTAssertEqual(li.meta?.lang, "he-IL")
+        XCTAssertEqual(li.meta?.markerText, "1.")
+        // Absence stays nil: "unknown language", i.e. the default locale.
+        XCTAssertNil(try byName(doc, "Lang_AbsentMeansUnknown").meta?.lang)
+    }
+
     /// `markerText` is additive, not a licence to invent siblings: an
     /// unknown meta key next to it is still a hard error (spec 05 rule 3).
     func testV2UnknownMetaKeyStillErrorsBesideMarkerText() {

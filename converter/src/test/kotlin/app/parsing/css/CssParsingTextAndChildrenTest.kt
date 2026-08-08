@@ -593,4 +593,58 @@ class CssParsingTextAndChildrenTest {
             "v1 serializer must not emit markerText in any spelling"
         )
     }
+
+    /**
+     * wave-37 lane W4 (THE LANG WIRE): `_lang` (the element's COMPUTED
+     * content language — already resolved by the extractor through HTML
+     * §3.2.6.2's own-lang → nearest-ancestor → `<html>`/`<body>` ladder) is
+     * parsed onto the IRComponent's `lang` field VERBATIM. "Verbatim" is the
+     * whole contract: RFC 4647 matching is case-insensitive and
+     * subtag-truncating, consumers normalise at LOOKUP, and canonicalising
+     * here would destroy the round-trip while buying nothing. Same v1 freeze
+     * rule as `_attrs`/`_decorations`/`_markerText`.
+     */
+    @Test
+    fun `_lang is parsed verbatim and ignored by the v1 serializer`() {
+        // The live css-content/quotes-030 shape: <html lang="en"> with a
+        // per-element override deeper in the tree.
+        val input = json.parseToJsonElement(
+            """
+            {
+              "components": {
+                "q30__0": {
+                  "properties": {},
+                  "_tag": "p",
+                  "_lang": "eN-Us",
+                  "children": {
+                    "q30__0__0": {
+                      "properties": {},
+                      "_tag": "q",
+                      "_lang": "zh-Hant"
+                    },
+                    "q30__0__1": {
+                      "properties": {},
+                      "_tag": "q"
+                    }
+                  }
+                }
+              }
+            }
+            """.trimIndent()
+        ).jsonObject
+
+        val ir = cssParsing(input)
+        // Case and subtags survive exactly as authored — no canonicalisation.
+        assertEquals("eN-Us", ir.components[0].lang)
+        assertEquals("zh-Hant", ir.components[0].children!![0].lang)
+        // A component the extractor left languageless must not gain one.
+        assertNull(ir.components[0].children!![1].lang)
+
+        // The frozen v1 wire never learns about lang (historical-drop).
+        val outString = Json { prettyPrint = false }.encodeToString(ir)
+        assertTrue(
+            !outString.contains("_lang") && !outString.contains("\"lang\""),
+            "v1 serializer must not emit lang in any spelling"
+        )
+    }
 }

@@ -1556,13 +1556,26 @@ test('wave30 B4b: buildResults source carries the CALLER CONTRACT + the result f
 // Without this pin the refusal lives only in prose, and prose does not fail a
 // build. The full rationale is on REFUSED_EXCLUSION_TAGS in the module and in
 // wpt-not-applicable.mjs's Rule 5 banner.
+//
+// wave-37 W5 added the second member, `requires-view-transitions`, refused on
+// the same discipline and a different number: the ::view-transition pseudo
+// tree IS unreachable by construction (UA-generated, top-layer, holds snapshot
+// images — never in the DOM, so no extractor or post-load bake can serialize
+// it), but 50 of the 192 scored css-view-transitions cells pass anyway, 47 of
+// them with real ink and 21 at SSIM exactly 1.0000, because a transition
+// frozen at `.ready` shows the OLD snapshot = the pre-script DOM. Precision of
+// the proposed exclusion: 142/192 = 0.740, against 1.000 for Rule 42 and the
+// font-face wall. Ten narrowings were measured; the best was 0.898 (wave-36
+// M6's own normalised test-vs-ref source-delta device, 59 fires). The full
+// table is tools/titan/results/wave37-W5-decisions.json.
 
 import {
   REFUSED_EXCLUSION_TAGS, SCORE_EXCLUDED_TAGS,
 } from './inject-wpt-block.mjs';
 
 test('wave36 M6: the refused tags are in NO exclusion family', () => {
-  assert.deepEqual([...REFUSED_EXCLUSION_TAGS], ['requires-print-medium']);
+  assert.deepEqual([...REFUSED_EXCLUSION_TAGS],
+    ['requires-print-medium', 'requires-view-transitions']);
   const families = {
     SCORE_EXCLUDED_TAGS,
     EXTRACTION_WALL_TAGS,
@@ -1593,4 +1606,145 @@ test('wave36 M6: a print-medium tag alone never score-excludes a test', () => {
     ['requires-fragmentation', 'requires-print-medium', 'requires-table-layout'],
     [web2]), false);
   assert.equal(web2.wptPass, false);
+});
+
+// ── wave-37 W5: the VIEW-TRANSITIONS refusal, pinned ────────────────────────
+//
+// css-view-transitions was the mining map's worst big section (195 tests, 192
+// scored, 26 % pass, 142 failing cells) and the obvious candidate for a fifth
+// exclusion family: the View Transitions pseudo tree is genuinely unreachable
+// — `::view-transition`, `::view-transition-group/-image-pair/-old/-new` are
+// UA-generated top-layer boxes holding SNAPSHOT IMAGES, never in the DOM, so
+// neither the static extractor nor post-load-extract.mjs's computed-style bake
+// (it walks real elements) can serialize them.
+//
+// It is refused anyway, on the wave-8 denominator rule: the wall is not
+// separable from the accidentally-deliverable subset. A transition frozen at
+// `.ready` with `animation-play-state: paused` paints the OLD snapshot, which
+// IS the pre-script DOM — css-view-transitions/escaped-name renders three
+// green boxes on both sides (12.821 % ink each, SSIM 1.0000). 50 of the 192
+// scored cells pass, 47 with real ink, 21 at exactly 1.0000. Precision of the
+// whole-tag exclusion: 142/192 = 0.740.
+//
+// These pins hold the DECISION, not the prose: the tag must keep firing as a
+// label, and must never gain the power to drop a test out of the denominator.
+
+test('wave37 W5: a view-transitions tag alone never score-excludes a test', () => {
+  // The exact shape of the 142 failing cells: tagged, no delivery stamp that
+  // could re-admit it, and still scored. If a future wave adds the tag to any
+  // exclusion family this flips and the 50 passing cells vanish silently.
+  const web = { ssim: 0.8449, wptPass: false };
+  assert.equal(applyNaScoreGate(['requires-view-transitions'], [web]), false);
+  assert.equal(web.wptPass, false);
+  assert.equal(web.scoreExcluded, undefined);
+});
+
+test('wave37 W5: the view-transitions tag does not smuggle in a wall exclusion', () => {
+  // 92 of the 195 section tests ALSO carry requires-script-mutation, a real
+  // EXTRACTION_WALL member — but 178 of them bake post-load, and the stamp is
+  // what re-admits them. The pin holds both arms so neither the wall nor the
+  // view-transition label can be read as doing the other's job.
+  const baked = { ssim: 1, wptPass: true };
+  assert.equal(applyNaScoreGate(
+    ['requires-script-mutation', 'requires-view-transitions'], [baked],
+    undefined, /* postLoadExtracted */ true), false);
+  assert.equal(baked.wptPass, true, 'a post-load-baked test stays scored');
+
+  const unbaked = { ssim: 0.3056, wptPass: false };
+  assert.equal(applyNaScoreGate(
+    ['requires-script-mutation', 'requires-view-transitions'], [unbaked]), true,
+    'without the stamp the SCRIPT wall excludes — not the view-transition tag');
+  assert.equal(unbaked.scoreExcluded, true);
+});
+
+test('wave37 W5: the print refusal covers the @page-canvas proposal too', async () => {
+  // Wave-36 refused the print EXCLUSION; wave-37 refused the print
+  // SIMULATION (honour `@page { size }` on the composed canvas). Both live on
+  // the same constant, and the second is only defensible while the refs stay
+  // screen-medium — so the pin names the fact it rests on.
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  assert.match(src, /ALL 157 css-page ref PNGs are 390 px wide/,
+    'the @page-canvas refusal must record the measurement that refused it');
+  const refSrc = await fs.readFile(
+    new URL('./capture-browser-ref.mjs', import.meta.url), 'utf8');
+  assert.equal(/emulateMediaType/.test(refSrc), false,
+    'refs are rasterised in SCREEN medium — the moment that changes, the ' +
+    '@page-canvas refusal has to be re-measured, not inherited');
+});
+
+test('wave37 W5: the refusal denominators are re-derivable from the committed map', async () => {
+  // The two refusals rest on counts, and counts rot. `webmap-v1.json` is the
+  // committed full-corpus web map both were measured on (the per-run
+  // manifests under tools/titan/runs/ are gitignored, so it is the only
+  // durable source), and this pin recomputes the precision figures quoted on
+  // REFUSED_EXCLUSION_TAGS straight from it. If a future map re-pin moves the
+  // numbers, this fails and the refusal gets re-argued instead of inherited.
+  const map = JSON.parse(await fs.readFile(
+    new URL('./results/webmap-v1.json', import.meta.url), 'utf8'));
+  const by = Object.fromEntries(map.sections.map((s) => [s.section, s]));
+
+  const vt = by['css-view-transitions'];
+  assert.equal(vt.scored, 192);
+  assert.equal(vt.pass, 50);
+  assert.equal(vt.fail, 142);
+  // Precision of the whole-tag exclusion = failing / scored. 0.740 is far
+  // under the ≥0.95 bar the accepted families sit at, and every narrowing
+  // measured in wave-37 topped out at 0.898.
+  assert.equal(Number((vt.fail / vt.scored).toFixed(3)), 0.740);
+
+  const pg = by['css-page'];
+  assert.equal(pg.scored, 157);
+  assert.equal(pg.pass, 71);
+  assert.equal(pg.fail, 86);
+  // The paged section is scored end to end — no test in it is admitted-out by
+  // an exclusion rule, which is the wave-36 M6 decision still holding.
+  assert.equal(pg.ineligible, 0);
+});
+
+test('wave37 W5: the decisions artifact agrees with the map it was derived from', async () => {
+  // tools/titan/results/wave37-W5-decisions.json carries the per-test rows the
+  // two refusals were argued from (the wave35-webmap manifests themselves are
+  // gitignored, so it is the durable copy). It must not drift from the map:
+  // an artifact that disagrees with webmap-v1 is worse than no artifact,
+  // because the refusals cite its narrowing table by name.
+  const here = (p) => new URL(p, import.meta.url);
+  const map = JSON.parse(await fs.readFile(here('./results/webmap-v1.json'), 'utf8'));
+  const art = JSON.parse(await fs.readFile(here('./results/wave37-W5-decisions.json'), 'utf8'));
+  const by = Object.fromEntries(map.sections.map((s) => [s.section, s]));
+  for (const section of ['css-view-transitions', 'css-page']) {
+    const d = art.decisions[section];
+    assert.equal(d.scored, by[section].scored, `${section} scored`);
+    assert.equal(d.pass, by[section].pass, `${section} pass`);
+    assert.equal(d.fail, by[section].fail, `${section} fail`);
+    assert.equal(art.rows[section].length, by[section].tests, `${section} row count`);
+  }
+  // The two facts the refusals actually turn on, held as data rather than prose.
+  assert.deepEqual(art.decisions['css-page'].distinctRefPngWidths, [390],
+    'every css-page ref is a screen-medium render at the canvas width');
+  assert.equal(art.decisions['css-view-transitions'].precisionOfWholeTagExclusion, 0.74);
+  assert.ok(art.decisions['css-view-transitions'].narrowingsMeasured
+    .every((n) => n.precision === null || n.precision < 0.95),
+    'no narrowing may reach the bar while the refusal stands');
+});
+
+test('wave37 W5: the at-HEAD verification runs lost no cells and only strengthen the refusal', async () => {
+  // Both sections were re-run web-only at HEAD (run-id wave37-W5) against the
+  // pre-FX map. The lane changes nothing the pipeline executes, so the bar is
+  // absolute: zero cells lost. And because every extractor improvement grows
+  // the accidentally-deliverable subset, the view-transition exclusion's
+  // precision must MOVE DOWN, never up — if it ever climbs past 0.95 the
+  // refusal is due for a re-argument rather than an inheritance.
+  const art = JSON.parse(await fs.readFile(
+    new URL('./results/wave37-W5-decisions.json', import.meta.url), 'utf8'));
+  for (const section of ['css-page', 'css-view-transitions']) {
+    const v = art.verification[section];
+    assert.equal(v.cellsLost, 0, `${section} must lose no cells`);
+    assert.ok(v.head.pass >= v.map.pass, `${section} must not regress vs the map`);
+    assert.equal(v.head.scored, v.map.scored, `${section} denominator must not move`);
+  }
+  const vt = art.verification['css-view-transitions'];
+  assert.equal(vt.precisionOfWholeTagExclusionAtHead, 0.719);
+  assert.ok(vt.precisionOfWholeTagExclusionAtHead
+    < art.decisions['css-view-transitions'].precisionOfWholeTagExclusion,
+    'a better extractor must weaken the exclusion case, not strengthen it');
 });
