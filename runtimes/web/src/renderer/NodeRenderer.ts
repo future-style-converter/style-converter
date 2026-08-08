@@ -132,9 +132,18 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
       className,
     };
     if (elementName === 'img') {
-      // Image source: skin-supplied (harness placeholder) or absent —
-      // the wire carries no src yet (wave-9 content-contract gap).
-      const src = options?.resolveImageSource ? options.resolveImageSource(ctx) : undefined;
+      // Image source. wave-36 closes the wave-9 content-contract gap: the
+      // wire now carries the replaced element's source in `meta.attrs.src`
+      // (a producer-relative PATH, exactly like `fontFaces[].src` — the
+      // CONSUMER resolves it, because only the consumer knows where its
+      // asset origin is). The skin hook still has the last word, since
+      // resolving that path is precisely the consumer-side knowledge the
+      // core must not hard-code; with no hook we emit the wire value
+      // verbatim, which is right for a production wire carrying real URLs.
+      const wireSrc = component.meta?.attrs?.src;
+      const src = options?.resolveImageSource
+        ? options.resolveImageSource(ctx)
+        : (typeof wireSrc === 'string' && wireSrc.length > 0 ? wireSrc : undefined);
       if (src !== undefined) voidProps.src = src;
       // The component's text is the natural alt text of an <img>.
       voidProps.alt = typeof text === 'string' ? text : '';

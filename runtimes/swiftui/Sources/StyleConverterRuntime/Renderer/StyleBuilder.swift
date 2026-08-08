@@ -256,6 +256,13 @@ struct ComponentStyle {
     // `count` drives the block-level full-width default for auto-width
     // multicol containers in ComponentRenderer (Columns_Decorated).
     var columns: ColumnsConfig? = nil
+
+    // CSS `zoom` (css-viewport-1). Nil when the IR carried no Zoom, in
+    // which case ZoomApplier chains as identity. Non-nil it carries the
+    // used scale factor that ZoomLayout multiplies the element's slot AND
+    // its whole painted subtree by — see StyleEngine/rendering/
+    // ZoomApplier.swift and its Compose twin.
+    var zoom: ZoomConfig? = nil
 }
 
 // MARK: - Builder
@@ -273,6 +280,20 @@ enum StyleBuilder {
             .flatMap({ ValueExtractors.extractPx($0.data) }) {
             s.spacing.context.fontSizePx = Double(fs)
         }
+        // wave-36 lane M8 — the UA fixed-default font size. An element that
+        // declares NO font-size but whose FIRST declared family is the
+        // `monospace` generic computes to 13px, not 16 (CSS Fonts 4 §3.5's
+        // `medium` keyword resolved against `defaultFixedFontSize`; see
+        // MonospaceUAFontSize for the two pixel measurements that pin it).
+        // It has to land HERE, in Phase 2, because SpacingContext.fontSizePx
+        // is the resolution base for every font-relative SIZING unit that the
+        // spacing/sizing extractors below will consume — block-ellipsis-001's
+        // `width: 63.1ch` and block-ellipsis-029's `margin: 1em` are exactly
+        // such units, so a 16px base mis-sized the box as well as the glyphs.
+        // Held in a local as well so the typography bridge further down can
+        // reuse the SAME decision instead of recomputing it.
+        let monospaceUaPx = MonospaceUAFontSize.resolvePx(from: properties)
+        if let ua = monospaceUaPx { s.spacing.context.fontSizePx = ua }
 
         // Phase 2: extract each spacing family once via the new extractors.
         // Properties in `PropertyRegistry.migrated` are then skipped in the
@@ -374,6 +395,13 @@ enum StyleBuilder {
         // is present; the typed count feeds ComponentRenderer's
         // block-full-width fold for auto-width multicol containers.
         s.columns = ColumnsExtractor.extract(from: properties)
+        // CSS `zoom` (css-viewport-1). Dedicated extractor rather than the
+        // rendering-hint bag: the factor lives under `value` in a tagged
+        // object, which the generic keyword fold flattens to the string
+        // "number" — see ZoomExtractor.swift's header. "Zoom" stays owned
+        // by RenderingProperty in the registry; RenderingApplier is
+        // identity, so only this config reaches a modifier.
+        s.zoom = ZoomExtractor.extract(from: properties)
         // CSS 2.1 §11.1.2 — the legacy `clip` property "applies to:
         // absolutely positioned elements" ONLY. On a static/relative
         // element web ignores `clip: rect(...)` entirely; iOS used to
@@ -405,7 +433,13 @@ enum StyleBuilder {
         // textAlign` directly. Mirror the aggregate's values so preview
         // labels keep reflecting the declared typography.
         if let agg = s.typography {
+            // wave-36 lane M8: the UA fixed default (13px) stands in for the
+            // absent `font-size` ONLY on a first-family-monospace element —
+            // everywhere else `monospaceUaPx` is nil and the field stays nil,
+            // so every `textConfig.fontSize ?? 16` bottom-out in
+            // ComponentRenderer is byte-identical to before.
             if let px = agg.fontSizePx     { s.text.fontSize = px }
+            else if let ua = monospaceUaPx { s.text.fontSize = CGFloat(ua) }
             if let w = agg.fontWeight      { s.text.fontWeight = w }
             if let it = agg.italic         { s.text.fontItalic = it }
             if let tr = agg.letterSpacingPx { s.text.letterSpacing = tr }
@@ -810,17 +844,45 @@ enum StyleBuilder {
     }
 
     /// Web-harness min-box floor decision (see MinBoxFloor below): the
-    /// floor applies per axis only when the IR declared NO width/min/max
-    /// on that axis — mirrors apps/web-harness ComponentRenderer.tsx
-    /// (`minWidth: styles.minWidth || (max ? '0' : (width || '50px'))`).
+    /// floor applies per axis only when the IR declared no width and no
+    /// min-* on that axis. A max-* cap does NOT disable it.
     /// Split out as a pure function so XCTest pins the truth table.
+    ///
+    /// WAVE-36 M6 — THE HONESTY SWEEP repaired this gate. It used to also
+    /// require `maxWidth == nil` / `maxHeight == nil`, which made iOS the
+    /// ONLY platform where a max-* cap could collapse a childless box to
+    /// nothing, and the committed baseline recorded that collapse:
+    /// `fixtures/visual-test.json` `Sizing_MaxWidthPercent`
+    /// (`max-width: 80%; height: 50px; background: #8e44ad`, no width)
+    /// ships `tools/visual/baseline/{web,Android}__004_Sizing_MaxWidthPercent.png`
+    /// with a 50×50 purple square at (16,16) — 2,414 purple pixels each,
+    /// byte-identical — while the iOS baseline carries ZERO purple pixels.
+    /// A cap is a ceiling, not a reason to let a box vanish; CSS 2.1 §10.4
+    /// resolves the used width as max(min-width, min(width, max-width)),
+    /// so a 0px used width here is wrong on its own terms too.
+    ///
+    /// THE PARITY TARGETS, both of which already exclude max-*:
+    ///   • Compose — `hasExplicitWidth  = type in [Width, MinWidth,
+    ///     InlineSize, MinInlineSize]` and its height twin
+    ///     (runtimes/compose/.../core/renderer/ComponentRenderer.kt);
+    ///   • web — the wave-35 branch in apps/web-harness ComponentRenderer.tsx
+    ///     that keeps the placeholder floor under a cap with no declared
+    ///     width (`(styles.width || styles.inlineSize) ? '0' : '50px'`),
+    ///     whose own comment asserts "SwiftUI's MinBoxFloor mirrors it".
+    ///     It did not. Now it does.
+    ///
+    /// SCOPE: WPT capture drops the floor entirely (MinBoxFloor's
+    /// wptCaptureMode branch), so no corpus cell can move; only the 327-pair
+    /// product baseline is in range, and only its two max-*-declaring
+    /// components — `Sizing_MinMax` bottoms out on its explicit
+    /// `min-width: 100px` and is untouched, leaving exactly one capture
+    /// affected: iOS__004_Sizing_MaxWidthPercent.png.
     static func minFloor(for size: SizeConfig) -> (width: CGFloat?, height: CGFloat?) {
-        // Inline axis: any explicit width-family constraint disables it.
-        let w: CGFloat? = (size.width == nil && size.minWidth == nil
-                           && size.maxWidth == nil) ? 50 : nil
+        // Inline axis: a declared width or min-width disables it. maxWidth is
+        // deliberately absent — see the parity note above.
+        let w: CGFloat? = (size.width == nil && size.minWidth == nil) ? 50 : nil
         // Block axis: same rule with the height family.
-        let h: CGFloat? = (size.height == nil && size.minHeight == nil
-                           && size.maxHeight == nil) ? 30 : nil
+        let h: CGFloat? = (size.height == nil && size.minHeight == nil) ? 30 : nil
         return (w, h)
     }
 
@@ -1179,6 +1241,16 @@ extension View {
             .modifier(EffectsModifier(effect: style.effect))
             .engineSpacingMargin(style.spacing.margin, context: style.spacing.context)
             .engineSpacingMarginTrim(style.spacing.marginTrim)
+            // CSS `zoom` (css-viewport-1 §"The zoom property") — LAST, so
+            // in SwiftUI's inner→outer chain it is the OUTERMOST node.
+            // `zoom` multiplies the element's USED values (every length,
+            // spacing band, border width, font size) AND the layout slot
+            // it occupies, so the whole chain above — box paint, sizing,
+            // transforms, filters, and the margin band right before it —
+            // has to sit inside for the multiplication to cover it.
+            // Identity unless the IR carried a real factor, so every other
+            // element in the corpus keeps a byte-identical view tree.
+            .engineZoom(style.zoom)
     }
 }
 

@@ -123,7 +123,24 @@ data class IRAttrs(
     // every positional construction of it) is untouched. Decoded for wire
     // completeness; Compose paints the baked [IRComponent.markerText]
     // instead of counting from it. Twin of Swift IRAttrs.start.
-    val start: String? = null
+    val start: String? = null,
+    // wave-36 lane M1: the REPLACED-ELEMENT SOURCE — a third disjoint attr
+    // lane (img/embed/object/video). ONE canonical key whatever the markup
+    // spelled (`src` on img/embed, `data` on object per HTML §4.8.7,
+    // `poster` on video per §4.8.9), carrying a PRODUCER-RELATIVE PATH or a
+    // `data:` URI — never a payload — on the same consumer-resolves
+    // contract as the document-level `fontFaces[].src`
+    // (schema/spec/04-metadata-fields.md).
+    //
+    // DECODED, NOT YET PAINTED. Compose has no asset origin for a
+    // producer-relative corpus path (a device cannot read the host's disk —
+    // the same asymmetry the @font-face channel documents), so this field
+    // exists so the strict v2 envelope ACCEPTS the key rather than throwing
+    // on a wire the web consumer needs. Painting it is the named follow-up:
+    // a bundling hop like the two feeders' --wpt-dir copy, then an
+    // AsyncImage/Painter in ComponentRenderer. Appended LAST for the same
+    // positional-construction reason `start` was. Twin of Swift IRAttrs.src.
+    val src: String? = null
 )
 
 /**

@@ -14,10 +14,21 @@
 // `<br clear>` markers (the natives' availableWidth=∞ twin, pin P4), and
 // the over-wide run overflows the synthetic frame visibly (CSS
 // overflow:visible), matching the ref crop.
+//
+// WEB-ONLY DIVERGENCE (wave-36 lane M5, pin P7): that wrapper is a BFC,
+// and CSS Shapes 1 exclusion only reaches line boxes inside the float's
+// OWN BFC — so packing a `shape-outside` float makes its declaration
+// inert and the surrounding content stops wrapping (measured on
+// css-shapes shape-outside-content-box-001: 0.65 ssim, 1.0000 once the
+// float is left unpacked). `shapesContent` below is therefore
+// DELIBERATELY absent from the natives' ChildFacts: neither Compose nor
+// SwiftUI implements float exclusion at all, so gating their packers on
+// shape-outside would only cost them the packing with nothing gained.
 
 import type { CSSProperties } from 'react';
 import { extractClear } from './ClearExtractor';
 import { extractFloat } from './FloatExtractor';
+import { extractShapeOutside } from '../shapes/ShapeOutsideExtractor';
 import type { IRPropertyLike } from './_shared';
 
 // P6 — the composed-WPT ref line-box pin, in CSS px: 16px ref font ×
@@ -29,7 +40,7 @@ import type { IRPropertyLike } from './_shared';
 // bottom margin edges, CSS 2.1 §10.6.7).
 export const FLOAT_ROW_STRUT_PX = 20;
 
-/** Per-sibling facts the segmenter consumes (pins P1/P2). */
+/** Per-sibling facts the segmenter consumes (pins P1/P2/P7). */
 export interface FloatChildFacts {
   // P1: Float ∈ {left, inline-start} — the engine's kebab keywords.
   floatsLeft: boolean;
@@ -37,6 +48,14 @@ export interface FloatChildFacts {
   // the `<br clear>` IR shape. clear:right does NOT clear a left run
   // (§9.5.2: clearance only past same-side floats).
   clearBreaksLeft: boolean;
+  // P7 (wave-36 lane M5): the float declares a non-`none` shape-outside,
+  // so it is NOT packable. css-shapes-1 §1 defines the float's exclusion
+  // area for the line boxes that share its block formatting context —
+  // hoisting it into the run wrapper's own BFC makes the declaration
+  // inert by construction and the surrounding content stops wrapping.
+  // Optional so existing call sites (and their pinned literals) stay
+  // byte-compatible; absent reads as `false`, today's behaviour.
+  shapesContent?: boolean;
 }
 
 /**
@@ -55,6 +74,10 @@ export function floatChildFacts(properties: IRPropertyLike[], hasChildren: boole
   // FloatPropertyParser emission set.
   const floats = float === 'left' || float === 'inline-start'
     || float === 'right' || float === 'inline-end';
+  // P7 — the declared shape-outside, through the engine's own extractor
+  // (single owner of that wire, so junk / unknown variants fold to
+  // `undefined` here exactly as they do in the style pass).
+  const shape = extractShapeOutside(properties).value;                // CSS text or undefined
   return {
     // P1 — left-family floats only; right/inline-end keep today's path (F4).
     floatsLeft: float === 'left' || float === 'inline-start',
@@ -63,6 +86,9 @@ export function floatChildFacts(properties: IRPropertyLike[], hasChildren: boole
       !hasChildren &&
       !floats &&
       (clear === 'both' || clear === 'left' || clear === 'inline-start'),
+    // P7 — a declared, non-`none` shape-outside makes this float
+    // unpackable (see FloatChildFacts); `none` declares no exclusion.
+    shapesContent: shape !== undefined && shape !== 'none',
   };
 }
 
@@ -78,12 +104,14 @@ export interface FloatSegment {
 }
 
 /**
- * P1 — split the sibling list into maximal float runs and singles.
+ * P1/P7 — split the sibling list into maximal float runs and singles.
  * A run is ≥2 CONSECUTIVE left-floating siblings; anything else (clear
- * marker, right float, in-flow box) ends the streak and renders as a
- * single. Lone left-floats stay singles too — the browser already lays
- * one float correctly, keeping the gated surface minimal (F4).
- * Byte-parallel with the natives' FloatRowPacking.segment.
+ * marker, right float, in-flow box, SHAPED float) ends the streak and
+ * renders as a single. Lone left-floats stay singles too — the browser
+ * already lays one float correctly, keeping the gated surface minimal
+ * (F4). Byte-parallel with the natives' FloatRowPacking.segment apart
+ * from the P7 shaped-float breaker (see the header for why that arm is
+ * web-only).
  */
 export function segmentFloatRuns(children: FloatChildFacts[]): FloatSegment[] {
   // Output accumulator — segments in sibling order.
@@ -107,7 +135,12 @@ export function segmentFloatRuns(children: FloatChildFacts[]): FloatSegment[] {
   };
   // Single pass over the siblings, building streaks.
   children.forEach((c, i) => {
-    if (c.floatsLeft) {
+    // P7 — a shaped float can never join (or continue) a run: the run
+    // wrapper is a BFC, and a float's shape-outside exclusion only
+    // applies to line boxes inside its own BFC. Treating it as a
+    // breaker keeps sibling order and hands it to the plain child path,
+    // where the browser runs the real exclusion.
+    if (c.floatsLeft && c.shapesContent !== true) {
       // Extend the current left-float streak.
       streak.push(i);
     } else {

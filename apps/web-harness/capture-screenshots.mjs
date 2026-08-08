@@ -234,6 +234,45 @@ try {
     document.fonts?.ready ?? Promise.resolve()
   );
 
+  // ── wave-36 lane M1: the IMAGE DELIVERY gate ───────────────────────────────
+  //
+  // The exact twin of the @font-face gate below, for the exact same reason.
+  // The wire now carries replaced-element sources (`meta.attrs.src`, routed
+  // through vite's /wpt-image/ middleware), and an <img> whose fetch has not
+  // finished paints NOTHING — no placeholder, no error, just a correctly
+  // sized empty box. That is indistinguishable in the screenshot from "the
+  // renderer failed to apply object-fit", which is precisely the measurement
+  // this lane exists to make. So: await every image's decode, then SAY how
+  // many never arrived.
+  //
+  // `decode()` is the wait, not `load`: it resolves only once the bitmap is
+  // ready to paint, which is the state the screenshot actually needs, and it
+  // rejects (rather than hanging) on a failed fetch. Images with no `src`
+  // attribute at all are excluded — a source-less <img> is legitimately
+  // 0×0 and complete, not a delivery failure.
+  //
+  // Non-fatal by design, like the font gate: one unreachable corpus image
+  // must not take down a section's other 40 tests. Loud, then honest.
+  const imageReport = await page.evaluate(async () => {
+    const imgs = [...document.images].filter((im) => im.getAttribute('src'));
+    await Promise.all(imgs.map((im) => im.decode().catch(() => {})));
+    const broken = imgs.filter((im) => !im.complete || im.naturalWidth === 0);
+    return {
+      total: imgs.length,
+      brokenCount: broken.length,
+      // A few exemplars are enough to name the route/path that failed; the
+      // full list would be thousands of identical entries on a big section.
+      sample: [...new Set(broken.map((im) => im.getAttribute('src')))].slice(0, 5),
+    };
+  });
+  if (imageReport.total > 0) {
+    console.log(`  [images] ${imageReport.total - imageReport.brokenCount} / ${imageReport.total} decoded`);
+    if (imageReport.brokenCount > 0) {
+      console.warn(`  ⚠️  ${imageReport.brokenCount} image(s) did NOT decode — those captures paint an EMPTY box ` +
+                   `(e.g. ${imageReport.sample.join(', ')})`);
+    }
+  }
+
   // ── wave-35 lane B2: the @font-face DELIVERY gate ──────────────────────────
   //
   // `fonts.ready` resolves when the font pipeline goes idle — including when

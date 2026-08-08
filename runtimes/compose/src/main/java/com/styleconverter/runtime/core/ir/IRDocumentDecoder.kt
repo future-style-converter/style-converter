@@ -127,13 +127,18 @@ object IRDocumentDecoder {
     // present (schema ir-v2.schema.json meta.runs.items — minProperties 1,
     // maxProperties 1, additionalProperties false).
     private val RUN_KEYS = setOf("text", "child")
-    // The ten attributes the wave-20 wire contract allows inside meta.attrs;
-    // anything else is a writer bug and errors like every strict envelope.
+    // The attributes the wire contract allows inside meta.attrs; anything
+    // else is a writer bug and errors like every strict envelope.
     // Wave-27 (lane CBAKE) added `start` for the disjoint ol/li ordinal
     // lane (HTML §4.4.5) — same envelope, verbatim-string typing.
+    // Wave-36 (lane M1) added `src` for the disjoint img/embed/object/video
+    // replaced-source lane — same envelope, verbatim-string typing. Adding
+    // it here is what keeps the strict decoder from REJECTING a document the
+    // web consumer needs; see IRAttrs.src for why Compose decodes but does
+    // not yet paint it.
     private val ATTR_KEYS = setOf(
         "type", "value", "checked", "multiple", "size",
-        "alt", "min", "max", "selected", "disabled", "start"
+        "alt", "min", "max", "selected", "disabled", "start", "src"
     )
     private val PROPERTY_KEYS = setOf("type", "data")
     private val SELECTOR_KEYS = setOf("condition", "properties")
@@ -421,7 +426,11 @@ object IRDocumentDecoder {
             // wave-27 lane CBAKE: the ordered-list counter origin. Verbatim
             // string lane (the extractor never coerces it) — Compose does
             // not count from it; only the web runtime does, natively.
-            start = p("start")?.contentOrNull
+            start = p("start")?.contentOrNull,
+            // wave-36 lane M1: the replaced element's image source. Verbatim
+            // string lane, same as `start` — a path (or data: URI), never a
+            // payload, and never coerced.
+            src = p("src")?.contentOrNull
         )
     }
 

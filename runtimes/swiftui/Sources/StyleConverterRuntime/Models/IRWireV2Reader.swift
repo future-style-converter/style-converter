@@ -303,10 +303,15 @@ enum IRWireV2Reader {
                         throw violation("meta.attrs must be an object", path: decoder.codingPath)
                     }
                     // Wave-27 added `start` for the disjoint ol/li ordinal
-                    // lane (HTML §4.4.5) — eleven legal attributes now.
+                    // lane (HTML §4.4.5). Wave-36 (lane M1) added `src` for
+                    // the disjoint img/embed/object/video replaced-source
+                    // lane — twelve legal attributes now. Admitting it here
+                    // is what keeps this strict reader from REJECTING a
+                    // document the web consumer needs; see IRAttrs.src for
+                    // why this runtime decodes but does not yet paint it.
                     let attrKeys: Set<String> = ["type", "value", "checked", "multiple",
                                                  "size", "alt", "min", "max", "selected",
-                                                 "disabled", "start"]
+                                                 "disabled", "start", "src"]
                     for k in o.keys where !attrKeys.contains(k) {
                         throw violation("unknown meta.attrs key '\(k)' (wave-20 wire contract)", path: decoder.codingPath)
                     }

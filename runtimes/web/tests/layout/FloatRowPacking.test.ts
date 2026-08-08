@@ -22,6 +22,10 @@ const kw = (type: string, keyword: string) => ({ type, data: keyword });
 const F: FloatChildFacts = { floatsLeft: true, clearBreaksLeft: false };
 const BR: FloatChildFacts = { floatsLeft: false, clearBreaksLeft: true };
 const X: FloatChildFacts = { floatsLeft: false, clearBreaksLeft: false };
+// P7 (wave-36 lane M5): a left float that declares shape-outside. It is
+// left-floating but UNPACKABLE — the run wrapper is a BFC and a float's
+// exclusion only reaches line boxes inside its own BFC.
+const FS: FloatChildFacts = { floatsLeft: true, clearBreaksLeft: false, shapesContent: true };
 
 describe('floatChildFacts (pins P1/P2)', () => {
   it('left and inline-start floats pack, right floats do not', () => {
@@ -48,6 +52,27 @@ describe('floatChildFacts (pins P1/P2)', () => {
     // A floating box never doubles as a break marker.
     expect(
       floatChildFacts([kw('Float', 'LEFT'), kw('Clear', 'BOTH')], false).clearBreaksLeft,
+    ).toBe(false);
+  });
+
+  it('P7 — a declared shape-outside marks the float unpackable', () => {
+    // The live css-shapes wire shapes (shape-box + basic-shape).
+    const box = { type: 'ShapeOutside', data: { type: 'content-box' } };
+    const circle = { type: 'ShapeOutside', data: { type: 'basic-shape', shape: 'circle(50%)' } };
+    expect(floatChildFacts([kw('Float', 'LEFT'), box], false).shapesContent).toBe(true);
+    expect(floatChildFacts([kw('Float', 'LEFT'), circle], false).shapesContent).toBe(true);
+    // `none` declares NO exclusion — the float stays packable.
+    expect(
+      floatChildFacts([kw('Float', 'LEFT'), { type: 'ShapeOutside', data: { type: 'none' } }], false)
+        .shapesContent,
+    ).toBe(false);
+    // No ShapeOutside wire at all → the frozen wave-19 behaviour.
+    expect(floatChildFacts([kw('Float', 'LEFT')], false).shapesContent).toBe(false);
+    // An unknown variant folds to undefined in the style pass, so it
+    // must fold to "not shaped" here too (no silent divergence).
+    expect(
+      floatChildFacts([kw('Float', 'LEFT'), { type: 'ShapeOutside', data: { type: 'made-up' } }], false)
+        .shapesContent,
     ).toBe(false);
   });
 });
@@ -81,6 +106,27 @@ describe('segmentFloatRuns (pins P1/P2)', () => {
     const segs = segmentFloatRuns([F, X, F]);
     expect(segs).toHaveLength(3);
     expect(segs.some((s) => s.isRun)).toBe(false);
+  });
+
+  it('P7 — shaped floats never pack, and break a run they sit in', () => {
+    // The css-shapes shape-box wire: TWO consecutive `float:left;
+    // shape-outside:content-box` siblings followed by the in-flow boxes
+    // that must wrap around them. Packing them into a flow-root wrapper
+    // made shape-outside inert (measured: content-box-001 0.65 ssim).
+    expect(segmentFloatRuns([FS, FS])).toEqual([
+      { indices: [0], isRun: false, strutted: false },
+      { indices: [1], isRun: false, strutted: false },
+    ]);
+    // A shaped float in the middle of a plain run splits it, and the
+    // surviving halves are lone floats → singles as well.
+    const split = segmentFloatRuns([F, FS, F]);
+    expect(split).toHaveLength(3);
+    expect(split.some((s) => s.isRun)).toBe(false);
+    // Plain runs on either side of a shaped float still pack.
+    const mixed = segmentFloatRuns([F, F, FS, F, F]);
+    expect(mixed[0]).toEqual({ indices: [0, 1], isRun: true, strutted: false });
+    expect(mixed[1]).toEqual({ indices: [2], isRun: false, strutted: false });
+    expect(mixed[2]).toEqual({ indices: [3, 4], isRun: true, strutted: false });
   });
 });
 

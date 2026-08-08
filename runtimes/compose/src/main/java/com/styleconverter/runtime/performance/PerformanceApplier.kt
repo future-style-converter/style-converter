@@ -43,6 +43,12 @@ object PerformanceApplier {
      * @param config PerformanceConfig with containment, will-change, zoom
      * @return Modified Modifier with performance optimizations
      */
+    // The zoom branch below calls the deprecated paint-only helper on
+    // purpose — this whole function is legacy and unreferenced by the
+    // renderer (StyleApplier never chains it). Suppressed rather than
+    // rewired so the deprecation stays visible on the helper itself,
+    // where a future caller would read it.
+    @Suppress("DEPRECATION")
     fun applyPerformance(modifier: Modifier, config: PerformanceConfig): Modifier {
         var result = modifier
 
@@ -128,10 +134,24 @@ object PerformanceApplier {
     /**
      * Apply CSS zoom property.
      *
+     * NOT THE RENDER PATH — do not chain this. `Modifier.scale` warps
+     * PAINT only and leaves the layout slot unzoomed, which is precisely
+     * the approximation css-viewport-1 `zoom` forbids (it multiplies used
+     * values AND the slot). The real implementation is the dedicated
+     * triplet in `rendering/` — [com.styleconverter.runtime.rendering
+     * .ZoomApplier], chained OUTERMOST by StyleApplier.applyConfig via
+     * a measure-then-scale layout node. This function survives only
+     * because [applyPerformance] (itself unreferenced by the renderer)
+     * calls it; chaining either would double-apply the factor.
+     *
      * @param modifier Starting modifier
-     * @param config ZoomConfig
+     * @param config ZoomConfig (the performance-local one, not rendering's)
      * @return Modified Modifier with scale
      */
+    @Deprecated(
+        "Paint-only zoom; use rendering.ZoomApplier.applyZoom for CSS zoom.",
+        ReplaceWith("modifier")
+    )
     fun applyZoom(modifier: Modifier, config: ZoomConfig): Modifier {
         if (config.isNormal) return modifier
         return modifier.scale(config.factor)

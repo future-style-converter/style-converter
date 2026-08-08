@@ -108,12 +108,22 @@ object TextStyleApplier {
         var textGeometricTransform: TextGeometricTransform? = null
         var lineBreak: LineBreak? = null
 
+        // wave-36 lane M8 — the UA fixed-default font size. Null on every
+        // element that declares its own font-size or whose first declared
+        // family is not the `monospace` generic, i.e. on all but a handful of
+        // corpus cells; see [MonospaceUAFontSize] for the rule and the pixel
+        // evidence. Computed BEFORE the fold so the line-height base below
+        // sees it too: `line-height: 1.4` under a bare `font-family:
+        // monospace` must multiply 13, not 16.
+        val monospaceUaSp: Float? = MonospaceUAFontSize.resolveSp(properties)
+
         // Pre-resolve FontSize so a unitless `line-height: <n>` declared
         // before FontSize in property order still multiplies against
         // the right base. CSS source order isn't guaranteed.
         val preResolvedFontSp: Float? = properties
             .firstOrNull { it.type == "FontSize" }
             ?.let { try { extractFontSize(it.data, relativeBaseSp)?.value } catch (_: Exception) { null } }
+            ?: monospaceUaSp
 
         properties.forEach { property ->
             try {
@@ -197,7 +207,12 @@ object TextStyleApplier {
             // rendered left-flushed on Android while web centered it
             // (TextAlign_Center, Android-web SSIM 0.86).
             textAlign = textAlign ?: TextAlign.Unspecified,
-            fontSize = fontSize ?: TextUnit.Unspecified,
+            // wave-36 lane M8: the UA fixed default (13sp) stands in for the
+            // absent `font-size` ONLY on a first-family-monospace element —
+            // everywhere else `monospaceUaSp` is null and the field stays
+            // Unspecified, so the renderer's own 16.sp bottom-out is
+            // byte-identical to before.
+            fontSize = fontSize ?: monospaceUaSp?.sp ?: TextUnit.Unspecified,
             fontWeight = fontWeight,
             fontStyle = fontStyle,
             fontFamily = fontFamily,

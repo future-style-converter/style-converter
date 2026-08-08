@@ -224,6 +224,40 @@ class IRDocumentDecoderTest {
         assertNull(doc.components[0].markerText)
     }
 
+    /**
+     * Wave 36, lane M1 — `meta.attrs.src` (the REPLACED-ELEMENT SOURCE lane:
+     * img/embed/object/video, one canonical key whatever the markup spelled)
+     * joins the strict attr key set and decodes as a VERBATIM string.
+     *
+     * Why the decode is load-bearing here even though Compose does not yet
+     * PAINT the source: this decoder is strict on the attr key set, so a
+     * missing entry would make it THROW on a document the web consumer
+     * needs — the entire css-images object-fit family. Accepting the key is
+     * the wire contract; painting it is the named follow-up (a device cannot
+     * read the host's corpus, the same asymmetry the @font-face channel
+     * documents). TWIN of the iOS `ConformanceTests` replaced-source case.
+     */
+    @Test
+    fun `v2 meta attrs src decodes verbatim for every replaced tag`() {
+        val doc = IRDocumentDecoder.decode(
+            """{"irVersion":2,"minReaderVersion":2,"components":[
+                {"id":"i","name":"I","properties":[],
+                 "meta":{"sourceTag":"img","attrs":{"src":"css/css-images/support/colors-16x8.png"}}},
+                {"id":"o","name":"O","properties":[],
+                 "meta":{"sourceTag":"object","attrs":{"src":"css/css-images/support/colors-16x8.svg"}}},
+                {"id":"v","name":"V","properties":[],
+                 "meta":{"sourceTag":"video","attrs":{"src":"data:image/png,%89%50"}}}]}"""
+        )
+        assertEquals("css/css-images/support/colors-16x8.png", doc.components[0].attrs?.src)
+        // <object> spells it `data` and <video> spells it `poster` in HTML;
+        // the wire normalizes both to `src`, so the decoder sees one key.
+        assertEquals("css/css-images/support/colors-16x8.svg", doc.components[1].attrs?.src)
+        // A `data:` payload is a legal wire value and is never re-resolved.
+        assertEquals("data:image/png,%89%50", doc.components[2].attrs?.src)
+        // Absence stays null — no fabricated path ever reaches a renderer.
+        assertNull(doc.components[0].attrs?.start)
+    }
+
     @Test
     fun `v2 rejects an unknown meta key even next to markerText`() {
         expectError(

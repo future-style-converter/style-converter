@@ -837,6 +837,10 @@ function isColorDivergent(histogramKL) {
  *  caught at the wave-8 device gate when every section row came back
  *  [NA-excluded]. */
 const SCORE_EXCLUDED_TAGS = new Set(['requires-bundled-asset']);
+// Exported for unit pins alongside the four families below — wave-36 M6's
+// REFUSED_EXCLUSION_TAGS pin has to be able to assert membership in ALL five
+// sets, and this was the only one the module kept private.
+export { SCORE_EXCLUDED_TAGS };
 
 /** wave-15 EXTRACTION-WALL tags — the honest-scoring boundary's second
  *  exclusion family. Like SCORE_EXCLUDED_TAGS these mark tests whose score
@@ -1082,6 +1086,38 @@ export const NATIVE_FONT_PARITY_PLATFORMS = Object.freeze(['ios-ref', 'android-r
  *  the diff. `true` would make a per-platform font boundary indistinguishable
  *  from a whole-test delivery gap in the manifest. */
 export const NATIVE_FONT_PARITY_STAMP = 'native-font-parity';
+
+/** wave-36 M6 — THE REFUSED FAMILY. Tags that were formally proposed for an
+ *  exclusion family, MEASURED against the corpus, and REJECTED. This constant
+ *  exists so the refusal is enforceable: inject-wpt-block.test.mjs asserts
+ *  that none of these appears in ANY of the five sets above, so a future wave
+ *  cannot quietly add one without deleting this pin and re-doing the
+ *  measurement that refused it.
+ *
+ *  `requires-print-medium` (wpt-not-applicable.mjs Rule 5). The wave-36
+ *  mining map's #5 opportunity asked whether paged media is a capability tier
+ *  like animation-runtime or scroll-state. It is not, for a reason about the
+ *  REFS rather than about pagination: capture-browser-ref.mjs rasterises every
+ *  ref in SCREEN medium (it never calls emulateMediaType('print')), so for
+ *  most `-print` tests the acceptance target is an ordinary screen render and
+ *  pagination never enters the diff.
+ *
+ *  MEASURED over all 275 scored tests carrying the tag, by the Rule 42/43
+ *  ceiling method (render the TEST in the refs' own Chromium under
+ *  capture-browser-ref.mjs's canvas contract, diff with diffWebVsRef):
+ *  Chromium reaches the committed ref on 193 of 275, INCLUDING 140 of the 141
+ *  cells we already pass. Excluding on the tag would therefore silence 193
+ *  reachable targets to hide 82 unreachable ones — precision 0.298, and the
+ *  wave-8 denominator-gutting failure repeated. Every cheap static narrowing
+ *  scored no better (@page 0.383, @page{size} 0.380, forced break 0.268, full
+ *  normalised test-vs-ref source delta 0.304).
+ *
+ *  The tag stays SCORED. Its 53 failures with a ≥0.95 ceiling are ordinary
+ *  bugs — wave-36 M6 fixed 8 of them in the extractor (the `<table border=1>`
+ *  presentational-attribute mapping). The 82 unreachable ones are closed by
+ *  giving the pipeline a print medium on both sides + a CANVAS_REV bump, not
+ *  by an exclusion. */
+export const REFUSED_EXCLUSION_TAGS = Object.freeze(['requires-print-medium']);
 
 /** wave-30 B4(b) per-platform gate (pure — exported for unit tests).
  *

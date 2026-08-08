@@ -239,6 +239,20 @@ object TypographyExtractor {
             }
         }
 
+        // wave-36 lane M8 — the UA fixed-default font size. An element that
+        // declares NO font-size but whose FIRST declared family is the
+        // `monospace` generic computes to 13px, not 16 (CSS Fonts 4 §3.5's
+        // `medium` keyword resolved against `defaultFixedFontSize`; see
+        // [MonospaceUAFontSize] for the two pixel measurements that pin it).
+        // It has to land HERE, on the extracted config, because
+        // StyleApplier.buildSpacingContext reads `config.typography.fontSize`
+        // as the resolution base for every font-relative SIZING unit — and
+        // block-ellipsis-001's `width: 63.1ch` is exactly such a unit, so a
+        // 16px base mis-sized the box as well as the glyphs.
+        if (config.fontSize == null) {
+            MonospaceUAFontSize.resolveSpFromPairs(properties)?.let { config = config.copy(fontSize = it.sp) }
+        }
+
         // Build extended text decoration if any decoration properties were set
         if (decoLine != null || decoColor != null || decoThickness != null ||
             decoUnderlineOffset != null || decoUnderlinePosition != TextUnderlinePosition.AUTO) {

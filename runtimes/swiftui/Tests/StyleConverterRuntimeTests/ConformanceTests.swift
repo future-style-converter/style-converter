@@ -239,6 +239,36 @@ final class ConformanceTests: XCTestCase {
         XCTAssertNil(try byName(doc, "Marker_BulletOutOfScope").meta?.markerText)
     }
 
+    // MARK: - wave-36 lane M1: meta.attrs.src (the replaced-source lane)
+
+    /// `meta.attrs.src` — the REPLACED-ELEMENT SOURCE lane (img/embed/object/
+    /// video, one canonical key whatever the markup spelled) — joins the
+    /// strict attr key set and decodes as a VERBATIM string.
+    ///
+    /// Why the decode is load-bearing even though this runtime does not yet
+    /// PAINT the source: the v2 reader is strict on the attr key set, so a
+    /// missing entry would make it THROW on a document the web consumer needs
+    /// — the whole css-images object-fit family. Accepting the key is the
+    /// wire contract; painting it is the named follow-up (a device cannot
+    /// read the host's corpus, the same asymmetry the @font-face channel
+    /// documents). TWIN of the Compose `IRDocumentDecoderTest` case.
+    func testV2MetaAttrsSrcDecodesVerbatim() throws {
+        let json = """
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "i-1", "name": "I", "properties": [],
+            "meta": { "sourceTag": "img",
+                      "attrs": { "src": "css/css-images/support/colors-16x8.png" } } },
+          { "id": "v-1", "name": "V", "properties": [],
+            "meta": { "sourceTag": "video", "attrs": { "src": "data:image/png,%89%50" } } } ] }
+        """
+        let doc = try decodeDoc(json)
+        XCTAssertEqual(try byName(doc, "I").meta?.attrs?.src, "css/css-images/support/colors-16x8.png")
+        // A `data:` payload is a legal wire value and is never re-resolved.
+        XCTAssertEqual(try byName(doc, "V").meta?.attrs?.src, "data:image/png,%89%50")
+        // Absence stays nil — no fabricated path ever reaches a renderer.
+        XCTAssertNil(try byName(doc, "I").meta?.attrs?.start)
+    }
+
     /// `markerText` is additive, not a licence to invent siblings: an
     /// unknown meta key next to it is still a hard error (spec 05 rule 3).
     func testV2UnknownMetaKeyStillErrorsBesideMarkerText() {

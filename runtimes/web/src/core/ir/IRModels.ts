@@ -184,6 +184,15 @@ export interface IRMeta {
    * and value on meter/progress — are numbers where numeric, everything
    * else verbatim source strings (schema/ir-v2.schema.json meta.attrs).
    * Application policy lives in renderer/WidgetAttrs.ts.
+   *
+   * Two disjoint lanes share the envelope: wave-27 adds `start` for
+   * `ol`/`li`, and wave-36 adds `src` for the REPLACED elements
+   * (img/embed/object/video) — the canonical key for the element's image
+   * source whatever attribute spelled it (`src`/`data`/`poster`),
+   * carrying a producer-relative PATH or a `data:` URI, never a payload.
+   * `src` is read by NodeRenderer's <img> branch (and resolved by the
+   * consumer, per schema/spec/04-metadata-fields.md), not by
+   * WidgetAttrs.ts — img is not a widget tag.
    */
   attrs?: Record<string, string | number | boolean> | null;
   /**

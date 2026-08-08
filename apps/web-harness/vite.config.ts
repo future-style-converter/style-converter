@@ -39,22 +39,68 @@ const FONT_CONTENT_TYPES: Record<string, string> = {
   otc: 'font/collection',
 }
 
+// ── wave-36 lane M1: the /wpt-image/ static route ────────────────────────────
+//
+// The SAME contract as /wpt-font/, one lane over. The wire's `meta.attrs.src`
+// (tools/titan/extract-fixture.mjs, the REPLACED_SRC_TAGS banner) carries the
+// corpus-relative PATH of a replaced element's image — `<img src>`, `<embed
+// src>`, `<object data>`, `<video poster>` — not a payload, for the same
+// reason fonts don't: the css-images corpus reuses eight support images across
+// ~2,600 element references, and percent-encoding them into the fixture would
+// have cost ~4.6 MB of JSON on one section. ComponentRenderer.tsx turns each
+// path into `/wpt-image/<that path>`; this middleware is the other half.
+//
+// Same security posture, deliberately: resolved-path containment (so
+// `%2e%2e/` cannot escape after decoding), a CLOSED extension table, GET/HEAD
+// only. The table is byte-parallel with the extractor's REPLACED_IMAGE_FORMATS
+// — a format the extractor will put on the wire and this route refuses would
+// be a guaranteed silent 404, which is the failure mode both halves exist to
+// prevent.
+const IMAGE_CONTENT_TYPES: Record<string, string> = {
+  png: 'image/png',
+  gif: 'image/gif',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  bmp: 'image/bmp',
+  ico: 'image/x-icon',
+  svg: 'image/svg+xml',
+  avif: 'image/avif',
+}
+
 /** The URL prefix, pinned against useFontFaces.ts's WPT_FONT_ROUTE by the
  *  harness unit test so a rename cannot half-land. */
 const WPT_FONT_ROUTE = '/wpt-font/'
 
-/** Serve font files out of the WPT corpus mirror under /wpt-font/. */
-function wptFontRoute(corpusRoot: string): Plugin {
+/** The image prefix, pinned against ComponentRenderer.tsx's
+ *  WPT_IMAGE_ROUTE by the harness unit test, same as the font pair. */
+const WPT_IMAGE_ROUTE = '/wpt-image/'
+
+/**
+ * Serve corpus files under one URL prefix, restricted to one closed
+ * extension→Content-Type table.
+ *
+ * Factored out of the wave-34 font route when the image lane arrived: the
+ * two differ ONLY in prefix and table, and forking the middleware would have
+ * meant two copies of the containment check — the one part of this file that
+ * must never drift.
+ */
+function wptCorpusRoute(
+  name: string,
+  routePrefix: string,
+  contentTypes: Record<string, string>,
+  corpusRoot: string,
+): Plugin {
   return {
-    name: 'sc-wpt-font-route',
+    name,
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = req.url ?? ''
-        if (!url.startsWith(WPT_FONT_ROUTE)) return next()
+        if (!url.startsWith(routePrefix)) return next()
         if (req.method !== 'GET' && req.method !== 'HEAD') return next()
         // Strip the query/hash vite's dev server may append, then decode:
         // the corpus has spaces and parentheses in some support paths.
-        const rawPath = url.slice(WPT_FONT_ROUTE.length).split(/[?#]/)[0]
+        const rawPath = url.slice(routePrefix.length).split(/[?#]/)[0]
         let rel: string
         try {
           rel = decodeURIComponent(rawPath)
@@ -68,7 +114,7 @@ function wptFontRoute(corpusRoot: string): Plugin {
         // corpus root's name would pass.
         if (abs !== corpusRoot && !abs.startsWith(corpusRoot + sep)) return next()
         const ext = /\.([A-Za-z0-9]+)$/.exec(abs)?.[1]?.toLowerCase()
-        const type = ext ? FONT_CONTENT_TYPES[ext] : undefined
+        const type = ext ? contentTypes[ext] : undefined
         if (!type) return next()
         let size: number
         try {
@@ -101,7 +147,11 @@ const REPO_ROOT = resolve(__dirname, '..', '..')
 const WPT_CORPUS_ROOT = resolve(process.env.WPT_DIR ?? resolve(REPO_ROOT, 'tools', 'wpt'))
 
 export default defineConfig({
-  plugins: [react(), wptFontRoute(WPT_CORPUS_ROOT)],
+  plugins: [
+    react(),
+    wptCorpusRoute('sc-wpt-font-route', WPT_FONT_ROUTE, FONT_CONTENT_TYPES, WPT_CORPUS_ROOT),
+    wptCorpusRoute('sc-wpt-image-route', WPT_IMAGE_ROUTE, IMAGE_CONTENT_TYPES, WPT_CORPUS_ROOT),
+  ],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
