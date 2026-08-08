@@ -193,7 +193,7 @@ const WPT_IMAGE_ROUTE = '/wpt-image/';
  * halves must agree on the escaping. `/` separators are preserved (encoding
  * them would defeat the route's own path resolution).
  */
-function wptImageSrc(component: { meta?: { attrs?: Record<string, unknown> | null } }): string | undefined {
+function wptImageSrc(component: { meta?: { attrs?: Record<string, unknown> | null } | null }): string | undefined {
   const raw = component.meta?.attrs?.src;
   if (typeof raw !== 'string' || raw.length === 0) return undefined;
   if (/^(?:data:|https?:|\/\/)/i.test(raw)) return raw;
