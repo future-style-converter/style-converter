@@ -1116,8 +1116,103 @@ export const NATIVE_FONT_PARITY_STAMP = 'native-font-parity';
  *  bugs — wave-36 M6 fixed 8 of them in the extractor (the `<table border=1>`
  *  presentational-attribute mapping). The 82 unreachable ones are closed by
  *  giving the pipeline a print medium on both sides + a CANVAS_REV bump, not
- *  by an exclusion. */
-export const REFUSED_EXCLUSION_TAGS = Object.freeze(['requires-print-medium']);
+ *  by an exclusion.
+ *
+ *  wave-37 W5 FOLLOW-UP — the OTHER half of the print question, and the same
+ *  answer. Wave-36 refused the EXCLUSION; the map's css-page row (157 tests,
+ *  45.2 %, 86 failures) left open whether the harness could instead SIMULATE
+ *  the page box — honour `@page { size / margin }` on the composed canvas the
+ *  way it honours `?width=`. Measured on the frozen wave35-webmap css-page
+ *  manifest and REFUSED, for a reason that follows straight from the sentence
+ *  above: the refs never use the page size.
+ *    - ALL 157 css-page ref PNGs are 390 px wide — CANVAS_WIDTH, i.e.
+ *      REF_RENDER_WIDTH + 2·CANVAS_PAD_PX — while the tests they answer
+ *      declare `@page { size: }` of 293px, 300×50px, 400×300px, 500px, a5,
+ *      `portrait`, … Ref heights DO vary (600 … 2304) because a screen-medium
+ *      render is one continuous flow. `@page size` shapes neither side today.
+ *    - The refs hand-encode the EXPECTED PAGED RESULT as ordinary DOM at that
+ *      358 px viewport: page-margin-007-print-ref.html writes seven 300 px
+ *      `.pagebox` divs for a `size: 400px 200px; margin: 50px` page;
+ *      page-background-005-print-ref.html writes three `.pageborder` boxes.
+ *      A page-sized canvas would therefore move US away from a target that
+ *      was authored at the canvas width — and it would relayout the 12
+ *      currently-PASSING css-page cells that declare a non-canvas `@page
+ *      size` (basic-pagination-001/002, monolithic-overflow-031,
+ *      page-rule-specificity-001/002, page-size-001/002/003/006/011/013/014).
+ *      Zero failing cells can converge on a property the ref ignores, so the
+ *      proposal's precision is not merely low, it is undefined-over-zero.
+ *    - What the 86 failures actually need, classified from source + the
+ *      frozen frames (one test may need several): fragmentation 58 (forced
+ *      break / named-page switch in the test, or a ref PNG taller than the
+ *      600 px floor — i.e. a real paged-layout engine), the CSS Paged Media
+ *      §5.3 sixteen-box margin grid 25, page-box painting 19, orthogonal flow
+ *      6, print-medium media-query resolution 1, script mutation 1. Twelve
+ *      `margin-boxes/*` cells need the margin grid and NOTHING else — the
+ *      largest genuinely bounded sub-mechanism in the section, and still a
+ *      feature (the §5.3 auto/percentage dimension algorithm), not a canvas
+ *      tweak. None of the 86 is an ordinary renderer bug reachable without a
+ *      paged model; the eight that no signal claimed were hand-read and are
+ *      paged too (`subpixel-page-size-*` page overflow, `page-margin-
+ *      negative*` negative page margins, `safe-printable-inset-*`
+ *      `page-margin-safety`, `media-queries-003` `<frameset>` + print MQ).
+ *
+ *  `requires-view-transitions` (wpt-not-applicable.mjs Rule 16). Wave-37 W5's
+ *  other question: css-view-transitions is the map's worst big section (195
+ *  tests, 192 scored, 26 % pass, 142 failing cells), and the View Transitions
+ *  pseudo tree really is unreachable BY CONSTRUCTION — `::view-transition`,
+ *  `::view-transition-group/-image-pair/-old/-new` are UA-generated boxes in
+ *  the top layer holding SNAPSHOT IMAGES of elements. They are not in the DOM,
+ *  so neither the static extractor nor post-load-extract.mjs's computed-style
+ *  bake (which walks real elements) can ever serialize them. Pixel evidence,
+ *  wave35-webmap captures vs frozen refs: 3d-transform-incoming diverges three
+ *  ways at once — the `::view-transition { background: pink }` root layer we
+ *  paint white, the new-vs-old snapshot choice (ref blue, ours the pre-script
+ *  green), and `::view-transition-image-pair(hidden) { visibility: hidden }`
+ *  suppressing a box we still paint.
+ *
+ *  AND YET IT IS REFUSED, because the wall is not separable from a large
+ *  ACCIDENTALLY-DELIVERABLE subset. 50 of the 192 scored cells PASS today; 47
+ *  of them carry real ink (ref coverage 1.068 % … 76.496 %) and 21 sit at SSIM
+ *  exactly 1.0000 — only 3 are near-blank-vs-blank. They pass because a
+ *  transition frozen at `.ready` with `animation-play-state: paused` shows the
+ *  OLD snapshot, which IS the pre-script DOM our extractor already serializes
+ *  (escaped-name: three green boxes, 12.821 % ink on both sides, SSIM 1.0000).
+ *  Excluding on the tag would silence those 50 — precision 142/192 = 0.740,
+ *  against 1.000 for Rule 42 and the font-face wall and an effective ~1.0 for
+ *  the anchor wall (0.89 raw, but its post-load stamp re-admitted 78 of 87).
+ *
+ *  NO NARROWING REACHES THE BAR EITHER, and the ceiling is flat because ~10 %
+ *  of EVERY sub-population passes: `::view-transition {…paint…}` 0.895 (95
+ *  fires), a pseudo styled with `transform` 0.895 (19), `width/height` on a
+ *  pseudo 0.885 (26), clip/object-fit on a pseudo 0.857 (28),
+ *  `::view-transition-image-pair` 0.775 (80), a normalised test-vs-ref source
+ *  delta > 0.6 0.898 (59) — wave-36 M6's own device — plus the whole `scoped/`
+ *  and `nested/` subtrees at 0.526 / 0.625. TEN candidates, none ≥ 0.95; the
+ *  full table is tools/titan/results/wave37-W5-decisions.json.
+ *
+ *  RE-MEASURED AT HEAD, and the refusal only gets stronger. Both sections were
+ *  re-run web-only at wave-36-final (run-id wave37-W5) against the pre-FX map
+ *  they were classified from: css-view-transitions 50 → 54 of 192, css-page
+ *  71 → 75 of 157, ZERO cells lost on either. The four view-transition gains
+ *  (massive-element-right-and-left-*-onscreen-old/new, no-root-capture,
+ *  nothing-captured) push the exclusion's precision DOWN to 138/192 = 0.719 —
+ *  i.e. every improvement to the extractor enlarges the deliverable subset the
+ *  exclusion would have silenced. The four css-page gains are the whole
+ *  page-name-img-001…004 cluster reaching SSIM 1.0000 on wave-36's image
+ *  delivery, which also trims the fragmentation bucket below: the 86/58
+ *  classification is the map's, and is an UPPER bound on what needs paging.
+ *
+ *  So the tag stays SCORED and the 138 failures stay visible as what they are:
+ *  a capability tier the harness does not have. It is closed by a view-
+ *  transition CAPTURE mode (drive the transition in the ref browser and
+ *  serialize the settled pseudo tree as ordinary boxes), not by an exclusion —
+ *  and a future wave that revisits it must beat 0.719, not re-argue it. Per-
+ *  test rows, the ten-narrowing table and both verification runs are in
+ *  tools/titan/results/wave37-W5-decisions.json. */
+export const REFUSED_EXCLUSION_TAGS = Object.freeze([
+  'requires-print-medium',    // Rule 5  — paged media (wave-36 M6, wave-37 W5)
+  'requires-view-transitions', // Rule 16 — the UA pseudo tree (wave-37 W5)
+]);
 
 /** wave-30 B4(b) per-platform gate (pure — exported for unit tests).
  *

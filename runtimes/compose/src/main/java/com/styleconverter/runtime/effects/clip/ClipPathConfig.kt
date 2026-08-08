@@ -62,6 +62,15 @@ sealed interface ClipShape {
      *   50%/50% — clip-path-basic-shapes 006_ClipPath_Circle_AtCorner sat
      *   at SSIM 0.86 vs web.)
      * @param centerYDp Vertical counterpart of [centerXDp].
+     * @param centerFromRight True when the `at` clause anchored the
+     *   horizontal offset to the RIGHT edge (`circle(50% at right 40px …)`).
+     *   The css-values-4 `<position>` grammar's `[left|right]
+     *   <length-percentage>` arm cannot be normalised to a left-origin
+     *   length by the converter, which never sees the box, so the IR ships
+     *   `pos.xEdge = "right"` and the applier subtracts at draw time.
+     *   (Wave 37 lane W3 — before it, the converter dropped every keyword
+     *   `at` clause outright, so this case never reached the runtimes.)
+     * @param centerFromBottom Vertical counterpart of [centerFromRight].
      */
     data class Circle(
         val radius: ClipRadius = ClipRadius.ClosestSide,
@@ -69,6 +78,8 @@ sealed interface ClipShape {
         val centerY: Float = 50f,
         val centerXDp: Dp? = null,
         val centerYDp: Dp? = null,
+        val centerFromRight: Boolean = false,
+        val centerFromBottom: Boolean = false,
     ) : ClipShape
 
     /**
@@ -80,12 +91,23 @@ sealed interface ClipShape {
      * @param radiusY Vertical radius
      * @param centerX Horizontal center position as percentage (0-100)
      * @param centerY Vertical center position as percentage (0-100)
+     * @param centerXDp Horizontal center as an absolute length, mirroring
+     *   [Circle.centerXDp] — `ellipse(40px 60px at 20px 30px)` puts
+     *   `pos.x = {px: 20}` on the wire and a percent read would silently
+     *   recentre it.
+     * @param centerYDp Vertical counterpart of [centerXDp].
+     * @param centerFromRight See [Circle.centerFromRight].
+     * @param centerFromBottom See [Circle.centerFromBottom].
      */
     data class Ellipse(
         val radiusX: ClipRadius = ClipRadius.ClosestSide,
         val radiusY: ClipRadius = ClipRadius.ClosestSide,
         val centerX: Float = 50f,
-        val centerY: Float = 50f
+        val centerY: Float = 50f,
+        val centerXDp: Dp? = null,
+        val centerYDp: Dp? = null,
+        val centerFromRight: Boolean = false,
+        val centerFromBottom: Boolean = false,
     ) : ClipShape
 
     /**

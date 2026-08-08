@@ -20,11 +20,16 @@ data class BackgroundImageProperty(
         // url() / image() reference — payload bytes preserved case-exactly.
         @Serializable data class Url(val url: IRUrl) : BackgroundImage
         // linear-gradient() / repeating-linear-gradient() (css-images-3 §3.1).
-        @Serializable data class LinearGradient(val angle: IRAngle?, val colorStops: List<ColorStop>, val repeating: Boolean = false) : BackgroundImage
+        // `interp` is the authored <color-interpolation-method> in canonical
+        // CSS spelling (`in oklch`, `in hsl longer hue`) or null when absent —
+        // see GradientValueParsers.interpolationMethodOf for why it is carried
+        // rather than dropped. Serializes as the OPTIONAL "interp" key, so a
+        // gradient written without one is byte-identical to the pre-wave-37 wire.
+        @Serializable data class LinearGradient(val angle: IRAngle?, val colorStops: List<ColorStop>, val repeating: Boolean = false, val interp: String? = null) : BackgroundImage
         // radial-gradient() — shape/size prefix per css-images-3 §3.5.
-        @Serializable data class RadialGradient(val shape: GradientShape?, val size: GradientSize?, val position: Position?, val colorStops: List<ColorStop>, val repeating: Boolean = false) : BackgroundImage
+        @Serializable data class RadialGradient(val shape: GradientShape?, val size: GradientSize?, val position: Position?, val colorStops: List<ColorStop>, val repeating: Boolean = false, val interp: String? = null) : BackgroundImage
         // conic-gradient() — `from <angle> at <position>` per css-images-4 §3.4.4.
-        @Serializable data class ConicGradient(val angle: IRAngle?, val position: Position?, val colorStops: List<ColorStop>, val repeating: Boolean = false) : BackgroundImage
+        @Serializable data class ConicGradient(val angle: IRAngle?, val position: Position?, val colorStops: List<ColorStop>, val repeating: Boolean = false, val interp: String? = null) : BackgroundImage
         // A bare `<color>` used *as an image* — only valid inside
         // cross-fade() per css-images-4 §2.6.2 (`<cf-image> = <percentage>?
         // && [ <image> | <color> ]`); modelled as a layer so CrossFade args

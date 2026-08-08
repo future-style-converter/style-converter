@@ -74,13 +74,59 @@ function stopsToCss(stops: IRStop[]): string {
   return parts.join(', ') || 'transparent, transparent';               // fallback keeps CSS valid
 }
 
+// wave-37 lane W2 — the authored <color-interpolation-method>.
+// The converter now carries it on the gradient layer as the optional `interp`
+// key (canonical CSS spelling, e.g. 'in oklch' / 'in hsl longer hue'); before
+// that it was peeled off and thrown away, so every polar-space gradient in the
+// corpus rendered an sRGB ramp.  Chrome has interpolated in every predefined
+// and polar space since 111 (verified on the capture browser itself), so the
+// web runtime's whole job here is to put the clause back into the syntax
+// prefix, where css-images-4 §3.1's `||` combinator allows it beside the
+// angle/shape.  A layer without the key emits byte-identical CSS to before.
+// The value is a CLOSED grammar on the producing side (GradientValueParsers'
+// INTERPOLATION_COLORSPACES × HUE_METHODS), but it arrives as wire text, so it
+// is re-validated here rather than trusted into a declaration.
+// css-color-4 §12.4 splits the spaces in two, and the split is LOAD-BEARING:
+//   <color-interpolation-method> = in [ <rectangular-color-space>
+//                                     | <polar-color-space> <hue-interpolation-method>? ]
+// A hue method on a rectangular space does not parse. Measured on the capture
+// browser: CSS.supports rejects `in oklab longer hue` for all 11 rectangular
+// spaces × all 4 hue methods, and an unparsed gradient takes the WHOLE
+// background-image declaration with it. The converter records the authored
+// text verbatim (that is its job); this table is where it becomes CSS, so
+// this is where the grammar is enforced.
+const INTERP_RECTANGULAR = new Set([
+  'srgb', 'srgb-linear', 'display-p3', 'a98-rgb', 'prophoto-rgb', 'rec2020',
+  'lab', 'oklab', 'xyz', 'xyz-d50', 'xyz-d65',
+]);
+const INTERP_POLAR = new Set(['hsl', 'hwb', 'lch', 'oklch']);
+const INTERP_HUE_METHODS = new Set(['shorter', 'longer', 'increasing', 'decreasing']);
+
+// `interp` → a validated ' in <space>[ <hue-method> hue]' fragment, or ''.
+export function interpClause(obj: Record<string, unknown>): string {
+  const raw = obj.interp;                                              // absent on most layers
+  if (typeof raw !== 'string') return '';                              // nothing authored → nothing emitted
+  const t = raw.trim().toLowerCase().split(/\s+/);                     // 'in oklch longer hue'
+  if (t.length !== 2 && t.length !== 4) return '';                     // only the two legal shapes
+  if (t[0] !== 'in') return '';
+  const polar = INTERP_POLAR.has(t[1]);
+  if (!polar && !INTERP_RECTANGULAR.has(t[1])) return '';              // unknown space → drop, never emit
+  if (t.length === 2) return ` in ${t[1]}`;
+  // A hue tail is only grammatical on a polar space; anything else means the
+  // author's own declaration was invalid, and re-emitting the invalid form
+  // would delete a gradient we render today. Drop the clause, keep the ramp.
+  if (!polar || !INTERP_HUE_METHODS.has(t[2]) || t[3] !== 'hue') return '';
+  return ` in ${t[1]} ${t[2]} hue`;
+}
+
 // Reconstruct a linear-gradient() / repeating-linear-gradient() layer.
 function linearGradientCss(obj: Record<string, unknown>, repeating: boolean): string {
   const angle = extractAngle(obj.angle);                               // optional — default 180deg per spec
   const deg = angle !== null ? angle.degrees : 180;                    // spec default (top-to-bottom)
   const stops = stopsToCss((obj.stops as IRStop[] | undefined) ?? []); // color-stop list
   const prefix = repeating ? 'repeating-' : '';                        // repeating variant prefix
-  return `${prefix}linear-gradient(${deg}deg, ${stops})`;              // final CSS fragment
+  const interp = interpClause(obj);                                    // ' in oklch longer hue' or ''
+  return `${prefix}linear-gradient(${deg}deg${interp}, ${stops})`;     // final CSS fragment
 }
 
 // One gradient-center axis → CSS text. The IR position axis is a
@@ -128,11 +174,14 @@ function radialGradientCss(obj: Record<string, unknown>, repeating: boolean): st
   const sizeKey = typeof obj.size === 'string' ? obj.size : '';        // 'closest-side' etc.
   const shape = [shapeKey, sizeKey, ...head].filter(Boolean).join(' ');// combined keyword prefix
   const at = atClause(obj);                                            // 'at …' via pos-key fix
-  const head2 = shape ? `${shape}${at}` : (at ? at.trimStart() : '');  // combine shape + position
+  const interp = interpClause(obj);                                    // ' in oklch shorter hue' or ''
+  // The method may be the WHOLE prefix (`radial-gradient(in oklab, red, blue)`),
+  // so it is appended before the head-emptiness test, not after.
+  const head2 = (shape ? `${shape}${at}` : (at ? at.trimStart() : '')) + interp;
   const stops = stopsToCss(rest);                                      // real color stops only
   const prefix = repeating ? 'repeating-' : '';                        // repeating variant prefix
-  return head2                                                         // 'circle at 50% 50%, red, blue'
-    ? `${prefix}radial-gradient(${head2}, ${stops})`
+  return head2.trim()                                                  // 'circle at 50% 50%, red, blue'
+    ? `${prefix}radial-gradient(${head2.trim()}, ${stops})`
     : `${prefix}radial-gradient(${stops})`;                            // no shape -> CSS uses default
 }
 
@@ -141,12 +190,57 @@ function conicGradientCss(obj: Record<string, unknown>, repeating: boolean): str
   const angle = extractAngle(obj.angle);                               // 'from X' starting angle
   const from = angle !== null ? `from ${angle.degrees}deg` : '';       // omit when not specified
   const at = atClause(obj);                                            // ' at …' via pos-key fix (A-RC5)
-  const head = (from + at).trim();                                     // combined prefix
+  const head = (from + at + interpClause(obj)).trim();                 // combined prefix
   const stops = stopsToCss((obj.stops as IRStop[] | undefined) ?? []); // stops
   const prefix = repeating ? 'repeating-' : '';                        // repeating variant prefix
   return head                                                          // 'from 30deg at 50% 50%, red, blue'
     ? `${prefix}conic-gradient(${head}, ${stops})`
     : `${prefix}conic-gradient(${stops})`;                             // stops-only form
+}
+
+// wave-37 lane W2 — the `{raw: …}` <image> passthrough.
+//
+// BackgroundImagePropertyParser drops any <image> its typed grammar cannot
+// model into `{raw: <author bytes>}` — its documented "original author bytes
+// for runtime resolution" fallback.  This module was returning null for every
+// one of them, so the layer VANISHED: no background-image declaration at all.
+// Measured on css-images: 28 image-set() tests (the converter has no
+// image-set model — css-images-4 §2.4) and 12 gradients whose stops use a
+// colour syntax ColorParser declines (`lch(50% 100% 0deg)`) all painted
+// nothing, at ssim 0.9435–0.9705 with presence + coverage vetoes.
+//
+// The web runtime is exactly the place that resolution belongs: the value is
+// CSS, and the browser is the CSS engine.  So the raw bytes are re-emitted —
+// but only through this gate:
+//   * a CLOSED head allow-list, so a raw value that is not an <image>
+//     function (a var() reference, a stray keyword) is still dropped;
+//   * paren balance + no ';' or '}', so a malformed corpus value can never
+//     escape its inline-style declaration;
+//   * SINGLE-LAYER ONLY (see parseLayers): in a comma-joined multi-layer
+//     declaration one invalid layer would take the valid ones down with it,
+//     which is the only way this could lose a currently-passing cell.
+const PASSTHROUGH_IMAGE_FNS = [
+  'image-set(', '-webkit-image-set(',                                  // css-images-4 §2.4
+  'linear-gradient(', 'repeating-linear-gradient(',                    // css-images-3 §3.1
+  'radial-gradient(', 'repeating-radial-gradient(',                    // css-images-3 §3.5
+  'conic-gradient(', 'repeating-conic-gradient(',                      // css-images-4 §3.4.4
+];
+
+function rawImageFunctionCss(raw: string): string | null {
+  const v = raw.trim();
+  const head = v.toLowerCase();
+  if (!PASSTHROUGH_IMAGE_FNS.some((fn) => head.startsWith(fn))) return null;
+  // ';' or '}' inside an inline style value would let a malformed corpus
+  // value escape its declaration — refuse rather than sanitise.
+  if (v.includes(';') || v.includes('}')) return null;
+  let depth = 0;                                                       // paren balance
+  for (const ch of v) {
+    if (ch === '(') depth++;
+    else if (ch === ')') { depth--; if (depth < 0) return null; }       // closes too early
+  }
+  if (depth !== 0) return null;                                        // unbalanced → not a whole function
+  if (!v.endsWith(')')) return null;                                   // trailing junk after the function
+  return v;
 }
 
 // Reconstruct one layer from an arbitrary IR entry.  Returns null on garbage.
@@ -302,7 +396,18 @@ function parseLayers(data: unknown): BackgroundLayer[] {
   const layers: BackgroundLayer[] = [];                                // accumulator
   for (const entry of arr) {
     const css = layerCss(entry);                                       // reconstruct one layer
-    if (css !== null) layers.push({ css });                            // keep successful reconstructions
+    if (css !== null) { layers.push({ css }); continue; }              // keep successful reconstructions
+    // Untyped `{raw:…}` <image> — hand the author's bytes to the browser,
+    // but ONLY when it is the whole value (see rawImageFunctionCss).  This
+    // lives here rather than in layerCss so the shared serialiser mask-image
+    // and cross-fade recurse through stays byte-identical.
+    if (arr.length === 1 && entry && typeof entry === 'object') {
+      const raw = (entry as Record<string, unknown>).raw;
+      if (typeof raw === 'string') {
+        const passthrough = rawImageFunctionCss(raw);
+        if (passthrough !== null) layers.push({ css: passthrough });
+      }
+    }
   }
   return layers;
 }

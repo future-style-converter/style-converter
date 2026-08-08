@@ -228,6 +228,21 @@ enum ClipExtractor {
         // Each axis: length → nil fallback to 0.5 (no view metrics here),
         // or percent → fraction. We store length as a raw px-to-fraction
         // ratio by assuming 100px≈100% which is wrong; documented TODO.
+        //
+        // WAVE 37 (lane W3). The converter now implements the full
+        // css-values-4 `<position>` grammar for basic shapes — before, it
+        // accepted only bare lengths plus a literal `center` and DROPPED
+        // every keyword `at` clause, so `circle(50% at left bottom)`
+        // silently recentred here. Keyword-only forms arrive normalised to
+        // percentages of the default (left / top) origin, which this
+        // reader already handles correctly and gets right for free.
+        // The one arm it does not handle is the far-edge offset — the IR
+        // marks it with `pos.xEdge == "right"` / `pos.yEdge == "bottom"`
+        // and the offset is a px length — but that value falls into the
+        // pre-existing px→0.5 TODO above either way, so no NEW class of
+        // wrongness is introduced. Reading the edges belongs with the px
+        // fix, which needs view metrics this extractor does not have.
+        // Android's ClipPathApplier.axisCenter is the reference for it.
         let x = axisFraction(o["x"]) ?? 0.5
         let y = axisFraction(o["y"]) ?? 0.5
         return (CGFloat(x), CGFloat(y))

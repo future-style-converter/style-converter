@@ -7,6 +7,15 @@
 // "property absent" (last-write-wins upstream decides when to overwrite).
 export interface LineClampConfig {
   value?: string | number;                                           // serialised CSS value
+  // wave-37 lane W2 — `line-clamp: auto` (css-overflow-4 §5.1) clamps at the
+  // element's own block-size constraint, so the LINE COUNT is a used value the
+  // IR cannot carry (`{"type":"auto"}` has no count by design).  The extractor
+  // resolves it from the component's sibling max-height/height + line-height
+  // and records the result here; `auto` stays true even when the count could
+  // not be resolved, so the applier can still clip honestly rather than
+  // pretending the declaration was absent.
+  auto?: boolean;                                                    // `line-clamp: auto` was declared
+  autoLines?: number;                                                // resolved clamp count (>= 1) or absent
 }
 
 // IR property type this module recognises.  Exported so the registry / tests

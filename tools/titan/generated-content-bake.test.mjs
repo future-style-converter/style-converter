@@ -20,6 +20,8 @@ import {
   applyQuoteKeyword,
   declaresStyleContainment,
   bakeGeneratedContentText,
+  quotesForLanguage,
+  resolveAutoQuotes,
   GENERATED_CONTENT_BAKED_REASON,
 } from './generated-content-bake.mjs';
 
@@ -336,4 +338,182 @@ test('M3 bake: a foreign-namespace refusal still advances the quote depth', () =
   bakeGeneratedContentText(components);
   assert.equal(components.root.children.s._pseudo.before._text, undefined);
   assert.equal(components.root.children.d._pseudo.before._text, '1');
+});
+
+
+// ── wave-37 lane W4: THE LANG WIRE → `quotes: auto` ─────────────────────────
+//
+// Every expected mark below is READ OFF a reference in tools/wpt (the
+// css-content quotes-0NN family spells the expected marks as character
+// references in its last <p>), never recalled — see the CLDR_QUOTE_PAIRS
+// banner for the enumeration command.
+
+test('W4 quotes: the CLDR table answers each corpus language with its ref-pinned pair', () => {
+  const l1 = (lang) => quotesForLanguage(lang).pairs[0];
+  const l2 = (lang) => quotesForLanguage(lang).pairs[1];
+  // quotes-004: «አንድ ‹ሁለት› ሦስት»
+  assert.deepEqual(l1('am'), { open: '«', close: '»' });
+  assert.deepEqual(l2('am'), { open: '‹', close: '›' });
+  // quotes-005 (RTL): the root pair MIRRORED, not the root pair.
+  assert.deepEqual(l1('ar'), { open: '”', close: '“' });
+  assert.deepEqual(l2('ar'), { open: '’', close: '‘' });
+  // quotes-008: «ένα “δύο” τρία»
+  assert.deepEqual(l1('el'), { open: '«', close: '»' });
+  assert.deepEqual(l2('el'), { open: '“', close: '”' });
+  // quotes-010: «un «deux» trois» — BOTH levels are guillemets.
+  assert.deepEqual(l1('fr'), { open: '«', close: '»' });
+  assert.deepEqual(l2('fr'), { open: '«', close: '»' });
+  // quotes-015: „egy »kettő« három”
+  assert.deepEqual(l1('hu'), { open: '„', close: '”' });
+  assert.deepEqual(l2('hu'), { open: '»', close: '«' });
+  // quotes-016: 「一 『二』 三」
+  assert.deepEqual(l1('ja'), { open: '「', close: '」' });
+  assert.deepEqual(l2('ja'), { open: '『', close: '』' });
+  // quotes-021: ‘een ‘twee’ drie’ — single marks at BOTH levels.
+  assert.deepEqual(l1('nl'), { open: '‘', close: '’' });
+  assert.deepEqual(l2('nl'), { open: '‘', close: '’' });
+});
+
+test('W4 quotes: the fourteen root languages fall through instead of being duplicated', () => {
+  // quotes-006/007/012/014/017/018/019/020/022/023/024/025/027 + en all
+  // spell the ROOT pair on their references, so the table deliberately does
+  // NOT list them — this pin is what keeps that a decision and not a hole.
+  for (const lang of ['bn', 'chr', 'gu', 'hi', 'km', 'ko', 'lo', 'my',
+                      'pa', 'ta', 'th', 'zh', 'zh-Hans', 'en']) {
+    assert.deepEqual(quotesForLanguage(lang).pairs,
+      [{ open: '“', close: '”' }, { open: '‘', close: '’' }], lang);
+  }
+  // …and zh-Hant, which is NOT root, must still beat that fall-through.
+  assert.deepEqual(quotesForLanguage('zh-Hant').pairs[0], { open: '「', close: '」' });
+});
+
+test('W4 quotes: RFC 4647 lookup is case-insensitive and truncates subtags', () => {
+  // quotes-035 pins exactly these: FR→fr, eN-Us→en, Fi→fi, JA→ja,
+  // DE-LATN-DE→de, he-IL→he.
+  assert.deepEqual(quotesForLanguage('FR').pairs[0], { open: '«', close: '»' });
+  assert.deepEqual(quotesForLanguage('eN-Us').pairs[0], { open: '“', close: '”' });
+  assert.deepEqual(quotesForLanguage('Fi').pairs[0], { open: '”', close: '”' });
+  assert.deepEqual(quotesForLanguage('JA').pairs[0], { open: '「', close: '」' });
+  assert.deepEqual(quotesForLanguage('DE-LATN-DE').pairs[0], { open: '„', close: '“' });
+  assert.deepEqual(quotesForLanguage('he-IL').pairs[0], { open: '”', close: '”' });
+  // quotes-034's fallback matrix: region subtags resolve to the base tag…
+  assert.deepEqual(quotesForLanguage('fr-FR').pairs[0], quotesForLanguage('fr').pairs[0]);
+  assert.deepEqual(quotesForLanguage('ja-JA').pairs[0], quotesForLanguage('ja').pairs[0]);
+  // …and an unknown primary tag falls to root, which is what aa/zz expect.
+  assert.deepEqual(quotesForLanguage('aa').pairs[0], { open: '“', close: '”' });
+  assert.deepEqual(quotesForLanguage('zz').pairs[0], { open: '“', close: '”' });
+  // A region entry must WIN over its own truncation (quotes-011 vs -010).
+  assert.deepEqual(quotesForLanguage('fr-CH').pairs[1], { open: '‹', close: '›' });
+  // §3.4: a singleton subtag is dropped with the truncation that exposes it.
+  assert.deepEqual(quotesForLanguage('fr-Latn-FR-x-foobar').pairs[0], { open: '«', close: '»' });
+  // Absent / empty language is the same "unknown" as an unlisted tag.
+  assert.deepEqual(quotesForLanguage(null).pairs[0], { open: '“', close: '”' });
+  assert.deepEqual(quotesForLanguage('').pairs[0], { open: '“', close: '”' });
+});
+
+test('W4 quotes: resolveAutoQuotes only touches `auto`', () => {
+  const pairs = parseQuotesValue('"A" "Z"');
+  assert.equal(resolveAutoQuotes(pairs, 'ja'), pairs);          // identity
+  assert.equal(resolveAutoQuotes(parseQuotesValue('none'), 'ja').kind, 'none');
+  assert.deepEqual(resolveAutoQuotes(parseQuotesValue('auto'), 'ja').pairs[0],
+    { open: '「', close: '」' });
+});
+
+test('W4 bake: `quotes: auto` now paints, keyed by the language on the wire', () => {
+  // The wave-36 refusal ("auto is reported, not resolved") is what this
+  // closes: before the lang wire this bag produced NO text at all.
+  const components = {
+    p: {
+      _tag: 'p',
+      _lang: 'fr',
+      properties: { quotes: 'auto' },
+      children: {
+        q: {
+          _tag: 'q',
+          _lang: 'fr',
+          properties: {},
+          _pseudo: {
+            before: { properties: { content: 'open-quote' } },
+            after: { properties: { content: 'close-quote' } },
+          },
+        },
+      },
+    },
+  };
+  const out = bakeGeneratedContentText(components, null, 'fr');
+  assert.equal(out.baked, 2);
+  assert.equal(components.p.children.q._pseudo.before._text, '«');
+  assert.equal(components.p.children.q._pseudo.after._text, '»');
+});
+
+test('W4 bake: `auto` resolves against the PARENT language, not the element\'s own', () => {
+  // css-content-3 §2.2.1 as amended by csswg-drafts#5478, pinned by
+  // quotes-030 ("based on the parent language (not the language of the
+  // element itself)"). Its reference renders
+  //   One “two <span lang=ja>‘three <span lang=fr>『four』</span>’</span>”
+  // so the ja element's own marks are ENGLISH and the fr element's are
+  // JAPANESE (clamped to ja's LAST pair at depth 2).
+  const quotePseudos = () => ({
+    before: { properties: { content: 'open-quote' } },
+    after: { properties: { content: 'close-quote' } },
+  });
+  const components = {
+    p: {
+      _tag: 'p',
+      _lang: 'en',
+      properties: { quotes: 'auto' },
+      children: {
+        q1: {
+          _tag: 'q', _lang: 'en', properties: {}, _pseudo: quotePseudos(),
+          children: {
+            q2: {
+              _tag: 'q', _lang: 'ja', properties: {}, _pseudo: quotePseudos(),
+              children: {
+                q3: { _tag: 'q', _lang: 'fr', properties: {}, _pseudo: quotePseudos() },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+  bakeGeneratedContentText(components, null, 'en');
+  const q1 = components.p.children.q1;
+  const q2 = q1.children.q2;
+  const q3 = q2.children.q3;
+  assert.deepEqual([q1._pseudo.before._text, q1._pseudo.after._text], ['“', '”']);
+  assert.deepEqual([q2._pseudo.before._text, q2._pseudo.after._text], ['‘', '’']);
+  assert.deepEqual([q3._pseudo.before._text, q3._pseudo.after._text], ['『', '』']);
+});
+
+test('W4 bake: an explicit pair list still beats `auto`, and `none` still paints nothing', () => {
+  const components = {
+    a: {
+      _tag: 'div', _lang: 'ja',
+      properties: { quotes: '"A" "Z"' },
+      _pseudo: { before: { properties: { content: 'open-quote' } } },
+    },
+    b: {
+      _tag: 'div', _lang: 'ja',
+      properties: { quotes: 'none' },
+      _pseudo: { before: { properties: { content: 'open-quote' } } },
+    },
+  };
+  bakeGeneratedContentText(components, null, 'ja');
+  assert.equal(components.a._pseudo.before._text, 'A');
+  assert.equal(components.b._pseudo.before._text, undefined);
+});
+
+test('W4 bake: a lang-free document keeps the ROOT pair, so nothing is invented', () => {
+  // Absence of `_lang` is the "unknown language" state, and Blink answers it
+  // with the root pair (quotes-034's aa/zz rows). The bake says the same.
+  const components = {
+    d: {
+      _tag: 'div',
+      properties: { quotes: 'auto' },
+      _pseudo: { before: { properties: { content: 'open-quote' } } },
+    },
+  };
+  bakeGeneratedContentText(components);
+  assert.equal(components.d._pseudo.before._text, '“');
 });

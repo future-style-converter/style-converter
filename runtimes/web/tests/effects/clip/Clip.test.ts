@@ -87,6 +87,21 @@ describe('Clip (legacy)', () => {
       { type: 'rect', top: { px: 10 }, right: { px: 150 }, bottom: { px: 110 }, left: { px: 10 } })])))
       .toEqual({ clip: 'rect(10px, 150px, 110px, 10px)' });
   });
+  // Wave-37 lane W3: the Kotlin parser encodes an `auto` side as an ABSENT
+  // field so runtimes can resolve it against real draw bounds. The web
+  // extractor used to fall through to '0' for a missing field, so
+  // `clip: rect(auto, auto, auto, auto)` — a no-op clip — reached the
+  // browser as `rect(0, 0, 0, 0)` and hid the element completely
+  // (WPT clip-rect-auto-001/002; -004/-005 lost their single auto side).
+  it('all-auto rect is a no-op clip, not an empty region', () => {
+    expect(applyClip(extractClip([p('Clip', { type: 'rect' })])))
+      .toEqual({ clip: 'rect(auto, auto, auto, auto)' });
+  });
+  it('a single auto side keeps its three lengths', () => {
+    expect(applyClip(extractClip([p('Clip',
+      { type: 'rect', top: { px: 50 }, bottom: { px: 150 }, left: { px: 100 } })])))
+      .toEqual({ clip: 'rect(50px, auto, 150px, 100px)' });
+  });
 });
 
 describe('ClipPathGeometryBox', () => {

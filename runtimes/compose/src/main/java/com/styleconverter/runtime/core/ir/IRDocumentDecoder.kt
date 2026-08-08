@@ -119,7 +119,12 @@ object IRDocumentDecoder {
     // Wave-32 (lane R): `runs` joined it — the ordered inline-content list
     // for a component whose own text interleaves with its kept children
     // (contract in [IRRun] + schema/spec/03-children.md §4.1).
-    private val META_KEYS = setOf("sourceTag", "role", "attrs", "decorations", "markerText", "runs")
+    // Wave-37 (lane W4): `lang` joined it — the element's COMPUTED content
+    // language, already resolved by the producer (contract in
+    // [IRComponent.lang] + schema/spec/04-metadata-fields.md).
+    private val META_KEYS = setOf(
+        "sourceTag", "role", "attrs", "decorations", "markerText", "lang", "runs"
+    )
     // The two keys ONE `meta.decorations` entry may carry (schema
     // ir-v2.schema.json meta.decorations.items, additionalProperties:false).
     private val DECORATION_KEYS = setOf("line", "color")
@@ -361,6 +366,13 @@ object IRDocumentDecoder {
             // string forwarded verbatim; absence keeps the renderer on its
             // own counter-style table.
             markerText = (meta?.get("markerText") as? JsonPrimitive)?.contentOrNull,
+            // meta.lang → lang (wave-37 computed content language, the same
+            // additive meta channel as attrs/decorations/markerText). A plain
+            // string like markerText, so the primitive read IS the decode —
+            // deliberately NOT lowercased here: RFC 4647 matching is
+            // case-insensitive and consumers normalise at lookup, so
+            // canonicalising would destroy the wire's round-trip.
+            lang = (meta?.get("lang") as? JsonPrimitive)?.contentOrNull,
             // meta.runs → runs (wave-32 ordered inline content, the same
             // additive meta channel as attrs/decorations/markerText).
             runs = decodeRuns(meta?.get("runs"), id),

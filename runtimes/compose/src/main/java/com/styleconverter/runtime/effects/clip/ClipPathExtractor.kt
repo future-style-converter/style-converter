@@ -200,8 +200,26 @@ object ClipPathExtractor {
         val pos = json["pos"] as? JsonObject
         val centerXDp = pos?.get("x")?.let { ValueExtractors.extractDp(it) }
         val centerYDp = pos?.get("y")?.let { ValueExtractors.extractDp(it) }
-        return ClipShape.Circle(radius, centerX, centerY, centerXDp, centerYDp)
+        return ClipShape.Circle(
+            radius, centerX, centerY, centerXDp, centerYDp,
+            centerFromRight = readsFromFarEdge(pos, "xEdge", "right"),
+            centerFromBottom = readsFromFarEdge(pos, "yEdge", "bottom"),
+        )
     }
+
+    /**
+     * Read one far-edge anchor flag off the `pos` object.
+     *
+     * Wave-37 lane W3 added `pos.xEdge` / `pos.yEdge` to the wire for the
+     * css-values-4 `[right|bottom] <length-percentage>` arm of `<position>`
+     * (`circle(50% at right 40px bottom 40px)`). The offset there is
+     * measured from the FAR edge and cannot be rewritten as a left/top
+     * origin length without the box size, which the converter never has.
+     * Absent (the overwhelming majority) means the default origin, so
+     * every value that parsed before this wave reads exactly as before.
+     */
+    private fun readsFromFarEdge(pos: JsonObject?, key: String, farEdge: String): Boolean =
+        pos?.get(key)?.jsonPrimitive?.contentOrNull?.lowercase() == farEdge
 
     /**
      * Extract ellipse shape configuration.
@@ -231,7 +249,17 @@ object ClipPathExtractor {
         val radiusX = readShapeRadiusAxis(json["rx"]) ?: ClipRadius.ClosestSide
         val radiusY = readShapeRadiusAxis(json["ry"]) ?: ClipRadius.ClosestSide
         val (centerX, centerY) = readCenterPercent(json)
-        return ClipShape.Ellipse(radiusX, radiusY, centerX, centerY)
+        // Same absolute-length and far-edge treatment as extractCircle —
+        // `ellipse(40px 60px at right 60px top 40px)` is as legal as the
+        // circle spelling and used to lose its whole `at` clause at parse.
+        val pos = json["pos"] as? JsonObject
+        return ClipShape.Ellipse(
+            radiusX, radiusY, centerX, centerY,
+            centerXDp = pos?.get("x")?.let { ValueExtractors.extractDp(it) },
+            centerYDp = pos?.get("y")?.let { ValueExtractors.extractDp(it) },
+            centerFromRight = readsFromFarEdge(pos, "xEdge", "right"),
+            centerFromBottom = readsFromFarEdge(pos, "yEdge", "bottom"),
+        )
     }
 
     /**

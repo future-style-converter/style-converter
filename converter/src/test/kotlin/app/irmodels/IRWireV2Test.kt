@@ -279,6 +279,41 @@ class IRWireV2Test {
         assertEquals(payload, IRWireV2.decodeDocument(obj).components[0].runs)
     }
 
+    // ---- wave-37 lane W4: meta.lang (the computed content language) ----
+
+    @Test
+    fun `lang groups under meta and round-trips verbatim`() {
+        // Verbatim is the contract: RFC 4647 matching is case-insensitive
+        // and subtag-truncating, so the wire keeps the AUTHORED spelling and
+        // consumers lowercase at lookup. A converter that canonicalised here
+        // would silently rewrite what the source document said.
+        val doc = IRDocument(listOf(comp("a", tag = "q").copy(lang = "eN-Us")))
+        val obj = IRWireV2.encodeDocument(doc)
+        val meta = obj["components"]!!.jsonArray[0].jsonObject["meta"]!!.jsonObject
+        assertEquals("eN-Us", meta["lang"]!!.jsonPrimitive.content)
+        assertEquals("eN-Us", IRWireV2.decodeDocument(obj).components[0].lang)
+    }
+
+    @Test
+    fun `lang alone is enough to emit the meta group`() {
+        // A body-root carries a language and nothing else in some documents,
+        // so the emission gate must count lang as a member in its own right.
+        val obj = IRWireV2.encodeDocument(IRDocument(listOf(comp("a").copy(lang = "fr"))))
+        val c = obj["components"]!!.jsonArray[0].jsonObject
+        assertEquals(setOf("lang"), c["meta"]!!.jsonObject.keys)
+    }
+
+    @Test
+    fun `absent lang stays off the wire`() {
+        // Omit-when-absent: a document that declares no language is
+        // byte-identical to its pre-wave-37 self, which is what makes the
+        // key additive rather than a wire break.
+        val obj = IRWireV2.encodeDocument(IRDocument(listOf(comp("a", tag = "span"))))
+        val meta = obj["components"]!!.jsonArray[0].jsonObject["meta"]!!.jsonObject
+        assertEquals(setOf("sourceTag"), meta.keys)
+        assertNull(IRWireV2.decodeDocument(obj).components[0].lang)
+    }
+
     // ---- hard errors on decode ----
 
     @Test

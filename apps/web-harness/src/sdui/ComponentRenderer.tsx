@@ -780,10 +780,43 @@ const HARNESS_OPTIONS: RendererOptions = {
   // control can never acquire a focus ring or interaction chrome the
   // never-focused browser-ref page doesn't show. Identity for every
   // other element AND for the whole non-WPT flow (byte-stable DOM).
-  decorateProps: (props, elementName) =>
-    WPT_MODE && WIDGET_TAGS.has(elementName)
-      ? { ...props, inert: true, tabIndex: -1 }
-      : props,
+  // wave-37 lane W4 — THE LANG ATTRIBUTE, the second thing this hook
+  // decides. `meta.lang` is the element's computed content language
+  // (schema/spec/04-metadata-fields.md) and the browser is the one reader
+  // that can act on it directly, through two mechanisms nothing else in
+  // this pipeline can imitate:
+  //
+  //   1. `quotes: auto` (css-content-3 §2.2.1). The harness already maps
+  //      `q` to a REAL <q> (TAG_ALLOWLIST), so Chromium's own UA rule
+  //      `q::before { content: open-quote }` fires — and picks its CLDR
+  //      pair from the element's language. With no lang attribute every
+  //      `<q>` in the corpus painted the ROOT pair, so the whole
+  //      css-content quotes-004…027 family (one test per language)
+  //      captured English “ ‘ ’ ” against Amharic « ›, French « «,
+  //      Japanese 「 『 references.
+  //   2. Generic-family font FALLBACK. `font: 32px serif` under
+  //      `lang="ja"` resolves to a Japanese serif face — for the LATIN
+  //      text in the same element too, which is why the quotes-016
+  //      reference wraps its English sentence in three lines where our
+  //      capture used two. Those six tests were tagged
+  //      `requires-bundled-font`; the font was never missing, the
+  //      LANGUAGE that selects it was.
+  //
+  // WPT-capture ONLY, the same gate every wire-widening calibration since
+  // wave-20 has shipped behind: the legacy 327-pair flow never sets
+  // `?wpt=1`, so every committed baseline capture keeps its exact DOM.
+  // Verbatim from the wire — RFC 4647 matching is case-insensitive and the
+  // browser does the lookup, so lowercasing here would only diverge from
+  // what the reference page's own attribute said.
+  decorateProps: (props, elementName, ctx) => {
+    const lang = WPT_MODE ? ctx.component.meta?.lang : undefined;
+    const withLang = (typeof lang === 'string' && lang.length > 0)
+      ? { ...props, lang }
+      : props;
+    return WPT_MODE && WIDGET_TAGS.has(elementName)
+      ? { ...withLang, inert: true, tabIndex: -1 }
+      : withLang;
+  },
   // Divergence #4: childless components render the placeholder label
   // instead of an empty element, so empty fixtures stay identifiable
   // against iOS/Android placeholders. The LABEL now draws as the shared

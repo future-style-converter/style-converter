@@ -258,7 +258,7 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             // when no member has a value so hint-free fixtures stay lean.
             if (value.tag != null || value.role != null || value.attrs != null ||
                 value.decorations != null || value.markerText != null ||
-                value.runs != null
+                value.lang != null || value.runs != null
             ) {
                 put("meta", buildJsonObject {
                     // sourceTag: v2 home of the extractor's `_tag` hint.
@@ -282,6 +282,12 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
                     // css-counter-styles-3 §6 spelling; spec 05 additive
                     // meta-key rule, the meta.attrs precedent).
                     value.markerText?.let { put("markerText", it) }
+                    // lang (wave-37 lane W4): v2 home of `_lang` — the
+                    // element's COMPUTED content language, forwarded
+                    // VERBATIM and uncanonicalised (the extractor owns the
+                    // authored BCP-47 spelling; spec 05 additive meta-key
+                    // rule, the meta.attrs precedent).
+                    value.lang?.let { put("lang", it) }
                     // runs (wave-32 lane R): v2 home of `_runs` — the
                     // ordered inline-content list ({text}|{child} entries in
                     // document order), forwarded VERBATIM (the extractor
@@ -340,6 +346,12 @@ object IRComponentV2Serializer : KSerializer<IRComponent> {
             // null ≡ absent, any string comes back byte-verbatim (the
             // runtimes render it; this codec never re-derives it).
             markerText = meta?.get("markerText")?.let { el ->
+                if (el is JsonNull) null else el.jsonPrimitive.content
+            },
+            // lang (wave-37 lane W4): opaque round-trip — JSON null ≡
+            // absent, any string comes back byte-verbatim (consumers
+            // lowercase at lookup; this codec never canonicalises it).
+            lang = meta?.get("lang")?.let { el ->
                 if (el is JsonNull) null else el.jsonPrimitive.content
             },
             // runs (wave-32 lane R): opaque round-trip — JSON null ≡

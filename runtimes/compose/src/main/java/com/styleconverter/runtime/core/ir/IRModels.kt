@@ -238,6 +238,16 @@ data class IRDecoration(
  *   as well. Null for every v1 document, every non-`<li>` component, and
  *   every marker family the bake leaves to this runtime's own table
  *   (the §6.1 bullets, `none`, and unmodelled counter styles).
+ * @property lang Wave-37 COMPUTED content language of this component's
+ *   source element — v2 wire name `meta.lang`, riding the meta channel
+ *   exactly like `attrs`. ALREADY RESOLVED by the producer through HTML
+ *   §3.2.6.2's own-lang → nearest-ancestor → `<html>`/`<body>` ladder,
+ *   because the flat v2 component list has no parent edge this decoder
+ *   could walk. VERBATIM as authored ("eN-Us" stays "eN-Us"): RFC 4647
+ *   matching is case-insensitive and subtag-truncating, so a consumer
+ *   lowercases at LOOKUP, never at decode. Null when the document declares
+ *   no language, which is the same state as "use the default locale" —
+ *   the state every pre-wave-37 document is in.
  * @property variables CSS custom-property definitions declared on this
  *   component ("--name" → RAW declaration value, verbatim). Additive IR
  *   v2 envelope key (schema/spec/01-envelope.md): names are
@@ -287,6 +297,12 @@ data class IRComponent(
     val attrs: IRAttrs? = null,
     val decorations: List<IRDecoration>? = null,
     val markerText: String? = null,
+    // Wave-37 (lane W4): the element's COMPUTED content language
+    // (`meta.lang`) — see the @property doc above. Droppable: a renderer
+    // that ignores it paints in the default locale, which costs LOCALE
+    // fidelity (CLDR quote pairs, generic-family font fallback) and never
+    // correctness.
+    val lang: String? = null,
     // Wave-32 (lane R): the ORDERED inline-content list (`meta.runs`) — the
     // component's own text and its kept children INTERLEAVED in document
     // order. AUTHORITATIVE when present: RenderContent paints the entries in

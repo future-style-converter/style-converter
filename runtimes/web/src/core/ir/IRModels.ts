@@ -162,7 +162,7 @@ export type IRRun =
 /**
  * Droppable renderer hints, grouped (v2 home of v1's `_tag` / `_role`).
  * Omitted entirely when empty; strict (`{sourceTag?, role?, attrs?,
- * decorations?, markerText?, runs?}` only) when present — see
+ * decorations?, markerText?, lang?, runs?}` only) when present — see
  * schema/spec/01-envelope.md.
  */
 export interface IRMeta {
@@ -219,6 +219,23 @@ export interface IRMeta {
    * native runtimes — which have no `::marker` — are the readers.
    */
   markerText?: string | null;
+  /**
+   * wave-37 COMPUTED content language (v2 home of the extractor's `_lang`)
+   * — the element's own `lang`, else the nearest ancestor's, else the
+   * `<html>`/`<body>` chain's, ALREADY RESOLVED per HTML §3.2.6.2 because
+   * the flat component list has no parent edge to walk. Verbatim as
+   * authored: BCP-47 matching is case-insensitive and subtag-truncating
+   * (RFC 4647), so consumers lowercase at LOOKUP, never at decode.
+   *
+   * Absent = "unknown", i.e. the consumer's default locale — the state
+   * every document was in before this key existed. The web capture
+   * harness puts it back on the DOM as a real `lang` attribute so the
+   * browser's own CLDR `quotes: auto` table (css-content-3 §2.2.1) and
+   * its generic-family font fallback engage; readers with no UA quote
+   * engine get literal marks baked upstream instead
+   * (schema/spec/04-metadata-fields.md).
+   */
+  lang?: string | null;
   /**
    * wave-32 ORDERED inline-content list (v2 home of the extractor's
    * `_runs`) — the component's own text and its kept children INTERLEAVED

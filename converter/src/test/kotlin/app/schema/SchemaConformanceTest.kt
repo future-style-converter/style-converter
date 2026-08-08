@@ -345,9 +345,12 @@ class SchemaConformanceTest {
                     // wave-27 lane CBAKE added `markerText` under the same
                     // spec-05 additive meta-key rule as attrs/decorations;
                     // wave-32 lane R added `runs` (the ordered inline-content
-                    // list — schema/spec/03-children.md §4.1) the same way.
+                    // list — schema/spec/03-children.md §4.1) the same way;
+                    // wave-37 lane W4 added `lang` (the element's computed
+                    // content language — schema/spec/04-metadata-fields.md).
                     meta.keys.all {
-                        it in setOf("sourceTag", "role", "attrs", "decorations", "markerText", "runs")
+                        it in setOf("sourceTag", "role", "attrs", "decorations",
+                                    "markerText", "lang", "runs")
                     },
                     "$where meta has unknown keys"
                 )

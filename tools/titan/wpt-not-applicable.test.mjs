@@ -21,14 +21,25 @@ import {
     declaresFontFaceRule,
     NON_LATIN_PREDEFINED_COUNTER_STYLES,
     shadowedCounterStyleNames,
+    // wave-37 lane W1: Rule 44's named predicate (the display-type anchor).
+    declaresGridLanesLayout,
+    // wave-37 lane W7: Rule 45's named predicate (the language-tag anchor).
+    needsHyphenationDictionary,
 } from './wpt-not-applicable.mjs';
+// wave-37 lane W1: the five exclusion families, imported so the Rule 44
+// refusal is ENFORCED here rather than merely described in a comment.
+import {
+    SCORE_EXCLUDED_TAGS, EXTRACTION_WALL_TAGS, FONT_FACE_WALL_TAGS,
+    REF_UNACHIEVABLE_TAGS, NATIVE_FONT_PARITY_TAGS, applyNaScoreGate,
+} from './inject-wpt-block.mjs';
 
-// ── Sanity: 43 rules (17 swarm-001 + 12 swarm-002 + 11 swarm-003 + 1 wave-21
+// ── Sanity: 45 rules (17 swarm-001 + 12 swarm-002 + 11 swarm-003 + 1 wave-21
 //    requires-wpt-server + 1 wave-29 browser-ref-divergent + 1 wave-30
-//    requires-non-latin-font-parity)
+//    requires-non-latin-font-parity + 1 wave-37 requires-grid-lanes
+//    + 1 wave-37 requires-hyphenation-dictionary)
 
-test('RULES exports exactly 43 entries', () => {
-    assert.equal(RULES.length, 43);
+test('RULES exports exactly 45 entries', () => {
+    assert.equal(RULES.length, 45);
 });
 
 test('RULES tags are unique', () => {
@@ -489,6 +500,51 @@ test('requires-view-transitions fires on view-transition-name property', () => {
 test('requires-view-transitions does NOT fire on plain CSS transition', () => {
     const html = '<style>div { transition: opacity 1s; }</style>';
     assert.equal(tagsForTest({ html }).includes('requires-view-transitions'), false);
+});
+
+// wave-37 W5 — the tag is a LABEL, and the label has to keep working. It was
+// measured for an exclusion family and refused (precision 0.740 over the 192
+// scored css-view-transitions cells; full table on inject-wpt-block.mjs's
+// REFUSED_EXCLUSION_TAGS), which means the ONE thing it must never do is stop
+// firing: 142 failing cells stay in the denominator and the tag is how a
+// dashboard reader learns why. These two pins hold the section's real shapes,
+// taken verbatim from the corpus, so a regex narrowing cannot quietly drop
+// them while the refusal stays on the books.
+test('wave37 W5: the refused tag still fires on the real corpus shapes', () => {
+    // css-view-transitions/3d-transform-incoming.html — the pseudo tree is the
+    // whole acceptance target: a pink `::view-transition` root layer, a frozen
+    // group, and an image-pair hidden by the UA box rather than by the DOM.
+    const frozen = [
+        '<style>',
+        '::view-transition-group(hidden) { animation-duration: 300s; }',
+        '::view-transition-image-pair(hidden) { visibility: hidden; }',
+        '::view-transition { background: pink; }',
+        '</style>',
+    ].join('\n');
+    assert.ok(tagsForTest({ html: frozen }).includes('requires-view-transitions'));
+    // css-view-transitions/escaped-name.html — one of the 50 ACCIDENTALLY
+    // DELIVERABLE cells (frozen at `.ready`, so the old snapshot equals the
+    // pre-script DOM; it scores SSIM 1.0000 today). It carries the tag too,
+    // which is exactly why the tag cannot be an exclusion.
+    const deliverable = [
+        '<style>#first { view-transition-name: first\\!; }',
+        '::view-transition-group(*) { animation-play-state: paused; }</style>',
+        '<script>document.startViewTransition(() => {}).ready.then(takeScreenshot);</script>',
+    ].join('\n');
+    assert.ok(tagsForTest({ html: deliverable }).includes('requires-view-transitions'));
+});
+
+test('wave37 W5: Rule 16 records why it is not an exclusion family', async () => {
+    // The refusal is enforceable on the inject side (the negative pin over
+    // REFUSED_EXCLUSION_TAGS); here it only has to be FINDABLE — a future
+    // reader of this rule must not have to guess whether the wall was ever
+    // considered. Rule 5 carries the twin note for the @page-canvas proposal.
+    const { promises: fsp } = await import('node:fs');
+    const src = await fsp.readFile(new URL('./wpt-not-applicable.mjs', import.meta.url), 'utf8');
+    assert.match(src, /MEASURED AND REFUSED as an exclusion family/,
+        'Rule 16 must say the exclusion was measured and refused');
+    assert.match(src, /ALL 157 css-page ref PNGs are 390 px wide/,
+        'Rule 5 must carry the wave-37 @page-canvas measurement');
 });
 
 // ── Rule 17: crash-test-blank-ref ───────────────────────────────────────────
@@ -1930,4 +1986,220 @@ test('Rule 43 fix-T4: the 319-fire baseline members are untouched (spot-check)',
     assert.ok(tagsForTest({ html: '<style>@counter-style x { system: extends arabic-indic; }</style>' }).includes(NLF));
     // And the deliberate declines stay declined.
     assert.equal(tagsForTest({ html: '<style>ol { list-style-type: lower-greek }</style>' }).includes(NLF), false);
+});
+
+// ── Rule 44 (wave-37 W1): requires-grid-lanes ───────────────────────────────
+//
+// The corpus' largest coherent failing pool (384 of 438 scored
+// css-grid/grid-lanes cells in the committed web map) and the mining map's
+// rank-2 opportunity. The tag NAMES the tier and deliberately changes no
+// score — the ceiling measurement behind that decision is written up on
+// declaresGridLanesLayout's banner in the module. These pins hold the three
+// spellings, the two deliberate declines, and the refusal itself.
+
+const GL = 'requires-grid-lanes';
+
+test('Rule 44 fires on the current spelling, `display: grid-lanes`', () => {
+    // grid-lanes-contain-intrinsic-size-001.html's exact declaration block.
+    const html = '<style>#target { display: grid-lanes; background: lightblue; '
+        + 'contain-intrinsic-size: 111px 222px; contain: size; }</style>';
+    assert.ok(tagsForTest({ html }).includes(GL));
+    assert.ok(declaresGridLanesLayout(html));
+});
+
+test('Rule 44 fires on the css-display-3 two-value form `display: inline grid-lanes`', () => {
+    // grid-lanes-item-placement-006.html / grid-lanes-align-content-001.html —
+    // the form the majority of the tree uses on its <grid> custom element.
+    const html = '<style>grid { display: inline grid-lanes; gap: 1px 2px; '
+        + 'grid-template-columns: repeat(4,20px); }</style>';
+    assert.ok(tagsForTest({ html }).includes(GL));
+});
+
+test('Rule 44 fires on the two LEGACY spellings the spec passed through', () => {
+    // `display: masonry` (intermediate) …
+    assert.ok(declaresGridLanesLayout('<style>.m { display: masonry }</style>'));
+    assert.ok(declaresGridLanesLayout('<style>.m { display: inline-masonry }</style>'));
+    // … and `grid-template-rows|columns: masonry` (original css-grid-3).
+    assert.ok(declaresGridLanesLayout(
+        '<style>.g { display: grid; grid-template-rows: masonry }</style>'));
+    assert.ok(declaresGridLanesLayout(
+        '<style>.g { grid-template-columns: repeat(3, 1fr); grid-template-rows: masonry; }</style>'));
+});
+
+test('Rule 44 does NOT fire on ordinary grid — including the refs\' own fallback', () => {
+    // Every grid-lanes REF builds the masonry picture out of these two, which
+    // is precisely why the ref renders the geometry and the test does not.
+    // If this ever fires, 461 ref documents join the tagged set for free.
+    assert.equal(declaresGridLanesLayout(
+        '<style>grid { display: inline-grid; grid-template-columns: repeat(4,20px) } '
+        + 'flex { display: flex; flex-direction: column }</style>'), false);
+    assert.equal(declaresGridLanesLayout('<style>.s { display: grid; grid-template-rows: subgrid }</style>'), false);
+    assert.equal(tagsForTest({ html: '<style>.g { display: grid }</style>' }).includes(GL), false);
+});
+
+test('Rule 44 declines a lanes PROPERTY on a non-lanes box (the all-prop decline)', () => {
+    // MEASURED false positive of the loose property-name alternation:
+    // css-cascade/all-prop-revert-layer.html enumerates every registered
+    // property — `masonry-auto-flow: ordered` among them — while asserting
+    // `revert-layer`. It establishes no lanes container, so it must not be
+    // tagged. This decline is the whole reason the rule anchors on `display`.
+    const allProp = '<style>#target { margin: 1px; masonry-auto-flow: ordered; '
+        + 'item-pack: dense; flow-tolerance: 0; all: revert-layer; }</style>';
+    assert.equal(declaresGridLanesLayout(allProp), false);
+    assert.equal(tagsForTest({ html: allProp }).includes(GL), false);
+});
+
+test('Rule 44 is IDENT-bounded — element names and prose cannot arm it', () => {
+    // `<grid-lanes-track>` is an element the refs use to fake lane columns;
+    // `.grid-lanes` is a class name. Neither is a `display:` value, and the
+    // corpus is full of both — the single most common false-positive shape
+    // in this tree.
+    assert.equal(declaresGridLanesLayout(
+        '<style>grid-lanes-track { display: block }</style><grid-lanes-track><x></x></grid-lanes-track>'), false);
+    assert.equal(declaresGridLanesLayout(
+        '<style>.grid-lanes > div { height: 100px }</style>'), false);
+    // Title / help-link prose naming the spec is not a declaration either.
+    assert.equal(declaresGridLanesLayout(
+        '<title>CSS Grid Test: Grid Lanes item placement</title>'
+        + '<link rel="help" href="https://drafts.csswg.org/css-grid-3/#grid-template-masonry">'), false);
+});
+
+test('Rule 44 predicate is stateless across calls and null-safe', () => {
+    // The three panel entries are non-global on purpose (a /g/ `.test()`
+    // would advance lastIndex on the SHARED panel and alternate true/false
+    // across the ~24k-file bucket pass).
+    const html = '<style>.m { display: grid-lanes }</style>';
+    for (let i = 0; i < 4; i += 1) assert.ok(declaresGridLanesLayout(html));
+    assert.equal(declaresGridLanesLayout(undefined), false);
+    assert.equal(declaresGridLanesLayout(null), false);
+    assert.equal(declaresGridLanesLayout(''), false);
+});
+
+test('Rule 44 is REFUSED as an exclusion — it is in none of the five families', () => {
+    // The refusal in one assertion. 363 of 437 measurable cells are
+    // unreachable for any Chrome-faithful renderer (Chromium 151 drops every
+    // spelling — `display:grid-lanes` computes to `block`), but 74 ARE
+    // reachable and 52 of those already pass, so a whole-tag exclusion scores
+    // precision 0.830 (0.842 for the best narrowing) against the 1.000 the
+    // accepted families sit at, and would delete real passes. Same discipline
+    // as inject-wpt-block.mjs's REFUSED_EXCLUSION_TAGS.
+    const families = {
+        SCORE_EXCLUDED_TAGS, EXTRACTION_WALL_TAGS, FONT_FACE_WALL_TAGS,
+        REF_UNACHIEVABLE_TAGS, NATIVE_FONT_PARITY_TAGS,
+    };
+    for (const [name, set] of Object.entries(families)) {
+        assert.equal(set.has(GL), false,
+            `${GL} was measured and REFUSED as an exclusion — it must not be in ${name}`);
+    }
+});
+
+test('Rule 44: a grid-lanes tag alone never score-excludes a test', () => {
+    // End to end through the gate with every delivery stamp in its most
+    // exclusion-friendly state: the cell keeps its pass/fail and its score.
+    const web = { ssim: 0.8019, wptPass: false };
+    assert.equal(applyNaScoreGate([GL], [web]), false);
+    assert.equal(web.wptPass, false);
+    assert.equal(web.scoreExcluded, undefined);
+    // A PASSING cell inside the tagged set — 52 of them exist — keeps its
+    // pass. This is the assertion the refusal is really about.
+    const pass = { ssim: 1, wptPass: true };
+    assert.equal(applyNaScoreGate([GL, 'requires-containment'], [pass]), false);
+    assert.equal(pass.wptPass, true);
+    assert.equal(pass.scoreExcluded, undefined);
+});
+
+test('Rule 44: the refusal denominators are re-derivable from the committed map', async () => {
+    // Counts rot, so pin them to the committed full-corpus web map (the
+    // per-run manifests under tools/titan/runs/ are gitignored). If a re-pin
+    // moves the pool, this fails and the refusal is re-argued, not inherited.
+    const { promises: fsp } = await import('node:fs');
+    const map = JSON.parse(await fsp.readFile(
+        new URL('./results/webmap-v1.json', import.meta.url), 'utf8'));
+    const lanes = map.miningMap.find((m) => m.opportunity.includes('grid-lanes'));
+    assert.equal(lanes.rank, 2);
+    assert.equal(lanes.section, 'css-grid');
+    assert.equal(lanes.scoredInFamily, 438);
+    assert.equal(lanes.cells, 384);                 // failing
+    assert.equal(lanes.alreadyPassingInFamily, 54); // the cells a tag would delete
+    // 54 passing cells inside a 438-cell pool is why precision alone could
+    // never carry this exclusion: the ceiling measurement found 74 reachable
+    // targets in total, so at BEST an exclusion trades 363 hidden failures
+    // for 74 silenced honest ones.
+    assert.equal(lanes.cells + lanes.alreadyPassingInFamily, lanes.scoredInFamily);
+});
+
+// ── Rule 45 (wave-37 lane W7) — requires-hyphenation-dictionary ─────────────
+//
+// The rule is a CONJUNCTION and both halves earn their keep, so they are
+// pinned independently: `hyphens: auto` alone must NOT fire (css-text-3 §6.1
+// makes the dictionary language-dependent, and WPT hyphens-auto-001 asserts
+// that untagged `auto` must not hyphenate — which is exactly what the natives
+// already do, and what they now SCORE: 0.7451 → 0.9950 on the private-sim
+// gate), and a language tag alone must not fire either (half the corpus is
+// language-tagged). Measurement table: needsHyphenationDictionary's banner.
+
+test('Rule 45 fires on hyphens:auto WITH a lang attribute', () => {
+    const html = '<style>div { hyphens: auto; width: 6ch }</style>'
+        + '<body lang="en"><div>regulation implementation now</div>';
+    assert.ok(needsHyphenationDictionary(html));
+    assert.ok(tagsForTest({ html, refHtml: '', testRel: 'css/css-text/hyphens/x.html' })
+        .includes('requires-hyphenation-dictionary'));
+});
+
+test('Rule 45 does NOT fire on hyphens:auto without any language tag', () => {
+    // css-text/hyphens-auto-001 in miniature — "no automatic hyphenation
+    // without language tagging". Tagging this would cost an earned pass.
+    const html = '<style>div { width: 4ch; hyphens: auto }</style>'
+        + '<div>implementation initialization realization</div>';
+    assert.equal(needsHyphenationDictionary(html), false);
+    assert.ok(!tagsForTest({ html, refHtml: '', testRel: 'css/css-text/hyphens/y.html' })
+        .includes('requires-hyphenation-dictionary'));
+});
+
+test('Rule 45 does NOT fire on a language tag without hyphens:auto', () => {
+    const html = '<body lang="de"><p>Rechtsschutzversicherung</p>';
+    assert.equal(needsHyphenationDictionary(html), false);
+});
+
+test('Rule 45 does NOT fire on hyphens:manual or hyphens:none, tagged or not', () => {
+    assert.equal(needsHyphenationDictionary(
+        '<style>div{hyphens:manual}</style><body lang="en"><div>x</div>'), false);
+    assert.equal(needsHyphenationDictionary(
+        '<style>div{hyphens:none}</style><body lang="en"><div>x</div>'), false);
+});
+
+test('Rule 45 accepts xml:lang and :lang() as the language anchor', () => {
+    assert.ok(needsHyphenationDictionary(
+        '<style>div{hyphens:auto}</style><div xml:lang="fr">x</div>'));
+    assert.ok(needsHyphenationDictionary(
+        '<style>:lang(en) div{hyphens:auto}</style><div>x</div>'));
+});
+
+test('Rule 45 rejects lang="" — an explicitly UNKNOWN language must not hyphenate', () => {
+    // §6.1 ties the resource to the language; an empty tag names none, so the
+    // correct render is `manual`, which is what the natives produce.
+    assert.equal(needsHyphenationDictionary(
+        '<style>div{hyphens:auto}</style><div lang="">x</div>'), false);
+});
+
+test('Rule 45 tolerates whitespace around the colon in the declaration', () => {
+    assert.ok(needsHyphenationDictionary(
+        '<style>div{hyphens:auto}</style><body lang=en>x'));
+    assert.ok(needsHyphenationDictionary(
+        '<style>div{ hyphens :  auto }</style><body lang=en>x'));
+});
+
+test('Rule 45 is INFORMATIONAL — in none of the five exclusion families', () => {
+    // The refusal is ENFORCED here, not merely described: wiring the tag into
+    // any family would silently move denominators (web scores 5 of the 9
+    // measured cells). A future wave that wants to spend it must delete this
+    // pin and re-measure — see needsHyphenationDictionary's banner.
+    const tag = 'requires-hyphenation-dictionary';
+    for (const fam of [SCORE_EXCLUDED_TAGS, EXTRACTION_WALL_TAGS,
+                       FONT_FACE_WALL_TAGS, REF_UNACHIEVABLE_TAGS,
+                       NATIVE_FONT_PARITY_TAGS]) {
+        assert.equal(fam.has(tag), false);
+    }
+    // …and the score gate agrees: a test carrying ONLY this tag stays eligible.
+    assert.equal(applyNaScoreGate([tag], [], [], false, false, false), false);
 });

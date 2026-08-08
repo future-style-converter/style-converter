@@ -347,6 +347,33 @@ describe('IR v2 golden fixtures — web runtime conformance', () => {
     expect(underlined.meta?.runs).toBeUndefined();
   });
 
+  // wave-37 lane W4 — the computed content language. The DECODE is the
+  // unit here: the browser is the one reader that can ACT on a language
+  // (CLDR `quotes: auto`, generic-family font fallback), and the capture
+  // harness puts it back on the DOM as a real `lang` attribute — a reader
+  // that dropped the key would make that whole path dead and silent.
+  it('content-language: meta.lang decodes verbatim, uncanonicalised', () => {
+    const doc = loadV2('content-language.json');
+    // The document element chain's language reaches the body-root…
+    expect(byName(doc, 'Lang_DocumentRoot').meta?.lang).toBe('fr');
+    // …and the producer already resolved inheritance for every element, so
+    // this flat list never has to walk a parent edge it does not have.
+    expect(byName(doc, 'Lang_InheritedFromDocument').meta?.lang).toBe('fr');
+    // An own attribute wins over what it inherited.
+    expect(byName(doc, 'Lang_OwnAttributeWins').meta?.lang).toBe('ja');
+    // Case and extra subtags survive — RFC 4647 matching is case-insensitive
+    // and subtag-truncating, so normalisation belongs at LOOKUP, not decode.
+    expect(byName(doc, 'Lang_VerbatimCaseAndSubtags').meta?.lang).toBe('eN-Us');
+    expect(byName(doc, 'Lang_ExtendedSubtagsSurvive').meta?.lang).toBe('DE-LATN-DE');
+    // It coexists with the other meta members rather than replacing them.
+    const li = byName(doc, 'Lang_BesideMarkerText');
+    expect(li.meta?.lang).toBe('he-IL');
+    expect(li.meta?.markerText).toBe('1.');
+    // Omit-when-absent: no language declared → no key, which is the
+    // "use the default locale" state every pre-wave-37 document is in.
+    expect(byName(doc, 'Lang_AbsentMeansUnknown').meta?.lang).toBeUndefined();
+  });
+
   // ---- gate rules (spec 05) ----
 
   it('gate: refuses a document whose minReaderVersion exceeds the runtime', () => {

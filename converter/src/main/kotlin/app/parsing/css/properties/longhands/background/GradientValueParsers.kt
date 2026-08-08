@@ -167,6 +167,40 @@ internal object GradientValueParsers {
     // Returns the segment minus the method (possibly empty — a method may
     // be the WHOLE prefix, `in oklab, red, blue`), or null when no method
     // is present so callers keep their existing path byte-identically.
+    /**
+     * The `<color-interpolation-method>` this segment carries, in canonical
+     * CSS spelling (`in oklch`, `in hsl increasing hue`), or null when the
+     * segment has none.
+     *
+     * wave-37 lane W2: [stripInterpolationMethod] has peeled the method off
+     * since wave-21 so the angle beside it survives — but the method itself
+     * was then DISCARDED with the comment "all engines interpolate in sRGB".
+     * That is false on this platform: the web runtime hands the declaration
+     * straight to the browser, and Chrome has interpolated gradients in every
+     * predefined and polar space since 111 (verified against the corpus's own
+     * capture browser). Throwing the method away made every polar-space
+     * gradient in css-images render an sRGB ramp — MEASURED as a colour-mass
+     * veto on gradient-hue-direction (0.6250), gradient-increasing-hue-lch
+     * (0.7276), gradient-decreasing-hue-lch (0.7278) and nine siblings.
+     * Carrying it costs one optional wire key that is ABSENT whenever the
+     * author wrote no method, so no existing byte shape moves.
+     *
+     * Same tokenizer and same closed keyword sets as the strip pass, so the
+     * two can never disagree about what a method is.
+     */
+    internal fun interpolationMethodOf(segment: String): String? {
+        val tokens = TokenizationUtils.tokenizeByWhitespace(segment)
+        val i = tokens.indices.firstOrNull { idx ->
+            tokens[idx] == "in" && idx + 1 < tokens.size &&
+                tokens[idx + 1] in INTERPOLATION_COLORSPACES
+        } ?: return null
+        // Optional trailing `<hue-method> hue` — only meaningful for the
+        // polar spaces, but re-emitted exactly where the author put it.
+        val hasHue = i + 3 < tokens.size && tokens[i + 2] in HUE_METHODS && tokens[i + 3] == "hue"
+        val end = if (hasHue) i + 3 else i + 1
+        return tokens.subList(i, end + 1).joinToString(" ")
+    }
+
     internal fun stripInterpolationMethod(segment: String): String? {
         // Paren-aware tokenization: an `in` inside a function argument list
         // (e.g. the color stop `color-mix(in srgb, red, blue)`) stays inside

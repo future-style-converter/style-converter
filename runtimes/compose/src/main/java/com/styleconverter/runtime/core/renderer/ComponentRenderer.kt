@@ -4798,6 +4798,64 @@ object ComponentRenderer {
         val tabConfig = TextStyleApplier.extractTabSize(properties)
         displayText = TextStyleApplier.applyTabSize(displayText, tabConfig)
 
+        // Wave 37 (lane W7, rule A) — `hyphens: none` (css-text-3 §6.1):
+        // U+00AD SOFT HYPHEN must not be a break opportunity. The twin of
+        // the iOS PlaceholderLabel strip, and DELIBERATELY KEPT even though
+        // it is measured-INERT on Compose today. The measurement, so the
+        // next wave does not redo it:
+        //
+        //   Compose's default is `TextStyle.hyphens = Hyphens.None`, which
+        //   sets Minikin's hyphenationFrequency to NONE — and Minikin then
+        //   ignores U+00AD outright. So Android ALREADY renders `hyphens:
+        //   none` correctly for soft hyphens, and the break it does take in
+        //   css-text/hyphens-none-011 is the ordinary emergency CHARACTER
+        //   break, not a soft-hyphen break. PROVEN by feeding a per-test IR
+        //   with the soft hyphens deleted upstream: the emulator capture
+        //   came back byte-identical (sha1 943f2b18…, both runs), i.e. the
+        //   glyphs Android breaks between do not depend on U+00AD at all.
+        //   iOS is the platform that needed the repair: TextKit honours soft
+        //   hyphens unconditionally (device-measured 0.8181 → 0.9017 on that
+        //   same test once they are stripped).
+        //
+        // It stays because it is a GUARD with a named trigger, not
+        // decoration: the moment a future wave turns `TextStyle.hyphens =
+        // Hyphens.Auto` on — the obvious closing move for
+        // `requires-hyphenation-dictionary` once the IR carries a language —
+        // Minikin starts honouring U+00AD, and without this strip `hyphens:
+        // none` would silently start breaking at soft hyphens on Android.
+        // Identity for `manual`/`auto` and for any run without a soft
+        // hyphen, so it can cost nothing in the meantime.
+        //
+        // The keyword is read from THIS component's own list first and the
+        // INHERITED channel second: `hyphens` is an inherited property
+        // (css-text-3 §6.1; it is in this renderer's `inheritableTypes`
+        // table), and the run that paints the glyphs is not always the box
+        // that declared it.
+        val hyphensMode = TextStyleApplier.extractHyphens(
+            if (properties.any { it.type == "Hyphens" }) properties
+            else LocalInheritedProperties.current
+        ).name
+        displayText = com.styleconverter.runtime.typography.wrapping.SoftHyphenPolicy
+            .displayString(displayText, hyphensMode)
+        // No-silent-fallthrough twin of the iOS HyphensApplier breadcrumb:
+        // `auto` is the one keyword neither native can honour in full
+        // (Minikin CAN hyphenate, but only against a language the IR does
+        // not carry — there is no lang channel on the wire, so the
+        // dictionary cannot be selected). The degradation is auto →
+        // manual's explicit opportunities, which is exactly right for
+        // untagged content (css-text-3 §6.1 makes the resource
+        // language-dependent) and a wall for tagged content — named in
+        // tools/titan/wpt-not-applicable.mjs as
+        // `requires-hyphenation-dictionary`. logUnhandled dedupes by type.
+        if (com.styleconverter.runtime.typography.wrapping.SoftHyphenPolicy
+                .wantsDictionaryHyphenation(hyphensMode)) {
+            com.styleconverter.runtime.PropertyTracker.logUnhandled(
+                "Hyphens",
+                "hyphens: auto — no hyphenation dictionary can be selected " +
+                    "(the IR carries no language); falls back to the explicit " +
+                    "opportunities `manual` allows")
+        }
+
         // ── Block-font label branch (cross-platform glyph-wall fix) ──────
         // The SYNTHESIZED component-name label no longer renders through a
         // font stack: it rasterizes via the shared 5x7 block atlas

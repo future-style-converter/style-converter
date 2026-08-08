@@ -186,6 +186,17 @@ data class IRComponent(
     // runtime that honours it must NOT also synthesise a marker from
     // `ListStyleType` — see schema/spec/04-metadata-fields.md.
     val markerText: String? = null,
+    // wave-37 lane W4 (THE LANG WIRE): the element's COMPUTED content
+    // language from the extractor's `_lang` hint — the authored BCP-47 tag
+    // ("fr", "zh-Hant", "eN-Us"), already resolved through HTML §3.2.6.2's
+    // own-lang → nearest-ancestor → `<html>`/`<body>` ladder because the flat
+    // v2 component list has no parent edge a reader could walk. v2 forwards
+    // it VERBATIM inside `meta.lang` (spec 05 additive meta-key rule, the
+    // same lane `meta.attrs` used); the v1 serializer ignores it so
+    // deprecated `--emit-ir v1` bytes stay frozen. NOT canonicalised — RFC
+    // 4647 matching is case-insensitive and subtag-truncating, so consumers
+    // lowercase at lookup instead (schema/spec/04-metadata-fields.md).
+    val lang: String? = null,
     // wave-32 lane R: the ORDERED inline-content list from the extractor's
     // `_runs` hint — an OPAQUE array of `{text}` / `{child}` entries in
     // DOCUMENT order. Emitted only for an element whose own text

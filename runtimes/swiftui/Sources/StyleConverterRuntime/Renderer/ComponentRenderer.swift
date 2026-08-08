@@ -3658,10 +3658,21 @@ private struct PlaceholderLabel: View {
         // chain below suppresses the environment transform so measure
         // and render share ONE string (mirror of Compose's
         // placeholderDisplayText, which transforms before layout).
-        let transformedText = TextTransformApplier.renderString(
+        let casedText = TextTransformApplier.renderString(
             visibleText,
             textCase: textConfig.textCase,
             capitalize: textConfig.capitalizeWords)
+        // Wave 37 (lane W7, rule A) — `hyphens: none` (css-text-3 §6.1):
+        // delete the CONDITIONAL soft hyphens so TextKit cannot break at
+        // them. Applied here, in the same "rewrite the string before it
+        // is measured" lane as the case fold above, for the same reason:
+        // the greedy pre-break must see the exact glyphs that render, and
+        // a U+00AD that survived into the measured string is a break
+        // opportunity GreedyLineBreaker does not model but TextKit takes.
+        // Identity for `manual`/`auto` and for any run without a soft
+        // hyphen — i.e. for every committed baseline capture.
+        let transformedText = SoftHyphenPolicy.displayString(
+            casedText, mode: textConfig.hyphensMode)
         // Lane IOS-TEXT fix 1 — greedy pre-break. Gated on: a known wrap
         // width, wrapping not suppressed (white-space/text-wrap nowrap,
         // css-text-4 §5.1), preserved-whitespace modes OFF (wave 5
@@ -3676,34 +3687,56 @@ private struct PlaceholderLabel: View {
         // COUNT is exact and the line box can be pinned; on any early-return
         // path TextKit still owns the breaking and the count is a guess. Only
         // the flag is new — every `return` value below is unchanged.
-        let broken: (text: String, preBroken: Bool) = {
+        //
+        // Wave 37 (lane W7, rule B) — and WHETHER any committed line is
+        // WIDER than `avail`. GreedyLineBreaker leaves an overlong word
+        // alone on its line to overflow (CSS 2.1 §9.5 / css-text-3 §5.2:
+        // under `overflow-wrap: normal` a word with no break opportunity
+        // overflows the line box), but a Text still constrained to the
+        // box width hands that line straight back to TextKit, which
+        // emergency-breaks it at a character boundary — the exact defect
+        // the wave-36 gate captured across css-text/hyphens (ref keeps
+        // "Deoxyribon|ucleic" on ONE overflowing line; iOS rendered three
+        // lines and then overflowed the pinned box height, because
+        // LineBoxMetrics counted the two lines we committed). The flag
+        // feeds the `.fixedSize(horizontal:)` gate below, which is the
+        // same vehicle wave 21 built for whole-run unbreakables.
+        let broken: (text: String, preBroken: Bool, overlong: Bool) = {
             guard let cb = wrapWidth, !textConfig.noWrap,
                   !textConfig.preservesSpaces,
-                  transformedText.contains(" ") else { return (transformedText, false) }
+                  transformedText.contains(" ") else { return (transformedText, false, false) }
             // Text width available inside the label: the content box
             // minus the 4px breathing inset each side (dropped in WPT
             // capture, mirroring the padding gate below) and the
             // text-indent leading pad — both shrink the line box.
             let avail = cb - (wptCaptureMode ? 0 : 8) - (textConfig.textIndentPx ?? 0)
-            guard avail > 0 else { return (transformedText, false) }
+            guard avail > 0 else { return (transformedText, false, false) }
             // Measure with the EXACT resolved render face + spacing so
             // the fit test uses the advances TextKit renders with.
+            // Bound ONCE (wave 37) so the overflow probe below re-uses the
+            // identical measurer instance the fit test used — two closures
+            // would measure the same string through two attribute bags.
+            let measure = GreedyLineBreaker.measurer(
+                font: measurementUIFont,
+                letterSpacingPx: textConfig.letterSpacing,
+                wordSpacingPx: textConfig.wordSpacingPx,
+                // Wave 34 (lane F1) — measure with the same bundled
+                // per-script faces the render installs, or the greedy
+                // pre-break would fit non-Latin text against CoreText's
+                // cascade advances and break where neither surface wraps.
+                scriptFallback: wptCaptureMode)
             let lines = GreedyLineBreaker.lines(
                 text: transformedText,
                 maxWidth: avail,
-                measure: GreedyLineBreaker.measurer(
-                    font: measurementUIFont,
-                    letterSpacingPx: textConfig.letterSpacing,
-                    wordSpacingPx: textConfig.wordSpacingPx,
-                    // Wave 34 (lane F1) — measure with the same bundled
-                    // per-script faces the render installs, or the greedy
-                    // pre-break would fit non-Latin text against CoreText's
-                    // cascade advances and break where neither surface wraps.
-                    scriptFallback: wptCaptureMode))
+                measure: measure)
             // Hard newlines force TextKit to OUR break positions — its
             // push-out strategy only relocates SOFT breaks, and every
-            // pre-broken line fits `avail` by construction.
-            return (lines.joined(separator: "\n"), true)
+            // pre-broken line fits `avail` by construction EXCEPT the
+            // overlong-word case rule B names (a single word wider than
+            // the box). Probe for it with the same measurer.
+            let overlong = GreedyLineBreaker.hasUnbreakableOverflowingLine(
+                lines, maxWidth: avail, measure: measure)
+            return (lines.joined(separator: "\n"), true, overlong)
         }()
         // The rendered string — identical to the pre-wave-30 `displayText`.
         let displayText = broken.text
@@ -3764,6 +3797,22 @@ private struct PlaceholderLabel: View {
         // break-word under WPT_COMPOSED_MODE.
         let wptUnbreakableRun = wptCaptureMode
             && !DecorationOps.hasSoftWrapOpportunity(displayText)
+        // Wave 37 (lane W7, rule B) — the SAME contract for a run that
+        // DOES have soft-wrap opportunities but still contains one word
+        // wider than the box. wave 21's whole-run test misses it (a
+        // single space anywhere in the run answers "breakable"), yet the
+        // overlong word is just as unbreakable as a whole run with no
+        // spaces at all: css-text-3 §5.2 lets it overflow, it must not be
+        // emergency-broken. The greedy pre-break already put it alone on
+        // its line; this flag is what stops TextKit re-breaking that line
+        // at the proposal edge. Gated on `preBroken` because only then do
+        // the hard newlines carry OUR break positions — without them
+        // `.fixedSize(horizontal:)` would collapse the run to one line —
+        // and on `wptCaptureMode` like its wave-21 sibling, so the 327
+        // committed baseline captures (where the pre-break also runs, at
+        // a 4px-inset `avail`) stay byte-identical.
+        let wptOverlongPreBrokenRun = wptCaptureMode
+            && broken.preBroken && broken.overlong
         // Wave 30 (lane LINEBOX) — the composed-WPT LINE-BOX PIN, i.e. the
         // Round-4 single-line cap above GENERALIZED to every run whose
         // rendered line count is known. See LineBoxMetrics.pinnedBoxHeight
@@ -3938,7 +3987,11 @@ private struct PlaceholderLabel: View {
             .lineLimit(textConfig.lineClampLimit)
             // Wave 21 (B-RC7): OR in the WPT unbreakable-run gate — see
             // the wptUnbreakableRun declaration above for the contract.
-            .fixedSize(horizontal: textConfig.noWrap || wptUnbreakableRun, vertical: true)
+            // Wave 37 (lane W7): OR in the overlong-word gate — same
+            // contract, per-WORD instead of per-run.
+            .fixedSize(horizontal: textConfig.noWrap || wptUnbreakableRun
+                        || wptOverlongPreBrokenRun,
+                       vertical: true)
             // Fidelity wave 3 — first/last half-leading (CSS 2.1
             // §10.8.1): browsers centre each line's glyphs inside a
             // line box `line-height` tall, so half the leading paints

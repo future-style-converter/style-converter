@@ -171,6 +171,100 @@ export function bodyRootHasContainment(bodyRoot: IRComponent): boolean {
 }
 
 /**
+ * The five `writing-mode` keywords css-writing-modes-4 §3.1 defines. Anything
+ * outside this set is not a writing mode and never reaches the canvas — the
+ * resolver below refuses unknown strings rather than writing an arbitrary IR
+ * value into a live style object (no-silent-fallthrough).
+ */
+const WRITING_MODE_KEYWORDS = new Set([
+  'horizontal-tb', 'vertical-rl', 'vertical-lr', 'sideways-rl', 'sideways-lr',
+]);
+
+/**
+ * wave-37 lane W6 — THE PRINCIPAL WRITING MODE (root block-axis rotation).
+ *
+ * WHY: css-writing-modes-4 §8 ("The Principal Writing Mode") says the
+ * `writing-mode` (and `direction`) used for the ICB — and therefore for the
+ * whole block-progression axis of the document — is taken from the ROOT
+ * element, or, in HTML, from the first `<body>` child when it has one. A page
+ * that opens `html { writing-mode: vertical-rl }` (css-logical's
+ * logical-values-float-clear-2/-4) or `body { writing-mode: vertical-rl }`
+ * (the 24-strong css-writing-modes/wm-propagation-body-0xx family) lays its
+ * top-level blocks out as a RIGHT-TO-LEFT row of vertical columns, not a
+ * top-to-bottom stack.
+ *
+ * WHY IT WAS LOST: the extractor already keeps the declaration — it lands on
+ * the synthetic `meta.role: 'body-root'` component, exactly where the
+ * background and padding propagations read from. But that component is a
+ * SIBLING of the document's top-level blocks in the composed root forest (spec
+ * 03 flat placement), not their parent, so its `writing-mode` styled an empty
+ * zero-size box and inherited to nobody. All 89 corpus fixtures with a
+ * vertical body-root were therefore laid out on a HORIZONTAL block axis.
+ *
+ * MEASURED (--web-only, wave-37 head, base → this change):
+ *   css-logical                          pass 3/6   → 5/6
+ *   css-writing-modes                    pass 69/136 → 72/136
+ *   logical-values-float-clear-2         0.2254 → 0.9976
+ *   logical-values-float-clear-4         0.5995 → 0.9938
+ *   vrl-…-sideways-alongside-vrl-floats  0.6841 → 1.0000
+ *   text-underline-position-vertical     0.9649 → 1.0000
+ *   wm-propagation-body-032              0.8080 → 0.8967 — the blue square
+ *     moves from the upper-LEFT to the upper-RIGHT corner the ref
+ *     (block-flow-direction-025-ref.xht) shows; the family stops short of
+ *     0.95 on a SECOND, unrelated defect: its message `<img width=359
+ *     height=36>` reaches the IR as the extractor's 100×100 rule-less
+ *     placeholder, so the bundled PNG paints crushed.
+ * The four `alongside-…-floats` tests also lost their overflow ink entirely
+ * (capture 390×801 with 18 500 overflow px → 390×600 with 0), i.e. the
+ * rotation fixes the document HEIGHT too, not just the box order.
+ *
+ * THE FIX: hoist the resolved mode onto the ICB div — the box that IS the
+ * ref's render viewport (see composedIcbStyle). `writing-mode` is an INHERITED
+ * property, so one declaration there reproduces the ref exactly: the root
+ * forest stacks along the rotated block axis and every descendant's text runs
+ * inherit the vertical flow, all of it laid out by Blink's own orthogonal-flow
+ * pass. Nothing is re-implemented in the harness.
+ *
+ * THE CONTAINMENT GATE: propagation to the viewport is conditional in exactly
+ * the way the background's is, and WPT states it in the test TITLES rather
+ * than leaving it to inference — css-contain/contain-body-w-m-001..004 and
+ * contain-html-w-m-001..004 read "layout / paint / size / style containment on
+ * body|html prevents writing-mode propagation", one per keyword, and all eight
+ * match ONE reference whose orange square sits in the upper-LEFT (i.e. the
+ * viewport stayed horizontal-tb). Since every containment kind blocks it
+ * alone, the gate does not grade by kind: we reuse [bodyRootHasContainment] —
+ * the same predicate resolveCanvasBackground gates on, inheriting its merged
+ * html+body caveat verbatim. VERIFIED at the wave-37 head: all eight fixtures
+ * carry `contain` on the SAME body-root bag as the `writing-mode`, so all
+ * eight captures stay byte-identical (they are depth-48 gate cells that iOS
+ * and Android pass at 0.9992 / 0.9891).
+ *
+ * Returns `undefined` when there is no body-root, when it declares no
+ * writing-mode, when the declared mode is the initial `horizontal-tb` (which
+ * is what the canvas already does), when containment blocks the propagation,
+ * or when the value is not a css-writing-modes keyword — in every one of those
+ * cases the caller writes NO `writingMode` key and the capture is byte-
+ * identical to wave 36.
+ */
+export function resolveCanvasWritingMode(doc: IRDocument): string | undefined {
+  // Same lookup rule as resolveCanvasBackground / resolveCanvasPadding — a
+  // document has exactly one body, and the extractor emits one bag for it.
+  const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
+  if (!bodyRoot) return undefined;
+  // Containment takes the element off the propagation path (see doc above).
+  if (bodyRootHasContainment(bodyRoot)) return undefined;
+  // Resolve through the SAME engine the renderer uses (WritingModeApplier),
+  // so the canvas can never disagree with what a component would have got.
+  const wm = buildStyles(bodyRoot.properties).writingMode;
+  if (typeof wm !== 'string') return undefined;                 // not declared
+  const value = wm.trim().toLowerCase();
+  // Unknown keyword ⇒ refuse (no-silent-fallthrough); `horizontal-tb` ⇒ the
+  // canvas default, so writing it would be a no-op with a byte-diff risk.
+  if (!WRITING_MODE_KEYWORDS.has(value) || value === 'horizontal-tb') return undefined;
+  return value;
+}
+
+/**
  * The composed canvas's image-space FRAME — capture-browser-ref.mjs's
  * CANVAS_PAD_PX. Since wave-25 CAL-RC1 the ref renders UNPADDED at 358 wide
  * and this 16px frame is memcpy'd around the finished PNG (padPngBuffer), so
@@ -436,6 +530,11 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
   // matched instead of diffed at a (+16,+16) offset — clip-path-circle-007's
   // whole divergence. Pure per document, memoised like the background.
   const canvasPadding = React.useMemo(() => resolveCanvasPadding(doc), [doc]);
+  // wave-37 W6: the PRINCIPAL WRITING MODE (css-writing-modes-4 §8). Pure per
+  // document like the two resolvers above — memoised on the same identity.
+  // `undefined` for every horizontal document, which is what keeps the rest of
+  // the corpus byte-identical (the style key is then never written).
+  const canvasWritingMode = React.useMemo(() => resolveCanvasWritingMode(doc), [doc]);
   return (
     <div
       data-capture-canvas
@@ -488,6 +587,13 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
           paddingRight: `${canvasPadding.right - CANVAS_FRAME_PX}px`,
           paddingBottom: `${canvasPadding.bottom - CANVAS_FRAME_PX}px`,
           paddingLeft: `${canvasPadding.left - CANVAS_FRAME_PX}px`,
+          // wave-37 W6 — the principal writing mode rides the ICB, because the
+          // ICB IS the ref's render viewport and `writing-mode` is inherited:
+          // one declaration here rotates the block-progression axis for the
+          // whole root forest and every descendant, exactly as the ref page's
+          // `html`/`body` declaration does. Spread LAST and conditionally, so a
+          // horizontal document writes no key at all and stays byte-identical.
+          ...(canvasWritingMode ? { writingMode: canvasWritingMode as React.CSSProperties['writingMode'] } : {}),
         }}
       >
         {roots.map((root, i) => (

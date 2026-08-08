@@ -108,4 +108,35 @@ describe('ObjectViewBoxExtractor — the inset() basic shape', () => {
     expect(vb({ type: 'none' })).toBe('none');
     expect(vb('NONE')).toBe('none');
   });
+
+  // ── wave-37 lane W2: the other two <basic-shape-rect> spellings ────────
+  it('rect() emits its four edges', () => {
+    // `object-view-box: rect(50px 50px 100px 25px)` (WPT object-view-box-rect).
+    expect(vb({
+      type: 'rect',
+      top: { px: 50 }, right: { px: 50 }, bottom: { px: 100 }, left: { px: 25 },
+    })).toBe('rect(50px 50px 100px 25px)');
+  });
+
+  it('xywh() emits origin then size, not edges', () => {
+    // `object-view-box: xywh(25px 50px 25px 50px)` (WPT object-view-box-xywh).
+    expect(vb({
+      type: 'xywh',
+      x: { px: 25 }, y: { px: 50 }, width: { px: 25 }, height: { px: 50 },
+    })).toBe('xywh(25px 50px 25px 50px)');
+  });
+
+  it('percentage arguments arrive as bare numbers and regain their unit', () => {
+    // IRLengthPercentage.Percentage serializes as a RAW NUMBER; emitting a
+    // unitless `50` would invalidate the whole function in the browser.
+    expect(vb({ type: 'xywh', x: 50, y: 50, width: 50, height: 50 }))
+      .toBe('xywh(50% 50% 50% 50%)');
+    expect(vb({ type: 'rect', top: 50, right: 100, bottom: 100, left: 50 }))
+      .toBe('rect(50% 100% 100% 50%)');
+  });
+
+  it('a missing rect/xywh argument drops the declaration like inset', () => {
+    expect(vb({ type: 'xywh', x: { px: 25 }, y: { px: 50 }, width: { px: 25 } }))
+      .toBeUndefined();
+  });
 });

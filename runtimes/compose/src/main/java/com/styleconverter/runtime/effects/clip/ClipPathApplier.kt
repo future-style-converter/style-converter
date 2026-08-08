@@ -90,6 +90,35 @@ object ClipPathApplier {
     }
 
     /**
+     * Resolve one axis of a basic shape's `at <position>` centre.
+     *
+     * CSS Shapes 1 §3.1 takes a css-values-4 `<position>`, whose
+     * `[left|right|top|bottom] <length-percentage>` arm measures the offset
+     * from the NAMED edge. The converter normalises every form it can to
+     * the default (left / top) origin and sets `pos.xEdge` / `pos.yEdge`
+     * only for the right/bottom-anchored offsets it cannot — those need the
+     * box extent, which is only known here (wave 37 lane W3; before it the
+     * converter dropped keyword `at` clauses entirely, so this arm never
+     * reached any runtime).
+     *
+     * @param dp absolute offset from that edge, when the IR carried a px
+     *   length; wins over [percent] exactly as it did before this wave.
+     * @param percent offset as 0..100 of the box extent.
+     * @param fromFarEdge true when the offset is measured from the right /
+     *   bottom edge rather than the left / top one.
+     */
+    private fun axisCenter(
+        dp: androidx.compose.ui.unit.Dp?,
+        percent: Float,
+        fromFarEdge: Boolean,
+        extent: Float,
+        density: Density,
+    ): Float {
+        val offset = dp?.let { with(density) { it.toPx() } } ?: (extent * (percent / 100f))
+        return if (fromFarEdge) extent - offset else offset
+    }
+
+    /**
      * Create a Compose Shape for circle clip-path.
      */
     private fun createCircleShape(circle: ClipShape.Circle): Shape {
@@ -101,10 +130,12 @@ object ClipPathApplier {
             ): Outline {
                 // Absolute-length center (`at 20px 30px`) wins over the
                 // percent form when present — CSS Shapes 1 §3.1 <position>.
-                val centerX = circle.centerXDp?.let { with(density) { it.toPx() } }
-                    ?: (size.width * (circle.centerX / 100f))
-                val centerY = circle.centerYDp?.let { with(density) { it.toPx() } }
-                    ?: (size.height * (circle.centerY / 100f))
+                val centerX = axisCenter(
+                    circle.centerXDp, circle.centerX, circle.centerFromRight, size.width, density,
+                )
+                val centerY = axisCenter(
+                    circle.centerYDp, circle.centerY, circle.centerFromBottom, size.height, density,
+                )
 
                 val radius = resolveCircleRadius(
                     circle.radius,
@@ -171,8 +202,12 @@ object ClipPathApplier {
                 layoutDirection: LayoutDirection,
                 density: Density
             ): Outline {
-                val centerX = size.width * (ellipse.centerX / 100f)
-                val centerY = size.height * (ellipse.centerY / 100f)
+                val centerX = axisCenter(
+                    ellipse.centerXDp, ellipse.centerX, ellipse.centerFromRight, size.width, density,
+                )
+                val centerY = axisCenter(
+                    ellipse.centerYDp, ellipse.centerY, ellipse.centerFromBottom, size.height, density,
+                )
 
                 val radiusX = resolveEllipseRadius(
                     ellipse.radiusX,

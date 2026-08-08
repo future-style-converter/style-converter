@@ -37,6 +37,9 @@ import {
   selectorMatches,
   selectorMatchesPseudoElement,
   propsForElement,
+  // wave-37 lane W8: the layered-cascade carve-out from "skip @-rules".
+  layerCountOf,
+  resolveLayeredCascade,
   propsForBodyRoot,
   buildComponents,
   // wave-17 BODY-HEIGHT SLOTTING: the explicit-absolute-height trigger.
@@ -91,6 +94,9 @@ import {
   hasBoxAffectingInlineStyle,
   adoptsUnclosedBody,
   leadingTypeSelector,
+  // wave-37 lane W4: THE LANG WIRE.
+  documentLanguage,
+  resolveLanguage,
 } from './extract-fixture.mjs';
 
 // ── stripComments ───────────────────────────────────────────────────────────
@@ -224,6 +230,146 @@ test('parseCss drops --custom-property declarations', () => {
   const rules = parseCss('.a { --x: 1; color: red }');
   assert.equal(rules[0].props['--x'], undefined);
   assert.equal(rules[0].props.color, 'red');
+});
+
+// ── wave-37 lane W8: @layer / @scope descend instead of being skipped ───────
+
+test('parseCss descends into @layer blocks and tags rules with layer order', () => {
+  const rules = parseCss('@layer a{.x{color:red}}@layer b{.x{color:green}}.x{color:blue}');
+  assert.deepEqual(rules.map((r) => r.selector), ['.x', '.x', '.x']);
+  assert.equal(rules[0].layerIdx, 0);
+  assert.equal(rules[1].layerIdx, 1);
+  // The unlayered rule keeps the historical shape — no layer keys at all.
+  assert.equal('layerIdx' in rules[2], false);
+  assert.equal(layerCountOf(rules), 2);
+});
+
+test('parseCss honours a @layer statement for layer ORDER', () => {
+  // layer-media-toggle.html: `@layer foo, bar;` fixes foo BEFORE bar even
+  // though the `bar` block is written first.
+  const rules = parseCss('@layer foo, bar;@layer bar{.x{color:green}}@layer foo{.x{color:red}}');
+  assert.equal(rules[0].layerName, 'bar');
+  assert.equal(rules[0].layerIdx, 1);
+  assert.equal(rules[1].layerName, 'foo');
+  assert.equal(rules[1].layerIdx, 0);
+});
+
+test('parseCss gives every anonymous @layer its own index', () => {
+  const rules = parseCss('@layer{.x{color:red}}@layer{.x{color:green}}');
+  assert.equal(rules[0].layerIdx, 0);
+  assert.equal(rules[1].layerIdx, 1);
+});
+
+test('parseCss records !important per declaration', () => {
+  const rules = parseCss('.a { color: red !important; width: 1px }');
+  assert.equal(rules[0].props.color, 'red');
+  assert.deepEqual(rules[0].important, { color: true });
+});
+
+test('parseCss still skips @media / @supports wholesale after the carve-out', () => {
+  const rules = parseCss('@media print{.b{color:blue}}@supports (a:b){.c{color:teal}}.d{color:red}');
+  assert.deepEqual(rules.map((r) => r.selector), ['.d']);
+});
+
+test('parseCss rewrites @scope selectors against the scope root', () => {
+  const rules = parseCss('@scope (.test){input{color:green}:scope{color:red}:scope::before{content:"B"}}');
+  assert.deepEqual(rules.map((r) => r.selector), ['.test input', '.test', '.test::before']);
+});
+
+test('parseCss unwraps an implicit @scope but declines its :scope rules', () => {
+  // No static root exists for `@scope { … }` (it is the owning <style>'s
+  // parent), so `:scope` rules are dropped rather than mis-targeted.
+  const rules = parseCss('@scope{.a{color:green}:scope{color:red}}');
+  assert.deepEqual(rules.map((r) => r.selector), ['.a']);
+});
+
+test('resolveLayeredCascade: later layer wins, unlayered beats every layer', () => {
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { color: 'red' } },
+    { rank: 1, props: { color: 'green' } },
+    { rank: 2, props: { color: 'blue' } }, // rank === layerCount ⇒ unlayered
+  ], 2);
+  assert.equal(out.color, 'blue');
+});
+
+test('resolveLayeredCascade: important REVERSES layer order', () => {
+  // css-cascade-5 §6.4.4 — an important declaration in the EARLIER layer
+  // wins, and unlayered important is the lowest of the importants.
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { color: 'green' }, important: { color: true } },
+    { rank: 1, props: { color: 'red' }, important: { color: true } },
+    { rank: 2, props: { color: 'blue' }, important: { color: true } },
+  ], 2);
+  assert.equal(out.color, 'green');
+});
+
+test('resolveLayeredCascade: revert-layer rolls back to the earlier layer', () => {
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { color: 'green' } },
+    { rank: 1, props: { color: 'revert-layer' } },
+  ], 2);
+  assert.equal(out.color, 'green');
+});
+
+test('resolveLayeredCascade: a revert-layer CHAIN walks back to the first layer', () => {
+  // revert-layer-007.html — three layers each reverting the one before.
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { color: 'green' } },
+    { rank: 1, props: { color: 'revert-layer' } },
+    { rank: 2, props: { color: 'revert-layer' } },
+    { rank: 3, props: { color: 'revert-layer' } },
+  ], 4);
+  assert.equal(out.color, 'green');
+});
+
+test('resolveLayeredCascade: revert-layer with nothing earlier drops the property', () => {
+  const out = resolveLayeredCascade([{ rank: 0, props: { color: 'revert-layer' } }], 1);
+  assert.equal('color' in out, false);
+});
+
+test('resolveLayeredCascade: `all: revert-layer` reverts every declared property', () => {
+  // revert-layer-003.html — one `all` line reverts width/height/background.
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { width: '100px', 'background-color': 'green' } },
+    { rank: 1, props: { width: '200px', 'background-color': 'red' } },
+    { rank: 1, props: { all: 'revert-layer' } },
+  ], 2);
+  assert.deepEqual(out, { width: '100px', 'background-color': 'green' });
+});
+
+test('resolveLayeredCascade: the style attribute outranks every layer', () => {
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { color: 'green' }, important: { color: true } },
+    { rank: 2, props: { color: 'blue' }, important: { color: true }, inline: true },
+  ], 1);
+  assert.equal(out.color, 'blue');
+});
+
+test('resolveLayeredCascade: revert-layer in the style attribute falls back to the sheets', () => {
+  // revert-layer-009 / -012: inline `background-color: revert-layer` rolls
+  // the cascade back past the style attribute to the stylesheet value.
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { color: 'green' } },
+    { rank: 1, props: { color: 'revert-layer' }, inline: true },
+  ], 0);
+  assert.equal(out.color, 'green');
+});
+
+test('propsForElement resolves a layered cascade end-to-end', () => {
+  // revert-layer-001.html in miniature.
+  const rules = parseCss(
+    '#target{width:100px}@layer{#target{background-color:green}}'
+    + '@layer{#target{background-color:red;background-color:revert-layer}}',
+  );
+  const { props } = propsForElement(rules, 'div', { id: 'target' }, [], null, {});
+  assert.equal(props['background-color'], 'green');
+  assert.equal(props.width, '100px');
+});
+
+test('propsForElement keeps the historical path when no layer is involved', () => {
+  const rules = parseCss('.a{color:red}.a{color:green}');
+  const { props } = propsForElement(rules, 'div', { class: 'a' }, [], null, {});
+  assert.equal(props.color, 'green');
 });
 
 // ── extractBodyChildren ─────────────────────────────────────────────────────
@@ -5684,4 +5830,77 @@ test('wave36 M3-b: a child that declares its own `quotes` is never overwritten',
   const rules = parseCss('body { quotes: none } .inner { quotes: auto }');
   const { components } = buildComponents(html, rules, 'q33');
   assert.equal(components['q33__0'].properties.quotes, 'auto');
+});
+
+
+// ── wave-37 lane W4: THE LANG WIRE ──────────────────────────────────────────
+
+test('W4 lang: the document element chain answers body-first, then html', () => {
+  // The exact ladder documentDirectionality uses, and for the same reason —
+  // <body> is the nearer ancestor of every component we emit.
+  assert.equal(documentLanguage('<html lang="fr"><body>x'), 'fr');
+  assert.equal(documentLanguage('<html lang="fr"><body lang="ja">x'), 'ja');
+  assert.equal(documentLanguage('<body lang=\'zh-Hant\'>x'), 'zh-Hant');
+  // Unquoted attribute values are how half the corpus writes them.
+  assert.equal(documentLanguage('<html lang=en><body>x'), 'en');
+  // Case + subtags survive verbatim — RFC 4647 matching happens at lookup.
+  assert.equal(documentLanguage('<html lang="eN-Us">'), 'eN-Us');
+  // No declaration anywhere is the "unknown" answer, not a guess.
+  assert.equal(documentLanguage('<html><body>x'), null);
+  assert.equal(documentLanguage(null), null);
+});
+
+test('W4 lang: `*lang` lookalike attributes are never read as `lang`', () => {
+  // The same `(?<![\w-])` lookbehind the dir scan uses: `hreflang`,
+  // `data-lang` and `xml:lang` must not answer this question.
+  assert.equal(documentLanguage('<html data-lang="fr">'), null);
+  assert.equal(documentLanguage('<html hreflang="fr">'), null);
+  assert.equal(documentLanguage('<html xml:lang="fr">'), null);
+  // …but a real one sitting beside a lookalike still wins.
+  assert.equal(documentLanguage('<html data-lang="fr" lang="ja">'), 'ja');
+});
+
+test('W4 lang: resolveLanguage walks own → nearest ancestor → document', () => {
+  const anc = (...langs) => langs.map((l) => ({ tag: 'div', attrs: l ? { lang: l } : {} }));
+  // Own attribute wins outright.
+  assert.equal(resolveLanguage({ lang: 'ja' }, anc('fr'), 'en'), 'ja');
+  // Otherwise the NEAREST declaring ancestor — the chain is outermost-first.
+  assert.equal(resolveLanguage({}, anc('en', 'fr'), 'de'), 'fr');
+  assert.equal(resolveLanguage({}, anc('en', null), 'de'), 'en');
+  // Nothing in the chain → the document element rung.
+  assert.equal(resolveLanguage({}, anc(null, null), 'de'), 'de');
+  // Nothing anywhere → null (absence means "unknown", never a default).
+  assert.equal(resolveLanguage({}, anc(null), null), null);
+  assert.equal(resolveLanguage(null, null, null), null);
+});
+
+test('W4 lang: HTML\'s explicit-unknown `lang=""` stops the walk without falling through', () => {
+  // HTML §3.2.6.2 — an empty lang says "the language is not known", which is
+  // the opposite of "ask my parent". Emitting the outer value here would
+  // make the attribute a no-op.
+  assert.equal(resolveLanguage({ lang: '' }, [{ tag: 'div', attrs: { lang: 'fr' } }], 'en'), null);
+  assert.equal(resolveLanguage({}, [{ tag: 'div', attrs: { lang: '' } }], 'en'), null);
+  assert.equal(documentLanguage('<html lang=""><body>'), '');
+});
+
+test('W4 lang: buildComponents stamps `_lang` on every element and on the body-root', () => {
+  const html = '<body><p>outer <q lang="ja">inner</q></p></body>';
+  const rules = parseCss('body { font: 32px serif }');
+  // The <html lang> rung has to travel on the ctx — the walker's ancestor
+  // chain starts INSIDE body.
+  const { components } = buildComponents(html, rules, 'w4', { documentLang: 'fr' });
+  assert.equal(components['w4__body']._lang, 'fr');
+  assert.equal(components['w4__0']._lang, 'fr');
+  assert.equal(components['w4__0'].children['w4__0__0']._lang, 'ja');
+});
+
+test('W4 lang: a lang-free document gains no `_lang` key at all', () => {
+  // The byte-identity contract: every pre-wave-37 fixture without a lang
+  // attribute must serialize exactly as it did before.
+  const { components } = buildComponents(
+    '<body><p>x</p></body>', parseCss('p { color: red }'), 'w4b',
+  );
+  for (const cmp of Object.values(components)) {
+    assert.equal('_lang' in cmp, false);
+  }
 });

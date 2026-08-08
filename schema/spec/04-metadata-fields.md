@@ -32,6 +32,54 @@ behavior, caveats included.
 > `extract-fixture.mjs`) forwards verbatim as `meta.runs`, same additive
 > rule. Its full contract lives in 03-children.md §4.1; the converter-hop
 > note is below.
+> **wave-37 exercised it a fifth time**: the extractor's `_lang` (the
+> element's *computed* content language — see the LANG WIRE banner in
+> `extract-fixture.mjs`) forwards verbatim as `meta.lang`, same additive
+> rule. Contract below.
+
+## `meta.lang` — the computed content language
+
+`lang` is the one piece of source state that changes how the *same*
+declarations paint. Two mechanisms read it, and a wire without it runs
+both on the consumer's default locale:
+
+- **`quotes: auto`** (css-content-3 §2.2.1). The UA's
+  `q::before { content: open-quote }` picks a CLDR quote pair keyed by
+  the content language: French `«…»`, Japanese `「…」`, German `„…“`.
+  With no language on the wire every `<q>` paints the root pair.
+- **Generic-family font fallback.** `font: 32px serif` resolves to a
+  *different face* under `lang="ja"` than under `lang="en"` — for the
+  Latin runs in the same element too, so line breaking moves.
+
+### The contract
+
+- **Already resolved, never a walk.** The value is the element's computed
+  content language per HTML §3.2.6.2 — own `lang`, else nearest
+  ancestor's, else the document element chain's (`<body lang>` nearer,
+  `<html lang>` farther). The flat v2 component list has no parent edge
+  to walk, so resolving upstream is the only shape that works; it is also
+  what lets a consumer set the attribute on one element without knowing
+  anything about its neighbours.
+- **Verbatim as authored, never canonicalised.** `lang="eN-Us"` ships as
+  `eN-Us`. BCP-47 matching is case-insensitive and subtag-truncating
+  (RFC 4647 §2.1 / §3.4), every consumer lowercases at *lookup*, and
+  rewriting here would only make the fixture lie about its source.
+- **Omitted when unknown.** A document that declares no language carries
+  no key — which is exactly the "use your default locale" state, so a
+  lang-free document's bytes are unchanged. `lang=""` is HTML's spelling
+  of *explicitly* unknown (§3.2.6.2): it stops the resolution walk and
+  still emits no key, so an empty attribute cannot fall through to an
+  outer language.
+- **Droppable, like every `meta` member.** A reader that ignores it
+  paints in its default locale — the pre-wave-37 result. Nothing about
+  layout *correctness* depends on it; fidelity does.
+- **Consumers.** Web sets the `lang` attribute on the rendered element
+  and lets the browser's own CLDR table and font fallback engage (the
+  capture harness does this in WPT mode). The generated-content bake
+  reads it to resolve `quotes: auto` into literal marks for the readers
+  that have no UA quote engine — see
+  `tools/titan/generated-content-bake.mjs`, whose CLDR table is derived
+  from the corpus's own `css-content/quotes-0NN` references.
 
 ## `meta.runs` — why the converter never rewrites a `child` key
 

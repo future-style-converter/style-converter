@@ -286,10 +286,11 @@ enum IRWireV2Reader {
                 let m = try c.nestedContainer(keyedBy: IRAnyKey.self, forKey: IRAnyKey("meta"))
                 // `markerText` is the wave-27 baked list marker (lane CBAKE).
                 // `runs` is the wave-32 ordered inline-content list (lane R).
+                // `lang` is the wave-37 computed content language (lane W4).
                 let members: Set<String> = ["sourceTag", "role", "attrs", "decorations",
-                                            "markerText", "runs"]
+                                            "markerText", "lang", "runs"]
                 for k in m.allKeys where !members.contains(k.stringValue) {
-                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role/attrs/decorations/markerText/runs)", path: decoder.codingPath)
+                    throw violation("unknown meta key '\(k.stringValue)' (allowed: sourceTag/role/attrs/decorations/markerText/lang/runs)", path: decoder.codingPath)
                 }
                 let tag = try m.decodeIfPresent(String.self, forKey: IRAnyKey("sourceTag"))
                 let role = try m.decodeIfPresent(String.self, forKey: IRAnyKey("role"))
@@ -368,6 +369,12 @@ enum IRWireV2Reader {
                 // is no shape to validate beyond "string" — the schema pins
                 // minLength 1 and the converter omits the key otherwise.
                 let markerText = try m.decodeIfPresent(String.self, forKey: IRAnyKey("markerText"))
+                // lang (wave-37 lane W4): a plain string like markerText —
+                // no shape to validate beyond "string" (the schema pins
+                // minLength 1), and deliberately NOT lowercased: RFC 4647
+                // matching is case-insensitive and consumers normalise at
+                // lookup, so canonicalising here would lose the round-trip.
+                let lang = try m.decodeIfPresent(String.self, forKey: IRAnyKey("lang"))
                 // runs (wave-32 lane R): strict where the schema is strict —
                 // a non-empty array whose entries are objects carrying
                 // EXACTLY ONE of `text` / `child`. Every one of those is a
@@ -412,12 +419,12 @@ enum IRWireV2Reader {
                     }
                 }
                 guard tag != nil || role != nil || attrs != nil || decorations != nil
-                        || markerText != nil || runs != nil else {
+                        || markerText != nil || lang != nil || runs != nil else {
                     throw violation("meta present but empty (schema: minProperties 1)", path: decoder.codingPath)
                 }
                 meta = IRMeta(sourceTag: tag, role: role, attrs: attrs,
                               decorations: decorations, markerText: markerText,
-                              runs: runs)
+                              lang: lang, runs: runs)
             }
             // variables: additive v2 key — "--name" → raw string map
             // (custom-property definitions, css-variables-1 §2). Schema

@@ -285,8 +285,18 @@ function translateV1(components: unknown[]): IRDocument {
     if (Array.isArray(c._runs) && c._runs.length > 0) {
       meta.runs = c._runs as IRMeta['runs'];
     }
+    // wave-37 lane W4: `_lang` → `meta.lang`, the same underscore→meta hop
+    // as `_decorations`/`_runs` and for the same reason — this path decodes
+    // EXTRACTOR-shaped input directly (spec 04's second column), and the
+    // browser is exactly the reader that can act on a language (CLDR quote
+    // pairs, generic-family font fallback). Carried verbatim; the harness
+    // owns the DOM-attribute policy.
+    if (typeof c._lang === 'string' && c._lang.length > 0) {
+      meta.lang = c._lang;
+    }
     if (meta.sourceTag !== undefined || meta.role !== undefined
-      || meta.decorations !== undefined || meta.runs !== undefined) {
+      || meta.decorations !== undefined || meta.runs !== undefined
+      || meta.lang !== undefined) {
       out.meta = meta;
     }
     // Composition: nested position becomes a child-side slot ref; roots

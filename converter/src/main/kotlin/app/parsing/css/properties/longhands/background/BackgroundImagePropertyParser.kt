@@ -127,6 +127,9 @@ object BackgroundImagePropertyParser : PropertyParser {
         // at the next segment).
         val rawFirst = parts[0].trim()
         val strippedFirst = GradientValueParsers.stripInterpolationMethod(rawFirst)
+        // wave-37: the method is CARRIED as well as peeled — the web runtime
+        // re-emits it so the browser interpolates in the authored space.
+        val interp = GradientValueParsers.interpolationMethodOf(rawFirst)
         if (strippedFirst != null) colorStopStart = 1
         val firstPart = strippedFirst ?: rawFirst
 
@@ -149,7 +152,7 @@ object BackgroundImagePropertyParser : PropertyParser {
         val colorStops = parts.drop(colorStopStart).flatMap { GradientValueParsers.parseColorStops(it.trim()) }
         if (colorStops.isEmpty()) return null
 
-        return BackgroundImageProperty.BackgroundImage.LinearGradient(angle, colorStops, repeating)
+        return BackgroundImageProperty.BackgroundImage.LinearGradient(angle, colorStops, repeating, interp)
     }
 
     private fun parseRadialGradient(value: String, repeating: Boolean): BackgroundImageProperty.BackgroundImage? {
@@ -181,6 +184,7 @@ object BackgroundImagePropertyParser : PropertyParser {
         // its presence alone marks the segment as the prefix.
         val rawRadialFirst = parts[0].trim()
         val strippedRadialFirst = GradientValueParsers.stripInterpolationMethod(rawRadialFirst)
+        val interp = GradientValueParsers.interpolationMethodOf(rawRadialFirst)
         val first = strippedRadialFirst ?: rawRadialFirst
         if (strippedRadialFirst != null && !looksLikeRadialPrefix(first)) {
             // Method-only prefix (`in oklab, red, blue`) — nothing else to
@@ -222,7 +226,7 @@ object BackgroundImagePropertyParser : PropertyParser {
         val colorStops = parts.drop(stopStart).flatMap { GradientValueParsers.parseColorStops(it.trim()) }
         if (colorStops.isEmpty()) return null
 
-        return BackgroundImageProperty.BackgroundImage.RadialGradient(shape, size, position, colorStops, repeating)
+        return BackgroundImageProperty.BackgroundImage.RadialGradient(shape, size, position, colorStops, repeating, interp)
     }
 
     // The first comma-segment of a radial-gradient is a prefix when it
@@ -257,6 +261,7 @@ object BackgroundImagePropertyParser : PropertyParser {
         // its from-angle); method presence alone marks the prefix.
         val rawConicFirst = parts[0].trim()
         val strippedConicFirst = GradientValueParsers.stripInterpolationMethod(rawConicFirst)
+        val interp = GradientValueParsers.interpolationMethodOf(rawConicFirst)
         if (strippedConicFirst != null) colorStopStart = 1
         val firstPart = strippedConicFirst ?: rawConicFirst
 
@@ -281,7 +286,7 @@ object BackgroundImagePropertyParser : PropertyParser {
         val colorStops = parts.drop(colorStopStart).flatMap { GradientValueParsers.parseColorStops(it.trim()) }
         if (colorStops.isEmpty()) return null
 
-        return BackgroundImageProperty.BackgroundImage.ConicGradient(fromAngle, position, colorStops, repeating)
+        return BackgroundImageProperty.BackgroundImage.ConicGradient(fromAngle, position, colorStops, repeating, interp)
     }
 
 }

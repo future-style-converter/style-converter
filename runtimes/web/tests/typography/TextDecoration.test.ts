@@ -215,6 +215,66 @@ describe('TextOverflow / LineClamp / MaxLines / BlockEllipsis', () => {
     expect(out.lineClamp).toBe('none');
     expect(out.display).toBeUndefined();
   });
+  // wave-37 lane W2 — `line-clamp: auto` (css-overflow-4 §5.1).
+  it('line-clamp auto resolves the count from a max-height in lh', () => {
+    const out = applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'auto' }),
+      p('MaxHeight', { type: 'length', original: { v: 4.5, u: 'LH' } }),
+    ]));
+    // 4.5 line boxes fit four WHOLE lines — the clamp point is the last line
+    // that starts before the constraint.
+    expect(out.maxHeight).toBe('4lh');
+    expect(out.overflow).toBe('hidden');
+    // NOT the -webkit-box trio: it re-parents block children (see applier).
+    expect(out.display).toBeUndefined();
+  });
+  it('line-clamp auto divides an absolute max-height by the used line-height', () => {
+    const out = applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'auto' }),
+      p('MaxHeight', { type: 'length', px: 138 }),
+      p('LineHeight', { original: { type: 'length', px: 32 } }),
+    ]));
+    expect(out.maxHeight).toBe('4lh');                       // floor(138 / 32)
+  });
+  it('line-clamp auto takes min-height when it overrides a smaller max-height', () => {
+    const out = applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'auto' }),
+      p('MinHeight', { type: 'length', original: { v: 4, u: 'LH' } }),
+      p('MaxHeight', { type: 'length', original: { v: 3, u: 'LH' } }),
+    ]));
+    expect(out.maxHeight).toBe('4lh');                       // CSS 2.1 §10.7: min wins
+  });
+  it('line-clamp auto with a zero constraint clips instead of clamping', () => {
+    const out = applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'auto' }),
+      p('MaxHeight', { type: 'length', px: 0 }),
+    ]));
+    // 0 is outside -webkit-line-clamp's [1,∞] grammar and `max-height:0lh`
+    // would fight the sizing engine's own 0 — hidden overflow is the clamp.
+    expect(out.overflow).toBe('hidden');
+    expect(out.maxHeight).toBeUndefined();
+  });
+  it('line-clamp auto with no block-size constraint emits nothing', () => {
+    // css-overflow-4: with nothing to clamp against, `auto` never clamps.
+    expect(applyLineClamp(extractLineClamp([p('LineClamp', { type: 'auto' })]))).toEqual({});
+  });
+  it('line-clamp auto leaves an unresolvable constraint alone', () => {
+    // A percentage max-height has no statically-knowable line count; guessing
+    // one would clamp at the wrong line, so the declaration is a no-op.
+    expect(applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'auto' }),
+      p('MaxHeight', { type: 'percentage', percentage: 50 }),
+    ]))).toEqual({});
+  });
+  it('a later line-clamp:none cancels an earlier auto', () => {
+    const out = applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'auto' }),
+      p('MaxHeight', { type: 'length', original: { v: 4, u: 'LH' } }),
+      p('LineClamp', { type: 'none' }),
+    ]));
+    expect(out.lineClamp).toBe('none');
+    expect(out.maxHeight).toBeUndefined();
+  });
   it('max-lines count', () => {
     const out = applyMaxLines(extractMaxLines([p('MaxLines', { type: 'count', value: 2 })]));
     expect(out.maxLines).toBe(2);

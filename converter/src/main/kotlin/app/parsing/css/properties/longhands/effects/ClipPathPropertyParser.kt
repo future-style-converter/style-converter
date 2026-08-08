@@ -5,13 +5,15 @@ import app.irmodels.IRPercentage
 import app.irmodels.properties.effects.ClipPathProperty
 import app.parsing.css.properties.longhands.PropertyParser
 import app.parsing.css.properties.primitiveParsers.LengthParser
+import app.parsing.css.properties.primitiveParsers.PositionParser
 import app.parsing.css.properties.primitiveParsers.UrlParser
 
 /**
  * Parser for `clip-path` property.
  *
  * Syntax: none | <url> | <basic-shape>
- * Basic shapes: inset(), circle(), ellipse(), polygon()
+ * Basic shapes: inset(), circle(), ellipse(), polygon(), path(), rect(),
+ * xywh(), shape()
  *
  * Examples:
  * - "none"
@@ -54,6 +56,12 @@ object ClipPathPropertyParser : PropertyParser {
                 parseShapeWithOptionalGeometryBox(value, geometryBoxes)
             }
             trimmed.startsWith("xywh(") -> {
+                parseShapeWithOptionalGeometryBox(value, geometryBoxes)
+            }
+            // css-shapes-2 §4 `shape()`. Added wave 37 (lane W3): without
+            // this branch the whole declaration fell out of the IR as an
+            // `_unmapped` Generic property and nothing was clipped.
+            trimmed.startsWith("shape(") -> {
                 parseShapeWithOptionalGeometryBox(value, geometryBoxes)
             }
             // Check for geometry-box alone or geometry-box + shape
@@ -166,8 +174,46 @@ object ClipPathPropertyParser : PropertyParser {
             lower.startsWith("path(") -> parsePath(value)
             lower.startsWith("rect(") -> parseRect(value)
             lower.startsWith("xywh(") -> parseXywh(value)
+            // `shape(` must be tested AFTER the specific functions above
+            // so it cannot shadow them; no other basic shape starts with
+            // those five characters, so ordering is a readability point
+            // rather than a correctness one.
+            lower.startsWith("shape(") -> parseShapeFunction(value)
             else -> null
         }
+    }
+
+    /**
+     * Parse the css-shapes-2 §4 `shape()` function as a VERBATIM string.
+     *
+     * `shape()` is a segment list — `shape(evenodd from 10px 10px, hline
+     * by 80px, vline by 80%, close)` — whose coordinates mix absolute
+     * lengths, percentages of the reference box, `<position>` keywords
+     * and relative (`by`) offsets. None of the relative forms can be
+     * pre-computed by a CSS *reader* that never sees a box, so the
+     * honest normalisation is no normalisation: keep the text and let
+     * each runtime decide (CLAUDE.md — `null`/unresolved means
+     * runtime-dependent). This is exactly how `path()` already treats
+     * its SVG `d` string one function above.
+     *
+     * The only transformation applied is whitespace collapsing: WPT
+     * sources wrap these declarations over several lines and the raw
+     * newlines survive extraction into the fixture, so runs of
+     * whitespace fold to one space to keep the wire (and any CSS the web
+     * runtime re-emits) on a single line. Whitespace is not significant
+     * anywhere in the `shape()` grammar, so this is lossless.
+     */
+    private fun parseShapeFunction(value: String): ClipPathProperty.Shape? {
+        val trimmed = value.trim()
+        // Guard the shape of the call itself; `parseShapeValue` already
+        // matched the prefix case-insensitively, so only the closing
+        // paren is still in question.
+        if (!trimmed.lowercase().startsWith("shape(") || !trimmed.endsWith(")")) return null
+        val collapsed = trimmed.replace(Regex("""\s+"""), " ")
+        // `shape()` with an empty argument list is not a valid basic
+        // shape — reject rather than emit a clip that hides everything.
+        if (collapsed.length <= "shape()".length) return null
+        return ClipPathProperty.Shape.ShapeFunction(collapsed)
     }
 
     /**
@@ -415,7 +461,20 @@ object ClipPathPropertyParser : PropertyParser {
 
     /**
      * Parse path() function.
-     * Format: path('<svg-path>')
+     *
+     * css-shapes-2 §3.2: `path( <fill-rule>? , <string> )` — the fill rule
+     * (`nonzero` | `evenodd`) is an OPTIONAL first argument, comma-separated
+     * from the SVG path string.
+     *
+     * WAVE-37 LANE W3 — WHAT THIS REPLACES. The previous body stripped
+     * quotes from the ENTIRE argument list, so the two-argument form
+     * `path(nonzero, 'M0,0 L100,0 L0,100 L0,0')` produced
+     * `d = "nonzero, 'M0,0 L100,0 L0,100 L0,0'"` — the fill rule and both
+     * inner quotes baked into the path data. The web runtime then emitted
+     * `path("nonzero, 'M0,0 …'")`, which is not a valid `path()` at all, so
+     * the browser dropped the declaration and the element went unclipped
+     * (WPT clip-path-path-002, clip-path-path-with-zoom and the
+     * path-interpolation-with-zoom animation).
      */
     private fun parsePath(value: String): ClipPathProperty.Shape? {
         val lower = value.lowercase()
@@ -423,41 +482,71 @@ object ClipPathPropertyParser : PropertyParser {
 
         val content = value.substring(5, value.length - 1).trim()
 
+        // Split off an optional leading `<fill-rule>`. Only the first comma
+        // is a separator — the path data itself is quoted and may contain
+        // commas (`'M0,0 L100,0'`), so splitting on every comma would tear
+        // it apart. Anything other than the two spec keywords in that slot
+        // is not a fill rule, so we leave the text alone and let the quote
+        // strip below decide whether it is a bare path.
+        var fillRule: String? = null
+        var pathPart = content
+        val comma = content.indexOf(',')
+        if (comma >= 0) {
+            val head = content.substring(0, comma).trim().lowercase()
+            if (head == "nonzero" || head == "evenodd") {
+                fillRule = head
+                pathPart = content.substring(comma + 1).trim()
+            }
+        }
+
         // Remove surrounding quotes if present
-        val pathData = content.removeSurrounding("'").removeSurrounding("\"")
+        val pathData = pathPart.removeSurrounding("'").removeSurrounding("\"")
 
         if (pathData.isEmpty()) return null
 
-        return ClipPathProperty.Shape.Path(pathData)
+        return ClipPathProperty.Shape.Path(pathData, fillRule)
     }
 
     /**
-     * Parse position value (x y) or keyword like "center".
+     * Parse the `at <position>` clause of `circle()` / `ellipse()`.
+     *
+     * WAVE-37 LANE W3 — WHAT THIS REPLACES. The previous implementation
+     * understood exactly three things: the literal string `center`, one
+     * bare length (copied onto BOTH axes, which is not what the grammar
+     * says — `at 30px` is `30px center`), and two bare lengths. Every
+     * keyword form therefore fell straight through to `return null`, and
+     * a null position means [ClipPathProperty.Shape.Circle] carries no
+     * `at` clause at all — the shape silently re-centres. The corpus is
+     * full of the dropped forms:
+     *
+     *   circle(50% at left bottom)               (css-shapes, 10 cells)
+     *   circle(50% at right 40px bottom 40px)    (css-masking circle-00N)
+     *   ellipse(40px 60px at right top)
+     *   ellipse(farthest-side closest-side at top 40px left 60px)
+     *
+     * Position parsing now delegates to
+     * [app.parsing.css.properties.primitiveParsers.PositionParser], the
+     * shared css-values-4 `<position>` implementation extracted this wave
+     * from the wave-36 `ObjectPositionPropertyParser` rewrite — same
+     * grammar, same unordered-arm axis rules, one copy. Returning null
+     * still means "not a position": the caller drops the `at` clause,
+     * which is what a browser does with an invalid basic shape.
      */
     private fun parsePosition(value: String): ClipPathProperty.Position? {
-        val trimmed = value.trim().lowercase()
-
-        // Handle single keyword
-        if (trimmed == "center") {
-            return ClipPathProperty.Position(
-                app.irmodels.IRLength.fromRelative(50.0, app.irmodels.IRLength.LengthUnit.PERCENT),
-                app.irmodels.IRLength.fromRelative(50.0, app.irmodels.IRLength.LengthUnit.PERCENT)
-            )
-        }
-
-        val coords = value.trim().split(Regex("""\s+"""))
-        if (coords.size == 1) {
-            // Single value - use for both x and y, or handle keyword
-            val singleVal = parseLengthOrPercentageToLength(coords[0])
-            return if (singleVal != null) ClipPathProperty.Position(singleVal, singleVal) else null
-        }
-
-        if (coords.size != 2) return null
-
-        val x = parseLengthOrPercentageToLength(coords[0]) ?: return null
-        val y = parseLengthOrPercentageToLength(coords[1]) ?: return null
-
-        return ClipPathProperty.Position(x, y)
+        val resolved = PositionParser.parse(value) ?: return null
+        return ClipPathProperty.Position(
+            x = resolved.x.offset,
+            y = resolved.y.offset,
+            // Only emit an edge when it is NOT the default origin. The
+            // parser normalises every keyword-only form to left/top (so
+            // `at right top` is x=100%, y=0% with no edges and the wire
+            // shape is unchanged from before this wave); an edge appears
+            // only for the `[right|bottom] <length-percentage>` arm,
+            // which genuinely cannot be expressed from the default
+            // origin without the reference-box size.
+            xEdge = if (resolved.x.edge == PositionParser.Edge.RIGHT) "right" else null,
+            yEdge = if (resolved.y.edge == PositionParser.Edge.BOTTOM) "bottom" else null,
+        )
     }
 
     /**
@@ -475,13 +564,6 @@ object ClipPathPropertyParser : PropertyParser {
 
         // Try length
         return LengthParser.parse(trimmed)
-    }
-
-    /**
-     * Parse length or percentage, returning IRLength (alias for type consistency).
-     */
-    private fun parseLengthOrPercentageToLength(value: String): app.irmodels.IRLength? {
-        return parseLengthOrPercentage(value)
     }
 
     /**

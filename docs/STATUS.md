@@ -753,16 +753,41 @@ dirs + WPT corpus are gitignored):
   hunt. Depth-48 gate: zero regressions, net clean. Totals:
   **web 1079/1333 (81.0%), iOS 880/1305 (67.4%), Android 835/1301
   (64.2%)**. css-grid web perfect 48/48 at depth.
+  Wave 37 (`tools/titan/results/corpus-v6-2.json`) answered the
+  map's biggest question: **the 384-cell grid-lanes pool is the
+  browser's ceiling, not ours** — Chromium-151 itself does not
+  implement `display: grid-lanes` (the refs hand-build lanes geometry
+  from supported CSS), and a 437-cell ceiling measurement showed our
+  captures sit at the Chromium ceiling with a median gap of 0.0008.
+  The exclusion was **refused** on precision (0.842, would cost 48–54
+  passing cells) — Rule 44 ships informational,
+  denominator-neutrality proven by A/B replay over 11,534 frozen
+  cells. The view-transitions exclusion was refused the same way
+  (0.74), with the closing move designed (a VT capture mode). What
+  did land: the near-miss sweep (+27 depth-48 web cells, 0 lost —
+  and the cascade counter/at-rule machinery reached the natives:
+  **css-cascade +11/+11/+10 on all three**), `line-clamp: auto`,
+  gradient hue-interpolation (css-images web +11 at the head),
+  clip-path `at <position>` + fill-rule (converter 258→302 tests),
+  the **lang wire** end-to-end, vertical-rl root propagation on web
+  (wm-propagation 0.808→0.897), and device-verified iOS
+  overflow-wrap rules — after correcting the wave-36 hyphens
+  taxonomy, which had the direction backwards. Known artifacts:
+  webmap-v1 is a stale-refs baseline for css-shapes (45/102 ref inks
+  changed under htmlpins); the 22-cell image-set residue is a corpus
+  sparse-checkout gap, not code. Depth-48 gate: zero regressions,
+  net clean. Totals: **web 1120/1333 (84.0%), iOS 890/1305 (68.2%),
+  Android 847/1302 (65.1%)**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 258 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1188 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2092 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1306 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1338 |
+| converter (Kotlin) | `./gradlew :converter:test` | 302 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1234 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2106 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1321 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1413 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap
