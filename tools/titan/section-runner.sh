@@ -295,7 +295,7 @@ EXTRACT_RC=0
 # Engagement must not depend on ambient shell state — same contract as
 # POST_LOAD_EXTRACT above. The two are independent and compose (state first,
 # then bidi geometry measured on the same settled page).
-POST_LOAD_EXTRACT=1 BIDI_BAKE=1 node "$TITAN_DIR/extract-fixture.mjs" "${TESTS[@]}" >"$EXTRACT_LOG" 2>&1 || EXTRACT_RC=$?
+POST_LOAD_EXTRACT=1 BIDI_BAKE=1 VT_BAKE=1 node "$TITAN_DIR/extract-fixture.mjs" "${TESTS[@]}" >"$EXTRACT_LOG" 2>&1 || EXTRACT_RC=$?
 EXTRACTED_OK=$(grep -c '^extracted ' "$EXTRACT_LOG" || true)
 EXTRACTED_FAIL=$(grep -c '^FAIL ' "$EXTRACT_LOG" || true)
 log "extracted=$EXTRACTED_OK failed=$EXTRACTED_FAIL"

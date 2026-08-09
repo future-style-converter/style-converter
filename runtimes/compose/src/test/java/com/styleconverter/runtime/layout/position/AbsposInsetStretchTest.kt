@@ -96,13 +96,47 @@ class AbsposInsetStretchTest {
         assertEquals(100.0, r.heightPx!!, 1e-9)
     }
 
-    @Test fun `explicit height blocks the ratio derivation of that axis`() {
-        // Inline stretch present but height explicit → height untouched,
-        // width injected from the stretch alone.
+    @Test fun `explicit height blocks its own axis and S6 derives the inline one`() {
+        // Height explicit → block axis untouched. S6 (wave 38): the
+        // definite block size + ratio DETERMINE the inline size
+        // (css-sizing-4 §4.1 — 80 × 2 = 160), which wins over the 200px
+        // inline stretch. Pre-S6 this pinned the raw 200 stretch, which
+        // painted abspos-006 as a full-canvas green bar on both natives
+        // against a 100×100 Chromium ref.
         val r = resolve(cbW = 200.0, cbH = 300.0,
             left = 0.0, right = 0.0, explicitH = 80.0, ratio = 2.0)
-        assertEquals(200.0, r.widthPx!!, 1e-9)
+        assertEquals(160.0, r.widthPx!!, 1e-9)
         assertEquals(null, r.heightPx)
+    }
+
+    @Test fun `S6 abspos-006 - ratio beats the inline stretch`() {
+        // The live shape: a 500×100 relative parent, all-zero insets,
+        // `height: 100px; aspect-ratio: 1/1` → 100×100, not 500×100.
+        val r = resolve(cbW = 500.0, cbH = 100.0,
+            left = 0.0, right = 0.0, top = 0.0, bottom = 0.0,
+            explicitH = 100.0, ratio = 1.0)
+        assertEquals(100.0, r.widthPx!!, 1e-9)
+        assertEquals(null, r.heightPx)
+    }
+
+    @Test fun `S6 does not fire for a non-px explicit height`() {
+        // `height: 100%` (abspos-009) arrives as hasExplicitH=true with
+        // explicitH=null — no honest basis, so the old stretch stands.
+        val r = resolve(cbW = 500.0, cbH = 100.0,
+            left = 0.0, right = 0.0, top = 0.0, bottom = 0.0,
+            explicitH = null, hasExplicitH = true, ratio = 1.0)
+        assertEquals(500.0, r.widthPx!!, 1e-9)
+        assertEquals(null, r.heightPx)
+    }
+
+    @Test fun `S6 yields to an author width`() {
+        // abspos-005 (`width: 100px`, height auto): the inline-first
+        // branch still owns the resolution.
+        val r = resolve(cbW = 100.0, cbH = 500.0,
+            left = 0.0, right = 0.0, top = 0.0, bottom = 0.0,
+            explicitW = 100.0, ratio = 1.0)
+        assertEquals(null, r.widthPx)
+        assertEquals(100.0, r.heightPx!!, 1e-9)
     }
 
     @Test fun `unknown cb axis disables the stretch on that axis only`() {

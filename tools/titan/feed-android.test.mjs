@@ -299,3 +299,19 @@ test('feed-android pushes fonts BEFORE the IR reaches the inbox', async () => {
   assert.match(src, /rm', '-rf', INBOX_DIR, SHOT_DIR, FONTS_DIR/,
     'the fonts dir must join the reset wipe');
 });
+
+test('feed-android scopes :app:installDebug to --udid, not the whole device farm', async () => {
+  // Source-scan pin on a MEASURED failure (wave-38 lane N8): with several
+  // emulators attached, `:app:installDebug` fans out to all of them, so one
+  // sick instance belonging to another run threw InstallException and killed
+  // a feeder that only ever touches its own `serial`. ANDROID_SERIAL is set
+  // on the CHILD env only, so it cannot leak into the `-s serial` adb calls.
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  const serialAt = src.indexOf('env.ANDROID_SERIAL = serial;');
+  const installAt = src.indexOf("':app:installDebug'");
+  assert.ok(serialAt > 0, 'the install env must pin ANDROID_SERIAL');
+  assert.ok(serialAt < installAt, 'ANDROID_SERIAL must be set BEFORE the gradle exec');
+  // …and it must be on the child env object, never on this process's own.
+  assert.ok(!/process\.env\.ANDROID_SERIAL\s*=/.test(src),
+    'ANDROID_SERIAL must not be written onto the feeder process env');
+});

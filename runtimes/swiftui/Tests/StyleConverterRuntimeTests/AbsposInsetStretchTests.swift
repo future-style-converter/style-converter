@@ -97,13 +97,50 @@ final class AbsposInsetStretchTests: XCTestCase {
         XCTAssertEqual(r.heightPx, 100)
     }
 
-    /// An explicit height blocks the ratio derivation of that axis; the
-    /// inline stretch still injects.
-    func testExplicitHeightBlocksDerivation() {
+    /// An explicit height blocks the ratio derivation of THAT axis — and
+    /// (S6, wave 38) determines the inline one: css-sizing-4 §4.1 makes
+    /// the automatic inline size blockSize × ratio = 80 × 2 = 160, which
+    /// wins over the 200px inline stretch. Pre-S6 this pinned the raw
+    /// 200 stretch, which painted abspos-006 as a full-canvas green bar
+    /// on both natives against a 100×100 Chromium ref.
+    func testExplicitHeightDerivesInlineSizeOverTheStretch() {
         let r = resolve(cbW: 200, cbH: 300, left: 0, right: 0,
                         explicitH: 80, ratio: 2)
-        XCTAssertEqual(r.widthPx, 200)
+        XCTAssertEqual(r.widthPx, 160)
         XCTAssertNil(r.heightPx)
+    }
+
+    /// S6's live pin — css-sizing/aspect-ratio/abspos-006: a 500×100
+    /// relative parent, all-zero insets, `height: 100px; aspect-ratio:
+    /// 1/1` → 100×100 (NOT the 500-wide inline stretch).
+    func testS6Abspos006RatioBeatsTheInlineStretch() {
+        let r = resolve(cbW: 500, cbH: 100,
+                        left: 0, right: 0, top: 0, bottom: 0,
+                        explicitH: 100, ratio: 1)
+        XCTAssertEqual(r.widthPx, 100)
+        XCTAssertNil(r.heightPx)
+    }
+
+    /// S6 needs an AUTHOR-DEFINITE px block size. A non-px explicit
+    /// height (`height: 100%` — abspos-009) arrives as
+    /// hasExplicitH=true / explicitH=nil and keeps the old stretch, so
+    /// the rule can never invent a width out of a basis it does not have.
+    func testS6DoesNotFireForANonPxExplicitHeight() {
+        let r = resolve(cbW: 500, cbH: 100,
+                        left: 0, right: 0, top: 0, bottom: 0,
+                        explicitH: nil, hasExplicitH: true, ratio: 1)
+        XCTAssertEqual(r.widthPx, 500)
+        XCTAssertNil(r.heightPx)
+    }
+
+    /// S6 never overrides an author width — abspos-005 (`width: 100px`
+    /// AND `height` auto) still routes through the inline-first branch.
+    func testS6YieldsToAnAuthorWidth() {
+        let r = resolve(cbW: 100, cbH: 500,
+                        left: 0, right: 0, top: 0, bottom: 0,
+                        explicitW: 100, ratio: 1)
+        XCTAssertNil(r.widthPx)
+        XCTAssertEqual(r.heightPx, 100)
     }
 
     /// An unknown containing-block axis disables the stretch on that

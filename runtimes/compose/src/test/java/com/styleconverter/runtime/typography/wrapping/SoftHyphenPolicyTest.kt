@@ -11,10 +11,14 @@ import org.junit.Test
 // TWIN of the iOS suite SoftHyphenPolicyTests.swift — SAME cases, SAME
 // expected strings (repo twin rule: identical pin tables). Change one,
 // change both. The Swift file additionally pins rule B's
-// unbreakable-overflow probe, which has no Compose counterpart: Compose
-// does not pre-break (its own line breaker already breaks greedily at
-// spaces like Chromium — only the emergency intra-word break differs, and
-// that has no Compose-reachable seam; see the lane report).
+// unbreakable-overflow probe; wave 38 (lane N8) built that seam on
+// Compose too, so the probe now has a Kotlin counterpart — see
+// GreedyLineBreakerTest / PreBreakPipelineTest in this package. (The
+// wave-37 note here claimed no Compose-reachable seam existed. It was
+// wrong about the vehicle, not the diagnosis: Compose's own breaker does
+// break greedily at spaces like Chromium and only the emergency intra-word
+// break differs, but the string itself is a reachable seam — pre-break the
+// run, then turn softWrap off so Minikin cannot re-break it.)
 //
 // Source of truth for the strings: the WPT css-text/hyphens family at
 // tools/wpt/css/css-text/hyphens/, whose fixtures are authored with

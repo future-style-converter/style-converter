@@ -118,7 +118,7 @@ fi
 echo "fetch-wpt: configuring sparse-checkout (cone mode)..."
 git -C "$WPT_DIR" sparse-checkout init --cone \
     || { echo "fetch-wpt: sparse-checkout init failed" >&2; exit 2; }
-# These three directories cover every CSS reftest:
+# These four directories cover every CSS reftest:
 #   css/        — the entire reftest corpus (Section 2.2 maps every
 #                 subdir to an IR category)
 #   resources/  — shared CSS / JS files that tests <link> from
@@ -126,7 +126,22 @@ git -C "$WPT_DIR" sparse-checkout init --cone \
 #   fonts/      — @font-face fixtures referenced by css-fonts/ tests.
 #                 Bucket-B per Section 4.1 — if we don't have the font
 #                 file the extractor can still emit a lossy fixture.
-git -C "$WPT_DIR" sparse-checkout set css resources fonts \
+#   images/     — WAVE-38 LANE N4. WPT's server-root image bank: 77 files,
+#                 131 KB total at the pinned SHA. css/ tests reference it
+#                 SERVER-ROOT-RELATIVE (`url(/images/green.png)`), which
+#                 extract-fixture.mjs resolves as join(tools/wpt, payload),
+#                 so with the directory absent EVERY such url() failed the
+#                 `fs.readFile` in `inlineUrlsInValue` and the owning
+#                 component was marked `_lossy` + 'requires-bundled-asset'
+#                 instead of carrying its data URI. That silently defeated
+#                 the whole css-images/image-set/ family (39 tests, 52
+#                 references to /images/{green,red}.png) plus
+#                 css-images/image-light-dark: the tests paint a green
+#                 image, we painted nothing. The directory is three orders
+#                 of magnitude smaller than fonts/, so there is no size
+#                 argument for keeping it out — it was simply never needed
+#                 until the asset inliner (wave 8) existed.
+git -C "$WPT_DIR" sparse-checkout set css resources fonts images \
     || { echo "fetch-wpt: sparse-checkout set failed" >&2; exit 2; }
 
 # ---------------------------------------------------------------------------
@@ -151,6 +166,15 @@ git -C "$WPT_DIR" checkout --detach FETCH_HEAD \
 # ---------------------------------------------------------------------------
 if [[ ! -d "$WPT_DIR/css" ]]; then
     echo "fetch-wpt: tools/wpt/css/ is missing after checkout" >&2
+    exit 2
+fi
+# Same check for the server-root image bank. A stale sparse config from a
+# pre-wave-38 checkout would leave this absent and the failure mode is
+# INVISIBLE downstream — the asset inliner just marks components lossy and
+# the run scores a green-image test against a blank box. Fail loudly here
+# instead.
+if [[ ! -d "$WPT_DIR/images" ]]; then
+    echo "fetch-wpt: tools/wpt/images/ is missing after checkout" >&2
     exit 2
 fi
 

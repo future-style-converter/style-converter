@@ -9,11 +9,30 @@ package com.styleconverter.runtime.layout
 // corpus never enters this layout.
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+
+/**
+ * Wave-38 lane N1 — "this composition is a MEMBER of a packed inline atom
+ * run". [InlineFlowLayout] provides `true` around its own content, which is
+ * exactly the run members (the layout is instantiated per run segment), so
+ * the UA-widget mount hook can tell the two placement regimes apart:
+ *  • run member → this layout already builds the §10.8 line box and places
+ *    the atom against the row baseline, so the widget must paint flush in
+ *    its promised box (adding lead here would shift the ink out of the
+ *    plan's slot);
+ *  • anything else → the widget is a lone inline-level box in a block and
+ *    gets no line box at all without [UAWidgetBlockLine].
+ * `compositionLocalOf` (not static): the value differs per subtree and the
+ * default `false` keeps every non-run composition byte-identical.
+ * Twin: the SwiftUI `inlineAtomRunMember` EnvironmentValue.
+ */
+internal val LocalInlineAtomRunMember = compositionLocalOf { false }
 
 /**
  * Lay an inline atom run out as wrapped rows.
@@ -41,7 +60,14 @@ internal fun InlineFlowLayout(
     atoms: List<UAWidgetIntrinsics.AtomSpec>,
     content: @Composable () -> Unit,
 ) {
-    Layout(content = content, modifier = Modifier) { measurables, constraints ->
+    Layout(
+        // Wave-38 lane N1 — mark the run members (see
+        // [LocalInlineAtomRunMember]). CompositionLocalProvider emits no
+        // layout node, so the measurable list — and every index the plan
+        // below aligns to it — is unchanged.
+        content = { CompositionLocalProvider(LocalInlineAtomRunMember provides true) { content() } },
+        modifier = Modifier,
+    ) { measurables, constraints ->
         // P18 — per-atom measurement under the table's fixed axes. CSS
         // px == dp at the capture density (the FloatRowLayout precedent).
         val placeables = measurables.mapIndexed { i, m ->

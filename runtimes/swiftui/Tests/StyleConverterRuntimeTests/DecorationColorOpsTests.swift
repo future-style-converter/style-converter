@@ -336,4 +336,118 @@ final class DecorationColorOpsTests: XCTestCase {
             }
         }
     }
+
+    // ── wave 38, lane N3: the css-text-decor-3 §2.1 `||` grammar gate ──────
+    // TWIN of the Compose DecorationColorOpsTest cases of the same names.
+    // Oracle: css/css-text-decor/text-decoration-line.html — its last four
+    // divs declare `blink blink`, `blink underline blink`,
+    // `blink underline overline blink` and
+    // `blink underline overline line-through blink`. Chromium (the frozen
+    // browser ref, tools/wpt/refs/9b5435e5…/…/css-text-decor/
+    // text-decoration-line.png) paints NO decoration on any of them, and the
+    // wave37-final per-test IR proves the wire hands the runtimes those
+    // duplicate lists verbatim — this platform painted 6 spurious
+    // full-width bands across them (ref-SSIM 0.9215; 0.9615 with the rows
+    // whited out).
+
+    func testARepeatedKeywordInvalidatesTheWholeDeclaration() {
+        // `blink blink` — the grammar's `||` admits each term once, so the
+        // declaration is dropped and the property keeps `none`.
+        XCTAssertFalse(DecorationColorOps.lineListIsValid(["blink", "blink"]))
+        // The three live corpus values that mix a real line with a repeat:
+        // every one of them must paint NOTHING, not the surviving line.
+        XCTAssertFalse(DecorationColorOps.lineListIsValid(["blink", "underline", "blink"]))
+        XCTAssertFalse(DecorationColorOps.lineListIsValid(
+            ["blink", "underline", "overline", "blink"]))
+        XCTAssertFalse(DecorationColorOps.lineListIsValid(
+            ["blink", "underline", "overline", "line-through", "blink"]))
+    }
+
+    func testDuplicateDetectionUsesTheCanonicalSpelling() {
+        // The v2 wire ships SCREAMING enum names; a value that repeats the
+        // same keyword in two spellings is still a repeat.
+        XCTAssertFalse(DecorationColorOps.lineListIsValid(["UNDERLINE", "underline"]))
+        XCTAssertFalse(DecorationColorOps.lineListIsValid(["LINE_THROUGH", "line-through"]))
+    }
+
+    func testNoneMayNotBeCombinedWithALineKeyword() {
+        // `none` is a STANDALONE alternative, never a `||` term.
+        XCTAssertFalse(DecorationColorOps.lineListIsValid(["none", "underline"]))
+        // …but on its own it is a perfectly valid declaration.
+        XCTAssertTrue(DecorationColorOps.lineListIsValid(["NONE"]))
+    }
+
+    func testEveryDistinctKeywordValueStaysValid() {
+        // The full `||` group in one value — the css-text-decor-3 §2.1
+        // maximum, and the `all-decorations` class of the same WPT test
+        // (which the ref DOES paint with all three lines).
+        XCTAssertTrue(DecorationColorOps.lineListIsValid(
+            ["UNDERLINE", "OVERLINE", "LINE_THROUGH"]))
+        // `blink` ONCE alongside real lines is valid: it simply paints
+        // nothing (§2.1 lets a UA not blink, and Chromium does not).
+        XCTAssertTrue(DecorationColorOps.lineListIsValid(["blink", "underline"]))
+        // Nothing declared → nothing to reject.
+        XCTAssertTrue(DecorationColorOps.lineListIsValid([]))
+    }
+
+    func testAnUnknownKeywordDoesNotInvalidateTheDeclaration() {
+        // css-text-decor-4 keeps growing this list (spelling-error,
+        // grammar-error) and schema/spec/05-versioning.md tolerates unknown
+        // wire values — so a token this build cannot paint keeps today's
+        // behaviour (no line) instead of blanking the whole value.
+        XCTAssertTrue(DecorationColorOps.lineListIsValid(["spelling-error"]))
+        XCTAssertTrue(DecorationColorOps.lineListIsValid(["underline", "spelling-error"]))
+        // A repeat of an unknown token is still a repeat, though.
+        XCTAssertFalse(DecorationColorOps.lineListIsValid(
+            ["spelling-error", "spelling-error"]))
+    }
+
+    func testTheCanonicaliserFoldsCaseAndTheWireUnderscore() {
+        XCTAssertEqual(DecorationColorOps.canonicalLineToken("LINE_THROUGH"), "line-through")
+        XCTAssertEqual(DecorationColorOps.canonicalLineToken("Underline"), "underline")
+        // Already-canonical input is returned unchanged (idempotent).
+        XCTAssertEqual(DecorationColorOps.canonicalLineToken("overline"), "overline")
+    }
+
+    // ── the same gate at the WIRE seam (extractor level) ───────────────────
+    // These are the EXACT TextDecorationLine payloads the wave37-final
+    // per-test IR carries for components 31/33/35/37 of that test. Compose
+    // twin: DecorationWirePinTest's live-wire gate cases.
+
+    /// Build the extractor's input from a raw JSON property payload.
+    private func lineFlags(_ json: String) -> TextDecorationLineConfig? {
+        let data = Data(json.utf8)
+        let value = try! JSONDecoder().decode(IRValue.self, from: data)
+        return TextDecorationLineExtractor.extract(
+            from: [IRProperty(type: "TextDecorationLine", data: value)])
+    }
+
+    func testTheLiveBlinkBlinkWireOwnsNoDecorationLine() {
+        let cfg = lineFlags(#"["BLINK","BLINK"]"#)
+        XCTAssertEqual(cfg, TextDecorationLineConfig())
+    }
+
+    func testTheLiveBlinkUnderlineBlinkWireOwnsNoDecorationLine() {
+        // The surviving `underline` must NOT be painted: the duplicate
+        // `blink` invalidates the whole declaration.
+        let cfg = lineFlags(#"["BLINK","UNDERLINE","BLINK"]"#)
+        XCTAssertEqual(cfg?.underline, false)
+        XCTAssertEqual(cfg, TextDecorationLineConfig())
+    }
+
+    func testTheLiveFourKeywordBlinkWireOwnsNothing() {
+        let cfg = lineFlags(#"["BLINK","UNDERLINE","OVERLINE","LINE_THROUGH","BLINK"]"#)
+        XCTAssertEqual(cfg?.underline, false)
+        XCTAssertEqual(cfg?.overline, false)
+        XCTAssertEqual(cfg?.lineThrough, false)
+    }
+
+    func testAValidMultiKeywordWireStillOwnsAllThreeLines() {
+        // The regression guard for the gate itself — component 22 of the
+        // same test (`all-decorations`), which the ref DOES paint.
+        let cfg = lineFlags(#"["UNDERLINE","OVERLINE","LINE_THROUGH"]"#)
+        XCTAssertEqual(cfg?.underline, true)
+        XCTAssertEqual(cfg?.overline, true)
+        XCTAssertEqual(cfg?.lineThrough, true)
+    }
 }

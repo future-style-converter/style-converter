@@ -1,0 +1,281 @@
+{
+ "_note": "WAVE-38 LANE N6 — THE PRINCIPAL DIRECTION (css-writing-modes-4 §8, inline axis), the twin of wave-37 lane W6's block axis. Scorer validated FIRST: inject-wpt-block's diffComposedVsRef was replayed over the 144 frozen web-ref rows of tools/titan/runs/wave37-final/sections/{css-writing-modes,css-break,css-contain} and reproduced ssim, pixelMismatchedCount, wptPass and all three vetoes exactly, 144/144 (_diag38/N6/validate-scorer.mjs). Every number below is web-only, measured at the wave-38 head with that scorer against the frozen refs at 9b5435e5/white-black-ink-font-lh-imgpad-htmlpins.",
+ "artifact": "wave38-N6-direction",
+ "date": "2026-08-08",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "canvasBoundary": "white-black-ink-font-lh-imgpad-htmlpins",
+ "landed": {
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "what": [
+   "resolveCanvasDirection — the body-root's `direction` propagated to the composed canvas's ICB div, gated by the SAME bodyRootHasContainment predicate the background and writing-mode propagations use (css-contain-1 §3.1 names `direction` in the same clause as `writing-mode`). Silent for no-body-root, no declaration, the initial `ltr`, containment, or a non-keyword value.",
+   "resolveCanvasTextAlign — the body-root's `text-align` on the same ICB, and ONLY when the direction propagation fired. Repairs a harness artifact (in the flat v2 forest a top-level INLINE root's line box belongs to the ICB, not to a body box), not a spec propagation."
+  ],
+  "tests": "apps/web-harness/tests/ui/ComposedCanvasDirection.test.tsx — 15 pins on the decision table and the ICB wiring."
+ },
+ "population": {
+  "howFound": "_diag38/N6/grep-root-dir scan of all 10,681 bucket-A tests for a root-scope (html | body | :root) CSS `direction` declaration or an html/body `dir=` attribute.",
+  "tests": 42,
+  "bySection": {
+   "css-break": 9,
+   "css-contain": 8,
+   "css-flexbox": 6,
+   "css-writing-modes": 6,
+   "css-text": 4,
+   "css-align": 2,
+   "css-ruby": 2,
+   "selectors": 2,
+   "CSS2": 1,
+   "css-anchor-position": 1,
+   "css-page": 1
+  },
+  "inLaneReach": "33 — the 42 minus the 8 containment-gated css-contain cells and the one explicit `ltr` document; matches the W6 report's count.",
+  "reachedByThisChange": "24 of the 33 (the CSS-rule route). The other 9 declare direction via the html/body `dir=` ATTRIBUTE, which never reaches the body-root property bag — see deferred.dirAttributeRoute."
+ },
+ "sliceAB": {
+  "what": "the 42-test root-direction slice, captured back-to-back with the pristine head and with this change (_diag38/N6/mini-run.sh, the section-runner's seven steps for an arbitrary test list).",
+  "passes": {
+   "base": 22,
+   "after": 26
+  },
+  "rowsUp": 13,
+  "rowsDown": 0,
+  "rowsByteIdentical": 29,
+  "gains": [
+   {
+    "t": "css-flexbox/gap-005-rtl",
+    "base": 0.8317,
+    "after": 1.0,
+    "pass": true
+   },
+   {
+    "t": "css-flexbox/gap-006-rtl",
+    "base": 0.8417,
+    "after": 1.0,
+    "pass": true
+   },
+   {
+    "t": "css-flexbox/gap-007-rtl",
+    "base": 0.8372,
+    "after": 0.9862,
+    "pass": true
+   },
+   {
+    "t": "css-break/table/table-collapsed-borders-paint-vlr-rtl",
+    "base": 0.7141,
+    "after": 0.9838,
+    "pass": true
+   },
+   {
+    "t": "css-break/table/table-grid-paint-vlr-rtl",
+    "base": 0.7987,
+    "after": 0.9015,
+    "pass": false
+   },
+   {
+    "t": "css-break/table/table-grid-paint-vrl-rtl",
+    "base": 0.8017,
+    "after": 0.9027,
+    "pass": false
+   },
+   {
+    "t": "css-break/table/table-section-paint-vlr-rtl",
+    "base": 0.7914,
+    "after": 0.8555,
+    "pass": false
+   },
+   {
+    "t": "css-break/table/table-section-paint-vrl-rtl",
+    "base": 0.7947,
+    "after": 0.857,
+    "pass": false
+   },
+   {
+    "t": "css-break/table/table-row-paint-vlr-rtl",
+    "base": 0.7911,
+    "after": 0.8538,
+    "pass": false
+   },
+   {
+    "t": "css-break/table/table-row-paint-vrl-rtl",
+    "base": 0.7942,
+    "after": 0.8551,
+    "pass": false
+   },
+   {
+    "t": "css-break/table/table-col-paint-vlr-rtl",
+    "base": 0.8231,
+    "after": 0.8426,
+    "pass": false
+   },
+   {
+    "t": "css-break/table/table-col-paint-vrl-rtl",
+    "base": 0.8255,
+    "after": 0.8448,
+    "pass": false
+   },
+   {
+    "t": "css-anchor-position/anchor-center-safe-rtl",
+    "base": 0.883,
+    "after": 0.9032,
+    "pass": false
+   }
+  ],
+  "theOneDipAndItsRepair": {
+   "t": "CSS2/text/bidi-span-002",
+   "directionAlone": 0.9945,
+   "withTextAlignPin": 1.0,
+   "evidence": "ink bbox moved from image x:18..25 (= the ref) to x:364..371 under the reversed ICB, and back to x:18..25 once the body's own `text-align: left` rides the ICB. The span root is INLINE, so the extractor's text-align bake onto it is inert — only the box establishing the line box can answer."
+  },
+  "whyTheCssBreakTableCellsSTILLfail": "the direction propagation supplies the horizontal band and nothing else: capture and ref now agree on x:274..373 for table-grid-paint-vrl-rtl, and the residue is the table's fragmentation/column paint (naTags requires-fragmentation + table layout), a capability tier, not an inline-axis bug."
+ },
+ "sectionAB": {
+  "method": "full-capability web-only section runs, base vs after, compared row by row; every moved row is attributed by asking whether that test's IR carries an UNCONTAINED body-root Direction RTL (_diag38/N6/section-ab.mjs). A moved row outside that set is drift from something else, not this change.",
+  "sections": {
+   "css-writing-modes": {
+    "tests": 136,
+    "pass": {
+     "base": 72,
+     "after": 72
+    },
+    "rowsMoved": 0,
+    "laneReach": 5,
+    "reading": "byte-stable end to end. The section's 5 in-reach documents (dynamic-offset-{,vrl-}rtl-001/002 and wm-propagation-002) were already at 1.0000 / 0.9955 / 0.9956 / 1.0000 / 0.9792 and stayed exactly there — the propagation is correct for them and was not what they were missing.",
+    "runs": [
+     "wave38-N6-base",
+     "wave38-N6-after"
+    ]
+   },
+   "css-break": {
+    "tests": 962,
+    "pass": {
+     "base": 881,
+     "after": 882
+    },
+    "rowsMoved": 9,
+    "rowsUp": 9,
+    "rowsDown": 0,
+    "rowsOutOfReach": 0,
+    "laneReach": 9,
+    "reading": "exactly the 9 in-reach rows moved, all up, out of 962. The +1 pass is table-collapsed-borders-paint-vlr-rtl (0.7141 → 0.9838); the other 8 gain 0.02–0.10 and stay blocked by the fragmentation/table tier.",
+    "runs": [
+     "wave38-N6-base2",
+     "wave38-N6-base"
+    ],
+    "runsNote": "the AFTER side here is the run labelled `wave38-N6-base`, which captured with the direction change already on disk (a race with an in-flight edit, caught by the numbers). It is a valid AFTER for this section because none of css-break's 9 uncontained rtl body-roots declares a `text-align`, so the text-align pin is provably inert here and direction-only == final. `wave38-N6-base2` is the pristine base, re-run for exactly this reason."
+   },
+   "css-contain": {
+    "tests": 280,
+    "pass": {
+     "base": 222
+    },
+    "laneReach": 0,
+    "reading": "PROVEN NO-OP by construction rather than by a second section run: all 8 of the section's body-root `direction: rtl` documents (contain-{body,html}-dir-001..004) also carry `contain`, so resolveCanvasDirection returns undefined for every one of the 280 tests and the ICB style is byte-identical. The 8 cells are also measured directly in the slice A/B — SSIM 1.0000, 0 mismatched px, on BOTH sides. Two attempts at an after-section run stalled in puppeteer under a load average of 30 from the other lanes sharing this worktree; the proof above is what the run would have re-measured.",
+    "runs": [
+     "wave38-N6-base"
+    ]
+   }
+  }
+ },
+ "deferred": {
+  "dirAttributeRoute": {
+   "what": "9 of the 42 population tests declare the root direction with an html/body `dir=` ATTRIBUTE instead of a CSS rule. HTML §14.3.1 makes that a presentational `direction` declaration, so css-writing-modes-4 §8 propagates it exactly like the rule — but extract-fixture's `documentDirectionality` reads the attribute only for `:dir()` matching, and the value never lands on the body-root property bag. resolveCanvasDirection is therefore silent for all 9.",
+   "worth": "css-align/self-alignment/self-align-safe-unsafe-{flex,grid}-003, both at 0.8015 with a 100%-displaced inline axis: capture ink bbox x:17..74 where the frozen ref has it at x:314..372 (orange band identical at 33,600 px in both). The other 7 need nothing — css-text/text-align-match-parent-root-{ltr,rtl,logical} and selectors/dir-{style-02a,pseudo-update-document-element} are already at SSIM 1.0000, and css-ruby/ruby-bidi-001/003 are blocked by the presence + coverage-ratio vetoes on a `color: transparent` near-blank page, not by direction.",
+   "cost": "those two css-align documents emit NO body-root component at all (their only root-scope declaration is the attribute), so delivering the value means the extractor MINTING a body-root — a flat-list shape change that reaches all three runtimes and needs a device A/B. Adding the property to an EXISTING bag (the css-ruby shape) is additive and cheap but worth zero measured cells. Also: tools/titan/extract-fixture.mjs is being edited by lane N4 in the same worktree this wave, so a structural edit there is a live merge hazard.",
+   "next": "one wave with a device port: mint the body-root from documentDirectionality, then A/B css-align + css-ruby + selectors + css-text on all three platforms."
+  },
+  "nativeTwins": {
+   "what": "Compose `LocalLayoutDirection = Rtl` and SwiftUI `.environment(\\.layoutDirection, .rightToLeft)` on the composed native canvases, gated by the containment predicate the natives already share (containmentBlocksCanvasPropagation / WPTCanvas.containmentBlocksPropagation).",
+   "whyNotLanded": "this lane has no private device allocated, and the wave's regression bar (byte-stable-or-better on the blast radius) cannot be met on captures that cannot be taken. Note also that the natives have no W6 BLOCK-axis twin either — wave-37 landed resolveCanvasWritingMode web-only — so this would be the first canvas-propagation twin on mobile and should land with its block-axis sibling, not alone.",
+   "knownHeadroom": "inside the frozen depth-48 gate the native direction cells are already at/near parity (contain-*-dir-* iOS 0.9992 / Android 0.9642 passing; dynamic-offset-* ~0.995), so the native win lives in the full-capability css-break table-*-rtl and css-flexbox gap-*-rtl cells, which the depth-48 gate does not sample."
+  },
+  "containWritingModeEight": {
+   "what": "css-contain/contain-{body,html}-w-m-001..004 — web 0.9101 while iOS 0.9992 and Android 0.9891 PASS (frozen wave37-final gate). A genuine web-native gap inside this lane's verification section, and NOT a direction cell (the direction twins contain-*-dir-001..004 are at 1.0000).",
+   "rootCauseMeasured": "the extractor routes `html::before` into the body-root's `pseudos` bucket, so the orange 100x100 generated box renders as a CHILD of the `writing-mode: vertical-rl` body box and stacks from its RIGHT edge. Capture: orange at image x:116..215 y:16..115 and the `<p>` overflowing off the canvas at x:0..109 y:20..54. Ref: orange at x:16..115 y:16..115 and the paragraph at x:17..209 y:120..171.",
+   "whyNotThisLane": "this is exactly the TODO already written into runtimes/web/src/renderer/RootPseudoPlacement.ts (\"NOT YET COVERED — the block axis\"). Its `margin-right: auto` pin is an INLINE-axis lever and, per that file's own headless-Chromium probe, cannot reach the block axis (no pin dx=100, margin-right:auto dx=100, writing-mode on the box itself dx=100). The two repairs it names — a full-inline-size shim wrapper, or an extractor-side root/body split — are both outside a direction lane's file set, and the wrapper adds a DOM level the native RootPseudoBox twins do not have."
+  },
+  "generalTextAlignHole": {
+   "what": "resolveCanvasTextAlign is gated on the direction propagation, but the artifact it repairs is general: an LTR document with `body { text-align: center }` and a top-level INLINE root has the same hole, because the line box belongs to the ICB and the extractor's text-align bake lands inertly on the inline box.",
+   "whyGated": "closing it generally rewrites the ICB style of every fixture whose body declares an alignment, corpus-wide, on zero measurement. Recorded as a follow-up with its own A/B rather than smuggled in behind a measured RTL change."
+  },
+  "cssPageAtPageSlice": {
+   "verdict": "NOT ATTEMPTED — followed, not re-decided. tools/titan/results/wave37-W5-decisions.json measured the @page canvas simulation and REFUSED it (capture-browser-ref.mjs never calls emulateMediaType('print'), so all 157 css-page refs are 390px-wide SCREEN renders regardless of the declared @page size). The refusal is already enforced at HEAD: 'requires-print-medium' sits in inject-wpt-block.mjs REFUSED_EXCLUSION_TAGS with the negative pins in inject-wpt-block.test.mjs. Nothing to land."
+  }
+ },
+ "reproduce": {
+  "scorerValidation": "node _diag38/N6/validate-scorer.mjs css-writing-modes css-break css-contain",
+  "slice": "bash _diag38/N6/mini-run.sh <label> _diag38/N6/rootdir.tests <port>  then  node _diag38/N6/ab.mjs base after2",
+  "section": "tools/titan/section-runner.sh <section> --web-only --run-id <id>  then  node _diag38/N6/section-ab.mjs <baseId> <afterId> <section>"
+ },
+ "wave38F2Verification": {
+  "_note": "WAVE-38 FINISH LANE F2 — the verification lane N6 could not finish before its API disconnect. Every number here was re-measured at the wave-38 HEAD (all eight lanes' edits on disk) with the lane's own section-ab.mjs, which attributes each moved row by asking whether that test's IR carries an UNCONTAINED body-root Direction RTL. Web-only, same frozen refs (9b5435e5 / white-black-ink-font-lh-imgpad-htmlpins).",
+  "date": "2026-08-09",
+  "cssBreak": {
+   "verdict": "CONFIRMED — and the report's caveat is now retired.",
+   "method": "tools/titan/section-runner.sh css-break --web-only --run-id wave38-F2 (a CLEAN after at head), A/B'd against the pristine wave38-N6-base2.",
+   "tests": 962,
+   "pass": {
+    "base": 881,
+    "after": 882
+   },
+   "rowsMoved": 9,
+   "rowsUp": 9,
+   "rowsDown": 0,
+   "rowsOutOfReach": 0,
+   "reading": "byte-for-byte the same nine in-reach rows and the same nine SSIMs the lane reported from the race-labelled `wave38-N6-base` run. The AFTER side no longer needs the 'text-align is provably inert here' argument — it is a clean run at head. N4's extractor change (the /images bank + @import inlining) moved NO css-break row."
+  },
+  "cssWritingModes": {
+   "verdict": "CONFIRMED byte-stable, twice.",
+   "runs": [
+    "wave38-N6-base → wave38-N6-after (the lane's own pair)",
+    "wave38-N6-base → wave38-F2 (re-run at head after a first attempt lost the 30 s vite-start race under load 140)"
+   ],
+   "tests": 136,
+   "pass": {
+    "base": 72,
+    "after": 72
+   },
+   "rowsMoved": 0,
+   "laneReach": 5
+  },
+  "cssContain": {
+   "verdict": "MEASURED, not merely proven by construction — the gap the lane flagged.",
+   "found": "the after-section run the lane believed had stalled DID complete at 20:44 (_diag38/N6/seq2.log exit=0); its manifest was sitting unread in tools/titan/runs/wave38-N6-after/sections/css-contain.",
+   "tests": 280,
+   "pass": {
+    "base": 222,
+    "after": 222
+   },
+   "rowsMoved": 0,
+   "laneReach": 0,
+   "headRerun": {
+    "firstRun": "wave38-F2 moved ONE row — css-contain/content-visibility/content-visibility-auto-print 1.0000 → 0.9881 (P→f), flagged OUT-OF-REACH by section-ab (the section has zero uncontained body-root RTL documents).",
+    "diagnosis": "a CAPTURE FLAKE, not a regression: the two IRs are byte-identical (one ContentVisibility AUTO component either side) and the two PNGs differ in 559 px inside a single glyph band at y:520..532 x:17..102 — content-visibility:auto decides render-eligibility from viewport proximity, so a loaded machine can capture the skipped state.",
+    "proof": "a third run (wave38-F2b) reproduces 222 → 222 with 0 rows moved."
+   }
+  },
+  "cssPage": {
+   "verdict": "the @page canvas slice stays REFUSED (nothing to land, per wave37-W5-decisions.json), and the refusal is still enforced at HEAD — `requires-print-medium` is in inject-wpt-block.mjs REFUSED_EXCLUSION_TAGS with its negative pins green in the tooling suite (1492 tests, 0 fail).",
+   "sectionRun": "tools/titan/runs/wave38-F2/sections/css-page — 157 tests, run at head and A/B'd against wave37-W5 (the wave-37 head).",
+   "pass": {
+    "wave37Head": 75,
+    "wave38Head": 74
+   },
+   "rowsMoved": 7,
+   "rowsUp": 6,
+   "rowsDown": 1,
+   "theOneLoss": {
+    "t": "css-page/background-image-only-for-print",
+    "ssim": "0.9809 → 0.9689",
+    "pass": "P→f",
+    "cause": "NOT this lane. Lane N4's fetch-wpt.sh `images` sparse-checkout: the test's `background-image: url(/images/green.png)` used to fail the asset inliner and paint nothing; it now carries a data URI and paints green.",
+    "realDefect": "the test's box is `class=print-only` under `@media not print { .print-only { display: none } }` — the extractor does not apply the media query, so the box exists on the wire at all. The image bank only made the pre-existing hole visible.",
+    "recommendation": "follow-up in an extractor lane: honour `@media not print` display:none at extraction. Do NOT revert the images bank — it is worth 39 css-images tests."
+   },
+   "theSixGains": "body-background-{slr,srl,vlr,vrl}-print, page-size-012-print, page-box-008-print — all up, none passing; same extractor provenance."
+  },
+  "suites": {
+   "webHarnessVitest": "248 passed / 0 failed (26 files; one hook-timeout flake under load re-ran green in isolation)",
+   "tooling": "1492 tests, 1488 pass, 0 fail, 4 skipped"
+  }
+ }
+}

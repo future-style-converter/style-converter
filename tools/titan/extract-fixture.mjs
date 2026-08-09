@@ -222,6 +222,396 @@ export function extractLinkedStylesheets(html) {
   return out;
 }
 
+// ── @import resolution (wave-38 lane N4) ─────────────────────────────────────
+//
+// THE HOLE. parseCss skips every at-rule it does not explicitly carve out
+// (see its banner: wave-37 lane W8 opened @layer and @scope), and nothing
+// upstream ever FETCHED an `@import`ed sheet either. So an imported
+// stylesheet's rules simply did not exist for the extractor. MEASURED on the
+// wave35 web map, css-cascade/import-conditional-001 and -002: the green
+// override lives in `support/test-green.css`, the local sheet's fallback is
+// `div { background: red }`, and both tests therefore shipped the FAIL red
+// square. Corpus-wide, 73 bucket-A tests carry an `@import` in their inline
+// <style>.
+//
+// THE OVER-APPLICATION GUARD, which is the whole difficulty. Two of the four
+// `@import`s in those two tests are DELIBERATE TRAPS:
+//
+//     @import "support/test-red.css" (max-width: 1px), nonsense;
+//     @import "support/test-red.css" supports(foo: bar);
+//
+// A resolver that inlines every `@import` it finds paints the tests RED —
+// strictly worse than not resolving them at all. So the gate here is
+// deliberately one-directional: **an `@import` is inlined only when its
+// condition can be PROVEN to match.** Unprovable is treated exactly like
+// false, and both mean "leave the rule alone", which is the byte-identical
+// status quo. Nothing in this section can turn a currently-passing cell into
+// a failing one by GUESSING a condition true.
+//
+// WHAT COUNTS AS PROVEN:
+//   * no condition at all                     → true;
+//   * a media-query list, evaluated against the reference viewport, where at
+//     least one query is provably a match (mediaQueryListMatches);
+//   * `supports(<decl>)` where the declaration is a custom property (always
+//     supported) or sits in the closed SUPPORTS_PROVABLE table below.
+// Anything else — `layer` / `layer()` (cascade-layer semantics this flat
+// model does not carry), a `url()` we cannot read off disk, an unparsed
+// prelude — declines.
+//
+// WHY CHROMIUM SEMANTICS AND NOT THE CONVERTER'S. `supports()` asks what the
+// RENDERING ENGINE supports, and the thing we are scored against is the
+// Chromium browser reference. Answering from the converter's own property
+// catalogue would make the fixture disagree with the ref whenever the two
+// differ. Since a stdlib-only extractor cannot interrogate Chromium, the
+// table is a hand-audited closed list that grows one measured entry at a
+// time — never a heuristic.
+
+// The viewport a media query is evaluated against. THIS IS THE REF'S
+// viewport, not the 390×600 canvas: capture-browser-ref.mjs renders the WPT
+// page at REF_RENDER_WIDTH × REF_RENDER_MIN_HEIGHT (390−2·16 by 600−2·16) and
+// only pads back to the canvas in IMAGE space, so `@media` sees 358×568.
+// Duplicated rather than imported because capture-browser-ref.mjs imports
+// extractRefHref from THIS module — importing back would close a cycle. The
+// drift is closed by a unit pin in extract-fixture.test.mjs that imports both
+// modules and asserts equality.
+export const MQ_VIEWPORT_WIDTH_PX = 358;
+export const MQ_VIEWPORT_HEIGHT_PX = 568;
+
+// css-values-4 §5.2 absolute length units, in px. `em`/`rem` in a media
+// query resolve against the INITIAL font size (MQ-4 §1.3: the initial value,
+// never the root element's used value), which is Chromium's 16px default.
+const MQ_ABSOLUTE_UNITS_PX = { px: 1, in: 96, cm: 96 / 2.54, mm: 96 / 25.4, q: 96 / 101.6, pt: 96 / 72, pc: 16 };
+const MQ_INITIAL_FONT_PX = 16;
+
+/** A media-query `<length>` in px, or null when the token is not one we can
+ *  evaluate (a calc(), a viewport unit, an unknown unit). Exported for tests. */
+export function mqLengthPx(token) {
+  const m = /^([+-]?(?:\d+\.?\d*|\.\d+))(px|in|cm|mm|q|pt|pc|em|rem)?$/i.exec(String(token).trim());
+  if (!m) return null;
+  const n = Number.parseFloat(m[1]);
+  const unit = (m[2] ?? '').toLowerCase();
+  // A unitless value is only a valid <length> when it is zero (css-values-4
+  // §5.2); anything else is a syntax error, so refuse rather than assume px.
+  if (!unit) return n === 0 ? 0 : null;
+  if (unit === 'em' || unit === 'rem') return n * MQ_INITIAL_FONT_PX;
+  return n * MQ_ABSOLUTE_UNITS_PX[unit];
+}
+
+/** Evaluate ONE parenthesised media feature. Returns true/false when the
+ *  feature is one we model against the ref viewport, or null when it is not
+ *  (which the caller treats as "unprovable"). Exported for tests. */
+export function mqFeature(text) {
+  const body = text.trim().replace(/^\(|\)$/g, '').trim();
+  const colon = body.indexOf(':');
+  const name = (colon === -1 ? body : body.slice(0, colon)).trim().toLowerCase();
+  const value = colon === -1 ? null : body.slice(colon + 1).trim();
+  // Boolean context — `(width)` is true when the value is non-zero. Only
+  // answered for the two dimensions we actually know.
+  if (value === null) {
+    if (name === 'width') return MQ_VIEWPORT_WIDTH_PX !== 0;
+    if (name === 'height') return MQ_VIEWPORT_HEIGHT_PX !== 0;
+    return null;
+  }
+  // `orientation` is decidable from the same two numbers.
+  if (name === 'orientation') {
+    const want = value.toLowerCase();
+    const isPortrait = MQ_VIEWPORT_HEIGHT_PX >= MQ_VIEWPORT_WIDTH_PX;
+    if (want === 'portrait') return isPortrait;
+    if (want === 'landscape') return !isPortrait;
+    return null;                                   // unknown keyword
+  }
+  // The range features. `min-`/`max-` are inclusive bounds (MQ-4 §2.4.1).
+  const dim = /^(?:min-|max-)?width$/.test(name) ? MQ_VIEWPORT_WIDTH_PX
+    : /^(?:min-|max-)?height$/.test(name) ? MQ_VIEWPORT_HEIGHT_PX
+      : null;
+  if (dim === null) return null;                   // some other feature — unprovable
+  const px = mqLengthPx(value);
+  if (px === null) return null;
+  if (name.startsWith('min-')) return dim >= px;
+  if (name.startsWith('max-')) return dim <= px;
+  return dim === px;                               // plain `(width: 358px)`
+}
+
+/** Split a string on a top-level separator regex, ignoring anything inside
+ *  parens or quotes. Used for the media-query list's commas and one query's
+ *  `and` chain, both of which can legally contain parenthesised text. */
+function splitPreludeTopLevel(src, isSeparatorAt) {
+  const out = [];
+  let depth = 0, quote = null, start = 0, i = 0;
+  while (i < src.length) {
+    const ch = src[i];
+    if (quote) { if (ch === quote && src[i - 1] !== '\\') quote = null; i++; continue; }
+    if (ch === '"' || ch === "'") { quote = ch; i++; continue; }
+    if (ch === '(') { depth++; i++; continue; }
+    if (ch === ')') { depth--; i++; continue; }
+    if (depth === 0) {
+      const len = isSeparatorAt(src, i);
+      if (len) { out.push(src.slice(start, i)); i += len; start = i; continue; }
+    }
+    i++;
+  }
+  out.push(src.slice(start));
+  return out;
+}
+
+/** Evaluate ONE media query (`screen and (min-width: 1px)`, `not print`,
+ *  `nonsense`). true / false / null(unprovable). Exported for tests. */
+export function mqQuery(query) {
+  let q = query.trim().toLowerCase();
+  if (!q) return null;
+  let negated = false;
+  if (/^not\b/.test(q)) { negated = true; q = q.slice(3).trim(); }
+  else if (/^only\b/.test(q)) { q = q.slice(4).trim(); }   // `only` is a legacy no-op
+  const terms = splitPreludeTopLevel(q, (s, i) => (/^\sand\s/.test(s.slice(i)) ? 5 : 0))
+    .map((t) => t.trim()).filter(Boolean);
+  if (!terms.length) return null;
+  let result = true;
+  for (const term of terms) {
+    let v;
+    if (term.startsWith('(')) {
+      v = mqFeature(term);
+    } else if (/^[a-z-]+$/.test(term)) {
+      // A media TYPE. The ref renders in a screen-media headless browser, so
+      // `all` and `screen` match and every other type — `print`, `speech`,
+      // and the `nonsense` the corpus uses as a deliberate non-match — does
+      // not (MQ-4 §2.1: an unknown media type never matches).
+      v = term === 'all' || term === 'screen';
+    } else {
+      v = null;                                    // range syntax etc — unprovable
+    }
+    if (v === null) return null;                   // one unknown poisons the query
+    if (v === false) result = false;               // keep scanning: a later
+    //                                                unknown must still poison
+  }
+  return negated ? !result : result;
+}
+
+/** Does a media-query LIST match? A list matches when ANY query does
+ *  (MQ-4 §2.1). Only a PROVEN match returns true. Exported for tests. */
+export function mediaQueryListMatches(list) {
+  const queries = splitPreludeTopLevel(String(list), (s, i) => (s[i] === ',' ? 1 : 0));
+  return queries.some((q) => mqQuery(q) === true);
+}
+
+// The closed `supports()` table (see the banner's WHY CHROMIUM SEMANTICS
+// note). One entry per property, listing only values whose support in
+// Chromium is not in question. `display` is here because
+// css-cascade/import-conditional-002 asks `supports(display: block)`; the
+// list is the css-display-3 §2 keyword set every engine has shipped for
+// years. Growing this table is a deliberate, per-value act — never a regex.
+const SUPPORTS_PROVABLE = new Map([
+  ['display', new Set([
+    'block', 'inline', 'inline-block', 'flow-root', 'none', 'contents',
+    'flex', 'inline-flex', 'grid', 'inline-grid', 'list-item',
+    'table', 'inline-table', 'table-row', 'table-cell',
+  ])],
+]);
+
+/** Can we PROVE a `supports()` condition true? Anything else — including a
+ *  condition that is merely probably false, like `supports(foo: bar)` — gets
+ *  the same answer as "no", because both mean "do not inline". Exported for
+ *  tests. */
+export function supportsConditionProvable(condition) {
+  const c = String(condition).trim();
+  // Only a bare `(<decl>)` is answered. `not`/`and`/`or` combinators and
+  // `selector()` / `font-tech()` functions decline.
+  if (!/^\([^()]*\)$/.test(c)) return false;
+  const body = c.slice(1, -1).trim();
+  const colon = body.indexOf(':');
+  if (colon === -1) return false;
+  const prop = body.slice(0, colon).trim().toLowerCase();
+  const value = body.slice(colon + 1).trim().toLowerCase();
+  // A custom property declaration is supported by definition (css-variables-1
+  // §2: any `--*` name with any token stream is valid).
+  if (prop.startsWith('--')) return value.length > 0;
+  const values = SUPPORTS_PROVABLE.get(prop);
+  return values ? values.has(value) : false;
+}
+
+/** Find the end of an at-rule STATEMENT: the index just past the first `;`
+ *  that is not inside a string or parens. Returns -1 when the statement is
+ *  unterminated (a truncated sheet) — the caller then leaves it alone. */
+function statementEnd(src, from) {
+  let depth = 0, quote = null;
+  for (let i = from; i < src.length; i++) {
+    const ch = src[i];
+    if (quote) { if (ch === quote && src[i - 1] !== '\\') quote = null; continue; }
+    if (ch === '"' || ch === "'") { quote = ch; continue; }
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    else if (ch === '{') return -1;                // a block, not a statement
+    else if (ch === ';' && depth === 0) return i + 1;
+  }
+  return -1;
+}
+
+/** Split an `@import` prelude into `{ href, rest }`. `href` is null when the
+ *  target is not a plain string / `url()` we can read off disk (a data: URI,
+ *  a remote sheet, a var()). Exported for tests. */
+export function parseImportPrelude(prelude) {
+  const p = prelude.trim();
+  let m = /^url\(\s*(?:"([^"]*)"|'([^']*)'|([^)"'\s]*))\s*\)/i.exec(p);
+  if (!m) m = /^(?:"([^"]*)"|'([^']*)')/.exec(p);
+  if (!m) return { href: null, rest: p };
+  const href = m[1] ?? m[2] ?? m[3] ?? '';
+  return { href, rest: p.slice(m[0].length).trim() };
+}
+
+/** Is the condition tail of an `@import` prelude PROVEN to match? Handles
+ *  `supports(<cond>) <media-query-list>` in either legal order-of-appearance
+ *  (supports comes first per css-cascade-5 §3.1). Exported for tests. */
+export function importConditionMatches(rest) {
+  let tail = rest.trim();
+  if (!tail) return true;                          // unconditional @import
+  // Cascade layers change WHICH layer the imported rules land in, which this
+  // flat model cannot express — decline rather than import them unlayered.
+  if (/^layer\b/i.test(tail)) return false;
+  if (/^supports\(/i.test(tail)) {
+    // Find the matching ')' of supports( … ) with a depth walk — the
+    // condition itself contains parens, so a lazy regex would stop early.
+    let depth = 0, end = -1;
+    for (let i = tail.indexOf('('); i < tail.length; i++) {
+      if (tail[i] === '(') depth++;
+      else if (tail[i] === ')') { depth--; if (depth === 0) { end = i; break; } }
+    }
+    if (end === -1) return false;                  // unbalanced — decline
+    if (!supportsConditionProvable(tail.slice(tail.indexOf('('), end + 1))) return false;
+    tail = tail.slice(end + 1).trim();
+    if (!tail) return true;                        // supports-only, proven
+  }
+  return mediaQueryListMatches(tail);
+}
+
+/** Rewrite every RELATIVE `url()` payload in an imported sheet so it resolves
+ *  against `baseDir` instead of the sheet's own directory.
+ *
+ *  This is what keeps the import faithful rather than merely present: URLs in
+ *  an imported sheet resolve against the IMPORTED sheet's URL (css-values-4
+ *  §4.5), while everything downstream in this extractor (the support-asset
+ *  inliner, resolveFontFaces) resolves against the importing DOCUMENT's dir.
+ *  Without this rewrite, `@import "support/MetricsTestFont.css"` — whose face
+ *  says `src: url(cap-x-height.ttf)` — would have the extractor look for the
+ *  font one directory too high and silently deliver no face at all. Absolute
+ *  (`/…`), data:, http(s): and fragment payloads already resolve identically
+ *  from either base and are left untouched. */
+function rebaseUrls(css, sheetDir, baseDir) {
+  return css.replace(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^)"'\s]+))\s*\)/gi, (whole, dq, sq, bare) => {
+    const payload = dq ?? sq ?? bare ?? '';
+    if (!payload || /^(?:data:|https?:|\/\/|#)/i.test(payload) || payload.startsWith('/')) return whole;
+    const abs = resolve(sheetDir, payload);
+    // POSIX separators: the value ends up in CSS text, not a filesystem call.
+    const rel = relative(baseDir, abs).split(sep).join('/');
+    return `url("${rel}")`;
+  });
+}
+
+/**
+ * Is this `@import` href SERVER-ROOT relative (`/fonts/ahem.css`)?
+ *
+ * Those are declined, and the reason is the REF CONTRACT rather than CSS.
+ * capture-browser-ref.mjs renders the browser reference over `file://`, where
+ * a leading `/` resolves against the filesystem root — `/fonts/ahem.css` 404s
+ * and the reference renders WITHOUT the sheet. All 19 corpus tests that use
+ * this idiom (`@import "/fonts/ahem.css";`, the css-text letter-spacing and
+ * css-align families) have refs that import the SAME sheet and therefore lose
+ * the Ahem face too, so honouring it on the fixture side alone manufactures a
+ * divergence instead of removing one.
+ *
+ * MEASURED on those 19 tests, resolving them from disk: 18 SSIM down, 1 up,
+ * 2 passing cells lost (css-text letter-spacing-211 0.9868→0.9530, -212
+ * 0.9669→0.9487) and none gained. Declining them keeps the 10 cells the
+ * RELATIVE imports win (which resolve identically on both sides) with nothing
+ * traded away.
+ *
+ * WHY THIS IS NOT THE SAME CALL AS THE `/images/…` ASSET INLINER, which DOES
+ * resolve server-root paths (wave-38 lane N4, the sparse-checkout half): the
+ * image-set refs paint their expected result with `background-color: lime`
+ * rather than by loading the same unreachable asset, so resolving it there
+ * makes the capture MATCH the reference. Here it makes it differ. The rule in
+ * both places is the same one — model what the Chromium reference actually
+ * renders — and it lands on opposite answers because the two ref families are
+ * written differently.
+ *
+ * If the ref capture ever serves the corpus over HTTP, delete this branch and
+ * re-measure: the decline exists only for the file:// contract.
+ */
+function isServerRootHref(href) {
+  return href.startsWith('/');
+}
+
+/** Recursion cap. WPT's deepest import chain is 1; 4 leaves room for a
+ *  legitimately nested sheet while bounding a pathological one. */
+const MAX_IMPORT_DEPTH = 4;
+
+/**
+ * Inline every PROVABLY-matching `@import` in one sheet, recursively.
+ *
+ * @param css      sheet text, already comment-stripped
+ * @param sheetDir directory the sheet itself lives in (import hrefs resolve
+ *                 against this)
+ * @param baseDir  directory downstream url() resolution uses (the importing
+ *                 DOCUMENT's dir) — see rebaseUrls
+ * @param seen     absolute paths already inlined on this branch (cycle guard)
+ * @param depth    recursion depth
+ * @returns `{ css, inlined, declined }`
+ *
+ * A declined `@import` is left in the text VERBATIM, which is byte-identical
+ * to the pre-wave-38 behaviour: parseCss skips it, scanFontFaces does not
+ * match it, and the sampler never sees it.
+ */
+export async function resolveImports(css, sheetDir, baseDir, seen = new Set(), depth = 0) {
+  let inlined = 0;
+  let declined = 0;
+  if (depth >= MAX_IMPORT_DEPTH || !/@import/i.test(css)) return { css, inlined, declined };
+  let out = '';
+  let cursor = 0;
+  const re = /@import\b/gi;
+  let m;
+  while ((m = re.exec(css)) !== null) {
+    // css-syntax-3 §3.1: `@import` is only valid before any style rule. A
+    // `{` earlier in the sheet means we are past that point and the rule is
+    // invalid — a browser drops it, so we must not honour it either.
+    if (css.slice(0, m.index).includes('{')) break;
+    const end = statementEnd(css, m.index + m[0].length);
+    if (end === -1) break;                         // unterminated — leave as is
+    const statement = css.slice(m.index, end);
+    const prelude = css.slice(m.index + m[0].length, end - 1);
+    out += css.slice(cursor, m.index);
+    cursor = end;
+    const { href, rest } = parseImportPrelude(prelude);
+    if (!href || /^(?:https?:)?\/\//i.test(href) || /^data:/i.test(href)
+      || isServerRootHref(href) || !importConditionMatches(rest)) {
+      out += statement;                            // declined — verbatim
+      declined++;
+      re.lastIndex = end;
+      continue;
+    }
+    const abs = resolve(sheetDir, href);
+    if (seen.has(abs)) { out += statement; declined++; re.lastIndex = end; continue; }
+    let text;
+    try {
+      text = stripComments(await fs.readFile(abs, 'utf8'));
+    } catch {
+      out += statement;                            // not on disk — verbatim
+      declined++;
+      re.lastIndex = end;
+      continue;
+    }
+    const nested = await resolveImports(
+      text, dirname(abs), baseDir, new Set([...seen, abs]), depth + 1,
+    );
+    inlined += 1 + nested.inlined;
+    declined += nested.declined;
+    // The imported rules take the @import's PLACE in the cascade
+    // (css-cascade-5 §3.1), which is what makes import-conditional-001's
+    // green sheet beat the red one imported above it.
+    out += `\n${rebaseUrls(nested.css, dirname(abs), baseDir)}\n`;
+    re.lastIndex = end;
+  }
+  out += css.slice(cursor);
+  return { css: out, inlined, declined };
+}
+
 /** Extract <meta name="fuzzy"> content, parsed into the
  *  `{ maxDifference: { min, max }, totalPixels: { min, max } }` shape
  *  the WPT spec defines. Returns null when absent or unparseable.
@@ -7183,16 +7573,22 @@ export async function extractFixture(testRel, opts = {}) {
 
   const inlineCss = extractInlineStyle(cleaned);
   const linkedHrefs = extractLinkedStylesheets(cleaned);
-  let allCss = inlineCss;
+  // wave-38 lane N4: each sheet's `@import`s resolve against ITS OWN
+  // directory (css-values-4 §4.5) while every downstream url() consumer
+  // resolves against the DOCUMENT's — hence the two dir arguments. Only
+  // provably-matching imports are inlined; see the resolveImports banner.
+  const docDir = dirname(testAbs);
+  let allCss = (await resolveImports(inlineCss, docDir, docDir)).css;
   for (const href of linkedHrefs) {
     // Skip http(s) — bucketer should have filtered already.
     if (/^https?:\/\//i.test(href)) continue;
     const cssAbs = href.startsWith('/')
       ? join(WPT_DIR, href.slice(1))
-      : resolve(dirname(testAbs), href);
+      : resolve(docDir, href);
     try {
       const cssRaw = await fs.readFile(cssAbs, 'utf8');
-      allCss += '\n' + stripComments(cssRaw);
+      const linked = await resolveImports(stripComments(cssRaw), dirname(cssAbs), docDir);
+      allCss += '\n' + linked.css;
     } catch {
       // Missing linked CSS is expected on some WPT tests with optional
       // resources; we proceed with what we have rather than failing.
@@ -7315,14 +7711,23 @@ export async function extractFixture(testRel, opts = {}) {
     const refCleaned = stripComments(refHtml);
     const refInline = extractInlineStyle(refCleaned);
     const refLinks  = extractLinkedStylesheets(refCleaned);
-    let refCss = refInline;
+    // wave-38 lane N4: the ref half of the @import resolution, resolved
+    // against the REF file's dir. Symmetric with the keyframes / @font-face
+    // passes below for the same reason — a test/ref pair must stay
+    // comparable, and several corpus refs import the same support sheet
+    // their test does.
+    const refDir = dirname(refAbs);
+    let refCss = (await resolveImports(refInline, refDir, refDir)).css;
     for (const href of refLinks) {
       if (/^https?:\/\//i.test(href)) continue;
       const cssAbs = href.startsWith('/')
         ? join(WPT_DIR, href.slice(1))
-        : resolve(dirname(refAbs), href);
+        : resolve(refDir, href);
       try {
-        refCss += '\n' + stripComments(await fs.readFile(cssAbs, 'utf8'));
+        const linkedRef = await resolveImports(
+          stripComments(await fs.readFile(cssAbs, 'utf8')), dirname(cssAbs), refDir,
+        );
+        refCss += '\n' + linkedRef.css;
       } catch { /* tolerate missing */ }
     }
     const refRules = parseCss(refCss);
@@ -9738,6 +10143,69 @@ export function bidiBakeTrigger(html) {
   return null;
 }
 
+// ── wave-38 VIEW-TRANSITION BAKE: the static trigger ────────────────────────
+//
+// tools/titan/view-transition-bake.mjs drives a test's view transition to its
+// FROZEN state in headless Chromium and re-expresses the settled
+// `::view-transition` pseudo tree as ordinary positioned boxes (full rationale
+// in that module's header). The gate for launching that browser lives HERE,
+// in the stdlib-only static extractor, for the two reasons the bidi trigger
+// banner above already states: COST (a bake is a page load plus two isolation
+// screenshots per painted leaf, and the ~24k-file batch runs must stay on the
+// pure-static path) and CONSERVATISM (the bake `display: none`s every live
+// component and writes a synthetic subtree in their place, so it must never
+// reach a document that has no view transition at all).
+//
+// The four signals below are the complete set of ways a document can enter a
+// view transition or style its pseudo tree, per css-view-transitions-1/-2:
+// the JS entry points (`startViewTransition` on `document` or on an element
+// for the scoped variant), the naming properties (`view-transition-name`,
+// `view-transition-class`), any `::view-transition*` pseudo-element selector,
+// and the `:active-view-transition*` selectors. Comments are stripped first,
+// mirroring every other static pass, so a commented-out demo cannot arm a
+// browser launch.
+//
+// This is deliberately an OVER-approximation — `css-view-transitions/parsing/`
+// tests mention the properties without ever starting a transition. The browser
+// is the authority that narrows it: no active transition at settle is a loud
+// bail, and the fixture stays byte-identical.
+
+/** `document.startViewTransition(...)` / `el.startViewTransition(...)` — the
+ *  only ways to begin one. Matched on the method name alone (any receiver),
+ *  because the corpus reaches it through `document`, a saved reference and,
+ *  for css-view-transitions-2 scoped transitions, an arbitrary element. */
+export const VT_START_API_RX = /(?<![-\w])startViewTransition\s*\(/;
+
+/** The two naming properties. `view-transition-class` is included on its own
+ *  (not as a prefix of the name property) because a test may set only the
+ *  class and inherit the name from a rule in a linked sheet. */
+export const VT_NAME_PROPERTY_RX =
+  /(?<![-\w])view-transition-(?:name|class)\s*:/i;
+
+/** Any `::view-transition…` pseudo-element selector — the tree the bake
+ *  serializes. Covers the bare root pseudo and all four sub-pseudos. */
+export const VT_PSEUDO_SELECTOR_RX = /::view-transition(?![-\w])|::view-transition-[a-z-]+\s*\(/i;
+
+/** The css-view-transitions-2 state pseudo-classes. A test that only asserts
+ *  `:active-view-transition` still has a live tree worth serializing. */
+export const VT_ACTIVE_SELECTOR_RX = /:active-view-transition(?:-type)?(?![-\w])/i;
+
+/**
+ * Does this test's source put the document into a view transition (or style
+ * one)? Returns a short human-readable REASON (logged and carried on the bake
+ * outcome) or null.
+ */
+export function viewTransitionBakeTrigger(html) {
+  const src = stripComments(String(html ?? ''));
+  // API first — it is the signal that a transition actually RUNS, which is
+  // the only shape the bake can deliver; the rest are styling-only hints.
+  if (VT_START_API_RX.test(src)) return 'start-view-transition-api';
+  if (VT_PSEUDO_SELECTOR_RX.test(src)) return 'view-transition-pseudo';
+  if (VT_NAME_PROPERTY_RX.test(src)) return 'view-transition-name';
+  if (VT_ACTIVE_SELECTOR_RX.test(src)) return 'active-view-transition-selector';
+  return null;
+}
+
 // ── specSection helper (mirrors bucket-wpt.mjs) ──────────────────────────────
 function specSectionOf(testRel) {
   const parts = testRel.split('/');
@@ -9777,10 +10245,17 @@ async function main() {
   // measured on the same settled page).
   const bidiBakeEnabled = process.argv.includes('--bidi-bake')
     || process.env.BIDI_BAKE === '1';
+  // wave-38 VIEW-TRANSITION BAKE activation (opt-in, same shape): `--vt-bake`
+  // flag or VT_BAKE=1 env. Independent of the other two — it delivers the
+  // settled `::view-transition` pseudo tree, which no computed-style overlay
+  // or text-geometry read can reach — and it runs LAST of the four passes
+  // because it retires every live component in favour of that tree.
+  const vtBakeEnabled = process.argv.includes('--vt-bake')
+    || process.env.VT_BAKE === '1';
   const inputs = process.argv.slice(2)
-    .filter((a) => a !== '--post-load' && a !== '--bidi-bake');
+    .filter((a) => a !== '--post-load' && a !== '--bidi-bake' && a !== '--vt-bake');
   if (inputs.length === 0) {
-    console.error('usage: extract-fixture.mjs [--post-load] [--bidi-bake] <relative-test-path>...');
+    console.error('usage: extract-fixture.mjs [--post-load] [--bidi-bake] [--vt-bake] <relative-test-path>...');
     console.error('       (paths are repo-relative, e.g. "css/css-color/a98rgb-001.html")');
     process.exit(1);
   }
@@ -9789,6 +10264,10 @@ async function main() {
   // Same lazy-import discipline for the bidi bake: it pulls puppeteer, and
   // the default static path must never pay that cost.
   const bidiBake = bidiBakeEnabled ? await import('./bidi-bake.mjs') : null;
+  // Same lazy-import discipline again: the view-transition bake pulls
+  // puppeteer AND pngjs (it solves each snapshot's colour out of two
+  // isolation composites), neither of which the static path may pay for.
+  const vtBake = vtBakeEnabled ? await import('./view-transition-bake.mjs') : null;
   let ok = 0, fail = 0;
   try {
     for (const rel of inputs) {
@@ -9852,10 +10331,43 @@ async function main() {
           : ` [counter-bake: ${counterOutcome.status} — ${counterOutcome.stamped} markers` +
             `${counterOutcome.declined ? `, ${counterOutcome.declined} declined` : ''}` +
             `${counterOutcome.reason ? ` (${counterOutcome.reason})` : ''}]`;
+        // wave-38 VIEW-TRANSITION BAKE, after every other pass. It is the one
+        // bake that RETIRES the tree the others built (a captured document is
+        // painted into the root snapshot, not in place — see that module's
+        // applyViewTransitionBakePlan), so running it last means the passes
+        // above never operate on the synthetic pseudo-tree subtree and the
+        // synthetic subtree is never re-walked by a pass that expects real
+        // elements. Skips/declines/bails leave the fixture byte-identical.
+        let vtNote = '';
+        if (vtBake) {
+          // The bake THROWS on a browser fault rather than dressing one up as
+          // a scope-boundary bail (see its discardWedgedBrowser banner). In
+          // THIS batch path that must not cost the fixture: an uncaught throw
+          // here skips writeFixturePair entirely, so the section run would
+          // silently lose a test that the pure-static path handles fine —
+          // strictly worse than never having enabled the bake. Measured: 7
+          // such faults in one 53-test batch (_diag38/N5/bake3.log). So the
+          // fault is caught, the static pair is still written byte-identically
+          // (the bail-to-static contract), and the note says `errored` — a
+          // word no successful outcome uses, so it cannot read as a bail.
+          try {
+            const outcome = await vtBake.viewTransitionBakeFixture(result.fixture, rel);
+            // 'skipped' is the overwhelmingly common outcome (no VT signal in
+            // the source) and would drown the batch log — report real activity.
+            if (outcome.status !== 'skipped') {
+              vtNote = ` [vt-bake: ${outcome.status}` +
+                (outcome.status === 'baked'
+                  ? ` — ${outcome.groups} groups, ${outcome.leaves} leaves`
+                  : ` — ${outcome.reason}`) + ']';
+            }
+          } catch (vtErr) {
+            vtNote = ` [vt-bake: errored — ${vtErr.message ?? vtErr}]`;
+          }
+        }
         const written = await writeFixturePair(result);
         console.log(`extracted ${rel} → ${relative(REPO_ROOT, written.testPath)}` +
                     (written.refPath ? ` (+ ref)` : ' (ref skipped)')
-                    + postLoadNote + bidiNote + counterNote);
+                    + postLoadNote + bidiNote + counterNote + vtNote);
         ok++;
       } catch (err) {
         console.error(`FAIL ${rel}: ${err.message ?? err}`);
@@ -9869,6 +10381,9 @@ async function main() {
     // The bidi bake keeps its OWN shared Chromium (post-load-extract's
     // instance is module-private there); same leak discipline.
     if (bidiBake) await bidiBake.closeBidiBakeBrowser();
+    // …and the view-transition bake keeps a third. Same leak discipline: a
+    // shared browser left open holds the process alive past the last test.
+    if (vtBake) await vtBake.closeViewTransitionBakeBrowser();
   }
   console.log(`extract-fixture: ${ok} ok, ${fail} failed`);
   process.exit(fail > 0 ? 2 : 0);

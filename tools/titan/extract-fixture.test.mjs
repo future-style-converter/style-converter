@@ -5904,3 +5904,214 @@ test('W4 lang: a lang-free document gains no `_lang` key at all', () => {
     assert.equal('_lang' in cmp, false);
   }
 });
+
+// ── wave-38 lane N4: @import resolution ──────────────────────────────────────
+//
+// The pins below hold the ONE-DIRECTIONAL gate the resolver is built around:
+// an `@import` is inlined only when its condition is PROVEN to match, so a
+// value we cannot evaluate behaves exactly like a value that evaluates false
+// (both mean "leave the rule alone"). css-cascade/import-conditional-001 and
+// -002 are the corpus tests that make this matter — each pairs a matching
+// green sheet with a deliberately NON-matching red one, so a resolver that
+// inlines everything paints the FAIL square.
+import {
+  mqLengthPx,
+  mqFeature,
+  mqQuery,
+  mediaQueryListMatches,
+  supportsConditionProvable,
+  parseImportPrelude,
+  importConditionMatches,
+  resolveImports,
+  MQ_VIEWPORT_WIDTH_PX,
+  MQ_VIEWPORT_HEIGHT_PX,
+} from './extract-fixture.mjs';
+import {
+  REF_RENDER_WIDTH as _REF_RENDER_WIDTH,
+  REF_RENDER_MIN_HEIGHT as _REF_RENDER_MIN_HEIGHT,
+} from './capture-browser-ref.mjs';
+
+test('N4 @import: the media-query viewport IS the ref render viewport', () => {
+  // extract-fixture.mjs cannot import capture-browser-ref.mjs (that module
+  // imports extractRefHref from it — the cycle), so the two numbers are
+  // duplicated. This is the pin that stops them drifting: a media query
+  // evaluated against a viewport the reference never had would inline the
+  // wrong arm of a `(min-width: …)` import.
+  assert.equal(MQ_VIEWPORT_WIDTH_PX, _REF_RENDER_WIDTH);
+  assert.equal(MQ_VIEWPORT_HEIGHT_PX, _REF_RENDER_MIN_HEIGHT);
+});
+
+test('N4 @import: mqLengthPx converts the absolute units and refuses the rest', () => {
+  assert.equal(mqLengthPx('1px'), 1);
+  assert.equal(mqLengthPx('40000in'), 3_840_000);   // import-conditional-001
+  assert.equal(mqLengthPx('1in'), 96);
+  assert.equal(mqLengthPx('72pt'), 96);
+  assert.equal(mqLengthPx('1pc'), 16);
+  assert.equal(mqLengthPx('2em'), 32);              // MQ-4 §1.3: INITIAL font size
+  assert.equal(mqLengthPx('0'), 0);                 // unitless zero is a <length>
+  assert.equal(mqLengthPx('5'), null);              // unitless non-zero is not
+  assert.equal(mqLengthPx('50vw'), null);           // viewport units decline
+  assert.equal(mqLengthPx('calc(1px + 1px)'), null);
+});
+
+test('N4 @import: mqFeature answers only the features it can measure', () => {
+  assert.equal(mqFeature('(min-width: 1px)'), true);
+  assert.equal(mqFeature(`(min-width: ${MQ_VIEWPORT_WIDTH_PX + 1}px)`), false);
+  assert.equal(mqFeature(`(max-width: ${MQ_VIEWPORT_WIDTH_PX}px)`), true);  // inclusive
+  assert.equal(mqFeature(`(width: ${MQ_VIEWPORT_WIDTH_PX}px)`), true);
+  assert.equal(mqFeature('(orientation: portrait)'), true);                 // 358×568
+  assert.equal(mqFeature('(orientation: landscape)'), false);
+  // Unmodelled feature / unmodelled keyword → null, never a guess.
+  assert.equal(mqFeature('(min-resolution: 2dppx)'), null);
+  assert.equal(mqFeature('(orientation: sideways)'), null);
+  assert.equal(mqFeature('(prefers-color-scheme: dark)'), null);
+});
+
+test('N4 @import: an unknown term poisons the whole query, it never defaults true', () => {
+  assert.equal(mqQuery('screen and (min-width: 1px)'), true);
+  // The unknown feature is ANDed with a true one — the answer must still be
+  // "we do not know", not "the true half carried it".
+  assert.equal(mqQuery('screen and (min-width: 1px) and (min-resolution: 2dppx)'), null);
+  // …and with a FALSE one too: `not` would otherwise flip an unknown to true.
+  assert.equal(mqQuery('(max-width: 1px) and (min-resolution: 2dppx)'), null);
+  assert.equal(mqQuery('not (min-resolution: 2dppx)'), null);
+});
+
+test('N4 @import: media TYPES resolve against the screen-media ref', () => {
+  assert.equal(mqQuery('all'), true);
+  assert.equal(mqQuery('screen'), true);
+  assert.equal(mqQuery('only screen'), true);        // `only` is a legacy no-op
+  assert.equal(mqQuery('print'), false);
+  assert.equal(mqQuery('not print'), true);
+  // MQ-4 §2.1: an unknown media type never matches. `nonsense` is the token
+  // import-conditional-001/002 use as their deliberate non-match.
+  assert.equal(mqQuery('nonsense'), false);
+});
+
+test('N4 @import: a media LIST matches when any query does', () => {
+  assert.equal(mediaQueryListMatches('(min-width: 1px) and (max-width: 40000in), nonsense'), true);
+  assert.equal(mediaQueryListMatches('(max-width: 1px), nonsense'), false);
+  assert.equal(mediaQueryListMatches('print, screen'), true);
+});
+
+test('N4 @import: supports() is answered from a closed table, never a heuristic', () => {
+  assert.equal(supportsConditionProvable('(display: block)'), true);
+  assert.equal(supportsConditionProvable('(display: grid)'), true);
+  assert.equal(supportsConditionProvable('(--x: 1)'), true);      // custom props always
+  // The import-conditional-002 trap: a property no engine has.
+  assert.equal(supportsConditionProvable('(foo: bar)'), false);
+  // A REAL property with a value the table does not vouch for still declines —
+  // the table is an allow-list, not a property-name check.
+  assert.equal(supportsConditionProvable('(display: ruby-text)'), false);
+  assert.equal(supportsConditionProvable('(color: red)'), false);
+  // Combinators and functional conditions are out of scope.
+  assert.equal(supportsConditionProvable('(not (display: block))'), false);
+  assert.equal(supportsConditionProvable('(display: block) and (color: red)'), false);
+});
+
+test('N4 @import: the prelude splits into href + condition tail', () => {
+  assert.deepEqual(parseImportPrelude(' "support/test-green.css" supports(display: block)'),
+    { href: 'support/test-green.css', rest: 'supports(display: block)' });
+  assert.deepEqual(parseImportPrelude('url("./a.css")'), { href: './a.css', rest: '' });
+  assert.deepEqual(parseImportPrelude("url(a.css) (min-width: 1px)"),
+    { href: 'a.css', rest: '(min-width: 1px)' });
+  // Not a form we can read off disk → href null, caller declines.
+  assert.equal(parseImportPrelude('var(--sheet)').href, null);
+});
+
+test('N4 @import: the four corpus conditions land exactly as the tests intend', () => {
+  // import-conditional-001: green imported, red NOT.
+  assert.equal(importConditionMatches('(min-width: 1px) and (max-width: 40000in), nonsense'), true);
+  assert.equal(importConditionMatches('(max-width: 1px), nonsense'), false);
+  // import-conditional-002: same shape through supports().
+  assert.equal(importConditionMatches('supports(display: block)'), true);
+  assert.equal(importConditionMatches('supports(foo: bar)'), false);
+  // Unconditional imports are trivially proven.
+  assert.equal(importConditionMatches(''), true);
+  // A cascade layer changes WHICH layer the rules land in — declined.
+  assert.equal(importConditionMatches('layer(base)'), false);
+  assert.equal(importConditionMatches('layer'), false);
+  // supports() AND a media list: both halves must hold.
+  assert.equal(importConditionMatches('supports(display: block) (min-width: 1px)'), true);
+  assert.equal(importConditionMatches('supports(display: block) (max-width: 1px)'), false);
+});
+
+test('N4 @import: a matching import is inlined AT ITS PLACE, a non-matching one left verbatim', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'n4-import-'));
+  await fsp.writeFile(path.join(dir, 'green.css'), '.t { background: green }');
+  await fsp.writeFile(path.join(dir, 'red.css'), '.t { background: red }');
+  const sheet = '@import "red.css";\n@import "green.css" (min-width: 1px);\n'
+    + '@import "red.css" (max-width: 1px);\ndiv { color: blue }';
+  const r = await resolveImports(sheet, dir, dir);
+  assert.equal(r.inlined, 2);
+  assert.equal(r.declined, 1);
+  // Order is the cascade: red's rules, then green's, then the leftover rule.
+  assert.ok(r.css.indexOf('background: red }') < r.css.indexOf('background: green }'));
+  // The declined rule survives BYTE-FOR-BYTE — parseCss skips it, which is
+  // the pre-wave-38 behaviour for every @import.
+  assert.ok(r.css.includes('@import "red.css" (max-width: 1px);'));
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('N4 @import: relative url() payloads are rebased onto the importing document', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'n4-rebase-'));
+  await fsp.mkdir(path.join(dir, 'support'));
+  await fsp.writeFile(path.join(dir, 'support', 'face.css'),
+    '@font-face { font-family: T; src: url(cap.ttf) }\n'
+    + '.a { background: url("/images/x.png") }\n.b { background: url(data:image/png,%00) }');
+  // The css-inline text-box-trim shape: the face's `src` is relative to the
+  // SHEET, everything downstream resolves against the DOCUMENT.
+  const r = await resolveImports('@import "support/face.css";', dir, dir);
+  assert.equal(r.inlined, 1);
+  assert.ok(r.css.includes('url("support/cap.ttf")'), r.css);
+  // Server-root, data: and http(s) payloads resolve identically from either
+  // base and must not be rewritten.
+  assert.ok(r.css.includes('url("/images/x.png")'));
+  assert.ok(r.css.includes('url(data:image/png,%00)'));
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('N4 @import: server-root hrefs are declined — the file:// ref cannot load them', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'n4-root-'));
+  // `@import "/fonts/ahem.css";` — 19 corpus tests, whose REFS import the
+  // same unreachable sheet. Measured: delivering the face on the fixture side
+  // alone moved 18 of the 19 SSIM DOWN.
+  const r = await resolveImports('@import "/fonts/ahem.css";\ndiv{color:red}', dir, dir);
+  assert.equal(r.inlined, 0);
+  assert.equal(r.declined, 1);
+  assert.ok(r.css.includes('@import "/fonts/ahem.css";'));
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('N4 @import: cycles, depth and misplaced rules all decline rather than loop', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'n4-guard-'));
+  // a.css imports b.css imports a.css.
+  await fsp.writeFile(path.join(dir, 'a.css'), '@import "b.css";\n.a{color:red}');
+  await fsp.writeFile(path.join(dir, 'b.css'), '@import "a.css";\n.b{color:blue}');
+  const cyc = await resolveImports('@import "a.css";', dir, dir);
+  assert.ok(cyc.css.includes('.a{color:red}'));
+  assert.ok(cyc.css.includes('.b{color:blue}'));
+  assert.ok(cyc.declined >= 1, 'the back-edge is declined, not followed');
+  // css-syntax-3 §3.1: an @import after a style rule is invalid — a browser
+  // drops it, so we must not honour it either.
+  const late = await resolveImports('div{color:red}\n@import "a.css";', dir, dir);
+  assert.equal(late.inlined, 0);
+  assert.ok(late.css.includes('@import "a.css";'));
+  // A sheet with no @import at all round-trips byte-identically.
+  const none = await resolveImports('div{color:red}', dir, dir);
+  assert.equal(none.css, 'div{color:red}');
+  assert.equal(none.inlined, 0);
+  await fsp.rm(dir, { recursive: true, force: true });
+});

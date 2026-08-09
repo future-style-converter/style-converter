@@ -1,0 +1,89 @@
+{
+ "_note": "WAVE-38 LANE N7 (native tails III) — the lane died on an API disconnect with its two mechanisms landed in the tree, its unit pins written, and ZERO device evidence: both of its feeders failed (feed-android on `:app:installDebug`, feed-ios mid-build). This artifact is the FINISH LANE F2's record: it re-validates the lane's scorer, states what the code does, and reports the device A/B that lane N7 never got. Everything below is measured with the campaign's own metric (inject-wpt-block.mjs diffComposedVsRef) against the frozen refs at 9b5435e5 / white-black-ink-font-lh-imgpad-htmlpins, with the frozen wave37-final manifest as the base.",
+ "artifact": "wave38-N7-native-tails",
+ "date": "2026-08-09",
+ "finishedBy": "wave-38 lane F2",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+ "canvasBoundary": "white-black-ink-font-lh-imgpad-htmlpins",
+
+ "scorerValidation": {
+  "harness": "_diag38/N7/score.mjs (diffComposedVsRef vs the frozen refs)",
+  "replayed": "the frozen wave37-final css-sizing captures, both natives",
+  "result": "css-sizing/ios pass 35 = frozen 35, drifted 0, missing 0, of 48 · css-sizing/android pass 39 = frozen 39, drifted 0, missing 0, of 48",
+  "reading": "the scorer reproduces every frozen cell exactly, so an 'after' number from it is comparable to the gate."
+ },
+
+ "mechanisms": [
+  {
+   "id": "M1",
+   "name": "iOS block-flow fill pre-empts the aspect-ratio inline size",
+   "spec": "css-sizing-4 §4.1 vs CSS 2.1 §10.3.3",
+   "platform": "iOS only — Compose hands the ratio to Modifier.aspectRatio and already passed these cells, so there is no fold to gate and no twin to write.",
+   "landed": [
+    "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/sizing/RatioInlineSize.swift (new) — one pure predicate: usable ratio (> 0) + auto width + `.exact` block size.",
+    "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift — `!RatioInlineSize.determinesInlineSize(s.size)` added to the wptBlockFlowFillWidth fold guard."
+   ],
+   "deviceAB": {
+    "device": "iPhone-17-Pro simulator `w38-f2` (97B5F3A3-6EFC-4051-8DD4-563FEE2F8720), private to this lane",
+    "css-sizing/ios": { "pass": { "frozen": 35, "after": 43 }, "moved": 9, "up": 9, "down": 0, "of": 48 },
+    "css-values/ios": { "pass": { "frozen": 29, "after": 31 }, "moved": 3, "up": 3, "down": 0, "of": 48 },
+    "rows": [
+     { "t": "css-sizing/aspect-ratio/block-aspect-ratio-002", "ssim": "0.9027 → 0.9974", "pass": "f→P" },
+     { "t": "css-sizing/aspect-ratio/block-aspect-ratio-007", "ssim": "0.9027 → 0.9974", "pass": "f→P" },
+     { "t": "css-sizing/aspect-ratio/block-aspect-ratio-016", "ssim": "0.9027 → 0.9974", "pass": "f→P" },
+     { "t": "css-sizing/aspect-ratio/block-aspect-ratio-018", "ssim": "0.9027 → 0.9974", "pass": "f→P" },
+     { "t": "css-sizing/aspect-ratio/block-aspect-ratio-006", "ssim": "0.9027 → 0.9699", "pass": "f→P" },
+     { "t": "css-sizing/aspect-ratio/block-aspect-ratio-014", "ssim": "0.9027 → 0.9699", "pass": "f→P" },
+     { "t": "css-sizing/aspect-ratio/block-aspect-ratio-015", "ssim": "0.9027 → 0.9699", "pass": "f→P" },
+     { "t": "css-values/calc-size/calc-size-aspect-ratio-001", "ssim": "0.9045 → 0.9718", "pass": "f→P" },
+     { "t": "css-values/calc-size/calc-size-aspect-ratio-004", "ssim": "0.9045 → 0.9718", "pass": "f→P" }
+    ],
+    "reading": "the lane predicted exactly these nine cells from one render cause (a full-canvas green BAR where the Chromium ref paints the ratio-derived square) and exactly these nine moved, all up, none down."
+   },
+   "unitPins": "runtimes/swiftui/Tests/StyleConverterRuntimeTests/RatioInlineSizeTests.swift — 7 truth-table pins, one arithmetic hand-off pin, and a two-raster controlled A/B."
+  },
+  {
+   "id": "M2",
+   "name": "abspos inset stretch overrides a ratio-determined inline size (S6)",
+   "spec": "css-sizing-4 §4.1 × css-position-3 §3.5.3",
+   "platform": "iOS + Android — line-for-line mirrored branches",
+   "landed": [
+    "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/AbsposInsetStretch.swift — S6 first inside S3: author-definite `explicitH` + no author width + a live inline stretch ⇒ outW := explicitH × ratio.",
+    "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/AbsposInsetStretch.kt — the identical branch."
+   ],
+   "deviceAB": {
+    "ios": { "t": "css-sizing/aspect-ratio/abspos-006", "ssim": "0.9053 → 0.9974", "pass": "f→P", "device": "sim w38-f2" },
+    "android": "NOT MEASURED — see openRisks.androidDeviceLeg."
+   },
+   "unitPins": [
+    "swiftui AbsposInsetStretchTests: testExplicitHeightDerivesInlineSizeOverTheStretch, testS6Abspos006RatioBeatsTheInlineStretch, testS6DoesNotFireForANonPxExplicitHeight, testS6YieldsToAnAuthorWidth",
+    "compose AbsposInsetStretchTest: the same four, same numbers (160 from 80×2, 100 from 100×1, the 500 non-px passthrough, the abspos-005 author-width yield)"
+   ],
+   "additiveArgument": "the case fell through every pre-existing S3 branch (branch 2 needs !hasExplicitH, branch 3 needs wKnown == null) and kept the raw stretch, and `height: 100%` (abspos-009) leaves explicitH nil and stays on the old path — which the device run confirms: abspos-009 did not move on either the frozen or the after side."
+  }
+ ],
+
+ "repairedByF2": {
+  "what": "RatioInlineSizeTests' two end-to-end rasters mounted the probed box as the TREE ROOT, where `wptBlockFlowFillWidth` is nil by construction (WPTCaptureMode.swift's key default; a block PARENT publishes it for its in-flow children via wptChildFillWidth). The fold therefore never fired: testRatioBoxDoesNotFillTheContainingBlock passed VACUOUSLY and testPlainAutoWidthBlockStillFills failed — the one failure the wave carried into this lane.",
+  "fix": "both rasters now mount the box as the in-flow child of a definite 300px block parent, the shape WPTBlockChildFillTests uses and the shape the test's own comment claimed. The pair is now a controlled A/B on the predicate alone: identical trees, one with `aspect-ratio` (100px square, canvas white at x=280) and one without (fills, green at x=280).",
+  "result": "RatioInlineSizeTests 10/10 green; the whole swiftui suite is 1362 tests / 2 skipped with no lane-38 failure."
+ },
+
+ "openRisks": {
+  "androidDeviceLeg": {
+   "what": "M2's Android twin has NO device measurement. Its frozen cell is css-sizing/aspect-ratio/abspos-006 at android 0.8929.",
+   "why": "the emulator host is saturated (5–7 emulators, load average 30–140 from the concurrent lanes). A private `-read-only` instance was booted twice on port 5614; `:app:installDebug` died with ddmlib ShellCommandUnresponsiveException, and a direct `adb install` of the already-built APK died with `Failure calling service package: Broken pipe` after ~20 minutes. Lane N7's own feeder failed the same way.",
+   "standingEvidence": "four compose unit pins on the exact arithmetic, the full compose suite at 2163/0, and the iOS twin of the same branch measured on device at 0.9053 → 0.9974.",
+   "next": "re-feed `_diag38/N7/ir/css-sizing` (48 fixtures, composed mode) to a quiet emulator and score with _diag38/N7/score.mjs css-sizing android <dir>; the expectation is abspos-006 up and every other cell byte-identical."
+  },
+  "sharedWorktree": "these captures were taken from a tree carrying all eight wave-38 lanes' edits, so a moved row is attributable to this lane only by mechanism. Two rows outside this lane's set did move and are named as such: css-sizing/aspect-ratio/auto-margins-001 (0.8954 → 0.9091) and css-values/calc-height-table-1 (0.8009 → 0.8742, lane N2's table work). Neither is a loss."
+ },
+
+ "notFixed": "the five mechanisms lane N7 classified but did not repair (C1 margins-in-fill-width, C2 the undeclared-display inline box, C3 Android flex min-content, C4 the four css-masking clip-path gaps, C5 selectors' text-metric divergences) stand exactly as recorded in _diag38/N7/classification.json — none was touched by this finish lane.",
+
+ "reproduce": {
+  "scorerValidate": "node _diag38/N7/score.mjs css-sizing ios x --validate",
+  "iosFeed": "node tools/titan/feed-ios.mjs --fixtures _diag38/N7/ir/css-sizing --out <dir> --udid <sim> --composed",
+  "score": "node _diag38/N7/score.mjs css-sizing ios <dir>"
+ }
+}

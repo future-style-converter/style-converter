@@ -105,7 +105,7 @@ object DecorationColorOps {
      *  unrecognised, so the caller DROPS the entry rather than painting a
      *  wrong line — the no-silent-fallthrough rule. */
     fun lineKindFrom(token: String?): LineKind? =
-        when (token?.lowercase()?.replace('_', '-')) {
+        when (token?.let(::canonicalLineToken)) {
             "underline" -> LineKind.UNDERLINE
             "overline" -> LineKind.OVERLINE
             "line-through" -> LineKind.LINE_THROUGH
@@ -116,6 +116,68 @@ object DecorationColorOps {
      *  `line` token is not one of the three paintable keywords. */
     fun decorationLine(line: String?, color: Rgba?): DecorationLine? =
         lineKindFrom(line)?.let { DecorationLine(it, color) }
+
+    /** Canonical spelling for ONE `text-decoration-line` keyword: CSS
+     *  keywords are ASCII case-insensitive (css-text-decor-3 §2.1) and the
+     *  v2 wire ships the converter's screaming enum name (`LINE_THROUGH`),
+     *  so both legs are undone here — ONE canonicaliser for the whole
+     *  keyword family, shared by [lineKindFrom] and [lineListIsValid] so
+     *  the validity gate and the paint gate can never disagree about what
+     *  "the same keyword" means. */
+    fun canonicalLineToken(token: String): String =
+        token.lowercase().replace('_', '-')
+
+    /**
+     * THE `||` GRAMMAR GATE (css-text-decor-3 §2.1, applier campaign wave
+     * 38 lane N3). BYTE-PARALLEL TWIN of the iOS
+     * `DecorationColorOps.lineListIsValid` — change one, change both.
+     *
+     * The property's grammar is
+     *     text-decoration-line: none | [ underline || overline || line-through || blink ]
+     * and `||` means "one or more of these, in any order, EACH AT MOST
+     * ONCE". A value that repeats a keyword — or mixes the standalone
+     * `none` with a line keyword — does not match the grammar, so
+     * css-syntax-3 §9 drops the whole DECLARATION and the property keeps
+     * its initial value `none`: the browser paints NOTHING.
+     *
+     * WHY THE RUNTIMES MUST OWN THIS. The converter's
+     * TextDecorationLinePropertyParser accepts duplicates (it splits on
+     * whitespace and `mapNotNull`s each token), so the live v2 wire really
+     * does carry `["BLINK","BLINK"]` and `["BLINK","UNDERLINE","BLINK"]`
+     * — measured, wave37-final per-test IR for
+     * css/css-text-decor/text-decoration-line.html, the four `blink …`
+     * divs at the end of that test. Web is immune by construction: its
+     * applier writes the value back as a CSS declaration and the BROWSER
+     * re-validates it (which is why web renders those four divs bare and
+     * both natives painted 6 spurious full-width bands — iOS
+     * ref-SSIM 0.9215, whiting the 6 rows out scores 0.9615). The natives
+     * have no CSS parser downstream of the wire, so the gate lands here,
+     * next to the keyword table it validates.
+     *
+     * DELIBERATELY NOT INVALIDATED: an UNRECOGNISED token. css-text-decor-4
+     * keeps adding keywords to this very list (`spelling-error`,
+     * `grammar-error`), and schema/spec/05-versioning.md says an unknown
+     * wire value is tolerated, not fatal — so a token this build does not
+     * know keeps today's behaviour (no line, no veto) instead of blanking
+     * a value the author may have written correctly.
+     *
+     * @param tokens the declared keywords, in wire order, in ANY spelling.
+     * @return false when the declaration must be dropped (paint nothing).
+     *   An EMPTY list is valid — it means nothing was declared, which the
+     *   callers already map to the initial `none`.
+     */
+    fun lineListIsValid(tokens: List<String>): Boolean {
+        // Nothing declared → nothing to reject (callers treat it as `none`).
+        if (tokens.isEmpty()) return true
+        val canon = tokens.map(::canonicalLineToken)
+        // `none` is a STANDALONE alternative of the grammar, never a term
+        // of the `||` group — `none underline` matches neither branch.
+        if (canon.size > 1 && canon.contains("none")) return false
+        // `||` admits each term at most once; a repeat fails the match.
+        // Compared on the canonical spelling so `UNDERLINE underline` is
+        // caught as the duplicate it is.
+        return canon.toSet().size == canon.size
+    }
 
     /**
      * The ordered line list the painter walks.

@@ -778,6 +778,33 @@ dirs + WPT corpus are gitignored):
   sparse-checkout gap, not code. Depth-48 gate: zero regressions,
   net clean. Totals: **web 1120/1333 (84.0%), iOS 890/1305 (68.2%),
   Android 847/1302 (65.1%)**.
+  Wave 38 (`tools/titan/results/corpus-v6-3.json`) was the native
+  wave — eight lanes on the web-native gap, and the corpus grew to
+  **30 sections**: css-view-transitions joined via the **sixth bake**
+  (`view-transition-bake.mjs` drives each transition to its frozen
+  state in the ref browser and serializes the settled
+  `::view-transition` pseudo tree as ordinary boxes; measured
+  +21/−1 web, 50→70/192, then pinned into section-runner per the
+  engagement-never-ambient principle). **iOS gained +45**: css-tables
+  25→36 (the UA display channel + shrink-to-fit + separated-tracks
+  completion, device-verified twice independently with zero losses),
+  css-sizing +8, css-ui/css-values/text-decor singles. **Android went
+  red first, then finished +27**: the unverified Compose table fold
+  had lost 13 cells on a false premise (the extractor never emits an
+  implied `<tbody>`; the table path is a rewrite only total for
+  canonical trees) — the fix landed the structural precondition,
+  stopped folding orphan rows, and removed a fabricated 1dp demo
+  cell border with no CSS basis; all 13 restored plus a masked
+  css-backgrounds loss the fix lane found itself. Six lanes died on
+  API disconnects mid-wave and were recovered by the
+  assess-and-finish pattern with zero work lost; the scoring harness
+  itself was hardened when a fix lane caught its local pass rule
+  skipping the veto predicates. Quick wins: the `/images/`
+  sparse-checkout gap closed (69 stale refs recaptured with assets),
+  conditional `@import`, the PositionParser migration, native lang
+  locales. Depth-48 gate: zero regressions, net clean. Totals:
+  **web 1143/1379 (82.9%), iOS 935/1351 (69.2%), Android 874/1347
+  (64.9%)**.
 
 ## Test suites
 
@@ -785,9 +812,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 302 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1234 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2106 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1321 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1413 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2169 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1362 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1494 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap
