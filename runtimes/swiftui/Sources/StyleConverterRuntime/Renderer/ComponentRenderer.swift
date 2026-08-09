@@ -126,6 +126,13 @@ public struct ComponentRenderer: View {
     // Mirrors the web harness's ?wpt=1 WPT_MODE empty-visible-text path.
     @Environment(\.wptCaptureMode) private var wptCaptureMode
 
+    // Wave 38 (lane N1) — "my subtree is packed by the inline atom flow"
+    // (InlineAtomBlockLayout.swift). The run packer already gives each atom
+    // its §10.8 line box and row-baseline slot, so the UA-widget mount hook
+    // must NOT add the block-context lead there; false (the default) means
+    // a lone, block-stacked widget that does need it.
+    @Environment(\.inlineAtomRunMember) private var inlineAtomRunMember
+
     // Wave 34 (lane T) — the enclosing TABLE box's used `border-spacing`
     // (CSS 2.1 §17.6.1). Declared on the table, but SPENT by the row it
     // encloses (between its cells) and by the table itself (its outer
@@ -980,10 +987,36 @@ public struct ComponentRenderer: View {
             // routes it into the atom rows) skips the fold and keeps its
             // UAWidgetIntrinsics/measured size. Non-widget children and
             // the whole non-WPT flow are untouched.
+            // Wave-38 lane N7 — RATIO guard (css-sizing-4 §4.1): a block
+            // box with a preferred aspect ratio and a DEFINITE block size
+            // does not take the §10.3.3 stretch-fit inline size; its
+            // automatic width IS blockSize × ratio, which SizeApplierMath
+            // already synthesises for the still-missing axis. Filling the
+            // width here pre-empted that fill, so nine frozen wave37-final
+            // cells (css-sizing block-aspect-ratio-002/006/007/014/015/
+            // 016/018, css-values calc-size-aspect-ratio-001/004) painted
+            // a full-canvas green bar where web, Android and the Chromium
+            // ref all paint the ratio-derived square. The predicate is
+            // deliberately narrow (usable ratio + auto width + `.exact`
+            // height) so every other block box keeps the fill verbatim —
+            // see RatioInlineSize.determinesInlineSize.
+            // Wave-38 lane N2 — TABLE guard (CSS 2.1 §17.5.2): a table box
+            // with `width: auto` is SHRINK-TO-FIT (the table layout
+            // algorithm's max(min-content, min(max-content, available))),
+            // not a §10.3.3 block-level fill. css-tables/background-clip-001
+            // is one `<td>` with a 40×40 inline-block inside 30px collapsed
+            // borders — a 100×100 table, 10 000 green ref pixels — and the
+            // fill made iOS paint 35 800 (a 358×100 bar). box-shadow-001 and
+            // extra-height-given-to-all-row-groups-00{1,2,5} are the same
+            // three ink counts. See TableBoxTree.shrinkToFitBox.
             if wptCaptureMode, let w = wptBlockFlowFillWidth,
                s.size.width == nil, !Self.isOutOfFlow(component),
                s.layout.display != .inline,
-               !Self.isInlineAtom(component) {
+               !Self.isInlineAtom(component),
+               !RatioInlineSize.determinesInlineSize(s.size),
+               !TableBoxTree.shrinkToFitBox(
+                    TableBoxTree.roleOf(displayProperties(now: now),
+                                        sourceTag: component.meta?.sourceTag)) {
                 // Wave 11: the published fill width is the containing
                 // block's content width — the box's target FRAME extent
                 // (CSS 2.1 §10.3.3: margin+border+padding+content fill
@@ -1495,7 +1528,14 @@ public struct ComponentRenderer: View {
                     // Atoms are OPAQUE: their content renders through the
                     // normal chain (W2's widget painting mounts inside) —
                     // this lane owns only their placement.
+                    //
+                    // Wave-38 lane N1: mark the subtree so the UA-widget
+                    // mount hook skips the BLOCK line box (this layout
+                    // already builds the run's line box — see
+                    // `inlineAtomRunMember`). `.environment` is an inert
+                    // modifier, so the Layout's subview list is unchanged.
                     contentOrPlaceholder(style: style)
+                        .environment(\.inlineAtomRunMember, true)
                 }
             } else {
                 VStack(
@@ -2343,10 +2383,17 @@ public struct ComponentRenderer: View {
     ///  • not in composed-WPT capture — the dark-stage 327 corpus must
     ///    keep the VStack byte-identically (it declares no table display
     ///    anywhere, so this is belt-and-braces, not the load-bearing gate);
-    ///  • this box's DECLARED `display` is not a table / row-group / row
-    ///    (`TableBoxTree.roleOf` reads the keyword ONLY — see its doc for
-    ///    why `meta.sourceTag` is deliberately not a second channel here);
+    ///  • this box's role is not a table / row-group / row;
     ///  • it has no in-flow children, so there are no tracks to place.
+    ///
+    /// Wave 38 (lane N2) — the role now reads the HTML UA channel
+    /// (`TableBoxTree.roleOf(_:sourceTag:)`) as well as the declared
+    /// keyword. The css-tables corpus is HTML markup with no author
+    /// `display`, so before this the gate saw NO table anywhere in 29 of
+    /// the section's 48 tests and every `<table>` stacked its cells
+    /// vertically; `meta.sourceTag` is the UA sheet's only sighting on the
+    /// wire. A declared `display` still wins — the fallback fires only
+    /// where the wire declared none.
     ///
     /// The plan runs over the SAME `inFlowChildren` array
     /// `contentOrPlaceholder` renders, so subview indices line up by
@@ -2355,8 +2402,9 @@ public struct ComponentRenderer: View {
     private func tableTrackPlan() -> TableTrackPlan? {
         // Composed-WPT capture only, mirroring the float / inline-atom gates.
         guard wptCaptureMode else { return nil }
-        // css-tables-3 §2.1 role from the declared keyword.
-        let role = TableBoxTree.roleOf(resolvedProperties)
+        // css-tables-3 §2.1 role: declared keyword first, HTML UA tag second.
+        let role = TableBoxTree.roleOf(resolvedProperties,
+                                       sourceTag: component.meta?.sourceTag)
         let arrangement = TableSeparatedTracks.arrangement(role)
         guard arrangement != .none else { return nil }
         // No children ⇒ no tracks; the box keeps its ordinary box painting.
@@ -2629,7 +2677,31 @@ public struct ComponentRenderer: View {
         if wptCaptureMode,
            let spec = UAWidgetsResolve.resolve(component: component,
                                                properties: resolvedProperties) {
-            UAWidgetView(spec: spec)
+            // Wave-38 lane N1 — the BLOCK-context line box. A widget packed
+            // into an inline atom RUN is already placed against its row
+            // baseline by InlineAtomBlockLayout, so it paints flush; a LONE
+            // widget is block-stacked and, before this lane, its wrapper
+            // advanced by the bare border-box height (css-ui
+            // appearance-revert-001 drifted 33px over 14 rows → 0.8222).
+            // UAWidgetBlockLine supplies the missing §10.8 leading.
+            let blockLead = inlineAtomRunMember
+                ? nil
+                : UAWidgetsResolve.blockLead(component: component,
+                                             properties: resolvedProperties)
+            // Padding OUTSIDE the replica and INSIDE the component box: the
+            // widget's own background/border (already painted on the box by
+            // the modifier chain) keeps its geometry, while the block
+            // advance grows to the line box height. CSS px == pt at the
+            // capture scale. Nil lead keeps the frozen, UNMODIFIED view —
+            // an explicit branch rather than a zero padding, so every
+            // pre-wave-38 widget composition is byte-identical.
+            if let lead = blockLead {
+                UAWidgetView(spec: spec)
+                    .padding(.top, CGFloat(lead.topPx))
+                    .padding(.bottom, CGFloat(lead.bottomPx))
+            } else {
+                UAWidgetView(spec: spec)
+            }
         }
         // The placeholder only appears when the component has NO
         // children at all — a parent whose children are ALL absolutely

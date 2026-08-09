@@ -183,4 +183,70 @@ object UAWidgetsResolve {
             accent = accentFor(component.properties)
         )
     }
+
+    /**
+     * Wave-38 lane N1 — the IR-reading half of the block-context line box
+     * (the arithmetic lives in the byte-parallel
+     * [com.styleconverter.runtime.layout.UAWidgetBlockLine]). Reads the
+     * three wire facts that solve it off the SAME merged property list
+     * [resolve] uses, so the lead and the replica can never disagree about
+     * which element they describe:
+     *  • an explicit `Height` (post-load-extracted computed style) → the
+     *    conservative gate, no lead at all;
+     *  • `MarginTop` / `MarginBottom` in absolute px — already applied by
+     *    the renderer's own margin modifier, so they are subtracted from
+     *    the table's lead instead of being added twice.
+     * Twin: Swift UAWidgetsResolve.blockLead(component:properties:).
+     */
+    fun blockLead(component: IRComponent): com.styleconverter.runtime.layout.UAWidgetBlockLine.Lead? =
+        com.styleconverter.runtime.layout.UAWidgetBlockLine.leadFor(
+            tag = component._tag?.lowercase(),
+            typeAttr = component.attrs?.type,
+            multiple = component.attrs?.multiple == true,
+            // Any Height declaration counts — auto/percentage/calc pin the
+            // box just as firmly as a px value once the renderer honours
+            // them, and this gate is deliberately the conservative one.
+            hasWireHeight = component.properties.any { it.type == "Height" },
+            wireMarginTopPx = wireMarginPx(component, "MarginTop"),
+            wireMarginBottomPx = wireMarginPx(component, "MarginBottom"),
+            horizontalWritingMode = isHorizontalWritingMode(component),
+        )
+
+    /**
+     * True when this element's block axis is the y axis — the only case the
+     * ref-probed table describes (see the axis gate in
+     * [com.styleconverter.runtime.layout.UAWidgetBlockLine.leadFor]).
+     *
+     * `writing-mode` INHERITS (css-writing-modes-4 §3.1) and is carried in
+     * ComponentRenderer's inherited-property set, so the declaration on an
+     * ancestor wrapper — which is where the css-writing-modes `forms`
+     * tests put it — reaches this merged list. (Written without a glob:
+     * Kotlin block comments NEST, so a literal slash-star inside this
+     * KDoc would open a comment that swallows the rest of the file.)
+     * Read as the raw wire keyword
+     * rather than through WritingModeExtractor so the Kotlin and Swift
+     * halves stay byte-parallel with no per-platform config type between
+     * them. Absent ⇒ horizontal-tb, the CSS initial value.
+     */
+    private fun isHorizontalWritingMode(component: IRComponent): Boolean {
+        val data = component.properties.firstOrNull { it.type == "WritingMode" }?.data
+            ?: return true
+        val keyword = (data as? JsonPrimitive)?.contentOrNull
+            ?: return true   // a non-string payload is unreadable here — assume the initial value
+        return keyword.equals("HORIZONTAL_TB", ignoreCase = true) ||
+            keyword.equals("horizontal-tb", ignoreCase = true)
+    }
+
+    /**
+     * One margin longhand in ABSOLUTE px, or 0.0 when the wire carries no
+     * such declaration (0 is exactly what the renderer then applies).
+     * Non-absolute shapes (`auto`, `%`, unresolved `calc()`) also read 0:
+     * the runtime cannot know their used value here, and under-subtracting
+     * keeps the lead at the ref value rather than silently shrinking it.
+     */
+    private fun wireMarginPx(component: IRComponent, type: String): Double {
+        val data = component.properties.firstOrNull { it.type == type }?.data ?: return 0.0
+        return (com.styleconverter.runtime.core.types.extractLength(data)
+            as? com.styleconverter.runtime.core.types.LengthValue.Exact)?.px ?: 0.0
+    }
 }

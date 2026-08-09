@@ -1758,6 +1758,15 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       // build-combined-fixture); true ⇔ ≥1 `<li>` marker was resolved
       // upstream instead of by the runtime's own keyword table.
       counterStyleBaked: meta.counterStyleBaked === true,
+      // Wave 38 — informational view-transition-bake provenance (see
+      // build-combined-fixture). true ⇔ this row's boxes ARE the settled
+      // `::view-transition` pseudo tree, with the page's own components
+      // retired, rather than the document the source describes. Purely
+      // provenance: `requires-view-transitions` is a REFUSED exclusion tag,
+      // so these rows are scored either way — the corresponding lossy reason
+      // is view-transition-bake.mjs's VT_BAKE_LOSSY_REASON,
+      // 'baked-view-transition-tree', which rides `lossyReasons` above.
+      viewTransitionBaked: meta.viewTransitionBaked === true,
       // wave-20: surfaced alongside — true ⇔ the component tree itself was
       // re-extracted from the serialized post-script DOM (appendChild
       // family), not just state-overlaid.

@@ -149,4 +149,62 @@ class DecorationWirePinTest {
             }
         }
     }
+
+    // ── wave 38, lane N3: the §2.1 `||` gate at the WIRE seam ─────────────
+    // These are the EXACT TextDecorationLine payloads the wave37-final
+    // per-test IR carries for css/css-text-decor/text-decoration-line.html
+    // (components 31/33/35/37 — the four `blink …` divs). The browser ref
+    // paints NOTHING on all four; before this gate the owned pass painted
+    // 6 spurious full-width bands across them. iOS twin:
+    // DecorationColorOpsTests' live-wire gate cases.
+
+    @Test
+    fun `the live blink-blink wire owns no decoration line`() {
+        val flags = TextStyleApplier.extractDecorationLineFlags(listOf(
+            prop("TextDecorationLine", """["BLINK","BLINK"]""")))
+        assertEquals(false, flags.any)
+    }
+
+    @Test
+    fun `the live blink-underline-blink wire owns no decoration line`() {
+        // The surviving `underline` must NOT be painted: the duplicate
+        // `blink` invalidates the whole declaration, so the property keeps
+        // its initial `none`.
+        val flags = TextStyleApplier.extractDecorationLineFlags(listOf(
+            prop("TextDecorationLine", """["BLINK","UNDERLINE","BLINK"]""")))
+        assertEquals(false, flags.underline)
+        assertEquals(false, flags.any)
+    }
+
+    @Test
+    fun `the live blink-underline-overline-linethrough-blink wire owns nothing`() {
+        val flags = TextStyleApplier.extractDecorationLineFlags(listOf(
+            prop("TextDecorationLine",
+                 """["BLINK","UNDERLINE","OVERLINE","LINE_THROUGH","BLINK"]""")))
+        assertEquals(false, flags.underline)
+        assertEquals(false, flags.overline)
+        assertEquals(false, flags.lineThrough)
+    }
+
+    @Test
+    fun `the built-in TextStyle decoration is dropped for an invalid value too`() {
+        // Both emitters must agree: extractTextDecorationConfig feeds
+        // Compose's BUILT-IN TextDecoration on the non-label paths. If only
+        // the owned pass honoured the gate the built-in would keep painting
+        // the line the ref does not have.
+        val cfg = TextStyleApplier.extractTextDecorationConfig(listOf(
+            prop("TextDecorationLine", """["BLINK","UNDERLINE","BLINK"]""")))
+        assertNull(cfg)
+    }
+
+    @Test
+    fun `a VALID multi-keyword wire still owns all three lines`() {
+        // The regression guard for the gate itself — component 22 of the
+        // same test (`all-decorations`), which the ref DOES paint.
+        val flags = TextStyleApplier.extractDecorationLineFlags(listOf(
+            prop("TextDecorationLine", """["UNDERLINE","OVERLINE","LINE_THROUGH"]""")))
+        assertEquals(true, flags.underline)
+        assertEquals(true, flags.overline)
+        assertEquals(true, flags.lineThrough)
+    }
 }

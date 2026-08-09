@@ -33,6 +33,7 @@ import com.styleconverter.runtime.typography.DecorationColorOps.DecorationLine
 import com.styleconverter.runtime.typography.DecorationColorOps.LineKind
 import com.styleconverter.runtime.typography.DecorationColorOps.Rgba
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -353,5 +354,81 @@ class DecorationColorOpsTest {
         )
         assertEquals(3, ops.size)
         assertTrue(ops.all { it.color == null })
+    }
+
+    // ── wave 38, lane N3: the css-text-decor-3 §2.1 `||` grammar gate ──────
+    // TWIN of the iOS DecorationColorOpsTests cases of the same names.
+    // Oracle: css/css-text-decor/text-decoration-line.html — its last four
+    // divs declare `blink blink`, `blink underline blink`,
+    // `blink underline overline blink` and
+    // `blink underline overline line-through blink`. Chromium (the frozen
+    // browser ref, tools/wpt/refs/9b5435e5…/…/css-text-decor/
+    // text-decoration-line.png) paints NO decoration on any of them, and
+    // the wave37-final per-test IR proves the wire hands the runtimes those
+    // duplicate lists verbatim.
+
+    @Test
+    fun `a repeated keyword invalidates the whole declaration`() {
+        // `blink blink` — the grammar's `||` admits each term once, so the
+        // declaration is dropped and the property keeps `none`.
+        assertFalse(DecorationColorOps.lineListIsValid(listOf("blink", "blink")))
+        // The three live corpus values that mix a real line with a repeat:
+        // every one of them must paint NOTHING, not the surviving line.
+        assertFalse(DecorationColorOps.lineListIsValid(listOf("blink", "underline", "blink")))
+        assertFalse(DecorationColorOps.lineListIsValid(
+            listOf("blink", "underline", "overline", "blink")))
+        assertFalse(DecorationColorOps.lineListIsValid(
+            listOf("blink", "underline", "overline", "line-through", "blink")))
+    }
+
+    @Test
+    fun `duplicate detection uses the canonical spelling`() {
+        // The v2 wire ships SCREAMING enum names; a value that repeats the
+        // same keyword in two spellings is still a repeat.
+        assertFalse(DecorationColorOps.lineListIsValid(listOf("UNDERLINE", "underline")))
+        assertFalse(DecorationColorOps.lineListIsValid(listOf("LINE_THROUGH", "line-through")))
+    }
+
+    @Test
+    fun `none may not be combined with a line keyword`() {
+        // `none` is a STANDALONE alternative, never a `||` term.
+        assertFalse(DecorationColorOps.lineListIsValid(listOf("none", "underline")))
+        // …but on its own it is a perfectly valid declaration.
+        assertTrue(DecorationColorOps.lineListIsValid(listOf("NONE")))
+    }
+
+    @Test
+    fun `every distinct-keyword value stays valid`() {
+        // The full `||` group in one value — the css-text-decor-3 §2.1
+        // maximum, and the `all-decorations` class of the same WPT test
+        // (which the ref DOES paint with all three lines).
+        assertTrue(DecorationColorOps.lineListIsValid(
+            listOf("UNDERLINE", "OVERLINE", "LINE_THROUGH")))
+        // `blink` ONCE alongside real lines is valid: it simply paints
+        // nothing (§2.1 lets a UA not blink, and Chromium does not).
+        assertTrue(DecorationColorOps.lineListIsValid(listOf("blink", "underline")))
+        // Nothing declared → nothing to reject.
+        assertTrue(DecorationColorOps.lineListIsValid(emptyList()))
+    }
+
+    @Test
+    fun `an unknown keyword does NOT invalidate the declaration`() {
+        // css-text-decor-4 keeps growing this list (spelling-error,
+        // grammar-error) and schema/spec/05-versioning.md tolerates unknown
+        // wire values — so a token this build cannot paint keeps today's
+        // behaviour (no line) instead of blanking the whole value.
+        assertTrue(DecorationColorOps.lineListIsValid(listOf("spelling-error")))
+        assertTrue(DecorationColorOps.lineListIsValid(listOf("underline", "spelling-error")))
+        // A repeat of an unknown token is still a repeat, though.
+        assertFalse(DecorationColorOps.lineListIsValid(
+            listOf("spelling-error", "spelling-error")))
+    }
+
+    @Test
+    fun `the canonicaliser folds case and the wire underscore`() {
+        assertEquals("line-through", DecorationColorOps.canonicalLineToken("LINE_THROUGH"))
+        assertEquals("underline", DecorationColorOps.canonicalLineToken("Underline"))
+        // Already-canonical input is returned unchanged (idempotent).
+        assertEquals("overline", DecorationColorOps.canonicalLineToken("overline"))
     }
 }

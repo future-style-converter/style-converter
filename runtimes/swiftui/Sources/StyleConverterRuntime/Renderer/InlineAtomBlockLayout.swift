@@ -18,6 +18,35 @@
 // SwiftUI for the Layout protocol; the packing core is view-free.
 import SwiftUI
 
+/// Wave-38 lane N1 — "this subtree is laid out by the inline atom flow".
+/// The renderer stamps `true` on `InlineAtomBlockLayout`'s content so the
+/// UA-widget mount hook can tell the two placement regimes apart:
+///  • inside this layout → the run packer already builds the §10.8 line box
+///    and places each atom against the row baseline, so the widget must
+///    paint flush in its promised box (adding lead here would shift the ink
+///    out of the plan's slot);
+///  • anything else → the widget is a lone inline-level box in a block and
+///    gets no line box at all without `UAWidgetBlockLine`.
+/// SCOPE NOTE (twin asymmetry, stated rather than hidden): Compose provides
+/// its `LocalInlineAtomRunMember` per RUN because `InlineFlowLayout` is
+/// instantiated once per run segment, while this Layout owns ALL of the
+/// container's children — so a lone widget that happens to share a
+/// container with a separate run also skips its lead here. That is the
+/// conservative direction (no change vs the frozen path) and no corpus test
+/// currently mixes the two shapes.
+private struct InlineAtomRunMemberKey: EnvironmentKey {
+    /// Default false — every composition outside a run keeps the block path.
+    static let defaultValue: Bool = false
+}
+
+extension EnvironmentValues {
+    /// See `InlineAtomRunMemberKey`.
+    var inlineAtomRunMember: Bool {
+        get { self[InlineAtomRunMemberKey.self] }
+        set { self[InlineAtomRunMemberKey.self] = newValue }
+    }
+}
+
 /// Block flow with inline atom rows (iOS 16 Layout — same availability
 /// discipline as FloatBlockLayout / MulticolGreedyLayout).
 @available(iOS 16.0, *)

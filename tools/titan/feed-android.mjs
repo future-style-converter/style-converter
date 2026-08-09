@@ -245,6 +245,17 @@ async function main() {
       const jdk = `${process.env.HOME}/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home`;
       if (existsSync(jdk)) env.JAVA_HOME = jdk;
     }
+    // SCOPE THE INSTALL TO *OUR* DEVICE. `:app:installDebug` fans out to
+    // EVERY attached device, so on the shared device farm one sick emulator
+    // fails the whole task — and with it this feeder — even though the run
+    // only ever touches `serial`. MEASURED (wave-38 lane N8): with 7
+    // emulators attached the install threw `InstallException` on somebody
+    // else's wedged instance and the css-text capture never started, while
+    // the app installed fine on the requested device. ANDROID_SERIAL is the
+    // knob AGP's device provider honours, and it is set on the CHILD env
+    // only, so it cannot leak into the adb calls below (which already carry
+    // `-s serial` through makeAdb).
+    env.ANDROID_SERIAL = serial;
     // Route Gradle's stdout to OUR stderr (fd 2) so it can't pollute the
     // machine-readable JSON summary we print to stdout at the end.
     execFileSync('./gradlew', [':app:installDebug', '--quiet'],

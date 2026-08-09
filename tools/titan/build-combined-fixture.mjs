@@ -213,6 +213,8 @@ async function main() {
                          // Wave 27 — a missing fixture certainly baked no
                          // list markers either (explicit, never inferred).
                          counterStyleBaked: false,
+                         // Wave 38 — nor any view-transition pseudo tree.
+                         viewTransitionBaked: false,
                          // Wave 35 — nor any font face: there is no fixture to
                          // read one from. Explicit false, same conservatism.
                          fontFacesDelivered: false };
@@ -296,6 +298,13 @@ async function main() {
         // investigator whether a row's markers were resolved upstream or
         // synthesised by each runtime's own table).
         counterStyleBaked: fixture._wpt?.counterStyleBaked === true,
+        // Wave 38 — the view-transition bake's provenance stamp, on the same
+        // informational channel. `requires-view-transitions` is a REFUSED
+        // exclusion tag (see inject-wpt-block's REFUSED_EXCLUSION_TAGS), so
+        // these tests were always SCORED and this can never feed
+        // applyNaScoreGate: it tells an investigator whether a row's boxes
+        // are the page's own or the settled `::view-transition` pseudo tree.
+        viewTransitionBaked: fixture._wpt?.viewTransitionBaked === true,
         // Wave 35 — the @font-face DELIVERY record, riding the same keyMap
         // channel as postLoadExtracted/structureExtracted (see those stamps
         // above). true ⇔ this test declared at least one usable face AND

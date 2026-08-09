@@ -265,6 +265,148 @@ export function resolveCanvasWritingMode(doc: IRDocument): string | undefined {
 }
 
 /**
+ * The two `direction` keywords css-writing-modes-4 §2.1 defines. Same
+ * no-silent-fallthrough discipline as WRITING_MODE_KEYWORDS above: an IR value
+ * outside this set is refused rather than written into a live style object.
+ */
+const DIRECTION_KEYWORDS = new Set(['ltr', 'rtl']);
+
+/**
+ * wave-38 lane N6 — THE PRINCIPAL DIRECTION (root inline-axis reversal).
+ *
+ * WHY: css-writing-modes-4 §8 names TWO propagated properties, not one. The
+ * same sentence that hands the root's (or, in HTML, the first `<body>`'s)
+ * `writing-mode` to the initial containing block hands over its `direction`:
+ * "the used values of writing-mode, direction and text-orientation on the root
+ * element are propagated to the viewport". Wave-37 lane W6 wired the block
+ * axis (resolveCanvasWritingMode above) and left the INLINE axis unwired, so a
+ * page that opens `body { direction: rtl }` still laid its ICB out left-to-
+ * right.
+ *
+ * WHAT THAT COSTS, precisely. `direction` is inherited, and the extractor
+ * already BAKES the body-root's declaration down onto every top-level body
+ * child (extract-fixture.mjs ROOT_INHERITED_TRIGGER_PROPS — `direction` is on
+ * that list by name), so the TEXT inside each root was already running RTL.
+ * What the bake cannot deliver is the one thing only the containing block can
+ * decide: WHERE a root-forest box that is narrower than the ICB is placed.
+ * CSS 2.1 §10.3.3 reads the CONTAINING BLOCK's direction for an
+ * over-constrained block ("if direction is rtl, margin-left is ignored"), and
+ * css-align/css-flexbox read it for `justify-content`/`start`. Under an LTR
+ * ICB every such box hugged the physical LEFT edge; the refs put it right.
+ *
+ * THE FIX, and why it is the same three lines W6 used: hoist the resolved
+ * keyword onto the ICB div — the box that IS the ref's render viewport (see
+ * composedIcbStyle). One inherited declaration there gives the root forest the
+ * ref's containing-block direction AND reaches every descendant, all resolved
+ * by Blink's own bidi/alignment pass. Nothing is re-implemented here.
+ *
+ * THE CONTAINMENT GATE is not an analogy this time, it is the spec's own
+ * wording: css-contain-1 §3.1 says that for a contained element "if this is
+ * the body element, the used values of writing-mode, direction and
+ * text-orientation are NOT propagated to the viewport" — direction is named
+ * alongside writing-mode in the same clause. WPT states it in the test TITLES:
+ * css-contain/contain-body-dir-001..004 and contain-html-dir-001..004 read
+ * "layout|paint|size|style containment on body|html prevents direction
+ * propagation", all eight matching ONE reference whose orange square sits in
+ * the upper-LEFT (the viewport stayed `ltr`). We therefore reuse
+ * [bodyRootHasContainment] — the identical predicate the background and
+ * writing-mode propagations gate on, inheriting its merged html+body caveat
+ * verbatim — and, like §3.1, do not grade by containment KIND.
+ *
+ * Returns `undefined` when there is no body-root, when it declares no
+ * direction, when the declared value is the initial `ltr` (which is what the
+ * canvas already does), when containment blocks the propagation, or when the
+ * value is not a css-writing-modes keyword. In every one of those cases the
+ * caller writes NO `direction` key and the capture is byte-identical to wave
+ * 37 — which is what keeps the ~10,600-fixture corpus still.
+ */
+export function resolveCanvasDirection(doc: IRDocument): string | undefined {
+  // Same lookup rule as the three resolvers above — one body per document, one
+  // synthetic bag for it.
+  const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
+  if (!bodyRoot) return undefined;
+  // css-contain-1 §3.1 names `direction` in the same clause as `writing-mode`.
+  if (bodyRootHasContainment(bodyRoot)) return undefined;
+  // Resolve through the SAME engine the renderer uses (DirectionApplier), so
+  // the canvas can never disagree with what a component would have got.
+  const dir = buildStyles(bodyRoot.properties).direction;
+  if (typeof dir !== 'string') return undefined;                  // not declared
+  const value = dir.trim().toLowerCase();
+  // Unknown keyword ⇒ refuse (no-silent-fallthrough); `ltr` ⇒ the canvas
+  // default, so writing it would be a no-op with a byte-diff risk.
+  if (!DIRECTION_KEYWORDS.has(value) || value === 'ltr') return undefined;
+  return value;
+}
+
+/**
+ * The `text-align` keywords css-text-4 §7.1 defines that are SELF-CONTAINED —
+ * they decide a line box's alignment from the value alone. `match-parent` is
+ * deliberately absent: it resolves against the PARENT's direction, and the ICB
+ * has no parent in the composed canvas, so forwarding it would be a guess.
+ */
+const TEXT_ALIGN_KEYWORDS = new Set([
+  'left', 'right', 'center', 'justify', 'justify-all', 'start', 'end',
+]);
+
+/**
+ * wave-38 lane N6 — the body-root's `text-align`, and ONLY while the canvas
+ * direction is reversed. This is not a spec propagation; it repairs a HARNESS
+ * artifact that reversing the inline axis makes observable.
+ *
+ * THE ARTIFACT. In the real document a top-level `<span>` is an INLINE-level
+ * child of `<body>`, so the line box it sits in belongs to body's block box and
+ * body's `text-align` decides where that line box is placed. In the flat v2
+ * forest (spec 03) the body's children are SIBLINGS of the body-root component,
+ * so their line box belongs to the ICB div instead — and the ICB carried no
+ * `text-align` at all, i.e. the initial `start`.
+ *
+ * That was invisible while the ICB was `ltr`, because `start` and the corpus's
+ * common `left` land in the same place. Reversing the inline axis separates
+ * them, and CSS2/text/bidi-span-002 is the exact cell that proves it:
+ * `body { text-align: left; direction: rtl }` with a single inline `<span>`
+ * root whose `::before`/`::after` generate "(" and ")". MEASURED at this
+ * wave's head, on the 42-test root-direction slice: the direction propagation
+ * alone moved its ink from image x:18..25 (the ref's position, SSIM 1.0000) to
+ * x:364..371 — the rtl ICB's `start` edge — for 0.9945. Reading the body's own
+ * `text-align: left` onto the ICB puts it back at 1.0000 with the reordering
+ * the test is actually about (in an RTL base direction the mirrored, reversed
+ * "(" + ")" render as "()" again, which is why the plain-LTR ref matches).
+ *
+ * WHY IT IS GATED ON THE DIRECTION. The artifact is GENERAL — an LTR document
+ * with `body { text-align: center }` and an inline-level root has the same hole
+ * — but closing it generally would rewrite the ICB style of every fixture whose
+ * body declares an alignment, corpus-wide, on zero measurement. This lane
+ * measured the RTL slice, so this lane moves the RTL slice: `undefined` unless
+ * [resolveCanvasDirection] already fired, which keeps the change inside the 33
+ * body-root-rtl fixtures the lane owns. The general widening is a follow-up
+ * with its own A/B, recorded as such rather than smuggled in here.
+ *
+ * (The bake is not an alternative route: extract-fixture's
+ * ROOT_INHERITED_TRIGGER_PROPS already copies `text-align` onto every top-level
+ * child, but `text-align` has no effect on an INLINE box — it aligns the line
+ * boxes of a BLOCK container — so the copy lands on the span and does nothing.
+ * Only the box that establishes the line box can answer, and here that is the
+ * ICB.)
+ */
+export function resolveCanvasTextAlign(doc: IRDocument): string | undefined {
+  // Self-gating: silent for every document whose inline axis we did not
+  // reverse, which is what bounds the blast radius to the measured slice.
+  if (resolveCanvasDirection(doc) === undefined) return undefined;
+  const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
+  if (!bodyRoot) return undefined;                    // unreachable via the gate
+  // Same engine hop as every resolver above (TextAlignApplier).
+  const ta = buildStyles(bodyRoot.properties).textAlign;
+  if (typeof ta !== 'string') return undefined;                   // not declared
+  const value = ta.trim().toLowerCase();
+  // Unknown or context-dependent keyword ⇒ refuse (no-silent-fallthrough).
+  if (!TEXT_ALIGN_KEYWORDS.has(value)) return undefined;
+  // `start` is the ICB's initial value — writing it would be a no-op with a
+  // byte-diff risk, exactly like `horizontal-tb` / `ltr` above.
+  if (value === 'start') return undefined;
+  return value;
+}
+
+/**
  * The composed canvas's image-space FRAME — capture-browser-ref.mjs's
  * CANVAS_PAD_PX. Since wave-25 CAL-RC1 the ref renders UNPADDED at 358 wide
  * and this 16px frame is memcpy'd around the finished PNG (padPngBuffer), so
@@ -535,6 +677,14 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
   // `undefined` for every horizontal document, which is what keeps the rest of
   // the corpus byte-identical (the style key is then never written).
   const canvasWritingMode = React.useMemo(() => resolveCanvasWritingMode(doc), [doc]);
+  // wave-38 N6: the PRINCIPAL DIRECTION — the inline-axis half of the same
+  // css-writing-modes-4 §8 sentence W6 wired the block axis from. Pure per
+  // document like the resolvers above; `undefined` for every LTR document,
+  // which is what keeps the rest of the corpus byte-identical.
+  const canvasDirection = React.useMemo(() => resolveCanvasDirection(doc), [doc]);
+  // wave-38 N6: the body's own `text-align`, consulted ONLY when the line above
+  // reversed the inline axis (resolveCanvasTextAlign gates on it internally).
+  const canvasTextAlign = React.useMemo(() => resolveCanvasTextAlign(doc), [doc]);
   return (
     <div
       data-capture-canvas
@@ -594,6 +744,20 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
           // `html`/`body` declaration does. Spread LAST and conditionally, so a
           // horizontal document writes no key at all and stays byte-identical.
           ...(canvasWritingMode ? { writingMode: canvasWritingMode as React.CSSProperties['writingMode'] } : {}),
+          // wave-38 N6 — the principal DIRECTION rides the ICB for the same
+          // two reasons the writing mode does: the ICB IS the ref's render
+          // viewport (so it is the containing block whose direction CSS 2.1
+          // §10.3.3 reads when placing an over-constrained root-forest box),
+          // and `direction` is inherited (so one declaration reaches every
+          // descendant's bidi resolution). Spread LAST and conditionally, so an
+          // LTR document writes no key at all and stays byte-identical.
+          ...(canvasDirection ? { direction: canvasDirection as React.CSSProperties['direction'] } : {}),
+          // wave-38 N6 — the body's `text-align` rides the ICB alongside the
+          // reversed direction, because in the flat forest the ICB is the box
+          // that establishes the line box a top-level INLINE root sits in.
+          // Never written on its own: the resolver is silent unless the
+          // direction fired, so no LTR capture can move.
+          ...(canvasTextAlign ? { textAlign: canvasTextAlign as React.CSSProperties['textAlign'] } : {}),
         }}
       >
         {roots.map((root, i) => (

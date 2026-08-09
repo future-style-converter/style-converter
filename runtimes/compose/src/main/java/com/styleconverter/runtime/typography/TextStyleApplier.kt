@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.styleconverter.runtime.PropertyTracker
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.types.ValueExtractors
 import kotlinx.serialization.json.*
@@ -551,8 +552,26 @@ object TextStyleApplier {
     private fun extractTextDecoration(data: JsonElement): TextDecoration? {
         // Handle array format: ["UNDERLINE"] or ["LINE_THROUGH"]
         if (data is kotlinx.serialization.json.JsonArray) {
+            // Wave 38 (lane N3) — the SAME §2.1 `||` grammar gate the owned
+            // pass applies in [extractDecorationLineFlags]. It has to run on
+            // BOTH emitters or an invalid value would be dropped by the
+            // owned rects and still painted by Compose's built-in
+            // TextDecoration on the non-label paths (the double-source bug
+            // the wave-22 wire contract exists to prevent). Returning null
+            // means "no decoration declared" — which is what an invalid,
+            // dropped declaration computes to.
+            val tokens = data.mapNotNull {
+                (it as? JsonPrimitive)?.contentOrNull?.let(DecorationColorOps::canonicalLineToken)
+            }
+            if (!DecorationColorOps.lineListIsValid(tokens)) {
+                PropertyTracker.markUnhandled(
+                    "TextDecorationLine(invalid '${tokens.joinToString(" ")}' — " +
+                        "css-text-decor-3 §2.1 || allows each keyword once; declaration dropped)"
+                )
+                return null
+            }
             val decorations = data.mapNotNull { elem ->
-                val kw = elem.jsonPrimitive.contentOrNull?.lowercase()?.replace("_", "-")
+                val kw = elem.jsonPrimitive.contentOrNull?.let(DecorationColorOps::canonicalLineToken)
                 when (kw) {
                     "underline" -> TextDecoration.Underline
                     "line-through" -> TextDecoration.LineThrough
@@ -882,6 +901,14 @@ object TextStyleApplier {
      * bare keyword primitive ("UNDERLINE"). `blink` is a no-visual-effect
      * value in every modern browser (css-text-decor-3 §2.1: UAs "may not"
      * blink) so it maps to no flags, like `none`.
+     *
+     * Wave 38 (lane N3): the declared list is first run through the §2.1
+     * `||` GRAMMAR GATE — [DecorationColorOps.lineListIsValid] — because
+     * the live wire really does carry values the grammar rejects (the
+     * converter's parser admits a repeated keyword). An invalid
+     * declaration is DROPPED, so the property keeps its initial `none` and
+     * this box owns no line, exactly like the browser. The drop is LOUD
+     * (PropertyTracker), never a silent fallthrough.
      */
     fun extractDecorationLineFlags(properties: List<IRProperty>): DecorationLineFlags {
         // No declared property → initial value `none` → nothing owned.
@@ -891,11 +918,21 @@ object TextStyleApplier {
         // lowercase + underscore→hyphen (wire ships LINE_THROUGH).
         val keywords: List<String> = if (data is JsonArray) {
             data.mapNotNull { elem ->
-                (elem as? JsonPrimitive)?.contentOrNull?.lowercase()?.replace("_", "-")
+                (elem as? JsonPrimitive)?.contentOrNull?.let(DecorationColorOps::canonicalLineToken)
             }
         } else {
             // Bare primitive wire — a single keyword or nothing.
-            listOfNotNull(ValueExtractors.extractKeyword(data)?.lowercase()?.replace("_", "-"))
+            listOfNotNull(ValueExtractors.extractKeyword(data)?.let(DecorationColorOps::canonicalLineToken))
+        }
+        // §2.1 `||`: a repeated keyword (or `none` mixed with a line) is
+        // an INVALID declaration — the browser drops it and paints
+        // nothing, so neither may this box.
+        if (!DecorationColorOps.lineListIsValid(keywords)) {
+            PropertyTracker.markUnhandled(
+                "TextDecorationLine(invalid '${keywords.joinToString(" ")}' — " +
+                    "css-text-decor-3 §2.1 || allows each keyword once; declaration dropped)"
+            )
+            return NO_DECORATION_LINES
         }
         // One flag per spec keyword; anything else (none/blink/garbage)
         // contributes no line.

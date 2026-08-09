@@ -101,6 +101,49 @@ object TableApplier {
      */
     val LocalTableBorderWidth = compositionLocalOf { 1.dp }
 
+    /**
+     * May a cell paint the DEMO default border in the SEPARATE model?
+     *
+     * ## What this switches off, and why it has to exist
+     * [TableCell] paints `Modifier.border(borderWidth, borderColor)` —
+     * 1dp solid black by default — on every cell of a `border-collapse:
+     * separate` table. That border has NO CSS basis: CSS 2.1 §17.6.1's
+     * separated model says each cell paints ITS OWN borders and the table
+     * paints nothing between them, and the wire already carries the cell's
+     * declared `BorderTopWidth`/`…Color`/… which `RenderComponent` applies
+     * to the cell component itself (wave 32 — a `table-cell` renders
+     * through the BLOCK path). The default is a demo affordance from this
+     * applier's public API, kept so a hand-written
+     * `TableApplier.Table { TableRow { TableCell { … } } }` still looks
+     * like a table.
+     *
+     * It was harmless while no real HTML `<table>` reached this applier.
+     * The wave-38 UA display fold routed every bare `<table>` here, and
+     * the fabrication immediately became the dominant ink error on the
+     * shapes the fold otherwise renders CORRECTLY: a `<td>` takes the
+     * composed-WPT block-fill width, so the fabricated border draws as a
+     * full-canvas-width black rectangle around content the reference shows
+     * unadorned. MEASURED on the frozen wave38-final Android captures —
+     * `CSS2/css21-errata/s-11-1-1b-003` 0.9805 → 0.9280, `-004`
+     * 0.9805 → 0.9280, `-007` 0.9817 → 0.9328,
+     * `css-display/display-contents-td-001` 0.9666 → 0.9190,
+     * `css-text-decor/text-decoration-propagation-05` 0.9712 → 0.9471 —
+     * five frozen Android passes lost to one fabricated rectangle.
+     *
+     * ONLY the separated model is switched: the COLLAPSE branch's
+     * right/bottom strokes stand for §17.6.2's table-owned collapsed
+     * border, which is a real (if still placeholder-coloured) box-model
+     * feature, and the wave-38 collapsed-border gains
+     * (`collapsed-border-positioned-tr-td` f→P, `border-conflict-resolution`
+     * 0.6453 → 0.8007, `border-collapse-empty-cell` 0.9073 → 0.9290) were
+     * measured WITH those strokes.
+     *
+     * Default `true` keeps every existing call site — the demo API and
+     * every declared-`display: table` box in the frozen corpus — byte
+     * identical.
+     */
+    val LocalTableFabricatedCellBorder = compositionLocalOf { true }
+
     // =========================================================================
     // TABLE CONTAINER
     // =========================================================================
@@ -112,6 +155,10 @@ object TableApplier {
      * @param caption Optional caption content
      * @param borderColor Border color for cells
      * @param borderWidth Border width for cells
+     * @param fabricatedCellBorder Whether cells may paint the DEMO default
+     *   border in the separated model — see [LocalTableFabricatedCellBorder]
+     *   for the five measured Android captures that made this a parameter.
+     *   `true` (the default) is the frozen behaviour.
      * @param modifier Modifier for the table
      * @param content Table rows
      */
@@ -121,13 +168,15 @@ object TableApplier {
         caption: (@Composable () -> Unit)? = null,
         borderColor: Color = Color.Black,
         borderWidth: Dp = 1.dp,
+        fabricatedCellBorder: Boolean = true,
         modifier: Modifier = Modifier,
         content: @Composable () -> Unit
     ) {
         CompositionLocalProvider(
             LocalTableConfig provides config,
             LocalTableBorderColor provides borderColor,
-            LocalTableBorderWidth provides borderWidth
+            LocalTableBorderWidth provides borderWidth,
+            LocalTableFabricatedCellBorder provides fabricatedCellBorder
         ) {
             Column(modifier = modifier) {
                 // Caption at top
@@ -311,7 +360,18 @@ object TableApplier {
 
         val borderModifier = when (config.borderCollapse) {
             BorderCollapse.SEPARATE -> {
-                Modifier.border(borderWidth, borderColor)
+                // CSS 2.1 §17.6.1: in the separated model a cell paints only
+                // its OWN declared borders, which the wire carries and
+                // `RenderComponent` applies to the cell component itself.
+                // This stroke is the applier's demo default; a caller that
+                // owns real cell styling opts out through
+                // `TableApplier.Table(fabricatedCellBorder = false)`. See
+                // LocalTableFabricatedCellBorder for the measured captures.
+                if (LocalTableFabricatedCellBorder.current) {
+                    Modifier.border(borderWidth, borderColor)
+                } else {
+                    Modifier
+                }
             }
             BorderCollapse.COLLAPSE -> {
                 // Draw only right and bottom borders to avoid double borders

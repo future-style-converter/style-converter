@@ -1293,9 +1293,30 @@ object ComponentRenderer {
         val hasAspectRatio = effectiveProperties.any { it.type == "AspectRatio" }
         val isOutOfFlow = extractPositionType(effectiveProperties)
             .let { it == PositionType.ABSOLUTE || it == PositionType.FIXED }
+        // Wave-38 lane N2 — the css-tables-3 §2.1 role of THIS box, reading
+        // the declared `display` first and the HTML UA sheet's tag second
+        // (see TableBoxTree.uaRoleOf). Resolved once and reused by the
+        // §17.5.2 shrink-to-fit guard below and by the display fold further
+        // down, so the width decision and the layout decision can never
+        // disagree about what this box is. The UA channel is capture-gated —
+        // outside WPT capture the tag is not read at all, so the 327-pair
+        // baseline stage is byte-identical by construction.
+        val tableRole = com.styleconverter.runtime.table.TableBoxTree.roleOf(
+            component, useUaTagDefaults = LocalWptCaptureMode.current
+        )
+        // CSS 2.1 §17.5.2: a table box with `width: auto` is SHRINK-TO-FIT
+        // (the table layout algorithm), never §10.3.3's block-level fill.
+        // css-tables/background-clip-001 is a 100×100 table (a 40×40
+        // inline-block inside 30px collapsed borders) whose reference paints
+        // 10 000 green pixels; the fill made Android paint 35 800 — a
+        // 358×100 bar, the full composed-canvas content width. Same picture,
+        // same ink counts, on box-shadow-001 and the three
+        // height-distribution/extra-height-given-to-all-row-groups tests.
+        val isShrinkToFitTable =
+            com.styleconverter.runtime.table.TableBoxTree.shrinkToFitBox(tableRole)
         val blockFlowWidth: Modifier =
             if (composedWpt && !hasExplicitWidth && !hasAspectRatio && !isOutOfFlow &&
-                !LocalSelfAlignmentHandled.current)
+                !isShrinkToFitTable && !LocalSelfAlignmentHandled.current)
                 Modifier.fillMaxWidth()
             else Modifier
         // The 50×30 placeholder floor — skipped entirely in composed WPT capture
@@ -1361,6 +1382,58 @@ object ComponentRenderer {
             extractDisplayConfig(effectiveProperties)
         } catch (e: Exception) {
             DisplayConfig(DisplayType.BLOCK, FlexDirection.ROW, JustifyContent.FLEX_START, AlignItems.STRETCH, AlignContent.STRETCH, FlexWrap.NOWRAP, 0.dp, 0.dp)
+        }.let { cfg ->
+            // Wave-38 lane N2 — the HTML UA display fold. [extractDisplayConfig]
+            // reads the wire's `Display` and nothing else, but the css-tables
+            // corpus is HTML markup carrying no author `display` at all: the
+            // display its `<table>`/`<tr>` boxes have comes from the HTML
+            // Standard's rendering section (§15.3.8 Tables), which the
+            // converter does not ship, so `meta.sourceTag` is its only
+            // sighting on the wire. Before this fold, 122 of the 171
+            // table-internal boxes in the frozen wave37-final css-tables
+            // section classified as ordinary blocks and every `<table>`
+            // rendered as a vertical Column of cells —
+            // `border-collapse-empty-cell`'s 2×2 grid captured as a 1×4
+            // stack (Android ssim 0.9073 vs the ref, web 1.0000).
+            //
+            // Applied ONLY to a box whose display resolved to BLOCK — i.e.
+            // the wire declared nothing, or declared something this mapper
+            // already folds to BLOCK — so a declared `display` always wins
+            // and no box that carried a table keyword changes. Capture-gated
+            // through `tableRole`, so the 327-pair baseline stage never reads
+            // the tag.
+            //
+            // ── Wave-38 finish pass, the Android repair. Two narrowings,
+            // both measured against the frozen wave37-final Android column:
+            //
+            //  1. ONLY Role.TABLE folds. The wave-38 first cut also folded
+            //     Role.ROW, on the reasoning that "TABLE_ROW" maps to
+            //     DisplayType.TABLE in the declared channel too. But a `<tr>`
+            //     only ever REACHES this function when it is NOT being
+            //     consumed by an enclosing table — `RenderTableContent` calls
+            //     `RenderComponent` on CELLS, never on rows — so every `<tr>`
+            //     folded here is an orphan row, and DisplayType.TABLE then
+            //     re-reads its `<td>` children as ROWS and its grandchildren
+            //     as CELLS. That is what put a fabricated full-width bordered
+            //     box around the black square of CSS2 s-11-1-1b-001/002/008
+            //     once their `<table>` correctly declined the fold.
+            //
+            //  2. The fold requires a row list `RenderTableContent` can
+            //     consume without loss — see TableBoxTree.consumableRowList,
+            //     which carries the per-test pixel evidence for the 11 frozen
+            //     Android passes the unguarded fold cost. Compose's table path
+            //     REWRITES the box tree (children→rows, grandchildren→cells,
+            //     the row level itself never rendered); the iOS twin's
+            //     `tableTrackPlan` only chooses an arrangement for the same
+            //     child array, which is why the guard is Compose-only and the
+            //     iOS half of lane N2 needs no change.
+            val uaTable = tableRole == com.styleconverter.runtime.table.TableBoxTree.Role.TABLE
+            if (uaTable && cfg.type == DisplayType.BLOCK &&
+                effectiveProperties.none { it.type == "Display" } &&
+                com.styleconverter.runtime.table.TableBoxTree.consumableRowList(
+                    component.children, useUaTagDefaults = true
+                )
+            ) cfg.copy(type = DisplayType.TABLE) else cfg
         }
 
         // Wave 9 (#37): `Color` rides the inheritance channel now, so the
@@ -2016,10 +2089,40 @@ object ComponentRenderer {
             DisplayType.TABLE -> {
                 // Table layout
                 val tableConfig = TableExtractor.extractTableConfig(
-                    component.properties.map { it.type to it.data }
+                    component.properties.map { it.type to it.data },
+                    // Wave-38 lane N2 — the UA `border-spacing` lane wave 34
+                    // built and recorded as deferred ("threading
+                    // `component._tag` there is what turns the UA lane on for
+                    // Android", TableExtractor.extractTableConfig's kdoc):
+                    // CSS 2.1 §17.6.1's HTML UA default of 2px is keyed on
+                    // the `<table>` ELEMENT, and meta.sourceTag is its only
+                    // sighting. Capture-gated with the rest of the tag
+                    // channel — outside WPT capture the argument stays null,
+                    // which is the pre-wave-34 result byte-for-byte.
+                    sourceTag = if (LocalWptCaptureMode.current) component._tag else null
                 )
                 TableApplier.Table(
                     config = tableConfig,
+                    // Wave-38 finish pass — a table this runtime reached
+                    // through the HTML UA tag channel (a bare `<table>` with
+                    // no declared `display`) carries REAL cell styling on the
+                    // wire, so the applier's demo default cell border would
+                    // be pure fabricated ink over it. A DECLARED
+                    // `display: table` keeps the fabrication, because that is
+                    // what every frozen capture of those boxes was measured
+                    // with. See TableApplier.LocalTableFabricatedCellBorder
+                    // for the five Android captures this recovers.
+                    //
+                    // The predicate is the SAME read the `sourceTag` argument
+                    // above makes — role from the tag, no declared `Display`,
+                    // capture-gated — so the border decision and the spacing
+                    // decision can never disagree about where this table box
+                    // came from.
+                    fabricatedCellBorder = !(LocalWptCaptureMode.current &&
+                        component.properties.none { it.type == "Display" } &&
+                        com.styleconverter.runtime.table.TableBoxTree
+                            .uaRoleOf(component._tag) ==
+                            com.styleconverter.runtime.table.TableBoxTree.Role.TABLE),
                     modifier = modifier
                 ) {
                     RenderTableContent(component, textColor)
@@ -2205,7 +2308,24 @@ object ComponentRenderer {
     @Composable
     private fun RenderTableContent(component: IRComponent, textColor: Color?) {
         // The table's own row list, with any row group spliced away.
-        val rows = com.styleconverter.runtime.table.TableBoxTree.rowsOf(component.children)
+        //
+        // Wave-38 lane N2 — the splice reads the HTML UA tag channel under
+        // the SAME capture gate the display fold uses: a source-written
+        // `<tbody>`/`<thead>`/`<tfoot>` carries no `display` on the wire, so
+        // without the UA channel wave 32's splice never fired for real
+        // markup and its `<td>`s sat one level below this loop. The same
+        // gate drops UA-only `<col>`/`<colgroup>` boxes, which css-tables-3
+        // §2.1 says generate no boxes at all.
+        //
+        // THIS LOOP IS A REWRITE, NOT A DECORATION: children become rows,
+        // grandchildren become cells, the row level is never rendered as a
+        // component, and a childless row degrades to PlaceholderContent. It
+        // is therefore only correct for a canonical `table → row → cell`
+        // tree, which is exactly what TableBoxTree.consumableRowList makes
+        // the fold above require before routing anything here.
+        val rows = com.styleconverter.runtime.table.TableBoxTree.rowsOf(
+            component.children, useUaTagDefaults = LocalWptCaptureMode.current
+        )
         // Does the TABLE box itself establish the containing block? Read
         // through the hoist's own predicate so this can never drift from
         // the pure walk. OR-ed with whatever the enclosing context already
@@ -2316,8 +2436,31 @@ object ComponentRenderer {
         // content — painting lives in widgets/UAWidgets*. Dark stage:
         // LocalWptCaptureMode is false on every 327-pair path → no-op.
         if (LocalWptCaptureMode.current) {
-            com.styleconverter.runtime.widgets.UAWidgetsResolve.resolve(component)
-                ?.let { spec -> com.styleconverter.runtime.widgets.UAWidgets.Render(spec); return }
+            com.styleconverter.runtime.widgets.UAWidgetsResolve.resolve(component)?.let { spec ->
+                // Wave-38 lane N1 — the BLOCK-context line box. A widget
+                // packed into an inline atom RUN is already placed against
+                // its row baseline by InlineFlowLayout, so it paints flush;
+                // a LONE widget is block-stacked and, before this lane, its
+                // wrapper advanced by the bare border-box height (css-ui
+                // appearance-revert-001 drifted 33px over 14 rows → 0.821).
+                // UAWidgetBlockLine supplies the missing §10.8 leading.
+                val lead =
+                    if (com.styleconverter.runtime.layout.LocalInlineAtomRunMember.current) null
+                    else com.styleconverter.runtime.widgets.UAWidgetsResolve.blockLead(component)
+                if (lead == null) {
+                    com.styleconverter.runtime.widgets.UAWidgets.Render(spec)
+                } else {
+                    // Padding OUTSIDE the replica and INSIDE the component
+                    // box: the widget's own background/border (which the
+                    // modifier chain already painted on the box) keeps its
+                    // geometry, while the block advance grows to the line
+                    // box height. CSS px == dp at the capture density.
+                    Box(Modifier.padding(top = lead.topPx.dp, bottom = lead.bottomPx.dp)) {
+                        com.styleconverter.runtime.widgets.UAWidgets.Render(spec)
+                    }
+                }
+                return
+            }
         }
         if (!component.children.isNullOrEmpty()) {
             // Bug 1: leading _text node — wrapped in a Box so it sits as a
@@ -5197,9 +5340,6 @@ object ComponentRenderer {
         // TYPOGRAPHY C06 in mixed cap sizes, Android showed normal case).
         val smallCaps = fontVariantConfig?.caps == FontVariantCaps.SMALL_CAPS ||
             fontVariantConfig?.caps == FontVariantCaps.ALL_SMALL_CAPS
-        val annotatedText = if (smallCaps)
-            synthesizeSmallCaps(displayText, effectiveFontSize.value)
-        else androidx.compose.ui.text.AnnotatedString(displayText)
 
         // css-text-3 §5.1 word-spacing — real implementation. Compose's
         // TextStyle has no word-spacing, and the old letter-spacing
@@ -5215,31 +5355,153 @@ object ComponentRenderer {
         // mirrored). Skipped entirely for absent/normal/zero values so the
         // frozen baseline renders byte-identically.
         val wordSpacingSp = TextStyleApplier.extractWordSpacingSp(properties, effectiveFontSize.value)
-        val spacedText = if (wordSpacingSp != null && wordSpacingSp != 0f) {
-            TextStyleApplier.applyWordSpacingSpans(
-                annotatedText,
-                TextStyleApplier.resolveWordSpacingSpanSp(
-                    wordSpacingSp, styledTextStyle.letterSpacing, effectiveFontSize.value
-                )
-            )
-        } else annotatedText
 
-        // Wave 34 (lane F1) — PER-SCRIPT FONT FALLBACK. css-fonts-4 §5.2
-        // matches a font stack per CHARACTER; Compose's FontFamily selects
-        // ONE face for the whole Text and hands the rest to an opaque
-        // platform cascade (Typeface.CustomFallbackBuilder, the API that
-        // would pin it, is API 29 against this module's minSdk 24). So a
-        // document painting Armenian / Arabic-Indic / Bengali / Khmer /
-        // Hebrew text resolved the emulator's own Noto subset while the
-        // browser-ref resolved CoreText's — different advances, different
-        // wrap points, an SSIM bounded by typography (the Rule-43 boundary
-        // in tools/titan/wpt-not-applicable.mjs). ScriptFallbackFonts splits
-        // the run by script and installs a BUNDLED face per run, which is
-        // ordinary text layout and needs no blocked API. Identity outside
-        // WPT capture AND for any string with no target-script codepoint —
-        // it returns `spacedText` itself, so the 327 baselines cannot move.
-        val scriptedText = com.styleconverter.runtime.typography.font
-            .ScriptFallbackFonts.applyTo(spacedText, LocalWptCaptureMode.current)
+        // ── The run's plain-string → AnnotatedString transform ──────────
+        // ONE lambda, called by BOTH the greedy fit measurement (wave 38,
+        // lane N8 — see the wrap block below) and the render below, so a
+        // fit test can never measure different glyphs than it paints. It
+        // is literally the former `annotatedText` / `spacedText` /
+        // `scriptedText` chain, verbatim and in the same order, so the
+        // string handed to Text is byte-identical to the pre-wave-38 one:
+        //
+        //  • small caps — the bundled static Inter honours "smcp" only
+        //    partially across weights and the browser SYNTHESIZES small
+        //    caps whenever the face lacks the feature, so we synthesize
+        //    the way Chrome does: lowercase letters uppercased at a
+        //    reduced size (Typography_C06 rendered normal case before).
+        //  • word-spacing — a SpanStyle letter-spacing on ONLY the space
+        //    characters, which adds the extra advance after each space
+        //    exactly like the CSS model (the old paragraph-wide
+        //    letter-spacing fallback pushed '0123 4567' half off its box).
+        //    The span REPLACES base tracking on those chars, so
+        //    resolveWordSpacingSpanSp folds the paragraph letter-spacing
+        //    back in — both trackings apply at a separator per spec.
+        //    Skipped for absent/normal/zero values.
+        //  • wave 34 (lane F1) PER-SCRIPT FONT FALLBACK — css-fonts-4 §5.2
+        //    matches a font stack per CHARACTER; Compose's FontFamily
+        //    selects ONE face for the whole Text and hands the rest to an
+        //    opaque platform cascade (Typeface.CustomFallbackBuilder, the
+        //    API that would pin it, is API 29 against this module's minSdk
+        //    24). ScriptFallbackFonts splits the run by script and installs
+        //    a BUNDLED face per run — ordinary text layout, no blocked API.
+        //    Identity outside WPT capture and for any string with no
+        //    target-script codepoint, so the 327 baselines cannot move.
+        //
+        // The capture-mode flag is READ HERE, in composition, not inside
+        // the lambda: a CompositionLocal may only be dereferenced from a
+        // @Composable, and this lambda is called from the plain-Kotlin
+        // measurer too.
+        val wptCaptureForRun = LocalWptCaptureMode.current
+        val runAnnotated: (String) -> androidx.compose.ui.text.AnnotatedString = { plain ->
+            val capped = if (smallCaps)
+                synthesizeSmallCaps(plain, effectiveFontSize.value)
+            else androidx.compose.ui.text.AnnotatedString(plain)
+            val spaced = if (wordSpacingSp != null && wordSpacingSp != 0f) {
+                TextStyleApplier.applyWordSpacingSpans(
+                    capped,
+                    TextStyleApplier.resolveWordSpacingSpanSp(
+                        wordSpacingSp, styledTextStyle.letterSpacing, effectiveFontSize.value
+                    )
+                )
+            } else capped
+            com.styleconverter.runtime.typography.font
+                .ScriptFallbackFonts.applyTo(spaced, wptCaptureForRun)
+        }
+
+        // ── Wave 38 (lane N8) — css-text-3 §5.5 rule B, the PRE-BREAK ───
+        // Minikin emergency-character-breaks any word too wide for the
+        // line; CSS reserves that for `overflow-wrap: break-word|anywhere`
+        // / `word-break: break-all` and otherwise lets the word OVERFLOW
+        // (measured: css-text/hyphens-manual-010 + hyphens-none-011, where
+        // Chromium keeps all 16 glyphs of "Deoxyribonucleic" on one
+        // overflowing line and Compose rendered three lines — android-ref
+        // 0.7500 at the wave37-final gate, against iOS's 0.9017 once lane
+        // W7 landed the same rule there). Compose's breaker is inside Text
+        // with no "let this word overflow" switch, so the string is the
+        // only lever: PreBreakPipeline reproduces the CSS breaking with
+        // GreedyLineBreaker and, ONLY when a committed line is a genuine
+        // unbreakable overflow, returns it with hard newlines at our break
+        // positions — paired with softWrap = false below so Minikin can
+        // add none of its own. See PreBreakPipeline's banner for why the
+        // sketched U+200B vehicle cannot serve (it can only ADD break
+        // opportunities; this defect needs one REMOVED).
+        //
+        // THE WRAP WIDTH is latched from the FIRST layout pass's
+        // constraints (see `onTextLayout` at the Text call site).
+        // TextLayoutInput.constraints are parent-imposed and
+        // content-independent, so one observation is enough — and latching
+        // makes the extra composition strictly one-shot, which is what
+        // rules out a measure/recompose oscillation. Frame 1 renders the
+        // frozen behaviour, frame 2 the repair; the composed capture waits
+        // 400ms for layout to settle (ScreenshotCaptureScreen), the same
+        // settling `composedLineBoxSnap` already relies on.
+        //
+        // The latch is written ONLY under LocalWptComposedMode and ONLY by
+        // the horizontal Text below — so outside composed WPT capture, and
+        // for every vertical writing-mode run (whose rotated wrapper
+        // measures against swapped constraints this pipeline does not
+        // model), `wrapWidthPx` stays -1 and the pipeline is a provable
+        // no-op. That is what keeps the 327 dark-stage captures
+        // byte-identical BY CONSTRUCTION.
+        val wptComposedWrap = LocalWptComposedMode.current
+        val wrapWidthState = androidx.compose.runtime.remember {
+            androidx.compose.runtime.mutableIntStateOf(-1)
+        }
+        val wrapWidthPx = if (wptComposedWrap) wrapWidthState.intValue else -1
+        val textMeasurer = androidx.compose.ui.text.rememberTextMeasurer()
+        val preBroken = com.styleconverter.runtime.typography.wrapping.PreBreakPipeline.preBreak(
+            text = displayText,
+            wrapWidthPx = wrapWidthPx.toFloat(),
+            enabled = wptComposedWrap,
+            softWrapAllowed = wrapConfig.softWrap,
+            // `overflow-wrap: break-word|anywhere` / `word-break: break-all`
+            // ASK for the mid-word break — Minikin is right there.
+            allowMidWordBreak = wrapConfig.allowMidWordBreak,
+            // css-text-3 §4.1.2 preserved space runs would be collapsed by
+            // the space-split breaker: a glyph-content rewrite, not a wrap
+            // fix, so those modes decline.
+            preservesSpaces = TextStyleApplier.extractWhiteSpace(properties)
+                .let { it == TextStyleApplier.WhiteSpaceMode.PRE_WRAP ||
+                    it == TextStyleApplier.WhiteSpaceMode.BREAK_SPACES },
+            // Single-line advance through the EXACT render style and the
+            // EXACT run transform (runAnnotated), so measure and paint can
+            // never disagree. getLineWidth(0) is the raw float advance —
+            // TextLayoutResult.size.width would be the ceil'd integer box
+            // and could shift a break by a pixel.
+            measure = { candidate ->
+                textMeasurer.measure(
+                    text = runAnnotated(candidate),
+                    style = styledTextStyle,
+                    softWrap = false,
+                    maxLines = 1
+                ).multiParagraph.getLineWidth(0)
+            }
+        )
+        // Rule B fired ⇒ the hard newlines are OUR line breaks and Minikin
+        // must not add any (softWrap off is the only switch that stops the
+        // emergency break); otherwise this is `effectiveSoftWrap` verbatim.
+        val ruleBSoftWrap = effectiveSoftWrap && !preBroken.fired
+        // Rewriting the run's string is exactly the kind of thing that must
+        // never happen silently (repo rule): one breadcrumb per distinct
+        // rewrite, carrying the width it was decided against so a capture
+        // can be audited from logcat alone. Keyed through `remember` so a
+        // plain recomposition does not re-log, and null (the overwhelming
+        // majority) logs nothing at all.
+        val ruleBLogKey = if (preBroken.fired) "$wrapWidthPx|${preBroken.text}" else null
+        androidx.compose.runtime.remember(ruleBLogKey) {
+            if (ruleBLogKey != null) {
+                android.util.Log.i(
+                    "ComponentRenderer",
+                    "css-text-3 §5.5 rule B: pre-broke an unbreakable overflowing " +
+                        "run at ${wrapWidthPx}px into " +
+                        "${preBroken.text.split("\n").size} line(s) " +
+                        "(softWrap off) — ${preBroken.text.replace("\n", "\\n")}"
+                )
+            }
+        }
+        // Identity instance when the pipeline declined — the downstream
+        // AnnotatedString is then built from the very same string as before.
+        val scriptedText = runAnnotated(preBroken.text)
 
         // CSS overflow is VISIBLE by default: text that exceeds its box
         // paints past the border box (CSS 2.1 §11.1.1 — overflow applies to
@@ -5713,11 +5975,14 @@ object ComponentRenderer {
             // is the same swap/coerce/centre-rotate measure policy verbatim).
             val verticalGlyphRun: @Composable () -> Unit = {
                 Text(
-                    // scriptedText = spacedText (= annotatedText +
-                    // word-spacing spans, identity when word-spacing is
-                    // absent/zero) + the wave-34 per-script fallback
-                    // spans (identity outside WPT capture and for any
-                    // Latin-only string).
+                    // scriptedText = runAnnotated(the run string) = small
+                    // caps + word-spacing spans (identity when
+                    // word-spacing is absent/zero) + the wave-34
+                    // per-script fallback spans (identity outside WPT
+                    // capture and for any Latin-only string). The rule-B
+                    // pre-break can never have fired on this branch — the
+                    // wrap-width latch is written only by the horizontal
+                    // Text below — so this is the frozen string verbatim.
                     text = scriptedText,
                     // paintedTextStyle == styledTextStyle unless the
                     // owned decoration pass is active (built-ins
@@ -5764,18 +6029,39 @@ object ComponentRenderer {
         }
 
         Text(
-            // scriptedText = spacedText (= annotatedText + word-spacing
-            // spans, identity when word-spacing is absent/zero — baseline
-            // byte-identical) + the wave-34 per-script fallback spans
-            // (identity outside WPT capture and for any Latin-only string).
+            // scriptedText = runAnnotated(the run string) = small caps +
+            // word-spacing spans (identity when word-spacing is
+            // absent/zero — baseline byte-identical) + the wave-34
+            // per-script fallback spans (identity outside WPT capture and
+            // for any Latin-only string). The run string is `displayText`
+            // itself unless the wave-38 rule-B pre-break fired.
             text = scriptedText,
             // paintedTextStyle == styledTextStyle unless the owned
             // decoration pass is active (built-ins stripped there).
             style = paintedTextStyle,
             maxLines = effectiveMaxLines,
             overflow = effectiveOverflow,
-            softWrap = effectiveSoftWrap,  // wrapConfig.softWrap minus the B-RC7 composed-WPT unbreakable-run gate
-            onTextLayout = { layoutResult.value = it },
+            // wrapConfig.softWrap minus the B-RC7 composed-WPT
+            // unbreakable-RUN gate, minus the wave-38 rule-B PRE-BREAK (a
+            // pre-broken run carries its own hard breaks and must not get
+            // Minikin's emergency character break on top).
+            softWrap = ruleBSoftWrap,
+            onTextLayout = {
+                layoutResult.value = it
+                // Wave 38 (lane N8) — latch the rule-B wrap width ONCE from
+                // the parent-imposed constraints this text laid out against
+                // (see the PreBreakPipeline block above for why one
+                // observation suffices and why the latch is what bounds the
+                // recomposition to a single extra pass). Composed WPT
+                // capture only, and only bounded constraints qualify — an
+                // unbounded proposal has no line box to overflow.
+                if (wptComposedWrap && wrapWidthState.intValue < 0) {
+                    val c = it.layoutInput.constraints
+                    if (c.hasBoundedWidth && c.maxWidth > 0) {
+                        wrapWidthState.intValue = c.maxWidth
+                    }
+                }
+            },
             // composedLineBoxSnap (no-op outside composed WPT) tightens the box
             // to the CSS line box before emphasis paints over it; the owned
             // decoration pass draws last so its rects sit over the final

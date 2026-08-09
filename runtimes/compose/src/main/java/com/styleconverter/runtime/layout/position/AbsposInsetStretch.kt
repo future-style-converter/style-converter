@@ -81,6 +81,13 @@ object AbsposInsetStretch {
      *    stays byte-identical; a block box legitimately stretches past
      *    its containing block under a negative inset (css-position-3
      *    §3.5.3 has no such clamp).
+     *  - S6 (wave 38, css-sizing-4 §4.1): an AUTHOR-DEFINITE block size
+     *    ([explicitH]) plus a ratio determines the inline size, so the
+     *    inline axis is NOT auto for §3.5.3 — width := explicitH × ratio
+     *    wins over the inline stretch (abspos-006: cb 500 wide, all-0
+     *    insets, `height: 100px; aspect-ratio: 1/1` → 100×100, not
+     *    500×100). Ordered FIRST inside S3 because the case fell through
+     *    every other branch; nothing S3 already handled changes.
      *
      * All parameters are px in the runtime's px==dp space; `ratio` is
      * CSS width/height (> 0), null when absent or auto-only. `isTable`
@@ -117,7 +124,29 @@ object AbsposInsetStretch {
             // The determined value per axis: author px first, else stretch.
             val wKnown = explicitW ?: stretchW
             val hKnown = explicitH ?: stretchH
-            if (wKnown != null && !hasExplicitH) {
+            if (explicitH != null && !hasExplicitW && stretchW != null) {
+                // S6 (wave 38, lane N7) — an AUTHOR-DEFINITE block size
+                // plus a ratio determines the inline size, and that wins
+                // over the §3.5.3 inline stretch. css-sizing-4 §4.1 makes
+                // the automatic inline size blockSize × ratio, so the
+                // inline axis is no longer `auto` for css-position-3
+                // §3.5.3's over-constrained equation — the END inset is
+                // the side that gets ignored (LTR), not the ratio.
+                // Measured on css-sizing/aspect-ratio/abspos-006 (cb
+                // 500×100, `left/right/top/bottom: 0; height: 100px;
+                // aspect-ratio: 1/1`): both natives painted the 500-wide
+                // stretch — a full-canvas green BAR in the frozen
+                // wave37-final captures (Android 0.8929, iOS 0.9053) —
+                // where the Chromium ref paints the 100×100 square.
+                // Strictly additive: this case previously fell through
+                // every S3 branch (branch 2 needs `!hasExplicitH`, branch
+                // 3 needs `wKnown == null`) and kept the raw stretch, and
+                // it cannot fire for abspos-003/004/005's pins (no author
+                // height, or an author width). A non-px explicit height
+                // (`height: 100%` — abspos-009) leaves `explicitH` null
+                // and stays on the old path.
+                outW = explicitH * ratio
+            } else if (wKnown != null && !hasExplicitH) {
                 // Inline determined → block derives from the ratio, even
                 // over a block stretch (the abspos-003 100×100 pin).
                 outH = wKnown / ratio
