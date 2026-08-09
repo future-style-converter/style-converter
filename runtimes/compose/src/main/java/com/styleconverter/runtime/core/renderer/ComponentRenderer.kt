@@ -2123,6 +2123,25 @@ object ComponentRenderer {
                         com.styleconverter.runtime.table.TableBoxTree
                             .uaRoleOf(component._tag) ==
                             com.styleconverter.runtime.table.TableBoxTree.Role.TABLE),
+                    // Wave 39 (lane A6) — CSS 2.1 §17.5.2 auto table width.
+                    // RenderComponent's `isShrinkToFitTable` already keeps
+                    // this box out of the composed-WPT block-fill channel;
+                    // the applier's own `TableRow.fillMaxWidth` then put the
+                    // fill straight back, so the table still stretched to the
+                    // canvas (see TableApplier.Table's banner for the six
+                    // measured css-tables captures). Same predicate, same
+                    // composed-capture gate as `blockFlowWidth`, so the width
+                    // decision cannot disagree with itself across the two
+                    // files — and every non-composed path (the 327-pair dark
+                    // stage, the per-component inbox path) keeps `false`.
+                    shrinkToFit = com.styleconverter.runtime.table.TableBoxTree
+                        .enforcesAutoTableWidth(
+                            role = com.styleconverter.runtime.table.TableBoxTree.roleOf(
+                                component,
+                                useUaTagDefaults = LocalWptCaptureMode.current
+                            ),
+                            composedCapture = LocalWptComposedMode.current
+                        ),
                     modifier = modifier
                 ) {
                     RenderTableContent(component, textColor)
@@ -2461,6 +2480,36 @@ object ComponentRenderer {
                 }
                 return
             }
+        }
+        // ── Wave-39 lane A2 REPLACED-ELEMENT mount hook (the ONLY renderer
+        // entry for image content). Structurally the twin of the widget hook
+        // above and placed immediately after it for the same reason: a
+        // replaced element's CONTENT replaces the text/children path, so it
+        // must claim the leaf before that path runs. Ordering between the two
+        // is not load-bearing — the widget lane owns `input`, this one owns
+        // img/embed/object/video, and the two tag sets are disjoint by
+        // construction (see ReplacedImageContent.REPLACED_TAGS).
+        //
+        // NOT gated on LocalWptCaptureMode, unlike the widget hook: a
+        // `meta.attrs.src` is production wire (schema/spec/04), not a capture
+        // affordance, and a real SDUI host pointing DocumentImageRegistry at
+        // its own asset directory should paint images too. The dark-stage 327
+        // pairs carry no `meta.attrs.src`, so `isCandidate` is false for every
+        // one of them and their composition shape is untouched.
+        if (com.styleconverter.runtime.images.ReplacedImageContent.isCandidate(component)) {
+            // The two axes' definiteness comes from the SAME predicate the
+            // sizing chain used, so the content can never disagree with the
+            // box about which axis was declared.
+            val painted = com.styleconverter.runtime.images.ReplacedImageContent.Paint(
+                component = component,
+                widthDefinite = hasDefiniteSize(component.properties, widthAxis = true),
+                heightDefinite = hasDefiniteSize(component.properties, widthAxis = false),
+            )
+            // Painted ⇒ the leaf is done. NOT painted ⇒ the asset was declined
+            // (logged + counted by the registry) and we deliberately fall
+            // through to the normal content path — byte-for-byte the behaviour
+            // this component had before the channel existed.
+            if (painted) return
         }
         if (!component.children.isNullOrEmpty()) {
             // Bug 1: leading _text node — wrapped in a Box so it sits as a
@@ -3176,6 +3225,40 @@ object ComponentRenderer {
                 }
             )
         } else Modifier
+        // Wave 39 (lane A1) — the ::marker's half of FIX 4. The item's own
+        // text run gets a draw-time glyph translation in PlaceholderContent
+        // that lands its baseline where Chromium puts it inside the line box
+        // (see [HalfLeadingBaseline]); that translation is LAYOUT-NEUTRAL, so
+        // the Row keeps aligning marker and item on the UNMOVED layout
+        // baseline while only the item's INK descends. Left alone, the marker
+        // would therefore sit 1px above its own item — a divergence this
+        // renderer does not have today, and one css-lists-3 §3.2 forbids
+        // outright (the marker IS the item's first inline box; they share one
+        // line, one baseline). So the marker takes the identical correction,
+        // computed from ITS resolved box and ITS measured layout — the same
+        // "marker and item must not be able to disagree about the line they
+        // share" rule ListMarkerLineBox states for the height half.
+        //
+        // Composed WPT only (same gate as the snap above) and inert whenever
+        // the marker declares no CSS box or its layout has not settled, so
+        // every other capture path is byte-identical.
+        val markerHalfLeadingCompensation = if (LocalWptComposedMode.current) {
+            Modifier.graphicsLayer {
+                val ml = markerLayout.value
+                // `toPx()` THROWS on a non-Sp TextUnit, so both conversions
+                // are guarded by `isSp` — an Em-valued style resolves to the
+                // browser default size / to "no CSS box", both of which the
+                // helper already treats as nothing-to-correct.
+                translationY = if (ml == null || ml.lineCount <= 0) 0f
+                else com.styleconverter.runtime.typography.HalfLeadingBaseline.deltaY(
+                    fontSizePx = if (markerStyle.fontSize.isSp) markerStyle.fontSize.toPx()
+                        else ListMarkerLineBox.DEFAULT_FONT_SIZE_SP,
+                    lineHeightPx = if (markerStyle.lineHeight.isSp)
+                        markerStyle.lineHeight.toPx() else 0f,
+                    platformBaselineFromLineTopPx = ml.getLineBaseline(0) - ml.getLineTop(0)
+                )
+            }
+        } else Modifier
         // Wave 30 (lane 3, fix B6) — the disc/circle/square SHAPE that
         // replaces the symbol glyph's ink. `Modifier` (a no-op) for every
         // numeric/alphabetic style and for every baked string that does
@@ -3430,6 +3513,14 @@ object ComponentRenderer {
                     // 34px pitch against web's 31–32 and iOS's 31. Composed
                     // WPT only — every other capture path is untouched.
                     .then(markerLineBoxSnapModifier)
+                    // Wave 39 (lane A1) — AFTER the snap, deliberately: the
+                    // snap decides the marker's BOX (height + the symmetric
+                    // ½px re-centring inside it) and this layer then moves
+                    // the drawn ink by the item's own half-leading delta, so
+                    // the two ink runs stay on one baseline. Draw-time only,
+                    // so the snap's reported height — which the Row's pitch
+                    // depends on — is untouched.
+                    .then(markerHalfLeadingCompensation)
                     .padding(end = ListMarkerRow.gapDp)
             )
             RenderComponent(child, markerBaselineClaim(aligns))
@@ -4278,6 +4369,44 @@ object ComponentRenderer {
                     resolvedSizes?.get(index)?.let {
                         itemModifier = itemModifier.flexMainWidthPin(it.toFloat().dp)
                     }
+                    // Wave 39 (lane A6) — css-flexbox-1 §4.5 automatic
+                    // minimum size. This loop is also the fall-through for a
+                    // flex container NO child of which declares a flex
+                    // property (flexLineSpec's `anyFlex` gate returns null),
+                    // and there Compose's Row hands a non-weighted item only
+                    // the leftover main space — ZERO for a zero-width
+                    // container, which collapsed the item to nothing. §4.5
+                    // floors an `auto` main minimum at the content-based
+                    // minimum instead, so the item OVERFLOWS. MEASURED on
+                    // css-values/calc-size/calc-size-flex-001..003 (row
+                    // half): the ref paints a 100×100 green square, iOS
+                    // paints the 80-wide content minimum and passes, Android
+                    // painted no green at all (0.9441 × 3). Applied only when
+                    // §9.7 did NOT already pin a used main size (a pin IS the
+                    // resolved size and already carries the §9.7.4 clamps),
+                    // and composed-WPT-capture only — see FlexAutoMinSize.
+                    //
+                    // The gate is `lineSpec == null`, NOT `resolvedSizes ==
+                    // null`: the diagnosed hole is precisely the line that
+                    // never entered flex resolution AT ALL, and the wider
+                    // predicate would also wrap the legacy-weight fallback
+                    // (a line whose container main size is definite-but-not-px),
+                    // which is a different, unmeasured shape.
+                    //
+                    // WAVE-39 HOTFIX: `MECHANISM_ENABLED` is measured-false,
+                    // so this is a no-op today and `flexAutoMinMain` returns
+                    // the receiver untouched (no extra layout node). The
+                    // isolation numbers that disarmed it — 0 wins, 1 pass
+                    // lost, 9 css-multicol captures lost — are in that
+                    // constant's banner.
+                    if (lineSpec == null) {
+                        with(com.styleconverter.runtime.layout.flexbox.FlexAutoMinSize) {
+                            itemModifier = itemModifier.flexAutoMinMain(
+                                enabled = MECHANISM_ENABLED && LocalWptComposedMode.current,
+                                rowAxis = true
+                            )
+                        }
+                    }
                     if (stretches) itemModifier = itemModifier.fillMaxHeight()
                 }
 
@@ -4488,6 +4617,26 @@ object ComponentRenderer {
                     // sizes exceed the container's height.
                     resolvedSizes?.get(index)?.let {
                         itemModifier = itemModifier.flexMainHeightPin(it.toFloat().dp)
+                    }
+                    // Wave 39 (lane A6) — css-flexbox-1 §4.5 automatic
+                    // minimum size, COLUMN twin of the row loop's floor (see
+                    // that banner and FlexAutoMinSize for the mechanism). The
+                    // measured half of the family here is
+                    // css-values/calc-size/calc-size-flex-004..006:
+                    // `flex-direction: column` containers with a ZERO height
+                    // whose sole item holds a fixed 60/80px-tall grandchild.
+                    // Android collapsed all three to nothing (0.9441 ×3)
+                    // against iOS passes of 0.9754–0.9819. Same
+                    // `lineSpec == null` gate as the row loop — see there.
+                    // WAVE-39 HOTFIX: gated off with the row twin — see that
+                    // call site and FlexAutoMinSize.MECHANISM_ENABLED.
+                    if (lineSpec == null) {
+                        with(com.styleconverter.runtime.layout.flexbox.FlexAutoMinSize) {
+                            itemModifier = itemModifier.flexAutoMinMain(
+                                enabled = MECHANISM_ENABLED && LocalWptComposedMode.current,
+                                rowAxis = false
+                            )
+                        }
                     }
                 }
 
@@ -5035,18 +5184,73 @@ object ComponentRenderer {
         // web wrapped "Edge Negativ eOffset" onto 3 lines, Compose clipped it
         // to 2 — Android-web SSIM 0.91). Only an explicit line-clamp /
         // -webkit-line-clamp / max-lines IR property may limit lines.
-        val maxLines = TextStyleApplier.extractMaxLines(properties) ?: Int.MAX_VALUE
+        val maxLines = placeholderMaxLines(properties)
         val textOverflow = TextStyleApplier.extractTextOverflow(properties)
 
         // Extract text wrap configuration (word-break, overflow-wrap, white-space)
         val wrapConfig = TextStyleApplier.extractTextWrapConfig(properties)
 
-        // Determine max lines based on white-space mode
-        // pre and nowrap should not wrap, so use Int.MAX_VALUE for no line limit
-        val effectiveMaxLines = when (wrapConfig.softWrap) {
-            false -> Int.MAX_VALUE  // No wrapping for nowrap/pre
-            true -> maxLines
-        }
+        // Wave 39 (lane A3) — the clamp survives `white-space: pre|nowrap`.
+        //
+        // This used to read `when (softWrap) { false -> Int.MAX_VALUE; true
+        // -> maxLines }`, i.e. `white-space: pre` (or `nowrap`, or
+        // `text-wrap: nowrap`) DELETED the line-clamp limit outright. That
+        // conflated two independent things: css-text-3 §4.1.1 `pre` governs
+        // where SOFT wrap opportunities are, while css-overflow-4 §5
+        // `line-clamp` caps LINE BOXES — and a preserved-newline run is all
+        // line boxes, so the cap must still apply. The two rules never
+        // interact; the old override only made sense back when `maxLines`
+        // carried an implicit `?: 2` default that had to be neutralised for
+        // nowrap runs (see the comment above — that default is long gone,
+        // so the guard was protecting nothing and costing the clamp).
+        //
+        // Measured at wave38-final (composed WPT, android-ref SSIM): every
+        // css-overflow test that pairs `white-space: pre` with `line-clamp`
+        // rendered ALL its lines on Android while iOS honoured the cap —
+        // line-clamp-004 0.9303 / -005 0.9476 / -006 0.9426 / -007 0.9426
+        // and block-ellipsis-013 / -014 / -017 0.9089, -026 0.8843, each a
+        // FAIL against iOS's pass, plus line-clamp-001 scraping through at
+        // 0.9542. Eight of the section's nine Android-only failures, one
+        // cause. iOS's twin never had the bug: `.lineLimit` there is applied
+        // independently of `noWrap` (which only feeds `fixedSize(horizontal:)`
+        // — Renderer/ComponentRenderer.swift), so this aligns the platforms.
+        //
+        // Blast radius is bounded BY CONSTRUCTION: `maxLines` is
+        // Int.MAX_VALUE unless the component carries an explicit LineClamp /
+        // MaxLines property, so `effectiveMaxLines` can only differ from the
+        // frozen value where such a property meets softWrap = false. Across
+        // the whole depth-48 corpus that is 12 components, all in
+        // css-overflow; no committed fixture under fixtures/ declares
+        // line-clamp at all, so the 327-pair dark stage cannot move.
+        //
+        // WHY THIS WORKS, and why the obvious "add an ellipsis too" is a
+        // LANDMINE. Read off the shipped bytecode of
+        // androidx.compose.foundation.text.modifiers.LayoutUtilsKt
+        // (foundation-android 1.11.4, the BOM this module builds against):
+        //
+        //   finalMaxLines(softWrap, overflow, maxLines) =
+        //       if (!softWrap && isEllipsis(overflow)) 1
+        //       else maxLines.coerceAtLeast(1)
+        //
+        //   finalMaxWidth(constraints, softWrap, overflow, maxIntrinsic) =
+        //       if ((softWrap || isEllipsis(overflow)) && hasBoundedWidth)
+        //            constraints.maxWidth else Constraints.Infinity
+        //
+        // So on this softWrap = false path:
+        //   • overflow Visible/Clip → the cap passes through VERBATIM (the
+        //     clamp lands) and the width stays UNBOUNDED (the preserved
+        //     lines keep overflowing the border box, exactly as the
+        //     wave38-final captures and the Chromium reference both show).
+        //   • overflow Ellipsis → maxLines is OVERWRITTEN WITH 1 and the
+        //     width becomes bounded: `line-clamp: 4` on a `pre` run would
+        //     collapse to a single re-wrapped line. Asking for the `…` glyph
+        //     here would be strictly worse than not clamping at all.
+        // Hence `effectiveOverflow` below deliberately keeps the
+        // TextOverflow.Visible these components already had — see
+        // placeholderOverflow's `unclippedLineWidths` parameter. Android
+        // therefore truncates without painting `…`, which is the same thing
+        // it already does for every soft-wrapped clamped run.
+        val effectiveMaxLines = maxLines
 
         // Wave 21 (lane TEXTDECOR, B-RC7) — unbreakable runs must NOT
         // emergency-wrap in composed WPT capture. CSS gives a run with no
@@ -5515,7 +5719,17 @@ object ComponentRenderer {
         // Visible whenever the fixture declares no clipping intent — i.e.
         // no explicit text-overflow AND no line-clamp limit; declared
         // ellipsis / line-clamp fixtures keep their clipping behaviour.
-        val effectiveOverflow = placeholderOverflow(properties, effectiveMaxLines, textOverflow)
+        // Wave 39 (lane A3) amends the line-clamp half of that sentence for
+        // `pre`/`nowrap` runs ONLY — see `unclippedLineWidths`.
+        val effectiveOverflow = placeholderOverflow(
+            properties, effectiveMaxLines, textOverflow,
+            // Wave 39 (lane A3) — see the parameter's banner. `pre`/`nowrap`
+            // runs keep the frozen TextOverflow.Visible they had while the
+            // clamp was being dropped, so this wave moves exactly ONE thing
+            // for them (the line cap) and leaves the horizontal-overflow
+            // paint the wave38-final captures recorded untouched.
+            unclippedLineWidths = !wrapConfig.softWrap
+        )
 
         // text-emphasis marks (css-text-decor-3 §3). Compose has no native
         // emphasis-mark support, so we paint one mark per typographic unit
@@ -5938,6 +6152,49 @@ object ComponentRenderer {
                         }
                     }
                 }
+                // FIX 4 (wave 39, lane A1) — HALF-LEADING BASELINE ROUNDING.
+                // COMPOSED WPT CAPTURE ONLY, and deliberately the EXCLUSIVE
+                // alternative to FIX 3 above (`!wptComposedActive` there,
+                // `wptComposedActive` here) so the two can never both write
+                // `dy`: FIX 3 restores the SUB-natural half-leading the
+                // platform clamps away, FIX 4 corrects the ±1px the two
+                // engines' ascent ROUNDING disagrees by inside a line box
+                // that is otherwise the right height.
+                //
+                // Measured (wave38-final, css-ui/box-sizing-010): the whole
+                // Android glyph run — every line, constant offset — sits 1px
+                // above the ref while the green box below it lands on the
+                // ref's own row, i.e. the block flow and the line-box HEIGHT
+                // are already right and only the ink inside is misplaced.
+                // 545 of 906 scored Android tests carry that same +1
+                // signature; 541 of them render text and only 4 of the 201
+                // text-free tests do. See [HalfLeadingBaseline] for the
+                // floor(a+0.5) vs ceil(a−0.5) arithmetic and why Inter at the
+                // corpus's inherited 16px is exactly the .5 tie that splits.
+                //
+                // `refLineBoxPx > 0f` is the same "there IS a CSS box" gate
+                // composedLineBoxSnap uses — declared `normal` resolves to
+                // TextUnit.Unspecified upstream, has no leading to split, and
+                // must keep the face's own metrics.
+                if (wptComposedActive && refLineBoxPx > 0f && layout.lineCount > 0) {
+                    // MEASURED platform side (not modelled): where Compose
+                    // actually put the first line's alphabetic baseline
+                    // relative to that line's box top. Both accessors are
+                    // integral px out of StaticLayout, so the delta below is
+                    // a whole pixel and the translation never resamples the
+                    // glyph raster.
+                    val platformBaseline =
+                        layout.getLineBaseline(0) - layout.getLineTop(0)
+                    dy = com.styleconverter.runtime.typography.HalfLeadingBaseline.deltaY(
+                        // `refLineBoxPx` is already density-converted above;
+                        // the font size is converted here (the layer block is
+                        // a Density scope). `isSp` guards the same throw the
+                        // refLineBoxPx conversion guards against.
+                        fontSizePx = if (effectiveFontSize.isSp) effectiveFontSize.toPx() else 0f,
+                        lineHeightPx = refLineBoxPx,
+                        platformBaselineFromLineTopPx = platformBaseline
+                    )
+                }
             }
             translationX = dx
             translationY = dy
@@ -6109,6 +6366,23 @@ object ComponentRenderer {
     }
 
     /**
+     * The placeholder Text's line cap (pure + internal for the JVM pinning
+     * suite). css-overflow-4 §5: `line-clamp` / `max-lines` cap the number
+     * of LINE BOXES the block generates. Nothing else may cap it — CSS has
+     * no implicit clamp — and in particular the white-space mode may not:
+     * `pre`'s preserved newlines produce line boxes just like soft wraps do,
+     * so a `white-space: pre` run is precisely the case where the cap has
+     * the most work to do. Wave 39 (lane A3) removed the old
+     * `softWrap == false → Int.MAX_VALUE` override that deleted the cap for
+     * `pre` / `nowrap`; see the call site's banner for the measurement.
+     *
+     * Int.MAX_VALUE = uncapped = the answer for every component that carries
+     * neither property, which is all of them outside css-overflow.
+     */
+    internal fun placeholderMaxLines(properties: List<IRProperty>): Int =
+        TextStyleApplier.extractMaxLines(properties) ?: Int.MAX_VALUE
+
+    /**
      * The placeholder Text's overflow policy (pure + internal for the JVM
      * pinning suite). Compose Text defaults to Clip, but CSS's initial
      * `overflow: visible` (CSS 2.1 §11.1.1) means overflowing glyphs PAINT
@@ -6122,11 +6396,34 @@ object ComponentRenderer {
     internal fun placeholderOverflow(
         properties: List<IRProperty>,
         effectiveMaxLines: Int,
-        declared: TextOverflow
+        declared: TextOverflow,
+        // Wave 39 (lane A3) — true when this run's lines lay out at their
+        // INTRINSIC width rather than the box's, i.e. `white-space: pre |
+        // nowrap` / `text-wrap: nowrap` (softWrap off). Such a run is
+        // SUPPOSED to paint past the border box, and the reference does
+        // exactly that: css-overflow/line-clamp/block-ellipsis-013's
+        // preserved first line runs off the 63.1ch box to the canvas edge in
+        // Chromium, in the web runtime and on iOS alike.
+        //
+        // It exists because the clamp branch above now reaches this function
+        // with a real cap for those runs (it used to be forced to
+        // Int.MAX_VALUE), and a bare `line-clamp` must NOT start clipping
+        // them: css-overflow-4 §5 expands `line-clamp: <n>` to `max-lines` +
+        // `block-ellipsis` + `continue` and sets no `overflow` at all — the
+        // `overflow: hidden` requirement belonged to the legacy
+        // `-webkit-line-clamp` idiom, not to this property.
+        //
+        // Defaults false, so every call that existed before this parameter
+        // answers byte-identically.
+        unclippedLineWidths: Boolean = false
     ): TextOverflow {
-        val declaresClipIntent = properties.any { it.type == "TextOverflow" } ||
-            effectiveMaxLines != Int.MAX_VALUE
-        return if (declaresClipIntent) declared else TextOverflow.Visible
+        // An explicit `text-overflow` is an author decision and always wins,
+        // in either direction.
+        if (properties.any { it.type == "TextOverflow" }) return declared
+        if (effectiveMaxLines != Int.MAX_VALUE) {
+            return if (unclippedLineWidths) TextOverflow.Visible else declared
+        }
+        return TextOverflow.Visible
     }
 
     /**

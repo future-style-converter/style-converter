@@ -236,6 +236,36 @@ object TableBoxTree {
     fun shrinkToFitBox(role: Role): Boolean = role == Role.TABLE
 
     /**
+     * Must the renderer ENFORCE §17.5.2's auto width on this box — i.e. hand
+     * `TableApplier.Table(shrinkToFit = true)` so the table Column takes
+     * `min(max-content, available)` instead of the canvas width?
+     *
+     * ## Why [shrinkToFitBox] alone was not enough (wave 39, lane A6)
+     * [shrinkToFitBox] gates ONE fill: `ComponentRenderer`'s composed-WPT
+     * `blockFlowWidth`. `TableApplier.TableRow` then adds its own
+     * unconditional `fillMaxWidth`, and a `fillMaxWidth` child makes its
+     * parent Column take the incoming max constraint — so removing the
+     * table box's fill only moved it one level down and the table still
+     * stretched to the full composed canvas. MEASURED on the frozen
+     * wave38-final Android captures: `css-tables/background-clip-001`'s
+     * 100×100 reference square captured as a ~358×100 bar (0.8891), with
+     * `box-shadow-001` (0.8897), `anonymous-table-cell-margin-collapsing`
+     * (0.8891) and `height-distribution/extra-height-given-to-all-row-groups-00{1,2,5}`
+     * (0.8882 ×3) the same picture — every one of them an iOS PASS.
+     *
+     * Two inputs, one function, so the width decision cannot drift between
+     * `ComponentRenderer` (which reads it) and this table (which owns it).
+     *
+     * @param role the box's css-tables-3 §2.1 role — [roleOf].
+     * @param composedCapture the composed-WPT capture flag
+     *   (`LocalWptComposedMode`). FALSE — the 327-pair dark stage and the
+     *   per-component inbox path — keeps the frozen unconstrained Column, so
+     *   those surfaces are byte-identical by construction.
+     */
+    fun enforcesAutoTableWidth(role: Role, composedCapture: Boolean): Boolean =
+        composedCapture && shrinkToFitBox(role)
+
+    /**
      * Does a box with this role render its content as an ordinary BLOCK
      * CONTAINER rather than re-entering table layout?
      *

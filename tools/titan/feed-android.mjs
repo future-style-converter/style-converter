@@ -36,7 +36,8 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } fr
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs, expectedPngNames, composedPngName, pngIsValid,
-         documentFontSrcs, resolveFontFile } from './feed-lib.mjs';
+         documentFontSrcs, resolveFontFile,
+         documentReplacedSrcs, resolveReplacedImageFile } from './feed-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -53,6 +54,14 @@ const SHOT_DIR = `/sdcard/Android/data/${PKG}/files/test_screenshots`;
 // with the corpus-relative path preserved verbatim (see feed-lib.mjs's hop
 // banner), which is why the pushes below mkdir the src's parent chain.
 const FONTS_DIR = `/sdcard/Android/data/${PKG}/files/fonts`;
+// wave-39 lane A2 — the replaced-element image sandbox. A SIBLING of both the
+// inbox and the fonts dir, for the same two reasons: the inbox listing globs
+// `*.json` (an image under it would be inert but confusing) and the two asset
+// channels must stay separately auditable. The runtime reads
+// File(IMAGES_DIR, src) with the corpus-relative path preserved verbatim (see
+// feed-lib.mjs's hop banner), which is why the pushes below mkdir the src's
+// parent chain exactly as the font pushes do.
+const IMAGES_DIR = `/sdcard/Android/data/${PKG}/files/images`;
 
 const log = (m) => process.stderr.write(`[feed-android] ${m}\n`);
 
@@ -123,8 +132,12 @@ async function resetAndLaunch(adbx, opts) {
   // run's file would be the worst possible stale state — the capture would
   // shape correctly-looking glyphs from the wrong file with no error anywhere
   // — so the fonts sandbox gets the same idempotence guarantee the inbox has.
-  adbx(['shell', 'rm', '-rf', INBOX_DIR, SHOT_DIR, FONTS_DIR]);
-  adbx(['shell', 'mkdir', '-p', INBOX_DIR, SHOT_DIR, FONTS_DIR]);
+  // wave-39: IMAGES_DIR joins the wipe on the same argument the fonts dir
+  // joined it on — a support image left over from a PREVIOUS run would let a
+  // fixture whose own delivery FAILED paint a plausible raster from the wrong
+  // file, with nothing in any log. Idempotence is the whole point.
+  adbx(['shell', 'rm', '-rf', INBOX_DIR, SHOT_DIR, FONTS_DIR, IMAGES_DIR]);
+  adbx(['shell', 'mkdir', '-p', INBOX_DIR, SHOT_DIR, FONTS_DIR, IMAGES_DIR]);
   try { adbx(['logcat', '-c']); } catch { /* logcat clear is best-effort */ }
   // Match the shared 390×844 @160dpi capture canvas. Composed mode layers
   // `--ez titanComposed true`: same inbox poll, whole doc onto one canvas.
@@ -176,6 +189,41 @@ function pushFontFaces(adbx, doc, opts) {
     if (!madeDirs.has(parent)) { adbx(['shell', 'mkdir', '-p', parent]); madeDirs.add(parent); }
     try { adbx(['push', abs, remote]); pushed++; }
     catch (e) { declined++; log(`  font PUSH FAILED: ${src} — ${e.message}`); }
+  }
+  return { pushed, declined };
+}
+
+/** wave-39 lane A2 — push this document's REPLACED-ELEMENT image files into
+ *  the device's images sandbox, preserving the corpus-relative path verbatim.
+ *
+ *  Called BEFORE the IR reaches the inbox, like its font twin — but for a
+ *  weaker reason, and the difference is worth stating rather than copying the
+ *  font comment: images are decoded at PAINT time, not at decode time, so a
+ *  late arrival would not silently mis-shape the capture the way a late font
+ *  does. It still goes first because the capture is asynchronous (the app may
+ *  begin rendering the moment the inbox file lands) and a race that
+ *  sometimes paints the image is far worse to debug than one that never does.
+ *
+ *  Returns { pushed, declined } for the feeder's per-fixture log. A decline is
+ *  never fatal: the runtimes paint the empty box they painted before this
+ *  channel existed and stamp the miss. Failing the fixture instead would hide
+ *  every OTHER property the test measures. */
+function pushReplacedImages(adbx, doc, opts) {
+  const srcs = documentReplacedSrcs(doc);
+  if (srcs.length === 0 || !opts.wptDir) return { pushed: 0, declined: srcs.length };
+  let pushed = 0, declined = 0;
+  const madeDirs = new Set();
+  for (const src of srcs) {
+    const abs = resolveReplacedImageFile(opts.wptDir, src, { resolve: path.resolve, existsSync, statSync });
+    if (!abs) { declined++; log(`  image DECLINED (unresolvable/not an image): ${src}`); continue; }
+    // `adb push` will not create intermediate directories, and the relative
+    // chain is what the runtime resolves against — so mkdir the parent once
+    // per distinct directory (WPT support images cluster in one support/ dir).
+    const remote = `${IMAGES_DIR}/${src}`;
+    const parent = remote.slice(0, remote.lastIndexOf('/'));
+    if (!madeDirs.has(parent)) { adbx(['shell', 'mkdir', '-p', parent]); madeDirs.add(parent); }
+    try { adbx(['push', abs, remote]); pushed++; }
+    catch (e) { declined++; log(`  image PUSH FAILED: ${src} — ${e.message}`); }
   }
   return { pushed, declined };
 }
@@ -297,6 +345,13 @@ async function main() {
     if (fonts.pushed || fonts.declined) {
       log(`  ${base}: fonts pushed=${fonts.pushed} declined=${fonts.declined}`);
     }
+    // wave-39: replaced-element images — also before the inbox push (see
+    // pushReplacedImages for why the ordering is a race guard, not a
+    // correctness contract like the font one).
+    const images = pushReplacedImages(adbx, doc, opts);
+    if (images.pushed || images.declined) {
+      log(`  ${base}: images pushed=${images.pushed} declined=${images.declined}`);
+    }
     // Push into the inbox under a unique, FIFO-ordered name (index prefix
     // guarantees uniqueness even if two fixtures share a basename).
     adbx(['push', fx, `${INBOX_DIR}/${String(i).padStart(4, '0')}-${base}`]);
@@ -346,10 +401,22 @@ async function main() {
     for (const row of timedOutRows) {
       const fx = fixtures.find((f) => path.basename(f) === row.fixture);
       if (!fx) continue;
+      const retryDoc = JSON.parse(readFileSync(fx, 'utf8'));
       const expected = opts.composed
         ? (() => { const n = composedPngName(row.fixture); return [{ deviceFile: n, hostFile: n }]; })()
-        : expectedPngNames(JSON.parse(readFileSync(fx, 'utf8')));
+        : expectedPngNames(retryDoc);
       const t0 = Date.now();
+      // RE-PUSH THE ASSETS. The timeout branch above called resetAndLaunch,
+      // which WIPES both asset sandboxes — so without this the retry would
+      // render the same document with its fonts and images gone, and a
+      // "salvaged" row would carry a capture measurably worse than the one
+      // that timed out. Pre-wave-39 this was a live (if narrow) defect on the
+      // font channel: only fixtures that both timed out AND declared a
+      // @font-face were affected, and their retry silently shaped in the
+      // bundled face. Both channels are idempotent, so re-pushing when the
+      // sandbox was NOT wiped (the last-fixture branch) costs one adb push.
+      pushFontFaces(adbx, retryDoc, opts);
+      pushReplacedImages(adbx, retryDoc, opts);
       // 9xxx prefix keeps the inbox name unique vs the first attempt's 0xxx.
       adbx(['push', fx, `${INBOX_DIR}/9${String(fixtures.indexOf(fx)).padStart(3, '0')}-${row.fixture}`]);
       const { done } = await waitForPngs(adbx, expected.map((e) => e.deviceFile), opts.timeoutPerFixture);

@@ -12,6 +12,12 @@ object MinWidthPropertyParser : PropertyParser {
             trimmed == "auto" -> MinWidthProperty.MinMaxValue.Auto()
             trimmed == "min-content" -> MinWidthProperty.MinMaxValue.MinContent()
             trimmed == "max-content" -> MinWidthProperty.MinMaxValue.MaxContent()
+            // css-sizing-3 §5.1 bare `fit-content` keyword (32 corpus
+            // occurrences on min-width) — see WidthPropertyParser's branch for
+            // the full decision record. MinMaxValue.FitContent(null) is the
+            // same @SerialName("fit-content") variant the functional form
+            // below produces, with no bounding length.
+            trimmed == "fit-content" -> MinWidthProperty.MinMaxValue.FitContent(null)
             trimmed.startsWith("fit-content(") && trimmed.endsWith(")") -> {
                 val sizeStr = trimmed.substring(12, trimmed.length - 1)
                 val size = LengthParser.parse(sizeStr)

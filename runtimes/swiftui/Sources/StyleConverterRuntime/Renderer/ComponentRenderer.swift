@@ -2703,6 +2703,43 @@ public struct ComponentRenderer: View {
                 UAWidgetView(spec: spec)
             }
         }
+        // ── Wave-39 lane A2 REPLACED-ELEMENT mount branch (the ONLY renderer
+        // entry for image content). Structurally the twin of the widget branch
+        // above and placed immediately after it for the same reason: a
+        // replaced element's CONTENT replaces the text/children path, so it
+        // must claim the leaf before that path runs. Ordering between the two
+        // is not load-bearing — the widget lane owns `input`, this one owns
+        // img/embed/object/video, and the two tag sets are disjoint by
+        // construction (ReplacedImageContent.replacedTags).
+        //
+        // NOT gated on wptCaptureMode, unlike the widget branch: a
+        // `meta.attrs.src` is production wire (schema/spec/04), not a capture
+        // affordance, and a real SDUI host pointing DocumentImageRegistry at
+        // its own asset directory should paint images too. The dark-stage 327
+        // pairs carry no `meta.attrs.src`, so `isCandidate` is false for every
+        // one of them and their view tree is untouched.
+        //
+        // A DECLINED source falls through to the branches below — byte-for-byte
+        // the behaviour this component had before the channel existed. That is
+        // why `resolve` is called in the condition rather than inside the body:
+        // an undelivered asset must look like an undelivered asset, never like
+        // a renderer bug.
+        else if ReplacedImageContent.isCandidate(component),
+                let decodedImage = DocumentImageRegistry.shared
+                    .resolve(component.meta?.attrs?.src) {
+            ReplacedImageView(
+                decoded: decodedImage,
+                // The two axes' definiteness comes from the SAME style the
+                // sizing chain consumed, so the content can never disagree
+                // with the box about which axis was declared.
+                mode: ReplacedBoxSizing.mode(
+                    widthDefinite: ReplacedBoxSizing.isDefinite(style.size.width),
+                    heightDefinite: ReplacedBoxSizing.isDefinite(style.size.height),
+                    aspectRatio: decodedImage.aspectRatio),
+                fit: ReplacedImageContent.fit(of: resolvedProperties),
+                alignment: ReplacedImageContent.position(of: resolvedProperties)
+            )
+        }
         // The placeholder only appears when the component has NO
         // children at all — a parent whose children are ALL absolutely
         // positioned still renders empty in-flow content (web parity:

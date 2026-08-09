@@ -41,7 +41,10 @@ import { PNG } from 'pngjs';
 import { safe } from './safe-name.mjs';
 // wave-35 lane B2: the @font-face file hop, shared byte-for-byte with
 // feed-android.mjs so the two natives resolve and decline identically.
-import { documentFontSrcs, resolveFontFile } from './feed-lib.mjs';
+import { documentFontSrcs, resolveFontFile,
+         // wave-39 lane A2: the replaced-element image hop, likewise shared
+         // byte-for-byte with feed-android.mjs.
+         documentReplacedSrcs, resolveReplacedImageFile } from './feed-lib.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..', '..');
@@ -413,6 +416,14 @@ async function main() {
   const fontsDir = join(container, 'Documents', 'fonts');
   await fs.rm(fontsDir, { recursive: true, force: true });
   await fs.mkdir(fontsDir, { recursive: true });
+  // wave-39 lane A2 — the replaced-element image sandbox, a THIRD sibling of
+  // the inbox (see feed-lib.mjs's hop banner for why images do not share the
+  // fonts dir). Wiped on entry on the same argument: a support image left over
+  // from a previous run would let a fixture whose own delivery failed paint a
+  // plausible raster from the wrong file, with nothing in any log.
+  const imagesDir = join(container, 'Documents', 'images');
+  await fs.rm(imagesDir, { recursive: true, force: true });
+  await fs.mkdir(imagesDir, { recursive: true });
   await fs.mkdir(inboxDir, { recursive: true }); // exist before first push (app creates lazily)
   await clearPngs(shotsDir);
   // Drain any stragglers from a prior run so the queue starts clean.
@@ -476,6 +487,24 @@ async function main() {
       await fs.mkdir(dirname(dest), { recursive: true });
       try { await fs.copyFile(abs, dest); }
       catch (err) { console.error(`[feed-ios] ${label}: font COPY FAILED ${src} — ${err.message}`); }
+    }
+    // wave-39 lane A2 — copy this document's REPLACED-ELEMENT image files into
+    // the app's sandbox, likewise before the IR reaches the inbox. Unlike the
+    // font hop above, the ordering here is a RACE guard rather than a
+    // correctness contract (images decode at paint time, not at decode time),
+    // but a capture that sometimes shows the image is worse to debug than one
+    // that never does. A decline is never fatal: the runtime paints the empty
+    // box it painted before this channel existed and stamps the miss.
+    for (const src of documentReplacedSrcs(doc)) {
+      const abs = resolveReplacedImageFile(args.wptDir, src, { resolve, existsSync, statSync });
+      if (!abs) { console.error(`[feed-ios] ${label}: image DECLINED (unresolvable/not an image): ${src}`); continue; }
+      // Corpus-relative path preserved verbatim under imagesDir — the runtime's
+      // DocumentImageRegistry resolves exactly this join, so no escaping rule
+      // can drift between host and device.
+      const dest = join(imagesDir, src);
+      await fs.mkdir(dirname(dest), { recursive: true });
+      try { await fs.copyFile(abs, dest); }
+      catch (err) { console.error(`[feed-ios] ${label}: image COPY FAILED ${src} — ${err.message}`); }
     }
     // Push via a temp name + rename so the app never reads a half-written JSON
     // (nextFixtureURL only sees `.json` files; the rename is atomic in-dir).

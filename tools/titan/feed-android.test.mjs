@@ -23,6 +23,8 @@ import {
   parentCreatesContext, composeRoots, flattenComponents, pngIsValid,
   // wave-35 lane B2 — the @font-face file hop shared by both feeders.
   documentFontSrcs, resolveFontFile,
+  // wave-39 lane A2 — the replaced-element image hop, its structural twin.
+  documentReplacedSrcs, resolveReplacedImageFile,
 } from './feed-lib.mjs';
 
 /** The fs probes resolveFontFile takes by injection (so the pure resolution
@@ -314,4 +316,124 @@ test('feed-android scopes :app:installDebug to --udid, not the whole device farm
   // …and it must be on the child env object, never on this process's own.
   assert.ok(!/process\.env\.ANDROID_SERIAL\s*=/.test(src),
     'ANDROID_SERIAL must not be written onto the feeder process env');
+});
+
+// ── wave-39 lane A2: the replaced-element image hop ──────────────────────────
+//
+// Same discipline as the font hop above and for the same reason: this code
+// writes files into an app sandbox from paths that arrived out of a
+// third-party corpus, so the DECLINE rules are the load-bearing half.
+
+test('documentReplacedSrcs returns each distinct src in document order', () => {
+  const doc = { components: [
+    { meta: { sourceTag: 'img', attrs: { src: 'css/s/a.png' } } },
+    // Same FILE named by a second component — css-grid's abspos family paints
+    // one support image from 41 boxes, and 41 adb pushes would dominate the
+    // fixture's wall clock for no gain.
+    { meta: { sourceTag: 'img', attrs: { src: 'css/s/a.png' } } },
+    { meta: { sourceTag: 'video', attrs: { src: 'css/s/poster.jpg' } } },
+  ] };
+  assert.deepEqual(documentReplacedSrcs(doc), ['css/s/a.png', 'css/s/poster.jpg']);
+});
+
+test('documentReplacedSrcs reaches v1 NESTED children, not just the flat list', () => {
+  // The feeders decode whatever IR the section pipeline handed them. A v1
+  // document silently delivering no images would be the same invisible
+  // failure the font hop's ordering contract guards against.
+  const doc = { components: [
+    { meta: { sourceTag: 'div' }, children: [
+      { meta: { sourceTag: 'img', attrs: { src: 'deep/b.gif' } } },
+    ] },
+  ] };
+  assert.deepEqual(documentReplacedSrcs(doc), ['deep/b.gif']);
+});
+
+test('documentReplacedSrcs ignores non-replaced tags, data: URIs and empties', () => {
+  assert.deepEqual(documentReplacedSrcs(null), []);
+  assert.deepEqual(documentReplacedSrcs({}), []);
+  assert.deepEqual(documentReplacedSrcs({ components: null }), []);
+  // `<input type=image src=…>` is a WIDGET, with its own attrs lane — the
+  // extractor never routes it through REPLACED_SRC_TAGS, so neither does this.
+  assert.deepEqual(documentReplacedSrcs({ components: [
+    { meta: { sourceTag: 'input', attrs: { src: 'css/s/a.png' } } },
+  ] }), []);
+  // A data: source is already the content; there is no file to copy, and
+  // returning it would hand the resolver a path it must then re-decline.
+  assert.deepEqual(documentReplacedSrcs({ components: [
+    { meta: { sourceTag: 'img', attrs: { src: 'data:image/png,%89PNG' } } },
+  ] }), []);
+  // Absent / blank / attr-less shapes are candidates that were never one.
+  assert.deepEqual(documentReplacedSrcs({ components: [
+    { meta: { sourceTag: 'img', attrs: { src: '   ' } } },
+    { meta: { sourceTag: 'img' } },
+    { meta: null },
+    {},
+  ] }), []);
+});
+
+test('resolveReplacedImageFile resolves a real corpus-relative image', async (t) => {
+  const root = await fs.mkdtemp(join(tmpdir(), 'w39a2-img-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  await fs.mkdir(join(root, 'css', 'css-ui', 'support'), { recursive: true });
+  const target = join(root, 'css', 'css-ui', 'support', 'w100_h100.svg');
+  await fs.writeFile(target, '<svg/>');
+  assert.equal(resolveReplacedImageFile(root, 'css/css-ui/support/w100_h100.svg', fsProbes), target);
+});
+
+test('resolveReplacedImageFile DECLINES traversal, absolute paths and URLs', async (t) => {
+  const root = await fs.mkdtemp(join(tmpdir(), 'w39a2-img-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  // Containment is checked on the RESOLVED path — the whole point of the
+  // check is that a `..` chain out of the corpus must never become a file
+  // this hop writes into an app sandbox.
+  assert.equal(resolveReplacedImageFile(root, '../../../etc/passwd.png', fsProbes), null);
+  assert.equal(resolveReplacedImageFile(root, '/etc/passwd.png', fsProbes), null);
+  assert.equal(resolveReplacedImageFile(root, 'https://evil.example/x.png', fsProbes), null);
+  assert.equal(resolveReplacedImageFile(root, 'data:image/png,%89PNG', fsProbes), null);
+  assert.equal(resolveReplacedImageFile(null, 'css/s/a.png', fsProbes), null);
+});
+
+test('resolveReplacedImageFile DECLINES a non-image extension even when present', async (t) => {
+  const root = await fs.mkdtemp(join(tmpdir(), 'w39a2-img-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  await fs.writeFile(join(root, 'payload.sh'), '#!/bin/sh\necho hi');
+  await fs.writeFile(join(root, 'doc.html'), '<p>');
+  // CLOSED table — `<object data="x.pdf">` / `<embed src="y.html">` are not
+  // images and must decline rather than get copied into a device sandbox.
+  assert.equal(resolveReplacedImageFile(root, 'payload.sh', fsProbes), null);
+  assert.equal(resolveReplacedImageFile(root, 'doc.html', fsProbes), null);
+  // …and an admitted extension that is ABSENT is a decline, not a guess.
+  assert.equal(resolveReplacedImageFile(root, 'missing.png', fsProbes), null);
+});
+
+test('resolveReplacedImageFile ADMITS svg — the platform gate lives in the runtimes', async (t) => {
+  const root = await fs.mkdtemp(join(tmpdir(), 'w39a2-img-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const target = join(root, 'r1-1.svg');
+  await fs.writeFile(target, '<svg viewBox="0 0 100 100"/>');
+  // Neither native can rasterise an SVG, but the DECISION to decline belongs
+  // to the runtime (which stamps it), not to the host channel: a host-side
+  // gate would hide a platform limit behind a "never sent" that reads like a
+  // plumbing bug. Exactly the layering the font hop uses for WOFF.
+  assert.equal(resolveReplacedImageFile(root, 'r1-1.svg', fsProbes), target);
+});
+
+test('feed-android pushes images BEFORE the IR, wipes them, and re-pushes on retry', async () => {
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  const imagesAt = src.indexOf('const images = pushReplacedImages(');
+  const inboxAt = src.indexOf("adbx(['push', fx, `${INBOX_DIR}");
+  assert.ok(imagesAt > 0 && inboxAt > 0, 'both push sites must exist');
+  assert.ok(imagesAt < inboxAt, 'images must be pushed before the IR (race guard)');
+  // The images sandbox joins the reset wipe for the font dir's reason: a
+  // support image left over from a previous run lets a fixture whose OWN
+  // delivery failed paint a plausible raster from the wrong file.
+  assert.match(src, /rm', '-rf', INBOX_DIR, SHOT_DIR, FONTS_DIR, IMAGES_DIR/,
+    'the images dir must join the reset wipe');
+  // The tail-retry pass runs AFTER resetAndLaunch wiped both sandboxes, so it
+  // must re-push or the "salvaged" capture is measurably worse than the one
+  // that timed out (a live pre-wave-39 defect on the font channel).
+  const retryAt = src.indexOf('pushReplacedImages(adbx, retryDoc, opts)');
+  assert.ok(retryAt > imagesAt, 'the tail-retry pass must re-push the images');
+  assert.ok(src.indexOf('pushFontFaces(adbx, retryDoc, opts)') > 0,
+    'the tail-retry pass must re-push the fonts too');
 });

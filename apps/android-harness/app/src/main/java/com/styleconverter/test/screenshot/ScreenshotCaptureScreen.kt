@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.sp
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRDocumentDecoder
 import com.styleconverter.runtime.typography.font.DocumentFontRegistry
+// wave-39 lane A2 — the replaced-element image channel's device-side half.
+import com.styleconverter.runtime.images.DocumentImageRegistry
 import com.styleconverter.runtime.core.renderer.ComponentHost
 import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.renderer.LocalWptComposedMode
@@ -287,6 +289,15 @@ fun ScreenshotCaptureScreen(
                 Log.i(TAG, "@font-face: declared=${rep.declared} registered=$faceCount" +
                         if (rep.declined.isEmpty()) "" else " DECLINED=${rep.declined.joinToString(",")}")
             }
+            // wave-39 lane A2 — point the replaced-element image registry at
+            // this run's sandbox and drop the previous document's cache.
+            // Called UNCONDITIONALLY for DocumentFontRegistry's reason, though
+            // the failure it guards against is subtler: rasters are cached by
+            // the wire `src`, so a document that reuses a path the PREVIOUS
+            // document delivered would paint the old picture even though its
+            // own delivery failed. Cheap (a map clear) and it makes the "no
+            // images this run" state explicit rather than inherited.
+            DocumentImageRegistry.configure(screenshotManager.getImagesDir())
             val composed = SlotComposer.compose(document)
             // Arm (or explicitly disarm) the two-pass backdrop render BEFORE
             // the roots reach composition — the coordinator's `enabled` flag

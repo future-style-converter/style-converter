@@ -109,6 +109,15 @@ struct InboxCaptureView: View {
             print("[TITAN] @font-face: declared=\(rep.declared) registered=\(faceCount)" +
                   (rep.declined.isEmpty ? "" : " DECLINED=\(rep.declined.joined(separator: ","))"))
         }
+        // wave-39 lane A2 — point the replaced-element image registry at this
+        // run's sandbox and drop the previous document's decode cache. Called
+        // UNCONDITIONALLY for DocumentFontRegistry's reason, though the failure
+        // it guards against is subtler: rasters are cached by the wire `src`,
+        // so a document reusing a path the PREVIOUS document delivered would
+        // paint the old picture even though its own delivery failed. Cheap (a
+        // dictionary clear) and it makes the "no images this run" state
+        // explicit rather than inherited.
+        DocumentImageRegistry.shared.configure(baseDirectory: ScreenshotManager.imagesDirectory)
         // TITAN WPT Round 3: composed sub-flag (titanComposed) switches this
         // per-fixture render between the two capture footings. Both consume
         // the IDENTICAL decoded IRDocument; only the capture GEOMETRY differs.

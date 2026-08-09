@@ -298,4 +298,32 @@ class TableUaDisplayTest {
         val declaredRow = box("r", tag = "tr", display = "TABLE_ROW")
         assertTrue(TableBoxTree.consumableRowList(listOf(declaredRow), useUaTagDefaults = false))
     }
+
+    // ── §17.5.2 auto width ENFORCEMENT (wave 39, lane A6) ──────────────
+
+    @Test
+    fun `auto table width is enforced only for a table box in composed capture`() {
+        // The two inputs of the gate the renderer hands to
+        // TableApplier.Table(shrinkToFit = …). Composed capture is the
+        // measured surface; every other surface (the 327-pair dark stage,
+        // the per-component inbox path) must keep the frozen unconstrained
+        // Column, so `false` there is the byte-stability guarantee.
+        assertTrue(
+            TableBoxTree.enforcesAutoTableWidth(TableBoxTree.Role.TABLE, composedCapture = true))
+        assertFalse(
+            TableBoxTree.enforcesAutoTableWidth(TableBoxTree.Role.TABLE, composedCapture = false))
+    }
+
+    @Test
+    fun `no internal table box enforces auto width`() {
+        // §17.5.2 sizes rows and cells BY the table's used width — only the
+        // table box itself resists the fill, and an ordinary block (NONE)
+        // still fills per §10.3.3. Mirrors the shrinkToFitBox pin so the
+        // composed gate can never widen past it.
+        for (r in listOf(TableBoxTree.Role.ROW, TableBoxTree.Role.ROW_GROUP,
+                         TableBoxTree.Role.CELL, TableBoxTree.Role.CAPTION,
+                         TableBoxTree.Role.NONE)) {
+            assertFalse("role $r", TableBoxTree.enforcesAutoTableWidth(r, composedCapture = true))
+        }
+    }
 }
