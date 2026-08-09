@@ -220,3 +220,41 @@ test('a wedged capture restarts the app so it cannot cascade-timeout the batch',
     'timeout recovery must relaunch the app after the restart log');
   assert.match(src, /n < fixtures\.length - 1/, 'last-fixture guard on the restart dropped');
 });
+
+// ── wave-39 lane A2: the replaced-element image hop (iOS half) ───────────────
+//
+// The PURE resolution rules are pinned once, in feed-android.test.mjs, because
+// both feeders import the SAME feed-lib functions. What is iOS-specific — and
+// therefore pinned here — is the sandbox's identity and the copy's position in
+// the per-fixture sequence.
+
+test('feed-ios copies images into a THIRD sibling sandbox, wiped on entry', async () => {
+  const src = await fs.readFile(new URL('./feed-ios.mjs', import.meta.url), 'utf8');
+  // Its own directory, not `fonts/` with a wider table: the two asset channels
+  // have different lifetimes and different decline semantics in the runtimes'
+  // heads, and must stay separately auditable (feed-lib.mjs's hop banner).
+  assert.match(src, /const imagesDir = join\(container, 'Documents', 'images'\)/,
+    'the images sandbox must be Documents/images');
+  assert.notEqual(src.indexOf("join(container, 'Documents', 'fonts')"), -1,
+    'the fonts sandbox must stay where it was');
+  // Wiped on entry for the fonts dir's reason: a support image left from a
+  // previous run lets a fixture whose own delivery failed paint a plausible
+  // raster from the wrong file, with nothing in any log.
+  assert.match(src, /imagesDir[\s\S]{0,120}fs\.rm\(imagesDir, \{ recursive: true, force: true \}\)/,
+    'the images sandbox must be wiped on entry');
+});
+
+test('feed-ios copies images BEFORE the IR reaches the inbox', async () => {
+  const src = await fs.readFile(new URL('./feed-ios.mjs', import.meta.url), 'utf8');
+  const imagesAt = src.indexOf('for (const src of documentReplacedSrcs(doc))');
+  const renameAt = src.indexOf('await fs.rename(tmp, dest)');
+  assert.ok(imagesAt > 0 && renameAt > 0, 'both sites must exist');
+  // A race guard rather than a correctness contract (images decode at paint
+  // time, fonts at decode time) — but a capture that SOMETIMES shows the image
+  // is worse to debug than one that never does.
+  assert.ok(imagesAt < renameAt, 'images must be copied before the IR lands in the inbox');
+  // Verbatim relative path under the sandbox root — the runtime's registry
+  // resolves exactly this join, so no escaping rule can drift host↔device.
+  assert.match(src, /const dest = join\(imagesDir, src\)/,
+    'the corpus-relative path must be preserved verbatim under imagesDir');
+});

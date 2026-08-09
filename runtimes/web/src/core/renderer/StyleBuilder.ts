@@ -265,9 +265,9 @@ export function buildVariables(variables?: Record<string, string>): CSSStyles {
 /**
  * Apply one Generic (untyped) declaration. Shape from the Kotlin parser:
  * `{ propertyName: 'border-top-left-radius', rawValue: 'var(--pad)', _unmapped: true }`.
- * Only dynamic values (containing var()/calc()) pass through — those are
- * exactly the ones the parser cannot pre-compute but a browser resolves
- * natively. Static unparseable values stay dropped (emitting them would
+ * Only dynamic values (containing var()/calc()/calc-size()) pass through —
+ * those are exactly the ones the parser cannot pre-compute but a browser
+ * resolves natively. Static unparseable values stay dropped (emitting them would
  * mask real parser gaps) but are now LOGGED per the no-silent-fallthrough
  * contract.
  */
@@ -282,7 +282,32 @@ function applyGeneric(styles: CSSStyles, data: unknown): void {
   }
   // Dynamic pass-through: browsers substitute var()/evaluate calc() in
   // inline styles, so the raw declaration is fully renderable as-is.
-  if (raw.includes('var(') || raw.includes('calc(')) {
+  //
+  // wave-39 lane A5 — `calc-size()` joins the set, and it is NOT covered by
+  // the `calc(` test above: css-values-5 §11 spells the function
+  // `calc-size(<calc-size-basis>, <calc-sum>)`, so the substring after the
+  // dash is `size(`, never `calc(`. It belongs here on the same argument the
+  // clause was written for and on no weaker one:
+  //   * it is UNRESOLVABLE in the reader by construction — its whole purpose
+  //     is arithmetic on an INTRINSIC size (`auto`, `fit-content`,
+  //     `min-content`) that only layout knows, which is why every sizing
+  //     parser correctly declines it into this envelope;
+  //   * it IS resolvable by the target — Chromium has shipped it since M129
+  //     (probed on the harness browser, HeadlessChrome/151:
+  //     `CSS.supports('width','calc-size(auto, size + 80px)')` → true).
+  // Note the value must ride VERBATIM, which is the other reason it cannot go
+  // through the typed length path: `calc(calc-size(…))` is INVALID (probed:
+  // `CSS.supports` → false), because a calc-size() is not a calc-compatible
+  // operand, and toCssLength() re-wraps every `kind:'calc'` interior.
+  // MEASURED against the wave38-final depth-48 gate: four css-values cells
+  // whose capture painted nothing (or a full-width bar) where the ref paints a
+  // 100×100 green square — calc-size/calc-size-min-max-sizes-001 and -004,
+  // calc-size-aspect-ratio-005, calc-size-grid-repeat — all four fail→pass
+  // web-only once this and the reader's bare-`fit-content` branch are both in.
+  // The `min-width:`/`max-width:` halves of that family route here too: the
+  // Min*/Max* value types carry no Expression variant, so their parsers can
+  // only decline into this envelope.
+  if (raw.includes('var(') || raw.includes('calc(') || raw.includes('calc-size(')) {
     // React style keys are camelCase ('border-top-left-radius' →
     // 'borderTopLeftRadius'); custom properties never reach here (they're
     // routed to `variables` upstream and never degrade to Generic).

@@ -159,6 +159,9 @@ object TableApplier {
      *   border in the separated model — see [LocalTableFabricatedCellBorder]
      *   for the five measured Android captures that made this a parameter.
      *   `true` (the default) is the frozen behaviour.
+     * @param shrinkToFit CSS 2.1 §17.5.2 auto table width — see the
+     *   `Modifier.width(IntrinsicSize.Max)` banner inside. `false` (the
+     *   default) is the frozen behaviour for every existing call site.
      * @param modifier Modifier for the table
      * @param content Table rows
      */
@@ -169,6 +172,7 @@ object TableApplier {
         borderColor: Color = Color.Black,
         borderWidth: Dp = 1.dp,
         fabricatedCellBorder: Boolean = true,
+        shrinkToFit: Boolean = false,
         modifier: Modifier = Modifier,
         content: @Composable () -> Unit
     ) {
@@ -178,7 +182,44 @@ object TableApplier {
             LocalTableBorderWidth provides borderWidth,
             LocalTableFabricatedCellBorder provides fabricatedCellBorder
         ) {
-            Column(modifier = modifier) {
+            // Wave 39 (lane A6) — CSS 2.1 §17.5.2 auto table width, ENFORCED.
+            //
+            // TableBoxTree.shrinkToFitBox already stops the table BOX from
+            // taking ComponentRenderer's composed-WPT block-fill channel
+            // (`blockFlowWidth`), but that only removes one `fillMaxWidth`.
+            // [TableRow] below adds its OWN, unconditionally — and a
+            // `fillMaxWidth` child makes its parent Column take the incoming
+            // max constraint, so the table stretched to the full composed
+            // canvas anyway. The guard was therefore inert: the fill simply
+            // moved one level down.
+            //
+            // MEASURED on the frozen wave38-final Android captures. The
+            // reference for `css-tables/background-clip-001` is a 100×100
+            // green square (a 40×40 inline-block inside 30px collapsed
+            // borders); Android painted a ~358×100 bar — the full canvas
+            // content width — while iOS painted the square and passed.
+            // Same picture, same cause: `box-shadow-001` (where the stretch
+            // also exposed the red decoy the square should cover, 0.8897),
+            // `anonymous-table-cell-margin-collapsing` (0.8891), and
+            // `height-distribution/extra-height-given-to-all-row-groups-00{1,2,5}`
+            // (0.8882 ×3) against iOS passes of 0.9541–0.9974.
+            //
+            // `Modifier.width(IntrinsicSize.Max)` is the exact CSS primitive:
+            // Compose measures the content's max intrinsic width — for this
+            // Column that is the widest row, i.e. the sum of the columns'
+            // max-content widths — and `IntrinsicSizeModifier` enforces the
+            // INCOMING constraints on top of it, so the result is
+            // `min(max-content, available)`: §17.5.2's used width. The rows'
+            // own `fillMaxWidth` then fills THAT instead of the canvas, which
+            // is also right — §17.5.2 sizes a row to the table's used width.
+            //
+            // Chained AFTER the caller's `modifier` so the table's own
+            // background/border (applied inside it) paints at the constrained
+            // width rather than the canvas width — the visible half of the
+            // same defect.
+            val tableModifier =
+                if (shrinkToFit) modifier.width(IntrinsicSize.Max) else modifier
+            Column(modifier = tableModifier) {
                 // Caption at top
                 if (caption != null && config.captionSide == CaptionSide.TOP) {
                     Box(

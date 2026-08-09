@@ -239,6 +239,26 @@ enum ScreenshotManager {
         return docs.appendingPathComponent("fonts", isDirectory: true)
     }
 
+    /// TITAN replaced-element image sandbox (wave-39 lane A2).
+    ///
+    /// A THIRD sibling of `inboxDirectory` and `fontsDirectory`, on the same
+    /// two arguments: `nextFixtureURL` lists the inbox for `.json` (an image
+    /// under it would be inert but confusing), and the two ASSET channels stay
+    /// separately auditable rather than sharing one directory with a widened
+    /// file-type table. The host feeder (tools/titan/feed-ios.mjs) copies each
+    /// image the fed document references to `<this dir>/<meta.attrs.src>`,
+    /// preserving the corpus-relative path VERBATIM — the whole contract with
+    /// `DocumentImageRegistry`, which resolves
+    /// `imagesDirectory.appendingPathComponent(src)` with no name mangling.
+    ///
+    /// Not created here, for `fontsDirectory`'s reason: absence means this
+    /// run's feeder delivered no images, and the registry's decline path
+    /// reports it with the source AND the path it looked at.
+    static var imagesDirectory: URL {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return docs.appendingPathComponent("images", isDirectory: true)
+    }
+
     /// Polls the inbox for the oldest *.json fixture. Returns its URL or
     /// nil if the inbox is empty. The caller is responsible for deleting
     /// the file after it's been processed (so a crash mid-render doesn't

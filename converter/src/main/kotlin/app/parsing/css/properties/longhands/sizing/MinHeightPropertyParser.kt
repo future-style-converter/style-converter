@@ -13,6 +13,9 @@ object MinHeightPropertyParser : PropertyParser {
             trimmed == "auto" -> MinWidthProperty.MinMaxValue.Auto()
             trimmed == "min-content" -> MinWidthProperty.MinMaxValue.MinContent()
             trimmed == "max-content" -> MinWidthProperty.MinMaxValue.MaxContent()
+            // css-sizing-3 §5.1 bare `fit-content` keyword (22 corpus
+            // occurrences on min-height) — see WidthPropertyParser's branch.
+            trimmed == "fit-content" -> MinWidthProperty.MinMaxValue.FitContent(null)
             trimmed.startsWith("fit-content(") && trimmed.endsWith(")") -> {
                 val sizeStr = trimmed.substring(12, trimmed.length - 1)
                 val size = LengthParser.parse(sizeStr)

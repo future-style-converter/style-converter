@@ -144,6 +144,129 @@ export function resolveFontFile(wptDir, src, { resolve, existsSync, statSync }) 
   return abs;
 }
 
+// ── wave-39 lane A2: the REPLACED-ELEMENT image hop (shared by both feeders) ─
+//
+// The second asset channel, and a deliberate CLONE of the font hop above
+// rather than a generalisation of it. Same shape, same guarantees:
+//
+//   Android:  /sdcard/Android/data/<pkg>/files/images/<src>   (adb push)
+//   iOS:      <app data container>/Documents/images/<src>     (host fs copy)
+//
+// WHY IT IS A SEPARATE DIRECTORY, not `fonts/` with a wider extension table:
+// the two sandboxes have different lifetimes in the runtimes' heads (a font is
+// registered with the text stack at decode time and must be there BEFORE
+// measurement; an image is decoded lazily at paint time) and different
+// decline semantics (a declined font degrades to the bundled face — still
+// text; a declined image paints nothing at all). Keeping them apart means a
+// future change to one channel cannot silently widen what the other writes
+// into an app sandbox.
+//
+// WHY IT IS NEEDED AT ALL. wave-36 lane M1 put the replaced element's SOURCE
+// on the wire (`meta.attrs.src`, a corpus-relative PATH — extract-fixture.mjs
+// REPLACED_SRC_TAGS) and taught the WEB harness to resolve it through its
+// /wpt-image/ route. The natives got the path and nothing to open: a device
+// cannot reach the host's corpus at all, so both painted an EMPTY box where
+// the browser ref paints the image. MEASURED (wave38-final, css-writing-modes
+// img-intrinsic-size-contribution-001/002): web 0.9623 PASS against natives
+// 0.8654 fail, with the ref's 200×100 blue raster simply absent from both
+// native captures. Same shape on the whole depth-48 replaced cluster.
+//
+// The RELATIVE PATH IS PRESERVED VERBATIM under the images root — the same
+// contract, and for the same reason, as the font hop: each runtime's
+// DocumentImageRegistry resolves `File(imagesDir, src)` /
+// `imagesDir.appending(src)` with no name mangling, so there is no shared
+// escaping rule to drift between four codebases, and two support images from
+// different corpus directories cannot collide on a shared basename.
+
+/** Image file extensions this hop will carry, mirroring extract-fixture.mjs's
+ *  REPLACED_IMAGE_FORMATS (the table that decided what got onto the wire) and
+ *  vite.config.ts's IMAGE_CONTENT_TYPES (the web route that serves the same
+ *  paths). A CLOSED table for the same reason FONT_EXTENSIONS is one: this
+ *  function decides what gets written into an app sandbox and must never
+ *  become a general file copier for whatever a corpus path points at.
+ *
+ *  `svg` IS admitted here even though NEITHER native can rasterise one. The
+ *  gate on platform decode capability lives in the RUNTIMES (Compose's
+ *  DocumentImageRegistry declines it loudly, exactly as its font twin declines
+ *  a WOFF), not in the host channel — the feeder's job is to deliver what the
+ *  wire named, and a host-side gate would hide the platform limit behind a
+ *  "file was never sent" that reads like a plumbing bug. */
+const REPLACED_IMAGE_EXTENSIONS = new Set([
+  'png', 'gif', 'jpg', 'jpeg', 'webp', 'bmp', 'ico', 'svg', 'avif',
+]);
+
+/** The four `meta.sourceTag` values extract-fixture.mjs's REPLACED_SRC_TAGS
+ *  will ever put a `meta.attrs.src` on. Read here as a CORROBORATION of the
+ *  wire, not as a re-derivation: `attrs.src` on any other tag is a shape this
+ *  producer does not emit, and pushing a file for it would mean the feeder had
+ *  invented a delivery the renderers were never told to expect. */
+const REPLACED_SRC_TAGS = new Set(['img', 'embed', 'object', 'video']);
+
+/** Every distinct, deliverable `meta.attrs.src` in a decoded IR document, in
+ *  document order. Pure — no disk access; the caller resolves.
+ *
+ *  Walks the v2 FLAT component list and, for robustness against a v1 document
+ *  (nested `children`), recurses into children too: the feeders decode whatever
+ *  IR the section pipeline handed them, and a v1 fixture silently delivering no
+ *  images would be the same invisible failure the font hop's ordering contract
+ *  guards against.
+ *
+ *  Deduped because a single test routinely paints ONE support image in many
+ *  boxes (css-grid grid-abspos-staticpos-align-self-img-001 references
+ *  colors-8x16.png from 41 components) and pushing it 41 times would multiply
+ *  the slowest step of a native section run for no gain.
+ *
+ *  `data:` sources are SKIPPED: the payload is already on the wire, so there is
+ *  no file to copy — the runtimes decode those bytes directly. Returning them
+ *  here would hand the resolver a path it must then re-decline. */
+export function documentReplacedSrcs(doc) {
+  const out = [];
+  const seen = new Set();
+  const visit = (c) => {
+    if (!c || typeof c !== 'object') return;
+    const tag = typeof c.meta?.sourceTag === 'string' ? c.meta.sourceTag.toLowerCase() : null;
+    const src = typeof c.meta?.attrs?.src === 'string' ? c.meta.attrs.src.trim() : '';
+    if (src && tag && REPLACED_SRC_TAGS.has(tag) && !/^data:/i.test(src) && !seen.has(src)) {
+      seen.add(src);
+      out.push(src);
+    }
+    // v1 nested shape — harmless on a v2 doc (no `children` key).
+    for (const kid of Array.isArray(c.children) ? c.children : []) visit(kid);
+  };
+  for (const c of Array.isArray(doc?.components) ? doc.components : []) visit(c);
+  return out;
+}
+
+/** Resolve one replaced-element `src` under the corpus root, or null when it
+ *  is not an image file this hop will carry.
+ *
+ *  Byte-for-byte the same check sequence as [resolveFontFile] — containment on
+ *  the RESOLVED absolute path (a `..` chain or an absolute token must never let
+ *  a fixture name a file outside the corpus and get it written into an app's
+ *  sandbox), a closed extension table, and a regular-file existence test — with
+ *  only the table swapped. Deliberately duplicated rather than factored into a
+ *  shared `resolveCorpusFile(table)`: the two tables are the two channels'
+ *  entire security surface, and a shared helper is one refactor away from a
+ *  caller passing the wrong one.
+ *
+ *  A null return is a DECLINE, never a clamp — the caller logs it and the
+ *  runtimes paint the empty box they painted before this channel existed. */
+export function resolveReplacedImageFile(wptDir, src, { resolve, existsSync, statSync }) {
+  if (!wptDir || typeof src !== 'string' || src === '') return null;
+  if (src.startsWith('/') || /^[a-z][a-z0-9+.-]*:/i.test(src)) return null;
+  const root = resolve(wptDir);
+  const abs = resolve(root, src);
+  if (abs !== root && !abs.startsWith(root + '/')) return null;
+  const ext = /\.([A-Za-z0-9]+)$/.exec(abs)?.[1]?.toLowerCase();
+  if (!ext || !REPLACED_IMAGE_EXTENSIONS.has(ext)) return null;
+  try {
+    if (!existsSync(abs) || !statSync(abs).isFile()) return null;
+  } catch {
+    return null;
+  }
+  return abs;
+}
+
 // ── Filename derivation (mirror of the Android capture path) ─────────────────
 
 /** Sanitise a component name for the ON-DEVICE per-component filename —

@@ -277,6 +277,31 @@ class ScreenshotManager(private val context: Context) {
         }
 
     /**
+     * TITAN replaced-element image sandbox (wave-39 lane A2).
+     *
+     * A THIRD sibling of [inboxDir] and [getFontsDir], on the same two
+     * arguments: [nextFixtureFile] lists the inbox for `*.json` (an image under
+     * it would be inert but confusing), and the two ASSET channels stay
+     * separately auditable rather than sharing one directory with a widened
+     * file-type table. The host feeder (tools/titan/feed-android.mjs
+     * `pushReplacedImages`) `adb push`es each image the fed document references
+     * to `<this dir>/<meta.attrs.src>`, preserving the corpus-relative path
+     * VERBATIM — the whole contract with
+     * [com.styleconverter.runtime.images.DocumentImageRegistry], which resolves
+     * `File(imagesDir, src)` with no name mangling.
+     *
+     * Not created here, for [getFontsDir]'s reason: absence means this run's
+     * feeder delivered no images, and the registry's decline path reports it
+     * with the source AND the path it looked at.
+     */
+    fun getImagesDir(): File =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            File(context.getExternalFilesDir(null), "images")
+        } else {
+            File(Environment.getExternalStorageDirectory(), "images")
+        }
+
+    /**
      * Returns the oldest *.json fixture currently in the inbox, or null
      * if the inbox is empty. Oldest-first matches the FIFO semantics the
      * host pushes in.

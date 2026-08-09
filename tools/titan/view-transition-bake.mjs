@@ -40,9 +40,17 @@
 //      calling `takeScreenshot()`, which removes the class. The corpus mirror's
 //      sparse checkout has no `common/`, so that script 404s and the page's
 //      inline `failIfNot(...)` throws — which is WHY today's post-load pass
-//      sees only the pre-script DOM. REFTEST_WAIT_SHIM below supplies the four
-//      helpers at document-start; 165 of 195 then settle inside
-//      VT_SETTLE_TIMEOUT_MS and 153 hold an `:active-view-transition`.
+//      sees only the pre-script DOM. REFTEST_WAIT_SHIM below supplies the
+//      helpers at document-start; 165 of 195 then settled inside
+//      VT_SETTLE_TIMEOUT_MS and 153 held an `:active-view-transition`.
+//      WAVE-39 lane A4 re-counted the 30 that did NOT settle and found the
+//      shim was three helpers short, not zero: `waitForCompositorReady` (28
+//      calls, from /dom/events/scrolling/scroll_support.js — the entire
+//      `scoped/` and `nested/` families gate their `startViewTransition()` on
+//      it) and `takeScreenshotOnAnimationsReady` (4 calls, from reftest-wait.js
+//      itself). With those supplied the family collapses from 30 to 1 — the
+//      survivor is `hit-test-unrelated-element`, which needs testdriver INPUT
+//      injection and is out of scope for any shim.
 //
 //   2. THE PSEUDO TREE IS FULLY INTROSPECTABLE. `getComputedStyle(
 //      document.documentElement, '::view-transition-group(name)')` returns
@@ -94,6 +102,14 @@
 //     be IDENTICAL. A still-running transition has no state to serialize, and
 //     baking one frame of it would encode this machine's scheduler. Same
 //     settle-stability discipline as post-load-extract.mjs.
+//     ONE drift is deferred rather than refused (wave-39 lane A4): the UA's
+//     COMPLEMENTARY plus-lighter cross-fade, whose composite is provably
+//     independent of the animation position when the two snapshots are the
+//     same image. The proof is split — the algebra in isComplementaryCrossFade
+//     / classifyStabilityDrift, the "same image" clause in pixels inside
+//     planViewTransitionBake — and a pair that fails the pixel half bails
+//     `cross-fade-not-invariant`. Nothing samples `currentTime`, so no baked
+//     byte depends on where in its 250 ms the transition was caught.
 //   - NO ROOT GROUP. When `:root` is NOT captured the page's own boxes keep
 //     painting in place and only the NAMED elements drop out, so a faithful
 //     bake would have to hide exactly those components — an element↔component
@@ -113,6 +129,14 @@
 //     non-root pair at all.)
 //   - OVERSIZE / DEGENERATE geometry: a group past VT_MAX_SNAPSHOT_PX on
 //     either axis, or a used transform this module cannot read back.
+//   - SNAPSHOT OVERFLOWS ITS BOX (wave-39 lane A4). A captured element's
+//     snapshot carries its INK OVERFLOW; the isolation window is the union of
+//     the group and leaf BOXES, which is smaller. Measuring inside that window
+//     and calling the result flat would ship a cropped lie —
+//     `content-with-child-with-transparent-background` did exactly that, baking
+//     a 50x50 grey box and deleting the two children painting 75 px outside it
+//     (ref ink coverage 2.137 %, cropped bake 1.068 %). probeSnapshotOverflow
+//     now reads the complement of the window off the same composites and bails.
 //
 // ACTIVATION (opt-in, the same shape as the wave-16 post-load mode and the
 // wave-23 bidi bake):
@@ -129,6 +153,48 @@
 // render; its baked tree diverges honestly and the loss is accepted).
 // Delivery taxonomy from the same tree: 38 of 195 bake, 153 bail loudly,
 // 2 decline, 0 errors, 0 fixtures lost.
+//
+// WAVE-39 lane A4 mined those 153 bails and moved three of the families
+// (the shim gap, the invariant cross-fade, and the isolation instrument's
+// live-`new` bug), then found and fixed a fourth thing on the way out — the
+// crop this module had been shipping silently, see probeSnapshotOverflow.
+// Re-scored twice on the same section, web-only, full cap. Run-id
+// wave39-A4-after carries the first three changes alone: 70/192, 2 gained,
+// 2 lost — and one of those losses,
+// `content-with-child-with-transparent-background`, is what exposed the crop
+// (it baked a 50x50 grey box and deleted two children painting 75 px outside
+// it). Run-id wave39-A4-probe is the SHIPPED state, all four:
+//
+//     70/192 HOLDS, and the composition is strictly more honest.
+//     GAINED  fragmented-at-start-ignored           (invariant cross-fade)
+//             transform-origin-view-transition-group (invariant cross-fade)
+//             new-and-old-sizes-match — wave 38's ACCEPTED LOSS, recovered:
+//               its "honest divergence" was a cropped snapshot (1 131 px of
+//               ink outside the measured box), and the crop bail restores the
+//               byte-identical static fixture that passed before the bake.
+//     LOST    capture-with-visibility-mixed-descendants
+//             clip-path-larger-than-border-box-on-child-of-named-element
+//             element-is-grouping-during-animation
+//               — all three were passing on a CROPPED bake (the first drops a
+//               10x10 green square 200 px outside the box; the third drops
+//               193 344 px of ink). A pass earned by deleting visible ink is
+//               the vacuous pass this campaign exists to retire, so the three
+//               go back to static and fail honestly.
+//
+// Delivery taxonomy from the shipped tree: 34 of 195 bake (3 carrying a proved
+// invariant cross-fade), 157 bail, 2 decline, 0 errors, 0 fixtures lost.
+// The bail families moved like this. Two SHRANK because the module got
+// better: `reftest-wait never cleared` 30 -> 2 (the shim gap; the survivors
+// need testdriver INPUT injection, out of scope for any shim) and
+// `transition-not-frozen` 40 -> 13 (the cross-fade classifier). The rest GREW
+// because tests that used to bail early now reach a later, more specific
+// refusal: `snapshot solve failed` 7 -> 52 (30 of them the new crop probe, 12
+// the `massive-element-*` family's `object-fit: none`), `no-active-transition`
+// 7 -> 27 (the newly settling `scoped/` family is css-view-transitions-2,
+// which THIS Chromium does not run — a browser-ref divergence, not a harness
+// gap), `root-not-captured` 22 -> 28. `non-uniform-snapshot` fell 40 -> 29
+// only because the crop probe now fires first on many of them; the raster
+// refusal itself is unchanged in kind.
 //
 // HONESTY STAMPS: `_wpt.viewTransitionBaked: true` on the fixture, plus
 // `_lossy` + VT_BAKE_LOSSY_REASON in `_lossyReasons` on the emitted subtree
@@ -213,6 +279,18 @@ export const VT_STABILITY_OPACITY_EPS = 1 / 255;
  *  ink on either side of the diff. */
 export const VT_PAINT_EPSILON = 1 / 255;
 
+/** How far `old.opacity + new.opacity` may sit from 1 and still be recognised
+ *  as the UA's COMPLEMENTARY cross-fade pair (see isComplementaryCrossFade).
+ *
+ *  Same 8-bit argument as VT_STABILITY_OPACITY_EPS: the two UA keyframes
+ *  (`-ua-view-transition-fade-out` 1→0 and `-ua-view-transition-fade-in` 0→1)
+ *  share one timing function, so the used pair is exactly (1−p, p) and the sum
+ *  is exactly 1 up to the browser's own float rounding. Measured across the 29
+ *  candidate tests (_diag39/A4/walk-tnf.json): every painted pair summed to
+ *  1 or 0.999999 on BOTH probe reads. A sum that misses by a whole 8-bit step
+ *  is not this pair and must not inherit its algebra. */
+export const VT_XFADE_SUM_EPS = 1 / 255;
+
 /** Per-channel 8-bit tolerance for "these two pixels are the same colour".
  *  The isolation reads are two flat composites of the SAME snapshot, so the
  *  only spread is the browser's own rounding on the alpha solve; 2/255 keeps
@@ -263,6 +341,25 @@ export const VT_ISOLATION_STYLE_ID = 'sc-vt-isolation';
  *  `*-object-view-box` pair reshapes the source box, not the fit.) */
 export const VT_CONTAINED_OBJECT_FITS = ['fill', 'contain', 'scale-down'];
 
+/** How much ink may sit OUTSIDE the isolation window before the measurement is
+ *  declared cropped (see probeSnapshotOverflow).
+ *
+ *  WHY IT IS NOT ZERO. The window edge is a whole-pixel ceil of a possibly
+ *  fractional box, so a snapshot whose own edge lands mid-pixel can leak one
+ *  antialiased row or column of near-transparent ink past it. Four pixels is
+ *  below anything a diff can see and orders of magnitude below a real overflow
+ *  — the defect this probe was written for (a captured element whose children
+ *  paint 75 px outside its border box) leaks 2 500.
+ *
+ *  WHY THE PROBE EXISTS AT ALL, measured. `content-with-child-with-transparent-
+ *  background` baked a 50x50 grey box and SILENTLY DROPPED the two 25x50
+ *  children painting outside it: the ref carries 2.137 % ink coverage, the
+ *  wave-38-instrument bake carried 1.068 %. A captured element's snapshot
+ *  includes its ink overflow; the isolation window is the union of the group
+ *  and leaf BOXES, which is smaller. Cropping and calling the result "uniform"
+ *  is precisely the silent fallthrough this repo forbids. */
+export const VT_OVERFLOW_INK_TOLERANCE_PX = 4;
+
 // ── The /common/ shim ───────────────────────────────────────────────────────
 //
 // WHY THIS EXISTS AND WHY IT IS NOT A NETWORK FETCH. fetch-wpt.sh's sparse
@@ -273,17 +370,40 @@ export const VT_CONTAINED_OBJECT_FITS = ['fill', 'contain', 'scale-down'];
 // from the harness either way. They are re-stated here rather than fetched
 // because a bake must be reproducible offline from the pinned corpus alone.
 //
-// The four functions are the complete set the 195 tests call
-// (`failIfNot` 172×, `waitForAtLeastOneFrame` 13×, `takeScreenshot`,
-// `takeScreenshotDelayed`) and each is the WPT semantic verbatim:
+// The functions are the complete set of MISSING globals the 195 tests call,
+// enumerated from the corpus rather than guessed (wave-39 lane A4 re-counted
+// them across the 30 `reftest-wait never cleared` bails —
+// `_diag39/A4/settle8.json` and the `<script src>` census beside it):
+//
+//   from /common/reftest-wait.js — `failIfNot` 172×, `takeScreenshot`,
+//     `takeScreenshotDelayed`, `takeScreenshotOnAnimationsReady` 4×;
+//   from /dom/events/scrolling/scroll_support.js — `waitForCompositorReady`
+//     28×, the SINGLE largest cause of the never-settled family (8 tests in
+//     `nested/`, 18 in `scoped/`, plus `nothing-captured` and
+//     `empty-render-target-capture`);
+//   from the same reftest-wait.js — `waitForAtLeastOneFrame` 13×.
+//
 // `takeScreenshot` removes `reftest-wait` from the root — that class removal
 // IS this module's settle signal, exactly as it is the WPT runner's.
 //
-// `failIfNot` diverges in ONE documented way: the WPT harness marks the test
-// failed and stops; here it clears the wait class so the drive terminates
-// promptly instead of burning VT_SETTLE_TIMEOUT_MS. The state it leaves
-// behind still has to survive the `:active-view-transition` gate below, so a
-// genuinely unsupported feature bails rather than baking a half-page.
+// TWO documented divergences, both of them shaped so a genuinely unsupported
+// feature still bails rather than baking a half-page:
+//
+//   - `failIfNot`: the WPT harness marks the test failed and stops; here it
+//     clears the wait class so the drive terminates promptly instead of
+//     burning VT_SETTLE_TIMEOUT_MS. The state it leaves behind still has to
+//     survive the `:active-view-transition` gate below.
+//   - `waitForCompositorReady`: WPT's version starts a throwaway 1 ms
+//     animation on `document.body` and awaits its `ready`, which resolves
+//     once the compositor has accepted the animation. Starting an opacity
+//     animation on the body forces a compositing layer, and this pipeline's
+//     whole raster contract is `--disable-gpu-rasterization` CPU raster
+//     (BROWSER_LAUNCH_ARGS) — promoting a layer here would change the pixels
+//     the alpha solve then measures. The shim delivers the same GUARANTEE the
+//     callers actually depend on — "at least one frame has been produced
+//     before I start the transition" — with the double-rAF the corpus's own
+//     `waitForAtLeastOneFrame` uses, and touches no style. Callers use it
+//     only as a scheduling barrier before `startViewTransition()`.
 export const REFTEST_WAIT_SHIM = `(function(){
   function takeScreenshot(){ document.documentElement.classList.remove('reftest-wait'); }
   function takeScreenshotDelayed(t){ setTimeout(takeScreenshot, t || 0); }
@@ -291,10 +411,23 @@ export const REFTEST_WAIT_SHIM = `(function(){
   function waitForAtLeastOneFrame(){
     return new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
   }
+  /* WPT semantic verbatim: wait for every running animation to be READY (the
+     UA view-transition keyframes included), then shoot. A rejected ready
+     promise still shoots — the WPT original has no rejection path because a
+     cancelled animation cannot happen there, and hanging is the one outcome
+     this drive must never produce. */
+  function takeScreenshotOnAnimationsReady(){
+    var ready = document.getAnimations().map(function(a){ return a.ready; });
+    return Promise.all(ready).then(takeScreenshot, takeScreenshot);
+  }
+  /* See the divergence note above: a frame barrier, not a layer promotion. */
+  function waitForCompositorReady(){ return waitForAtLeastOneFrame(); }
   window.takeScreenshot = takeScreenshot;
   window.takeScreenshotDelayed = takeScreenshotDelayed;
+  window.takeScreenshotOnAnimationsReady = takeScreenshotOnAnimationsReady;
   window.failIfNot = failIfNot;
   window.waitForAtLeastOneFrame = waitForAtLeastOneFrame;
+  window.waitForCompositorReady = waitForCompositorReady;
 })();`;
 
 /**
@@ -527,6 +660,56 @@ export function solveSnapshot(blackPng, whitePng) {
 }
 
 /**
+ * Crop the top-left `w`x`h` of an isolation composite, as a PNG buffer.
+ *
+ * The composites are now taken at the FULL viewport (see the driver) so that
+ * probeSnapshotOverflow can see the region OUTSIDE the isolation window. The
+ * solve itself must still run on exactly the window it always did, and this is
+ * that crop — the same pixels the wave-38 `page.screenshot({ clip })` produced,
+ * because it is the same render.
+ */
+export function cropComposite(pngBuf, w, h) {
+  const src = PNG.sync.read(pngBuf);
+  const out = new PNG({ width: w, height: h });
+  for (let y = 0; y < h; y++) {
+    src.data.copy(out.data, y * w * 4, y * src.width * 4, y * src.width * 4 + w * 4);
+  }
+  return PNG.sync.write(out);
+}
+
+/**
+ * How many painted pixels of this leaf's snapshot fall OUTSIDE the isolation
+ * window — i.e. how much ink the window would have cropped.
+ *
+ * Same alpha solve as solveSnapshot (green channel, two backdrops), applied to
+ * the complement of the window rather than to the window. A non-zero answer
+ * means the leaf's snapshot is bigger than the union of its group and leaf
+ * boxes, which happens whenever the captured element has INK OVERFLOW: the
+ * snapshot carries the overflowing descendants, the boxes do not.
+ *
+ * The root capture needs no special case: its group box IS the snapshot
+ * containing block, so its window is the whole viewport and the complement is
+ * empty by construction.
+ */
+export function probeSnapshotOverflow(blackPng, whitePng, win) {
+  const b = PNG.sync.read(blackPng);
+  const w = PNG.sync.read(whitePng);
+  if (b.width !== w.width || b.height !== w.height) {
+    return { error: `overflow-probe size drift ${b.width}x${b.height} vs ${w.width}x${w.height}` };
+  }
+  let outside = 0;
+  for (let y = 0; y < b.height; y++) {
+    for (let x = 0; x < b.width; x++) {
+      if (x < win.width && y < win.height) continue;   // inside the window
+      const o = (y * b.width + x) * 4;
+      const a = 1 - (w.data[o + 1] - b.data[o + 1]) / 255;
+      if (a > VT_PAINT_EPSILON) outside++;
+    }
+  }
+  return { outside };
+}
+
+/**
  * First structural difference between two pseudo-tree reads, as a dotted
  * path + the two values — or null when they are identical.
  *
@@ -535,29 +718,145 @@ export function solveSnapshot(blackPng, whitePng) {
  * unfrozen transition) from a walker artifact such as an unstable name order.
  * Both are bails, but only one is a bug in this module, and the reason string
  * is the only place that distinction ever surfaces in a batch log.
+ *
+ * The single tolerance the walk grants (see VT_STABILITY_OPACITY_EPS) lives in
+ * allDifferences, which this is the one-answer front end for: one traversal
+ * implementation, so the classifier below and the log line here can never
+ * disagree about what counts as a difference.
  */
 export function firstDifference(a, b, path = '') {
-  if (a === b) return null;
+  return allDifferences(a, b, path)[0] ?? null;
+}
+
+/**
+ * EVERY structural difference between two pseudo-tree reads, not just the
+ * first. Same walk, same tolerance rule as firstDifference (which stays the
+ * single-answer front end for the log line and the unit pins); this one exists
+ * because the drift CLASSIFIER below has to see the whole set — a tree whose
+ * only movement is one complementary cross-fade is a different animal from one
+ * that also moved a matrix, and "the first difference" cannot tell them apart.
+ */
+export function allDifferences(a, b, path = '', out = []) {
+  if (a === b) return out;
   const ta = a === null ? 'null' : Array.isArray(a) ? 'array' : typeof a;
   const tb = b === null ? 'null' : Array.isArray(b) ? 'array' : typeof b;
-  if (ta !== tb) return { path: path || '<root>', a, b };
+  if (ta !== tb) { out.push({ path: path || '<root>', a, b }); return out; }
   if (ta === 'object' || ta === 'array') {
-    const keys = [...new Set([...Object.keys(a), ...Object.keys(b)])];
-    for (const k of keys) {
-      const d = firstDifference(a[k], b[k], path ? `${path}.${k}` : k);
-      if (d) return d;
+    for (const k of [...new Set([...Object.keys(a), ...Object.keys(b)])]) {
+      allDifferences(a[k], b[k], path ? `${path}.${k}` : k, out);
     }
-    return null;
+    return out;
   }
-  // The single tolerance (see VT_STABILITY_OPACITY_EPS): an opacity that moved
-  // by less than one 8-bit step is the same rendered state. The key NAME is
-  // the discriminator, so nothing else can accidentally inherit it.
   if (path.endsWith('opacity')) {
     const na = Number.parseFloat(a), nb = Number.parseFloat(b);
     if (Number.isFinite(na) && Number.isFinite(nb)
-        && Math.abs(na - nb) < VT_STABILITY_OPACITY_EPS) return null;
+        && Math.abs(na - nb) < VT_STABILITY_OPACITY_EPS) return out;
   }
-  return { path: path || '<root>', a, b };
+  out.push({ path: path || '<root>', a, b });
+  return out;
+}
+
+/**
+ * Is this group's leaf pair the UA's COMPLEMENTARY plus-lighter cross-fade?
+ *
+ * WHY THE QUESTION EARNS AN ANSWER. 29 of the 40 `transition-not-frozen` bails
+ * (wave-38's single largest bail family, re-measured in
+ * _diag39/A4/walk-tnf.json) drift ONLY in leaf opacity, and in every one of
+ * them the two leaves' used opacities sum to 1 on both probe reads. That is
+ * the signature of the UA cross-fade running with its default 250 ms timing
+ * while the test froze only the groups it cares about — and a cross-fade
+ * between two IDENTICAL snapshots is TIME-INVARIANT, so there is a frozen
+ * rendered state to serialize even though the tree is still moving.
+ *
+ * The algebra, stated so the gate is provable rather than hopeful.
+ * `::view-transition-image-pair` carries `isolation: isolate` (UA sheet), so
+ * the pair's backdrop starts at transparent black and PLUS-LIGHTER reduces to
+ * a premultiplied SUM of the two leaves:
+ *
+ *     Co·αo = α·(1−p)·C  +  α·p·C  =  α·C
+ *     αo    = α·(1−p)    +  α·p    =  α
+ *
+ * for a snapshot of colour C and own alpha α — independent of p, the animation
+ * position. Three things have to hold for that collapse, and each is a
+ * separate clause below:
+ *   1. BOTH leaves blend with `plus-lighter`. Under `normal` the composite is
+ *      source-over, `αo = αp + α(1−p)(1−αp)`, which is NOT independent of p.
+ *   2. The used opacities are complementary — (1−p, p), i.e. they sum to 1
+ *      within VT_XFADE_SUM_EPS. Two independently animated opacities are not
+ *      one cross-fade.
+ *   3. The pair is actually painted at all: neither leaf `visibility: hidden`
+ *      (the decoy-group idiom parks a group exactly this way) and the group ×
+ *      image-pair chain above them is not itself faded out.
+ *
+ * The FOURTH condition — that the two snapshots really are identical — cannot
+ * be answered from computed style. It is answered in pixels, after the solve,
+ * inside planViewTransitionBake; a pair that fails it bails
+ * `cross-fade-not-invariant` and the fixture stays byte-identical.
+ *
+ * Note what this deliberately does NOT do: it never samples the animation at a
+ * chosen time. Nothing here reads or writes `currentTime`, so no baked byte
+ * depends on where in its 250 ms this machine's scheduler happened to catch
+ * the transition — which is the whole reason the settle-stability contract
+ * exists.
+ */
+export function isComplementaryCrossFade(group) {
+  const old = group?.old, nw = group?.new;
+  if (!old || !nw) return false;
+  // (1) the UA blend that makes the sum exact.
+  if (old.mixBlendMode !== 'plus-lighter' || nw.mixBlendMode !== 'plus-lighter') return false;
+  // (3a) a hidden leaf paints nothing, so there is no cross-fade to collapse.
+  if (old.visibility === 'hidden' || nw.visibility === 'hidden') return false;
+  // (2) complementary — the pair is (1−p, p).
+  const o = Number.parseFloat(old.opacity), n = Number.parseFloat(nw.opacity);
+  if (!Number.isFinite(o) || !Number.isFinite(n)) return false;
+  if (Math.abs(o + n - 1) > VT_XFADE_SUM_EPS) return false;
+  // (3b) the chain ABOVE the leaves must still put ink on the canvas. Leaf
+  //      opacity is excluded on purpose: the whole point is that one of the
+  //      two is momentarily near zero while the other carries the ink.
+  return crossFadeChainOpacity(group) > VT_PAINT_EPSILON;
+}
+
+/** The opacity the group contributes ABOVE an invariant cross-fade pair: the
+ *  chain product with the leaves' own (summing-to-1) contribution left out.
+ *  Mirrors leafEffectiveOpacity, which folds the leaf in for the single-leaf
+ *  case. */
+export function crossFadeChainOpacity(group) {
+  const n = (v) => { const f = Number.parseFloat(v); return Number.isFinite(f) ? f : 1; };
+  return n(group.opacity) * n(group.imagePair?.opacity);
+}
+
+/**
+ * Split the settle-stability drift into the part that FORBIDS a bake and the
+ * part that merely defers the decision to the pixels.
+ *
+ * Returns `{ hard, crossFade }`:
+ *   - `hard` — the first difference that is not a recognised complementary
+ *     cross-fade, in firstDifference's `{ path, a, b }` shape, or null. A
+ *     non-null `hard` is the `transition-not-frozen` bail, unchanged.
+ *   - `crossFade` — the sorted group NAMES whose only drift was such a pair.
+ *     planViewTransitionBake must then prove, in pixels, that each one's two
+ *     snapshots are identical.
+ *
+ * A group only qualifies when it reads as a complementary cross-fade in BOTH
+ * probe reads and keeps the same name at the same index across them — an
+ * unstable name ORDER is a walker artifact and must stay a hard bail, which is
+ * exactly the distinction firstDifference's doc comment says the reason string
+ * exists to preserve.
+ */
+export function classifyStabilityDrift(first, second) {
+  const crossFade = new Set();
+  for (const d of allDifferences(first, second)) {
+    const m = /^groups\.(\d+)\.(old|new)\.opacity$/.exec(d.path);
+    if (!m) return { hard: d, crossFade: [...crossFade].sort() };
+    const i = Number(m[1]);
+    const ga = first?.groups?.[i], gb = second?.groups?.[i];
+    if (!ga || !gb || ga.name !== gb.name) return { hard: d, crossFade: [...crossFade].sort() };
+    if (!isComplementaryCrossFade(ga) || !isComplementaryCrossFade(gb)) {
+      return { hard: d, crossFade: [...crossFade].sort() };
+    }
+    crossFade.add(ga.name);
+  }
+  return { hard: null, crossFade: [...crossFade].sort() };
 }
 
 /**
@@ -630,8 +929,15 @@ export function snapshotColorCss(rgba) {
  * `walk` is what inPageVtWalker returns; `solved` maps `"<name>|<leaf>"` to a
  * solveSnapshot result. Both are plain data, so the whole decision surface is
  * unit-testable without a browser.
+ *
+ * `crossFadeNames` is classifyStabilityDrift's deferred list — group names
+ * whose leaf pair is a complementary plus-lighter cross-fade and whose
+ * time-invariance still has to be PROVED in pixels here. Defaults to empty, so
+ * every caller that does not opt in keeps the wave-38 decision surface
+ * byte-for-byte.
  */
-export function planViewTransitionBake(walk, solved) {
+export function planViewTransitionBake(walk, solved, crossFadeNames = []) {
+  const crossFade = new Set(crossFadeNames);
   if (!walk.active) return { bail: 'no-active-transition' };
   const groups = walk.groups.filter((g) => groupPseudoExists(g));
   if (!groups.length) return { bail: 'no-view-transition-groups' };
@@ -674,9 +980,61 @@ export function planViewTransitionBake(walk, solved) {
     const matrix = parseUsedMatrix(g.transform);
     if (!matrix) return { bail: `unreadable transform for '${g.name}' (${g.transform})` };
 
-    // Which leaves actually put ink on the canvas.
-    const painted = ['old', 'new'].filter((which) => leafPainted(g, g[which]));
     const leaves = [];
+    // ── The INVARIANT CROSS-FADE branch (wave-39 lane A4) ────────────────
+    // classifyStabilityDrift proved from computed style that this group's
+    // leaves are the UA's complementary plus-lighter pair; its doc comment
+    // carries the algebra that collapses the pair to `α·C`, independent of the
+    // animation position. What is left is the one clause pixels alone can
+    // answer: the two snapshots must actually BE the same image. Both are
+    // measured with opacity forced to 1 by the isolation sheet, so the solves
+    // are of the two BITMAPS and are not themselves time-dependent.
+    if (crossFade.has(g.name)) {
+      const so = solved[`${g.name}|old`], sn = solved[`${g.name}|new`];
+      for (const [which, s] of [['old', so], ['new', sn]]) {
+        if (!s) return { bail: `missing snapshot solve for ${g.name}/${which}` };
+        if (s.error) return { bail: `snapshot solve failed for ${g.name}/${which}: ${s.error}` };
+        if (!s.uniform) {
+          // THE RASTER REFUSAL, same boundary as the single-leaf path.
+          return { bail: `non-uniform-snapshot ${g.name}/${which} (${s.distinct} colours, ${s.coverage}% flat)` };
+        }
+      }
+      // Identical means BOTH the painted rect and the solved colour+alpha. A
+      // pair that differs anywhere is a genuine mid-flight cross-fade whose
+      // composite moves with p, and there is no frozen state to ship.
+      const same = JSON.stringify(so.rect) === JSON.stringify(sn.rect)
+                && JSON.stringify(so.rgba) === JSON.stringify(sn.rgba);
+      if (!same) {
+        return { bail: `cross-fade-not-invariant '${g.name}' (old ${JSON.stringify(so.rect)}/${JSON.stringify(so.rgba)} vs new ${JSON.stringify(sn.rect)}/${JSON.stringify(sn.rgba)})` };
+      }
+      if (so.rect) {
+        // ONE box for the pair: the sum of the two premultiplied layers is
+        // exactly the snapshot, so the leaves' own opacities are already
+        // accounted for and only the chain ABOVE them is folded in.
+        const chain = crossFadeChainOpacity(g);
+        leaves.push({
+          which: 'cross-fade',
+          props: {
+            position: 'absolute',
+            left:   px(so.rect.x),
+            top:    px(so.rect.y),
+            width:  px(so.rect.w),
+            height: px(so.rect.h),
+            'box-sizing': 'border-box',
+            'background-color': snapshotColorCss(so.rgba),
+            ...(chain < 1 && Number.parseFloat(g.opacity) === 1
+              ? { opacity: String(r2(chain)) }
+              : {}),
+          },
+        });
+      }
+    }
+
+    // Which leaves actually put ink on the canvas. A group already handled by
+    // the cross-fade branch is skipped here — its pair is one box, not two.
+    const painted = crossFade.has(g.name)
+      ? []
+      : ['old', 'new'].filter((which) => leafPainted(g, g[which]));
     for (const which of painted) {
       const leaf = g[which];
       // ── The plus-lighter question, answered from the compositing algebra ──
@@ -998,14 +1356,36 @@ export function inPageVtWalker(params) {
  *  what lets a paused UA keyframe be overridden here without touching it.
  *  Among the important rules the named selector out-specifies the `(*)` one
  *  (a view-transition name argument has type-selector specificity, `*` has
- *  none), so the "hide all, then re-show one" pair resolves the right way. */
+ *  none), so the "hide all, then re-show one" pair resolves the right way.
+ *
+ *  THE PAGE'S OWN BACKGROUND IS DELIBERATELY NOT TOUCHED (wave-39 lane A4).
+ *  Through wave 38 this sheet opened with
+ *      :where(html, body) { background: <backdrop> !important; }
+ *  as belt-and-braces against a window that had slid past the fixed
+ *  `::view-transition` box. It was unnecessary AND it silently destroyed a
+ *  whole class of measurement:
+ *
+ *  UNNECESSARY — `::view-transition` is `position: fixed; inset: 0` on the
+ *  snapshot containing block, i.e. the whole viewport; the caller refuses any
+ *  isolation window larger than the viewport, and the rules below pin the
+ *  group at `left/top: 0` and translate it by a NON-negative offset. The clip
+ *  therefore always lies inside an opaque backdrop box.
+ *
+ *  HARMFUL — `::view-transition-new(<name>)` is a LIVE representation of the
+ *  captured element, not a frozen bitmap (css-view-transitions-1 §"the new
+ *  content is a live representation"). Repainting html/body with the backdrop
+ *  repainted the leaf ITSELF, so the two composites came back identical and
+ *  the alpha solve read α = 0 — "nothing painted" — for every live `new` leaf.
+ *  Measured on three tests both ways (_diag39/A4/iso-current.json vs
+ *  iso-noPageBg.json): with the rule, `root/new` solved to `rect: null`;
+ *  without it, to the same 358×568 opaque white the frozen `root/old` leaf
+ *  already solved to. A leaf that solves to nothing emits no box (see
+ *  planViewTransitionBake), so the rule was DELETING the new-content half of
+ *  the pseudo tree from every baked fixture that had one. */
 export function isolationCss(name, leaf, backdrop, offset = { x: 0, y: 0 }) {
   return `
-    /* The canvas gets the same backdrop as the top-layer box: the fixed
-       ::view-transition covers the viewport, but a window whose translate
-       has pushed part of the group past its edge would otherwise read the
-       page - which solves to "opaque" and floods the measurement. */
-    :where(html, body) { background: ${backdrop} !important; }
+    /* The opaque backdrop the alpha solve reads against. The PAGE's own
+       background is deliberately left alone - see the banner above. */
     ::view-transition { background: ${backdrop} !important; }
     ::view-transition-group(*) { opacity: 0 !important; }
     ::view-transition-group(${name}) {
@@ -1155,7 +1535,11 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
     const first = await page.evaluate(inPageVtWalker, walkParams);
     await page.evaluate((ms) => new Promise((r) => setTimeout(r, ms)), VT_STABILITY_DELAY_MS);
     const walk = await page.evaluate(inPageVtWalker, walkParams);
-    const drift = firstDifference(first, walk);
+    // The drift is CLASSIFIED, not merely detected: a tree whose only movement
+    // is the UA's complementary cross-fade still has a frozen rendered state
+    // (see classifyStabilityDrift / isComplementaryCrossFade). Everything else
+    // is the wave-38 bail, byte-for-byte.
+    const { hard: drift, crossFade } = classifyStabilityDrift(first, walk);
     if (drift) {
       return {
         status: 'bailed',
@@ -1163,6 +1547,7 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
       };
     }
     if (!walk.active) return { status: 'bailed', reason: 'no-active-transition' };
+    const crossFadeSet = new Set(crossFade);
 
     // Which leaves need a snapshot solve? Only the painted ones — an isolation
     // pair costs two screenshots, and a hidden decoy group (this section's
@@ -1173,7 +1558,11 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
       const w = Number.parseFloat(g.width), h = Number.parseFloat(g.height);
       if (!(w > 0 && h > 0) || w > VT_MAX_SNAPSHOT_PX || h > VT_MAX_SNAPSHOT_PX) continue;
       for (const which of ['old', 'new']) {
-        if (leafPainted(g, g[which])) {
+        // A cross-fade pair needs BOTH solves even when one side's animated
+        // opacity has momentarily dipped below the paint floor: the isolation
+        // sheet forces opacity 1, so the solve measures the BITMAP, and it is
+        // the two bitmaps' equality that the invariance proof rests on.
+        if (crossFadeSet.has(g.name) || leafPainted(g, g[which])) {
           wanted.push({
             name: g.name, which, fit: g[which].objectFit,
             window: isolationWindow(g, g[which]),
@@ -1213,12 +1602,31 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
           () => requestAnimationFrame(r))));
         shots.push(await page.screenshot({
           type: 'png',
-          // The isolation pins the group at `left/top: 0` and translates it by
-          // `win.offset`, so the window starts at the viewport origin.
-          clip: { x: 0, y: 0, width: win.width, height: win.height },
+          // The FULL viewport, not the window. The isolation pins the group at
+          // `left/top: 0` and translates it by `win.offset`, so the window is
+          // the top-left `win.width`x`win.height` of this image — and the REST
+          // of the image is what probeSnapshotOverflow needs to see. Same
+          // render either way, so the window's pixels are byte-identical to
+          // the wave-38 `clip`.
+          clip: { x: 0, y: 0, width: viewport.width, height: viewport.height },
         }));
       }
-      const s = solveSnapshot(shots[0], shots[1]);
+      // CROP DETECTION before the solve: a snapshot that paints past the union
+      // of its group and leaf boxes (a captured element with ink overflow)
+      // would otherwise be measured as a smaller, "uniform" box and ship with
+      // the overflowing ink silently deleted.
+      const over = probeSnapshotOverflow(shots[0], shots[1], win);
+      if (over.error) { solved[key] = { error: over.error }; continue; }
+      if (over.outside > VT_OVERFLOW_INK_TOLERANCE_PX) {
+        solved[key] = {
+          error: `snapshot overflows its ${win.width}x${win.height} box ` +
+                 `(${over.outside}px of ink outside it)`,
+        };
+        continue;
+      }
+      const s = solveSnapshot(
+        cropComposite(shots[0], win.width, win.height),
+        cropComposite(shots[1], win.width, win.height));
       // Re-base the measured rect into the GROUP's own coordinates (undo the
       // isolation translate).
       if (s.rect) s.rect = { ...s.rect, x: s.rect.x - win.offset.x, y: s.rect.y - win.offset.y };
@@ -1228,7 +1636,7 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
     await page.evaluate((id) => { const s = document.getElementById(id); if (s) s.remove(); },
       VT_ISOLATION_STYLE_ID);
 
-    const { bail, plan } = planViewTransitionBake(walk, solved);
+    const { bail, plan } = planViewTransitionBake(walk, solved, crossFade);
     if (bail) return { status: 'bailed', reason: bail };
     const stem = fixtureStem(testRel);
     const written = applyViewTransitionBakePlan(fixture, stem, plan);
@@ -1236,6 +1644,9 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
       status: 'baked', trigger,
       groups: plan.boxes.length,
       leaves: plan.boxes.reduce((n, b) => n + b.leaves.length, 0),
+      // Provenance for the batch log: which groups shipped as a proved
+      // time-invariant cross-fade rather than as a single frozen leaf.
+      crossFade: crossFade.length,
       written,
     };
   } catch (err) {
@@ -1283,7 +1694,9 @@ async function main() {
         }
         console.log(`${outcome.status.padEnd(8)} ${rel}` +
           (outcome.status === 'baked'
-            ? ` (${outcome.groups} groups, ${outcome.leaves} leaves — ${outcome.trigger})`
+            ? ` (${outcome.groups} groups, ${outcome.leaves} leaves` +
+              `${outcome.crossFade ? `, ${outcome.crossFade} invariant cross-fade` : ''}` +
+              ` — ${outcome.trigger})`
             : ` (${outcome.reason})`));
       } catch (err) {
         hardFail++;

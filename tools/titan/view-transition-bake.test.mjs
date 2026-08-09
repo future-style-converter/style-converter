@@ -45,6 +45,9 @@ import {
   parseUsedMatrix, transformedBounds, boundsOverlap, isolationWindow,
   solveSnapshot, firstDifference, hexToComputedRgb, snapshotColorCss,
   planViewTransitionBake, applyViewTransitionBakePlan, isolationCss,
+  VT_XFADE_SUM_EPS, allDifferences, isComplementaryCrossFade,
+  crossFadeChainOpacity, classifyStabilityDrift, REFTEST_WAIT_SHIM,
+  VT_OVERFLOW_INK_TOLERANCE_PX, cropComposite, probeSnapshotOverflow,
 } from './view-transition-bake.mjs';
 import {
   viewTransitionBakeTrigger,
@@ -388,6 +391,60 @@ test('VT solve: mismatched composite sizes are a loud error, never a silent crop
 
 // ── 6. Settle stability ─────────────────────────────────────────────────────
 
+// ── 5b. The crop probe (wave-39 A4) ─────────────────────────────────────────
+
+test('VT overflow: the ink tolerance is a sub-visible antialiasing allowance, not a fudge', () => {
+  assert.equal(VT_OVERFLOW_INK_TOLERANCE_PX, 4);
+});
+
+test('VT overflow: the crop is byte-identical to the pixels the old clip produced', () => {
+  const [black, white] = composites(20, 12, (x, y) =>
+    ({ r: x * 10, g: y * 10, b: 7, a: 1 }));
+  const crop = PNG.sync.read(cropComposite(black, 8, 5));
+  const full = PNG.sync.read(black);
+  assert.equal(crop.width, 8);
+  assert.equal(crop.height, 5);
+  for (let y = 0; y < 5; y++) {
+    for (let x = 0; x < 8; x++) {
+      for (let c = 0; c < 4; c++) {
+        assert.equal(crop.data[(y * 8 + x) * 4 + c], full.data[(y * 20 + x) * 4 + c]);
+      }
+    }
+  }
+  // …and the white composite crops the same way, or the solve pairs two
+  // different regions.
+  assert.equal(PNG.sync.read(cropComposite(white, 8, 5)).width, 8);
+});
+
+test('VT overflow: a snapshot confined to its window reports NO outside ink', () => {
+  // Painted only inside the 10×10 window; the rest of the 40×40 viewport is
+  // the transparent surround.
+  const [b, w] = composites(40, 40, (x, y) =>
+    (x < 10 && y < 10 ? { r: 0, g: 128, b: 0, a: 1 } : { r: 0, g: 0, b: 0, a: 0 }));
+  assert.deepEqual(probeSnapshotOverflow(b, w, { width: 10, height: 10 }), { outside: 0 });
+});
+
+test('VT overflow: ink outside the window is COUNTED — the cropped-lie detector', () => {
+  // The measured defect's shape: a 10×10 box whose children paint well past it.
+  const [b, w] = composites(40, 40, (x, y) =>
+    ((x < 10 && y < 10) || (x >= 20 && x < 25 && y >= 20 && y < 30)
+      ? { r: 0, g: 128, b: 0, a: 1 }
+      : { r: 0, g: 0, b: 0, a: 0 }));
+  assert.equal(probeSnapshotOverflow(b, w, { width: 10, height: 10 }).outside, 50);
+});
+
+test('VT overflow: a window that IS the viewport has an empty complement — the root case', () => {
+  const [b, w] = composites(24, 24, () => ({ r: 255, g: 255, b: 255, a: 1 }));
+  assert.deepEqual(probeSnapshotOverflow(b, w, { width: 24, height: 24 }), { outside: 0 });
+});
+
+test('VT overflow: mismatched composite sizes are a loud error, never a silent pass', () => {
+  const [b] = composites(8, 8, () => ({ r: 0, g: 0, b: 0, a: 1 }));
+  const [w] = composites(8, 9, () => ({ r: 0, g: 0, b: 0, a: 1 }));
+  assert.match(probeSnapshotOverflow(b, w, { width: 8, height: 8 }).error,
+    /overflow-probe size drift 8x8 vs 8x9/);
+});
+
 test('VT stability: firstDifference reports the dotted PATH, so a batch log says what moved', () => {
   const a = { groups: [{ name: 'root', old: { opacity: '1' } }] };
   const b = { groups: [{ name: 'root', old: { opacity: '0.5' } }] };
@@ -408,6 +465,155 @@ test('VT stability: the opacity tolerance is one 8-bit step and applies ONLY to 
 test('VT stability: a type change and a new key both surface', () => {
   assert.deepEqual(firstDifference({ a: 1 }, { a: '1' }), { path: 'a', a: 1, b: '1' });
   assert.deepEqual(firstDifference({}, { a: 1 }), { path: 'a', a: undefined, b: 1 });
+});
+
+test('VT stability: firstDifference is the one-answer front end for allDifferences', () => {
+  const a = { p: { x: '1', y: '2' } }, b = { p: { x: '9', y: '8' } };
+  const all = allDifferences(a, b);
+  assert.equal(all.length, 2);
+  assert.deepEqual(firstDifference(a, b), all[0]);
+  // The tolerance lives in ONE traversal, so the two can never disagree.
+  const o = (v) => ({ groups: [{ old: { opacity: String(v) } }] });
+  assert.deepEqual(allDifferences(o(0.5), o(0.5 + 0.5 / 255)), []);
+  assert.equal(firstDifference(o(0.5), o(0.5 + 0.5 / 255)), null);
+});
+
+// ── 6b. The invariant cross-fade (wave-39 A4) ───────────────────────────────
+
+/** The section's real shape: a UA cross-fade caught mid-flight — both leaves
+ *  plus-lighter, opacities complementary. */
+function xfadeGroup(p, over = {}) {
+  return grp({
+    old: { opacity: String(1 - p), mixBlendMode: 'plus-lighter' },
+    new: { opacity: String(p), mixBlendMode: 'plus-lighter' },
+    ...over,
+  });
+}
+
+test('VT cross-fade: the sum tolerance is one 8-bit step, like every other tolerance here', () => {
+  assert.equal(VT_XFADE_SUM_EPS, 1 / 255);
+});
+
+test('VT cross-fade: the UA pair is recognised at any animation position', () => {
+  for (const p of [0, 0.001, 0.5, 0.9994, 1]) {
+    assert.equal(isComplementaryCrossFade(xfadeGroup(p)), true, `p=${p}`);
+  }
+});
+
+test('VT cross-fade: `normal` blending is refused — source-over is NOT position-independent', () => {
+  // Co = αp + α(1−p)(1−αp) depends on p, so the collapse to α·C does not hold.
+  assert.equal(isComplementaryCrossFade(grp({
+    old: { opacity: '0.4' }, new: { opacity: '0.6' },   // default blend: normal
+  })), false);
+});
+
+test('VT cross-fade: two opacities that do not sum to 1 are two animations, not one fade', () => {
+  const g = grp({
+    old: { opacity: '0.4', mixBlendMode: 'plus-lighter' },
+    new: { opacity: '0.4', mixBlendMode: 'plus-lighter' },
+  });
+  assert.equal(isComplementaryCrossFade(g), false);
+  // …and the boundary is the 8-bit step, measured on both sides of it.
+  assert.equal(isComplementaryCrossFade(xfadeGroup(0.5, {
+    new: { opacity: String(0.5 + 0.5 / 255), mixBlendMode: 'plus-lighter' },
+  })), true);
+  assert.equal(isComplementaryCrossFade(xfadeGroup(0.5, {
+    new: { opacity: String(0.5 + 2 / 255), mixBlendMode: 'plus-lighter' },
+  })), false);
+});
+
+test('VT cross-fade: the decoy-group idiom (hidden image-pair) is not a cross-fade', () => {
+  assert.equal(isComplementaryCrossFade(xfadeGroup(0.5, {
+    imagePair: { visibility: 'hidden' }, old: { visibility: 'hidden', mixBlendMode: 'plus-lighter', opacity: '0.5' },
+  })), false);
+  // …nor is a pair whose whole chain above them has been faded out.
+  assert.equal(isComplementaryCrossFade(xfadeGroup(0.5, { opacity: '0' })), false);
+});
+
+test('VT cross-fade: the chain opacity leaves the (summing-to-1) leaves out', () => {
+  assert.equal(crossFadeChainOpacity(xfadeGroup(0.3, {
+    opacity: '0.5', imagePair: { opacity: '0.5' },
+  })), 0.25);
+});
+
+test('VT cross-fade: classify defers ONLY a leaf-opacity pair, and names the group', () => {
+  const a = walkOf([xfadeGroup(0.1)]), b = walkOf([xfadeGroup(0.9)]);
+  assert.deepEqual(classifyStabilityDrift(a, b), { hard: null, crossFade: ['root'] });
+});
+
+test('VT cross-fade: any OTHER drift stays a hard transition-not-frozen bail', () => {
+  const a = walkOf([xfadeGroup(0.1)]);
+  const b = walkOf([xfadeGroup(0.9, { transform: 'matrix(1, 0, 0, 1, 5, 0)' })]);
+  const { hard } = classifyStabilityDrift(a, b);
+  assert.equal(hard.path, 'groups.0.transform');
+  // …and an unstable NAME order is a walker artifact, never a cross-fade.
+  const c = walkOf([xfadeGroup(0.9, { name: 'other' })]);
+  assert.ok(classifyStabilityDrift(a, c).hard);
+});
+
+test('VT cross-fade: a leaf-opacity drift on a NON-complementary pair is still hard', () => {
+  const mk = (o, n) => walkOf([grp({
+    old: { opacity: String(o), mixBlendMode: 'plus-lighter' },
+    new: { opacity: String(n), mixBlendMode: 'plus-lighter' },
+  })]);
+  const { hard, crossFade } = classifyStabilityDrift(mk(1, 1), mk(0.5, 1));
+  assert.equal(hard.path, 'groups.0.old.opacity');
+  assert.deepEqual(crossFade, []);
+});
+
+test('VT cross-fade plan: two IDENTICAL snapshots collapse to ONE box', () => {
+  const w = walkOf([xfadeGroup(0.3)]);
+  const solved = { 'root|old': solvedFlat(), 'root|new': solvedFlat() };
+  const { bail, plan } = planViewTransitionBake(w, solved, ['root']);
+  assert.equal(bail, undefined);
+  assert.equal(plan.boxes[0].leaves.length, 1);
+  assert.equal(plan.boxes[0].leaves[0].which, 'cross-fade');
+  // The pair's own opacities sum to 1, so NO leaf opacity is emitted…
+  assert.equal(plan.boxes[0].leaves[0].props.opacity, undefined);
+  assert.equal(plan.boxes[0].leaves[0].props['background-color'], 'rgb(0, 128, 0)');
+});
+
+test('VT cross-fade plan: the chain ABOVE the pair is still folded onto the box', () => {
+  const w = walkOf([xfadeGroup(0.3, { imagePair: { opacity: '0.5' } })]);
+  const solved = { 'root|old': solvedFlat(), 'root|new': solvedFlat() };
+  const { plan } = planViewTransitionBake(w, solved, ['root']);
+  assert.equal(plan.boxes[0].leaves[0].props.opacity, '0.5');
+});
+
+test('VT cross-fade plan bail: a pair whose snapshots DIFFER has no frozen state', () => {
+  const w = walkOf([xfadeGroup(0.3)]);
+  const solved = {
+    'root|old': solvedFlat(),
+    'root|new': solvedFlat({ rgba: { r: 255, g: 0, b: 0, a: 1 } }),
+  };
+  assert.match(planViewTransitionBake(w, solved, ['root']).bail,
+    /^cross-fade-not-invariant 'root'/);
+  // A rect difference is just as disqualifying as a colour one.
+  const solved2 = {
+    'root|old': solvedFlat(),
+    'root|new': solvedFlat({ rect: { x: 0, y: 0, w: 100, h: 99 } }),
+  };
+  assert.match(planViewTransitionBake(w, solved2, ['root']).bail,
+    /^cross-fade-not-invariant 'root'/);
+});
+
+test('VT cross-fade plan: the raster refusal and the missing-solve bail still apply to the pair', () => {
+  const w = walkOf([xfadeGroup(0.3)]);
+  assert.match(planViewTransitionBake(w, { 'root|old': solvedFlat() }, ['root']).bail,
+    /missing snapshot solve for root\/new/);
+  assert.match(planViewTransitionBake(w, {
+    'root|old': solvedFlat({ uniform: false, distinct: 4, coverage: 61 }),
+    'root|new': solvedFlat(),
+  }, ['root']).bail, /non-uniform-snapshot root\/old \(4 colours, 61% flat\)/);
+});
+
+test('VT cross-fade plan: an un-flagged group keeps the wave-38 both-leaves-painted bail', () => {
+  // The default third argument is empty, so every pre-existing caller and
+  // every future one that does not opt in decides exactly as wave 38 did.
+  const w = walkOf([xfadeGroup(0.3)]);
+  const solved = { 'root|old': solvedFlat(), 'root|new': solvedFlat() };
+  assert.match(planViewTransitionBake(w, solved).bail,
+    /mix-blend-mode 'plus-lighter' with both leaves painted on 'root'/);
 });
 
 // ── 7. planViewTransitionBake ───────────────────────────────────────────────
@@ -665,16 +871,54 @@ test('VT: snapshotColorCss keeps the common case the simplest string', () => {
   assert.equal(snapshotColorCss({ r: 1, g: 2, b: 3, a: 0.25 }), 'rgba(1, 2, 3, 0.25)');
 });
 
+// ── 9b. The /common/ shim's surface (wave-39 A4) ────────────────────────────
+
+test('VT shim: every global the corpus calls is supplied, and each is on `window`', () => {
+  // Enumerated from the corpus, not guessed — the census behind the module's
+  // banner. `waitForCompositorReady` is the biggest single one (28 calls) and
+  // the sole reason 26 of the 30 never-settled tests never settled.
+  for (const fn of [
+    'takeScreenshot', 'takeScreenshotDelayed', 'takeScreenshotOnAnimationsReady',
+    'failIfNot', 'waitForAtLeastOneFrame', 'waitForCompositorReady',
+  ]) {
+    assert.match(REFTEST_WAIT_SHIM, new RegExp(`function ${fn}\\(`), `defines ${fn}`);
+    assert.match(REFTEST_WAIT_SHIM, new RegExp(`window\\.${fn} = ${fn};`), `exports ${fn}`);
+  }
+});
+
+test('VT shim: the settle signal is the reftest-wait class removal, and nothing can hang', () => {
+  assert.match(REFTEST_WAIT_SHIM, /classList\.remove\('reftest-wait'\)/);
+  // takeScreenshotOnAnimationsReady must shoot on REJECTION too: a cancelled
+  // animation would otherwise hold the page until VT_SETTLE_TIMEOUT_MS.
+  assert.match(REFTEST_WAIT_SHIM, /Promise\.all\(ready\)\.then\(takeScreenshot, takeScreenshot\)/);
+});
+
+test('VT shim: waitForCompositorReady promotes NO layer — the CPU-raster contract', () => {
+  // WPT's original animates document.body, which forces a compositing layer
+  // and would change the pixels the alpha solve measures under
+  // --disable-gpu-rasterization. The shim is a frame barrier instead.
+  assert.doesNotMatch(REFTEST_WAIT_SHIM, /\.animate\(/);
+  assert.match(REFTEST_WAIT_SHIM,
+    /function waitForCompositorReady\(\)\{ return waitForAtLeastOneFrame\(\); \}/);
+});
+
 test('VT: isolationCss silences every other group and pins the measured one at the origin', () => {
   const css = isolationCss('target', 'old', '#000000', { x: 12.345, y: -6 });
   assert.match(css, /::view-transition-group\(\*\) \{ opacity: 0 !important; \}/);
   assert.match(css, /::view-transition-group\(target\)/);
   assert.match(css, /transform: translate\(12\.35px, -6px\) !important/);
   assert.match(css, /left: 0 !important; top: 0 !important/);
-  // Both the canvas and the fixed backdrop get the isolation colour, or a
-  // window pushed past the ::view-transition edge would read the page.
-  assert.match(css, /:where\(html, body\) \{ background: #000000 !important; \}/);
+  // The fixed ::view-transition box IS the backdrop — it is `inset: 0` on the
+  // snapshot containing block and the caller refuses a window bigger than the
+  // viewport, so one opaque rule covers every pixel the clip can read.
   assert.match(css, /::view-transition \{ background: #000000 !important; \}/);
+  // …and the PAGE's own background is never touched (wave-39 A4). The wave-38
+  // `:where(html, body)` belt-and-braces rule repainted a LIVE
+  // `::view-transition-new` leaf with the backdrop, so its alpha solve read
+  // "nothing painted" and the whole new-content half of the tree was dropped.
+  // This is the regression pin for that deletion.
+  assert.doesNotMatch(css, /html/);
+  assert.doesNotMatch(css, /\bbody\b/);
   // The measured leaf is the ONLY one left painting, with blending disabled.
   assert.match(css, /::view-transition-old\(\*\), ::view-transition-new\(\*\) \{ opacity: 0 !important; \}/);
   assert.match(css, /::view-transition-old\(target\)/);

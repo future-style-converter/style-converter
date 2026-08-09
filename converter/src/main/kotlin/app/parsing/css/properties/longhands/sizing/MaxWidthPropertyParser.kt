@@ -12,6 +12,9 @@ object MaxWidthPropertyParser : PropertyParser {
             trimmed == "none" -> MaxWidthProperty.MaxValue.None()
             trimmed == "min-content" -> MaxWidthProperty.MaxValue.MinContent()
             trimmed == "max-content" -> MaxWidthProperty.MaxValue.MaxContent()
+            // css-sizing-3 §5.1 bare `fit-content` keyword (33 corpus
+            // occurrences on max-width) — see WidthPropertyParser's branch.
+            trimmed == "fit-content" -> MaxWidthProperty.MaxValue.FitContent(null)
             trimmed.startsWith("fit-content(") && trimmed.endsWith(")") -> {
                 val sizeStr = trimmed.substring(12, trimmed.length - 1)
                 val size = LengthParser.parse(sizeStr)

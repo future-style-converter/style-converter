@@ -7991,6 +7991,80 @@ export function documentDirectionality(html) {
   return null;
 }
 
+/**
+ * wave-39 lane A5 — THE dir-ATTRIBUTE BODY ROOT (N6's honest deferral).
+ *
+ * WHAT WAS MISSING, measured. Wave-38 lane N6 wired the PRINCIPAL DIRECTION:
+ * css-writing-modes-4 §8 propagates the body's `direction` to the initial
+ * containing block, and the web harness now hoists it onto the ICB div
+ * (apps/web-harness resolveCanvasDirection). That channel reads ONE place —
+ * the synthetic `meta.role: 'body-root'` component — and the extractor mints
+ * that component only when a root-scope CSS RULE (`body {…}` / `html {…}` /
+ * `:root {…}` / `* {…}`) matched. A document that declares its base direction
+ * the HTML way, `<body dir=rtl>` or `<html dir=rtl>`, therefore had no
+ * component for the propagation to ride and stayed left-to-right end to end.
+ * The same hole starves the wave-30 A4 bake-down, whose ROOT_INHERITED_
+ * TRIGGER_PROPS list names `direction` by name: with no root bag there is no
+ * inheritance SOURCE, so not even the top-level children ran RTL.
+ *
+ * POPULATION: 9 bucket-A tests carry a `dir` attribute on html/body
+ * (css-align self-align-safe-unsafe-{flex,grid}-003, css-ruby ruby-bidi-001/
+ * -003, css-text text-align-match-parent-root-{ltr,rtl,logical}, selectors
+ * dir-pseudo-update-document-element and dir-style-02a). Six of them resolve
+ * to `rtl`; two of the nine sit inside the depth-48 gate.
+ *
+ * WHY THIS IS THE SAME MAPPING THE PER-ELEMENT PATH ALREADY MAKES. HTML
+ * §15.3.4 defines `dir=ltr|rtl` as a presentational hint for the CSS
+ * `direction` property; buildNode has mapped it onto every ordinary element
+ * since wave-15 (see the BIDI-EXTRACT part 2 banner). This is that mapping
+ * applied to the ONE element the element walker never visits — `<body>` —
+ * routed to the bag that represents it. Two properties of that mapping are
+ * inherited verbatim rather than re-decided here:
+ *   * `unicode-bidi: isolate`, the other half of §15.3.4's hint, is NOT
+ *     emitted (no runtime has a unicode-bidi applier — wave-15's documented
+ *     scope cut);
+ *   * `dir=auto` on html/body is not answered at all, because
+ *     documentDirectionality refuses it rather than guessing (its own doc
+ *     comment records why).
+ *
+ * PRECEDENCE. The hint is UA-origin (CSS Cascade 5 §6.1), so any author
+ * `direction` already in the root bag — from `html {direction:ltr}`, from
+ * `body {direction:rtl}` — wins and this writes nothing. Identical guard to
+ * the per-element path's `('direction' in props) ? null : …`.
+ *
+ * WHY `rtl` ONLY, and why that is not an asymmetry. `ltr` is the INITIAL
+ * value of `direction` (css-writing-modes-4 §2.1), so a minted `direction:
+ * ltr` bag states a fact the cascade already holds: no box moves, the ICB
+ * hoist refuses it by name (resolveCanvasDirection returns undefined for
+ * `ltr`), and the only observable effects would be churn — a brand-new empty
+ * component in the flat list of every LTR document plus a baked no-op
+ * `direction: ltr` and a `body-inherited-baked` lossy marker on each of its
+ * top-level children. That is the same reason resolveCanvasWritingMode and
+ * resolveCanvasDirection both refuse their initial values. Refusing `ltr`
+ * here keeps every LTR fixture in the ~10.7k-fixture corpus byte-identical,
+ * including the currently-passing gate cell
+ * selectors/dir-pseudo-update-document-element (`<html dir="ltr">`).
+ *
+ * MUTATES `root.props` in place (same contract as bakeSampledAnimation) and
+ * returns true when it wrote, so the caller can open its emit gate for a
+ * document whose ONLY root-scope declaration is this one. Exported for the
+ * unit pins.
+ *
+ * @param {{props: Record<string,string>}} root  the propsForBodyRoot result
+ * @param {'ltr'|'rtl'|null|undefined} documentDir  documentDirectionality()
+ * @returns {boolean} true when a `direction` was minted onto the bag
+ */
+export function mintDocumentDirection(root, documentDir) {
+  // Defensive: legacy direct callers may hand a bagless root or no dir at all.
+  if (!root || !root.props || typeof root.props !== 'object') return false;
+  // Only the non-initial keyword carries information (see the doc comment).
+  if (documentDir !== 'rtl') return false;
+  // UA-origin loses to any author declaration already in the root scope.
+  if ('direction' in root.props) return false;
+  root.props.direction = documentDir;
+  return true;
+}
+
 // ── THE LANG WIRE (wave-37 lane W4) ─────────────────────────────────────────
 //
 // WHAT WAS MISSING, measured. The `lang` attribute is the ONE piece of source
@@ -9216,6 +9290,18 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // canvases read background/padding straight off it.
   const root = propsForBodyRoot(rules);
 
+  // wave-39 lane A5 — THE dir-ATTRIBUTE BODY ROOT. `<body dir=rtl>` /
+  // `<html dir=rtl>` is HTML §15.3.4's presentational hint for `direction`,
+  // and this is the ONE element the tree walker never visits, so the hint has
+  // to be applied here or nowhere. Runs immediately after propsForBodyRoot so
+  // every consumer below — the emit gate, shouldSlotBodyChildren, the wave-30
+  // A4 inherited bake-down (whose trigger list names `direction`), and the
+  // harness's ICB direction hoist — sees ONE bag with no ordering caveat.
+  // Returns false (and writes nothing) for every document without an rtl
+  // document-element dir attribute, which is what keeps the corpus still; see
+  // mintDocumentDirection's banner for the population and the `ltr` refusal.
+  const directionMinted = mintDocumentDirection(root, effectiveCtx.documentDir);
+
   // wave-15 BIDI-EXTRACT part 3: white-space resolver handed to the tree
   // walker via mergeCtx. `white-space` is an INHERITED property (CSS Text
   // §3), so the effective value for an element is its own matched value
@@ -9269,7 +9355,14 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // the synthetic root — it is the box the generated content hangs off. The
   // pre-A-RC2 gate looked at `root.props` alone, which was sound only while
   // pseudo declarations were (wrongly) merged into that same bag.
-  if (root.matchedRules > 0 &&
+  // wave-39 lane A5: `|| directionMinted` is the second way this bag can be
+  // real. `matchedRules` counts root-scope CSS RULES, and a document whose
+  // base direction comes from `<body dir=rtl>` alone has none — yet its bag
+  // now holds a genuine declaration (the §15.3.4 hint), so refusing to emit
+  // would throw the value away one line after minting it. The second clause
+  // is untouched and still holds by construction: a minted direction makes
+  // `root.props` non-empty.
+  if ((root.matchedRules > 0 || directionMinted) &&
       (Object.keys(root.props).length > 0 || rootPseudoNames.length > 0)) {
     // wave-13 KEYFRAMES-SAMPLER: the measured WPT test (background-color-
     // animation-in-body) animates <body> itself, so the body-root bag is a
@@ -10357,7 +10450,13 @@ async function main() {
             if (outcome.status !== 'skipped') {
               vtNote = ` [vt-bake: ${outcome.status}` +
                 (outcome.status === 'baked'
-                  ? ` — ${outcome.groups} groups, ${outcome.leaves} leaves`
+                  ? ` — ${outcome.groups} groups, ${outcome.leaves} leaves` +
+                    // wave-39 A4 provenance: how many of those groups shipped
+                    // as a PROVED time-invariant cross-fade (a still-running
+                    // UA fade between two identical snapshots) rather than as
+                    // a frozen single leaf. Silent when zero, so the wave-38
+                    // log shape is unchanged for every test that had none.
+                    (outcome.crossFade ? `, ${outcome.crossFade} invariant cross-fade` : '')
                   : ` — ${outcome.reason}`) + ']';
             }
           } catch (vtErr) {

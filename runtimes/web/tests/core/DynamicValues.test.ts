@@ -121,6 +121,33 @@ describe('buildStyles — end-to-end token-fixture shapes', () => {
     ]);
     expect(styles.borderTopLeftRadius).toBeUndefined();
   });
+  // wave-39 lane A5 — css-values-5 §11 calc-size(). The `calc(` substring test
+  // above cannot see it (the function name continues `calc-size(`), so it fell
+  // into the static-drop branch and five depth-48 css-values cells captured an
+  // empty page. It is unresolvable in the reader by construction (its operand
+  // is an INTRINSIC size) and resolvable by the target (Chromium ships it), so
+  // it belongs with var()/calc() and nowhere else.
+  it('passes calc-size() through verbatim (css-values-5 §11)', () => {
+    const styles = buildStyles([
+      p('Generic', { propertyName: 'width', rawValue: 'calc-size(auto, size + 80px)', _unmapped: true }),
+      p('Generic', { propertyName: 'min-width', rawValue: 'calc-size(auto, size - 50px)', _unmapped: true }),
+      p('Generic', { propertyName: 'max-width', rawValue: 'calc-size(min-content, size * 1000)', _unmapped: true }),
+    ]);
+    // Verbatim: the value must NOT be re-wrapped — `calc(calc-size(...))` is
+    // invalid CSS (calc-size() is not a calc-compatible operand).
+    expect(styles.width).toBe('calc-size(auto, size + 80px)');
+    expect(styles.minWidth).toBe('calc-size(auto, size - 50px)');
+    expect(styles.maxWidth).toBe('calc-size(min-content, size * 1000)');
+  });
+  it('still drops a static intrinsic keyword — that gap belongs to the reader', () => {
+    // `width: fit-content` is typed by the Kotlin parser as of wave-39 A5, so
+    // it never reaches this envelope any more; if it ever does again, dropping
+    // it here keeps the parser hole visible instead of masking it.
+    const styles = buildStyles([
+      p('Generic', { propertyName: 'width', rawValue: 'fit-content', _unmapped: true }),
+    ]);
+    expect(styles.width).toBeUndefined();
+  });
 });
 
 describe('buildVariables — custom-property definitions → inline-style keys', () => {

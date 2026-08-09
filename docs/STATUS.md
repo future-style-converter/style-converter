@@ -610,7 +610,7 @@ dirs + WPT corpus are gitignored):
   machinery (Compose's is API 29 vs minSdk 24); Rule 43 stays intact
   with the real closing move specified in its banner. filter-effects
   web 5→6/11. 27 sections; zero regressions; 327-net clean. Totals:
-  **web 269/302, iOS 238/289, Android 229/289**.
+  **web 269/317, iOS 238/289, Android 229/289**.
   Wave 32 (`tools/titan/results/corpus-v5-7.json`) landed the **v3
   `meta.runs` wire** — the inline anonymous-run box deferred since
   wave 21. An ordered `[{text}|{child}]` list rides the same meta hop
@@ -635,7 +635,7 @@ dirs + WPT corpus are gitignored):
   item, not an engine defect. Post-load gained wedged-Chromium
   recovery. Operational contract: pre-`_runs` harness builds hard-fail
   the new meta key, so gates force fresh installs. 27 sections; zero
-  regressions; 327-net clean. Totals: **web 269/302, iOS 239/289,
+  regressions; 327-net clean. Totals: **web 269/317, iOS 239/289,
   Android 234/289**.
   Wave 33 (`tools/titan/results/corpus-v5-8.json`): **css-tables
   perfect on web (11/11) and Android (11/11), iOS 10/11**. The
@@ -661,7 +661,7 @@ dirs + WPT corpus are gitignored):
   inline formatting context. One harness item queued from that
   diagnosis: composed-canvas document ROOTS stack in the harness's own
   Column. 27 sections; zero regressions; 327-net clean. Totals:
-  **web 270/302, iOS 241/289, Android 236/289**. Eight web-perfect
+  **web 270/317, iOS 241/289, Android 236/289**. Eight web-perfect
   sections.
   Wave 34 (`tools/titan/results/corpus-v5-9.json`) was the maximum
   wave — nine builder lanes. **css-tables is perfect on all three
@@ -768,7 +768,7 @@ dirs + WPT corpus are gitignored):
   and the cascade counter/at-rule machinery reached the natives:
   **css-cascade +11/+11/+10 on all three**), `line-clamp: auto`,
   gradient hue-interpolation (css-images web +11 at the head),
-  clip-path `at <position>` + fill-rule (converter 258→302 tests),
+  clip-path `at <position>` + fill-rule (converter 258→317 tests),
   the **lang wire** end-to-end, vertical-rl root propagation on web
   (wm-propagation 0.808→0.897), and device-verified iOS
   overflow-wrap rules — after correcting the wave-36 hyphens
@@ -805,16 +805,44 @@ dirs + WPT corpus are gitignored):
   locales. Depth-48 gate: zero regressions, net clean. Totals:
   **web 1143/1379 (82.9%), iOS 935/1351 (69.2%), Android 874/1347
   (64.9%)**.
+  Wave 39 (`tools/titan/results/corpus-v6-4.json`) was the Android
+  wave, and it **closed the Android–iOS gap to 0.4 points** (was
+  4.3). The centerpiece: the 1px half-leading cluster's root cause is
+  a *rounding-tie asymmetry* — Blink rounds the positive ascent
+  magnitude (`floor(a+0.5)`) while Android's Paint rounds the
+  negative scalar (`= ceil(a−0.5)`); the two differ only at exact .5
+  ties, and Inter's ascent (1984/2048) lands on a half-integer
+  exactly at 16px, the corpus body size. `HalfLeadingBaseline`
+  corrects the draw-time delta behind a ±2px refusal guard;
+  the predicted +59 flips verified at the gate across 16 sections
+  (css-tables +10, css-ui +8, overflow +5…). The wave also survived
+  two instrument events, both resolved with evidence: a pool-emulator
+  flake killed two Android section feeds (re-fed clean), and nine
+  multicol captures vanished — root-caused **from disassembled
+  bytecode** (SubcomposeLayout's measure policy throws on all
+  intrinsic queries; a new flex auto-min mechanism probed them), and
+  the offending mechanism was gated off after an isolation A/B
+  proved it had won zero cells (its apparent gains were the
+  half-leading uplift — a false attribution the two-APK experiment
+  corrected). Also landed: the native image hop (feeder asset bundle
+  + img rendering through the object-fit appliers; SVG stays the
+  honest wall), the css-overflow one-defect fix (+5, the monospace
+  hypothesis refuted by measurement), css-values web 37→42, the
+  direction body-root minting, and honest-flat VT mining (four real
+  defects fixed; three vacuous passes traded for three earned ones).
+  Depth-48 gate: zero regressions, net clean. Totals: **web
+  1151/1379 (83.5%), iOS 939/1351 (69.5%), Android 931/1347
+  (69.1%)**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 302 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1234 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2169 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1362 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1494 |
+| converter (Kotlin) | `./gradlew :converter:test` | 317 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1236 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2217 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1375 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1533 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

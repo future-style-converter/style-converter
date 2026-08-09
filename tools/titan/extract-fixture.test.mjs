@@ -6115,3 +6115,87 @@ test('N4 @import: cycles, depth and misplaced rules all decline rather than loop
   assert.equal(none.inlined, 0);
   await fsp.rm(dir, { recursive: true, force: true });
 });
+
+// ── wave-39 lane A5: THE dir-ATTRIBUTE BODY ROOT ────────────────────────────
+//
+// N6 (wave 38) wired the principal-direction propagation to the synthetic
+// body-root; these pin the OTHER half — that a `<body dir=rtl>` /
+// `<html dir=rtl>` document actually produces a body-root for it to ride,
+// and that no LTR document moves.
+import { mintDocumentDirection } from './extract-fixture.mjs';
+
+test('A5 dir-mint: the §15.3.4 hint lands on the root bag, and only for rtl', () => {
+  // The whole mapping: an rtl document direction becomes a real declaration.
+  const bag = { props: {} };
+  assert.equal(mintDocumentDirection(bag, 'rtl'), true);
+  assert.deepEqual(bag.props, { direction: 'rtl' });
+  // `ltr` is the INITIAL value — minting it would add a component and a baked
+  // no-op to every LTR document for zero rendering change, so it is refused.
+  const ltr = { props: {} };
+  assert.equal(mintDocumentDirection(ltr, 'ltr'), false);
+  assert.deepEqual(ltr.props, {});
+  // No document-element dir attribute at all (documentDirectionality's null,
+  // and the undefined a legacy direct caller leaves on the ctx).
+  assert.equal(mintDocumentDirection({ props: {} }, null), false);
+  assert.equal(mintDocumentDirection({ props: {} }, undefined), false);
+  // Defensive shapes never throw.
+  assert.equal(mintDocumentDirection(null, 'rtl'), false);
+  assert.equal(mintDocumentDirection({}, 'rtl'), false);
+});
+
+test('A5 dir-mint: an author `direction` beats the UA-origin hint', () => {
+  // CSS Cascade 5 §6.1 — a presentational hint is UA origin, so any
+  // root-scope author declaration wins. Same guard the per-element dir path
+  // uses (`('direction' in props) ? null : …`).
+  const bag = { props: { direction: 'ltr' } };
+  assert.equal(mintDocumentDirection(bag, 'rtl'), false);
+  assert.equal(bag.props.direction, 'ltr');
+});
+
+test('A5 dir-mint: `<html dir=rtl>` with NO root-scope rule still emits a body-root', () => {
+  // This is the deferral N6 recorded: before the mint, `matchedRules === 0`
+  // meant no component at all, so the harness's ICB direction hoist had
+  // nothing to read and the wave-30 A4 bake-down had no inheritance source.
+  const html = '<html dir="rtl"><body><div>one</div></body></html>';
+  const { components } = buildComponents(html, parseCss('div { color: lime }'), 'd1');
+  assert.equal(components['d1__body'].properties.direction, 'rtl');
+  assert.equal(components['d1__body']._role, 'body-root');
+  // …and the inherited bake-down delivers it to the top-level child, which is
+  // the body's SIBLING on the flat wire.
+  assert.equal(components['d1__0'].properties.direction, 'rtl');
+  assert.ok(components['d1__0']._lossyReasons.includes('body-inherited-baked'));
+});
+
+test('A5 dir-mint: `<body dir>` is the nearer rung, and ltr documents do not move', () => {
+  // documentDirectionality answers body-first, so `<html dir=rtl><body dir=ltr>`
+  // resolves to the INITIAL ltr — nothing is minted and no body-root appears
+  // (the corpus-stillness guarantee for every LTR fixture).
+  const mixed = buildComponents(
+    '<html dir="rtl"><body dir="ltr"><div>one</div></body></html>',
+    parseCss('div { color: lime }'), 'd2',
+  ).components;
+  assert.equal(mixed['d2__body'], undefined);
+  assert.equal(mixed['d2__0'].properties.direction, undefined);
+  // A plain `<html dir=ltr>` document is likewise untouched.
+  const ltr = buildComponents(
+    '<html dir="ltr"><body><div>one</div></body></html>',
+    parseCss('div { color: lime }'), 'd3',
+  ).components;
+  assert.equal(ltr['d3__body'], undefined);
+  // …and so is a document with no dir attribute anywhere.
+  const none = buildComponents(
+    '<html><body><div>one</div></body></html>',
+    parseCss('div { color: lime }'), 'd4',
+  ).components;
+  assert.equal(none['d4__body'], undefined);
+});
+
+test('A5 dir-mint: the hint merges into an EXISTING root bag without displacing it', () => {
+  // `<body dir=rtl>` alongside a real root-scope rule: the rule's own
+  // declarations survive verbatim and the direction joins them, so the
+  // canvas resolvers (background / writing-mode / direction) all read one bag.
+  const html = '<html dir="rtl"><body><div>one</div></body></html>';
+  const { components } = buildComponents(html, parseCss('body { background: green }'), 'd5');
+  assert.equal(components['d5__body'].properties.background, 'green');
+  assert.equal(components['d5__body'].properties.direction, 'rtl');
+});

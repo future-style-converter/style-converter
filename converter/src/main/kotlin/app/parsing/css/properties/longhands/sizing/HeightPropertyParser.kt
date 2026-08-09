@@ -14,6 +14,12 @@ object HeightPropertyParser : PropertyParser {
             lower == "auto" -> WidthProperty.WidthValue.Auto()
             lower == "min-content" -> WidthProperty.WidthValue.MinContent()
             lower == "max-content" -> WidthProperty.WidthValue.MaxContent()
+            // css-sizing-3 §5.1 bare `fit-content` keyword — see the decision
+            // record on WidthPropertyParser's identical branch. `height:
+            // fit-content` is the second-commonest intrinsic declaration in
+            // the WPT corpus (87 occurrences) and reached the runtimes only as
+            // a dropped Generic before this branch existed.
+            lower == "fit-content" -> WidthProperty.WidthValue.FitContent(null)
             lower.startsWith("fit-content(") && lower.endsWith(")") -> {
                 val sizeStr = lower.substring(12, lower.length - 1)
                 val size = LengthParser.parse(sizeStr)
