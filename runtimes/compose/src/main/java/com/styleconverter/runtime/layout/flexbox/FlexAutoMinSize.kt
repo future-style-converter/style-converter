@@ -42,31 +42,19 @@ package com.styleconverter.runtime.layout.flexbox
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Constraints
-import java.util.Collections
+import com.styleconverter.runtime.layout.IntrinsicChannel
 
 object FlexAutoMinSize {
 
     // ── Wave 39 hotfix: the intrinsic channel is OPTIONAL on this platform ──
     //
     // §4.5's "content size suggestion" is read through Compose's intrinsic
-    // channel, and Compose does NOT guarantee that channel exists. Every
-    // layout built on SubcomposeLayout — `BoxWithConstraints`, the lazy
-    // lists, `TabRow` — installs `LayoutNode.NoIntrinsicsMeasurePolicy`,
-    // whose four intrinsic entry points do nothing but throw. Read off the
-    // shipped bytecode of androidx.compose.ui:ui-android 1.11.4 (the BOM
-    // this module builds against):
-    //
-    //   LayoutNode$NoIntrinsicsMeasurePolicy.minIntrinsicWidth(…):
-    //     0: new  java/lang/IllegalStateException
-    //     …
-    //    14: athrow                      ← nothing else executes
-    //
-    //   LayoutNodeSubcompositionsState$createMeasurePolicy$1
-    //     extends LayoutNode$NoIntrinsicsMeasurePolicy(NoIntrinsicsMessage)
-    //   NoIntrinsicsMessage = "Asking for intrinsic measurements of
-    //     SubcomposeLayout layouts is not supported. This includes components
-    //     that are built on top of SubcomposeLayout, such as lazy lists,
-    //     BoxWithConstraints, TabRow, etc. …"
+    // channel, and Compose does NOT guarantee that channel exists: the
+    // SubcomposeLayout family refuses it by THROWING. The mechanism — which
+    // layouts refuse, the ui-android 1.11.4 bytecode proof, the narrow-by-
+    // type rule — now lives in [IntrinsicChannel], hoisted there when the
+    // table's §17.5.2 / §17.5.3 intrinsic reads (TableApplier) picked up
+    // the same hazard. What stays HERE is this lane's measured history:
     //
     // MEASURED (wave39-final vs wave38-final, css-multicol Android): the
     // section captured 45 tests at wave38-final and only 36 at wave39-final.
@@ -124,47 +112,26 @@ object FlexAutoMinSize {
     // flipping this one constant and re-running the two isolation sections.
     const val MECHANISM_ENABLED: Boolean = false
 
-    /** One log line per distinct refusal message — never a per-frame spam. */
-    private val intrinsicRefusalsLogged =
-        Collections.synchronizedSet(mutableSetOf<String>())
-
     /**
      * Run an intrinsic query that the platform is allowed to refuse.
      *
      * `internal`, not private, so the JVM suite can pin the refusal contract
      * without Robolectric — the standing shape of this module's tests.
+     * A thin delegate: the guard itself (type-narrowed catch, log-once) is
+     * [IntrinsicChannel.probe]; only this lane's log wording lives here.
      *
      * @return the queried intrinsic, or `null` when this subtree has no
      *   intrinsic channel at all. `null` is NOT a silent fallthrough: the
      *   caller drops to the frozen measure and the refusal is logged once.
      */
     internal fun probeIntrinsic(query: () -> Int): Int? =
-        try {
-            query()
-        } catch (refused: IllegalStateException) {
-            // Narrow by TYPE, not by message text: IllegalStateException is
-            // the exact and only thing NoIntrinsicsMeasurePolicy raises, and
-            // matching the prose would silently stop working the next time
-            // androidx reworks that string. Anything else (an
-            // IllegalArgumentException out of Constraints packing, say) is a
-            // real bug and keeps propagating.
-            logIntrinsicRefusalOnce(refused.message ?: "no message")
-            null
-        }
-
-    /** First caller per distinct message wins the log (atomic `add`). */
-    private fun logIntrinsicRefusalOnce(message: String) {
-        if (intrinsicRefusalsLogged.add(message)) {
-            runCatching {
-                android.util.Log.i(
-                    "FlexAutoMinSize",
-                    "css-flexbox-1 §4.5 automatic minimum size skipped — this " +
-                        "flex item's subtree has no intrinsic channel; the item " +
-                        "keeps the pre-wave-39 measure. Platform said: $message"
-                )
-            }
-        }
-    }
+        IntrinsicChannel.probe(
+            logTag = "FlexAutoMinSize",
+            refusalContext = "css-flexbox-1 §4.5 automatic minimum size skipped — " +
+                "this flex item's subtree has no intrinsic channel; the item " +
+                "keeps the pre-wave-39 measure.",
+            query = query
+        )
 
     /**
      * The main-axis constraint band a flex item must be measured with once
