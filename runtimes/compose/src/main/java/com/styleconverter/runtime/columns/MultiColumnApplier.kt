@@ -36,6 +36,11 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+// The ONE guard for Compose's optional intrinsic channel — a multicol child
+// is an arbitrary component subtree (nested multicol, grid, scroll, …), so
+// the fragmentation gate's natural-height probe can meet
+// NoIntrinsicsMeasurePolicy's throw (see IntrinsicChannel's banner).
+import com.styleconverter.runtime.layout.IntrinsicChannel
 
 /**
  * Applies CSS multi-column layout properties to Compose.
@@ -613,9 +618,30 @@ object MultiColumnApplier {
                 // (a measurable may still be measured after an intrinsic
                 // query), so the identity path below stays untouched when
                 // nothing overflows.
-                val naturalHeights = measurables.map { it.minIntrinsicHeight(columnWidth) }
+                // Guarded (campaign audit 2026-08-10): same hazard as the
+                // spanner-flow probe above — a child whose subtree reaches a
+                // SubcomposeLayout renderer THROWS on the raw read, and the
+                // throw would kill the whole capture composition instead of
+                // skipping one fragmentation decision.
+                val naturalHeights = measurables.map {
+                    IntrinsicChannel.probe(
+                        logTag = "MultiColumnApplier",
+                        refusalContext = "css-break-3 §4 fragmentation-gate " +
+                            "probe skipped — a child's subtree has no intrinsic " +
+                            "channel; this container keeps the legacy greedy " +
+                            "column measure (an over-tall child overflows " +
+                            "instead of fragmenting)."
+                    ) { it.minIntrinsicHeight(columnWidth) }
+                }
                 // Which children WOULD fragment: natural size beyond H.
-                val overflowing = naturalHeights.count { it > columnBlockSize }
+                // ANY refusal ⇒ the overflow census is unknowable — count 0 so
+                // control falls through to the legacy path below, with the
+                // skip recorded in this applier's own fallback ledger
+                // (IntrinsicChannel already logged the platform's refusal).
+                val overflowing = if (naturalHeights.any { it == null }) {
+                    logFragmentationFallbackOnce("child refused the intrinsic probe (SubcomposeLayout subtree)")
+                    0
+                } else naturalHeights.count { it!! > columnBlockSize }
                 if (overflowing > 0 && !fragmentationAllowed) {
                     // Vertical writing-mode bail — blocked-platform, log once.
                     logFragmentationFallbackOnce("vertical writing-mode (blocked-platform)")

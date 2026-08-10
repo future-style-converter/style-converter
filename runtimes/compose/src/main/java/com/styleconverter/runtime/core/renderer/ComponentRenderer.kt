@@ -6774,6 +6774,18 @@ private class BreakWordMinIntrinsicModifier(
         // the break-word min-content floor. Never RAISE the child's own
         // min intrinsic (short labels stay exact).
         val oneChar = with(this) { fontSizeSp.sp.roundToPx() }
+        // RAW forward, deliberately NOT routed through IntrinsicChannel
+        // (campaign audit 2026-08-10): the NoIntrinsicsMeasurePolicy throw is
+        // unreachable below this modifier. The shim wraps ONLY the
+        // placeholder-Text chain (textModifier → composed line-box snap →
+        // glyph compensation → emphasis → decoration → Text; the single
+        // consumer is the label Text call), every link of which is a plain
+        // layout/draw modifier ending at Compose Text's own measure policy —
+        // which always answers intrinsics; no SubcomposeLayout can appear
+        // under it. And this override only RUNS inside somebody's intrinsic
+        // query, which in this runtime is always issued through
+        // IntrinsicChannel.probe — a refusal below (were one ever possible)
+        // would surface at that guarded caller, not escape from here.
         return minOf(measurable.minIntrinsicWidth(height), oneChar)
     }
 }

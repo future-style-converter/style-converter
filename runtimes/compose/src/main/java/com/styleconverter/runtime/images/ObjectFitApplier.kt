@@ -13,6 +13,11 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
+// The ONE guard for Compose's optional intrinsic channel — ObjectFitBox is
+// public API taking ARBITRARY caller content, so ScaleDownLayout's
+// natural-size probes can meet NoIntrinsicsMeasurePolicy's throw whenever
+// that content reaches a SubcomposeLayout (see IntrinsicChannel's banner).
+import com.styleconverter.runtime.layout.IntrinsicChannel
 import kotlin.math.min
 
 /**
@@ -268,17 +273,38 @@ object ObjectFitApplier {
                 (containerHeight * contentAspectRatio) to containerHeight
             }
 
-            // Use intrinsic size if smaller, otherwise use contain size
+            // Use intrinsic size if smaller, otherwise use contain size.
+            // Both natural-size reads are guarded (campaign audit 2026-08-10):
+            // [content] is arbitrary caller content, and a SubcomposeLayout
+            // anywhere below it THROWS on a raw intrinsic query — killing the
+            // whole capture composition, not just this box's scale decision.
             val measurable = measurables.first()
-            val intrinsicWidth = measurable.maxIntrinsicWidth(constraints.maxHeight)
-            val intrinsicHeight = measurable.maxIntrinsicHeight(constraints.maxWidth)
+            val intrinsicWidth = IntrinsicChannel.probe(
+                logTag = "ObjectFitApplier",
+                refusalContext = "object-fit: scale-down natural-width probe " +
+                    "skipped — the content's subtree has no intrinsic channel; " +
+                    "scale-down degrades to contain (the branch that never " +
+                    "overflows the box)."
+            ) { measurable.maxIntrinsicWidth(constraints.maxHeight) }
+            val intrinsicHeight = IntrinsicChannel.probe(
+                logTag = "ObjectFitApplier",
+                refusalContext = "object-fit: scale-down natural-height probe " +
+                    "skipped — the content's subtree has no intrinsic channel; " +
+                    "scale-down degrades to contain (the branch that never " +
+                    "overflows the box)."
+            ) { measurable.maxIntrinsicHeight(constraints.maxWidth) }
 
-            val (contentWidth, contentHeight) = if (intrinsicWidth <= containWidth.toInt() &&
+            val (contentWidth, contentHeight) = if (intrinsicWidth != null &&
+                intrinsicHeight != null &&
+                intrinsicWidth <= containWidth.toInt() &&
                 intrinsicHeight <= containHeight.toInt()) {
-                // Natural size is smaller - use none behavior
+                // Natural size is knowable AND smaller - use none behavior
                 intrinsicWidth.toFloat() to intrinsicHeight.toFloat()
             } else {
-                // Natural size is larger - use contain behavior
+                // Natural size is larger — or unknowable (either probe
+                // refused): css-images-3 §5.4 scale-down is the smaller of
+                // none/contain, and with no knowable natural size contain is
+                // the bound that cannot overflow the box.
                 containWidth to containHeight
             }
 
