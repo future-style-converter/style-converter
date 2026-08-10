@@ -1,0 +1,17 @@
+{
+  "components": {
+    "Grid_AutoTrack_MulticolCell_CaptureAlive": {
+      "properties": { "display": "grid", "grid-template-columns": "auto 60px", "width": "220px", "background-color": "#e5e7eb" },
+      "children": {
+        "cell1": {
+          "properties": { "column-count": "2", "column-gap": "8px" },
+          "children": {
+            "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#10b981" } },
+            "b": { "properties": { "width": "40px", "height": "40px", "background-color": "#3b82f6" } }
+          }
+        },
+        "cell2": { "properties": { "height": "40px", "background-color": "#f59e0b" } }
+      }
+    }
+  }
+}
