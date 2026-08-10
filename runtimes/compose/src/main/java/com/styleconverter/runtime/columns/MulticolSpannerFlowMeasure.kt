@@ -17,6 +17,12 @@ import androidx.compose.ui.layout.MeasureScope
 // Constraints.Infinity marks the unbounded child measure (the continuous
 // slice source of the wave-10 replay — same trick as the definite branch).
 import androidx.compose.ui.unit.Constraints
+// The ONE guard for Compose's optional intrinsic channel — a multicol child
+// is an arbitrary component subtree (the nested-multicol shape reaches this
+// very measure body through the outer's own probe, per the B-RC6 banner in
+// MultiColumnApplier), so the natural-height probe below can meet
+// NoIntrinsicsMeasurePolicy's throw (see IntrinsicChannel's banner).
+import com.styleconverter.runtime.layout.IntrinsicChannel
 
 /**
  * Measures + places a multicol container per [MulticolSpannerFlow.plan]
@@ -103,14 +109,34 @@ internal object MulticolSpannerFlowMeasure {
         // an intrinsic query): natural heights feed the engagement gate.
         // Spanners probe at container width (§6.2 full-width), everything
         // else at the used column width (§2 column containing block).
+        // Guarded (campaign audit 2026-08-10): a child whose subtree reaches
+        // a SubcomposeLayout renderer THROWS on the raw read, and the throw
+        // would kill the whole capture composition, not just this plan.
         val probed = measurables.mapIndexed { i, m ->
-            m.minIntrinsicHeight(
-                if (roles[i] == MulticolSpannerFlow.Role.SPANNER) constraints.maxWidth
-                else columnWidthPx
-            )
+            IntrinsicChannel.probe(
+                logTag = "MulticolSpannerFlow",
+                refusalContext = "css-multicol §6 spanner-flow natural-height " +
+                    "probe skipped — a child's subtree has no intrinsic " +
+                    "channel; the spanner-flow plan disengages and the frozen " +
+                    "legacy paths keep this container's measure."
+            ) {
+                m.minIntrinsicHeight(
+                    if (roles[i] == MulticolSpannerFlow.Role.SPANNER) constraints.maxWidth
+                    else columnWidthPx
+                )
+            }
+        }
+        // ANY refusal ⇒ the engagement gate has no honest input — disengage
+        // like every bail above: one line in the applier's fallback ledger
+        // (IntrinsicChannel already logged the platform's refusal), and the
+        // caller's frozen paths own the measure.
+        if (probed.any { it == null }) {
+            logFallback("spanner-flow child refused the intrinsic probe (SubcomposeLayout subtree)")
+            return null
         }
         val probeChildren = roles.indices.map {
-            MulticolSpannerFlow.Child(probed[it], roles[it], childSpecs[it].explicitBlockSize)
+            // Non-null by the disengage gate right above (!! documents it).
+            MulticolSpannerFlow.Child(probed[it]!!, roles[it], childSpecs[it].explicitBlockSize)
         }
         // The narrow engagement gate (SP-table pinned) — false keeps every
         // legacy fixture byte-identical.

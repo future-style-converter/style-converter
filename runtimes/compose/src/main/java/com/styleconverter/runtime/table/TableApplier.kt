@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +29,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.styleconverter.runtime.layout.IntrinsicChannel
 
 /**
  * Applies CSS table properties to Compose layouts.
@@ -144,6 +144,27 @@ object TableApplier {
      */
     val LocalTableFabricatedCellBorder = compositionLocalOf { true }
 
+    // ── Guarded-intrinsic refusal wording (see IntrinsicChannel) ────────────
+    //
+    // Logged ONCE per (tag, platform message) when a table subtree refuses
+    // the intrinsic channel — a multicol / grid / scroll / sticky /
+    // container-query / line-clamp box anywhere under a cell is enough. The
+    // box then keeps the measure it had before the intrinsic mechanism
+    // existed: mis-sized at worst, never a dead capture.
+
+    /** §17.5.2 shrink-to-fit fell back — the fill channel wins for this box. */
+    private const val TABLE_WIDTH_REFUSAL =
+        "CSS 2.1 §17.5.2 auto table width skipped — this table's subtree " +
+            "has no intrinsic channel; the table keeps the pre-wave-39 " +
+            "(fill-channel) measure."
+
+    /** §17.5.3 row height fell back — the row wraps its content unequalized. */
+    private const val ROW_HEIGHT_REFUSAL =
+        "CSS 2.1 §17.5.3 table row height skipped — this row's subtree has " +
+            "no intrinsic channel; the row wraps its content instead of " +
+            "sizing to its tallest cell (cells lose fillMaxHeight " +
+            "equalization for this row only)."
+
     // =========================================================================
     // TABLE CONTAINER
     // =========================================================================
@@ -160,8 +181,8 @@ object TableApplier {
      *   for the five measured Android captures that made this a parameter.
      *   `true` (the default) is the frozen behaviour.
      * @param shrinkToFit CSS 2.1 §17.5.2 auto table width — see the
-     *   `Modifier.width(IntrinsicSize.Max)` banner inside. `false` (the
-     *   default) is the frozen behaviour for every existing call site.
+     *   guarded-intrinsic banner inside. `false` (the default) is the
+     *   frozen behaviour for every existing call site.
      * @param modifier Modifier for the table
      * @param content Table rows
      */
@@ -204,21 +225,39 @@ object TableApplier {
             // `height-distribution/extra-height-given-to-all-row-groups-00{1,2,5}`
             // (0.8882 ×3) against iOS passes of 0.9541–0.9974.
             //
-            // `Modifier.width(IntrinsicSize.Max)` is the exact CSS primitive:
-            // Compose measures the content's max intrinsic width — for this
-            // Column that is the widest row, i.e. the sum of the columns'
-            // max-content widths — and `IntrinsicSizeModifier` enforces the
-            // INCOMING constraints on top of it, so the result is
+            // [IntrinsicChannel.widthAtMaxIntrinsic] is the exact CSS
+            // primitive: Compose measures the content's max intrinsic width —
+            // for this Column that is the widest row, i.e. the sum of the
+            // columns' max-content widths — and re-applies the INCOMING
+            // constraints on top of it, so the result is
             // `min(max-content, available)`: §17.5.2's used width. The rows'
             // own `fillMaxWidth` then fills THAT instead of the canvas, which
             // is also right — §17.5.2 sizes a row to the table's used width.
+            //
+            // NOT `Modifier.width(IntrinsicSize.Max)` (the wave-39 original,
+            // whose measure the replacement reproduces bound-for-bound): that
+            // reads the intrinsic channel unguarded, and a subtree reaching
+            // any SubcomposeLayout-based renderer (a multicol box in a cell
+            // is enough) would throw and kill the whole capture — the
+            // css-multicol nine-capture shape, one section over. See
+            // IntrinsicChannel's banner for the hazard and the exactness
+            // contract; on refusal THIS box keeps the pre-wave-39
+            // fill-channel measure (mis-sized, logged, alive).
             //
             // Chained AFTER the caller's `modifier` so the table's own
             // background/border (applied inside it) paints at the constrained
             // width rather than the canvas width — the visible half of the
             // same defect.
-            val tableModifier =
-                if (shrinkToFit) modifier.width(IntrinsicSize.Max) else modifier
+            val tableModifier = if (shrinkToFit) {
+                with(IntrinsicChannel) {
+                    modifier.widthAtMaxIntrinsic(
+                        logTag = "TableApplier",
+                        refusalContext = TABLE_WIDTH_REFUSAL
+                    )
+                }
+            } else {
+                modifier
+            }
             Column(modifier = tableModifier) {
                 // Caption at top
                 if (caption != null && config.captionSide == CaptionSide.TOP) {
@@ -332,10 +371,24 @@ object TableApplier {
     ) {
         val config = LocalTableConfig.current
 
+        // §17.5.3: a row is as tall as its tallest cell needs — min intrinsic
+        // height, so the cells' own `fillMaxHeight` equalizes them to it.
+        // Guarded ([IntrinsicChannel.heightAtMinIntrinsic], measure-identical
+        // to the former `height(IntrinsicSize.Min)` wherever the channel
+        // answers): this read predates wave 39 (2026-07-08) but is the SAME
+        // unguarded-throw hazard — a multicol box in a CELL reaches a
+        // SubcomposeLayout, and the row's intrinsic query would kill the
+        // capture even with the table's own width read guarded.
+        val rowHeight = with(IntrinsicChannel) {
+            Modifier.heightAtMinIntrinsic(
+                logTag = "TableApplier",
+                refusalContext = ROW_HEIGHT_REFUSAL
+            )
+        }
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .height(IntrinsicSize.Min),
+                .then(rowHeight),
             horizontalArrangement = if (config.borderCollapse == BorderCollapse.SEPARATE) {
                 Arrangement.spacedBy(config.effectiveSpacingHorizontal)
             } else {
@@ -534,9 +587,17 @@ object TableApplier {
     ) {
         val config = LocalTableConfig.current
 
+        // Same §17.5.3 guarded row height as [TableRow] — one hazard, one
+        // guard, both row variants (see the banner there).
+        val rowHeight = with(IntrinsicChannel) {
+            Modifier.heightAtMinIntrinsic(
+                logTag = "TableApplier",
+                refusalContext = ROW_HEIGHT_REFUSAL
+            )
+        }
         Row(
             modifier = modifier
-                .height(IntrinsicSize.Min),
+                .then(rowHeight),
             horizontalArrangement = if (config.borderCollapse == BorderCollapse.SEPARATE) {
                 Arrangement.spacedBy(config.effectiveSpacingHorizontal)
             } else {

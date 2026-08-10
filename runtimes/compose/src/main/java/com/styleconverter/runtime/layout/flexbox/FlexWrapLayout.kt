@@ -32,6 +32,10 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+// The ONE guard for Compose's optional intrinsic channel — a wrapping flex
+// item is an arbitrary component subtree, so both hypothetical-size reads
+// below can meet NoIntrinsicsMeasurePolicy's throw (see its banner).
+import com.styleconverter.runtime.layout.IntrinsicChannel
 
 /**
  * A wrapping flex row with real per-line cross sizing.
@@ -92,13 +96,48 @@ fun FlexWrapRow(
         // FlowRow path it replaces had. TODO(wave26): feed FlexSizeResolver
         // per line, then drop the ceiling the way CAL-RC4 did for the
         // non-wrapping Row.
+        // Both hypothetical reads go through IntrinsicChannel (campaign audit
+        // 2026-08-10): an item whose subtree reaches a SubcomposeLayout-based
+        // renderer (multicol's BoxWithConstraints, grid, scroll, …) THROWS on
+        // a raw intrinsic query, and an unguarded throw here would not
+        // mis-wrap a line — it would kill the whole capture composition
+        // (IntrinsicChannel's banner; the wave-39 css-multicol precedent).
         val mainSizes = IntArray(n) {
-            measurables[it].maxIntrinsicWidth(Constraints.Infinity).coerceIn(0, availableMain)
+            IntrinsicChannel.probe(
+                logTag = "FlexWrapLayout",
+                refusalContext = "css-flexbox-1 §9.2.3.E hypothetical main size " +
+                    "skipped — this wrapping flex item's subtree has no intrinsic " +
+                    "channel; the item takes the full line budget as its measure " +
+                    "ceiling and §9.3 wraps it onto a line of its own."
+            ) {
+                measurables[it].maxIntrinsicWidth(Constraints.Infinity)
+            }?.coerceIn(0, availableMain)
+                // REFUSED ⇒ the full line budget: the item still measures once
+                // below (ceiling availableMain — Infinity stays unbounded when
+                // the container is unbounded) and takes its own line, instead
+                // of a 0-width squeeze that would blank the whole subtree.
+                ?: availableMain
         }
         // §9.4 step 7 input: each item's hypothetical CROSS size, asked for
         // at the main size it will actually be measured with (so wrapping
         // text reports the height it will really occupy).
-        val hypoCross = IntArray(n) { measurables[it].maxIntrinsicHeight(mainSizes[it]) }
+        val hypoCross = IntArray(n) {
+            IntrinsicChannel.probe(
+                logTag = "FlexWrapLayout",
+                refusalContext = "css-flexbox-1 §9.4 step 7 hypothetical cross size " +
+                    "skipped — this wrapping flex item's subtree has no intrinsic " +
+                    "channel; the line's cross size comes from the item's MEASURED " +
+                    "height via the post-measure max() net instead."
+            ) {
+                measurables[it].maxIntrinsicHeight(mainSizes[it])
+            }
+                // REFUSED ⇒ 0: the "grow the line rather than clip" max() over
+                // measured heights below recovers non-stretch items exactly;
+                // only a STRETCH item alone on an otherwise-0 line keeps a
+                // collapsed band — one mis-sized box, logged once, instead of
+                // a dead composition.
+                ?: 0
+        }
         val lines = FlexWrapLines.breakLines(mainSizes, availableMain, mainGapPx)
         // §9.4 step 7 — a line is as tall as its tallest hypothetical item.
         val baseCross = IntArray(lines.size) { li ->

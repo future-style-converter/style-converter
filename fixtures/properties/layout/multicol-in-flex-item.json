@@ -1,0 +1,30 @@
+{
+  "components": {
+    "FlexWrap_StretchLine_MulticolItem_CaptureAlive": {
+      "properties": { "display": "flex", "flex-wrap": "wrap", "width": "160px", "background-color": "#e5e7eb" },
+      "children": {
+        "cols": {
+          "properties": { "width": "120px", "column-count": "2", "column-gap": "8px" },
+          "children": {
+            "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#10b981" } },
+            "b": { "properties": { "width": "40px", "height": "40px", "background-color": "#3b82f6" } }
+          }
+        },
+        "sib": { "properties": { "width": "60px", "height": "24px", "background-color": "#f59e0b" } }
+      }
+    },
+    "FlexIntrinsicBase_MulticolItem_CaptureAlive": {
+      "properties": { "display": "flex", "width": "240px", "background-color": "#e5e7eb" },
+      "children": {
+        "cols": {
+          "properties": { "flex-grow": "1", "column-count": "2", "column-gap": "8px" },
+          "children": {
+            "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#ef4444" } },
+            "b": { "properties": { "width": "40px", "height": "40px", "background-color": "#8b5cf6" } }
+          }
+        },
+        "fixed": { "properties": { "width": "60px", "height": "24px", "background-color": "#14b8a6" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "components": {
+    "Sizing_MinContentWidth_MulticolChild_CaptureAlive": {
+      "properties": { "width": "min-content", "background-color": "#e5e7eb" },
+      "children": {
+        "cols": {
+          "properties": { "width": "120px", "column-count": "2", "column-gap": "8px" },
+          "children": {
+            "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#10b981" } },
+            "b": { "properties": { "width": "40px", "height": "40px", "background-color": "#3b82f6" } }
+          }
+        }
+      }
+    },
+    "Sizing_MaxContentWidth_MulticolChild_CaptureAlive": {
+      "properties": { "width": "max-content", "background-color": "#e5e7eb" },
+      "children": {
+        "cols": {
+          "properties": { "width": "120px", "column-count": "2", "column-gap": "8px" },
+          "children": {
+            "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#ef4444" } },
+            "b": { "properties": { "width": "40px", "height": "40px", "background-color": "#f59e0b" } }
+          }
+        }
+      }
+    },
+    "Sizing_MinContentHeight_MulticolChild_CaptureAlive": {
+      "properties": { "height": "min-content", "background-color": "#e5e7eb" },
+      "children": {
+        "cols": {
+          "properties": { "width": "120px", "column-count": "2", "column-gap": "8px" },
+          "children": {
+            "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#8b5cf6" } },
+            "b": { "properties": { "width": "40px", "height": "40px", "background-color": "#ec4899" } }
+          }
+        }
+      }
+    },
+    "Sizing_MaxContentHeight_MulticolChild_CaptureAlive": {
+      "properties": { "height": "max-content", "background-color": "#e5e7eb" },
+      "children": {
+        "cols": {
+          "properties": { "width": "120px", "column-count": "2", "column-gap": "8px" },
+          "children": {
+            "a": { "properties": { "width": "40px", "height": "40px", "background-color": "#14b8a6" } },
+            "b": { "properties": { "width": "40px", "height": "40px", "background-color": "#f97316" } }
+          }
+        }
+      }
+    }
+  }
+}

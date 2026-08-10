@@ -6,11 +6,13 @@ package com.styleconverter.runtime.sizing
 // heightIn/aspectRatio with the same Dp values.
 //
 // Relative units (em, rem, vw, %) are resolved through the spacing module's
-// SpacingResolve helper so there's one source of truth. Compose can't express
-// min-content/max-content directly on a size modifier — we approximate with
-// wrapContentWidth/Height() which at least reads as "shrink to content".
+// SpacingResolve helper so there's one source of truth. min-content /
+// max-content map to Compose's intrinsic channel — through IntrinsicChannel's
+// guarded twins of Modifier.width/height(IntrinsicSize.*), because a subtree
+// holding any SubcomposeLayout-based renderer refuses the intrinsic read by
+// THROWING (see IntrinsicChannel's banner) and an unguarded throw kills the
+// whole capture composition, not just this box.
 
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,10 +27,35 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.core.types.LengthUnit
 import com.styleconverter.runtime.core.types.LengthValue
+import com.styleconverter.runtime.layout.IntrinsicChannel
 import com.styleconverter.runtime.spacing.SpacingContext
 import com.styleconverter.runtime.spacing.resolveToDp
 
 object SizingApplier {
+
+    // ── Guarded-intrinsic refusal wording (see IntrinsicChannel) ──────────
+    //
+    // Logged ONCE per (tag, platform message) when a min-/max-content sized
+    // box's subtree refuses the intrinsic channel — any SubcomposeLayout-
+    // based renderer below it (multicol's BoxWithConstraints, grid, scroll,
+    // sticky, container-query, line-clamp) is enough. The box then keeps
+    // the measure its incoming constraints give it: mis-sized at worst,
+    // never a dead capture. Same fallback contract as TableApplier's
+    // §17.5.2/§17.5.3 reads, which hit this hazard first.
+
+    /** Log tag — points refusals at this applier, not the shared guard. */
+    private const val TAG = "SizingApplier"
+
+    /**
+     * One refusal sentence per declaration. [IntrinsicChannel.probe] logs
+     * the FIRST refusal per (tag, platform message), so the sentence names
+     * the exact declaration skipped — the winning log line must say which
+     * keyword lane fell back, per the no-silent-fallthrough rule.
+     */
+    private fun intrinsicRefusal(declaration: String) =
+        "css-sizing-3 §4 `$declaration` skipped — this box's subtree has " +
+            "no intrinsic channel; the box keeps the measure its incoming " +
+            "constraints give it (auto-like, mis-sized at worst, alive)."
 
     /** Apply [config] to [modifier]. Returns [modifier] unchanged if empty.
      *
@@ -231,19 +258,28 @@ object SizingApplier {
             // Non-% relative (em/vw/…) goes through the spacing resolver.
             m.width(resolveToDp(v, ctx))
         }
+        // Both keyword lanes read the child's intrinsics through
+        // IntrinsicChannel's guarded twins — measure-identical to the former
+        // unguarded width(IntrinsicSize.*) wherever the channel answers
+        // (IntrinsicChannel's exactness contract), but a SubcomposeLayout
+        // anywhere in the subtree now logs one refusal and keeps the
+        // incoming measure instead of throwing away the whole capture.
         is LengthValue.Intrinsic -> when (v.kind) {
             // width: min-content → the box takes its MIN intrinsic width
             // (css-sizing-3 §4: the narrowest width that avoids overflow —
-            // for text, the widest unbreakable run). Compose expresses this
-            // directly as Modifier.width(IntrinsicSize.Min). The previous
+            // for text, the widest unbreakable run). The pre-wave
             // wrapContentWidth() let content pick its PREFERRED width, so
             // `width: min-content` rendered max-content-wide — web showed a
             // letter-wrapped sliver while Android filled the line
             // (PW_Sizing_Spacing_02, A-w 0.698 / 28.5% px).
-            LengthValue.IntrinsicKind.MIN_CONTENT -> m.width(IntrinsicSize.Min)
+            LengthValue.IntrinsicKind.MIN_CONTENT -> with(IntrinsicChannel) {
+                m.widthAtMinIntrinsic(TAG, intrinsicRefusal("width: min-content"))
+            }
             // width: max-content → MAX intrinsic width (no-wrap preferred
             // size, css-sizing-3 §4).
-            LengthValue.IntrinsicKind.MAX_CONTENT -> m.width(IntrinsicSize.Max)
+            LengthValue.IntrinsicKind.MAX_CONTENT -> with(IntrinsicChannel) {
+                m.widthAtMaxIntrinsic(TAG, intrinsicRefusal("width: max-content"))
+            }
             // fit-content(<bound>): Compose has no direct analog; use the
             // bound as a max-width constraint which approximates "content,
             // but capped at bound".
@@ -264,11 +300,18 @@ object SizingApplier {
         } else {
             m.height(resolveToDp(v, ctx))
         }
+        // Block-axis mirror of the width branch — same guarded channel,
+        // same refusal contract, height twins.
         is LengthValue.Intrinsic -> when (v.kind) {
-            // Block-axis mirror of the width branch: height(IntrinsicSize.*)
-            // gives the true min/max intrinsic content heights.
-            LengthValue.IntrinsicKind.MIN_CONTENT -> m.height(IntrinsicSize.Min)
-            LengthValue.IntrinsicKind.MAX_CONTENT -> m.height(IntrinsicSize.Max)
+            // height: min-content → MIN intrinsic content height under the
+            // incoming width (css-sizing-3 §4).
+            LengthValue.IntrinsicKind.MIN_CONTENT -> with(IntrinsicChannel) {
+                m.heightAtMinIntrinsic(TAG, intrinsicRefusal("height: min-content"))
+            }
+            // height: max-content → MAX (preferred) intrinsic content height.
+            LengthValue.IntrinsicKind.MAX_CONTENT -> with(IntrinsicChannel) {
+                m.heightAtMaxIntrinsic(TAG, intrinsicRefusal("height: max-content"))
+            }
             LengthValue.IntrinsicKind.FIT_CONTENT -> {
                 val bound = v.bound?.let { resolveToDp(it, ctx) }
                 if (bound != null) m.heightIn(max = bound) else m.wrapContentHeight()

@@ -24,6 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+// The ONE guard for Compose's optional intrinsic channel — a flex item is
+// an arbitrary component subtree, so the content-sized base reads below can
+// meet NoIntrinsicsMeasurePolicy's throw (see IntrinsicChannel's banner).
+import com.styleconverter.runtime.layout.IntrinsicChannel
 import kotlin.math.roundToInt
 
 /**
@@ -74,7 +78,23 @@ fun FlexIntrinsicRow(
             gapRealPx = gapPx.toFloat().dp.toPx().toDouble(),
             items = items,
             density = density,
-            maxContentOf = { i -> measurables[i].maxIntrinsicWidth(heightHint).toDouble() }
+            // Guarded read (campaign audit 2026-08-10): an item whose subtree
+            // reaches a SubcomposeLayout renderer throws on the raw query and
+            // would kill the whole capture composition, not just this line.
+            maxContentOf = { i ->
+                IntrinsicChannel.probe(
+                    logTag = "FlexIntrinsicLayout",
+                    refusalContext = "css-flexbox-1 §9.2.3.E content-sized flex " +
+                        "base skipped — this flex item's subtree has no intrinsic " +
+                        "channel; the base falls to 0 and §9.7 grow distributes " +
+                        "the line's free space proportionally (the legacy weight " +
+                        "distribution this layout replaced)."
+                ) { measurables[i].maxIntrinsicWidth(heightHint) }
+                    // REFUSED ⇒ 0.0: the resolver's min clamp still applies and
+                    // a grow>0 item recovers a proportional share of the budget
+                    // — mis-sized at worst, never a dead composition.
+                    ?.toDouble() ?: 0.0
+            }
         )
         // Measure each child EXACTLY at its resolved main size — fixed
         // constraints beat the child's own width modifiers and placeholder
@@ -145,7 +165,20 @@ fun FlexIntrinsicColumn(
             gapRealPx = gapPx.toFloat().dp.toPx().toDouble(),
             items = items,
             density = density,
-            maxContentOf = { i -> measurables[i].maxIntrinsicHeight(widthHint).toDouble() }
+            // Guarded read — the block-axis twin of the row's probe: same
+            // SubcomposeLayout throw hazard, same guard, same 0-base fallback.
+            maxContentOf = { i ->
+                IntrinsicChannel.probe(
+                    logTag = "FlexIntrinsicLayout",
+                    refusalContext = "css-flexbox-1 §9.2.3.E content-sized flex " +
+                        "base (block axis) skipped — this flex item's subtree has " +
+                        "no intrinsic channel; the base falls to 0 and §9.7 grow " +
+                        "distributes the column's free space proportionally (the " +
+                        "legacy weight distribution this layout replaced)."
+                ) { measurables[i].maxIntrinsicHeight(widthHint) }
+                    // REFUSED ⇒ 0.0 — see the row twin's rationale above.
+                    ?.toDouble() ?: 0.0
+            }
         )
         val placeables = measurables.mapIndexed { i, m ->
             val h = resolved[i].roundToInt().coerceAtLeast(0)

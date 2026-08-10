@@ -16,6 +16,10 @@ import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.placement.itemPlacement
 import com.styleconverter.runtime.core.types.ValueExtractors
+// The ONE guard for Compose's optional intrinsic channel — a grid item is
+// an arbitrary component subtree, so the auto-track max-content read below
+// can meet NoIntrinsicsMeasurePolicy's throw (see IntrinsicChannel's banner).
+import com.styleconverter.runtime.layout.IntrinsicChannel
 // Wave 19: ambient layout direction — RTL grids may inherit direction from
 // an ancestor via the ComponentRenderer RTL provider (css-writing-modes §2).
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -999,11 +1003,32 @@ object GridRenderer {
                 when (specs.getOrNull(t)) {
                     is TrackSpec.Auto, is TrackSpec.Fit ->
                         cells.withIndex().filter { it.value.col == t && it.value.colSpan == 1 }
-                            .maxOfOrNull { (i, cell) ->
-                                measurables[i].maxIntrinsicWidth(
-                                    cellHeightPx(cell) ?: Int.MAX_VALUE
-                                ).toFloat()
-                            } ?: 0f
+                            // Guarded read (campaign audit 2026-08-10): a cell
+                            // whose subtree reaches a SubcomposeLayout renderer
+                            // (multicol's BoxWithConstraints, scroll, …) THROWS
+                            // on the raw query, and an unguarded throw would
+                            // kill the whole capture composition, not just
+                            // mis-size this track. mapNotNull drops refusals so
+                            // the track still sizes from the cells that answer.
+                            .mapNotNull { (i, cell) ->
+                                IntrinsicChannel.probe(
+                                    logTag = "GridRenderer",
+                                    refusalContext = "css-grid-1 §7.2 auto-track " +
+                                        "max-content contribution skipped — this " +
+                                        "grid item's subtree has no intrinsic " +
+                                        "channel; the track sizes from its other " +
+                                        "items (or collapses to the 0 base when " +
+                                        "none answer)."
+                                ) {
+                                    measurables[i].maxIntrinsicWidth(
+                                        cellHeightPx(cell) ?: Int.MAX_VALUE
+                                    )
+                                }?.toFloat()
+                            // Same 0 base as an EMPTY track: an all-refused
+                            // track degrades to its flexible/base share, which
+                            // is what CSS gives a track with no content-sized
+                            // contribution either.
+                            }.maxOrNull() ?: 0f
                     else -> 0f
                 }
             }
