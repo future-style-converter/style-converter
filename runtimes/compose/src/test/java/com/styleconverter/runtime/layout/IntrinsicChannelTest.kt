@@ -8,8 +8,8 @@ import org.junit.Test
 
 /**
  * Pins [IntrinsicChannel] — the shared guard for Compose's OPTIONAL
- * intrinsic channel and the fixed-band arithmetic behind the guarded
- * `width(IntrinsicSize.Max)` / `height(IntrinsicSize.Min)` twins.
+ * intrinsic channel and the fixed-band arithmetic behind all four guarded
+ * `width/height(IntrinsicSize.Min/Max)` twins (table + sizing call sites).
  *
  * The modifiers themselves need a Compose layout pass (and therefore
  * Robolectric, which this suite deliberately does not use), so the whole

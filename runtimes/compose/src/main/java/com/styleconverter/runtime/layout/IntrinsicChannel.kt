@@ -101,7 +101,9 @@ object IntrinsicChannel {
     // identical to foundation-layout's originals, or captures won on them
     // move. The original's measure is, verbatim from IntrinsicSizeModifier
     // (enforceIncoming = true for the plain `width()`/`height()` spellings;
-    // width(IntrinsicSize.Max) shown, the height variant transposed):
+    // width(IntrinsicSize.Max) shown, the other three axis/kind
+    // transpositions swap only WHICH intrinsic is read and WHICH axis it
+    // fixes):
     //
     //   w = measurable.maxIntrinsicWidth(constraints.maxHeight)
     //   placeable = measurable.measure(constraints.constrain(Constraints.fixedWidth(w)))
@@ -194,6 +196,61 @@ object IntrinsicChannel {
                 constraints.copy(minHeight = minH, maxHeight = maxH)
             )
             // Same epilogue as the width twin.
+            layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+        }
+
+    /**
+     * `Modifier.width(IntrinsicSize.Min)` with the intrinsic read guarded.
+     *
+     * The MIN transposition of [widthAtMaxIntrinsic], reproducing
+     * MinIntrinsicWidthNode: same sized axis (width) and same height hint
+     * (incoming maxHeight), but the queried intrinsic is MIN — css-sizing-3
+     * §4's min-content width, the narrowest the box can be without
+     * overflowing (for text, the widest unbreakable run). Added for
+     * SizingApplier's `width: min-content` lane, which carried the same
+     * unguarded-throw hazard as the table reads this file was hoisted for.
+     */
+    fun Modifier.widthAtMinIntrinsic(logTag: String, refusalContext: String): Modifier =
+        layout { measurable, constraints ->
+            // The min-content width, read exactly the way
+            // MinIntrinsicWidthNode reads it (height hint = incoming
+            // maxHeight, Infinity allowed) — or null on refusal.
+            val intrinsic = probe(logTag, refusalContext) {
+                measurable.minIntrinsicWidth(constraints.maxHeight)
+            }
+            // Same pinned decision as the Max twin: fixed-at-intrinsic when
+            // answered, incoming band when refused; height band untouched.
+            val (minW, maxW) = fixedBand(intrinsic, constraints.minWidth, constraints.maxWidth)
+            val placeable = measurable.measure(
+                constraints.copy(minWidth = minW, maxWidth = maxW)
+            )
+            // IntrinsicSizeModifier's exact epilogue, shared by every twin.
+            layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+        }
+
+    /**
+     * `Modifier.height(IntrinsicSize.Max)` with the intrinsic read guarded.
+     *
+     * The MAX transposition of [heightAtMinIntrinsic], reproducing
+     * MaxIntrinsicHeightNode: same sized axis (height) and same width hint
+     * (incoming maxWidth), but the queried intrinsic is MAX — css-sizing-3
+     * §4's max-content height, the content's preferred (unclamped) block
+     * size. Added alongside [widthAtMinIntrinsic] to complete the four
+     * axis/kind twins for SizingApplier's keyword lanes.
+     */
+    fun Modifier.heightAtMaxIntrinsic(logTag: String, refusalContext: String): Modifier =
+        layout { measurable, constraints ->
+            // The max-content height under the incoming width — or null on
+            // refusal (same channel, same throw, same guard).
+            val intrinsic = probe(logTag, refusalContext) {
+                measurable.maxIntrinsicHeight(constraints.maxWidth)
+            }
+            // Same pinned decision, height axis; width band untouched.
+            val (minH, maxH) = fixedBand(intrinsic, constraints.minHeight, constraints.maxHeight)
+            val placeable = measurable.measure(
+                constraints.copy(minHeight = minH, maxHeight = maxH)
+            )
+            // Same epilogue as every twin.
             layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
         }
 }
