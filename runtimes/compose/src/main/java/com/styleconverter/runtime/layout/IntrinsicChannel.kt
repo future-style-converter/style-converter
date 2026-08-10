@@ -36,6 +36,19 @@ package com.styleconverter.runtime.layout
 // IntrinsicSizeModifier's math bound-for-bound) is exactly the kind of
 // thing copies let drift apart.
 //
+// EXACTNESS SCOPE (merge-review finding, wave 40): the twins reproduce
+// IntrinsicSizeModifier's MEASURE math bound-for-bound, but NOT its
+// intrinsic REPORTING. The originals are IntrinsicSizeModifier nodes that
+// override min/max intrinsic queries to return the same-kind child
+// intrinsic (bytecode: IntrinsicWidthNode overrides BOTH width queries);
+// these Modifier.layout{} twins inherit LayoutModifierNode's defaults, so
+// a maxIntrinsicWidth query against a width(IntrinsicSize.Min) twin
+// reports the child's real max-content instead of its min-content. No
+// corpus shape reaches that nesting today (154/154 captures byte-identical
+// with intrinsics supported, both fixture arms); if one appears, the
+// hardening is to hand the twins explicit intrinsic overrides mirroring
+// the node pair.
+//
 // This is a SUPPORTS-CHECK, not a list of known-bad IR types: such a list
 // drifts the moment a renderer swaps in a subcomposed layout, and the
 // platform already tells us the answer.
