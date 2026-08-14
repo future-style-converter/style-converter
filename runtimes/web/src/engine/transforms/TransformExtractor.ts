@@ -67,6 +67,28 @@ function fnToCss(raw: unknown): string | undefined {
   }
 }
 
+// ── wave-40 lane T1: the CSS-WIDE KEYWORD leg ────────────────────────────────
+//
+// `TransformPropertyParser.kt` routes any GlobalKeywords hit to the wire's
+// THIRD variant, `TransformValue.Keyword` → `{type:'keyword', keyword:'…'}`
+// (see irmodels/properties/transforms/TransformProperty.kt). Only `functions`
+// and `expression` were read here, so `transform: inherit` — the one form a
+// browser resolves for free — was silently DROPPED.
+//
+// MEASURED (wave39-final, css-transforms/css-transform-inherit-scale): the
+// green child declares `transform: inherit` to pick up its parent's
+// `scale(2)`; without it the child stayed 50×50 inside a 2×-scaled yellow
+// parent, so ~12.5 % of the canvas painted YELLOW where the ref
+// (ref-filled-green-200px-square.html) is solid green — mean ΔE 9.05, the
+// colour-mass veto's exact signature (web-ref 0.9988 SSIM yet wptPass=false).
+//
+// The set is CLOSED to the CSS Cascade 5 §7 wide keywords: those are the only
+// strings a browser resolves natively, and passing an arbitrary wire string
+// into an inline style would be a silent fallthrough. `revert-layer` is
+// included because GlobalKeywords accepts it; an unknown keyword returns
+// undefined and the declaration is dropped exactly as before.
+const CSS_WIDE_KEYWORDS = new Set(['inherit', 'initial', 'unset', 'revert', 'revert-layer']);
+
 // Parse ONE `Transform` IR payload into its CSS value (or undefined to skip).
 function parseOne(data: unknown): string | undefined {
   if (data === null || data === undefined) return undefined;                        // absent
@@ -75,6 +97,11 @@ function parseOne(data: unknown): string | undefined {
   const o = data as Record<string, unknown>;
   if (o.type === 'none') return 'none';                                             // explicit CSS keyword
   if (o.type === 'expression' && typeof o.expr === 'string') return o.expr;         // pre-normalised calc
+  if (o.type === 'keyword' && typeof o.keyword === 'string') {                       // CSS-wide keyword wire
+    const kw = o.keyword.trim().toLowerCase();                                       // parser emits lowercase
+    if (kw === 'none') return 'none';                                                // defensive: same as above
+    return CSS_WIDE_KEYWORDS.has(kw) ? kw : undefined;                               // closed set, no fallthrough
+  }
   if (o.type === 'functions' && Array.isArray(o.list)) {                             // the common case
     const tokens = o.list.map(fnToCss).filter((t): t is string => t !== undefined); // drop unknown fns
     if (tokens.length === 0) return 'none';                                         // empty list == no-op

@@ -40,7 +40,42 @@ export function isBackgroundImageProperty(type: string): type is BackgroundImage
 }
 
 // One entry in the IR 'stops' array — may be a real stop or a mis-parsed shape word.
-interface IRStop { color?: unknown; position?: unknown }
+// `positionLength` is the wave-40 <length> arm of the spec's
+// <length-percentage> stop position (see stopPosCss).
+interface IRStop { color?: unknown; position?: unknown; positionLength?: unknown }
+
+// A stop's explicit position → the CSS text that follows the colour, or ''
+// when the stop has none (CSS then auto-spaces it).
+//
+// css-images-4 §3.4.3 types a stop position as a <length-percentage>, and the
+// IR carries the two arms in two keys because only the percentage arm has a
+// frozen wire shape (a raw number):
+//   position: 42          → '42%'
+//   positionLength:{px:30}→ '30px'   (absolute length, normalized by the reader)
+//   positionLength:{original:{v:1,u:'EM'}} → '1em' (runtime-dependent unit —
+//                           re-emitted verbatim, the browser resolves it against
+//                           the live font metrics, same rule as positionAxisCss)
+// Before wave-40 the length arm did not exist and the position was dropped, so
+// a REPEATING gradient lost its repeat period entirely: WPT css-images
+// gradient-border-box / gradient-content-box (`repeating-linear-gradient(to
+// bottom right, white, black, white 30px)`) painted one full-box ramp against a
+// 30px-striped reference, web 0.6458 / 0.6504.
+function stopPosCss(s: IRStop): string {
+  if (typeof s.position === 'number') return ` ${s.position}%`;        // percentage arm (raw-number wire)
+  const len = s.positionLength;                                        // length arm (absent on most stops)
+  if (len && typeof len === 'object') {
+    const o = len as Record<string, unknown>;
+    const orig = o.original as Record<string, unknown> | undefined;
+    // Runtime-dependent unit first: `px` is absent whenever it is unresolvable,
+    // and the enum name is uppercase on the wire while CSS wants lowercase.
+    if (orig && typeof orig.v === 'number' && typeof orig.u === 'string') {
+      const unit = orig.u === 'PERCENT' ? '%' : orig.u.toLowerCase();
+      return ` ${orig.v}${unit}`;
+    }
+    if (typeof o.px === 'number') return ` ${o.px}px`;                 // absolute length
+  }
+  return '';                                                           // no explicit position
+}
 
 // Walk stops, splitting out leading shape/size keywords from real color stops.
 function splitStopsHead(stops: IRStop[]): { head: string[]; rest: IRStop[] } {
@@ -67,9 +102,7 @@ function stopsToCss(stops: IRStop[]): string {
     const color = extractColor(s.color);                               // parse IR color primitive
     if (color.kind === 'unknown') continue;                            // drop malformed
     const css = colorToCss(color);                                     // rgba(...) or dynamic
-    const pos = s.position;                                            // may be null / number
-    if (typeof pos === 'number') parts.push(`${css} ${pos}%`);         // explicit stop position
-    else parts.push(css);                                              // no position -> CSS auto-spaces
+    parts.push(`${css}${stopPosCss(s)}`);                              // '' when the stop has no position
   }
   return parts.join(', ') || 'transparent, transparent';               // fallback keeps CSS valid
 }
@@ -95,8 +128,14 @@ function stopsToCss(stops: IRStop[]): string {
 // background-image declaration with it. The converter records the authored
 // text verbatim (that is its job); this table is where it becomes CSS, so
 // this is where the grammar is enforced.
+// wave-40 lane T6 adds 'display-p3-linear' (css-color-hdr's linear-light
+// companion). It is gated on the same evidence as the rest of this table —
+// measured on the capture browser (Chrome 151), CSS.supports accepts
+// `in display-p3-linear` and REJECTS `a98-rgb-linear`, `prophoto-rgb-linear`,
+// `rec2020-linear` and every `rec2100-*`, which is why only this one joins.
 const INTERP_RECTANGULAR = new Set([
-  'srgb', 'srgb-linear', 'display-p3', 'a98-rgb', 'prophoto-rgb', 'rec2020',
+  'srgb', 'srgb-linear', 'display-p3', 'display-p3-linear',
+  'a98-rgb', 'prophoto-rgb', 'rec2020',
   'lab', 'oklab', 'xyz', 'xyz-d50', 'xyz-d65',
 ]);
 const INTERP_POLAR = new Set(['hsl', 'hwb', 'lch', 'oklch']);

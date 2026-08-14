@@ -147,6 +147,19 @@ object BackgroundImagePropertyParser : PropertyParser {
             }
         }
 
+        // ── syntax-prefix strictness (wave-40 lane T6) ────────────────────
+        // The full rationale + the measured CSS.supports evidence lives in
+        // GradientPrefixGuard (same package). Two shapes are rejected here:
+        //   1. a leftover beside a RECOGNISED interpolation method that is
+        //      neither an angle nor a direction (`0.25turns in srgb`) — §3.1's
+        //      `||` combinator allows nothing else in that slot;
+        //   2. an UNCLAIMED first segment that cannot be a <color-stop>.
+        // Returning null routes the layer to parse()'s Raw fallback, whose
+        // author bytes the web runtime re-emits verbatim — so the browser
+        // drops exactly what Chromium drops, instead of us inventing pixels.
+        if (colorStopStart == 1 && angle == null && firstPart.isNotEmpty()) return null
+        if (colorStopStart == 0 && !GradientPrefixGuard.isColorStopSegment(firstPart)) return null
+
         // Parse color stops — flatMap because a double-position stop
         // (`red 25% 50%`, css-images-4 §3.4.3) expands into TWO entries.
         val colorStops = parts.drop(colorStopStart).flatMap { GradientValueParsers.parseColorStops(it.trim()) }
@@ -273,6 +286,12 @@ object BackgroundImagePropertyParser : PropertyParser {
             val atIndex = afterFrom.indexOf(" at ")
             val anglePart = if (atIndex >= 0) afterFrom.substring(0, atIndex).trim() else afterFrom
             fromAngle = AngleParser.parse(anglePart)
+            // Same strictness as the linear case, same reason: css-images-4
+            // §3.4.4 types this slot as `from <angle>` and nothing else, so a
+            // unit outside the css-values-4 §7.1 table (`from 0.25turns`)
+            // makes the whole function — and therefore the declaration —
+            // invalid. We used to drop just the angle and paint from 0deg.
+            if (fromAngle == null) return null
             if (atIndex >= 0) {
                 position = GradientValueParsers.parsePosition(afterFrom.substring(atIndex + 4).trim())
             }

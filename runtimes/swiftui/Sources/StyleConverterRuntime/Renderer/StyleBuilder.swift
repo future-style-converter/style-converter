@@ -628,6 +628,16 @@ enum StyleBuilder {
             }
         }
 
+        // Wave 40 (lane T7) — the css-ui-3 §5 border-box FLOOR, applied LAST
+        // because it needs the finished sizing, padding and border configs at
+        // once: a `box-sizing: border-box` box whose declared size is smaller
+        // than its own padding + border bands has a zero content box, not a
+        // smaller border box (css-ui box-sizing-026's 10px width inside 50px
+        // borders is a 100px green square in every browser). Identity for
+        // every component that does not EXPLICITLY declare border-box — see
+        // BorderBoxFloor's enumerated trigger scope.
+        BorderBoxFloor.apply(to: &s, bands: paddingAndBorderBands(s))
+
         return s
     }
 
@@ -845,6 +855,20 @@ enum StyleBuilder {
         // Unset or explicit border-box → the frame already IS the
         // declared size; no inflation on either axis.
         guard style.size.boxSizing == .contentBox else { return (0, 0) }
+        return paddingAndBorderBands(style)
+    }
+
+    /// The per-axis padding + USED border sum, in px — the band a declared
+    /// size sits inside (`box-sizing: border-box`) or outside (`content-box`).
+    ///
+    /// Split out of `contentBoxInflation` in wave 40 so the border-box FLOOR
+    /// (StyleEngine/sizing/BorderBoxFloor.swift) measures the bands with the
+    /// exact same rule the inflation does — one definition of "what counts as
+    /// a border" for both directions, so the two can never drift.
+    /// Border widths use the same hasBorder/effectiveWidth gate as
+    /// backgroundClipInsets: a side with `border-style: none` has USED width 0
+    /// (CSS 2.1 §8.5.3) and contributes nothing.
+    static func paddingAndBorderBands(_ style: ComponentStyle) -> (h: CGFloat, v: CGFloat) {
         // Border band per side — mirrors backgroundClipInsets' gating.
         let b = style.borderSides
         let top: CGFloat      = b?.top.hasBorder    == true ? (b?.top.effectiveWidth ?? 0)    : 0

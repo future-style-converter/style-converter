@@ -45,6 +45,12 @@ import { documentFontSrcs, resolveFontFile,
          // wave-39 lane A2: the replaced-element image hop, likewise shared
          // byte-for-byte with feed-android.mjs.
          documentReplacedSrcs, resolveReplacedImageFile } from './feed-lib.mjs';
+// wave-40 lane T5: the SVG PRE-RASTER pre-pass. iOS ships no SVG file decoder
+// (asset catalogs only), so the vector is rasterised on the HOST and this
+// document's copy of the wire is re-pointed at the PNG sibling BEFORE the
+// image hop above copies anything. Shared — not cloned — with
+// feed-android.mjs: both natives must be scored against the same raster.
+import { prerasterizeFixtures, applyPrerasterRewrite } from './svg-preraster.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..', '..');
@@ -358,6 +364,26 @@ async function main() {
   await fs.mkdir(outDir, { recursive: true });
   console.log(`[feed-ios] ${fixtures.length} fixture(s) → ${outDir}`);
 
+  // wave-40 lane T5 — SVG PRE-RASTER pre-pass. FIRST, ahead of every device
+  // call: it is pure HOST work (headless Chromium → PNG siblings in the
+  // corpus) with no device dependency at all, so running it here means a sick
+  // simulator cannot mask a raster failure, and a raster failure cannot be
+  // mistaken for one. ONE browser launch covers the whole batch (the css-ui
+  // box-sizing cluster's 19 tests share six support vectors), and a batch with
+  // no vectors — 29 of the depth-48 corpus's 30 sections — launches nothing at
+  // all. The returned map is vector-src → raster-src for the rasters that
+  // actually exist; anything missing from it keeps its `.svg` on the wire so
+  // DocumentImageRegistry's format decline still fires and still stamps.
+  const rasterMap = await prerasterizeFixtures(fixtures, {
+    wptDir: args.wptDir,
+    log: (m) => console.log(`[feed-ios] ${m}`),
+    // The document walker is INJECTED rather than imported by the pre-raster
+    // module: feed-lib.mjs owns the `meta.attrs.src` walk (documentReplacedSrcs)
+    // and the two must never disagree about which components carry a source —
+    // a second walker would be a second chance to miss one.
+    srcsOf: documentReplacedSrcs,
+  });
+
   // 1. Locate the already-running simulator (never boot one).
   const listed = run('xcrun', ['simctl', 'list', 'devices', '--json']);
   if (listed.status !== 0) throw new Error(`simctl list failed: ${listed.stderr}`);
@@ -495,6 +521,14 @@ async function main() {
     // but a capture that sometimes shows the image is worse to debug than one
     // that never does. A decline is never fatal: the runtime paints the empty
     // box it painted before this channel existed and stamps the miss.
+    // wave-40 lane T5 — swap every vector source this run rasterised for its
+    // PNG sibling, IN THIS DOCUMENT'S IN-MEMORY COPY ONLY. It has to happen
+    // here, above the copy loop, so the hop below delivers the PNG rather than
+    // the SVG; the on-disk per-test IR and the web harness's bundle are
+    // untouched, which is what keeps the web score byte-identical.
+    for (const { src, rasterSrc } of applyPrerasterRewrite(doc, rasterMap)) {
+      console.log(`[feed-ios] ${label}: svg PRE-RASTER stand-in ${src} → ${rasterSrc}`);
+    }
     for (const src of documentReplacedSrcs(doc)) {
       const abs = resolveReplacedImageFile(args.wptDir, src, { resolve, existsSync, statSync });
       if (!abs) { console.error(`[feed-ios] ${label}: image DECLINED (unresolvable/not an image): ${src}`); continue; }

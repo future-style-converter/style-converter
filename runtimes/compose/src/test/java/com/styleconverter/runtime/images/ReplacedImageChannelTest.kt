@@ -158,6 +158,11 @@ class ReplacedImageChannelTest {
         // format gate exists so the log says that, instead of the
         // indistinguishable "BitmapFactory returned no raster" a corrupt PNG
         // would produce.
+        //
+        // Wave-40 lane T5 did NOT change this: reaching this branch still
+        // means the vector is undeliverable. What changed is that it now also
+        // means the HOST pre-raster hop failed to stand in, which the decline
+        // line says out loud.
         DocumentImageRegistry.clear()
         val dir = kotlin.io.path.createTempDirectory("w39a2-img").toFile()
         try {
@@ -166,10 +171,64 @@ class ReplacedImageChannelTest {
             DocumentImageRegistry.configure(dir)
             assertNull(DocumentImageRegistry.resolve("r1-1.svg"))
             assertEquals(listOf("r1-1.svg"), DocumentImageRegistry.lastReport.declined)
+            // …and it is NOT counted as a pre-raster: the stand-in never
+            // arrived, so a non-zero count here would claim a fidelity this
+            // capture does not have.
+            assertEquals(0, DocumentImageRegistry.lastReport.preRastered)
         } finally {
             dir.deleteRecursively()
             DocumentImageRegistry.clear()
         }
+    }
+
+    // ── wave-40 lane T5: the HOST PRE-RASTER stand-in ──────────────────────
+
+    @Test
+    fun `isHostPreRaster matches the host and Swift twins exactly`() {
+        // Byte-parallel with tools/titan/svg-preraster.mjs `isPrerasterSrc`
+        // and Swift DocumentImageRegistry.isHostPreRaster. Pinned separately
+        // on all three because a drift means a host-rasterised stand-in paints
+        // with nothing in any log saying it was one — the single failure mode
+        // this whole honesty hook exists to prevent.
+        assertTrue(DocumentImageRegistry.isHostPreRaster("css/s/r1-1.svg.png"))
+        assertTrue(DocumentImageRegistry.isHostPreRaster("css/s/R1-1.SVG.PNG"))
+        assertTrue(DocumentImageRegistry.isHostPreRaster("  css/s/a.svg.png  "))
+        // An AUTHORED raster is not a stand-in — claiming it were would
+        // over-report the lossy surface and make every capture look worse than
+        // it is.
+        assertFalse(DocumentImageRegistry.isHostPreRaster("css/s/a.png"))
+        // The vector itself is not a stand-in; it is the thing that could not
+        // be decoded.
+        assertFalse(DocumentImageRegistry.isHostPreRaster("css/s/a.svg"))
+        // The dot before `svg` is required, so a file genuinely NAMED "svg.png"
+        // is not mistaken for one.
+        assertFalse(DocumentImageRegistry.isHostPreRaster("css/s/svg.png"))
+        assertFalse(DocumentImageRegistry.isHostPreRaster(null))
+        assertFalse(DocumentImageRegistry.isHostPreRaster(""))
+    }
+
+    @Test
+    fun `a pre-raster that cannot be delivered is a DECLINE, never a silent count`() {
+        // The gate is decode success, not the name: `preRastered` is a SUBSET
+        // of `decoded`. A registry with no sandbox declines the stand-in like
+        // any other source, and must not report having painted one.
+        DocumentImageRegistry.clear()
+        assertNull(DocumentImageRegistry.resolve("css/s/r1-1.svg.png"))
+        val r = DocumentImageRegistry.lastReport
+        assertEquals(1, r.requested)
+        assertEquals(0, r.decoded)
+        assertEquals(0, r.preRastered)
+        assertEquals(listOf("css/s/r1-1.svg.png"), r.declined)
+    }
+
+    @Test
+    fun `configure clears the pre-raster count with the rest of the document`() {
+        // Same argument as the cache wipe: a count carried across documents
+        // would attribute one document's stand-ins to the next one's capture.
+        DocumentImageRegistry.clear()
+        DocumentImageRegistry.resolve("css/s/r1-1.svg.png")
+        DocumentImageRegistry.configure(null)
+        assertEquals(0, DocumentImageRegistry.lastReport.preRastered)
     }
 
     @Test

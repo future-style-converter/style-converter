@@ -232,6 +232,28 @@ export const POST_LOAD_COMPUTED_PROPERTIES = [
   // already accepts, and only '0px' is delete-not-write (below).
   'border-top-left-radius', 'border-top-right-radius',
   'border-bottom-right-radius', 'border-bottom-left-radius',
+  // wave-40 lane T1: `transform-style` — the ANCESTOR property that decides
+  // whether a 3D subtree flattens, and therefore whether a descendant's
+  // `backface-visibility: hidden` hides it.
+  //
+  // `transform` is already in this list, so a script that swaps a 3D
+  // transform in gets its matrix baked — but the transform-style that makes
+  // that matrix compose with the child's, instead of flattening it away, was
+  // NOT captured, and the two are only meaningful together. MEASURED on
+  // wave39-final's css-transforms/backface-visibility-hidden-animated-001
+  // and -002: post-load delivered `#flip`'s animated
+  // `matrix3d(-1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1)` (= rotateY(180deg)) but
+  // dropped the `.flip` rule's `transform-style: preserve-3d`, so `#back`
+  // (its own rotateY(180deg) + `backface-visibility: hidden`) flattened into
+  // the parent's plane instead of composing to identity — the capture came
+  // out BLANK (ink 0.00 % against the ref's 8.55 %) and tripped the presence
+  // + coverage-ratio vetoes on all three platforms.
+  //
+  // `flat` is the css-transforms-2 §4 initial value and is what the pinned
+  // headless Chromium reports for every element that does not opt in, so it
+  // is delete-not-write below: only a genuinely 3D-preserving element gains
+  // the key, and the overlay stays reviewable.
+  'transform-style',
 ];
 
 // Per-property write rules for the merge. Default (not listed) = write the
@@ -276,6 +298,13 @@ export const WRITE_RULES = {
   'border-top-right-radius':    { deleteWhen: '0px' },
   'border-bottom-right-radius': { deleteWhen: '0px' },
   'border-bottom-left-radius':  { deleteWhen: '0px' },
+  // wave-40 lane T1: `flat` is the css-transforms-2 §4 initial value and what
+  // the pinned headless Chromium reports for every element that has not opted
+  // into a 3D rendering context, so writing it would stamp a key onto
+  // essentially every component in every post-load fixture. Delete-not-write
+  // keeps the overlay reviewable while still removing a stale static
+  // `preserve-3d` that a script has since flattened.
+  'transform-style': { deleteWhen: 'flat' },
 };
 
 // Static shorthands the computed longhands displace. When the overlay writes

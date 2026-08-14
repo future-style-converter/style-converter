@@ -858,12 +858,56 @@ const composedCanvasStyle: React.CSSProperties = {
  *   - transparent         (the outer canvas paints the background, so the
  *                          frame band shows the page/body colour exactly as
  *                          the ref's sampled image pad does)
+ *   - display:flow-root   (wave-40 lane T1 — see below)
  * The author body padding (if any) is written on top per side.
+ *
+ * ── wave-40 lane T1: THE MISSING BFC (the ref's `display: flow-root` twin) ──
+ *
+ * THE DEFECT. This div is the web twin of the box the ref is laid out in, and
+ * capture-browser-ref.mjs's `canvasFrameCss()` pins
+ * `:where(body) { display: flow-root; box-sizing: border-box; min-height: 100vh }`
+ * on that box for one stated reason: "the body establishes a BFC so a first
+ * child's block margin cannot escape through the body edge (it would shift the
+ * whole page relative to a harness canvas that clips it)". The harness twin
+ * carried `box-sizing` and the min-height but NOT `flow-root`, so the two
+ * boxes were not twins at all: a first in-flow root with a UA block margin —
+ * every WPT test that opens `<p>Test passes if …</p>`, i.e. most of the corpus
+ * — collapsed its 1em margin THROUGH this div and pushed the div's border box
+ * down by that margin.
+ *
+ * WHY IT ONLY SHOWED ON OUT-OF-FLOW CONTENT. In-flow content does not move
+ * (the child sits at the displaced div's top edge either way), so prose-only
+ * tests were unaffected and the defect stayed invisible for 15 waves. But this
+ * div is ALSO the containing block for every abspos/fixed descendant, and the
+ * ref's is the viewport — which never moves. So `top: 60px` landed 16 px lower
+ * than the ref put it, on EVERY test combining a prose intro with out-of-flow
+ * boxes, and the canvas grew 16 px taller than the ref's 600.
+ *
+ * MEASURED (puppeteer, this exact canvas + ICB markup — _diag40/T1/probe5.mjs;
+ * scene = the css-transform-3d-rotateX-positive body):
+ *                       canvas h   ICB y   <p> y   abspos box
+ *   without flow-root      616       32      32      (76, 92)
+ *   with    flow-root      600       16      32      (76, 76)
+ *   browser-ref            600       16      32      (76, 76)
+ * In-flow content is byte-identical (the `<p>` stays at y=32 in both); only
+ * the out-of-flow anchor and the canvas height move, both ONTO the ref.
+ * On the wave39-final css-transforms head this single 16 px displacement is
+ * the whole of the eight-strong `css-transform-3d-rotate{3d-,}{X,Y}-*` cluster
+ * (web 0.9293 against iOS 0.9988), plus css3-transform-scale-002 and
+ * css-transform-3d-transform-style.
+ *
+ * `flow-root` — not `overflow:hidden`, not a 1px padding — because it is
+ * EXACTLY what the ref declares: same BFC, same float containment, same
+ * margin-escape block, and it adds no clip and no geometry of its own.
  */
 const composedIcbStyle: React.CSSProperties = {
   width: '100%',
   minHeight: `${ICB_MIN_HEIGHT_PX}px`,
   boxSizing: 'border-box',
+  // The ref's `:where(body){ display: flow-root }` twin — pins this box's
+  // border-box top at the frame corner so out-of-flow descendants anchor
+  // where the image-space-framed ref raster puts them (banner above).
+  display: 'flow-root',
   position: 'relative',
   transform: 'translateZ(0)',
 };

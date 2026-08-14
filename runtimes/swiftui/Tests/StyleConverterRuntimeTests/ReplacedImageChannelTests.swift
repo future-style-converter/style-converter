@@ -230,6 +230,12 @@ final class ReplacedImageChannelTests: XCTestCase {
         DocumentImageRegistry.shared.configure(baseDirectory: dir)
         XCTAssertNil(DocumentImageRegistry.shared.resolve("r1-1.svg"))
         XCTAssertEqual(DocumentImageRegistry.shared.lastReport.declined, ["r1-1.svg"])
+        // Wave-40 lane T5: reaching this branch still means the vector is
+        // undeliverable — what changed is that it now ALSO means the host
+        // pre-raster hop failed to stand in, which the decline line says out
+        // loud. It is NOT counted as a pre-raster: the stand-in never arrived,
+        // so a non-zero count would claim a fidelity this capture lacks.
+        XCTAssertEqual(DocumentImageRegistry.shared.lastReport.preRastered, 0)
     }
 
     func testConfigureReplacesThePreviousDocumentsCache() {
@@ -242,5 +248,101 @@ final class ReplacedImageChannelTests: XCTestCase {
         DocumentImageRegistry.shared.configure(baseDirectory: nil)
         XCTAssertEqual(DocumentImageRegistry.shared.lastReport.requested, 0)
         XCTAssertEqual(DocumentImageRegistry.shared.lastReport.declined, [])
+    }
+
+    // ── wave-40 lane T5: the HOST PRE-RASTER stand-in ──────────────────────
+
+    func testIsHostPreRasterMatchesTheHostAndKotlinTwinsExactly() {
+        // Byte-parallel with tools/titan/svg-preraster.mjs `isPrerasterSrc`
+        // and Kotlin DocumentImageRegistry.isHostPreRaster. Pinned separately
+        // on all three because a drift means a host-rasterised stand-in paints
+        // with nothing in any log saying it was one — the single failure mode
+        // this whole honesty hook exists to prevent.
+        XCTAssertTrue(DocumentImageRegistry.isHostPreRaster("css/s/r1-1.svg.png"))
+        XCTAssertTrue(DocumentImageRegistry.isHostPreRaster("css/s/R1-1.SVG.PNG"))
+        XCTAssertTrue(DocumentImageRegistry.isHostPreRaster("  css/s/a.svg.png  "))
+        // An AUTHORED raster is not a stand-in — claiming it were would
+        // over-report the lossy surface and make every capture look worse than
+        // it is.
+        XCTAssertFalse(DocumentImageRegistry.isHostPreRaster("css/s/a.png"))
+        // The vector itself is not a stand-in; it is the thing that could not
+        // be decoded.
+        XCTAssertFalse(DocumentImageRegistry.isHostPreRaster("css/s/a.svg"))
+        // The dot before `svg` is required, so a file genuinely NAMED
+        // "svg.png" is not mistaken for one.
+        XCTAssertFalse(DocumentImageRegistry.isHostPreRaster("css/s/svg.png"))
+        XCTAssertFalse(DocumentImageRegistry.isHostPreRaster(nil))
+        XCTAssertFalse(DocumentImageRegistry.isHostPreRaster(""))
+    }
+
+    func testAPreRasterThatCannotBeDeliveredIsADeclineNeverASilentCount() {
+        // The gate is decode success, not the name: `preRastered` is a SUBSET
+        // of `decoded`. A registry with no sandbox declines the stand-in like
+        // any other source, and must not report having painted one.
+        DocumentImageRegistry.shared.clear()
+        XCTAssertNil(DocumentImageRegistry.shared.resolve("css/s/r1-1.svg.png"))
+        let r = DocumentImageRegistry.shared.lastReport
+        XCTAssertEqual(r.requested, 1)
+        XCTAssertEqual(r.decoded, 0)
+        XCTAssertEqual(r.preRastered, 0)
+        XCTAssertEqual(r.declined, ["css/s/r1-1.svg.png"])
+    }
+
+    #if canImport(UIKit)
+    func testADeliveredPreRasterDecodesThroughTheORDINARYPathAndIsCounted() throws {
+        // The load-bearing claim of the whole hop: a `<stem>.svg.png` is just a
+        // PNG. There is no branch, no special loader, and the ONLY difference
+        // it makes is the stamp + this counter. Kotlin's twin cannot assert
+        // this — its JVM suite has no BitmapFactory — so this is the one place
+        // the DECODE half of the stand-in is pinned off-device.
+        let dir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent("w40t5-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        // A 1×1 opaque PNG, byte-for-byte — the smallest thing that proves
+        // ImageIO accepted the container.
+        let onePixelPNG = Data(base64Encoded:
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")!
+        try onePixelPNG.write(to: dir.appendingPathComponent("r1-1.svg.png"))
+        DocumentImageRegistry.shared.configure(baseDirectory: dir)
+        let decoded = DocumentImageRegistry.shared.resolve("r1-1.svg.png")
+        XCTAssertNotNil(decoded, "a pre-raster is an ordinary PNG and must decode like one")
+        let r = DocumentImageRegistry.shared.lastReport
+        XCTAssertEqual(r.decoded, 1)
+        // preRastered is a SUBSET of decoded — never an extra request.
+        XCTAssertEqual(r.preRastered, 1)
+        XCTAssertEqual(r.requested, 1)
+        XCTAssertEqual(r.declined, [])
+        // And the intrinsic size comes from the RASTER's pixels, which is the
+        // scale contract's entire consequence for the CSS box model.
+        XCTAssertEqual(decoded?.intrinsicWidthPx, 1.0)
+        XCTAssertEqual(decoded?.intrinsicHeightPx, 1.0)
+    }
+
+    func testAnAuthoredRasterIsDecodedButNOTCountedAsAPreRaster() throws {
+        // The negative half of the counter: an ordinary `.png` the corpus
+        // authored is full-fidelity content, and counting it as a stand-in
+        // would over-report the lossy surface of every capture.
+        let dir = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent("w40t5-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let onePixelPNG = Data(base64Encoded:
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")!
+        try onePixelPNG.write(to: dir.appendingPathComponent("colors-8x16.png"))
+        DocumentImageRegistry.shared.configure(baseDirectory: dir)
+        XCTAssertNotNil(DocumentImageRegistry.shared.resolve("colors-8x16.png"))
+        XCTAssertEqual(DocumentImageRegistry.shared.lastReport.decoded, 1)
+        XCTAssertEqual(DocumentImageRegistry.shared.lastReport.preRastered, 0)
+    }
+    #endif
+
+    func testConfigureClearsThePreRasterCountWithTheRestOfTheDocument() {
+        // Same argument as the cache wipe: a count carried across documents
+        // would attribute one document's stand-ins to the next one's capture.
+        DocumentImageRegistry.shared.clear()
+        _ = DocumentImageRegistry.shared.resolve("css/s/r1-1.svg.png")
+        DocumentImageRegistry.shared.configure(baseDirectory: nil)
+        XCTAssertEqual(DocumentImageRegistry.shared.lastReport.preRastered, 0)
     }
 }

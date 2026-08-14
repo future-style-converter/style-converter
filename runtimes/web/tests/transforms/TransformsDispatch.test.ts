@@ -87,6 +87,37 @@ describe('Transform function list', () => {
   });
 });
 
+// ── wave-40 lane T1: the CSS-WIDE KEYWORD wire ───────────────────────────────
+// TransformPropertyParser.kt routes a GlobalKeywords hit to the wire's THIRD
+// variant, `{type:'keyword', keyword:'inherit'}`. Only `functions` and
+// `expression` were read, so `transform: inherit` was dropped — the whole of
+// wave39-final's css-transforms/css-transform-inherit-scale divergence (the
+// green child stayed 50×50 inside a 2×-scaled yellow parent, mean ΔE 9.05
+// against a solid-green ref). A browser resolves `inherit` for free; the fix
+// is to pass the keyword through.
+describe('Transform CSS-wide keyword wire (wave-40 T1)', () => {
+  it('inherit passes through', () => {
+    expect(applyTransform(extractTransform([p('Transform', { type: 'keyword', keyword: 'inherit' })])))
+      .toEqual({ transform: 'inherit' });
+  });
+  it('initial / unset / revert / revert-layer pass through', () => {
+    for (const kw of ['initial', 'unset', 'revert', 'revert-layer']) {
+      expect(applyTransform(extractTransform([p('Transform', { type: 'keyword', keyword: kw })])))
+        .toEqual({ transform: kw });
+    }
+  });
+  it('a keyword-wrapped `none` still resolves to none', () => {
+    expect(applyTransform(extractTransform([p('Transform', { type: 'keyword', keyword: 'none' })])))
+      .toEqual({ transform: 'none' });
+  });
+  it('an unknown keyword is DROPPED, never passed into an inline style', () => {
+    // No silent fallthrough: the set is closed to CSS Cascade 5 §7, so a wire
+    // string we do not recognise emits nothing rather than an invalid value.
+    expect(applyTransform(extractTransform([p('Transform', { type: 'keyword', keyword: 'wobble' })])))
+      .toEqual({});
+  });
+});
+
 describe('Rotate longhand', () => {
   it('angle degrees', () => {
     expect(applyRotate(extractRotate([p('Rotate', { type: 'angle', deg: 45 })])))

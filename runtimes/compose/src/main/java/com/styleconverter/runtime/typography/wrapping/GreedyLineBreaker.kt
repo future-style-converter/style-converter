@@ -125,15 +125,29 @@ object GreedyLineBreaker {
      * report as overflowing on a half-pixel difference and pull a
      * perfectly fitting run out of the constrained layout.
      */
+    /**
+     * @param dictionaryHyphenation wave 40 (lane T2) — `hyphens: auto`
+     *   with a language tag is live for this run, so §6.1 ADDS the
+     *   dictionary's opportunities to the UAX #14 set the veto below
+     *   approximates. A line holding a hyphenatable word is therefore no
+     *   longer unbreakable and must not trigger rule B — pre-breaking it
+     *   would hand the run to `softWrap = false` and suppress the
+     *   hyphenation. Lines with no letters to hyphenate (`00000`) still
+     *   count, which is what keeps css-text/hyphens-punctuation-001's
+     *   digit runs from being desperate-broken. See
+     *   [AutoHyphenation.hasDictionaryOpportunity].
+     */
     @JvmStatic
     fun hasUnbreakableOverflowingLine(
         lines: List<String>,
         maxWidth: Float,
         tolerance: Float = 0.5f,
+        dictionaryHyphenation: Boolean = false,
         measure: (String) -> Float
     ): Boolean = lines.any { line ->
         measure(line) > maxWidth + tolerance &&
             !com.styleconverter.runtime.typography.DecorationOps
-                .hasSoftWrapOpportunity(line)
+                .hasSoftWrapOpportunity(line) &&
+            !(dictionaryHyphenation && AutoHyphenation.hasDictionaryOpportunity(line))
     }
 }

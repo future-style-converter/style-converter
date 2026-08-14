@@ -189,6 +189,70 @@ object TextWrapApplier {
         }
     }
 
+    // ── Minikin dictionary hyphenation (wave 40, lane T2) ────────────
+    //
+    // The two mappings above take a TYPED config and have exactly one
+    // caller each in the test suite: the renderer never built its config
+    // objects on the placeholder path, so `Hyphens.Auto` was mapped and
+    // never applied — every Compose run laid out at the default
+    // `Hyphens.None`, i.e. Minikin's hyphenator was OFF (wave 39's A3
+    // finding). The pair below is the RENDER-path entry point: it takes
+    // the two raw strings the renderer actually holds — the IR `Hyphens`
+    // keyword and `meta.lang` — and answers with the two TextStyle fields
+    // Minikin needs to run its dictionary.
+    //
+    // BOTH fields are required together. `TextStyle.hyphens = Hyphens.Auto`
+    // only sets `LineBreaker.HYPHENATION_FREQUENCY_NORMAL`; the pattern
+    // file Minikin loads (`/system/usr/hyphen-data/hyph-<tag>.hyb`) is
+    // chosen from the paragraph's LOCALE, so leaving `localeList` at the
+    // default would hyphenate against the DEVICE language rather than the
+    // document's — a source of drift no capture should carry.
+    //
+    // The gate is [com.styleconverter.runtime.typography.wrapping.AutoHyphenation.engaged];
+    // see its banner for why "auto AND a language tag" is the spec's own
+    // condition (§6.1) and why it is provably inert for every committed
+    // baseline.
+
+    /**
+     * The `TextStyle.hyphens` value for a run, from the RAW IR keyword +
+     * computed content language.
+     *
+     * Returns [Hyphens.None] — Compose's own default, so the emitted
+     * TextStyle is unchanged — for every run that does not qualify:
+     * `none`/`manual`, and `auto` with no language tag (§6.1 makes the
+     * resource language-dependent; WPT css-text/hyphens-auto-001 asserts
+     * automatic hyphenation must NOT happen without language tagging).
+     *
+     * @param hyphensMode resolved `hyphens` keyword, any case.
+     * @param lang the run's `meta.lang`, or null.
+     */
+    fun hyphensFor(hyphensMode: String?, lang: String?): Hyphens =
+        if (com.styleconverter.runtime.typography.wrapping.AutoHyphenation
+                .engaged(hyphensMode, lang)) Hyphens.Auto
+        else Hyphens.None
+
+    /**
+     * The `TextStyle.localeList` Minikin should select its hyphenation
+     * dictionary with, or null when hyphenation is not engaged.
+     *
+     * Null is the "leave the field alone" answer on purpose: the renderer
+     * must not touch `localeList` on a run it is not hyphenating, because
+     * the locale also steers Han-unification face selection (a zh/ja/ko
+     * run painted through the wrong locale picks different glyphs), and
+     * no capture in the corpus should acquire that dependency as a side
+     * effect of a hyphenation switch.
+     *
+     * `LocaleList` parses BCP-47 language tags, which is exactly what
+     * `meta.lang` carries (verbatim as authored — see AutoHyphenation).
+     */
+    fun hyphenationLocaleFor(
+        hyphensMode: String?,
+        lang: String?
+    ): androidx.compose.ui.text.intl.LocaleList? =
+        com.styleconverter.runtime.typography.wrapping.AutoHyphenation
+            .localeTag(hyphensMode, lang)
+            ?.let { androidx.compose.ui.text.intl.LocaleList(it) }
+
     /**
      * Preprocess text based on white-space rules.
      *

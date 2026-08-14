@@ -275,4 +275,99 @@ describe('BackgroundImage', () => {
     expect(css).toContain('url("support/exif-orientation-2-ur.jpg")');
     expect(css).toContain('url("support/exif-orientation-6-ru.jpg")');
   });
+
+  // ---- wave-40 T6: the <length> arm of a stop position ---------------
+  // css-images-4 §3.4.3 types a stop position as a <length-percentage>. The
+  // percentage arm has always been the raw-number `position` key; the length
+  // arm arrives as the additive `positionLength` key (an IRLength object).
+
+  it('emits an absolute-length stop position in px', () => {
+    // The WPT gradient-border-box declaration's wire form: the 30px stop is
+    // the REPEAT PERIOD, and dropping it painted one full-box ramp (0.6458).
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'repeating-linear-gradient', angle: { deg: 135 },
+        stops: [
+          { color: { srgb: { r: 1, g: 1, b: 1 } }, position: null },
+          { color: { srgb: { r: 0, g: 0, b: 0 } }, position: null },
+          { color: { srgb: { r: 1, g: 1, b: 1 } }, position: null, positionLength: { px: 30 } },
+        ],
+      }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'repeating-linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(0, 0, 0, 1), rgba(255, 255, 255, 1) 30px)');
+  });
+
+  it('re-emits a runtime-dependent stop unit verbatim for the browser to resolve', () => {
+    // Same rule as the gradient centre's positionAxisCss: px is absent when
+    // the unit cannot be pre-resolved, so the authored value+unit rides out.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'linear-gradient', angle: { deg: 90 },
+        stops: [
+          { color: { srgb: { r: 1, g: 0, b: 0 } }, position: null },
+          { color: { srgb: { r: 0, g: 0, b: 1 } }, position: null, positionLength: { original: { v: 2, u: 'EM' } } },
+        ],
+      }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toContain('rgba(0, 0, 255, 1) 2em');
+  });
+
+  it('lets the percentage arm win when both keys somehow arrive', () => {
+    // Defensive: `position` is the frozen key, so it stays authoritative and
+    // a stray length can never produce two positions on one stop.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'linear-gradient', angle: { deg: 90 },
+        stops: [
+          { color: { srgb: { r: 1, g: 0, b: 0 } }, position: 25, positionLength: { px: 30 } },
+          { color: { srgb: { r: 0, g: 0, b: 1 } }, position: null },
+        ],
+      }]),
+    ]);
+    const css = applyBackgroundImage(cfg).backgroundImage!;
+    expect(css).toContain('rgba(255, 0, 0, 1) 25%');
+    expect(css).not.toContain('30px');
+  });
+
+  it('ignores a malformed positionLength instead of emitting junk', () => {
+    for (const positionLength of [null, 'thirty', 30, {}, { px: 'x' }]) {
+      const cfg = extractBackgroundImage([
+        p('BackgroundImage', [{
+          type: 'linear-gradient', angle: { deg: 90 },
+          stops: [
+            { color: { srgb: { r: 1, g: 0, b: 0 } }, position: null, positionLength },
+            { color: { srgb: { r: 0, g: 0, b: 1 } }, position: null },
+          ],
+        }]),
+      ]);
+      expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+        'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))');
+    }
+  });
+
+  // ---- wave-40 T6: display-p3-linear joins the rectangular table -----
+
+  it('emits `in display-p3-linear` (the capture browser accepts it)', () => {
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'linear-gradient', angle: { deg: 90 },
+        stops: redBlueStops, interp: 'in display-p3-linear',
+      }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toContain('linear-gradient(90deg in display-p3-linear,');
+  });
+
+  it('still refuses the linear-light spaces the capture browser rejects', () => {
+    // Measured on Chrome 151: CSS.supports rejects every one of these, and an
+    // unparsed gradient takes the WHOLE declaration with it — so the clause is
+    // dropped and the ramp survives, exactly as for any unknown space.
+    for (const interp of ['in a98-rgb-linear', 'in prophoto-rgb-linear', 'in rec2020-linear', 'in rec2100-pq']) {
+      const cfg = extractBackgroundImage([
+        p('BackgroundImage', [{ type: 'linear-gradient', angle: { deg: 90 }, stops: redBlueStops, interp }]),
+      ]);
+      expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+        'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))');
+    }
+  });
 });

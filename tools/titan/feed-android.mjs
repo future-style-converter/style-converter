@@ -32,12 +32,20 @@
 // rule — this tool must not create/destroy devices).
 
 import { execFileSync, execSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync,
+         writeFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs, expectedPngNames, composedPngName, pngIsValid,
          documentFontSrcs, resolveFontFile,
          documentReplacedSrcs, resolveReplacedImageFile } from './feed-lib.mjs';
+// wave-40 lane T5: the SVG PRE-RASTER pre-pass. Android's BitmapFactory ships
+// no SVG decoder, so the vector is rasterised on the HOST and this document's
+// copy of the wire is re-pointed at the PNG sibling BEFORE the image hop
+// pushes anything. Shared — not cloned — with feed-ios.mjs: both natives must
+// be scored against the same raster.
+import { prerasterizeFixtures, applyPrerasterRewrite } from './svg-preraster.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -137,7 +145,25 @@ async function resetAndLaunch(adbx, opts) {
   // fixture whose own delivery FAILED paint a plausible raster from the wrong
   // file, with nothing in any log. Idempotence is the whole point.
   adbx(['shell', 'rm', '-rf', INBOX_DIR, SHOT_DIR, FONTS_DIR, IMAGES_DIR]);
-  adbx(['shell', 'mkdir', '-p', INBOX_DIR, SHOT_DIR, FONTS_DIR, IMAGES_DIR]);
+  // SHOT_DIR is deliberately NOT shell-mkdir'd: it is the ONE dir the APP
+  // must WRITE, and on newer emulator images (observed API 36.1, wave 40) a
+  // shell-created dir under the app's external files fails the app's own
+  // ScreenshotManager.canWrite() probe ("Permission check failed: Permission
+  // denied") — the app then renders forever and never writes a PNG, which
+  // the feeder sees as TIMEOUT (0/N) on EVERY fixture. ScreenshotManager
+  // mkdirs its own dir on first capture (ScreenshotManager.kt:39/80/119),
+  // with app ownership, which always passes its own probe. The INBOX is
+  // likewise NOT shell-mkdir'd: on API-36.1 emulator images a shell-created
+  // dir under the app's external files is invisible to the app's FUSE view
+  // for LISTING too — the app "polls the inbox for next fixture" forever and
+  // every fixture times out (the wave-40 gate lost ~30h to exactly this).
+  // The app lazily mkdirs the inbox app-owned on first poll
+  // (ScreenshotManager.inboxDir), and the launch-marker wait below
+  // guarantees it exists before the first push. fonts/images stay
+  // shell-created for now: pushed subtrees under them are a KNOWN residual
+  // hazard on API-36.1 (fontFaces/image tests may not see pushed assets on
+  // such images — probe before trusting; older pool AVDs are unaffected).
+  adbx(['shell', 'mkdir', '-p', FONTS_DIR, IMAGES_DIR]);
   try { adbx(['logcat', '-c']); } catch { /* logcat clear is best-effort */ }
   // Match the shared 390×844 @160dpi capture canvas. Composed mode layers
   // `--ez titanComposed true`: same inbox poll, whole doc onto one canvas.
@@ -156,6 +182,23 @@ async function resetAndLaunch(adbx, opts) {
   for (let i = 0; i < 40 && !marked; i++) {
     try { marked = markerRe.test(adbx(['logcat', '-d'])); } catch { /* retry */ }
     if (!marked) await new Promise((r) => setTimeout(r, 250));
+  }
+  // The first push must land in an APP-created inbox (see the mkdir note
+  // above) — wait for the app's lazy inboxDir mkdirs to have run. The app
+  // logs its first "polling …/inbox" only after that lazy init; the ls poll
+  // below closes the race without trusting the ordering. 60s cap: the very
+  // first cold launch (JIT + font init) has been observed to need >10s, and
+  // an expired wait must FAIL LOUDLY — falling through would let the first
+  // `adb push` auto-create the inbox as SHELL, which on API-36.1 images the
+  // app cannot list, silently killing the WHOLE section's Android leg (the
+  // wave-40 gate lost its first two sections to exactly this race).
+  let inboxReady = false;
+  for (let i = 0; i < 240; i++) {
+    try { adbx(['shell', 'ls', '-d', INBOX_DIR]); inboxReady = true; break; } catch { /* not yet */ }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  if (!inboxReady) {
+    throw new Error(`app never created ${INBOX_DIR} within 60s — refusing to push (a shell-created inbox is invisible to the app on API-36.1 images)`);
   }
   return marked;
 }
@@ -284,6 +327,26 @@ async function main() {
   const adbx = makeAdb(adb, serial);
   log(`device=${serial}  fixtures=${fixtures.length}  out=${opts.out}  timeout=${opts.timeoutPerFixture}s  composed=${opts.composed}`);
 
+  // wave-40 lane T5 — SVG PRE-RASTER pre-pass. FIRST, ahead of every device
+  // call: it is pure HOST work (headless Chromium → PNG siblings in the
+  // corpus) with no device dependency at all, so running it here means a sick
+  // emulator cannot mask a raster failure, and a raster failure cannot be
+  // mistaken for one. ONE browser launch covers the whole batch (the css-ui
+  // box-sizing cluster's 19 tests share six support vectors), and a batch with
+  // no vectors — 29 of the depth-48 corpus's 30 sections — launches nothing at
+  // all. The returned map is vector-src → raster-src for the rasters that
+  // actually exist; anything missing from it keeps its `.svg` on the wire so
+  // DocumentImageRegistry's format decline still fires and still stamps.
+  const rasterMap = await prerasterizeFixtures(fixtures, {
+    wptDir: opts.wptDir,
+    log,
+    // The document walker is INJECTED rather than imported by the pre-raster
+    // module: feed-lib.mjs owns the `meta.attrs.src` walk (documentReplacedSrcs)
+    // and the two must never disagree about which components carry a source —
+    // a second walker would be a second chance to miss one.
+    srcsOf: documentReplacedSrcs,
+  });
+
   // Install (unless reusing the already-installed app) so the feeder is
   // self-contained. Incremental Gradle → a no-change reinstall is fast.
   if (!opts.skipInstall) {
@@ -318,6 +381,31 @@ async function main() {
   log(marked ? `verified: app logged ${opts.composed ? 'titanComposed=true' : 'titanInbox=true'}`
              : `WARNING: never saw ${opts.composed ? 'titanComposed=true' : 'titanInbox=true'} marker (continuing)`);
 
+  // Scratch dir for REWRITTEN IR. Android pushes the fixture FILE into the
+  // inbox (iOS re-serialises its in-memory doc), so a rewritten document needs
+  // a file of its own — under the SAME basename, because the app derives the
+  // composed PNG's test key from the inbox filename. Created lazily: a run
+  // with no rasters writes nothing and pushes the original bytes, which is
+  // what keeps every non-SVG section byte-identical.
+  //
+  // Returns the path to PUSH: the original fixture when nothing was rewritten
+  // (byte-identical bytes on the wire), else the rewritten scratch file.
+  // `localName` only has to be unique WITHIN the scratch dir — the on-device
+  // inbox name is composed separately by the caller, and it is that name the
+  // app derives the test key from.
+  let rewriteDir = null;
+  const pushableFixture = (fx, doc, localName, label) => {
+    const applied = applyPrerasterRewrite(doc, rasterMap);
+    if (applied.length === 0) return fx;
+    for (const { src, rasterSrc } of applied) {
+      log(`  ${label}: svg PRE-RASTER stand-in ${src} → ${rasterSrc}`);
+    }
+    if (rewriteDir === null) rewriteDir = mkdtempSync(path.join(os.tmpdir(), 'titan-preraster-'));
+    const out = path.join(rewriteDir, localName);
+    writeFileSync(out, JSON.stringify(doc));
+    return out;
+  };
+
   // Feed each fixture and record a result row.
   const results = [];
   for (let i = 0; i < fixtures.length; i++) {
@@ -345,6 +433,12 @@ async function main() {
     if (fonts.pushed || fonts.declined) {
       log(`  ${base}: fonts pushed=${fonts.pushed} declined=${fonts.declined}`);
     }
+    // wave-40 lane T5 — swap every vector source this run rasterised for its
+    // PNG sibling, in THIS DOCUMENT'S IN-MEMORY COPY ONLY, and take the file
+    // to push back. Above the image hop so the push below carries the PNG
+    // rather than the SVG; the on-disk per-test IR and the web harness's
+    // bundle are untouched, which is what keeps the web score byte-identical.
+    const pushFx = pushableFixture(fx, doc, `${String(i).padStart(4, '0')}-${base}`, base);
     // wave-39: replaced-element images — also before the inbox push (see
     // pushReplacedImages for why the ordering is a race guard, not a
     // correctness contract like the font one).
@@ -354,7 +448,7 @@ async function main() {
     }
     // Push into the inbox under a unique, FIFO-ordered name (index prefix
     // guarantees uniqueness even if two fixtures share a basename).
-    adbx(['push', fx, `${INBOX_DIR}/${String(i).padStart(4, '0')}-${base}`]);
+    adbx(['push', pushFx, `${INBOX_DIR}/${String(i).padStart(4, '0')}-${base}`]);
     const { done, present } = await waitForPngs(adbx, wantDevice, opts.timeoutPerFixture);
     if (!done) {
       results.push({ fixture: base, ok: false, error: 'timeout',
@@ -415,10 +509,18 @@ async function main() {
       // @font-face were affected, and their retry silently shaped in the
       // bundled face. Both channels are idempotent, so re-pushing when the
       // sandbox was NOT wiped (the last-fixture branch) costs one adb push.
+      // wave-40 lane T5: re-apply the raster rewrite too. The retry re-parses
+      // the fixture FROM DISK, so its `meta.attrs.src` is the untouched `.svg`
+      // again — without this line a salvaged row would be the one capture in
+      // the run scored against a vector both natives decline, i.e. exactly the
+      // silent asymmetry the asset re-push above exists to prevent.
+      const retryFx = pushableFixture(
+        fx, retryDoc, `9${String(fixtures.indexOf(fx)).padStart(3, '0')}-${row.fixture}`, row.fixture,
+      );
       pushFontFaces(adbx, retryDoc, opts);
       pushReplacedImages(adbx, retryDoc, opts);
       // 9xxx prefix keeps the inbox name unique vs the first attempt's 0xxx.
-      adbx(['push', fx, `${INBOX_DIR}/9${String(fixtures.indexOf(fx)).padStart(3, '0')}-${row.fixture}`]);
+      adbx(['push', retryFx, `${INBOX_DIR}/9${String(fixtures.indexOf(fx)).padStart(3, '0')}-${row.fixture}`]);
       const { done } = await waitForPngs(adbx, expected.map((e) => e.deviceFile), opts.timeoutPerFixture);
       row.retried = true;
       if (done) {
@@ -441,6 +543,11 @@ async function main() {
   }
 
   adbx(['shell', 'am', 'force-stop', PKG]); // stop app; leave the device running
+
+  // wave-40 lane T5: drop the rewritten-IR scratch dir. Best-effort — a leak
+  // here is a few KB in $TMPDIR, never a wrong capture, so it must not be able
+  // to fail a run that already produced its PNGs.
+  if (rewriteDir !== null) { try { rmSync(rewriteDir, { recursive: true, force: true }); } catch { /* best effort */ } }
 
   // Machine-readable summary on stdout (human logs went to stderr).
   const okCount = results.filter((r) => r.ok).length;
