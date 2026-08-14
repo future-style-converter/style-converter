@@ -293,7 +293,10 @@ test('feed-android pushes fonts BEFORE the IR reaches the inbox', async () => {
   // shape the capture and the screenshot silently records the fallback.
   const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
   const fontsAt = src.indexOf('const fonts = pushFontFaces(');
-  const inboxAt = src.indexOf("adbx(['push', fx, `${INBOX_DIR}");
+  // `pushFx`, not `fx`, since wave-40 lane T5: the inbox push carries the
+  // fixture file OR its SVG-pre-raster rewrite. The ordering contract this
+  // test pins is unchanged — only the name of the pushed path moved.
+  const inboxAt = src.indexOf("adbx(['push', pushFx, `${INBOX_DIR}");
   assert.ok(fontsAt > 0 && inboxAt > 0, 'both push sites must exist');
   assert.ok(fontsAt < inboxAt, 'fonts must be pushed before the IR');
   // The fonts sandbox must be wiped with the inbox: a face left from a
@@ -421,7 +424,8 @@ test('resolveReplacedImageFile ADMITS svg — the platform gate lives in the run
 test('feed-android pushes images BEFORE the IR, wipes them, and re-pushes on retry', async () => {
   const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
   const imagesAt = src.indexOf('const images = pushReplacedImages(');
-  const inboxAt = src.indexOf("adbx(['push', fx, `${INBOX_DIR}");
+  // See the fonts twin above for why this is `pushFx` from wave-40 lane T5 on.
+  const inboxAt = src.indexOf("adbx(['push', pushFx, `${INBOX_DIR}");
   assert.ok(imagesAt > 0 && inboxAt > 0, 'both push sites must exist');
   assert.ok(imagesAt < inboxAt, 'images must be pushed before the IR (race guard)');
   // The images sandbox joins the reset wipe for the font dir's reason: a

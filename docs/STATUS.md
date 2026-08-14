@@ -833,16 +833,49 @@ dirs + WPT corpus are gitignored):
   Depth-48 gate: zero regressions, net clean. Totals: **web
   1151/1379 (83.5%), iOS 939/1351 (69.5%), Android 931/1347
   (69.1%)**.
+  Wave 40 (`tools/titan/results/corpus-v6-5.json`) was the ICB wave.
+  The centerpiece is a **15-wave-old harness bug**: the composed
+  capture canvas ICB was a plain block, so root-level margins
+  collapsed *through* it and transformed/filtered roots painted
+  against a shifted origin; one line — `display: flow-root` on the
+  composed ICB — makes it a formatting-context root exactly like the
+  WPT harness viewport. css-transforms web 33→47 (+14), filter-effects
+  31→40 (+9), zero regressions corpus-wide, pinned by a dedicated
+  harness test. Also landed: the will-change list-wire rewrite (every
+  `will-change` had been silently dropped), `transform: inherit`,
+  gradient angle strictness (css-images +3 web, +1/+1 native),
+  `hyphens: auto` switched on for both natives (Minikin dictionary
+  hyphenation on Android, soft-hyphen insertion on iOS; css-text iOS
+  +3), the two-colour view-transition bake (css-view-transitions +1 on
+  all three), and iOS UA-element font + border-box floor rules. The
+  standing multicol hang premise was **refuted** — IntrinsicChannel
+  (PR #111) already guards it, 48/48 captures clean — and the SVG
+  pre-raster hop was built but ships **default-OFF**: it would add 8
+  vacuous passes (honesty finding). One honest −1: css-sizing Android
+  `aspect-ratio/abspos-016` (0.997→0.9525, reproducible AA drift on
+  the API-36.1 emulator image, not a code regression). The gate itself
+  consumed ~30 hours before its root cause fell: **on API-36.1
+  emulator images, shell-created dirs under the app's external files
+  are invisible to the app's FUSE view** — the screenshot dir fails
+  the app's own `canWrite` probe and a shell-created inbox cannot be
+  *listed*, so the app polls forever and every fixture times out with
+  zero PNGs. The feeder now lets the app create its own dirs first and
+  waits (loudly, bounded) for the app-created inbox before pushing;
+  fonts/images subtrees remain shell-created — a known residual hazard
+  on such images. Lesson pinned: verify *capture counts*, never
+  process liveness. Depth-48 gate: zero regressions, net clean.
+  Totals: **web 1180/1379 (85.6%), iOS 946/1351 (70.0%), Android
+  936/1350 (69.3%)**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 317 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1236 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2226 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1375 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1533 |
+| converter (Kotlin) | `./gradlew :converter:test` | 329 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1252 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2237 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1416 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1575 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

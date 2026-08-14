@@ -86,6 +86,13 @@ test('post-load: POST_LOAD_COMPUTED_PROPERTIES is the exact deliberate set', () 
     // sees the pre-mutation value, so the corners were painted wrong.
     'border-top-left-radius', 'border-top-right-radius',
     'border-bottom-right-radius', 'border-bottom-left-radius',
+    // wave-40 T1: the ancestor property that decides whether a 3D subtree
+    // flattens. `transform` alone is not enough — css-transforms/
+    // backface-visibility-hidden-animated-001/-002 baked the animated
+    // rotateY(180deg) matrix but lost the `.flip` rule's `preserve-3d`, so
+    // the backface-hidden child flattened instead of composing to identity
+    // and the capture came out blank (ink 0.00 % vs the ref's 8.55 %).
+    'transform-style',
   ]);
 });
 
@@ -97,7 +104,8 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
     ['align-self', 'border-bottom-left-radius', 'border-bottom-right-radius',
      'border-top-left-radius', 'border-top-right-radius',
      'bottom', 'height', 'left', 'list-style-position',
-     'list-style-type', 'right', 'top', 'transform', 'width', 'z-index']);
+     'list-style-type', 'right', 'top', 'transform', 'transform-style',
+     'width', 'z-index']);
   assert.equal(WRITE_RULES.top.deleteWhen, 'auto');
   assert.equal(WRITE_RULES.transform.deleteWhen, 'none');
   assert.equal(WRITE_RULES.width.requirePx, true);
@@ -117,6 +125,11 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
                         'border-bottom-right-radius', 'border-bottom-left-radius']) {
     assert.equal(WRITE_RULES[corner].deleteWhen, '0px', `${corner} must be delete-not-write at 0px`);
   }
+  // wave-40 T1: `flat` is the css-transforms-2 §4 initial and what Chromium
+  // reports for every element outside a 3D rendering context — writing it
+  // would stamp a key onto essentially every post-load component, so only a
+  // genuinely 3D-preserving element gains one.
+  assert.equal(WRITE_RULES['transform-style'].deleteWhen, 'flat');
 });
 
 test('post-load b-rc4: an inherited list-style-position mutation lands, initials do not', () => {

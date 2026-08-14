@@ -103,6 +103,21 @@ object PreBreakPipeline {
      *   (css-text-3 §4.1.2 keeps space runs). The greedy breaker splits
      *   on spaces and would collapse them — a glyph-content rewrite, not
      *   a wrap fix — so those modes decline.
+     * @param dictionaryHyphenation wave 40 (lane T2) —
+     *   [AutoHyphenation.engaged]: this run is `hyphens: auto` WITH a
+     *   language tag, so Minikin's hyphenator is on for it. Rule B's
+     *   premise then weakens PER LINE: a word only overflows because it
+     *   has "nowhere left to break", and under dictionary hyphenation
+     *   `implementation` has break points the space-split
+     *   [GreedyLineBreaker] cannot see. Firing on such a line would hand
+     *   Minikin a hard-newlined string with `softWrap = false` and
+     *   thereby SUPPRESS the very hyphenation we just enabled (measured:
+     *   css-text/hyphens-auto-010, whose 6ch box makes every word an
+     *   "unbreakable overflow" to the space-split breaker — 0.8530 with
+     *   rule B still claiming it). The flag is forwarded, NOT short-
+     *   circuited here, because a line with no LETTERS still has nowhere
+     *   to break and still needs rule B (css-text/hyphens-punctuation-001's
+     *   `00000` runs — see [AutoHyphenation.hasDictionaryOpportunity]).
      * @param measure single-line advance of a candidate string, in the
      *   SAME px space as [wrapWidthPx], built over the SAME resolved
      *   style the run renders with.
@@ -115,6 +130,7 @@ object PreBreakPipeline {
         softWrapAllowed: Boolean,
         allowMidWordBreak: Boolean,
         preservesSpaces: Boolean,
+        dictionaryHyphenation: Boolean = false,
         measure: (String) -> Float
     ): Result {
         // Every decline returns the SAME instance — see Result.text.
@@ -135,7 +151,8 @@ object PreBreakPipeline {
         // line is an unbreakable overflow (the rule-B trigger).
         val lines = GreedyLineBreaker.lines(text, wrapWidthPx, measure)
         if (!GreedyLineBreaker.hasUnbreakableOverflowingLine(
-                lines, wrapWidthPx, measure = measure)) {
+                lines, wrapWidthPx,
+                dictionaryHyphenation = dictionaryHyphenation, measure = measure)) {
             // The platform's own greedy breaking already agrees with CSS
             // here — leave the frozen behaviour alone.
             return identity

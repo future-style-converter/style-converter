@@ -50,6 +50,24 @@ import java.io.File
  * counted in [lastReport]. That matters most for SVG, which is 19 of the 28
  * depth-48 replaced-source tests and which Android cannot rasterise at all —
  * the honest gap is a stamped decline, never a plausible-looking wrong raster.
+ *
+ * ## wave-40 lane T5 — the HOST PRE-RASTER stand-in
+ *
+ * The platform still has no SVG rasteriser and this file has not grown one.
+ * What changed is UPSTREAM: the feeders now rasterise each referenced vector
+ * with the pipeline's own headless Chromium and re-point the NATIVE copy of
+ * `meta.attrs.src` at a PNG sibling (`…/r1-1.svg` → `…/r1-1.svg.png`;
+ * tools/titan/svg-preraster.mjs). Such a file arrives here as an ordinary PNG
+ * and decodes through the ordinary path — there is no branch, no special
+ * loader, and not one pixel of behaviour that depends on where it came from.
+ *
+ * The ONE thing this registry adds is HONESTY, because a stand-in that painted
+ * silently would be indistinguishable from a runtime that had grown a real
+ * vector renderer. [isHostPreRaster] names the convention, [resolve] stamps a
+ * line the moment one is used, and [Report.preRastered] counts them, so a
+ * capture's log always says how much of what it painted is a raster frozen at
+ * ONE size (the vector's natural size — the scale contract, and its three
+ * named losses, are in the host module's header).
  */
 object DocumentImageRegistry {
 
@@ -103,6 +121,26 @@ object DocumentImageRegistry {
     private val ANDROID_DECODABLE_EXTENSIONS =
         setOf("png", "jpg", "jpeg", "gif", "webp", "bmp", "heic", "heif", "avif")
 
+    /**
+     * wave-40 lane T5 — is this `src` a HOST PRE-RASTER: a PNG the host wrote
+     * to stand in for a vector this platform cannot decode?
+     *
+     * The naming contract is tools/titan/svg-preraster.mjs's, and it is a
+     * SUFFIX APPEND (`support/r1-1.svg` → `support/r1-1.svg.png`) precisely so
+     * this predicate is a one-line, un-mistakable string test on all three
+     * codebases — the same predicate lives in `isPrerasterSrc` on the host and
+     * in the Swift twin, each unit-pinned, because a drift between them means
+     * a stand-in painting with no line in any log saying it was one.
+     *
+     * PURE and public so a test can assert the rule without a filesystem.
+     *
+     * NOT a gate: a pre-raster decodes through the ordinary PNG path with no
+     * special casing at all. This is *only* the honesty hook — what it changes
+     * is the log and [Report.preRastered], never a pixel.
+     */
+    fun isHostPreRaster(src: String?): Boolean =
+        src?.trim()?.endsWith(".svg.png", ignoreCase = true) == true
+
     /** The directory the host copied the image FILES under; the wire's `src` is
      *  joined onto it verbatim. Null ⇒ nothing on disk can resolve (a `data:`
      *  source still can — it carries its own bytes). */
@@ -127,6 +165,13 @@ object DocumentImageRegistry {
         val requested: Int = 0,
         val decoded: Int = 0,
         val declined: List<String> = emptyList(),
+        /** wave-40 lane T5 — how many of [decoded] were HOST PRE-RASTERS
+         *  ([isHostPreRaster]) rather than authored rasters. A SUBSET of
+         *  `decoded`, never an addition to it: the number answers "how much of
+         *  what this document painted is a stand-in whose fidelity is capped
+         *  by the host's one-size raster", which is a different question from
+         *  "what failed" and must not be folded into either other counter. */
+        val preRastered: Int = 0,
     )
 
     @Volatile
@@ -171,11 +216,30 @@ object DocumentImageRegistry {
         if (cache.containsKey(key)) return cache[key]
         val decoded = decodeSource(key)
         cache[key] = decoded
+        val preRaster = decoded != null && isHostPreRaster(key)
+        // `decoded != null` is repeated so the compiler smart-casts it inside
+        // the block (a Boolean computed one line up carries no such proof).
+        if (preRaster && decoded != null) {
+            // THE LOUD STAMP (wave-40 lane T5). Once per distinct source — the
+            // cache above guarantees that — and phrased so a reader of the
+            // capture log knows three things without opening any code: these
+            // pixels are NOT the vector, the size they were frozen at, and
+            // that the intrinsic size driving the CSS box came from the raster
+            // rather than from the SVG's own sizing attributes. A pre-raster
+            // that painted silently would be indistinguishable from a runtime
+            // that had grown a real SVG rasteriser.
+            logw("pre-raster IN USE for '$key': a HOST-rasterised PNG stand-in " +
+                "(${decoded.intrinsicWidthPx}x${decoded.intrinsicHeightPx}px) for the vector of the " +
+                "same name — this platform has no SVG rasteriser, so the intrinsic size AND ratio " +
+                "below come from the raster, frozen at ONE size by the host " +
+                "(tools/titan/svg-preraster.mjs, THE SCALE CONTRACT)")
+        }
         val r = lastReport
         lastReport = Report(
             requested = r.requested + 1,
             decoded = r.decoded + (if (decoded != null) 1 else 0),
             declined = if (decoded == null) r.declined + key else r.declined,
+            preRastered = r.preRastered + (if (preRaster) 1 else 0),
         )
         return decoded
     }
@@ -204,8 +268,20 @@ object DocumentImageRegistry {
         // truth is "this platform has no rasteriser for that container".
         val ext = file.name.substringAfterLast('.', "").lowercase()
         if (ext !in ANDROID_DECODABLE_EXTENSIONS) {
+            // wave-40 lane T5 sharpened this line for the SVG case. Reaching it
+            // with an `.svg` now means TWO things went wrong, and the log has
+            // to separate them: the platform still has no rasteriser (as it
+            // always did) AND the host's pre-raster hop did not stand in — the
+            // vector was not rasterised (no --wpt-dir, no browser, a malformed
+            // file) or its raster was declined. Naming the hop is what stops
+            // an investigator re-deriving "Android cannot do SVG" for the
+            // third time when the actual fault is upstream and fixable.
+            val hint = if (ext == "svg")
+                " — AND the host SVG pre-raster hop did not stand in for it " +
+                "(tools/titan/svg-preraster.mjs: no --wpt-dir, no headless browser, or a declined vector)"
+            else ""
             logw("declined image '$src': '$ext' is a container android.graphics." +
-                "BitmapFactory cannot parse (Android ships no SVG rasteriser) — " +
+                "BitmapFactory cannot parse (Android ships no SVG rasteriser)$hint — " +
                 "painting the empty box rather than a wrong raster")
             return null
         }

@@ -10456,7 +10456,15 @@ async function main() {
                     // UA fade between two identical snapshots) rather than as
                     // a frozen single leaf. Silent when zero, so the wave-38
                     // log shape is unchanged for every test that had none.
-                    (outcome.crossFade ? `, ${outcome.crossFade} invariant cross-fade` : '')
+                    (outcome.crossFade ? `, ${outcome.crossFade} invariant cross-fade` : '') +
+                    // wave-40 T4 provenance: which leaves needed the
+                    // TWO-COLOUR fit, by measured shape (band-h / band-v /
+                    // nested / corner). Silent when none, so a batch log only
+                    // grows a word where the narrowed raster refusal actually
+                    // fired — and it says WHICH geometry, not just "more".
+                    (outcome.shapes?.length
+                      ? `, two-colour ${[...new Set(outcome.shapes)].sort().join('/')}`
+                      : '')
                   : ` — ${outcome.reason}`) + ']';
             }
           } catch (vtErr) {

@@ -89,6 +89,26 @@
 // stays visible as what it is. The population is stated in the log so a
 // future wave can weigh a real snapshot channel with the numbers in hand.
 //
+// WAVE-40 lane T4 took that stated population and moved the part of it that
+// is not a raster at all. Wave-39 A4's mining of the 40 `non-uniform-snapshot`
+// bails found 28 whose settled snapshot solves to exactly TWO quantised
+// colours in a trivially rectangular arrangement — an element that is half its
+// old colour and half its new one, or a child box sitting inside its parent's
+// snapshot. Those are not bitmaps the IR cannot carry; they are two boxes.
+// fitTwoColourSnapshot measures the second region and PROVES it rectangular
+// (every pixel inside its bbox is one colour, every pixel outside it the
+// other, at the same 99.5 % floor the single-colour path uses PLUS a location
+// test so a third region cannot hide in that floor's slack), and snapshotBoxes
+// emits the background colour's COMPLEMENT pieces plus the sub-rect —
+// non-overlapping, so a translucent snapshot colour composites exactly once,
+// exactly as its own pixel did. Both orientations are tried, because which
+// colour is the background is not decided by area: a box on a background makes
+// the box the minority, a FRAME around a fill makes the frame the minority and
+// the FILL the rectangle. Anything with a gradient, a glyph, a diagonal, three
+// regions or a non-rectangular second region still fails that proof and still
+// bails. The refusal is unchanged in kind: this ships measured geometry, never
+// pixels.
+//
 // SCOPE BOUNDARY (documented, enforced, never silent). Every one of these is
 // a loud bail that leaves the fixture byte-identical — the bail-to-static
 // contract the other five bakes share:
@@ -117,7 +137,12 @@
 //     callback mutated the DOM this walk is reading. 16 tests; refused rather
 //     than approximated. (`escaped-name`, one of them, passes today at SSIM
 //     1.0000 — bailing keeps it byte-identical and passing.)
-//   - NON-UNIFORM SNAPSHOT — the raster refusal above.
+//   - NON-UNIFORM SNAPSHOT that the TWO-COLOUR fit cannot describe — the
+//     raster refusal above, narrowed by wave-40 lane T4 to exactly the
+//     snapshots that are genuinely rasters. A snapshot which is one flat
+//     colour with one flat rectangle in it ships as measured boxes; three
+//     regions, a gradient, a glyph or a non-rectangular second region still
+//     takes the whole test back to the static fixture.
 //   - MIX-BLEND-MODE on a painted leaf: the image-pair is an isolation group
 //     and a blended leaf's result depends on the pixels underneath it, which a
 //     flat box cannot reproduce.
@@ -360,6 +385,37 @@ export const VT_CONTAINED_OBJECT_FITS = ['fill', 'contain', 'scale-down'];
  *  is precisely the silent fallthrough this repo forbids. */
 export const VT_OVERFLOW_INK_TOLERANCE_PX = 4;
 
+/** Smallest sub-rectangle, in px², the TWO-COLOUR fit will call a second
+ *  region rather than noise (see fitTwoColourSnapshot).
+ *
+ *  WHY IT IS NOT 1. The minority class is whatever did not match the dominant
+ *  colour, and on a snapshot whose own edge lands mid-pixel that set can be a
+ *  handful of antialiased pixels. A 2-px "region" is not a shape the bake
+ *  learned anything from — it is the residue the 99.5 % dominance floor already
+ *  forgives on the single-colour path, and promoting it to a box would emit a
+ *  hairline nobody rendered. Four px² is the same allowance
+ *  VT_OVERFLOW_INK_TOLERANCE_PX makes for the same cause (one antialiased row
+ *  or column of a fractional-px edge), and it is deliberately the WEAKER of
+ *  the two gates: the rectangle proof below is what actually decides, and a
+ *  region small enough to matter here has already been forgiven upstream by
+ *  `uniform`. This exists so the fit can never answer with a speck. */
+export const VT_TWO_COLOUR_MIN_AREA_PX = 4;
+
+/** How far from a region BOUNDARY a mismatched pixel may sit, in px, before
+ *  the two-colour fit refuses the snapshot outright.
+ *
+ *  WHY A LOCATION TEST AND NOT JUST A COUNT. VT_UNIFORM_DOMINANCE_PCT forgives
+ *  0.5 % of the rect, which on a root-sized snapshot (358×568) is a thousand
+ *  pixels — enough for a whole THIRD region to hide in the slack and be
+ *  deleted silently. The 0.5 % exists for one measured reason only: a
+ *  snapshot's own edge can be antialiased where the box lands mid-pixel, and
+ *  those pixels are by construction ON an edge. So the allowance is spent
+ *  where its justification lives — within one pixel of the painted rect's
+ *  perimeter or of the second region's — and a mismatch anywhere else is a
+ *  shape this fit did not measure, which bails. One px, because an 8-bit AA
+ *  boundary between two flat fills is one pixel wide. */
+export const VT_TWO_COLOUR_EDGE_SLACK_PX = 1;
+
 // ── The /common/ shim ───────────────────────────────────────────────────────
 //
 // WHY THIS EXISTS AND WHY IT IS NOT A NETWORK FETCH. fetch-wpt.sh's sparse
@@ -590,6 +646,12 @@ export function boundsOverlap(a, b) {
  *   - `rgba` — the dominant (r,g,b) with the dominant α as a 0–1 float.
  *   - `uniform` — every pixel inside `rect` is painted and matches the
  *     dominant within VT_COLOR_TOLERANCE, at ≥ VT_UNIFORM_DOMINANCE_PCT.
+ *   - `two` — present ONLY when `uniform` is false: fitTwoColourSnapshot's
+ *     answer (`null` when the snapshot is genuinely a raster). See that
+ *     function for the whole decision; the short version is that a
+ *     `{ kind, rect, rgba, coverage }` here means the snapshot is `two.base ??
+ *     rgba` everywhere in `rect` EXCEPT the sub-rectangle `two.rect`, which is
+ *     `two.rgba` (or transparent when that is null).
  *
  * A leaf with no painted pixel at all returns `rect: null` — a legitimate
  * outcome (an empty `<div>`'s snapshot) that emits no box.
@@ -622,7 +684,7 @@ export function solveSnapshot(blackPng, whitePng) {
     for (let ch = 0; ch < 3; ch++) rgb[i * 3 + ch] = Math.max(0, Math.min(255, Math.round(b.data[o + ch] / a)));
     // Quantise for the dominance histogram: the exact match test below uses
     // the tolerance, this bucket only has to FIND the dominant candidate.
-    const key = `${rgb[i * 3] >> 1},${rgb[i * 3 + 1] >> 1},${rgb[i * 3 + 2] >> 1},${Math.round(a * 64)}`;
+    const key = quantKey(rgb, alpha, i);
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
   if (!painted) return { rect: null, rgba: null, uniform: true, distinct: 0, coverage: 0 };
@@ -632,8 +694,7 @@ export function solveSnapshot(blackPng, whitePng) {
   let rep = null;
   for (let i = 0; i < W * H && !rep; i++) {
     if (!alpha[i]) continue;
-    const key = `${rgb[i * 3] >> 1},${rgb[i * 3 + 1] >> 1},${rgb[i * 3 + 2] >> 1},${Math.round(alpha[i] * 64)}`;
-    if (key === topKey) rep = { r: rgb[i * 3], g: rgb[i * 3 + 1], b: rgb[i * 3 + 2], a: alpha[i] };
+    if (quantKey(rgb, alpha, i) === topKey) rep = pixelRep(rgb, alpha, i);
   }
   const rect = { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 };
   // Second pass: how much of the RECT matches the representative? Unpainted
@@ -644,19 +705,278 @@ export function solveSnapshot(blackPng, whitePng) {
     for (let x = rect.x; x <= maxX; x++) {
       const i = y * W + x;
       if (!alpha[i]) continue;
-      if (Math.abs(rgb[i * 3] - rep.r) <= VT_COLOR_TOLERANCE
-       && Math.abs(rgb[i * 3 + 1] - rep.g) <= VT_COLOR_TOLERANCE
-       && Math.abs(rgb[i * 3 + 2] - rep.b) <= VT_COLOR_TOLERANCE
-       && Math.abs(alpha[i] - rep.a) <= 2 / 255) match++;
+      if (pixelMatchesRep(rgb, alpha, i, rep)) match++;
     }
   }
+  const uniform = (100 * match / area) >= VT_UNIFORM_DOMINANCE_PCT;
   return {
     rect,
     rgba: { r: rep.r, g: rep.g, b: rep.b, a: r2(rep.a) },
-    uniform: (100 * match / area) >= VT_UNIFORM_DOMINANCE_PCT,
+    uniform,
     distinct: counts.size,
     coverage: r2(100 * match / area),
+    // Only a NON-uniform snapshot is asked the two-colour question; a uniform
+    // one already has its answer and must keep the wave-38/39 result shape
+    // byte-for-byte (an added key would break every deepEqual pin on it).
+    ...(uniform ? {} : { two: fitTwoColourSnapshot({ W, alpha, rgb, rect, rep }) }),
   };
+}
+
+// ── The TWO-COLOUR fit (wave-40 lane T4) ────────────────────────────────────
+
+/** The dominance-histogram bucket for one pixel — quantised rgb (1 bit off
+ *  each channel) plus alpha in 1/64ths. Extracted so the dominant search and
+ *  the SECOND-colour search below bucket identically; the exact per-pixel
+ *  verdict is always pixelMatchesRep's, never a bucket comparison. */
+function quantKey(rgb, alpha, i) {
+  return `${rgb[i * 3] >> 1},${rgb[i * 3 + 1] >> 1},${rgb[i * 3 + 2] >> 1},${Math.round(alpha[i] * 64)}`;
+}
+
+/** One pixel as an exact representative colour (unrounded alpha — r2 is
+ *  applied only where the value leaves this module). */
+function pixelRep(rgb, alpha, i) {
+  return { r: rgb[i * 3], g: rgb[i * 3 + 1], b: rgb[i * 3 + 2], a: alpha[i] };
+}
+
+/** Is this pixel the same colour as `rep`? Per-channel VT_COLOR_TOLERANCE plus
+ *  the same 2/255 alpha window the wave-38 solve used — moved out of
+ *  solveSnapshot verbatim so the two searches cannot drift apart. */
+function pixelMatchesRep(rgb, alpha, i, rep) {
+  return Math.abs(rgb[i * 3] - rep.r) <= VT_COLOR_TOLERANCE
+      && Math.abs(rgb[i * 3 + 1] - rep.g) <= VT_COLOR_TOLERANCE
+      && Math.abs(rgb[i * 3 + 2] - rep.b) <= VT_COLOR_TOLERANCE
+      && Math.abs(alpha[i] - rep.a) <= 2 / 255;
+}
+
+/**
+ * Can this non-uniform snapshot be described as ONE flat colour with ONE flat
+ * sub-rectangle in it? Returns `{ kind, rect, rgba, coverage, base? }` or null
+ * — `rect`/`rgba` are the sub-rectangle's, and `base` appears only when the
+ * background is NOT the dominant colour (the frame orientation below).
+ *
+ * WHY THIS IS NOT A CRACK IN THE RASTER REFUSAL. The refusal (module banner)
+ * is against shipping the browser's OUTPUT PIXELS as an image asset, which
+ * would let the harness re-display a raster it never resolved. This fit ships
+ * no pixels: it ships the same kind of typed IR the single-colour path already
+ * ships — positioned boxes with a `background-color` — and it only ships them
+ * when the measurement PROVES the snapshot is exactly that geometry. Anything
+ * with a gradient, a glyph, a diagonal, three regions or a non-rectangular
+ * second region fails the proof below and bails as before — measured on this
+ * section, `animating-new-content` (117 colours) and
+ * `content-with-transform-old-image` (139) still bail, which is what tells you
+ * the proof is doing work. The population this WAS written for (wave-39 lane
+ * A4's mining of the 40 `non-uniform-snapshot` bails) is 28 snapshots that
+ * solve to exactly two quantised colours.
+ *
+ * THE DECOMPOSITION IS NON-OVERLAPPING, which is what makes it exact for any
+ * alpha. A "colour B box drawn over a colour A box" would composite B over A
+ * wherever B is translucent, and a snapshot pixel's α is its own, not a
+ * stack's. So the base colour is emitted as the COMPLEMENT of the sub-rect
+ * (rectComplement — up to four boxes; exactly one for a split band), and the
+ * sub-rect is emitted once. Every emitted box then paints over the same thing
+ * the snapshot pixel did: the group's transparent backdrop.
+ *
+ * THE SECOND REGION MAY BE TRANSPARENT. `rgba: null` means the sub-rect is a
+ * HOLE — the snapshot is colour A with a rectangular bite out of it — and
+ * snapshotBoxes emits nothing there. Same proof, one fewer box.
+ *
+ * `state` is solveSnapshot's own pixel state (`W`, `alpha`, `rgb`, `rect`,
+ * `rep`); this stays a private helper because reproducing that state is the
+ * job of solveSnapshot, and the unit pins drive it through the same PNG pair
+ * the browser produces.
+ */
+function fitTwoColourSnapshot({ W, alpha, rgb, rect, rep }) {
+  const x1 = rect.x + rect.w, y1 = rect.y + rect.h;
+  // Pass 1 — the two candidate minority populations inside the rect: pixels
+  // that are painted but are not the dominant colour, and pixels that are not
+  // painted at all (a hole). They are counted separately because they need
+  // different representatives, and the LARGER one is the region under test:
+  // if both are substantial the fit will fail dominance below, which is the
+  // correct answer (three classes is not two).
+  let nOther = 0, nHole = 0;
+  const counts2 = new Map();
+  for (let y = rect.y; y < y1; y++) {
+    for (let x = rect.x; x < x1; x++) {
+      const i = y * W + x;
+      if (!alpha[i]) { nHole++; continue; }
+      if (pixelMatchesRep(rgb, alpha, i, rep)) continue;
+      nOther++;
+      const k = quantKey(rgb, alpha, i);
+      counts2.set(k, (counts2.get(k) ?? 0) + 1);
+    }
+  }
+  const holeIsMinority = nHole > nOther;
+  if (!(holeIsMinority ? nHole : nOther)) return null;   // nothing to fit
+  // Pass 2 — the minority representative (null for a hole) and its bbox.
+  let rep2 = null;
+  if (!holeIsMinority) {
+    let topKey = null, topN = 0;
+    for (const [k, c] of counts2) if (c > topN) { topN = c; topKey = k; }
+    for (let y = rect.y; y < y1 && !rep2; y++) {
+      for (let x = rect.x; x < x1 && !rep2; x++) {
+        const i = y * W + x;
+        if (alpha[i] && quantKey(rgb, alpha, i) === topKey) rep2 = pixelRep(rgb, alpha, i);
+      }
+    }
+    if (!rep2) return null;                              // defensive: no bucket
+  }
+  const isDominant = (i) => !!alpha[i] && pixelMatchesRep(rgb, alpha, i, rep);
+  const isMinority = (i) => (holeIsMinority
+    ? !alpha[i]
+    : (!!alpha[i] && pixelMatchesRep(rgb, alpha, i, rep2)));
+  const asRgba = (r) => (r ? { r: r.r, g: r.g, b: r.b, a: r2(r.a) } : null);
+  // Pass 3 — the rectangle proof, run for each ORIENTATION. Which of the two
+  // colours is the background and which is the inner rectangle is not decided
+  // by area:
+  //   - a BOX ON A BACKGROUND makes the box the minority (orientation 1);
+  //   - a FRAME AROUND A FILL makes the frame the minority, and the frame is
+  //     not a rectangle — the FILL is (orientation 2). A thin border is as
+  //     representable as orientation 1: same two colours, same two
+  //     non-overlapping regions, roles swapped. Measured on this section:
+  //     `content-visibility-auto-shared-element` is exactly this shape (a 1 px
+  //     black border round a 98×498 green fill) and bailed before wave 40.
+  // Orientation 2 is skipped when the minority is a HOLE: a transparent base
+  // would have put the painted bbox somewhere else, so the shape cannot arise.
+  const one = proveTwoRegions({ W, alpha, rect }, isDominant, isMinority);
+  if (one) return { ...one, rgba: asRgba(rep2) };
+  if (holeIsMinority) return null;
+  const two = proveTwoRegions({ W, alpha, rect }, isMinority, isDominant);
+  // The BASE colour moves with the roles: here the surround is the minority
+  // and the sub-rect is the dominant, so snapshotBoxes must not reach for
+  // `s.rgba` (which is always the dominant) as the background.
+  return two ? { ...two, rgba: asRgba(rep), base: asRgba(rep2) } : null;
+}
+
+/**
+ * The rectangle PROOF, for one assignment of the two colour classes.
+ *
+ * `isBase` and `isSub` are per-pixel class predicates. The claim under test is
+ * "everything in `rect` is the base class except one solid sub-RECTANGLE of
+ * the sub class", and the sub-rectangle is not guessed — it is the bounding
+ * box of the sub class, so a shape that is not a rectangle (an L, a diagonal,
+ * a ring, a second scattered region) puts base-class pixels inside its own
+ * bbox and fails here.
+ *
+ * TWO tests decide, and both must pass:
+ *   - the same VT_UNIFORM_DOMINANCE_PCT floor the single-colour path uses;
+ *   - the LOCATION test (VT_TWO_COLOUR_EDGE_SLACK_PX): every mismatch must sit
+ *     within a pixel of the painted rect's perimeter or of the sub-rect's.
+ *     Without it, 0.5 % of a root-sized snapshot is a thousand pixels — room
+ *     for a whole third region to be deleted silently.
+ *
+ * Returns `{ kind, rect, coverage }` (the caller attaches the colours) or null.
+ */
+function proveTwoRegions({ W, alpha, rect }, isBase, isSub) {
+  const x1 = rect.x + rect.w, y1 = rect.y + rect.h;
+  let mnX = Infinity, mnY = Infinity, mxX = -Infinity, mxY = -Infinity;
+  for (let y = rect.y; y < y1; y++) {
+    for (let x = rect.x; x < x1; x++) {
+      if (!isSub(y * W + x)) continue;
+      if (x < mnX) mnX = x; if (x > mxX) mxX = x;
+      if (y < mnY) mnY = y; if (y > mxY) mxY = y;
+    }
+  }
+  if (!Number.isFinite(mnX)) return null;
+  const sub = { x: mnX, y: mnY, w: mxX - mnX + 1, h: mxY - mnY + 1 };
+  // A sub-rect that is the WHOLE rect leaves the base colour nowhere to paint
+  // — that is not a two-region shape, it is a failed class split.
+  if (sub.w >= rect.w && sub.h >= rect.h) return null;
+  if (sub.w * sub.h < VT_TWO_COLOUR_MIN_AREA_PX) return null;
+  const e = VT_TWO_COLOUR_EDGE_SLACK_PX;
+  const nearOuterEdge = (x, y) =>
+    x - rect.x <= e || x1 - 1 - x <= e || y - rect.y <= e || y1 - 1 - y <= e;
+  const nearSubEdge = (x, y) =>
+    x >= sub.x - e && x < sub.x + sub.w + e && y >= sub.y - e && y < sub.y + sub.h + e
+    && !(x >= sub.x + e && x < sub.x + sub.w - e && y >= sub.y + e && y < sub.y + sub.h - e);
+  let match = 0;
+  for (let y = rect.y; y < y1; y++) {
+    for (let x = rect.x; x < x1; x++) {
+      const i = y * W + x;
+      const inSub = x >= sub.x && x < sub.x + sub.w && y >= sub.y && y < sub.y + sub.h;
+      if (inSub ? isSub(i) : isBase(i)) { match++; continue; }
+      // A mismatch away from every boundary is a shape, not an edge artifact.
+      if (!nearOuterEdge(x, y) && !nearSubEdge(x, y)) return null;
+    }
+  }
+  const coverage = 100 * match / (rect.w * rect.h);
+  if (coverage < VT_UNIFORM_DOMINANCE_PCT) return null;
+  return { kind: twoColourKind(rect, sub), rect: sub, coverage: r2(coverage) };
+}
+
+/**
+ * Name the two-region SHAPE, from the two rects alone.
+ *
+ * This is the "simple geometry" the lane brief asks the fit to DETECT, and it
+ * is reported (in the bake log and on the plan's leaf boxes) rather than used
+ * as a gate: every one of these shapes decomposes into ≤ 4 non-overlapping
+ * boxes by the same rectComplement, so accepting one and refusing another
+ * would be taste, not measurement. The names are what make a batch log
+ * readable — `band-h` (the section's commonest: an element half old-colour,
+ * half new-colour), `nested` (a child box inside its parent's snapshot),
+ * `corner`, and the degenerate `full` the fit itself rejects.
+ */
+export function twoColourKind(outer, inner) {
+  const spansW = inner.x <= outer.x && inner.x + inner.w >= outer.x + outer.w;
+  const spansH = inner.y <= outer.y && inner.y + inner.h >= outer.y + outer.h;
+  if (spansW && spansH) return 'full';
+  if (spansW) return 'band-h';       // full-width band → splits top/bottom
+  if (spansH) return 'band-v';       // full-height band → splits left/right
+  const edges = (inner.x <= outer.x) + (inner.y <= outer.y)
+              + (inner.x + inner.w >= outer.x + outer.w)
+              + (inner.y + inner.h >= outer.y + outer.h);
+  return edges ? 'corner' : 'nested';
+}
+
+/**
+ * `outer` minus `inner`, as up to four NON-OVERLAPPING rectangles.
+ *
+ * Top band, bottom band, then the left and right pieces of the middle strip —
+ * the standard four-way split, in that order so the emitted box list is
+ * deterministic. An `inner` that misses `outer` entirely yields `outer`
+ * unchanged; an `inner` that covers it yields nothing.
+ *
+ * Non-overlapping is the whole point (see fitTwoColourSnapshot): each piece
+ * paints directly onto the group's backdrop, so a translucent snapshot colour
+ * composites exactly once, exactly as its own pixel did.
+ */
+export function rectComplement(outer, inner) {
+  const x0 = Math.max(outer.x, inner.x), y0 = Math.max(outer.y, inner.y);
+  const x1 = Math.min(outer.x + outer.w, inner.x + inner.w);
+  const y1 = Math.min(outer.y + outer.h, inner.y + inner.h);
+  if (!(x1 > x0 && y1 > y0)) return [{ ...outer }];
+  const out = [];
+  const oy1 = outer.y + outer.h, ox1 = outer.x + outer.w;
+  if (y0 > outer.y) out.push({ x: outer.x, y: outer.y, w: outer.w, h: y0 - outer.y });
+  if (y1 < oy1)     out.push({ x: outer.x, y: y1, w: outer.w, h: oy1 - y1 });
+  if (x0 > outer.x) out.push({ x: outer.x, y: y0, w: x0 - outer.x, h: y1 - y0 });
+  if (x1 < ox1)     out.push({ x: x1, y: y0, w: ox1 - x1, h: y1 - y0 });
+  return out;
+}
+
+/**
+ * The BOXES one solved snapshot ships, as `{ rect, rgba }` in the leaf's own
+ * coordinates — the single place that knows how a solve becomes geometry.
+ *
+ * Three cases, one function so the plan and the cross-fade invariance check
+ * can never disagree about what a solve means:
+ *   - nothing painted → no boxes;
+ *   - uniform → one box, exactly the wave-38 shape;
+ *   - two-colour → the dominant's complement pieces first, then the sub-rect
+ *     (omitted when it is a transparent hole).
+ * Order is paint order, but the pieces never overlap, so it is only
+ * determinism, not stacking.
+ */
+export function snapshotBoxes(s) {
+  if (!s || !s.rect) return [];
+  if (!s.two) return [{ rect: s.rect, rgba: s.rgba }];
+  // `two.base` is present only for the FRAME orientation, where the background
+  // is the minority colour rather than the dominant one; everywhere else the
+  // base IS `s.rgba` and the override is absent.
+  const base = s.two.base ?? s.rgba;
+  return [
+    ...rectComplement(s.rect, s.two.rect).map((rect) => ({ rect, rgba: base })),
+    ...(s.two.rgba ? [{ rect: s.two.rect, rgba: s.two.rgba }] : []),
+  ];
 }
 
 /**
@@ -922,6 +1242,25 @@ export function snapshotColorCss(rgba) {
 
 // ── Pure planning: walk → bake plan ─────────────────────────────────────────
 
+/** The declaration block for ONE emitted snapshot box. Extracted so the
+ *  single-leaf path, the cross-fade path and the two-colour pieces all emit
+ *  the SAME keys in the SAME order — the fixture's bytes depend on it, and a
+ *  fourth hand-rolled copy is how that silently drifts. `opacity` is the
+ *  already-folded chain value; 1 emits no declaration at all (the wave-38
+ *  shape). */
+function leafBoxProps(box, opacity) {
+  return {
+    position: 'absolute',
+    left:   px(box.rect.x),
+    top:    px(box.rect.y),
+    width:  px(box.rect.w),
+    height: px(box.rect.h),
+    'box-sizing': 'border-box',
+    'background-color': snapshotColorCss(box.rgba),
+    ...(opacity < 1 ? { opacity: String(r2(opacity)) } : {}),
+  };
+}
+
 /**
  * Turn the browser walk (+ the per-leaf solved snapshots) into the boxes the
  * fixture will carry, or a bail string.
@@ -994,38 +1333,33 @@ export function planViewTransitionBake(walk, solved, crossFadeNames = []) {
       for (const [which, s] of [['old', so], ['new', sn]]) {
         if (!s) return { bail: `missing snapshot solve for ${g.name}/${which}` };
         if (s.error) return { bail: `snapshot solve failed for ${g.name}/${which}: ${s.error}` };
-        if (!s.uniform) {
+        if (!s.uniform && !s.two) {
           // THE RASTER REFUSAL, same boundary as the single-leaf path.
           return { bail: `non-uniform-snapshot ${g.name}/${which} (${s.distinct} colours, ${s.coverage}% flat)` };
         }
       }
-      // Identical means BOTH the painted rect and the solved colour+alpha. A
-      // pair that differs anywhere is a genuine mid-flight cross-fade whose
-      // composite moves with p, and there is no frozen state to ship.
-      const same = JSON.stringify(so.rect) === JSON.stringify(sn.rect)
-                && JSON.stringify(so.rgba) === JSON.stringify(sn.rgba);
-      if (!same) {
-        return { bail: `cross-fade-not-invariant '${g.name}' (old ${JSON.stringify(so.rect)}/${JSON.stringify(so.rgba)} vs new ${JSON.stringify(sn.rect)}/${JSON.stringify(sn.rgba)})` };
+      // Identical means the two solves ship the same BOXES — rect, colour and
+      // alpha, including a two-colour sub-rect when there is one. A pair that
+      // differs anywhere is a genuine mid-flight cross-fade whose composite
+      // moves with p, and there is no frozen state to ship.
+      const oldBoxes = snapshotBoxes(so), newBoxes = snapshotBoxes(sn);
+      if (JSON.stringify(oldBoxes) !== JSON.stringify(newBoxes)) {
+        return { bail: `cross-fade-not-invariant '${g.name}' (old ${JSON.stringify(oldBoxes)} vs new ${JSON.stringify(newBoxes)})` };
       }
-      if (so.rect) {
-        // ONE box for the pair: the sum of the two premultiplied layers is
-        // exactly the snapshot, so the leaves' own opacities are already
-        // accounted for and only the chain ABOVE them is folded in.
-        const chain = crossFadeChainOpacity(g);
+      // ONE box per solved region for the pair: the sum of the two
+      // premultiplied layers is exactly the snapshot, so the leaves' own
+      // opacities are already accounted for and only the chain ABOVE them is
+      // folded in.
+      const chain = crossFadeChainOpacity(g);
+      const chainFold = chain < 1 && Number.parseFloat(g.opacity) === 1 ? chain : 1;
+      for (const box of oldBoxes) {
         leaves.push({
           which: 'cross-fade',
-          props: {
-            position: 'absolute',
-            left:   px(so.rect.x),
-            top:    px(so.rect.y),
-            width:  px(so.rect.w),
-            height: px(so.rect.h),
-            'box-sizing': 'border-box',
-            'background-color': snapshotColorCss(so.rgba),
-            ...(chain < 1 && Number.parseFloat(g.opacity) === 1
-              ? { opacity: String(r2(chain)) }
-              : {}),
-          },
+          // Provenance for the batch log only (see the `shape` roll-up in
+          // viewTransitionBakeFixture); absent when the solve was uniform, so
+          // the wave-38/39 leaf shape is untouched on that path.
+          ...(so.two ? { shape: so.two.kind } : {}),
+          props: leafBoxProps(box, chainFold),
         });
       }
     }
@@ -1059,28 +1393,29 @@ export function planViewTransitionBake(walk, solved, crossFadeNames = []) {
       const s = solved[`${g.name}|${which}`];
       if (!s) return { bail: `missing snapshot solve for ${g.name}/${which}` };
       if (s.error) return { bail: `snapshot solve failed for ${g.name}/${which}: ${s.error}` };
-      if (!s.uniform) {
-        // THE RASTER REFUSAL — see the module banner.
+      if (!s.uniform && !s.two) {
+        // THE RASTER REFUSAL — see the module banner. A snapshot the
+        // TWO-COLOUR fit could describe (`s.two`) is not a raster and is
+        // emitted below as its measured rectangles; everything else still
+        // takes the whole test back to the static fixture.
         return { bail: `non-uniform-snapshot ${g.name}/${which} (${s.distinct} colours, ${s.coverage}% flat)` };
       }
       if (!s.rect) continue;                 // nothing painted — emit no box
-      leaves.push({
-        which,
-        props: {
-          position: 'absolute',
-          left:   px(s.rect.x),
-          top:    px(s.rect.y),
-          width:  px(s.rect.w),
-          height: px(s.rect.h),
-          'box-sizing': 'border-box',
-          'background-color': snapshotColorCss(s.rgba),
-          // The chain's opacity, folded here (see leafEffectiveOpacity). The
-          // group carries its own below, so this is the image-pair × leaf half.
-          ...(leafEffectiveOpacity(g, leaf) < 1 && Number.parseFloat(g.opacity) === 1
-            ? { opacity: String(r2(leafEffectiveOpacity(g, leaf))) }
-            : {}),
-        },
-      });
+      // The chain's opacity, folded onto every emitted box (see
+      // leafEffectiveOpacity). The group carries its own below, so this is the
+      // image-pair × leaf half.
+      const eff = leafEffectiveOpacity(g, leaf);
+      const fold = eff < 1 && Number.parseFloat(g.opacity) === 1 ? eff : 1;
+      // ONE box for a uniform snapshot (the wave-38 shape, byte-for-byte);
+      // the dominant colour's complement pieces plus the sub-rect for a
+      // two-colour one. snapshotBoxes is the single place that decides.
+      for (const box of snapshotBoxes(s)) {
+        leaves.push({
+          which,
+          ...(s.two ? { shape: s.two.kind } : {}),
+          props: leafBoxProps(box, fold),
+        });
+      }
     }
     if (!leaves.length) continue;            // an entirely invisible group
 
@@ -1628,8 +1963,18 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
         cropComposite(shots[0], win.width, win.height),
         cropComposite(shots[1], win.width, win.height));
       // Re-base the measured rect into the GROUP's own coordinates (undo the
-      // isolation translate).
+      // isolation translate). The two-colour sub-rect is measured in the same
+      // window and must move with it — a rebase that skipped it would put the
+      // second region's box at the wrong offset on every non-zero-offset
+      // window (the twelve `pseudo-with-classes-*` shapes).
       if (s.rect) s.rect = { ...s.rect, x: s.rect.x - win.offset.x, y: s.rect.y - win.offset.y };
+      if (s.two) {
+        s.two.rect = {
+          ...s.two.rect,
+          x: s.two.rect.x - win.offset.x,
+          y: s.two.rect.y - win.offset.y,
+        };
+      }
       solved[key] = s;
     }
     // Remove the instrument before anything else reads the page.
@@ -1647,6 +1992,10 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
       // Provenance for the batch log: which groups shipped as a proved
       // time-invariant cross-fade rather than as a single frozen leaf.
       crossFade: crossFade.length,
+      // …and which leaves needed the TWO-COLOUR fit, by shape, so a batch log
+      // says WHICH geometries the corpus actually contains rather than only
+      // how many bails it avoided.
+      shapes: plan.boxes.flatMap((b) => b.leaves.map((l) => l.shape).filter(Boolean)),
       written,
     };
   } catch (err) {
@@ -1696,6 +2045,7 @@ async function main() {
           (outcome.status === 'baked'
             ? ` (${outcome.groups} groups, ${outcome.leaves} leaves` +
               `${outcome.crossFade ? `, ${outcome.crossFade} invariant cross-fade` : ''}` +
+              `${outcome.shapes?.length ? `, two-colour ${[...new Set(outcome.shapes)].sort().join('/')}` : ''}` +
               ` — ${outcome.trigger})`
             : ` (${outcome.reason})`));
       } catch (err) {

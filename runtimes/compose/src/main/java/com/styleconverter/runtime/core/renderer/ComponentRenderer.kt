@@ -256,6 +256,34 @@ object ComponentRenderer {
         androidx.compose.runtime.compositionLocalOf { false }
 
     /**
+     * Wave 40 (lane T2) — THE LANG CHANNEL, renderer side.
+     *
+     * The COMPUTED content language of the component currently composing
+     * (`meta.lang`, the wave-37 wire — see [IRComponent.lang]). Provided
+     * by [RenderComponent] alongside [LocalInheritedProperties] and read
+     * by that component's own [PlaceholderContent], which is where the
+     * glyphs are laid out and therefore the only place a language can
+     * change a pixel.
+     *
+     * A CompositionLocal, not a parameter, because the text that needs it
+     * arrives through several call sites (leaf `_text`, inline-run
+     * entries, list rows, table cells) and threading a fifth optional
+     * argument through all of them would be churn with no extra meaning.
+     *
+     * Provided VERBATIM from the component's own `meta.lang` and NOT
+     * OR-ed with the ancestor value on purpose: the producer already
+     * resolved the HTML §3.2.6.2 ladder, and HTML's explicit-unknown
+     * `lang=""` stops that walk and emits no key — so an absent value
+     * means "no language", never "ask my parent". Falling back to
+     * `.current` would silently re-inherit across exactly that stop.
+     *
+     * Sole consumer today: the `hyphens: auto` dictionary gate
+     * ([com.styleconverter.runtime.typography.wrapping.AutoHyphenation]).
+     */
+    internal val LocalContentLanguage =
+        androidx.compose.runtime.compositionLocalOf<String?> { null }
+
+    /**
      * True when the nearest RenderComponent's merged list carries a Color
      * that arrived ONLY through the inheritance channel (no own
      * declaration). PlaceholderContent reads it to keep LEAF placeholder
@@ -1692,6 +1720,15 @@ object ComponentRenderer {
         val inheritanceWrappedContent: @Composable () -> Unit = {
             CompositionLocalProvider(
                 LocalInheritedProperties provides inheritableForChildren,
+                // Wave 40 (lane T2): THIS component's computed content
+                // language (`meta.lang`), verbatim — read by its own
+                // PlaceholderContent for the `hyphens: auto` dictionary
+                // gate. Null for every fixture-authored document (no
+                // `_lang` key on a CSS envelope), which is what keeps the
+                // committed baselines byte-identical. See
+                // LocalContentLanguage for why it is NOT ?:-chained to the
+                // ancestor value.
+                LocalContentLanguage provides component.lang,
                 // Wave 9: whether THIS component's Color is inherited-only —
                 // read by its own PlaceholderContent (leaf-glyph gate); each
                 // child RenderComponent re-provides its own value before the
@@ -5129,23 +5166,35 @@ object ComponentRenderer {
         ).name
         displayText = com.styleconverter.runtime.typography.wrapping.SoftHyphenPolicy
             .displayString(displayText, hyphensMode)
-        // No-silent-fallthrough twin of the iOS HyphensApplier breadcrumb:
-        // `auto` is the one keyword neither native can honour in full
-        // (Minikin CAN hyphenate, but only against a language the IR does
-        // not carry — there is no lang channel on the wire, so the
-        // dictionary cannot be selected). The degradation is auto →
-        // manual's explicit opportunities, which is exactly right for
-        // untagged content (css-text-3 §6.1 makes the resource
-        // language-dependent) and a wall for tagged content — named in
-        // tools/titan/wpt-not-applicable.mjs as
-        // `requires-hyphenation-dictionary`. logUnhandled dedupes by type.
+        // ── Wave 40 (lane T2) — THE DICTIONARY HALF, switched on ────────
+        // §6.1's `auto` is "manual's opportunities PLUS the ones a
+        // hyphenation resource appropriate to the LANGUAGE of the text
+        // determines". Minikin ships those resources
+        // (/system/usr/hyphen-data/hyph-<tag>.hyb, API 23+) and Compose can
+        // ask for them — the missing input until wave 37 was the language,
+        // and `meta.lang` (LocalContentLanguage) now carries it. So the
+        // wall the block below used to declare is only a wall for UNTAGGED
+        // content, which is exactly where §6.1 wants no hyphenation
+        // anyway (WPT css-text/hyphens-auto-001).
+        //
+        // The keyword is read from THIS component's own list first and the
+        // inherited channel second (see below); the LANGUAGE needs no such
+        // ladder — the producer already resolved it per element.
+        val autoHyphenLang = LocalContentLanguage.current
+        val dictionaryHyphenation = com.styleconverter.runtime.typography.wrapping
+            .AutoHyphenation.engaged(hyphensMode, autoHyphenLang)
+        // No-silent-fallthrough twin of the iOS HyphensApplier breadcrumb —
+        // now raised ONLY for the half that is still a wall: `auto` on a
+        // run with no language tag, where no dictionary can be selected.
+        // A tagged run no longer degrades, so it no longer logs.
+        // logUnhandled dedupes by type.
         if (com.styleconverter.runtime.typography.wrapping.SoftHyphenPolicy
-                .wantsDictionaryHyphenation(hyphensMode)) {
+                .wantsDictionaryHyphenation(hyphensMode) && !dictionaryHyphenation) {
             com.styleconverter.runtime.PropertyTracker.logUnhandled(
                 "Hyphens",
                 "hyphens: auto — no hyphenation dictionary can be selected " +
-                    "(the IR carries no language); falls back to the explicit " +
-                    "opportunities `manual` allows")
+                    "(this run carries no language tag); falls back to the " +
+                    "explicit opportunities `manual` allows")
         }
 
         // ── Block-font label branch (cross-platform glyph-wall fix) ──────
@@ -5267,8 +5316,21 @@ object ComponentRenderer {
         // there); web twin: ComponentRenderer.tsx suppresses its span's
         // hardcoded `word-break: break-word` under the same composed gate,
         // iOS twin: fixedSize(horizontal:) in its PlaceholderLabel chain.
+        //
+        // Wave 40 (lane T2) — `dictionaryHyphenation` VETOES the gate. The
+        // predicate above answers "does UAX #14 give this run a break
+        // opportunity?", and its space/punctuation/ideograph approximation
+        // is the complete answer only while the hyphenator is off. Under
+        // `hyphens: auto` + a language tag, §6.1 adds the dictionary's
+        // opportunities: `highway` becomes `high-way` and the run is no
+        // longer unbreakable, so suppressing softWrap here would paint it
+        // on one line and silently undo the switch (measured shape:
+        // css-text/hyphens-span-002 and hyphens-out-of-flow-002, seven
+        // single-word `highway` boxes each of which the Chromium ref
+        // breaks). Identical veto to the one PreBreakPipeline takes, for
+        // the identical reason.
         val effectiveSoftWrap = wrapConfig.softWrap &&
-            !(LocalWptComposedMode.current &&
+            !(LocalWptComposedMode.current && !dictionaryHyphenation &&
                 !com.styleconverter.runtime.typography.DecorationOps.hasSoftWrapOpportunity(displayText))
 
         // Extract additional text style properties. The inherited font-size
@@ -5532,9 +5594,30 @@ object ComponentRenderer {
         val featureSettings = fontVariantConfig
             ?.let { FontVariantApplier.buildFontFeatureSettings(it) }
             ?.takeIf { it.isNotEmpty() }
-        val styledTextStyle = if (featureSettings != null)
+        val featuredTextStyle = if (featureSettings != null)
             finalTextStyle.copy(fontFeatureSettings = featureSettings)
         else finalTextStyle
+
+        // Wave 40 (lane T2) — the two TextStyle fields Minikin's hyphenator
+        // needs, applied together and ONLY when `hyphens: auto` meets a
+        // language tag (TextWrapApplier.hyphensFor / hyphenationLocaleFor;
+        // the gate is AutoHyphenation.engaged). Both `Hyphens.Auto` and the
+        // `LocaleList` are required: the first sets Minikin's
+        // hyphenationFrequency, the second picks the pattern file. Every
+        // other run keeps the IDENTICAL instance it had before this wave —
+        // `.copy` is not called at all — which is what makes the 363
+        // committed baselines byte-stable by construction (no fixture
+        // carries `_lang`, so `dictionaryHyphenation` is false for all of
+        // them). See AutoHyphenation for the full inertness argument.
+        val hyphenationLocale = com.styleconverter.runtime.typography.TextWrapApplier
+            .hyphenationLocaleFor(hyphensMode, autoHyphenLang)
+        val styledTextStyle = if (hyphenationLocale != null)
+            featuredTextStyle.copy(
+                hyphens = com.styleconverter.runtime.typography.TextWrapApplier
+                    .hyphensFor(hyphensMode, autoHyphenLang),
+                localeList = hyphenationLocale
+            )
+        else featuredTextStyle
 
         // font-variant-caps: small-caps. The bundled static Inter honours
         // "smcp" only partially across weights, and the browser SYNTHESIZES
@@ -5667,6 +5750,13 @@ object ComponentRenderer {
             preservesSpaces = TextStyleApplier.extractWhiteSpace(properties)
                 .let { it == TextStyleApplier.WhiteSpaceMode.PRE_WRAP ||
                     it == TextStyleApplier.WhiteSpaceMode.BREAK_SPACES },
+            // Wave 40 (lane T2) — rule B's premise is "nowhere left to
+            // break". Under `hyphens: auto` + a language tag Minikin has a
+            // dictionary full of break points the space-split greedy
+            // breaker cannot see, so no line is unbreakable and firing here
+            // would hard-newline the run with softWrap OFF — suppressing
+            // the hyphenation we just switched on.
+            dictionaryHyphenation = dictionaryHyphenation,
             // Single-line advance through the EXACT render style and the
             // EXACT run transform (runAnnotated), so measure and paint can
             // never disagree. getLineWidth(0) is the raw float advance —

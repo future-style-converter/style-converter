@@ -7,6 +7,7 @@ package app.parsing.css.properties.longhands.background
 // <position>` clauses, and `to <side>` direction keywords. MaskImage
 // inherits all of this through the parseImage delegation.
 import app.irmodels.IRAngle
+import app.irmodels.IRLength
 import app.irmodels.IRLengthPercentage
 import app.irmodels.IRPercentage
 import app.irmodels.properties.background.BackgroundImageProperty
@@ -27,6 +28,36 @@ internal object GradientValueParsers {
     // conic-gradient-angle-negative 0.944 failure on all three platforms).
     // Tokenization is paren-aware so colors with spaces inside functions
     // (`color(srgb 1 0 0 / 0.5)`, `rgb(0, 0, 0)`) stay ONE token.
+    // One resolved <color-stop> position. css-images-4 §3.4.3 types it as a
+    // <length-percentage>, so exactly one of the two arms is ever set:
+    //   pct — the historical raw-number `position` wire key (unchanged bytes)
+    //   len — the ADDITIVE `positionLength` key (see ColorStop's doc comment)
+    private data class StopPos(val pct: IRPercentage?, val len: IRLength?)
+
+    // One position token → StopPos, or null when the token is not a position
+    // at all (an unknown ident, a bare number) — callers keep their historical
+    // "null means no explicit position" behavior for those.
+    private fun stopPos(tok: String): StopPos? {
+        // <percentage> — the legacy raw-number wire form.
+        PercentageParser.parse(tok)?.let { return StopPos(it, null) }
+        // Unitless zero is a valid <length> (css-values-4 §5.1) that
+        // PercentageParser rejects; 0px from the gradient line start ≡ 0%,
+        // so it keeps riding the percentage arm (byte-stable).
+        if (tok == "0") return StopPos(IRPercentage(0.0), null)
+        // <length> — LengthParser normalizes absolute units to px and carries
+        // relative units typed with pixels=null, exactly as parsePosition's
+        // axis helper does. Before wave-40 this fell through to null, so
+        // `repeating-linear-gradient(…, white 30px)` lost the 30px REPEAT
+        // PERIOD and painted one full-size ramp (WPT css-images
+        // gradient-border-box / gradient-content-box, web 0.6458 / 0.6504).
+        LengthParser.parse(tok)?.let { return StopPos(null, it) }
+        return null
+    }
+
+    // StopPos? → ColorStop, keeping "absent position" as a pair of nulls.
+    private fun stopOf(color: app.irmodels.IRColor, p: StopPos?) =
+        BackgroundImageProperty.ColorStop(color, p?.pct, p?.len)
+
     internal fun parseColorStops(value: String): List<BackgroundImageProperty.ColorStop> {
         val parts = TokenizationUtils.tokenizeByWhitespace(value)
         if (parts.isEmpty()) return emptyList()
@@ -34,29 +65,24 @@ internal object GradientValueParsers {
         // First token must be the color (angular hints for conic gradients
         // put positions AFTER the color in every supported form).
         val color = ColorParser.parse(parts[0]) ?: return emptyList()
-        // Position tokens: <percentage>, or the bare `0` length which
-        // PercentageParser rejects — css-values-4 §5.1 allows a unitless
-        // zero <length>; 0px from the gradient line start ≡ 0%.
-        fun pos(tok: String): IRPercentage? =
-            PercentageParser.parse(tok) ?: if (tok == "0") IRPercentage(0.0) else null
 
         return when (parts.size) {
             // Bare color — auto-spaced stop.
-            1 -> listOf(BackgroundImageProperty.ColorStop(color, null))
-            // Single explicit position (may still be null if the token is
-            // an unsupported form, e.g. a px length — keep prior behavior).
-            2 -> listOf(BackgroundImageProperty.ColorStop(color, pos(parts[1])))
+            1 -> listOf(stopOf(color, null))
+            // Single explicit position (may still be a pair of nulls if the
+            // token is neither a <percentage> nor a <length>).
+            2 -> listOf(stopOf(color, stopPos(parts[1])))
             // Double position → two stops with the same color (§3.4.3:
             // "identical to specifying the color twice").
             3 -> {
-                val p1 = pos(parts[1])
-                val p2 = pos(parts[2])
+                val p1 = stopPos(parts[1])
+                val p2 = stopPos(parts[2])
                 // Both positions must parse — otherwise this isn't the
                 // double-position production; fall back to the first.
                 if (p1 != null && p2 != null) listOf(
-                    BackgroundImageProperty.ColorStop(color, p1),
-                    BackgroundImageProperty.ColorStop(color, p2)
-                ) else listOf(BackgroundImageProperty.ColorStop(color, p1))
+                    stopOf(color, p1),
+                    stopOf(color, p2)
+                ) else listOf(stopOf(color, p1))
             }
             // >3 tokens is not a valid <color-stop> — drop the segment.
             else -> emptyList()
@@ -147,10 +173,23 @@ internal object GradientValueParsers {
     // closed keyword set guards stripInterpolationMethod against eating
     // an `in` that is NOT an interpolation method.
     private val INTERPOLATION_COLORSPACES = setOf(
-        "srgb", "srgb-linear", "display-p3", "a98-rgb", "prophoto-rgb",
-        "rec2020", "lab", "oklab", "xyz", "xyz-d50", "xyz-d65",
+        "srgb", "srgb-linear", "display-p3", "display-p3-linear", "a98-rgb",
+        "prophoto-rgb", "rec2020", "lab", "oklab", "xyz", "xyz-d50", "xyz-d65",
         "hsl", "hwb", "lch", "oklch"
     )
+    // wave-40 lane T6: `display-p3-linear` (css-color-hdr's linear-light
+    // companion to display-p3) was MISSING from the table above, so the
+    // `in display-p3-linear` in WPT css-images gradient/display-p3-linear-
+    // gradient was not recognised as a method — stripInterpolationMethod
+    // returned null, the whole segment stayed `to right in display-p3-linear`,
+    // and `to right` therefore failed to resolve too. The gradient rendered
+    // TOP-TO-BOTTOM in sRGB against a left-to-right linear-light reference
+    // (web 0.9762, all three platforms). Chrome 151 — the capture browser —
+    // accepts it: CSS.supports('background-image',
+    // 'linear-gradient(to right in display-p3-linear, red, blue)') === true,
+    // measured alongside `a98-rgb-linear` / `prophoto-rgb-linear` /
+    // `rec2020-linear` / `rec2100-*`, which it REJECTS and which are
+    // therefore deliberately absent here.
     // The four <hue-interpolation-method> heads (css-color-4 §12.4);
     // each must be followed by the literal `hue` to form the production.
     private val HUE_METHODS = setOf("shorter", "longer", "increasing", "decreasing")

@@ -60,7 +60,33 @@ data class BackgroundImageProperty(
     // parser into TWO ColorStop entries sharing the color, so this model
     // stays a single-position pair and every runtime renders the implied
     // hard stop without new wire shapes.
-    @Serializable data class ColorStop(val color: IRColor, val position: IRPercentage?)
+    //
+    // `positionLength` (wave-40 lane T6) carries the OTHER half of the
+    // spec's <length-percentage> stop position — the `<length>` arm, which
+    // had no home at all before and was silently discarded, costing the
+    // repeat period of every `repeating-*-gradient(…, <color> <length>)`
+    // (WPT css-images gradient-border-box / gradient-content-box, all three
+    // platforms ≈0.645 against a striped reference: one full-size ramp
+    // instead of 30px stripes).
+    //
+    // ADDITIVE BY CONSTRUCTION, on purpose. It is a NEW optional key with a
+    // null default, and the converter's Json instance runs with
+    // `encodeDefaults` off, so a stop whose position is a percentage (or
+    // absent) serializes byte-for-byte as before — `schema/spec/05-
+    // versioning.md`'s freeze is on emitted byte SHAPES, and no existing
+    // shape moves. Re-typing `position` itself to IRLengthPercentage (the
+    // move the gradient CENTRE made) was rejected precisely because it is
+    // NOT additive: the Compose reader decodes it as
+    // `obj["position"]?.jsonPrimitive?.floatOrNull`, and `jsonPrimitive`
+    // THROWS on a JsonObject, so an object-shaped position would break
+    // Android decoding of every length stop. Both native readers ignore
+    // unknown stop keys, so they keep today's behavior until their own
+    // lane teaches them the length arm.
+    @Serializable data class ColorStop(
+        val color: IRColor,
+        val position: IRPercentage?,
+        val positionLength: IRLength? = null
+    )
 
     // Gradient center (`at <position>`). Each axis is a
     // <length-percentage> (css-images-3 §3.5 / css-values-4 §5.4):

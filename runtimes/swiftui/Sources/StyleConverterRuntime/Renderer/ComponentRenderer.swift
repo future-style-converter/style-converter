@@ -273,13 +273,33 @@ public struct ComponentRenderer: View {
         // Hoisted: the UA rule needs the element's OWN list, which the
         // merge below also consumes — evaluating the transition blend
         // twice would be pure waste.
+        //
+        // Wave 40 (lane T7) — the SECOND tag-keyed UA rule, at the same
+        // cascade step and for the same css-cascade-4 §4.3 reason: the UA
+        // sheet's `h1…h6 { font-size: <n>em; font-weight: bold }` and
+        // `sub, sup { font-size: smaller }` are declarations ON the element,
+        // so they beat the inherited body face and lose to the author's own.
+        // Web never needed a twin (Chromium applies its own html.css to the
+        // real `<h3>` the harness renders), which is exactly why the web
+        // column passes cells iOS fails — see UAElementFontRule for the two
+        // ref-pixel measurements and the named gaps. Returns its input
+        // unchanged for every untagged component and every tag outside the
+        // table, so the whole 327-pair baseline is byte-identical.
         let ownProperties = motionEffectiveProperties(now: now)
-        return ListStyleUaRule.apply(
+        return UAElementFontRule.apply(
             sourceTag: component.meta?.sourceTag,
             own: ownProperties,
-            merged: GlobalExtractor.applyingAllReset(to: InheritedText.merge(
-                own: InheritedText.resolvingCurrentColorOnColor(ownProperties),
-                inherited: inheritedTextProperties)))
+            merged: ListStyleUaRule.apply(
+                sourceTag: component.meta?.sourceTag,
+                own: ownProperties,
+                merged: GlobalExtractor.applyingAllReset(to: InheritedText.merge(
+                    own: InheritedText.resolvingCurrentColorOnColor(ownProperties),
+                    inherited: inheritedTextProperties))),
+            // The heading half stands down for a heading that hosts child
+            // boxes — this container stacks them, and a 2em face only
+            // magnifies that (UAElementFontRule.headingAppliesTo carries the
+            // measured cells). sup/sub are unaffected by the flag.
+            hasElementChildren: component.children?.isEmpty == false)
     }
 
     /// Wave 9 (#37) — true when the merged list's `Color` arrived ONLY
@@ -2621,7 +2641,11 @@ public struct ComponentRenderer: View {
             clipTextGradient: nil,
             fillWidth: style.size.width != nil,
             wptCaptureMode: wptCaptureMode,
-            wrapWidth: textWrapWidth(style: style)
+            wrapWidth: textWrapWidth(style: style),
+            // Wave 40 (lane T2) — the component's COMPUTED content
+            // language (`meta.lang`), the input the `hyphens: auto`
+            // dictionary gate needs. nil for every CSS-envelope fixture.
+            lang: component.meta?.lang,
         )
     }
 
@@ -2812,6 +2836,9 @@ public struct ComponentRenderer: View {
                     // the greedy pre-break (leading text wraps exactly like
                     // leaf text: same box, same containing block).
                     wrapWidth: textWrapWidth(style: style),
+                    // Wave 40 (lane T2) — the component's COMPUTED content
+                    // language (`meta.lang`); see the leaf site below.
+                    lang: component.meta?.lang,
                     // Wave 22 (lane DECOR): this run renders the COMPONENT's
                     // own text, so it owns the component's
                     // `meta.decorations` list too — the mixed-content
@@ -3409,6 +3436,11 @@ public struct ComponentRenderer: View {
                 // Chromium/Compose break (greedy), not where TextKit's
                 // push-out moves the soft break (see GreedyLineBreaker).
                 wrapWidth: textWrapWidth(style: style),
+                // Wave 40 (lane T2) — the component's COMPUTED content
+                // language (`meta.lang`), already resolved by the producer
+                // through HTML §3.2.6.2's ladder. The ONLY consumer is the
+                // `hyphens: auto` dictionary gate (AutoHyphenation).
+                lang: component.meta?.lang,
                 // Wave 22 (lane DECOR): the LEAF site — where a collapsed
                 // inline run lands (the extractor flattens the chain to one
                 // childless text component). `meta.decorations` reaches the
@@ -3716,6 +3748,23 @@ private struct PlaceholderLabel: View {
     // geometry known → the legacy soft-wrap path, byte-identical.
     var wrapWidth: CGFloat? = nil
 
+    // Wave 40 (lane T2) — THE LANG CHANNEL, label side: the COMPUTED
+    // content language of the component this label belongs to
+    // (`meta.lang`, the wave-37 wire). Threaded EXPLICITLY from the three
+    // ComponentRenderer call sites rather than published through the
+    // environment, matching how `rawText` and `wptCaptureMode` already
+    // reach here — the value is per-component and the renderer holds it.
+    //
+    // Passed VERBATIM from `component.lang` and NOT defaulted to an
+    // ancestor's: the producer already resolved HTML §3.2.6.2's ladder,
+    // and `lang=""` (explicit unknown) deliberately stops that walk and
+    // emits no key, so absent means "no language", never "ask my parent".
+    //
+    // Sole consumer: the `hyphens: auto` dictionary gate
+    // (AutoHyphenation.engaged). nil everywhere the IR came from a CSS
+    // envelope, i.e. for every committed baseline capture.
+    var lang: String? = nil
+
     // Wave 22 (lane DECOR, B-RC4b) — the merged `meta.decorations` wire
     // for a COLLAPSED inline run: the ordered, ancestor-first list of
     // every decorating box's line and its OWN colour (css-text-decor-3
@@ -3810,10 +3859,37 @@ private struct PlaceholderLabel: View {
         // LineBoxMetrics counted the two lines we committed). The flag
         // feeds the `.fixedSize(horizontal:)` gate below, which is the
         // same vehicle wave 21 built for whole-run unbreakables.
+        //
+        // Wave 40 (lane T2) — and it now carries the css-text-3 §6.1 `auto`
+        // DICTIONARY. On this platform the pre-break IS the line breaker
+        // (TextKit only ever sees hard newlines), so hyphenation has to
+        // happen here or nowhere; `hyphenator` below is nil for every run
+        // that is not `hyphens: auto` with a language tag, which leaves the
+        // fold byte-identical. Two gates loosen with it:
+        //   • the `contains(" ")` precondition — a SINGLE word is exactly
+        //     the case a dictionary can break (`highway` → `high-way`,
+        //     css-text/hyphens-span-002's seven boxes), and the old guard
+        //     was written when the breaker could only split on spaces;
+        //   • `hasUnbreakableOverflowingLine`'s per-line claim (see there).
+        let hyphenLocaleTag = AutoHyphenation.localeTag(textConfig.hyphensMode, lang)
+        let hyphenLocale = hyphenLocaleTag.flatMap { AutoHyphenation.locale(for: $0) }
+        // No-silent-fallthrough: `auto` degrades to `manual`'s explicit
+        // opportunities whenever the run has no language tag, or the device
+        // ships no dictionary for the one it has. Both are honest walls and
+        // both are now NAMED separately from the ones we can serve.
+        if SoftHyphenPolicy.wantsDictionaryHyphenation(textConfig.hyphensMode),
+           hyphenLocale == nil {
+            _ = PropertyTracker.logOnce(
+                key: "hyphens:auto",
+                message: "hyphens: auto — no hyphenation dictionary for "
+                    + "\(hyphenLocaleTag ?? "<no lang>"); falls back to the "
+                    + "explicit opportunities `manual` allows")
+        }
         let broken: (text: String, preBroken: Bool, overlong: Bool) = {
             guard let cb = wrapWidth, !textConfig.noWrap,
                   !textConfig.preservesSpaces,
-                  transformedText.contains(" ") else { return (transformedText, false, false) }
+                  transformedText.contains(" ") || hyphenLocale != nil
+            else { return (transformedText, false, false) }
             // Text width available inside the label: the content box
             // minus the 4px breathing inset each side (dropped in WPT
             // capture, mirroring the padding gate below) and the
@@ -3837,14 +3913,30 @@ private struct PlaceholderLabel: View {
             let lines = GreedyLineBreaker.lines(
                 text: transformedText,
                 maxWidth: avail,
-                measure: measure)
+                measure: measure,
+                // Wave 40 — the dictionary, or nil. CFStringGetHyphenation…
+                // is a pure string query (no view, no layout manager), so
+                // it is reachable from the ImageRenderer-safe path the
+                // TextKit hyphenator is not — see AutoHyphenation's banner.
+                hyphenate: hyphenLocale.map { loc in
+                    { word in AutoHyphenation.breakOffsets(in: word, locale: loc) }
+                },
+                // The UA hyphen §6.1 leaves undefined: U+2010, which is what
+                // Chromium paints and therefore what the frozen refs carry.
+                // css-text-4 §6.3 `hyphenate-character` would override it,
+                // but HyphenateCharacterApplier is still an identity
+                // contribution (the keyword never reaches TextConfig), so
+                // routing it is a separate, wire-side change — deliberately
+                // NOT smuggled in here.
+                hyphenChar: AutoHyphenation.defaultHyphenCharacter)
             // Hard newlines force TextKit to OUR break positions — its
             // push-out strategy only relocates SOFT breaks, and every
             // pre-broken line fits `avail` by construction EXCEPT the
             // overlong-word case rule B names (a single word wider than
             // the box). Probe for it with the same measurer.
             let overlong = GreedyLineBreaker.hasUnbreakableOverflowingLine(
-                lines, maxWidth: avail, measure: measure)
+                lines, maxWidth: avail,
+                dictionaryHyphenation: hyphenLocale != nil, measure: measure)
             return (lines.joined(separator: "\n"), true, overlong)
         }()
         // The rendered string — identical to the pre-wave-30 `displayText`.
@@ -3904,7 +3996,20 @@ private struct PlaceholderLabel: View {
         // is byte-identical. Twins: Compose gates softWrap under
         // LocalWptComposedMode, web drops its span's hardcoded
         // break-word under WPT_COMPOSED_MODE.
+        //
+        // Wave 40 (lane T2) — `broken.preBroken` VETOES the claim. The
+        // predicate answers "does UAX #14 give this run a break?", which
+        // is the complete answer only while the hyphenator is off; under
+        // `hyphens: auto` §6.1 adds the dictionary's points and the
+        // pre-break has ALREADY spent them, so `displayText` carries hard
+        // newlines even though it has no space. Leaving the claim standing
+        // there would `.fixedSize(horizontal:)` the run back onto one line
+        // and undo the hyphenation (measured shape:
+        // css-text/hyphens-span-002's `highway` boxes, where the ref
+        // paints `high-`/`way`). A run the pre-break declined is
+        // untouched, so every wave-21 capture keeps its exact flag.
         let wptUnbreakableRun = wptCaptureMode
+            && !broken.preBroken
             && !DecorationOps.hasSoftWrapOpportunity(displayText)
         // Wave 37 (lane W7, rule B) — the SAME contract for a run that
         // DOES have soft-wrap opportunities but still contains one word

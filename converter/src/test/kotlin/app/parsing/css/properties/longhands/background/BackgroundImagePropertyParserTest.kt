@@ -416,4 +416,146 @@ class BackgroundImagePropertyParserTest {
         val prop = BackgroundImagePropertyParser.parse("cross-fade(10% notacolorimage!!)") as BackgroundImageProperty
         assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
     }
+
+    // ---- wave-40 T6: the angle-unit table is now a GATE ---------------
+    // The wave-39 A5 deferral. Every declaration below is one of WPT
+    // css-values/angle-units-001's four "invalid; <valid form> is valid"
+    // comments; the capture browser drops all four
+    // (CSS.supports('background-image', …) === false, measured), and so
+    // must we — as Raw author bytes, not an invented ramp.
+
+    @Test
+    fun `plural turn unit invalidates the whole gradient`() {
+        val prop = BackgroundImagePropertyParser.parse("linear-gradient(0.25turns, red, red)") as BackgroundImageProperty
+        val raw = assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
+        // Author bytes preserved verbatim for the web runtime's passthrough.
+        assertEquals("linear-gradient(0.25turns, red, red)", raw.value)
+    }
+
+    @Test
+    fun `spelled-out angle units invalidate the whole gradient`() {
+        for (css in listOf(
+            "linear-gradient(90degree, red, red)",
+            "linear-gradient(100gradian, red, red)",
+            "linear-gradient(1.57radian, red, red)",
+        )) {
+            val prop = BackgroundImagePropertyParser.parse(css) as BackgroundImageProperty
+            assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0], css)
+        }
+    }
+
+    @Test
+    fun `the four real angle units still parse`() {
+        // The other half of the gate: angle-units-002..005 (mixed case) must
+        // keep resolving, so strictness never costs a valid unit.
+        for ((css, deg) in listOf(
+            "linear-gradient(90DeG, green, green)" to 90.0,
+            "linear-gradient(100gRaD, green, green)" to 90.0,
+            "linear-gradient(1.57rAd, green, green)" to 89.954,
+            "linear-gradient(0.25tUrN, green, green)" to 90.0,
+        )) {
+            val g = layer(css)
+            assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g, css)
+            assertEquals(deg, Math.round(g.angle!!.degrees * 1000.0) / 1000.0, css)
+        }
+    }
+
+    @Test
+    fun `unresolvable direction keyword invalidates the whole gradient`() {
+        // `to bottom left top` names two vertical sides — no <side-or-corner>
+        // production matches, so the function is invalid (it used to render
+        // as a default top-to-bottom ramp of the remaining stops).
+        val prop = BackgroundImagePropertyParser.parse("linear-gradient(to bottom left top, red, blue)") as BackgroundImageProperty
+        assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
+    }
+
+    @Test
+    fun `bad angle riding beside a valid interpolation method invalidates too`() {
+        // The method is recognised and peeled, but the leftover is neither an
+        // angle nor a direction — §3.1's `||` combinator allows nothing else.
+        val prop = BackgroundImagePropertyParser.parse("linear-gradient(0.25turns in srgb, red, blue)") as BackgroundImageProperty
+        assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
+    }
+
+    @Test
+    fun `conic from-angle with an invalid unit invalidates the whole gradient`() {
+        val prop = BackgroundImagePropertyParser.parse("conic-gradient(from 0.25turns, red, blue)") as BackgroundImageProperty
+        assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
+    }
+
+    @Test
+    fun `strictness does not touch colour-first stop segments`() {
+        // The guard must reject only `to …` and leading <dimension>s. A
+        // colour-function first stop — including one carrying its own
+        // top-level-looking `in` inside parens — keeps its old path.
+        val g = layer("linear-gradient(color-mix(in srgb, red, blue) 10%, blue)")
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g)
+        assertNull(g.angle)
+        val legacyZero = layer("linear-gradient(0, red, blue)")
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(legacyZero)
+        assertEquals(0.0, legacyZero.angle!!.degrees)
+    }
+
+    // ---- wave-40 T6: <length> color-stop positions --------------------
+
+    @Test
+    fun `wpt gradient-border-box declaration keeps its 30px repeat period`() {
+        // EXACT declaration from tools/wpt/css/css-images/gradient-border-box
+        // .html — the 30px stop is the REPEAT PERIOD, and dropping it painted
+        // one full-box ramp instead of stripes (web 0.6458).
+        val g = layer("repeating-linear-gradient(to bottom right, white, black, white 30px)")
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g)
+        assertTrue(g.repeating)
+        assertEquals(3, g.colorStops.size)
+        // The percentage arm stays empty — the length rides its own key.
+        assertNull(g.colorStops[2].position)
+        assertEquals(30.0, g.colorStops[2].positionLength!!.pixels)
+    }
+
+    @Test
+    fun `relative-unit stop position rides typed with null pixels`() {
+        // Same "null means runtime-dependent" convention the gradient CENTRE
+        // uses: the engines resolve em/lh where the font metrics live.
+        val g = layer("linear-gradient(red, blue 2em)")
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g)
+        assertNull(g.colorStops[1].positionLength!!.pixels)
+        assertEquals(2.0, g.colorStops[1].positionLength!!.originalValue)
+        assertEquals(IRLength.LengthUnit.EM, g.colorStops[1].positionLength!!.originalUnit)
+    }
+
+    @Test
+    fun `percentage stops keep byte-identical wire bytes`() {
+        // The whole point of making positionLength an ADDITIVE key: a stop
+        // that carries a percentage must not gain one byte. `encodeDefaults`
+        // is off on the converter's Json instance, so the key is absent.
+        val g = layer("linear-gradient(red 25%, blue)")
+        val el = json.encodeToJsonElement(BackgroundImageSerializer, g).jsonObject
+        val stops = el["stops"]!!.jsonArray
+        assertEquals(25.0, stops[0].jsonObject["position"]!!.jsonPrimitive.double)
+        assertTrue(!stops[0].jsonObject.containsKey("positionLength"))
+        assertTrue(!stops[1].jsonObject.containsKey("positionLength"))
+    }
+
+    @Test
+    fun `length stop serializes as the additive positionLength key`() {
+        val g = layer("linear-gradient(red, blue 30px)")
+        val stops = json.encodeToJsonElement(BackgroundImageSerializer, g).jsonObject["stops"]!!.jsonArray
+        val second = stops[1].jsonObject
+        // The frozen `position` key is still present and still null.
+        assertTrue(second.containsKey("position"))
+        assertEquals(30.0, second["positionLength"]!!.jsonObject["px"]!!.jsonPrimitive.double)
+    }
+
+    // ---- wave-40 T6: display-p3-linear as an interpolation space ------
+
+    @Test
+    fun `display-p3-linear is a recognised interpolation method`() {
+        // WPT css-images gradient/display-p3-linear-gradient. The space was
+        // missing from the table, so the method was not peeled and `to right`
+        // died with it — the gradient rendered top-to-bottom in sRGB (0.9762).
+        val g = layer("linear-gradient(to right in display-p3-linear, rgb(255, 0, 0), rgb(0, 255, 0))")
+        assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g)
+        assertEquals(90.0, g.angle!!.degrees)
+        assertEquals("in display-p3-linear", g.interp)
+    }
 }
