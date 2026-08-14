@@ -82,10 +82,13 @@ object PreBreakPipeline {
      *
      * @param text the display string, AFTER text-transform, tab-size and
      *   the `hyphens: none` soft-hyphen strip ([SoftHyphenPolicy]) — i.e.
-     *   exactly the glyphs that will be measured and painted. A U+00AD
-     *   that survived into this string is a break opportunity Minikin may
-     *   take and the greedy breaker does not model, which is precisely
-     *   why rule A runs first.
+     *   exactly the glyphs that will be measured and painted. Rule A
+     *   still runs first so a `none` run can never break at its authored
+     *   U+00ADs; a soft hyphen that DOES survive to here (`manual`/
+     *   `auto`) is, since wave 41, modeled by the fold itself
+     *   ([WordBreakOpportunities]): a fired result carries the taken
+     *   points as painted hyphens and no soft hyphen at all, so Minikin
+     *   (softWrap off) renders exactly the measured string.
      * @param wrapWidthPx the content-box inline size this run wraps at,
      *   in px. ≤ 0 means "unknown" (an unbounded constraint, or the first
      *   composition before the width has been observed) → decline.

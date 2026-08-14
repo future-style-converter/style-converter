@@ -22,6 +22,10 @@
 //
 
 import XCTest
+// SwiftUI for the wave-41 raster pin (Text / ImageRenderer / Color);
+// ImageRenderer is the same @MainActor surface the sibling raster suites
+// (ListMarkerInFlowItemRasterTests) already stand on.
+import SwiftUI
 @testable import StyleConverterRuntime
 
 final class ListMarkerSymbolTests: XCTestCase {
@@ -98,5 +102,97 @@ final class ListMarkerSymbolTests: XCTestCase {
         // font-independent, so both natives now land on one size.
         XCTAssertEqual(ListMarkerSymbol.sizeEm, 0.35, accuracy: 0.0001)
         XCTAssertEqual(ListMarkerSymbol.strokeEm, 1.0 / 16.0, accuracy: 0.0001)
+    }
+
+    // MARK: - wave 41 (lane T4): the TEXT branch's typography
+
+    func testTheTextBranchCarriesTheResolvedMarkerFontSize() {
+        // css-lists-3 §3.2 — the ::marker inherits from its originating
+        // element, whose iOS text bottom-out is `.custom("Inter",
+        // size: fontSize ?? 16)`. Before wave 41 the marker `Text` carried
+        // NO font and ASCII markers resolved SwiftUI's environment body
+        // default (SF at 17pt) — a face and size with no CSS basis, where
+        // css-lists-3 §3.2 inherits the originating element's computed
+        // font (the document default, 16px Inter). Digit metrics cannot
+        // distinguish SF@17 from Inter@16 at capture resolution, so the
+        // pin rests on the inheritance rule, not a measured face delta.
+        // The extension threads ONE resolved size
+        // into both consumers so shape and text can never disagree.
+        let m = ListMarkerSymbolPaint(
+            shape: nil,
+            sizePt: ListMarkerSymbol.sizePt(fontSizePx: 16),
+            strokePt: ListMarkerSymbol.strokePt(fontSizePx: 16),
+            markerFontPt: 16)
+        XCTAssertEqual(m.markerFontPt, 16)
+        // A declared container size reaches the text branch verbatim — the
+        // 25px counter-styles shape keeps painting its markers at 25.
+        let large = ListMarkerSymbolPaint(shape: nil, sizePt: 8.75,
+                                          strokePt: 25.0 / 16.0,
+                                          markerFontPt: 25)
+        XCTAssertEqual(large.markerFontPt, 25)
+    }
+
+    func testAnUnresolvableFontSizeDisablesTheTextBranchFont() {
+        // Defensive twin of the `sizePt > 0` symbol guard: ≤ 0 must keep
+        // the pre-wave-41 render (no font modifier) rather than handing
+        // `.custom` a degenerate size-0 face.
+        let m = ListMarkerSymbolPaint(shape: nil, sizePt: 0, strokePt: 0,
+                                      markerFontPt: 0)
+        XCTAssertEqual(m.markerFontPt, 0)
+        // The branch condition itself is `markerFontPt > 0` — pinned here
+        // as data so a refactor that flips the guard's sense cannot pass.
+        XCTAssertFalse(m.markerFontPt > 0)
+    }
+
+    /// The behavioural half: the text branch's font genuinely reaches the
+    /// glyphs. A property pin alone cannot see a dropped `.font` call, so
+    /// this rasterizes the same marker string through the modifier at two
+    /// sizes far enough apart (16 vs 32) that the ink height must roughly
+    /// double — true whether or not the Inter face is registered in the
+    /// unit bundle, because `Font.custom` preserves its SIZE through the
+    /// unregistered-family fallback (the same degrade the item path's
+    /// `.custom("Inter", …)` documents at ComponentRenderer's `font` var).
+    @MainActor
+    func testTheTextBranchFontActuallySizesTheInk() throws {
+        // Rasterize "1." through the modifier at a given marker font size,
+        // on a white stage, and return the glyph band's ink height.
+        func inkHeight(markerFontPt: CGFloat) throws -> Int {
+            let view = Text("1.")
+                .modifier(ListMarkerSymbolPaint(shape: nil, sizePt: 0,
+                                                strokePt: 0,
+                                                markerFontPt: markerFontPt))
+                .frame(width: 80, height: 80, alignment: .topLeading)
+                .background(Color.white)
+            let renderer = ImageRenderer(content: view)
+            renderer.scale = 1
+            let cg = try XCTUnwrap(renderer.cgImage)
+            let w = cg.width, h = cg.height
+            var buf = [UInt8](repeating: 0, count: w * h * 4)
+            let ctx = try XCTUnwrap(CGContext(
+                data: &buf, width: w, height: h, bitsPerComponent: 8,
+                bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+            // Ink = dark pixels; the band's height is max inked y − min.
+            var minY = Int.max, maxY = Int.min
+            for y in 0..<h { for x in 0..<w {
+                let i = (y * w + x) * 4
+                if buf[i] < 128 && buf[i + 1] < 128 && buf[i + 2] < 128 {
+                    minY = min(minY, y); maxY = max(maxY, y)
+                }
+            } }
+            return minY == .max ? 0 : maxY - minY + 1
+        }
+        let at16 = try inkHeight(markerFontPt: 16)
+        let at32 = try inkHeight(markerFontPt: 32)
+        // Both must actually paint …
+        XCTAssertGreaterThan(at16, 0, "no ink at 16pt — the branch vanished")
+        // … and 32pt must be materially taller than 16pt: a dropped
+        // `.font` would render BOTH at the ~17pt environment default and
+        // the two heights would collapse to equal.
+        XCTAssertGreaterThanOrEqual(at32, at16 + 6,
+            "marker ink did not scale with markerFontPt (16pt → \(at16)px, "
+            + "32pt → \(at32)px) — the text branch's font is not reaching "
+            + "the glyphs")
     }
 }

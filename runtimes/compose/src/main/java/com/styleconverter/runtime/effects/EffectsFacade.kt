@@ -136,6 +136,27 @@ object EffectsFacade {
         // Apply mask (determines visible region based on image/gradient)
         result = MaskApplier.applyMask(result, config.mask)
 
+        // The element's own colour-matrix `filter` half — OUTERMOST of the
+        // backdrop node, wave-41 correction of the wave-26 order.
+        //
+        // filter-effects-2 §2's Backdrop Filter algorithm composites the
+        // filtered backdrop as the BOTTOM-MOST CONTENT of the element's
+        // transparency group, and the group is then rendered with the
+        // element's own `filter`/opacity — so `filter` MUST see the
+        // backplate. Wave 26 read the resulting double-invert (an element
+        // declaring both `backdrop-filter: invert(1)` and `filter:
+        // invert(1)` lands back on the unfiltered colour) as a bug and moved
+        // the foreground chain inside; Chrome's own ref for WPT
+        // `backdrop-filter-plus-filter.html` refutes that reading — its box
+        // body is dark purple = invert(white BLURRED backdrop + translucent
+        // green bg), i.e. the element filter applied OVER the filtered
+        // backplate (web 1.0000 vs Android 0.9168 on wave40-final, where the
+        // Android box rendered nothing at all — the second, independent bug
+        // this call also fixes; see applyGroupColorFilters' crop KDoc).
+        // Pass A stays sound: the backplate node inside suppresses all
+        // content, so this group composites nothing into the root image.
+        result = FilterApplier.applyGroupColorFilters(result, config.filters, positionOffset)
+
         // BACKDROP filter — before the shadow, and therefore OUTER of it.
         //
         // wave-26 skeptic fix. The backdrop node suppresses this element's
@@ -147,11 +168,6 @@ object EffectsFacade {
         // blurred/inverted underneath the box that cast it. filter-effects-2
         // §2 puts the element's shadow in the ELEMENT's paint, above the
         // filtered backdrop, never in the Backdrop Root Image.
-        //
-        // Minimal ordering on purpose: only the BACKDROP half moved out here.
-        // The foreground `filter` chain stays below the shadow exactly where
-        // it has always been, so every committed shadow capture (and the
-        // shadow pins that go with them) is untouched.
         result = FilterApplier.applyBackdropFilters(
             result, config.filters, radiusConfig, elementAlpha, marginInsets,
             positionOffset,
@@ -166,16 +182,11 @@ object EffectsFacade {
         // to the box, not to its abandoned layout slot).
         result = ShadowApplier.applyShadow(result, config.shadows, radiusConfig, positionOffset)
 
-        // Apply the element's own `filter` chain — its own pixels only, so it
-        // must NOT reach the backplate installed above. Second half of the
-        // wave-26 ordering fix: the foreground chain used to be appended
-        // BEFORE the backdrop registration inside applyFilters, i.e. its
-        // `Modifier.blur`/`graphicsLayer(renderEffect)`/`alpha` layers wrapped
-        // the backdrop draw node, so an element declaring both
-        // `backdrop-filter: invert(1)` and `filter: invert(1)` inverted its
-        // backdrop TWICE and landed back on the unfiltered colour. Both
-        // natives had that bug; both now paint the backplate outside the
-        // foreground chain (iOS: FilterApplier.body step order).
+        // The rest of the element's own `filter` chain (blur, drop-shadow,
+        // opacity) stays INNER of the shadow step, exactly where it has
+        // always been, so every committed shadow capture (and the shadow
+        // pins that go with them) is untouched. Only the colour-matrix half
+        // moved out above — the minimal reorder the plus-filter ref demands.
         result = FilterApplier.applyForegroundFilters(result, config.filters)
 
         return result
@@ -199,6 +210,11 @@ object EffectsFacade {
     ): Modifier {
         var result = modifier
 
+        // Colour-matrix group outermost, for the same reason as [apply]:
+        // filter-effects-2 §2 renders the element's group — filtered
+        // backplate included — through the element's own `filter`.
+        result = FilterApplier.applyGroupColorFilters(result, config.filters)
+
         // Backdrop before the shadow, for the same reason as [apply]: the
         // element's own shadow must not paint into its own pass-A backdrop.
         result = FilterApplier.applyBackdropFilters(result, config.filters)
@@ -206,7 +222,8 @@ object EffectsFacade {
         // Apply shadows (they render behind the content)
         result = ShadowApplier.applyShadowWithRadius(result, config.shadows, cornerRadius)
 
-        // Apply the element's own filter chain, inside both of the above.
+        // The blur/drop-shadow/opacity half of the filter chain, inside all
+        // of the above.
         result = FilterApplier.applyForegroundFilters(result, config.filters)
 
         return result

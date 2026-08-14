@@ -159,11 +159,24 @@ async function resetAndLaunch(adbx, opts) {
   // every fixture times out (the wave-40 gate lost ~30h to exactly this).
   // The app lazily mkdirs the inbox app-owned on first poll
   // (ScreenshotManager.inboxDir), and the launch-marker wait below
-  // guarantees it exists before the first push. fonts/images stay
-  // shell-created for now: pushed subtrees under them are a KNOWN residual
-  // hazard on API-36.1 (fontFaces/image tests may not see pushed assets on
-  // such images — probe before trusting; older pool AVDs are unaffected).
-  adbx(['shell', 'mkdir', '-p', FONTS_DIR, IMAGES_DIR]);
+  // guarantees it exists before the first push. FONTS_DIR / IMAGES_DIR are
+  // NOT shell-mkdir'd either — the wave-40 "residual hazard" note that used
+  // to sit here was PROBED REAL in wave-41 (lane T2, private API-36.1
+  // instance): a shell-created asset root is invisible to the app for
+  // DIRECT-PATH OPENS too, not just listing — the feeder pushed the woff,
+  // shell `ls` saw all 261 KB of it, and DocumentFontRegistry still declined
+  // "no readable file at <that exact path>" (shell-owned uid 2000 dir vs app
+  // uid 10224; captures byte-identical to a no-asset run). So the asset
+  // roots ride the SAME app-first pattern as the inbox: ScreenshotManager's
+  // poll loop (ensureAssetRoots, called from nextFixtureFile) creates both
+  // roots app-owned on every poll, and the launch wait below blocks on all
+  // THREE dirs before anything is pushed. Only the SUBPATHS below the roots
+  // (pushFontFaces/pushReplacedImages' `mkdir -p` of each src's parent
+  // chain) remain shell-created — probed VISIBLE under an app-owned root on
+  // the same instance: the pushed woff got far enough to hit the runtime's
+  // own woff-container decline (i.e. the file was READ through the
+  // shell-made subchain), and the grid support PNG painted, moving pixels
+  // (grid-abspos-staticpos-align-self-img-001: 0.9576 vacuous → 0.9615).
   try { adbx(['logcat', '-c']); } catch { /* logcat clear is best-effort */ }
   // Match the shared 390×844 @160dpi capture canvas. Composed mode layers
   // `--ez titanComposed true`: same inbox poll, whole doc onto one canvas.
@@ -183,22 +196,30 @@ async function resetAndLaunch(adbx, opts) {
     try { marked = markerRe.test(adbx(['logcat', '-d'])); } catch { /* retry */ }
     if (!marked) await new Promise((r) => setTimeout(r, 250));
   }
-  // The first push must land in an APP-created inbox (see the mkdir note
-  // above) — wait for the app's lazy inboxDir mkdirs to have run. The app
-  // logs its first "polling …/inbox" only after that lazy init; the ls poll
-  // below closes the race without trusting the ordering. 60s cap: the very
+  // The first push must land in APP-created dirs (see the mkdir note above)
+  // — wait for the app's lazy per-poll mkdirs to have run: the inbox
+  // (ScreenshotManager.inboxDir) AND, since wave-41, the two asset roots
+  // (ScreenshotManager.ensureAssetRoots, same poll call), because a font or
+  // image pushed before the app created its root would auto-create that root
+  // as SHELL — which on API-36.1 images the app cannot see even for
+  // direct-path opens (the wave-41 T2 probe), silently stripping every
+  // fontFaces/replaced-image test of its assets. One `ls -d` with all three
+  // paths: it exits non-zero while ANY of them is missing, so the loop's
+  // pass condition is exactly "the app's poll has fully provisioned". The
+  // app logs its first "polling …/inbox" only after that lazy init; the ls
+  // poll closes the race without trusting the ordering. 60s cap: the very
   // first cold launch (JIT + font init) has been observed to need >10s, and
   // an expired wait must FAIL LOUDLY — falling through would let the first
-  // `adb push` auto-create the inbox as SHELL, which on API-36.1 images the
-  // app cannot list, silently killing the WHOLE section's Android leg (the
-  // wave-40 gate lost its first two sections to exactly this race).
-  let inboxReady = false;
+  // `adb push` create shell-owned dirs and silently kill the WHOLE
+  // section's Android leg (the wave-40 gate lost its first two sections to
+  // exactly this race, on the inbox alone).
+  let dirsReady = false;
   for (let i = 0; i < 240; i++) {
-    try { adbx(['shell', 'ls', '-d', INBOX_DIR]); inboxReady = true; break; } catch { /* not yet */ }
+    try { adbx(['shell', 'ls', '-d', INBOX_DIR, FONTS_DIR, IMAGES_DIR]); dirsReady = true; break; } catch { /* not yet */ }
     await new Promise((r) => setTimeout(r, 250));
   }
-  if (!inboxReady) {
-    throw new Error(`app never created ${INBOX_DIR} within 60s — refusing to push (a shell-created inbox is invisible to the app on API-36.1 images)`);
+  if (!dirsReady) {
+    throw new Error(`app never created ${INBOX_DIR} + asset roots within 60s — refusing to push (shell-created dirs are invisible to the app on API-36.1 images)`);
   }
   return marked;
 }

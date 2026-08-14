@@ -365,34 +365,43 @@ export async function prerasterizeSvgSources(srcs, opts) {
   // leaves both natives in their exact pre-wave-40 behaviour — the vector
   // rides the wire, the runtime declines it by name, the box paints empty.
   //
-  // OFF is the default ON PURPOSE, and the reason is a MEASUREMENT THAT HAS
-  // NOT HAPPENED YET, not caution for its own sake. Of the 19 css-ui
-  // box-sizing tests this hop targets, eleven fail on both natives today with
-  // the image entirely absent (box-sizing-009: web 0.9811 PASS vs iOS 0.5390 /
-  // Android 0.5380) and the raster can only help them. The other EIGHT — 010,
-  // 011, 014, 015, 016, 017, 018, 019 — currently PASS VACUOUSLY at 0.9561 /
-  // 0.9570: they pass *because* the image is missing and the missing area is
-  // small. Each of those constrains the box with `max-width`/`max-height` plus
-  // `box-sizing: border-box`, and ReplacedBoxSizing deliberately does NOT model
-  // CSS 2.1 §10.4's constraint-violation rules for replaced content (its own
-  // header says so), so a delivered raster will paint its INTRINSIC size on
-  // the unconstrained axis and overshoot the reference box — 150 px of green
-  // where box-sizing-016's ref has 70. Whether that overshoot costs those
-  // eight their pass is an SSIM question, and SSIM questions are answered on a
-  // device, not in a comment.
+  // OFF is the default because the A/B was RUN (wave-41 lane T2, private
+  // API-36.1 emulator + iPhone 17 Pro sim, the exact procedure below) and
+  // arm B LOSES — decisively, and by the §10.4 mechanism the original note
+  // predicted. Per-arm results on the 19-test css-ui box-sizing cluster
+  // (diffComposedVsRef vs the frozen white-black-ink-font-lh-imgpad-htmlpins
+  // refs, fuzzy null):
   //
-  // So the hop ships COMPLETE and OFF: the gate is byte-identical with it off
+  //     Android  arm A (off): 8/19 pass, mean SSIM 0.8798
+  //              arm B (on):  1/19 pass, mean SSIM 0.8536   → costs 7 passes
+  //     iOS      arm A (off): 8/19 pass, mean SSIM 0.8808
+  //              arm B (on):  0/19 pass, mean SSIM 0.8421   → costs 8 passes
+  //
+  // The eight vacuous passes (010, 011, 014..019 — the image missing and the
+  // missing area small) ALL flip to fail with the raster delivered: each test
+  // constrains its box with `max-width`/`max-height` + `box-sizing:
+  // border-box`, ReplacedBoxSizing deliberately does NOT model CSS 2.1
+  // §10.4's constraint-violation rules for replaced content (its own header
+  // says so), and the delivered raster paints its INTRINSIC size on the
+  // unconstrained axis — box-sizing-016's second "70px square" renders as a
+  // ~150px-wide rectangle that also WRAPS to its own line (0.9561 → 0.9083 on
+  // Android). The three worst absent-image tests (007..009) improve only
+  // ~0.05 SSIM (009: 0.5380 → 0.5948 Android) — the raster lands at the
+  // wrong size there too, nowhere near a pass. Net: arm B rescues exactly ONE
+  // test on ONE platform (012 Android, 0.9369 → 0.9695).
+  //
+  // So the hop stays COMPLETE and OFF: the gate is byte-identical with it off
   // (no rewrite, no browser, no delivery change — the empty map makes
-  // applyPrerasterRewrite a no-op), and the A/B that decides the default is a
-  // single variable flip on one binary:
+  // applyPrerasterRewrite a no-op). The flip is no longer gated on a
+  // measurement; it is gated on the RUNTIMES growing §10.4
+  // constraint-violation sizing for replaced content (both natives'
+  // ReplacedBoxSizing), after which this A/B should be re-run:
   //
   //   node tools/titan/feed-{android,ios}.mjs --fixtures <19 per-test IR> \
   //       --out <arm> --composed --wpt-dir tools/wpt --udid <dev>
   //   #  arm A: TITAN_SVG_PRERASTER unset   arm B: TITAN_SVG_PRERASTER=1
   //   # then score both with inject-wpt-block.mjs's diffComposedVsRef against
   //   # tools/wpt/refs/<sha>/white-black-ink-font-lh-imgpad-htmlpins/css-ui/
-  //
-  // Flip the default to ON in the same commit that publishes arm B's numbers.
   const envSwitch = process.env.TITAN_SVG_PRERASTER;
   const enabled = opts.enabled === true || envSwitch === '1';
   if (!enabled) {

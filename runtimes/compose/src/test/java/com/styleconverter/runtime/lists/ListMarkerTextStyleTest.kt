@@ -106,26 +106,48 @@ class ListMarkerTextStyleTest {
     }
 
     @Test
-    fun `an empty inherited style narrows to an empty marker style plus Inter`() {
+    fun `an empty inherited style narrows to Inter at the 16sp browser default`() {
         // The renderer's failure fallback: a malformed typography payload
         // yields TextStyle(), and forItem must not invent anything from it
-        // — the marker then paints at the platform default exactly as it
-        // did before wave 27, rather than vanishing.
+        // beyond the item's own two bottom-outs, so the marker paints
+        // exactly like an undeclared-everything item text run would.
         //
-        // WAVE 29 (lane MP) — with ONE deliberate exception, the font
-        // FAMILY. It used to be `TextStyle()` verbatim; the family is now
-        // the bundled Inter, which is what the ITEM's own text run has
-        // always bottomed out at (ComponentRenderer's placeholder branches:
+        // WAVE 29 (lane MP) — the font FAMILY bottoms out at the bundled
+        // Inter, which is what the ITEM's own text run has always bottomed
+        // out at (ComponentRenderer's placeholder branches:
         // `textStyle.fontFamily ?: InterFontFamily`). A null family is not
         // "the item's font" — it is Compose's SYSTEM face, so the same CSS
         // `font-family` produced two different primary faces for marker and
         // item, and hence two different natural line boxes on the row.
         // css-lists-3 §3.2 makes the marker inherit from its originating
         // element, so it must land on the item's face, not the platform's.
+        //
+        // WAVE 41 (lane T4) — the font SIZE bottoms out at 16sp, the same
+        // browser default the item's text run resolves an Unspecified size
+        // to (ComponentRenderer.PlaceholderContent `else 16.sp`) and the
+        // same ListMarkerLineBox.DEFAULT_FONT_SIZE_SP the marker's snap
+        // reads. It used to stay Unspecified, which Compose's `Text`
+        // renders at the Material ~14sp default — so every text marker of
+        // a document with no declared font-size painted visibly smaller
+        // than both its own item's glyphs and the browser-ref's 16px
+        // markers (wave40-final cssom-negative-setter android: marker
+        // cap-height 10px vs web 12px).
         val marker = ListMarkerTextStyle.forItem(TextStyle())
         assertEquals(
-            TextStyle(fontFamily = com.styleconverter.runtime.typography.InterFontFamily),
+            TextStyle(
+                fontFamily = com.styleconverter.runtime.typography.InterFontFamily,
+                fontSize = 16.sp),
             marker)
+    }
+
+    @Test
+    fun `a declared font-size beats the 16sp bottom-out`() {
+        // The bottom-out is only for the UNDECLARED case — an author
+        // font-size is "Inherited: yes" (css-fonts-4 §1.1) and reaches the
+        // marker through the container's merged style. The 25sp
+        // arabic-indic shape must keep painting at 25.
+        val marker = ListMarkerTextStyle.forItem(itemStyle)
+        assertEquals(25.sp, marker.fontSize)
     }
 
     @Test

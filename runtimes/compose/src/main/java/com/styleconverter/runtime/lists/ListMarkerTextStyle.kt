@@ -2,6 +2,10 @@ package com.styleconverter.runtime.lists
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+// TextUnit.Unspecified is how a resolved style spells "no font-size
+// declaration"; `sp` builds the 16sp browser-default bottom-out below.
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 // The bundled face the marker falls back to when nothing declared one —
 // the item's own bottom-out (see the fontFamily comment below).
 import com.styleconverter.runtime.typography.InterFontFamily
@@ -78,7 +82,32 @@ object ListMarkerTextStyle {
             // `font-family`, `font-weight` and `font-style` are all
             // "Inherited: yes" (css-fonts-4 §1.1), so the marker's are
             // the item's.
-            fontSize = inherited.fontSize,
+            //
+            // Wave 41 (lane T4) — the UNDECLARED case bottoms out at the
+            // browser default 16, the SAME bottom-out the item's own text
+            // run gets (ComponentRenderer.PlaceholderContent:
+            // `if (fontSize != Unspecified) fontSize else 16.sp`) and the
+            // same constant the marker's own composed-WPT snap already
+            // reads (ListMarkerLineBox.DEFAULT_FONT_SIZE_SP). It was
+            // `inherited.fontSize` alone, i.e. Unspecified for every
+            // document that never declares `font-size` — and an
+            // Unspecified size is not "the item's size": Compose's `Text`
+            // resolves it to the Material default (~14sp), so one CSS
+            // font-size produced a 14sp marker beside 16sp item text on
+            // every marker row of such a document. css-lists-3 §3.2 makes
+            // the marker inherit from its originating element, whose
+            // default IS 16 (css-fonts-4 §2.6 `medium`, the corpus-pinned
+            // browser default). MEASURED on wave40-final
+            // css-counter-styles/cssom__cssom-negative-setter android:
+            // marker cap-height 10px vs web's 12px vs the ref's glyph rows
+            // — every text-marker row on Android under-painted its ink by
+            // (14/16)². The two core call sites that DERIVE numbers from
+            // this style (the snap's fontSizePx at ComponentRenderer:3311
+            // and the half-leading delta at :3291) already bottomed out at
+            // the same 16, so an explicit 16.sp here leaves them
+            // byte-identical and only the painted glyph moves.
+            fontSize = if (inherited.fontSize != TextUnit.Unspecified)
+                inherited.fontSize else ListMarkerLineBox.DEFAULT_FONT_SIZE_SP.sp,
             // Wave 29 (lane MP) — the UNDECLARED case bottoms out at the
             // bundled Inter, the SAME bottom-out
             // `ComponentRenderer.PlaceholderContent` applies to the item's

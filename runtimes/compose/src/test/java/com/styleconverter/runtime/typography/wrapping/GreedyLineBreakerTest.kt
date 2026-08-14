@@ -111,35 +111,91 @@ class GreedyLineBreakerTest {
         )
     }
 
-    /** THE VETO, and why it exists. hyphens-none-012's box is
-     *  `regu-lation imple-menta-tion now` at 6ch: this breaker splits on
-     *  SPACES only, so `imple-menta-tion` is one 16-char "word" that
-     *  overflows — but its U+002D hyphen-minus (UAX #14 class HY) IS a
-     *  break opportunity, and there the platform breaker is RIGHT
-     *  (`hyphens` does not govern it). Firing here would stop a wrap the
-     *  reference performs; iOS measured that regression at 0.8548 → 0.8431
-     *  before adding this per-line veto. */
+    /** hyphens-none-012, the wave-41 fold. `regu-lation imple-menta-tion
+     *  now` at 6ch: a U+002D hyphen-minus (UAX #14 class HY) is a
+     *  break-AFTER opportunity `hyphens` does not govern, and the fold
+     *  now takes it itself — the Chromium ref's exact six lines,
+     *  including `imple-` via the overflow fallback (at 6ch the head
+     *  fits exactly; see WordBreakOpportunitiesTest for the narrower
+     *  case). Wave 38's fold left these words WHOLE and relied on the
+     *  per-line veto; the veto is still pinned below on the op classes
+     *  the fold deliberately does NOT model. */
     @Test
-    fun aHyphenatedOverlongWordIsNotUnbreakable() {
+    fun theFoldBreaksAfterLiteralHyphens() {
         val text = "regu-lation imple-menta-tion now"
+        assertEquals(
+            listOf("regu-", "lation", "imple-", "menta-", "tion", "now"),
+            GreedyLineBreaker.lines(text, 6 * CH, mono)
+        )
+        // Every line fits, so rule B has nothing to claim.
+        assertFalse(
+            GreedyLineBreaker.hasUnbreakableOverflowingLine(
+                GreedyLineBreaker.lines(text, 6 * CH, mono), 6 * CH, measure = mono)
+        )
+    }
+
+    /** hyphens-none-013 is the same fixture with U+2010 HYPHEN instead of
+     *  the ASCII one — the analyzer carves both in, so the fold output is
+     *  the same shape. */
+    @Test
+    fun theFoldAlsoBreaksAfterTheUnicodeHyphen() {
+        val text = "regu‐lation imple‐menta‐tion now"
+        assertEquals(
+            listOf("regu‐", "lation", "imple‐", "menta‐", "tion", "now"),
+            GreedyLineBreaker.lines(text, 6 * CH, mono)
+        )
+    }
+
+    /** THE VETO still exists for the opportunity classes the fold does
+     *  NOT model (en/em dashes, ZWSP, ideographs): such a line stays
+     *  whole, overflows, and must not claim rule B — the platform
+     *  breaker owns those breaks (see DecorationOps.hasSoftWrapOpportunity,
+     *  the shared UAX #14 approximation). */
+    @Test
+    fun anUnmodeledDashKeepsTheVeto() {
+        val text = "regu–lation" // U+2013 EN DASH — not an analyzer op.
         val lines = GreedyLineBreaker.lines(text, 6 * CH, mono)
-        // The greedy fold does leave overflowing lines here…
-        assertTrue(lines.any { mono(it) > 6 * CH })
-        // …but none of them is unbreakable, so rule B must not fire.
+        // The fold leaves the word whole and overflowing…
+        assertEquals(listOf(text), lines)
+        assertTrue(mono(text) > 6 * CH)
+        // …but the dash is a real platform opportunity, so no claim.
         assertFalse(
             GreedyLineBreaker.hasUnbreakableOverflowingLine(lines, 6 * CH, measure = mono)
         )
     }
 
-    /** hyphens-none-013 is the same fixture with U+2010 HYPHEN instead of
-     *  the ASCII one — the shared UAX #14 approximation carves both in, so
-     *  the veto holds identically. */
+    /** The soft-hyphen half of the wave-41 fold: hyphens-manual-013's
+     *  `Deoxy&shy;ribonucleic acid` at 10ch. The shy is a conditional
+     *  hyphenation point (css-text-3 §6.1): taking it paints U+2010 and
+     *  the mark itself never reaches the output; the unbreakable tail
+     *  `ribonucleic` overflows (CSS 2.1 §9.5) and DOES claim rule B —
+     *  which is exactly what lets PreBreakPipeline fire and render the
+     *  ref's `Deoxy-`/`ribonucleic`/`acid` instead of Minikin's
+     *  hyphen-less character break (wave40-final android-ref 0.9458). */
     @Test
-    fun theVetoAlsoCoversTheUnicodeHyphen() {
-        val text = "regu‐lation imple‐menta‐tion now"
-        val lines = GreedyLineBreaker.lines(text, 6 * CH, mono)
+    fun aSoftHyphenIsTakenAndPaintsTheHyphenCharacter() {
+        val text = "Deoxy­ribonucleic acid"
+        val lines = GreedyLineBreaker.lines(text, 10 * CH, mono)
+        assertEquals(listOf("Deoxy‐", "ribonucleic", "acid"), lines)
+        // The tail is genuinely unbreakable and overflowing → rule B.
+        assertTrue(
+            GreedyLineBreaker.hasUnbreakableOverflowingLine(lines, 10 * CH, measure = mono)
+        )
+    }
+
+    /** hyphens-manual-011 (`Deoxy&shy;ribo&shy;nucleic acid`, 10ch): the
+     *  fold is GREEDY over shy points — the LAST one that fits wins
+     *  (`Deoxyribo-` is exactly 10ch with its painted hyphen) — and with
+     *  every line fitting, rule B stays quiet: PreBreakPipeline declines
+     *  and Minikin keeps the run, so the committed wave-40 capture of
+     *  that test cannot move. */
+    @Test
+    fun shySplitsAreGreedyAndAFittingResultStaysMinikinOwned() {
+        val text = "Deoxy­ribo­nucleic acid"
+        val lines = GreedyLineBreaker.lines(text, 10 * CH, mono)
+        assertEquals(listOf("Deoxyribo‐", "nucleic", "acid"), lines)
         assertFalse(
-            GreedyLineBreaker.hasUnbreakableOverflowingLine(lines, 6 * CH, measure = mono)
+            GreedyLineBreaker.hasUnbreakableOverflowingLine(lines, 10 * CH, measure = mono)
         )
     }
 

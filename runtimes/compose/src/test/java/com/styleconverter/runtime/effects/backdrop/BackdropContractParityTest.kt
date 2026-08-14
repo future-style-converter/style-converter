@@ -305,23 +305,40 @@ class BackdropContractParityTest {
     }
 
     @Test
-    fun `EffectsFacade installs the backdrop OUTSIDE the shadow and the foreground filters`() {
+    fun `EffectsFacade installs group colour filters OUTSIDE the backdrop, which is OUTSIDE the shadow`() {
         // Clause 5 (shadow leak) and clause 3 (ordering) are both statements
         // about Compose modifier-chain ORDER, and a JVM test cannot run Compose
-        // draw. Pin the order at the source: earlier in the chain == outer, so
-        // backdrop < shadow guarantees pass A's early return suppresses the
-        // element's own box-shadow instead of baking it into its own backdrop,
-        // and backdrop < foreground filters guarantees `filter: invert(1)`
-        // cannot re-invert the backplate.
+        // draw. Pin the order at the source: earlier in the chain == outer.
+        //
+        //  - group colour filters < backdrop: filter-effects-2 §2 composites
+        //    the filtered backplate as the bottom-most content of the
+        //    element's group and THEN renders the group through the element's
+        //    own `filter` — Chrome's `backdrop-filter-plus-filter.html` ref
+        //    (dark purple = invert over the blurred backplate) is the pixel
+        //    proof. The wave-26 order (backdrop outer of ALL foreground
+        //    filters, justified as "filter must not re-invert the backplate")
+        //    read the spec backwards; wave 41 reverses it for the
+        //    colour-matrix half.
+        //  - backdrop < shadow: pass A's early return must suppress the
+        //    element's own box-shadow instead of baking it into its own
+        //    backdrop (the wave-26 fix, unchanged).
+        //  - shadow < remaining foreground filters (blur/drop-shadow/
+        //    opacity): unchanged from wave 26, keeping every committed
+        //    shadow capture byte-identical.
         val src = repoFile(
             "runtimes/compose/src/main/java/com/styleconverter/runtime/effects/EffectsFacade.kt",
         ).readText()
+        val group = src.indexOf("FilterApplier.applyGroupColorFilters(")
         val backdrop = src.indexOf("FilterApplier.applyBackdropFilters(")
         val shadow = src.indexOf("ShadowApplier.applyShadow(")
         val foreground = src.indexOf("FilterApplier.applyForegroundFilters(")
-        assertTrue("all three steps must exist", backdrop > 0 && shadow > 0 && foreground > 0)
+        assertTrue(
+            "all four steps must exist",
+            group > 0 && backdrop > 0 && shadow > 0 && foreground > 0,
+        )
+        assertTrue("group colour filters must be OUTER of the backdrop", group < backdrop)
         assertTrue("backdrop must be OUTER of the shadow", backdrop < shadow)
-        assertTrue("shadow must be OUTER of the foreground filters", shadow < foreground)
+        assertTrue("shadow must be OUTER of the remaining foreground filters", shadow < foreground)
     }
 
     @Test

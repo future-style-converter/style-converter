@@ -36,7 +36,11 @@
 //  their own when unbroken.
 //
 //  Deliberately NOT applied to `manual`/`auto`: there the soft hyphen
-//  is a real opportunity and the platforms' own handling is correct.
+//  is a real opportunity. Who takes it depends on the path (wave 41): a
+//  greedily pre-broken run spends it inside the fold itself
+//  (WordBreakOpportunities — the taken point comes back as a painted
+//  hyphen, the rest disappear before TextKit ever sees the string), and
+//  a run the pre-break declines keeps the platform's own handling.
 //
 //  Twin: SoftHyphenPolicy.kt (Compose), same two entry points, same
 //  identity contract. Pure + Foundation-only so XCTest pins it without

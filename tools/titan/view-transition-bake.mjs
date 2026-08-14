@@ -154,6 +154,16 @@
 //     non-root pair at all.)
 //   - OVERSIZE / DEGENERATE geometry: a group past VT_MAX_SNAPSHOT_PX on
 //     either axis, or a used transform this module cannot read back.
+//   - GENERATED NAMES / NESTED GROUP TREES (wave-41 lane T1). css-view-
+//     transitions-2's `view-transition-name: auto|match-element` mints
+//     per-element generated names the walker cannot enumerate (the computed
+//     value is the keyword; its own group pseudo answers `auto`), and a name
+//     whose `::view-transition-group-children` pseudo exists nests its child
+//     groups inside it, where the single-group isolation instrument hides
+//     them. Both shipped ink-deleting bakes when the two-colour fit let the
+//     `nested/group-children-sizing*` pair through (five match-element bars
+//     deleted, SSIM 0.8744→0.7910); both now bail before the existence
+//     filter can drop a group silently.
 //   - SNAPSHOT OVERFLOWS ITS BOX (wave-39 lane A4). A captured element's
 //     snapshot carries its INK OVERFLOW; the isolation window is the union of
 //     the group and leaf BOXES, which is smaller. Measuring inside that window
@@ -253,9 +263,12 @@ import { fixtureStem } from './safe-name.mjs';
 // The browser-ref rendering contract: same launch flags, same 358×568 UNPADDED
 // white canvas, same embedded Inter faces + line-height pin. Geometry read
 // under any other environment would carry a systematic offset.
+// padColorFor is the REF pipeline's own image-space frame rule (8-point border
+// ring sample); the wave-41 frame-ring stamp below reuses it VERBATIM so the
+// two sides of the comparison can never disagree about what a ring "is".
 import {
   BROWSER_LAUNCH_ARGS, canvasFrameCss, CANVAS_BG,
-  REF_RENDER_WIDTH, REF_RENDER_MIN_HEIGHT,
+  REF_RENDER_WIDTH, REF_RENDER_MIN_HEIGHT, padColorFor, parseHexRgb,
 } from './capture-browser-ref.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -1240,6 +1253,50 @@ export function snapshotColorCss(rgba) {
     : `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${rgba.a})`;
 }
 
+/**
+ * The composed-canvas FRAME colour one settled page implies, or null when the
+ * pipeline default (CANVAS_BG) already matches — the wave-41 frame-ring stamp.
+ *
+ * THE DEFECT THIS CLOSES, measured at the wave-41 full-cap re-score. A test
+ * whose author paints `::view-transition { background: lightpink }` shows that
+ * backdrop to the viewport EDGE whenever no snapshot covers it (fixed inset 0,
+ * top layer). The REF pipeline frames its render in IMAGE space with
+ * padColorFor — a uniform border ring becomes the 16px pad — so the frozen
+ * ref carries a PINK pad. The composed harnesses paint their pad from
+ * resolveCanvasBackground, which reads ONE channel: the `meta.role:
+ * 'body-root'` component's background (apps/web-harness/src/ui/
+ * ComposedCaptureGallery.tsx and its two native twins). The bake never wrote
+ * that channel, so every such capture wore a WHITE ring against a pink-padded
+ * ref: 15 baked tests failing in a cluster at SSIM ≈0.9172 whose diffs are
+ * 100% ring (interior 0 differing pixels of 203 344 — e.g.
+ * new-content-is-empty-div, ring 30 656/30 656 differing).
+ *
+ * THE RULE IS THE REF'S OWN RULE, run on the test side: sample the SETTLED
+ * page's border ring with the same 8-point predicate the ref pad uses
+ * (padColorFor, reused not copied). Three outcomes:
+ *   - uniform non-white ring → that colour, as the `rgb()` string the fixture
+ *     property bag carries (the stamp target is a CSS declaration);
+ *   - uniform WHITE ring → null: the pipeline default already matches, and
+ *     stamping white would churn fixture bytes for zero pixel change;
+ *   - non-uniform ring → padColorFor answers its CANVAS_BG fallback → null,
+ *     which mirrors the ref side exactly (its pad falls back to white too).
+ * Because every currently-PASSING baked test has a white ring on both sides
+ * (a non-white settled ring against today's white frame cannot score ≥0.95),
+ * the null path keeps each of them byte-identical — measured, not hoped.
+ */
+export function frameRingColor(pngBuf) {
+  // The ref pipeline's own 8-point ring rule, byte-for-byte (same function).
+  const ring = padColorFor(PNG.sync.read(pngBuf));
+  // CANVAS_BG parsed through the same helper the ref uses, so a future
+  // contract change cannot desynchronise the two comparisons.
+  const bg = parseHexRgb(CANVAS_BG);
+  // Fallback OR genuinely-white ring: the composed default already matches.
+  if (ring.r === bg.r && ring.g === bg.g && ring.b === bg.b && ring.a === bg.a) return null;
+  // The ring is opaque by construction (screenshots have no alpha), so the
+  // plain `rgb()` spelling is exact — same shape snapshotColorCss emits.
+  return `rgb(${ring.r}, ${ring.g}, ${ring.b})`;
+}
+
 // ── Pure planning: walk → bake plan ─────────────────────────────────────────
 
 /** The declaration block for ONE emitted snapshot box. Extracted so the
@@ -1278,6 +1335,30 @@ function leafBoxProps(box, opacity) {
 export function planViewTransitionBake(walk, solved, crossFadeNames = []) {
   const crossFade = new Set(crossFadeNames);
   if (!walk.active) return { bail: 'no-active-transition' };
+  // ── css-view-transitions-2 guards (wave-41), BEFORE the existence filter ──
+  // GENERATED NAMES: `view-transition-name: auto | match-element` gives every
+  // captured element a UNIQUE generated name; the computed value the walker
+  // enumerates is the KEYWORD, whose own group pseudo answers `auto` — so the
+  // real groups are unaddressable and would be dropped SILENTLY by the filter
+  // below. Measured: nested/group-children-sizing baked "1 group" while
+  // Chromium's settled state paints five `match-element` bars (the bake shipped
+  // a green frame and deleted every bar — the exact ink-deletion vacuity the
+  // wave-39 crop probe retired for leaves). A keyword name in the walk means
+  // the tree has groups this module cannot see, so the whole test bails.
+  const kw = walk.groups.find((g) => g.name === 'auto' || g.name === 'match-element');
+  if (kw) {
+    return { bail: `generated-names (view-transition-name: ${kw.name} mints unaddressable groups)` };
+  }
+  // NESTED GROUP TREES: a name whose `::view-transition-group-children`
+  // pseudo EXISTS (real px, same discriminator as groupPseudoExists) is a
+  // nesting container — its children's boxes resolve against IT, and the
+  // isolation instrument hides it (`::view-transition-group(*){opacity:0}`),
+  // so every nested child solves to "nothing painted" and vanishes. Bail
+  // until the instrument can isolate a chain, not a single group.
+  const nested = walk.groups.find((g) => groupPseudoExists(g.groupChildren));
+  if (nested) {
+    return { bail: `nested-group-tree ('${nested.name}' has ::view-transition-group-children)` };
+  }
   const groups = walk.groups.filter((g) => groupPseudoExists(g));
   if (!groups.length) return { bail: 'no-view-transition-groups' };
   // See the SCOPE BOUNDARY banner: without a LIVE root capture the page keeps
@@ -1483,8 +1564,17 @@ export function planViewTransitionBake(walk, solved, crossFadeNames = []) {
  * live boxes are not painted at all (css-view-transitions-1 §"the captured
  * element is not painted"). Anything the page still shows comes back through
  * the root group's own leaf box, which this plan carries.
+ *
+ * `frameRing` (optional, wave-41) is frameRingColor's answer for the settled
+ * page: a CSS colour the composed canvas FRAME must show, or null/absent for
+ * the default. Non-null stamps it on the `_role: 'body-root'` component —
+ * the ONE channel all three composed canvases read their background from —
+ * creating that component when the static extraction minted none (a page
+ * with no body/html-scoped CSS has no body-root, yet its `::view-transition`
+ * backdrop still reaches the viewport edge). Absent keeps every existing
+ * caller and fixture byte-identical.
  */
-export function applyViewTransitionBakePlan(fixture, stem, plan) {
+export function applyViewTransitionBakePlan(fixture, stem, plan, frameRing = null) {
   let written = 0;
   // 1. Retire the live document. `display: none` (not `visibility: hidden`)
   //    so the hidden boxes also stop contributing height to the composed
@@ -1554,6 +1644,41 @@ export function applyViewTransitionBakePlan(fixture, stem, plan) {
     written++;
   }
   (fixture.components ??= {})[rootId] = vtRoot;
+
+  // 2c. The frame-ring stamp (wave-41; see frameRingColor for the measured
+  //     defect). The composed canvases paint their 16px frame from the
+  //     body-root component's background — a PROPERTY read that step 1's
+  //     `display: none` deliberately does not disturb — so the settled ring
+  //     colour is delivered by writing exactly that property.
+  if (frameRing) {
+    // The static extraction mints at most one body-root (`<stem>__body`,
+    // extract-fixture.mjs); find it by ROLE, not id, because the role is the
+    // contract the canvases resolve by.
+    const bodyRoot = Object.values(fixture.components)
+      .find((c) => c && typeof c === 'object' && c._role === 'body-root');
+    if (bodyRoot) {
+      // Override, never merge: the ring IS the visible canvas colour of the
+      // settled state (the author's own body background sits UNDER the
+      // top-layer backdrop whenever the two differ, so the ring wins).
+      (bodyRoot.properties ??= {})['background-color'] = frameRing;
+    } else {
+      // No body-root minted — the page had no body/html-scoped CSS. Create
+      // the minimal one: role marker (the canvases' lookup key), the ring as
+      // its background, and `display: none` so the component paints nothing
+      // itself, exactly like every step-1-retired box. Same id shape the
+      // extractor uses, which cannot collide (only the extractor mints it,
+      // and it did not).
+      fixture.components[`${stem}__body`] = {
+        properties: { display: 'none', 'background-color': frameRing },
+        _role: 'body-root',
+        // Honesty stamp: this component exists only because the bake
+        // measured the ring — same provenance the wrapper subtree carries.
+        _lossy: true,
+        _lossyReasons: [VT_BAKE_LOSSY_REASON],
+      };
+    }
+    written++;
+  }
 
   // 3. Honesty stamps: the delivery record plus the fixture-level roll-up.
   fixture._wpt ??= {};
@@ -1632,12 +1757,22 @@ export function inPageVtWalker(params) {
   const groups = [];
   for (const name of names) {
     const g = read(`::view-transition-${pseudoKinds.group}(${name})`);
+    // css-view-transitions-2 NESTED-TREE probe (wave-41): a name whose
+    // `::view-transition-group-children` pseudo has REAL used px dimensions
+    // is a nesting CONTAINER — its child groups live inside it, not against
+    // the snapshot containing block. Measured in this Chromium: the pseudo
+    // answers `auto` for every flat-tree name (root of group-children-sizing)
+    // and `200px` for the nesting `clipper`, so the same px-discriminator
+    // groupPseudoExists uses works unchanged. Width/height only — existence
+    // is the whole question.
+    const gc = getComputedStyle(de, `::view-transition-group-children(${name})`);
     groups.push({
       name,
       documentIndex: documentIndex.has(name) ? documentIndex.get(name) : -1,
       width: g.width, height: g.height, left: g.left, top: g.top,
       transform: g.transform, transformOrigin: g.transformOrigin,
       opacity: g.opacity, visibility: g.visibility,
+      groupChildren: { width: gc.width, height: gc.height },
       imagePair: read(`::view-transition-${pseudoKinds.imagePair}(${name})`),
       old: read(`::view-transition-${pseudoKinds.old}(${name})`),
       new: read(`::view-transition-${pseudoKinds.new}(${name})`),
@@ -1983,8 +2118,18 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
 
     const { bail, plan } = planViewTransitionBake(walk, solved, crossFade);
     if (bail) return { status: 'bailed', reason: bail };
+    // The frame-ring sample (wave-41; see frameRingColor). Taken AFTER the
+    // plan is accepted so bailed tests never pay the screenshot, and AFTER
+    // the isolation sheet was removed above so this is the SETTLED page —
+    // the same pixels the ref pipeline's padColorFor frames the ref against.
+    const ringShot = await page.screenshot({
+      type: 'png',
+      // The 358×568 ref-contract viewport, exactly what the ref render pads.
+      clip: { x: 0, y: 0, width: viewport.width, height: viewport.height },
+    });
+    const frameRing = frameRingColor(ringShot);
     const stem = fixtureStem(testRel);
-    const written = applyViewTransitionBakePlan(fixture, stem, plan);
+    const written = applyViewTransitionBakePlan(fixture, stem, plan, frameRing);
     return {
       status: 'baked', trigger,
       groups: plan.boxes.length,
@@ -1996,6 +2141,9 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
       // says WHICH geometries the corpus actually contains rather than only
       // how many bails it avoided.
       shapes: plan.boxes.flatMap((b) => b.leaves.map((l) => l.shape).filter(Boolean)),
+      // …and the frame-ring stamp when one was delivered (wave-41), so the
+      // batch log names the tests whose composed-canvas frame the bake set.
+      ...(frameRing ? { frameRing } : {}),
       written,
     };
   } catch (err) {
@@ -2046,6 +2194,7 @@ async function main() {
             ? ` (${outcome.groups} groups, ${outcome.leaves} leaves` +
               `${outcome.crossFade ? `, ${outcome.crossFade} invariant cross-fade` : ''}` +
               `${outcome.shapes?.length ? `, two-colour ${[...new Set(outcome.shapes)].sort().join('/')}` : ''}` +
+              `${outcome.frameRing ? `, frame-ring ${outcome.frameRing}` : ''}` +
               ` — ${outcome.trigger})`
             : ` (${outcome.reason})`));
       } catch (err) {

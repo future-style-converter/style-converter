@@ -54,7 +54,7 @@ import {
   crossFadeChainOpacity, classifyStabilityDrift, REFTEST_WAIT_SHIM,
   VT_OVERFLOW_INK_TOLERANCE_PX, cropComposite, probeSnapshotOverflow,
   VT_TWO_COLOUR_MIN_AREA_PX, VT_TWO_COLOUR_EDGE_SLACK_PX,
-  twoColourKind, rectComplement, snapshotBoxes,
+  twoColourKind, rectComplement, snapshotBoxes, frameRingColor,
 } from './view-transition-bake.mjs';
 import {
   viewTransitionBakeTrigger,
@@ -1152,6 +1152,143 @@ test('VT apply: the written count covers hidden components, groups and leaves', 
   const { plan } = planOneRoot();
   // 3 retired + 1 group + 1 leaf.
   assert.equal(applyViewTransitionBakePlan(fx, 't', plan), 5);
+});
+
+// ── 7b. css-view-transitions-2 guards (wave-41) ─────────────────────────────
+//
+// Measured defect: nested/group-children-sizing baked "1 group, 1 leaf" while
+// Chromium's settled state paints five `match-element` bars — the walker
+// enumerates the KEYWORD (whose group pseudo answers `auto`), the existence
+// filter drops it silently, and the bake ships a tree with the bars deleted
+// (0.8744 static → 0.7910 baked). Both guards fire BEFORE that filter.
+
+test('VT plan: a `match-element` keyword name bails the whole test — its real groups are unaddressable', () => {
+  const g = grp();
+  // The walker reports the keyword as a name whose own group does not exist
+  // (auto-sized) — exactly what nested/group-children-sizing produces.
+  const kw = grp({ name: 'match-element', width: 'auto', height: 'auto' });
+  const out = planViewTransitionBake(walkOf([g, kw]), { 'root|old': solvedFlat(), 'root|new': solvedFlat() });
+  assert.match(out.bail, /generated-names.*match-element/);
+});
+
+test('VT plan: a `view-transition-name: auto` name bails the same way', () => {
+  const g = grp();
+  const kw = grp({ name: 'auto', width: 'auto', height: 'auto' });
+  const out = planViewTransitionBake(walkOf([g, kw]), { 'root|old': solvedFlat(), 'root|new': solvedFlat() });
+  assert.match(out.bail, /generated-names.*auto/);
+});
+
+test('VT plan: an existing ::view-transition-group-children pseudo bails — nested children are invisible to the isolation', () => {
+  // The nesting container as the walker reports it: real px on the
+  // group-children probe (measured 200px×200px on `clipper`).
+  const g = grp({ groupChildren: { width: '200px', height: '200px' } });
+  const out = planViewTransitionBake(walkOf([g]), { 'root|old': solvedFlat(), 'root|new': solvedFlat() });
+  assert.match(out.bail, /nested-group-tree.*'root'/);
+});
+
+test('VT plan: a flat tree with the group-children probe answering `auto` does NOT bail', () => {
+  // The wave-38/39/40 walks carried no groupChildren field at all; the new
+  // field with `auto` must be equally inert — both spellings of "flat".
+  const g = grp({ groupChildren: { width: 'auto', height: 'auto' } });
+  const out = planViewTransitionBake(walkOf([g]), { 'root|old': solvedFlat(), 'root|new': solvedFlat() });
+  assert.equal(out.bail, undefined);
+  assert.ok(out.plan);
+});
+
+// ── 8b. The frame-ring stamp (wave-41) ──────────────────────────────────────
+//
+// The measured defect: 15 baked tests failing in a cluster at SSIM ≈0.9172
+// whose diff is 100% the 16px frame ring (interior 0 differing px of
+// 203 344 — new-content-is-empty-div et al.), because the author's
+// `::view-transition { background }` reaches the viewport edge in the settled
+// state, the ref pipeline's padColorFor frames the REF in that colour, and
+// the composed canvases paint their frame from the ONE channel the bake never
+// wrote: the body-root component's background.
+
+/** A solid W×H PNG buffer, with an optional per-pixel override — the settled
+ *  screenshot stand-in the ring sampler reads. */
+function solidPng(w, h, [r, g, b], override = null) {
+  const png = new PNG({ width: w, height: h });
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const o = (y * w + x) * 4;
+      const c = override?.(x, y) ?? [r, g, b];
+      png.data[o] = c[0]; png.data[o + 1] = c[1]; png.data[o + 2] = c[2];
+      png.data[o + 3] = 255;
+    }
+  }
+  return PNG.sync.write(png);
+}
+
+test('VT frame-ring: a uniform non-white ring answers its rgb() string', () => {
+  // The measured cluster colour: lightpink, the section’s commonest backdrop.
+  assert.equal(frameRingColor(solidPng(20, 20, [255, 182, 193])), 'rgb(255, 182, 193)');
+});
+
+test('VT frame-ring: a WHITE ring answers null — the pipeline default already matches', () => {
+  // Stamping white would churn fixture bytes for zero pixel change; every
+  // currently-passing baked test is this case, so null is the no-regression
+  // guarantee, pinned.
+  assert.equal(frameRingColor(solidPng(20, 20, [255, 255, 255])), null);
+});
+
+test('VT frame-ring: a non-uniform ring answers null — mirroring the ref pad fallback', () => {
+  // One corner differing breaks padColorFor’s 8-point uniformity, which
+  // falls back to CANVAS_BG — exactly what the ref side does, so the two
+  // pads agree by construction.
+  const buf = solidPng(20, 20, [255, 182, 193], (x, y) => (x === 0 && y === 0 ? [0, 128, 0] : null));
+  assert.equal(frameRingColor(buf), null);
+});
+
+test('VT apply: the frame ring lands on an EXISTING body-root’s background, nothing else moves', () => {
+  const fx = fixtureWith(1);
+  // The extractor’s own body-root shape: role marker + a property bag.
+  fx.components.t__body = { properties: { 'font-size': '20px', 'background-color': 'rgb(1, 2, 3)' }, _role: 'body-root' };
+  const { plan } = planOneRoot();
+  applyViewTransitionBakePlan(fx, 't', plan, 'rgb(255, 182, 193)');
+  const br = fx.components.t__body;
+  // Overridden, not merged: the ring IS the settled state’s visible canvas.
+  assert.equal(br.properties['background-color'], 'rgb(255, 182, 193)');
+  // The rest of the bag survives (the bake overrides paint, never rewrites).
+  assert.equal(br.properties['font-size'], '20px');
+  // Retired like every live component (step 1 ran over it too).
+  assert.equal(br.properties.display, 'none');
+  // No SECOND body-root was minted.
+  assert.equal(Object.values(fx.components).filter((c) => c._role === 'body-root').length, 1);
+});
+
+test('VT apply: with NO body-root the stamp mints the minimal one, provenance-marked', () => {
+  const fx = fixtureWith(1);
+  const { plan } = planOneRoot();
+  applyViewTransitionBakePlan(fx, 't', plan, 'rgb(255, 192, 203)');
+  const br = fx.components.t__body;
+  assert.ok(br, 'minted at the extractor’s own id shape, <stem>__body');
+  // The canvases’ lookup key is the ROLE, so the mint must carry it.
+  assert.equal(br._role, 'body-root');
+  assert.equal(br.properties['background-color'], 'rgb(255, 192, 203)');
+  // Paints nothing itself — the ring is delivered through the canvas
+  // resolver’s PROPERTY read, exactly like the display:none’d live boxes.
+  assert.equal(br.properties.display, 'none');
+  // Same honesty stamp the wrapper subtree carries.
+  assert.equal(br._lossy, true);
+  assert.deepEqual(br._lossyReasons, [VT_BAKE_LOSSY_REASON]);
+});
+
+test('VT apply: the stamp counts as one written component', () => {
+  const fx = fixtureWith(3);
+  const { plan } = planOneRoot();
+  // 3 retired + 1 group + 1 leaf + 1 body-root mint.
+  assert.equal(applyViewTransitionBakePlan(fx, 't', plan, 'rgb(255, 182, 193)'), 6);
+});
+
+test('VT apply: NO frameRing argument keeps the fixture byte-identical to the wave-40 shape', () => {
+  // The default-argument path is the one every existing caller and golden
+  // exercises; a body-root mint appearing without a measured ring would be
+  // the silent fallthrough this repo forbids.
+  const fx = fixtureWith(1);
+  const { plan } = planOneRoot();
+  applyViewTransitionBakePlan(fx, 't', plan);
+  assert.equal('t__body' in fx.components, false);
 });
 
 // ── 9. String shapes ────────────────────────────────────────────────────────

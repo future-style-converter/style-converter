@@ -45,17 +45,30 @@ enum GreedyLineBreaker {
     /// paragraph boundaries. Words are space-separated (the converter's
     /// text channel is whitespace-collapsed upstream, matching the
     /// css-text-3 §4.1 collapse the browser applied to the reference).
+    ///
+    /// Wave 41 (lane T3) — the fold now models IN-WORD opportunities via
+    /// `WordBreakOpportunities`: U+00AD soft hyphens (a `none` run never
+    /// reaches here with any — SoftHyphenPolicy deletes them first) and
+    /// literal `-`/U+2010 break-afters. Words carrying NEITHER, folded
+    /// with no dictionary, take decisions byte-identical to wave 40 —
+    /// analyze() returns the word itself with no ops, so every split
+    /// probe declines at once. Returned lines are the DISPLAY strings:
+    /// soft hyphens are gone (taken ones replaced by `hyphenChar`), so
+    /// TextKit renders exactly what was measured and the line COUNT the
+    /// box height is pinned from is exact — the wave40-final css-text
+    /// captures show the undercount this repairs (hyphens-manual-011:
+    /// 3 rendered lines centered in a 2-line frame, 0.8832).
     /// - Parameters:
     ///   - hyphenate: wave 40 (lane T2) — the css-text-3 §6.1 `auto`
     ///     dictionary, as "every offset inside this word where a hyphen
-    ///     may be inserted" (AutoHyphenation.breakOffsets). nil — the
-    ///     default and every pre-wave-40 call site — leaves the fold
-    ///     BYTE-IDENTICAL: the branch below is entered only when a word
-    ///     does not fit AND a hyphenator was supplied AND it found a
-    ///     usable point. This is the platform's whole hyphenation seam,
-    ///     because on iOS the line breaker is ours: TextKit only ever
-    ///     sees the hard-newlined result (Compose instead switches
-    ///     Minikin's own hyphenator on — see AutoHyphenation.kt).
+    ///     may be inserted" (AutoHyphenation.breakOffsets). nil for every
+    ///     run that is not `hyphens: auto` with a language tag. §6.1's
+    ///     priority rule is applied HERE: a word whose characters
+    ///     explicitly suggest break points (a soft hyphen or a literal
+    ///     hyphen) never consults the dictionary — the WPT
+    ///     hyphens-auto-control ref breaks `fragilistic\u{AD}expiali` at
+    ///     the conditional hyphen in ALL THREE widths, ignoring the
+    ///     automatic points before and after it.
     ///   - hyphenChar: the glyph painted at a taken hyphenation point
     ///     (§6.1 UA-defined, css-text-4 `hyphenate-character` overrides).
     ///     It is a REAL character in the returned string, so it is
@@ -70,82 +83,68 @@ enum GreedyLineBreaker {
         var out: [String] = []
         // Hard breaks split paragraphs; each wraps independently.
         for para in text.components(separatedBy: "\n") {
-            // Collapse-split into words; an all-space paragraph yields
-            // an empty visual line, preserved for count stability.
-            let words = para.split(separator: " ").map(String.init)
+            // Collapse-split into words (an all-space paragraph yields an
+            // empty visual line, preserved for count stability), then
+            // decompose each into its display text + explicit ops.
+            let words = para.split(separator: " ")
+                .map { WordBreakOpportunities.analyze(String($0)) }
             guard !words.isEmpty else { out.append(""); continue }
             // Greedy fold. `line` is the committed-so-far content of the
-            // current line; empty means the line has not been opened yet
-            // (only possible after a hyphenated commit, since the first
-            // word always opens a line — CSS 2.1 §9.5 lets an overlong
-            // first word overflow rather than break).
-            var line = words[0]
-            // Wave 40: an opening word may itself be too wide, and under
-            // `hyphens: auto` that is no longer a reason to overflow —
-            // the dictionary may have a point inside it. Identity when
-            // `hyphenate` is nil (the guard inside returns nil at once).
-            if hyphenate != nil, measure(line) > maxWidth {
-                line = openWithHyphenation(line, maxWidth: maxWidth, out: &out,
-                                           measure: measure,
-                                           hyphenate: hyphenate,
-                                           hyphenChar: hyphenChar)
-            }
+            // current line. The first word always opens a line; an
+            // opening word that overflows breaks at its own ops first
+            // (CSS 2.1 §9.5 overflow only remains for words with none).
+            var line = open(words[0], maxWidth: maxWidth, out: &out,
+                            measure: measure, hyphenate: hyphenate,
+                            hyphenChar: hyphenChar)
             for word in words.dropFirst() {
                 // Candidate = current line + separator + next word,
                 // measured as ONE string so the space's own advance and
                 // any kerning are included exactly as rendered.
-                let candidate = line + " " + word
+                let candidate = line + " " + word.text
                 if measure(candidate) <= maxWidth {
                     line = candidate       // fits → keep accumulating
                     continue
                 }
-                // Wave 40 — before moving the whole word down, offer the
-                // dictionary the chance to split it ACROSS the break, which
-                // is what `hyphens: auto` asks for. `prefix` is the largest
-                // head that still fits after the current line (with the
-                // hyphen glyph included in the measurement).
-                if let (head, tail) = hyphenatedSplit(
-                    word, after: line + " ", maxWidth: maxWidth,
-                    measure: measure, hyphenate: hyphenate, hyphenChar: hyphenChar) {
+                // Before moving the whole word down, offer its ops the
+                // chance to split it ACROSS the break — the head stays on
+                // the current line (an op inside the word sits AFTER the
+                // space, so it is the greedier break). No overflow
+                // fallback here: if no head fits, the plain space break
+                // below is the correct earlier opportunity.
+                if let (head, tail) = split(word, after: line + " ",
+                                            maxWidth: maxWidth, measure: measure,
+                                            hyphenate: hyphenate, hyphenChar: hyphenChar,
+                                            overflowFallback: false) {
                     out.append(line + " " + head)
                     // The tail opens the next line and may need splitting
                     // again (a long word can span three lines in a narrow box).
-                    line = tail
-                    if hyphenate != nil, measure(line) > maxWidth {
-                        line = openWithHyphenation(line, maxWidth: maxWidth, out: &out,
-                                                   measure: measure,
-                                                   hyphenate: hyphenate,
-                                                   hyphenChar: hyphenChar)
-                    }
+                    line = open(tail, maxWidth: maxWidth, out: &out,
+                                measure: measure, hyphenate: hyphenate,
+                                hyphenChar: hyphenChar)
                     continue
                 }
                 out.append(line)           // commit the full line…
-                line = word                // …and open the next one
-                // …which may itself be overlong and hyphenatable. The
-                // `hyphenate != nil` guard keeps the no-hyphenation path
-                // free of the extra measurement it never needed, so the
-                // fold is identical in COST as well as in output.
-                if hyphenate != nil, measure(line) > maxWidth {
-                    line = openWithHyphenation(line, maxWidth: maxWidth, out: &out,
-                                               measure: measure,
-                                               hyphenate: hyphenate,
-                                               hyphenChar: hyphenChar)
-                }
+                line = open(word, maxWidth: maxWidth, out: &out,
+                            measure: measure, hyphenate: hyphenate,
+                            hyphenChar: hyphenChar)
             }
             out.append(line)               // trailing partial line
         }
         return out
     }
 
-    /// Repeatedly split `word` at dictionary points while the remainder
-    /// still overflows an EMPTY line, appending each hyphenated head to
-    /// `out`; returns the final remainder (which opens the current line).
+    /// Open a line with `word`, splitting at its opportunities while the
+    /// remainder still overflows; each head becomes a committed line and
+    /// the final remainder is returned as the (open) current line.
     ///
-    /// Identity — returns `word` and appends nothing — whenever there is
-    /// no hyphenator or the dictionary offers no point that fits, which
-    /// is the CSS 2.1 §9.5 overflow the pre-wave-40 fold already produced.
-    private static func openWithHyphenation(
-        _ word: String,
+    /// Identity — returns `word.text` and appends nothing — whenever the
+    /// word fits, or has no ops and no dictionary, or nothing usable
+    /// fits: that last case is the CSS 2.1 §9.5 overflow the pre-wave-40
+    /// fold already produced, EXCEPT for explicit ops, where the
+    /// overflow fallback breaks at the first op to minimize the overflow
+    /// (see `WordBreakOpportunities.split`).
+    private static func open(
+        _ word: WordBreakOpportunities.Word,
         maxWidth: CGFloat,
         out: inout [String],
         measure: (String) -> CGFloat,
@@ -154,55 +153,60 @@ enum GreedyLineBreaker {
     ) -> String {
         var rest = word
         // Bounded: every accepted split strictly shortens `rest`, and the
-        // loop stops the moment no point fits.
-        while let (head, tail) = hyphenatedSplit(
-            rest, after: "", maxWidth: maxWidth,
-            measure: measure, hyphenate: hyphenate, hyphenChar: hyphenChar) {
+        // loop stops the moment no point is usable.
+        while measure(rest.text) > maxWidth,
+              let (head, tail) = split(rest, after: "", maxWidth: maxWidth,
+                                       measure: measure, hyphenate: hyphenate,
+                                       hyphenChar: hyphenChar,
+                                       // An opening word that cannot fit any
+                                       // head still breaks at its FIRST
+                                       // explicit op (Chromium minimizes the
+                                       // overflow; hyphens-none-012's ref
+                                       // wraps `imple-menta-tion` in a box
+                                       // `imple-` alone overflows).
+                                       overflowFallback: true) {
             out.append(head)
             rest = tail
-            if measure(rest) <= maxWidth { break }
         }
-        return rest
+        return rest.text
     }
 
-    /// The largest dictionary split of `word` whose head — placed after
-    /// `prefix` and followed by `hyphenChar` — still fits `maxWidth`.
+    /// Resolve the ops for `word` — §6.1 priority first — and delegate to
+    /// the shared greedy split walk.
     ///
-    /// Greedy, exactly like the word fold: css-text-3 §5 breaks at the
-    /// LAST opportunity that fits, which is what Chromium's and Minikin's
-    /// line breakers both do. nil when there is no hyphenator, no point,
-    /// or no point small enough — the caller then falls back to the
-    /// unhyphenated behaviour, unchanged.
-    private static func hyphenatedSplit(
-        _ word: String,
+    /// Explicit marks (soft hyphens recorded by `analyze`, literal
+    /// hyphens) suppress the dictionary for THIS word: css-text-3 §6.1
+    /// gives characters inside the word priority over the hyphenation
+    /// resource. Only a mark-free word under `hyphens: auto` consults
+    /// `hyphenate`, whose offsets become paint-a-hyphen points exactly as
+    /// in wave 40. The overflow fallback is confined to explicit ops so
+    /// the wave-40 dictionary contract (no fitting point ⇒ whole-word
+    /// overflow) is preserved byte for byte.
+    private static func split(
+        _ word: WordBreakOpportunities.Word,
         after prefix: String,
         maxWidth: CGFloat,
         measure: (String) -> CGFloat,
         hyphenate: ((String) -> [Int])?,
-        hyphenChar: String
-    ) -> (head: String, tail: String)? {
-        guard let hyphenate = hyphenate else { return nil }
-        let offsets = hyphenate(word)
-        guard !offsets.isEmpty else { return nil }
-        // Walk DOWN from the last opportunity so the first fit found is
-        // the greediest one.
-        let utf16 = word.utf16
-        for off in offsets.reversed() {
-            // CF answers in UTF-16 offsets; a Character boundary is not
-            // guaranteed (a point inside a surrogate pair or a combining
-            // sequence is nonsense to split at), so a failed conversion
-            // SKIPS the point rather than forcing it.
-            guard let u16 = utf16.index(utf16.startIndex, offsetBy: off,
-                                        limitedBy: utf16.endIndex),
-                  let split = String.Index(u16, within: word) else { continue }
-            let head = String(word[word.startIndex..<split]) + hyphenChar
-            let tail = String(word[split...])
-            guard !tail.isEmpty else { continue }
-            if measure(prefix + head) <= maxWidth {
-                return (head, tail)
-            }
+        hyphenChar: String,
+        overflowFallback: Bool
+    ) -> (head: String, tail: WordBreakOpportunities.Word)? {
+        if !word.ops.isEmpty {
+            return WordBreakOpportunities.split(
+                word, ops: word.ops, after: prefix, maxWidth: maxWidth,
+                measure: measure, hyphenChar: hyphenChar,
+                overflowFallback: overflowFallback)
         }
-        return nil
+        // Mark-free word: the dictionary (when engaged) owns the split.
+        guard let hyphenate = hyphenate else { return nil }
+        let ops = hyphenate(word.text)
+            .map { WordBreakOpportunities.Op(offset: $0, paintsHyphen: true) }
+        guard !ops.isEmpty else { return nil }
+        return WordBreakOpportunities.split(
+            word, ops: ops, after: prefix, maxWidth: maxWidth,
+            measure: measure, hyphenChar: hyphenChar,
+            // Dictionary points never use the fallback — wave-40 contract.
+            overflowFallback: false)
     }
 
     /// Wave 37 (lane W7, rule B) — does any committed line overflow the

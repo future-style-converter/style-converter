@@ -1,21 +1,15 @@
 package com.styleconverter.runtime.effects.filter
 
-import android.graphics.RenderEffect
-import android.graphics.Shader
-import android.os.Build
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.graphicsLayer
 // The two-pass backdrop render lives in its own module (effects/backdrop/);
 // this applier is only its registration point — see applyBackdropFilters.
 import com.styleconverter.runtime.effects.backdrop.backdropFilterTwoPass
@@ -32,14 +26,11 @@ import kotlin.math.sin
  * - `opacity()` - Uses Modifier.alpha() directly
  *
  * ### ColorMatrix-based Filters
- * ColorMatrix filters (brightness, contrast, grayscale, etc.) are applied via
- * graphicsLayer with RenderEffect on Android 12+ for true element-wide filtering.
- * On older versions, uses drawWithContent with ColorFilter as a fallback.
- *
- * ### Platform Support
- * - Android 12+ (API 31+): Full RenderEffect support for element-wide filtering
- * - Android 10-11: Fallback using drawWithContent + ColorFilter
- * - Below Android 10: Limited support
+ * ColorMatrix filters (brightness, contrast, grayscale, etc.) are applied as
+ * a GROUP saveLayer with a ColorMatrix ColorFilter — every API level, one
+ * path (see [applyGroupColorFilters] for why the former API-31 RenderEffect
+ * route was retired: its offscreen buffer cropped positioned elements to
+ * their un-offset layout slot).
  */
 object FilterApplier {
 
@@ -70,21 +61,32 @@ object FilterApplier {
         marginInsets: com.styleconverter.runtime.spacing.MarginInsets =
             com.styleconverter.runtime.spacing.MarginInsets.NONE,
     ): Modifier {
-        // Backdrop FIRST (outermost in chain order), foreground filters after,
-        // so a caller that wants both in one call gets the same relative order
-        // EffectsFacade builds by hand. The two halves are separate public
-        // entry points because EffectsFacade has to interleave the shadow step
-        // between them — see applyBackdropFilters' KDoc.
-        var result = applyBackdropFilters(modifier, config, radiusConfig, elementAlpha, marginInsets)
+        // Same relative order EffectsFacade builds by hand (see its apply):
+        // the colour-matrix GROUP layer outermost — filter-effects-2 §2 puts
+        // the filtered backdrop INSIDE the element's group, so the element's
+        // own `filter` must wrap the backplate node — then the backdrop node,
+        // then the rest of the foreground chain. The halves are separate
+        // public entry points because EffectsFacade has to interleave the
+        // shadow step between them — see applyBackdropFilters' KDoc.
+        var result = applyGroupColorFilters(modifier, config)
+        result = applyBackdropFilters(result, config, radiusConfig, elementAlpha, marginInsets)
         result = applyForegroundFilters(result, config)
         return result
     }
 
     /**
-     * The `filter` half of [applyFilters]: the element's OWN pixels.
+     * The `filter` half of [applyFilters] that stays INNER of the two draw
+     * lanes EffectsFacade interleaves above it (see its apply): blur,
+     * drop-shadow and opacity over the element's OWN pixels.
      *
-     * Split out so EffectsFacade can place the element's box-shadow BETWEEN
-     * the backdrop node and this chain (see [applyBackdropFilters]).
+     * The colour-matrix half of the `filter` list is NOT here any more — it
+     * moved to [applyGroupColorFilters], installed OUTERMOST in the facade,
+     * because filter-effects-2 §2 composites the filtered backplate into the
+     * element's group BEFORE the element's own `filter` applies (the wave-41
+     * `backdrop-filter-plus-filter.html` fix; the function's own KDoc has the
+     * measurement). Note the list was ALREADY applied by type rather than in
+     * authored order (blur first, matrices after), so the split does not lose
+     * any ordering fidelity that existed here.
      */
     fun applyForegroundFilters(modifier: Modifier, config: FilterConfig): Modifier {
         var result = modifier
@@ -93,7 +95,6 @@ object FilterApplier {
         val blurFilters = config.filters.filterIsInstance<FilterFunction.Blur>()
         val opacityFilters = config.filters.filterIsInstance<FilterFunction.Opacity>()
         val dropShadowFilters = config.filters.filterIsInstance<FilterFunction.DropShadow>()
-        val colorMatrixFilters = config.filters.filter { it.isColorMatrixFilter() }
 
         // Apply blur first.
         //
@@ -112,11 +113,6 @@ object FilterApplier {
         // Apply drop shadows
         dropShadowFilters.forEach { shadow ->
             result = applyDropShadow(result, shadow)
-        }
-
-        // Apply color matrix filters (combined for efficiency)
-        if (colorMatrixFilters.isNotEmpty()) {
-            result = applyColorMatrixFilters(result, colorMatrixFilters)
         }
 
         // Apply opacity last
@@ -144,72 +140,87 @@ object FilterApplier {
     }
 
     /**
-     * Apply color matrix filters using the best available method.
+     * The colour-matrix half of the element's `filter` list, applied as a
+     * GROUP layer: `canvas.saveLayer(bounds, paint-with-ColorFilter)` around
+     * everything chained inside it, so the matrix runs over the element's
+     * whole rendering at restore time — Skia's own group-with-colour-filter
+     * mechanism, on every API level.
+     *
+     * ## Why this is a saveLayer and not `graphicsLayer { renderEffect }`
+     * The previous path (API 31+) hung the matrix on a RenderEffect. HWUI
+     * renders a RenderNode carrying a RenderEffect into an offscreen buffer
+     * SIZED TO THE NODE'S OWN BOUNDS — and this node sits at StyleApplier
+     * step 3, OUTER of step 4's `absoluteOffset`, so a positioned element
+     * paints OUTSIDE those bounds and was cropped away. Measured on WPT
+     * `backdrop-filter-plus-filter.html` (wave40-final): the `.bluebox`
+     * (`filter: invert(1); position: absolute; left: 60px; top: 110px`)
+     * rendered ZERO pixels on Android while its unfiltered sibling rendered
+     * exactly at its offset — the offset box and the layer's un-offset slot
+     * do not even intersect. The saveLayer takes explicit bounds instead
+     * ([FilterGroupGeometry.groupLayerBounds] — the un-offset box UNION the
+     * offset box), so the offset paint stays inside the group. The matrix
+     * itself is unchanged (ColorMatrixColorFilter operates on unpremultiplied
+     * colour on both paths), so a static element renders identically.
+     *
+     * ## Why this is installed OUTERMOST (see EffectsFacade.apply)
+     * filter-effects-2 §2's Backdrop Filter algorithm composites the filtered
+     * backdrop as the bottom-most content of the element's transparency
+     * group, and the group is THEN rendered with the element's own `filter`.
+     * So `filter: invert(1)` + `backdrop-filter: blur(10px)` must invert the
+     * blurred backplate too — Chrome's `backdrop-filter-plus-filter.html`
+     * ref is exactly that (dark-purple body = invert(white blurred backdrop
+     * + translucent green bg)). This node therefore wraps the backplate node
+     * rather than sitting inside it. During pass A the backplate node
+     * suppresses all content, so this layer composites nothing — the group
+     * cannot leak into the Backdrop Root Image.
+     *
+     * @param positionOffset the element's resolved position offset
+     *   (`PositionApplier.resolvedOffset` — the value form of the very
+     *   `absoluteOffset` step 4 chains), threaded exactly like the shadow
+     *   and backplate lanes thread it. Default Zero keeps every static call
+     *   site byte-identical.
      */
-    private fun applyColorMatrixFilters(
+    fun applyGroupColorFilters(
         modifier: Modifier,
-        filters: List<FilterFunction>
+        config: FilterConfig,
+        positionOffset: androidx.compose.ui.unit.DpOffset =
+            androidx.compose.ui.unit.DpOffset.Zero,
     ): Modifier {
-        val colorMatrix = buildCombinedColorMatrix(filters) ?: return modifier
-
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+: Use RenderEffect for true element-wide filtering
-            applyColorMatrixWithRenderEffect(modifier, colorMatrix)
-        } else {
-            // Fallback: Use drawWithContent
-            applyColorMatrixWithDraw(modifier, colorMatrix)
-        }
-    }
-
-    /**
-     * Apply color matrix using RenderEffect (Android 12+).
-     * This provides true element-wide filtering including children.
-     */
-    private fun applyColorMatrixWithRenderEffect(
-        modifier: Modifier,
-        colorMatrix: ColorMatrix
-    ): Modifier {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            modifier.graphicsLayer {
-                val androidMatrix = android.graphics.ColorMatrix(colorMatrix.values)
-                renderEffect = RenderEffect.createColorFilterEffect(
-                    android.graphics.ColorMatrixColorFilter(androidMatrix)
-                ).asComposeRenderEffect()
-            }
-        } else {
-            modifier
-        }
-    }
-
-    /**
-     * Apply color matrix using drawWithContent (fallback for older Android).
-     * This draws content with the color filter applied.
-     */
-    private fun applyColorMatrixWithDraw(
-        modifier: Modifier,
-        colorMatrix: ColorMatrix
-    ): Modifier {
-        val colorFilter = ColorFilter.colorMatrix(colorMatrix)
+        // Only the matrix ops live here; blur/drop-shadow/opacity stay in
+        // applyForegroundFilters. No matrix ops → no layer at all, so the
+        // overwhelming majority of elements pay nothing. The MATRIX is built
+        // at chain time (androidx ColorMatrix is pure float math, JVM-safe);
+        // the ColorFilter wrapping it is built inside the draw lambda below,
+        // because ColorFilter.colorMatrix constructs an android.graphics
+        // object — a throwing stub in the JVM unit suite, which introspects
+        // this chain (FilterGroupApplierTest) without ever drawing it.
+        val colorMatrixFilters = config.filters.filter { it.isColorMatrixFilter() }
+        val colorMatrix = buildCombinedColorMatrix(colorMatrixFilters) ?: return modifier
 
         return modifier.drawWithContent {
-            // Draw content with color filter applied
+            // Compose draw scopes only expose saveLayer through the native
+            // canvas — same route the pre-31 fallback always used.
             drawIntoCanvas { canvas ->
-                val paint = Paint().apply {
-                    this.colorFilter = colorFilter
-                }
-
-                // Save the layer with the color filter
+                // The group's paint carries the matrix; Skia applies it when
+                // the layer is composited at restore(). Per-draw allocation,
+                // matching the Paint the drop-shadow lane allocates per draw.
+                val paint = Paint().apply { colorFilter = ColorFilter.colorMatrix(colorMatrix) }
+                // Bounds cover the un-offset node box AND the position-offset
+                // box (Dp→px is legal here — DrawScope is a Density), fixing
+                // the crop measured in the KDoc above.
                 canvas.saveLayer(
-                    bounds = androidx.compose.ui.geometry.Rect(
-                        0f, 0f, size.width, size.height
+                    bounds = FilterGroupGeometry.groupLayerBounds(
+                        widthPx = size.width,
+                        heightPx = size.height,
+                        positionOffsetXPx = positionOffset.x.toPx(),
+                        positionOffsetYPx = positionOffset.y.toPx(),
                     ),
-                    paint = paint
+                    paint = paint,
                 )
-
-                // Draw the content
+                // Everything inner — backplate patch, background, borders,
+                // children — renders into the group.
                 drawContent()
-
-                // Restore the layer
+                // Composite the group through the matrix.
                 canvas.restore()
             }
         }
