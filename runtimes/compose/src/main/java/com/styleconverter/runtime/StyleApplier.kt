@@ -557,12 +557,21 @@ object StyleApplier {
             // literally the value form of the modifier step 4 emits, so the
             // two cannot disagree. Gated on a consumer being declared, for
             // the same reason as the margin read: every other element would
-            // pay the resolve for nothing. TWO lanes consume it now: the
-            // backdrop path, and (same defect, found next on WPT
+            // pay the resolve for nothing. THREE lanes consume it now: the
+            // backdrop path; (same defect, found next on WPT
             // `backdrop-filter-box-shadow.html`) the box-shadow painter,
             // whose `drawBehind` also lives at this step and was painting a
-            // positioned element's shadow at its UN-offset layout slot.
+            // positioned element's shadow at its UN-offset layout slot; and
+            // (wave-41 skeptic S3, found on WPT `css-color/
+            // composited-filters-under-opacity`) the element color-matrix
+            // group in FilterApplier.applyGroupColorFilters, whose saveLayer
+            // bounds must cover the offset box or the flagless layer clips
+            // the positioned paint exactly like the retired RenderEffect
+            // buffer did. hasFilters is deliberately a little broader than
+            // "has a color-matrix filter": blur/drop-shadow element filters
+            // ignore the value, and the resolve is a cheap value read.
             positionOffset = if (config.effects.filters.hasBackdropFilters ||
+                config.effects.filters.hasFilters ||
                 config.effects.shadows.hasShadow)
                 com.styleconverter.runtime.layout.position.PositionApplier
                     .resolvedOffset(config.layout.position)

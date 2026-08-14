@@ -1,10 +1,14 @@
 //
 //  ListMarkerSymbol.swift
-//  StyleEngine/lists — wave 30, lane 3 (fix B6).
+//  StyleEngine/lists — wave 30, lane 3 (fix B6); wave 41 lane T4 adds the
+//  TEXT branch's typography (see ListMarkerSymbolPaint.body).
 //
 //  The GEOMETRY of a `disc` / `circle` / `square` marker. BYTE-PARALLEL
 //  TWIN of Compose lists/ListMarkerSymbol.kt: same constants, same names,
-//  same guard, same deferral. Change one, change both.
+//  same guard, same deferral. Change one, change both. (The wave-41 text
+//  typography twin lives in Compose's ListMarkerTextStyle instead — that
+//  is where Compose's marker font is resolved; iOS's only lists-owned
+//  seam on the marker Text is this modifier.)
 //
 //  ## The defect (measured on the LIVE wave29-final css-lists section)
 //  Both natives paint the three UA symbol markers as TEXT: `•`, `○`, `■`
@@ -148,14 +152,54 @@ struct ListMarkerSymbolPaint: ViewModifier {
     let shape: ListMarkerSymbol.Shape?
     let sizePt: CGFloat
     let strokePt: CGFloat
+    /// Wave 41 (lane T4) — the resolved font size the TEXT branch paints
+    /// its glyphs at (the container's `style.text.fontSize ?? 16`, the
+    /// same value `sizePt` was derived from). ≤ 0 disables the branch's
+    /// font entirely (defensive twin of the `sizePt > 0` guard above).
+    let markerFontPt: CGFloat
 
     @ViewBuilder
     func body(content: Content) -> some View {
         if let shape, sizePt > 0 {
+            // SYMBOL branch — untouched by wave 41: the glyph is `.hidden()`
+            // and only its BOX drives layout, so re-facing it would have
+            // pure layout consequences (every currently-calibrated bullet
+            // row's pitch) with zero ink benefit. Its box stays measured
+            // against the ambient environment font, exactly as before.
             content
                 .hidden()
                 .overlay(alignment: .leading) { symbol(shape) }
+        } else if markerFontPt > 0 {
+            // TEXT branch, wave 41 (lane T4) — the marker's typography.
+            // css-lists-3 §3.2: the ::marker box inherits from its
+            // originating element, and the item's own text bottoms out at
+            // the bundled Inter at 16pt (ComponentRenderer's `font` var:
+            // `.custom("Inter", size: textConfig.fontSize ?? 16)`) — the
+            // face all four corpus surfaces pin (capture-browser-ref.mjs
+            // "BLACK ink, Inter face" sub-boundary: ref @font-face, web
+            // index.html, Compose InterFontFamily, iOS registered
+            // "Inter"). This marker `Text` carried NO font, so ASCII
+            // markers resolved SwiftUI's environment body default (SF at
+            // 17pt): a face and size with no CSS basis, where css-lists-3
+            // §3.2 has ::marker inherit the originating element's computed
+            // font — here the document default, 16px Inter. (Wave-41
+            // skeptic note: digit-glyph metrics cannot distinguish SF@17
+            // from Inter@16 at capture resolution — CoreText ground truth
+            // renders "2." at identical h/w/column-runs in both — so the
+            // change is pinned on the inheritance rule, not on a pixel
+            // divergence between the faces.) `.font` sets
+            // the environment default, so the per-script runs
+            // ScriptFallbackFonts.annotate attributes (Android-only today)
+            // keep their explicit faces, and CoreText cascades any glyph
+            // Inter lacks exactly as it does for the item's own text.
+            // Weight is NOT threaded here — this call site has only the
+            // size, the same container-scope limitation
+            // ListMarkerTextStyle documents on both natives; every corpus
+            // marker is regular-weight.
+            content.font(.custom("Inter", size: markerFontPt))
         } else {
+            // Unresolvable font size — keep the pre-wave-41 render rather
+            // than painting at .custom's size-0 degenerate.
             content
         }
     }
@@ -183,14 +227,23 @@ struct ListMarkerSymbolPaint: ViewModifier {
 }
 
 extension View {
-    /// Attach `ListMarkerSymbolPaint` for a resolved counter style, or
-    /// leave the view untouched when it paints text.
+    /// Attach `ListMarkerSymbolPaint` for a resolved counter style — the
+    /// painted shape for the three UA symbols, and (wave 41, lane T4) the
+    /// item-inherited Inter face at `fontSizePx` for every TEXT marker.
+    /// This extension is the one lists-owned modifier on the marker
+    /// `Text`, which is why the marker's typography rides it: `fontSizePx`
+    /// is already the container's resolved size (`style.text.fontSize ??
+    /// 16` at both core call sites), i.e. exactly the value css-lists-3
+    /// §3.2's "inherits from the originating element" resolves to here.
     func listMarkerSymbol(type: ListMarkerType,
                           markerText: String,
                           fontSizePx: CGFloat) -> some View {
         modifier(ListMarkerSymbolPaint(
             shape: ListMarkerSymbol.shape(for: type, markerText: markerText),
             sizePt: ListMarkerSymbol.sizePt(fontSizePx: fontSizePx),
-            strokePt: ListMarkerSymbol.strokePt(fontSizePx: fontSizePx)))
+            strokePt: ListMarkerSymbol.strokePt(fontSizePx: fontSizePx),
+            // The text branch paints at the SAME resolved size the shape
+            // was derived from — one input, two consumers, no drift.
+            markerFontPt: fontSizePx))
     }
 }

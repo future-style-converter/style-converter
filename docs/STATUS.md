@@ -866,6 +866,39 @@ dirs + WPT corpus are gitignored):
   process liveness. Depth-48 gate: zero regressions, net clean.
   Totals: **web 1180/1379 (85.6%), iOS 946/1351 (70.0%), Android
   936/1350 (69.3%)**.
+  Wave 41 (`tools/titan/results/corpus-v6-6.json`) was the skeptic
+  wave: seven builder lanes, then six adversarial skeptics who had to
+  *execute* their refutations. The web gain is all view-transitions —
+  measuring wave-40's two-colour extension at full cap (+3) exposed
+  the **frame-ring defect**: fifteen tests failed on nothing but the
+  16px pad ring because the bake never delivered the settled
+  `::view-transition` background to the body-root channel all three
+  composed canvases pad from; the stamp (byte-identical for white
+  rings, skeptic-verified) plus two VT2 guards took full-cap web from
+  70 to **90/192** and the gate sample from 23 to 30. Android +12:
+  css-overflow +5 (the cross-component line-clamp cap — a skeptic
+  reproduced its geometry from the real code and simulated all 15
+  fire-cases before the gate ran), css-text +3, view-transitions +4,
+  and the wave-40 `abspos-016` loss recovered by the instrument fix.
+  iOS +7: the pre-break was blind to in-word break opportunities
+  (soft and literal hyphens), sizing boxes to fewer lines than
+  TextKit then rendered. The instrument work proved the API-36.1
+  shell-dir invisibility extends to **direct-path opens** on the
+  fonts/images channels (uid evidence; the app now creates all asset
+  roots itself and the feeder refuses to push until they exist), and
+  the SVG pre-raster A/B verdict came back: **default stays OFF** —
+  it costs 7-8 passes per platform until replaced boxes learn CSS2
+  §10.4 constraint sizing. Skeptics found one real missed fix (the
+  positionOffset resolve gate lacked the new color-matrix consumer),
+  the gradle filtered-run-state hazard (a plain suite run after a
+  `--tests` run silently re-runs only the filtered class), and one
+  honest −1 shipped knowingly: counter-styles `broken-symbols`
+  Android (0.9527→0.9481), named at-risk pre-gate — markers now
+  inherit the document's 16px Inter per css-lists-3 §3.2 instead of
+  an off-spec 14sp, and the old pass was metric-lucky. Depth-48 gate:
+  all capture columns full, zero watchdogs, 327-net clean. Totals:
+  **web 1187/1379 (86.1%), iOS 953/1351 (70.5%), Android 948/1350
+  (70.2%)**.
 
 ## Test suites
 
@@ -873,9 +906,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 329 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1252 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2237 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1416 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1575 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2276 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1431 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1589 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
 
 ## Roadmap

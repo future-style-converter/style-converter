@@ -38,8 +38,12 @@ package com.styleconverter.runtime.typography.wrapping
  * a named trigger: turning `Hyphens.Auto` on (the closing move for
  * `requires-hyphenation-dictionary`) makes Minikin honour U+00AD again.
  *
- * Deliberately NOT applied to `manual`/`auto`: there the soft hyphen is a
- * real opportunity and the platform's own handling is correct.
+ * Deliberately NOT applied to `manual`/`auto`: there the soft hyphen IS
+ * a real opportunity. Who takes it depends on the path (wave 41): a run
+ * [PreBreakPipeline] fires on spends it inside the greedy fold
+ * ([WordBreakOpportunities] — the taken point comes back as a painted
+ * hyphen, the rest disappear), and every other run keeps the platform's
+ * own handling.
  *
  * Twin: SoftHyphenPolicy.swift (SwiftUI), same two entry points, same
  * identity contract. Pure Kotlin so the JVM suite pins it without a

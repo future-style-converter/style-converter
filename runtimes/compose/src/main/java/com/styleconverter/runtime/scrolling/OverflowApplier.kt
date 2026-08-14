@@ -20,14 +20,17 @@ object OverflowApplier {
      *   scrolling still needs composable-level wiring (see applyScrolling)
      */
     fun applyOverflow(modifier: Modifier, config: OverflowConfig): Modifier {
-        // Fast identity when neither axis was declared non-visible.
-        if (!config.hasOverflow) return modifier
-
         // Per-axis clip decisions from USED values (§3.1 coercion inside).
         val cx = config.clipsX
         val cy = config.clipsY
 
-        return when {
+        // The declared-overflow clip, exactly as before wave 41: this
+        // branch is byte-identical for every clamp-less component (the
+        // cap block below is a no-op when lineClampCapPx is null).
+        val base = when {
+            // No axis declared non-visible → identity (the pre-wave-41
+            // fast path, now falling through to the cap check).
+            !config.hasOverflow -> modifier
             // Both axes clip → plain rectangle clip. graphicsLayer clipping
             // is cheaper than a draw-lambda and pixel-identical here.
             cx && cy -> modifier.clip(RectangleShape)
@@ -37,6 +40,29 @@ object OverflowApplier {
             // Neither clips (visible/visible after coercion) → identity.
             else -> modifier
         }
+
+        // Wave 41 (lane T6) — the block-level line-clamp cap. A fixed-count
+        // `line-clamp: <n>` implies `continue: discard` (css-overflow-4 §5):
+        // the container keeps its first N line boxes and the rest is not
+        // rendered — even when those line boxes live in CHILD components the
+        // leaf Text(maxLines) path cannot cap (block-ellipsis-012/027/032,
+        // line-clamp-005: the wave-40 native captures render every child
+        // line unclamped below the box the ref closed after line N).
+        val capPx = config.lineClampCapPx ?: return base
+
+        // Discarded lines must be unpaintable, so the cap needs a BLOCK-axis
+        // ink clip. If the declared overflow already clips Y it is already
+        // in `base` (wrapping the cap node below — correct nesting); a bare
+        // clamp adds a Y-only clip and NEVER an X clip: line-clamp creates
+        // no inline-axis clip (block-ellipsis-013's preserved line paints
+        // past the border box's right edge in the ref and must keep doing
+        // so — see placeholderOverflow's unclippedLineWidths note).
+        val clipped = if (config.hasOverflow && cy) base
+                      else base.axisSelectiveClip(clipX = false, clipY = true)
+
+        // The layout cap itself, INSIDE the clip so the clip rect tracks
+        // the capped box size (LineClampCap has the geometry contract).
+        return clipped.lineClampHeightCap(capPx)
 
         // Note: Scroll modifiers need to be applied at the composable level.
         // Scroll state should be handled by the container renderer.

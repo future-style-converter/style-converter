@@ -28,7 +28,21 @@ data class OverflowConfig(
     /** Clip margin when overflow is clip */
     val clipMargin: Dp? = null,
     /** Reference box for clip margin */
-    val clipMarginBox: OverflowClipMarginBox = OverflowClipMarginBox.PADDING_BOX
+    val clipMarginBox: OverflowClipMarginBox = OverflowClipMarginBox.PADDING_BOX,
+    /**
+     * Wave 41 (lane T6) — the block-level `line-clamp` height cap in px,
+     * or null when the component declares no fixed-count clamp. Computed
+     * by [LineClampCap.capPx] (N line boxes + the vertical padding +
+     * border bands that measure inside the overflow node) and consumed by
+     * [OverflowApplier.applyOverflow], which chains a Y-ink clip + the
+     * [lineClampHeightCap] layout cap so a clamp root whose line boxes
+     * live in CHILD components is capped like css-overflow-4 §5 demands
+     * (`continue: discard` — content past the Nth line box is not
+     * rendered). Leaf components are unaffected: their Text(maxLines)
+     * measurement already sits at/under this cap (see LineClampCap's
+     * SLACK_PX note).
+     */
+    val lineClampCapPx: Float? = null
 ) {
     val hasOverflow: Boolean
         get() = overflowX != OverflowBehavior.VISIBLE || overflowY != OverflowBehavior.VISIBLE

@@ -441,3 +441,68 @@ test('feed-android pushes images BEFORE the IR, wipes them, and re-pushes on ret
   assert.ok(src.indexOf('pushFontFaces(adbx, retryDoc, opts)') > 0,
     'the tail-retry pass must re-push the fonts too');
 });
+
+// ── wave-41 lane T2: the app-first ASSET-ROOT contract ───────────────────────
+//
+// PROBED REAL on a private API-36.1 instance (Medium_Phone_API_36.1): a
+// shell-created `fonts/`/`images/` root under the app's external files is
+// invisible to the app's FUSE view even for DIRECT-PATH opens — the feeder
+// pushed the woff, shell `ls` saw all 261 KB, and DocumentFontRegistry still
+// declined "no readable file at <that exact path>" (shell uid 2000 dir vs app
+// uid; captures byte-identical to a no-asset run). The fix is the same
+// app-first pattern the wave-40 inbox fix used: ScreenshotManager's poll loop
+// creates both roots app-owned, and the feeder WAITS for them before pushing.
+
+test('asset roots are app-created: no shell mkdir, and the launch wait covers them', async () => {
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  // The regression this pins out: a future "tidy-up" re-adding the shell
+  // mkdir would resurrect the silent asset loss on API-36.1 images while
+  // every capture still completes — nothing downstream would catch it.
+  assert.ok(!/mkdir', '-p', FONTS_DIR/.test(src),
+    'FONTS_DIR must never be shell-mkdir’d (invisible to the app on API-36.1)');
+  assert.ok(!/mkdir', '-p', (FONTS_DIR|IMAGES_DIR)/.test(src),
+    'asset roots must never be shell-mkdir’d (invisible to the app on API-36.1)');
+  // The launch wait must block on ALL THREE app-created dirs in one `ls -d`
+  // (non-zero exit while any is missing) — waiting on the inbox alone would
+  // let the first font/image push auto-create its root as SHELL again.
+  assert.match(src, /ls', '-d', INBOX_DIR, FONTS_DIR, IMAGES_DIR/,
+    'the post-launch wait must require the inbox AND both asset roots');
+  // The failure mode is a REFUSAL, not a warning: pushing into shell-owned
+  // dirs is indistinguishable from success on the host side.
+  assert.match(src, /never created .*asset roots.*refusing to push/,
+    'an expired dir wait must fail loudly rather than push');
+});
+
+test('the app side of the contract: nextFixtureFile creates the asset roots BEFORE listing', async () => {
+  // The feeder's three-dir wait (previous test) is only half the contract —
+  // the other half is the APP actually creating fonts/ + images/ app-owned
+  // in its poll loop, which is what the wait blocks on. Pinning both halves
+  // in ONE file means either side regressing fails the same suite, instead
+  // of the two drifting apart across trees with nothing to catch it.
+  const kt = await fs.readFile(new URL(
+    '../../apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotManager.kt',
+    import.meta.url), 'utf8');
+  const ensureAt = kt.indexOf('ensureAssetRoots()');
+  const listAt = kt.indexOf('inboxDir.listFiles');
+  assert.ok(ensureAt > 0, 'ScreenshotManager must define/call ensureAssetRoots');
+  assert.ok(listAt > 0, 'the inbox listing must still exist');
+  // The CALL inside nextFixtureFile must precede the inbox listing: the
+  // feeder pushes the moment all three dirs exist, so roots created after
+  // the listing would race the first asset push into shell ownership.
+  assert.ok(ensureAt < listAt, 'ensureAssetRoots must run before the inbox listing');
+  // Both roots, app-owned, via the getters the registries also use — a
+  // literal path here would silently diverge from getFontsDir/getImagesDir.
+  assert.match(kt, /getFontsDir\(\)\.mkdirs\(\)/, 'fonts root must be app-created');
+  assert.match(kt, /getImagesDir\(\)\.mkdirs\(\)/, 'images root must be app-created');
+});
+
+test('the SUBPATHS below the asset roots may stay shell-created (probed visible)', async () => {
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  // The same probe showed shell-created SUBDIR chains + pushed files UNDER an
+  // app-owned root ARE visible to the app (the woff got far enough to hit the
+  // runtime's woff-container decline; the grid support PNG painted). So the
+  // per-src parent `mkdir -p` in the two push hops is correct as-is — this
+  // pin documents that asymmetry so nobody "fixes" it into an app-side
+  // walker it does not need.
+  assert.match(src, /madeDirs\.has\(parent\)/, 'the per-src parent mkdir must remain in pushFontFaces/pushReplacedImages');
+});

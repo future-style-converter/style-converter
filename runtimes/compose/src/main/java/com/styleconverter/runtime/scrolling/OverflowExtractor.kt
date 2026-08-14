@@ -47,6 +47,17 @@ object OverflowExtractor {
             }
         }
 
+        // Wave 41 (lane T6) — the block-level line-clamp cap. A fixed-count
+        // `line-clamp: <n>` (css-overflow-4 §5: max-lines + continue:discard)
+        // caps the container at N line boxes even when those line boxes live
+        // in CHILD components the leaf Text(maxLines) path cannot reach;
+        // LineClampCap.capPx bails to null in one property-list scan for the
+        // (overwhelmingly common) clamp-less component, so this stays cheap.
+        val capPx = LineClampCap.capPx(properties)
+        // Only touch the config when a cap exists — the clamp-less path
+        // returns the byte-identical config it always did.
+        if (capPx != null) config = config.copy(lineClampCapPx = capPx)
+
         return config
     }
 

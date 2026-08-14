@@ -265,9 +265,12 @@ class ScreenshotManager(private val context: Context) {
      * resolves `File(fontsDir, face.src)` with no name mangling, so there is
      * no escaping rule that could drift between host and device.
      *
-     * Note it is NOT created here. Absence is a meaningful state — it means
-     * this run's feeder pushed no faces — and the registry's decline path
-     * already reports it with the family AND the path.
+     * Note the getter itself does NOT create it — but in titan-inbox mode
+     * [ensureAssetRoots] pre-creates it APP-OWNED on every poll, because on
+     * API-36.1 emulator images a shell-created dir here is invisible to the
+     * app's FUSE view (wave-41 T2 probe; full evidence on that function).
+     * "Feeder pushed no faces" is still loud: the registry's decline path
+     * reports the family AND the path it probed.
      */
     fun getFontsDir(): File =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -290,9 +293,9 @@ class ScreenshotManager(private val context: Context) {
      * [com.styleconverter.runtime.images.DocumentImageRegistry], which resolves
      * `File(imagesDir, src)` with no name mangling.
      *
-     * Not created here, for [getFontsDir]'s reason: absence means this run's
-     * feeder delivered no images, and the registry's decline path reports it
-     * with the source AND the path it looked at.
+     * Not created by this getter, for [getFontsDir]'s reason — but in
+     * titan-inbox mode [ensureAssetRoots] pre-creates it APP-OWNED on every
+     * poll (see that function for the wave-41 API-36.1 FUSE evidence).
      */
     fun getImagesDir(): File =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -300,6 +303,41 @@ class ScreenshotManager(private val context: Context) {
         } else {
             File(Environment.getExternalStorageDirectory(), "images")
         }
+
+    /**
+     * wave-41 lane T2 — create the two ASSET ROOTS ([getFontsDir] /
+     * [getImagesDir]) APP-OWNED before the host's first asset push can land.
+     *
+     * Why the app must create them: on API-36.1 emulator images a
+     * shell-created directory under this app's external files is INVISIBLE to
+     * the app's FUSE view — not just for listing (the wave-40 inbox lesson)
+     * but for DIRECT-PATH opens too. MEASURED (wave-41 T2 probe, private
+     * Medium_Phone_API_36.1 instance): the feeder shell-mkdir'd `fonts/`,
+     * pushed LinLibertine_Re-4.7.5.woff (shell `ls` saw all 261 KB), and
+     * DocumentFontRegistry still declined "no readable file at <that path>" —
+     * the shell-owned dir (uid 2000) simply does not exist for the app (uid
+     * 10224), so every fontFaces/replaced-image test silently lost its assets.
+     * App-created dirs (like the inbox and test_screenshots) are visible to
+     * both sides, which is the whole app-first pattern.
+     *
+     * Called from [nextFixtureFile] — i.e. on every inbox poll — so the roots
+     * exist app-owned from the FIRST poll, before the feeder (which waits for
+     * all three dirs after launch) pushes anything. `mkdirs()` on an existing
+     * dir is a cheap no-op, so per-poll cost is two stat calls.
+     *
+     * The "absence is meaningful" note on the getters survives in weakened
+     * form: the ROOTS now always exist in titan mode, and "feeder delivered
+     * nothing" is reported by the registries' per-file decline lines instead
+     * (same loudness, path included) — a trade forced by the FUSE behaviour
+     * above, not a preference.
+     */
+    private fun ensureAssetRoots() {
+        // Both mkdirs calls are best-effort: a failure here surfaces moments
+        // later as the registry's own loud per-file decline, which names the
+        // path — strictly more actionable than a throw from a poll loop.
+        getFontsDir().mkdirs()
+        getImagesDir().mkdirs()
+    }
 
     /**
      * Returns the oldest *.json fixture currently in the inbox, or null
@@ -311,6 +349,12 @@ class ScreenshotManager(private val context: Context) {
      * silently — the next poll picks the same file up.
      */
     fun nextFixtureFile(): File? {
+        // wave-41 lane T2 — asset roots FIRST, on every poll: the feeder's
+        // post-launch wait blocks on fonts/ + images/ existing (alongside the
+        // inbox) before its first push, so creating them here — app-owned, the
+        // only ownership the API-36.1 FUSE view honours — is what makes the
+        // font/image asset channel deliverable at all on such images.
+        ensureAssetRoots()
         // Ordering (oldest-first, name tiebreak) lives in TitanInbox.pickOldest
         // so the shipped path and the unit-tested path are the SAME code — the
         // filter here (regular *.json only) stays local since it's about the

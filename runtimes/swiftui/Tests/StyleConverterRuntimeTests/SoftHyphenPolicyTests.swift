@@ -116,17 +116,32 @@ final class SoftHyphenPolicyTests: XCTestCase {
             lines, maxWidth: 10, measure: charWidth))
     }
 
-    /// The css-text/hyphens-none-012 shape: an overlong "word" that
-    /// carries a REAL U+002D hyphen-minus. UAX #14 class HY is a break
-    /// opportunity `hyphens` does not govern, the ref wraps there, and
-    /// the platform breaker gets it right — so the probe must decline
-    /// even though the line overflows. (Device-measured: firing here
-    /// cost 0.8548 → 0.8431.)
-    func testOverflowingLineWithAHyphenIsNotUnbreakable() {
+    /// The css-text/hyphens-none-012 shape: a "word" carrying a REAL
+    /// U+002D hyphen-minus. UAX #14 class HY is a break opportunity
+    /// `hyphens` does not govern; since wave 41 the fold takes it ITSELF
+    /// (see WordBreakOpportunitiesTests for the full model) so the line
+    /// count downstream box heights are pinned from is exact — the
+    /// wave40-final iOS captures of none-012/013 show the undercount
+    /// (3 committed lines, 6 rendered, text centered out of the border).
+    /// With both halves fitting, the probe has nothing to claim.
+    func testAHyphenMinusWordIsSplitByTheFold() {
         let lines = GreedyLineBreaker.lines(text: "regu-lation", maxWidth: 6,
                                             measure: charWidth)
-        XCTAssertEqual(lines, ["regu-lation"])          // one space-word
-        XCTAssertTrue(charWidth("regu-lation") > 6)     // …and it overflows
+        XCTAssertEqual(lines, ["regu-", "lation"])
+        XCTAssertFalse(GreedyLineBreaker.hasUnbreakableOverflowingLine(
+            lines, maxWidth: 6, measure: charWidth))
+    }
+
+    /// The VETO still exists for opportunity classes the fold does NOT
+    /// model (en/em dashes, ZWSP, ideographs): such a line stays whole,
+    /// overflows, and must not claim rule B — TextKit owns those breaks
+    /// exactly as before this wave.
+    func testAnUnmodeledDashKeepsTheVeto() {
+        let text = "regu\u{2013}lation" // EN DASH — not an analyzer op.
+        let lines = GreedyLineBreaker.lines(text: text, maxWidth: 6,
+                                            measure: charWidth)
+        XCTAssertEqual(lines, [text])                   // left whole…
+        XCTAssertTrue(charWidth(text) > 6)              // …and overflowing
         XCTAssertFalse(GreedyLineBreaker.hasUnbreakableOverflowingLine(
             lines, maxWidth: 6, measure: charWidth))
     }

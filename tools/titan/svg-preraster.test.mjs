@@ -148,13 +148,15 @@ test('prerasterizeSvgSources declines everything, loudly, with no --wpt-dir', as
   assert.match(lines.join('\n'), /SKIPPED/);
 });
 
-test('the hop is OFF by default — the gate is byte-identical until it is measured', async (t) => {
-  // The default is OFF because eight of the nineteen target tests currently
-  // pass VACUOUSLY (the image is missing and the missing area is small), and
-  // whether a delivered raster's §10.4-unclamped overshoot costs them their
-  // pass is an SSIM question only a device answers. An empty map makes
-  // applyPrerasterRewrite a no-op, so "off" is byte-identical, not merely
-  // similar. See the switch banner in svg-preraster.mjs.
+test('the hop is OFF by default — the MEASURED verdict, not a pending question', async (t) => {
+  // The default is OFF because the wave-41 T2 A/B measured arm B (raster
+  // delivered) COSTING 7 Android + 8 iOS passes on the 19-test cluster: the
+  // eight vacuous passes all flip to fail when the §10.4-unclamped raster
+  // paints its intrinsic size and overshoots the constrained box. The flip
+  // is now gated on ReplacedBoxSizing growing §10.4 constraint-violation
+  // sizing, not on a measurement. An empty map makes applyPrerasterRewrite
+  // a no-op, so "off" is byte-identical, not merely similar. Full per-arm
+  // numbers in the switch banner in svg-preraster.mjs.
   const prev = process.env.TITAN_SVG_PRERASTER;
   delete process.env.TITAN_SVG_PRERASTER;
   t.after(() => { if (prev === undefined) delete process.env.TITAN_SVG_PRERASTER; else process.env.TITAN_SVG_PRERASTER = prev; });

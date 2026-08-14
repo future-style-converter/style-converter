@@ -149,8 +149,10 @@ class PreBreakPipelineTest {
      *  call site), so hyphens-none-011's authored
      *  `Deoxy&shy;ribo&shy;nucleic` arrives as the bare word and fires
      *  exactly like hyphens-manual-010's. Left in place — i.e. under
-     *  `manual` — the soft hyphens are real opportunities and the veto
-     *  stands the pipeline down, which is also correct. */
+     *  `manual` — the soft hyphens are opportunities the wave-41 fold
+     *  SPENDS itself (`Deoxyribo‐`/`nucleic`/`acid`, every line
+     *  fitting), so the probe stays false and the pipeline still
+     *  declines: hyphens-manual-011's committed capture cannot move. */
     @Test
     fun composesWithTheSoftHyphenPolicy() {
         val authored = "Deoxy­ribo­nucleic acid"
@@ -159,8 +161,9 @@ class PreBreakPipelineTest {
         val none = fire(text = stripped)
         assertTrue(none.fired)
         assertEquals("Deoxyribonucleic\nacid", none.text)
-        // hyphens: manual → the conditional characters survive and ARE
-        // break opportunities, so the run stays the platform's.
+        // hyphens: manual → the conditional characters survive; the fold
+        // takes the greedy one and every line fits, so no rule-B claim
+        // and the run stays the platform's.
         val manual = fire(text = SoftHyphenPolicy.displayString(authored, "manual"))
         assertFalse(manual.fired)
     }
