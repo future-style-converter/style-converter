@@ -149,14 +149,19 @@ test('prerasterizeSvgSources declines everything, loudly, with no --wpt-dir', as
 });
 
 test('the hop is OFF by default — the MEASURED verdict, not a pending question', async (t) => {
-  // The default is OFF because the wave-41 T2 A/B measured arm B (raster
-  // delivered) COSTING 7 Android + 8 iOS passes on the 19-test cluster: the
-  // eight vacuous passes all flip to fail when the §10.4-unclamped raster
-  // paints its intrinsic size and overshoots the constrained box. The flip
-  // is now gated on ReplacedBoxSizing growing §10.4 constraint-violation
-  // sizing, not on a measurement. An empty map makes applyPrerasterRewrite
-  // a no-op, so "off" is byte-identical, not merely similar. Full per-arm
-  // numbers in the switch banner in svg-preraster.mjs.
+  // The default is OFF on TWO measured A/Bs of the 19-test cluster. Wave-41
+  // T2: arm B (raster delivered) cost 7 Android + 8 iOS passes — the eight
+  // vacuous passes all flipped to fail when the §10.4-unclamped raster
+  // painted its intrinsic size and overshot the constrained box. Wave-42 W6
+  // landed §10.4 and the wave-43 V1 RE-RUN measured the size defect gone
+  // but arm B still costing 8 Android + 7 iOS passes on PLACEMENT: the
+  // delivered replaced roots block-stack one per line where the ref packs
+  // them on line boxes, because the composed root row flow admits only
+  // declared inline-blocks (InlineBlockAtom B1). The flip is now gated on
+  // wiring InlineAtomFlow's wave-43 replaced-image atom family through the
+  // root flow. An empty map makes applyPrerasterRewrite a no-op, so "off"
+  // is byte-identical, not merely similar. Full per-arm numbers in the
+  // switch banner in svg-preraster.mjs.
   const prev = process.env.TITAN_SVG_PRERASTER;
   delete process.env.TITAN_SVG_PRERASTER;
   t.after(() => { if (prev === undefined) delete process.env.TITAN_SVG_PRERASTER; else process.env.TITAN_SVG_PRERASTER = prev; });

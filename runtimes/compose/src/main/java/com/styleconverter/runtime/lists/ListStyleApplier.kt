@@ -102,14 +102,46 @@ object ListStyleApplier {
 
     private fun toUpperRoman(num: Int): String = toLowerRoman(num).uppercase()
 
+    /**
+     * Index one FIXED SYMBOL RUN \u2014 the shared guard for every cyclic /
+     * fixed counter style (css-counter-styles-3 \u00A76.1 "cyclic", \u00A76.2
+     * "fixed"). Out of range on EITHER end falls back to `decimal`, the
+     * fallback \u00A76.2 assigns the predefined styles.
+     *
+     * The `index >= 0` half is the crash guard, and it is not theoretical.
+     * Since wave 43 the marker index comes from [ListOrdinal] (the HTML
+     * ordinal plan), not the raw loop position, so a NEGATIVE index is
+     * reachable straight off the wire: `<ol start="-3">` and `<li
+     * value="-3">` both parse their sign in
+     * [ListOrdinal.parseHtmlInteger], and [ListOrdinal.markerIndex]
+     * subtracts one more. Wave-43 skeptic S4 measured the live corpus
+     * delivering ordinals \u22123\u2026\u22121 (wpt/css-lists cssom-negative-setter) and
+     * proved the old `greekLower[index]` then throws
+     * StringIndexOutOfBoundsException \u2014 thrown inside a @Composable, so
+     * the harness app dies and the whole run reports TIMEOUT instead of
+     * one wrong marker. Byte-for-byte the guard the iOS twin has carried
+     * since wave 24 (StyleEngine/lists/ListMarkerText.cyclic:
+     * `index >= 0 && index < symbols.count ? symbols[index] : "\(index + 1)"`);
+     * this closes the Compose-side gap. All six runs below are BMP-only,
+     * so single-char indexing is exact.
+     */
+    private fun cyclic(index: Int, symbols: String): String =
+        // In range \u21D2 the run's glyph; out of range (either end) \u21D2 decimal.
+        if (index >= 0 && index < symbols.length) symbols[index].toString()
+        else "${index + 1}"
+
     private fun toLowerGreek(index: Int): String {
         val greekLower = "\u03B1\u03B2\u03B3\u03B4\u03B5\u03B6\u03B7\u03B8\u03B9\u03BA\u03BB\u03BC\u03BD\u03BE\u03BF\u03C0\u03C1\u03C3\u03C4\u03C5\u03C6\u03C7\u03C8\u03C9"
-        return if (index < greekLower.length) greekLower[index].toString() else "${index + 1}"
+        // \u00A76.1 lower-greek: \u03B1\u2026\u03C9, no final sigma \u2014 routed through the
+        // guarded indexer so a negative ordinal cannot throw.
+        return cyclic(index, greekLower)
     }
 
     private fun toUpperGreek(index: Int): String {
         val greekUpper = "\u0391\u0392\u0393\u0394\u0395\u0396\u0397\u0398\u0399\u039A\u039B\u039C\u039D\u039E\u039F\u03A0\u03A1\u03A3\u03A4\u03A5\u03A6\u03A7\u03A8\u03A9"
-        return if (index < greekUpper.length) greekUpper[index].toString() else "${index + 1}"
+        // Same run in capitals; same guard (upper-greek is not predefined
+        // in \u00A76, it mirrors lower-greek here for wire parity).
+        return cyclic(index, greekUpper)
     }
 
     private fun toArmenian(num: Int): String {
@@ -175,26 +207,46 @@ object ListStyleApplier {
 
     private fun toCjkDecimal(num: Int): String {
         val cjkDigits = "\u3007\u4E00\u4E8C\u4E09\u56DB\u4E94\u516D\u4E03\u516B\u4E5D"
+        // The SAME S4 crash class as `cyclic` above, one step removed: a
+        // negative ordinal stringifies with a leading '-', and `'-' - '0'`
+        // is -3, so the digit map would be indexed at -3 and throw
+        // StringIndexOutOfBoundsException (app death ⇒ harness TIMEOUT).
+        // css-counter-styles-3 §6.2 gives cjk-decimal no `negative`
+        // descriptor override, so the default "-" sign prefix applies and
+        // the plain decimal string is the honest fallback here — the same
+        // decimal fallback `cyclic` uses when it runs off its run.
+        // TWIN NOTE (deliberate, not an oversight): iOS
+        // ListMarkerText.cjkDecimal filters with
+        // `compactMap { $0.wholeNumberValue }`, which silently DROPS the
+        // sign (-3 renders "三"). Compose keeps the sign rather than paint
+        // a positive-looking marker for a negative ordinal; the divergence
+        // is confined to negative input, which no fixture reaches today
+        // (before this guard Android crashed there and iOS lied there).
+        if (num < 0) return num.toString()
         return num.toString().map { cjkDigits[it - '0'] }.joinToString("")
     }
 
     private fun toHiragana(index: Int): String {
         val hiragana = "\u3042\u3044\u3046\u3048\u304A\u304B\u304D\u304F\u3051\u3053\u3055\u3057\u3059\u305B\u305D\u305F\u3061\u3064\u3066\u3068\u306A\u306B\u306C\u306D\u306E\u306F\u3072\u3075\u3078\u307B\u307E\u307F\u3080\u3081\u3082\u3084\u3086\u3088\u3089\u308A\u308B\u308C\u308D\u308F\u3092\u3093"
-        return if (index < hiragana.length) hiragana[index].toString() else "${index + 1}"
+        // §6.2 hiragana (gojūon order) — guarded indexer, see `cyclic`.
+        return cyclic(index, hiragana)
     }
 
     private fun toKatakana(index: Int): String {
         val katakana = "\u30A2\u30A4\u30A6\u30A8\u30AA\u30AB\u30AD\u30AF\u30B1\u30B3\u30B5\u30B7\u30B9\u30BB\u30BD\u30BF\u30C1\u30C4\u30C6\u30C8\u30CA\u30CB\u30CC\u30CD\u30CE\u30CF\u30D2\u30D5\u30D8\u30DB\u30DE\u30DF\u30E0\u30E1\u30E2\u30E4\u30E6\u30E8\u30E9\u30EA\u30EB\u30EC\u30ED\u30EF\u30F2\u30F3"
-        return if (index < katakana.length) katakana[index].toString() else "${index + 1}"
+        // §6.2 katakana (gojūon order) — guarded indexer, see `cyclic`.
+        return cyclic(index, katakana)
     }
 
     private fun toHiraganaIroha(index: Int): String {
+        // §6.2 hiragana-iroha (iroha poem order) — guarded, see `cyclic`.
         val iroha = "\u3044\u308D\u306F\u306B\u307B\u3078\u3068\u3061\u308A\u306C\u308B\u3092\u308F\u304B\u3088\u305F\u308C\u305D\u3064\u306D\u306A\u3089\u3080\u3046\u3090\u306E\u304A\u304F\u3084\u307E\u3051\u3075\u3053\u3048\u3066\u3042\u3055\u304D\u3086\u3081\u307F\u3057\u3091\u3072\u3082\u305B\u3059"
-        return if (index < iroha.length) iroha[index].toString() else "${index + 1}"
+        return cyclic(index, iroha)
     }
 
     private fun toKatakanaIroha(index: Int): String {
+        // §6.2 katakana-iroha (iroha poem order) — guarded, see `cyclic`.
         val iroha = "\u30A4\u30ED\u30CF\u30CB\u30DB\u30D8\u30C8\u30C1\u30EA\u30CC\u30EB\u30F2\u30EF\u30AB\u30E8\u30BF\u30EC\u30BD\u30C4\u30CD\u30CA\u30E9\u30E0\u30A6\u30F0\u30CE\u30AA\u30AF\u30E4\u30DE\u30B1\u30D5\u30B3\u30A8\u30C6\u30A2\u30B5\u30AD\u30E6\u30E1\u30DF\u30B7\u30F1\u30D2\u30E2\u30BB\u30B9"
-        return if (index < iroha.length) iroha[index].toString() else "${index + 1}"
+        return cyclic(index, iroha)
     }
 }

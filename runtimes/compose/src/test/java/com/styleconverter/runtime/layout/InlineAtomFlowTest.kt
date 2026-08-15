@@ -340,4 +340,142 @@ class InlineAtomFlowTest {
             )
         )
     }
+
+    // ── Wave-43 V1 — the replaced-image atom family ──
+
+    @Test
+    fun `replaced images join the inline flow only with a delivered raster`() {
+        // Default (no attestation) is the frozen pre-wave-43 answer: an
+        // <img> is NOT an atom — the byte-compat pin for every caller
+        // that does not pass the new fact.
+        assertFalse(InlineAtomFlow.isAtom("img", null, false, hasText = false))
+        // The caller-attested delivered raster admits the whole replaced
+        // family (the paint channel's tag table).
+        for (tag in listOf("img", "embed", "object", "video")) {
+            assertTrue(tag, InlineAtomFlow.isAtom(tag, null, false, false, hasDeliveredRaster = true))
+        }
+        // The flag NEVER admits a non-replaced tag: an attestation for a
+        // <div> is a renderer bug the gate refuses rather than packs.
+        assertFalse(InlineAtomFlow.isAtom("div", null, false, false, hasDeliveredRaster = true))
+        // css-display-3 §2 still runs first: a declared block-level
+        // display takes even a delivered img out of the inline flow,
+        // while INLINE-family keywords keep it.
+        assertFalse(InlineAtomFlow.isAtom("img", "BLOCK", false, false, hasDeliveredRaster = true))
+        assertTrue(InlineAtomFlow.isAtom("img", "INLINE_BLOCK", false, false, hasDeliveredRaster = true))
+    }
+
+    // The VERBATIM wave42-final per-test IR of css-ui box-sizing-010/-016
+    // (tools/titan/runs/wave42-final/sections/css-ui/per-test-ir/): a <p>,
+    // a 70×70 inline-block div (margin-bottom 30 "for alignement"), and an
+    // <img src=…svg> under `box-sizing: border-box; padding-bottom: 30px;
+    // max-height: 100px`. Only the img's src differs between the two.
+    private fun boxSizingWire(n: String, src: String) = """
+        {"irVersion":2,"minReaderVersion":2,"components":[
+        {"id":"wpt__css-ui__box-sizing-${n}__0-328","name":"wpt__css-ui__box-sizing-${n}__0","properties":[],
+         "text":"Test passes if there are 2 filled green squares and they are the same size.",
+         "meta":{"sourceTag":"p","role":"ws-after"}},
+        {"id":"wpt__css-ui__box-sizing-${n}__1-329","name":"wpt__css-ui__box-sizing-${n}__1","properties":[
+         {"type":"Display","data":"INLINE_BLOCK"},{"type":"MarginBottom","data":{"px":30}},
+         {"type":"Width","data":{"type":"length","px":70}},{"type":"Height","data":{"type":"length","px":70}},
+         {"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}}],
+         "meta":{"role":"ws-after"}},
+        {"id":"wpt__css-ui__box-sizing-${n}__2-330","name":"wpt__css-ui__box-sizing-${n}__2","properties":[
+         {"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},
+         {"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},
+         {"type":"PaddingBottom","data":{"px":30}},{"type":"MaxHeight","data":{"type":"length","px":100}}],
+         "meta":{"sourceTag":"img","attrs":{"src":"$src"}}}]}
+    """.trimIndent()
+
+    /** The per-sibling facts EXACTLY as blockInlineAtomSegments derives
+     *  them from the decoded wire, plus the wave-43 attestation. */
+    private fun atomFact(c: IRComponent, rasterDelivered: Boolean) = InlineAtomFlow.isAtom(
+        tag = c._tag,
+        displayKeyword = c.properties.firstOrNull { it.type == "Display" }
+            ?.let { com.styleconverter.runtime.core.types.ValueExtractors.extractKeyword(it.data)?.uppercase() },
+        hasElementChildren = !c.children.isNullOrEmpty(),
+        hasText = !c._text.isNullOrEmpty(),
+        // Both halves of the paint decision: the wire candidacy is read
+        // off the decoded component; the registry-resolve half has no
+        // JVM bitmap store, so the test injects it — exactly the seam
+        // the renderer wiring will fill with DocumentImageRegistry.
+        hasDeliveredRaster = rasterDelivered &&
+            com.styleconverter.runtime.images.ReplacedImageContent.isCandidate(c),
+    )
+
+    @Test
+    fun `box-sizing-010 and 016 verbatim wire facts gate on the delivered raster`() {
+        for ((n, src) in listOf("010" to "css/css-ui/support/w100_h100.svg",
+                                "016" to "css/css-ui/support/r1-1.svg")) {
+            val comps = com.styleconverter.runtime.core.ir.IRDocumentDecoder
+                .decode(boxSizingWire(n, src)).components
+            // The wire candidacy (replaced sourceTag + non-blank src) is
+            // true for the img alone — the <p> has text, the div has no
+            // sourceTag at all on this wire.
+            assertEquals(listOf(false, false, true),
+                comps.map { com.styleconverter.runtime.images.ReplacedImageContent.isCandidate(it) })
+            // Undelivered (the pre-raster-OFF arm): nothing is an atom —
+            // the frozen stacking stays byte-identical.
+            assertEquals(listOf(false, false, false), comps.map { atomFact(it, rasterDelivered = false) })
+            // Delivered (the pre-raster-ON arm): the img is admitted…
+            assertEquals(listOf(false, false, true), comps.map { atomFact(it, rasterDelivered = true) })
+            // …but the pair still has NO ≥2 run: the div's inline-block
+            // admission rides the InlineBlockAtom family (B1–B7), whose
+            // B5 margin gate refuses its 30px margin-bottom today. Pinned
+            // so the residual stacking is a named number, not a surprise:
+            // packing 010/016 needs the margin-aware inline-block
+            // follow-up, not more img admission.
+            val segs = InlineAtomFlow.segment(comps.map { atomFact(it, rasterDelivered = true) })
+            assertTrue(segs.none { it.isRun })
+            assertNull(InlineBlockAtom.spec(comps[1].properties,
+                hasOwnText = false, hasOwnRuns = false, containerDeclaresLineHeight = false))
+        }
+    }
+
+    @Test
+    fun `five consecutive delivered imgs form one packable run`() {
+        // The box-sizing-008/-009 sibling shape (text root, <p>, the
+        // inline-block ref div, then FIVE <img> roots): admitting the
+        // delivered imgs makes exactly one 5-atom run — the div stays a
+        // single (B5, above) and never breaks the img streak.
+        val flags = listOf(false, false, false, true, true, true, true, true)
+        val segs = InlineAtomFlow.segment(flags)
+        assertEquals(4, segs.size)
+        assertTrue(segs[3].isRun)
+        assertEquals(listOf(3, 4, 5, 6, 7), segs[3].indices)
+    }
+
+    @Test
+    fun `a replaced atom measures with the sec 10-4 constrained content size`() {
+        // The admitted atom has NO fixed UA spec: InlineFlowLayout
+        // measures it free, and the rendered box under width/height auto
+        // is ReplacedImageContent's INTRINSIC mode — the wave-42 §10.4
+        // table over the wire bounds. On box-sizing-010's verbatim
+        // properties (border-box maxH 100 − 30px pad band = content maxH
+        // 70) the 100×100 pre-raster resolves to the ref's 70×70 content…
+        val img010 = com.styleconverter.runtime.core.ir.IRDocumentDecoder
+            .decode(boxSizingWire("010", "css/css-ui/support/w100_h100.svg")).components[2]
+        val used010 = com.styleconverter.runtime.images.ReplacedImageContent.constrainedAutoContentSize(
+            properties = img010.properties.map { it.type to it.data },
+            // The composed capture runs WPT-gated; BoxSizing is DECLARED
+            // border-box on this wire, so the tri-state is explicit.
+            wptCaptureMode = true,
+            intrinsicWidthPx = 100f, intrinsicHeightPx = 100f, aspectRatio = 1f,
+        )
+        assertEquals(70f, used010.widthPx, 1e-3f)
+        assertEquals(70f, used010.heightPx, 1e-3f)
+        // …and 016's r1-1 pre-raster (150×150, the asserted 1:1 ratio)
+        // resolves to the SAME 70×70. With the 30px pad band back on, the
+        // atom's measured border box is 70×100 — baseline at its bottom
+        // margin edge (§10.8.1 replaced ⇒ descent 0), matching the ref's
+        // side-by-side geometry with the 70×70(+30 margin) div.
+        val img016 = com.styleconverter.runtime.core.ir.IRDocumentDecoder
+            .decode(boxSizingWire("016", "css/css-ui/support/r1-1.svg")).components[2]
+        val used016 = com.styleconverter.runtime.images.ReplacedImageContent.constrainedAutoContentSize(
+            properties = img016.properties.map { it.type to it.data },
+            wptCaptureMode = true,
+            intrinsicWidthPx = 150f, intrinsicHeightPx = 150f, aspectRatio = 1f,
+        )
+        assertEquals(70f, used016.widthPx, 1e-3f)
+        assertEquals(70f, used016.heightPx, 1e-3f)
+    }
 }

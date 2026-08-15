@@ -2749,6 +2749,28 @@ object ComponentRenderer {
                         .filter { ListStyleExtractor.isListStyleProperty(it.type) }
                         .map { it.type to it.data }
                 } else emptyList()
+            // Wave 43 (lane V4) — the HTML ordinal plan for this container's
+            // items, computed ONCE per parent because an item's ordinal
+            // depends on its SIBLINGS: `<ol start>` sets the base and
+            // `<li value>` resets the running counter (HTML §4.4.5/§4.4.8),
+            // neither of which the raw per-child loop index below can see —
+            // counter-list-item painted "1. 2. 3." where Chromium paints
+            // "30. 31. 32." (android-ref 0.744, wave42-final). Index-aligned
+            // with `component.children`; null for non-list parents, so every
+            // other container keeps the exact pre-wave-43 index math.
+            // `reversed = false` is a documented WIRE GAP, not a shrug: the
+            // producer never forwards `<ol reversed>` (extract-fixture.mjs
+            // LIST_ATTR_KEYS) and the strict attrs decoder would reject the
+            // key. The countdown itself is already implemented and unit-
+            // tested to the SPEC — css-lists-3 §4.4.2 reversed-counter
+            // instantiation, see ListOrdinal's header — so closing the gap
+            // is one boolean, not a behaviour decision.
+            val listOrdinals: IntArray? = if (isListParent)
+                com.styleconverter.runtime.lists.ListOrdinal.ordinals(
+                    startAttr = component.attrs?.start,
+                    reversed = false,
+                    children = component.children
+                ) else null
 
             // Check if this is a positioned container (position: relative)
             // Wave 35 (lane B1) — OR-ed in: a box with a used transform is a
@@ -2831,8 +2853,14 @@ object ComponentRenderer {
                             // Render absolutely positioned child with offset
                             RenderAbsoluteChild(child)
                         } else if (isListParent && child._tag?.lowercase() == "li") {
+                            // Wave 43 (lane V4): the marker numbers from the
+                            // HTML ordinal plan, not the raw loop index —
+                            // see the listOrdinals hoist above.
                             RenderListItemMarker(
-                                child, index, parentTag, parentListPairs,
+                                child,
+                                com.styleconverter.runtime.lists.ListOrdinal
+                                    .markerIndex(listOrdinals, index),
+                                parentTag, parentListPairs,
                                 inheritedAwareTextColor, inheritedMarkerTextStyle)
                         } else {
                             RenderComponent(child)
@@ -2874,8 +2902,13 @@ object ComponentRenderer {
                     // composition shape, not merely their pixels.
                     ProvidingRowPitch(rowPitchAccumulator) {
                     if (isListParent && child._tag?.lowercase() == "li") {
+                        // Wave 43 (lane V4): same ordinal bridge as the
+                        // positioned-container branch — one plan, two loops.
                         RenderListItemMarker(
-                            child, index, parentTag, parentListPairs,
+                            child,
+                            com.styleconverter.runtime.lists.ListOrdinal
+                                .markerIndex(listOrdinals, index),
+                            parentTag, parentListPairs,
                             inheritedAwareTextColor, inheritedMarkerTextStyle)
                     } else {
                         // Auto-margin centering for block children is handled
@@ -3283,6 +3316,10 @@ object ComponentRenderer {
     @Composable
     private fun RenderListItemMarker(
         child: IRComponent,
+        // Wave 43 (lane V4): the 0-based getMarker input, already bridged
+        // through ListOrdinal.markerIndex at both call sites — the HTML
+        // ordinal minus one (`<ol start>`/`<li value>` aware), NOT the raw
+        // child position it was before wave 43.
         index: Int,
         parentTag: String?,
         parentListPairs: List<Pair<String, kotlinx.serialization.json.JsonElement?>>,

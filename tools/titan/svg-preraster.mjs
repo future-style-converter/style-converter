@@ -380,22 +380,49 @@ export async function prerasterizeSvgSources(srcs, opts) {
   // The eight vacuous passes (010, 011, 014..019 — the image missing and the
   // missing area small) ALL flip to fail with the raster delivered: each test
   // constrains its box with `max-width`/`max-height` + `box-sizing:
-  // border-box`, ReplacedBoxSizing deliberately does NOT model CSS 2.1
+  // border-box`, ReplacedBoxSizing deliberately did NOT model CSS 2.1
   // §10.4's constraint-violation rules for replaced content (its own header
-  // says so), and the delivered raster paints its INTRINSIC size on the
-  // unconstrained axis — box-sizing-016's second "70px square" renders as a
+  // said so), and the delivered raster painted its INTRINSIC size on the
+  // unconstrained axis — box-sizing-016's second "70px square" rendered as a
   // ~150px-wide rectangle that also WRAPS to its own line (0.9561 → 0.9083 on
-  // Android). The three worst absent-image tests (007..009) improve only
-  // ~0.05 SSIM (009: 0.5380 → 0.5948 Android) — the raster lands at the
-  // wrong size there too, nowhere near a pass. Net: arm B rescues exactly ONE
+  // Android). The three worst absent-image tests (007..009) improved only
+  // ~0.05 SSIM (009: 0.5380 → 0.5948 Android) — the raster landed at the
+  // wrong size there too, nowhere near a pass. Net: arm B rescued exactly ONE
   // test on ONE platform (012 Android, 0.9369 → 0.9695).
+  //
+  // Wave-41 gated the flip on the runtimes growing §10.4 sizing; wave-42 W6
+  // LANDED it (both natives' ReplacedBoxSizing.constrainAutoSize) and wave-43
+  // V1 RE-RAN this A/B (same procedure below, private API-36.1 emulator-5680
+  // + iPhone 17 Pro sim, arms on the one installed binary). The size defect
+  // is gone — arm B's second square now paints the ref's exact 70×70 — but
+  // arm B STILL loses, now purely on PLACEMENT:
+  //
+  //     Android  arm A (off): 8/19 pass, mean SSIM 0.8798
+  //              arm B (on):  0/19 pass, mean SSIM 0.8533   → costs 8 passes
+  //     iOS      arm A (off): 8/19 pass, mean SSIM 0.8808
+  //              arm B (on):  1/19 pass, mean SSIM 0.8544   → costs 7 passes
+  //
+  // MEASURED (arm B Android, box-sizing-010): the delivered 70×70 square
+  // paints at (16,188) on its OWN LINE below the inline-block div at
+  // (16,88) — the ref packs them side by side on ONE line box (one green
+  // band, x16..160, top y88). 007's twenty 100×100 imgs stack ONE PER LINE
+  // (2534px-tall capture) where the ref wraps them into rows. Root cause:
+  // these <img>s are document ROOTS, and the composed canvases' root row
+  // flow (ComposedRootInlineFlow.{kt,swift} → InlineBlockAtom.rootBox)
+  // admits ONLY declared `display:inline-block` boxes — a replaced img is
+  // refused by B1, and the 010-family div's 30px margin-bottom by B5.
+  // InlineAtomFlow.isAtom grew the replaced-image family in wave-43 V1
+  // (delivered-raster-gated, dormant until wired); flipping this hop ON is
+  // gated on wiring that admission through the ROOT flow (both harness
+  // twins + the InlineBlockAtom facade), then re-running this A/B. The one
+  // arm-B pass is 012 iOS (0.9383 → 0.9503); Android 012 fell from wave-41's
+  // 0.9695 to 0.9489 because §10.4 honestly clamps w100.svg.png's asserted
+  // 2:3 ratio to 46.7×70 where the browser used the vector's 100×70
+  // (limitation 2 above; the pinned ReplacedBoxSizingConstraintTest row).
   //
   // So the hop stays COMPLETE and OFF: the gate is byte-identical with it off
   // (no rewrite, no browser, no delivery change — the empty map makes
-  // applyPrerasterRewrite a no-op). The flip is no longer gated on a
-  // measurement; it is gated on the RUNTIMES growing §10.4
-  // constraint-violation sizing for replaced content (both natives'
-  // ReplacedBoxSizing), after which this A/B should be re-run:
+  // applyPrerasterRewrite a no-op). The A/B procedure, verbatim:
   //
   //   node tools/titan/feed-{android,ios}.mjs --fixtures <19 per-test IR> \
   //       --out <arm> --composed --wpt-dir tools/wpt --udid <dev>

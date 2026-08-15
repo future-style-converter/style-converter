@@ -155,14 +155,24 @@ enum SpacingResolver {
         // identical to the previous behaviour (and to Compose).
         case .em, .cap, .ic:
             return toPx(value * ctx.fontSizePx)
-        // Pin P5 — `lh` = used line-height; `normal` computes to ≈1.2 ×
-        // font-size in every UA default sheet, the approximation we pin.
+        // Pin P5 (amended wave 43, lane V3) — `lh` = the element's USED
+        // line-height (css-values-4 §6.2.1). The threaded
+        // SpacingContext.lineHeightPx wins when the renderer resolved one
+        // (declared line-height verbatim, or the WPT-capture calibrated
+        // grid — see LhUnitLineHeight); a nil channel keeps the historical
+        // `normal ≈ 1.2em` UA-sheet approximation byte-for-byte (measured:
+        // discard-multicol-001 `height: 2lh` at monospace-13px resolved
+        // 31.2px against the ref's 32.5 = 2 × 13 × the 1.25 ref pin).
         case .lh:
-            return toPx(value * 1.2 * ctx.fontSizePx)
+            return toPx(value * (ctx.lineHeightPx ?? 1.2 * ctx.fontSizePx))
         // Root-em resolves against a fixed 16pt root size per SpacingContext.
         case .rem:
             return toPx(value * 16.0)
-        // Pin P6 — root line-height: the same 1.2 ratio on the 16px root.
+        // Pin P6 — root line-height: kept on the 1.2 ratio over the 16px
+        // root, deliberately NOT moved with lh — the harness never styles
+        // the root element and no wave42-final capture exercises rlh, so
+        // moving it would be metric-blind guessing (Compose twin states
+        // the same rationale at its RLH arm).
         case .rlh:
             return toPx(value * 1.2 * 16.0)
 

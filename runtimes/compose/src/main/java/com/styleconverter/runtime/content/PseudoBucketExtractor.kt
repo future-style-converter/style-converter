@@ -24,6 +24,7 @@ package com.styleconverter.runtime.content
 
 import com.styleconverter.runtime.PropertyTracker
 import com.styleconverter.runtime.core.ir.IRLog
+import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.renderer.isBlockDisplay
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -106,6 +107,14 @@ object PseudoBucketExtractor {
         // literal word FAIL of css-pseudo/before-dynamic-display-none (iOS
         // PseudoTextBridge already refuses any bucket declaring `display`).
         var suppressed = false
+        // Wave-43 lane V7 — the bucket's OWN styling declarations, typed.
+        // The render site (ContentApplier.PseudoElement) already feeds
+        // config.properties through TextStyleApplier, so converting the
+        // raw color/font-size/font-family strings to their typed wire
+        // shapes lets the ONE existing text pipeline style the run
+        // (declared values then win over PseudoTextMetrics' bottom-outs,
+        // author > UA). See PseudoStyledDeclarations for the census.
+        val styled = mutableListOf<IRProperty>()
         // Walk every declaration so nothing is silently dropped.
         if (decls != null) for ((prop, raw) in decls) {
             // Declaration values are string primitives; anything else is
@@ -131,7 +140,27 @@ object PseudoBucketExtractor {
                         PropertyTracker.markUnhandled("Pseudo::$which/$prop")
                         IRLog.warn(TAG, "::$which '$prop: $value' has no baked _text — counter state not applied")
                     }
-                // Every other styling declaration (color, margins, …) is a
+                // Wave-43 lane V7: the styling trio the census carries —
+                // color / font-size / font-family — converts to the typed
+                // wire shapes the pseudo Text pipeline already consumes.
+                "color", "font-size", "font-family" ->
+                    when (val c = PseudoStyledDeclarations.convert(prop.trim().lowercase(), value)) {
+                        // Typed — the run renders with the declared value.
+                        is PseudoStyledDeclarations.Conversion.Typed -> styled += c.property
+                        // A CSS-wide keyword collapsing to the run's
+                        // existing default — consumed, correctly, as no-op.
+                        PseudoStyledDeclarations.Conversion.Inert -> {}
+                        // Unconvertible flavor (var()/calc()/keyword sizes)
+                        // — named exactly like before this lane.
+                        PseudoStyledDeclarations.Conversion.Unsupported -> {
+                            PropertyTracker.markUnhandled("Pseudo::$which/$prop")
+                            IRLog.warn(TAG, "::$which '$prop: $value' unsupported by the pseudos-bucket bridge")
+                        }
+                        // convert() only returns null for names outside its
+                        // trio — unreachable behind this branch's match.
+                        null -> {}
+                    }
+                // Every other styling declaration (margins, borders, …) is a
                 // raw CSS string this runtime cannot type — tracked so the
                 // gap stays visible in the coverage report.
                 else -> {
@@ -154,11 +183,13 @@ object PseudoBucketExtractor {
             // One resolved run — the wrapper's buildContentString passes
             // ContentValue.Text through verbatim (no counter context needed).
             content = listOf(ContentValue.Text(text)),
-            // The raw declarations cannot become typed IRProperty entries
-            // (no CSS parser in the runtime — see the file banner), so the
-            // pseudo renders with inherited/default typography; the loop
-            // above already named each declaration this leaves behind.
-            properties = emptyList(),
+            // Wave-43 lane V7: the bucket's OWN color/font-size/font-family,
+            // converted to typed entries above — the render site's
+            // TextStyleApplier resolves them (em against the threaded
+            // inherited base) and PseudoTextMetrics lets declared values
+            // win over its WPT bottom-outs (author > UA). Declarations the
+            // conversion could not type were named in the walk.
+            properties = styled,
             isInline = isInline
         )
     }

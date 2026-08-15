@@ -352,4 +352,142 @@ final class InlineAtomFlowTests: XCTestCase {
                         3],                    // progress alone
                        p.y.map(rowOf))
     }
+
+    // ── Wave-43 V1 — the replaced-image atom family (Kotlin twin verbatim) ──
+
+    func testReplacedImagesJoinTheInlineFlowOnlyWithADeliveredRaster() {
+        // Default (no attestation) is the frozen pre-wave-43 answer: an
+        // <img> is NOT an atom — the byte-compat pin for every caller
+        // that does not pass the new fact.
+        XCTAssertFalse(InlineAtomFlow.isAtom(tag: "img", displayKeyword: nil,
+                                             hasElementChildren: false, hasText: false))
+        // The caller-attested delivered raster admits the whole replaced
+        // family (the paint channel's tag table).
+        for tag in ["img", "embed", "object", "video"] {
+            XCTAssertTrue(InlineAtomFlow.isAtom(tag: tag, displayKeyword: nil,
+                                                hasElementChildren: false, hasText: false,
+                                                hasDeliveredRaster: true), tag)
+        }
+        // The flag NEVER admits a non-replaced tag: an attestation for a
+        // <div> is a renderer bug the gate refuses rather than packs.
+        XCTAssertFalse(InlineAtomFlow.isAtom(tag: "div", displayKeyword: nil,
+                                             hasElementChildren: false, hasText: false,
+                                             hasDeliveredRaster: true))
+        // css-display-3 §2 still runs first: a declared block-level
+        // display takes even a delivered img out of the inline flow,
+        // while INLINE-family keywords keep it.
+        XCTAssertFalse(InlineAtomFlow.isAtom(tag: "img", displayKeyword: "BLOCK",
+                                             hasElementChildren: false, hasText: false,
+                                             hasDeliveredRaster: true))
+        XCTAssertTrue(InlineAtomFlow.isAtom(tag: "img", displayKeyword: "INLINE_BLOCK",
+                                            hasElementChildren: false, hasText: false,
+                                            hasDeliveredRaster: true))
+    }
+
+    /// The VERBATIM wave42-final per-test IR of css-ui box-sizing-010/-016
+    /// (tools/titan/runs/wave42-final/sections/css-ui/per-test-ir/): a <p>,
+    /// a 70×70 inline-block div (margin-bottom 30 "for alignement"), and an
+    /// <img src=…svg> under `box-sizing: border-box; padding-bottom: 30px;
+    /// max-height: 100px`. Only the img's src differs between the two.
+    private func boxSizingWire(_ n: String, _ src: String) -> String { """
+        {"irVersion":2,"minReaderVersion":2,"components":[
+        {"id":"wpt__css-ui__box-sizing-\(n)__0-328","name":"wpt__css-ui__box-sizing-\(n)__0","properties":[],
+         "text":"Test passes if there are 2 filled green squares and they are the same size.",
+         "meta":{"sourceTag":"p","role":"ws-after"}},
+        {"id":"wpt__css-ui__box-sizing-\(n)__1-329","name":"wpt__css-ui__box-sizing-\(n)__1","properties":[
+         {"type":"Display","data":"INLINE_BLOCK"},{"type":"MarginBottom","data":{"px":30}},
+         {"type":"Width","data":{"type":"length","px":70}},{"type":"Height","data":{"type":"length","px":70}},
+         {"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}}],
+         "meta":{"role":"ws-after"}},
+        {"id":"wpt__css-ui__box-sizing-\(n)__2-330","name":"wpt__css-ui__box-sizing-\(n)__2","properties":[
+         {"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},
+         {"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},
+         {"type":"PaddingBottom","data":{"px":30}},{"type":"MaxHeight","data":{"type":"length","px":100}}],
+         "meta":{"sourceTag":"img","attrs":{"src":"\(src)"}}}]}
+        """
+    }
+
+    /// The per-sibling facts EXACTLY as blockInlineAtomSegments derives
+    /// them from the decoded wire, plus the wave-43 attestation.
+    private func atomFact(_ c: IRComponent, rasterDelivered: Bool) -> Bool {
+        InlineAtomFlow.isAtom(
+            tag: c.meta?.sourceTag,
+            displayKeyword: c.properties.first(where: { $0.type == "Display" })
+                .flatMap { ValueExtractors.extractKeyword($0.data)?.uppercased() },
+            hasElementChildren: c.children?.isEmpty == false,
+            hasText: c.text?.isEmpty == false,
+            // Both halves of the paint decision: the wire candidacy is
+            // read off the decoded component; the registry-resolve half
+            // has no XCTest raster store, so the test injects it — the
+            // seam the renderer wiring will fill with DocumentImageRegistry.
+            hasDeliveredRaster: rasterDelivered && ReplacedImageContent.isCandidate(c)
+        )
+    }
+
+    func testBoxSizing010And016VerbatimWireFactsGateOnTheDeliveredRaster() throws {
+        for (n, src) in [("010", "css/css-ui/support/w100_h100.svg"),
+                         ("016", "css/css-ui/support/r1-1.svg")] {
+            let doc = try JSONDecoder().decode(IRDocument.self,
+                                               from: Data(boxSizingWire(n, src).utf8))
+            let comps = doc.components
+            // The wire candidacy (replaced sourceTag + non-blank src) is
+            // true for the img alone — the <p> has text, the div has no
+            // sourceTag at all on this wire.
+            XCTAssertEqual([false, false, true], comps.map { ReplacedImageContent.isCandidate($0) })
+            // Undelivered (the pre-raster-OFF arm): nothing is an atom —
+            // the frozen stacking stays byte-identical.
+            XCTAssertEqual([false, false, false], comps.map { atomFact($0, rasterDelivered: false) })
+            // Delivered (the pre-raster-ON arm): the img is admitted…
+            XCTAssertEqual([false, false, true], comps.map { atomFact($0, rasterDelivered: true) })
+            // …but the pair still has NO ≥2 run: the div's inline-block
+            // admission rides the InlineBlockAtom family (B1–B7), whose
+            // B5 margin gate refuses its 30px margin-bottom today. Pinned
+            // so the residual stacking is a named number, not a surprise:
+            // packing 010/016 needs the margin-aware inline-block
+            // follow-up, not more img admission.
+            let segs = InlineAtomFlow.segment(comps.map { atomFact($0, rasterDelivered: true) })
+            XCTAssertFalse(segs.contains(where: { $0.isRun }))
+            XCTAssertNil(InlineBlockAtom.spec(properties: comps[1].properties,
+                                              hasOwnText: false, hasOwnRuns: false,
+                                              containerDeclaresLineHeight: false))
+        }
+    }
+
+    func testFiveConsecutiveDeliveredImgsFormOnePackableRun() {
+        // The box-sizing-008/-009 sibling shape (text root, <p>, the
+        // inline-block ref div, then FIVE <img> roots): admitting the
+        // delivered imgs makes exactly one 5-atom run — the div stays a
+        // single (B5, above) and never breaks the img streak.
+        let segs = InlineAtomFlow.segment([false, false, false, true, true, true, true, true])
+        XCTAssertEqual(4, segs.count)
+        XCTAssertTrue(segs[3].isRun)
+        XCTAssertEqual([3, 4, 5, 6, 7], segs[3].indices)
+    }
+
+    func testAReplacedAtomMeasuresWithTheSec104ConstrainedContentSize() {
+        // The admitted atom has NO fixed UA spec: InlineAtomBlockLayout
+        // measures it free, and the rendered box under width/height auto
+        // is ReplacedImageContent's intrinsic mode — the wave-42 §10.4
+        // table over the style the chain built. box-sizing-010/-016's
+        // declared set (border-box maxH 100 − 30px pad band = content
+        // maxH 70) resolves BOTH pre-raster sizes (w100_h100 → 100×100,
+        // r1-1 → 150×150, each asserting ratio 1) to the ref's 70×70
+        // content. (The Kotlin twin decodes the wire verbatim; this side
+        // goes through the ComponentStyle structs the renderer hands the
+        // paint channel — the same seam the wave-42 pins use.)
+        var s = ComponentStyle()
+        s.size.boxSizing = .borderBox
+        s.size.maxHeight = .exact(px: 100)
+        s.spacing.padding = PaddingConfig(bottom: .exact(px: 30))
+        for intrinsic in [100.0, 150.0] {
+            let used = ReplacedImageContent.constrainedAutoContentSize(
+                style: s, intrinsicWidthPx: intrinsic, intrinsicHeightPx: intrinsic, aspectRatio: 1)
+            XCTAssertEqual(used.widthPx, 70, accuracy: 1e-3)
+            // With the 30px pad band back on, the atom's measured border
+            // box is 70×100 — baseline at its bottom margin edge
+            // (§10.8.1 replaced ⇒ descent 0), matching the ref's
+            // side-by-side geometry with the 70×70(+30 margin) div.
+            XCTAssertEqual(used.heightPx, 70, accuracy: 1e-3)
+        }
+    }
 }

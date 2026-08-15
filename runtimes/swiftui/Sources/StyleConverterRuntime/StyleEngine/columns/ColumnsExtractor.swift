@@ -58,6 +58,36 @@ enum ColumnsExtractor {
                 }
             }
         }
+        // Wave-43 lane V6 — css-overflow-4 §3 `continue: discard`. The
+        // "Continue" IR property is REGISTERED by the regions no-op tree
+        // (css-regions also defines `continue`), so it is deliberately NOT
+        // in ColumnsProperty.names — this extractor only READS it, exactly
+        // like Compose's MultiColumnExtractor handles "Continue" without
+        // listing it in MULTI_COLUMN_PROPERTIES. Wire shape (converter
+        // ContinueProperty): the keyword string "DISCARD"/"AUTO"/"OVERFLOW";
+        // only DISCARD engages the discard semantics. A separate whole-list
+        // scan (not the `owned` loop above) keeps the read out of the
+        // `touched` accounting — `continue` alone must not fabricate a
+        // columns config (css-multicol-1 §2: only count/width establish one).
+        //
+        // Wave-43 lane G3 — this scan is LAST-write-wins, not any-wins.
+        // `properties` arrives in declaration order, so a later duplicate
+        // must override an earlier one (css-cascade-5 §6.4.4: order of
+        // appearance is the final tiebreak). The wave-42 shape was
+        // `properties.contains { … == "DISCARD" }`, which let ANY discard
+        // declaration win: the wire [Continue DISCARD, Continue AUTO]
+        // extracted true here but false on Compose, whose `when` branch
+        // reassigns `continueDiscard` per declaration (MultiColumnExtractor
+        // lines 40-41) and therefore already folds last-write-wins.
+        // `properties.last { … }` is this codebase's cascade idiom —
+        // LineHeightNormal.isDeclaredNormal([IRProperty]) takes the same
+        // shape for exactly this reason — and restores the byte-for-byte
+        // parity with Compose that ColumnsConfig.continueDiscard claims.
+        cfg.continueDiscard = ValueExtractors.extractKeyword(
+            // The LAST declaration of this IR type wins; nil when the
+            // property is absent, which decodes to nil and stays false.
+            properties.last { $0.type == "Continue" }?.data
+        )?.uppercased() == "DISCARD"
         return cfg.touched ? cfg : nil
     }
 }

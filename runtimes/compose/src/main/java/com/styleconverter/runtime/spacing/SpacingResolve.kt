@@ -63,6 +63,19 @@ data class SpacingContext(
     // renders byte-identically. Set by the WPT-capture percent paths in
     // Padding/MarginApplier and by SizingExtractor's content-box inflation.
     val percentIndefiniteAsZero: Boolean = false,
+    // Wave-43 lane V3 — the element's USED line-height in px, the `lh` unit
+    // basis (css-values-4 §6.2.1: lh is "equal to the computed value of the
+    // line-height property of the element on which it is used"). Populated
+    // by StyleApplier.buildSpacingContext through LhUnitLineHeight's
+    // three-state pick (declared value wins; WPT capture takes the
+    // calibrated composed ratio the capture line grid lays on). Null means
+    // "no line-height source was threaded at this call site" — the LH arms
+    // below then keep the historical `normal ≈ 1.2em` approximation, so
+    // every default-context consumer (LineClampCap, SizingApplier's legacy
+    // sites, BorderImageExtractor, the whole dark-stage corpus — no
+    // committed fixture under fixtures/properties|components uses lh,
+    // checked wave 43) resolves byte-identically to wave 42.
+    val lineHeightPx: Float? = null,
 )
 
 /**
@@ -165,12 +178,22 @@ private fun resolveRelative(r: LengthValue.Relative, ctx: SpacingContext): Float
             PropertyTracker.markUnhandled("SpacingResolve:CAP≈1em")
             v * ctx.fontSizePx
         }
-        // Pin P5 — `lh`: the element's line-height. We don't thread the
-        // used line-height; `normal` computes to ≈1.2 × font-size in
-        // every browser default stylesheet, so 1.2em is the approximation.
-        LengthUnit.LH -> v * 1.2f * ctx.fontSizePx
-        // Pin P6 — `rlh`: root line-height, same 1.2 ratio on the root
-        // font size (the harness never styles the root element).
+        // Pin P5 (amended wave 43, lane V3) — `lh`: the element's USED
+        // line-height per css-values-4 §6.2.1. The threaded
+        // [SpacingContext.lineHeightPx] wins when the builder resolved one
+        // (declared line-height verbatim, or the WPT-capture calibrated
+        // grid — see LhUnitLineHeight); a null channel keeps the
+        // historical `normal ≈ 1.2 × font-size` UA-sheet approximation
+        // byte-for-byte (measured defect this closes: discard-multicol-001
+        // `height: 2lh` at monospace-13px resolved 31.2px against the
+        // ref's 32.5px = 2 × 13 × the pinned 1.25 composed ratio).
+        LengthUnit.LH -> v * (ctx.lineHeightPx ?: 1.2f * ctx.fontSizePx)
+        // Pin P6 — `rlh`: root line-height, kept on the 1.2 ratio over the
+        // root font size — deliberately NOT moved with lh: the harness
+        // never styles the root element, so there is no declared root
+        // line-height to win, and no wave42-final capture exercises rlh
+        // (grep of the run's per-test-ir found LH only). Moving it would
+        // be metric-blind guessing, not a measured fix.
         LengthUnit.RLH -> v * 1.2f * ctx.rootFontSizePx
         // Viewport-relative units. Compose fronts a small/large/dynamic
         // distinction that we don't meaningfully support yet; treat the three
@@ -344,12 +367,14 @@ private class CalcParser(private val src: String, private val ctx: SpacingContex
         "%" -> percentBasePx(ctx) * v / 100f
         // Pins P1–P6 mirrored from resolveRelative (see the table there):
         // ch = advance of '0' (0.5em fallback), ex = 0.5em, ic/cap = 1em,
-        // lh = 1.2em, rlh = 1.2rem — kept in lockstep per the file rule
-        // "any new unit added to resolveRelative Just Works here too".
+        // lh = the threaded USED line-height (wave 43 — 1.2em only as the
+        // no-channel fallback), rlh = 1.2rem — kept in lockstep per the
+        // file rule "any new unit added to resolveRelative Just Works
+        // here too": a calc(1lh + 2px) and a bare 1lh must agree.
         "ch" -> v * (ctx.chAdvancePx ?: 0.5f * ctx.fontSizePx)
         "ex" -> v * 0.5f * ctx.fontSizePx
         "ic", "cap" -> v * ctx.fontSizePx
-        "lh" -> v * 1.2f * ctx.fontSizePx
+        "lh" -> v * (ctx.lineHeightPx ?: 1.2f * ctx.fontSizePx)
         "rlh" -> v * 1.2f * ctx.rootFontSizePx
         // Logical viewport axes fold onto vw/vh (horizontal-tb, pins P7/P8);
         // container-query lengths ride the same arms (css-contain-3 §9
