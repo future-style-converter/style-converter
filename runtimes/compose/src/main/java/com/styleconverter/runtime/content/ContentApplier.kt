@@ -15,6 +15,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+// Wave-42 lane W1: draw-time ink translation for the pseudo run's
+// half-leading correction (layout-neutral, mirrors the ::marker site).
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -264,6 +267,27 @@ object ContentApplier {
             TextStyle.Default
         }
 
+        // Wave-42 lane W1 — WPT metric parity for the pseudo run. The
+        // pseudos-bucket channel carries no typed properties, so the raw
+        // extraction above leaves every field Unspecified and the run fell
+        // to Material defaults (~14sp/theme ink) while its SIBLING text
+        // paints PlaceholderContent's browser bottom-outs. parityStyle is
+        // the identity outside WPT capture (LocalWptCaptureMode false on
+        // every committed-baseline path → byte-stability by construction);
+        // see PseudoTextMetrics for the three bottom-outs and the shared
+        // ::marker line-grid rule it reuses.
+        val wptCapture = com.styleconverter.runtime.core.renderer.LocalWptCaptureMode.current
+        val composedWpt = com.styleconverter.runtime.core.renderer.LocalWptComposedMode.current
+        val effectiveStyle = PseudoTextMetrics.parityStyle(
+            base = textStyle,
+            // css-fonts-4 §4.3: a DECLARED `normal` keeps the face's own
+            // metrics — same three-state input the marker resolution takes.
+            declaredNormal = com.styleconverter.runtime.typography
+                .LineHeightNormal.isDeclaredNormal(config.properties),
+            wptCapture = wptCapture,
+            composedWpt = composedWpt
+        )
+
         // Check for image content first
         val imageUrl = config.content.filterIsInstance<ContentValue.Url>().firstOrNull()
 
@@ -275,6 +299,37 @@ object ContentApplier {
             quoteLevel = quoteLevel
         )
 
+        // Wave-42 lane W1 — the run's own TextLayoutResult, read by the
+        // half-leading correction below (the settle contract is the same
+        // one the ::marker call site documents: before the first layout
+        // pass there is nothing to correct, translation 0).
+        val pseudoLayout = remember {
+            androidx.compose.runtime.mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null)
+        }
+        // Wave-42 lane W1 — the wave-39 FIX-4 baseline correction, applied
+        // to the pseudo run for the SAME reason the ::marker takes it: the
+        // sibling item text gets a draw-time glyph translation that lands
+        // its baseline where Chromium puts it inside the line box
+        // (HalfLeadingBaseline), so a same-line run WITHOUT the correction
+        // sits ~1px off its own siblings. Composed-WPT gated (flag false on
+        // every other capture path → byte-identical) and layout-neutral
+        // (graphicsLayer moves ink only, never the measured box).
+        val pseudoHalfLeading = if (composedWpt) {
+            Modifier.graphicsLayer {
+                val ml = pseudoLayout.value
+                // `toPx()` THROWS on a non-Sp TextUnit, so both conversions
+                // are isSp-guarded — the same guard the marker site carries.
+                translationY = if (ml == null || ml.lineCount <= 0) 0f
+                else com.styleconverter.runtime.typography.HalfLeadingBaseline.deltaY(
+                    fontSizePx = if (effectiveStyle.fontSize.isSp) effectiveStyle.fontSize.toPx()
+                    else com.styleconverter.runtime.lists.ListMarkerLineBox.DEFAULT_FONT_SIZE_SP,
+                    lineHeightPx = if (effectiveStyle.lineHeight.isSp)
+                        effectiveStyle.lineHeight.toPx() else 0f,
+                    platformBaselineFromLineTopPx = ml.getLineBaseline(0) - ml.getLineTop(0)
+                )
+            }
+        } else Modifier
+
         // Render content
         Box(modifier = modifier) {
             when {
@@ -283,10 +338,14 @@ object ContentApplier {
                     PseudoElementImage(url = imageUrl.url)
                 }
                 textContent.isNotEmpty() -> {
-                    // Render text
+                    // Render text (parity style + ink-only baseline shim —
+                    // both are the identity outside WPT capture, see above).
                     Text(
                         text = textContent,
-                        style = textStyle
+                        style = effectiveStyle,
+                        // Feed the correction's settle loop.
+                        onTextLayout = { pseudoLayout.value = it },
+                        modifier = pseudoHalfLeading
                     )
                 }
             }

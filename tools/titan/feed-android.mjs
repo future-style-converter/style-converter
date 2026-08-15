@@ -46,6 +46,17 @@ import { parseArgs, expectedPngNames, composedPngName, pngIsValid,
 // pushes anything. Shared — not cloned — with feed-ios.mjs: both natives must
 // be scored against the same raster.
 import { prerasterizeFixtures, applyPrerasterRewrite } from './svg-preraster.mjs';
+// wave-42 lane W9: the WOFF→TTF TRANSCODE pre-pass. android.graphics.Typeface
+// cannot parse a WOFF container (it loads as the DEFAULT typeface — the
+// wave-35 device gate measured it), so DocumentFontRegistry declines every
+// `.woff` by name and ALL 48 wave-41 corpus faces shaped in the fallback.
+// WOFF1 is a per-table zlib wrapper around the sfnt, so the HOST repackages
+// it losslessly (node core zlib, no new dependency) and this feeder's copy of
+// the wire is re-pointed at the `.woff.ttf`/`.woff.otf` sibling. ANDROID-ONLY
+// by design — web browsers and iOS CoreText both parse WOFF1 natively
+// (measured in DocumentFontRegistry.kt's format-table comment), so feed-ios
+// deliberately does NOT import this module.
+import { transcodeWoffFixtures, applyWoffTranscodeRewrite } from './woff-to-ttf.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -368,6 +379,34 @@ async function main() {
     srcsOf: documentReplacedSrcs,
   });
 
+  // wave-42 lane W9 — WOFF→TTF TRANSCODE pre-pass, the font channel's twin of
+  // the pre-raster above and placed here for the same reason: pure HOST work
+  // (zlib inflate → sfnt siblings in the corpus) with no device dependency,
+  // so a sick emulator cannot mask a transcode failure or vice versa. ONE
+  // pass covers the whole batch (all 48 wave-41 font tests share a single
+  // LinLibertine woff). The returned map is woff-src → sfnt-src for the
+  // siblings that actually exist; anything missing from it keeps its `.woff`
+  // on the wire so DocumentFontRegistry's extension decline still fires and
+  // still stamps. Unlike the pre-raster this defaults ON — the transcode is
+  // LOSSLESS (identical table bytes, rebuilt container only), so there is no
+  // fidelity trade to A/B; TITAN_WOFF_TRANSCODE=0 is the off-switch.
+  const woffMap = await transcodeWoffFixtures(fixtures, {
+    wptDir: opts.wptDir,
+    log,
+    // Injected for the same one-walker-one-truth reason as above: feed-lib's
+    // documentFontSrcs is the ONLY reader of `fontFaces[].src`, and the
+    // transcoder must see exactly the srcs the push below will resolve.
+    srcsOf: documentFontSrcs,
+    // The other half of the same env switch: `=0` turns the hop off (above),
+    // `=force` rewrites every sibling regardless of the mtime cache. Needed
+    // because the cache keys on the WOFF's mtime, so a fix to the transcoder
+    // itself changes its output while every input file stays untouched — this
+    // knob is how such a fix reaches an already-materialised corpus without
+    // hand-deleting siblings. Any other value (unset included) keeps the
+    // ordinary validated-cache path.
+    force: process.env.TITAN_WOFF_TRANSCODE === 'force',
+  });
+
   // Install (unless reusing the already-installed app) so the feeder is
   // self-contained. Incremental Gradle → a no-change reinstall is fast.
   if (!opts.skipInstall) {
@@ -417,9 +456,23 @@ async function main() {
   let rewriteDir = null;
   const pushableFixture = (fx, doc, localName, label) => {
     const applied = applyPrerasterRewrite(doc, rasterMap);
-    if (applied.length === 0) return fx;
+    // wave-42 lane W9 — the WOFF→TTF stand-in rewrite rides the SAME seam and
+    // the same in-memory-only discipline as the pre-raster one: this doc copy
+    // (and the scratch file below) is the only place the `.woff.ttf`/`.otf`
+    // src exists — the on-disk per-test IR, the web bundle and the iOS
+    // feeder's copy all keep the real `.woff`. Only srcs whose sibling was
+    // actually WRITTEN are in woffMap, so a failed transcode keeps its woff
+    // and the runtime's extension decline stays visible (module banner).
+    const woffApplied = applyWoffTranscodeRewrite(doc, woffMap);
+    if (applied.length === 0 && woffApplied.length === 0) return fx;
     for (const { src, rasterSrc } of applied) {
       log(`  ${label}: svg PRE-RASTER stand-in ${src} → ${rasterSrc}`);
+    }
+    // The per-fixture LOUD STAMP for the font rewrite, mirroring the svg one:
+    // the feeder log must say, next to each fixture, which faces will shape
+    // from a host repackage rather than from the authored container.
+    for (const { src, fontSrc } of woffApplied) {
+      log(`  ${label}: woff TRANSCODE stand-in ${src} → ${fontSrc}`);
     }
     if (rewriteDir === null) rewriteDir = mkdtempSync(path.join(os.tmpdir(), 'titan-preraster-'));
     const out = path.join(rewriteDir, localName);
@@ -449,17 +502,24 @@ async function main() {
       : expectedPngNames(doc);
     const wantDevice = expected.map((e) => e.deviceFile);
     const t0 = Date.now();
-    // wave-35: faces FIRST — see pushFontFaces' ordering contract.
+    // wave-40 lane T5 / wave-42 lane W9 — apply BOTH native-side wire
+    // rewrites (svg → pre-raster PNG sibling; woff → transcoded sfnt sibling)
+    // to THIS DOCUMENT'S IN-MEMORY COPY ONLY, and take the file to push back.
+    // MOVED ABOVE the two asset pushes in wave-42, and the order is now a
+    // correctness contract: pushFontFaces below reads the REWRITTEN doc's
+    // fontFaces, so the woff rewrite must land first or the push would carry
+    // the `.woff` Android's Typeface cannot parse instead of the `.ttf`/`.otf`
+    // sibling the registry can load. The on-disk per-test IR and the web
+    // harness's bundle are untouched, which keeps the web score byte-identical.
+    const pushFx = pushableFixture(fx, doc, `${String(i).padStart(4, '0')}-${base}`, base);
+    // wave-35: faces FIRST (before the IR reaches the inbox) — see
+    // pushFontFaces' ordering contract. Since wave-42 the doc's srcs may be
+    // the `.woff.ttf`/`.woff.otf` stand-ins, which resolveFontFile admits
+    // (ttf/otf are in FONT_EXTENSIONS) and the transcode pre-pass wrote.
     const fonts = pushFontFaces(adbx, doc, opts);
     if (fonts.pushed || fonts.declined) {
       log(`  ${base}: fonts pushed=${fonts.pushed} declined=${fonts.declined}`);
     }
-    // wave-40 lane T5 — swap every vector source this run rasterised for its
-    // PNG sibling, in THIS DOCUMENT'S IN-MEMORY COPY ONLY, and take the file
-    // to push back. Above the image hop so the push below carries the PNG
-    // rather than the SVG; the on-disk per-test IR and the web harness's
-    // bundle are untouched, which is what keeps the web score byte-identical.
-    const pushFx = pushableFixture(fx, doc, `${String(i).padStart(4, '0')}-${base}`, base);
     // wave-39: replaced-element images — also before the inbox push (see
     // pushReplacedImages for why the ordering is a race guard, not a
     // correctness contract like the font one).
@@ -535,6 +595,9 @@ async function main() {
       // again — without this line a salvaged row would be the one capture in
       // the run scored against a vector both natives decline, i.e. exactly the
       // silent asymmetry the asset re-push above exists to prevent.
+      // wave-42 lane W9: pushableFixture also re-applies the WOFF rewrite for
+      // the same re-parsed-from-disk reason, and it MUST stay above the
+      // pushFontFaces call below — the font push resolves the rewritten srcs.
       const retryFx = pushableFixture(
         fx, retryDoc, `9${String(fixtures.indexOf(fx)).padStart(3, '0')}-${row.fixture}`, row.fixture,
       );

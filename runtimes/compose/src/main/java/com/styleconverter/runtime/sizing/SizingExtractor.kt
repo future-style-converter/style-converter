@@ -78,6 +78,32 @@ object SizingExtractor {
         // only as wire-compat for external readers.
         for ((type, data) in properties) {
             if (type !in PROPERTIES && type != BOX_SIZING_TYPE) continue
+            // css-values-5 calc-size() (wave 42 lane W3): the typed wire
+            // shape {"type":"calc-size",…} routes into its own config slot
+            // BEFORE asSize — extractLength does not know the shape and
+            // returned Unknown, which dropped the declaration outright
+            // (the calc-size-flex family's no-green Android captures).
+            // Physical slots only: the converter types the physical
+            // longhands today; a calc-size payload on a LOGICAL twin would
+            // fall through to asSize's null, the pre-existing drop.
+            // Max*/Max* twins decode successfully here too but are NOT
+            // carried (see SizingConfig's slot comment): the applier's
+            // documented behavior for an unresolvable max is "no
+            // constraint", which the undecoded slot already produces —
+            // decoding them into dead config would imply support we do
+            // not have (calc-size-grid-repeat renders identically either
+            // way, PASS at 0.9742).
+            val calc = CalcSizeValue.decode(data)
+            if (calc != null) {
+                cfg = when (type) {
+                    "Width" -> cfg.copy(widthCalc = calc)
+                    "Height" -> cfg.copy(heightCalc = calc)
+                    "MinWidth" -> cfg.copy(minWidthCalc = calc)
+                    "MinHeight" -> cfg.copy(minHeightCalc = calc)
+                    else -> cfg // Max*/logical: documented no-op (above)
+                }
+                continue
+            }
             cfg = when (type) {
                 // Inline axis (width in horizontal-tb).
                 "Width", "InlineSize" -> cfg.copy(width = asSize(data))

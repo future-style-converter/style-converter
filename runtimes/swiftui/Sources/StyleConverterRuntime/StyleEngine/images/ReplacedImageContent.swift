@@ -105,6 +105,52 @@ enum ReplacedImageContent {
         return Alignment(horizontal: horizontal, vertical: vertical)
     }
 
+    /// Wave-42 W6 — the wire half of §10.4: read the min/max bounds off the
+    /// finished ComponentStyle, convert each to CONTENT-BOX px, and hand them
+    /// to `ReplacedBoxSizing.constrainAutoSize`. Pure (no view building) so
+    /// XCTest pins the border-box band arithmetic without a device.
+    ///
+    /// Bound conversion (css-sizing-3 §3, mirroring the sizing chain's own
+    /// semantics so the box and its content can never disagree):
+    ///   * effective `content-box` (the renderer folds
+    ///     SizeApplierMath.effectiveBoxSizing BEFORE this runs, so the WPT
+    ///     unset-defaults-to-content-box decision is already on the config) —
+    ///     the declared bound IS the content bound;
+    ///   * everything else (explicit `border-box`, or unset = the chain's
+    ///     border-box status quo) — content bound = declared − (padding +
+    ///     used border) band on that axis via StyleBuilder's ONE band
+    ///     definition (paddingAndBorderBands), floored at 0 (css-ui-3 §5).
+    /// Only `.exact` bounds participate: `none` means unbounded and a %/em
+    /// bound has no resolvable px here (documented narrowing — the chain
+    /// still clamps the BOX by it at layout time). Twin of the Kotlin
+    /// ReplacedImageContent.constrainedAutoContentSize.
+    static func constrainedAutoContentSize(
+        style: ComponentStyle,
+        intrinsicWidthPx: Double,
+        intrinsicHeightPx: Double,
+        aspectRatio: Double?
+    ) -> ReplacedBoxSizing.UsedSize {
+        // Effective content-box needs no band; border-box (explicit or the
+        // unset status quo) subtracts the padding+border band per axis.
+        let bands: (h: CGFloat, v: CGFloat) =
+            style.size.boxSizing == .contentBox ? (0, 0)
+            : StyleBuilder.paddingAndBorderBands(style)
+        // One declared bound → content-box px, or nil when unresolvable.
+        func bound(_ v: LengthValue?, band: CGFloat) -> Double? {
+            guard case .some(.exact(let px)) = v else { return nil }
+            return max(px - Double(band), 0)
+        }
+        // The pure §10.4 table, in content-box px throughout.
+        return ReplacedBoxSizing.constrainAutoSize(
+            intrinsicWidthPx: intrinsicWidthPx,
+            intrinsicHeightPx: intrinsicHeightPx,
+            aspectRatio: aspectRatio,
+            minWidthPx: bound(style.size.minWidth, band: bands.h),
+            maxWidthPx: bound(style.size.maxWidth, band: bands.h),
+            minHeightPx: bound(style.size.minHeight, band: bands.v),
+            maxHeightPx: bound(style.size.maxHeight, band: bands.v))
+    }
+
     /// One `<position>` axis → lowercase keyword, or nil for an offset.
     private static func axisKeyword(_ value: IRValue?) -> String? {
         guard let value else { return nil }
@@ -131,6 +177,12 @@ struct ReplacedImageView: View {
     let mode: ReplacedBoxSizing.Mode
     let fit: ReplacedImageContent.Fit
     let alignment: Alignment
+    /// Wave-42 W6 — the §10.4-resolved used content size for the `.intrinsic`
+    /// row (nil falls back to the raster's own size, keeping every
+    /// pre-wave-42 construction site byte-identical). Computed by
+    /// `ReplacedImageContent.constrainedAutoContentSize`, which is the
+    /// identity when the wire declares no min/max bounds.
+    var resolved: ReplacedBoxSizing.UsedSize? = nil
 
     var body: some View {
         // The §10.3.2 used CONTENT box, expressed as a frame. `.infinity`
@@ -150,10 +202,12 @@ struct ReplacedImageView: View {
                 .aspectRatio(decoded.aspectRatio ?? 1, contentMode: .fit)
                 .frame(maxHeight: .infinity, alignment: alignment)
         case .intrinsic:
-            // CSS px == pt at the capture scale, the identity every geometry
-            // constant in this runtime assumes.
-            scaled.frame(width: CGFloat(decoded.intrinsicWidthPx),
-                         height: CGFloat(decoded.intrinsicHeightPx),
+            // The intrinsic size run through §10.4's constraint table when
+            // the caller supplied bounds (wave-42 W6); the raster's own size
+            // otherwise. CSS px == pt at the capture scale, the identity
+            // every geometry constant in this runtime assumes.
+            scaled.frame(width: CGFloat(resolved?.widthPx ?? decoded.intrinsicWidthPx),
+                         height: CGFloat(resolved?.heightPx ?? decoded.intrinsicHeightPx),
                          alignment: alignment)
         }
     }

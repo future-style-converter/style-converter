@@ -273,14 +273,300 @@ class MulticolSpannerFlowTest {
         )
         // specsFor pairs roles with the declared-block-size flag: the flow
         // child declares Height (explicit), the spanner does not; leading
-        // text is content-sized by definition.
+        // text is content-sized by definition. Wave-42: both real children
+        // are empty leaves, so both are MONOLITHIC (css-break-3 §4.1 — no
+        // class-A/B breakpoint inside them); the anonymous leading-text box
+        // is NOT (its line boxes are class-B break points).
         assertEquals(
             listOf(
                 MulticolSpannerFlow.ChildSpec(Role.FLOW, false),
-                MulticolSpannerFlow.ChildSpec(Role.SPANNER, false),
-                MulticolSpannerFlow.ChildSpec(Role.FLOW, true)
+                MulticolSpannerFlow.ChildSpec(Role.SPANNER, false, monolithicContent = true),
+                MulticolSpannerFlow.ChildSpec(Role.FLOW, true, monolithicContent = true)
             ),
             MulticolSpannerFlow.specsFor(listOf(spanner, flow), leadingText = true)
         )
+    }
+
+    // ── Wave-42 lane W4: forced column breaks + continue:discard ──────────
+    // BRK/DSC rows — the iOS twin carries the SAME rows byte-for-byte.
+
+    /** BRK1 — discard-multicol-003 live IR: 4 break-after chunks + spanner, N=3, discard. */
+    @Test
+    fun `BRK1 discard drops the overflow chunk and everything after - live IR discard-multicol-003`() {
+        // Wire order: 4 one-line (19px) <p break-after:column> then the
+        // flattened "Spanner 1". Chunks p1|p2|p3 own columns 0..2; p4 needs
+        // the §8.2 overflow column → css-overflow-4 §3 discards it AND the
+        // spanner after it; the container is one 19px line tall (the ref).
+        val plan = MulticolSpannerFlow.plan(
+            listOf(
+                Child(19, Role.FLOW_BREAK_AFTER), Child(19, Role.FLOW_BREAK_AFTER),
+                Child(19, Role.FLOW_BREAK_AFTER), Child(19, Role.FLOW_BREAK_AFTER),
+                Child(19, Role.SPANNER)
+            ),
+            3,
+            discardOverflow = true
+        )
+        assertEquals(
+            listOf(
+                Slot(Role.FLOW_BREAK_AFTER, 0, 0),
+                Slot(Role.FLOW_BREAK_AFTER, 1, 0),
+                Slot(Role.FLOW_BREAK_AFTER, 2, 0),
+                Slot(Role.FLOW_BREAK_AFTER, 0, 0, discarded = true),
+                Slot(Role.SPANNER, 0, 19, discarded = true)
+            ),
+            plan.slots
+        )
+        assertEquals(19, plan.containerBlockSizePx)
+        assertNull(plan.soleFlowColumnBlockSizePx)
+    }
+
+    /** BRK2 — discard-multicol-003's ref box: 3 chunks fit 3 columns exactly. */
+    @Test
+    fun `BRK2 three break-after chunks fill three columns one line tall`() {
+        val plan = MulticolSpannerFlow.plan(
+            listOf(
+                Child(19, Role.FLOW_BREAK_AFTER), Child(19, Role.FLOW_BREAK_AFTER),
+                Child(19, Role.FLOW_BREAK_AFTER)
+            ),
+            3
+        )
+        assertEquals(
+            listOf(
+                Slot(Role.FLOW_BREAK_AFTER, 0, 0),
+                Slot(Role.FLOW_BREAK_AFTER, 1, 0),
+                Slot(Role.FLOW_BREAK_AFTER, 2, 0)
+            ),
+            plan.slots
+        )
+        assertEquals(19, plan.containerBlockSizePx)
+    }
+
+    /** BRK3 — without discard the 4th chunk takes a §8.2 OVERFLOW column (index 3 = painted outside). */
+    @Test
+    fun `BRK3 overflow chunk keeps flowing into overflow columns when not discarding`() {
+        val plan = MulticolSpannerFlow.plan(
+            listOf(
+                Child(19, Role.FLOW_BREAK_AFTER), Child(19, Role.FLOW_BREAK_AFTER),
+                Child(19, Role.FLOW_BREAK_AFTER), Child(19, Role.FLOW_BREAK_AFTER)
+            ),
+            3
+        )
+        // Column index 3 ≥ N: the placement's i·(W+G) puts it past the
+        // container's inline end — Chromium's visible overflow column.
+        assertEquals(
+            listOf(
+                Slot(Role.FLOW_BREAK_AFTER, 0, 0),
+                Slot(Role.FLOW_BREAK_AFTER, 1, 0),
+                Slot(Role.FLOW_BREAK_AFTER, 2, 0),
+                Slot(Role.FLOW_BREAK_AFTER, 3, 0)
+            ),
+            plan.slots
+        )
+        // §8.2: overflow columns never grow the container block-size.
+        assertEquals(19, plan.containerBlockSizePx)
+    }
+
+    /** BRK4 — ≤N one-child chunks reproduce the greedy assignment exactly (the green-cell guard). */
+    @Test
+    fun `BRK4 chunk columns match the greedy distribution for at-most-N single-child chunks`() {
+        // balance-break-avoidance-001's shape class: every chunk is one
+        // child and chunks ≤ N — the plan MUST be render-identical to the
+        // greedy path it replaces (engagement is then output-neutral).
+        val heights = listOf(10, 20, 30)
+        val plan = MulticolSpannerFlow.plan(heights.map { Child(it, Role.FLOW_BREAK_AFTER) }, 3)
+        val greedy = MultiColumnDistribution.distribute(heights, 3)
+        // Same column per child, same in-column offset (all tops)…
+        heights.indices.forEach { i ->
+            assertEquals(greedy[i].columnIndex, plan.slots[i].columnIndex)
+            assertEquals(greedy[i].yOffsetPx, plan.slots[i].yPx)
+        }
+        // …and the same container block-size (tallest chunk == tallest column).
+        assertEquals(
+            MultiColumnDistribution.containerBlockSizePx(heights, greedy),
+            plan.containerBlockSizePx
+        )
+    }
+
+    /** BRK5 — a chunk may hold several children; the break ends it mid-segment. */
+    @Test
+    fun `BRK5 multi-child chunk stacks before the forced break`() {
+        // Chunk 0 = {10-flow, 12-break} stacked; chunk 1 = {5-flow}.
+        val plan = MulticolSpannerFlow.plan(
+            listOf(Child(10, Role.FLOW), Child(12, Role.FLOW_BREAK_AFTER), Child(5, Role.FLOW)), 2
+        )
+        assertEquals(
+            listOf(
+                Slot(Role.FLOW, 0, 0),
+                Slot(Role.FLOW_BREAK_AFTER, 0, 10),
+                Slot(Role.FLOW, 1, 0)
+            ),
+            plan.slots
+        )
+        // §7.1 forced-break balancing: H = the tallest chunk (22), not ceil(T/N).
+        assertEquals(22, plan.containerBlockSizePx)
+    }
+
+    /** DSC1 — the discard cascade crosses segments: later flow content drops too. */
+    @Test
+    fun `DSC1 discard latches across the following spanner and segment`() {
+        val plan = MulticolSpannerFlow.plan(
+            listOf(
+                Child(19, Role.FLOW_BREAK_AFTER), Child(19, Role.FLOW_BREAK_AFTER),
+                Child(19, Role.FLOW_BREAK_AFTER), Child(19, Role.FLOW_BREAK_AFTER),
+                Child(10, Role.SPANNER), Child(19, Role.FLOW)
+            ),
+            3,
+            discardOverflow = true
+        )
+        // The tail (spanner + post-spanner flow) is discarded wholesale…
+        assertTrue(plan.slots[4].discarded)
+        assertTrue(plan.slots[5].discarded)
+        // …and contributes no block-size (container = the one retained row).
+        assertEquals(19, plan.containerBlockSizePx)
+    }
+
+    /** BRK6 — engagement: a forced break always takes the plan (greedy cannot honor it). */
+    @Test
+    fun `BRK6 break-after children engage the plan`() {
+        assertTrue(
+            MulticolSpannerFlow.engages(
+                listOf(Child(10, Role.FLOW_BREAK_AFTER), Child(10, Role.FLOW)), 3
+            )
+        )
+    }
+
+    /** BRK7 — rolesFor classifies break-after:column; flowCount counts it as flow. */
+    @Test
+    fun `BRK7 rolesFor reads BreakAfter COLUMN and flowCount includes it`() {
+        // The dm-003 wire shape: BreakAfter → "COLUMN" keyword.
+        val breaker = IRComponent(
+            id = "b", name = "b",
+            properties = listOf(IRProperty("BreakAfter", JsonPrimitive("COLUMN")))
+        )
+        // `avoid` (and page keywords) must NOT force a column break.
+        val avoider = IRComponent(
+            id = "v", name = "v",
+            properties = listOf(IRProperty("BreakAfter", JsonPrimitive("AVOID")))
+        )
+        assertEquals(
+            listOf(Role.FLOW_BREAK_AFTER, Role.FLOW),
+            MulticolSpannerFlow.rolesFor(listOf(breaker, avoider))
+        )
+        // The forced-break child is still IN FLOW for every counting gate
+        // (iOS multicolDistributes' ≥2 routing rides this).
+        assertEquals(2, MulticolSpannerFlow.flowCount(listOf(Role.FLOW_BREAK_AFTER, Role.FLOW)))
+    }
+
+    /** FLT1 — specsFor flags floated subtrees (the run fragmenter's float bail). */
+    @Test
+    fun `FLT1 specsFor marks children whose subtree declares a float`() {
+        // floats-clear-multicol-000's .container: floats one level DOWN.
+        val float = IRComponent(
+            id = "fl", name = "fl",
+            properties = listOf(IRProperty("Float", JsonPrimitive("LEFT")))
+        )
+        val container = IRComponent(id = "c", name = "c", children = listOf(float))
+        // `float: none` never counts — only actually floated boxes do.
+        val noneFloat = IRComponent(
+            id = "nf", name = "nf",
+            properties = listOf(IRProperty("Float", JsonPrimitive("NONE")))
+        )
+        val specs = MulticolSpannerFlow.specsFor(listOf(container, noneFloat))
+        assertTrue(specs[0].floatedContent)
+        assertFalse(specs[1].floatedContent)
+    }
+
+    /**
+     * FBK1 — specsFor flags the forced column breaks the ROLE list cannot
+     * see (the run fragmenter's forced-break bail). Pinned against the LIVE
+     * wave41-final IR of css-break block-in-inline-014
+     * (tools/titan/runs/wave41-final/sections/css-break/per-test-ir/): the
+     * multicol's own children are anonymous `<span>` wrappers with NO break
+     * property, and the `BreakAfter: COLUMN` sits on their inner divs — so
+     * without this flag the run fragmenter sees four plain flow children of
+     * 100px in a 400px fill:auto container, concludes T == H ("fits one
+     * column"), and stacks all four in column 0 instead of the one-per-
+     * column render that is Chromium's reference (cell currently green on
+     * Android at 0.9967).
+     */
+    @Test
+    fun `FBK1 specsFor marks forced column breaks hidden below the child`() {
+        // block-in-inline-014's shape: span > div[break-after: column].
+        val innerBreakAfter = IRComponent(
+            id = "d", name = "d",
+            properties = listOf(IRProperty("BreakAfter", JsonPrimitive("COLUMN")))
+        )
+        val span = IRComponent(id = "s", name = "s", children = listOf(innerBreakAfter))
+        // block-in-inline-013's shape: span > div[break-before: column].
+        val innerBreakBefore = IRComponent(
+            id = "d2", name = "d2",
+            properties = listOf(IRProperty("BreakBefore", JsonPrimitive("COLUMN")))
+        )
+        val span2 = IRComponent(id = "s2", name = "s2", children = listOf(innerBreakBefore))
+        // The child's OWN break-before is equally invisible to the roles
+        // (which only classify break-AFTER) — so it must flag too.
+        val ownBreakBefore = IRComponent(
+            id = "ob", name = "ob",
+            properties = listOf(IRProperty("BreakBefore", JsonPrimitive("COLUMN")))
+        )
+        // The child's OWN break-after is NOT hidden — it becomes
+        // Role.FLOW_BREAK_AFTER and the chunk walk honours it, so the run
+        // bail must not fire for it (dm-003's `<p>`s take this row).
+        val ownBreakAfter = IRComponent(
+            id = "oa", name = "oa",
+            properties = listOf(IRProperty("BreakAfter", JsonPrimitive("COLUMN")))
+        )
+        // A PAGE break is a different fragmentation context (css-break-3
+        // §4.1) — never a multicol forced break.
+        val pageBreak = IRComponent(
+            id = "pg", name = "pg",
+            properties = listOf(IRProperty("BreakAfter", JsonPrimitive("PAGE")))
+        )
+        val specs = MulticolSpannerFlow.specsFor(
+            listOf(span, span2, ownBreakBefore, ownBreakAfter, pageBreak)
+        )
+        assertTrue(specs[0].forcedBreakContent)
+        assertTrue(specs[1].forcedBreakContent)
+        assertTrue(specs[2].forcedBreakContent)
+        assertFalse(specs[3].forcedBreakContent)
+        assertFalse(specs[4].forcedBreakContent)
+        // …and the own-break-after child is still the forced-break ROLE.
+        assertEquals(Role.FLOW_BREAK_AFTER, specs[3].role)
+        // Same call pins the MONOLITHIC flag (css-break-3 §4.1): the span
+        // wrappers have children (breakable), the leaf boxes do not.
+        assertFalse(specs[0].monolithicContent)
+        assertFalse(specs[1].monolithicContent)
+        assertTrue(specs[2].monolithicContent)
+        // A leaf with TEXT is breakable — line boxes are class-B points.
+        val texty = IRComponent(id = "t", name = "t", _text = "Line 1")
+        assertFalse(MulticolSpannerFlow.specsFor(listOf(texty))[0].monolithicContent)
+    }
+
+    /**
+     * FBK2 — the sole-flow index used by the replay pass counts a
+     * forced-break child as flow. Regression pin for a real
+     * IndexOutOfBounds: [MulticolSpannerFlow.soleFlowFragmentReplay] admits
+     * a lone `break-after: column` child (it counts with `isFlow`), and
+     * MulticolSpannerFlowMeasure then looks the child up to slice it — the
+     * pre-fix `indexOfFirst { it == Role.FLOW }` answered -1 there and
+     * `placeables[-1]` would have thrown out of the measure pass, killing
+     * the whole capture composition rather than one layout decision.
+     */
+    @Test
+    fun `FBK2 firstFlowIndex finds a forced-break sole flow child`() {
+        val roles = listOf(Role.SPANNER, Role.FLOW_BREAK_AFTER, Role.STATIC)
+        assertEquals(1, MulticolSpannerFlow.firstFlowIndex(roles))
+        // The exact shape that used to crash: sole flow child, forced
+        // break, 0-height spanner — the replay gate says yes…
+        val children = listOf(Child(60, Role.FLOW_BREAK_AFTER), Child(0, Role.SPANNER))
+        assertTrue(MulticolSpannerFlow.soleFlowFragmentReplay(children))
+        // …and the plan hands the measure pass a positive fragmentainer,
+        // so the lookup below is genuinely reached at render time.
+        val plan = MulticolSpannerFlow.plan(children, 2)
+        assertEquals(60, plan.soleFlowColumnBlockSizePx)
+        assertEquals(0, MulticolSpannerFlow.firstFlowIndex(children.map { it.role }))
+        // A container with no in-flow child at all answers -1, which the
+        // measure pass now treats as "no replay" instead of indexing.
+        assertEquals(-1, MulticolSpannerFlow.firstFlowIndex(listOf(Role.SPANNER, Role.STATIC)))
     }
 }

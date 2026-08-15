@@ -905,8 +905,16 @@ object ComponentRenderer {
                     .rendersInFlowAsStaticPosition(component.properties, hoistHasPositionedAncestor)
             ) {
                 // Outermost slot, exactly like the overlay's canvasAnchor.
+                // Wave 42 (lane W8): the CSS2 §10.3.7 shrink-to-fit spec
+                // rides along — a width:auto static-position box wraps at
+                // its flow slot's constraint envelope instead of measuring
+                // its text unbounded (the whole decision + pins live in
+                // CanvasRootHoist.staticPositionShrinkToFit).
                 itemModifier.then(
-                    com.styleconverter.runtime.layout.position.CanvasRootHoist.zeroFlowAnchor()
+                    com.styleconverter.runtime.layout.position.CanvasRootHoist.zeroFlowAnchor(
+                        shrinkToFit = com.styleconverter.runtime.layout.position.CanvasRootHoist
+                            .staticPositionShrinkToFit(component.properties)
+                    )
                 )
             } else {
                 itemModifier
@@ -1539,9 +1547,27 @@ object ComponentRenderer {
             null
         }
 
-        // Extract before/after pseudo-element configuration from selectors
+        // Extract before/after pseudo-element configuration.
+        // Wave-42 lane W1 — the v2 `pseudos` bucket is the wire's ONLY
+        // channel for an ordinary element's ::before/::after (spec
+        // 01-envelope.md; no v2 document emits pseudo selectors), and it
+        // was decoded then dropped — the wave-41 dead-wire find (blank
+        // Android render vs the ref's baked text on the whole
+        // css-counter-styles / css-lists / css-pseudo fail set). The
+        // bucket is preferred; the selectors channel below stays as the
+        // LEGACY v1/fixture fallback, byte-identical when no bucket
+        // resolves. Gated on the engine's display answer because a
+        // `display: none` originating element generates NO boxes at all,
+        // pseudo boxes included (css-display-3 §2.4) — the suppression
+        // inside RenderComponentContent sits INSIDE this wrapper and could
+        // not veto it. Body-root buckets stay with RootPseudoBox (the
+        // extractor's own role gate — see its banner).
         val beforeAfterConfig = try {
-            ContentApplier.extractBeforeAfterConfig(component.selectors)
+            (if (engineDecision.kind != com.styleconverter.runtime.layout.ContainerKind.None)
+                com.styleconverter.runtime.content.PseudoBucketExtractor
+                    .extractBeforeAfterConfig(component.pseudos, component.role)
+            else null)
+                ?: ContentApplier.extractBeforeAfterConfig(component.selectors)
         } catch (e: Exception) {
             null
         }
@@ -2263,8 +2289,31 @@ object ComponentRenderer {
                     // its 1em). LocalWptCaptureMode is false on every
                     // property-fixture path, so the 327 dark-stage baselines
                     // take the identity branch and stay byte-identical.
+                    // Lane W5 (wave 42) — CSS 2.2 §9.5.2 float clearance.
+                    // Resolve a scope plan at composed roots / BFC roots
+                    // (FloatClearance.resolve's attach gate), or inherit the
+                    // ancestor's when this container sits inside an active
+                    // scope. Capture-gated like every wave-19+ float path,
+                    // so the dark-stage 327 corpus takes the null branch.
+                    val inheritedClearance =
+                        com.styleconverter.runtime.layout.LocalFloatClearancePlan.current
+                    val clearancePlan =
+                        if (inheritedClearance != null &&
+                            inheritedClearance.scopeIds.contains(component.id)
+                        ) inheritedClearance
+                        else if (LocalWptCaptureMode.current &&
+                            displayConfig.type == DisplayType.BLOCK
+                        ) com.styleconverter.runtime.layout.FloatClearance.resolve(component)
+                        else null
                     val collapse =
-                        if (displayConfig.type == DisplayType.BLOCK)
+                        // A clearance-covered container SUPPRESSES its §8.3.1
+                        // collapse plan: the clearance plan already owns every
+                        // absorbed/overridden margin in its scope, and both
+                        // emulations moving the same margins would double the
+                        // spacing (FloatClearance.kt's suppression contract).
+                        if (clearancePlan != null)
+                            CollapsePlanResult(null, null)
+                        else if (displayConfig.type == DisplayType.BLOCK)
                             blockCollapsePlanFor(component, LocalWptCaptureMode.current)
                         else CollapsePlanResult(null, null)
                     // No-silent-fallthrough: an in-scope-looking container we
@@ -2315,7 +2364,22 @@ object ComponentRenderer {
                         // pre-collapse path, byte-identical to the frozen
                         // baseline.
                         Column(modifier = modifier) {
-                            RenderContent(component, textColor, displayConfig)
+                            // Lane W5: publish the §9.5.2 scope plan for the
+                            // block child loops below. A clearance-covered
+                            // container always lands in THIS branch (its
+                            // collapse plan is suppressed above), and the
+                            // plan is id-keyed so it is inert outside its
+                            // scope; null keeps the frozen composition shape.
+                            if (clearancePlan != null) {
+                                CompositionLocalProvider(
+                                    com.styleconverter.runtime.layout
+                                        .LocalFloatClearancePlan provides clearancePlan
+                                ) {
+                                    RenderContent(component, textColor, displayConfig)
+                                }
+                            } else {
+                                RenderContent(component, textColor, displayConfig)
+                            }
                         }
                     }
                 } else {
@@ -2818,20 +2882,52 @@ object ComponentRenderer {
                         // inside RenderComponent's self-alignment wrapper (one
                         // implementation covers tree children AND root-level
                         // standalone captures).
-                        val collapsed = collapsePlan?.perChild?.getOrNull(index)
-                        if (collapsed != null) {
-                            // Hand the child its post-collapse applied
-                            // block-axis margins; the child's RenderComponent
-                            // reads the local and passes it into its style
-                            // chain (and resets it for ITS children).
-                            CompositionLocalProvider(
-                                com.styleconverter.runtime.spacing.BlockMarginCollapse
-                                    .LocalCollapsedMargin provides collapsed
-                            ) {
+                        // Lane W5 (wave 42) — this child's §9.5.2 clearance
+                        // adjustment, id-keyed from the scope plan (null for
+                        // the entire corpus outside an active clearance
+                        // scope — see FloatClearance.kt).
+                        val clearanceAdj = com.styleconverter.runtime.layout
+                            .LocalFloatClearancePlan.current?.adjustments?.get(child.id)
+                        // The §9.5.2 applied margin outranks the container's
+                        // §8.3.1 plan (which is suppressed in-scope anyway):
+                        // for the cleared box appliedTopPx IS the clearance-
+                        // adjusted margin; absorbed chain members carry 0.
+                        val collapsed = clearanceAdj?.appliedTopPx?.let { top ->
+                            com.styleconverter.runtime.spacing.CollapsedMargin(
+                                top.toFloat(),
+                                (clearanceAdj.appliedBottomPx ?: 0.0).toFloat(),
+                            )
+                        } ?: collapsePlan?.perChild?.getOrNull(index)
+                        // The child's style chain, with the margin override
+                        // when one applies (§8.3.1 plan or §9.5.2 clearance —
+                        // both ride the same LocalCollapsedMargin channel).
+                        val blockChildBody: @Composable () -> Unit = {
+                            if (collapsed != null) {
+                                // Hand the child its post-collapse applied
+                                // block-axis margins; the child's RenderComponent
+                                // reads the local and passes it into its style
+                                // chain (and resets it for ITS children).
+                                CompositionLocalProvider(
+                                    com.styleconverter.runtime.spacing.BlockMarginCollapse
+                                        .LocalCollapsedMargin provides collapsed
+                                ) {
+                                    RenderComponent(child)
+                                }
+                            } else {
                                 RenderComponent(child)
                             }
+                        }
+                        // Lane W5 — floats are OUT OF FLOW (CSS 2.1 §9.5): a
+                        // plan-marked float paints at its slot but reports
+                        // zero height, so following in-flow siblings stack
+                        // as if it were not there (the ClearanceZeroFlow
+                        // adapter's contract).
+                        if (clearanceAdj?.zeroFlowHeight == true) {
+                            com.styleconverter.runtime.layout.ClearanceZeroFlow {
+                                blockChildBody()
+                            }
                         } else {
-                            RenderComponent(child)
+                            blockChildBody()
                         }
                     }
                     }

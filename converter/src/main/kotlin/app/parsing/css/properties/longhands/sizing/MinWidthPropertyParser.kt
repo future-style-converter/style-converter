@@ -3,12 +3,26 @@ package app.parsing.css.properties.longhands.sizing
 import app.irmodels.*
 import app.irmodels.properties.spacing.MinWidthProperty
 import app.parsing.css.properties.longhands.PropertyParser
+import app.parsing.css.properties.primitiveParsers.CalcSizeParser
 import app.parsing.css.properties.primitiveParsers.LengthParser
 
 object MinWidthPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim().lowercase()
         val minValue = when {
+            // css-values-5 §10.1 calc-size() (wave 42 lane W3) — see the
+            // decision record on WidthPropertyParser's identical branch. On
+            // min-width the runtimes resolve the `auto` basis as the
+            // automatic minimum size (css-flexbox-1 §4.5 for flex items —
+            // the calc-size-flex-001..003/009 shape). Unreducible calls
+            // return null → Generic (web verbatim replay preserved).
+            trimmed.startsWith("calc-size(") -> when (val r = CalcSizeParser.parse(trimmed)) {
+                is CalcSizeParser.Result.Resolved ->
+                    MinWidthProperty.MinMaxValue.LengthValue(IRLength.fromPx(r.px))
+                is CalcSizeParser.Result.Dynamic ->
+                    MinWidthProperty.MinMaxValue.CalcSize(r.basis, r.factor, r.offsetPx, r.original)
+                null -> return null
+            }
             trimmed == "auto" -> MinWidthProperty.MinMaxValue.Auto()
             trimmed == "min-content" -> MinWidthProperty.MinMaxValue.MinContent()
             trimmed == "max-content" -> MinWidthProperty.MinMaxValue.MaxContent()

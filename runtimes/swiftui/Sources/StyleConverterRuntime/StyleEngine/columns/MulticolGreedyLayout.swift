@@ -103,7 +103,13 @@ struct MulticolGreedyLayout: Layout {
         // the FULL container width (§6.2 full-width span); flow children
         // keep the column-width proposal. Everything else — nil roles,
         // spanner-free role lists — keeps the greedy path byte-identical.
-        if let roles, roles.contains(.spanner) {
+        // Wave-42 lane W4: a FORCED column break (break-after: column,
+        // css-break-3 §4.1) also takes the plan — the greedy min-height
+        // heuristic cannot honor it, and for the ≤N one-child-per-chunk
+        // shapes the corpus's green cells exercise the chunk walk is
+        // provably greedy-identical (BRK4 pin), so engaging is
+        // render-neutral there and correct everywhere else.
+        if let roles, roles.contains(where: { $0 == .spanner || $0 == .flowBreakAfter }) {
             // Roles must align 1:1 with subviews; a mismatch means some
             // child composed differently than the renderer predicted —
             // bail loudly to greedy (repo no-silent-fallthrough rule).
@@ -206,6 +212,17 @@ struct MulticolGreedyLayout: Layout {
             // One slot per subview, index-aligned by construction.
             for (index, sub) in subviews.enumerated() {
                 let slot = sp.slots[index]
+                // Wave-42: css-overflow-4 §3 DISCARDED slots render nothing
+                // — but a SwiftUI Layout must place every subview (an
+                // unplaced subview gets a DEFAULT placement, which would
+                // paint it mid-container), so park them far offscreen.
+                if slot.discarded {
+                    sub.place(at: CGPoint(x: bounds.maxX + 1_000_000,
+                                          y: bounds.maxY + 1_000_000),
+                              anchor: .topLeading,
+                              proposal: ProposedViewSize(width: w, height: nil))
+                    continue
+                }
                 // Spanners span all columns: x=0, full container width
                 // (§6.2); flow/static children sit at their column's
                 // inline origin i·(W+G) — the Android placement twin.

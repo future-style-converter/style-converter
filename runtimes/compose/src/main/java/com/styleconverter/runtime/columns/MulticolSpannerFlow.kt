@@ -43,11 +43,29 @@ object MulticolSpannerFlow {
     enum class Role {
         /** In-flow, span:none — distributes into column boxes (§2). */
         FLOW,
+        /**
+         * In-flow with `break-after: column` (wave-42 lane W4) — flows like
+         * [FLOW] but FORCES a column break after itself: css-break-3 §4.1
+         * (a forced break value ends the current fragmentainer) applied to
+         * the multicol case, so the NEXT flow content starts a fresh column
+         * chunk. Kept as a role (not a side flag) because the renderer call
+         * sites pass bare `List<Role>` through to the platform layouts and
+         * must stay untouched (lane ownership: columns/ only).
+         */
+        FLOW_BREAK_AFTER,
         /** In-flow, column-span:all — interrupts the flow full-width (§6.2). */
         SPANNER,
         /** Out-of-flow (abspos/fixed) — no space, static-position anchor only (css-position-3 §3.1). */
         STATIC
     }
+
+    /**
+     * Both in-flow non-spanner roles — every consumer that previously asked
+     * `role == FLOW` about flow PARTICIPATION (space consumption, sole-flow
+     * counting) must treat a forced-break child identically; only the
+     * chunk walk in [plan] cares about the break itself.
+     */
+    val Role.isFlow: Boolean get() = this == Role.FLOW || this == Role.FLOW_BREAK_AFTER
 
     /** One child as the planner sees it: measured block-size + role. */
     data class Child(
@@ -73,7 +91,45 @@ object MulticolSpannerFlow {
         /** The child's flow participation — see [Role]. */
         val role: Role,
         /** True iff the IR declares Height or BlockSize on the child. */
-        val explicitBlockSize: Boolean
+        val explicitBlockSize: Boolean,
+        /**
+         * True iff the child's SUBTREE declares `float: left/right`
+         * anywhere (wave-42 lane W4). The multi-child run fragmenter must
+         * bail on such children: the natives still lay floats out as
+         * stacked in-flow boxes (the float lane owns css-break-3 §5 float
+         * fragmentation + CSS 2.1 §9.5.2 clearance), so slicing that stack
+         * across columns would faithfully replicate a WRONG layout into
+         * every column instead of one.
+         */
+        val floatedContent: Boolean = false,
+        /**
+         * True iff a forced `break-before/after: column` sits somewhere the
+         * container-level [Role] list cannot express (wave-42 lane W4):
+         * the child's OWN `break-before`, or EITHER break side on any
+         * descendant. (The child's own `break-after: column` is not here —
+         * it becomes [Role.FLOW_BREAK_AFTER], which the plan honours.)
+         *
+         * The run fragmenter must bail on it: those breaks are invisible to
+         * the container-level run model (css-break WPT
+         * block-in-inline-013/014 put them on divs inside anonymous `span`
+         * wrappers, and Chromium's one-green-box-per-column reference comes
+         * ENTIRELY from honoring them), so slicing the raw stacked strip
+         * would ignore real break points the greedy whole-child spread
+         * currently gets right.
+         *
+         * Computed by [specsFor]'s `hasHiddenForcedColumnBreak`.
+         */
+        val forcedBreakContent: Boolean = false,
+        /**
+         * True iff the child box has NOTHING inside it — no IR children and
+         * no text (wave-42 lane W4). Such a box has neither a class-A
+         * breakpoint (between block-level siblings) nor a class-B one
+         * (between line boxes) anywhere within it (css-break-3 §4.1), so it
+         * is MONOLITHIC: a column boundary may not pass through it, and the
+         * run fragmenter pushes it whole into the next column instead
+         * ([MulticolRunFragment.runPlan]'s `monolithic` argument).
+         */
+        val monolithicContent: Boolean = false
     )
 
     /**
@@ -84,10 +140,22 @@ object MulticolSpannerFlow {
     data class Slot(
         /** The child's [Role], echoed so placement loops need no zip. */
         val role: Role,
-        /** 0-based used-column index (0 for spanners by convention). */
+        /**
+         * 0-based used-column index (0 for spanners by convention). May
+         * EXCEED N-1 for a forced-break chunk that ran out of columns —
+         * that is a css-multicol-1 §8.2 OVERFLOW column, painted past the
+         * container's inline end edge exactly where i·(W+G) lands it.
+         */
         val columnIndex: Int,
         /** Block offset from the container's content-box top, in px. */
-        val yPx: Int
+        val yPx: Int,
+        /**
+         * True when css-overflow-4 §3 `continue: discard` dropped this
+         * child: content from the first overflow column on — and EVERYTHING
+         * after it in flow order, spanners included — is not rendered.
+         * Placement loops must skip (or park offscreen) discarded slots.
+         */
+        val discarded: Boolean = false
     )
 
     /** The full spanner-flow answer for one container. */
@@ -124,18 +192,42 @@ object MulticolSpannerFlow {
                 ?.let { ValueExtractors.extractKeyword(it.data)?.uppercase() }
             val span = child.properties.firstOrNull { it.type == "ColumnSpan" }
                 ?.let { ValueExtractors.extractKeyword(it.data)?.uppercase() }
+            // Wave-42 lane W4: `break-after: column` forces a column break
+            // after this box (css-break-3 §4.1 / §2 "column" applies to the
+            // nearest multicol fragmentation context). Only the COLUMN
+            // keyword is classified — page/region breaks have no multicol
+            // meaning, and `avoid*` values are break AVOIDANCE, not force.
+            val breakAfter = child.properties.firstOrNull { it.type == "BreakAfter" }
+                ?.let { ValueExtractors.extractKeyword(it.data)?.uppercase() }
             when {
                 // Out-of-flow first — see the precedence note above.
                 position == "ABSOLUTE" || position == "FIXED" -> Role.STATIC
                 // §6.2: only `all` spans; `none` (and unknown) stays in flow.
                 span == "ALL" -> Role.SPANNER
+                // Forced column break AFTER an in-flow box (wave-42).
+                breakAfter == "COLUMN" -> Role.FLOW_BREAK_AFTER
                 else -> Role.FLOW
             }
         }
     }
 
     /** In-flow non-spanner child count — the routing gate both natives share. */
-    fun flowCount(roles: List<Role>): Int = roles.count { it == Role.FLOW }
+    fun flowCount(roles: List<Role>): Int = roles.count { it.isFlow }
+
+    /**
+     * Index of the first IN-FLOW (non-spanner, non-static) child, or -1
+     * when the container has none — the measure pass' lookup for the sole
+     * flow child the wave-10 replay slices.
+     *
+     * Exists as a named function because the obvious spelling
+     * (`indexOfFirst { it == Role.FLOW }`) became WRONG the moment wave-42
+     * added [Role.FLOW_BREAK_AFTER]: [soleFlowFragmentReplay] counts with
+     * [isFlow], so a container whose only flow child carries
+     * `break-after: column` passed the replay gate and then indexed
+     * `placeables[-1]` — an IndexOutOfBounds that would take down the whole
+     * capture composition, not just one fragmentation decision.
+     */
+    fun firstFlowIndex(roles: List<Role>): Int = roles.indexOfFirst { it.isFlow }
 
     /**
      * [rolesFor] plus the per-child declared-block-size flag ([ChildSpec])
@@ -152,10 +244,87 @@ object MulticolSpannerFlow {
         return head + (children ?: emptyList()).mapIndexed { index, child ->
             ChildSpec(
                 roles[index + head.size],
-                child.properties.any { it.type == "Height" || it.type == "BlockSize" }
+                child.properties.any { it.type == "Height" || it.type == "BlockSize" },
+                // Wave-42: the run fragmenter's float bail rides this flag
+                // (see ChildSpec.floatedContent for why floats disqualify).
+                hasFloatedDescendant(child),
+                // Wave-42: the run fragmenter's FORCED-BREAK bail (see
+                // ChildSpec.forcedBreakContent) — a break the container-
+                // level role list cannot see, because it sits on the child
+                // itself as `break-before` or anywhere below it.
+                hasHiddenForcedColumnBreak(child),
+                // Wave-42: empty box ⇒ no class-A/B breakpoint inside it ⇒
+                // MONOLITHIC (see ChildSpec.monolithicContent). Text counts
+                // as content because line boxes ARE class-B break points,
+                // and generated ::before/::after content is content too
+                // (the wire field is `_text` on this platform, `text` on
+                // the iOS twin — same three inputs, same predicate).
+                child.children.isNullOrEmpty() &&
+                    child._text.isNullOrEmpty() &&
+                    child.pseudos?.isNotEmpty() != true
             )
         }
     }
+
+    /**
+     * True when a forced COLUMN break lives in [component]'s box tree in a
+     * place the container's [rolesFor] classification cannot express, i.e.
+     * everywhere except the child's own `break-after` (which becomes
+     * [Role.FLOW_BREAK_AFTER]):
+     *  - the child's own `break-before: column` (css-break-3 §4.1 — the
+     *    break happens BEFORE this box, so the preceding sibling's column
+     *    ends, which the after-only role list never encodes);
+     *  - any `break-before`/`break-after: column` on a DESCENDANT — the
+     *    WPT block-in-inline-013/014 shape puts them on divs inside
+     *    anonymous `<span>` wrappers, so the multicol's direct children
+     *    (the spans) look like plain flow while Chromium's one-green-box-
+     *    per-column reference comes ENTIRELY from honoring them.
+     *
+     * Consumers treat this as "this child's block-axis run has break points
+     * I cannot model" and keep the legacy whole-child distribution, which
+     * on those two fixtures happens to place one child per column — the
+     * render the forced breaks ask for.
+     */
+    private fun hasHiddenForcedColumnBreak(component: IRComponent): Boolean =
+        // The child's OWN break-before (its own break-after is the role).
+        forcedColumnBreak(component, "BreakBefore") ||
+            // …then the whole subtree, both directions.
+            component.children?.any { hasForcedColumnBreakDeep(it) } == true
+
+    /** [hasHiddenForcedColumnBreak]'s subtree half — both break sides count. */
+    private fun hasForcedColumnBreakDeep(component: IRComponent): Boolean =
+        forcedColumnBreak(component, "BreakBefore") ||
+            forcedColumnBreak(component, "BreakAfter") ||
+            component.children?.any { hasForcedColumnBreakDeep(it) } == true
+
+    /**
+     * Whether [component] declares [property] (`BreakBefore`/`BreakAfter`)
+     * with the `column` keyword — the only value that FORCES a multicol
+     * break (css-break-3 §4.1); `page`/`region` target other fragmentation
+     * contexts and `avoid*` is avoidance, not a forced break.
+     */
+    private fun forcedColumnBreak(component: IRComponent, property: String): Boolean =
+        component.properties.firstOrNull { it.type == property }
+            ?.let { ValueExtractors.extractKeyword(it.data)?.uppercase() } == "COLUMN"
+
+    /**
+     * True when [component] or ANY descendant declares `float: left/right`
+     * (the IR `Float` keyword — see the converter's FloatPropertyParser).
+     * `none` (and unknown keywords) do not count: only an actually floated
+     * box triggers the run fragmenter's float bail.
+     */
+    private fun hasFloatedDescendant(component: IRComponent): Boolean =
+        // The component's own declaration first (cheap, no recursion)…
+        component.properties.any {
+            it.type == "Float" &&
+                ValueExtractors.extractKeyword(it.data)?.uppercase() in FLOAT_SIDES
+        } ||
+            // …then the subtree — a float any depth down still means the
+            // stacked-not-floated layout defect lives inside this child.
+            component.children?.any { hasFloatedDescendant(it) } == true
+
+    /** The two floated `float` keywords (CSS 2.1 §9.5.1) — `none` excluded. */
+    private val FLOAT_SIDES = setOf("LEFT", "RIGHT")
 
     /**
      * Whether the spanner-flow plan replaces the legacy greedy/stack
@@ -175,6 +344,14 @@ object MulticolSpannerFlow {
     fun engages(children: List<Child>, columnCount: Int): Boolean {
         // §6.2 — a spanner always takes the plan.
         if (children.any { it.role == Role.SPANNER }) return true
+        // Wave-42: a forced column break always takes the plan too — the
+        // greedy min-height heuristic cannot honor css-break-3 §4.1 (it
+        // would pack post-break content wherever is shortest). For the
+        // ≤N-chunks / one-child-per-chunk shapes the corpus's GREEN cells
+        // exercise (balance-break-avoidance-001), the chunk walk provably
+        // reproduces the greedy assignment (pinned BRK4), so engaging is
+        // render-neutral there and correct everywhere else.
+        if (children.any { it.role == Role.FLOW_BREAK_AFTER }) return true
         // Sole-flow-child balance: exactly one child, in flow, with a
         // DECLARED block-size (the iOS twin gate is the explicit-C
         // resolution in ColumnsApplier.fragmentPlan).
@@ -197,8 +374,9 @@ object MulticolSpannerFlow {
      * place whole children instead).
      */
     fun soleFlowFragmentReplay(children: List<Child>): Boolean =
-        // The replay slices exactly one continuous child paint.
-        children.count { it.role == Role.FLOW } == 1 &&
+        // The replay slices exactly one continuous child paint (a forced-
+        // break sole child counts — its chunk is its whole extent).
+        children.count { it.role.isFlow } == 1 &&
             // Static ink is part of the same draw pass — must not replay.
             children.none { it.role == Role.STATIC } &&
             // Only inkless (0-height) spanners coexist with the replay.
@@ -214,6 +392,10 @@ object MulticolSpannerFlow {
         // Walk the same segments as [plan], tracking each child's R.
         var crosses = false
         forEachSegment(children) { segment ->
+            // Wave-42: a segment with FORCED breaks places one whole chunk
+            // per column (H = the tallest chunk), so no flow child can
+            // straddle a column boundary by construction — skip it.
+            if (segment.any { it.role == Role.FLOW_BREAK_AFTER }) return@forEachSegment
             val t = segment.filter { it.role == Role.FLOW }.sumOf { maxOf(0, it.heightPx) }
             val h = if (t == 0) 0 else (t + n - 1) / n
             var r = 0
@@ -241,19 +423,45 @@ object MulticolSpannerFlow {
         }
     }
 
-    /** The plan itself — see the class doc for the model. SP-table pinned. */
-    fun plan(children: List<Child>, columnCount: Int): Plan {
+    /**
+     * The plan itself — see the class doc for the model. SP-table pinned.
+     *
+     * Wave-42 lane W4 additions:
+     *  - a segment containing [Role.FLOW_BREAK_AFTER] children is split
+     *    into CHUNKS at the forced breaks (css-break-3 §4.1); chunk j owns
+     *    column j whole, and the segment's used column block-size is the
+     *    TALLEST chunk (css-multicol-1 §7.1: forced breaks become the only
+     *    break opportunities). Chunks past column N-1 land in §8.2
+     *    OVERFLOW columns (columnIndex ≥ N — painted past the inline end).
+     *  - [discardOverflow] = the container declared `continue: discard`
+     *    (css-overflow-4 §3): content from the FIRST overflow column on —
+     *    and everything after it in flow order, later spanners and
+     *    segments included — is marked [Slot.discarded] and contributes no
+     *    container block-size. Default false keeps every pre-wave-42
+     *    caller (and the whole SP pin table) byte-identical.
+     */
+    fun plan(children: List<Child>, columnCount: Int, discardOverflow: Boolean = false): Plan {
         // §3.2 used counts are ≥ 1; floor defensively for direct callers.
         val n = maxOf(1, columnCount)
         val slots = ArrayList<Slot>(children.size)
         // Running container block offset (spanner tops / segment starts).
         var y = 0
         // Sole-flow bookkeeping for the replay fragmentainer.
-        val soleFlow = children.count { it.role == Role.FLOW } == 1
+        val soleFlow = children.count { it.role.isFlow } == 1
         var soleFlowH: Int? = null
+        // css-overflow-4 §3 latch: once discard triggers, EVERYTHING after
+        // is dropped — the flag never resets within one container.
+        var discarding = false
         var i = 0
         while (i < children.size) {
             val c = children[i]
+            // Post-discard tail: emit an index-aligned discarded slot (the
+            // y is the frozen flow bottom — placement skips it anyway).
+            if (discarding) {
+                slots.add(Slot(c.role, 0, y, discarded = true))
+                i++
+                continue
+            }
             if (c.role == Role.SPANNER) {
                 // §6.2: the spanner spans all columns at the current flow
                 // bottom; the flow resumes below it.
@@ -267,8 +475,48 @@ object MulticolSpannerFlow {
             var t = 0
             while (j < children.size && children[j].role != Role.SPANNER) {
                 // Only in-flow children consume column space (§2).
-                if (children[j].role == Role.FLOW) t += maxOf(0, children[j].heightPx)
+                if (children[j].role.isFlow) t += maxOf(0, children[j].heightPx)
                 j++
+            }
+            if (children.subList(i, j).any { it.role == Role.FLOW_BREAK_AFTER }) {
+                // ── Wave-42 CHUNK walk (forced breaks present) ─────────
+                // col = the chunk's column; r = flow offset INSIDE the
+                // current chunk; h = tallest RETAINED (col < N) chunk.
+                var col = 0
+                var r = 0
+                var h = 0
+                for (k in i until j) {
+                    val ck = children[k]
+                    // css-overflow-4 §3: the first overflow column starts
+                    // the discard — from here on everything drops.
+                    if (discardOverflow && col >= n) discarding = true
+                    if (discarding) {
+                        slots.add(Slot(ck.role, 0, y, discarded = true))
+                        continue
+                    }
+                    // The chunk owns its column whole: block offset = the
+                    // running flow offset within the chunk.
+                    slots.add(Slot(ck.role, col, y + r))
+                    if (ck.role.isFlow) r += maxOf(0, ck.heightPx)
+                    if (ck.role == Role.FLOW_BREAK_AFTER) {
+                        // §7.1 forced-break balancing: only chunks that got
+                        // a real column grow the container's block-size —
+                        // §8.2 overflow columns never do.
+                        if (col < n) h = maxOf(h, r)
+                        // The forced break: next content opens a new chunk.
+                        col++
+                        r = 0
+                    }
+                }
+                // The trailing (breakless) chunk, when it kept a column.
+                if (!discarding && col < n) h = maxOf(h, r)
+                // A sole flow child's fragmentainer is its segment H (the
+                // replay gate needs C > H, which a whole chunk never is).
+                if (soleFlow && children.subList(i, j).any { it.role.isFlow }) soleFlowH = h
+                // The segment occupies the tallest retained chunk.
+                y += h
+                i = j
+                continue
             }
             // §6.3/§7.1 balanced column block-size: ceil(T / N); an empty
             // segment (all-static, or nothing) contributes no height.

@@ -146,6 +146,37 @@ class DocumentFontRegistryTest {
     }
 
     @Test
+    fun `the wave-42 host TRANSCODE double extension is admitted`() {
+        // wave-42 lane W9: tools/titan/woff-to-ttf.mjs repackages a WOFF1 on
+        // the HOST into the raw sfnt it wraps and delivers it as a SIBLING
+        // named `<stem>.woff.otf` / `<stem>.woff.ttf` — the suffix is APPENDED
+        // rather than substituted so the woff stem stays legible in every adb
+        // listing and cannot collide with an authored `<stem>.ttf`.
+        //
+        // That naming makes THIS registry's sniff load-bearing: it takes the
+        // LAST dot-segment (`substringAfterLast('.')`), so `.woff.otf` reads
+        // as 'otf' and passes ANDROID_LOADABLE_EXTENSIONS. PROBED REAL on a
+        // private API-36.1 emulator (Medium_Phone_API_36.1, port 5678): the
+        // same css-text boundary-shaping face flipped this registry's log from
+        // "declined … is a 'woff' container" to "registered 1 @font-face
+        // family: test" for all 48 face-bearing fixtures, and the 8 that
+        // actually reference the family re-shaped from Inter to LinLibertine.
+        //
+        // Pinned because a plausible-looking future tightening of the sniff —
+        // e.g. declining anything whose NAME contains ".woff" — would silently
+        // un-deliver every transcoded face and send Android back to the
+        // fallback with no feeder-side signal at all.
+        for (ext in listOf("ttf", "otf")) {
+            val file = tempFontFile("Face.woff.$ext")
+            val base = file.parentFile.parentFile.parentFile
+            assertEquals("the .woff.$ext host transcode must load", 1,
+                DocumentFontRegistry.register(
+                    listOf(IRFontFace(family = "test", src = "css/res/Face.woff.$ext")), base))
+            assertNotNull(DocumentFontRegistry.resolve("test"))
+        }
+    }
+
+    @Test
     fun `otf and ttc are admitted alongside ttf`() {
         // The table is CLOSED but not narrower than the platform: all three
         // are containers Typeface.createFromFile genuinely parses.

@@ -442,6 +442,47 @@ test('feed-android pushes images BEFORE the IR, wipes them, and re-pushes on ret
     'the tail-retry pass must re-push the fonts too');
 });
 
+// ── wave-42 lane W9: the WOFF→TTF transcode hop wiring ───────────────────────
+//
+// The module itself (parse/rebuild/naming/rewrite) is pinned in
+// woff-to-ttf.test.mjs; these pins cover only what feed-android.mjs OWNS —
+// that the hop is wired, walker-injected, and ORDERED so the font push reads
+// the rewritten document.
+
+test('feed-android runs the woff transcode pre-pass with the feed-lib font walker', async () => {
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  // The pre-pass must exist and must inject documentFontSrcs — one walker,
+  // one truth: the transcoder has to see exactly the srcs pushFontFaces will
+  // later resolve, or a face could be transcoded but never pushed (or vice
+  // versa) with nothing in any log connecting the two.
+  const preAt = src.indexOf('await transcodeWoffFixtures(fixtures');
+  assert.ok(preAt > 0, 'the transcode pre-pass must run over the whole batch');
+  assert.match(src.slice(preAt, preAt + 400), /srcsOf: documentFontSrcs/,
+    'the fontFaces walker must be the injected feed-lib one');
+});
+
+test('the woff rewrite lands BEFORE the font push reads the document', async () => {
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  // ORDERING IS CORRECTNESS here, not a race guard: pushFontFaces resolves
+  // documentFontSrcs(doc) against the corpus, so if the rewrite ran after it
+  // the device would receive the `.woff` Android's Typeface silently cannot
+  // parse instead of the `.woff.ttf`/`.woff.otf` sibling the registry loads.
+  const rewriteAt = src.indexOf('const pushFx = pushableFixture(');
+  const fontsAt = src.indexOf('const fonts = pushFontFaces(');
+  assert.ok(rewriteAt > 0 && fontsAt > 0, 'both call sites must exist');
+  assert.ok(rewriteAt < fontsAt, 'pushableFixture (the rewrites) must precede the font push');
+  // And the rewrite seam must apply the font stand-ins alongside the svg ones
+  // — one scratch write carries both.
+  assert.match(src, /applyWoffTranscodeRewrite\(doc, woffMap\)/,
+    'pushableFixture must apply the woff rewrite');
+  // The retry path re-parses from disk, so it re-applies via the same seam;
+  // its pushableFixture call must also precede its font re-push.
+  const retryRewriteAt = src.indexOf('const retryFx = pushableFixture(');
+  const retryFontsAt = src.indexOf('pushFontFaces(adbx, retryDoc, opts)');
+  assert.ok(retryRewriteAt > 0 && retryFontsAt > 0, 'retry call sites must exist');
+  assert.ok(retryRewriteAt < retryFontsAt, 'the retry rewrite must precede the retry font push');
+});
+
 // ── wave-41 lane T2: the app-first ASSET-ROOT contract ───────────────────────
 //
 // PROBED REAL on a private API-36.1 instance (Medium_Phone_API_36.1): a

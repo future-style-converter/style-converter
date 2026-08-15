@@ -413,11 +413,85 @@ object CanvasRootHoist {
         originPx + EndInsetAnchor.placePx(endEdgePx, boxPx)
 
     /**
+     * Wave 42 (lane W8) — the CSS2 §10.3.7 shrink-to-fit request for an
+     * out-of-flow box whose `width` is AUTO.
+     *
+     * §10.3.7: with `width: auto` (and at least one auto horizontal inset)
+     * the used width is `min(max(preferred minimum, available), preferred)`.
+     * The pre-wave-42 anchors measured UNBOUNDED always, i.e. they used
+     * `preferred` (the single-line max-content width) unconditionally —
+     * measured on WPT `filter-effects/backdrop-filter-edge-pixels.html`
+     * (android-ref 0.9211): the abspos `<p>` container's text runs off the
+     * canvas UNWRAPPED while Chromium wraps it at the ICB edge; same
+     * defect on `backdrop-filter-clip-rect.html`'s abspos prose div.
+     *
+     * @param widthAuto is the box's `width`/`inline-size` undeclared in the
+     *   IR? Only then does §10.3.7's shrink-to-fit clause apply — a
+     *   declared width must keep the unbounded measure so it can OVERFLOW
+     *   its containing block (css-position-3 §2.1), never clamp to it.
+     * @param availableX the §10.3.7 "available width" in the slot's own
+     *   space, or null to derive it from the slot's incoming maxWidth (the
+     *   RC1 static-position mount: its flow slot's constraint envelope IS
+     *   the width the box would have resolved in flow, which §10.3.7's
+     *   static-position case prescribes).
+     */
+    data class ShrinkToFitSpec(
+        val widthAuto: Boolean,
+        val availableX: Dp? = null,
+    )
+
+    /**
+     * Is `width` auto for shrink-to-fit purposes? Pure IR predicate
+     * (JVM-pinned): true when the declaration list carries NO physical
+     * `Width` and NO logical `InlineSize` (the two IR spellings that set a
+     * used inline extent; min/max clamps leave the width AUTO per
+     * css-sizing-3 §5). Deliberately conservative: ANY declared width —
+     * px, %, calc, keyword — keeps the frozen unbounded measure, because
+     * §10.3.7's first clause ("If width is not auto…") uses the declared
+     * value and overflow is then the correct rendering.
+     */
+    internal fun widthIsAuto(properties: List<IRProperty>): Boolean =
+        properties.none { it.type == "Width" || it.type == "InlineSize" }
+
+    /**
+     * §10.3.7's "available width" for a canvas-anchored box: the ICB width
+     * minus the DECLARED horizontal insets (an auto inset contributes
+     * nothing; the spec's solve-for-auto treats it as the remainder). The
+     * subtraction is SIGNED — a negative `left` genuinely widens the space
+     * to the right edge — and the result floors at 0 (a box anchored past
+     * the far edge has no available span, not a negative one). Pure Dp
+     * math, JVM-pinned in CanvasRootHoistTest.
+     */
+    internal fun shrinkAvailableWidth(canvasWidth: Dp, start: Dp?, end: Dp?): Dp {
+        // Remainder after both declared insets (absent side = 0 taken).
+        val remainder = canvasWidth.value - (start?.value ?: 0f) - (end?.value ?: 0f)
+        // Floor at zero — Constraints cannot carry a negative bound.
+        return Dp(remainder.coerceAtLeast(0f))
+    }
+
+    /**
+     * The measure-time max-width band for a shrink-to-fit box, in px:
+     * `max(preferred minimum, available)`. Feeding that as maxWidth
+     * reproduces §10.3.7's full clamp — content narrower than the band
+     * sizes to its preferred width (the `min(…, preferred)` half falls out
+     * of content-sized measurement), content wider WRAPS at the band, and
+     * the band never squeezes below the preferred minimum (a fixed-width
+     * child keeps its declared size and overflows, exactly like the
+     * unbounded measure did). Null preferredMin = the intrinsic channel
+     * refused ([IntrinsicChannel.probe] — a subcomposed descendant); the
+     * caller then keeps the FROZEN unbounded measure, which mis-wraps one
+     * box instead of squeezing an unknowable minimum. Pure, JVM-pinned.
+     */
+    internal fun shrinkToFitMaxPx(preferredMinPx: Int?, availablePx: Int): Int? =
+        preferredMinPx?.let { kotlin.math.max(it, availablePx) }
+
+    /**
      * Zero-flow anchor — the ONE measurement wrapper both out-of-flow
      * mounting modes share: measure the component UNBOUNDED
      * (Constraints() == 0..∞ — its own width/height modifiers decide, the
-     * same rationale as the wave-8 absposOverflowMeasure), report 0×0 (see
-     * [hoistedFlowReportPx]) so the box occupies NO flow space
+     * same rationale as the wave-8 absposOverflowMeasure) UNLESS a
+     * [ShrinkToFitSpec] engages §10.3.7's width clamp (see above), report
+     * 0×0 (see [hoistedFlowReportPx]) so the box occupies NO flow space
      * (css-position-3 §2.1 / pin S5), and place the ink at (0,0) — the
      * slot's own origin. Compose draws beyond a reported size unclipped,
      * matching CSS overflow:visible.
@@ -451,9 +525,39 @@ object CanvasRootHoist {
         // — whose slot origin already IS the flow position — byte-identical.
         originX: Dp = 0.dp,
         originY: Dp = 0.dp,
-    ): Modifier = Modifier.layout { measurable, _ ->
-        // Unbounded measure — the box is sized by its own properties alone.
-        val placeable = measurable.measure(Constraints())
+        // Wave 42 (lane W8) — §10.3.7 shrink-to-fit for a width:auto box.
+        // Default null keeps every pre-wave-42 call site (and every
+        // declared-width box) on the frozen unbounded measure.
+        shrinkToFit: ShrinkToFitSpec? = null,
+    ): Modifier = Modifier.layout { measurable, constraints ->
+        // Measure constraints: unbounded by default (the box is sized by
+        // its own properties alone) — narrowed to the §10.3.7 band ONLY
+        // when a spec says width is auto AND an available width is known.
+        val childConstraints = if (shrinkToFit?.widthAuto == true) {
+            // Available width: the caller-computed ICB remainder (overlay
+            // slots), else this slot's own incoming maxWidth when bounded
+            // (the RC1 static-position flow slot).
+            val availablePx = shrinkToFit.availableX?.roundToPx()
+                ?: constraints.maxWidth.takeIf { constraints.hasBoundedWidth }
+            // The preferred minimum (§10.3.7 = min-content width), read
+            // through the guarded channel: subcomposed descendants REFUSE
+            // intrinsics with a throw that would kill the whole capture
+            // composition (see IntrinsicChannel's banner), so a refusal
+            // logs once and keeps the frozen unbounded measure.
+            val preferredMinPx = availablePx?.let {
+                com.styleconverter.runtime.layout.IntrinsicChannel.probe(
+                    "CanvasRootHoist",
+                    "abspos shrink-to-fit (§10.3.7) skipped for one box — " +
+                        "no intrinsic channel; it keeps its unbounded " +
+                        "preferred width.",
+                ) { measurable.minIntrinsicWidth(Constraints.Infinity) }
+            }
+            // max(preferred-min, available) as the wrap band, or the
+            // frozen unbounded measure when either input is unknowable.
+            val maxPx = availablePx?.let { shrinkToFitMaxPx(preferredMinPx, it) }
+            if (maxPx != null) Constraints(maxWidth = maxPx) else Constraints()
+        } else Constraints()
+        val placeable = measurable.measure(childConstraints)
         // Report zero on both axes: no flow/canvas growth from the ink.
         layout(hoistedFlowReportPx(), hoistedFlowReportPx()) {
             // Anchor at the containing block's START corner (start-anchored
@@ -508,8 +612,35 @@ object CanvasRootHoist {
             // caller that passes no frame, i.e. the wave-17/18 behavior.
             originX = canvasFrame,
             originY = canvasFrame,
+            // Wave 42 (lane W8): §10.3.7 shrink-to-fit for a width:auto
+            // hoisted box. Available = ICB width minus the DECLARED
+            // horizontal insets (the same resolved sides the anchor rule
+            // table reads, so anchor and clamp cannot disagree). A caller
+            // without canvas geometry (A4) passes no spec and keeps the
+            // frozen unbounded measure.
+            shrinkToFit = if (canvasWidth != null && widthIsAuto(properties)) {
+                ShrinkToFitSpec(
+                    widthAuto = true,
+                    availableX = shrinkAvailableWidth(
+                        canvasWidth, config.resolvedStart, config.resolvedEnd,
+                    ),
+                )
+            } else null,
         )
     }
+
+    /**
+     * Wave 42 (lane W8) — the [ShrinkToFitSpec] for ComponentRenderer's
+     * RC1 static-position mount: width-auto boxes wrap at their flow
+     * slot's OWN constraint envelope (availableX = null → the anchor reads
+     * the incoming maxWidth, which for a static-position box IS §10.3.7's
+     * containing-block remainder). Declared-width boxes return null and
+     * keep the frozen unbounded measure. Lives here rather than at the
+     * call site so the whole shrink-to-fit decision stays in one file with
+     * its truth table and pins.
+     */
+    fun staticPositionShrinkToFit(properties: List<IRProperty>): ShrinkToFitSpec? =
+        if (widthIsAuto(properties)) ShrinkToFitSpec(widthAuto = true) else null
 
     /**
      * The canvas-root host. Wrap the document content (INCLUDING its canvas

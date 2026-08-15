@@ -35,5 +35,22 @@ data class MinWidthProperty(
         @Serializable
         @SerialName("fit-content")
         data class FitContent(val maxSize: IRLength?) : MinMaxValue
+
+        // css-values-5 §10.1 calc-size(<keyword basis>, affine `size` expr)
+        // (wave 42 lane W3). The kotlinx polymorphic encoding writes the
+        // @SerialName as the `type` discriminator and the constructor
+        // parameter names as payload keys, so the wire shape is
+        // {"type":"calc-size","basis":…,"factor":…,"offsetPx":…,"original":…}
+        // — byte-identical to the hand-written WidthValueSerializer branch,
+        // one decode path for every runtime. Parse-time-evaluable calls
+        // (pure-length basis / size-free expr) emit LengthValue instead.
+        @Serializable
+        @SerialName("calc-size")
+        data class CalcSize(
+            val basis: String,    // auto|min-content|max-content|fit-content|stretch|content
+            val factor: Double,   // multiplier on the resolved basis size
+            val offsetPx: Double, // absolute px addend (may be negative)
+            val original: String, // verbatim declaration for web browser replay
+        ) : MinMaxValue
     }
 }

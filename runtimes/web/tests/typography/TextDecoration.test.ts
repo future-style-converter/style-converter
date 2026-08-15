@@ -266,6 +266,45 @@ describe('TextOverflow / LineClamp / MaxLines / BlockEllipsis', () => {
       p('MaxHeight', { type: 'percentage', percentage: 50 }),
     ]))).toEqual({});
   });
+  // wave-42 lane W7 — the two-value grammar's marker component
+  // (css-overflow-4 §5.1 `<integer [1,∞]> || <'block-ellipsis'>`).
+  it('line-clamp 4 no-ellipsis clamps by geometry, never the trio', () => {
+    // WPT block-ellipsis-023's wire: the marker must not render and must not
+    // displace content — the -webkit-box trio's "…" would do both.
+    const out = applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'lines', count: 4, ellipsis: { type: 'no-ellipsis' } }),
+    ]));
+    expect(out.maxHeight).toBe('4lh');                       // exactly 4 line boxes
+    expect(out.overflow).toBe('hidden');                     // discard what follows
+    expect(out.display).toBeUndefined();                     // NOT -webkit-box
+    expect((out as Record<string, unknown>).WebkitLineClamp).toBeUndefined();
+  });
+  it('line-clamp 4 with an empty string marker behaves like no-ellipsis', () => {
+    // WPT block-ellipsis-024's assert: `""` has the same effect as no-ellipsis.
+    const out = applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'lines', count: 4, ellipsis: { type: 'string', value: '' } }),
+    ]));
+    expect(out.maxHeight).toBe('4lh');
+    expect(out.display).toBeUndefined();
+  });
+  it('a non-empty string marker keeps the trio (a marker SHOULD render)', () => {
+    // `9 " etc., etc. "` wants a marker; the trio's "…" is the closest the
+    // platform offers, so the fixed-count path stays untouched.
+    const out = applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'lines', count: 9, ellipsis: { type: 'string', value: ' etc., etc. ' } }),
+    ]));
+    expect(out.display).toBe('-webkit-box');
+    expect((out as Record<string, unknown>).WebkitLineClamp).toBe(9);
+  });
+  it('a later plain count reinstates the trio after a no-ellipsis one', () => {
+    // Last-write-wins must carry the marker fate WITH the winning value.
+    const out = applyLineClamp(extractLineClamp([
+      p('LineClamp', { type: 'lines', count: 4, ellipsis: { type: 'no-ellipsis' } }),
+      p('LineClamp', { type: 'lines', count: 6 }),
+    ]));
+    expect(out.display).toBe('-webkit-box');                 // default marker again
+    expect((out as Record<string, unknown>).WebkitLineClamp).toBe(6);
+  });
   it('a later line-clamp:none cancels an earlier auto', () => {
     const out = applyLineClamp(extractLineClamp([
       p('LineClamp', { type: 'auto' }),

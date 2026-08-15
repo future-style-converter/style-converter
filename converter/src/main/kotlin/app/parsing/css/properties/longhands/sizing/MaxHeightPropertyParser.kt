@@ -4,12 +4,23 @@ import app.irmodels.*
 import app.irmodels.properties.spacing.MaxHeightProperty
 import app.irmodels.properties.spacing.MaxWidthProperty
 import app.parsing.css.properties.longhands.PropertyParser
+import app.parsing.css.properties.primitiveParsers.CalcSizeParser
 import app.parsing.css.properties.primitiveParsers.LengthParser
 
 object MaxHeightPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim().lowercase()
         val maxValue = when {
+            // css-values-5 §10.1 calc-size() (wave 42 lane W3) — the
+            // block-axis twin of MaxWidthPropertyParser's branch; see the
+            // decision record on WidthPropertyParser's.
+            trimmed.startsWith("calc-size(") -> when (val r = CalcSizeParser.parse(trimmed)) {
+                is CalcSizeParser.Result.Resolved ->
+                    MaxWidthProperty.MaxValue.LengthValue(IRLength.fromPx(r.px))
+                is CalcSizeParser.Result.Dynamic ->
+                    MaxWidthProperty.MaxValue.CalcSize(r.basis, r.factor, r.offsetPx, r.original)
+                null -> return null
+            }
             trimmed == "none" -> MaxWidthProperty.MaxValue.None()
             trimmed == "min-content" -> MaxWidthProperty.MaxValue.MinContent()
             trimmed == "max-content" -> MaxWidthProperty.MaxValue.MaxContent()

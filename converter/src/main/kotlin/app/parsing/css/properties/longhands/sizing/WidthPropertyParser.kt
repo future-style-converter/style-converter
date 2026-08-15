@@ -3,6 +3,7 @@ package app.parsing.css.properties.longhands.sizing
 import app.irmodels.*
 import app.irmodels.properties.spacing.WidthProperty
 import app.parsing.css.properties.longhands.PropertyParser
+import app.parsing.css.properties.primitiveParsers.CalcSizeParser
 import app.parsing.css.properties.primitiveParsers.LengthParser
 
 object WidthPropertyParser : PropertyParser {
@@ -37,6 +38,21 @@ object WidthPropertyParser : PropertyParser {
             }
             lower.startsWith("anchor-size(") && lower.endsWith(")") -> {
                 parseAnchorSize(trimmed)
+            }
+            // css-values-5 §10.1 calc-size() (wave 42 lane W3). Must sit
+            // BEFORE the isExpression branch so it is typed rather than
+            // preserved as an opaque Expression string. A parse-time-
+            // evaluable call (pure-length basis / size-free expr) collapses
+            // to a plain length; an affine `size` expr over a keyword basis
+            // becomes the typed CalcSize value the runtimes resolve; every
+            // other shape (min(size,…), percent basis) returns null → the
+            // Generic envelope, keeping web's verbatim replay unchanged.
+            lower.startsWith("calc-size(") -> when (val r = CalcSizeParser.parse(trimmed)) {
+                is CalcSizeParser.Result.Resolved ->
+                    WidthProperty.WidthValue.LengthValue(IRLength.fromPx(r.px))
+                is CalcSizeParser.Result.Dynamic ->
+                    WidthProperty.WidthValue.CalcSize(r.basis, r.factor, r.offsetPx, r.original)
+                null -> return null
             }
             // Handle calc(), clamp(), min(), max(), var(), env() and math function expressions
             LengthParser.isExpression(lower) -> WidthProperty.WidthValue.Expression(trimmed)

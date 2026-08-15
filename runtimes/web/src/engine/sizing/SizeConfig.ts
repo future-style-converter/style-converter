@@ -13,6 +13,10 @@ import type { LengthValue } from '../core/types/LengthValue';
 // AspectRatio has its own (ratio, isAuto) shape — kept separate to avoid
 // polluting LengthValue.
 import type { AspectRatioValue } from './AspectRatioValue';
+// css-values-5 calc-size() typed values (wave 42 lane W3) — kept in their own
+// side-table rather than widening LengthValue, because LengthValue is a
+// shared core type and calc-size is a sizing-only concern here.
+import type { CalcSizeValue } from './CalcSizeValue';
 
 // Every field is optional — the extractor only populates keys whose IR
 // property actually appeared in the component's properties array.
@@ -36,6 +40,17 @@ export interface SizeConfig {
   // Aspect ratio — `null` / missing means "don't emit".  An `isAuto:true`
   // value round-trips to the CSS keyword `auto`.
   aspectRatio?: AspectRatioValue;
+  // css-values-5 calc-size() typed values (wave 42 lane W3), keyed by the
+  // same slot names as the LengthValue fields above. A slot appears in
+  // EITHER this table OR the LengthValue fields, never both — the extractor
+  // routes the typed calc-size wire shape here, everything else there. The
+  // applier re-emits these as verbatim `calc-size(...)` declarations so the
+  // browser (which implements calc-size natively) resolves them — the same
+  // path the Generic envelope used to provide before the value was typed.
+  calcSize?: Partial<Record<
+    'width' | 'height' | 'minWidth' | 'maxWidth' | 'minHeight' | 'maxHeight',
+    CalcSizeValue
+  >>;
 }
 
 // IR property-type strings the sizing pipeline owns.  Used both by the

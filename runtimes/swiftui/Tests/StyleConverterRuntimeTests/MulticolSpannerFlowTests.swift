@@ -225,12 +225,203 @@ final class MulticolSpannerFlowTests: XCTestCase {
             [.flow, .spanner])
         // specsFor pairs roles with the declared-block-size flag: the flow
         // child declares Height (explicit), the spanner does not; leading
-        // text is content-sized by definition.
+        // text is content-sized by definition. Wave-42: both real children
+        // are empty leaves, so both are MONOLITHIC (css-break-3 §4.1 — no
+        // class-A/B breakpoint inside them); the anonymous leading-text box
+        // is NOT (its line boxes are class-B break points).
         XCTAssertEqual(
             MulticolSpannerFlow.specsFor(children: [spannerChild, flowChild], leadingText: true),
             [.init(role: .flow, explicitBlockSize: false),
-             .init(role: .spanner, explicitBlockSize: false),
-             .init(role: .flow, explicitBlockSize: true)])
+             .init(role: .spanner, explicitBlockSize: false, monolithicContent: true),
+             .init(role: .flow, explicitBlockSize: true, monolithicContent: true)])
+    }
+
+    // MARK: - Wave-42 lane W4: forced column breaks + continue:discard
+    // BRK/DSC rows — the Android twin carries the SAME rows byte-for-byte.
+
+    /// Shorthand: an in-flow child with `break-after: column`.
+    private func breaker(_ h: Double) -> MulticolSpannerFlow.Child {
+        .init(heightPx: h, role: .flowBreakAfter)
+    }
+
+    /// BRK1 — discard-multicol-003 live IR: 4 break-after chunks + spanner, N=3, discard.
+    func testBRK1DiscardDropsOverflowChunkAndTail() {
+        // Wire order: 4 one-line (19px) <p break-after:column> then the
+        // flattened "Spanner 1". Chunks p1|p2|p3 own columns 0..2; p4 needs
+        // the §8.2 overflow column → css-overflow-4 §3 discards it AND the
+        // spanner after it; the container is one 19px line tall (the ref).
+        let plan = MulticolSpannerFlow.plan(
+            children: [breaker(19), breaker(19), breaker(19), breaker(19), spanner(19)],
+            columnCount: 3, discardOverflow: true)
+        XCTAssertEqual(plan.slots, [
+            .init(role: .flowBreakAfter, columnIndex: 0, yPx: 0),
+            .init(role: .flowBreakAfter, columnIndex: 1, yPx: 0),
+            .init(role: .flowBreakAfter, columnIndex: 2, yPx: 0),
+            .init(role: .flowBreakAfter, columnIndex: 0, yPx: 0, discarded: true),
+            .init(role: .spanner, columnIndex: 0, yPx: 19, discarded: true),
+        ])
+        XCTAssertEqual(plan.containerBlockSizePx, 19)
+        XCTAssertNil(plan.soleFlowColumnBlockSizePx)
+    }
+
+    /// BRK2 — discard-multicol-003's ref box: 3 chunks fill 3 columns one line tall.
+    func testBRK2ThreeChunksFillThreeColumns() {
+        let plan = MulticolSpannerFlow.plan(
+            children: [breaker(19), breaker(19), breaker(19)], columnCount: 3)
+        XCTAssertEqual(plan.slots, [
+            .init(role: .flowBreakAfter, columnIndex: 0, yPx: 0),
+            .init(role: .flowBreakAfter, columnIndex: 1, yPx: 0),
+            .init(role: .flowBreakAfter, columnIndex: 2, yPx: 0),
+        ])
+        XCTAssertEqual(plan.containerBlockSizePx, 19)
+    }
+
+    /// BRK3 — without discard the 4th chunk takes a §8.2 OVERFLOW column (index 3).
+    func testBRK3OverflowChunkKeepsFlowingWithoutDiscard() {
+        let plan = MulticolSpannerFlow.plan(
+            children: [breaker(19), breaker(19), breaker(19), breaker(19)], columnCount: 3)
+        // Column index 3 ≥ N: the placement's i·(W+G) puts it past the
+        // container's inline end — Chromium's visible overflow column.
+        XCTAssertEqual(plan.slots, [
+            .init(role: .flowBreakAfter, columnIndex: 0, yPx: 0),
+            .init(role: .flowBreakAfter, columnIndex: 1, yPx: 0),
+            .init(role: .flowBreakAfter, columnIndex: 2, yPx: 0),
+            .init(role: .flowBreakAfter, columnIndex: 3, yPx: 0),
+        ])
+        // §8.2: overflow columns never grow the container block-size.
+        XCTAssertEqual(plan.containerBlockSizePx, 19)
+    }
+
+    /// BRK4 — ≤N one-child chunks reproduce the greedy assignment (the green-cell guard).
+    func testBRK4ChunkColumnsMatchGreedyForAtMostNChunks() {
+        // balance-break-avoidance-001's shape class: every chunk one child
+        // and chunks ≤ N — the plan must be render-identical to the greedy
+        // path it replaces (engagement is then output-neutral).
+        let heights: [Double] = [10, 20, 30]
+        let plan = MulticolSpannerFlow.plan(
+            children: heights.map { breaker($0) }, columnCount: 3)
+        let greedy = MulticolDistribution.distribute(childHeightsPx: heights, columnCount: 3)
+        // Same column per child, same in-column offset (all tops)…
+        for i in heights.indices {
+            XCTAssertEqual(plan.slots[i].columnIndex, greedy[i].columnIndex)
+            XCTAssertEqual(plan.slots[i].yPx, greedy[i].yOffsetPx)
+        }
+        // …and the same container block-size (tallest chunk == tallest column).
+        XCTAssertEqual(
+            plan.containerBlockSizePx,
+            MulticolDistribution.containerBlockSizePx(childHeightsPx: heights, slots: greedy))
+    }
+
+    /// BRK5 — a chunk may hold several children; the break ends it mid-segment.
+    func testBRK5MultiChildChunkStacksBeforeTheBreak() {
+        // Chunk 0 = {10-flow, 12-break} stacked; chunk 1 = {5-flow}.
+        let plan = MulticolSpannerFlow.plan(
+            children: [flow(10), breaker(12), flow(5)], columnCount: 2)
+        XCTAssertEqual(plan.slots, [
+            .init(role: .flow, columnIndex: 0, yPx: 0),
+            .init(role: .flowBreakAfter, columnIndex: 0, yPx: 10),
+            .init(role: .flow, columnIndex: 1, yPx: 0),
+        ])
+        // §7.1 forced-break balancing: H = the tallest chunk (22), not ceil(T/N).
+        XCTAssertEqual(plan.containerBlockSizePx, 22)
+    }
+
+    /// DSC1 — the discard cascade crosses segments: later flow content drops too.
+    func testDSC1DiscardLatchesAcrossSpannerAndSegment() {
+        let plan = MulticolSpannerFlow.plan(
+            children: [breaker(19), breaker(19), breaker(19), breaker(19),
+                       spanner(10), flow(19)],
+            columnCount: 3, discardOverflow: true)
+        // The tail (spanner + post-spanner flow) is discarded wholesale…
+        XCTAssertTrue(plan.slots[4].discarded)
+        XCTAssertTrue(plan.slots[5].discarded)
+        // …and contributes no block-size (container = the one retained row).
+        XCTAssertEqual(plan.containerBlockSizePx, 19)
+    }
+
+    /// BRK6 — engagement: a forced break always takes the plan.
+    func testBRK6BreakAfterChildrenEngage() {
+        XCTAssertTrue(MulticolSpannerFlow.engages(
+            children: [breaker(10), flow(10)], columnCount: 3))
+    }
+
+    /// BRK7 — rolesFor classifies break-after:column; flowCount counts it as flow.
+    func testBRK7RolesForReadsBreakAfterColumn() {
+        // The dm-003 wire shape: BreakAfter → "COLUMN" keyword.
+        let breakChild = component("b", [IRProperty(type: "BreakAfter", data: .string("COLUMN"))])
+        // `avoid` (and page keywords) must NOT force a column break.
+        let avoidChild = component("v", [IRProperty(type: "BreakAfter", data: .string("AVOID"))])
+        XCTAssertEqual(
+            MulticolSpannerFlow.rolesFor(children: [breakChild, avoidChild]),
+            [.flowBreakAfter, .flow])
+        // The forced-break child is still IN FLOW for every counting gate
+        // (multicolDistributes' ≥2 routing rides this).
+        XCTAssertEqual(MulticolSpannerFlow.flowCount([.flowBreakAfter, .flow]), 2)
+    }
+
+    /// FLT1 — specsFor flags floated subtrees (the run fragmenter's float bail).
+    func testFLT1SpecsForMarksFloatedSubtrees() {
+        // floats-clear-multicol-000's .container: floats one level DOWN.
+        let floatChild = component("fl", [IRProperty(type: "Float", data: .string("LEFT"))])
+        let container = IRComponent(id: "c", name: "c", properties: [],
+                                    selectors: nil, media: nil, children: [floatChild],
+                                    slot: nil, text: nil, pseudos: nil, meta: nil)
+        // `float: none` never counts — only actually floated boxes do.
+        let noneFloat = component("nf", [IRProperty(type: "Float", data: .string("NONE"))])
+        let specs = MulticolSpannerFlow.specsFor(children: [container, noneFloat])
+        XCTAssertTrue(specs[0].floatedContent)
+        XCTAssertFalse(specs[1].floatedContent)
+    }
+
+    /// FBK1 — specsFor flags the forced column breaks the ROLE list cannot
+    /// see (the run fragmenter's forced-break bail). Pinned against the
+    /// LIVE wave41-final IR of css-break block-in-inline-013/014
+    /// (tools/titan/runs/wave41-final/sections/css-break/per-test-ir/):
+    /// the multicol's own children are anonymous `<span>` wrappers with NO
+    /// break property, and the `BreakBefore/BreakAfter: COLUMN` sits on
+    /// their inner divs — so without this flag a run fragmenter sees four
+    /// plain 100px flow children in a 400px fill:auto container, concludes
+    /// T == H ("fits one column"), and stacks all four in column 0 instead
+    /// of the one-box-per-column render that is Chromium's reference.
+    /// Byte-twin of the Android FBK1 row.
+    func testFBK1SpecsForMarksHiddenForcedColumnBreaks() {
+        // block-in-inline-014's shape: span > div[break-after: column].
+        let innerAfter = component("d", [IRProperty(type: "BreakAfter", data: .string("COLUMN"))])
+        let span = IRComponent(id: "s", name: "s", properties: [],
+                               selectors: nil, media: nil, children: [innerAfter],
+                               slot: nil, text: nil, pseudos: nil, meta: nil)
+        // block-in-inline-013's shape: span > div[break-before: column].
+        let innerBefore = component("d2", [IRProperty(type: "BreakBefore", data: .string("COLUMN"))])
+        let span2 = IRComponent(id: "s2", name: "s2", properties: [],
+                                selectors: nil, media: nil, children: [innerBefore],
+                                slot: nil, text: nil, pseudos: nil, meta: nil)
+        // The child's OWN break-before is equally invisible to the roles
+        // (which only classify break-AFTER) — so it must flag too.
+        let ownBefore = component("ob", [IRProperty(type: "BreakBefore", data: .string("COLUMN"))])
+        // The child's OWN break-after is NOT hidden — it becomes
+        // .flowBreakAfter and the chunk walk honours it.
+        let ownAfter = component("oa", [IRProperty(type: "BreakAfter", data: .string("COLUMN"))])
+        // A PAGE break targets another fragmentation context (§4.1).
+        let pageBreak = component("pg", [IRProperty(type: "BreakAfter", data: .string("PAGE"))])
+        let specs = MulticolSpannerFlow.specsFor(
+            children: [span, span2, ownBefore, ownAfter, pageBreak])
+        XCTAssertTrue(specs[0].forcedBreakContent)
+        XCTAssertTrue(specs[1].forcedBreakContent)
+        XCTAssertTrue(specs[2].forcedBreakContent)
+        XCTAssertFalse(specs[3].forcedBreakContent)
+        XCTAssertFalse(specs[4].forcedBreakContent)
+        // …and the own-break-after child is still the forced-break ROLE.
+        XCTAssertEqual(specs[3].role, .flowBreakAfter)
+        // Same call pins the MONOLITHIC flag (css-break-3 §4.1): the span
+        // wrappers have children (breakable), the leaf boxes do not.
+        XCTAssertFalse(specs[0].monolithicContent)
+        XCTAssertFalse(specs[1].monolithicContent)
+        XCTAssertTrue(specs[2].monolithicContent)
+        // A leaf with TEXT is breakable — line boxes are class-B points.
+        let texty = IRComponent(id: "t", name: "t", properties: [],
+                                selectors: nil, media: nil, children: nil,
+                                slot: nil, text: "Line 1", pseudos: nil, meta: nil)
+        XCTAssertFalse(MulticolSpannerFlow.specsFor(children: [texty])[0].monolithicContent)
     }
 
     /// B-RC5 — fragmentPlan's capture-only AUTO-height balanced branch

@@ -12,7 +12,7 @@ includes it as `:runtime` via an out-of-tree `projectDir`.
 ```bash
 # from the repo root — needs JDK 21 + Android SDK
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
-(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)   # JUnit suite (2276 tests)
+(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)   # JUnit suite (2414 tests)
 ```
 
 Rendered and screenshot-tested by [`apps/android-harness/`](../../apps/android-harness/)

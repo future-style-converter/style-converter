@@ -9,6 +9,8 @@
 
 import type { CSSProperties } from 'react';
 import { toCssLength } from '../core/types/LengthValue';
+// css-values-5 calc-size() re-emission (wave 42 lane W3).
+import { toCalcSizeCss } from './CalcSizeValue';
 import type { SizeConfig } from './SizeConfig';
 
 // Output type — a slice of CSSProperties so callers can Object.assign it
@@ -42,6 +44,22 @@ export function applySize(cfg: SizeConfig): SizeStyles {
   if (cfg.maxBlockSize)   out.maxBlockSize   = toCssLength(cfg.maxBlockSize);
   if (cfg.minInlineSize)  out.minInlineSize  = toCssLength(cfg.minInlineSize);
   if (cfg.maxInlineSize)  out.maxInlineSize  = toCssLength(cfg.maxInlineSize);
+
+  // css-values-5 calc-size() (wave 42 lane W3) — re-emit each typed slot as
+  // its verbatim `calc-size(...)` declaration (toCalcSizeCss prefers the
+  // wire's `original` field byte-for-byte). The browser implements
+  // calc-size() natively, so serialisation IS the implementation here —
+  // exactly the contract the Generic envelope provided before the converter
+  // typed the value. A slot never appears both here and above (the extractor
+  // routes exclusively), so this cannot overwrite a length emission.
+  if (cfg.calcSize) {
+    if (cfg.calcSize.width)     out.width     = toCalcSizeCss(cfg.calcSize.width);
+    if (cfg.calcSize.height)    out.height    = toCalcSizeCss(cfg.calcSize.height);
+    if (cfg.calcSize.minWidth)  out.minWidth  = toCalcSizeCss(cfg.calcSize.minWidth);
+    if (cfg.calcSize.maxWidth)  out.maxWidth  = toCalcSizeCss(cfg.calcSize.maxWidth);
+    if (cfg.calcSize.minHeight) out.minHeight = toCalcSizeCss(cfg.calcSize.minHeight);
+    if (cfg.calcSize.maxHeight) out.maxHeight = toCalcSizeCss(cfg.calcSize.maxHeight);
+  }
 
   // AspectRatio — "auto" round-trips; a concrete ratio emits as a single
   // number (CSS accepts `aspect-ratio: 1.7777...`).

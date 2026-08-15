@@ -22,6 +22,7 @@ object MultiColumnExtractor {
         var ruleColor: Color? = null
         var span = ColumnSpan.NONE
         var fill = ColumnFill.BALANCE
+        var continueDiscard = false
 
         for ((type, data) in properties) {
             when (type) {
@@ -33,6 +34,11 @@ object MultiColumnExtractor {
                 "ColumnRuleColor" -> ruleColor = ValueExtractors.extractColor(data)
                 "ColumnSpan" -> span = extractColumnSpan(data)
                 "ColumnFill" -> fill = extractColumnFill(data)
+                // css-overflow-4 §3 `continue: discard` (wave-42 lane W4) —
+                // only the DISCARD keyword flips the flag; `auto` (and any
+                // future keyword) keeps the normal overflow rendering.
+                "Continue" -> continueDiscard =
+                    ValueExtractors.extractKeyword(data)?.uppercase() == "DISCARD"
             }
         }
 
@@ -45,6 +51,9 @@ object MultiColumnExtractor {
             ruleColor = ruleColor,
             span = span,
             fill = fill,
+            // Wave-42: `continue: discard` rides the config into the
+            // spanner-flow plan (see MultiColumnConfig.continueDiscard).
+            continueDiscard = continueDiscard,
             // The css-break-3 fragmentation pass is horizontal-tb only — flag
             // vertical writing modes so MultiColumnLayout can bail (+log once)
             // instead of slicing along the wrong axis. Delegates to the

@@ -597,15 +597,55 @@ object StyleApplier {
         val spacingCtx = buildSpacingContext(config)
         result = LayoutFacade.applyToModifier(result, config.layout, collapsedMargin, spacingCtx)
 
-        // 5. Borders (sides and radius). Radius's clip sits between the
-        //    outer sizing frame and the background, so the rounded corners
-        //    clip the full border-box including the padding band.
-        result = BordersFacade.apply(result, config.borders)
-
-        // 6. Colors (background, opacity). Background paints the full
-        //    sized box, INCLUDING the padding region (because padding is
-        //    applied in step 8 below, INSIDE bg in chain order).
-        result = ColorApplier.applyColors(result, config.colors)
+        // 5./6. Borders then colors — with a wave-42 mode split for
+        //    border-radius. css-backgrounds-3 §4.3 rounds the element's OWN
+        //    background and border; DESCENDANTS are clipped only under
+        //    overflow != visible (css-overflow-3 §3). The legacy
+        //    `Modifier.clip` route clips children too (measured: WPT
+        //    filter-effects/backdrop-filter-clip-rect.html's red abspos
+        //    `.menu` boxes — 1552 red px in ref+iOS, 0 on Android), so when
+        //    every radius-shaped paint is expressible as self-paint
+        //    (uniform/no border, plain color background — the pure gate in
+        //    BorderRadiusApplier.selfPaintsWithoutClip), the radius shapes
+        //    the background fill + border band directly and clips NOTHING.
+        if (com.styleconverter.runtime.borders.radius.BorderRadiusApplier.selfPaintsWithoutClip(
+                radius = config.borders.radius,
+                sides = config.borders.sides,
+                // css-overflow-3 §3 used values: any clipping axis keeps the
+                // legacy children-clipping mode (that clip IS the spec then).
+                overflowClips = config.overflow.shouldClip,
+                // Rectangular layer paints (gradients/url layers, clip
+                // insets) would lose their rounding without the clip.
+                hasBackgroundLayers = config.colors.backgroundImages.isNotEmpty(),
+                hasClipInsets = config.colors.backgroundClipInsets != null,
+                // opacity < 1: the fill must stay INSIDE ColorApplier's
+                // alpha layer (its step 1 wraps its step 2); self-paint
+                // would hoist it outside and un-attenuate it.
+                hasPartialOpacity = (config.colors.opacity ?: 1f) < 1f,
+            )
+        ) {
+            // Rounded fill + band, no clip — children paint unclipped.
+            result = com.styleconverter.runtime.borders.radius.BorderRadiusApplier.applySelfPaint(
+                result, config.borders.radius, config.borders.sides,
+                config.colors.backgroundColor,
+            )
+            // Outline unchanged — it draws OUTSIDE the box and never rode
+            // the radius clip (BordersFacade applies it after the sides).
+            result = com.styleconverter.runtime.borders.outline.OutlineApplier
+                .applyOutline(result, config.borders.outline)
+            // Colors with the solid fill suppressed (applySelfPaint is its
+            // single owner in this mode); opacity/layers logic unchanged.
+            result = ColorApplier.applyColors(result, config.colors.copy(backgroundColor = null))
+        } else {
+            // Legacy route (no radius, or a combination self-paint cannot
+            // express yet): radius clip sits between the outer sizing frame
+            // and the background, so the rounded corners clip the full
+            // border-box including the padding band; background then paints
+            // the full sized box, INCLUDING the padding region (padding is
+            // applied in step 8 below, INSIDE bg in chain order).
+            result = BordersFacade.apply(result, config.borders)
+            result = ColorApplier.applyColors(result, config.colors)
+        }
 
         // 7. Overflow (clipping and scrolling)
         result = OverflowApplier.applyOverflow(result, config.overflow)
