@@ -61,6 +61,19 @@ struct SpacingContext: Equatable {
     // falls back to the same section's mandated 0.5em assumption.
     var chAdvancePx: Double? = nil
 
+    // Wave-43 lane V3 — the element's USED line-height in px: the CSS `lh`
+    // unit basis (css-values-4 §6.2.1: lh equals the computed line-height
+    // of the element it is used on). Populated by ComponentRenderer's
+    // styledContent context fold through LhUnitLineHeight's three-state
+    // pick (declared line-height wins; declared-`normal`/absent under WPT
+    // capture take the calibrated ref grid — wptRefLineHeightRatio 1.25).
+    // Nil = no source threaded → the resolver keeps its historical
+    // `normal ≈ 1.2em` approximation, so every channel-less consumer and
+    // the whole dark-stage corpus (no committed fixture uses lh — checked
+    // wave 43) resolve byte-identically. Compose twin:
+    // SpacingContext.lineHeightPx (spacing/SpacingResolve.kt).
+    var lineHeightPx: Double? = nil
+
     // Surface dimensions used for vw/vh resolution. Wave 6 (#39): these
     // literals are legacy DEFAULTS only — ComponentRenderer overwrites
     // all three geometry fields from the host-published `styleViewport`

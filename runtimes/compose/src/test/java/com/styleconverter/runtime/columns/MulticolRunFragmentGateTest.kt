@@ -168,6 +168,110 @@ class MulticolRunFragmentGateTest {
             measureSource.contains("run fragmentation: single used column"))
     }
 
+    // ── 4. Wave-43 lane V6: the N == 1 `continue: discard` caveat ─────────
+    //
+    // The N == 1 gate exists to keep "content painted below" from becoming
+    // "content discarded" — but css-overflow-4 §3 `continue: discard` is
+    // exactly the declaration that makes the drop CORRECT. For a definite-
+    // height fill:auto multi-child container with `column-count: 1` and
+    // `continue: discard`, the bail therefore keeps the WRONG render (the
+    // overflow paints below instead of being discarded): the run pass takes
+    // no discard parameter at all, so the config flag cannot reach the gate.
+    //
+    // This is a DOCUMENTED caveat, not a fix, because no corpus shape can
+    // measure the fix: every `Continue: DISCARD` container in the wave-42
+    // gate (tools/titan/runs/wave42-final — the discard-multicol-001…004
+    // IRs, the corpus' complete discard family) declares ColumnCount 3, and
+    // three of the four carry raw text (no measurables), which the run pass
+    // never handles anyway. Building the N == 1 discard branch would be
+    // unmeasurable code; this pin keeps the bail's shape honest until a
+    // corpus shape exists to prove a fix against.
+
+    @Test
+    fun `at one used column the bail also un-discards continue-discard content - documented caveat`() {
+        // The IR shape that WOULD hit the caveat, through the real config
+        // pipeline: a single-column fill:auto container declaring discard.
+        val config = MultiColumnExtractor.extractMultiColumnConfig(
+            listOf(
+                prop("ColumnCount", "1"),
+                prop("ColumnFill", "\"AUTO\""),
+                prop("Continue", "\"DISCARD\"")
+            ).map { it.type to it.data }
+        )
+        // Both facts survive extraction — the caveat is in the WIRING, not
+        // the config: the flag exists and is true, the count is one.
+        assertEquals(1, config.columnCount)
+        assertTrue("the discard flag must extract", config.continueDiscard)
+        assertEquals(ColumnFill.AUTO, config.fill)
+        // The pure half: at N == 1 the run plan's single H-clipped fragment
+        // (pinned in the test above) is EXACTLY the render §3 discard wants
+        // — proof the machinery could serve the shape; only the gate stands
+        // between them, and only for the reason documented here.
+        val plan = MulticolRunFragment.runPlan(
+            childHeightsPx = listOf(100, 100),
+            columnBlockSizePx = 120,
+            columnWidthPx = 300,
+            columnGapPx = 16,
+            columnCount = 1
+        )
+        assertEquals("one fragment, clipped to H — the discard-correct paint",
+            120, plan.fragments.single().clipHeight)
+        // The wiring half (source scan, same shape as the pins above): the
+        // run pass declares NO discard parameter, so the bail cannot
+        // distinguish a discard container from a plain one…
+        assertFalse(
+            "measureRunFragment must not silently grow a discard parameter " +
+                "without retiring this caveat pin",
+            measureSource.contains("discardOverflow"))
+        // …and the N == 1 bail's own comment owns the tradeoff by naming
+        // `continue: discard` as the exception it knowingly swallows.
+        assertTrue(
+            "the N == 1 bail must document the discard exception",
+            measureSource.contains("only `continue: discard` may drop"))
+    }
+
+    // ── 5. Wave-43 lane G3: the `continue` cascade fold is last-write-wins ─
+    //
+    // The extractor's `when` branch REASSIGNS `continueDiscard` per
+    // declaration (MultiColumnExtractor lines 40-41), so a duplicated
+    // `continue` resolves by order of appearance — css-cascade-5 §6.4.4's
+    // final tiebreak. iOS's ColumnsExtractor folded the same property with
+    // an any-DISCARD-wins `properties.contains { … }` scan until wave-43 G3,
+    // so the wire [DISCARD, AUTO] extracted true there and false here. These
+    // two pins are the Compose half of the cross-platform pin pair (the twin
+    // lives in swiftui MulticolDiscardThreadingTests); Compose already
+    // behaved — the pins keep it from drifting to any-wins in either
+    // direction, which is why BOTH orders are pinned (an any-keyword-wins
+    // fold would pass one of them by accident).
+
+    @Test
+    fun `duplicate continue declarations take the last one - discard then auto`() {
+        val config = MultiColumnExtractor.extractMultiColumnConfig(
+            listOf(
+                prop("ColumnCount", "3"),
+                prop("Continue", "\"DISCARD\""),
+                prop("Continue", "\"AUTO\"")
+            ).map { it.type to it.data }
+        )
+        assertFalse(
+            "[DISCARD, AUTO]: the later `auto` overrides the earlier discard",
+            config.continueDiscard)
+    }
+
+    @Test
+    fun `duplicate continue declarations take the last one - auto then discard`() {
+        val config = MultiColumnExtractor.extractMultiColumnConfig(
+            listOf(
+                prop("ColumnCount", "3"),
+                prop("Continue", "\"AUTO\""),
+                prop("Continue", "\"DISCARD\"")
+            ).map { it.type to it.data }
+        )
+        assertTrue(
+            "[AUTO, DISCARD]: the later `discard` overrides the earlier auto",
+            config.continueDiscard)
+    }
+
     @Test
     fun `the applier threads the flag into the run pass it calls first`() {
         // The hand-off itself…

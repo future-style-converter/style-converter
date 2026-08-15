@@ -48,6 +48,13 @@ struct MulticolGreedyLayout: Layout {
     /// byte-identical; a roles list containing a spanner engages the
     /// css-multicol-1 §6 spanner-flow plan instead.
     var roles: [MulticolSpannerFlow.Role]? = nil
+    /// Wave-43 lane V6 — css-overflow-4 §3 `continue: discard`, threaded
+    /// from ColumnsConfig.continueDiscard through the renderer seam. Only
+    /// the roles-gated spanner-flow branch consumes it (the plan marks
+    /// content from the first §8.2 overflow column on as discarded); the
+    /// greedy branch never reads it, so the default false — and every
+    /// dark-stage caller — stays byte-identical to wave-42.
+    var discardOverflow: Bool = false
 
     /// Everything both protocol methods need, computed from ONE width so
     /// the measure and place passes can never drift (CSSFlexLayout's
@@ -126,9 +133,15 @@ struct MulticolGreedyLayout: Layout {
                     width: role == .spanner ? widthPx : w, height: nil)).height)
             }
             // The shared SP-table plan (pinned identically on Android).
+            // Wave-43 lane V6: `continue: discard` rides into the plan —
+            // css-overflow-4 §3 drops content from the first overflow
+            // column on (discard-multicol-003's 4th chunk AND the spanner
+            // after it), exactly as Compose already threads it
+            // (MultiColumnApplier → MulticolSpannerFlow.plan).
             let sp = MulticolSpannerFlow.plan(
                 children: zip(heights, roles).map { MulticolSpannerFlow.Child(heightPx: $0, role: $1) },
-                columnCount: used.count)
+                columnCount: used.count,
+                discardOverflow: discardOverflow)
             // Whole-child placement approximation: say so once when a
             // child straddles a balanced boundary (no fragmentation for
             // multi-child segments — mirrors Android's log).

@@ -372,8 +372,20 @@ fun cssParsing(doc: JsonObject): IRDocument {
         componentCounter++
         val id = "${name.lowercase().replace(" ", "-")}-${componentCounter.toString().padStart(3, '0')}"
 
-        // Parse properties directly to specific property classes
-        val properties = component.properties?.let { PropertiesParser.parse(it) } ?: mutableListOf()
+        // Parse properties directly to specific property classes. This is
+        // the BASE-declaration bucket — the per-component cascade winners —
+        // so redundant `inherit` on inherited-by-default longhands resolves
+        // here (drop == natural inheritance, CSS22 §6.2.1; see
+        // InheritedDefaultResolution). Selector/media buckets and keyframe
+        // stops keep the flag off: there `inherit` overrides the base.
+        // `component.tag` (the extractor's `_tag`) rides along because the
+        // drop is only identity on an element the UA sheet leaves alone: on
+        // a UA-styled tag (<select>, <h1>, <th>, …) removing the declaration
+        // hands the slot to the UA rule on web instead of to inheritance,
+        // so InheritedDefaultResolution exempts those components (guard 4).
+        val properties = component.properties
+            ?.let { PropertiesParser.parse(it, resolveInheritedDefaults = true, sourceTag = component.tag) }
+            ?: mutableListOf()
 
         // Extract custom-property declarations (--name: value) from the SAME
         // base properties map into the component-level `variables` map.

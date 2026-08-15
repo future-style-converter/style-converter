@@ -930,16 +930,47 @@ dirs + WPT corpus are gitignored):
   captures moved toward the ref under self-paint) + 327-net clean.
   Totals: **web 1187/1379 (86.1%), iOS 977/1351 (72.3%), Android
   970/1350 (71.9%)**.
+  Wave 43 (`tools/titan/results/corpus-v6-8.json`) was the hardening
+  wave, and its corpus delta is **zero flips — stated plainly**. What
+  moved sub-threshold: the discard-multicol family gained +0.02–0.03
+  on both natives (the `lh` unit now resolves against the used
+  line-height instead of a hardcoded 1.2, and iOS finally threads
+  `continue: discard`); `<ol start>`/`<li value>` ordinals are live
+  and capture-verified on both natives (the residual is the `reversed`
+  attribute, which the producer never puts on the wire). The converter
+  inherit fix reached the gate IR but pixels stayed flat — exposing
+  **the inline-run stacking wall** (`meta.runs` inline content renders
+  as stacked blocks on both natives) as the single recurring residual
+  behind inherit-computed, before-as-flex, the hyphens-manual-inline
+  family, and iOS raw-text multicol: the named wave-44 headline
+  target. Correctness and instrument work that carries no score claim:
+  CSS opacity no longer clips on Android (the `Modifier.alpha`
+  clip=true physics, bytecode-proven, replaced with an unbounded
+  save-layer group), styled pseudo text (em-based sizes, colors; the
+  iOS refusal doctrine relaxed only for spec-dead declarations),
+  per-test fontFaces scoping (a face-parse crash can no longer poison
+  sibling tests), the UA-styled-tag scope on the inherit drop (on
+  web, absence ≠ inherit when the UA sheet is an origin), a
+  negative-ordinal crash guard, and the reversed-anchor comments
+  inverted to the truth — a skeptic adjudicated the code
+  spec-correct per css-lists-3 §4.4.2 and the comments claiming
+  "ref-pinned, not spec" were the defect. The replaced-image
+  inline-atom predicate shipped dormant after the wave-42 layer
+  diagnosis was corrected (the box-sizing images are document roots),
+  and the SVG pre-raster A/B re-ran: still OFF. Depth-48 gate: zero
+  watchdogs, all columns full under a tightened per-section capture
+  check, 327-net clean. Totals: unchanged — **web 1187/1379 (86.1%),
+  iOS 977/1351 (72.3%), Android 970/1350 (71.9%)**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 354 |
+| converter (Kotlin) | `./gradlew :converter:test` | 368 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1263 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2414 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1513 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1619 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2475 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1555 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1626 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap

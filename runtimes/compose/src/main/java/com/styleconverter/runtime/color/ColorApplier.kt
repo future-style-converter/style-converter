@@ -2,7 +2,6 @@ package com.styleconverter.runtime.color
 
 import androidx.compose.foundation.background
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -78,16 +77,21 @@ object ColorApplier {
      * Apply all color-related properties to a Modifier.
      *
      * Order of application:
-     * 1. Opacity FIRST (outermost in this group) — `Modifier.alpha`
-     *    introduces a graphics layer that wraps everything BELOW it in
-     *    the chain (and the children). Applying it first means the bg
-     *    paint, the gradient draw, AND the children all render INSIDE
-     *    the alpha layer, so `opacity: 0` actually hides everything.
-     *    Previously opacity was applied LAST here, which put the alpha
-     *    layer INSIDE the bg drawer — bg painted at full opacity and
-     *    only the (text) children faded. `Edge_ZeroOpacity` rendered as
-     *    a fully-opaque red rectangle on Android while iOS / web
-     *    correctly produced a fully-transparent surface (SSIM 1.00).
+     * 1. Opacity FIRST (outermost in this group) — OpacityApplier's
+     *    transparency group wraps everything BELOW it in the chain (and
+     *    the children). Applying it first means the bg paint, the
+     *    gradient draw, AND the children all render INSIDE the group, so
+     *    `opacity: 0` actually hides everything. Previously opacity was
+     *    applied LAST here, which put the alpha layer INSIDE the bg
+     *    drawer — bg painted at full opacity and only the (text)
+     *    children faded. `Edge_ZeroOpacity` rendered as a fully-opaque
+     *    red rectangle on Android while iOS / web correctly produced a
+     *    fully-transparent surface (SSIM 1.00). Wave-43 V2 swapped the
+     *    mechanism from `Modifier.alpha` — which is graphicsLayer(alpha,
+     *    clip=TRUE) in bytecode and cropped overflowing children at the
+     *    element's bounds (css-color/composited-filters-under-opacity,
+     *    android-ref 0.9401) — to OpacityApplier's UNBOUNDED saveLayer
+     *    group; CSS opacity never clips (css-color-4 §2.2).
      * 2. Background images (gradients) - drawn first (bottom layer)
      * 3. Solid background color - drawn on top of gradients
      *
@@ -107,9 +111,14 @@ object ColorApplier {
     fun applyColors(modifier: Modifier, config: ColorConfig): Modifier {
         var result = modifier
 
-        // 1. Opacity FIRST → alpha layer wraps bg + children below it.
+        // 1. Opacity FIRST → the transparency group wraps bg + children
+        // below it. Delegated to OpacityApplier (the dedicated per-property
+        // applier, twin of iOS color/OpacityApplier.swift): an unbounded
+        // saveLayer group per css-color-4 §2.2 — never a clipping
+        // graphicsLayer (see OpacityApplier's header for the bytecode
+        // proof that Modifier.alpha ≡ graphicsLayer(alpha, clip=true)).
         config.opacity?.let { alpha ->
-            result = result.alpha(alpha.coerceIn(0f, 1f))
+            result = OpacityApplier.applyOpacity(result, alpha)
         }
 
         // 2. Background COLOR is the bottom-most layer of the box's
@@ -250,14 +259,17 @@ object ColorApplier {
     }
 
     /**
-     * Apply opacity to a Modifier.
+     * Apply opacity to a Modifier — kept as a public convenience surface;
+     * the real semantics (clamp, opacity-1 fast path, the UNBOUNDED
+     * css-color-4 §2.2 transparency group that replaced the clipping
+     * `Modifier.alpha`) live in the dedicated [OpacityApplier].
      *
      * @param modifier The base modifier
-     * @param alpha Opacity value (0.0-1.0)
-     * @return Modified Modifier with alpha applied
+     * @param alpha Opacity value (0.0-1.0; out-of-range clamps per spec)
+     * @return Modified Modifier with the transparency group applied
      */
     fun applyOpacity(modifier: Modifier, alpha: Float): Modifier {
-        return modifier.alpha(alpha.coerceIn(0f, 1f))
+        return OpacityApplier.applyOpacity(modifier, alpha)
     }
 
     /**

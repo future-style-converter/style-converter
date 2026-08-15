@@ -855,6 +855,22 @@ public struct ComponentRenderer: View {
             // resolve against a definite ancestor basis (CSS 2.1
             // §10.5); nil keeps the percent-height skip.
             s.spacing.context.containingBlockHeightPx = containingBlockHeight.map(Double.init)
+            // Wave 43 (lane V3) — the `lh` unit's line-height source
+            // (css-values-4 §6.2.1: lh = the element's USED line-height).
+            // Folded HERE because only the renderer holds the
+            // wptCaptureMode environment flag the calibrated rows key on;
+            // the pick itself is the pure LhUnitLineHeight three-state
+            // (declared wins / `normal`-or-absent under capture takes the
+            // ref's 1.25 grid / nil elsewhere keeps the resolver's
+            // historical 1.2em fallback, byte-identical dark stage).
+            // fontSizePx is already final at this point (StyleBuilder set
+            // the declared size or the monospace-UA 13px quirk), so lh
+            // and em resolve against the same font by construction.
+            s.spacing.context.lineHeightPx = LhUnitLineHeight.usedLineHeightPx(
+                declaredPx: (s.typography?.lineHeightPx).map(Double.init),
+                declaredNormal: s.typography?.lineHeightIsNormal ?? false,
+                fontSizePx: s.spacing.context.fontSizePx,
+                wptCapture: wptCaptureMode)
             // TITAN WPT lane (wave 11) — the box-sizing UA default.
             // css-sizing-3 §3: the INITIAL value of box-sizing is
             // content-box, and WPT refs are authored against that UA
@@ -1506,7 +1522,16 @@ public struct ComponentRenderer: View {
                         ? MulticolSpannerFlow.rolesFor(
                             children: FlexboxApplier.sorted(inFlowChildren),
                             leadingText: component.text?.isEmpty == false)
-                        : nil
+                        : nil,
+                    // Wave-43 lane V6 — css-overflow-4 §3 `continue:
+                    // discard`, from the typed columns config (the
+                    // "Continue" IR property, DISCARD keyword). Threaded
+                    // unconditionally because only the roles-gated
+                    // spanner-flow branch above consumes it — roles are
+                    // nil outside capture, so the dark stage stays
+                    // byte-identical (Compose threads the same flag via
+                    // MultiColumnConfig.continueDiscard).
+                    discardOverflow: style.columns?.continueDiscard ?? false
                 ) {
                     // Same content pass as every container: leading text
                     // (if any) and the sorted in-flow children become the
@@ -3064,6 +3089,29 @@ public struct ComponentRenderer: View {
                 // The used per-column inline size in px.
                 return CGFloat(used.widthPx)
             }()
+            // Wave 43 (lane V4) — the HTML ordinal plan for this container's
+            // items, computed ONCE per parent because an item's ordinal
+            // depends on its SIBLINGS: `<ol start>` sets the base and
+            // `<li value>` resets the running counter (HTML §4.4.5/§4.4.8),
+            // neither of which the raw ForEach index below can see —
+            // counter-list-item painted "1. 2. 3." where Chromium paints
+            // "30. 31. 32." (ios-ref 0.761, wave42-final). Index-aligned
+            // with `children` (the SAME sorted array the loop walks); nil
+            // for non-list parents via the uaDefault gate, so every other
+            // container keeps the exact pre-wave-43 index math.
+            // `reversed: false` is a documented WIRE GAP, not a shrug: the
+            // producer never forwards `<ol reversed>` (extract-fixture.mjs
+            // LIST_ATTR_KEYS) and the attrs capsule has no field for it.
+            // The countdown itself is already implemented and unit-tested
+            // to the SPEC — css-lists-3 §4.4.2 reversed-counter
+            // instantiation, see ListOrdinal's header — so closing the gap
+            // is one boolean, not a behaviour decision.
+            let listOrdinals: [Int]? =
+                ListMarkerResolver.uaDefault(sourceTag: component.meta?.sourceTag) == nil
+                    ? nil
+                    : ListOrdinal.ordinals(startAttr: component.meta?.attrs?.start,
+                                           reversed: false,
+                                           children: children)
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
                 // Wave-32 lane R: the anonymous inline runs that precede THIS
                 // child, emitted immediately before it so the wire's document
@@ -3175,7 +3223,12 @@ public struct ComponentRenderer: View {
                     // honours it. Unchanged.)
                     if let baked = child.meta?.markerText { return baked }
                     guard isListItem, let cfg = markerConfig else { return "" }
-                    return ListMarkerText.marker(index: index, config: cfg)
+                    // Wave 43 (lane V4): the marker numbers from the HTML
+                    // ordinal plan (`<ol start>`/`<li value>` aware), not
+                    // the raw loop index — see the listOrdinals hoist.
+                    return ListMarkerText.marker(
+                        index: ListOrdinal.markerIndex(listOrdinals, index),
+                        config: cfg)
                 }()
                 let isMarkerRow = !markerText.isEmpty
                 // Wave 28 (lane MC): which of the two placements this

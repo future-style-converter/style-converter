@@ -33,33 +33,69 @@ object InlineAtomFlow {
         "button", "input", "textarea", "select", "meter", "progress"
     )
 
+    // Wave-43 V1 — the REPLACED-element tag family, mirroring the paint
+    // channel's own table (images/ReplacedImageContent.REPLACED_TAGS —
+    // private there, so this mirror is the same contract the WIDGET set
+    // has with the wave-20 identity table; skeptic probes diff the two).
+    // Only meaningful together with the caller-attested
+    // `hasDeliveredRaster` fact below: the tag alone admits nothing.
+    private val REPLACED_TAGS = setOf("img", "embed", "object", "video")
+
     /**
      * P15 — the atom predicate. An inline-level atom is:
      *  • a widget tag (above) whose display is not overridden to a
      *    block-level value (css-display-3 §2: declared block/flex/grid/
      *    table/list-item displays leave the inline flow; the UA default
      *    for all these controls is inline-block), or
+     *  • (wave-43 V1) a REPLACED element whose raster the platform has
+     *    actually DELIVERED — an `<img>` is inline-level by UA default
+     *    (CSS 2.1 §9.2.2) and sized as replaced content (§10.3.2), so
+     *    the browser packs it on the line box beside other inline-level
+     *    boxes (css-ui box-sizing-007..009's five-img rows), or
      *  • an <a> carrying ONLY text (no element children) — plain inline
      *    content the ref lays on the same line as the widgets.
      * [displayKeyword] is the SHOUTY IR Display keyword or null when the
      * component declares none; any non-INLINE-prefixed keyword (BLOCK,
      * FLEX, GRID, TABLE, LIST_ITEM, NONE, …) disqualifies — NONE renders
      * nothing and must keep the frozen path that already handles it.
+     *
+     * [hasDeliveredRaster] is the CALLER's attestation of BOTH halves of
+     * the replaced-paint decision (mirroring exactly when
+     * images/ReplacedImageContent.Paint paints): the component is a
+     * replaced candidate (replaced meta.sourceTag + non-blank
+     * meta.attrs.src — ReplacedImageContent.isCandidate) AND the
+     * platform's DocumentImageRegistry resolved that src to a decoded
+     * raster. An UNDELIVERED asset paints an empty box (Paint's
+     * return-false contract) and must keep the frozen block path, so the
+     * pre-raster-off arm stays byte-identical. Defaulted false so every
+     * pre-wave-43 caller and JVM/XCTest pin keeps its exact behaviour.
+     * A replaced atom carries NO fixed UA geometry: it measures its own
+     * rendered box, which under `width/height: auto` is the wave-42
+     * §10.4-constrained content size (ReplacedBoxSizing.constrainAutoSize
+     * via ReplacedImageContent.constrainedAutoContentSize) plus the
+     * chain's padding/border band; its baseline is the bottom margin
+     * edge (§10.8.1's replaced rule ⇒ descent 0 when the spec lands).
      */
     fun isAtom(
         tag: String?,
         displayKeyword: String?,
         hasElementChildren: Boolean,
         hasText: Boolean,
+        hasDeliveredRaster: Boolean = false,
     ): Boolean {
         // A declared non-inline display takes the box out of the inline
         // flow (css-display-3 §2) — the frozen block loop owns it.
         if (displayKeyword != null && !displayKeyword.startsWith("INLINE")) return false
-        // The tag decides the family (widget vs text-only anchor).
+        // The tag decides the family (widget vs replaced vs anchor).
         val t = tag?.lowercase() ?: return false
         // Widget atoms are opaque regardless of children (a <select>'s
         // <option>s are its content, not flow siblings).
         if (t in WIDGET_TAGS) return true
+        // Wave-43 V1 — replaced admission needs BOTH facts: the tag
+        // family AND the delivered raster (never the flag alone — a
+        // caller passing true for a <div> is a renderer bug this gate
+        // refuses rather than packs).
+        if (hasDeliveredRaster && t in REPLACED_TAGS) return true
         // Anchors qualify only in the text-only shape (P15) — an <a>
         // wrapping elements is a real inline subtree, out of scope.
         return t == "a" && hasText && !hasElementChildren

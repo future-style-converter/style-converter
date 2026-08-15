@@ -322,8 +322,19 @@ object StyleApplier {
         // Extract all configurations
         val config = extractConfig(pairs, wptCaptureMode)
 
-        // Apply in correct order
-        return applyConfig(Modifier, config, collapsedMargin)
+        // Apply in correct order. Wave-43 lane V3: the WPT flag and the
+        // declared-`normal` discriminator ride into the spacing context so
+        // the `lh` unit resolves against the element's USED line-height
+        // (css-values-4 §6.2.1) instead of a hardcoded 1.2em — the keyword
+        // test is the shared LineHeightNormal predicate over the SAME
+        // cascade order (last declaration wins) the typography extractor
+        // folded, so the gate and the extracted number can never disagree.
+        return applyConfig(
+            Modifier, config, collapsedMargin,
+            wptCaptureMode = wptCaptureMode,
+            lineHeightDeclaredNormal = com.styleconverter.runtime.typography
+                .LineHeightNormal.isDeclaredNormal(properties),
+        )
     }
 
     /**
@@ -431,6 +442,16 @@ object StyleApplier {
         // Optional §8.3.1 collapse override — see applyProperties. Default
         // null keeps every existing call site byte-identical.
         collapsedMargin: com.styleconverter.runtime.spacing.CollapsedMargin? = null,
+        // Wave-43 lane V3 — the two `lh`-unit inputs the spacing context
+        // needs (see buildSpacingContext): the ambient WPT-capture flag
+        // (applyProperties threads LocalWptCaptureMode; this static chain
+        // cannot read CompositionLocals) and the declared-`normal`
+        // line-height discriminator (LineHeightNormal — the keyword's
+        // extracted 1.2 stand-in must not pose as an author value under
+        // capture). Defaults keep every direct applyConfig call site
+        // (ContentApplier's pseudo boxes, tests) byte-identical.
+        wptCaptureMode: Boolean = false,
+        lineHeightDeclaredNormal: Boolean = false,
     ): Modifier {
         var result = modifier
 
@@ -594,7 +615,7 @@ object StyleApplier {
         //    actually uses the ch unit (zero overhead otherwise) — the
         //    measured advance of '0' from ChUnitMetrics, so `width: 63.1ch`
         //    resolves against real font metrics instead of collapsing to 0.
-        val spacingCtx = buildSpacingContext(config)
+        val spacingCtx = buildSpacingContext(config, wptCaptureMode, lineHeightDeclaredNormal)
         result = LayoutFacade.applyToModifier(result, config.layout, collapsedMargin, spacingCtx)
 
         // 5./6. Borders then colors — with a wave-42 mode split for
@@ -689,8 +710,20 @@ object StyleApplier {
      * when a sizing slot actually carries a ch length — ChUnitMetrics hits
      * the platform text engine, and the corpus overwhelmingly doesn't use
      * ch, so the gate keeps applyConfig allocation-free on the hot path.
+     *
+     * Wave-43 lane V3 — the context now also carries the `lh` unit's
+     * line-height source (css-values-4 §6.2.1: lh = the element's USED
+     * line-height, not a 1.2 constant): LhUnitLineHeight's three-state
+     * pick over the extracted line-height, the declared-`normal`
+     * discriminator and the WPT flag. Both new parameters default to the
+     * pre-wave-43 state (no capture, no keyword) so every legacy caller
+     * builds a byte-identical context with a null [SpacingContext.lineHeightPx].
      */
-    internal fun buildSpacingContext(config: StyleConfig): com.styleconverter.runtime.spacing.SpacingContext {
+    internal fun buildSpacingContext(
+        config: StyleConfig,
+        wptCaptureMode: Boolean = false,
+        lineHeightDeclaredNormal: Boolean = false,
+    ): com.styleconverter.runtime.spacing.SpacingContext {
         // Element font size in px (css-values-4 §5.1.1 resolved value). A
         // non-sp TextUnit (em, unspecified) can't be converted statically —
         // keep the 16px default rather than guessing.
@@ -710,6 +743,19 @@ object StyleApplier {
                 com.styleconverter.runtime.spacing.ChUnitMetrics
                     .measure(config.typography.fontFamily, fontSizePx)
             } else null,
+            // The lh basis: declared line-height (Sp-typed — every shape
+            // the typography extractor emits) wins; declared-`normal` and
+            // bare text take the calibrated composed grid under WPT
+            // capture; null elsewhere keeps the resolver's historical
+            // 1.2 × font-size fallback (see LhUnitLineHeight's table).
+            lineHeightPx = com.styleconverter.runtime.spacing.LhUnitLineHeight.usedLineHeightPx(
+                declaredLineHeightPx = config.typography.lineHeight
+                    ?.takeIf { it.type == androidx.compose.ui.unit.TextUnitType.Sp }
+                    ?.value,
+                declaredNormal = lineHeightDeclaredNormal,
+                fontSizePx = fontSizePx,
+                wptCapture = wptCaptureMode,
+            ),
         )
     }
 

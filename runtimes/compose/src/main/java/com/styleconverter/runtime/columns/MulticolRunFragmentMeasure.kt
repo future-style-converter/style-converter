@@ -114,6 +114,14 @@ internal object MulticolRunFragmentMeasure {
         // owns N == 1. Note the used count collapses to 1 on narrow
         // containers too (resolveUsedColumns' gap fit), not only on an
         // explicit `column-count: 1`.
+        // KNOWN CAVEAT (wave-43 lane V6): for a container that DOES declare
+        // `continue: discard` the drop would be correct — this bail then
+        // keeps the wrong (overflowing) render, because no discard flag is
+        // threaded here. Left unbuilt deliberately: the corpus' complete
+        // discard family (wave42-final discard-multicol-001…004) is all
+        // ColumnCount 3, so an N == 1 discard branch would be unmeasurable
+        // code. MulticolRunFragmentGateTest pins this tradeoff — retire its
+        // caveat pin before threading a discard parameter through here.
         if (usedCount <= 1) {
             logFallback("run fragmentation: single used column — content overflows below instead of being clipped away")
             return null

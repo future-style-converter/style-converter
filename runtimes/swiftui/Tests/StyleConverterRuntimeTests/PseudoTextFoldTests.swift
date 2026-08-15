@@ -191,6 +191,147 @@ final class PseudoTextFoldTests: XCTestCase {
         XCTAssertEqual(PseudoTextFold.resolve(c).text, "ab")
     }
 
+    // MARK: - Wave 43 (lane V7): styled pseudo text, verbatim payloads
+
+    /// css-contain/contain-content-011.html ::after (wave42-final
+    /// per-test-ir, VERBATIM): `_text "25"` + `font-size: 3em` on a
+    /// textless host. The Chromium ref paints the counter number at 48px
+    /// (3 × the 16px inherited base); wave-42 refused the bucket so iOS
+    /// rendered nothing. The fold must carry the text AND append the
+    /// resolved typed FontSize so the ordinary text pipeline sizes it.
+    func testStyledFontSizeFoldsAndAppendsTypedProperty() throws {
+        let c = try component("""
+        {"id":"contain-content-011__3-004","name":"div","properties":[],
+         "pseudos":{"after":{"properties":{"content":"\\"25\\"","font-size":"3em"},
+                             "_text":"25","_lossy":true,
+                             "_lossyReasons":["generated-content-baked"]}}}
+        """)
+        let r = PseudoTextFold.resolve(c)
+        // The baked number becomes the leaf text…
+        XCTAssertEqual(r.text, "25")
+        // …and the 3em resolves against the 16px document default → 48px,
+        // in the exact {px:N} shape FontSizeExtractor unwraps.
+        XCTAssertEqual(r.properties.last?.type, "FontSize")
+        XCTAssertEqual(r.properties.last.flatMap { ValueExtractors.extractPx($0.data) }, 48)
+    }
+
+    /// The em base is the HOST's own font-size when declared (css-values-4
+    /// §5.1.1: font-size's em resolves against the INHERITED size, and the
+    /// pseudo's parent is its originating element) — not a hardcoded 16.
+    func testStyledFontSizeEmResolvesAgainstHostFontSize() throws {
+        let c = try component("""
+        {"id":"x","name":"div",
+         "properties":[{"type":"FontSize","data":{"px":20}}],
+         "pseudos":{"before":{"properties":{"content":"\\"x\\"","font-size":"2em"},
+                              "_text":"x"}}}
+        """)
+        let r = PseudoTextFold.resolve(c)
+        // 2em × the host's 20px = 40px, appended LAST so it wins the
+        // extractors' last-wins cascade over the host's own entry.
+        XCTAssertEqual(r.properties.last.flatMap { ValueExtractors.extractPx($0.data) }, 40)
+    }
+
+    /// css-display/display-contents-dynamic-before-after-001.html,
+    /// component …__0-049 (VERBATIM): `_text "P"` + `color: red` +
+    /// `display: contents` + `border: 1px solid red`. display:contents
+    /// makes the pseudo box-less (css-display-3 §2.5) so the border is
+    /// spec-dead, and the declared ink converts to a typed Color entry.
+    func testStyledColorUnderDisplayContentsFoldsWithTypedInk() throws {
+        let c = try component("""
+        {"id":"display-contents-dynamic-before-after-001__1__0__0-049",
+         "name":"div","properties":[],
+         "pseudos":{"before":{"properties":{"content":"\\"P\\"","color":"red",
+                                            "display":"contents",
+                                            "border":"1px solid red"},
+                              "_text":"P","_lossy":true,
+                              "_lossyReasons":["generated-content-baked"]}}}
+        """)
+        let r = PseudoTextFold.resolve(c)
+        // The bucket folds despite display/border (both consumed by spec)…
+        XCTAssertEqual(r.text, "P")
+        // …and the declared red rides the copy as the typed srgb block.
+        XCTAssertEqual(r.properties.last?.type, "Color")
+        XCTAssertEqual(r.properties.last.map { extractColor($0.data) },
+                       .srgb(r: 1, g: 0, b: 0, a: 1))
+    }
+
+    /// css-display/display-contents-before-after-002.html (VERBATIM):
+    /// UNSTYLED before "P" / after "S" around host text "AS", each with
+    /// `display: contents` + `border: 100px solid red`. The wave-42 gate
+    /// refused these for the very declarations css-display-3 §2.5 makes
+    /// dead — the ref paints "PASS", no red, and so must the fold.
+    func testDisplayContentsWithDeadBorderFoldsAroundHostText() throws {
+        let c = try component("""
+        {"id":"display-contents-before-after-002__1-003","name":"div",
+         "properties":[],"text":"AS",
+         "pseudos":{"before":{"properties":{"display":"contents",
+                                            "border":"100px solid red",
+                                            "content":"\\"P\\""},
+                              "_text":"P","_lossy":true,
+                              "_lossyReasons":["generated-content-baked"]},
+                    "after":{"properties":{"display":"contents",
+                                           "border":"100px solid red",
+                                           "content":"\\"S\\""},
+                             "_text":"S","_lossy":true,
+                             "_lossyReasons":["generated-content-baked"]}}}
+        """)
+        let r = PseudoTextFold.resolve(c)
+        // The ref's word, assembled in CSS 2.1 §12.1 order.
+        XCTAssertEqual(r.text, "PASS")
+        // Unstyled buckets append nothing — no typed entries invented.
+        XCTAssertTrue(r.properties.isEmpty)
+    }
+
+    /// A styled bucket that is NOT the component's sole ink refuses (one
+    /// uniform `text` run cannot carry two styles) — named, and the
+    /// component stays identity.
+    func testStyledBucketSharingTheRunIsRefusedAndNamed() throws {
+        let c = try component("""
+        {"id":"x","name":"div","properties":[],"text":"mid",
+         "pseudos":{"before":{"properties":{"content":"\\"p\\"","color":"red"},
+                              "_text":"p"}}}
+        """)
+        let r = PseudoTextFold.resolve(c)
+        // Identity: the styled fold would repaint "mid" red — refused.
+        XCTAssertEqual(r.text, "mid")
+        XCTAssertTrue(r.properties.isEmpty)
+        // The refusal is the named uniformity gate (dedupe pin).
+        XCTAssertFalse(PropertyTracker.logOnce(
+            key: "pseudotext-styled-nonuniform-before", message: "dup"))
+    }
+
+    /// A box declaration WITHOUT display:contents still refuses — the
+    /// §2.5 dead-box rule only applies to a box-less pseudo, so the
+    /// wave-42 gate stands for every real-box shape.
+    func testBorderWithoutDisplayContentsStillRefuses() throws {
+        let c = try component("""
+        {"id":"x","name":"div","properties":[],
+         "pseudos":{"before":{"properties":{"content":"\\"hi\\"",
+                                            "border":"1px solid red"},
+                              "_text":"hi"}}}
+        """)
+        // Refused whole: a bordered inline box is beyond the text fold.
+        XCTAssertNil(PseudoTextFold.resolve(c).text)
+        // And named under the same key family as every other refusal.
+        XCTAssertFalse(PropertyTracker.logOnce(
+            key: "pseudotext-unsupported-before-border", message: "dup"))
+    }
+
+    /// An unparseable styling value (var() needs a scope this seam does
+    /// not have) refuses the bucket — folding the text in the WRONG ink
+    /// would half-render, the exact lie the wave-42 gate exists to stop.
+    func testUnparseableColorRefusesTheBucket() throws {
+        let c = try component("""
+        {"id":"x","name":"div","properties":[],
+         "pseudos":{"before":{"properties":{"content":"\\"p\\"",
+                                            "color":"var(--ink)"},
+                              "_text":"p"}}}
+        """)
+        XCTAssertNil(PseudoTextFold.resolve(c).text)
+        XCTAssertFalse(PropertyTracker.logOnce(
+            key: "pseudotext-unsupported-before-color", message: "dup"))
+    }
+
     // MARK: - Wire tolerance + identity
 
     /// The v2 spelling (`text`) is tolerated exactly like web's

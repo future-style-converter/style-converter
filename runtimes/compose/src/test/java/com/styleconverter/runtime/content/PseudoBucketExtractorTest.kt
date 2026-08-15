@@ -168,6 +168,54 @@ class PseudoBucketExtractorTest {
         assertNull(PseudoBucketExtractor.extractBeforeAfterConfig(p, role = null))
     }
 
+    // ── wave-43 lane V7: the bucket's own styling declarations ──────────
+
+    @Test
+    fun `declared color rides the config as a typed property`() {
+        // css-display/display-contents-dynamic-before-after-001 …__0-049,
+        // VERBATIM from wave42-final per-test-ir: the ::before bakes "P"
+        // and declares `color: red` (plus display:contents + border, which
+        // stay outside the text conversion). The config must carry a typed
+        // Color entry so the render site paints the declared ink.
+        val p = pseudos(
+            """{"before": {"properties": {"content": "\"P\"", "color": "red", "display": "contents", "border": "1px solid red"}, "_text": "P", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}}"""
+        )
+        val cfg = PseudoBucketExtractor.extractBeforeAfterConfig(p, role = null)
+        assertEquals("P", textOf(cfg?.before))
+        // Exactly one typed entry: the converted color (border/display are
+        // not text styling and must not be forged into properties).
+        assertEquals(listOf("Color"), cfg!!.before!!.properties.map { it.type })
+        // display: contents is not block-level → the run stays inline.
+        assertTrue(cfg.before!!.isInline)
+    }
+
+    @Test
+    fun `declared font-size rides the config as a typed property`() {
+        // css-contain/contain-content-011 ::after, VERBATIM: `_text: "25"`
+        // with `font-size: 3em` — the Chromium ref paints the number at
+        // 48px (3 × the 16px inherited base) while Android painted 16sp
+        // (android-ref 0.9275 FAIL). The typed FontSize entry hands the
+        // resolution to TextStyleApplier's inherited-base branch.
+        val p = pseudos(
+            """{"after": {"properties": {"content": "\"25\"", "font-size": "3em"}, "_text": "25", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}}"""
+        )
+        val cfg = PseudoBucketExtractor.extractBeforeAfterConfig(p, role = null)
+        assertEquals("25", textOf(cfg?.after))
+        // The single symbolic FontSize entry (em resolves at render time).
+        assertEquals(listOf("FontSize"), cfg!!.after!!.properties.map { it.type })
+    }
+
+    @Test
+    fun `unstyled buckets keep an empty properties list`() {
+        // The wave-42 population (content/counter-* only) must be
+        // byte-identical in behavior: no typed entries invented.
+        val p = pseudos(
+            """{"before": {"properties": {"content": "\"1-5\""}, "_text": "1-5"}}"""
+        )
+        val cfg = PseudoBucketExtractor.extractBeforeAfterConfig(p, role = null)
+        assertTrue(cfg!!.before!!.properties.isEmpty())
+    }
+
     // ── literalContentText corners ──────────────────────────────────────
 
     @Test

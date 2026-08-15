@@ -32,6 +32,21 @@ struct ColumnsConfig: Equatable {
     // multicol element's children is the column box).
     var widthPx: Double? = nil
 
+    // Wave-43 lane V6 — css-overflow-4 §3 `continue: discard`: content
+    // laid out past the multicol box's last column (the §8.2 overflow
+    // columns) is DISCARDED instead of painted. Only the DISCARD keyword
+    // flips this; `auto` (and any future keyword) keeps normal overflow.
+    // Mirrors Compose's MultiColumnConfig.continueDiscard byte-for-byte:
+    // the flag rides the columns config into MulticolGreedyLayout, which
+    // threads it into MulticolSpannerFlow.plan's discardOverflow (the
+    // wave-42 plan machinery both natives already share and pin).
+    // Wave-43 lane G3 made that parity claim true for the FOLD as well:
+    // both extractors now take the LAST `Continue` declaration in the
+    // cascade (css-cascade-5 §6.4.4), so a duplicated declaration such as
+    // [DISCARD, AUTO] resolves false on both platforms. It used to resolve
+    // true here (an any-DISCARD-wins `contains` scan) and false on Compose.
+    var continueDiscard: Bool = false
+
     // True when either typed multicol input is non-auto — css-multicol-1
     // §2: an element whose computed column-width OR column-count is not
     // `auto` establishes a multicol formatting context. Rule properties

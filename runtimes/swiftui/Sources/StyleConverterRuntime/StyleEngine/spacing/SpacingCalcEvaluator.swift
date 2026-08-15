@@ -190,8 +190,12 @@ enum SpacingCalcEvaluator {
             // Pins P2–P6 — spec/UA fallback constants (see resolver docs).
             case "ex":  return v * 0.5 * ctx.fontSizePx        // x-height ≈ 0.5em
             case "ic", "cap": return v * ctx.fontSizePx        // 1em fallbacks
-            case "lh":  return v * 1.2 * ctx.fontSizePx        // normal ≈ 1.2em
-            case "rlh": return v * 1.2 * 16.0                  // 1.2 × root 16px
+            // Wave 43 (lane V3): lh reads the threaded USED line-height —
+            // kept in lockstep with SpacingResolver's .lh arm so a
+            // calc(1lh + 2px) and a bare 1lh can never disagree; the nil
+            // fallback is the historical `normal ≈ 1.2em` approximation.
+            case "lh":  return v * (ctx.lineHeightPx ?? 1.2 * ctx.fontSizePx)
+            case "rlh": return v * 1.2 * 16.0                  // 1.2 × root 16px (unmoved — see resolver)
             // Viewport width family; vi/vb fold onto vw/vh in horizontal-tb
             // (pins P7/P8); cq* ride along per css-contain-3 §9's
             // no-container small-viewport fallback.

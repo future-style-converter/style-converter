@@ -63,9 +63,31 @@ object PropertiesParser {
      * Parse a map of CSS properties into a list of specific IRProperty instances.
      *
      * @param properties Map of property name → CssPropertyValue
+     * @param resolveInheritedDefaults Opt-in cascade resolution: when true,
+     *   a winning `inherit` on an inherited-by-default longhand is DROPPED
+     *   after shorthand expansion (CSS22 §6.2.1 — for those properties the
+     *   declaration is byte-equivalent to absence, and the unresolved
+     *   `{global:"inherit"}` marker shadows the natives' inheritance
+     *   channels; see InheritedDefaultResolution). ONLY the base-declaration
+     *   call site (CssParsing.convertToIR) passes true: in selector/media
+     *   buckets and keyframe stops `inherit` OVERRIDES the base declaration
+     *   when the bucket applies, so absence would change the render — those
+     *   call sites keep the default false and emit the keyword unresolved.
+     * @param sourceTag The component's originating HTML tag (the extractor's
+     *   `_tag` hint → IR v2 `meta.sourceTag`), or null when the input has
+     *   none. Consulted ONLY when resolveInheritedDefaults is true: on a
+     *   UA-styled tag (InheritedDefaultResolution.UA_STYLED_TAGS) the drop
+     *   is not identity — Chromium's UA sheet declares those properties, so
+     *   the vacated slot is filled by the UA rule instead of by inheritance
+     *   (css-cascade-4 §7.3 defaulting applies only when NO origin declared
+     *   a winner). Bucket call sites leave it null; they don't drop anyway.
      * @return Mutable list of IRProperty instances (specific types from irmodels/)
      */
-    fun parse(properties: Map<String, CssPropertyValue>): MutableList<IRProperty> {
+    fun parse(
+        properties: Map<String, CssPropertyValue>,
+        resolveInheritedDefaults: Boolean = false,
+        sourceTag: String? = null
+    ): MutableList<IRProperty> {
         val result = mutableListOf<IRProperty>()
 
         // Step 0: route custom properties (--*) OUT of the typed pipeline.
@@ -117,8 +139,33 @@ object PropertiesParser {
             }
         }
 
+        // Step 2.5 (base declarations only): resolve redundant `inherit`.
+        // Post-expansion so `font: inherit` (per-longhand keyword forward,
+        // FontExpanderTest pins it) resolves through the same rule as the
+        // longhand form. Identity for every bucket call site (flag false),
+        // for every UA-styled sourceTag (guard 4 — the UA sheet owns the
+        // vacated slot on web), and for every map with no redundant entry —
+        // see InheritedDefaultResolution for the full spec argument.
+        val resolvedProperties =
+            if (resolveInheritedDefaults) InheritedDefaultResolution.resolve(expandedProperties, sourceTag)
+            else expandedProperties
+        // Keep the drop visible in the convert log — never a silent eat.
+        if (resolvedProperties.size != expandedProperties.size) {
+            val dropped = expandedProperties.keys - resolvedProperties.keys
+            println("[CSS Parser] Resolved redundant 'inherit' on inherited-by-default propert${if (dropped.size == 1) "y" else "ies"} (drop == natural inheritance): ${dropped.joinToString(", ")}")
+        }
+        // …and keep the SKIP equally visible: a UA-styled tag that carried
+        // candidate `inherit` declarations kept them on purpose, so the log
+        // records the exemption instead of leaving a silent non-event.
+        if (resolveInheritedDefaults && InheritedDefaultResolution.isUaStyledTag(sourceTag)) {
+            val kept = expandedProperties.filter { (n, v) -> InheritedDefaultResolution.isRedundantInherit(n, v) }.keys
+            if (kept.isNotEmpty()) {
+                println("[CSS Parser] Kept 'inherit' on <$sourceTag> (UA-styled tag: the UA sheet declares these, so absence ≠ inheritance): ${kept.joinToString(", ")}")
+            }
+        }
+
         // Step 3: Parse each longhand property into specific IRProperty
-        for ((name, value) in expandedProperties) {
+        for ((name, value) in resolvedProperties) {
             val property = PropertyParserRegistry.parse(name, value)
 
             if (property != null) {
