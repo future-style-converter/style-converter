@@ -25,6 +25,26 @@ function parse(data: unknown): string | number | undefined {
   return undefined;
 }
 
+// wave-42 lane W7 — the <'block-ellipsis'> component of the two-value grammar
+// (css-overflow-4 §5.1 `<integer [1,∞]> || <'block-ellipsis'>`).  The
+// converter rides it on the lines variant as an ADDITIVE nested object:
+//   {type:'lines', count:N, ellipsis:{type:'no-ellipsis'}}       — keyword
+//   {type:'lines', count:N, ellipsis:{type:'string', value:s}}   — <string>
+//   {type:'lines', count:N, ellipsis:{type:'auto'}} / absent     — UA marker
+// `no-ellipsis` and the EMPTY string mean the marker must not render AND must
+// not displace content to make room for itself (WPT block-ellipsis-023/024's
+// asserts, verbatim) — which rules out the applier's -webkit-box trio, whose
+// "…" cannot be turned off.  Detected here, separately from parse(), so the
+// cascade fold below can keep last-write-wins semantics for it.
+function suppressesMarker(data: unknown): boolean {
+  if (!data || typeof data !== 'object') return false;               // legacy scalar shapes carry no marker
+  const e = (data as Record<string, unknown>).ellipsis;              // the additive field
+  if (!e || typeof e !== 'object') return false;                     // absent → default (UA) marker
+  const o = e as Record<string, unknown>;
+  if (o.type === 'no-ellipsis') return true;                         // the explicit no-marker keyword
+  return o.type === 'string' && o.value === '';                      // `""` ≡ no-ellipsis (block-ellipsis-024)
+}
+
 // ── `line-clamp: auto` used-value resolution ────────────────────────────────
 //
 // css-overflow-4 §5.1: `auto` clamps at the LAST line box that still fits the
@@ -111,10 +131,14 @@ function constraintInLines(properties: IRPropertyLike[]): number | null {
 // Main entrypoint — last write wins, mirroring CSS cascade semantics.
 export function extractLineClamp(properties: IRPropertyLike[]): LineClampConfig {
   const cfg: LineClampConfig = {};                                      // blank accumulator
+  let noMarker = false;                                                 // wave-42: whether the WINNING declaration suppresses the marker
   for (const p of properties) {
     if (!isLineClampProperty(p.type)) continue;                         // filter unrelated
     const v = parse(p.data);                                          // convert payload
-    if (v !== undefined) cfg.value = v;                               // record result
+    if (v !== undefined) {
+      cfg.value = v;                                                  // record result
+      noMarker = suppressesMarker(p.data);                            // marker fate follows the same winner
+    }
   }
   // Resolve `auto` once, AFTER the cascade fold, so a later `line-clamp:none`
   // in the same component cancels it exactly the way CSS does.
@@ -126,6 +150,18 @@ export function extractLineClamp(properties: IRPropertyLike[]): LineClampConfig 
     // count of 0 is legal here (`max-height:0`) but is NOT a legal
     // -webkit-line-clamp value, so the applier clips instead — see there.
     if (lines !== null && Number.isFinite(lines) && lines >= 0) cfg.autoLines = Math.floor(lines);
+  } else if (typeof cfg.value === 'number' && noMarker) {
+    // wave-42 lane W7 — a fixed count whose marker is suppressed
+    // (`line-clamp: 4 no-ellipsis` / `4 ""`, block-ellipsis-023/024).  Route
+    // it onto the SAME geometry path `auto` uses (applier: lineClamp + N·lh
+    // max-height + hidden overflow, and deliberately NOT the -webkit-box
+    // trio): that path clamps at exactly N line boxes without ever drawing
+    // "…", which is precisely what no-ellipsis demands — the trio's marker
+    // cannot be disabled and WOULD displace end-of-line content, the exact
+    // failure both tests assert against.  Unlike real `auto`, the count needs
+    // no constraint resolution: the declaration itself carries it.
+    cfg.auto = true;                                                  // geometry-clamp path selector (see Config doc)
+    cfg.autoLines = cfg.value;                                        // clamp at the declared count
   }
   return cfg;
 }

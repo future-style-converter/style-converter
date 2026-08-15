@@ -8,6 +8,8 @@
 
 import { extractLength, type LengthValue } from '../core/types/LengthValue';
 import { extractAspectRatio } from './AspectRatioValue';
+// css-values-5 calc-size() typed wire decode (wave 42 lane W3).
+import { extractCalcSize } from './CalcSizeValue';
 import type { SizeConfig, SizePropertyType } from './SizeConfig';
 import { SIZE_PROPERTY_TYPES } from './SizeConfig';
 
@@ -32,6 +34,28 @@ function applyOne(cfg: SizeConfig, prop: IRPropertyLike): void {
     const ar = extractAspectRatio(prop.data);
     if (ar) cfg.aspectRatio = ar;   // null -> skip (unrecognised shape)
     return;
+  }
+  // css-values-5 calc-size() (wave 42 lane W3): the typed wire shape decodes
+  // into the config's calc-size side-table BEFORE the length delegate —
+  // extractLength does not know the shape and would return {kind:'unknown'},
+  // silently dropping the declaration the browser is fully able to resolve
+  // (the 15 css-values/calc-size WPT cells pass on web precisely because the
+  // declaration reaches Chromium). Only the six physical slots can carry it:
+  // the converter types calc-size on the physical longhands only today.
+  const cs = extractCalcSize(prop.data);
+  if (cs) {
+    const slot = ({
+      Width: 'width', Height: 'height',
+      MinWidth: 'minWidth', MaxWidth: 'maxWidth',
+      MinHeight: 'minHeight', MaxHeight: 'maxHeight',
+    } as const)[prop.type as string];
+    // A calc-size payload on a slot we do not route (logical longhands —
+    // never emitted by the converter today) falls through to extractLength,
+    // whose 'unknown' drop is the pre-existing documented behavior.
+    if (slot) {
+      (cfg.calcSize ??= {})[slot] = cs;
+      return;
+    }
   }
   // Every remaining property carries a length-like value — delegate parsing
   // to the shared extractor (handles WidthValue *and* SizeValue envelopes).

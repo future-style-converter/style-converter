@@ -47,6 +47,15 @@ struct SizeConfig: Equatable {
     // Nil means the property was absent (distinct from `.isAuto`).
     var aspectRatio: AspectRatioValue? = nil
 
+    // css-values-5 calc-size() typed values (wave 42 lane W3) — the two
+    // slots iOS consumes (preferred width/height). A slot carries EITHER
+    // its LengthValue OR its calc value, never both (SizeExtractor routes
+    // exclusively). Min*/Max* calc-size deliberately has NO slot here —
+    // see SizeExtractor's calc-size comment for the measured record (the
+    // flex family PASSES on the intrinsic fallback those slots keep).
+    var widthCalc: CalcSizeValue? = nil
+    var heightCalc: CalcSizeValue? = nil
+
     // css-sizing-3 §3 `box-sizing`. Nil = the IR never declared it (the
     // border-box status quo must not change); `.contentBox` makes the
     // applier inflate explicit width/height by the padding + border
@@ -63,6 +72,10 @@ struct SizeConfig: Equatable {
         width != nil || height != nil ||
         minWidth != nil || maxWidth != nil ||
         minHeight != nil || maxHeight != nil ||
-        aspectRatio != nil
+        aspectRatio != nil ||
+        // calc-size slots size the box too — without these the applier's
+        // fast path would skip a component whose ONLY sizing is a typed
+        // calc-size width (exactly the calc-size-min-max inner-div shape).
+        widthCalc != nil || heightCalc != nil
     }
 }

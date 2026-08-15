@@ -9,7 +9,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.styleconverter.runtime.borders.sides.BorderSideConfig
+import com.styleconverter.runtime.borders.sides.BorderSideExtractor
 import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
+import com.styleconverter.runtime.core.types.LengthValue
+import com.styleconverter.runtime.sizing.BoxSizingKeyword
+import com.styleconverter.runtime.sizing.SizingExtractor
+import com.styleconverter.runtime.spacing.SpacingContext
+import com.styleconverter.runtime.spacing.SpacingExtractor
+import com.styleconverter.runtime.spacing.resolveToDp
+import kotlinx.serialization.json.JsonElement
 
 /**
  * ReplacedImageContent — the Compose paint half of wave-39 lane A2: a
@@ -69,15 +79,16 @@ object ReplacedImageContent {
         heightDefinite: Boolean,
     ): Boolean {
         val decoded = DocumentImageRegistry.resolve(component.attrs?.src) ?: return false
+        // The (type, data) pair list every extractor below consumes — built
+        // once so object-fit and the §10.4 bounds read the SAME properties.
+        val props = component.properties.map { it.type to it.data }
         // object-fit / object-position, read from the SAME per-property
         // extractor the images/ triplet already ships (wave-8). This is the
         // wiring its own applier header called for: "When a content-image
         // channel lands, route its raster through … with the objectFit keyword
         // mapped". `contentScale` only has an effect once the content box and
         // the raster disagree, i.e. in the FILL_BOTH / ratio modes below.
-        val fit = ObjectFitExtractor.extractObjectFitConfig(
-            component.properties.map { it.type to it.data }
-        )
+        val fit = ObjectFitExtractor.extractObjectFitConfig(props)
         // §10.3.2 used-content-size decision (pure, twinned on iOS).
         val mode = ReplacedBoxSizing.mode(widthDefinite, heightDefinite, decoded.aspectRatio)
         val sizing = when (mode) {
@@ -92,11 +103,27 @@ object ReplacedImageContent {
                 Modifier.fillMaxWidth().aspectRatio(decoded.aspectRatio!!, false)
             ReplacedBoxSizing.Mode.HEIGHT_FILLS_RATIO_WIDTH ->
                 Modifier.fillMaxHeight().aspectRatio(decoded.aspectRatio!!, true)
-            // Neither axis declared: the content is its intrinsic size and the
-            // wrapping Box hugs it. CSS px == dp at the 160 dpi capture
-            // density, the identity every geometry constant here assumes.
-            ReplacedBoxSizing.Mode.INTRINSIC ->
-                Modifier.size(decoded.intrinsicWidthPx.dp, decoded.intrinsicHeightPx.dp)
+            // Neither axis declared: the content is its intrinsic size run
+            // through §10.4's min/max constraint resolution (wave-42 W6 —
+            // identity when no bounds are declared, so every pre-wave-42
+            // capture is byte-identical). The wrapping Box hugs the result.
+            // CSS px == dp at the 160 dpi capture density, the identity every
+            // geometry constant here assumes.
+            ReplacedBoxSizing.Mode.INTRINSIC -> {
+                // §10.4 bounds live on the SAME wire properties the sizing
+                // chain clamps the box with, so box and content stay agreed.
+                val used = constrainedAutoContentSize(
+                    properties = props,
+                    // The chain's own box-sizing tri-state resolution needs
+                    // the WPT flag (unset defaults to content-box ONLY there
+                    // — SizingApplier.effectiveBoxSizing's pinned decision).
+                    wptCaptureMode = LocalWptCaptureMode.current,
+                    intrinsicWidthPx = decoded.intrinsicWidthPx.toFloat(),
+                    intrinsicHeightPx = decoded.intrinsicHeightPx.toFloat(),
+                    aspectRatio = decoded.aspectRatio,
+                )
+                Modifier.size(used.widthPx.dp, used.heightPx.dp)
+            }
         }
         Image(
             bitmap = decoded.bitmap,
@@ -110,5 +137,83 @@ object ReplacedImageContent {
             modifier = sizing,
         )
         return true
+    }
+
+    /**
+     * Wave-42 W6 — the wire half of §10.4: read the min/max bounds off the
+     * component's properties, convert each to CONTENT-BOX px, and hand them to
+     * [ReplacedBoxSizing.constrainAutoSize]. Pure (no composition) so the JVM
+     * suite pins the border-box band arithmetic without a device.
+     *
+     * Bound conversion (css-sizing-3 §3, mirroring the sizing chain's own
+     * semantics so the box and its content can never disagree):
+     *   * effective `content-box` — the declared bound IS the content bound;
+     *   * everything else (explicit `border-box`, or unset = the chain's
+     *     border-box status quo) — content bound = declared − (padding +
+     *     used border) band on that axis, floored at 0 (a bound smaller than
+     *     its own bands leaves a zero content box, css-ui-3 §5's floor).
+     * Only [LengthValue.Exact] bounds participate: `none` means unbounded and
+     * a %/em bound has no resolvable px here (documented narrowing — the
+     * chain still clamps the BOX by it at layout time).
+     */
+    internal fun constrainedAutoContentSize(
+        properties: List<Pair<String, JsonElement?>>,
+        wptCaptureMode: Boolean,
+        intrinsicWidthPx: Float,
+        intrinsicHeightPx: Float,
+        aspectRatio: Float?,
+    ): ReplacedBoxSizing.UsedSize {
+        // The SAME extractor the sizing chain runs, WPT tri-state included
+        // (SizingExtractor resolves effectiveBoxSizing internally), so the
+        // keyword this reads is the keyword the chain clamped with.
+        val sizing = SizingExtractor.extractSizingConfig(properties, wptCaptureMode)
+        // Effective content-box needs no band; border-box (explicit or the
+        // unset status quo) subtracts the padding+border band per axis.
+        val (bandX, bandY) =
+            if (sizing.boxSizing == BoxSizingKeyword.CONTENT_BOX) 0f to 0f
+            else paddingAndBorderBands(properties)
+        // One declared bound → content-box px, or null when unresolvable.
+        fun bound(v: LengthValue?, band: Float): Float? =
+            (v as? LengthValue.Exact)?.px?.toFloat()?.minus(band)?.coerceAtLeast(0f)
+        // The pure §10.4 table, in content-box px throughout.
+        return ReplacedBoxSizing.constrainAutoSize(
+            intrinsicWidthPx = intrinsicWidthPx,
+            intrinsicHeightPx = intrinsicHeightPx,
+            aspectRatio = aspectRatio,
+            minWidthPx = bound(sizing.minWidth, bandX),
+            maxWidthPx = bound(sizing.maxWidth, bandX),
+            minHeightPx = bound(sizing.minHeight, bandY),
+            maxHeightPx = bound(sizing.maxHeight, bandY),
+        )
+    }
+
+    /**
+     * Per-axis padding + USED border band, px — the amount a border-box bound
+     * exceeds its content bound. Mirrors SizingExtractor.contentBoxInflation
+     * line for line (that helper is private and gated on content-box, where
+     * this caller needs the band for the border-box direction): padding rides
+     * SpacingExtractor with the §5.2.1 indefinite-percent-as-zero context,
+     * borders ride the [BorderSideConfig.hasBorder] gate so `border-style:
+     * none` contributes 0 (CSS 2.1 §8.5.3) — one definition of "band" keeps
+     * inflation and deflation from ever drifting.
+     */
+    private fun paddingAndBorderBands(
+        properties: List<Pair<String, JsonElement?>>
+    ): Pair<Float, Float> {
+        // Padding resolved exactly as PaddingApplier will inset it; the
+        // indefinite percent basis contributes zero (css-sizing-3 §5.2.1),
+        // matching the sizing chain's static resolution.
+        val pad = SpacingExtractor.extractPaddingConfig(properties).resolve(isRtl = false)
+        val ctx = SpacingContext(percentIndefiniteAsZero = true)
+        fun side(v: LengthValue?): Float = resolveToDp(v, ctx).value.coerceAtLeast(0f)
+        // Border band — only sides that actually paint consume space.
+        val borders = BorderSideExtractor.extractBorderConfig(properties)
+        fun band(s: BorderSideConfig): Float = if (s.hasBorder) s.width?.value ?: 0f else 0f
+        return Pair(
+            // Inline axis: left + right padding plus start + end borders.
+            side(pad.left) + side(pad.right) + band(borders.start) + band(borders.end),
+            // Block axis: top + bottom padding plus top + bottom borders.
+            side(pad.top) + side(pad.bottom) + band(borders.top) + band(borders.bottom),
+        )
     }
 }

@@ -108,11 +108,22 @@ class IntrinsicFitContentKeywordTest {
     }
 
     @Test
-    fun `calc-size stays in the Generic envelope`() {
-        // css-values-5 §11 calc-size() operates on an INTRINSIC size that only
-        // layout knows, so the reader must keep declining it — the web runtime
-        // forwards it verbatim from the Generic envelope instead (StyleBuilder
-        // applyGeneric). A null return here is what routes it there.
-        assertNull(WidthPropertyParser.parse("calc-size(auto, size + 80px)"))
+    fun `calc-size routing — affine is typed, unreducible stays Generic`() {
+        // SUPERSEDED PIN (wave 42, lane W3): this test froze the wave-39
+        // state where EVERY calc-size() declined to the Generic envelope.
+        // CalcSizeParser now types the affine `size` family so the NATIVE
+        // runtimes can resolve it (Android dropped these outright —
+        // calc-size-flex-001..006 painted no green at all); the typed value
+        // carries the verbatim `original` so the web runtime still replays
+        // the exact declaration into the browser (the fidelity this pin
+        // was protecting). What must STILL decline is the unreducible
+        // family — nested math functions over `size` — which keeps riding
+        // the Generic envelope to the browser untyped.
+        val typed = assertIs<WidthProperty>(
+            WidthPropertyParser.parse("calc-size(auto, size + 80px)"))
+        assertEquals("calc-size(auto, size + 80px)",
+            assertIs<WidthProperty.WidthValue.CalcSize>(typed.width).original)
+        // min(size, 100px) is not affine in `size` → Generic, as before.
+        assertNull(WidthPropertyParser.parse("calc-size(auto, min(size, 100px))"))
     }
 }

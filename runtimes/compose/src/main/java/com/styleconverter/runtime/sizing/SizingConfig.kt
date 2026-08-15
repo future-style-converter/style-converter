@@ -60,6 +60,19 @@ data class SizingConfig(
     val maxInlineSize: LengthValue? = null,
     // aspect-ratio is its own shape.
     val aspectRatio: AspectRatioValue? = null,
+    // css-values-5 calc-size() typed values (wave 42 lane W3) — the four
+    // slots the converter types today (physical width/height + their min
+    // twins). Kept BESIDE the LengthValue slots rather than widening the
+    // shared core LengthValue: a slot carries EITHER its LengthValue OR its
+    // calc-size value, never both (SizingExtractor routes exclusively).
+    // Max* calc-size values are deliberately NOT carried: the applier's
+    // documented behavior for an unresolvable max bound is "no constraint",
+    // which is exactly what the undecoded slot already yields — see the
+    // extractor's Max* comment for the non-silent record.
+    val widthCalc: CalcSizeValue? = null,
+    val heightCalc: CalcSizeValue? = null,
+    val minWidthCalc: CalcSizeValue? = null,
+    val minHeightCalc: CalcSizeValue? = null,
     // css-sizing-3 §3 `box-sizing`. Null = the IR never declared it — the
     // border-box status quo (the whole width+padding fixture corpus is
     // captured against web's `* { box-sizing: border-box }` reset) must not
@@ -97,7 +110,12 @@ data class SizingConfig(
             blockSize != null || inlineSize != null ||
             minBlockSize != null || maxBlockSize != null ||
             minInlineSize != null || maxInlineSize != null ||
-            aspectRatio != null
+            aspectRatio != null ||
+            // calc-size slots size the box too — without these the applier's
+            // fast path would skip a component whose ONLY sizing is typed
+            // calc-size (exactly the calc-size-flex item shape).
+            widthCalc != null || heightCalc != null ||
+            minWidthCalc != null || minHeightCalc != null
 
     /**
      * True when any width-direction constraint is specified. Used by callers

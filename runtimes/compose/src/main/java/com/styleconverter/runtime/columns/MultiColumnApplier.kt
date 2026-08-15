@@ -258,8 +258,12 @@ object MultiColumnApplier {
         // Dark-stage 327 protection: the spanner-flow plan is composed-WPT
         // capture only (same gate as the wave-19/20 float and inline-atom
         // lanes) — the dark-stage corpus never sets the capture local, so
-        // its multicol containers keep the frozen greedy layout.
-        val spannerSpecs = if (com.styleconverter.runtime.core.renderer.LocalWptCaptureMode.current) childSpecs else null
+        // its multicol containers keep the frozen greedy layout. Wave-42
+        // reads the local ONCE and threads the flag down: the line-snap
+        // pass needs it independently of childSpecs (a text-only container
+        // has NO children, so its specs are null even under capture).
+        val captureMode = com.styleconverter.runtime.core.renderer.LocalWptCaptureMode.current
+        val spannerSpecs = if (captureMode) childSpecs else null
         BoxWithConstraints(modifier = modifier) {
             val containerWidth = maxWidth
             val columnCount = config.getEffectiveColumnCount(containerWidth)
@@ -297,6 +301,11 @@ object MultiColumnApplier {
                         containerBlockSizeDefinite = containerBlockSizeDefinite,
                         // Wave-21: capture-gated spanner-flow roles (see above).
                         childSpecs = spannerSpecs,
+                        // Wave-42: capture flag (line snap) + fill mode (run
+                        // pass) + `continue: discard` (spanner-flow plan).
+                        captureMode = captureMode,
+                        columnFillAuto = config.fill == ColumnFill.AUTO,
+                        discardOverflow = config.continueDiscard,
                         content = content
                     )
                 } else {
@@ -307,6 +316,11 @@ object MultiColumnApplier {
                         containerBlockSizeDefinite = containerBlockSizeDefinite,
                         // Wave-21: capture-gated spanner-flow roles (see above).
                         childSpecs = spannerSpecs,
+                        // Wave-42: capture flag (line snap) + fill mode (run
+                        // pass) + `continue: discard` (spanner-flow plan).
+                        captureMode = captureMode,
+                        columnFillAuto = config.fill == ColumnFill.AUTO,
+                        discardOverflow = config.continueDiscard,
                         content = content
                     )
                 }
@@ -331,6 +345,14 @@ object MultiColumnApplier {
         // Wave-21: per-measurable spanner-flow roles (already capture-gated
         // by MultiColumnLayout); null keeps the legacy layout untouched.
         childSpecs: List<MulticolSpannerFlow.ChildSpec>? = null,
+        // Wave-42: composed-WPT capture flag — gates the line-snap probe
+        // independently of childSpecs (text-only containers have none).
+        captureMode: Boolean = false,
+        // Wave-42: true iff the container declares `column-fill: auto` —
+        // the multi-child run pass engages only there (§7.2 sequential fill).
+        columnFillAuto: Boolean = false,
+        // Wave-42: `continue: discard` (css-overflow-4 §3) for the plan.
+        discardOverflow: Boolean = false,
         content: @Composable () -> Unit
     ) {
         Row(
@@ -354,6 +376,10 @@ object MultiColumnApplier {
             containerBlockSizeDefinite = containerBlockSizeDefinite,
             // Wave-21: spanner-flow roles ride through to the measure pass.
             childSpecs = childSpecs,
+            // Wave-42: the three new signals ride through unchanged.
+            captureMode = captureMode,
+            columnFillAuto = columnFillAuto,
+            discardOverflow = discardOverflow,
             content = content
         )
     }
@@ -373,6 +399,10 @@ object MultiColumnApplier {
         containerBlockSizeDefinite: Boolean,
         // Wave-21: per-measurable spanner-flow roles (see SimpleMultiColumn).
         childSpecs: List<MulticolSpannerFlow.ChildSpec>? = null,
+        // Wave-42: capture flag + fill mode + discard (see SimpleMultiColumn).
+        captureMode: Boolean = false,
+        columnFillAuto: Boolean = false,
+        discardOverflow: Boolean = false,
         content: @Composable () -> Unit
     ) {
         val ruleColor = config.ruleColor ?: Color.Gray
@@ -386,6 +416,10 @@ object MultiColumnApplier {
             containerBlockSizeDefinite = containerBlockSizeDefinite,
             // Wave-21: spanner-flow roles ride through to the measure pass.
             childSpecs = childSpecs,
+            // Wave-42: the three new signals ride through unchanged.
+            captureMode = captureMode,
+            columnFillAuto = columnFillAuto,
+            discardOverflow = discardOverflow,
             modifier = Modifier.drawBehind {
                 val gapPx = gap.toPx()
                 val ruleWidthPx = ruleWidth.toPx()
@@ -478,6 +512,17 @@ object MultiColumnApplier {
         // dark-stage caller — makes the spanner-flow delegation below a
         // no-op, keeping the frozen paths byte-identical.
         childSpecs: List<MulticolSpannerFlow.ChildSpec>? = null,
+        // Wave-42 lane W4: composed-WPT capture flag — gates the line-snap
+        // probe (childSpecs is null for text-only containers, so the flag
+        // must ride separately). Default false = dark stage/direct callers
+        // (MasonryLayout) keep the raw slice byte-identically.
+        captureMode: Boolean = false,
+        // Wave-42: `column-fill: auto` flag — the multi-child run pass
+        // engages only there (§7.2; balance keeps the greedy spread).
+        columnFillAuto: Boolean = false,
+        // Wave-42: `continue: discard` (css-overflow-4 §3) for the
+        // spanner-flow plan's overflow-column truncation.
+        discardOverflow: Boolean = false,
         content: @Composable () -> Unit
     ) {
         // Measure→draw bridge: the layout pass below publishes the fragment
@@ -599,6 +644,9 @@ object MultiColumnApplier {
                     gapPx = gapPx,
                     definiteBlockSize = definiteBlockSize,
                     fragmentationAllowed = fragmentationAllowed,
+                    // Wave-42: `continue: discard` truncates the plan's
+                    // overflow columns (css-overflow-4 §3).
+                    discardOverflow = discardOverflow,
                     // B-RC6 contract: the helper receives the bridge STATE
                     // and writes it from its PLACEMENT block only (the
                     // bridge test pins this file's own touches to 3).
@@ -614,6 +662,39 @@ object MultiColumnApplier {
                 logFragmentationFallbackOnce("unbounded inline size (no definite column width to probe)")
             }
             if (definiteBlockSize && inlineSizeBounded) {
+                // ── Wave-42 lane W4: the multi-child RUN pass ────────────
+                // Definite-height fill:auto containers with 2+ plain flow
+                // children fragment as ONE continuous block run (§7.2
+                // sequential fill) through the same replay machinery.
+                // Every gate (specs alignment, plain-flow-only, the float
+                // bail, the fill mode) lives in the helper; null falls
+                // through to the wave-10 probes + legacy paths untouched.
+                // Wave-42 skeptic S2: `fragmentationAllowed` must ride
+                // along — this call sits BEFORE the sole-child branch's own
+                // vertical bail below, so without the parameter a vertical
+                // writing-mode container fragmented along the wrong axis.
+                // `usedCount` carries the second gate (N == 1 overflows,
+                // never clips) — both are enforced inside the helper.
+                // The bridge write happens in the HELPER's placement block
+                // (B-RC6: this file keeps its exact 3 fragmentsState
+                // touches).
+                if (measurables.size > 1) {
+                    with(MulticolRunFragmentMeasure) {
+                        measureRunFragment(
+                            measurables = measurables,
+                            constraints = constraints,
+                            childSpecs = childSpecs,
+                            columnFillAuto = columnFillAuto,
+                            fragmentationAllowed = fragmentationAllowed,
+                            usedCount = used.count,
+                            columnWidthPx = columnWidth,
+                            gapPx = gapPx,
+                            columnBlockSizePx = columnBlockSize,
+                            fragmentsBridge = fragmentsState,
+                            logFallback = ::logFragmentationFallbackOnce
+                        )?.let { return@Layout it }
+                    }
+                }
                 // Probe natural block-sizes via intrinsics — non-destructive
                 // (a measurable may still be measured after an intrinsic
                 // query), so the identity path below stays untouched when
@@ -652,6 +733,34 @@ object MultiColumnApplier {
                     logFragmentationFallbackOnce("multi-child container (only single-child fragmentation is implemented)")
                 } else if (overflowing == 1) {
                     // THE fragmentation branch: sole child, C > H, horizontal-tb.
+                    // Wave-42 lane W4: probe the child's single-LINE height
+                    // FIRST (intrinsics before measure, like the gate probe
+                    // above) — at a huge width a text child lays out as one
+                    // line, so the answer IS its line-box height L. Capture
+                    // only: the dark stage keeps the raw slice byte-
+                    // identically, and the guarded channel turns a
+                    // SubcomposeLayout refusal into null (= raw slice).
+                    // Wave-42 skeptic S2: the width is CLAMPED into the
+                    // legal Constraints range at the call site, not just
+                    // chosen legal in MulticolLineSnap — the inherited
+                    // minIntrinsicHeight builds Constraints(maxWidth = w)
+                    // from it, and an unrepresentable w throws
+                    // IllegalArgumentException, which IntrinsicChannel
+                    // deliberately does NOT catch (it narrows to
+                    // IllegalStateException) and which kills the whole
+                    // capture composition. Defense in depth: this failure
+                    // mode has now cost captures twice (wave-39, wave-42).
+                    val lineBoxPx = if (captureMode) IntrinsicChannel.probe(
+                        logTag = "MulticolLineSnap",
+                        refusalContext = "css-break-3 §4 line-box probe " +
+                            "skipped — the sole child has no intrinsic " +
+                            "channel; fragments keep the raw −i·H slice."
+                    ) {
+                        measurables[0].minIntrinsicHeight(
+                            MulticolLineSnap.clampedProbeWidthPx(
+                                MulticolLineSnap.LINE_PROBE_WIDTH_PX))
+                    }
+                    else null
                     // Measure ONCE at column width with unbounded block-size so
                     // the child lays out (and paints) as one continuous C-tall
                     // box — the slice source.
@@ -665,8 +774,22 @@ object MultiColumnApplier {
                     )
                     // Geometry from the MEASURED height (the true laid-out C;
                     // intrinsics only gated entry) — pinned by the shared
-                    // S-table in FragmentGeometryTest.
-                    val fragments = FragmentGeometry.fragmentGeometry(
+                    // S-table in FragmentGeometryTest. Wave-42: a child that
+                    // IS a uniform line stack snaps its fragments to whole
+                    // line boxes instead (class-B breakpoints — css-break-3
+                    // §4 forbids breaking in the middle of a line box; the
+                    // raw −i·H slice tore glyphs and drifted per column on
+                    // the wave-41 discard-multicol captures). The snap
+                    // declines (null) for anything that is not a line stack,
+                    // keeping the raw geometry (LS-table pinned).
+                    val fragments = MulticolLineSnap.snappedFragments(
+                        childBlockSizePx = placeable.height,
+                        columnBlockSizePx = columnBlockSize,
+                        lineBoxPx = lineBoxPx,
+                        columnWidthPx = columnWidth,
+                        columnGapPx = gapPx,
+                        columnCount = used.count
+                    ) ?: FragmentGeometry.fragmentGeometry(
                         childBlockSizePx = placeable.height,
                         columnBlockSizePx = columnBlockSize,
                         columnWidthPx = columnWidth,

@@ -283,6 +283,19 @@ enum SizeApplierMath {
             })
         }
 
+        // css-values-5 calc-size() preferred sizes (wave 42 lane W3) —
+        // wrapped OUTERMOST like MinContentWidthLayout, so the resolved
+        // `factor * basis + offset` is the frame every downstream painter
+        // (background, border) sees. The width/height LengthValue slots are
+        // guaranteed nil when these are set (SizeExtractor routes
+        // exclusively), so no exact .frame above can fight the layout.
+        if let wc = c.widthCalc {
+            out = AnyView(CalcSizeSizeLayout(isWidth: true, value: wc) { out })
+        }
+        if let hc = c.heightCalc {
+            out = AnyView(CalcSizeSizeLayout(isWidth: false, value: hc) { out })
+        }
+
         // AspectRatio last — aspectRatio reinterprets any remaining
         // degree of freedom in the frame. When `auto`, we skip so
         // SwiftUI uses the natural ratio. We also skip when the

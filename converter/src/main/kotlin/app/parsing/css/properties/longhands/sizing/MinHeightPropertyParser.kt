@@ -4,12 +4,24 @@ import app.irmodels.*
 import app.irmodels.properties.spacing.MinHeightProperty
 import app.irmodels.properties.spacing.MinWidthProperty
 import app.parsing.css.properties.longhands.PropertyParser
+import app.parsing.css.properties.primitiveParsers.CalcSizeParser
 import app.parsing.css.properties.primitiveParsers.LengthParser
 
 object MinHeightPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim().lowercase()
         val minValue = when {
+            // css-values-5 §10.1 calc-size() (wave 42 lane W3) — see the
+            // decision record on WidthPropertyParser's identical branch; the
+            // column-axis twin of MinWidthPropertyParser's branch
+            // (calc-size-flex-004..006 exercise it on min-height).
+            trimmed.startsWith("calc-size(") -> when (val r = CalcSizeParser.parse(trimmed)) {
+                is CalcSizeParser.Result.Resolved ->
+                    MinWidthProperty.MinMaxValue.LengthValue(IRLength.fromPx(r.px))
+                is CalcSizeParser.Result.Dynamic ->
+                    MinWidthProperty.MinMaxValue.CalcSize(r.basis, r.factor, r.offsetPx, r.original)
+                null -> return null
+            }
             trimmed == "auto" -> MinWidthProperty.MinMaxValue.Auto()
             trimmed == "min-content" -> MinWidthProperty.MinMaxValue.MinContent()
             trimmed == "max-content" -> MinWidthProperty.MinMaxValue.MaxContent()

@@ -37,10 +37,31 @@ enum SizeExtractor {
         for p in properties {
             switch p.type {
             // ─── Physical width family (WidthValue shape) ────────────
+            // css-values-5 calc-size() (wave 42 lane W3): the typed wire
+            // shape routes Width/Height into the calc slots BEFORE
+            // extractLength (which returns `.unknown` for it — the drop
+            // that left calc-size-min-max-sizes-001..006 painting a ~20px
+            // sliver against the ref's 100px square, ssim 0.9619 FAIL ×6).
+            //
+            // Min*/Max* calc-size is DELIBERATELY left on the extractLength
+            // path: `.unknown` resolves to nil (no constraint) in
+            // SizeApplierResolve — byte-identical to the pre-typed-wire
+            // behavior under which all six calc-size-flex cells PASS on
+            // iOS (0.9751..0.9819, the item renders its content-based
+            // minimum). A floor lane here would be an unmeasured change to
+            // passing cells; this comment is the non-silent record.
             case "Width":
-                cfg.width = extractLength(p.data)
+                if let calc = CalcSizeValue.decode(p.data) {
+                    cfg.widthCalc = calc
+                } else {
+                    cfg.width = extractLength(p.data)
+                }
             case "Height":
-                cfg.height = extractLength(p.data)
+                if let calc = CalcSizeValue.decode(p.data) {
+                    cfg.heightCalc = calc
+                } else {
+                    cfg.height = extractLength(p.data)
+                }
             case "MinWidth":
                 cfg.minWidth = extractLength(p.data)
             case "MaxWidth":

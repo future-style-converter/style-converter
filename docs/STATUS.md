@@ -21,7 +21,7 @@ the full history lives in git history.
   slot/placement wire); the JSON is machine-checked against
   `schema/ir-v2.schema.json` (`schema/ir-v1.schema.json` is the deprecated
   legacy contract for the `--emit-ir v1` compat wire) + the normative spec
-  in [`schema/spec/`](../schema/spec/); 36 golden fixtures (12 v1 + 24 v2)
+  in [`schema/spec/`](../schema/spec/); 39 golden fixtures (12 v1 + 27 v2)
   are decoded by conformance tests on all four codebases
   (`node schema/conformance/run.mjs`).
 
@@ -899,17 +899,48 @@ dirs + WPT corpus are gitignored):
   all capture columns full, zero watchdogs, 327-net clean. Totals:
   **web 1187/1379 (86.1%), iOS 953/1351 (70.5%), Android 948/1350
   (70.2%)**.
+  Wave 42 (`tools/titan/results/corpus-v6-7.json`) was the dead-wire
+  wave — nine builder lanes, six executed-repro skeptics, four fix
+  lanes. The headline: ordinary-element `::before`/`::after` baked
+  text was **dead code on the v2 wire in both native core renderers**
+  (Compose read a channel no v2 document emits — its own TODO said
+  so; iOS had no seam at all). Wiring it delivered css-lists Android
+  +9 / iOS +11 and counter-styles +1/+1. `calc-size()` went from
+  Generic-unmapped (Android collapsed flex items to nothing) to a
+  typed wire evaluated on all three platforms: css-values iOS +8,
+  Android +2. CSS2 §9.5.2 float clearance landed as byte-parallel
+  twins (identity unless every simulated position is exact): CSS2
+  +5/+4. Plus the line-clamp two-value grammar, the Android
+  border-radius self-paint split (`Modifier.clip` clips children;
+  §4.3 doesn't), abspos shrink-to-fit, and the WOFF→TTF host hop — a
+  deliberate zero-flip fidelity fix that ends the sans-serif
+  fallback for every corpus font. The skeptics earned their keep:
+  one **ship-stopper caught pre-gate** (a multicol intrinsic probe
+  width 3.8× over Compose's Constraints packing limit — the wave-39
+  capture-death class), the §10.4 row-9 mis-transcription in both
+  twins, a pseudo `display:none` that would have painted the word
+  FAIL on a WPT test while the metric said PASS, the padded-float
+  clearance hole, and a WOFF cache that would have shipped a
+  truncated font forever after one interrupted run. The SVG
+  pre-raster A/B re-ran post-§10.4: default stays OFF — the blocker
+  moved to inline-atom flow not admitting replaced images. One
+  instrument flake at the gate (the known adb-pull truncation,
+  single-fixture refeed recovered it at 0.9967). Depth-48 gate: zero
+  watchdogs, all columns full, audited baseline refresh (18 radius
+  captures moved toward the ref under self-paint) + 327-net clean.
+  Totals: **web 1187/1379 (86.1%), iOS 977/1351 (72.3%), Android
+  970/1350 (71.9%)**.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 329 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1252 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2276 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1431 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1589 |
-| IR conformance | `node schema/conformance/run.mjs --emit` | 36 goldens (12 v1 + 24 v2) × 4 codebases |
+| converter (Kotlin) | `./gradlew :converter:test` | 354 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1263 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2414 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1513 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1619 |
+| IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap
 

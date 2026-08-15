@@ -4,6 +4,7 @@ import app.irmodels.*
 import app.irmodels.properties.spacing.HeightProperty
 import app.irmodels.properties.spacing.WidthProperty
 import app.parsing.css.properties.longhands.PropertyParser
+import app.parsing.css.properties.primitiveParsers.CalcSizeParser
 import app.parsing.css.properties.primitiveParsers.LengthParser
 
 object HeightPropertyParser : PropertyParser {
@@ -27,6 +28,18 @@ object HeightPropertyParser : PropertyParser {
             }
             lower.startsWith("anchor-size(") && lower.endsWith(")") -> {
                 parseAnchorSize(trimmed)
+            }
+            // css-values-5 §10.1 calc-size() (wave 42 lane W3) — see the
+            // decision record on WidthPropertyParser's identical branch.
+            // Typed BEFORE isExpression so the affine `size` family reaches
+            // the runtimes as a resolvable value; unreducible calls return
+            // null → Generic (web verbatim replay preserved).
+            lower.startsWith("calc-size(") -> when (val r = CalcSizeParser.parse(trimmed)) {
+                is CalcSizeParser.Result.Resolved ->
+                    WidthProperty.WidthValue.LengthValue(IRLength.fromPx(r.px))
+                is CalcSizeParser.Result.Dynamic ->
+                    WidthProperty.WidthValue.CalcSize(r.basis, r.factor, r.offsetPx, r.original)
+                null -> return null
             }
             // Handle calc(), clamp(), min(), max(), var(), env() and math function expressions
             LengthParser.isExpression(lower) -> WidthProperty.WidthValue.Expression(trimmed)

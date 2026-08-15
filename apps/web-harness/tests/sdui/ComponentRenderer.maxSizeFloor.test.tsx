@@ -79,7 +79,31 @@ describe('placeholder size floor vs declared max-* (legacy capture path)', () =>
     vi.unstubAllGlobals();
     vi.resetModules();
     ComponentRenderer = (await import('../../src/sdui/ComponentRenderer')).ComponentRenderer;
-  });
+  }, 60_000); // ← hook timeout, NOT the default 10s. See below.
+  //
+  // WHY THIS HOOK NEEDS SIXTY SECONDS (wave-42 lane F4, a measured flake).
+  //
+  // `vi.resetModules()` drops the module cache, so EVERY iteration of this
+  // hook re-imports ComponentRenderer from scratch — and that import pulls the
+  // whole @style-converter/web engine (1,681 `.ts` modules under
+  // runtimes/web/src) back through vite's transform. Measured on an idle
+  // machine, one cold pass costs ~1.8s wall (~1.4s of it transform). That is
+  // comfortably inside vitest's 10s default hookTimeout ALONE — which is
+  // exactly why this looked fine in isolation and failed in CI: `npm test` at
+  // the repo root runs every workspace's suite with a worker per core, so this
+  // transform competes with the web runtime's own 1200+ tests for the same
+  // CPUs and the same vite cache, and the hook was measured straddling the 10s
+  // line under that load. A straddled timeout is the worst kind of red: it
+  // fails a hook whose only sin is scheduling, and it fails DIFFERENT files run
+  // to run, which reads as a real regression to whoever sees it next.
+  //
+  // 60s is chosen as ~30x the measured idle cost — high enough that only a
+  // genuine hang (a circular import, a never-resolving dynamic import) can
+  // reach it, so the timeout keeps its diagnostic value instead of becoming a
+  // load gauge. The honest alternative — dropping resetModules and importing
+  // once at file scope — is NOT available here: the module-level WPT_MODE
+  // constant is read at import time, so the fresh import IS the mechanism that
+  // pins the legacy capture path this whole file is about.
 
   /** Pull the inline style string off the rendered component element. */
   function styleOf(component: IRComponent): string {

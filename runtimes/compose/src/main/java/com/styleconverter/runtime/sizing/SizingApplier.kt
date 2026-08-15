@@ -85,6 +85,16 @@ object SizingApplier {
         val maxHv = config.maxHeight ?: config.maxBlockSize
         val minWv = config.minWidth ?: config.minInlineSize
         val minHv = config.minHeight ?: config.minBlockSize
+        // css-values-5 calc-size() (wave 42 lane W3): a calc-size MIN slot
+        // that coexists with a definite Exact size takes over the WHOLE
+        // axis — CSS resolves used = max(preferred, floor) in one clamp
+        // (css-sizing-3 §5.2) and splitting that across two modifiers
+        // would let the outer exact node coerce the floored measure back
+        // down (the reported box and the painted ink would disagree). The
+        // min modifier receives the specified px and owns the clamp, so
+        // the normal width/height emission is suppressed for that axis.
+        val minWCalcOwnsAxis = config.minWidthCalc != null && rawW is LengthValue.Exact
+        val minHCalcOwnsAxis = config.minHeightCalc != null && rawH is LengthValue.Exact
         // Physical width wins over logical inlineSize (CSS spec).
         // Lane BX — `box-sizing: content-box` (css-sizing-3 §3): the
         // declared width/height size the CONTENT box, but this chain's
@@ -97,19 +107,42 @@ object SizingApplier {
         // inflateForContentBox is identity unless boxSizing is an
         // EXPLICIT CONTENT_BOX (null = unset keeps border-box), so the
         // whole existing corpus keeps byte-identical modifier chains.
-        r = applyWidth(r, inflateForContentBox(
+        if (!minWCalcOwnsAxis) r = applyWidth(r, inflateForContentBox(
             clampLength(rawW, minWv, maxWv, ctx),
             // RC-B6b: the WPT flag rides the config into the width branch
             // so ch/em widths can take the overflow-aware exact path.
             config.boxSizing, config.contentBoxInflateX), ctx, config.wptCaptureMode)
-        r = applyHeight(r, inflateForContentBox(
+        if (!minHCalcOwnsAxis) r = applyHeight(r, inflateForContentBox(
             clampLength(rawH, minHv, maxHv, ctx),
             config.boxSizing, config.contentBoxInflateY), ctx)
+        // calc-size PREFERRED lane — sits exactly where Modifier.width/
+        // height would have gone (the slot pair is exclusive: the extractor
+        // never fills width AND widthCalc together), so the background
+        // chained inside paints at the resolved target.
+        config.widthCalc?.let { r = r.calcSizePreferred(rowAxis = true, spec = it) }
+        config.heightCalc?.let { r = r.calcSizePreferred(rowAxis = false, spec = it) }
         // Min/max constraints — kept for the case where no explicit
         // width/height was set (then clamp short-circuits to null and
         // widthIn/heightIn carry the intent).
         r = applyWidthIn(r, minWv, maxWv, ctx)
         r = applyHeightIn(r, minHv, maxHv, ctx)
+        // calc-size MIN (floor) lane — css-flexbox-1 §4.5 / css-sizing-3
+        // §5.2. The specified px rides in when the axis had a definite
+        // size (the suppressed emission above); a Relative/intrinsic
+        // preferred size keeps its own modifier and the floor lane runs
+        // with a null specified suggestion (documented approximation: the
+        // §4.5 specified-size suggestion is only read from Exact px — the
+        // corpus family is all px or auto).
+        config.minWidthCalc?.let {
+            r = r.calcSizeMin(rowAxis = true, spec = it,
+                specifiedPx = (rawW as? LengthValue.Exact)?.px?.let { px ->
+                    kotlin.math.round(px).toInt() })
+        }
+        config.minHeightCalc?.let {
+            r = r.calcSizeMin(rowAxis = false, spec = it,
+                specifiedPx = (rawH as? LengthValue.Exact)?.px?.let { px ->
+                    kotlin.math.round(px).toInt() })
+        }
         // aspect-ratio. ratio=0.0 with isAuto means auto-only — skip modifier
         // and let Compose auto-size.
         //
@@ -121,7 +154,15 @@ object SizingApplier {
         // aspect-ratio:16/9`) while web/iOS kept the declared 180×150
         // (Android-web 0.806). Skip the modifier when both axes are pinned.
         config.aspectRatio?.let { ar ->
-            if (ar.ratio > 0.0 && !(isDefiniteAxis(rawW) && isDefiniteAxis(rawH))) {
+            // A calc-size preferred slot PINS its axis just like a definite
+            // length (its modifier resolves a concrete px at measure time),
+            // so it joins the both-axes-pinned skip — without this,
+            // calc-size-aspect-ratio-001 would chain aspectRatio on top of
+            // an already fully-sized 50×100 box (harmless today only
+            // because tight constraints win; the gate keeps it structural).
+            val wPinned = isDefiniteAxis(rawW) || config.widthCalc != null
+            val hPinned = isDefiniteAxis(rawH) || config.heightCalc != null
+            if (ar.ratio > 0.0 && !(wPinned && hPinned)) {
                 r = r.aspectRatio(ar.ratio.toFloat())
             }
         }
@@ -285,7 +326,21 @@ object SizingApplier {
             // but capped at bound".
             LengthValue.IntrinsicKind.FIT_CONTENT -> {
                 val bound = v.bound?.let { resolveToDp(it, ctx) }
-                if (bound != null) m.widthIn(max = bound) else m.wrapContentWidth()
+                if (bound != null) m.widthIn(max = bound) else {
+                    // Bare fit-content. Wave 42 (lane W3): in WPT capture
+                    // the wrapContent lane gains the css-sizing-3 §5.1
+                    // min-content floor INSIDE it — a squeezing container
+                    // (calc-size-min-max-sizes-001/004's width:0 outer)
+                    // collapsed the box to nothing where the ref paints
+                    // its 100px min-content. Pass-through whenever the
+                    // container offers at least min-content, and absent
+                    // entirely (no extra node) off the WPT path — see
+                    // FitContentSqueeze's banner for the measured defect.
+                    val wrapped = m.wrapContentWidth()
+                    if (wptCaptureMode) with(FitContentSqueeze) {
+                        wrapped.fitContentWidthSqueezeGuard()
+                    } else wrapped
+                }
             }
         }
         is LengthValue.Calc, is LengthValue.Fraction -> m  // unresolved → skip
@@ -361,15 +416,27 @@ object SizingApplier {
     fun applyWidthOnly(modifier: Modifier, config: SizingConfig): Modifier {
         val ctx = SpacingContext()
         var r = modifier
+        // Wave 42 (lane W3): calc-size lanes mirror applySizing — a min
+        // calc over a definite Exact width owns the whole axis (one clamp,
+        // see the main lane's comment), otherwise the normal emission runs
+        // and the calc modifiers chain in their canonical positions.
+        val rawW = config.width ?: config.inlineSize
+        val minOwns = config.minWidthCalc != null && rawW is LengthValue.Exact
         // Lane BX — flex items honour content-box the same way the main
         // lane does (identity unless the item explicitly declared it).
         // RC-B6b: the WPT relative-overflow routing also rides the config
         // here so a flex item's ch/em width resolves identically.
-        r = applyWidth(r, inflateForContentBox(
-            config.width ?: config.inlineSize,
+        if (!minOwns) r = applyWidth(r, inflateForContentBox(
+            rawW,
             config.boxSizing, config.contentBoxInflateX), ctx, config.wptCaptureMode)
+        config.widthCalc?.let { r = r.calcSizePreferred(rowAxis = true, spec = it) }
         r = applyWidthIn(r, config.minWidth ?: config.minInlineSize,
             config.maxWidth ?: config.maxInlineSize, ctx)
+        config.minWidthCalc?.let {
+            r = r.calcSizeMin(rowAxis = true, spec = it,
+                specifiedPx = (rawW as? LengthValue.Exact)?.px?.let { px ->
+                    kotlin.math.round(px).toInt() })
+        }
         return r
     }
 
@@ -377,12 +444,21 @@ object SizingApplier {
     fun applyHeightOnly(modifier: Modifier, config: SizingConfig): Modifier {
         val ctx = SpacingContext()
         var r = modifier
+        // Wave 42 (lane W3): the height twin of applyWidthOnly's calc lanes.
+        val rawH = config.height ?: config.blockSize
+        val minOwns = config.minHeightCalc != null && rawH is LengthValue.Exact
         // Lane BX — same explicit-content-box inflation as applyWidthOnly.
-        r = applyHeight(r, inflateForContentBox(
-            config.height ?: config.blockSize,
+        if (!minOwns) r = applyHeight(r, inflateForContentBox(
+            rawH,
             config.boxSizing, config.contentBoxInflateY), ctx)
+        config.heightCalc?.let { r = r.calcSizePreferred(rowAxis = false, spec = it) }
         r = applyHeightIn(r, config.minHeight ?: config.minBlockSize,
             config.maxHeight ?: config.maxBlockSize, ctx)
+        config.minHeightCalc?.let {
+            r = r.calcSizeMin(rowAxis = false, spec = it,
+                specifiedPx = (rawH as? LengthValue.Exact)?.px?.let { px ->
+                    kotlin.math.round(px).toInt() })
+        }
         return r
     }
 }

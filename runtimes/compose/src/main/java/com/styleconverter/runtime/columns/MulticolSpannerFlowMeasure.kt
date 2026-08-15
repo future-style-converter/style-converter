@@ -70,6 +70,10 @@ internal object MulticolSpannerFlowMeasure {
         definiteBlockSize: Boolean,
         // False under vertical writing modes (blocked-platform bail).
         fragmentationAllowed: Boolean,
+        // Wave-42 lane W4: the container declared `continue: discard`
+        // (css-overflow-4 §3, threaded from MultiColumnConfig) — overflow-
+        // column content and everything after it is dropped by the plan.
+        discardOverflow: Boolean = false,
         // The measure→draw bridge state ([] = plain drawContent). Written
         // ONLY inside the placement block below (B-RC6 contract).
         fragmentsBridge: MutableState<List<FragmentGeometry.Fragment>>,
@@ -160,7 +164,9 @@ internal object MulticolSpannerFlowMeasure {
         val children = roles.indices.map {
             MulticolSpannerFlow.Child(placeables[it].height, roles[it], childSpecs[it].explicitBlockSize)
         }
-        val plan = MulticolSpannerFlow.plan(children, usedCount)
+        // Wave-42: the discard flag rides into the plan — slots past the
+        // first overflow column come back marked discarded (skipped below).
+        val plan = MulticolSpannerFlow.plan(children, usedCount, discardOverflow)
         // The replay fragment list this pass wants drawn — computed HERE,
         // but published only inside the placement block below (the wedge
         // lane's B-RC6 contract: a measure-body snapshot write executes
@@ -171,9 +177,14 @@ internal object MulticolSpannerFlowMeasure {
             // Sole-flow replay: fragment the one flow child with the
             // BALANCED H as fragmentainer (its slot is provably (0,0) —
             // all spanners are 0-height under the replay gate).
-            val flowIndex = roles.indexOfFirst { it == MulticolSpannerFlow.Role.FLOW }
+            // Wave-42: the lookup goes through the shared helper because a
+            // forced-break child is ALSO in flow (Role.isFlow) — the old
+            // `== Role.FLOW` spelling answered -1 for a sole
+            // `break-after: column` child that had just passed the replay
+            // gate, and `placeables[-1]` below would have thrown.
+            val flowIndex = MulticolSpannerFlow.firstFlowIndex(roles)
             val h = plan.soleFlowColumnBlockSizePx ?: 0
-            fragments = if (h > 0) FragmentGeometry.fragmentGeometry(
+            fragments = if (h > 0 && flowIndex >= 0) FragmentGeometry.fragmentGeometry(
                 childBlockSizePx = placeables[flowIndex].height,
                 columnBlockSizePx = h,
                 columnWidthPx = columnWidthPx,
@@ -200,9 +211,12 @@ internal object MulticolSpannerFlowMeasure {
             // swallows equal-value republishes.
             fragmentsBridge.value = fragments
             // In-flow content first — spanners at x=0 (full width), flow
-            // children at their column's inline origin i·(W+G).
+            // children at their column's inline origin i·(W+G). Wave-42:
+            // css-overflow-4 §3 DISCARDED slots are simply never placed —
+            // an unplaced Compose placeable draws nothing, which IS the
+            // discard rendering.
             plan.slots.forEachIndexed { index, slot ->
-                if (slot.role != MulticolSpannerFlow.Role.STATIC) {
+                if (slot.role != MulticolSpannerFlow.Role.STATIC && !slot.discarded) {
                     val x = if (slot.role == MulticolSpannerFlow.Role.SPANNER) 0
                     else slot.columnIndex * (columnWidthPx + gapPx)
                     placeables[index].place(x, slot.yPx)
@@ -211,9 +225,10 @@ internal object MulticolSpannerFlowMeasure {
             // Statics LAST: CSS 2.1 Appendix E — positioned descendants
             // paint after in-flow content, so the abspos ink (which the
             // wave-18 zeroFlowAnchor paints at its placed origin) covers
-            // the flow content at the same static position.
+            // the flow content at the same static position. Discarded
+            // statics (in a dropped tail) are skipped like the flow above.
             plan.slots.forEachIndexed { index, slot ->
-                if (slot.role == MulticolSpannerFlow.Role.STATIC) {
+                if (slot.role == MulticolSpannerFlow.Role.STATIC && !slot.discarded) {
                     placeables[index].place(slot.columnIndex * (columnWidthPx + gapPx), slot.yPx)
                 }
             }

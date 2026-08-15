@@ -26,6 +26,17 @@ data class WidthProperty(
             val anchorName: String?, // null for implicit anchor
             val dimension: String    // width, height, block, inline, self-block, self-inline
         ) : WidthValue
+        // css-values-5 §10.1 calc-size(<basis>, <calc-sum>) with a KEYWORD
+        // basis and an affine expression over `size` — the runtime-resolvable
+        // typed form CalcSizeParser produces (wave 42 lane W3). Pure-length
+        // bases and size-free expressions are evaluated at parse time and
+        // never reach this variant (they emit LengthValue instead).
+        @Serializable data class CalcSize(
+            val basis: String,    // auto|min-content|max-content|fit-content|stretch|content
+            val factor: Double,   // multiplier on the resolved basis size
+            val offsetPx: Double, // absolute px addend (may be negative)
+            val original: String, // verbatim declaration for web browser replay
+        ) : WidthValue
     }
 }
 
@@ -55,6 +66,19 @@ object WidthValueSerializer : KSerializer<WidthProperty.WidthValue> {
                 put("dimension", value.dimension)
                 value.anchorName?.let { put("name", it) }
             }
+            // calc-size wire shape (wave 42 lane W3) — flat, discriminated by
+            // type like every other tagged WidthValue. Deliberately the SAME
+            // field set the kotlinx-polymorphic MinMaxValue/MaxValue twins
+            // emit, so all three runtimes decode ONE shape for all six
+            // physical sizing longhands (schema leaves are permissive;
+            // additive shape per schema/spec/02-values.md).
+            is WidthProperty.WidthValue.CalcSize -> buildJsonObject {
+                put("type", "calc-size")
+                put("basis", value.basis)       // keyword the runtime resolves
+                put("factor", value.factor)     // multiplier on `size`
+                put("offsetPx", value.offsetPx) // absolute px addend
+                put("original", value.original) // verbatim CSS for web replay
+            }
         })
     }
     override fun deserialize(decoder: Decoder): WidthProperty.WidthValue {
@@ -71,6 +95,17 @@ object WidthValueSerializer : KSerializer<WidthProperty.WidthValue> {
                 WidthProperty.WidthValue.AnchorSize(
                     anchorName = element["name"]?.jsonPrimitive?.content,
                     dimension = element["dimension"]?.jsonPrimitive?.content ?: "width"
+                )
+            // calc-size round-trip (wave 42 lane W3) — symmetric with the
+            // encode branch above; defaults mirror the identity expression
+            // `calc-size(auto, size)` so a partially-formed object degrades
+            // to the basis itself rather than throwing.
+            element is JsonObject && element["type"]?.jsonPrimitive?.content == "calc-size" ->
+                WidthProperty.WidthValue.CalcSize(
+                    basis = element["basis"]?.jsonPrimitive?.content ?: "auto",
+                    factor = element["factor"]?.jsonPrimitive?.double ?: 1.0,
+                    offsetPx = element["offsetPx"]?.jsonPrimitive?.double ?: 0.0,
+                    original = element["original"]?.jsonPrimitive?.content ?: ""
                 )
             element is JsonObject && element.containsKey("fit-content") ->
                 WidthProperty.WidthValue.FitContent(decoder.json.decodeFromJsonElement(IRLength.serializer(), element["fit-content"]!!))

@@ -14,7 +14,14 @@ export interface LineClampConfig {
   // and records the result here; `auto` stays true even when the count could
   // not be resolved, so the applier can still clip honestly rather than
   // pretending the declaration was absent.
-  auto?: boolean;                                                    // `line-clamp: auto` was declared
+  //
+  // wave-42 lane W7 — `auto` is more precisely the GEOMETRY-CLAMP PATH
+  // selector: it is also set for a fixed count whose <'block-ellipsis'>
+  // component suppresses the marker (`4 no-ellipsis` / `4 ""`,
+  // css-overflow-4 §5.1 two-value grammar), because that path clamps at
+  // N·lh + hidden overflow WITHOUT the -webkit-box trio's undisableable
+  // "…" — see the extractor's suppressesMarker note.
+  auto?: boolean;                                                   // geometry-clamp path: `auto` declared, or count with suppressed marker
   autoLines?: number;                                                // resolved clamp count (>= 1) or absent
 }
 

@@ -64,6 +64,11 @@ public struct ComponentRenderer: View {
     // §8.3.1 hoist band the HOST owns (the composed root stack folds it into
     // its gaps instead). nil everywhere else; see HoistBandSuppressedForKey.
     @Environment(\.hoistBandSuppressedFor) private var hoistBandSuppressedFor
+    // Wave 42 (lane W5) — the CSS 2.2 §9.5.2 clearance scope plan, set by
+    // an ANCESTOR scope-root block container (see ClearanceZeroFlow.swift).
+    // Read here for the inherit-or-resolve decision in clearanceScopePlan;
+    // consumption is id-keyed so a plan flowing past its scope is inert.
+    @Environment(\.floatClearancePlan) private var floatClearancePlan
 
     // TITAN Round 4 (GAP 1, WIDTH half) — the composed-WPT block-flow
     // fill-width channel (WPTCaptureMode.swift). nil everywhere but the
@@ -773,8 +778,20 @@ public struct ComponentRenderer: View {
     // display-contents-alignment-002 grid-item fix. Identity for the
     // whole contents-free corpus (ContentsUnboxing.resolve returns the
     // input untouched), keeping every committed baseline byte-stable.
+    // Wave 42 (lane W2) — the pseudos text seam sits in the SAME single
+    // entry, after unboxing: PseudoTextFold folds the baked ::before /
+    // ::after `_text` (schema/spec/01 `pseudos`, previously decoded and
+    // dropped on this platform) into `component.text`, so every existing
+    // text consumer — the leaf PlaceholderLabel, the mixed-content leading
+    // label, wrap-width measurement — paints and measures the generated
+    // content with zero further plumbing (web parity: NodeRenderer's
+    // before/text/after positional order). Identity for every component
+    // without a foldable bucket, i.e. the whole committed baseline corpus.
+    // Order matters only trivially: ContentsUnboxing refuses any
+    // pseudos-carrying component anyway (its line-68 gate), so unboxing
+    // first just lets the fold see the final composed shape.
     public init(component: IRComponent) {
-        self.component = ContentsUnboxing.resolve(component)
+        self.component = PseudoTextFold.resolve(ContentsUnboxing.resolve(component))
     }
 
     // public: View protocol witness on a public type must be public.
@@ -1162,8 +1179,20 @@ public struct ComponentRenderer: View {
             // wptCaptureMode is false on every property-fixture path, so
             // the 327 dark-stage baselines take the identity branch and
             // stay byte-identical.
-            let hoistPlan = MarginCollapse.containerPlan(component: component, style: style,
-                                                         uaBlockMargins: wptCaptureMode)
+            // Wave 42 (lane W5) — a §9.5.2-clearance-covered container
+            // SUPPRESSES its §8.3.1 hoist band exactly like its per-child
+            // overrides (the T4 wrapper would otherwise paint a 16px band
+            // ABOVE the styled box on top of the cleared child's 20px
+            // applied margin — two emulations moving one margin). This is
+            // the SECOND containerPlan call site; the child-loop site in
+            // contentOrPlaceholder suppresses with the same predicate, so
+            // the two can never disagree about scope membership.
+            let clearanceSuppressed =
+                clearanceScopePlan?.scopeIds.contains(component.id) == true
+            let hoistPlan = clearanceSuppressed
+                ? nil
+                : MarginCollapse.containerPlan(component: component, style: style,
+                                               uaBlockMargins: wptCaptureMode)
             // Wave 26 (lane RES residual 3a): a composed ROOT's band is owned
             // by the harness's root-stack fold, which folds this exact number
             // into the same §8.3.1 max() as the root's own margin. Emitting it
@@ -1574,9 +1603,51 @@ public struct ComponentRenderer: View {
                     // InlineRunPlan's "HONEST SCOPE" note.
                     contentOrPlaceholder(style: style, interleaveRuns: true)
                 }
+                // Wave 42 (lane W5) — publish the §9.5.2 clearance scope
+                // plan for DESCENDANT block containers' child loops (this
+                // body's own ForEach reads clearanceScopePlan directly —
+                // see its kdoc). Id-keyed, so re-publishing an inherited
+                // plan (or nil) is the identity for the frozen corpus.
+                .environment(\.floatClearancePlan, clearanceScopePlan)
             }
         }
         }
+    }
+
+    // MARK: - §9.5.2 float clearance (wave 42, lane W5)
+
+    /// The clearance scope plan ACTIVE for this container's children:
+    /// an ancestor's plan when this container sits inside its scope,
+    /// else a fresh resolve at eligible attach points (composed roots /
+    /// BFC roots — FloatClearance.resolve's own gate), else whatever the
+    /// ambient channel carried (inert outside its scope by id-keying).
+    /// Computed — the ForEach consumption sites below must use THIS value
+    /// (not the @Environment property) because an environment written on
+    /// the VStack is invisible to the SAME body that attaches it, and the
+    /// scope root's direct children are exactly where most adjustments
+    /// live (negative-clearance-after-adjoining-float's float + clear
+    /// are the red root's immediate children).
+    private var clearanceScopePlan: FloatClearance.Plan? {
+        // Nested scope level: the ancestor's plan covers this container.
+        if let p = floatClearancePlan, p.scopeIds.contains(component.id) { return p }
+        // Attach is capture-gated like every wave-19+ float path — the
+        // dark-stage corpus never sets wptCaptureMode.
+        guard wptCaptureMode else { return floatClearancePlan }
+        // Fresh resolve (nil for everything but a proven §9.5.2 scope).
+        return FloatClearance.resolve(component) ?? floatClearancePlan
+    }
+
+    /// The §9.5.2 margin override for one child, or nil: for the cleared
+    /// box `appliedTopPx` IS the clearance-adjusted margin; absorbed
+    /// chain members carry 0 (see FloatClearance.resolve). Rides the
+    /// same `marginCollapseOverride` channel as the §8.3.1 plan — which
+    /// is suppressed inside a clearance scope, so exactly ONE emulation
+    /// ever moves a given margin.
+    private func clearanceOverride(_ child: IRComponent) -> MarginCollapseOverride? {
+        guard let adj = clearanceScopePlan?.adjustments[child.id],
+              let top = adj.appliedTopPx else { return nil }
+        return MarginCollapseOverride(top: CGFloat(top),
+                                      bottom: CGFloat(adj.appliedBottomPx ?? 0))
     }
 
     // MARK: - Absolute overlay (fidelity wave 3)
@@ -2761,7 +2832,17 @@ public struct ComponentRenderer: View {
                     heightDefinite: ReplacedBoxSizing.isDefinite(style.size.height),
                     aspectRatio: decodedImage.aspectRatio),
                 fit: ReplacedImageContent.fit(of: resolvedProperties),
-                alignment: ReplacedImageContent.position(of: resolvedProperties)
+                alignment: ReplacedImageContent.position(of: resolvedProperties),
+                // Wave-42 W6 — CSS 2.1 §10.4 min/max resolution for the
+                // both-axes-auto row, off the SAME finished style the sizing
+                // chain clamps the box with (boxSizing already effective —
+                // the fold above this branch), so box and content agree.
+                // Identity when the wire declares no min/max bounds.
+                resolved: ReplacedImageContent.constrainedAutoContentSize(
+                    style: style,
+                    intrinsicWidthPx: decodedImage.intrinsicWidthPx,
+                    intrinsicHeightPx: decodedImage.intrinsicHeightPx,
+                    aspectRatio: decodedImage.aspectRatio)
             )
         }
         // The placeholder only appears when the component has NO
@@ -2937,9 +3018,20 @@ public struct ComponentRenderer: View {
             // Lane UAM (BD-RC3): same UA-default fold as the hoist-band
             // call in styledContent — the two MUST pass the identical flag
             // or the bands and the per-child overrides would disagree.
-            let collapsePlan = MarginCollapse.containerPlan(component: component,
-                                                            style: style,
-                                                            uaBlockMargins: wptCaptureMode)
+            // Wave 42 (lane W5) — the active §9.5.2 clearance plan for
+            // THIS child loop (computed, not the @Environment read — the
+            // scope root's own children consume it in this same body).
+            let clearancePlan = clearanceScopePlan
+            let collapsePlan = (clearancePlan?.scopeIds.contains(component.id) == true)
+                // A clearance-covered container SUPPRESSES its §8.3.1
+                // plan: the clearance plan owns every absorbed/overridden
+                // margin in its scope, and both emulations moving the
+                // same margins would double the spacing (the T4 wrapper's
+                // 16px hoist band — FloatClearance.kt's twin contract).
+                ? nil
+                : MarginCollapse.containerPlan(component: component,
+                                               style: style,
+                                               uaBlockMargins: wptCaptureMode)
             // Wave-9 regression fix — the USED column-gap feeding the
             // multicol fill basis (css-multicol-1 §3 via MulticolMath in
             // wptChildFillWidth). Factored into multicolUsedGapPx (lane
@@ -3197,6 +3289,15 @@ public struct ComponentRenderer: View {
                         ComponentHost(component: child)
                     }
                 }
+                // Wave 42 (lane W5) — floats are OUT OF FLOW (CSS 2.1
+                // §9.5): a clearance-plan-marked float paints at its slot
+                // but contributes zero stacked height, so following
+                // in-flow siblings stack as if it were not there. The
+                // modifier's inactive branch is the identity — the frozen
+                // corpus keeps its exact view tree (nil plan everywhere
+                // outside an active §9.5.2 scope).
+                .modifier(ClearanceZeroFlow(
+                    active: clearancePlan?.adjustments[child.id]?.zeroFlowHeight == true))
                 // Grid + flex size injection (css-align-3 §9 stretch and
                 // css-flexbox-1 §9.7 flexed main sizes) — the values are
                 // ALWAYS written (nil when nothing to inject) so the
@@ -3256,7 +3357,13 @@ public struct ComponentRenderer: View {
                 // applies. ALWAYS written so a grandparent's override
                 // can never leak past its own children (same reset
                 // discipline as every channel above).
-                .environment(\.marginCollapseOverride, collapsePlan?.overrides[index])
+                // Wave 42 (lane W5): the §9.5.2 clearance override wins
+                // when this child is the scope's cleared box or an
+                // absorbed chain member — the collapse plan is suppressed
+                // inside the scope, so exactly one emulation ever moves a
+                // given margin (clearanceOverride's kdoc).
+                .environment(\.marginCollapseOverride,
+                             clearanceOverride(child) ?? collapsePlan?.overrides[index])
                 // Text inheritance (css-cascade-4): publish this
                 // element's merged inheritable declarations for the
                 // child. Always written so each level's channel is

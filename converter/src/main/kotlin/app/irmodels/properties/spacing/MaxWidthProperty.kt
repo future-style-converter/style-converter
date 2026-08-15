@@ -35,5 +35,20 @@ data class MaxWidthProperty(
         @Serializable
         @SerialName("fit-content")
         data class FitContent(val maxSize: IRLength?) : MaxValue
+
+        // css-values-5 §10.1 calc-size (wave 42 lane W3) — same wire shape as
+        // the MinMaxValue/WidthValue twins (see MinWidthProperty.CalcSize for
+        // the polymorphic-encoding note). Typed so max-width/max-height
+        // declarations reach the web runtime for verbatim browser replay;
+        // the native runtimes currently consume it as "no constraint" (their
+        // documented pre-existing behavior for unresolvable max bounds).
+        @Serializable
+        @SerialName("calc-size")
+        data class CalcSize(
+            val basis: String,    // auto|min-content|max-content|fit-content|stretch|content
+            val factor: Double,   // multiplier on the resolved basis size
+            val offsetPx: Double, // absolute px addend (may be negative)
+            val original: String, // verbatim declaration for web browser replay
+        ) : MaxValue
     }
 }

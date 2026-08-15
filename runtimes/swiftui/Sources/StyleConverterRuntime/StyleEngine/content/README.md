@@ -17,5 +17,14 @@ See `CLAUDE.md` → *Per-property contract*.
 
 ## Status
 
-Empty — properties migrate in one-at-a-time from `../Renderer/StyleBuilder.swift`
-as they're implemented per the `testing/ROLLOUT.md` phase plan.
+- `Content{Config,Extractor,Applier}.swift` — the registered triplet for the
+  IR `Content` property (identity applier: `content` on an ELEMENT has no
+  mobile analogue).
+- `PseudoTextBridge.swift` + `PseudoTextFold.swift` (wave 42, lane W2) — the
+  component-level consumer of the v2 `pseudos` bucket: baked
+  `::before`/`::after` `_text` folds into `component.text` as leading /
+  trailing inline runs (web parity: `runtimes/web/src/renderer/
+  PseudoNodeRenderer.ts` + NodeRenderer's before/text/after order), gated to
+  text-only buckets — box pseudos stay with `Renderer/RootPseudoBox.swift`,
+  `pseudos.marker` with the list marker path. Seam: `ComponentRenderer.init`.
+  Tests: `PseudoTextFoldTests.swift`.

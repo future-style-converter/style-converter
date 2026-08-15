@@ -45,7 +45,16 @@ data class MultiColumnConfig(
      * this flag is set. Extracted from the WritingMode IR property by
      * [MultiColumnExtractor].
      */
-    val verticalWritingMode: Boolean = false
+    val verticalWritingMode: Boolean = false,
+    /**
+     * True when the container declares `continue: discard` (css-overflow-4
+     * §3, the IR `Continue` keyword — wave-42 lane W4): content that lands
+     * in an OVERFLOW column (css-multicol-1 §8.2), and everything after it
+     * in flow order, is discarded instead of painted. Consumed by the
+     * spanner-flow plan (MulticolSpannerFlow.plan's discardOverflow);
+     * default false keeps every other caller byte-identical.
+     */
+    val continueDiscard: Boolean = false
 ) {
     val hasMultiColumn: Boolean
         get() = columnCount != null || columnWidth != null
