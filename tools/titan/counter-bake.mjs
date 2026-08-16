@@ -54,26 +54,52 @@
 //     nested-pop there would have printed 8.
 //   A two-reference fact, recorded as such rather than smoothed over.
 //
-// THE REVERSED IMPLIED VALUE — likewise derived. css-lists-3 §4.2 says an
-// omitted `reversed()` integer means "the number of elements in scope that
-// increment it", which reproduces NONE of the eight reversed references (they
-// all come out one short, and the two with non-unit increments come out far
-// short). The value the references actually demand is
+// THE REVERSED IMPLIED VALUE — likewise derived. css-lists-3 §4.2's one-line
+// reading ("the number of elements in scope that increment it") reproduces
+// NONE of the eight reversed references. wave-37 replaced it with the
+// empirical `Σ|increment| + |the LAST increment|`, which fits all eight
+// because every one of them increments by a NEGATIVE amount and none of them
+// carries a `counter-set`. wave-44 lane H2 widened the lane to `<ol reversed>`
+// and had to face the populations that do both, so the formula is now
+// css-lists-3 §4.4.2's actual walk — a strict GENERALISATION that agrees with
+// the old one wherever the old one was pinned:
 //
-//     initial = Σ|increment| over the scope  +  |the LAST increment|
+//     num = 0
+//     for each element in the counter's scope, in tree order:
+//         num += −(its increment)                       ← "incrementNegated"
+//         if it counter-SETs this counter:  num += that value;  STOP
+//     if the walk ran to the end:  num += the LAST NON-ZERO incrementNegated
 //
-// which for the ordinary all-(-1) list is N+1 — i.e. the first item prints N
-// and the last prints 1, the whole point of a reversed counter. Verified
-// against all eight: siblings-001a (-1,-2 → 5 ⇒ 4,2), siblings-002 (⇒ 1 and
-// 3), siblings-003 (⇒ 4,2), display-none (⇒ 3,2,1, the display:none item
-// contributing NOTHING), pseudo-001 (-1,-2,-1,-2 → 8 ⇒ 7,5,4,2), multiple
-// (two counters at once ⇒ 2,4 / 1,2), list-item and list-item-start (⇒ 7).
+// (SIGNED, not absolute, on that trailing term.) For the ordinary all-(−1)
+// list this is still N+1 — first item prints N, last prints 1. The three
+// places it differs from the wave-37 formula are all pinned by references:
+//   • POSITIVE increments — li-value-reversed-006a's third list (three
+//     `counter-increment: list-item 2` items) has ref `<ol reversed start=-9>`
+//     ⇒ −6,−4,−2, i.e. initial −8 = (−2−2−2) + (−2). The old formula said
+//     +8 and painted 10,12,14. Its own ref's `<meta name=assert>` states the
+//     rule outright: "The last counter-increment value determines the start".
+//   • a `counter-set` in scope STOPS the walk — li-value-reversed-001
+//     (`<li value=6>` second of three) has ref 7,6,5 ⇒ initial 8 =
+//     (+1)+(+1)+6, not the old formula's 4.
+//   • `<li value>` IS a counter-set (HTML §15.3.7), which is why
+//     css-lists/counter-list-item's third reversed list starts at 32 and not
+//     at 6 — the same anchor the natives' ListOrdinal already implements.
+// Still verified against all eight wave-37 pins (all-negative, set-free ⇒
+// Σ(−inc) + last(−inc) IS Σ|inc| + |last inc|): siblings-001a (-1,-2 → 5 ⇒
+// 4,2), siblings-002 (⇒ 1 and 3), siblings-003 (⇒ 4,2), display-none (⇒
+// 3,2,1, the display:none item contributing NOTHING), pseudo-001
+// (-1,-2,-1,-2 → 8 ⇒ 7,5,4,2), multiple (two counters at once ⇒ 2,4 / 1,2),
+// list-item and list-item-start (⇒ 7).
+//
+// KNOWN OUTLIER, measured and named rather than smoothed over:
+// li-value-reversed-019's INNER list (`<li>Four` whose own child `<div>` does
+// `counter-set: list-item 3`) wants initial 5; the walk above yields 4, so
+// that one item paints 3 where the reference paints 4. Every other reference
+// in the `li-value-reversed-*` family that this lane can see agrees with the
+// walk. One item on one test is not worth a second, unpinned rule.
 //
 // NOT MODELLED, and left as a refusal or an untouched declaration rather than
 // an approximation:
-//   • `<ol reversed>` — the `reversed` attribute does not ride `_attrs`
-//     (LIST_ATTR_KEYS is `start`/`value`), so a reversed HTML list numbers
-//     forward here. Adding it is a wire change, not an extractor change.
 //   • counter styles outside counter-style-table.mjs's §6 transcription
 //     (including author `@counter-style` rules) — refused, not defaulted to
 //     decimal, so a fixture never claims a number the document didn't ask for.
@@ -132,13 +158,41 @@ function isDisplayNone(node) {
   return String(node?.properties?.display ?? '').trim().toLowerCase() === 'none';
 }
 
+/** wave-44 lane H2 — HTML §4.4.5 boolean-attribute semantics for
+ *  `<ol reversed>`: PRESENCE is the whole value (`reversed="false"` still
+ *  reverses). The v2 wire carries it as a literal `true`
+ *  (extract-fixture.mjs LIST_BOOLEAN_ATTR_KEYS, wave-44 lane U5), but a
+ *  hand-authored or pre-U5 bag may spell it as the raw attribute string;
+ *  both mean present. Only a literal JS `false` — which nothing emits, but
+ *  which is the one unambiguous "explicitly not present" marker — is not. */
+function hasReversedAttr(node) {
+  const v = node?._attrs?.reversed;
+  return v !== undefined && v !== false;
+}
+
 /** The implicit UA `counter-reset` a list container contributes, as if it had
  *  been authored. `<ol start=N>` seeds the counter at N-1 so the first item
- *  prints N (HTML §4.4.5). */
+ *  prints N (HTML §4.4.5).
+ *
+ *  wave-44 lane H2 — `<ol reversed>` instantiates a REVERSED `list-item`
+ *  counter instead (css-lists-3 §4.4.2 via the HTML §15.3.7 presentational
+ *  hint), which flips the implicit per-item increment to −1 (see the walk).
+ *  Its seed is the mirror of the forward one: `start=N` seeds N+1 so the
+ *  first item prints N after its −1 step (li-value-reversed-011:
+ *  `<ol reversed start=3>` ⇒ 3,2,1), and an ABSENT `start` seeds `null` —
+ *  the "compute it from the scope" marker the reversed implied-value walk
+ *  above resolves in pass 1. */
 function uaResetsFor(node) {
   const tag = String(node?._tag ?? '').toLowerCase();
   if (!LIST_CONTAINER_TAGS.has(tag)) return [];
   const start = Number.parseInt(String(node?._attrs?.start ?? ''), 10);
+  if (hasReversedAttr(node)) {
+    return [{
+      name: 'list-item',
+      value: Number.isFinite(start) ? start + 1 : null,
+      reversed: true,
+    }];
+  }
   return [{ name: 'list-item', value: Number.isFinite(start) ? start - 1 : 0, reversed: false }];
 }
 
@@ -148,21 +202,48 @@ const innermost = (set, name) => {
   return stack && stack.length ? stack[stack.length - 1] : null;
 };
 
+/** One counter INSTANCE, with the css-lists-3 §4.4.2 accumulators the
+ *  reversed pre-pass reads (see the IMPLIED VALUE banner). The three extra
+ *  fields are inert on a forward counter — nothing but the reversed branch
+ *  of bakeCounters ever looks at them. */
+function newInstance(name, value, reversed, key = null) {
+  return {
+    name, value, reversed, key,
+    negSum: 0,       // Σ of −increment over the walk so far
+    lastNeg: 0,      // the LAST NON-ZERO −increment (signed) — the trailing term
+    stopped: false,  // a counter-set has frozen the walk
+    implied: 0,      // the frozen num, once `stopped`
+  };
+}
+
 function setCounter(set, name, value) {
   const inst = innermost(set, name);
-  if (inst) inst.value = value;
-  else (set[name] ??= []).push({ name, value, reversed: false, increments: [] });
+  if (!inst) { (set[name] ??= []).push(newInstance(name, value, false)); return; }
+  // §4.4.2: the walk stops at the FIRST element that counter-sets this
+  // counter, adding the set VALUE to what it has accumulated so far. Recorded
+  // before the assignment because `negSum` must not include anything after.
+  if (inst.reversed && !inst.stopped) {
+    inst.implied = inst.negSum + value;
+    inst.stopped = true;
+  }
+  inst.value = value;
 }
 
 function bumpCounter(set, name, delta) {
   let inst = innermost(set, name);
   if (!inst) {
-    inst = { name, value: 0, reversed: false, increments: [] };
+    inst = newInstance(name, 0, false);
     (set[name] ??= []).push(inst);
   }
   inst.value += delta;
-  // Recorded for the reversed pre-pass; harmless on a forward counter.
-  inst.increments.push(delta);
+  // §4.4.2 accumulation for the reversed pre-pass; a forward counter and a
+  // walk already stopped by a counter-set both ignore it.
+  if (inst.reversed && !inst.stopped) {
+    inst.negSum += -delta;
+    // "the last NON-ZERO incrementNegated" — a `counter-increment: x 0`
+    // element takes part in the walk but cannot be the trailing term.
+    if (delta !== 0) inst.lastNeg = -delta;
+  }
 }
 
 /** The counters set in force INSIDE one pseudo-element bag: a copy of the
@@ -182,9 +263,8 @@ function pseudoSet(bag, own) {
     // A reversed counter instantiated on a PSEUDO is not something any
     // corpus reference exercises; its implied value would need its own key
     // in the two-pass measurement, so it starts at its explicit value or 0.
-    (set[entry.name] ??= []).push({
-      name: entry.name, value: entry.value ?? 0, reversed: entry.reversed, increments: [],
-    });
+    (set[entry.name] ??= []).push(
+      newInstance(entry.name, entry.value ?? 0, entry.reversed));
   }
   if (!applyPairs(set, props['counter-set'], 0, 'set')) return null;
   if (!applyPairs(set, props['counter-increment'], 1, 'increment')) return null;
@@ -246,14 +326,13 @@ function walk(components, implied, onUse) {
         const entry = entries[e];
         const outer = innermost(own, entry.name);
         const key = `${nodeIdx}#${entry.name}#${e}`;
-        const inst = {
-          name: entry.name,
-          reversed: entry.reversed,
-          increments: [],
-          key,
-          value: entry.value !== null ? entry.value
+        const inst = newInstance(
+          entry.name,
+          entry.value !== null ? entry.value
             : (entry.reversed ? (implied.get(key) ?? 0) : 0),
-        };
+          entry.reversed,
+          key,
+        );
         (own[entry.name] ??= []).push(inst);
         created.push(inst);
         // The nested-pop: see the SCOPE MODEL banner. Reversed instantiations
@@ -263,12 +342,8 @@ function walk(components, implied, onUse) {
       // ── counter-set, then counter-increment ─────────────────────────
       // Both create the counter on the fly when it does not exist yet
       // (css-lists-3 §4.4 — implicitly instantiated on the root).
-      if (!applyPairs(own, node.properties?.['counter-set'], 0, 'set')) { ok = false; return; }
       const liValue = Number.parseInt(String(node?._attrs?.value ?? ''), 10);
       const listItem = isListItem(node);
-      // HTML §4.4.8 `<li value=N>` sets the ordinal outright before the
-      // implicit increment, so the item itself prints N.
-      if (listItem && Number.isFinite(liValue)) setCounter(own, 'list-item', liValue - 1);
       const incRaw = node.properties?.['counter-increment'];
       if (listItem && incRaw === undefined) {
         // The UA `display: list-item` increment. Its SIGN follows the counter
@@ -277,6 +352,37 @@ function walk(components, implied, onUse) {
         bumpCounter(own, 'list-item', li && li.reversed ? -1 : 1);
       }
       if (!applyPairs(own, incRaw, 1, 'increment')) { ok = false; return; }
+      // HTML §4.4.8 `<li value=N>` — a `counter-set: list-item N` hint
+      // (HTML §15.3.7), so the item prints N outright.
+      //
+      // wave-44 lane H2 moved this AFTER the increment. It used to write
+      // `N − 1` before it, which survives a forward +1 step to the same N but
+      // is wrong twice over once reversed lists are in the lane: a −1 step
+      // would land on N − 2, and a DECLARED `counter-increment` on the same
+      // <li> (li-value-reversed-013: `<li value=3 style="counter-increment:
+      // list-item -2">`, reference 5,3,2) was applied after the pre-offset
+      // set and moved the item off its own value. Setting N after the step
+      // is byte-identical for every forward list and correct for both.
+      // It is also what makes the §4.4.2 implied-value walk see this
+      // element's own increment BEFORE its set, which the walk requires.
+      if (listItem && Number.isFinite(liValue)) setCounter(own, 'list-item', liValue);
+      // ── counter-set, LAST ────────────────────────────────────────────
+      // wave-44 lane H2 moved this from before counter-increment to after
+      // it. MEASURED in the pinned headless Chromium (`<ol start=11><li
+      // style="counter-set: list-item 8">` paints marker 8 then 9, and the
+      // same li with an added `counter-increment: list-item 5` still paints
+      // 8): the set is applied AFTER the increment, so it wins outright.
+      // li-value-reversed-008's reference says the same thing statically
+      // (`<li style="counter-set: list-item 8">8` inside `<ol start=11>`),
+      // and -022's reference needs it for both the item value and the
+      // reversed implied walk. The old order silently subtracted the
+      // element's own increment from every counter-set item.
+      // UN-REFERENCED CORNER, named not hidden: an element carrying BOTH a
+      // `<li value>` hint and an author `counter-set` for list-item applies
+      // the author declaration last (correct cascade — a presentational hint
+      // loses), but the §4.4.2 walk anchors on whichever ran FIRST, i.e. the
+      // hint. No corpus reference exercises the pair.
+      if (!applyPairs(own, node.properties?.['counter-set'], 0, 'set')) { ok = false; return; }
       // ── uses, in css-content-3 §2.1 document order ──────────────────
       // A pseudo-element is a real box in the counter tree: it may carry its
       // own counter-reset/-set/-increment, and its INCREMENTS are visible to
@@ -378,10 +484,13 @@ export function bakeCounters(fixture, html = '') {
   const implied = new Map();
   for (const inst of pass1.created) {
     if (!inst.reversed) continue;
-    const incs = inst.increments;
-    implied.set(inst.key, incs.length === 0
-      ? 0
-      : incs.reduce((a, b) => a + Math.abs(b), 0) + Math.abs(incs[incs.length - 1]));
+    // css-lists-3 §4.4.2 (see the IMPLIED VALUE banner): a walk stopped by a
+    // counter-set carries its own frozen num; a walk that ran to the end adds
+    // the last non-zero incrementNegated (SIGNED — li-value-reversed-006a's
+    // positive-increment lists have NEGATIVE initial values). Nothing
+    // incremented ⇒ negSum 0 + lastNeg 0 ⇒ 0, the pre-wave-44 answer for an
+    // empty scope (li-value-reversed-006d's `<ol reversed></ol>`).
+    implied.set(inst.key, inst.stopped ? inst.implied : inst.negSum + inst.lastNeg);
   }
   // ── PASS 2 — resolve with the implied values in hand ─────────────────
   const queue = [];

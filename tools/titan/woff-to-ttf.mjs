@@ -37,8 +37,11 @@
 // WOFF file back to an sfnt font file" prescribes exactly this). The transcode
 // is LOSSLESS: every table's bytes are the original table's bytes, so — unlike
 // svg-preraster.mjs's one-size raster — no glyph, metric or shaping behaviour
-// can differ from what the original font file would have produced. That is
-// why this hop defaults ON where the pre-raster defaults OFF.
+// can differ from what the original font file would have produced. That is why
+// this hop could default ON with no A/B to justify it, where the lossy
+// pre-raster defaulted OFF for three waves and only flipped ON in wave 44 once
+// a measured A/B finally came out ahead. Both hops default ON today; only one
+// of them had to prove it.
 //
 // WOFF2 is REJECTED LOUDLY: it is a different format (Brotli entropy coding
 // plus a destructive glyf/loca transform that must be re-derived, not just
@@ -506,11 +509,15 @@ async function transcodeIsFresh(woffAbs, sfntAbs, expectedBytes, force) {
  * ── THE SWITCH, and why it defaults ON ────────────────────────────────────
  * `TITAN_WOFF_TRANSCODE=0` disables the hop (both feeder legs then behave
  * exactly as wave-41: the woff rides the wire, DocumentFontRegistry declines
- * it by name, the capture shapes in the bundled fallback). Default ON —
- * deliberately OPPOSITE to svg-preraster's default — because this transcode
- * is LOSSLESS (the header banner: identical table bytes, only the container
- * is rebuilt) where the pre-raster is lossy at one frozen size and measurably
- * LOST its A/B. The off-switch exists precisely to make that A/B cheap here.
+ * it by name, the capture shapes in the bundled fallback). Default ON — the
+ * SAME default svg-preraster carries since wave 44, but reached by a different
+ * route, and the distinction is the point: this transcode is LOSSLESS (the
+ * header banner: identical table bytes, only the container is rebuilt), so it
+ * needed no evidence to default ON, whereas the pre-raster is lossy at one
+ * frozen size, LOST its wave-41 and wave-43 A/Bs, and only earned its flip
+ * once wave-44 lane U3 fixed the sizing and placement defects those A/Bs
+ * named. The off-switch exists so an A/B stays cheap HERE too, should a
+ * transcode defect ever demand one.
  *
  * `TITAN_WOFF_TRANSCODE=force` is the OTHER half of the same switch, wired by
  * the feeder into `opts.force`: rewrite every sibling regardless of the cache.
@@ -531,7 +538,8 @@ export async function transcodeWoffSources(srcs, opts) {
   const transcoded = new Map();
   const log = opts?.log ?? (() => {});
   if (!Array.isArray(srcs) || srcs.length === 0) return transcoded;
-  // The default-ON gate — see the banner above for why it inverts preraster's.
+  // The default-ON gate — see the banner above for why this hop never had to
+  // earn that default (preraster now defaults ON too, but only by measurement).
   if (process.env.TITAN_WOFF_TRANSCODE === '0') {
     log(`woff transcode OFF (TITAN_WOFF_TRANSCODE=0) — ${srcs.length} woff(s) keep riding the wire ` +
       `and the Android runtime will decline them by name`);

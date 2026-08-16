@@ -93,6 +93,13 @@ test('post-load: POST_LOAD_COMPUTED_PROPERTIES is the exact deliberate set', () 
     // the backface-hidden child flattened instead of composing to identity
     // and the capture came out blank (ink 0.00 % vs the ref's 8.55 %).
     'transform-style',
+    // wave-44 H2: the inverse of U5's display-contents repair. U5 taught the
+    // static matcher the real <body> attribute bag; that also made the static
+    // bake match a class the script REMOVES (selectors/invalidation/
+    // sheet-going-away-002 clears `<body class="red">` on load), stamping
+    // `color: red` on a paragraph Chromium painted green. REPAIR-ONLY — see
+    // the WRITE_RULES pin below and the repairOnly tests.
+    'color',
   ]);
 });
 
@@ -103,7 +110,7 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
   assert.deepEqual(Object.keys(WRITE_RULES).sort(),
     ['align-self', 'border-bottom-left-radius', 'border-bottom-right-radius',
      'border-top-left-radius', 'border-top-right-radius',
-     'bottom', 'height', 'left', 'list-style-position',
+     'bottom', 'color', 'height', 'left', 'list-style-position',
      'list-style-type', 'right', 'top', 'transform', 'transform-style',
      'width', 'z-index']);
   assert.equal(WRITE_RULES.top.deleteWhen, 'auto');
@@ -130,6 +137,102 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
   // would stamp a key onto essentially every post-load component, so only a
   // genuinely 3D-preserving element gains one.
   assert.equal(WRITE_RULES['transform-style'].deleteWhen, 'flat');
+  // wave-44 H2: `color` is the ONLY repairOnly rule — neither of the other
+  // two kinds fits. deleteWhen would be WRONG (an inherited property whose
+  // "default" black is a legitimate authored value under a red ancestor), and
+  // an unconditional write would stamp a colour onto every component of every
+  // post-load fixture. It must therefore carry NO deleteWhen/requirePx.
+  assert.equal(WRITE_RULES.color.repairOnly, true);
+  assert.equal(WRITE_RULES.color.deleteWhen, undefined);
+  assert.equal(WRITE_RULES.color.requirePx, undefined);
+});
+
+test('post-load h2: a stale static color is REPAIRED to the live computed one', () => {
+  // The verbatim sheet-going-away-002 shape: the static bake matched
+  // `.red p { color: red }` through the (post-U5) body sentinel, but the
+  // script had already cleared `<body class="red">`, so Chromium painted
+  // green — proven in the same snapshot bag by the currentColor-resolved
+  // border colours. Live wins.
+  const cmp = { properties: { color: 'red' } };
+  overlayComputedOnComponent(cmp, {
+    color: 'rgb(0, 128, 0)',
+    'border-top-color': 'rgb(0, 128, 0)', 'border-right-color': 'rgb(0, 128, 0)',
+    'border-bottom-color': 'rgb(0, 128, 0)', 'border-left-color': 'rgb(0, 128, 0)',
+    display: 'block', position: 'static',
+  });
+  assert.equal(cmp.properties.color, 'rgb(0, 128, 0)');
+});
+
+test('post-load h2: repairOnly NEVER introduces a color key', () => {
+  // The blast-radius guarantee. `color` is inherited and always has a
+  // computed value ('rgb(0, 0, 0)' by default), so an unconditional write
+  // would stamp a key onto every component of all 1,188 delivered post-load
+  // fixtures. A component the static bake never gave a colour keeps none.
+  const cmp = { properties: { display: 'block' } };
+  overlayComputedOnComponent(cmp, { color: 'rgb(0, 0, 0)', display: 'block' });
+  assert.equal('color' in cmp.properties, false);
+});
+
+// The VERBATIM regression shape — css/selectors/invalidation/
+// sheet-going-away-002.html reduced to the three lines that matter: a body
+// class the script REMOVES, a rule that only matches while it is there, and
+// the rule the ref demands. Kept as source so the two halves of the wave-44
+// story are pinned against each other: U5's body sentinel is what makes the
+// static bake wrong here, H2's repair is what makes the fixture right.
+const BODY_CLASS_REMOVED_HTML = `
+<style>
+  p { color: green; }
+</style>
+<style id="style">
+  .red p { color: red; }
+</style>
+<body class="red">
+<p>
+  Should be green.
+</p>
+<script>
+document.body.offsetTop;
+document.body.className = "";
+style.remove();
+</script>
+</body>`;
+
+test('post-load h2: the static bake asserts red, the overlay repairs it to green', () => {
+  // Half 1 — the STATIC bake, as U5 left it: the body sentinel now wears
+  // class="red", so `.red p` outranks `p { color: green }` and the fixture
+  // ships the colour the script removed. This assertion is the regression
+  // itself, pinned so it cannot be "fixed" by silently narrowing U5.
+  const cleaned = stripComments(BODY_CLASS_REMOVED_HTML);
+  const rules = parseCss(extractInlineStyle(cleaned));
+  const { components } = buildComponents(cleaned, rules, 'sheet-going-away-002');
+  const cmp = components['sheet-going-away-002__0'];
+  assert.equal(cmp._tag, 'p');
+  assert.equal(cmp.properties.color, 'red');
+
+  // Half 2 — the OVERLAY, with the values Chromium actually reported for
+  // that <p> after settle (MEASURED on the pinned headless build; the
+  // border colours are `currentColor` resolved, which is how the skeptic
+  // proved the live ink was green before `color` was ever snapshotted).
+  overlayComputedOnComponent(cmp, {
+    color: 'rgb(0, 128, 0)',
+    'border-top-color': 'rgb(0, 128, 0)', 'border-right-color': 'rgb(0, 128, 0)',
+    'border-bottom-color': 'rgb(0, 128, 0)', 'border-left-color': 'rgb(0, 128, 0)',
+    'background-color': 'rgba(0, 0, 0, 0)',
+    display: 'block', position: 'static',
+    width: '358px', height: '20px', 'box-sizing': 'content-box',
+  });
+  assert.equal(cmp.properties.color, 'rgb(0, 128, 0)');
+});
+
+test('post-load h2: repairOnly never DELETES a color key either', () => {
+  // No deleteWhen: a component whose static colour agrees with the live one
+  // keeps a declaration (rewritten to the resolved spelling — semantically a
+  // no-op, and the reason the rule is presence-gated rather than diff-gated:
+  // `black` and `rgb(0, 0, 0)` name the same ink, and deciding that is colour
+  // parsing the overlay has no business doing).
+  const cmp = { properties: { color: 'black' } };
+  overlayComputedOnComponent(cmp, { color: 'rgb(0, 0, 0)' });
+  assert.equal(cmp.properties.color, 'rgb(0, 0, 0)');
 });
 
 test('post-load b-rc4: an inherited list-style-position mutation lands, initials do not', () => {

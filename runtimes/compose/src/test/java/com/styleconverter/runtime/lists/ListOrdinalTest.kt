@@ -111,8 +111,10 @@ class ListOrdinalTest {
     // css-lists-3 §4.4.2 "Instantiating Counters" — the SPEC rule for a
     // reversed counter created without an explicit value, not a fit to the
     // ref PNG (the ref agrees because Chromium runs the same algorithm).
-    // The producer does not forward `<ol reversed>` yet, so these columns
-    // are unit-only for now — the wire gap ListOrdinal's header documents.
+    // Wave 44 (lane U5) closed the wire gap these columns used to wait on:
+    // the producer forwards `<ol reversed>` as a presence-`true` boolean and
+    // the ComponentRenderer plan passes `attrs?.reversed == true` — so these
+    // pins now guard the LIVE path, not a dormant one.
 
     @Test
     fun `reversed without start counts down to one`() =

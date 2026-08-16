@@ -140,7 +140,16 @@ data class IRAttrs(
     // a bundling hop like the two feeders' --wpt-dir copy, then an
     // AsyncImage/Painter in ComponentRenderer. Appended LAST for the same
     // positional-construction reason `start` was. Twin of Swift IRAttrs.src.
-    val src: String? = null
+    val src: String? = null,
+    // wave-44 lane U5: `<ol reversed>` — HTML §4.4.5's BOOLEAN attribute
+    // (presence is the whole value), so the producer emits literal `true`
+    // (extract-fixture LIST_BOOLEAN_ATTR_KEYS) and it rides the boolean
+    // channel like checked/multiple. CONSUMED on this platform: the
+    // ComponentRenderer ordinal plan feeds it to ListOrdinal.ordinals —
+    // the wave-43 css-lists-3 §4.4.2 countdown whose wiring this closes.
+    // Appended LAST for the same positional-construction reason as `start`
+    // and `src`. Twin of Swift IRAttrs.reversed.
+    val reversed: Boolean? = null
 )
 
 /**

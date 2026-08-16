@@ -1696,19 +1696,45 @@ private fun ComposedCaptureCanvas(
                     // See ComposedRootInlineFlow.kt for the enumerated blast
                     // radius and why the RULES live in the runtime facade.
                     val rootBoxes = composedRootInlineBoxes(roots)
+                    // wave-44 U3a — the H3 PROBE gaps: every atom root's plan
+                    // entry recomputed with its DECLARED block margins muted
+                    // (they ride the RootBox into the packer now, so the gap
+                    // they used to inject must not refuse the run), while UA
+                    // margins and hoist bands keep their real values and
+                    // still refuse. See atomNeutralPlan's kdoc.
+                    val probeGaps = neutralizedRootGapsPx(
+                        roots, rootPlans, rootBoxes.map { it != null })
                     val rootSegments = com.styleconverter.runtime.layout.InlineBlockAtom
                         .rootSegments(
                             boxes = rootBoxes,
-                            // H3 reads the gap ABOVE each root — rootGaps is
+                            // H3 reads the gap ABOVE each root — the probe is
                             // roots+1 long ([before…, …, afterLast]), so the
                             // trailing entry is dropped here.
-                            blockGapsAbovePx = rootGaps.take(roots.size).map { it.toDouble() },
+                            blockGapsAbovePx = probeGaps.take(roots.size).map { it.toDouble() },
                         )
+                    // The gaps the walk EMITS (wave-44 U3a): neutralize only
+                    // the roots that actually landed in a RUN — a lone atom
+                    // (or a run H3 degraded to singles) stacks in the frozen
+                    // shape, so its declared margins must keep feeding its
+                    // gaps exactly as before. With no run at all this IS
+                    // rootGaps, keeping every run-free document's Spacers
+                    // byte-identical.
+                    val flowGaps = if (rootSegments == null) rootGaps else
+                        neutralizedRootGapsPx(
+                            roots, rootPlans,
+                            roots.indices.map { i ->
+                                rootSegments.any { it.isRun && i in it.indices }
+                            })
                     // The per-root render, extracted VERBATIM from the frozen
                     // loop so both walks below emit the identical node for a
-                    // given root — only the PLACEMENT ever differs.
-                    val renderRootAt: @androidx.compose.runtime.Composable (Int) -> Unit = { i ->
-                        val root = roots[i]
+                    // given root — only the PLACEMENT ever differs. wave-44
+                    // U3a: the COMPONENT now rides in as a parameter so the
+                    // run branch can hand in a margin-STRIPPED copy (the
+                    // packer owns a run member's margins; rendering them too
+                    // would fight the row's exact member constraints —
+                    // Compose margins are absolutePadding/offset). Every
+                    // other call site passes roots[i] unchanged.
+                    val renderRootAt: @androidx.compose.runtime.Composable (Int, com.styleconverter.runtime.core.ir.IRComponent) -> Unit = { i, root ->
                         // RC-A4: a stripped root renders with its block margins
                         // ZEROED through the runtime's §8.3.1 override channel
                         // (the same substitution MarginApplier performs for
@@ -1762,7 +1788,7 @@ private fun ComposedCaptureCanvas(
                             // Gap ABOVE this root (collapsed with the previous root's
                             // bottom margin; the first root's is its full top margin).
                             if (rootGaps[i] > 0f) Spacer(Modifier.height(rootGaps[i].dp))
-                            renderRootAt(i)
+                            renderRootAt(i, roots[i])
                         }
                     } else {
                         // wave-34 H1 — the segment walk. A RUN of consecutive
@@ -1770,15 +1796,29 @@ private fun ComposedCaptureCanvas(
                         // gap above its FIRST member is the block gap that
                         // still applies — the interior ones are gone because
                         // inline-level siblings on a line box have none, which
-                        // H3 already proved is a no-op here); every other
+                        // H3 already proved via the probe); every other
                         // segment is a single root stacked exactly as above.
+                        // wave-44 U3a: all Spacers read flowGaps — for run
+                        // members the declared-margin part now lives in the
+                        // row plan, for everything else flowGaps equals the
+                        // frozen rootGaps entry.
                         rootSegments.forEach { seg ->
                             val memberBoxes = seg.indices.mapNotNull { rootBoxes[it] }
                             if (seg.isRun && memberBoxes.size == seg.indices.size) {
                                 val first = seg.indices.first()
-                                if (rootGaps[first] > 0f) Spacer(Modifier.height(rootGaps[first].dp))
+                                if (flowGaps[first] > 0f) Spacer(Modifier.height(flowGaps[first].dp))
                                 ComposedRootInlineRow(memberBoxes) {
-                                    seg.indices.forEach { renderRootAt(it) }
+                                    // wave-44 U3a — run members render with
+                                    // their packer-owned margin declarations
+                                    // stripped (the facade's shared rule, so
+                                    // iOS strips the identical type set).
+                                    seg.indices.forEach {
+                                        renderRootAt(
+                                            it,
+                                            com.styleconverter.runtime.layout.InlineBlockAtom
+                                                .packedMarginStripped(roots[it]),
+                                        )
+                                    }
                                 }
                             } else {
                                 // A run whose boxes went missing between the plan
@@ -1786,14 +1826,18 @@ private fun ComposedCaptureCanvas(
                                 // stack its members like the frozen loop rather
                                 // than place them against a short plan.
                                 seg.indices.forEach { i ->
-                                    if (rootGaps[i] > 0f) Spacer(Modifier.height(rootGaps[i].dp))
-                                    renderRootAt(i)
+                                    if (flowGaps[i] > 0f) Spacer(Modifier.height(flowGaps[i].dp))
+                                    renderRootAt(i, roots[i])
                                 }
                             }
                         }
                     }
-                    // Trailing gap = the last root's (uncollapsed) bottom margin.
-                    if (rootGaps[roots.size] > 0f) Spacer(Modifier.height(rootGaps[roots.size].dp))
+                    // Trailing gap = the last root's (uncollapsed) bottom margin
+                    // (flowGaps IS rootGaps for a run-free document; when the
+                    // LAST root is a run member its declared bottom margin is
+                    // packer-owned and the neutralized entry emits 0 — the
+                    // browser consumes it inside the line box, §10.8).
+                    if (flowGaps[roots.size] > 0f) Spacer(Modifier.height(flowGaps[roots.size].dp))
                 }
             }
         }

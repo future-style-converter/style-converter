@@ -214,6 +214,14 @@ public struct IRAttrs: Equatable {
     /// bundling hop like the feeders' --wpt-dir copy, then an `Image` in
     /// ComponentRenderer. Twin of Kotlin IRAttrs.src.
     public let src: String?
+    /// Wave-44 lane U5: `<ol reversed>` — HTML §4.4.5's BOOLEAN attribute
+    /// (presence is the whole value), so the producer emits literal `true`
+    /// (extract-fixture LIST_BOOLEAN_ATTR_KEYS) and it rides the boolean
+    /// channel like checked/multiple. CONSUMED on this platform: the
+    /// ComponentRenderer ordinal plan feeds it to ListOrdinal.ordinals —
+    /// the wave-43 css-lists-3 §4.4.2 countdown whose wiring this closes.
+    /// Twin of Kotlin IRAttrs.reversed.
+    public let reversed: Bool?
 
     // internal: constructed by the decode paths and by tests. Defaults
     // keep pre-attrs construction sites and tests terse.
@@ -221,7 +229,7 @@ public struct IRAttrs: Equatable {
          checked: Bool? = nil, multiple: Bool? = nil, selected: Bool? = nil,
          disabled: Bool? = nil, size: String? = nil, alt: String? = nil,
          min: Double? = nil, max: Double? = nil, start: String? = nil,
-         src: String? = nil) {
+         src: String? = nil, reversed: Bool? = nil) {
         self.type = type
         self.value = value
         self.valueNumber = valueNumber
@@ -235,6 +243,7 @@ public struct IRAttrs: Equatable {
         self.max = max
         self.start = start
         self.src = src
+        self.reversed = reversed
     }
 
     /// Build from the wire's raw IRValue object — shared by the strict v2
@@ -266,7 +275,13 @@ public struct IRAttrs: Equatable {
             // wave-36 lane M1: the replaced element's image source. Verbatim
             // string lane, same as `start` — a path (or data: URI), never a
             // payload, and never coerced.
-            src: o["src"]?.stringValue
+            src: o["src"]?.stringValue,
+            // wave-44 lane U5: `<ol reversed>` — presence-`true` boolean on
+            // the wire (HTML §4.4.5 boolean attribute). boolValue never
+            // coerces strings, matching the Kotlin decoder's non-string
+            // gate, so an off-contract stringly writer fills neither
+            // platform's boolean channel.
+            reversed: o["reversed"]?.boolValue
         )
     }
 }

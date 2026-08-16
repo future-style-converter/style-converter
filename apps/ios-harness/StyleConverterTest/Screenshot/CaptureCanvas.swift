@@ -620,30 +620,66 @@ struct ComposedCaptureCanvas: View {
         // enumerated blast radius and why the RULES live in the runtime
         // facade rather than here.
         let rootBoxes = composedRootInlineBoxes(split.flow)
+        // wave-44 U3a — the H3 PROBE spacing: every atom root's plan entry
+        // recomputed with its DECLARED block margins muted (they ride the
+        // RootBox into the packer now, so the gap they used to inject must
+        // not refuse the run), while UA margins and hoist bands keep their
+        // real values and still refuse. See atomNeutralPlan's doc.
+        let probeSpacing = neutralizedStackedSpacing(
+            split.flow, plans: plans, neutralize: rootBoxes.map { $0 != nil })
         let rootSegments = InlineBlockAtom.rootSegments(
             boxes: rootBoxes,
-            // H3 reads the gap ABOVE each root — `spacing.leading` is exactly
-            // that array, index-aligned with `split.flow`.
-            blockGapsAbovePx: spacing.leading.map { Double($0) })
+            // H3 reads the gap ABOVE each root — `probeSpacing.leading` is
+            // exactly that array, index-aligned with `split.flow`.
+            blockGapsAbovePx: probeSpacing.leading.map { Double($0) })
+        // The spacing the walk EMITS (wave-44 U3a): neutralize only the
+        // roots that actually landed in a RUN — a lone atom (or a run H3
+        // degraded to singles) stacks in the frozen shape, so its declared
+        // margins must keep feeding its pads exactly as before. With no run
+        // at all this IS `spacing`, keeping every run-free document's pads
+        // byte-identical.
+        let flowSpacing = rootSegments == nil ? spacing :
+            neutralizedStackedSpacing(
+                split.flow, plans: plans,
+                neutralize: split.flow.indices.map { i in
+                    rootSegments!.contains { $0.isRun && $0.indices.contains(i) }
+                })
         return VStack(alignment: .leading, spacing: 0) {
             if let segments = rootSegments {
                 // wave-34 H1 — the segment walk. A RUN of consecutive
                 // inline-block roots becomes ONE §9.4.2 row item carrying the
                 // block gap above its FIRST member (the interior ones are
                 // gone because inline-level siblings on a line box have none,
-                // which H3 already proved is a no-op here); every other
+                // which H3 already proved via the probe); every other
                 // segment is a single root laid out exactly as below.
+                // wave-44 U3a: all pads read flowSpacing — for run members
+                // the declared-margin part now lives in the row plan, for
+                // everything else flowSpacing equals the frozen entry.
                 ForEach(Array(segments.enumerated()), id: \.offset) { _, seg in
                     let memberBoxes = seg.indices.compactMap { rootBoxes[$0] }
                     if seg.isRun, memberBoxes.count == seg.indices.count {
-                        ComposedRootInlineRow(boxes: memberBoxes) {
+                        // wave-44 U3 — the wrap width for SwiftUI's nil/
+                        // infinite width probes: the SAME content width the
+                        // `.frame(maxWidth:)` below resolves, so the ideal
+                        // height equals the placed height and the canvas
+                        // grows with a wrapped run (box-sizing-007's ten
+                        // rows) instead of centering the overflow.
+                        ComposedRootInlineRow(
+                            boxes: memberBoxes,
+                            fallbackAvailableWidthPx: Double(Self.width - pad.leading - pad.trailing)
+                        ) {
                             ForEach(seg.indices, id: \.self) { i in
-                                rootBody(i, split.flow[i], plans: plans)
+                                // wave-44 U3a — run members render with their
+                                // packer-owned margin declarations stripped
+                                // (the facade's shared rule, so Compose
+                                // strips the identical type set).
+                                rootBody(i, InlineBlockAtom.packedMarginStripped(split.flow[i]),
+                                         plans: plans)
                             }
                         }
-                        .padding(.top, spacing.leading[seg.indices[0]])
+                        .padding(.top, flowSpacing.leading[seg.indices[0]])
                         .padding(.bottom,
-                                 seg.indices.contains(lastIndex) ? spacing.trailing : 0)
+                                 seg.indices.contains(lastIndex) ? flowSpacing.trailing : 0)
                     } else {
                         // A run whose boxes went missing between the plan and
                         // here is a harness bug, not layout state: stack its
@@ -651,8 +687,8 @@ struct ComposedCaptureCanvas: View {
                         // them against a short plan.
                         ForEach(seg.indices, id: \.self) { i in
                             rootBody(i, split.flow[i], plans: plans)
-                                .padding(.top, spacing.leading[i])
-                                .padding(.bottom, i == lastIndex ? spacing.trailing : 0)
+                                .padding(.top, flowSpacing.leading[i])
+                                .padding(.bottom, i == lastIndex ? flowSpacing.trailing : 0)
                         }
                     }
                 }

@@ -4123,8 +4123,10 @@ test('cbake: widgetAttrsFor — ol/li forward start/value as verbatim strings', 
 test('cbake: the list lane is allow-listed and omit-when-empty', async () => {
   const { widgetAttrsFor } = await import('./extract-fixture.mjs');
   // Selector fuel (id/class/style) and non-lane attributes never forward.
+  // (wave-44: `reversed` joined the lane as a presence-boolean, so the
+  // bare `reversed` here now forwards as literal `true` — see the U5 block.)
   assert.deepEqual(widgetAttrsFor('ol', { start: '3', id: 'x', type: 'a', reversed: '' }),
-    { start: '3' });
+    { start: '3', reversed: true });
   // No qualifying attribute at all → no `_attrs` field at all.
   assert.equal(widgetAttrsFor('ol', { id: 'x' }), null);
   assert.equal(widgetAttrsFor('li', {}), null);
@@ -6198,4 +6200,140 @@ test('A5 dir-mint: the hint merges into an EXISTING root bag without displacing 
   const { components } = buildComponents(html, parseCss('body { background: green }'), 'd5');
   assert.equal(components['d5__body'].properties.background, 'green');
   assert.equal(components['d5__body'].properties.direction, 'rtl');
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// wave-44 lane U5 — (a) the `<ol reversed>` wire; (b) the real body-attr
+// sentinel behind the post-load pseudo re-derivation.
+// ═════════════════════════════════════════════════════════════════════════════
+
+// New exports under test — dynamic import, same pattern as the wave-29 block.
+const {
+  LIST_ATTR_KEYS,
+  LIST_BOOLEAN_ATTR_KEYS,
+  widgetAttrsFor: u5WidgetAttrsFor,
+  documentBodyAttrs,
+} = await import('./extract-fixture.mjs');
+
+// ── (a) `reversed` rides the list lane as a presence-boolean ────────────────
+
+test('U5: LIST_ATTR_KEYS carries reversed, typed boolean by the lane subset', () => {
+  // The allow-list order IS the wire key order (widgetAttrsFor walks it).
+  assert.deepEqual(LIST_ATTR_KEYS, ['start', 'value', 'reversed']);
+  // Exactly one boolean key today — HTML §4.4.5 pins `reversed` as boolean.
+  assert.deepEqual([...LIST_BOOLEAN_ATTR_KEYS], ['reversed']);
+});
+
+test('U5: <ol reversed> forwards presence as literal true, whatever the source spelled', () => {
+  // Bare attribute (walkChildren stores '' for it) — the common spelling.
+  assert.deepEqual(u5WidgetAttrsFor('ol', { reversed: '' }), { reversed: true });
+  // HTML boolean-attribute rule: ANY value means present — even "false"
+  // (§2.3.2: "the values 'true' and 'false' are not allowed", presence wins).
+  assert.deepEqual(u5WidgetAttrsFor('ol', { reversed: 'false' }), { reversed: true });
+  // Alongside `start`: both lanes' typing rules hold in one bag —
+  // counter-list-item's second reversed list is exactly <ol start="30" reversed>.
+  assert.deepEqual(u5WidgetAttrsFor('ol', { start: '30', reversed: '' }),
+    { start: '30', reversed: true });
+  // Absent attribute ⇒ absent wire key (present-only contract, unchanged).
+  assert.deepEqual(u5WidgetAttrsFor('ol', { start: '30' }), { start: '30' });
+  // The widget lane did NOT gain the key: reversed on a widget tag is not a
+  // widget attribute (the two lanes stay disjoint).
+  assert.equal(u5WidgetAttrsFor('input', { reversed: '' }), null);
+});
+
+test('U5: buildComponents emits `_attrs` with reversed for <ol reversed>', () => {
+  // End-to-end through the walker: the exact counter-list-item list shapes.
+  const { components } = buildComponents(
+    "<body><ol start='30' reversed><li>a</li></ol><ol><li>b</li></ol></body>",
+    parseCss('ol { color: red }'), 'rv');
+  assert.equal(components['rv__0']._tag, 'ol');
+  assert.deepEqual(components['rv__0']._attrs, { start: '30', reversed: true });
+  // The unreversed sibling stays attr-less — presence-only, no false noise.
+  assert.equal(components['rv__1']._attrs, undefined);
+});
+
+// ── (b) documentBodyAttrs: the real <body …> bag ────────────────────────────
+
+test('U5: documentBodyAttrs reads the real body start tag, omit-when-empty', () => {
+  // The display-contents-dynamic-before-after-001 post-load shape: the
+  // serialized DOM's body carries the script-set class.
+  assert.deepEqual(documentBodyAttrs('<html><body class="active"><div></div></body></html>'),
+    { class: 'active' });
+  // Multiple attributes parse with the walker's own grammar (lowercased
+  // keys, quoted or bare values).
+  assert.deepEqual(documentBodyAttrs("<body ID='t' dir=rtl>x</body>"),
+    { id: 't', dir: 'rtl' });
+  // Attribute-less body → null, so the frozen empty sentinel stays in use.
+  assert.equal(documentBodyAttrs('<body>x</body>'), null);
+  // No body tag at all (fallback documents) → null.
+  assert.equal(documentBodyAttrs('<div>no body</div>'), null);
+  // Non-string input is refused, not thrown on.
+  assert.equal(documentBodyAttrs(null), null);
+});
+
+test('U5: documentBodyAttrs scans MASKED markup — script strings and comments cannot fake a body', () => {
+  // A `<body …>` inside a JS string (the cssom/computed-style-002 shape)
+  // must not be read; the real body after it must be.
+  assert.deepEqual(documentBodyAttrs(
+    '<script>d.write(\'<body class="fake">\');</script><body class="real">x</body>'),
+    { class: 'real' });
+  // Same for a commented-out body.
+  assert.deepEqual(documentBodyAttrs(
+    '<!-- <body class="fake"> --><body class="real">x</body>'),
+    { class: 'real' });
+  // A quoted attr value containing `>` cannot truncate the tag slice (the
+  // masked match spans to the REAL tag close, then slices original bytes).
+  assert.deepEqual(documentBodyAttrs('<body class="a" title="x > y">t</body>'),
+    { class: 'a', title: 'x > y' });
+});
+
+test('U5: ctx.bodyAttrs dresses the body sentinel — `.active div::before` flips buckets', () => {
+  // The EXACT css-display/display-contents-dynamic-before-after-001 cascade:
+  //   div::before         { color: red }
+  //   .active div::before { color: green }
+  // With `.active` on BODY, only a body sentinel wearing the class can let
+  // the second rule match (the walker's chain starts inside body).
+  const rules = parseCss('div::before { color: red } .active div::before { color: green }');
+  const pos = { sibIndex: 0, sibCount: 1, sibTypeIndex: 0, sibTypeCount: 1, isEmpty: true };
+  // Pre-mutation truth (no class on body): red, exactly as before wave-44.
+  assert.equal(propsForElement(rules, 'div', {}, [], pos, {}).pseudo.before.color, 'red');
+  // Post-mutation truth (serialized DOM's body carries class="active"): green.
+  assert.equal(
+    propsForElement(rules, 'div', {}, [], pos, { bodyAttrs: { class: 'active' } })
+      .pseudo.before.color,
+    'green');
+});
+
+test('U5: buildComponents harvests body attrs end-to-end into the pseudo bags', () => {
+  // The re-derivation path in one call: extractFixture hands buildComponents
+  // the SERIALIZED post-load document (body class present in markup), ctx
+  // null — the bodyAttrs ctx rung must self-harvest, exactly like the dir
+  // and lang rungs it mirrors.
+  const css = 'div::before { content: ""; color: red } '
+    + '.active div::before { content: ""; color: green }';
+  const post = buildComponents(
+    '<html><body class="active"><div>x</div></body></html>',
+    parseCss(css), 'pb').components;
+  assert.equal(post['pb__0']._pseudo.before.properties.color, 'green');
+  // And the PRE-mutation source (no class in markup) still bakes red — the
+  // static pass stays the honest pre-load truth.
+  const pre = buildComponents(
+    '<html><body><div>x</div></body></html>',
+    parseCss(css), 'pr').components;
+  assert.equal(pre['pr__0']._pseudo.before.properties.color, 'red');
+});
+
+test('U5: a caller-supplied ctx.bodyAttrs wins over harvesting (injection contract)', () => {
+  // Same copy-not-mutate contract as documentDir/documentLang: a supplied
+  // value (null included) is respected, the caller's object is untouched.
+  const css = '.active div { color: green } div { color: red }';
+  const ctx = { bodyAttrs: null };
+  const out = buildComponents(
+    '<html><body class="active"><div>x</div></body></html>',
+    parseCss(css), 'ci', ctx).components;
+  // Injection said "no body attrs", so `.active div` must NOT match even
+  // though the markup carries the class.
+  assert.equal(out['ci__0'].properties.color, 'red');
+  // The caller's ctx object was not mutated by the rungs.
+  assert.deepEqual(ctx, { bodyAttrs: null });
 });

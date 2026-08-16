@@ -44,11 +44,12 @@
 //  1 ⇒ the last item lands on 1; that is the only case where the naive
 //  "initial = item count" shortcut agrees. The shortcut is NOT the CSS-UA
 //  rule (it ignores counter-set entirely) — do not "simplify" this back to
-//  it. The caller passes `false` today because the producer never forwards the
-//  attribute (tools/titan/extract-fixture.mjs LIST_ATTR_KEYS has no
-//  'reversed') and the meta.attrs capsule has no field for it — closing
-//  that is a producer + decoder change outside this lane; the countdown is
-//  unit-tested here so the wiring is one boolean when the wire arrives.
+//  it. Wave 44 (lane U5) delivered the wire this header used to defer: the
+//  producer forwards `<ol reversed>` as a presence-`true` boolean
+//  (extract-fixture.mjs LIST_BOOLEAN_ATTR_KEYS, HTML §4.4.5 boolean
+//  attribute), both strict decoders admit it (Swift IRWireV2Reader attrKeys
+//  / Kotlin IRDocumentDecoder.ATTR_KEYS), and the ComponentRenderer ordinal
+//  plan passes `attrs?.reversed == true` here.
 //
 //  TWIN of Compose lists/ListOrdinal.kt — same functions, same anchor
 //  rule, same tests. Change one, change both.

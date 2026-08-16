@@ -92,9 +92,68 @@ func composedRootInlineBoxes(_ roots: [IRComponent]) -> [InlineBlockAtom.RootBox
             hasOwnText: root.text?.isEmpty == false,
             // B6 — so is an ordered inline-run list (wave-32 lane R).
             hasOwnRuns: root.meta?.runs?.isEmpty == false,
-            containerDeclaresLineHeight: bodyDeclaresLineHeight
+            containerDeclaresLineHeight: bodyDeclaresLineHeight,
+            // wave-44 U3b — the delivered-replaced attestation, read by the
+            // runtime's own seam (candidacy + DocumentImageRegistry decode)
+            // so this harness and the Compose twin cannot disagree about
+            // what "delivered" means. Nil (an undelivered/non-replaced
+            // root) keeps the wave-34 behavior byte-for-byte.
+            replaced: InlineBlockAtom.replacedRootFacts(of: root)
         )
     }
+}
+
+/// wave-44 U3a — one root's DECLARED-NEUTRAL stack-plan entry: the same
+/// `RootStackMargin` the canvas's rootPlans fold builds, but with the
+/// root's declared block margins contributing ZERO (`staticDeclaredEdges:
+/// (0, 0)` — declared sides muted, undeclared sides keep their UA
+/// default) while the wave-26 hoist band keeps its real value.
+///
+/// Used for atom roots in two places (see CaptureCanvas's segment walk):
+///  - the H3 PROBE — an admitted atom's declared margins now ride its
+///    `InlineBlockAtom.RootBox` and are re-expressed by the packer's
+///    margin-box fold, so the gap they used to inject must not refuse the
+///    run; anything the neutralization does NOT explain (a UA margin, a
+///    hoist band) still does;
+///  - the RUN-path gap emission — the pad above a run must carry only the
+///    PREVIOUS root's contribution (the browser puts the first member's
+///    own margin-top INSIDE the line box, §10.8; emitting it in the pad
+///    too would double-count it whenever it exceeds the neighbor's bottom
+///    margin).
+/// Atoms are never hoisted/static-position (B3 refuses out-of-flow), so
+/// the plain opaque branch of the rootPlans fold is the only shape here.
+/// Twin: apps/android-harness ComposedRootInlineFlow.atomNeutralPlan.
+func atomNeutralPlan(_ root: IRComponent) -> UABlockMargin.RootStackMargin {
+    // Declared sides contribute 0 (the packer owns them); undeclared keep
+    // the UA default, which is what lets a UA-margined atom-shaped root
+    // still refuse through the probe.
+    let base = UABlockMargin.rootStackMargin(
+        tag: root.meta?.sourceTag,
+        declaresTop: UABlockMargin.declaresBlockMarginTop(root.properties),
+        declaresBottom: UABlockMargin.declaresBlockMarginBottom(root.properties),
+        staticDeclaredEdges: (0, 0))
+    // The wave-26 hoist band is OUTER spacing the packer does not model —
+    // it keeps its real value so a band-carrying run refuses via H3.
+    return UABlockMargin.withHoistBand(
+        base,
+        band: UABlockMargin.composedRootHoistBand(root, uaBlockMargins: true))
+}
+
+/// wave-44 U3a — the stacked spacing a segment walk should emit, given
+/// which roots' declared block margins moved into the inline packer:
+/// `neutralize[i]` marks the roots (always exactly the RUN members, or
+/// every atom for the H3 probe) whose plan entries are replaced by
+/// `atomNeutralPlan`; everything else keeps its real `plans` entry, so
+/// singles and non-atoms collapse exactly as the frozen loop would.
+/// Pure — twin of the Compose harness's neutralizedRootGapsPx.
+func neutralizedStackedSpacing(
+    _ roots: [IRComponent],
+    plans: [UABlockMargin.RootStackMargin],
+    neutralize: [Bool]
+) -> (leading: [CGFloat], trailing: CGFloat) {
+    UABlockMargin.stackedSpacing(plans: plans.enumerated().map { i, plan in
+        (i < neutralize.count && neutralize[i]) ? atomNeutralPlan(roots[i]) : plan
+    })
 }
 
 /// Lay one run of inline-block ROOTS out as §9.4.2 rows.
@@ -125,6 +184,22 @@ struct ComposedRootInlineRow: Layout {
     /// subviews the caller builds from the same segment indices.
     let boxes: [InlineBlockAtom.RootBox]
 
+    /// wave-44 U3 (MEASURED on the iPhone 17 Pro sim): the canvas CONTENT
+    /// width to wrap at when the incoming proposal carries no usable
+    /// width. SwiftUI probes a Layout's ideal size with `.unspecified`
+    /// (width nil) and its max with `.infinity` — under either, the old
+    /// `?? .infinity` fallback answered the NO-WRAP single-row size, so
+    /// box-sizing-007's twenty imgs reported one 124pt row where the real
+    /// render wraps into ten (1240pt). The canvas's `fixedSize(vertical:
+    /// true)` then kept the 600pt floor and SwiftUI CENTERED the
+    /// overflowing VStack — the arm-B capture lost the `<p>` off the top
+    /// and five rows off the bottom (iOS 0.7325 vs Android's 0.9844 on
+    /// the identical plan). Wrapping at the canvas width is the honest
+    /// ideal answer: it is the exact width the placement pass receives.
+    /// Wave-34's one-row runs report identical sizes either way, so every
+    /// frozen capture is unchanged.
+    let fallbackAvailableWidthPx: Double
+
     /// Per-member exact proposals — one place builds them so the size and
     /// place passes cannot disagree.
     private func proposals() -> [ProposedViewSize] {
@@ -139,11 +214,23 @@ struct ComposedRootInlineRow: Layout {
         InlineBlockAtom.rootRowPlan(
             widthsPx: boxes.map(\.widthPx),
             heightsPx: boxes.map(\.heightPx),
-            // The VStack's content width drives the wrap; an unbounded
-            // proposal simply never wraps.
-            availableWidthPx: proposal.width.map { Double($0) } ?? .infinity,
+            // The VStack's content width drives the wrap. A nil width
+            // (SwiftUI's `.unspecified` ideal probe) or a non-finite one
+            // (the `.infinity` max probe) falls back to the canvas content
+            // width — see fallbackAvailableWidthPx's MEASURED rationale.
+            availableWidthPx: proposal.width.flatMap {
+                $0.isFinite ? Double($0) : nil
+            } ?? fallbackAvailableWidthPx,
             // The collapsed source white-space between inline siblings.
-            gapPx: InlineBlockAtom.rootAtomGapPx
+            gapPx: InlineBlockAtom.rootAtomGapPx,
+            // wave-44 U3a — the members' declared margins, packer-owned
+            // (the render is margin-stripped): the facade folds them into
+            // §10.8.1 margin-box rows and hands back BORDER-box origins.
+            // CSS px == pt at the capture scale, so no conversion here.
+            marginTopsPx: boxes.map(\.marginTopPx),
+            marginRightsPx: boxes.map(\.marginRightPx),
+            marginBottomsPx: boxes.map(\.marginBottomPx),
+            marginLeftsPx: boxes.map(\.marginLeftPx)
         )
     }
 

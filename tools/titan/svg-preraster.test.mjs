@@ -148,29 +148,47 @@ test('prerasterizeSvgSources declines everything, loudly, with no --wpt-dir', as
   assert.match(lines.join('\n'), /SKIPPED/);
 });
 
-test('the hop is OFF by default — the MEASURED verdict, not a pending question', async (t) => {
-  // The default is OFF on TWO measured A/Bs of the 19-test cluster. Wave-41
-  // T2: arm B (raster delivered) cost 7 Android + 8 iOS passes — the eight
-  // vacuous passes all flipped to fail when the §10.4-unclamped raster
-  // painted its intrinsic size and overshot the constrained box. Wave-42 W6
-  // landed §10.4 and the wave-43 V1 RE-RUN measured the size defect gone
-  // but arm B still costing 8 Android + 7 iOS passes on PLACEMENT: the
-  // delivered replaced roots block-stack one per line where the ref packs
-  // them on line boxes, because the composed root row flow admits only
-  // declared inline-blocks (InlineBlockAtom B1). The flip is now gated on
-  // wiring InlineAtomFlow's wave-43 replaced-image atom family through the
-  // root flow. An empty map makes applyPrerasterRewrite a no-op, so "off"
-  // is byte-identical, not merely similar. Full per-arm numbers in the
-  // switch banner in svg-preraster.mjs.
+test('the hop is ON by default — the wave-44 MEASURED verdict', async (t) => {
+  // Waves 40..43 pinned OFF on two measured A/B losses (intrinsic-size
+  // painting, then root block-stacking). Wave-44 U3 landed both named
+  // gates — the root facade's delivered-replaced family + margin channel
+  // (InlineBlockAtom.rootBox) wired through both harness canvases — and
+  // the RE-RUN A/B flipped decisively: Android 8/19 → 15/19 (mean 0.8798
+  // → 0.9690), iOS 8/19 → 16/19 (0.8808 → 0.9702), zero passes lost.
+  // Full per-arm numbers and the residual-fail ledger live in the switch
+  // banner in svg-preraster.mjs. Default-ON must reach the browser
+  // launch; the hermetic tmp corpus below is the same rig the env test
+  // uses (the real tools/wpt/ mirror is gitignored, absent on CI).
   const prev = process.env.TITAN_SVG_PRERASTER;
   delete process.env.TITAN_SVG_PRERASTER;
   t.after(() => { if (prev === undefined) delete process.env.TITAN_SVG_PRERASTER; else process.env.TITAN_SVG_PRERASTER = prev; });
+  const tmpRoot = await fs.mkdtemp(join(tmpdir(), 'svg-preraster-default-'));
+  t.after(() => fs.rm(tmpRoot, { recursive: true, force: true }));
+  await fs.mkdir(join(tmpRoot, 'css', 'css-ui', 'support'), { recursive: true });
+  await fs.writeFile(join(tmpRoot, 'css', 'css-ui', 'support', 'r1-1.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>');
+  let launched = false;
+  await prerasterizeSvgSources(['css/css-ui/support/r1-1.svg'], {
+    wptDir: tmpRoot,
+    log: () => {},
+    launch: () => { launched = true; throw new Error('stop here — reaching launch is the assertion'); },
+  });
+  assert.equal(launched, true, 'env unset must engage the hop (the wave-44 default)');
+});
+
+test('TITAN_SVG_PRERASTER=0 is the escape hatch back to the pre-wave-40 wire', async (t) => {
+  // The literal '0' (and ONLY '0' — the mirror of the OFF era's literal-'1'
+  // discipline, so a typo cannot silently disable a measured-ON gate)
+  // restores the exact old behaviour: no browser, an empty map, and
+  // applyPrerasterRewrite as a byte-identical no-op.
+  const prev = process.env.TITAN_SVG_PRERASTER;
+  t.after(() => { if (prev === undefined) delete process.env.TITAN_SVG_PRERASTER; else process.env.TITAN_SVG_PRERASTER = prev; });
+  process.env.TITAN_SVG_PRERASTER = '0';
   const lines = [];
   const map = await prerasterizeSvgSources(['css/css-ui/support/r1-1.svg'], {
     wptDir: WPT_DIR, log: (m) => lines.push(m), launch: () => { throw new Error('must not launch'); },
   });
   assert.equal(map.size, 0);
-  assert.match(lines.join('\n'), /OFF \(default/);
+  assert.match(lines.join('\n'), /OFF \(TITAN_SVG_PRERASTER=0/);
   // …and an empty map really is a no-op on a document that references it.
   const doc = { components: [imgComponent('a', 'css/css-ui/support/r1-1.svg')] };
   const before = JSON.stringify(doc);
@@ -178,7 +196,7 @@ test('the hop is OFF by default — the MEASURED verdict, not a pending question
   assert.equal(JSON.stringify(doc), before);
 });
 
-test('TITAN_SVG_PRERASTER=1 engages the hop; any other value leaves it off', async (t) => {
+test('every env value except the literal 0 leaves the default-ON engaged', async (t) => {
   const prev = process.env.TITAN_SVG_PRERASTER;
   t.after(() => { if (prev === undefined) delete process.env.TITAN_SVG_PRERASTER; else process.env.TITAN_SVG_PRERASTER = prev; });
   // Hermetic corpus: the engaged arm must get PAST the existsSync gate to
@@ -190,9 +208,10 @@ test('TITAN_SVG_PRERASTER=1 engages the hop; any other value leaves it off', asy
   t.after(() => fs.rm(tmpRoot, { recursive: true, force: true }));
   await fs.mkdir(join(tmpRoot, 'css', 'css-ui', 'support'), { recursive: true });
   await fs.writeFile(join(tmpRoot, 'css', 'css-ui', 'support', 'r1-1.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>');
-  // Only the literal '1' engages it — 'true'/'yes'/'0' must NOT, so a typo in
-  // a section-runner env line cannot silently turn a measured-off gate on.
-  for (const [val, wantLaunch] of [['1', true], ['0', false], ['true', false], ['', false]]) {
+  // '1' (the old opt-in) and any stray value keep the hop ON; only the
+  // literal '0' opts out. `enabled: false` is the caller-side force-off
+  // (tests), pinned here alongside the env row it mirrors.
+  for (const [val, wantLaunch] of [['1', true], ['0', false], ['true', true], ['', true]]) {
     process.env.TITAN_SVG_PRERASTER = val;
     let launched = false;
     await prerasterizeSvgSources(['css/css-ui/support/r1-1.svg'], {
@@ -202,6 +221,14 @@ test('TITAN_SVG_PRERASTER=1 engages the hop; any other value leaves it off', asy
     });
     assert.equal(launched, wantLaunch, `TITAN_SVG_PRERASTER=${JSON.stringify(val)}`);
   }
+  // The explicit caller override forces OFF whatever the env says.
+  delete process.env.TITAN_SVG_PRERASTER;
+  let launched = false;
+  await prerasterizeSvgSources(['css/css-ui/support/r1-1.svg'], {
+    enabled: false, wptDir: tmpRoot, log: () => {},
+    launch: () => { launched = true; throw new Error('must not launch'); },
+  });
+  assert.equal(launched, false, 'opts.enabled === false must force the hop off');
 });
 
 test('prerasterizeSvgSources launches nothing for an empty batch', async () => {

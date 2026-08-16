@@ -47,13 +47,12 @@ package com.styleconverter.runtime.lists
 // num = itemCount + 1 ⇒ the last item lands on 1; that is the only case
 // where the naive "initial = item count" shortcut agrees. The shortcut is
 // NOT the CSS-UA rule (it ignores counter-set entirely) — do not
-// "simplify" this back to it. The caller passes `false` today because the
-// producer never forwards the attribute: tools/titan/extract-fixture.mjs
-// pins LIST_ATTR_KEYS = ['start','value'] (no 'reversed'), and the strict
-// meta.attrs decoders on both natives would reject the key anyway
-// (IRDocumentDecoder.ATTR_KEYS / Swift IRAttrs.from). Closing that is a
-// producer + decoder change outside this lane; the countdown is unit-tested
-// here so the wiring is one boolean when the wire arrives.
+// "simplify" this back to it. Wave 44 (lane U5) delivered the wire this
+// header used to defer: the producer forwards `<ol reversed>` as a
+// presence-`true` boolean (extract-fixture.mjs LIST_BOOLEAN_ATTR_KEYS,
+// HTML §4.4.5 boolean attribute), both strict decoders admit it
+// (IRDocumentDecoder.ATTR_KEYS / Swift IRWireV2Reader attrKeys), and the
+// ComponentRenderer ordinal plan passes `attrs?.reversed == true` here.
 //
 // TWIN of the iOS StyleEngine/lists/ListOrdinal.swift — same functions,
 // same anchor rule, same tests. Change one, change both.
@@ -115,8 +114,9 @@ object ListOrdinal {
      *
      * @param startAttr the container's verbatim `meta.attrs.start` string
      *   (`<ol start>`), or null.
-     * @param reversed whether the list counts down (`<ol reversed>` —
-     *   currently always false at the call site; see the file header).
+     * @param reversed whether the list counts down (`<ol reversed>` — the
+     *   call site passes the wire's `attrs?.reversed == true` since wave 44;
+     *   see the file header).
      * @param children the SAME list the render loop iterates, so indices
      *   align by construction.
      */

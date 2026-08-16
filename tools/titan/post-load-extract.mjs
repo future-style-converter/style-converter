@@ -254,6 +254,36 @@ export const POST_LOAD_COMPUTED_PROPERTIES = [
   // is delete-not-write below: only a genuinely 3D-preserving element gains
   // the key, and the overlay stays reviewable.
   'transform-style',
+  // wave-44 lane H2 — `color`, the INVERSE of wave-44 U5's display-contents
+  // repair, and the property that repair regressed.
+  //
+  // U5 taught the static matcher the real `<body …>` attribute bag so a
+  // script-ADDED body class (display-contents-dynamic-before-after-001) would
+  // match through the post-load pseudo re-derivation. The same widening also
+  // made the STATIC bake see a body class the script REMOVES:
+  // css/selectors/invalidation/sheet-going-away-002 authors
+  // `<body class="red">` + `.red p { color: red }`, then clears the class and
+  // removes the sheet on load — test and ref both demand green. Post-U5 the
+  // static bake matched `.red p` and stamped `color: red`, and nothing
+  // downstream repaired it because `color` was not in this list.
+  //
+  // MEASURED (pinned headless Chromium, this test, pre-fix fixture): the very
+  // same snapshot bag already carried the live green — `border-*-color` came
+  // back `rgb(0, 128, 0)`, which is `currentColor` resolved against the live
+  // `color`. So the browser had rendered green, the bag proved it, and only
+  // the ink the reftest actually grades was left on the stale static value.
+  // Snapshotting `color` closes that: what Chromium computed wins.
+  //
+  // REPAIR-ONLY (see WRITE_RULES): unlike every entry above, this one never
+  // INTRODUCES a key — it only overwrites a `color` the static bake already
+  // asserted. `color` is inherited with a non-empty computed value on every
+  // element in the corpus (`rgb(0, 0, 0)` by default), so an unconditional
+  // write would stamp a colour onto every component of all 1,188 delivered
+  // post-load fixtures, and a `deleteWhen: 'rgb(0, 0, 0)'` rule would be
+  // WRONG for an inherited property (an explicit `color: black` under a red
+  // ancestor would be deleted and then inherit red). Repair-only is the shape
+  // that fixes the stale bake and changes nothing else.
+  'color',
 ];
 
 // Per-property write rules for the merge. Default (not listed) = write the
@@ -261,6 +291,19 @@ export const POST_LOAD_COMPUTED_PROPERTIES = [
 // default carries no declaration" — writing them would bloat every component
 // with noise; but the matching STATIC key is still DELETED so a stale
 // pre-mutation value can never linger underneath.
+//
+// Rule kinds:
+//   deleteWhen  — this computed value carries no declaration: delete the
+//                 static key, write nothing.
+//   requirePx   — only a concrete px used value is bakeable; anything else
+//                 deletes the static key.
+//   repairOnly  — (wave-44 lane H2) LIVE-WINS REPAIR, never introduction:
+//                 write the computed value ONLY when the static bake already
+//                 asserted this key, and leave components without one
+//                 untouched. For a property that is inherited and always has
+//                 a computed value, this is the only shape that can correct a
+//                 provably-wrong static bake without stamping a key onto
+//                 every component in every post-load fixture.
 export const WRITE_RULES = {
   top:        { deleteWhen: 'auto' },   // static-position boxes: no inset declaration
   right:      { deleteWhen: 'auto' },
@@ -305,6 +348,15 @@ export const WRITE_RULES = {
   // keeps the overlay reviewable while still removing a stale static
   // `preserve-3d` that a script has since flattened.
   'transform-style': { deleteWhen: 'flat' },
+  // wave-44 lane H2 — see the `color` entry in POST_LOAD_COMPUTED_PROPERTIES
+  // for the measurement and why neither of the other two rule kinds fits.
+  // The repair is deliberately unconditional ON PRESENCE rather than gated on
+  // "the values differ": textual inequality is not semantic inequality for
+  // colours (`green` vs the computed `rgb(0, 128, 0)` name the same ink), so a
+  // differs? test would make the overlay do colour parsing it has no business
+  // doing — while writing the resolved value is a semantic no-op exactly when
+  // they already agree, and the repair when they do not.
+  color: { repairOnly: true },
 };
 
 // Static shorthands the computed longhands displace. When the overlay writes
@@ -1252,6 +1304,10 @@ export function barControlAuthorBoxSuppression(cmp, styles, props) {
  *     the WRITE_RULES defaults ('auto' insets / z-index, 'none' transform,
  *     non-px width/height) which are delete-not-write: the static key is
  *     removed (a stale value must not linger) but no declaration is added;
+ *   - wave-44 lane H2: a `repairOnly` property (`color`) is written only
+ *     where the static bake already asserted the key — the live value wins
+ *     over a provably-wrong static one, and components that never carried
+ *     the key are left exactly as they were;
  *   - the computed `box-sizing` is baked alongside width/height because gCS
  *     expresses those sizes in the element's OWN basis (border-box elements
  *     report border-box px — the block-axis-constraint parents are exactly
@@ -1294,6 +1350,12 @@ export function overlayComputedOnComponent(cmp, styles, opts = {}) {
     const rule = WRITE_RULES[name];
     // Missing value (defensive — walker always supplies all names): skip.
     if (v === undefined || v === null || v === '') continue;
+    // wave-44 lane H2 — repairOnly: correct a static assertion, never make
+    // one. No static key ⇒ nothing to repair, and nothing is added (see the
+    // rule-kind doc on WRITE_RULES). Placed BEFORE deleteWhen/requirePx so a
+    // repair-only property can never delete a key either: the contract is
+    // "overwrite what the bake got wrong", full stop.
+    if (rule?.repairOnly && props[name] === undefined) continue;
     // deleteWhen: the computed default carries no declaration.
     if (rule?.deleteWhen !== undefined && v === rule.deleteWhen) { delete props[name]; continue; }
     // requirePx: keyword sizes ('auto', 'fit-content(…)') are not concrete

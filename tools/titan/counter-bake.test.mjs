@@ -186,6 +186,118 @@ test('an <ol start> seeds the implicit list-item counter', () => {
   assert.deepEqual(contents(components), ['"30"', '"31"']);
 });
 
+// ── wave-44 lane H2: `<ol reversed>` ────────────────────────────────────────
+//
+// The wire half landed in lane U5 (`reversed` joined LIST_ATTR_KEYS as a
+// presence-boolean); these pin the counter half. Every expectation is the
+// literal run the matching `-ref.html` prints.
+
+test('counter-list-item: <ol reversed> counts DOWN to 1 (3, 2, 1)', () => {
+  const li = () => cmp({}, { _tag: 'li', _pseudo: before('counter(list-item)') });
+  const components = {
+    ol: cmp({}, {
+      _tag: 'ol', _attrs: { reversed: true },
+      children: { a: li(), b: li(), c: li() },
+    }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components), ['"3"', '"2"', '"1"']);
+});
+
+test('counter-list-item: <ol reversed start=30> starts AT 30 and counts down', () => {
+  // li-value-reversed-011 (`<ol reversed start=3>` ⇒ 3,2,1) is the same rule:
+  // the seed is start+1 so the first item lands on start after its −1 step —
+  // the mirror of the forward seed's start−1.
+  const li = () => cmp({}, { _tag: 'li', _pseudo: before('counter(list-item)') });
+  const components = {
+    ol: cmp({}, {
+      _tag: 'ol', _attrs: { start: '30', reversed: true },
+      children: { a: li(), b: li(), c: li() },
+    }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components), ['"30"', '"29"', '"28"']);
+});
+
+test('counter-list-item: <li value> ANCHORS the reversed run (32,31,30,29,35,34)', () => {
+  // The test's third reversed list, and the whole reason the §4.4.2 walk
+  // replaced `Σ|inc| + |last inc|`: the walk stops at the first counter-set
+  // (here the `<li value=30>` presentational hint) and ADDS ITS VALUE, so
+  // the implied initial is 1+1+30 = 32 (+1 pre-step) — not the item count.
+  const li = (value) => cmp({}, {
+    _tag: 'li', _pseudo: before('counter(list-item)'),
+    ...(value === undefined ? {} : { _attrs: { value } }),
+  });
+  const components = {
+    ol: cmp({}, {
+      _tag: 'ol', _attrs: { reversed: true },
+      children: { a: li(), b: li(), c: li('30'), d: li(), e: li('35'), f: li() },
+    }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components),
+    ['"32"', '"31"', '"30"', '"29"', '"35"', '"34"']);
+});
+
+test('li-value-reversed-006a: POSITIVE increments give a NEGATIVE initial (-6,-4,-2)', () => {
+  // The reference is `<ol reversed start="-9">` printing -6, -4, -2, and its
+  // own <meta assert> states the rule: "The last counter-increment value
+  // determines the start value." num = (-2-2-2) + (-2) = -8 ⇒ first item -6.
+  // The pre-wave-44 `Σ|inc| + |last inc|` said +8 and painted 10, 12, 14.
+  const li = () => cmp({ 'counter-increment': 'list-item 2' },
+    { _tag: 'li', _pseudo: before('counter(list-item)') });
+  const components = {
+    ol: cmp({}, { _tag: 'ol', _attrs: { reversed: true },
+      children: { a: li(), b: li(), c: li() } }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components), ['"-6"', '"-4"', '"-2"']);
+});
+
+test('li-value-reversed-013: a <li value> with its OWN increment still prints its value (5,3,2)', () => {
+  // `<li value=3 style="counter-increment: list-item -2">` — the value is a
+  // counter-set applied AFTER the increment, so the item prints 3 outright;
+  // the pre-wave-44 `value − 1` pre-offset let the declared −2 drag it to 0.
+  const li = (extra = {}, props = {}) => cmp(props,
+    { _tag: 'li', _pseudo: before('counter(list-item)'), ...extra });
+  const components = {
+    ol: cmp({}, { _tag: 'ol', _attrs: { reversed: true }, children: {
+      a: li(),
+      b: li({ _attrs: { value: '3' } }, { 'counter-increment': 'list-item -2' }),
+      c: li(),
+    } }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components), ['"5"', '"3"', '"2"']);
+});
+
+test('li-value-reversed-008: counter-set is applied AFTER counter-increment', () => {
+  // `<ol start=11>` with `<li style="counter-set: list-item 8">` prints 8,
+  // then 9 (MEASURED in the pinned headless Chromium, and what the -008
+  // reference shows). The old order subtracted the item's own +1 first and
+  // printed 7.
+  const li = (props = {}) => cmp(props, { _tag: 'li', _pseudo: before('counter(list-item)') });
+  const components = {
+    ol: cmp({}, { _tag: 'ol', _attrs: { start: '11' }, children: {
+      a: li({ 'counter-set': 'list-item 8' }),
+      b: li(),
+    } }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components), ['"8"', '"9"']);
+});
+
+test('an <ol> with no reversed attribute is untouched by the reversed lane', () => {
+  // The blast-radius guard: presence is the whole test, so an <ol> whose bag
+  // carries no `reversed` key numbers forward exactly as before.
+  const li = () => cmp({}, { _tag: 'li', _pseudo: before('counter(list-item)') });
+  const components = {
+    ol: cmp({}, { _tag: 'ol', _attrs: { start: '30' }, children: { a: li(), b: li() } }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components), ['"30"', '"31"']);
+});
+
 test('a counter style outside the §6 table is REFUSED, not defaulted to decimal', () => {
   const components = {
     a: cmp({ 'counter-reset': 'c', 'counter-increment': 'c' },

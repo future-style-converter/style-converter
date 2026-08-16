@@ -129,7 +129,16 @@ object MulticolSpannerFlow {
          * run fragmenter pushes it whole into the next column instead
          * ([MulticolRunFragment.runPlan]'s `monolithic` argument).
          */
-        val monolithicContent: Boolean = false
+        val monolithicContent: Boolean = false,
+        /**
+         * The wave-44 lane-U8 FLOAT-STRIP facts (leading out-of-flow
+         * floats, §9.5.2 clear sides, trailing paint ink) — or null when
+         * any wire flavor on this child is outside that lane's proven
+         * scope ([MulticolFloatStrip.factsFor]'s strict-bail contract). A
+         * single null fact disables the whole container's strip, so the
+         * run fragmenter's float bail keeps owning unproven float shapes.
+         */
+        val floatStrip: MulticolFloatStrip.ChildFacts? = null
     )
 
     /**
@@ -239,6 +248,13 @@ object MulticolSpannerFlow {
         val roles = rolesFor(children, leadingText)
         // The leading text spec (when present) heads the list.
         val head = if (leadingText) listOf(ChildSpec(Role.FLOW, false)) else emptyList()
+        // Wave-44 lane U8: one float-presence read per child (shared by the
+        // wave-42 flag below AND the strip-facts gate — the strip is only
+        // relevant when SOME child floats, and skipping the facts walk for
+        // float-less containers keeps their specs byte-identical to
+        // wave-42, pinned by the R1 row).
+        val floated = (children ?: emptyList()).map { hasFloatedDescendant(it) }
+        val anyFloated = floated.any { it }
         // Pair each child's role with its Height/BlockSize declaration —
         // presence is the signal (the measure pass supplies the value).
         return head + (children ?: emptyList()).mapIndexed { index, child ->
@@ -247,7 +263,7 @@ object MulticolSpannerFlow {
                 child.properties.any { it.type == "Height" || it.type == "BlockSize" },
                 // Wave-42: the run fragmenter's float bail rides this flag
                 // (see ChildSpec.floatedContent for why floats disqualify).
-                hasFloatedDescendant(child),
+                floated[index],
                 // Wave-42: the run fragmenter's FORCED-BREAK bail (see
                 // ChildSpec.forcedBreakContent) — a break the container-
                 // level role list cannot see, because it sits on the child
@@ -261,7 +277,11 @@ object MulticolSpannerFlow {
                 // the iOS twin — same three inputs, same predicate).
                 child.children.isNullOrEmpty() &&
                     child._text.isNullOrEmpty() &&
-                    child.pseudos?.isNotEmpty() != true
+                    child.pseudos?.isNotEmpty() != true,
+                // Wave-44 lane U8: the float-strip facts (or the strict
+                // null bail) — computed only for containers with a float
+                // somewhere (see the `anyFloated` gate above).
+                if (anyFloated) MulticolFloatStrip.factsFor(child) else null
             )
         }
     }

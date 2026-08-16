@@ -259,6 +259,56 @@ class IRDocumentDecoderTest {
     }
 
     /**
+     * Wave 44, lane U5 — `meta.attrs.reversed` (`<ol reversed>`, HTML
+     * §4.4.5's BOOLEAN attribute) joins the strict attr key set and rides
+     * the boolean channel: the producer emits literal `true` on presence
+     * (extract-fixture LIST_BOOLEAN_ATTR_KEYS) and never emits the key
+     * otherwise.
+     *
+     * Why the decode is the unit under test: the countdown itself is
+     * already pinned by [ListOrdinalTest]; what wave 43 could not do was
+     * RECEIVE the flag — this strict decoder threw on the key. The verbatim
+     * payload is counter-list-item's second reversed list,
+     * `<ol start="30" reversed>`. TWIN of the iOS `ConformanceTests`
+     * reversed case.
+     */
+    @Test
+    fun `v2 meta attrs reversed decodes the presence boolean`() {
+        val doc = IRDocumentDecoder.decode(
+            """{"irVersion":2,"minReaderVersion":2,"components":[
+                {"id":"r","name":"R","properties":[],
+                 "meta":{"sourceTag":"ol","attrs":{"start":"30","reversed":true}}},
+                {"id":"f","name":"F","properties":[],
+                 "meta":{"sourceTag":"ol","attrs":{"start":"30"}}}]}"""
+        )
+        // Presence decodes true, alongside the untouched string-lane start.
+        assertEquals(true, doc.components[0].attrs?.reversed)
+        assertEquals("30", doc.components[0].attrs?.start)
+        // Absence stays null — the renderer's `== true` gate keeps every
+        // unreversed list counting up exactly as before wave 44.
+        assertNull(doc.components[1].attrs?.reversed)
+    }
+
+    /**
+     * Wave 44, lane U5 — the non-string gate holds for `reversed`: a
+     * stringly `"true"` is off-contract (the wire pins a JSON boolean) and
+     * must NOT fill the boolean channel, mirroring the iOS reader's
+     * `boolValue` (which never coerces strings) so the twin decoders agree
+     * on every wire shape — the same skeptic-alignment rule the wave-20
+     * boolean four follow.
+     */
+    @Test
+    fun `v2 meta attrs reversed ignores a stringly boolean`() {
+        val doc = IRDocumentDecoder.decode(
+            """{"irVersion":2,"minReaderVersion":2,"components":[
+                {"id":"s","name":"S","properties":[],
+                 "meta":{"sourceTag":"ol","attrs":{"reversed":"true"}}}]}"""
+        )
+        // The key is legal (no throw) but the string stays off the channel.
+        assertNull(doc.components[0].attrs?.reversed)
+    }
+
+    /**
      * Wave 37, lane W4 (THE LANG WIRE) — `meta.lang` decodes onto
      * [IRComponent.lang] VERBATIM and joins the strict META_KEYS set.
      *

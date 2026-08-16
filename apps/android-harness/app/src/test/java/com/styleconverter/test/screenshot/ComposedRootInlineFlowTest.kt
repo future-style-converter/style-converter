@@ -113,6 +113,164 @@ class ComposedRootInlineFlowTest {
         assertNull(InlineBlockAtom.rootSegments(boxes, listOf(16.0, 0.0, 16.0)))
     }
 
+    // ── wave 44 (U3): the margin channel's harness half ─────────────────
+
+    @Test fun `an undelivered img root is not an atom on the JVM`() {
+        // The replaced family is delivered-raster gated; this JVM suite
+        // never configures DocumentImageRegistry, so the seam answers null
+        // and the img keeps the frozen block path — the arm-A byte-compat
+        // pin at the HARNESS level (the delivered arm is pinned in the
+        // runtime's InlineBlockAtomTest, where facts are constructed).
+        val img = IRComponent(
+            id = "img", name = "img", _tag = "img",
+            attrs = com.styleconverter.runtime.core.ir.IRAttrs(src = "css/css-ui/support/w100_h100.svg.png"),
+            properties = listOf(prop("BoxSizing", "\"BORDER_BOX\"")),
+        )
+        assertNull(composedRootInlineBoxes(listOf(img, img))[0])
+    }
+
+    @Test fun `the margined ref div IS an atom and carries its margin`() {
+        // box-sizing-010's `#ref` div — refused before wave 44, admitted
+        // now with the margin riding the RootBox for the packer.
+        val div = IRComponent(
+            id = "d", name = "d",
+            properties = listOf(
+                prop("Display", "\"INLINE_BLOCK\""), len("MarginBottom", 30.0),
+                len("Width", 70.0), len("Height", 70.0),
+            ),
+        )
+        assertEquals(
+            InlineBlockAtom.RootBox(70.0, 70.0, marginBottomPx = 30.0),
+            composedRootInlineBoxes(listOf(div))[0],
+        )
+    }
+
+    @Test fun `atomNeutralPlan mutes declared block margins but keeps UA ones`() {
+        // A margined atom-shaped div: declared sides contribute ZERO to
+        // the stack fold (the packer owns them now)…
+        val div = IRComponent(
+            id = "d", name = "d",
+            properties = listOf(
+                prop("Display", "\"INLINE_BLOCK\""), len("MarginBottom", 30.0),
+                len("Width", 70.0), len("Height", 70.0),
+            ),
+        )
+        val neutral = atomNeutralPlan(div)
+        assertEquals(0f, neutral.topPx, 0f)
+        assertEquals(0f, neutral.bottomPx, 0f)
+        // …while an undeclared side on a UA-margined tag keeps its UA
+        // default, which is what lets the H3 probe refuse a UA-margined
+        // member instead of silently dropping its gap.
+        val p = IRComponent(id = "p", name = "p", _tag = "p")
+        assertEquals(16f, atomNeutralPlan(p).topPx, 0f)
+        assertEquals(16f, atomNeutralPlan(p).bottomPx, 0f)
+    }
+
+    @Test fun `neutralized gaps drop only the run members' declared margins`() {
+        // [<p>, #ref div (margin-bottom 30), img] — the 010 root list.
+        // The frozen plans fold the div's declared 30 into the gap above
+        // the img; neutralizing the two ATOMS (div + img) leaves only the
+        // <p>'s UA bottom margin above the run and ZERO inside it.
+        val p = IRComponent(id = "p", name = "p", _tag = "p", _text = "t")
+        val div = IRComponent(
+            id = "d", name = "d",
+            properties = listOf(
+                prop("Display", "\"INLINE_BLOCK\""), len("MarginBottom", 30.0),
+                len("Width", 70.0), len("Height", 70.0),
+            ),
+        )
+        val img = IRComponent(id = "i", name = "i", _tag = "img")
+        val roots = listOf(p, div, img)
+        // The REAL plans, built exactly like the capture screen's fold
+        // (declared statics resolved, stripDeclared set for the div).
+        val plans = roots.map { root ->
+            val declared = declaredMarginSides(root.properties.map { it.type })
+            rootStackMargin(
+                root._tag, "top" in declared, "bottom" in declared,
+                StaticEmMargin.verticalEdges(root.properties),
+            )
+        }
+        // Frozen: [16 above p, 16 above div, 30 between div and img, 0].
+        assertEquals(listOf(16f, 16f, 30f, 0f), collapsedRootStackGapsPx(plans))
+        // Neutralized over the two atoms: the div's 30 is gone (it rides
+        // the packer), the <p>'s UA margins survive untouched.
+        assertEquals(
+            listOf(16f, 16f, 0f, 0f),
+            neutralizedRootGapsPx(roots, plans, listOf(false, true, true)),
+        )
+        // Neutralizing NOTHING is the frozen fold verbatim — the run-free
+        // document identity the walk relies on.
+        assertEquals(
+            collapsedRootStackGapsPx(plans),
+            neutralizedRootGapsPx(roots, plans, listOf(false, false, false)),
+        )
+    }
+
+    // ── wave 44 (skeptic S2): the B8 pass-preservation proof ────────────
+
+    @Test fun `B8 - scope-pseudo-element's verbatim wave43 IR keeps its passing root run`() {
+        // ADVERSARIAL pin (wave-44 skeptic S2): css-cascade/scope-pseudo-
+        // element is the ONE currently-PASSING composed document (Android
+        // 0.9742, wave43-final frozen) whose three roots declare BOTH
+        // `display: inline-block` AND `vertical-align: top`. An UNSCOPED
+        // B8 gate would evict all three from the root run and revert the
+        // canvas to the block stack — an unmeasured regression of a pass.
+        // This test feeds the committed wave43-final per-test IR VERBATIM
+        // (decoder → SlotComposer → the harness facade — the exact path
+        // ComposedCaptureCanvas runs) and pins the run's survival.
+        val rel = "tools/titan/runs/wave43-final/sections/css-cascade/" +
+            "per-test-ir/wpt__css-cascade__scope-pseudo-element.json"
+        // Repo-root walk-up — the ComposedFullHeightCaptureTest convention,
+        // robust to Gradle running tests from module subdirs. The frozen
+        // runs/ evidence is gitignored (materialised in campaign worktrees,
+        // absent on CI), so absence SKIPS rather than fails: the gate table
+        // itself stays pinned by the synthetic B8 test above either way.
+        var dir: java.io.File? = java.io.File(System.getProperty("user.dir") ?: ".").absoluteFile
+        while (dir != null && !java.io.File(dir, rel).exists()) dir = dir.parentFile
+        org.junit.Assume.assumeTrue(
+            "wave43-final evidence not materialised (gitignored runs/) — skipping the verbatim-IR pin",
+            dir != null,
+        )
+        val json = java.io.File(dir!!, rel).readText()
+        val roots = com.styleconverter.runtime.core.renderer.SlotComposer.compose(
+            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(json),
+        )
+        assertEquals("the document's three inline-block roots", 3, roots.size)
+        // Guard the premise: every root really declares the B8-adverse
+        // shape (a keyword-wrapped `vertical-align: top` off the wire) —
+        // if a converter change ever drops it, this test must say so
+        // rather than vacuously pass.
+        for (root in roots) {
+            val va = root.properties.last { it.type == "VerticalAlign" }.data.toString()
+            assertEquals("""{"type":"keyword","value":"TOP"}""", va)
+        }
+        val boxes = composedRootInlineBoxes(roots)
+        boxes.forEachIndexed { i, b ->
+            assertNotNull(
+                "root $i must keep its frozen wave-34 admission — B8 must stay scoped to the margin/replaced channels",
+                b,
+            )
+            // 100px content + 1px borders per side, margin-free: the exact
+            // pre-wave-44 box, so the committed capture cannot move.
+            assertEquals(InlineBlockAtom.RootBox(102.0, 102.0), b)
+        }
+        // The canvas's H3 probe for an all-atom document: every plan entry
+        // is atomNeutralPlan's (placeholder plans are never read when all
+        // roots neutralize). The run must survive the probe too.
+        val placeholder = roots.map { RootStackMargin(0f, 0f, stripDeclared = false) }
+        val probeGaps = neutralizedRootGapsPx(roots, placeholder, roots.map { true })
+        val segs = InlineBlockAtom.rootSegments(
+            boxes,
+            probeGaps.take(roots.size).map { it.toDouble() },
+        )
+        assertNotNull("the plan must exist — no plan means the block stack", segs)
+        assertEquals(
+            "the three roots must pack as ONE run, exactly the frozen passing layout",
+            listOf(0, 1, 2),
+            segs!!.single { it.isRun }.indices,
+        )
+    }
+
     // ── wire helpers ─────────────────────────────────────────────────────
 
     private fun prop(type: String, json: String) =

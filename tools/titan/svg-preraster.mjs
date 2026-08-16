@@ -359,80 +359,74 @@ export async function prerasterizeSvgSources(srcs, opts) {
   const rasterized = new Map();
   const log = opts.log ?? (() => {});
   if (!Array.isArray(srcs) || srcs.length === 0) return rasterized;
-  // ── THE SWITCH, and why it defaults OFF ────────────────────────────────────
+  // ── THE SWITCH, and why it now defaults ON (wave-44 lane U3) ───────────────
   //
-  // `TITAN_SVG_PRERASTER=1` engages the hop; anything else (including unset)
-  // leaves both natives in their exact pre-wave-40 behaviour — the vector
-  // rides the wire, the runtime declines it by name, the box paints empty.
+  // The hop is ON by default; `TITAN_SVG_PRERASTER=0` is the escape hatch
+  // back to the pre-wave-40 behaviour (the vector rides the wire, the
+  // runtime declines it by name, the box paints empty). Only the literal
+  // '0' disables — a typo in an env line must not silently turn a
+  // measured-ON gate off, the mirror of the discipline the OFF era pinned.
   //
-  // OFF is the default because the A/B was RUN (wave-41 lane T2, private
-  // API-36.1 emulator + iPhone 17 Pro sim, the exact procedure below) and
-  // arm B LOSES — decisively, and by the §10.4 mechanism the original note
-  // predicted. Per-arm results on the 19-test css-ui box-sizing cluster
-  // (diffComposedVsRef vs the frozen white-black-ink-font-lh-imgpad-htmlpins
-  // refs, fuzzy null):
+  // The default was OFF through waves 40..43 on two measured A/B losses,
+  // kept verbatim here because each one names the mechanism its fix landed:
   //
-  //     Android  arm A (off): 8/19 pass, mean SSIM 0.8798
-  //              arm B (on):  1/19 pass, mean SSIM 0.8536   → costs 7 passes
-  //     iOS      arm A (off): 8/19 pass, mean SSIM 0.8808
-  //              arm B (on):  0/19 pass, mean SSIM 0.8421   → costs 8 passes
+  //  · wave-41 T2 (first A/B): arm B cost 7 Android + 8 iOS passes on the
+  //    19-test css-ui box-sizing cluster — the raster painted its INTRINSIC
+  //    size (no §10.4 constraint sizing), box-sizing-016's "70px square"
+  //    rendering ~150px wide. Wave-42 W6 landed ReplacedBoxSizing
+  //    .constrainAutoSize on both natives.
+  //  · wave-43 V1 (re-run): the size defect measured GONE, but arm B still
+  //    cost 8 Android + 7 iOS passes purely on PLACEMENT — delivered <img>
+  //    ROOTS block-stacked one per line where the ref packs them on §9.4.2
+  //    line boxes, because the composed root row flow admitted only
+  //    declared inline-blocks (B1) and refused the 010-family div's 30px
+  //    margin-bottom (B5).
   //
-  // The eight vacuous passes (010, 011, 014..019 — the image missing and the
-  // missing area small) ALL flip to fail with the raster delivered: each test
-  // constrains its box with `max-width`/`max-height` + `box-sizing:
-  // border-box`, ReplacedBoxSizing deliberately did NOT model CSS 2.1
-  // §10.4's constraint-violation rules for replaced content (its own header
-  // said so), and the delivered raster painted its INTRINSIC size on the
-  // unconstrained axis — box-sizing-016's second "70px square" rendered as a
-  // ~150px-wide rectangle that also WRAPS to its own line (0.9561 → 0.9083 on
-  // Android). The three worst absent-image tests (007..009) improved only
-  // ~0.05 SSIM (009: 0.5380 → 0.5948 Android) — the raster landed at the
-  // wrong size there too, nowhere near a pass. Net: arm B rescued exactly ONE
-  // test on ONE platform (012 Android, 0.9369 → 0.9695).
-  //
-  // Wave-41 gated the flip on the runtimes growing §10.4 sizing; wave-42 W6
-  // LANDED it (both natives' ReplacedBoxSizing.constrainAutoSize) and wave-43
-  // V1 RE-RAN this A/B (same procedure below, private API-36.1 emulator-5680
-  // + iPhone 17 Pro sim, arms on the one installed binary). The size defect
-  // is gone — arm B's second square now paints the ref's exact 70×70 — but
-  // arm B STILL loses, now purely on PLACEMENT:
+  // Wave-44 U3 landed exactly the two named gates: InlineBlockAtom.rootBox
+  // grew the delivered-replaced family (facts-attested, §10.3.2/§10.6.2/
+  // §10.4-sized) and the margin channel (exact-px margins folded into
+  // §10.8.1 margin-box packing), wired through both harness root facades —
+  // plus the iOS ComposedRootInlineRow ideal-width fix its first arm-B run
+  // exposed (nil-width probes answered the no-wrap height, so 007's ten
+  // rows centered inside a 600pt canvas). The A/B was then RE-RUN (private
+  // API-36.1 emulator-5682 + iPhone 17 Pro sim 0BB986A6, both arms on the
+  // one installed binary per platform, diffComposedVsRef vs the frozen
+  // white-black-ink-font-lh-imgpad-htmlpins refs, fuzzy null):
   //
   //     Android  arm A (off): 8/19 pass, mean SSIM 0.8798
-  //              arm B (on):  0/19 pass, mean SSIM 0.8533   → costs 8 passes
+  //              arm B (on): 15/19 pass, mean SSIM 0.9690   → +7 passes
   //     iOS      arm A (off): 8/19 pass, mean SSIM 0.8808
-  //              arm B (on):  1/19 pass, mean SSIM 0.8544   → costs 7 passes
+  //              arm B (on): 16/19 pass, mean SSIM 0.9702   → +8 passes
   //
-  // MEASURED (arm B Android, box-sizing-010): the delivered 70×70 square
-  // paints at (16,188) on its OWN LINE below the inline-block div at
-  // (16,88) — the ref packs them side by side on ONE line box (one green
-  // band, x16..160, top y88). 007's twenty 100×100 imgs stack ONE PER LINE
-  // (2534px-tall capture) where the ref wraps them into rows. Root cause:
-  // these <img>s are document ROOTS, and the composed canvases' root row
-  // flow (ComposedRootInlineFlow.{kt,swift} → InlineBlockAtom.rootBox)
-  // admits ONLY declared `display:inline-block` boxes — a replaced img is
-  // refused by B1, and the 010-family div's 30px margin-bottom by B5.
-  // InlineAtomFlow.isAtom grew the replaced-image family in wave-43 V1
-  // (delivered-raster-gated, dormant until wired); flipping this hop ON is
-  // gated on wiring that admission through the ROOT flow (both harness
-  // twins + the InlineBlockAtom facade), then re-running this A/B. The one
-  // arm-B pass is 012 iOS (0.9383 → 0.9503); Android 012 fell from wave-41's
-  // 0.9695 to 0.9489 because §10.4 honestly clamps w100.svg.png's asserted
-  // 2:3 ratio to 46.7×70 where the browser used the vector's 100×70
-  // (limitation 2 above; the pinned ReplacedBoxSizingConstraintTest row).
+  // Not one arm-A pass is lost: every 010-family pair now renders the
+  // ref's side-by-side squares (0.9561 → 0.9811 Android / 0.9570 → 0.9820
+  // iOS), 007's twenty imgs wrap into the ref's ten rows of two (0.5908 →
+  // 0.9844 / 0.5909 → 0.9845), 008/009 pass likewise. Arm A stayed
+  // byte-stable against the wave-43 frozen numbers to 4 decimals on both
+  // natives, and the three previously-admitted root-run documents
+  // (CSS2/abspos/static-inside-inline-block, anchor-center-overflow-005,
+  // scope-pseudo-element) re-measured identical. The residual arm-B fails,
+  // stated plainly: 013 (0.9436/0.9450) and 023 (0.9344/0.9394) are near
+  // misses; 012 splits (iOS 0.9503 PASS / Android 0.9489); and 022
+  // regresses fail→fail by ~0.02 (0.8989 → 0.8773) because w100.svg.png
+  // asserts a 2:3 ratio the VECTOR does not have, so §10.4's min-width row
+  // re-solves height to 195 where the browser keeps 150 — the scale
+  // contract's limitation 2, priced in and still a net win.
   //
-  // So the hop stays COMPLETE and OFF: the gate is byte-identical with it off
-  // (no rewrite, no browser, no delivery change — the empty map makes
-  // applyPrerasterRewrite a no-op). The A/B procedure, verbatim:
+  // The A/B procedure, verbatim (re-run it before ever flipping BACK):
   //
   //   node tools/titan/feed-{android,ios}.mjs --fixtures <19 per-test IR> \
   //       --out <arm> --composed --wpt-dir tools/wpt --udid <dev>
-  //   #  arm A: TITAN_SVG_PRERASTER unset   arm B: TITAN_SVG_PRERASTER=1
+  //   #  arm A: TITAN_SVG_PRERASTER=0        arm B: unset (the default)
   //   # then score both with inject-wpt-block.mjs's diffComposedVsRef against
   //   # tools/wpt/refs/<sha>/white-black-ink-font-lh-imgpad-htmlpins/css-ui/
   const envSwitch = process.env.TITAN_SVG_PRERASTER;
-  const enabled = opts.enabled === true || envSwitch === '1';
+  // opts.enabled is the caller/test override (true forces on, false forces
+  // off); otherwise only the literal env '0' opts out of the default-ON.
+  const enabled = opts.enabled === true
+    || (opts.enabled !== false && envSwitch !== '0');
   if (!enabled) {
-    log(`svg pre-raster OFF (default; set TITAN_SVG_PRERASTER=1 to engage) — `
+    log(`svg pre-raster OFF (TITAN_SVG_PRERASTER=0 escape hatch; the wave-44 default is ON) — `
       + `${srcs.length} vector(s) keep riding the wire and both natives will decline them by name`);
     return rasterized;
   }

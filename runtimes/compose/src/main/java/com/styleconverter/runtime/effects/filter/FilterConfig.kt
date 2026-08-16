@@ -42,7 +42,7 @@ data class FilterConfig(
  * | Filter | Support | Implementation |
  * |--------|---------|----------------|
  * | blur | Full | Modifier.blur() |
- * | opacity | Full | Modifier.alpha() |
+ * | opacity | Full | color/OpacityApplier.applyOpacity (unbounded saveLayerAlpha group) |
  * | brightness | Partial | ColorMatrix |
  * | contrast | Partial | ColorMatrix |
  * | grayscale | Partial | ColorMatrix |

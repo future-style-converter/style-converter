@@ -35,6 +35,12 @@ log()  { echo -e "${G}[doc-check]${N} $*"; }
 warn() { echo -e "${Y}[doc-check]${N} $*" >&2; }
 err()  { echo -e "${R}[doc-check]${N} $*" >&2; FAILED=1; }
 
+# Wave-44 helpers (context-aware count matching + gradle-XML executed
+# totals) — split into a sourced lib so this file stays under the ~300-line
+# ceiling and the helpers stay probe-able without running the whole check.
+# shellcheck source=tools/visual/doc-staleness-lib.sh
+source tools/visual/doc-staleness-lib.sh
+
 # ── Coverage check (live-derived catalogue × 3 platforms) ───────────────────
 echo -e "${B}━━━ coverage-audit.mjs vs README/CLAUDE/STATUS ━━━${N}"
 COVERAGE_OUTPUT=$(node tools/visual/coverage-audit.mjs 2>&1)
@@ -87,12 +93,15 @@ if [[ -z "$TEST_COUNT" ]]; then
 else
     log "live: $TEST_COUNT unit tests"
     # The README.md + CLAUDE.md + docs/STATUS.md test-suite tables quote the
-    # tooling count — keep them in lockstep with the live number.
+    # tooling count — keep them in lockstep with the live number. Wave-44:
+    # the count must sit in the `| tooling … | N |` row (or an inline
+    # `(N tests` phrase), not merely anywhere in the file — see
+    # doc_quotes_suite_count for the wave-43 stale-row post-mortem.
     for doc in README.md CLAUDE.md docs/STATUS.md; do
-        if grep -qE "(^|[^0-9])$TEST_COUNT([^0-9]|$)" "$doc"; then
+        if doc_quotes_suite_count "tooling" "$TEST_COUNT" "$doc"; then
             log "✓ $doc mentions tooling test count $TEST_COUNT"
         else
-            err "$doc does NOT mention live tooling test count $TEST_COUNT — update its test-suite table"
+            err "$doc does NOT mention live tooling test count $TEST_COUNT in its test-suite table — update it"
         fi
     done
 fi
@@ -102,19 +111,40 @@ fi
 # The R7 docs rewrite put a test-suite table in README.md + CLAUDE.md
 # (converter / web / compose / swiftui counts). Derive each count live so
 # the tables can't drift:
-#   - converter + compose: JUnit `@Test` annotation count (1 annotation ==
-#     1 runtime test today; if parameterized tests ever appear, switch to
-#     parsing the gradle test-results XML instead)
+#   - converter + compose: executed total from the latest gradle JUnit XML
+#     when that run is fresh (see xml_test_total — the wave-43 post-mortem),
+#     falling back to the JUnit `@Test` annotation count (1 annotation ==
+#     1 runtime test today: both trees verified free of parameterized/
+#     repeated/factory/inherited-@Test constructs, wave 44)
 #   - swiftui: XCTest `func test` declaration count (same 1:1 property)
 #   - web: a real vitest run (~3s) — loops/`it.each` generate tests, so a
 #     static grep undercounts (723 declarations vs 786 runtime tests)
 echo -e "\n${B}━━━ per-suite test counts vs README/CLAUDE tables ━━━${N}"
-CONVERTER_TESTS=$(grep -rE "@Test" converter/src/test --include="*.kt" | wc -l | tr -d ' ')
-COMPOSE_TESTS=$(grep -rE "@Test" runtimes/compose/src/test --include="*.kt" | wc -l | tr -d ' ')
+# Annotation counts first — the always-available static baseline for the
+# two JUnit trees (exact today: 1 annotation == 1 executed test, see above).
+CONVERTER_ANNOTATED=$(grep -rE "@Test" converter/src/test --include="*.kt" | wc -l | tr -d ' ')
+COMPOSE_ANNOTATED=$(grep -rE "@Test" runtimes/compose/src/test --include="*.kt" | wc -l | tr -d ' ')
+# Executed totals from the latest gradle run's JUnit XML — empty when no
+# run is recorded, the run pre-dates a test-source edit, or the run is
+# incomplete/undersized vs the annotation floor (xml_test_total).
+CONVERTER_XML=$(xml_test_total converter/build/test-results/test converter/src/test "$CONVERTER_ANNOTATED" || true)
+COMPOSE_XML=$(xml_test_total runtimes/compose/build/test-results/testDebugUnitTest runtimes/compose/src/test "$COMPOSE_ANNOTATED" || true)
+# Prefer the executed truth when available; annotations otherwise.
+CONVERTER_TESTS=${CONVERTER_XML:-$CONVERTER_ANNOTATED}
+COMPOSE_TESTS=${COMPOSE_XML:-$COMPOSE_ANNOTATED}
+# A fresh, complete XML total EXCEEDING the annotation grep means
+# annotation-invisible tests exist (parameterized/repeated/…). Surface the
+# delta and hold the docs to the EXECUTED number — the figure a runner
+# actually reports. (Wave-43's 2468-vs-2465 reading was not this case: the
+# two numbers were sampled from different mid-wave trees.)
+[[ -n "$CONVERTER_XML" && "$CONVERTER_XML" != "$CONVERTER_ANNOTATED" ]] && \
+    warn "converter executed=$CONVERTER_XML != annotated=$CONVERTER_ANNOTATED — annotation-invisible tests; docs held to the executed total"
+[[ -n "$COMPOSE_XML" && "$COMPOSE_XML" != "$COMPOSE_ANNOTATED" ]] && \
+    warn "compose executed=$COMPOSE_XML != annotated=$COMPOSE_ANNOTATED — annotation-invisible tests; docs held to the executed total"
 SWIFTUI_TESTS=$(grep -rE "func test" runtimes/swiftui/Tests --include="*.swift" -r | wc -l | tr -d ' ')
 WEB_TESTS=$(npm -w runtimes/web run test 2>&1 | grep -E "Tests +[0-9]+ passed" | grep -oE "[0-9]+" | head -1)
 log "live: converter=$CONVERTER_TESTS web=$WEB_TESTS compose=$COMPOSE_TESTS swiftui=$SWIFTUI_TESTS"
-check_suite_count() { # $1=label $2=count $3…=docs that must quote it
+check_suite_count() { # $1=suite keyword (must appear in its table row's first cell) $2=count $3…=docs that must quote it
     local label="$1" count="$2"; shift 2
     if [[ -z "$count" || "$count" == "0" ]]; then
         # Non-fatal: web count needs a live vitest run whose reporter output
@@ -125,10 +155,14 @@ check_suite_count() { # $1=label $2=count $3…=docs that must quote it
         return
     fi
     for doc in "$@"; do
-        if grep -qE "(^|[^0-9])$count([^0-9]|$)" "$doc"; then
+        # Wave-44 hardening: the count must sit in the suite's own table
+        # row or an inline `(N tests` phrase — a bare number elsewhere in
+        # the file no longer vouches for the row (the wave-43 stale-row
+        # escape; see doc_quotes_suite_count).
+        if doc_quotes_suite_count "$label" "$count" "$doc"; then
             log "✓ $doc mentions $label=$count"
         else
-            err "$doc does NOT mention live $label test count $count — update its test-suite table"
+            err "$doc does NOT mention live $label test count $count in its test-suite table/inline count — update it"
         fi
     done
 }

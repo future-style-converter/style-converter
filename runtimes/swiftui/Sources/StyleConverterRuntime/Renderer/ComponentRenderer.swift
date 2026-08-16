@@ -2891,6 +2891,22 @@ public struct ComponentRenderer: View {
             // Known limitation: leading-only; full inline-flow ordering
             // would need an interleaved inlineRuns IR shape.
             // (v2 rename: the wire field is `text`, formerly `_text`.)
+            // ── Wave-44 lane U2: REAL inline flow for `meta.runs` ───────
+            // When every referenced child is a metrics-uniform plain
+            // `<span>`, the container's inline content is ONE paragraph
+            // (CSS 2.1 §9.4.2 — one inline formatting context), so the
+            // fold below hands ONE folded string to the exact leaf-text
+            // machinery (greedy pre-break + pinned line boxes) instead of
+            // stacking each run as its own label. nil — hence the wave-32
+            // stacked path below, byte-for-byte — for every unsupported
+            // shape (atoms, block members, styled spans, out-of-flow
+            // siblings…), each refusal logged in InlineRunFlow.
+            let inlineFlow = interleaveRuns
+                ? InlineRunFlow.fold(runs: component.meta?.runs,
+                                     children: FlexboxApplier.sorted(inFlowChildren),
+                                     totalChildCount: component.children?.count ?? 0,
+                                     containerProperties: resolvedProperties)
+                : nil
             // ── Wave-32 lane R: the ordered inline content ──────────────
             // `meta.runs` says where this component's own text sits RELATIVE
             // to its children (spec 03 §4.1) — the shape the single `text`
@@ -2903,11 +2919,69 @@ public struct ComponentRenderer: View {
             // inert — for every component without the key, for every
             // non-plain container (see the `interleaveRuns` doc), and for a
             // list the fold cannot express (InlineRunPlan.resolve's proof).
-            let runPlan = interleaveRuns
+            // Wave 44 (lane U2): the engaged inline FLOW wins over the
+            // stacked plan — computing both would be dead work, and the
+            // flow consumes every child the plan would interleave.
+            let runPlan = (interleaveRuns && inlineFlow == nil)
                 ? InlineRunPlan.resolve(component.meta?.runs,
                                         children: FlexboxApplier.sorted(inFlowChildren))
                 : nil
-            if let t = component.text, !t.isEmpty, runPlan == nil {
+            // Wave 44 (lane U2) — the engaged fold renders HERE, as the
+            // container's single paragraph, through the SAME label the
+            // leading-text branch uses: same currentColor bottom-out,
+            // same TextConfig, same greedy pre-break at the content-box
+            // wrap width, same parent decoration wire. The children the
+            // fold consumed are dropped from the child walk below (the
+            // `children` binding), so no glyph paints twice.
+            if let flow = inlineFlow {
+                PlaceholderLabel(
+                    // The name is dead weight here — `rawText` wins in
+                    // the label's visibleText resolution — but keeps the
+                    // component identifiable in view debugging.
+                    name: component.name,
+                    // The folded paragraph: parent runs and member text
+                    // interleaved exactly as the wire orders them.
+                    rawText: flow,
+                    // Same ink chain as the leading-text site: declared
+                    // color, else the WPT/stage currentColor bottom-out.
+                    color: style.text.color
+                        ?? (currentColorBottomsOut
+                                ? WPTCanvas.captureTextInk(
+                                    wptCaptureMode: wptCaptureMode,
+                                    defaultInk: InheritedText.defaultTextColor)
+                                : nil),
+                    textConfig: style.text,
+                    backgroundColor: style.backgroundColor,
+                    clipTextGradient: nil,
+                    // text-align has room to act only in an explicit-width
+                    // box (the leading-text site's exact gate).
+                    fillWidth: style.size.width != nil,
+                    // Composed-mode line-box pin + padding-0 (Round 4).
+                    wptCaptureMode: wptCaptureMode,
+                    // The content-box wrap width — the fold's whole point:
+                    // the paragraph breaks greedily where Chromium breaks
+                    // it, members included (GreedyLineBreaker).
+                    wrapWidth: textWrapWidth(style: style),
+                    // The container's computed content language (`meta.
+                    // lang`) — the hyphens:auto dictionary gate; member
+                    // langs cannot differ (the fold's hyphens-equivalence
+                    // gate refuses mode changes, and `manual` reads no
+                    // dictionary at all).
+                    lang: component.meta?.lang,
+                    // The container's own decoration wire propagates over
+                    // its whole inline content (css-text-decor-3 §2.1) —
+                    // exactly the paragraph this label paints. Members
+                    // with their OWN wire refused the fold upstream.
+                    decorations: DecorationWire.decorationLines(
+                        from: component.meta?.decorations)
+                )
+            }
+            if let t = component.text, !t.isEmpty, runPlan == nil,
+               // Wave 44 (lane U2): the engaged flow already carries the
+               // parent's runs text inside the paragraph — the leading
+               // label would double those glyphs (same suppression
+               // contract as runPlan, one binding over).
+               inlineFlow == nil {
                 PlaceholderLabel(
                     name: t,
                     // Wave-5 gate follow-up — same currentColor
@@ -2959,7 +3033,11 @@ public struct ComponentRenderer: View {
             // at build time. When no child carries Order, this is a no-op.
             // Wave 3: in-flow children only — absolute/fixed boxes render
             // via the styledContent overlay (see absoluteOverlay).
-            let children = FlexboxApplier.sorted(inFlowChildren)
+            // Wave 44 (lane U2): an engaged inline flow CONSUMED every
+            // child into the paragraph label above (the fold's all-claimed
+            // gate proves there are no others), so the child walk empties —
+            // rendering them again would double every member's glyphs.
+            let children = inlineFlow == nil ? FlexboxApplier.sorted(inFlowChildren) : []
             // Parent aggregate for flex-child decoration. Nil fallback
             // keeps us on the legacy-layout path when Phase 7 has not
             // touched this component.
@@ -3099,18 +3177,22 @@ public struct ComponentRenderer: View {
             // with `children` (the SAME sorted array the loop walks); nil
             // for non-list parents via the uaDefault gate, so every other
             // container keeps the exact pre-wave-43 index math.
-            // `reversed: false` is a documented WIRE GAP, not a shrug: the
-            // producer never forwards `<ol reversed>` (extract-fixture.mjs
-            // LIST_ATTR_KEYS) and the attrs capsule has no field for it.
-            // The countdown itself is already implemented and unit-tested
-            // to the SPEC — css-lists-3 §4.4.2 reversed-counter
-            // instantiation, see ListOrdinal's header — so closing the gap
-            // is one boolean, not a behaviour decision.
+            // Wave 44 (lane U5) closed the wave-43 WIRE GAP: the producer
+            // now forwards `<ol reversed>` (extract-fixture.mjs
+            // LIST_BOOLEAN_ATTR_KEYS, presence-`true` per HTML §4.4.5's
+            // boolean-attribute rule) and the strict reader admits it
+            // (IRWireV2Reader attrKeys / IRAttrs.reversed), so the
+            // css-lists-3 §4.4.2 countdown wave 43 implemented and
+            // unit-tested finally receives its input — absent attr decodes
+            // nil, `== true` keeps every unreversed list on the exact
+            // pre-wave-44 up-count. MEASURED: wave43-final css-lists/
+            // counter-list-item.html's "Reversed ordered lists" column
+            // repeated the forward numbering (ios-ref 0.754, FAIL).
             let listOrdinals: [Int]? =
                 ListMarkerResolver.uaDefault(sourceTag: component.meta?.sourceTag) == nil
                     ? nil
                     : ListOrdinal.ordinals(startAttr: component.meta?.attrs?.start,
-                                           reversed: false,
+                                           reversed: component.meta?.attrs?.reversed == true,
                                            children: children)
             ForEach(Array(children.enumerated()), id: \.offset) { index, child in
                 // Wave-32 lane R: the anonymous inline runs that precede THIS

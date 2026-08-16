@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
+// The wave-43 CSS-opacity mechanism — the unbounded saveLayerAlpha group.
+// Animated opacity reuses it (see applyInterpolatedState) so a keyframe
+// frame and a static `opacity` can never drift apart in clip physics.
+import com.styleconverter.runtime.color.OpacityApplier
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.cos
@@ -206,16 +209,34 @@ object KeyframeAnimationApplier {
 
     /**
      * Apply interpolated keyframe values to a modifier.
+     *
+     * Internal (not private) so the JVM unit suite can fold the chain it
+     * builds and pin the opacity mechanism without a composition host
+     * (KeyframeOpacityGroupTest — the OpacityApplierTest idiom).
      */
-    private fun applyInterpolatedState(
+    internal fun applyInterpolatedState(
         baseModifier: Modifier,
         state: InterpolatedKeyframe
     ): Modifier {
         var modifier = baseModifier
 
-        // Apply opacity
+        // Apply opacity.
+        //
+        // Wave 44 (lane U4): composite through the wave-43 CSS-opacity
+        // mechanism — color/OpacityApplier's UNBOUNDED saveLayerAlpha
+        // group — instead of `Modifier.alpha`. AlphaKt bytecode (ui-android
+        // 1.11.4) shows Modifier.alpha IS graphicsLayer(alpha, clip = TRUE),
+        // a record-time crop at the node's own bounds (OpacityApplier's
+        // KDoc carries the full physics + the wave-43 measurement), so a
+        // mid-animation opacity frame cropped children overflowing the
+        // animated element. But an animated `opacity` is the SAME property
+        // css-color-4 §2.2 defines, only time-varying (web-animations-1
+        // animates the computed value; it adds no clip of its own), so the
+        // frame must form the same unclipped transparency group a static
+        // `opacity` forms. The [0,1] clamp the old call carried lives
+        // inside applyOpacity (css-color-4 §2.2's computed-value clamp).
         state.opacity?.let { opacity ->
-            modifier = modifier.alpha(opacity.coerceIn(0f, 1f))
+            modifier = OpacityApplier.applyOpacity(modifier, opacity)
         }
 
         // Apply transforms via graphicsLayer for performance

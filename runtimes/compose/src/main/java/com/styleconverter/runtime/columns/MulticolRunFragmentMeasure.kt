@@ -138,8 +138,11 @@ internal object MulticolRunFragmentMeasure {
             logFallback("run fragmentation: non-plain-flow child (spanner/static/forced-break) — legacy layout kept")
             return null
         }
-        // The float bail — the honest wave-42 line for floats-clear-multicol
-        // (see the class doc; the float lane owns the missing geometry).
+        // The float bail — the honest wave-42 line for floated content.
+        // Wave-44 lane U8: the PROVEN leading-float shapes now fragment in
+        // MulticolFloatStripMeasure (which the caller consults BEFORE this
+        // pass); everything reaching this check is an UNPROVEN float shape
+        // whose stacked layout must not be cloned into every column.
         if (childSpecs.any { it.floatedContent }) {
             logFallback("run fragmentation: floated content — column fragmentation deferred to the float lane")
             return null

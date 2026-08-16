@@ -3,11 +3,14 @@ package com.styleconverter.runtime.animations
 import androidx.compose.animation.core.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+// The wave-43 CSS-opacity mechanism — the unbounded saveLayerAlpha group.
+// Every animated-alpha site in this file reuses it (fade / generic /
+// transition) so animation frames share the property's no-clip physics.
+import com.styleconverter.runtime.color.OpacityApplier
 
 /**
  * Composable function that creates an animated modifier based on AnimationConfig.
@@ -92,7 +95,14 @@ private fun fadeAnimation(baseModifier: Modifier, config: AnimationConfig): Modi
         label = "fadeAlpha"
     )
 
-    return baseModifier.alpha(alpha)
+    // Wave 44 (lane U4): composite the animated alpha through
+    // color/OpacityApplier's unbounded saveLayerAlpha group. The previous
+    // `Modifier.alpha` IS graphicsLayer(alpha, clip = TRUE) (ui-android
+    // 1.11.4 AlphaKt bytecode — OpacityApplier's KDoc has the physics), so
+    // every mid-fade frame cropped children overflowing the element's
+    // bounds; css-color-4 §2.2's transparency group never clips, animated
+    // or not. The old call's implicit clamp lives inside applyOpacity.
+    return OpacityApplier.applyOpacity(baseModifier, alpha)
 }
 
 /**
@@ -241,7 +251,11 @@ private fun genericAnimation(baseModifier: Modifier, config: AnimationConfig): M
         label = "progress"
     )
 
-    return baseModifier.alpha(0.5f + progress * 0.5f)
+    // Wave 44 (lane U4): same eviction as fadeAnimation above — the pulse's
+    // per-frame alpha (0.5..1) composites through the unbounded group, not
+    // Modifier.alpha's clip=TRUE graphicsLayer (see fadeAnimation's comment
+    // for the bytecode citation and the css-color-4 §2.2 no-clip rule).
+    return OpacityApplier.applyOpacity(baseModifier, 0.5f + progress * 0.5f)
 }
 
 /**
@@ -273,5 +287,10 @@ fun transitionModifier(
         if (state) 1f else 0f
     }
 
-    return baseModifier.alpha(alpha)
+    // Wave 44 (lane U4): same eviction as fadeAnimation above — the
+    // transition's per-frame alpha composites through the unbounded group,
+    // not Modifier.alpha's clip=TRUE graphicsLayer (see fadeAnimation's
+    // comment for the bytecode citation; a `transition: opacity` frame is
+    // the same css-color-4 §2.2 property, only time-varying).
+    return OpacityApplier.applyOpacity(baseModifier, alpha)
 }

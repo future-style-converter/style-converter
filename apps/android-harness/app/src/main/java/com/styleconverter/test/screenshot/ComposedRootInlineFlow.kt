@@ -97,9 +97,74 @@ internal fun composedRootInlineBoxes(roots: List<IRComponent>): List<InlineBlock
             // B6 — so is an ordered inline-run list (wave-32 lane R).
             hasOwnRuns = !root.runs.isNullOrEmpty(),
             containerDeclaresLineHeight = bodyDeclaresLineHeight,
+            // wave-44 U3b — the delivered-replaced attestation, read by the
+            // runtime's own seam (candidacy + DocumentImageRegistry decode)
+            // so this harness and the iOS twin cannot disagree about what
+            // "delivered" means. Null (an undelivered/non-replaced root)
+            // keeps the wave-34 behavior byte-for-byte.
+            replaced = InlineBlockAtom.replacedRootFactsOf(root),
         )
     }
 }
+
+/**
+ * wave-44 U3a — one root's DECLARED-NEUTRAL stack-plan entry: the same
+ * [RootStackMargin] the canvas's rootPlans fold builds, but with the
+ * root's declared block margins contributing ZERO (`staticDeclaredPx =
+ * (0, 0)` — declared sides muted, undeclared sides keep their UA
+ * default) while the wave-26 hoist band keeps its real value.
+ *
+ * Used for atom roots in two places (see the canvas's segment walk):
+ *  - the H3 PROBE — an admitted atom's declared margins now ride its
+ *    [InlineBlockAtom.RootBox] and are re-expressed by the packer's
+ *    margin-box fold, so the gap they used to inject must not refuse the
+ *    run; anything the neutralization does NOT explain (a UA margin, a
+ *    hoist band) still does;
+ *  - the RUN-path gap emission — the Spacer above a run must carry only
+ *    the PREVIOUS root's contribution (the browser puts the first
+ *    member's own margin-top INSIDE the line box, §10.8; emitting it in
+ *    the Spacer too would double-count it whenever it exceeds the
+ *    neighbor's bottom margin).
+ * Atoms are never hoisted/static-position (B3 refuses out-of-flow), so
+ * the plain opaque branch of the rootPlans fold is the only shape here.
+ */
+internal fun atomNeutralPlan(root: IRComponent): RootStackMargin {
+    // Which block sides the IR declares — same read as the rootPlans fold.
+    val declared = declaredMarginSides(root.properties.map { it.type })
+    // Declared sides contribute 0 (the packer owns them); undeclared keep
+    // the UA default, which is what lets a UA-margined atom-shaped root
+    // still refuse through the probe.
+    val base = rootStackMargin(
+        root._tag,
+        "top" in declared,
+        "bottom" in declared,
+        staticDeclaredPx = 0f to 0f,
+    )
+    // The wave-26 hoist band is OUTER spacing the packer does not model —
+    // it keeps its real value so a band-carrying run refuses via H3.
+    val band = com.styleconverter.runtime.core.renderer.ComponentRenderer
+        .composedRootHoistBand(root, uaBlockMargins = true)
+    return withHoistBand(base, band.topPx to band.bottomPx)
+}
+
+/**
+ * wave-44 U3a — the gap array a segment walk should emit, given which
+ * roots' declared block margins moved into the inline packer:
+ * [neutralize] marks the roots (always exactly the RUN members, or every
+ * atom for the H3 probe) whose plan entries are replaced by
+ * [atomNeutralPlan]; everything else keeps its real [plans] entry, so
+ * singles and non-atoms collapse exactly as the frozen loop would.
+ * Pure — pinned in ComposedRootInlineFlowTest.
+ */
+internal fun neutralizedRootGapsPx(
+    roots: List<IRComponent>,
+    plans: List<RootStackMargin>,
+    neutralize: List<Boolean>,
+): List<Float> = collapsedRootStackGapsPx(
+    plans.mapIndexed { i, plan ->
+        if (neutralize.getOrNull(i) == true) atomNeutralPlan(roots[i]) else plan
+    }
+)
 
 /**
  * Lay one run of inline-block ROOTS out as §9.4.2 rows.
@@ -158,6 +223,14 @@ internal fun ComposedRootInlineRow(
             // The collapsed source white-space between inline siblings,
             // converted exactly like InlineFlowLayout converts it.
             gapPx = InlineBlockAtom.ROOT_ATOM_GAP_PX.dp.toPx().toDouble(),
+            // wave-44 U3a — the members' declared margins, packer-owned
+            // (the render is margin-stripped), converted dp→device px with
+            // the same `.dp.toPx()` the widths' measurement used so the
+            // margin-box fold and the border boxes share one pixel space.
+            marginTopsPx = boxes.map { it.marginTopPx.dp.toPx().toDouble() },
+            marginRightsPx = boxes.map { it.marginRightPx.dp.toPx().toDouble() },
+            marginBottomsPx = boxes.map { it.marginBottomPx.dp.toPx().toDouble() },
+            marginLeftsPx = boxes.map { it.marginLeftPx.dp.toPx().toDouble() },
         )
         // Report the flow's own extent inside the incoming envelope.
         val reportedW = plan.widthPx.roundToInt().coerceIn(constraints.minWidth, constraints.maxWidth)

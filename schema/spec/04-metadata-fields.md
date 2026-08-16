@@ -146,7 +146,13 @@ one droppable string instead of three new channels.
   *disjoint* attr lane from the wave-20 widget tags (`start`, `value`,
   verbatim strings) so the web renderer — the one platform that paints a
   real `<ol>` and lets the browser synthesise `::marker` — gets native
-  numbering instead of a baked string.
+  numbering instead of a baked string. Wave 44 added `reversed` to the
+  same lane as a **presence boolean** (literal `true`, the widget-lane
+  precedent), because HTML §4.4.5 pins `reversed` as a boolean
+  attribute — presence is the whole value (`reversed="false"` still
+  reverses), so a verbatim string would force every consumer to know
+  `""` is truthy. Consumers thread it into the reversed-ordinal
+  countdown (css-lists-3 §4.4.2).
 
 ## `meta.attrs.src` — the replaced-element source (wave-36)
 

@@ -288,6 +288,48 @@ object MultiColumnApplier {
             // (fragmentainerBlockSizePx pins the OR-composition).
             val containerBlockSizeDefinite = this.constraints.hasFixedHeight
 
+            // ── Wave-44 lane U8: the float-strip's zero-flow paint half ──
+            // A container whose specs prove the FLOAT-STRIP shape (leading
+            // out-of-flow floats + optional §9.5.2 cleared sibling — the
+            // CSS2/floats-clear-multicol family) gets a synthetic id-keyed
+            // §9.5.2 plan provided around its content: each proven float
+            // reports ZERO flow height at its slot (CSS 2.1 §9.5 — floats
+            // take no block-axis space), which the existing block child
+            // loop consumes via LocalFloatClearancePlan + ClearanceZeroFlow
+            // with NO renderer change. Gated exactly like the measure half
+            // (MulticolFloatStripMeasure): definite block-size, ≥2 columns,
+            // horizontal-tb — the two halves must decide together or the
+            // floats would zero-flow under a layout that still stacks them.
+            // spannerSpecs is capture-nulled above, so the dark-stage 327
+            // corpus provably takes the null branch.
+            // Wave-44 skeptic S5: the two halves now share ONE pre-measure
+            // predicate (MulticolFloatStripPlan.engagesPreMeasure, called
+            // inside zeroFlowPlan) instead of two gates that could disagree
+            // — the fill mode rides in because the §7.1 balance branch has a
+            // degenerate case the composition gate could not otherwise see,
+            // and a definite block-size of 0 is excluded here too because
+            // the measure half must reject it (no fragmentainer) and floats
+            // must not zero-flow under a layout that still stacks them. The
+            // one residual asymmetry (specs vs measurables count) is
+            // invisible at composition time and documented in zeroFlowPlan.
+            val floatStripZeroFlow =
+                if (containerBlockSizeDefinite && this.constraints.maxHeight > 0 &&
+                    fragmentationAllowed && columnCount > 1)
+                    MulticolFloatStrip.zeroFlowPlan(
+                        spannerSpecs, columnFillAuto = config.fill == ColumnFill.AUTO)
+                else null
+            // Wrap the content ONCE when the strip engages; the identity
+            // lambda otherwise keeps every other container's composition
+            // shape untouched (not merely its pixels).
+            val stripContent: @Composable () -> Unit =
+                if (floatStripZeroFlow != null) {
+                    {
+                        CompositionLocalProvider(
+                            com.styleconverter.runtime.layout
+                                .LocalFloatClearancePlan provides floatStripZeroFlow
+                        ) { content() }
+                    }
+                } else content
             CompositionLocalProvider(
                 LocalMultiColumnConfig provides config,
                 LocalColumnCount provides columnCount
@@ -306,7 +348,8 @@ object MultiColumnApplier {
                         captureMode = captureMode,
                         columnFillAuto = config.fill == ColumnFill.AUTO,
                         discardOverflow = config.continueDiscard,
-                        content = content
+                        // Wave-44: the (possibly zero-flow-wrapped) content.
+                        content = stripContent
                     )
                 } else {
                     SimpleMultiColumn(
@@ -321,7 +364,8 @@ object MultiColumnApplier {
                         captureMode = captureMode,
                         columnFillAuto = config.fill == ColumnFill.AUTO,
                         discardOverflow = config.continueDiscard,
-                        content = content
+                        // Wave-44: the (possibly zero-flow-wrapped) content.
+                        content = stripContent
                     )
                 }
             }
@@ -679,6 +723,34 @@ object MultiColumnApplier {
                 // (B-RC6: this file keeps its exact 3 fragmentsState
                 // touches).
                 if (measurables.size > 1) {
+                    // ── Wave-44 lane U8: the FLOAT-STRIP pass ────────────
+                    // Runs BEFORE the run pass because the run pass bails
+                    // on floated content by design (its wave-42 honesty
+                    // line): a container whose specs PROVE the float-strip
+                    // shape fragments here as one continuous strip with
+                    // §9.5 out-of-flow floats and §9.5.2 clearance; every
+                    // unproven shape returns null and keeps the run/greedy
+                    // paths byte-identically. Engages under BOTH fill
+                    // modes (§7.2 auto keeps H; §7.1 balance reduces to
+                    // ceil(C/N) — the balancing refs' 85px columns). The
+                    // bridge write happens in the HELPER's placement block
+                    // (B-RC6: this file keeps its exact 3 fragmentsState
+                    // touches).
+                    with(MulticolFloatStripMeasure) {
+                        measureFloatStrip(
+                            measurables = measurables,
+                            constraints = constraints,
+                            childSpecs = childSpecs,
+                            columnFillAuto = columnFillAuto,
+                            fragmentationAllowed = fragmentationAllowed,
+                            usedCount = used.count,
+                            columnWidthPx = columnWidth,
+                            gapPx = gapPx,
+                            columnBlockSizePx = columnBlockSize,
+                            fragmentsBridge = fragmentsState,
+                            logFallback = ::logFragmentationFallbackOnce
+                        )?.let { return@Layout it }
+                    }
                     with(MulticolRunFragmentMeasure) {
                         measureRunFragment(
                             measurables = measurables,

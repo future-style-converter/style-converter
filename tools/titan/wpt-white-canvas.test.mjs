@@ -379,7 +379,13 @@ test('corpus-v4.1 swiftui: WPTCanvas.textInk is black and both bottom-outs route
   // purely by being interleaved. The `doesNotMatch` below is the real guard;
   // this count is what makes a NEW site visible rather than silent.
   const routed = renderer.match(/WPTCanvas\.captureTextInk\(\s*\n\s*wptCaptureMode: wptCaptureMode,\s*\n\s*defaultInk: InheritedText\.defaultTextColor\)/g) ?? [];
-  assert.equal(routed.length, 3, 'every iOS currentColor bottom-out must route through the ink split');
+  // Four since wave-44 lane U2: the inline-run FOLD's merged label joined
+  // the three wave-32 sites (leading-text, leaf, inlineRunLabel) — a folded
+  // paragraph's glyphs must bottom out through the same split or a runs
+  // component's ink would change purely by being folded. The doesNotMatch
+  // below remains the real bypass guard; this count only makes NEW sites
+  // visible for exactly this kind of review.
+  assert.equal(routed.length, 4, 'every iOS currentColor bottom-out must route through the ink split');
   assert.doesNotMatch(renderer, /\? InheritedText\.defaultTextColor : nil/,
     'an iOS currentColor bottom-out bypasses the ink split');
   // The no-color PlaceholderLabel fallback is black in WPT mode…
