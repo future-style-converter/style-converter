@@ -77,6 +77,10 @@ object OpacityApplier {
      *   paint they want attenuated, see ColorApplier.applyColors step 1).
      * @param alpha CSS opacity value; clamped to 0..1 per css-color-4 §2.2
      *   ("values outside the range are clipped to this range").
+     *   DUAL DOMAIN since wave-44 U4: the SAME coerceIn serves css-color-4
+     *   §2.2 `opacity` AND Filter Effects 1 §10.2 `filter: opacity()` (§10.2:
+     *   amounts over 100% "must be clamped to 1", negatives floor at 0), so
+     *   both specs' clamps land here and neither caller re-clamps.
      * @return The modifier unchanged for opacity ≥ 1, else with the group.
      */
     fun applyOpacity(modifier: Modifier, alpha: Float): Modifier {

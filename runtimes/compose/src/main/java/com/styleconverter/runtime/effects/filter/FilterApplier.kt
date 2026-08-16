@@ -2,7 +2,6 @@ package com.styleconverter.runtime.effects.filter
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
@@ -10,6 +9,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+// The wave-43 CSS-opacity mechanism — the unbounded saveLayerAlpha group.
+// `filter: opacity()` reuses it verbatim (see applyForegroundFilters) so the
+// filter function and the property can never drift apart in clip physics.
+import com.styleconverter.runtime.color.OpacityApplier
 // The two-pass backdrop render lives in its own module (effects/backdrop/);
 // this applier is only its registration point — see applyBackdropFilters.
 import com.styleconverter.runtime.effects.backdrop.backdropFilterTwoPass
@@ -23,7 +26,11 @@ import kotlin.math.sin
  *
  * ### Direct Modifier Support
  * - `blur()` - Uses Modifier.blur() directly
- * - `opacity()` - Uses Modifier.alpha() directly
+ * - `opacity()` - Reuses color/OpacityApplier's unbounded saveLayerAlpha
+ *   group (wave 44: `Modifier.alpha` IS graphicsLayer(alpha, clip = TRUE) —
+ *   the identical record-time crop wave 43 evicted from the CSS `opacity`
+ *   property, and Filter Effects 1 §10.2 gives filter functions no clip
+ *   either — see the comment at the apply site)
  *
  * ### ColorMatrix-based Filters
  * ColorMatrix filters (brightness, contrast, grayscale, etc.) are applied as
@@ -115,9 +122,26 @@ object FilterApplier {
             result = applyDropShadow(result, shadow)
         }
 
-        // Apply opacity last
+        // Apply opacity last (the pre-existing by-type order of this chain).
+        //
+        // Wave 44 (lane U4): composite through the wave-43 CSS-opacity
+        // mechanism — color/OpacityApplier's UNBOUNDED framework-canvas
+        // saveLayerAlpha group — instead of `Modifier.alpha`. AlphaKt
+        // bytecode (ui-android 1.11.4) shows Modifier.alpha IS
+        // graphicsLayer(alpha, clip = TRUE): a record-time crop at the
+        // node's own bounds, the exact physics wave 43 measured and evicted
+        // from the `opacity` property (composited-filters-under-opacity,
+        // android-ref 0.9401 — OpacityApplier's KDoc carries the full
+        // story). Filter Effects 1 §10.2 defines `opacity()` as a pure
+        // alpha multiply over the element's rendering and gives filter
+        // functions no border-box clip, so descendants painting outside
+        // the bounds (abspos children, ink overflow) must survive here
+        // exactly as they do under the property. §10.2's over-100% rule
+        // ("values of amount over 100% … must be clamped to 1") and the
+        // negative-value floor are OpacityApplier's own coerceIn(0f, 1f),
+        // so the clamp the old call carried is preserved, not dropped.
         opacityFilters.forEach { opacity ->
-            result = result.alpha(opacity.amount.coerceIn(0f, 1f))
+            result = OpacityApplier.applyOpacity(result, opacity.amount)
         }
 
         return result

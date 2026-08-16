@@ -114,6 +114,15 @@ enum MulticolSpannerFlow {
         /// run fragmenter pushes it whole into the next column
         /// (MulticolRunFragment.runPlan's `monolithic` argument).
         var monolithicContent: Bool = false
+        /// The wave-44 lane-U8 FLOAT-STRIP facts (leading out-of-flow
+        /// floats, §9.5.2 clear sides, trailing paint ink) — or nil when
+        /// any wire on this child is outside that lane's proven scope
+        /// (MulticolFloatStrip.factsFor's strict-bail contract). A single
+        /// nil fact disables the whole container's strip. Twin of the
+        /// Kotlin ChildSpec.floatStrip; consumed on Android today, kept
+        /// here for byte-parallel specs until the iOS renderer seams land
+        /// (MulticolFloatStrip.swift's CONSUMPTION STATUS banner).
+        var floatStrip: MulticolFloatStrip.ChildFacts? = nil
     }
 
     /// One child's planned position. x derives at the layout site as
@@ -199,6 +208,13 @@ enum MulticolSpannerFlow {
         let roles = rolesFor(children: children, leadingText: leadingText)
         // The leading text spec (when present) heads the list.
         let head: [ChildSpec] = leadingText ? [ChildSpec(role: .flow, explicitBlockSize: false)] : []
+        // Wave-44 lane U8: one float-presence read per child (shared by
+        // the wave-42 flag below AND the strip-facts gate — the strip is
+        // only relevant when SOME child floats, and skipping the facts
+        // walk for float-less containers keeps their specs byte-identical
+        // to wave-42, pinned by the R1 row on both natives).
+        let floated = children.map { hasFloatedDescendant($0) }
+        let anyFloated = floated.contains(true)
         // Pair each child's role with its Height/BlockSize declaration —
         // presence is the signal (the measure pass supplies the value).
         return head + children.enumerated().map { index, child in
@@ -209,7 +225,7 @@ enum MulticolSpannerFlow {
                 },
                 // Wave-42: the run fragmenter's float bail rides this flag
                 // (see ChildSpec.floatedContent for why floats disqualify).
-                floatedContent: hasFloatedDescendant(child),
+                floatedContent: floated[index],
                 // Wave-42: the run fragmenter's FORCED-BREAK bail — a break
                 // the container-level role list cannot see (the child's own
                 // break-before, or either side anywhere below it).
@@ -221,7 +237,11 @@ enum MulticolSpannerFlow {
                 // twin reads (`_text` there is `text` here).
                 monolithicContent: (child.children?.isEmpty ?? true)
                     && (child.text?.isEmpty ?? true)
-                    && child.pseudos == nil)
+                    && child.pseudos == nil,
+                // Wave-44 lane U8: the float-strip facts (or the strict
+                // nil bail) — computed only for containers with a float
+                // somewhere (the `anyFloated` gate above).
+                floatStrip: anyFloated ? MulticolFloatStrip.factsFor(child) : nil)
         }
     }
 

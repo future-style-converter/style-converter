@@ -2758,17 +2758,21 @@ object ComponentRenderer {
             // "30. 31. 32." (android-ref 0.744, wave42-final). Index-aligned
             // with `component.children`; null for non-list parents, so every
             // other container keeps the exact pre-wave-43 index math.
-            // `reversed = false` is a documented WIRE GAP, not a shrug: the
-            // producer never forwards `<ol reversed>` (extract-fixture.mjs
-            // LIST_ATTR_KEYS) and the strict attrs decoder would reject the
-            // key. The countdown itself is already implemented and unit-
-            // tested to the SPEC — css-lists-3 §4.4.2 reversed-counter
-            // instantiation, see ListOrdinal's header — so closing the gap
-            // is one boolean, not a behaviour decision.
+            // Wave 44 (lane U5) closed the wave-43 WIRE GAP: the producer
+            // now forwards `<ol reversed>` (extract-fixture.mjs
+            // LIST_BOOLEAN_ATTR_KEYS, presence-`true` per HTML §4.4.5's
+            // boolean-attribute rule) and the strict decoder admits it
+            // (IRDocumentDecoder.ATTR_KEYS / IRAttrs.reversed), so the
+            // css-lists-3 §4.4.2 countdown wave 43 implemented and
+            // unit-tested finally receives its input — absent attr decodes
+            // null, `== true` keeps every unreversed list on the exact
+            // pre-wave-44 up-count. MEASURED: wave43-final css-lists/
+            // counter-list-item.html's "Reversed ordered lists" column
+            // repeated the forward numbering (android-ref 0.741, FAIL).
             val listOrdinals: IntArray? = if (isListParent)
                 com.styleconverter.runtime.lists.ListOrdinal.ordinals(
                     startAttr = component.attrs?.start,
-                    reversed = false,
+                    reversed = component.attrs?.reversed == true,
                     children = component.children
                 ) else null
 
@@ -3096,6 +3100,78 @@ object ComponentRenderer {
                         }
                     }
                 } else if (inlineRunPlan != null) {
+                    // ── Wave 44 (lane U1) — the inline-run FOLD ─────────
+                    // InlineRunFold collapses a text-and-plain-span member
+                    // sequence into ONE paragraph string rendered through
+                    // the SAME single-Text pipeline every flat text box
+                    // uses (PlaceholderContent), which is real inline flow:
+                    // one greedy line-break pass at the host's content
+                    // width, one shared baseline per line — with every
+                    // calibration that pipeline already owns (rule-B
+                    // pre-break, hyphen materialization, line-box snap,
+                    // half-leading). Measured victims and the full member
+                    // gate live in InlineRunFold's banner; anything the
+                    // gate refuses keeps the wave-32 stacked fallback below
+                    // BYTE-IDENTICALLY, with the bail reason logged once.
+                    val runFold = com.styleconverter.runtime.typography.inline.InlineRunFold.fold(
+                        entries = inlineRunPlan.entries,
+                        children = component.children,
+                        hostProperties = component.properties,
+                        // The host's effective content language (its own
+                        // meta.lang is already provided into this local at
+                        // the RenderComponent seam) — gates `hyphens: auto`
+                        // adoption, whose dictionary is language-selected.
+                        hostEffectiveLang = LocalContentLanguage.current,
+                    )
+                    // One breadcrumb per host per outcome (repo rule: no
+                    // silent path change and no silent refusal). Keyed via
+                    // remember so recomposition does not re-log; runCatching
+                    // guards android.util.Log for the JVM suite.
+                    val foldLogKey = "${component.id}|${runFold::class.simpleName}"
+                    androidx.compose.runtime.remember(foldLogKey) {
+                        runCatching {
+                            when (runFold) {
+                                is com.styleconverter.runtime.typography.inline.InlineRunFold.Outcome.Folded ->
+                                    android.util.Log.i(
+                                        "ComponentRenderer",
+                                        "meta.runs fold: ${inlineRunPlan.entries.size} inline members " +
+                                            "render as ONE paragraph (${runFold.text.length} chars" +
+                                            (if (runFold.adoptedHyphens) ", member hyphens adopted" else "") +
+                                            (if (runFold.droppedEmptyMembers > 0)
+                                                ", ${runFold.droppedEmptyMembers} empty member(s) dropped" else "") +
+                                            ") — component ${component.id}"
+                                    )
+                                is com.styleconverter.runtime.typography.inline.InlineRunFold.Outcome.Bailed ->
+                                    android.util.Log.i(
+                                        "ComponentRenderer",
+                                        "meta.runs fold bail (${runFold.reason}): component " +
+                                            "${component.id} keeps the stacked wave-32 order fallback"
+                                    )
+                            }
+                        }
+                    }
+                    if (runFold is com.styleconverter.runtime.typography.inline.InlineRunFold.Outcome.Folded) {
+                        // The merged paragraph renders exactly like a leaf
+                        // `_text` box: host properties (plus any adopted
+                        // member Hyphens — appended, never overriding) and
+                        // the host's own decoration wire, mirroring the
+                        // Entry.Text site below.
+                        PlaceholderContent(
+                            name = runFold.text,
+                            textColor = inheritedAwareTextColor,
+                            properties = runFold.properties,
+                            rawText = runFold.text,
+                            decorations = com.styleconverter.runtime.typography.DecorationWire
+                                .toDecorationLines(component.decorations)
+                        )
+                        // Rule 4 — children the runs list did not name still
+                        // render after the paragraph, in sibling order
+                        // (verbatim twin of the stacked branch's loop).
+                        inlineRunPlan.unreferenced.forEach { i ->
+                            renderBlockChild(i, component.children[i])
+                        }
+                        return
+                    }
                     // Wave 32 (lane R) — the ordered inline content. Text runs
                     // and child boxes emit in WIRE order through the SAME
                     // per-child renderer the frozen loop uses (original

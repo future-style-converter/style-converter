@@ -961,6 +961,34 @@ dirs + WPT corpus are gitignored):
   watchdogs, all columns full under a tightened per-section capture
   check, 327-net clean. Totals: unchanged — **web 1187/1379 (86.1%),
   iOS 977/1351 (72.3%), Android 970/1350 (71.9%)**.
+  Wave 44 (`tools/titan/results/corpus-v6-9.json`) was the inline-fold
+  wave. The **SVG pre-raster flipped ON** — after the root-facade
+  replaced-image wiring and the §10.8.1 margin-baseline math landed,
+  the A/B measured on-device said arm B stopped costing passes
+  (Android 15/19 vs 8/19; a skeptic independently reproduced the
+  numbers from the captures) — and the gate delivered exactly the
+  measured css-ui gains: **Android +7, iOS +8**. The inline-run wall
+  half-fell: the Compose fold (a 298-host simulation proved exactly
+  the five failing victims fold) flipped two css-text cells and moved
+  inherit-computed +0.06; the iOS fold engaged partially — its gate
+  list is stricter, wave-45 widens it to parity. Two cells were lost
+  **honestly**: align-items-007's passes on both natives were vacuous
+  (absent image + white-canvas slack); the now-delivered raster
+  reveals a real color divergence the flip's skeptic had flagged
+  pre-gate. One web cell is the known view-transition settle flake.
+  Reversed lists now count down end-to-end (wire, both decoders,
+  schema, and the counter bake's spec-walk replacing a wave-37
+  reference-fitted formula). The float strip improved all eight
+  Android floats-multicol cells without flipping any — wave 45 has
+  capture evidence where wave 44 had hand geometry. Skeptics caught
+  and fixes closed pre-gate: a post-load truth-regression (class
+  *removals* baked stale styles), a double-measure crash, and a batch
+  of comment-truth corrections. Operationally the gate hit a full
+  disk mid-run (the wave-38 lesson unapplied) — recovered and the
+  df preflight is now part of the gate template. Rerun gate: zero
+  watchdogs, all columns full, 327-net clean. Totals: **web
+  1186/1379 (86.0%), iOS 984/1351 (72.8%), Android 978/1350
+  (72.4%)**.
 
 ## Test suites
 
@@ -968,9 +996,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 368 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1263 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2475 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1555 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1626 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2540 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1597 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1646 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap

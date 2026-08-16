@@ -108,11 +108,52 @@ package com.styleconverter.runtime.layout
 // namespace-001 and filter-effects/backdrop-filter-boundary keep the
 // exact runs and the exact per-member (w,h) they had.
 //
+// ## Wave 44 (lane U3) — the ROOT facade grows two channels the nested
+// lane does not have (and [spec] therefore does NOT gain):
+//  U3a · a MARGIN channel: [rootBox] tolerates exact-px physical margins
+//        (negative included) and carries them on [RootBox]; [rootRowPlan]
+//        folds them into the §10.8.1 baseline math by packing MARGIN
+//        boxes (baseline = bottom margin edge for both admitted families,
+//        CSS 2.1 §10.8.1). This is what admits css-ui box-sizing-010/-014/
+//        -016/-020/-024's `#ref` div (`margin-bottom: 30px "for
+//        alignement"`) and box-sizing-007..009's twenty margined imgs.
+//        The nested lane keeps refusing margins because its AtomSpec has
+//        no margin channel and its adapters pack border boxes.
+//  U3b · the REPLACED family: a root whose `meta.sourceTag` is a replaced
+//        element with a DELIVERED raster (the same family+fact contract as
+//        the wave-43 V1 [InlineAtomFlow.isAtom] predicate — candidate tag
+//        + src, attested registry decode) is an inline-level atom
+//        (CSS 2.1 §9.2.2), sized by §10.3.2/§10.6.2/§10.4 through the
+//        wave-42 [com.styleconverter.runtime.images.ReplacedBoxSizing]
+//        table. Undelivered assets refuse, so every pre-raster-OFF arm is
+//        byte-identical.
+//  B8  · both NEW channels require the declared `vertical-align` to be
+//        absent or `baseline` — the packer models §10.8.1 baseline rows
+//        only. Scoped to the new admissions: the frozen wave-34
+//        zero-margin declared-inline-block family keeps its VA-ignorant
+//        admission (css-cascade/scope-pseudo-element's three `vertical-
+//        align: top` roots are admitted TODAY and score Android 0.9742
+//        PASS; evicting them would be an unmeasured regression).
+// Blast radius, re-enumerated over all 1435 frozen wave43-final per-test
+// IRs (30 sections under tools/titan/runs/wave43-final/): with the
+// pre-raster OFF — now the TITAN_SVG_PRERASTER=0 ESCAPE HATCH, not the
+// default — ZERO documents change; with it ON (the wave-44 default, which
+// the re-run A/B in tools/titan/svg-preraster.mjs earned: +7 Android /
+// +8 iOS passes) exactly 17 css-ui box-sizing tests gain root runs
+// (007..011, 013..022, 024, 025 — 012/023's div is not inline-block, so
+// their lone img stays a single and keeps the frozen stack).
+//
 // Pure over the IR (no Compose types) so the whole gate table is
-// JVM-pinnable. Twin: StyleEngine/layout/InlineBlockAtom.swift.
+// JVM-pinnable — the ONE registry seam is [replacedRootFactsOf], which
+// the harnesses call and tests bypass by constructing facts directly.
+// Twin: StyleEngine/layout/InlineBlockAtom.swift.
 
+import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.types.LengthValue
 import com.styleconverter.runtime.core.types.extractLength
+import com.styleconverter.runtime.images.DocumentImageRegistry
+import com.styleconverter.runtime.images.ReplacedBoxSizing
+import com.styleconverter.runtime.images.ReplacedImageContent
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -290,11 +331,25 @@ object InlineBlockAtom {
             // nothing about them needs to be readable.
             "BORDER_BOX" -> return 0.0 to 0.0
             // Declared content-box, or unset (⇒ content-box under P19's
-            // composed-WPT gate — see the kdoc). Fall through.
-            "CONTENT_BOX", null -> Unit
+            // composed-WPT gate — see the kdoc): the real bands, strictly
+            // read (wave-44 factored the accumulation into [strictBandsPx]
+            // so the replaced gate can read the SAME bands byte-for-byte).
+            "CONTENT_BOX", null -> return strictBandsPx(properties)
             // Wire drift: never guess a sizing model.
             else -> return null
         }
+    }
+
+    /**
+     * The STRICT (inline, block) padding + used-border band read — the
+     * exact wave-34 content-box accumulation, factored out (wave-44 U3b)
+     * because the replaced gate needs the REAL bands under either
+     * box-sizing (its content box is declared − band). All three
+     * refusals in [borderBoxBandsPx]'s kdoc live here unchanged.
+     */
+    private fun strictBandsPx(
+        properties: List<com.styleconverter.runtime.core.ir.IRProperty>,
+    ): Pair<Double, Double>? {
         // Refusal 2 — logical bands must be absent or an explicit zero.
         for (t in LOGICAL_BANDS) {
             val data = properties.lastOrNull { it.type == t }?.data ?: continue
@@ -423,8 +478,108 @@ object InlineBlockAtom {
     // the runs, [InlineAtomFlow.layout] packs them. No new layout rule.
 
     /** One root's OUTER border box, in CSS px — the scalar projection of
-     *  the [UAWidgetIntrinsics.AtomSpec] [spec] returns. */
-    data class RootBox(val widthPx: Double, val heightPx: Double)
+     *  the [UAWidgetIntrinsics.AtomSpec] [spec] returns — plus (wave-44
+     *  U3a) the DECLARED physical margins the packer now owns. The margin
+     *  defaults keep every pre-wave-44 construction site (and pin)
+     *  byte-identical: a margin-free box packs exactly as before. */
+    data class RootBox(
+        val widthPx: Double,
+        val heightPx: Double,
+        // The §8.3 physical margins, exact px off the wire (negative
+        // legal — box-sizing-007's `margin-left: -10px`). They live HERE,
+        // not in the render: the harness strips them from the member's
+        // render ([packedMarginStripped]) and [rootRowPlan] re-expresses
+        // them as §10.8.1 margin-box packing, so no margin is ever painted
+        // twice or dropped.
+        val marginTopPx: Double = 0.0,
+        val marginRightPx: Double = 0.0,
+        val marginBottomPx: Double = 0.0,
+        val marginLeftPx: Double = 0.0,
+    )
+
+    /**
+     * Wave-44 U3b — the caller's attestation that a root is a DELIVERED
+     * replaced element, mirroring the wave-43 V1 [InlineAtomFlow.isAtom]
+     * family+fact contract: non-null means "replaced candidate
+     * ([ReplacedImageContent.isCandidate]: replaced `meta.sourceTag` +
+     * non-blank `meta.attrs.src`) AND the platform's
+     * [DocumentImageRegistry] decoded that src to a raster". The facade
+     * still re-checks the TAG family itself — a facts object handed to a
+     * `<div>` is a harness bug the gate refuses rather than packs, the
+     * same discipline `isAtom` pins for its boolean.
+     *
+     * The intrinsic fields are the raster's pixel dimensions, which ARE
+     * the CSS intrinsic size at the capture density (the
+     * [DocumentImageRegistry.DecodedImage] contract), and the ratio is
+     * css-images-3 §5.2's width ÷ height (null for a degenerate raster).
+     */
+    data class ReplacedRootFacts(
+        val sourceTag: String?,
+        val intrinsicWidthPx: Double,
+        val intrinsicHeightPx: Double,
+        val aspectRatio: Double?,
+    )
+
+    /**
+     * The ONE impure seam of this file (wave-44 U3b): read a root
+     * component's [ReplacedRootFacts] from the live document state —
+     * candidacy off the wire, delivery off [DocumentImageRegistry]. Null
+     * when the root is not a replaced candidate OR its asset was not
+     * delivered (the undelivered arm then keeps the frozen block stack,
+     * which is what makes every pre-raster-OFF capture byte-identical).
+     * Lives in the runtime rather than the harnesses so the two capture
+     * canvases read the SAME attestation and cannot drift; unit tests pin
+     * [rootBox] by constructing facts directly and never touch this.
+     */
+    fun replacedRootFactsOf(component: IRComponent): ReplacedRootFacts? {
+        // Half 1 — the wire candidacy (replaced tag + non-blank src).
+        if (!ReplacedImageContent.isCandidate(component)) return null
+        // Half 2 — the platform actually decoded the named asset.
+        val decoded = DocumentImageRegistry.resolve(component.attrs?.src) ?: return null
+        return ReplacedRootFacts(
+            sourceTag = component._tag,
+            intrinsicWidthPx = decoded.intrinsicWidthPx.toDouble(),
+            intrinsicHeightPx = decoded.intrinsicHeightPx.toDouble(),
+            aspectRatio = decoded.aspectRatio?.toDouble(),
+        )
+    }
+
+    /** The four physical §8.3 margin sides, in (top, right, bottom, left)
+     *  order — the wave-44 U3a margin channel's read set. Separate from
+     *  [ZERO_MARGINS] (the nested [spec]'s all-eight absent-or-zero list)
+     *  because the ROOT channel tolerates these four and still forces the
+     *  logical four to zero. */
+    private val PHYSICAL_MARGINS =
+        listOf("MarginTop", "MarginRight", "MarginBottom", "MarginLeft")
+
+    /** The logical margin sides — absent or an explicit zero even under
+     *  the tolerant root channel, because their physical mapping is
+     *  writing-mode dependent (css-logical-1 §4.1) and this rule does not
+     *  model it — the same refusal the band reader keeps. */
+    private val LOGICAL_MARGINS = listOf(
+        "MarginBlockStart", "MarginBlockEnd",
+        "MarginInlineStart", "MarginInlineEnd",
+    )
+
+    /** The margin property types the ROOT margin channel owns (wave-44
+     *  U3a): the physical sides [rootBox] reads onto [RootBox] plus the
+     *  logical sides it forces to zero. A harness renders a RUN member
+     *  with these stripped ([packedMarginStripped]) because the packer
+     *  now owns them — leaving them on the render would paint each margin
+     *  twice (Compose margins render as absolutePadding/offset, which
+     *  would fight the row's exact member constraints). */
+    val PACKED_MARGIN_TYPES: Set<String> =
+        (PHYSICAL_MARGINS + LOGICAL_MARGINS).toSet()
+
+    /** A copy of [component] with every [PACKED_MARGIN_TYPES] declaration
+     *  removed — the RUN-member render shape (wave-44 U3a). Identity (the
+     *  same instance) for margin-free components, so the wave-34 sites
+     *  render through the exact object they always did. Kept in the
+     *  facade (not the harnesses) so both platforms strip the identical
+     *  type set that [rootBox] read. */
+    fun packedMarginStripped(component: IRComponent): IRComponent =
+        if (component.properties.none { it.type in PACKED_MARGIN_TYPES }) component
+        else component.copy(properties = component.properties.filterNot { it.type in PACKED_MARGIN_TYPES })
 
     /** One segment of the composed root list: a packable inline RUN
      *  (`isRun`, always ≥2 root indices) or a single root that keeps the
@@ -447,11 +602,17 @@ object InlineBlockAtom {
     const val ROOT_ATOM_GAP_PX: Double = UAWidgetIntrinsics.ATOM_GAP_PX
 
     /**
-     * H1 — this root's [RootBox], or null when it is not a declared
-     * inline-block atom and must keep the harness's block stack.
-     * Verbatim [spec] under the covers, so a root and a nested child are
-     * admitted by the IDENTICAL B1–B7 table (including the wave-34 H2
-     * box-sizing read) and can never drift.
+     * H1 — this root's [RootBox], or null when it is not an inline atom
+     * and must keep the harness's block stack.
+     *
+     * Wave 44 (U3): no longer a verbatim [spec] delegate — the ROOT table
+     * is now a documented SUPERSET of the nested one (see the header's
+     * U3a/U3b/B8 notes). On the shapes both admit — a margin-free
+     * declared inline-block — the two answers are IDENTICAL (unit-pinned
+     * on both platforms so the shared rules cannot drift); the deltas
+     * are: the margin channel (U3a), the delivered-replaced family
+     * ([replaced] non-null, U3b), and the B8 vertical-align gate over
+     * exactly those two additions.
      *
      * [containerDeclaresLineHeight] is B7 over the composed canvas's own
      * container: the harness passes whether the document's `body-root`
@@ -466,13 +627,276 @@ object InlineBlockAtom {
         hasOwnText: Boolean,
         hasOwnRuns: Boolean,
         containerDeclaresLineHeight: Boolean,
+        replaced: ReplacedRootFacts? = null,
     ): RootBox? {
-        val s = spec(properties, hasOwnText, hasOwnRuns, containerDeclaresLineHeight) ?: return null
-        // B2 guarantees both axes are definite, so the !! is total; the
-        // elvis keeps a future spec variant from crashing a capture.
-        val w = s.fixedWpx ?: return null
-        val h = s.fixedHpx ?: return null
-        return RootBox(w, h)
+        // B7 — a declared container line-height invalidates the strut pins
+        // (identical to the nested lane's first refusal).
+        if (containerDeclaresLineHeight) return null
+        // B3 — out-of-flow boxes never join a line box (CSS 2.2 §9.3.1).
+        lastKeyword(properties, "Position")?.let {
+            if (it == "ABSOLUTE" || it == "FIXED") return null
+        }
+        // B4 — a float is block-level (§9.7) and owned by the wave-19 packer.
+        lastKeyword(properties, "Float")?.let { if (it != "NONE") return null }
+        // B5m (U3a) — the margin channel: exact-px physical margins ride
+        // the RootBox; any unreadable shape (auto/%/em/calc) refuses.
+        val m = rootMarginChannelPx(properties) ?: return null
+        // Does this box USE the new margin channel at all? B8 is scoped to
+        // exactly the wave-44 additions (see the header's B8 note).
+        val carriesMargins = m.any { it != 0.0 }
+        if (replaced != null) {
+            // ── U3b: the replaced family ─────────────────────────────────
+            // The tag re-check half of the family+fact contract: the facts
+            // alone admit nothing (mirrors InlineAtomFlow.isAtom's refusal
+            // of a delivered-flag on a <div>).
+            if ((replaced.sourceTag ?: "").lowercase() !in REPLACED_ROOT_TAGS) return null
+            // css-display-3 §2 — a declared non-INLINE display takes even a
+            // delivered img out of the inline flow; absent keeps the UA
+            // inline default (CSS 2.1 §9.2.2). Same rule as isAtom.
+            lastKeyword(properties, "Display")?.let {
+                if (!it.startsWith("INLINE")) return null
+            }
+            // B8 — the packer models §10.8.1 baseline rows only; a replaced
+            // element's declared vertical-align must be absent or baseline.
+            if (!verticalAlignIsBaseline(properties)) return null
+            // NOTE: hasOwnText/hasOwnRuns are deliberately NOT consulted
+            // here — an <img>'s wire text is its alt fallback, which never
+            // paints once the raster is delivered (ReplacedImageContent's
+            // contract), so it generates no line box. Mirrors isAtom, which
+            // ignores the text facts for the replaced family.
+            val (w, h) = replacedBorderBoxPx(properties, replaced) ?: return null
+            return RootBox(w, h, m[0], m[1], m[2], m[3])
+        }
+        // ── the declared inline-block family (B1/B6/B2/H2, wave-33/34) ──
+        // B1 — the declared keyword is the whole admission ticket.
+        if (lastKeyword(properties, "Display") != "INLINE_BLOCK") return null
+        // B6 — own line boxes would move the baseline off the box bottom.
+        if (hasOwnText || hasOwnRuns) return null
+        // B8 — scoped to the NEW margin channel: a margin-free inline-block
+        // keeps the frozen wave-34 (VA-ignorant) admission, because
+        // css-cascade/scope-pseudo-element's `vertical-align: top` run is
+        // admitted today and scores Android 0.9742 PASS.
+        if (carriesMargins && !verticalAlignIsBaseline(properties)) return null
+        // B2 — a definite size on BOTH axes, or no atom.
+        val w = exactPx(properties, INLINE_SIZE) ?: return null
+        val h = exactPx(properties, BLOCK_SIZE) ?: return null
+        // B5 (bands half, H2) — the box-sizing-aware outer-box read.
+        val (bandX, bandY) = borderBoxBandsPx(properties) ?: return null
+        return RootBox(w + bandX, h + bandY, m[0], m[1], m[2], m[3])
+    }
+
+    /** Wave-43 V1's replaced tag family, re-mirrored for the ROOT gate —
+     *  the same table as [InlineAtomFlow]'s REPLACED_TAGS and
+     *  [ReplacedImageContent]'s (both private, so this is the third pinned
+     *  copy of the one contract; skeptic probes diff them). */
+    private val REPLACED_ROOT_TAGS = setOf("img", "embed", "object", "video")
+
+    /**
+     * U3a — the (top, right, bottom, left) physical margins in exact px,
+     * or null when the channel cannot own them and the atom must refuse:
+     *  - a physical side with any non-exact shape (`auto`, %, `em`,
+     *    `calc`) — resolving it needs bases this pure rule does not have,
+     *    and §10.3.3's auto-margin resolution is a line-layout question;
+     *  - a LOGICAL side that is not an explicit zero (css-logical-1 §4.1,
+     *    the same writing-mode refusal the band reader keeps).
+     * Absent sides are 0 (the §8.3 initial). Negative px pass through:
+     *  the §10.8.1 margin-box fold in [rootRowPlan] is signed arithmetic
+     *  (box-sizing-007's `margin-left: -10px` / `margin-bottom: -10px`).
+     */
+    private fun rootMarginChannelPx(
+        properties: List<com.styleconverter.runtime.core.ir.IRProperty>,
+    ): DoubleArray? {
+        // Logical sides: absent or an explicit zero, never a real value.
+        for (t in LOGICAL_MARGINS) {
+            val data = properties.lastOrNull { it.type == t }?.data ?: continue
+            val px = (extractLength(data) as? LengthValue.Exact)?.px ?: return null
+            if (px != 0.0) return null
+        }
+        // Physical sides: exact px (any sign) or absent.
+        val out = DoubleArray(4)
+        for ((i, t) in PHYSICAL_MARGINS.withIndex()) {
+            val data = properties.lastOrNull { it.type == t }?.data ?: continue
+            out[i] = (extractLength(data) as? LengthValue.Exact)?.px ?: return null
+        }
+        return out
+    }
+
+    /**
+     * B8 — is the declared `vertical-align` compatible with the packer's
+     * §10.8.1 baseline rows? True when ABSENT (the `baseline` initial,
+     * css-inline-3 §3.1 / CSS 2.1 §10.8) or when it reads as the
+     * `baseline` keyword; false for every other readable keyword AND for
+     * any unreadable shape (a length or % shifts the baseline by an
+     * amount this rule does not model — refuse rather than guess).
+     * MEASURED need: css-position/position-absolute-semi-replaced-
+     * stretch-input/-other declare `vertical-align: top` on margined
+     * inline-blocks — without B8 they were the only two documents the
+     * margin channel changed with the pre-raster OFF; with it the OFF-arm
+     * blast radius is exactly zero.
+     */
+    private fun verticalAlignIsBaseline(
+        properties: List<com.styleconverter.runtime.core.ir.IRProperty>,
+    ): Boolean {
+        val data = properties.lastOrNull { it.type == "VerticalAlign" }?.data ?: return true
+        // Three wire spellings: bare string, {"keyword": …}, and the
+        // parser's {"type":"keyword","value":…} wrapper (the shape the
+        // semi-replaced-stretch corpus carries).
+        val s = (data as? JsonPrimitive)?.takeIf { it.isString }?.content
+            ?: ((data as? JsonObject)?.get("keyword") as? JsonPrimitive)?.contentOrNull
+            ?: (data as? JsonObject)
+                ?.takeIf { ((it["type"] as? JsonPrimitive)?.contentOrNull) == "keyword" }
+                ?.let { (it["value"] as? JsonPrimitive)?.contentOrNull }
+        return s?.uppercase() == "BASELINE"
+    }
+
+    /**
+     * U3b — the replaced root's OUTER border box (w, h) px, or null when
+     * it is not statically computable and the atom must refuse.
+     *
+     * The sizing is CSS 2.1 §10.3.2/§10.6.2 with §10.4's constraint
+     * table, computed over CONTENT-box px and converted through
+     * css-sizing-3 §3 exactly like the paint path does
+     * ([ReplacedImageContent.constrainedAutoContentSize]'s bound
+     * conversion), so the box this facade promises equals the content the
+     * member renders inside it:
+     *
+     *  - the padding+border BANDS must be statically readable
+     *    ([strictBandsPx]) under EITHER box-sizing — unlike the
+     *    inline-block H2 read, a `border-box` replaced element still
+     *    needs the real band to derive its content box;
+     *  - each axis is an exact px (definite) or `auto`/absent — any other
+     *    shape (%, intrinsic keywords, calc) refuses;
+     *  - both auto → the wave-42 [ReplacedBoxSizing.constrainAutoSize]
+     *    §10.4 table over the intrinsic size and the (band-converted)
+     *    min/max bounds;
+     *  - one definite → the free axis follows the intrinsic ratio
+     *    (§10.6.2 rule 2 / §10.3.2 rule 2; the intrinsic dimension when
+     *    the ratio is degenerate), then clamps to its own bounds;
+     *  - both definite → the declared box, band-converted.
+     * A declared min/max bound that is not exact px (and not `none`)
+     * refuses — the paint path would ignore it where the browser clamps,
+     * and promising that box would bake the disagreement into a row.
+     */
+    private fun replacedBorderBoxPx(
+        properties: List<com.styleconverter.runtime.core.ir.IRProperty>,
+        facts: ReplacedRootFacts,
+    ): Pair<Double, Double>? {
+        // The REAL bands — required readable whatever the sizing model.
+        val (bandX, bandY) = strictBandsPx(properties) ?: return null
+        // css-sizing-3 §3 tri-state, same read as the H2 band rule.
+        val borderBox = when (lastKeyword(properties, "BoxSizing")) {
+            "BORDER_BOX" -> true
+            // Declared content-box, or unset (⇒ content-box under P19's
+            // composed-WPT gate — SizingApplier.effectiveBoxSizing).
+            "CONTENT_BOX", null -> false
+            // Wire drift: never guess a sizing model.
+            else -> return null
+        }
+        // Declared px → CONTENT px on each axis (border-box subtracts its
+        // band, floored at 0 per css-ui-3 §5's empty-content floor).
+        fun contentX(px: Double) = if (borderBox) kotlin.math.max(0.0, px - bandX) else px
+        fun contentY(px: Double) = if (borderBox) kotlin.math.max(0.0, px - bandY) else px
+        // Axis reads: definite px, auto, or refuse.
+        val wRead = axisRead(properties, INLINE_SIZE) ?: return null
+        val hRead = axisRead(properties, BLOCK_SIZE) ?: return null
+        // Min/max bounds in CONTENT px; `refused` latches any unreadable
+        // declared bound (the local fun cannot return from rootBox).
+        var refused = false
+        fun bound(type: String, toContent: (Double) -> Double): Double? {
+            val data = properties.lastOrNull { it.type == type }?.data ?: return null
+            val lv = extractLength(data)
+            // `max-*: none` is the initial — unbounded, not a refusal.
+            if (lv is LengthValue.None) return null
+            val px = (lv as? LengthValue.Exact)?.px
+            if (px == null) { refused = true; return null }
+            return kotlin.math.max(0.0, toContent(px))
+        }
+        val minW = bound("MinWidth", ::contentX)
+        val maxW = bound("MaxWidth", ::contentX)
+        val minH = bound("MinHeight", ::contentY)
+        val maxH = bound("MaxHeight", ::contentY)
+        if (refused) return null
+        // §10.4 preamble clamp for the single-definite rows: lo floors at
+        // the min (0 when undeclared), hi at max(max, lo) — max-below-min
+        // resolves to the min, the same rule constrainAutoSize pins.
+        fun clamp(v: Double, lo: Double?, hi: Double?): Double {
+            val lo2 = kotlin.math.max(lo ?: 0.0, 0.0)
+            val hi2 = kotlin.math.max(hi ?: Double.POSITIVE_INFINITY, lo2)
+            return kotlin.math.min(kotlin.math.max(v, lo2), hi2)
+        }
+        // The usable-ratio gate, same as ReplacedBoxSizing.mode's.
+        val ratio = facts.aspectRatio?.takeIf { it.isFinite() && it > 0.0 }
+        val cw: Double
+        val ch: Double
+        when {
+            // §10.3.2 rule 4 — both auto: the intrinsic size through the
+            // §10.4 constraint table (wave-42 W6, the box-sizing-010
+            // family's 70×70). Float-typed like the paint path, so the
+            // promised box and the painted content share every rounding.
+            wRead is AxisRead.Auto && hRead is AxisRead.Auto -> {
+                val used = ReplacedBoxSizing.constrainAutoSize(
+                    intrinsicWidthPx = facts.intrinsicWidthPx.toFloat(),
+                    intrinsicHeightPx = facts.intrinsicHeightPx.toFloat(),
+                    aspectRatio = ratio?.toFloat(),
+                    minWidthPx = minW?.toFloat(),
+                    maxWidthPx = maxW?.toFloat(),
+                    minHeightPx = minH?.toFloat(),
+                    maxHeightPx = maxH?.toFloat(),
+                )
+                cw = used.widthPx.toDouble()
+                ch = used.heightPx.toDouble()
+            }
+            // §10.6.2 rule 2 — width definite, height from the ratio (the
+            // intrinsic height when the ratio is degenerate), then the
+            // height's own bounds clamp the derived axis.
+            wRead is AxisRead.Definite && hRead is AxisRead.Auto -> {
+                cw = contentX(wRead.px)
+                ch = clamp(
+                    if (ratio != null) cw / ratio else facts.intrinsicHeightPx,
+                    minH, maxH,
+                )
+            }
+            // §10.3.2 rule 2 — the mirror: height definite, width derived.
+            wRead is AxisRead.Auto && hRead is AxisRead.Definite -> {
+                ch = contentY(hRead.px)
+                cw = clamp(
+                    if (ratio != null) ch * ratio else facts.intrinsicWidthPx,
+                    minW, maxW,
+                )
+            }
+            // §10.3.2 rule 1 — both definite: the declared box, clamped by
+            // its own bounds (identity across the corpus, which declares
+            // no bound alongside a definite axis).
+            else -> {
+                cw = clamp(contentX((wRead as AxisRead.Definite).px), minW, maxW)
+                ch = clamp(contentY((hRead as AxisRead.Definite).px), minH, maxH)
+            }
+        }
+        // Content → OUTER border box: the real bands go back on.
+        return (cw + bandX) to (ch + bandY)
+    }
+
+    /** One sizing axis as the replaced gate reads it: a definite exact px,
+     *  `auto` (declared or absent — the §10.3.2 initial), or null for any
+     *  other shape (%, intrinsic keyword, calc), which refuses. */
+    private sealed interface AxisRead {
+        data class Definite(val px: Double) : AxisRead
+        object Auto : AxisRead
+    }
+
+    /** Read the LAST declaration of [types] as an [AxisRead], or null to
+     *  refuse. Absent ⇒ Auto (the initial value never reaches the wire —
+     *  the converter only serializes declarations). */
+    private fun axisRead(
+        properties: List<com.styleconverter.runtime.core.ir.IRProperty>,
+        types: List<String>,
+    ): AxisRead? {
+        val data = properties.lastOrNull { it.type in types }?.data ?: return AxisRead.Auto
+        return when (val lv = extractLength(data)) {
+            is LengthValue.Exact -> AxisRead.Definite(lv.px)
+            LengthValue.Auto -> AxisRead.Auto
+            else -> null
+        }
     }
 
     /**
@@ -488,14 +912,17 @@ object InlineBlockAtom {
      *
      *  - H3 (no block gap may be swallowed): a run's INTERIOR gaps stop
      *    existing, because inline-level siblings on one line box have no
-     *    block-flow gap between them (§9.4.2). That is right when those
-     *    gaps are zero, which they are at every corpus site — B5 already
-     *    forces the members' own margins to zero, and the members carry
-     *    no UA-margin tag. If a member ever DID arrive with a non-zero
-     *    gap above it, dropping it would silently lose layout, so the
-     *    whole run refuses and the frozen stack renders instead. The gap
-     *    above the run's FIRST member is kept by the caller and is never
-     *    part of this test.
+     *    block-flow gap between them (§9.4.2). Wave 44 (U3a): now that
+     *    members may CARRY declared margins (owned by the packer), the
+     *    harness passes the DECLARED-NEUTRAL gaps — each atom root's plan
+     *    entry recomputed with its declared block margins contributing 0
+     *    (they are re-expressed in [rootRowPlan]'s margin-box fold, never
+     *    dropped) while UA margins and hoist bands keep their real
+     *    values. An interior gap that survives that neutralization is a
+     *    layout this lane does not model (a UA-margined member, a hoist
+     *    band), so the run refuses and the frozen stack renders instead.
+     *    The gap above the run's FIRST member is kept by the caller and
+     *    is never part of this test.
      */
     fun rootSegments(
         boxes: List<RootBox?>,
@@ -525,29 +952,63 @@ object InlineBlockAtom {
 
     /**
      * H1 — pack one run into §9.4.2 rows. Pure delegation to the wave-20
-     * packer with the inline-block family's fixed answers: descent 0
-     * (§10.8.1's no-line-box case, B6) and no margins (B5), plus the
-     * §10.8.1 strut pins every composed row is floored at.
+     * packer, wave-44 U3a: in MARGIN-BOX space. CSS 2.1 §10.8.1 puts the
+     * admitted families' baseline at the bottom MARGIN edge (replaced
+     * elements; inline-blocks with no line boxes), and §10.8's line-box
+     * arithmetic runs over the inline box's MARGIN box — so the packer is
+     * fed margin boxes (mL+w+mR × mT+h+mB, descent 0 = baseline at the
+     * margin-box bottom) and the returned origins are converted back to
+     * BORDER boxes (+mL, +mT) for the caller's placement. With all-zero
+     * margins (every wave-34 site, and the defaults) the two spaces
+     * coincide and the plan is byte-identical to the pre-wave-44 one.
      *
-     * [widthsPx]/[heightsPx] are the members' measured border boxes in
-     * the caller's own pixel space, [availableWidthPx] the container's
-     * content width (the composed canvas's 358), [gapPx] the collapsed
-     * white-space advance in that same space ([ROOT_ATOM_GAP_PX]
-     * converted by the caller, mirroring InlineFlowLayout's `.dp.toPx()`).
+     * Worked example, box-sizing-010 (ref-verified): div 70×70 with
+     * `margin-bottom: 30` (margin box 70×100, baseline 30 BELOW its
+     * border-box bottom) beside an img whose border box is 70×100 (70px
+     * green content + 30px `padding-bottom`). Both margin boxes are 100
+     * tall ⇒ one row, both border-box TOPS at y 0 — the ref's two
+     * baseline-aligned squares at image (16,88)/(91,88); the div's green
+     * bottom edge and the img's white padding land on the same band.
+     *
+     * [widthsPx]/[heightsPx] are the members' measured BORDER boxes in
+     * the caller's own pixel space; the margin lists are index-aligned
+     * signed px in that same space (negative legal — box-sizing-007),
+     * defaulting to all-zero so every pre-wave-44 caller and pin is
+     * unchanged; [availableWidthPx] is the container's content width (the
+     * composed canvas's 358), [gapPx] the collapsed white-space advance
+     * ([ROOT_ATOM_GAP_PX] converted by the caller, mirroring
+     * InlineFlowLayout's `.dp.toPx()`).
      */
     fun rootRowPlan(
         widthsPx: List<Double>,
         heightsPx: List<Double>,
         availableWidthPx: Double,
         gapPx: Double,
+        marginTopsPx: List<Double> = emptyList(),
+        marginRightsPx: List<Double> = emptyList(),
+        marginBottomsPx: List<Double> = emptyList(),
+        marginLeftsPx: List<Double> = emptyList(),
     ): RootRowPlan {
+        // Index-tolerant margin reads: a short (or empty, the default)
+        // list means zero — the margin-free wave-34 shape.
+        fun mT(i: Int) = marginTopsPx.getOrElse(i) { 0.0 }
+        fun mR(i: Int) = marginRightsPx.getOrElse(i) { 0.0 }
+        fun mB(i: Int) = marginBottomsPx.getOrElse(i) { 0.0 }
+        fun mL(i: Int) = marginLeftsPx.getOrElse(i) { 0.0 }
         val plan = InlineAtomFlow.layout(
-            widths = widthsPx,
-            heights = heightsPx,
-            // B6 — baseline at the bottom margin edge ⇒ descent 0, which
-            // is what leaves the strut's 4px under a row of tall boxes.
+            // §10.8 — the inline box the row packs is the MARGIN box on
+            // both axes. Signed sums: a negative side legitimately shrinks
+            // the advance (t01's -10 left margin overlaps its neighbor's
+            // gap exactly like the browser's cursor math).
+            widths = widthsPx.indices.map { mL(it) + widthsPx[it] + mR(it) },
+            heights = widthsPx.indices.map { mT(it) + heightsPx[it] + mB(it) },
+            // §10.8.1 — baseline at the bottom MARGIN edge ⇒ descent 0
+            // from the margin-box bottom, which leaves the strut's 4px
+            // under the row exactly as the ref paints it.
             descents = widthsPx.map { 0.0 },
-            // B5 — admitted atoms have zero margins on both sides.
+            // The margin channel is already folded into `widths` above, so
+            // the packer's own margin inputs stay zero (its marginStarts
+            // channel offsets x by +mS, which would double-count).
             marginStarts = widthsPx.map { 0.0 },
             marginEnds = widthsPx.map { 0.0 },
             availableWidth = availableWidthPx,
@@ -557,6 +1018,15 @@ object InlineBlockAtom {
             strutAscentPx = UAWidgetIntrinsics.STRUT_ASCENT_PX,
             strutDescentPx = UAWidgetIntrinsics.STRUT_DESCENT_PX,
         )
-        return RootRowPlan(plan.x, plan.y, plan.width, plan.height)
+        return RootRowPlan(
+            // Margin-box origins → BORDER-box origins: +mL/+mT per member.
+            // For a negative left margin this moves the border box LEFT of
+            // its slot (t01's border starts 10px into the previous margin),
+            // which is precisely CSS's negative-margin overlap.
+            xPx = plan.x.mapIndexed { i, x -> x + mL(i) },
+            yPx = plan.y.mapIndexed { i, y -> y + mT(i) },
+            widthPx = plan.width,
+            heightPx = plan.height,
+        )
     }
 }

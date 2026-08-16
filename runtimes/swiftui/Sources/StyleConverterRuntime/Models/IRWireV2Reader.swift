@@ -306,13 +306,17 @@ enum IRWireV2Reader {
                     // Wave-27 added `start` for the disjoint ol/li ordinal
                     // lane (HTML §4.4.5). Wave-36 (lane M1) added `src` for
                     // the disjoint img/embed/object/video replaced-source
-                    // lane — twelve legal attributes now. Admitting it here
-                    // is what keeps this strict reader from REJECTING a
-                    // document the web consumer needs; see IRAttrs.src for
-                    // why this runtime decodes but does not yet paint it.
+                    // lane. Admitting each here is what keeps this strict
+                    // reader from REJECTING a document another consumer
+                    // needs; see IRAttrs.src for why this runtime decodes
+                    // but does not yet paint that one. Wave-44 (lane U5)
+                    // added `reversed` — the ol lane's HTML §4.4.5 boolean
+                    // attribute (presence-`true` on the wire), the reversed
+                    // input of the wave-43 ListOrdinal countdown — thirteen
+                    // legal attributes now.
                     let attrKeys: Set<String> = ["type", "value", "checked", "multiple",
                                                  "size", "alt", "min", "max", "selected",
-                                                 "disabled", "start", "src"]
+                                                 "disabled", "start", "src", "reversed"]
                     for k in o.keys where !attrKeys.contains(k) {
                         throw violation("unknown meta.attrs key '\(k)' (wave-20 wire contract)", path: decoder.codingPath)
                     }

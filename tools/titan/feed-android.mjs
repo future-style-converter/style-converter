@@ -387,9 +387,12 @@ async function main() {
   // LinLibertine woff). The returned map is woff-src → sfnt-src for the
   // siblings that actually exist; anything missing from it keeps its `.woff`
   // on the wire so DocumentFontRegistry's extension decline still fires and
-  // still stamps. Unlike the pre-raster this defaults ON — the transcode is
-  // LOSSLESS (identical table bytes, rebuilt container only), so there is no
-  // fidelity trade to A/B; TITAN_WOFF_TRANSCODE=0 is the off-switch.
+  // still stamps. Like the pre-raster above, this defaults ON — but the two
+  // reached that default by different routes: the transcode is LOSSLESS
+  // (identical table bytes, rebuilt container only), so it had no fidelity
+  // trade to A/B and defaulted ON from wave 42, where the lossy pre-raster
+  // had to EARN its wave-44 flip with a measured A/B. TITAN_WOFF_TRANSCODE=0
+  // is this hop's off-switch, TITAN_SVG_PRERASTER=0 the pre-raster's.
   const woffMap = await transcodeWoffFixtures(fixtures, {
     wptDir: opts.wptDir,
     log,

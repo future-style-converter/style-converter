@@ -111,10 +111,14 @@ object SizingApplier {
             clampLength(rawW, minWv, maxWv, ctx),
             // RC-B6b: the WPT flag rides the config into the width branch
             // so ch/em widths can take the overflow-aware exact path.
-            config.boxSizing, config.contentBoxInflateX), ctx, config.wptCaptureMode)
+            // Wave 44 (lane U6): the SAME threaded ctx rides into the
+            // inflation so a content-box Relative resolves against the
+            // exact font/line-height basis the apply branch would use.
+            config.boxSizing, config.contentBoxInflateX, ctx), ctx, config.wptCaptureMode)
         if (!minHCalcOwnsAxis) r = applyHeight(r, inflateForContentBox(
             clampLength(rawH, minHv, maxHv, ctx),
-            config.boxSizing, config.contentBoxInflateY), ctx)
+            // Wave 44 (lane U6): ctx threaded — see the width twin above.
+            config.boxSizing, config.contentBoxInflateY, ctx), ctx)
         // calc-size PREFERRED lane — sits exactly where Modifier.width/
         // height would have gone (the slot pair is exclusive: the extractor
         // never fills width AND widthCalc together), so the background
@@ -186,24 +190,83 @@ object SizingApplier {
      * [BoxSizingKeyword.CONTENT_BOX] — the tri-state guard (null = unset)
      * that keeps every fixture captured against web's border-box reset
      * byte-stable, and keeps explicit `border-box` declarations (the
-     * fixture's passing V1_border sentinel) untouched. Only Exact px
-     * inflates: percent widths route to fillMaxWidth (fractional — no px
-     * to add) and em/rem resolve at apply time; both stay border-box with
-     * the honest divergence noted here rather than half-inflating (no
-     * silent fallthrough: content-box + non-px sizes have no fixture yet).
+     * fixture's passing V1_border sentinel) untouched.
+     *
+     * Wave 44 (lane U6) — DEFINITE sizes now inflate in BOTH shapes:
+     *   * Exact px — the original wave-11 arithmetic, unchanged;
+     *   * non-% Relative (lh/em/ch/rem/vw…) — css-sizing-3 §3 makes no
+     *     px-vs-font-relative distinction: `height: 2lh` under content-box
+     *     is exactly as definite as `height: 32.5px` once resolved, so it
+     *     resolves HERE through the same LhUnitLineHeight-aware
+     *     [resolveToDp] the apply branches use ([ctx] is the identical
+     *     threaded context — the two resolves can never disagree) and
+     *     gains the band. Measured defect this closes: discard-multicol-
+     *     001/002/004's `height: 2lh` (monospace-13 → 32.5px) rendered
+     *     32.5 as the BORDER box on Android — the ref's box is 32.5
+     *     content + 1px borders = 34.5 → the second text row clipped
+     *     mid-glyph (android rows 104..136 = 33px vs ref 88..122 = 35px,
+     *     wave43-final css-overflow captures).
+     *   Gated on a NONZERO band: with nothing to add, converting the
+     *   shape would only flip the apply branch (width()/exactWidth) for
+     *   no geometric reason, so zero-band Relatives pass through and the
+     *   whole borderless-WPT + dark-stage corpus keeps byte-identical
+     *   modifier chains (grep at wave 44: the ONLY committed fixture
+     *   declaring content-box — fixtures/properties/sizing/box-sizing.json
+     *   — is all-px, so no committed baseline can move).
+     *   BLAST RADIUS, measured not assumed (wave-44 skeptic S5, D2): 40
+     *   wave43-final WPT tests carry a component with a non-% Relative
+     *   width/height AND a nonzero band (the ch-sized css-text/hyphens and
+     *   css-overflow/line-clamp families, plus the discard-multicol trio).
+     *   The band is added on top of a PLATFORM-resolved basis, so a capture
+     *   does NOT necessarily move toward its ref: where Android's resolved
+     *   basis already overshoots Chromium's, the band overshoots further.
+     *   Simulated post-fix captures (the band spliced into the wave43-final
+     *   Android PNG, scored against the same run's web capture with the
+     *   comparator's ssim.js `fast` mssim) — css-text/hyphens:
+     *   hyphens-auto-control 0.9632 → 0.9618 and hyphens-vertical-001
+     *   0.9558 → 0.9538 both move AWAY (still passing, both nearer the 0.95
+     *   line), hyphens-manual-010 0.9552 → 0.9554 moves toward. The arm is
+     *   still right by §3 — the residual is font metrics (see the 27ch case
+     *   in ContentBoxRelativeInflationTest: 27 × Android's 8.0px advance + 2
+     *   = 218 vs the ref's 27 × 7.8 + 2 = 213) — but "content-box arithmetic
+     *   fixed" is the claim, NOT "every affected cell improves".
+     * Still passing through, each an honest documented divergence:
+     *   * PERCENT — routes to fillMaxWidth/Height (fractional; a px band
+     *     cannot be added to a fraction — needs a layout-time add);
+     *   * Calc — the apply branches skip unresolved Calc entirely, and
+     *     resolving it here would CREATE a size modifier where none
+     *     existed (out of this lane's scope);
+     *   * Auto/Intrinsic/None — no definite size to reinterpret (§3).
+     * Min/max clamping of Relative sizes stays absent (clampLength is
+     * Exact-only) — pre-existing gap, unchanged by this lane.
      */
     internal fun inflateForContentBox(
         v: LengthValue?,
         boxSizing: BoxSizingKeyword?,
-        inflatePx: Float
+        inflatePx: Float,
+        // Resolution context for the Relative arm — defaulted so the
+        // wave-11 three-arg call shape (BoxSizingContentBoxTest and the
+        // flex-item lanes before ctx threading) stays source-compatible.
+        ctx: SpacingContext = SpacingContext(),
     ): LengthValue? {
         // Not explicitly content-box → border-box status quo, untouched.
         if (boxSizing != BoxSizingKeyword.CONTENT_BOX) return v
-        // Only definite px sizes reinterpret (css-sizing-3 §3); auto /
-        // intrinsic / relative shapes pass through unchanged.
-        if (v !is LengthValue.Exact) return v
-        // content-box: frame = declared content size + padding + border.
-        return LengthValue.Exact(v.px + inflatePx)
+        return when {
+            // Exact px: frame = declared content size + padding + border.
+            v is LengthValue.Exact -> LengthValue.Exact(v.px + inflatePx)
+            // Non-% Relative with a real band: resolve to definite px via
+            // the shared SpacingResolve (lh takes ctx.lineHeightPx — the
+            // wave-43 LhUnitLineHeight channel; ch takes the measured
+            // advance; em the font size), then add the band. Float→Double
+            // via the resolved Dp's value, same as the apply-time path.
+            v is LengthValue.Relative && v.unit != LengthUnit.PERCENT &&
+                inflatePx != 0f ->
+                LengthValue.Exact(
+                    (resolveToDp(v, ctx).value + inflatePx).toDouble())
+            // Everything else (%, calc, auto, intrinsic, zero-band
+            // relative): unchanged — the documented pass-throughs above.
+            else -> v
+        }
     }
 
     /**
@@ -428,7 +491,10 @@ object SizingApplier {
         // here so a flex item's ch/em width resolves identically.
         if (!minOwns) r = applyWidth(r, inflateForContentBox(
             rawW,
-            config.boxSizing, config.contentBoxInflateX), ctx, config.wptCaptureMode)
+            // Wave 44 (lane U6): the flex-item lane threads its own local
+            // ctx (default context — same one its apply branch resolves
+            // with) so a content-box Relative width inflates identically.
+            config.boxSizing, config.contentBoxInflateX, ctx), ctx, config.wptCaptureMode)
         config.widthCalc?.let { r = r.calcSizePreferred(rowAxis = true, spec = it) }
         r = applyWidthIn(r, config.minWidth ?: config.minInlineSize,
             config.maxWidth ?: config.maxInlineSize, ctx)
@@ -450,7 +516,9 @@ object SizingApplier {
         // Lane BX — same explicit-content-box inflation as applyWidthOnly.
         if (!minOwns) r = applyHeight(r, inflateForContentBox(
             rawH,
-            config.boxSizing, config.contentBoxInflateY), ctx)
+            // Wave 44 (lane U6): ctx threaded — the height twin of
+            // applyWidthOnly's inflation call above.
+            config.boxSizing, config.contentBoxInflateY, ctx), ctx)
         config.heightCalc?.let { r = r.calcSizePreferred(rowAxis = false, spec = it) }
         r = applyHeightIn(r, config.minHeight ?: config.minBlockSize,
             config.maxHeight ?: config.maxBlockSize, ctx)

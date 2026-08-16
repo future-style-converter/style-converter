@@ -3780,10 +3780,19 @@ const ROOT_SENTINEL_ANCESTOR = {
  * Per HTML §13.2.6.4 the parser always synthesises `<head>` and `<body>` as
  * the document element's only two element children, so body is honestly the
  * 2nd of 2 element children (`sibIndex: 1, sibCount: 2`) and the only `body`
- * of its type (`sibTypeIndex: 0, sibTypeCount: 1`). Attributes are left empty:
- * the static extractor has no obligation to model `<body class>` (script-
- * mutated in the corpus' only such test), and an empty bag is strictly closer
- * to the truth than "no body exists at all".
+ * of its type (`sibTypeIndex: 0, sibTypeCount: 1`).
+ *
+ * ATTRIBUTES (wave-44 lane U5): the frozen default bag is empty, but
+ * propsForElement swaps in the REAL `<body …>` attributes when the document
+ * supplies them (ctx.bodyAttrs, harvested by documentBodyAttrs below). The
+ * original wave-36 note said the static extractor "has no obligation to
+ * model `<body class>` (script-mutated in the corpus' only such test)" —
+ * that obligation ARRIVED with the post-load pseudo re-derivation: wave-29's
+ * rePseudoFromLivePage re-runs THIS static matcher over the serialized
+ * post-mutation DOM (whose body really does carry class="active"), and the
+ * hard-coded empty bag made `.active div::before { color: green }` match
+ * nothing, so css-display/display-contents-dynamic-before-after-001's
+ * re-derived bags kept the pre-mutation red (wave-43 S6's finding).
  */
 const BODY_SENTINEL_ANCESTOR = {
   tag: 'body', attrs: {},
@@ -3804,6 +3813,47 @@ const DOCUMENT_SENTINEL_ANCESTORS = Object.freeze([
   ROOT_SENTINEL_ANCESTOR, BODY_SENTINEL_ANCESTOR,
 ]);
 export { DOCUMENT_SENTINEL_ANCESTORS };
+
+/**
+ * wave-44 lane U5 — the REAL `<body …>` attribute bag, or null.
+ *
+ * The walker's chain starts INSIDE body, so `<body>`'s own attributes can
+ * only reach the selector matcher through the synthetic sentinel — and the
+ * frozen BODY_SENTINEL_ANCESTOR carries an empty bag. This harvester reads
+ * the actual start tag so buildComponents can hand the truth down on the
+ * ctx (the exact channel documentDirectionality/documentLanguage already
+ * use for `<html dir>`/`<html lang>`, and for the same reason).
+ *
+ * WHY THE MASKED SCAN, not documentDirectionality's bare regex: `<body` can
+ * appear inside a comment, a JS string (cssom/computed-style-002 writes
+ * one via frmDoc.write), or a quoted attribute value. maskNonMarkupForBodyScan
+ * blanks all three LENGTH-PRESERVINGLY, so the masked match locates the one
+ * REAL start tag and the same [index, index+length) span slices the
+ * original bytes back out — attr VALUES are blanked in the mask, so parsing
+ * must happen on the original slice. The masked match also cannot stop at a
+ * `>` hidden inside a quoted value (the mask blanked it), which a plain
+ * indexOf('>') scan over the original would.
+ *
+ * Returns null (not `{}`) when body is absent or attribute-less, so callers
+ * can distinguish "nothing to model" from "modelled, empty" the way every
+ * other omit-when-empty channel does. Exported for unit pins.
+ */
+export function documentBodyAttrs(html) {
+  // Non-string input (defensive: unit tests feed edge shapes) → nothing.
+  if (typeof html !== 'string') return null;
+  // Locate the one real <body …> start tag on the masked copy (see above).
+  const masked = maskNonMarkupForBodyScan(html);
+  const m = /<body\b[^>]*>/i.exec(masked);
+  if (!m) return null;
+  // Same span, original bytes — the mask is length-preserving by contract.
+  const tagOpen = html.slice(m.index, m.index + m[0].length);
+  // Reuse the walker's own attr scanner so `<body class="active">` parses
+  // exactly as any other element's attributes do (lowercased keys, '' for
+  // bare attributes) — one attribute grammar, never two.
+  const attrs = parseAttrsFromTagOpen(tagOpen);
+  // Omit-when-empty: an attribute-less body keeps the frozen sentinel.
+  return Object.keys(attrs).length > 0 ? attrs : null;
+}
 
 // Bug 1 fix (pilot-001 / css-color/color-001): the previous implementation
 // dropped <p>, <noscript>, <script>, <h1..h3> via an INSTRUCTION_TAGS set
@@ -4075,7 +4125,27 @@ export const LIST_ATTR_TAGS = new Set(['ol', 'li']);
 // WIDGET_ATTR_KEYS member whose non-meter/progress typing is "string", and
 // keeping `start` in the same lane avoids a second numeric-typing rule for
 // one attribute the DOM re-parses anyway.
-export const LIST_ATTR_KEYS = ['start', 'value'];
+//
+// wave-44 lane U5: `reversed` joins the lane. HTML §4.4.5 pins it as a
+// BOOLEAN attribute — presence is the whole value ("reversed=false" still
+// reverses), so it rides the wire as literal `true` exactly like the widget
+// lane's presence-booleans (checked/multiple/selected/disabled), NOT as the
+// verbatim string the other two keys use (a bare attribute stringifies to
+// "", which every consumer would then have to know is truthy — the boolean
+// says it once, on the wire). Consumers: both natives feed it to their
+// ListOrdinal countdown (css-lists-3 §4.4.2 reversed-counter instantiation,
+// implemented + unit-tested in wave 43); the web runtime's WidgetAttrs
+// forwarding is a named follow-up (its default branch tracks the key
+// loudly via logUnhandled until then). MEASURED need: wave43-final
+// css-lists/counter-list-item.html — the "Reversed ordered lists" column
+// repeats the forward numbering (android-ref 0.741 / ios-ref 0.754, both
+// FAIL) because nothing on the wire said the three <ol reversed> count down.
+export const LIST_ATTR_KEYS = ['start', 'value', 'reversed'];
+
+// The subset of LIST_ATTR_KEYS carrying HTML boolean-attribute semantics
+// (presence ⇒ true) — the list-lane mirror of WIDGET_BOOLEAN_ATTR_KEYS,
+// kept separate because the two lanes are disjoint by construction.
+export const LIST_BOOLEAN_ATTR_KEYS = new Set(['reversed']);
 
 // ── wave-20 fix 5: the non-HTML-namespace gate ──────────────────────────────
 //
@@ -4159,10 +4229,16 @@ export function widgetAttrsFor(tag, attrs) {
   // early so no widget typing rule can ever reach an <ol>/<li>.
   if (tag && LIST_ATTR_TAGS.has(tag)) {
     const list = {};
-    // Allow-list order, present-only, verbatim — the same three contract
-    // rules the widget lane below follows.
+    // Allow-list order, present-only — the same contract rules the widget
+    // lane below follows. Values are verbatim strings EXCEPT the boolean
+    // subset (wave-44: `reversed`), whose presence IS the value per HTML
+    // §4.4.5 — see LIST_BOOLEAN_ATTR_KEYS.
     for (const key of LIST_ATTR_KEYS) {
-      if (attrs && key in attrs) list[key] = String(attrs[key]);
+      // Present-only contract: absent source attribute ⇒ absent wire key.
+      if (!attrs || !(key in attrs)) continue;
+      // Boolean lane: presence ⇒ literal `true` (HTML boolean attribute —
+      // a bare `reversed` parses to '' and MUST still count as reversed).
+      list[key] = LIST_BOOLEAN_ATTR_KEYS.has(key) ? true : String(attrs[key]);
     }
     return Object.keys(list).length > 0 ? list : null;
   }
@@ -5705,7 +5781,19 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
   // wave-36 M7: the scaffolding is `html` THEN `body` (see
   // DOCUMENT_SENTINEL_ANCESTORS) — the walker's chain starts inside body, so
   // without the body entry no `body …` / `body > …` rule could ever match.
-  const chain = ancestors ? [...DOCUMENT_SENTINEL_ANCESTORS, ...ancestors] : null;
+  // wave-44 lane U5: when the document's REAL `<body …>` carries attributes
+  // (ctx.bodyAttrs — harvested by documentBodyAttrs, threaded by
+  // buildComponents), the body sentinel wears them, so `.active div` /
+  // `body.foo span` match the way they do in the browser. This is what lets
+  // the post-load pseudo re-derivation (post-load-extract rePseudoFromLivePage,
+  // which re-runs THIS matcher over the serialized post-mutation DOM) see a
+  // script-set body class — the display-contents-dynamic-before-after-001
+  // repair. Position metadata is untouched: attributes change which rules
+  // match, never where body sits in the tree.
+  const bodySentinel = (ctx.bodyAttrs && Object.keys(ctx.bodyAttrs).length > 0)
+    ? { ...BODY_SENTINEL_ANCESTOR, attrs: ctx.bodyAttrs }
+    : BODY_SENTINEL_ANCESTOR;
+  const chain = ancestors ? [ROOT_SENTINEL_ANCESTOR, bodySentinel, ...ancestors] : null;
   // wave-37 lane W8: the matched bags are collected FIRST so the layered
   // path can see all of them at once. `buckets['']` is the host, the rest
   // are pseudo-element names.
@@ -9251,8 +9339,17 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
   // body-subtree chain the walker builds, so resolveLanguage's last rung has
   // to be handed down here. Caller-supplied wins (unit-test injection); the
   // copy keeps a caller's ctx object untouched, exactly like the dir rung.
-  const effectiveCtx = withDocDir.documentLang !== undefined ? withDocDir
+  const withDocLang = withDocDir.documentLang !== undefined ? withDocDir
     : { ...withDocDir, documentLang: documentLanguage(cleaned) };
+  // wave-44 lane U5 — the same ctx rung for the BODY ATTRIBUTE bag. The
+  // walker never visits `<body>` itself, so its class/id can only reach the
+  // selector matcher through the sentinel swap in propsForElement (see the
+  // chain-injection comment there); documentBodyAttrs reads the real start
+  // tag, null when absent/attribute-less (the frozen empty sentinel stays).
+  // Caller-supplied wins (unit-test injection), copy-not-mutate — the exact
+  // shape of the dir and lang rungs above.
+  const effectiveCtx = withDocLang.bodyAttrs !== undefined ? withDocLang
+    : { ...withDocLang, bodyAttrs: documentBodyAttrs(cleaned) };
   // wave-12 EXTRACTOR-INLINE: merge context for pure-inline run merging.
   // styledTags guards the merge — any tag a rule directly targets keeps
   // its child-component path so the declarations under test survive (see

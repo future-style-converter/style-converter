@@ -30,7 +30,17 @@ import com.styleconverter.runtime.core.ir.IRRun
  * the same approximation the leading-`_text` box always was, now at the
  * right position instead of always first. That is a real fidelity gain
  * (the CSS2 static-position family is decided purely by order) and it is
- * NOT the full inline-formatting-context model, which stays out of scope.
+ * NOT the full inline-formatting-context model.
+ *
+ * Wave 44 (lane U1) AMENDS that scope for ONE member family: when every
+ * resolved member is a plain text run or a policy-only/empty inline leaf,
+ * `typography/inline/InlineRunFold` collapses the plan into a single
+ * paragraph rendered through the ordinary one-Text pipeline — real
+ * inline flow (shared line boxes, one greedy break pass, one baseline)
+ * for exactly the shapes where one paragraph is provably equivalent to
+ * the inline formatting context. Everything else (atoms, floats, abspos,
+ * styled/nested inline boxes) still takes the stacked fallback above,
+ * with the refusal logged at the renderer seam.
  */
 object InlineRunPlan {
 

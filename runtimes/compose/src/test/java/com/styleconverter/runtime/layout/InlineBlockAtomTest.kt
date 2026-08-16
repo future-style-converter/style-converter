@@ -445,6 +445,320 @@ class InlineBlockAtomTest {
         assertEquals(direct.height, viaFacade.heightPx, 0.0)
     }
 
+    // ── wave 44 (lane U3): the ROOT facade's margin + replaced channels ──
+
+    @Test fun `U3 - rootBox equals the spec projection on margin-free inline-blocks`() {
+        // The anti-drift pin: rootBox is no longer a spec delegate, so the
+        // shapes BOTH admit must produce the identical box. Plain, unset-
+        // box-sizing banded, and border-box banded shapes all agree.
+        val shapes = listOf(
+            box("INLINE_BLOCK", 100.0, 100.0),
+            box("INLINE_BLOCK", 100.0, 50.0) + len("PaddingRight", 7.0),
+            box("INLINE_BLOCK", 100.0, 100.0) + prop("BoxSizing", "\"BORDER_BOX\"") +
+                len("BorderTopWidth", 10.0),
+        )
+        for (props in shapes) {
+            val s = InlineBlockAtom.spec(props, false, false, false)!!
+            assertEquals(
+                InlineBlockAtom.RootBox(s.fixedWpx!!, s.fixedHpx!!),
+                InlineBlockAtom.rootBox(props, false, false, false),
+            )
+        }
+    }
+
+    @Test fun `U3a - the box-sizing-010 ref div rides its margin-bottom onto the box`() {
+        // The `#ref` div, verbatim: `display:inline-block; margin-bottom:
+        // 30px /*for alignement*/; width/height: 70px`. The margin now
+        // lives on the RootBox (the packer owns it) …
+        val props = box("INLINE_BLOCK", 70.0, 70.0) + len("MarginBottom", 30.0)
+        assertEquals(
+            InlineBlockAtom.RootBox(70.0, 70.0, marginBottomPx = 30.0),
+            InlineBlockAtom.rootBox(props, false, false, false),
+        )
+        // …while the NESTED lane's spec keeps refusing it — its AtomSpec
+        // has no margin channel and its adapters pack border boxes.
+        assertNull(InlineBlockAtom.spec(props, false, false, false))
+        // Negative margins are legal exact px (box-sizing-007's t01 kind).
+        assertEquals(
+            InlineBlockAtom.RootBox(70.0, 70.0, marginLeftPx = -10.0),
+            InlineBlockAtom.rootBox(
+                box("INLINE_BLOCK", 70.0, 70.0) + len("MarginLeft", -10.0),
+                false, false, false,
+            ),
+        )
+    }
+
+    @Test fun `U3a - unreadable or logical margins still refuse the root box`() {
+        val base = box("INLINE_BLOCK", 70.0, 70.0)
+        // `auto` needs §10.3.3's line-layout resolution — refuse.
+        assertNull(InlineBlockAtom.rootBox(base + prop("MarginTop", "\"auto\""), false, false, false))
+        // A % margin's basis is a containing-block question — refuse.
+        assertNull(
+            InlineBlockAtom.rootBox(
+                base + prop("MarginLeft", """{"type":"percentage","value":10}"""),
+                false, false, false,
+            )
+        )
+        // A non-zero LOGICAL margin is writing-mode dependent — refuse.
+        assertNull(InlineBlockAtom.rootBox(base + len("MarginInlineStart", 5.0), false, false, false))
+        // …but an explicit logical ZERO is fine (the extractor's UA reset).
+        assertNotNull(InlineBlockAtom.rootBox(base + len("MarginInlineStart", 0.0), false, false, false))
+    }
+
+    @Test fun `B8 - vertical-align gates the margin channel but not the frozen family`() {
+        val va = prop("VerticalAlign", """{"type":"keyword","value":"TOP"}""")
+        // css-position/position-absolute-semi-replaced-stretch-input's
+        // shape: a MARGINED inline-block declaring `vertical-align: top`
+        // refuses — the packer models §10.8.1 baseline rows only, and
+        // without this gate those two tests were the only OFF-arm change.
+        assertNull(
+            InlineBlockAtom.rootBox(
+                box("INLINE_BLOCK", 150.0, 100.0) + len("MarginTop", 5.0) + va,
+                false, false, false,
+            )
+        )
+        // css-cascade/scope-pseudo-element's shape: the same declaration
+        // on a margin-FREE inline-block keeps its frozen wave-34
+        // admission (admitted today, Android 0.9742 PASS).
+        assertNotNull(
+            InlineBlockAtom.rootBox(box("INLINE_BLOCK", 100.0, 100.0) + va, false, false, false)
+        )
+        // An explicit `baseline` is the modelled value — admitted.
+        assertNotNull(
+            InlineBlockAtom.rootBox(
+                box("INLINE_BLOCK", 150.0, 100.0) + len("MarginTop", 5.0) +
+                    prop("VerticalAlign", """{"type":"keyword","value":"BASELINE"}"""),
+                false, false, false,
+            )
+        )
+    }
+
+    /** The box-sizing-010 img, verbatim wire shape: `box-sizing:
+     *  border-box; width/height: auto; padding-bottom: 30px; max-height:
+     *  100px` (the white background is not read by the gate). */
+    private fun imgProps010(): List<IRProperty> =
+        prop("BoxSizing", "\"BORDER_BOX\"") +
+            prop("Width", "\"auto\"") + prop("Height", "\"auto\"") +
+            len("PaddingBottom", 30.0) + len("MaxHeight", 100.0)
+
+    /** Delivered-raster facts for one support vector, per the pre-raster
+     *  scale contract's probe table (svg-preraster.mjs). */
+    private fun facts(w: Double, h: Double, tag: String = "img") =
+        InlineBlockAtom.ReplacedRootFacts(tag, w, h, w / h)
+
+    @Test fun `U3b - a delivered img root is sized by 10-3-2 and 10-4`() {
+        // box-sizing-010: w100_h100 (100×100 intrinsic), max-height 100
+        // BORDER-box over a 30px bottom band ⇒ content max 70 ⇒ §10.4 row
+        // "h > max-height" re-solves width through the 1:1 ratio: content
+        // 70×70, OUTER border box 70×100 (the 30px white band below).
+        assertEquals(
+            InlineBlockAtom.RootBox(70.0, 100.0),
+            InlineBlockAtom.rootBox(imgProps010(), false, false, false, facts(100.0, 100.0)),
+        )
+        // box-sizing-016: r1-1 pre-rasterises at 150×150 (ratio survives,
+        // the size is the raster's assertion) — same §10.4 row, same box.
+        assertEquals(
+            InlineBlockAtom.RootBox(70.0, 100.0),
+            InlineBlockAtom.rootBox(imgProps010(), false, false, false, facts(150.0, 150.0)),
+        )
+        // UNDELIVERED (facts null — the pre-raster-OFF arm): refused, the
+        // frozen block stack renders. THE byte-compat pin for arm A.
+        assertNull(InlineBlockAtom.rootBox(imgProps010(), false, false, false))
+        // Document-level: [<p>, #ref div, img] segments into the <p>
+        // single plus ONE 2-member run — the ref's side-by-side squares.
+        // The declared-neutral probe gaps carry only the <p>'s UA margins.
+        val boxes = listOf(
+            null,
+            InlineBlockAtom.rootBox(
+                box("INLINE_BLOCK", 70.0, 70.0) + len("MarginBottom", 30.0),
+                false, false, false,
+            ),
+            InlineBlockAtom.rootBox(imgProps010(), false, false, false, facts(100.0, 100.0)),
+        )
+        val segs = InlineBlockAtom.rootSegments(boxes, listOf(16.0, 16.0, 0.0))
+        assertEquals(listOf(1, 2), segs!!.single { it.isRun }.indices)
+    }
+
+    @Test fun `U3b - the family and display gates hold for replaced roots`() {
+        // Facts attached to a non-replaced tag are a harness bug the gate
+        // refuses rather than packs (isAtom's discipline, mirrored).
+        assertNull(
+            InlineBlockAtom.rootBox(imgProps010(), false, false, false, facts(100.0, 100.0, tag = "div"))
+        )
+        // css-display-3 §2: a declared block-level display leaves the
+        // inline flow even with a delivered raster; INLINE keeps it.
+        assertNull(
+            InlineBlockAtom.rootBox(
+                imgProps010() + prop("Display", "\"BLOCK\""),
+                false, false, false, facts(100.0, 100.0),
+            )
+        )
+        assertNotNull(
+            InlineBlockAtom.rootBox(
+                imgProps010() + prop("Display", "\"INLINE\""),
+                false, false, false, facts(100.0, 100.0),
+            )
+        )
+        // B8 — a replaced root declaring a non-baseline vertical-align
+        // refuses (the packer's baseline-row model).
+        assertNull(
+            InlineBlockAtom.rootBox(
+                imgProps010() + prop("VerticalAlign", """{"type":"keyword","value":"TOP"}"""),
+                false, false, false, facts(100.0, 100.0),
+            )
+        )
+    }
+
+    @Test fun `U3b - a definite axis derives the free one through the ratio`() {
+        // box-sizing-007 t03: `width: 120px; padding-left: 20px;
+        // box-sizing: border-box; margin: 10px; margin-left: -10px` over
+        // the 100×100 raster ⇒ content 100 wide, height 100 via the 1:1
+        // ratio ⇒ border box 120×100 with the margins riding the box.
+        val t03 = prop("BoxSizing", "\"BORDER_BOX\"") +
+            len("Width", 120.0) + prop("Height", "\"auto\"") +
+            len("PaddingLeft", 20.0) +
+            len("MarginTop", 10.0) + len("MarginRight", 10.0) +
+            len("MarginBottom", 10.0) + len("MarginLeft", -10.0)
+        assertEquals(
+            InlineBlockAtom.RootBox(120.0, 100.0, 10.0, 10.0, 10.0, -10.0),
+            InlineBlockAtom.rootBox(t03, false, false, false, facts(100.0, 100.0)),
+        )
+        // t04, the mirror: `height: 120px; padding-bottom: 20px` ⇒ content
+        // 100 tall, width 100 via the ratio ⇒ border box 100×120.
+        val t04 = prop("BoxSizing", "\"BORDER_BOX\"") +
+            prop("Width", "\"auto\"") + len("Height", 120.0) +
+            len("PaddingBottom", 20.0) +
+            len("MarginTop", 10.0) + len("MarginRight", 10.0) +
+            len("MarginBottom", -10.0) + len("MarginLeft", 10.0)
+        assertEquals(
+            InlineBlockAtom.RootBox(100.0, 120.0, 10.0, 10.0, -10.0, 10.0),
+            InlineBlockAtom.rootBox(t04, false, false, false, facts(100.0, 100.0)),
+        )
+    }
+
+    @Test fun `U3a - rootRowPlan packs margin boxes and returns border-box origins`() {
+        // The box-sizing-010 pair, ref-verified geometry: div 70×70 with
+        // margin-bottom 30 (margin box 70×100) beside the img's 70×100
+        // border box. One row — both margin boxes 100 tall — with both
+        // border tops at y 0, the img at x 70 + 4.5 = 74.5 (image x 91).
+        val plan = InlineBlockAtom.rootRowPlan(
+            widthsPx = listOf(70.0, 70.0),
+            heightsPx = listOf(70.0, 100.0),
+            availableWidthPx = 358.0,
+            gapPx = InlineBlockAtom.ROOT_ATOM_GAP_PX,
+            marginBottomsPx = listOf(30.0, 0.0),
+        )
+        assertEquals(listOf(0.0, 74.5), plan.xPx)
+        assertEquals(listOf(0.0, 0.0), plan.yPx)
+        // Row = ascent 100 (the margin boxes) + the §10.8.1 strut's 4.
+        assertEquals(104.0, plan.heightPx, 0.0)
+        // Margin-free lists are the wave-34 plan byte-for-byte.
+        val frozen = InlineBlockAtom.rootRowPlan(
+            widthsPx = List(3) { 100.0 }, heightsPx = List(3) { 100.0 },
+            availableWidthPx = 358.0, gapPx = InlineBlockAtom.ROOT_ATOM_GAP_PX,
+        )
+        assertEquals(listOf(0.0, 104.5, 209.0), frozen.xPx)
+    }
+
+    @Test fun `U3 - the verbatim box-sizing-007 twenty-img run wraps two per row`() {
+        // The twenty imgs of css-ui/box-sizing-007, property lists
+        // verbatim from the frozen wave43-final per-test IR: four support
+        // vectors × five sizing shapes, every margin box exactly 120×120
+        // (the test's "same size" design). At the composed canvas's 358px
+        // the packer must put TWO per row — 120 + 4.5 + 120 = 244.5 fits,
+        // a third (369) does not — for the ref's ten rows of two.
+        val margins = len("MarginTop", 10.0) + len("MarginRight", 10.0)
+        fun img(shape: Int, iw: Double, ih: Double): InlineBlockAtom.RootBox? {
+            val sizing = when (shape) {
+                // t*0 — both auto, plain margins.
+                0 -> prop("Width", "\"auto\"") + prop("Height", "\"auto\"") +
+                    len("MarginBottom", 10.0) + len("MarginLeft", 10.0)
+                // t*1 — both auto, padding-left 20, margin-left -10.
+                1 -> prop("Width", "\"auto\"") + prop("Height", "\"auto\"") +
+                    len("MarginBottom", 10.0) + len("MarginLeft", -10.0) + len("PaddingLeft", 20.0)
+                // t*2 — both auto, padding-bottom 20, margin-bottom -10.
+                2 -> prop("Width", "\"auto\"") + prop("Height", "\"auto\"") +
+                    len("MarginBottom", -10.0) + len("MarginLeft", 10.0) + len("PaddingBottom", 20.0)
+                // t*3 — width 120 definite, padding-left 20, margin-left -10.
+                3 -> len("Width", 120.0) + prop("Height", "\"auto\"") +
+                    len("MarginBottom", 10.0) + len("MarginLeft", -10.0) + len("PaddingLeft", 20.0)
+                // t*4 — height 120 definite, padding-bottom 20, margin-bottom -10.
+                else -> prop("Width", "\"auto\"") + len("Height", 120.0) +
+                    len("MarginBottom", -10.0) + len("MarginLeft", 10.0) + len("PaddingBottom", 20.0)
+            }
+            return InlineBlockAtom.rootBox(
+                prop("BoxSizing", "\"BORDER_BOX\"") + sizing + margins,
+                false, false, false, facts(iw, ih),
+            )
+        }
+        // The bare-r1-1 row (t30..t34) declares one definite axis per img
+        // in the SOURCE (its vector has no intrinsic size), so its five
+        // property lists differ from the other three rows' — verbatim:
+        fun r11(shape: Int): InlineBlockAtom.RootBox? {
+            val sizing = when (shape) {
+                // t30 — width 100, plain margins.
+                0 -> len("Width", 100.0) + prop("Height", "\"auto\"") +
+                    len("MarginBottom", 10.0) + len("MarginLeft", 10.0)
+                // t31 — height 100, padding-left 20, margin-left -10.
+                1 -> prop("Width", "\"auto\"") + len("Height", 100.0) +
+                    len("MarginBottom", 10.0) + len("MarginLeft", -10.0) + len("PaddingLeft", 20.0)
+                // t32 — width 100, padding-bottom 20, margin-bottom -10.
+                2 -> len("Width", 100.0) + prop("Height", "\"auto\"") +
+                    len("MarginBottom", -10.0) + len("MarginLeft", 10.0) + len("PaddingBottom", 20.0)
+                // t33 — width 120, padding-left 20, margin-left -10.
+                3 -> len("Width", 120.0) + prop("Height", "\"auto\"") +
+                    len("MarginBottom", 10.0) + len("MarginLeft", -10.0) + len("PaddingLeft", 20.0)
+                // t34 — height 120, padding-bottom 20, margin-bottom -10.
+                else -> prop("Width", "\"auto\"") + len("Height", 120.0) +
+                    len("MarginBottom", -10.0) + len("MarginLeft", 10.0) + len("PaddingBottom", 20.0)
+            }
+            // The bare vector's pre-raster asserts 150×150 (the scale
+            // contract's limitation 2) — but every t3x declares an axis,
+            // so only the surviving 1:1 RATIO is consumed here.
+            return InlineBlockAtom.rootBox(
+                prop("BoxSizing", "\"BORDER_BOX\"") + sizing + margins,
+                false, false, false, facts(150.0, 150.0),
+            )
+        }
+        // Rows t0x/t1x/t2x: the three sized vectors all pre-raster at
+        // 100×100 (the probe table), shapes 0..4 verbatim.
+        val boxes = (0 until 3).flatMap { (0..4).map { s -> img(s, 100.0, 100.0) } } +
+            (0..4).map { r11(it) }
+        // Every one of the twenty is admitted…
+        assertEquals(20, boxes.filterNotNull().size)
+        // …but the bare-r1-1 row's t30 declares `width: 100px`, so its
+        // border box is 100×100 like every other (margin box 120×120).
+        for (b in boxes.filterNotNull()) {
+            assertEquals(120.0, b.marginLeftPx + b.widthPx + b.marginRightPx, 0.0)
+            assertEquals(120.0, b.marginTopPx + b.heightPx + b.marginBottomPx, 0.0)
+        }
+        // The packed run: ten rows of two at the canvas width.
+        val bs = boxes.filterNotNull()
+        val plan = InlineBlockAtom.rootRowPlan(
+            widthsPx = bs.map { it.widthPx },
+            heightsPx = bs.map { it.heightPx },
+            availableWidthPx = 358.0,
+            gapPx = InlineBlockAtom.ROOT_ATOM_GAP_PX,
+            marginTopsPx = bs.map { it.marginTopPx },
+            marginRightsPx = bs.map { it.marginRightPx },
+            marginBottomsPx = bs.map { it.marginBottomPx },
+            marginLeftsPx = bs.map { it.marginLeftPx },
+        )
+        // Row pitch 124 (margin-box ascent 120 + strut descent 4), ten
+        // rows — the ref's green rows at image y 98, 222, … 1214.
+        assertEquals(1240.0, plan.heightPx, 0.0)
+        // t00's border box at x 10 (its +10 margin-left), t01's at 114.5
+        // (slot 124.5 minus its -10 margin-left; its green starts +20
+        // padding later — the ref's 151 column).
+        assertEquals(10.0, plan.xPx[0], 0.0)
+        assertEquals(114.5, plan.xPx[1], 0.0)
+        // Border tops sit +10 (margin-top) into each 124px row.
+        assertEquals(10.0, plan.yPx[0], 0.0)
+        assertEquals(10.0, plan.yPx[1], 0.0)
+        assertEquals(9 * 124.0 + 10.0, plan.yPx[18], 0.0)
+        assertEquals(9 * 124.0 + 10.0, plan.yPx[19], 0.0)
+    }
+
     // ───────────────────────── wire helpers ──────────────────────────────
 
     private fun prop(type: String, json: String) = listOf(IRProperty(type, Json.parseToJsonElement(json)))

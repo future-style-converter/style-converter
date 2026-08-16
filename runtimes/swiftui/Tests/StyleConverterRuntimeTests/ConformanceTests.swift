@@ -269,6 +269,42 @@ final class ConformanceTests: XCTestCase {
         XCTAssertNil(try byName(doc, "I").meta?.attrs?.start)
     }
 
+    // MARK: - wave-44 lane U5: meta.attrs.reversed (the <ol reversed> wire)
+
+    /// `meta.attrs.reversed` — `<ol reversed>`, HTML §4.4.5's BOOLEAN
+    /// attribute — joins the strict attr key set and rides the boolean
+    /// channel: the producer emits literal `true` on presence
+    /// (extract-fixture LIST_BOOLEAN_ATTR_KEYS), never the key otherwise.
+    ///
+    /// Why the decode is the unit under test: the §4.4.2 countdown itself is
+    /// pinned by `ListOrdinalTests`; what wave 43 could not do was RECEIVE
+    /// the flag — this strict reader threw on the key. The verbatim payload
+    /// is counter-list-item's second reversed list, `<ol start="30"
+    /// reversed>`. TWIN of the Compose `IRDocumentDecoderTest` case.
+    func testV2MetaAttrsReversedDecodesThePresenceBoolean() throws {
+        let json = """
+        { "irVersion": 2, "minReaderVersion": 2, "components": [
+          { "id": "r-1", "name": "R", "properties": [],
+            "meta": { "sourceTag": "ol",
+                      "attrs": { "start": "30", "reversed": true } } },
+          { "id": "f-1", "name": "F", "properties": [],
+            "meta": { "sourceTag": "ol", "attrs": { "start": "30" } } },
+          { "id": "s-1", "name": "S", "properties": [],
+            "meta": { "sourceTag": "ol", "attrs": { "reversed": "true" } } } ] }
+        """
+        let doc = try decodeDoc(json)
+        // Presence decodes true, beside the untouched string-lane start.
+        XCTAssertEqual(try byName(doc, "R").meta?.attrs?.reversed, true)
+        XCTAssertEqual(try byName(doc, "R").meta?.attrs?.start, "30")
+        // Absence stays nil — the renderer's `== true` gate keeps every
+        // unreversed list counting up exactly as before wave 44.
+        XCTAssertNil(try byName(doc, "F").meta?.attrs?.reversed)
+        // A stringly "true" is off-contract: the key is legal (no throw) but
+        // boolValue never coerces strings, so the channel stays empty —
+        // byte-for-byte the Kotlin decoder's non-string gate.
+        XCTAssertNil(try byName(doc, "S").meta?.attrs?.reversed)
+    }
+
     // MARK: - wave-37 lane W4: meta.lang (the computed content language)
 
     /// The element's COMPUTED content language decodes verbatim off the

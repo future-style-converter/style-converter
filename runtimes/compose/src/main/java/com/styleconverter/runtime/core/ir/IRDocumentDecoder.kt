@@ -141,9 +141,12 @@ object IRDocumentDecoder {
     // it here is what keeps the strict decoder from REJECTING a document the
     // web consumer needs; see IRAttrs.src for why Compose decodes but does
     // not yet paint it.
+    // Wave-44 (lane U5) added `reversed` — the ol lane's HTML §4.4.5
+    // boolean attribute (presence-`true` on the wire), the reversed input
+    // of the wave-43 ListOrdinal countdown.
     private val ATTR_KEYS = setOf(
         "type", "value", "checked", "multiple", "size",
-        "alt", "min", "max", "selected", "disabled", "start", "src"
+        "alt", "min", "max", "selected", "disabled", "start", "src", "reversed"
     )
     private val PROPERTY_KEYS = setOf("type", "data")
     private val SELECTOR_KEYS = setOf("condition", "properties")
@@ -436,13 +439,20 @@ object IRDocumentDecoder {
             min = num("min"),
             max = num("max"),
             // wave-27 lane CBAKE: the ordered-list counter origin. Verbatim
-            // string lane (the extractor never coerces it) — Compose does
-            // not count from it; only the web runtime does, natively.
+            // string lane (the extractor never coerces it); wave-43's
+            // ListOrdinal counts from it on this platform.
             start = p("start")?.contentOrNull,
             // wave-36 lane M1: the replaced element's image source. Verbatim
             // string lane, same as `start` — a path (or data: URI), never a
             // payload, and never coerced.
-            src = p("src")?.contentOrNull
+            src = p("src")?.contentOrNull,
+            // wave-44 lane U5: `<ol reversed>` — HTML §4.4.5's BOOLEAN
+            // attribute, presence-`true` on the wire (extract-fixture
+            // LIST_BOOLEAN_ATTR_KEYS), so it rides the boolean channel like
+            // checked/multiple — the non-string gate keeps a stringly
+            // off-contract writer on the (ignored) string side, matching
+            // the iOS reader's boolValue coercion exactly.
+            reversed = bool("reversed")
         )
     }
 
