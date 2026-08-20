@@ -3162,7 +3162,16 @@ object ComponentRenderer {
                             properties = runFold.properties,
                             rawText = runFold.text,
                             decorations = com.styleconverter.runtime.typography.DecorationWire
-                                .toDecorationLines(component.decorations)
+                                .toDecorationLines(component.decorations),
+                            // Wave 45 (lane X2) — the fold's ATOM RING: one
+                            // painted empty member per U+FFFC marker in the
+                            // merged text (marker order). PlaceholderContent
+                            // mounts them as InlineTextContent placeholders
+                            // sized/painted by InlineAtomContent, with ITS
+                            // resolved font size and effective ink (the
+                            // currentColor base) — null for every atom-less
+                            // fold keeps the call byte-identical to wave 44.
+                            inlineAtoms = runFold.atoms.takeIf { it.isNotEmpty() },
                         )
                         // Rule 4 — children the runs list did not name still
                         // render after the paragraph, in sibling order
@@ -5314,7 +5323,18 @@ object ComponentRenderer {
         // The full seam is live: extractor `_decorations` → converter
         // `meta.decorations` → IRDocumentDecoder → IRComponent.decorations
         // → DecorationWire → here.
-        decorations: List<com.styleconverter.runtime.typography.DecorationColorOps.DecorationLine>? = null
+        decorations: List<com.styleconverter.runtime.typography.DecorationColorOps.DecorationLine>? = null,
+        // Wave 45 (lane X2) — the inline-fold ATOM RING: the painted empty
+        // members of a folded runs host, one per U+FFFC marker in
+        // [rawText], marker order (InlineRunFold.Outcome.Folded.atoms).
+        // Only the fold seam passes this; null (every other caller, and
+        // every atom-less fold) leaves this function byte-identical to
+        // wave 44. Resolved HERE rather than at the seam because the ring
+        // geometry needs this function's own effectiveFontSize (e.g.
+        // inherit-computed-001's host declares `font-size: larger`, which
+        // only the typography pipeline below resolves to 19.2px) and its
+        // effectiveColor (the css-color-4 §7.1 currentColor base).
+        inlineAtoms: List<com.styleconverter.runtime.typography.inline.InlineRunFold.Atom>? = null
     ) {
         // When rawText is supplied (the IR's `_text` channel), it wins
         // over the synthesised "Component Name" placeholder. For legacy
@@ -6006,6 +6026,40 @@ object ComponentRenderer {
         // AnnotatedString is then built from the very same string as before.
         val scriptedText = runAnnotated(preBroken.text)
 
+        // ── Wave 45 (lane X2) — the inline-fold ATOM RING mount ─────────
+        // A folded runs host with painted empty members carries one U+FFFC
+        // marker per atom in its merged string; here each marker becomes a
+        // foundation InlineTextContent slot (id "x2atom:<k>", k = marker
+        // order) whose Placeholder reserves the ring's advance and whose
+        // composable paints the ring (InlineAtomContent's banner has the
+        // line-box math). Annotation happens on the FINAL string — after
+        // small caps / word-spacing / script fallback / rule-B pre-break,
+        // none of which touches U+FFFC — so marker positions cannot drift.
+        // Both values are identity (null / scriptedText) for every caller
+        // without atoms: the wave-44 render is byte-identical there.
+        // Honest limitation: the rule-B measure lambda above measures the
+        // marker as a raw glyph (its Placeholder width is unknown to the
+        // plain-Kotlin measurer); rule B only fires on unbreakable
+        // OVERFLOW lines, which an atom-bearing paragraph does not hit in
+        // the corpus — noted, not silent.
+        val atomInlineContent = if (!inlineAtoms.isNullOrEmpty()) {
+            com.styleconverter.runtime.typography.inline.InlineAtomContent.contentMap(
+                atoms = inlineAtoms,
+                // px == sp == dp (density-1 harness): .value is the px count.
+                fontSizePx = effectiveFontSize.value,
+                // The paragraph's computed ink — the currentColor base the
+                // ring's sentinel paints resolve against (css-color-4 §7.1).
+                currentColor = effectiveColor,
+            )
+        } else null
+        val atomAnnotatedText = if (atomInlineContent != null) {
+            com.styleconverter.runtime.typography.inline.InlineAtomContent.annotate(
+                scriptedText,
+                // LinkedHashMap: iteration order == atom (marker) order.
+                atomInlineContent.keys.toList(),
+            )
+        } else scriptedText
+
         // CSS overflow is VISIBLE by default: text that exceeds its box
         // paints past the border box (CSS 2.1 §11.1.1 — overflow applies to
         // the box, and the initial value clips nothing). Compose Text
@@ -6591,7 +6645,12 @@ object ComponentRenderer {
             // per-script fallback spans (identity outside WPT capture and
             // for any Latin-only string). The run string is `displayText`
             // itself unless the wave-38 rule-B pre-break fired.
-            text = scriptedText,
+            // Wave 45 (lane X2): atomAnnotatedText === scriptedText unless
+            // the fold seam passed inlineAtoms (see the mount block above).
+            text = atomAnnotatedText,
+            // Wave 45 (lane X2): the atom rings' InlineTextContent map —
+            // material3 Text's own default (empty map) for every other call.
+            inlineContent = atomInlineContent ?: emptyMap(),
             // paintedTextStyle == styledTextStyle unless the owned
             // decoration pass is active (built-ins stripped there).
             style = paintedTextStyle,

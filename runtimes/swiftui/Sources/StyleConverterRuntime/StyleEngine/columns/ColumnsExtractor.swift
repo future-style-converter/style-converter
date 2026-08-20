@@ -33,6 +33,19 @@ enum ColumnsExtractor {
             if p.type == "ColumnCount", let n = p.data.doubleValue, n >= 1 {
                 cfg.count = Int(n)
             }
+            // Wave-45 lane X3 — typed `column-fill` (css-multicol-1 §7.2:
+            // `auto | balance | balance-all`). Wire shape (converter
+            // ColumnFillSerializer): the SHOUTY keyword string ("AUTO" /
+            // "BALANCE" / "BALANCE_ALL"). Assignment-per-declaration folds
+            // last-write-wins over the declaration-ordered list, the same
+            // cascade idiom as Compose's MultiColumnExtractor `when` branch
+            // (css-cascade-5 §6.4.4: order of appearance is the tiebreak).
+            // Only AUTO flips the flag; balance/balance-all/unknown keep
+            // the initial-balance false.
+            if p.type == "ColumnFill" {
+                cfg.fillAuto = ValueExtractors
+                    .extractKeyword(p.data)?.uppercased() == "AUTO"
+            }
             // Wave-9 regression fix — typed `column-width` (css-multicol-1
             // §3.2: `auto | <length [0,∞]>`). Wire shape (converter
             // ColumnWidthSerializer): `auto` → the string "auto"; a length

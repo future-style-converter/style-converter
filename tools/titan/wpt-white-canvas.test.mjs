@@ -55,7 +55,12 @@ test('capture-browser-ref: white CANVAS_BG + cache keyed by CANVAS_REV', () => {
   // wave-30 A5 fifth leg: the three INHERITED pins moved to `:where(html)`,
   // retiring every ref of a page that declares color/font-family/line-height
   // at :root/html (those rasterised the CLOBBERED value — see canvasFrameCss).
-  assert.match(s, /export const CANVAS_REV = 'white-black-ink-font-lh-imgpad-htmlpins'/, 'cache revision segment missing');
+  // wave-45 lane X6: the literal grew a `${notoPilotRevSuffix()}` tail —
+  // an ENV-GATED IDENTITY ('' unless TITAN_NOTO_PILOT=1; both directions
+  // pinned by noto-pilot.test.mjs, which also pins the default expanded
+  // string byte-for-byte), so the production rev is unchanged and pilot
+  // refs live in their own '…-notopilot' tree.
+  assert.match(s, /export const CANVAS_REV = `white-black-ink-font-lh-imgpad-htmlpins\$\{notoPilotRevSuffix\(\)\}`/, 'cache revision segment missing');
   assert.match(s, /join\(REFS_ROOT, wptRef, CANVAS_REV, section/, 'cachePathFor must key on CANVAS_REV');
 });
 
@@ -300,7 +305,11 @@ test('corpus-v4.1 font: the ref injection pins the harness Inter stack + embeds 
   // color: #000;` prefix in the pattern is what holds the new scope — on the
   // body rule the assertion would still have matched, which is exactly how
   // the clobber survived four waves.
-  assert.match(s, /:where\(html\) \{ color: #000;\s*\n\s*font-family: \$\{REF_FONT_STACK\};/,
+  // wave-45 lane X6: the stack now routes through notoPilotStack(), an
+  // env-gated IDENTITY (input returned unchanged unless TITAN_NOTO_PILOT=1
+  // — both directions pinned by noto-pilot.test.mjs), so the default
+  // injection still applies REF_FONT_STACK verbatim.
+  assert.match(s, /:where\(html\) \{ color: #000;\s*\n\s*font-family: \$\{notoPilotStack\(REF_FONT_STACK\)\};/,
     'ref injection must apply REF_FONT_STACK on the ROOT, not on body');
   // The harness's own Inter faces are embedded so 'Inter' resolves in the
   // ref browser (raw WPT HTML has no @font-face of its own).
@@ -424,7 +433,9 @@ test('corpus-v4.1 line-height: the ref injection pins a deterministic unitless 1
   // wave-30 A5: that block is now the ROOT block — line-height is INHERITED,
   // and a specified value on body beat any author `:root { line-height }`
   // (CSS Cascade 5 §6.2). The trio must stay together AND stay on html.
-  assert.match(s, /font-family: \$\{REF_FONT_STACK\};\s*\n\s*line-height: \$\{REF_LINE_HEIGHT\}; \}/,
+  // (wave-45 lane X6: the font-family placeholder routes through the
+  // env-gated identity notoPilotStack() — see the font pin above.)
+  assert.match(s, /font-family: \$\{notoPilotStack\(REF_FONT_STACK\)\};\s*\n\s*line-height: \$\{REF_LINE_HEIGHT\}; \}/,
     'ref injection must apply REF_LINE_HEIGHT at zero specificity');
 });
 
@@ -441,7 +452,10 @@ test('wave-30 A5: the ref frame splits INHERITED pins from the body box rules', 
   // in the suite would notice, because a body-scoped pin renders IDENTICALLY
   // on every ref that has no root-scope text declaration (the vast majority).
   const s = src('tools/titan/capture-browser-ref.mjs');
-  const injected = /export async function canvasFrameCss\(\) \{\s*\n\s*return `([\s\S]*?)`;\s*\n\}/.exec(s)?.[1];
+  // wave-45 lane X6: the function body now opens with a comment block before
+  // the `return`, so the grab tolerates leading prose — the captured sheet
+  // is still everything inside the template literal.
+  const injected = /export async function canvasFrameCss\(\) \{[\s\S]*?return `([\s\S]*?)`;\s*\n\}/.exec(s)?.[1];
   assert.ok(injected, 'canvasFrameCss() frame stylesheet not found');
   const bodyRule = /:where\(body\)\s*\{([^}]*)\}/.exec(injected)?.[1];
   assert.ok(bodyRule, ':where(body) rule missing from the canvas frame');
@@ -456,7 +470,7 @@ test('wave-30 A5: the ref frame splits INHERITED pins from the body box rules', 
   // own, so a `[^}]*` block grab truncates mid-rule (it does not at runtime,
   // where capture-browser-ref.test.mjs pins the EXPANDED sheet instead).
   assert.match(injected,
-    /:where\(html\) \{ color: #000;\s*\n\s*font-family: \$\{REF_FONT_STACK\};\s*\n\s*line-height: \$\{REF_LINE_HEIGHT\}; \}/,
+    /:where\(html\) \{ color: #000;\s*\n\s*font-family: \$\{notoPilotStack\(REF_FONT_STACK\)\};\s*\n\s*line-height: \$\{REF_LINE_HEIGHT\}; \}/,
     'the three INHERITED pins must sit together on :where(html)');
   // The NON-inherited body geometry is untouched by the hoist — moving any of
   // these would break the CAL-RC1 contract the tests above hold.
@@ -592,7 +606,9 @@ test('wave-21 box model: the ref injection frames only html/body — UA control 
   // sheet and their hand-copied versions had already drifted back to the
   // pre-CAL-RC1 CSS pad. Pinning the factory body therefore pins all THREE
   // injection sites at once — see the bake-alignment test below.
-  const injected = /export async function canvasFrameCss\(\) \{\s*\n\s*return `([\s\S]*?)`;\s*\n\}/.exec(s)?.[1];
+  // (wave-45 lane X6: the factory body opens with a comment block before the
+  // `return`, so the grab tolerates leading prose — same as the A5 scan.)
+  const injected = /export async function canvasFrameCss\(\) \{[\s\S]*?return `([\s\S]*?)`;\s*\n\}/.exec(s)?.[1];
   assert.ok(injected, 'canvasFrameCss() frame stylesheet not found');
   // …and the ref capture must actually USE it (a factory nobody calls would
   // let the real injection drift while every assertion below still passes).

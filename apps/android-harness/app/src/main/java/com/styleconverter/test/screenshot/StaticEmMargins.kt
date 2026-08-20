@@ -29,9 +29,24 @@ package com.styleconverter.test.screenshot
 //     the property list. Still bails.
 //   - `vw`/`vh`/`cq*`/`calc()`/`rem`/`ex`/`ch` need the viewport, container
 //     query, root element or font metrics. All still bail.
-//   - An em margin on a component with NO own FontSize would need the
-//     INHERITED size, which the flattened composed-root IR does not carry.
-//     Bails too — guessing 16px would be a silent fallthrough.
+//   - An em margin on a component with NO own FontSize (wave 45, H0):
+//     the base is the INHERITED size — and for a composed WPT ROOT that
+//     inherited size is statically known, because roots are body-level
+//     children and the harness canvas never re-declares a body font-size
+//     (a fixture that pins one has it folded into the root's own list by
+//     the converter, hitting the declared lane above). So the base is the
+//     UA `medium` default: 16px, or Chromium's 13px `defaultFixedFontSize`
+//     when the root's FIRST declared family is the monospace generic —
+//     consulted through MonospaceUAFontSize (the single quirk owner, same
+//     ladder as the Swift UAElementFontRule.emBasePx), so one table
+//     decides the fixed default for the whole runtime. Pre-wave-45 this
+//     bailed instead, and the composed stack then DOUBLE-spaced: the fold
+//     emitted the UA inter-component gap (R4/R5, no strip) AND
+//     MarginApplier rendered the full declared margin — measured +16px on
+//     floats-clear-multicol-002 / discard-multicol-001's boxes.
+//   - A DECLARED but non-absolute FontSize (em/%/`var()`/`calc()`) still
+//     bails — that base is genuinely unresolvable here, and guessing
+//     would be a silent fallthrough.
 //
 // ONLY the composed WPT canvas reaches this file (ScreenshotCaptureScreen's
 // rootPlans fold). The runtime's own §8.3.1 machinery (ComponentRenderer's
@@ -45,24 +60,56 @@ import com.styleconverter.runtime.core.types.LengthValue
 import com.styleconverter.runtime.core.types.extractLength
 import com.styleconverter.runtime.spacing.MarginExtractor
 import com.styleconverter.runtime.spacing.MarginValue
+// Wave 45 (H0): the single owner of the UA fixed-default (monospace-13)
+// font-size quirk — consulted, never re-derived, on the no-declaration rung.
+import com.styleconverter.runtime.typography.MonospaceUAFontSize
 
 object StaticEmMargin {
 
     /**
-     * The component's OWN font-size in px, or null when it declares none /
-     * declares a non-absolute one. `lastOrNull` mirrors the extractors'
-     * last-declaration-wins fold (MarginExtractor's two passes,
-     * AbsposInsetStretch.strictSidePx's read) so a duplicated FontSize
-     * resolves to the same value the renderer paints with. `> 0` because a
-     * zero/negative font-size cannot scale a margin into anything
-     * meaningful — the caller conservatively bails instead.
+     * The UA `defaultFontSize` — the `medium` keyword's value in every
+     * engine's standard (non-monospace) bucket, and the root font the whole
+     * UA margin table above this lane is calibrated to ("at a 16px root",
+     * UaBlockMargins.kt). Named here because the runtime keeps no public
+     * constant for it (its 16f literals are private to the typography
+     * extractors); the Swift twin mirrors it as `uaDefaultPx`.
+     */
+    const val UA_DEFAULT_FONT_SIZE_PX: Float = 16f
+
+    /**
+     * The component's OWN font-size in px — the em base of css-values-4
+     * §5.1.1 — or null when a DECLARED size is not statically resolvable.
+     *
+     * Resolution ladder (wave 45, H0 — mirrors the Swift
+     * UAElementFontRule.emBasePx precedent):
+     *  F1 declared absolute px > 0 → that px. `lastOrNull` mirrors the
+     *     extractors' last-declaration-wins fold (MarginExtractor's two
+     *     passes, AbsposInsetStretch.strictSidePx's read) so a duplicated
+     *     FontSize resolves to the value the renderer paints with; `> 0`
+     *     because a zero/negative size cannot scale a margin into anything
+     *     meaningful.
+     *  F2 declared but non-absolute (em/%/`var()`/`calc()`/unparseable) →
+     *     null — the E4 bail, kept: the base is genuinely unresolvable
+     *     without the inheritance channel, so the root falls back to the
+     *     pre-fix R4/R5 render path instead of guessing.
+     *  F3 no declaration, first declared family is the monospace generic →
+     *     13px, via MonospaceUAFontSize.resolveSpFromPairs (Chromium's
+     *     `defaultFixedFontSize`, the value the frozen refs rasterised).
+     *  F4 no declaration otherwise → [UA_DEFAULT_FONT_SIZE_PX]: a composed
+     *     root is a body-level child, so its inherited size IS the UA
+     *     `medium` default (see the file header for why this is statically
+     *     sound on this canvas and only this canvas).
      */
     fun ownFontSizePx(properties: List<IRProperty>): Float? {
-        // No FontSize longhand at all ⇒ the used size is INHERITED, which
-        // the flattened composed-root IR does not carry ⇒ not resolvable.
-        val data = properties.lastOrNull { it.type == "FontSize" }?.data ?: return null
-        // Only an absolute px font-size is an honest em base. `font-size:
-        // 2em` / `120%` decode to Relative and correctly bail here.
+        val data = properties.lastOrNull { it.type == "FontSize" }?.data
+            // F3/F4 — no FontSize longhand at all ⇒ the UA-default ladder.
+            // resolveSpFromPairs' own "any declared FontSize disarms the
+            // quirk" gate is trivially satisfied on this branch, so the two
+            // owners can never disagree about when the quirk fires.
+            ?: return MonospaceUAFontSize.resolveSpFromPairs(properties.map { it.type to it.data })
+                ?: UA_DEFAULT_FONT_SIZE_PX
+        // F1/F2 — only an absolute px font-size is an honest em base.
+        // `font-size: 2em` / `120%` decode to Relative and bail here.
         val v = extractLength(data)
         return (v as? LengthValue.Exact)?.px?.takeIf { it > 0.0 }?.toFloat()
     }
@@ -83,8 +130,12 @@ object StaticEmMargin {
      *     upstream, so this branch is reachable only on the Swift twin —
      *     it is spelled out here so the two rule tables read identically.
      *  E3 `em` without a fallback, own font-size known → value × base.
-     *  E4 `em` without a fallback and NO own font-size → null (inherited
-     *     base unknown — see the file header).
+     *  E4 `em` without a fallback and an UNRESOLVABLE own font-size →
+     *     null. Wave 45 (H0) narrowed this bail: an ABSENT FontSize now
+     *     resolves through ownFontSizePx's UA-default ladder (F3/F4 — 13px
+     *     monospace quirk or the 16px default), so E4 fires only for a
+     *     DECLARED-but-relative/`var()`/`calc()` size (F2), where the base
+     *     is genuinely unknowable without the inheritance channel.
      *  E5 anything else (auto, negative, %, vw, calc, unknown) → null.
      */
     fun edgePx(v: MarginValue?, emBasePx: Float?): Float? = when (v) {
@@ -135,7 +186,9 @@ object StaticEmMargin {
         // isRtl only affects the inline axis this fold never touches).
         val resolved = MarginExtractor.extract(properties.map { it.type to it.data })
             .resolve(isRtl = false)
-        // The em base for THIS component (null ⇒ em edges will bail, E4).
+        // The em base for THIS component — declared px, or (wave 45, H0)
+        // the UA-default ladder when nothing is declared; null only for a
+        // declared-but-unresolvable size (⇒ em edges bail, E4).
         val base = ownFontSizePx(properties)
         // Each vertical edge must classify; one out-of-scope edge bails both
         // (collapsing only one side would produce geometry no engine renders).

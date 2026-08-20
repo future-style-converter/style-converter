@@ -172,7 +172,17 @@ for s in $(_booted_serials); do
     sleep 10
   done
   if (( INSTALLED )); then
-    log "installed APK on $s"
+    # wave-45: `pm clear` after every (re)install. On API-36.1 emulator
+    # images a reinstall over an existing package leaves the app's external
+    # files dir in a broken state until its data is cleared (the wave-38
+    # "bare adb install wedge" family; re-proven at the wave-45 gate, where
+    # the first seven sections' feeders hit the wave-42 loud-fail — the app
+    # could not create its inbox — and produced zero Android captures).
+    # Clearing data right after install gives every gate a factory-state
+    # app; the feeder's app-first dir creation then works from fixture one.
+    _bounded 60 "$ADB" -s "$s" shell pm clear com.styleconverter.test >/dev/null 2>&1 \
+      || log "WARNING: pm clear failed on $s — external-dir wedge possible"
+    log "installed APK on $s (+ pm clear)"
     echo "$s" >> "$POOL_ROOT/provisioned-android.tmp"
   else
     log "WARNING: install failed 3x on $s — device excluded from pool"

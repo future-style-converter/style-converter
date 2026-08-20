@@ -57,6 +57,16 @@ import { prerasterizeFixtures, applyPrerasterRewrite } from './svg-preraster.mjs
 // (measured in DocumentFontRegistry.kt's format-table comment), so feed-ios
 // deliberately does NOT import this module.
 import { transcodeWoffFixtures, applyWoffTranscodeRewrite } from './woff-to-ttf.mjs';
+// wave-45 lane X6 — the Rule-43 NOTO BUNDLING PILOT (noto-pilot.mjs banner).
+// The feeder's half is DELIVERY ONLY: with TITAN_NOTO_PILOT=1 the staged
+// pilot faces are pushed once per run into a `_noto-pilot/` corner of the
+// fonts sandbox, proving the per-run font hop can carry the wave-46 payload.
+// The runtime deliberately does NOT consume them (nothing registers a face
+// no document references): what Compose actually paints in this pilot is its
+// wave-34 bundled Noto (5 scripts) + the emulator's system Noto CJK, which
+// is exactly what the pilot ref adopts. Flag off ⇒ both imports are inert
+// and the feeder is byte-identical (pinned by feed-android.test.mjs).
+import { notoPilotEnabled, notoPilotFontFiles } from './noto-pilot.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -233,6 +243,32 @@ async function resetAndLaunch(adbx, opts) {
     throw new Error(`app never created ${INBOX_DIR} + asset roots within 60s — refusing to push (shell-created dirs are invisible to the app on API-36.1 images)`);
   }
   return marked;
+}
+
+/** wave-45 lane X6 — push the staged NOTO-PILOT faces into the fonts
+ *  sandbox, once per run, under `_noto-pilot/` (a name no corpus-relative
+ *  `fontFaces[].src` can collide with — corpus paths never start with an
+ *  underscore dir we invent). No-op with the flag unset. Delivery proof for
+ *  the wave-46 decision, deliberately NOT consumed by the runtime (see the
+ *  import banner); a later in-run resetAndLaunch (timeout recovery) wipes
+ *  the sandbox and does NOT re-push — irrelevant to the proof, and nothing
+ *  downstream reads the files. Missing staged files are LOUD per face, so a
+ *  mis-set TITAN_NOTO_PILOT_FONTS can never masquerade as a delivered run. */
+function pushNotoPilotFonts(adbx) {
+  if (!notoPilotEnabled()) return { pushed: 0, missing: 0 };
+  const { present, missing } = notoPilotFontFiles(process.env, { existsSync });
+  for (const face of missing) {
+    log(`  noto-pilot: staged font MISSING for '${face.family}' (${face.file}) — not pushed`);
+  }
+  const remote = `${FONTS_DIR}/_noto-pilot`;
+  let pushed = 0;
+  if (present.length) adbx(['shell', 'mkdir', '-p', remote]);
+  for (const face of present) {
+    try { adbx(['push', face.abs, `${remote}/${face.file}`]); pushed++; }
+    catch (e) { log(`  noto-pilot: PUSH FAILED ${face.file} — ${e.message}`); }
+  }
+  if (pushed) log(`noto-pilot: pushed ${pushed}/${present.length + missing.length} pilot faces (delivery proof only)`);
+  return { pushed, missing: missing.length };
 }
 
 /** wave-35 lane B2 — push this document's @font-face FILES into the device's
@@ -443,6 +479,11 @@ async function main() {
   const marked = await resetAndLaunch(adbx, opts);
   log(marked ? `verified: app logged ${opts.composed ? 'titanComposed=true' : 'titanInbox=true'}`
              : `WARNING: never saw ${opts.composed ? 'titanComposed=true' : 'titanInbox=true'} marker (continuing)`);
+
+  // wave-45 lane X6: pilot font delivery, AFTER resetAndLaunch's dirs-ready
+  // wait (the fonts root must be app-created first — the wave-41 T2 probe)
+  // and before any fixture. Identity no-op unless TITAN_NOTO_PILOT=1.
+  pushNotoPilotFonts(adbx);
 
   // Scratch dir for REWRITTEN IR. Android pushes the fixture FILE into the
   // inbox (iOS re-serialises its in-memory doc), so a rewritten document needs

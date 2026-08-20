@@ -38,6 +38,7 @@ package com.styleconverter.runtime.spacing
 // drift apart silently.
 
 import androidx.compose.runtime.compositionLocalOf
+import com.styleconverter.runtime.core.types.LengthUnit
 import com.styleconverter.runtime.core.types.LengthValue
 import kotlinx.serialization.json.JsonElement
 
@@ -167,8 +168,29 @@ object BlockMarginCollapse {
             // per the lane scope (committed fixtures are positive-only).
             is LengthValue.Exact ->
                 if (len.px >= 0.0) len.px.toFloat() else null
-            // Relative (%/em/vw) and calc need the live resolution context a
-            // pure plan can't see; auto/intrinsic/fraction are not margins.
+            // wave-45 lane X4 — an EM margin CARRYING a prebaked pxFallback
+            // classifies through that fallback. MarginExtractor now keeps
+            // the DynamicValueResolver-prebaked em shape as Relative(EM,
+            // pxFallback=prebake) so the APPLIER can re-resolve against the
+            // element's own computed font-size (css-values-4 §5.1.1 / the
+            // CSS Fonts 4 §3.5 monospace-13 quirk); before wave 45 the
+            // exact same wire classified here as Exact(prebake), so using
+            // the fallback keeps every §8.3.1 plan value byte-identical —
+            // same non-negativity floor included. Known, documented limit:
+            // in the quirk case a plan built from the 16px-basis fallback
+            // can disagree with the 13px-basis applied inline margins; no
+            // wave-44 capture nests quirk-em-margin children inside a
+            // collapsing block container (the affected components are all
+            // composed ROOTS, whose gaps the harness fold owns), so the
+            // conservative fallback is the honest choice over guessing a
+            // context this pure classifier cannot see.
+            is LengthValue.Relative ->
+                if (len.unit == LengthUnit.EM && len.pxFallback != null && len.pxFallback >= 0.0) {
+                    len.pxFallback.toFloat()
+                } else null
+            // Remaining relative flavors (%/vw/…, em without a prebake) and
+            // calc need live resolution context a pure plan can't see;
+            // auto/intrinsic/fraction are not margins.
             else -> null
         }
     }

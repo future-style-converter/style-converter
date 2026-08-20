@@ -989,16 +989,40 @@ dirs + WPT corpus are gitignored):
   watchdogs, all columns full, 327-net clean. Totals: **web
   1186/1379 (86.0%), iOS 984/1351 (72.8%), Android 978/1350
   (72.4%)**.
+  Wave 45 (`tools/titan/results/corpus-v6-10.json`) was the
+  convergence wave. Two lanes independently measured the same +16px
+  composed-canvas offset behind two failing families — the harness
+  em-margin resolver bailed on any root margin in `em` without its
+  own font size, emitting the UA gap *and* the full declared margin.
+  One four-rung resolution ladder on both harness stackers flipped
+  the floats-multicol family (**CSS2 Android 31→39**) and, with the
+  em-basis and iOS discard threading, the discard-multicol family
+  (**css-overflow +4/+4**). The iOS inline fold reached Compose
+  parity (css-text iOS +1), the Compose atom ring landed, and the VT
+  flake hardening — root-caused as *two* mechanisms and verified by
+  fault injection — paid immediately (web +1, the settle cell
+  recovered at this very gate). The Noto pilot answered the
+  three-wave-old Rule-43 question by measurement: **net zero** new
+  passes from bundling fonts — the exclusion is vindicated, and the
+  real constraints are named (Compose line-pitch drift ~1px/row, CJK
+  wrap divergence). Operationally the gate exposed a provisioning
+  wedge (reinstall without `pm clear` breaks the app's external dir
+  on API-36.1 — the first seven sections produced zero Android
+  captures with the feeder's loud-fail working exactly as designed);
+  the provision script now clears app data after every install, and
+  the refeed recipe learned it must carry `--wpt-dir`. Totals: **web
+  1187/1379 (86.1%), iOS 990/1351 (73.3%), Android 991/1350
+  (73.5%)** — both natives cross 73%.
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 368 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1263 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2540 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1597 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1646 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1265 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2559 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1622 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1666 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap
