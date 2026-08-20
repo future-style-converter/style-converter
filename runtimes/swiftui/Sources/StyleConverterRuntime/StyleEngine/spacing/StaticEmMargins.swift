@@ -26,9 +26,24 @@
 //      the property list. Still bails.
 //    • `vw`/`vh`/`cq*`/`calc()`/`rem`/`ex`/`ch` need the viewport, container
 //      query, root element or font metrics. All still bail.
-//    • An em margin on a component with NO own FontSize declaration would
-//      need the INHERITED size, which the flattened composed-root IR does
-//      not carry. Bails too — guessing 16px would be a silent fallthrough.
+//    • An em margin on a component with NO own FontSize (wave 45, H0): the
+//      base is the INHERITED size — and for a composed WPT ROOT that
+//      inherited size is statically known, because roots are body-level
+//      children and the harness canvas never re-declares a body font-size
+//      (a fixture that pins one has it folded into the root's own list by
+//      the converter, hitting the declared lane above). So the base is the
+//      UA `medium` default: 16px, or Chromium's 13px `defaultFixedFontSize`
+//      when the root's FIRST declared family is the monospace generic —
+//      consulted through MonospaceUAFontSize (the single quirk owner, the
+//      same ladder UAElementFontRule.emBasePx already runs), so one table
+//      decides the fixed default for the whole runtime. Pre-wave-45 this
+//      bailed instead, and the composed stack DOUBLE-spaced: the fold
+//      emitted the UA inter-component gap (R4/R5, no strip) AND
+//      MarginApplier rendered the full declared margin — measured +16px on
+//      floats-clear-multicol-002 / discard-multicol-001's boxes.
+//    • A DECLARED but non-absolute FontSize (em/%/`var()`/`calc()`) still
+//      bails — that base is genuinely unresolvable here, and guessing
+//      would be a silent fallthrough.
 //
 //  Byte-parallel with the Kotlin twin (apps/android-harness
 //  StaticEmMargins.kt): the shared E1–E8 pin table asserts IDENTICAL
@@ -45,20 +60,44 @@ import CoreGraphics
 // Pure namespace — never instantiated (same shape as MarginCollapse).
 enum StaticEmMargin {
 
-    /// The component's OWN font-size in px, or nil when it declares none /
-    /// declares a non-absolute one. `last(where:)` mirrors the extractors'
-    /// last-declaration-wins fold (MarginExtractor's two passes, the
-    /// Kotlin AbsposInsetStretch.strictSidePx read) so a duplicated
-    /// FontSize resolves to the same value the renderer paints with.
-    /// `> 0` because a zero/negative font-size cannot scale a margin into
-    /// anything meaningful — the caller conservatively bails instead.
+    /// The UA `defaultFontSize` — the `medium` keyword's value in every
+    /// engine's standard (non-monospace) bucket, and the root font the UA
+    /// margin table this lane feeds is calibrated to ("at a 16px root",
+    /// UABlockMargin). Same number UAElementFontRule.emBasePx falls back
+    /// to; the Kotlin twin mirrors it as `UA_DEFAULT_FONT_SIZE_PX`.
+    static let uaDefaultPx: CGFloat = 16
+
+    /// The component's OWN font-size in px — the em base of css-values-4
+    /// §5.1.1 — or nil when a DECLARED size is not statically resolvable.
+    ///
+    /// Resolution ladder (wave 45, H0 — the UAElementFontRule.emBasePx
+    /// ladder, applied to the composed-root lane):
+    ///  F1 declared absolute px > 0 → that px. `last(where:)` mirrors the
+    ///     extractors' last-declaration-wins fold (MarginExtractor's two
+    ///     passes, the Kotlin AbsposInsetStretch.strictSidePx read) so a
+    ///     duplicated FontSize resolves to the value the renderer paints
+    ///     with; `> 0` because a zero/negative size cannot scale a margin
+    ///     into anything meaningful.
+    ///  F2 declared but non-absolute (em/%/`var()`/`calc()`/unparseable) →
+    ///     nil — the E4 bail, kept: the base is genuinely unresolvable
+    ///     without the inheritance channel, so the root falls back to the
+    ///     pre-fix R4/R5 render path instead of guessing.
+    ///  F3 no declaration, first declared family is the monospace generic →
+    ///     13px, via MonospaceUAFontSize.resolvePx (Chromium's
+    ///     `defaultFixedFontSize`, the value the frozen refs rasterised).
+    ///  F4 no declaration otherwise → `uaDefaultPx`: a composed root is a
+    ///     body-level child, so its inherited size IS the UA `medium`
+    ///     default (see the file header for why this is statically sound
+    ///     on this canvas and only this canvas).
     static func ownFontSizePx(_ properties: [IRProperty]) -> CGFloat? {
-        // No FontSize longhand at all ⇒ the used size is INHERITED, which
-        // the flattened composed-root IR does not carry ⇒ not resolvable.
+        // F3/F4 — no FontSize longhand at all ⇒ the UA-default ladder.
+        // resolvePx's own "any declared FontSize disarms the quirk" gate is
+        // trivially satisfied on this branch, so the two owners can never
+        // disagree about when the quirk fires.
         guard let data = properties.last(where: { $0.type == "FontSize" })?.data
-        else { return nil }
-        // Only an absolute px font-size is an honest em base. `font-size:
-        // 2em`/`120%` decode to `.relative` and correctly bail here.
+        else { return MonospaceUAFontSize.resolvePx(from: properties).map { CGFloat($0) } ?? uaDefaultPx }
+        // F1/F2 — only an absolute px font-size is an honest em base.
+        // `font-size: 2em`/`120%` decode to `.relative` and bail here.
         guard case .exact(let px) = extractLength(data), px > 0 else { return nil }
         return CGFloat(px)
     }
@@ -73,8 +112,12 @@ enum StaticEmMargin {
     ///     `{"px":N,"original":{"v":…,"u":"EM"}}` when it could pre-resolve;
     ///     the pre-resolved value is authoritative over re-multiplying).
     ///  E3 `em` without a fallback, own font-size known → value × base.
-    ///  E4 `em` without a fallback and NO own font-size → nil (inherited
-    ///     base unknown — see the file header).
+    ///  E4 `em` without a fallback and an UNRESOLVABLE own font-size →
+    ///     nil. Wave 45 (H0) narrowed this bail: an ABSENT FontSize now
+    ///     resolves through ownFontSizePx's UA-default ladder (F3/F4 —
+    ///     13px monospace quirk or the 16px default), so E4 fires only for
+    ///     a DECLARED-but-relative/`var()`/`calc()` size (F2), where the
+    ///     base is genuinely unknowable without the inheritance channel.
     ///  E5 anything else (auto, negative, %, vw, calc, unknown) → nil.
     static func edgePx(_ v: LengthValue, emBasePx: CGFloat?) -> CGFloat? {
         // E1 — the existing absolute-px classifier, unchanged and reused.
@@ -109,7 +152,9 @@ enum StaticEmMargin {
         // No margin longhand at all ⇒ both edges are the initial 0
         // (css-box-3 §3) — fully eligible, same as staticVerticalEdges.
         guard let cfg = MarginExtractor.extract(from: properties) else { return (0, 0) }
-        // The em base for THIS component (nil ⇒ em edges will bail, E4).
+        // The em base for THIS component — declared px, or (wave 45, H0)
+        // the UA-default ladder when nothing is declared; nil only for a
+        // declared-but-unresolvable size (⇒ em edges bail, E4).
         let base = ownFontSizePx(properties)
         // Each vertical edge must classify; one out-of-scope edge bails both
         // (collapsing only one side would produce geometry no engine renders).

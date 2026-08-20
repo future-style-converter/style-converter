@@ -51,6 +51,17 @@ import { documentFontSrcs, resolveFontFile,
 // image hop above copies anything. Shared — not cloned — with
 // feed-android.mjs: both natives must be scored against the same raster.
 import { prerasterizeFixtures, applyPrerasterRewrite } from './svg-preraster.mjs';
+// wave-45 lane X6 — the Rule-43 NOTO BUNDLING PILOT (noto-pilot.mjs banner).
+// DELIVERY ONLY, the exact twin of feed-android's hook: with
+// TITAN_NOTO_PILOT=1 the staged pilot faces are copied once per run into a
+// `_noto-pilot/` corner of the fonts sandbox, proving the per-run hop can
+// carry the wave-46 payload. The runtime deliberately does NOT consume them
+// (CTFontManager registration never joins the CoreText cascade, and
+// ScriptFallbackFonts.substitutionEnabled is false on iOS — the wave-34
+// lane-F1 measurement); what SwiftUI paints in this pilot is the Apple
+// system cascade, and the pilot SCORES that honestly against Noto refs.
+// Flag off ⇒ inert imports, byte-identical feeder (feed-ios.test.mjs pins).
+import { notoPilotEnabled, notoPilotFontFiles } from './noto-pilot.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..', '..');
@@ -451,6 +462,24 @@ async function main() {
   await fs.rm(imagesDir, { recursive: true, force: true });
   await fs.mkdir(imagesDir, { recursive: true });
   await fs.mkdir(inboxDir, { recursive: true }); // exist before first push (app creates lazily)
+  // wave-45 lane X6: pilot font delivery — after the fonts sandbox is
+  // (re)created above, before any fixture. Identity no-op unless
+  // TITAN_NOTO_PILOT=1; missing staged files are LOUD per face so a mis-set
+  // TITAN_NOTO_PILOT_FONTS can never masquerade as a delivered run.
+  if (notoPilotEnabled()) {
+    const pilot = notoPilotFontFiles(process.env, { existsSync });
+    for (const face of pilot.missing) {
+      console.log(`[feed-ios] noto-pilot: staged font MISSING for '${face.family}' (${face.file}) — not copied`);
+    }
+    if (pilot.present.length) {
+      const pilotDir = join(fontsDir, '_noto-pilot');
+      await fs.mkdir(pilotDir, { recursive: true });
+      for (const face of pilot.present) {
+        await fs.copyFile(face.abs, join(pilotDir, face.file));
+      }
+      console.log(`[feed-ios] noto-pilot: copied ${pilot.present.length}/${pilot.present.length + pilot.missing.length} pilot faces (delivery proof only)`);
+    }
+  }
   await clearPngs(shotsDir);
   // Drain any stragglers from a prior run so the queue starts clean.
   try {

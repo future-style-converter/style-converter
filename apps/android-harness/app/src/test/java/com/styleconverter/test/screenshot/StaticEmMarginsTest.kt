@@ -9,8 +9,10 @@ import org.junit.Test
 /**
  * Wave 22 (B-RC2) — the shared E1–E8 pin table for [StaticEmMargin], the
  * em-resolving static block-margin classifier the composed WPT canvas feeds
- * into the CSS 2.1 §8.3.1 root-stack fold. Every expected value here is
- * IDENTICAL to the Swift twin's (runtimes/swiftui Tests/…/
+ * into the CSS 2.1 §8.3.1 root-stack fold — plus the wave-45 (H0) F3/F4
+ * pins for the UA-default em base (absent FontSize ⇒ 16px, or the 13px
+ * monospace fixed default via MonospaceUAFontSize). Every expected value
+ * here is IDENTICAL to the Swift twin's (runtimes/swiftui Tests/…/
  * StaticEmMarginsTests.swift) so the two implementations cannot drift.
  *
  * Plain junit:4.13.2, no Android runtime — the IR model + kotlinx JSON types
@@ -102,27 +104,142 @@ class StaticEmMarginsTest {
         assertEquals(92f, StaticEmMargin.ownFontSizePx(listOf(fontSize(92.0))))
     }
 
-    // ── E4: no honest base ⇒ bail ──────────────────────────────────────────
-
-    @Test
-    fun e4_emEdgeWithoutOwnFontSize_bails() {
-        // E4: the base would be the INHERITED font-size, which the flattened
-        // composed-root IR does not carry — guessing 16px would be a silent
-        // fallthrough, so the root keeps the pre-fix R4/R5 behavior.
-        val p = listOf(emMargin("MarginTop", 0.5), emMargin("MarginBottom", 0.5))
-        assertNull(StaticEmMargin.verticalEdges(p))
-    }
+    // ── E4 (narrowed, wave 45 H0): declared-but-unresolvable base ⇒ bail ──
 
     @Test
     fun e4_relativeOwnFontSize_isNotAnHonestBase() {
         // `font-size: 2em` decodes to Relative — no absolute px, so the em
-        // margin has nothing to multiply against and the root bails.
+        // margin has nothing to multiply against and the root bails. This
+        // is the E4 bail KEPT by wave 45: a DECLARED size that needs the
+        // inheritance channel (em/%/var()/calc()) is genuinely
+        // unresolvable, unlike the ABSENT-size case below.
         val p = listOf(
             prop("FontSize", """{"original":{"v":2,"u":"EM"}}"""),
             emMargin("MarginTop", 0.5),
         )
         assertNull(StaticEmMargin.ownFontSizePx(p))
         assertNull(StaticEmMargin.verticalEdges(p))
+    }
+
+    // ── F3/F4 (wave 45, H0): ABSENT FontSize resolves the UA ladder ───────
+
+    @Test
+    fun f4_floatsClearMulticol002Wire_absentFontSize_resolvesEmAt16() {
+        // F4 — the verbatim live wire of tools/titan/runs/wave44-final/
+        // sections/CSS2/per-test-ir/wpt__CSS2__floats-clear__floats-clear-
+        // multicol-002.json root __1: `margin: 1em` on a multicol root with
+        // NO FontSize and NO FontFamily. The base is the UA `medium`
+        // default 16px (a composed root is a body-level child), so both
+        // vertical edges resolve to 1em × 16 = 16. Pre-fix E4 bailed here
+        // and the stack double-spaced (measured +16px, X3/X4).
+        val p = listOf(
+            emMargin("MarginTop", 1.0),
+            emMargin("MarginRight", 1.0),
+            emMargin("MarginBottom", 1.0),
+            emMargin("MarginLeft", 1.0),
+            prop("BorderTopStyle", "\"SOLID\""),
+            prop("BorderRightStyle", "\"SOLID\""),
+            prop("BorderBottomStyle", "\"SOLID\""),
+            prop("BorderLeftStyle", "\"SOLID\""),
+            prop("BorderTopColor", """{"srgb":{"r":0.7529411764705882,"g":0.7529411764705882,"b":0.7529411764705882},"original":"silver"}"""),
+            prop("Width", """{"type":"length","px":300}"""),
+            prop("ColumnWidth", """{"px":100}"""),
+            prop("ColumnGap", """{"type":"length","px":0}"""),
+            prop("ColumnFill", "\"AUTO\""),
+            prop("Height", """{"type":"length","px":100}"""),
+        )
+        assertEquals(16f, StaticEmMargin.ownFontSizePx(p))
+        assertEquals(16f to 16f, StaticEmMargin.verticalEdges(p))
+    }
+
+    @Test
+    fun f3_discardMulticol001Wire_monospaceFirstFamily_resolvesEmAt13() {
+        // F3 — the verbatim live wire of …/css-overflow/per-test-ir/
+        // wpt__css-overflow__line-clamp__discard__discard-multicol-001.json
+        // roots __1/__2: FontFamily ["monospace"] FIRST + `margin: 1em`,
+        // no FontSize. MonospaceUAFontSize's 13px fixed default (the value
+        // the frozen refs rasterised) is the base ⇒ 13/13 — consulted
+        // through the single quirk owner, never re-derived here.
+        val p = listOf(
+            prop("FontFamily", """["monospace"]"""),
+            prop("RowGap", """{"type":"length","original":{"v":1,"u":"CH"}}"""),
+            prop("ColumnGap", """{"type":"length","original":{"v":1,"u":"CH"}}"""),
+            prop("Width", """{"type":"length","original":{"v":27,"u":"CH"}}"""),
+            prop("ColumnCount", "3"),
+            prop("Height", """{"type":"length","original":{"v":2,"u":"LH"}}"""),
+            prop("BorderTopWidth", """{"px":1}"""),
+            prop("BorderTopStyle", "\"SOLID\""),
+            emMargin("MarginTop", 1.0),
+            emMargin("MarginRight", 1.0),
+            emMargin("MarginBottom", 1.0),
+            emMargin("MarginLeft", 1.0),
+            prop("Continue", "\"DISCARD\""),
+        )
+        assertEquals(13f, StaticEmMargin.ownFontSizePx(p))
+        assertEquals(13f to 13f, StaticEmMargin.verticalEdges(p))
+    }
+
+    @Test
+    fun f4_concreteFaceFirstFamily_keepsTheStandard16Default() {
+        // The quirk keys on the FIRST entry being the monospace GENERIC
+        // (Blink's rule — see MonospaceUAFontSize's header): a concrete
+        // face first keeps the standard 16px default even when the list
+        // ends in the generic.
+        val p = listOf(
+            prop("FontFamily", """["Courier New","monospace"]"""),
+            emMargin("MarginTop", 1.0),
+        )
+        assertEquals(16f, StaticEmMargin.ownFontSizePx(p))
+        assertEquals(16f to 0f, StaticEmMargin.verticalEdges(p))
+    }
+
+    @Test
+    fun f4_floatsClearMulticol002_stackFoldEmitsOneSingle16pxGap() {
+        // The consequence pin — the measured defect this wave closes. The
+        // fixture stacks a bare `<p>` (UA margins 16/16) above the 1em-
+        // margin multicol root. Post-fix the root classifies (16,16), so
+        // rootStackMargin takes R2 (stripDeclared) and the §8.3.1 fold
+        // emits ONE max(16,16) = 16px gap between the two roots; the
+        // pre-fix bail (R4/R5) emitted the 16px UA gap AND left
+        // MarginApplier rendering the full 16px margin — 32px total, the
+        // measured +16 shift (Android border-top y=124 vs the ref's 108).
+        val multicol = listOf(emMargin("MarginTop", 1.0), emMargin("MarginBottom", 1.0))
+        val edges = StaticEmMargin.verticalEdges(multicol)
+        assertEquals(16f to 16f, edges)
+        val plans = listOf(
+            // The fixture's root __0: `<p>`, zero properties ⇒ R1 pure UA.
+            rootStackMargin("p", declaresTop = false, declaresBottom = false,
+                staticDeclaredPx = 0f to 0f),
+            // The multicol root ⇒ R2: declared px into the fold + strip.
+            rootStackMargin(null, declaresTop = true, declaresBottom = true,
+                staticDeclaredPx = edges),
+        )
+        assertEquals(true, plans[1].stripDeclared)
+        // Gap indices: [above p, BETWEEN p and multicol, after multicol].
+        assertEquals(listOf(16f, 16f, 16f), collapsedRootStackGapsPx(plans))
+    }
+
+    @Test
+    fun f3_discardMulticol001_stackFoldCollapsesTheTwo13pxBoxes() {
+        // discard-multicol-001 stacks TWO monospace 1em-margin boxes under
+        // the intro `<p>`: p↔box1 collapses max(16,13) = 16 (box1 top at
+        // the ref's 88, not the pre-fix 104) and box1↔box2 collapses
+        // max(13,13) = 13 — both margins in the gaps, neither rendered.
+        val box = listOf(
+            prop("FontFamily", """["monospace"]"""),
+            emMargin("MarginTop", 1.0), emMargin("MarginBottom", 1.0),
+        )
+        val edges = StaticEmMargin.verticalEdges(box)
+        assertEquals(13f to 13f, edges)
+        val plans = listOf(
+            rootStackMargin("p", declaresTop = false, declaresBottom = false,
+                staticDeclaredPx = 0f to 0f),
+            rootStackMargin(null, declaresTop = true, declaresBottom = true,
+                staticDeclaredPx = edges),
+            rootStackMargin(null, declaresTop = true, declaresBottom = true,
+                staticDeclaredPx = edges),
+        )
+        assertEquals(listOf(16f, 16f, 13f, 13f), collapsedRootStackGapsPx(plans))
     }
 
     // ── E5: every other flavor still bails ─────────────────────────────────

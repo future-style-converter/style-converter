@@ -55,11 +55,25 @@ struct MulticolGreedyLayout: Layout {
     /// greedy branch never reads it, so the default false — and every
     /// dark-stage caller — stays byte-identical to wave-42.
     var discardOverflow: Bool = false
+    /// Wave-45 lane X3 — the FLOAT-STRIP seam (CSS 2.1 §9.5/§9.5.2
+    /// inside css-multicol-1 column boxes, the wave-44 lane-U8 model):
+    /// non-nil ONLY when the renderer's composition-time gate
+    /// (MulticolFloatStrip.engagedStrip) proved the strip owns this
+    /// container AND published the matching zero-flow plan on the
+    /// floatClearancePlan environment — one decision, two consumers, so
+    /// the floats this layout expects to measure as zero-flow really do
+    /// (the wave-44 skeptic-S5 half-engage hazard). Nil — the default
+    /// and every dark-stage caller — keeps every existing plan branch
+    /// byte-identical.
+    var floatStrip: MulticolFloatStrip.EngagedStrip? = nil
 
     /// Everything both protocol methods need, computed from ONE width so
     /// the measure and place passes can never drift (CSSFlexLayout's
-    /// shared-plan pattern).
-    private struct Plan {
+    /// shared-plan pattern). Internal (not private) since wave 45: the
+    /// float-strip branch lives in its own file
+    /// (MulticolGreedyLayoutStrip.swift — the repo file-size rule) and
+    /// Swift `private` is file-scoped.
+    struct Plan {
         /// The §3 used column geometry (count >= 1, width >= 0).
         let used: MulticolMath.UsedColumns
         /// Per-child measured heights at the used column width.
@@ -71,13 +85,25 @@ struct MulticolGreedyLayout: Layout {
         /// consumer reads this plan instead (§6.2 spanner sequencing +
         /// §6.3 balanced segments + css-position §3.1 static anchors).
         var spannerPlan: MulticolSpannerFlow.Plan? = nil
+        /// Wave-45 lane X3: the float-strip answer — non-nil ONLY when
+        /// the floatStrip seam engaged; `slots` are then empty and the
+        /// placement maps each child's strip offset to its column via
+        /// MulticolFloatStrip.columnSlot (§9.5.2 clearance offsets +
+        /// fill/balance column block-size, the shared FS-table geometry).
+        var stripPlan: MulticolFloatStrip.StripPlan? = nil
     }
 
     /// Build the distribution plan for a definite inline size.
     /// Mirrors Android's measure pass: resolve used columns from the
     /// available width, measure every child at the used column width
     /// with an unbounded block-size, then distribute greedily.
-    private func plan(widthPx: CGFloat, subviews: Subviews) -> Plan {
+    /// `heightPx` (wave-45 lane X3) is the definite column block-size H
+    /// for the float-strip branch — the PROPOSED height in sizeThatFits
+    /// and bounds.height in placeSubviews, i.e. the container's actual
+    /// content block-size, the same live-constraints basis the Compose
+    /// strip gates on (its min==max height constraints); nil (the ideal
+    /// probe, or an auto-height chain) declines the strip only.
+    private func plan(widthPx: CGFloat, heightPx: CGFloat?, subviews: Subviews) -> Plan {
         // §3 used-value fit — the SAME math (MulticolMath) the wave-9
         // fill basis and the wave-10 fragment plan consume.
         let used: MulticolMath.UsedColumns
@@ -104,6 +130,17 @@ struct MulticolGreedyLayout: Layout {
         // unbounded height; the SwiftUI analogue proposes (W, nil) — a
         // child with an explicit width keeps it, auto content wraps at W.
         let w = CGFloat(used.widthPx)
+        // ── Wave-45 lane X3: the FLOAT-STRIP branch (wave-44 U8 model) ──
+        // Engages only when the renderer seam threaded an EngagedStrip;
+        // the whole branch — gates, zero-flow measure, FS geometry —
+        // lives in MulticolGreedyLayoutStrip.swift (the repo file-size
+        // rule). The strip owns all-flow containers, the spanner branch
+        // below owns containers WITH a spanner/forced break — disjoint
+        // by role, so branch order cannot flip a result.
+        if let sp = stripPlan(used: used, columnWidth: w,
+                              heightPx: heightPx, subviews: subviews) {
+            return sp
+        }
         // ── Wave-21 spanner-flow branch (css-multicol-1 §6) ─────────────
         // Engages only when the renderer supplied ALIGNED roles containing
         // a spanner (capture-gated at the call site). Spanners measure at
@@ -195,7 +232,15 @@ struct MulticolGreedyLayout: Layout {
         }
         // Plan once from the proposed width (placeSubviews re-derives the
         // identical plan from bounds.width — pure inputs cannot drift).
-        let p = plan(widthPx: w, subviews: subviews)
+        let p = plan(widthPx: w, heightPx: proposal.height, subviews: subviews)
+        // Wave-45 lane X3: an engaged strip keeps the container at its
+        // definite block-size H — the proposed height that fed the plan
+        // (Compose parity: the strip layout reports the DECLARED H even
+        // when §7.1 balance shortens the columns; the balancing refs
+        // keep the 100px box with 85px columns).
+        if p.stripPlan != nil, let h = proposal.height {
+            return CGSize(width: w, height: h)
+        }
         // Wave-21: a spanner-flow plan owns the container block-size —
         // §6.3 balanced segments + spanner heights (SP-table).
         if let sp = p.spannerPlan {
@@ -216,10 +261,20 @@ struct MulticolGreedyLayout: Layout {
         // Nothing to place for an empty container.
         guard !subviews.isEmpty else { return }
         // bounds.width is always definite here — derive the same plan the
-        // size pass produced for this width.
-        let p = plan(widthPx: bounds.width, subviews: subviews)
+        // size pass produced for this width (bounds.height IS the size
+        // pass's answer, so the strip branch re-derives identically).
+        let p = plan(widthPx: bounds.width, heightPx: bounds.height, subviews: subviews)
         // The used per-column inline size, shared by every slot.
         let w = CGFloat(p.used.widthPx)
+        // ── Wave-45 lane X3: float-strip placement ──────────────────────
+        // Each child places ONCE in the column its strip offset starts
+        // in — the body lives beside the plan branch in
+        // MulticolGreedyLayoutStrip.swift (one file owns the strip).
+        if let sp = p.stripPlan {
+            placeStripSubviews(sp, in: bounds, used: p.used,
+                               columnWidth: w, subviews: subviews)
+            return
+        }
         // ── Wave-21 spanner-flow placement (css-multicol-1 §6) ──────────
         if let sp = p.spannerPlan {
             // One slot per subview, index-aligned by construction.

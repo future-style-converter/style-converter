@@ -42,6 +42,19 @@ import { captureIsolatedTest } from './capture-isolated.mjs';
 // module is dependency-free, so importing it across the workspace boundary is
 // safe (web-harness does not vendor pngjs).
 import { safe } from '../../tools/titan/safe-name.mjs';
+// wave-45 lane X6 — the Rule-43 NOTO BUNDLING PILOT (tools/titan/
+// noto-pilot.mjs banner). Env-gated on TITAN_NOTO_PILOT=1: by default
+// notoPilotWebCss() returns '' and NOTHING below injects, so the standard
+// capture is byte-identical. With the flag on, the live page gets the same
+// pilot @font-face payloads + extended font stack the pilot browser-ref
+// renders under (REF_FONT_STACK is the pinned base both sides extend — the
+// wpt-white-canvas.test.mjs contract), so web captures and pilot refs keep
+// resolving every glyph to the SAME face. REF_FONT_STACK's home module is
+// import-safe (IS_CLI-gated main; no top-level browser work).
+import { notoPilotWebCss, NOTO_PILOT_FACES } from '../../tools/titan/noto-pilot.mjs';
+import { REF_FONT_STACK } from '../../tools/titan/capture-browser-ref.mjs';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -212,6 +225,20 @@ try {
   console.log(`→ loading ${captureUrl}${wptMode ? ' (WPT_MODE=1: placeholder text suppressed)' : ''}${wptComposed ? ' (WPT_COMPOSED=1: one composed PNG per test)' : ''}`);
   await page.goto(captureUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
 
+  // ── wave-45 lane X6: the NOTO-PILOT style injection ────────────────────────
+  // '' (and no injection at all) unless TITAN_NOTO_PILOT=1 — the standard
+  // capture path is byte-identical. Injected BEFORE the gallery sentinel
+  // wait so the pilot faces/stack participate in the same settle the
+  // ordinary fonts do (the document.fonts.ready wait + reflow settles
+  // below); the dedicated pilot delivery gate further down then SAYS which
+  // pilot families actually resolved, mirroring the @font-face gate's
+  // loud-never-silent contract.
+  const notoPilotCss = await notoPilotWebCss(REF_FONT_STACK, process.env, { readFile, existsSync });
+  if (notoPilotCss) {
+    await page.addStyleTag({ content: notoPilotCss });
+    console.log(`  [noto-pilot] pilot @font-face + stack override injected (TITAN_NOTO_PILOT=1)`);
+  }
+
   // Wait for the CaptureGallery sentinel (emitted after the IR is loaded and
   // every canvas has been rendered). `data-capture-ready` holds the expected
   // canvas count, so we can compare against the live canvas count below.
@@ -317,6 +344,34 @@ try {
     // A face that loaded LATE still needs one more settle: `font-display:
     // block` swaps the invisible text in on load, and that swap reflows every
     // line box the screenshot is about to record.
+    await page.evaluate(() => new Promise((r) => setTimeout(r, 50)));
+  }
+
+  // ── wave-45 lane X6: the NOTO-PILOT delivery gate ─────────────────────────
+  // The wave-35 gate above only audits the families the harness's managed
+  // <style> mounted (per-document @font-face); the pilot faces arrive via
+  // OUR addStyleTag injection, so they need their own check or a failed
+  // pilot payload would silently measure the pre-pilot cascade under a
+  // pilot-labelled run — the exact wrong-face-no-error failure the delivery
+  // gates exist to end. Same document.fonts.check probe, same loud-then-
+  // honest contract, and the same late-load settle. Skipped entirely (no
+  // evaluate, no log) when the pilot injection above did not run.
+  if (notoPilotCss) {
+    const pilotFamilies = NOTO_PILOT_FACES.map((f) => f.family);
+    const pilotReport = await page.evaluate((fams) => fams.map((f) => ({
+      family: f,
+      loaded: (() => { try { return document.fonts.check(`36px "${f}"`); } catch { return false; } })(),
+    })), pilotFamilies);
+    for (const f of pilotReport) {
+      console.log(`  [noto-pilot] ${f.loaded ? 'LOADED' : 'NOT LOADED'} pilot family "${f.family}"`);
+    }
+    const missingPilot = pilotReport.filter((f) => !f.loaded).map((f) => f.family);
+    if (missingPilot.length) {
+      console.warn(`  ⚠️  [noto-pilot] ${missingPilot.length} pilot famil${missingPilot.length === 1 ? 'y' : 'ies'} ` +
+                   `did NOT load (${missingPilot.join(', ')}) — those scripts render the PRE-PILOT cascade`);
+    }
+    // Same reflow argument as the wave-35 gate: a late pilot-face load swaps
+    // glyphs under font-display: block and reflows the line boxes.
     await page.evaluate(() => new Promise((r) => setTimeout(r, 50)));
   }
   // Brief post-render settle. We can't use requestAnimationFrame here —

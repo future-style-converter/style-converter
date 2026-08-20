@@ -131,6 +131,21 @@ export function widgetDomProps(
         // model to translate it into. Documented, not silent.
         out.selected = value === true;
         break;
+      case 'reversed':
+        // wave-45 lane X4: `<ol reversed>` (HTML §4.4.5) — the countdown
+        // switch for the list-item counter (css-lists-3 §4.4.2 reversed
+        // instantiation). The extractor has carried it since wave-44
+        // (extract-fixture.mjs LIST_ATTR_KEYS + LIST_BOOLEAN_ATTR_KEYS:
+        // presence-`true` on the wire, exactly like `checked`), but this
+        // policy dropped it to the tracker, so the browser numbered every
+        // reversed list FORWARD (wave-44 counter-list-item capture: markers
+        // 1./2./3. where the ref paints 3./2./1.). React DOM serializes the
+        // boolean `reversed` prop as the bare attribute, and the capture
+        // browser then counts down natively — including the §4.4.5
+        // interaction with `start` and `<li value>` overrides, which the
+        // renderer could not hope to re-derive itself.
+        out.reversed = value === true;
+        break;
       // Plain passthrough attributes — same name in React DOM.
       case 'type':      // input chrome selector (§4.10.5) / button type
       case 'multiple':  // select listbox-vs-menulist switch (§4.10.7)

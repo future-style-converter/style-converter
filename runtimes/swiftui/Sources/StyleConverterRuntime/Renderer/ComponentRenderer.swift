@@ -1506,6 +1506,58 @@ public struct ComponentRenderer: View {
                 // its table's value flow through untouched.
                 .environment(\.tableBorderSpacing, track.publish ?? tableBorderSpacing)
             } else if multicolDistributes(style: style) {
+                // ── X3 (wave 45): the iOS FLOAT-STRIP seam ──────────────
+                // The wave-44 U8 strip model (CSS 2.1 §9.5 floats +
+                // §9.5.2 clearance inside css-multicol-1 column boxes)
+                // was pure-module-only on iOS: this branch never
+                // delivered the float-clearance plan, so the CSS2
+                // floats-clear-multicol family stacked its 250px floats
+                // in-flow (wave-44 capture: red container band exposed,
+                // cleared box at the top of the wrong column). Two
+                // consumers, ONE decision (the Compose MultiColumnApplier
+                // principle): the layout gets the proven specs as a
+                // PARAMETER — a SwiftUI Layout cannot inject environment
+                // into its subviews — and the SAME engagement's zero-flow
+                // plan is published on the floatClearancePlan environment
+                // BELOW, so floats measure zero-flow exactly when the
+                // layout places by strip offsets.
+                // Per-subview specs through the shared classifier, in the
+                // exact contentOrPlaceholder order (leading text first) —
+                // capture-gated like the roles hook, so the dark stage
+                // threads nil by construction.
+                let stripSpecs: [MulticolSpannerFlow.ChildSpec]? = wptCaptureMode
+                    ? MulticolSpannerFlow.specsFor(
+                        children: FlexboxApplier.sorted(inFlowChildren),
+                        leadingText: component.text?.isEmpty == false)
+                    : nil
+                // The composition-time used-column count for the N>1 gate,
+                // through the SAME MulticolMath + gap lane the layout
+                // itself resolves with (the declared content-box width is
+                // the layout's proposed width in the composed canvas).
+                let stripUsedCount: Int = flexContentSize(style: style, vertical: false)
+                    .flatMap {
+                        MulticolMath.usedColumns(
+                            availableWidthPx: Double($0),
+                            requestedCount: style.columns?.count,
+                            requestedWidthPx: style.columns?.widthPx,
+                            gapPx: Double(multicolUsedGapPx(style: style)))?.count
+                    } ?? 1
+                // The ONE engagement decision (columns tree owns the
+                // gates): definite block-size, N>1, horizontal-tb, proven
+                // specs + the shared pre-measure predicate. The definite
+                // H gate reads the DECLARED height through the same
+                // resolver lane as definiteBorderBox (paddings do not
+                // matter for the >0 gate; the layout takes the live
+                // proposed height as its H).
+                let stripSeam = MulticolFloatStrip.engagedStrip(
+                    specs: stripSpecs,
+                    columnFillAuto: style.columns?.fillAuto == true,
+                    definiteColumnBlockSizePx: ContainingBlockBasis
+                        .definiteBorderBox(style: style, vertical: true)
+                        .map(Double.init),
+                    usedColumnCount: stripUsedCount,
+                    horizontalWritingMode: WritingModeExtractor.extract(
+                        from: resolvedProperties)?.isVertical != true)
                 MulticolGreedyLayout(
                     // The §3 inputs, straight from the typed config — the
                     // same fields MulticolMath consumes everywhere else.
@@ -1531,7 +1583,11 @@ public struct ComponentRenderer: View {
                     // nil outside capture, so the dark stage stays
                     // byte-identical (Compose threads the same flag via
                     // MultiColumnConfig.continueDiscard).
-                    discardOverflow: style.columns?.continueDiscard ?? false
+                    discardOverflow: style.columns?.continueDiscard ?? false,
+                    // X3 (wave 45): the strip seam — nil (dark stage and
+                    // every non-engaged container) keeps every existing
+                    // plan branch byte-identical.
+                    floatStrip: stripSeam
                 ) {
                     // Same content pass as every container: leading text
                     // (if any) and the sorted in-flow children become the
@@ -1540,6 +1596,18 @@ public struct ComponentRenderer: View {
                     // layout (leading text included).
                     contentOrPlaceholder(style: style)
                 }
+                // X3 (wave 45): the paint half — the engaged strip's
+                // §9.5.2 zero-flow plan (floats report zero flow height
+                // at their slot; ClearanceZeroFlow consumes it in the
+                // descendants' block child loops), else the same
+                // clearance scope plan the plain-VStack branch publishes
+                // (wave-42 W5) — this branch simply never delivered it.
+                // Outside capture BOTH terms reduce to the inherited
+                // ambient value (clearanceScopePlan's wptCaptureMode
+                // guard), so the re-publish is the identity for the
+                // frozen corpus.
+                .environment(\.floatClearancePlan,
+                             stripSeam?.zeroFlowPlan ?? clearanceScopePlan)
             } else if let floatSegments = blockFloatSegments() {
                 // Wave-19 lane FLOAT — CSS 2.1 §9.5 float row packing,
                 // composed-WPT capture ONLY (pin P8; the gate lives in
@@ -2892,20 +2960,28 @@ public struct ComponentRenderer: View {
             // would need an interleaved inlineRuns IR shape.
             // (v2 rename: the wire field is `text`, formerly `_text`.)
             // ── Wave-44 lane U2: REAL inline flow for `meta.runs` ───────
-            // When every referenced child is a metrics-uniform plain
-            // `<span>`, the container's inline content is ONE paragraph
-            // (CSS 2.1 §9.4.2 — one inline formatting context), so the
-            // fold below hands ONE folded string to the exact leaf-text
-            // machinery (greedy pre-break + pinned line boxes) instead of
-            // stacking each run as its own label. nil — hence the wave-32
-            // stacked path below, byte-for-byte — for every unsupported
-            // shape (atoms, block members, styled spans, out-of-flow
-            // siblings…), each refusal logged in InlineRunFlow.
+            // (wave-45 X1: gate widened to Compose parity — see the fold's
+            // banner for the ring and the corpus simulation proof.)
+            // When every referenced child is a plain inline text member
+            // (or an admitted glyphless EMPTY member), the container's
+            // inline content is ONE paragraph (CSS 2.1 §9.4.2 — one inline
+            // formatting context), so the fold below hands ONE folded
+            // string to the exact leaf-text machinery (greedy pre-break +
+            // pinned line boxes) instead of stacking each run as its own
+            // label. nil — hence the wave-32 stacked path below,
+            // byte-for-byte — for every unsupported shape (glyph atoms,
+            // block members, styled spans, out-of-flow siblings…), each
+            // refusal logged in InlineRunFlow.
             let inlineFlow = interleaveRuns
                 ? InlineRunFlow.fold(runs: component.meta?.runs,
                                      children: FlexboxApplier.sorted(inFlowChildren),
                                      totalChildCount: component.children?.count ?? 0,
-                                     containerProperties: resolvedProperties)
+                                     containerProperties: resolvedProperties,
+                                     // X1: the container's computed content
+                                     // language — gates `auto` ADOPTION,
+                                     // whose dictionary is language-
+                                     // selected (css-text-3 §6.1).
+                                     containerLang: component.meta?.lang)
                 : nil
             // ── Wave-32 lane R: the ordered inline content ──────────────
             // `meta.runs` says where this component's own text sits RELATIVE
@@ -2934,6 +3010,28 @@ public struct ComponentRenderer: View {
             // fold consumed are dropped from the child walk below (the
             // `children` binding), so no glyph paints twice.
             if let flow = inlineFlow {
+                // X1: an admitted EMPTY member's strut/border ink is a
+                // stated loss (the fold's banner) — leave the breadcrumb
+                // the Compose seam leaves, once per host per process.
+                let _ = flow.droppedEmptyMembers > 0
+                    ? PropertyTracker.logOnce(
+                        key: "inline-run-flow:dropped-empty:\(component.id)",
+                        message: "meta.runs fold dropped "
+                            + "\(flow.droppedEmptyMembers) empty member(s) — "
+                            + "component \(component.id)")
+                    : false
+                // X1: the paragraph's TextConfig — the host's, with an
+                // ADOPTED member `hyphens` injected (the fold only adopts
+                // when the host declared none, so this never overrides a
+                // host declaration; behavior-neutral for `manual`, the
+                // css-text-3 §6.1 initial the label already assumes).
+                let foldTextConfig: TextConfig = {
+                    var cfg = style.text
+                    if let adopted = flow.adoptedHyphensMode {
+                        cfg.hyphensMode = adopted
+                    }
+                    return cfg
+                }()
                 PlaceholderLabel(
                     // The name is dead weight here — `rawText` wins in
                     // the label's visibleText resolution — but keeps the
@@ -2941,7 +3039,7 @@ public struct ComponentRenderer: View {
                     name: component.name,
                     // The folded paragraph: parent runs and member text
                     // interleaved exactly as the wire orders them.
-                    rawText: flow,
+                    rawText: flow.text,
                     // Same ink chain as the leading-text site: declared
                     // color, else the WPT/stage currentColor bottom-out.
                     color: style.text.color
@@ -2950,7 +3048,7 @@ public struct ComponentRenderer: View {
                                     wptCaptureMode: wptCaptureMode,
                                     defaultInk: InheritedText.defaultTextColor)
                                 : nil),
-                    textConfig: style.text,
+                    textConfig: foldTextConfig,
                     backgroundColor: style.backgroundColor,
                     clipTextGradient: nil,
                     // text-align has room to act only in an explicit-width
@@ -2963,10 +3061,11 @@ public struct ComponentRenderer: View {
                     // it, members included (GreedyLineBreaker).
                     wrapWidth: textWrapWidth(style: style),
                     // The container's computed content language (`meta.
-                    // lang`) — the hyphens:auto dictionary gate; member
-                    // langs cannot differ (the fold's hyphens-equivalence
-                    // gate refuses mode changes, and `manual` reads no
-                    // dictionary at all).
+                    // lang`) — the hyphens:auto dictionary gate. X1: an
+                    // ADOPTED `auto` is safe with this lang because the
+                    // fold's lang-divergence gate only adopts a member
+                    // `auto` whose language equals the paragraph's
+                    // (css-text-3 §6.1 language-appropriate resource).
                     lang: component.meta?.lang,
                     // The container's own decoration wire propagates over
                     // its whole inline content (css-text-decor-3 §2.1) —

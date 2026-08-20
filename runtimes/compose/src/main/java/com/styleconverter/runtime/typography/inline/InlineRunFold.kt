@@ -58,11 +58,16 @@ import com.styleconverter.runtime.typography.text.TextExtractor
  *     a wider inert set applies ([EMPTY_MEMBER_INERT_TYPES]: color and
  *     decoration properties cannot paint without glyphs) over the wider
  *     [EMPTY_MEMBER_TAGS] (UA font styling is invisible on nothing).
- *     Dropped from the string, counted in [Outcome.Folded.droppedEmptyMembers]
- *     so the caller can leave a breadcrumb (an empty inline's strut/
- *     border paint is a stated loss — inherit-computed-001's `<em>`
- *     carries `border: inherit` colors whose style never reached the
- *     wire, a converter gap, so nothing paints on any path today).
+ *     Wave 45 (lane X2) split this family in two: a PAINTED empty member
+ *     — visible borders per [InlineAtomRing.resolve], which also decodes
+ *     the converter's `border: inherit` wire dialect against the host —
+ *     becomes an ATOM: one [InlineAtomRing.MARKER] in the merged string,
+ *     one [Outcome.Folded.atoms] entry, rendered as an InlineTextContent
+ *     placeholder by the seam (inherit-computed-001's `<em>` is the
+ *     measured case: the ref paints a 6×29px black ring inline).
+ *     A PAINT-INERT one is dropped from the string as before, counted in
+ *     [Outcome.Folded.droppedEmptyMembers] so the caller can leave a
+ *     breadcrumb (its strut is still a stated loss — CSS 2.1 §10.8).
  * Host-level bails: `text-transform` (a length-changing rewrite this fold
  * does not model), a vertical writing mode (the rotated branch's swapped
  * constraints are uncalibrated for merged runs), tabs (tab-size expansion
@@ -86,6 +91,12 @@ import com.styleconverter.runtime.typography.text.TextExtractor
  */
 object InlineRunFold {
 
+    /** One PAINTED empty member (wave 45, lane X2 — the ATOM RING): its
+     *  child index and resolved box paint. The merged text carries one
+     *  [InlineAtomRing.MARKER] per atom, in list order, which the seam
+     *  turns into an InlineTextContent placeholder (InlineAtomContent). */
+    data class Atom(val memberIndex: Int, val spec: InlineAtomRing.Spec)
+
     /** The fold decision — never silent: a bail always carries its reason. */
     sealed interface Outcome {
         /** The runs collapse into one faithful paragraph. */
@@ -96,8 +107,12 @@ object InlineRunFold {
             val properties: List<IRProperty>,
             /** True when a member's `hyphens` now governs the paragraph. */
             val adoptedHyphens: Boolean,
-            /** Empty members dropped (zero glyphs — see class banner). */
+            /** PAINT-INERT empty members dropped (zero glyphs, zero paint —
+             *  see class banner; painted ones become [atoms] instead). */
             val droppedEmptyMembers: Int,
+            /** Wave 45 (lane X2): painted empty members, one per MARKER in
+             *  [text], marker order. Empty for every pre-wave-45 shape. */
+            val atoms: List<Atom> = emptyList(),
         ) : Outcome
 
         /** Unsupported shape — caller keeps the stacked fallback and logs. */
@@ -144,9 +159,36 @@ object InlineRunFold {
         "Color", "TextDecorationLine", "TextDecorationColor", "TextDecorationStyle",
     )
 
+    // Wave 45 (lane X2) — what a PAINTED empty member (an ATOM) may carry
+    // beyond the inert set: the box-paint longhands the atom ring renders.
+    // Everything else still bails (FontSize would change the strut/ring
+    // height, Padding* would open a painted content area — unmodeled).
+    // BackgroundColor stays OUT deliberately: with zero content width and
+    // no padding it paints nothing, so admitting it would silently drop a
+    // declaration the stacked fallback at least mounts as a box.
+    private val ATOM_MEMBER_TYPES = EMPTY_MEMBER_INERT_TYPES + setOf(
+        "BorderTopStyle", "BorderRightStyle", "BorderBottomStyle", "BorderLeftStyle",
+        "BorderTopWidth", "BorderRightWidth", "BorderBottomWidth", "BorderLeftWidth",
+    )
+
     /** The SHOUTY keyword of a Hyphens property ("MANUAL"/"AUTO"/"NONE"). */
     private fun hyphensKeyword(prop: IRProperty): String? =
         ValueExtractors.extractKeyword(prop.data)?.uppercase()
+
+    /**
+     * Whether the merged text so far ends in a collapsible space, LOOKING
+     * THROUGH any trailing atom markers: css-text-3 §4.1.1's phase-1
+     * collapsing crosses element boundaries, and an empty inline BOX (the
+     * atom) does not interrupt the chain — Chromium paints
+     * inherit-computed-001's `… size <em></em> and …` as "size ▮and":
+     * the space BEFORE the em survives, the one after it collapses.
+     */
+    private fun endsWithCollapsibleSpace(sb: StringBuilder): Boolean {
+        // Walk back over markers (zero-glyph boxes) to the last real char.
+        var i = sb.length - 1
+        while (i >= 0 && sb[i] == InlineAtomRing.MARKER) i--
+        return i >= 0 && sb[i] == ' '
+    }
 
     /**
      * Append [segment] to [sb] with css-text-3 §4.1.1 phase-1 collapsing
@@ -154,14 +196,16 @@ object InlineRunFold {
      * following another collapsible space — even across an element
      * boundary, and even across an intervening EMPTY inline — collapses.
      * (inherit-computed-001: `… size <em></em> and …` must merge to
-     * "size and", one space, exactly as the Chromium ref paints it.)
+     * "size ▮and", one space, exactly as the Chromium ref paints it.)
      * Only U+0020 is handled: the producer already collapsed runs of
      * source whitespace to single spaces inside each text node.
      */
     private fun appendCollapsed(sb: StringBuilder, segment: String) {
         // Drop the incoming segment's leading spaces when the merged text
-        // already ends in one — the cross-boundary collapse.
-        val s = if (sb.isNotEmpty() && sb.last() == ' ') segment.trimStart(' ') else segment
+        // already ends in one — the cross-boundary collapse. The check
+        // looks through atom markers (wave 45): an empty inline box does
+        // not break the collapsing chain.
+        val s = if (endsWithCollapsibleSpace(sb)) segment.trimStart(' ') else segment
         // Everything else is verbatim content (soft hyphens included —
         // rule A / the manual-mode materialization live downstream).
         sb.append(s)
@@ -200,8 +244,10 @@ object InlineRunFold {
         }
         // The merged paragraph accumulator.
         val sb = StringBuilder()
-        // Empty members dropped (reported, never silent).
+        // PAINT-INERT empty members dropped (reported, never silent).
         var dropped = 0
+        // Wave 45 (lane X2) — PAINTED empty members, in marker order.
+        val atoms = mutableListOf<Atom>()
         // The member-adopted Hyphens declaration (first one wins; a second
         // DIFFERENT one bails below).
         var adopted: IRProperty? = null
@@ -210,7 +256,15 @@ object InlineRunFold {
         // Walk the resolved entries in wire order.
         for (entry in entries) when (entry) {
             // Anonymous text run — verbatim content (spaces included).
-            is InlineRunPlan.Entry.Text -> appendCollapsed(sb, entry.text)
+            is InlineRunPlan.Entry.Text -> {
+                // Alias guard (wave 45): a SOURCE U+FFFC would be
+                // indistinguishable from an atom marker downstream, so the
+                // fold declines rather than mis-binding a placeholder.
+                if (entry.text.indexOf(InlineAtomRing.MARKER) >= 0) {
+                    return Outcome.Bailed("contains-object-replacement")
+                }
+                appendCollapsed(sb, entry.text)
+            }
             // A referenced child — classify against the member gate.
             is InlineRunPlan.Entry.Child -> {
                 // resolve() only emits valid indices; guard anyway so a
@@ -231,10 +285,26 @@ object InlineRunFold {
                 if (tag !in (if (emptyMember) EMPTY_MEMBER_TAGS else TEXT_MEMBER_TAGS)) {
                     return Outcome.Bailed("member-tag:$tag")
                 }
+                // Alias guard (wave 45) — same as the Entry.Text gate.
+                if (text != null && text.indexOf(InlineAtomRing.MARKER) >= 0) {
+                    return Outcome.Bailed("contains-object-replacement")
+                }
+                // Wave 45 (lane X2) — the ATOM RING gate: a PAINTED empty
+                // member (visible borders once the `border: inherit` wire
+                // dialect is decoded against the host — see InlineAtomRing's
+                // banner) becomes an inline placeholder instead of a drop.
+                // null == paint-inert → the wave-44 drop path, unchanged.
+                val atomSpec = if (emptyMember) InlineAtomRing.resolve(child.properties, hostProperties) else null
                 // Property admission — the first unsupported type names
-                // the bail so logcat can be audited per member.
+                // the bail so logcat can be audited per member. A painted
+                // empty member may additionally carry the box-paint
+                // longhands its ring renders (ATOM_MEMBER_TYPES).
                 val offending = child.properties.firstOrNull {
-                    it.type !in (if (emptyMember) EMPTY_MEMBER_INERT_TYPES else TEXT_MEMBER_TYPES)
+                    it.type !in when {
+                        atomSpec != null -> ATOM_MEMBER_TYPES
+                        emptyMember -> EMPTY_MEMBER_INERT_TYPES
+                        else -> TEXT_MEMBER_TYPES
+                    }
                 }
                 if (offending != null) return Outcome.Bailed("member-prop:${offending.type}")
                 // Hyphens contribution (see the class banner's adoption rules).
@@ -260,23 +330,38 @@ object InlineRunFold {
                         return Outcome.Bailed("hyphens-conflict")
                     }
                 }
-                // Contribute the member's glyphs (or count the drop).
-                if (emptyMember) dropped++ else appendCollapsed(sb, text!!)
+                // Contribute the member's glyphs — or its atom marker
+                // (wave 45: a painted empty member occupies real advance
+                // in the line, exactly one MARKER's placeholder) — or
+                // count the paint-inert drop.
+                when {
+                    atomSpec != null -> {
+                        // The marker the seam binds to this atom, k-th
+                        // marker ↔ atoms[k] (InlineAtomContent.annotate).
+                        sb.append(InlineAtomRing.MARKER)
+                        atoms += Atom(entry.index, atomSpec)
+                    }
+                    emptyMember -> dropped++
+                    else -> appendCollapsed(sb, text!!)
+                }
             }
         }
         // Host gate 3 — tab-size expansion downstream rewrites '\t' into
         // spaces and would shift boundaries; no victim carries tabs.
         if (sb.indexOf("\t") >= 0) return Outcome.Bailed("contains-tab")
         // An all-empty merge has nothing to paint — the stacked fallback's
-        // empty boxes are the established rendering for that shape.
+        // empty boxes are the established rendering for that shape. A
+        // MARKER-only merge counts as empty too (wave 45): a glyph-less
+        // host keeps its established stacked rendering rather than
+        // routing a lone atom through the paragraph pipeline.
         val merged = sb.toString()
-        if (merged.isEmpty()) return Outcome.Bailed("empty-merge")
+        if (merged.none { it != InlineAtomRing.MARKER }) return Outcome.Bailed("empty-merge")
         // The paragraph's property list: the host's, plus the adopted
         // member policy appended LAST (PlaceholderContent's own-list-first
         // Hyphens read finds it; an existing host declaration was never
         // overridden — adoption only happens when the host declared none).
         val properties = adopted?.let { hostProperties + it } ?: hostProperties
-        // The faithful fold.
-        return Outcome.Folded(merged, properties, adopted != null, dropped)
+        // The faithful fold (atoms in marker order — see Atom's contract).
+        return Outcome.Folded(merged, properties, adopted != null, dropped, atoms)
     }
 }

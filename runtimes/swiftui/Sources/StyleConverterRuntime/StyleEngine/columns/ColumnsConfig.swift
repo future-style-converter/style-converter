@@ -47,6 +47,15 @@ struct ColumnsConfig: Equatable {
     // true here (an any-DISCARD-wins `contains` scan) and false on Compose.
     var continueDiscard: Bool = false
 
+    // Wave-45 lane X3 — typed `column-fill` (css-multicol-1 §7.2): true
+    // iff the computed value is `auto` (sequential fill); false is the
+    // INITIAL `balance` (§7.1) and every other/absent keyword. The float
+    // strip needs the distinction because the two modes produce different
+    // used column block-sizes (fill keeps the definite H; balance reduces
+    // to ceil(C/N)) — the same `config.fill == ColumnFill.AUTO` read the
+    // Compose twin threads into its strip halves (MultiColumnApplier).
+    var fillAuto: Bool = false
+
     // True when either typed multicol input is non-auto — css-multicol-1
     // §2: an element whose computed column-width OR column-count is not
     // `auto` establishes a multicol formatting context. Rule properties

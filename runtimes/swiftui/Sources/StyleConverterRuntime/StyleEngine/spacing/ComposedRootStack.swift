@@ -83,6 +83,15 @@ public extension UABlockMargin {
     /// (MarginCollapsePlanner / MarginCollapseChildGates) keeps calling the
     /// narrow MarginCollapse.staticVerticalEdges and the 327-pair dark-stage
     /// baseline cannot move.
+    ///
+    /// Wave 45 (H0): an em margin on a root with NO declared FontSize no
+    /// longer bails either — StaticEmMargin.ownFontSizePx resolves the UA
+    /// default ladder (MonospaceUAFontSize's 13px fixed default, else 16px),
+    /// because the pre-fix bail sent such roots down R4/R5 where the fold
+    /// emitted the UA gap AND MarginApplier rendered the full declared
+    /// margin — a measured +16px double-space on floats-clear-multicol-002
+    /// and discard-multicol-001. Declared var()/calc()/relative sizes still
+    /// bail (E4 kept, narrowed).
     static func staticDeclaredEdges(_ properties: [IRProperty])
         -> (top: CGFloat, bottom: CGFloat)? {
         StaticEmMargin.verticalEdges(properties)

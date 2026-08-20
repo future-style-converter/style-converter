@@ -158,6 +158,39 @@ class BlockMarginCollapseTest {
         )
     }
 
+    /** wave-45 lane X4 — an EM margin CARRYING a prebaked pxFallback (the
+     *  shape MarginExtractor now emits for DynamicValueResolver-prebaked
+     *  em) classifies through that fallback, keeping every §8.3.1 plan
+     *  value byte-identical to the pre-wave-45 Exact(prebake) reading. */
+    @Test
+    fun `em with a prebaked fallback classifies via the fallback px`() {
+        val cfg = MarginConfig(
+            top = MarginValue.Length(LengthValue.Relative(1.0, LengthUnit.EM, 16.0)),
+            bottom = MarginValue.Length(LengthValue.Relative(0.5, LengthUnit.EM, 46.0)),
+        )
+        assertEquals(m(16f, 46f), BlockMarginCollapse.blockMarginsOrNull(cfg))
+    }
+
+    /** Same non-negativity floor as the Exact lane (§8.3.1 negative rules
+     *  are not emulated), and non-EM relatives never ride the fallback. */
+    @Test
+    fun `fallback lane keeps the negative floor and the EM-only gate`() {
+        // Negative prebake bails — identical to Exact(-10) bailing.
+        assertNull(
+            BlockMarginCollapse.blockMarginsOrNull(
+                MarginConfig(top = MarginValue.Length(LengthValue.Relative(-1.0, LengthUnit.EM, -16.0)))
+            )
+        )
+        // A %-flavored fallback carrier stays out of scope (its base is
+        // the containing block, never a font size — the fallback shortcut
+        // is an EM-lane contract only).
+        assertNull(
+            BlockMarginCollapse.blockMarginsOrNull(
+                MarginConfig(top = MarginValue.Length(LengthValue.Relative(10.0, LengthUnit.PERCENT, 39.0)))
+            )
+        )
+    }
+
     /** An all-null config (no margin declared) is a valid zero pair — the
      *  plan builder separately skips all-zero containers. */
     @Test

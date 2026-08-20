@@ -208,4 +208,30 @@ describe('list-ordinal attrs (wave-27)', () => {
       { mapTag: (t) => t ?? 'div' });
     expect(out).toContain('start="1860"');
   });
+
+  // ── wave-45 lane X4: `<ol reversed>` forwarding ──────────────────────────
+  // Pinned on css-lists/counter-list-item's VERBATIM wire attrs (wave-44
+  // per-test IR): {"reversed":true} and {"start":"30","reversed":true}.
+  // Before this lane the key hit the unhandled tracker and the capture
+  // browser numbered the reversed lists forward (1./2./3.) while the ref
+  // counts down (3./2./1.) — forwarding lets the browser apply HTML §4.4.5
+  // natively, including its interaction with start and <li value>.
+  it('maps the wire presence-boolean reversed onto <ol> (counter-list-item shape)', () => {
+    // Bare `<ol reversed>` — third-column list of the fixture.
+    expect(widgetDomProps('ol', { reversed: true })).toEqual({ reversed: true });
+    // `<ol start="30" reversed>` — both lane keys ride the same envelope.
+    expect(widgetDomProps('ol', { start: '30', reversed: true }))
+      .toEqual({ start: '30', reversed: true });
+    // Strict presence contract (extractor LIST_BOOLEAN_ATTR_KEYS): anything
+    // but literal `true` must NOT paint a countdown list.
+    expect(widgetDomProps('ol', { reversed: false })).toEqual({ reversed: false });
+  });
+
+  it('serialises reversed onto a real <ol> element as the bare boolean attribute', () => {
+    const out = html(node(comp({ meta: { sourceTag: 'ol', attrs: { start: '30', reversed: true } } })),
+      { mapTag: (t) => t ?? 'div' });
+    // React DOM boolean serialization: present, valueless (like checked="").
+    expect(out).toContain('reversed=""');
+    expect(out).toContain('start="30"');
+  });
 });

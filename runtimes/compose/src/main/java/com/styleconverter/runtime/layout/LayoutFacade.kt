@@ -172,7 +172,12 @@ object LayoutFacade {
         // subsequent applySizing chains size INSIDE the margin-padding.
         // Net effect: outer = size + margin, content area = size, sibling
         // children see outer for flex layout. CSS-correct.
-        result = SpacingApplier.applyMargin(result, config.margin, collapsedMargin)
+        // wave-45 lane X4 (one-line seam): margins get the SAME resolution
+        // context as sizing — an em margin preserved by MarginExtractor must
+        // multiply against the element's own computed font-size (css-values-4
+        // §5.1.1, incl. the monospace-13 quirk the ctx already carries), not
+        // the 16px default the old three-arg call fell back to.
+        result = SpacingApplier.applyMargin(result, config.margin, collapsedMargin, spacingCtx)
 
         // Apply sizing AFTER margin so size is INSIDE the margin-padding
         // wrap. This is what makes `width: 250 + padding: 20` render as a

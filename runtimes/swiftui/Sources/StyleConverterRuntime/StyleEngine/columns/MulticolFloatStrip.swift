@@ -21,22 +21,22 @@
 //     (css-break-3 §4): fill keeps the definite H (100 → 100+100+50 aqua
 //     slices), balance reduces to H = ceil(C/N) (255/3 → the refs' 85).
 //
-//  CONSUMPTION STATUS (iOS): pure module + pins only, exactly the wave-42
-//  MulticolRunFragment.swift precedent. Two renderer seams block the iOS
-//  integration, both ComponentRenderer-owned (out of this lane's
-//  ownership; U1/U2 own renderer seams):
-//   1. the §9.5.2 zero-flow paint half needs the floatClearancePlan
-//      ENVIRONMENT published around the multicol branch's content —
-//      today only the plain-VStack branch publishes it
-//      (ComponentRenderer.swift, the `.environment(\.floatClearancePlan,
-//      clearanceScopePlan)` on the VStack), so a multicol-scope plan can
-//      never reach the float container's child loop;
-//   2. the strip's clip+translate replay needs the multi-child clone-row
-//      seam documented since wave-42 (MulticolRunFragment.swift's banner:
-//      iOS fragments via renderer-composed multicolFragmentRow).
-//  On Android the Kotlin twin IS consumed (MulticolFloatStripMeasure);
-//  landing this twin keeps the FS table native-pair-pinned so the seam
-//  consumer starts from proven geometry.
+//  CONSUMPTION STATUS (iOS): CONSUMED since wave 45 (lane X3) — seam 1
+//  is closed. The renderer's multicol branch builds the composition-time
+//  engagement (MulticolFloatStripSeam.engagedStrip), publishes the
+//  §9.5.2 zero-flow plan on the floatClearancePlan environment around
+//  the layout's content, and threads the SAME engagement into
+//  MulticolGreedyLayout as a parameter (a SwiftUI Layout cannot inject
+//  environment into its subviews) — the layout's strip branch then
+//  measures under zero-flow and places every child at its strip column
+//  (MulticolFloatStripSeam.columnSlot). STILL OPEN — seam 2: the
+//  css-break-3 §4 clip+translate slice REPLAY needs the multi-child
+//  clone-row seam documented since wave-42 (MulticolRunFragment.swift's
+//  banner: iOS fragments via renderer-composed multicolFragmentRow), so
+//  float ink taller than one column stays in its anchor column instead
+//  of slicing across — renderer-owned, logged at the layout.
+//  On Android the Kotlin twin is consumed by MulticolFloatStripMeasure;
+//  the FS table stays native-pair-pinned on both platforms.
 //
 
 // CoreGraphics for the FragmentGeometry shapes; Foundation for ceil().

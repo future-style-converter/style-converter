@@ -231,6 +231,15 @@
 // only because the crop probe now fires first on many of them; the raster
 // refusal itself is unchanged in kind.
 //
+// WAVE-45 lane X5 hardened the drive against its ONE recurring flake — the
+// per-gate web −1 (wave-41: pseudo-with-classes-match-wildcard's crop probe
+// read the whole window complement as transient "ink"; wave-44:
+// fractional-box-old's one-off protocol timeout). viewTransitionBakeFixture
+// now spends at most VT_MAX_REDRIVES fresh drives when a drive hits the
+// DIRTY-PROBE signature (isDirtyOverflowProbe) or throws, then lets the
+// outcome stand. Clean drives and genuine bails are byte-identical to
+// wave-44 behaviour; see the function's doc block for the evidence.
+//
 // HONESTY STAMPS: `_wpt.viewTransitionBaked: true` on the fixture, plus
 // `_lossy` + VT_BAKE_LOSSY_REASON in `_lossyReasons` on the emitted subtree
 // AND in the fixture-level roll-up. The reason string is fresh, so it can
@@ -397,6 +406,43 @@ export const VT_CONTAINED_OBJECT_FITS = ['fill', 'contain', 'scale-down'];
  *  and leaf BOXES, which is smaller. Cropping and calling the result "uniform"
  *  is precisely the silent fallthrough this repo forbids. */
 export const VT_OVERFLOW_INK_TOLERANCE_PX = 4;
+
+/** Fraction of the isolation window's COMPLEMENT (viewport area minus window
+ *  area, in px²) at or above which an overflow-probe reading stops meaning
+ *  "this snapshot has ink overflow" and starts meaning "this composite was
+ *  never isolated at all" — the DIRTY-SETTLE signature the bounded re-drive
+ *  in viewTransitionBakeFixture fires on (wave-45 lane X5).
+ *
+ *  WHY THE TWO POPULATIONS CANNOT COLLIDE, measured. A genuine ink overflow
+ *  is the snapshot's own painted excess past the union window and is small by
+ *  construction: fractional-box-with-overflow-children reads 225 px outside
+ *  its 101x51 window (0.11 % of the 198 193 px² complement),
+ *  fractional-box-with-shadow reads 624 px (0.31 %), and the founding case —
+ *  content-with-child-with-transparent-background's children painting 75 px
+ *  past the box — leaks ~2 500 px (1.3 %). The one dirty settle ever caught
+ *  in a gate (wave-41 fullcap2: pseudo-with-classes-match-wildcard, `snapshot
+ *  overflows its 200x100 box (183344px of ink outside it)`) read EXACTLY the
+ *  full complement of its window in the 358×568 viewport (203 344 − 20 000 =
+ *  183 344): every single pixel outside the window solved as ink, which no
+ *  element's overflow can produce and which is the arithmetic fingerprint of
+ *  one composite showing the UN-isolated page — a backdrop pixel then reads
+ *  α = 1 − (w−b)/255 ≈ 1 instead of 0, because the "black" composite was
+ *  never black. Half the complement sits two orders of magnitude above every
+ *  genuine overflow ever measured and a factor of two below the one observed
+ *  dirty read, so the boundary is a measured one with no ambiguous middle —
+ *  the same shape of argument as VT_STABILITY_OPACITY_EPS. */
+export const VT_DIRTY_PROBE_COMPLEMENT_FRACTION = 0.5;
+
+/** How many RE-DRIVES one test may spend recovering from a transient dirty
+ *  settle (or a transient drive fault) before the drive's own outcome stands.
+ *  ONE, not more: both flakes this bound exists for are one-offs that
+ *  re-drive clean on the first try (wave-41: 4/4 clean re-drives after the
+ *  dirty crop probe; wave-44's fractional-box-old protocol timeout: baked
+ *  clean on every re-drive; wave-45 X5: 12/12 clean, byte-identical drives of
+ *  the same tests), so a second retry could only ever mask a REPRODUCIBLE
+ *  fault — which must stay visible as what it is (a bail or an error), never
+ *  be retried into silence. */
+export const VT_MAX_REDRIVES = 1;
 
 /** Smallest sub-rectangle, in px², the TWO-COLOUR fit will call a second
  *  region rather than noise (see fitTwoColourSnapshot).
@@ -1040,6 +1086,41 @@ export function probeSnapshotOverflow(blackPng, whitePng, win) {
     }
   }
   return { outside };
+}
+
+/**
+ * Is this overflow-probe reading the DIRTY-SETTLE signature rather than real
+ * ink overflow? (wave-45 lane X5)
+ *
+ * The distinction decides RETRY-vs-BAIL in viewTransitionBakeFixture: a
+ * genuine overflow — a snapshot painting past the union of its group and leaf
+ * boxes — is a stable property of the page and must BAIL, because re-driving
+ * it would measure the same ink again. A dirty read — the whole window
+ * complement solving as ink because one composite raced the isolation
+ * restyle and shows the un-isolated page — is a property of one bad
+ * measurement session, and the ONE bounded re-drive is exactly the remedy the
+ * wave-41 evidence supports (4/4 clean re-drives of the identical test). See
+ * VT_DIRTY_PROBE_COMPLEMENT_FRACTION for the measured gap between the two
+ * populations (≤1.3 % of the complement for every genuine overflow ever
+ * observed vs 100 % for the one observed dirty read).
+ *
+ * The retry can never change a correct outcome: whatever the SECOND drive
+ * measures stands, so a pathological page whose real ink genuinely covers
+ * half the complement re-measures the same overflow and bails exactly as
+ * before — it only pays one extra drive.
+ *
+ * A window that fills the whole viewport has an EMPTY complement (the root
+ * group's usual case): nothing outside it can ever read as ink, so the answer
+ * is false by construction rather than a 0-of-0 ambiguity.
+ */
+export function isDirtyOverflowProbe(outsidePx, win, viewport) {
+  // The region the probe actually scanned: every viewport pixel that is not
+  // in the top-left window (probeSnapshotOverflow skips x<w && y<h).
+  const complement = viewport.width * viewport.height - win.width * win.height;
+  // ≥, not >: the observed dirty read sits AT 100 % of the complement, and a
+  // reading at half of it is already two orders of magnitude past every
+  // genuine overflow measured — there is nothing between to protect.
+  return complement > 0 && outsidePx >= VT_DIRTY_PROBE_COMPLEMENT_FRACTION * complement;
 }
 
 /**
@@ -1966,6 +2047,37 @@ async function waitForReftestSettle(page, timeoutMs) {
  *   - 'bailed'   — a scope boundary fired (see the module banner); the fixture
  *                  is left byte-identical;
  *   - 'baked'    — the settled pseudo tree was delivered, fixture stamped.
+ *
+ * THE BOUNDED RE-DRIVE (wave-45 lane X5). Two gates in a row lost exactly one
+ * web pass each to a transient, non-reproducible drive fault in THIS module —
+ * the recurring web −1:
+ *   - wave-41 fullcap2: pseudo-with-classes-match-wildcard bailed `snapshot
+ *     overflows its 200x100 box (183344px of ink outside it)` — the crop
+ *     probe read the ENTIRE window complement as ink because one isolation
+ *     composite raced the restyle and showed the un-isolated page; 4/4
+ *     re-drives baked clean (fullcap ran the identical tree and baked it).
+ *   - wave-44 final: fractional-box-old errored `Runtime.callFunctionOn timed
+ *     out` (extract.log:36) — a one-off protocol wedge; the recycled browser
+ *     baked the very next test, and every re-drive of fractional-box-old
+ *     bakes clean (wave-45 X5: 12/12 clean, byte-identical fixtures).
+ * Both flakes cost the bake (bail-to-static → web-ref 1.0 → ~0.975 → a lost
+ * pass) and both re-drive clean, so this wrapper spends at most
+ * VT_MAX_REDRIVES fresh page drives before letting the outcome stand:
+ *   - a drive whose crop probe read the DIRTY signature (see
+ *     isDirtyOverflowProbe — the whole-complement reading no real ink can
+ *     produce) is re-driven once, loudly;
+ *   - a drive that THREW is re-driven once, loudly, on a fresh browser (the
+ *     throwing drive already recycled the wedged one); an error that repeats
+ *     stays an error — the caller's tally and bail-to-static contract are
+ *     unchanged.
+ * CLEAN DRIVES ARE UNTOUCHED: no dirty signature, no throw → the first
+ * drive's result returns straight through this loop, byte-for-byte the
+ * pre-wave-45 behaviour (verified: 12/12 repeated drives of
+ * fractional-box-old + pseudo-with-classes-match-wildcard hash-identical
+ * before and after this change). Genuine bails are also untouched: their
+ * probe readings sit orders of magnitude below the dirty signature, and even
+ * a pathological page that trips it simply re-measures the same state and
+ * bails identically one drive later.
  */
 export async function viewTransitionBakeFixture(fixture, testRel) {
   const testAbs = join(WPT_DIR, testRel);
@@ -1976,6 +2088,56 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
   const decline = postLoadDecline(html);
   if (decline) return { status: 'declined', reason: decline };
 
+  // The re-drive loop proper. Unbounded `for` with an in-loop bound, so the
+  // final iteration's outcome (or error) ALWAYS escapes — there is no path
+  // that retries forever and none that swallows the last result.
+  for (let drive = 0; ; drive++) {
+    let outcome;
+    try {
+      outcome = await driveViewTransitionBake(fixture, testRel, testAbs, trigger);
+    } catch (err) {
+      // TRANSIENT DRIVE FAULT — the wave-44 signature. The drive already
+      // recycled the wedged browser (see its catch), so the retry runs on a
+      // freshly launched one. Logged to stderr so a gate's extract.log shows
+      // every retry next to the test it saved (or failed to).
+      if (drive < VT_MAX_REDRIVES) {
+        console.warn(`view-transition-bake: re-drive ${drive + 1}/${VT_MAX_REDRIVES} for ${testRel} — ` +
+          `transient drive fault (${err.message ?? err}); browser recycled ` +
+          `(wave-44 fractional-box-old precedent: one-off wedge, clean on re-drive)`);
+        continue;
+      }
+      // Reproducible → stays an error, exactly as before wave-45: the CLI
+      // tallies it and extract-fixture.mjs's batch path writes the static
+      // pair (the bail-to-static contract pinned in the unit tests).
+      throw err;
+    }
+    // DIRTY CROP PROBE — the wave-41 signature. Non-null only when a solve's
+    // overflow reading was classified as "un-isolated composite" rather than
+    // ink (isDirtyOverflowProbe); such a drive always bails, so retrying can
+    // only ever trade a flake-bail for the truth (never overwrite a bake).
+    if (outcome.dirtyProbe && drive < VT_MAX_REDRIVES) {
+      console.warn(`view-transition-bake: re-drive ${drive + 1}/${VT_MAX_REDRIVES} for ${testRel} — ` +
+        `dirty crop probe (${outcome.dirtyProbe}): a whole-complement reading is a ` +
+        `transient un-isolated composite (wave-41 fullcap2 precedent), not ink overflow`);
+      continue;
+    }
+    // Strip the internal dirty-probe channel before the result reaches the
+    // CLI / extract-fixture.mjs — the retry is THIS function's concern, and
+    // the callers' outcome vocabulary must not grow a key they never read.
+    const { dirtyProbe, ...result } = outcome;
+    return result;
+  }
+}
+
+/**
+ * ONE full drive of the bake — the pre-wave-45 viewTransitionBakeFixture
+ * body, verbatim, plus the dirty-probe channel: opens the page, settles,
+ * walks, solves, plans, and on success applies the plan to `fixture` in
+ * place. The fixture is mutated ONLY on the 'baked' return (the plan apply is
+ * the final synchronous step), so a re-drive of any bailed or thrown drive
+ * always starts from an unmutated fixture.
+ */
+async function driveViewTransitionBake(fixture, testRel, testAbs, trigger) {
   const browser = await getBrowser();
   let page;
   try {
@@ -2042,6 +2204,12 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
     }
     const viewport = page.viewport();
     const solved = {};
+    // Dirty-probe channel (wave-45 X5): overflow readings the classifier
+    // calls "un-isolated composite" rather than ink. The first one is enough
+    // — one dirty read already proves the measurement session raced the
+    // restyle — but the push is per-leaf so the log names the leaf that read
+    // dirty, not just the test.
+    const dirtyProbes = [];
     for (const item of wanted) {
       const win = item.window;
       const key = `${item.name}|${item.which}`;
@@ -2088,6 +2256,16 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
       const over = probeSnapshotOverflow(shots[0], shots[1], win);
       if (over.error) { solved[key] = { error: over.error }; continue; }
       if (over.outside > VT_OVERFLOW_INK_TOLERANCE_PX) {
+        // DIRTY-vs-GENUINE (wave-45 X5): a reading at ≥half the window's
+        // complement is the wave-41 transient-settle signature (an
+        // un-isolated composite reads its ENTIRE complement as ink), not a
+        // property of the page — record it so the outer loop can spend its
+        // one re-drive. The solve error below is recorded EITHER WAY: this
+        // drive's own outcome must stay the honest bail, so a second dirty
+        // read on the re-drive bails exactly as wave-41 did.
+        if (isDirtyOverflowProbe(over.outside, win, viewport)) {
+          dirtyProbes.push(`${key} read ${over.outside}px outside its ${win.width}x${win.height} window`);
+        }
         solved[key] = {
           error: `snapshot overflows its ${win.width}x${win.height} box ` +
                  `(${over.outside}px of ink outside it)`,
@@ -2117,7 +2295,13 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
       VT_ISOLATION_STYLE_ID);
 
     const { bail, plan } = planViewTransitionBake(walk, solved, crossFade);
-    if (bail) return { status: 'bailed', reason: bail };
+    // The dirty-probe channel rides the BAIL return only. It cannot ride the
+    // baked one: a dirty leaf's solve is an error, `wanted` and the plan
+    // consult the same painted/cross-fade predicates over the same walk, so
+    // every wanted leaf IS consulted and an error among them always bails —
+    // the retry can therefore never re-drive over an applied (mutated)
+    // fixture.
+    if (bail) return { status: 'bailed', reason: bail, dirtyProbe: dirtyProbes[0] ?? null };
     // The frame-ring sample (wave-41; see frameRingColor). Taken AFTER the
     // plan is accepted so bailed tests never pay the screenshot, and AFTER
     // the isolation sheet was removed above so this is the SETTLED page —
@@ -2151,7 +2335,10 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
     // cascade). Deliberately NOT converted into a `bailed` status: a bail is a
     // documented scope boundary this module chose, and dressing a browser
     // fault up as one would hide a broken environment behind 195 plausible
-    // declines. It stays an error; only the CASCADE is fixed.
+    // declines. It stays an error; only the CASCADE is fixed — though the
+    // outer loop in viewTransitionBakeFixture may spend its ONE re-drive on
+    // it first (wave-45 X5; the wave-44 gate lost fractional-box-old to
+    // exactly one such transient), on the fresh browser this recycle makes.
     discardWedgedBrowser();
     throw err;
   } finally {

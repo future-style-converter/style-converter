@@ -118,6 +118,15 @@ object MarginApplier {
      * the border box would be off by the difference. No corpus fixture
      * combines `backdrop-filter` with a percentage margin; if one arrives, the
      * fix is to thread the resolved insets from the composed lane instead.
+     *
+     * SECOND KNOWN LIMIT (wave-45 lane X4, same shape): StyleApplier's
+     * backdrop read calls this with the DEFAULT context while the layout
+     * step now threads the element's real one (LayoutFacade → applyMargin),
+     * so a preserved em margin (MarginExtractor's prebaked-em shape) on a
+     * monospace-quirk element would resolve 16-basis here vs 13-basis in
+     * layout. No wave-44 capture combines `backdrop-filter` with a quirk em
+     * margin; the fix when one arrives is to hoist buildSpacingContext above
+     * StyleApplier's step 3 and pass it into the resolvedInsets read.
      */
     fun resolvedInsets(
         config: MarginConfig,

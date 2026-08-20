@@ -228,6 +228,15 @@ import { extractRefHref } from './extract-fixture.mjs';
 // use, or two nested tests with equal basenames would share one cache slot —
 // the first render's PNG silently serving as the second test's reference.
 import { fixtureStem } from './safe-name.mjs';
+// wave-45 lane X6 — the Rule-43 NOTO BUNDLING PILOT (see noto-pilot.mjs's
+// banner). Every function is env-gated on TITAN_NOTO_PILOT=1 and collapses
+// to identity/'' with the flag unset, so the default ref contract below is
+// byte-identical (pinned by noto-pilot.test.mjs). With the flag ON: the
+// canvas rev gains a '-notopilot' suffix (pilot refs live in their own tree,
+// the frozen refs are never touched), the injected stack gains the pilot
+// Noto families after 'Inter', and the staged pilot faces ride the same
+// data-URI @font-face delivery Inter already uses.
+import { notoPilotRevSuffix, notoPilotStack, notoPilotFontFaceCss } from './noto-pilot.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -270,7 +279,14 @@ export const CANVAS_BG = '#FFFFFF';
 // the WRONG ink/face/rhythm and must never reach a live diff, so the rev bump
 // retires the whole tree; refs of pages with no root-scope text declaration
 // re-render byte-identically, they just pay the lazy re-render once.
-export const CANVAS_REV = 'white-black-ink-font-lh-imgpad-htmlpins';
+// '-notopilot' (wave-45 lane X6, APPENDED ONLY UNDER TITAN_NOTO_PILOT=1 —
+// '' otherwise, so the default rev string is byte-identical): the pilot's
+// sixth leg is the extended font contract (pilot Noto families after
+// 'Inter' + their staged @font-face payloads). Pilot refs render into their
+// own '…-notopilot' tree so they can never be adopted by — or leak into —
+// the frozen production scorer view; whether this leg ever becomes a REAL
+// corpus-wide rev bump is exactly the wave-46 decision the pilot measures.
+export const CANVAS_REV = `white-black-ink-font-lh-imgpad-htmlpins${notoPilotRevSuffix()}`;
 // wave-16 POST-LOAD: exported (was module-private) so post-load-extract.mjs
 // can frame the TEST page in the identical canvas the ref capture uses —
 // computed geometry snapshotted under a different pad would bake a
@@ -453,10 +469,23 @@ export async function interFontFaceCss() {
  *  async because the embedded @font-face payloads are read from disk once
  *  per process (interFontFaceCss memoises them). */
 export async function canvasFrameCss() {
+  // wave-45 lane X6: both pilot calls are env-gated identities by default —
+  // notoPilotFontFaceCss() is '' and notoPilotStack() returns its input
+  // unchanged unless TITAN_NOTO_PILOT=1, so the flag-off sheet is
+  // byte-identical to the pre-pilot literal. With the flag on, the pilot
+  // faces ride the SAME data-URI delivery as Inter and the stack gains the
+  // pilot families AFTER 'Inter' (Latin keeps resolving exactly where it
+  // does today; only the fall-through the frozen stack hands to the
+  // platform cascade is caught). Reading env at CALL time (not module load)
+  // is deliberate: the two TEST-page bake paths (post-load-extract.mjs,
+  // bidi-bake.mjs) inject this same sheet, so a pilot extraction run bakes
+  // its geometry under the same faces the pilot ref rasterises — the
+  // corpus-v4.1 font-pin lesson applied to the pilot itself.
   return `
       ${await interFontFaceCss()}
+      ${await notoPilotFontFaceCss(process.env, { readFile: fs.readFile, existsSync })}
       :where(html) { color: #000;
-                     font-family: ${REF_FONT_STACK};
+                     font-family: ${notoPilotStack(REF_FONT_STACK)};
                      line-height: ${REF_LINE_HEIGHT}; }
       :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }
       :where(body) { display: flow-root; box-sizing: border-box;

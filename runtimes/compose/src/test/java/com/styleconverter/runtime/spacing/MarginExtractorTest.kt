@@ -86,6 +86,48 @@ class MarginExtractorTest {
         assertNull(cfg.top)
     }
 
+    // ── wave-45 lane X4: the prebaked-em preservation ────────────────────
+    // DynamicValueResolver's pre-pass adds a resolved px NEXT TO an em
+    // original (shape `{"px":N,"original":{"v":V,"u":"EM"}}`); the
+    // extractor must keep the em identity (with the prebake as fallback)
+    // so the applier can re-resolve against the element's OWN computed
+    // font-size (css-values-4 §5.1.1 — the CSS Fonts 4 §3.5 monospace-13
+    // quirk case measured on wave-44 discard-multicol-001).
+
+    @Test fun `prebaked em keeps Relative with the prebake as pxFallback`() {
+        // The exact post-resolver wire of discard-multicol-001's div
+        // (margin: 1em prebaked at the 16px default basis).
+        val cfg = MarginExtractor.extract(listOf(
+            pair("MarginTop", """{"px":16.0,"original":{"v":1.0,"u":"EM"}}"""),
+        ))
+        assertEquals(
+            MarginValue.Length(LengthValue.Relative(1.0, LengthUnit.EM, 16.0)),
+            cfg.top,
+        )
+    }
+
+    @Test fun `prebaked em inside the typed length wrapper is preserved too`() {
+        // The `{"type":"length"}` envelope variant the pre-pass preserves.
+        val cfg = MarginExtractor.extract(listOf(
+            pair("MarginTop", """{"type":"length","px":46.0,"original":{"v":0.5,"u":"EM"}}"""),
+        ))
+        assertEquals(
+            MarginValue.Length(LengthValue.Relative(0.5, LengthUnit.EM, 46.0)),
+            cfg.top,
+        )
+    }
+
+    @Test fun `prebaked NON-em originals keep the canonical Exact px`() {
+        // Absolute source units (converter emits px beside e.g. PT): px is
+        // canonical, exactly as before wave 45 — only EM re-resolves.
+        val cfg = MarginExtractor.extract(listOf(
+            pair("MarginTop", """{"px":16.0,"original":{"v":12.0,"u":"PT"}}"""),
+            pair("MarginBottom", """{"px":39.0,"original":{"v":10.0,"u":"VW"}}"""),
+        ))
+        assertEquals(MarginValue.Length(LengthValue.Exact(16.0)), cfg.top)
+        assertEquals(MarginValue.Length(LengthValue.Exact(39.0)), cfg.bottom)
+    }
+
     @Test fun `isMarginProperty matches all 8 longhands`() {
         val all = listOf(
             "MarginTop", "MarginRight", "MarginBottom", "MarginLeft",

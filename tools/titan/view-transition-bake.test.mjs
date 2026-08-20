@@ -32,7 +32,12 @@
 //  10. source-wiring pins for the extract-fixture.mjs CLI integration —
 //      the bail-to-static guarantee on a browser fault, the wedged-browser
 //      recycle, and a doc-drift pin holding the module header and
-//      section-runner.sh to the same story about whether VT_BAKE is pinned.
+//      section-runner.sh to the same story about whether VT_BAKE is pinned;
+//  11. the wave-45 X5 DIRTY-PROBE classifier + bounded re-drive — the
+//      measured populations (genuine overflow vs the wave-41 whole-complement
+//      dirty read), a synthetic dirty-probe injection at the pixel level, and
+//      source pins holding the retry to one bounded, logged re-drive that
+//      clean drives never enter.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -55,6 +60,7 @@ import {
   VT_OVERFLOW_INK_TOLERANCE_PX, cropComposite, probeSnapshotOverflow,
   VT_TWO_COLOUR_MIN_AREA_PX, VT_TWO_COLOUR_EDGE_SLACK_PX,
   twoColourKind, rectComplement, snapshotBoxes, frameRingColor,
+  VT_DIRTY_PROBE_COMPLEMENT_FRACTION, VT_MAX_REDRIVES, isDirtyOverflowProbe,
 } from './view-transition-bake.mjs';
 import {
   viewTransitionBakeTrigger,
@@ -1449,4 +1455,124 @@ test('VT wiring: the header and section-runner.sh AGREE about whether VT_BAKE is
   // The two pinned bakes are still pinned — this test must not pass by the
   // whole activation block having been deleted.
   assert.match(runner, /POST_LOAD_EXTRACT=1 BIDI_BAKE=1/);
+});
+
+// ── 11. wave-45 X5: dirty-probe classification + the bounded re-drive ───────
+
+test('VT dirty probe: the tunables are the measured boundary and the evidence-backed bound', () => {
+  // 0.5 of the complement: two orders of magnitude above every genuine
+  // overflow ever measured (≤1.3 %) and a factor of two below the one
+  // observed dirty read (100 %) — see the constant's doc block.
+  assert.equal(VT_DIRTY_PROBE_COMPLEMENT_FRACTION, 0.5);
+  // ONE re-drive: every observed instance of the flake is a one-off that
+  // re-drives clean (wave-41 4/4, wave-45 X5 12/12); more retries could only
+  // mask a reproducible fault.
+  assert.equal(VT_MAX_REDRIVES, 1);
+});
+
+test('VT dirty probe: the wave-41 reading IS the whole complement, and classifies dirty', () => {
+  const win = { width: 200, height: 100 };
+  const viewport = { width: 358, height: 568 };
+  // The arithmetic fingerprint from the wave-41 fullcap2 extract log:
+  // `snapshot overflows its 200x100 box (183344px of ink outside it)` —
+  // 183 344 is EXACTLY viewport minus window, i.e. every complement pixel
+  // solved as ink, which no element's ink overflow can produce.
+  assert.equal(358 * 568 - 200 * 100, 183344);
+  assert.equal(isDirtyOverflowProbe(183344, win, viewport), true);
+});
+
+test('VT dirty probe: every GENUINE overflow ever measured stays a bail, never a retry', () => {
+  const viewport = { width: 358, height: 568 };
+  // fractional-box-with-overflow-children: 225 px outside a 101x51 window
+  // (wave-43 AND wave-44 extract logs — stable across gates, i.e. real ink).
+  assert.equal(isDirtyOverflowProbe(225, { width: 101, height: 51 }, viewport), false);
+  // fractional-box-with-shadow: 624 px outside the same window.
+  assert.equal(isDirtyOverflowProbe(624, { width: 101, height: 51 }, viewport), false);
+  // The founding crop case (content-with-child-with-transparent-background):
+  // children painting 75 px past a 50x50 box leak ~2 500 px.
+  assert.equal(isDirtyOverflowProbe(2500, { width: 50, height: 50 }, viewport), false);
+});
+
+test('VT dirty probe: the boundary is ≥ half the complement, and an empty complement is never dirty', () => {
+  const win = { width: 100, height: 100 };
+  const viewport = { width: 200, height: 100 };
+  const complement = 200 * 100 - 100 * 100;              // 10 000 px²
+  // Exactly at the boundary → dirty (the ≥ in the classifier).
+  assert.equal(isDirtyOverflowProbe(complement / 2, win, viewport), true);
+  // One pixel under → genuine-overflow territory, bail as before.
+  assert.equal(isDirtyOverflowProbe(complement / 2 - 1, win, viewport), false);
+  // A window that fills the viewport (the root group's case) has no
+  // complement to read — false by construction, not 0/0.
+  assert.equal(isDirtyOverflowProbe(0, { width: 358, height: 568 }, { width: 358, height: 568 }), false);
+});
+
+test('VT dirty probe: SYNTHETIC INJECTION — an un-isolated composite reads its whole complement as ink', () => {
+  // The wave-41 mechanism at the pixel level: the "black-backdrop" composite
+  // raced the isolation restyle and shows the UN-ISOLATED page (the white
+  // ref canvas), while the white composite is properly isolated. A complement
+  // pixel then solves α = 1 − (w−b)/255 = 1 − (255−255)/255 = 1 — "painted" —
+  // so the probe reads EXACTLY the full complement, the dirty fingerprint.
+  const W = 20, H = 10;                                   // miniature viewport
+  const win = { width: 5, height: 4 };                    // top-left window
+  const mk = (pix) => {
+    const png = new PNG({ width: W, height: H });
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const v = pix(x, y);
+      const o = (y * W + x) * 4;
+      png.data[o] = v; png.data[o + 1] = v; png.data[o + 2] = v; png.data[o + 3] = 255;
+    }
+    return PNG.sync.write(png);
+  };
+  const inWin = (x, y) => x < win.width && y < win.height;
+  // DIRTY pair: black shot shows the page's white canvas everywhere (the
+  // restyle never painted); white shot is a proper isolation (white backdrop
+  // outside the window, a grey snapshot inside it).
+  const dirtyBlack = mk(() => 255);
+  const cleanWhite = mk((x, y) => (inWin(x, y) ? 128 : 255));
+  const dirty = probeSnapshotOverflow(dirtyBlack, cleanWhite, win);
+  assert.equal(dirty.outside, W * H - win.width * win.height,
+    'every complement pixel must solve as ink when one composite is un-isolated');
+  assert.equal(isDirtyOverflowProbe(dirty.outside, win, { width: W, height: H }), true);
+  // CLEAN pair over the same geometry: black backdrop outside on the black
+  // shot, white outside on the white shot → zero complement ink, no retry.
+  const cleanBlack = mk((x, y) => (inWin(x, y) ? 128 : 0));
+  const clean = probeSnapshotOverflow(cleanBlack, cleanWhite, win);
+  assert.equal(clean.outside, 0);
+  assert.equal(isDirtyOverflowProbe(clean.outside, win, { width: W, height: H }), false);
+});
+
+test('VT re-drive wiring: bounded loop, both triggers logged, clean drives pass straight through', () => {
+  // The driver needs a live browser, so these are source pins in the
+  // section-10 style. What they hold: (a) the loop's ONLY early exits are the
+  // final `return result` and the rethrow, both bound-gated, so the last
+  // drive's outcome always escapes; (b) both retry triggers — the thrown
+  // drive and the dirty probe — are gated on the SAME bound and both log to
+  // stderr with the test path; (c) a clean drive (no throw, no dirty probe)
+  // returns its first outcome untouched, which is what makes clean bakes
+  // byte-identical through the retry path.
+  const src = readFileSync(join(__dirname, 'view-transition-bake.mjs'), 'utf8');
+  // (a) the unbounded-for-with-in-loop-bound shape, and the final rethrow.
+  assert.match(src, /for \(let drive = 0; ; drive\+\+\) \{/);
+  assert.match(src, /if \(drive < VT_MAX_REDRIVES\) \{\s*\n\s*console\.warn\(`view-transition-bake: re-drive/);
+  assert.match(src, /continue;\s*\n\s*\}\s*\n(\s*\/\/[^\n]*\n)*\s*throw err;/);
+  // (b) the dirty-probe trigger uses the same bound and warns with testRel.
+  assert.match(src, /if \(outcome\.dirtyProbe && drive < VT_MAX_REDRIVES\) \{/);
+  assert.ok(src.split('console.warn(`view-transition-bake: re-drive ${drive + 1}/${VT_MAX_REDRIVES} for ${testRel}').length - 1 === 2,
+    'both retry triggers must log the same greppable re-drive line');
+  // (c) the internal channel is stripped before the caller sees the outcome.
+  assert.match(src, /const \{ dirtyProbe, \.\.\.result \} = outcome;\s*\n\s*return result;/);
+});
+
+test('VT re-drive wiring: the dirty probe is classified ONLY on the overflow-bail branch and rides the bail return', () => {
+  const src = readFileSync(join(__dirname, 'view-transition-bake.mjs'), 'utf8');
+  // Classified exactly where the overflow bail is minted — a dirty read still
+  // records the solve error, so the drive's OWN outcome stays the honest bail
+  // (a second dirty read on the re-drive bails exactly as wave-41 did).
+  assert.match(src, /if \(isDirtyOverflowProbe\(over\.outside, win, viewport\)\) \{\s*\n\s*dirtyProbes\.push/);
+  // …and the channel rides the plan-bail return only: a dirty leaf's solve is
+  // an error and always bails, so a retry can never re-drive over an applied
+  // (mutated) fixture.
+  assert.match(src, /return \{ status: 'bailed', reason: bail, dirtyProbe: dirtyProbes\[0\] \?\? null \};/);
+  assert.equal(src.split('dirtyProbe: dirtyProbes[0]').length - 1, 1,
+    'exactly one return carries the channel — the baked path must never');
 });

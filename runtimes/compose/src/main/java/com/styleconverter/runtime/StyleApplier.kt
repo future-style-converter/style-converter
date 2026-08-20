@@ -553,8 +553,11 @@ object StyleApplier {
         // so the backdrop draw node's box is the MARGIN box — while
         // filter-effects-2 §2 samples and clips the BORDER box. Read from
         // MarginApplier.resolvedInsets, i.e. literally the numbers step 4 is
-        // about to add, with the SAME collapse override and the SAME default
-        // SpacingContext SpacingApplier.applyMargin uses.
+        // about to add, with the SAME collapse override. NOTE (wave-45 X4):
+        // applyMargin now receives the facade-threaded SpacingContext while
+        // this read keeps the DEFAULT context — the divergence MarginApplier
+        // documents; only pre-pass-kept units (ch/ex/lh/ic/cap) can differ,
+        // and no corpus backdrop carries one (skeptic S5's enumeration).
         result = EffectsFacade.apply(
             result, config.effects, config.borders.radius,
             elementAlpha = config.colors.opacity ?: 1f,

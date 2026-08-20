@@ -1474,6 +1474,15 @@ private fun ComposedCaptureCanvas(
                 // dotted-001's three `margin: .5em; font-size: 92px` divs
                 // bailed on the relative flavor and painted 46+46 = 92px of
                 // inter-div space where the ref collapses to ONE 46px gap.
+                // Wave 45 (H0): a root with an em margin but NO declared
+                // FontSize no longer bails either — ownFontSizePx resolves
+                // the UA-default ladder (MonospaceUAFontSize's 13px quirk,
+                // else 16px), because the pre-fix E4 bail sent such roots
+                // down R4/R5 where the fold emitted the UA gap AND
+                // MarginApplier rendered the full declared margin — a
+                // measured +16px double-space on floats-clear-multicol-002
+                // and discard-multicol-001. Declared var()/calc()/relative
+                // sizes still bail (E4 kept, narrowed).
                 // StaticEmMargin.verticalEdges is a strict SUPERSET of
                 // BlockMarginCollapse.blockMarginsOrNull on non-em wires
                 // (pin E8), so every wave-19 R/S/T value is unchanged; the

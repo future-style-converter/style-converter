@@ -99,16 +99,45 @@ class InlineRunFoldTest {
     }
 
     @Test
-    fun `inherit-computed-001 - empty em drops and its flanking spaces collapse to one`() {
+    fun `inherit-computed-001 - the painted empty em becomes ONE atom marker in the string`() {
+        // Wave 45 (lane X2) — the ATOM RING on the verbatim wire: the em's
+        // `border: inherit` (wire dialect: four Border*Color "inherit"
+        // longhands, style/width dropped by BorderExpander) resolves
+        // against the host's `border: medium solid` to a painted ring, so
+        // the fold now emits string + one placeholder instead of a drop.
         val outcome = foldOf(root(INHERIT_COMPUTED_001, 0))
         val folded = outcome as InlineRunFold.Outcome.Folded
-        // "… size " + <em></em> + " and …" — css-text-3 §4.1.1 collapses
-        // the space AFTER the empty inline into the one before it, exactly
-        // as the Chromium ref paints "size ▮and" with a single word space.
-        assertEquals("This line is all in one font size and there is no red.", folded.text)
-        // The empty <em> (its Color/border-color payload is paint-inert
-        // without glyphs or border styles) is dropped — and REPORTED.
-        assertEquals(1, folded.droppedEmptyMembers)
+        // "… size " + <em/> + " and …": the space BEFORE the em survives,
+        // the one after it collapses THROUGH the atom marker (css-text-3
+        // §4.1.1 crosses element boundaries) — exactly the Chromium ref's
+        // "size ▮and" paint order.
+        assertEquals(
+            "This line is all in one font size \uFFFCand there is no red.",
+            folded.text)
+        // One atom, bound to the em (host child index 1), no drops left.
+        assertEquals(1, folded.atoms.size)
+        assertEquals(0, folded.droppedEmptyMembers)
+        assertEquals(1, folded.atoms[0].memberIndex)
+        // The k-th marker ↔ atoms[k] contract: exactly one marker, at the
+        // position the collapse math left it.
+        assertEquals(1, folded.text.count { it == InlineAtomRing.MARKER })
+        // The decoded ring: every side inherits the host's computed border
+        // — solid, `medium` (3px, no declared width), currentColor (the
+        // host's BorderColor "medium" mis-expansion is unparseable and the
+        // host declares no `color`, so the sentinel defers to the ink).
+        val spec = folded.atoms[0].spec
+        listOf(spec.top, spec.right, spec.bottom, spec.left).forEach { side ->
+            assertEquals(3f, side.widthPx)
+            assertEquals("SOLID", side.style)
+            assertEquals(InlineAtomRing.Paint.CurrentColor, side.paint)
+        }
+        // GEOMETRY PINNED — the ref's measured ring at the host's resolved
+        // 19.2px (`font-size: larger` = 16 × 1.2): border-box 6px wide
+        // (3+0+3), 29.23px tall (Inter (1984+494)/2048 × 19.2 + 3 + 3) —
+        // the wave44-final ref rasterises it 6×29 at x=289..294, y=36..64.
+        val (ringW, ringH) = InlineAtomRing.ringSizePx(spec, 19.2f)
+        assertEquals(6f, ringW, 0.001f)
+        assertEquals(29.231f, ringH, 0.01f)
         // No member declared Hyphens → nothing adopted, nothing appended:
         // the paragraph property list is the host's own, unchanged.
         assertEquals(false, folded.adoptedHyphens)
@@ -247,6 +276,112 @@ class InlineRunFoldTest {
             hostEffectiveLang = null,
         )
         assertEquals("contains-tab", (tab as InlineRunFold.Outcome.Bailed).reason)
+    }
+
+    // ── wave 45 (lane X2) — the ATOM RING gate, in isolation ─────────────
+
+    /** A JSON border-color payload with a resolved sRGB (the wire shape). */
+    private fun srgb(r: Double, g: Double, b: Double) = kotlinx.serialization.json.buildJsonObject {
+        put("srgb", kotlinx.serialization.json.buildJsonObject {
+            put("r", JsonPrimitive(r)); put("g", JsonPrimitive(g)); put("b", JsonPrimitive(b))
+        })
+    }
+
+    @Test
+    fun `atom ring - a paint-inert empty member still drops (no style anywhere)`() {
+        // Color + a REAL border-color but no border-style on member or
+        // host: css-backgrounds-3 §3.2 paints nothing → the wave-44 drop
+        // path is preserved byte-identically (dropped and REPORTED).
+        val outcome = InlineRunFold.fold(
+            entries = entries("a "),
+            children = listOf(member("em", null, listOf(
+                IRProperty("Color", srgb(1.0, 0.0, 0.0)),
+                IRProperty("BorderTopColor", srgb(0.0, 0.0, 0.0)),
+            ))),
+            hostProperties = emptyList(),
+            hostEffectiveLang = null,
+        )
+        val folded = outcome as InlineRunFold.Outcome.Folded
+        assertEquals("a", folded.text.trimEnd())
+        assertEquals(1, folded.droppedEmptyMembers)
+        assertEquals(0, folded.atoms.size)
+    }
+
+    @Test
+    fun `atom ring - an empty member with its OWN styled border becomes an atom`() {
+        // Declared style + width + color on the member itself (no dialect
+        // decode involved): a 2px solid red top-only ring.
+        val outcome = InlineRunFold.fold(
+            entries = entries("a "),
+            children = listOf(member("span", null, listOf(
+                IRProperty("BorderTopStyle", JsonPrimitive("SOLID")),
+                IRProperty("BorderTopWidth", kotlinx.serialization.json.buildJsonObject { put("px", JsonPrimitive(2)) }),
+                IRProperty("BorderTopColor", srgb(1.0, 0.0, 0.0)),
+            ))),
+            hostProperties = emptyList(),
+            hostEffectiveLang = null,
+        )
+        val folded = outcome as InlineRunFold.Outcome.Folded
+        // The marker occupies the member's slot; nothing was dropped.
+        assertEquals("a \uFFFC", folded.text)
+        assertEquals(1, folded.atoms.size)
+        assertEquals(0, folded.droppedEmptyMembers)
+        val spec = folded.atoms[0].spec
+        // The styled side: declared width + concrete declared color.
+        assertEquals(2f, spec.top.widthPx)
+        assertEquals(InlineAtomRing.Paint.Concrete(1f, 0f, 0f, 1f), spec.top.paint)
+        // Unstyled sides compute to width 0 (§3.1) — they never paint.
+        assertEquals(0f, spec.right.widthPx)
+        assertEquals(0f, spec.bottom.widthPx)
+        assertEquals(0f, spec.left.widthPx)
+    }
+
+    @Test
+    fun `atom ring - border-inherit over an unpainted host stays a drop`() {
+        // The dialect decode routes the side to the host — whose computed
+        // border is styleless → the inherited side is styleless too
+        // (css-cascade-4 §7.3): paint-inert, so the drop path is kept.
+        val outcome = InlineRunFold.fold(
+            entries = entries("a "),
+            children = listOf(member("em", null, listOf(
+                IRProperty("BorderTopColor", kotlinx.serialization.json.buildJsonObject { put("original", JsonPrimitive("inherit")) }),
+            ))),
+            hostProperties = emptyList(),
+            hostEffectiveLang = null,
+        )
+        val folded = outcome as InlineRunFold.Outcome.Folded
+        assertEquals(1, folded.droppedEmptyMembers)
+        assertEquals(0, folded.atoms.size)
+    }
+
+    @Test
+    fun `atom ring - a strut-bearing painted empty member still bails`() {
+        // FontSize changes the strut AND the ring's content height — the
+        // atom admission set excludes it, so the member bails even though
+        // its border would paint.
+        val outcome = InlineRunFold.fold(
+            entries = entries("a "),
+            children = listOf(member("em", null, listOf(
+                IRProperty("BorderTopStyle", JsonPrimitive("SOLID")),
+                IRProperty("FontSize", JsonPrimitive(32)),
+            ))),
+            hostProperties = emptyList(),
+            hostEffectiveLang = null,
+        )
+        assertEquals("member-prop:FontSize", (outcome as InlineRunFold.Outcome.Bailed).reason)
+    }
+
+    @Test
+    fun `atom ring - a source U+FFFC bails the fold (marker alias guard)`() {
+        // A literal OBJECT REPLACEMENT CHARACTER in source text would be
+        // indistinguishable from an atom marker — the fold declines.
+        val outcome = InlineRunFold.fold(
+            entries = entries("a \uFFFC "),
+            children = listOf(member("span", "b")),
+            hostProperties = emptyList(),
+            hostEffectiveLang = null,
+        )
+        assertEquals("contains-object-replacement", (outcome as InlineRunFold.Outcome.Bailed).reason)
     }
 
     @Test
