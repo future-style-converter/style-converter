@@ -25,14 +25,21 @@ enum FontFamilyExtractor {
                     // An entry can be an object {"name":"Helvetica"} or
                     // {"keyword":"serif"} or a bare string.
                     if case .object(let o) = entry {
-                        if let n = o["name"]?.stringValue { cfg.names.append(n) }
+                        if let n = o["name"]?.stringValue { cfg.names.append(n); cfg.walk.append(n) }
                         if let kw = o["keyword"]?.stringValue {
                             classifyGeneric(kw, into: &cfg)
+                            // wave-46 lane Y7: the keyword keeps its place in
+                            // the §5.2 walk (FontFamilyConfig.walk) so a
+                            // document face registered under that name is
+                            // found where the author put the generic.
+                            cfg.walk.append(kw)
                         }
                     } else if let s = entry.stringValue {
                         // Bare string: either a name or a generic keyword.
                         classifyGeneric(s, into: &cfg)
                         if !isGeneric(s) { cfg.names.append(s) }
+                        // wave-46 lane Y7: generics included — see `walk`.
+                        cfg.walk.append(s)
                     }
                 }
             }
@@ -40,6 +47,7 @@ enum FontFamilyExtractor {
             else if let s = prop.data.stringValue {
                 classifyGeneric(s, into: &cfg)
                 if !isGeneric(s) { cfg.names.append(s) }
+                cfg.walk.append(s)   // wave-46 lane Y7: generics included — see `walk`.
             }
         }
         return touched ? cfg : nil

@@ -21,8 +21,9 @@ enum ClipShape: Equatable {
     // that resolve against the box's own dimensions at draw time —
     // can't be flattened into `cornerRadius` (a CGFloat in points)
     // without knowing the rect, so the applier picks one of the two.
-    case inset(top: CGFloat, right: CGFloat, bottom: CGFloat,
-               left: CGFloat, cornerRadius: CGFloat,
+    // The four sides ride in `ClipInsetSides` (points + optional
+    // reference-box fraction each — wave 46, lane Y4).
+    case inset(sides: ClipInsetSides, cornerRadius: CGFloat,
                cornerRadiusFraction: CGFloat?)
     // `circle(radius at cx cy)` — radius is either a length / percent OR
     // a `<shape-radius>` keyword (`closest-side` / `farthest-side` per
@@ -55,10 +56,61 @@ enum ClipShape: Equatable {
     // `clip-path: url(#id)` — references an SVG clipPath. No SwiftUI
     // equivalent — we carry the id so the applier can log / skip.
     case url(id: String)
-    // `clip-path: border-box` etc. — just a geometry-box keyword with no
-    // shape. We treat these as identity for now (no clipping), matching
-    // CSS behaviour when no shape is specified.
+    // `clip-path: border-box` etc. — a geometry-box keyword with no
+    // shape. css-masking-1 §7.1: the clip region IS that reference box,
+    // corner curves included (a `border-radius: 50px` border-box clips
+    // to the circle; the margin box's corners follow css-shapes-1 §4).
+    // Which box is in `ClipConfig.geometryBox`. Wave 46 (lane Y4):
+    // before this the case was an identity no-op, so WPT clip-path-
+    // marginBox-1b/1c/1d's 200px outline flooded the canvas.
     case geometryBoxOnly(box: String)
+}
+
+// css-shapes-1 §3.1 `inset()` sides. Each side is a `<length-percentage>`
+// measured inward from the REFERENCE BOX edge: the points value plus an
+// optional 0…1 fraction of the box's height (top/bottom) or width
+// (left/right), resolved by InsetShape at draw time. Before wave 46 a
+// percent side silently read as 0 pt (WPT clip-path-inset-round-percent:
+// `inset(80% 0 0 round 8%)` rendered the whole box).
+struct ClipInsetSides: Equatable {
+    var top: CGFloat = 0
+    var right: CGFloat = 0
+    var bottom: CGFloat = 0
+    var left: CGFloat = 0
+    var topFraction: CGFloat? = nil
+    var rightFraction: CGFloat? = nil
+    var bottomFraction: CGFloat? = nil
+    var leftFraction: CGFloat? = nil
+}
+
+// css-masking-1 §7.1 `<geometry-box>` — the reference box every basic
+// shape resolves against (and the clip itself for the bare keyword
+// form). The SVG-only fill-box / stroke-box / view-box keywords map per
+// the spec's used-value rule for an element with a CSS layout box
+// (fill → content, stroke / view → border) in the extractor.
+enum ClipGeometryBox: Equatable {
+    case marginBox, borderBox, paddingBox, contentBox
+}
+
+// The element's own box metrics, read from the same IR the layout
+// chain consumes (ClipExtractor.boxMetrics), so the applier can derive
+// the margin / padding / content box from the clip's rect — which on
+// iOS is the BORDER box: `.engineClipPath` sits inside the margin
+// modifier and outside padding/borders (StyleBuilder.applyGroupEffects).
+struct ClipBoxMetrics: Equatable {
+    // Declared margins in points (negative allowed; `auto` reads as 0).
+    var marginTop: CGFloat = 0, marginRight: CGFloat = 0
+    var marginBottom: CGFloat = 0, marginLeft: CGFloat = 0
+    // USED border widths — 0 for a none/hidden-style side (CSS2 §8.5.3).
+    var borderTop: CGFloat = 0, borderRight: CGFloat = 0
+    var borderBottom: CGFloat = 0, borderLeft: CGFloat = 0
+    // Resolved paddings in points.
+    var paddingTop: CGFloat = 0, paddingRight: CGFloat = 0
+    var paddingBottom: CGFloat = 0, paddingLeft: CGFloat = 0
+    // The border box's corner curves (percent axes resolve at draw time).
+    var radius: BorderRadiusConfig = BorderRadiusConfig()
+    // No metrics: every reference box coincides with the clip rect.
+    static let none = ClipBoxMetrics()
 }
 
 // CSS Shapes 1 §3.1 `<shape-radius>` family. A single axis of a circle
@@ -116,8 +168,22 @@ struct ClipConfig: Equatable {
     // Primary clip-path value. `nil` ≡ not set; `.some(.none)` ≡
     // explicit `clip-path: none`.
     var shape: ClipShape? = nil
+    // css-masking-1 §7.1 reference box — border-box unless the wire
+    // named another (alone or next to a shape). Wave 46 (lane Y4):
+    // before this the keyword was read and dropped ("documented TODO"),
+    // so `circle(farthest-side) content-box` clipped to the 180px border
+    // box instead of the 100px content box (WPT contentBox-1a).
+    var geometryBox: ClipGeometryBox = .borderBox
+    // The box metrics the reference box derives from (see the struct).
+    var box: ClipBoxMetrics = .none
     // Winding rule (only consulted for .polygon/.path shapes).
     var rule: ClipRule = .nonzero
+    // css-shapes-1 §3.1 `path(<fill-rule>?, <string>)` — the fill rule
+    // carried INSIDE the path() function (the IR `rule` key), distinct
+    // from the `clip-rule` property above which only applies to SVG
+    // content. WPT clip-path-path-002 is `path(evenodd, …)` with no
+    // clip-rule declared. nil = nonzero (the function's default).
+    var pathFillRule: ClipRule? = nil
     // Legacy clip rectangle, applied via `.clipShape(Rectangle())`
     // after inset framing. Mutually exclusive with `shape` in practice.
     var legacy: LegacyClip? = nil

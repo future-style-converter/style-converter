@@ -91,6 +91,27 @@ fun uaVerticalBlockMargins(sourceTag: String?): Pair<Float, Float> =
     }
 
 /**
+ * wave-46 lane Y8 — the same UA margins resolved against the element's
+ * OWN computed font-size, the em base css-values-4 §5.1.1 prescribes
+ * (HTML §15.3 declares every UA block margin in em; inherit-computed-001's
+ * `<p>` with `font-size: larger` gets 1em × 19.2 = 19.2px in the browser
+ * -ref, where the fixed table above gave 16 and painted the box 3px high).
+ *
+ * @param ownFontSizePx the element's computed size
+ *   ([UaBlockMarginFontBasis.ownFontSizePx]); NULL = "no own font signal"
+ *   → the 16px-root table above VERBATIM, so every existing pin and every
+ *   corpus element without a font-size declaration is byte-identical.
+ */
+fun uaVerticalBlockMargins(sourceTag: String?, ownFontSizePx: Float?): Pair<Float, Float> {
+    // Identity rung: no basis → the Round-4 ref-calibrated table.
+    if (ownFontSizePx == null) return uaVerticalBlockMargins(sourceTag)
+    // The UA sheet's em factor for the tag × the element's own size; tags
+    // with no UA block margin stay (0, 0) exactly as in the table.
+    val px = UaBlockMarginFontBasis.uaBlockMarginEm(sourceTag)?.times(ownFontSizePx) ?: 0f
+    return px to px
+}
+
+/**
  * The block-margin-TOP longhand names the wire can carry. The converter
  * fully EXPANDS the `margin` / `margin-block` shorthands (MarginExtractor
  * recognises only the eight longhands), so this two-name set is exactly
@@ -129,19 +150,26 @@ fun declaresUaChildBottom(propertyTypes: Collection<String>): Boolean =
  *   type-name based rather than value based.
  * @param enabled false → return [declared] VERBATIM (the dark-stage 327
  *   identity branch; see the file header).
+ * @param ownFontSizePx wave-46 lane Y8: the child's own computed font-size
+ *   for the em basis of its UA margin (see the two-arg
+ *   [uaVerticalBlockMargins]); null (every caller today — the renderer's
+ *   plan builder has no inheritance channel into this fold yet) keeps the
+ *   16px-root table, so no existing plan value moves.
  */
 fun uaChildBlockEdges(
     sourceTag: String?,
     propertyTypes: Collection<String>,
     declared: CollapsedMargin,
     enabled: Boolean,
+    ownFontSizePx: Float? = null,
 ): CollapsedMargin {
     // Identity branch: no UA emulation outside WPT capture — the property
     // -fixture pipeline's plans stay bit-for-bit what they were.
     if (!enabled) return declared
     // The tag's UA defaults (0,0 for divs and unknown tags — the common
-    // case, which then also returns `declared` unchanged below).
-    val (uaTop, uaBottom) = uaVerticalBlockMargins(sourceTag)
+    // case, which then also returns `declared` unchanged below), resolved
+    // against the child's own font basis when the caller has one.
+    val (uaTop, uaBottom) = uaVerticalBlockMargins(sourceTag, ownFontSizePx)
     return CollapsedMargin(
         // Top edge: declared wins, else the UA default.
         topPx = if (declaresUaChildTop(propertyTypes)) declared.topPx else uaTop,

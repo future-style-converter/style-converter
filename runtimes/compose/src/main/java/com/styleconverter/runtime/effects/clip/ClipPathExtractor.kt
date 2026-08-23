@@ -82,10 +82,28 @@ object ClipPathExtractor {
         var clipPathShape: ClipShape? = null
         var legacyRect: ClipShape.LegacyRect? = null
         var positionKeyword: String? = null
+        // css-masking-1 §7.1 `<geometry-box>` — border-box unless the wire
+        // names another (alone, or next to a shape).
+        var geometryBox = ClipGeometryBox.BORDER_BOX
         for ((type, data) in properties) {
             when (type) {
                 "ClipPath" -> if (clipPathShape == null && data != null) {
-                    clipPathShape = extractShape(data)
+                    // Wave 46 (lane Y4): the wire has THREE object forms —
+                    // `{type: <shape>…}`, `{geometry-box: <kw>, shape: {…}}`
+                    // and `{geometry-box: <kw>}` (ClipPathSerializers.kt).
+                    // Only the first reached extractShape before; the other
+                    // two returned null and the element rendered UNCLIPPED
+                    // (WPT contentBox-1a: the 180px square instead of the
+                    // 100px circle; marginBox-1b: a 291px outline flood).
+                    val boxKeyword = (data as? JsonObject)?.get("geometry-box")
+                        ?.jsonPrimitive?.contentOrNull
+                    if (boxKeyword != null) {
+                        geometryBox = ClipBoxGeometryExtractor.parseGeometryBox(boxKeyword)
+                        val inner = (data as JsonObject)["shape"]
+                        clipPathShape = if (inner != null) extractShape(inner) else ClipShape.ReferenceBox
+                    } else {
+                        clipPathShape = extractShape(data)
+                    }
                 }
                 // Legacy CSS 2.1 `clip` — IR shape is
                 // {type:"rect", top|right|bottom|left: <length>?} where any
@@ -104,8 +122,16 @@ object ClipPathExtractor {
                 "Position" -> positionKeyword = ValueExtractors.extractKeyword(data)?.uppercase()
             }
         }
-        // Modern `clip-path` always applies (css-masking-1 §7).
-        if (clipPathShape != null) return ClipPathConfig(shape = clipPathShape)
+        // Modern `clip-path` always applies (css-masking-1 §7). The box
+        // metrics are read only once a clip exists — this extractor runs for
+        // every component and the margin/border/padding/radius/position
+        // reads would otherwise tax the whole corpus for nothing.
+        if (clipPathShape != null) {
+            return ClipPathConfig(
+                shape = clipPathShape, geometryBox = geometryBox,
+                box = ClipBoxGeometryExtractor.extract(properties),
+            )
+        }
         // CSS 2.1 §11.1.2: `clip` applies ONLY to absolutely positioned
         // elements (position: absolute | fixed). Chrome/Firefox/WebKit all
         // ignore it on static/relative boxes, and the web harness renders
@@ -113,7 +139,9 @@ object ClipPathExtractor {
         // cut the label text (Effects_BoxModel 0.86, Effects_Decorated 0.7853).
         val isAbsolutelyPositioned = positionKeyword == "ABSOLUTE" || positionKeyword == "FIXED"
         if (legacyRect != null && isAbsolutelyPositioned) {
-            return ClipPathConfig(shape = legacyRect)
+            // The legacy rect measures from the border box too (§11.1.2), so
+            // it rides the same reference-box machinery.
+            return ClipPathConfig(shape = legacyRect, box = ClipBoxGeometryExtractor.extract(properties))
         }
         return ClipPathConfig()
     }
@@ -407,23 +435,39 @@ object ClipPathExtractor {
      * them. `round` is the same key in both schemas.
      */
     private fun extractInset(json: JsonObject): ClipShape.Inset {
-        val top = ValueExtractors.extractDp(json["t"] ?: json["top"]) ?: 0.dp
-        val right = ValueExtractors.extractDp(json["r"] ?: json["right"]) ?: 0.dp
-        val bottom = ValueExtractors.extractDp(json["b"] ?: json["bottom"]) ?: 0.dp
-        val left = ValueExtractors.extractDp(json["l"] ?: json["left"]) ?: 0.dp
+        val topJson = json["t"] ?: json["top"]
+        val rightJson = json["r"] ?: json["right"]
+        val bottomJson = json["b"] ?: json["bottom"]
+        val leftJson = json["l"] ?: json["left"]
+        val top = ValueExtractors.extractDp(topJson) ?: 0.dp
+        val right = ValueExtractors.extractDp(rightJson) ?: 0.dp
+        val bottom = ValueExtractors.extractDp(bottomJson) ?: 0.dp
+        val left = ValueExtractors.extractDp(leftJson) ?: 0.dp
         val roundJson = json["round"]
         val radius = ValueExtractors.extractDp(roundJson) ?: 0.dp
         // Pull a percentage radius (e.g. `round 50%`) out as a fraction so
         // the applier can resolve against the rendered box size; otherwise
         // the previous extractor silently dropped percent radii to 0.dp
         // and the inset clip rendered as a sharp rectangle.
-        val radiusFraction = (roundJson as? JsonObject)?.let { obj ->
+        val radiusFraction = percentFraction(roundJson)
+        // Wave 46 (lane Y4): percent SIDES ride along the same way — the
+        // IRLength `{original:{v,u:PERCENT}}` form has no px, so extractDp
+        // read 0 and `inset(80% 0 0)` clipped nothing away.
+        return ClipShape.Inset(
+            top, right, bottom, left, radius,
+            topFraction = percentFraction(topJson), rightFraction = percentFraction(rightJson),
+            bottomFraction = percentFraction(bottomJson), leftFraction = percentFraction(leftJson),
+            borderRadiusFraction = radiusFraction,
+        )
+    }
+
+    /** `{original:{v, u:"PERCENT"}}` → v/100, else null (px or absent). */
+    private fun percentFraction(node: JsonElement?): Float? =
+        (node as? JsonObject)?.let { obj ->
             (obj["original"] as? JsonObject)?.takeIf {
                 it["u"]?.jsonPrimitive?.contentOrNull?.equals("PERCENT", ignoreCase = true) == true
             }?.get("v")?.jsonPrimitive?.floatOrNull?.div(100f)
         }
-        return ClipShape.Inset(top, right, bottom, left, radius, radiusFraction)
-    }
 
     /**
      * Extract polygon shape configuration.

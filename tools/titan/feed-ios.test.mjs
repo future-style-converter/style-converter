@@ -258,3 +258,21 @@ test('feed-ios copies images BEFORE the IR reaches the inbox', async () => {
   assert.match(src, /const dest = join\(imagesDir, src\)/,
     'the corpus-relative path must be preserved verbatim under imagesDir');
 });
+
+// ── wave-46 lane Y7: the MONO-PIN pilot hooks ───────────────────────────────
+
+test('feed-ios serialises the mono-pinned doc AFTER the corpus font hop read the original', async () => {
+  // Same two-sided ordering contract as feed-android: the corpus hop must see
+  // the document's own `fontFaces[].src` (the pin's `_mono-pin/…` srcs are
+  // sandbox-relative and would be declined for nothing), and the inbox must
+  // receive the PINNED document or the runtime never registers the face.
+  const src = await fs.readFile(new URL('./feed-ios.mjs', import.meta.url), 'utf8');
+  const fontsAt = src.indexOf('for (const src of documentFontSrcs(doc))');
+  const pinAt = src.indexOf('const inboxDoc = monoPinDocument(doc)');
+  const writeAt = src.indexOf('await fs.writeFile(tmp, JSON.stringify(inboxDoc))');
+  assert.ok(fontsAt > 0 && pinAt > 0 && writeAt > 0, 'all three sites must exist');
+  assert.ok(fontsAt < pinAt && pinAt < writeAt, 'font hop < mono-pin rewrite < inbox write');
+  // Faces are copied into the module-named corner of the SAME fonts sandbox
+  // the runtime resolves `fontFaces[].src` against.
+  assert.match(src, /join\(fontsDir, MONO_PIN_SANDBOX_DIR\)/);
+});

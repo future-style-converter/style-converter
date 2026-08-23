@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.toArgb
+import com.styleconverter.runtime.color.ColorApplier
 import com.styleconverter.runtime.color.ColorStop
 import kotlin.math.PI
 import kotlin.math.cos
@@ -39,6 +40,28 @@ import kotlin.math.sqrt
  * Compose's `Brush.sweepGradient()` does NOT support TileMode. To simulate repeating,
  * we manually expand the color stops to cover 360 degrees multiple times.
  *
+ * ### One-stop gradients (wave 46, lane Y2)
+ * css-images-3 §3.4.4 makes a one-stop gradient a UNIFORM fill of that
+ * colour — `repeating-linear-gradient(green 50px)` and
+ * `repeating-radial-gradient(circle at 0 0, green)` paint solid green.
+ * Wave 36 (ColorApplier.paintableStops) widened the one-stop list for the
+ * NON-repeating brush factories, but every factory here still answered
+ * `null` below two stops — which does not paint nothing, it drops the
+ * layer and exposes whatever sits beneath. WPT gradient-single-stop-003
+ * / -005 (a green gradient div over an abspos RED div) rasterised RED on
+ * Android while ref, web and iOS rasterised green (two depth-48 cells).
+ * Every factory now routes through the same `paintableStops` guard; a
+ * genuinely empty list still returns null so a malformed payload fails
+ * visibly rather than inventing a colour.
+ *
+ * ### Known gap — <length> stop positions
+ * The converter emits px stop positions as `positionLength` (wave 40),
+ * but `ColorStop` (color/ColorConfig.kt) carries a 0..1 fraction only
+ * and color/ColorExtractor.extractColorStops drops the px arm, so the
+ * repeat PERIOD of `…, white 30px` never reaches these helpers
+ * (gradient-border-box / gradient-content-box: one ramp instead of 30px
+ * stripes). That plumbing lives in the color/ tree — outside this lane.
+ *
  * ## Example
  * ```kotlin
  * // CSS: repeating-linear-gradient(45deg, red 0px, blue 20px)
@@ -66,7 +89,8 @@ object RepeatingGradientHelper {
         colorStops: List<ColorStop>,
         size: Size = Size(500f, 500f)
     ): Brush? {
-        if (colorStops.size < 2) return null
+        // §3.4.4 one-stop widening (header) — null only for NO stops.
+        val paintStops = ColorApplier.paintableStops(colorStops) ?: return null
 
         // Convert CSS angle to radians
         // CSS: 0deg = to top (up), 90deg = to right
@@ -76,8 +100,8 @@ object RepeatingGradientHelper {
         val diagonalLength = sqrt(size.width * size.width + size.height * size.height)
 
         // Find the pattern length from color stops
-        val minPos = colorStops.minOfOrNull { it.position } ?: 0f
-        val maxPos = colorStops.maxOfOrNull { it.position } ?: 1f
+        val minPos = paintStops.minOfOrNull { it.position } ?: 0f
+        val maxPos = paintStops.maxOfOrNull { it.position } ?: 1f
         val patternLength = (maxPos - minPos).coerceIn(0.01f, 1f) * diagonalLength
 
         // Calculate start and end points for one pattern
@@ -91,7 +115,7 @@ object RepeatingGradientHelper {
         val endY = centerY - sin(angleRad) * halfPattern
 
         // Normalize color stops to 0-1 range for this pattern
-        val normalizedStops = normalizeColorStops(colorStops)
+        val normalizedStops = normalizeColorStops(paintStops)
 
         return Brush.linearGradient(
             colorStops = normalizedStops,
@@ -116,14 +140,15 @@ object RepeatingGradientHelper {
         colorStops: List<ColorStop>,
         size: Size = Size(500f, 500f)
     ): Brush? {
-        if (colorStops.size < 2) return null
+        // §3.4.4 one-stop widening (header) — null only for NO stops.
+        val paintStops = ColorApplier.paintableStops(colorStops) ?: return null
 
         // Calculate the center in pixel coordinates
         val center = Offset(centerX * size.width, centerY * size.height)
 
         // Find the pattern radius from color stops
-        val minPos = colorStops.minOfOrNull { it.position } ?: 0f
-        val maxPos = colorStops.maxOfOrNull { it.position } ?: 1f
+        val minPos = paintStops.minOfOrNull { it.position } ?: 0f
+        val maxPos = paintStops.maxOfOrNull { it.position } ?: 1f
         val patternLength = (maxPos - minPos).coerceIn(0.01f, 1f)
 
         // Calculate radius for one pattern (based on smaller dimension)
@@ -131,7 +156,7 @@ object RepeatingGradientHelper {
         val patternRadius = patternLength * baseRadius
 
         // Normalize color stops
-        val normalizedStops = normalizeColorStops(colorStops)
+        val normalizedStops = normalizeColorStops(paintStops)
 
         return Brush.radialGradient(
             colorStops = normalizedStops,
@@ -163,14 +188,15 @@ object RepeatingGradientHelper {
         size: Size = Size(500f, 500f),
         repetitions: Int = 0
     ): Brush? {
-        if (colorStops.size < 2) return null
+        // §3.4.4 one-stop widening (header) — null only for NO stops.
+        val paintStops = ColorApplier.paintableStops(colorStops) ?: return null
 
         // Calculate center
         val center = Offset(centerX * size.width, centerY * size.height)
 
         // Find the pattern coverage
-        val minPos = colorStops.minOfOrNull { it.position } ?: 0f
-        val maxPos = colorStops.maxOfOrNull { it.position } ?: 1f
+        val minPos = paintStops.minOfOrNull { it.position } ?: 0f
+        val maxPos = paintStops.maxOfOrNull { it.position } ?: 1f
         val patternCoverage = (maxPos - minPos).coerceIn(0.01f, 1f)
 
         // Calculate how many repetitions we need to fill 360 degrees
@@ -186,7 +212,7 @@ object RepeatingGradientHelper {
         for (rep in 0 until reps) {
             val offset = rep.toFloat() / reps
 
-            colorStops.forEach { stop ->
+            paintStops.forEach { stop ->
                 val newPos = (offset + (stop.position - minPos) / patternCoverage / reps)
                     .coerceIn(0f, 1f)
                 expandedStops.add(newPos to stop.color)
@@ -201,7 +227,7 @@ object RepeatingGradientHelper {
 
         // Ensure we have at least 2 stops — degrade to a 2-stop sweep.
         val effectiveStops = if (sortedStops.size < 2) {
-            arrayOf(0f to colorStops.first().color, 1f to colorStops.last().color)
+            arrayOf(0f to paintStops.first().color, 1f to paintStops.last().color)
         } else {
             sortedStops
         }

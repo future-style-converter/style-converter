@@ -1490,7 +1490,19 @@ private fun ComposedCaptureCanvas(
                 // classifier, keeping the dark-stage baseline byte-stable.
                 val staticEdges = if (isOutOfFlowRoot(root) && !staticPos) null else
                     StaticEmMargin.verticalEdges(root.properties)
-                rootStackMargin(root._tag, "top" in declared, "bottom" in declared, staticEdges)
+                // wave-46 lane Y8: the root's UA default resolves its em
+                // against the root's OWN computed font-size (css-values-4
+                // §5.1.1) — null for every root without a font signal, so
+                // only a font-sized `<p>`/`<ul>`/… root moves (measured:
+                // inherit-computed-001's `font-size: larger` p, 16 → 19px).
+                // The tag rides in as well: it gates the monospace
+                // fixed-default rung (B1), which Blink applies only to
+                // KEYWORD-sized elements — an em-sized heading keeps the
+                // ref-calibrated table rather than a wrong 13px em base.
+                val uaBasisPx = com.styleconverter.runtime.spacing.UaBlockMarginFontBasis
+                    .ownFontSizePx(root.properties, sourceTag = root._tag)
+                rootStackMargin(root._tag, "top" in declared, "bottom" in declared, staticEdges,
+                    ownFontSizePx = uaBasisPx)
                     // Transparency rides the SAME plan entry so the fold and
                     // the render agree on this root's (zero) flow footprint.
                     .copy(marginTransparent = staticPos)

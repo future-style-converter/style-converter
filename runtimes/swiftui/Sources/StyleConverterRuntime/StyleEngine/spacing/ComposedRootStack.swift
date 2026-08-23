@@ -107,13 +107,21 @@ public extension UABlockMargin {
     ///   - staticDeclaredEdges: the classifier's declared px, or nil to bail
     ///     (out-of-scope value flavors, or an OUT-OF-FLOW root — its margins
     ///     never collapse, §8.3.1's in-flow precondition).
+    ///   - ownFontSizePx: wave-46 lane H1 (Y8's iOS twin): the root's own
+    ///     computed font-size, the em basis of its UA default
+    ///     (`UABlockMarginFontBasis.ownFontSizePx`); nil (no own font
+    ///     signal — every R1-R7 pin, every corpus root without a FontSize)
+    ///     keeps the 16px-root table byte-identical. Rounded to whole px
+    ///     by `rootVertical`, as the Kotlin harness table is.
     static func rootStackMargin(tag: String?,
                                 declaresTop: Bool,
                                 declaresBottom: Bool,
-                                staticDeclaredEdges edges: (top: CGFloat, bottom: CGFloat)?)
+                                staticDeclaredEdges edges: (top: CGFloat, bottom: CGFloat)?,
+                                ownFontSizePx: CGFloat? = nil)
         -> RootStackMargin {
-        // UA defaults for this tag (per-side deferral handled below).
-        let ua = vertical(forTag: tag)
+        // UA defaults for this tag (per-side deferral handled below),
+        // resolved against the root's own font basis when it has one.
+        let ua = rootVertical(forTag: tag, ownFontSizePx: ownFontSizePx)
         // R1 — no declared block margin: pure UA contribution (Round 4 as-is).
         if !declaresTop && !declaresBottom {
             return RootStackMargin(top: ua.top, bottom: ua.bottom, stripDeclared: false)

@@ -64,6 +64,41 @@ public extension UABlockMargin {
         vertical(forTag: tag)
     }
 
+    /// wave-46 lane H1 (Y8's iOS twin) — the same UA margins resolved
+    /// against the element's OWN computed font-size, the em base
+    /// css-values-4 §5.1.1 prescribes (HTML §15.3 declares every UA block
+    /// margin in em; inherit-computed-001's `<p>` with `font-size: larger`
+    /// gets 1em × 19.2 = 19.2px in the browser-ref, where the fixed table
+    /// gave 16 and painted the box 3px high on both natives).
+    ///
+    /// Twin of the Kotlin two-arg `uaVerticalBlockMargins(tag, basis)` in
+    /// runtime/spacing/UaBlockChildMargins.kt — UNROUNDED, like it: the
+    /// composed ROOT path rounds to whole px at its own seam
+    /// (`rootVertical(forTag:ownFontSizePx:)`, the harness-table twin).
+    ///
+    /// - Parameter ownFontSizePx: the element's computed size
+    ///   (`UABlockMarginFontBasis.ownFontSizePx`); NIL = "no own font
+    ///   signal" → the 16px-root table VERBATIM, so every existing pin and
+    ///   every corpus element without a font-size declaration is
+    ///   byte-identical.
+    static func vertical(forTag tag: String?,
+                         ownFontSizePx: CGFloat?) -> (top: CGFloat, bottom: CGFloat) {
+        // Identity rung: no basis → the Round-4 ref-calibrated table.
+        guard let basis = ownFontSizePx else { return vertical(forTag: tag) }
+        // The UA sheet's em factor for the tag × the element's own size;
+        // tags with no UA block margin stay (0, 0) exactly as in the table.
+        let px = UABlockMarginFontBasis.uaBlockMarginEm(forTag: tag).map { $0 * basis } ?? 0
+        return (px, px)
+    }
+
+    /// The basis-aware CHILD table — `childVertical(forTag:)` with the
+    /// wave-46 own-font basis threaded through; same delegation, same
+    /// single owner, nil basis = the one-arg table verbatim.
+    static func childVertical(forTag tag: String?,
+                              ownFontSizePx: CGFloat?) -> (top: CGFloat, bottom: CGFloat) {
+        vertical(forTag: tag, ownFontSizePx: ownFontSizePx)
+    }
+
     /// Merge one in-flow block child's DECLARED static block margins with
     /// the UA default for its source tag — the per-edge cascade the
     /// browser runs.
@@ -86,16 +121,25 @@ public extension UABlockMargin {
     ///     undeclared edge).
     ///   - enabled: false → return `declared` VERBATIM (the dark-stage
     ///     327 identity branch; see the file header).
+    ///   - ownFontSizePx: wave-46 lane H1: the child's own computed
+    ///     font-size for the em basis of its UA margin (see the two-arg
+    ///     `vertical(forTag:ownFontSizePx:)`); nil (every caller today —
+    ///     the renderer's plan builder has no inheritance channel into
+    ///     this fold yet, same deferral as the Compose twin) keeps the
+    ///     16px-root table, so no existing plan value moves.
     static func childBlockEdges(tag: String?,
                                 properties: [IRProperty],
                                 declared: (top: CGFloat, bottom: CGFloat),
-                                enabled: Bool) -> (top: CGFloat, bottom: CGFloat) {
+                                enabled: Bool,
+                                ownFontSizePx: CGFloat? = nil) -> (top: CGFloat, bottom: CGFloat) {
         // Identity branch: no UA emulation outside WPT capture — the
         // property-fixture pipeline's plans stay bit-for-bit as they were.
         guard enabled else { return declared }
         // The tag's UA defaults ((0,0) for divs and unknown tags — the
-        // common case, which then also returns `declared` unchanged).
-        let ua = childVertical(forTag: tag)
+        // common case, which then also returns `declared` unchanged),
+        // resolved against the child's own font basis when the caller
+        // has one.
+        let ua = childVertical(forTag: tag, ownFontSizePx: ownFontSizePx)
         return (
             // Top edge: declared wins, else the UA default.
             top: declaresBlockMarginTop(properties) ? declared.top : ua.top,

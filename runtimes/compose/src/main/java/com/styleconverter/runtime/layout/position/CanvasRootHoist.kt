@@ -529,6 +529,23 @@ object CanvasRootHoist {
         // Default null keeps every pre-wave-42 call site (and every
         // declared-width box) on the frozen unbounded measure.
         shrinkToFit: ShrinkToFitSpec? = null,
+        // Wave 46 (lane Y6) — the SLOT-relative end anchor for the
+        // positioned-parent Column mount (PositionedParentFlowSlot): an axis
+        // whose only inset is `right`/`bottom` anchors at the slot's own
+        // bounded max constraint. On the INLINE axis that is the containing
+        // block's content width. On the BLOCK axis Compose's Column hands a
+        // non-weighted child the REMAINING main-axis space whenever the
+        // Column's own maxHeight is finite — which equals the containing
+        // block's content height exactly when no in-flow sibling precedes
+        // the child (every preceding out-of-flow one reports 0×0 through
+        // this same anchor), and is short by their height otherwise. A
+        // genuinely unbounded axis ⇒ null ⇒ A4 start anchor, as before; the
+        // full caveat table is PositionedParentFlowSlot's header. Only read
+        // when the explicit
+        // endEdgeX/endEdgeY above are null, so the overlay's canvas-extent
+        // anchor keeps precedence; default null keeps every pre-wave-46
+        // call site byte-identical.
+        slotEndAnchor: PositionConfig? = null,
     ): Modifier = Modifier.layout { measurable, constraints ->
         // Measure constraints: unbounded by default (the box is sized by
         // its own properties alone) — narrowed to the §10.3.7 band ONLY
@@ -558,6 +575,26 @@ object CanvasRootHoist {
             if (maxPx != null) Constraints(maxWidth = maxPx) else Constraints()
         } else Constraints()
         val placeable = measurable.measure(childConstraints)
+        // Wave 46 (lane Y6) — the slot-relative end edges, resolved INSIDE
+        // the measure (the slot's constraints are only known here). The
+        // inline axis is direction-aware through the same predicate the
+        // nested Box mount applies (a logical-only inline-end inset under
+        // RTL withdraws to the start anchor — PositionedAncestorAnchor's
+        // rationale); the block axis reads the physical/logical fold as is.
+        val slotEndX: Float? = slotEndAnchor?.let { cfg ->
+            PositionedParentFlowSlot.slotEndEdgePx(
+                PositionedAncestorAnchor.inlineAxisAnchorsFromEnd(
+                    cfg, layoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl,
+                ),
+                if (constraints.hasBoundedWidth) constraints.maxWidth else null,
+            )
+        }
+        val slotEndY: Float? = slotEndAnchor?.let { cfg ->
+            PositionedParentFlowSlot.slotEndEdgePx(
+                cfg.anchorsFromEndY,
+                if (constraints.hasBoundedHeight) constraints.maxHeight else null,
+            )
+        }
         // Report zero on both axes: no flow/canvas growth from the ink.
         layout(hoistedFlowReportPx(), hoistedFlowReportPx()) {
             // Anchor at the containing block's START corner (start-anchored
@@ -567,10 +604,12 @@ object CanvasRootHoist {
             // (A5). The end edge is measured FROM the same origin, so both
             // branches share the one translation. Dp→px here, inside the
             // Density receiver, so the arithmetic is in the same device-px
-            // space as placeable.width/height at any screen density.
+            // space as placeable.width/height at any screen density. The
+            // explicit canvas end edge (overlay slots) wins over the
+            // slot-relative one (wave 46); both null ⇒ the start anchor.
             placeable.place(
-                x = anchorPlacePx(originX.roundToPx(), endEdgeX?.toPx(), placeable.width),
-                y = anchorPlacePx(originY.roundToPx(), endEdgeY?.toPx(), placeable.height),
+                x = anchorPlacePx(originX.roundToPx(), endEdgeX?.toPx() ?: slotEndX, placeable.width),
+                y = anchorPlacePx(originY.roundToPx(), endEdgeY?.toPx() ?: slotEndY, placeable.height),
             )
         }
     }

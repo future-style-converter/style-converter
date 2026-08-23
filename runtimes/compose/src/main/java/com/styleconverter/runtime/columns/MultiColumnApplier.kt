@@ -805,6 +805,36 @@ object MultiColumnApplier {
                     logFragmentationFallbackOnce("multi-child container (only single-child fragmentation is implemented)")
                 } else if (overflowing == 1) {
                     // THE fragmentation branch: sole child, C > H, horizontal-tb.
+                    // ── Wave-46 lane Y3: the CLONE pass (css-break-3 §5.2) ──
+                    // A sole `box-decoration-break: clone` child with no
+                    // content of its own is measured at H and replayed
+                    // untranslated per column — one complete decorated box
+                    // per fragment (borders-008's circles, background-
+                    // image-007's one cat per column). Every gate (clone
+                    // declared, leaf, px bands, capacity) lives in the
+                    // helper; null continues into the slice replay below
+                    // byte-identically. The spec is capture-nulled at the
+                    // MultiColumnLayout boundary, so the dark stage takes
+                    // the null branch provably. The bridge write happens
+                    // in the HELPER's placement block (B-RC6: this file
+                    // keeps its exact 3 fragmentsState touches).
+                    with(MulticolCloneMeasure) {
+                        measureCloneFragments(
+                            measurable = measurables[0],
+                            constraints = constraints,
+                            spec = childSpecs?.singleOrNull(),
+                            // The gate probe's C — non-null here because
+                            // `overflowing == 1` required every probe to
+                            // answer.
+                            naturalBlockSizePx = naturalHeights[0]!!,
+                            usedCount = used.count,
+                            columnWidthPx = columnWidth,
+                            gapPx = gapPx,
+                            columnBlockSizePx = columnBlockSize,
+                            fragmentsBridge = fragmentsState,
+                            logFallback = ::logFragmentationFallbackOnce
+                        )?.let { return@Layout it }
+                    }
                     // Wave-42 lane W4: probe the child's single-LINE height
                     // FIRST (intrinsics before measure, like the gate probe
                     // above) — at a huge width a text child lays out as one

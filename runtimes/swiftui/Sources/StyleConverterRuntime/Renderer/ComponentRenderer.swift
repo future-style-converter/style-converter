@@ -834,6 +834,16 @@ public struct ComponentRenderer: View {
         // wins per css-align-3 §9's "auto block size" precondition).
         let style: ComponentStyle = {
             var s = StyleBuilder.build(from: displayProperties(now: now))
+            // Wave 46 (lane Y1) — a MARKER-LESS clamp (`line-clamp: 4
+            // no-ellipsis` / `4 ""`, css-overflow-4 §5.1) cannot ride the
+            // leaf's inner `.lineLimit`: SwiftUI tail truncation always
+            // paints "…" (block-ellipsis-023's iOS capture shows the
+            // forbidden marker). Leave the leaf unlimited so it lays out
+            // every line, and let the block-level cap below discard the
+            // tail without a glyph. Identity (the count as today) for
+            // every clamp that draws a marker — LineClampCap.leafLineLimit.
+            s.text.lineClampLimit = LineClampCap.leafLineLimit(
+                s.text.lineClampLimit, properties: displayProperties(now: now))
             // Wave 6 (#39) — adopt the host-published surface geometry
             // FIRST so every resolver lane below (vw/vh, percent bases,
             // GeometryReader fallbacks) uses the capture canvas / app
@@ -1128,7 +1138,36 @@ public struct ComponentRenderer: View {
             // border) and stroking e.g. a 3px black border across an
             // overlapping abspos child.
             let decoratedBox = AnyView(
-                flowContainer(style: style).applyBoxDecoration(style))
+                flowContainer(style: style)
+                    // Wave 46 (lane Y1) — the BLOCK-LEVEL line-clamp cap
+                    // (css-overflow-4 §5: `line-clamp: <n>` keeps the
+                    // first N LINE BOXES and `continue: discard` makes the
+                    // rest unpaintable), the iOS twin of Compose's wave-41
+                    // LineClampCap. The leaf `.lineLimit` cannot reach line
+                    // boxes that live in CHILD components (block-ellipsis-
+                    // 012/-022/-027/-031/-015: every child painted
+                    // unclamped on iOS while the Android cap passes), so
+                    // the container caps here — INNERMOST of the box chain,
+                    // on the content box, so padding / border / sizing /
+                    // paint all wrap the capped box. Identity (no view
+                    // node) for every component without a fixed-count
+                    // clamp — LineClampCap.resolveCapPx returns nil on the
+                    // wire gate — so the clamp-less corpus is byte-stable.
+                    .engineLineClampCap(LineClampCap.resolveCapPx(
+                        component: component,
+                        // The same order-sorted in-flow list the child
+                        // walk paints (out-of-flow boxes make no line box).
+                        inFlowChildren: FlexboxApplier.sorted(inFlowChildren),
+                        rootProperties: resolvedProperties,
+                        // The root's metrics off the SAME TextConfig its
+                        // own label lays out with (monospace-UA folded,
+                        // declared px line-height, the `normal` flag).
+                        root: LineClampRootMetrics(
+                            rootProperties: resolvedProperties,
+                            fontSizePx: style.text.fontSize ?? 16,
+                            declaredLineHeightPx: style.text.lineHeight,
+                            declaredNormal: style.text.lineHeightIsNormal)))
+                    .applyBoxDecoration(style))
             // Stage 2: non-negative-z positioned children attach via
             // `.overlay` ON the painted box — SwiftUI overlays paint
             // above everything applied so far, which is exactly step 8
@@ -3463,7 +3502,13 @@ public struct ComponentRenderer: View {
                     ctx: style.spacing.context,
                     // Wave-21: unlocks the §7.1 auto-height balanced
                     // fragmentainer (B-RC5) in capture only.
-                    wptCaptureMode: wptCaptureMode)
+                    wptCaptureMode: wptCaptureMode,
+                    // Wave-46 lane Y3: the css-break-3 §5.2 clone branch
+                    // engages only for a child with no content of its own
+                    // (MulticolClonePlan's re-render trick) — the shared
+                    // leaf predicate, computed here because the plan sees
+                    // properties only.
+                    childIsLeaf: MulticolSpannerFlow.isLeafBox(child))
                 Group {
                     if let plan = fragPlan {
                         // Fragment pass — F clipped+translated clones of
@@ -3850,7 +3895,12 @@ public struct ComponentRenderer: View {
             // columnIndex is unique by construction (0..<F) — a stable
             // ForEach identity for the clones.
             ForEach(plan.fragments, id: \.columnIndex) { frag in
-                ComponentHost(component: child)
+                // Wave-46 lane Y3: under `box-decoration-break: clone`
+                // the plan hands each fragment the child RE-DECLARED at
+                // that fragment's block-size (css-break-3 §5.2 — every
+                // fragment independently wrapped); under slice this is
+                // the child itself, byte-identical to the wave-10 row.
+                ComponentHost(component: plan.child(child, forFragmentAt: frag.columnIndex))
                     // css-multicol-1 §2: the child's containing block
                     // is the COLUMN box — override the container-width
                     // channel the outer ForEach publishes (the inner,

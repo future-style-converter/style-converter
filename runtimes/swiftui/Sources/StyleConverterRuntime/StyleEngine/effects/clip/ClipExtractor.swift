@@ -33,7 +33,12 @@ enum ClipExtractor {
             default: break
             }
         }
-        return cfg.touched ? cfg : nil
+        guard cfg.touched else { return nil }
+        // Reference-box metrics only when something will actually clip.
+        if cfg.shape != nil || cfg.legacy != nil {
+            cfg.box = ClipBoxMetricsExtractor.extract(from: properties)
+        }
+        return cfg
     }
 
     // MARK: - ClipPath
@@ -52,14 +57,17 @@ enum ClipExtractor {
         }
         guard case .object(let o) = data else { return }
 
-        // Geometry-box-only (or box + shape combo).
+        // Geometry-box-only (or box + shape combo). css-masking-1 §7.1:
+        // the keyword picks the REFERENCE BOX the shape resolves against
+        // — or IS the clip when no shape follows. Wave 46 (lane Y4): the
+        // keyword used to be read and dropped here ("documented TODO"),
+        // so `circle(farthest-side) content-box` clipped the 180px border
+        // box instead of the 100px content box (WPT contentBox-1a) and
+        // `polygon(…) margin-box` kept only the roof (geometryBox-2).
         if let box = o["geometry-box"]?.stringValue {
-            // When a shape is also present, parse it; the box tells us
-            // which reference rectangle the shape's units are in — we
-            // don't currently honour that and always use the view's own
-            // frame (documented TODO).
+            cfg.geometryBox = ClipBoxMetricsExtractor.parseGeometryBox(box)
             if let shape = o["shape"], case .object(let inner) = shape {
-                cfg.shape = parseShape(inner)
+                cfg.shape = parseShape(inner, into: &cfg)
             } else {
                 cfg.shape = .geometryBoxOnly(box: box)
             }
@@ -68,12 +76,14 @@ enum ClipExtractor {
         }
 
         // Bare-shape forms.
-        cfg.shape = parseShape(o)
+        cfg.shape = parseShape(o, into: &cfg)
         cfg.touched = true
     }
 
     // Dispatcher for `{ "type": "inset|circle|ellipse|polygon|path|rect|xywh", ... }`.
-    private static func parseShape(_ o: [String: IRValue]) -> ClipShape? {
+    // `cfg` receives side-channel facts a shape carries beyond its
+    // geometry (today: the path() fill rule).
+    private static func parseShape(_ o: [String: IRValue], into cfg: inout ClipConfig) -> ClipShape? {
         guard let t = o["type"]?.stringValue else { return nil }
         switch t {
         case "inset":
@@ -98,12 +108,16 @@ enum ClipExtractor {
                       let v = orig["v"]?.doubleValue else { return nil }
                 return CGFloat(v) / 100.0
             }()
-            return .inset(top:    CGFloat(lenPx(o["t"]) ?? 0),
-                          right:  CGFloat(lenPx(o["r"]) ?? 0),
-                          bottom: CGFloat(lenPx(o["b"]) ?? 0),
-                          left:   CGFloat(lenPx(o["l"]) ?? 0),
-                          cornerRadius: roundPx,
-                          cornerRadiusFraction: roundPct)
+            // Wave 46 (lane Y4): percent SIDES ride along as fractions
+            // of the reference box the same way — the IRLength
+            // `{original:{v,u:PERCENT}}` form has no px, so lenPx read 0
+            // and `inset(80% 0 0)` clipped nothing away.
+            let sides = ClipInsetSides(
+                top: CGFloat(lenPx(o["t"]) ?? 0), right: CGFloat(lenPx(o["r"]) ?? 0),
+                bottom: CGFloat(lenPx(o["b"]) ?? 0), left: CGFloat(lenPx(o["l"]) ?? 0),
+                topFraction: percentFraction(o["t"]), rightFraction: percentFraction(o["r"]),
+                bottomFraction: percentFraction(o["b"]), leftFraction: percentFraction(o["l"]))
+            return .inset(sides: sides, cornerRadius: roundPx, cornerRadiusFraction: roundPct)
         case "circle":
             // Four shapes can land here, all from ClipPathShapeSerializer
             // (src/main/kotlin/app/irmodels/properties/effects/ClipPathSerializers.kt:63-67)
@@ -167,6 +181,13 @@ enum ClipExtractor {
             }
             return .polygon(points: points)
         case "path":
+            // css-shapes-1 §3.1 `path(<fill-rule>?, <string>)` — the IR
+            // `rule` key ("nonzero" / "evenodd") is the function's own
+            // fill rule (WPT clip-path-path-002 is `path(evenodd, …)`),
+            // independent of the `clip-rule` property.
+            if let rule = o["rule"]?.stringValue?.lowercased() {
+                cfg.pathFillRule = rule == "evenodd" ? .evenodd : .nonzero
+            }
             return .path(data: o["d"]?.stringValue ?? "")
         case "rect":
             // top/right/bottom/left — "auto" allowed, else a length.
@@ -293,6 +314,14 @@ enum ClipExtractor {
         default:
             return nil
         }
+    }
+
+    /// `{original:{v, u:"PERCENT"}}` → v/100, else nil (px or absent).
+    private static func percentFraction(_ v: IRValue?) -> CGFloat? {
+        guard let o = v?.objectValue, let orig = o["original"]?.objectValue,
+              orig["u"]?.stringValue == "PERCENT",
+              let vv = orig["v"]?.doubleValue else { return nil }
+        return CGFloat(vv) / 100
     }
 
     // Rect allows literal "auto" in any component → nil; else a length.

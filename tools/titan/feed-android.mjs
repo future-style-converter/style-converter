@@ -67,6 +67,17 @@ import { transcodeWoffFixtures, applyWoffTranscodeRewrite } from './woff-to-ttf.
 // is exactly what the pilot ref adopts. Flag off ⇒ both imports are inert
 // and the feeder is byte-identical (pinned by feed-android.test.mjs).
 import { notoPilotEnabled, notoPilotFontFiles } from './noto-pilot.mjs';
+// wave-46 lane Y7 — the MONOSPACE FONT-METRIC PIN pilot (mono-pin.mjs banner).
+// Unlike the Noto pilot above, the runtime DOES consume this one: with
+// TITAN_MONO_PIN=1 the two staged DejaVu Sans Mono files are pushed once per
+// app launch into a `_mono-pin/` corner of the fonts sandbox, and every
+// document that names the `monospace` generic reaches the inbox with two
+// `fontFaces` entries NAMED `monospace` pointing at them — so Compose's
+// document-font-first resolution (wave-35 B2) paints the pin face with no
+// resolver change. Flag off ⇒ every call below is an identity and the feeder
+// is byte-identical (pinned by mono-pin.test.mjs + feed-android.test.mjs).
+import { monoPinEnabled, monoPinFontFiles, monoPinMissingWarnings, monoPinDocument,
+         MONO_PIN_SANDBOX_DIR } from './mono-pin.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
@@ -268,6 +279,33 @@ function pushNotoPilotFonts(adbx) {
     catch (e) { log(`  noto-pilot: PUSH FAILED ${face.file} — ${e.message}`); }
   }
   if (pushed) log(`noto-pilot: pushed ${pushed}/${present.length + missing.length} pilot faces (delivery proof only)`);
+  return { pushed, missing: missing.length };
+}
+
+/** wave-46 lane Y7 — push the staged MONO-PIN faces into the fonts sandbox
+ *  under `_mono-pin/` (MONO_PIN_SANDBOX_DIR — a leading-underscore dir no
+ *  corpus-relative `fontFaces[].src` can collide with). No-op with the flag
+ *  unset.
+ *
+ *  Called after EVERY resetAndLaunch, not once per run: the relaunch wipes
+ *  FONTS_DIR (wave-35 idempotence), and unlike the Noto delivery proof above
+ *  the runtime READS these files — a timeout-recovery relaunch that did not
+ *  re-push would silently hand the rest of the batch back to Droid Sans Mono
+ *  under a pilot-labelled run. `adb push` is idempotent, so the repeat costs
+ *  two pushes. Missing staged files are LOUD per face (mono-pin.mjs wording)
+ *  so a mis-set TITAN_MONO_PIN_FONTS can never masquerade as a pinned run. */
+function pushMonoPinFonts(adbx) {
+  if (!monoPinEnabled()) return { pushed: 0, missing: 0 };
+  const { present, missing } = monoPinFontFiles(process.env, { existsSync });
+  for (const line of monoPinMissingWarnings(process.env, { existsSync }, 'feed-android')) log(`  ${line}`);
+  const remote = `${FONTS_DIR}/${MONO_PIN_SANDBOX_DIR}`;
+  let pushed = 0;
+  if (present.length) adbx(['shell', 'mkdir', '-p', remote]);
+  for (const face of present) {
+    try { adbx(['push', face.abs, `${remote}/${face.file}`]); pushed++; }
+    catch (e) { log(`  mono-pin: PUSH FAILED ${face.file} — ${e.message}`); }
+  }
+  if (pushed) log(`mono-pin: pushed ${pushed}/${present.length + missing.length} DejaVu Sans Mono faces → ${remote}`);
   return { pushed, missing: missing.length };
 }
 
@@ -484,6 +522,9 @@ async function main() {
   // wait (the fonts root must be app-created first — the wave-41 T2 probe)
   // and before any fixture. Identity no-op unless TITAN_NOTO_PILOT=1.
   pushNotoPilotFonts(adbx);
+  // wave-46 lane Y7: the mono-pin faces ride the same post-launch slot; the
+  // runtime reads them, so this push repeats after every later relaunch.
+  pushMonoPinFonts(adbx);
 
   // Scratch dir for REWRITTEN IR. Android pushes the fixture FILE into the
   // inbox (iOS re-serialises its in-memory doc), so a rewritten document needs
@@ -521,6 +562,26 @@ async function main() {
     if (rewriteDir === null) rewriteDir = mkdtempSync(path.join(os.tmpdir(), 'titan-preraster-'));
     const out = path.join(rewriteDir, localName);
     writeFileSync(out, JSON.stringify(doc));
+    return out;
+  };
+
+  // wave-46 lane Y7 — the MONO-PIN document rewrite, a THIRD in-memory-only
+  // seam beside the pre-raster and WOFF ones, with one ordering difference
+  // that is a correctness contract: it runs AFTER pushFontFaces has read the
+  // document's own `fontFaces[].src`, because the pin's `_mono-pin/…` srcs
+  // are sandbox-relative (pushed above by pushMonoPinFonts), not
+  // corpus-relative, and the corpus hop would DECLINE them loudly for nothing.
+  // Identity (the already-chosen pushFx path) unless the flag is on AND the
+  // document names the generic; otherwise the pinned doc goes to the same
+  // scratch dir under a `mono-` prefixed local name, and the per-fixture LOUD
+  // STAMP says which fixtures shape from the pin.
+  const monoPinnedFixture = (pushFx, doc, localName, label) => {
+    const pinned = monoPinDocument(doc);
+    if (pinned === doc) return pushFx;
+    log(`  ${label}: mono-pin @font-face 'monospace' → ${pinned.fontFaces.map((f) => f.src).join(', ')}`);
+    if (rewriteDir === null) rewriteDir = mkdtempSync(path.join(os.tmpdir(), 'titan-preraster-'));
+    const out = path.join(rewriteDir, `mono-${localName}`);
+    writeFileSync(out, JSON.stringify(pinned));
     return out;
   };
 
@@ -571,9 +632,12 @@ async function main() {
     if (images.pushed || images.declined) {
       log(`  ${base}: images pushed=${images.pushed} declined=${images.declined}`);
     }
+    // wave-46 lane Y7: the mono-pin rewrite LAST — after the corpus font hop
+    // above has read the document's own srcs (see monoPinnedFixture).
+    const inboxFx = monoPinnedFixture(pushFx, doc, `${String(i).padStart(4, '0')}-${base}`, base);
     // Push into the inbox under a unique, FIFO-ordered name (index prefix
     // guarantees uniqueness even if two fixtures share a basename).
-    adbx(['push', pushFx, `${INBOX_DIR}/${String(i).padStart(4, '0')}-${base}`]);
+    adbx(['push', inboxFx, `${INBOX_DIR}/${String(i).padStart(4, '0')}-${base}`]);
     const { done, present } = await waitForPngs(adbx, wantDevice, opts.timeoutPerFixture);
     if (!done) {
       results.push({ fixture: base, ok: false, error: 'timeout',
@@ -587,6 +651,8 @@ async function main() {
         log(`  ${base}: TIMEOUT (${present.size}/${expected.length} PNGs) — restarting app to clear the wedge`);
         const remarked = await resetAndLaunch(adbx, opts);
         if (!remarked) log('  WARNING: marker not seen after restart (continuing)');
+        // wave-46 lane Y7: the relaunch wiped FONTS_DIR — re-deliver the pin.
+        pushMonoPinFonts(adbx);
       } else {
         log(`  ${base}: TIMEOUT (${present.size}/${expected.length} PNGs) — last fixture, not restarting`);
       }
@@ -647,8 +713,15 @@ async function main() {
       );
       pushFontFaces(adbx, retryDoc, opts);
       pushReplacedImages(adbx, retryDoc, opts);
+      // wave-46 lane Y7: re-deliver the pin faces (the last-fixture timeout
+      // branch does not relaunch, but the push is idempotent) and re-apply
+      // the pin rewrite to the re-parsed doc, after the font hop as always.
+      pushMonoPinFonts(adbx);
+      const retryInboxFx = monoPinnedFixture(
+        retryFx, retryDoc, `9${String(fixtures.indexOf(fx)).padStart(3, '0')}-${row.fixture}`, row.fixture,
+      );
       // 9xxx prefix keeps the inbox name unique vs the first attempt's 0xxx.
-      adbx(['push', retryFx, `${INBOX_DIR}/9${String(fixtures.indexOf(fx)).padStart(3, '0')}-${row.fixture}`]);
+      adbx(['push', retryInboxFx, `${INBOX_DIR}/9${String(fixtures.indexOf(fx)).padStart(3, '0')}-${row.fixture}`]);
       const { done } = await waitForPngs(adbx, expected.map((e) => e.deviceFile), opts.timeoutPerFixture);
       row.retried = true;
       if (done) {
@@ -665,6 +738,10 @@ async function main() {
       } else {
         log(`  ${row.fixture}: RETRY TIMEOUT — genuinely failing, restarting app`);
         await resetAndLaunch(adbx, opts);
+        // wave-46 lane Y7: the relaunch wiped FONTS_DIR — re-deliver the pin
+        // so the NEXT retry row (and the force-stop'd app's final state)
+        // never run un-pinned under a pilot-labelled run.
+        pushMonoPinFonts(adbx);
       }
       adbx(['shell', 'rm', '-f', `${SHOT_DIR}/*`]);
     }

@@ -4,6 +4,10 @@ import com.styleconverter.runtime.core.ir.IRComponent
 // Wave 25 (lane UAM): the single Kotlin owner of the UA vertical table —
 // shared with the runtime's block-CHILD fold so root and descendant agree.
 import com.styleconverter.runtime.spacing.uaVerticalBlockMargins
+// wave-46 lane Y8: the single owner of the UA margin's FONT BASIS — the
+// root's own computed font-size the em table resolves against.
+import com.styleconverter.runtime.spacing.UaBlockMarginFontBasis
+import kotlin.math.roundToInt
 
 /**
  * Pure user-agent default block-margin model for the COMPOSED WPT capture
@@ -32,7 +36,9 @@ import com.styleconverter.runtime.spacing.uaVerticalBlockMargins
  *    [collapsedVerticalGaps]. Two 16px-margin bars → a single 16px gap.
  */
 
-/** UA default block margins in px (at a 16px root font). */
+/** UA default block margins in px (at a 16px root font — or, wave-46 Y8,
+ *  at the root's OWN computed size when it carries one; whole px because
+ *  the composed canvas's gap Spacers are placed at integer px anyway). */
 data class UaMargins(val top: Int, val bottom: Int, val left: Int, val right: Int) {
     companion object { val ZERO = UaMargins(0, 0, 0, 0) }
 }
@@ -44,7 +50,7 @@ data class UaMargins(val top: Int, val bottom: Int, val left: Int, val right: In
  * against). Tags with no block margin in the UA sheet (div/section/article/
  * header/footer/main/nav/aside) and unknown/null tags return [UaMargins.ZERO].
  */
-fun uaBlockMargins(sourceTag: String?): UaMargins {
+fun uaBlockMargins(sourceTag: String?, ownFontSizePx: Float? = null): UaMargins {
     // Wave 25 (lane UAM): the VERTICAL half is no longer duplicated here.
     // The runtime owns the ONE Kotlin copy of the table (spacing/
     // UaBlockChildMargins.uaVerticalBlockMargins) because the block-CHILD
@@ -53,7 +59,13 @@ fun uaBlockMargins(sourceTag: String?): UaMargins {
     // unchanged (p 16 · h1 21 · h2 19 · h3 16 · h4 21 · h5 27 · h6 37 ·
     // ul/ol/blockquote/pre/figure 16 · everything else 0), so every
     // Round-4 / RC-A4 pin in UaBlockMarginsTest keeps its number.
-    val (top, bottom) = uaVerticalBlockMargins(sourceTag)
+    // wave-46 lane Y8: [ownFontSizePx] (null = no own font signal → the
+    // table verbatim) is the em basis of css-values-4 §5.1.1 — a root
+    // `<p>` with `font-size: larger` gets 1em × 19.2 = 19.2 → 19px, the
+    // browser-ref's row (inherit-computed-001 sat 3px high at 16). Rounded
+    // to whole px: Chromium snaps the box edge, and 19.2 lands on row 35
+    // exactly as the frozen ref does.
+    val (top, bottom) = uaVerticalBlockMargins(sourceTag, ownFontSizePx)
     // The HORIZONTAL half stays local: only blockquote and figure carry a
     // UA inline inset (`margin: 1em 40px`), and §8.3.1 collapses the block
     // axis only — so the child fold has no use for these and the runtime
@@ -62,7 +74,7 @@ fun uaBlockMargins(sourceTag: String?): UaMargins {
         "blockquote", "figure" -> 40
         else -> 0
     }
-    return UaMargins(top.toInt(), bottom.toInt(), inline, inline)
+    return UaMargins(top.roundToInt(), bottom.roundToInt(), inline, inline)
 }
 
 /**
@@ -96,8 +108,13 @@ fun declaredMarginSides(propertyTypes: Collection<String>): Set<String> {
  * IR-declared margin (higher-priority origin) already renders through the
  * runtime's margin applier and MUST win over the UA default. Pure/testable.
  */
-fun effectiveUaMargins(sourceTag: String?, declaredSides: Set<String>): UaMargins {
-    val ua = uaBlockMargins(sourceTag)
+fun effectiveUaMargins(
+    sourceTag: String?,
+    declaredSides: Set<String>,
+    // wave-46 Y8: the root's own computed font-size (null = 16px table).
+    ownFontSizePx: Float? = null,
+): UaMargins {
+    val ua = uaBlockMargins(sourceTag, ownFontSizePx)
     return UaMargins(
         top = if ("top" in declaredSides) 0 else ua.top,
         bottom = if ("bottom" in declaredSides) 0 else ua.bottom,
@@ -106,9 +123,19 @@ fun effectiveUaMargins(sourceTag: String?, declaredSides: Set<String>): UaMargin
     )
 }
 
-/** [effectiveUaMargins] for a decoded component (reads `_tag` + property types). */
+/** [effectiveUaMargins] for a decoded component (reads `_tag` + property
+ *  types, and — wave-46 Y8 — its own FontSize for the em basis: a composed
+ *  root is a body-level child, so its inherited size is the UA 16px default
+ *  and [UaBlockMarginFontBasis.ownFontSizePx]'s default base is exact).
+ *  The tag rides into the basis too: it gates the monospace fixed-default
+ *  rung, which Blink applies only to KEYWORD-sized elements — an em-sized
+ *  heading (h1/h2/h3/h5/h6) keeps the table instead of a wrong 13px em. */
 fun effectiveUaMargins(component: IRComponent): UaMargins =
-    effectiveUaMargins(component._tag, declaredMarginSides(component.properties.map { it.type }))
+    effectiveUaMargins(
+        component._tag,
+        declaredMarginSides(component.properties.map { it.type }),
+        UaBlockMarginFontBasis.ownFontSizePx(component.properties, sourceTag = component._tag),
+    )
 
 /**
  * Collapsed vertical GAPS to insert around a vertical stack of blocks whose
@@ -313,15 +340,21 @@ fun withHoistBand(plan: RootStackMargin, band: Pair<Float, Float>): RootStackMar
  *   Null when any block side is auto / negative / relative / calc (out of the
  *   static scope) OR when the root is out of flow (its margins never collapse,
  *   §8.3.1's in-flow precondition) — both bail to the FIX 1 behavior.
+ * @param ownFontSizePx wave-46 Y8: the root's own computed font-size, the em
+ *   basis of its UA default ([UaBlockMarginFontBasis.ownFontSizePx]); null
+ *   (no own font signal — every R1-R7 pin, every corpus root without a
+ *   FontSize) keeps the 16px-root table byte-identical.
  */
 fun rootStackMargin(
     sourceTag: String?,
     declaresTop: Boolean,
     declaresBottom: Boolean,
     staticDeclaredPx: Pair<Float, Float>?,
+    ownFontSizePx: Float? = null,
 ): RootStackMargin {
-    // UA defaults for this tag (per-side deferral handled below).
-    val ua = uaBlockMargins(sourceTag)
+    // UA defaults for this tag (per-side deferral handled below), resolved
+    // against the root's own font basis when it has one.
+    val ua = uaBlockMargins(sourceTag, ownFontSizePx)
     // R1 — no declared block margin: pure UA contribution, FIX 1 unchanged.
     if (!declaresTop && !declaresBottom) {
         return RootStackMargin(ua.top.toFloat(), ua.bottom.toFloat(), stripDeclared = false)
