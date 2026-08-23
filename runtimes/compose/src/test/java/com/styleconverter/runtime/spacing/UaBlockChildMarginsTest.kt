@@ -146,4 +146,51 @@ class UaBlockChildMarginsTest {
         assertEquals(CollapsedMargin(21f, 21f), on("h1", emptyList(), none))
         assertEquals(CollapsedMargin(37f, 37f), on("h6", emptyList(), none))
     }
+
+    // ── U13-U15 (wave 46, lane Y8): the own-font basis ──────────────────
+
+    /** U13 — a NULL basis is the identity: the two-arg table equals the
+     *  one-arg table for every tag, which is the contract that keeps every
+     *  corpus element without a font-size declaration byte-identical. */
+    @Test
+    fun `U13 - null basis is the 16px-root table verbatim`() {
+        for (tag in listOf("p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol",
+                           "blockquote", "pre", "figure", "div", "li", null)) {
+            assertEquals("tag=$tag", uaVerticalBlockMargins(tag), uaVerticalBlockMargins(tag, null))
+        }
+        // The default parameter on the merge is the same identity.
+        assertEquals(CollapsedMargin(16f, 16f), uaChildBlockEdges("p", emptyList(), none, enabled = true))
+    }
+
+    /** U14 — THE measured case: a `<p>` whose own computed size is 19.2px
+     *  (`font-size: larger` of 16, inherit-computed-001) carries 1em ×
+     *  19.2 = 19.2px on both edges — the browser-ref's row 35 (16 pad +
+     *  19.2) against the 16px table's row 32. A 1em tag scales linearly
+     *  (a 92px `<p>` → 92), and a font-sized `<div>` still has none. */
+    @Test
+    fun `U14 - 1em tags resolve against the own font basis`() {
+        assertEquals(19.2f to 19.2f, uaVerticalBlockMargins("p", 19.2f))
+        assertEquals(92f to 92f, uaVerticalBlockMargins("ul", 92f))
+        assertEquals(13f to 13f, uaVerticalBlockMargins("blockquote", 13f))
+        assertEquals(0f to 0f, uaVerticalBlockMargins("div", 19.2f))
+        // Through the merge: declared edges still win per edge (§6.1).
+        assertEquals(CollapsedMargin(19.2f, 19.2f),
+                     uaChildBlockEdges("p", emptyList(), none, enabled = true, ownFontSizePx = 19.2f))
+        assertEquals(CollapsedMargin(40f, 19.2f),
+                     uaChildBlockEdges("p", listOf("MarginTop"), CollapsedMargin(40f, 0f),
+                                       enabled = true, ownFontSizePx = 19.2f))
+        // And the dark-stage flag still short-circuits BEFORE the basis.
+        assertEquals(none, uaChildBlockEdges("p", emptyList(), none, enabled = false, ownFontSizePx = 19.2f))
+    }
+
+    /** U15 — headings scale by their OWN em factor over the given basis
+     *  (html.css `h1 { margin-block: .67em }` … `h6 { 2.33em }`): an `<h1>`
+     *  the author resized to 40px carries .67 × 40 = 26.8px. */
+    @Test
+    fun `U15 - headings scale by their ua em factor`() {
+        val (top, bottom) = uaVerticalBlockMargins("h1", 40f)
+        assertEquals(26.8f, top, 1e-4f)
+        assertEquals(26.8f, bottom, 1e-4f)
+        assertEquals(2.33f * 10f, uaVerticalBlockMargins("h6", 10f).first, 1e-4f)
+    }
 }

@@ -1,5 +1,9 @@
 package com.styleconverter.test.screenshot
 
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.spacing.UaBlockMarginFontBasis
+import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -359,5 +363,53 @@ class UaBlockMarginsTest {
         val folded = withHoistBand(opaque(0f, 0f), 0f to 16f)
         assertEquals(0f, folded.topPx, 0f)
         assertEquals(16f, folded.bottomPx, 0f)
+    }
+
+    // ── Y1-Y3 (wave 46, lane Y8): the UA margin's FONT BASIS ────────────
+    // The composed ROOT path for CSS2/cascade/inherit-computed-001: a `<p>`
+    // declaring `font-size: larger` (live wire below, verbatim from the
+    // wave45-final per-test IR). The browser-ref's border-top is at row 35
+    // = 16px image pad + 1em × 19.2px; the 16px-root table put it at 32.
+
+    /** The inherit-computed-001 root: `<p>` + `font-size: larger`, no margins. */
+    private fun largerParagraph() = IRComponent(
+        id = "p", name = "wpt__CSS2__cascade__inherit-computed-001__0", _tag = "p",
+        properties = listOf(IRProperty("FontSize",
+            Json.parseToJsonElement("""{"original":{"type":"relative","keyword":"larger"}}"""))),
+    )
+
+    @Test
+    fun y1_largerParagraphRoot_uaMarginIs19px() {
+        // Y1: 1em × 19.2 = 19.2 → 19 whole px (the Spacer is placed at
+        // integer px; 16 + 19 = row 35, the ref's row). Both edges, no inline.
+        assertEquals(UaMargins(19, 19, 0, 0), uaBlockMargins("p", 19.2f))
+        assertEquals(UaMargins(19, 19, 0, 0), effectiveUaMargins(largerParagraph()))
+        // The root-stack plan the rootPlans fold builds for this root (R1
+        // shape: no declared block margin, never strips).
+        assertEquals(RootStackMargin(19f, 19f, false),
+            rootStackMargin("p", declaresTop = false, declaresBottom = false,
+                staticDeclaredPx = 0f to 0f,
+                ownFontSizePx = UaBlockMarginFontBasis.ownFontSizePx(largerParagraph().properties)))
+    }
+
+    @Test
+    fun y2_nullBasis_isTheTableVerbatim() {
+        // Y2: every root WITHOUT an own font signal resolves a null basis
+        // and keeps the Round-4 numbers — the identity that protects the
+        // whole corpus (simulated root blast radius: exactly one test).
+        val plain = IRComponent(id = "p", name = "t__0", _tag = "p")
+        assertEquals(UaMargins(16, 16, 0, 0), effectiveUaMargins(plain))
+        assertEquals(uaBlockMargins("h2"), uaBlockMargins("h2", null))
+        assertEquals(RootStackMargin(16f, 16f, false),
+            rootStackMargin("p", false, false, 0f to 0f, ownFontSizePx = null))
+    }
+
+    @Test
+    fun y3_declaredSideStillWinsOverTheScaledUa() {
+        // Y3: author > UA per edge (css-cascade-4 §6.1) survives the basis —
+        // a declared top zeroes the UA top, the scaled UA bottom stays.
+        assertEquals(UaMargins(0, 19, 0, 0), effectiveUaMargins("p", setOf("top"), 19.2f))
+        // Inline insets are untouched by the block-axis basis.
+        assertEquals(UaMargins(19, 19, 40, 40), uaBlockMargins("blockquote", 19.2f))
     }
 }

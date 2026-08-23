@@ -62,6 +62,17 @@ import { prerasterizeFixtures, applyPrerasterRewrite } from './svg-preraster.mjs
 // system cascade, and the pilot SCORES that honestly against Noto refs.
 // Flag off ⇒ inert imports, byte-identical feeder (feed-ios.test.mjs pins).
 import { notoPilotEnabled, notoPilotFontFiles } from './noto-pilot.mjs';
+// wave-46 lane Y7 — the MONOSPACE FONT-METRIC PIN pilot (mono-pin.mjs banner).
+// Unlike the Noto delivery proof above, the runtime CONSUMES this one: with
+// TITAN_MONO_PIN=1 the two staged DejaVu Sans Mono files are copied once per
+// run into a `_mono-pin/` corner of the fonts sandbox (which is NOT wiped by
+// the in-run relaunch — only feed-android's resetAndLaunch wipes), and every
+// document naming the `monospace` generic is serialised into the inbox with
+// two `fontFaces` entries NAMED `monospace` pointing at them, so SwiftUI's
+// document-font-first pick (wave-35 B2) paints the pin face with no resolver
+// change. Flag off ⇒ every call is an identity (mono-pin.test.mjs).
+import { monoPinEnabled, monoPinFontFiles, monoPinMissingWarnings, monoPinDocument,
+         MONO_PIN_SANDBOX_DIR } from './mono-pin.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..', '..');
@@ -480,6 +491,19 @@ async function main() {
       console.log(`[feed-ios] noto-pilot: copied ${pilot.present.length}/${pilot.present.length + pilot.missing.length} pilot faces (delivery proof only)`);
     }
   }
+  // wave-46 lane Y7: mono-pin face delivery — same slot, same loud-miss rule.
+  // Copied ONCE: the iOS fonts sandbox survives the timeout relaunch below
+  // (only the inbox + PNGs are drained), unlike feed-android's FONTS_DIR.
+  if (monoPinEnabled()) {
+    for (const line of monoPinMissingWarnings(process.env, { existsSync }, 'feed-ios')) console.error(line);
+    const pin = monoPinFontFiles(process.env, { existsSync });
+    if (pin.present.length) {
+      const pinDir = join(fontsDir, MONO_PIN_SANDBOX_DIR);
+      await fs.mkdir(pinDir, { recursive: true });
+      for (const face of pin.present) await fs.copyFile(face.abs, join(pinDir, face.file));
+      console.log(`[feed-ios] mono-pin: copied ${pin.present.length}/${pin.present.length + pin.missing.length} DejaVu Sans Mono faces → ${pinDir}`);
+    }
+  }
   await clearPngs(shotsDir);
   // Drain any stragglers from a prior run so the queue starts clean.
   try {
@@ -575,7 +599,16 @@ async function main() {
     // app's nextFixtureURL (it globs `.json` only) even mid-write.
     const tmp = join(inboxDir, `.${inboxBase}.json.tmp`);
     const dest = join(inboxDir, `${inboxBase}.json`);
-    await fs.writeFile(tmp, JSON.stringify(doc));
+    // wave-46 lane Y7: the mono-pin rewrite LAST — after the corpus font hop
+    // above has read the document's own `fontFaces[].src` (the pin's srcs
+    // are sandbox-relative and the corpus hop would decline them loudly for
+    // nothing). Identity unless the flag is on AND the document names the
+    // generic; the per-fixture LOUD STAMP says which fixtures shape from it.
+    const inboxDoc = monoPinDocument(doc);
+    if (inboxDoc !== doc) {
+      console.log(`[feed-ios] ${label}: mono-pin @font-face 'monospace' → ${inboxDoc.fontFaces.map((f) => f.src).join(', ')}`);
+    }
+    await fs.writeFile(tmp, JSON.stringify(inboxDoc));
     await fs.rename(tmp, dest);
 
     // timeoutPerFixture is SECONDS (see parseArgs); waitForCaptures wants ms.

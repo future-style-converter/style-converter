@@ -235,14 +235,24 @@ enum MulticolSpannerFlow {
                 // class-B break points, and generated ::before/::after
                 // content is content too — the same three inputs the Kotlin
                 // twin reads (`_text` there is `text` here).
-                monolithicContent: (child.children?.isEmpty ?? true)
-                    && (child.text?.isEmpty ?? true)
-                    && child.pseudos == nil,
+                monolithicContent: isLeafBox(child),
                 // Wave-44 lane U8: the float-strip facts (or the strict
                 // nil bail) — computed only for containers with a float
                 // somewhere (the `anyFloated` gate above).
                 floatStrip: anyFloated ? MulticolFloatStrip.factsFor(child) : nil)
         }
+    }
+
+    /// True when `child` has NOTHING inside it — no IR children, no text
+    /// (line boxes ARE class-B break points) and no generated
+    /// ::before/::after content. The wave-42 `monolithicContent` predicate,
+    /// named so the wave-46 clone branch (ColumnsApplier.fragmentPlan's
+    /// `childIsLeaf`) and specsFor share ONE definition — the same three
+    /// inputs the Kotlin twin reads (`_text` there is `text` here).
+    static func isLeafBox(_ child: IRComponent) -> Bool {
+        (child.children?.isEmpty ?? true)
+            && (child.text?.isEmpty ?? true)
+            && child.pseudos == nil
     }
 
     /// True when a forced COLUMN break lives in `component`'s box tree in a

@@ -349,6 +349,23 @@ struct ComposedCaptureCanvas: View {
     /// per-index arrays must match the flow ForEach exactly).
     private func rootPlans(for flowRoots: [IRComponent]) -> [UABlockMargin.RootStackMargin] {
         flowRoots.map { root in
+            // wave-46 lane H1 (Y8's iOS twin): the root's UA default
+            // resolves its em against the root's OWN computed font-size
+            // (css-values-4 §5.1.1) — nil for every root without a font
+            // signal, so only a font-sized `<p>`/`<ul>`/… root moves
+            // (measured: inherit-computed-001's `font-size: larger` p,
+            // 16 → 19px; iOS 0.8863 → 0.9767 on a 3px translate). A
+            // composed root is a body-level child, so the basis's default
+            // 16px inherited base is exact. Resolved ONCE here and threaded
+            // into BOTH in-flow branches below, the way the Kotlin twin's
+            // single rootStackMargin call covers both (ScreenshotCaptureScreen
+            // rootPlans — `uaBasisPx`).
+            // The tag rides in as well: it gates the monospace
+            // fixed-default rung (B1), which Blink applies only to
+            // KEYWORD-sized elements — an em-sized heading (h1/h2/h3/h5/h6)
+            // keeps the ref-calibrated table rather than a wrong 13px em base.
+            let uaBasisPx = UABlockMarginFontBasis.ownFontSizePx(
+                root.properties, sourceTag: root.meta?.sourceTag)
             // Wave-19 follow-up: the RC1 static-position family (the ONLY
             // out-of-flow roots FixedHoist.split leaves in the flow list —
             // absolute, no positioned ancestor, no inset) mounts at 0×0
@@ -370,7 +387,10 @@ struct ComposedCaptureCanvas: View {
                     tag: root.meta?.sourceTag,
                     declaresTop: UABlockMargin.declaresBlockMarginTop(root.properties),
                     declaresBottom: UABlockMargin.declaresBlockMarginBottom(root.properties),
-                    staticDeclaredEdges: UABlockMargin.staticDeclaredEdges(root.properties))
+                    staticDeclaredEdges: UABlockMargin.staticDeclaredEdges(root.properties),
+                    // H1: same basis as the opaque branch — the Kotlin
+                    // twin's one call serves both shapes.
+                    ownFontSizePx: uaBasisPx)
                 // Same contribution + strip, flagged transparent so the fold
                 // keeps the adjoining set open across this root's slot.
                 return UABlockMargin.RootStackMargin(
@@ -385,7 +405,9 @@ struct ComposedCaptureCanvas: View {
                 // paints); nil for any other out-of-flow root (defensive —
                 // split hoists them all, so none should reach here).
                 staticDeclaredEdges: ComponentRenderer.isOutOfFlow(root)
-                    ? nil : UABlockMargin.staticDeclaredEdges(root.properties))
+                    ? nil : UABlockMargin.staticDeclaredEdges(root.properties),
+                // H1: the root's own font basis (nil = the 16px table).
+                ownFontSizePx: uaBasisPx)
             // wave-26 (lane RES residual 3a): fold in the HOIST BAND the
             // root's own §8.3.1 plan would otherwise paint as padding OUTSIDE
             // its styled box. Both are outer spacing in the same adjoining

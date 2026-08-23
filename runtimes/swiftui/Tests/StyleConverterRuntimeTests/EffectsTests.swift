@@ -53,8 +53,8 @@ final class EffectsTests: XCTestCase {
                 "round": obj(["px": .double(5)]),
             ])),
         ]))
-        if case .inset(let t, let r, let b, let l, let cr, _) = ins?.shape ?? .none,
-           t == 10, r == 20, b == 30, l == 40, cr == 5 { /* ok */ }
+        if case .inset(let sides, let cr, _) = ins?.shape ?? .none,
+           sides.top == 10, sides.right == 20, sides.bottom == 30, sides.left == 40, cr == 5 { /* ok */ }
         else { f.append("ClipPath: inset 10 20 30 40 round 5 mismatch") }
 
         // circle(50px at 50% 50%)

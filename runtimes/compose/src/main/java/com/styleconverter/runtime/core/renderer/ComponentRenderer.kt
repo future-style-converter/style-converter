@@ -59,6 +59,9 @@ import com.styleconverter.runtime.lists.ListStyleExtractor
 import com.styleconverter.runtime.lists.ListStyleApplier as StyleListApplier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+// Wave 46 (lane Y5): the per-line re-pitch bands (linePitchRepitch).
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
 // Draw-time fractional translation for the glyph placement compensation
 // (center-align snap + sub-natural line-height) — graphicsLayer does not
 // affect layout, so box geometry and the committed baselines stay put.
@@ -2935,6 +2938,35 @@ object ComponentRenderer {
                                 (clearanceAdj.appliedBottomPx ?: 0.0).toFloat(),
                             )
                         } ?: collapsePlan?.perChild?.getOrNull(index)
+                        // ── Wave 46 (lane Y6): the abspos STATIC-POSITION
+                        // mount for a child of a `position: absolute |
+                        // fixed | sticky` parent — CSS 2.1 §9.3.2 /
+                        // §10.6.4: an out-of-flow box reserves NO flow
+                        // space, so consecutive abspos siblings share one
+                        // static position instead of stacking (the
+                        // composited-filters-under-opacity defect: two
+                        // `left: 0` / `left: 50px` squares painted 150px
+                        // apart). The zero-footprint anchor is the RC1 mount
+                        // (CanvasRootHoist.zeroFlowAnchor) applied one level
+                        // deeper; the decision table and the documented
+                        // limits live in PositionedParentFlowSlot. Host-gated
+                        // exactly like RC1, so hostless paths (dark stage,
+                        // every committed baseline) keep the identity
+                        // modifier here — and a `relative`/transform-CB
+                        // parent never reaches this loop (its children take
+                        // the positioned-container Box branch above).
+                        val outOfFlowSlotMount: Modifier =
+                            if (com.styleconverter.runtime.layout.position.CanvasRootHoist
+                                    .LocalActive.current &&
+                                com.styleconverter.runtime.layout.position
+                                    .PositionedParentFlowSlot
+                                    .applies(child.properties, component.properties)
+                            ) {
+                                com.styleconverter.runtime.layout.position
+                                    .PositionedParentFlowSlot.mount(child.properties)
+                            } else {
+                                Modifier
+                            }
                         // The child's style chain, with the margin override
                         // when one applies (§8.3.1 plan or §9.5.2 clearance —
                         // both ride the same LocalCollapsedMargin channel).
@@ -2948,10 +2980,10 @@ object ComponentRenderer {
                                     com.styleconverter.runtime.spacing.BlockMarginCollapse
                                         .LocalCollapsedMargin provides collapsed
                                 ) {
-                                    RenderComponent(child)
+                                    RenderComponent(child, outOfFlowSlotMount)
                                 }
                             } else {
-                                RenderComponent(child)
+                                RenderComponent(child, outOfFlowSlotMount)
                             }
                         }
                         // Lane W5 — floats are OUT OF FLOW (CSS 2.1 §9.5): a
@@ -6378,6 +6410,18 @@ object ComponentRenderer {
             if (effectiveLineHeight != TextUnit.Unspecified)
                 with(snapDensity) { effectiveLineHeight.toPx() }
             else 0f
+        // Wave 46 (lane Y5) — the per-line re-pitch plan the snap below
+        // derives from the SETTLED layout and the draw modifier after it
+        // consumes. A state, not a local: the layout block writes it and the
+        // draw block reads it, and a changed plan must redraw without
+        // recomposing (same channel discipline as `layoutResult`). Null for
+        // every run that needs no re-pitch — see ComposedLinePitch's header
+        // for the exact decline table (single line, integer box, `normal`,
+        // non-uniform platform pitch).
+        val linePitchPlan = androidx.compose.runtime.remember {
+            androidx.compose.runtime.mutableStateOf<
+                com.styleconverter.runtime.typography.ComposedLinePitch.Plan?>(null)
+        }
         val composedLineBoxSnap: Modifier =
             if (LocalWptComposedMode.current && refLineBoxPx > 0f) {
                 Modifier.layout { measurable, constraints ->
@@ -6385,15 +6429,77 @@ object ComponentRenderer {
                     // lineCount comes from the previous frame's onTextLayout
                     // (below); until it settles (0) we pass the natural height
                     // through unchanged — the capture waits for layout to settle.
-                    val lines = layoutResult.value?.lineCount ?: 0
-                    if (lines <= 0) {
+                    val settled = layoutResult.value
+                    val lines = settled?.lineCount ?: 0
+                    if (lines <= 0 || settled == null) {
+                        // Wave 46 (lane Y5): no settled lines ⇒ no plan either.
+                        if (linePitchPlan.value != null) linePitchPlan.value = null
                         layout(placeable.width, placeable.height) { placeable.place(0, 0) }
                     } else {
                         val target = Math.round(lines * refLineBoxPx).coerceAtLeast(0)
+                        // Center the (slightly taller) glyph box in the
+                        // tightened CSS line box — symmetric ½px trim.
+                        val placementY = (target - placeable.height) / 2
+                        // Wave 46 (lane Y5) — Compose lays every line of this
+                        // run out ceil(L) tall (LineHeightStyleSpan, verified
+                        // in ComposedLinePitch's header), so a multi-line run
+                        // at a FRACTIONAL box advances faster than the
+                        // browser's accumulated i × L edges. The plan is the
+                        // per-line whole-pixel translation back onto that
+                        // grid, measured from the same placement this block
+                        // reports, so the two can never disagree about where
+                        // the box top is. Written only on change so a settled
+                        // frame does not invalidate the draw again.
+                        val plan = com.styleconverter.runtime.typography.ComposedLinePitch.plan(
+                            lineBoxPx = refLineBoxPx,
+                            lineTopsPx = FloatArray(lines) { settled.getLineTop(it) },
+                            lineBottomsPx = FloatArray(lines) { settled.getLineBottom(it) },
+                            placementYPx = placementY
+                        )
+                        if (linePitchPlan.value != plan) linePitchPlan.value = plan
                         layout(placeable.width, target) {
-                            // Center the (slightly taller) glyph box in the
-                            // tightened CSS line box — symmetric ½px trim.
-                            placeable.place(0, (target - placeable.height) / 2)
+                            placeable.place(0, placementY)
+                        }
+                    }
+                }
+            } else Modifier
+        // Wave 46 (lane Y5) — the draw half of the re-pitch: paint the run
+        // once per line, each pass clipped to that line's band (in the
+        // Text's own coordinates, so `clipRect` sits INSIDE `translate`) and
+        // shifted by the plan's whole-pixel delta. Adjacent translated bands
+        // can overlap by at most one pixel, and that pixel is leading on
+        // both sides (the box is at least the face's content area — see the
+        // uniform-pitch gate), so no ink is painted twice. A null plan keeps
+        // the single `drawContent()` every run has today, and outside
+        // composed WPT the modifier is not even in the chain, so the dark
+        // stage's composition shape is untouched. Placed AFTER the FIX-2/3/4
+        // graphicsLayer (its whole-run translation applies on top) and
+        // BEFORE the emphasis / decoration painters, so their per-line rects
+        // ride the bands with the glyphs — `drawContent()` here IS them.
+        val linePitchRepitch: Modifier =
+            if (LocalWptComposedMode.current && refLineBoxPx > 0f) {
+                Modifier.drawWithContent {
+                    val plan = linePitchPlan.value
+                    if (plan == null) {
+                        drawContent()
+                    } else {
+                        val w = size.width
+                        for (band in plan.bands) {
+                            translate(top = band.deltaYPx) {
+                                // Horizontal clip is open on both sides: a
+                                // `TextOverflow.Visible` run may paint past
+                                // its own width and must keep doing so.
+                                clipRect(
+                                    left = -com.styleconverter.runtime.typography
+                                        .ComposedLinePitch.OPEN_BAND_PX,
+                                    top = band.clipTopPx,
+                                    right = w + com.styleconverter.runtime.typography
+                                        .ComposedLinePitch.OPEN_BAND_PX,
+                                    bottom = band.clipBottomPx
+                                ) {
+                                    this@drawWithContent.drawContent()
+                                }
+                            }
                         }
                     }
                 }
@@ -6687,7 +6793,11 @@ object ComponentRenderer {
             // (The rotated writing-mode branch above deliberately skips the
             // compensation: its glyph run is rotated ±90° and the corpus's
             // vertical fixtures are neither centered nor sub-natural.)
-            modifier = textModifier.then(composedLineBoxSnap).then(glyphPlacementCompensation).then(emphasisModifier).then(decorationModifier)
+            modifier = textModifier.then(composedLineBoxSnap).then(glyphPlacementCompensation)
+                // Wave 46 (lane Y5): the per-line re-pitch sits between the
+                // whole-run graphicsLayer and the per-line painters (see
+                // linePitchRepitch's banner for why exactly here).
+                .then(linePitchRepitch).then(emphasisModifier).then(decorationModifier)
         )
     }
 

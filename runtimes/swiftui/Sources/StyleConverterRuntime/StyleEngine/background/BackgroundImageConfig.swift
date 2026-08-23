@@ -119,14 +119,30 @@ enum BackgroundImageLayer: Equatable {
 }
 
 // Single gradient stop. `position` is 0..1 (normalised from 0..100
-// percentage in the IR) or nil when CSS didn't specify one (SwiftUI
-// will interpolate evenly across nil positions).
+// percentage in the IR) or nil when CSS didn't specify one — the
+// resolver (GradientStopResolver, css-images-4 §3.4.3) spaces nil
+// stops between their positioned neighbours.
 struct BackgroundImageStop: Equatable {
     // Parsed colour. May be `.dynamic(...)` or `.unknown` — applier
     // falls back to clear when the colour can't be resolved.
     var color: ColorValue
     // Normalised position 0..1, or nil for "auto".
     var position: Double?
+    // Wave 46 (lane Y2): the <length> arm of the stop position
+    // (wire `positionLength: {px: N}`, css-images-4 §3.4.2
+    // <length-percentage>). Absolute CSS px along the gradient line;
+    // resolved against the line length at render time (the box is only
+    // known inside the GeometryReader / Canvas). Dropped on the floor
+    // before this lane — which erased the period of every
+    // `repeating-*-gradient(…, <color> <length>)`.
+    var positionPx: Double? = nil
+    // Wave 46 (lane Y2): the gradient's <color-interpolation-method>.
+    // A GRADIENT-level attribute carried on every stop because the
+    // layer enum's case arity is destructured outside this tree
+    // (ComponentRenderer's clip-text `.linear(_, let stops)`), so adding
+    // a payload there is not this lane's seam; the extractor stamps the
+    // same value on each stop and the resolver reads `stops[0]`.
+    var interp: GradientInterpolation = .legacy
 }
 
 // Top-level container. `layers` is empty when no BackgroundImage property

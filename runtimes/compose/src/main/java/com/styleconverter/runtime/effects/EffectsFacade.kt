@@ -124,14 +124,27 @@ object EffectsFacade {
         // so nothing else in the chain changes.
         positionOffset: androidx.compose.ui.unit.DpOffset =
             androidx.compose.ui.unit.DpOffset.Zero,
+        // wave-46 (lane Y4, skeptic S2) — the CSS2 §8.3.1 collapse override
+        // the element's MARGIN step receives, consumed ONLY by the clip-path
+        // lane, which needs to know how much of the node is applied margin
+        // band to place the css-masking-1 §7.1 reference box. Threaded as a
+        // parameter for the same reason MarginApplier takes one: this step's
+        // modifiers materialise INSIDE the provider that re-provides
+        // `LocalCollapsedMargin` as null for descendants, so a
+        // CompositionLocal read here always sees null while the margin step
+        // uses the real override. Defaulted, so nothing else changes.
+        collapsed: com.styleconverter.runtime.spacing.CollapsedMargin? = null,
     ): Modifier {
         var result = modifier
 
         // Apply blend mode first (affects layer compositing)
         result = BlendModeApplier.applyBlendMode(result, config.blendMode)
 
-        // Apply clip path (determines visible region)
-        result = ClipPathApplier.applyClipPath(result, config.clipPath)
+        // Apply clip path (determines visible region). The collapse
+        // override rides along so the clip's reference box subtracts the
+        // margin bands the margin step ACTUALLY applied (see the parameter's
+        // comment above and ClipPathApplier.applyClipPath's KDoc).
+        result = ClipPathApplier.applyClipPath(result, config.clipPath, collapsed)
 
         // Apply mask (determines visible region based on image/gradient)
         result = MaskApplier.applyMask(result, config.mask)

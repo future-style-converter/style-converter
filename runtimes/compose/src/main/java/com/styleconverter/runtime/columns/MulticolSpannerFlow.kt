@@ -138,7 +138,23 @@ object MulticolSpannerFlow {
          * single null fact disables the whole container's strip, so the
          * run fragmenter's float bail keeps owning unproven float shapes.
          */
-        val floatStrip: MulticolFloatStrip.ChildFacts? = null
+        val floatStrip: MulticolFloatStrip.ChildFacts? = null,
+        /**
+         * Wave-46 lane Y3 — true iff the child declares
+         * `box-decoration-break: clone` (css-break-3 §5.2). Separate from
+         * [cloneBands] so the sole-child fragmenter can LOG (never
+         * silently slice) a clone child whose bands did not resolve or
+         * whose content it cannot re-flow per fragment.
+         */
+        val cloneDeclared: Boolean = false,
+        /**
+         * Wave-46 lane Y3 — the child's statically-resolved block-axis
+         * decoration bands when it is a clone child
+         * ([MulticolCloneDecoration.bandsFor]); null for every slice
+         * child (the default, byte-identical S-table path) and for a
+         * clone child with a non-px band (logged bail to slice).
+         */
+        val cloneBands: MulticolCloneGeometry.Bands? = null
     )
 
     /**
@@ -281,7 +297,12 @@ object MulticolSpannerFlow {
                 // Wave-44 lane U8: the float-strip facts (or the strict
                 // null bail) — computed only for containers with a float
                 // somewhere (see the `anyFloated` gate above).
-                if (anyFloated) MulticolFloatStrip.factsFor(child) else null
+                if (anyFloated) MulticolFloatStrip.factsFor(child) else null,
+                // Wave-46 lane Y3: the css-break-3 §5.2 clone signal + its
+                // resolved decoration bands (null for slice children, so
+                // every non-clone container's spec is byte-identical).
+                MulticolCloneDecoration.declaresClone(child),
+                MulticolCloneDecoration.bandsFor(child)
             )
         }
     }

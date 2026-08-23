@@ -34,6 +34,24 @@ enum ColumnsApplier {
         let columnBlockSizePx: CGFloat
         /// G — the used column-gap in px (the HStack spacing).
         let gapPx: CGFloat
+        /// Wave-46 lane Y3 — css-break-3 §5.2 `box-decoration-break:
+        /// clone`: the DECLARED block-size the child copy rendered in
+        /// each fragment carries, index-aligned with `fragments`. Nil
+        /// (the default, every slice plan) = the child renders unchanged
+        /// in every fragment, byte-identical to the wave-10 row.
+        var cloneDeclaredHeightsPx: [CGFloat]? = nil
+
+        /// The child to render in fragment `index`: under clone, its copy
+        /// re-declared at that fragment's size (MulticolCloneDecoration.
+        /// fragmentChild); under slice, the child itself. Out-of-range
+        /// indices (never produced — the heights are built from the same
+        /// fragment list) also fall back to the child.
+        func child(_ child: IRComponent, forFragmentAt index: Int) -> IRComponent {
+            guard let heights = cloneDeclaredHeightsPx, heights.indices.contains(index) else {
+                return child
+            }
+            return MulticolCloneDecoration.fragmentChild(child, declaredHeightPx: heights[index])
+        }
     }
 
     /// Decide whether ONE in-flow child of a multicol container
@@ -69,6 +87,13 @@ enum ColumnsApplier {
     ///     ceil(C/N)); false (the default, and the whole dark-stage
     ///     corpus) keeps the definite-height-only wave-10 behaviour
     ///     byte-identically.
+    ///   - childIsLeaf: wave-46 lane Y3 — true iff the child has NO content
+    ///     of its own (no IR children, no text, no generated content — the
+    ///     MulticolSpannerFlow `monolithicContent` predicate). Only such a
+    ///     child may take the css-break-3 §5.2 CLONE branch (its fragments
+    ///     are nothing but decoration, so re-rendering it at each
+    ///     fragment's size IS the clone); the default false keeps every
+    ///     legacy caller on slice, and a content-bearing clone child logs.
     static func fragmentPlan(columns: ColumnsConfig?,
                              verticalWritingMode: Bool,
                              siblingCount: Int,
@@ -77,7 +102,8 @@ enum ColumnsApplier {
                              gapPx: CGFloat,
                              childProperties: [IRProperty],
                              ctx: SpacingContext,
-                             wptCaptureMode: Bool = false) -> FragmentPlan? {
+                             wptCaptureMode: Bool = false,
+                             childIsLeaf: Bool = false) -> FragmentPlan? {
         // §2 gate: only a multicol container (non-auto column-count or
         // column-width) establishes columns to fragment into.
         guard columns?.isMulticolContainer == true else { return nil }
@@ -148,6 +174,25 @@ enum ColumnsApplier {
             // Dark stage keeps the wave-10 contract: auto-height multicol
             // grows to fit instead of fragmenting (frozen behaviour).
             return nil
+        }
+        // ── Wave-46 lane Y3: the CLONE branch (css-break-3 §5.2) ────────
+        // A sole leaf child declaring `box-decoration-break: clone` gets
+        // the K-table plan (MulticolClonePlan): per-fragment child copies
+        // re-declared at each fragment's size, no block translate. Every
+        // bail inside (content-bearing child, non-px band, bands filling
+        // H) logs once and returns nil, so the slice row below stays the
+        // byte-identical fallback; a slice child never enters.
+        if MulticolCloneDecoration.declaresClone(childProperties),
+           let clone = clonePlan(childDeclaredBlockSizePx: c,
+                                 columnBlockSizePx: h,
+                                 used: used,
+                                 gapPx: gapPx,
+                                 childProperties: childProperties,
+                                 childSize: childSize,
+                                 siblingCount: siblingCount,
+                                 childIsLeaf: childIsLeaf,
+                                 wptCaptureMode: wptCaptureMode) {
+            return clone
         }
         // The geometry itself: nil when C <= H (S2 identity — the fits
         // case never reaches a break point, css-break-3 §4).

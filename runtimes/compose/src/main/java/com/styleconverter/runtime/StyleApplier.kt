@@ -600,6 +600,16 @@ object StyleApplier {
                 com.styleconverter.runtime.layout.position.PositionApplier
                     .resolvedOffset(config.layout.position)
             else androidx.compose.ui.unit.DpOffset.Zero,
+            // wave-46 (lane Y4, skeptic S2) — the SAME §8.3.1 collapse
+            // override step 4 below hands MarginApplier, threaded on to the
+            // clip-path lane so its css-masking-1 §7.1 reference box
+            // subtracts the bands that were actually applied. It cannot read
+            // the CompositionLocal itself: this step's modifiers materialise
+            // inside the provider that resets LocalCollapsedMargin to null
+            // for descendants, so the local always read null here while the
+            // margin step used the real value (WPT clip-path-ellipse-006
+            // then clipped a zero-height border box and rendered empty).
+            collapsed = collapsedMargin,
         )
 
         // 3.5. Mask — applied INSIDE EffectsFacade.apply (step 3), which

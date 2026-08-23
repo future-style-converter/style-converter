@@ -15,7 +15,11 @@
 //      FIRST entry inside `stops` with no srgb — brief says detect and
 //      skip these; we also capture the keyword for shape hinting.
 //    * Stop position is 0..100 percentage (may be null); we normalise to
-//      0..1 Double here so the applier doesn't need to remember.
+//      0..1 Double here so the applier doesn't need to remember. The
+//      <length> arm (`positionLength: {px}`) rides as absolute px
+//      (wave 46) — resolved against the gradient line at render time.
+//    * `interp` (the <color-interpolation-method>) is parsed per layer
+//      and stamped on each stop (wave 46, see BackgroundImageStop).
 //    * Gradient centers (`pos: {x, y}`) are per-axis <length-percentage>
 //      (A-RC8): raw number = percent; {px: N} = absolute; typed lh/em
 //      resolve HERE against the component's own FontSize / LineHeight
@@ -109,9 +113,14 @@ enum BackgroundImageExtractor {
         guard let t = o["type"]?.stringValue?.lowercased() else { return nil }
         let angle = readAngle(o["angle"])
         let rawStops = o["stops"]?.arrayValue ?? []
+        // Wave 46: the authored <color-interpolation-method> rides the
+        // layer as the optional `interp` key (BackgroundImageProperty.kt,
+        // canonical spelling like "in hsl longer hue"); parsed once per
+        // layer and stamped on each stop (see BackgroundImageStop.interp).
+        let interp = GradientInterpolation.parse(o["interp"]?.stringValue)
         // Parse stops via the shared helper; it also yields any shape
         // keyword captured from a malformed first entry.
-        let parsed = parseStops(rawStops)
+        let parsed = parseStops(rawStops, interp: interp)
         // CSS `at <position>` for radial / conic gradients lands in the
         // IR under `pos: {x, y}` — per-axis <length-percentage> since
         // A-RC8 (raw number = percent, object = length; lh/em resolve
@@ -221,7 +230,7 @@ enum BackgroundImageExtractor {
     // Any stop whose `color` object has no `srgb` AND is not a dynamic
     // colour is treated as a shape keyword leakage; we capture the
     // `original` string and skip that stop.
-    private static func parseStops(_ raw: [IRValue])
+    private static func parseStops(_ raw: [IRValue], interp: GradientInterpolation = .legacy)
         -> (stops: [BackgroundImageStop], shapeKeyword: String?) {
 
         var out: [BackgroundImageStop] = []
@@ -251,7 +260,19 @@ enum BackgroundImageExtractor {
                 if let d = positionRaw?.doubleValue { return d / 100.0 }
                 return nil
             }()
-            out.append(BackgroundImageStop(color: color, position: pos))
+            // Wave 46: the <length> arm — `positionLength: {px: N}`
+            // (absolute, reader-normalised). Runtime-dependent units
+            // ({original:{v,u}} with no px) stay unpositioned here: the
+            // gradient line has no font context of its own, and a
+            // breadcrumb beats a guessed period.
+            let lenObj = o["positionLength"]?.objectValue
+            let posPx = lenObj?["px"]?.doubleValue
+            if lenObj != nil && posPx == nil {
+                PropertyTracker.logOnce(key: "gradient-stop-length-unit",
+                    message: "gradient stop <length> in a runtime-dependent unit — treated as unpositioned on iOS")
+            }
+            out.append(BackgroundImageStop(color: color, position: pos,
+                                           positionPx: posPx, interp: interp))
         }
         return (out, shape)
     }

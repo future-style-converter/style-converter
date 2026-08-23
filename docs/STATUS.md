@@ -1013,6 +1013,36 @@ dirs + WPT corpus are gitignored):
   the refeed recipe learned it must carry `--wpt-dir`. Totals: **web
   1187/1379 (86.1%), iOS 990/1351 (73.3%), Android 991/1350
   (73.5%)** — both natives cross 73%.
+  Wave 46 (`tools/titan/results/corpus-v6-11.json`) was the
+  clean-sweep wave: **zero regressions anywhere**, and every lane's
+  projection landed within a cell. The clip-path reference box
+  (css-masking-1 §7.1 geometry-box forms, ignored on both natives —
+  Android rendered such elements *unclipped*) delivered css-masking
+  **+5 / +11** exactly as projected, after a skeptic caught a
+  regression-grade defect pre-gate (the clip read its collapsed
+  margin through a `composed` modifier that materialises inside the
+  provider nulling it — three ellipse tests would have rendered
+  empty). The iOS line-clamp twin shipped with a line-box census the
+  Compose model lacks (css-overflow iOS +5, the 005/006/007 trio
+  protected); iOS gradient machinery landed repeating periods and
+  hue-arc interpolation (css-images +2/+4); clone decoration closed
+  four css-break cells, and the catastrophic 0.14 pair was
+  reclassified as the vertical-writing-mode transposition wall.
+  inherit-computed-001 finally flipped on both natives — the UA
+  paragraph margin resolving `1em` against 16px instead of the
+  element's own 19.2px was the entire residual. The Android abspos
+  static-position fix (consecutive abspos siblings were stacking)
+  paid across five sections, including the three filter-effects
+  cells the wave-41 backdrop work had waited on — and moved the
+  ring-fenced `backdrop-filter-basic-blur` render by generic
+  mechanism (0.915→0.899, still failing; reported plainly, no
+  carve-out). The line-pitch drift was fixed where it exists but
+  honestly found *not* to be the non-Latin family's constraint; the
+  monospace font-metric wall was measured (nine face-only cells) and
+  its pilot ships OFF pending two named seams. First fully clean
+  gate in four waves. Totals: **web 1187/1379 (86.1%), iOS
+  1013/1351 (75.0%), Android 1008/1350 (74.7%)** — iOS crosses 75%,
+  Android crosses 1000 passes.
 
 ## Test suites
 
@@ -1020,9 +1050,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 368 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1265 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2559 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1622 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1666 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2641 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1737 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1684 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap

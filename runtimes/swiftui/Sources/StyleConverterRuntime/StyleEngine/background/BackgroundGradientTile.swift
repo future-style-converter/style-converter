@@ -102,15 +102,18 @@ struct BackgroundGradientTileView: View {
                       cx: cx.fraction(Double(shaderSize.width)),
                       cy: cy.fraction(Double(shaderSize.height)))
         case .repeating(let kind, let angle, let stops):
-            // Period-less repeating layers equal their plain base flavour
-            // (GradientApplier header note 3) — same dispatch here.
+            // Same dispatch as GradientApplier.render with the repeating
+            // flag set — the resolver tiles the stop span across the
+            // per-tile gradient line (wave 46, header note 5 there).
             switch kind {
             case .linear: fillLinear(rect, shaderSize: shaderSize, in: context,
-                                     angleDeg: angle, stops: stops)
+                                     angleDeg: angle, stops: stops, repeating: true)
             case .radial: fillRadial(rect, shaderSize: shaderSize, in: context,
-                                     shape: "circle", stops: stops, cx: 0.5, cy: 0.5)
+                                     shape: "circle", stops: stops, cx: 0.5, cy: 0.5,
+                                     repeating: true)
             case .conic:  fillConic(rect, shaderSize: shaderSize, in: context,
-                                    fromDeg: angle, stops: stops, cx: 0.5, cy: 0.5)
+                                    fromDeg: angle, stops: stops, cx: 0.5, cy: 0.5,
+                                    repeating: true)
             }
         case .color(let cv):
             // <color>-as-image: a solid fill has no internal geometry —
@@ -136,16 +139,24 @@ struct BackgroundGradientTileView: View {
     /// FRACTIONAL shader tile (never the snapped rect — §3.4.1 pins the
     /// gradient box to the tile) and translated to this rect's origin.
     private func fillLinear(_ rect: CGRect, shaderSize: CGSize, in context: GraphicsContext,
-                            angleDeg: Double?, stops: [BackgroundImageStop]) {
+                            angleDeg: Double?, stops: [BackgroundImageStop],
+                            repeating: Bool = false) {
         let (s, e) = GradientApplier.linearEndpoints(angleDeg: angleDeg ?? 180,
                                                      size: shaderSize)
+        // <length> stops / the repeat period resolve against THIS tile's
+        // gradient-line length (css-images-4 §3.4.1: the gradient box is
+        // the tile) — same quantity the view path feeds toGradient.
+        let gradient = GradientApplier.toGradient(
+            stops,
+            lengthPx: GradientApplier.lineLengthPx(angleDeg: angleDeg ?? 180, size: shaderSize),
+            repeating: repeating)
         // UnitPoint fractions (may exceed 0…1 — fine) → absolute pixels,
         // scaled by the shader tile and anchored at the SNAPPED rect
         // origin: the ≤0.5px phase shift is invisible, the AA seam the
         // snapping closes was not. A snapped-wide rect clamps its final
         // sub-pixel column to the gradient's edge colour.
         context.fill(Path(rect), with: .linearGradient(
-            GradientApplier.toGradient(stops),
+            gradient,
             startPoint: CGPoint(x: rect.minX + s.x * shaderSize.width,
                                 y: rect.minY + s.y * shaderSize.height),
             endPoint: CGPoint(x: rect.minX + e.x * shaderSize.width,
@@ -158,11 +169,17 @@ struct BackgroundGradientTileView: View {
     /// path's render-circular-then-squash trick with Canvas transforms.
     private func fillRadial(_ rect: CGRect, shaderSize: CGSize, in context: GraphicsContext,
                             shape: String?, stops: [BackgroundImageStop],
-                            cx: Double, cy: Double) {
-        let g = GradientApplier.toGradient(stops)
+                            cx: Double, cy: Double, repeating: Bool = false) {
         // Geometry (centre / radii) resolves against the FRACTIONAL
         // shader tile, not the snapped rect (§3.4.1 — see fillLinear).
         let w = shaderSize.width, h = shaderSize.height
+        // <length> stops measure along the ray: the circle's end radius,
+        // or the ellipse's HORIZONTAL radius √2·w/2 (css-images-3
+        // §3.2.3) — mirrors GradientApplier.radial's lengths exactly.
+        let rayPx: Double = shape == "circle"
+            ? Double(sqrt(w * w + h * h) / 2)
+            : Double(w) / 2 * 2.0.squareRoot()
+        let g = GradientApplier.toGradient(stops, lengthPx: rayPx, repeating: repeating)
         if shape == "circle" {
             // `at <pos>` centre as 0…1 fractions of the tile → pixels,
             // anchored at the snapped rect's origin.
@@ -210,12 +227,12 @@ struct BackgroundGradientTileView: View {
     /// AngularGradient (wave-1 fix).
     private func fillConic(_ rect: CGRect, shaderSize: CGSize, in context: GraphicsContext,
                            fromDeg: Double?, stops: [BackgroundImageStop],
-                           cx: Double, cy: Double) {
+                           cx: Double, cy: Double, repeating: Bool = false) {
         // Centre resolves against the FRACTIONAL shader tile anchored at
         // the snapped rect origin (§3.4.1 — see fillLinear); the fill
-        // region is the snapped rect.
+        // region is the snapped rect. Conic stops are angles — no px.
         context.fill(Path(rect), with: .conicGradient(
-            GradientApplier.toGradient(stops),
+            GradientApplier.toGradient(stops, repeating: repeating),
             center: CGPoint(x: rect.minX + cx * shaderSize.width,
                             y: rect.minY + cy * shaderSize.height),
             angle: .degrees((fromDeg ?? 0) - 90)))

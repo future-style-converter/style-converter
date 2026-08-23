@@ -296,7 +296,9 @@ test('feed-android pushes fonts BEFORE the IR reaches the inbox', async () => {
   // `pushFx`, not `fx`, since wave-40 lane T5: the inbox push carries the
   // fixture file OR its SVG-pre-raster rewrite. The ordering contract this
   // test pins is unchanged — only the name of the pushed path moved.
-  const inboxAt = src.indexOf("adbx(['push', pushFx, `${INBOX_DIR}");
+  // wave-46 lane Y7: `inboxFx` — the pushFx path or its mono-pin rewrite
+  // (monoPinnedFixture), chosen right before the inbox push.
+  const inboxAt = src.indexOf("adbx(['push', inboxFx, `${INBOX_DIR}");
   assert.ok(fontsAt > 0 && inboxAt > 0, 'both push sites must exist');
   assert.ok(fontsAt < inboxAt, 'fonts must be pushed before the IR');
   // The fonts sandbox must be wiped with the inbox: a face left from a
@@ -424,8 +426,9 @@ test('resolveReplacedImageFile ADMITS svg — the platform gate lives in the run
 test('feed-android pushes images BEFORE the IR, wipes them, and re-pushes on retry', async () => {
   const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
   const imagesAt = src.indexOf('const images = pushReplacedImages(');
-  // See the fonts twin above for why this is `pushFx` from wave-40 lane T5 on.
-  const inboxAt = src.indexOf("adbx(['push', pushFx, `${INBOX_DIR}");
+  // See the fonts twin above for why this is `pushFx` from wave-40 lane T5 on
+  // — and `inboxFx` (pushFx or its mono-pin rewrite) from wave-46 lane Y7 on.
+  const inboxAt = src.indexOf("adbx(['push', inboxFx, `${INBOX_DIR}");
   assert.ok(imagesAt > 0 && inboxAt > 0, 'both push sites must exist');
   assert.ok(imagesAt < inboxAt, 'images must be pushed before the IR (race guard)');
   // The images sandbox joins the reset wipe for the font dir's reason: a
@@ -546,4 +549,42 @@ test('the SUBPATHS below the asset roots may stay shell-created (probed visible)
   // pin documents that asymmetry so nobody "fixes" it into an app-side
   // walker it does not need.
   assert.match(src, /madeDirs\.has\(parent\)/, 'the per-src parent mkdir must remain in pushFontFaces/pushReplacedImages');
+});
+
+// ── wave-46 lane Y7: the MONO-PIN pilot hooks ───────────────────────────────
+
+test('feed-android applies the mono-pin rewrite AFTER the corpus font hop and BEFORE the inbox push', async () => {
+  // Ordering is a correctness contract in BOTH directions: the pin's
+  // `_mono-pin/…` srcs are sandbox-relative, so the corpus hop
+  // (pushFontFaces → resolveFontFile) must have read the document's OWN srcs
+  // first or it would decline the pin loudly for nothing; and the pinned doc
+  // must be the one that lands in the inbox, or the runtime would never see
+  // the `monospace` face the pilot measures.
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  const fontsAt = src.indexOf('const fonts = pushFontFaces(');
+  const pinAt = src.indexOf('const inboxFx = monoPinnedFixture(pushFx, doc,');
+  const inboxAt = src.indexOf("adbx(['push', inboxFx, `${INBOX_DIR}");
+  assert.ok(fontsAt > 0 && pinAt > 0 && inboxAt > 0, 'all three sites must exist');
+  assert.ok(fontsAt < pinAt && pinAt < inboxAt, 'font hop < mono-pin rewrite < inbox push');
+  // The tail-retry re-parses from disk, so it must re-apply the rewrite too.
+  const retryPinAt = src.indexOf('const retryInboxFx = monoPinnedFixture(');
+  const retryPushAt = src.indexOf("adbx(['push', retryInboxFx,");
+  assert.ok(retryPinAt > inboxAt && retryPushAt > retryPinAt, 'the retry path re-applies the pin before its push');
+});
+
+test('feed-android re-pushes the mono-pin faces after EVERY relaunch (the runtime reads them)', async () => {
+  // resetAndLaunch wipes FONTS_DIR. The Noto pilot could ignore that
+  // (delivery proof only); this pilot cannot — a timeout-recovery relaunch
+  // that did not re-push would hand the rest of the batch back to the
+  // platform monospace under a pilot-labelled run.
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  const launches = [...src.matchAll(/await resetAndLaunch\(adbx, opts\)/g)].map((m) => m.index);
+  assert.ok(launches.length >= 2, 'initial launch + timeout recovery');
+  for (const at of launches) {
+    const next = src.indexOf('pushMonoPinFonts(adbx)', at);
+    assert.ok(next > 0 && next - at < 900, `a relaunch at ${at} must be followed by a pin re-push`);
+  }
+  // The pin corner is the module constant, never a literal that could drift
+  // from what the runtime joins onto its fonts root.
+  assert.match(src, /const remote = `\$\{FONTS_DIR\}\/\$\{MONO_PIN_SANDBOX_DIR\}`/);
 });

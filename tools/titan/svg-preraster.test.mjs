@@ -275,14 +275,23 @@ test('feed-android rewrites BEFORE the image push, and pushes the rewritten file
   const imagesAt = src.indexOf('const images = pushReplacedImages(');
   assert.ok(rewriteAt > 0 && imagesAt > 0, 'both sites must exist');
   assert.ok(rewriteAt < imagesAt, 'the rewrite must precede the image push');
-  assert.ok(src.includes("adbx(['push', pushFx, `${INBOX_DIR}"),
+  // wave-46 lane Y7: the inbox push carries `inboxFx` — `pushFx` itself, or
+  // its mono-pin rewrite (monoPinnedFixture, applied ON TOP of pushFx's doc,
+  // so the pre-raster/woff rewrites are never lost). Pin both halves: the
+  // pinned path derives from pushFx, and the push carries it.
+  assert.ok(src.includes("const inboxFx = monoPinnedFixture(pushFx, doc,"),
+    'the mono-pin rewrite must derive from the rewritten pushFx');
+  assert.ok(src.includes("adbx(['push', inboxFx, `${INBOX_DIR}"),
     'the inbox push must carry the rewritten file, not the original');
   // The tail-retry pass re-reads the fixture FROM DISK, so it must re-apply
   // the rewrite or a salvaged row is the one capture in the run scored against
   // a vector both natives decline.
   assert.ok(src.indexOf('const retryFx = pushableFixture(') > imagesAt,
     'the tail-retry pass must re-apply the rewrite');
-  assert.ok(src.includes("adbx(['push', retryFx,"), 'and push its rewritten file');
+  assert.ok(src.includes("const retryInboxFx = monoPinnedFixture(\n        retryFx,") ||
+            src.includes("monoPinnedFixture(\n        retryFx, retryDoc"),
+    'the retry mono-pin rewrite must derive from retryFx');
+  assert.ok(src.includes("adbx(['push', retryInboxFx,"), 'and push its rewritten file');
 });
 
 test('feed-ios rewrites BEFORE the image copy loop', async () => {
@@ -293,7 +302,10 @@ test('feed-ios rewrites BEFORE the image copy loop', async () => {
   assert.ok(rewriteAt < copyAt, 'the rewrite must precede the image copy');
   // iOS re-serialises its in-memory doc into the inbox, so no file swap is
   // needed there — but the write must still come after the rewrite.
-  assert.ok(src.indexOf('JSON.stringify(doc)') > rewriteAt);
+  // wave-46 lane Y7: the serialised doc is `inboxDoc` — `doc` itself, or its
+  // mono-pin copy (monoPinDocument shares every key but `fontFaces`).
+  assert.ok(src.indexOf('const inboxDoc = monoPinDocument(doc)') > rewriteAt);
+  assert.ok(src.indexOf('JSON.stringify(inboxDoc)') > rewriteAt);
 });
 
 test('the pre-raster pre-pass runs ONCE per feeder run, before the fixture loop', async () => {

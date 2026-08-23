@@ -20,7 +20,17 @@ enum FontFamilyApplier {
         // in order and pick the first face UIFont(name:) actually resolves.
         // Without this, CSS `font-family: "Missing", "Installed", sans-serif`
         // silently fell back to the system font instead of Installed.
-        agg.fontFamilyNames = cfg.names
+        // wave-46 lane Y7: the chain handed to the walkers is `cfg.walk` —
+        // generic keywords INCLUDED in author order — so the document
+        // @font-face lookup (StyleBuilder / TypographyApplier consult
+        // DocumentFontRegistry per name, wave-35 B2) sees a face registered
+        // under a generic's own name where the generic sits. That is how the
+        // monospace font-metric pin pilot (tools/titan/mono-pin.mjs) reaches
+        // the label. A generic nobody registered misses the registry AND
+        // `UIFont(name:)`, so it is skipped exactly as if absent, and
+        // `fontFamilyPrimary` above stays concrete-only: the `.custom`
+        // fallback is never handed a keyword.
+        agg.fontFamilyNames = cfg.walk
         // Fold generic flags OR-wise so multiple triplets (e.g. a later
         // font shorthand) can't accidentally unset a prior flag.
         agg.fontFamilyMonospace = agg.fontFamilyMonospace || cfg.hasMonospace

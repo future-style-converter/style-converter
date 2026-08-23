@@ -102,14 +102,40 @@ public enum UABlockMargin {
         properties.contains { bottomNames.contains($0.type) }
     }
 
+    /// wave-46 lane H1 (Y8's iOS twin) — the composed ROOT's UA vertical
+    /// margins resolved against the root's OWN computed font-size, in WHOLE
+    /// px. Twin of the vertical half of the Kotlin harness table
+    /// `uaBlockMargins(sourceTag, ownFontSizePx)` (apps/android-harness
+    /// UaBlockMargins.kt), which `roundToInt()`s the product: Chromium
+    /// snaps the box edge, and inherit-computed-001's 1em × 19.2 = 19.2
+    /// lands on row 35 (16 pad + 19) exactly as the frozen ref does — the
+    /// canvas's gap pads are placed at integer px anyway. Nil basis = the
+    /// one-arg table verbatim (its values are already whole, so the
+    /// rounding is the identity there — every Round 4 / R1-R7 pin holds).
+    public static func rootVertical(forTag tag: String?,
+                                    ownFontSizePx: CGFloat?) -> (top: CGFloat, bottom: CGFloat) {
+        // The unrounded basis-aware table (shared with the child fold).
+        let ua = vertical(forTag: tag, ownFontSizePx: ownFontSizePx)
+        // Whole px, ties away from zero — Kotlin's roundToInt on the same
+        // non-negative products gives the same integer.
+        return (ua.top.rounded(.toNearestOrAwayFromZero),
+                ua.bottom.rounded(.toNearestOrAwayFromZero))
+    }
+
     /// The EFFECTIVE UA vertical margins for one root: the tag's UA default
     /// on each edge the IR leaves undeclared, or 0 on an edge the IR sets
     /// (author > UA — the runtime's MarginApplier owns those edges). This
     /// is the per-edge deferral the browser performs when an author
     /// `margin-top` overrides only the UA `margin`'s top longhand.
+    ///
+    /// wave-46 lane H1: `ownFontSizePx` (the root's own computed size,
+    /// `UABlockMarginFontBasis.ownFontSizePx`) scales the UA default like
+    /// the Kotlin twin `effectiveUaMargins(tag, declared, ownFontSizePx)`;
+    /// nil (the default — every pre-existing caller) is the table verbatim.
     public static func effectiveVertical(tag: String?,
-                                         properties: [IRProperty]) -> (top: CGFloat, bottom: CGFloat) {
-        let ua = vertical(forTag: tag)
+                                         properties: [IRProperty],
+                                         ownFontSizePx: CGFloat? = nil) -> (top: CGFloat, bottom: CGFloat) {
+        let ua = rootVertical(forTag: tag, ownFontSizePx: ownFontSizePx)
         let top = declaresBlockMarginTop(properties) ? 0 : ua.top
         let bottom = declaresBlockMarginBottom(properties) ? 0 : ua.bottom
         return (top, bottom)
