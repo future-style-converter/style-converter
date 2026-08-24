@@ -370,8 +370,16 @@ object ColorExtractor {
     private fun extractLinearGradient(obj: JsonObject, repeating: Boolean): BackgroundImageConfig.LinearGradient {
         val angle = obj["angle"]?.jsonObject?.get("deg")?.jsonPrimitive?.floatOrNull ?: 180f
         val stops = extractColorStops(obj["stops"] as? JsonArray)
-        return BackgroundImageConfig.LinearGradient(angle, stops, repeating)
+        // Wave 47: the authored <color-interpolation-method> rides the
+        // layer as the optional `interp` key (BackgroundImageProperty.kt,
+        // pinned by the wave46-final increasing-hue-hsl IR: "in hsl
+        // increasing hue"). Absent → LEGACY (the historical sRGB ramp).
+        return BackgroundImageConfig.LinearGradient(angle, stops, repeating, extractInterp(obj))
     }
+
+    /** Parse the layer's optional `interp` wire key (see LinearGradient). */
+    private fun extractInterp(obj: JsonObject): GradientInterpolation =
+        GradientInterpolation.parse(obj["interp"]?.jsonPrimitive?.contentOrNull)
 
     /**
      * Extract radial gradient configuration.
@@ -413,7 +421,10 @@ object ColorExtractor {
                 else -> null
             }
         }
-        return BackgroundImageConfig.RadialGradient(centerX, centerY, stops, repeating, shape, size)
+        // The `interp` clause is grammatical on every gradient flavour
+        // (css-images-4 §3.1) — read it here too, same wire key.
+        return BackgroundImageConfig.RadialGradient(
+            centerX, centerY, stops, repeating, shape, size, extractInterp(obj))
     }
 
     /**
@@ -441,7 +452,10 @@ object ColorExtractor {
         // Serializer writes "angle" for conic; "fromAngle" was legacy.
         val angle = (obj["angle"] ?: obj["fromAngle"])?.jsonObject?.get("deg")?.jsonPrimitive?.floatOrNull ?: 0f
         val stops = extractColorStops(obj["stops"] as? JsonArray)
-        return BackgroundImageConfig.ConicGradient(centerX, centerY, angle, stops, repeating)
+        // Conic stops are <angle-percentage>s — positionLength never
+        // applies — but the interp clause does (css-images-4 §3.1).
+        return BackgroundImageConfig.ConicGradient(
+            centerX, centerY, angle, stops, repeating, extractInterp(obj))
     }
 
     /**
@@ -492,15 +506,25 @@ object ColorExtractor {
     /**
      * Extract color stops from a JSON array.
      *
-     * IR format:
+     * IR format (live-pinned against the wave46-final gradient-border-box
+     * per-test IR):
      * ```json
      * [
      *   { "color": { "srgb": { "r": 1, "g": 0, "b": 0 } }, "position": 0.0 },
-     *   { "color": { "srgb": { "r": 0, "g": 0, "b": 1 } }, "position": 100.0 }
+     *   { "color": { "srgb": …  }, "position": null },
+     *   { "color": { "srgb": …  }, "position": null, "positionLength": { "px": 30 } }
      * ]
      * ```
      *
-     * Note: Position is in percentage (0-100) in IR, converted to fraction (0-1) here.
+     * `position` is a percentage (0-100) → [ColorStop.declaredPosition]
+     * fraction; `positionLength` (the wave-40 <length> arm) → [ColorStop
+     * .positionPx] — before wave 47 that arm was DROPPED here, so the
+     * 30px repeat period of gradient-border-box never reached the brush
+     * (android-ref 0.646, one ramp instead of stripes). The legacy
+     * [ColorStop.position] keeps the declared-or-even-spread value for
+     * the unowned RepeatingGradientHelper consumer; the render pipeline
+     * spreads unpositioned stops per §3.4.3 in GradientStopResolver
+     * instead (between positioned NEIGHBOURS, not over the whole count).
      */
     private fun extractColorStops(array: JsonArray?): List<ColorStop> {
         if (array == null) return emptyList()
@@ -509,12 +533,31 @@ object ColorExtractor {
             val obj = (element as? JsonObject) ?: return@mapIndexedNotNull null
             val color = obj["color"]?.let { ValueExtractors.extractColor(it) } ?: return@mapIndexedNotNull null
 
-            // Position is in percentage (0-100), convert to fraction (0-1)
-            // If no position, distribute evenly
-            val position = obj["position"]?.jsonPrimitive?.floatOrNull?.let { it / 100f }
-                ?: (index.toFloat() / (array.size - 1).coerceAtLeast(1))
+            // Authored percent (0-100 → 0..1 fraction); JsonNull (the
+            // serializer emits `"position": null` for unpositioned
+            // stops) reads as floatOrNull == null, i.e. undeclared.
+            val declared = obj["position"]?.jsonPrimitive?.floatOrNull?.let { it / 100f }
 
-            ColorStop(color, position)
+            // Wave 47: the <length> arm — `positionLength: {px: N}`
+            // (absolute, reader-normalised). Runtime-dependent units
+            // ({original:{v,u}} with no px) stay unpositioned here: the
+            // gradient line has no font context of its own, and a
+            // breadcrumb beats a guessed period (iOS twin rule).
+            val lenObj = obj["positionLength"] as? JsonObject
+            val positionPx = lenObj?.get("px")?.jsonPrimitive?.floatOrNull
+            if (lenObj != null && positionPx == null) {
+                GradientLog.once("gradient-stop-length-unit",
+                    "gradient stop <length> in a runtime-dependent unit — treated as unpositioned on Android")
+            }
+
+            ColorStop(
+                color = color,
+                // Legacy resolution (declared, else the pre-wave even
+                // spread) — kept ONLY for the unowned helper consumer.
+                position = declared ?: (index.toFloat() / (array.size - 1).coerceAtLeast(1)),
+                declaredPosition = declared,
+                positionPx = positionPx
+            )
         }
     }
 

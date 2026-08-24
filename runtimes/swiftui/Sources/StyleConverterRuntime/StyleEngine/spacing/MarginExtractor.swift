@@ -50,13 +50,34 @@ enum MarginExtractor {
             default: break
             }
         }
-        // Second pass — logical longhands override the physical edge.
+        // Second pass — logical longhands override the physical edge they
+        // MAP to. Wave 47 (lane Z2): the target side comes from the
+        // css-writing-modes-4 §6.4 table under VERTICAL writing modes
+        // (`margin-block-end` on a vertical-rl box is a LEFT margin — the
+        // css-break background-image wall); `sides` is nil for every
+        // horizontal mode (LogicalSides.verticalOrNil's blast-radius
+        // contract), where the ?? defaults reproduce the legacy LTR-TB
+        // fold byte-identically.
+        let sides = LogicalSides.verticalOrNil(properties)
+        // One side-targeted store, shared by all four logical longhands.
+        func assign(_ side: PhysicalSide, _ value: LengthValue) {
+            switch side {
+            case .top:    cfg.top = value
+            case .right:  cfg.right = value
+            case .bottom: cfg.bottom = value
+            case .left:   cfg.left = value
+            }
+        }
         for prop in properties {
             switch prop.type {
-            case "MarginBlockStart":  cfg.top    = extractLengthPercentDefault(prop.data); touched = true
-            case "MarginInlineEnd":   cfg.right  = extractLengthPercentDefault(prop.data); touched = true
-            case "MarginBlockEnd":    cfg.bottom = extractLengthPercentDefault(prop.data); touched = true
-            case "MarginInlineStart": cfg.left   = extractLengthPercentDefault(prop.data); touched = true
+            case "MarginBlockStart":
+                assign(sides?.blockStart ?? .top, extractLengthPercentDefault(prop.data)); touched = true
+            case "MarginInlineEnd":
+                assign(sides?.inlineEnd ?? .right, extractLengthPercentDefault(prop.data)); touched = true
+            case "MarginBlockEnd":
+                assign(sides?.blockEnd ?? .bottom, extractLengthPercentDefault(prop.data)); touched = true
+            case "MarginInlineStart":
+                assign(sides?.inlineStart ?? .left, extractLengthPercentDefault(prop.data)); touched = true
             default: break
             }
         }

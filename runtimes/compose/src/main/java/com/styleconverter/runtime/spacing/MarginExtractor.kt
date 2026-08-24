@@ -58,6 +58,13 @@ object MarginExtractor {
             top = top, right = right, bottom = bottom, left = left,
             blockStart = blockStart, blockEnd = blockEnd,
             inlineStart = inlineStart, inlineEnd = inlineEnd,
+            // Wave-47 lane Z2 — the §6.4 mapping for the component's used
+            // writing mode, read off the SAME (merged, inheritance-resolved)
+            // list so an ancestor's `writing-mode: vertical-rl` reaches a
+            // margin-only child (css-break background-image-001's .mc rows).
+            // Null for every horizontal mode → resolve() is byte-identical
+            // for all pre-existing content (LogicalSides contract).
+            logicalSides = LogicalSides.verticalOrNull(properties),
         )
     }
 

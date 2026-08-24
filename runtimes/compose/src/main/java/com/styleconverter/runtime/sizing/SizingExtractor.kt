@@ -63,6 +63,18 @@ object SizingExtractor {
         wptCaptureMode: Boolean = false,
     ): SizingConfig {
         var cfg = SizingConfig()
+        // Wave-47 lane Z2 — the component's used writing mode, read off the
+        // SAME (merged, inheritance-resolved) list via the one shared decoder
+        // (the read MultiColumnExtractor already uses). Under a VERTICAL
+        // mode css-logical-1 §4.1 maps inline-size to the vertical axis and
+        // block-size to the horizontal one, so the logical slots below swap
+        // their physical targets; horizontal modes (all pre-existing
+        // content) keep the identical legacy mapping. Physical Width/Height
+        // are untouched — and post-load-extracted WPT wires that bake used
+        // physical sizes AFTER the logical entries still win by the
+        // last-occurrence rule either way.
+        val verticalWm = com.styleconverter.runtime.typography.text.TextExtractor
+            .extractWritingModeConfig(properties).isVertical
         // Walk once, dispatch per property. Last occurrence wins (matches CSS
         // cascade for same-specificity rules).
         //
@@ -104,15 +116,39 @@ object SizingExtractor {
                 }
                 continue
             }
+            // Wave-47 lane Z2 — the logical slots' PHYSICAL target follows
+            // the used writing mode (css-logical-1 §4.1): under vertical
+            // modes InlineSize sizes the VERTICAL axis (height) and
+            // BlockSize the HORIZONTAL one (width) — the exact transposition
+            // the css-break background-image wall renders wrong today.
             cfg = when (type) {
-                // Inline axis (width in horizontal-tb).
-                "Width", "InlineSize" -> cfg.copy(width = asSize(data))
-                "MinWidth", "MinInlineSize" -> cfg.copy(minWidth = asSize(data))
-                "MaxWidth", "MaxInlineSize" -> cfg.copy(maxWidth = asSize(data))
-                // Block axis (height in horizontal-tb).
-                "Height", "BlockSize" -> cfg.copy(height = asSize(data))
-                "MinHeight", "MinBlockSize" -> cfg.copy(minHeight = asSize(data))
-                "MaxHeight", "MaxBlockSize" -> cfg.copy(maxHeight = asSize(data))
+                // Physical longhands are axis-fixed by definition.
+                "Width" -> cfg.copy(width = asSize(data))
+                "MinWidth" -> cfg.copy(minWidth = asSize(data))
+                "MaxWidth" -> cfg.copy(maxWidth = asSize(data))
+                "Height" -> cfg.copy(height = asSize(data))
+                "MinHeight" -> cfg.copy(minHeight = asSize(data))
+                "MaxHeight" -> cfg.copy(maxHeight = asSize(data))
+                // Inline axis: width in horizontal modes, height in vertical.
+                "InlineSize" ->
+                    if (verticalWm) cfg.copy(height = asSize(data))
+                    else cfg.copy(width = asSize(data))
+                "MinInlineSize" ->
+                    if (verticalWm) cfg.copy(minHeight = asSize(data))
+                    else cfg.copy(minWidth = asSize(data))
+                "MaxInlineSize" ->
+                    if (verticalWm) cfg.copy(maxHeight = asSize(data))
+                    else cfg.copy(maxWidth = asSize(data))
+                // Block axis: height in horizontal modes, width in vertical.
+                "BlockSize" ->
+                    if (verticalWm) cfg.copy(width = asSize(data))
+                    else cfg.copy(height = asSize(data))
+                "MinBlockSize" ->
+                    if (verticalWm) cfg.copy(minWidth = asSize(data))
+                    else cfg.copy(minHeight = asSize(data))
+                "MaxBlockSize" ->
+                    if (verticalWm) cfg.copy(maxWidth = asSize(data))
+                    else cfg.copy(maxHeight = asSize(data))
                 // AspectRatio uses its own wire shape.
                 "AspectRatio" -> cfg.copy(aspectRatio = extractAspectRatio(data))
                 // Lane BX — box-sizing tri-state (unset ≠ content-box).

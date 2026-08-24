@@ -33,14 +33,23 @@
 //  cross band. The two runs MUST agree, so the line arithmetic below no
 //  longer lives here: it moved to `FlexWrapPlan`, which both call.
 //
-//  STILL TODO here (named, not silently skipped): per-line
-//  justify-content, wrap-reverse ordering, and the non-stretch
-//  align-content keywords (start/center/end/space-*). Those need the
-//  same treatment the nowrap path got in fidelity wave 2. Column-
-//  direction wrap is also unimplemented — this Layout lays out ROWS
-//  whatever `flex-direction` says (the pre-wave-25 behaviour), which is
-//  why the build-time plan refuses column containers instead of
-//  injecting a cross size the placement would contradict.
+//  WAVE 47 (lane Z7) — per-line justify-content and the non-stretch
+//  align-content keywords now PLACE through CSSFlexMath.mainOffsets,
+//  the same §8.2 distribution the nowrap path uses (css-align-3 has ONE
+//  <content-distribution> grammar for both axes). Measured against the
+//  frozen Chromium refs: flex-gap-decorations-040…042 distribute each
+//  line's leftover into its item gaps (space-between/around/evenly) and
+//  047…049 position the line block (the row rules sit centred in the
+//  distributed line gaps). Nil keywords take mainOffsets' packed
+//  default, byte-identical to the removed accumulation loops.
+//
+//  STILL TODO here (named, not silently skipped): wrap-reverse
+//  ordering. Column-direction wrap is also unimplemented — this Layout
+//  lays out ROWS whatever `flex-direction` says (the pre-wave-25
+//  behaviour), which is why the build-time plan refuses column
+//  containers instead of injecting a cross size the placement would
+//  contradict (that wall is what keeps flex-gap-decorations-043/045
+//  failing on iOS).
 //
 
 import SwiftUI
@@ -75,6 +84,26 @@ struct FlowLayout: Layout {
     /// container. Corpus-inert today: no WPT or property fixture pairs
     /// `align-content` with `flex-wrap` (grep AlignContent+FlexWrap → 0).
     var alignContent: AlignmentKeyword? = nil
+
+    /// Container `justify-content` (§8.2) — wave 47 (lane Z7): applied
+    /// PER LINE through the same CSSFlexMath.mainOffsets the nowrap path
+    /// uses (css-align-3 §8.3: content distribution is a per-line
+    /// operation). Nil = the initial `normal` → packed start, which is
+    /// byte-identical to the pre-wave-47 accumulation loop (measured:
+    /// the wave-46 iOS captures for flex-gap-decorations-040…042 packed
+    /// every line flush-left where the Chromium ref distributes them).
+    var justifyContent: AlignmentKeyword? = nil
+    /// True when the IR declared an explicit MAIN (inline) size — wave
+    /// 47: a definite-width container's content box IS that width, so
+    /// `sizeThatFits` must claim the proposal instead of hugging the
+    /// widest line, or the per-line §8.2 distribution above never sees
+    /// the free space (measured via the raster pins: a `width: 170`
+    /// wrap container reported 150 — its widest line — and SwiftUI
+    /// placed the Layout hugged inside the outer frame, so
+    /// `bounds.width` at placement was 150 and space-between had
+    /// nothing to hand out). False = CSS shrink-to-fit hugging, the
+    /// pre-wave-47 report, byte for byte.
+    var definiteMain: Bool = false
 
     /// css-align-3 §5.3 — does `align-content` distribute leftover cross
     /// space to the LINES (rather than merely position them)? Delegated
@@ -176,9 +205,26 @@ struct FlowLayout: Layout {
         let lines = plan(subviews: subviews,
                          maxMain: proposal.replacingUnspecifiedDimensions().width,
                          availCross: proposal.height)
-        let height = lines.reduce(0) { $0 + $1.cross }
+        // Content (hugged) extents — the CSS shrink-to-fit report.
+        let hugWidth = lines.map(\.main).max() ?? 0
+        let hugHeight = lines.reduce(0) { $0 + $1.cross }
             + verticalSpacing * CGFloat(max(0, lines.count - 1))
-        return CGSize(width: lines.map(\.main).max() ?? 0, height: height)
+        // Wave 47 (lane Z7) — a DEFINITE axis claims the proposal: the
+        // CSS content box of a `width: 170px` (or `height: 150px`) flex
+        // container is that size whatever its lines hug to, and the
+        // §8.2/§9.6 distribution at placement time needs `bounds` to BE
+        // that box (see `definiteMain`). max() keeps overflow honest —
+        // lines wider/taller than the box still spill like CSS
+        // `overflow: visible` (the pre-wave-47 behavior for them).
+        // Under stretch the lines already sum to the definite cross, so
+        // the height claim is the number the old code returned anyway.
+        let width = definiteMain
+            ? max(proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? hugWidth, hugWidth)
+            : hugWidth
+        let height = definiteCross
+            ? max(proposal.height.flatMap { $0.isFinite ? $0 : nil } ?? hugHeight, hugHeight)
+            : hugHeight
+        return CGSize(width: width, height: height)
     }
 
     /// Place every item, stretching the auto-cross ones to their line.
@@ -192,10 +238,37 @@ struct FlowLayout: Layout {
         let lines = plan(subviews: subviews,
                          maxMain: bounds.width,
                          availCross: bounds.height)
-        var y = bounds.minY
-        for line in lines {
-            var x = bounds.minX
-            for item in line.items {
+        // Wave 47 (lane Z7) — §9.6 align-content POSITIONING keywords.
+        // Line cross positions come from the same distribution math the
+        // main axis uses (css-align-3 defines one <content-distribution>
+        // grammar for both): sizes = the line crosses, available = the
+        // container's definite cross, keyword = align-content. Under the
+        // initial normal/stretch the lines were already stretched to
+        // consume the leftover (plan → FlexWrapPlan.stretchLines), so
+        // free space is zero and these offsets reproduce the pre-wave-47
+        // packed accumulation bit for bit; center/end/space-* now place
+        // the line BLOCK where css-flexbox-1 §9.6 says instead of
+        // packing at cross-start (WPT flex-gap-decorations-047…049: the
+        // Chromium ref's row rules sit centred in the DISTRIBUTED line
+        // gaps). `definiteCross` gates it exactly like stretch: a
+        // hugging container has no leftover to distribute.
+        let lineYs = CSSFlexMath.mainOffsets(
+            sizes: lines.map(\.cross),
+            available: definiteCross ? bounds.height : nil,
+            gap: verticalSpacing,
+            justify: alignContentStretches ? nil : alignContent)
+        for (li, line) in lines.enumerated() {
+            let y = bounds.minY + lineYs[li]
+            // §8.2 justify-content per line: item main positions from
+            // the shared nowrap math. Nil justify → packed start →
+            // byte-identical to the old `x += size + gap` walk.
+            let xs = CSSFlexMath.mainOffsets(
+                sizes: line.items.map(\.size.width),
+                available: bounds.width,
+                gap: horizontalSpacing,
+                justify: justifyContent)
+            for (k, item) in line.items.enumerated() {
+                let x = bounds.minX + xs[k]
                 // Stretching items take the line's whole cross extent;
                 // everyone else keeps the size they measured at.
                 let cross = item.stretches ? line.cross : item.size.height
@@ -219,9 +292,7 @@ struct FlowLayout: Layout {
                     proposal: item.stretches
                         ? ProposedViewSize(width: item.size.width, height: cross)
                         : ProposedViewSize(item.size))
-                x += item.size.width + horizontalSpacing
             }
-            y += line.cross + verticalSpacing
         }
     }
 }

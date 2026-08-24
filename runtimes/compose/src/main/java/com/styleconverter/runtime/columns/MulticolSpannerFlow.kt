@@ -154,7 +154,19 @@ object MulticolSpannerFlow {
          * child (the default, byte-identical S-table path) and for a
          * clone child with a non-px band (logged bail to slice).
          */
-        val cloneBands: MulticolCloneGeometry.Bands? = null
+        val cloneBands: MulticolCloneGeometry.Bands? = null,
+        /**
+         * Wave-47 lane Z2 — true iff the child's wire carries BOTH baked
+         * physical `Width` and `Height` entries: the post-load extractor's
+         * signature (it resolves the browser's used layout into physical
+         * longhands on every component). The vertical fragmentation pass
+         * ([VerticalMulticolMeasure]) declines such children — their baked
+         * geometry already encodes the browser's fragmentation, and the
+         * anchor-position-multicol family PASSES today on exactly that
+         * frozen render. Default false keeps every other consumer of this
+         * spec byte-identical.
+         */
+        val bakedPhysicalSize: Boolean = false
     )
 
     /**
@@ -302,7 +314,13 @@ object MulticolSpannerFlow {
                 // resolved decoration bands (null for slice children, so
                 // every non-clone container's spec is byte-identical).
                 MulticolCloneDecoration.declaresClone(child),
-                MulticolCloneDecoration.bandsFor(child)
+                MulticolCloneDecoration.bandsFor(child),
+                // Wave-47 lane Z2: the post-load-extraction signature —
+                // baked physical Width AND Height on the child's own wire
+                // (see ChildSpec.bakedPhysicalSize for why the vertical
+                // fragmentation pass must decline such children).
+                child.properties.any { it.type == "Width" } &&
+                    child.properties.any { it.type == "Height" }
             )
         }
     }

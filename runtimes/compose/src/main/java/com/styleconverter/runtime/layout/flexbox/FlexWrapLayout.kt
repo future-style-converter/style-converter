@@ -73,6 +73,13 @@ fun FlexWrapRow(
     cross: List<FlexCrossPlacement>,
     containerCross: Alignment.Vertical,
     alignContentStretches: Boolean,
+    // Wave 47 (lane Z7) — the §9.6 POSITIONING keywords (css-align-3
+    // §5.3: every non-stretch align-content leaves the leftover cross
+    // space free and places the line BLOCK inside it). Null keeps the
+    // packed cross-start stacking byte-for-byte — every pre-wave-47
+    // call site. WPT flex-gap-decorations-047…049 (row gaps created
+    // purely by content distribution between lines) are the pins.
+    crossDistribution: FlexWrapLines.CrossDistribution? = null,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -193,8 +200,24 @@ fun FlexWrapRow(
                 if (constraints.hasBoundedHeight) constraints.maxHeight.toLong() else Int.MAX_VALUE.toLong()
             ).toInt()
         layout(width, height) {
-            var y = 0
+            // Wave 47 (lane Z7) — §9.6 line-block positioning: each
+            // line's cross start comes from the pure offsets helper.
+            // Null distribution (or a hugging container) reproduces the
+            // old `y += finalCross + gap` accumulation bit for bit, so
+            // every committed capture is untouched; a positioning
+            // keyword inside a definite cross band distributes the
+            // leftover the way the Chromium refs paint it.
+            val lineY = FlexWrapLines.lineCrossOffsets(
+                lineCross = finalCross,
+                // Only a definite cross band has leftover to place in —
+                // same signal step 8 uses.
+                containerCross = if (crossDistribution != null && constraints.hasFixedHeight)
+                    constraints.maxHeight else null,
+                gap = crossGapPx,
+                distribution = crossDistribution
+            )
             lines.forEachIndexed { li, line ->
+                val y = lineY[li]
                 // Delegate main-axis positioning to the container's own
                 // arrangement, per line, across the container's main size —
                 // justify-content therefore behaves identically on the
@@ -220,7 +243,6 @@ fun FlexWrapRow(
                     // row layout.
                     p.place(positions[k], y + dy)
                 }
-                y += finalCross[li] + crossGapPx
             }
         }
     }

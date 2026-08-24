@@ -253,22 +253,32 @@ final class FlexWrapStretchTests: XCTestCase {
 
     /// §9.6's equal division is gated on `align-content`, not just on a
     /// definite cross size (css-align-3 §5.3): under `space-between` the
-    /// leftover stays FREE SPACE and merely positions the line block, so
-    /// the lines keep their hypothetical 30pt cross. Compose's
-    /// FlexWrapLines applies the identical `alignContentStretches`
-    /// precondition — without this gate the two runtimes would place the
-    /// lines at different coordinates the moment a fixture pairs
-    /// `align-content` with `flex-wrap`.
+    /// leftover stays FREE SPACE — the lines keep their hypothetical
+    /// 30pt cross. Wave 47 (lane Z7) implemented the wave-25 TODO this
+    /// pin used to freeze: that free space now POSITIONS the line block
+    /// (css-flexbox-1 §9.6), so with two 30pt lines, a 10pt row-gap and
+    /// a 110pt box the 40pt leftover becomes one distributed line gap —
+    /// line 1 at y 0–30, line 2 flush with the cross end at y 80–110
+    /// (the WPT flex-gap-decorations-047 geometry, whose frozen
+    /// Chromium ref paints the row rule centred in exactly that
+    /// distributed gap). The lines must still NOT stretch — that half
+    /// of the wave-25 gate is unchanged.
     @MainActor
     func testNonStretchAlignContentLeavesTheLinesHypothetical() throws {
         let img = try render(containerExtra: [
             #"{"type":"AlignContent","data":"SPACE_BETWEEN"}"#])
-        // Lines hug their items again: y 0–30 and y 40–70.
-        expect(img, [(25, 15), (25, 45)], blue, "item box")
-        // Nothing reaches the bottom of the 110pt box…
-        expect(img, [(25, 105)], white, "space-between distributed the leftover")
-        // …and the control case (no align-content) does — the two
-        // renders differ ONLY by the keyword, so this really is the gate.
+        // Line 1 hugs its 30pt items at the cross start…
+        expect(img, [(25, 15), (85, 15)], blue, "line-1 item box")
+        // …line 2 sits flush with the cross END (§9.6 space-between).
+        expect(img, [(25, 105), (85, 105)], blue, "line 2 at the cross end")
+        // The distributed gap between them is bare — y 45 was line 2's
+        // packed position before wave 47, so this pin fails on either a
+        // stretch regression (50pt lines) or a return to packing.
+        expect(img, [(25, 45), (25, 70)], white,
+               "the distributed line gap was inked")
+        // The control case (no align-content) still stretches to the
+        // bottom — the two renders differ ONLY by the keyword, so this
+        // really is the stretch-vs-position gate.
         expect(try render(), [(25, 105)], blue, "control: stretch case regressed")
     }
 }

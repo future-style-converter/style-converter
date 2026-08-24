@@ -86,9 +86,72 @@ object ListMarkerRow {
      *   so a marker no taller than the item cannot grow it (css-sizing-3
      *   §5.1: a definite `height` IS the used height — larger content
      *   overflows rather than stretching the box).
+     *
+     * ## Wave 47 (lane Z5) — [sharesSnappedLineGrid] vetoes the claim
+     *
+     * When BOTH children are snapped onto the SAME resolved CSS line box
+     * ([ListMarkerLineBox.snap] on the marker, `composedLineBoxSnap` on
+     * the item's run — one `resolve`, one grid), baseline alignment is
+     * not just redundant, it is the +1px/row divergence. MEASURED on
+     * emulator-5690 (wave-47 Z5 probe, armenian-006/007 + bengali-117,
+     * every row identical):
+     *
+     *   marker Text  post-snap  h=31  claimed baseline 25
+     *   item wrapper post-snap  h=31  claimed baseline 24
+     *   row (baseline-aligned)  h=32  — every row, vs the ref's 31.25 grid
+     *
+     * Both Texts lay out the IDENTICAL paragraph (ceil(31.25)=32 natural,
+     * LineHeightStyleSpan Center baseline 25 — 1px below Chromium's
+     * floor(ascent + half-leading) = 24) and both snaps preserve it — the
+     * ±1 is not typographic at all. It is a CHANNEL split: the Row reads
+     * the marker's baseline straight off the Text's measure result (25),
+     * but the item's Text sits under wrapper Boxes, and Compose folds the
+     * wave-39 FIX-4 half-leading graphicsLayer translation (−1, the
+     * draw-time ink correction) into the alignment line those ancestors
+     * propagate (24). PROVEN by A/B: zeroing FIX-4's `translationY` alone
+     * flipped every wrapper claim 24 → 25. Aligning on two claims that
+     * disagree about the same line makes the Row
+     * `max(25,24) + max(31−25, 31−24) = 32` on every row — a constant
+     * 32px pitch against the ref's alternating 31/32 (31.25px box), i.e.
+     * +0.75px/row accumulating until the last ink row falls off the
+     * capture — AND offsets the item +1 while FIX-4 pulls only the
+     * marker's ink −1, the "identical rasters, item ink ±1" the wave-46
+     * gate measured.
+     *
+     * The CSS model has no second reconciliation to make: marker and item
+     * share ONE line box whose position is the block grid's (css-inline-3
+     * §4.2 — the line box stacks in the block flow; inline boxes sit
+     * INSIDE it by the half-leading model, which here is the two FIX-4
+     * draw translations, both landing ink on the model baseline 24). So
+     * when the shared grid exists, the row stacks the two equal-grid
+     * boxes by their TOPS: the row's height is the snapped line box
+     * (the accumulator's 31/32/31/31… — the ref's own sub-pixel
+     * stacking), and both ink runs land on one baseline by construction.
+     * Baseline claims stay authoritative everywhere else — declared
+     * `line-height: normal` (no CSS box: the faces' real metrics ARE the
+     * line), every non-composed capture path, and the whole dark stage,
+     * where [sharesSnappedLineGrid] is false and this function is
+     * byte-identical to its wave-28 self.
+     *
+     * KNOWN LIMIT, stated not silent: an item whose FIRST LINE sits below
+     * its box top (own top padding/margin) would need the baseline claim
+     * even under the grid; no marker row in the corpus has one (the
+     * counter-styles/css-lists items are bare text), and the honest fix
+     * there is the still-deferred B-RC3 part-3 custom layout.
+     *
+     * @param itemExposesTextBaseline does the item's principal box carry
+     *   a first text baseline at all (see [itemExposesTextBaseline])?
+     * @param sharesSnappedLineGrid are BOTH children snapped onto one
+     *   resolved CSS line box (composed WPT capture with a resolvable
+     *   box — the exact gate [ListMarkerLineBox.snap] is active under)?
+     *   Defaults to false so every pre-wave-47 caller and test is
+     *   byte-identical.
      */
-    fun alignsByBaseline(itemExposesTextBaseline: Boolean): Boolean =
-        itemExposesTextBaseline
+    fun alignsByBaseline(
+        itemExposesTextBaseline: Boolean,
+        sharesSnappedLineGrid: Boolean = false
+    ): Boolean =
+        itemExposesTextBaseline && !sharesSnappedLineGrid
 
     /**
      * Does this list item render any IN-FLOW text, i.e. will its box carry

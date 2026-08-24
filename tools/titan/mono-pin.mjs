@@ -1,12 +1,14 @@
 // tools/titan/mono-pin.mjs
 //
-// wave-46 lane Y7 — the MONOSPACE FONT-METRIC PIN pilot (measurement before
-// commitment). One module owns every pilot knob so the two native feeders
-// (feed-android.mjs, feed-ios.mjs) cannot drift on the family name, the face
-// files, the sandbox corner or the env-flag spelling. Structure mirrors the
-// wave-45 noto-pilot.mjs so the two pilots read the same way.
+// The MONOSPACE FONT-METRIC PIN — piloted by wave-46 lane Y7 (measurement
+// before commitment), DEFAULT-ON since wave-47 lane Z4 earned the flip (the
+// flag-contract section below carries the A/B numbers). One module owns
+// every pin knob so the two native feeders (feed-android.mjs, feed-ios.mjs)
+// cannot drift on the family name, the face files, the sandbox corner or
+// the env-flag spelling. Structure mirrors the wave-45 noto-pilot.mjs so
+// the pilot-family modules read the same way.
 //
-// ## The wall this pilot measures
+// ## The wall this pin closes
 // The corpus canvas pins Inter for `sans-serif` (capture-browser-ref.mjs's
 // corpus-v4.1 FONT sub-boundary) but NOT `monospace`: each surface resolves
 // the generic through its own platform cascade. MEASURED over the wave-45
@@ -59,41 +61,65 @@
 // the fonts sandbox. The UA fixed-default 13px quirk (MonospaceUAFontSize on
 // both natives) keys on the declared family NAME, so it still fires.
 //
-// ## Known seams the pilot does NOT close (stated, not hidden)
-//   * Compose spacing/ChUnitMetrics measures `ch` from the GENERIC
-//     (Typeface.MONOSPACE); a document family falls to Typeface.DEFAULT. With
-//     the pin, Android `ch` widths resolve against Roboto's '0'. 53 of the 71
-//     tests use `ch`. Owner: spacing/ (outside lane Y7).
-//   * SwiftUI ChUnitMetrics.zeroAdvancePx and ComponentRenderer's
-//     measurementUIFont key on the generic DESIGN (.monospaced → SF Mono), so
-//     the iOS `ch` basis and the greedy pre-break's measuring font stay SF Mono
-//     while the label paints DejaVu. Pre-existing for every wave-35 document
-//     face. Owner: spacing/ + Renderer/ (outside lane Y7).
+// ## The two measurement seams (measured open by Y7, CLOSED in wave-47 Z4)
+//   * Compose spacing/ChUnitMetrics measured `ch` from the GENERIC
+//     (Typeface.MONOSPACE) and fell to Typeface.DEFAULT for a document
+//     family, so pinned Android `ch` widths resolved against Roboto's '0'
+//     (10ch box 184px vs the ref's 197). Closed: DocumentFontRegistry keeps
+//     a per-family measuring handle (DocumentFontTypefaces) and ChUnitMetrics
+//     measures THE REGISTERED face. 53 of the 71 wall tests use `ch`.
+//   * SwiftUI ChUnitMetrics.zeroAdvancePx, ComponentRenderer's
+//     measurementUIFont and LineBoxMetrics.contentHeight keyed on the generic
+//     DESIGN (.monospaced → SF Mono), so the iOS `ch` basis (box 202 vs 197),
+//     the greedy pre-break's measuring font and the line grid stayed SF Mono
+//     while the label painted DejaVu (the pilot's one regression,
+//     hyphens-auto-inline-010 0.9528→0.9406 — glyph runs ~3px low). Closed:
+//     all three resolve the document face first, via the same §5.2 registry
+//     walk that fills TextConfig.fontFaceName.
 //
-// ## The flag contract (byte-discipline)
-// Every export is a FUNCTION of an env object defaulting to process.env, and
-// every consumer call site collapses to its pre-pilot behaviour when
-// TITAN_MONO_PIN !== '1': documents are returned with the SAME identity, the
+// ## The flag contract (byte-discipline, default ON since wave 47)
+// Every export is a FUNCTION of an env object defaulting to process.env.
+// The pin is the DEFAULT: wave-47 lane Z4's decisive A/B (both seams closed,
+// css-text + css-overflow on both natives, private devices, scored with the
+// frozen-ref scorer) measured arm B at +12 passes / 0 regressions —
+//   css-text      iOS 25→33 (all 8 face-only wall cells flip)  Android 27→28
+//   css-overflow  iOS 40→43                                    Android 42→42
+// — meeting the svg-preraster flip rule ("costs no passes"). Explicit
+// TITAN_MONO_PIN=0 (or any spelling other than '1') restores the platform
+// cascade byte-for-byte: documents come back with the SAME identity, the
 // face list is empty, nothing is pushed. Pinned by mono-pin.test.mjs.
 //
-// Files are staged in a host directory named by TITAN_MONO_PIN_FONTS —
-// deliberately NOT repo binaries: whether DejaVu Sans Mono lands in-repo is
-// the decision this pilot informs.
+// The faces live IN-REPO at tools/titan/fonts/mono-pin/ (Bitstream Vera
+// licence — see the LICENSE there, extracted from the faces' own name
+// table): a default cannot depend on an uncommitted host directory. The
+// wave-46 pilot staged them host-side precisely because in-repo binaries
+// were the decision the pilot informed; the A/B above made that decision.
+// TITAN_MONO_PIN_FONTS still overrides the directory for experiments.
 
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-/** The one spelling of the pilot flag. '1' and nothing else — mirrors the
- *  TITAN_NOTO_PILOT / WPT_MODE convention. */
+/** ON unless explicitly disabled. Unset ⇒ ON (the wave-47 default); '1' ⇒ ON
+ *  (the historical explicit-on spelling keeps working); ANY other value ⇒
+ *  OFF — one loud opt-out spelling ('0' by convention) rather than a junk
+ *  value silently half-enabling a metric pin. */
 export function monoPinEnabled(env = process.env) {
-  return env.TITAN_MONO_PIN === '1';
+  const v = env.TITAN_MONO_PIN;
+  return v === undefined || v === '1';
 }
 
-/** Host directory holding the staged DejaVu files, or null when unset. Kept
- *  separate from the enabled flag so a mis-set run fails LOUDLY (enabled with
- *  no dir ⇒ every face reported missing) instead of silently rendering the
- *  platform cascade under a pilot-labelled run. */
+/** The committed default faces directory — resolved relative to THIS module
+ *  so every consumer (feeders run from any cwd) lands on the same bytes. */
+export const MONO_PIN_DEFAULT_FONTS_DIR =
+  path.join(path.dirname(fileURLToPath(import.meta.url)), 'fonts', 'mono-pin');
+
+/** Directory holding the staged DejaVu files: TITAN_MONO_PIN_FONTS when set
+ *  (experiments keep their override), else the committed default. Still a
+ *  separate function from the enabled flag so a bad override fails LOUDLY
+ *  (enabled with a wrong dir ⇒ every face reported missing) instead of
+ *  silently rendering the platform cascade under a pinned-labelled run. */
 export function monoPinFontsDir(env = process.env) {
-  return env.TITAN_MONO_PIN_FONTS || null;
+  return env.TITAN_MONO_PIN_FONTS || MONO_PIN_DEFAULT_FONTS_DIR;
 }
 
 /** The CSS family the pin registers under. It is the GENERIC's own name on
@@ -221,8 +247,11 @@ export function monoPinDocument(doc, env = process.env) {
  *  DocumentFontRegistry decline stamp makes the miss measurable on-device. */
 export function monoPinMissingWarnings(env = process.env, { existsSync }, tag = 'mono-pin') {
   const { missing } = monoPinFontFiles(env, { existsSync });
+  // monoPinFontsDir never answers null since the wave-47 default-ON flip
+  // (unset ⇒ the committed tools/titan/fonts/mono-pin), so the old
+  // '<TITAN_MONO_PIN_FONTS unset>' arm is gone with the reason it existed.
   return missing.map((face) =>
     `[${tag}] WARN: staged pin font MISSING ` +
-    `(${monoPinFontsDir(env) ?? '<TITAN_MONO_PIN_FONTS unset>'}/${face.file}) — ` +
+    `(${monoPinFontsDir(env)}/${face.file}) — ` +
     `weight ${face.weight} keeps the platform monospace cascade`);
 }

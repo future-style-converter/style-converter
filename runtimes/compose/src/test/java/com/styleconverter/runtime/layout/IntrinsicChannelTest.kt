@@ -104,4 +104,32 @@ class IntrinsicChannelTest {
             assertEquals("packing", expected.message)
         }
     }
+
+    // wave-47 gate crash pin: width 98311 + intrinsic height 32769 under an
+    // Infinity height band produced an unrepresentable Constraints copy at
+    // heightAtMinIntrinsic (the wave-39/42/46 packing family). The cap must
+    // bound the fixed band by the OTHER axis's packing capacity.
+    @Test
+    fun packableCap_pairsMatchConstraintsFocusTable() {
+        org.junit.Assert.assertEquals(262142, IntrinsicChannel.packableCap(8190))
+        org.junit.Assert.assertEquals(65534, IntrinsicChannel.packableCap(32766))
+        org.junit.Assert.assertEquals(32766, IntrinsicChannel.packableCap(65534))
+        org.junit.Assert.assertEquals(8190, IntrinsicChannel.packableCap(262142))
+        org.junit.Assert.assertEquals(8190, IntrinsicChannel.packableCap(98311))
+        org.junit.Assert.assertEquals(
+            262142,
+            IntrinsicChannel.packableCap(androidx.compose.ui.unit.Constraints.Infinity))
+    }
+
+    @Test
+    fun fixedBandPackable_capsTheGateCrashShape() {
+        // The exact wave-47 crash inputs: intrinsic 32769, band 0..Infinity,
+        // other axis max 98311 -> the cap (8190) must bound both ends, and
+        // the resulting pair must build a real Constraints with that width.
+        val (minH, maxH) = IntrinsicChannel.fixedBandPackable(
+            32769, 0, androidx.compose.ui.unit.Constraints.Infinity, 98311)
+        org.junit.Assert.assertEquals(8190, minH)
+        org.junit.Assert.assertEquals(8190, maxH)
+        androidx.compose.ui.unit.Constraints(maxWidth = 98311, minHeight = minH, maxHeight = maxH)
+    }
 }

@@ -66,6 +66,10 @@ object PaddingExtractor {
             blockEnd = blockEnd,
             inlineStart = inlineStart,
             inlineEnd = inlineEnd,
+            // Wave-47 lane Z2 — the §6.4 mapping for the component's used
+            // writing mode (same merged-list read as MarginExtractor; null
+            // for every horizontal mode keeps resolve() byte-identical).
+            logicalSides = LogicalSides.verticalOrNull(properties),
         )
     }
 

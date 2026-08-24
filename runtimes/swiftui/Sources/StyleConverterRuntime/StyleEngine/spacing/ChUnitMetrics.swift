@@ -37,22 +37,39 @@ enum ChUnitMetrics {
     // Plain lock — StyleBuilder may run on multiple render threads.
     private static let lock = NSLock()
 
-    /// The advance width of '0' in px for the resolved generic design at
-    /// [sizePx], or nil when metrics are unavailable. Callers must map nil
-    /// to the 0.5em spec fallback — never to zero.
+    /// The advance width of '0' in px for the resolved font at [sizePx], or
+    /// nil when metrics are unavailable. Callers must map nil to the 0.5em
+    /// spec fallback — never to zero.
     /// The three booleans mirror TypographyAggregate's generic-family
     /// flags with FontMod.design(for:)'s precedence (rounded > monospaced
     /// > serif > default) so the measured font is the rendered font.
+    /// - Parameter documentFaceName: wave-47 lane Z4 (SEAM 2 of the monospace
+    ///   pin) — the platform name of the DOCUMENT @font-face the label will
+    ///   actually render with (StyleBuilder's css-fonts-4 §5.2 registry walk,
+    ///   the same one that fills `TextConfig.fontFaceName`). When set it
+    ///   outranks every generic design, exactly as it does at render time:
+    ///   wave-46 Y7 measured the old design-only basis keeping a pinned
+    ///   `width: 10ch` box at SF Mono's 202px while the frozen Menlo ref —
+    ///   and the painted DejaVu glyphs — advance to 197px. nil (the universal
+    ///   face-free document) keeps the pre-wave-47 path byte-identical.
     static func zeroAdvancePx(rounded: Bool, monospaced: Bool,
-                              serif: Bool, sizePx: Double) -> Double? {
+                              serif: Bool, sizePx: Double,
+                              documentFaceName: String? = nil) -> Double? {
         // Precedence mirror of FontMod.design(for:).
         let design = rounded ? "rounded" : monospaced ? "monospaced"
                    : serif ? "serif" : "default"
-        let key = "\(design)-\(sizePx)"
+        // Document faces key on the registry EPOCH + the face name: the
+        // registry re-registers wholesale per document, and two documents may
+        // bind one PostScript name to different files — an epoch-less memo
+        // could serve document N's advance to document N+1.
+        let key = documentFaceName.map {
+            "face:\(DocumentFontRegistry.shared.epoch):\($0)-\(sizePx)"
+        } ?? "\(design)-\(sizePx)"
         lock.lock()
         if let hit = cache[key] { lock.unlock(); return hit }
         lock.unlock()
-        let advance = measure(design: design, sizePx: sizePx)
+        let advance = measure(design: design, sizePx: sizePx,
+                              documentFaceName: documentFaceName)
         lock.lock()
         cache[key] = advance
         lock.unlock()
@@ -73,10 +90,13 @@ enum ChUnitMetrics {
     // The actual CoreText measurement — isolated so zeroAdvancePx can
     // memoize. Returns nil on any failure (missing glyph, degenerate
     // advance) so the resolver's 0.5em fallback takes over.
-    private static func measure(design: String, sizePx: Double) -> Double? {
+    private static func measure(design: String, sizePx: Double,
+                                documentFaceName: String? = nil) -> Double? {
         let size = CGFloat(sizePx)
-        // Resolve the CTFont for the design.
-        guard let font = resolvedFont(design: design, size: size) else { return nil }
+        // Resolve the CTFont — the document face when one is registered
+        // (wave-47 Z4), else the generic design.
+        guard let font = resolvedFont(design: design, size: size,
+                                      documentFaceName: documentFaceName) else { return nil }
         // Glyph for U+0030 DIGIT ZERO — the css-values-4 measuring glyph.
         var chars: [UniChar] = [0x30]
         var glyphs: [CGGlyph] = [0]
@@ -89,9 +109,22 @@ enum ChUnitMetrics {
         return advance.isFinite && advance > 0 ? advance : nil
     }
 
-    // Map the generic design onto the font SwiftUI's system designs use.
-    private static func resolvedFont(design: String, size: CGFloat) -> CTFont? {
+    // Map the resolved family onto the font SwiftUI renders with: the
+    // document @font-face when one is registered, else the generic design.
+    private static func resolvedFont(design: String, size: CGFloat,
+                                     documentFaceName: String? = nil) -> CTFont? {
         #if canImport(UIKit)
+        // wave-47 lane Z4 (SEAM 2): the document face FIRST — the same
+        // precedence PlaceholderLabel's `font` gives `fontFaceName` (a
+        // declared face outranks Inter and every system design), so the ch
+        // basis and the paint share one set of glyph advances. UIFont(name:)
+        // resolves the PostScript name CoreText reported at registration
+        // (DocumentFontRegistry.platformFontName); a name that no longer
+        // resolves (cleared registry, stale config) falls through to the
+        // design below — the exact pre-wave-47 answer, never nil-by-surprise.
+        if let name = documentFaceName, let f = UIFont(name: name, size: size) {
+            return f as CTFont
+        }
         // UIFont is toll-free bridged to CTFont, so the explicit `as`
         // casts below hand the exact rendered font to the CoreText APIs.
         switch design {

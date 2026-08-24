@@ -105,4 +105,85 @@ class FlexWrapLinesTest {
     @Test fun `a single line absorbs the whole definite cross size`() {
         assertArrayEquals(intArrayOf(100), FlexWrapLines.stretchLines(intArrayOf(30), 100, 10))
     }
+
+    // ---- wave 47 (lane Z7): §9.6 line-block POSITIONING offsets ----
+
+    @Test fun `null distribution packs lines at the cross start`() {
+        // The pre-wave-47 accumulation, bit for bit: 0, 30+5, 30+5+30+5.
+        assertArrayEquals(
+            intArrayOf(0, 35, 70),
+            FlexWrapLines.lineCrossOffsets(intArrayOf(30, 30, 30), 200, 5, null)
+        )
+    }
+
+    @Test fun `space-between distributes the leftover into the line gaps`() {
+        // WPT flex-gap-decorations-047 shape: 3×40px lines in a 200px
+        // box, no row-gap → free 80 → two distributed 40px gaps, lines
+        // at 0 / 80 / 160 (frozen-ref rows 16-55 / 96-135 / 176-215
+        // minus the 16px canvas pad).
+        assertArrayEquals(
+            intArrayOf(0, 80, 160),
+            FlexWrapLines.lineCrossOffsets(
+                intArrayOf(40, 40, 40), 200, 0,
+                FlexWrapLines.CrossDistribution.SPACE_BETWEEN
+            )
+        )
+    }
+
+    @Test fun `space-around halves the edge share`() {
+        // 048 shape: free 80 over 3 lines → between 26.67, lead 13.33 →
+        // rounded line starts 13 / 80 / 147 (ref rows 29/96/163 − 16).
+        assertArrayEquals(
+            intArrayOf(13, 80, 147),
+            FlexWrapLines.lineCrossOffsets(
+                intArrayOf(40, 40, 40), 200, 0,
+                FlexWrapLines.CrossDistribution.SPACE_AROUND
+            )
+        )
+    }
+
+    @Test fun `space-evenly equalizes all four gaps`() {
+        // 049 shape: free 80 over 4 gaps → 20 each → 20 / 80 / 140
+        // (ref rows 37/97/157 − 16, ±1 subpixel).
+        assertArrayEquals(
+            intArrayOf(20, 80, 140),
+            FlexWrapLines.lineCrossOffsets(
+                intArrayOf(40, 40, 40), 200, 0,
+                FlexWrapLines.CrossDistribution.SPACE_EVENLY
+            )
+        )
+    }
+
+    @Test fun `center and end position the block, gaps intact`() {
+        // Two 30px lines + 10px row-gap in a 150px box → block 70, free 80.
+        assertArrayEquals(
+            intArrayOf(40, 80),
+            FlexWrapLines.lineCrossOffsets(
+                intArrayOf(30, 30), 150, 10, FlexWrapLines.CrossDistribution.CENTER
+            )
+        )
+        assertArrayEquals(
+            intArrayOf(80, 120),
+            FlexWrapLines.lineCrossOffsets(
+                intArrayOf(30, 30), 150, 10, FlexWrapLines.CrossDistribution.END
+            )
+        )
+    }
+
+    @Test fun `hugging or overflowing containers pack under every keyword`() {
+        // No definite cross → nothing to distribute into.
+        assertArrayEquals(
+            intArrayOf(0, 40),
+            FlexWrapLines.lineCrossOffsets(
+                intArrayOf(40, 40), null, 0, FlexWrapLines.CrossDistribution.SPACE_BETWEEN
+            )
+        )
+        // Negative free (overflow) packs — CSS spills, never compresses.
+        assertArrayEquals(
+            intArrayOf(0, 40),
+            FlexWrapLines.lineCrossOffsets(
+                intArrayOf(40, 40), 50, 0, FlexWrapLines.CrossDistribution.CENTER
+            )
+        )
+    }
 }

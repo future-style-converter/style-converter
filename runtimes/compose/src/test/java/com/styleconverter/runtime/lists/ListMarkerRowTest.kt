@@ -110,6 +110,45 @@ class ListMarkerRowTest {
         assertTrue(ListMarkerRow.alignsByBaseline(true))
     }
 
+    @Test
+    fun `a shared snapped line grid vetoes the baseline claim`() {
+        // Wave 47 (lane Z5). When BOTH children are snapped onto one
+        // resolved CSS line box (composed WPT + a resolvable box — the
+        // gate ListMarkerLineBox.snap is active under), the row stacks
+        // the two same-grid boxes by their TOPS: baseline-aligning them
+        // re-derives the row's height from claims the two Texts deliver
+        // through DIFFERENT channels (the marker's measure-result direct,
+        // the item's wrapper-propagated with the FIX-4 half-leading layer
+        // folded in), which is the measured constant-32px pitch on the
+        // ref's 31.25px grid — armenian-006/007 + bengali-117, wave-47
+        // probe table on ListMarkerRow.alignsByBaseline itself.
+        assertFalse(
+            ListMarkerRow.alignsByBaseline(
+                itemExposesTextBaseline = true, sharesSnappedLineGrid = true)
+        )
+        // A baseline-less item stays top-aligned under the grid too — the
+        // veto can only ever REMOVE a claim, never invent one.
+        assertFalse(
+            ListMarkerRow.alignsByBaseline(
+                itemExposesTextBaseline = false, sharesSnappedLineGrid = true)
+        )
+    }
+
+    @Test
+    fun `without the shared grid the wave-28 truth table is byte-identical`() {
+        // The default argument is the pre-wave-47 call shape: every
+        // existing call site and the whole dark stage resolve through it,
+        // so the two-row truth table above must be reproduced EXACTLY.
+        assertFalse(
+            ListMarkerRow.alignsByBaseline(
+                itemExposesTextBaseline = false, sharesSnappedLineGrid = false)
+        )
+        assertTrue(
+            ListMarkerRow.alignsByBaseline(
+                itemExposesTextBaseline = true, sharesSnappedLineGrid = false)
+        )
+    }
+
     // ── Decision 1: which placement the marker takes ────────────────────
 
     @Test

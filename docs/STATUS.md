@@ -1043,6 +1043,32 @@ dirs + WPT corpus are gitignored):
   gate in four waves. Totals: **web 1187/1379 (86.1%), iOS
   1013/1351 (75.0%), Android 1008/1350 (74.7%)** — iOS crosses 75%,
   Android crosses 1000 passes.
+  Wave 47 (`tools/titan/results/corpus-v6-12.json`) was the pin wave.
+  The **monospace font pin earned its default flip** — both measurement
+  seams closed (`ch`, the pre-break, and the line grid all measure the
+  registered document face now) and the on-device A/B delivered
+  exactly: css-text iOS +8, css-overflow +6/+3. The flex lane
+  *revised its own brief*: the real defect was `align-self: auto`
+  never resolving to stretch (css-align-3 §6.4) — the prescribed fix
+  would have broken 13 passers and was measured out; the correct one
+  fired on exactly nine cells (css-values Android +7). css-gaps
+  +3/+8 came from layout distribution (per-line justify/align-content
+  and a sizeThatFits starvation bug), the Android gradient pipeline
+  landed byte-parallel with wave-46's iOS twins (+3, both natives
+  pinned against the same frozen Chromium pixels), and the Rule-43
+  mechanism was **named and fixed**: a baseline-claim channel split
+  between the marker's direct Text and the item's wrapper-folded
+  half-leading translation. A skeptic caught the vertical seam firing
+  on four passing select-appearance cells pre-gate (text-only children
+  carry no Display wire); the guard landed and all four held. The
+  gate's own crash — the Constraints packing family again, fed by
+  transposed vertical sizes into an Infinity band — is fixed and
+  pinned in IntrinsicChannel; two fixtures still wedge post-fix
+  (a layout hang and a corrupt-encoder render) and ship unmeasured as
+  the named wave-48 item. The iOS view-transitions column was lost to
+  sim-pool exhaustion and recovered by section refeed. Totals: **web
+  1187/1379 (86.1%), iOS 1038/1351 (76.8%), Android 1029/1349
+  (76.3%)**.
 
 ## Test suites
 
@@ -1050,9 +1076,9 @@ dirs + WPT corpus are gitignored):
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 368 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1265 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2641 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1737 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1684 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2757 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1785 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1685 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap

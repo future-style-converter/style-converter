@@ -1262,8 +1262,30 @@ object ComponentRenderer {
         // Apply default min dimensions matching web's ComponentRenderer defaults:
         // web: minWidth = styles.width || styles.minWidth || '50px'
         // web: minHeight = styles.height || styles.minHeight || '30px'
-        val hasExplicitWidth = effectiveProperties.any { it.type in listOf("Width", "MinWidth", "InlineSize", "MinInlineSize") }
-        val hasExplicitHeight = effectiveProperties.any { it.type in listOf("Height", "MinHeight", "BlockSize", "MinBlockSize") }
+        // Wave-47 lane Z2 — the component's USED writing mode, read off the
+        // merged pairs (WritingMode inherits, css-writing-modes-4 §3.1, and
+        // rides the inherited-property channel). Under a VERTICAL mode the
+        // logical size longhands change PHYSICAL axis (css-logical-1 §4.1):
+        // InlineSize declares the HEIGHT and BlockSize the WIDTH — exactly
+        // the swap SizingExtractor now performs — so the explicitness tests
+        // below must count them on the same axis or the block-flow fill
+        // would fillMaxWidth() straight over a BlockSize-declared width
+        // (tight-constraint coercion made the 122px .mc boxes canvas-wide
+        // on the css-break background-image wall).
+        val verticalWm = try {
+            com.styleconverter.runtime.typography.text.TextExtractor
+                .extractWritingModeConfig(propertyPairs).isVertical
+        } catch (e: Exception) {
+            false
+        }
+        val hasExplicitWidth = effectiveProperties.any {
+            it.type in if (verticalWm) listOf("Width", "MinWidth", "BlockSize", "MinBlockSize")
+            else listOf("Width", "MinWidth", "InlineSize", "MinInlineSize")
+        }
+        val hasExplicitHeight = effectiveProperties.any {
+            it.type in if (verticalWm) listOf("Height", "MinHeight", "InlineSize", "MinInlineSize")
+            else listOf("Height", "MinHeight", "BlockSize", "MinBlockSize")
+        }
         // Web-parity clamp for ANIMATION-SUPPLIED sizes: web's placeholder
         // floor (min-width:50/min-height:30, injected when the BASE styles
         // lack width/height) keeps clamping an @keyframes-animated size —
@@ -1353,8 +1375,36 @@ object ComponentRenderer {
         // height-distribution/extra-height-given-to-all-row-groups tests.
         val isShrinkToFitTable =
             com.styleconverter.runtime.table.TableBoxTree.shrinkToFitBox(tableRole)
+        // Wave-47 lane Z2 — the two vertical-fill inputs: does this box
+        // DECLARE writing-mode on its own wire (an ORTHOGONAL boundary —
+        // horizontal parent — where §7.3.2 sizes an auto inline size to
+        // fit-content, never stretch; the merged list keeps exactly one
+        // WritingMode entry — the OWN one wins in mergeInherited — so the
+        // raw own list is the boundary signal), and is it inside a flow
+        // this lane actually MODELS (the seam / vertical multicol scope —
+        // see LocalVerticalFlowScope's blast-radius doc)?
+        val ownDeclaresWm = component.properties.any { it.type == "WritingMode" }
+        val verticalFlowScope = LocalVerticalFlowScope.current
         val blockFlowWidth: Modifier =
-            if (composedWpt && !hasExplicitWidth && !hasAspectRatio && !isOutOfFlow &&
+            if (composedWpt && verticalWm && (ownDeclaresWm || verticalFlowScope)) {
+                // VERTICAL writing mode, in a modeled context: the §10.3.3
+                // stretch fit applies to the INLINE axis, which is now the
+                // HEIGHT (css-writing-modes-4 §7.3); the block axis (width)
+                // NEVER stretches — an orthogonal box's auto block size hugs
+                // its content. So: fill the height when no explicit inline
+                // size (same-flow boxes only — the orthogonal guard), and
+                // never fillMaxWidth (which both stretched the 122px-wide
+                // css-break .mc boxes canvas-wide AND left their 472px
+                // inline extent collapsed). Outside the modeled contexts a
+                // vertical box keeps the FROZEN horizontal-tb fill below —
+                // the css-writing-modes available-size family passes on it
+                // today. Same exclusion guards as the horizontal branch.
+                if (verticalFlowScope && !ownDeclaresWm &&
+                    !hasExplicitHeight && !hasAspectRatio && !isOutOfFlow &&
+                    !isShrinkToFitTable && !LocalSelfAlignmentHandled.current)
+                    Modifier.fillMaxHeight()
+                else Modifier
+            } else if (composedWpt && !hasExplicitWidth && !hasAspectRatio && !isOutOfFlow &&
                 !isShrinkToFitTable && !LocalSelfAlignmentHandled.current)
                 Modifier.fillMaxWidth()
             else Modifier
@@ -1988,7 +2038,40 @@ object ComponentRenderer {
                     // container needs a RenderContent feature the wrap
                     // layout doesn't emit, so every other wrapping row
                     // keeps the frozen FlowRow path.
-                    val stretchPlan = wrapRowStretchPlan(component, displayConfig)
+                    // Wave 47 (lane Z7) — §9.6 POSITIONING keywords
+                    // (css-align-3 §5.3): a non-stretch align-content
+                    // places the line BLOCK in the free cross space,
+                    // which FlowRow cannot express any more than it can
+                    // express line stretch. Such a container routes
+                    // through FlexWrapRow even when NO item stretches
+                    // (WPT flex-gap-decorations-047…049: fixed-size
+                    // items, row gaps created purely by distribution).
+                    // FLEX_START is left out — it packs exactly like
+                    // FlowRow, so routing it would change layout
+                    // implementation with zero visual need.
+                    val crossDistribution = when (displayConfig.alignContent) {
+                        AlignContent.FLEX_END ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.END
+                        AlignContent.CENTER ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.CENTER
+                        AlignContent.SPACE_BETWEEN ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.SPACE_BETWEEN
+                        AlignContent.SPACE_AROUND ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.SPACE_AROUND
+                        AlignContent.SPACE_EVENLY ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.SPACE_EVENLY
+                        // STRETCH (the normal/absent fold) and FLEX_START
+                        // keep the wave-25 stretch-only routing.
+                        else -> null
+                    }
+                    val stretchPlan = wrapRowStretchPlan(
+                        component, displayConfig,
+                        // A positioning keyword needs the wrap layout for
+                        // its LINES even when no ITEM stretches; the
+                        // guard clauses inside still refuse containers
+                        // the wrap layout cannot render.
+                        requireStretch = crossDistribution == null
+                    )
                     if (stretchPlan != null) {
                         com.styleconverter.runtime.layout.flexbox.FlexWrapRow(
                             modifier = modifier,
@@ -2007,7 +2090,10 @@ object ComponentRenderer {
                             // 003/004 declare `align-content: center` with
                             // a 100px height and were being stretched).
                             alignContentStretches =
-                                displayConfig.alignContent == AlignContent.STRETCH
+                                displayConfig.alignContent == AlignContent.STRETCH,
+                            // Wave 47: the §9.6 line-block placement the
+                            // keyword asks for (null = packed, as ever).
+                            crossDistribution = crossDistribution
                         ) {
                             // One measurable per flex item, index-aligned
                             // with the plan — same 1:1 wrapper the
@@ -2257,7 +2343,20 @@ object ComponentRenderer {
                             .specsFor(it, !multicolComponent._text.isNullOrEmpty())
                     }
                 ) {
-                    RenderContent(multicolComponent, textColor, displayConfig)
+                    // Wave-47 lane Z2: a VERTICAL multicol container's
+                    // content flows into VERTICALLY-stacked column boxes
+                    // (VerticalMulticolMeasure) — a modeled vertical flow,
+                    // so its children unlock the inline-axis fill /
+                    // width-fill suppression (LocalVerticalFlowScope).
+                    // Capture-gated like the pass itself; every horizontal
+                    // container provides the inherited value untouched.
+                    if (columnConfig.verticalWritingMode && multicolCapture) {
+                        CompositionLocalProvider(LocalVerticalFlowScope provides true) {
+                            RenderContent(multicolComponent, textColor, displayConfig)
+                        }
+                    } else {
+                        RenderContent(multicolComponent, textColor, displayConfig)
+                    }
                 }
             }
             DisplayType.INLINE -> {
@@ -2280,6 +2379,126 @@ object ComponentRenderer {
                 // keep the Box for leaf/placeholder rendering where
                 // contentAlignment still matters.
                 if (!component.children.isNullOrEmpty()) {
+                    // ── Wave-47 lane Z2: the VERTICAL block-flow seam ───
+                    // css-writing-modes-4 §6: under vertical-rl/-lr the
+                    // block-flow direction is HORIZONTAL, so this
+                    // container's block-level children stack side-by-side
+                    // (right→left for vertical-rl) via
+                    // VerticalBlockFlowLayout instead of the Column below.
+                    // Gates, each load-bearing:
+                    //  * WPT capture only — every wave-19+ block-layout
+                    //    emulation's dark-stage protection precedent; the
+                    //    327 corpus keeps the Column byte-identically.
+                    //  * the container's USED writing mode is vertical
+                    //    (WritingMode inherits and `component` here is the
+                    //    merged view, so an ancestor's declaration counts).
+                    //  * NO inline-level child: inline-LEVEL boxes flow
+                    //    along the INLINE axis — vertical, i.e. exactly the
+                    //    Column this branch replaces — so a container of
+                    //    inline-blocks must keep it (css-position
+                    //    position-absolute-center-002's green box: two
+                    //    inline-block spans stacking vertically IS the
+                    //    reference render).
+                    //  * no leading `_text` (a text run's vertical flow is
+                    //    the VerticalTextFlowLayout lane's, not this one's).
+                    // §8.3.1 margin COLLAPSE along the horizontal block
+                    // axis is NOT modeled inside the seam — logged once
+                    // honestly; the css-break wall's containers carry
+                    // single-sided block margins where the pairwise sum is
+                    // exact.
+                    val verticalBlockWm = try {
+                        com.styleconverter.runtime.typography.text.TextExtractor
+                            .extractWritingModeConfig(
+                                component.properties.map { it.type to it.data })
+                    } catch (e: Exception) {
+                        null
+                    }
+                    val childIsInlineLevel = component.children.orEmpty().any { child ->
+                        // The B2 normalization: the wire's Display keyword,
+                        // underscored, against the shared inline-level set.
+                        val d = child.properties.firstOrNull { it.type == "Display" }
+                            ?.let { ValueExtractors.extractKeyword(it.data) }
+                            ?.uppercase()?.replace('-', '_')
+                        d != null && d in INLINE_LEVEL_DISPLAY_KEYWORDS
+                    }
+                    // The IN-FLOW children — the boxes the seam would
+                    // actually re-stack (out-of-flow boxes take no slot,
+                    // css-position-3 §2.1; an abspos-only container keeps
+                    // the frozen Column, whose static-position machinery
+                    // already models vertical modes — the grid
+                    // abspos-staticpos-vertWM family passes on it today).
+                    val seamInFlowChildren = component.children.orEmpty().filter { child ->
+                        extractPositionType(child.properties)
+                            .let { it != PositionType.ABSOLUTE && it != PositionType.FIXED }
+                    }
+                    // ORTHOGONAL child guard: a child declaring its own
+                    // writing-mode sits at a flow boundary whose §7.3
+                    // orthogonal sizing this seam does not model — and the
+                    // frozen Column passes those tests today
+                    // (css-contain contain-body-w-m, float-in-htb-in-vrl).
+                    val anyOrthogonalChild = seamInFlowChildren.any { child ->
+                        child.properties.any { it.type == "WritingMode" }
+                    }
+                    // BAKED-LAYOUT guard: post-load-extracted wires carry
+                    // the browser's used physical Width+Height on every
+                    // box — that layout already encodes vertical flow AND
+                    // fragmentation, and the frozen Column render of it
+                    // passes today (the anchor-position-multicol family);
+                    // re-stacking would break passing cells (the same
+                    // protection as ChildSpec.bakedPhysicalSize).
+                    val anyBakedChild = seamInFlowChildren.any { child ->
+                        child.properties.any { it.type == "Width" } &&
+                            child.properties.any { it.type == "Height" }
+                    }
+                    // TEXT-ONLY-LEAVES guard (wave-47 skeptic S3 D1): a
+                    // container whose EVERY in-flow child is a text-only
+                    // leaf with no Display wire is an anonymous inline
+                    // formatting context (the select-appearance option
+                    // list: 5 bare text children) — its children flow on
+                    // the INLINE axis, which under vertical modes is the
+                    // vertical axis the frozen Column already models; the
+                    // seam would re-stack them horizontally and break the
+                    // 4 passing select-appearance-none-vertical cells.
+                    val allTextOnlyLeaves = seamInFlowChildren.isNotEmpty() &&
+                        seamInFlowChildren.all { child ->
+                            child.children.isNullOrEmpty() &&
+                                !child._text.isNullOrEmpty() &&
+                                child.properties.none { it.type == "Display" }
+                        }
+                    if (LocalWptCaptureMode.current &&
+                        verticalBlockWm?.isVertical == true &&
+                        seamInFlowChildren.isNotEmpty() &&
+                        !childIsInlineLevel &&
+                        !anyOrthogonalChild &&
+                        !anyBakedChild &&
+                        !allTextOnlyLeaves &&
+                        component._text.isNullOrEmpty()
+                    ) {
+                        // No-silent-fallthrough: the seam owns this
+                        // container, and its one modeled gap is named.
+                        logCollapseFallbackOnce(
+                            "vertical block flow: horizontal-axis §8.3.1 margin collapse not modeled (single-sided margins render exactly)",
+                            component.id)
+                        VerticalBlockFlowLayout(
+                            // vertical-rl / sideways-rl walk right→left
+                            // (css-writing-modes-4 §6.4).
+                            blockRtl = verticalBlockWm.writingMode ==
+                                com.styleconverter.runtime.typography.text.WritingModeValue.VERTICAL_RL ||
+                                verticalBlockWm.writingMode ==
+                                com.styleconverter.runtime.typography.text.WritingModeValue.SIDEWAYS_RL,
+                            modifier = modifier
+                        ) {
+                            // The children ARE in a modeled vertical flow:
+                            // unlock the inline-axis fill / width-fill
+                            // suppression for them (LocalVerticalFlowScope's
+                            // blast-radius doc).
+                            CompositionLocalProvider(LocalVerticalFlowScope provides true) {
+                                RenderContent(component, textColor, displayConfig)
+                            }
+                        }
+                        return
+                    }
+                    // ── end Wave-47 lane Z2 seam ────────────────────────
                     // CSS2 §8.3.1 margin collapse for the block child loop:
                     // build the container's collapse plan (max() rule between
                     // siblings, edge margins hoisted through a padding-0 /
@@ -3171,6 +3390,17 @@ object ComponentRenderer {
                                             (if (runFold.adoptedHyphens) ", member hyphens adopted" else "") +
                                             (if (runFold.droppedEmptyMembers > 0)
                                                 ", ${runFold.droppedEmptyMembers} empty member(s) dropped" else "") +
+                                            // Wave 47 (lane Z6) — the styled-span ring's
+                                            // breadcrumbs: how many member ranges carry
+                                            // attribution, and any STATED LOSS (border box
+                                            // ink a character-style ring cannot paint —
+                                            // InlineSpanRing's banner) named per member so
+                                            // a capture can be audited from logcat alone.
+                                            (if (runFold.spans.isNotEmpty())
+                                                ", ${runFold.spans.size} styled span(s)" else "") +
+                                            (runFold.spans.flatMap { it.statedLossTypes }
+                                                .takeIf { it.isNotEmpty() }
+                                                ?.let { ", STATED LOSS: ${it.joinToString(";")}" } ?: "") +
                                             ") — component ${component.id}"
                                     )
                                 is com.styleconverter.runtime.typography.inline.InlineRunFold.Outcome.Bailed ->
@@ -3204,6 +3434,14 @@ object ComponentRenderer {
                             // currentColor base) — null for every atom-less
                             // fold keeps the call byte-identical to wave 44.
                             inlineAtoms = runFold.atoms.takeIf { it.isNotEmpty() },
+                            // Wave 47 (lane Z6) — the STYLED-SPAN ring: the
+                            // fold's member ranges over rawText, overlaid as
+                            // SpanStyles on the final string inside the label
+                            // (InlineSpanContent — the ranges must be mapped
+                            // through the label's own string surgery, so the
+                            // overlay cannot happen out here). null for every
+                            // span-less fold keeps the call byte-identical.
+                            inlineSpans = runFold.spans.takeIf { it.isNotEmpty() },
                         )
                         // Rule 4 — children the runs list did not name still
                         // render after the paragraph, in sibling order
@@ -3499,10 +3737,30 @@ object ComponentRenderer {
         // per-row rounding every other capture path keeps.
         val markerRowPitch = com.styleconverter.runtime.lists
             .LocalRowPitchAccumulator.current
+        // Wave 47 (lane Z5) — the marker's resolved CSS line box in px,
+        // HOISTED from the snap call below so the row-alignment decision
+        // (`aligns`, inside the Row) can read the same number: 0f is the
+        // declared-`normal` / no-box state where the snap is inert and the
+        // faces' real metrics rule the line.
+        val markerRefLineBoxPx = if (markerStyle.lineHeight != TextUnit.Unspecified)
+            with(markerSnapDensity) { markerStyle.lineHeight.toPx() } else 0f
+        // Wave 47 (lane Z5) — is the marker row on ONE snapped line grid?
+        // True exactly when the marker snap below is ACTIVE (composed WPT
+        // + a resolvable CSS box), which is also when the item's own run
+        // takes `composedLineBoxSnap` onto the same calibrated box — one
+        // ListMarkerLineBox.resolve, one grid. Read by alignsByBaseline
+        // below: two same-grid boxes stack by their tops (css-inline-3
+        // §4.2 — the line box position is the block grid's), because
+        // baseline-aligning them re-derives the row from claims the two
+        // Texts deliver through DIFFERENT channels (measure-result direct
+        // vs wrapper-propagated with the FIX-4 layer folded in — the
+        // measured +1px/row of the wave-46 Rule-43 family; the full probe
+        // table lives on ListMarkerRow.alignsByBaseline).
+        val markerSharesSnappedLineGrid =
+            LocalWptComposedMode.current && markerRefLineBoxPx > 0f
         val markerLineBoxSnapModifier = if (LocalWptComposedMode.current) {
             ListMarkerLineBox.snap(
-                refLineBoxPx = if (markerStyle.lineHeight != TextUnit.Unspecified)
-                    with(markerSnapDensity) { markerStyle.lineHeight.toPx() } else 0f,
+                refLineBoxPx = markerRefLineBoxPx,
                 lineCount = { markerLayout.value?.lineCount ?: 0 },
                 // Keyed by the ITEM's IR id: stable across measure passes
                 // (the idempotence the accumulator's ordering contract
@@ -3664,7 +3922,14 @@ object ComponentRenderer {
         Row(verticalAlignment = Alignment.Top) {
             // Wave 28 (lane MC) — whether a baseline claim means anything
             // for THIS item. See repair 2 below.
-            val aligns = ListMarkerRow.alignsByBaseline(exposesBaseline)
+            // Wave 47 (lane Z5) — vetoed when both children are snapped
+            // onto ONE resolved CSS line grid (markerSharesSnappedLineGrid
+            // above): same-grid boxes stack by their tops, and the row's
+            // height becomes the snapped line box itself — the measured
+            // repair for the constant-32 pitch on the 31.25px grid (full
+            // probe table on ListMarkerRow.alignsByBaseline).
+            val aligns = ListMarkerRow.alignsByBaseline(
+                exposesBaseline, markerSharesSnappedLineGrid)
             // Marker text.
             //
             // Wave 28 (lane MC) — the trailing space is GONE. It was
@@ -4432,6 +4697,18 @@ object ComponentRenderer {
             // WPT-capture-gated — the dark-stage 327 corpus keeps the
             // wave-18 machinery byte-identically (see the loop below).
             val wptMode = LocalWptCaptureMode.current
+            // Wave 47 (lane Z3) — css-flexbox-1 §8.3 cross-axis stretch for
+            // `align-self: auto` items (align-items initial `normal` behaves
+            // as stretch). Container-level inputs read ONCE: what auto
+            // resolves to, and whether a definite cross size gives fillMax*
+            // a real line-growth target (§9.4 step 8). Composed-WPT-gated
+            // inside FlexCrossStretch — see that file's banner for why the
+            // dark-stage corpus keeps the frozen no-stretch measure.
+            val composedWptStretch = LocalWptComposedMode.current
+            val containerItemsStretch = com.styleconverter.runtime.layout.flexbox
+                .FlexCrossStretch.containerAlignItemsStretches(component.properties)
+            // Row cross axis = vertical → the container's HEIGHT is the gate.
+            val containerCrossDefinite = hasDefiniteSize(component.properties, widthAxis = false)
             // Sort children by order property
             val sortedChildren = sortByOrder(component.children)
             // Extract the line inputs once; run the static §9.7 pass when
@@ -4501,8 +4778,25 @@ object ComponentRenderer {
                 // §4.1: stretch never stretches an out-of-flow child either
                 // (static position treats it as flex-start).
                 val childHeightDefinite = hasDefiniteSize(child.properties, widthAxis = false)
-                val stretches = alignSelf == AlignSelf.STRETCH &&
-                    !childHeightDefinite && !childIsOutOfFlow
+                // Wave 47 (lane Z3): the whole stretch decision — the frozen
+                // explicit-`align-self: stretch` arm (byte-identical to the
+                // old inline predicate in every mode) PLUS the composed-WPT
+                // `align-self: auto` → `align-items: normal/stretch` arm
+                // (css-align-3 §6.4) that repaints calc-size-flex-001..003 /
+                // 009's zero-ink items — lives in FlexCrossStretch (JVM-
+                // pinned). Cross axis here is HEIGHT (row container).
+                val stretches = com.styleconverter.runtime.layout.flexbox.FlexCrossStretch
+                    .effectiveStretch(
+                        composedWpt = composedWptStretch,
+                        alignSelf = alignSelf,
+                        rowAxis = true,
+                        containerItemsStretch = containerItemsStretch,
+                        containerCrossDefinite = containerCrossDefinite,
+                        childCrossDefinite = childHeightDefinite,
+                        childIsOutOfFlow = childIsOutOfFlow,
+                        childGeneratesBox = com.styleconverter.runtime.layout.flexbox
+                            .FlexCrossStretch.childGeneratesBox(child.properties),
+                    )
                 // Wave 19 (lane FLEX): the FULL static-position resolve —
                 // physical (x,y) claims from the RAW flex-direction /
                 // writing-mode / direction wire (never the extractDisplayConfig
@@ -4599,7 +4893,13 @@ object ComponentRenderer {
                     // auto-height case fills below instead of aligning.
                     AlignSelf.STRETCH -> if (stretches) childModifier.fillMaxHeight()
                         else childModifier.align(Alignment.Top)
-                    else -> childModifier
+                    // Wave 47 (lane Z3): `auto` may now resolve to stretch
+                    // through the container's align-items (composed-WPT arm
+                    // in FlexCrossStretch) — fill exactly like the explicit
+                    // arm above; BASELINE also lands here and never
+                    // stretches (positional per §8.3), so `stretches` is
+                    // false for it by construction.
+                    else -> if (stretches) childModifier.fillMaxHeight() else childModifier
                 }
 
                 // LAST-RESORT legacy weight: only reachable when the line is
@@ -4730,6 +5030,19 @@ object ComponentRenderer {
             // Wave 19 (lane FLEX): same WPT gate as the row loop — the
             // abspos static resolver never runs on the dark-stage corpus.
             val wptMode = LocalWptCaptureMode.current
+            // Wave 47 (lane Z3) — column twin of the row loop's §8.3
+            // cross-stretch inputs. The column cross axis is HORIZONTAL, so
+            // the definite-cross gate reads the container's WIDTH. This arm
+            // repaints calc-size-flex-004..006's items (0-wide × 100-tall
+            // green under the frozen loop). Composed-WPT-gated inside
+            // FlexCrossStretch — the dark-stage FC_AlignSelf fit-content
+            // calibration (stretch ⇒ Alignment.Start, no fill) stands
+            // everywhere else.
+            val composedWptStretch = LocalWptComposedMode.current
+            val containerItemsStretch = com.styleconverter.runtime.layout.flexbox
+                .FlexCrossStretch.containerAlignItemsStretches(component.properties)
+            // Column cross axis = horizontal → the container's WIDTH gates.
+            val containerCrossDefinite = hasDefiniteSize(component.properties, widthAxis = true)
             // Sort children by order property
             val sortedChildren = sortByOrder(component.children)
             // §9.7 line inputs + static resolve — column main axis is
@@ -4777,6 +5090,27 @@ object ComponentRenderer {
                 // alignment still derives their static position but every
                 // sizing branch is gated off below.
                 val childIsOutOfFlow = isOutOfFlowChild(child.properties)
+                // Wave 47 (lane Z3): §8.3 — a definite WIDTH (column cross
+                // axis) degrades any stretch to flex-start, mirroring the
+                // row loop's childHeightDefinite read.
+                val childWidthDefinite = hasDefiniteSize(child.properties, widthAxis = true)
+                // The single stretch decision (FlexCrossStretch, JVM-pinned):
+                // frozen behaviour outside composed-WPT capture (this loop
+                // NEVER filled — explicit stretch mapped to Alignment.Start),
+                // and the composed §6.4 auto→align-items resolution plus the
+                // explicit-stretch fill inside it.
+                val stretches = com.styleconverter.runtime.layout.flexbox.FlexCrossStretch
+                    .effectiveStretch(
+                        composedWpt = composedWptStretch,
+                        alignSelf = alignSelf,
+                        rowAxis = false,
+                        containerItemsStretch = containerItemsStretch,
+                        containerCrossDefinite = containerCrossDefinite,
+                        childCrossDefinite = childWidthDefinite,
+                        childIsOutOfFlow = childIsOutOfFlow,
+                        childGeneratesBox = com.styleconverter.runtime.layout.flexbox
+                            .FlexCrossStretch.childGeneratesBox(child.properties),
+                    )
                 // Wave 19 (lane FLEX) — column twin of the row loop's full
                 // resolve: physical (x,y) claims from the RAW wire, WPT
                 // gated (dark-stage keeps the wave-18 machinery below).
@@ -4866,8 +5200,19 @@ object ComponentRenderer {
                     // not full-width). Mirror that: align Start, no fill.
                     // Compose's Column default would otherwise CENTER the
                     // child whenever align-items:center is set (0.963 row).
-                    AlignSelf.STRETCH -> childModifier.align(Alignment.Start)
-                    else -> childModifier
+                    // Wave 47 (lane Z3): that fit-content wrapper only
+                    // exists on the DARK-STAGE harness — the composed WPT
+                    // page keeps the item's cross size genuinely auto, so
+                    // the browser DOES stretch; `stretches` (composed-gated
+                    // in FlexCrossStretch) fills there and Start stands
+                    // everywhere else, byte-identically.
+                    AlignSelf.STRETCH -> if (stretches) childModifier.fillMaxWidth()
+                        else childModifier.align(Alignment.Start)
+                    // Wave 47 (lane Z3): the `auto` → `align-items:
+                    // normal/stretch` resolution (css-align-3 §6.4), composed
+                    // arm only — repaints calc-size-flex-004..006's 0-wide
+                    // items. BASELINE also lands here; never a stretch.
+                    else -> if (stretches) childModifier.fillMaxWidth() else childModifier
                 }
 
                 // LAST-RESORT legacy weight — same gate + logging as the row
@@ -4925,6 +5270,12 @@ object ComponentRenderer {
                             )
                         }
                     }
+                    // Wave 47 (lane Z3): the item root itself must measure at
+                    // the stretched cross size too (the row loop's
+                    // fillMaxHeight twin) — the outer Box alone would report
+                    // full width while the item inside hugged its content and
+                    // painted narrow ink. Composed-gated via `stretches`.
+                    if (stretches) itemModifier = itemModifier.fillMaxWidth()
                 }
 
                 Box(modifier = childModifier) {
@@ -5081,7 +5432,12 @@ object ComponentRenderer {
      */
     private fun wrapRowStretchPlan(
         component: IRComponent,
-        displayConfig: DisplayConfig
+        displayConfig: DisplayConfig,
+        // Wave 47 (lane Z7): false lets a §9.6 positioning keyword route
+        // through FlexWrapRow with a plan even when no item stretches —
+        // the guard clauses below still refuse containers the wrap
+        // layout cannot render (text, markers, non-static children).
+        requireStretch: Boolean = true
     ): List<com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement>? {
         val children = component.children
         if (children.isNullOrEmpty()) return null
@@ -5115,7 +5471,10 @@ object ComponentRenderer {
             }
         }
         return plan.takeIf {
-            it.contains(com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH)
+            // Wave 47: a positioning-keyword caller takes the plan as-is
+            // (its LINES need the wrap layout, stretch or not).
+            !requireStretch ||
+                it.contains(com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH)
         }
     }
 
@@ -5366,7 +5725,19 @@ object ComponentRenderer {
         // inherit-computed-001's host declares `font-size: larger`, which
         // only the typography pipeline below resolves to 19.2px) and its
         // effectiveColor (the css-color-4 §7.1 currentColor base).
-        inlineAtoms: List<com.styleconverter.runtime.typography.inline.InlineRunFold.Atom>? = null
+        inlineAtoms: List<com.styleconverter.runtime.typography.inline.InlineRunFold.Atom>? = null,
+        // Wave 47 (lane Z6) — the inline-fold STYLED-SPAN RING: the styled
+        // members of a folded runs host, each a range over [rawText] (the
+        // fold's merged string) plus its typed attribution
+        // (InlineRunFold.Span / InlineSpanRing.Style). Overlaid HERE, on
+        // the FINAL AnnotatedString — after the soft-hyphen strip and the
+        // rule-B pre-break, whose character surgery the ranges are mapped
+        // through (InlineSpanRing.alignment) — because only this function
+        // knows the final string and the resolved paragraph font size the
+        // em-factor sizes multiply. null (every caller but the fold seam,
+        // and every span-less fold) keeps this function byte-identical to
+        // wave 45.
+        inlineSpans: List<com.styleconverter.runtime.typography.inline.InlineRunFold.Span>? = null
     ) {
         // When rawText is supplied (the IR's `_text` channel), it wins
         // over the synthesised "Component Name" placeholder. For legacy
@@ -6092,6 +6463,40 @@ object ComponentRenderer {
             )
         } else scriptedText
 
+        // ── Wave 47 (lane Z6) — the inline-fold STYLED-SPAN mount ───────
+        // The fold's member ranges (recorded over rawText, the merged
+        // string) are remapped through the pipeline's string surgery and
+        // overlaid as SpanStyles on the FINAL AnnotatedString — added
+        // last, so a member attribute wins over the paragraph-level spans
+        // (word-spacing kerns, script fallback) where they overlap, the
+        // CSS inner-box order. Identity (the same instance) for every
+        // caller without spans, so wave-45 renders are byte-identical.
+        // A null overlay means the final string was rewritten by surgery
+        // outside the modeled op set — the paragraph renders UN-styled
+        // rather than mis-ranged (degraded style, never wrong glyphs),
+        // and the breadcrumb below names it (repo no-silent-fallthrough).
+        val spanOverlaidText = if (!inlineSpans.isNullOrEmpty() && !rawText.isNullOrEmpty()) {
+            com.styleconverter.runtime.typography.inline.InlineSpanContent.overlay(
+                base = atomAnnotatedText,
+                original = rawText,
+                spans = inlineSpans,
+                // px == sp == dp (density-1 harness): the resolved
+                // paragraph size the member em/% factors multiply.
+                paragraphFontSizePx = effectiveFontSize.value,
+            ) ?: atomAnnotatedText.also {
+                androidx.compose.runtime.remember("spanAlign|$rawText") {
+                    runCatching {
+                        android.util.Log.i(
+                            "ComponentRenderer",
+                            "styled-span overlay: alignment failed for " +
+                                "${inlineSpans.size} span(s) — rendering the fold " +
+                                "UN-styled (glyphs exact, member styles dropped)"
+                        )
+                    }
+                }
+            }
+        } else atomAnnotatedText
+
         // CSS overflow is VISIBLE by default: text that exceeds its box
         // paints past the border box (CSS 2.1 §11.1.1 — overflow applies to
         // the box, and the initial value clips nothing). Compose Text
@@ -6268,6 +6673,34 @@ object ComponentRenderer {
             Modifier.drawWithContent {
                 drawContent()
                 val layout = layoutResult.value ?: return@drawWithContent
+                // Wave 47 (lane Z7) — css-text-decor-4 §2.6
+                // `text-decoration-skip-spaces` (initial `start end`):
+                // per-line ink extents come through the pure trimmer so
+                // edge spacer runs carry no decoration (WPT skip-
+                // spaces-001; see DecorationSkipSpaces). A line without
+                // edge spacers gets the raw getLineLeft/getLineRight
+                // objects back untouched — the fast path every committed
+                // baseline text rides — and a spacers-only line collapses
+                // to a zero extent, which bands() already drops.
+                val laidOutText = layout.layoutInput.text.text
+                val trimmedExtent = { i: Int ->
+                    val s = layout.getLineStart(i)
+                    // visibleEnd=false keeps trailing spacers in the
+                    // line's own text so the trimmer sees them; a hard
+                    // '\n' terminator is stripped — its caret is the
+                    // line right edge anyway.
+                    val e = layout.getLineEnd(i, visibleEnd = false)
+                    com.styleconverter.runtime.typography.DecorationSkipSpaces.trimmedExtent(
+                        lineText = laidOutText.substring(s, e).trimEnd('\n'),
+                        lineStart = s,
+                        left = layout.getLineLeft(i),
+                        right = layout.getLineRight(i),
+                        // Caret x at a whole-string offset (LTR primary
+                        // direction; the trimmer falls back to the raw
+                        // extent when carets come back bidi-reversed).
+                        caretX = { off -> layout.getHorizontalPosition(off, usePrimaryDirection = true) }
+                    )
+                }
                 // Per-visual-line COLORED bands, one per requested line
                 // per visual line, line-major then request order — which
                 // for the legacy (no-wire) request list is exactly the
@@ -6290,8 +6723,10 @@ object ComponentRenderer {
                     explicitThicknessPx = explicitThicknessPx,
                     lines = decorationRequests,
                     lineBaseline = { layout.getLineBaseline(it) },
-                    lineLeft = { layout.getLineLeft(it) },
-                    lineRight = { layout.getLineRight(it) }
+                    // Trimmed ink extents (§2.6). Equal left/right for a
+                    // spacers-only line = the zero-extent drop above.
+                    lineLeft = { trimmedExtent(it)?.first ?: layout.getLineLeft(it) },
+                    lineRight = { trimmedExtent(it)?.second ?: layout.getLineLeft(it) }
                 )
                 // Expand every band into its style's ops, each op TAGGED
                 // with its own line's color, and paint. A dotted
@@ -6753,7 +7188,9 @@ object ComponentRenderer {
             // itself unless the wave-38 rule-B pre-break fired.
             // Wave 45 (lane X2): atomAnnotatedText === scriptedText unless
             // the fold seam passed inlineAtoms (see the mount block above).
-            text = atomAnnotatedText,
+            // Wave 47 (lane Z6): spanOverlaidText === atomAnnotatedText
+            // unless the fold seam passed inlineSpans (styled-span mount).
+            text = spanOverlaidText,
             // Wave 45 (lane X2): the atom rings' InlineTextContent map —
             // material3 Text's own default (empty map) for every other call.
             inlineContent = atomInlineContent ?: emptyMap(),

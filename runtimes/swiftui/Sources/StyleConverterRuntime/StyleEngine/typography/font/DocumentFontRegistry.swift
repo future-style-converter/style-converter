@@ -89,6 +89,14 @@ public final class DocumentFontRegistry {
 
     public private(set) var lastReport = Report()
 
+    /// wave-47 lane Z4 — registration epoch: bumped by every [clear] (and so
+    /// by every [register], which clears first). ChUnitMetrics folds it into
+    /// its memoized-advance key so a '0' advance cached for document N's face
+    /// can never answer for document N+1 — the registry replaces its mapping
+    /// wholesale per document, and two documents may bind one PostScript name
+    /// to different files.
+    public private(set) var epoch: Int = 0
+
     private init() {}
 
     /// css-fonts-4 §4.2 family identity: ASCII case-insensitive, quotes
@@ -195,6 +203,9 @@ public final class DocumentFontRegistry {
         registeredURLs.removeAll()
         mapping.removeAll()
         lastReport = Report()
+        // The document boundary: everything memoized against the old faces
+        // (ChUnitMetrics' advance cache) expires with them — see `epoch`.
+        epoch += 1
     }
 
     /// The name `.custom(_:size:)` / `UIFont(name:)` will accept for the first

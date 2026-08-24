@@ -1,20 +1,27 @@
 #!/usr/bin/env node
 //
-// Unit tests for tools/titan/mono-pin.mjs (wave-46 lane Y7).
+// Unit tests for tools/titan/mono-pin.mjs (wave-46 lane Y7; default-ON flip
+// wave-47 lane Z4).
 //
-// The property that matters most is BYTE-DISCIPLINE: with TITAN_MONO_PIN
-// unset every export must collapse to identity / empty so the default native
-// feed cannot move. The flag-on shape is pinned second: which documents take
-// the pin, the exact `fontFaces` entries appended, the face order the iOS
-// single-name registry depends on, and the two places the pin must yield to
-// the document's own declaration.
+// The property that matters most is BYTE-DISCIPLINE — in BOTH directions
+// since the wave-47 flip: TITAN_MONO_PIN=0 (any non-'1' value) must collapse
+// every export to identity / empty so the un-pinned feed is reproducible on
+// demand, and the DEFAULT (unset) must be the pin — pointed at the COMMITTED
+// faces — because the flip's A/B (+12 passes / 0 regressions, two sections ×
+// two natives) is only honoured if the default actually delivers the faces.
+// The pin shape is pinned second: which documents take it, the exact
+// `fontFaces` entries appended, the face order the iOS single-name registry
+// depends on, and the two places the pin must yield to the document's own
+// declaration.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 
 import {
   monoPinEnabled,
   monoPinFontsDir,
+  MONO_PIN_DEFAULT_FONTS_DIR,
   MONO_PIN_FAMILY,
   MONO_PIN_GENERICS,
   MONO_PIN_SANDBOX_DIR,
@@ -26,7 +33,9 @@ import {
   monoPinMissingWarnings,
 } from './mono-pin.mjs';
 
-const OFF = {};                                                   // the default pipeline
+// Explicit opt-out — the ONLY way to an un-pinned feed since the wave-47
+// default-ON flip ({} used to be this constant; it is now the ON default).
+const OFF = { TITAN_MONO_PIN: '0' };
 const ON  = { TITAN_MONO_PIN: '1', TITAN_MONO_PIN_FONTS: '/staged' };
 
 /** A minimal flat-v2 document whose one component declares `families`. */
@@ -40,11 +49,28 @@ const MONO_DOC = docWith(['monospace']);
 
 // ── flag OFF: every export is an identity ───────────────────────────────────
 
-test('flag off: enabled=false for unset/other values, dir=null', () => {
+test('wave-47 default: unset ⇒ ON, pointed at the COMMITTED faces', () => {
+  // The flip's whole promise: no env at all delivers the pin.
+  assert.equal(monoPinEnabled({}), true);
+  assert.equal(monoPinEnabled({ TITAN_MONO_PIN: '1' }), true);       // historical explicit-on
+  // The default dir is the in-repo staged corner, resolved module-relative…
+  assert.equal(monoPinFontsDir({}), MONO_PIN_DEFAULT_FONTS_DIR);
+  assert.match(MONO_PIN_DEFAULT_FONTS_DIR, /tools\/titan\/fonts\/mono-pin$/);
+  // …and the committed bytes are actually there (REAL fs on purpose: a
+  // deleted/renamed face would silently un-pin every default run).
+  const r = monoPinFontFiles({}, { existsSync });
+  assert.equal(r.missing.length, 0);
+  assert.deepEqual(r.present.map((f) => f.file),
+    ['DejaVuSansMono-Bold.ttf', 'DejaVuSansMono.ttf']);
+  // An explicit TITAN_MONO_PIN_FONTS override still wins (experiments).
+  assert.equal(monoPinFontsDir({ TITAN_MONO_PIN_FONTS: '/staged' }), '/staged');
+});
+
+test('flag off: any spelling other than unset/"1" disables', () => {
   assert.equal(monoPinEnabled(OFF), false);
   assert.equal(monoPinEnabled({ TITAN_MONO_PIN: '0' }), false);
-  assert.equal(monoPinEnabled({ TITAN_MONO_PIN: 'true' }), false);   // '1' only
-  assert.equal(monoPinFontsDir(OFF), null);
+  // One loud opt-out convention — junk must not half-enable a metric pin.
+  assert.equal(monoPinEnabled({ TITAN_MONO_PIN: 'true' }), false);
 });
 
 test('flag off: monoPinDocument returns the SAME object (identity, not a copy)', () => {
@@ -152,10 +178,17 @@ test('flag on: present/missing split follows existsSync, missing warns LOUDLY pe
   assert.match(w[0], /weight 700/);
 });
 
-test('flag on with NO fonts dir: every face is missing (a mis-set run cannot pass quietly)', () => {
-  const r = monoPinFontFiles({ TITAN_MONO_PIN: '1' }, { existsSync: () => true });
+test('a mis-set FONTS override cannot pass quietly: every face warns, naming the override dir', () => {
+  // Since the wave-47 flip an UNSET dir falls to the committed default (the
+  // first test pins that), so the loud-miss property now guards the OVERRIDE:
+  // a wrong TITAN_MONO_PIN_FONTS must produce one warning per face, naming
+  // the directory that was actually probed — never a quiet platform-cascade
+  // run under a pinned label.
+  const badOverride = { TITAN_MONO_PIN_FONTS: '/nowhere' };
+  const r = monoPinFontFiles(badOverride, { existsSync: () => false });
   assert.equal(r.present.length, 0);
   assert.equal(r.missing.length, MONO_PIN_FACES.length);
-  assert.match(monoPinMissingWarnings({ TITAN_MONO_PIN: '1' }, { existsSync: () => true })[0],
-               /<TITAN_MONO_PIN_FONTS unset>/);
+  const w = monoPinMissingWarnings(badOverride, { existsSync: () => false });
+  assert.equal(w.length, MONO_PIN_FACES.length);
+  assert.match(w[0], /\/nowhere\/DejaVuSansMono-Bold\.ttf/);
 });

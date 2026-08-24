@@ -16,7 +16,10 @@
 //
 //  We branch on the IR property name, not the payload shape, because the
 //  same payload (bare `20.0`) means different things on Width vs
-//  InlineSize. Logical → physical mapping assumes LTR writing mode.
+//  InlineSize. Logical → physical mapping follows the component's used
+//  writing mode (wave 47 lane Z2): horizontal modes keep the legacy
+//  inline=width/block=height fold; vertical modes swap the axes
+//  (css-logical-1 §4.1).
 //
 
 // Foundation for array iteration; nothing else needed here.
@@ -32,6 +35,18 @@ enum SizeExtractor {
     // occasionally emits both when shorthands expand).
     static func extract(from properties: [IRProperty]) -> SizeConfig {
         var cfg = SizeConfig()
+        // Wave 47 (lane Z2) — the component's used writing mode, read off
+        // the SAME (merged, inheritance-resolved) list via the one shared
+        // decoder. Under a VERTICAL mode css-logical-1 §4.1 maps
+        // inline-size to the vertical axis and block-size to the horizontal
+        // one, so the logical cases below swap their physical targets —
+        // the css-break background-image wall's 122×472 boxes. Horizontal
+        // modes (all pre-existing content) keep the identical legacy
+        // mapping, and post-load-extracted wires that bake used physical
+        // Width/Height AFTER the logical entries still win by the
+        // last-write-wins rule either way (Compose twin:
+        // SizingExtractor.kt's verticalWm read).
+        let verticalWm = WritingModeExtractor.extract(from: properties)?.isVertical == true
         // Track whether we saw any sizing prop so the caller can decide
         // to attach / skip the applier without re-inspecting the config.
         for p in properties {
@@ -72,21 +87,29 @@ enum SizeExtractor {
                 cfg.maxHeight = extractLength(p.data)
 
             // ─── Logical sizing family (SizeValue shape) ─────────────
-            // LTR mapping: block axis = height, inline axis = width.
-            // Logical props override physical when both are present
-            // (last-write-wins); matches the Android applier's order.
+            // Horizontal modes: block axis = height, inline axis = width.
+            // VERTICAL modes swap the physical target (css-logical-1 §4.1
+            // — see the verticalWm read above). Logical props override
+            // physical when both are present (last-write-wins); matches
+            // the Android applier's order.
             case "BlockSize":
-                cfg.height = extractSizeValue(p.data)
+                if verticalWm { cfg.width = extractSizeValue(p.data) }
+                else { cfg.height = extractSizeValue(p.data) }
             case "InlineSize":
-                cfg.width = extractSizeValue(p.data)
+                if verticalWm { cfg.height = extractSizeValue(p.data) }
+                else { cfg.width = extractSizeValue(p.data) }
             case "MinBlockSize":
-                cfg.minHeight = extractSizeValue(p.data)
+                if verticalWm { cfg.minWidth = extractSizeValue(p.data) }
+                else { cfg.minHeight = extractSizeValue(p.data) }
             case "MaxBlockSize":
-                cfg.maxHeight = extractSizeValue(p.data)
+                if verticalWm { cfg.maxWidth = extractSizeValue(p.data) }
+                else { cfg.maxHeight = extractSizeValue(p.data) }
             case "MinInlineSize":
-                cfg.minWidth = extractSizeValue(p.data)
+                if verticalWm { cfg.minHeight = extractSizeValue(p.data) }
+                else { cfg.minWidth = extractSizeValue(p.data) }
             case "MaxInlineSize":
-                cfg.maxWidth = extractSizeValue(p.data)
+                if verticalWm { cfg.maxHeight = extractSizeValue(p.data) }
+                else { cfg.maxWidth = extractSizeValue(p.data) }
 
             // ─── AspectRatio (disjoint shape) ─────────────────────────
             case "AspectRatio":

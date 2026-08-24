@@ -266,7 +266,17 @@ object MultiColumnApplier {
         val spannerSpecs = if (captureMode) childSpecs else null
         BoxWithConstraints(modifier = modifier) {
             val containerWidth = maxWidth
-            val columnCount = config.getEffectiveColumnCount(containerWidth)
+            // Wave-47 lane Z2: under a VERTICAL writing mode the multicol
+            // inline axis is vertical, so an auto column count fits against
+            // the container's HEIGHT (css-multicol §3.4 transposed).
+            // Capture-gated like every vertical-pass input, so the dark
+            // stage's count basis is byte-identical; a declared
+            // column-count (every corpus vertical container) returns
+            // unchanged from either basis anyway.
+            val columnCount =
+                if (config.verticalWritingMode && captureMode)
+                    config.getEffectiveColumnCount(maxHeight)
+                else config.getEffectiveColumnCount(containerWidth)
             val gap = config.columnGap ?: 16.dp
 
             // css-break-3 fragmentation is modeled for horizontal-tb only —
@@ -287,6 +297,14 @@ object MultiColumnApplier {
             // Capture the definiteness HERE and thread it down to the gate
             // (fragmentainerBlockSizePx pins the OR-composition).
             val containerBlockSizeDefinite = this.constraints.hasFixedHeight
+
+            // Wave-47 lane Z2 — the wave-11 lesson, transposed: under a
+            // VERTICAL writing mode the fragmentainer's block extent is the
+            // container's WIDTH, and the inner Box loosening destroys
+            // hasFixedWidth exactly like it destroys hasFixedHeight, so the
+            // definiteness must be captured HERE and threaded down to the
+            // vertical measure pass.
+            val containerBlockAxisDefiniteVertical = this.constraints.hasFixedWidth
 
             // ── Wave-44 lane U8: the float-strip's zero-flow paint half ──
             // A container whose specs prove the FLOAT-STRIP shape (leading
@@ -348,6 +366,11 @@ object MultiColumnApplier {
                         captureMode = captureMode,
                         columnFillAuto = config.fill == ColumnFill.AUTO,
                         discardOverflow = config.continueDiscard,
+                        // Wave-47 lane Z2: the vertical-pass inputs (mode,
+                        // block direction, boundary width-definiteness).
+                        verticalMode = config.verticalWritingMode,
+                        verticalBlockRtl = config.verticalBlockRtl,
+                        containerBlockAxisDefiniteVertical = containerBlockAxisDefiniteVertical,
                         // Wave-44: the (possibly zero-flow-wrapped) content.
                         content = stripContent
                     )
@@ -364,6 +387,11 @@ object MultiColumnApplier {
                         captureMode = captureMode,
                         columnFillAuto = config.fill == ColumnFill.AUTO,
                         discardOverflow = config.continueDiscard,
+                        // Wave-47 lane Z2: the vertical-pass inputs (mode,
+                        // block direction, boundary width-definiteness).
+                        verticalMode = config.verticalWritingMode,
+                        verticalBlockRtl = config.verticalBlockRtl,
+                        containerBlockAxisDefiniteVertical = containerBlockAxisDefiniteVertical,
                         // Wave-44: the (possibly zero-flow-wrapped) content.
                         content = stripContent
                     )
@@ -397,6 +425,10 @@ object MultiColumnApplier {
         columnFillAuto: Boolean = false,
         // Wave-42: `continue: discard` (css-overflow-4 §3) for the plan.
         discardOverflow: Boolean = false,
+        // Wave-47 lane Z2: vertical-pass inputs (see MultiColumnLayout).
+        verticalMode: Boolean = false,
+        verticalBlockRtl: Boolean = false,
+        containerBlockAxisDefiniteVertical: Boolean = false,
         content: @Composable () -> Unit
     ) {
         Row(
@@ -424,6 +456,10 @@ object MultiColumnApplier {
             captureMode = captureMode,
             columnFillAuto = columnFillAuto,
             discardOverflow = discardOverflow,
+            // Wave-47 lane Z2: the vertical-pass inputs ride through.
+            verticalMode = verticalMode,
+            verticalBlockRtl = verticalBlockRtl,
+            containerBlockAxisDefiniteVertical = containerBlockAxisDefiniteVertical,
             content = content
         )
     }
@@ -447,6 +483,10 @@ object MultiColumnApplier {
         captureMode: Boolean = false,
         columnFillAuto: Boolean = false,
         discardOverflow: Boolean = false,
+        // Wave-47 lane Z2: vertical-pass inputs (see MultiColumnLayout).
+        verticalMode: Boolean = false,
+        verticalBlockRtl: Boolean = false,
+        containerBlockAxisDefiniteVertical: Boolean = false,
         content: @Composable () -> Unit
     ) {
         val ruleColor = config.ruleColor ?: Color.Gray
@@ -464,6 +504,10 @@ object MultiColumnApplier {
             captureMode = captureMode,
             columnFillAuto = columnFillAuto,
             discardOverflow = discardOverflow,
+            // Wave-47 lane Z2: the vertical-pass inputs ride through.
+            verticalMode = verticalMode,
+            verticalBlockRtl = verticalBlockRtl,
+            containerBlockAxisDefiniteVertical = containerBlockAxisDefiniteVertical,
             modifier = Modifier.drawBehind {
                 val gapPx = gap.toPx()
                 val ruleWidthPx = ruleWidth.toPx()
@@ -567,6 +611,13 @@ object MultiColumnApplier {
         // Wave-42: `continue: discard` (css-overflow-4 §3) for the
         // spanner-flow plan's overflow-column truncation.
         discardOverflow: Boolean = false,
+        // Wave-47 lane Z2: the vertical writing-mode pass' inputs — the
+        // mode itself, its block direction (rl walks bands leftward), and
+        // the boundary-captured width definiteness (the wave-11 lesson
+        // transposed: the fragmentainer extent here is the WIDTH).
+        verticalMode: Boolean = false,
+        verticalBlockRtl: Boolean = false,
+        containerBlockAxisDefiniteVertical: Boolean = false,
         content: @Composable () -> Unit
     ) {
         // Measure→draw bridge: the layout pass below publishes the fragment
@@ -630,6 +681,32 @@ object MultiColumnApplier {
                 }
         ) { measurables, constraints ->
             val gapPx = gap.roundToPx()
+            // ── Wave-47 lane Z2: the VERTICAL writing-mode pass ─────────
+            // Runs FIRST because every pass below is horizontal-tb-only by
+            // contract (they all bail on `fragmentationAllowed == false`,
+            // which MultiColumnLayout derives from the vertical flag). The
+            // helper owns every gate — capture (specs null outside), sole
+            // flow child, no baked post-load layout, bounded axes, N ≥ 2 —
+            // and declines to null for everything else, so the frozen
+            // paths (and their logged vertical bails) are byte-identical
+            // whenever it does not engage. The bridge write happens in the
+            // HELPER's placement block (B-RC6: this file keeps its exact 3
+            // fragmentsState touches).
+            if (verticalMode) {
+                with(VerticalMulticolMeasure) {
+                    measureVerticalSoleChild(
+                        measurables = measurables,
+                        constraints = constraints,
+                        childSpecs = childSpecs,
+                        usedCount = columnCount.coerceAtLeast(1),
+                        gapPx = gapPx,
+                        containerBlockAxisDefinite = containerBlockAxisDefiniteVertical,
+                        blockRtl = verticalBlockRtl,
+                        fragmentsBridge = fragmentsState,
+                        logFallback = ::logFragmentationFallbackOnce
+                    )?.let { return@Layout it }
+                }
+            }
             // Wave 21 (B-RC6): css-multicol §3.4's used-width fitting needs a
             // DEFINITE available inline size. Under an UNBOUNDED measure —
             // absposOverflowMeasure hands its child Constraints(), so an
